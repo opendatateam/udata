@@ -2,6 +2,12 @@
 
 ## Current (in progress)
 
+- Handle None values in dataset and resource extras endpoints [#2805](https://github.com/opendatateam/udata/pull/2805)
+- Fix default license being selected in form in optional select group [#2809](https://github.com/opendatateam/udata/pull/2809)
+- Fix only SHA1 checksum is accepted when uploading resources [#2808](https://github.com/opendatateam/udata/pull/2808)
+
+## 6.0.1 (2023-01-18)
+
 - Add python version requirement <3.10 [#2798](https://github.com/opendatateam/udata/pull/2798)
 - Fix date timezone and format for harvest previz [#2799](https://github.com/opendatateam/udata/pull/2799)
 - Add support for DCAT startDate and endDate in temporal coverage [#2801](https://github.com/opendatateam/udata/pull/2801)

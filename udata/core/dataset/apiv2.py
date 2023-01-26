@@ -219,6 +219,11 @@ class DatasetExtrasAPI(API):
         if dataset.deleted:
             apiv2.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
+        # first remove extras key associated to a None value in payload
+        for key in [k for k in data if data[k] is None]:
+            dataset.extras.pop(key, None)
+            data.pop(key)
+        # then update the extras with the remaining payload
         dataset.extras.update(data)
         dataset.save()
         return dataset.extras
@@ -329,6 +334,11 @@ class ResourceExtrasAPI(ResourceMixin, API):
             apiv2.abort(410, 'Dataset has been deleted')
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
+        # first remove extras key associated to a None value in payload
+        for key in [k for k in data if data[k] == None]:
+            resource.extras.pop(key, None)
+            data.pop(key)
+        # then update the extras with the remaining payload
         resource.extras.update(data)
         resource.save()
         return resource.extras

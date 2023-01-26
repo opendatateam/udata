@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2022-10-19 14:26+0200\n"
-"PO-Revision-Date: 2022-12-14 12:23\n"
+"POT-Creation-Date: 2023-01-17 14:41+0100\n"
+"PO-Revision-Date: 2023-01-17 17:47\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -18,31 +18,31 @@ msgstr ""
 "X-Crowdin-File: /master/udata/translations/udata.pot\n"
 "X-Crowdin-File-ID: 6\n"
 
-#: udata/settings.py:102
+#: udata/settings.py:99
 msgid "Welcome"
 msgstr "Bem-vindo"
 
-#: udata/settings.py:103
+#: udata/settings.py:100
 msgid "Please confirm your email"
 msgstr "Por favor confirme o seu e-mail"
 
-#: udata/settings.py:104
+#: udata/settings.py:101
 msgid "Login instructions"
 msgstr "Instruções de login"
 
-#: udata/settings.py:105
+#: udata/settings.py:102
 msgid "Your password has been reset"
 msgstr "A sua palavra-passe foi redefinida"
 
-#: udata/settings.py:106
+#: udata/settings.py:103
 msgid "Your password has been changed"
 msgstr "A sua palavra-passe foi alterada"
 
-#: udata/settings.py:108
+#: udata/settings.py:105
 msgid "Password reset instructions"
 msgstr "Instruções para recuperação da palavra-passe"
 
-#: udata/settings.py:393
+#: udata/settings.py:405
 msgid "This dataset has been archived"
 msgstr "O seu conjunto de dados foi arquivado"
 
@@ -62,30 +62,47 @@ msgstr "Âmbito predefinido"
 msgid "System administrator rights"
 msgstr "Direitos do administrador de sistema"
 
-#: udata/auth/forms.py:12 udata/core/user/forms.py:14
+#: udata/auth/forms.py:13 udata/core/user/forms.py:14
 msgid "First name"
 msgstr "Nome"
 
-#: udata/auth/forms.py:12
+#: udata/auth/forms.py:13
 msgid "First name is required"
 msgstr "O primeiro nome é obrigatório"
 
-#: udata/auth/forms.py:13 udata/auth/forms.py:16 udata/core/user/forms.py:15
+#: udata/auth/forms.py:14 udata/auth/forms.py:17 udata/core/user/forms.py:15
 #: udata/core/user/forms.py:17
 msgid "URLs not allowed in this field"
 msgstr "URLs não permitidas neste campo"
 
-#: udata/auth/forms.py:15 udata/core/user/forms.py:16
+#: udata/auth/forms.py:16 udata/core/user/forms.py:16
 msgid "Last name"
 msgstr "Apelido"
 
-#: udata/auth/forms.py:15
+#: udata/auth/forms.py:16
 msgid "Last name is required"
 msgstr "O último nome é obrigatório"
 
-#: udata/auth/forms.py:32
+#: udata/auth/forms.py:33
 msgid "Password must be changed for security reasons"
 msgstr "A senha deve ser alterada por razões de segurança"
+
+#: udata/auth/forms.py:53
+msgid "New email"
+msgstr ""
+
+#: udata/auth/forms.py:55
+msgid "Retype email"
+msgstr ""
+
+#: udata/auth/forms.py:56
+msgid "Email does not match"
+msgstr ""
+
+#: udata/auth/forms.py:58 udata/templates/security/change_email.html:10
+#: udata/templates/security/change_email.html:16
+msgid "Change email"
+msgstr ""
 
 #: udata/auth/password_validation.py:27
 msgid "Password must be at least {pass_length} characters long"
@@ -107,23 +124,39 @@ msgstr "A senha deve conter maiúsculas"
 msgid "Password must contain symbols"
 msgstr "A palavra-passe pode conter símbolos"
 
-#: udata/commands/init.py:29
+#: udata/auth/views.py:41
+msgid "Confirm change of email instructions"
+msgstr ""
+
+#: udata/auth/views.py:72
+msgid "You did not confirm your change of email within {email_within}. New instructions to confirm your change of email have been sent to {new_email}."
+msgstr ""
+
+#: udata/auth/views.py:82
+msgid "Thank you. Your change of email has been confirmed."
+msgstr ""
+
+#: udata/auth/views.py:97
+msgid "Thank you. Confirmation instructions for changing your email have been sent to {new_email}."
+msgstr ""
+
+#: udata/commands/init.py:32
 msgid "Do you want to create a superadmin user?"
 msgstr "Deseja criar um utilizador superadmin?"
 
-#: udata/commands/init.py:34
+#: udata/commands/init.py:37
 msgid "Do you want to import some data-related license?"
 msgstr "Quer importar dados relacionados com licenças?"
 
-#: udata/commands/init.py:38
+#: udata/commands/init.py:41
 msgid "Do you want to import some spatial zones (countries)?"
 msgstr "Você deseja importar algumas zonas espaciais (países)?"
 
-#: udata/commands/init.py:42
+#: udata/commands/init.py:45
 msgid "Do you want to create some sample data?"
 msgstr "Quer criar alguns dados de exemplo?"
 
-#: udata/commands/init.py:46
+#: udata/commands/init.py:49
 msgid "Your udata instance is ready!"
 msgstr "O uData foi iniciado com sucesso!"
 
@@ -307,163 +340,163 @@ msgstr "Privado"
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "Restringir a visibilidade do dataset para si ou para a sua organização apenas."
 
-#: udata/core/dataset/models.py:43
+#: udata/core/dataset/models.py:44
 msgid "Unknown"
 msgstr "Desconhecido"
 
-#: udata/core/dataset/models.py:44
+#: udata/core/dataset/models.py:45
 msgid "Punctual"
 msgstr "Pontual"
 
-#: udata/core/dataset/models.py:45
+#: udata/core/dataset/models.py:46
 msgid "Real time"
 msgstr "Tempo real"
 
-#: udata/core/dataset/models.py:46
+#: udata/core/dataset/models.py:47
 msgid "Hourly"
 msgstr "Hora a hora"
 
-#: udata/core/dataset/models.py:47
+#: udata/core/dataset/models.py:48
 msgid "Four times a day"
 msgstr "Quatro vezes por dia"
 
-#: udata/core/dataset/models.py:48
+#: udata/core/dataset/models.py:49
 msgid "Three times a day"
 msgstr "Três vezes por dia"
 
-#: udata/core/dataset/models.py:49
+#: udata/core/dataset/models.py:50
 msgid "Semidaily"
 msgstr "Duas vezes por dia"
 
-#: udata/core/dataset/models.py:50 udata/harvest/models.py:25
+#: udata/core/dataset/models.py:51 udata/harvest/models.py:18
 msgid "Daily"
 msgstr "Diário"
 
-#: udata/core/dataset/models.py:51
+#: udata/core/dataset/models.py:52
 msgid "Four times a week"
 msgstr "Quatro vezes por semana"
 
-#: udata/core/dataset/models.py:52
+#: udata/core/dataset/models.py:53
 msgid "Three times a week"
 msgstr "Três vezes por semana"
 
-#: udata/core/dataset/models.py:53
+#: udata/core/dataset/models.py:54
 msgid "Semiweekly"
 msgstr "Duas vezes por semana"
 
-#: udata/core/dataset/models.py:54 udata/harvest/models.py:24
+#: udata/core/dataset/models.py:55 udata/harvest/models.py:17
 msgid "Weekly"
 msgstr "Semanal"
 
-#: udata/core/dataset/models.py:55
+#: udata/core/dataset/models.py:56
 msgid "Biweekly"
 msgstr "Quinzenal"
 
-#: udata/core/dataset/models.py:56
+#: udata/core/dataset/models.py:57
 msgid "Three times a month"
 msgstr "Três vezes por mês"
 
-#: udata/core/dataset/models.py:57
+#: udata/core/dataset/models.py:58
 msgid "Semimonthly"
 msgstr "Duas vezes por mês"
 
-#: udata/core/dataset/models.py:58 udata/harvest/models.py:23
+#: udata/core/dataset/models.py:59 udata/harvest/models.py:16
 msgid "Monthly"
 msgstr "Mensal"
 
-#: udata/core/dataset/models.py:59
+#: udata/core/dataset/models.py:60
 msgid "Bimonthly"
 msgstr "Bimensal"
 
-#: udata/core/dataset/models.py:60
+#: udata/core/dataset/models.py:61
 msgid "Quarterly"
 msgstr "Trimestral"
 
-#: udata/core/dataset/models.py:61
+#: udata/core/dataset/models.py:62
 msgid "Three times a year"
 msgstr "Três vezes por ano"
 
-#: udata/core/dataset/models.py:62
+#: udata/core/dataset/models.py:63
 msgid "Biannual"
 msgstr "Semestral"
 
-#: udata/core/dataset/models.py:63
+#: udata/core/dataset/models.py:64
 msgid "Annual"
 msgstr "Anual"
 
-#: udata/core/dataset/models.py:64
+#: udata/core/dataset/models.py:65
 msgid "Biennial"
 msgstr "Bienal"
 
-#: udata/core/dataset/models.py:65
+#: udata/core/dataset/models.py:66
 msgid "Triennial"
 msgstr "Trienal"
 
-#: udata/core/dataset/models.py:66
+#: udata/core/dataset/models.py:67
 msgid "Quinquennial"
 msgstr "Quinquenal"
 
-#: udata/core/dataset/models.py:67
+#: udata/core/dataset/models.py:68
 msgid "Irregular"
 msgstr "Irregular"
 
-#: udata/core/dataset/models.py:89
+#: udata/core/dataset/models.py:90
 msgid "Main file"
 msgstr "Ficheiro principal"
 
-#: udata/core/dataset/models.py:90
+#: udata/core/dataset/models.py:91
 msgid "Documentation"
 msgstr "Documentação"
 
-#: udata/core/dataset/models.py:91
+#: udata/core/dataset/models.py:92
 msgid "Update"
 msgstr "Atualização"
 
-#: udata/core/dataset/models.py:92 udata/core/reuse/models.py:16
+#: udata/core/dataset/models.py:93 udata/core/reuse/models.py:16
 msgid "API"
 msgstr "API"
 
-#: udata/core/dataset/models.py:93
+#: udata/core/dataset/models.py:94
 msgid "Code repository"
 msgstr "Repositório de código"
 
-#: udata/core/dataset/models.py:94 udata/core/spatial/models.py:24
+#: udata/core/dataset/models.py:95 udata/core/spatial/models.py:24
 msgid "Other"
 msgstr "Outro"
 
-#: udata/core/dataset/models.py:99
+#: udata/core/dataset/models.py:100
 msgid "Uploaded file"
 msgstr "Ficheiro carregado"
 
-#: udata/core/dataset/models.py:100
+#: udata/core/dataset/models.py:101
 msgid "Remote file"
 msgstr "Ficheiro remoto"
 
-#: udata/core/dataset/models.py:352 udata/core/dataset/rdf.py:334
+#: udata/core/dataset/models.py:375 udata/core/dataset/rdf.py:337
 msgid "Nameless resource"
 msgstr "Recurso sem nome"
 
-#: udata/core/dataset/models.py:414 udata/models/datetime_fields.py:59
+#: udata/core/dataset/models.py:437 udata/models/datetime_fields.py:59
 msgid "Creation date"
 msgstr "Data de criação"
 
-#: udata/core/dataset/models.py:416 udata/models/datetime_fields.py:61
+#: udata/core/dataset/models.py:439 udata/models/datetime_fields.py:61
 msgid "Last modification date"
 msgstr "Data da última modificação"
 
-#: udata/core/dataset/models.py:432
+#: udata/core/dataset/models.py:455
 msgid "Future date of update"
 msgstr "Data futura de atualização"
 
-#: udata/core/dataset/models.py:448
+#: udata/core/dataset/models.py:472
 msgid "Pivotal data"
 msgstr "Dados centrais"
 
-#: udata/core/dataset/models.py:486
+#: udata/core/dataset/models.py:510
 msgid "dataset"
 msgstr "conjunto de dados"
 
-#: udata/core/dataset/rdf.py:332
+#: udata/core/dataset/rdf.py:335
 msgid "{format} resource"
 msgstr "{format} recurso"
 
@@ -558,17 +591,17 @@ msgid "Editor"
 msgstr "Editor"
 
 #: udata/core/organization/models.py:30 udata/features/transfer/models.py:14
-#: udata/harvest/models.py:29 udata/harvest/models.py:39 udata/harvest/models.py:77
+#: udata/harvest/models.py:22 udata/harvest/models.py:32 udata/harvest/models.py:70
 msgid "Pending"
 msgstr "Pendente"
 
 #: udata/core/organization/models.py:31 udata/features/transfer/models.py:15
-#: udata/harvest/models.py:78
+#: udata/harvest/models.py:71
 msgid "Accepted"
 msgstr "Aceite"
 
 #: udata/core/organization/models.py:32 udata/features/transfer/models.py:16
-#: udata/harvest/models.py:79
+#: udata/harvest/models.py:72
 msgid "Refused"
 msgstr "Recusado"
 
@@ -1005,43 +1038,43 @@ msgstr "Alguns detalhes opcionais sobre esta colheita"
 msgid "Backend"
 msgstr "Backend"
 
-#: udata/harvest/models.py:22
+#: udata/harvest/models.py:15
 msgid "Manual"
 msgstr "Manual"
 
-#: udata/harvest/models.py:30
+#: udata/harvest/models.py:23
 msgid "Initializing"
 msgstr "A iniciar"
 
-#: udata/harvest/models.py:31
+#: udata/harvest/models.py:24
 msgid "Initialized"
 msgstr "Iniciado"
 
-#: udata/harvest/models.py:32
+#: udata/harvest/models.py:25
 msgid "Processing"
 msgstr "Processando"
 
-#: udata/harvest/models.py:33 udata/harvest/models.py:41
+#: udata/harvest/models.py:26 udata/harvest/models.py:34
 msgid "Done"
 msgstr "Concluído"
 
-#: udata/harvest/models.py:34
+#: udata/harvest/models.py:27
 msgid "Done with errors"
 msgstr "Concluído com erros"
 
-#: udata/harvest/models.py:35 udata/harvest/models.py:42
+#: udata/harvest/models.py:28 udata/harvest/models.py:35
 msgid "Failed"
 msgstr "Falhou"
 
-#: udata/harvest/models.py:40
+#: udata/harvest/models.py:33
 msgid "Started"
 msgstr "Iniciado"
 
-#: udata/harvest/models.py:43
+#: udata/harvest/models.py:36
 msgid "Skipped"
 msgstr "Ignorado"
 
-#: udata/harvest/models.py:44
+#: udata/harvest/models.py:37
 msgid "Archived"
 msgstr "Arquivado"
 
@@ -1384,19 +1417,19 @@ msgstr "Para ativar a sua conta, por favor confirme o seu endereço de e-mail at
 msgid "Confirm now"
 msgstr "Confirmar agora"
 
-#: udata/tests/search/test_adapter.py:25
+#: udata/tests/search/test_adapter.py:24
 msgid "Never reused"
 msgstr "Nunca reutilizado"
 
-#: udata/tests/search/test_adapter.py:26
+#: udata/tests/search/test_adapter.py:25
 msgid "Little reused"
 msgstr "Pouco reutilizado"
 
-#: udata/tests/search/test_adapter.py:27
+#: udata/tests/search/test_adapter.py:26
 msgid "Quite reused"
 msgstr "Bastante reutilizado"
 
-#: udata/tests/search/test_adapter.py:28
+#: udata/tests/search/test_adapter.py:27
 msgid "Heavily reused"
 msgstr "Muito reutilizado"
 

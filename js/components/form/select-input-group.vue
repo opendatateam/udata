@@ -8,7 +8,7 @@
     :disabled="readonly"
     @change="onChange">
     <optgroup v-for="(group, ids) in field.groups" :label="group">
-        <option v-for="option in options | extract group" :value="option.value">
+        <option v-for="option in options | extract group" :value="option.value" :selected="option.value == value">
             {{option.text || option.value}}
         </option>
     </optgroup>
@@ -25,7 +25,9 @@ export default {
     props: {
         groups: {
             type: Object,
-            default: {}
+            default() {
+                return {}
+            }
         }
     },
     computed: {
