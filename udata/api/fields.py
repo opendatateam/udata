@@ -1,4 +1,5 @@
 import logging
+import pytz
 
 from dateutil.parser import parse
 
@@ -17,7 +18,7 @@ class ISODateTime(String):
     def format(self, value):
         if isinstance(value, str):
             value = parse(value)
-        return value.isoformat()
+        return pytz.utc.localize(value).isoformat()
 
 
 class Markdown(String):
