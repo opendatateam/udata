@@ -105,6 +105,10 @@ from udata.features.territories.models import *  # noqa
 # Load HarvestSource model as harvest for catalog
 from udata.harvest.models import HarvestSource as Harvest  # noqa
 
+# Load metrics
+import udata.core.organization.metrics  # noqa
+import udata.core.followers.metrics  # noqa
+
 import udata.linkchecker.models  # noqa
 
 

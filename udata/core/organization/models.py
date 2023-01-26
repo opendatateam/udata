@@ -271,7 +271,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
     def count_reuses(self):
         from udata.models import Reuse
-        self.metrics['reuses'] = Reuse.objects(organization=self).count()
+        self.metrics['reuses'] = Reuse.objects(organization=self).visible().count()
         self.save()
 
     def count_followers(self):
