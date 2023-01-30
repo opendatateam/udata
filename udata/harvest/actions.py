@@ -133,6 +133,14 @@ def delete_source(ident):
     signals.harvest_source_deleted.send(source)
     return source
 
+def clean_source(ident):
+    '''Deletes all datasets linked to a harvest source'''
+    source = get_source(ident)
+    datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
+    for dataset in datasets:
+        dataset.delete()
+    return len(datasets)
+
 
 def purge_sources():
     '''Permanently remove sources flagged as deleted'''
