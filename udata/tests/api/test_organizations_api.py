@@ -76,6 +76,7 @@ class OrganizationAPITest:
         member = org.member(user)
         assert member is not None, 'Current user should be a member'
         assert member.role == 'admin', 'Current user should be an administrator'
+        assert org.get_metrics()['members'] == 1
 
     def test_organization_api_update(self, api):
         '''It should update an organization from the API'''
@@ -345,6 +346,7 @@ class MembershipAPITest:
         organization.reload()
         assert organization.is_member(added_user)
         assert organization.is_admin(added_user)
+        assert organization.get_metrics()['members'] == 2
 
     def test_only_admin_can_create_member(self, api):
         user = api.login()
@@ -430,6 +432,7 @@ class MembershipAPITest:
 
         organization.reload()
         assert not organization.is_member(deleted_user)
+        assert organization.get_metrics()['members'] == 1
 
     def test_only_admin_can_delete_member(self, api):
         user = api.login()

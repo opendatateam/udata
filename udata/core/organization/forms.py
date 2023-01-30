@@ -39,6 +39,7 @@ class OrganizationForm(ModelForm):
             user = current_user._get_current_object()
             member = Member(user=user, role='admin')
             org.members.append(member)
+            org.count_members()
 
         if commit:
             org.save()
