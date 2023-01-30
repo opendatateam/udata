@@ -94,6 +94,7 @@ def update(site=False, organizations=False, users=False, datasets=False,
                     organization.count_datasets()
                     organization.count_reuses()
                     organization.count_followers()
+                    organization.count_members()
                 except Exception as e:
                     log.info(f'Error during update: {e}')
                     continue

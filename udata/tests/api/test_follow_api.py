@@ -9,13 +9,16 @@ from udata.core.followers.signals import on_follow, on_unfollow
 from . import APITestCase
 
 
-class Fake(db.Document):
+class FakeModel(db.Document):
     name = db.StringField()
+
+    def count_followers(self):
+        pass
 
 
 @api.route('/fake/<id>/follow/', endpoint='follow_fake')
 class FollowFakeAPI(FollowAPI):
-    model = Fake
+    model = FakeModel
 
 
 class FollowAPITest(APITestCase):
@@ -29,7 +32,7 @@ class FollowAPITest(APITestCase):
     def test_follow(self):
         '''It should follow on POST'''
         user = self.login()
-        to_follow = Fake.objects.create()
+        to_follow = FakeModel.objects.create()
 
         with on_follow.connected_to(self.handler):
             response = self.post(url_for('api.follow_fake', id=to_follow.id))
@@ -50,7 +53,7 @@ class FollowAPITest(APITestCase):
     def test_follow_already_followed(self):
         '''It should do nothing when following an already followed object'''
         user = self.login()
-        to_follow = Fake.objects.create()
+        to_follow = FakeModel.objects.create()
         Follow.objects.create(follower=user, following=to_follow)
 
         with on_follow.connected_to(self.handler):
@@ -67,7 +70,7 @@ class FollowAPITest(APITestCase):
     def test_unfollow(self):
         '''It should unfollow on DELETE'''
         user = self.login()
-        to_follow = Fake.objects.create()
+        to_follow = FakeModel.objects.create()
         Follow.objects.create(follower=user, following=to_follow)
 
         with on_unfollow.connected_to(self.handler):
@@ -88,7 +91,7 @@ class FollowAPITest(APITestCase):
     def test_unfollow_not_existing(self):
         '''It should raise 404 when trying to unfollow a not followed object'''
         self.login()
-        to_follow = Fake.objects.create()
+        to_follow = FakeModel.objects.create()
 
         response = self.delete(url_for('api.follow_fake', id=to_follow.id))
         self.assert404(response)
