@@ -18,9 +18,7 @@ class ISODateTime(String):
     def format(self, value):
         if isinstance(value, str):
             value = parse(value)
-        elif isinstance(value, datetime.date) and not isinstance(value, datetime.datetime):
-            value = datetime.datetime.combine(value, datetime.datetime.min.time())
-        if value.tzinfo:
+        elif isinstance(value, datetime.date) and not isinstance(value, datetime.datetime) or value.tzinfo:
             return value.isoformat()
         return pytz.utc.localize(value).isoformat()
 

@@ -99,6 +99,7 @@ resource_fields = api.model('Resource', {
     'filesize': fields.Integer(description='The resource file size in bytes'),
     'mime': fields.String(description='The resource mime type'),
     'created_at': fields.ISODateTime(
+        attribute=lambda o: o.harvest.created_at if o.harvest and o.harvest.created_at else o.created_at,
         readonly=True, description='The resource creation date'),
     'published': fields.ISODateTime(
         description='The resource publication date'),
@@ -180,7 +181,7 @@ dataset_fields = api.model('Dataset', {
     'description': fields.Markdown(
         description='The dataset description in markdown', required=True),
     'created_at': fields.ISODateTime(
-        attribute=lambda o: max([o.created_at, to_naive_datetime(o.harvest.created_at)]) if o.harvest and o.harvest.created_at else o.created_at,
+        attribute=lambda o: o.harvest.created_at if o.harvest and o.harvest.created_at else o.created_at,
         description='The dataset creation date', required=True),
     'last_modified': fields.ISODateTime(
         attribute=lambda o: max([o.last_modified, to_naive_datetime(o.harvest.modified_at)]) if o.harvest and o.harvest.modified_at else o.last_modified,

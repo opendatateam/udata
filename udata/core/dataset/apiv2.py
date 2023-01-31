@@ -68,8 +68,10 @@ dataset_fields = apiv2.model('Dataset', {
     'description': fields.Markdown(
         description='The dataset description in markdown', required=True),
     'created_at': fields.ISODateTime(
+        attribute=lambda o: o.harvest.created_at if o.harvest and o.harvest.created_at else o.created_at,
         description='The dataset creation date', required=True),
     'last_modified': fields.ISODateTime(
+        attribute=lambda o: max([o.last_modified, to_naive_datetime(o.harvest.modified_at)]) if o.harvest and o.harvest.modified_at else o.last_modified,
         description='The dataset last modification date', required=True),
     'deleted': fields.ISODateTime(description='The deletion date if deleted'),
     'archived': fields.ISODateTime(description='The archival date if archived'),
