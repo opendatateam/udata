@@ -133,6 +133,7 @@ def delete_source(ident):
     signals.harvest_source_deleted.send(source)
     return source
 
+
 def clean_source(ident):
     '''Deletes all datasets linked to a harvest source'''
     source = get_source(ident)
