@@ -139,7 +139,8 @@ def clean_source(ident):
     source = get_source(ident)
     datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
     for dataset in datasets:
-        dataset.delete()
+        dataset.deleted = datetime.now()
+        dataset.save()    
     return len(datasets)
 
 
