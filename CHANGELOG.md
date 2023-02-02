@@ -6,6 +6,7 @@
 - Fix default license being selected in form in optional select group [#2809](https://github.com/opendatateam/udata/pull/2809)
 - Fix only SHA1 checksum is accepted when uploading resources [#2808](https://github.com/opendatateam/udata/pull/2808)
 - Fix organization metrics count [#2811](https://github.com/opendatateam/udata/pull/2811)
+- Fix setuptools version used in CI [#2813](https://github.com/opendatateam/udata/pull/2813)
 
 ## 6.0.1 (2023-01-18)
 
