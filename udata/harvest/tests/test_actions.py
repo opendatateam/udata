@@ -291,6 +291,17 @@ class HarvestActionsTest:
         deleted_sources = HarvestSource.objects(deleted__exists=True)
         assert len(deleted_sources) == 1
 
+    @pytest.mark.parametrize('by_attr', ['source.id', 'str(source.id)', 'source.slug'])
+    def test_clean_source(self, by_attr):
+        source = HarvestSourceFactory()
+        for _ in range(5):
+            DatasetFactory(harvest=HarvestDatasetMetadata(source_id=str(source.id)))
+        actions.clean_source(eval(by_attr))
+        datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
+        assert len(datasets) == 5
+        for dataset in datasets:
+            assert dataset.deleted is not None
+
     def test_get_job_by_id(self):
         job = HarvestJobFactory()
         assert actions.get_job(str(job.id)) == job

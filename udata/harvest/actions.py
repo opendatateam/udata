@@ -134,6 +134,16 @@ def delete_source(ident):
     return source
 
 
+def clean_source(ident):
+    '''Deletes all datasets linked to a harvest source'''
+    source = get_source(ident)
+    datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
+    for dataset in datasets:
+        dataset.deleted = datetime.now()
+        dataset.save()    
+    return len(datasets)
+
+
 def purge_sources():
     '''Permanently remove sources flagged as deleted'''
     sources = HarvestSource.objects(deleted__exists=True)
