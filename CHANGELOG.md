@@ -9,6 +9,7 @@
     - Expose computed max between harvest and internal dates through API
     - Exposed dates through API are now timezone aware
 - Fix organization metrics count [#2811](https://github.com/opendatateam/udata/pull/2811)
+- Fix setuptools version used in CI [#2813](https://github.com/opendatateam/udata/pull/2813)
 
 ## 6.0.1 (2023-01-18)
 
