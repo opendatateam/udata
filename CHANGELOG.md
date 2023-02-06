@@ -7,6 +7,7 @@
 - Fix only SHA1 checksum is accepted when uploading resources [#2808](https://github.com/opendatateam/udata/pull/2808)
 - Fix organization metrics count [#2811](https://github.com/opendatateam/udata/pull/2811)
 - Fix setuptools version used in CI [#2813](https://github.com/opendatateam/udata/pull/2813)
+- Removed all code logic related to the `published` date in resource model, now deprecated. :warning: The attribute itself was left in the model because of the complexity of the migration [#2807](https://github.com/opendatateam/udata/pull/2807)
 
 ## 6.0.1 (2023-01-18)
 
@@ -14,7 +15,6 @@
 - Fix date timezone and format for harvest previz [#2799](https://github.com/opendatateam/udata/pull/2799)
 - Add support for DCAT startDate and endDate in temporal coverage [#2801](https://github.com/opendatateam/udata/pull/2801)
 - New feature: Users can now change their email by themselves [#2792](https://github.com/opendatateam/udata/pull/2792)
-- Remove useless published date in resource model [#2807](https://github.com/opendatateam/udata/pull/2807)
 
 ## 6.0.0 (2023-01-09)
 
