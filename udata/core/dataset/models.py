@@ -292,6 +292,7 @@ class ResourceMixin(object):
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
     modified = db.DateTimeField(default=datetime.now, required=True)
+    published = db.DateTimeField()  # DEPRECATED BUT LEFT FOR BACKWARDS COMPATIBILITY
     deleted = db.DateTimeField()
 
     def clean(self):
