@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Removed all code logic related to the `published` date in resource model, now deprecated. :warning: The attribute itself was left in the model because of the complexity of the migration [#2807](https://github.com/opendatateam/udata/pull/2807)
 
 ## 6.0.2 (2023-02-06)
 
@@ -11,7 +11,6 @@
 - Fix only SHA1 checksum is accepted when uploading resources [#2808](https://github.com/opendatateam/udata/pull/2808)
 - Fix organization metrics count [#2811](https://github.com/opendatateam/udata/pull/2811)
 - Fix setuptools version used in CI [#2813](https://github.com/opendatateam/udata/pull/2813)
-- Removed all code logic related to the `published` date in resource model, now deprecated. :warning: The attribute itself was left in the model because of the complexity of the migration [#2807](https://github.com/opendatateam/udata/pull/2807)
 - Add `udata harvest clean` command [#2812](https://github.com/opendatateam/udata/pull/2812)
 
 ## 6.0.1 (2023-01-18)
