@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add `xlsx` as closed format for quality score [#2814](https://github.com/opendatateam/udata/pull/2814)
 
 ## 6.0.2 (2023-02-06)
 
@@ -12,7 +12,6 @@
 - Fix organization metrics count [#2811](https://github.com/opendatateam/udata/pull/2811)
 - Fix setuptools version used in CI [#2813](https://github.com/opendatateam/udata/pull/2813)
 - Add `udata harvest clean` command [#2812](https://github.com/opendatateam/udata/pull/2812)
-- Add `xlsx` as closed format for quality score [#2814](https://github.com/opendatateam/udata/pull/2814)
 
 ## 6.0.1 (2023-01-18)
 
