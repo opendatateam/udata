@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Add `xlsx` as closed format for quality score [#2814](https://github.com/opendatateam/udata/pull/2814)
+- Add `xlsx` and `docx` as closed format for quality score [#2814](https://github.com/opendatateam/udata/pull/2814)
 
 ## 6.0.2 (2023-02-06)
 
