@@ -101,8 +101,6 @@ resource_fields = api.model('Resource', {
     'created_at': fields.ISODateTime(
         attribute=lambda o: o.harvest.created_at if o.harvest and o.harvest.created_at else o.created_at,
         readonly=True, description='The resource creation date'),
-    'published': fields.ISODateTime(
-        description='The resource publication date'),
     'last_modified': fields.ISODateTime(
         attribute=lambda o: max([o.modified, to_naive_datetime(o.harvest.modified_at)]) if o.harvest and o.harvest.modified_at else o.modified,
         readonly=True,

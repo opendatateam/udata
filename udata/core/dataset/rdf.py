@@ -133,7 +133,7 @@ def resource_to_rdf(resource, dataset=None, graph=None):
     r.add(DCT.description, Literal(resource.description))
     r.add(DCAT.downloadURL, URIRef(resource.url))
     r.add(DCAT.accessURL, URIRef(permalink))
-    r.add(DCT.issued, Literal(resource.published))
+    r.add(DCT.issued, Literal(resource.created_at))
     r.add(DCT.modified, Literal(resource.modified))
     if dataset and dataset.license:
         r.add(DCT.rights, Literal(dataset.license.title))

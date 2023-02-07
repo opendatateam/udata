@@ -94,7 +94,7 @@ class DatasetModelTest:
         dataset = DatasetFactory(owner=user)
         resource = ResourceFactory()
         dataset.add_resource(resource)
-        assert_equal_dates(dataset.last_update, resource.published)
+        assert_equal_dates(dataset.last_update, resource.created_at)
 
     def test_last_update_without_resource(self):
         user = UserFactory()

@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Removed all code logic related to the `published` date in resource model, now deprecated. :warning: The attribute itself was left in the model because of the complexity of the migration [#2807](https://github.com/opendatateam/udata/pull/2807)
 - Add `xlsx` and `docx` as closed format for quality score [#2814](https://github.com/opendatateam/udata/pull/2814)
 
 ## 6.0.2 (2023-02-06)
