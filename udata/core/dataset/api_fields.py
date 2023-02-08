@@ -99,9 +99,7 @@ resource_fields = api.model('Resource', {
     'mime': fields.String(description='The resource mime type'),
     'created_at': fields.ISODateTime(
         readonly=True, description='The resource creation date'),
-    'last_modified': fields.ISODateTime(
-        attribute='modified', readonly=True,
-        description='The resource last modification date'),
+    'last_modified': fields.ISODateTime(readonly=True, description='The resource last modification date'),
     'metrics': fields.Raw(
         description='The resource metrics', readonly=True),
     'harvest': fields.Nested(
@@ -179,8 +177,8 @@ dataset_fields = api.model('Dataset', {
         description='The dataset creation date', required=True),
     'last_modified': fields.ISODateTime(
         description='The dataset last modification date', required=True),
-    'deleted': fields.ISODateTime(description='The deletion date if deleted'),
-    'archived': fields.ISODateTime(description='The archival date if archived'),
+    'deleted': fields.ISODateTime(attribute='deleted_at_internal', description='The deletion date if deleted'),
+    'archived': fields.ISODateTime(attribute='archived_at_internal', description='The archival date if archived'),
     'featured': fields.Boolean(description='Is the dataset featured'),
     'private': fields.Boolean(
         description='Is the dataset private to the owner or the organization'),

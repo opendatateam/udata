@@ -290,10 +290,18 @@ class ResourceMixin(object):
     harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)
     schema = db.DictField()
 
-    created_at = db.DateTimeField(default=datetime.now, required=True)
-    modified = db.DateTimeField(default=datetime.now, required=True)
+    created_at_internal = db.DateTimeField(default=datetime.now, required=True)
+    last_modified_internal = db.DateTimeField(default=datetime.now, required=True)
     published = db.DateTimeField()  # DEPRECATED BUT LEFT FOR BACKWARDS COMPATIBILITY
-    deleted = db.DateTimeField()
+    deleted_at_internal = db.DateTimeField()
+
+    @property
+    def created_at(self):
+        return self.harvest.created_at if self.harvest and self.harvest.created_at else self.created_at_internal
+
+    @property
+    def last_modified(self):
+        return max([self.last_modified_internal, to_naive_datetime(self.harvest.modified_at)]) if self.harvest and self.harvest.modified_at else self.last_modified_internal
 
     def clean(self):
         super(ResourceMixin, self).clean()
@@ -374,8 +382,8 @@ class ResourceMixin(object):
             'url': self.latest,
             'name': self.title or _('Nameless resource'),
             'contentUrl': self.url,
-            'dateCreated': self.created_at.isoformat(),
-            'dateModified': self.modified.isoformat(),
+            'dateCreated': self.created_at_internal.isoformat(),
+            'dateModified': self.last_modified_internal.isoformat(),
             'extras': [get_json_ld_extra(*item)
                        for item in self.extras.items()],
         }
@@ -433,10 +441,6 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
 
 
 class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
-    created_at = DateTimeField(verbose_name=_('Creation date'),
-                               default=datetime.now, required=True)
-    last_modified = DateTimeField(verbose_name=_('Last modification date'),
-                                  default=datetime.now, required=True)
     title = db.StringField(required=True)
     acronym = db.StringField(max_length=128)
     # /!\ do not set directly the slug when creating or updating a dataset
@@ -461,8 +465,12 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     featured = db.BooleanField(required=True, default=False)
 
-    deleted = db.DateTimeField()
-    archived = db.DateTimeField()
+    created_at_internal = DateTimeField(verbose_name=_('Creation date'),
+                               default=datetime.now, required=True)
+    last_modified_internal = DateTimeField(verbose_name=_('Last modification date'),
+                                  default=datetime.now, required=True)
+    deleted_at_internal = db.DateTimeField()
+    archived_at_internal = db.DateTimeField()
 
     def __str__(self):
         return self.title or ''
@@ -481,8 +489,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     meta = {
         'indexes': [
             '$title',
-            'created_at',
-            'last_modified',
+            'created_at_internal',
+            'last_modified_internal',
             'metrics.reuses',
             'metrics.followers',
             'metrics.views',
@@ -490,7 +498,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             'resources.id',
             'resources.urlhash',
         ] + db.Owned.meta['indexes'],
-        'ordering': ['-created_at'],
+        'ordering': ['-created_at_internal'],
         'queryset_class': DatasetQuerySet,
     }
 
@@ -579,6 +587,14 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         return [resource.check_availability() for resource in remote_resources]
 
     @property
+    def created_at(self):
+        return self.harvest.created_at if self.harvest and self.harvest.created_at else self.created_at_internal
+
+    @property
+    def last_modified(self):
+        return max([self.last_modified_internal, to_naive_datetime(self.harvest.modified_at)]) if self.harvest and self.harvest.modified_at else self.last_modified_internal
+
+    @property
     def last_update(self):
         """
         Use the more recent date we would have on resources (harvest, modified).
@@ -587,12 +603,12 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         if self.resources:
             dates = []
             for res in self.resources:
-                dates.append(res.modified)
+                dates.append(res.last_modified_internal)
                 if res.harvest and res.harvest.modified_at:
                     dates.append(to_naive_datetime(res.harvest.modified_at))
             return max(dates)
         else:
-            return self.last_modified
+            return self.last_modified_internal
 
     @property
     def next_update(self):
@@ -838,7 +854,7 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
     ]
 
     meta = {
-        'ordering': ['-created_at'],
+        'ordering': ['-created_at_internal'],
         'queryset_class': db.OwnedQuerySet,
     }
 
