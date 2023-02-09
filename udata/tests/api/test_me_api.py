@@ -286,6 +286,7 @@ class MeAPITest(APITestCase):
     def test_delete(self):
         '''It should delete the connected user'''
         user = self.login()
+        user_email = user.email
         self.assertIsNone(user.deleted)
         other_user = UserFactory()
         members = [Member(user=user), Member(user=other_user)]
@@ -309,7 +310,7 @@ class MeAPITest(APITestCase):
         with capture_mails() as mails:
             response = self.delete(url_for('api.me'))
         self.assertEqual(len(mails), 1)
-        self.assertEqual(mails[0].send_to, set([user.email]))
+        self.assertEqual(mails[0].send_to, set([user_email]))
         self.assertEqual(mails[0].subject, _('Account deletion'))
         self.assert204(response)
 
