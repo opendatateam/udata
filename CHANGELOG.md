@@ -2,10 +2,18 @@
 
 ## Current (in progress)
 
+- Removed all code logic related to the `published` date in resource model, now deprecated. :warning: The attribute itself was left in the model because of the complexity of the migration [#2807](https://github.com/opendatateam/udata/pull/2807)
+- Add `xlsx` and `docx` as closed format for quality score [#2814](https://github.com/opendatateam/udata/pull/2814)
+- Exposed dates through API are now timezone aware [#2810](https://github.com/opendatateam/udata/pull/2810)
+
+## 6.0.2 (2023-02-06)
+
 - Handle None values in dataset and resource extras endpoints [#2805](https://github.com/opendatateam/udata/pull/2805)
 - Fix default license being selected in form in optional select group [#2809](https://github.com/opendatateam/udata/pull/2809)
 - Fix only SHA1 checksum is accepted when uploading resources [#2808](https://github.com/opendatateam/udata/pull/2808)
-- Exposed dates through API are now timezone aware [#2810](https://github.com/opendatateam/udata/pull/2810)
+- Fix organization metrics count [#2811](https://github.com/opendatateam/udata/pull/2811)
+- Fix setuptools version used in CI [#2813](https://github.com/opendatateam/udata/pull/2813)
+- Add `udata harvest clean` command [#2812](https://github.com/opendatateam/udata/pull/2812)
 
 ## 6.0.1 (2023-01-18)
 
