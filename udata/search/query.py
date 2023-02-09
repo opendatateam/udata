@@ -1,9 +1,9 @@
 import copy
 import logging
 import requests
+from requests.models import PreparedRequest
 
 from flask import request, current_app, url_for
-from werkzeug import routing
 
 from udata.search.result import SearchResult
 
@@ -72,5 +72,8 @@ class SearchQuery:
                     params[key] = value
         else:
             params['page'] = self.page
-        href = routing(url or request.base_url)
-        return href(params)
+        # Href has been deprecated and removed since https://github.com/pallets/werkzeug/pull/2085
+        # Anything better alternative?
+        prepared_url = PreparedRequest()
+        prepared_url.prepare_url(url or request.base_url, params)
+        return prepared_url.url
