@@ -168,8 +168,9 @@ def init_logging(app):
     return app
 
 
-def create_cli_app(info):
-    app = create_app(info.settings, init_logging=init_logging)
+def create_cli_app():
+    # TODO: how can we get info settings?
+    app = create_app(init_logging=init_logging)
     return standalone(app)
 
 
