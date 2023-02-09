@@ -5,9 +5,7 @@
 - Handle None values in dataset and resource extras endpoints [#2805](https://github.com/opendatateam/udata/pull/2805)
 - Fix default license being selected in form in optional select group [#2809](https://github.com/opendatateam/udata/pull/2809)
 - Fix only SHA1 checksum is accepted when uploading resources [#2808](https://github.com/opendatateam/udata/pull/2808)
-- Dates improvements [#2810](https://github.com/opendatateam/udata/pull/2810):
-    - Expose computed max between harvest and internal dates through API
-    - Exposed dates through API are now timezone aware
+- Exposed dates through API are now timezone aware [#2810](https://github.com/opendatateam/udata/pull/2810)
 
 ## 6.0.1 (2023-01-18)
 
