@@ -485,7 +485,7 @@ class ResourceAPI(ResourceMixin, API):
         # update_resource saves the updated resource dict to the database
         # the additional dataset.save is required as we update the last_modified date.
         form.populate_obj(resource)
-        resource.modified = datetime.now()
+        resource.last_modified_internal = datetime.now()
         dataset.update_resource(resource)
         dataset.last_modified_internal = datetime.now()
         dataset.save()
@@ -539,7 +539,7 @@ class CommunityResourcesAPI(API):
             })
         if not resource.organization:
             resource.owner = current_user._get_current_object()
-        resource.modified = datetime.now()
+        resource.last_modified_internal = datetime.now()
         resource.save()
         return resource, 201
 
@@ -567,7 +567,7 @@ class CommunityResourceAPI(API):
         form.populate_obj(community)
         if not community.organization and not community.owner:
             community.owner = current_user._get_current_object()
-        community.modified = datetime.now()
+        community.last_modified_internal = datetime.now()
         community.save()
         return community
 
