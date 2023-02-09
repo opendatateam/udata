@@ -258,7 +258,7 @@ class DatasetRdfAPI(API):
     @api.doc('rdf_dataset')
     def get(self, dataset):
         format = RDF_EXTENSIONS[negociate_content()]
-        url = url_for('api.dataset_rdf_format', dataset=dataset.id, format=format)
+        url = url_for('api.dataset_rdf_format', dataset=dataset.id, format=format, _external=True)
         return redirect(url)
 
 

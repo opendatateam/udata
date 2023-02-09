@@ -86,7 +86,7 @@ class SiteHomeReusesAPI(API):
 class SiteDataPortal(API):
     def get(self, format):
         '''Root RDF endpoint with content negociation handling'''
-        url = url_for('api.site_rdf_catalog_format', format=format)
+        url = url_for('api.site_rdf_catalog_format', format=format, _external=True)
         return redirect(url)
 
 
@@ -95,7 +95,7 @@ class SiteRdfCatalog(API):
     def get(self):
         '''Root RDF endpoint with content negociation handling'''
         format = RDF_EXTENSIONS[negociate_content()]
-        url = url_for('api.site_rdf_catalog_format', format=format)
+        url = url_for('api.site_rdf_catalog_format', format=format, _external=True)
         return redirect(url)
 
 

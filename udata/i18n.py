@@ -195,7 +195,7 @@ def redirect_to_lang(*args, **kwargs):
     kwargs = multi_to_dict(request.args)
     kwargs.update(request.view_args)
     kwargs['lang_code'] = default_lang
-    return redirect(url_for(endpoint, **kwargs))
+    return redirect(url_for(endpoint, **kwargs, _external=True))
 
 
 def redirect_to_unlocalized(*args, **kwargs):
@@ -204,7 +204,7 @@ def redirect_to_unlocalized(*args, **kwargs):
     kwargs = multi_to_dict(request.args)
     kwargs.update(request.view_args)
     kwargs.pop('lang_code', None)
-    return redirect(url_for(endpoint, **kwargs))
+    return redirect(url_for(endpoint, **kwargs, _external=True))
 
 
 class I18nBlueprintSetupState(BlueprintSetupState):
