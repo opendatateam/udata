@@ -293,7 +293,7 @@ class ResourceMixin(object):
     created_at_internal = db.DateTimeField(default=datetime.now, required=True)
     last_modified_internal = db.DateTimeField(default=datetime.now, required=True)
     published = db.DateTimeField()  # DEPRECATED BUT LEFT FOR BACKWARDS COMPATIBILITY
-    deleted_at_internal = db.DateTimeField()
+    deleted = db.DateTimeField()
 
     @property
     def created_at(self):
@@ -382,8 +382,8 @@ class ResourceMixin(object):
             'url': self.latest,
             'name': self.title or _('Nameless resource'),
             'contentUrl': self.url,
-            'dateCreated': self.created_at_internal.isoformat(),
-            'dateModified': self.last_modified_internal.isoformat(),
+            'dateCreated': self.created_at.isoformat(),
+            'dateModified': self.last_modified.isoformat(),
             'extras': [get_json_ld_extra(*item)
                        for item in self.extras.items()],
         }
@@ -469,8 +469,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
                                default=datetime.now, required=True)
     last_modified_internal = DateTimeField(verbose_name=_('Last modification date'),
                                   default=datetime.now, required=True)
-    deleted_at_internal = db.DateTimeField()
-    archived_at_internal = db.DateTimeField()
+    deleted = db.DateTimeField()
+    archived = db.DateTimeField()
 
     def __str__(self):
         return self.title or ''
@@ -603,12 +603,12 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         if self.resources:
             dates = []
             for res in self.resources:
-                dates.append(res.last_modified_internal)
+                dates.append(res.last_modified)
                 if res.harvest and res.harvest.modified_at:
                     dates.append(to_naive_datetime(res.harvest.modified_at))
             return max(dates)
         else:
-            return self.last_modified_internal
+            return self.last_modified
 
     @property
     def next_update(self):

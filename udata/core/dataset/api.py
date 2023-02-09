@@ -211,7 +211,7 @@ class DatasetAPI(API):
         if dataset.deleted and request_deleted is not None:
             api.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.now()
         form = api.validate(DatasetForm, dataset)
         return form.save()
 
@@ -224,7 +224,7 @@ class DatasetAPI(API):
             api.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
         dataset.deleted = datetime.now()
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.now()
         dataset.save()
         return '', 204
 
@@ -334,7 +334,7 @@ class ResourcesAPI(API):
             api.abort(400, 'This endpoint only supports remote resources')
         form.populate_obj(resource)
         dataset.add_resource(resource)
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.now()
         dataset.save()
         return resource, 201
 
@@ -383,7 +383,7 @@ class UploadNewDatasetResource(UploadMixin, API):
         infos = self.handle_upload(dataset)
         resource = Resource(**infos)
         dataset.add_resource(resource)
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.now()
         dataset.save()
         return resource, 201
 
@@ -430,7 +430,7 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
         for k, v in infos.items():
             resource[k] = v
         dataset.update_resource(resource)
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.now()
         dataset.save()
         if fs_filename_to_remove is not None:
             storages.resources.delete(fs_filename_to_remove)
@@ -487,7 +487,7 @@ class ResourceAPI(ResourceMixin, API):
         form.populate_obj(resource)
         resource.modified = datetime.now()
         dataset.update_resource(resource)
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.now()
         dataset.save()
         return resource
 
@@ -498,7 +498,7 @@ class ResourceAPI(ResourceMixin, API):
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         dataset.remove_resource(resource)
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.now()
         dataset.save()
         return '', 204
 
