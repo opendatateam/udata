@@ -360,7 +360,6 @@ class UploadMixin(object):
         prefix = '/'.join((dataset.slug,
                            datetime.now().strftime('%Y%m%d-%H%M%S')))
         infos = handle_upload(storages.resources, prefix)
-        print('INFOS :', infos)
         if 'html' in infos['mime']:
             api.abort(415, 'Incorrect file content type: HTML')
         infos['title'] = os.path.basename(infos['filename'])
