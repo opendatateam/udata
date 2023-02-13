@@ -1,5 +1,5 @@
 import json
-
+import pytz
 from datetime import datetime
 from io import BytesIO
 from uuid import uuid4
@@ -1732,3 +1732,27 @@ class HarvestMetadataAPITest:
         assert response.json['resources'][0]['harvest'] == {
             'dynamic_field': 'dynamic_value',
         }
+
+    def test_dataset_with_harvest_computed_dates(self, api):
+        creation_date = datetime(2022, 2, 22)
+        modification_date = datetime(2022, 3, 19)
+        harvest_metadata = HarvestDatasetMetadata(
+            created_at=creation_date,
+            modified_at=modification_date,
+        )
+        dataset = DatasetFactory(harvest=harvest_metadata)
+
+        response = api.get(url_for('api.dataset', dataset=dataset))
+        assert200(response)
+        assert response.json['created_at'] == creation_date.isoformat()
+        assert response.json['last_modified'] != modification_date.isoformat()
+
+        resource_harvest_metadata = HarvestResourceMetadata(
+            created_at=creation_date,
+        )
+        dataset = DatasetFactory(resources=[ResourceFactory(harvest=resource_harvest_metadata)])
+
+        response = api.get(url_for('api.dataset', dataset=dataset))
+        assert200(response)
+        assert response.json['resources'][0]['created_at'] == creation_date.isoformat()
+        assert response.json['resources'][0]['last_modified'] != modification_date.isoformat()

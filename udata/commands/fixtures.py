@@ -45,14 +45,17 @@ def generate_fixtures_file(data_source):
             del json_dataset['uri']
             del json_dataset['page']
             del json_dataset['last_update']
+            del json_dataset['last_modified']
             del json_dataset['license']
             del json_dataset['badges']
             del json_dataset['spatial']
+            json_resources['created_at_internal'] = json_dataset.pop('created_at')
             json_resources = json_dataset.pop('resources')
             for res in json_resources:
                 del res['latest']
                 del res['preview_url']
                 del res['last_modified']
+                json_resources['created_at_internal'] = json_dataset.pop('created_at')
             if json_dataset['organization'] is None:
                 json_owner = json_dataset.pop('owner')
                 json_dataset['owner'] = json_owner['id']
@@ -85,6 +88,7 @@ def generate_fixtures_file(data_source):
                 del com['latest']
                 del com['last_modified']
                 del com['preview_url']
+                json_resources['created_at_internal'] = json_dataset.pop('created_at')
             json_fixture['community_resources'] = json_community
 
             json_discussion = requests.get(f"{data_source}{DISCUSSION_URL}/?for={json_dataset['id']}").json()['data']

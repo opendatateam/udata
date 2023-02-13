@@ -601,12 +601,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         Default to dataset last_modified if no resource.
         """
         if self.resources:
-            dates = []
-            for res in self.resources:
-                dates.append(res.last_modified)
-                if res.harvest and res.harvest.modified_at:
-                    dates.append(to_naive_datetime(res.harvest.modified_at))
-            return max(dates)
+            return max([res.last_modified for res in self.resources])
         else:
             return self.last_modified
 
