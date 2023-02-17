@@ -17,16 +17,15 @@ from werkzeug.utils import import_string
 log = logging.getLogger(__name__)
 
 
-class UDataSecurity(Security):
-    def render_template(self, *args, **kwargs):
-        try:
-            render = import_string(current_app.config.get('SECURITY_RENDER'))
-        except Exception:
-            render = render_template
-        return render(*args, **kwargs)
+def render_security_template(*args, **kwargs):
+    try:
+        render = import_string(current_app.config.get('SECURITY_RENDER'))
+    except Exception:
+        render = render_template
+    return render(*args, **kwargs)
 
 
-security = UDataSecurity()
+security = Security()
 
 
 class Permission(BasePermission):
@@ -46,6 +45,7 @@ def init_app(app):
     from udata.models import datastore
     security.init_app(app, datastore,
                       register_blueprint=False,
+                      render_template=render_security_template,
                       login_form=ExtendedLoginForm,
                       confirm_register_form=ExtendedRegisterForm,
                       register_form=ExtendedRegisterForm,
