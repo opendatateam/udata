@@ -36,7 +36,7 @@ class DatasetCsvAdapter(csv.Adapter):
         ('harvest.backend', lambda r: r.harvest and r.harvest.backend),
         ('harvest.domain', lambda r: r.harvest and r.harvest.domain),
         ('harvest.created_at', lambda r: r.harvest and r.harvest.created_at),
-        ('harvest.modified_at', lambda r: r.harvest and r.harvest.modified_at),
+        ('harvest.last_modified', lambda r: r.harvest and r.harvest.last_modified),
         ('quality_score', lambda o: format(o.quality['score'], '.2f')),
     )
 
@@ -76,10 +76,10 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
         ('checksum.type', lambda o: getattr(o.checksum, 'type', None)),
         ('checksum.value', lambda o: getattr(o.checksum, 'value', None)),
         'created_at',
-        'last_modified',
+        ('modified', lambda o: o.last_modified),
         ('downloads', lambda o: int(o.metrics.get('views', 0))),
         ('harvest.created_at', lambda o: o.harvest and o.harvest.created_at),
-        ('harvest.modified_at', lambda o: o.harvest and o.harvest.modified_at),
+        ('harvest.last_modified', lambda o: o.harvest and o.harvest.last_modified),
     )
     attribute = 'resources'
 

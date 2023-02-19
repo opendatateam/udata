@@ -1641,7 +1641,7 @@ class HarvestMetadataAPITest:
         harvest_metadata = HarvestDatasetMetadata(
             backend='DCAT',
             created_at=date,
-            modified_at=date,
+            last_modified=date,
             source_id='source_id',
             remote_id='remote_id',
             domain='domain.gouv.fr',
@@ -1659,7 +1659,7 @@ class HarvestMetadataAPITest:
         assert response.json['harvest'] == {
             'backend': 'DCAT',
             'created_at': date.isoformat(),
-            'modified_at': date.isoformat(),
+            'last_modified': date.isoformat(),
             'source_id': 'source_id',
             'remote_id': 'remote_id',
             'domain': 'domain.gouv.fr',
@@ -1698,7 +1698,7 @@ class HarvestMetadataAPITest:
 
         harvest_metadata = HarvestResourceMetadata(
             created_at=date,
-            modified_at=date,
+            last_modified=date,
             uri='http://domain.gouv.fr/dataset/uri',
         )
         dataset = DatasetFactory(resources=[ResourceFactory(harvest=harvest_metadata)])
@@ -1707,7 +1707,7 @@ class HarvestMetadataAPITest:
         assert200(response)
         assert response.json['resources'][0]['harvest'] == {
             'created_at': date.isoformat(),
-            'modified_at': date.isoformat(),
+            'last_modified': date.isoformat(),
             'uri': 'http://domain.gouv.fr/dataset/uri',
         }
 
@@ -1738,7 +1738,7 @@ class HarvestMetadataAPITest:
         modification_date = datetime(2022, 3, 19)
         harvest_metadata = HarvestDatasetMetadata(
             created_at=creation_date,
-            modified_at=modification_date,
+            last_modified=modification_date,
         )
         dataset = DatasetFactory(harvest=harvest_metadata)
 

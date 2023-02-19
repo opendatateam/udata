@@ -77,7 +77,7 @@ class DcatBackendTest:
             assert d.harvest.remote_url == f'http://data.test.org/datasets/{i}'
             assert d.harvest.uri == f'http://data.test.org/datasets/{i}'
             assert d.harvest.created_at.date() == date(2016, 12, 14)
-            assert d.harvest.modified_at.date() == date(2016, 12, 14)
+            assert d.harvest.last_modified.date() == date(2016, 12, 14)
             assert d.harvest.last_update.date() == date.today()
             assert d.harvest.archived_at is None
             assert d.harvest.archived is None
@@ -243,7 +243,7 @@ class DcatBackendTest:
         assert dataset.harvest.remote_url == 'http://data.test.org/datasets/3'
         assert dataset.harvest.remote_id == '3'
         assert dataset.harvest.created_at.date() == date(2016, 12, 14)
-        assert dataset.harvest.modified_at.date() == date(2016, 12, 14)
+        assert dataset.harvest.last_modified.date() == date(2016, 12, 14)
         assert dataset.frequency == 'daily'
         assert dataset.description == 'Dataset 3 description'
 
@@ -272,7 +272,7 @@ class DcatBackendTest:
         assert dataset.harvest.remote_id == '0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2'
         assert dataset.harvest.dct_identifier == '0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2'
         assert dataset.harvest.created_at.date() == date(2004, 11, 3)
-        assert dataset.harvest.modified_at is None
+        assert dataset.harvest.last_modified is None
         assert dataset.harvest.uri == 'https://sig.oreme.org/geonetwork/srv/resources/datasets/0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2'
         assert dataset.harvest.remote_url is None  # the uri validation failed
         assert dataset.description.startswith('Data of type chemistry')
@@ -301,7 +301,7 @@ class DcatBackendTest:
         assert dataset.harvest.dct_identifier == '0437a976-cff1-4fa6-807a-c23006df2f8f'
         assert dataset.harvest.remote_id == '0437a976-cff1-4fa6-807a-c23006df2f8f'
         assert dataset.harvest.created_at is None
-        assert dataset.harvest.modified_at is None
+        assert dataset.harvest.last_modified is None
         assert dataset.harvest.uri == 'https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//datasets/0437a976-cff1-4fa6-807a-c23006df2f8f'
         assert dataset.harvest.remote_url == 'https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//datasets/0437a976-cff1-4fa6-807a-c23006df2f8f'
         assert dataset.harvest.last_update.date() == date.today()

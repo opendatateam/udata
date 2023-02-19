@@ -26,7 +26,7 @@ dataset_harvest_fields = api.model('HarvestDatasetMetadata', {
     'backend': fields.String(description='Harvest backend used', allow_null=True),
     'created_at': fields.ISODateTime(description='The dataset harvested creation date',
                                      allow_null=True),
-    'modified_at': fields.ISODateTime(description='The dataset harvest last modification date',
+    'last_modified': fields.ISODateTime(description='The dataset harvest last modification date',
                                       allow_null=True),
     'source_id': fields.String(description='The harvester id', allow_null=True),
     'remote_id': fields.String(description='The dataset remote id on the source portal',
@@ -47,7 +47,7 @@ dataset_harvest_fields = api.model('HarvestDatasetMetadata', {
 resource_harvest_fields = api.model('HarvestResourceMetadata', {
     'created_at': fields.ISODateTime(description='The resource harvested creation date',
                                      allow_null=True),
-    'modified_at': fields.ISODateTime(description='The resource harvest last modification date',
+    'last_modified': fields.ISODateTime(description='The resource harvest last modification date',
                                       allow_null=True),
     'uri': fields.String(description='The resource harvest uri', allow_null=True)
 })
