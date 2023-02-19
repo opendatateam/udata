@@ -4,6 +4,12 @@
 
 - Removed all code logic related to the `published` date in resource model, now deprecated. :warning: The attribute itself was left in the model because of the complexity of the migration [#2807](https://github.com/opendatateam/udata/pull/2807)
 - Add `xlsx` and `docx` as closed format for quality score [#2814](https://github.com/opendatateam/udata/pull/2814)
+- Dates renaming to provide more relevant computed dates between internal and harvested dates [#2815](https://github.com/opendatateam/udata/pull/2815):
+    - Renamed `created_at` and `last_modified` of Dataset model to `created_at_internal` and `last_modified_internal`
+    - Renamed `created_at` and `modified` of Resource model to `created_at_internal` and `last_modified_internal`
+    - Added `created_at` computed property in Dataset and Resource model to provide harvested date if present and internal otherwise
+    - Added `last_modified` computed property in Dataset and Resource model to provide max date between internal and harvested date
+    - Renamed `modified_at` of Harvest model to `last_modified`
 
 ## 6.0.2 (2023-02-06)
 
