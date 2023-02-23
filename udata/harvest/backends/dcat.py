@@ -172,6 +172,9 @@ class CswBackend(DcatBackend):
             graphs.append(graph)
             page += 1
 
+            if self.max_items and len(self.job.items) >= self.max_items:
+                break
+
             if search_results.attrib['nextRecord'] != '0':
                 tree = ET.fromstring(
                     requests.post(url, data=body.format(start=search_results.attrib['nextRecord']),
