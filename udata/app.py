@@ -80,7 +80,8 @@ class UDataApp(Flask):
     def register_blueprint(self, blueprint, **kwargs):
 
         if blueprint.name in self.blueprints:
-            # TODO: did the behaviour on multiple register_blueprint changed?
+            # TODO: remove this warning and let Flask return a ValueError once
+            # we can set a custom blueprint name in Flask-storage
             self.logger.warning('Blueprint already loaded')
             return self.blueprints[blueprint.name]
 

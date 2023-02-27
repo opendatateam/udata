@@ -234,7 +234,7 @@ def instance_path(app, tmpdir):
         app.config.pop(key.format('ROOT'), None)
 
     storages.init_app(app)
-    app.register_blueprint(blueprint)
+    app.register_blueprint(blueprint, name='test-storage')
 
     return tmpdir
 
