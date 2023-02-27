@@ -25,7 +25,7 @@ class UdataMailUtil:
             sender = (str(sender[0]), str(sender[1]))
         else:
             sender = str(sender)
-        msg = Message(subject, sender=sender, recipients=[recipient])
+        msg = Message(str(subject), sender=sender, recipients=[recipient])
         msg.body = body
         msg.html = html
 
