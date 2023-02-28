@@ -174,7 +174,6 @@ class User(WithMetrics, UserMixin, db.Document):
         return self.metrics.get('followers', 0)
 
     def generate_api_key(self):
-        # TODO: is this working?
         payload = {
             'user': str(self.id),
             'time': time(),
