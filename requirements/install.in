@@ -17,7 +17,7 @@ Flask-CDN==1.5.3
 Flask-Cors==3.0.8
 flask-storage==1.0.0
 Flask-Gravatar==0.5.0
-Flask-Login==0.6.2  # an issue with 0.6.2? https://github.com/maxcountryman/flask-login/issues/729
+Flask-Login==0.6.2
 Flask-Mail==0.9.1
 flask-mongoengine==0.9.5
 Flask-Navigation==0.2.0
