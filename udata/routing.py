@@ -209,7 +209,7 @@ def lazy_raise_or_redirect():
         elif isinstance(value, LazyRedirect):
             new_args = request.view_args
             new_args[name] = value.arg
-            new_url = url_for(request.endpoint, **new_args, _external=True)
+            new_url = url_for(request.endpoint, **new_args)
             return redirect(new_url, code=308)
 
 

@@ -179,13 +179,8 @@ def _add_language_code(endpoint, values):
 def _pull_lang_code(endpoint, values):
     lang_code = values.pop('lang_code', g.get('lang_code') or get_locale())
     if lang_code not in current_app.config['LANGUAGES']:
-        try:
-            abort(redirect(
-                url_for(endpoint, lang_code=default_lang, **values)))
-        except:
-            abort(redirect(
-                request.url.replace('/{0}/'.format(lang_code),
-                                    '/{0}/'.format(default_lang))))
+        abort(redirect(
+            url_for(endpoint, lang_code=default_lang, **values)))
     g.lang_code = lang_code
 
 
@@ -195,7 +190,7 @@ def redirect_to_lang(*args, **kwargs):
     kwargs = multi_to_dict(request.args)
     kwargs.update(request.view_args)
     kwargs['lang_code'] = default_lang
-    return redirect(url_for(endpoint, **kwargs, _external=True))
+    return redirect(url_for(endpoint, **kwargs))
 
 
 def redirect_to_unlocalized(*args, **kwargs):
@@ -204,7 +199,7 @@ def redirect_to_unlocalized(*args, **kwargs):
     kwargs = multi_to_dict(request.args)
     kwargs.update(request.view_args)
     kwargs.pop('lang_code', None)
-    return redirect(url_for(endpoint, **kwargs, _external=True))
+    return redirect(url_for(endpoint, **kwargs))
 
 
 class I18nBlueprintSetupState(BlueprintSetupState):
