@@ -124,7 +124,7 @@ from udata.settings import Defaults
 DEBUG = True
 SEND_MAIL = False
 SERVER_NAME ='dev.local:7000'
-CACHE_TYPE = 'null'
+CACHE_TYPE = 'flask_caching.backends.null'
 
 URLS_ALLOW_PRIVATE = True
 URLS_ALLOW_LOCAL = True
