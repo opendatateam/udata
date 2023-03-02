@@ -1736,8 +1736,8 @@ class HarvestMetadataAPITest:
         }
 
     def test_dataset_with_harvest_computed_dates(self, api):
-        creation_date = datetime(2022, 2, 22)
-        modification_date = datetime(2022, 3, 19)
+        creation_date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
+        modification_date = datetime(2022, 3, 19, tzinfo=pytz.UTC)
         harvest_metadata = HarvestDatasetMetadata(
             created_at=creation_date,
             modified_at=modification_date,
