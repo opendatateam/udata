@@ -4,12 +4,14 @@
 #
 #    pip-compile --output-file=requirements/install.pip requirements/install.in
 #
-amqp==2.6.1
+amqp==5.1.1
     # via kombu
 aniso8601==9.0.1
     # via flask-restx
 appdirs==1.4.4
     # via urlextract
+async-timeout==4.0.2
+    # via redis
 attrs==21.2.0
     # via jsonschema
 authlib==0.14.3
@@ -22,7 +24,7 @@ babel==2.8.0
     #   flask-babelex
 bcrypt==3.1.7
     # via -r requirements/install.in
-billiard==3.6.4.0
+billiard==4.1.0
     # via celery
 bleach==3.1.0
     # via -r requirements/install.in
@@ -42,7 +44,7 @@ botocore==1.27.96
     #   s3transfer
 cachelib==0.9.0
     # via flask-caching
-celery==4.3.0
+celery==5.3.0b2
     # via
     #   -r requirements/install.in
     #   celerybeat-mongo
@@ -58,14 +60,26 @@ chardet==3.0.4
     # via
     #   -r requirements/install.in
     #   requests
-click==8.0.0
+click==8.1.2
     # via
     #   -r requirements/install.in
+    #   celery
+    #   click-didyoumean
+    #   click-plugins
+    #   click-repl
     #   flask
+click-didyoumean==0.3.0
+    # via celery
+click-plugins==1.1.1
+    # via celery
+click-repl==0.2.0
+    # via celery
 cryptography==2.8
     # via
     #   -r requirements/install.in
     #   authlib
+deprecated==1.2.13
+    # via redis
 dnspython==2.1.0
     # via email-validator
 email-validator==1.1.3
@@ -162,7 +176,7 @@ jsonschema==3.2.0
     # via
     #   -r requirements/install.in
     #   flask-restx
-kombu[redis]==4.4.0
+kombu[redis]==5.3.0b2
     # via
     #   -r requirements/install.in
     #   celery
@@ -183,6 +197,8 @@ msgpack==0.6.2
     # via -r requirements/install.in
 netaddr==0.7.19
     # via -r requirements/install.in
+packaging==23.0
+    # via redis
 passlib==1.7.4
     # via flask-security-too
 pillow==9.2.0
@@ -190,6 +206,8 @@ pillow==9.2.0
     #   -r requirements/install.in
     #   flask-storage
     #   pydenticon
+prompt-toolkit==3.0.38
+    # via click-repl
 pycparser==2.20
     # via cffi
 pydenticon==0.3.1
@@ -208,7 +226,7 @@ python-dateutil==2.8.1
     #   -r requirements/install.in
     #   botocore
     #   faker
-pytz==2019.3
+pytz==2021.3
     # via
     #   -r requirements/install.in
     #   babel
@@ -216,7 +234,7 @@ pytz==2019.3
     #   flask-restx
 rdflib==6.0.0
     # via -r requirements/install.in
-redis==3.3.11
+redis==4.2.2
     # via
     #   -r requirements/install.in
     #   kombu
@@ -232,6 +250,7 @@ six==1.16.0
     # via
     #   bcrypt
     #   bleach
+    #   click-repl
     #   cryptography
     #   faker
     #   flask-cors
@@ -248,6 +267,8 @@ text-unidecode==1.3
     # via faker
 tlds==2021080800
     # via -r requirements/install.in
+typing-extensions==4.5.0
+    # via kombu
 ujson==1.35
     # via -r requirements/install.in
 unicodecsv==0.14.1
@@ -262,13 +283,15 @@ urllib3==1.25.11
     # via
     #   botocore
     #   requests
-vine==1.3.0
+vine==5.0.0
     # via
-    #   -r requirements/install.in
     #   amqp
     #   celery
+    #   kombu
 voluptuous==0.11.7
     # via -r requirements/install.in
+wcwidth==0.2.6
+    # via prompt-toolkit
 webencodings==0.5.1
     # via bleach
 werkzeug==2.2.2
@@ -277,6 +300,8 @@ werkzeug==2.2.2
     #   flask
     #   flask-login
     #   flask-restx
+wrapt==1.15.0
+    # via deprecated
 wtforms==2.2.1
     # via
     #   -r requirements/install.in

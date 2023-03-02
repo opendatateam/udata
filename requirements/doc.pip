@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements/doc.pip requirements/doc.in
 #
-amqp==2.6.1
+amqp==5.1.1
     # via
     #   -c requirements/install.pip
     #   kombu
@@ -16,6 +16,10 @@ appdirs==1.4.4
     # via
     #   -c requirements/install.pip
     #   urlextract
+async-timeout==4.0.2
+    # via
+    #   -c requirements/install.pip
+    #   redis
 attrs==21.2.0
     # via
     #   -c requirements/install.pip
@@ -37,7 +41,7 @@ bcrypt==3.1.7
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-billiard==3.6.4.0
+billiard==4.1.0
     # via
     #   -c requirements/install.pip
     #   celery
@@ -67,7 +71,7 @@ cachelib==0.9.0
     # via
     #   -c requirements/install.pip
     #   flask-caching
-celery==4.3.0
+celery==5.3.0b2
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -90,17 +94,37 @@ chardet==3.0.4
     #   -c requirements/install.pip
     #   -r requirements/install.in
     #   requests
-click==8.0.0
+click==8.1.2
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
+    #   celery
+    #   click-didyoumean
+    #   click-plugins
+    #   click-repl
     #   flask
     #   mkdocs
+click-didyoumean==0.3.0
+    # via
+    #   -c requirements/install.pip
+    #   celery
+click-plugins==1.1.1
+    # via
+    #   -c requirements/install.pip
+    #   celery
+click-repl==0.2.0
+    # via
+    #   -c requirements/install.pip
+    #   celery
 cryptography==2.8
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
     #   authlib
+deprecated==1.2.13
+    # via
+    #   -c requirements/install.pip
+    #   redis
 dnspython==2.1.0
     # via
     #   -c requirements/install.pip
@@ -249,7 +273,7 @@ jsonschema==3.2.0
     #   -c requirements/install.pip
     #   -r requirements/install.in
     #   flask-restx
-kombu[redis]==4.4.0
+kombu[redis]==5.3.0b2
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -287,8 +311,11 @@ netaddr==0.7.19
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-packaging==21.3
-    # via mkdocs
+packaging==23.0
+    # via
+    #   -c requirements/install.pip
+    #   mkdocs
+    #   redis
 passlib==1.7.4
     # via
     #   -c requirements/install.pip
@@ -299,6 +326,10 @@ pillow==9.2.0
     #   -r requirements/install.in
     #   flask-storage
     #   pydenticon
+prompt-toolkit==3.0.38
+    # via
+    #   -c requirements/install.pip
+    #   click-repl
 pycparser==2.20
     # via
     #   -c requirements/install.pip
@@ -316,7 +347,6 @@ pymongo==3.10.1
 pyparsing==2.4.7
     # via
     #   -c requirements/install.pip
-    #   packaging
     #   rdflib
 pyrsistent==0.18.0
     # via
@@ -329,7 +359,7 @@ python-dateutil==2.8.1
     #   botocore
     #   faker
     #   ghp-import
-pytz==2019.3
+pytz==2021.3
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -346,7 +376,7 @@ rdflib==6.0.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-redis==3.3.11
+redis==4.2.2
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -372,6 +402,7 @@ six==1.16.0
     #   -c requirements/install.pip
     #   bcrypt
     #   bleach
+    #   click-repl
     #   cryptography
     #   faker
     #   flask-cors
@@ -396,6 +427,10 @@ tlds==2021080800
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
+typing-extensions==4.5.0
+    # via
+    #   -c requirements/install.pip
+    #   kombu
 ujson==1.35
     # via
     #   -c requirements/install.pip
@@ -421,18 +456,22 @@ urllib3==1.25.11
     #   -c requirements/install.pip
     #   botocore
     #   requests
-vine==1.3.0
+vine==5.0.0
     # via
     #   -c requirements/install.pip
-    #   -r requirements/install.in
     #   amqp
     #   celery
+    #   kombu
 voluptuous==0.11.7
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
 watchdog==2.1.6
     # via mkdocs
+wcwidth==0.2.6
+    # via
+    #   -c requirements/install.pip
+    #   prompt-toolkit
 webencodings==0.5.1
     # via
     #   -c requirements/install.pip
@@ -444,6 +483,10 @@ werkzeug==2.2.2
     #   flask
     #   flask-login
     #   flask-restx
+wrapt==1.15.0
+    # via
+    #   -c requirements/install.pip
+    #   deprecated
 wtforms==2.2.1
     # via
     #   -c requirements/install.pip
