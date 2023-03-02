@@ -111,15 +111,10 @@ def assert_redirects(response, location, message=None):
     :param message: an optional failure message
     """
     __tracebackhide__ = True
-    parts = urlparse(location)
 
-    if parts.netloc:
-        expected_location = location
-    else:
-        expected_location = urljoin('http://local.test', location)
     not_redirect = REDIRECT_MSG.format(response.status_code)
     assert response.status_code in REDIRECT_CODES, message or not_redirect
-    assert response.location == expected_location, message
+    assert response.location == location, message
 
 
 def assert_status(response, status_code, message=None):

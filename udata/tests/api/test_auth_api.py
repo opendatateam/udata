@@ -7,7 +7,6 @@ from flask import url_for
 from authlib.common.security import generate_token
 from authlib.common.urls import urlparse, url_decode
 from authlib.oauth2.rfc7636 import (
-    CodeChallenge as _CodeChallenge,
     create_s256_code_challenge,
 )
 
@@ -154,7 +153,7 @@ class APIAuthTest:
         assert401(response)
         assert response.content_type == 'application/json'
         assert 'message' in response.json
-    
+
     def test_deleted_user(self, api):
         '''Should raise a HTTP 401 if the user is deleted'''
         user = UserFactory()

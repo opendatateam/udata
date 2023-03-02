@@ -17,16 +17,15 @@ from werkzeug.utils import import_string
 log = logging.getLogger(__name__)
 
 
-class UDataSecurity(Security):
-    def render_template(self, *args, **kwargs):
-        try:
-            render = import_string(current_app.config.get('SECURITY_RENDER'))
-        except Exception:
-            render = render_template
-        return render(*args, **kwargs)
+def render_security_template(*args, **kwargs):
+    try:
+        render = import_string(current_app.config.get('SECURITY_RENDER'))
+    except Exception:
+        render = render_template
+    return render(*args, **kwargs)
 
 
-security = UDataSecurity()
+security = Security()
 
 
 class Permission(BasePermission):
@@ -44,15 +43,16 @@ def init_app(app):
     from .password_validation import UdataPasswordUtil
     from .views import create_security_blueprint
     from udata.models import datastore
-    state = security.init_app(app, datastore,
-                              register_blueprint=False,
-                              login_form=ExtendedLoginForm,
-                              confirm_register_form=ExtendedRegisterForm,
-                              register_form=ExtendedRegisterForm,
-                              reset_password_form=ExtendedResetPasswordForm,
-                              mail_util_cls=UdataMailUtil,
-                              password_util_cls=UdataPasswordUtil)
+    security.init_app(app, datastore,
+                      register_blueprint=False,
+                      render_template=render_security_template,
+                      login_form=ExtendedLoginForm,
+                      confirm_register_form=ExtendedRegisterForm,
+                      register_form=ExtendedRegisterForm,
+                      reset_password_form=ExtendedResetPasswordForm,
+                      mail_util_cls=UdataMailUtil,
+                      password_util_cls=UdataPasswordUtil)
 
-    security_bp = create_security_blueprint(state, 'security_blueprint')
+    security_bp = create_security_blueprint(app.extensions['security'], 'security_blueprint')
 
     app.register_blueprint(security_bp)

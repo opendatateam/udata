@@ -3,7 +3,8 @@ from uuid import UUID
 
 from flask import request, redirect, url_for
 from mongoengine.errors import InvalidQueryError
-from werkzeug.routing import BaseConverter, NotFound, PathConverter
+from werkzeug.exceptions import NotFound
+from werkzeug.routing import BaseConverter, PathConverter
 from werkzeug.urls import url_quote
 
 from udata import models

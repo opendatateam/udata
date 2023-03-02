@@ -451,9 +451,9 @@ You can see the full options list in
 
 ### CACHE_TYPE
 
-**default**: `'redis'`
+**default**: `'flask_caching.backends.redis'`
 
-The cache type, which can be adjusted to your needs (_ex:_ `null`, `memcached`)
+The cache type, which can be adjusted to your needs (_ex:_ `null`, `flask_caching.backends.memcached`)
 
 ### CACHE_KEY_PREFIX
 

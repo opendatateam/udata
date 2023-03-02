@@ -48,6 +48,7 @@ class TestClient(FlaskClient):
             session['user_id'] = user_id
             session['_fresh'] = True
             session['_id'] = current_app.login_manager._session_identifier_generator()
+            current_app.login_manager._update_request_context_with_user(user)
         return user
 
     def logout(self):
@@ -233,7 +234,7 @@ def instance_path(app, tmpdir):
         app.config.pop(key.format('ROOT'), None)
 
     storages.init_app(app)
-    app.register_blueprint(blueprint)
+    app.register_blueprint(blueprint, name='test-storage')
 
     return tmpdir
 

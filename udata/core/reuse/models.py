@@ -1,6 +1,6 @@
 from blinker import Signal
 from mongoengine.signals import pre_save, post_save
-from werkzeug import cached_property
+from werkzeug.utils import cached_property
 
 from udata.core.storages import images, default_image_basename
 from udata.frontend.markdown import mdstrip
