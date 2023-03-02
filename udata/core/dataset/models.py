@@ -131,7 +131,7 @@ def get_json_ld_extra(key, value):
 class HarvestDatasetMetadata(DynamicEmbeddedDocument):
     backend = db.StringField()
     created_at = db.DateTimeField()
-    last_modified = db.DateTimeField()
+    modified_at = db.DateTimeField()
     source_id = db.StringField()
     remote_id = db.StringField()
     domain = db.StringField()
@@ -145,7 +145,7 @@ class HarvestDatasetMetadata(DynamicEmbeddedDocument):
 
 class HarvestResourceMetadata(DynamicEmbeddedDocument):
     created_at = db.DateTimeField()
-    last_modified = db.DateTimeField()
+    modified_at = db.DateTimeField()
     uri = db.StringField()
 
 
@@ -301,7 +301,7 @@ class ResourceMixin(object):
 
     @property
     def last_modified(self):
-        return max([self.last_modified_internal, to_naive_datetime(self.harvest.last_modified)]) if self.harvest and self.harvest.last_modified else self.last_modified_internal
+        return max([self.last_modified_internal, to_naive_datetime(self.harvest.modified_at)]) if self.harvest and self.harvest.modified_at else self.last_modified_internal
 
     def clean(self):
         super(ResourceMixin, self).clean()
@@ -592,7 +592,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     @property
     def last_modified(self):
-        return max([self.last_modified_internal, to_naive_datetime(self.harvest.last_modified)]) if self.harvest and self.harvest.last_modified else self.last_modified_internal
+        return max([self.last_modified_internal, to_naive_datetime(self.harvest.modified_at)]) if self.harvest and self.harvest.modified_at else self.last_modified_internal
 
     @property
     def last_update(self):

@@ -584,7 +584,7 @@ class HarvestMetadataTest:
         harvest_metadata = HarvestDatasetMetadata(
             backend='DCAT',
             created_at=datetime.now(),
-            last_modified=datetime.now(),
+            modified_at=datetime.now(),
             source_id='source_id',
             remote_id='remote_id',
             domain='domain.gouv.fr',
@@ -618,7 +618,7 @@ class HarvestMetadataTest:
 
         harvest_metadata = HarvestResourceMetadata(
             created_at=datetime.now(),
-            last_modified=datetime.now(),
+            modified_at=datetime.now(),
             uri='http://domain.gouv.fr/dataset/uri'
         )
         resource.harvest = harvest_metadata
