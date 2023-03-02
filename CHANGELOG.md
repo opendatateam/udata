@@ -9,7 +9,7 @@
     - Renamed `created_at` and `modified` of Resource model to `created_at_internal` and `last_modified_internal`
     - Added `created_at` computed property in Dataset and Resource model to provide harvested date if present and internal otherwise
     - Added `last_modified` computed property in Dataset and Resource model to provide max date between internal and harvested date
-    - Renamed `modified_at` of Harvest model to `last_modified`
+- Exposed dates through API are now timezone aware [#2810](https://github.com/opendatateam/udata/pull/2810)
 
 ## 6.0.2 (2023-02-06)
 
