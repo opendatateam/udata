@@ -3,7 +3,7 @@ from datetime import datetime
 import logging
 from urllib.parse import urlparse
 
-from werkzeug import cached_property
+from werkzeug.utils import cached_property
 
 from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.models import db, Dataset

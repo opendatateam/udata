@@ -2,6 +2,11 @@
 
 ## Current (in progress)
 
+- :warning: Upgrading Flask to 2.1.2, leading to an upgrade of click (8.0), Flask-BabelEx (0.9.4), Flask-Caching (2.0.2), flask-storage (1.0.0) instead of flask-fs, Flask-Login (0.6.2), flask-restx (1.0.5), Flask-Security-Too (4.1.5), Jinja2 (3.1.2), pillow (9.2.0), werkzeug (2.2.2) [#2816](https://github.com/opendatateam/udata/pull/2816)
+  - Use the full path to the caching backend in `CACHE_TYPE`, ex: `flask_caching.backends.redis`. Named backends are deprecated.
+  - Werkzeug redirect now returns the relative url as location in response (https://github.com/pallets/werkzeug/issues/2352).
+  - Removed functions have been replaced (`contextfilter` and `contextfunction` from Jinja, root imports and `Href` from Werkzeug, `JSONWebSignatureSerializer` from itsdangerous)
+  - Prevent multiple blueprint with same name registration (not supported anymore in Flask).
 - Removed all code logic related to the `published` date in resource model, now deprecated. :warning: The attribute itself was left in the model because of the complexity of the migration [#2807](https://github.com/opendatateam/udata/pull/2807)
 - Add `xlsx` and `docx` as closed format for quality score [#2814](https://github.com/opendatateam/udata/pull/2814)
 - Exposed dates through API are now timezone aware [#2810](https://github.com/opendatateam/udata/pull/2810)
