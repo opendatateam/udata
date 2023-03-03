@@ -111,6 +111,8 @@ class DcatBackend(BaseBackend):
             return URIRef(nid) if item.kwargs['type'] == 'uriref' else BNode(nid)
 
     def process(self, item):
+        if item.remote_id == 'None':
+            raise ValueError('The DCT.identifier is missing on this DCAT.Dataset record')
         graph = Graph(namespace_manager=namespace_manager)
         data = self.job.data['graphs'][item.kwargs['page']]
         format = self.job.data['format']
@@ -123,13 +125,10 @@ class DcatBackend(BaseBackend):
         return dataset
 
 
-class CswBackend(DcatBackend):
-    display_name = 'CSW'
+class CswDcatBackend(DcatBackend):
+    display_name = 'CSW-DCAT'
 
     def parse_graph(self, url, fmt):
-        graphs = []
-
-        page = 0
         body = '''<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
                                   xmlns:gmd="http://www.isotc211.org/2005/gmd"
                                   service="CSW" version="2.0.2" resultType="results"
@@ -147,9 +146,11 @@ class CswBackend(DcatBackend):
                 </csw:GetRecords>'''
         headers = {"Content-Type": "application/xml"}
 
+        graphs = []
+        page = 0
+
         content = requests.post(url, data=body.format(start=1), headers=headers).text
         tree = ET.fromstring(content)
-
         while tree:
             graph = Graph(namespace_manager=namespace_manager)
             # TODO: could we find a better way to deal with namespaces?
@@ -172,14 +173,12 @@ class CswBackend(DcatBackend):
             graphs.append(graph)
             page += 1
 
-            if self.max_items and len(self.job.items) >= self.max_items:
+            if int(search_results.attrib['nextRecord']) == 0 or \
+                    self.max_items and len(self.job.items) >= self.max_items:
                 break
 
-            if search_results.attrib['nextRecord'] != '0':
-                tree = ET.fromstring(
-                    requests.post(url, data=body.format(start=search_results.attrib['nextRecord']),
-                                  headers=headers).text)
-            else:
-                break
+            tree = ET.fromstring(
+                requests.post(url, data=body.format(start=search_results.attrib['nextRecord']),
+                              headers=headers).text)
 
         return graphs
