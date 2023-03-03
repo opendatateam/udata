@@ -2,9 +2,8 @@ from datetime import datetime
 from itertools import chain
 
 from blinker import Signal
-from flask import url_for
 from mongoengine.signals import pre_save, post_save
-from werkzeug import cached_property
+from werkzeug.utils import cached_property
 
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip

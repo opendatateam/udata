@@ -201,11 +201,7 @@ export default {
                 }, {
                     id: 'description',
                     label: this._('Description'),
-                    rows:3,
-                }, {
-                    id: 'published',
-                    label: this._('Publication date'),
-                    widget: 'date-picker'
+                    rows:3
                 }],
             progress: 0,
         };

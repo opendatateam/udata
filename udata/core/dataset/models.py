@@ -11,7 +11,7 @@ from mongoengine import DynamicEmbeddedDocument
 from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
 from stringdist import rdlevenshtein
-from werkzeug import cached_property
+from werkzeug.utils import cached_property
 import requests
 
 from udata.app import cache
@@ -105,7 +105,7 @@ CHECKSUM_TYPES = ('sha1', 'sha2', 'sha256', 'md5', 'crc')
 DEFAULT_CHECKSUM_TYPE = 'sha1'
 
 PIVOTAL_DATA = 'pivotal-data'
-CLOSED_FORMATS = ('pdf', 'doc', 'word', 'xls', 'excel')
+CLOSED_FORMATS = ('pdf', 'doc', 'docx', 'word', 'xls', 'excel', 'xlsx')
 
 # Maximum acceptable Damerau-Levenshtein distance
 # used to guess license
@@ -292,7 +292,7 @@ class ResourceMixin(object):
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
     modified = db.DateTimeField(default=datetime.now, required=True)
-    published = db.DateTimeField(default=datetime.now, required=True)
+    published = db.DateTimeField()  # DEPRECATED BUT LEFT FOR BACKWARDS COMPATIBILITY
     deleted = db.DateTimeField()
 
     def clean(self):
@@ -376,7 +376,6 @@ class ResourceMixin(object):
             'contentUrl': self.url,
             'dateCreated': self.created_at.isoformat(),
             'dateModified': self.modified.isoformat(),
-            'datePublished': self.published.isoformat(),
             'extras': [get_json_ld_extra(*item)
                        for item in self.extras.items()],
         }
@@ -582,13 +581,13 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     @property
     def last_update(self):
         """
-        Use the more recent date we would have on resources (harvest, published, modified).
+        Use the more recent date we would have on resources (harvest, modified).
         Default to dataset last_modified if no resource.
         """
         if self.resources:
             dates = []
             for res in self.resources:
-                dates += [res.modified, res.published]
+                dates.append(res.modified)
                 if res.harvest and res.harvest.modified_at:
                     dates.append(to_naive_datetime(res.harvest.modified_at))
             return max(dates)

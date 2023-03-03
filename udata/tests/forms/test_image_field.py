@@ -2,7 +2,7 @@ import logging
 
 import pytest
 
-import flask_fs as fs
+import flask_storage as fs
 
 from udata.models import db
 from udata.forms import Form
