@@ -6,10 +6,10 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: udata 6.0.1.dev0\n"
+"Project-Id-Version: udata 6.0.3.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2023-01-17 14:41+0100\n"
-"PO-Revision-Date: 2023-01-17 14:41+0100\n"
+"POT-Creation-Date: 2023-03-06 15:58+0100\n"
+"PO-Revision-Date: 2023-03-06 15:58+0100\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -205,7 +205,7 @@ msgid ""
 "is : {properties}"
 msgstr ""
 
-#: udata/core/dataset/forms.py:67 udata/core/dataset/forms.py:128
+#: udata/core/dataset/forms.py:67 udata/core/dataset/forms.py:125
 #: udata/core/discussions/forms.py:12 udata/core/reuse/forms.py:19
 #: udata/core/site/forms.py:12 udata/templates/mail/discussion_closed.html:26
 #: udata/templates/mail/new_discussion.html:25
@@ -213,7 +213,7 @@ msgstr ""
 msgid "Title"
 msgstr ""
 
-#: udata/core/dataset/forms.py:69 udata/core/dataset/forms.py:132
+#: udata/core/dataset/forms.py:69 udata/core/dataset/forms.py:129
 #: udata/core/jobs/forms.py:28 udata/core/organization/forms.py:25
 #: udata/core/reuse/forms.py:21 udata/core/topic/forms.py:17
 #: udata/harvest/forms.py:62
@@ -261,91 +261,83 @@ msgstr ""
 msgid "The file size in bytes"
 msgstr ""
 
-#: udata/core/dataset/forms.py:94
-msgid "Publication date"
-msgstr ""
-
 #: udata/core/dataset/forms.py:95
-msgid "The publication date of the resource"
-msgstr ""
-
-#: udata/core/dataset/forms.py:98
 msgid "Schema"
 msgstr ""
 
-#: udata/core/dataset/forms.py:101
+#: udata/core/dataset/forms.py:98
 msgid "The schema slug the resource adheres to"
 msgstr ""
 
-#: udata/core/dataset/forms.py:113
+#: udata/core/dataset/forms.py:110
 msgid "Related dataset"
 msgstr ""
 
-#: udata/core/dataset/forms.py:115 udata/core/dataset/forms.py:159
+#: udata/core/dataset/forms.py:112 udata/core/dataset/forms.py:156
 #: udata/core/reuse/forms.py:38 udata/harvest/forms.py:69
 msgid "Publish as"
 msgstr ""
 
-#: udata/core/dataset/forms.py:129 udata/core/organization/forms.py:23
+#: udata/core/dataset/forms.py:126 udata/core/organization/forms.py:23
 msgid "Acronym"
 msgstr ""
 
-#: udata/core/dataset/forms.py:130
+#: udata/core/dataset/forms.py:127
 msgid "An optional acronym"
 msgstr ""
 
-#: udata/core/dataset/forms.py:133
+#: udata/core/dataset/forms.py:130
 msgid "The details about the dataset (collection process, specifics...)."
 msgstr ""
 
-#: udata/core/dataset/forms.py:136
+#: udata/core/dataset/forms.py:133
 msgid "License"
 msgstr ""
 
-#: udata/core/dataset/forms.py:138
+#: udata/core/dataset/forms.py:135
 msgid "Update frequency"
 msgstr ""
 
-#: udata/core/dataset/forms.py:142
+#: udata/core/dataset/forms.py:139
 msgid "The frequency at which data are updated."
 msgstr ""
 
-#: udata/core/dataset/forms.py:143
+#: udata/core/dataset/forms.py:140
 msgid "Expected frequency date"
 msgstr ""
 
-#: udata/core/dataset/forms.py:147
+#: udata/core/dataset/forms.py:144
 msgid "Temporal coverage"
 msgstr ""
 
-#: udata/core/dataset/forms.py:148
+#: udata/core/dataset/forms.py:145
 msgid "The period covered by the data"
 msgstr ""
 
-#: udata/core/dataset/forms.py:150 udata/core/spatial/forms.py:83
+#: udata/core/dataset/forms.py:147 udata/core/spatial/forms.py:83
 msgid "Spatial coverage"
 msgstr ""
 
-#: udata/core/dataset/forms.py:151
+#: udata/core/dataset/forms.py:148
 msgid "The geographical area covered by the data."
 msgstr ""
 
-#: udata/core/dataset/forms.py:152 udata/core/post/forms.py:26
+#: udata/core/dataset/forms.py:149 udata/core/post/forms.py:26
 #: udata/core/reuse/forms.py:29 udata/core/site/forms.py:13
 #: udata/core/topic/forms.py:22
 msgid "Tags"
 msgstr ""
 
-#: udata/core/dataset/forms.py:152 udata/core/reuse/forms.py:29
+#: udata/core/dataset/forms.py:149 udata/core/reuse/forms.py:29
 msgid "Some taxonomy keywords"
 msgstr ""
 
-#: udata/core/dataset/forms.py:154 udata/core/reuse/forms.py:32
+#: udata/core/dataset/forms.py:151 udata/core/reuse/forms.py:32
 #: udata/core/topic/forms.py:23
 msgid "Private"
 msgstr ""
 
-#: udata/core/dataset/forms.py:155 udata/core/reuse/forms.py:33
+#: udata/core/dataset/forms.py:152 udata/core/reuse/forms.py:33
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr ""
 
@@ -485,23 +477,23 @@ msgstr ""
 msgid "Nameless resource"
 msgstr ""
 
-#: udata/core/dataset/models.py:437 udata/models/datetime_fields.py:59
+#: udata/core/dataset/models.py:436 udata/models/datetime_fields.py:59
 msgid "Creation date"
 msgstr ""
 
-#: udata/core/dataset/models.py:439 udata/models/datetime_fields.py:61
+#: udata/core/dataset/models.py:438 udata/models/datetime_fields.py:61
 msgid "Last modification date"
 msgstr ""
 
-#: udata/core/dataset/models.py:455
+#: udata/core/dataset/models.py:454
 msgid "Future date of update"
 msgstr ""
 
-#: udata/core/dataset/models.py:472
+#: udata/core/dataset/models.py:471
 msgid "Pivotal data"
 msgstr ""
 
-#: udata/core/dataset/models.py:510
+#: udata/core/dataset/models.py:509
 msgid "dataset"
 msgstr ""
 
@@ -514,7 +506,7 @@ msgid "You need to update some frequency-based datasets"
 msgstr ""
 
 #: udata/core/discussions/forms.py:14 udata/core/discussions/forms.py:21
-#: udata/core/organization/forms.py:53 udata/core/organization/forms.py:57
+#: udata/core/organization/forms.py:54 udata/core/organization/forms.py:58
 #: udata/harvest/forms.py:78
 msgid "Comment"
 msgstr ""
@@ -587,38 +579,38 @@ msgstr ""
 msgid "Logo"
 msgstr ""
 
-#: udata/core/organization/forms.py:64
+#: udata/core/organization/forms.py:65
 msgid "Role"
 msgstr ""
 
-#: udata/core/organization/models.py:23
+#: udata/core/organization/models.py:22
 msgid "Administrator"
 msgstr ""
 
-#: udata/core/organization/models.py:24
+#: udata/core/organization/models.py:23
 msgid "Editor"
 msgstr ""
 
-#: udata/core/organization/models.py:30 udata/features/transfer/models.py:14
+#: udata/core/organization/models.py:29 udata/features/transfer/models.py:14
 #: udata/harvest/models.py:22 udata/harvest/models.py:32 udata/harvest/models.py:70
 msgid "Pending"
 msgstr ""
 
-#: udata/core/organization/models.py:31 udata/features/transfer/models.py:15
+#: udata/core/organization/models.py:30 udata/features/transfer/models.py:15
 #: udata/harvest/models.py:71
 msgid "Accepted"
 msgstr ""
 
-#: udata/core/organization/models.py:32 udata/features/transfer/models.py:16
+#: udata/core/organization/models.py:31 udata/features/transfer/models.py:16
 #: udata/harvest/models.py:72
 msgid "Refused"
 msgstr ""
 
-#: udata/core/organization/models.py:138
+#: udata/core/organization/models.py:137
 msgid "Public Service"
 msgstr ""
 
-#: udata/core/organization/models.py:139
+#: udata/core/organization/models.py:138
 msgid "Certified"
 msgstr ""
 
@@ -961,7 +953,7 @@ msgstr ""
 msgid "Roles"
 msgstr ""
 
-#: udata/core/user/models.py:263 udata/tests/api/test_me_api.py:313
+#: udata/core/user/models.py:267 udata/tests/api/test_me_api.py:314
 msgid "Account deletion"
 msgstr ""
 
