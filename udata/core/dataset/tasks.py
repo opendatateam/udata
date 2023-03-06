@@ -14,7 +14,7 @@ from udata.frontend import csv
 from udata.harvest.models import HarvestJob
 from udata.i18n import lazy_gettext as _
 from udata.models import (Follow, Discussion, Activity, Topic,
-                          Organization, Transfer)
+                          Organization, Transfer, db)
 from udata.tasks import job
 
 from .models import Dataset, Resource, CommunityResource, UPDATE_FREQUENCIES, Checksum
@@ -24,7 +24,7 @@ log = get_task_logger(__name__)
 
 def flatten(iterable):
     for el in iterable:
-        if isinstance(el, collections.Iterable) and not isinstance(el, str):
+        if isinstance(el, collections.Iterable) and not (isinstance(el, str) or isinstance(el, db.Document)):
             yield from flatten(el)
         else:
             yield el
@@ -72,7 +72,7 @@ def purge_datasets(self):
 def send_frequency_reminder(self):
     # We exclude irrelevant frequencies.
     frequencies = [f for f in UPDATE_FREQUENCIES.keys()
-                   if f not in ('unknown', 'realtime', 'punctual')]
+                   if f not in ('unknown', 'realtime', 'punctual', 'irregular', 'continuous')]
     now = datetime.now()
     reminded_orgs = {}
     reminded_people = []
