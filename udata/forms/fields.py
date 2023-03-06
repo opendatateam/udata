@@ -4,7 +4,7 @@ from dateutil.parser import parse
 
 from flask import url_for
 from flask_mongoengine.wtf import fields as mefields
-from flask_fs.mongo import ImageReference
+from flask_storage.mongo import ImageReference
 from wtforms import Form as WTForm, Field as WTField, validators, fields, SubmitField
 from wtforms.ext.dateutil import fields as dtfields
 from wtforms.utils import unset_value

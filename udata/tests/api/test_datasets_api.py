@@ -1,34 +1,36 @@
 import json
-
 from datetime import datetime
 from io import BytesIO
 from uuid import uuid4
 
-from flask import url_for
 import pytest
-
-from . import APITestCase
+import pytz
+from flask import url_for
 
 from udata.api import fields
 from udata.app import cache
 from udata.core import storages
-from udata.core.dataset.factories import (
-    DatasetFactory, VisibleDatasetFactory, CommunityResourceFactory,
-    LicenseFactory, ResourceFactory)
-from udata.core.dataset.api_fields import dataset_harvest_fields, resource_harvest_fields
-from udata.core.dataset.models import ResourceMixin, HarvestDatasetMetadata, HarvestResourceMetadata
-from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.badges.factories import badge_factory
+from udata.core.dataset.api_fields import (dataset_harvest_fields,
+                                           resource_harvest_fields)
+from udata.core.dataset.factories import (CommunityResourceFactory,
+                                          DatasetFactory, LicenseFactory,
+                                          ResourceFactory,
+                                          VisibleDatasetFactory)
+from udata.core.dataset.models import (HarvestDatasetMetadata,
+                                       HarvestResourceMetadata, ResourceMixin)
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
+from udata.core.user.factories import AdminFactory, UserFactory
+from udata.models import (LEGACY_FREQUENCIES, RESOURCE_TYPES,
+                          UPDATE_FREQUENCIES, CommunityResource, Dataset,
+                          Follow, Member, db)
+from udata.tags import MAX_TAG_LENGTH, MIN_TAG_LENGTH
 from udata.tests.features.territories import create_geozones_fixtures
-from udata.models import (
-    CommunityResource, Dataset, Follow, Member, UPDATE_FREQUENCIES,
-    LEGACY_FREQUENCIES, RESOURCE_TYPES, db
-)
-from udata.tags import MIN_TAG_LENGTH, MAX_TAG_LENGTH
-from udata.utils import unique_string, faker
 from udata.tests.helpers import assert200, assert404
+from udata.utils import faker, unique_string
+
+from . import APITestCase
 
 SAMPLE_GEOM = {
     "type": "MultiPolygon",
@@ -1637,7 +1639,7 @@ class HarvestMetadataAPITest:
     resource_harvest_fields['dynamic_field'] = fields.String(description='', allow_null=True)
 
     def test_dataset_with_harvest_metadata(self, api):
-        date = datetime(2022, 2, 22)
+        date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
         harvest_metadata = HarvestDatasetMetadata(
             backend='DCAT',
             created_at=date,
@@ -1694,7 +1696,7 @@ class HarvestMetadataAPITest:
         }
 
     def test_dataset_with_resource_harvest_metadata(self, api):
-        date = datetime(2022, 2, 22)
+        date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
 
         harvest_metadata = HarvestResourceMetadata(
             created_at=date,
