@@ -271,7 +271,7 @@ mistune==0.8.4
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-mkdocs==1.2.3
+mkdocs==1.2.4
     # via -r requirements/doc.in
 mongoengine==0.20.0
     # via
