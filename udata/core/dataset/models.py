@@ -11,7 +11,7 @@ from mongoengine import DynamicEmbeddedDocument
 from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
 from stringdist import rdlevenshtein
-from werkzeug import cached_property
+from werkzeug.utils import cached_property
 import requests
 
 from udata.app import cache
