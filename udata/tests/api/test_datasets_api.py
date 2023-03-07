@@ -574,6 +574,18 @@ class DatasetAPITest(APITestCase):
         dataset.reload()
         self.assertFalse(dataset.featured)
 
+    def test_dataset_api_unfeature_already(self):
+        '''It shouldn't do anything to unfeature a not featured dataset'''
+        self.login(AdminFactory())
+        dataset = DatasetFactory(featured=False)
+
+        response = self.delete(url_for('api.dataset_featured',
+                                       dataset=dataset))
+        self.assert200(response)
+
+        dataset.reload()
+        self.assertFalse(dataset.featured)
+
     def test_dataset_new_resource_with_schema(self):
         '''Should filters datasets results based on query filters'''
         user = self.login()

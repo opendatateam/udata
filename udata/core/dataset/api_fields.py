@@ -258,5 +258,5 @@ resource_type_fields = api.model('ResourceType', {
 schema_fields = api.model('Schema', {
     'id': fields.String(description='The schema identifier'),
     'label': fields.String(description='The schema display name'),
-    'versions': fields.List(fields.String, description='The available versions of the schema')
+    'versions': fields.List(fields.String, description='The available versions of the schema'),
 })
