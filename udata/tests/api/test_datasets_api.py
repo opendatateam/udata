@@ -587,7 +587,7 @@ class DatasetAPITest(APITestCase):
         self.assertFalse(dataset.featured)
 
     def test_dataset_new_resource_with_schema(self):
-        '''Should filters datasets results based on query filters'''
+        '''Tests api validation to prevent schema creation with a name and a url'''
         user = self.login()
         dataset = DatasetFactory(owner=user)
         data = dataset.to_dict()
