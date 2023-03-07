@@ -4,6 +4,7 @@ from flask import current_app
 
 from udata.forms import ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
+from udata.uris import validate as validate_url, ValidationError
 
 from udata.core.storages import resources
 from udata.core.spatial.forms import SpatialCoverageField
@@ -35,13 +36,23 @@ def enforce_allowed_schemas(form, field):
     schema = field.data
     if schema:
         allowed_schemas = [s['id'] for s in ResourceSchema.objects()]
-        if schema.get('name') not in allowed_schemas:
+
+        if not bool('name' in schema) ^ bool('url' in schema):
+            raise validators.ValidationError(_('Schema must have at least a name or an url. Having both is not allowed.'))
+
+        if 'url' in schema:
+            try:
+                validate_url(schema.get('url'))
+            except ValidationError:
+                raise validators.ValidationError(_('Provided URL is not valid.'))
+
+        if 'name' in schema and schema.get('name') not in allowed_schemas:
             message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}')
             raise validators.ValidationError(message.format(
                 schema=schema.get('name'),
                 values=', '.join(allowed_schemas)
             ))
-        
+
         schema_versions = [d['versions'] for d in ResourceSchema.objects() if d['id'] == schema.get('name')]
         allowed_versions = schema_versions[0] if schema_versions else []
         allowed_versions.append('latest')
@@ -52,7 +63,8 @@ def enforce_allowed_schemas(form, field):
                     version=schema.get('version'),
                     values=', '.join(allowed_versions)
                 ))
-        properties = ['name', 'version']
+
+        properties = ['name', 'version', 'url']
         for prop in schema:
             if prop not in properties:
                 message = _('Sub-property "{prop}" is not allowed value in schema field. Allowed values is : {properties}')

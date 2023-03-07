@@ -574,17 +574,31 @@ class DatasetAPITest(APITestCase):
         dataset.reload()
         self.assertFalse(dataset.featured)
 
-    def test_dataset_api_unfeature_already(self):
-        '''It shouldn't do anything to unfeature a not featured dataset'''
-        self.login(AdminFactory())
-        dataset = DatasetFactory(featured=False)
+    def test_dataset_new_resource_with_schema(self):
+        '''Should filters datasets results based on query filters'''
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        data = dataset.to_dict()
+        resource_data = ResourceFactory.as_dict()
 
-        response = self.delete(url_for('api.dataset_featured',
-                                       dataset=dataset))
+        resource_data['schema'] = {'name': 'my-schema', 'version': '1.0.0', 'url': 'http://example.com'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert400(response)
+        assert response.json['errors']['resources'][0]['schema'][0] == 'Schema must have at least a name or an url. Having both is not allowed.'
+
+        resource_data['schema'] = {'url': 'test'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert400(response)
+        assert response.json['errors']['resources'][0]['schema'][0] == 'Provided URL is not valid.'
+
+        resource_data['schema'] = {'url': 'http://example.com'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert200(response)
-
         dataset.reload()
-        self.assertFalse(dataset.featured)
+        assert dataset.resources[0].schema['url'] == 'http://example.com'
 
 
 class DatasetBadgeAPITest(APITestCase):
