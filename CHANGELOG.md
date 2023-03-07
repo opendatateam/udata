@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 6.1.0 (2023-03-07)
 
 - :warning: Upgrading Flask to 2.1.2, leading to an upgrade of click (8.0), Flask-BabelEx (0.9.4), Flask-Caching (2.0.2), flask-storage (1.0.0) instead of flask-fs, Flask-Login (0.6.2), flask-restx (1.0.5), Flask-Security-Too (4.1.5), Jinja2 (3.1.2), pillow (9.2.0), werkzeug (2.2.2) [#2816](https://github.com/opendatateam/udata/pull/2816)
