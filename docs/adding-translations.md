@@ -76,7 +76,7 @@ python setup.py update_catalog
 ```
 
 You can then translate the po file using the editor of your choice.
-You can set up a Crowdin project if you want.
+You could take a look at [Poedit][] or set up a Crowdin project if you want.
 
 When translation is done, you can compile translations catalogs using:
 
@@ -90,3 +90,4 @@ python setup.py compile_catalog  # Compile .mo files for each language
 
 [Babel]: http://babel.pocoo.org/
 [cookiecutter-template]: https://github.com/opendatateam/cookiecutter-udata-theme
+[Poedit]: https://poedit.net/

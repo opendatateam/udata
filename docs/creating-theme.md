@@ -270,6 +270,5 @@ Please report any difficulty you encounter with a dedicated [Github issue][githu
 [github-new-issue]: https://github.com/opendatateam/udata/issues/new
 [PyPI]: https://pypi.org/
 [front-hooks]: https://github.com/etalab/udata-front/blob/master/udata_front/theme/__init__.py
-[Poedit]: https://poedit.net/
 [front-project]: https://github.com/etalab/udata-front/
 [github-discussions]: https://github.com/opendatateam/udata/discussions/2721
