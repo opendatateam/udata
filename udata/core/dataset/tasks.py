@@ -180,6 +180,7 @@ def export_csv_for_model(model, dataset):
         writer.writerow(adapter.header())
         for row in adapter.rows():
             writer.writerow(row)
+        csvfile.flush()
         # make a resource from this tmp file
         created, resource = store_resource(csvfile, model, dataset)
         # add it to the dataset
