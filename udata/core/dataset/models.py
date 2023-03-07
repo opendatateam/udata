@@ -299,7 +299,7 @@ class ResourceMixin(object):
         super(ResourceMixin, self).clean()
         if not self.urlhash or 'url' in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
-        if not bool('name' in self.schema) ^ bool('url' in self.schema):
+        if self.schema and (not bool('name' in self.schema) ^ bool('url' in self.schema)):
             raise MongoEngineValidationError('Schema must have at least a name or an url. Having both is not allowed.')
 
     @cached_property  # Accessed at least 2 times in front rendering
@@ -888,7 +888,6 @@ class ResourceSchema(object):
         if not content:
             log.error(f'No content found inc. from cache for schema catalog')
             raise SchemasCacheUnavailableException('No content in cache for schema catalog')
-
         return content
 
 

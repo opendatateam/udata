@@ -1541,7 +1541,6 @@ class DatasetSchemasAPITest:
         })
         response = api.get(url_for('api.schemas'))
 
-        print(response.json)
         assert200(response)
         assert response.json == [
             {
