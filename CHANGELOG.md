@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Resources schema can now have an URL field. [#2825](https://github.com/opendatateam/udata/pull/2825)
 
 ## 6.1.0 (2023-03-07)
 
@@ -13,7 +13,7 @@
   - Prevent multiple blueprint with same name registration (not supported anymore in Flask).
 - Removed all code logic related to the `published` date in resource model, now deprecated. :warning: The attribute itself was left in the model because of the complexity of the migration [#2807](https://github.com/opendatateam/udata/pull/2807)
 - Add `xlsx` and `docx` as closed format for quality score [#2814](https://github.com/opendatateam/udata/pull/2814)
-- Flush latest rows in csv catalog export before storing file [#2818](https://github.com/opendatateam/udata/pull/2818) 
+- Flush latest rows in csv catalog export before storing file [#2818](https://github.com/opendatateam/udata/pull/2818)
 - Exposed dates through API are now timezone aware [#2810](https://github.com/opendatateam/udata/pull/2810)
 - Fix frequency reminder [#2821](https://github.com/opendatateam/udata/pull/2821)
 
