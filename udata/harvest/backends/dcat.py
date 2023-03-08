@@ -128,20 +128,20 @@ class DcatBackend(BaseBackend):
 class CswDcatBackend(DcatBackend):
     display_name = 'CSW-DCAT'
 
-    def parse_graph(self, url, fmt):
+    def parse_graph(self, url: str, fmt: str) -> List[Graph]:
         body = '''<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
                                   xmlns:gmd="http://www.isotc211.org/2005/gmd"
                                   service="CSW" version="2.0.2" resultType="results"
-                                  startPosition="{start}" maxPosition="15"
+                                  startPosition="{start}" maxPosition="200"
                                   outputSchema="http://www.w3.org/ns/dcat#">
                     <csw:Query typeNames="gmd:MD_Metadata">
                         <csw:ElementSetName>full</csw:ElementSetName>
-                        <csw:Constraint version="1.1.0">
-                            <Filter xmlns="http://www.opengis.net/ogc"><PropertyIsEqualTo>
-                                <PropertyName>documentStandard</PropertyName>
-                                <Literal>iso19139</Literal>
-                            </PropertyIsEqualTo></Filter>
-                        </csw:Constraint>
+                        <ogc:SortBy xmlns:ogc="http://www.opengis.net/ogc">
+                            <ogc:SortProperty>
+                                <ogc:PropertyName>identifier</ogc:PropertyName>
+                            <ogc:SortOrder>ASC</ogc:SortOrder>
+                            </ogc:SortProperty>
+                        </ogc:SortBy>
                     </csw:Query>
                 </csw:GetRecords>'''
         headers = {"Content-Type": "application/xml"}
