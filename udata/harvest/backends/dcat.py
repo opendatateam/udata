@@ -148,8 +148,9 @@ class CswDcatBackend(DcatBackend):
 
         graphs = []
         page = 0
+        start = 1
 
-        content = requests.post(url, data=body.format(start=1), headers=headers).text
+        content = requests.post(url, data=body.format(start=start), headers=headers).text
         tree = ET.fromstring(content)
         while tree:
             graph = Graph(namespace_manager=namespace_manager)
@@ -157,7 +158,6 @@ class CswDcatBackend(DcatBackend):
             namespace = tree.tag.split('}')[0].strip('{}')
             search_results = tree.find('csw:SearchResults', {'csw': namespace})
             if not search_results:
-                # TODO: may be worth an investigation if it happens
                 log.error(f'No search results found for {url} on page {page}')
                 break
             for child in search_results:
@@ -173,12 +173,35 @@ class CswDcatBackend(DcatBackend):
             graphs.append(graph)
             page += 1
 
-            if int(search_results.attrib['nextRecord']) == 0 or \
-                    self.max_items and len(self.job.items) >= self.max_items:
+            next_record = int(search_results.attrib['nextRecord'])
+            matched_count = int(search_results.attrib['numberOfRecordsMatched'])
+            returned_count = int(search_results.attrib['numberOfRecordsReturned'])
+
+            # Break conditions copied gratefully from
+            # noqa https://github.com/geonetwork/core-geonetwork/blob/main/harvesters/src/main/java/org/fao/geonet/kernel/harvest/harvester/csw/Harvester.java#L338-L369
+            break_conditions = (
+                # standard CSW: A value of 0 means all records have been returned.
+                next_record == 0,
+
+                # Misbehaving CSW server returning a next record > matched count
+                next_record > matched_count,
+
+                # No results returned already
+                returned_count == 0,
+
+                # Current next record is lower than previous one
+                next_record < start,
+
+                # Enough items have been harvested already
+                self.max_items and len(self.job.items) >= self.max_items
+            )
+
+            if any(break_conditions):
                 break
 
+            start = next_record
             tree = ET.fromstring(
-                requests.post(url, data=body.format(start=search_results.attrib['nextRecord']),
+                requests.post(url, data=body.format(start=start),
                               headers=headers).text)
 
         return graphs
