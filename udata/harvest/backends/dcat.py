@@ -36,6 +36,8 @@ KNOWN_PAGINATION = (
     (HYDRA.PagedCollection, HYDRA.nextPage)
 )
 
+CSW_NAMESPACE = 'http://www.opengis.net/cat/csw/2.0.2'
+
 
 def extract_graph(source, target, node, specs):
     for p, o in source.predicate_objects(node):
@@ -154,9 +156,7 @@ class CswDcatBackend(DcatBackend):
         tree = ET.fromstring(content)
         while tree:
             graph = Graph(namespace_manager=namespace_manager)
-            # TODO: could we find a better way to deal with namespaces?
-            namespace = tree.tag.split('}')[0].strip('{}')
-            search_results = tree.find('csw:SearchResults', {'csw': namespace})
+            search_results = tree.find('csw:SearchResults', {'csw': CSW_NAMESPACE})
             if not search_results:
                 log.error(f'No search results found for {url} on page {page}')
                 break
