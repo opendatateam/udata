@@ -53,6 +53,6 @@ def init_app(app):
                       mail_util_cls=UdataMailUtil,
                       password_util_cls=UdataPasswordUtil)
 
-    security_bp = create_security_blueprint(app.extensions['security'], 'security_blueprint')
+    security_bp = create_security_blueprint(app, app.extensions['security'], 'security_blueprint')
 
     app.register_blueprint(security_bp)

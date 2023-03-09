@@ -186,7 +186,7 @@ flask-restx==1.0.5
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-flask-security-too==5.0.0
+flask-security-too==5.1.1
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
