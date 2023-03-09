@@ -30,6 +30,7 @@ class Role(db.Document, RoleMixin):
     ADMIN = 'admin'
     name = db.StringField(max_length=80, unique=True)
     description = db.StringField(max_length=255)
+    permissions = db.ListField()
 
     def __str__(self):
         return self.name

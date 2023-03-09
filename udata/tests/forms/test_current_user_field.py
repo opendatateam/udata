@@ -221,7 +221,7 @@ class CurrentUserFieldTest(TestCase, DBTestMixin):
         self.assertIn('Invalid email address', form.errors['email'])
 
         today = datetime.datetime.now()
-        user = UserFactory(email='b@fake.notreal', password='password', confirmed_at=today)
+        user = UserFactory(email='b@fake.com', password='password', confirmed_at=today)
         form = ExtendedLoginForm.from_json({
             'email': user.email,
             'password': 'password'
