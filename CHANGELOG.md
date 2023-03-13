@@ -3,6 +3,11 @@
 ## Current (in progress)
 
 - Fix edge case on aware datetime string [#2827](https://github.com/opendatateam/udata/pull/2827)
+- :warning: Flask-Security update to enable `GenericResponses` [#2826](https://github.com/opendatateam/udata/pull/2826):
+    - Upgrade Flask-Security 4.5.1 -> 5.1.1
+    - Upgrade WTForms 2.2.1 -> 3.0.1
+    - Upgrade WTForms-json 0.3.3 -> 0.3.5
+    - New security email template for existing users
 
 ## 6.1.0 (2023-03-07)
 
@@ -13,7 +18,7 @@
   - Prevent multiple blueprint with same name registration (not supported anymore in Flask).
 - Removed all code logic related to the `published` date in resource model, now deprecated. :warning: The attribute itself was left in the model because of the complexity of the migration [#2807](https://github.com/opendatateam/udata/pull/2807)
 - Add `xlsx` and `docx` as closed format for quality score [#2814](https://github.com/opendatateam/udata/pull/2814)
-- Flush latest rows in csv catalog export before storing file [#2818](https://github.com/opendatateam/udata/pull/2818) 
+- Flush latest rows in csv catalog export before storing file [#2818](https://github.com/opendatateam/udata/pull/2818)
 - Exposed dates through API are now timezone aware [#2810](https://github.com/opendatateam/udata/pull/2810)
 - Fix frequency reminder [#2821](https://github.com/opendatateam/udata/pull/2821)
 
