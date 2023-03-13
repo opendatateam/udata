@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix edge case on aware datetime string [#2827](https://github.com/opendatateam/udata/pull/2827)
 
 ## 6.1.0 (2023-03-07)
 
