@@ -6,10 +6,10 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: udata 6.0.3.dev0\n"
+"Project-Id-Version: udata 6.1.1.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2023-03-06 15:58+0100\n"
-"PO-Revision-Date: 2023-03-06 15:58+0100\n"
+"POT-Creation-Date: 2023-03-13 14:58+0100\n"
+"PO-Revision-Date: 2023-03-13 14:58+0100\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -43,7 +43,7 @@ msgstr ""
 msgid "Password reset instructions"
 msgstr ""
 
-#: udata/settings.py:405
+#: udata/settings.py:407
 msgid "This dataset has been archived"
 msgstr ""
 
@@ -953,7 +953,7 @@ msgstr ""
 msgid "Roles"
 msgstr ""
 
-#: udata/core/user/models.py:267 udata/tests/api/test_me_api.py:314
+#: udata/core/user/models.py:268 udata/tests/api/test_me_api.py:314
 msgid "Account deletion"
 msgstr ""
 
@@ -973,52 +973,60 @@ msgstr ""
 msgid "Test mail"
 msgstr ""
 
-#: udata/forms/fields.py:99
+#: udata/forms/fields.py:117
+msgid "Please input a date/time value"
+msgstr ""
+
+#: udata/forms/fields.py:129 udata/forms/fields.py:137
+msgid "Invalid date/time input"
+msgstr ""
+
+#: udata/forms/fields.py:163
 msgid "The role {role} does not exist"
 msgstr ""
 
-#: udata/forms/fields.py:116
+#: udata/forms/fields.py:180
 msgid "Not a valid UUID"
 msgstr ""
 
-#: udata/forms/fields.py:141
+#: udata/forms/fields.py:205
 msgid "Invalid URL"
 msgstr ""
 
-#: udata/forms/fields.py:337
+#: udata/forms/fields.py:401
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
 msgstr ""
 
-#: udata/forms/fields.py:377 udata/forms/fields.py:429
+#: udata/forms/fields.py:441 udata/forms/fields.py:493
 msgid "{0} does not exists"
 msgstr ""
 
-#: udata/forms/fields.py:416
+#: udata/forms/fields.py:480
 msgid "Expect both class and identifier"
 msgstr ""
 
-#: udata/forms/fields.py:462
+#: udata/forms/fields.py:526
 msgid "Model for {0} not found"
 msgstr ""
 
-#: udata/forms/fields.py:497
+#: udata/forms/fields.py:561
 msgid "Unknown identifiers: {identifiers}"
 msgstr ""
 
-#: udata/forms/fields.py:632
+#: udata/forms/fields.py:696
 msgid "Unable to parse date range"
 msgstr ""
 
-#: udata/forms/fields.py:659 udata/forms/fields.py:682
+#: udata/forms/fields.py:723 udata/forms/fields.py:746
 msgid "You must be authenticated"
 msgstr ""
 
-#: udata/forms/fields.py:662
+#: udata/forms/fields.py:726
 msgid "You can only set yourself as owner"
 msgstr ""
 
-#: udata/forms/fields.py:685
+#: udata/forms/fields.py:749
 msgid "Permission denied for this organization"
 msgstr ""
 
@@ -1432,6 +1440,28 @@ msgstr ""
 msgid "Confirm now"
 msgstr ""
 
+#: udata/templates/security/email/welcome_existing.html:7
+#, python-format
+msgid "Hello %(email)s!"
+msgstr ""
+
+#: udata/templates/security/email/welcome_existing.html:10
+msgid "Someone (you?) tried to register this email - which is already in our system."
+msgstr ""
+
+#: udata/templates/security/email/welcome_existing.html:14
+#, python-format
+msgid "This account also has the following username associated with it: %(username)s."
+msgstr ""
+
+#: udata/templates/security/email/welcome_existing.html:19
+msgid "If you forgot your password you can reset it"
+msgstr ""
+
+#: udata/templates/security/email/welcome_existing.html:25
+msgid "Here"
+msgstr ""
+
 #: udata/tests/search/test_adapter.py:24
 msgid "Never reused"
 msgstr ""
@@ -1447,3 +1477,4 @@ msgstr ""
 #: udata/tests/search/test_adapter.py:27
 msgid "Heavily reused"
 msgstr ""
+
