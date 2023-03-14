@@ -39,7 +39,8 @@ def migrate(db):
             },
         },
         { '$unset': 'resources.created_at'},
-        { '$unset': 'resources.modified'}
+        { '$unset': 'resources.modified'},
+        { '$unset': 'resources.published'}
     ])
 
     log.info('Completed.')

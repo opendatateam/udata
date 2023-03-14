@@ -292,7 +292,6 @@ class ResourceMixin(object):
 
     created_at_internal = db.DateTimeField(default=datetime.now, required=True)
     last_modified_internal = db.DateTimeField(default=datetime.now, required=True)
-    published = db.DateTimeField()  # DEPRECATED BUT LEFT FOR BACKWARDS COMPATIBILITY
     deleted = db.DateTimeField()
 
     @property
