@@ -1,9 +1,9 @@
 import copy
 import logging
 import requests
+import urllib.parse
 
 from flask import request, current_app, url_for
-from werkzeug.urls import Href
 
 from udata.search.result import SearchResult
 
@@ -72,5 +72,4 @@ class SearchQuery:
                     params[key] = value
         else:
             params['page'] = self.page
-        href = Href(url or request.base_url)
-        return href(params)
+        return f'{url or request.base_url}?{urllib.parse.urlencode(params)}'

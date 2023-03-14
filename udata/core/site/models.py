@@ -1,6 +1,5 @@
 from flask import g, current_app
 from werkzeug.local import LocalProxy
-from werkzeug import cached_property
 
 from udata.models import db, WithMetrics
 from udata.core.organization.models import Organization

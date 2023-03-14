@@ -11,7 +11,7 @@ from mongoengine import DynamicEmbeddedDocument
 from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
 from stringdist import rdlevenshtein
-from werkzeug import cached_property
+from werkzeug.utils import cached_property
 import requests
 
 from udata.app import cache
@@ -500,6 +500,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         ] + db.Owned.meta['indexes'],
         'ordering': ['-created_at_internal'],
         'queryset_class': DatasetQuerySet,
+        'auto_create_index_on_save': True
     }
 
     before_save = signal('Dataset.before_save')
