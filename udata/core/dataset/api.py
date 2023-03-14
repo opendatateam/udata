@@ -74,8 +74,8 @@ SUGGEST_SORTING = '-metrics.followers'
 class DatasetApiParser(ModelApiParser):
     sorts = {
         'title': 'title',
-        'created': 'created_at',
-        'last_modified': 'last_modified',
+        'created': 'created_at_internal',
+        'last_modified': 'last_modified_internal',
         'reuses': 'metrics.reuses',
         'followers': 'metrics.followers',
         'views': 'metrics.views',
@@ -173,7 +173,7 @@ class DatasetListAPI(API):
         args = dataset_parser.parse()
         datasets = Dataset.objects(archived=None, deleted=None, private=False)
         datasets = dataset_parser.parse_filters(datasets, args)
-
+        print(args['sort'])
         sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
         return datasets.order_by(sort).paginate(args['page'], args['page_size'])
 

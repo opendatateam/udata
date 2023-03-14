@@ -9,6 +9,7 @@
     - Upgrade pymongo 3.10.1 -> 4.3.3
     - Upgrade mongoengine 0.20.0 -> 0.26.0
 - Dates renaming to provide more relevant computed dates between internal and harvested dates [#2815](https://github.com/opendatateam/udata/pull/2815):
+    - Removed `published` attribute from Resource model
     - Renamed `created_at` and `last_modified` of Dataset model to `created_at_internal` and `last_modified_internal`
     - Renamed `created_at` and `modified` of Resource model to `created_at_internal` and `last_modified_internal`
     - Added `created_at` computed property in Dataset and Resource model to provide harvested date if present and internal otherwise
