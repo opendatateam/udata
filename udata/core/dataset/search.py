@@ -22,7 +22,7 @@ class DatasetSearch(ModelSearchAdapter):
     search_url = 'datasets/'
 
     sorts = {
-        'created': 'created_at',
+        'created': 'created_at_internal',
         'reuses': 'metrics.reuses',
         'followers': 'metrics.followers',
         'views': 'metrics.views',
@@ -53,7 +53,7 @@ class DatasetSearch(ModelSearchAdapter):
         datasets = Dataset.objects(archived=None, deleted=None, private=False)
         datasets = DatasetApiParser.parse_filters(datasets, args)
 
-        sort = cls.parse_sort('created_at_internal' if args['sort'] == 'created_at' else args['sort']) or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
+        sort = cls.parse_sort(args['sort']) or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
         offset = (args['page'] - 1) * args['page_size']
         return datasets.order_by(sort).skip(offset).limit(args['page_size']), datasets.count()
 
