@@ -8,6 +8,7 @@
     - Upgrade must be done release by release to set the `FeatureCompatibilityVersion` variable like stated in [this](https://www.mongodb.com/docs/v4.2/release-notes/4.0/#upgrade-procedures) documentation.
     - Upgrade pymongo 3.10.1 -> 4.3.3
     - Upgrade mongoengine 0.20.0 -> 0.26.0
+- Add IATA `ssim` among allowed file extensions [#2828](https://github.com/opendatateam/udata/pull/2828)
 
 ## 6.1.0 (2023-03-07)
 
