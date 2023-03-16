@@ -14,6 +14,7 @@
     - Renamed `created_at` and `modified` of Resource model to `created_at_internal` and `last_modified_internal`
     - Added `created_at` computed property in Dataset and Resource model to provide harvested date if present and internal otherwise
     - Added `last_modified` computed property in Dataset and Resource model to provide max date between internal and harvested date
+- Add IATA `ssim` among allowed file extensions [#2828](https://github.com/opendatateam/udata/pull/2828)
 
 ## 6.1.0 (2023-03-07)
 
