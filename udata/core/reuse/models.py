@@ -107,6 +107,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
                     'urlhash'] + db.Owned.meta['indexes'],
         'ordering': ['-created_at'],
         'queryset_class': ReuseQuerySet,
+        'auto_create_index_on_save': True
     }
 
     before_save = Signal()

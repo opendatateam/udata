@@ -92,7 +92,8 @@ class User(WithMetrics, UserMixin, db.Document):
 
     meta = {
         'indexes': ['$slug', '-created_at', 'slug', 'apikey'],
-        'ordering': ['-created_at']
+        'ordering': ['-created_at'],
+        'auto_create_index_on_save': True
     }
 
     __metrics_keys__ = [

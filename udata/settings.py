@@ -297,7 +297,7 @@ class Defaults(object):
         'rdf', 'ttl', 'n3',
         # Misc
         'dbf', 'prj', 'sql', 'sqlite', 'db', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl', 'dxf',
-        'ics', 'other'
+        'ics', 'ssim', 'other'
     ]
 
     ALLOWED_RESOURCES_MIMES = [
