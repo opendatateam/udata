@@ -27,7 +27,7 @@ Flask-Security==3.0.0
 Flask-Sitemap==0.3.0
 Flask-Themes2==0.1.4
 Flask-WTF==0.14.2
-Flask==1.0.4
+Flask==1.1.4
 geojson==2.5.0
 html2text==2019.9.26
 itsdangerous==1.1.0
