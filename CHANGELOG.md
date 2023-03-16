@@ -15,6 +15,8 @@
     - Added `created_at` computed property in Dataset and Resource model to provide harvested date if present and internal otherwise
     - Added `last_modified` computed property in Dataset and Resource model to provide max date between internal and harvested date
 - Add IATA `ssim` among allowed file extensions [#2828](https://github.com/opendatateam/udata/pull/2828)
+- Copy user mail card back from udata-front [#2822](https://github.com/opendatateam/udata/pull/2822)
+- Upgrade node to a version still available [#2830](https://github.com/opendatateam/udata/pull/2830)
 
 ## 6.1.0 (2023-03-07)
 
