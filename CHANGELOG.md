@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add support for a CSW-DCAT harvester [#2800](https://github.com/opendatateam/udata/pull/2800)
 
 ## 6.1.1 (2023-03-17)
 
