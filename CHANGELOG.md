@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 6.1.1 (2023-03-17)
 
 - Fix edge case on aware datetime string [#2827](https://github.com/opendatateam/udata/pull/2827)
 - :warning: MongoDB support up to 6.0.4 [#2819](https://github.com/opendatateam/udata/pull/2819):
