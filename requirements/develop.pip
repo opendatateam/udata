@@ -140,6 +140,7 @@ dnspython==2.1.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   email-validator
+    #   pymongo
 docutils==0.17.1
     # via readme-renderer
 email-validator==1.1.3
@@ -362,7 +363,7 @@ mock==3.0.5
     # via
     #   -c requirements/test.pip
     #   -r requirements/test.in
-mongoengine==0.20.0
+mongoengine==0.26.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -425,7 +426,7 @@ pydenticon==0.3.1
     #   -r requirements/install.in
 pygments==2.9.0
     # via readme-renderer
-pymongo==3.10.1
+pymongo==4.3.3
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip

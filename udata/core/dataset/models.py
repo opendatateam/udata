@@ -492,6 +492,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         ] + db.Owned.meta['indexes'],
         'ordering': ['-created_at'],
         'queryset_class': DatasetQuerySet,
+        'auto_create_index_on_save': True
     }
 
     before_save = signal('Dataset.before_save')

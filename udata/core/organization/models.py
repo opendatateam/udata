@@ -128,6 +128,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         ],
         'ordering': ['-created_at'],
         'queryset_class': OrganizationQuerySet,
+        'auto_create_index_on_save': True
     }
 
     def __str__(self):
