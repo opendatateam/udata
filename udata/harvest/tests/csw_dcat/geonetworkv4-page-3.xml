@@ -3,7 +3,7 @@
   xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" 
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
   <csw:SearchStatus timestamp="2023-03-03T16:33:20.806325Z" />
-  <csw:SearchResults numberOfRecordsMatched="30" numberOfRecordsReturned="10" elementSet="full" nextRecord="21">
+  <csw:SearchResults numberOfRecordsMatched="6" numberOfRecordsReturned="2" elementSet="full" nextRecord="5">
     <rdf:RDF 
       xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
       xmlns:skos="http://www.w3.org/2004/02/skos/core#" 
