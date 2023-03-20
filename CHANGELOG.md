@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix URLField validation error message [#2831](https://github.com/opendatateam/udata/pull/2831)
 
 ## 6.1.1 (2023-03-17)
 
