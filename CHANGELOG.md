@@ -3,6 +3,19 @@
 ## Current (in progress)
 
 - Resources schema can now have an URL field. [#2825](https://github.com/opendatateam/udata/pull/2825)
+- Fix URLField validation error message [#2831](https://github.com/opendatateam/udata/pull/2831)
+
+## 6.1.1 (2023-03-17)
+
+- Fix edge case on aware datetime string [#2827](https://github.com/opendatateam/udata/pull/2827)
+- :warning: MongoDB support up to 6.0.4 [#2819](https://github.com/opendatateam/udata/pull/2819):
+    - Older versions of MongoDB >=3.6 are still supported
+    - Upgrade must be done release by release to set the `FeatureCompatibilityVersion` variable like stated in [this](https://www.mongodb.com/docs/v4.2/release-notes/4.0/#upgrade-procedures) documentation.
+    - Upgrade pymongo 3.10.1 -> 4.3.3
+    - Upgrade mongoengine 0.20.0 -> 0.26.0
+- Add IATA `ssim` among allowed file extensions [#2828](https://github.com/opendatateam/udata/pull/2828)
+- Copy user mail card back from udata-front [#2822](https://github.com/opendatateam/udata/pull/2822)
+- Upgrade node to a version still available [#2830](https://github.com/opendatateam/udata/pull/2830)
 
 ## 6.1.0 (2023-03-07)
 
