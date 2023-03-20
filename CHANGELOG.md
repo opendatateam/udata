@@ -3,6 +3,12 @@
 ## Current (in progress)
 
 - Fix URLField validation error message [#2831](https://github.com/opendatateam/udata/pull/2831)
+- Dates renaming to provide more relevant computed dates between internal and harvested dates [#2815](https://github.com/opendatateam/udata/pull/2815):
+    - Removed `published` attribute from Resource model
+    - Renamed `created_at` and `last_modified` of Dataset model to `created_at_internal` and `last_modified_internal`
+    - Renamed `created_at` and `modified` of Resource model to `created_at_internal` and `last_modified_internal`
+    - Added `created_at` computed property in Dataset and Resource model to provide harvested date if present and internal otherwise
+    - Added `last_modified` computed property in Dataset and Resource model to provide max date between internal and harvested date
 
 ## 6.1.1 (2023-03-17)
 

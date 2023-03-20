@@ -140,7 +140,7 @@ def clean_source(ident):
     datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
     for dataset in datasets:
         dataset.deleted = datetime.now()
-        dataset.save()    
+        dataset.save()
     return len(datasets)
 
 
@@ -304,7 +304,7 @@ def attach(domain, filename):
             dataset.harvest.domain = domain
             dataset.harvest.remote_id = row['remote']
 
-            dataset.last_modified = datetime.now()
+            dataset.last_modified_internal = datetime.now()
             dataset.save()
             count += 1
 
