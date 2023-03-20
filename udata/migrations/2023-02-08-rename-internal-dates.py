@@ -24,7 +24,9 @@ def migrate(db):
     result = community_resource_collection.update_many({}, {'$rename': {
         'created_at': 'created_at_internal',
         'modified': 'last_modified_internal'}})
-    log.info(f'{result.modified_count} Community Resources processed.')
+    log.info(f'{result.modified_count} Community Resources processed for renaming.')
+    result = community_resource_collection.update_many({}, {'$unset': { 'published': "" }})
+    log.info(f'{result.modified_count} Community Resources processed for published removing.')
 
     result = dataset_collection.update_many({}, [{
         '$set': {
