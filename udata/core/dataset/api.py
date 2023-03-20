@@ -74,8 +74,8 @@ SUGGEST_SORTING = '-metrics.followers'
 class DatasetApiParser(ModelApiParser):
     sorts = {
         'title': 'title',
-        'created': 'created_at',
-        'last_modified': 'last_modified',
+        'created': 'created_at_internal',
+        'last_modified': 'last_modified_internal',
         'reuses': 'metrics.reuses',
         'followers': 'metrics.followers',
         'views': 'metrics.views',
@@ -173,7 +173,6 @@ class DatasetListAPI(API):
         args = dataset_parser.parse()
         datasets = Dataset.objects(archived=None, deleted=None, private=False)
         datasets = dataset_parser.parse_filters(datasets, args)
-
         sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
         return datasets.order_by(sort).paginate(args['page'], args['page_size'])
 
@@ -211,7 +210,7 @@ class DatasetAPI(API):
         if dataset.deleted and request_deleted is not None:
             api.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.now()
         form = api.validate(DatasetForm, dataset)
         return form.save()
 
@@ -224,7 +223,7 @@ class DatasetAPI(API):
             api.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
         dataset.deleted = datetime.now()
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.now()
         dataset.save()
         return '', 204
 
@@ -334,7 +333,7 @@ class ResourcesAPI(API):
             api.abort(400, 'This endpoint only supports remote resources')
         form.populate_obj(resource)
         dataset.add_resource(resource)
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.now()
         dataset.save()
         return resource, 201
 
@@ -383,7 +382,7 @@ class UploadNewDatasetResource(UploadMixin, API):
         infos = self.handle_upload(dataset)
         resource = Resource(**infos)
         dataset.add_resource(resource)
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.now()
         dataset.save()
         return resource, 201
 
@@ -430,7 +429,7 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
         for k, v in infos.items():
             resource[k] = v
         dataset.update_resource(resource)
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.now()
         dataset.save()
         if fs_filename_to_remove is not None:
             storages.resources.delete(fs_filename_to_remove)
@@ -485,9 +484,9 @@ class ResourceAPI(ResourceMixin, API):
         # update_resource saves the updated resource dict to the database
         # the additional dataset.save is required as we update the last_modified date.
         form.populate_obj(resource)
-        resource.modified = datetime.now()
+        resource.last_modified_internal = datetime.now()
         dataset.update_resource(resource)
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.now()
         dataset.save()
         return resource
 
@@ -498,7 +497,7 @@ class ResourceAPI(ResourceMixin, API):
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         dataset.remove_resource(resource)
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.now()
         dataset.save()
         return '', 204
 
@@ -539,7 +538,7 @@ class CommunityResourcesAPI(API):
             })
         if not resource.organization:
             resource.owner = current_user._get_current_object()
-        resource.modified = datetime.now()
+        resource.last_modified_internal = datetime.now()
         resource.save()
         return resource, 201
 
@@ -567,7 +566,7 @@ class CommunityResourceAPI(API):
         form.populate_obj(community)
         if not community.organization and not community.owner:
             community.owner = current_user._get_current_object()
-        community.modified = datetime.now()
+        community.last_modified_internal = datetime.now()
         community.save()
         return community
 

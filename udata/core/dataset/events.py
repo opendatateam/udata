@@ -23,7 +23,7 @@ def serialize_resource_for_event(resource):
         'checksum_type': resource.checksum.type if resource.checksum else None,
         'checksum_value': resource.checksum.value if resource.checksum else None,
         'created_at': to_iso_datetime(resource.created_at),
-        'modified': to_iso_datetime(resource.modified)
+        'last_modified': to_iso_datetime(resource.last_modified)
     }
     extras = {}
     for key, value in resource.extras.items():
