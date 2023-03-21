@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Resources schema can now have an URL field. [#2825](https://github.com/opendatateam/udata/pull/2825)
 - Fix URLField validation error message [#2831](https://github.com/opendatateam/udata/pull/2831)
 - Dates renaming to provide more relevant computed dates between internal and harvested dates [#2815](https://github.com/opendatateam/udata/pull/2815):
     - Removed `published` attribute from Resource model

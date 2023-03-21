@@ -608,6 +608,32 @@ class DatasetAPITest(APITestCase):
         dataset.reload()
         self.assertFalse(dataset.featured)
 
+    def test_dataset_new_resource_with_schema(self):
+        '''Tests api validation to prevent schema creation with a name and a url'''
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        data = dataset.to_dict()
+        resource_data = ResourceFactory.as_dict()
+
+        resource_data['schema'] = {'name': 'my-schema', 'version': '1.0.0', 'url': 'http://example.com'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert400(response)
+        assert response.json['errors']['resources'][0]['schema'][0] == 'Schema must have at least a name or an url. Having both is not allowed.'
+
+        resource_data['schema'] = {'url': 'test'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert400(response)
+        assert response.json['errors']['resources'][0]['schema'][0] == 'Provided URL is not valid.'
+
+        resource_data['schema'] = {'url': 'http://example.com'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        assert dataset.resources[0].schema['url'] == 'http://example.com'
+
 
 class DatasetBadgeAPITest(APITestCase):
     @classmethod
@@ -1549,7 +1575,6 @@ class DatasetSchemasAPITest:
         })
         response = api.get(url_for('api.schemas'))
 
-        print(response.json)
         assert200(response)
         assert response.json == [
             {
