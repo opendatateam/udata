@@ -459,7 +459,7 @@ class HarvestActionsTest:
                 domain='test.org',
                 remote_id=str(i)
             )
-            dataset.last_modified = datetime.now()
+            dataset.last_modified_internal = datetime.now()
             dataset.save()
             attached_datasets.append(dataset)
 

@@ -148,6 +148,7 @@ def store_resource(csvfile, model, dataset):
     with open(csvfile.name, 'rb') as infile:
         stored_filename = storage.save(infile, prefix=prefix, filename=filename)
     r_info = storage.metadata(stored_filename)
+    r_info['last_modified_internal'] = r_info.pop('modified')
     r_info['fs_filename'] = stored_filename
     checksum = r_info.pop('checksum')
     algo, checksum = checksum.split(':', 1)
@@ -186,7 +187,7 @@ def export_csv_for_model(model, dataset):
         # add it to the dataset
         if created:
             dataset.add_resource(resource)
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.now()
         dataset.save()
     finally:
         csvfile.close()
@@ -208,7 +209,6 @@ def export_csv(self, model=None):
     if not DATASET_ID:
         log.error('EXPORT_CSV_DATASET_ID setting value not set')
         return
-
     try:
         dataset = Dataset.objects.get(id=DATASET_ID)
     except Dataset.DoesNotExist:

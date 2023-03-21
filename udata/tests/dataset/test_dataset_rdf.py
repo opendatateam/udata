@@ -118,7 +118,7 @@ class DatasetToRdfTest:
         assert r.value(DCT.title) == Literal(resource.title)
         assert r.value(DCAT.downloadURL).identifier == URIRef(resource.url)
         assert r.value(DCT.issued) == Literal(resource.created_at)
-        assert r.value(DCT.modified) == Literal(resource.modified)
+        assert r.value(DCT.modified) == Literal(resource.last_modified)
 
     def test_all_resource_fields(self):
         license = LicenseFactory()
@@ -133,7 +133,7 @@ class DatasetToRdfTest:
         assert r.value(DCT.title) == Literal(resource.title)
         assert r.value(DCT.description) == Literal(resource.description)
         assert r.value(DCT.issued) == Literal(resource.created_at)
-        assert r.value(DCT.modified) == Literal(resource.modified)
+        assert r.value(DCT.modified) == Literal(resource.last_modified)
         assert r.value(DCT.license).identifier == URIRef(license.url)
         assert r.value(DCT.rights) == Literal(license.title)
         assert r.value(DCAT.downloadURL).identifier == URIRef(resource.url)

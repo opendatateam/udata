@@ -42,4 +42,4 @@ class URLField(StringField):
         try:
             uris.validate(value, **kwargs)
         except uris.ValidationError as e:
-            self.error(e.message)
+            self.error(str(e))
