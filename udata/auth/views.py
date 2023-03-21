@@ -12,7 +12,7 @@ from flask_security.views import send_login
 from flask_security.views import token_login
 from flask_security.utils import (
     send_mail, do_flash, get_message, get_token_status, hash_data,
-    login_user, logout_user, verify_hash, url_for_security)
+    login_user, logout_user, verify_hash)
 from werkzeug.local import LocalProxy
 from udata.i18n import lazy_gettext as _
 from udata.uris import endpoint_for
