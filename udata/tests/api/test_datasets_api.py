@@ -96,6 +96,28 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(len(response.json['data']), 3)
         self.assertEqual(response.json['data'][0]['id'], str(to_follow.id))
 
+    def test_dataset_api_sorting_created(self):
+        user = self.login()
+        first = VisibleDatasetFactory(title="first created dataset")
+        second = VisibleDatasetFactory(title="second created dataset")
+        response = self.get(url_for('api.datasets', sort='created'))
+        self.assert200(response)
+        self.assertEqual(response.json['data'][0]['id'], str(first.id))
+
+        response = self.get(url_for('api.datasets', sort='-created'))
+        self.assert200(response)
+        self.assertEqual(response.json['data'][0]['id'], str(second.id))
+
+        second.title = "second updated dataset"
+        second.save()
+        response = self.get(url_for('api.datasets', sort='-last_modified'))
+        self.assert200(response)
+        self.assertEqual(response.json['data'][0]['id'], str(second.id))
+
+        response = self.get(url_for('api.datasets', sort='last_modified'))
+        self.assert200(response)
+        self.assertEqual(response.json['data'][0]['id'], str(first.id))
+
     def test_dataset_api_list_with_filters(self):
         '''Should filters datasets results based on query filters'''
         owner = UserFactory()
@@ -1734,3 +1756,27 @@ class HarvestMetadataAPITest:
         assert response.json['resources'][0]['harvest'] == {
             'dynamic_field': 'dynamic_value',
         }
+
+    def test_dataset_with_harvest_computed_dates(self, api):
+        creation_date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
+        modification_date = datetime(2022, 3, 19, tzinfo=pytz.UTC)
+        harvest_metadata = HarvestDatasetMetadata(
+            created_at=creation_date,
+            modified_at=modification_date,
+        )
+        dataset = DatasetFactory(harvest=harvest_metadata)
+
+        response = api.get(url_for('api.dataset', dataset=dataset))
+        assert200(response)
+        assert response.json['created_at'] == creation_date.isoformat()
+        assert response.json['last_modified'] != modification_date.isoformat()
+
+        resource_harvest_metadata = HarvestResourceMetadata(
+            created_at=creation_date,
+        )
+        dataset = DatasetFactory(resources=[ResourceFactory(harvest=resource_harvest_metadata)])
+
+        response = api.get(url_for('api.dataset', dataset=dataset))
+        assert200(response)
+        assert response.json['resources'][0]['created_at'] == creation_date.isoformat()
+        assert response.json['resources'][0]['last_modified'] != modification_date.isoformat()

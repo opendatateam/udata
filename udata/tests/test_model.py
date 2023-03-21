@@ -347,7 +347,7 @@ class URLFieldTest:
 
     def test_not_valid(self):
         obj = URLTester(url='invalid')
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match='Invalid URL'):
             obj.save()
 
     def test_strip_spaces(self):
@@ -365,7 +365,7 @@ class URLFieldTest:
     def test_public_private(self):
         url = 'http://10.10.0.2/path/'
         PrivateURLTester(url=url).save()
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match='private URL'):
             URLTester(url=url).save()
 
 

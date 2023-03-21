@@ -40,7 +40,7 @@ class FakeBackend(BaseBackend):
         for key, value in DatasetFactory.as_dict(visible=True).items():
             setattr(dataset, key, value)
         if self.source.config.get('last_modified'):
-            dataset.last_modified = self.source.config['last_modified']
+            dataset.last_modified_internal = self.source.config['last_modified']
         return dataset
 
 
@@ -156,7 +156,7 @@ class BaseBackendTest:
 
         dataset = Dataset.objects.first()
 
-        assert dataset.last_modified == last_modified
+        assert dataset.last_modified_internal == last_modified
         assert_equal_dates(dataset.harvest.last_update, datetime.now())
 
     def test_dont_overwrite_last_modified_even_if_set_to_same(self, mocker):
@@ -169,7 +169,7 @@ class BaseBackendTest:
 
         dataset = Dataset.objects.first()
 
-        assert dataset.last_modified == last_modified
+        assert dataset.last_modified_internal == last_modified
         assert_equal_dates(dataset.harvest.last_update, datetime.now())
 
     def test_autoarchive(self, app):
