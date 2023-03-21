@@ -104,7 +104,7 @@ class Defaults(object):
                                     'Your password has been changed')
     SECURITY_EMAIL_SUBJECT_PASSWORD_RESET = _('Password reset instructions')
 
-    SECURITY_RETURN_GENERIC_RESPONSES = True
+    SECURITY_RETURN_GENERIC_RESPONSES = False
 
     # Sentry configuration
     SENTRY_DSN = None

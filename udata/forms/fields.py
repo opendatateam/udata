@@ -85,7 +85,8 @@ class FloatField(FieldHelper, fields.FloatField):
 
 class WTFDateTimeField(WTField):
     """
-    DateTimeField represented by a text input, accepts all input text formats
+    Field copied from the code of wtforms extention dateutil removed in version 3.
+    WTFDateTimeField represented by a text input, accepts all input text formats
     that `dateutil.parser.parse` will.
     :param parse_kwargs:
         A dictionary of keyword args to pass to the dateutil parse() function.

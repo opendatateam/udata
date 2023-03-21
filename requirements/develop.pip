@@ -242,7 +242,7 @@ flask-restx==1.0.5
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-flask-security-too==5.1.1
+flask-security-too==5.1.2
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
