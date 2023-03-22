@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+  xmlns:foaf="http://xmlns.com/foaf/0.1/"
+  xmlns:owl="http://www.w3.org/2002/07/owl#"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:dcat="http://www.w3.org/ns/dcat#"
+  xmlns:dct="http://purl.org/dc/terms/"
+  xmlns:dcterms="http://purl.org/dc/terms/"
+  xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
+  xmlns:schema="http://schema.org/"
+>
+  <dcat:Catalog rdf:about="http://data.test.org/">
+    <dcat:dataset>
+      <dcat:Dataset>
+        <dcterms:title>Dataset 3</dcterms:title>
+        <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T19:01:24.184120</dcterms:modified>
+        <owl:versionInfo>1.0</owl:versionInfo>
+        <dcterms:identifier>3</dcterms:identifier>
+        <dcterms:spatial rdf:resource="http://wuEurope.com/"/>
+        <dcat:keyword>Tag 2</dcat:keyword>
+        <dcterms:publisher rdf:resource="http://data.test.org/organizations/1"/>
+        <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T18:59:02.737480</dcterms:issued>
+        <dcterms:description>Dataset 3 description</dcterms:description>
+        <dcat:keyword>Tag 1</dcat:keyword>
+        <dcat:distribution rdf:resource="datasets/3/resources/1"/>
+        <dct:license>Licence Ouverte Version 2.0</dct:license>
+        <dcat:landingPage>http://data.test.org/datasets/3</dcat:landingPage>
+        <dct:accrualPeriodicity xmlns:dct="http://purl.org/dc/terms/">daily</dct:accrualPeriodicity>
+        <dct:temporal>
+          <dcterms:PeriodOfTime>
+            <schema:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-01T00:00:00</schema:startDate>
+            <schema:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-05T00:00:00</schema:endDate>
+          </dcterms:PeriodOfTime>
+        </dct:temporal>
+      </dcat:Dataset>
+    </dcat:dataset>
+    <dcterms:title>Sample DCAT Catalog</dcterms:title>
+    <dcat:dataset>
+      <dcat:Dataset>
+        <dcat:theme>Theme 2</dcat:theme>
+        <dcat:contactPoint rdf:resource="http://data.test.org/contacts/1"/>
+        <dcat:landingPage>http://data.test.org/datasets/1</dcat:landingPage>
+        <dcat:keyword>Tag 3</dcat:keyword>
+        <dcterms:abstract>Dataset 1 description</dcterms:abstract>
+        <dcterms:title>Dataset 1</dcterms:title>
+        <dct:temporal>
+          <dcterms:PeriodOfTime>
+            <dcat:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-01T00:00:00</dcat:startDate>
+            <dcat:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-05T00:00:00</dcat:endDate>
+          </dcterms:PeriodOfTime>
+        </dct:temporal>
+        <dcat:theme>Theme 1</dcat:theme>
+        <dcterms:publisher rdf:resource="http://data.test.org/organizations/1"/>
+        <owl:versionInfo>1.0</owl:versionInfo>
+        <dcat:distribution rdf:resource="http://data.test.org/datasets/1/resources/2"/>
+        <dcat:keyword>Tag 4</dcat:keyword>
+        <dcterms:spatial rdf:resource="http://wuEurope.com/"/>
+        <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T19:01:24.184120</dcterms:modified>
+        <dcat:keyword>Tag 2</dcat:keyword>
+        <dcat:keyword>Tag 1</dcat:keyword>
+        <dcat:distribution rdf:resource="http://data.test.org/datasets/1/resources/1"/>
+        <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T18:59:02.737480</dcterms:issued>
+        <dcterms:identifier>1</dcterms:identifier>
+      </dcat:Dataset>
+    </dcat:dataset>
+    <dcat:dataset>
+      <dcat:Dataset>
+        <dcat:keyword>Tag 1</dcat:keyword>
+        <dcat:distribution rdf:resource="http://data.test.org/datasets/2/resources/1"/>
+        <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T19:01:24.184120</dcterms:modified>
+        <dcterms:description>Dataset 2 description</dcterms:description>
+        <dcterms:publisher rdf:resource="http://data.test.org/organizations/1"/>
+        <dcterms:temporal rdf:resource="file:///base/data/home/apps/s%7Erdf-translator/2.408516547054015808/temporal-2"/>
+        <dcat:contactPoint rdf:resource="http://data.test.org/contacts/1"/>
+        <owl:versionInfo>1.0</owl:versionInfo>
+        <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T18:59:02.737480</dcterms:issued>
+        <dcat:landingPage>http://data.test.org/datasets/2</dcat:landingPage>
+        <dcat:keyword>Tag 2</dcat:keyword>
+        <dcat:keyword>Tag 3</dcat:keyword>
+        <dcat:distribution rdf:resource="http://data.test.org/datasets/2/resources/2"/>
+        <dcterms:title>Dataset 2</dcterms:title>
+        <dcterms:spatial rdf:resource="http://wuEurope.com/"/>
+        <dcterms:identifier>2</dcterms:identifier>
+      </dcat:Dataset>
+    </dcat:dataset>
+    <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-15T09:19:51.723691</dcterms:modified>
+    <foaf:homepage>http://data.test.org</foaf:homepage>
+    <dcterms:language>en</dcterms:language>
+  </dcat:Catalog>
+  <dcat:Distribution rdf:about="http://data.test.org/datasets/2/resources/2">
+    <dcterms:description>A JSON resource</dcterms:description>
+    <dcterms:title>Resource 2-2</dcterms:title>
+    <dcterms:format>JSON</dcterms:format>
+    <dcat:accessURL>http://data.test.org/datasets/2/resources/2/file.json</dcat:accessURL>
+  </dcat:Distribution>
+  <vcard:Organization rdf:about="http://data.test.org/contacts/1">
+    <vcard:fn>Organization contact</vcard:fn>
+    <vcard:hasEmail>hello@its.me</vcard:hasEmail>
+  </vcard:Organization>
+  <dcterms:PeriodOfTime rdf:about="file:///base/data/home/apps/s%7Erdf-translator/2.408516547054015808/temporal-2">
+    <schema:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-01T00:00:00</schema:startDate>
+    <schema:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-05T00:00:00</schema:endDate>
+  </dcterms:PeriodOfTime>
+  <dcat:Distribution rdf:about="http://data.test.org/datasets/1/resources/1">
+    <dcterms:title>Resource 1-1</dcterms:title>
+    <dcterms:format>JSON</dcterms:format>
+    <dcterms:description>A JSON resource</dcterms:description>
+    <dcat:accessURL>http://data.test.org/datasets/1/resources/1/file.json</dcat:accessURL>
+  </dcat:Distribution>
+  <dcterms:PeriodOfTime rdf:about="file:///base/data/home/apps/s%7Erdf-translator/2.408516547054015808/temporal-1">
+    <schema:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-05T00:00:00</schema:startDate>
+  </dcterms:PeriodOfTime>
+  <dcat:Distribution rdf:about="http://data.test.org/datasets/1/resources/2">
+    <dcterms:description>A JSON resource</dcterms:description>
+    <dcterms:format>JSON</dcterms:format>
+    <dcterms:title>Resource 1-2</dcterms:title>
+    <dcat:accessURL>http://data.test.org/datasets/1/resources/2/file.json</dcat:accessURL>
+  </dcat:Distribution>
+  <dcat:Distribution rdf:about="http://data.test.org/datasets/2/resources/1">
+    <dcat:accessURL>http://data.test.org/datasets/2/resources/1/file.json</dcat:accessURL>
+    <dcterms:title>Resource 2-1</dcterms:title>
+    <dcterms:format>JSON</dcterms:format>
+    <dcterms:description>A JSON resource</dcterms:description>
+  </dcat:Distribution>
+  <dcat:Distribution rdf:about="datasets/3/resources/1">
+    <dcterms:format>JSON</dcterms:format>
+    <dcterms:title>Resource 3-1</dcterms:title>
+    <dcterms:description>A JSON resource</dcterms:description>
+    <dcat:accessURL>http://data.test.org/datasets/3/resources/1/file.json</dcat:accessURL>
+  </dcat:Distribution>
+  <dcterms:Location rdf:about="http://wuEurope.com/"/>
+  <foaf:Organization rdf:about="http://data.test.org/organizations/1">
+    <foaf:name>An Organization</foaf:name>
+  </foaf:Organization>
+</rdf:RDF>
