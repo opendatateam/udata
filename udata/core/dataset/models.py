@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 from blinker import signal
 from dateutil.parser import parse as parse_dt
 from flask import current_app
-from mongoengine import DynamicEmbeddedDocument
+from mongoengine import DynamicEmbeddedDocument, ValidationError as MongoEngineValidationError
 from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
 from stringdist import rdlevenshtein
@@ -306,6 +306,8 @@ class ResourceMixin(object):
         super(ResourceMixin, self).clean()
         if not self.urlhash or 'url' in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
+        if self.schema and (not bool('name' in self.schema) ^ bool('url' in self.schema)):
+            raise MongoEngineValidationError('Schema must have at least a name or an url. Having both is not allowed.')
 
     @cached_property  # Accessed at least 2 times in front rendering
     def preview_url(self):
@@ -897,7 +899,6 @@ class ResourceSchema(object):
         if not content:
             log.error(f'No content found inc. from cache for schema catalog')
             raise SchemasCacheUnavailableException('No content in cache for schema catalog')
-
         return content
 
 
