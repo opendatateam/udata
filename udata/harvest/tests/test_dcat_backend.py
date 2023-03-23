@@ -269,8 +269,8 @@ class DcatBackendTest:
         assert dataset.temporal_coverage.end == date(2016, 12, 5)
 
         dataset = Dataset.objects.get(harvest__dct_identifier='1')
-        # test abstract description support
-        assert dataset.description == 'Dataset 1 description'
+        # test html abstract description support
+        assert dataset.description == '# h1 title\n\n## h2 title\n\n **and bold text**'
         # test DCAT periodoftime
         assert dataset.temporal_coverage is not None
         assert dataset.temporal_coverage.start == date(2016, 1, 1)

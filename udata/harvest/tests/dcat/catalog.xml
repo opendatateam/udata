@@ -41,7 +41,7 @@
         <dcat:contactPoint rdf:resource="http://data.test.org/contacts/1"/>
         <dcat:landingPage>http://data.test.org/datasets/1</dcat:landingPage>
         <dcat:keyword>Tag 3</dcat:keyword>
-        <dcterms:abstract>Dataset 1 description</dcterms:abstract>
+        <dcterms:abstract><![CDATA[<h1>h1 title</h1><h2>h2 title</h2><b>and bold text</b>]]></dcterms:abstract>
         <dcterms:title>Dataset 1</dcterms:title>
         <dct:temporal>
           <dcterms:PeriodOfTime>
