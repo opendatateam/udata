@@ -63,6 +63,9 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
             lambda r: str(r.organization.id) if r.organization else None),
         dataset_field('license'),
         dataset_field('private'),
+        dataset_field(
+            'archived',
+            lambda r: r.archived or False),
     )
     nested_fields = (
         'id',
