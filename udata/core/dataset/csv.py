@@ -63,6 +63,9 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
             lambda r: str(r.organization.id) if r.organization else None),
         dataset_field('license'),
         dataset_field('private'),
+        dataset_field(
+            'archived',
+            lambda r: r.archived or False),
     )
     nested_fields = (
         'id',
@@ -76,7 +79,7 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
         ('checksum.type', lambda o: getattr(o.checksum, 'type', None)),
         ('checksum.value', lambda o: getattr(o.checksum, 'value', None)),
         'created_at',
-        'modified',
+        ('modified', lambda o: o.last_modified),
         ('downloads', lambda o: int(o.metrics.get('views', 0))),
         ('harvest.created_at', lambda o: o.harvest and o.harvest.created_at),
         ('harvest.modified_at', lambda o: o.harvest and o.harvest.modified_at),

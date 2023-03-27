@@ -193,38 +193,38 @@ def test_default_should_validate_default_schemes(scheme):
 @pytest.mark.parametrize('scheme', CUSTOM_SCHEMES)
 def test_default_should_not_validate_non_default_schemes(scheme):
     url = '{0}://somewhere.com'.format(scheme)
-    with pytest.raises(uris.ValidationError):
+    with pytest.raises(uris.ValidationError, match='Invalid scheme'):
         uris.validate(url)
 
 
 @pytest.mark.parametrize('tld', CUSTOM_TLDS)
 def test_default_should_not_validate_unknown_tlds(tld):
     url = 'http://somewhere.{0}'.format(tld)
-    with pytest.raises(uris.ValidationError):
+    with pytest.raises(uris.ValidationError, match='Invalid TLD'):
         uris.validate(url)
 
 
 @pytest.mark.parametrize('url', PRIVATE)
 def test_default_should_not_validate_private_urls(url):
-    with pytest.raises(uris.ValidationError):
+    with pytest.raises(uris.ValidationError, match='private URL'):
         uris.validate(url)
 
 
 @pytest.mark.parametrize('url', LOCAL_HOSTS)
 def test_default_should_not_validate_local_hosts(url):
-    with pytest.raises(uris.ValidationError):
+    with pytest.raises(uris.ValidationError, match='local URL'):
         uris.validate(url)
 
 
 @pytest.mark.parametrize('url', INVALID)
 def test_should_not_validate_bad_urls(url):
-    with pytest.raises(uris.ValidationError):
+    with pytest.raises(uris.ValidationError, match='Invalid URL'):
         uris.validate(url)
 
 
 @pytest.mark.parametrize('url', MULTICAST)
 def test_should_not_validate_multicast_urls(url):
-    with pytest.raises(uris.ValidationError):
+    with pytest.raises(uris.ValidationError, match='multicast IP'):
         uris.validate(url)
 
 
@@ -235,7 +235,7 @@ def test_private_should_validate_public_and_private_urls(url):
 
 @pytest.mark.parametrize('url', LOCAL)
 def test_private_should_not_validate_local_urls(url):
-    with pytest.raises(uris.ValidationError):
+    with pytest.raises(uris.ValidationError, match='local URL'):
         uris.validate(url, private=True)
 
 
@@ -246,7 +246,7 @@ def test_local_should_validate_public_and_local_urls(url):
 
 @pytest.mark.parametrize('url', PRIVATE)
 def test_local_should_not_validate_private_urls(url):
-    with pytest.raises(uris.ValidationError):
+    with pytest.raises(uris.ValidationError, match='private URL'):
         uris.validate(url, local=True)
 
 
@@ -264,7 +264,7 @@ def test_custom_schemes(scheme):
 @pytest.mark.parametrize('scheme', DEFAULT_SCHEMES)
 def test_custom_schemes_should_not_validate_defaults(scheme):
     url = '{0}://somewhere.com'.format(scheme)
-    with pytest.raises(uris.ValidationError):
+    with pytest.raises(uris.ValidationError, match='Invalid scheme'):
         uris.validate(url, schemes=CUSTOM_SCHEMES)
 
 
@@ -277,7 +277,7 @@ def test_custom_tlds(tld):
 @pytest.mark.parametrize('tld', DEFAULT_TLDS)
 def test_custom_tlds_should_not_validate_defaults(tld):
     url = 'http://somewhere.{0}'.format(tld)
-    with pytest.raises(uris.ValidationError):
+    with pytest.raises(uris.ValidationError, match='Invalid TLD'):
         uris.validate(url, tlds=CUSTOM_TLDS)
 
 
@@ -288,6 +288,5 @@ def test_with_credentials(url):
 
 @pytest.mark.parametrize('url', WITH_CREDENTIALS)
 def test_with_credentials_disabled(url):
-    with pytest.raises(uris.ValidationError):
+    with pytest.raises(uris.ValidationError, match='Credentials in URL are not allowed'):
         uris.validate(url, credentials=False)
-
