@@ -12,6 +12,7 @@
     - Added `last_modified` computed property in Dataset and Resource model to provide max date between internal and harvested date
 - Fix for PR [#2815](https://github.com/opendatateam/udata/pull/2815) [#2832](https://github.com/opendatateam/udata/pull/2832)
 - Add dataset archived field in resource catalog [#2833](https://github.com/opendatateam/udata/pull/2833)
+- Add `https://github.com/opendatateam/udata/pull/2836` to `udata.i18n`
 
 ## 6.1.1 (2023-03-17)
 
