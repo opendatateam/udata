@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2023-03-27 10:32+0200\n"
-"PO-Revision-Date: 2023-03-27 08:33\n"
+"PO-Revision-Date: 2023-03-27 08:38\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -186,11 +186,11 @@ msgstr "Valeur de la somme de contrôle"
 
 #: udata/core/dataset/forms.py:41
 msgid "Schema must have at least a name or an url. Having both is not allowed."
-msgstr ""
+msgstr "Le schéma doit avoir au moins un nom ou une URL. Avoir les deux à la fois n'est pas autorisé."
 
 #: udata/core/dataset/forms.py:47
 msgid "Provided URL is not valid."
-msgstr ""
+msgstr "L'URL fournie est invalide."
 
 #: udata/core/dataset/forms.py:50
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
