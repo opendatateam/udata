@@ -1,11 +1,12 @@
 from datetime import datetime
 
+import pytz
 from flask import url_for
 
-from udata.features.notifications import actions
 from udata.core.user.factories import UserFactory
+from udata.features.notifications import actions
 
-from . import TestCase, DBTestMixin
+from . import DBTestMixin, TestCase
 from .api import APITestCase
 
 
@@ -57,7 +58,7 @@ class NotificationsAPITest(NotificationsMixin, APITestCase):
 
     def test_has_notifications(self):
         self.login()
-        dt = datetime.now()
+        dt = datetime.now(pytz.utc)
 
         @actions.notifier('fake')
         def fake_notifier(user):

@@ -99,9 +99,7 @@ resource_fields = api.model('Resource', {
     'mime': fields.String(description='The resource mime type'),
     'created_at': fields.ISODateTime(
         readonly=True, description='The resource creation date'),
-    'last_modified': fields.ISODateTime(
-        attribute='modified', readonly=True,
-        description='The resource last modification date'),
+    'last_modified': fields.ISODateTime(readonly=True, description='The resource last modification date'),
     'metrics': fields.Raw(
         description='The resource metrics', readonly=True),
     'harvest': fields.Nested(

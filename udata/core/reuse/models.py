@@ -1,6 +1,6 @@
 from blinker import Signal
 from mongoengine.signals import pre_save, post_save
-from werkzeug import cached_property
+from werkzeug.utils import cached_property
 
 from udata.core.storages import images, default_image_basename
 from udata.frontend.markdown import mdstrip
@@ -107,6 +107,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
                     'urlhash'] + db.Owned.meta['indexes'],
         'ordering': ['-created_at'],
         'queryset_class': ReuseQuerySet,
+        'auto_create_index_on_save': True
     }
 
     before_save = Signal()

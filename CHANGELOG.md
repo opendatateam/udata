@@ -2,8 +2,41 @@
 
 ## Current (in progress)
 
+- Resources schema can now have an URL field. [#2825](https://github.com/opendatateam/udata/pull/2825)
+- Fix URLField validation error message [#2831](https://github.com/opendatateam/udata/pull/2831)
+- Dates renaming to provide more relevant computed dates between internal and harvested dates [#2815](https://github.com/opendatateam/udata/pull/2815):
+    - Removed `published` attribute from Resource model
+    - Renamed `created_at` and `last_modified` of Dataset model to `created_at_internal` and `last_modified_internal`
+    - Renamed `created_at` and `modified` of Resource model to `created_at_internal` and `last_modified_internal`
+    - Added `created_at` computed property in Dataset and Resource model to provide harvested date if present and internal otherwise
+    - Added `last_modified` computed property in Dataset and Resource model to provide max date between internal and harvested date
+- Fix for PR [#2815](https://github.com/opendatateam/udata/pull/2815) [#2832](https://github.com/opendatateam/udata/pull/2832)
+- Add dataset archived field in resource catalog [#2833](https://github.com/opendatateam/udata/pull/2833)
+
+## 6.1.1 (2023-03-17)
+
+- Fix edge case on aware datetime string [#2827](https://github.com/opendatateam/udata/pull/2827)
+- :warning: MongoDB support up to 6.0.4 [#2819](https://github.com/opendatateam/udata/pull/2819):
+    - Older versions of MongoDB >=3.6 are still supported
+    - Upgrade must be done release by release to set the `FeatureCompatibilityVersion` variable like stated in [this](https://www.mongodb.com/docs/v4.2/release-notes/4.0/#upgrade-procedures) documentation.
+    - Upgrade pymongo 3.10.1 -> 4.3.3
+    - Upgrade mongoengine 0.20.0 -> 0.26.0
+- Add IATA `ssim` among allowed file extensions [#2828](https://github.com/opendatateam/udata/pull/2828)
+- Copy user mail card back from udata-front [#2822](https://github.com/opendatateam/udata/pull/2822)
+- Upgrade node to a version still available [#2830](https://github.com/opendatateam/udata/pull/2830)
+
+## 6.1.0 (2023-03-07)
+
+- :warning: Upgrading Flask to 2.1.2, leading to an upgrade of click (8.0), Flask-BabelEx (0.9.4), Flask-Caching (2.0.2), flask-storage (1.0.0) instead of flask-fs, Flask-Login (0.6.2), flask-restx (1.0.5), Flask-Security-Too (4.1.5), Jinja2 (3.1.2), pillow (9.2.0), werkzeug (2.2.2) [#2816](https://github.com/opendatateam/udata/pull/2816)
+  - Use the full path to the caching backend in `CACHE_TYPE`, ex: `flask_caching.backends.redis`. Named backends are deprecated.
+  - Werkzeug redirect now returns the relative url as location in response (https://github.com/pallets/werkzeug/issues/2352).
+  - Removed functions have been replaced (`contextfilter` and `contextfunction` from Jinja, root imports and `Href` from Werkzeug, `JSONWebSignatureSerializer` from itsdangerous)
+  - Prevent multiple blueprint with same name registration (not supported anymore in Flask).
 - Removed all code logic related to the `published` date in resource model, now deprecated. :warning: The attribute itself was left in the model because of the complexity of the migration [#2807](https://github.com/opendatateam/udata/pull/2807)
 - Add `xlsx` and `docx` as closed format for quality score [#2814](https://github.com/opendatateam/udata/pull/2814)
+- Flush latest rows in csv catalog export before storing file [#2818](https://github.com/opendatateam/udata/pull/2818)
+- Exposed dates through API are now timezone aware [#2810](https://github.com/opendatateam/udata/pull/2810)
+- Fix frequency reminder [#2821](https://github.com/opendatateam/udata/pull/2821)
 
 ## 6.0.2 (2023-02-06)
 

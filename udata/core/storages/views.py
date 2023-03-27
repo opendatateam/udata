@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 from flask_security import login_required
-import flask_fs as fs
+import flask_storage as fs
 
 from .api import handle_upload, on_upload_status, UploadStatus
 
