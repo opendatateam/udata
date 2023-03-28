@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 6.1.2 (2023-03-28)
 
 - Resources schema can now have an URL field. [#2825](https://github.com/opendatateam/udata/pull/2825)
