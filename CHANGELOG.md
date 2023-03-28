@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 6.1.2 (2023-03-28)
 
 - Resources schema can now have an URL field. [#2825](https://github.com/opendatateam/udata/pull/2825)
 - Fix URLField validation error message [#2831](https://github.com/opendatateam/udata/pull/2831)
