@@ -115,6 +115,23 @@ class DcatBackendTest:
         assert len(datasets['2'].resources) == 2
         assert len(datasets['3'].resources) == 1
 
+    def test_flat_with_blank_nodes_xml(self, rmock):
+        filename = 'bnodes.xml'
+        url = mock_dcat(rmock, filename)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+
+        actions.run(source.slug)
+
+        datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
+
+        assert len(datasets) == 3
+        assert len(datasets['3'].resources) == 1
+        assert len(datasets['1'].resources) == 2
+        assert len(datasets['2'].resources) == 2
+
     def test_simple_nested_attributes(self, rmock):
         filename = 'nested.jsonld'
         url = mock_dcat(rmock, filename)
@@ -252,8 +269,8 @@ class DcatBackendTest:
         assert dataset.temporal_coverage.end == date(2016, 12, 5)
 
         dataset = Dataset.objects.get(harvest__dct_identifier='1')
-        # test abstract description support
-        assert dataset.description == 'Dataset 1 description'
+        # test html abstract description support
+        assert dataset.description == '# h1 title\n\n## h2 title\n\n **and bold text**'
         # test DCAT periodoftime
         assert dataset.temporal_coverage is not None
         assert dataset.temporal_coverage.start == date(2016, 1, 1)

@@ -11,7 +11,7 @@
 >
   <dcat:Catalog rdf:about="http://data.test.org/">
     <dcat:dataset>
-      <dcat:Dataset rdf:about="http://data.test.org/datasets/3">
+      <dcat:Dataset>
         <dcterms:title>Dataset 3</dcterms:title>
         <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T19:01:24.184120</dcterms:modified>
         <owl:versionInfo>1.0</owl:versionInfo>
@@ -36,12 +36,12 @@
     </dcat:dataset>
     <dcterms:title>Sample DCAT Catalog</dcterms:title>
     <dcat:dataset>
-      <dcat:Dataset rdf:about="http://data.test.org/datasets/1">
+      <dcat:Dataset>
         <dcat:theme>Theme 2</dcat:theme>
         <dcat:contactPoint rdf:resource="http://data.test.org/contacts/1"/>
         <dcat:landingPage>http://data.test.org/datasets/1</dcat:landingPage>
         <dcat:keyword>Tag 3</dcat:keyword>
-        <dcterms:abstract><![CDATA[<h1>h1 title</h1><h2>h2 title</h2><b>and bold text</b>]]></dcterms:abstract>
+        <dcterms:abstract>Dataset 1 description</dcterms:abstract>
         <dcterms:title>Dataset 1</dcterms:title>
         <dct:temporal>
           <dcterms:PeriodOfTime>
@@ -64,7 +64,7 @@
       </dcat:Dataset>
     </dcat:dataset>
     <dcat:dataset>
-      <dcat:Dataset rdf:about="http://data.test.org/datasets/2">
+      <dcat:Dataset>
         <dcat:keyword>Tag 1</dcat:keyword>
         <dcat:distribution rdf:resource="http://data.test.org/datasets/2/resources/1"/>
         <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T19:01:24.184120</dcterms:modified>
