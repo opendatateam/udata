@@ -38,3 +38,56 @@ Once it has been accepted, we will also create the new language translation in C
 [crowdin]: https://crowdin.com
 [crowdin-udata]: https://crowdin.com/project/udata
 [crowdin-udata-front]: https://crowdin.com/project/udata-front
+
+## Adding translations in a plugin
+
+You can also add or override some translations in your plugin (or your theme).
+They should be located inside your module directory and follow this layout.
+```
+├── udata_plugin
+│   ├── translations
+│   │   ├── xx/LC_MESSAGES
+│   │   │   └── udata-plugin.po
+│   │   └── udata-plugin.pot
+```
+
+If the `translations` directory is present and contains some gettext-based translations(`po/mo` files),
+they will be loaded. In the case of a theme, they will override existing ones.
+
+The [dedicated cookiecutter template][cookiecutter-template] makes use of [Babel][] to extract string from your template
+or compile them.
+
+You can extract translations from your own templates using:
+
+```bash
+python setup.py extract_messages  # Extract messages in your pot file
+```
+
+Then you can either add new supported locale:
+
+```bash
+python setup.py init_catalog -l xx  # where XX is the locale you want to add. ex: fr
+```
+
+or update the existing ones:
+
+```bash
+python setup.py update_catalog
+```
+
+You can then translate the po file using the editor of your choice.
+You could take a look at [Poedit][] or set up a Crowdin project if you want.
+
+When translation is done, you can compile translations catalogs using:
+
+```bash
+python setup.py compile_catalog  # Compile .mo files for each language
+```
+
+!!! warning
+    Don't forget to compile and include translations in your theme distribution
+    when you publish it.
+
+[Babel]: http://babel.pocoo.org/
+[cookiecutter-template]: https://github.com/opendatateam/cookiecutter-udata-theme
+[Poedit]: https://poedit.net/

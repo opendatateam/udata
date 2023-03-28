@@ -170,6 +170,7 @@ Any registered plugin may also expose some default settings in a `settings` modu
 
 Any registered plugin may also expose translations in its root module `translations` directory.
 They will be automatically discovered and loaded if the plugin is enabled.
+Take a look at [adding-translations](adding-translations.md) to set up translations.
 
 ## Contributing
 
