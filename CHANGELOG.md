@@ -11,6 +11,7 @@
     - Added `created_at` computed property in Dataset and Resource model to provide harvested date if present and internal otherwise
     - Added `last_modified` computed property in Dataset and Resource model to provide max date between internal and harvested date
 - Fix for PR [#2815](https://github.com/opendatateam/udata/pull/2815) [#2832](https://github.com/opendatateam/udata/pull/2832)
+- Fix dcat harvesting on dcat:Dataset with blank nodes [#2834](https://github.com/opendatateam/udata/pull/2834)
 - Add dataset archived field in resource catalog [#2833](https://github.com/opendatateam/udata/pull/2833)
 
 ## 6.1.1 (2023-03-17)
