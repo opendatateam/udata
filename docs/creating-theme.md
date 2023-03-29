@@ -217,44 +217,7 @@ def home_context(context):
 ## Translations
 
 You can also (and optionally) add or override some translations in you theme.
-
-If the `translations` directory is present and contains some gettext-based translations(`po/mo` files),
-they will be loaded after all others and so they will override existing ones.
-
-The cookiecutter template makes use of [Babel][] to extract string from your template
-or compile them.
-
-You can extract translations from your own templates using:
-
-```bash
-python setup.py extract_messages  # Extract messages in your pot file
-```
-
-Then you can either add new supported locale:
-
-```bash
-python setup.py init_catalog -l xx  # where XX is the locale you want to add. ex: fr
-```
-
-or update the existing ones:
-
-```bash
-python setup.py update_catalog
-```
-
-You can then translate the po file using the editor of your choice
-(take a look at [Poedit][]).
-
-When translation is done, you can compile translations catalogs using:
-
-```bash
-python setup.py compile_catalog  # Compile .mo files for each language
-```
-
-!!! warning
-    Don't forget to compile and include translations in your theme distribution
-    when you publish it.
-
+Take a look at [adding-translations](adding-translations.md) to set up translations.
 
 ## Avatars/identicon customization
 
@@ -305,9 +268,7 @@ Please report any difficulty you encounter with a dedicated [Github issue][githu
 [Flask-Themes2]: http://flask-themes2.readthedocs.io/en/latest/
 [Jinja documentation]: https://jinja.pocoo.org/docs/
 [github-new-issue]: https://github.com/opendatateam/udata/issues/new
-[Babel]: http://babel.pocoo.org/
 [PyPI]: https://pypi.org/
 [front-hooks]: https://github.com/etalab/udata-front/blob/master/udata_front/theme/__init__.py
-[Poedit]: https://poedit.net/
 [front-project]: https://github.com/etalab/udata-front/
 [github-discussions]: https://github.com/opendatateam/udata/discussions/2721

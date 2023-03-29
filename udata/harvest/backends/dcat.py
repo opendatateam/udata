@@ -93,8 +93,7 @@ class DcatBackend(BaseBackend):
 
             for node in subgraph.subjects(RDF.type, DCAT.Dataset):
                 id = subgraph.value(node, DCT.identifier)
-                kwargs = {'nid': str(node), 'page': page}
-                kwargs['type'] = 'uriref' if isinstance(node, URIRef) else 'blank'
+                kwargs = {'page': page}
                 self.add_item(id, **kwargs)
                 if self.max_items and len(self.job.items) >= self.max_items:
                     # this will stop iterating on pagination
@@ -104,18 +103,19 @@ class DcatBackend(BaseBackend):
 
         return graphs
 
-    def get_node_from_item(self, item):
-        if 'nid' in item.kwargs and 'type' in item.kwargs:
-            nid = item.kwargs['nid']
-            return URIRef(nid) if item.kwargs['type'] == 'uriref' else BNode(nid)
+    def get_node_from_item(self, graph, item):
+        for node in graph.subjects(RDF.type, DCAT.Dataset):
+            if str(graph.value(node, DCT.identifier)) == item.remote_id:
+                return node
+        raise ValueError(f'Unable to find dataset with DCT.identifier:{item.remote_id}')
 
     def process(self, item):
         graph = Graph(namespace_manager=namespace_manager)
         data = self.job.data['graphs'][item.kwargs['page']]
         format = self.job.data['format']
 
-        node = self.get_node_from_item(item)
         graph.parse(data=bytes(data, encoding='utf8'), format=format)
+        node = self.get_node_from_item(graph, item)
 
         dataset = self.get_dataset(item.remote_id)
         dataset = dataset_from_rdf(graph, dataset, node=node)

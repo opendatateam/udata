@@ -110,7 +110,6 @@
     ]
   },
   {
-    "@id": "_:dataset-3",
     "@type": ["http://www.w3.org/ns/dcat#Dataset"],
     "http://purl.org/dc/terms/description": [{"@value": "Dataset 3 description"}],
     "http://purl.org/dc/terms/identifier": [{"@value": "3"}],

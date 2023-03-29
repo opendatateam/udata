@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2023-01-17 14:41+0100\n"
-"PO-Revision-Date: 2023-01-17 17:56\n"
+"POT-Creation-Date: 2023-03-27 10:32+0200\n"
+"PO-Revision-Date: 2023-03-27 08:38\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -180,23 +180,31 @@ msgstr "a mis à jour un jeu de données"
 msgid "deleted a dataset"
 msgstr "a supprimé un jeu de données"
 
-#: udata/core/dataset/forms.py:25
+#: udata/core/dataset/forms.py:26
 msgid "Checksum value"
 msgstr "Valeur de la somme de contrôle"
 
-#: udata/core/dataset/forms.py:39
+#: udata/core/dataset/forms.py:41
+msgid "Schema must have at least a name or an url. Having both is not allowed."
+msgstr "Le schéma doit avoir au moins un nom ou une URL. Avoir les deux à la fois n'est pas autorisé."
+
+#: udata/core/dataset/forms.py:47
+msgid "Provided URL is not valid."
+msgstr "L'URL fournie est invalide."
+
+#: udata/core/dataset/forms.py:50
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr "Le nom du schéma \"{schema}\" n'est pas une valeur autorisée. Valeurs autorisées : {values}"
 
-#: udata/core/dataset/forms.py:50
+#: udata/core/dataset/forms.py:61
 msgid "Version \"{version}\" is not an allowed value. Allowed values: {values}"
 msgstr "La version \"{version}\" n'est pas une valeur autorisée. Valeurs autorisées : {values}"
 
-#: udata/core/dataset/forms.py:58
+#: udata/core/dataset/forms.py:70
 msgid "Sub-property \"{prop}\" is not allowed value in schema field. Allowed values is : {properties}"
 msgstr "La sous-propriété \"{prop}\" n'est pas autorisée dans le champ schéma. Les valeurs autorisées sont : {properties}"
 
-#: udata/core/dataset/forms.py:67 udata/core/dataset/forms.py:128
+#: udata/core/dataset/forms.py:79 udata/core/dataset/forms.py:137
 #: udata/core/discussions/forms.py:12 udata/core/reuse/forms.py:19
 #: udata/core/site/forms.py:12 udata/templates/mail/discussion_closed.html:26
 #: udata/templates/mail/new_discussion.html:25
@@ -204,139 +212,131 @@ msgstr "La sous-propriété \"{prop}\" n'est pas autorisée dans le champ schém
 msgid "Title"
 msgstr "Titre"
 
-#: udata/core/dataset/forms.py:69 udata/core/dataset/forms.py:132
+#: udata/core/dataset/forms.py:81 udata/core/dataset/forms.py:141
 #: udata/core/jobs/forms.py:28 udata/core/organization/forms.py:25
 #: udata/core/reuse/forms.py:21 udata/core/topic/forms.py:17
 #: udata/harvest/forms.py:62
 msgid "Description"
 msgstr "Description"
 
-#: udata/core/dataset/forms.py:71
+#: udata/core/dataset/forms.py:83
 msgid "File type"
 msgstr "Type de fichier"
 
-#: udata/core/dataset/forms.py:73
+#: udata/core/dataset/forms.py:85
 msgid "Whether the resource is an uploaded file, a remote file or an API"
 msgstr "Est-ce que la ressource est un fichier uploadé, un fichier distant ou une API"
 
-#: udata/core/dataset/forms.py:76 udata/core/reuse/forms.py:24
+#: udata/core/dataset/forms.py:88 udata/core/reuse/forms.py:24
 msgid "Type"
 msgstr "Type"
 
-#: udata/core/dataset/forms.py:78
+#: udata/core/dataset/forms.py:90
 msgid "Resource type (documentation, API...)"
 msgstr "Type de ressource (documentation, API...)"
 
-#: udata/core/dataset/forms.py:80 udata/core/reuse/forms.py:26
+#: udata/core/dataset/forms.py:92 udata/core/reuse/forms.py:26
 #: udata/harvest/forms.py:64
 msgid "URL"
 msgstr "URL"
 
-#: udata/core/dataset/forms.py:82
+#: udata/core/dataset/forms.py:94
 msgid "Format"
 msgstr "Format"
 
-#: udata/core/dataset/forms.py:87
+#: udata/core/dataset/forms.py:99
 msgid "Mime type"
 msgstr "Type MIME"
 
-#: udata/core/dataset/forms.py:88
+#: udata/core/dataset/forms.py:100
 msgid "The mime type associated to the extension. (ex: text/plain)"
 msgstr "Le type MIME associé au format de fichier. (ex: text/plain)"
 
-#: udata/core/dataset/forms.py:91
+#: udata/core/dataset/forms.py:103
 msgid "Size"
 msgstr "Taille"
 
-#: udata/core/dataset/forms.py:92
+#: udata/core/dataset/forms.py:104
 msgid "The file size in bytes"
 msgstr "La taille du fichier en octets"
 
-#: udata/core/dataset/forms.py:94
-msgid "Publication date"
-msgstr "Date de publication"
-
-#: udata/core/dataset/forms.py:95
-msgid "The publication date of the resource"
-msgstr "La date de publication de la ressource"
-
-#: udata/core/dataset/forms.py:98
+#: udata/core/dataset/forms.py:107
 msgid "Schema"
 msgstr "Schéma"
 
-#: udata/core/dataset/forms.py:101
+#: udata/core/dataset/forms.py:110
 msgid "The schema slug the resource adheres to"
 msgstr "L'identifiant du schéma auquel la ressource adhère"
 
-#: udata/core/dataset/forms.py:113
+#: udata/core/dataset/forms.py:122
 msgid "Related dataset"
 msgstr "Jeu de données concerné"
 
-#: udata/core/dataset/forms.py:115 udata/core/dataset/forms.py:159
+#: udata/core/dataset/forms.py:124 udata/core/dataset/forms.py:168
 #: udata/core/reuse/forms.py:38 udata/harvest/forms.py:69
 msgid "Publish as"
 msgstr "Publier en tant que"
 
-#: udata/core/dataset/forms.py:129 udata/core/organization/forms.py:23
+#: udata/core/dataset/forms.py:138 udata/core/organization/forms.py:23
 msgid "Acronym"
 msgstr "Sigle"
 
-#: udata/core/dataset/forms.py:130
+#: udata/core/dataset/forms.py:139
 msgid "An optional acronym"
 msgstr "Un acronyme facultatif"
 
-#: udata/core/dataset/forms.py:133
+#: udata/core/dataset/forms.py:142
 msgid "The details about the dataset (collection process, specifics...)."
 msgstr "Les détails sur le jeu de données (processus de collecte, spécificités...)."
 
-#: udata/core/dataset/forms.py:136
+#: udata/core/dataset/forms.py:145
 msgid "License"
 msgstr "Licence"
 
-#: udata/core/dataset/forms.py:138
+#: udata/core/dataset/forms.py:147
 msgid "Update frequency"
 msgstr "Fréquence de mise à jour"
 
-#: udata/core/dataset/forms.py:142
+#: udata/core/dataset/forms.py:151
 msgid "The frequency at which data are updated."
 msgstr "La fréquence à laquelle les données sont mises à jour."
 
-#: udata/core/dataset/forms.py:143
+#: udata/core/dataset/forms.py:152
 msgid "Expected frequency date"
 msgstr "Date de mise à jour prévue"
 
-#: udata/core/dataset/forms.py:147
+#: udata/core/dataset/forms.py:156
 msgid "Temporal coverage"
 msgstr "Couverture temporelle"
 
-#: udata/core/dataset/forms.py:148
+#: udata/core/dataset/forms.py:157
 msgid "The period covered by the data"
 msgstr "La période couverte par les données"
 
-#: udata/core/dataset/forms.py:150 udata/core/spatial/forms.py:83
+#: udata/core/dataset/forms.py:159 udata/core/spatial/forms.py:83
 msgid "Spatial coverage"
 msgstr "Couverture spatiale"
 
-#: udata/core/dataset/forms.py:151
+#: udata/core/dataset/forms.py:160
 msgid "The geographical area covered by the data."
 msgstr "La zone géographique couverte par les données."
 
-#: udata/core/dataset/forms.py:152 udata/core/post/forms.py:26
+#: udata/core/dataset/forms.py:161 udata/core/post/forms.py:26
 #: udata/core/reuse/forms.py:29 udata/core/site/forms.py:13
 #: udata/core/topic/forms.py:22
 msgid "Tags"
 msgstr "Mots-clés"
 
-#: udata/core/dataset/forms.py:152 udata/core/reuse/forms.py:29
+#: udata/core/dataset/forms.py:161 udata/core/reuse/forms.py:29
 msgid "Some taxonomy keywords"
 msgstr "Quelques mots-clés pour la taxonomie"
 
-#: udata/core/dataset/forms.py:154 udata/core/reuse/forms.py:32
+#: udata/core/dataset/forms.py:163 udata/core/reuse/forms.py:32
 #: udata/core/topic/forms.py:23
 msgid "Private"
 msgstr "Privé"
 
-#: udata/core/dataset/forms.py:155 udata/core/reuse/forms.py:33
+#: udata/core/dataset/forms.py:164 udata/core/reuse/forms.py:33
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "Restreint la visibilité du jeu de données à vous ou votre organisation seulement."
 
@@ -472,27 +472,27 @@ msgstr "Fichier uploadé"
 msgid "Remote file"
 msgstr "Fichier distant"
 
-#: udata/core/dataset/models.py:375 udata/core/dataset/rdf.py:337
+#: udata/core/dataset/models.py:384 udata/core/dataset/rdf.py:337
 msgid "Nameless resource"
 msgstr "Ressource sans nom"
 
-#: udata/core/dataset/models.py:437 udata/models/datetime_fields.py:59
-msgid "Creation date"
-msgstr "Date de création"
-
-#: udata/core/dataset/models.py:439 udata/models/datetime_fields.py:61
-msgid "Last modification date"
-msgstr "Date de dernière modification"
-
-#: udata/core/dataset/models.py:455
+#: udata/core/dataset/models.py:459
 msgid "Future date of update"
 msgstr "Future date de mise à jour"
 
-#: udata/core/dataset/models.py:472
+#: udata/core/dataset/models.py:469 udata/models/datetime_fields.py:59
+msgid "Creation date"
+msgstr "Date de création"
+
+#: udata/core/dataset/models.py:471 udata/models/datetime_fields.py:61
+msgid "Last modification date"
+msgstr "Date de dernière modification"
+
+#: udata/core/dataset/models.py:480
 msgid "Pivotal data"
 msgstr "Données pivot"
 
-#: udata/core/dataset/models.py:510
+#: udata/core/dataset/models.py:519
 msgid "dataset"
 msgstr "jeu de données"
 
@@ -505,7 +505,7 @@ msgid "You need to update some frequency-based datasets"
 msgstr "Vous devez publier certains jeux de données avec une fréquence de mise à jour"
 
 #: udata/core/discussions/forms.py:14 udata/core/discussions/forms.py:21
-#: udata/core/organization/forms.py:53 udata/core/organization/forms.py:57
+#: udata/core/organization/forms.py:54 udata/core/organization/forms.py:58
 #: udata/harvest/forms.py:78
 msgid "Comment"
 msgstr "Commentaire"
@@ -578,29 +578,29 @@ msgstr "L'URL du site web de votre organisation"
 msgid "Logo"
 msgstr "Logo"
 
-#: udata/core/organization/forms.py:64
+#: udata/core/organization/forms.py:65
 msgid "Role"
 msgstr "Rôle"
 
-#: udata/core/organization/models.py:23
+#: udata/core/organization/models.py:22
 msgid "Administrator"
 msgstr "Administrateur"
 
-#: udata/core/organization/models.py:24
+#: udata/core/organization/models.py:23
 msgid "Editor"
 msgstr "Éditeur"
 
-#: udata/core/organization/models.py:30 udata/features/transfer/models.py:14
+#: udata/core/organization/models.py:29 udata/features/transfer/models.py:14
 #: udata/harvest/models.py:22 udata/harvest/models.py:32 udata/harvest/models.py:70
 msgid "Pending"
 msgstr "En attente"
 
-#: udata/core/organization/models.py:31 udata/features/transfer/models.py:15
+#: udata/core/organization/models.py:30 udata/features/transfer/models.py:15
 #: udata/harvest/models.py:71
 msgid "Accepted"
 msgstr "Acceptée"
 
-#: udata/core/organization/models.py:32 udata/features/transfer/models.py:16
+#: udata/core/organization/models.py:31 udata/features/transfer/models.py:16
 #: udata/harvest/models.py:72
 msgid "Refused"
 msgstr "Refusée"
@@ -800,7 +800,7 @@ msgstr "Outils open data"
 msgid "Others"
 msgstr "Autres"
 
-#: udata/core/reuse/models.py:120
+#: udata/core/reuse/models.py:121
 msgid "reuse"
 msgstr "réutilisation"
 
@@ -952,7 +952,7 @@ msgstr "À propos"
 msgid "Roles"
 msgstr "Rôles"
 
-#: udata/core/user/models.py:263 udata/tests/api/test_me_api.py:313
+#: udata/core/user/models.py:268 udata/tests/api/test_me_api.py:314
 msgid "Account deletion"
 msgstr "Suppression de compte"
 

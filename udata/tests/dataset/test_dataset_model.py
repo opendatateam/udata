@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import pytest
 import requests
 from flask import current_app
-from mongoengine import post_save
+from mongoengine import post_save, ValidationError
 
 from udata.app import cache
 from udata.models import (
@@ -575,6 +575,19 @@ class ResourceSchemaTest:
         rmock.get('https://example.com/schemas', status_code=500)
         assert 'dummy_from_cache' == ResourceSchema.objects()
         assert rmock.call_count == 2
+
+    def test_resource_schema_validation(self):
+        resource = ResourceFactory()
+
+        resource.schema = {'name': 'etalab/schema-irve'}
+        resource.validate()
+
+        resource.schema = {'url': 'https://example.com'}
+        resource.validate()
+
+        resource.schema = {'name': 'etalab/schema-irve', 'url': 'https://example.com'}
+        with pytest.raises(ValidationError):
+            resource.validate()
 
 
 class HarvestMetadataTest:
