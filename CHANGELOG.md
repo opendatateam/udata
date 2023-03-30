@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Fix schema is undefined when checking for schema.url in admin resource form [#2837](https://github.com/opendatateam/udata/pull/2837)
+- Fix to_naive_datetime in harvest preview [#2835](https://github.com/opendatateam/udata/pull/2835)
 
 ## 6.1.2 (2023-03-28)
 
@@ -14,7 +15,7 @@
     - Renamed `created_at` and `modified` of Resource model to `created_at_internal` and `last_modified_internal`
     - Added `created_at` computed property in Dataset and Resource model to provide harvested date if present and internal otherwise
     - Added `last_modified` computed property in Dataset and Resource model to provide max date between internal and harvested date
-- Fix for PR [#2815](https://github.com/opendatateam/udata/pull/2815) [#2832](https://github.com/opendatateam/udata/pull/2832)
+- Fix following dates refactoring [#2815](https://github.com/opendatateam/udata/pull/2815) [#2832](https://github.com/opendatateam/udata/pull/2832)
 - Fix dcat harvesting on dcat:Dataset with blank nodes [#2834](https://github.com/opendatateam/udata/pull/2834)
 - Add dataset archived field in resource catalog [#2833](https://github.com/opendatateam/udata/pull/2833)
 
