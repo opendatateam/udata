@@ -2,6 +2,25 @@
 
 ## Current (in progress)
 
+- Fix schema is undefined when checking for schema.url in admin resource form [#2837](https://github.com/opendatateam/udata/pull/2837)
+- Fix to_naive_datetime in harvest preview [#2835](https://github.com/opendatateam/udata/pull/2835)
+
+## 6.1.2 (2023-03-28)
+
+- Resources schema can now have an URL field. [#2825](https://github.com/opendatateam/udata/pull/2825)
+- Fix URLField validation error message [#2831](https://github.com/opendatateam/udata/pull/2831)
+- Dates renaming to provide more relevant computed dates between internal and harvested dates [#2815](https://github.com/opendatateam/udata/pull/2815):
+    - Removed `published` attribute from Resource model
+    - Renamed `created_at` and `last_modified` of Dataset model to `created_at_internal` and `last_modified_internal`
+    - Renamed `created_at` and `modified` of Resource model to `created_at_internal` and `last_modified_internal`
+    - Added `created_at` computed property in Dataset and Resource model to provide harvested date if present and internal otherwise
+    - Added `last_modified` computed property in Dataset and Resource model to provide max date between internal and harvested date
+- Fix following dates refactoring [#2815](https://github.com/opendatateam/udata/pull/2815) [#2832](https://github.com/opendatateam/udata/pull/2832)
+- Fix dcat harvesting on dcat:Dataset with blank nodes [#2834](https://github.com/opendatateam/udata/pull/2834)
+- Add dataset archived field in resource catalog [#2833](https://github.com/opendatateam/udata/pull/2833)
+
+## 6.1.1 (2023-03-17)
+
 - Fix edge case on aware datetime string [#2827](https://github.com/opendatateam/udata/pull/2827)
 - :warning: MongoDB support up to 6.0.4 [#2819](https://github.com/opendatateam/udata/pull/2819):
     - Older versions of MongoDB >=3.6 are still supported
@@ -9,6 +28,8 @@
     - Upgrade pymongo 3.10.1 -> 4.3.3
     - Upgrade mongoengine 0.20.0 -> 0.26.0
 - Add IATA `ssim` among allowed file extensions [#2828](https://github.com/opendatateam/udata/pull/2828)
+- Copy user mail card back from udata-front [#2822](https://github.com/opendatateam/udata/pull/2822)
+- Upgrade node to a version still available [#2830](https://github.com/opendatateam/udata/pull/2830)
 
 ## 6.1.0 (2023-03-07)
 

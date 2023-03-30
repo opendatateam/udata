@@ -63,7 +63,7 @@ def parse_url(url, quiet=False, rid=''):
         if not rid or rid in item.remote_id:
             echo(magenta('Processing item {}'.format(item.remote_id)))
             echo('Item kwargs: {}'.format(yellow(item.kwargs)))
-            node = backend.get_node_from_item(item)
+            node = backend.get_node_from_item(graph, item)
             dataset = MockDatasetFactory()
             dataset = dataset_from_rdf(graph, dataset, node=node)
             echo('')

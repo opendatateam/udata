@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 from blinker import signal
 from dateutil.parser import parse as parse_dt
 from flask import current_app
-from mongoengine import DynamicEmbeddedDocument
+from mongoengine import DynamicEmbeddedDocument, ValidationError as MongoEngineValidationError
 from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
 from stringdist import rdlevenshtein
@@ -290,15 +290,24 @@ class ResourceMixin(object):
     harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)
     schema = db.DictField()
 
-    created_at = db.DateTimeField(default=datetime.now, required=True)
-    modified = db.DateTimeField(default=datetime.now, required=True)
-    published = db.DateTimeField()  # DEPRECATED BUT LEFT FOR BACKWARDS COMPATIBILITY
+    created_at_internal = db.DateTimeField(default=datetime.now, required=True)
+    last_modified_internal = db.DateTimeField(default=datetime.now, required=True)
     deleted = db.DateTimeField()
+
+    @property
+    def created_at(self):
+        return self.harvest.created_at if self.harvest and self.harvest.created_at else self.created_at_internal
+
+    @property
+    def last_modified(self):
+        return max([self.last_modified_internal, to_naive_datetime(self.harvest.modified_at)]) if self.harvest and self.harvest.modified_at else self.last_modified_internal
 
     def clean(self):
         super(ResourceMixin, self).clean()
         if not self.urlhash or 'url' in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
+        if self.schema and (not bool('name' in self.schema) ^ bool('url' in self.schema)):
+            raise MongoEngineValidationError('Schema must have at least a name or an url. Having both is not allowed.')
 
     @cached_property  # Accessed at least 2 times in front rendering
     def preview_url(self):
@@ -375,7 +384,7 @@ class ResourceMixin(object):
             'name': self.title or _('Nameless resource'),
             'contentUrl': self.url,
             'dateCreated': self.created_at.isoformat(),
-            'dateModified': self.modified.isoformat(),
+            'dateModified': self.last_modified.isoformat(),
             'extras': [get_json_ld_extra(*item)
                        for item in self.extras.items()],
         }
@@ -433,10 +442,6 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
 
 
 class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
-    created_at = DateTimeField(verbose_name=_('Creation date'),
-                               default=datetime.now, required=True)
-    last_modified = DateTimeField(verbose_name=_('Last modification date'),
-                                  default=datetime.now, required=True)
     title = db.StringField(required=True)
     acronym = db.StringField(max_length=128)
     # /!\ do not set directly the slug when creating or updating a dataset
@@ -461,6 +466,10 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     featured = db.BooleanField(required=True, default=False)
 
+    created_at_internal = DateTimeField(verbose_name=_('Creation date'),
+                               default=datetime.now, required=True)
+    last_modified_internal = DateTimeField(verbose_name=_('Last modification date'),
+                                  default=datetime.now, required=True)
     deleted = db.DateTimeField()
     archived = db.DateTimeField()
 
@@ -481,8 +490,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     meta = {
         'indexes': [
             '$title',
-            'created_at',
-            'last_modified',
+            'created_at_internal',
+            'last_modified_internal',
             'metrics.reuses',
             'metrics.followers',
             'metrics.views',
@@ -490,7 +499,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             'resources.id',
             'resources.urlhash',
         ] + db.Owned.meta['indexes'],
-        'ordering': ['-created_at'],
+        'ordering': ['-created_at_internal'],
         'queryset_class': DatasetQuerySet,
         'auto_create_index_on_save': True
     }
@@ -580,18 +589,21 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         return [resource.check_availability() for resource in remote_resources]
 
     @property
+    def created_at(self):
+        return self.harvest.created_at if self.harvest and self.harvest.created_at else self.created_at_internal
+
+    @property
+    def last_modified(self):
+        return max([self.last_modified_internal, to_naive_datetime(self.harvest.modified_at)]) if self.harvest and self.harvest.modified_at else self.last_modified_internal
+
+    @property
     def last_update(self):
         """
         Use the more recent date we would have on resources (harvest, modified).
         Default to dataset last_modified if no resource.
         """
         if self.resources:
-            dates = []
-            for res in self.resources:
-                dates.append(res.modified)
-                if res.harvest and res.harvest.modified_at:
-                    dates.append(to_naive_datetime(res.harvest.modified_at))
-            return max(dates)
+            return max([res.last_modified for res in self.resources])
         else:
             return self.last_modified
 
@@ -839,7 +851,7 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
     ]
 
     meta = {
-        'ordering': ['-created_at'],
+        'ordering': ['-created_at_internal'],
         'queryset_class': db.OwnedQuerySet,
     }
 
@@ -887,7 +899,6 @@ class ResourceSchema(object):
         if not content:
             log.error(f'No content found inc. from cache for schema catalog')
             raise SchemasCacheUnavailableException('No content in cache for schema catalog')
-
         return content
 
 

@@ -140,6 +140,8 @@ def daterange_end(value):
 
 
 def to_naive_datetime(given_date):
+    if isinstance(given_date, str):
+        given_date = parse_dt(given_date)
     if isinstance(given_date, date) and not isinstance(given_date, datetime):
         return datetime(
             given_date.year,
@@ -148,6 +150,7 @@ def to_naive_datetime(given_date):
         )
     elif isinstance(given_date, datetime):
         return given_date.replace(tzinfo=None)
+    return given_date
 
 
 def to_iso(dt):

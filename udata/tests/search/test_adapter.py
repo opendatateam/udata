@@ -152,8 +152,8 @@ class IndexingLifecycleTest(APITestCase):
 
     @patch('requests.post')
     def test_index_model_from_datetime(self, mock_req):
-        VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211', last_modified=datetime.datetime(2020, 1, 1))
-        fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1212', last_modified=datetime.datetime(2022, 1, 1))
+        VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211', last_modified_internal=datetime.datetime(2020, 1, 1))
+        fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1212', last_modified_internal=datetime.datetime(2022, 1, 1))
 
         index_model(DatasetSearch, start=None, from_datetime=datetime.datetime(2023, 1, 1))
         mock_req.assert_not_called()
