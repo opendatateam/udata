@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2023-03-27 10:32+0200\n"
-"PO-Revision-Date: 2023-03-27 08:33\n"
+"POT-Creation-Date: 2023-03-29 12:17+0200\n"
+"PO-Revision-Date: 2023-04-03 08:25\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -42,7 +42,7 @@ msgstr "A sua palavra-passe foi alterada"
 msgid "Password reset instructions"
 msgstr "Instruções para recuperação da palavra-passe"
 
-#: udata/settings.py:405
+#: udata/settings.py:407
 msgid "This dataset has been archived"
 msgstr "O seu conjunto de dados foi arquivado"
 
@@ -952,7 +952,7 @@ msgstr "Sobre"
 msgid "Roles"
 msgstr "Perfis"
 
-#: udata/core/user/models.py:268 udata/tests/api/test_me_api.py:314
+#: udata/core/user/models.py:269 udata/tests/api/test_me_api.py:314
 msgid "Account deletion"
 msgstr "Conta eliminada"
 
@@ -972,52 +972,60 @@ msgstr "Moderador do site"
 msgid "Test mail"
 msgstr "E-mail de teste"
 
-#: udata/forms/fields.py:99
+#: udata/forms/fields.py:118
+msgid "Please input a date/time value"
+msgstr ""
+
+#: udata/forms/fields.py:130 udata/forms/fields.py:138
+msgid "Invalid date/time input"
+msgstr ""
+
+#: udata/forms/fields.py:164
 msgid "The role {role} does not exist"
 msgstr "O perfil {role} não existe"
 
-#: udata/forms/fields.py:116
+#: udata/forms/fields.py:181
 msgid "Not a valid UUID"
 msgstr "Identificador (UUID) inválido"
 
-#: udata/forms/fields.py:141
+#: udata/forms/fields.py:206
 msgid "Invalid URL"
 msgstr "URL inválido"
 
-#: udata/forms/fields.py:337
+#: udata/forms/fields.py:402
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
 msgstr "A tag \"%(tag)s\" deve ter entre %(min)d e %(max)d caracteres."
 
-#: udata/forms/fields.py:377 udata/forms/fields.py:429
+#: udata/forms/fields.py:442 udata/forms/fields.py:494
 msgid "{0} does not exists"
 msgstr "{0} não existe"
 
-#: udata/forms/fields.py:416
+#: udata/forms/fields.py:481
 msgid "Expect both class and identifier"
 msgstr "Esperados uma classe e um identificador"
 
-#: udata/forms/fields.py:462
+#: udata/forms/fields.py:527
 msgid "Model for {0} not found"
 msgstr "Modelo para {0} não foi encontrado"
 
-#: udata/forms/fields.py:497
+#: udata/forms/fields.py:562
 msgid "Unknown identifiers: {identifiers}"
 msgstr "Identificadores desconhecidos: {identifiers}"
 
-#: udata/forms/fields.py:632
+#: udata/forms/fields.py:697
 msgid "Unable to parse date range"
 msgstr "Não é possível analisar o intervalo de datas"
 
-#: udata/forms/fields.py:659 udata/forms/fields.py:682
+#: udata/forms/fields.py:724 udata/forms/fields.py:747
 msgid "You must be authenticated"
 msgstr "Você deve estar autenticado"
 
-#: udata/forms/fields.py:662
+#: udata/forms/fields.py:727
 msgid "You can only set yourself as owner"
 msgstr "Apenas pode definir-se como proprietário"
 
-#: udata/forms/fields.py:685
+#: udata/forms/fields.py:750
 msgid "Permission denied for this organization"
 msgstr "Permissão recusada para esta organização"
 
@@ -1416,6 +1424,28 @@ msgstr "Para ativar a sua conta, por favor confirme o seu endereço de e-mail at
 #: udata/templates/security/email/welcome.html:18
 msgid "Confirm now"
 msgstr "Confirmar agora"
+
+#: udata/templates/security/email/welcome_existing.html:7
+#, python-format
+msgid "Hello %(email)s!"
+msgstr ""
+
+#: udata/templates/security/email/welcome_existing.html:10
+msgid "Someone (you?) tried to register this email - which is already in our system."
+msgstr ""
+
+#: udata/templates/security/email/welcome_existing.html:14
+#, python-format
+msgid "This account also has the following username associated with it: %(username)s."
+msgstr ""
+
+#: udata/templates/security/email/welcome_existing.html:19
+msgid "If you forgot your password you can reset it"
+msgstr ""
+
+#: udata/templates/security/email/welcome_existing.html:25
+msgid "Here"
+msgstr ""
 
 #: udata/tests/search/test_adapter.py:24
 msgid "Never reused"
