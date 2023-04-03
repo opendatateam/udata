@@ -219,6 +219,7 @@ class DatasetAPI(API):
     @api.response(204, 'Dataset deleted')
     def delete(self, dataset):
         '''Delete a dataset given its identifier'''
+        print(dataset)
         if dataset.deleted:
             api.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()

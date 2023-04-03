@@ -118,11 +118,14 @@ def get_settings(request):
 
 def drop_db(app):
     '''Clear the database'''
-    parsed_url = urlparse(app.config['MONGODB_HOST'])
-
-    # drop the leading /
-    db_name = parsed_url.path[1:]
-    db.connection.drop_database(db_name)
+    config = app.config['MONGODB_HOST']
+    if isinstance(config, dict):
+        db_name = config['db']
+    elif isinstance(config, str):
+        parsed_url = urlparse(config)
+        # drop the leading /
+        db_name = parsed_url.path[1:]
+    db.connection['default'].drop_database('test')
 
 
 @pytest.fixture
