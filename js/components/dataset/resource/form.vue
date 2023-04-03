@@ -252,7 +252,7 @@ export default {
                 const values = [{id: '', label: ''}].concat(schemas.data);
                 return [{
                     id: 'schema.name',
-                    label: this.resource.schema.url ? this._('Schema (Url already set)') : this._('Schema'),
+                    label: (this.resource.schema && this.resource.schema.url) ? this._('Schema (Url already set)') : this._('Schema'),
                     widget: 'select-input',
                     values,
                     map: function(item) {
