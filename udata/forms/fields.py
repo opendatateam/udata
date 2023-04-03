@@ -6,8 +6,8 @@ from flask import url_for
 from flask_mongoengine.wtf import fields as mefields
 from flask_storage.mongo import ImageReference
 from wtforms import Form as WTForm, Field as WTField, validators, fields, SubmitField
-from wtforms.ext.dateutil import fields as dtfields
 from wtforms.utils import unset_value
+from wtforms.widgets import TextInput
 from wtforms_json import flatten_json
 
 from . import widgets
@@ -83,8 +83,73 @@ class FloatField(FieldHelper, fields.FloatField):
     pass
 
 
-class DateField(FieldHelper, dtfields.DateField):
-    pass
+class WTFDateTimeField(WTField):
+    """
+    Field copied from the code of wtforms extention dateutil removed in version 3.
+    WTFDateTimeField represented by a text input, accepts all input text formats
+    that `dateutil.parser.parse` will.
+    :param parse_kwargs:
+        A dictionary of keyword args to pass to the dateutil parse() function.
+        See dateutil docs for available keywords.
+    :param display_format:
+        A format string to pass to strftime() to format dates for display.
+    """
+    widget = TextInput()
+
+    def __init__(self, label=None, validators=None, parse_kwargs=None,
+                 display_format='%Y-%m-%d %H:%M', **kwargs):
+        super(WTFDateTimeField, self).__init__(label, validators, **kwargs)
+        if parse_kwargs is None:
+            parse_kwargs = {}
+        self.parse_kwargs = parse_kwargs
+        self.display_format = display_format
+
+    def _value(self):
+        if self.raw_data:
+            return ' '.join(self.raw_data)
+        else:
+            return self.data and self.data.strftime(self.display_format) or ''
+
+    def process_formdata(self, valuelist):
+        if valuelist:
+            date_str = ' '.join(valuelist)
+            if not date_str:
+                self.data = None
+                raise validators.ValidationError(_('Please input a date/time value'))
+
+            parse_kwargs = self.parse_kwargs.copy()
+            if 'default' not in parse_kwargs:
+                try:
+                    parse_kwargs['default'] = self.default()
+                except TypeError:
+                    parse_kwargs['default'] = self.default
+            try:
+                self.data = parse(date_str, **parse_kwargs)
+            except ValueError:
+                self.data = None
+                raise validators.ValidationError(_('Invalid date/time input'))
+            except TypeError:
+                if not DATEUTIL_TYPEERROR_ISSUE:
+                    raise
+
+                # If we're using dateutil 2.2, then consider it a normal
+                # ValidationError. Hopefully dateutil fixes this issue soon.
+                self.data = None
+                raise validators.ValidationError(_('Invalid date/time input'))
+
+
+class DateField(WTFDateTimeField):
+    """
+    Same as the DateTimeField, but stores only the date portion.
+    """
+    def __init__(self, label=None, validators=None, parse_kwargs=None,
+                 display_format='%Y-%m-%d', **kwargs):
+        super(DateField, self).__init__(label, validators, parse_kwargs=parse_kwargs, display_format=display_format, **kwargs)
+
+    def process_formdata(self, valuelist):
+        super(DateField, self).process_formdata(valuelist)
+        if self.data is not None and hasattr(self.data, 'date'):
+            self.data = self.data.date()
 
 
 class RolesField(Field):
@@ -99,7 +164,7 @@ class RolesField(Field):
                     _('The role {role} does not exist').format(role=name))
 
 
-class DateTimeField(Field, fields.DateTimeField):
+class DateTimeField(Field, WTFDateTimeField):
     def process_formdata(self, valuelist):
         if valuelist:
             dt = valuelist[0]
@@ -183,9 +248,9 @@ class FormField(FieldHelper, fields.FormField):
         self.prefix = '{0}-'.format(self.name)
         self._formdata = None
 
-    def process(self, formdata, data=unset_value):
+    def process(self, formdata, data=unset_value, **kwargs):
         self._formdata = formdata
-        return super(FormField, self).process(formdata, data=data)
+        return super(FormField, self).process(formdata, data=data, **kwargs)
 
     def validate(self, form, extra_validators=tuple()):
         if extra_validators:
@@ -246,9 +311,9 @@ class ImageField(FormField):
         super(ImageField, self).__init__(ImageForm, label, validators,
                                          **kwargs)
 
-    def process(self, formdata, data=unset_value):
+    def process(self, formdata, data=unset_value, **kwargs):
         self.src = data(100) if isinstance(data, ImageReference) else None
-        super(ImageField, self).process(formdata, data)
+        super(ImageField, self).process(formdata, data, **kwargs)
 
     def populate_obj(self, obj, name):
         field = getattr(obj, name)
@@ -265,7 +330,7 @@ class ImageField(FormField):
 
 
 def nullable_text(value):
-    return None if value == 'None' else fields.core.text_type(value)
+    return None if value == 'None' else str(value)
 
 
 class SelectField(FieldHelper, fields.SelectField):
@@ -379,7 +444,7 @@ class ModelFieldMixin(object):
 
 
 class ModelField(Field):
-    def process(self, formdata, data=unset_value):
+    def process(self, formdata, data=unset_value, **kwargs):
         if formdata:
             # Process prefixed values as in FormField
             newdata = {}
@@ -390,7 +455,7 @@ class ModelField(Field):
                     newdata[key.replace(prefix, '')] = value
             if newdata:
                 formdata.add(self.short_name, newdata)
-        super(ModelField, self).process(formdata, data)
+        super(ModelField, self).process(formdata, data, **kwargs)
 
     def process_formdata(self, valuelist):
         if not valuelist or len(valuelist) != 1 or not valuelist[0]:
@@ -512,7 +577,7 @@ class NestedModelList(fields.FieldList):
         self.initial_data = []
         self.prefix = '{0}-'.format(self.name)
 
-    def process(self, formdata, data=unset_value):
+    def process(self, formdata, data=unset_value, **kwargs):
         self._formdata = formdata
         self.initial_data = data
         self.is_list_data = formdata and self.name in formdata
@@ -521,10 +586,10 @@ class NestedModelList(fields.FieldList):
         )
         self.has_data = self.is_list_data or self.is_dict_data
         if self.has_data:
-            super(NestedModelList, self).process(formdata, data)
+            super(NestedModelList, self).process(formdata, data, **kwargs)
         else:
             self.entries = []
-            # super(NestedModelList, self).process(None, data)
+            # super(NestedModelList, self).process(None, data, **kwargs)
 
     def validate(self, form, extra_validators=tuple()):
         '''Perform validation only if data has been submitted'''
@@ -647,10 +712,10 @@ class CurrentUserField(ModelFieldMixin, Field):
         kwargs['default'] = kwargs.pop('default', default_owner)
         super(CurrentUserField, self).__init__(*args, **kwargs)
 
-    def process(self, formdata, data=unset_value):
+    def process(self, formdata, data=unset_value, **kwargs):
         if formdata and self.name in formdata and formdata[self.name] is None:
             formdata.pop(self.name)  # None value does not trigger default
-        return super(CurrentUserField, self).process(formdata, data)
+        return super(CurrentUserField, self).process(formdata, data, **kwargs)
 
     def pre_validate(self, form):
         if self.data:
@@ -696,7 +761,7 @@ class PublishAsField(ModelFieldMixin, Field):
 
 def field_parse(cls, value, *args, **kwargs):
     kwargs['_form'] = WTForm()
-    kwargs['_name'] = 'extra'
+    kwargs['name'] = 'extra'
     field = cls(*args, **kwargs)
     field.process_formdata([value])
     return field.data
