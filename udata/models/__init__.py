@@ -152,15 +152,15 @@ def init_app(app):
     validate_config(app.config)
     if app.config['TESTING']:
         build_test_config(app.config)
-    # import mongomock
-    # test = {
-    #     "host": 'mongodb://localhost', "mongo_client_class": mongomock.MongoClient
-    # }
-    # app.config["MONGODB_SETTINGS"] = [
-    #     {
-    #         "host": "mongodb://localhost",
-    #         "mongo_client_class": mongomock.MongoClient
-    #     }
-    # ]
+    import mongomock
+    test = {
+        "host": 'mongodb://localhost', "mongo_client_class": mongomock.MongoClient
+    }
+    app.config["MONGODB_SETTINGS"] = [
+        {
+            "host": "mongodb://localhost",
+            "mongo_client_class": mongomock.MongoClient
+        }
+    ]
     db.init_app(app)
     entrypoints.get_enabled('udata.models', app)
