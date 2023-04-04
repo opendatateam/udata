@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from flask import request
+from mongoengine.errors import ValidationError
 
 from udata.api import api, API, errors
 from udata.api.parsers import ModelApiParser
@@ -159,7 +160,7 @@ class ReuseDatasetsAPI(API):
             api.abort(400, 'Expect a dataset identifier')
         try:
             dataset = Dataset.objects.get_or_404(id=request.json['id'])
-        except Dataset.DoesNotExist:
+        except (Dataset.DoesNotExist, ValidationError):
             msg = 'Dataset {0} does not exists'.format(request.json['id'])
             api.abort(404, msg)
         if dataset in reuse.datasets:
