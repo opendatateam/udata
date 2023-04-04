@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2023-03-29 12:17+0200\n"
-"PO-Revision-Date: 2023-04-03 08:25\n"
+"PO-Revision-Date: 2023-04-04 08:00\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -974,11 +974,11 @@ msgstr "Mail de test"
 
 #: udata/forms/fields.py:118
 msgid "Please input a date/time value"
-msgstr ""
+msgstr "Merci d'indiquer une date/heure valide"
 
 #: udata/forms/fields.py:130 udata/forms/fields.py:138
 msgid "Invalid date/time input"
-msgstr ""
+msgstr "Date/heure non valide"
 
 #: udata/forms/fields.py:164
 msgid "The role {role} does not exist"
@@ -1431,24 +1431,24 @@ msgstr "Confirmer maintenant"
 #: udata/templates/security/email/welcome_existing.html:7
 #, python-format
 msgid "Hello %(email)s!"
-msgstr ""
+msgstr "Bonjour %(email)s !"
 
 #: udata/templates/security/email/welcome_existing.html:10
 msgid "Someone (you?) tried to register this email - which is already in our system."
-msgstr ""
+msgstr "Quelqu'un (vous ?) a essayé de créer un compte avec cet e-mail qui est déjà dans notre système."
 
 #: udata/templates/security/email/welcome_existing.html:14
 #, python-format
 msgid "This account also has the following username associated with it: %(username)s."
-msgstr ""
+msgstr "Ce compte a également le nom d'utilisateur suivant qui lui est associé : %(username)s."
 
 #: udata/templates/security/email/welcome_existing.html:19
 msgid "If you forgot your password you can reset it"
-msgstr ""
+msgstr "Si vous avez oublié votre mot de passe, vous pouvez le réinitialiser"
 
 #: udata/templates/security/email/welcome_existing.html:25
 msgid "Here"
-msgstr ""
+msgstr "Ici"
 
 #: udata/tests/search/test_adapter.py:24
 msgid "Never reused"
