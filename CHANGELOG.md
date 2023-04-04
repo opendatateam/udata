@@ -9,6 +9,7 @@
     - Upgrade WTForms 2.2.1 -> 3.0.1
     - Upgrade WTForms-json 0.3.3 -> 0.3.5
     - New security email template for existing users
+- Add `format_timedelta` to `udata.i18n` [#2836](https://github.com/opendatateam/udata/pull/2836)
 
 ## 6.1.2 (2023-03-28)
 
