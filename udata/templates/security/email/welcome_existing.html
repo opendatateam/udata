@@ -1,0 +1,32 @@
+{% extends 'security/email/base.html' %}
+{% from 'security/email/button.html' import mail_button %}
+
+{% block body %}
+
+<p>
+    {{ _('Hello %(email)s!', email=user.email) }}
+</p>
+<p>
+    {{ _('Someone (you?) tried to register this email - which is already in our system.') }}
+</p>
+{% if user.username %}
+<p>
+    {{ _('This account also has the following username associated with it: %(username)s.', username=user.username) }}
+</p>
+{% endif %}
+{% if recovery_link %}
+<p>
+    {{ _('If you forgot your password you can reset it') }}
+</p>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td align="center">
+            {{ mail_button(
+                _('Here'),
+                recovery_link
+            ) }}
+        </td>
+    </tr>
+</table>
+{% endif %}
+{% endblock %}

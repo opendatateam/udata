@@ -2,6 +2,16 @@
 
 ## Current (in progress)
 
+- Fix schema is undefined when checking for schema.url in admin resource form [#2837](https://github.com/opendatateam/udata/pull/2837)
+- Fix to_naive_datetime in harvest preview [#2835](https://github.com/opendatateam/udata/pull/2835)
+- :warning: Flask-Security update to enable `GenericResponses` [#2826](https://github.com/opendatateam/udata/pull/2826):
+    - Upgrade Flask-Security 4.5.1 -> 5.1.1
+    - Upgrade WTForms 2.2.1 -> 3.0.1
+    - Upgrade WTForms-json 0.3.3 -> 0.3.5
+    - New security email template for existing users
+
+## 6.1.2 (2023-03-28)
+
 - Resources schema can now have an URL field. [#2825](https://github.com/opendatateam/udata/pull/2825)
 - Fix URLField validation error message [#2831](https://github.com/opendatateam/udata/pull/2831)
 - Dates renaming to provide more relevant computed dates between internal and harvested dates [#2815](https://github.com/opendatateam/udata/pull/2815):
@@ -11,6 +21,8 @@
     - Added `created_at` computed property in Dataset and Resource model to provide harvested date if present and internal otherwise
     - Added `last_modified` computed property in Dataset and Resource model to provide max date between internal and harvested date
 - Fix for PR [#2815](https://github.com/opendatateam/udata/pull/2815) [#2832](https://github.com/opendatateam/udata/pull/2832)
+- Fix following dates refactoring [#2815](https://github.com/opendatateam/udata/pull/2815) [#2832](https://github.com/opendatateam/udata/pull/2832)
+- Fix dcat harvesting on dcat:Dataset with blank nodes [#2834](https://github.com/opendatateam/udata/pull/2834)
 - Add dataset archived field in resource catalog [#2833](https://github.com/opendatateam/udata/pull/2833)
 - Add `https://github.com/opendatateam/udata/pull/2836` to `udata.i18n`
 

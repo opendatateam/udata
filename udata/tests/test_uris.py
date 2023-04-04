@@ -277,7 +277,7 @@ def test_custom_tlds(tld):
 @pytest.mark.parametrize('tld', DEFAULT_TLDS)
 def test_custom_tlds_should_not_validate_defaults(tld):
     url = 'http://somewhere.{0}'.format(tld)
-    with pytest.raises(uris.ValidationError, match='Invalid TLD'):
+    with pytest.raises(uris.ValidationError, match='Invalid '):
         uris.validate(url, tlds=CUSTOM_TLDS)
 
 

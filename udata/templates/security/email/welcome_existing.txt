@@ -1,0 +1,14 @@
+{% extends 'security/email/base.txt' %}
+{% block body %}
+{{ _('Hello') }}
+{{ _('Someone (you?) tried to register this email - which is already in our system.') }}
+
+{% if user.username %}
+{{ _('This account also has the following username associated with it: %(username)s', username=user.username) }}
+{% endif %}
+
+{% if recovery_link %}
+    {{ _('If you forgot your password you can reset it with the following link:') }}
+    {{ recovery_link }}
+{% endif %}
+{% endblock %}
