@@ -15,6 +15,9 @@ except ImportError:
 
 
 from babel.support import NullTranslations, Translations
+from babel.dates import format_timedelta as babel_format_timedelta
+
+from datetime import datetime
 
 from flask_babelex import Babel, Domain, refresh
 from flask_babelex import format_date, format_datetime  # noqa
@@ -84,7 +87,6 @@ class PluggableDomain(Domain):
 domain = PluggableDomain(domain='udata')
 babel = Babel(default_domain=domain)
 
-
 # Create shortcuts for the default Flask domain
 def gettext(*args, **kwargs):
     return domain.gettext(*args, **kwargs)
@@ -121,6 +123,16 @@ L_ = lazy_gettext
 def lazy_pgettext(*args, **kwargs):
     return domain.lazy_pgettext(*args, **kwargs)
 
+
+def format_timedelta(datetime_or_timedelta, granularity='second', add_direction=False, threshold=0.85):
+    '''This is format_timedelta from Flask-Babel, Flask-BabelEx missed the add_direction parameter'''
+    if isinstance(datetime_or_timedelta, datetime):
+        datetime_or_timedelta = datetime.utcnow() - datetime_or_timedelta
+    return babel_format_timedelta(datetime_or_timedelta, 
+                                  granularity,
+                                  threshold=threshold,
+                                  add_direction=add_direction,
+                                  locale=get_current_locale())
 
 def _default_lang(user=None):
     lang = getattr(user or current_user, 'prefered_language', None)
