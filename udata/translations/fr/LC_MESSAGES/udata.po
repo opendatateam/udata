@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2023-03-27 10:32+0200\n"
-"PO-Revision-Date: 2023-03-27 08:38\n"
+"POT-Creation-Date: 2023-03-29 12:17+0200\n"
+"PO-Revision-Date: 2023-04-04 08:00\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -42,7 +42,7 @@ msgstr "Votre mot de passe a été modifié"
 msgid "Password reset instructions"
 msgstr "Instructions de réinitialisation du mot de passe"
 
-#: udata/settings.py:405
+#: udata/settings.py:407
 msgid "This dataset has been archived"
 msgstr "Ce jeu de données a été archivé"
 
@@ -952,7 +952,7 @@ msgstr "À propos"
 msgid "Roles"
 msgstr "Rôles"
 
-#: udata/core/user/models.py:268 udata/tests/api/test_me_api.py:314
+#: udata/core/user/models.py:269 udata/tests/api/test_me_api.py:314
 msgid "Account deletion"
 msgstr "Suppression de compte"
 
@@ -972,52 +972,60 @@ msgstr "Moderateur"
 msgid "Test mail"
 msgstr "Mail de test"
 
-#: udata/forms/fields.py:99
+#: udata/forms/fields.py:118
+msgid "Please input a date/time value"
+msgstr "Merci d'indiquer une date/heure valide"
+
+#: udata/forms/fields.py:130 udata/forms/fields.py:138
+msgid "Invalid date/time input"
+msgstr "Date/heure non valide"
+
+#: udata/forms/fields.py:164
 msgid "The role {role} does not exist"
 msgstr "Le rôle {role} n'existe pas"
 
-#: udata/forms/fields.py:116
+#: udata/forms/fields.py:181
 msgid "Not a valid UUID"
 msgstr "N'est pas un UUID"
 
-#: udata/forms/fields.py:141
+#: udata/forms/fields.py:206
 msgid "Invalid URL"
 msgstr "URL invalide"
 
-#: udata/forms/fields.py:337
+#: udata/forms/fields.py:402
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
 msgstr "Le mot-clé \"%(tag)s\" doit avoir entre %(min)d et %(max)d caractères."
 
-#: udata/forms/fields.py:377 udata/forms/fields.py:429
+#: udata/forms/fields.py:442 udata/forms/fields.py:494
 msgid "{0} does not exists"
 msgstr "{0} n'existe pas"
 
-#: udata/forms/fields.py:416
+#: udata/forms/fields.py:481
 msgid "Expect both class and identifier"
 msgstr "Attends à la fois une classe et un identifiant"
 
-#: udata/forms/fields.py:462
+#: udata/forms/fields.py:527
 msgid "Model for {0} not found"
 msgstr "Modèle pour {0} non trouvé"
 
-#: udata/forms/fields.py:497
+#: udata/forms/fields.py:562
 msgid "Unknown identifiers: {identifiers}"
 msgstr "Identifiants inconnus : {identifiers}"
 
-#: udata/forms/fields.py:632
+#: udata/forms/fields.py:697
 msgid "Unable to parse date range"
 msgstr "Incapable de comprendre la date"
 
-#: udata/forms/fields.py:659 udata/forms/fields.py:682
+#: udata/forms/fields.py:724 udata/forms/fields.py:747
 msgid "You must be authenticated"
 msgstr "Vous devez être authentifié"
 
-#: udata/forms/fields.py:662
+#: udata/forms/fields.py:727
 msgid "You can only set yourself as owner"
 msgstr "Vous ne pouvez définir que vous-même en tant que propriétaire"
 
-#: udata/forms/fields.py:685
+#: udata/forms/fields.py:750
 msgid "Permission denied for this organization"
 msgstr "Permission refusée pour cette organisation"
 
@@ -1419,6 +1427,28 @@ msgstr "Pour activer votre compte, veuillez confirmer votre adresse email par le
 #: udata/templates/security/email/welcome.html:18
 msgid "Confirm now"
 msgstr "Confirmer maintenant"
+
+#: udata/templates/security/email/welcome_existing.html:7
+#, python-format
+msgid "Hello %(email)s!"
+msgstr "Bonjour %(email)s !"
+
+#: udata/templates/security/email/welcome_existing.html:10
+msgid "Someone (you?) tried to register this email - which is already in our system."
+msgstr "Quelqu'un (vous ?) a essayé de créer un compte avec cet e-mail qui est déjà dans notre système."
+
+#: udata/templates/security/email/welcome_existing.html:14
+#, python-format
+msgid "This account also has the following username associated with it: %(username)s."
+msgstr "Ce compte a également le nom d'utilisateur suivant qui lui est associé : %(username)s."
+
+#: udata/templates/security/email/welcome_existing.html:19
+msgid "If you forgot your password you can reset it"
+msgstr "Si vous avez oublié votre mot de passe, vous pouvez le réinitialiser"
+
+#: udata/templates/security/email/welcome_existing.html:25
+msgid "Here"
+msgstr "Ici"
 
 #: udata/tests/search/test_adapter.py:24
 msgid "Never reused"
