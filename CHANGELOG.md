@@ -10,6 +10,10 @@
     - Upgrade WTForms-json 0.3.3 -> 0.3.5
     - New security email template for existing users
 - Add `format_timedelta` to `udata.i18n` [#2836](https://github.com/opendatateam/udata/pull/2836)
+- Upgrades [#2839](https://github.com/opendatateam/udata/pull/2839):
+    - Upgrade flask-storage 1.0.0 -> 1.3.2
+    - Upgrade flask-mongoengine 0.9.5 -> 1.0.0
+    - Upgrade mongoengine 0.26.0 -> 0.27.0
 
 ## 6.1.2 (2023-03-28)
 
