@@ -108,9 +108,8 @@ from udata.harvest.models import HarvestSource as Harvest  # noqa
 import udata.linkchecker.models  # noqa
 
 
-MONGODB_CONNECTION_SETTINGS = ['host']
 MONGODB_DEPRECATED_SETTINGS = 'MONGODB_PORT', 'MONGODB_DB'
-MONGODB_DEPRECATED_MSG = '{0} is deprecated, use the MONGODB_HOST dict syntax'
+MONGODB_DEPRECATED_MSG = '{0} is deprecated, use the MONGODB_HOST url syntax'
 
 
 def validate_config(config):
@@ -119,18 +118,12 @@ def validate_config(config):
             msg = MONGODB_DEPRECATED_MSG.format(setting)
             log.warning(msg)
             warnings.warn(msg, category=DeprecationWarning, stacklevel=2)
-    config = config['MONGODB_HOST']
-    if isinstance(config, dict) and not all(setting in config for setting in MONGODB_CONNECTION_SETTINGS):
-        raise ConfigError('MongoDB settings does not contain the minimal required configuration')
-    elif isinstance(config, str):
-        msg = MONGODB_DEPRECATED_MSG.format('Url syntax')
-        log.warning(msg)
-        warnings.warn(msg, category=DeprecationWarning, stacklevel=2)
-        parsed_url = urlparse(config)
-        if not all((parsed_url.scheme, parsed_url.netloc)):
-            raise ConfigError('{0} is not a valid MongoDB URL'.format(url))
-        if len(parsed_url.path) <= 1:
-            raise ConfigError('{0} is missing the database path'.format(url))
+    url = config['MONGODB_HOST']
+    parsed_url = urlparse(url)
+    if not all((parsed_url.scheme, parsed_url.netloc)):
+        raise ConfigError('{0} is not a valid MongoDB URL'.format(url))
+    if len(parsed_url.path) <= 1:
+        raise ConfigError('{0} is missing the database path'.format(url))
 
 
 def build_test_config(config):
@@ -152,15 +145,5 @@ def init_app(app):
     validate_config(app.config)
     if app.config['TESTING']:
         build_test_config(app.config)
-    import mongomock
-    test = {
-        "host": 'mongodb://localhost', "mongo_client_class": mongomock.MongoClient
-    }
-    app.config["MONGODB_SETTINGS"] = [
-        {
-            "host": "mongodb://localhost",
-            "mongo_client_class": mongomock.MongoClient
-        }
-    ]
     db.init_app(app)
     entrypoints.get_enabled('udata.models', app)

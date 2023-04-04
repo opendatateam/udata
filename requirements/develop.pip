@@ -253,7 +253,7 @@ flask-sitemap==0.3.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-flask-storage==1.3.0
+flask-storage==1.3.2
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -344,7 +344,7 @@ lxml==4.4.2
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-markupsafe==2.1.1
+markupsafe==2.1.2
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip

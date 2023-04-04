@@ -128,7 +128,7 @@ flask-security-too==5.1.2
     # via -r requirements/install.in
 flask-sitemap==0.3.0
     # via -r requirements/install.in
-flask-storage==1.3.0
+flask-storage==1.3.2
     # via -r requirements/install.in
 flask-wtf==1.0.1
     # via
@@ -172,7 +172,7 @@ kombu[redis]==4.4.0
     #   celery
 lxml==4.4.2
     # via -r requirements/install.in
-markupsafe==2.1.1
+markupsafe==2.1.2
     # via
     #   flask-storage
     #   jinja2

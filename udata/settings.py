@@ -1,5 +1,4 @@
 import pkg_resources
-import mongomock
 
 from kombu import Exchange, Queue
 from tlds import tld_set
@@ -28,19 +27,6 @@ class Defaults(object):
 
     MONGODB_HOST = 'mongodb://localhost:27017/udata'
     MONGODB_CONNECT = False  # Lazy connexion for Fork-safe usage
-
-    MONGODB_HOST_TEST = 'mongodb://localhost:27018/udata'
-    # MONGODB_SETTINGS = {
-    #     "db": "udata",
-    #     "host": "localhost",
-    #     "port": 27017,
-    #     "alias": "default"
-    # }
-    # MONGODB_HOST_TEST = {
-    #     "db": "udata",
-    #     "host": "localhost",
-    #     "mongo_client_class": mongomock.MongoClient
-    # }
 
     # Search service configuration
     SEARCH_SERVICE_API_URL = None
@@ -117,6 +103,8 @@ class Defaults(object):
     SECURITY_EMAIL_SUBJECT_PASSWORD_CHANGE_NOTICE = _(
                                     'Your password has been changed')
     SECURITY_EMAIL_SUBJECT_PASSWORD_RESET = _('Password reset instructions')
+
+    SECURITY_RETURN_GENERIC_RESPONSES = False
 
     # Sentry configuration
     SENTRY_DSN = None
