@@ -9,6 +9,7 @@
     - Upgrade WTForms 2.2.1 -> 3.0.1
     - Upgrade WTForms-json 0.3.3 -> 0.3.5
     - New security email template for existing users
+- Add `format_timedelta` to `udata.i18n` [#2836](https://github.com/opendatateam/udata/pull/2836)
 
 ## 6.1.2 (2023-03-28)
 
@@ -24,7 +25,6 @@
 - Fix following dates refactoring [#2815](https://github.com/opendatateam/udata/pull/2815) [#2832](https://github.com/opendatateam/udata/pull/2832)
 - Fix dcat harvesting on dcat:Dataset with blank nodes [#2834](https://github.com/opendatateam/udata/pull/2834)
 - Add dataset archived field in resource catalog [#2833](https://github.com/opendatateam/udata/pull/2833)
-- Add `https://github.com/opendatateam/udata/pull/2836` to `udata.i18n`
 
 ## 6.1.1 (2023-03-17)
 
