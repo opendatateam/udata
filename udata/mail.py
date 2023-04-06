@@ -6,6 +6,8 @@ from blinker import signal
 from flask import current_app, render_template
 from flask_mail import Mail, Message
 
+from smtplib import SMTPException
+
 from udata import i18n
 
 
@@ -65,4 +67,7 @@ def send(subject, recipients, template_base, **kwargs):
                 msg.html = render_template(
                     f'{tpl_path}.html', subject=subject,
                     sender=sender, recipient=recipient, **kwargs)
-                conn.send(msg)
+                try:
+                    conn.send(msg)
+                except SMTPException as e:
+                    log.error(f'Error sending mail {e}')
