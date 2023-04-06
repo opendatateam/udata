@@ -10,6 +10,7 @@
     - Upgrade WTForms-json 0.3.3 -> 0.3.5
     - New security email template for existing users
 - Add `format_timedelta` to `udata.i18n` [#2836](https://github.com/opendatateam/udata/pull/2836)
+- Improve send_mail resilience with refused address among recipients [#2840](https://github.com/opendatateam/udata/pull/2840)
 
 ## 6.1.2 (2023-03-28)
 
