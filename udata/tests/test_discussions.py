@@ -220,6 +220,35 @@ class DiscussionsTest(APITestCase):
 
         self.assertEqual(len(response.json['data']), len(discussions))
 
+    def test_list_discussions_user(self):
+        dataset = DatasetFactory()
+        discussions = []
+        for i in range(3):
+            user = UserFactory()
+            message = Message(content=faker.sentence(), posted_by=user)
+            discussion = Discussion.objects.create(
+                subject=dataset,
+                user=user,
+                title='test discussion {}'.format(i),
+                discussion=[message]
+            )
+            discussions.append(discussion)
+        user = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=user)
+        Discussion.objects.create(
+            subject=DatasetFactory(),
+            user=user,
+            title='test discussion {}'.format(i+1),
+            discussion=[message]
+        )
+
+        kwargs = {'user': str(user.id)}
+        response = self.get(url_for('api.discussions', **kwargs))
+        self.assert200(response)
+
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['user']['id'], str(user.id))
+
     def test_get_discussion(self):
         dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
