@@ -454,7 +454,7 @@ class Testing(object):
     CACHE_NO_NULL_WARNING = True
     DEBUG_TOOLBAR = False
     SERVER_NAME = 'local.test'
-    DEFAULT_LANGUAGE = 'en'
+    DEFAULT_LANGUAGE = 'fr'
     ACTIVATE_TERRITORIES = False
     LOGGER_HANDLER_POLICY = 'never'
     CELERYD_HIJACK_ROOT_LOGGER = False
