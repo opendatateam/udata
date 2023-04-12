@@ -9,6 +9,7 @@
     - Upgrade WTForms 2.2.1 -> 3.0.1
     - Upgrade WTForms-json 0.3.3 -> 0.3.5
     - New security email template for existing users
+- Fix SelectField validation failure following WTForms upgrade [#2841](https://github.com/opendatateam/udata/pull/2841)
 - Add `format_timedelta` to `udata.i18n` [#2836](https://github.com/opendatateam/udata/pull/2836)
 - Improve send_mail resilience with refused address among recipients [#2840](https://github.com/opendatateam/udata/pull/2840)
 
