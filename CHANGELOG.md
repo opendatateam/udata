@@ -12,6 +12,7 @@
 - Fix SelectField validation failure following WTForms upgrade [#2841](https://github.com/opendatateam/udata/pull/2841)
 - Add `format_timedelta` to `udata.i18n` [#2836](https://github.com/opendatateam/udata/pull/2836)
 - Improve send_mail resilience with refused address among recipients [#2840](https://github.com/opendatateam/udata/pull/2840)
+- Add user arg to discussion list API [#2842](https://github.com/opendatateam/udata/pull/2842)
 
 ## 6.1.2 (2023-03-28)
 
