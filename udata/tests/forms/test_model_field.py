@@ -164,7 +164,7 @@ class Required:
 
         assert 'target' in form.errors
         assert len(form.errors['target']) == 1
-        assert 'required' in form.errors['target'][0]
+        assert 'requis' in form.errors['target'][0]
 
     def test_none(self):
         form = self.form.from_json({
@@ -176,7 +176,7 @@ class Required:
 
         assert 'target' in form.errors
         assert len(form.errors['target']) == 1
-        assert 'required' in form.errors['target'][0]
+        assert 'requis' in form.errors['target'][0]
 
     def test_with_initial_object_none(self):
         model = self.model(target=Target.objects.create())
@@ -190,7 +190,7 @@ class Required:
 
         assert 'target' in form.errors
         assert len(form.errors['target']) == 1
-        assert 'required' in form.errors['target'][0]
+        assert 'requis' in form.errors['target'][0]
 
 
 class Optionnal:

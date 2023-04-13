@@ -100,60 +100,59 @@ def change_email():
     return _security.render_template('security/change_email.html', change_email_form=form)
 
 
-def create_security_blueprint(state, import_name):
+def create_security_blueprint(app, state, import_name):
     from udata.i18n import I18nBlueprint
 
     """
     Creates the security extension blueprint
     This creates an I18nBlueprint to use as a base.
     """
-
     bp = I18nBlueprint(state.blueprint_name, import_name,
                        url_prefix=state.url_prefix,
                        subdomain=state.subdomain,
                        template_folder='templates')
 
-    bp.route(state.logout_url, endpoint='logout')(logout)
+    bp.route(app.config['SECURITY_LOGOUT_URL'], endpoint='logout')(logout)
 
     if state.passwordless:
-        bp.route(state.login_url,
+        bp.route(app.config['SECURITY_LOGIN_URL'],
                  methods=['GET', 'POST'],
                  endpoint='login')(send_login)
         bp.route(
-            state.login_url + slash_url_suffix(state.login_url, '<token>'),
+            app.config['SECURITY_LOGIN_URL'] + slash_url_suffix(app.config['SECURITY_LOGIN_URL'], '<token>'),
             endpoint='token_login'
         )(token_login)
     else:
-        bp.route(state.login_url,
+        bp.route(app.config['SECURITY_LOGIN_URL'],
                  methods=['GET', 'POST'],
                  endpoint='login')(login)
 
     if state.registerable:
-        bp.route(state.register_url,
+        bp.route(app.config['SECURITY_REGISTER_URL'],
                  methods=['GET', 'POST'],
                  endpoint='register')(register)
 
     if state.recoverable:
-        bp.route(state.reset_url,
+        bp.route(app.config['SECURITY_RESET_URL'],
                  methods=['GET', 'POST'],
                  endpoint='forgot_password')(forgot_password)
         bp.route(
-            state.reset_url + slash_url_suffix(state.reset_url, '<token>'),
+            app.config['SECURITY_RESET_URL'] + slash_url_suffix(app.config['SECURITY_RESET_URL'], '<token>'),
             methods=['GET', 'POST'],
             endpoint='reset_password'
         )(reset_password)
 
     if state.changeable:
-        bp.route(state.change_url,
+        bp.route(app.config['SECURITY_CHANGE_URL'],
                  methods=['GET', 'POST'],
                  endpoint='change_password')(change_password)
 
     if state.confirmable:
-        bp.route(state.confirm_url,
+        bp.route(app.config['SECURITY_CONFIRM_URL'],
                  methods=['GET', 'POST'],
                  endpoint='send_confirmation')(send_confirmation)
         bp.route(
-            state.confirm_url + slash_url_suffix(state.confirm_url, '<token>'),
+            app.config['SECURITY_CONFIRM_URL'] + slash_url_suffix(app.config['SECURITY_CONFIRM_URL'], '<token>'),
             methods=['GET', 'POST'],
             endpoint='confirm_email'
         )(confirm_email)

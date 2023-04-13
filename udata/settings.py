@@ -104,6 +104,8 @@ class Defaults(object):
                                     'Your password has been changed')
     SECURITY_EMAIL_SUBJECT_PASSWORD_RESET = _('Password reset instructions')
 
+    SECURITY_RETURN_GENERIC_RESPONSES = False
+
     # Sentry configuration
     SENTRY_DSN = None
     SENTRY_TAGS = {}
@@ -452,7 +454,7 @@ class Testing(object):
     CACHE_NO_NULL_WARNING = True
     DEBUG_TOOLBAR = False
     SERVER_NAME = 'local.test'
-    DEFAULT_LANGUAGE = 'en'
+    DEFAULT_LANGUAGE = 'fr'
     ACTIVATE_TERRITORIES = False
     LOGGER_HANDLER_POLICY = 'never'
     CELERYD_HIJACK_ROOT_LOGGER = False
