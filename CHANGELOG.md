@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 6.1.3 (2023-04-18)
 
 - Fix XSS vulnerability: escape user content in selectize items in admin [#2843](https://github.com/opendatateam/udata/pull/2843)
 - Fix schema is undefined when checking for schema.url in admin resource form [#2837](https://github.com/opendatateam/udata/pull/2837)
