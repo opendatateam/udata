@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Fix XSS vulnerability: escape user content in selectize items in admin [#2843](https://github.com/opendatateam/udata/pull/2843)
 - Fix schema is undefined when checking for schema.url in admin resource form [#2837](https://github.com/opendatateam/udata/pull/2837)
 - Fix to_naive_datetime in harvest preview [#2835](https://github.com/opendatateam/udata/pull/2835)
 - :warning: Flask-Security update to enable `GenericResponses` [#2826](https://github.com/opendatateam/udata/pull/2826):
