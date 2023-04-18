@@ -5,12 +5,15 @@ import Reuse from 'models/reuse';
 import BaseCompleter from 'components/form/base-completer.vue';
 import ReuseCard from 'components/reuse/card.vue';
 
-const template = `<div class="selectize-option">
-    <div class="logo pull-left">
-        <img src="{{image_url}}"/>
-    </div>
-    {{title}}
-</div>`;
+
+function render(data, escape) {
+    return `<div class="selectize-option">
+        <div class="logo pull-left">
+            <img src=" ${data.image_url} "/>
+        </div>
+        ${escape(data.title)}
+    </div>`;
+}
 
 function cardify(value, $el) {
     var card = new Vue({
@@ -45,11 +48,9 @@ export default {
             });
         },
         render: {
-            option: function(data, escape) {
-                return new Vue({data: data}).$interpolate(template);
-            },
+            option: render,
             item: function(data, escape) {
-                return `<div class="card-input">${data.title}</div>`;
+                return `<div class="card-input">${escape(data.title)}</div>`;
             }
         }
     }
