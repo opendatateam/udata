@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Upgrade development dependencies [#2844](https://github.com/opendatateam/udata/pull/2844)
 
 ## 6.1.3 (2023-04-18)
 
