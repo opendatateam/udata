@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Compile translations for testing [#2845](https://github.com/opendatateam/udata/pull/2845)
 
 ## 6.1.3 (2023-04-18)
 
