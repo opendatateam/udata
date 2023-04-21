@@ -410,7 +410,7 @@ pluggy==0.13.1
     # via
     #   -c requirements/test.pip
     #   pytest
-pre-commit==3.2.2
+pre-commit==2.21.0
     # via -r requirements/develop.in
 pycparser==2.20
     # via
