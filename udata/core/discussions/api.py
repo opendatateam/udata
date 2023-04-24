@@ -1,3 +1,4 @@
+from bson import ObjectId
 from datetime import datetime
 
 from flask_security import current_user
@@ -74,6 +75,9 @@ parser.add_argument(
 parser.add_argument(
     'for', type=str, location='args', action='append',
     help='Filter discussions for a given subject')
+parser.add_argument(
+    'user', type=str, location='args',
+    help='Filter discussions created by a user')
 parser.add_argument(
     'page', type=int, default=1, location='args', help='The page to fetch')
 parser.add_argument(
@@ -165,6 +169,8 @@ class DiscussionsAPI(API):
         discussions = Discussion.objects
         if args['for']:
             discussions = discussions.generic_in(subject=args['for'])
+        if args['user']:
+            discussions = discussions(discussion__posted_by=ObjectId(args['user']))
         if args['closed'] is False:
             discussions = discussions(closed=None)
         elif args['closed'] is True:

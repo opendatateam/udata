@@ -3,6 +3,8 @@
 ## Current (in progress)
 
 - Upgrade development dependencies [#2844](https://github.com/opendatateam/udata/pull/2844)
+- Compile translations for testing [#2845](https://github.com/opendatateam/udata/pull/2845)
+- Add user arg to discussion list API [#2842](https://github.com/opendatateam/udata/pull/2842)
 
 ## 6.1.3 (2023-04-18)
 

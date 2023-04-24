@@ -20,6 +20,7 @@ from udata.core.dataset.rdf import (
     temporal_from_rdf, frequency_to_rdf, frequency_from_rdf,
     EU_RDF_REQUENCIES
 )
+from udata.i18n import gettext as _
 from udata.rdf import DCAT, DCT, FREQ, SPDX, SCHEMA, SKOS
 from udata.utils import faker
 from udata.tests.helpers import assert200, assert_redirects
@@ -53,7 +54,7 @@ class DatasetToRdfTest:
         g = d.graph
 
         assert isinstance(d, RdfResource)
-        assert len(list(g.subjects(RDF.type, DCAT.Dataset))) is 1
+        assert len(list(g.subjects(RDF.type, DCAT.Dataset))) == 1
 
         assert g.value(d.identifier, RDF.type) == DCAT.Dataset
 
@@ -71,7 +72,7 @@ class DatasetToRdfTest:
         g = d.graph
 
         assert isinstance(d, RdfResource)
-        assert len(list(g.subjects(RDF.type, DCAT.Dataset))) is 1
+        assert len(list(g.subjects(RDF.type, DCAT.Dataset))) == 1
 
         assert g.value(d.identifier, RDF.type) == DCAT.Dataset
 
@@ -477,7 +478,7 @@ class RdfToDatasetTest:
         resource = resource_from_rdf(g)
         resource.validate()
 
-        assert resource.title == 'csv resource'
+        assert resource.title == _('{format} resource').format(format='csv')
 
     def test_resource_generic_title(self):
         node = BNode()
@@ -490,7 +491,7 @@ class RdfToDatasetTest:
         resource = resource_from_rdf(g)
         resource.validate()
 
-        assert resource.title == 'Nameless resource'
+        assert resource.title == _('Nameless resource')
 
     def test_resource_title_ignore_dynamic_url(self):
         node = BNode()
@@ -503,7 +504,7 @@ class RdfToDatasetTest:
         resource = resource_from_rdf(g)
         resource.validate()
 
-        assert resource.title == 'Nameless resource'
+        assert resource.title == _('Nameless resource')
 
     def test_match_existing_resource_by_url(self):
         dataset = DatasetFactory(resources=ResourceFactory.build_batch(3))
