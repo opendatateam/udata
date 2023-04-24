@@ -3,6 +3,7 @@ import pytest
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
+from udata.i18n import gettext as _
 from udata.models import db
 
 
@@ -39,7 +40,7 @@ class Generic:
 
         assert 'target' in form.errors
         assert len(form.errors['target']) == 1
-        assert form.errors['target'][0] == 'Expect both class and identifier'
+        assert form.errors['target'][0] == _('Expect both class and identifier')
 
     def test_error_with_identifier_only(self):
         expected_target = Target.objects.create()
@@ -52,7 +53,7 @@ class Generic:
 
         assert 'target' in form.errors
         assert len(form.errors['target']) == 1
-        assert form.errors['target'][0] == 'Expect both class and identifier'
+        assert form.errors['target'][0] == _('Expect both class and identifier')
 
     def test_error_with_unknown_model(self):
         form = self.form.from_json({
@@ -67,7 +68,7 @@ class Generic:
 
         assert 'target' in form.errors
         assert len(form.errors['target']) == 1
-        assert form.errors['target'][0] == 'Model "Unknown" does not exist'
+        assert form.errors['target'][0] == _('Model "Unknown" does not exist')
 
 
 class Explicit:
@@ -151,7 +152,7 @@ class Explicit:
 
         assert 'target' in form.errors
         assert len(form.errors['target']) == 1
-        assert form.errors['target'][0] == 'Expect a "Target" class but "Wrong" was found'
+        assert form.errors['target'][0] == _('Expect a "Target" class but "Wrong" was found')
 
 
 class Required:
@@ -314,7 +315,7 @@ class CommonMixin:
         assert 'target' in form.errors
         assert len(form.errors['target']) == 1
         # assert 'Unsupported identifier' in form.errors['target'][0]
-        assert form.errors['target'][0] == 'Missing "id" field'
+        assert form.errors['target'][0] == _('Missing "id" field')
 
     def test_json_errors(self):
         form = self.form.from_json({
@@ -328,7 +329,7 @@ class CommonMixin:
 
         assert 'target' in form.errors
         assert len(form.errors['target']) == 1
-        assert form.errors['target'][0] == 'Missing "id" field'
+        assert form.errors['target'][0] == _('Missing "id" field')
 
     def test_bad_id(self):
         form = self.form.from_json({

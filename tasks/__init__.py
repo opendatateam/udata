@@ -54,6 +54,83 @@ def update(ctx, migrate=False):
 
 
 @task
+def i18n(ctx, update=False):
+    '''Extract translatable strings'''
+    header('Extract translatable strings')
+
+    info('Extract Python strings')
+    with ctx.cd(ROOT):
+        ctx.run('python setup.py extract_messages')
+
+    # Fix crowdin requiring Language with `2-digit` iso code in potfile
+    # to produce 2-digit iso code pofile
+    # Opening the catalog also allows to set extra metadata
+    potfile = join(ROOT, 'udata', 'translations', '{}.pot'.format(I18N_DOMAIN))
+    with open(potfile, 'rb') as infile:
+        catalog = read_po(infile, 'en')
+    catalog.copyright_holder = 'Open Data Team'
+    catalog.msgid_bugs_address = 'i18n@opendata.team'
+    catalog.language_team = 'Open Data Team <i18n@opendata.team>'
+    catalog.last_translator = 'Open Data Team <i18n@opendata.team>'
+    catalog.revision_date = datetime.now(LOCALTZ)
+    with open(potfile, 'wb') as outfile:
+        write_po(outfile, catalog, width=80)
+
+    if update:
+        with ctx.cd(ROOT):
+            ctx.run('python setup.py update_catalog')
+
+    info('Extract JavaScript strings')
+    keys = set()
+    catalog = {}
+    catalog_filename = join(ROOT, 'js', 'locales',
+                            '{}.en.json'.format(I18N_DOMAIN))
+    if exists(catalog_filename):
+        with open(catalog_filename) as f:
+            catalog = json.load(f)
+
+    globs = '*.js', '*.vue', '*.hbs'
+    regexps = [
+        re.compile(r'(?:|\.|\s|\{)_\(\s*(?:"|\')(.*?)(?:"|\')\s*(?:\)|,)'),  # JS _('trad')
+        re.compile(r'v-i18n="(.*?)"'),  # Vue.js directive v-i18n="trad"
+        re.compile(r'"\{\{\{?\s*\'(.*?)\'\s*\|\s*i18n\}\}\}?"'),  # Vue.js filter {{ 'trad'|i18n }}
+        re.compile(r'{{_\s*"(.*?)"\s*}}'),  # Handlebars {{_ "trad" }}
+        re.compile(r'{{_\s*\'(.*?)\'\s*}}'),  # Handlebars {{_ 'trad' }}
+        re.compile(r'\:[a-z0-9_\-]+="\s*_\(\'(.*?)\'\)\s*"'),  # Vue.js binding :prop="_('trad')"
+    ]
+
+    for directory, _, _ in os.walk(join(ROOT, 'js')):
+        glob_patterns = (iglob(join(directory, g)) for g in globs)
+        for filename in itertools.chain(*glob_patterns):
+            print('Extracting messages from {0}'.format(cyan(filename)))
+            content = open(filename).read()
+            for regexp in regexps:
+                for match in regexp.finditer(content):
+                    key = match.group(1)
+                    key = key.replace('\\n', '\n')
+                    keys.add(key)
+                    if key not in catalog:
+                        catalog[key] = key
+
+    # Remove old/not found translations
+    for key in list(catalog.keys()):
+        if key not in keys:
+            del catalog[key]
+
+    with open(catalog_filename, 'w') as f:
+        json.dump(catalog, f, sort_keys=True, indent=4, ensure_ascii=False,
+                  separators=(',', ': '))
+
+
+@task
+def i18nc(ctx):
+    '''Compile translations'''
+    header('Compiling translations')
+    with ctx.cd(ROOT):
+        ctx.run('python setup.py compile_catalog')
+
+
+@task(i18nc)
 def test(ctx, fast=False, report=False, verbose=False, ci=False):
     '''Run tests suite'''
     header('Run tests suite')
@@ -131,83 +208,6 @@ def work(ctx, loglevel='info'):
 def beat(ctx, loglevel='info'):
     '''Run celery beat process'''
     ctx.run('celery -A udata.worker beat -l %s' % loglevel)
-
-
-@task
-def i18n(ctx, update=False):
-    '''Extract translatable strings'''
-    header('Extract translatable strings')
-
-    info('Extract Python strings')
-    with ctx.cd(ROOT):
-        ctx.run('python setup.py extract_messages')
-
-    # Fix crowdin requiring Language with `2-digit` iso code in potfile
-    # to produce 2-digit iso code pofile
-    # Opening the catalog also allows to set extra metadata
-    potfile = join(ROOT, 'udata', 'translations', '{}.pot'.format(I18N_DOMAIN))
-    with open(potfile, 'rb') as infile:
-        catalog = read_po(infile, 'en')
-    catalog.copyright_holder = 'Open Data Team'
-    catalog.msgid_bugs_address = 'i18n@opendata.team'
-    catalog.language_team = 'Open Data Team <i18n@opendata.team>'
-    catalog.last_translator = 'Open Data Team <i18n@opendata.team>'
-    catalog.revision_date = datetime.now(LOCALTZ)
-    with open(potfile, 'wb') as outfile:
-        write_po(outfile, catalog, width=80)
-
-    if update:
-        with ctx.cd(ROOT):
-            ctx.run('python setup.py update_catalog')
-
-    info('Extract JavaScript strings')
-    keys = set()
-    catalog = {}
-    catalog_filename = join(ROOT, 'js', 'locales',
-                            '{}.en.json'.format(I18N_DOMAIN))
-    if exists(catalog_filename):
-        with open(catalog_filename) as f:
-            catalog = json.load(f)
-
-    globs = '*.js', '*.vue', '*.hbs'
-    regexps = [
-        re.compile(r'(?:|\.|\s|\{)_\(\s*(?:"|\')(.*?)(?:"|\')\s*(?:\)|,)'),  # JS _('trad')
-        re.compile(r'v-i18n="(.*?)"'),  # Vue.js directive v-i18n="trad"
-        re.compile(r'"\{\{\{?\s*\'(.*?)\'\s*\|\s*i18n\}\}\}?"'),  # Vue.js filter {{ 'trad'|i18n }}
-        re.compile(r'{{_\s*"(.*?)"\s*}}'),  # Handlebars {{_ "trad" }}
-        re.compile(r'{{_\s*\'(.*?)\'\s*}}'),  # Handlebars {{_ 'trad' }}
-        re.compile(r'\:[a-z0-9_\-]+="\s*_\(\'(.*?)\'\)\s*"'),  # Vue.js binding :prop="_('trad')"
-    ]
-
-    for directory, _, _ in os.walk(join(ROOT, 'js')):
-        glob_patterns = (iglob(join(directory, g)) for g in globs)
-        for filename in itertools.chain(*glob_patterns):
-            print('Extracting messages from {0}'.format(cyan(filename)))
-            content = open(filename).read()
-            for regexp in regexps:
-                for match in regexp.finditer(content):
-                    key = match.group(1)
-                    key = key.replace('\\n', '\n')
-                    keys.add(key)
-                    if key not in catalog:
-                        catalog[key] = key
-
-    # Remove old/not found translations
-    for key in list(catalog.keys()):
-        if key not in keys:
-            del catalog[key]
-
-    with open(catalog_filename, 'w') as f:
-        json.dump(catalog, f, sort_keys=True, indent=4, ensure_ascii=False,
-                  separators=(',', ': '))
-
-
-@task
-def i18nc(ctx):
-    '''Compile translations'''
-    header('Compiling translations')
-    with ctx.cd(ROOT):
-        ctx.run('python setup.py compile_catalog')
 
 
 @task

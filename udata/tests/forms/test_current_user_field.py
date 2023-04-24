@@ -7,6 +7,7 @@ from udata.auth import login_user
 from udata.auth.forms import ExtendedLoginForm, ExtendedRegisterForm
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.forms import ModelForm, fields
+from udata.i18n import gettext as _
 from udata.models import db, User
 from udata.tests import TestCase, DBTestMixin
 
@@ -197,7 +198,11 @@ class CurrentUserFieldTest(TestCase, DBTestMixin):
 
     def test_password_rotation(self):
         today = datetime.datetime.now()
-        user = UserFactory(password='password', password_rotation_demanded=today, confirmed_at=today)
+        user = UserFactory(
+            password='password',
+            password_rotation_demanded=today,
+            confirmed_at=today
+        )
 
         form = ExtendedLoginForm.from_json({
             'email': user.email,
@@ -206,7 +211,7 @@ class CurrentUserFieldTest(TestCase, DBTestMixin):
 
         form.validate()
 
-        self.assertIn('Password must be changed for security reasons', form.errors['password'])
+        self.assertIn(_('Password must be changed for security reasons'), form.errors['password'])
 
     def test_email_validation(self):
         self.app.config['SECURITY_EMAIL_VALIDATOR_ARGS'] = None

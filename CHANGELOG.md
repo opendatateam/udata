@@ -2,6 +2,12 @@
 
 ## Current (in progress)
 
+- Compile translations for testing [#2845](https://github.com/opendatateam/udata/pull/2845)
+- Add user arg to discussion list API [#2842](https://github.com/opendatateam/udata/pull/2842)
+
+## 6.1.3 (2023-04-18)
+
+- Fix XSS vulnerability: escape user content in selectize items in admin [#2843](https://github.com/opendatateam/udata/pull/2843)
 - Fix schema is undefined when checking for schema.url in admin resource form [#2837](https://github.com/opendatateam/udata/pull/2837)
 - Fix to_naive_datetime in harvest preview [#2835](https://github.com/opendatateam/udata/pull/2835)
 - :warning: Flask-Security update to enable `GenericResponses` [#2826](https://github.com/opendatateam/udata/pull/2826):
@@ -12,7 +18,6 @@
 - Fix SelectField validation failure following WTForms upgrade [#2841](https://github.com/opendatateam/udata/pull/2841)
 - Add `format_timedelta` to `udata.i18n` [#2836](https://github.com/opendatateam/udata/pull/2836)
 - Improve send_mail resilience with refused address among recipients [#2840](https://github.com/opendatateam/udata/pull/2840)
-- Add user arg to discussion list API [#2842](https://github.com/opendatateam/udata/pull/2842)
 
 ## 6.1.2 (2023-03-28)
 
