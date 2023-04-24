@@ -1,4 +1,5 @@
 -r install.in
 -c install.pip
+-c test.pip
 
-mkdocs==1.2.4
+mkdocs==1.4.2
