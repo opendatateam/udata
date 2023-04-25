@@ -111,11 +111,11 @@ class DatasetAPITest(APITestCase):
 
         second.title = "second updated dataset"
         second.save()
-        response = self.get(url_for('api.datasets', sort='-last_modified'))
+        response = self.get(url_for('api.datasets', sort='-last_update'))
         self.assert200(response)
         self.assertEqual(response.json['data'][0]['id'], str(second.id))
 
-        response = self.get(url_for('api.datasets', sort='last_modified'))
+        response = self.get(url_for('api.datasets', sort='last_update'))
         self.assert200(response)
         self.assertEqual(response.json['data'][0]['id'], str(first.id))
 
