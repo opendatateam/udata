@@ -6,6 +6,7 @@
 - Compile translations for testing [#2845](https://github.com/opendatateam/udata/pull/2845)
 - Add user arg to discussion list API [#2842](https://github.com/opendatateam/udata/pull/2842)
 - No more sending email, slug and user name to sentry [#2846](https://github.com/opendatateam/udata/pull/2846)
+- Add test for passwordless user [#2848](https://github.com/opendatateam/udata/pull/2848)
 
 ## 6.1.3 (2023-04-18)
 
@@ -20,7 +21,6 @@
 - Fix SelectField validation failure following WTForms upgrade [#2841](https://github.com/opendatateam/udata/pull/2841)
 - Add `format_timedelta` to `udata.i18n` [#2836](https://github.com/opendatateam/udata/pull/2836)
 - Improve send_mail resilience with refused address among recipients [#2840](https://github.com/opendatateam/udata/pull/2840)
-- Add test for passwordless user [#2848](https://github.com/opendatateam/udata/pull/2848)
 
 ## 6.1.2 (2023-03-28)
 
