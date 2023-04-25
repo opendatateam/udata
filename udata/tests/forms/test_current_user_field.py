@@ -213,6 +213,18 @@ class CurrentUserFieldTest(TestCase, DBTestMixin):
 
         self.assertIn(_('Password must be changed for security reasons'), form.errors['password'])
 
+    def test_user_without_password(self):
+        user = UserFactory(password=None)
+
+        form = ExtendedLoginForm.from_json({
+            'email': user.email,
+            'password': ''
+        })
+
+        form.validate()
+
+        self.assertIn('Password not provided', form.errors['password'])
+
     def test_email_validation(self):
         self.app.config['SECURITY_EMAIL_VALIDATOR_ARGS'] = None
         form = ExtendedRegisterForm.from_json({
