@@ -1,6 +1,6 @@
 -r test.in
 -c test.pip
 
-flake8==3.7.8
-coverage==4.5.4
-pytest-cov==2.6.1
+flake8==3.9.2
+coverage==7.2.3
+pytest-cov==4.0.0
