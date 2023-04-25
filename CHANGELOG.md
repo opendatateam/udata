@@ -2,6 +2,14 @@
 
 ## Current (in progress)
 
+- Upgrade development dependencies [#2844](https://github.com/opendatateam/udata/pull/2844)
+- Compile translations for testing [#2845](https://github.com/opendatateam/udata/pull/2845)
+- Add user arg to discussion list API [#2842](https://github.com/opendatateam/udata/pull/2842)
+- No more sending email, slug and user name to sentry [#2846](https://github.com/opendatateam/udata/pull/2846)
+
+## 6.1.3 (2023-04-18)
+
+- Fix XSS vulnerability: escape user content in selectize items in admin [#2843](https://github.com/opendatateam/udata/pull/2843)
 - Fix schema is undefined when checking for schema.url in admin resource form [#2837](https://github.com/opendatateam/udata/pull/2837)
 - Fix to_naive_datetime in harvest preview [#2835](https://github.com/opendatateam/udata/pull/2835)
 - :warning: Flask-Security update to enable `GenericResponses` [#2826](https://github.com/opendatateam/udata/pull/2826):

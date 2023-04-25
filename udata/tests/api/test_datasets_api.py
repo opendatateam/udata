@@ -22,6 +22,7 @@ from udata.core.dataset.models import (HarvestDatasetMetadata,
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.i18n import gettext as _
 from udata.models import (LEGACY_FREQUENCIES, RESOURCE_TYPES,
                           UPDATE_FREQUENCIES, CommunityResource, Dataset,
                           Follow, Member, db)
@@ -37,7 +38,7 @@ SAMPLE_GEOM = {
     "coordinates": [
         [[[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]],  # noqa
         [[[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],  # noqa
-        [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]]
+         [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]]
     ]
 }
 
@@ -79,7 +80,7 @@ class DatasetAPITest(APITestCase):
 
     def test_dataset_api_sorting(self):
         '''Should sort datasets results from the API'''
-        user = self.login()
+        self.login()
         [VisibleDatasetFactory() for i in range(2)]
 
         to_follow = VisibleDatasetFactory(title="dataset to follow")
@@ -97,7 +98,7 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(response.json['data'][0]['id'], str(to_follow.id))
 
     def test_dataset_api_sorting_created(self):
-        user = self.login()
+        self.login()
         first = VisibleDatasetFactory(title="first created dataset")
         second = VisibleDatasetFactory(title="second created dataset")
         response = self.get(url_for('api.datasets', sort='created'))
@@ -132,7 +133,9 @@ class DatasetAPITest(APITestCase):
 
         paca, _, _ = create_geozones_fixtures()
         geozone_dataset = VisibleDatasetFactory(spatial=SpatialCoverageFactory(zones=[paca.id]))
-        granularity_dataset = VisibleDatasetFactory(spatial=SpatialCoverageFactory(granularity='country'))
+        granularity_dataset = VisibleDatasetFactory(
+            spatial=SpatialCoverageFactory(granularity='country')
+        )
 
         temporal_coverage = db.DateRange(start='2022-05-03', end='2022-05-04')
         temporal_coverage_dataset = DatasetFactory(temporal_coverage=temporal_coverage)
@@ -615,17 +618,23 @@ class DatasetAPITest(APITestCase):
         data = dataset.to_dict()
         resource_data = ResourceFactory.as_dict()
 
-        resource_data['schema'] = {'name': 'my-schema', 'version': '1.0.0', 'url': 'http://example.com'}
+        resource_data['schema'] = {
+            'name': 'my-schema',
+            'version': '1.0.0',
+            'url': 'http://example.com'
+        }
         data['resources'].append(resource_data)
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert400(response)
-        assert response.json['errors']['resources'][0]['schema'][0] == 'Schema must have at least a name or an url. Having both is not allowed.'
+        expected = _('Schema must have at least a name or an url. Having both is not allowed.')
+        assert response.json['errors']['resources'][0]['schema'][0] == expected
 
         resource_data['schema'] = {'url': 'test'}
         data['resources'].append(resource_data)
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert400(response)
-        assert response.json['errors']['resources'][0]['schema'][0] == 'Provided URL is not valid.'
+        expected_error = _('Provided URL is not valid.')
+        assert response.json['errors']['resources'][0]['schema'][0] == expected_error
 
         resource_data['schema'] = {'url': 'http://example.com'}
         data['resources'].append(resource_data)
@@ -857,7 +866,6 @@ class DatasetResourceAPITest(APITestCase):
         resource = ResourceFactory()
         self.dataset.resources.append(resource)
         self.dataset.save()
-        now = datetime.now()
         data = {
             'title': faker.sentence(),
             'description': faker.text(),
@@ -884,7 +892,6 @@ class DatasetResourceAPITest(APITestCase):
         resource.filetype = 'remote'
         self.dataset.resources.append(resource)
         self.dataset.save()
-        now = datetime.now()
         data = {
             'title': faker.sentence(),
             'description': faker.text(),
@@ -910,7 +917,6 @@ class DatasetResourceAPITest(APITestCase):
         resources = ResourceFactory.build_batch(2)
         self.dataset.resources.extend(resources)
         self.dataset.save()
-        now = datetime.now()
         ids = [r.id for r in self.dataset.resources]
         data = [{
             'id': str(id),
@@ -1462,7 +1468,7 @@ class CommunityResourceAPITest(APITestCase):
 
     def test_community_resource_api_unallowed_create_filetype_file(self):
         '''It should create a remote community resource from the API'''
-        user = self.login()
+        self.login()
         dataset = VisibleDatasetFactory()
         attrs = CommunityResourceFactory.as_dict()
         attrs['filetype'] = 'file'  # to be explicit
@@ -1471,7 +1477,8 @@ class CommunityResourceAPITest(APITestCase):
             url_for('api.community_resources'),
             attrs
         )
-        # should fail because the POST endpoint only supports URL setting for remote community resources
+        # should fail because the POST endpoint only supports URL setting
+        # for remote community resources
         self.assert400(response)
 
     def test_community_resource_api_create_remote_needs_dataset(self):
