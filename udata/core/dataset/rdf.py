@@ -17,7 +17,7 @@ from udata.frontend.markdown import parse_html
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.models import db
 from udata.rdf import (
-    DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ,
+    DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT,
     namespace_manager, url_from_rdf
 )
 from udata.utils import get_by, safe_unicode
@@ -314,6 +314,16 @@ def frequency_from_rdf(term):
         return freq
 
 
+def format_from_rdf(resource):
+    format = rdf_value(resource, DCT.format)
+    if not format:
+        return
+    if EUFORMAT in format or IANAFORMAT in format:
+        _, _, format = namespace_manager.compute_qname(URIRef(format))
+        return format.lower()
+    return format.lower()
+
+
 def title_from_rdf(rdf, url):
     '''
     Try to extract a distribution title from a property.
@@ -383,9 +393,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
     resource.description = sanitize_html(distrib.value(DCT.description))
     resource.filesize = rdf_value(distrib, DCAT.bytesSize)
     resource.mime = rdf_value(distrib, DCAT.mediaType)
-    fmt = rdf_value(distrib, DCT.format)
-    if fmt:
-        resource.format = fmt.lower()
+    resource.format = format_from_rdf(distrib)
     checksum = distrib.value(SPDX.checksum)
     if checksum:
         algorithm = checksum.value(SPDX.algorithm).identifier
