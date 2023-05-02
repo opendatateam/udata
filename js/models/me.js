@@ -18,9 +18,6 @@ class Me extends User {
         if (config.sentry) {
             Raven.setUserContext({
                 id: response.obj.id,
-                email: response.obj.email,
-                slug: response.obj.slug,
-                fullname: `${response.obj.first_name} ${response.obj.last_name}`,
                 is_authenticated: true,
                 is_anonymous: false
             });

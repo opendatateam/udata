@@ -5,7 +5,8 @@ from dateutil.parser import parse
 from flask import url_for
 from flask_mongoengine.wtf import fields as mefields
 from flask_storage.mongo import ImageReference
-from wtforms import Form as WTForm, Field as WTField, validators, fields, SubmitField
+from speaklater import is_lazy_string
+from wtforms import Form as WTForm, Field as WTField, validators, fields, SubmitField  # noqa
 from wtforms.utils import unset_value
 from wtforms.widgets import TextInput
 from wtforms_json import flatten_json
@@ -128,14 +129,6 @@ class WTFDateTimeField(WTField):
             except ValueError:
                 self.data = None
                 raise validators.ValidationError(_('Invalid date/time input'))
-            except TypeError:
-                if not DATEUTIL_TYPEERROR_ISSUE:
-                    raise
-
-                # If we're using dateutil 2.2, then consider it a normal
-                # ValidationError. Hopefully dateutil fixes this issue soon.
-                self.data = None
-                raise validators.ValidationError(_('Invalid date/time input'))
 
 
 class DateField(WTFDateTimeField):
@@ -144,7 +137,8 @@ class DateField(WTFDateTimeField):
     """
     def __init__(self, label=None, validators=None, parse_kwargs=None,
                  display_format='%Y-%m-%d', **kwargs):
-        super(DateField, self).__init__(label, validators, parse_kwargs=parse_kwargs, display_format=display_format, **kwargs)
+        super(DateField, self).__init__(label, validators, parse_kwargs=parse_kwargs,
+                                        display_format=display_format, **kwargs)
 
     def process_formdata(self, valuelist):
         super(DateField, self).process_formdata(valuelist)
@@ -339,9 +333,17 @@ class SelectField(FieldHelper, fields.SelectField):
         # self._choices = kwargs.pop('choices')
         super(SelectField, self).__init__(label, validators, coerce, **kwargs)
 
+    @staticmethod
+    def localize_label(label):
+        if not label:
+            return ''
+        if is_lazy_string(label):
+            return label
+        return _(label)
+
     def iter_choices(self):
         localized_choices = [
-            (value, _(label) if label else '', selected)
+            (value, self.localize_label(label), selected)
             for value, label, selected
             in super(SelectField, self).iter_choices()
         ]

@@ -2,6 +2,20 @@
 
 ## Current (in progress)
 
+- Upgrade development dependencies [#2844](https://github.com/opendatateam/udata/pull/2844)
+- Compile translations for testing [#2845](https://github.com/opendatateam/udata/pull/2845)
+- Add user arg to discussion list API [#2842](https://github.com/opendatateam/udata/pull/2842)
+- No more sending email, slug and user name to sentry [#2846](https://github.com/opendatateam/udata/pull/2846)
+- Add test for passwordless user [#2848](https://github.com/opendatateam/udata/pull/2848)
+- Parse IANA and EUROPA URIs format [#2849](https://github.com/opendatateam/udata/pull/2849)
+- Upgrades [#2839](https://github.com/opendatateam/udata/pull/2839):
+    - Upgrade flask-storage 1.0.0 -> 1.3.2
+    - Upgrade flask-mongoengine 0.9.5 -> 1.0.0
+    - Upgrade mongoengine 0.26.0 -> 0.27.0
+
+## 6.1.3 (2023-04-18)
+
+- Fix XSS vulnerability: escape user content in selectize items in admin [#2843](https://github.com/opendatateam/udata/pull/2843)
 - Fix schema is undefined when checking for schema.url in admin resource form [#2837](https://github.com/opendatateam/udata/pull/2837)
 - Fix to_naive_datetime in harvest preview [#2835](https://github.com/opendatateam/udata/pull/2835)
 - :warning: Flask-Security update to enable `GenericResponses` [#2826](https://github.com/opendatateam/udata/pull/2826):
@@ -9,11 +23,9 @@
     - Upgrade WTForms 2.2.1 -> 3.0.1
     - Upgrade WTForms-json 0.3.3 -> 0.3.5
     - New security email template for existing users
+- Fix SelectField validation failure following WTForms upgrade [#2841](https://github.com/opendatateam/udata/pull/2841)
 - Add `format_timedelta` to `udata.i18n` [#2836](https://github.com/opendatateam/udata/pull/2836)
-- Upgrades [#2839](https://github.com/opendatateam/udata/pull/2839):
-    - Upgrade flask-storage 1.0.0 -> 1.3.2
-    - Upgrade flask-mongoengine 0.9.5 -> 1.0.0
-    - Upgrade mongoengine 0.26.0 -> 0.27.0
+- Improve send_mail resilience with refused address among recipients [#2840](https://github.com/opendatateam/udata/pull/2840)
 
 ## 6.1.2 (2023-03-28)
 
