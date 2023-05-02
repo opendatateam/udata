@@ -276,6 +276,19 @@ class DcatBackendTest:
         assert dataset.temporal_coverage.start == date(2016, 1, 1)
         assert dataset.temporal_coverage.end == date(2016, 12, 5)
 
+        assert len(dataset.resources) == 2
+
+        resource_1 = next(res for res in dataset.resources if res.title == 'Resource 1-1')
+        # Format is a IANA URI
+        assert resource_1.format == 'json'
+        assert resource_1.description == 'A JSON resource'
+        assert resource_1.url == 'http://data.test.org/datasets/1/resources/1/file.json'
+
+        resource_2 = next(res for res in dataset.resources if res.title == 'Resource 1-2')
+        assert resource_2.format == 'json'
+        assert resource_2.description == 'A JSON resource'
+        assert resource_2.url == 'http://data.test.org/datasets/1/resources/2/file.json'
+
     def test_geonetwork_xml_catalog(self, rmock):
         url = mock_dcat(rmock, 'geonetwork.xml', path='catalog.xml')
         org = OrganizationFactory()

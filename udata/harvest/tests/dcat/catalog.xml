@@ -103,7 +103,11 @@
   </dcterms:PeriodOfTime>
   <dcat:Distribution rdf:about="http://data.test.org/datasets/1/resources/1">
     <dcterms:title>Resource 1-1</dcterms:title>
-    <dcterms:format>JSON</dcterms:format>
+    <dcterms:format>
+      <dcterms:MediaTypeOrExtent rdf:about="https://www.iana.org/assignments/media-types/application/json">
+        <rdf:type rdf:resource="http://purl.org/dc/terms/MediaTypeOrExtent" />
+      </dcterms:MediaTypeOrExtent>
+    </dcterms:format>
     <dcterms:description>A JSON resource</dcterms:description>
     <dcat:accessURL>http://data.test.org/datasets/1/resources/1/file.json</dcat:accessURL>
   </dcat:Distribution>

@@ -7,6 +7,7 @@
 - Add user arg to discussion list API [#2842](https://github.com/opendatateam/udata/pull/2842)
 - No more sending email, slug and user name to sentry [#2846](https://github.com/opendatateam/udata/pull/2846)
 - Add test for passwordless user [#2848](https://github.com/opendatateam/udata/pull/2848)
+- Parse IANA and EUROPA URIs format [#2849](https://github.com/opendatateam/udata/pull/2849)
 
 ## 6.1.3 (2023-04-18)
 
