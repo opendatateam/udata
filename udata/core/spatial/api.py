@@ -5,7 +5,6 @@ from flask_restx import inputs
 
 from udata.api import api, API
 from udata.i18n import _
-from udata.utils import id_or_404
 from udata.models import Dataset, TERRITORY_DATASETS
 from udata.core.dataset.api_fields import dataset_ref_fields
 
@@ -94,7 +93,7 @@ class ZoneChildrenAPI(API):
     @api.marshal_list_with(feature_collection_fields)
     def get(self, id):
         '''Fetch children of a zone.'''
-        zone = GeoZone.objects.get_or_404(id=id_or_404(id))
+        zone = GeoZone.objects.get_or_404(id=id)
         if not current_app.config.get('ACTIVATE_TERRITORIES'):
             return abort(501)
         return {
@@ -111,7 +110,7 @@ class ZoneDatasetsAPI(API):
     def get(self, id):
         '''Fetch datasets for a given zone'''
         args = dataset_parser.parse_args()
-        zone = GeoZone.objects.get_or_404(id=id_or_404(id))
+        zone = GeoZone.objects.get_or_404(id=id)
         if (args.get('dynamic') and
                 current_app.config.get('ACTIVATE_TERRITORIES')):
             DATASETS = TERRITORY_DATASETS[zone.level_code]
@@ -134,7 +133,7 @@ class ZoneAPI(API):
     @api.doc('spatial_zone', params={'id': 'A zone identifier'})
     def get(self, id):
         '''Fetch a zone'''
-        zone = GeoZone.objects.get_or_404(id=id_or_404(id))
+        zone = GeoZone.objects.get_or_404(id=id)
         return zone.toGeoJSON()
 
 
@@ -169,7 +168,7 @@ class SpatialCoverageAPI(API):
     @api.marshal_list_with(feature_collection_fields)
     def get(self, level):
         '''List each zone for a given level with their datasets count'''
-        level = GeoLevel.objects.get_or_404(id=id_or_404(level))
+        level = GeoLevel.objects.get_or_404(id=level)
         features = []
 
         for zone in GeoZone.objects(level=level.id):
