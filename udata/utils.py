@@ -310,5 +310,6 @@ def safe_unicode(string):
 def id_or_404(object_id):
     try:
         ObjectId(object_id)
+        return object_id
     except InvalidId:
         abort(404)

@@ -2,7 +2,7 @@ from bson import ObjectId
 from uuid import UUID
 
 from flask import request, redirect, url_for
-from mongoengine.errors import InvalidQueryError
+from mongoengine.errors import InvalidQueryError, ValidationError
 from werkzeug.exceptions import NotFound
 from werkzeug.routing import BaseConverter, PathConverter
 from werkzeug.urls import url_quote
@@ -11,7 +11,6 @@ from udata import models
 from udata.models import db
 from udata.core.spatial.models import GeoZone
 from udata.i18n import ISO_639_1_CODES
-from udata.utils import id_or_404
 
 
 class LazyRedirect(object):
@@ -86,8 +85,8 @@ class ModelConverter(BaseConverter):
 
     def to_python(self, value):
         try:
-            return self.model.objects.get_or_404(id=id_or_404(value))
-        except NotFound:
+            return self.model.objects.get_or_404(id=value)
+        except (NotFound, ValidationError):
             pass
         try:
             quoted = self.quote(value)

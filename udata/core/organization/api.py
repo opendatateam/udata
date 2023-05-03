@@ -7,7 +7,7 @@ from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission, current_user
 from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
-from udata.utils import multi_to_dict, id_or_404
+from udata.utils import multi_to_dict
 from udata.rdf import (
     RDF_EXTENSIONS, negociate_content, graph_response
 )
@@ -271,7 +271,7 @@ class MembershipAcceptAPI(MembershipAPI):
     def post(self, org, id):
         '''Accept user membership to a given organization.'''
         EditOrganizationPermission(org).test()
-        membership_request = self.get_or_404(org, id_or_404(id))
+        membership_request = self.get_or_404(org, id)
 
         if org.is_member(membership_request.user):
             return org.member(membership_request.user), 409
@@ -299,7 +299,7 @@ class MembershipRefuseAPI(MembershipAPI):
     def post(self, org, id):
         '''Refuse user membership to a given organization.'''
         EditOrganizationPermission(org).test()
-        membership_request = self.get_or_404(org, id_or_404(id))
+        membership_request = self.get_or_404(org, id)
         form = api.validate(MembershipRefuseForm)
         membership_request.status = 'refused'
         membership_request.handled_by = current_user._get_current_object()
