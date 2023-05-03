@@ -1,12 +1,12 @@
 from datetime import datetime
 
 from flask import request
-from mongoengine.errors import ValidationError
 
 from udata.api import api, API, errors
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission
 from udata.models import Dataset
+from udata.utils import id_or_404
 
 from udata.core.badges import api as badges_api
 from udata.core.dataset.api_fields import dataset_ref_fields
@@ -159,8 +159,8 @@ class ReuseDatasetsAPI(API):
         if 'id' not in request.json:
             api.abort(400, 'Expect a dataset identifier')
         try:
-            dataset = Dataset.objects.get_or_404(id=request.json['id'])
-        except (Dataset.DoesNotExist, ValidationError):
+            dataset = Dataset.objects.get_or_404(id=id_or_404(request.json['id']))
+        except Dataset.DoesNotExist:
             msg = 'Dataset {0} does not exists'.format(request.json['id'])
             api.abort(404, msg)
         if dataset in reuse.datasets:

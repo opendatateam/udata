@@ -6,6 +6,7 @@ from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api_fields import reuse_ref_fields
 from udata.core.user.api_fields import user_ref_fields
 from udata.models import db, User, Organization, Dataset, Reuse
+from udata.utils import id_or_404
 
 from .actions import request_transfer, accept_transfer, refuse_transfer
 from .models import TRANSFER_STATUS, Transfer
@@ -119,14 +120,14 @@ class TransferRequestAPI(API):
     @api.marshal_with(transfer_fields)
     def get(self, id):
         '''Fetch a transfer request given its identifier'''
-        return Transfer.objects.get_or_404(id=id)
+        return Transfer.objects.get_or_404(id=id_or_404(id))
 
     @api.doc('respond_to_transfer')
     @api.expect(transfer_response_fields)
     @api.marshal_with(transfer_fields)
     def post(self, id):
         '''Respond to a transfer request'''
-        transfer = Transfer.objects.get_or_404(id=id)
+        transfer = Transfer.objects.get_or_404(id=id_or_404(id))
 
         data = request.json
         comment = data.get('comment')
