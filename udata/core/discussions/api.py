@@ -6,6 +6,7 @@ from flask_restx.inputs import boolean
 
 from udata.auth import admin_permission
 from udata.api import api, API, fields
+from udata.utils import id_or_404
 from udata.core.user.api_fields import user_ref_fields
 
 from .forms import DiscussionCreateForm, DiscussionCommentForm
@@ -94,7 +95,7 @@ class DiscussionAPI(API):
     @api.marshal_with(discussion_fields)
     def get(self, id):
         '''Get a discussion given its ID'''
-        discussion = Discussion.objects.get_or_404(id=id)
+        discussion = Discussion.objects.get_or_404(id=id_or_404(id))
         return discussion
 
     @api.secure
@@ -104,7 +105,7 @@ class DiscussionAPI(API):
     @api.marshal_with(discussion_fields)
     def post(self, id):
         '''Add comment and optionally close a discussion given its ID'''
-        discussion = Discussion.objects.get_or_404(id=id)
+        discussion = Discussion.objects.get_or_404(id=id_or_404(id))
         form = api.validate(DiscussionCommentForm)
         message = Message(
             content=form.comment.data,
@@ -129,7 +130,7 @@ class DiscussionAPI(API):
     @api.response(403, 'Not allowed to delete this discussion')
     def delete(self, id):
         '''Delete a discussion given its ID'''
-        discussion = Discussion.objects.get_or_404(id=id)
+        discussion = Discussion.objects.get_or_404(id=id_or_404(id))
         discussion.delete()
         on_discussion_deleted.send(discussion)
         return '', 204
@@ -145,7 +146,7 @@ class DiscussionCommentAPI(API):
     @api.response(403, 'Not allowed to delete this comment')
     def delete(self, id, cidx):
         '''Delete a comment given its index'''
-        discussion = Discussion.objects.get_or_404(id=id)
+        discussion = Discussion.objects.get_or_404(id=id_or_404(id))
         if len(discussion.discussion) <= cidx:
             api.abort(404, 'Comment does not exist')
         elif cidx == 0:
