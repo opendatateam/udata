@@ -23,6 +23,7 @@ class DatasetSearch(ModelSearchAdapter):
 
     sorts = {
         'created': 'created_at_internal',
+        'last_update': 'last_modified_internal',
         'reuses': 'metrics.reuses',
         'followers': 'metrics.followers',
         'views': 'metrics.views',
@@ -84,6 +85,7 @@ class DatasetSearch(ModelSearchAdapter):
             'badges': [badge.kind for badge in dataset.badges],
             'frequency': dataset.frequency,
             'created_at': to_iso_datetime(dataset.created_at),
+            'last_update': to_iso_datetime(dataset.last_update),
             'views': dataset.metrics.get('views', 0),
             'followers': dataset.metrics.get('followers', 0),
             'reuses': dataset.metrics.get('reuses', 0),
