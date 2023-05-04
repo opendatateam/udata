@@ -7,6 +7,7 @@ from udata import tracking
 from udata.api import api, API, fields
 from udata.models import Follow
 from udata.core.user.api_fields import user_ref_fields
+from udata.utils import id_or_404
 
 from .signals import on_new_follow
 
@@ -44,7 +45,7 @@ class FollowAPI(API):
     def get(self, id):
         '''List all followers for a given object'''
         args = parser.parse_args()
-        model = self.model.objects.only('id').get_or_404(id=id)
+        model = self.model.objects.only('id').get_or_404(id=id_or_404(id))
         qs = Follow.objects(following=model, until=None)
         return qs.paginate(args['page'], args['page_size'])
 
@@ -52,7 +53,7 @@ class FollowAPI(API):
     @api.doc(description=NOTE)
     def post(self, id):
         '''Follow an object given its ID'''
-        model = self.model.objects.get_or_404(id=id)
+        model = self.model.objects.get_or_404(id=id_or_404(id))
         follow, created = Follow.objects.get_or_create(
             follower=current_user.id, following=model, until=None)
         count = Follow.objects.followers(model).count()
@@ -64,7 +65,7 @@ class FollowAPI(API):
     @api.doc(description=NOTE)
     def delete(self, id):
         '''Unfollow an object given its ID'''
-        model = self.model.objects.only('id').get_or_404(id=id)
+        model = self.model.objects.only('id').get_or_404(id=id_or_404(id))
         follow = Follow.objects.get_or_404(follower=current_user.id,
                                            following=model,
                                            until=None)

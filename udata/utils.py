@@ -4,6 +4,8 @@ import re
 
 import factory
 
+from bson import ObjectId
+from bson.errors import InvalidId
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 from dateutil.parser import parse as parse_dt
@@ -11,6 +13,7 @@ from faker import Faker
 from faker.config import PROVIDERS
 from faker.providers import BaseProvider
 from faker.providers.lorem.la import Provider as LoremProvider
+from flask import abort
 from math import ceil
 from uuid import uuid4, UUID
 from xml.sax.saxutils import escape
@@ -302,3 +305,11 @@ def safe_unicode(string):
     if string is None:
         return None
     return string.decode('utf8') if isinstance(string, bytes) else str(string)
+
+
+def id_or_404(object_id):
+    try:
+        ObjectId(object_id)
+        return object_id
+    except InvalidId:
+        abort(404)

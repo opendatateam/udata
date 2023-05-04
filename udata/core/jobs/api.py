@@ -7,6 +7,7 @@ from flask import request
 from udata.api import api, API, fields
 from udata.auth import admin_permission
 from udata.tasks import schedulables, celery
+from udata.utils import id_or_404
 
 from .forms import CrontabTaskForm, IntervalTaskForm
 from .models import PeriodicTask, PERIODS
@@ -107,13 +108,13 @@ class JobAPI(API):
     @api.marshal_with(job_fields)
     def get(self, id):
         '''Fetch a single scheduled job'''
-        return self.get_or_404(id)
+        return self.get_or_404(id_or_404(id))
 
     @api.secure(admin_permission)
     @api.marshal_with(job_fields)
     def put(self, id):
         '''Update a single scheduled job'''
-        task = self.get_or_404(id)
+        task = self.get_or_404(id_or_404(id))
         if 'crontab' in request.json:
             task.interval = None
             task.crontab = PeriodicTask.Crontab()
@@ -128,7 +129,7 @@ class JobAPI(API):
     @api.response(204, 'Successfuly deleted')
     def delete(self, id):
         '''Delete a single scheduled job'''
-        task = self.get_or_404(id)
+        task = self.get_or_404(id_or_404(id))
         task.delete()
         return '', 204
 
