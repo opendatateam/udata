@@ -300,7 +300,9 @@ class ResourceMixin(object):
 
     @property
     def last_modified(self):
-        return max([self.last_modified_internal, to_naive_datetime(self.harvest.modified_at)]) if self.harvest and self.harvest.modified_at else self.last_modified_internal
+        if self.harvest and self.harvest.modified_at and to_naive_datetime(self.harvest.modified_at) < datetime.now():
+            return max([self.last_modified_internal, to_naive_datetime(self.harvest.modified_at)])
+        return self.last_modified_internal
 
     def clean(self):
         super(ResourceMixin, self).clean()
@@ -594,7 +596,9 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     @property
     def last_modified(self):
-        return max([self.last_modified_internal, to_naive_datetime(self.harvest.modified_at)]) if self.harvest and self.harvest.modified_at else self.last_modified_internal
+        if self.harvest and self.harvest.modified_at and to_naive_datetime(self.harvest.modified_at) < datetime.now():
+            return max([self.last_modified_internal, to_naive_datetime(self.harvest.modified_at)])
+        return self.last_modified_internal
 
     @property
     def last_update(self):

@@ -8,6 +8,9 @@
 - No more sending email, slug and user name to sentry [#2846](https://github.com/opendatateam/udata/pull/2846)
 - Add test for passwordless user [#2848](https://github.com/opendatateam/udata/pull/2848)
 - Parse IANA and EUROPA URIs format [#2849](https://github.com/opendatateam/udata/pull/2849)
+- Dataset last update sorting:
+    - Transmit dataset's `last_update` field to search service [#2847](https://github.com/opendatateam/udata/pull/2847)
+    - Check if dataset's and resource's harvesting date `modified_at` are ealier than today's date [#2850](https://github.com/opendatateam/udata/pull/2850)
 - Upgrade mongoengine and storage deps [#2839](https://github.com/opendatateam/udata/pull/2839):
     - Upgrade flask-storage 1.0.0 -> 1.3.2
     - Upgrade flask-mongoengine 0.9.5 -> 1.0.0, now returning a ValidationError on get_or_404 on invalid id
