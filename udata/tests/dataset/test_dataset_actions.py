@@ -21,4 +21,4 @@ class DatasetActionsTest:
         assert dataset.archived is not None
         discussions = Discussion.objects.filter(subject=dataset)
         assert len(discussions) == 1
-        assert 'archived' in discussions[0].discussion[0].content
+        assert discussions[0].discussion[0].posted_by == user

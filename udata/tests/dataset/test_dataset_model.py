@@ -626,6 +626,28 @@ class HarvestMetadataTest:
         dataset.harvest = harvest_metadata
         dataset.save()
 
+    def test_harvest_dataset_metadata_future_modifed_at(self):
+        dataset = DatasetFactory()
+
+        harvest_metadata = HarvestDatasetMetadata(
+            created_at=datetime.now(),
+            modified_at=datetime.now()+timedelta(days=1)
+        )
+        dataset.harvest = harvest_metadata
+        dataset.save()
+        assert dataset.last_modified == dataset.last_modified_internal
+
+    def test_harvest_dataset_metadata_past_modifed_at(self):
+        dataset = DatasetFactory()
+
+        harvest_metadata = HarvestDatasetMetadata(
+            created_at=datetime.now(),
+            modified_at=datetime.now(),
+        )
+        dataset.harvest = harvest_metadata
+        dataset.save()
+        assert dataset.last_modified == harvest_metadata.modified_at
+
     def test_harvest_resource_metadata_validate_success(self):
         resource = ResourceFactory()
 
@@ -651,3 +673,19 @@ class HarvestMetadataTest:
         resource = ResourceFactory()
         resource.harvest = harvest_metadata
         resource.validate()
+
+    def test_harvest_resource_metadata_future_modifed_at(self):
+        resource = ResourceFactory()
+        harvest_metadata = HarvestResourceMetadata(modified_at=datetime.now()+timedelta(days=1))
+        resource.harvest = harvest_metadata
+        resource.validate()
+
+        assert resource.last_modified == resource.last_modified_internal
+
+    def test_harvest_resource_metadata_past_modifed_at(self):
+        resource = ResourceFactory()
+        harvest_metadata = HarvestResourceMetadata(modified_at=datetime.now())
+        resource.harvest = harvest_metadata
+        resource.validate()
+
+        assert resource.last_modified == harvest_metadata.modified_at

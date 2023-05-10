@@ -2,6 +2,22 @@
 
 ## Current (in progress)
 
+- Upgrade development dependencies [#2844](https://github.com/opendatateam/udata/pull/2844)
+- Compile translations for testing [#2845](https://github.com/opendatateam/udata/pull/2845)
+- Add user arg to discussion list API [#2842](https://github.com/opendatateam/udata/pull/2842)
+- No more sending email, slug and user name to sentry [#2846](https://github.com/opendatateam/udata/pull/2846)
+- Add test for passwordless user [#2848](https://github.com/opendatateam/udata/pull/2848)
+- Parse IANA and EUROPA URIs format [#2849](https://github.com/opendatateam/udata/pull/2849)
+- Dataset last update sorting:
+    - Transmit dataset's `last_update` field to search service [#2847](https://github.com/opendatateam/udata/pull/2847)
+    - Check if dataset's and resource's harvesting date `modified_at` are ealier than today's date [#2850](https://github.com/opendatateam/udata/pull/2850)
+- Upgrade mongoengine and storage deps [#2839](https://github.com/opendatateam/udata/pull/2839):
+    - Upgrade flask-storage 1.0.0 -> 1.3.2
+    - Upgrade flask-mongoengine 0.9.5 -> 1.0.0, now returning a ValidationError on get_or_404 on invalid id
+    - Upgrade mongoengine 0.26.0 -> 0.27.0
+
+## 6.1.3 (2023-04-18)
+
 - Fix XSS vulnerability: escape user content in selectize items in admin [#2843](https://github.com/opendatateam/udata/pull/2843)
 - Add support for a CSW-DCAT harvester [#2800](https://github.com/opendatateam/udata/pull/2800)
 - Fix schema is undefined when checking for schema.url in admin resource form [#2837](https://github.com/opendatateam/udata/pull/2837)

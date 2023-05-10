@@ -2,7 +2,7 @@ from bson import ObjectId
 from uuid import UUID
 
 from flask import request, redirect, url_for
-from mongoengine.errors import InvalidQueryError
+from mongoengine.errors import InvalidQueryError, ValidationError
 from werkzeug.exceptions import NotFound
 from werkzeug.routing import BaseConverter, PathConverter
 from werkzeug.urls import url_quote
@@ -86,7 +86,7 @@ class ModelConverter(BaseConverter):
     def to_python(self, value):
         try:
             return self.model.objects.get_or_404(id=value)
-        except NotFound:
+        except (NotFound, ValidationError):
             pass
         try:
             quoted = self.quote(value)
