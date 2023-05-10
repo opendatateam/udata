@@ -631,7 +631,7 @@ class HarvestMetadataTest:
 
         harvest_metadata = HarvestDatasetMetadata(
             created_at=datetime.now(),
-            modified_at=datetime(2032, 12, 1)
+            modified_at=datetime.now()+timedelta(days=1)
         )
         dataset.harvest = harvest_metadata
         dataset.save()
@@ -676,7 +676,7 @@ class HarvestMetadataTest:
 
     def test_harvest_resource_metadata_future_modifed_at(self):
         resource = ResourceFactory()
-        harvest_metadata = HarvestResourceMetadata(modified_at=datetime(2032, 12, 1))
+        harvest_metadata = HarvestResourceMetadata(modified_at=datetime.now()+timedelta(days=1))
         resource.harvest = harvest_metadata
         resource.validate()
 
