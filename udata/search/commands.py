@@ -77,7 +77,8 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
             elif not indexable and not reindex:
                 url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/{adapter.model.__name__.lower()}s/{doc['id']}/unindex"
                 r = requests.delete(url)
-                r.raise_for_status()
+                if r.status_code != 404:  # We don't want to raise on 404
+                    r.raise_for_status()
             else:
                 continue
         except Exception as e:
