@@ -16,6 +16,7 @@
     - Upgrade flask-mongoengine 0.9.5 -> 1.0.0, now returning a ValidationError on get_or_404 on invalid id
     - Upgrade mongoengine 0.26.0 -> 0.27.0
 -  Prevent raising unecessary error in index command [#2851](https://github.com/opendatateam/udata/pull/2851)
+-  Use `datetime.utcnow` to make sure to handle utc datetimes [#2853](https://github.com/opendatateam/udata/pull/2853)
 
 ## 6.1.3 (2023-04-18)
 
