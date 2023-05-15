@@ -43,7 +43,7 @@ class ExtendedResetPasswordForm(ResetPasswordForm):
 
         if self.user.password_rotation_demanded:
             self.user.password_rotation_demanded = None
-            self.user.password_rotation_performed = datetime.datetime.now()
+            self.user.password_rotation_performed = datetime.datetime.utcnow()
             self.user.save()
 
         return True

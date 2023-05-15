@@ -210,7 +210,7 @@ class DatasetAPI(API):
         if dataset.deleted and request_deleted is not None:
             api.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
-        dataset.last_modified_internal = datetime.now()
+        dataset.last_modified_internal = datetime.utcnow()
         form = api.validate(DatasetForm, dataset)
         return form.save()
 
@@ -222,8 +222,8 @@ class DatasetAPI(API):
         if dataset.deleted:
             api.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
-        dataset.deleted = datetime.now()
-        dataset.last_modified_internal = datetime.now()
+        dataset.deleted = datetime.utcnow()
+        dataset.last_modified_internal = datetime.utcnow()
         dataset.save()
         return '', 204
 
@@ -333,7 +333,7 @@ class ResourcesAPI(API):
             api.abort(400, 'This endpoint only supports remote resources')
         form.populate_obj(resource)
         dataset.add_resource(resource)
-        dataset.last_modified_internal = datetime.now()
+        dataset.last_modified_internal = datetime.utcnow()
         dataset.save()
         return resource, 201
 
@@ -357,7 +357,7 @@ class ResourcesAPI(API):
 class UploadMixin(object):
     def handle_upload(self, dataset):
         prefix = '/'.join((dataset.slug,
-                           datetime.now().strftime('%Y%m%d-%H%M%S')))
+                           datetime.utcnow().strftime('%Y%m%d-%H%M%S')))
         infos = handle_upload(storages.resources, prefix)
         if 'html' in infos['mime']:
             api.abort(415, 'Incorrect file content type: HTML')
@@ -382,7 +382,7 @@ class UploadNewDatasetResource(UploadMixin, API):
         infos = self.handle_upload(dataset)
         resource = Resource(**infos)
         dataset.add_resource(resource)
-        dataset.last_modified_internal = datetime.now()
+        dataset.last_modified_internal = datetime.utcnow()
         dataset.save()
         return resource, 201
 
@@ -429,7 +429,7 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
         for k, v in infos.items():
             resource[k] = v
         dataset.update_resource(resource)
-        dataset.last_modified_internal = datetime.now()
+        dataset.last_modified_internal = datetime.utcnow()
         dataset.save()
         if fs_filename_to_remove is not None:
             storages.resources.delete(fs_filename_to_remove)
@@ -484,9 +484,9 @@ class ResourceAPI(ResourceMixin, API):
         # update_resource saves the updated resource dict to the database
         # the additional dataset.save is required as we update the last_modified date.
         form.populate_obj(resource)
-        resource.last_modified_internal = datetime.now()
+        resource.last_modified_internal = datetime.utcnow()
         dataset.update_resource(resource)
-        dataset.last_modified_internal = datetime.now()
+        dataset.last_modified_internal = datetime.utcnow()
         dataset.save()
         return resource
 
@@ -497,7 +497,7 @@ class ResourceAPI(ResourceMixin, API):
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         dataset.remove_resource(resource)
-        dataset.last_modified_internal = datetime.now()
+        dataset.last_modified_internal = datetime.utcnow()
         dataset.save()
         return '', 204
 
@@ -538,7 +538,7 @@ class CommunityResourcesAPI(API):
             })
         if not resource.organization:
             resource.owner = current_user._get_current_object()
-        resource.last_modified_internal = datetime.now()
+        resource.last_modified_internal = datetime.utcnow()
         resource.save()
         return resource, 201
 
@@ -566,7 +566,7 @@ class CommunityResourceAPI(API):
         form.populate_obj(community)
         if not community.organization and not community.owner:
             community.owner = current_user._get_current_object()
-        community.last_modified_internal = datetime.now()
+        community.last_modified_internal = datetime.utcnow()
         community.save()
         return community
 

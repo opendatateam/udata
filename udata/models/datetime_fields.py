@@ -57,13 +57,13 @@ class DateRange(EmbeddedDocument):
 
 class Datetimed(object):
     created_at = DateTimeField(verbose_name=_('Creation date'),
-                               default=datetime.now, required=True)
+                               default=datetime.utcnow, required=True)
     last_modified = DateTimeField(verbose_name=_('Last modification date'),
-                                  default=datetime.now, required=True)
+                                  default=datetime.utcnow, required=True)
 
 
 @pre_save.connect
 def set_modified_datetime(sender, document, **kwargs):
     changed = document._get_changed_fields()
     if isinstance(document, Datetimed) and 'last_modified' not in changed:
-        document.last_modified = datetime.now()
+        document.last_modified = datetime.utcnow()

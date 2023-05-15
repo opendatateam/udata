@@ -130,7 +130,7 @@ def index(models=None, reindex=True, from_datetime=None):
         log.error('Missing URL for search service')
         sys.exit(-1)
 
-    start = datetime.now()
+    start = datetime.utcnow()
     if from_datetime:
         from_datetime = datetime.strptime(from_datetime, TIMESTAMP_FORMAT)
 

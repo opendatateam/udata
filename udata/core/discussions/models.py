@@ -11,7 +11,7 @@ COMMENT_SIZE_LIMIT = 50000
 
 class Message(db.EmbeddedDocument):
     content = db.StringField(required=True)
-    posted_on = db.DateTimeField(default=datetime.now, required=True)
+    posted_on = db.DateTimeField(default=datetime.utcnow, required=True)
     posted_by = db.ReferenceField('User')
 
 
@@ -20,7 +20,7 @@ class Discussion(db.Document):
     subject = db.GenericReferenceField()
     title = db.StringField(required=True)
     discussion = db.ListField(db.EmbeddedDocumentField(Message))
-    created = db.DateTimeField(default=datetime.now, required=True)
+    created = db.DateTimeField(default=datetime.utcnow, required=True)
     closed = db.DateTimeField()
     closed_by = db.ReferenceField('User')
     extras = db.ExtrasField()
