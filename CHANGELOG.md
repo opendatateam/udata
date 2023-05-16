@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 6.1.4 (2023-05-16)
 
 - Upgrade development dependencies [#2844](https://github.com/opendatateam/udata/pull/2844)
