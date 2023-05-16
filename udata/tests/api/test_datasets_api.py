@@ -229,7 +229,7 @@ class DatasetAPITest(APITestCase):
 
     def test_dataset_api_get_deleted(self):
         '''It should not fetch a deleted dataset from the API and raise 410'''
-        dataset = VisibleDatasetFactory(deleted=datetime.now())
+        dataset = VisibleDatasetFactory(deleted=datetime.utcnow())
 
         response = self.get(url_for('api.dataset', dataset=dataset))
         self.assert410(response)
@@ -238,7 +238,7 @@ class DatasetAPITest(APITestCase):
         '''It should a deleted dataset from the API if user is authorized'''
         self.login()
         dataset = VisibleDatasetFactory(owner=self.user,
-                                        deleted=datetime.now())
+                                        deleted=datetime.utcnow())
 
         response = self.get(url_for('api.dataset', dataset=dataset))
         self.assert200(response)
@@ -534,7 +534,7 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_update_deleted(self):
         '''It should not update a deleted dataset from the API and raise 401'''
         user = self.login()
-        dataset = DatasetFactory(owner=user, deleted=datetime.now())
+        dataset = DatasetFactory(owner=user, deleted=datetime.utcnow())
         data = dataset.to_dict()
         data['description'] = 'new description'
         response = self.put(url_for('api.dataset', dataset=dataset), data)
@@ -560,7 +560,7 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_delete_deleted(self):
         '''It should delete a deleted dataset from the API and raise 410'''
         user = self.login()
-        dataset = VisibleDatasetFactory(owner=user, deleted=datetime.now())
+        dataset = VisibleDatasetFactory(owner=user, deleted=datetime.utcnow())
         response = self.delete(url_for('api.dataset', dataset=dataset))
 
         self.assert410(response)
@@ -1272,7 +1272,7 @@ class DatasetArchivedAPITest(APITestCase):
     def test_dataset_api_search_archived(self):
         '''It should search datasets from the API, excluding archived ones'''
         VisibleDatasetFactory(archived=None)
-        dataset = VisibleDatasetFactory(archived=datetime.now())
+        dataset = VisibleDatasetFactory(archived=datetime.utcnow())
 
         response = self.get(url_for('api.datasets', q=''))
         self.assert200(response)
@@ -1282,7 +1282,7 @@ class DatasetArchivedAPITest(APITestCase):
 
     def test_dataset_api_get_archived(self):
         '''It should fetch an archived dataset from the API and return 200'''
-        dataset = VisibleDatasetFactory(archived=datetime.now())
+        dataset = VisibleDatasetFactory(archived=datetime.utcnow())
         response = self.get(url_for('api.dataset', dataset=dataset))
         self.assert200(response)
 

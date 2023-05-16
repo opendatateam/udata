@@ -138,7 +138,7 @@ def load(filename=DEFAULT_GEOZONES_FILE, drop=False):
 
     <filename> can be either a local path or a remote URL.
     '''
-    ts = datetime.now().isoformat().replace('-', '').replace(':', '').split('.')[0]
+    ts = datetime.utcnow().isoformat().replace('-', '').replace(':', '').split('.')[0]
     prefix = 'geozones-{0}'.format(ts)
     if filename.startswith('http'):
         log.info('Downloading GeoZones bundle: %s', filename)

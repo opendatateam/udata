@@ -33,7 +33,7 @@ def accept_transfer(transfer, comment=None):
     '''Accept an incoming a transfer request'''
     TransferResponsePermission(transfer).test()
 
-    transfer.responded = datetime.now()
+    transfer.responded = datetime.utcnow()
     transfer.responder = current_user._get_current_object()
     transfer.status = 'accepted'
     transfer.response_comment = comment
@@ -56,7 +56,7 @@ def refuse_transfer(transfer, comment=None):
     '''Refuse an incoming a transfer request'''
     TransferResponsePermission(transfer).test()
 
-    transfer.responded = datetime.now()
+    transfer.responded = datetime.utcnow()
     transfer.responder = current_user._get_current_object()
     transfer.status = 'refused'
     transfer.response_comment = comment

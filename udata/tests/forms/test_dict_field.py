@@ -36,7 +36,7 @@ class DictFieldTest:
     def test_with_valid_data(self):
         Fake, FakeForm = self.factory()
 
-        now = datetime.now()
+        now = datetime.utcnow()
         today = date.today()
 
         fake = Fake()

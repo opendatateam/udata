@@ -18,7 +18,7 @@ class NoCheckLinkchecker(object):
         return {
             'check:status': 204,
             'check:available': True,
-            'check:date': datetime.now()
+            'check:date': datetime.utcnow()
         }
 
 

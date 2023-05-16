@@ -197,7 +197,7 @@ class CurrentUserFieldTest(TestCase, DBTestMixin):
         self.assertEqual(len(form.errors['owner']), 1)
 
     def test_password_rotation(self):
-        today = datetime.datetime.now()
+        today = datetime.datetime.utcnow()
         user = UserFactory(
             password='password',
             password_rotation_demanded=today,
@@ -237,7 +237,7 @@ class CurrentUserFieldTest(TestCase, DBTestMixin):
         form.validate()
         self.assertIn('Invalid email address', form.errors['email'])
 
-        today = datetime.datetime.now()
+        today = datetime.datetime.utcnow()
         user = UserFactory(email='b@fake.com', password='password', confirmed_at=today)
         form = ExtendedLoginForm.from_json({
             'email': user.email,

@@ -122,7 +122,7 @@ class PublishPostAPI(API):
     @api.marshal_with(post_fields)
     def post(self, post):
         '''Publish an existing post'''
-        post.modify(published=datetime.now())
+        post.modify(published=datetime.utcnow())
         return post
 
     @api.secure(admin_permission)
