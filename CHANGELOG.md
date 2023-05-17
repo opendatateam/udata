@@ -2,6 +2,10 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 6.1.4 (2023-05-16)
+
 - Upgrade development dependencies [#2844](https://github.com/opendatateam/udata/pull/2844)
 - Compile translations for testing [#2845](https://github.com/opendatateam/udata/pull/2845)
 - Add user arg to discussion list API [#2842](https://github.com/opendatateam/udata/pull/2842)
@@ -15,6 +19,8 @@
     - Upgrade flask-storage 1.0.0 -> 1.3.2
     - Upgrade flask-mongoengine 0.9.5 -> 1.0.0, now returning a ValidationError on get_or_404 on invalid id
     - Upgrade mongoengine 0.26.0 -> 0.27.0
+-  Prevent raising unecessary error in index command [#2851](https://github.com/opendatateam/udata/pull/2851)
+-  Use `datetime.utcnow` to make sure to handle utc datetimes [#2853](https://github.com/opendatateam/udata/pull/2853)
 
 ## 6.1.3 (2023-04-18)
 

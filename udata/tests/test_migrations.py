@@ -123,7 +123,7 @@ def test_get_record(db):
         'plugin': 'test',
         'filename': 'filename.py',
         'ops': [{
-            'date': datetime.now(),
+            'date': datetime.utcnow(),
             'type': 'migrate',
             'script': 'script',
             'output': 'output',
@@ -468,7 +468,7 @@ def test_unrecord_migration(db):
         'plugin': 'test',
         'filename': 'filename.py',
         'ops': [{
-            'date': datetime.now(),
+            'date': datetime.utcnow(),
             'type': 'migrate',
             'script': 'script',
             'output': 'output',

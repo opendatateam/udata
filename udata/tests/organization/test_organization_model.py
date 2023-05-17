@@ -31,20 +31,20 @@ class OrganizationModelTest(TestCase, DBTestMixin):
             DatasetFactory(organization=org)
         with assert_emit(on_follow):
             follow = Follow.objects.create(following=org, follower=UserFactory(),
-                                           since=datetime.now())
+                                           since=datetime.utcnow())
 
         assert org.get_metrics()['datasets'] == 1
         assert org.get_metrics()['reuses'] == 1
         assert org.get_metrics()['followers'] == 1
 
         with assert_emit(Reuse.on_delete):
-            reuse.deleted = datetime.now()
+            reuse.deleted = datetime.utcnow()
             reuse.save()
         with assert_emit(Dataset.on_delete):
-            dataset.deleted = datetime.now()
+            dataset.deleted = datetime.utcnow()
             dataset.save()
         with assert_emit(on_unfollow):
-            follow.until = datetime.now()
+            follow.until = datetime.utcnow()
             follow.save()
 
         assert org.get_metrics()['datasets'] == 0

@@ -153,7 +153,7 @@ class License(db.Document):
     # We need to declare id explicitly since we do not use the default
     # value set by Mongo.
     id = db.StringField(primary_key=True)
-    created_at = db.DateTimeField(default=datetime.now, required=True)
+    created_at = db.DateTimeField(default=datetime.utcnow, required=True)
     title = db.StringField(required=True)
     alternate_titles = db.ListField(db.StringField())
     slug = db.SlugField(required=True, populate_from='title')
@@ -290,8 +290,8 @@ class ResourceMixin(object):
     harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)
     schema = db.DictField()
 
-    created_at_internal = db.DateTimeField(default=datetime.now, required=True)
-    last_modified_internal = db.DateTimeField(default=datetime.now, required=True)
+    created_at_internal = db.DateTimeField(default=datetime.utcnow, required=True)
+    last_modified_internal = db.DateTimeField(default=datetime.utcnow, required=True)
     deleted = db.DateTimeField()
 
     @property
@@ -300,7 +300,7 @@ class ResourceMixin(object):
 
     @property
     def last_modified(self):
-        if self.harvest and self.harvest.modified_at and to_naive_datetime(self.harvest.modified_at) < datetime.now():
+        if self.harvest and self.harvest.modified_at and to_naive_datetime(self.harvest.modified_at) < datetime.utcnow():
             return max([self.last_modified_internal, to_naive_datetime(self.harvest.modified_at)])
         return self.last_modified_internal
 
@@ -356,7 +356,7 @@ class ResourceMixin(object):
         else:
             delta = min_cache_duration
         if self.extras.get('check:date'):
-            limit_date = datetime.now() - timedelta(minutes=delta)
+            limit_date = datetime.utcnow() - timedelta(minutes=delta)
             check_date = self.extras['check:date']
             if not isinstance(check_date, datetime):
                 try:
@@ -469,9 +469,9 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     featured = db.BooleanField(required=True, default=False)
 
     created_at_internal = DateTimeField(verbose_name=_('Creation date'),
-                               default=datetime.now, required=True)
+                                        default=datetime.utcnow, required=True)
     last_modified_internal = DateTimeField(verbose_name=_('Last modification date'),
-                                  default=datetime.now, required=True)
+                                           default=datetime.utcnow, required=True)
     deleted = db.DateTimeField()
     archived = db.DateTimeField()
 
@@ -596,7 +596,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     @property
     def last_modified(self):
-        if self.harvest and self.harvest.modified_at and to_naive_datetime(self.harvest.modified_at) < datetime.now():
+        if (self.harvest and self.harvest.modified_at and
+                to_naive_datetime(self.harvest.modified_at) < datetime.utcnow()):
             return max([self.last_modified_internal, to_naive_datetime(self.harvest.modified_at)])
         return self.last_modified_internal
 
@@ -674,13 +675,18 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
         result['update_frequency'] = self.frequency and self.frequency != 'unknown'
         if self.next_update:
-            result['update_fulfilled_in_time'] = True if -(self.next_update - datetime.now()).days <= 0 else False
+            result['update_fulfilled_in_time'] = (
+                True if -(self.next_update - datetime.utcnow()).days <= 0 else False
+            )
         elif self.frequency in ['continuous', 'irregular', 'punctual']:
             # For these frequencies, we don't expect regular updates or can't quantify them.
             # Thus we consider the update_fulfilled_in_time quality criterion to be true.
             result['update_fulfilled_in_time'] = True
 
-        result['dataset_description_quality'] = True if len(self.description) > current_app.config.get('QUALITY_DESCRIPTION_LENGTH') else False
+        result['dataset_description_quality'] = (
+            True if len(self.description) > current_app.config.get('QUALITY_DESCRIPTION_LENGTH')
+            else False
+        )
 
         if self.resources:
             result['has_resources'] = True

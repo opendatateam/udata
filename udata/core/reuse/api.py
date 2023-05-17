@@ -142,7 +142,7 @@ class ReuseAPI(API):
         if reuse.deleted:
             api.abort(410, 'This reuse has been deleted')
         ReuseEditPermission(reuse).test()
-        reuse.deleted = datetime.now()
+        reuse.deleted = datetime.utcnow()
         reuse.save()
         return '', 204
 

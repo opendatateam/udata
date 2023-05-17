@@ -51,7 +51,7 @@ class OrganizationAPITest:
 
     def test_organization_api_get_deleted(self, api):
         '''It should not fetch a deleted organization from the API'''
-        organization = OrganizationFactory(deleted=datetime.now())
+        organization = OrganizationFactory(deleted=datetime.utcnow())
         response = api.get(url_for('api.organization', org=organization))
         assert410(response)
 
@@ -59,7 +59,7 @@ class OrganizationAPITest:
         '''It should fetch a deleted organization from the API if authorized'''
         user = api.login()
         member = Member(user=user, role='editor')
-        organization = OrganizationFactory(deleted=datetime.now(),
+        organization = OrganizationFactory(deleted=datetime.utcnow(),
                                            members=[member])
         response = api.get(url_for('api.organization', org=organization))
         assert200(response)
@@ -92,7 +92,7 @@ class OrganizationAPITest:
 
     def test_organization_api_update_deleted(self, api):
         '''It should not update a deleted organization from the API'''
-        org = OrganizationFactory(deleted=datetime.now())
+        org = OrganizationFactory(deleted=datetime.utcnow())
         data = org.to_dict()
         data['description'] = 'new description'
         api.login()
@@ -124,7 +124,7 @@ class OrganizationAPITest:
     def test_organization_api_delete_deleted(self, api):
         '''It should not delete a deleted organization from the API'''
         api.login()
-        organization = OrganizationFactory(deleted=datetime.now())
+        organization = OrganizationFactory(deleted=datetime.utcnow())
         response = api.delete(url_for('api.organization', org=organization))
         assert410(response)
         assert Organization.objects[0].deleted is not None

@@ -35,7 +35,7 @@ class Activity(db.Document, metaclass=EmitNewActivityMetaClass):
     actor = db.ReferenceField('User', required=True)
     organization = db.ReferenceField('Organization')
     related_to = db.ReferenceField(db.DomainModel, required=True)
-    created_at = db.DateTimeField(default=datetime.now, required=True)
+    created_at = db.DateTimeField(default=datetime.utcnow, required=True)
 
     kwargs = db.DictField()
 

@@ -92,14 +92,14 @@ class ReuseAPITest:
 
     def test_reuse_api_get_deleted(self, api):
         '''It should not fetch a deleted reuse from the API and raise 410'''
-        reuse = ReuseFactory(deleted=datetime.now())
+        reuse = ReuseFactory(deleted=datetime.utcnow())
         response = api.get(url_for('api.reuse', reuse=reuse))
         assert410(response)
 
     def test_reuse_api_get_deleted_but_authorized(self, api):
         '''It should fetch a deleted reuse from the API if authorized'''
         user = api.login()
-        reuse = ReuseFactory(deleted=datetime.now(), owner=user)
+        reuse = ReuseFactory(deleted=datetime.utcnow(), owner=user)
         response = api.get(url_for('api.reuse', reuse=reuse))
         assert200(response)
 
@@ -157,7 +157,7 @@ class ReuseAPITest:
     def test_reuse_api_update_deleted(self, api):
         '''It should not update a deleted reuse from the API and raise 410'''
         api.login()
-        reuse = ReuseFactory(deleted=datetime.now())
+        reuse = ReuseFactory(deleted=datetime.utcnow())
         response = api.put(url_for('api.reuse', reuse=reuse), {})
         assert410(response)
 
@@ -173,7 +173,7 @@ class ReuseAPITest:
     def test_reuse_api_delete_deleted(self, api):
         '''It should not delete a deleted reuse from the API and raise 410'''
         api.login()
-        reuse = ReuseFactory(deleted=datetime.now())
+        reuse = ReuseFactory(deleted=datetime.utcnow())
         response = api.delete(url_for('api.reuse', reuse=reuse))
         assert410(response)
 

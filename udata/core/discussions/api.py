@@ -117,7 +117,7 @@ class DiscussionAPI(API):
         if close:
             CloseDiscussionPermission(discussion).test()
             discussion.closed_by = current_user._get_current_object()
-            discussion.closed = datetime.now()
+            discussion.closed = datetime.utcnow()
         discussion.save()
         if close:
             on_discussion_closed.send(discussion, message=message_idx)
