@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Specify *public* datasets and reuses in admin count [#2852](https://github.com/opendatateam/udata/pull/2852)
 
 ## 6.1.4 (2023-05-16)
 
