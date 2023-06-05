@@ -13,7 +13,7 @@ def archive(dataset, comment=False):
     """Archive a dataset"""
     if dataset.archived:
         log.warning('Dataset %s already archived, bumping date', dataset)
-    dataset.archived = datetime.now()
+    dataset.archived = datetime.utcnow()
     dataset.save()
 
     if comment:

@@ -375,21 +375,21 @@ class DatetimedTest:
         assert isinstance(DatetimedTester.last_modified, db.DateTimeField)
 
     def test_new_instance(self):
-        now = datetime.now()
+        now = datetime.utcnow()
         datetimed = DatetimedTester()
 
-        assert now <= datetimed.created_at <= datetime.now()
-        assert now <= datetimed.last_modified <= datetime.now()
+        assert now <= datetimed.created_at <= datetime.utcnow()
+        assert now <= datetimed.last_modified <= datetime.utcnow()
 
     def test_save_new_instance(self):
-        now = datetime.now()
+        now = datetime.utcnow()
         datetimed = DatetimedTester.objects.create()
 
-        assert now <= datetimed.created_at <= datetime.now()
-        assert now <= datetimed.last_modified <= datetime.now()
+        assert now <= datetimed.created_at <= datetime.utcnow()
+        assert now <= datetimed.last_modified <= datetime.utcnow()
 
     def test_save_last_modified_instance(self):
-        now = datetime.now()
+        now = datetime.utcnow()
         earlier = now - timedelta(days=1)
         datetimed = DatetimedTester.objects.create(
             created_at=earlier, last_modified=earlier)
@@ -401,7 +401,7 @@ class DatetimedTest:
         assert_equal_dates(datetimed.last_modified, now)
 
     def test_save_last_modified_instance_manually_set(self):
-        now = datetime.now()
+        now = datetime.utcnow()
         manual = now - timedelta(days=1)
         earlier = now - timedelta(days=2)
         datetimed = DatetimedTester.objects.create(created_at=earlier, last_modified=earlier)
@@ -414,7 +414,7 @@ class DatetimedTest:
         assert_equal_dates(datetimed.last_modified, manual)
 
     def test_save_last_modified_instance_manually_set_same_value(self):
-        now = datetime.now()
+        now = datetime.utcnow()
         manual = now - timedelta(days=1)
         earlier = now - timedelta(days=2)
         datetimed = DatetimedTester.objects.create(created_at=earlier, last_modified=earlier)
@@ -436,7 +436,7 @@ class ExtrasFieldTest:
         class Tester(db.Document):
             extras = db.ExtrasField()
 
-        now = datetime.now()
+        now = datetime.utcnow()
         today = date.today()
 
         tester = Tester(extras={
@@ -469,7 +469,7 @@ class ExtrasFieldTest:
         (db.IntField, 42),
         (db.FloatField, 0.42),
         (db.BooleanField, True),
-        (db.DateTimeField, datetime.now()),
+        (db.DateTimeField, datetime.utcnow()),
         (db.DateField, date.today()),
     ])
     def test_validate_registered_db_type(self, dbtype, value):
@@ -481,8 +481,8 @@ class ExtrasFieldTest:
         Tester(extras={'test': value}).validate()
 
     @pytest.mark.parametrize('dbtype,value', [
-        (db.IntField, datetime.now()),
-        (db.FloatField, datetime.now()),
+        (db.IntField, datetime.utcnow()),
+        (db.FloatField, datetime.utcnow()),
         (db.BooleanField, 42),
         (db.DateTimeField, 42),
         (db.DateField, 42),

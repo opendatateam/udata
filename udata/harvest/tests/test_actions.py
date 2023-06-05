@@ -54,7 +54,7 @@ class HarvestActionsTest:
     def test_list_sources_exclude_deleted(self):
         assert actions.list_sources() == []
 
-        now = datetime.now()
+        now = datetime.utcnow()
         sources = HarvestSourceFactory.create_batch(3)
         deleted_sources = HarvestSourceFactory.create_batch(2, deleted=now)
 
@@ -70,7 +70,7 @@ class HarvestActionsTest:
     def test_list_sources_include_deleted(self):
         assert actions.list_sources() == []
 
-        now = datetime.now()
+        now = datetime.utcnow()
         sources = HarvestSourceFactory.create_batch(3)
         sources.extend(HarvestSourceFactory.create_batch(2, deleted=now))
 
@@ -132,7 +132,7 @@ class HarvestActionsTest:
 
     def test_paginate_sources_exclude_deleted(self):
         HarvestSourceFactory.create_batch(2)
-        HarvestSourceFactory(deleted=datetime.now())
+        HarvestSourceFactory(deleted=datetime.utcnow())
 
         result = actions.paginate_sources(page_size=2)
         assert isinstance(result, Paginable)
@@ -143,7 +143,7 @@ class HarvestActionsTest:
 
     def test_paginate_sources_include_deleted(self):
         HarvestSourceFactory.create_batch(2)
-        HarvestSourceFactory(deleted=datetime.now())
+        HarvestSourceFactory(deleted=datetime.utcnow())
 
         result = actions.paginate_sources(page_size=2, deleted=True)
         assert isinstance(result, Paginable)
@@ -388,7 +388,7 @@ class HarvestActionsTest:
             enabled=True,
             crontab=PeriodicTask.Crontab()
         )
-        now = datetime.now()
+        now = datetime.utcnow()
         to_delete = HarvestSourceFactory.create_batch(2, deleted=now)
         to_delete.append(
             HarvestSourceFactory(periodic_task=periodic_task, deleted=now)
@@ -411,7 +411,7 @@ class HarvestActionsTest:
 
     @pytest.mark.options(HARVEST_JOBS_RETENTION_DAYS=2)
     def test_purge_jobs(self):
-        now = datetime.now()
+        now = datetime.utcnow()
         retention = now - timedelta(days=2)
         too_old = retention - timedelta(days=1)
         to_delete = HarvestJobFactory.create_batch(3, created=too_old)
@@ -459,7 +459,7 @@ class HarvestActionsTest:
                 domain='test.org',
                 remote_id=str(i)
             )
-            dataset.last_modified_internal = datetime.now()
+            dataset.last_modified_internal = datetime.utcnow()
             dataset.save()
             attached_datasets.append(dataset)
 

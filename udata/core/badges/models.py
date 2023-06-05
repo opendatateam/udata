@@ -17,7 +17,7 @@ __all__ = ('Badge', 'BadgeMixin')
 
 class Badge(db.EmbeddedDocument):
     kind = db.StringField(required=True)
-    created = db.DateTimeField(default=datetime.now, required=True)
+    created = db.DateTimeField(default=datetime.utcnow, required=True)
     created_by = db.ReferenceField('User')
 
     def __str__(self):

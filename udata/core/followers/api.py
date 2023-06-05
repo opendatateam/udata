@@ -69,7 +69,7 @@ class FollowAPI(API):
         follow = Follow.objects.get_or_404(follower=current_user.id,
                                            following=model,
                                            until=None)
-        follow.until = datetime.now()
+        follow.until = datetime.utcnow()
         follow.save()
         count = Follow.objects.followers(model).count()
         return {'followers': count}, 200

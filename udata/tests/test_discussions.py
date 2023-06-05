@@ -148,7 +148,7 @@ class DiscussionsTest(APITestCase):
                 user=user,
                 title='test discussion {}'.format(i),
                 discussion=[message],
-                closed=datetime.now(),
+                closed=datetime.utcnow(),
                 closed_by=user
             )
             closed_discussions.append(discussion)
@@ -181,7 +181,7 @@ class DiscussionsTest(APITestCase):
                 user=user,
                 title='test discussion {}'.format(i),
                 discussion=[message],
-                closed=datetime.now(),
+                closed=datetime.utcnow(),
                 closed_by=user
             )
             closed_discussions.append(discussion)
@@ -493,7 +493,7 @@ class DiscussionsNotificationsTest(TestCase, DBTestMixin):
             user=user,
             title=faker.sentence(),
             discussion=[message],
-            closed=datetime.now(),
+            closed=datetime.utcnow(),
             closed_by=user
         )
 
@@ -532,7 +532,7 @@ class DiscussionsNotificationsTest(TestCase, DBTestMixin):
             user=user,
             title=faker.sentence(),
             discussion=[message],
-            closed=datetime.now(),
+            closed=datetime.utcnow(),
             closed_by=user
         )
 

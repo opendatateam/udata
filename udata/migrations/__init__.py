@@ -126,7 +126,7 @@ class Record(dict):
             {'plugin': self.plugin, 'filename': self.filename},
             {
                 '$push': {'ops': {
-                    'date': datetime.now(),
+                    'date': datetime.utcnow(),
                     'type': _type,
                     'script': script,
                     'output': output,
@@ -256,7 +256,7 @@ class Migration:
             self.db_query,
             {
                 '$push': {'ops': {
-                    'date': datetime.now(),
+                    'date': datetime.utcnow(),
                     'type': type,
                     'script': script,
                     'output': output,

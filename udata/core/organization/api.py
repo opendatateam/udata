@@ -144,7 +144,7 @@ class OrganizationAPI(API):
         if org.deleted:
             api.abort(410, 'Organization has been deleted')
         EditOrganizationPermission(org).test()
-        org.deleted = datetime.now()
+        org.deleted = datetime.utcnow()
         org.save()
         return '', 204
 
@@ -278,7 +278,7 @@ class MembershipAcceptAPI(MembershipAPI):
 
         membership_request.status = 'accepted'
         membership_request.handled_by = current_user._get_current_object()
-        membership_request.handled_on = datetime.now()
+        membership_request.handled_on = datetime.utcnow()
         member = Member(user=membership_request.user, role='editor')
 
         org.members.append(member)
@@ -303,7 +303,7 @@ class MembershipRefuseAPI(MembershipAPI):
         form = api.validate(MembershipRefuseForm)
         membership_request.status = 'refused'
         membership_request.handled_by = current_user._get_current_object()
-        membership_request.handled_on = datetime.now()
+        membership_request.handled_on = datetime.utcnow()
         membership_request.refusal_comment = form.comment.data
 
         org.save()

@@ -134,7 +134,7 @@ class BaseBackend(object):
         log.debug('Initializing backend')
         factory = HarvestJob if self.dryrun else HarvestJob.objects.create
         self.job = factory(status='initializing',
-                           started=datetime.now(),
+                           started=datetime.utcnow(),
                            source=self.source)
 
         before_harvest_job.send(self)
@@ -180,7 +180,7 @@ class BaseBackend(object):
     def process_item(self, item):
         log.debug('Processing: %s', item.remote_id)
         item.status = 'started'
-        item.started = datetime.now()
+        item.started = datetime.utcnow()
         if not self.dryrun:
             self.job.save()
 
@@ -191,7 +191,7 @@ class BaseBackend(object):
             dataset.harvest.domain = self.source.domain
             dataset.harvest.remote_id = item.remote_id
             dataset.harvest.source_id = str(self.source.id)
-            dataset.harvest.last_update = datetime.now()
+            dataset.harvest.last_update = datetime.utcnow()
             dataset.harvest.backend = self.display_name
 
             # unset archived status if needed
@@ -232,7 +232,7 @@ class BaseBackend(object):
             item.errors.append(error)
             item.status = 'failed'
 
-        item.ended = datetime.now()
+        item.ended = datetime.utcnow()
         if not self.dryrun:
             self.job.save()
 
@@ -283,7 +283,7 @@ class BaseBackend(object):
         self.end()
 
     def end(self):
-        self.job.ended = datetime.now()
+        self.job.ended = datetime.utcnow()
         if not self.dryrun:
             self.job.save()
         after_harvest_job.send(self)
