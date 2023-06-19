@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 6.1.5 (2023-06-19)
 
 - Specify *public* datasets and reuses in admin count [#2852](https://github.com/opendatateam/udata/pull/2852)
