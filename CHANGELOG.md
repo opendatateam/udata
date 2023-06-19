@@ -4,6 +4,11 @@
 
 - Nothing yet
 
+## 6.1.5 (2023-06-19)
+
+- Specify *public* datasets and reuses in admin count [#2852](https://github.com/opendatateam/udata/pull/2852)
+- Fix url params being stripped in markdown for internal URLs [#2855](https://github.com/opendatateam/udata/pull/2855)
+
 ## 6.1.4 (2023-05-16)
 
 - Upgrade development dependencies [#2844](https://github.com/opendatateam/udata/pull/2844)
