@@ -115,6 +115,11 @@ class DcatBackendTest:
         assert len(datasets['2'].resources) == 2
         assert len(datasets['3'].resources) == 1
 
+        assert datasets['1'].resources[0].title == 'Resource 1-1'
+        assert datasets['1'].resources[0].description == 'A JSON resource'
+        assert datasets['1'].resources[0].format == 'json'
+        assert datasets['1'].resources[0].mime == 'application/json'
+
     def test_flat_with_blank_nodes_xml(self, rmock):
         filename = 'bnodes.xml'
         url = mock_dcat(rmock, filename)
@@ -281,6 +286,7 @@ class DcatBackendTest:
         resource_1 = next(res for res in dataset.resources if res.title == 'Resource 1-1')
         # Format is a IANA URI
         assert resource_1.format == 'json'
+        assert resource_1.mime == 'application/json'
         assert resource_1.description == 'A JSON resource'
         assert resource_1.url == 'http://data.test.org/datasets/1/resources/1/file.json'
 
