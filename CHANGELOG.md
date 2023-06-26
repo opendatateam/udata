@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Improve DCAT harvest of mime type [#2857](https://github.com/opendatateam/udata/pull/2857)
 
 ## 6.1.5 (2023-06-19)
 
