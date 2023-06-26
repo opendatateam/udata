@@ -4,7 +4,7 @@ This module centralize dataset helpers for RDF/DCAT serialization and parsing
 import calendar
 import logging
 
-from datetime import date, datetime
+from datetime import date
 from html.parser import HTMLParser
 from dateutil.parser import parse as parse_dt
 from flask import current_app
@@ -314,6 +314,17 @@ def frequency_from_rdf(term):
         return freq
 
 
+def mime_from_rdf(resource):
+    # DCAT.mediaType *should* only be used when defined as IANA
+    mime = rdf_value(resource, DCAT.mediaType)
+    if not mime:
+        return
+    if IANAFORMAT in mime:
+        return '/'.join(mime.split('/')[-2:])
+    if isinstance(mime, str):
+        return mime
+
+
 def format_from_rdf(resource):
     format = rdf_value(resource, DCT.format)
     if not format:
@@ -392,7 +403,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
     resource.url = url
     resource.description = sanitize_html(distrib.value(DCT.description))
     resource.filesize = rdf_value(distrib, DCAT.bytesSize)
-    resource.mime = rdf_value(distrib, DCAT.mediaType)
+    resource.mime = mime_from_rdf(distrib)
     resource.format = format_from_rdf(distrib)
     checksum = distrib.value(SPDX.checksum)
     if checksum:
@@ -443,7 +454,9 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     tags += [theme.toPython() for theme in d.objects(DCAT.theme) if not isinstance(theme, RdfResource)]
     dataset.tags = list(set(tags))
 
-    dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
+    temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
+    if temporal_coverage:
+        dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
 
     licenses = set()
     for distrib in d.objects(DCAT.distribution | DCAT.distributions):

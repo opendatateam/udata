@@ -108,6 +108,7 @@
         <rdf:type rdf:resource="http://purl.org/dc/terms/MediaTypeOrExtent" />
       </dcterms:MediaTypeOrExtent>
     </dcterms:format>
+    <dcat:mediaType rdf:resource="https://www.iana.org/assignments/media-types/application/json" />
     <dcterms:description>A JSON resource</dcterms:description>
     <dcat:accessURL>http://data.test.org/datasets/1/resources/1/file.json</dcat:accessURL>
   </dcat:Distribution>
