@@ -319,10 +319,10 @@ def mime_from_rdf(resource):
     mime = rdf_value(resource, DCAT.mediaType)
     if not mime:
         return
-    if isinstance(mime, str):
-        return mime
     if IANAFORMAT in mime:
         return '/'.join(mime.split('/')[-2:])
+    if isinstance(mime, str):
+        return mime
 
 
 def format_from_rdf(resource):
