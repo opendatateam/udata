@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Don't crash on files not found when purging resources [2858](https://github.com/opendatateam/udata/pull/2858)
 
 ## 6.1.5 (2023-06-19)
 
