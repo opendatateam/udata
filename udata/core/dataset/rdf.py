@@ -114,6 +114,17 @@ def frequency_to_rdf(frequency, graph=None):
     return RDF_FREQUENCIES.get(frequency, getattr(FREQ, frequency))
 
 
+def owner_to_rdf(dataset, graph=None):
+    from udata.core.organization.rdf import organization_to_rdf
+    from udata.core.user.rdf import user_to_rdf
+
+    if dataset.owner:
+        return user_to_rdf(dataset.owner, graph)
+    elif dataset.organization:
+        return organization_to_rdf(dataset.organization, graph)
+    return
+
+
 def resource_to_rdf(resource, dataset=None, graph=None):
     '''
     Map a Resource domain model to a DCAT/RDF graph
@@ -198,6 +209,10 @@ def dataset_to_rdf(dataset, graph=None):
     frequency = frequency_to_rdf(dataset.frequency)
     if frequency:
         d.set(DCT.accrualPeriodicity, frequency)
+
+    publisher = owner_to_rdf(dataset, graph)
+    if publisher:
+        d.set(DCT.publisher, publisher)
 
     return d
 
