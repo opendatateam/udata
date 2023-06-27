@@ -287,6 +287,7 @@ class DcatBackendTest:
         # Format is a IANA URI
         assert resource_1.format == 'json'
         assert resource_1.mime == 'application/json'
+        assert resource_1.filesize == 12323
         assert resource_1.description == 'A JSON resource'
         assert resource_1.url == 'http://data.test.org/datasets/1/resources/1/file.json'
 
