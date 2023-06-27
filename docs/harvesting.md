@@ -117,7 +117,7 @@ Fields are extracted according these rules:
 | last_modified | dct:modified                       |                                        |
 | format        | dct:format                         |                                        |
 | mime          | dcat:mediaType                     |                                        |
-| filesize      | dcat:bytesSize                     |                                        |
+| filesize      | dcat:byteSize                     |                                        |
 | checksum      | spdx:checksum                      | See [Checksum](#checksum)              |
 
 

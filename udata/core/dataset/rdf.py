@@ -140,7 +140,7 @@ def resource_to_rdf(resource, dataset=None, graph=None):
         if dataset.license.url:
             r.add(DCT.license, URIRef(dataset.license.url))
     if resource.filesize is not None:
-        r.add(DCAT.bytesSize, Literal(resource.filesize))
+        r.add(DCAT.byteSize, Literal(resource.filesize))
     if resource.mime:
         r.add(DCAT.mediaType, Literal(resource.mime))
     if resource.format:
@@ -402,7 +402,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
     resource.title = title_from_rdf(distrib, url)
     resource.url = url
     resource.description = sanitize_html(distrib.value(DCT.description))
-    resource.filesize = rdf_value(distrib, DCAT.bytesSize)
+    resource.filesize = rdf_value(distrib, DCAT.byteSize)
     resource.mime = mime_from_rdf(distrib)
     resource.format = format_from_rdf(distrib)
     checksum = distrib.value(SPDX.checksum)
