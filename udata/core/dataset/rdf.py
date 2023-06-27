@@ -136,7 +136,8 @@ def resource_to_rdf(resource, dataset=None, graph=None):
                                  _anchor='resource-{0}'.format(resource.id)))
     else:
         id = BNode(resource.id)
-    permalink = endpoint_for('datasets.resource', 'api.resource_redirect', id=resource.id, _external=True)
+    permalink = endpoint_for('datasets.resource', 'api.resource_redirect', id=resource.id,
+                             _external=True)
     r = graph.resource(id)
     r.set(RDF.type, DCAT.Distribution)
     r.set(DCT.identifier, Literal(resource.id))
@@ -466,7 +467,8 @@ def dataset_from_rdf(graph, dataset=None, node=None):
         dataset.acronym = acronym
 
     tags = [tag.toPython() for tag in d.objects(DCAT.keyword)]
-    tags += [theme.toPython() for theme in d.objects(DCAT.theme) if not isinstance(theme, RdfResource)]
+    tags += [theme.toPython() for theme in d.objects(DCAT.theme)
+             if not isinstance(theme, RdfResource)]
     dataset.tags = list(set(tags))
 
     temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
