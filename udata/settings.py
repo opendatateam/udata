@@ -104,6 +104,11 @@ class Defaults(object):
                                     'Your password has been changed')
     SECURITY_EMAIL_SUBJECT_PASSWORD_RESET = _('Password reset instructions')
 
+    SECURITY_MSG_PASSWORD_RESET_REQUEST = (
+        _("Instructions to reset your password have been sent to %(email)s if it exists."),
+        "info",
+    )
+
     SECURITY_RETURN_GENERIC_RESPONSES = False
 
     # Sentry configuration
