@@ -166,8 +166,8 @@ class DatasetToRdfTest:
         pot = d.value(DCT.temporal)
 
         assert pot.value(RDF.type).identifier == DCT.PeriodOfTime
-        assert pot.value(SCHEMA.startDate).toPython() == start
-        assert pot.value(SCHEMA.endDate).toPython() == end
+        assert pot.value(DCAT.startDate).toPython() == start
+        assert pot.value(DCAT.endDate).toPython() == end
 
     def test_from_external_repository(self):
         dataset = DatasetFactory(harvest=HarvestDatasetMetadata(
@@ -277,8 +277,8 @@ class RdfToDatasetTest:
         pot = BNode()
         g.add((node, DCT.temporal, pot))
         g.set((pot, RDF.type, DCT.PeriodOfTime))
-        g.set((pot, SCHEMA.startDate, Literal(start)))
-        g.set((pot, SCHEMA.endDate, Literal(end)))
+        g.set((pot, DCAT.startDate, Literal(start)))
+        g.set((pot, DCAT.endDate, Literal(end)))
         for tag in tags:
             g.add((node, DCAT.keyword, Literal(tag)))
 

@@ -103,8 +103,8 @@ def temporal_to_rdf(daterange, graph=None):
     graph = graph or Graph(namespace_manager=namespace_manager)
     pot = graph.resource(BNode())
     pot.set(RDF.type, DCT.PeriodOfTime)
-    pot.set(SCHEMA.startDate, Literal(daterange.start))
-    pot.set(SCHEMA.endDate, Literal(daterange.end))
+    pot.set(DCAT.startDate, Literal(daterange.start))
+    pot.set(DCAT.endDate, Literal(daterange.end))
     return pot
 
 
