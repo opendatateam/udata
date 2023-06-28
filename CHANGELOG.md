@@ -4,6 +4,7 @@
 
 - Improve DCAT harvest of mime type [#2857](https://github.com/opendatateam/udata/pull/2857)
 - Don't crash on files not found when purging resources [2858](https://github.com/opendatateam/udata/pull/2858)
+- Allow customization of the password reset page message [#2861](https://github.com/opendatateam/udata/pull/2861)
 
 ## 6.1.5 (2023-06-19)
 
