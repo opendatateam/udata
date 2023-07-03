@@ -302,6 +302,8 @@ class ResourceMixin(object):
     def last_modified(self):
         if self.harvest and self.harvest.modified_at and to_naive_datetime(self.harvest.modified_at) < datetime.utcnow():
             return max([self.last_modified_internal, to_naive_datetime(self.harvest.modified_at)])
+        if resource.filetype == 'remote' and extras.get('analysis:last-modified-at'):
+            return extras.get('analysis:last-modified-at')
         return self.last_modified_internal
 
     def clean(self):
