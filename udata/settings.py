@@ -248,6 +248,8 @@ class Defaults(object):
     # The number of days since last harvesting date when a missing dataset is archived
     HARVEST_AUTOARCHIVE_GRACE_DAYS = 7
 
+    HARVEST_VALIDATION_CONTACT_FORM = None
+
     ACTIVATE_TERRITORIES = False
     # The order is important to compute parents/children, smaller first.
     HANDLED_LEVELS = tuple()

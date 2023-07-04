@@ -6,6 +6,14 @@
 <div class="row">
     <div class="col-xs-12 lead text-center">
         <p>{{ _('Your harvester is now pending for team review.') }}</p>
+        <div v-if="harvestValidationContactForm">
+            <p>{{ _('Please inform us through the following contact form (at the end of the page) if you want us to validate your harvester:') }}</p>
+            <p>
+                <a href="{{ harvestValidationContactForm }}">
+                    {{ _('Harvester validation contact form') }}
+                </a>
+            </p>
+        </div>
         <p>{{ _("You'll be notified on approval (or refusal)") }}</p>
     </div>
 </div>
@@ -22,9 +30,16 @@
 </template>
 
 <script>
+import config from 'config';
+
 export default {
     props: {
         source: {type: Object, default: () => {}}
+    },
+    data() {
+        return {
+            harvestValidationContactForm: config.harvest_validation_contact_form
+        }
     }
 };
 </script>
