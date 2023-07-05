@@ -692,7 +692,7 @@ class HarvestMetadataTest:
 
     def test_harvest_resource_metadata_extra_modifed_at(self):
         resource = ResourceFactory(filetype='remote')
-        resource.extras.update({'analysis:last-modified-at': datetime.utcnow()})
+        resource.extras.update({'analysis:last-modified-at': datetime.datetime(2023,1,1)})
         resource.validate()
 
         assert resource.last_modified == resource.extras['analysis:last-modified-at']
