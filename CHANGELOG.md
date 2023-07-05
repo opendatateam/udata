@@ -4,6 +4,7 @@
 
 - Improve DCAT harvest of mime type [#2857](https://github.com/opendatateam/udata/pull/2857)
 - Don't crash on files not found when purging resources [2858](https://github.com/opendatateam/udata/pull/2858)
+- Add optionnal harvest validation form [#2864](https://github.com/opendatateam/udata/pull/2864)
 
 ## 6.1.5 (2023-06-19)
 
