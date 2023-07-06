@@ -67,7 +67,7 @@ from .exceptions import (
 from .rdf import dataset_to_rdf
 
 
-DEFAULT_SORTING = '-created_at'
+DEFAULT_SORTING = '-created_at_internal'
 SUGGEST_SORTING = '-metrics.followers'
 
 

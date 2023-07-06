@@ -27,7 +27,6 @@ from .permissions import DatasetEditPermission, ResourceEditPermission
 from .search import DatasetSearch
 
 DEFAULT_PAGE_SIZE = 50
-DEFAULT_SORTING = '-created_at'
 
 #: Default mask to make it lightweight by default
 DEFAULT_MASK_APIV2 = ','.join((
