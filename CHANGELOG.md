@@ -4,6 +4,7 @@
 
 - Improve DCAT harvest of mime type [#2857](https://github.com/opendatateam/udata/pull/2857)
 - Don't crash on files not found when purging resources [2858](https://github.com/opendatateam/udata/pull/2858)
+- Use the resource's extra `analysis:last-modified-at` in the `last_modified` property [#2863](https://github.com/opendatateam/udata/pull/2863)
 - Add optionnal harvest validation form [#2864](https://github.com/opendatateam/udata/pull/2864)
 - Fix dataset list default sorting [#2867](https://github.com/opendatateam/udata/pull/2867)
 
