@@ -229,7 +229,7 @@ class DatasetAPITest(APITestCase):
         # reloads dataset from mongoDB to get mongoDB's date's seconds reset.
         dataset.reload()
         self.assertEqual(data['internal']['created_at_internal'], fields.ISODateTime().format(dataset.created_at_internal))
-        self.assertEqual(data['internal']['last_modified_internal'], pytz.utc.localize(dataset.last_modified_internal).isoformat())
+        self.assertEqual(data['internal']['last_modified_internal'], fields.ISODateTime().format(dataset.last_modified_internal))
 
 
     def test_dataset_api_get_deleted(self):
