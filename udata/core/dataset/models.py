@@ -826,6 +826,13 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         return result
 
     @property
+    def internal(self):
+        return {
+            'created_at_internal': self.created_at_internal,
+            'last_modified_internal': self.last_modified_internal
+        }
+
+    @property
     def views_count(self):
         return self.metrics.get('views', 0)
 

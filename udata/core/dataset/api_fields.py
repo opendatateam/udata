@@ -159,11 +159,18 @@ community_resource_page_fields = api.model(
 
 #: Default mask to make it lightweight by default
 DEFAULT_MASK = ','.join((
-    'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'created_at_internal', 'last_modified', 'deleted',
+    'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
     'private', 'tags', 'badges', 'resources', 'frequency', 'frequency_date', 'extras', 'harvest',
     'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
-    'uri', 'page', 'last_update', 'archived', 'quality'
+    'uri', 'page', 'last_update', 'archived', 'quality', 'internal'
 ))
+
+dataset_internal_fields = api.model('DatasetInternals', {
+    'created_at_internal': fields.ISODateTime(
+        description='The dataset\'s internal creation date on the site', required=True),
+    'last_modified_internal': fields.ISODateTime(
+        description='The dataset\'s internal last modification date', required=True),
+})
 
 dataset_fields = api.model('Dataset', {
     'id': fields.String(description='The dataset identifier', readonly=True),
@@ -175,8 +182,6 @@ dataset_fields = api.model('Dataset', {
         description='The dataset description in markdown', required=True),
     'created_at': fields.ISODateTime(
         description='This date is computed between harvested creation date if any and site\'s internal creation date' , required=True),
-    'created_at_internal': fields.ISODateTime(
-        description='The dataset\'s internal creation date on the site', required=True),
     'last_modified': fields.ISODateTime(
         description='The dataset last modification date', required=True),
     'deleted': fields.ISODateTime(description='The deletion date if deleted'),
@@ -230,6 +235,8 @@ dataset_fields = api.model('Dataset', {
     'quality': fields.Raw(description='The dataset quality', readonly=True),
     'last_update': fields.ISODateTime(
         description='The resources last modification date', required=True),
+    'internal': fields.Nested(
+        dataset_internal_fields, description='Site internal and specific dataset\'s data'),
 }, mask=DEFAULT_MASK)
 
 dataset_page_fields = api.model('DatasetPage', fields.pager(dataset_fields),
