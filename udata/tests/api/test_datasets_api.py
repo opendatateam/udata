@@ -119,6 +119,15 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(response.json['data'][0]['id'], str(first.id))
 
+    def test_dataset_api_default_sorting(self):
+        # Default sort should be -created
+        self.login()
+        [VisibleDatasetFactory(title="some created dataset") for i in range(10)]
+        last = VisibleDatasetFactory(title="last created dataset")
+        response = self.get(url_for('api.datasets'))
+        self.assert200(response)
+        self.assertEqual(response.json['data'][0]['id'], str(last.id))
+
     def test_dataset_api_list_with_filters(self):
         '''Should filters datasets results based on query filters'''
         owner = UserFactory()

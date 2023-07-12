@@ -62,5 +62,8 @@
     config.LICENSE_GROUPS|tojson|urlencode
 }} />
 <meta name="read-only-enabled" content="{{ 'true' if config.READ_ONLY_MODE else 'false' }}">
+{% if config.HARVEST_VALIDATION_CONTACT_FORM %}
+<meta name="harvest-validation-contact-form" content="{{config.HARVEST_VALIDATION_CONTACT_FORM}}">
+{% endif %}
 
 {% endmacro %}
