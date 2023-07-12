@@ -95,7 +95,7 @@ and fields are mapped according to:
 | last_modified     | dct:modified            |       |
 | format            | dct:format              |       |
 | mime              | dcat:mediaType          |       |
-| filesize          | dcat:bytesSize          |       |
+| filesize          | dcat:byteSize          |       |
 | checksum          | spdx:checksum           |       |
 
 | TemporalCoverage | dct:PeriodOfTime |
