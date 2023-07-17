@@ -103,8 +103,8 @@ def temporal_to_rdf(daterange, graph=None):
     graph = graph or Graph(namespace_manager=namespace_manager)
     pot = graph.resource(BNode())
     pot.set(RDF.type, DCT.PeriodOfTime)
-    pot.set(SCHEMA.startDate, Literal(daterange.start))
-    pot.set(SCHEMA.endDate, Literal(daterange.end))
+    pot.set(DCAT.startDate, Literal(daterange.start))
+    pot.set(DCAT.endDate, Literal(daterange.end))
     return pot
 
 
@@ -112,6 +112,17 @@ def frequency_to_rdf(frequency, graph=None):
     if not frequency:
         return
     return RDF_FREQUENCIES.get(frequency, getattr(FREQ, frequency))
+
+
+def owner_to_rdf(dataset, graph=None):
+    from udata.core.organization.rdf import organization_to_rdf
+    from udata.core.user.rdf import user_to_rdf
+
+    if dataset.owner:
+        return user_to_rdf(dataset.owner, graph)
+    elif dataset.organization:
+        return organization_to_rdf(dataset.organization, graph)
+    return
 
 
 def resource_to_rdf(resource, dataset=None, graph=None):
@@ -125,7 +136,8 @@ def resource_to_rdf(resource, dataset=None, graph=None):
                                  _anchor='resource-{0}'.format(resource.id)))
     else:
         id = BNode(resource.id)
-    permalink = endpoint_for('datasets.resource', 'api.resource_redirect', id=resource.id, _external=True)
+    permalink = endpoint_for('datasets.resource', 'api.resource_redirect', id=resource.id,
+                             _external=True)
     r = graph.resource(id)
     r.set(RDF.type, DCAT.Distribution)
     r.set(DCT.identifier, Literal(resource.id))
@@ -140,7 +152,7 @@ def resource_to_rdf(resource, dataset=None, graph=None):
         if dataset.license.url:
             r.add(DCT.license, URIRef(dataset.license.url))
     if resource.filesize is not None:
-        r.add(DCAT.bytesSize, Literal(resource.filesize))
+        r.add(DCAT.byteSize, Literal(resource.filesize))
     if resource.mime:
         r.add(DCAT.mediaType, Literal(resource.mime))
     if resource.format:
@@ -198,6 +210,10 @@ def dataset_to_rdf(dataset, graph=None):
     frequency = frequency_to_rdf(dataset.frequency)
     if frequency:
         d.set(DCT.accrualPeriodicity, frequency)
+
+    publisher = owner_to_rdf(dataset, graph)
+    if publisher:
+        d.set(DCT.publisher, publisher)
 
     return d
 
@@ -402,7 +418,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
     resource.title = title_from_rdf(distrib, url)
     resource.url = url
     resource.description = sanitize_html(distrib.value(DCT.description))
-    resource.filesize = rdf_value(distrib, DCAT.bytesSize)
+    resource.filesize = rdf_value(distrib, DCAT.byteSize)
     resource.mime = mime_from_rdf(distrib)
     resource.format = format_from_rdf(distrib)
     checksum = distrib.value(SPDX.checksum)
@@ -451,7 +467,8 @@ def dataset_from_rdf(graph, dataset=None, node=None):
         dataset.acronym = acronym
 
     tags = [tag.toPython() for tag in d.objects(DCAT.keyword)]
-    tags += [theme.toPython() for theme in d.objects(DCAT.theme) if not isinstance(theme, RdfResource)]
+    tags += [theme.toPython() for theme in d.objects(DCAT.theme)
+             if not isinstance(theme, RdfResource)]
     dataset.tags = list(set(tags))
 
     temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
