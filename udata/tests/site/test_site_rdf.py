@@ -39,6 +39,7 @@ class CatalogTest:
         assert isinstance(catalog.identifier, URIRef)
         assert str(catalog.identifier) == uri
         assert catalog.value(DCT.title) == Literal(site.title)
+        assert catalog.value(DCT.description) == Literal(f"{site.title}")
         lang = app.config['DEFAULT_LANGUAGE']
         assert catalog.value(DCT.language) == Literal(lang)
 
