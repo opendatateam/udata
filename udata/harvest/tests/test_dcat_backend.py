@@ -287,6 +287,7 @@ class DcatBackendTest:
         # Format is a IANA URI
         assert resource_1.format == 'json'
         assert resource_1.mime == 'application/json'
+        assert resource_1.filesize == 12323
         assert resource_1.description == 'A JSON resource'
         assert resource_1.url == 'http://data.test.org/datasets/1/resources/1/file.json'
 
@@ -305,11 +306,11 @@ class DcatBackendTest:
         dataset = Dataset.objects.filter(organization=org).first()
         assert dataset is not None
         assert dataset.harvest is not None
-        assert dataset.harvest.remote_id == '0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2'
-        assert dataset.harvest.dct_identifier == '0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2'
+        assert dataset.harvest.remote_id == '0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2'  # noqa
+        assert dataset.harvest.dct_identifier == '0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2'  # noqa
         assert dataset.harvest.created_at.date() == date(2004, 11, 3)
         assert dataset.harvest.modified_at is None
-        assert dataset.harvest.uri == 'https://sig.oreme.org/geonetwork/srv/resources/datasets/0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2'
+        assert dataset.harvest.uri == 'https://sig.oreme.org/geonetwork/srv/resources/datasets/0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2'  # noqa
         assert dataset.harvest.remote_url is None  # the uri validation failed
         assert dataset.description.startswith('Data of type chemistry')
         assert dataset.temporal_coverage is not None
@@ -338,8 +339,8 @@ class DcatBackendTest:
         assert dataset.harvest.remote_id == '0437a976-cff1-4fa6-807a-c23006df2f8f'
         assert dataset.harvest.created_at is None
         assert dataset.harvest.modified_at is None
-        assert dataset.harvest.uri == 'https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//datasets/0437a976-cff1-4fa6-807a-c23006df2f8f'
-        assert dataset.harvest.remote_url == 'https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//datasets/0437a976-cff1-4fa6-807a-c23006df2f8f'
+        assert dataset.harvest.uri == 'https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//datasets/0437a976-cff1-4fa6-807a-c23006df2f8f'  # noqa
+        assert dataset.harvest.remote_url == 'https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//datasets/0437a976-cff1-4fa6-807a-c23006df2f8f'  # noqa
         assert dataset.harvest.last_update.date() == date.today()
 
     def test_unsupported_mime_type(self, rmock):
