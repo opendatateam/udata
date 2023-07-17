@@ -104,6 +104,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     image_url = db.StringField()
     logo = db.ImageField(fs=avatars, basename=default_image_basename,
                          max_size=LOGO_MAX_SIZE, thumbnails=LOGO_SIZES)
+    siret = db.StringField(max_length=14)
 
     members = db.ListField(db.EmbeddedDocumentField(Member))
     teams = db.ListField(db.EmbeddedDocumentField(Team))

@@ -9,6 +9,7 @@
 - Add optionnal harvest validation form [#2864](https://github.com/opendatateam/udata/pull/2864)
 - Fix dataset list default sorting [#2867](https://github.com/opendatateam/udata/pull/2867)
 - Update API doc link [#2866](https://github.com/opendatateam/udata/pull/2866)
+- Add `siret` metadata for organizations []()
 
 ## 6.1.5 (2023-06-19)
 
