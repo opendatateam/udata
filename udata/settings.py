@@ -412,7 +412,7 @@ class Defaults(object):
     ####################
     SCHEMA_CATALOG_URL = None
 
-    API_DOC_EXTERNAL_LINK = 'https://doc.data.gouv.fr/api/reference/'
+    API_DOC_EXTERNAL_LINK = 'https://guides.data.gouv.fr/publier-des-donnees/guide-data.gouv.fr/api/reference'
 
     # Read Only Mode
     ####################
