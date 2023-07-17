@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2023-07-05 11:39+0200\n"
-"PO-Revision-Date: 2023-07-05 17:19\n"
+"PO-Revision-Date: 2023-07-17 14:36\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -1455,16 +1455,16 @@ msgstr "Ici"
 
 #: udata/tests/forms/test_model_field.py:71
 msgid "Model \"Unknown\" does not exist"
-msgstr ""
+msgstr "Le modèle \"Unknown\" n'existe pas"
 
 #: udata/tests/forms/test_model_field.py:155
 msgid "Expect a \"Target\" class but \"Wrong\" was found"
-msgstr ""
+msgstr "Attend une classe \"Target\" mais \"Wrong\" a été trouvée"
 
 #: udata/tests/forms/test_model_field.py:318
 #: udata/tests/forms/test_model_field.py:332
 msgid "Missing \"id\" field"
-msgstr ""
+msgstr "Champ \"id\" manquant"
 
 #: udata/tests/search/test_adapter.py:24
 msgid "Never reused"
