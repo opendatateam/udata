@@ -61,7 +61,7 @@ org_fields = api.model('Organization', {
         required=True),
     'description': fields.Markdown(
         description='The organization description in Markdown', required=True),
-    'siret': fields.String(description='The organization\'s business identification number.'),
+    'establishment_number_id': fields.String(description='The organization\'s establishment identification number.'),
     'created_at': fields.ISODateTime(
         description='The organization creation date', readonly=True),
     'last_modified': fields.ISODateTime(
