@@ -18,13 +18,14 @@ __all__ = (
 def siret_check(form, field):
     numero_siren = str(field.data)
 
-    chiffres = [int(chiffre) for chiffre in numero_siren]
-    chiffres[1::2] = [chiffre * 2 for chiffre in chiffres[1::2]]
-    chiffres = [chiffre - 9 if chiffre > 9 else chiffre for chiffre in chiffres]
-    somme = sum(chiffres)
+    if numero_siren:
+        chiffres = [int(chiffre) for chiffre in numero_siren]
+        chiffres[1::2] = [chiffre * 2 for chiffre in chiffres[1::2]]
+        chiffres = [chiffre - 9 if chiffre > 9 else chiffre for chiffre in chiffres]
+        somme = sum(chiffres)
 
-    if not somme % 10 == 0:
-        raise validators.ValidationError(_('Invalid Siret number'))
+        if not somme % 10 == 0:
+            raise validators.ValidationError(_('Invalid Siret number'))
 
 
 class OrganizationForm(ModelForm):
