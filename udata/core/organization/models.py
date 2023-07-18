@@ -40,6 +40,9 @@ CERTIFIED = 'certified'
 TITLE_SIZE_LIMIT = 350
 DESCRIPTION_SIZE_LIMIT = 100000
 
+ORG_EID_SIZE_LIMIT = 14
+ORG_EID_FORMAT = 'fr'
+
 
 class Team(db.EmbeddedDocument):
     name = db.StringField(required=True)
