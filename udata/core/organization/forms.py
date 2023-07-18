@@ -16,9 +16,13 @@ __all__ = (
 
 
 def siret_check(form, field):
-    numero_siren = str(field.data)
+    if field.data:
+        numero_siren = str(field.data)
+        # Min length done here and not in `validators.Length` because the field has to stay optional.
+        if len(numero_siren) < 9:
+            raise validators.ValidationError(_('Invalid Siret number'))
 
-    if numero_siren:
+        # Checksum compute
         chiffres = [int(chiffre) for chiffre in numero_siren]
         chiffres[1::2] = [chiffre * 2 for chiffre in chiffres[1::2]]
         chiffres = [chiffre - 9 if chiffre > 9 else chiffre for chiffre in chiffres]
@@ -40,7 +44,7 @@ class OrganizationForm(ModelForm):
     url = fields.URLField(
         _('Website'), description=_('The organization website URL'))
     logo = fields.ImageField(_('Logo'), sizes=LOGO_SIZES)
-    siret = fields.StringField(_('Siret'), [validators.Length(min=9, max=14), siret_check])
+    siret = fields.StringField(_('Siret'), [validators.Length(max=14), siret_check])
 
     deleted = fields.DateTimeField()
     extras = fields.ExtrasField()
