@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2023-03-29 12:17+0200\n"
-"PO-Revision-Date: 2023-04-03 08:25\n"
+"POT-Creation-Date: 2023-07-17 16:43+0200\n"
+"PO-Revision-Date: 2023-07-17 14:57\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: it\n"
 "Language-Team: Italian\n"
@@ -42,7 +42,7 @@ msgstr "La tua password è stata modificata"
 msgid "Password reset instructions"
 msgstr "Istruzioni per reimpostare la password"
 
-#: udata/settings.py:407
+#: udata/settings.py:409
 msgid "This dataset has been archived"
 msgstr "Questo dataset è stato archiviato"
 
@@ -83,7 +83,7 @@ msgstr "Cognome"
 msgid "Last name is required"
 msgstr "Il cognome è obbligatorio"
 
-#: udata/auth/forms.py:33
+#: udata/auth/forms.py:33 udata/tests/forms/test_current_user_field.py:214
 msgid "Password must be changed for security reasons"
 msgstr "La password deve essere cambiata per motivi di sicurezza"
 
@@ -184,11 +184,11 @@ msgstr "ha eliminato un dataset"
 msgid "Checksum value"
 msgstr "Valore del checksum"
 
-#: udata/core/dataset/forms.py:41
+#: udata/core/dataset/forms.py:41 udata/tests/api/test_datasets_api.py:638
 msgid "Schema must have at least a name or an url. Having both is not allowed."
 msgstr ""
 
-#: udata/core/dataset/forms.py:47
+#: udata/core/dataset/forms.py:47 udata/tests/api/test_datasets_api.py:645
 msgid "Provided URL is not valid."
 msgstr ""
 
@@ -472,35 +472,37 @@ msgstr "File caricato"
 msgid "Remote file"
 msgstr "File remoto"
 
-#: udata/core/dataset/models.py:384 udata/core/dataset/rdf.py:337
+#: udata/core/dataset/models.py:388 udata/core/dataset/rdf.py:374
+#: udata/tests/dataset/test_dataset_rdf.py:499
+#: udata/tests/dataset/test_dataset_rdf.py:512
 msgid "Nameless resource"
 msgstr "File senza nome"
 
-#: udata/core/dataset/models.py:459
+#: udata/core/dataset/models.py:463
 msgid "Future date of update"
 msgstr "Data di aggiornamento futura"
 
-#: udata/core/dataset/models.py:469 udata/models/datetime_fields.py:59
+#: udata/core/dataset/models.py:473 udata/models/datetime_fields.py:59
 msgid "Creation date"
 msgstr "Data di creazione"
 
-#: udata/core/dataset/models.py:471 udata/models/datetime_fields.py:61
+#: udata/core/dataset/models.py:475 udata/models/datetime_fields.py:61
 msgid "Last modification date"
 msgstr "Data dell'ultima modifica"
 
-#: udata/core/dataset/models.py:480
+#: udata/core/dataset/models.py:484
 msgid "Pivotal data"
 msgstr "Dati cardine"
 
-#: udata/core/dataset/models.py:519
+#: udata/core/dataset/models.py:523
 msgid "dataset"
 msgstr "dataset"
 
-#: udata/core/dataset/rdf.py:335
+#: udata/core/dataset/rdf.py:372 udata/tests/dataset/test_dataset_rdf.py:486
 msgid "{format} resource"
 msgstr "File {format}"
 
-#: udata/core/dataset/tasks.py:95
+#: udata/core/dataset/tasks.py:98
 msgid "You need to update some frequency-based datasets"
 msgstr "È necessario aggiornare alcuni dataset con una frequenza di aggiornamento"
 
@@ -740,7 +742,7 @@ msgstr "Visualizzazione"
 msgid "Connected device"
 msgstr "Dispositivo connesso"
 
-#: udata/core/reuse/models.py:27
+#: udata/core/reuse/models.py:27 udata/tests/reuse/test_reuse_model.py:104
 msgid "Health"
 msgstr "Salute"
 
@@ -972,60 +974,70 @@ msgstr "Moderatore del sito"
 msgid "Test mail"
 msgstr "Email di prova"
 
-#: udata/forms/fields.py:118
+#: udata/forms/fields.py:119
 msgid "Please input a date/time value"
 msgstr ""
 
-#: udata/forms/fields.py:130 udata/forms/fields.py:138
+#: udata/forms/fields.py:131
 msgid "Invalid date/time input"
 msgstr ""
 
-#: udata/forms/fields.py:164
+#: udata/forms/fields.py:158
 msgid "The role {role} does not exist"
 msgstr "Il ruolo {role} non esiste"
 
-#: udata/forms/fields.py:181
+#: udata/forms/fields.py:175
 msgid "Not a valid UUID"
 msgstr "UUID non valido"
 
-#: udata/forms/fields.py:206
+#: udata/forms/fields.py:200
 msgid "Invalid URL"
 msgstr "URL non valido"
 
-#: udata/forms/fields.py:402
+#: udata/forms/fields.py:404
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
 msgstr "Il tag \"%(tag)s\" deve essere di lunghezza compresa tra %(min)d e %(max)d caratteri."
 
-#: udata/forms/fields.py:442 udata/forms/fields.py:494
+#: udata/forms/fields.py:444 udata/forms/fields.py:496
 msgid "{0} does not exists"
 msgstr "{0} non esiste"
 
-#: udata/forms/fields.py:481
+#: udata/forms/fields.py:470 udata/tests/forms/test_model_field.py:318
+#: udata/tests/forms/test_model_field.py:332
+msgid "Missing \"id\" field"
+msgstr ""
+
+#: udata/forms/fields.py:477
+msgid "Expect a \"{0}\" class but \"{1}\" was found"
+msgstr ""
+
+#: udata/forms/fields.py:483 udata/tests/forms/test_model_field.py:43
+#: udata/tests/forms/test_model_field.py:56
 msgid "Expect both class and identifier"
 msgstr "Si attende sia una classe che un identificatore"
 
-#: udata/forms/fields.py:527
+#: udata/forms/fields.py:529
 msgid "Model for {0} not found"
 msgstr "Modello per {0} non trovato"
 
-#: udata/forms/fields.py:562
+#: udata/forms/fields.py:564
 msgid "Unknown identifiers: {identifiers}"
 msgstr "Identificatori sconosciuti: {identifiers}"
 
-#: udata/forms/fields.py:697
+#: udata/forms/fields.py:699
 msgid "Unable to parse date range"
 msgstr "Impossibile analizzare l'intervallo di date"
 
-#: udata/forms/fields.py:724 udata/forms/fields.py:747
+#: udata/forms/fields.py:726 udata/forms/fields.py:749
 msgid "You must be authenticated"
 msgstr "Devi essere autenticatə"
 
-#: udata/forms/fields.py:727
+#: udata/forms/fields.py:729
 msgid "You can only set yourself as owner"
 msgstr "Puoi solo impostare te stessə come proprietariə"
 
-#: udata/forms/fields.py:750
+#: udata/forms/fields.py:752
 msgid "Permission denied for this organization"
 msgstr "Permesso negato per questa organizzazione"
 
@@ -1445,6 +1457,10 @@ msgstr ""
 
 #: udata/templates/security/email/welcome_existing.html:25
 msgid "Here"
+msgstr ""
+
+#: udata/tests/forms/test_model_field.py:155
+msgid "Expect a \"Target\" class but \"Wrong\" was found"
 msgstr ""
 
 #: udata/tests/search/test_adapter.py:24
