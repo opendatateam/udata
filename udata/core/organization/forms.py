@@ -47,9 +47,6 @@ class OrganizationForm(ModelForm):
     deleted = fields.DateTimeField()
     extras = fields.ExtrasField()
 
-    def validate_siret(self, form, field):
-        pass
-
     def save(self, commit=True, **kwargs):
         '''Register the current user as admin on creation'''
         org = super(OrganizationForm, self).save(commit=False, **kwargs)
