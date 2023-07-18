@@ -15,6 +15,21 @@ __all__ = (
 )
 
 
+def siret_check(form, field):
+    numero_siren = str(field.data)
+    if len(numero_siren) < 9:
+        raise validators.ValidationError(_('Invalid Siret number'))
+
+    # Calcul de la clé de contrôle
+    chiffres = [int(chiffre) for chiffre in numero_siren]
+    chiffres[1::2] = [chiffre * 2 for chiffre in chiffres[1::2]]
+    chiffres = [chiffre - 9 if chiffre > 9 else chiffre for chiffre in chiffres]
+    somme = sum(chiffres)
+
+    if not somme % 10 == 0:
+        raise validators.ValidationError(_('Invalid Siret number'))
+
+
 class OrganizationForm(ModelForm):
     model_class = Organization
 
@@ -27,9 +42,13 @@ class OrganizationForm(ModelForm):
     url = fields.URLField(
         _('Website'), description=_('The organization website URL'))
     logo = fields.ImageField(_('Logo'), sizes=LOGO_SIZES)
+    siret = fields.StringField(_('Siret'), [validators.Length(max=14), siret_check])
 
     deleted = fields.DateTimeField()
     extras = fields.ExtrasField()
+
+    def validate_siret(self, form, field):
+        pass
 
     def save(self, commit=True, **kwargs):
         '''Register the current user as admin on creation'''

@@ -25,6 +25,9 @@ export default {
                     id: 'acronym',
                     label: this._('Acronym')
                 }, {
+                    id: 'siret',
+                    label: this._('Siret')
+                }, {
                     id: 'description',
                     label: this._('Description')
                 }, {
