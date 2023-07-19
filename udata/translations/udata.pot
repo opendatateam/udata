@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 6.1.6.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2023-07-19 14:06+0200\n"
-"PO-Revision-Date: 2023-07-19 14:06+0200\n"
+"POT-Creation-Date: 2023-07-19 15:10+0200\n"
+"PO-Revision-Date: 2023-07-19 15:10+0200\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -222,7 +222,7 @@ msgid "Title"
 msgstr ""
 
 #: udata/core/dataset/forms.py:81 udata/core/dataset/forms.py:141
-#: udata/core/jobs/forms.py:28 udata/core/organization/forms.py:44
+#: udata/core/jobs/forms.py:28 udata/core/organization/forms.py:47
 #: udata/core/reuse/forms.py:21 udata/core/topic/forms.py:17
 #: udata/harvest/forms.py:62
 msgid "Description"
@@ -286,7 +286,7 @@ msgstr ""
 msgid "Publish as"
 msgstr ""
 
-#: udata/core/dataset/forms.py:138 udata/core/organization/forms.py:42
+#: udata/core/dataset/forms.py:138 udata/core/organization/forms.py:45
 msgid "Acronym"
 msgstr ""
 
@@ -516,7 +516,7 @@ msgid "You need to update some frequency-based datasets"
 msgstr ""
 
 #: udata/core/discussions/forms.py:14 udata/core/discussions/forms.py:21
-#: udata/core/organization/forms.py:76 udata/core/organization/forms.py:80
+#: udata/core/organization/forms.py:79 udata/core/organization/forms.py:83
 #: udata/harvest/forms.py:78
 msgid "Comment"
 msgstr ""
@@ -539,7 +539,7 @@ msgstr ""
 msgid "A discussion has been closed"
 msgstr ""
 
-#: udata/core/jobs/forms.py:27 udata/core/organization/forms.py:40
+#: udata/core/jobs/forms.py:27 udata/core/organization/forms.py:43
 #: udata/core/post/forms.py:15 udata/core/topic/forms.py:15
 #: udata/harvest/forms.py:60 udata/templates/api/admin.html:10
 msgid "Name"
@@ -574,38 +574,42 @@ msgid "A siret number is a least 14 characters long"
 msgstr ""
 
 #: udata/core/organization/forms.py:34
+msgid "A siret number is only made of digits"
+msgstr ""
+
+#: udata/core/organization/forms.py:37
 msgid "Invalid Siret number"
 msgstr ""
 
-#: udata/core/organization/forms.py:42
+#: udata/core/organization/forms.py:45
 msgid "Shorter organization name"
 msgstr ""
 
-#: udata/core/organization/forms.py:45
+#: udata/core/organization/forms.py:48
 msgid "The details about your organization"
 msgstr ""
 
-#: udata/core/organization/forms.py:47 udata/core/user/forms.py:20
+#: udata/core/organization/forms.py:50 udata/core/user/forms.py:20
 msgid "Website"
 msgstr ""
 
-#: udata/core/organization/forms.py:47
+#: udata/core/organization/forms.py:50
 msgid "The organization website URL"
 msgstr ""
 
-#: udata/core/organization/forms.py:48
+#: udata/core/organization/forms.py:51
 msgid "Logo"
 msgstr ""
 
-#: udata/core/organization/forms.py:49
+#: udata/core/organization/forms.py:52
 msgid "Business id"
 msgstr ""
 
-#: udata/core/organization/forms.py:51
+#: udata/core/organization/forms.py:54
 msgid "Business identification number"
 msgstr ""
 
-#: udata/core/organization/forms.py:87
+#: udata/core/organization/forms.py:90
 msgid "Role"
 msgstr ""
 
