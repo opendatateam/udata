@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2023-03-29 12:17+0200\n"
-"PO-Revision-Date: 2023-04-04 08:00\n"
+"POT-Creation-Date: 2023-07-17 16:43+0200\n"
+"PO-Revision-Date: 2023-07-17 15:03\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -42,7 +42,7 @@ msgstr "Votre mot de passe a été modifié"
 msgid "Password reset instructions"
 msgstr "Instructions de réinitialisation du mot de passe"
 
-#: udata/settings.py:407
+#: udata/settings.py:409
 msgid "This dataset has been archived"
 msgstr "Ce jeu de données a été archivé"
 
@@ -83,7 +83,7 @@ msgstr "Nom"
 msgid "Last name is required"
 msgstr "Nom de famille requis"
 
-#: udata/auth/forms.py:33
+#: udata/auth/forms.py:33 udata/tests/forms/test_current_user_field.py:214
 msgid "Password must be changed for security reasons"
 msgstr "Le mot de passe doit être modifié pour des raisons de sécurité. Veuillez utiliser la récupération de mot de passe afin d’en définir un nouveau"
 
@@ -184,11 +184,11 @@ msgstr "a supprimé un jeu de données"
 msgid "Checksum value"
 msgstr "Valeur de la somme de contrôle"
 
-#: udata/core/dataset/forms.py:41
+#: udata/core/dataset/forms.py:41 udata/tests/api/test_datasets_api.py:638
 msgid "Schema must have at least a name or an url. Having both is not allowed."
 msgstr "Le schéma doit avoir au moins un nom ou une URL. Avoir les deux à la fois n'est pas autorisé."
 
-#: udata/core/dataset/forms.py:47
+#: udata/core/dataset/forms.py:47 udata/tests/api/test_datasets_api.py:645
 msgid "Provided URL is not valid."
 msgstr "L'URL fournie est invalide."
 
@@ -472,35 +472,37 @@ msgstr "Fichier uploadé"
 msgid "Remote file"
 msgstr "Fichier distant"
 
-#: udata/core/dataset/models.py:384 udata/core/dataset/rdf.py:337
+#: udata/core/dataset/models.py:388 udata/core/dataset/rdf.py:374
+#: udata/tests/dataset/test_dataset_rdf.py:499
+#: udata/tests/dataset/test_dataset_rdf.py:512
 msgid "Nameless resource"
 msgstr "Ressource sans nom"
 
-#: udata/core/dataset/models.py:459
+#: udata/core/dataset/models.py:463
 msgid "Future date of update"
 msgstr "Future date de mise à jour"
 
-#: udata/core/dataset/models.py:469 udata/models/datetime_fields.py:59
+#: udata/core/dataset/models.py:473 udata/models/datetime_fields.py:59
 msgid "Creation date"
 msgstr "Date de création"
 
-#: udata/core/dataset/models.py:471 udata/models/datetime_fields.py:61
+#: udata/core/dataset/models.py:475 udata/models/datetime_fields.py:61
 msgid "Last modification date"
 msgstr "Date de dernière modification"
 
-#: udata/core/dataset/models.py:480
+#: udata/core/dataset/models.py:484
 msgid "Pivotal data"
 msgstr "Données pivot"
 
-#: udata/core/dataset/models.py:519
+#: udata/core/dataset/models.py:523
 msgid "dataset"
 msgstr "jeu de données"
 
-#: udata/core/dataset/rdf.py:335
+#: udata/core/dataset/rdf.py:372 udata/tests/dataset/test_dataset_rdf.py:486
 msgid "{format} resource"
 msgstr "Ressource {format}"
 
-#: udata/core/dataset/tasks.py:95
+#: udata/core/dataset/tasks.py:98
 msgid "You need to update some frequency-based datasets"
 msgstr "Vous devez publier certains jeux de données avec une fréquence de mise à jour"
 
@@ -740,7 +742,7 @@ msgstr "Visualisation"
 msgid "Connected device"
 msgstr "Objet connecté"
 
-#: udata/core/reuse/models.py:27
+#: udata/core/reuse/models.py:27 udata/tests/reuse/test_reuse_model.py:104
 msgid "Health"
 msgstr "Santé"
 
@@ -972,60 +974,70 @@ msgstr "Moderateur"
 msgid "Test mail"
 msgstr "Mail de test"
 
-#: udata/forms/fields.py:118
+#: udata/forms/fields.py:119
 msgid "Please input a date/time value"
 msgstr "Merci d'indiquer une date/heure valide"
 
-#: udata/forms/fields.py:130 udata/forms/fields.py:138
+#: udata/forms/fields.py:131
 msgid "Invalid date/time input"
 msgstr "Date/heure non valide"
 
-#: udata/forms/fields.py:164
+#: udata/forms/fields.py:158
 msgid "The role {role} does not exist"
 msgstr "Le rôle {role} n'existe pas"
 
-#: udata/forms/fields.py:181
+#: udata/forms/fields.py:175
 msgid "Not a valid UUID"
 msgstr "N'est pas un UUID"
 
-#: udata/forms/fields.py:206
+#: udata/forms/fields.py:200
 msgid "Invalid URL"
 msgstr "URL invalide"
 
-#: udata/forms/fields.py:402
+#: udata/forms/fields.py:404
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
 msgstr "Le mot-clé \"%(tag)s\" doit avoir entre %(min)d et %(max)d caractères."
 
-#: udata/forms/fields.py:442 udata/forms/fields.py:494
+#: udata/forms/fields.py:444 udata/forms/fields.py:496
 msgid "{0} does not exists"
 msgstr "{0} n'existe pas"
 
-#: udata/forms/fields.py:481
+#: udata/forms/fields.py:470 udata/tests/forms/test_model_field.py:318
+#: udata/tests/forms/test_model_field.py:332
+msgid "Missing \"id\" field"
+msgstr "Champ \"id\" manquant"
+
+#: udata/forms/fields.py:477
+msgid "Expect a \"{0}\" class but \"{1}\" was found"
+msgstr "Attend une classe \"{0}\" mais \"{1}\" a été trouvée"
+
+#: udata/forms/fields.py:483 udata/tests/forms/test_model_field.py:43
+#: udata/tests/forms/test_model_field.py:56
 msgid "Expect both class and identifier"
 msgstr "Attends à la fois une classe et un identifiant"
 
-#: udata/forms/fields.py:527
+#: udata/forms/fields.py:529
 msgid "Model for {0} not found"
 msgstr "Modèle pour {0} non trouvé"
 
-#: udata/forms/fields.py:562
+#: udata/forms/fields.py:564
 msgid "Unknown identifiers: {identifiers}"
 msgstr "Identifiants inconnus : {identifiers}"
 
-#: udata/forms/fields.py:697
+#: udata/forms/fields.py:699
 msgid "Unable to parse date range"
 msgstr "Incapable de comprendre la date"
 
-#: udata/forms/fields.py:724 udata/forms/fields.py:747
+#: udata/forms/fields.py:726 udata/forms/fields.py:749
 msgid "You must be authenticated"
 msgstr "Vous devez être authentifié"
 
-#: udata/forms/fields.py:727
+#: udata/forms/fields.py:729
 msgid "You can only set yourself as owner"
 msgstr "Vous ne pouvez définir que vous-même en tant que propriétaire"
 
-#: udata/forms/fields.py:750
+#: udata/forms/fields.py:752
 msgid "Permission denied for this organization"
 msgstr "Permission refusée pour cette organisation"
 
@@ -1449,6 +1461,10 @@ msgstr "Si vous avez oublié votre mot de passe, vous pouvez le réinitialiser"
 #: udata/templates/security/email/welcome_existing.html:25
 msgid "Here"
 msgstr "Ici"
+
+#: udata/tests/forms/test_model_field.py:155
+msgid "Expect a \"Target\" class but \"Wrong\" was found"
+msgstr "Attend une classe \"Target\" mais \"Wrong\" a été trouvée"
 
 #: udata/tests/search/test_adapter.py:24
 msgid "Never reused"
