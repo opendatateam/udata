@@ -24,11 +24,14 @@ def org_bid_check(form, field):
             if len(siret_number) != 14:
                 raise validators.ValidationError(_('A siret number is a least 14 characters long'))
 
-            # Checksum compute
-            chiffres = [int(chiffre) for chiffre in siret_number]
-            chiffres[1::2] = [chiffre * 2 for chiffre in chiffres[1::2]]
-            chiffres = [chiffre - 9 if chiffre > 9 else chiffre for chiffre in chiffres]
-            total = sum(chiffres)
+            # Checksum verification on only the SIREN part, the 9 first digits.
+            try:
+                chiffres = [int(chiffre) for chiffre in siret_number[:9]]
+                chiffres[1::2] = [chiffre * 2 for chiffre in chiffres[1::2]]
+                chiffres = [chiffre - 9 if chiffre > 9 else chiffre for chiffre in chiffres]
+                total = sum(chiffres)
+            except ValueError:
+                raise validators.ValidationError(_('A siret number is only made of digits'))
 
             if not total % 10 == 0:
                 raise validators.ValidationError(_('Invalid Siret number'))
