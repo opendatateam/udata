@@ -145,6 +145,11 @@ export const tags = _jsonMeta('tags-config');
 export const license_groups = _jsonMeta('license-groups-options') && Object.fromEntries(_jsonMeta('license-groups-options'));
 
 /**
+ * Harvest validation contact form
+ */
+export const harvest_validation_contact_form = _meta('harvest-validation-contact-form')
+
+/**
  * Max number of resources to display uncollapsed in dataset view
  */
 export const dataset_max_resources_uncollapsed = _jsonMeta('dataset-max-resources-uncollapsed');
@@ -191,6 +196,7 @@ export default {
     hidpi,
     tags,
     license_groups,
+    harvest_validation_contact_form,
     dataset_max_resources_uncollapsed,
     is_search_autocomplete_enabled,
     search_autocomplete_debounce,

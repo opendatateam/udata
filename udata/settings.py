@@ -248,6 +248,8 @@ class Defaults(object):
     # The number of days since last harvesting date when a missing dataset is archived
     HARVEST_AUTOARCHIVE_GRACE_DAYS = 7
 
+    HARVEST_VALIDATION_CONTACT_FORM = None
+
     ACTIVATE_TERRITORIES = False
     # The order is important to compute parents/children, smaller first.
     HANDLED_LEVELS = tuple()
@@ -410,7 +412,7 @@ class Defaults(object):
     ####################
     SCHEMA_CATALOG_URL = None
 
-    API_DOC_EXTERNAL_LINK = 'https://doc.data.gouv.fr/api/reference/'
+    API_DOC_EXTERNAL_LINK = 'https://guides.data.gouv.fr/publier-des-donnees/guide-data.gouv.fr/api/reference'
 
     # Read Only Mode
     ####################

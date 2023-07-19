@@ -53,7 +53,10 @@ def purge_datasets(self):
         storage = storages.resources
         for resource in dataset.resources:
             if resource.fs_filename is not None:
-                storage.delete(resource.fs_filename)
+                try:
+                    storage.delete(resource.fs_filename)
+                except FileNotFoundError as e:
+                    log.warning(e)
             # Not removing the resource from dataset.resources
             # with `dataset.remove_resource` as removing elements
             # from a list while iterating causes random effects.

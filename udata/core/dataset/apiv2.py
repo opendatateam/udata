@@ -27,7 +27,6 @@ from .permissions import DatasetEditPermission, ResourceEditPermission
 from .search import DatasetSearch
 
 DEFAULT_PAGE_SIZE = 50
-DEFAULT_SORTING = '-created_at'
 
 #: Default mask to make it lightweight by default
 DEFAULT_MASK_APIV2 = ','.join((
@@ -82,13 +81,15 @@ dataset_fields = apiv2.model('Dataset', {
                           readonly=True),
     'resources': fields.Raw(attribute=lambda o: {
         'rel': 'subsection',
-        'href': url_for('apiv2.resources', dataset=o.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True),
+        'href': url_for('apiv2.resources', dataset=o.id, page=1,
+                        page_size=DEFAULT_PAGE_SIZE, _external=True),
         'type': 'GET',
         'total': len(o.resources)
         }, description='Link to the dataset resources'),
     'community_resources': fields.Raw(attribute=lambda o: {
         'rel': 'subsection',
-        'href': url_for('api.community_resources', dataset=o.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True),
+        'href': url_for('api.community_resources', dataset=o.id, page=1,
+                        page_size=DEFAULT_PAGE_SIZE, _external=True),
         'type': 'GET',
         'total': len(o.community_resources)
         }, description='Link to the dataset community resources'),
@@ -257,8 +258,9 @@ class ResourcesAPI(API):
         args = resources_parser.parse_args()
         page = args['page']
         page_size = args['page_size']
-        next_page = f"{url_for('apiv2.resources', dataset=dataset.id, _external=True)}?page={page + 1}&page_size={page_size}"
-        previous_page = f"{url_for('apiv2.resources', dataset=dataset.id, _external=True)}?page={page - 1}&page_size={page_size}"
+        list_resources_url = url_for('apiv2.resources', dataset=dataset.id, _external=True)
+        next_page = f"{list_resources_url}?page={page + 1}&page_size={page_size}"
+        previous_page = f"{list_resources_url}?page={page - 1}&page_size={page_size}"
         res = dataset.resources
 
         if args['type']:
@@ -335,7 +337,7 @@ class ResourceExtrasAPI(ResourceMixin, API):
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         # first remove extras key associated to a None value in payload
-        for key in [k for k in data if data[k] == None]:
+        for key in [k for k in data if data[k] is None]:
             resource.extras.pop(key, None)
             data.pop(key)
         # then update the extras with the remaining payload
