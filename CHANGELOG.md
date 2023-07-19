@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 6.1.6 (2023-07-19)
 
 - Improve DCAT harvest of mime type [#2857](https://github.com/opendatateam/udata/pull/2857)
