@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 6.1.6.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2023-07-18 17:59+0200\n"
-"PO-Revision-Date: 2023-07-18 17:59+0200\n"
+"POT-Creation-Date: 2023-07-19 14:06+0200\n"
+"PO-Revision-Date: 2023-07-19 14:06+0200\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -598,11 +598,11 @@ msgid "Logo"
 msgstr ""
 
 #: udata/core/organization/forms.py:49
-msgid "Establishment id"
+msgid "Business id"
 msgstr ""
 
 #: udata/core/organization/forms.py:51
-msgid "Establishment identification number"
+msgid "Business identification number"
 msgstr ""
 
 #: udata/core/organization/forms.py:87

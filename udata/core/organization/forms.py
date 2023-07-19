@@ -4,7 +4,7 @@ from udata.i18n import lazy_gettext as _
 
 from .models import (
     Organization, MembershipRequest, Member, LOGO_SIZES, ORG_ROLES,
-    TITLE_SIZE_LIMIT, DESCRIPTION_SIZE_LIMIT, ORG_EID_SIZE_LIMIT, ORG_EID_FORMAT
+    TITLE_SIZE_LIMIT, DESCRIPTION_SIZE_LIMIT, ORG_BID_SIZE_LIMIT, ORG_BID_FORMAT
 )
 
 __all__ = (
@@ -15,10 +15,10 @@ __all__ = (
 )
 
 
-def org_eid_check(form, field):
+def org_bid_check(form, field):
     if field.data:
         # EID checks are country dependant. Following one is suitable for France.
-        if ORG_EID_FORMAT == 'fr':
+        if ORG_BID_FORMAT == 'siret':
             siret_number = str(field.data)
             # Min length done here and not in `validators.Length` because the field has to stay optional.
             if len(siret_number) != 14:
@@ -46,9 +46,9 @@ class OrganizationForm(ModelForm):
     url = fields.URLField(
         _('Website'), description=_('The organization website URL'))
     logo = fields.ImageField(_('Logo'), sizes=LOGO_SIZES)
-    establishment_number_id = fields.StringField(_('Establishment id'),
-                                                 [validators.Length(max=ORG_EID_SIZE_LIMIT), org_eid_check],
-                                                 description=_('Establishment identification number'))
+    business_number_id = fields.StringField(_('Business id'),
+                                                 [validators.Length(max=ORG_BID_SIZE_LIMIT), org_bid_check],
+                                            description=_('Business identification number'))
 
     deleted = fields.DateTimeField()
     extras = fields.ExtrasField()
