@@ -235,7 +235,7 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(len(data['resources']), len(resources))
         self.assertTrue('quality' in data)
         self.assertTrue('internal' in data)
-        # reloads dataset from mongoDB to get mongoDB's date's seconds reset.
+        # Reloads dataset from mongoDB to get mongoDB's date's milliseconds reset.
         dataset.reload()
         self.assertEqual(data['internal']['created_at_internal'], fields.ISODateTime().format(dataset.created_at_internal))
         self.assertEqual(data['internal']['last_modified_internal'], fields.ISODateTime().format(dataset.last_modified_internal))
