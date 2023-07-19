@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 6.1.6.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2023-07-05 11:39+0200\n"
-"PO-Revision-Date: 2023-07-05 11:39+0200\n"
+"POT-Creation-Date: 2023-07-17 16:43+0200\n"
+"PO-Revision-Date: 2023-07-17 16:43+0200\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -191,11 +191,11 @@ msgstr ""
 msgid "Checksum value"
 msgstr ""
 
-#: udata/core/dataset/forms.py:41 udata/tests/api/test_datasets_api.py:629
+#: udata/core/dataset/forms.py:41 udata/tests/api/test_datasets_api.py:638
 msgid "Schema must have at least a name or an url. Having both is not allowed."
 msgstr ""
 
-#: udata/core/dataset/forms.py:47 udata/tests/api/test_datasets_api.py:636
+#: udata/core/dataset/forms.py:47 udata/tests/api/test_datasets_api.py:645
 msgid "Provided URL is not valid."
 msgstr ""
 
@@ -481,33 +481,33 @@ msgstr ""
 msgid "Remote file"
 msgstr ""
 
-#: udata/core/dataset/models.py:386 udata/core/dataset/rdf.py:358
-#: udata/tests/dataset/test_dataset_rdf.py:494
-#: udata/tests/dataset/test_dataset_rdf.py:507
+#: udata/core/dataset/models.py:388 udata/core/dataset/rdf.py:374
+#: udata/tests/dataset/test_dataset_rdf.py:499
+#: udata/tests/dataset/test_dataset_rdf.py:512
 msgid "Nameless resource"
 msgstr ""
 
-#: udata/core/dataset/models.py:461
+#: udata/core/dataset/models.py:463
 msgid "Future date of update"
 msgstr ""
 
-#: udata/core/dataset/models.py:471 udata/models/datetime_fields.py:59
+#: udata/core/dataset/models.py:473 udata/models/datetime_fields.py:59
 msgid "Creation date"
 msgstr ""
 
-#: udata/core/dataset/models.py:473 udata/models/datetime_fields.py:61
+#: udata/core/dataset/models.py:475 udata/models/datetime_fields.py:61
 msgid "Last modification date"
 msgstr ""
 
-#: udata/core/dataset/models.py:482
+#: udata/core/dataset/models.py:484
 msgid "Pivotal data"
 msgstr ""
 
-#: udata/core/dataset/models.py:521
+#: udata/core/dataset/models.py:523
 msgid "dataset"
 msgstr ""
 
-#: udata/core/dataset/rdf.py:356 udata/tests/dataset/test_dataset_rdf.py:481
+#: udata/core/dataset/rdf.py:372 udata/tests/dataset/test_dataset_rdf.py:486
 msgid "{format} resource"
 msgstr ""
 
@@ -1012,6 +1012,15 @@ msgstr ""
 msgid "{0} does not exists"
 msgstr ""
 
+#: udata/forms/fields.py:470 udata/tests/forms/test_model_field.py:318
+#: udata/tests/forms/test_model_field.py:332
+msgid "Missing \"id\" field"
+msgstr ""
+
+#: udata/forms/fields.py:477
+msgid "Expect a \"{0}\" class but \"{1}\" was found"
+msgstr ""
+
 #: udata/forms/fields.py:483 udata/tests/forms/test_model_field.py:43
 #: udata/tests/forms/test_model_field.py:56
 msgid "Expect both class and identifier"
@@ -1473,17 +1482,8 @@ msgstr ""
 msgid "Here"
 msgstr ""
 
-#: udata/tests/forms/test_model_field.py:71
-msgid "Model \"Unknown\" does not exist"
-msgstr ""
-
 #: udata/tests/forms/test_model_field.py:155
 msgid "Expect a \"Target\" class but \"Wrong\" was found"
-msgstr ""
-
-#: udata/tests/forms/test_model_field.py:318
-#: udata/tests/forms/test_model_field.py:332
-msgid "Missing \"id\" field"
 msgstr ""
 
 #: udata/tests/search/test_adapter.py:24

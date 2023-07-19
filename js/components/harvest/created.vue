@@ -7,7 +7,7 @@
     <div class="col-xs-12 lead text-center">
         <p>{{ _('Your harvester is now pending for team review.') }}</p>
         <div v-if="harvestValidationContactForm">
-            <p>{{ _('Please inform us through the following contact form (at the end of the page) if you want us to validate your harvester:') }}</p>
+            <p>{{ _('Please inform us through the following contact form if you want us to validate your harvester:') }}</p>
             <p>
                 <a href="{{ harvestValidationContactForm }}">
                     {{ _('Harvester validation contact form') }}
