@@ -164,11 +164,11 @@ def populate_slug(instance, field, max_identical_slugs):
         def exists(s):
             return qs(**{field.db_field: s}).clear_cls_query().limit(1).count(True) > 0
 
-        while (exists := exists(slug)) and index <= max_identical_slugs:
+        while (slug_exists := exists(slug)) and index <= max_identical_slugs:
             slug = '{0}-{1}'.format(base_slug, index)
             index += 1
 
-        if exists:
+        if slug_exists:
             raise ValueError(f"Limit of identical slugs is reached for '{field.populate_from}'")
 
         if is_uuid(slug):
