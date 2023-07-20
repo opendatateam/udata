@@ -437,6 +437,7 @@ class Defaults(object):
     ###########################################################################
     QUALITY_DESCRIPTION_LENGTH = 100
 
+
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''
     TESTING = True

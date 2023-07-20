@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Fix dataset with duplicate long title cannot be added
+- Fix dataset with duplicate long title cannot be added [#2873](https://github.com/opendatateam/udata/pull/2873)
 
 ## 6.1.6 (2023-07-19)
 
