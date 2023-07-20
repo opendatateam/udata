@@ -2,6 +2,10 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 6.1.6 (2023-07-19)
+
 - Improve DCAT harvest of mime type [#2857](https://github.com/opendatateam/udata/pull/2857)
 - Don't crash on files not found when purging resources [2858](https://github.com/opendatateam/udata/pull/2858)
 - Improve DCAT catalog exposed [#2860](https://github.com/opendatateam/udata/pull/2860)
