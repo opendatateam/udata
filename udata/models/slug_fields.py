@@ -1,6 +1,7 @@
 import logging
 import slugify
 
+from flask import current_app
 from flask_mongoengine import Document
 from mongoengine.fields import StringField
 from mongoengine.signals import pre_save, post_delete
@@ -28,6 +29,7 @@ class SlugField(StringField):
         self.separator = separator
         self.follow = follow
         self.instance = None
+        self.max_identical_slugs = current_app.config['MAX_IDENTICAL_SLUGS']
         super(SlugField, self).__init__(**kwargs)
 
     def __get__(self, instance, owner):
@@ -57,7 +59,8 @@ class SlugField(StringField):
         if value is None:
             return
 
-        return slugify.slugify(value, max_length=self.max_length,
+        max_length = self.max_length - len(str(self.max_identical_slugs)) - 1
+        return slugify.slugify(value, max_length=max_length,
                                separator=self.separator,
                                to_lower=self.lower_case)
 
@@ -84,7 +87,7 @@ class SlugField(StringField):
     def populate_on_pre_save(self, sender, document, **kwargs):
         field = document._fields.get(self.name)
         if field:
-            populate_slug(document, field)
+            populate_slug(document, field, self.max_identical_slugs)
 
 
 class SlugFollow(Document):
@@ -108,7 +111,7 @@ class SlugFollow(Document):
     }
 
 
-def populate_slug(instance, field):
+def populate_slug(instance, field, max_identical_slugs):
     '''
     Populate a slug field if needed.
     '''
@@ -162,9 +165,12 @@ def populate_slug(instance, field):
         def exists(s):
             return qs(**{field.db_field: s}).clear_cls_query().limit(1).count(True) > 0
 
-        while exists(slug):
+        while exists := exists(slug) and index <= max_identical_slugs:
             slug = '{0}-{1}'.format(base_slug, index)
             index += 1
+
+        if exists:
+            raise ValueError(f"Limit of identical slugs is reached for '{field.populate_from}'")
 
         if is_uuid(slug):
             slug = '{0}-uuid'.format(slug)
