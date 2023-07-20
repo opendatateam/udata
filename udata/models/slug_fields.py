@@ -20,7 +20,7 @@ class SlugField(StringField):
     _auto_gen = True
 
     def __init__(self, populate_from=None, update=False, lower_case=True,
-                 separator='-', follow=False, **kwargs):
+                 separator='-', follow=False, max_identical_slugs=999, **kwargs):
         kwargs.setdefault('unique', True)
         self.populate_from = populate_from
         self.update = update
@@ -28,7 +28,7 @@ class SlugField(StringField):
         self.separator = separator
         self.follow = follow
         self.instance = None
-        self.max_identical_slugs = 999
+        self.max_identical_slugs = max_identical_slugs
         super(SlugField, self).__init__(**kwargs)
 
     def __get__(self, instance, owner):

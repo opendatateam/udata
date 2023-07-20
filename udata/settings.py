@@ -437,11 +437,6 @@ class Defaults(object):
     ###########################################################################
     QUALITY_DESCRIPTION_LENGTH = 100
 
-    # Max number of identical slugs
-    ###########################################################################
-    # Defines, among other things, how many datasets with identical titles can be added
-    MAX_IDENTICAL_SLUGS = 999
-
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''
     TESTING = True
