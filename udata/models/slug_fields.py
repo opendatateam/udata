@@ -1,7 +1,6 @@
 import logging
 import slugify
 
-from flask import current_app
 from flask_mongoengine import Document
 from mongoengine.fields import StringField
 from mongoengine.signals import pre_save, post_delete
@@ -29,7 +28,7 @@ class SlugField(StringField):
         self.separator = separator
         self.follow = follow
         self.instance = None
-        self.max_identical_slugs = current_app.config['MAX_IDENTICAL_SLUGS']
+        self.max_identical_slugs = 999
         super(SlugField, self).__init__(**kwargs)
 
     def __get__(self, instance, owner):
