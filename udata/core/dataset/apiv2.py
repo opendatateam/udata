@@ -16,7 +16,8 @@ from .api_fields import (
     user_ref_fields,
     checksum_fields,
     dataset_harvest_fields,
-    resource_harvest_fields
+    resource_harvest_fields,
+    internal_fields
 )
 from udata.core.spatial.api_fields import geojson
 from .models import (
@@ -164,6 +165,7 @@ apiv2.inherit('GeoJSON', geojson)
 apiv2.inherit('Checksum', checksum_fields)
 apiv2.inherit('HarvestDatasetMetadata', dataset_harvest_fields)
 apiv2.inherit('HarvestResourceMetadata', resource_harvest_fields)
+apiv2.inherit('Internals', internal_fields)
 
 
 @ns.route('/search/', endpoint='dataset_search')
