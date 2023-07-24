@@ -20,6 +20,12 @@ def org_bid_check(form, field):
         # EID checks are country dependant. Following one is suitable for France.
         if ORG_BID_FORMAT == 'siret':
             siret_number = str(field.data)
+            # Length control done here instead of using WTForm validator because field must remain optional.
+            if len(siret_number) != 14:
+                raise validators.ValidationError(_('A siret number is made of 14 digits'))
+            # Siret exception for the french postal service which business number id does not match the algorithm.
+            if siret_number == '35600000000048':
+                return
             # Checksum verification on only the SIREN part, the 9 first digits.
             try:
                 chiffres = [int(chiffre) for chiffre in siret_number[:9]]
@@ -45,8 +51,7 @@ class OrganizationForm(ModelForm):
     url = fields.URLField(
         _('Website'), description=_('The organization website URL'))
     logo = fields.ImageField(_('Logo'), sizes=LOGO_SIZES)
-    business_number_id = fields.StringField(_('Business id'),
-                                                 [validators.Length(min=ORG_BID_SIZE_LIMIT, max=ORG_BID_SIZE_LIMIT), org_bid_check],
+    business_number_id = fields.StringField(_('Business id'), [org_bid_check],
                                             description=_('Business identification number'))
 
     deleted = fields.DateTimeField()

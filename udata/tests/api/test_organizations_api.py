@@ -112,6 +112,7 @@ class OrganizationAPITest:
         data['business_number_id'] = '110014016'
         response = api.put(url_for('api.organization', org=org), data)
         assert400(response)
+        assert response.json['errors']['business_number_id'][0] == _('A siret number is made of 14 digits')
 
         data['business_number_id'] = '12345678901234'
         response = api.put(url_for('api.organization', org=org), data)
