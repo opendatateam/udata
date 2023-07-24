@@ -73,6 +73,13 @@ frequency_fields = api.model('Frequency', {
     'label': fields.String(description='The frequency display name')
 })
 
+internal_fields = api.model('Internals', {
+    'created_at_internal': fields.ISODateTime(
+        description='The object\'s internal creation date on the site', required=True),
+    'last_modified_internal': fields.ISODateTime(
+        description='The object\'s internal last modification date', required=True),
+})
+
 resource_fields = api.model('Resource', {
     'id': fields.String(description='The resource unique ID', readonly=True),
     'title': fields.String(description='The resource title', required=True),
@@ -112,6 +119,8 @@ resource_fields = api.model('Resource', {
                                  'new page)',
                                  readonly=True),
     'schema': fields.Raw(description='Reference to the associated schema', readonly=True),
+    'internal': fields.Nested(
+        internal_fields, readonly=True, description='Site internal and specific object\'s data'),
 })
 
 upload_fields = api.inherit('UploadedResource', resource_fields, {
@@ -236,7 +245,7 @@ dataset_fields = api.model('Dataset', {
     'last_update': fields.ISODateTime(
         description='The resources last modification date', required=True),
     'internal': fields.Nested(
-        dataset_internal_fields, readonly=True, description='Site internal and specific dataset\'s data'),
+        internal_fields, readonly=True, description='Site internal and specific object\'s data'),
 }, mask=DEFAULT_MASK)
 
 dataset_page_fields = api.model('DatasetPage', fields.pager(dataset_fields),
