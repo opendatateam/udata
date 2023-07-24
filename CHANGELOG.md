@@ -2,6 +2,10 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 6.1.6 (2023-07-19)
+
 - Improve DCAT harvest of mime type [#2857](https://github.com/opendatateam/udata/pull/2857)
 - Don't crash on files not found when purging resources [2858](https://github.com/opendatateam/udata/pull/2858)
 - Expose dataset's `*_internal` dates in a nested `internal` nested field in api marshalling [#2862](https://github.com/opendatateam/udata/pull/2862)
@@ -10,6 +14,7 @@
 - Add optionnal harvest validation form [#2864](https://github.com/opendatateam/udata/pull/2864)
 - Fix dataset list default sorting [#2867](https://github.com/opendatateam/udata/pull/2867)
 - Update API doc link [#2866](https://github.com/opendatateam/udata/pull/2866)
+- Update admin quality progress bar [#2872](https://github.com/opendatateam/udata/pull/2872)
 
 ## 6.1.5 (2023-06-19)
 
