@@ -236,7 +236,7 @@ dataset_fields = api.model('Dataset', {
     'last_update': fields.ISODateTime(
         description='The resources last modification date', required=True),
     'internal': fields.Nested(
-        dataset_internal_fields, description='Site internal and specific dataset\'s data'),
+        dataset_internal_fields, readonly=True, description='Site internal and specific dataset\'s data'),
 }, mask=DEFAULT_MASK)
 
 dataset_page_fields = api.model('DatasetPage', fields.pager(dataset_fields),
