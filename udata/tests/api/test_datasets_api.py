@@ -240,6 +240,9 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(data['internal']['created_at_internal'], fields.ISODateTime().format(dataset.created_at_internal))
         self.assertEqual(data['internal']['last_modified_internal'], fields.ISODateTime().format(dataset.last_modified_internal))
 
+        self.assertTrue('internal' in data['resources'][0])
+        self.assertEqual(data['resources'][0]['internal']['created_at_internal'], fields.ISODateTime().format(dataset.resources[0].created_at_internal))
+        self.assertEqual(data['resources'][0]['internal']['last_modified_internal'], fields.ISODateTime().format(dataset.resources[0].last_modified_internal))
 
     def test_dataset_api_get_deleted(self):
         '''It should not fetch a deleted dataset from the API and raise 410'''
