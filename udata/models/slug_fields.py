@@ -164,7 +164,7 @@ def populate_slug(instance, field):
 
         while exists(slug):
             # keep space for index suffix, trim slug if needed
-            slug_overflow = len(base_slug) + 1 + len(str(index)) - field.max_length
+            slug_overflow = len('{0}-{1}'.format(base_slug, index)) - field.max_length
             if slug_overflow >= 1:
                 base_slug = base_slug[:-slug_overflow]
             slug = '{0}-{1}'.format(base_slug, index)
