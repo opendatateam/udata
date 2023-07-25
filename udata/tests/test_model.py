@@ -200,6 +200,24 @@ class SlugFieldTest:
         assert len(obj.title) == SlugTester.slug.max_length + 1
         assert len(obj.slug) == SlugTester.slug.max_length
 
+    def test_crop_with_index(self):
+        '''SlugField should truncate itself to keep room for index suffix if not unique'''
+        first_obj = SlugTester(title='x' * (SlugTester.slug.max_length + 1))
+        first_obj.save()
+        assert len(first_obj.slug) == SlugTester.slug.max_length
+        assert first_obj.slug.endswith('x')
+        # Try adding a second obj with same title with a slug already at max_length
+        second_obj = SlugTester(title='x' * (SlugTester.slug.max_length + 1))
+        second_obj.save()
+        assert len(second_obj.slug) == SlugTester.slug.max_length
+        assert second_obj.slug.endswith('-1')
+        # We could even have 10+ obj with the same title that needs index suffix
+        [SlugTester(title='x' * (SlugTester.slug.max_length + 1)).save() for i in range(8)]
+        last_obj = SlugTester(title='x' * (SlugTester.slug.max_length + 1))
+        last_obj.save()
+        assert len(last_obj.slug) == SlugTester.slug.max_length
+        assert last_obj.slug.endswith('-10')
+
     def test_multiple_spaces(self):
         field = db.SlugField()
         assert field.slugify('a  b') == 'a-b'
