@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements/test.pip requirements/test.in
 #
-amqp==2.6.1
+amqp==5.1.1
     # via
     #   -c requirements/install.pip
     #   kombu
@@ -16,6 +16,10 @@ appdirs==1.4.4
     # via
     #   -c requirements/install.pip
     #   urlextract
+async-timeout==4.0.2
+    # via
+    #   -c requirements/install.pip
+    #   redis
 attrs==21.2.0
     # via
     #   -c requirements/install.pip
@@ -37,11 +41,11 @@ bcrypt==3.1.7
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-billiard==3.6.4.0
+billiard==4.1.0
     # via
     #   -c requirements/install.pip
     #   celery
-bleach==3.1.0
+bleach==3.3.1
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -67,7 +71,7 @@ cachelib==0.9.0
     # via
     #   -c requirements/install.pip
     #   flask-caching
-celery==4.3.0
+celery==5.3.1
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -90,11 +94,27 @@ chardet==3.0.4
     #   -c requirements/install.pip
     #   -r requirements/install.in
     #   requests
-click==8.0.0
+click==8.1.2
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
+    #   celery
+    #   click-didyoumean
+    #   click-plugins
+    #   click-repl
     #   flask
+click-didyoumean==0.3.0
+    # via
+    #   -c requirements/install.pip
+    #   celery
+click-plugins==1.1.1
+    # via
+    #   -c requirements/install.pip
+    #   celery
+click-repl==0.3.0
+    # via
+    #   -c requirements/install.pip
+    #   celery
 cryptography==2.8
     # via
     #   -c requirements/install.pip
@@ -175,7 +195,7 @@ flask-mongoengine==1.0.0
     #   -c requirements/install.pip
     #   -r requirements/install.in
     #   flask-storage
-flask-navigation==0.2.0
+flask-navigation @ git+https://github.com/krs-novice/flask-navigation-ks.git@develop
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -191,7 +211,7 @@ flask-security-too==5.1.2
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-flask-sitemap==0.3.0
+flask-sitemap==0.4.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -249,7 +269,7 @@ jsonschema==3.2.0
     #   -c requirements/install.pip
     #   -r requirements/install.in
     #   flask-restx
-kombu[redis]==4.4.0
+kombu[redis]==5.3.1
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -287,6 +307,8 @@ netaddr==0.7.19
     #   -r requirements/install.in
 packaging==23.1
     # via
+    #   -c requirements/install.pip
+    #   bleach
     #   pytest
     #   pytest-sugar
 passlib==1.7.4
@@ -301,6 +323,10 @@ pillow==9.2.0
     #   pydenticon
 pluggy==0.13.1
     # via pytest
+prompt-toolkit==3.0.39
+    # via
+    #   -c requirements/install.pip
+    #   click-repl
 pycparser==2.20
     # via
     #   -c requirements/install.pip
@@ -338,24 +364,24 @@ pytest-mock==3.10.0
     # via -r requirements/test.in
 pytest-sugar==0.9.7
     # via -r requirements/test.in
-python-dateutil==2.8.1
+python-dateutil==2.8.2
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
     #   botocore
+    #   celery
     #   faker
 pytz==2019.3
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
     #   babel
-    #   celery
     #   flask-restx
 rdflib==6.0.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-redis==3.3.11
+redis==4.5.2
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -412,6 +438,10 @@ tlds==2021080800
     #   -r requirements/install.in
 tomli==2.0.1
     # via pytest
+tzdata==2023.3
+    # via
+    #   -c requirements/install.pip
+    #   celery
 ujson==1.35
     # via
     #   -c requirements/install.pip
@@ -437,16 +467,20 @@ urllib3==1.25.11
     #   -c requirements/install.pip
     #   botocore
     #   requests
-vine==1.3.0
+vine==5.0.0
     # via
     #   -c requirements/install.pip
-    #   -r requirements/install.in
     #   amqp
     #   celery
+    #   kombu
 voluptuous==0.11.7
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
+wcwidth==0.2.6
+    # via
+    #   -c requirements/install.pip
+    #   prompt-toolkit
 webencodings==0.5.1
     # via
     #   -c requirements/install.pip
