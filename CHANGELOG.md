@@ -8,6 +8,7 @@
 
 - Improve DCAT harvest of mime type [#2857](https://github.com/opendatateam/udata/pull/2857)
 - Don't crash on files not found when purging resources [2858](https://github.com/opendatateam/udata/pull/2858)
+- Expose dataset's `*_internal` dates in a nested `internal` nested field in api marshalling [#2862](https://github.com/opendatateam/udata/pull/2862)
 - Improve DCAT catalog exposed [#2860](https://github.com/opendatateam/udata/pull/2860)
 - Use the resource's extra `analysis:last-modified-at` in the `last_modified` property [#2863](https://github.com/opendatateam/udata/pull/2863)
 - Add optionnal harvest validation form [#2864](https://github.com/opendatateam/udata/pull/2864)

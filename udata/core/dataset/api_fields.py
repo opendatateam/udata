@@ -73,6 +73,13 @@ frequency_fields = api.model('Frequency', {
     'label': fields.String(description='The frequency display name')
 })
 
+resource_internal_fields = api.model('ResourceInternals', {
+    'created_at_internal': fields.ISODateTime(
+        description='The resource\'s internal creation date on the site', required=True),
+    'last_modified_internal': fields.ISODateTime(
+        description='The resource\'s internal last modification date', required=True),
+})
+
 resource_fields = api.model('Resource', {
     'id': fields.String(description='The resource unique ID', readonly=True),
     'title': fields.String(description='The resource title', required=True),
@@ -112,6 +119,8 @@ resource_fields = api.model('Resource', {
                                  'new page)',
                                  readonly=True),
     'schema': fields.Raw(description='Reference to the associated schema', readonly=True),
+    'internal': fields.Nested(
+        resource_internal_fields, readonly=True, description='Site internal and specific object\'s data'),
 })
 
 upload_fields = api.inherit('UploadedResource', resource_fields, {
@@ -162,8 +171,15 @@ DEFAULT_MASK = ','.join((
     'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
     'private', 'tags', 'badges', 'resources', 'frequency', 'frequency_date', 'extras', 'harvest',
     'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
-    'uri', 'page', 'last_update', 'archived', 'quality'
+    'uri', 'page', 'last_update', 'archived', 'quality', 'internal'
 ))
+
+dataset_internal_fields = api.model('DatasetInternals', {
+    'created_at_internal': fields.ISODateTime(
+        description='The dataset\'s internal creation date on the site', required=True),
+    'last_modified_internal': fields.ISODateTime(
+        description='The dataset\'s internal last modification date', required=True),
+})
 
 dataset_fields = api.model('Dataset', {
     'id': fields.String(description='The dataset identifier', readonly=True),
@@ -174,7 +190,7 @@ dataset_fields = api.model('Dataset', {
     'description': fields.Markdown(
         description='The dataset description in markdown', required=True),
     'created_at': fields.ISODateTime(
-        description='The dataset creation date', required=True),
+        description='This date is computed between harvested creation date if any and site\'s internal creation date' , required=True),
     'last_modified': fields.ISODateTime(
         description='The dataset last modification date', required=True),
     'deleted': fields.ISODateTime(description='The deletion date if deleted'),
@@ -228,6 +244,8 @@ dataset_fields = api.model('Dataset', {
     'quality': fields.Raw(description='The dataset quality', readonly=True),
     'last_update': fields.ISODateTime(
         description='The resources last modification date', required=True),
+    'internal': fields.Nested(
+        dataset_internal_fields, readonly=True, description='Site internal and specific object\'s data'),
 }, mask=DEFAULT_MASK)
 
 dataset_page_fields = api.model('DatasetPage', fields.pager(dataset_fields),
