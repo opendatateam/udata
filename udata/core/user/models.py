@@ -62,7 +62,7 @@ class User(WithMetrics, UserMixin, db.Document):
 
     apikey = db.StringField()
 
-    created_at = db.DateTimeField(default=datetime.now, required=True)
+    created_at = db.DateTimeField(default=datetime.utcnow, required=True)
 
     # The field below is required for Flask-security
     # when SECURITY_CONFIRMABLE is True
@@ -247,7 +247,7 @@ class User(WithMetrics, UserMixin, db.Document):
         self.about = None
         self.extras = None
         self.apikey = None
-        self.deleted = datetime.now()
+        self.deleted = datetime.utcnow()
         self.save()
         for organization in self.organizations:
             organization.members = [member

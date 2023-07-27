@@ -39,7 +39,7 @@ class MeAPITest(APITestCase):
         member = Member(user=user, role='editor')
         org = OrganizationFactory(members=[member])
         deleted_org = OrganizationFactory(members=[member],
-                                          deleted=datetime.now())
+                                          deleted=datetime.utcnow())
         response = self.get(url_for('api.me'))
         self.assert200(response)
         orgs = [o['id'] for o in response.json['organizations']]

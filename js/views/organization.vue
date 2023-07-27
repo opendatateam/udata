@@ -153,13 +153,13 @@ export default {
             }
             return [{
                 value: this.org.metrics.datasets || 0,
-                label: this.org.metrics.datasets ? this._('Datasets') : this._('Dataset'),
+                label: this.org.metrics.datasets ? this._('Public datasets') : this._('Public dataset'),
                 icon: 'cubes',
                 color: 'aqua',
                 target: '#datasets-widget'
             }, {
                 value: this.org.metrics.reuses || 0,
-                label: this.org.metrics.reuses ? this._('Reuses') : this._('Reuse'),
+                label: this.org.metrics.reuses ? this._('Public reuses') : this._('Public reuse'),
                 icon: 'recycle',
                 color: 'green',
                 target: '#reuses-widget'

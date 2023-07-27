@@ -130,50 +130,50 @@ class DatasetModelTest:
     def test_next_update_hourly(self):
         dataset = DatasetFactory(frequency='hourly')
         assert_equal_dates(dataset.next_update,
-                           datetime.now() + timedelta(hours=1))
+                           datetime.utcnow() + timedelta(hours=1))
 
     @pytest.mark.parametrize('freq', ['fourTimesADay', 'threeTimesADay', 'semidaily', 'daily'])
     def test_next_update_daily(self, freq):
         dataset = DatasetFactory(frequency=freq)
         assert_equal_dates(dataset.next_update,
-                           datetime.now() + timedelta(days=1))
+                           datetime.utcnow() + timedelta(days=1))
 
     @pytest.mark.parametrize('freq', ['fourTimesAWeek', 'threeTimesAWeek', 'semiweekly', 'weekly'])
     def test_next_update_weekly(self, freq):
         dataset = DatasetFactory(frequency=freq)
         assert_equal_dates(dataset.next_update,
-                           datetime.now() + timedelta(days=7))
+                           datetime.utcnow() + timedelta(days=7))
 
     def test_next_update_biweekly(self):
         dataset = DatasetFactory(frequency='biweekly')
         assert_equal_dates(dataset.next_update,
-                           datetime.now() + timedelta(weeks=2))
+                           datetime.utcnow() + timedelta(weeks=2))
 
     def test_next_update_quarterly(self):
         dataset = DatasetFactory(frequency='quarterly')
         assert_equal_dates(dataset.next_update,
-                           datetime.now() + timedelta(days=365/4))
+                           datetime.utcnow() + timedelta(days=365/4))
 
     @pytest.mark.parametrize('freq', ['threeTimesAYear', 'semiannual', 'annual'])
     def test_next_update_annual(self, freq):
         dataset = DatasetFactory(frequency=freq)
         assert_equal_dates(dataset.next_update,
-                           datetime.now() + timedelta(days=365))
+                           datetime.utcnow() + timedelta(days=365))
 
     def test_next_update_biennial(self):
         dataset = DatasetFactory(frequency='biennial')
         assert_equal_dates(dataset.next_update,
-                           datetime.now() + timedelta(days=365*2))
+                           datetime.utcnow() + timedelta(days=365*2))
 
     def test_next_update_triennial(self):
         dataset = DatasetFactory(frequency='triennial')
         assert_equal_dates(dataset.next_update,
-                           datetime.now() + timedelta(days=365*3))
+                           datetime.utcnow() + timedelta(days=365*3))
 
     def test_next_update_quinquennial(self):
         dataset = DatasetFactory(frequency='quinquennial')
         assert_equal_dates(dataset.next_update,
-                           datetime.now() + timedelta(days=365*5))
+                           datetime.utcnow() + timedelta(days=365*5))
 
     @pytest.mark.parametrize('freq', ['continuous', 'punctual', 'irregular', 'unknown'])
     def test_next_update_undefined(self, freq):
@@ -264,7 +264,7 @@ class DatasetModelTest:
     def test_send_on_delete(self):
         dataset = DatasetFactory()
         with assert_emit(Dataset.on_delete):
-            dataset.deleted = datetime.now()
+            dataset.deleted = datetime.utcnow()
             dataset.save()
 
     def test_ignore_post_save_signal(self):
@@ -596,16 +596,16 @@ class HarvestMetadataTest:
 
         harvest_metadata = HarvestDatasetMetadata(
             backend='DCAT',
-            created_at=datetime.now(),
-            modified_at=datetime.now(),
+            created_at=datetime.utcnow(),
+            modified_at=datetime.utcnow(),
             source_id='source_id',
             remote_id='remote_id',
             domain='domain.gouv.fr',
-            last_update=datetime.now(),
+            last_update=datetime.utcnow(),
             remote_url='http://domain.gouv.fr/dataset/remote_url',
             uri='http://domain.gouv.fr/dataset/uri',
             dct_identifier='http://domain.gouv.fr/dataset/identifier',
-            archived_at=datetime.now(),
+            archived_at=datetime.utcnow(),
             archived='not-on-remote'
         )
         dataset.harvest = harvest_metadata
@@ -626,12 +626,34 @@ class HarvestMetadataTest:
         dataset.harvest = harvest_metadata
         dataset.save()
 
+    def test_harvest_dataset_metadata_future_modifed_at(self):
+        dataset = DatasetFactory()
+
+        harvest_metadata = HarvestDatasetMetadata(
+            created_at=datetime.utcnow(),
+            modified_at=datetime.utcnow()+timedelta(days=1)
+        )
+        dataset.harvest = harvest_metadata
+        dataset.save()
+        assert dataset.last_modified == dataset.last_modified_internal
+
+    def test_harvest_dataset_metadata_past_modifed_at(self):
+        dataset = DatasetFactory()
+
+        harvest_metadata = HarvestDatasetMetadata(
+            created_at=datetime.utcnow(),
+            modified_at=datetime.utcnow(),
+        )
+        dataset.harvest = harvest_metadata
+        dataset.save()
+        assert dataset.last_modified == harvest_metadata.modified_at
+
     def test_harvest_resource_metadata_validate_success(self):
         resource = ResourceFactory()
 
         harvest_metadata = HarvestResourceMetadata(
-            created_at=datetime.now(),
-            modified_at=datetime.now(),
+            created_at=datetime.utcnow(),
+            modified_at=datetime.utcnow(),
             uri='http://domain.gouv.fr/dataset/uri'
         )
         resource.harvest = harvest_metadata
@@ -651,3 +673,26 @@ class HarvestMetadataTest:
         resource = ResourceFactory()
         resource.harvest = harvest_metadata
         resource.validate()
+
+    def test_harvest_resource_metadata_future_modifed_at(self):
+        resource = ResourceFactory()
+        harvest_metadata = HarvestResourceMetadata(modified_at=datetime.utcnow()+timedelta(days=1))
+        resource.harvest = harvest_metadata
+        resource.validate()
+
+        assert resource.last_modified == resource.last_modified_internal
+
+    def test_harvest_resource_metadata_past_modifed_at(self):
+        resource = ResourceFactory()
+        harvest_metadata = HarvestResourceMetadata(modified_at=datetime.utcnow())
+        resource.harvest = harvest_metadata
+        resource.validate()
+
+        assert resource.last_modified == harvest_metadata.modified_at
+
+    def test_resource_metadata_extra_modifed_at(self):
+        resource = ResourceFactory(filetype='remote')
+        resource.extras.update({'analysis:last-modified-at': datetime(2023,1,1)})
+        resource.validate()
+
+        assert resource.last_modified == resource.extras['analysis:last-modified-at']

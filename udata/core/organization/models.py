@@ -40,6 +40,9 @@ CERTIFIED = 'certified'
 TITLE_SIZE_LIMIT = 350
 DESCRIPTION_SIZE_LIMIT = 100000
 
+ORG_BID_SIZE_LIMIT = 14
+ORG_BID_FORMAT = 'siret'
+
 
 class Team(db.EmbeddedDocument):
     name = db.StringField(required=True)
@@ -54,7 +57,7 @@ class Team(db.EmbeddedDocument):
 class Member(db.EmbeddedDocument):
     user = db.ReferenceField('User')
     role = db.StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE)
-    since = db.DateTimeField(default=datetime.now, required=True)
+    since = db.DateTimeField(default=datetime.utcnow, required=True)
 
     @property
     def label(self):
@@ -70,7 +73,7 @@ class MembershipRequest(db.EmbeddedDocument):
     status = db.StringField(
         choices=list(MEMBERSHIP_STATUS), default='pending')
 
-    created = db.DateTimeField(default=datetime.now, required=True)
+    created = db.DateTimeField(default=datetime.utcnow, required=True)
 
     handled_on = db.DateTimeField()
     handled_by = db.ReferenceField('User')
@@ -104,6 +107,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     image_url = db.StringField()
     logo = db.ImageField(fs=avatars, basename=default_image_basename,
                          max_size=LOGO_MAX_SIZE, thumbnails=LOGO_SIZES)
+    business_number_id = db.StringField(max_length=ORG_BID_SIZE_LIMIT)
 
     members = db.ListField(db.EmbeddedDocumentField(Member))
     teams = db.ListField(db.EmbeddedDocumentField(Team))

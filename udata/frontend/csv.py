@@ -233,7 +233,7 @@ def stream(queryset_or_adapter, basename=None):
     else:
         raise ValueError('Unsupported object type')
 
-    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M')
+    timestamp = datetime.utcnow().strftime('%Y-%m-%d-%H-%M')
     headers = {
         'Content-Disposition': 'attachment; filename={0}-{1}.csv'.format(
             basename or 'export', timestamp),

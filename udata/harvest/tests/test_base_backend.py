@@ -67,7 +67,7 @@ class HarvestFilterTest:
 @pytest.mark.usefixtures('clean_db')
 class BaseBackendTest:
     def test_simple_harvest(self):
-        now = datetime.now()
+        now = datetime.utcnow()
         nb_datasets = 3
         source = HarvestSourceFactory(config={'nb_datasets': nb_datasets})
         backend = FakeBackend(source)
@@ -157,7 +157,7 @@ class BaseBackendTest:
         dataset = Dataset.objects.first()
 
         assert dataset.last_modified_internal == last_modified
-        assert_equal_dates(dataset.harvest.last_update, datetime.now())
+        assert_equal_dates(dataset.harvest.last_update, datetime.utcnow())
 
     def test_dont_overwrite_last_modified_even_if_set_to_same(self, mocker):
         last_modified = faker.date_time_between(start_date='-30y', end_date='-1y')
@@ -170,7 +170,7 @@ class BaseBackendTest:
         dataset = Dataset.objects.first()
 
         assert dataset.last_modified_internal == last_modified
-        assert_equal_dates(dataset.harvest.last_update, datetime.now())
+        assert_equal_dates(dataset.harvest.last_update, datetime.utcnow())
 
     def test_autoarchive(self, app):
         nb_datasets = 3
@@ -179,7 +179,7 @@ class BaseBackendTest:
 
         # create a dangling dataset to be archived
         limit = app.config['HARVEST_AUTOARCHIVE_GRACE_DAYS']
-        last_update = datetime.now() - timedelta(days=limit + 1)
+        last_update = datetime.utcnow() - timedelta(days=limit + 1)
         dataset_arch = DatasetFactory(harvest={
                 'domain': source.domain,
                 'source_id': str(source.id),
@@ -189,7 +189,7 @@ class BaseBackendTest:
 
         # create a dangling dataset that _won't_ be archived because of grace period
         limit = app.config['HARVEST_AUTOARCHIVE_GRACE_DAYS']
-        last_update = datetime.now() - timedelta(days=limit - 1)
+        last_update = datetime.utcnow() - timedelta(days=limit - 1)
         dataset_no_arch = DatasetFactory(harvest={
                 'domain': source.domain,
                 'source_id': str(source.id),
@@ -221,9 +221,9 @@ class BaseBackendTest:
         # test unarchive: archive manually then relaunch harvest
         q = {'harvest__remote_id': 'fake-1'}
         dataset = Dataset.objects.get(**q)
-        dataset.archived = datetime.now()
+        dataset.archived = datetime.utcnow()
         dataset.harvest.archived = 'not-on-remote'
-        dataset.harvest.archived_at = datetime.now()
+        dataset.harvest.archived_at = datetime.utcnow()
         dataset.save()
         backend.harvest()
         dataset.reload()

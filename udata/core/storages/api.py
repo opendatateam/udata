@@ -100,7 +100,7 @@ def save_chunk(file, args):
         'uuid': str(args['uuid']),
         'filename': args['filename'],
         'totalparts': args['totalparts'],
-        'lastchunk': datetime.now(),
+        'lastchunk': datetime.utcnow(),
     }), overwrite=True)
     raise UploadProgress()
 

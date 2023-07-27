@@ -53,7 +53,10 @@ def purge_datasets(self):
         storage = storages.resources
         for resource in dataset.resources:
             if resource.fs_filename is not None:
-                storage.delete(resource.fs_filename)
+                try:
+                    storage.delete(resource.fs_filename)
+                except FileNotFoundError as e:
+                    log.warning(e)
             # Not removing the resource from dataset.resources
             # with `dataset.remove_resource` as removing elements
             # from a list while iterating causes random effects.
@@ -73,7 +76,7 @@ def send_frequency_reminder(self):
     # We exclude irrelevant frequencies.
     frequencies = [f for f in UPDATE_FREQUENCIES.keys()
                    if f not in ('unknown', 'realtime', 'punctual', 'irregular', 'continuous')]
-    now = datetime.now()
+    now = datetime.utcnow()
     reminded_orgs = {}
     reminded_people = []
     allowed_delay = current_app.config['DELAY_BEFORE_REMINDER_NOTIFICATION']
@@ -141,7 +144,7 @@ def get_or_create_resource(r_info, model, dataset):
 
 
 def store_resource(csvfile, model, dataset):
-    timestr = datetime.now().strftime('%Y%m%d-%H%M%S')
+    timestr = datetime.utcnow().strftime('%Y%m%d-%H%M%S')
     filename = 'export-%s-%s.csv' % (model, timestr)
     prefix = '/'.join((dataset.slug, timestr))
     storage = storages.resources
@@ -187,7 +190,7 @@ def export_csv_for_model(model, dataset):
         # add it to the dataset
         if created:
             dataset.add_resource(resource)
-        dataset.last_modified_internal = datetime.now()
+        dataset.last_modified_internal = datetime.utcnow()
         dataset.save()
     finally:
         csvfile.close()

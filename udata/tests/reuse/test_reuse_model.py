@@ -61,7 +61,7 @@ class ReuseModelTest(TestCase, DBTestMixin):
     def test_send_on_delete(self):
         reuse = ReuseFactory()
         with assert_emit(Reuse.on_delete):
-            reuse.deleted = datetime.now()
+            reuse.deleted = datetime.utcnow()
             reuse.save()
 
     def test_reuse_metrics(self):

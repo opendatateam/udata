@@ -2,12 +2,42 @@
 
 ## Current (in progress)
 
+- Fix slug overflow with index suffix when reaching max_length [#2874](https://github.com/opendatateam/udata/pull/2874)
+
+## 6.1.6 (2023-07-19)
+
+- Improve DCAT harvest of mime type [#2857](https://github.com/opendatateam/udata/pull/2857)
+- Don't crash on files not found when purging resources [2858](https://github.com/opendatateam/udata/pull/2858)
+- Improve DCAT catalog exposed [#2860](https://github.com/opendatateam/udata/pull/2860)
+- Use the resource's extra `analysis:last-modified-at` in the `last_modified` property [#2863](https://github.com/opendatateam/udata/pull/2863)
+- Add optionnal harvest validation form [#2864](https://github.com/opendatateam/udata/pull/2864)
+- Fix dataset list default sorting [#2867](https://github.com/opendatateam/udata/pull/2867)
+- Update API doc link [#2866](https://github.com/opendatateam/udata/pull/2866)
+- Add `business_number_id` metadata for organizations [#2871](https://github.com/opendatateam/udata/pull/2871)
+- Update admin quality progress bar [#2872](https://github.com/opendatateam/udata/pull/2872)
+
+## 6.1.5 (2023-06-19)
+
+- Specify *public* datasets and reuses in admin count [#2852](https://github.com/opendatateam/udata/pull/2852)
+- Fix url params being stripped in markdown for internal URLs [#2855](https://github.com/opendatateam/udata/pull/2855)
+
+## 6.1.4 (2023-05-16)
+
 - Upgrade development dependencies [#2844](https://github.com/opendatateam/udata/pull/2844)
 - Compile translations for testing [#2845](https://github.com/opendatateam/udata/pull/2845)
 - Add user arg to discussion list API [#2842](https://github.com/opendatateam/udata/pull/2842)
 - No more sending email, slug and user name to sentry [#2846](https://github.com/opendatateam/udata/pull/2846)
 - Add test for passwordless user [#2848](https://github.com/opendatateam/udata/pull/2848)
 - Parse IANA and EUROPA URIs format [#2849](https://github.com/opendatateam/udata/pull/2849)
+- Dataset last update sorting:
+    - Transmit dataset's `last_update` field to search service [#2847](https://github.com/opendatateam/udata/pull/2847)
+    - Check if dataset's and resource's harvesting date `modified_at` are ealier than today's date [#2850](https://github.com/opendatateam/udata/pull/2850)
+- Upgrade mongoengine and storage deps [#2839](https://github.com/opendatateam/udata/pull/2839):
+    - Upgrade flask-storage 1.0.0 -> 1.3.2
+    - Upgrade flask-mongoengine 0.9.5 -> 1.0.0, now returning a ValidationError on get_or_404 on invalid id
+    - Upgrade mongoengine 0.26.0 -> 0.27.0
+-  Prevent raising unecessary error in index command [#2851](https://github.com/opendatateam/udata/pull/2851)
+-  Use `datetime.utcnow` to make sure to handle utc datetimes [#2853](https://github.com/opendatateam/udata/pull/2853)
 
 ## 6.1.3 (2023-04-18)
 

@@ -91,11 +91,11 @@ and fields are mapped according to:
 | description       | dct:description         |       |
 | url               | dcat:downloadURL        | as URI reference |
 | permanent url     | dcat:accessURL          | as URI reference |
-| published         | dct:issued              |       |
+| created_at        | dct:issued              |       |
 | last_modified     | dct:modified            |       |
 | format            | dct:format              |       |
 | mime              | dcat:mediaType          |       |
-| filesize          | dcat:bytesSize          |       |
+| filesize          | dcat:byteSize          |       |
 | checksum          | spdx:checksum           |       |
 
 | TemporalCoverage | dct:PeriodOfTime |

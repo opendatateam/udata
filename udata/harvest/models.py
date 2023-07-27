@@ -44,7 +44,7 @@ DEFAULT_HARVEST_ITEM_STATUS = 'pending'
 
 class HarvestError(db.EmbeddedDocument):
     '''Store harvesting errors'''
-    created_at = db.DateTimeField(default=datetime.now, required=True)
+    created_at = db.DateTimeField(default=datetime.utcnow, required=True)
     message = db.StringField()
     details = db.StringField()
 
@@ -54,7 +54,7 @@ class HarvestItem(db.EmbeddedDocument):
     dataset = db.ReferenceField(Dataset)
     status = db.StringField(choices=list(HARVEST_ITEM_STATUS),
                             default=DEFAULT_HARVEST_ITEM_STATUS, required=True)
-    created = db.DateTimeField(default=datetime.now, required=True)
+    created = db.DateTimeField(default=datetime.utcnow, required=True)
     started = db.DateTimeField()
     ended = db.DateTimeField()
     errors = db.ListField(db.EmbeddedDocumentField(HarvestError))
@@ -98,7 +98,7 @@ class HarvestSource(db.Owned, db.Document):
     config = db.DictField()
     periodic_task = db.ReferenceField('PeriodicTask',
                                       reverse_delete_rule=db.NULLIFY)
-    created_at = db.DateTimeField(default=datetime.now, required=True)
+    created_at = db.DateTimeField(default=datetime.utcnow, required=True)
     frequency = db.StringField(choices=list(HARVEST_FREQUENCIES),
                                default=DEFAULT_HARVEST_FREQUENCY,
                                required=True)
@@ -151,7 +151,7 @@ class HarvestSource(db.Owned, db.Document):
 
 class HarvestJob(db.Document):
     '''Keep track of harvestings'''
-    created = db.DateTimeField(default=datetime.now, required=True)
+    created = db.DateTimeField(default=datetime.utcnow, required=True)
     started = db.DateTimeField()
     ended = db.DateTimeField()
     status = db.StringField(choices=list(HARVEST_JOB_STATUS),
@@ -177,7 +177,7 @@ def archive_harvested_dataset(dataset, reason, dryrun=False):
     If `dryrun` is True, the dataset is not saved but validated only.
     '''
     log.debug('Archiving dataset %s', dataset.id)
-    archival_date = datetime.now()
+    archival_date = datetime.utcnow()
     dataset.archived = archival_date
     if not dataset.harvest:
         dataset.harvest = HarvestDatasetMetadata()

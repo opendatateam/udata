@@ -59,7 +59,7 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
 
         datasets = VisibleDatasetFactory.create_batch(3, organization=origin_org)
         catalog = build_org_catalog(origin_org, datasets)
-        
+
         graph = catalog.graph
 
         self.assertIsInstance(catalog, RdfResource)
@@ -76,6 +76,9 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
         org = catalog.value(DCT.publisher)
         self.assertEqual(org.value(RDF.type).identifier, FOAF.Organization)
         self.assertEqual(org.value(FOAF.name), Literal(origin_org.name))
+
+        self.assertEqual(catalog.value(DCT.title), Literal(f"{origin_org.name}"))
+        self.assertEqual(catalog.value(DCT.description), Literal(f"{origin_org.name}"))
 
         graph = catalog.graph
         graph_datasets = graph.subjects(RDF.type, DCAT.Dataset)

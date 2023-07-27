@@ -467,14 +467,14 @@ class ModelField(Field):
         if isinstance(specs, str):
             specs = {'id': specs}
         elif not specs.get('id', None):
-            raise validators.ValidationError('Missing "id" field')
+            raise validators.ValidationError(_('Missing "id" field'))
 
         if isinstance(model_field, db.ReferenceField):
             expected_model = str(model_field.document_type.__name__)
             if 'class' not in specs:
                 specs['class'] = expected_model
             elif specs['class'] != expected_model:
-                msg = 'Expect a "{0}" class but "{1}" was found'.format(
+                msg = _('Expect a "{0}" class but "{1}" was found').format(
                     expected_model, specs['class']
                 )
                 raise validators.ValidationError(msg)

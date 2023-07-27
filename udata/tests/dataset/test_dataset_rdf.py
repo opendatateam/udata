@@ -7,7 +7,7 @@ from xml.etree.ElementTree import XML
 from flask import url_for
 
 from rdflib import Graph, URIRef, Literal, BNode
-from rdflib.namespace import RDF
+from rdflib.namespace import FOAF, RDF
 from rdflib.resource import Resource as RdfResource
 
 from udata.models import db
@@ -20,6 +20,7 @@ from udata.core.dataset.rdf import (
     temporal_from_rdf, frequency_to_rdf, frequency_from_rdf,
     EU_RDF_REQUENCIES
 )
+from udata.core.organization.factories import OrganizationFactory
 from udata.i18n import gettext as _
 from udata.rdf import DCAT, DCT, FREQ, SPDX, SCHEMA, SKOS
 from udata.utils import faker
@@ -66,8 +67,9 @@ class DatasetToRdfTest:
 
     def test_all_dataset_fields(self):
         resources = ResourceFactory.build_batch(3)
+        org = OrganizationFactory(name="organization")
         dataset = DatasetFactory(tags=faker.words(nb=3), resources=resources,
-                                 frequency='daily', acronym='acro')
+                                 frequency='daily', acronym='acro', organization=org)
         d = dataset_to_rdf(dataset)
         g = d.graph
 
@@ -90,6 +92,9 @@ class DatasetToRdfTest:
         expected_tags = set(Literal(t) for t in dataset.tags)
         assert set(d.objects(DCAT.keyword)) == expected_tags
         assert len(list(d.objects(DCAT.distribution))) == len(resources)
+        org = d.value(DCT.publisher)
+        assert org.value(RDF.type).identifier == FOAF.Organization
+        assert org.value(FOAF.name) == Literal("organization")
 
     def test_map_unkownn_frequencies(self):
         assert frequency_to_rdf('hourly') == FREQ.continuous
@@ -139,7 +144,7 @@ class DatasetToRdfTest:
         assert r.value(DCT.rights) == Literal(license.title)
         assert r.value(DCAT.downloadURL).identifier == URIRef(resource.url)
         assert r.value(DCAT.accessURL).identifier == URIRef(permalink)
-        assert r.value(DCAT.bytesSize) == Literal(resource.filesize)
+        assert r.value(DCAT.byteSize) == Literal(resource.filesize)
         assert r.value(DCAT.mediaType) == Literal(resource.mime)
         assert r.value(DCT.format) == Literal(resource.format)
 
@@ -161,8 +166,8 @@ class DatasetToRdfTest:
         pot = d.value(DCT.temporal)
 
         assert pot.value(RDF.type).identifier == DCT.PeriodOfTime
-        assert pot.value(SCHEMA.startDate).toPython() == start
-        assert pot.value(SCHEMA.endDate).toPython() == end
+        assert pot.value(DCAT.startDate).toPython() == start
+        assert pot.value(DCAT.endDate).toPython() == end
 
     def test_from_external_repository(self):
         dataset = DatasetFactory(harvest=HarvestDatasetMetadata(
@@ -272,8 +277,8 @@ class RdfToDatasetTest:
         pot = BNode()
         g.add((node, DCT.temporal, pot))
         g.set((pot, RDF.type, DCT.PeriodOfTime))
-        g.set((pot, SCHEMA.startDate, Literal(start)))
-        g.set((pot, SCHEMA.endDate, Literal(end)))
+        g.set((pot, DCAT.startDate, Literal(start)))
+        g.set((pot, DCAT.endDate, Literal(end)))
         for tag in tags:
             g.add((node, DCAT.keyword, Literal(tag)))
 
@@ -391,7 +396,7 @@ class RdfToDatasetTest:
         g.add((node, DCAT.downloadURL, Literal(url)))
         g.add((node, DCT.issued, Literal(issued)))
         g.add((node, DCT.modified, Literal(modified)))
-        g.add((node, DCAT.bytesSize, Literal(filesize)))
+        g.add((node, DCAT.byteSize, Literal(filesize)))
         g.add((node, DCAT.mediaType, Literal(mime)))
         g.add((node, DCT.format, Literal('CSV')))
 
