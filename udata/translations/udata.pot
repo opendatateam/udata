@@ -6,10 +6,10 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: udata 6.1.6.dev0\n"
+"Project-Id-Version: udata 6.1.7.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2023-07-17 16:43+0200\n"
-"PO-Revision-Date: 2023-07-17 16:43+0200\n"
+"POT-Creation-Date: 2023-07-24 11:21+0200\n"
+"PO-Revision-Date: 2023-07-24 11:21+0200\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -222,7 +222,7 @@ msgid "Title"
 msgstr ""
 
 #: udata/core/dataset/forms.py:81 udata/core/dataset/forms.py:141
-#: udata/core/jobs/forms.py:28 udata/core/organization/forms.py:25
+#: udata/core/jobs/forms.py:28 udata/core/organization/forms.py:49
 #: udata/core/reuse/forms.py:21 udata/core/topic/forms.py:17
 #: udata/harvest/forms.py:62
 msgid "Description"
@@ -286,7 +286,7 @@ msgstr ""
 msgid "Publish as"
 msgstr ""
 
-#: udata/core/dataset/forms.py:138 udata/core/organization/forms.py:23
+#: udata/core/dataset/forms.py:138 udata/core/organization/forms.py:47
 msgid "Acronym"
 msgstr ""
 
@@ -516,7 +516,7 @@ msgid "You need to update some frequency-based datasets"
 msgstr ""
 
 #: udata/core/discussions/forms.py:14 udata/core/discussions/forms.py:21
-#: udata/core/organization/forms.py:54 udata/core/organization/forms.py:58
+#: udata/core/organization/forms.py:80 udata/core/organization/forms.py:84
 #: udata/harvest/forms.py:78
 msgid "Comment"
 msgstr ""
@@ -539,7 +539,7 @@ msgstr ""
 msgid "A discussion has been closed"
 msgstr ""
 
-#: udata/core/jobs/forms.py:27 udata/core/organization/forms.py:21
+#: udata/core/jobs/forms.py:27 udata/core/organization/forms.py:45
 #: udata/core/post/forms.py:15 udata/core/topic/forms.py:15
 #: udata/harvest/forms.py:60 udata/templates/api/admin.html:10
 msgid "Name"
@@ -569,27 +569,50 @@ msgstr ""
 msgid "updated an organization"
 msgstr ""
 
-#: udata/core/organization/forms.py:23
+#: udata/core/organization/forms.py:25
+#: udata/tests/api/test_organizations_api.py:115
+msgid "A siret number is made of 14 digits"
+msgstr ""
+
+#: udata/core/organization/forms.py:36
+#: udata/tests/api/test_organizations_api.py:125
+msgid "A siret number is only made of digits"
+msgstr ""
+
+#: udata/core/organization/forms.py:39
+#: udata/tests/api/test_organizations_api.py:120
+msgid "Invalid Siret number"
+msgstr ""
+
+#: udata/core/organization/forms.py:47
 msgid "Shorter organization name"
 msgstr ""
 
-#: udata/core/organization/forms.py:26
+#: udata/core/organization/forms.py:50
 msgid "The details about your organization"
 msgstr ""
 
-#: udata/core/organization/forms.py:28 udata/core/user/forms.py:20
+#: udata/core/organization/forms.py:52 udata/core/user/forms.py:20
 msgid "Website"
 msgstr ""
 
-#: udata/core/organization/forms.py:28
+#: udata/core/organization/forms.py:52
 msgid "The organization website URL"
 msgstr ""
 
-#: udata/core/organization/forms.py:29
+#: udata/core/organization/forms.py:53
 msgid "Logo"
 msgstr ""
 
-#: udata/core/organization/forms.py:65
+#: udata/core/organization/forms.py:54
+msgid "Business id"
+msgstr ""
+
+#: udata/core/organization/forms.py:55
+msgid "Business identification number"
+msgstr ""
+
+#: udata/core/organization/forms.py:91
 msgid "Role"
 msgstr ""
 
@@ -616,11 +639,11 @@ msgstr ""
 msgid "Refused"
 msgstr ""
 
-#: udata/core/organization/models.py:138
+#: udata/core/organization/models.py:142
 msgid "Public Service"
 msgstr ""
 
-#: udata/core/organization/models.py:139
+#: udata/core/organization/models.py:143
 msgid "Certified"
 msgstr ""
 

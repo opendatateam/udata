@@ -40,6 +40,9 @@ CERTIFIED = 'certified'
 TITLE_SIZE_LIMIT = 350
 DESCRIPTION_SIZE_LIMIT = 100000
 
+ORG_BID_SIZE_LIMIT = 14
+ORG_BID_FORMAT = 'siret'
+
 
 class Team(db.EmbeddedDocument):
     name = db.StringField(required=True)
@@ -104,6 +107,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     image_url = db.StringField()
     logo = db.ImageField(fs=avatars, basename=default_image_basename,
                          max_size=LOGO_MAX_SIZE, thumbnails=LOGO_SIZES)
+    business_number_id = db.StringField(max_length=ORG_BID_SIZE_LIMIT)
 
     members = db.ListField(db.EmbeddedDocumentField(Member))
     teams = db.ListField(db.EmbeddedDocumentField(Team))

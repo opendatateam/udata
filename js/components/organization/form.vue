@@ -25,6 +25,9 @@ export default {
                     id: 'acronym',
                     label: this._('Acronym')
                 }, {
+                    id: 'business_number_id',
+                    label: this._('Business id')
+                }, {
                     id: 'description',
                     label: this._('Description')
                 }, {
