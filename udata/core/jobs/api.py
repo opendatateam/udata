@@ -1,7 +1,7 @@
 from celery import states
 from celery.result import AsyncResult
 from celery.utils import get_full_cls_name
-from celery.utils.encoding import safe_repr
+from kombu.utils.encoding import safe_repr
 from flask import request
 
 from udata.api import api, API, fields
