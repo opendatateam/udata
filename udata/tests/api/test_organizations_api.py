@@ -15,11 +15,12 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
+from udata.i18n import _
 
 from udata.tests.helpers import (
     assert_emit, assert_not_emit,
-    assert200, assert201, assert204, assert403, assert404, assert410,
-    assert_status
+    assert200, assert201, assert204, assert403, assert400, assert404,
+    assert410, assert_status
 )
 
 pytestmark = [
@@ -89,6 +90,39 @@ class OrganizationAPITest:
         assert200(response)
         assert Organization.objects.count() is 1
         assert Organization.objects.first().description == 'new description'
+
+    def test_organization_api_update_business_number_id(self, api):
+        '''It should update an organization from the API by adding a business number id'''
+        user = api.login()
+        member = Member(user=user, role='admin')
+        org = OrganizationFactory(members=[member])
+        data = org.to_dict()
+        data['business_number_id'] = '13002526500013'
+        response = api.put(url_for('api.organization', org=org), data)
+        assert200(response)
+        assert Organization.objects.count() is 1
+        assert Organization.objects.first().business_number_id == '13002526500013'
+
+    def test_organization_api_update_business_number_id_failing(self, api):
+        '''It should update an organization from the API by adding a business number id'''
+        user = api.login()
+        member = Member(user=user, role='admin')
+        org = OrganizationFactory(members=[member])
+        data = org.to_dict()
+        data['business_number_id'] = '110014016'
+        response = api.put(url_for('api.organization', org=org), data)
+        assert400(response)
+        assert response.json['errors']['business_number_id'][0] == _('A siret number is made of 14 digits')
+
+        data['business_number_id'] = '12345678901234'
+        response = api.put(url_for('api.organization', org=org), data)
+        assert400(response)
+        assert response.json['errors']['business_number_id'][0] == _('Invalid Siret number')
+
+        data['business_number_id'] = 'tttttttttttttt'
+        response = api.put(url_for('api.organization', org=org), data)
+        assert400(response)
+        assert response.json['errors']['business_number_id'][0] == _('A siret number is only made of digits')
 
     def test_organization_api_update_deleted(self, api):
         '''It should not update a deleted organization from the API'''

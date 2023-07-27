@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix slug overflow with index suffix when reaching max_length [#2874](https://github.com/opendatateam/udata/pull/2874)
 
 ## 6.1.6 (2023-07-19)
 
@@ -14,6 +14,7 @@
 - Add optionnal harvest validation form [#2864](https://github.com/opendatateam/udata/pull/2864)
 - Fix dataset list default sorting [#2867](https://github.com/opendatateam/udata/pull/2867)
 - Update API doc link [#2866](https://github.com/opendatateam/udata/pull/2866)
+- Add `business_number_id` metadata for organizations [#2871](https://github.com/opendatateam/udata/pull/2871)
 - Update admin quality progress bar [#2872](https://github.com/opendatateam/udata/pull/2872)
 
 ## 6.1.5 (2023-06-19)
