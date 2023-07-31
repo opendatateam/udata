@@ -23,6 +23,7 @@ class Topic(db.Document):
     owner = db.ReferenceField('User')
     featured = db.BooleanField()
     private = db.BooleanField()
+    extras = db.ExtrasField()
 
     def __str__(self):
         return self.name
