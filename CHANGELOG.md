@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Fix slug overflow with index suffix when reaching max_length [#2874](https://github.com/opendatateam/udata/pull/2874)
+- Add extra field to topic model and add it to the dataset search adapter [#2876](https://github.com/opendatateam/udata/pull/2876)
 
 ## 6.1.6 (2023-07-19)
 
