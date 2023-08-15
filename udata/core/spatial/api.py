@@ -1,4 +1,4 @@
-from flask import current_app, abort
+from flask import current_app
 from mongoengine.queryset.visitor import Q
 
 from flask_restx import inputs
@@ -55,9 +55,10 @@ class SuggestZonesAPI(API):
             {
                 'id': geozone.id,
                 'name': payload_name(geozone.name),
-                'code': geozone.code,
-                'level': geozone.level,
-                'keys': geozone.keys
+                'code_insee': geozone.code_insee,
+                'code_article': geozone.code_article,
+                'type': geozone.type,
+                'uri': geozone.uri
             }
             for geozone in geozones.order_by(DEFAULT_SORTING).limit(args['size']) if geozone.is_current
         ]
@@ -87,21 +88,6 @@ class ZonesAPI(API):
         }
 
 
-@ns.route('/zone/<path:id>/children/', endpoint='zone_children')
-class ZoneChildrenAPI(API):
-    @api.doc('spatial_zone_children', params={'id': 'A zone identifier'})
-    @api.marshal_list_with(feature_collection_fields)
-    def get(self, id):
-        '''Fetch children of a zone.'''
-        zone = GeoZone.objects.get_or_404(id=id)
-        if not current_app.config.get('ACTIVATE_TERRITORIES'):
-            return abort(501)
-        return {
-            'type': 'FeatureCollection',
-            'features': [z.toGeoJSON() for z in zone.children]
-        }
-
-
 @ns.route('/zone/<path:id>/datasets/', endpoint='zone_datasets')
 class ZoneDatasetsAPI(API):
     @api.doc('spatial_zone_datasets', params={'id': 'A zone identifier'})
@@ -111,17 +97,17 @@ class ZoneDatasetsAPI(API):
         '''Fetch datasets for a given zone'''
         args = dataset_parser.parse_args()
         zone = GeoZone.objects.get_or_404(id=id)
-        if (args.get('dynamic') and
-                current_app.config.get('ACTIVATE_TERRITORIES')):
-            DATASETS = TERRITORY_DATASETS[zone.level_code]
-            dynamic_dataset_classes = sorted(DATASETS.values(),
-                                             key=lambda a: a.order)
-            datasets = [
-                dynamic_dataset_class(zone)
-                for dynamic_dataset_class in dynamic_dataset_classes
-            ]
-        else:
-            datasets = []
+        # if (args.get('dynamic') and
+        #         current_app.config.get('ACTIVATE_TERRITORIES')):
+        #     DATASETS = TERRITORY_DATASETS[zone.level_code]
+        #     dynamic_dataset_classes = sorted(DATASETS.values(),
+        #                                      key=lambda a: a.order)
+        #     datasets = [
+        #         dynamic_dataset_class(zone)
+        #         for dynamic_dataset_class in dynamic_dataset_classes
+        #     ]
+        # else:
+        datasets = []
         datasets += list(Dataset.objects.visible()
                          .filter(spatial__zones=zone)
                          .limit(args['size']))
@@ -180,11 +166,12 @@ class SpatialCoverageAPI(API):
             features.append({
                 'id': zone.id,
                 'type': 'Feature',
-                'geometry': zone.geom,
                 'properties': {
                     'name': _(zone.name),
-                    'code': zone.code,
-                    'level': zone.level,
+                    'code_insee': zone.code_insee,
+                    'code_article': zone.code_article,
+                    'type': zone.type,
+                    'uri': zone.uri,
                     'datasets': nb_datasets
                 }
             })

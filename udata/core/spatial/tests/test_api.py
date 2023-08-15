@@ -29,45 +29,13 @@ class SpatialApiTest(APITestCase):
 
         feature = response.json['features'][0]
         self.assertEqual(feature['type'], 'Feature')
-        assert_json_equal(feature['geometry'], zone.geom)
         self.assertEqual(feature['id'], zone.id)
 
         properties = feature['properties']
         self.assertEqual(properties['name'], zone.name)
-        self.assertEqual(properties['code'], zone.code)
-        self.assertEqual(properties['level'], zone.level)
-        self.assertEqual(properties['parents'], zone.parents)
-        self.assertEqual(properties['population'], zone.population)
-        self.assertEqual(properties['area'], zone.area)
-        self.assertEqual(properties['keys'], zone.keys)
-        self.assertEqual(properties['logo'], zone.logo_url(external=True))
-
-    def test_zones_api_no_geom(self):
-        zone = GeoZoneFactory(geom=None)
-
-        url = url_for('api.zones', ids=[zone.id])
-        response = self.get(url)
-        self.assert200(response)
-
-        self.assertEqual(len(response.json['features']), 1)
-
-        feature = response.json['features'][0]
-        self.assertEqual(feature['type'], 'Feature')
-        assert_json_equal(feature['geometry'], {
-            'type': 'MultiPolygon',
-            'coordinates': [],
-        })
-        self.assertEqual(feature['id'], zone.id)
-
-        properties = feature['properties']
-        self.assertEqual(properties['name'], zone.name)
-        self.assertEqual(properties['code'], zone.code)
-        self.assertEqual(properties['level'], zone.level)
-        self.assertEqual(properties['parents'], zone.parents)
-        self.assertEqual(properties['population'], zone.population)
-        self.assertEqual(properties['area'], zone.area)
-        self.assertEqual(properties['keys'], zone.keys)
-        self.assertEqual(properties['logo'], zone.logo_url(external=True))
+        self.assertEqual(properties['code_insee'], zone.code_insee)
+        self.assertEqual(properties['code_article'], zone.code_article)
+        self.assertEqual(properties['uri'], zone.uri(external=True))
 
     def test_zones_api_many(self):
         zones = [GeoZoneFactory() for _ in range(3)]
@@ -80,18 +48,13 @@ class SpatialApiTest(APITestCase):
 
         for zone, feature in zip(zones, response.json['features']):
             self.assertEqual(feature['type'], 'Feature')
-            assert_json_equal(feature['geometry'], zone.geom)
             self.assertEqual(feature['id'], zone.id)
 
             properties = feature['properties']
             self.assertEqual(properties['name'], zone.name)
-            self.assertEqual(properties['code'], zone.code)
-            self.assertEqual(properties['level'], zone.level)
-            self.assertEqual(properties['parents'], zone.parents)
-            self.assertEqual(properties['population'], zone.population)
-            self.assertEqual(properties['area'], zone.area)
-            self.assertEqual(properties['keys'], zone.keys)
-            self.assertEqual(properties['logo'], zone.logo_url(external=True))
+            self.assertEqual(properties['code_insee'], zone.code_insee)
+            self.assertEqual(properties['code_article'], zone.code_article)
+            self.assertEqual(properties['uri'], zone.uri(external=True))
 
     def test_suggest_zones_on_name(self):
         '''It should suggest zones based on its name'''
@@ -109,10 +72,9 @@ class SpatialApiTest(APITestCase):
         for suggestion in response.json:
             self.assertIn('id', suggestion)
             self.assertIn('name', suggestion)
-            self.assertIn('code', suggestion)
-            self.assertIn('level', suggestion)
-            self.assertIn('keys', suggestion)
-            self.assertIsInstance(suggestion['keys'], dict)
+            self.assertIn('code_insee', suggestion)
+            self.assertIn('code_article', suggestion)
+            self.assertIn('uri', suggestion)
             self.assertIn('name-test', suggestion['name'])
 
     def test_suggest_zones_on_code(self):
@@ -320,16 +282,6 @@ class SpatialApiTest(APITestCase):
             self.assertEqual(properties['level'], 'sub')
             # Nested levels datasets should be counted
             self.assertEqual(properties['datasets'], 3)
-
-    def test_zone_children(self):
-        paca, bdr, arles = create_geozones_fixtures()
-
-        response = self.get(url_for('api.zone_children', id=paca.id))
-        self.assertStatus(response, 501)
-        response = self.get(url_for('api.zone_children', id=bdr.id))
-        self.assertStatus(response, 501)
-        response = self.get(url_for('api.zone_children', id=arles.id))
-        self.assertStatus(response, 501)
 
 
 class SpatialTerritoriesApiTest(APITestCase):
