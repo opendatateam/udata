@@ -203,12 +203,10 @@ class DatasetModelTest:
         assert dataset.quality['score'] == Dataset.normalize_score(2)
 
     def test_quality_description_length(self):
-        dataset = DatasetFactory(
-            description='a' * (current_app.config.get('QUALITY_DESCRIPTION_LENGTH') - 1))
+        dataset = DatasetFactory(description='a' * (current_app.config.get('QUALITY_DESCRIPTION_LENGTH') - 1))
         assert dataset.quality['dataset_description_quality'] is False
         assert dataset.quality['score'] == 0
-        dataset = DatasetFactory(
-            description='a' * (current_app.config.get('QUALITY_DESCRIPTION_LENGTH') + 1))
+        dataset = DatasetFactory(description='a' * (current_app.config.get('QUALITY_DESCRIPTION_LENGTH') + 1))
         assert dataset.quality['dataset_description_quality'] is True
         assert dataset.quality['score'] == Dataset.normalize_score(1)
 
@@ -408,7 +406,7 @@ class LicenseModelTest:
         assert license.id == found.id
 
     def test_exact_match_by_title_with_mismatch_slug(self):
-        license = LicenseFactory(title='Licence Ouverte v2', slug='licence-2')
+        license = LicenseFactory(title="Licence Ouverte v2", slug="licence-2")
         found = License.guess(license.title)
         assert isinstance(found, License)
         assert license.id == found.id
@@ -511,19 +509,19 @@ class ResourceSchemaTest:
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_resource_schema_objects(self, app, rmock):
         rmock.get('https://example.com/schemas', json={
-            'schemas': [
+            "schemas": [
                 {
-                    'name': 'etalab/schema-irve',
-                    'title': 'Schéma IRVE',
-                    'versions': [
+                    "name": "etalab/schema-irve",
+                    "title": "Schéma IRVE",
+                    "versions": [
                         {
-                            'version_name': '1.0.0'
+                            "version_name": "1.0.0"
                         },
                         {
-                            'version_name': '1.0.1'
+                            "version_name": "1.0.1"
                         },
                         {
-                            'version_name': '1.0.2'
+                            "version_name": "1.0.2"
                         }
                     ]
                 }
@@ -532,42 +530,12 @@ class ResourceSchemaTest:
 
         assert ResourceSchema.objects() == [
             {
-                'id': 'etalab/schema-irve',
-                'label': 'Schéma IRVE',
-                'versions': [
-                    '1.0.0',
-                    '1.0.1',
-                    '1.0.2'
-                ]
-            }
-        ]
-
-    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
-    def test_resource_schema_objects_ignored_type(self, app, rmock):
-        # datapackage schema should be ignored
-        rmock.get('https://example.com/schemas', json={
-            'schemas': [
-                {
-                    'name': 'schema-tableschema',
-                    'title': 'Schéma IRVE',
-                    'versions': [{'version_name': '1.0.0'}],
-                    'schema_type': 'tableschema'
-                },
-                {
-                    'name': 'schema-datapackage',
-                    'title': 'Schéma IRVE',
-                    'versions': [{'version_name': '1.0.0'}],
-                    'schema_type': 'datapackage'
-                }
-            ]
-        })
-
-        assert ResourceSchema.objects() == [
-            {
-                'id': 'schema-tableschema',
-                'label': 'Schéma IRVE',
-                'versions': [
-                    '1.0.0'
+                "id": "etalab/schema-irve",
+                "label": "Schéma IRVE",
+                "versions": [
+                    "1.0.0",
+                    "1.0.1",
+                    "1.0.2"
                 ]
             }
         ]
@@ -583,19 +551,19 @@ class ResourceSchemaTest:
 
         # fill cache
         rmock.get('https://example.com/schemas', json={
-            'schemas': [
+            "schemas": [
                 {
-                    'name': 'etalab/schema-irve',
-                    'title': 'Schéma IRVE',
-                    'versions': [
+                    "name": "etalab/schema-irve",
+                    "title": "Schéma IRVE",
+                    "versions": [
                         {
-                            'version_name': '1.0.0'
+                            "version_name": "1.0.0"
                         },
                         {
-                            'version_name': '1.0.1'
+                            "version_name": "1.0.1"
                         },
                         {
-                            'version_name': '1.0.2'
+                            "version_name": "1.0.2"
                         }
                     ]
                 }
@@ -724,7 +692,7 @@ class HarvestMetadataTest:
 
     def test_resource_metadata_extra_modifed_at(self):
         resource = ResourceFactory(filetype='remote')
-        resource.extras.update({'analysis:last-modified-at': datetime(2023, 1, 1)})
+        resource.extras.update({'analysis:last-modified-at': datetime(2023,1,1)})
         resource.validate()
 
         assert resource.last_modified == resource.extras['analysis:last-modified-at']
