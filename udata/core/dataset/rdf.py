@@ -319,15 +319,15 @@ def frequency_from_rdf(term):
         except uris.ValidationError:
             pass
     if isinstance(term, Literal):
-        if term.toPython() in UPDATE_FREQUENCIES:
-            return term.toPython()
+        if term.toPython().lower() in UPDATE_FREQUENCIES:
+            return term.toPython().lower()
     if isinstance(term, RdfResource):
         term = term.identifier
     if isinstance(term, URIRef):
         if EUFREQ in term:
             return EU_RDF_REQUENCIES.get(term)
         _, _, freq = namespace_manager.compute_qname(term)
-        return freq
+        return freq.lower()
 
 
 def mime_from_rdf(resource):
