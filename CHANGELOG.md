@@ -6,6 +6,7 @@
 - Upgrade pyyaml in develop and doc deps [#2880](https://github.com/opendatateam/udata/pull/2880)
 - Expose dataset's `*_internal` dates in a nested `internal` nested field in api marshalling [#2862](https://github.com/opendatateam/udata/pull/2862)
 - Add `business_number_id` metadata for organizations [#2871](https://github.com/opendatateam/udata/pull/2871)
+- Ensure rdf parsed frequency is lowercase [#2883](https://github.com/opendatateam/udata/pull/2883)
 
 ## 6.1.6 (2023-07-19)
 
