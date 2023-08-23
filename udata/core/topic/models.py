@@ -33,6 +33,8 @@ class Topic(db.Document):
 
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
+        # Try catch is to prevent the mechanism to crash at the
+        # creation of the Topic, where an original state does not exist.
         try:
             original_doc = sender.objects.get(id=document.id)
             # Get the diff between the original and current datasets and reuses
