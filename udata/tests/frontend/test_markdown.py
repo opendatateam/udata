@@ -219,6 +219,21 @@ class MarkdownTest:
         ))
         assert_md(text, expected)
 
+    def test_collapsible(self, assert_md):
+        '''It should not escape the collabsible HTML elem'''
+        text = '\n'.join((
+            '<details>',
+            '<summary>TITLE</summary>',
+            'BODY CONTENT',
+            '</details>',
+        ))
+        expected = '\n'.join((
+            '<details>',
+            '<summary>TITLE</summary>',
+            'BODY CONTENT',
+            '</details>',
+        ))
+        assert_md(text, expected)
 
 @pytest.mark.frontend
 class MdStripTest:

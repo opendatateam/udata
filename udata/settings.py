@@ -187,6 +187,8 @@ class Defaults(object):
         'tbody',
         'thead',
         'tfooter',
+        'details',
+        'summary'
         # 'title',
     ]
 
