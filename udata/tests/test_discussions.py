@@ -351,6 +351,11 @@ class DiscussionsTest(APITestCase):
             data['discussion'][1]['posted_by']['id'], str(owner.id))
         self.assertIsNotNone(data['discussion'][1]['posted_on'])
 
+        # Can't add anymore comments
+        response = self.post(url_for('api.discussion', id=discussion.id),
+                             {'comment': "can't comment"})
+        self.assert403(response)
+
     def test_close_discussion_permissions(self):
         dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
