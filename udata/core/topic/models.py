@@ -35,17 +35,16 @@ class Topic(db.Document):
     def pre_save(cls, sender, document, **kwargs):
         try:
             original_doc = sender.objects.get(id=document.id)
-            datasets_list_dif = list(set(original_doc.datasets).symmetric_difference(set(document.datasets)))
-            reuses_list_dif = list(set(original_doc.reuses).symmetric_difference(set(document.reuses)))
+            # Get the diff between the original and current datasets and reuses
+            datasets_list_dif = set(original_doc.datasets) ^ set(document.datasets)
+            reuses_list_dif = set(original_doc.reuses) ^ set(document.reuses)
         except cls.DoesNotExist:
             datasets_list_dif = document.datasets
             reuses_list_dif = document.reuses
-        if datasets_list_dif:
-            for dataset in datasets_list_dif:
-                reindex.delay(*as_task_param(dataset))
-        if reuses_list_dif:
-            for reuse in reuses_list_dif:
-                reindex.delay(*as_task_param(reuse))
+        for dataset in datasets_list_dif:
+            reindex.delay(*as_task_param(dataset))
+        for reuse in reuses_list_dif:
+            reindex.delay(*as_task_param(reuse))
 
     @property
     def display_url(self):
