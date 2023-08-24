@@ -16,7 +16,7 @@ pytestmark = pytest.mark.usefixtures('clean_db')
 class TopicModelTest:
 
     def test_pre_save(self, job_reindex):
-        topic = TopicFactory()
+        topic = TopicFactory(datasets=[])
         dataset = DatasetFactory()
 
         topic.name = 'new_name'

@@ -21,7 +21,7 @@ class TopicsAPITest(APITestCase):
 
     def test_topic_api_get(self):
         '''It should fetch a topic from the API'''
-        topic = TopicFactory(datasets=[DatasetFactory.create_batch(3)])
+        topic = TopicFactory()
         response = self.get(url_for('api.topic', topic=topic))
         self.assert200(response)
 
