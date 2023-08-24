@@ -16,11 +16,5 @@ class TopicFactory(ModelFactory):
     description = factory.Faker('text')
     tags = factory.LazyAttribute(lambda o: [utils.unique_string(16)
                                  for _ in range(3)])
-
-    @factory.lazy_attribute
-    def datasets(self):
-        return DatasetFactory.create_batch(3)
-
-    @factory.lazy_attribute
-    def reuses(self):
-        return ReuseFactory.create_batch(3)
+    datasets = []
+    reuses = []

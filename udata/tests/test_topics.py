@@ -18,6 +18,17 @@ class TopicModelTest:
     def test_pre_save(self, job_reindex):
         topic = TopicFactory()
         dataset = DatasetFactory()
+
+        topic.name = 'new_name'
+        topic.save()
+        job_reindex.assert_not_called()
+
         topic.datasets = [dataset]
         topic.save()
         job_reindex.assert_called()
+
+        topic.datasets = []
+        topic.save()
+        job_reindex.assert_called()
+
+

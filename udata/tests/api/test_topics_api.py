@@ -3,6 +3,7 @@ from flask import url_for
 from udata.core.topic.models import Topic
 from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import AdminFactory
+from udata.core.dataset.factories import DatasetFactory
 
 from . import APITestCase
 
@@ -20,7 +21,7 @@ class TopicsAPITest(APITestCase):
 
     def test_topic_api_get(self):
         '''It should fetch a topic from the API'''
-        topic = TopicFactory()
+        topic = TopicFactory(datasets=[DatasetFactory.create_batch(3)])
         response = self.get(url_for('api.topic', topic=topic))
         self.assert200(response)
 
