@@ -37,16 +37,12 @@ class Topic(db.Document):
         # creation of the Topic, where an original state does not exist.
         try:
             original_doc = sender.objects.get(id=document.id)
-            # Get the diff between the original and current datasets and reuses
+            # Get the diff between the original and current datasets
             datasets_list_dif = set(original_doc.datasets) ^ set(document.datasets)
-            reuses_list_dif = set(original_doc.reuses) ^ set(document.reuses)
         except cls.DoesNotExist:
             datasets_list_dif = document.datasets
-            reuses_list_dif = document.reuses
         for dataset in datasets_list_dif:
             reindex.delay(*as_task_param(dataset))
-        for reuse in reuses_list_dif:
-            reindex.delay(*as_task_param(reuse))
 
     @property
     def display_url(self):
