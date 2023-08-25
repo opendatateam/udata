@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Fix slug overflow with index suffix when reaching max_length [#2874](https://github.com/opendatateam/udata/pull/2874)
+- Add extra field to topic model and add it to the dataset search adapter [#2876](https://github.com/opendatateam/udata/pull/2876)
 - Upgrade pyyaml in develop and doc deps [#2880](https://github.com/opendatateam/udata/pull/2880)
 - Expose dataset's `*_internal` dates in a nested `internal` nested field in api marshalling [#2862](https://github.com/opendatateam/udata/pull/2862)
 - Add `business_number_id` metadata for organizations [#2871](https://github.com/opendatateam/udata/pull/2871)
