@@ -38,7 +38,7 @@ KNOWN_PAGINATION = (
 # Useful to patch essential failing URIs
 URIS_TO_REPLACE = {
     # See https://github.com/etalab/data.gouv.fr/issues/1151
-    'https://project-open-data.cio.gov/v1.1/schema/catalog.jsonld': 'https://gist.github.com/maudetes/f019586185d6f59dcfb07f97148a1973'  # noqa
+    'https://project-open-data.cio.gov/v1.1/schema/catalog.jsonld': 'https://gist.githubusercontent.com/maudetes/f019586185d6f59dcfb07f97148a1973/raw/585c3c7bf602b5a4e635b137257d0619792e2c1f/gistfile1.txt'  # noqa
 }
 
 
