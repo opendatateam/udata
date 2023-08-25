@@ -8,6 +8,7 @@
 - Add `business_number_id` metadata for organizations [#2871](https://github.com/opendatateam/udata/pull/2871)
 - Return 403 when posting comment on discussion closed [#2881](https://github.com/opendatateam/udata/pull/2881)
 - Ensure rdf parsed frequency is lowercase [#2883](https://github.com/opendatateam/udata/pull/2883)
+- Add a dict of URIs to replace in a RDF graph at harvest time [#2884](https://github.com/opendatateam/udata/pull/2884)
 
 ## 6.1.6 (2023-07-19)
 
