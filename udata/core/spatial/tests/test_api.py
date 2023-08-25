@@ -33,8 +33,8 @@ class SpatialApiTest(APITestCase):
 
         properties = feature['properties']
         self.assertEqual(properties['name'], zone.name)
-        self.assertEqual(properties['code_insee'], zone.code_insee)
-        self.assertEqual(properties['code_article'], zone.code_article)
+        self.assertEqual(properties['code'], zone.code)
+        self.assertEqual(properties['level'], zone.level)
         self.assertEqual(properties['uri'], zone.uri(external=True))
 
     def test_zones_api_many(self):
@@ -52,8 +52,8 @@ class SpatialApiTest(APITestCase):
 
             properties = feature['properties']
             self.assertEqual(properties['name'], zone.name)
-            self.assertEqual(properties['code_insee'], zone.code_insee)
-            self.assertEqual(properties['code_article'], zone.code_article)
+            self.assertEqual(properties['code'], zone.code)
+            self.assertEqual(properties['level'], zone.level)
             self.assertEqual(properties['uri'], zone.uri(external=True))
 
     def test_suggest_zones_on_name(self):
@@ -72,9 +72,9 @@ class SpatialApiTest(APITestCase):
         for suggestion in response.json:
             self.assertIn('id', suggestion)
             self.assertIn('name', suggestion)
-            self.assertIn('code_insee', suggestion)
-            self.assertIn('code_article', suggestion)
+            self.assertIn('code', suggestion)
             self.assertIn('uri', suggestion)
+            self.assertIn('level', suggestion)
             self.assertIn('name-test', suggestion['name'])
 
     def test_suggest_zones_on_code(self):
@@ -95,8 +95,7 @@ class SpatialApiTest(APITestCase):
             self.assertIn('name', suggestion)
             self.assertIn('code', suggestion)
             self.assertIn('level', suggestion)
-            self.assertIn('keys', suggestion)
-            self.assertIsInstance(suggestion['keys'], dict)
+            self.assertIn('uri', suggestion)
             self.assertIn('code-test', suggestion['code'])
 
     def test_suggest_zones_no_match(self):
@@ -129,8 +128,7 @@ class SpatialApiTest(APITestCase):
             self.assertIn('name', suggestion)
             self.assertIn('code', suggestion)
             self.assertIn('level', suggestion)
-            self.assertIn('keys', suggestion)
-            self.assertIsInstance(suggestion['keys'], dict)
+            self.assertIn('uri', suggestion)
             self.assertIn('name-testé', suggestion['name'])
 
     def test_suggest_zones_empty(self):
@@ -157,8 +155,7 @@ class SpatialApiTest(APITestCase):
             self.assertIn('name', suggestion)
             self.assertIn('code', suggestion)
             self.assertIn('level', suggestion)
-            self.assertIn('keys', suggestion)
-            self.assertIsInstance(suggestion['keys'], dict)
+            self.assertIn('uri', suggestion)
             self.assertTrue(suggestion['name'].endswith('-current'))
 
     def test_spatial_levels(self):

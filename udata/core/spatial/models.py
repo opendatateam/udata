@@ -1,9 +1,13 @@
+from flask import current_app
 from werkzeug.local import LocalProxy
+from werkzeug.utils import cached_property
 
 from udata.app import cache
 from udata.uris import endpoint_for
 from udata.i18n import _, L_, get_locale, language
 from udata.models import db
+
+from . import geoids
 
 
 __all__ = (
@@ -29,19 +33,47 @@ class GeoLevel(db.Document):
                               default=100)
 
 
+class GeoZoneQuerySet(db.BaseQuerySet):
+
+    def resolve(self, geoid, id_only=False):
+        '''
+        Resolve a GeoZone given a GeoID.
+
+        The start date is resolved from the given GeoID,
+        ie. it find there is a zone valid a the geoid validity,
+        resolve the `latest` alias
+        or use `latest` when no validity is given.
+
+        If `id_only` is True,
+        the result will be the resolved GeoID
+        instead of the resolved zone.
+        '''
+        level, code, validity = geoids.parse(geoid)
+        qs = self(level=level, code=code)
+        if id_only:
+            qs = qs.only('id')
+        if validity == 'latest':
+            result = qs.latest()
+        else:
+            result = qs.valid_at(validity).first()
+        return result.id if id_only and result else result
+
+
 class GeoZone(db.Document):
     id = db.StringField(primary_key=True)
     slug = db.StringField(required=True)
     name = db.StringField(required=True)
-    code_insee = db.StringField(required=True)
-    code_article = db.StringField(required=True)
+    code = db.StringField(required=True)
     type = db.StringField(required=True)
     uri = db.StringField(required=True)
+    level = db.StringField(required=True)
 
     meta = {
         'indexes': [
-            'name'
-        ]
+            'name',
+            ('level', 'code'),
+        ],
+        'queryset_class': GeoZoneQuerySet
     }
 
     def __str__(self):
@@ -51,6 +83,33 @@ class GeoZone(db.Document):
         """In use within the admin."""
         return '{name} <i>({code})</i>'.format(
             name=_(self.name), code=self.code)
+
+    @cached_property
+    def level_code(self):
+        """Truncated level code for the sake of readability."""
+        # Either 'region', 'departement' or 'commune',
+        # useful to match TERRITORY_DATASETS keys.
+        return self.id.split(':')[1]
+
+    @cached_property
+    def level_name(self):
+        """Truncated level name for the sake of readability."""
+        if self.level.startswith('fr:'):
+            return self.level[3:]
+        # Keep the whole level name as a fallback (e.g. `country:fr`)
+        return self.level
+
+    @cached_property
+    def level_i18n_name(self):
+        """In use within templates for dynamic translations."""
+        for level, name in spatial_granularities:
+            if self.level == level:
+                return name
+        return self.level_name  # Fallback that should never happen.
+
+    @property
+    def handled_level(self):
+        return self.level in current_app.config.get('HANDLED_LEVELS')
 
     @property
     def url(self):
@@ -67,10 +126,10 @@ class GeoZone(db.Document):
             'properties': {
                 'slug': self.slug,
                 'name': _(self.name),
-                'code_insee': self.code_insee,
-                'code_article': self.code_article,
+                'code': self.code,
                 'type': self.type,
-                'uri': self.uri
+                'uri': self.uri,
+                'level': self.level,
             }
         }
 

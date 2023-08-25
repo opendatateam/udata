@@ -105,10 +105,11 @@ class GeoZoneFactory(ModelFactory):
 
     id = factory.LazyAttribute(geoids.from_zone)
     name = factory.Faker('city')
+    type = factory.Faker('city')
     slug = factory.Faker('slug')
-    code_insee = factory.Faker('zipcode')
-    code_article = factory.Faker('zipcode')
+    code = factory.Faker('zipcode')
     uri = factory.Faker('url')
+    level = factory.LazyAttribute(lambda o: GeoLevelFactory().id)
 
 
 class SpatialCoverageFactory(ModelFactory):

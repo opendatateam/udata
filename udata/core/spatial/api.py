@@ -55,8 +55,7 @@ class SuggestZonesAPI(API):
             {
                 'id': geozone.id,
                 'name': payload_name(geozone.name),
-                'code_insee': geozone.code_insee,
-                'code_article': geozone.code_article,
+                'code': geozone.code,
                 'type': geozone.type,
                 'uri': geozone.uri
             }
@@ -168,8 +167,7 @@ class SpatialCoverageAPI(API):
                 'type': 'Feature',
                 'properties': {
                     'name': _(zone.name),
-                    'code_insee': zone.code_insee,
-                    'code_article': zone.code_article,
+                    'code': zone.code,
                     'type': zone.type,
                     'uri': zone.uri,
                     'datasets': nb_datasets

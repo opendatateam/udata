@@ -67,24 +67,9 @@ def load_zones(col, path):
                 'slug': slugify.slugify(geozone['name'], separator='-'),
                 'level': geozone['level'],
                 'code': geozone['code'],
-                'name': geozone['name'],
-                'keys': geozone.get('keys'),
-                'parents': geozone.get('parents', []),
-                'ancestors': geozone.get('ancestors', []),
-                'successors': geozone.get('successors', []),
-                'validity': geozone.get('validity'),
-                'population': geozone.get('population'),
-                'dbpedia': geozone.get('dbpedia'),
-                'flag': geozone.get('flag'),
-                'blazon': geozone.get('blazon'),
-                'wikidata': geozone.get('wikidata'),
-                'wikipedia': geozone.get('wikipedia'),
-                'area': geozone.get('area'),
+                'uri': geozone['name'],
+                'type': geozone['name']
             }
-            if geozone.get('geom') and (
-                geozone['geom']['type'] != 'GeometryCollection' or
-                    geozone['geom']['geometries']):
-                params['geom'] = geozone['geom']
             try:
                 col.objects(id=geozone['_id']).modify(upsert=True, **{
                     'set__{0}'.format(k): v for k, v in params.items()
