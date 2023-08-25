@@ -101,7 +101,8 @@ def finalize_reindex(models, start):
     modified_since_reindex = 0
     for adapter in iter_adapters():
         if not models or adapter.model.__name__.lower() in models:
-            modified_since_reindex += adapter.model.objects(last_modified__gte=start).count()
+            modified_since_reindex += adapter.model.objects(
+                last_modified_internal__gte=start).count()
 
     log.warning(
         f'{modified_since_reindex} documents have been modified since reindexation start. '
