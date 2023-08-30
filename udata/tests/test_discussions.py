@@ -4,7 +4,7 @@ from flask import url_for
 
 from udata.models import Dataset, Member
 from udata.core.discussions.models import Message, Discussion
-from udata.core.discussions.metrics import update_discussions_metric
+from udata.core.discussions.metrics import update_discussions_metric  # noqa
 from udata.core.discussions.notifications import discussions_notifications
 from udata.core.discussions.signals import (
     on_new_discussion, on_new_discussion_comment,
@@ -17,6 +17,7 @@ from udata.core.discussions.tasks import (
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory, AdminFactory
+from udata.tests.helpers import capture_mails
 from udata.utils import faker
 
 from . import TestCase, DBTestMixin
@@ -351,6 +352,11 @@ class DiscussionsTest(APITestCase):
             data['discussion'][1]['posted_by']['id'], str(owner.id))
         self.assertIsNotNone(data['discussion'][1]['posted_on'])
 
+        # Can't add anymore comments
+        response = self.post(url_for('api.discussion', id=discussion.id),
+                             {'comment': "can't comment"})
+        self.assert403(response)
+
     def test_close_discussion_permissions(self):
         dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
@@ -545,3 +551,76 @@ class DiscussionsNotificationsTest(TestCase, DBTestMixin):
             self.assertEqual(details['title'], discussion.title)
             self.assertEqual(details['subject']['id'], discussion.subject.id)
             self.assertEqual(details['subject']['type'], 'dataset')
+
+
+class DiscussionsMailsTest(APITestCase):
+    modules = []
+
+    def test_new_discussion_mail(self):
+        user = UserFactory()
+        owner = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=DatasetFactory(owner=owner),
+            user=user,
+            title=faker.sentence(),
+            discussion=[message]
+        )
+
+        with capture_mails() as mails:
+            notify_new_discussion(discussion.id)
+
+        # Should have sent one mail to the owner
+        self.assertEqual(len(mails), 1)
+        self.assertEqual(mails[0].recipients[0], owner.email)
+
+    def test_new_discussion_comment_mail(self):
+        owner = UserFactory()
+        poster = UserFactory()
+        commenter = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=poster)
+        second_message = Message(content=faker.sentence(), posted_by=owner)
+        new_message = Message(content=faker.sentence(), posted_by=commenter)
+        discussion = Discussion.objects.create(
+            subject=DatasetFactory(owner=owner),
+            user=poster,
+            title=faker.sentence(),
+            discussion=[message, second_message, new_message]
+        )
+
+        with capture_mails() as mails:
+            notify_new_discussion_comment(discussion.id, message=len(discussion.discussion) - 1)
+
+        # Should have sent one mail to the owner and the other participants
+        # and no mail to the commenter. The owner should appear only once in the recipients
+        # even if he is in both the discussion and the owner of the dataset.
+        expected_recipients = (owner.email, poster.email)
+        self.assertEqual(len(mails), len(expected_recipients))
+        for mail in mails:
+            self.assertIn(mail.recipients[0], expected_recipients)
+            self.assertNotIn(commenter.email, mail.recipients)
+
+    def test_closed_discussion_mail(self):
+        owner = UserFactory()
+        poster = UserFactory()
+        commenter = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=poster)
+        second_message = Message(content=faker.sentence(), posted_by=commenter)
+        closing_message = Message(content=faker.sentence(), posted_by=owner)
+        discussion = Discussion.objects.create(
+            subject=DatasetFactory(owner=owner),
+            user=poster,
+            title=faker.sentence(),
+            discussion=[message, second_message, closing_message]
+        )
+
+        with capture_mails() as mails:
+            notify_discussion_closed(discussion.id, message=len(discussion.discussion) - 1)
+
+        # Should have sent one mail to each participant
+        # and no mail to the closer
+        expected_recipients = (poster.email, commenter.email)
+        self.assertEqual(len(mails), len(expected_recipients))
+        for mail in mails:
+            self.assertIn(mail.recipients[0], expected_recipients)
+            self.assertNotIn(owner.email, mail.recipients)

@@ -5,6 +5,7 @@
 <script>
 import Organization from 'models/organization';
 import VForm from 'components/form/vertical-form.vue';
+import config from '../../config';
 
 export default {
     components: {VForm},
@@ -26,7 +27,8 @@ export default {
                     label: this._('Acronym')
                 }, {
                     id: 'business_number_id',
-                    label: this._('Business id')
+                    label: this._('Business id') +
+                         (config.org_bid_format ? ' (' + config.org_bid_format.toUpperCase() + ')' : '')
                 }, {
                     id: 'description',
                     label: this._('Description')

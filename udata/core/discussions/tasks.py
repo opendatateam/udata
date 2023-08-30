@@ -41,7 +41,7 @@ def notify_new_discussion_comment(discussion_id, message=None):
     if isinstance(discussion.subject, (Dataset, Reuse, Post)):
         recipients = owner_recipients(discussion) + [
             m.posted_by for m in discussion.discussion]
-        recipients = [u for u in set(recipients) if u != message.posted_by]
+        recipients = list({u.id: u for u in recipients if u != message.posted_by}.values())
         subject = _('%(user)s commented your discussion',
                     user=message.posted_by.fullname)
 
@@ -59,7 +59,7 @@ def notify_discussion_closed(discussion_id, message=None):
     if isinstance(discussion.subject, (Dataset, Reuse, Post)):
         recipients = owner_recipients(discussion) + [
             m.posted_by for m in discussion.discussion]
-        recipients = [u for u in set(recipients) if u != message.posted_by]
+        recipients = list({u.id: u for u in recipients if u != message.posted_by}.values())
         subject = _('A discussion has been closed')
         mail.send(subject, recipients, 'discussion_closed',
                   discussion=discussion, message=message)

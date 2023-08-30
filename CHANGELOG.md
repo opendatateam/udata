@@ -3,6 +3,14 @@
 ## Current (in progress)
 
 - Fix slug overflow with index suffix when reaching max_length [#2874](https://github.com/opendatateam/udata/pull/2874)
+- Add extra field to topic model and add it to the dataset search adapter [#2876](https://github.com/opendatateam/udata/pull/2876)
+- Upgrade pyyaml in develop and doc deps [#2880](https://github.com/opendatateam/udata/pull/2880)
+- Expose dataset's `*_internal` dates in a nested `internal` nested field in api marshalling [#2862](https://github.com/opendatateam/udata/pull/2862)
+- Add `business_number_id` metadata for organizations [#2871](https://github.com/opendatateam/udata/pull/2871) [#2887](https://github.com/opendatateam/udata/pull/2887)
+- Return 403 when posting comment on discussion closed [#2881](https://github.com/opendatateam/udata/pull/2881)
+- Ensure rdf parsed frequency is lowercase [#2883](https://github.com/opendatateam/udata/pull/2883)
+- Add a dict of URIs to replace in a RDF graph at harvest time [#2884](https://github.com/opendatateam/udata/pull/2884)
+- Fix duplicate recipients in new comments mail [#2886](https://github.com/opendatateam/udata/pull/2886)
 
 ## 6.1.6 (2023-07-19)
 
@@ -13,7 +21,6 @@
 - Add optionnal harvest validation form [#2864](https://github.com/opendatateam/udata/pull/2864)
 - Fix dataset list default sorting [#2867](https://github.com/opendatateam/udata/pull/2867)
 - Update API doc link [#2866](https://github.com/opendatateam/udata/pull/2866)
-- Add `business_number_id` metadata for organizations [#2871](https://github.com/opendatateam/udata/pull/2871)
 - Update admin quality progress bar [#2872](https://github.com/opendatateam/udata/pull/2872)
 
 ## 6.1.5 (2023-06-19)

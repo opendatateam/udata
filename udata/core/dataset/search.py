@@ -1,6 +1,6 @@
 import datetime
 from udata.models import (
-    Dataset, Organization, User, GeoZone, License
+    Dataset, Organization, User, GeoZone, License, Topic
 )
 from udata.search import (
     ModelSearchAdapter, register,
@@ -41,6 +41,7 @@ class DatasetSearch(ModelSearchAdapter):
         'schema': Filter(),
         'temporal_coverage': TemporalCoverageFilter(),
         'featured': BoolFilter(),
+        'topic': ModelTermsFilter(model=Topic),
     }
 
     @classmethod
@@ -62,6 +63,8 @@ class DatasetSearch(ModelSearchAdapter):
     def serialize(cls, dataset):
         organization = None
         owner = None
+
+        topics = Topic.objects(datasets=dataset)
 
         if dataset.organization:
             org = Organization.objects(id=dataset.organization.id).first()
@@ -94,7 +97,8 @@ class DatasetSearch(ModelSearchAdapter):
             'organization': organization,
             'owner': str(owner.id) if owner else None,
             'format': [r.format.lower() for r in dataset.resources if r.format],
-            'schema': [r.schema.get('name') for r in dataset.resources if r.schema]
+            'schema': [r.schema.get('name') for r in dataset.resources if r.schema],
+            'topics': [t.slug for t in topics if topics],
         }
         extras = {}
         for key, value in dataset.extras.items():

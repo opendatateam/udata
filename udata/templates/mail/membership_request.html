@@ -8,7 +8,7 @@
 {{ _('As an administrator of "%(org)s" you are being informed than a new membership request from %(user)s is pending for validation',
     user=(
         '<a href="'|safe
-        + url_for('users.show', user=request.user, _external=True)
+        + url_for('api.user', user=request.user, _external=True)
         + '">'|safe
         + request.user.fullname
         + '</a>'|safe

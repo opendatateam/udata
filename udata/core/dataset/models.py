@@ -295,6 +295,13 @@ class ResourceMixin(object):
     deleted = db.DateTimeField()
 
     @property
+    def internal(self):
+        return {
+            'created_at_internal': self.created_at_internal,
+            'last_modified_internal': self.last_modified_internal
+        }
+
+    @property
     def created_at(self):
         return self.harvest.created_at if self.harvest and self.harvest.created_at else self.created_at_internal
 
@@ -826,6 +833,13 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             result['author'] = author
 
         return result
+
+    @property
+    def internal(self):
+        return {
+            'created_at_internal': self.created_at_internal,
+            'last_modified_internal': self.last_modified_internal
+        }
 
     @property
     def views_count(self):
