@@ -155,6 +155,11 @@ export const harvest_validation_contact_form = _meta('harvest-validation-contact
 export const dataset_max_resources_uncollapsed = _jsonMeta('dataset-max-resources-uncollapsed');
 
 /**
+ * The expected business identification format
+ */
+export const org_bid_format = _meta('org-bid-format')
+
+/**
  * Markdown configuration.
  */
 export const markdown = _jsonMeta('markdown-config');
@@ -198,6 +203,7 @@ export default {
     license_groups,
     harvest_validation_contact_form,
     dataset_max_resources_uncollapsed,
+    org_bid_format,
     is_search_autocomplete_enabled,
     search_autocomplete_debounce,
     markdown,

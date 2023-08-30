@@ -41,7 +41,6 @@ TITLE_SIZE_LIMIT = 350
 DESCRIPTION_SIZE_LIMIT = 100000
 
 ORG_BID_SIZE_LIMIT = 14
-ORG_BID_FORMAT = 'siret'
 
 
 class Team(db.EmbeddedDocument):
