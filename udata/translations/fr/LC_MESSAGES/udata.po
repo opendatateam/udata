@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2023-07-24 11:21+0200\n"
-"PO-Revision-Date: 2023-08-30 12:16\n"
+"PO-Revision-Date: 2023-08-30 12:19\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -563,17 +563,17 @@ msgstr "a mis à jour une organisation"
 #: udata/core/organization/forms.py:25
 #: udata/tests/api/test_organizations_api.py:115
 msgid "A siret number is made of 14 digits"
-msgstr ""
+msgstr "Un numéro siret est composé de 14 chiffres"
 
 #: udata/core/organization/forms.py:36
 #: udata/tests/api/test_organizations_api.py:125
 msgid "A siret number is only made of digits"
-msgstr ""
+msgstr "Un numéro siret est composé uniquement de chiffres"
 
 #: udata/core/organization/forms.py:39
 #: udata/tests/api/test_organizations_api.py:120
 msgid "Invalid Siret number"
-msgstr ""
+msgstr "Numéro siret invalide"
 
 #: udata/core/organization/forms.py:47
 msgid "Shorter organization name"
@@ -597,11 +597,11 @@ msgstr "Logo"
 
 #: udata/core/organization/forms.py:54
 msgid "Business id"
-msgstr ""
+msgstr "Numéro d'identification d'entreprise"
 
 #: udata/core/organization/forms.py:55
 msgid "Business identification number"
-msgstr ""
+msgstr "Numéro d'identification d'entreprise"
 
 #: udata/core/organization/forms.py:91
 msgid "Role"
