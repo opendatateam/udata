@@ -1,10 +1,12 @@
+from flask import current_app
+
 from udata.auth import current_user
 from udata.forms import Form, ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 
 from .models import (
     Organization, MembershipRequest, Member, LOGO_SIZES, ORG_ROLES,
-    TITLE_SIZE_LIMIT, DESCRIPTION_SIZE_LIMIT, ORG_BID_SIZE_LIMIT, ORG_BID_FORMAT
+    TITLE_SIZE_LIMIT, DESCRIPTION_SIZE_LIMIT
 )
 
 __all__ = (
@@ -18,7 +20,7 @@ __all__ = (
 def org_bid_check(form, field):
     if field.data:
         # EID checks are country dependant. Following one is suitable for France.
-        if ORG_BID_FORMAT == 'siret':
+        if current_app.config.get('ORG_BID_FORMAT') == 'siret':
             siret_number = str(field.data)
             # Length control done here instead of using WTForm validator because field must remain optional.
             if len(siret_number) != 14:
