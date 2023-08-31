@@ -15,7 +15,12 @@ class GeoIDError(ValueError):
 
 def parse(text):
     '''Parse a geoid from text and return a tuple (level, code, validity)'''
-    spatial = text
+    # Kept validity parsing for legacy parsing and migration.
+    # Validity is parsed but ignored.
+    if '@' in text:
+        spatial, validity = text.split('@')
+    else:
+        spatial = text
     spatial = spatial.lower().replace('/', ':')  # Backward compatibility
     if ':' not in spatial:
         raise GeoIDError('Bad GeoID format: {0}'.format(text))

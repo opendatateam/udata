@@ -3,6 +3,7 @@ import logging
 import signal
 import sys
 
+from bson.objectid import ObjectId
 from collections import Counter
 from contextlib import contextmanager
 from datetime import datetime
@@ -51,20 +52,20 @@ def load_levels(col, json_levels):
 def load_zones(col, json_geozones):
     for i, geozone in enumerate(json_geozones):
         params = {
-            'slug': slugify.slugify(geozone['name'], separator='-'),
-            'level': geozone['level'],
-            'code': geozone['code'],
-            'name': geozone['name'],
+            'slug': slugify.slugify(geozone['nom'], separator='-'),
+            'level': str(geozone['level']),
+            'code': geozone['codeINSEE'],
+            'name': geozone['nom'],
             'uri': geozone['uri'],
-            'type': geozone['name']
+            'type': geozone['type']
         }
         try:
-            col.objects(id=geozone['_id']).modify(upsert=True, **{
+            col.objects(id=ObjectId()).modify(upsert=True, **{
                 'set__{0}'.format(k): v for k, v in params.items()
             })
         except errors.ValidationError as e:
             log.warning('Validation error (%s) for %s with %s',
-                        e, geozone['_id'], params)
+                        e, geozone['nom'], params)
             continue
     return i
 
@@ -105,11 +106,12 @@ def load(geozones_file, levels_file, drop=False):
     <filename> can be either a local path or a remote URL.
     '''
     log.info('Loading GeoZones levels')
-    if geozones_file.startswith('http'):
-        json_levels = requests.get(geozones_file).json()
+    if levels_file.startswith('http'):
+        json_levels = requests.get(levels_file).json()['data']
     else:
-        with open(geozones_file) as f:
+        with open(levels_file) as f:
             json_levels = json.load(f)
+
     ts = datetime.utcnow().isoformat().replace('-', '').replace(':', '').split('.')[0]
     prefix = 'geozones-{0}'.format(ts)
     if drop and GeoLevel.objects.count():
@@ -126,7 +128,7 @@ def load(geozones_file, levels_file, drop=False):
 
     log.info('Loading Zones')
     if geozones_file.startswith('http'):
-        json_geozones = requests.get(geozones_file).json()
+        json_geozones = requests.get(geozones_file).json()['data']
     else:
         with open(geozones_file) as f:
             json_geozones = json.load(f)
