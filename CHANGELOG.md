@@ -11,6 +11,7 @@
 - Ensure rdf parsed frequency is lowercase [#2883](https://github.com/opendatateam/udata/pull/2883)
 - Add a dict of URIs to replace in a RDF graph at harvest time [#2884](https://github.com/opendatateam/udata/pull/2884)
 - Fix duplicate recipients in new comments mail [#2886](https://github.com/opendatateam/udata/pull/2886)
+- Add type to resource csv adapter [#2888](https://github.com/opendatateam/udata/pull/2888)
 
 ## 6.1.6 (2023-07-19)
 
