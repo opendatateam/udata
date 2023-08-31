@@ -52,7 +52,10 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
     log.info('Indexing %s objects', model.__name__)
     qs = model.objects
     if from_datetime:
-        qs = qs.filter(last_modified_internal__gte=from_datetime)
+        date_property = ('last_modified_internal'
+                         if model.__name__.lower() in ['dataset']
+                         else 'last_modified')
+        qs = qs.filter(**{f'{date_property}__gte': from_datetime})
     index_name = adapter.model.__name__.lower()
     if reindex:
         index_name += '-' + default_index_suffix_name(start)
