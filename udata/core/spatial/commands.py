@@ -60,6 +60,7 @@ def load_zones(col, json_geozones):
             'type': geozone['type']
         }
         try:
+            # TODO: Change this is to more relevant one.
             col.objects(id=ObjectId()).modify(upsert=True, **{
                 'set__{0}'.format(k): v for k, v in params.items()
             })
@@ -168,9 +169,8 @@ def migrate():
                 counter['skipped'] += 1
                 continue
             previous = None
-            while not zone.is_current and len(zone.successors) == 1 and zone.id != previous:
+            while zone.id != previous:
                 previous = zone.id
-                zone = qs(id=zone.successors[0]).first() or zone
             new_zones.append(zone.id)
             counter[zone.level] += 1
         dataset.update(
