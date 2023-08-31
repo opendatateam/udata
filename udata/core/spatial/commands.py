@@ -3,7 +3,6 @@ import logging
 import signal
 import sys
 
-from bson.objectid import ObjectId
 from collections import Counter
 from contextlib import contextmanager
 from datetime import datetime
@@ -60,8 +59,7 @@ def load_zones(col, json_geozones):
             'type': geozone['type']
         }
         try:
-            # TODO: Change this is to more relevant one.
-            col.objects(id=ObjectId()).modify(upsert=True, **{
+            col.objects(id=geozone['_id']).modify(upsert=True, **{
                 'set__{0}'.format(k): v for k, v in params.items()
             })
         except errors.ValidationError as e:
