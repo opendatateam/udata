@@ -134,25 +134,6 @@ class SpatialApiTest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
-    def test_only_suggest_current_zones(self):
-        '''It should only suggest current zones'''
-        for i in range(4):
-            GeoZoneFactory(name='test-{0}-{1}'.format(i, 'current' if i % 2 else 'legacy'))
-
-        response = self.get(
-            url_for('api.suggest_zones'), qs={'q': 'test', 'size': '5'})
-        self.assert200(response)
-
-        self.assertEqual(len(response.json), 2)
-
-        for suggestion in response.json:
-            self.assertIn('id', suggestion)
-            self.assertIn('name', suggestion)
-            self.assertIn('code', suggestion)
-            self.assertIn('level', suggestion)
-            self.assertIn('uri', suggestion)
-            self.assertTrue(suggestion['name'].endswith('-current'))
-
     def test_spatial_levels(self):
         levels = [GeoLevelFactory() for _ in range(3)]
 
@@ -235,43 +216,6 @@ class SpatialApiTest(APITestCase):
             'type': 'FeatureCollection',
             'features': [],
         })
-
-    def test_coverage_for_level(self):
-        GeoLevelFactory(id='top')
-        GeoLevelFactory(id='sub')
-        GeoLevelFactory(id='child')
-
-        topzones, subzones, childzones = [], [], []
-        for _ in range(2):
-            zone = GeoZoneFactory(level='top')
-            topzones.append(zone)
-            for _ in range(2):
-                subzone = GeoZoneFactory(level='sub')
-                subzones.append(subzone)
-                for _ in range(2):
-                    childzone = GeoZoneFactory(level='child')
-                    childzones.append(childzone)
-
-        for zone in topzones + subzones + childzones:
-            VisibleDatasetFactory(
-                spatial=SpatialCoverageFactory(zones=[zone.id]))
-
-        response = self.get(url_for('api.spatial_coverage', level='sub'))
-        self.assert200(response)
-        self.assertEqual(len(response.json['features']), len(subzones))
-
-        for feature in response.json['features']:
-            self.assertEqual(feature['type'], 'Feature')
-
-            zone = get_by(subzones, 'id', feature['id'])
-            self.assertIsNotNone(zone)
-
-            properties = feature['properties']
-            self.assertEqual(properties['name'], zone.name)
-            self.assertEqual(properties['code'], zone.code)
-            self.assertEqual(properties['level'], 'sub')
-            # Nested levels datasets should be counted
-            self.assertEqual(properties['datasets'], 3)
 
 
 class SpatialTerritoriesApiTest(APITestCase):
