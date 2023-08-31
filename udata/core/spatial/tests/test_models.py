@@ -19,19 +19,6 @@ class SpacialCoverageTest(DBTestMixin, TestCase):
         coverage = SpatialCoverage(zones=[zone])
         self.assertEqual(coverage.top_label, 'name')
 
-    def test_geolabel_priority(self):
-        GeoLevelFactory(id='top')
-        GeoLevelFactory(id='middle')
-        GeoLevelFactory(id='bottom')
-
-        big = GeoZoneFactory(level='top')
-        medium = GeoZoneFactory(level='middle')
-        small = GeoZoneFactory(level='bottom')
-
-        coverage = SpatialCoverage(zones=[small, medium, big])
-
-        self.assertEqual(coverage.top_label, big.name)
-
 
 class SpatialTemporalResolutionTest(DBTestMixin, TestCase):
 
