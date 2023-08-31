@@ -48,14 +48,11 @@ class GeoZoneQuerySet(db.BaseQuerySet):
         the result will be the resolved GeoID
         instead of the resolved zone.
         '''
-        level, code, validity = geoids.parse(geoid)
+        level, code = geoids.parse(geoid)
         qs = self(level=level, code=code)
         if id_only:
             qs = qs.only('id')
-        if validity == 'latest':
-            result = qs.latest()
-        else:
-            result = qs.valid_at(validity).first()
+        result = qs.first()
         return result.id if id_only and result else result
 
 

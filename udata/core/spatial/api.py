@@ -57,9 +57,10 @@ class SuggestZonesAPI(API):
                 'name': payload_name(geozone.name),
                 'code': geozone.code,
                 'type': geozone.type,
+                'level': geozone.level,
                 'uri': geozone.uri
             }
-            for geozone in geozones.order_by(DEFAULT_SORTING).limit(args['size']) if geozone.is_current
+            for geozone in geozones.order_by(DEFAULT_SORTING).limit(args['size'])
         ]
 
 
@@ -130,8 +131,7 @@ class SpatialLevelsAPI(API):
         '''List all known levels'''
         return [{
             'id': level.id,
-            'name': _(level.name),
-            'parents': [p.id for p in level.parents],
+            'name': _(level.name)
         } for level in GeoLevel.objects]
 
 
@@ -158,7 +158,7 @@ class SpatialCoverageAPI(API):
 
         for zone in GeoZone.objects(level=level.id):
             # fetch nested levels IDs
-            ids = GeoZone.objects(parents=zone.id).only('id').distinct('id')
+            ids = []
             ids.append(zone.id)
             # Count datasets in zone
             nb_datasets = Dataset.objects(spatial__zones__in=ids).count()

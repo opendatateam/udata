@@ -35,7 +35,7 @@ class SpatialApiTest(APITestCase):
         self.assertEqual(properties['name'], zone.name)
         self.assertEqual(properties['code'], zone.code)
         self.assertEqual(properties['level'], zone.level)
-        self.assertEqual(properties['uri'], zone.uri(external=True))
+        self.assertEqual(properties['uri'], zone.uri)
 
     def test_zones_api_many(self):
         zones = [GeoZoneFactory() for _ in range(3)]
@@ -54,14 +54,13 @@ class SpatialApiTest(APITestCase):
             self.assertEqual(properties['name'], zone.name)
             self.assertEqual(properties['code'], zone.code)
             self.assertEqual(properties['level'], zone.level)
-            self.assertEqual(properties['uri'], zone.uri(external=True))
+            self.assertEqual(properties['uri'], zone.uri)
 
     def test_suggest_zones_on_name(self):
         '''It should suggest zones based on its name'''
         for i in range(4):
             GeoZoneFactory(name='name-test-{0}'.format(i)
-                           if i % 2 else faker.word(),
-                           is_current=True)
+                           if i % 2 else faker.word())
 
         response = self.get(
             url_for('api.suggest_zones'), qs={'q': 'name-test', 'size': '5'})
@@ -81,8 +80,7 @@ class SpatialApiTest(APITestCase):
         '''It should suggest zones based on its code'''
         for i in range(4):
             GeoZoneFactory(code='code-test-{0}'.format(i)
-                           if i % 2 else faker.word(),
-                           is_current=True)
+                           if i % 2 else faker.word())
 
         response = self.get(
             url_for('api.suggest_zones'), qs={'q': 'code-test', 'size': '5'})
@@ -102,8 +100,7 @@ class SpatialApiTest(APITestCase):
         '''It should not provide zones suggestions if no match'''
         for i in range(3):
             GeoZoneFactory(name=5 * '{0}'.format(i),
-                           code=3 * '{0}'.format(i),
-                           is_current=True)
+                           code=3 * '{0}'.format(i))
 
         response = self.get(
             url_for('api.suggest_zones'), qs={'q': 'xxxxxx', 'size': '5'})
@@ -114,8 +111,7 @@ class SpatialApiTest(APITestCase):
         '''It should suggest zones based on its name'''
         for i in range(4):
             GeoZoneFactory(name='name-testé-{0}'.format(i)
-                           if i % 2 else faker.word(),
-                           is_current=True)
+                           if i % 2 else faker.word())
 
         response = self.get(
             url_for('api.suggest_zones'), qs={'q': 'name-testé', 'size': '5'})
@@ -141,8 +137,7 @@ class SpatialApiTest(APITestCase):
     def test_only_suggest_current_zones(self):
         '''It should only suggest current zones'''
         for i in range(4):
-            GeoZoneFactory(name='test-{0}-{1}'.format(i, 'current' if i % 2 else 'legacy'),
-                           is_current=i % 2)
+            GeoZoneFactory(name='test-{0}-{1}'.format(i, 'current' if i % 2 else 'legacy'))
 
         response = self.get(
             url_for('api.suggest_zones'), qs={'q': 'test', 'size': '5'})
@@ -243,19 +238,18 @@ class SpatialApiTest(APITestCase):
 
     def test_coverage_for_level(self):
         GeoLevelFactory(id='top')
-        GeoLevelFactory(id='sub', parents=['top'])
-        GeoLevelFactory(id='child', parents=['sub'])
+        GeoLevelFactory(id='sub')
+        GeoLevelFactory(id='child')
 
         topzones, subzones, childzones = [], [], []
         for _ in range(2):
             zone = GeoZoneFactory(level='top')
             topzones.append(zone)
             for _ in range(2):
-                subzone = GeoZoneFactory(level='sub', parents=[zone.id])
+                subzone = GeoZoneFactory(level='sub')
                 subzones.append(subzone)
                 for _ in range(2):
-                    childzone = GeoZoneFactory(
-                        level='child', parents=[zone.id, subzone.id])
+                    childzone = GeoZoneFactory(level='child')
                     childzones.append(childzone)
 
         for zone in topzones + subzones + childzones:
@@ -271,7 +265,6 @@ class SpatialApiTest(APITestCase):
 
             zone = get_by(subzones, 'id', feature['id'])
             self.assertIsNotNone(zone)
-            assert_json_equal(feature['geometry'], zone.geom)
 
             properties = feature['properties']
             self.assertEqual(properties['name'], zone.name)

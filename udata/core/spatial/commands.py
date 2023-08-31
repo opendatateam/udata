@@ -1,9 +1,5 @@
-import os
-import contextlib
+import json
 import logging
-import lzma
-import tarfile
-import shutil
 import signal
 import sys
 
@@ -11,11 +7,9 @@ from collections import Counter
 from contextlib import contextmanager
 from datetime import datetime
 from textwrap import dedent
-from urllib.request import urlretrieve
 import requests
 
 import click
-import msgpack
 import slugify
 
 from bson import DBRef
@@ -26,13 +20,12 @@ from udata.commands import cli
 from udata.core.dataset.models import Dataset
 from udata.core.spatial import geoids
 from udata.core.spatial.models import GeoLevel, GeoZone, SpatialCoverage
-from udata.core.storages import logos, tmp
 
 log = logging.getLogger(__name__)
 
 
-DEFAULT_GEOZONES_FILE = 'https://github.com/etalab/geozones/releases/download/2019.0/geozones-countries-2019-0-msgpack.tar.xz'
-GEOZONE_FILENAME = 'geozones.tar.xz'
+DEFAULT_GEOZONES_FILE = 'https://demo.data.gouv.fr/fr/datasets/r/7d5e912d-7567-43be-ab52-c18a165a070a'
+DEFAULT_LEVELS_FILE = 'https://demo.data.gouv.fr/fr/datasets/r/5415fe00-20d5-4d50-8d04-4d2e9c39f07a'
 
 
 def level_ref(level):
@@ -45,47 +38,35 @@ def grp():
     pass
 
 
-def load_levels(col, path):
-    with open(path, 'rb') as fp:
-        unpacker = msgpack.Unpacker(fp, raw=False)
-        for i, level in enumerate(unpacker, start=1):
-            col.objects(id=level['id']).modify(
-                upsert=True,
-                set__name=level['label'],
-                set__parents=[level_ref(p) for p in level['parents']],
-                set__admin_level=level.get('admin_level')
-            )
+def load_levels(col, json_levels):
+    for i, level in enumerate(json_levels):
+        col.objects(id=level['id']).modify(
+            upsert=True,
+            set__name=level['label'],
+            set__admin_level=level.get('admin_level')
+        )
     return i
 
 
-def load_zones(col, path):
-    with open(path, 'rb') as fp:
-        unpacker = msgpack.Unpacker(fp, raw=False)
-        next(unpacker)  # Skip headers.
-        for i, geozone in enumerate(unpacker):
-            params = {
-                'slug': slugify.slugify(geozone['name'], separator='-'),
-                'level': geozone['level'],
-                'code': geozone['code'],
-                'uri': geozone['name'],
-                'type': geozone['name']
-            }
-            try:
-                col.objects(id=geozone['_id']).modify(upsert=True, **{
-                    'set__{0}'.format(k): v for k, v in params.items()
-                })
-            except errors.ValidationError as e:
-                log.warning('Validation error (%s) for %s with %s',
-                            e, geozone['_id'], params)
-                continue
+def load_zones(col, json_geozones):
+    for i, geozone in enumerate(json_geozones):
+        params = {
+            'slug': slugify.slugify(geozone['name'], separator='-'),
+            'level': geozone['level'],
+            'code': geozone['code'],
+            'name': geozone['name'],
+            'uri': geozone['uri'],
+            'type': geozone['name']
+        }
+        try:
+            col.objects(id=geozone['_id']).modify(upsert=True, **{
+                'set__{0}'.format(k): v for k, v in params.items()
+            })
+        except errors.ValidationError as e:
+            log.warning('Validation error (%s) for %s with %s',
+                        e, geozone['_id'], params)
+            continue
     return i
-
-
-def cleanup(prefix):
-    log.info('Removing temporary files')
-    tmp.delete(prefix)
-    if tmp.exists(GEOZONE_FILENAME):  # Has been downloaded
-        tmp.delete(GEOZONE_FILENAME)
 
 
 @contextmanager
@@ -107,7 +88,6 @@ def handle_error(prefix, to_delete=None):
         log.error(e)
     else:
         return  # Nothing to do in case of success
-    cleanup(prefix)
     if to_delete:
         log.info('Removing temporary collection %s', to_delete._get_collection_name())
         to_delete.drop_collection()
@@ -115,84 +95,53 @@ def handle_error(prefix, to_delete=None):
 
 
 @grp.command()
-@click.argument('filename', metavar='<filename>', default=DEFAULT_GEOZONES_FILE)
+@click.argument('geozones-file', default=DEFAULT_GEOZONES_FILE)
+@click.argument('levels-file', default=DEFAULT_LEVELS_FILE)
 @click.option('-d', '--drop', is_flag=True, help='Drop existing data')
-def load(filename=DEFAULT_GEOZONES_FILE, drop=False):
+def load(geozones_file, levels_file, drop=False):
     '''
     Load a geozones archive from <filename>
 
     <filename> can be either a local path or a remote URL.
     '''
+    log.info('Loading GeoZones levels')
+    if geozones_file.startswith('http'):
+        json_levels = requests.get(geozones_file).json()
+    else:
+        with open(geozones_file) as f:
+            json_levels = json.load(f)
     ts = datetime.utcnow().isoformat().replace('-', '').replace(':', '').split('.')[0]
     prefix = 'geozones-{0}'.format(ts)
-    if filename.startswith('http'):
-        log.info('Downloading GeoZones bundle: %s', filename)
-        # Use tmp.open to make sure that the directory exists in FS
-        with tmp.open(GEOZONE_FILENAME, 'wb') as newfile:
-            newfile.write(requests.get(filename).content)
-            filename = tmp.path(GEOZONE_FILENAME)
-
-    log.info('Extracting GeoZones bundle')
-    with handle_error(prefix):
-        with contextlib.closing(lzma.LZMAFile(filename)) as xz:
-            with tarfile.open(fileobj=xz) as f:
-                f.extractall(tmp.path(prefix))
-
-    log.info('Loading GeoZones levels')
-
-    log.info('Loading levels.msgpack')
-    levels_filepath = tmp.path(prefix + '/levels.msgpack')
     if drop and GeoLevel.objects.count():
         name = '_'.join((GeoLevel._get_collection_name(), ts))
         target = GeoLevel._get_collection_name()
         with switch_collection(GeoLevel, name):
             with handle_error(prefix, GeoLevel):
-                total = load_levels(GeoLevel, levels_filepath)
+                total = load_levels(GeoLevel, json_levels)
                 GeoLevel.objects._collection.rename(target, dropTarget=True)
     else:
         with handle_error(prefix):
-            total = load_levels(GeoLevel, levels_filepath)
+            total = load_levels(GeoLevel, json_levels)
     log.info('Loaded {total} levels'.format(total=total))
 
-    log.info('Loading zones.msgpack')
-    zones_filepath = tmp.path(prefix + '/zones.msgpack')
+    log.info('Loading Zones')
+    if geozones_file.startswith('http'):
+        json_geozones = requests.get(geozones_file).json()
+    else:
+        with open(geozones_file) as f:
+            json_geozones = json.load(f)
+
     if drop and GeoZone.objects.count():
         name = '_'.join((GeoZone._get_collection_name(), ts))
         target = GeoZone._get_collection_name()
         with switch_collection(GeoZone, name):
             with handle_error(prefix, GeoZone):
-                total = load_zones(GeoZone, zones_filepath)
+                total = load_zones(GeoZone, json_geozones)
                 GeoZone.objects._collection.rename(target, dropTarget=True)
     else:
         with handle_error(prefix):
-            total = load_zones(GeoZone, zones_filepath)
+            total = load_zones(GeoZone, json_geozones)
     log.info('Loaded {total} zones'.format(total=total))
-
-    cleanup(prefix)
-
-
-@grp.command()
-@click.argument('filename', metavar='<filename>')
-def load_logos(filename):
-    '''
-    Load logos from a geologos archive from <filename>
-
-    <filename> can be either a local path or a remote URL.
-    '''
-    if filename.startswith('http'):
-        log.info('Downloading GeoLogos bundle: %s', filename)
-        filename, _ = urlretrieve(filename, tmp.path('geologos.tar.xz'))
-
-    log.info('Extracting GeoLogos bundle')
-    with contextlib.closing(lzma.LZMAFile(filename)) as xz:
-        with tarfile.open(fileobj=xz, encoding='utf8') as tar:
-            tar.extractall(tmp.root, members=tar.getmembers())
-
-    log.info('Moving to the final location and cleaning up')
-    if os.path.exists(logos.root):
-        shutil.rmtree(logos.root)
-    shutil.move(tmp.path('logos'), logos.root)
-    log.info('Done')
 
 
 @grp.command()
@@ -210,8 +159,8 @@ def migrate():
         new_zones = []
         for current_zone in dataset.spatial.zones:
             counter['zones'] += 1
-            level, code, validity = geoids.parse(current_zone.id)
-            zone = qs(level=level, code=code).valid_at(validity).first()
+            level, code = geoids.parse(current_zone.id)
+            zone = qs(level=level, code=code).first()
             if not zone:
                 log.warning('No match for %s: skipped', current_zone.id)
                 counter['skipped'] += 1
