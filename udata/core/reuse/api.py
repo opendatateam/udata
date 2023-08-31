@@ -1,3 +1,4 @@
+from bson.objectid import ObjectId
 from datetime import datetime
 
 from flask import request
@@ -60,6 +61,8 @@ class ReuseApiParser(ModelApiParser):
             phrase_query = ' '.join([f'"{elem}"' for elem in args['q'].split(' ')])
             reuses = reuses.search_text(phrase_query)
         if args.get('dataset'):
+            if not ObjectId.is_valid(args['dataset']):
+                api.abort(400, 'Dataset arg must be an identifier')
             reuses = reuses.filter(datasets=args['dataset'])
         if args.get('featured'):
             reuses = reuses.filter(featured=args['featured'])
@@ -70,8 +73,12 @@ class ReuseApiParser(ModelApiParser):
         if args.get('tag'):
             reuses = reuses.filter(tags=args['tag'])
         if args.get('organization'):
+            if not ObjectId.is_valid(args['organization']):
+                api.abort(400, 'Organization arg must be an identifier')
             reuses = reuses.filter(organization=args['organization'])
         if args.get('owner'):
+            if not ObjectId.is_valid(args['owner']):
+                api.abort(400, 'Owner arg must be an identifier')
             reuses = reuses.filter(owner=args['owner'])
         return reuses
 
