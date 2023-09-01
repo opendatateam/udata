@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add harvesters count to site metrics [#2890](https://github.com/opendatateam/udata/pull/2890)
 
 ## 6.1.7 (2023-09-01)
 
