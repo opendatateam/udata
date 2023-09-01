@@ -38,6 +38,12 @@ KNOWN_PAGINATION = (
 
 CSW_NAMESPACE = 'http://www.opengis.net/cat/csw/2.0.2'
 
+# Useful to patch essential failing URIs
+URIS_TO_REPLACE = {
+    # See https://github.com/etalab/data.gouv.fr/issues/1151
+    'https://project-open-data.cio.gov/v1.1/schema/catalog.jsonld': 'https://gist.githubusercontent.com/maudetes/f019586185d6f59dcfb07f97148a1973/raw/585c3c7bf602b5a4e635b137257d0619792e2c1f/gistfile1.txt'  # noqa
+}
+
 
 def extract_graph(source, target, node, specs):
     for p, o in source.predicate_objects(node):
@@ -83,7 +89,10 @@ class DcatBackend(BaseBackend):
         page = 0
         while url:
             subgraph = Graph(namespace_manager=namespace_manager)
-            subgraph.parse(data=requests.get(url).text, format=fmt)
+            data = requests.get(url).text
+            for old_uri, new_uri in URIS_TO_REPLACE.items():
+                data = data.replace(old_uri, new_uri)
+            subgraph.parse(data=data, format=fmt)
 
             url = None
             for cls, prop in KNOWN_PAGINATION:

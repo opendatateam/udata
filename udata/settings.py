@@ -187,6 +187,8 @@ class Defaults(object):
         'tbody',
         'thead',
         'tfooter',
+        'details',
+        'summary'
         # 'title',
     ]
 
@@ -361,6 +363,11 @@ class Defaults(object):
     POST_DISCUSSIONS_ENABLED = False
     # Default pagination size on listing
     POST_DEFAULT_PAGINATION = 20
+
+    # Organization settings
+    ###########################################################################
+    # The business identification format to use for validation
+    ORG_BID_FORMAT = 'siret'
 
     # Dataset settings
     ###########################################################################

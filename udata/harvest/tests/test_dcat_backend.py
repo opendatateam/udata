@@ -11,6 +11,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.dataset.factories import LicenseFactory
 
 from .factories import HarvestSourceFactory
+from ..backends.dcat import URIS_TO_REPLACE
 from .. import actions
 
 log = logging.getLogger(__name__)
@@ -348,7 +349,7 @@ class DcatBackendTest:
         assert 'geodesy' in dataset.tags  # support dcat:theme
         assert dataset.license.id == 'fr-lo'
         assert len(dataset.resources) == 1
-        assert dataset.description.startswith('Data from the \'National network')
+        assert dataset.description.startswith("Data from the 'National network")
         assert dataset.harvest is not None
         assert dataset.harvest.dct_identifier == '0437a976-cff1-4fa6-807a-c23006df2f8f'
         assert dataset.harvest.remote_id == '0437a976-cff1-4fa6-807a-c23006df2f8f'
@@ -398,8 +399,32 @@ class DcatBackendTest:
         error = job.errors[0]
         expected = 'Unable to detect format from extension or mime type'
         assert error.message == expected
+        
+    def test_use_replaced_uris(self, rmock, mocker):
+        mocker.patch.dict(
+            URIS_TO_REPLACE,
+            {'http://example.org/this-url-does-not-exist': 'https://json-ld.org/contexts/person.jsonld'}
+        )
+        url = DCAT_URL_PATTERN.format(path='', domain=TEST_DOMAIN)
+        rmock.get(url, json={
+            '@context': 'http://example.org/this-url-does-not-exist',
+            '@type': 'dcat:Catalog',
+            'dataset': []
+        })
+        rmock.head(url, headers={'Content-Type': 'application/json'})
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+        actions.run(source.slug)
 
+        source.reload()
 
+        job = source.get_last_job()
+        assert len(job.items) == 0
+        assert job.status == 'done'
+
+        
 @pytest.mark.usefixtures('clean_db')
 @pytest.mark.options(PLUGINS=['csw-dcat'])
 class CswDcatBackendTest:

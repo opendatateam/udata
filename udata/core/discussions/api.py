@@ -101,11 +101,14 @@ class DiscussionAPI(API):
     @api.secure
     @api.doc('comment_discussion')
     @api.expect(comment_discussion_fields)
-    @api.response(403, 'Not allowed to close this discussion')
+    @api.response(403, 'Not allowed to close this discussion '
+                       "OR can't add comments on a closed discussion")
     @api.marshal_with(discussion_fields)
     def post(self, id):
         '''Add comment and optionally close a discussion given its ID'''
         discussion = Discussion.objects.get_or_404(id=id_or_404(id))
+        if discussion.closed:
+            api.abort(403, "Can't add comments on a closed discussion")
         form = api.validate(DiscussionCommentForm)
         message = Message(
             content=form.comment.data,

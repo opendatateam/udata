@@ -73,6 +73,7 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
         'title',
         'description',
         'filetype',
+        'type',
         'format',
         'mime',
         'filesize',

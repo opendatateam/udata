@@ -1,6 +1,9 @@
 from flask import url_for
 
+from mongoengine.signals import pre_save
 from udata.models import db
+from udata.search import reindex
+from udata.tasks import as_task_param
 
 
 __all__ = ('Topic', )
@@ -23,10 +26,27 @@ class Topic(db.Document):
     owner = db.ReferenceField('User')
     featured = db.BooleanField()
     private = db.BooleanField()
+    extras = db.ExtrasField()
 
     def __str__(self):
         return self.name
 
+    @classmethod
+    def pre_save(cls, sender, document, **kwargs):
+        # Try catch is to prevent the mechanism to crash at the
+        # creation of the Topic, where an original state does not exist.
+        try:
+            original_doc = sender.objects.get(id=document.id)
+            # Get the diff between the original and current datasets
+            datasets_list_dif = set(original_doc.datasets) ^ set(document.datasets)
+        except cls.DoesNotExist:
+            datasets_list_dif = document.datasets
+        for dataset in datasets_list_dif:
+            reindex.delay(*as_task_param(dataset))
+
     @property
     def display_url(self):
         return url_for('topics.display', topic=self)
+
+
+pre_save.connect(Topic.pre_save, sender=Topic)

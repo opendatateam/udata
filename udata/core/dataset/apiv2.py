@@ -16,7 +16,9 @@ from .api_fields import (
     user_ref_fields,
     checksum_fields,
     dataset_harvest_fields,
-    resource_harvest_fields
+    dataset_internal_fields,
+    resource_harvest_fields,
+    resource_internal_fields
 )
 from udata.core.spatial.api_fields import geojson
 from .models import (
@@ -33,7 +35,7 @@ DEFAULT_MASK_APIV2 = ','.join((
     'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
     'private', 'tags', 'badges', 'resources', 'community_resources', 'frequency', 'frequency_date',
     'extras', 'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
-    'uri', 'page', 'last_update', 'archived', 'quality', 'harvest'
+    'uri', 'page', 'last_update', 'archived', 'quality', 'harvest', 'internal'
 ))
 
 log = logging.getLogger(__name__)
@@ -129,6 +131,8 @@ dataset_fields = apiv2.model('Dataset', {
     'quality': fields.Raw(description='The dataset quality', readonly=True),
     'last_update': fields.ISODateTime(
         description='The resources last modification date', required=True),
+    'internal': fields.Nested(
+        dataset_internal_fields, readonly=True, description='Site internal and specific object\'s data')
 }, mask=DEFAULT_MASK_APIV2)
 
 
@@ -164,6 +168,8 @@ apiv2.inherit('GeoJSON', geojson)
 apiv2.inherit('Checksum', checksum_fields)
 apiv2.inherit('HarvestDatasetMetadata', dataset_harvest_fields)
 apiv2.inherit('HarvestResourceMetadata', resource_harvest_fields)
+apiv2.inherit('DatasetInternals', dataset_internal_fields)
+apiv2.inherit('ResourceInternals', resource_internal_fields)
 
 
 @ns.route('/search/', endpoint='dataset_search')

@@ -229,12 +229,20 @@ class DatasetAPITest(APITestCase):
         '''It should fetch a dataset from the API'''
         resources = [ResourceFactory() for _ in range(2)]
         dataset = DatasetFactory(resources=resources)
-
         response = self.get(url_for('api.dataset', dataset=dataset))
         self.assert200(response)
         data = json.loads(response.data)
         self.assertEqual(len(data['resources']), len(resources))
         self.assertTrue('quality' in data)
+        self.assertTrue('internal' in data)
+        # Reloads dataset from mongoDB to get mongoDB's date's milliseconds reset.
+        dataset.reload()
+        self.assertEqual(data['internal']['created_at_internal'], fields.ISODateTime().format(dataset.created_at_internal))
+        self.assertEqual(data['internal']['last_modified_internal'], fields.ISODateTime().format(dataset.last_modified_internal))
+
+        self.assertTrue('internal' in data['resources'][0])
+        self.assertEqual(data['resources'][0]['internal']['created_at_internal'], fields.ISODateTime().format(dataset.resources[0].created_at_internal))
+        self.assertEqual(data['resources'][0]['internal']['last_modified_internal'], fields.ISODateTime().format(dataset.resources[0].last_modified_internal))
 
     def test_dataset_api_get_deleted(self):
         '''It should not fetch a deleted dataset from the API and raise 410'''
