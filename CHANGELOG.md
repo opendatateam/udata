@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 6.1.7 (2023-09-01)
 
 - Fix slug overflow with index suffix when reaching max_length [#2874](https://github.com/opendatateam/udata/pull/2874)
