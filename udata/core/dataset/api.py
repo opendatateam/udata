@@ -21,6 +21,7 @@ import os
 import logging
 from datetime import datetime
 
+from bson.objectid import ObjectId
 from flask import request, current_app, abort, redirect, url_for, make_response
 from flask_security import current_user
 from mongoengine.queryset.visitor import Q
@@ -118,8 +119,12 @@ class DatasetApiParser(ModelApiParser):
         if args.get('featured'):
             datasets = datasets.filter(featured=args['featured'])
         if args.get('organization'):
+            if not ObjectId.is_valid(args['organization']):
+                api.abort(400, 'Organization arg must be an identifier')
             datasets = datasets.filter(organization=args['organization'])
         if args.get('owner'):
+            if not ObjectId.is_valid(args['owner']):
+                api.abort(400, 'Owner arg must be an identifier')
             datasets = datasets.filter(owner=args['owner'])
         if args.get('format'):
             datasets = datasets.filter(resources__format=args['format'])
