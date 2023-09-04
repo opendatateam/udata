@@ -138,18 +138,27 @@ class IndexingLifecycleTest(APITestCase):
         url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/datasets/index"
         mock_req.assert_called_with(url, json=expected_value)
 
+    @patch('requests.post')
     @patch('requests.Session.post')
-    def test_reindex_model(self, mock_req):
+    def test_reindex_model(self, mock_session, mock_req):
         fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211')
 
         index_model(DatasetSearch, start=datetime.datetime(2022, 2, 20, 20, 2), reindex=True)
 
+        # Create index
+        expected_value = {
+            'index': 'dataset-2022-02-20-20-02'
+        }
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/create-index"
+        mock_req.assert_called_with(url, json=expected_value)
+
+        # Index document
         expected_value = {
             'document': DatasetSearch.serialize(fake_data),
             'index': 'dataset-2022-02-20-20-02'
         }
         url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/datasets/index"
-        mock_req.assert_called_with(url, json=expected_value)
+        mock_session.assert_called_with(url, json=expected_value)
 
     @patch('requests.Session.post')
     def test_index_model_from_datetime(self, mock_req):
