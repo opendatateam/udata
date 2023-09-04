@@ -49,6 +49,7 @@ def iter_qs(qs, adapter):
 def index_model(adapter, start, reindex=False, from_datetime=None):
     '''Index or unindex all objects given a model'''
     model = adapter.model
+    search_service_url = current_app.config['SEARCH_SERVICE_API_URL']
     log.info('Indexing %s objects', model.__name__)
     qs = model.objects
     if from_datetime:
@@ -56,13 +57,14 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
                          if model.__name__.lower() in ['dataset']
                          else 'last_modified')
         qs = qs.filter(**{f'{date_property}__gte': from_datetime})
-    index_name = adapter.model.__name__.lower()
+    model_name = adapter.model.__name__.lower()
+    index_name = model_name
     if reindex:
         index_name += '-' + default_index_suffix_name(start)
         payload = {
             'index': index_name
         }
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/create-index"
+        url = f"{search_service_url}/create-index"
         r = requests.post(url, json=payload)
         r.raise_for_status()
 
@@ -75,11 +77,11 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
                         'document': doc,
                         'index': index_name
                     }
-                    url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/{adapter.model.__name__.lower()}s/index"
+                    url = f"{search_service_url}/{model_name}s/index"
                     r = session.post(url, json=payload)
                     r.raise_for_status()
                 elif not indexable and not reindex:
-                    url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/{adapter.model.__name__.lower()}s/{doc['id']}/unindex"
+                    url = f"{search_service_url}/{model_name}s/{doc['id']}/unindex"
                     r = session.delete(url)
                     if r.status_code != 404:  # We don't want to raise on 404
                         r.raise_for_status()
@@ -108,7 +110,9 @@ def finalize_reindex(models, start):
             date_property = ('last_modified_internal'
                              if adapter.model.__name__.lower() in ['dataset']
                              else 'last_modified')
-            modified_since_reindex += adapter.model.objects(**{f'{date_property}__gte': start}).count()
+            modified_since_reindex += adapter.model.objects(
+                **{f'{date_property}__gte': start}
+            ).count()
 
     log.warning(
         f'{modified_since_reindex} documents have been modified since reindexation start. '
