@@ -52,7 +52,10 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
     log.info('Indexing %s objects', model.__name__)
     qs = model.objects
     if from_datetime:
-        qs = qs.filter(last_modified_internal__gte=from_datetime)
+        date_property = ('last_modified_internal'
+                         if model.__name__.lower() in ['dataset']
+                         else 'last_modified')
+        qs = qs.filter(**{f'{date_property}__gte': from_datetime})
     index_name = adapter.model.__name__.lower()
     if reindex:
         index_name += '-' + default_index_suffix_name(start)
@@ -101,7 +104,10 @@ def finalize_reindex(models, start):
     modified_since_reindex = 0
     for adapter in iter_adapters():
         if not models or adapter.model.__name__.lower() in models:
-            modified_since_reindex += adapter.model.objects(last_modified__gte=start).count()
+            date_property = ('last_modified_internal'
+                             if adapter.model.__name__.lower() in ['dataset']
+                             else 'last_modified')
+            modified_since_reindex += adapter.model.objects(**{f'{date_property}__gte': start}).count()
 
     log.warning(
         f'{modified_since_reindex} documents have been modified since reindexation start. '

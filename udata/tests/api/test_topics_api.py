@@ -3,6 +3,7 @@ from flask import url_for
 from udata.core.topic.models import Topic
 from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import AdminFactory
+from udata.core.dataset.factories import DatasetFactory
 
 from . import APITestCase
 

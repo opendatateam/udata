@@ -364,6 +364,11 @@ class Defaults(object):
     # Default pagination size on listing
     POST_DEFAULT_PAGINATION = 20
 
+    # Organization settings
+    ###########################################################################
+    # The business identification format to use for validation
+    ORG_BID_FORMAT = 'siret'
+
     # Dataset settings
     ###########################################################################
     # Max number of resources to display uncollapsed in dataset view
