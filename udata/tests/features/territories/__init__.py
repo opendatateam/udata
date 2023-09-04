@@ -21,8 +21,7 @@ def create_old_new_regions_fixtures():
         name='Languedoc-Rousillon', code='91')
     occitanie = GeoZoneFactory(
         id='fr:region:76', level='fr:region',
-        name='Languedoc-Rousillon et Midi-Pyrénées',
-        ancestors=['fr:region:91'], code='76')
+        name='Languedoc-Rousillon et Midi-Pyrénées', code='76')
     return lr, occitanie
 
 

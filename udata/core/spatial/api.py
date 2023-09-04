@@ -1,11 +1,10 @@
-from flask import current_app
 from mongoengine.queryset.visitor import Q
 
 from flask_restx import inputs
 
 from udata.api import api, API
 from udata.i18n import _
-from udata.models import Dataset, TERRITORY_DATASETS
+from udata.models import Dataset
 from udata.core.dataset.api_fields import dataset_ref_fields
 
 from .api_fields import (
