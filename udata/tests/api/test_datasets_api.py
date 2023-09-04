@@ -207,11 +207,17 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(len(response.json['data']), 1)
         self.assertEqual(response.json['data'][0]['id'], str(owner_dataset.id))
 
+        response = self.get(url_for('api.datasets', owner='owner-id'))
+        self.assert400(response)
+
         # filter on organization
         response = self.get(url_for('api.datasets', organization=org.id))
         self.assert200(response)
         self.assertEqual(len(response.json['data']), 1)
         self.assertEqual(response.json['data'][0]['id'], str(org_dataset.id))
+
+        response = self.get(url_for('api.datasets', organization='org-id'))
+        self.assert400(response)
 
         # filter on schema
         response = self.get(url_for('api.datasets', schema='my-schema'))

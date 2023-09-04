@@ -41,6 +41,7 @@ topic_fields = api.model('Topic', {
     'page': fields.UrlFor(
         'topics.display', lambda o: {'topic': o},
         description='The topic page URL', readonly=True, fallback_endpoint='api.topic'),
+    'extras': fields.Raw(description='Extras attributes as key-value pairs'),
 }, mask='*,datasets{id,title,uri,page},reuses{id,title, image, image_thumbnail,uri,page}')
 
 
