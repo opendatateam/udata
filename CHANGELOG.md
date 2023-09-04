@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Return 400 instead of 500 in case of not ObjectID arg in API [#2889](https://github.com/opendatateam/udata/pull/2889)
+- Use a single session for reindex [#2891](https://github.com/opendatateam/udata/pull/2891)
 
 ## 6.1.7 (2023-09-01)
 
@@ -16,7 +17,6 @@
 - Add a dict of URIs to replace in a RDF graph at harvest time [#2884](https://github.com/opendatateam/udata/pull/2884)
 - Fix duplicate recipients in new comments mail [#2886](https://github.com/opendatateam/udata/pull/2886)
 - Add type to resource csv adapter [#2888](https://github.com/opendatateam/udata/pull/2888)
-- Return 400 instead of 500 in case of not ObjectID arg in API [#2889](https://github.com/opendatateam/udata/pull/2889)
 
 ## 6.1.6 (2023-07-19)
 
