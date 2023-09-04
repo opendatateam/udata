@@ -84,6 +84,12 @@ class ReuseAPITest:
         assert len(response.json['data']) == 1
         assert response.json['data'][0]['id'] == str(org_reuse.id)
 
+        response = api.get(url_for('api.reuses', owner='owner-id'))
+        assert400(response)
+
+        response = api.get(url_for('api.reuses', organization='org-id'))
+        assert400(response)
+
     def test_reuse_api_get(self, api):
         '''It should fetch a reuse from the API'''
         reuse = ReuseFactory()
