@@ -7,6 +7,8 @@ from rdflib.namespace import RDF
 import xml.etree.ElementTree as ET
 from typing import List
 
+from udata.harvest.backends.base import HarvestFeature
+from udata.i18n import gettext as _
 from udata.rdf import (
     DCAT, DCT, HYDRA, SPDX, namespace_manager, guess_format, url_from_rdf
 )
@@ -37,6 +39,7 @@ KNOWN_PAGINATION = (
 )
 
 CSW_NAMESPACE = 'http://www.opengis.net/cat/csw/2.0.2'
+OWS_NAMESPACE = 'http://www.opengis.net/ows'
 
 # Useful to patch essential failing URIs
 URIS_TO_REPLACE = {
@@ -139,12 +142,24 @@ class DcatBackend(BaseBackend):
 class CswDcatBackend(DcatBackend):
     display_name = 'CSW-DCAT'
 
+    features = (
+        HarvestFeature('geodcat_ap', _('Use GeoDCAT-AP schema'),
+            _('If enabled, use GeoDCAT-AP schema instead of default.')),
+    )
+
+    DEFAULT_CSW_SCHEMA = 'http://www.w3.org/ns/dcat#'
+
     def parse_graph(self, url: str, fmt: str) -> List[Graph]:
+        if self.has_feature('geodcat_ap'):
+            schema = 'http://data.europa.eu/930/'
+        else:
+            schema = self.DEFAULT_CSW_SCHEMA
+
         body = '''<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
                                   xmlns:gmd="http://www.isotc211.org/2005/gmd"
                                   service="CSW" version="2.0.2" resultType="results"
                                   startPosition="{start}" maxPosition="200"
-                                  outputSchema="http://www.w3.org/ns/dcat#">
+                                  outputSchema="{schema}">
                     <csw:Query typeNames="gmd:MD_Metadata">
                         <csw:ElementSetName>full</csw:ElementSetName>
                         <ogc:SortBy xmlns:ogc="http://www.opengis.net/ogc">
@@ -160,9 +175,12 @@ class CswDcatBackend(DcatBackend):
         graphs = []
         page = 0
         start = 1
-
-        content = requests.post(url, data=body.format(start=start), headers=headers).text
+        response = requests.post(url, data=body.format(start=start, schema=schema), headers=headers)
+        response.raise_for_status()
+        content = response.text
         tree = ET.fromstring(content)
+        if tree.tag == '{' + OWS_NAMESPACE + '}ExceptionReport':
+            raise ValueError(f'Failed to query CSW:\n{content}')
         while tree:
             graph = Graph(namespace_manager=namespace_manager)
             search_results = tree.find('csw:SearchResults', {'csw': CSW_NAMESPACE})
@@ -210,7 +228,7 @@ class CswDcatBackend(DcatBackend):
 
             start = next_record
             tree = ET.fromstring(
-                requests.post(url, data=body.format(start=start),
+                requests.post(url, data=body.format(start=start, schema=schema),
                               headers=headers).text)
 
         return graphs
