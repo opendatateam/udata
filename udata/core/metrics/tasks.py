@@ -4,6 +4,7 @@ from udata.models import Site
 from udata.tasks import job
 from udata.core.metrics.signals import on_site_metrics_computed
 
+
 @job('compute-site-metrics')
 def compute_site_metrics(self):
     site = Site.objects(id=current_app.config['SITE_ID']).first()
@@ -14,6 +15,7 @@ def compute_site_metrics(self):
     site.count_reuses()
     site.count_followers()
     site.count_discussions()
+    site.count_harvesters()
     site.count_max_dataset_followers()
     site.count_max_dataset_reuses()
     site.count_max_reuse_datasets()
