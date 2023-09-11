@@ -19,9 +19,9 @@ from babel.dates import format_timedelta as babel_format_timedelta
 
 from datetime import datetime
 
-from flask_babelex import Babel, Domain, refresh
-from flask_babelex import format_date, format_datetime  # noqa
-from flask_babelex import get_locale as get_current_locale  # noqa
+from flask_babel import Babel, Domain, refresh
+from flask_babel import format_date, format_datetime  # noqa
+from flask_babel import get_locale as get_current_locale  # noqa
 
 from werkzeug.local import LocalProxy
 
@@ -30,6 +30,8 @@ from udata.app import Blueprint
 from udata.auth import current_user
 from udata.errors import ConfigError
 from udata.utils import multi_to_dict
+
+import os
 
 
 class PluggableDomain(Domain):
@@ -49,7 +51,7 @@ class PluggableDomain(Domain):
 
         translations = cache.get(str(locale))
         if translations is None:
-            translations_dir = self.get_translations_path(ctx)
+            translations_dir = os.path.join(ctx.app.root_path, 'translations')
             translations = Translations.load(translations_dir, locale,
                                              domain=self.domain)
 
@@ -84,8 +86,15 @@ class PluggableDomain(Domain):
         return translations
 
 
+def get_locale():
+    if getattr(g, 'lang_code', None):
+        return g.lang_code
+    return str(default_lang)
+
+
 domain = PluggableDomain(domain='udata')
-babel = Babel(default_domain=domain)
+babel = Babel(default_domain=domain, locale_selector=get_locale)
+
 
 # Create shortcuts for the default Flask domain
 def gettext(*args, **kwargs):
@@ -157,13 +166,6 @@ def language(lang_code):
     if ctx:
         ctx.pop()
     refresh()
-
-
-@babel.localeselector
-def get_locale():
-    if getattr(g, 'lang_code', None):
-        return g.lang_code
-    return str(default_lang)
 
 
 def check_config(cfg):
