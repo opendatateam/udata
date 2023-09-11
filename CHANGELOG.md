@@ -4,6 +4,7 @@
 
 - Return 400 instead of 500 in case of not ObjectID arg in API [#2889](https://github.com/opendatateam/udata/pull/2889)
 - Use a single session for reindex [#2891](https://github.com/opendatateam/udata/pull/2891)
+- Migrate to Flask-Babel because of Flask-BabelEx deprecation [#2897](https://github.com/opendatateam/udata/pull/2897)
 
 ## 6.1.7 (2023-09-01)
 
