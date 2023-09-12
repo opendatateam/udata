@@ -53,7 +53,7 @@ class PluggableDomain(Domain):
         if translations is None:
             translations_dir = os.path.join(ctx.app.root_path, 'translations')
             translations = Translations.load(translations_dir, locale,
-                                             domain=self.domain)
+                                             domain=self.domain[0])
 
             # Load plugins translations
             if isinstance(translations, Translations):
@@ -73,12 +73,14 @@ class PluggableDomain(Domain):
                 translations.merge(flask_security_translations)
 
                 for pkg in entrypoints.get_roots(current_app):
+                    print(pkg)
                     loader = pkgutil.get_loader(pkg)
                     path = dirname(loader.path)
                     domains = [f.replace(path, '').replace('.pot', '')[1:]
                                for f in iglob(join(path, '**/translations/*.pot'), recursive=True)]
                     for domain in domains:
                         domain_path = join(path, dirname(domain))
+                        print(domain_path)
                         translations.merge(Translations.load(domain_path, locale,
                                                              domain=basename(domain)))
                 cache[str(locale)] = translations

@@ -214,7 +214,7 @@ python-dateutil==2.8.1
     #   -r requirements/install.in
     #   botocore
     #   faker
-pytz==2023.3.post1
+pytz==2022.7
     # via
     #   -r requirements/install.in
     #   celery
@@ -293,8 +293,6 @@ xmltodict==0.12.0
     # via -r requirements/install.in
 zipp==3.12.1
     # via importlib-metadata
-zxcvbn==4.4.28
-    # via -r requirements/install.in
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
