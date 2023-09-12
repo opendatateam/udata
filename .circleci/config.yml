@@ -4,7 +4,7 @@ version: 2
 jobs:
   python:
     docker:
-      - image: udata/circleci:3.10-alpine
+      - image: udata/circleci:py3.10
       - image: mongo:6.0.4
       - image: redis:alpine
     environment:
@@ -25,10 +25,7 @@ jobs:
       - run:
           name: Install python dependencies
           command: |
-            python -m venv venv
-            source venv/bin/activate
-            pip install -r requirements/develop.pip
-            pip install -e .
+            python -m venv venv && source venv/bin/activate && cd /workspace && pip install -r requirements/develop.pip && pip install -e .
       - save_cache:
           key: py3-cache-v9-{{ arch }}-{{ checksum "python.deps" }}
           paths:
@@ -101,7 +98,7 @@ jobs:
 
   dist:
     docker:
-      - image: udata/circleci:3.10-alpine
+      - image: udata/circleci:py3.10
     environment:
        BASH_ENV: /root/.bashrc
     steps:
@@ -132,7 +129,7 @@ jobs:
 
   publish:
     docker:
-      - image: udata/circleci:3.10-alpine
+      - image: udata/circleci:py3.10
     steps:
       - attach_workspace:
           at: .
