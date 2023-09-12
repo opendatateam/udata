@@ -25,7 +25,10 @@ jobs:
       - run:
           name: Install python dependencies
           command: |
-            python -m venv venv && source venv/bin/activate && cd /workspace && pip install -r requirements/develop.pip && pip install -e .
+            python -m venv venv
+            source venv/bin/activate
+            pip install -r requirements/develop.pip
+            pip install -e .
       - save_cache:
           key: py3-cache-v9-{{ arch }}-{{ checksum "python.deps" }}
           paths:
