@@ -52,7 +52,7 @@ celerybeat-mongo==0.2.0
     # via -r requirements/install.in
 certifi==2021.5.30
     # via requests
-cffi==1.14.6
+cffi==1.15.1
     # via
     #   bcrypt
     #   cryptography
