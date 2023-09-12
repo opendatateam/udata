@@ -11,8 +11,8 @@ from flask_security.views import send_confirmation
 from flask_security.views import send_login
 from flask_security.views import token_login
 from flask_security.utils import (
-    send_mail, do_flash, get_message, check_and_get_token_status, hash_data,
-    login_user, logout_user, verify_hash)
+    check_and_get_token_status, do_flash, get_message, get_within_delta, hash_data,
+    login_user, logout_user, send_mail, verify_hash)
 from werkzeug.local import LocalProxy
 from udata.i18n import lazy_gettext as _
 from udata.uris import endpoint_for
@@ -49,12 +49,13 @@ def send_change_email_confirmation_instructions(user, new_email):
 
 
 def confirm_change_email_token_status(token):
-    expired, invalid, user, token_data = check_and_get_token_status(
-        token, 'confirm', 'CONFIRM_EMAIL', return_data=True)
+    expired, invalid, token_data = check_and_get_token_status(
+        token, 'confirm', get_within_delta('CONFIRM_EMAIL_WITHIN'))
     new_email = None
 
-    if not invalid and user:
-        _, token_email_hash, new_email = token_data
+    if not invalid and token_data:
+        user, token_email_hash, new_email = token_data
+        user = _datastore.find_user(fs_uniquifier=user)
         invalid = not verify_hash(token_email_hash, user.email)
 
     return expired, invalid, user, new_email
