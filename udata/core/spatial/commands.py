@@ -147,7 +147,7 @@ def migrate():
     Should only be run once with the new version of geozones w/ geohisto.
     '''
     counter = Counter(['zones', 'datasets'])
-    qs = GeoZone.objects.only('id', 'level', 'successors')
+    qs = GeoZone.objects.only('id', 'level')
     # Iter over datasets with zones
     for dataset in Dataset.objects(spatial__zones__gt=[]):
         counter['datasets'] += 1
