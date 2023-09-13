@@ -63,7 +63,6 @@ class GeoZone(db.Document):
     slug = db.StringField(required=True)
     name = db.StringField(required=True)
     code = db.StringField(required=True)
-    type = db.StringField(required=True)
     uri = db.StringField(required=True)
     level = db.StringField(required=True)
 
@@ -126,7 +125,6 @@ class GeoZone(db.Document):
                 'slug': self.slug,
                 'name': _(self.name),
                 'code': self.code,
-                'type': self.type,
                 'uri': self.uri,
                 'level': self.level,
             }

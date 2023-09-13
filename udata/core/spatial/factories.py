@@ -105,7 +105,6 @@ class GeoZoneFactory(ModelFactory):
 
     id = factory.LazyAttribute(geoids.from_zone)
     name = factory.Faker('city')
-    type = factory.Faker('city')
     slug = factory.Faker('slug')
     code = factory.Faker('zipcode')
     uri = factory.Faker('url')

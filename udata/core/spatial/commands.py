@@ -28,10 +28,6 @@ DEFAULT_GEOZONES_FILE = 'https://demo.data.gouv.fr/fr/datasets/r/7d5e912d-7567-4
 DEFAULT_LEVELS_FILE = 'https://demo.data.gouv.fr/fr/datasets/r/5415fe00-20d5-4d50-8d04-4d2e9c39f07a'
 
 
-def level_ref(level):
-    return DBRef(GeoLevel._get_collection_name(), level)
-
-
 @cli.group('spatial')
 def grp():
     '''Geospatial related operations'''
@@ -70,7 +66,7 @@ def load_zones(col, json_geozones):
 
 
 @contextmanager
-def handle_error(prefix, to_delete=None):
+def handle_error(to_delete=None):
     '''
     Handle errors while loading.
     In case of error, properly log it, remove the temporary files and collections and exit.
@@ -112,16 +108,15 @@ def load(geozones_file, levels_file, drop=False):
             json_levels = json.load(f)
 
     ts = datetime.utcnow().isoformat().replace('-', '').replace(':', '').split('.')[0]
-    prefix = 'geozones-{0}'.format(ts)
     if drop and GeoLevel.objects.count():
         name = '_'.join((GeoLevel._get_collection_name(), ts))
         target = GeoLevel._get_collection_name()
         with switch_collection(GeoLevel, name):
-            with handle_error(prefix, GeoLevel):
+            with handle_error(GeoLevel):
                 total = load_levels(GeoLevel, json_levels)
                 GeoLevel.objects._collection.rename(target, dropTarget=True)
     else:
-        with handle_error(prefix):
+        with handle_error():
             total = load_levels(GeoLevel, json_levels)
     log.info('Loaded {total} levels'.format(total=total))
 
@@ -136,11 +131,11 @@ def load(geozones_file, levels_file, drop=False):
         name = '_'.join((GeoZone._get_collection_name(), ts))
         target = GeoZone._get_collection_name()
         with switch_collection(GeoZone, name):
-            with handle_error(prefix, GeoZone):
+            with handle_error(GeoZone):
                 total = load_zones(GeoZone, json_geozones)
                 GeoZone.objects._collection.rename(target, dropTarget=True)
     else:
-        with handle_error(prefix):
+        with handle_error():
             total = load_zones(GeoZone, json_geozones)
     log.info('Loaded {total} zones'.format(total=total))
 
@@ -166,9 +161,6 @@ def migrate():
                 log.warning('No match for %s: skipped', current_zone.id)
                 counter['skipped'] += 1
                 continue
-            previous = None
-            while zone.id != previous:
-                previous = zone.id
             new_zones.append(zone.id)
             counter[zone.level] += 1
         dataset.update(

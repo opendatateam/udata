@@ -55,7 +55,6 @@ class SuggestZonesAPI(API):
                 'id': geozone.id,
                 'name': payload_name(geozone.name),
                 'code': geozone.code,
-                'type': geozone.type,
                 'level': geozone.level,
                 'uri': geozone.uri
             }
@@ -96,16 +95,6 @@ class ZoneDatasetsAPI(API):
         '''Fetch datasets for a given zone'''
         args = dataset_parser.parse_args()
         zone = GeoZone.objects.get_or_404(id=id)
-        # if (args.get('dynamic') and
-        #         current_app.config.get('ACTIVATE_TERRITORIES')):
-        #     DATASETS = TERRITORY_DATASETS[zone.level_code]
-        #     dynamic_dataset_classes = sorted(DATASETS.values(),
-        #                                      key=lambda a: a.order)
-        #     datasets = [
-        #         dynamic_dataset_class(zone)
-        #         for dynamic_dataset_class in dynamic_dataset_classes
-        #     ]
-        # else:
         datasets = []
         datasets += list(Dataset.objects.visible()
                          .filter(spatial__zones=zone)
@@ -167,7 +156,6 @@ class SpatialCoverageAPI(API):
                 'properties': {
                     'name': _(zone.name),
                     'code': zone.code,
-                    'type': zone.type,
                     'uri': zone.uri,
                     'datasets': nb_datasets
                 }
