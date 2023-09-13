@@ -51,8 +51,7 @@ def load_zones(col, json_geozones):
             'level': str(geozone['level']),
             'code': geozone['codeINSEE'],
             'name': geozone['nom'],
-            'uri': geozone['uri'],
-            'type': geozone['type']
+            'uri': geozone['uri']
         }
         try:
             col.objects(id=geozone['_id']).modify(upsert=True, **{
