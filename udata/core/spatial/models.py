@@ -39,11 +39,6 @@ class GeoZoneQuerySet(db.BaseQuerySet):
         '''
         Resolve a GeoZone given a GeoID.
 
-        The start date is resolved from the given GeoID,
-        ie. it find there is a zone valid a the geoid validity,
-        resolve the `latest` alias
-        or use `latest` when no validity is given.
-
         If `id_only` is True,
         the result will be the resolved GeoID
         instead of the resolved zone.

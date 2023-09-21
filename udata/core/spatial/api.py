@@ -1,3 +1,4 @@
+import re
 from mongoengine.queryset.visitor import Q
 
 from flask_restx import inputs
@@ -20,6 +21,7 @@ GEOM_TYPES = (
     'Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString',
     'MultiPolygon'
 )
+LEGACY_GEOID_PATTERN = r"^([a-z]+:[a-z]+:\d+)@(\d{4}-\d{2}-\d{2})$"
 
 DEFAULT_SORTING = '-created_at'
 
@@ -39,6 +41,15 @@ suggest_parser.add_argument(
 def payload_name(name):
     '''localize name'''
     return _(name)  # Avoid dict quotes in gettext
+
+
+def legacy_geoid(legacy_id):
+    ''' Returns an geoid without validity date
+    as we do not support it anymore'''
+    match = re.match(LEGACY_GEOID_PATTERN, legacy_id)
+    if match:
+        return legacy_id.split('@')[0]
+    return legacy_id
 
 
 @ns.route('/zones/suggest/', endpoint='suggest_zones')
@@ -78,8 +89,9 @@ class ZonesAPI(API):
     @api.marshal_with(feature_collection_fields)
     def get(self, ids):
         '''Fetch a zone list as GeoJSON'''
-        zones = GeoZone.objects.in_bulk(ids)
-        zones = [zones[id] for id in ids]
+        ids_list = list(map(legacy_geoid, ids))
+        zones = GeoZone.objects.in_bulk(ids_list)
+        zones = [zones[id] for id in ids_list]
         return {
             'type': 'FeatureCollection',
             'features': [z.toGeoJSON() for z in zones],
@@ -93,6 +105,7 @@ class ZoneDatasetsAPI(API):
     @api.marshal_with(dataset_ref_fields)
     def get(self, id):
         '''Fetch datasets for a given zone'''
+        id = legacy_geoid(id)
         args = dataset_parser.parse_args()
         zone = GeoZone.objects.get_or_404(id=id)
         datasets = []
@@ -107,6 +120,7 @@ class ZoneAPI(API):
     @api.doc('spatial_zone', params={'id': 'A zone identifier'})
     def get(self, id):
         '''Fetch a zone'''
+        id = legacy_geoid(id)
         zone = GeoZone.objects.get_or_404(id=id)
         return zone.toGeoJSON()
 
