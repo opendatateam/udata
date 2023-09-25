@@ -148,26 +148,32 @@ def migrate():
     '''
     counter = Counter(['zones', 'datasets'])
     qs = GeoZone.objects.only('id', 'level')
-    # Iter over datasets with zones
+    # Fetch datasets with non-empty spatial zones
     for dataset in Dataset.objects(spatial__zones__gt=[]):
         counter['datasets'] += 1
         new_zones = []
         for current_zone in dataset.spatial.zones:
             counter['zones'] += 1
+
             level, code = geoids.parse(current_zone.id)
-            zone = qs(level=level, code=code).first()
+            zone = qs(level=level, code=code).first() or qs(code=code).first()
+
             if not zone:
                 log.warning('No match for %s: skipped', current_zone.id)
                 counter['skipped'] += 1
                 continue
+
             new_zones.append(zone.id)
             counter[zone.level] += 1
+
+        # Update dataset with new spatial zones
         dataset.update(
             spatial=SpatialCoverage(
                 granularity=dataset.spatial.granularity,
                 zones=list(new_zones)
             )
         )
+
     level_summary = '\n'.join([
         ' - {0}: {1}'.format(l.id, counter[l.id])
         for l in GeoLevel.objects.order_by('admin_level')
