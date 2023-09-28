@@ -130,6 +130,7 @@ class UDataApi(Api):
         def wrapper(*args, **kwargs):
             if current_user.is_authenticated:
                 return func(*args, **kwargs)
+
             apikey = request.headers.get(HEADER_API_KEY)
             if apikey:
                 try:
