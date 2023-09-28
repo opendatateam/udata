@@ -12,7 +12,6 @@ import requests
 import click
 import slugify
 
-from bson import DBRef
 from mongoengine import errors
 from mongoengine.context_managers import switch_collection
 
@@ -49,7 +48,7 @@ def load_zones(col, json_geozones):
         params = {
             'slug': slugify.slugify(geozone['nom'], separator='-'),
             'level': str(geozone['level']),
-            'code': geozone['codeINSEE'],
+            'code': geozone['codeINSEE'].lower(),
             'name': geozone['nom'],
             'uri': geozone['uri']
         }
