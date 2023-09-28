@@ -1,5 +1,4 @@
 from udata.api import api, fields, API
-from udata.auth import admin_permission
 
 
 from udata.core.dataset.api_fields import dataset_fields
@@ -63,7 +62,6 @@ class TopicsAPI(API):
                              .paginate(args['page'], args['page_size']))
 
     @api.doc('create_topic')
-    @api.secure(admin_permission)
     @api.expect(topic_fields)
     @api.marshal_with(topic_fields)
     @api.response(400, 'Validation error')
@@ -84,7 +82,6 @@ class TopicAPI(API):
         return topic
 
     @api.doc('update_topic')
-    @api.secure(admin_permission)
     @api.expect(topic_fields)
     @api.marshal_with(topic_fields)
     @api.response(400, 'Validation error')
@@ -94,7 +91,6 @@ class TopicAPI(API):
         return form.save()
 
     @api.doc('delete_topic')
-    @api.secure(admin_permission)
     @api.response(204, 'Object deleted')
     def delete(self, topic):
         '''Delete a given topic'''
