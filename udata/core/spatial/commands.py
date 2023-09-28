@@ -120,7 +120,7 @@ def load(geozones_file, levels_file, drop=False):
 
     log.info('Loading Zones')
     if geozones_file.startswith('http'):
-        json_geozones = requests.get(geozones_file).json()['data']
+        json_geozones = requests.get(geozones_file).json()
     else:
         with open(geozones_file) as f:
             json_geozones = json.load(f)
