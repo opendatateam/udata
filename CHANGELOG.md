@@ -5,6 +5,7 @@
 - Add harvesters count to site metrics [#2890](https://github.com/opendatateam/udata/pull/2890)
 - Return 400 instead of 500 in case of not ObjectID arg in API [#2889](https://github.com/opendatateam/udata/pull/2889)
 - Use a single session for reindex [#2891](https://github.com/opendatateam/udata/pull/2891)
+- Fix site title and keywords never get updated [#2900](https://github.com/opendatateam/udata/pull/2900)
 
 ## 6.1.7 (2023-09-01)
 

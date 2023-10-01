@@ -1,3 +1,5 @@
+import logging
+
 from flask import g, current_app
 from werkzeug.local import LocalProxy
 
@@ -142,10 +144,15 @@ class Site(WithMetrics, db.Document):
 def get_current_site():
     if getattr(g, 'site', None) is None:
         site_id = current_app.config['SITE_ID']
-        g.site, _ = Site.objects.get_or_create(id=site_id, defaults={
-            'title': current_app.config.get('SITE_TITLE'),
-            'keywords': current_app.config.get('SITE_KEYWORDS', []),
+        site_title = current_app.config.get('SITE_TITLE')
+        site_keywords = current_app.config.get('SITE_KEYWORDS', [])
+        g.site, created = Site.objects.get_or_create(id=site_id, defaults={
+            'title': site_title,
+            'keywords': site_keywords,
         })
+        if not created:
+            Site.objects(id=site_id).modify(set__title=site_title, set__keywords=site_keywords)
+
     return g.site
 
 
