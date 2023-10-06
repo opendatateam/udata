@@ -53,7 +53,6 @@ class TopicsAPITest(APITestCase):
         member = Member(user=user, role='editor')
         org = OrganizationFactory(members=[member])
         data['organization'] = str(org.id)
-        print(data)
         response = self.post(url_for('api.topics'), data)
         self.assert201(response)
         self.assertEqual(Topic.objects.count(), 1)
