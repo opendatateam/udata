@@ -2,6 +2,7 @@ from udata.api import api, fields, API
 
 
 from udata.core.dataset.api_fields import dataset_fields
+from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api_fields import reuse_fields
 from udata.core.user.api_fields import user_ref_fields
 
@@ -31,6 +32,9 @@ topic_fields = api.model('Topic', {
         description='The topic last modification date', readonly=True),
     'deleted': fields.ISODateTime(
         description='The organization identifier', readonly=True),
+    'organization': fields.Nested(
+        org_ref_fields, allow_null=True,
+        description='The publishing organization', readonly=True),
     'owner': fields.Nested(
         user_ref_fields, description='The owner user', readonly=True,
         allow_null=True),

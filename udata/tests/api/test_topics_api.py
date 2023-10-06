@@ -2,6 +2,8 @@ from flask import url_for
 
 from udata.core.topic.models import Topic
 from udata.core.topic.factories import TopicFactory
+from udata.core.organization.factories import OrganizationFactory
+from udata.models import Member
 
 from . import APITestCase
 
@@ -41,6 +43,23 @@ class TopicsAPITest(APITestCase):
             self.assertEqual(str(dataset.id), expected)
         for reuse, expected in zip(topic.reuses, data['reuses']):
             self.assertEqual(str(reuse.id), expected)
+
+    def test_topic_api_create_as_org(self):
+        '''It should create a topic as organization from the API'''
+        data = TopicFactory.as_dict()
+        data['datasets'] = [str(d.id) for d in data['datasets']]
+        data['reuses'] = [str(r.id) for r in data['reuses']]
+        user = self.login()
+        member = Member(user=user, role='editor')
+        org = OrganizationFactory(members=[member])
+        data['organization'] = str(org.id)
+        response = self.post(url_for('api.topics'), data)
+        self.assert201(response)
+        self.assertEqual(Topic.objects.count(), 1)
+
+        topic = Topic.objects.first()
+        assert topic.owner is None
+        assert topic.organization == org
 
     def test_topic_api_update(self):
         '''It should update a topic from the API'''
