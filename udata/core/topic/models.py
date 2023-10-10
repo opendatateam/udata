@@ -27,6 +27,14 @@ class Topic(db.Document, db.Owned):
     private = db.BooleanField()
     extras = db.ExtrasField()
 
+    meta = {
+        'indexes': [
+            '$name',
+            'slug'
+        ] + db.Owned.meta['indexes'],
+        'auto_create_index_on_save': True
+    }
+
     def __str__(self):
         return self.name
 

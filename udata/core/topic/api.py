@@ -1,6 +1,5 @@
 from udata.api import api, fields, API
-
-
+from udata.api.parsers import ModelApiParser
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api_fields import reuse_fields
@@ -8,6 +7,8 @@ from udata.core.user.api_fields import user_ref_fields
 
 from .models import Topic
 from .forms import TopicForm
+
+DEFAULT_SORTING = '-created_at'
 
 ns = api.namespace('topics', 'Topics related operations')
 
@@ -28,8 +29,6 @@ topic_fields = api.model('Topic', {
     'private': fields.Boolean(description='Is the topic private'),
     'created_at': fields.ISODateTime(
         description='The topic creation date', readonly=True),
-    'last_modified': fields.ISODateTime(
-        description='The topic last modification date', readonly=True),
     'deleted': fields.ISODateTime(
         description='The organization identifier', readonly=True),
     'organization': fields.Nested(
@@ -50,20 +49,48 @@ topic_fields = api.model('Topic', {
 
 topic_page_fields = api.model('TopicPage', fields.pager(topic_fields))
 
-parser = api.page_parser()
+
+class TopicApiParser(ModelApiParser):
+    sorts = {
+        'name': 'name',
+        'created': 'created_at'
+    }
+
+    def __init__(self):
+        super().__init__()
+        self.parser.add_argument('tag', type=str, location='args')
+
+    @staticmethod
+    def parse_filters(topics, args):
+        if args.get('q'):
+            # Following code splits the 'q' argument by spaces to surround
+            # every word in it with quotes before rebuild it.
+            # This allows the search_text method to tokenise with an AND
+            # between tokens whereas an OR is used without it.
+            phrase_query = ' '.join([f'"{elem}"' for elem in args['q'].split(' ')])
+            topics = topics.search_text(phrase_query)
+        if args.get('tag'):
+            topics = topics.filter(tags=args['tag'])
+        return topics
+
+
+topic_parser = TopicApiParser()
 
 
 @ns.route('/', endpoint='topics')
 class TopicsAPI(API):
 
     @api.doc('list_topics')
-    @api.expect(parser)
+    @api.expect(topic_parser.parser)
     @api.marshal_with(topic_page_fields)
     def get(self):
         '''List all topics'''
-        args = parser.parse_args()
-        return (Topic.objects.order_by('-created')
-                             .paginate(args['page'], args['page_size']))
+        args = topic_parser.parse()
+        topics = Topic.objects()
+        topics = topic_parser.parse_filters(topics, args)
+        sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
+        return (topics.order_by(sort)
+                .paginate(args['page'], args['page_size']))
 
     @api.doc('create_topic')
     @api.expect(topic_fields)
