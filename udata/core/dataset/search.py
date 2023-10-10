@@ -98,7 +98,7 @@ class DatasetSearch(ModelSearchAdapter):
             'owner': str(owner.id) if owner else None,
             'format': [r.format.lower() for r in dataset.resources if r.format],
             'schema': [r.schema.get('name') for r in dataset.resources if r.schema],
-            'topics': [t.slug for t in topics if topics],
+            'topics': [str(t.id) for t in topics if topics],
         }
         extras = {}
         for key, value in dataset.extras.items():

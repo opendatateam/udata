@@ -5,6 +5,10 @@
 - Add harvesters count to site metrics [#2890](https://github.com/opendatateam/udata/pull/2890)
 - Return 400 instead of 500 in case of not ObjectID arg in API [#2889](https://github.com/opendatateam/udata/pull/2889)
 - Use a single session for reindex [#2891](https://github.com/opendatateam/udata/pull/2891)
+- Topics changes:
+  - Topics creation, update and deletion are now opened to all users [#2898](https://github.com/opendatateam/udata/pull/2898)
+  - Topics are now `db.Owned` and searchable by `id` in dataset search [#2901](https://github.com/opendatateam/udata/pull/2901)
+  - Remove `deleted` api field that does not exist [#2903](https://github.com/opendatateam/udata/pull/2903)
 - Fix site title and keywords never get updated [#2900](https://github.com/opendatateam/udata/pull/2900)
 
 ## 6.1.7 (2023-09-01)
