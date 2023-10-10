@@ -144,12 +144,14 @@ def get_current_site():
         site_id = current_app.config['SITE_ID']
         site_title = current_app.config.get('SITE_TITLE')
         site_keywords = current_app.config.get('SITE_KEYWORDS', [])
-        g.site, created = Site.objects.get_or_create(id=site_id, defaults={
+        g.site, _ = Site.objects.get_or_create(id=site_id, defaults={
             'title': site_title,
             'keywords': site_keywords,
         })
-        if not created:
-            Site.objects(id=site_id).modify(set__title=site_title, set__keywords=site_keywords)
+        if g.site.title != site_title:
+            Site.objects(id=site_id).modify(set__title=site_title)
+        if g.site.keywords != site_keywords:
+            Site.objects(id=site_id).modify(set__keywords=site_keywords)
 
     return g.site
 
