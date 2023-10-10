@@ -540,7 +540,7 @@ class ModelList(object):
             return ''
 
     def process_formdata(self, valuelist):
-        if valuelist == []:
+        if not valuelist:
             self.data = []
             return
         if len(valuelist) == 1 and isinstance(valuelist[0], str):
