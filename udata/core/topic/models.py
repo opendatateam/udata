@@ -1,5 +1,6 @@
+from datetime import datetime
 from flask import url_for
-
+from mongoengine.fields import DateTimeField
 from mongoengine.signals import pre_save
 from udata.models import db
 from udata.search import reindex
@@ -27,11 +28,15 @@ class Topic(db.Document, db.Owned):
     private = db.BooleanField()
     extras = db.ExtrasField()
 
+    created_at = DateTimeField(default=datetime.utcnow, required=True)
+
     meta = {
         'indexes': [
             '$name',
+            'created_at',
             'slug'
         ] + db.Owned.meta['indexes'],
+        'ordering': ['-created_at'],
         'auto_create_index_on_save': True
     }
 
