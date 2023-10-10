@@ -8,6 +8,7 @@
 - Topics changes:
   - Topics creation, update and deletion are now opened to all users [#2898](https://github.com/opendatateam/udata/pull/2898)
   - Topics are now `db.Owned` and searchable by `id` in dataset search [#2901](https://github.com/opendatateam/udata/pull/2901)
+  - Remove `deleted` api field that does not exist [#2903](https://github.com/opendatateam/udata/pull/2903)
 
 ## 6.1.7 (2023-09-01)
 
