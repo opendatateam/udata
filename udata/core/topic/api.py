@@ -30,8 +30,6 @@ topic_fields = api.model('Topic', {
         description='The topic creation date', readonly=True),
     'last_modified': fields.ISODateTime(
         description='The topic last modification date', readonly=True),
-    'deleted': fields.ISODateTime(
-        description='The organization identifier', readonly=True),
     'organization': fields.Nested(
         org_ref_fields, allow_null=True,
         description='The publishing organization', readonly=True),
