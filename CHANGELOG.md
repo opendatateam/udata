@@ -10,6 +10,7 @@
   - Topics are now `db.Owned` and searchable by `id` in dataset search [#2901](https://github.com/opendatateam/udata/pull/2901)
   - Remove `deleted` api field that does not exist [#2903](https://github.com/opendatateam/udata/pull/2903)
 - Fix site title and keywords never get updated [#2900](https://github.com/opendatateam/udata/pull/2900)
+- Reuse's extras are now exposed by API [#2905](https://github.com/opendatateam/udata/pull/2905)
 
 ## 6.1.7 (2023-09-01)
 
