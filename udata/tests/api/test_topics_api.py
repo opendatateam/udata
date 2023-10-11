@@ -2,8 +2,8 @@ from flask import url_for
 
 from udata.core.topic.models import Topic
 from udata.core.topic.factories import TopicFactory
-from udata.core.user.factories import AdminFactory
-from udata.core.dataset.factories import DatasetFactory
+from udata.core.organization.factories import OrganizationFactory
+from udata.models import Member
 
 from . import APITestCase
 
@@ -34,7 +34,7 @@ class TopicsAPITest(APITestCase):
         data = TopicFactory.as_dict()
         data['datasets'] = [str(d.id) for d in data['datasets']]
         data['reuses'] = [str(r.id) for r in data['reuses']]
-        self.login(AdminFactory())
+        self.login()
         response = self.post(url_for('api.topics'), data)
         self.assert201(response)
         self.assertEqual(Topic.objects.count(), 1)
@@ -44,12 +44,29 @@ class TopicsAPITest(APITestCase):
         for reuse, expected in zip(topic.reuses, data['reuses']):
             self.assertEqual(str(reuse.id), expected)
 
+    def test_topic_api_create_as_org(self):
+        '''It should create a topic as organization from the API'''
+        data = TopicFactory.as_dict()
+        data['datasets'] = [str(d.id) for d in data['datasets']]
+        data['reuses'] = [str(r.id) for r in data['reuses']]
+        user = self.login()
+        member = Member(user=user, role='editor')
+        org = OrganizationFactory(members=[member])
+        data['organization'] = str(org.id)
+        response = self.post(url_for('api.topics'), data)
+        self.assert201(response)
+        self.assertEqual(Topic.objects.count(), 1)
+
+        topic = Topic.objects.first()
+        assert topic.owner is None
+        assert topic.organization == org
+
     def test_topic_api_update(self):
         '''It should update a topic from the API'''
         topic = TopicFactory()
         data = topic.to_dict()
         data['description'] = 'new description'
-        self.login(AdminFactory())
+        self.login()
         response = self.put(url_for('api.topic', topic=topic), data)
         self.assert200(response)
         self.assertEqual(Topic.objects.count(), 1)
@@ -58,7 +75,7 @@ class TopicsAPITest(APITestCase):
     def test_topic_api_delete(self):
         '''It should delete a topic from the API'''
         topic = TopicFactory()
-        with self.api_user(AdminFactory()):
+        with self.api_user():
             response = self.delete(url_for('api.topic', topic=topic))
         self.assertStatus(response, 204)
         self.assertEqual(Topic.objects.count(), 0)
