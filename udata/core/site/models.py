@@ -142,10 +142,17 @@ class Site(WithMetrics, db.Document):
 def get_current_site():
     if getattr(g, 'site', None) is None:
         site_id = current_app.config['SITE_ID']
+        site_title = current_app.config.get('SITE_TITLE')
+        site_keywords = current_app.config.get('SITE_KEYWORDS', [])
         g.site, _ = Site.objects.get_or_create(id=site_id, defaults={
-            'title': current_app.config.get('SITE_TITLE'),
-            'keywords': current_app.config.get('SITE_KEYWORDS', []),
+            'title': site_title,
+            'keywords': site_keywords,
         })
+        if g.site.title != site_title:
+            Site.objects(id=site_id).modify(set__title=site_title)
+        if g.site.keywords != site_keywords:
+            Site.objects(id=site_id).modify(set__keywords=site_keywords)
+
     return g.site
 
 

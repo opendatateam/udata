@@ -13,6 +13,8 @@
   - Topics can now be filtered by `tag` field [#2904](https://github.com/opendatateam/udata/pull/2904)
   - Topics can now be queried by test search in `name` field with `q` argument [#2904](https://github.com/opendatateam/udata/pull/2904)
   - Fixed bug where topic's datasets and reuses lists couldn't be emptied [#2904](https://github.com/opendatateam/udata/pull/2904)
+- Fix site title and keywords never get updated [#2900](https://github.com/opendatateam/udata/pull/2900)
+- Reuse's extras are now exposed by API [#2905](https://github.com/opendatateam/udata/pull/2905)
 
 ## 6.1.7 (2023-09-01)
 
