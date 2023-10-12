@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2023-07-24 11:21+0200\n"
-"PO-Revision-Date: 2023-10-12 08:42\n"
+"PO-Revision-Date: 2023-10-12 10:45\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: de\n"
 "Language-Team: German\n"
@@ -154,11 +154,11 @@ msgstr ""
 
 #: udata/commands/init.py:45
 msgid "Do you want to create some sample data?"
-msgstr ""
+msgstr "Möchten Sie Beispieldaten erstellen?"
 
 #: udata/commands/init.py:49
 msgid "Your udata instance is ready!"
-msgstr ""
+msgstr "Deine udata Instanz ist bereit!"
 
 #: udata/core/badges/forms.py:14
 msgid "Kind"
