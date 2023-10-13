@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2023-07-24 11:21+0200\n"
-"PO-Revision-Date: 2023-10-13 15:22\n"
+"PO-Revision-Date: 2023-10-13 16:41\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: de\n"
 "Language-Team: German\n"
@@ -303,7 +303,7 @@ msgstr "Die Häufigkeit, mit der Daten aktualisiert werden."
 
 #: udata/core/dataset/forms.py:152
 msgid "Expected frequency date"
-msgstr ""
+msgstr "Erwartete Änderungshäufigkeit"
 
 #: udata/core/dataset/forms.py:156
 msgid "Temporal coverage"
@@ -311,7 +311,7 @@ msgstr "Zeitliche Abdeckung"
 
 #: udata/core/dataset/forms.py:157
 msgid "The period covered by the data"
-msgstr ""
+msgstr "Der Zeitraum, der von den Daten abgedeckt wird"
 
 #: udata/core/dataset/forms.py:159 udata/core/spatial/forms.py:83
 msgid "Spatial coverage"
@@ -334,7 +334,7 @@ msgstr ""
 #: udata/core/dataset/forms.py:163 udata/core/reuse/forms.py:32
 #: udata/core/topic/forms.py:23
 msgid "Private"
-msgstr ""
+msgstr "Privat"
 
 #: udata/core/dataset/forms.py:164 udata/core/reuse/forms.py:33
 msgid "Restrict the dataset visibility to you or your organization only."
@@ -342,71 +342,71 @@ msgstr ""
 
 #: udata/core/dataset/models.py:44
 msgid "Unknown"
-msgstr ""
+msgstr "Unbekannt"
 
 #: udata/core/dataset/models.py:45
 msgid "Punctual"
-msgstr ""
+msgstr "Gelegentlich"
 
 #: udata/core/dataset/models.py:46
 msgid "Real time"
-msgstr ""
+msgstr "Echtzeit"
 
 #: udata/core/dataset/models.py:47
 msgid "Hourly"
-msgstr ""
+msgstr "Stündlich"
 
 #: udata/core/dataset/models.py:48
 msgid "Four times a day"
-msgstr ""
+msgstr "Viermal pro Tag"
 
 #: udata/core/dataset/models.py:49
 msgid "Three times a day"
-msgstr ""
+msgstr "Dreimal pro Tag"
 
 #: udata/core/dataset/models.py:50
 msgid "Semidaily"
-msgstr ""
+msgstr "Zweimal pro Tag"
 
 #: udata/core/dataset/models.py:51 udata/harvest/models.py:18
 msgid "Daily"
-msgstr ""
+msgstr "Täglich"
 
 #: udata/core/dataset/models.py:52
 msgid "Four times a week"
-msgstr ""
+msgstr "Viermal pro Woche"
 
 #: udata/core/dataset/models.py:53
 msgid "Three times a week"
-msgstr ""
+msgstr "Dreimal pro Woche"
 
 #: udata/core/dataset/models.py:54
 msgid "Semiweekly"
-msgstr ""
+msgstr "Zweimal pro Woche"
 
 #: udata/core/dataset/models.py:55 udata/harvest/models.py:17
 msgid "Weekly"
-msgstr ""
+msgstr "Wöchentlich"
 
 #: udata/core/dataset/models.py:56
 msgid "Biweekly"
-msgstr ""
+msgstr "Zweiwöchentlich"
 
 #: udata/core/dataset/models.py:57
 msgid "Three times a month"
-msgstr ""
+msgstr "Dreimal im Monat"
 
 #: udata/core/dataset/models.py:58
 msgid "Semimonthly"
-msgstr ""
+msgstr "Halbmonatlich"
 
 #: udata/core/dataset/models.py:59 udata/harvest/models.py:16
 msgid "Monthly"
-msgstr ""
+msgstr "Monatlich"
 
 #: udata/core/dataset/models.py:60
 msgid "Bimonthly"
-msgstr ""
+msgstr "Zweimonatlich"
 
 #: udata/core/dataset/models.py:61
 msgid "Quarterly"
@@ -466,17 +466,17 @@ msgstr ""
 
 #: udata/core/dataset/models.py:100
 msgid "Uploaded file"
-msgstr ""
+msgstr "Hochgeladene Datei"
 
 #: udata/core/dataset/models.py:101
 msgid "Remote file"
-msgstr ""
+msgstr "Externe Datei"
 
 #: udata/core/dataset/models.py:388 udata/core/dataset/rdf.py:374
 #: udata/tests/dataset/test_dataset_rdf.py:499
 #: udata/tests/dataset/test_dataset_rdf.py:512
 msgid "Nameless resource"
-msgstr ""
+msgstr "Namenlose Ressource"
 
 #: udata/core/dataset/models.py:463
 msgid "Future date of update"
@@ -484,11 +484,11 @@ msgstr ""
 
 #: udata/core/dataset/models.py:473 udata/models/datetime_fields.py:59
 msgid "Creation date"
-msgstr ""
+msgstr "Erstellungsdatum"
 
 #: udata/core/dataset/models.py:475 udata/models/datetime_fields.py:61
 msgid "Last modification date"
-msgstr ""
+msgstr "Letzte Änderung"
 
 #: udata/core/dataset/models.py:484
 msgid "Pivotal data"
@@ -496,7 +496,7 @@ msgstr ""
 
 #: udata/core/dataset/models.py:523
 msgid "dataset"
-msgstr ""
+msgstr "Datensatz"
 
 #: udata/core/dataset/rdf.py:372 udata/tests/dataset/test_dataset_rdf.py:486
 msgid "{format} resource"
@@ -510,7 +510,7 @@ msgstr ""
 #: udata/core/organization/forms.py:80 udata/core/organization/forms.py:84
 #: udata/harvest/forms.py:78
 msgid "Comment"
-msgstr ""
+msgstr "Kommentar"
 
 #: udata/core/discussions/forms.py:15
 msgid "Subject"
@@ -528,7 +528,7 @@ msgstr ""
 
 #: udata/core/discussions/tasks.py:63
 msgid "A discussion has been closed"
-msgstr ""
+msgstr "Eine Diskussion wurde geschlossen"
 
 #: udata/core/jobs/forms.py:27 udata/core/organization/forms.py:45
 #: udata/core/post/forms.py:15 udata/core/topic/forms.py:15
@@ -577,23 +577,23 @@ msgstr ""
 
 #: udata/core/organization/forms.py:47
 msgid "Shorter organization name"
-msgstr ""
+msgstr "Kurzer Name der Organisation"
 
 #: udata/core/organization/forms.py:50
 msgid "The details about your organization"
-msgstr ""
+msgstr "Die Details zu Ihrer Organisation"
 
 #: udata/core/organization/forms.py:52 udata/core/user/forms.py:20
 msgid "Website"
-msgstr ""
+msgstr "Webseite"
 
 #: udata/core/organization/forms.py:52
 msgid "The organization website URL"
-msgstr ""
+msgstr "Die URL der Organisations-Webseite"
 
 #: udata/core/organization/forms.py:53
 msgid "Logo"
-msgstr ""
+msgstr "Logo"
 
 #: udata/core/organization/forms.py:54
 msgid "Business id"
@@ -605,69 +605,69 @@ msgstr ""
 
 #: udata/core/organization/forms.py:91
 msgid "Role"
-msgstr ""
+msgstr "Rolle"
 
 #: udata/core/organization/models.py:22
 msgid "Administrator"
-msgstr ""
+msgstr "Administrator"
 
 #: udata/core/organization/models.py:23
 msgid "Editor"
-msgstr ""
+msgstr "Bearbeiter"
 
 #: udata/core/organization/models.py:29 udata/features/transfer/models.py:14
 #: udata/harvest/models.py:22 udata/harvest/models.py:32 udata/harvest/models.py:70
 msgid "Pending"
-msgstr ""
+msgstr "Ausstehend"
 
 #: udata/core/organization/models.py:30 udata/features/transfer/models.py:15
 #: udata/harvest/models.py:71
 msgid "Accepted"
-msgstr ""
+msgstr "Akzeptiert"
 
 #: udata/core/organization/models.py:31 udata/features/transfer/models.py:16
 #: udata/harvest/models.py:72
 msgid "Refused"
-msgstr ""
+msgstr "Abgelehnt"
 
 #: udata/core/organization/models.py:142
 msgid "Public Service"
-msgstr ""
+msgstr "Öffentliche Stelle"
 
 #: udata/core/organization/models.py:143
 msgid "Certified"
-msgstr ""
+msgstr "Zertifiziert"
 
 #: udata/core/organization/tasks.py:50
 msgid "New membership request"
-msgstr ""
+msgstr "Neue Mitgliedschaftsanfrage"
 
 #: udata/core/organization/tasks.py:60 udata/core/organization/tasks.py:73
 #, python-format
 msgid "You are now a member of the organization \"%(org)s\""
-msgstr ""
+msgstr "Sie sind jetzt Mitglied der Organisation \"%(org)s\""
 
 #: udata/core/organization/tasks.py:64
 msgid "Membership refused"
-msgstr ""
+msgstr "Mitgliedschaft abgelehnt"
 
 #: udata/core/organization/tasks.py:84
 #, python-format
 msgid "Your organization \"%(name)s\" has been certified"
-msgstr ""
+msgstr "Ihre Organisation \"%(name)s\" wurde zertifiziert"
 
 #: udata/core/organization/tasks.py:104
 #, python-format
 msgid "Your organization \"%(name)s\" has been identified as public service"
-msgstr ""
+msgstr "Ihre Organisation \"%(name)s\" wurde als öffentliche Stelle identifiziert"
 
 #: udata/core/post/forms.py:16
 msgid "Headline"
-msgstr ""
+msgstr "Überschrift"
 
 #: udata/core/post/forms.py:17
 msgid "Content"
-msgstr ""
+msgstr "Inhalt"
 
 #: udata/core/post/forms.py:19 udata/core/topic/forms.py:19
 msgid "Associated datasets"
@@ -679,15 +679,15 @@ msgstr ""
 
 #: udata/core/post/forms.py:22 udata/core/reuse/forms.py:28
 msgid "Image"
-msgstr ""
+msgstr "Bild"
 
 #: udata/core/post/forms.py:23
 msgid "Image credits"
-msgstr ""
+msgstr "Bildnachweis"
 
 #: udata/core/post/forms.py:24
 msgid "Credit URL"
-msgstr ""
+msgstr "Bildnachweis-URL"
 
 #: udata/core/post/forms.py:29
 msgid "body type"
@@ -699,11 +699,11 @@ msgstr ""
 
 #: udata/core/post/models.py:16
 msgid "Markdown"
-msgstr ""
+msgstr "Markdown"
 
 #: udata/core/post/models.py:17
 msgid "HTML"
-msgstr ""
+msgstr "HTML"
 
 #: udata/core/post/models.py:60
 msgid "post"
@@ -731,15 +731,15 @@ msgstr ""
 
 #: udata/core/reuse/forms.py:30
 msgid "Used datasets"
-msgstr ""
+msgstr "Verwendete Datensätze"
 
 #: udata/core/reuse/forms.py:35
 msgid "Topic"
-msgstr ""
+msgstr "Thema"
 
 #: udata/core/reuse/models.py:17
 msgid "Application"
-msgstr ""
+msgstr "Anwendung"
 
 #: udata/core/reuse/models.py:18
 msgid "Idea"
@@ -767,11 +767,11 @@ msgstr ""
 
 #: udata/core/reuse/models.py:27 udata/tests/reuse/test_reuse_model.py:104
 msgid "Health"
-msgstr ""
+msgstr "Gesundheit"
 
 #: udata/core/reuse/models.py:28
 msgid "Transport and mobility"
-msgstr ""
+msgstr "Verkehr und Mobilität"
 
 #: udata/core/reuse/models.py:29
 msgid "Housing and development"
@@ -899,15 +899,15 @@ msgstr ""
 
 #: udata/core/spatial/translations.py:12
 msgid "Country"
-msgstr ""
+msgstr "Staat"
 
 #: udata/core/spatial/translations.py:13
 msgid "World"
-msgstr ""
+msgstr "Welt"
 
 #: udata/core/spatial/translations.py:14
 msgid "Country group"
-msgstr ""
+msgstr "Staatengruppe"
 
 #: udata/core/spatial/translations.py:15
 msgid "Country subset"
@@ -915,7 +915,7 @@ msgstr ""
 
 #: udata/core/spatial/translations.py:16
 msgid "European Union"
-msgstr ""
+msgstr "Europäische Union"
 
 #: udata/core/spatial/translations.py:17
 msgid "Metropolitan France"
@@ -963,7 +963,7 @@ msgstr ""
 
 #: udata/core/user/forms.py:18
 msgid "Email"
-msgstr ""
+msgstr "E-Mail"
 
 #: udata/core/user/forms.py:19
 msgid "Avatar"
@@ -971,7 +971,7 @@ msgstr ""
 
 #: udata/core/user/forms.py:21
 msgid "About"
-msgstr ""
+msgstr "Über"
 
 #: udata/core/user/forms.py:25
 msgid "Roles"
@@ -1011,11 +1011,11 @@ msgstr ""
 
 #: udata/forms/fields.py:175
 msgid "Not a valid UUID"
-msgstr ""
+msgstr "Keine gültige UUID"
 
 #: udata/forms/fields.py:200
 msgid "Invalid URL"
-msgstr ""
+msgstr "Ungültiger URL"
 
 #: udata/forms/fields.py:404
 #, python-format
@@ -1062,7 +1062,7 @@ msgstr ""
 
 #: udata/forms/fields.py:752
 msgid "Permission denied for this organization"
-msgstr ""
+msgstr "Berechtigung für diese Organisation verweigert"
 
 #: udata/forms/validators.py:59
 #, python-format
@@ -1071,7 +1071,7 @@ msgstr ""
 
 #: udata/frontend/markdown.py:30
 msgid "Source"
-msgstr ""
+msgstr "Quelle"
 
 #: udata/harvest/forms.py:63
 msgid "Some optional details about this harvester"
@@ -1079,11 +1079,11 @@ msgstr ""
 
 #: udata/harvest/forms.py:65
 msgid "Backend"
-msgstr ""
+msgstr "Backend"
 
 #: udata/harvest/models.py:15
 msgid "Manual"
-msgstr ""
+msgstr "Manuell"
 
 #: udata/harvest/models.py:23
 msgid "Initializing"
