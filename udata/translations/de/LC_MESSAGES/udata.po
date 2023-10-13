@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2023-07-24 11:21+0200\n"
-"PO-Revision-Date: 2023-10-13 05:33\n"
+"PO-Revision-Date: 2023-10-13 11:26\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: de\n"
 "Language-Team: German\n"
@@ -24,7 +24,7 @@ msgstr "Willkommen"
 
 #: udata/settings.py:100
 msgid "Please confirm your email"
-msgstr "Bitte bestätigen Sie Ihre E-Mail-Adrese"
+msgstr "Bitte bestätigen Sie Ihre E-Mail-Adresse"
 
 #: udata/settings.py:101
 msgid "Login instructions"
@@ -134,23 +134,23 @@ msgstr ""
 
 #: udata/auth/views.py:82
 msgid "Thank you. Your change of email has been confirmed."
-msgstr "Vielen Dank. Ihre Änderung der E-Mail wurde bestätigt."
+msgstr "Vielen Dank. Ihre Änderung der E-Mail-Adresse wurde bestätigt."
 
 #: udata/auth/views.py:97
 msgid "Thank you. Confirmation instructions for changing your email have been sent to {new_email}."
-msgstr "Vielen Dank. Bestätigungsanweisungen zum Ändern Ihrer E-Mail wurden an {new_email} gesendet."
+msgstr "Vielen Dank. Eine Anleitung zum Ändern Ihrer E-Mail-Adresse wurden an {new_email} gesendet."
 
 #: udata/commands/init.py:32
 msgid "Do you want to create a superadmin user?"
-msgstr "Möchten Sie einen Superadmin-Benutzer erstellen?"
+msgstr "Möchten Sie einen Super-Admin-Benutzer erstellen?"
 
 #: udata/commands/init.py:37
 msgid "Do you want to import some data-related license?"
-msgstr "Möchten Sie einige datenbezogene Lizenzen importieren?"
+msgstr "Möchten Sie datenbezogene Lizenzen importieren?"
 
 #: udata/commands/init.py:41
 msgid "Do you want to import some spatial zones (countries)?"
-msgstr "Möchten Sie einige räumliche Bereiche (Länder) importieren?"
+msgstr "Möchten Sie räumliche Bereiche (Länder) importieren?"
 
 #: udata/commands/init.py:45
 msgid "Do you want to create some sample data?"
