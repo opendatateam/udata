@@ -12,6 +12,9 @@
   - Add `created_at`field to topic's model [#2904](https://github.com/opendatateam/udata/pull/2904)
   - Topics can now be filtered by `tag` field [#2904](https://github.com/opendatateam/udata/pull/2904)
   - Topics can now be queried by test search in `name` field with `q` argument [#2904](https://github.com/opendatateam/udata/pull/2904)
+- Fix site title and keywords never get updated [#2900](https://github.com/opendatateam/udata/pull/2900)
+- Reuse's extras are now exposed by API [#2905](https://github.com/opendatateam/udata/pull/2905)
+- Add German to udata translations [2899](https://github.com/opendatateam/udata/pull/2899)[2909](https://github.com/opendatateam/udata/pull/2909)
 
 ## 6.1.7 (2023-09-01)
 
