@@ -9,7 +9,7 @@ from udata.tasks import as_task_param
 __all__ = ('Topic', )
 
 
-class Topic(db.Document):
+class Topic(db.Document, db.Owned):
     name = db.StringField(required=True)
     slug = db.SlugField(max_length=255, required=True, populate_from='name',
                         update=True, follow=True)
@@ -23,7 +23,6 @@ class Topic(db.Document):
     reuses = db.ListField(
         db.ReferenceField('Reuse', reverse_delete_rule=db.PULL))
 
-    owner = db.ReferenceField('User')
     featured = db.BooleanField()
     private = db.BooleanField()
     extras = db.ExtrasField()

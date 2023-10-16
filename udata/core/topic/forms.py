@@ -11,6 +11,7 @@ class TopicForm(ModelForm):
     model_class = Topic
 
     owner = fields.CurrentUserField()
+    organization = fields.PublishAsField(_('Publish as'))
 
     name = fields.StringField(_('Name'), [validators.DataRequired()])
     description = fields.MarkdownField(
