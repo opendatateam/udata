@@ -541,8 +541,6 @@ class ModelList(object):
 
     def process_formdata(self, valuelist):
         if not valuelist:
-            if valuelist == []:
-                self.data = []
             return []
         if len(valuelist) == 1 and isinstance(valuelist[0], str):
             oids = [clean_oid(id, self.model)

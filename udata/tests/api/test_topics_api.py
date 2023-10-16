@@ -84,17 +84,6 @@ class TopicsAPITest(APITestCase):
         self.assertEqual(Topic.objects.count(), 1)
         self.assertEqual(Topic.objects.first().description, 'new description')
 
-    def test_topic_api_update_datasets(self):
-        '''It should update a topic from the API'''
-        topic = TopicFactory()
-        data = topic.to_dict()
-        data['datasets'] = []
-        self.login()
-        response = self.put(url_for('api.topic', topic=topic), data)
-        self.assert200(response)
-        self.assertEqual(Topic.objects.count(), 1)
-        self.assertEqual(Topic.objects.first().datasets, [])
-
     def test_topic_api_delete(self):
         '''It should delete a topic from the API'''
         topic = TopicFactory()
