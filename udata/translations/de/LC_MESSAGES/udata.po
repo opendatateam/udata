@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2023-07-24 11:21+0200\n"
-"PO-Revision-Date: 2023-10-17 19:44\n"
+"PO-Revision-Date: 2023-10-17 20:51\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: de\n"
 "Language-Team: German\n"
@@ -410,39 +410,39 @@ msgstr "Zweimonatlich"
 
 #: udata/core/dataset/models.py:61
 msgid "Quarterly"
-msgstr ""
+msgstr "Vierteljährlich"
 
 #: udata/core/dataset/models.py:62
 msgid "Three times a year"
-msgstr ""
+msgstr "Dreimal im Jahr"
 
 #: udata/core/dataset/models.py:63
 msgid "Biannual"
-msgstr ""
+msgstr "Halbjährlich"
 
 #: udata/core/dataset/models.py:64
 msgid "Annual"
-msgstr ""
+msgstr "Jährlich"
 
 #: udata/core/dataset/models.py:65
 msgid "Biennial"
-msgstr ""
+msgstr "Alle zwei Jahre"
 
 #: udata/core/dataset/models.py:66
 msgid "Triennial"
-msgstr ""
+msgstr "Alle drei Jahre"
 
 #: udata/core/dataset/models.py:67
 msgid "Quinquennial"
-msgstr ""
+msgstr "Alle fünf Jahre"
 
 #: udata/core/dataset/models.py:68
 msgid "Irregular"
-msgstr ""
+msgstr "Unregelmäßig"
 
 #: udata/core/dataset/models.py:90
 msgid "Main file"
-msgstr ""
+msgstr "Hauptdatei"
 
 #: udata/core/dataset/models.py:91
 msgid "Documentation"
@@ -534,15 +534,15 @@ msgstr "Eine Diskussion wurde geschlossen"
 #: udata/core/post/forms.py:15 udata/core/topic/forms.py:15
 #: udata/harvest/forms.py:60 udata/templates/api/admin.html:10
 msgid "Name"
-msgstr ""
+msgstr "Name"
 
 #: udata/core/jobs/forms.py:29
 msgid "Tasks"
-msgstr ""
+msgstr "Aufgaben"
 
 #: udata/core/jobs/forms.py:30
 msgid "Enabled"
-msgstr ""
+msgstr "Aktiviert"
 
 #: udata/core/jobs/models.py:18
 msgid "every {0.period_singular}"
@@ -791,35 +791,35 @@ msgstr ""
 
 #: udata/core/reuse/models.py:33
 msgid "Environment and energy"
-msgstr ""
+msgstr "Umwelt und Energie"
 
 #: udata/core/reuse/models.py:34
 msgid "Work and training"
-msgstr ""
+msgstr "Arbeit und Ausbildung"
 
 #: udata/core/reuse/models.py:35
 msgid "Politics and public life"
-msgstr ""
+msgstr "Politik und öffentliches Leben"
 
 #: udata/core/reuse/models.py:36
 msgid "Safety and security"
-msgstr ""
+msgstr "Sicherheit und Schutz"
 
 #: udata/core/reuse/models.py:37
 msgid "Education and research"
-msgstr ""
+msgstr "Bildung und Forschung"
 
 #: udata/core/reuse/models.py:38
 msgid "Society and demography"
-msgstr ""
+msgstr "Gesellschaft und Demographie"
 
 #: udata/core/reuse/models.py:39
 msgid "Law and justice"
-msgstr ""
+msgstr "Recht und Justiz"
 
 #: udata/core/reuse/models.py:40
 msgid "Open data tools"
-msgstr ""
+msgstr "Open Data-Werkzeuge"
 
 #: udata/core/reuse/models.py:41
 msgid "Others"
@@ -827,11 +827,11 @@ msgstr ""
 
 #: udata/core/reuse/models.py:121
 msgid "reuse"
-msgstr ""
+msgstr "Wiederverwendung"
 
 #: udata/core/reuse/tasks.py:45
 msgid "New reuse"
-msgstr ""
+msgstr "Neue Wiederverwendung"
 
 #: udata/core/site/forms.py:13
 msgid "Some SEO keywords"
@@ -847,15 +847,15 @@ msgstr ""
 
 #: udata/core/spatial/forms.py:48
 msgid "Unknown geoid(s): {identifiers}"
-msgstr ""
+msgstr "Unbekannte Geo-ID(s): {identifiers}"
 
 #: udata/core/spatial/forms.py:67
 msgid "Not a valid GeoJSON"
-msgstr ""
+msgstr "Kein gültiger GeoJSON"
 
 #: udata/core/spatial/forms.py:84
 msgid "A list of covered territories"
-msgstr ""
+msgstr "Eine Liste der abgedeckten Gebiete"
 
 #: udata/core/spatial/forms.py:86
 msgid "Spatial granularity"
@@ -935,31 +935,31 @@ msgstr ""
 
 #: udata/core/topic/forms.py:24
 msgid "Featured"
-msgstr ""
+msgstr "Hervorgehoben"
 
 #: udata/core/user/activities.py:32 udata/core/user/activities.py:64
 msgid "followed an organization"
-msgstr ""
+msgstr "folgt einer Organisation"
 
 #: udata/core/user/activities.py:37
 msgid "followed a user"
-msgstr ""
+msgstr "folgt einem Benutzer"
 
 #: udata/core/user/activities.py:44
 msgid "discussed a dataset"
-msgstr ""
+msgstr "diskutiert einen Datensatz"
 
 #: udata/core/user/activities.py:49
 msgid "discussed a reuse"
-msgstr ""
+msgstr "diskutiert eine Wiederverwendung"
 
 #: udata/core/user/activities.py:54
 msgid "followed a dataset"
-msgstr ""
+msgstr "folgt einem Datensatz"
 
 #: udata/core/user/activities.py:59
 msgid "followed a reuse"
-msgstr ""
+msgstr "folgt einer Wiederverwendung"
 
 #: udata/core/user/forms.py:18
 msgid "Email"
@@ -967,7 +967,7 @@ msgstr "E-Mail"
 
 #: udata/core/user/forms.py:19
 msgid "Avatar"
-msgstr ""
+msgstr "Profilbild"
 
 #: udata/core/user/forms.py:21
 msgid "About"
@@ -975,7 +975,7 @@ msgstr "Über"
 
 #: udata/core/user/forms.py:25
 msgid "Roles"
-msgstr ""
+msgstr "Rollen"
 
 #: udata/core/user/models.py:269 udata/tests/api/test_me_api.py:314
 msgid "Account deletion"
@@ -995,7 +995,7 @@ msgstr ""
 
 #: udata/core/user/tasks.py:15
 msgid "Test mail"
-msgstr ""
+msgstr "Test-E-Mail"
 
 #: udata/forms/fields.py:119
 msgid "Please input a date/time value"
@@ -1184,11 +1184,11 @@ msgstr ""
 
 #: udata/templates/api/oauth_error.html:15
 msgid "OAuth Authentication Error"
-msgstr ""
+msgstr "OAuth-Authentifizierungsfehler"
 
 #: udata/templates/api/oauth_error.html:20 udata/templates/macros/metadata.html:2
 msgid "Home"
-msgstr ""
+msgstr "Start"
 
 #: udata/templates/comments/dataset_archived.txt:1
 msgid "This dataset has been archived by our administration team.\n\n"
@@ -1213,7 +1213,7 @@ msgstr ""
 #: udata/templates/mail/badge_added_certified.html:27
 #: udata/templates/mail/badge_added_public_service.html:27
 msgid "See the badge"
-msgstr ""
+msgstr "Abzeichen ansehen"
 
 #: udata/templates/mail/badge_added_public_service.html:6
 #, python-format
@@ -1236,7 +1236,7 @@ msgstr ""
 
 #: udata/templates/mail/base.html:87 udata/templates/security/email/base.html:87
 msgid "See you soon on the platform"
-msgstr ""
+msgstr "Bis bald auf der Plattform"
 
 #: udata/templates/mail/base.html:88 udata/templates/security/email/base.html:88
 #, python-format
@@ -1258,7 +1258,7 @@ msgstr ""
 #: udata/templates/mail/new_discussion.html:38
 #: udata/templates/mail/new_discussion_comment.html:39
 msgid "See the discussion"
-msgstr ""
+msgstr "Diskussion ansehen"
 
 #: udata/templates/mail/frequency_reminder.html:6
 msgid "Some of your datasets need to be updated according to the frequency you set:"
@@ -1294,7 +1294,7 @@ msgstr ""
 
 #: udata/templates/mail/membership_request.html:40
 msgid "See the request"
-msgstr ""
+msgstr "Anfrage ansehen"
 
 #: udata/templates/mail/new_discussion.html:6
 #, python-format
@@ -1313,7 +1313,7 @@ msgstr ""
 
 #: udata/templates/mail/new_member.html:21
 msgid "See the organization page"
-msgstr ""
+msgstr "Organisationsseite ansehen"
 
 #: udata/templates/mail/new_reuse.html:7
 #, python-format
@@ -1322,15 +1322,15 @@ msgstr ""
 
 #: udata/templates/mail/new_reuse.html:31
 msgid "See the reuse"
-msgstr ""
+msgstr "Wiederverwendung ansehen"
 
 #: udata/templates/mail/new_reuse.html:37
 msgid "See on the dataset page"
-msgstr ""
+msgstr "Auf der Datensatzseite ansehen"
 
 #: udata/templates/mail/test.html:4
 msgid "This is a test mail"
-msgstr ""
+msgstr "Dies ist eine Test-E-Mail"
 
 #: udata/templates/mail/test.html:5
 msgid "If you read this, your mail configuration is working"
@@ -1339,14 +1339,14 @@ msgstr ""
 #: udata/templates/security/change_password.html:9
 #: udata/templates/security/change_password.html:16
 msgid "Change Password"
-msgstr ""
+msgstr "Passwort ändern"
 
 #: udata/templates/security/forgot_password.html:9
 #: udata/templates/security/forgot_password.html:15
 #: udata/templates/security/reset_password.html:10
 #: udata/templates/security/reset_password.html:16
 msgid "Reset Password"
-msgstr ""
+msgstr "Passwort zurücksetzen"
 
 #: udata/templates/security/forgot_password.html:10
 msgid "Forgotten your password? Enter your email address below, and we'll email instructions for setting a new one."
@@ -1354,11 +1354,11 @@ msgstr ""
 
 #: udata/templates/security/login_user.html:13
 msgid "Sign In"
-msgstr ""
+msgstr "Anmelden"
 
 #: udata/templates/security/login_user.html:17
 msgid "Sign in"
-msgstr ""
+msgstr "Anmelden"
 
 #: udata/templates/security/login_user.html:21
 msgid "Forgot your password?"
@@ -1427,7 +1427,7 @@ msgstr ""
 
 #: udata/templates/security/email/login_instructions.html:13
 msgid "Login now"
-msgstr ""
+msgstr "Jetzt anmelden"
 
 #: udata/templates/security/email/reset_instructions.html:7
 #, python-format
@@ -1440,7 +1440,7 @@ msgstr ""
 
 #: udata/templates/security/email/reset_instructions.html:18
 msgid "Reset my password"
-msgstr ""
+msgstr "Mein Passwort zurücksetzen"
 
 #: udata/templates/security/email/reset_notice.html:7
 #, python-format
@@ -1458,7 +1458,7 @@ msgstr ""
 
 #: udata/templates/security/email/welcome.html:18
 msgid "Confirm now"
-msgstr ""
+msgstr "Jetzt bestätigen"
 
 #: udata/templates/security/email/welcome_existing.html:7
 #, python-format
@@ -1488,17 +1488,17 @@ msgstr ""
 
 #: udata/tests/search/test_adapter.py:24
 msgid "Never reused"
-msgstr ""
+msgstr "Niemals wiederverwendet"
 
 #: udata/tests/search/test_adapter.py:25
 msgid "Little reused"
-msgstr ""
+msgstr "Wenig wiederverwendet"
 
 #: udata/tests/search/test_adapter.py:26
 msgid "Quite reused"
-msgstr ""
+msgstr "Durchaus wiederverwendet"
 
 #: udata/tests/search/test_adapter.py:27
 msgid "Heavily reused"
-msgstr ""
+msgstr "Stark wiederverwendet"
 
