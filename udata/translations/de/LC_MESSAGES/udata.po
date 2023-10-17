@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2023-07-24 11:21+0200\n"
-"PO-Revision-Date: 2023-10-13 16:41\n"
+"PO-Revision-Date: 2023-10-17 18:24\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: de\n"
 "Language-Team: German\n"
@@ -28,7 +28,7 @@ msgstr "Bitte bestätigen Sie Ihre E-Mail-Adresse"
 
 #: udata/settings.py:101
 msgid "Login instructions"
-msgstr ""
+msgstr "Anleitung zum Anmelden"
 
 #: udata/settings.py:102
 msgid "Your password has been reset"
@@ -40,7 +40,7 @@ msgstr "Das Passwort wurde geändert"
 
 #: udata/settings.py:105
 msgid "Password reset instructions"
-msgstr ""
+msgstr "Anleitung zum Zurücksetzen des Passworts"
 
 #: udata/settings.py:409
 msgid "This dataset has been archived"
@@ -89,7 +89,7 @@ msgstr "Aus Sicherheitsgründen muss das Passwort geändert werden"
 
 #: udata/auth/forms.py:53
 msgid "New email"
-msgstr ""
+msgstr "Neue E-Mail-Adresse"
 
 #: udata/auth/forms.py:55
 msgid "Retype email"
