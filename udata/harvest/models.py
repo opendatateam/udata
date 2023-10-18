@@ -165,7 +165,8 @@ class HarvestJob(db.Document):
         'indexes': [
             '-created',
             'source',
-            ('source', '-created')
+            ('source', '-created'),
+            'items.dataset'
         ],
         'ordering': ['-created'],
     }
