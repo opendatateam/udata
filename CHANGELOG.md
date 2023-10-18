@@ -8,6 +8,7 @@
 - Topics changes:
   - Topics creation, update and deletion are now opened to all users [#2898](https://github.com/opendatateam/udata/pull/2898)
   - Topics are now `db.Owned` and searchable by `id` in dataset search [#2901](https://github.com/opendatateam/udata/pull/2901)
+- Add support for a CSW harvester using DCAT format [#2800](https://github.com/opendatateam/udata/pull/2800)
 
 ## 6.1.7 (2023-09-01)
 
@@ -59,7 +60,6 @@
 ## 6.1.3 (2023-04-18)
 
 - Fix XSS vulnerability: escape user content in selectize items in admin [#2843](https://github.com/opendatateam/udata/pull/2843)
-- Add support for a CSW-DCAT harvester [#2800](https://github.com/opendatateam/udata/pull/2800)
 - Fix schema is undefined when checking for schema.url in admin resource form [#2837](https://github.com/opendatateam/udata/pull/2837)
 - Fix to_naive_datetime in harvest preview [#2835](https://github.com/opendatateam/udata/pull/2835)
 - :warning: Flask-Security update to enable `GenericResponses` [#2826](https://github.com/opendatateam/udata/pull/2826):
