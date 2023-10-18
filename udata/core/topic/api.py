@@ -1,10 +1,11 @@
 from udata.api import api, fields, API
-from udata.api.parsers import ModelApiParser
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api_fields import reuse_fields
 from udata.core.topic.permissions import TopicEditPermission
 from udata.core.user.api_fields import user_ref_fields
+
+from udata.core.topic.parsers import TopicApiParser
 
 from .models import Topic
 from .forms import TopicForm
@@ -45,33 +46,7 @@ topic_fields = api.model('Topic', {
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
 }, mask='*,datasets{id,title,uri,page},reuses{id,title, image, image_thumbnail,uri,page}')
 
-
 topic_page_fields = api.model('TopicPage', fields.pager(topic_fields))
-
-
-class TopicApiParser(ModelApiParser):
-    sorts = {
-        'name': 'name',
-        'created': 'created_at'
-    }
-
-    def __init__(self):
-        super().__init__()
-        self.parser.add_argument('tag', type=str, location='args')
-
-    @staticmethod
-    def parse_filters(topics, args):
-        if args.get('q'):
-            # Following code splits the 'q' argument by spaces to surround
-            # every word in it with quotes before rebuild it.
-            # This allows the search_text method to tokenise with an AND
-            # between tokens whereas an OR is used without it.
-            phrase_query = ' '.join([f'"{elem}"' for elem in args['q'].split(' ')])
-            topics = topics.search_text(phrase_query)
-        if args.get('tag'):
-            topics = topics.filter(tags=args['tag'])
-        return topics
-
 
 topic_parser = TopicApiParser()
 
