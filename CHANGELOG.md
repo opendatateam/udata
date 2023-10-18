@@ -14,6 +14,7 @@
   - Topics can now be queried by test search in `name` field with `q` argument [#2904](https://github.com/opendatateam/udata/pull/2904)
 - Fix site title and keywords never get updated [#2900](https://github.com/opendatateam/udata/pull/2900)
 - Reuse's extras are now exposed by API [#2905](https://github.com/opendatateam/udata/pull/2905)
+- Add items.dataset to HarvestJob indexes [#2907](https://github.com/opendatateam/udata/pull/2907)
 - Add German to udata translations [2899](https://github.com/opendatateam/udata/pull/2899)[2909](https://github.com/opendatateam/udata/pull/2909)
 - Fix default community resource sort parser [#2908](https://github.com/opendatateam/udata/pull/2908)
 
