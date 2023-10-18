@@ -9,9 +9,14 @@
   - Topics creation, update and deletion are now opened to all users [#2898](https://github.com/opendatateam/udata/pull/2898)
   - Topics are now `db.Owned` and searchable by `id` in dataset search [#2901](https://github.com/opendatateam/udata/pull/2901)
   - Remove `deleted` api field that does not exist [#2903](https://github.com/opendatateam/udata/pull/2903)
+  - Add `created_at`field to topic's model [#2904](https://github.com/opendatateam/udata/pull/2904)
+  - Topics can now be filtered by `tag` field [#2904](https://github.com/opendatateam/udata/pull/2904)
+  - Topics can now be queried by test search in `name` field with `q` argument [#2904](https://github.com/opendatateam/udata/pull/2904)
 - Fix site title and keywords never get updated [#2900](https://github.com/opendatateam/udata/pull/2900)
 - Reuse's extras are now exposed by API [#2905](https://github.com/opendatateam/udata/pull/2905)
 - Add items.dataset to HarvestJob indexes [#2907](https://github.com/opendatateam/udata/pull/2907)
+- Add German to udata translations [2899](https://github.com/opendatateam/udata/pull/2899)[2909](https://github.com/opendatateam/udata/pull/2909)
+- Fix default community resource sort parser [#2908](https://github.com/opendatateam/udata/pull/2908)
 
 ## 6.1.7 (2023-09-01)
 

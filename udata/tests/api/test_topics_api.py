@@ -13,11 +13,23 @@ class TopicsAPITest(APITestCase):
 
     def test_topic_api_list(self):
         '''It should fetch a topic list from the API'''
-        topics = TopicFactory.create_batch(3)
+        TopicFactory.create_batch(3)
+        tag_topic = TopicFactory(tags=['energy'])
+        name_topic = TopicFactory(name='topic-for-query')
 
         response = self.get(url_for('api.topics'))
         self.assert200(response)
-        self.assertEqual(len(response.json['data']), len(topics))
+        self.assertEqual(len(response.json['data']), 5)
+
+        response = self.get(url_for('api.topics', q='topic-for'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(name_topic.id))
+
+        response = self.get(url_for('api.topics', tag='energy'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(tag_topic.id))
 
     def test_topic_api_get(self):
         '''It should fetch a topic from the API'''
