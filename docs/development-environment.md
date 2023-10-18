@@ -38,24 +38,25 @@ $ pip install -r requirements/develop.pip
 $ pip install -e .
 ```
 
-### Macos Big Sur caveat
+### Mac OS caveat
 
 If installing `cryptography` fails:
 
 ```
 brew install openssl
-export LDFLAGS="-L/usr/local/opt/openssl@1.1/lib"
-export CPPFLAGS="-I/usr/local/opt/openssl@1.1/include"
+export LDFLAGS="-L/opt/homebrew/opt/openssl@1.1/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/openssl@1.1/include"
 pip install -r requirements/develop.pip
 ```
 
 If installing `Pillow` fails:
+
 ```
 brew install libjpeg
 pip install -r requirements/develop.pip
 ```
 
-You should be to start using and contributing to udata.
+You should be able to start using and contributing to udata.
 
 ## Running the project
 
