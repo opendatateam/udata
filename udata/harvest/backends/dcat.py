@@ -2,13 +2,11 @@ import logging
 
 import requests
 
-from rdflib import Graph, URIRef, BNode
+from rdflib import Graph, URIRef
 from rdflib.namespace import RDF
 import xml.etree.ElementTree as ET
 from typing import List
 
-from udata.harvest.backends.base import HarvestFeature
-from udata.i18n import gettext as _
 from udata.rdf import (
     DCAT, DCT, HYDRA, SPDX, namespace_manager, guess_format, url_from_rdf
 )
@@ -142,19 +140,9 @@ class DcatBackend(BaseBackend):
 class CswDcatBackend(DcatBackend):
     display_name = 'CSW-DCAT'
 
-    features = (
-        HarvestFeature('geodcat_ap', _('Use GeoDCAT-AP schema'),
-            _('If enabled, use GeoDCAT-AP schema instead of default.')),
-    )
-
-    DEFAULT_CSW_SCHEMA = 'http://www.w3.org/ns/dcat#'
+    DCAT_SCHEMA = 'http://www.w3.org/ns/dcat#'
 
     def parse_graph(self, url: str, fmt: str) -> List[Graph]:
-        if self.has_feature('geodcat_ap'):
-            schema = 'http://data.europa.eu/930/'
-        else:
-            schema = self.DEFAULT_CSW_SCHEMA
-
         body = '''<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
                                   xmlns:gmd="http://www.isotc211.org/2005/gmd"
                                   service="CSW" version="2.0.2" resultType="results"
@@ -170,12 +158,13 @@ class CswDcatBackend(DcatBackend):
                         </ogc:SortBy>
                     </csw:Query>
                 </csw:GetRecords>'''
-        headers = {"Content-Type": "application/xml"}
+        headers = {'Content-Type': 'application/xml'}
 
         graphs = []
         page = 0
         start = 1
-        response = requests.post(url, data=body.format(start=start, schema=schema), headers=headers)
+        response = requests.post(url, data=body.format(start=start, schema=self.DCAT_SCHEMA),
+                                 headers=headers)
         response.raise_for_status()
         content = response.text
         tree = ET.fromstring(content)
@@ -228,7 +217,7 @@ class CswDcatBackend(DcatBackend):
 
             start = next_record
             tree = ET.fromstring(
-                requests.post(url, data=body.format(start=start, schema=schema),
+                requests.post(url, data=body.format(start=start, schema=self.DCAT_SCHEMA),
                               headers=headers).text)
 
         return graphs
