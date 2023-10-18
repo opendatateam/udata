@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2023-07-24 11:21+0200\n"
-"PO-Revision-Date: 2023-10-17 20:51\n"
+"PO-Revision-Date: 2023-10-18 19:11\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: de\n"
 "Language-Team: German\n"
@@ -711,19 +711,19 @@ msgstr ""
 
 #: udata/core/reuse/activities.py:22
 msgid "created a reuse"
-msgstr ""
+msgstr "Wiederverwendung angelegt"
 
 #: udata/core/reuse/activities.py:28
 msgid "updated a reuse"
-msgstr ""
+msgstr "Wiederverwendung aktualisiert"
 
 #: udata/core/reuse/activities.py:35
 msgid "deleted a reuse"
-msgstr ""
+msgstr "Wiederverwendung gelöscht"
 
 #: udata/core/reuse/forms.py:13
 msgid "This URL is already registered"
-msgstr ""
+msgstr "Diese URL ist bereits registriert"
 
 #: udata/core/reuse/forms.py:22
 msgid "The details about the reuse (build process, specifics, self-critics...)."
@@ -743,7 +743,7 @@ msgstr "Anwendung"
 
 #: udata/core/reuse/models.py:18
 msgid "Idea"
-msgstr ""
+msgstr "Idee"
 
 #: udata/core/reuse/models.py:19
 msgid "News Article"
@@ -759,11 +759,11 @@ msgstr ""
 
 #: udata/core/reuse/models.py:22
 msgid "Visualization"
-msgstr ""
+msgstr "Visualisierung"
 
 #: udata/core/reuse/models.py:23
 msgid "Connected device"
-msgstr ""
+msgstr "Verbundenes Gerät"
 
 #: udata/core/reuse/models.py:27 udata/tests/reuse/test_reuse_model.py:104
 msgid "Health"
@@ -775,19 +775,19 @@ msgstr "Verkehr und Mobilität"
 
 #: udata/core/reuse/models.py:29
 msgid "Housing and development"
-msgstr ""
+msgstr "Wohnen und Entwicklung"
 
 #: udata/core/reuse/models.py:30
 msgid "Food and agriculture"
-msgstr ""
+msgstr "Nahrungsmittel und Landwirtschaft"
 
 #: udata/core/reuse/models.py:31
 msgid "Culture and recreation"
-msgstr ""
+msgstr "Kultur und Erholung"
 
 #: udata/core/reuse/models.py:32
 msgid "Economy and business"
-msgstr ""
+msgstr "Wirtschaft und Unternehmen"
 
 #: udata/core/reuse/models.py:33
 msgid "Environment and energy"
@@ -983,15 +983,15 @@ msgstr ""
 
 #: udata/core/user/permissions.py:6
 msgid "System administrator"
-msgstr ""
+msgstr "Systemadministrator"
 
 #: udata/core/user/permissions.py:7
 msgid "Site editorialist"
-msgstr ""
+msgstr "Seiten-Redakteur"
 
 #: udata/core/user/permissions.py:8
 msgid "Site moderator"
-msgstr ""
+msgstr "Seiten-Moderator"
 
 #: udata/core/user/tasks.py:15
 msgid "Test mail"
@@ -1087,39 +1087,39 @@ msgstr "Manuell"
 
 #: udata/harvest/models.py:23
 msgid "Initializing"
-msgstr ""
+msgstr "Initialisieren"
 
 #: udata/harvest/models.py:24
 msgid "Initialized"
-msgstr ""
+msgstr "Initialisiert"
 
 #: udata/harvest/models.py:25
 msgid "Processing"
-msgstr ""
+msgstr "Wird ausgeführt"
 
 #: udata/harvest/models.py:26 udata/harvest/models.py:34
 msgid "Done"
-msgstr ""
+msgstr "Beendet"
 
 #: udata/harvest/models.py:27
 msgid "Done with errors"
-msgstr ""
+msgstr "Mit Fehlern beendet"
 
 #: udata/harvest/models.py:28 udata/harvest/models.py:35
 msgid "Failed"
-msgstr ""
+msgstr "Fehlgeschlagen"
 
 #: udata/harvest/models.py:33
 msgid "Started"
-msgstr ""
+msgstr "Gestartet"
 
 #: udata/harvest/models.py:36
 msgid "Skipped"
-msgstr ""
+msgstr "Übersprungen"
 
 #: udata/harvest/models.py:37
 msgid "Archived"
-msgstr ""
+msgstr "Archiviert"
 
 #: udata/templates/admin.html:7
 msgid "Admin"
@@ -1135,11 +1135,11 @@ msgstr ""
 
 #: udata/templates/api/admin.html:31
 msgid "Edit"
-msgstr ""
+msgstr "Bearbeiten"
 
 #: udata/templates/api/admin.html:34
 msgid "Delete"
-msgstr ""
+msgstr "Löschen"
 
 #: udata/templates/api/admin.html:42
 msgid "No OAuth clients"
@@ -1362,11 +1362,11 @@ msgstr "Anmelden"
 
 #: udata/templates/security/login_user.html:21
 msgid "Forgot your password?"
-msgstr ""
+msgstr "Passwort vergessen?"
 
 #: udata/templates/security/login_user.html:23
 msgid "Recover your password"
-msgstr ""
+msgstr "Passwort wieder­herstellen"
 
 #: udata/templates/security/login_user.html:28
 msgid "Confirmation instructions not received?"
@@ -1379,19 +1379,19 @@ msgstr ""
 #: udata/templates/security/login_user.html:41
 #: udata/templates/security/register_user.html:13
 msgid "Sign up"
-msgstr ""
+msgstr "Registrieren"
 
 #: udata/templates/security/login_user.html:44
 msgid "Register"
-msgstr ""
+msgstr "Anmelden"
 
 #: udata/templates/security/login_user.html:48
 msgid "Create an account"
-msgstr ""
+msgstr "Ein Konto anlegen"
 
 #: udata/templates/security/register_user.html:9
 msgid "Sign Up"
-msgstr ""
+msgstr "Anmelden"
 
 #: udata/templates/security/send_confirmation.html:9
 msgid "Resend confirmation instructions"
@@ -1399,11 +1399,11 @@ msgstr ""
 
 #: udata/templates/security/send_confirmation.html:15
 msgid "Submit"
-msgstr ""
+msgstr "Absenden"
 
 #: udata/templates/security/email/change_notice.html:6
 msgid "Your password has been changed."
-msgstr ""
+msgstr "Ihr Passwort wurde geändert."
 
 #: udata/templates/security/email/change_notice.html:10
 msgid "If you did not change your password, click below to reset it."
@@ -1411,7 +1411,7 @@ msgstr ""
 
 #: udata/templates/security/email/change_notice.html:15
 msgid "Reset password"
-msgstr ""
+msgstr "Passwort zurücksetzen"
 
 #: udata/templates/security/email/confirmation_instructions.html:6
 msgid "Please confirm your email through the link below:"
@@ -1419,7 +1419,7 @@ msgstr ""
 
 #: udata/templates/security/email/confirmation_instructions.html:14
 msgid "Confirm my account"
-msgstr ""
+msgstr "Mein Konto bestätigen"
 
 #: udata/templates/security/email/login_instructions.html:6
 msgid "You can log into your account through the link below:"
