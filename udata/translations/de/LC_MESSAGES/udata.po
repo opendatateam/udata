@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2023-07-24 11:21+0200\n"
-"PO-Revision-Date: 2023-10-18 19:11\n"
+"PO-Revision-Date: 2023-10-19 19:08\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: de\n"
 "Language-Team: German\n"
@@ -56,7 +56,7 @@ msgstr "Bearer Token"
 
 #: udata/api/oauth2.py:57
 msgid "Default scope"
-msgstr ""
+msgstr "Standardumfang"
 
 #: udata/api/oauth2.py:58
 msgid "System administrator rights"
@@ -519,12 +519,12 @@ msgstr ""
 #: udata/core/discussions/tasks.py:28
 #, python-format
 msgid "Your %(type)s have a new discussion"
-msgstr ""
+msgstr "Ihr(e) %(type)s hat eine neue Diskussion"
 
 #: udata/core/discussions/tasks.py:45
 #, python-format
 msgid "%(user)s commented your discussion"
-msgstr ""
+msgstr "%(user)s hat ihre Diskussion kommentiert"
 
 #: udata/core/discussions/tasks.py:63
 msgid "A discussion has been closed"
@@ -563,17 +563,17 @@ msgstr ""
 #: udata/core/organization/forms.py:25
 #: udata/tests/api/test_organizations_api.py:115
 msgid "A siret number is made of 14 digits"
-msgstr ""
+msgstr "Eine SIRET-Nummer besteht aus 14 Ziffern"
 
 #: udata/core/organization/forms.py:36
 #: udata/tests/api/test_organizations_api.py:125
 msgid "A siret number is only made of digits"
-msgstr ""
+msgstr "Eine SIRET-Nummer besteht nur aus Ziffern"
 
 #: udata/core/organization/forms.py:39
 #: udata/tests/api/test_organizations_api.py:120
 msgid "Invalid Siret number"
-msgstr ""
+msgstr "Ungültige SIRET-Nummer"
 
 #: udata/core/organization/forms.py:47
 msgid "Shorter organization name"
@@ -671,11 +671,11 @@ msgstr "Inhalt"
 
 #: udata/core/post/forms.py:19 udata/core/topic/forms.py:19
 msgid "Associated datasets"
-msgstr ""
+msgstr "Verknüpfte Datensätze"
 
 #: udata/core/post/forms.py:20 udata/core/topic/forms.py:20
 msgid "Associated reuses"
-msgstr ""
+msgstr "Verknüpfte Wiederverwendungen"
 
 #: udata/core/post/forms.py:22 udata/core/reuse/forms.py:28
 msgid "Image"
