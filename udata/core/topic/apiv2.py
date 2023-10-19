@@ -102,7 +102,7 @@ class TopicAPI(API):
 
 topic_add_items_fields = apiv2.model('TopicItemsAdd', {
     'id': fields.String(description='Id of the item to add', required=True),
-}, location="json")
+}, location='json')
 
 
 @ns.route('/<topic:topic>/datasets/', endpoint='topic_datasets', doc=common_doc)
