@@ -12,6 +12,7 @@ from udata.core.reuse.models import Reuse
 from udata.core.reuse.apiv2 import reuse_page_fields
 from udata.core.topic.models import Topic
 from udata.core.topic.parsers import TopicApiParser
+from udata.core.topic.permissions import TopicEditPermission
 from udata.core.user.api_fields import user_ref_fields
 
 DEFAULT_SORTING = '-created_at'
@@ -115,7 +116,7 @@ class TopicDatasetsAPI(API):
         return (Dataset.objects.filter(id__in=(d.id for d in topic.datasets))
                 .paginate(args['page'], args['page_size']))
 
-    # FIXME: secure
+    @apiv2.secure
     @apiv2.doc('topic_datasets_create')
     @apiv2.expect([dataset_add_fields])
     @apiv2.marshal_with(topic_fields)
@@ -124,9 +125,9 @@ class TopicDatasetsAPI(API):
     @apiv2.response(400, 'Expecting a list of dicts with id attribute')
     @apiv2.response(404, 'Topic not found')
     @apiv2.response(404, 'Dataset(s) not found')
+    @apiv2.response(403, 'Forbidden')
     def post(self, topic):
         '''Add datasets to a given topic from a list of dataset ids'''
-
         def add_dataset(topic, dataset):
             # TODO: maybe a mongo query on Dataset would be faster?
             if dataset.id not in (d.id for d in topic.datasets):
@@ -139,6 +140,9 @@ class TopicDatasetsAPI(API):
             except mongoengine.errors.ValidationError:
                 apiv2.abort(400, 'Malformed object id(s) in request')
             return dataset
+
+        if not TopicEditPermission(topic).can():
+            apiv2.abort(403, 'Forbidden')
 
         data = request.json
 
@@ -157,20 +161,24 @@ class TopicDatasetsAPI(API):
         return topic, 201
 
 
-# FIXME: secure
 @ns.route('/<topic:topic>/datasets/<dataset:dataset>/', endpoint='topic_dataset', doc={
     'params': {'topic': 'The topic ID', 'dataset': 'The dataset ID'}
 })
 class TopicDatasetAPI(API):
+    @apiv2.secure
     @apiv2.response(404, 'Topic not found')
     @apiv2.response(404, 'Dataset not found in topic')
     @apiv2.response(204, 'Success')
     def delete(self, topic, dataset):
         '''Delete a given dataset from the given topic'''
+        if not TopicEditPermission(topic).can():
+            apiv2.abort(403, 'Forbidden')
+
         if dataset.id not in (d.id for d in topic.datasets):
             apiv2.abort(404, 'Dataset not found in topic')
         topic.datasets = [d for d in topic.datasets if d.id != dataset.id]
         topic.save()
+
         return None, 204
 
 
