@@ -8,8 +8,8 @@ from udata.api import apiv2, API, fields
 from udata.core.dataset.apiv2 import dataset_page_fields
 from udata.core.dataset.models import Dataset
 from udata.core.organization.api_fields import org_ref_fields
-from udata.core.reuse.models import Reuse
 from udata.core.reuse.apiv2 import reuse_page_fields
+from udata.core.reuse.models import Reuse
 from udata.core.topic.models import Topic
 from udata.core.topic.parsers import TopicApiParser
 from udata.core.topic.permissions import TopicEditPermission
@@ -192,3 +192,24 @@ class TopicReusesAPI(API):
         args = generic_parser.parse_args()
         return (Reuse.objects.filter(id__in=(d.id for d in topic.reuses))
                 .paginate(args['page'], args['page_size']))
+
+
+@ns.route('/<topic:topic>/reuses/<reuse:reuse>/', endpoint='topic_reuse', doc={
+    'params': {'topic': 'The topic ID', 'reuse': 'The reuse ID'}
+})
+class TopicReuseAPI(API):
+    @apiv2.secure
+    @apiv2.response(404, 'Topic not found')
+    @apiv2.response(404, 'Reuse not found in topic')
+    @apiv2.response(204, 'Success')
+    def delete(self, topic, reuse):
+        '''Delete a given reuse from the given topic'''
+        if not TopicEditPermission(topic).can():
+            apiv2.abort(403, 'Forbidden')
+
+        if reuse.id not in (d.id for d in topic.reuses):
+            apiv2.abort(404, 'Reuse not found in topic')
+        topic.reuses = [d for d in topic.reuses if d.id != reuse.id]
+        topic.save()
+
+        return None, 204

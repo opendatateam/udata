@@ -139,3 +139,22 @@ class TopicReusesAPITest(APITestCase):
         data = response.json['data']
         assert len(data) == 3
         assert all(str(r.id) in (_r['id'] for _r in data) for r in topic.reuses)
+
+
+class TopicReuseAPITest(APITestCase):
+    def test_delete_reuse(self):
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        reuse = topic.reuses[0]
+        response = self.delete(url_for('apiv2.topic_reuse', topic=topic, reuse=reuse))
+        assert response.status_code == 204
+        topic.reload()
+        assert len(topic.reuses) == 2
+        assert reuse not in (d.id for d in topic.reuses)
+
+    def test_delete_reuse_perm(self):
+        topic = TopicFactory(owner=UserFactory())
+        reuse = topic.reuses[0]
+        self.login()
+        response = self.delete(url_for('apiv2.topic_reuse', topic=topic, reuse=reuse))
+        assert response.status_code == 403
