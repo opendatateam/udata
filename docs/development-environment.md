@@ -44,8 +44,8 @@ If installing `cryptography` fails:
 
 ```
 brew install openssl
-export LDFLAGS="-L/opt/homebrew/opt/openssl@1.1/lib"
-export CPPFLAGS="-I/opt/homebrew/opt/openssl@1.1/include"
+export LDFLAGS="-L$(brew --prefix openssl@1.1)/lib"
+export CPPFLAGS="-I$(brew --prefix openssl@1.1)/include"
 pip install -r requirements/develop.pip
 ```
 
