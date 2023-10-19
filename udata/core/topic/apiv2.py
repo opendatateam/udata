@@ -1,28 +1,33 @@
 import logging
 
-from flask import url_for
+import mongoengine
+
+from flask import url_for, request
 
 from udata.api import apiv2, API, fields
 from udata.core.dataset.apiv2 import dataset_page_fields
 from udata.core.dataset.models import Dataset
 from udata.core.organization.api_fields import org_ref_fields
+from udata.core.reuse.models import Reuse
+from udata.core.reuse.apiv2 import reuse_page_fields
 from udata.core.topic.models import Topic
 from udata.core.topic.parsers import TopicApiParser
 from udata.core.user.api_fields import user_ref_fields
 
 DEFAULT_SORTING = '-created_at'
-DEFAULT_PAGE_SIZE = 50
+DEFAULT_PAGE_SIZE = 20
 
 log = logging.getLogger(__name__)
 
 ns = apiv2.namespace('topics', 'Topics related operations')
 
 topic_parser = TopicApiParser()
-datasets_parser = apiv2.page_parser()
+generic_parser = apiv2.page_parser()
 
 common_doc = {
     'params': {'topic': 'The topic ID'}
 }
+
 
 topic_fields = apiv2.model('Topic', {
     'id': fields.String(description='The topic identifier'),
@@ -36,14 +41,14 @@ topic_fields = apiv2.model('Topic', {
 
     'datasets': fields.Raw(attribute=lambda o: {
         'rel': 'subsection',
-        'href': url_for('apiv2.dataset_search', topic=o.id, page=1,
+        'href': url_for('apiv2.topic_datasets', topic=o.id, page=1,
                         page_size=DEFAULT_PAGE_SIZE, _external=True),
         'type': 'GET',
         'total': len(o.datasets)
         }, description='Link to the topic datasets'),
     'reuses': fields.Raw(attribute=lambda o: {
         'rel': 'subsection',
-        'href': url_for('apiv2.reuse_search', topic=o.id, page=1,
+        'href': url_for('apiv2.topic_reuses', topic=o.id, page=1,
                         page_size=DEFAULT_PAGE_SIZE, _external=True),
         'type': 'GET',
         'total': len(o.reuses)
@@ -70,7 +75,7 @@ topic_fields = apiv2.model('Topic', {
 topic_page_fields = apiv2.model('TopicPage', fields.pager(topic_fields))
 
 
-@ns.route('/', endpoint='topics_list', doc=common_doc)
+@ns.route('/', endpoint='topics_list')
 class TopicsAPI(API):
     @apiv2.expect(topic_parser.parser)
     @apiv2.marshal_with(topic_page_fields)
@@ -94,14 +99,88 @@ class TopicAPI(API):
         return topic
 
 
+dataset_add_fields = apiv2.model('DatasetAdd', {
+    'id': fields.String(description='Id of the dataset to add', required=True),
+}, location="json")
+
+
 @ns.route('/<topic:topic>/datasets/', endpoint='topic_datasets', doc=common_doc)
 class TopicDatasetsAPI(API):
-    @apiv2.doc('get_topic_datasets')
-    @apiv2.expect(datasets_parser)
+    @apiv2.doc('topic_datasets')
+    @apiv2.expect(generic_parser)
     @apiv2.marshal_with(dataset_page_fields)
     def get(self, topic):
         '''Get a given topic datasets'''
-        args = datasets_parser.parse_args()
-        return Dataset.objects.filter(
-            id__in=(d.id for d in topic.datasets)
-        ).paginate(args['page'], args['page_size'])
+        args = generic_parser.parse_args()
+        return (Dataset.objects.filter(id__in=(d.id for d in topic.datasets))
+                .paginate(args['page'], args['page_size']))
+
+    # FIXME: secure
+    @apiv2.doc('topic_datasets_create')
+    @apiv2.expect([dataset_add_fields])
+    @apiv2.marshal_with(topic_fields)
+    @apiv2.response(400, 'Malformed object id(s) in request')
+    @apiv2.response(400, 'Expecting a list')
+    @apiv2.response(400, 'Expecting a list of dicts with id attribute')
+    @apiv2.response(404, 'Topic not found')
+    @apiv2.response(404, 'Dataset(s) not found')
+    def post(self, topic):
+        '''Add datasets to a given topic from a list of dataset ids'''
+
+        def add_dataset(topic, dataset):
+            # TODO: maybe a mongo query on Dataset would be faster?
+            if dataset.id not in (d.id for d in topic.datasets):
+                topic.datasets.append(dataset)
+            return topic
+
+        def get_dataset(dataset_id):
+            try:
+                dataset = Dataset.objects.get_or_404(id=dataset_id)
+            except mongoengine.errors.ValidationError:
+                apiv2.abort(400, 'Malformed object id(s) in request')
+            return dataset
+
+        data = request.json
+
+        if not isinstance(data, list):
+            apiv2.abort(400, 'Expecting a list')
+        if not all(isinstance(d, dict) and d.get('id') for d in data):
+            apiv2.abort(400, 'Expecting a list of dicts with id attribute')
+
+        datasets = (get_dataset(d['id']) for d in data)
+        for dataset in datasets:
+            topic = add_dataset(topic, dataset)
+        topic.save()
+
+        # TODO: maybe we should return None, or the topics/datasets page
+        # but pagination might not match
+        return topic, 201
+
+
+# FIXME: secure
+@ns.route('/<topic:topic>/datasets/<dataset:dataset>/', endpoint='topic_dataset', doc={
+    'params': {'topic': 'The topic ID', 'dataset': 'The dataset ID'}
+})
+class TopicDatasetAPI(API):
+    @apiv2.response(404, 'Topic not found')
+    @apiv2.response(404, 'Dataset not found in topic')
+    @apiv2.response(204, 'Success')
+    def delete(self, topic, dataset):
+        '''Delete a given dataset from the given topic'''
+        if dataset.id not in (d.id for d in topic.datasets):
+            apiv2.abort(404, 'Dataset not found in topic')
+        topic.datasets = [d for d in topic.datasets if d.id != dataset.id]
+        topic.save()
+        return None, 204
+
+
+@ns.route('/<topic:topic>/reuses/', endpoint='topic_reuses', doc=common_doc)
+class TopicReusesAPI(API):
+    @apiv2.doc('topic_reuses')
+    @apiv2.expect(generic_parser)
+    @apiv2.marshal_with(reuse_page_fields)
+    def get(self, topic):
+        '''Get a given topic reuses'''
+        args = generic_parser.parse_args()
+        return (Reuse.objects.filter(id__in=(d.id for d in topic.reuses))
+                .paginate(args['page'], args['page_size']))

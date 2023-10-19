@@ -3,9 +3,8 @@ from udata.core.dataset.api_fields import dataset_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api_fields import reuse_fields
 from udata.core.topic.permissions import TopicEditPermission
-from udata.core.user.api_fields import user_ref_fields
-
 from udata.core.topic.parsers import TopicApiParser
+from udata.core.user.api_fields import user_ref_fields
 
 from .models import Topic
 from .forms import TopicForm
