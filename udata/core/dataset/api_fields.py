@@ -4,6 +4,7 @@ from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.models import LOGO_SIZES
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.user.api_fields import user_ref_fields
+from udata.core.contact_points.api_fields import contact_points_fields
 
 from .models import (
     UPDATE_FREQUENCIES, RESOURCE_FILETYPES, DEFAULT_FREQUENCY,
@@ -246,6 +247,8 @@ dataset_fields = api.model('Dataset', {
         description='The resources last modification date', required=True),
     'internal': fields.Nested(
         dataset_internal_fields, readonly=True, description='Site internal and specific object\'s data'),
+    'contact_points': fields.List(
+        fields.Nested(contact_points_fields, description='The dataset\'s contact points')),
 }, mask=DEFAULT_MASK)
 
 dataset_page_fields = api.model('DatasetPage', fields.pager(dataset_fields),

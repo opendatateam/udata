@@ -58,6 +58,8 @@ class User(WithMetrics, UserMixin, db.Document):
     website = db.URLField()
     about = db.StringField()
 
+    contact_points = db.ListField(db.ReferenceField('ContactPoint', reverse_delete_rule=db.PULL))
+
     prefered_language = db.StringField()
 
     apikey = db.StringField()

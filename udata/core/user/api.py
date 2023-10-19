@@ -7,6 +7,8 @@ from udata.core import storages
 from udata.auth import admin_permission
 from udata.models import CommunityResource, Dataset, Reuse, User
 
+from udata.core.contact_points.api_fields import contact_points_fields
+from udata.core.contact_points.forms import ContactPointForm
 from udata.core.dataset.api_fields import (
     community_resource_fields, dataset_fields
 )
@@ -314,6 +316,21 @@ class UserAPI(API):
                 storage.delete(value)
         user.mark_as_deleted()
         return '', 204
+
+
+@ns.route('/<user:user>/contact/', endpoint='user_contact_points')
+class UserContactAPI(API):
+    @api.secure
+    @api.doc('create_user_contact_point', responses={400: 'Validation error'})
+    @api.expect(contact_points_fields)
+    @api.marshal_list_with(contact_points_fields, code=201)
+    def post(self, user):
+        '''Create a new user contact point'''
+        form = api.validate(ContactPointForm)
+        contact_point = form.save()
+        user.contact_points.append(contact_point)
+        user.save()
+        return contact_point, 201
 
 
 @ns.route('/<id>/followers/', endpoint='user_followers')

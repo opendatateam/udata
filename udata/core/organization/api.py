@@ -41,6 +41,8 @@ from udata.core.reuse.models import Reuse
 from udata.core.storages.api import (
     uploaded_image_fields, image_parser, parse_uploaded_image
 )
+from udata.core.contact_points.api_fields import contact_points_fields
+from udata.core.contact_points.forms import ContactPointForm
 
 
 DEFAULT_SORTING = '-created_at'
@@ -204,6 +206,21 @@ class OrganizationBadgeAPI(API):
     def delete(self, org, badge_kind):
         '''Delete a badge for a given organization'''
         return badges_api.remove(org, badge_kind)
+
+
+@ns.route('/<org:org>/contact/', endpoint='org_contact_points')
+class OrgContactAPI(API):
+    @api.secure
+    @api.doc('create_organization_contact_point', responses={400: 'Validation error'})
+    @api.expect(contact_points_fields)
+    @api.marshal_list_with(contact_points_fields, code=201)
+    def post(self, org):
+        '''Create a new organization contact point'''
+        form = api.validate(ContactPointForm)
+        contact_point = form.save()
+        org.contact_points.append(contact_point)
+        org.save()
+        return contact_point, 201
 
 
 requests_parser = api.parser()

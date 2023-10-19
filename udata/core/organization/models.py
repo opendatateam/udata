@@ -108,6 +108,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
                          max_size=LOGO_MAX_SIZE, thumbnails=LOGO_SIZES)
     business_number_id = db.StringField(max_length=ORG_BID_SIZE_LIMIT)
 
+    contact_points = db.ListField(db.ReferenceField('ContactPoint', reverse_delete_rule=db.PULL))
     members = db.ListField(db.EmbeddedDocumentField(Member))
     teams = db.ListField(db.EmbeddedDocumentField(Team))
     requests = db.ListField(db.EmbeddedDocumentField(MembershipRequest))
