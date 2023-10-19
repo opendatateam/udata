@@ -83,6 +83,7 @@ session_interface = MongoEngineSessionInterface(db)
 
 
 # Load all core models and mixins
+from udata.core.contact_points.models import *  # noqa
 from udata.core.spatial.models import *  # noqa
 from udata.core.metrics.models import *  # noqa
 from udata.core.badges.models import *  # noqa
@@ -98,7 +99,6 @@ from udata.core.topic.models import *  # noqa
 from udata.core.post.models import *  # noqa
 from udata.core.jobs.models import *  # noqa
 from udata.core.tags.models import *  # noqa
-from udata.core.contact_points.models import *  # noqa
 
 from udata.features.transfer.models import *  # noqa
 from udata.features.territories.models import *  # noqa
