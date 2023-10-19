@@ -3,6 +3,7 @@ from flask import url_for
 from udata.tests.api import APITestCase
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.topic.factories import TopicFactory
+from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
 
 
@@ -139,6 +140,59 @@ class TopicReusesAPITest(APITestCase):
         data = response.json['data']
         assert len(data) == 3
         assert all(str(r.id) in (_r['id'] for _r in data) for r in topic.reuses)
+
+    def test_add_reuses(self):
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        r1, r2 = ReuseFactory.create_batch(2)
+        response = self.post(url_for('apiv2.topic_reuses', topic=topic), [
+            {'id': r1.id}, {'id': r2.id}
+        ])
+        assert response.status_code == 201
+        topic.reload()
+        assert len(topic.reuses) == 5
+        assert all(r.id in (_r.id for _r in topic.reuses) for r in (r1, r2))
+
+    def test_add_reuses_double(self):
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        reuse = ReuseFactory()
+        response = self.post(url_for('apiv2.topic_reuses', topic=topic), [
+            {'id': reuse.id}, {'id': reuse.id}
+        ])
+        assert response.status_code == 201
+        topic.reload()
+        assert len(topic.reuses) == 4
+        response = self.post(url_for('apiv2.topic_reuses', topic=topic), [
+            {'id': reuse.id}
+        ])
+        assert response.status_code == 201
+        topic.reload()
+        assert len(topic.reuses) == 4
+
+    def test_add_reuses_perm(self):
+        user = UserFactory()
+        topic = TopicFactory(owner=user)
+        reuse = ReuseFactory()
+        self.login()
+        response = self.post(url_for('apiv2.topic_reuses', topic=topic), [
+            {'id': reuse.id}
+        ])
+        assert response.status_code == 403
+
+    def test_add_reuses_wrong_payload(self):
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        response = self.post(url_for('apiv2.topic_reuses', topic=topic), [
+            {'id': 'xxx'}
+        ])
+        assert response.status_code == 400
+        response = self.post(url_for('apiv2.topic_reuses', topic=topic), [
+            {'nain': 'portekoi'}
+        ])
+        assert response.status_code == 400
+        response = self.post(url_for('apiv2.topic_reuses', topic=topic), {'non': 'mais'})
+        assert response.status_code == 400
 
 
 class TopicReuseAPITest(APITestCase):

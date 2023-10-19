@@ -100,8 +100,8 @@ class TopicAPI(API):
         return topic
 
 
-dataset_add_fields = apiv2.model('DatasetAdd', {
-    'id': fields.String(description='Id of the dataset to add', required=True),
+topic_add_items_fields = apiv2.model('TopicItemsAdd', {
+    'id': fields.String(description='Id of the item to add', required=True),
 }, location="json")
 
 
@@ -118,7 +118,7 @@ class TopicDatasetsAPI(API):
 
     @apiv2.secure
     @apiv2.doc('topic_datasets_create')
-    @apiv2.expect([dataset_add_fields])
+    @apiv2.expect([topic_add_items_fields])
     @apiv2.marshal_with(topic_fields)
     @apiv2.response(400, 'Malformed object id(s) in request')
     @apiv2.response(400, 'Expecting a list')
@@ -192,6 +192,49 @@ class TopicReusesAPI(API):
         args = generic_parser.parse_args()
         return (Reuse.objects.filter(id__in=(d.id for d in topic.reuses))
                 .paginate(args['page'], args['page_size']))
+
+    @apiv2.secure
+    @apiv2.doc('topic_reuses_create')
+    @apiv2.expect([topic_add_items_fields])
+    @apiv2.marshal_with(topic_fields)
+    @apiv2.response(400, 'Malformed object id(s) in request')
+    @apiv2.response(400, 'Expecting a list')
+    @apiv2.response(400, 'Expecting a list of dicts with id attribute')
+    @apiv2.response(404, 'Topic not found')
+    @apiv2.response(404, 'Reuse(s) not found')
+    @apiv2.response(403, 'Forbidden')
+    def post(self, topic):
+        '''Add reuses to a given topic from a list of reuses ids'''
+        def add_reuse(topic, reuse):
+            if reuse.id not in (r.id for r in topic.reuses):
+                topic.reuses.append(reuse)
+            return topic
+
+        def get_reuse(reuse_id):
+            try:
+                reuse = Reuse.objects.get_or_404(id=reuse_id)
+            except mongoengine.errors.ValidationError:
+                apiv2.abort(400, 'Malformed object id(s) in request')
+            return reuse
+
+        if not TopicEditPermission(topic).can():
+            apiv2.abort(403, 'Forbidden')
+
+        data = request.json
+
+        if not isinstance(data, list):
+            apiv2.abort(400, 'Expecting a list')
+        if not all(isinstance(d, dict) and d.get('id') for d in data):
+            apiv2.abort(400, 'Expecting a list of dicts with id attribute')
+
+        reuses = (get_reuse(d['id']) for d in data)
+        for reuse in reuses:
+            topic = add_reuse(topic, reuse)
+        topic.save()
+
+        # TODO: maybe we should return None, or the topics/reuses page
+        # but pagination might not match
+        return topic, 201
 
 
 @ns.route('/<topic:topic>/reuses/<reuse:reuse>/', endpoint='topic_reuse', doc={
