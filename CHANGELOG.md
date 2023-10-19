@@ -8,6 +8,7 @@
 - Topics changes:
   - Topics creation, update and deletion are now opened to all users [#2898](https://github.com/opendatateam/udata/pull/2898)
   - Topics are now `db.Owned` and searchable by `id` in dataset search [#2901](https://github.com/opendatateam/udata/pull/2901)
+- Add support for a CSW harvester using DCAT format [#2800](https://github.com/opendatateam/udata/pull/2800)
   - Remove `deleted` api field that does not exist [#2903](https://github.com/opendatateam/udata/pull/2903)
   - Add `created_at`field to topic's model [#2904](https://github.com/opendatateam/udata/pull/2904)
   - Topics can now be filtered by `tag` field [#2904](https://github.com/opendatateam/udata/pull/2904)
