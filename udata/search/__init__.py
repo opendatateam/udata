@@ -16,6 +16,8 @@ adapter_catalog = {}
 
 @task(route='high.search')
 def reindex(classname, id):
+    if not current_app.config['SEARCH_SERVICE_API_URL']:
+        return
     model = db.resolve_model(classname)
     obj = model.objects.get(pk=id)
     adapter_class = adapter_catalog.get(model)
@@ -46,6 +48,8 @@ def reindex(classname, id):
 
 @task(route='high.search')
 def unindex(classname, id):
+    if not current_app.config['SEARCH_SERVICE_API_URL']:
+        return
     model = db.resolve_model(classname)
     adapter_class = adapter_catalog.get(model)
     log.info('Unindexing %s (%s)', model.__name__, id)
