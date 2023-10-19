@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2023-07-24 11:21+0200\n"
-"PO-Revision-Date: 2023-10-19 19:08\n"
+"PO-Revision-Date: 2023-10-19 20:36\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: de\n"
 "Language-Team: German\n"
@@ -839,11 +839,11 @@ msgstr ""
 
 #: udata/core/site/forms.py:15
 msgid "Feed size"
-msgstr ""
+msgstr "Feed-Größe"
 
 #: udata/core/site/forms.py:15
 msgid "Number of elements in feeds"
-msgstr ""
+msgstr "Anzahl der Elemente in Feeds"
 
 #: udata/core/spatial/forms.py:48
 msgid "Unknown geoid(s): {identifiers}"
@@ -859,11 +859,11 @@ msgstr "Eine Liste der abgedeckten Gebiete"
 
 #: udata/core/spatial/forms.py:86
 msgid "Spatial granularity"
-msgstr ""
+msgstr "Räumliche Detailgenauigkeit"
 
 #: udata/core/spatial/forms.py:87
 msgid "The size of the data increment"
-msgstr ""
+msgstr "Die Größe der Datenzunahme"
 
 #: udata/core/spatial/models.py:23
 msgid "POI"
@@ -1024,7 +1024,7 @@ msgstr ""
 
 #: udata/forms/fields.py:444 udata/forms/fields.py:496
 msgid "{0} does not exists"
-msgstr ""
+msgstr "{0} existiert nicht"
 
 #: udata/forms/fields.py:470 udata/tests/forms/test_model_field.py:318
 #: udata/tests/forms/test_model_field.py:332
@@ -1143,7 +1143,7 @@ msgstr "Löschen"
 
 #: udata/templates/api/admin.html:42
 msgid "No OAuth clients"
-msgstr ""
+msgstr "Keine OAuth-Clients"
 
 #: udata/templates/api/admin.html:53
 msgid "Add a client"
@@ -1152,11 +1152,11 @@ msgstr ""
 #: udata/templates/api/oauth_authorize.html:23
 #, python-format
 msgid "%(app)s want to access your %(site)s account."
-msgstr ""
+msgstr "%(app)s möchte auf Ihr %(site)s Konto zugreifen."
 
 #: udata/templates/api/oauth_authorize.html:35
 msgid "Details"
-msgstr ""
+msgstr "Details"
 
 #: udata/templates/api/oauth_authorize.html:45
 msgid "Access your profile"
@@ -1168,7 +1168,7 @@ msgstr ""
 
 #: udata/templates/api/oauth_authorize.html:54
 msgid "Publish data"
-msgstr ""
+msgstr "Daten veröffentlichen"
 
 #: udata/templates/api/oauth_authorize.html:55
 msgid "Publish datasets, reuses, follow or unfollow"
@@ -1176,11 +1176,11 @@ msgstr ""
 
 #: udata/templates/api/oauth_authorize.html:65
 msgid "Accept"
-msgstr ""
+msgstr "Annehmen"
 
 #: udata/templates/api/oauth_authorize.html:67
 msgid "Refuse"
-msgstr ""
+msgstr "Ablehnen"
 
 #: udata/templates/api/oauth_error.html:15
 msgid "OAuth Authentication Error"
@@ -1203,12 +1203,12 @@ msgstr ""
 
 #: udata/templates/mail/account_deleted.html:4
 msgid "Your account has now been deleted"
-msgstr ""
+msgstr "Ihr Benutzerkonto wurde gelöscht"
 
 #: udata/templates/mail/badge_added_certified.html:6
 #, python-format
 msgid "%(user)s has certified your organization \"%(name)s\""
-msgstr ""
+msgstr "%(user)s hat Ihre Organisation \"%(name)s \" zertifiziert"
 
 #: udata/templates/mail/badge_added_certified.html:27
 #: udata/templates/mail/badge_added_public_service.html:27
@@ -1218,7 +1218,7 @@ msgstr "Abzeichen ansehen"
 #: udata/templates/mail/badge_added_public_service.html:6
 #, python-format
 msgid "%(user)s has identified your organization \"%(name)s\" as public service"
-msgstr ""
+msgstr "%(user)s hat Ihre Organisation \"%(name)s\" als öffentlichen Dienst identifiziert"
 
 #: udata/templates/mail/base.html:45 udata/templates/security/email/base.html:45
 msgid "on your browser."
@@ -1232,7 +1232,7 @@ msgstr ""
 #: udata/templates/mail/base.html:76 udata/templates/security/email/base.html:76
 #, python-format
 msgid "Hi %(user)s"
-msgstr ""
+msgstr "Hallo %(user)s"
 
 #: udata/templates/mail/base.html:87 udata/templates/security/email/base.html:87
 msgid "See you soon on the platform"
