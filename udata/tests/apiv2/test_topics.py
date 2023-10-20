@@ -122,7 +122,7 @@ class TopicDatasetAPITest(APITestCase):
         assert response.status_code == 204
         topic.reload()
         assert len(topic.datasets) == 2
-        assert dataset not in (d.id for d in topic.datasets)
+        assert dataset.id not in (d.id for d in topic.datasets)
 
     def test_delete_dataset_perm(self):
         topic = TopicFactory(owner=UserFactory())
@@ -204,7 +204,7 @@ class TopicReuseAPITest(APITestCase):
         assert response.status_code == 204
         topic.reload()
         assert len(topic.reuses) == 2
-        assert reuse not in (d.id for d in topic.reuses)
+        assert reuse.id not in (d.id for d in topic.reuses)
 
     def test_delete_reuse_perm(self):
         topic = TopicFactory(owner=UserFactory())
