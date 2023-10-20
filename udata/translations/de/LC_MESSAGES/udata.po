@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2023-07-24 11:21+0200\n"
-"PO-Revision-Date: 2023-10-19 20:36\n"
+"PO-Revision-Date: 2023-10-20 18:48\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: de\n"
 "Language-Team: German\n"
@@ -48,7 +48,7 @@ msgstr "Dieser Datensatz wurde archiviert"
 
 #: udata/api/errors.py:4
 msgid "Validation error: your data cannot be updated for now, we have been notified of the error and we will fix it as soon as possible."
-msgstr ""
+msgstr "Überprüfungsfehler: Ihre Daten können im Moment nicht aktualisiert werden. Wir wurden über den Fehler benachrichtigt und werden ihn so bald wie möglich beheben."
 
 #: udata/api/oauth2.py:53
 msgid "Bearer Token"
@@ -130,7 +130,7 @@ msgstr "Anleitung zur Bestätigung der E-Mail-Adressänderung"
 
 #: udata/auth/views.py:72
 msgid "You did not confirm your change of email within {email_within}. New instructions to confirm your change of email have been sent to {new_email}."
-msgstr ""
+msgstr "Sie haben die Änderung Ihrer E-Mail-Adresse innerhalb von {email_within} nicht bestätigt. Neue Anweisungen zur Bestätigung der Änderung der E-Mail-Adresse wurden an {new_email} gesendet."
 
 #: udata/auth/views.py:82
 msgid "Thank you. Your change of email has been confirmed."
@@ -198,7 +198,7 @@ msgstr ""
 
 #: udata/core/dataset/forms.py:61
 msgid "Version \"{version}\" is not an allowed value. Allowed values: {values}"
-msgstr ""
+msgstr "Version \"{version}\" ist kein zulässiger Wert. Erlaubte Werte: {values}"
 
 #: udata/core/dataset/forms.py:70
 msgid "Sub-property \"{prop}\" is not allowed value in schema field. Allowed values is : {properties}"
