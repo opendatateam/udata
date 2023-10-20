@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2023-07-24 11:21+0200\n"
-"PO-Revision-Date: 2023-10-20 18:48\n"
+"PO-Revision-Date: 2023-10-20 20:00\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: de\n"
 "Language-Team: German\n"
@@ -225,7 +225,7 @@ msgstr "Dateityp"
 
 #: udata/core/dataset/forms.py:85
 msgid "Whether the resource is an uploaded file, a remote file or an API"
-msgstr ""
+msgstr "Ob die Ressource eine hochgeladene Datei, eine Remote-Datei oder eine API ist"
 
 #: udata/core/dataset/forms.py:88 udata/core/reuse/forms.py:24
 msgid "Type"
@@ -233,7 +233,7 @@ msgstr "Typ"
 
 #: udata/core/dataset/forms.py:90
 msgid "Resource type (documentation, API...)"
-msgstr ""
+msgstr "Ressourcentyp (Dokumentation, API...)"
 
 #: udata/core/dataset/forms.py:92 udata/core/reuse/forms.py:26
 #: udata/harvest/forms.py:64
@@ -250,7 +250,7 @@ msgstr "MIME-Typ"
 
 #: udata/core/dataset/forms.py:100
 msgid "The mime type associated to the extension. (ex: text/plain)"
-msgstr ""
+msgstr "Der Erweiterung zugeordnete Mime-Typ (z.B. text/plain)."
 
 #: udata/core/dataset/forms.py:103
 msgid "Size"
