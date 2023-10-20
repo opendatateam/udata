@@ -54,6 +54,7 @@ from .api_fields import (
     schema_fields,
 )
 from udata.linkchecker.checker import check_resource
+from udata.core.topic.models import Topic
 from .models import (
     Dataset, Resource, Checksum, License, UPDATE_FREQUENCIES,
     CommunityResource, RESOURCE_TYPES, ResourceSchema, get_resource
@@ -95,6 +96,7 @@ class DatasetApiParser(ModelApiParser):
         self.parser.add_argument('format', type=str, location='args')
         self.parser.add_argument('schema', type=str, location='args')
         self.parser.add_argument('schema_version', type=str, location='args')
+        self.parser.add_argument('topic', type=str, location='args')
 
     @staticmethod
     def parse_filters(datasets, args):
@@ -132,6 +134,13 @@ class DatasetApiParser(ModelApiParser):
             datasets = datasets.filter(resources__schema__name=args['schema'])
         if args.get('schema_version'):
             datasets = datasets.filter(resources__schema__version=args['schema_version'])
+        if args.get('topic'):
+            try:
+                topic = Topic.objects.get(id=args['topic'])
+            except Topic.DoesNotExist:
+                pass
+            else:
+                datasets = datasets.filter(id__in=[d.id for d in topic.datasets])
         return datasets
 
 
