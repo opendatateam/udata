@@ -5,14 +5,14 @@
 - Add harvesters count to site metrics [#2890](https://github.com/opendatateam/udata/pull/2890)
 - Return 400 instead of 500 in case of not ObjectID arg in API [#2889](https://github.com/opendatateam/udata/pull/2889)
 - Use a single session for reindex [#2891](https://github.com/opendatateam/udata/pull/2891)
-- Topics changes:
+- Topics have been refactored and are no more deprecated:
   - Topics creation, update and deletion are now opened to all users [#2898](https://github.com/opendatateam/udata/pull/2898)
   - Topics are now `db.Owned` and searchable by `id` in dataset search [#2901](https://github.com/opendatateam/udata/pull/2901)
-- Add support for a CSW harvester using DCAT format [#2800](https://github.com/opendatateam/udata/pull/2800)
   - Remove `deleted` api field that does not exist [#2903](https://github.com/opendatateam/udata/pull/2903)
   - Add `created_at`field to topic's model [#2904](https://github.com/opendatateam/udata/pull/2904)
   - Topics can now be filtered by `tag` field [#2904](https://github.com/opendatateam/udata/pull/2904)
   - Topics can now be queried by test search in `name` field with `q` argument [#2904](https://github.com/opendatateam/udata/pull/2904)
+- Add support for a CSW harvester using DCAT format [#2800](https://github.com/opendatateam/udata/pull/2800)
 - Fix site title and keywords never get updated [#2900](https://github.com/opendatateam/udata/pull/2900)
 - Reuse's extras are now exposed by API [#2905](https://github.com/opendatateam/udata/pull/2905)
 - Add items.dataset to HarvestJob indexes [#2907](https://github.com/opendatateam/udata/pull/2907)
