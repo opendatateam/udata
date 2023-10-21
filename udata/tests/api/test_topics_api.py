@@ -105,7 +105,7 @@ class TopicsAPITest(APITestCase):
         self.assertEqual(Topic.objects.count(), 0)
 
     def test_topic_api_delete_perm(self):
-        '''It should delete a topic from the API'''
+        '''It should not delete a topic from the API'''
         owner = UserFactory()
         topic = TopicFactory(owner=owner)
         with self.api_user():
