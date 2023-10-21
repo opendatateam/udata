@@ -245,6 +245,10 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertTrue(len(response.json['data']) > 0)
 
+        # filter on non id for topic
+        response = self.get(url_for('api.datasets', topic='xxx'))
+        self.assert400(response)
+
     def test_dataset_api_get(self):
         '''It should fetch a dataset from the API'''
         resources = [ResourceFactory() for _ in range(2)]

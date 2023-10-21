@@ -135,6 +135,8 @@ class DatasetApiParser(ModelApiParser):
         if args.get('schema_version'):
             datasets = datasets.filter(resources__schema__version=args['schema_version'])
         if args.get('topic'):
+            if not ObjectId.is_valid(args['topic']):
+                api.abort(400, 'Topic arg must be an identifier')
             try:
                 topic = Topic.objects.get(id=args['topic'])
             except Topic.DoesNotExist:
