@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2023-07-24 11:21+0200\n"
-"PO-Revision-Date: 2023-10-22 19:05\n"
+"PO-Revision-Date: 2023-10-22 20:15\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: de\n"
 "Language-Team: German\n"
@@ -875,27 +875,27 @@ msgstr "Französische Region"
 
 #: udata/core/spatial/translations.py:6
 msgid "French intermunicipal (EPCI)"
-msgstr ""
+msgstr "Französische Gemeindeverbände (EPCI)"
 
 #: udata/core/spatial/translations.py:7
 msgid "French county"
-msgstr ""
+msgstr "Französisches Département"
 
 #: udata/core/spatial/translations.py:8
 msgid "French district"
-msgstr ""
+msgstr "Französischer Verwaltungsbezirk"
 
 #: udata/core/spatial/translations.py:9
 msgid "French town"
-msgstr ""
+msgstr "Französische Stadt"
 
 #: udata/core/spatial/translations.py:10
 msgid "French canton"
-msgstr ""
+msgstr "Französischer Kanton"
 
 #: udata/core/spatial/translations.py:11
 msgid "Iris (Insee districts)"
-msgstr ""
+msgstr "Iris (Insee-Einteilung)"
 
 #: udata/core/spatial/translations.py:12
 msgid "Country"
@@ -911,7 +911,7 @@ msgstr "Staatengruppe"
 
 #: udata/core/spatial/translations.py:15
 msgid "Country subset"
-msgstr ""
+msgstr "Teilmenge des Landes"
 
 #: udata/core/spatial/translations.py:16
 msgid "European Union"
@@ -919,15 +919,15 @@ msgstr "Europäische Union"
 
 #: udata/core/spatial/translations.py:17
 msgid "Metropolitan France"
-msgstr ""
+msgstr "Metropolitanes Frankreich"
 
 #: udata/core/spatial/translations.py:18
 msgid "Overseas France"
-msgstr ""
+msgstr "Französische Überseegebiete"
 
 #: udata/core/spatial/translations.py:19
 msgid "French overseas collectivities"
-msgstr ""
+msgstr "Französische Überseegemeinschaften"
 
 #: udata/core/spatial/translations.py:20
 msgid "French arrondissement"
