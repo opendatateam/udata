@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2023-07-24 11:21+0200\n"
-"PO-Revision-Date: 2023-10-20 20:00\n"
+"PO-Revision-Date: 2023-10-22 19:05\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: de\n"
 "Language-Team: German\n"
@@ -871,7 +871,7 @@ msgstr ""
 
 #: udata/core/spatial/translations.py:5
 msgid "French region"
-msgstr ""
+msgstr "Französische Region"
 
 #: udata/core/spatial/translations.py:6
 msgid "French intermunicipal (EPCI)"
@@ -931,7 +931,7 @@ msgstr ""
 
 #: udata/core/spatial/translations.py:20
 msgid "French arrondissement"
-msgstr ""
+msgstr "Französisches Arrondissement"
 
 #: udata/core/topic/forms.py:24
 msgid "Featured"
