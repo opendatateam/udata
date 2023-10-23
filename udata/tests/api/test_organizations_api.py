@@ -643,19 +643,18 @@ class MembershipAPITest:
         for i in range(3):
             OrganizationFactory(
                 name=faker.word(),
-                acronym=f'TEST{i}' if i % 2 else faker.word(),
+                acronym=f'UDATA{i}' if i % 2 else faker.word(),
                 metrics={"followers": i})
         max_follower_organization = OrganizationFactory(
             name=faker.word(),
-            acronym='TEST4',
+            acronym='UDATA4',
             metrics={"followers": 10}
         )
         response = api.get(url_for('api.suggest_organizations'),
-                           qs={'q': 'tEsT', 'size': '5'})
+                           qs={'q': 'uDaTa', 'size': '5'})
         assert200(response)
 
-        assert len(response.json) <= 5
-        assert len(response.json) > 1
+        assert len(response.json) == 2
 
         for suggestion in response.json:
             assert 'id' in suggestion
@@ -663,7 +662,7 @@ class MembershipAPITest:
             assert 'name' in suggestion
             assert 'image_url' in suggestion
             assert 'acronym' in suggestion
-            assert 'TEST' in suggestion['acronym']
+            assert 'UDATA' in suggestion['acronym']
             assert response.json[0]['id'] == str(max_follower_organization.id)
 
 
