@@ -6,7 +6,7 @@
 
 - Topics have been refactored and are no more deprecated:
   - Topics creation, update and deletion are now opened to all users [#2898](https://github.com/opendatateam/udata/pull/2898)
-  - Topics are now `db.Owned` and searchable by `id` in dataset search [#2901](https://github.com/opendatateam/udata/pull/2901)
+  - Topics are now `db.Owned` and searchable by `id` in dataset search [#2901](https://github.com/opendatateam/udata/pull/2901) [#2917](https://github.com/opendatateam/udata/pull/2917)
   - Remove `deleted` api field that does not exist [#2903](https://github.com/opendatateam/udata/pull/2903)
   - Add `created_at`field to topic's model [#2904](https://github.com/opendatateam/udata/pull/2904)
   - Topics can now be filtered by `tag` field [#2904](https://github.com/opendatateam/udata/pull/2904)
