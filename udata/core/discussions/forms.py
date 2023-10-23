@@ -3,7 +3,7 @@ from udata.i18n import lazy_gettext as _
 
 from .models import Discussion, COMMENT_SIZE_LIMIT
 
-__all__ = ('DiscussionCreateForm', 'DiscussionCommentForm')
+__all__ = ('DiscussionCreateForm', 'DiscussionCommentForm', 'EditDiscussionCommentForm')
 
 
 class DiscussionCreateForm(ModelForm):
@@ -20,3 +20,7 @@ class DiscussionCommentForm(Form):
     comment = fields.StringField(
         _('Comment'), [validators.DataRequired(), validators.Length(max=COMMENT_SIZE_LIMIT)])
     close = fields.BooleanField(default=False)
+
+
+class EditDiscussionCommentForm(Form):
+    comment = fields.StringField(_('Comment'), [validators.DataRequired()])
