@@ -12,6 +12,7 @@
 import config from 'config';
 import me from 'models/me';
 import site from 'models/site';
+import Sentry from 'sentry';
 
 import AppHeader from 'components/header.vue';
 import Sidebar from 'components/sidebar.vue';
@@ -54,17 +55,24 @@ export default {
                 details: this._('Due to security reasons, the creation of new content is currently disabled.'),
             });
         }
-        // Displays an error identifier on uncaught error
-        document.addEventListener('ravenSuccess', (e) => {
+    },
+    created() {
+        Sentry.configureScope((scope) => {
+            scope.addEventProcessor((event, hint) => {
+                this.handleSentryEvents(event);
+                return event;
+            })
+        })
+    },
+    methods: {
+        handleSentryEvents(event) {
             this.notifications.push({
                 type: 'error',
                 icon: 'exclamation-triangle',
                 title: this._('An error occured'),
-                details: this._('The error identifier is {id}', {id: e.data.event_id}),
+                details: this._('The error identifier is {id}', {id: event.event_id}),
             });
-        });
-    },
-    methods: {
+        },
         handleApiError(response) {
             const notif = {type: 'error', icon: 'exclamation-circle'};
             if (response.status === 403) {

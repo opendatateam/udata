@@ -86,6 +86,8 @@
     "webpack-fail-plugin": "^2.0.0"
   },
   "dependencies": {
+    "@sentry/tracing": "^6.9.0",
+    "@sentry/vue": "^6.9.0",
     "admin-lte": "2.3.11",
     "babel-polyfill": "^6.9.1",
     "babel-runtime": "^6.9.1",
@@ -104,7 +106,6 @@
     "jquery.browser": "0.1.0",
     "markdown-it": "10.0.0",
     "moment": "^2.14.1",
-    "raven-js": "^3.24.2",
     "respond.js": "^1.4.2",
     "selectize": "^0.12.2",
     "sifter": "^0.5.3",

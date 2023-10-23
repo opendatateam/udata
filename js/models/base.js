@@ -5,7 +5,7 @@ import API from 'api';
 import i18n from 'i18n';
 import config from 'config';
 import mask from './mask';
-import Raven from 'raven';
+import Sentry from 'sentry';
 import validator from 'models/validator';
 import {isString} from 'utils';
 import {pubsub, PubSub} from 'pubsub';
@@ -159,8 +159,8 @@ export class Base {
                 const msg = messages.join('\n');
                 if (!isServerSentry && config.sentry) {
                     // Submit to Sentry
-                    // The global Raven/Sentry listener will display the error
-                    Raven.captureMessage(msg, {extra: {response}});
+                    // The global Sentry listener will display the error
+                    Sentry.captureMessage(msg, {extra: {response}});
                 } else {
                     // Fallback on console error logging
                     // TODO: implement a pubsub feedback for views being able to notify the error
