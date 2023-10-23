@@ -103,6 +103,14 @@ inv assets-build
 inv widgets-build
 ```
 
+### Alternative to nvm
+
+If you don't want to use nvm and are not actively contributing to the frontend part of udata, you shoud be able to install the dependencies with this command on a modern node version (tested on v20):
+
+```bash
+npm install --legacy-peer-deps
+```
+
 ## Configure udata
 
 udata uses a config file called `udata.cfg` and a custom directory as base for its filesystem, we’ll call it `fs`. You can put them as shown below.

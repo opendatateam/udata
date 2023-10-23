@@ -1,5 +1,5 @@
-from udata.auth import Permission
+from udata.core.dataset.permissions import OwnablePermission
 
 
-class TopicEditPermission(Permission):
+class TopicEditPermission(OwnablePermission):
     pass
