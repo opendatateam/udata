@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from flask import request, url_for, redirect, make_response
+from mongoengine.queryset.visitor import Q
 
 from udata.api import api, API, errors
 from udata.api.parsers import ModelApiParser
@@ -407,7 +408,7 @@ class OrganizationSuggestAPI(API):
     def get(self):
         '''Organizations suggest endpoint using mongoDB contains'''
         args = suggest_parser.parse_args()
-        orgs = Organization.objects(deleted=None, name__icontains=args['q'])
+        orgs = Organization.objects(Q(name__icontains=args['q']) | Q(acronym__icontains=args['q']), deleted=None)
         return [
             {
                 'id': org.id,

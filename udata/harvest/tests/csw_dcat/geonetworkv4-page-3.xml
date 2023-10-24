@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<csw:GetRecordsResponse 
+  xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
+  <csw:SearchStatus timestamp="2023-03-03T16:33:20.806325Z" />
+  <csw:SearchResults numberOfRecordsMatched="6" numberOfRecordsReturned="2" elementSet="full" nextRecord="5">
+    <rdf:RDF 
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+      xmlns:skos="http://www.w3.org/2004/02/skos/core#" 
+      xmlns:gmd="http://www.isotc211.org/2005/gmd" 
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" 
+      xmlns:foaf="http://xmlns.com/foaf/0.1/" 
+      xmlns:xslUtils="java:org.fao.geonet.util.XslUtil" 
+      xmlns:void="http://www.w3.org/TR/void/" 
+      xmlns:dct="http://purl.org/dc/terms/" 
+      xmlns:dcat="http://www.w3.org/ns/dcat#">
+      <dcat:CatalogRecord rdf:about="https://dev.geo2france.fr/geonetwork/records/7a75c089-76e7-4adc-9f50-c86675d3115f">
+        <foaf:primaryTopic rdf:resource="http://localhost:8080/geonetwork/srv/resources/https%3A%2F%2Fwww.geo2france.fr%2Fortho%2F2018%2Frvb-ir" />
+        <dct:conformsTo rdf:resource="https://www.iso.org/standard/32557.html" />
+        <dct:issued>2020-07-21</dct:issued>
+        <dct:modified>2020-07-21</dct:modified>
+        <dct:references>
+          <rdf:Description rdf:about="https://dev.geo2france.fr/geonetwork/srv/api/records/7a75c089-76e7-4adc-9f50-c86675d3115f/formatters/xml">
+            <dct:format>
+              <dct:IMT>
+                <rdf:value>application/xml</rdf:value>
+                <rdfs:label>XML</rdfs:label>
+              </dct:IMT>
+            </dct:format>
+          </rdf:Description>
+        </dct:references>
+        <dct:references>
+          <rdf:Description rdf:about="https://dev.geo2france.fr/geonetwork/srv/api/records/7a75c089-76e7-4adc-9f50-c86675d3115f">
+            <dct:format>
+              <dct:IMT>
+                <rdf:value>text/html</rdf:value>
+                <rdfs:label>HTML</rdfs:label>
+              </dct:IMT>
+            </dct:format>
+          </rdf:Description>
+        </dct:references>
+      </dcat:CatalogRecord>
+      <dcat:Dataset rdf:about="http://localhost:8080/geonetwork/srv/resources/datasets/https://www.geo2france.fr/ortho/2018/rvb-ir">
+        <dct:identifier>https://www.geo2france.fr/ortho/2018/rvb-ir</dct:identifier>
+        <dct:title>Orthophotographie des Hauts-de-France (2018) - rayonnement Infra-Rouge</dct:title>
+        <dct:abstract>Orthophotographie numérique Infra-Rouge du territoire de la Région Hauts-de-France en 2017 et 2018, avec une zone tampon de 5 km sur les espaces frontaliers internationaux et de 1 km sur les espaces interrégionaux, hors zone maritime.</dct:abstract>
+        <dcat:keyword>DONNEES OUVERTES</dcat:keyword>
+        <dcat:keyword>ORTHO</dcat:keyword>
+        <dcat:keyword>ORTHOPHOTO</dcat:keyword>
+        <dcat:keyword>INFRAROUGE</dcat:keyword>
+        <dcat:keyword>infrarouge</dcat:keyword>
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0/concepts/Ortho-imagerie" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion/concepts/HAUTS-DE-FRANCE" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/SOMME" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/OISE" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/AISNE" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/PAS-DE-CALAIS" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/NORD" />
+        <dcat:theme rdf:resource="https://inspire.ec.europa.eu/metadata-codelist/TopicCategory/imageryBaseMapsEarthCover" />
+        <foaf:thumbnail rdf:resource="https://www.geo2france.fr/geonetwork/srv/api/records/7a75c089-76e7-4adc-9f50-c86675d3115f/attachments/Clipboard03.jpg" />
+        <dct:spatial>
+          <ogc:Polygon 
+            xmlns:ogc="http://www.opengis.net/rdf#">
+            <geo:asWKT 
+              xmlns:geo="http://www.opengis.net/ont/geosparql#" rdf:datatype="http://www.opengis.net/rdf#wktLiteral">Polygon((1.38022461103 48.8372121327, 1.38022461103 51.0890003105, 4.25573382669 51.0890003105, 4.25573382669 48.8372121327, 1.38022461103 48.8372121327))
+            </geo:asWKT>
+          </ogc:Polygon>
+        </dct:spatial>
+        <dct:issued>2018-06-01</dct:issued>
+        <dct:publisher rdf:resource="http://localhost:8080/geonetwork/srv/resources/organizations/G%C3%A9o2France" />
+        <dcat:granularity>1000</dcat:granularity>
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/7a75c089-76e7-4adc-9f50-c86675d3115f#OGC%3AWMS-ortho_regionale_2018_ir" />
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/7a75c089-76e7-4adc-9f50-c86675d3115f#WWW%3ALINK-1.0-http--link-Orthophoto%202018%20Hauts-de-France%20%28rayonnement%20IR%29" />
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/7a75c089-76e7-4adc-9f50-c86675d3115f#WWW%3ALINK-1.0-http--link-T%C3%A9l%C3%A9chargement%20des%20index%20et%20des%20mosa%C3%AFques" />
+        <dcat:dataQuality>Les prises de vues et l’aérotriangulation ont été réalisées par l’IGN dans le cadre d’un partenariat de co-production avec la Région Hauts-de-France, à une résolution native de 20cm.</dcat:dataQuality>
+      </dcat:Dataset>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0/concepts/Ortho-imagerie">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0" />
+        <skos:prefLabel>Ortho-imagerie</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion/concepts/HAUTS-DE-FRANCE">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion" />
+        <skos:prefLabel>HAUTS-DE-FRANCE</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/SOMME">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements" />
+        <skos:prefLabel>SOMME</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/OISE">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements" />
+        <skos:prefLabel>OISE</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/AISNE">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements" />
+        <skos:prefLabel>AISNE</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/PAS-DE-CALAIS">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements" />
+        <skos:prefLabel>PAS-DE-CALAIS</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/NORD">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements" />
+        <skos:prefLabel>NORD</skos:prefLabel>
+      </skos:Concept>
+      <dcat:Distribution rdf:about="https://dev.geo2france.fr/geonetwork/records/7a75c089-76e7-4adc-9f50-c86675d3115f#OGC%3AWMS-ortho_regionale_2018_ir">
+        <dcat:accessURL>https://www.geo2france.fr/geoserver/geo2france/ows</dcat:accessURL>
+        <dct:title>ortho_regionale_2018_ir</dct:title>
+        <dct:format>OGC:WMS</dct:format>
+      </dcat:Distribution>
+      <dcat:Distribution rdf:about="https://dev.geo2france.fr/geonetwork/records/7a75c089-76e7-4adc-9f50-c86675d3115f#WWW%3ALINK-1.0-http--link-Orthophoto%202018%20Hauts-de-France%20%28rayonnement%20IR%29">
+        <dcat:accessURL>https://www.geo2france.fr/opendata/ortho/2018/IR</dcat:accessURL>
+        <dct:title>Orthophoto 2018 Hauts-de-France (rayonnement IR)</dct:title>
+        <dct:format>WWW:LINK-1.0-http--link</dct:format>
+      </dcat:Distribution>
+      <dcat:Distribution rdf:about="https://dev.geo2france.fr/geonetwork/records/7a75c089-76e7-4adc-9f50-c86675d3115f#WWW%3ALINK-1.0-http--link-T%C3%A9l%C3%A9chargement%20des%20index%20et%20des%20mosa%C3%AFques">
+        <dcat:accessURL>https://www.geo2france.fr/opendata/ortho/2018/RVB/</dcat:accessURL>
+        <dct:title>Téléchargement des index et des mosaïques</dct:title>
+        <dct:format>WWW:LINK-1.0-http--link</dct:format>
+      </dcat:Distribution>
+      <foaf:Organization rdf:about="http://localhost:8080/geonetwork/srv/resources/organizations/G%C3%A9o2France">
+        <foaf:name>Géo2France</foaf:name>
+        <foaf:member rdf:resource="http://localhost:8080/geonetwork/srv/resources/persons/contact%40geo2france.fr" />
+      </foaf:Organization>
+      <foaf:Agent rdf:about="http://localhost:8080/geonetwork/srv/resources/persons/contact%40geo2france.fr">
+        <foaf:name>Géo2France</foaf:name>
+        <foaf:phone />
+        <foaf:mbox rdf:resource="mailto:contact@geo2france.fr" />
+      </foaf:Agent>
+    </rdf:RDF>
+    <rdf:RDF 
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+      xmlns:skos="http://www.w3.org/2004/02/skos/core#" 
+      xmlns:gmd="http://www.isotc211.org/2005/gmd" 
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" 
+      xmlns:foaf="http://xmlns.com/foaf/0.1/" 
+      xmlns:xslUtils="java:org.fao.geonet.util.XslUtil" 
+      xmlns:void="http://www.w3.org/TR/void/" 
+      xmlns:dct="http://purl.org/dc/terms/" 
+      xmlns:dcat="http://www.w3.org/ns/dcat#">
+      <dcat:CatalogRecord rdf:about="https://dev.geo2france.fr/geonetwork/records/2b2238b7-945f-44c0-8bc0-b680758aba4b">
+        <foaf:primaryTopic rdf:resource="http://localhost:8080/geonetwork/srv/resources/https%3A%2F%2Fwww.geo2france.fr%2Fgeonetwork%2Fsrv%2Ffre%2Fcatalog.search%23%2Fmetadata%2F2b2238b7-945f-44c0-8bc0-b680758aba4b" />
+        <dct:conformsTo rdf:resource="https://www.iso.org/standard/32557.html" />
+        <dct:issued>2019-11-21</dct:issued>
+        <dct:modified>2019-11-21</dct:modified>
+        <dct:references>
+          <rdf:Description rdf:about="https://dev.geo2france.fr/geonetwork/srv/api/records/2b2238b7-945f-44c0-8bc0-b680758aba4b/formatters/xml">
+            <dct:format>
+              <dct:IMT>
+                <rdf:value>application/xml</rdf:value>
+                <rdfs:label>XML</rdfs:label>
+              </dct:IMT>
+            </dct:format>
+          </rdf:Description>
+        </dct:references>
+        <dct:references>
+          <rdf:Description rdf:about="https://dev.geo2france.fr/geonetwork/srv/api/records/2b2238b7-945f-44c0-8bc0-b680758aba4b">
+            <dct:format>
+              <dct:IMT>
+                <rdf:value>text/html</rdf:value>
+                <rdfs:label>HTML</rdfs:label>
+              </dct:IMT>
+            </dct:format>
+          </rdf:Description>
+        </dct:references>
+      </dcat:CatalogRecord>
+      <dcat:Dataset rdf:about="http://localhost:8080/geonetwork/srv/resources/datasets/https://www.geo2france.fr/geonetwork/srv/fre/catalog.search#/metadata/2b2238b7-945f-44c0-8bc0-b680758aba4b">
+        <dct:identifier>https://www.geo2france.fr/geonetwork/srv/fre/catalog.search#/metadata/2b2238b7-945f-44c0-8bc0-b680758aba4b</dct:identifier>
+        <dct:title>BD Ortho infrarouge de la Picardie de 2013 optimisée par GéoPicardie</dct:title>
+        <dct:abstract>BD Ortho infrarouge de la Picardie de 2013.
+
+Le produit BD ORTHO® V2 est une collection de mosaïques d'orthophotographies numériques en couleurs ou en Infra Rouge couleurs, rectifiées dans la projection adaptée au territoire couvert.
+
+Les images d'origines fournies par l'IGN ont été modifiées pour y intégrer des aperçus à plusieurs échelles et pour rendre transparentes les zones sans données en vue d'optimiser les performances des services web de GéoPicardie sans en altérer l'aspect graphique.
+
+Ces données sont cofinancées par l’Union européenne. L’Europe s’engage en Picardie avec le Fonds européen de développement régional.</dct:abstract>
+        <dcat:keyword>ortho-imagerie</dcat:keyword>
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion/concepts/PICARDIE" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/rayonnement%20infrarouge" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/photographie%20a%C3%A9rienne" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/photographie" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0%20INSPIRE%20themes/concepts/Ortho-imagerie" />
+        <dcat:theme rdf:resource="https://inspire.ec.europa.eu/metadata-codelist/TopicCategory/imageryBaseMapsEarthCover" />
+        <foaf:thumbnail rdf:resource="https://www.geo2france.fr/geonetwork/srv/api/records/2b2238b7-945f-44c0-8bc0-b680758aba4b/attachments/apercu_ortho_picardie_ign_2013_ir_2_s.png" />
+        <foaf:thumbnail rdf:resource="https://www.geo2france.fr/geonetwork/srv/api/records/2b2238b7-945f-44c0-8bc0-b680758aba4b/attachments/apercu_ortho_picardie_ign_2013_ir_2.png" />
+        <dct:spatial>
+          <ogc:Polygon 
+            xmlns:ogc="http://www.opengis.net/rdf#">
+            <geo:asWKT 
+              xmlns:geo="http://www.opengis.net/ont/geosparql#" rdf:datatype="http://www.opengis.net/rdf#wktLiteral">Polygon((1.31 48.78, 1.31 50.41, 4.33 50.41, 4.33 48.78, 1.31 48.78))
+            </geo:asWKT>
+          </ogc:Polygon>
+        </dct:spatial>
+        <dct:publisher rdf:resource="http://localhost:8080/geonetwork/srv/resources/organizations/G%C3%A9o2France" />
+        <dct:publisher rdf:resource="http://localhost:8080/geonetwork/srv/resources/organizations/Institut%20national%20de%20l%27information%20g%C3%A9ographique%20et%20foresti%C3%A8re%20%28IGN-F%29" />
+        <dct:license>license</dct:license>
+        <dct:license>license</dct:license>
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/2b2238b7-945f-44c0-8bc0-b680758aba4b#OGC%3AWMS-picardie_ortho_ign_2013_ir" />
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/2b2238b7-945f-44c0-8bc0-b680758aba4b#OGC%3AWCS-picardie_ortho_ign_2013_ir" />
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/2b2238b7-945f-44c0-8bc0-b680758aba4b#WWW%3ALINK-1.0-http--link-Lien%20vers%20la%20fiche%20de%20m%C3%A9tadonn%C3%A9es%20d%27origine" />
+        <dcat:dataQuality>BD Ortho V2 infrarouge livrée par département au format ECW.
+Encodage au format GEOTIFF avec compression LZW puis pyramidage au format GEOTIFF, compression JPEG, tuilage interne pour de meilleures performance de lecture et ajout d'un canal de transparence pour les zones sans données.</dcat:dataQuality>
+      </dcat:Dataset>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion/concepts/PICARDIE">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion" />
+        <skos:prefLabel>PICARDIE</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/rayonnement%20infrarouge">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4" />
+        <skos:prefLabel>rayonnement infrarouge</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/photographie%20a%C3%A9rienne">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4" />
+        <skos:prefLabel>photographie aérienne</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/photographie">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4" />
+        <skos:prefLabel>photographie</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0%20INSPIRE%20themes/concepts/Ortho-imagerie">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0%20INSPIRE%20themes" />
+        <skos:prefLabel>Ortho-imagerie</skos:prefLabel>
+      </skos:Concept>
+      <dcat:Distribution rdf:about="https://dev.geo2france.fr/geonetwork/records/2b2238b7-945f-44c0-8bc0-b680758aba4b#OGC%3AWMS-picardie_ortho_ign_2013_ir">
+        <dcat:accessURL>https://www.geo2france.fr/geoserver/geopicardie/ows?service=WMS&amp;request=GetCapabilities</dcat:accessURL>
+        <dct:title>picardie_ortho_ign_2013_ir</dct:title>
+        <dct:format>OGC:WMS</dct:format>
+      </dcat:Distribution>
+      <dcat:Distribution rdf:about="https://dev.geo2france.fr/geonetwork/records/2b2238b7-945f-44c0-8bc0-b680758aba4b#OGC%3AWCS-picardie_ortho_ign_2013_ir">
+        <dcat:accessURL>https://www.geo2france.fr/geoserver/geopicardie/ows?service=WCS&amp;request=GetCapabilities</dcat:accessURL>
+        <dct:title>picardie_ortho_ign_2013_ir</dct:title>
+        <dct:format>OGC:WCS</dct:format>
+      </dcat:Distribution>
+      <dcat:Distribution rdf:about="https://dev.geo2france.fr/geonetwork/records/2b2238b7-945f-44c0-8bc0-b680758aba4b#WWW%3ALINK-1.0-http--link-Lien%20vers%20la%20fiche%20de%20m%C3%A9tadonn%C3%A9es%20d%27origine">
+        <dcat:accessURL>https://www.geo2france.fr/geonetwork/srv/fre/catalog.search#/metadata/2b2238b7-945f-44c0-8bc0-b680758aba4b</dcat:accessURL>
+        <dct:title>Lien vers la fiche de métadonnées d'origine</dct:title>
+        <dct:format>WWW:LINK-1.0-http--link</dct:format>
+      </dcat:Distribution>
+      <foaf:Organization rdf:about="http://localhost:8080/geonetwork/srv/resources/organizations/G%C3%A9o2France">
+        <foaf:name>Géo2France</foaf:name>
+        <foaf:member rdf:resource="http://localhost:8080/geonetwork/srv/resources/persons/contact%40geo2france.fr" />
+      </foaf:Organization>
+      <foaf:Organization rdf:about="http://localhost:8080/geonetwork/srv/resources/organizations/Institut%20national%20de%20l%27information%20g%C3%A9ographique%20et%20foresti%C3%A8re%20%28IGN-F%29">
+        <foaf:name>Institut national de l'information géographique et forestière (IGN-F)</foaf:name>
+        <foaf:member rdf:resource="http://localhost:8080/geonetwork/srv/resources/persons/sav.bd%40ign.fr" />
+      </foaf:Organization>
+      <foaf:Agent rdf:about="http://localhost:8080/geonetwork/srv/resources/persons/contact%40geo2france.fr">
+        <foaf:mbox rdf:resource="mailto:contact@geo2france.fr" />
+      </foaf:Agent>
+      <foaf:Agent rdf:about="http://localhost:8080/geonetwork/srv/resources/persons/sav.bd%40ign.fr">
+        <foaf:mbox rdf:resource="mailto:sav.bd@ign.fr" />
+      </foaf:Agent>
+    </rdf:RDF>
+  </csw:SearchResults>
+</csw:GetRecordsResponse>

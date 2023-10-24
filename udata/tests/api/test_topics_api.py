@@ -1,8 +1,9 @@
 from flask import url_for
 
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.topic.models import Topic
 from udata.core.topic.factories import TopicFactory
-from udata.core.organization.factories import OrganizationFactory
+from udata.core.user.factories import UserFactory
 from udata.models import Member
 
 from . import APITestCase
@@ -75,19 +76,38 @@ class TopicsAPITest(APITestCase):
 
     def test_topic_api_update(self):
         '''It should update a topic from the API'''
-        topic = TopicFactory()
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
         data = topic.to_dict()
         data['description'] = 'new description'
-        self.login()
         response = self.put(url_for('api.topic', topic=topic), data)
         self.assert200(response)
         self.assertEqual(Topic.objects.count(), 1)
         self.assertEqual(Topic.objects.first().description, 'new description')
 
+    def test_topic_api_update_perm(self):
+        '''It should not update a topic from the API'''
+        owner = UserFactory()
+        topic = TopicFactory(owner=owner)
+        user = self.login()
+        data = topic.to_dict()
+        data['owner'] = user.to_dict()
+        response = self.put(url_for('api.topic', topic=topic), data)
+        self.assert403(response)
+
     def test_topic_api_delete(self):
         '''It should delete a topic from the API'''
-        topic = TopicFactory()
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
         with self.api_user():
             response = self.delete(url_for('api.topic', topic=topic))
         self.assertStatus(response, 204)
         self.assertEqual(Topic.objects.count(), 0)
+
+    def test_topic_api_delete_perm(self):
+        '''It should not delete a topic from the API'''
+        owner = UserFactory()
+        topic = TopicFactory(owner=owner)
+        with self.api_user():
+            response = self.delete(url_for('api.topic', topic=topic))
+        self.assertStatus(response, 403)
