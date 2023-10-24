@@ -18,12 +18,12 @@
 - Fix site title and keywords never get updated [#2900](https://github.com/opendatateam/udata/pull/2900)
 - Reuse's extras are now exposed by API [#2905](https://github.com/opendatateam/udata/pull/2905)
 - Add items.dataset to HarvestJob indexes [#2907](https://github.com/opendatateam/udata/pull/2907)
+- Consider acronym when suggesting organization [#2918](https://github.com/opendatateam/udata/pull/2918)
 
 ### Fixes
 
 - Return 400 instead of 500 in case of not ObjectID arg in API [#2889](https://github.com/opendatateam/udata/pull/2889)
 - Fix default community resource sort parser [#2908](https://github.com/opendatateam/udata/pull/2908)
-- Consider acronym when suggesting organization [#2918](https://github.com/opendatateam/udata/pull/2918)
 
 ### Deprecation
 
