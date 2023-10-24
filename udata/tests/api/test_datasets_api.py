@@ -1323,6 +1323,21 @@ class CommunityResourceAPITest(APITestCase):
         data = json.loads(response.data)
         self.assertEqual(data['id'], str(community_resource.id))
 
+    def test_resources_api_list(self):
+        '''It should list community resources from the API'''
+        community_resources = [CommunityResourceFactory() for _ in range(40)]
+        response = self.get(url_for('api.community_resources'))
+        self.assert200(response)
+        resources = json.loads(response.data)['data']
+
+        response = self.get(url_for('api.community_resources', page=2))
+        self.assert200(response)
+        resources += json.loads(response.data)['data']
+
+        self.assertEqual(len(resources), len(community_resources))
+        # Assert we don't have duplicates
+        self.assertEqual(len(set(res['id'] for res in resources)), len(community_resources))
+
     def test_community_resource_api_get_from_string_id(self):
         '''It should fetch a community resource from the API'''
         community_resource = CommunityResourceFactory()

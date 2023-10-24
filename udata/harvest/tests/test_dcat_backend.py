@@ -4,6 +4,7 @@ import os
 import pytest
 
 from datetime import date
+import xml.etree.ElementTree as ET
 
 from udata.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
@@ -19,6 +20,7 @@ log = logging.getLogger(__name__)
 TEST_DOMAIN = 'data.test.org'  # Need to be used in fixture file
 DCAT_URL_PATTERN = 'http://{domain}/{path}'
 DCAT_FILES_DIR = os.path.join(os.path.dirname(__file__), 'dcat')
+CSW_DCAT_FILES_DIR = os.path.join(os.path.dirname(__file__), 'csw_dcat')
 
 
 def mock_dcat(rmock, filename, path=None):
@@ -40,6 +42,19 @@ def mock_pagination(rmock, path, pattern):
             return dcatfile.read()
 
     rmock.get(rmock.ANY, text=callback)
+    return url
+
+
+def mock_csw_pagination(rmock, path, pattern):
+    url = DCAT_URL_PATTERN.format(path=path, domain=TEST_DOMAIN)
+
+    def callback(request, context):
+        request_tree = ET.fromstring(request.body)
+        page = int(request_tree.get('startPosition'))
+        with open(os.path.join(CSW_DCAT_FILES_DIR, pattern.format(page))) as cswdcatfile:
+            return cswdcatfile.read()
+
+    rmock.post(rmock.ANY, text=callback)
     return url
 
 
@@ -384,7 +399,7 @@ class DcatBackendTest:
         error = job.errors[0]
         expected = 'Unable to detect format from extension or mime type'
         assert error.message == expected
-
+        
     def test_use_replaced_uris(self, rmock, mocker):
         mocker.patch.dict(
             URIS_TO_REPLACE,
@@ -408,3 +423,40 @@ class DcatBackendTest:
         job = source.get_last_job()
         assert len(job.items) == 0
         assert job.status == 'done'
+
+        
+@pytest.mark.usefixtures('clean_db')
+@pytest.mark.options(PLUGINS=['csw-dcat'])
+class CswDcatBackendTest:
+
+    def test_geonetworkv4(self, rmock):
+        url = mock_csw_pagination(rmock, 'geonetwork/srv/eng/csw.rdf', 'geonetworkv4-page-{}.xml')
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='csw-dcat',
+                                      url=url,
+                                      organization=org)
+
+        actions.run(source.slug)
+
+        source.reload()
+
+        job = source.get_last_job()
+        assert len(job.items) == 6
+
+        datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
+
+        assert len(datasets) == 6
+
+        # First dataset
+        dataset = datasets['https://www.geo2france.fr/2017/accidento']
+        assert dataset.title == 'Localisation des accidents de la circulation routière en 2017'
+        assert dataset.description == 'Accidents corporels de la circulation en Hauts de France (2017)'
+        assert set(dataset.tags) == set([
+            'donnee-ouverte', 'accidentologie', 'accident'
+        ])
+        assert dataset.harvest.created_at.date() == date(2017, 1, 1)
+        assert len(dataset.resources) == 1
+        resource = dataset.resources[0]
+        assert resource.title == 'accidento_hdf_L93'
+        assert resource.url == 'https://www.geo2france.fr/geoserver/cr_hdf/ows'
+        assert resource.format == 'ogc:wms'
