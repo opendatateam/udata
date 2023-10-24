@@ -23,6 +23,7 @@
 
 - Return 400 instead of 500 in case of not ObjectID arg in API [#2889](https://github.com/opendatateam/udata/pull/2889)
 - Fix default community resource sort parser [#2908](https://github.com/opendatateam/udata/pull/2908)
+- Consider acronym when suggesting organization [#2918](https://github.com/opendatateam/udata/pull/2918)
 
 ### Deprecation
 
