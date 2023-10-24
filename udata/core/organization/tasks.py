@@ -24,6 +24,9 @@ def purge_organizations(self):
         # Remove transfers
         Transfer.objects(recipient=organization).delete()
         Transfer.objects(owner=organization).delete()
+        # Remove related contact points
+        for contact_point in organization.contact_points:
+            contact_point.delete()
         # Store datasets for later reindexation
         d_ids = [d.id for d in Dataset.objects(organization=organization)]
         # Remove organization's logo in all sizes
