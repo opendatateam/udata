@@ -3,6 +3,7 @@ from udata.api.parsers import ModelApiParser
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api_fields import reuse_fields
+from udata.core.topic.permissions import TopicEditPermission
 from udata.core.user.api_fields import user_ref_fields
 
 from .models import Topic
@@ -110,18 +111,26 @@ class TopicAPI(API):
         '''Get a given topic'''
         return topic
 
+    @api.secure
     @api.doc('update_topic')
     @api.expect(topic_fields)
     @api.marshal_with(topic_fields)
     @api.response(400, 'Validation error')
+    @api.response(403, 'Forbidden')
     def put(self, topic):
         '''Update a given topic'''
+        if not TopicEditPermission(topic).can():
+            api.abort(403, 'Forbidden')
         form = api.validate(TopicForm, topic)
         return form.save()
 
+    @api.secure
     @api.doc('delete_topic')
     @api.response(204, 'Object deleted')
+    @api.response(403, 'Forbidden')
     def delete(self, topic):
         '''Delete a given topic'''
+        if not TopicEditPermission(topic).can():
+            api.abort(403, 'Forbidden')
         topic.delete()
         return '', 204

@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<csw:GetRecordsResponse 
+  xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
+  <csw:SearchStatus timestamp="2023-03-03T16:09:50.697645Z" />
+  <csw:SearchResults numberOfRecordsMatched="6" numberOfRecordsReturned="2" elementSet="full" nextRecord="3">
+    <rdf:RDF 
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+      xmlns:skos="http://www.w3.org/2004/02/skos/core#" 
+      xmlns:gmd="http://www.isotc211.org/2005/gmd" 
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" 
+      xmlns:foaf="http://xmlns.com/foaf/0.1/" 
+      xmlns:xslUtils="java:org.fao.geonet.util.XslUtil" 
+      xmlns:void="http://www.w3.org/TR/void/" 
+      xmlns:dct="http://purl.org/dc/terms/" 
+      xmlns:dcat="http://www.w3.org/ns/dcat#">
+      <dcat:CatalogRecord rdf:about="https://dev.geo2france.fr/geonetwork/records/257f3fbc-d2b2-4dfd-9145-8b6899f6fb4b">
+        <foaf:primaryTopic rdf:resource="http://localhost:8080/geonetwork/srv/resources/https%3A%2F%2Fwww.geo2france.fr%2F2017%2Faccidento" />
+        <dct:conformsTo rdf:resource="https://www.iso.org/standard/32557.html" />
+        <dct:issued>2021-02-08</dct:issued>
+        <dct:modified>2021-02-08</dct:modified>
+        <dct:references>
+          <rdf:Description rdf:about="https://dev.geo2france.fr/geonetwork/srv/api/records/257f3fbc-d2b2-4dfd-9145-8b6899f6fb4b/formatters/xml">
+            <dct:format>
+              <dct:IMT>
+                <rdf:value>application/xml</rdf:value>
+                <rdfs:label>XML</rdfs:label>
+              </dct:IMT>
+            </dct:format>
+          </rdf:Description>
+        </dct:references>
+        <dct:references>
+          <rdf:Description rdf:about="https://dev.geo2france.fr/geonetwork/srv/api/records/257f3fbc-d2b2-4dfd-9145-8b6899f6fb4b">
+            <dct:format>
+              <dct:IMT>
+                <rdf:value>text/html</rdf:value>
+                <rdfs:label>HTML</rdfs:label>
+              </dct:IMT>
+            </dct:format>
+          </rdf:Description>
+        </dct:references>
+      </dcat:CatalogRecord>
+      <dcat:Dataset rdf:about="http://localhost:8080/geonetwork/srv/resources/datasets/https://www.geo2france.fr/2017/accidento">
+        <dct:identifier>https://www.geo2france.fr/2017/accidento</dct:identifier>
+        <dct:title>Localisation des accidents de la circulation routière en 2017</dct:title>
+        <dct:abstract>Accidents corporels de la circulation en Hauts de France (2017)</dct:abstract>
+        <dcat:keyword>donnée ouverte</dcat:keyword>
+        <dcat:keyword>accidentologie</dcat:keyword>
+        <dcat:keyword>accident</dcat:keyword>
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0/concepts/R%C3%A9seaux%20de%20transport" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/accident%20de%20la%20route" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion/concepts/HAUTS-DE-FRANCE" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/NORD" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/PAS-DE-CALAIS" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/OISE" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/SOMME" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/AISNE" />
+        <dcat:theme rdf:resource="https://inspire.ec.europa.eu/metadata-codelist/TopicCategory/transportation" />
+        <foaf:thumbnail rdf:resource="https://www.geo2france.fr/public/vignettes_geonetwork/accidento.jpg" />
+        <dct:spatial>
+          <ogc:Polygon 
+            xmlns:ogc="http://www.opengis.net/rdf#">
+            <geo:asWKT 
+              xmlns:geo="http://www.opengis.net/ont/geosparql#" rdf:datatype="http://www.opengis.net/rdf#wktLiteral">Polygon((1.38022461103 48.8372121327, 1.38022461103 51.0890003105, 4.25573382669 51.0890003105, 4.25573382669 48.8372121327, 1.38022461103 48.8372121327))
+            </geo:asWKT>
+          </ogc:Polygon>
+        </dct:spatial>
+        <dct:issued>2017-01-01</dct:issued>
+        <dct:publisher rdf:resource="http://localhost:8080/geonetwork/srv/resources/organizations/G%C3%A9o2France" />
+        <dcat:granularity>1000</dcat:granularity>
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/257f3fbc-d2b2-4dfd-9145-8b6899f6fb4b#OGC%3AWMS-accidento_hdf_L93" />
+        <dcat:dataQuality>Données issues de data.gouv.fr</dcat:dataQuality>
+      </dcat:Dataset>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0/concepts/R%C3%A9seaux%20de%20transport">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0" />
+        <skos:prefLabel>Réseaux de transport</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/accident%20de%20la%20route">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4" />
+        <skos:prefLabel>accident de la route</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion/concepts/HAUTS-DE-FRANCE">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion" />
+        <skos:prefLabel>HAUTS-DE-FRANCE</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/NORD">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements" />
+        <skos:prefLabel>NORD</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/PAS-DE-CALAIS">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements" />
+        <skos:prefLabel>PAS-DE-CALAIS</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/OISE">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements" />
+        <skos:prefLabel>OISE</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/SOMME">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements" />
+        <skos:prefLabel>SOMME</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/AISNE">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements" />
+        <skos:prefLabel>AISNE</skos:prefLabel>
+      </skos:Concept>
+      <dcat:Distribution rdf:about="https://dev.geo2france.fr/geonetwork/records/257f3fbc-d2b2-4dfd-9145-8b6899f6fb4b#OGC%3AWMS-accidento_hdf_L93">
+        <dcat:accessURL>https://www.geo2france.fr/geoserver/cr_hdf/ows</dcat:accessURL>
+        <dct:title>accidento_hdf_L93</dct:title>
+        <dct:format>OGC:WMS</dct:format>
+      </dcat:Distribution>
+      <foaf:Organization rdf:about="http://localhost:8080/geonetwork/srv/resources/organizations/G%C3%A9o2France">
+        <foaf:name>Géo2France</foaf:name>
+        <foaf:member rdf:resource="http://localhost:8080/geonetwork/srv/resources/persons/contact%40geo2france.fr" />
+      </foaf:Organization>
+      <foaf:Agent rdf:about="http://localhost:8080/geonetwork/srv/resources/persons/contact%40geo2france.fr">
+        <foaf:mbox rdf:resource="mailto:contact@geo2france.fr" />
+      </foaf:Agent>
+    </rdf:RDF>
+    <rdf:RDF 
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+      xmlns:skos="http://www.w3.org/2004/02/skos/core#" 
+      xmlns:gmd="http://www.isotc211.org/2005/gmd" 
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" 
+      xmlns:foaf="http://xmlns.com/foaf/0.1/" 
+      xmlns:xslUtils="java:org.fao.geonet.util.XslUtil" 
+      xmlns:void="http://www.w3.org/TR/void/" 
+      xmlns:dct="http://purl.org/dc/terms/" 
+      xmlns:dcat="http://www.w3.org/ns/dcat#">
+      <dcat:CatalogRecord rdf:about="https://dev.geo2france.fr/geonetwork/records/33ba7668-5a93-47af-9e2f-8a72620b83b3">
+        <foaf:primaryTopic rdf:resource="http://localhost:8080/geonetwork/srv/resources/https%3A%2F%2Fwww.geo2france.fr%2Fchemins_ruraux_tests" />
+        <dct:conformsTo rdf:resource="https://www.iso.org/standard/32557.html" />
+        <dct:issued>2021-02-04</dct:issued>
+        <dct:modified>2021-02-04</dct:modified>
+        <dct:references>
+          <rdf:Description rdf:about="https://dev.geo2france.fr/geonetwork/srv/api/records/33ba7668-5a93-47af-9e2f-8a72620b83b3/formatters/xml">
+            <dct:format>
+              <dct:IMT>
+                <rdf:value>application/xml</rdf:value>
+                <rdfs:label>XML</rdfs:label>
+              </dct:IMT>
+            </dct:format>
+          </rdf:Description>
+        </dct:references>
+        <dct:references>
+          <rdf:Description rdf:about="https://dev.geo2france.fr/geonetwork/srv/api/records/33ba7668-5a93-47af-9e2f-8a72620b83b3">
+            <dct:format>
+              <dct:IMT>
+                <rdf:value>text/html</rdf:value>
+                <rdfs:label>HTML</rdfs:label>
+              </dct:IMT>
+            </dct:format>
+          </rdf:Description>
+        </dct:references>
+      </dcat:CatalogRecord>
+      <dcat:Dataset rdf:about="http://localhost:8080/geonetwork/srv/resources/datasets/https://www.geo2france.fr/chemins_ruraux_tests">
+        <dct:identifier>https://www.geo2france.fr/chemins_ruraux_tests</dct:identifier>
+        <dct:title>Identification des chemins ruraux</dct:title>
+        <dct:abstract>Identification des chemins ruraux, sur des secteurs de tests (Houchin, Longfossé, Marck, Mont Bernachon, Saint Hilaire Cottes, Servins) par l'association des chemins ruraux en Hauts-de-France.</dct:abstract>
+        <dcat:keyword>Biodiversité</dcat:keyword>
+        <dcat:keyword>Nature</dcat:keyword>
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0/concepts/D%C3%A9nominations%20g%C3%A9ographiques" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/sentier%20pedestre" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion/concepts/HAUTS-DE-FRANCE" />
+        <dcat:theme rdf:resource="https://inspire.ec.europa.eu/metadata-codelist/TopicCategory/environment" />
+        <foaf:thumbnail rdf:resource="https://www.geo2france.fr/public/vignettes_geonetwork/chemins.jpg" />
+        <dct:spatial>
+          <ogc:Polygon 
+            xmlns:ogc="http://www.opengis.net/rdf#">
+            <geo:asWKT 
+              xmlns:geo="http://www.opengis.net/ont/geosparql#" rdf:datatype="http://www.opengis.net/rdf#wktLiteral">Polygon((1.38022461103 48.8372121327, 1.38022461103 51.0890003105, 4.25573382669 51.0890003105, 4.25573382669 48.8372121327, 1.38022461103 48.8372121327))
+            </geo:asWKT>
+          </ogc:Polygon>
+        </dct:spatial>
+        <dct:issued>2019-01-01</dct:issued>
+        <dct:publisher rdf:resource="http://localhost:8080/geonetwork/srv/resources/organizations/G%C3%A9o2France" />
+        <dcat:granularity>1000</dcat:granularity>
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/33ba7668-5a93-47af-9e2f-8a72620b83b3#OGC%3AWMS-Secteur_HouchinFINAL" />
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/33ba7668-5a93-47af-9e2f-8a72620b83b3#OGC%3AWMS-Secteur_Longfoss%C3%A9FINAL" />
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/33ba7668-5a93-47af-9e2f-8a72620b83b3#OGC%3AWMS-Secteur_MarckFINAL" />
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/33ba7668-5a93-47af-9e2f-8a72620b83b3#OGC%3AWMS-Secteur_MontBernanchonFINAL" />
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/33ba7668-5a93-47af-9e2f-8a72620b83b3#OGC%3AWMS-Secteur_SaintHilaireCottesFINAL" />
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/33ba7668-5a93-47af-9e2f-8a72620b83b3#OGC%3AWMS-Secteur_ServinsFINAL" />
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/33ba7668-5a93-47af-9e2f-8a72620b83b3#OGC%3AWFS-asso_chemin_ruraux%3ASecteur_HouchinFINAL" />
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/33ba7668-5a93-47af-9e2f-8a72620b83b3#OGC%3AWFS-asso_chemin_ruraux%3ASecteur_Longfoss%C3%A9FINAL" />
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/33ba7668-5a93-47af-9e2f-8a72620b83b3#OGC%3AWFS-asso_chemin_ruraux%3ASecteur_MarckFINAL" />
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/33ba7668-5a93-47af-9e2f-8a72620b83b3#OGC%3AWFS-asso_chemin_ruraux%3ASecteur_MontBernanchonFINAL" />
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/33ba7668-5a93-47af-9e2f-8a72620b83b3#OGC%3AWFS-asso_chemin_ruraux%3ASecteur_SaintHilaireCottesFINAL" />
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/33ba7668-5a93-47af-9e2f-8a72620b83b3#OGC%3AWFS-asso_chemin_ruraux%3ASecteur_ServinsFINAL" />
+        <dcat:dataQuality />
+      </dcat:Dataset>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0/concepts/D%C3%A9nominations%20g%C3%A9ographiques">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0" />
+        <skos:prefLabel>Dénominations géographiques</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/sentier%20pedestre">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4" />
+        <skos:prefLabel>sentier pedestre</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion/concepts/HAUTS-DE-FRANCE">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/R%C3%A9gion" />
+        <skos:prefLabel>HAUTS-DE-FRANCE</skos:prefLabel>
+      </skos:Concept>
+      <dcat:Distribution rdf:about="https://dev.geo2france.fr/geonetwork/records/33ba7668-5a93-47af-9e2f-8a72620b83b3#OGC%3AWMS-Secteur_HouchinFINAL">
+        <dcat:accessURL>https://www.geo2france.fr/geoserver/asso_chemin_ruraux/ows</dcat:accessURL>
+        <dct:title>Secteur_HouchinFINAL</dct:title>
+        <dct:format>OGC:WMS</dct:format>
+      </dcat:Distribution>
+      <foaf:Organization rdf:about="http://localhost:8080/geonetwork/srv/resources/organizations/G%C3%A9o2France">
+        <foaf:name>Géo2France</foaf:name>
+        <foaf:member rdf:resource="http://localhost:8080/geonetwork/srv/resources/persons/contact%40geo2france.fr" />
+      </foaf:Organization>
+      <foaf:Agent rdf:about="http://localhost:8080/geonetwork/srv/resources/persons/contact%40geo2france.fr">
+        <foaf:mbox rdf:resource="mailto:contact@geo2france.fr" />
+      </foaf:Agent>
+    </rdf:RDF>
+  </csw:SearchResults>
+</csw:GetRecordsResponse>
