@@ -216,6 +216,7 @@ class OrgContactAPI(API):
     @api.marshal_list_with(contact_points_fields, code=201)
     def post(self, org):
         '''Create a new organization contact point'''
+        EditOrganizationPermission(org).test()
         form = api.validate(ContactPointForm)
         contact_point = form.save()
         org.contact_points.append(contact_point)

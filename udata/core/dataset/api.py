@@ -34,7 +34,9 @@ from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
-from udata.utils import get_by
+from udata.core.contact_points.models import ContactPoint
+from udata.core.contact_points.api_fields import contact_points_fields
+from udata.utils import get_by, id_or_404
 from udata.rdf import (
     RDF_EXTENSIONS,
     negociate_content, graph_response
@@ -232,6 +234,26 @@ class DatasetAPI(API):
         dataset.last_modified_internal = datetime.utcnow()
         dataset.save()
         return '', 204
+
+
+@ns.route('/<dataset:dataset>/contact/', endpoint='dataset_contact_points')
+class DatasetContactAPI(API):
+    @api.secure
+    @api.doc('create_dataset_contact_point')
+    @api.expect(contact_points_fields)
+    @api.marshal_list_with(contact_points_fields, code=201)
+    def post(self, dataset):
+        '''Assign a contact point to a dataset'''
+        data = request.json
+        contact_point_id = data.get('id')
+        if not contact_point_id:
+            api.abort(400, 'Wrong payload format, id expected')
+        DatasetEditPermission(dataset).test()
+        contact_point = ContactPoint.objects.get_or_404(id=id_or_404(contact_point_id))
+        print(contact_point)
+        dataset.contact_points.append(contact_point)
+        dataset.save()
+        return contact_point, 201
 
 
 @ns.route('/<dataset:dataset>/featured/', endpoint='dataset_featured')

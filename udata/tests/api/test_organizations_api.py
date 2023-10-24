@@ -820,3 +820,24 @@ class OrganizationBadgeAPITest:
         url = url_for('api.organization_badge', org=self.organization, badge_kind=kind)
         response = api.delete(url)
         assert404(response)
+
+
+class OrganizationContactPointsAPITest:
+    modules = []
+
+    def test_org_contact_points(self, api):
+        user = api.login()
+        member = Member(user=user, role='admin')
+        org = OrganizationFactory(members=[member])
+        data = {
+            'email': 'mooneywayne@cobb-cochran.com',
+            'name': 'Martin Schultz'
+        }
+
+        response = api.post(url_for('api.org_contact_points', org=org), data)
+        assert201(response)
+
+        response = api.get(url_for('api.organization', org=org))
+        assert200(response)
+        assert response.json['contact_points'][0]['name'] == data['name']
+        assert response.json['contact_points'][0]['email'] == data['email']

@@ -321,6 +321,7 @@ def init_app(app):
     import udata.core.tags.api  # noqa
     import udata.core.topic.api  # noqa
     import udata.core.post.api  # noqa
+    import udata.core.contact_points.api # noqa
     import udata.features.transfer.api  # noqa
     import udata.features.notifications.api  # noqa
     import udata.features.identicon.api  # noqa
