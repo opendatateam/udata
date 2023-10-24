@@ -18,6 +18,7 @@
 - Add items.dataset to HarvestJob indexes [#2907](https://github.com/opendatateam/udata/pull/2907)
 - Add German to udata translations [2899](https://github.com/opendatateam/udata/pull/2899)[2909](https://github.com/opendatateam/udata/pull/2909)
 - Fix default community resource sort parser [#2908](https://github.com/opendatateam/udata/pull/2908)
+- Consider acronym when suggesting organization [#2918](https://github.com/opendatateam/udata/pull/2918)
 
 ## 6.1.7 (2023-09-01)
 
