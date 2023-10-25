@@ -30,6 +30,7 @@ To propose a new language you need to submit a pull request:
 * create a branch for the new translations (ex: `add-language-fr`)
 * in this branch
     - add the language to the `LANGUAGES` setting
+    - add the language to the const `languages` in webpack.config.js
 * submit the pull request
 
 Once it has been accepted, we will also create the new language translation in Crowdin.

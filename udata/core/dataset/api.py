@@ -143,7 +143,7 @@ dataset_parser = DatasetApiParser()
 
 community_parser = api.parser()
 community_parser.add_argument(
-    'sort', type=str, default='-created', location='args',
+    'sort', type=str, default='-created_at_internal', location='args',
     help='The sorting attribute')
 community_parser.add_argument(
     'page', type=int, default=1, location='args', help='The page to fetch')
