@@ -74,7 +74,7 @@ class Defaults(object):
 
     # Flask security settings
 
-    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_SAMESITE = None  # Can be set to 'Lax' or 'Strict'. See https://flask.palletsprojects.com/en/2.3.x/security/#security-cookie
 
     # Flask-Security-Too settings
