@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 6.2.0 (2023-10-26)
 
 ### New & Improved
