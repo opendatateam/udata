@@ -17,6 +17,7 @@
 - Use a single session for reindex [#2891](https://github.com/opendatateam/udata/pull/2891)
 - Fix site title and keywords never get updated [#2900](https://github.com/opendatateam/udata/pull/2900)
 - Reuse's extras are now exposed by API [#2905](https://github.com/opendatateam/udata/pull/2905)
+- Add configuration settings to enhance cookies security [#2910](https://github.com/opendatateam/udata/pull/2910)
 - Add items.dataset to HarvestJob indexes [#2907](https://github.com/opendatateam/udata/pull/2907)
 - Consider acronym when suggesting organization [#2918](https://github.com/opendatateam/udata/pull/2918)
 
