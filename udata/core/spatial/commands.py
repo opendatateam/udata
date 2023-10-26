@@ -48,7 +48,7 @@ def load_zones(col, json_geozones):
         params = {
             'slug': slugify.slugify(geozone['nom'], separator='-'),
             'level': str(geozone['level']),
-            'code': geozone['codeINSEE'].lower(),
+            'code': geozone['codeINSEE'],
             'name': geozone['nom'],
             'uri': geozone['uri']
         }

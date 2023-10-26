@@ -58,8 +58,8 @@ class GeoZone(db.Document):
     slug = db.StringField(required=True)
     name = db.StringField(required=True)
     code = db.StringField(required=True)
-    uri = db.StringField(required=True)
     level = db.StringField(required=True)
+    uri = db.StringField()
 
     meta = {
         'indexes': [
