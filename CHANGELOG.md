@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Prevent sending post_save signals on extras update [#2919](https://github.com/opendatateam/udata/pull/2919)
 
 ## 6.2.0 (2023-10-26)
 
