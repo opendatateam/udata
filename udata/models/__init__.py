@@ -18,7 +18,7 @@ from udata.errors import ConfigError
 from .badges_field import BadgesField
 from .taglist_field import TagListField
 from .datetime_fields import DateField, DateRange, Datetimed
-from .extras_fields import ExtrasField
+from .extras_fields import ExtrasField, OrganizationExtrasField
 from .slug_fields import SlugField
 from .url_field import URLField
 from .uuid_fields import AutoUUIDField
@@ -38,6 +38,7 @@ class UDataMongoEngine(MongoEngine):
         self.DateField = DateField
         self.Datetimed = Datetimed
         self.ExtrasField = ExtrasField
+        self.OrganizationExtrasField = OrganizationExtrasField
         self.SlugField = SlugField
         self.AutoUUIDField = AutoUUIDField
         self.Document = UDataDocument
