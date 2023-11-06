@@ -129,8 +129,7 @@ class TopicDatasetsAPI(API):
     def post(self, topic):
         '''Add datasets to a given topic from a list of dataset ids'''
         def add_dataset(topic, dataset):
-            # TODO: maybe a mongo query on Dataset would be faster?
-            if dataset.id not in (d.id for d in topic.datasets):
+            if dataset not in topic.datasets:
                 topic.datasets.append(dataset)
             return topic
 
