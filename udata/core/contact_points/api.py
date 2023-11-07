@@ -24,7 +24,7 @@ class ContactPointApiParser(ModelApiParser):
         return contact_points
 
 
-ns = api.namespace('contact_points', 'Contact points related operations')
+ns = api.namespace('contact', 'Contact points related operations')
 
 contact_point_parser = ContactPointApiParser()
 
