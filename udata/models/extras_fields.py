@@ -69,21 +69,13 @@ class OrganizationExtrasField(ExtrasField):
     def validate(self, values):
         super(ExtrasField, self).validate(values)
 
-        expected_keys = {"title", "description", "type"}
-        valid_types = {"str", "int", "float", "bool", "datetime", "date"}
+        expected_keys = {"title", "description", "type", "choices"}
+        valid_types = {"str", "int", "float", "bool", "datetime", "date", "choice"}
 
         for elem in values.get('custom', []):
             # Check if the dictionary contains the expected keys and only them
-            if set(elem.keys()) == expected_keys:
-                # Check if the values of all keys are strings
-                all_values_are_strings = all(isinstance(value, str) for value in elem.values())
-
-                if not all_values_are_strings:
-                    self.error('Unsupported types', errors=errors)
-                    print("The dictionary contains the expected keys, but some values are not strings.")
-
-                type_value = elem.get("type")
-                if type_value not in valid_types:
+            if all(key in expected_keys for key in elem.keys()):
+                if elem.get("type") not in valid_types:
                     print("The 'type' value is not valid. It should be one of: str, int, float, bool, datetime, date.")
             else:
                 print("The dictionary does not contain the expected keys or contains extra keys.")
