@@ -115,9 +115,8 @@ class TopicDatasetsAPI(API):
     def get(self, topic):
         '''Get a given topic datasets, with filters'''
         args = dataset_parser.parse()
-        # FIXME: use `topic` filter in parser from https://github.com/opendatateam/udata/pull/2915
-        datasets = Dataset.objects.filter(id__in=[d.id for d in topic.datasets])
-        datasets = dataset_parser.parse_filters(datasets, args)
+        args['topic'] = topic.id
+        datasets = dataset_parser.parse_filters(Dataset.objects.visible(), args)
         sort = args['sort'] or ('$text_score' if args['q'] else None) or '-created_at_internal'
         return datasets.order_by(sort).paginate(args['page'], args['page_size'])
 
