@@ -1,5 +1,7 @@
 import datetime
 
+import pytest
+
 from flask import current_app
 from flask_restx import inputs
 from flask_restx.reqparse import RequestParser
@@ -101,6 +103,7 @@ class SearchAdaptorTest:
         assertHasArgument(parser, 'page_size', int)
 
 
+@pytest.mark.options(SEARCH_SERVICE_API_URL="smtg")
 class IndexingLifecycleTest(APITestCase):
 
     @patch('requests.delete')

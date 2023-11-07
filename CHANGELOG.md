@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add topic filter on datasets list [#2915](https://github.com/opendatateam/udata/pull/2915)
+- Topics: API v2 endpoints [#2913](https://github.com/opendatateam/udata/pull/2913)
 
 ## 6.2.0 (2023-10-26)
 
