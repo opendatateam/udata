@@ -118,7 +118,8 @@ class TopicDatasetsAPI(API):
         '''Get a given topic datasets, with filters'''
         args = dataset_parser.parse()
         args['topic'] = topic.id
-        datasets = dataset_parser.parse_filters(Dataset.objects.visible(), args)
+        datasets = Dataset.objects(archived=None, deleted=None, private=False)
+        datasets = dataset_parser.parse_filters(datasets, args)
         sort = args['sort'] or ('$text_score' if args['q'] else None) or '-created_at_internal'
         return datasets.order_by(sort).paginate(args['page'], args['page_size'])
 
@@ -161,8 +162,6 @@ class TopicDatasetsAPI(API):
             topic = add_dataset(topic, dataset)
         topic.save()
 
-        # TODO: maybe we should return None, or the topics/datasets page
-        # but pagination might not match
         return topic, 201
 
 
@@ -242,8 +241,6 @@ class TopicReusesAPI(API):
             topic = add_reuse(topic, reuse)
         topic.save()
 
-        # TODO: maybe we should return None, or the topics/reuses page
-        # but pagination might not match
         return topic, 201
 
 
