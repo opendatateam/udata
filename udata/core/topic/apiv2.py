@@ -9,6 +9,7 @@ from udata.core.dataset.api import DatasetApiParser
 from udata.core.dataset.apiv2 import dataset_page_fields
 from udata.core.dataset.models import Dataset
 from udata.core.organization.api_fields import org_ref_fields
+from udata.core.reuse.api import ReuseApiParser
 from udata.core.reuse.apiv2 import reuse_page_fields
 from udata.core.reuse.models import Reuse
 from udata.core.topic.models import Topic
@@ -26,6 +27,7 @@ ns = apiv2.namespace('topics', 'Topics related operations')
 topic_parser = TopicApiParser()
 generic_parser = apiv2.page_parser()
 dataset_parser = DatasetApiParser()
+reuse_parser = ReuseApiParser()
 
 common_doc = {
     'params': {'topic': 'The topic ID'}
@@ -110,7 +112,7 @@ topic_add_items_fields = apiv2.model('TopicItemsAdd', {
 @ns.route('/<topic:topic>/datasets/', endpoint='topic_datasets', doc=common_doc)
 class TopicDatasetsAPI(API):
     @apiv2.doc('topic_datasets')
-    @apiv2.expect(dataset_parser)
+    @apiv2.expect(dataset_parser.parser)
     @apiv2.marshal_with(dataset_page_fields)
     def get(self, topic):
         '''Get a given topic datasets, with filters'''
@@ -188,13 +190,19 @@ class TopicDatasetAPI(API):
 @ns.route('/<topic:topic>/reuses/', endpoint='topic_reuses', doc=common_doc)
 class TopicReusesAPI(API):
     @apiv2.doc('topic_reuses')
-    @apiv2.expect(generic_parser)
+    @apiv2.expect(reuse_parser.parser)
     @apiv2.marshal_with(reuse_page_fields)
     def get(self, topic):
-        '''Get a given topic reuses'''
-        args = generic_parser.parse_args()
-        return (Reuse.objects.filter(id__in=(d.id for d in topic.reuses))
-                .paginate(args['page'], args['page_size']))
+        '''Get a given topic reuses, with filters'''
+        args = reuse_parser.parse()
+        reuses = Reuse.objects(deleted=None, private__ne=True).filter(
+            id__in=[d.id for d in topic.reuses]
+        )
+        # warning: topic in reuse_parser is different from Topic
+        args.pop('topic', None)
+        reuses = reuse_parser.parse_filters(reuses, args)
+        sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
+        return reuses.order_by(sort).paginate(args['page'], args['page_size'])
 
     @apiv2.secure
     @apiv2.doc('topic_reuses_create')
