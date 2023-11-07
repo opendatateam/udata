@@ -2,6 +2,10 @@
 
 ## Current (in progress)
 
+- Add topic filter on datasets list [#2915](https://github.com/opendatateam/udata/pull/2915)
+
+## 6.2.0 (2023-10-26)
+
 ### New & Improved
 
 - Topics have been refactored and are no more deprecated:

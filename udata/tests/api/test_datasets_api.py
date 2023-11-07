@@ -21,6 +21,7 @@ from udata.core.dataset.models import (HarvestDatasetMetadata,
                                        HarvestResourceMetadata, ResourceMixin)
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
+from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
 from udata.models import (LEGACY_FREQUENCIES, RESOURCE_TYPES,
@@ -139,6 +140,8 @@ class DatasetAPITest(APITestCase):
         license_dataset = VisibleDatasetFactory(license=LicenseFactory(id='cc-by'))
         format_dataset = DatasetFactory(resources=[ResourceFactory(format='my-format')])
         featured_dataset = VisibleDatasetFactory(featured=True)
+        topic_dataset = VisibleDatasetFactory()
+        topic = TopicFactory(datasets=[topic_dataset])
 
         paca, _, _ = create_geozones_fixtures()
         geozone_dataset = VisibleDatasetFactory(spatial=SpatialCoverageFactory(zones=[paca.id]))
@@ -230,6 +233,21 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json['data']), 1)
         self.assertEqual(response.json['data'][0]['id'], str(schema_version2_dataset.id))
+
+        # filter on topic
+        response = self.get(url_for('api.datasets', topic=topic.id))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(topic_dataset.id))
+
+        # filter on non existing topic
+        response = self.get(url_for('api.datasets', topic=topic_dataset.id))
+        self.assert200(response)
+        self.assertTrue(len(response.json['data']) > 0)
+
+        # filter on non id for topic
+        response = self.get(url_for('api.datasets', topic='xxx'))
+        self.assert400(response)
 
     def test_dataset_api_get(self):
         '''It should fetch a dataset from the API'''
