@@ -199,7 +199,6 @@ class TopicReusesAPI(API):
             id__in=[d.id for d in topic.reuses]
         )
         # warning: topic in reuse_parser is different from Topic
-        args.pop('topic', None)
         reuses = reuse_parser.parse_filters(reuses, args)
         sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
         return reuses.order_by(sort).paginate(args['page'], args['page_size'])
