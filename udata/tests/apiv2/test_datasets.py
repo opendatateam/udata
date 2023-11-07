@@ -1,5 +1,4 @@
 from flask import url_for
-import pytest
 
 from udata.tests.api import APITestCase
 
