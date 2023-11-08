@@ -334,15 +334,15 @@ class DatasetAPITest(APITestCase):
         org = OrganizationFactory(members=[member])
         contact_point_data = {
             'email': 'mooneywayne@cobb-cochran.com',
-            'name': 'Martin Schultz'
+            'name': 'Martin Schultz',
+            'organization': str(org.id)
         }
-
-        response = self.post(url_for('api.org_contact_points', org=org), contact_point_data)
+        response = self.post(url_for('api.contact_points'), contact_point_data)
         self.assert201(response)
 
-        response = self.get(url_for('api.organization', org=org))
+        response = self.get(url_for('api.org_contact_points', org=org))
         assert200(response)
-        contact_point_id = response.json['contact_points'][0]['id']
+        contact_point_id = response.json[0]['id']
 
         # Dataset creation
         data = DatasetFactory.as_dict()

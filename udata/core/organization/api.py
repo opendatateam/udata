@@ -213,7 +213,14 @@ class OrgContactAPI(API):
     def get(self, org):
         '''List all organization contact points'''
         from udata.models import ContactPoint
-        return ContactPoint.objects(organization=org)
+        return [
+            {
+                'id': elem.id,
+                'name': elem.name,
+                'email': elem.email
+            }
+            for elem in ContactPoint.objects(organization=org)
+        ]
 
 
 requests_parser = api.parser()

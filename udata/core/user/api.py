@@ -7,8 +7,6 @@ from udata.core import storages
 from udata.auth import admin_permission
 from udata.models import CommunityResource, Dataset, Reuse, User
 
-from udata.core.contact_points.api_fields import contact_points_fields
-from udata.core.contact_points.forms import ContactPointForm
 from udata.core.dataset.api_fields import (
     community_resource_fields, dataset_fields
 )
@@ -324,7 +322,14 @@ class OrgContactAPI(API):
     def get(self, user):
         '''List all user contact points'''
         from udata.models import ContactPoint
-        return ContactPoint.objects(owner=user)
+        return [
+            {
+                'id': elem.id,
+                'name': elem.name,
+                'email': elem.email
+            }
+            for elem in ContactPoint.objects(owner=user)
+        ]
 
 
 @ns.route('/<id>/followers/', endpoint='user_followers')
