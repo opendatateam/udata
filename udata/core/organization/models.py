@@ -7,7 +7,7 @@ from werkzeug.utils import cached_property
 
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
-from udata.models import db, BadgeMixin, WithMetrics, ContactPoint
+from udata.models import db, BadgeMixin, WithMetrics
 from udata.i18n import lazy_gettext as _
 from udata.uris import endpoint_for
 
@@ -108,7 +108,6 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
                          max_size=LOGO_MAX_SIZE, thumbnails=LOGO_SIZES)
     business_number_id = db.StringField(max_length=ORG_BID_SIZE_LIMIT)
 
-    contact_points = db.ListField(db.ReferenceField(ContactPoint, reverse_delete_rule=db.PULL))
     members = db.ListField(db.EmbeddedDocumentField(Member))
     teams = db.ListField(db.EmbeddedDocumentField(Team))
     requests = db.ListField(db.EmbeddedDocumentField(MembershipRequest))

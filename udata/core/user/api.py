@@ -318,21 +318,6 @@ class UserAPI(API):
         return '', 204
 
 
-@ns.route('/<user:user>/contact/', endpoint='user_contact_points')
-class UserContactAPI(API):
-    @api.secure
-    @api.doc('create_user_contact_point', responses={400: 'Validation error'})
-    @api.expect(contact_points_fields)
-    @api.marshal_list_with(contact_points_fields, code=201)
-    def post(self, user):
-        '''Create a new user contact point'''
-        form = api.validate(ContactPointForm)
-        contact_point = form.save()
-        user.contact_points.append(contact_point)
-        user.save()
-        return contact_point, 201
-
-
 @ns.route('/<id>/followers/', endpoint='user_followers')
 @ns.doc(get={'id': 'list_user_followers'},
         post={'id': 'follow_user'},

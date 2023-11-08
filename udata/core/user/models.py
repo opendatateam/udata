@@ -58,8 +58,6 @@ class User(WithMetrics, UserMixin, db.Document):
     website = db.URLField()
     about = db.StringField()
 
-    contact_points = db.ListField(db.ReferenceField(ContactPoint, reverse_delete_rule=db.PULL))
-
     prefered_language = db.StringField()
 
     apikey = db.StringField()
@@ -268,6 +266,7 @@ class User(WithMetrics, UserMixin, db.Document):
             discussion.save()
         Follow.objects(follower=self).delete()
         Follow.objects(following=self).delete()
+        ContactPoint.objects(owner=self).delete()
         mail.send(_('Account deletion'), copied_user, 'account_deleted')
 
     def count_datasets(self):

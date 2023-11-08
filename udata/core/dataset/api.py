@@ -260,7 +260,12 @@ class DatasetContactAPI(API):
         if not contact_point_id:
             api.abort(400, 'Wrong payload format, id expected')
         DatasetEditPermission(dataset).test()
-        contact_point = ContactPoint.objects.get_or_404(id=id_or_404(contact_point_id))
+        if dataset.organization:
+            contact_point = ContactPoint.objects.get_or_404(
+                id=id_or_404(contact_point_id), organization=dataset.organization)
+        else:
+            contact_point = ContactPoint.objects.get_or_404(
+                id=id_or_404(contact_point_id), owner=dataset.owner)
         print(contact_point)
         dataset.contact_points.append(contact_point)
         dataset.save()

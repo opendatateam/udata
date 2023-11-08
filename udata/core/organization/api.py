@@ -209,22 +209,6 @@ class OrganizationBadgeAPI(API):
         return badges_api.remove(org, badge_kind)
 
 
-@ns.route('/<org:org>/contact/', endpoint='org_contact_points')
-class OrgContactAPI(API):
-    @api.secure
-    @api.doc('create_organization_contact_point', responses={400: 'Validation error'})
-    @api.expect(contact_points_fields)
-    @api.marshal_list_with(contact_points_fields, code=201)
-    def post(self, org):
-        '''Create a new organization contact point'''
-        EditOrganizationPermission(org).test()
-        form = api.validate(ContactPointForm)
-        contact_point = form.save()
-        org.contact_points.append(contact_point)
-        org.save()
-        return contact_point, 201
-
-
 requests_parser = api.parser()
 requests_parser.add_argument(
     'status',

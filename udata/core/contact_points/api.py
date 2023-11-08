@@ -12,17 +12,6 @@ class ContactPointApiParser(ModelApiParser):
     def __init__(self):
         super().__init__()
 
-    @staticmethod
-    def parse_filters(contact_points, args):
-        if args.get('q'):
-            # Following code splits the 'q' argument by spaces to surround
-            # every word in it with quotes before rebuild it.
-            # This allows the search_text method to tokenise with an AND
-            # between tokens whereas an OR is used without it.
-            phrase_query = ' '.join([f'"{elem}"' for elem in args['q'].split(' ')])
-            contact_points = contact_points.search_text(phrase_query)
-        return contact_points
-
 
 ns = api.namespace('contact', 'Contact points related operations')
 
@@ -44,6 +33,17 @@ class ContactPointsListAPI(API):
 @ns.route('/<contact_point:contact_point>/', endpoint='contact_point')
 @api.response(404, 'Contact point not found')
 class ContactPointAPI(API):
+    @api.secure
+    @api.doc('create_contact_point')
+    @api.expect(contact_points_fields)
+    @api.marshal_with(contact_points_fields)
+    @api.response(400, 'Validation error')
+    def post(self):
+        '''Creates a contact point'''
+        form = api.validate(ContactPointForm)
+        contact_point = form.save()
+        return contact_point, 201
+
     @api.secure
     @api.doc('update_contact_point')
     @api.expect(contact_points_fields)

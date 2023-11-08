@@ -12,3 +12,5 @@ class ContactPointForm(ModelForm):
     name = fields.StringField(_('Name'), [validators.DataRequired(),
                                                 validators.NoURLs(_('URLs not allowed in this field'))])
     email = fields.StringField(_('Email'), [validators.DataRequired(), validators.Email()])
+    owner = fields.CurrentUserField()
+    organization = fields.PublishAsField(_('Publish as'))
