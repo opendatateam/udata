@@ -557,6 +557,12 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     display_url = property(url_for)
 
+    def contact_point(self, contact):
+        for contact_elem in self.contact_points:
+            if contact_elem == contact:
+                return contact_elem
+        return None
+
     @property
     def is_visible(self):
         return not self.is_hidden

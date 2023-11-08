@@ -15,11 +15,12 @@ class OrganizationTasksTest(APITestCase):
         self.login()
         member = Member(user=self.user, role='admin')
         org = Organization.objects.create(name='delete me', description='XXX', members=[member])
-        contact_point_data = {
+        data = {
             'email': 'mooneywayne@cobb-cochran.com',
-            'name': 'Martin Schultz'
+            'name': 'Martin Schultz',
+            'organization': str(org.id)
         }
-        response = self.post(url_for('api.org_contact_points', org=org), contact_point_data)
+        response = self.post(url_for('api.contact_points'), data)
         self.assert201(response)
 
         response = self.get(url_for('api.contact_points'))

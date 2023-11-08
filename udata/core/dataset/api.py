@@ -266,10 +266,23 @@ class DatasetContactAPI(API):
         else:
             contact_point = ContactPoint.objects.get_or_404(
                 id=id_or_404(contact_point_id), owner=dataset.owner)
-        print(contact_point)
         dataset.contact_points.append(contact_point)
         dataset.save()
         return contact_point, 201
+
+
+@ns.route('/<dataset:dataset>/contact/<contact_point:contact_point>/', endpoint='dataset_contact_point')
+class DatasetContactAPI(API):
+    @api.secure
+    @api.doc('detach_dataset_contact_point')
+    def delete(self, dataset, contact_point):
+        '''Detach a contact point from a dataset'''
+        DatasetEditPermission(dataset).test()
+        contact = dataset.contact_point(contact_point)
+        if contact:
+            Dataset.objects(id=dataset.id).update_one(pull__contact_points=contact_point)
+            return '', 204
+        api.abort(404)
 
 
 @ns.route('/<dataset:dataset>/featured/', endpoint='dataset_featured')

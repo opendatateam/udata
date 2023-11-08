@@ -29,7 +29,7 @@ from udata.models import (LEGACY_FREQUENCIES, RESOURCE_TYPES,
                           Follow, Member, db)
 from udata.tags import MAX_TAG_LENGTH, MIN_TAG_LENGTH
 from udata.tests.features.territories import create_geozones_fixtures
-from udata.tests.helpers import assert200, assert404
+from udata.tests.helpers import assert200, assert404, assert204
 from udata.utils import faker, unique_string
 
 from . import APITestCase
@@ -366,6 +366,13 @@ class DatasetAPITest(APITestCase):
         response = self.get(url_for('api.dataset', dataset=dataset))
         assert200(response)
         self.assertEqual(response.json['contact_points'][0]['id'], contact_point_id)
+
+        response = self.delete(url_for('api.dataset_contact_point', dataset=dataset, contact_point=contact_point_id))
+        assert204(response)
+
+        response = self.get(url_for('api.dataset', dataset=dataset))
+        assert200(response)
+        self.assertEqual(len(response.json['contact_points']), 0)
 
     def test_dataset_api_create_tags(self):
         '''It should create a dataset from the API with tags'''
