@@ -859,13 +859,14 @@ class OrganizationContactPointsAPITest:
         org = OrganizationFactory(members=[member])
         data = {
             'email': 'mooneywayne@cobb-cochran.com',
-            'name': 'Martin Schultz'
+            'name': 'Martin Schultz',
+            'organization': str(org.id)
         }
-
-        response = api.post(url_for('api.org_contact_points', org=org), data)
+        response = api.post(url_for('api.contact_points'), data)
         assert201(response)
 
-        response = api.get(url_for('api.organization', org=org))
+        response = api.get(url_for('api.org_contact_points', org=org))
         assert200(response)
-        assert response.json['contact_points'][0]['name'] == data['name']
-        assert response.json['contact_points'][0]['email'] == data['email']
+
+        assert response.json[0]['name'] == data['name']
+        assert response.json[0]['email'] == data['email']

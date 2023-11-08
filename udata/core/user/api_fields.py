@@ -1,6 +1,5 @@
 from udata.auth.helpers import current_user_is_admin_or_self
 from udata.api import api, fields, base_reference
-from udata.core.contact_points.api_fields import contact_points_fields
 
 from .models import AVATAR_SIZES
 
@@ -64,8 +63,6 @@ user_fields = api.model('User', {
         description='The user API URI', required=True),
     'metrics': fields.Raw(attribute=lambda o: o.get_metrics(),
         description='The user metrics', readonly=True),
-    'contact_points': fields.List(
-        fields.Nested(contact_points_fields, description='The user\'s contact points')),
 })
 
 me_fields = api.inherit('Me', user_fields, {

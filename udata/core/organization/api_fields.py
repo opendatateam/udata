@@ -1,6 +1,5 @@
 from udata.api import api, fields, base_reference
 from udata.core.badges.api import badge_fields
-from udata.core.contact_points.api_fields import contact_points_fields
 
 from .models import ORG_ROLES, DEFAULT_ROLE, MEMBERSHIP_STATUS, LOGO_SIZES
 
@@ -83,8 +82,6 @@ org_fields = api.model('Organization', {
     'logo_thumbnail': fields.ImageField(attribute='logo', size=BIGGEST_LOGO_SIZE,
         description='The organization logo thumbnail URL. This is the square '
         '({0}x{0}) and cropped version.'.format(BIGGEST_LOGO_SIZE)),
-    'contact_points': fields.List(
-        fields.Nested(contact_points_fields, description='The organization\'s contact points')),
     'members': fields.List(
         fields.Nested(member_fields, description='The organization members')),
     'badges': fields.List(fields.Nested(badge_fields),

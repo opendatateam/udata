@@ -17,7 +17,7 @@ import requests
 from udata.app import cache
 from udata.core import storages
 from udata.frontend.markdown import mdstrip
-from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage, ContactPoint
+from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
 from udata.i18n import lazy_gettext as _
 from udata.utils import get_by, hash_url, to_naive_datetime
 from udata.uris import ValidationError, endpoint_for
@@ -477,7 +477,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     featured = db.BooleanField(required=True, default=False)
 
-    contact_points = db.ListField(db.ReferenceField(ContactPoint, reverse_delete_rule=db.PULL))
+    contact_points = db.ListField(db.ReferenceField('ContactPoint', reverse_delete_rule=db.PULL))
 
     created_at_internal = DateTimeField(verbose_name=_('Creation date'),
                                         default=datetime.utcnow, required=True)

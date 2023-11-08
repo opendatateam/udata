@@ -350,13 +350,15 @@ class UserAPITest(APITestCase):
         user = UserFactory()
         data = {
             'email': 'mooneywayne@cobb-cochran.com',
-            'name': 'Martin Schultz'
+            'name': 'Martin Schultz',
+            'owner': str(user.id)
         }
 
-        response = self.post(url_for('api.user_contact_points', user=user), data)
+        response = self.post(url_for('api.contact_points'), data)
         self.assert201(response)
 
-        response = self.get(url_for('api.user', user=user))
+        response = self.get(url_for('api.user_contact_points', user=user))
         self.assert200(response)
-        assert response.json['contact_points'][0]['name'] == data['name']
-        assert response.json['contact_points'][0]['email'] == data['email']
+
+        assert response.json[0]['name'] == data['name']
+        assert response.json[0]['email'] == data['email']

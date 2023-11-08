@@ -318,6 +318,15 @@ class UserAPI(API):
         return '', 204
 
 
+@ns.route('/<user:user>/contact/', endpoint='user_contact_points')
+class OrgContactAPI(API):
+    @api.doc('get_user_contact_point')
+    def get(self, user):
+        '''List all user contact points'''
+        from udata.models import ContactPoint
+        return ContactPoint.objects(owner=user)
+
+
 @ns.route('/<id>/followers/', endpoint='user_followers')
 @ns.doc(get={'id': 'list_user_followers'},
         post={'id': 'follow_user'},

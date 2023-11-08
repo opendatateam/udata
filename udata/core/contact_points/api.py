@@ -21,7 +21,6 @@ contact_point_parser = ContactPointApiParser()
 @ns.route('/', endpoint='contact_points')
 class ContactPointsListAPI(API):
     '''Contact points collection endpoint'''
-
     @api.doc('list_contact_points')
     @api.marshal_with(contact_points_page_fields)
     def get(self):
@@ -29,10 +28,6 @@ class ContactPointsListAPI(API):
         args = contact_point_parser.parse()
         return ContactPoint.objects().paginate(args['page'], args['page_size'])
 
-
-@ns.route('/<contact_point:contact_point>/', endpoint='contact_point')
-@api.response(404, 'Contact point not found')
-class ContactPointAPI(API):
     @api.secure
     @api.doc('create_contact_point')
     @api.expect(contact_points_fields)
@@ -43,6 +38,16 @@ class ContactPointAPI(API):
         form = api.validate(ContactPointForm)
         contact_point = form.save()
         return contact_point, 201
+
+
+@ns.route('/<contact_point:contact_point>/', endpoint='contact_point')
+@api.response(404, 'Contact point not found')
+class ContactPointAPI(API):
+    @api.doc('get_contact_point')
+    @api.marshal_with(contact_points_fields)
+    def get(self, contact_point):
+        '''Get a contact point given its identifier'''
+        return contact_point
 
     @api.secure
     @api.doc('update_contact_point')

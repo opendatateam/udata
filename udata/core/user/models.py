@@ -16,7 +16,7 @@ from udata import mail
 from udata.uris import endpoint_for
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.models import db, WithMetrics, Follow, ContactPoint
+from udata.models import db, WithMetrics, Follow
 from udata.core.discussions.models import Discussion
 from udata.core.storages import avatars, default_image_basename
 
@@ -266,7 +266,10 @@ class User(WithMetrics, UserMixin, db.Document):
             discussion.save()
         Follow.objects(follower=self).delete()
         Follow.objects(following=self).delete()
+
+        from udata.models import ContactPoint
         ContactPoint.objects(owner=self).delete()
+
         mail.send(_('Account deletion'), copied_user, 'account_deleted')
 
     def count_datasets(self):
