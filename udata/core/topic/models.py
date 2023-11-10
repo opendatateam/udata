@@ -60,5 +60,9 @@ class Topic(db.Document, db.Owned):
     def display_url(self):
         return url_for('topics.display', topic=self)
 
+    def count_discussions(self):
+        # There are no metrics on Topic to store discussions count
+        pass
+
 
 pre_save.connect(Topic.pre_save, sender=Topic)
