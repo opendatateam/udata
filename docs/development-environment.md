@@ -63,8 +63,8 @@ pip install -r requirements/develop.pip
 If you're using `{something}.local` as your `SITE_NAME`, you need to add an ipv6 resolution to this FQDN:
 
 ```
-127.0.0.1	dev.local
-::1		    dev.local
+127.0.0.1   dev.local
+::1         dev.local
 ```
 
 [Reference and context here](https://superuser.com/a/1596341).
