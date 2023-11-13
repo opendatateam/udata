@@ -550,6 +550,25 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         if self.frequency in LEGACY_FREQUENCIES:
             self.frequency = LEGACY_FREQUENCIES[self.frequency]
 
+        for key, value in self.extras.items():
+            if 'custom' in key:
+                if not self.organization:
+                    raise MongoEngineValidationError(
+                        'Custom metadatas are only accessible to dataset owned by on organization.')
+                custom_meta = key.split(':')[1]
+                org_custom = self.organization.extras.get('custom')
+                if not org_custom:
+                    raise MongoEngineValidationError(
+                        'Dataset\'s organization does not have any custom metadata.')
+                custom_present = False
+                for custom in org_custom:
+                    if custom['title'] == custom_meta:
+                        custom_present = True
+                        break
+                if not custom_present:
+                    raise MongoEngineValidationError(
+                        'Dataset\'s organization did not define the requested custom metadata.')
+
     def url_for(self, *args, **kwargs):
         return endpoint_for('datasets.show', 'api.dataset', dataset=self, *args, **kwargs)
 
