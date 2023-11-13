@@ -272,7 +272,7 @@ class DatasetExtrasAPITest(APITestCase):
         response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
         self.assert200(response)
         dataset.reload()
-        assert gdataset.extras['custom:color'] == 'FFFFFFF'
+        assert dataset.extras['custom:color'] == 'FFFFFFF'
 
 
 class DatasetResourceExtrasAPITest(APITestCase):
