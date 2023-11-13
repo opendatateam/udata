@@ -1,4 +1,5 @@
 import logging
+import mongoengine
 
 from flask import url_for, request, abort
 from flask_restx import marshal
@@ -232,7 +233,10 @@ class DatasetExtrasAPI(API):
             data.pop(key)
         # then update the extras with the remaining payload
         dataset.extras.update(data)
-        dataset.save()
+        try:
+            dataset.save()
+        except mongoengine.errors.ValidationError as e:
+            apiv2.abort(400, e.message)
         return dataset.extras
 
     @apiv2.secure

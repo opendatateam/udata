@@ -71,8 +71,8 @@ class OrganizationExtrasField(ExtrasField):
 
         errors = {}
 
-        expected_keys = {"title", "description", "type", "choices"}
-        valid_types = {"str", "int", "float", "bool", "datetime", "date", "choice"}
+        expected_keys = ["title", "description", "type", "choices"]
+        valid_types = ["str", "int", "float", "bool", "datetime", "date", "choice"]
 
         for elem in values.get('custom', []):
             # Check if the dictionary contains the expected keys and only them

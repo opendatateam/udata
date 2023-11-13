@@ -5,6 +5,7 @@ from udata.tests.api import APITestCase
 from udata.core.dataset.apiv2 import DEFAULT_PAGE_SIZE
 from udata.core.dataset.factories import (
     DatasetFactory, ResourceFactory, CommunityResourceFactory)
+from udata.core.organization.factories import OrganizationFactory, Member
 
 
 class DatasetAPIV2Test(APITestCase):
@@ -242,6 +243,36 @@ class DatasetExtrasAPITest(APITestCase):
         self.dataset.reload()
         assert len(self.dataset.extras) == 1
         assert self.dataset.extras['test::extra'] == 'test-value'
+
+    def test_dataset_custom_extras(self):
+        member = Member(user=self.user, role='admin')
+        org = OrganizationFactory(members=[member])
+        org.extras = {
+            "custom": [
+                {
+                    "title": "color",
+                    "description": "the banner color of the dataset (Hex code)",
+                    "type": "str"
+                }
+            ]
+        }
+        org.save()
+        dataset = DatasetFactory(organization=org)
+
+        data = {
+            'custom:test': 'FFFFFFF'
+        }
+        response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
+        self.assert400(response)
+        assert 'Dataset\'s organization did not define the requested custom metadata' in response.json['message']
+
+        data = {
+            'custom:color': 'FFFFFFF'
+        }
+        response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        assert gdataset.extras['custom:color'] == 'FFFFFFF'
 
 
 class DatasetResourceExtrasAPITest(APITestCase):
