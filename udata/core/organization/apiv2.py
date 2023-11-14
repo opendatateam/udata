@@ -38,10 +38,10 @@ class OrganizationSearchAPI(API):
 @apiv2.response(400, 'Wrong payload format, list expected')
 @apiv2.response(404, 'Organization not found')
 @apiv2.response(410, 'Organization has been deleted')
-class DatasetExtrasAPI(API):
+class OrganizationExtrasAPI(API):
     @apiv2.doc('get_organization_extras')
     def get(self, org):
-        '''Get a organization extras given its identifier'''
+        '''Get an organization extras given its identifier'''
         if org.deleted:
             apiv2.abort(410, 'Dataset has been deleted')
         return org.extras

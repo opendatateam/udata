@@ -267,6 +267,13 @@ class DatasetExtrasAPITest(APITestCase):
         assert 'Dataset\'s organization did not define the requested custom metadata' in response.json['message']
 
         data = {
+            'custom:color': 123
+        }
+        response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
+        self.assert400(response)
+        assert 'Custom metadata is not of the right type' in response.json['message']
+
+        data = {
             'custom:color': 'FFFFFFF'
         }
         response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)

@@ -10,6 +10,7 @@ from flask import current_app
 from mongoengine import DynamicEmbeddedDocument, ValidationError as MongoEngineValidationError
 from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
+from pydoc import locate
 from stringdist import rdlevenshtein
 from werkzeug.utils import cached_property
 import requests
@@ -561,13 +562,18 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
                     raise MongoEngineValidationError(
                         'Dataset\'s organization does not have any custom metadata.')
                 custom_present = False
+                custom_type = None
                 for custom in org_custom:
                     if custom['title'] == custom_meta:
                         custom_present = True
+                        custom_type = custom['type']
                         break
                 if not custom_present:
                     raise MongoEngineValidationError(
                         'Dataset\'s organization did not define the requested custom metadata.')
+                if not isinstance(value, locate(custom_type)):
+                    raise MongoEngineValidationError(
+                        'Custom metadata is not of the right type.')
 
     def url_for(self, *args, **kwargs):
         return endpoint_for('datasets.show', 'api.dataset', dataset=self, *args, **kwargs)
