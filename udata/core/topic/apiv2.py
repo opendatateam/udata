@@ -123,8 +123,6 @@ class TopicDatasetsAPI(API):
         sort = args['sort'] or ('$text_score' if args['q'] else None) or '-created_at_internal'
         return datasets.order_by(sort).paginate(args['page'], args['page_size'])
 
-    from line_profiler_decorator import profiler
-
     @apiv2.secure
     @apiv2.doc('topic_datasets_create')
     @apiv2.expect([topic_add_items_fields])
@@ -135,7 +133,6 @@ class TopicDatasetsAPI(API):
     @apiv2.response(404, 'Topic not found')
     @apiv2.response(404, 'Dataset(s) not found')
     @apiv2.response(403, 'Forbidden')
-    @profiler(follow=[Topic.save, Topic._nestable_types_clear_changed_fields])
     def post(self, topic):
         '''Add datasets to a given topic from a list of dataset ids'''
         def add_dataset(topic, dataset):
