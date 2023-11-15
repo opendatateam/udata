@@ -31,6 +31,16 @@ class TopicsAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json['data']), 1)
         self.assertEqual(response.json['data'][0]['id'], str(tag_topic.id))
+        datasets = response.json['data'][0]['datasets']
+        self.assertEqual(len(datasets), 3)
+        for dataset, expected in zip(datasets, tag_topic.datasets):
+            self.assertEqual(dataset['id'], str(expected.id))
+            self.assertEqual(dataset['title'], str(expected.title))
+        reuses = response.json['data'][0]['reuses']
+        for reuse, expected in zip(reuses, tag_topic.reuses):
+            self.assertEqual(reuse['id'], str(expected.id))
+            self.assertEqual(reuse['title'], str(expected.title))
+        self.assertEqual(len(reuses), 3)
 
     def test_topic_api_get(self):
         '''It should fetch a topic from the API'''
@@ -41,6 +51,11 @@ class TopicsAPITest(APITestCase):
         data = response.json
         for dataset, expected in zip(data['datasets'], topic.datasets):
             self.assertEqual(dataset['id'], str(expected.id))
+            self.assertEqual(dataset['title'], str(expected.title))
+
+        for reuse, expected in zip(data['reuses'], topic.reuses):
+            self.assertEqual(reuse['id'], str(expected.id))
+            self.assertEqual(reuse['title'], str(expected.title))
 
     def test_topic_api_create(self):
         '''It should create a topic from the API'''
