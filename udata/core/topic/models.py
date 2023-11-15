@@ -20,9 +20,9 @@ class Topic(db.Document, db.Owned):
 
     tags = db.ListField(db.StringField())
     datasets = db.ListField(
-        db.LazyReferenceField('Dataset', passthrough=True, reverse_delete_rule=db.PULL))
+        db.LazyReferenceField('Dataset', reverse_delete_rule=db.PULL))
     reuses = db.ListField(
-        db.LazyReferenceField('Reuse', passthrough=True, reverse_delete_rule=db.PULL))
+        db.LazyReferenceField('Reuse', reverse_delete_rule=db.PULL))
 
     featured = db.BooleanField()
     private = db.BooleanField()
