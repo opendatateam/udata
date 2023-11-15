@@ -46,9 +46,11 @@ class DatasetSearch(ModelSearchAdapter):
 
     @classmethod
     def is_indexable(cls, dataset):
+        valid_access_rights = ((dataset.access_rights == 'public' and len(dataset.resources) > 0)
+                               or dataset.access_rights == 'openable'
+                               or dataset.access_rights == 'restricted')
         return (dataset.deleted is None and dataset.archived is None and
-                len(dataset.resources) > 0 and
-                not dataset.private)
+                not dataset.private and valid_access_rights)
 
     @classmethod
     def mongo_search(cls, args):
