@@ -7,7 +7,8 @@ from udata.core.user.api_fields import user_ref_fields
 
 from .models import (
     UPDATE_FREQUENCIES, RESOURCE_FILETYPES, DEFAULT_FREQUENCY,
-    CHECKSUM_TYPES, DEFAULT_CHECKSUM_TYPE, DEFAULT_LICENSE, RESOURCE_TYPES
+    CHECKSUM_TYPES, DEFAULT_CHECKSUM_TYPE, DEFAULT_LICENSE,
+    RESOURCE_TYPES, ACCESS_RIGHTS, DEFAULT_ACCESS_RIGHTS
 )
 
 
@@ -244,6 +245,9 @@ dataset_fields = api.model('Dataset', {
     'quality': fields.Raw(description='The dataset quality', readonly=True),
     'last_update': fields.ISODateTime(
         description='The resources last modification date', required=True),
+    'access_right': fields.String(
+        description='The dataset access right', required=True,
+        enum=list(ACCESS_RIGHTS), default=DEFAULT_ACCESS_RIGHTS),
     'internal': fields.Nested(
         dataset_internal_fields, readonly=True, description='Site internal and specific object\'s data'),
 }, mask=DEFAULT_MASK)

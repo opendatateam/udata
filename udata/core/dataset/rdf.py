@@ -194,6 +194,7 @@ def dataset_to_rdf(dataset, graph=None):
     d.set(DCT.description, Literal(dataset.description))
     d.set(DCT.issued, Literal(dataset.created_at))
     d.set(DCT.modified, Literal(dataset.last_modified))
+    d.set(DCT.accessRights, Literal(dataset.access_rights))
 
     if dataset.acronym:
         d.set(SKOS.altLabel, Literal(dataset.acronym))
@@ -488,6 +489,7 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     default_license = dataset.license or License.default()
     dataset_license = rdf_value(d, DCT.license)
     dataset.license = License.guess(dataset_license, *licenses, default=default_license)
+    dataset.access_rights = rdf_value(d, DCT.accessRights)
 
     identifier = rdf_value(d, DCT.identifier)
     uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
