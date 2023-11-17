@@ -452,7 +452,8 @@ class CswDcatBackendTest:
         assert dataset.title == 'Localisation des accidents de la circulation routière en 2017'
         assert dataset.description == 'Accidents corporels de la circulation en Hauts de France (2017)'
         assert set(dataset.tags) == set([
-            'donnee-ouverte', 'accidentologie', 'accident'
+            'donnee-ouverte', 'accidentologie', 'accident', 'reseaux-de-transport', 'accident-de-la-route',
+            'hauts-de-france', 'nord', 'pas-de-calais', 'oise', 'somme', 'aisne'
         ])
         assert dataset.harvest.created_at.date() == date(2017, 1, 1)
         assert len(dataset.resources) == 1
