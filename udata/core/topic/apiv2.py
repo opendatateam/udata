@@ -134,19 +134,6 @@ class TopicDatasetsAPI(API):
     @apiv2.response(404, 'Dataset(s) not found')
     @apiv2.response(403, 'Forbidden')
     def post(self, topic):
-        '''Add datasets to a given topic from a list of dataset ids'''
-        def add_dataset(topic, dataset):
-            if dataset not in topic.datasets:
-                topic.datasets.append(dataset)
-            return topic
-
-        def get_dataset(dataset_id):
-            try:
-                dataset = Dataset.objects.get_or_404(id=dataset_id)
-            except mongoengine.errors.ValidationError:
-                apiv2.abort(400, 'Malformed object id(s) in request')
-            return dataset
-
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, 'Forbidden')
 
@@ -157,9 +144,14 @@ class TopicDatasetsAPI(API):
         if not all(isinstance(d, dict) and d.get('id') for d in data):
             apiv2.abort(400, 'Expecting a list of dicts with id attribute')
 
-        datasets = (get_dataset(d['id']) for d in data)
-        for dataset in datasets:
-            topic = add_dataset(topic, dataset)
+        try:
+            datasets = Dataset.objects.filter(id__in=[d['id'] for d in data]).only('id')
+            diff = set([d.id for d in datasets]) - set([d.id for d in topic.datasets])
+        except mongoengine.errors.ValidationError:
+            apiv2.abort(400, 'Malformed object id(s) in request')
+
+        to_add = Dataset.objects.filter(id__in=list(diff)).only('id')
+        topic.datasets += to_add
         topic.save()
 
         return topic, 201
