@@ -146,7 +146,7 @@ class TopicDatasetsAPI(API):
 
         try:
             datasets = Dataset.objects.filter(id__in=[d['id'] for d in data]).only('id')
-            diff = set([d.id for d in datasets]) - set([d.id for d in topic.datasets])
+            diff = set(d.id for d in datasets) - set(d.id for d in topic.datasets)
         except mongoengine.errors.ValidationError:
             apiv2.abort(400, 'Malformed object id(s) in request')
 
