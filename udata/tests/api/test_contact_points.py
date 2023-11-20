@@ -3,7 +3,7 @@ import pytest
 from flask import url_for
 
 from udata.models import ContactPoint
-from udata.core.contact_points.factories import ContactPointFactory
+from udata.core.contact_point.factories import ContactPointFactory
 
 from udata.tests.helpers import assert200, assert204
 
@@ -18,7 +18,7 @@ class ContactPointAPITest:
     def test_contact_points_api_list(self, api):
         contact_points = ContactPointFactory.create_batch(3)
 
-        response = api.get(url_for('api.contact_points'))
+        response = api.get(url_for('api.contact_point'))
         assert200(response)
         len(response.json['data']) == len(contact_points)
 

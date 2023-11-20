@@ -34,8 +34,8 @@ from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
-from udata.core.contact_points.models import ContactPoint
-from udata.core.contact_points.api_fields import contact_points_fields
+from udata.core.contact_point.models import ContactPoint
+from udata.core.contact_point.api_fields import contact_point_fields
 from udata.utils import get_by, id_or_404
 from udata.rdf import (
     RDF_EXTENSIONS,
@@ -247,12 +247,12 @@ class DatasetAPI(API):
         return '', 204
 
 
-@ns.route('/<dataset:dataset>/contact/', endpoint='dataset_contact_points')
+@ns.route('/<dataset:dataset>/contact/', endpoint='dataset_contact_point')
 class DatasetContactAPI(API):
     @api.secure
     @api.doc('create_dataset_contact_point')
-    @api.expect(contact_points_fields)
-    @api.marshal_list_with(contact_points_fields, code=201)
+    @api.expect(contact_point_fields)
+    @api.marshal_list_with(contact_point_fields, code=201)
     def post(self, dataset):
         '''Assign a contact point to a dataset'''
         data = request.json
@@ -266,7 +266,7 @@ class DatasetContactAPI(API):
         else:
             contact_point = ContactPoint.objects.get_or_404(
                 id=id_or_404(contact_point_id), owner=dataset.owner)
-        dataset.contact_points.append(contact_point)
+        dataset.contact_point = contact_point
         dataset.save()
         return contact_point, 201
 
@@ -278,9 +278,9 @@ class DatasetContactAPI(API):
     def delete(self, dataset, contact_point):
         '''Detach a contact point from a dataset'''
         DatasetEditPermission(dataset).test()
-        contact = dataset.contact_point(contact_point)
-        if contact:
-            Dataset.objects(id=dataset.id).update_one(pull__contact_points=contact_point)
+        if dataset.contact_point == contact_point:
+            dataset.contact_point = None
+            dataset.save()
             return '', 204
         api.abort(404)
 

@@ -1,7 +1,7 @@
 from udata.api import api, API
 from udata.api.parsers import ModelApiParser
 
-from .api_fields import contact_points_fields, contact_points_page_fields
+from .api_fields import contact_point_fields, contact_point_page_fields
 from .forms import ContactPointForm
 from .models import ContactPoint
 
@@ -18,11 +18,11 @@ ns = api.namespace('contact', 'Contact points related operations')
 contact_point_parser = ContactPointApiParser()
 
 
-@ns.route('/', endpoint='contact_points')
+@ns.route('/', endpoint='contact_point')
 class ContactPointsListAPI(API):
     '''Contact points collection endpoint'''
     @api.doc('list_contact_points')
-    @api.marshal_with(contact_points_page_fields)
+    @api.marshal_with(contact_point_page_fields)
     def get(self):
         '''List all contact points'''
         args = contact_point_parser.parse()
@@ -30,8 +30,8 @@ class ContactPointsListAPI(API):
 
     @api.secure
     @api.doc('create_contact_point')
-    @api.expect(contact_points_fields)
-    @api.marshal_with(contact_points_fields)
+    @api.expect(contact_point_fields)
+    @api.marshal_with(contact_point_fields)
     @api.response(400, 'Validation error')
     def post(self):
         '''Creates a contact point'''
@@ -44,15 +44,15 @@ class ContactPointsListAPI(API):
 @api.response(404, 'Contact point not found')
 class ContactPointAPI(API):
     @api.doc('get_contact_point')
-    @api.marshal_with(contact_points_fields)
+    @api.marshal_with(contact_point_fields)
     def get(self, contact_point):
         '''Get a contact point given its identifier'''
         return contact_point
 
     @api.secure
     @api.doc('update_contact_point')
-    @api.expect(contact_points_fields)
-    @api.marshal_with(contact_points_fields)
+    @api.expect(contact_point_fields)
+    @api.marshal_with(contact_point_fields)
     @api.response(400, 'Validation error')
     def put(self, contact_point):
         '''Updates a contact point given its identifier'''

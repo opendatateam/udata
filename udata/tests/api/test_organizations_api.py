@@ -862,7 +862,7 @@ class OrganizationContactPointsAPITest:
             'name': 'Martin Schultz',
             'organization': str(org.id)
         }
-        response = api.post(url_for('api.contact_points'), data)
+        response = api.post(url_for('api.contact_point'), data)
         assert201(response)
 
         response = api.get(url_for('api.org_contact_points', org=org))

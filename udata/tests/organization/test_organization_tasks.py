@@ -20,10 +20,10 @@ class OrganizationTasksTest(APITestCase):
             'name': 'Martin Schultz',
             'organization': str(org.id)
         }
-        response = self.post(url_for('api.contact_points'), data)
+        response = self.post(url_for('api.contact_point'), data)
         self.assert201(response)
 
-        response = self.get(url_for('api.contact_points'))
+        response = self.get(url_for('api.contact_point'))
         self.assert200(response)
         self.assertEqual(len(response.json['data']), 1)
 
@@ -76,7 +76,7 @@ class OrganizationTasksTest(APITestCase):
         self.assertEqual(list(storages.avatars.list_files()), [])
 
         # Check organization's contact points are deleted
-        response = self.get(url_for('api.contact_points'))
+        response = self.get(url_for('api.contact_point'))
         self.assert200(response)
         self.assertEqual(len(response.json['data']), 0)
 

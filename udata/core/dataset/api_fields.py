@@ -4,7 +4,7 @@ from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.models import LOGO_SIZES
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.user.api_fields import user_ref_fields
-from udata.core.contact_points.api_fields import contact_points_fields
+from udata.core.contact_point.api_fields import contact_point_fields
 
 from .models import (
     UPDATE_FREQUENCIES, RESOURCE_FILETYPES, DEFAULT_FREQUENCY,
@@ -172,7 +172,7 @@ DEFAULT_MASK = ','.join((
     'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
     'private', 'tags', 'badges', 'resources', 'frequency', 'frequency_date', 'extras', 'harvest',
     'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
-    'uri', 'page', 'last_update', 'archived', 'quality', 'internal', 'contact_points',
+    'uri', 'page', 'last_update', 'archived', 'quality', 'internal', 'contact_point',
 ))
 
 dataset_internal_fields = api.model('DatasetInternals', {
@@ -247,8 +247,8 @@ dataset_fields = api.model('Dataset', {
         description='The resources last modification date', required=True),
     'internal': fields.Nested(
         dataset_internal_fields, readonly=True, description='Site internal and specific object\'s data'),
-    'contact_points': fields.List(
-        fields.Nested(contact_points_fields, description='The dataset\'s contact points')),
+    'contact_point': fields.List(
+        fields.Nested(contact_point_fields, description='The dataset\'s contact points')),
 }, mask=DEFAULT_MASK)
 
 dataset_page_fields = api.model('DatasetPage', fields.pager(dataset_fields),

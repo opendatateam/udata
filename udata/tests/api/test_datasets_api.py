@@ -337,7 +337,7 @@ class DatasetAPITest(APITestCase):
             'name': 'Martin Schultz',
             'organization': str(org.id)
         }
-        response = self.post(url_for('api.contact_points'), contact_point_data)
+        response = self.post(url_for('api.contact_point'), contact_point_data)
         self.assert201(response)
 
         response = self.get(url_for('api.org_contact_points', org=org))
@@ -360,19 +360,19 @@ class DatasetAPITest(APITestCase):
         contact_point_data_id = {
             'id': contact_point_id
         }
-        response = self.post(url_for('api.dataset_contact_points', dataset=dataset), contact_point_data_id)
+        response = self.post(url_for('api.dataset_contact_point', dataset=dataset), contact_point_data_id)
         self.assert201(response)
 
         response = self.get(url_for('api.dataset', dataset=dataset))
         assert200(response)
-        self.assertEqual(response.json['contact_points'][0]['id'], contact_point_id)
+        self.assertEqual(response.json['contact_point']['id'], contact_point_id)
 
         response = self.delete(url_for('api.dataset_contact_point', dataset=dataset, contact_point=contact_point_id))
         assert204(response)
 
         response = self.get(url_for('api.dataset', dataset=dataset))
         assert200(response)
-        self.assertEqual(len(response.json['contact_points']), 0)
+        self.assertEqual(response.json['contact_point'], None)
 
     def test_dataset_api_create_tags(self):
         '''It should create a dataset from the API with tags'''

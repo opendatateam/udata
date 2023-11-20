@@ -477,7 +477,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     featured = db.BooleanField(required=True, default=False)
 
-    contact_points = db.ListField(db.ReferenceField('ContactPoint', reverse_delete_rule=db.PULL))
+    contact_point = db.ReferenceField('ContactPoint', reverse_delete_rule=db.PULL)
 
     created_at_internal = DateTimeField(verbose_name=_('Creation date'),
                                         default=datetime.utcnow, required=True)
@@ -556,12 +556,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         return endpoint_for('datasets.show', 'api.dataset', dataset=self, *args, **kwargs)
 
     display_url = property(url_for)
-
-    def contact_point(self, contact):
-        for contact_elem in self.contact_points:
-            if contact_elem == contact:
-                return contact_elem
-        return None
 
     @property
     def is_visible(self):
