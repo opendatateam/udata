@@ -354,7 +354,7 @@ class UserAPITest(APITestCase):
             'owner': str(user.id)
         }
 
-        response = self.post(url_for('api.contact_point'), data)
+        response = self.post(url_for('api.contact_points'), data)
         self.assert201(response)
 
         response = self.get(url_for('api.user_contact_points', user=user))

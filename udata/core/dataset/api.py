@@ -271,8 +271,8 @@ class DatasetContactAPI(API):
         return contact_point, 201
 
 
-@ns.route('/<dataset:dataset>/contact/<contact_point:contact_point>/', endpoint='dataset_contact_point')
-class DatasetContactAPI(API):
+@ns.route('/<dataset:dataset>/contact/<contact_point:contact_point>/', endpoint='specific_dataset_contact_point')
+class DatasetSpecificContactAPI(API):
     @api.secure
     @api.doc('detach_dataset_contact_point')
     def delete(self, dataset, contact_point):

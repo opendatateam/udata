@@ -18,7 +18,7 @@ ns = api.namespace('contact', 'Contact points related operations')
 contact_point_parser = ContactPointApiParser()
 
 
-@ns.route('/', endpoint='contact_point')
+@ns.route('/', endpoint='contact_points')
 class ContactPointsListAPI(API):
     '''Contact points collection endpoint'''
     @api.doc('list_contact_points')

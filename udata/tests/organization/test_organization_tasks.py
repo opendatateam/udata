@@ -20,10 +20,10 @@ class OrganizationTasksTest(APITestCase):
             'name': 'Martin Schultz',
             'organization': str(org.id)
         }
-        response = self.post(url_for('api.contact_point'), data)
+        response = self.post(url_for('api.contact_points'), data)
         self.assert201(response)
 
-        response = self.get(url_for('api.contact_point'))
+        response = self.get(url_for('api.contact_points'))
         self.assert200(response)
         self.assertEqual(len(response.json['data']), 1)
 

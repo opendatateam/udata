@@ -337,7 +337,7 @@ class DatasetAPITest(APITestCase):
             'name': 'Martin Schultz',
             'organization': str(org.id)
         }
-        response = self.post(url_for('api.contact_point'), contact_point_data)
+        response = self.post(url_for('api.contact_points'), contact_point_data)
         self.assert201(response)
 
         response = self.get(url_for('api.org_contact_points', org=org))
@@ -367,7 +367,7 @@ class DatasetAPITest(APITestCase):
         assert200(response)
         self.assertEqual(response.json['contact_point']['id'], contact_point_id)
 
-        response = self.delete(url_for('api.dataset_contact_point', dataset=dataset, contact_point=contact_point_id))
+        response = self.delete(url_for('api.specific_dataset_contact_point', dataset=dataset, contact_point=contact_point_id))
         assert204(response)
 
         response = self.get(url_for('api.dataset', dataset=dataset))

@@ -247,8 +247,7 @@ dataset_fields = api.model('Dataset', {
         description='The resources last modification date', required=True),
     'internal': fields.Nested(
         dataset_internal_fields, readonly=True, description='Site internal and specific object\'s data'),
-    'contact_point': fields.List(
-        fields.Nested(contact_point_fields, description='The dataset\'s contact points')),
+    'contact_point': fields.Nested(contact_point_fields, allow_null=True, description='The dataset\'s contact points'),
 }, mask=DEFAULT_MASK)
 
 dataset_page_fields = api.model('DatasetPage', fields.pager(dataset_fields),
