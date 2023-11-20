@@ -71,6 +71,7 @@ class DcatBackend(BaseBackend):
         # we fallback on the declared Content-Type
         if not fmt:
             response = requests.head(self.source.url)
+            response.raise_for_status()
             mime_type = response.headers.get('Content-Type', '').split(';', 1)[0]
             if not mime_type:
                 msg = 'Unable to detect format from extension or mime type'
