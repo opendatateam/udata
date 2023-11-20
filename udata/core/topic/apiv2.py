@@ -151,8 +151,9 @@ class TopicDatasetsAPI(API):
         except mongoengine.errors.ValidationError:
             apiv2.abort(400, 'Malformed object id(s) in request')
 
-        topic.datasets += [ObjectId(did) for did in diff]
-        topic.save()
+        if diff:
+            topic.datasets += [ObjectId(did) for did in diff]
+            topic.save()
 
         return topic, 201
 
