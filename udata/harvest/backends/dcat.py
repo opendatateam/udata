@@ -91,7 +91,9 @@ class DcatBackend(BaseBackend):
         page = 0
         while url:
             subgraph = Graph(namespace_manager=namespace_manager)
-            data = requests.get(url).text
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.text
             for old_uri, new_uri in URIS_TO_REPLACE.items():
                 data = data.replace(old_uri, new_uri)
             subgraph.parse(data=data, format=fmt)
