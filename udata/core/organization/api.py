@@ -207,20 +207,23 @@ class OrganizationBadgeAPI(API):
         return badges_api.remove(org, badge_kind)
 
 
+from udata.models import ContactPoint
+from udata.core.contact_point.api import ContactPointApiParser
+from udata.core.contact_point.api_fields import contact_point_page_fields
+
+
+contact_point_parser = ContactPointApiParser()
+
+
 @ns.route('/<org:org>/contact/', endpoint='org_contact_points')
 class OrgContactAPI(API):
     @api.doc('get_organization_contact_point')
+    @api.marshal_with(contact_point_page_fields)
     def get(self, org):
         '''List all organization contact points'''
-        from udata.models import ContactPoint
-        return [
-            {
-                'id': elem.id,
-                'name': elem.name,
-                'email': elem.email
-            }
-            for elem in ContactPoint.objects(organization=org)
-        ]
+        args = contact_point_parser.parse()
+        contact_points = ContactPoint.objects.owned_by(org)
+        return contact_points.paginate(args['page'], args['page_size'])
 
 
 requests_parser = api.parser()
