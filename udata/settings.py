@@ -199,7 +199,7 @@ class Defaults(object):
     ]
 
     MD_ALLOWED_ATTRIBUTES = {
-        'a': ['href', 'title', 'rel', 'data-tooltip'],
+        'a': ['href', 'title', 'rel', 'data-tooltip', 'id'],
         'abbr': ['title'],
         'acronym': ['title'],
         'img': ['alt', 'src', 'title']
