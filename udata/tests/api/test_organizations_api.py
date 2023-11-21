@@ -868,5 +868,5 @@ class OrganizationContactPointsAPITest:
         response = api.get(url_for('api.org_contact_points', org=org))
         assert200(response)
 
-        assert response.json[0]['name'] == data['name']
-        assert response.json[0]['email'] == data['email']
+        assert response.json['data'][0]['name'] == data['name']
+        assert response.json['data'][0]['email'] == data['email']
