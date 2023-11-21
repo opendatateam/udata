@@ -15,7 +15,7 @@ from rdflib.namespace import RDF
 from udata import i18n, uris
 from udata.frontend.markdown import parse_html
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
-from udata.models import db
+from udata.models import db, ContactPoint
 from udata.rdf import (
     DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD,
     namespace_manager, url_from_rdf
@@ -312,15 +312,15 @@ def temporal_from_rdf(period_of_time):
         log.warning('Unable to parse temporal coverage', exc_info=True)
 
 
-def point_of_contact_from_rdf(rdf):
+def contact_point_from_rdf(rdf):
     contact_point = rdf.value(DCAT.contactPoint)
     if contact_point:
-        return {
-            'name': contact_point.value(VCARD.fn),
-            'email': contact_point.value(VCARD.hasEmail)
-            or contact_point.value(VCARD.email)
-            or contact_point.value(DCAT.email)
-        }
+        name = contact_point.value(VCARD.fn)
+        email = (contact_point.value(VCARD.hasEmail)
+                 or contact_point.value(VCARD.email)
+                 or contact_point.value(DCAT.email))
+        contact = ContactPoint(name=name, email=email).save()
+        return contact
 
 
 def frequency_from_rdf(term):
@@ -481,6 +481,7 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     description = d.value(DCT.description) or d.value(DCT.abstract)
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
+    dataset.contact_point = contact_point_from_rdf(d)
 
     acronym = rdf_value(d, SKOS.altLabel)
     if acronym:
@@ -521,6 +522,5 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     dataset.harvest.remote_url = remote_url
     dataset.harvest.created_at = created_at
     dataset.harvest.modified_at = modified_at
-    dataset.harvest.point_of_contact = point_of_contact_from_rdf(d)
 
     return dataset
