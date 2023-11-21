@@ -426,6 +426,33 @@ class DcatBackendTest:
         assert len(job.items) == 0
         assert job.status == 'done'
 
+    def test_target_404(self, rmock):
+        filename = 'obvious-format.jsonld'
+        url = url=DCAT_URL_PATTERN.format(path=filename, domain=TEST_DOMAIN)
+        rmock.get(url, status_code=404)
+
+        source = HarvestSourceFactory(backend='dcat', url=url, organization=OrganizationFactory())
+        actions.run(source.slug)
+        source.reload()
+
+        job = source.get_last_job()
+        assert job.status == "failed"
+        assert len(job.errors) == 1
+        assert "404 Client Error" in job.errors[0].message
+
+        filename = 'need-to-head-to-guess-format'
+        url = url=DCAT_URL_PATTERN.format(path=filename, domain=TEST_DOMAIN)
+        rmock.head(url, status_code=404)
+
+        source = HarvestSourceFactory(backend='dcat', url=url, organization=OrganizationFactory())
+        actions.run(source.slug)
+        source.reload()
+
+        job = source.get_last_job()
+        assert job.status == "failed"
+        assert len(job.errors) == 1
+        assert "404 Client Error" in job.errors[0].message
+
         
 @pytest.mark.usefixtures('clean_db')
 @pytest.mark.options(PLUGINS=['csw-dcat'])
