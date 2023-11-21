@@ -426,7 +426,7 @@ class DcatBackendTest:
         assert len(job.items) == 0
         assert job.status == 'done'
 
- def test_target_404(self, rmock):
+    def test_target_404(self, rmock):
         filename = 'obvious-format.jsonld'
         url = url=DCAT_URL_PATTERN.format(path=filename, domain=TEST_DOMAIN)
         rmock.get(url, status_code=404)
