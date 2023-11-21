@@ -426,6 +426,33 @@ class DcatBackendTest:
         assert len(job.items) == 0
         assert job.status == 'done'
 
+ def test_target_404(self, rmock):
+        filename = 'obvious-format.jsonld'
+        url = url=DCAT_URL_PATTERN.format(path=filename, domain=TEST_DOMAIN)
+        rmock.get(url, status_code=404)
+
+        source = HarvestSourceFactory(backend='dcat', url=url, organization=OrganizationFactory())
+        actions.run(source.slug)
+        source.reload()
+
+        job = source.get_last_job()
+        assert job.status == "failed"
+        assert len(job.errors) == 1
+        assert "404 Client Error" in job.errors[0].message
+
+        filename = 'need-to-head-to-guess-format'
+        url = url=DCAT_URL_PATTERN.format(path=filename, domain=TEST_DOMAIN)
+        rmock.head(url, status_code=404)
+
+        source = HarvestSourceFactory(backend='dcat', url=url, organization=OrganizationFactory())
+        actions.run(source.slug)
+        source.reload()
+
+        job = source.get_last_job()
+        assert job.status == "failed"
+        assert len(job.errors) == 1
+        assert "404 Client Error" in job.errors[0].message
+
 
 @pytest.mark.usefixtures('clean_db')
 @pytest.mark.options(PLUGINS=['csw-dcat'])
@@ -454,7 +481,8 @@ class CswDcatBackendTest:
         assert dataset.title == 'Localisation des accidents de la circulation routière en 2017'
         assert dataset.description == 'Accidents corporels de la circulation en Hauts de France (2017)'
         assert set(dataset.tags) == set([
-            'donnee-ouverte', 'accidentologie', 'accident'
+            'donnee-ouverte', 'accidentologie', 'accident', 'reseaux-de-transport', 'accident-de-la-route',
+            'hauts-de-france', 'nord', 'pas-de-calais', 'oise', 'somme', 'aisne'
         ])
         assert dataset.harvest.created_at.date() == date(2017, 1, 1)
         assert len(dataset.resources) == 1
