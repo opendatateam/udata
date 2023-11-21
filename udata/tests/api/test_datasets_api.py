@@ -342,7 +342,7 @@ class DatasetAPITest(APITestCase):
 
         response = self.get(url_for('api.org_contact_points', org=org))
         assert200(response)
-        contact_point_id = response.json[0]['id']
+        contact_point_id = response.json['data'][0]['id']
 
         # Dataset creation
         data = DatasetFactory.as_dict()
