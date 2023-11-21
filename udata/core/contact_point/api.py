@@ -13,7 +13,7 @@ class ContactPointApiParser(ModelApiParser):
         super().__init__()
 
 
-ns = api.namespace('contact', 'Contact points related operations')
+ns = api.namespace('contacts', 'Contact points related operations')
 
 contact_point_parser = ContactPointApiParser()
 
