@@ -83,6 +83,19 @@
         <dcterms:identifier>2</dcterms:identifier>
       </dcat:Dataset>
     </dcat:dataset>
+    <dcat:dataset>
+      <dcat:Dataset rdf:about="http://data.test.org/datasets/4">
+        <dcterms:title>Dataset 4</dcterms:title>
+        <dcat:hasPart>
+          <foaf:Document rdf:about="http://data.test.org/datasets/4/resources/1">
+            <dcterms:title>Resource 4-2</dcterms:title>
+            <dcterms:description>Additional file for Dataset 4</dcterms:description>
+            <dcterms:format>JSON</dcterms:format>
+            <rdf:about>http://data.test.org/datasets/4/resources/1/file.json</rdf:about>
+          </foaf:Document>
+        </dcat:hasPart>
+      </dcat:Dataset>
+    </dcat:dataset>
     <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-15T09:19:51.723691</dcterms:modified>
     <foaf:homepage>http://data.test.org</foaf:homepage>
     <dcterms:language>en</dcterms:language>

@@ -389,17 +389,8 @@ def remote_url_from_rdf(rdf):
             except uris.ValidationError:
                 pass
 
-def theme_labels_from_rdf(rdf):
-    for theme in rdf.objects(DCAT.theme):
-        if isinstance(theme, RdfResource):
-            label = rdf_value(theme, SKOS.prefLabel)
-        else:
-            label = theme.toPython()
-        if label:
-            yield label
 
-
-def resource_from_rdf(graph_or_distrib, dataset=None):
+def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     '''
     Map a Resource domain model to a DCAT/RDF graph
     '''
@@ -410,9 +401,12 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
                                       object=DCAT.Distribution)
         distrib = graph_or_distrib.resource(node)
 
-    download_url = url_from_rdf(distrib, DCAT.downloadURL)
-    access_url = url_from_rdf(distrib, DCAT.accessURL)
-    url = safe_unicode(download_url or access_url)
+    if not is_additionnal:
+        download_url = url_from_rdf(distrib, DCAT.downloadURL)
+        access_url = url_from_rdf(distrib, DCAT.accessURL)
+        url = safe_unicode(download_url or access_url)
+    else:
+        url = url_from_rdf(distrib, DCAT.URI)
     # we shouldn't create resources without URLs
     if not url:
         log.warning(f'Resource without url: {distrib}')
@@ -476,7 +470,8 @@ def dataset_from_rdf(graph, dataset=None, node=None):
         dataset.acronym = acronym
 
     tags = [tag.toPython() for tag in d.objects(DCAT.keyword)]
-    tags += theme_labels_from_rdf(d)
+    tags += [theme.toPython() for theme in d.objects(DCAT.theme)
+             if not isinstance(theme, RdfResource)]
     dataset.tags = list(set(tags))
 
     temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
@@ -488,6 +483,15 @@ def dataset_from_rdf(graph, dataset=None, node=None):
         resource_from_rdf(distrib, dataset)
         for predicate in DCT.license, DCT.rights:
             value = distrib.value(predicate)
+            if isinstance(value, (URIRef, Literal)):
+                licenses.add(value.toPython())
+            elif isinstance(value, RdfResource):
+                licenses.add(value.identifier.toPython())
+
+    for additionnal in d.objects(DCAT.hasPart):
+        resource_from_rdf(distrib, dataset, is_additionnal=True)
+        for predicate in DCT.license, DCT.rights:
+            value = additionnal.value(predicate)
             if isinstance(value, (URIRef, Literal)):
                 licenses.add(value.toPython())
             elif isinstance(value, RdfResource):
