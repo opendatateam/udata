@@ -91,7 +91,7 @@ class DcatBackend(BaseBackend):
         page = 0
         while url:
             subgraph = Graph(namespace_manager=namespace_manager)
-            response = requests.get(url)
+            response = self.get(url)
             response.raise_for_status()
             data = response.text
             for old_uri, new_uri in URIS_TO_REPLACE.items():
@@ -166,8 +166,8 @@ class CswDcatBackend(DcatBackend):
         graphs = []
         page = 0
         start = 1
-        response = requests.post(url, data=body.format(start=start, schema=self.DCAT_SCHEMA),
-                                 headers=headers)
+        response = self.post(url, data=body.format(start=start, schema=self.DCAT_SCHEMA),
+                             headers=headers)
         response.raise_for_status()
         content = response.text
         tree = ET.fromstring(content)
@@ -220,7 +220,7 @@ class CswDcatBackend(DcatBackend):
 
             start = next_record
             tree = ET.fromstring(
-                requests.post(url, data=body.format(start=start, schema=self.DCAT_SCHEMA),
-                              headers=headers).text)
+                self.post(url, data=body.format(start=start, schema=self.DCAT_SCHEMA),
+                          headers=headers).text)
 
         return graphs
