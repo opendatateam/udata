@@ -71,6 +71,7 @@ class DcatBackend(BaseBackend):
         # we fallback on the declared Content-Type
         if not fmt:
             response = requests.head(self.source.url)
+            response.raise_for_status()
             mime_type = response.headers.get('Content-Type', '').split(';', 1)[0]
             if not mime_type:
                 msg = 'Unable to detect format from extension or mime type'
@@ -90,7 +91,9 @@ class DcatBackend(BaseBackend):
         page = 0
         while url:
             subgraph = Graph(namespace_manager=namespace_manager)
-            data = requests.get(url).text
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.text
             for old_uri, new_uri in URIS_TO_REPLACE.items():
                 data = data.replace(old_uri, new_uri)
             subgraph.parse(data=data, format=fmt)
