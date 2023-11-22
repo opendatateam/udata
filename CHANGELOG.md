@@ -3,6 +3,11 @@
 ## Current (in progress)
 
 - Prevent sending post_save signals on extras update [#2919](https://github.com/opendatateam/udata/pull/2919)
+- Add topic filter on datasets list [#2915](https://github.com/opendatateam/udata/pull/2915)
+- Topics: API v2 endpoints [#2913](https://github.com/opendatateam/udata/pull/2913)
+- Allow for discussions on Topics [#2922](https://github.com/opendatateam/udata/pull/2922)
+- Support skos.Concept themes for tags [#2926](https://github.com/opendatateam/udata/pull/2926)
+- Raise for status on DCAT harvester calls [#2927](https://github.com/opendatateam/udata/pull/2927)
 
 ## 6.2.0 (2023-10-26)
 
