@@ -1,13 +1,15 @@
 from udata.api import api, fields, API
-
-
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api_fields import reuse_fields
+from udata.core.topic.permissions import TopicEditPermission
+from udata.core.topic.parsers import TopicApiParser
 from udata.core.user.api_fields import user_ref_fields
 
 from .models import Topic
 from .forms import TopicForm
+
+DEFAULT_SORTING = '-created_at'
 
 ns = api.namespace('topics', 'Topics related operations')
 
@@ -28,8 +30,6 @@ topic_fields = api.model('Topic', {
     'private': fields.Boolean(description='Is the topic private'),
     'created_at': fields.ISODateTime(
         description='The topic creation date', readonly=True),
-    'last_modified': fields.ISODateTime(
-        description='The topic last modification date', readonly=True),
     'organization': fields.Nested(
         org_ref_fields, allow_null=True,
         description='The publishing organization', readonly=True),
@@ -45,23 +45,25 @@ topic_fields = api.model('Topic', {
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
 }, mask='*,datasets{id,title,uri,page},reuses{id,title, image, image_thumbnail,uri,page}')
 
-
 topic_page_fields = api.model('TopicPage', fields.pager(topic_fields))
 
-parser = api.page_parser()
+topic_parser = TopicApiParser()
 
 
 @ns.route('/', endpoint='topics')
 class TopicsAPI(API):
 
     @api.doc('list_topics')
-    @api.expect(parser)
+    @api.expect(topic_parser.parser)
     @api.marshal_with(topic_page_fields)
     def get(self):
         '''List all topics'''
-        args = parser.parse_args()
-        return (Topic.objects.order_by('-created')
-                             .paginate(args['page'], args['page_size']))
+        args = topic_parser.parse()
+        topics = Topic.objects()
+        topics = topic_parser.parse_filters(topics, args)
+        sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
+        return (topics.order_by(sort)
+                .paginate(args['page'], args['page_size']))
 
     @api.doc('create_topic')
     @api.expect(topic_fields)
@@ -83,18 +85,26 @@ class TopicAPI(API):
         '''Get a given topic'''
         return topic
 
+    @api.secure
     @api.doc('update_topic')
     @api.expect(topic_fields)
     @api.marshal_with(topic_fields)
     @api.response(400, 'Validation error')
+    @api.response(403, 'Forbidden')
     def put(self, topic):
         '''Update a given topic'''
+        if not TopicEditPermission(topic).can():
+            api.abort(403, 'Forbidden')
         form = api.validate(TopicForm, topic)
         return form.save()
 
+    @api.secure
     @api.doc('delete_topic')
     @api.response(204, 'Object deleted')
+    @api.response(403, 'Forbidden')
     def delete(self, topic):
         '''Delete a given topic'''
+        if not TopicEditPermission(topic).can():
+            api.abort(403, 'Forbidden')
         topic.delete()
         return '', 204

@@ -1,5 +1,6 @@
+from datetime import datetime
 from flask import url_for
-
+from mongoengine.fields import DateTimeField
 from mongoengine.signals import pre_save
 from udata.models import db
 from udata.search import reindex
@@ -27,6 +28,18 @@ class Topic(db.Document, db.Owned):
     private = db.BooleanField()
     extras = db.ExtrasField()
 
+    created_at = DateTimeField(default=datetime.utcnow, required=True)
+
+    meta = {
+        'indexes': [
+            '$name',
+            'created_at',
+            'slug'
+        ] + db.Owned.meta['indexes'],
+        'ordering': ['-created_at'],
+        'auto_create_index_on_save': True
+    }
+
     def __str__(self):
         return self.name
 
@@ -46,6 +59,10 @@ class Topic(db.Document, db.Owned):
     @property
     def display_url(self):
         return url_for('topics.display', topic=self)
+
+    def count_discussions(self):
+        # There are no metrics on Topic to store discussions count
+        pass
 
 
 pre_save.connect(Topic.pre_save, sender=Topic)

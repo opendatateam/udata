@@ -78,3 +78,6 @@ data
 
 # PyCharm
 .idea
+
+# Pyenv
+.python-version
