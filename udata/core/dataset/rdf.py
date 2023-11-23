@@ -416,7 +416,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
         access_url = url_from_rdf(distrib, DCAT.accessURL)
         url = safe_unicode(download_url or access_url)
     else:
-        url = url_from_rdf(distrib, DCAT.URI)
+        url = distrib.identifier.toPython() if isinstance(distrib.identifier, URIRef) else None
     # we shouldn't create resources without URLs
     if not url:
         log.warning(f'Resource without url: {distrib}')
@@ -442,6 +442,8 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
             resource.checksum = Checksum()
             resource.checksum.value = rdf_value(checksum, SPDX.checksumValue)
             resource.checksum.type = algorithm
+    if is_additionnal:
+        resource.type = 'other'
 
     identifier = rdf_value(distrib, DCT.identifier)
     uri = distrib.identifier.toPython() if isinstance(distrib.identifier, URIRef) else None
@@ -498,7 +500,7 @@ def dataset_from_rdf(graph, dataset=None, node=None):
                 licenses.add(value.identifier.toPython())
 
     for additionnal in d.objects(DCAT.hasPart):
-        resource_from_rdf(distrib, dataset, is_additionnal=True)
+        resource_from_rdf(additionnal, dataset, is_additionnal=True)
         for predicate in DCT.license, DCT.rights:
             value = additionnal.value(predicate)
             if isinstance(value, (URIRef, Literal)):
