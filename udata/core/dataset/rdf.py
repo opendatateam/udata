@@ -424,6 +424,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
         resource = Resource()
         if dataset:
             dataset.resources.append(resource)
+    resource.filetype = 'remote'
     resource.title = title_from_rdf(distrib, url)
     resource.url = url
     resource.description = sanitize_html(distrib.value(DCT.description))
