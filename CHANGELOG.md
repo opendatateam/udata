@@ -7,6 +7,7 @@
 - Allow for discussions on Topics [#2922](https://github.com/opendatateam/udata/pull/2922)
 - Support skos.Concept themes for tags [#2926](https://github.com/opendatateam/udata/pull/2926)
 - Raise for status on DCAT harvester calls [#2927](https://github.com/opendatateam/udata/pull/2927)
+- Make sure harvested resources are marked as remote [#2931](https://github.com/opendatateam/udata/pull/2931)
 
 ## 6.2.0 (2023-10-26)
 
