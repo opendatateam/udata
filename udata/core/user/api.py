@@ -324,7 +324,7 @@ from udata.core.contact_point.api_fields import contact_point_page_fields
 contact_point_parser = ContactPointApiParser()
 
 
-@ns.route('/<user:user>/contact/', endpoint='user_contact_points')
+@ns.route('/<user:user>/contacts/', endpoint='user_contact_points')
 class OrgContactAPI(API):
     @api.doc('get_user_contact_point')
     @api.marshal_with(contact_point_page_fields)
