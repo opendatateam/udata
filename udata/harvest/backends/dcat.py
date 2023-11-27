@@ -1,7 +1,5 @@
 import logging
 
-import requests
-
 from rdflib import Graph, URIRef
 from rdflib.namespace import RDF
 import xml.etree.ElementTree as ET
@@ -70,7 +68,7 @@ class DcatBackend(BaseBackend):
         # if format can't be guessed from the url
         # we fallback on the declared Content-Type
         if not fmt:
-            response = requests.head(self.source.url)
+            response = self.head(self.source.url)
             response.raise_for_status()
             mime_type = response.headers.get('Content-Type', '').split(';', 1)[0]
             if not mime_type:

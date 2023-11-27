@@ -96,6 +96,11 @@ class BaseBackend(object):
     def config(self):
         return self.source.config
 
+    def head(self, url, headers={}, **kwargs):
+        headers.update(self.get_headers())
+        kwargs['verify'] = kwargs.get('verify', self.verify_ssl)
+        return requests.head(url, headers=headers, **kwargs)
+
     def get(self, url, headers={}, **kwargs):
         headers.update(self.get_headers())
         kwargs['verify'] = kwargs.get('verify', self.verify_ssl)
