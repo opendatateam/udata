@@ -481,7 +481,7 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     description = d.value(DCT.description) or d.value(DCT.abstract)
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
-    dataset.contact_point = contact_point_from_rdf(d)
+    dataset.contact_point = contact_point_from_rdf(d) or dataset.contact_point
 
     acronym = rdf_value(d, SKOS.altLabel)
     if acronym:
