@@ -389,6 +389,15 @@ def remote_url_from_rdf(rdf):
             except uris.ValidationError:
                 pass
 
+def theme_labels_from_rdf(rdf):
+    for theme in rdf.objects(DCAT.theme):
+        if isinstance(theme, RdfResource):
+            label = rdf_value(theme, SKOS.prefLabel)
+        else:
+            label = theme.toPython()
+        if label:
+            yield label
+
 
 def resource_from_rdf(graph_or_distrib, dataset=None):
     '''
@@ -467,8 +476,7 @@ def dataset_from_rdf(graph, dataset=None, node=None):
         dataset.acronym = acronym
 
     tags = [tag.toPython() for tag in d.objects(DCAT.keyword)]
-    tags += [theme.toPython() for theme in d.objects(DCAT.theme)
-             if not isinstance(theme, RdfResource)]
+    tags += theme_labels_from_rdf(d)
     dataset.tags = list(set(tags))
 
     temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
