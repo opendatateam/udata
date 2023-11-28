@@ -499,7 +499,7 @@ def dataset_from_rdf(graph, dataset=None, node=None):
             elif isinstance(value, RdfResource):
                 licenses.add(value.identifier.toPython())
 
-    for additionnal in d.objects(DCAT.hasPart):
+    for additionnal in d.objects(DCT.hasPart):
         resource_from_rdf(additionnal, dataset, is_additionnal=True)
         for predicate in DCT.license, DCT.rights:
             value = additionnal.value(predicate)
