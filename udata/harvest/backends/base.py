@@ -206,11 +206,6 @@ class BaseBackend(object):
             dataset.archived = None
 
             # TODO permissions checking
-            if not dataset.organization and not dataset.owner:
-                if self.source.organization:
-                    dataset.organization = self.source.organization
-                elif self.source.owner:
-                    dataset.owner = self.source.owner
 
             # TODO: Apply editble mappings
 
@@ -302,7 +297,16 @@ class BaseBackend(object):
                 {'harvest.source_id': str(self.source.id)},
             ],
         }).first()
-        return dataset or Dataset()
+
+        if dataset:
+            return dataset
+
+        if self.source.organization:
+            return Dataset(organization=self.source.organization)
+        elif self.source.owner:
+            return Dataset(owner=self.source.owner)
+
+        return Dataset()
 
     def validate(self, data, schema):
         '''Perform a data validation against a given schema.
