@@ -501,12 +501,6 @@ def dataset_from_rdf(graph, dataset=None, node=None):
 
     for additionnal in d.objects(DCT.hasPart):
         resource_from_rdf(additionnal, dataset, is_additionnal=True)
-        for predicate in DCT.license, DCT.rights:
-            value = additionnal.value(predicate)
-            if isinstance(value, (URIRef, Literal)):
-                licenses.add(value.toPython())
-            elif isinstance(value, RdfResource):
-                licenses.add(value.identifier.toPython())
 
     default_license = dataset.license or License.default()
     dataset_license = rdf_value(d, DCT.license)
