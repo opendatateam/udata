@@ -23,9 +23,15 @@ topic_fields = api.model('Topic', {
     'tags': fields.List(
         fields.String, description='Some keywords to help in search', required=True),
     'datasets': fields.List(
-        fields.Nested(dataset_fields), description='The topic datasets', attribute="datasets_deref"),
+        fields.Nested(dataset_fields),
+        description='The topic datasets',
+        attribute=lambda o: [d.fetch() for d in o.datasets],
+    ),
     'reuses': fields.List(
-        fields.Nested(reuse_fields), description='The topic reuses', attribute="reuses_deref"),
+        fields.Nested(reuse_fields),
+        description='The topic reuses',
+        attribute=lambda o: [r.fetch() for r in o.reuses],
+    ),
     'featured': fields.Boolean(description='Is the topic featured'),
     'private': fields.Boolean(description='Is the topic private'),
     'created_at': fields.ISODateTime(
@@ -83,9 +89,6 @@ class TopicAPI(API):
     @api.marshal_with(topic_fields)
     def get(self, topic):
         '''Get a given topic'''
-        # NB: settings topic.(datasets|reuses) directly won't work
-        topic.datasets_deref = [d.fetch() for d in topic.datasets]
-        topic.reuses_deref = [r.fetch() for r in topic.reuses]
         return topic
 
     @api.secure

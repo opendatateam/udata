@@ -33,15 +33,15 @@ class TopicsAPITest(APITestCase):
         self.assertEqual(response.json['data'][0]['id'], str(tag_topic.id))
         datasets = response.json['data'][0]['datasets']
         self.assertEqual(len(datasets), 3)
-        for dataset, expected in zip(datasets, tag_topic.datasets):
+        for dataset, expected in zip(datasets, [d.fetch() for d in tag_topic.datasets]):
             self.assertEqual(dataset['id'], str(expected.id))
             self.assertEqual(dataset['title'], str(expected.title))
             self.assertIsNotNone(dataset['page'])
             self.assertIsNotNone(dataset['uri'])
         reuses = response.json['data'][0]['reuses']
-        for reuse, expected in zip(reuses, tag_topic.reuses):
+        for reuse, expected in zip(reuses, [r.fetch() for r in tag_topic.reuses]):
             self.assertEqual(reuse['id'], str(expected.id))
-            self.assertEqual(reuse['title'], str(reuse.title))
+            self.assertEqual(reuse['title'], str(expected.title))
             self.assertIsNotNone(reuse['page'])
             self.assertIsNotNone(reuse['uri'])
         self.assertEqual(len(reuses), 3)
