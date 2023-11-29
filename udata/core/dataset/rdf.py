@@ -321,12 +321,12 @@ def contact_point_from_rdf(rdf, dataset):
                  or contact_point.value(DCAT.email))
         if dataset.organization:
             contact_point = ContactPoint.objects(
-                name=name, email=email, organization=dataset.organization)
+                name=name, email=email, organization=dataset.organization).first()
             return (contact_point or
                     ContactPoint(name=name, email=email, organization=dataset.organization).save())
         elif dataset.owner:
             contact_point = ContactPoint.objects(
-                name=name, email=email, owner=dataset.owner)
+                name=name, email=email, owner=dataset.owner).first()
             return (contact_point or
                     ContactPoint(name=name, email=email, owner=dataset.owner).save())
 
@@ -489,7 +489,9 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     description = d.value(DCT.description) or d.value(DCT.abstract)
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
-    dataset.contact_point = contact_point_from_rdf(d, dataset) or dataset.contact_point
+    bob = contact_point_from_rdf(d, dataset) or dataset.contact_point
+    print(bob)
+    dataset.contact_point = bob
 
     acronym = rdf_value(d, SKOS.altLabel)
     if acronym:
