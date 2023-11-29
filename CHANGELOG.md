@@ -5,8 +5,9 @@
 - Add topic filter on datasets list [#2915](https://github.com/opendatateam/udata/pull/2915)
 - Topics: API v2 endpoints [#2913](https://github.com/opendatateam/udata/pull/2913)
 - Allow for discussions on Topics [#2922](https://github.com/opendatateam/udata/pull/2922)
-- Support skos.Concept themes for tags [#2926](https://github.com/opendatateam/udata/pull/2926)
-- :warning: **Breaking change** Use LazyReferenceField on Topic datasets and reuses [#2924](https://github.com/opendatateam/udata/pull/2924)
+- Raise for status on DCAT harvester calls [#2927](https://github.com/opendatateam/udata/pull/2927)
+- Use GET and POST harvest BaseBackend utility to have user-agent [#2930](https://github.com/opendatateam/udata/pull/2930)
+- Use LazyReferenceField on Topic datasets and reuses [#2924](https://github.com/opendatateam/udata/pull/2924)
 
 ## 6.2.0 (2023-10-26)
 
