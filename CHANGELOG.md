@@ -8,6 +8,11 @@
 - Support skos.Concept themes for tags [#2926](https://github.com/opendatateam/udata/pull/2926)
 - Raise for status on DCAT harvester calls [#2927](https://github.com/opendatateam/udata/pull/2927)
 - Use GET and POST harvest BaseBackend utility to have user-agent [#2930](https://github.com/opendatateam/udata/pull/2930)
+- :warning: **breaking change** Geozone refactor [#2878](https://github.com/opendatateam/udata/pull/2878):
+  - Complete Geozone model refactor, keeping only fields `slug`, `name`, `code`, `level` and adding `uri`
+  - Removed parent and validity concept
+  - `udata spatial load -d` to load new geozones into the database
+  - `udata spatial migrate` to migrate datasets geozones to new ones
 
 ## 6.2.0 (2023-10-26)
 
