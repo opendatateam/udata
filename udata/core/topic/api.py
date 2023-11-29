@@ -58,6 +58,10 @@ topic_parser = TopicApiParser()
 
 @ns.route('/', endpoint='topics')
 class TopicsAPI(API):
+    """
+    Warning: querying a list with a topic containing a lot of related objects (datasets, reuses)
+    will fail/take a lot of time because every object is dereferenced. Use api v2 if you can.
+    """
 
     @api.doc('list_topics')
     @api.expect(topic_parser.parser)
@@ -85,6 +89,11 @@ class TopicsAPI(API):
 @api.param('topic', 'The topic ID or slug')
 @api.response(404, 'Object not found')
 class TopicAPI(API):
+    """
+    Warning: querying a topic containing a lot of related objects (datasets, reuses)
+    will fail/take a lot of time because every object is dereferenced. Use api v2 if you can.
+    """
+
     @api.doc('get_topic')
     @api.marshal_with(topic_fields)
     def get(self, topic):
