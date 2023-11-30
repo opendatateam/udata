@@ -23,9 +23,15 @@ topic_fields = api.model('Topic', {
     'tags': fields.List(
         fields.String, description='Some keywords to help in search', required=True),
     'datasets': fields.List(
-        fields.Nested(dataset_fields), description='The topic datasets'),
+        fields.Nested(dataset_fields),
+        description='The topic datasets',
+        attribute=lambda o: [d.fetch() for d in o.datasets],
+    ),
     'reuses': fields.List(
-        fields.Nested(reuse_fields), description='The topic reuses'),
+        fields.Nested(reuse_fields),
+        description='The topic reuses',
+        attribute=lambda o: [r.fetch() for r in o.reuses],
+    ),
     'featured': fields.Boolean(description='Is the topic featured'),
     'private': fields.Boolean(description='Is the topic private'),
     'created_at': fields.ISODateTime(
@@ -43,7 +49,7 @@ topic_fields = api.model('Topic', {
         'topics.display', lambda o: {'topic': o},
         description='The topic page URL', readonly=True, fallback_endpoint='api.topic'),
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
-}, mask='*,datasets{id,title,uri,page},reuses{id,title, image, image_thumbnail,uri,page}')
+}, mask='*,datasets{id,title,uri,page},reuses{id,title,image,image_thumbnail,uri,page}')
 
 topic_page_fields = api.model('TopicPage', fields.pager(topic_fields))
 
@@ -52,6 +58,10 @@ topic_parser = TopicApiParser()
 
 @ns.route('/', endpoint='topics')
 class TopicsAPI(API):
+    """
+    Warning: querying a list with a topic containing a lot of related objects (datasets, reuses)
+    will fail/take a lot of time because every object is dereferenced. Use api v2 if you can.
+    """
 
     @api.doc('list_topics')
     @api.expect(topic_parser.parser)
@@ -79,6 +89,11 @@ class TopicsAPI(API):
 @api.param('topic', 'The topic ID or slug')
 @api.response(404, 'Object not found')
 class TopicAPI(API):
+    """
+    Warning: querying a topic containing a lot of related objects (datasets, reuses)
+    will fail/take a lot of time because every object is dereferenced. Use api v2 if you can.
+    """
+
     @api.doc('get_topic')
     @api.marshal_with(topic_fields)
     def get(self, topic):
