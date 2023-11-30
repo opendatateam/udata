@@ -20,9 +20,9 @@ class Topic(db.Document, db.Owned):
 
     tags = db.ListField(db.StringField())
     datasets = db.ListField(
-        db.ReferenceField('Dataset', reverse_delete_rule=db.PULL))
+        db.LazyReferenceField('Dataset', reverse_delete_rule=db.PULL))
     reuses = db.ListField(
-        db.ReferenceField('Reuse', reverse_delete_rule=db.PULL))
+        db.LazyReferenceField('Reuse', reverse_delete_rule=db.PULL))
 
     featured = db.BooleanField()
     private = db.BooleanField()
@@ -54,7 +54,7 @@ class Topic(db.Document, db.Owned):
         except cls.DoesNotExist:
             datasets_list_dif = document.datasets
         for dataset in datasets_list_dif:
-            reindex.delay(*as_task_param(dataset))
+            reindex.delay(*as_task_param(dataset.fetch()))
 
     @property
     def display_url(self):
