@@ -300,6 +300,7 @@ class DcatBackendTest:
         assert len(dataset.resources) == 2
 
         resource_1 = next(res for res in dataset.resources if res.title == 'Resource 1-1')
+        assert resource_1.filetype == 'remote'
         # Format is a IANA URI
         assert resource_1.format == 'json'
         assert resource_1.mime == 'application/json'
