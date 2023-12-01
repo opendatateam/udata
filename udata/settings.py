@@ -461,6 +461,8 @@ class Testing(object):
     WTF_CSRF_ENABLED = False
     AUTO_INDEX = False
     CELERY_TASK_ALWAYS_EAGER = True
+    # TODO: ideally, this should be set to True in order to reveal exceptions in delayed tasks
+    CELERY_TASK_EAGER_PROPAGATES = False
     TEST_WITH_PLUGINS = False
     PLUGINS = []
     TEST_WITH_THEME = False

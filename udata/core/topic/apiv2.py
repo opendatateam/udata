@@ -2,6 +2,7 @@ import logging
 
 import mongoengine
 
+from bson import ObjectId
 from flask import url_for, request
 
 from udata.api import apiv2, API, fields
@@ -131,22 +132,8 @@ class TopicDatasetsAPI(API):
     @apiv2.response(400, 'Expecting a list')
     @apiv2.response(400, 'Expecting a list of dicts with id attribute')
     @apiv2.response(404, 'Topic not found')
-    @apiv2.response(404, 'Dataset(s) not found')
     @apiv2.response(403, 'Forbidden')
     def post(self, topic):
-        '''Add datasets to a given topic from a list of dataset ids'''
-        def add_dataset(topic, dataset):
-            if dataset not in topic.datasets:
-                topic.datasets.append(dataset)
-            return topic
-
-        def get_dataset(dataset_id):
-            try:
-                dataset = Dataset.objects.get_or_404(id=dataset_id)
-            except mongoengine.errors.ValidationError:
-                apiv2.abort(400, 'Malformed object id(s) in request')
-            return dataset
-
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, 'Forbidden')
 
@@ -157,10 +144,15 @@ class TopicDatasetsAPI(API):
         if not all(isinstance(d, dict) and d.get('id') for d in data):
             apiv2.abort(400, 'Expecting a list of dicts with id attribute')
 
-        datasets = (get_dataset(d['id']) for d in data)
-        for dataset in datasets:
-            topic = add_dataset(topic, dataset)
-        topic.save()
+        try:
+            datasets = Dataset.objects.filter(id__in=[d['id'] for d in data]).only('id')
+            diff = set(d.id for d in datasets) - set(d.id for d in topic.datasets)
+        except mongoengine.errors.ValidationError:
+            apiv2.abort(400, 'Malformed object id(s) in request')
+
+        if diff:
+            topic.datasets += [ObjectId(did) for did in diff]
+            topic.save()
 
         return topic, 201
 
@@ -210,22 +202,9 @@ class TopicReusesAPI(API):
     @apiv2.response(400, 'Expecting a list')
     @apiv2.response(400, 'Expecting a list of dicts with id attribute')
     @apiv2.response(404, 'Topic not found')
-    @apiv2.response(404, 'Reuse(s) not found')
     @apiv2.response(403, 'Forbidden')
     def post(self, topic):
         '''Add reuses to a given topic from a list of reuses ids'''
-        def add_reuse(topic, reuse):
-            if reuse.id not in (r.id for r in topic.reuses):
-                topic.reuses.append(reuse)
-            return topic
-
-        def get_reuse(reuse_id):
-            try:
-                reuse = Reuse.objects.get_or_404(id=reuse_id)
-            except mongoengine.errors.ValidationError:
-                apiv2.abort(400, 'Malformed object id(s) in request')
-            return reuse
-
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, 'Forbidden')
 
@@ -236,10 +215,15 @@ class TopicReusesAPI(API):
         if not all(isinstance(d, dict) and d.get('id') for d in data):
             apiv2.abort(400, 'Expecting a list of dicts with id attribute')
 
-        reuses = (get_reuse(d['id']) for d in data)
-        for reuse in reuses:
-            topic = add_reuse(topic, reuse)
-        topic.save()
+        try:
+            reuses = Reuse.objects.filter(id__in=[r['id'] for r in data]).only('id')
+            diff = set(d.id for d in reuses) - set(d.id for d in topic.reuses)
+        except mongoengine.errors.ValidationError:
+            apiv2.abort(400, 'Malformed object id(s) in request')
+
+        if diff:
+            topic.reuses += [ObjectId(rid) for rid in diff]
+            topic.save()
 
         return topic, 201
 
