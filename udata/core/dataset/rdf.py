@@ -327,7 +327,8 @@ def frequency_from_rdf(term):
         if EUFREQ in term:
             return EU_RDF_REQUENCIES.get(term)
         _, _, freq = namespace_manager.compute_qname(term)
-        return freq.lower()
+        if freq.lower() in UPDATE_FREQUENCIES:
+            return freq.lower()
 
 
 def mime_from_rdf(resource):
