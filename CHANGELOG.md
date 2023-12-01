@@ -12,6 +12,7 @@
 - Use GET and POST harvest BaseBackend utility to have user-agent [#2930](https://github.com/opendatateam/udata/pull/2930)
 - Use LazyReferenceField on Topic datasets and reuses [#2924](https://github.com/opendatateam/udata/pull/2924)
 - Use harvested dates and not max with internal [#2932](https://github.com/opendatateam/udata/pull/2932)
+- Better rdf frequency resilience [#2933](https://github.com/opendatateam/udata/pull/2933)
 - :warning: **breaking change** Geozone refactor [#2878](https://github.com/opendatateam/udata/pull/2878):
   - Complete Geozone model refactor, keeping only fields `slug`, `name`, `code`, `level` and adding `uri`
   - Removed parent and validity concept
