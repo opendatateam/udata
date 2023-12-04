@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 7.0.0 (2023-12-04)
 
 - Prevent sending post_save signals on extras update [#2919](https://github.com/opendatateam/udata/pull/2919)
 - Add topic filter on datasets list [#2915](https://github.com/opendatateam/udata/pull/2915)
