@@ -130,7 +130,6 @@ class DatasetSearch(ModelSearchAdapter):
                 geozones.append({
                     'id': zone.id,
                     'name': zone.name,
-                    'keys': zone.keys_values
                 })
                 coverage_level = min(coverage_level, admin_levels[zone.level])
             document.update({
