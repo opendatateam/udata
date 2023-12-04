@@ -21,7 +21,7 @@
     - `udata spatial load -d` to load new geozones into the database
     - `udata spatial migrate` to migrate datasets geozones to new ones
     - Reindex datasets
-  - Removedg forgotten fields in search [#2934](https://github.com/opendatateam/udata/pull/2934)
+  - Removed forgotten fields in search [#2934](https://github.com/opendatateam/udata/pull/2934)
 
 ## 6.2.0 (2023-10-26)
 
