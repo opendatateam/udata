@@ -124,7 +124,7 @@ class DatasetSearch(ModelSearchAdapter):
             # Index precise zone labels and parents zone identifiers
             # to allow fast filtering.
             zone_ids = [z.id for z in dataset.spatial.zones]
-            zones = GeoZone.objects(id__in=zone_ids).exclude('geom')
+            zones = GeoZone.objects(id__in=zone_ids)
             parents = set()
             geozones = []
             coverage_level = ADMIN_LEVEL_MAX
