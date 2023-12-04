@@ -43,6 +43,7 @@
         <dcat:keyword>Tag 3</dcat:keyword>
         <dcterms:abstract><![CDATA[<h1>h1 title</h1><h2>h2 title</h2><b>and bold text</b>]]></dcterms:abstract>
         <dcterms:title>Dataset 1</dcterms:title>
+        <dct:accrualPeriodicity><dcterms:Frequency rdf:about="http://purl.org/cld/freq/ThisTermDoesNotExist"></dcterms:Frequency></dct:accrualPeriodicity>
         <dct:temporal>
           <dcterms:PeriodOfTime>
             <dcat:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-01T00:00:00</dcat:startDate>
