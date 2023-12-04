@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 7.0.0 (2023-12-04)
 
 - Prevent sending post_save signals on extras update [#2919](https://github.com/opendatateam/udata/pull/2919)
