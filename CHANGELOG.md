@@ -24,7 +24,7 @@
     - Datasets with geozone will return a 500 due to `mongoengine.errors.FieldDoesNotExist: The fields "{'flag', 'dbpedia', ...}" do not exist on the document "GeoZone"`
     - `udata spatial load -d` to load new geozones into the database
     - `udata spatial migrate` to migrate datasets geozones to new ones
-    - Reindex datasets
+    - Reindex datasets (`udata search index dataset`) if using [udata-search-service](https://github.com/opendatateam/udata-search-service)
   - Removed forgotten fields in search [#2934](https://github.com/opendatateam/udata/pull/2934)
 
 ## 6.2.0 (2023-10-26)
