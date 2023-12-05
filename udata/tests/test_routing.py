@@ -293,83 +293,20 @@ class TerritoryConverterTest:
     def test_serialize_zone_with_validity(self):
         zone = GeoZoneFactory()
         url = url_for('territory_tester', territory=zone)
-        expected = '/territory/{level}/{code}@{validity.start}/{slug}'
+        expected = '/territory/{level}/{code}/{slug}'
         assert url == expected.format(**zone._data)
-
-    def test_serialize_zone_without_validity(self):
-        zone = GeoZoneFactory(validity=None)
-        url = url_for('territory_tester', territory=zone)
-        expected = '/territory/{level}/{code}@latest/{slug}'
-        assert url == expected.format(**zone._data)
-
-    def test_serialize_default_prefix_zone_with_validity(self):
-        zone = GeoZoneFactory(level='fr:level')
-        url = url_for('territory_tester', territory=zone)
-        expected = '/territory/level/{code}@{validity.start}/{slug}'
-        assert url == expected.format(**zone._data)
-
-    def test_serialize_default_prefix_zone_without_validity(self):
-        zone = GeoZoneFactory(level='fr:level', validity=None)
-        url = url_for('territory_tester', territory=zone)
-        expected = '/territory/level/{code}@latest/{slug}'
-        assert url == expected.format(**zone._data)
-
-    def test_resolve_default_prefix_zone_with_validity(self, client):
-        zone = GeoZoneFactory(level='fr:level')
-        url = '/territory/level/{code}@{validity.start}/{slug}'
-        response = client.get(url.format(**zone._data))
-        assert200(response)
-
-    def test_resolve_default_prefix_zone_without_validity(self, client):
-        zone = GeoZoneFactory(level='fr:level', validity=None)
-        url = '/territory/level/{code}@latest/{slug}'
-        response = client.get(url.format(**zone._data))
-        assert200(response)
-
-    def test_resolve_zone_with_validity(self, client):
-        zone = GeoZoneFactory()
-        url = '/territory/{level}/{code}@{validity.start}/{slug}'
-        response = client.get(url.format(**zone._data))
-        assert200(response)
-
-    def test_resolve_zone_with_latest_validity(self, client):
-        zone = GeoZoneFactory(validity=None)
-        url = '/territory/{level}/{code}@latest/{slug}'
-        response = client.get(url.format(**zone._data))
-        assert200(response)
-
-    def test_resolve_zone_without_validity(self, client):
-        zone = GeoZoneFactory(validity=None)
-        url = '/territory/{level}/{code}/{slug}'
-        response = client.get(url.format(**zone._data))
-        assert200(response)
 
     def test_resolve_zone_without_optional_slug(self, client):
-        zone = GeoZoneFactory(validity=None)
-        url = '/territory/{level}/{code}@latest/'
+        zone = GeoZoneFactory()
+        url = '/territory/{level}/{code}/'
         response = client.get(url.format(**zone._data))
         assert200(response)
 
     def test_resolve_zone_without_slug_nor_trailing_slash(self, client):
-        zone = GeoZoneFactory(validity=None)
-        url = '/territory/{level}/{code}@latest'
+        zone = GeoZoneFactory()
+        url = '/territory/{level}/{code}'
         response = client.get(url.format(**zone._data))
         assert200(response)
 
     def test_model_not_found(self, client):
-        assert404(client.get('/territory/l/c@latest'))
-
-    def test_resolve_latest_without_validity_end(self, client):
-        '''
-        Two zones for the same code, one w/ validity.end and the other w/o:
-        we should get the one w/o validity.end (i.e. still valid)
-        '''
-        zone1 = GeoZoneFactory(level='fr:level')
-        zone2 = GeoZoneFactory(level='fr:level', code=zone1.code, slug=zone1.slug)
-        zone2.validity.end = None
-        zone2.save()
-        url = '/territory/level/{code}@latest/{slug}'.format(code=zone1.code, slug=zone1.slug)
-        response = client.get(url)
-        assert200(response)
-        assert response.data.decode() == zone2.id
-        assert response.data.decode() != zone1.id
+        assert404(client.get('/territory/l/c'))

@@ -2,9 +2,30 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 7.0.0 (2023-12-04)
+
+- Prevent sending post_save signals on extras update [#2919](https://github.com/opendatateam/udata/pull/2919)
 - Add topic filter on datasets list [#2915](https://github.com/opendatateam/udata/pull/2915)
 - Topics: API v2 endpoints [#2913](https://github.com/opendatateam/udata/pull/2913)
 - Allow for discussions on Topics [#2922](https://github.com/opendatateam/udata/pull/2922)
+- Raise for status on DCAT harvester calls [#2927](https://github.com/opendatateam/udata/pull/2927)
+- Harvest dcterms:hasPart as 'other' resource in DCAT [#2928](https://github.com/opendatateam/udata/pull/2928)
+- Make sure harvested resources are marked as remote [#2931](https://github.com/opendatateam/udata/pull/2931)
+- Use GET and POST harvest BaseBackend utility to have user-agent [#2930](https://github.com/opendatateam/udata/pull/2930)
+- Use LazyReferenceField on Topic datasets and reuses [#2924](https://github.com/opendatateam/udata/pull/2924)
+- Use harvested dates and not max with internal [#2932](https://github.com/opendatateam/udata/pull/2932)
+- Better rdf frequency resilience [#2933](https://github.com/opendatateam/udata/pull/2933)
+- :warning: **breaking change** Geozone refactor [#2878](https://github.com/opendatateam/udata/pull/2878):
+  - Complete Geozone model refactor, keeping only fields `slug`, `name`, `code`, `level` and adding `uri`
+  - Removed parent and validity concept
+  - To deploy:
+    - Datasets with geozone will return a 500 due to `mongoengine.errors.FieldDoesNotExist: The fields "{'flag', 'dbpedia', ...}" do not exist on the document "GeoZone"`
+    - `udata spatial load -d` to load new geozones into the database
+    - `udata spatial migrate` to migrate datasets geozones to new ones
+    - Reindex datasets (`udata search index dataset`) if using [udata-search-service](https://github.com/opendatateam/udata-search-service)
+  - Removed forgotten fields in search [#2934](https://github.com/opendatateam/udata/pull/2934)
 
 ## 6.2.0 (2023-10-26)
 

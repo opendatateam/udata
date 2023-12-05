@@ -296,21 +296,32 @@ class DcatBackendTest:
         assert dataset.temporal_coverage is not None
         assert dataset.temporal_coverage.start == date(2016, 1, 1)
         assert dataset.temporal_coverage.end == date(2016, 12, 5)
+        assert dataset.frequency is None
 
-        assert len(dataset.resources) == 2
+        assert len(dataset.resources) == 3
 
         resource_1 = next(res for res in dataset.resources if res.title == 'Resource 1-1')
+        assert resource_1.filetype == 'remote'
         # Format is a IANA URI
         assert resource_1.format == 'json'
         assert resource_1.mime == 'application/json'
         assert resource_1.filesize == 12323
         assert resource_1.description == 'A JSON resource'
         assert resource_1.url == 'http://data.test.org/datasets/1/resources/1/file.json'
+        assert resource_1.type == 'main'
 
         resource_2 = next(res for res in dataset.resources if res.title == 'Resource 1-2')
         assert resource_2.format == 'json'
         assert resource_2.description == 'A JSON resource'
         assert resource_2.url == 'http://data.test.org/datasets/1/resources/2/file.json'
+        assert resource_2.type == 'main'
+
+        # Make sure additionnal resource is correctly harvested
+        resource_3 = next(res for res in dataset.resources if res.title == 'Resource 1-3')
+        assert resource_3.format == 'json'
+        assert resource_3.description == ''
+        assert resource_3.url == 'http://data.test.org/datasets/1/resources/3'
+        assert resource_3.type == 'other'
 
     def test_geonetwork_xml_catalog(self, rmock):
         url = mock_dcat(rmock, 'geonetwork.xml', path='catalog.xml')
@@ -359,6 +370,19 @@ class DcatBackendTest:
         assert dataset.harvest.remote_url == 'https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//datasets/0437a976-cff1-4fa6-807a-c23006df2f8f'  # noqa
         assert dataset.harvest.last_update.date() == date.today()
 
+    def test_user_agent_get(self, rmock):
+        url = mock_dcat(rmock, 'catalog.xml', path='without/extension')
+        rmock.head(url, headers={'Content-Type': 'application/xml; charset=utf-8'})
+        get_mock = rmock.get(url)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+        actions.run(source.slug)
+
+        assert 'User-Agent' in get_mock.last_request.headers
+        assert get_mock.last_request.headers['User-Agent'] == 'uData/0.1 dcat'
+
     def test_unsupported_mime_type(self, rmock):
         url = DCAT_URL_PATTERN.format(path='', domain=TEST_DOMAIN)
         rmock.head(url, headers={'Content-Type': 'text/html; charset=utf-8'})
@@ -399,7 +423,7 @@ class DcatBackendTest:
         error = job.errors[0]
         expected = 'Unable to detect format from extension or mime type'
         assert error.message == expected
-        
+
     def test_use_replaced_uris(self, rmock, mocker):
         mocker.patch.dict(
             URIS_TO_REPLACE,
@@ -424,7 +448,34 @@ class DcatBackendTest:
         assert len(job.items) == 0
         assert job.status == 'done'
 
-        
+    def test_target_404(self, rmock):
+        filename = 'obvious-format.jsonld'
+        url = DCAT_URL_PATTERN.format(path=filename, domain=TEST_DOMAIN)
+        rmock.get(url, status_code=404)
+
+        source = HarvestSourceFactory(backend='dcat', url=url, organization=OrganizationFactory())
+        actions.run(source.slug)
+        source.reload()
+
+        job = source.get_last_job()
+        assert job.status == "failed"
+        assert len(job.errors) == 1
+        assert "404 Client Error" in job.errors[0].message
+
+        filename = 'need-to-head-to-guess-format'
+        url = DCAT_URL_PATTERN.format(path=filename, domain=TEST_DOMAIN)
+        rmock.head(url, status_code=404)
+
+        source = HarvestSourceFactory(backend='dcat', url=url, organization=OrganizationFactory())
+        actions.run(source.slug)
+        source.reload()
+
+        job = source.get_last_job()
+        assert job.status == "failed"
+        assert len(job.errors) == 1
+        assert "404 Client Error" in job.errors[0].message
+
+
 @pytest.mark.usefixtures('clean_db')
 @pytest.mark.options(PLUGINS=['csw-dcat'])
 class CswDcatBackendTest:
@@ -452,7 +503,8 @@ class CswDcatBackendTest:
         assert dataset.title == 'Localisation des accidents de la circulation routière en 2017'
         assert dataset.description == 'Accidents corporels de la circulation en Hauts de France (2017)'
         assert set(dataset.tags) == set([
-            'donnee-ouverte', 'accidentologie', 'accident'
+            'donnee-ouverte', 'accidentologie', 'accident', 'reseaux-de-transport', 'accident-de-la-route',
+            'hauts-de-france', 'nord', 'pas-de-calais', 'oise', 'somme', 'aisne'
         ])
         assert dataset.harvest.created_at.date() == date(2017, 1, 1)
         assert len(dataset.resources) == 1
@@ -460,3 +512,16 @@ class CswDcatBackendTest:
         assert resource.title == 'accidento_hdf_L93'
         assert resource.url == 'https://www.geo2france.fr/geoserver/cr_hdf/ows'
         assert resource.format == 'ogc:wms'
+
+    def test_user_agent_post(self, rmock):
+        url = mock_csw_pagination(rmock, 'geonetwork/srv/eng/csw.rdf', 'geonetworkv4-page-{}.xml')
+        get_mock = rmock.post(url)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='csw-dcat',
+                                      url=url,
+                                      organization=org)
+
+        actions.run(source.slug)
+
+        assert 'User-Agent' in get_mock.last_request.headers
+        assert get_mock.last_request.headers['User-Agent'] == 'uData/0.1 csw-dcat'
