@@ -262,10 +262,10 @@ class DatasetContactAPI(API):
         DatasetEditPermission(dataset).test()
         if dataset.organization:
             contact_point = ContactPoint.objects(
-                id=contact_point_id, organization=dataset.organization)
+                id=contact_point_id, organization=dataset.organization).first()
         else:
             contact_point = ContactPoint.objects(
-                id=contact_point_id, owner=dataset.owner)
+                id=contact_point_id, owner=dataset.owner).first()
         if not contact_point:
             api.abort(400, 'Wrong contact point id or contact point ownership mismatch')
         dataset.contact_point = contact_point
