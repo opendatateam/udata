@@ -76,6 +76,21 @@ class SpatialApiTest(APITestCase):
             self.assertIn('level', suggestion)
             self.assertIn('name-test', suggestion['name'])
 
+    def test_suggest_zones_sorted(self):
+        '''It should suggest zones based on its name'''
+        country_level = GeoLevelFactory(id='country', name='country', admin_level=10)
+        region_level = GeoLevelFactory(id='region', name='region', admin_level=20)
+        country_zone = GeoZoneFactory(name='name-test-country', level=country_level.id)
+        region_zone = GeoZoneFactory(name='name-test-region', level=region_level.id)
+
+        response = self.get(
+            url_for('api.suggest_zones'), qs={'q': 'name-test', 'size': '5'})
+        self.assert200(response)
+
+        self.assertEqual(len(response.json), 2)
+        self.assertEqual((response.json[0]['id']), country_zone.id)
+        self.assertEqual((response.json[1]['id']), region_zone.id)
+
     def test_suggest_zones_on_code(self):
         '''It should suggest zones based on its code'''
         for i in range(4):
