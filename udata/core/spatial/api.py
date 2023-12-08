@@ -23,8 +23,6 @@ GEOM_TYPES = (
 )
 LEGACY_GEOID_PATTERN = r"^([a-z]+:[a-z]+:\d+)@(\d{4}-\d{2}-\d{2})$"
 
-DEFAULT_SORTING = '-created_at'
-
 
 ns = api.namespace('spatial', 'Spatial references')
 
@@ -61,6 +59,11 @@ class SuggestZonesAPI(API):
         '''Geospatial zones suggest endpoint using mongoDB contains'''
         args = suggest_parser.parse_args()
         geozones = GeoZone.objects(Q(name__icontains=args['q']) | Q(code__icontains=args['q']))
+
+        # We're manually sorting based on zone level int (cause we don't have the int value directly in mongo document)
+        level_id_to_int_level = {level.id: level.admin_level for level in GeoLevel.objects()}
+        geozones = sorted(geozones, key=lambda zone: level_id_to_int_level[zone.level])
+
         return [
             {
                 'id': geozone.id,
@@ -69,7 +72,7 @@ class SuggestZonesAPI(API):
                 'level': geozone.level,
                 'uri': geozone.uri
             }
-            for geozone in geozones.order_by(DEFAULT_SORTING).limit(args['size'])
+            for geozone in geozones[:args['size']]
         ]
 
 
