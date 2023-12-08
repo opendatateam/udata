@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Improve search serialization perfs for datasets in big topics [#2937](https://github.com/opendatateam/udata/pull/2937)
 
 ## 7.0.1 (2023-12-06)
 
