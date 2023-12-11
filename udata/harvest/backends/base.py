@@ -96,13 +96,18 @@ class BaseBackend(object):
     def config(self):
         return self.source.config
 
-    def get(self, url, **kwargs):
-        headers = self.get_headers()
+    def head(self, url, headers={}, **kwargs):
+        headers.update(self.get_headers())
+        kwargs['verify'] = kwargs.get('verify', self.verify_ssl)
+        return requests.head(url, headers=headers, **kwargs)
+
+    def get(self, url, headers={}, **kwargs):
+        headers.update(self.get_headers())
         kwargs['verify'] = kwargs.get('verify', self.verify_ssl)
         return requests.get(url, headers=headers, **kwargs)
 
-    def post(self, url, data, **kwargs):
-        headers = self.get_headers()
+    def post(self, url, data, headers={}, **kwargs):
+        headers.update(self.get_headers())
         kwargs['verify'] = kwargs.get('verify', self.verify_ssl)
         return requests.post(url, data=data, headers=headers, **kwargs)
 
@@ -268,8 +273,6 @@ class BaseBackend(object):
         raise NotImplementedError
 
     def add_item(self, identifier, *args, **kwargs):
-        if identifier is None:
-            raise ValueError('DCT.identifier is required for all DCAT.Dataset records')
         item = HarvestItem(remote_id=str(identifier), args=args, kwargs=kwargs)
         self.job.items.append(item)
         return item

@@ -2,10 +2,67 @@
 
 ## Current (in progress)
 
-- Add harvesters count to site metrics [#2890](https://github.com/opendatateam/udata/pull/2890)
-- Return 400 instead of 500 in case of not ObjectID arg in API [#2889](https://github.com/opendatateam/udata/pull/2889)
-- Use a single session for reindex [#2891](https://github.com/opendatateam/udata/pull/2891)
+- Improve search serialization perfs for datasets in big topics [#2937](https://github.com/opendatateam/udata/pull/2937)
 - Migrate to Flask-Babel because of Flask-BabelEx deprecation [#2897](https://github.com/opendatateam/udata/pull/2897)
+
+## 7.0.1 (2023-12-06)
+
+- Add sorting in geozone suggest API endpoint to return zones based on their admin level [#2936](https://github.com/opendatateam/udata/pull/2936)
+
+## 7.0.0 (2023-12-04)
+
+- Prevent sending post_save signals on extras update [#2919](https://github.com/opendatateam/udata/pull/2919)
+- Add topic filter on datasets list [#2915](https://github.com/opendatateam/udata/pull/2915)
+- Topics: API v2 endpoints [#2913](https://github.com/opendatateam/udata/pull/2913)
+- Allow for discussions on Topics [#2922](https://github.com/opendatateam/udata/pull/2922)
+- Raise for status on DCAT harvester calls [#2927](https://github.com/opendatateam/udata/pull/2927)
+- Harvest dcterms:hasPart as 'other' resource in DCAT [#2928](https://github.com/opendatateam/udata/pull/2928)
+- Make sure harvested resources are marked as remote [#2931](https://github.com/opendatateam/udata/pull/2931)
+- Use GET and POST harvest BaseBackend utility to have user-agent [#2930](https://github.com/opendatateam/udata/pull/2930)
+- Use LazyReferenceField on Topic datasets and reuses [#2924](https://github.com/opendatateam/udata/pull/2924)
+- Use harvested dates and not max with internal [#2932](https://github.com/opendatateam/udata/pull/2932)
+- Better rdf frequency resilience [#2933](https://github.com/opendatateam/udata/pull/2933)
+- :warning: **breaking change** Geozone refactor [#2878](https://github.com/opendatateam/udata/pull/2878):
+  - Complete Geozone model refactor, keeping only fields `slug`, `name`, `code`, `level` and adding `uri`
+  - Removed parent and validity concept
+  - To deploy:
+    - Datasets with geozone will return a 500 due to `mongoengine.errors.FieldDoesNotExist: The fields "{'flag', 'dbpedia', ...}" do not exist on the document "GeoZone"`
+    - `udata spatial load -d` to load new geozones into the database
+    - `udata spatial migrate` to migrate datasets geozones to new ones
+    - Reindex datasets (`udata search index dataset`) if using [udata-search-service](https://github.com/opendatateam/udata-search-service)
+  - Removed forgotten fields in search [#2934](https://github.com/opendatateam/udata/pull/2934)
+
+## 6.2.0 (2023-10-26)
+
+### New & Improved
+
+- Topics have been refactored and are no more deprecated:
+  - Topics creation, update and deletion are now opened to all users [#2898](https://github.com/opendatateam/udata/pull/2898)
+  - Topics are now `db.Owned` and searchable by `id` in dataset search [#2901](https://github.com/opendatateam/udata/pull/2901) [#2917](https://github.com/opendatateam/udata/pull/2917)
+  - Remove `deleted` api field that does not exist [#2903](https://github.com/opendatateam/udata/pull/2903)
+  - Add `created_at`field to topic's model [#2904](https://github.com/opendatateam/udata/pull/2904)
+  - Topics can now be filtered by `tag` field [#2904](https://github.com/opendatateam/udata/pull/2904)
+  - Topics can now be queried by test search in `name` field with `q` argument [#2904](https://github.com/opendatateam/udata/pull/2904)
+- Add support for a CSW harvester using DCAT format [#2800](https://github.com/opendatateam/udata/pull/2800)
+- Add German to udata translations [2899](https://github.com/opendatateam/udata/pull/2899)[2909](https://github.com/opendatateam/udata/pull/2909)
+- Add harvesters count to site metrics [#2890](https://github.com/opendatateam/udata/pull/2890)
+- Use a single session for reindex [#2891](https://github.com/opendatateam/udata/pull/2891)
+
+- Fix site title and keywords never get updated [#2900](https://github.com/opendatateam/udata/pull/2900)
+- Reuse's extras are now exposed by API [#2905](https://github.com/opendatateam/udata/pull/2905)
+- Add configuration settings to enhance cookies security [#2910](https://github.com/opendatateam/udata/pull/2910)
+- Add items.dataset to HarvestJob indexes [#2907](https://github.com/opendatateam/udata/pull/2907)
+- Consider acronym when suggesting organization [#2918](https://github.com/opendatateam/udata/pull/2918)
+
+### Fixes
+
+- Return 400 instead of 500 in case of not ObjectID arg in API [#2889](https://github.com/opendatateam/udata/pull/2889)
+- Fix default community resource sort parser [#2908](https://github.com/opendatateam/udata/pull/2908)
+
+### Deprecation
+
+- Python 3.7 is now deprecated and will be removed in upcoming release [#2859](https://github.com/opendatateam/udata/pull/2859)
+- GeoZone model will be heavily refactored for a simplified version [#2878](https://github.com/opendatateam/udata/pull/2878)
 
 ## 6.1.7 (2023-09-01)
 

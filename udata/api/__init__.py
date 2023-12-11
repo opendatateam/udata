@@ -320,6 +320,7 @@ def init_app(app):
     import udata.core.site.api  # noqa
     import udata.core.tags.api  # noqa
     import udata.core.topic.api  # noqa
+    import udata.core.topic.apiv2  # noqa
     import udata.core.post.api  # noqa
     import udata.features.transfer.api  # noqa
     import udata.features.notifications.api  # noqa

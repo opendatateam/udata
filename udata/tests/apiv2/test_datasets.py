@@ -1,12 +1,12 @@
 from flask import url_for
-import pytest
 
 from udata.tests.api import APITestCase
 
 from udata.core.dataset.apiv2 import DEFAULT_PAGE_SIZE
 from udata.core.dataset.factories import (
     DatasetFactory, ResourceFactory, CommunityResourceFactory)
-
+from udata.models import Dataset
+from udata.tests.helpers import assert_not_emit
 
 class DatasetAPIV2Test(APITestCase):
 
@@ -217,7 +217,11 @@ class DatasetExtrasAPITest(APITestCase):
             'test::none': None,
             'test::none-will-be-deleted': None,
         }
-        response = self.put(url_for('apiv2.dataset_extras', dataset=self.dataset), data)
+
+        # We don't expect post save signals on extras update
+        unexpected_signals = Dataset.after_save, Dataset.on_update
+        with assert_not_emit(*unexpected_signals):
+            response = self.put(url_for('apiv2.dataset_extras', dataset=self.dataset), data)
         self.assert200(response)
 
         self.dataset.reload()
@@ -237,7 +241,11 @@ class DatasetExtrasAPITest(APITestCase):
         assert response.json['message'] == 'Wrong payload format, list expected'
 
         data = ['another::key']
-        response = self.delete(url_for('apiv2.dataset_extras', dataset=self.dataset), data)
+
+        # We don't expect post save signals on extras update
+        unexpected_signals = Dataset.after_save, Dataset.on_update
+        with assert_not_emit(*unexpected_signals):
+            response = self.delete(url_for('apiv2.dataset_extras', dataset=self.dataset), data)
         self.assert204(response)
 
         self.dataset.reload()
@@ -286,8 +294,11 @@ class DatasetResourceExtrasAPITest(APITestCase):
             'test::none': None,
             'test::none-will-be-deleted': None,
         }
-        response = self.put(url_for('apiv2.resource_extras', dataset=self.dataset,
-                                    rid=resource.id), data)
+        # We don't expect post save signals on extras update
+        unexpected_signals = Dataset.after_save, Dataset.on_update
+        with assert_not_emit(*unexpected_signals):
+            response = self.put(url_for('apiv2.resource_extras', dataset=self.dataset,
+                                        rid=resource.id), data)
         self.assert200(response)
 
         self.dataset.reload()
@@ -310,8 +321,11 @@ class DatasetResourceExtrasAPITest(APITestCase):
         assert response.json['message'] == 'Wrong payload format, list expected'
 
         data = ['another::key']
-        response = self.delete(url_for('apiv2.resource_extras', dataset=self.dataset,
-                                       rid=resource.id), data)
+        # We don't expect post save signals on extras update
+        unexpected_signals = Dataset.after_save, Dataset.on_update
+        with assert_not_emit(*unexpected_signals):
+            response = self.delete(url_for('apiv2.resource_extras', dataset=self.dataset,
+                                        rid=resource.id), data)
         self.assert204(response)
         self.dataset.reload()
         assert len(self.dataset.resources[0].extras) == 1

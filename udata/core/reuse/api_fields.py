@@ -58,6 +58,7 @@ reuse_fields = api.model('Reuse', {
     'page': fields.UrlFor(
         'reuses.show', lambda o: {'reuse': o},
         description='The reuse page URL', readonly=True, fallback_endpoint='api.reuse'),
+    'extras': fields.Raw(description='Extras attributes as key-value pairs'),
 }, mask='*,datasets{title,uri,page}')
 
 reuse_page_fields = api.model('ReusePage', fields.pager(reuse_fields))

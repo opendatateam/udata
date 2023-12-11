@@ -19,6 +19,7 @@ class Defaults(object):
         'es': 'Español',
         'pt': 'Português',
         'sr': 'Српски',
+        'de': 'Deutsch',
     }
     DEFAULT_LANGUAGE = 'en'
     SECRET_KEY = 'Default uData secret key'
@@ -72,6 +73,11 @@ class Defaults(object):
     MAIL_DEFAULT_SENDER = 'webmaster@udata'
 
     # Flask security settings
+
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = None  # Can be set to 'Lax' or 'Strict'. See https://flask.palletsprojects.com/en/2.3.x/security/#security-cookie
+
+    # Flask-Security-Too settings
 
     SECURITY_TRACKABLE = True
     SECURITY_REGISTERABLE = True
@@ -455,6 +461,8 @@ class Testing(object):
     WTF_CSRF_ENABLED = False
     AUTO_INDEX = False
     CELERY_TASK_ALWAYS_EAGER = True
+    # TODO: ideally, this should be set to True in order to reveal exceptions in delayed tasks
+    CELERY_TASK_EAGER_PROPAGATES = False
     TEST_WITH_PLUGINS = False
     PLUGINS = []
     TEST_WITH_THEME = False
