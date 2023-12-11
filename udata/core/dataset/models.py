@@ -571,6 +571,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
                 if not custom_present:
                     raise MongoEngineValidationError(
                         'Dataset\'s organization did not define the requested custom metadata.')
+                if custom_type == 'choice':
+                    custom_type = 'list'
                 if not isinstance(value, locate(custom_type)):
                     raise MongoEngineValidationError(
                         'Custom metadata is not of the right type.')
