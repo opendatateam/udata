@@ -187,12 +187,10 @@ class TerritoryConverter(PathConverter):
 
         code = getattr(obj, 'code', None)
         slug = getattr(obj, 'slug', None)
-        validity = getattr(obj, 'validity', None)
         if code and slug:
-            return '{level_name}/{code}@{start_date}/{slug}'.format(
+            return '{level_name}/{code}/{slug}'.format(
                 level_name=level_name,
                 code=code,
-                start_date=getattr(validity, 'start', None) or 'latest',
                 slug=slug
             )
         else:

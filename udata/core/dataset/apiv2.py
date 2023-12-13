@@ -235,7 +235,7 @@ class DatasetExtrasAPI(API):
             data.pop(key)
         # then update the extras with the remaining payload
         dataset.extras.update(data)
-        dataset.save()
+        dataset.save(signal_kwargs={'ignores': ['post_save']})
         return dataset.extras
 
     @apiv2.secure
@@ -253,7 +253,7 @@ class DatasetExtrasAPI(API):
                 del dataset.extras[key]
         except KeyError:
             apiv2.abort(404, 'Key not found in existing extras')
-        dataset.save()
+        dataset.save(signal_kwargs={'ignores': ['post_save']})
         return dataset.extras, 204
 
 
@@ -351,7 +351,7 @@ class ResourceExtrasAPI(ResourceMixin, API):
             data.pop(key)
         # then update the extras with the remaining payload
         resource.extras.update(data)
-        resource.save()
+        resource.save(signal_kwargs={'ignores': ['post_save']})
         return resource.extras
 
     @apiv2.secure
@@ -370,5 +370,5 @@ class ResourceExtrasAPI(ResourceMixin, API):
                 del resource.extras[key]
         except KeyError:
             apiv2.abort(404, 'Key not found in existing extras')
-        resource.save()
+        resource.save(signal_kwargs={'ignores': ['post_save']})
         return resource.extras, 204
