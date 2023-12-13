@@ -621,6 +621,34 @@ class DatasetAPITest(APITestCase):
         dataset.reload()
         self.assertEqual(dataset.contact_point, None)
 
+    def test_dataset_api_update_contact_point_error(self):
+        '''It should update a dataset from the API'''
+        self.login()
+
+        # Org and contact point creation
+        member = Member(user=self.user, role='admin')
+        org = OrganizationFactory(members=[member])
+        contact_point_data = {
+            'email': 'mooneywayne@cobb-cochran.com',
+            'name': 'Martin Schultz',
+            'organization': str(org.id)
+        }
+        response = self.post(url_for('api.contact_points'), contact_point_data)
+        self.assert201(response)
+
+        response = self.get(url_for('api.org_contact_points', org=org))
+        assert200(response)
+        contact_point_id = response.json['data'][0]['id']
+
+        # Dataset creation
+        dataset = DatasetFactory(owner=self.user)
+        data = DatasetFactory.as_dict()
+
+        data['contact_point'] = contact_point_id
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert400(response)
+        self.assertEqual(response.json['errors']['contact_point'][0], 'Wrong contact point id or contact point ownership mismatch')
+
     def test_dataset_api_delete(self):
         '''It should delete a dataset from the API'''
         user = self.login()
