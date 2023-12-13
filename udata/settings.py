@@ -153,6 +153,7 @@ class Defaults(object):
         'password': 30 * 24 * HOUR,
         'client_credentials': 30 * 24 * HOUR
     }
+    OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI = False
 
     MD_ALLOWED_TAGS = [
         'a',
@@ -461,6 +462,8 @@ class Testing(object):
     WTF_CSRF_ENABLED = False
     AUTO_INDEX = False
     CELERY_TASK_ALWAYS_EAGER = True
+    # TODO: ideally, this should be set to True in order to reveal exceptions in delayed tasks
+    CELERY_TASK_EAGER_PROPAGATES = False
     TEST_WITH_PLUGINS = False
     PLUGINS = []
     TEST_WITH_THEME = False

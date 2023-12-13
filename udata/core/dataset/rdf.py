@@ -346,7 +346,8 @@ def frequency_from_rdf(term):
         if EUFREQ in term:
             return EU_RDF_REQUENCIES.get(term)
         _, _, freq = namespace_manager.compute_qname(term)
-        return freq.lower()
+        if freq.lower() in UPDATE_FREQUENCIES:
+            return freq.lower()
 
 
 def mime_from_rdf(resource):
@@ -408,6 +409,7 @@ def remote_url_from_rdf(rdf):
             except uris.ValidationError:
                 pass
 
+
 def theme_labels_from_rdf(rdf):
     for theme in rdf.objects(DCAT.theme):
         if isinstance(theme, RdfResource):
@@ -418,7 +420,7 @@ def theme_labels_from_rdf(rdf):
             yield label
 
 
-def resource_from_rdf(graph_or_distrib, dataset=None):
+def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     '''
     Map a Resource domain model to a DCAT/RDF graph
     '''
@@ -429,9 +431,12 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
                                       object=DCAT.Distribution)
         distrib = graph_or_distrib.resource(node)
 
-    download_url = url_from_rdf(distrib, DCAT.downloadURL)
-    access_url = url_from_rdf(distrib, DCAT.accessURL)
-    url = safe_unicode(download_url or access_url)
+    if not is_additionnal:
+        download_url = url_from_rdf(distrib, DCAT.downloadURL)
+        access_url = url_from_rdf(distrib, DCAT.accessURL)
+        url = safe_unicode(download_url or access_url)
+    else:
+        url = distrib.identifier.toPython() if isinstance(distrib.identifier, URIRef) else None
     # we shouldn't create resources without URLs
     if not url:
         log.warning(f'Resource without url: {distrib}')
@@ -443,6 +448,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
         resource = Resource()
         if dataset:
             dataset.resources.append(resource)
+    resource.filetype = 'remote'
     resource.title = title_from_rdf(distrib, url)
     resource.url = url
     resource.description = sanitize_html(distrib.value(DCT.description))
@@ -457,6 +463,8 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
             resource.checksum = Checksum()
             resource.checksum.value = rdf_value(checksum, SPDX.checksumValue)
             resource.checksum.type = algorithm
+    if is_additionnal:
+        resource.type = 'other'
 
     identifier = rdf_value(distrib, DCT.identifier)
     uri = distrib.identifier.toPython() if isinstance(distrib.identifier, URIRef) else None
@@ -512,6 +520,9 @@ def dataset_from_rdf(graph, dataset=None, node=None):
                 licenses.add(value.toPython())
             elif isinstance(value, RdfResource):
                 licenses.add(value.identifier.toPython())
+
+    for additionnal in d.objects(DCT.hasPart):
+        resource_from_rdf(additionnal, dataset, is_additionnal=True)
 
     default_license = dataset.license or License.default()
     dataset_license = rdf_value(d, DCT.license)
