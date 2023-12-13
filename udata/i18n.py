@@ -39,17 +39,7 @@ def get_translation_directories_and_domains():
     translations_dir = []
     domains = []
 
-    # wtforms translations
-    from wtforms.i18n import messages_path
-    translations_dir.append(messages_path())
-    domains.append('wtforms')
-
-    # security translations
-    import flask_security
-    translations_dir.append(join(flask_security.__path__[0], 'translations'))
-    domains.append('flask_security')
-
-    # plugins translations
+    # uadata and plugin translations
     from _frozen_importlib_external import SourceFileLoader
     for pkg in entrypoints.get_roots(current_app):
         loader = pkgutil.get_loader(pkg)
