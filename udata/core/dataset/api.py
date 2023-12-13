@@ -247,46 +247,6 @@ class DatasetAPI(API):
         return '', 204
 
 
-@ns.route('/<dataset:dataset>/contact/', endpoint='dataset_contact_point')
-class DatasetContactAPI(API):
-    @api.secure
-    @api.doc('create_dataset_contact_point')
-    @api.expect(contact_point_fields)
-    @api.marshal_list_with(contact_point_fields, code=201)
-    def post(self, dataset):
-        '''Assign a contact point to a dataset'''
-        data = request.json
-        contact_point_id = data.get('id')
-        if not contact_point_id:
-            api.abort(400, 'Wrong payload format, id expected')
-        DatasetEditPermission(dataset).test()
-        if dataset.organization:
-            contact_point = ContactPoint.objects(
-                id=contact_point_id, organization=dataset.organization).first()
-        else:
-            contact_point = ContactPoint.objects(
-                id=contact_point_id, owner=dataset.owner).first()
-        if not contact_point:
-            api.abort(400, 'Wrong contact point id or contact point ownership mismatch')
-        dataset.contact_point = contact_point
-        dataset.save()
-        return contact_point, 201
-
-
-@ns.route('/<dataset:dataset>/contact/<contact_point:contact_point>/', endpoint='specific_dataset_contact_point')
-class DatasetSpecificContactAPI(API):
-    @api.secure
-    @api.doc('detach_dataset_contact_point')
-    def delete(self, dataset, contact_point):
-        '''Detach a contact point from a dataset'''
-        DatasetEditPermission(dataset).test()
-        if dataset.contact_point == contact_point:
-            dataset.contact_point = None
-            dataset.save()
-            return '', 204
-        api.abort(404)
-
-
 @ns.route('/<dataset:dataset>/featured/', endpoint='dataset_featured')
 @api.doc(**common_doc)
 class DatasetFeaturedAPI(API):

@@ -325,55 +325,6 @@ class DatasetAPITest(APITestCase):
         self.assert400(response)
         self.assertEqual(Dataset.objects.count(), 0)
 
-    def test_dataset_api_create_as_org_and_add_contact(self):
-        '''It should create a dataset as organization from the API and add contact point to it'''
-        self.login()
-
-        # Org and contact point creation
-        member = Member(user=self.user, role='admin')
-        org = OrganizationFactory(members=[member])
-        contact_point_data = {
-            'email': 'mooneywayne@cobb-cochran.com',
-            'name': 'Martin Schultz',
-            'organization': str(org.id)
-        }
-        response = self.post(url_for('api.contact_points'), contact_point_data)
-        self.assert201(response)
-
-        response = self.get(url_for('api.org_contact_points', org=org))
-        assert200(response)
-        contact_point_id = response.json['data'][0]['id']
-
-        # Dataset creation
-        data = DatasetFactory.as_dict()
-        data['organization'] = str(org.id)
-
-        response = self.post(url_for('api.datasets'), data)
-        self.assert201(response)
-        self.assertEqual(Dataset.objects.count(), 1)
-
-        dataset = Dataset.objects.first()
-        self.assertEqual(dataset.organization, org)
-        self.assertIsNone(dataset.owner)
-
-        # Assigning org's contact point to dataset
-        contact_point_data_id = {
-            'id': contact_point_id
-        }
-        response = self.post(url_for('api.dataset_contact_point', dataset=dataset), contact_point_data_id)
-        self.assert201(response)
-
-        response = self.get(url_for('api.dataset', dataset=dataset))
-        assert200(response)
-        self.assertEqual(response.json['contact_point']['id'], contact_point_id)
-
-        response = self.delete(url_for('api.specific_dataset_contact_point', dataset=dataset, contact_point=contact_point_id))
-        assert204(response)
-
-        response = self.get(url_for('api.dataset', dataset=dataset))
-        assert200(response)
-        self.assertEqual(response.json['contact_point'], None)
-
     def test_dataset_api_create_tags(self):
         '''It should create a dataset from the API with tags'''
         data = DatasetFactory.as_dict()
@@ -632,6 +583,43 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description,
                          dataset.description)
+
+    def test_dataset_api_update_contact_point(self):
+        '''It should update a dataset from the API'''
+        self.login()
+
+        # Org and contact point creation
+        member = Member(user=self.user, role='admin')
+        org = OrganizationFactory(members=[member])
+        contact_point_data = {
+            'email': 'mooneywayne@cobb-cochran.com',
+            'name': 'Martin Schultz',
+            'organization': str(org.id)
+        }
+        response = self.post(url_for('api.contact_points'), contact_point_data)
+        self.assert201(response)
+
+        response = self.get(url_for('api.org_contact_points', org=org))
+        assert200(response)
+        contact_point_id = response.json['data'][0]['id']
+
+        # Dataset creation
+        dataset = DatasetFactory(organization=org)
+        data = DatasetFactory.as_dict()
+
+        data['contact_point'] = contact_point_id
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+
+        dataset = Dataset.objects.first()
+        self.assertEqual(dataset.contact_point.name, contact_point_data['name'])
+
+        data['contact_point'] = None
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+
+        dataset.reload()
+        self.assertEqual(dataset.contact_point, None)
 
     def test_dataset_api_delete(self):
         '''It should delete a dataset from the API'''
