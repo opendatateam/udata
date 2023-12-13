@@ -151,6 +151,7 @@ class Defaults(object):
         'password': 30 * 24 * HOUR,
         'client_credentials': 30 * 24 * HOUR
     }
+    OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI = False
 
     MD_ALLOWED_TAGS = [
         'a',
