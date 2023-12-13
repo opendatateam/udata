@@ -1,26 +1,20 @@
 import pkgutil
 
 from contextlib import contextmanager
-from os.path import exists, join, dirname, basename
+from os.path import join, dirname, basename
 from glob import iglob
 
 from flask import (  # noqa
     g, request, current_app, abort, redirect, url_for, has_request_context
 )
 from flask.blueprints import BlueprintSetupState, _endpoint_from_view_func
-try:
-    from flask import _app_ctx_stack as stack
-except ImportError:
-    from flask import _request_ctx_stack as stack
 
-
-from babel.support import NullTranslations, Translations
 from babel.dates import format_timedelta as babel_format_timedelta
 
 from datetime import datetime
 
 import flask_babel
-from flask_babel import Babel, Domain, refresh
+from flask_babel import Babel, refresh
 from flask_babel import format_date, format_datetime  # noqa
 from flask_babel import get_locale as get_current_locale  # noqa
 
@@ -31,8 +25,6 @@ from udata.app import Blueprint
 from udata.auth import current_user
 from udata.errors import ConfigError
 from udata.utils import multi_to_dict
-
-import os
 
 
 def get_translation_directories_and_domains():
@@ -45,8 +37,9 @@ def get_translation_directories_and_domains():
         loader = pkgutil.get_loader(pkg)
         if isinstance(loader, SourceFileLoader):
             path = dirname(loader.path)
-            plugin_domains = [f.replace(path, '').replace('.pot', '')[1:]
-                            for f in iglob(join(path, '**/translations/*.pot'), recursive=True)]
+            plugin_domains = [
+                f.replace(path, '').replace('.pot', '')[1:]
+                for f in iglob(join(path, '**/translations/*.pot'), recursive=True)]
             for domain in plugin_domains:
                 translations_dir.append(join(path, dirname(domain)))
                 domains.append(basename(domain))
@@ -97,15 +90,18 @@ def lazy_pgettext(*args, **kwargs):
     return flask_babel.lazy_pgettext(*args, **kwargs)
 
 
-def format_timedelta(datetime_or_timedelta, granularity='second', add_direction=False, threshold=0.85):
-    '''This is format_timedelta from Flask-Babel, Flask-BabelEx missed the add_direction parameter'''
+def format_timedelta(datetime_or_timedelta, granularity='second',
+                     add_direction=False, threshold=0.85):
+    '''This is format_timedelta from Flask-Babel'''
+    '''Flask-BabelEx missed the add_direction parameter'''
     if isinstance(datetime_or_timedelta, datetime):
         datetime_or_timedelta = datetime.utcnow() - datetime_or_timedelta
-    return babel_format_timedelta(datetime_or_timedelta, 
+    return babel_format_timedelta(datetime_or_timedelta,
                                   granularity,
                                   threshold=threshold,
                                   add_direction=add_direction,
                                   locale=get_current_locale())
+
 
 def _default_lang(user=None):
     lang = getattr(user or current_user, 'prefered_language', None)
