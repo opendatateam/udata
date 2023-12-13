@@ -100,8 +100,6 @@ class Defaults(object):
 
     SECURITY_EMAIL_SENDER = MAIL_DEFAULT_SENDER
 
-    SECURITY_I18N_DOMAIN = 'udata'
-
     SECURITY_EMAIL_SUBJECT_REGISTER = _('Welcome')
     SECURITY_EMAIL_SUBJECT_CONFIRM = _('Please confirm your email')
     SECURITY_EMAIL_SUBJECT_PASSWORDLESS = _('Login instructions')

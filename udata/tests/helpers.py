@@ -11,7 +11,8 @@ from contextlib import contextmanager
 from datetime import timedelta
 from urllib.parse import urljoin, urlparse, parse_qs
 
-from flask import request, url_for, json
+from flask import request, url_for, json, current_app
+from flask_security.babel import FsDomain
 
 
 def assert_equal_dates(datetime1, datetime2, limit=1):  # Seconds.
@@ -227,3 +228,6 @@ def create_test_image():
     file.name = 'test.png'
     file.seek(0)
     return file
+
+def security_gettext(string):
+    return FsDomain(current_app).gettext(string)
