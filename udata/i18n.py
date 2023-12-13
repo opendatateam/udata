@@ -1,4 +1,4 @@
-import pkgutil
+import importlib.util
 
 from contextlib import contextmanager
 from os.path import join, dirname, basename
@@ -31,18 +31,16 @@ def get_translation_directories_and_domains():
     translations_dir = []
     domains = []
 
-    # uadata and plugin translations
-    from _frozen_importlib_external import SourceFileLoader
+    # udata and plugin translations
     for pkg in entrypoints.get_roots(current_app):
-        loader = pkgutil.get_loader(pkg)
-        if isinstance(loader, SourceFileLoader):
-            path = dirname(loader.path)
-            plugin_domains = [
-                f.replace(path, '').replace('.pot', '')[1:]
-                for f in iglob(join(path, '**/translations/*.pot'), recursive=True)]
-            for domain in plugin_domains:
-                translations_dir.append(join(path, dirname(domain)))
-                domains.append(basename(domain))
+        spec = importlib.util.find_spec(pkg)
+        path = dirname(spec.origin)
+        plugin_domains = [
+            f.replace(path, '').replace('.pot', '')[1:]
+            for f in iglob(join(path, '**/translations/*.pot'), recursive=True)]
+        for domain in plugin_domains:
+            translations_dir.append(join(path, dirname(domain)))
+            domains.append(basename(domain))
 
     return translations_dir, domains
 
