@@ -34,9 +34,7 @@ from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
-from udata.core.contact_point.models import ContactPoint
-from udata.core.contact_point.api_fields import contact_point_fields
-from udata.utils import get_by, id_or_404
+from udata.utils import get_by
 from udata.rdf import (
     RDF_EXTENSIONS,
     negociate_content, graph_response
