@@ -5,7 +5,7 @@ from udata.core import storages
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.user.factories import AdminFactory
 from udata.core.organization import tasks
-from udata.models import Dataset, Organization, Transfer, Member
+from udata.models import Dataset, Organization, Transfer, Member, ContactPoint
 from udata.tests.api import APITestCase
 from udata.tests.helpers import create_test_image
 
@@ -23,9 +23,7 @@ class OrganizationTasksTest(APITestCase):
         response = self.post(url_for('api.contact_points'), data)
         self.assert201(response)
 
-        response = self.get(url_for('api.contact_points'))
-        self.assert200(response)
-        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(ContactPoint.objects().count(), 1)
 
         resources = [ResourceFactory() for _ in range(2)]
         dataset = DatasetFactory(resources=resources, organization=org)
@@ -76,9 +74,7 @@ class OrganizationTasksTest(APITestCase):
         self.assertEqual(list(storages.avatars.list_files()), [])
 
         # Check organization's contact points are deleted
-        response = self.get(url_for('api.contact_points'))
-        self.assert200(response)
-        self.assertEqual(len(response.json['data']), 0)
+        self.assertEqual(ContactPoint.objects().count(), 0)
 
         dataset = Dataset.objects(id=dataset.id).first()
         self.assertIsNone(dataset.organization)

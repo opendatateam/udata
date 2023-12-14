@@ -15,13 +15,6 @@ pytestmark = [
 class ContactPointAPITest:
     modules = []
 
-    def test_contact_points_api_list(self, api):
-        contact_points = ContactPointFactory.create_batch(3)
-
-        response = api.get(url_for('api.contact_points'))
-        assert200(response)
-        assert len(response.json['data']) == len(contact_points)
-
     def test_contact_point_api_update(self, api):
         user = api.login()
         contact_point = ContactPointFactory()

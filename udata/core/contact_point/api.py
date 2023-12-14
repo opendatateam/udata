@@ -22,15 +22,6 @@ contact_point_parser = ContactPointApiParser()
 @ns.route('/', endpoint='contact_points')
 class ContactPointsListAPI(API):
     '''Contact points collection endpoint'''
-
-    @api.secure(admin_permission)
-    @api.doc('list_contact_points')
-    @api.marshal_with(contact_point_page_fields)
-    def get(self):
-        '''List all contact points'''
-        args = contact_point_parser.parse()
-        return ContactPoint.objects().paginate(args['page'], args['page_size'])
-
     @api.secure
     @api.doc('create_contact_point')
     @api.expect(contact_point_fields)
