@@ -21,6 +21,7 @@ from .api_fields import (
     resource_internal_fields
 )
 from udata.core.spatial.api_fields import geojson
+from udata.core.contact_point.api_fields import contact_point_fields
 from .models import (
     Dataset, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE, CommunityResource
 )
@@ -35,7 +36,7 @@ DEFAULT_MASK_APIV2 = ','.join((
     'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
     'private', 'tags', 'badges', 'resources', 'community_resources', 'frequency', 'frequency_date',
     'extras', 'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
-    'uri', 'page', 'last_update', 'archived', 'quality', 'harvest', 'internal'
+    'uri', 'page', 'last_update', 'archived', 'quality', 'harvest', 'internal', 'contact_point',
 ))
 
 log = logging.getLogger(__name__)
@@ -132,7 +133,8 @@ dataset_fields = apiv2.model('Dataset', {
     'last_update': fields.ISODateTime(
         description='The resources last modification date', required=True),
     'internal': fields.Nested(
-        dataset_internal_fields, readonly=True, description='Site internal and specific object\'s data')
+        dataset_internal_fields, readonly=True, description='Site internal and specific object\'s data'),
+    'contact_point': fields.Nested(contact_point_fields, allow_null=True, description='The dataset\'s contact point'),
 }, mask=DEFAULT_MASK_APIV2)
 
 
@@ -170,6 +172,7 @@ apiv2.inherit('HarvestDatasetMetadata', dataset_harvest_fields)
 apiv2.inherit('HarvestResourceMetadata', resource_harvest_fields)
 apiv2.inherit('DatasetInternals', dataset_internal_fields)
 apiv2.inherit('ResourceInternals', resource_internal_fields)
+apiv2.inherit('ContactPoint', contact_point_fields)
 
 
 @ns.route('/search/', endpoint='dataset_search')

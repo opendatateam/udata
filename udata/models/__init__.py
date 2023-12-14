@@ -89,6 +89,7 @@ from udata.core.discussions.models import *  # noqa
 from udata.core.followers.models import *  # noqa
 from udata.core.user.models import *  # noqa
 from udata.core.organization.models import *  # noqa
+from udata.core.contact_point.models import *  # noqa
 from udata.core.site.models import *  # noqa
 from udata.core.dataset.models import *  # noqa
 from udata.core.reuse.models import *  # noqa
