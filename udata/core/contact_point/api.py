@@ -1,5 +1,6 @@
 from udata.api import api, API
 from udata.api.parsers import ModelApiParser
+from udata.auth import admin_permission
 
 from .api_fields import contact_point_fields, contact_point_page_fields
 from .forms import ContactPointForm
@@ -21,6 +22,8 @@ contact_point_parser = ContactPointApiParser()
 @ns.route('/', endpoint='contact_points')
 class ContactPointsListAPI(API):
     '''Contact points collection endpoint'''
+
+    @api.secure(admin_permission)
     @api.doc('list_contact_points')
     @api.marshal_with(contact_point_page_fields)
     def get(self):
