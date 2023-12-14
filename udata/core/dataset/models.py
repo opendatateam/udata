@@ -478,7 +478,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     featured = db.BooleanField(required=True, default=False)
 
-    contact_point = db.ReferenceField('ContactPoint', reverse_delete_rule=mongoengine.NULLIFY)
+    contact_point = db.ReferenceField('ContactPoint', reverse_delete_rule=db.NULLIFY)
 
     created_at_internal = DateTimeField(verbose_name=_('Creation date'),
                                         default=datetime.utcnow, required=True)
