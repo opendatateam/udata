@@ -296,6 +296,8 @@ class DcatBackendTest:
         assert dataset.temporal_coverage is not None
         assert dataset.temporal_coverage.start == date(2016, 1, 1)
         assert dataset.temporal_coverage.end == date(2016, 12, 5)
+        assert dataset.contact_point['email'] == 'hello@its.me'
+        assert dataset.contact_point['name'] == 'Organization contact'
         assert dataset.frequency is None
 
         assert len(dataset.resources) == 3

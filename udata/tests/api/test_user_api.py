@@ -343,3 +343,22 @@ class UserAPITest(APITestCase):
         self.assert410(response)
         response = self.delete(url_for('api.user', user=user))
         self.assert403(response)
+
+    def test_contact_points(self):
+        user = AdminFactory()
+        self.login(user)
+        user = UserFactory()
+        data = {
+            'email': 'mooneywayne@cobb-cochran.com',
+            'name': 'Martin Schultz',
+            'owner': str(user.id)
+        }
+
+        response = self.post(url_for('api.contact_points'), data)
+        self.assert201(response)
+
+        response = self.get(url_for('api.user_contact_points', user=user))
+        self.assert200(response)
+
+        assert response.json['data'][0]['name'] == data['name']
+        assert response.json['data'][0]['email'] == data['email']
