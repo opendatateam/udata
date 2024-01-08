@@ -298,7 +298,8 @@ class DatasetExtrasAPITest(APITestCase):
                 {
                     "title": "color",
                     "description": "the colors of the dataset (Hex code)",
-                    "type": "choice"
+                    "type": "choice",
+                    "choices": ["yellow", "blue"]
                 }
             ]
         }
@@ -310,15 +311,15 @@ class DatasetExtrasAPITest(APITestCase):
         }
         response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
         self.assert400(response)
-        assert 'Custom metadata is not of the right type' in response.json['message']
+        assert 'Custom metadata choice is not defined by organization' in response.json['message']
 
         data = {
-            'custom:color': ['eea393', 'ff5733']
+            'custom:color': 'yellow'
         }
         response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
         self.assert200(response)
         dataset.reload()
-        assert dataset.extras['custom:color'] == ['eea393', 'ff5733']
+        assert dataset.extras['custom:color'] == 'yellow'
 
 
 class DatasetResourceExtrasAPITest(APITestCase):

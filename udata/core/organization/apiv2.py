@@ -43,7 +43,7 @@ class OrganizationExtrasAPI(API):
     def get(self, org):
         '''Get an organization extras given its identifier'''
         if org.deleted:
-            apiv2.abort(410, 'Dataset has been deleted')
+            apiv2.abort(410, 'Organization has been deleted')
         return org.extras
 
     @apiv2.secure
@@ -79,10 +79,10 @@ class OrganizationExtrasAPI(API):
         if org.deleted:
             apiv2.abort(410, 'Organization has been deleted')
         EditOrganizationPermission(org).test()
-        try:
-            for key in data:
+        for key in data:
+            try:
                 del org.extras[key]
-        except KeyError:
-            apiv2.abort(404, 'Key not found in existing extras')
+            except KeyError:
+                pass
         org.save()
         return org.extras, 204

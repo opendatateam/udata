@@ -552,30 +552,29 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             self.frequency = LEGACY_FREQUENCIES[self.frequency]
 
         for key, value in self.extras.items():
-            if 'custom' in key:
-                if not self.organization:
-                    raise MongoEngineValidationError(
-                        'Custom metadatas are only accessible to dataset owned by on organization.')
-                custom_meta = key.split(':')[1]
-                org_custom = self.organization.extras.get('custom')
-                if not org_custom:
-                    raise MongoEngineValidationError(
-                        'Dataset\'s organization does not have any custom metadata.')
-                custom_present = False
-                custom_type = None
-                for custom in org_custom:
-                    if custom['title'] == custom_meta:
-                        custom_present = True
-                        custom_type = custom['type']
-                        break
-                if not custom_present:
-                    raise MongoEngineValidationError(
-                        'Dataset\'s organization did not define the requested custom metadata.')
-                if custom_type == 'choice':
-                    custom_type = 'list'
-                if not isinstance(value, locate(custom_type)):
-                    raise MongoEngineValidationError(
-                        'Custom metadata is not of the right type.')
+            if not key.startswith('custom:'):
+                continue
+            if not self.organization:
+                raise MongoEngineValidationError(
+                    'Custom metadatas are only accessible to dataset owned by on organization.')
+            custom_meta = key.split(':')[1]
+            org_custom = self.organization.extras.get('custom', [])
+            custom_present = False
+            for custom in org_custom:
+                if custom['title'] != custom_meta:
+                    continue
+                custom_present = True
+                if custom['type'] == 'choice':
+                    if value not in custom['choices']:
+                        raise MongoEngineValidationError(
+                            'Custom metadata choice is not defined by organization.')
+                else:
+                    if not isinstance(value, locate(custom['type'])):
+                        raise MongoEngineValidationError(
+                            'Custom metadata is not of the right type.')
+            if not custom_present:
+                raise MongoEngineValidationError(
+                    'Dataset\'s organization did not define the requested custom metadata.')
 
     def url_for(self, *args, **kwargs):
         return endpoint_for('datasets.show', 'api.dataset', dataset=self, *args, **kwargs)

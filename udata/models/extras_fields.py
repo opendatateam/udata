@@ -71,16 +71,32 @@ class OrganizationExtrasField(ExtrasField):
 
         errors = {}
 
-        expected_keys = ["title", "description", "type", "choices"]
+        mandatory_keys = ["title", "description", "type"]
+        optional_keys = ["choices"]
         valid_types = ["str", "int", "float", "bool", "datetime", "date", "choice"]
 
         for elem in values.get('custom', []):
-            # Check if the dictionary contains the expected keys and only them
-            if all(key in expected_keys for key in elem.keys()):
+            mandatory_keys_set = set(mandatory_keys)
+            optional_keys_set = set(optional_keys)
+            dict_keys_set = set(elem.keys())
+            # Check if all mandatory keys are in the dictionary
+            if not mandatory_keys_set.issubset(dict_keys_set):
+                errors['custom'] = 'The dictionary does not contain the mandatory keys.'
+            # Combine mandatory and optional keys
+            all_allowed_keys = mandatory_keys_set.union(optional_keys_set)
+            # Check if there are any keys in the dictionary that are neither mandatory nor optional
+            extra_keys = dict_keys_set - all_allowed_keys
+            # If there are no extra keys, the dictionary is valid
+            if len(extra_keys) == 0:
                 if elem.get("type") not in valid_types:
-                    errors['type'] = 'Value should be one of: {types}'.format(types=valid_types)
+                    errors['type'] = ('Type \'{type}\' of \'{title}\' should be one of: {types}'
+                                      .format(type=elem.get("type"), title=elem.get("title"), types=valid_types))
             else:
-                errors['custom'] = 'The dictionary does not contain the expected keys or contains extra keys.'
+                errors['custom'] = 'The dictionary does contains extra keys than allowed ones.'
+
+            # If the "choices" key exists, check that it's not an empty list
+            if "choices" in elem and not elem["choices"]:
+                errors['custom'] = 'The \'choices\' keys cannot be an empty list.'
 
         if errors:
-            self.error('Unknown badges types', errors=errors)
+            self.error('Custom extras error', errors=errors)
