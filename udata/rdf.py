@@ -25,6 +25,7 @@ EUFREQ = Namespace('http://publications.europa.eu/resource/authority/frequency/'
 EUFORMAT = Namespace('http://publications.europa.eu/resource/authority/file-type/')
 IANAFORMAT = Namespace('https://www.iana.org/assignments/media-types/')
 DCT = DCTERMS  # More common usage
+VCARD = Namespace('http://www.w3.org/2006/vcard/ns#')
 
 namespace_manager = NamespaceManager(Graph())
 namespace_manager.bind('dcat', DCAT)

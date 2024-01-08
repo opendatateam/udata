@@ -28,7 +28,6 @@ org_ref_fields = api.inherit('OrganizationReference', base_reference, {
         readonly=True),
 })
 
-
 from udata.core.user.api_fields import user_ref_fields  # noqa: required
 
 request_fields = api.model('MembershipRequest', {

@@ -15,9 +15,9 @@ from rdflib.namespace import RDF
 from udata import i18n, uris
 from udata.frontend.markdown import parse_html
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
-from udata.models import db
+from udata.models import db, ContactPoint
 from udata.rdf import (
-    DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT,
+    DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD,
     namespace_manager, url_from_rdf
 )
 from udata.utils import get_by, safe_unicode
@@ -312,6 +312,25 @@ def temporal_from_rdf(period_of_time):
         log.warning('Unable to parse temporal coverage', exc_info=True)
 
 
+def contact_point_from_rdf(rdf, dataset):
+    contact_point = rdf.value(DCAT.contactPoint)
+    if contact_point:
+        name = contact_point.value(VCARD.fn)
+        email = (contact_point.value(VCARD.hasEmail)
+                 or contact_point.value(VCARD.email)
+                 or contact_point.value(DCAT.email))
+        if dataset.organization:
+            contact_point = ContactPoint.objects(
+                name=name, email=email, organization=dataset.organization).first()
+            return (contact_point or
+                    ContactPoint(name=name, email=email, organization=dataset.organization).save())
+        elif dataset.owner:
+            contact_point = ContactPoint.objects(
+                name=name, email=email, owner=dataset.owner).first()
+            return (contact_point or
+                    ContactPoint(name=name, email=email, owner=dataset.owner).save())
+
+
 def frequency_from_rdf(term):
     if isinstance(term, str):
         try:
@@ -478,6 +497,7 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     description = d.value(DCT.description) or d.value(DCT.abstract)
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
+    dataset.contact_point = contact_point_from_rdf(d, dataset) or dataset.contact_point
 
     acronym = rdf_value(d, SKOS.altLabel)
     if acronym:
