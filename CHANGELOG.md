@@ -3,7 +3,7 @@
 ## Current (in progress)
 
 - Improve search serialization perfs for datasets in big topics [#2937](https://github.com/opendatateam/udata/pull/2937)
-- Contact points feature [#2914](https://github.com/opendatateam/udata/pull/2914):
+- Contact points feature [#2914](https://github.com/opendatateam/udata/pull/2914) [#2943](https://github.com/opendatateam/udata/pull/2943):
   - Users and Organizations can now define a list of contact points
   - Api endpoint for creating, updating and deleting contact points
   - Datasets can define one contact point, among the list of the organization or the user owning the dataset.
