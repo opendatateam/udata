@@ -117,6 +117,47 @@ class OrganizationExtrasAPITest(APITestCase):
         response = self.put(url_for('apiv2.organization_extras', org=self.org), data)
         self.assert400(response)
 
+        # Choice type but missing choices key
+        data = {
+            "custom": [
+                {
+                    "title": "color",
+                    "description": "the banner color of the dataset (Hex code)",
+                    "type": "choice"
+                }
+            ]
+        }
+        response = self.put(url_for('apiv2.organization_extras', org=self.org), data)
+        self.assert400(response)
+
+        # Str type but present choices key
+        data = {
+            "custom": [
+                {
+                    "title": "color",
+                    "description": "the banner color of the dataset (Hex code)",
+                    "type": "str",
+                    "choices": ["yellow"]
+                }
+            ]
+        }
+        response = self.put(url_for('apiv2.organization_extras', org=self.org), data)
+        self.assert400(response)
+
+        # Choice type but empty list choices
+        data = {
+            "custom": [
+                {
+                    "title": "lispum",
+                    "description": "lispum",
+                    "type": "choice",
+                    "choices": []
+                }
+            ]
+        }
+        response = self.put(url_for('apiv2.organization_extras', org=self.org), data)
+        self.assert400(response)
+
         data = {
             "custom": [
                 {
@@ -132,19 +173,6 @@ class OrganizationExtrasAPITest(APITestCase):
         assert self.org.extras['custom'][0]['title'] == 'color'
         assert self.org.extras['custom'][0]['description'] == 'the banner color of the dataset (Hex code)'
         assert self.org.extras['custom'][0]['type'] == 'str'
-
-        data = {
-            "custom": [
-                {
-                    "title": "lispum",
-                    "description": "lispum",
-                    "type": "choice",
-                    "choices": []
-                }
-            ]
-        }
-        response = self.put(url_for('apiv2.organization_extras', org=self.org), data)
-        self.assert400(response)
 
         data = {
             "custom": [

@@ -76,27 +76,28 @@ class OrganizationExtrasField(ExtrasField):
         valid_types = ["str", "int", "float", "bool", "datetime", "date", "choice"]
 
         for elem in values.get('custom', []):
-            mandatory_keys_set = set(mandatory_keys)
-            optional_keys_set = set(optional_keys)
-            dict_keys_set = set(elem.keys())
             # Check if all mandatory keys are in the dictionary
-            if not mandatory_keys_set.issubset(dict_keys_set):
+            if not all(key in elem for key in mandatory_keys):
                 errors['custom'] = 'The dictionary does not contain the mandatory keys.'
-            # Combine mandatory and optional keys
-            all_allowed_keys = mandatory_keys_set.union(optional_keys_set)
-            # Check if there are any keys in the dictionary that are neither mandatory nor optional
-            extra_keys = dict_keys_set - all_allowed_keys
-            # If there are no extra keys, the dictionary is valid
-            if len(extra_keys) == 0:
-                if elem.get("type") not in valid_types:
-                    errors['type'] = ('Type \'{type}\' of \'{title}\' should be one of: {types}'
-                                      .format(type=elem.get("type"), title=elem.get("title"), types=valid_types))
-            else:
+
+            # Check if the dictionary contains only keys that are either mandatory or optional
+            if not all(key in mandatory_keys + optional_keys for key in elem):
                 errors['custom'] = 'The dictionary does contains extra keys than allowed ones.'
 
-            # If the "choices" key exists, check that it's not an empty list
-            if "choices" in elem and not elem["choices"]:
-                errors['custom'] = 'The \'choices\' keys cannot be an empty list.'
+            # Check if the "type" value is one of the valid types
+            if elem.get("type") not in valid_types:
+                errors['type'] = ('Type \'{type}\' of \'{title}\' should be one of: {types}'
+                                  .format(type=elem.get("type"), title=elem.get("title"), types=valid_types))
+
+            # Check if the "choices" key is present only if the type is "choice" and it's not an empty list
+            is_choices_valid = True
+            if elem.get("type") == "choice":
+                is_choices_valid = "choices" in elem and isinstance(elem["choices"], list) and len(
+                    elem["choices"]) > 0
+            elif "choices" in elem:
+                is_choices_valid = False
+            if not is_choices_valid:
+                errors['choices'] = 'The \'choices\' key must be an non empty list and can only be present when type \'choice\' is selected.'
 
         if errors:
             self.error('Custom extras error', errors=errors)
