@@ -8,6 +8,7 @@
   - Api endpoint for creating, updating and deleting contact points
   - Datasets can define one contact point, among the list of the organization or the user owning the dataset.
   - Defining a contact point for a dataset is done throught a form field
+- Allow wildcards in redirect_uris for Oauth2Client [#2935](https://github.com/opendatateam/udata/pull/2935)
 
 ## 7.0.1 (2023-12-06)
 
@@ -35,7 +36,6 @@
     - `udata spatial migrate` to migrate datasets geozones to new ones
     - Reindex datasets (`udata search index dataset`) if using [udata-search-service](https://github.com/opendatateam/udata-search-service)
   - Removed forgotten fields in search [#2934](https://github.com/opendatateam/udata/pull/2934)
-- Allow wildcards in redirect_uris for Oauth2Client [#2935](https://github.com/opendatateam/udata/pull/2935)
 
 ## 6.2.0 (2023-10-26)
 
