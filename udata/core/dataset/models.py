@@ -687,8 +687,10 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
         result['update_frequency'] = self.frequency and self.frequency != 'unknown'
         if self.next_update:
+            # Allow for being one day late on update.
+            # We may have up to one day delay due to harvesting for example
             result['update_fulfilled_in_time'] = (
-                True if -(self.next_update - datetime.utcnow()).days <= 0 else False
+                True if (self.next_update - datetime.utcnow()).days >= -1 else False
             )
         elif self.frequency in ['continuous', 'irregular', 'punctual']:
             # For these frequencies, we don't expect regular updates or can't quantify them.
