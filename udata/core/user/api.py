@@ -316,6 +316,25 @@ class UserAPI(API):
         return '', 204
 
 
+from udata.models import ContactPoint
+from udata.core.contact_point.api import ContactPointApiParser
+from udata.core.contact_point.api_fields import contact_point_page_fields
+
+
+contact_point_parser = ContactPointApiParser()
+
+
+@ns.route('/<user:user>/contacts/', endpoint='user_contact_points')
+class OrgContactAPI(API):
+    @api.doc('get_user_contact_point')
+    @api.marshal_with(contact_point_page_fields)
+    def get(self, user):
+        '''List all user contact points'''
+        args = contact_point_parser.parse()
+        contact_points = ContactPoint.objects.owned_by(user)
+        return contact_points.paginate(args['page'], args['page_size'])
+
+
 @ns.route('/<id>/followers/', endpoint='user_followers')
 @ns.doc(get={'id': 'list_user_followers'},
         post={'id': 'follow_user'},
