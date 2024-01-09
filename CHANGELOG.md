@@ -9,6 +9,7 @@
   - Datasets can define one contact point, among the list of the organization or the user owning the dataset.
   - Defining a contact point for a dataset is done throught a form field
 - Allow wildcards in redirect_uris for Oauth2Client [#2935](https://github.com/opendatateam/udata/pull/2935)
+- Allow for being one day late on update fulfilled in time [#2941](https://github.com/opendatateam/udata/pull/2941)
 
 ## 7.0.1 (2023-12-06)
 
