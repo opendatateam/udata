@@ -69,7 +69,7 @@ We’re trying to develop this project in the open as much as possible. We creat
 
 ### Python style guide
 
-We follow the PEP-0008 and PEP-0257 as mush as possible in the respect of PEP-0020.
+We follow the PEP-0008 and PEP-0257 as must as possible in the respect of PEP-0020.
 
 On top of that, we apply the [Python Style Guide][py-style-guide] from Google.
 
