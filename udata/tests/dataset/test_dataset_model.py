@@ -202,6 +202,22 @@ class DatasetModelTest:
         assert dataset.quality['update_fulfilled_in_time'] is True
         assert dataset.quality['score'] == Dataset.normalize_score(2)
 
+    def test_quality_frequency_update_one_day_late(self):
+        dataset = DatasetFactory(
+            description='', frequency="daily",
+            last_modified_internal=datetime.utcnow() - timedelta(days=1, hours=1))
+        assert dataset.quality['update_frequency'] is True
+        assert dataset.quality['update_fulfilled_in_time'] is True
+        assert dataset.quality['score'] == Dataset.normalize_score(2)
+
+    def test_quality_frequency_update_two_days_late(self):
+        dataset = DatasetFactory(
+            description='', frequency="daily",
+            last_modified_internal=datetime.utcnow() - timedelta(days=2, hours=1))
+        assert dataset.quality['update_frequency'] is True
+        assert dataset.quality['update_fulfilled_in_time'] is False
+        assert dataset.quality['score'] == Dataset.normalize_score(1)
+
     def test_quality_description_length(self):
         dataset = DatasetFactory(description='a' * (current_app.config.get('QUALITY_DESCRIPTION_LENGTH') - 1))
         assert dataset.quality['dataset_description_quality'] is False
