@@ -4,7 +4,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.topic.models import Topic
 from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import UserFactory
-from udata.models import Member
+from udata.models import Member, Discussion
 
 from . import APITestCase
 
@@ -122,10 +122,27 @@ class TopicsAPITest(APITestCase):
         '''It should delete a topic from the API'''
         owner = self.login()
         topic = TopicFactory(owner=owner)
+
+        with self.api_user():
+            response = self.post(url_for('api.discussions'), {
+                'title': 'test title',
+                'comment': 'bla bla',
+                'subject': {
+                    'class': 'Topic',
+                    'id': topic.id,
+                }
+            })
+        self.assert201(response)
+
+        discussions = Discussion.objects(subject=topic)
+        self.assertEqual(len(discussions), 1)
+
         with self.api_user():
             response = self.delete(url_for('api.topic', topic=topic))
         self.assertStatus(response, 204)
+
         self.assertEqual(Topic.objects.count(), 0)
+        self.assertEqual(Discussion.objects.count(), 0)
 
     def test_topic_api_delete_perm(self):
         '''It should not delete a topic from the API'''
