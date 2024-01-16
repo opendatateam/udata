@@ -10,6 +10,7 @@ from udata.forms import ModelForm, fields
 from udata.i18n import gettext as _
 from udata.models import db, User
 from udata.tests import TestCase, DBTestMixin
+from udata.tests.helpers import security_gettext
 
 
 class CurrentUserFieldTest(TestCase, DBTestMixin):
@@ -223,7 +224,7 @@ class CurrentUserFieldTest(TestCase, DBTestMixin):
 
         form.validate()
 
-        self.assertIn('Password not provided', form.errors['password'])
+        self.assertIn(security_gettext('Password not provided'), form.errors['password'])
 
     def test_email_validation(self):
         self.app.config['SECURITY_EMAIL_VALIDATOR_ARGS'] = None
@@ -235,7 +236,7 @@ class CurrentUserFieldTest(TestCase, DBTestMixin):
             'last_name': 'azeaze',
         })
         form.validate()
-        self.assertIn('Invalid email address', form.errors['email'])
+        self.assertIn(security_gettext('Invalid email address'), form.errors['email'])
 
         today = datetime.datetime.utcnow()
         user = UserFactory(email='b@fake.com', password='password', confirmed_at=today)
