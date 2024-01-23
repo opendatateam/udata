@@ -1,6 +1,7 @@
 '''
 This module centralize udata-wide RDF helpers and configuration
 '''
+import logging
 import re
 
 from flask import request, url_for, abort
@@ -12,6 +13,8 @@ from rdflib.namespace import (
 )
 from rdflib.util import SUFFIX_FORMAT_MAP, guess_format as raw_guess_format
 from udata.models import Schema
+from mongoengine import ValidationError
+
 
 # Extra Namespaces
 ADMS = Namespace('http://www.w3.org/ns/adms#')
@@ -221,7 +224,12 @@ def schema_from_rdf(rdf):
         schema.url = resource.identifier.toPython()
         schema.title = resource.value(DCT.title)
 
-    # TODO Check schema.url if it's not an URL, log and return None?
+    try:
+        schema.validate()
+    except ValidationError:
+        # RDF already log a warning for invalid URLs.
+        return None
+
     return schema
 
 
