@@ -18,7 +18,7 @@ from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMet
 from udata.models import db, ContactPoint
 from udata.rdf import (
     DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD,
-    namespace_manager, url_from_rdf
+    namespace_manager, schema_from_rdf, url_from_rdf
 )
 from udata.utils import get_by, safe_unicode
 from udata.uris import endpoint_for
@@ -373,7 +373,6 @@ def format_from_rdf(resource):
         return format.lower()
     return format.lower()
 
-
 def title_from_rdf(rdf, url):
     '''
     Try to extract a distribution title from a property.
@@ -458,6 +457,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     resource.filesize = rdf_value(distrib, DCAT.byteSize)
     resource.mime = mime_from_rdf(distrib)
     resource.format = format_from_rdf(distrib)
+    resource.schema = schema_from_rdf(distrib)
     checksum = distrib.value(SPDX.checksum)
     if checksum:
         algorithm = checksum.value(SPDX.algorithm).identifier
@@ -501,6 +501,7 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
     dataset.contact_point = contact_point_from_rdf(d, dataset) or dataset.contact_point
+    dataset.schema = schema_from_rdf(d)
 
     acronym = rdf_value(d, SKOS.altLabel)
     if acronym:

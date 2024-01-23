@@ -81,6 +81,7 @@
         <dcterms:title>Dataset 2</dcterms:title>
         <dcterms:spatial rdf:resource="http://wuEurope.com/"/>
         <dcterms:identifier>2</dcterms:identifier>
+        <dct:conformsTo rdf:resource="https://www.ecologie.gouv.fr/sites/default/files/R%C3%A9glementation%20IRVE.pdf" />
       </dcat:Dataset>
     </dcat:dataset>
     <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-15T09:19:51.723691</dcterms:modified>
@@ -121,6 +122,7 @@
     <dcterms:title>Resource 2-1</dcterms:title>
     <dcterms:format>JSON</dcterms:format>
     <dcterms:description>A JSON resource</dcterms:description>
+    <dct:conformsTo rdf:resource="https://schema.data.gouv.fr/schemas/etalab/schema-irve-statique/2.2.1/schema-statique.json" />
   </dcat:Distribution>
   <dcat:Distribution rdf:about="datasets/3/resources/1">
     <dcterms:format>JSON</dcterms:format>
@@ -129,6 +131,10 @@
     <dcat:accessURL>http://data.test.org/datasets/3/resources/1/file.json</dcat:accessURL>
   </dcat:Distribution>
   <dcterms:Location rdf:about="http://wuEurope.com/"/>
+  <dcterms:Standard rdf:about="https://schema.data.gouv.fr/schemas/etalab/schema-irve-statique/2.2.1/schema-statique.json">
+    <dcterms:title>Infrastructures de recharges pour véhicules électriques (IRVE)</dcterms:title>
+    <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-01-23T18:59:02.737480</dcterms:issued>
+  </dcterms:Standard>
   <foaf:Organization rdf:about="http://data.test.org/organizations/1">
     <foaf:name>An Organization</foaf:name>
   </foaf:Organization>

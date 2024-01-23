@@ -30,7 +30,7 @@ from .exceptions import (
 )
 
 __all__ = (
-    'License', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
+    'License', 'Schema', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
     'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_FILETYPES',
     'PIVOTAL_DATA', 'DEFAULT_LICENSE', 'RESOURCE_TYPES',
     'ResourceSchema'
@@ -271,6 +271,10 @@ class Checksum(db.EmbeddedDocument):
         if bool(self.value):
             return super(Checksum, self).to_mongo()
 
+class Schema(db.EmbeddedDocument):
+    url = db.URLField(required=True)
+    title = db.StringField()
+
 
 class ResourceMixin(object):
     id = db.AutoUUIDField(primary_key=True)
@@ -289,7 +293,7 @@ class ResourceMixin(object):
     fs_filename = db.StringField()
     extras = db.ExtrasField()
     harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)
-    schema = db.DictField()
+    schema = db.EmbeddedDocumentField(Schema)
 
     created_at_internal = db.DateTimeField(default=datetime.utcnow, required=True)
     last_modified_internal = db.DateTimeField(default=datetime.utcnow, required=True)
@@ -318,8 +322,8 @@ class ResourceMixin(object):
         super(ResourceMixin, self).clean()
         if not self.urlhash or 'url' in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
-        if self.schema and (not bool('name' in self.schema) ^ bool('url' in self.schema)):
-            raise MongoEngineValidationError('Schema must have at least a name or an url. Having both is not allowed.')
+        # if self.schema and (not bool('name' in self.schema) ^ bool('url' in self.schema)):
+        #     raise MongoEngineValidationError('Schema must have at least a name or an url. Having both is not allowed.')
 
     @cached_property  # Accessed at least 2 times in front rendering
     def preview_url(self):
@@ -475,6 +479,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()
     harvest = db.EmbeddedDocumentField(HarvestDatasetMetadata)
+    schema = db.EmbeddedDocumentField(Schema)
 
     featured = db.BooleanField(required=True, default=False)
 

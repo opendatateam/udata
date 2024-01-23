@@ -11,6 +11,7 @@ from rdflib.namespace import (
     Namespace, NamespaceManager, DCTERMS, SKOS, FOAF, XSD, RDFS, RDF
 )
 from rdflib.util import SUFFIX_FORMAT_MAP, guess_format as raw_guess_format
+from udata.models import Schema
 
 # Extra Namespaces
 ADMS = Namespace('http://www.w3.org/ns/adms#')
@@ -204,6 +205,24 @@ CONTEXT = {
     },
     'totalItems': 'hydra:totalItems',
 }
+
+def schema_from_rdf(rdf):
+    '''
+    Try to extract a schema from a conformsTo property.
+    Currently the "issued" property is not harvest.
+    '''
+    resource = rdf.value(DCT.conformsTo)
+    if not resource: return None
+
+    schema = Schema()
+    if isinstance(resource, (URIRef, Literal)):
+        schema.url = resource.toPython()
+    elif isinstance(resource, RdfResource):
+        schema.url = resource.identifier.toPython()
+        schema.title = resource.value(DCT.title)
+
+    # TODO Check schema.url if it's not an URL, log and return None?
+    return schema
 
 
 def url_from_rdf(rdf, prop):
