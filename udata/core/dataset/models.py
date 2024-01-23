@@ -272,8 +272,13 @@ class Checksum(db.EmbeddedDocument):
             return super(Checksum, self).to_mongo()
 
 class Schema(db.EmbeddedDocument):
-    url = db.URLField(required=True)
-    title = db.StringField()
+    url = db.URLField()
+    name = db.StringField()
+
+    def clean(self):
+        super(Schema, self).clean()
+        if not self.name and not self.url:
+            raise MongoEngineValidationError('Schema must have at least a name or an url.')
 
 
 class ResourceMixin(object):
@@ -322,8 +327,6 @@ class ResourceMixin(object):
         super(ResourceMixin, self).clean()
         if not self.urlhash or 'url' in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
-        # if self.schema and (not bool('name' in self.schema) ^ bool('url' in self.schema)):
-        #     raise MongoEngineValidationError('Schema must have at least a name or an url. Having both is not allowed.')
 
     @cached_property  # Accessed at least 2 times in front rendering
     def preview_url(self):

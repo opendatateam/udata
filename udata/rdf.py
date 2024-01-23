@@ -222,7 +222,8 @@ def schema_from_rdf(rdf):
         schema.url = resource.toPython()
     elif isinstance(resource, RdfResource):
         schema.url = resource.identifier.toPython()
-        schema.title = resource.value(DCT.title)
+        name = resource.value(DCT.title)
+        if name: schema.name = name.toPython()
 
     try:
         schema.validate()
