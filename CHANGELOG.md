@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 7.0.2 (2024-01-23)
 
 - Improve search serialization perfs for datasets in big topics [#2937](https://github.com/opendatateam/udata/pull/2937)
 - Migrate to Flask-Babel because of Flask-BabelEx deprecation [#2897](https://github.com/opendatateam/udata/pull/2897)
