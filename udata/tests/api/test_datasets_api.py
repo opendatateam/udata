@@ -724,17 +724,6 @@ class DatasetAPITest(APITestCase):
         data = dataset.to_dict()
         resource_data = ResourceFactory.as_dict()
 
-        resource_data['schema'] = {
-            'name': 'my-schema',
-            'version': '1.0.0',
-            'url': 'http://example.com'
-        }
-        data['resources'].append(resource_data)
-        response = self.put(url_for('api.dataset', dataset=dataset), data)
-        self.assert400(response)
-        expected = _('Schema must have at least a name or an url. Having both is not allowed.')
-        assert response.json['errors']['resources'][0]['schema'][0] == expected
-
         resource_data['schema'] = {'url': 'test'}
         data['resources'].append(resource_data)
         response = self.put(url_for('api.dataset', dataset=dataset), data)
@@ -747,6 +736,15 @@ class DatasetAPITest(APITestCase):
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert200(response)
         dataset.reload()
+        assert dataset.resources[0].schema['name'] == None
+        assert dataset.resources[0].schema['url'] == 'http://example.com'
+
+        resource_data['schema'] = {'name': 'etalab/schema-irve', 'url': 'http://example.com'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        assert dataset.resources[0].schema['name'] == 'etalab/schema-irve'
         assert dataset.resources[0].schema['url'] == 'http://example.com'
 
 

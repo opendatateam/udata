@@ -23,6 +23,11 @@ checksum_fields = api.model('Checksum', {
                            required=True)
 })
 
+schema_fields = api.model('Schema', {
+    'name': fields.String(description='The name of the schema. User provided.'),
+    'url': fields.Url(description="The URL of the schema. Always required except for schemas from the main catalog (in this case the URL can be recomputed from the name)")
+})
+
 dataset_harvest_fields = api.model('HarvestDatasetMetadata', {
     'backend': fields.String(description='Harvest backend used', allow_null=True),
     'created_at': fields.ISODateTime(description='The dataset harvested creation date',
@@ -119,7 +124,9 @@ resource_fields = api.model('Resource', {
                                  'loaded as a standalone page (ie. iframe or '
                                  'new page)',
                                  readonly=True),
-    'schema': fields.Raw(description='Reference to the associated schema', readonly=True),
+    'schema': fields.Nested(
+        schema_fields, allow_null=True, readonly=True,
+        description='Reference to the associated schema'),
     'internal': fields.Nested(
         resource_internal_fields, readonly=True, description='Site internal and specific object\'s data'),
 })
@@ -248,6 +255,9 @@ dataset_fields = api.model('Dataset', {
     'internal': fields.Nested(
         dataset_internal_fields, readonly=True, description='Site internal and specific object\'s data'),
     'contact_point': fields.Nested(contact_point_fields, allow_null=True, description='The dataset\'s contact points'),
+    'schema': fields.Nested(
+        schema_fields, allow_null=True, readonly=True,
+        description='Reference to the associated schema'),
 }, mask=DEFAULT_MASK)
 
 dataset_page_fields = api.model('DatasetPage', fields.pager(dataset_fields),
