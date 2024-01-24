@@ -272,6 +272,7 @@ class Checksum(db.EmbeddedDocument):
 class Schema(db.EmbeddedDocument):
     url = db.URLField()
     name = db.StringField()
+    version = db.StringField()
 
     def clean(self):
         super(Schema, self).clean()
@@ -945,7 +946,8 @@ class ResourceSchema(object):
             return content
         except requests.exceptions.RequestException as e:
             log.exception(f'Error while getting schema catalog from {endpoint} ({e})')
-            return cache.get(cache_key, [])
+            content = cache.get(cache_key)
+            return content if content else []
 
 
 def get_resource(id):
