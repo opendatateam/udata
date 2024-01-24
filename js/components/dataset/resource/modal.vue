@@ -37,9 +37,11 @@
                 <dd><a :href="resource.url">{{resource.url}}</a></dd>
                 <dt v-if="resource.format">{{ _('Format') }}</dt>
                 <dd v-if="resource.format">{{ resource.format }}</dd>
-                <dt v-if="resource.schema?.name || resource.schema?.url">{{ _('Schema') }}</dt>
-                <dd v-if="resource.schema?.name">{{ resource.schema.name }}</dd>
-                <dd v-if="resource.schema?.url">{{ resource.schema.url }}</dd>
+                <dt v-if="resource.schema">{{ _('Schema') }}</dt>
+                <dd v-if="resource.schema">
+                    <a v-if="resource.schema.name" :href="resource.schema.url">{{ resource.schema.name }}</a>
+                    <span v-else>{{ resource.schema.url }}</span>
+                </dd>
                 <dt v-if="resource.mime">{{ _('Mime Type') }}</dt>
                 <dd v-if="resource.mime">{{ resource.mime }}</dd>
                 <dt v-if="resource.filesize">{{ _('Size') }}</dt>

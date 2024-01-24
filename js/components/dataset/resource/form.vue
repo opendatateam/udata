@@ -249,7 +249,7 @@ export default {
         },
         schema_field() {
             if (this.hasSchemas) {
-                const values = [{id: '', label: ''}].concat(schemas.data.filter((schema) => schema.schema_type === 'tableschema'));
+                const values = [{schema_url: null, title: null}].concat(schemas.data.filter((schema) => schema.schema_type === 'tableschema'));
                 return [{
                     id: 'schema.url',
                     label: (this.resource.schema && this.resource.schema.url) ? this._('Schema (Url already set)') : this._('Schema'),

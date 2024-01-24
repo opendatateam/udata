@@ -1,4 +1,5 @@
 import logging
+from pprint import pprint
 import mongoengine
 
 from datetime import datetime, timedelta
@@ -276,6 +277,29 @@ class Schema(db.EmbeddedDocument):
         super(Schema, self).clean()
         # if not self.name and not self.url:
         #     raise MongoEngineValidationError('Schema must have at least a name or an url.')
+
+    def get_name(self):
+        if self.name: return self.name
+
+        # If the schema is one of ours, try to find an appropriate name
+        schemas = ResourceSchema.objects()
+        for schema in schemas:
+            if self.url == schema['schema_url'] or self.url in map(lambda version: version['schema_url'], schema['versions']):
+                return schema['title']
+            
+        return None
+    
+    def get_version(self):
+        if self.version: return self.version
+
+        # If the schema is one of ours, try to find an appropriate version
+        schemas = ResourceSchema.objects()
+        for schema in schemas:
+            for version in schema['versions']:
+                if version['schema_url'] == self.url:
+                    return version['version_name']
+                
+        return None
 
 
 class ResourceMixin(object):

@@ -25,7 +25,7 @@ checksum_fields = api.model('Checksum', {
 
 # Use for schema inside Dataset or Resource
 embed_schema_fields = api.model('Schema', {
-    'name': fields.String(description='The name of the schema. User provided.', allow_null=True),
+    'name': fields.Raw(attribute=lambda schema: schema.get_name(), description='The name of the schema.'),
     'url': fields.String(description="The URL of the schema. Always required except for schemas from the main catalog (in this case the URL can be recomputed from the name)", allow_null=True)
 })
 
