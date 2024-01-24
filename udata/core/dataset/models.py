@@ -277,8 +277,8 @@ class Schema(db.EmbeddedDocument):
 
     def clean(self):
         super(Schema, self).clean()
-        if not self.name and not self.url:
-            raise MongoEngineValidationError('Schema must have at least a name or an url.')
+        # if not self.name and not self.url:
+        #     raise MongoEngineValidationError('Schema must have at least a name or an url.')
 
 
 class ResourceMixin(object):

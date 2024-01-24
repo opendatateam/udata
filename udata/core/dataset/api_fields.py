@@ -23,9 +23,10 @@ checksum_fields = api.model('Checksum', {
                            required=True)
 })
 
-schema_fields = api.model('Schema', {
-    'name': fields.String(description='The name of the schema. User provided.'),
-    'url': fields.Url(description="The URL of the schema. Always required except for schemas from the main catalog (in this case the URL can be recomputed from the name)")
+# Use for schema inside Dataset or Resource
+embed_schema_fields = api.model('Schema', {
+    'name': fields.String(description='The name of the schema. User provided.', allow_null=True),
+    # 'url': fields.Url(description="The URL of the schema. Always required except for schemas from the main catalog (in this case the URL can be recomputed from the name)", allow_null=True)
 })
 
 dataset_harvest_fields = api.model('HarvestDatasetMetadata', {
@@ -125,7 +126,7 @@ resource_fields = api.model('Resource', {
                                  'new page)',
                                  readonly=True),
     'schema': fields.Nested(
-        schema_fields, allow_null=True, readonly=True,
+        embed_schema_fields, allow_null=True, readonly=True,
         description='Reference to the associated schema'),
     'internal': fields.Nested(
         resource_internal_fields, readonly=True, description='Site internal and specific object\'s data'),
@@ -256,7 +257,7 @@ dataset_fields = api.model('Dataset', {
         dataset_internal_fields, readonly=True, description='Site internal and specific object\'s data'),
     'contact_point': fields.Nested(contact_point_fields, allow_null=True, description='The dataset\'s contact points'),
     'schema': fields.Nested(
-        schema_fields, allow_null=True, readonly=True,
+        embed_schema_fields, allow_null=True, readonly=True,
         description='Reference to the associated schema'),
 }, mask=DEFAULT_MASK)
 
@@ -282,7 +283,7 @@ resource_type_fields = api.model('ResourceType', {
     'label': fields.String(description='The resource type display name')
 })
 
-
+# Use for returning the list of known schemas
 schema_fields = api.model('Schema', {
     'id': fields.String(description='The schema identifier'),
     'label': fields.String(description='The schema display name'),
