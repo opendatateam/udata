@@ -9,7 +9,7 @@ from udata.app import cache
 from udata.models import (
     db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchema, UPDATE_FREQUENCIES
 )
-from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
+from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata, Schema
 from udata.core.dataset.factories import (
     ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory
 )
@@ -595,13 +595,16 @@ class ResourceSchemaTest:
     def test_resource_schema_validation(self):
         resource = ResourceFactory()
 
-        resource.schema = {'name': 'etalab/schema-irve'}
+        resource.schema = Schema(name='etalab/schema-irve')
         resource.validate()
 
-        resource.schema = {'url': 'https://example.com'}
+        resource.schema = Schema(url='https://example.com')
         resource.validate()
 
-        resource.schema = {'name': 'etalab/schema-irve', 'url': 'https://example.com'}
+        resource.schema = Schema(name='etalab/schema-irve', url='https://example.com')
+        resource.validate()
+
+        resource.schema = Schema()
         with pytest.raises(ValidationError):
             resource.validate()
 
