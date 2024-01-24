@@ -2,6 +2,8 @@
 
 ## Current (in progress)
 
+- **BREAKING** `/api/1/datasets/schemas` now returns the schemas from the catalog with all the information (the structure of the response changed, it's now the same as the `schemas` array inside https://schema.data.gouv.fr/schemas/schemas.json)
+- Harvest datasets' and resources' schemas from DCAT
 - Improve search serialization perfs for datasets in big topics [#2937](https://github.com/opendatateam/udata/pull/2937)
 - Migrate to Flask-Babel because of Flask-BabelEx deprecation [#2897](https://github.com/opendatateam/udata/pull/2897)
 - Contact points feature [#2914](https://github.com/opendatateam/udata/pull/2914) [#2943](https://github.com/opendatateam/udata/pull/2943):

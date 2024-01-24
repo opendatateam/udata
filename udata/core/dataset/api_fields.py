@@ -26,6 +26,7 @@ checksum_fields = api.model('Checksum', {
 # Use for schema inside Dataset or Resource
 embed_schema_fields = api.model('Schema', {
     'name': fields.Raw(attribute=lambda schema: schema.get_name(), description='The name of the schema.'),
+    'version': fields.Raw(attribute=lambda schema: schema.get_version(), description='The version of the schema.'),
     'url': fields.String(description="The URL of the schema. Always required except for schemas from the main catalog (in this case the URL can be recomputed from the name)", allow_null=True)
 })
 
@@ -284,6 +285,7 @@ resource_type_fields = api.model('ResourceType', {
 })
 
 # Use for returning the list of known schemas
+# TODO remove this?
 schema_fields = api.model('Schema', {
     'id': fields.String(description='The schema identifier'),
     'label': fields.String(description='The schema display name'),

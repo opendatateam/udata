@@ -51,7 +51,6 @@ from .api_fields import (
     resource_fields,
     resource_type_fields,
     upload_fields,
-    schema_fields,
 )
 from udata.linkchecker.checker import check_resource
 from udata.core.topic.models import Topic
