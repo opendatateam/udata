@@ -13,9 +13,6 @@ from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMet
 from udata.core.dataset.factories import (
     ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory
 )
-from udata.core.dataset.exceptions import (
-    SchemasCatalogNotFoundException, SchemasCacheUnavailableException
-)
 from udata.core.user.factories import UserFactory
 from udata.utils import faker
 from udata.tests.helpers import (
@@ -513,14 +510,12 @@ class LicenseModelTest:
 class ResourceSchemaTest:
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/notfound')
     def test_resource_schema_objects_404_endpoint(self):
-        with pytest.raises(SchemasCatalogNotFoundException):
-            ResourceSchema.objects()
+        assert ResourceSchema.objects() == []
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_resource_schema_objects_timeout_no_cache(self, client, rmock):
         rmock.get('https://example.com/schemas', exc=requests.exceptions.ConnectTimeout)
-        with pytest.raises(SchemasCacheUnavailableException):
-            ResourceSchema.objects()
+        assert ResourceSchema.objects() == []
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_resource_schema_objects(self, app, rmock):

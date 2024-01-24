@@ -63,9 +63,6 @@ from .permissions import DatasetEditPermission, ResourceEditPermission
 from .forms import (
     ResourceForm, DatasetForm, CommunityResourceForm, ResourcesListForm
 )
-from .exceptions import (
-    SchemasCatalogNotFoundException, SchemasCacheUnavailableException
-)
 from .rdf import dataset_to_rdf
 
 
@@ -722,13 +719,8 @@ class ResourceTypesAPI(API):
 @ns.route('/schemas/', endpoint='schemas')
 class SchemasAPI(API):
     @api.doc('schemas')
-    @api.marshal_list_with(schema_fields)
     def get(self):
+        # TODO add documentation
         '''List all available schemas'''
-        try:
-            # This method call is cached as it makes HTTP requests
-            return ResourceSchema.objects()
-        except SchemasCacheUnavailableException:
-            abort(503, description='No schemas in cache and endpoint unavailable')
-        except SchemasCatalogNotFoundException:
-            abort(404, description='Schema catalog endpoint was not found')
+        # This method call is cached as it makes HTTP requests
+        return ResourceSchema.objects()

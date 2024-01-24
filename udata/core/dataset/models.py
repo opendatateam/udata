@@ -25,9 +25,6 @@ from udata.uris import ValidationError, endpoint_for
 from udata.uris import validate as validate_url
 
 from .preview import get_preview_url
-from .exceptions import (
-    SchemasCatalogNotFoundException, SchemasCacheUnavailableException
-)
 
 __all__ = (
     'License', 'Schema', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
@@ -917,28 +914,14 @@ class ResourceSchema(object):
         cache_key = 'schema-catalog-objects'
         try:
             response = requests.get(endpoint, timeout=5)
-            # do not cache 404 and forward status code
-            if response.status_code == 404:
-                raise SchemasCatalogNotFoundException(f'Schemas catalog does not exist at {endpoint}')
             response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            log.exception(f'Error while getting schema catalog from {endpoint}')
-            content = cache.get(cache_key)
-        else:
-            schemas = response.json().get('schemas', [])
-            content = [
-                {
-                    'id': s['name'],
-                    'label': s['title'],
-                    'versions': [d['version_name'] for d in s['versions']],
-                } for s in schemas
-            ]
+
+            content = response.json().get('schemas', [])
             cache.set(cache_key, content)
-        # no cached version or no content
-        if not content:
-            log.error(f'No content found inc. from cache for schema catalog')
-            raise SchemasCacheUnavailableException('No content in cache for schema catalog')
-        return content
+            return content
+        except requests.exceptions.RequestException as e:
+            log.exception(f'Error while getting schema catalog from {endpoint} ({e})')
+            return cache.get(cache_key, [])
 
 
 def get_resource(id):
