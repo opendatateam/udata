@@ -1,5 +1,6 @@
 from udata.api import api, fields, API
 from udata.core.dataset.api_fields import dataset_fields
+from udata.core.discussions.models import Discussion
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api_fields import reuse_fields
 from udata.core.topic.permissions import TopicEditPermission
@@ -121,5 +122,7 @@ class TopicAPI(API):
         '''Delete a given topic'''
         if not TopicEditPermission(topic).can():
             api.abort(403, 'Forbidden')
+        # Remove discussions linked to the topic
+        Discussion.objects(subject=topic).delete()
         topic.delete()
         return '', 204
