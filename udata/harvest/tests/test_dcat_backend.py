@@ -153,6 +153,32 @@ class DcatBackendTest:
         assert len(datasets['1'].resources) == 2
         assert len(datasets['2'].resources) == 2
 
+
+    def test_harvest_schemas(self, rmock):
+        filename = 'bnodes.xml'
+        url = mock_dcat(rmock, filename)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+
+        actions.run(source.slug)
+
+        datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
+
+        assert datasets['3'].schema == None
+        assert datasets['2'].schema.name == None
+        assert datasets['2'].schema.url == 'https://www.ecologie.gouv.fr/sites/default/files/R%C3%A9glementation%20IRVE.pdf'
+        
+        for resource in datasets['2'].resources:
+            if resource['title'] == 'Resource 2-2':
+                assert resource.schema == None
+
+            if resource['title'] == 'Resource 2-1':
+                assert resource.schema.name == 'Infrastructures de recharges pour véhicules électriques (IRVE)'
+                assert resource.schema.url == 'https://schema.data.gouv.fr/schemas/etalab/schema-irve-statique/2.2.1/schema-statique.json'
+
+
     def test_simple_nested_attributes(self, rmock):
         filename = 'nested.jsonld'
         url = mock_dcat(rmock, filename)

@@ -11,6 +11,8 @@ from rdflib.namespace import (
     Namespace, NamespaceManager, DCTERMS, SKOS, FOAF, XSD, RDFS, RDF
 )
 from rdflib.util import SUFFIX_FORMAT_MAP, guess_format as raw_guess_format
+from udata.models import Schema
+from mongoengine import ValidationError
 
 # Extra Namespaces
 ADMS = Namespace('http://www.w3.org/ns/adms#')
@@ -217,6 +219,24 @@ def url_from_rdf(rdf, prop):
     elif isinstance(value, RdfResource):
         return value.identifier.toPython()
 
+
+def schema_from_rdf(rdf):
+    '''
+    Try to extract a schema from a conformsTo property.
+    Currently the "issued" property is not harvest.
+    '''
+    resource = rdf.value(DCT.conformsTo)
+    if not resource: return None
+
+    schema = Schema()
+    if isinstance(resource, (URIRef, Literal)):
+        schema.url = resource.toPython()
+    elif isinstance(resource, RdfResource):
+        schema.url = resource.identifier.toPython()
+        name = resource.value(DCT.title)
+        if name: schema.name = name.toPython()
+
+    return schema
 
 def escape_xml_illegal_chars(val, replacement='?'):
     illegal_xml_chars_RE = re.compile(ILLEGAL_XML_CHARS)
