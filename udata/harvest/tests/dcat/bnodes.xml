@@ -61,7 +61,6 @@
         <dcat:distribution rdf:resource="http://data.test.org/datasets/1/resources/1"/>
         <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T18:59:02.737480</dcterms:issued>
         <dcterms:identifier>1</dcterms:identifier>
-        <dct:conformsTo rdf:resource="invalid conforms to" />
       </dcat:Dataset>
     </dcat:dataset>
     <dcat:dataset>

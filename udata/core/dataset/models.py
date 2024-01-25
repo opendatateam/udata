@@ -157,6 +157,16 @@ class Schema(db.EmbeddedDocument):
     name = db.StringField()
     version = db.StringField()
 
+    def __bool__(self):
+        '''
+        In the database, since the schemas were only simple dicts, there is
+        empty `{}` stored. To prevent problems with converting to bool 
+        (bool({}) and default bool(Schema) do not yield the same value), we transform
+        empty Schema() to False.
+        It's maybe not necessary but being paranoid here.
+        '''
+        return bool(self.name) or bool(self.url)
+
     def get_url(self):
         if self.url: return self.url
 

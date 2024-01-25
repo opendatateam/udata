@@ -595,9 +595,9 @@ class ResourceSchemaTest:
         resource.schema = Schema(url='https://example.com')
         resource.validate()
 
+        # Everything should pass
         resource.schema = Schema(name='etalab/schema-irve', url='https://example.com')
-        with pytest.raises(ValidationError):
-            resource.validate()
+        resource.validate()
 
 
 class HarvestMetadataTest:
