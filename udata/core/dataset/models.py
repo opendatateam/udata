@@ -165,10 +165,10 @@ class Schema(db.EmbeddedDocument):
         schemas = ResourceSchema.all()
         for schema in schemas:
             if self.name != schema['name']: continue # Not the correct schema
-            if not version: return schema['url'] # If there is no version we take the URL of the latest version
+            if not self.version: return schema['schema_url'] # If there is no version we take the URL of the latest version
 
             for version in schema['versions']:
-                if version['version_name'] != version: continue # Not the correct version
+                if version['version_name'] != self.version: continue # Not the correct version
                 return version['schema_url']
 
             log.warning(f"The version {self.version} of schema {self.name} doesn't match any of the available versions.")
@@ -991,7 +991,6 @@ class ResourceSchema(object):
             raise SchemasCacheUnavailableException('No content in cache for schema catalog')
 
         return schemas
-
 
 def get_resource(id):
     '''Fetch a resource given its UUID'''

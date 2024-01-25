@@ -2,13 +2,14 @@ import json
 from datetime import datetime
 from io import BytesIO
 from uuid import uuid4
+from os.path import join
 
 import pytest
 import pytz
 from flask import url_for
 
 from udata.api import fields
-from udata.app import cache
+from udata.app import ROOT_DIR, cache
 from udata.core import storages
 from udata.core.badges.factories import badge_factory
 from udata.core.dataset.api_fields import (dataset_harvest_fields,
@@ -18,7 +19,7 @@ from udata.core.dataset.factories import (CommunityResourceFactory,
                                           ResourceFactory,
                                           VisibleDatasetFactory)
 from udata.core.dataset.models import (HarvestDatasetMetadata,
-                                       HarvestResourceMetadata, ResourceMixin)
+                                       HarvestResourceMetadata, ResourceMixin, ResourceSchema)
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.core.topic.factories import TopicFactory
@@ -42,7 +43,6 @@ SAMPLE_GEOM = {
          [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]]
     ]
 }
-
 
 class DatasetAPITest(APITestCase):
     modules = []
@@ -717,8 +717,11 @@ class DatasetAPITest(APITestCase):
         dataset.reload()
         self.assertFalse(dataset.featured)
 
-    def test_dataset_new_resource_with_schema(self):
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
+    def test_dataset_new_resource_with_schema(self, rmock):
         '''Tests api validation to prevent schema creation with a name and a url'''
+        rmock.get('https://example.com/schemas', json=json.load(open(join(ROOT_DIR, 'tests', 'schemas.json'))))
+
         user = self.login()
         dataset = DatasetFactory(owner=user)
         data = dataset.to_dict()
@@ -741,12 +744,28 @@ class DatasetAPITest(APITestCase):
         self.assert400(response)
         assert response.json['errors']['resources'][0]['schema']['url'] == [_('Invalid URL')]
 
+        resource_data['schema'] = {'name': 'unknown-schema'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert400(response)
+        assert response.json['errors']['resources'][0]['schema']['name'] == [_('Schema name "{schema}" is not an allowed value. Allowed values: {values}').format(schema='unknown-schema', values='etalab/schema-irve-statique, 139bercy/format-commande-publique')]
+
         resource_data['schema'] = {'url': 'http://example.com'}
         data['resources'].append(resource_data)
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert200(response)
         dataset.reload()
         assert dataset.resources[0].schema['url'] == 'http://example.com'
+        assert dataset.resources[0].schema['name'] == None
+
+        
+        resource_data['schema'] = {'name': 'etalab/schema-irve-statique'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        assert dataset.resources[0].schema['name'] == 'etalab/schema-irve-statique'
+        assert dataset.resources[0].schema['url'] == None
 
 
 class DatasetBadgeAPITest(APITestCase):

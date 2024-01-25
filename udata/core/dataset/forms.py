@@ -58,7 +58,7 @@ class SchemaForm(ModelForm):
         version = form.version.data
 
         # If there is no URL, the name must match a known schema from our catalog.
-        allowed_schemas_version_by_name = {schema['id']: schema['versions'] for schema in ResourceSchema.all()}
+        allowed_schemas_version_by_name = {schema['name']: schema['versions'] for schema in ResourceSchema.all()}
         allowed_versions = allowed_schemas_version_by_name.get(name)
 
         if not allowed_versions:
