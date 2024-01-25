@@ -943,9 +943,6 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
 
 
 class ResourceSchema(object):
-    # Static mocked for test
-    mocked = False
-
     @staticmethod
     @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
     def objects():
@@ -973,9 +970,6 @@ class ResourceSchema(object):
         - @cache.cached decorator w/ short lived cache for normal operations
         - a long terme cache w/o timeout to be able to always render some content
         '''
-        if ResourceSchema.mocked:
-            return ResourceSchema.get_mock_data()['schemas']
-
         endpoint = current_app.config.get('SCHEMA_CATALOG_URL')
         if endpoint is None:
             return []

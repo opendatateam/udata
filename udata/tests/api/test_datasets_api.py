@@ -7,6 +7,7 @@ from os.path import join
 import pytest
 import pytz
 from flask import url_for
+import requests_mock
 
 from udata.api import fields
 from udata.app import ROOT_DIR, cache
@@ -718,9 +719,10 @@ class DatasetAPITest(APITestCase):
         self.assertFalse(dataset.featured)
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
-    def test_dataset_new_resource_with_schema(self):
+    @requests_mock.Mocker(kw='rmock')
+    def test_dataset_new_resource_with_schema(self, rmock):
         '''Tests api validation to prevent schema creation with a name and a url'''
-        ResourceSchema.mocked = True
+        rmock.get('https://example.com/schemas', json=ResourceSchema.get_mock_data())
 
         user = self.login()
         dataset = DatasetFactory(owner=user)
@@ -1700,39 +1702,11 @@ class DatasetSchemasAPITest:
         # made before setting up rmock at module load, resulting in a 404
         app.config['SCHEMA_CATALOG_URL'] = 'https://example.com/schemas'
 
-        rmock.get('https://example.com/schemas', json={
-            "schemas": [
-                {
-                    "name": "etalab/schema-irve",
-                    "title": "Schéma IRVE",
-                    "versions": [
-                        {
-                            "version_name": "1.0.0"
-                        },
-                        {
-                            "version_name": "1.0.1"
-                        },
-                        {
-                            "version_name": "1.0.2"
-                        }
-                    ]
-                }
-            ]
-        })
+        rmock.get('https://example.com/schemas', json=ResourceSchema.get_mock_data())
         response = api.get(url_for('api.schemas'))
 
         assert200(response)
-        assert response.json == [
-            {
-                "id": "etalab/schema-irve",
-                "label": "Schéma IRVE",
-                "versions": [
-                    "1.0.0",
-                    "1.0.1",
-                    "1.0.2"
-                ]
-            }
-        ]
+        assert response.json == ResourceSchema.get_expected_v1_result_from_mock_data()
 
     @pytest.mark.options(SCHEMA_CATALOG_URL=None)
     def test_dataset_schemas_api_list_no_catalog_url(self, api):
