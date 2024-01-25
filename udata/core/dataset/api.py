@@ -50,6 +50,7 @@ from .api_fields import (
     license_fields,
     resource_fields,
     resource_type_fields,
+    catalog_schema_fields,
     upload_fields,
 )
 from udata.linkchecker.checker import check_resource
@@ -718,6 +719,7 @@ class ResourceTypesAPI(API):
 @ns.route('/schemas/', endpoint='schemas')
 class SchemasAPI(API):
     @api.doc('schemas')
+    @api.marshal_list_with(catalog_schema_fields)
     def get(self):
         # TODO add documentation
         '''List all available schemas'''

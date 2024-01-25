@@ -24,7 +24,7 @@ checksum_fields = api.model('Checksum', {
 })
 
 # Use for schema inside Dataset or Resource
-embed_schema_fields = api.model('Schema', {
+schema_fields = api.model('Schema', {
     'name': fields.Raw(attribute=lambda schema: schema.get_name(), description='The name of the schema.'),
     'version': fields.Raw(attribute=lambda schema: schema.get_version(), description='The version of the schema.'),
     'url': fields.String(description="The URL of the schema. Always required except for schemas from the main catalog (in this case the URL can be recomputed from the name)", allow_null=True)
@@ -127,7 +127,7 @@ resource_fields = api.model('Resource', {
                                  'new page)',
                                  readonly=True),
     'schema': fields.Nested(
-        embed_schema_fields, allow_null=True, readonly=True,
+        schema_fields, allow_null=True, readonly=True,
         description='Reference to the associated schema'),
     'internal': fields.Nested(
         resource_internal_fields, readonly=True, description='Site internal and specific object\'s data'),
@@ -258,7 +258,7 @@ dataset_fields = api.model('Dataset', {
         dataset_internal_fields, readonly=True, description='Site internal and specific object\'s data'),
     'contact_point': fields.Nested(contact_point_fields, allow_null=True, description='The dataset\'s contact points'),
     'schema': fields.Nested(
-        embed_schema_fields, allow_null=True, readonly=True,
+        schema_fields, allow_null=True, readonly=True,
         description='Reference to the associated schema'),
 }, mask=DEFAULT_MASK)
 
@@ -285,9 +285,32 @@ resource_type_fields = api.model('ResourceType', {
 })
 
 # Use for returning the list of known schemas
-# TODO remove this?
-schema_fields = api.model('Schema', {
-    'id': fields.String(description='The schema identifier'),
-    'label': fields.String(description='The schema display name'),
-    'versions': fields.List(fields.String, description='The available versions of the schema'),
+# Copied from https://opendataschema.frama.io/catalog/schema-catalog.json
+catalog_schema_example_fields = api.model('CatalogSchemaExample', {
+    'title': fields.String(description='Name of the example'),
+    'path': fields.String(description='Link to the file'),
 })
+catalog_schema_version_fields = api.model('CatalogSchemaVersion', {
+    'version_name': fields.String(description='Version number.', example='2.2.0'),
+    'schema_url': fields.String(description='The URL to this specific version of the schema.'),
+})
+
+catalog_schema_fields = api.model('CatalogSchema', {
+    'name': fields.String(description='The schema identifier/slug. Can be display', example="etalab/schema-irve-statique"),
+    'title': fields.String(description='Long title to display', example="Budget des collectivités et établissements publics locaux"),
+    'description': fields.String(),
+    'schema_url': fields.String(description='The URL to the latest version of the schema', required=True,),
+    'schema_type': fields.String(required=True, enum=["tableschema", "jsonschema", "datapackage", "xsd", "other"]),
+    'contact': fields.String(description='The email address of contact.'),
+    'examples': fields.List(fields.Nested(catalog_schema_example_fields), description='List of links to valid files following this schema.'),
+    'labels': fields.List(fields.String(), description='Tags to group schemas.'),
+    'consolidation_dataset_id': fields.String(),
+    'versions': fields.List(fields.Nested(catalog_schema_version_fields)),
+    'external_doc': fields.String(),
+    'external_tool': fields.String(),
+    'homepage': fields.String(description='URL to the schema repository.'),
+    'datapackage_title': fields.String(required=False),
+    'datapackage_name': fields.String(required=False),
+    'datapackage_description': fields.String(required=False),
+})
+

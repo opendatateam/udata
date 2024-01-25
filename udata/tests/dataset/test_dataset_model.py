@@ -14,6 +14,7 @@ from udata.core.dataset.factories import (
     ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory
 )
 from udata.core.user.factories import UserFactory
+from udata.tests.api.test_datasets_api import DatasetSchemasAPITest
 from udata.utils import faker
 from udata.tests.helpers import (
     assert_emit, assert_not_emit, assert_equal_dates
@@ -519,37 +520,8 @@ class ResourceSchemaTest:
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_resource_schema_objects(self, app, rmock):
-        rmock.get('https://example.com/schemas', json={
-            "schemas": [
-                {
-                    "name": "etalab/schema-irve",
-                    "title": "Schéma IRVE",
-                    "versions": [
-                        {
-                            "version_name": "1.0.0"
-                        },
-                        {
-                            "version_name": "1.0.1"
-                        },
-                        {
-                            "version_name": "1.0.2"
-                        }
-                    ]
-                }
-            ]
-        })
-
-        assert ResourceSchema.objects() == [
-            {
-                "id": "etalab/schema-irve",
-                "label": "Schéma IRVE",
-                "versions": [
-                    "1.0.0",
-                    "1.0.1",
-                    "1.0.2"
-                ]
-            }
-        ]
+        rmock.get('https://example.com/schemas', json=DatasetSchemasAPITest.CATALOG_SCHEMAS)
+        assert ResourceSchema.objects() == DatasetSchemasAPITest.CATALOG_SCHEMAS['schemas']
 
     @pytest.mark.options(SCHEMA_CATALOG_URL=None)
     def test_resource_schema_objects_no_catalog_url(self):
@@ -561,25 +533,7 @@ class ResourceSchemaTest:
         mocker.patch.object(cache, 'get', return_value='dummy_from_cache')
 
         # fill cache
-        rmock.get('https://example.com/schemas', json={
-            "schemas": [
-                {
-                    "name": "etalab/schema-irve",
-                    "title": "Schéma IRVE",
-                    "versions": [
-                        {
-                            "version_name": "1.0.0"
-                        },
-                        {
-                            "version_name": "1.0.1"
-                        },
-                        {
-                            "version_name": "1.0.2"
-                        }
-                    ]
-                }
-            ]
-        })
+        rmock.get('https://example.com/schemas', json=DatasetSchemasAPITest.CATALOG_SCHEMAS)
         ResourceSchema.objects()
         assert cache_mock_set.called
 

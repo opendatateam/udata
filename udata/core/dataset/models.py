@@ -276,8 +276,30 @@ class Schema(db.EmbeddedDocument):
 
     def clean(self):
         super(Schema, self).clean()
-        # if not self.name and not self.url:
-        #     raise MongoEngineValidationError('Schema must have at least a name or an url.')
+        if not self.url:
+            if not self.name:
+                raise MongoEngineValidationError('Schema must have at least an url.')
+            
+            # Try to patch the schema to add a valid URL because legacy objects and/or API usage
+            # only sent the name of the CatalogSchema and no URL.
+            self.url = self.guess_url_from_name_and_version(self.name, self.version)
+            if not self.url:
+
+
+    def guess_url_from_name_and_version(name, version):
+        schemas = ResourceSchema.objects()
+        for schema in schemas:
+            if name != schema['name']: continue # Not the correct schema
+            if not version: return schema['url'] # If there is no version we take the URL of the latest version
+
+            for version in schema['versions']:
+                if version['version_name'] != version: continue # Not the correct version
+                return version['schema_url']
+            
+            raise MongoEngineValidationError(f"The version provided doesn't match any of the version of the schema {name}.")
+        
+        return None # Nothing match
+
 
     def get_name(self):
         if self.name: return self.name

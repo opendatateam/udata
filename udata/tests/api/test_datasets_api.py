@@ -1747,7 +1747,10 @@ class DatasetSchemasAPITest:
                 ],
                 "external_doc": None,
                 "external_tool": None,
-                "homepage": "https://github.com/139bercy/format-commande-publique"
+                "homepage": "https://github.com/139bercy/format-commande-publique",
+                "datapackage_title": None,
+                "datapackage_name": None,
+                "datapackage_description": None
             },
         ]
     }
