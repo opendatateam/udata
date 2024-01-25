@@ -1,5 +1,7 @@
+import json
 import logging
-import mongoengine
+from pprint import pprint
+from os.path import join
 
 from datetime import datetime, timedelta
 from collections import OrderedDict
@@ -15,7 +17,7 @@ from stringdist import rdlevenshtein
 from werkzeug.utils import cached_property
 import requests
 
-from udata.app import cache
+from udata.app import cache, ROOT_DIR
 from udata.core import storages
 from udata.frontend.markdown import mdstrip
 from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
@@ -339,7 +341,7 @@ class ResourceMixin(object):
     fs_filename = db.StringField()
     extras = db.ExtrasField()
     harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)
-    schema = db.EmbeddedDocumentField(Schema)
+    schema = db.EmbeddedDocumentField(Schema, required = False)
     
     created_at_internal = db.DateTimeField(default=datetime.utcnow, required=True)
     last_modified_internal = db.DateTimeField(default=datetime.utcnow, required=True)
@@ -519,7 +521,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     frequency_date = db.DateTimeField(verbose_name=_('Future date of update'))
     temporal_coverage = db.EmbeddedDocumentField(db.DateRange)
     spatial = db.EmbeddedDocumentField(SpatialCoverage)
-    schema = db.EmbeddedDocumentField(Schema)
+    schema = db.EmbeddedDocumentField(Schema, required = False)
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()
@@ -941,6 +943,9 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
 
 
 class ResourceSchema(object):
+    # Static mocked for test
+    mocked = False
+
     @staticmethod
     @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
     def objects():
@@ -968,6 +973,9 @@ class ResourceSchema(object):
         - @cache.cached decorator w/ short lived cache for normal operations
         - a long terme cache w/o timeout to be able to always render some content
         '''
+        if ResourceSchema.mocked:
+            return ResourceSchema.get_mock_data()['schemas']
+
         endpoint = current_app.config.get('SCHEMA_CATALOG_URL')
         if endpoint is None:
             return []
@@ -991,7 +999,35 @@ class ResourceSchema(object):
             raise SchemasCacheUnavailableException('No content in cache for schema catalog')
 
         return schemas
-
+    
+    @staticmethod
+    def get_mock_data():
+        return json.load(open(join(ROOT_DIR, 'tests', 'schemas.json')))
+    
+    @staticmethod
+    def get_expected_v1_result_from_mock_data():
+        return [
+            {
+                "id": "etalab/schema-irve-statique",
+                "label": "IRVE statique",
+                "versions": [
+                    "2.2.0",
+                    "2.2.1"
+                ]
+            },
+            {
+                "id": "139bercy/format-commande-publique",
+                "label": "Données essentielles des marchés publics français",
+                "versions": [
+                    "1.3.0",
+                    "1.4.0",
+                    "1.5.0",
+                    "2.0.0",
+                    "2.0.1"
+                ]
+            }
+        ]
+    
 def get_resource(id):
     '''Fetch a resource given its UUID'''
     dataset = Dataset.objects(resources__id=id).first()

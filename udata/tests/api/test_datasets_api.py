@@ -718,9 +718,9 @@ class DatasetAPITest(APITestCase):
         self.assertFalse(dataset.featured)
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
-    def test_dataset_new_resource_with_schema(self, rmock):
+    def test_dataset_new_resource_with_schema(self):
         '''Tests api validation to prevent schema creation with a name and a url'''
-        rmock.get('https://example.com/schemas', json=json.load(open(join(ROOT_DIR, 'tests', 'schemas.json'))))
+        ResourceSchema.mocked = True
 
         user = self.login()
         dataset = DatasetFactory(owner=user)
@@ -1756,51 +1756,13 @@ class DatasetSchemasAPITest:
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_dataset_schemas_api_list_error_w_cache(self, api, rmock, mocker):
         cache_mock_set = mocker.patch.object(cache, 'set')
-        mocker.patch.object(cache, 'get', return_value=[
-            {
-                "id": "etalab/schema-irve",
-                "label": "Schéma IRVE",
-                "versions": [
-                    "1.0.0",
-                    "1.0.1",
-                    "1.0.2"
-                ]
-            }
-        ])
+        mocker.patch.object(cache, 'get', return_value=ResourceSchema.get_mock_data()['schemas'])
 
         # Fill cache
-        rmock.get('https://example.com/schemas', json={
-            "schemas": [
-                {
-                    "name": "etalab/schema-irve",
-                    "title": "Schéma IRVE",
-                    "versions": [
-                        {
-                            "version_name": "1.0.0"
-                        },
-                        {
-                            "version_name": "1.0.1"
-                        },
-                        {
-                            "version_name": "1.0.2"
-                        }
-                    ]
-                }
-            ]
-        })
+        rmock.get('https://example.com/schemas', json=ResourceSchema.get_mock_data())
         response = api.get(url_for('api.schemas'))
         assert200(response)
-        assert response.json == [
-            {
-                "id": "etalab/schema-irve",
-                "label": "Schéma IRVE",
-                "versions": [
-                    "1.0.0",
-                    "1.0.1",
-                    "1.0.2"
-                ]
-            }
-        ]
+        assert response.json == ResourceSchema.get_expected_v1_result_from_mock_data()
         assert cache_mock_set.called
 
         # Endpoint becomes unavailable
@@ -1809,17 +1771,7 @@ class DatasetSchemasAPITest:
         # Long term cache is used
         response = api.get(url_for('api.schemas'))
         assert200(response)
-        assert response.json == [
-            {
-                "id": "etalab/schema-irve",
-                "label": "Schéma IRVE",
-                "versions": [
-                    "1.0.0",
-                    "1.0.1",
-                    "1.0.2"
-                ]
-            }
-        ]
+        assert response.json == ResourceSchema.get_expected_v1_result_from_mock_data()
 
 
 @pytest.mark.usefixtures('clean_db')

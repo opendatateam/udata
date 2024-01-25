@@ -575,33 +575,15 @@ class ResourceSchemaTest:
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_resource_schema_objects_w_cache(self, rmock, mocker):
         cache_mock_set = mocker.patch.object(cache, 'set')
-        mocker.patch.object(cache, 'get', return_value='dummy_from_cache')
 
         # fill cache
-        rmock.get('https://example.com/schemas', json={
-            "schemas": [
-                {
-                    "name": "etalab/schema-irve",
-                    "title": "Schéma IRVE",
-                    "versions": [
-                        {
-                            "version_name": "1.0.0"
-                        },
-                        {
-                            "version_name": "1.0.1"
-                        },
-                        {
-                            "version_name": "1.0.2"
-                        }
-                    ]
-                }
-            ]
-        })
+        rmock.get('https://example.com/schemas', json=ResourceSchema.get_mock_data())
         ResourceSchema.objects()
         assert cache_mock_set.called
 
+        mocker.patch.object(cache, 'get', return_value=ResourceSchema.get_mock_data()['schemas'])
         rmock.get('https://example.com/schemas', status_code=500)
-        assert 'dummy_from_cache' == ResourceSchema.objects()
+        assert ResourceSchema.get_expected_v1_result_from_mock_data() == ResourceSchema.objects()
         assert rmock.call_count == 2
 
     def test_resource_schema_validation(self):
