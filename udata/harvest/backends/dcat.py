@@ -2,7 +2,7 @@ import logging
 
 from rdflib import Graph, URIRef
 from rdflib.namespace import RDF
-import xml.etree.ElementTree as ET
+import lxml.etree as ET
 from typing import List
 
 from udata.rdf import (
@@ -141,9 +141,21 @@ class DcatBackend(BaseBackend):
 class CswDcatBackend(DcatBackend):
     display_name = 'CSW-DCAT'
 
-    DCAT_SCHEMA = 'http://www.w3.org/ns/dcat#'
+    ISO_SCHEMA = 'http://www.isotc211.org/2005/gmd'
 
     def parse_graph(self, url: str, fmt: str) -> List[Graph]:
+        '''
+        Parse CSW graph querying ISO schema.
+        Use GeoDCAT-AP XSLT to map it to a correct version.
+        See https://github.com/SEMICeu/iso-19139-to-dcat-ap for more information on the XSLT.
+        '''
+
+        # Load XSLT
+        xslURL = "https://raw.githubusercontent.com/SEMICeu/iso-19139-to-dcat-ap/master/iso-19139-to-dcat-ap.xsl"
+        xsl = ET.fromstring(self.get(xslURL).content)
+        transform = ET.XSLT(xsl)
+
+        # Start querying and parsing graph
         body = '''<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
                                   xmlns:gmd="http://www.isotc211.org/2005/gmd"
                                   service="CSW" version="2.0.2" resultType="results"
@@ -164,61 +176,37 @@ class CswDcatBackend(DcatBackend):
         graphs = []
         page = 0
         start = 1
-        response = self.post(url, data=body.format(start=start, schema=self.DCAT_SCHEMA),
+        page_size = 10
+        response = self.post(url, data=body.format(start=start, schema=self.ISO_SCHEMA),
                              headers=headers)
         response.raise_for_status()
-        content = response.text
-        tree = ET.fromstring(content)
-        if tree.tag == '{' + OWS_NAMESPACE + '}ExceptionReport':
-            raise ValueError(f'Failed to query CSW:\n{content}')
+        xml = ET.fromstring(response.content)
+        tree = transform(xml)
+
         while tree:
-            graph = Graph(namespace_manager=namespace_manager)
-            search_results = tree.find('csw:SearchResults', {'csw': CSW_NAMESPACE})
-            if not search_results:
-                log.error(f'No search results found for {url} on page {page}')
-                break
-            for child in search_results:
-                subgraph = Graph(namespace_manager=namespace_manager)
-                subgraph.parse(data=ET.tostring(child), format=fmt)
-                graph += subgraph
+            subgraph = Graph(namespace_manager=namespace_manager)
+            subgraph.parse(data = ET.tostring(tree), format=fmt)
 
-                for node in subgraph.subjects(RDF.type, DCAT.Dataset):
-                    id = subgraph.value(node, DCT.identifier)
-                    kwargs = {'nid': str(node), 'page': page}
-                    kwargs['type'] = 'uriref' if isinstance(node, URIRef) else 'blank'
-                    self.add_item(id, **kwargs)
-            graphs.append(graph)
+            if not subgraph.subjects(RDF.type, DCAT.Dataset):
+                raise ValueError("Failed to fetch CSW content")
+
+            dataset_found = False
+            for node in subgraph.subjects(RDF.type, DCAT.Dataset):
+                id = subgraph.value(node, DCT.identifier)
+                kwargs = {'nid': str(node), 'page': page}
+                kwargs['type'] = 'uriref' if isinstance(node, URIRef) else 'blank'
+                self.add_item(id, **kwargs)
+                dataset_found = True
+
+            if not dataset_found:
+                break
+            
+            graphs.append(subgraph)
             page += 1
+            start = start + page_size
 
-            next_record = int(search_results.attrib['nextRecord'])
-            matched_count = int(search_results.attrib['numberOfRecordsMatched'])
-            returned_count = int(search_results.attrib['numberOfRecordsReturned'])
-
-            # Break conditions copied gratefully from
-            # noqa https://github.com/geonetwork/core-geonetwork/blob/main/harvesters/src/main/java/org/fao/geonet/kernel/harvest/harvester/csw/Harvester.java#L338-L369
-            break_conditions = (
-                # standard CSW: A value of 0 means all records have been returned.
-                next_record == 0,
-
-                # Misbehaving CSW server returning a next record > matched count
-                next_record > matched_count,
-
-                # No results returned already
-                returned_count == 0,
-
-                # Current next record is lower than previous one
-                next_record < start,
-
-                # Enough items have been harvested already
-                self.max_items and len(self.job.items) >= self.max_items
-            )
-
-            if any(break_conditions):
-                break
-
-            start = next_record
-            tree = ET.fromstring(
-                self.post(url, data=body.format(start=start, schema=self.DCAT_SCHEMA),
-                          headers=headers).text)
+            tree = transform(ET.fromstring(
+                self.post(url, data=body.format(start=start, schema=self.ISO_SCHEMA),
+                          headers=headers).content))
 
         return graphs
