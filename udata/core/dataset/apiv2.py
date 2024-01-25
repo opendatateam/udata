@@ -18,7 +18,9 @@ from .api_fields import (
     dataset_harvest_fields,
     dataset_internal_fields,
     resource_harvest_fields,
-    resource_internal_fields
+    resource_internal_fields,
+    catalog_schema_fields,
+    schema_fields
 )
 from udata.core.spatial.api_fields import geojson
 from udata.core.contact_point.api_fields import contact_point_fields
@@ -173,6 +175,8 @@ apiv2.inherit('HarvestResourceMetadata', resource_harvest_fields)
 apiv2.inherit('DatasetInternals', dataset_internal_fields)
 apiv2.inherit('ResourceInternals', resource_internal_fields)
 apiv2.inherit('ContactPoint', contact_point_fields)
+apiv2.inherit('Schema', schema_fields)
+apiv2.inherit('CatalogSchema', catalog_schema_fields)
 
 
 @ns.route('/search/', endpoint='dataset_search')

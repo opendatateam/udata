@@ -10,7 +10,7 @@ from udata.core.storages import resources
 from udata.core.spatial.forms import SpatialCoverageField
 
 from .models import (
-    Dataset, Resource, License, Checksum, CommunityResource,
+    Dataset, Resource, Schema, License, Checksum, CommunityResource,
     UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, RESOURCE_FILETYPES, CHECKSUM_TYPES,
     LEGACY_FREQUENCIES, RESOURCE_TYPES, TITLE_SIZE_LIMIT, DESCRIPTION_SIZE_LIMIT,
     ResourceSchema,
@@ -32,46 +32,49 @@ def normalize_format(data):
         return data.strip().lower()
 
 
-def enforce_allowed_schemas(form, field):
-    schema = field.data
-    if schema:
-        allowed_schemas = [s['id'] for s in ResourceSchema.objects()]
+class SchemaForm(ModelForm):
+    model_class = Schema
+    url = fields.URLField()
+    name = fields.StringField(_('Name of the schema'))
+    version = fields.StringField(_('Version of the schema'))
 
-        if not bool('name' in schema) ^ bool('url' in schema):
-            raise validators.ValidationError(_('Schema must have at least a name or an url. Having both is not allowed.'))
+    def validate_url(form, field):
+        if not field.data: 
+            if form.name.data: return
+            raise validators.ValidationError(_('URL is required when name is missing.'))
 
-        if 'url' in schema:
-            try:
-                validate_url(schema.get('url'))
-            except ValidationError:
-                raise validators.ValidationError(_('Provided URL is not valid.'))
+        if form.name.data:
+            raise validators.ValidationError(_('Having both name and URL is not allowed.'))
 
-        if 'name' in schema and schema.get('name') not in allowed_schemas:
+    def validate_name(form, field):
+        if not field.data: 
+            if form.url.data: return
+            raise validators.ValidationError(_('Name is required when URL is missing.'))
+
+        if form.url.data: 
+            raise validators.ValidationError(_('Having both name and URL is not allowed.'))
+
+        name = field.data
+        version = form.version.data
+
+        # If there is no URL, the name must match a known schema from our catalog.
+        allowed_schemas_version_by_name = {schema['id']: schema['versions'] for schema in ResourceSchema.all()}
+        allowed_versions = allowed_schemas_version_by_name.get(name)
+
+        if not allowed_versions:
             message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}')
             raise validators.ValidationError(message.format(
-                schema=schema.get('name'),
-                values=', '.join(allowed_schemas)
+                schema=name,
+                values=', '.join(allowed_schemas_version_by_name.keys())
             ))
-
-        schema_versions = [d['versions'] for d in ResourceSchema.objects() if d['id'] == schema.get('name')]
-        allowed_versions = schema_versions[0] if schema_versions else []
-        allowed_versions.append('latest')
-        if 'version' in schema:
-            if schema.get('version') not in allowed_versions:
-                message = _('Version "{version}" is not an allowed value. Allowed values: {values}')
-                raise validators.ValidationError(message.format(
-                    version=schema.get('version'),
-                    values=', '.join(allowed_versions)
-                ))
-
-        properties = ['name', 'version', 'url']
-        for prop in schema:
-            if prop not in properties:
-                message = _('Sub-property "{prop}" is not allowed value in schema field. Allowed values is : {properties}')
-                raise validators.ValidationError(message.format(
-                    prop=prop,
-                    properties=', '.join(properties),
-                ))
+        
+        if version and version not in allowed_versions and version != 'latest':
+            message = _('Version "{version}" is not an allowed value for the schema "{schema}". Allowed versions: {values}')
+            raise validators.ValidationError(message.format(
+                version=version,
+                schema=name,
+                values=', '.join(allowed_versions)
+            ))
 
 
 class BaseResourceForm(ModelForm):
@@ -103,11 +106,7 @@ class BaseResourceForm(ModelForm):
         _('Size'), [validators.optional()],
         description=_('The file size in bytes'))
     extras = fields.ExtrasField()
-    schema = fields.DictField(
-        _('Schema'),
-        default={},
-        validators=[validators.optional(), enforce_allowed_schemas],
-        description=_('The schema slug the resource adheres to'))
+    schema = fields.FormField(SchemaForm)
 
 
 class ResourceForm(BaseResourceForm):

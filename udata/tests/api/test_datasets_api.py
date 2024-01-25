@@ -732,15 +732,14 @@ class DatasetAPITest(APITestCase):
         data['resources'].append(resource_data)
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert400(response)
-        expected = _('Schema must have at least a name or an url. Having both is not allowed.')
-        assert response.json['errors']['resources'][0]['schema'][0] == expected
+        assert response.json['errors']['resources'][0]['schema']['url'] == [_('Having both name and URL is not allowed.')]
+        assert response.json['errors']['resources'][0]['schema']['name'] == [_('Having both name and URL is not allowed.')]
 
         resource_data['schema'] = {'url': 'test'}
         data['resources'].append(resource_data)
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert400(response)
-        expected_error = _('Provided URL is not valid.')
-        assert response.json['errors']['resources'][0]['schema'][0] == expected_error
+        assert response.json['errors']['resources'][0]['schema']['url'] == [_('Invalid URL')]
 
         resource_data['schema'] = {'url': 'http://example.com'}
         data['resources'].append(resource_data)

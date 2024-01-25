@@ -30,7 +30,7 @@ from .exceptions import (
 )
 
 __all__ = (
-    'License', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
+    'License', 'Resource', 'Schema', 'Dataset', 'Checksum', 'CommunityResource',
     'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_FILETYPES',
     'PIVOTAL_DATA', 'DEFAULT_LICENSE', 'RESOURCE_TYPES',
     'ResourceSchema'
@@ -149,6 +149,56 @@ class HarvestResourceMetadata(DynamicEmbeddedDocument):
     modified_at = db.DateTimeField()
     uri = db.StringField()
 
+
+class Schema(db.EmbeddedDocument):
+    url = db.URLField()
+    name = db.StringField()
+    version = db.StringField()
+
+    def clean(self):
+        if not bool('name' in self) ^ bool('url' in self):
+            raise MongoEngineValidationError('Schema must have at least a name or an url. Having both is not allowed.')
+
+    def get_url(self):
+        if self.url: return self.url
+
+        schemas = ResourceSchema.all()
+        for schema in schemas:
+            if self.name != schema['name']: continue # Not the correct schema
+            if not version: return schema['url'] # If there is no version we take the URL of the latest version
+
+            for version in schema['versions']:
+                if version['version_name'] != version: continue # Not the correct version
+                return version['schema_url']
+
+            log.warning(f"The version {self.version} of schema {self.name} doesn't match any of the available versions.")
+            return None
+
+        log.warning(f"The schema {self.name} doesn't match any of the available schemas.")
+        return None # Nothing match
+
+    def get_name(self):
+        if self.name: return self.name
+
+        # If the schema is one of ours, try to find an appropriate name
+        schemas = ResourceSchema.all()
+        for schema in schemas:
+            if self.url == schema['schema_url'] or self.url in map(lambda version: version['schema_url'], schema['versions']):
+                return schema['title']
+
+        return None
+
+    def get_version(self):
+        if self.version: return self.version
+
+        # If the schema is one of ours, try to find an appropriate version
+        schemas = ResourceSchema.all()
+        for schema in schemas:
+            for version in schema['versions']:
+                if version['schema_url'] == self.url:
+                    return version['version_name']
+
+        return None
 
 class License(db.Document):
     # We need to declare id explicitly since we do not use the default
@@ -289,8 +339,8 @@ class ResourceMixin(object):
     fs_filename = db.StringField()
     extras = db.ExtrasField()
     harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)
-    schema = db.DictField()
-
+    schema = db.EmbeddedDocumentField(Schema)
+    
     created_at_internal = db.DateTimeField(default=datetime.utcnow, required=True)
     last_modified_internal = db.DateTimeField(default=datetime.utcnow, required=True)
     deleted = db.DateTimeField()
@@ -318,8 +368,6 @@ class ResourceMixin(object):
         super(ResourceMixin, self).clean()
         if not self.urlhash or 'url' in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
-        if self.schema and (not bool('name' in self.schema) ^ bool('url' in self.schema)):
-            raise MongoEngineValidationError('Schema must have at least a name or an url. Having both is not allowed.')
 
     @cached_property  # Accessed at least 2 times in front rendering
     def preview_url(self):
@@ -471,6 +519,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     frequency_date = db.DateTimeField(verbose_name=_('Future date of update'))
     temporal_coverage = db.EmbeddedDocumentField(db.DateRange)
     spatial = db.EmbeddedDocumentField(SpatialCoverage)
+    schema = db.EmbeddedDocumentField(Schema)
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()
@@ -896,6 +945,23 @@ class ResourceSchema(object):
     @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
     def objects():
         '''
+        This rewrite is used in API returns.
+        It could be possible in the future to change the API with a breaking change to return
+        the full schema information from the catalog.
+        '''
+        schemas = ResourceSchema.all()
+        return [
+            {
+                'id': s['name'],
+                'label': s['title'],
+                'versions': [d['version_name'] for d in s['versions']],
+            } for s in schemas
+        ]
+
+    @staticmethod
+    @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
+    def all():
+        '''
         Get a list of schemas from a schema catalog endpoint.
 
         This has a double layer of cache:
@@ -915,22 +981,16 @@ class ResourceSchema(object):
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             log.exception(f'Error while getting schema catalog from {endpoint}')
-            content = cache.get(cache_key)
+            schemas = cache.get(cache_key)
         else:
             schemas = response.json().get('schemas', [])
-            content = [
-                {
-                    'id': s['name'],
-                    'label': s['title'],
-                    'versions': [d['version_name'] for d in s['versions']],
-                } for s in schemas
-            ]
-            cache.set(cache_key, content)
+            cache.set(cache_key, schemas)
         # no cached version or no content
-        if not content:
+        if not schemas:
             log.error(f'No content found inc. from cache for schema catalog')
             raise SchemasCacheUnavailableException('No content in cache for schema catalog')
-        return content
+
+        return schemas
 
 
 def get_resource(id):

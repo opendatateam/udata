@@ -51,7 +51,7 @@ from .api_fields import (
     resource_fields,
     resource_type_fields,
     upload_fields,
-    schema_fields,
+    catalog_schema_fields,
 )
 from udata.linkchecker.checker import check_resource
 from udata.core.topic.models import Topic
@@ -722,7 +722,7 @@ class ResourceTypesAPI(API):
 @ns.route('/schemas/', endpoint='schemas')
 class SchemasAPI(API):
     @api.doc('schemas')
-    @api.marshal_list_with(schema_fields)
+    @api.marshal_list_with(catalog_schema_fields)
     def get(self):
         '''List all available schemas'''
         try:
