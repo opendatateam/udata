@@ -760,11 +760,11 @@ class DatasetAPITest(APITestCase):
         assert dataset.resources[0].schema['url'] == 'http://example.com'
         assert dataset.resources[0].schema['name'] == None
 
-        
         resource_data['schema'] = {'name': 'etalab/schema-irve-statique'}
         data['resources'].append(resource_data)
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert200(response)
+
         dataset.reload()
         assert dataset.resources[0].schema['name'] == 'etalab/schema-irve-statique'
         assert dataset.resources[0].schema['url'] == None

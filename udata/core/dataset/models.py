@@ -157,10 +157,6 @@ class Schema(db.EmbeddedDocument):
     name = db.StringField()
     version = db.StringField()
 
-    def clean(self):
-        if not bool('name' in self) ^ bool('url' in self):
-            raise MongoEngineValidationError('Schema must have at least a name or an url. Having both is not allowed.')
-
     def get_url(self):
         if self.url: return self.url
 
@@ -341,7 +337,7 @@ class ResourceMixin(object):
     fs_filename = db.StringField()
     extras = db.ExtrasField()
     harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)
-    schema = db.EmbeddedDocumentField(Schema, required = False)
+    schema = db.EmbeddedDocumentField(Schema)
     
     created_at_internal = db.DateTimeField(default=datetime.utcnow, required=True)
     last_modified_internal = db.DateTimeField(default=datetime.utcnow, required=True)
@@ -521,7 +517,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     frequency_date = db.DateTimeField(verbose_name=_('Future date of update'))
     temporal_coverage = db.EmbeddedDocumentField(db.DateRange)
     spatial = db.EmbeddedDocumentField(SpatialCoverage)
-    schema = db.EmbeddedDocumentField(Schema, required = False)
+    schema = db.EmbeddedDocumentField(Schema)
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()
