@@ -141,6 +141,8 @@ URLS_ALLOWED_TLDS = Defaults.URLS_ALLOWED_TLDS | set(['local'])
 RESOURCES_FILE_ALLOWED_DOMAINS = ['*']
 PLUGINS = []
 FS_ROOT = 'fs'
+
+SESSION_COOKIE_SECURE = False
 ```
 
 This define `dev.local:7000` as the URL for your local setup. You’ll have to edit your `/etc/hosts` to add this rule.

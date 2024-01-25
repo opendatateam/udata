@@ -131,7 +131,7 @@ def get_spatial_granularities(lang):
     with language(lang):
         return [
             (l.id, _(l.name)) for l in GeoLevel.objects
-        ] + [(id, label.value) for id, label in BASE_GRANULARITIES]
+        ] + [(id, str(label)) for id, label in BASE_GRANULARITIES]
 
 
 spatial_granularities = LocalProxy(

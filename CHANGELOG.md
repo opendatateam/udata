@@ -2,7 +2,12 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 7.0.2 (2024-01-23)
+
 - Improve search serialization perfs for datasets in big topics [#2937](https://github.com/opendatateam/udata/pull/2937)
+- Migrate to Flask-Babel because of Flask-BabelEx deprecation [#2897](https://github.com/opendatateam/udata/pull/2897)
 - Contact points feature [#2914](https://github.com/opendatateam/udata/pull/2914) [#2943](https://github.com/opendatateam/udata/pull/2943):
   - Users and Organizations can now define a list of contact points
   - Api endpoint for creating, updating and deleting contact points
@@ -10,6 +15,7 @@
   - Defining a contact point for a dataset is done throught a form field
 - Allow wildcards in redirect_uris for Oauth2Client [#2935](https://github.com/opendatateam/udata/pull/2935)
 - Allow for being one day late on update fulfilled in time [#2941](https://github.com/opendatateam/udata/pull/2941)
+- When a topic is deleted, corresponding discussions are purged [#2944](https://github.com/opendatateam/udata/pull/2944)
 
 ## 7.0.1 (2023-12-06)
 
@@ -53,6 +59,7 @@
 - Add German to udata translations [2899](https://github.com/opendatateam/udata/pull/2899)[2909](https://github.com/opendatateam/udata/pull/2909)
 - Add harvesters count to site metrics [#2890](https://github.com/opendatateam/udata/pull/2890)
 - Use a single session for reindex [#2891](https://github.com/opendatateam/udata/pull/2891)
+
 - Fix site title and keywords never get updated [#2900](https://github.com/opendatateam/udata/pull/2900)
 - Reuse's extras are now exposed by API [#2905](https://github.com/opendatateam/udata/pull/2905)
 - Add configuration settings to enhance cookies security [#2910](https://github.com/opendatateam/udata/pull/2910)
@@ -68,7 +75,6 @@
 
 - Python 3.7 is now deprecated and will be removed in upcoming release [#2859](https://github.com/opendatateam/udata/pull/2859)
 - GeoZone model will be heavily refactored for a simplified version [#2878](https://github.com/opendatateam/udata/pull/2878)
-
 
 ## 6.1.7 (2023-09-01)
 
