@@ -25,9 +25,9 @@ checksum_fields = api.model('Checksum', {
 
 # Use for schema inside Dataset or Resource
 schema_fields = api.model('Schema', {
-    'name': fields.Raw(attribute=lambda schema: schema.get_name()),
-    'version': fields.Raw(attribute=lambda schema: schema.get_version()),
-    'url': fields.Raw(attribute=lambda schema: schema.get_url()),
+    'name': fields.String(),
+    'version': fields.String(),
+    'url': fields.String(),
 })
 
 dataset_harvest_fields = api.model('HarvestDatasetMetadata', {
