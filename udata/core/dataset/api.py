@@ -196,7 +196,7 @@ class DatasetListAPI(API):
     @api.secure
     @api.doc('create_dataset', responses={400: 'Validation error'})
     @api.expect(dataset_fields)
-    @api.marshal_with(dataset_fields)
+    @api.marshal_with(dataset_fields, code=201)
     def post(self):
         '''Create a new dataset'''
         form = api.validate(DatasetForm)
