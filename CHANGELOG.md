@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix reuses inside database without private information (default to public)
 
 ## 7.0.2 (2024-01-23)
 
