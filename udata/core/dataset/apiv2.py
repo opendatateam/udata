@@ -252,11 +252,11 @@ class DatasetExtrasAPI(API):
         if dataset.deleted:
             apiv2.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
-        try:
-            for key in data:
+        for key in data:
+            try:
                 del dataset.extras[key]
-        except KeyError:
-            apiv2.abort(404, 'Key not found in existing extras')
+            except KeyError:
+                pass
         dataset.save(signal_kwargs={'ignores': ['post_save']})
         return dataset.extras, 204
 

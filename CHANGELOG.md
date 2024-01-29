@@ -16,6 +16,10 @@
 - Allow wildcards in redirect_uris for Oauth2Client [#2935](https://github.com/opendatateam/udata/pull/2935)
 - Allow for being one day late on update fulfilled in time [#2941](https://github.com/opendatateam/udata/pull/2941)
 - When a topic is deleted, corresponding discussions are purged [#2944](https://github.com/opendatateam/udata/pull/2944)
+- Custom extras metadata [#2921](https://github.com/opendatateam/udata/pull/2921):
+  - Organization can nom define a custom metadata of a choosen type
+  - Dataset belonging to the organization can assign a value to the defined metadata
+  - Metadata value must match the choosen type by the organization
 
 ## 7.0.1 (2023-12-06)
 

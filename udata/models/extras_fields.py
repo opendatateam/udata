@@ -78,7 +78,7 @@ class OrganizationExtrasField(ExtrasField):
         for elem in values.get('custom', []):
             # Check if all mandatory keys are in the dictionary
             if not all(key in elem for key in mandatory_keys):
-                errors['custom'] = 'The dictionary does not contain the mandatory keys.'
+                errors['custom'] = 'The dictionary does not contain the mandatory keys: \'title\', \'description\', \'type\'.'
 
             # Check if the dictionary contains only keys that are either mandatory or optional
             if not all(key in mandatory_keys + optional_keys for key in elem):
