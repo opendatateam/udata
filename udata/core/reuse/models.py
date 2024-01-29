@@ -77,7 +77,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
     topic = db.StringField(required=True, choices=list(REUSE_TOPICS))
     # badges = db.ListField(db.EmbeddedDocumentField(ReuseBadge))
 
-    private = db.BooleanField()
+    private = db.BooleanField(required=True, default=False)
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()
