@@ -11,7 +11,7 @@ from udata.models import (
 )
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.dataset.factories import (
-    ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory
+    ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory, ResourceSchemaMockData
 )
 from udata.core.dataset.exceptions import (
     SchemasCatalogNotFoundException, SchemasCacheUnavailableException
@@ -577,13 +577,13 @@ class ResourceSchemaTest:
         cache_mock_set = mocker.patch.object(cache, 'set')
 
         # fill cache
-        rmock.get('https://example.com/schemas', json=ResourceSchema.get_mock_data())
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
         ResourceSchema.objects()
         assert cache_mock_set.called
 
-        mocker.patch.object(cache, 'get', return_value=ResourceSchema.get_mock_data()['schemas'])
+        mocker.patch.object(cache, 'get', return_value=ResourceSchemaMockData.get_mock_data()['schemas'])
         rmock.get('https://example.com/schemas', status_code=500)
-        assert ResourceSchema.get_expected_v1_result_from_mock_data() == ResourceSchema.objects()
+        assert ResourceSchemaMockData.get_expected_v1_result_from_mock_data() == ResourceSchema.objects()
         assert rmock.call_count == 2
 
     def test_resource_schema_validation(self):

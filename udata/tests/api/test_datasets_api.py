@@ -2,7 +2,6 @@ import json
 from datetime import datetime
 from io import BytesIO
 from uuid import uuid4
-from os.path import join
 
 import pytest
 import pytz
@@ -10,17 +9,17 @@ from flask import url_for
 import requests_mock
 
 from udata.api import fields
-from udata.app import ROOT_DIR, cache
+from udata.app import cache
 from udata.core import storages
 from udata.core.badges.factories import badge_factory
 from udata.core.dataset.api_fields import (dataset_harvest_fields,
                                            resource_harvest_fields)
 from udata.core.dataset.factories import (CommunityResourceFactory,
                                           DatasetFactory, LicenseFactory,
-                                          ResourceFactory,
+                                          ResourceFactory, ResourceSchemaMockData,
                                           VisibleDatasetFactory)
 from udata.core.dataset.models import (HarvestDatasetMetadata,
-                                       HarvestResourceMetadata, ResourceMixin, ResourceSchema)
+                                       HarvestResourceMetadata, ResourceMixin)
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.core.topic.factories import TopicFactory
@@ -722,7 +721,7 @@ class DatasetAPITest(APITestCase):
     @requests_mock.Mocker(kw='rmock')
     def test_dataset_new_resource_with_schema(self, rmock):
         '''Tests api validation to prevent schema creation with a name and a url'''
-        rmock.get('https://example.com/schemas', json=ResourceSchema.get_mock_data())
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
 
         user = self.login()
         dataset = DatasetFactory(owner=user)
@@ -1702,11 +1701,11 @@ class DatasetSchemasAPITest:
         # made before setting up rmock at module load, resulting in a 404
         app.config['SCHEMA_CATALOG_URL'] = 'https://example.com/schemas'
 
-        rmock.get('https://example.com/schemas', json=ResourceSchema.get_mock_data())
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
         response = api.get(url_for('api.schemas'))
 
         assert200(response)
-        assert response.json == ResourceSchema.get_expected_v1_result_from_mock_data()
+        assert response.json == ResourceSchemaMockData.get_expected_v1_result_from_mock_data()
 
     @pytest.mark.options(SCHEMA_CATALOG_URL=None)
     def test_dataset_schemas_api_list_no_catalog_url(self, api):
@@ -1730,13 +1729,13 @@ class DatasetSchemasAPITest:
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_dataset_schemas_api_list_error_w_cache(self, api, rmock, mocker):
         cache_mock_set = mocker.patch.object(cache, 'set')
-        mocker.patch.object(cache, 'get', return_value=ResourceSchema.get_mock_data()['schemas'])
+        mocker.patch.object(cache, 'get', return_value=ResourceSchemaMockData.get_mock_data()['schemas'])
 
         # Fill cache
-        rmock.get('https://example.com/schemas', json=ResourceSchema.get_mock_data())
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
         response = api.get(url_for('api.schemas'))
         assert200(response)
-        assert response.json == ResourceSchema.get_expected_v1_result_from_mock_data()
+        assert response.json == ResourceSchemaMockData.get_expected_v1_result_from_mock_data()
         assert cache_mock_set.called
 
         # Endpoint becomes unavailable
@@ -1745,7 +1744,7 @@ class DatasetSchemasAPITest:
         # Long term cache is used
         response = api.get(url_for('api.schemas'))
         assert200(response)
-        assert response.json == ResourceSchema.get_expected_v1_result_from_mock_data()
+        assert response.json == ResourceSchemaMockData.get_expected_v1_result_from_mock_data()
 
 
 @pytest.mark.usefixtures('clean_db')

@@ -1,7 +1,4 @@
-import json
 import logging
-from pprint import pprint
-from os.path import join
 
 from datetime import datetime, timedelta
 from collections import OrderedDict
@@ -17,7 +14,7 @@ from stringdist import rdlevenshtein
 from werkzeug.utils import cached_property
 import requests
 
-from udata.app import cache, ROOT_DIR
+from udata.app import cache
 from udata.core import storages
 from udata.frontend.markdown import mdstrip
 from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
@@ -1006,33 +1003,6 @@ class ResourceSchema(object):
 
         return schemas
     
-    @staticmethod
-    def get_mock_data():
-        return json.load(open(join(ROOT_DIR, 'tests', 'schemas.json')))
-    
-    @staticmethod
-    def get_expected_v1_result_from_mock_data():
-        return [
-            {
-                "id": "etalab/schema-irve-statique",
-                "label": "IRVE statique",
-                "versions": [
-                    "2.2.0",
-                    "2.2.1"
-                ]
-            },
-            {
-                "id": "139bercy/format-commande-publique",
-                "label": "Données essentielles des marchés publics français",
-                "versions": [
-                    "1.3.0",
-                    "1.4.0",
-                    "1.5.0",
-                    "2.0.0",
-                    "2.0.1"
-                ]
-            }
-        ]
     
 def get_resource(id):
     '''Fetch a resource given its UUID'''
