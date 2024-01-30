@@ -458,7 +458,10 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     resource.filesize = rdf_value(distrib, DCAT.byteSize)
     resource.mime = mime_from_rdf(distrib)
     resource.format = format_from_rdf(distrib)
-    resource.schema = schema_from_rdf(distrib)
+    schema = schema_from_rdf(distrib)
+    if schema:
+        resource.schema = schema
+
     checksum = distrib.value(SPDX.checksum)
     if checksum:
         algorithm = checksum.value(SPDX.algorithm).identifier
@@ -502,7 +505,9 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
     dataset.contact_point = contact_point_from_rdf(d, dataset) or dataset.contact_point
-    dataset.schema = schema_from_rdf(d)
+    schema = schema_from_rdf(d)
+    if schema:
+        dataset.schema = schema
 
     acronym = rdf_value(d, SKOS.altLabel)
     if acronym:

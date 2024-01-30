@@ -226,7 +226,8 @@ def schema_from_rdf(rdf):
     Currently the "issued" property is not harvest.
     '''
     resource = rdf.value(DCT.conformsTo)
-    if not resource: return None
+    if not resource:
+        return None
 
     schema = Schema()
     if isinstance(resource, (URIRef, Literal)):

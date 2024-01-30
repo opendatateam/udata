@@ -168,15 +168,19 @@ class Schema(db.EmbeddedDocument):
         return bool(self.name) or bool(self.url)
 
     def get_url(self):
-        if self.url: return self.url
+        if self.url:
+            return self.url
 
         schemas = ResourceSchema.all()
         for schema in schemas:
-            if self.name != schema['name']: continue # Not the correct schema
-            if not self.version: return schema['schema_url'] # If there is no version we take the URL of the latest version
+            if self.name != schema['name']:
+                continue # Not the correct schema
+            if not self.version:
+                return schema['schema_url'] # If there is no version we take the URL of the latest version
 
             for version in schema['versions']:
-                if version['version_name'] != self.version: continue # Not the correct version
+                if version['version_name'] != self.version:
+                    continue # Not the correct version
                 return version['schema_url']
 
             log.warning(f"The version {self.version} of schema {self.name} doesn't match any of the available versions.")
@@ -186,7 +190,8 @@ class Schema(db.EmbeddedDocument):
         return None # Nothing match
 
     def get_name(self):
-        if self.name: return self.name
+        if self.name:
+            return self.name
 
         # If the schema is one of ours, try to find an appropriate name
         schemas = ResourceSchema.all()
@@ -197,7 +202,8 @@ class Schema(db.EmbeddedDocument):
         return None
 
     def get_version(self):
-        if self.version: return self.version
+        if self.version:
+            return self.version
 
         # If the schema is one of ours, try to find an appropriate version
         schemas = ResourceSchema.all()

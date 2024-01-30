@@ -34,13 +34,14 @@ def normalize_format(data):
 
 class SchemaForm(ModelForm):
     model_class = Schema
-    url = fields.URLField()
+    url = fields.URLField(_('URL of the schema'))
     name = fields.StringField(_('Name of the schema'))
     version = fields.StringField(_('Version of the schema'))
 
     def validate_url(form, field):
         if not field.data: 
-            if form.name.data: return
+            if form.name.data:
+                return
             raise validators.ValidationError(_('URL is required when name is missing.'))
 
         if form.name.data:
@@ -48,7 +49,8 @@ class SchemaForm(ModelForm):
 
     def validate_name(form, field):
         if not field.data: 
-            if form.url.data: return
+            if form.url.data:
+                return
             raise validators.ValidationError(_('Name is required when URL is missing.'))
 
         if form.url.data: 
