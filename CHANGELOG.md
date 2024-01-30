@@ -4,6 +4,7 @@
 
 - Fix reuses inside database without private information (default to public)
 - Fix: you can now remove schema from a resource in the admin
+- Harvest DCAT conformsTo into schemas for resources and datasets
 
 ## 7.0.2 (2024-01-23)
 
