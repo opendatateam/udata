@@ -24,7 +24,7 @@ class SpamMixin(object):
     def allowed_langs():
         return current_app.config.get('SPAM_ALLOWED_LANGS', [])
 
-    def detect_spam_listener(sender, document):
+    def detect_spam_listener(sender, document, *args, **kwargs):
         '''This is the callback called on MongoEngine pre_save() for all models of the application'''
         if not isinstance(document, SpamMixin):
             return
