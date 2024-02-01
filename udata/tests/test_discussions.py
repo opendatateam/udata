@@ -1,6 +1,8 @@
 from datetime import datetime
 
 from flask import url_for
+from udata.core.spam.models import SpamMixin
+import pytest
 
 from udata.models import Dataset, Member
 from udata.core.discussions.models import Message, Discussion
@@ -22,12 +24,13 @@ from udata.utils import faker
 
 from . import TestCase, DBTestMixin
 from .api import APITestCase
-from .helpers import assert_emit
+from .helpers import assert_emit, assert_not_emit
 
 
 class DiscussionsTest(APITestCase):
     modules = []
 
+    @pytest.mark.options(SPAM_WORDS=['spam'])
     def test_new_discussion(self):
         user = self.login()
         dataset = Dataset.objects.create(title='Test dataset')
@@ -41,7 +44,7 @@ class DiscussionsTest(APITestCase):
                     'id': dataset.id,
                 }
             })
-        self.assert201(response)
+            self.assert201(response)
 
         dataset.reload()
         self.assertEqual(dataset.get_metrics()['discussions'], 1)
@@ -56,11 +59,64 @@ class DiscussionsTest(APITestCase):
         self.assertIsNone(discussion.closed)
         self.assertIsNone(discussion.closed_by)
         self.assertEqual(discussion.title, 'test title')
+        self.assertFalse(discussion.is_spam())
 
         message = discussion.discussion[0]
         self.assertEqual(message.content, 'bla bla')
         self.assertEqual(message.posted_by, user)
         self.assertIsNotNone(message.posted_on)
+        self.assertFalse(message.is_spam())
+
+    @pytest.mark.options(SPAM_WORDS=['spam'])
+    def test_spam_in_new_discussion_title(self):
+        self.login()
+        dataset = Dataset.objects.create(title='Test dataset')
+
+        with assert_not_emit(on_new_discussion):
+            response = self.post(url_for('api.discussions'), {
+                'title': 'spam and blah',
+                'comment': 'bla bla',
+                'subject': {
+                    'class': 'Dataset',
+                    'id': dataset.id,
+                }
+            })
+            self.assertStatus(response, 201)
+
+        discussions = Discussion.objects(subject=dataset)
+        self.assertEqual(len(discussions), 1)
+
+        discussion = discussions[0]
+        self.assertTrue(discussion.is_spam())
+        self.assertFalse(discussion.discussion[0].is_spam())
+        self.assertTrue('signal_new' in discussion.spam.callbacks)
+
+        with assert_emit(on_new_discussion):
+            response = self.delete(url_for('api.discussion_spam', id=discussion.id))
+            self.assertStatus(response, 200)
+
+    @pytest.mark.options(SPAM_WORDS=['spam'])
+    def test_spam_in_new_discussion_comment(self):
+        self.login()
+        dataset = Dataset.objects.create(title='Test dataset')
+
+        with assert_not_emit(on_new_discussion):
+            response = self.post(url_for('api.discussions'), {
+                'title': 'title and blah',
+                'comment': 'bla bla spam',
+                'subject': {
+                    'class': 'Dataset',
+                    'id': dataset.id,
+                }
+            })
+            self.assertStatus(response, 201)
+
+        discussions = Discussion.objects(subject=dataset)
+        self.assertEqual(len(discussions), 1)
+
+        discussion = discussions[0]
+        self.assertTrue(discussion.is_spam())
+        self.assertFalse(discussion.discussion[0].is_spam())
 
     def test_new_discussion_missing_comment(self):
         self.login()
@@ -277,6 +333,7 @@ class DiscussionsTest(APITestCase):
             data['discussion'][0]['posted_by']['id'], str(user.id))
         self.assertIsNotNone(data['discussion'][0]['posted_on'])
 
+    @pytest.mark.options(SPAM_WORDS=['spam'])
     def test_add_comment_to_discussion(self):
         dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
@@ -297,6 +354,7 @@ class DiscussionsTest(APITestCase):
         self.assert200(response)
 
         dataset.reload()
+        discussion.reload()
         self.assertEqual(dataset.get_metrics()['discussions'], 1)
 
         data = response.json
@@ -313,6 +371,37 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(
             data['discussion'][1]['posted_by']['id'], str(poster.id))
         self.assertIsNotNone(data['discussion'][1]['posted_on'])
+        self.assertFalse(discussion.discussion[1].is_spam())
+
+    @pytest.mark.options(SPAM_WORDS=['spam'])
+    def test_add_spam_comment_to_discussion(self):
+        dataset = Dataset.objects.create(title='Test dataset')
+        user = UserFactory()
+        message = Message(content='bla bla', posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset,
+            user=user,
+            title='test discussion',
+            discussion=[message]
+        )
+        on_new_discussion.send(discussion)  # Updating metrics.
+
+        self.login()
+        with assert_not_emit(on_new_discussion_comment):
+            response = self.post(url_for('api.discussion', id=discussion.id), {
+                'comment': 'spam new bla bla'
+            })
+            self.assert200(response)
+
+        discussion.reload()
+        self.assertFalse(discussion.is_spam())
+        self.assertTrue(discussion.discussion[1].is_spam())
+        self.assertTrue('signal_comment' in discussion.discussion[1].spam.callbacks)
+
+        with assert_emit(on_new_discussion_comment):
+            response = self.delete(url_for('api.discussion_comment_spam', id=discussion.id, cidx=1))
+            self.assertStatus(response, 200)
+
 
     def test_close_discussion(self):
         owner = self.login()
@@ -356,6 +445,36 @@ class DiscussionsTest(APITestCase):
         response = self.post(url_for('api.discussion', id=discussion.id),
                              {'comment': "can't comment"})
         self.assert403(response)
+
+    @pytest.mark.options(SPAM_WORDS=['spam'])
+    def test_close_discussion_with_spam(self):
+        owner = self.login()
+        dataset = Dataset.objects.create(title='Test dataset', owner=owner)
+        user = UserFactory()
+        message = Message(content='bla bla', posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset,
+            user=user,
+            title='test discussion',
+            discussion=[message]
+        )
+        on_new_discussion.send(discussion)  # Updating metrics.
+
+        with assert_not_emit(on_discussion_closed):
+            response = self.post(url_for('api.discussion', id=discussion.id), {
+                'comment': 'spam new bla bla',
+                'close': True,
+            })
+            self.assert200(response)
+
+        discussion.reload()
+        self.assertFalse(discussion.is_spam())
+        self.assertTrue(discussion.discussion[1].is_spam())
+        self.assertTrue('signal_close' in discussion.discussion[1].spam.callbacks)
+
+        with assert_emit(on_discussion_closed):
+            response = self.delete(url_for('api.discussion_comment_spam', id=discussion.id, cidx=1))
+            self.assertStatus(response, 200)
 
     def test_close_discussion_permissions(self):
         dataset = Dataset.objects.create(title='Test dataset')

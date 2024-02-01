@@ -2,6 +2,9 @@ import logging
 from datetime import datetime
 
 from udata.models import db
+from udata.core.spam.models import SpamMixin, spam_protected
+from .signals import (on_new_discussion, on_discussion_closed, on_new_discussion_comment)
+
 
 log = logging.getLogger(__name__)
 
@@ -9,13 +12,16 @@ log = logging.getLogger(__name__)
 COMMENT_SIZE_LIMIT = 50000
 
 
-class Message(db.EmbeddedDocument):
+class Message(SpamMixin, db.EmbeddedDocument):
     content = db.StringField(required=True)
     posted_on = db.DateTimeField(default=datetime.utcnow, required=True)
     posted_by = db.ReferenceField('User')
 
+    def attributes_to_check_for_spam(self):
+        return [self.content]
 
-class Discussion(db.Document):
+
+class Discussion(SpamMixin, db.Document):
     user = db.ReferenceField('User')
     subject = db.GenericReferenceField()
     title = db.StringField(required=True)
@@ -41,8 +47,26 @@ class Discussion(db.Document):
         """
         return any(message.posted_by == person for message in self.discussion)
 
+    def attributes_to_check_for_spam(self):
+        return [self.title, self.discussion[0].content]
+    
+    def embeds_to_check_for_spam(self):
+        return self.discussion[1:]
+
     @property
     def external_url(self):
         return self.subject.url_for(
             _anchor='discussion-{id}'.format(id=self.id),
             _external=True)
+    
+    @spam_protected()
+    def signal_new(self):
+        on_new_discussion.send(self)
+
+    @spam_protected(lambda discussion, message: discussion.discussion[message])
+    def signal_close(self, message):
+        on_discussion_closed.send(self, message=message)
+
+    @spam_protected(lambda discussion, message: discussion.discussion[message])
+    def signal_comment(self, message):
+        on_new_discussion_comment.send(self, message=message)
