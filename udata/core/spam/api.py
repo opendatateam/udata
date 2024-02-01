@@ -1,10 +1,4 @@
-from datetime import datetime
-
-from flask import current_app, request
-from flask_security import current_user
-
-from udata.api import api, API, fields
-from udata.core.user.api_fields import user_ref_fields
+from udata.api import api, API
 from udata.utils import id_or_404
 
 class SpamAPI(API):
@@ -14,6 +8,7 @@ class SpamAPI(API):
     model = None
 
     def get_model(self, id):
+        '''This function returns the base model and the spamable model which can be different. The base model is the model stored inside Mongo and the spamable model is the embed document (for exemple a comment inside a discussion)'''
         model = self.model.objects.get_or_404(id=id_or_404(id))
         return model, model
 
