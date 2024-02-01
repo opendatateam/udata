@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from flask import url_for
-from udata.core.spam.models import SpamMixin
 import pytest
 
 from udata.models import Dataset, Member
@@ -12,6 +11,7 @@ from udata.core.discussions.signals import (
     on_new_discussion, on_new_discussion_comment,
     on_discussion_closed, on_discussion_deleted,
 )
+from udata.core.spam.signals import on_new_potential_spam
 from udata.core.discussions.tasks import (
     notify_new_discussion, notify_new_discussion_comment,
     notify_discussion_closed
@@ -73,15 +73,16 @@ class DiscussionsTest(APITestCase):
         dataset = Dataset.objects.create(title='Test dataset')
 
         with assert_not_emit(on_new_discussion):
-            response = self.post(url_for('api.discussions'), {
-                'title': 'spam and blah',
-                'comment': 'bla bla',
-                'subject': {
-                    'class': 'Dataset',
-                    'id': dataset.id,
-                }
-            })
-            self.assertStatus(response, 201)
+            with assert_emit(on_new_potential_spam):
+                response = self.post(url_for('api.discussions'), {
+                    'title': 'spam and blah',
+                    'comment': 'bla bla',
+                    'subject': {
+                        'class': 'Dataset',
+                        'id': dataset.id,
+                    }
+                })
+                self.assertStatus(response, 201)
 
         discussions = Discussion.objects(subject=dataset)
         self.assertEqual(len(discussions), 1)
@@ -101,15 +102,16 @@ class DiscussionsTest(APITestCase):
         dataset = Dataset.objects.create(title='Test dataset')
 
         with assert_not_emit(on_new_discussion):
-            response = self.post(url_for('api.discussions'), {
-                'title': 'title and blah',
-                'comment': 'bla bla spam',
-                'subject': {
-                    'class': 'Dataset',
-                    'id': dataset.id,
-                }
-            })
-            self.assertStatus(response, 201)
+            with assert_emit(on_new_potential_spam):
+                response = self.post(url_for('api.discussions'), {
+                    'title': 'title and blah',
+                    'comment': 'bla bla spam',
+                    'subject': {
+                        'class': 'Dataset',
+                        'id': dataset.id,
+                    }
+                })
+                self.assertStatus(response, 201)
 
         discussions = Discussion.objects(subject=dataset)
         self.assertEqual(len(discussions), 1)
@@ -388,10 +390,11 @@ class DiscussionsTest(APITestCase):
 
         self.login()
         with assert_not_emit(on_new_discussion_comment):
-            response = self.post(url_for('api.discussion', id=discussion.id), {
-                'comment': 'spam new bla bla'
-            })
-            self.assert200(response)
+            with assert_emit(on_new_potential_spam):
+                response = self.post(url_for('api.discussion', id=discussion.id), {
+                    'comment': 'spam new bla bla'
+                })
+                self.assert200(response)
 
         discussion.reload()
         self.assertFalse(discussion.is_spam())
@@ -461,11 +464,12 @@ class DiscussionsTest(APITestCase):
         on_new_discussion.send(discussion)  # Updating metrics.
 
         with assert_not_emit(on_discussion_closed):
-            response = self.post(url_for('api.discussion', id=discussion.id), {
-                'comment': 'This is a suspicious, real suspicious message in english.',
-                'close': True,
-            })
-            self.assert200(response)
+            with assert_emit(on_new_potential_spam):
+                response = self.post(url_for('api.discussion', id=discussion.id), {
+                    'comment': 'This is a suspicious, real suspicious message in english.',
+                    'close': True,
+                })
+                self.assert200(response)
 
         discussion.reload()
         self.assertFalse(discussion.is_spam())

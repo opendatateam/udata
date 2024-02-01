@@ -3,6 +3,7 @@ from mongoengine import signals
 from langdetect import detect
 
 from udata.models import db
+from .signals import on_new_potential_spam
 
 NOT_CHECKED = 'not_checked'
 POTENTIEL_SPAM = 'potentiel_spam'
@@ -30,7 +31,7 @@ class SpamMixin(object):
 
         document.detect_spam()
 
-    def detect_spam(self):
+    def detect_spam(self, breadcrumb = []):
         """
         This is the main function doing the spam detection.
         This function set a flag POTENTIEL_SPAM if a model is suspicious.
@@ -39,6 +40,10 @@ class SpamMixin(object):
         # During initialisation some models can have no spam associated
         if not self.spam:
             self.spam = SpamInfo(status=NOT_CHECKED, callbacks={})
+
+        # The breadcrumb is useful during reporting to know where we came from
+        # in case of a potential spam inside an embed.
+        breadcrumb.append(self)
 
         # We do not want to try to detect spam if we are only trying to set the
         # the spam status. If we try to detect the spam status we cannot set the
@@ -58,6 +63,7 @@ class SpamMixin(object):
                 for word in SpamMixin.spam_words():
                     if word in text.lower():
                         self.spam.status = POTENTIEL_SPAM
+                        self._report(text=text, breadcrumb=breadcrumb, reason=f"contains spam words {word}")
                         return
 
                 # Language detection is not working well with texts of a few words.
@@ -65,10 +71,12 @@ class SpamMixin(object):
                     lang = detect(text)
                     if lang not in SpamMixin.allowed_langs():
                         self.spam.status = POTENTIEL_SPAM
+                        self._report(text=text, breadcrumb=breadcrumb, reason=f"not allowed language {lang}")
                         return
 
         for embed in self.embeds_to_check_for_spam():
-            embed.detect_spam()
+            # We need to copy to avoid adding multiple time (in each loop iteration) a new element to the shared breadcrumb list
+            embed.detect_spam(breadcrumb.copy())
 
     def mark_as_no_spam(self, base_model):
         """
@@ -92,6 +100,25 @@ class SpamMixin(object):
 
     def embeds_to_check_for_spam(self):
         return []
+    
+    def spam_report_title(self):
+        return type(self).__name__
+    
+    def spam_report_link(self):
+        return None
+    
+    def _report(self, text, breadcrumb, reason):
+        # Note that all the chain should be a SpamMixin, maybe we could filter out if it's not the case here…
+        title = " → ".join(map(lambda o: o.spam_report_title(), breadcrumb))
+
+        # Select the first link in the embed list (for exemple message doesn't have a link, so check if discussion have one)
+        for object in reversed(breadcrumb):
+            link = object.spam_report_link()
+            if link:
+                break
+
+        on_new_potential_spam.send(title=title, link=link, text=text, reason=reason)
+
 
 def spam_protected(get_model_to_check=None):
     """

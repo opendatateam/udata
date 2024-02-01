@@ -59,6 +59,12 @@ class Discussion(SpamMixin, db.Document):
             _anchor='discussion-{id}'.format(id=self.id),
             _external=True)
     
+    def spam_report_title(self):
+        return self.title
+    
+    def spam_report_link(self):
+        return self.external_url
+    
     @spam_protected()
     def signal_new(self):
         on_new_discussion.send(self)
