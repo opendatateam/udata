@@ -23,6 +23,8 @@ babel==2.12.1
 bcrypt==3.1.7
     # via -r requirements/install.in
 billiard==3.6.4.0
+langdetect==1.0.9
+
     # via celery
 bleach==3.1.0
     # via -r requirements/install.in

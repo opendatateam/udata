@@ -1,6 +1,6 @@
-import logging
 from flask import current_app
 from mongoengine import signals
+from langdetect import detect
 
 from udata.models import db
 
@@ -18,6 +18,10 @@ class SpamMixin(object):
     @staticmethod
     def spam_words():
         return current_app.config.get('SPAM_WORDS', [])
+    
+    @staticmethod
+    def allowed_langs():
+        return current_app.config.get('SPAM_ALLOWED_LANGS', [])
 
     def detect_spam_listener(sender, document):
         '''This is the callback called on MongoEngine pre_save() for all models of the application'''
@@ -48,8 +52,18 @@ class SpamMixin(object):
         # do the spam detection
         if not self._get_changed_fields() or not all(field.startswith('spam.') for field in self._get_changed_fields()):
             for text in self.attributes_to_check_for_spam():
+                if not text:
+                    continue
+
                 for word in SpamMixin.spam_words():
-                    if word in text:
+                    if word in text.lower():
+                        self.spam.status = POTENTIEL_SPAM
+                        return
+
+                # Language detection is not working well with texts of a few words.
+                if SpamMixin.allowed_langs() and len(text) > 30:
+                    lang = detect(text)
+                    if lang not in SpamMixin.allowed_langs():
                         self.spam.status = POTENTIEL_SPAM
                         return
 

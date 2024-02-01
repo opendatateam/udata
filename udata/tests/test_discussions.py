@@ -446,12 +446,12 @@ class DiscussionsTest(APITestCase):
                              {'comment': "can't comment"})
         self.assert403(response)
 
-    @pytest.mark.options(SPAM_WORDS=['spam'])
+    @pytest.mark.options(SPAM_WORDS=['spam'], SPAM_ALLOWED_LANGS=['fr'])
     def test_close_discussion_with_spam(self):
         owner = self.login()
         dataset = Dataset.objects.create(title='Test dataset', owner=owner)
         user = UserFactory()
-        message = Message(content='bla bla', posted_by=user)
+        message = Message(content='Premier message', posted_by=user)
         discussion = Discussion.objects.create(
             subject=dataset,
             user=user,
@@ -462,7 +462,7 @@ class DiscussionsTest(APITestCase):
 
         with assert_not_emit(on_discussion_closed):
             response = self.post(url_for('api.discussion', id=discussion.id), {
-                'comment': 'spam new bla bla',
+                'comment': 'This is a suspicious, real suspicious message in english.',
                 'close': True,
             })
             self.assert200(response)
