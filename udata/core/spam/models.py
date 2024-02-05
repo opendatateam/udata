@@ -31,18 +31,20 @@ class SpamMixin(object):
 
         document.detect_spam()
 
-    def detect_spam(self, breadcrumb = []):
+    def detect_spam(self, breadcrumb = None):
         """
         This is the main function doing the spam detection.
         This function set a flag POTENTIAL_SPAM if a model is suspicious.
         """
-
         # During initialisation some models can have no spam associated
         if not self.spam:
             self.spam = SpamInfo(status=NOT_CHECKED, callbacks={})
 
         # The breadcrumb is useful during reporting to know where we came from
         # in case of a potential spam inside an embed.
+        if breadcrumb is None:
+            breadcrumb = []
+
         breadcrumb.append(self)
 
         # We do not want to try to detect spam if we are only trying to set the
@@ -63,7 +65,7 @@ class SpamMixin(object):
                 for word in SpamMixin.spam_words():
                     if word in text.lower():
                         self.spam.status = POTENTIAL_SPAM
-                        self._report(text=text, breadcrumb=breadcrumb, reason=f"contains spam words {word}")
+                        self._report(text=text, breadcrumb=breadcrumb, reason=f"contains spam words \"{word}\"")
                         return
 
                 # Language detection is not working well with texts of a few words.
@@ -71,7 +73,7 @@ class SpamMixin(object):
                     lang = detect(text)
                     if lang not in SpamMixin.allowed_langs():
                         self.spam.status = POTENTIAL_SPAM
-                        self._report(text=text, breadcrumb=breadcrumb, reason=f"not allowed language {lang}")
+                        self._report(text=text, breadcrumb=breadcrumb, reason=f"not allowed language \"{lang}\"")
                         return
 
         for embed in self.embeds_to_check_for_spam():
@@ -117,7 +119,7 @@ class SpamMixin(object):
             if link:
                 break
 
-        on_new_potential_spam.send(title=title, link=link, text=text, reason=reason)
+        on_new_potential_spam.send(self, title=title, link=link, text=text, reason=reason)
 
 
 def spam_protected(get_model_to_check=None):
