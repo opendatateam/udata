@@ -391,7 +391,7 @@ class UploadMixin(object):
 @api.doc(**common_doc)
 class UploadNewDatasetResource(UploadMixin, API):
     @api.secure
-    @api.doc('upload_new_dataset_resource', responses={415: 'Incorrect file content type'})
+    @api.doc('upload_new_dataset_resource', responses={415: 'Incorrect file content type', 400: 'Upload error'})
     @api.expect(upload_parser)
     @api.marshal_with(upload_fields, code=201)
     def post(self, dataset):
@@ -410,7 +410,7 @@ class UploadNewDatasetResource(UploadMixin, API):
 @api.doc(**common_doc)
 class UploadNewCommunityResources(UploadMixin, API):
     @api.secure
-    @api.doc('upload_new_community_resource', responses={415: 'Incorrect file content type'})
+    @api.doc('upload_new_community_resource', responses={415: 'Incorrect file content type', 400: 'Upload error'})
     @api.expect(upload_parser)
     @api.marshal_with(upload_fields, code=201)
     def post(self, dataset):
@@ -436,7 +436,7 @@ class ResourceMixin(object):
 @api.param('rid', 'The resource unique identifier')
 class UploadDatasetResource(ResourceMixin, UploadMixin, API):
     @api.secure
-    @api.doc('upload_dataset_resource', responses={415: 'Incorrect file content type'})
+    @api.doc('upload_dataset_resource', responses={415: 'Incorrect file content type', 400: 'Upload error'})
     @api.marshal_with(upload_fields)
     def post(self, dataset, rid):
         '''Upload a file related to a given resource on a given dataset'''
@@ -459,7 +459,7 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
 @api.param('community', 'The community resource unique identifier')
 class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
     @api.secure
-    @api.doc('upload_community_resource', responses={415: 'Incorrect file content type'})
+    @api.doc('upload_community_resource', responses={415: 'Incorrect file content type', 400: 'Upload error'})
     @api.marshal_with(upload_fields)
     def post(self, community):
         '''Update the file related to a given community resource'''
