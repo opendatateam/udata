@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Fix: you can now remove schema from a resource in the admin
+- Improve documentation for API errors
 
 ## 7.0.2 (2024-01-23)
 
