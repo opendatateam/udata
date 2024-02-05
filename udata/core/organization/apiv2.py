@@ -59,7 +59,7 @@ class OrganizationExtrasAPI(API):
             apiv2.abort(410, 'Organization has been deleted')
         EditOrganizationPermission(org).test()
         # first remove extras key associated to a None value in payload
-        for key in [k for k in data if data[k] is None and k != 'custom']:
+        for key in [k for k in data if data[k] is None]:
             org.extras.pop(key, None)
             data.pop(key)
 
