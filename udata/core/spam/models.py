@@ -6,11 +6,11 @@ from udata.models import db
 from .signals import on_new_potential_spam
 
 NOT_CHECKED = 'not_checked'
-POTENTIEL_SPAM = 'potentiel_spam'
+POTENTIAL_SPAM = 'potential_spam'
 NO_SPAM = 'no_spam'
 
 class SpamInfo(db.EmbeddedDocument):
-    status = db.StringField(choices=[NOT_CHECKED, POTENTIEL_SPAM, NO_SPAM], default=NOT_CHECKED)
+    status = db.StringField(choices=[NOT_CHECKED, POTENTIAL_SPAM, NO_SPAM], default=NOT_CHECKED)
     callbacks = db.DictField(default={})
 
 class SpamMixin(object):
@@ -34,7 +34,7 @@ class SpamMixin(object):
     def detect_spam(self, breadcrumb = []):
         """
         This is the main function doing the spam detection.
-        This function set a flag POTENTIEL_SPAM if a model is suspicious.
+        This function set a flag POTENTIAL_SPAM if a model is suspicious.
         """
 
         # During initialisation some models can have no spam associated
@@ -62,7 +62,7 @@ class SpamMixin(object):
 
                 for word in SpamMixin.spam_words():
                     if word in text.lower():
-                        self.spam.status = POTENTIEL_SPAM
+                        self.spam.status = POTENTIAL_SPAM
                         self._report(text=text, breadcrumb=breadcrumb, reason=f"contains spam words {word}")
                         return
 
@@ -70,7 +70,7 @@ class SpamMixin(object):
                 if SpamMixin.allowed_langs() and len(text) > 30:
                     lang = detect(text)
                     if lang not in SpamMixin.allowed_langs():
-                        self.spam.status = POTENTIEL_SPAM
+                        self.spam.status = POTENTIAL_SPAM
                         self._report(text=text, breadcrumb=breadcrumb, reason=f"not allowed language {lang}")
                         return
 
@@ -93,7 +93,7 @@ class SpamMixin(object):
             callback(*args['args'], **args['kwargs'])
 
     def is_spam(self):
-        return self.spam and self.spam.status == POTENTIEL_SPAM
+        return self.spam and self.spam.status == POTENTIAL_SPAM
     
     def attributes_to_check_for_spam(self):
         raise NotImplementedError("Please implement the `attributes_to_check_for_spam` method. Should return the list of attributes to check.")
