@@ -48,7 +48,8 @@ class Discussion(SpamMixin, db.Document):
         return any(message.posted_by == person for message in self.discussion)
 
     def attributes_to_check_for_spam(self):
-        return [self.title, self.discussion[0].content]
+        # Discussion should always have a first message but it's not the case in some tests…
+        return [self.title, self.discussion[0].content if len(self.discussion) else '']
     
     def embeds_to_check_for_spam(self):
         return self.discussion[1:]
