@@ -1,5 +1,4 @@
 from flask import current_app
-from mongoengine import signals
 from langdetect import detect
 
 from udata.models import db
@@ -24,12 +23,13 @@ class SpamMixin(object):
     def allowed_langs():
         return current_app.config.get('SPAM_ALLOWED_LANGS', [])
 
-    def detect_spam_listener(sender, document, *args, **kwargs):
-        '''This is the callback called on MongoEngine pre_save() for all models of the application'''
-        if not isinstance(document, SpamMixin):
-            return
+    def clean(self):
+        super().clean()
 
-        document.detect_spam()
+        # We do not want to check embeded document here, they will be checked
+        # during the clean of their parents.
+        if isinstance(self, db.Document):
+            self.detect_spam()
 
     def detect_spam(self, breadcrumb = None):
         """
@@ -157,7 +157,3 @@ def spam_protected(get_model_to_check=None):
         return protected_function
     return decorator
 
-# Register a signal for all app models. This may be ineficient (we do a custom check at the beginning of the listener
-# to early return of non `SpamMixin`), but I didn't find a way to only register this signal for `SpamMixin` (problems with 
-# Python circular dependencies or force the user to connect manualy to the signal for each implementation of SpamMixin).
-signals.pre_save.connect(SpamMixin.detect_spam_listener)
