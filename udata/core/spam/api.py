@@ -1,5 +1,6 @@
 from udata.api import api, API
 from udata.utils import id_or_404
+from udata.auth import admin_permission
 
 class SpamAPI(API):
     '''
@@ -12,7 +13,7 @@ class SpamAPI(API):
         model = self.model.objects.get_or_404(id=id_or_404(id))
         return model, model
 
-    @api.secure
+    @api.secure(admin_permission)
     def delete(self, **kwargs):
         '''Mark a potentiel spam as no spam'''
         base_model, model = self.get_model(**kwargs)
