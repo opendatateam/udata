@@ -15,6 +15,13 @@ class SpamInfo(db.EmbeddedDocument):
 class SpamMixin(object):
     spam = db.EmbeddedDocumentField(SpamInfo)
 
+    attributes_before = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.attributes_before = self.attributes_to_check_for_spam()
+
     @staticmethod
     def spam_words():
         return current_app.config.get('SPAM_WORDS', [])
@@ -57,28 +64,46 @@ class SpamMixin(object):
         # spammy messages)
         # Note that the first time a model is created `_get_changed_fields` is empty so we must
         # do the spam detection
-        if not self._get_changed_fields() or not all(field.startswith('spam.') for field in self._get_changed_fields()):
-            for text in self.attributes_to_check_for_spam():
-                if not text:
-                    continue
+        for before, text in zip(self.attributes_before, self.attributes_to_check_for_spam()):
+            if not text:
+                continue
 
-                for word in SpamMixin.spam_words():
-                    if word in text.lower():
-                        self.spam.status = POTENTIAL_SPAM
-                        self._report(text=text, breadcrumb=breadcrumb, reason=f"contains spam words \"{word}\"")
-                        return
+            # We do not want to re-run the spam detection if the texts didn't changed from the initialisation.
+            # If the model is new, the texts haven't changed since the init but we still we want to do the spam check.
+            if before == text and not self.is_new():
+                continue
 
-                # Language detection is not working well with texts of a few words.
-                if SpamMixin.allowed_langs() and len(text) > 30:
-                    lang = detect(text)
-                    if lang not in SpamMixin.allowed_langs():
-                        self.spam.status = POTENTIAL_SPAM
-                        self._report(text=text, breadcrumb=breadcrumb, reason=f"not allowed language \"{lang}\"")
-                        return
+            for word in SpamMixin.spam_words():
+                if word in text.lower():
+                    self.spam.status = POTENTIAL_SPAM
+                    self._report(text=text, breadcrumb=breadcrumb, reason=f"contains spam words \"{word}\"")
+                    return
+
+            # Language detection is not working well with texts of a few words.
+            if SpamMixin.allowed_langs() and len(text) > 30:
+                lang = detect(text)
+                if lang not in SpamMixin.allowed_langs():
+                    self.spam.status = POTENTIAL_SPAM
+                    self._report(text=text, breadcrumb=breadcrumb, reason=f"not allowed language \"{lang}\"")
+                    return
 
         for embed in self.embeds_to_check_for_spam():
             # We need to copy to avoid adding multiple time (in each loop iteration) a new element to the shared breadcrumb list
             embed.detect_spam(breadcrumb.copy())
+
+    def is_new(self):
+        """
+        Check if the model is new (not already saved inside DB), in this case
+        we want to check for spam on all the fields.
+        On subsequent requests we want to check only the modified fields.
+        MongoEngine doesn't provide a good way to do this check so we must use derived information.
+        """
+        if isinstance(self, db.Document):
+            return len(self._qs) == 0
+        elif isinstance(self, db.EmbeddedDocument):
+            return self._instance is None
+        else:
+            raise RuntimeError("SpamMixin should be a Document or an EmbeddedDocument")
 
     def mark_as_no_spam(self, base_model):
         """

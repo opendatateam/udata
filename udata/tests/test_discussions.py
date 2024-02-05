@@ -103,6 +103,13 @@ class DiscussionsTest(APITestCase):
             self.assertStatus(response, 200)
             self.assertFalse(discussion.reload().is_spam())
 
+        # Adding a new comment / modifying the not spam discussion
+        response = self.post(url_for('api.discussion', id=discussion.id), {
+            'comment': 'A new normal comment'
+        })
+        self.assertStatus(response, 200)
+        self.assertFalse(discussion.reload().is_spam())
+
     @pytest.mark.options(SPAM_WORDS=['spam'])
     def test_spam_in_new_discussion_comment(self):
         self.login()
