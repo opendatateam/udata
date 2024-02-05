@@ -87,7 +87,7 @@ parser.add_argument(
     help='The page size to fetch')
 
 
-@ns.route('/<id>/spam', endpoint='discussion_spam')
+@ns.route('/<id>/spam/', endpoint='discussion_spam')
 @ns.doc(delete={'id': 'unspam'})
 class DiscussionSpamAPI(SpamAPI):
     model = Discussion
