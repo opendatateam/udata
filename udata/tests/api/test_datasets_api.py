@@ -751,6 +751,11 @@ class DatasetAPITest(APITestCase):
         self.assert400(response)
         assert response.json['errors']['resources'][0]['schema']['name'] == [_('Schema name "{schema}" is not an allowed value. Allowed values: {values}').format(schema='unknown-schema', values='etalab/schema-irve-statique, 139bercy/format-commande-publique')]
 
+        resource_data['schema'] = {'name': 'etalab/schema-irve-statique', 'version': '42.0.0'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert400(response)
+
         resource_data['schema'] = {'url': 'http://example.com'}
         data['resources'].append(resource_data)
         response = self.put(url_for('api.dataset', dataset=dataset), data)
@@ -767,6 +772,17 @@ class DatasetAPITest(APITestCase):
         dataset.reload()
         assert dataset.resources[0].schema['name'] == 'etalab/schema-irve-statique'
         assert dataset.resources[0].schema['url'] == None
+        assert dataset.resources[0].schema['version'] == None
+
+        resource_data['schema'] = {'name': 'etalab/schema-irve-statique', 'version': '2.2.0'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+
+        dataset.reload()
+        assert dataset.resources[0].schema['name'] == 'etalab/schema-irve-statique'
+        assert dataset.resources[0].schema['url'] == None
+        assert dataset.resources[0].schema['version'] == '2.2.0'
 
 
 class DatasetBadgeAPITest(APITestCase):

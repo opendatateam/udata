@@ -67,7 +67,7 @@ class SchemaForm(ModelForm):
 
         # If there is no URL, the name must match a known schema from our catalog.
         allowed_schemas_version_by_name = {schema['name']: schema['versions'] for schema in ResourceSchema.all()}
-        allowed_versions = allowed_schemas_version_by_name.get(name)
+        allowed_versions = list(map(lambda version: version['version_name'], allowed_schemas_version_by_name.get(name, [])))
 
         if not allowed_versions:
             message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}')
@@ -75,7 +75,7 @@ class SchemaForm(ModelForm):
                 schema=name,
                 values=', '.join(allowed_schemas_version_by_name.keys())
             ))
-        
+
         if version and version not in allowed_versions and version != 'latest':
             message = _('Version "{version}" is not an allowed value for the schema "{schema}". Allowed versions: {values}')
             raise validators.ValidationError(message.format(
