@@ -39,6 +39,9 @@ class SchemaForm(ModelForm):
     version = fields.StringField(_('Version of the schema'))
 
     def validate_url(form, field):
+        '''
+        This method is auto called by WTForms for the URL
+        '''
         if not field.data: 
             if form.name.data:
                 return
@@ -48,6 +51,9 @@ class SchemaForm(ModelForm):
             raise validators.ValidationError(_('Having both name and URL is not allowed.'))
 
     def validate_name(form, field):
+        '''
+        This method is auto called by WTForms for the name
+        '''
         if not field.data: 
             if form.url.data:
                 return
