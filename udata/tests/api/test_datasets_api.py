@@ -755,6 +755,7 @@ class DatasetAPITest(APITestCase):
         data['resources'].append(resource_data)
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert400(response)
+        assert response.json['errors']['resources'][0]['schema']['name'] == [_('Version "{version}" is not an allowed value for the schema "{name}". Allowed versions: {values}').format(version='42.0.0', name='etalab/schema-irve-statique', values='2.2.0, 2.2.1, latest')]
 
         resource_data['schema'] = {'url': 'http://example.com'}
         data['resources'].append(resource_data)

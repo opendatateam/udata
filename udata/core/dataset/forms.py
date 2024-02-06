@@ -69,9 +69,9 @@ class SchemaForm(ModelForm):
         existing_schema = ResourceSchema.get_schema_by_name(name)
 
         if not existing_schema:
-            message = _('Schema name "{name}" is not an allowed value. Allowed values: {values}')
+            message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}')
             raise validators.ValidationError(message.format(
-                name=name,
+                schema=name,
                 values=', '.join(map(lambda schema: schema['name'], ResourceSchema.all()))
             ))
 

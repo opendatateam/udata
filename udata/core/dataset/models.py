@@ -151,6 +151,11 @@ class HarvestResourceMetadata(DynamicEmbeddedDocument):
 
 
 class Schema(db.EmbeddedDocument):
+    '''
+    Schema can only be two things right now:
+    - Known schema: name is set, url is not set, version is maybe set
+    - Unknown schema: url is set, name and version are maybe set
+    '''
     url = db.URLField()
     name = db.StringField()
     version = db.StringField()
