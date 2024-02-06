@@ -20,7 +20,9 @@ class SpamMixin(object):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.attributes_before = self.attributes_to_check_for_spam()
+        # Save the list of texts at initialisation to not recheck for spam a text
+        # if it didn't change during this request lifecycle.
+        self.attributes_before = self.texts_to_check_for_spam()
 
     @staticmethod
     def spam_words():
@@ -54,22 +56,14 @@ class SpamMixin(object):
 
         breadcrumb.append(self)
 
-        # We do not want to try to detect spam if we are only trying to set the
-        # the spam status. If we try to detect the spam status we cannot set the
-        # status as NO_SPAM because this function will change the status again
-        # before saving to POTENTIAL_SPAM.
-        # Note that this is working because when we manualy set a model as NO_SPAM we only
-        # change these fields and nothing else.
-        # But we still want to check for embed spam (a NO_SPAM discussion could contain
-        # spammy messages)
-        # Note that the first time a model is created `_get_changed_fields` is empty so we must
-        # do the spam detection
-        for before, text in zip(self.attributes_before, self.attributes_to_check_for_spam()):
+        for before, text in zip(self.attributes_before, self.texts_to_check_for_spam()):
             if not text:
                 continue
 
-            # We do not want to re-run the spam detection if the texts didn't changed from the initialisation.
-            # If the model is new, the texts haven't changed since the init but we still we want to do the spam check.
+            # We do not want to re-run the spam detection if the texts didn't changed from the initialisation. If we don't do this,
+            # a potential spam marked as no spam will be reflag as soon as we make change in the model (for exemple to set the spam status,
+            # or to add a new message).
+            # If the model is new, the texts haven't changed since the init but we still want to do the spam check.
             if before == text and not self.is_new():
                 continue
 
@@ -105,7 +99,7 @@ class SpamMixin(object):
     def mark_as_no_spam(self, base_model):
         """
         When an admin mark a model as a false positive (not a real spam)
-        we need to callback the saved callbacks that where delayed in `spam_protected`
+        we need to call back the saved callbacks that where delayed in `spam_protected`
         """
         callbacks = self.spam.callbacks
         self.spam.status = NO_SPAM
@@ -119,8 +113,8 @@ class SpamMixin(object):
     def is_spam(self):
         return self.spam and self.spam.status == POTENTIAL_SPAM
     
-    def attributes_to_check_for_spam(self):
-        raise NotImplementedError("Please implement the `attributes_to_check_for_spam` method. Should return the list of attributes to check.")
+    def texts_to_check_for_spam(self):
+        raise NotImplementedError("Please implement the `texts_to_check_for_spam` method. Should return a list of strings to check.")
 
     def embeds_to_check_for_spam(self):
         return []
@@ -169,9 +163,9 @@ def spam_protected(get_model_to_check=None):
                     'args': args[1:],
                     'kwargs': kwargs
                 }
-                # At this point we recall `detect_spam`, but there is a check inside `detect_spam` to not do nothing if 
-                # we only change spam.* fields.
                 # Here we call save() on the base model because we cannot save an embed document.
+                # `save()` call `clean()` so we recall `detect_spam()`, but there is a check inside `detect_spam()` to not do nothing
+                # if we didn't change the texts to check.
                 base_model.save()
             else:
                 f(*args, **kwargs)

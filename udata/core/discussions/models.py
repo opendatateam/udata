@@ -17,7 +17,7 @@ class Message(SpamMixin, db.EmbeddedDocument):
     posted_on = db.DateTimeField(default=datetime.utcnow, required=True)
     posted_by = db.ReferenceField('User')
 
-    def attributes_to_check_for_spam(self):
+    def texts_to_check_for_spam(self):
         return [self.content]
 
 
@@ -47,7 +47,7 @@ class Discussion(SpamMixin, db.Document):
         """
         return any(message.posted_by == person for message in self.discussion)
 
-    def attributes_to_check_for_spam(self):
+    def texts_to_check_for_spam(self):
         # Discussion should always have a first message but it's not the case in some tests…
         return [self.title, self.discussion[0].content if len(self.discussion) else '']
     
