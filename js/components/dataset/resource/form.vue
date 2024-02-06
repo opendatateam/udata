@@ -317,7 +317,19 @@ export default {
         },
         serialize() {
             // Required because of readonly fields and filetype.
-            return Object.assign({}, this.resource, this.$refs.form.serialize());
+            return Object.assign({}, this.resource, this.$refs.form.serialize(), this.getSchemaValue());
+        },
+        getSchemaValue() {
+            // The form mixin remove all null values from non required fields but this
+            // behaviour prevent removing a schema from a resource. Since we don't want
+            // to touch all forms in this old codebase, I patch here the serialization
+            // to add back the null schema.
+            if (! this.$refs.form.$form) return {}
+
+            let el = this.$refs.form.$form.querySelector("select[name='schema.name']");
+            if (! el) return {}
+
+            return el.value ? { schema: { name: el.value } } : { schema: null };
         },
         validate() {
             return this.$refs.form.validate();
