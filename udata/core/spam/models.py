@@ -96,12 +96,9 @@ class SpamMixin(object):
         Check if the model is new (not already saved inside DB), in this case
         we want to check for spam on all the fields.
         On subsequent requests we want to check only the modified fields.
-        MongoEngine doesn't provide a good way to do this check so we must use derived information.
         """
-        if isinstance(self, db.Document):
-            return len(self._qs) == 0
-        elif isinstance(self, db.EmbeddedDocument):
-            return self._instance is None
+        if isinstance(self, db.Document) or isinstance(self, db.EmbeddedDocument):
+            return self._created
         else:
             raise RuntimeError("SpamMixin should be a Document or an EmbeddedDocument")
 

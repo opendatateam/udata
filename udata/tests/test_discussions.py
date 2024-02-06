@@ -422,6 +422,14 @@ class DiscussionsTest(APITestCase):
             self.assertStatus(response, 200)
             self.assertFalse(discussion.reload().discussion[1].is_spam())
 
+        response = self.post(url_for('api.discussion', id=discussion.id), {
+            'comment': 'New comment'
+        })
+        self.assert200(response)
+
+        # The spam comment marked as no spam is still a no spam
+        self.assertFalse(discussion.reload().discussion[1].is_spam())
+
 
     def test_close_discussion(self):
         owner = self.login()
