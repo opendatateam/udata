@@ -179,7 +179,7 @@ community_resource_page_fields = api.model(
 DEFAULT_MASK = ','.join((
     'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
     'private', 'tags', 'badges', 'resources', 'frequency', 'frequency_date', 'extras', 'harvest',
-    'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
+    'metrics', 'organization', 'owner', 'schema', 'temporal_coverage', 'spatial', 'license',
     'uri', 'page', 'last_update', 'archived', 'quality', 'internal', 'contact_point',
 ))
 
