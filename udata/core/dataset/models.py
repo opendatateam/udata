@@ -165,53 +165,6 @@ class Schema(db.EmbeddedDocument):
         '''
         return bool(self.name) or bool(self.url)
 
-    def get_url(self):
-        if self.url:
-            return self.url
-
-        schemas = ResourceSchema.all()
-        for schema in schemas:
-            if self.name != schema['name']:
-                continue # Not the correct schema
-            if not self.version:
-                return schema['schema_url'] # If there is no version we take the URL of the latest version
-
-            for version in schema['versions']:
-                if version['version_name'] != self.version:
-                    continue # Not the correct version
-                return version['schema_url']
-
-            log.warning(f"The version {self.version} of schema {self.name} doesn't match any of the available versions.")
-            return None
-
-        log.warning(f"The schema {self.name} doesn't match any of the available schemas.")
-        return None # Nothing match
-
-    def get_name(self):
-        if self.name:
-            return self.name
-
-        # If the schema is one of ours, try to find an appropriate name
-        schemas = ResourceSchema.all()
-        for schema in schemas:
-            if self.url == schema['schema_url'] or self.url in map(lambda version: version['schema_url'], schema['versions']):
-                return schema['title']
-
-        return None
-
-    def get_version(self):
-        if self.version:
-            return self.version
-
-        # If the schema is one of ours, try to find an appropriate version
-        schemas = ResourceSchema.all()
-        for schema in schemas:
-            for version in schema['versions']:
-                if version['schema_url'] == self.url:
-                    return version['version_name']
-
-        return None
-
 class License(db.Document):
     # We need to declare id explicitly since we do not use the default
     # value set by Mongo.
