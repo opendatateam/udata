@@ -129,6 +129,7 @@
     <dcterms:title>Resource 3-1</dcterms:title>
     <dcterms:description>A JSON resource</dcterms:description>
     <dcat:accessURL>http://data.test.org/datasets/3/resources/1/file.json</dcat:accessURL>
+    <dct:conformsTo rdf:resource="https://schema.data.gouv.fr/schemas/etalab/schema-irve-statique/2.2.0/schema-statique.json" />
   </dcat:Distribution>
   <dcterms:Location rdf:about="http://wuEurope.com/"/>
   <dcterms:Standard rdf:about="https://schema.data.gouv.fr/schemas/etalab/schema-irve-statique/2.2.1/schema-statique.json">

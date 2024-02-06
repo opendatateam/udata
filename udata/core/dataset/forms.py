@@ -66,23 +66,26 @@ class SchemaForm(ModelForm):
         version = form.version.data
 
         # If there is no URL, the name must match a known schema from our catalog.
-        allowed_schemas_version_by_name = {schema['name']: schema['versions'] for schema in ResourceSchema.all()}
-        allowed_versions = list(map(lambda version: version['version_name'], allowed_schemas_version_by_name.get(name, [])))
+        existing_schema = ResourceSchema.get_schema_by_name(name)
 
-        if not allowed_versions:
-            message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}')
+        if not existing_schema:
+            message = _('Schema name "{name}" is not an allowed value. Allowed values: {values}')
             raise validators.ValidationError(message.format(
-                schema=name,
-                values=', '.join(allowed_schemas_version_by_name.keys())
+                name=name,
+                values=', '.join(map(lambda schema: schema['name'], ResourceSchema.all()))
             ))
 
-        if version and version not in allowed_versions and version != 'latest':
-            message = _('Version "{version}" is not an allowed value for the schema "{schema}". Allowed versions: {values}')
-            raise validators.ValidationError(message.format(
-                version=version,
-                schema=name,
-                values=', '.join(allowed_versions)
-            ))
+        if version:
+            allowed_versions = list(map(lambda version: version['version_name'], existing_schema['versions']))
+            allowed_versions.append('latest')
+
+            if version not in allowed_versions:
+                message = _('Version "{version}" is not an allowed value for the schema "{name}". Allowed versions: {values}')
+                raise validators.ValidationError(message.format(
+                    version=version,
+                    name=name,
+                    values=', '.join(allowed_versions)
+                ))
 
 
 class BaseResourceForm(ModelForm):

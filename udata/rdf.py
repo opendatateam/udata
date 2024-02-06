@@ -11,7 +11,7 @@ from rdflib.namespace import (
     Namespace, NamespaceManager, DCTERMS, SKOS, FOAF, XSD, RDFS, RDF
 )
 from rdflib.util import SUFFIX_FORMAT_MAP, guess_format as raw_guess_format
-from udata.models import Schema
+from udata.models import Schema, ResourceSchema
 from mongoengine import ValidationError
 
 # Extra Namespaces
@@ -231,11 +231,25 @@ def schema_from_rdf(rdf):
 
     schema = Schema()
     if isinstance(resource, (URIRef, Literal)):
-        schema.url = resource.toPython()
+        url = resource.toPython()
     elif isinstance(resource, RdfResource):
-        schema.url = resource.identifier.toPython()
+        url = resource.identifier.toPython()
         name = resource.value(DCT.title)
-        if name: schema.name = name.toPython()
+    else:
+        return None
+
+    if url and name:
+        schema.url = url
+        schema.name = name
+    elif url:
+        # If the URL exists inside our schema catalog we want to only set 
+        # the name of the schema, not the URL (and the version if it exists).
+        info = ResourceSchema.get_existing_schema_info_by_url(url)
+        if info:
+            schema.name = info[0]
+            schema.version = info[1]
+        else:
+            schema.url = url
 
     return schema
 

@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 
 from udata.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.dataset.factories import LicenseFactory
+from udata.core.dataset.factories import LicenseFactory, ResourceSchemaMockData
 
 from .factories import HarvestSourceFactory
 from ..backends.dcat import URIS_TO_REPLACE
@@ -153,8 +153,10 @@ class DcatBackendTest:
         assert len(datasets['1'].resources) == 2
         assert len(datasets['2'].resources) == 2
 
-
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_harvest_schemas(self, rmock):
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
+
         filename = 'bnodes.xml'
         url = mock_dcat(rmock, filename)
         org = OrganizationFactory()
@@ -170,14 +172,20 @@ class DcatBackendTest:
         assert datasets['2'].schema.name == None
         assert datasets['2'].schema.url == 'https://www.ecologie.gouv.fr/sites/default/files/R%C3%A9glementation%20IRVE.pdf'
         
-        for resource in datasets['2'].resources:
-            if resource['title'] == 'Resource 2-2':
-                assert resource.schema == None
+        resources_by_title = { resource['title']: resource for resource in datasets['2'].resources }
 
-            if resource['title'] == 'Resource 2-1':
-                assert resource.schema.name == 'Infrastructures de recharges pour véhicules électriques (IRVE)'
-                assert resource.schema.url == 'https://schema.data.gouv.fr/schemas/etalab/schema-irve-statique/2.2.1/schema-statique.json'
+        assert resources_by_title['Resource 2-1'].schema.name == 'Infrastructures de recharges pour véhicules électriques (IRVE)'
+        assert resources_by_title['Resource 2-1'].schema.url == 'https://schema.data.gouv.fr/schemas/etalab/schema-irve-statique/2.2.1/schema-statique.json'
+        assert resources_by_title['Resource 2-1'].schema.version == None
 
+        assert resources_by_title['Resource 2-2'].schema == None
+
+        resources_by_title = { resource['title']: resource for resource in datasets['3'].resources }
+
+        # If there is only an URL and it matches a known schema inside the catalog, only set the name and the version (discard the URL)
+        assert resources_by_title['Resource 3-1'].schema.name == 'etalab/schema-irve-statique'
+        assert resources_by_title['Resource 3-1'].schema.url == None
+        assert resources_by_title['Resource 3-1'].schema.version == '2.2.0'
 
     def test_simple_nested_attributes(self, rmock):
         filename = 'nested.jsonld'

@@ -13,6 +13,7 @@ from mongoengine.fields import DateTimeField
 from stringdist import rdlevenshtein
 from werkzeug.utils import cached_property
 import requests
+from typing import Optional, Tuple
 
 from udata.app import cache
 from udata.core import storages
@@ -950,7 +951,6 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
     def from_community(self):
         return True
 
-
 class ResourceSchema(object):
     @staticmethod
     @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
@@ -1002,7 +1002,28 @@ class ResourceSchema(object):
             raise SchemasCacheUnavailableException('No content in cache for schema catalog')
 
         return schemas
-    
+
+    def get_schema_by_name(name: str):
+        for schema in ResourceSchema.all():
+            if schema['name'] == name:
+                return schema
+
+    def get_existing_schema_info_by_url(url: str) -> Optional[Tuple[str, Optional[str]]]:
+        '''
+        Returns the name and the version if exists
+        '''
+        for schema in ResourceSchema.all():
+            for version in schema['versions']:
+                if version['schema_url'] == url:
+                    return schema['name'], version['version_name']
+
+            if schema['schema_url'] == url:
+                # The main schema URL is often the 'latest' version but
+                # not sure if it's mandatory everywhere so set the version to
+                # None here.
+                return schema['name'], None
+
+        return None
     
 def get_resource(id):
     '''Fetch a resource given its UUID'''
