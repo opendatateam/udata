@@ -7,6 +7,7 @@ from flask_restx.inputs import boolean
 from udata.auth import admin_permission
 from udata.api import api, API, fields
 from udata.core.spam.api import SpamAPI
+from udata.core.spam.fields import spam_fields
 from udata.utils import id_or_404
 from udata.core.user.api_fields import user_ref_fields
 
@@ -25,6 +26,7 @@ message_fields = api.model('DiscussionMessage', {
     'posted_by': fields.Nested(user_ref_fields,
                                description='The message author'),
     'posted_on': fields.ISODateTime(description='The message posting date'),
+    'spam': fields.Nested(spam_fields),
 })
 
 discussion_fields = api.model('Discussion', {
@@ -44,6 +46,7 @@ discussion_fields = api.model('Discussion', {
     'url': fields.UrlFor('api.discussion',
                          description='The discussion API URI'),
     'extras': fields.Raw(description='Extra attributes as key-value pairs'),
+    'spam': fields.Nested(spam_fields),
 })
 
 start_discussion_fields = api.model('DiscussionStart', {

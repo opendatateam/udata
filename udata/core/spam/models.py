@@ -8,14 +8,19 @@ NOT_CHECKED = 'not_checked'
 POTENTIAL_SPAM = 'potential_spam'
 NO_SPAM = 'no_spam'
 
+SPAM_STATUS_CHOICES = [NOT_CHECKED, POTENTIAL_SPAM, NO_SPAM]
+
+
 class SpamInfo(db.EmbeddedDocument):
-    status = db.StringField(choices=[NOT_CHECKED, POTENTIAL_SPAM, NO_SPAM], default=NOT_CHECKED)
+    status = db.StringField(choices=SPAM_STATUS_CHOICES, default=NOT_CHECKED)
     callbacks = db.DictField(default={})
+
 
 class SpamMixin(object):
     spam = db.EmbeddedDocumentField(SpamInfo)
 
     attributes_before = None
+    detect_spam_enabled: bool = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -27,7 +32,7 @@ class SpamMixin(object):
     @staticmethod
     def spam_words():
         return current_app.config.get('SPAM_WORDS', [])
-    
+
     @staticmethod
     def allowed_langs():
         return current_app.config.get('SPAM_ALLOWED_LANGS', [])
@@ -35,16 +40,27 @@ class SpamMixin(object):
     def clean(self):
         super().clean()
 
-        # We do not want to check embeded document here, they will be checked
+        # We do not want to check embedded document here, they will be checked
         # during the clean of their parents.
         if isinstance(self, db.Document):
             self.detect_spam()
 
-    def detect_spam(self, breadcrumb = None):
+    def save_without_spam_detection(self):
+        """
+        Allow to save a model without doing the spam detection (useful when saving the callbacks for exemple)
+        """
+        self.detect_spam_enabled = False
+        self.save()
+        self.detect_spam_enabled = True
+
+    def detect_spam(self, breadcrumb=None):
         """
         This is the main function doing the spam detection.
         This function set a flag POTENTIAL_SPAM if a model is suspicious.
         """
+        if not self.detect_spam_enabled:
+            return
+
         # During initialisation some models can have no spam associated
         if not self.spam:
             self.spam = SpamInfo(status=NOT_CHECKED, callbacks={})
@@ -60,10 +76,10 @@ class SpamMixin(object):
             if not text:
                 continue
 
-            # We do not want to re-run the spam detection if the texts didn't changed from the initialisation. If we don't do this,
-            # a potential spam marked as no spam will be reflag as soon as we make change in the model (for exemple to set the spam status,
-            # or to add a new message).
-            # If the model is new, the texts haven't changed since the init but we still want to do the spam check.
+            # We do not want to re-run the spam detection if the texts didn't change from the initialisation. If we
+            # don't do this, a potential spam marked as no spam will be re-flag as soon as we make change in the model
+            # (for example to set the spam status, or to add a new message). If the model is new, the texts haven't
+            # changed since the init, but we still want to do the spam check.
             if before == text and not self.is_new():
                 continue
 
@@ -82,7 +98,8 @@ class SpamMixin(object):
                     return
 
         for embed in self.embeds_to_check_for_spam():
-            # We need to copy to avoid adding multiple time (in each loop iteration) a new element to the shared breadcrumb list
+            # We need to copy to avoid adding multiple time (in each loop iteration) a new element to the shared
+            # breadcrumb list
             embed.detect_spam(breadcrumb.copy())
 
     def is_new(self):
@@ -112,24 +129,26 @@ class SpamMixin(object):
 
     def is_spam(self):
         return self.spam and self.spam.status == POTENTIAL_SPAM
-    
+
     def texts_to_check_for_spam(self):
-        raise NotImplementedError("Please implement the `texts_to_check_for_spam` method. Should return a list of strings to check.")
+        raise NotImplementedError(
+            "Please implement the `texts_to_check_for_spam` method. Should return a list of strings to check.")
 
     def embeds_to_check_for_spam(self):
         return []
-    
+
     def spam_report_title(self):
         return type(self).__name__
-    
+
     def spam_report_link(self):
         return None
-    
+
     def _report(self, text, breadcrumb, reason):
         # Note that all the chain should be a SpamMixin, maybe we could filter out if it's not the case here…
         title = " → ".join(map(lambda o: o.spam_report_title(), breadcrumb))
 
-        # Select the first link in the embed list (for exemple message doesn't have a link, so check if discussion have one)
+        # Select the first link in the embed list (for example message doesn't have a link, so check if discussion
+        # have one)
         for object in reversed(breadcrumb):
             link = object.spam_report_link()
             if link:
@@ -147,6 +166,7 @@ def spam_protected(get_model_to_check=None):
     on an embed document. The class method should always take a `self` as a first argument which is the base 
     model to allow saving the callbacks back into Mongo (we cannot .save() an embed document).
     """
+
     def decorator(f):
         def protected_function(*args, **kwargs):
             base_model = args[0]
@@ -156,20 +176,18 @@ def spam_protected(get_model_to_check=None):
                 model_to_check = base_model
 
             if not isinstance(model_to_check, SpamMixin):
-                raise ValueError("@spam_protected should be called within a SpamMixin. " + type(model_to_check).__name__ + " given.")
+                raise ValueError(
+                    "@spam_protected should be called within a SpamMixin. " + type(model_to_check).__name__ + " given.")
 
             if model_to_check.is_spam():
                 model_to_check.spam.callbacks[f.__name__] = {
                     'args': args[1:],
                     'kwargs': kwargs
                 }
-                # Here we call save() on the base model because we cannot save an embed document.
-                # `save()` call `clean()` so we recall `detect_spam()`, but there is a check inside `detect_spam()` to not do nothing
-                # if we didn't change the texts to check.
-                base_model.save()
+                base_model.save_without_spam_detection()
             else:
                 f(*args, **kwargs)
 
         return protected_function
-    return decorator
 
+    return decorator

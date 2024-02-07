@@ -1,7 +1,7 @@
 import requests
-from udata.tasks import connect
 from udata.core.spam.signals import on_new_potential_spam
 from flask import current_app
+
 
 @on_new_potential_spam.connect
 def notify_potential_spam(sender, **kwargs):
