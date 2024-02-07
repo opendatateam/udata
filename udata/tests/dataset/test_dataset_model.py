@@ -7,7 +7,7 @@ from mongoengine import post_save, ValidationError
 
 from udata.app import cache
 from udata.models import (
-    db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchema, UPDATE_FREQUENCIES, Schema
+    db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchema, UPDATE_FREQUENCIES, Schema, FieldValidationError
 )
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.dataset.factories import (
@@ -586,18 +586,28 @@ class ResourceSchemaTest:
         assert ResourceSchemaMockData.get_expected_v1_result_from_mock_data() == ResourceSchema.objects()
         assert rmock.call_count == 2
 
-    def test_resource_schema_validation(self):
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
+    def test_resource_schema_validation(self, rmock):
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
+
         resource = ResourceFactory()
 
-        resource.schema = Schema(name='etalab/schema-irve')
+        resource.schema = Schema(name='etalab/schema-irve-statique')
         resource.validate()
 
         resource.schema = Schema(url='https://example.com')
         resource.validate()
 
-        # Everything should pass
-        resource.schema = Schema(name='etalab/schema-irve', url='https://example.com')
+        resource.schema = Schema(name='some-name', url='https://example.com')
         resource.validate()
+
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(name='etalab/schema-irve-statique', version='1337.42.0')
+            resource.validate()
+
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(version='2.0.0')
+            resource.validate()
 
 
 class HarvestMetadataTest:

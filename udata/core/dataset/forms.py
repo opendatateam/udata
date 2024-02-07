@@ -1,10 +1,7 @@
-from urllib.parse import urlparse
-
-from flask import current_app
+from mongoengine import ValidationError
 
 from udata.forms import ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
-from udata.uris import validate as validate_url, ValidationError
 
 from udata.core.storages import resources
 from udata.core.spatial.forms import SpatialCoverageField
@@ -13,10 +10,11 @@ from .models import (
     Dataset, Resource, Schema, License, Checksum, CommunityResource,
     UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, RESOURCE_FILETYPES, CHECKSUM_TYPES,
     LEGACY_FREQUENCIES, RESOURCE_TYPES, TITLE_SIZE_LIMIT, DESCRIPTION_SIZE_LIMIT,
-    ResourceSchema,
 )
 
 __all__ = ('DatasetForm', 'ResourceForm', 'CommunityResourceForm')
+
+from ...models import FieldValidationError
 
 
 class ChecksumForm(ModelForm):
@@ -38,54 +36,17 @@ class SchemaForm(ModelForm):
     name = fields.StringField(_('Name of the schema'))
     version = fields.StringField(_('Version of the schema'))
 
-    def validate_url(form, field):
-        '''
-        This method is auto called by WTForms for the URL
-        '''
-        if not field.data: 
-            if form.name.data:
-                return
-            raise validators.ValidationError(_('URL is required when name is missing.'))
+    def validate(self, extra_validators = None):
+        validation = super().validate(extra_validators)
 
-        if form.name.data:
-            raise validators.ValidationError(_('Having both name and URL is not allowed.'))
+        try:
+            Schema(url=self.url.data, name=self.name.data, version=self.version.data).clean()
+        except FieldValidationError as err:
+            field = getattr(self, err.field)
+            field.errors.append(err.message)
+            return False
 
-    def validate_name(form, field):
-        '''
-        This method is auto called by WTForms for the name
-        '''
-        if not field.data: 
-            if form.url.data:
-                return
-            raise validators.ValidationError(_('Name is required when URL is missing.'))
-
-        if form.url.data: 
-            raise validators.ValidationError(_('Having both name and URL is not allowed.'))
-
-        name = field.data
-        version = form.version.data
-
-        # If there is no URL, the name must match a known schema from our catalog.
-        existing_schema = ResourceSchema.get_schema_by_name(name)
-
-        if not existing_schema:
-            message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}')
-            raise validators.ValidationError(message.format(
-                schema=name,
-                values=', '.join(map(lambda schema: schema['name'], ResourceSchema.all()))
-            ))
-
-        if version:
-            allowed_versions = list(map(lambda version: version['version_name'], existing_schema['versions']))
-            allowed_versions.append('latest')
-
-            if version not in allowed_versions:
-                message = _('Version "{version}" is not an allowed value for the schema "{name}". Allowed versions: {values}')
-                raise validators.ValidationError(message.format(
-                    version=version,
-                    name=name,
-                    values=', '.join(allowed_versions)
-                ))
+        return validation
 
 
 class BaseResourceForm(ModelForm):

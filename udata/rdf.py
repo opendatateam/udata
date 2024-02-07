@@ -231,25 +231,12 @@ def schema_from_rdf(rdf):
 
     schema = Schema()
     if isinstance(resource, (URIRef, Literal)):
-        url = resource.toPython()
+        schema.url = resource.toPython()
     elif isinstance(resource, RdfResource):
-        url = resource.identifier.toPython()
-        name = resource.value(DCT.title)
+        schema.url = resource.identifier.toPython()
+        schema.name = resource.value(DCT.title)
     else:
         return None
-
-    if url and name:
-        schema.url = url
-        schema.name = name
-    elif url:
-        # If the URL exists inside our schema catalog we want to only set 
-        # the name of the schema, not the URL (and the version if it exists).
-        info = ResourceSchema.get_existing_schema_info_by_url(url)
-        if info:
-            schema.name = info[0]
-            schema.version = info[1]
-        else:
-            schema.url = url
 
     return schema
 

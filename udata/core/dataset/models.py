@@ -18,7 +18,7 @@ from typing import Optional, Tuple
 from udata.app import cache
 from udata.core import storages
 from udata.frontend.markdown import mdstrip
-from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
+from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage, FieldValidationError
 from udata.i18n import lazy_gettext as _
 from udata.utils import get_by, hash_url, to_naive_datetime
 from udata.uris import ValidationError, endpoint_for
@@ -151,24 +151,64 @@ class HarvestResourceMetadata(DynamicEmbeddedDocument):
 
 
 class Schema(db.EmbeddedDocument):
-    '''
+    """
     Schema can only be two things right now:
-    - Known schema: name is set, url is not set, version is maybe set
+    - Known schema: url is not set, name is set, version is maybe set
     - Unknown schema: url is set, name and version are maybe set
-    '''
+    """
     url = db.URLField()
     name = db.StringField()
     version = db.StringField()
 
     def __bool__(self):
-        '''
+        """
         In the database, since the schemas were only simple dicts, there is
-        empty `{}` stored. To prevent problems with converting to bool 
+        empty `{}` stored. To prevent problems with converting to bool
         (bool({}) and default bool(Schema) do not yield the same value), we transform
         empty Schema() to False.
         It's maybe not necessary but being paranoid here.
-        '''
+        """
         return bool(self.name) or bool(self.url)
+
+    def clean(self):
+        super().clean()
+
+        # First check if the URL is a known schema
+        if self.url:
+            info = ResourceSchema.get_existing_schema_info_by_url(self.url)
+            if info:
+                self.url = None
+                self.name = info[0]
+                self.version = info[1]
+                return
+
+        # We know this schema so we can do some checks
+        if not self.url:
+            if not self.name:
+                raise FieldValidationError(_('Name is required when URL is missing.'), field='name')
+
+            existing_schema = ResourceSchema.get_schema_by_name(self.name)
+            if not existing_schema:
+                message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}')
+                raise FieldValidationError(message.format(
+                    schema=self.name,
+                    values=', '.join(map(lambda schema: schema['name'], ResourceSchema.all()))
+                ), field='name')
+
+            if self.version:
+                allowed_versions = list(map(lambda version: version['version_name'], existing_schema['versions']))
+                allowed_versions.append('latest')
+
+                if self.version not in allowed_versions:
+                    message = _(
+                        'Version "{version}" is not an allowed value for the schema "{name}". Allowed versions: {'
+                        'values}')
+                    raise FieldValidationError(message.format(
+                        version=self.version,
+                        name=self.name,
+                        values=', '.join(allowed_versions)
+                    ), field='version')
+
 
 class License(db.Document):
     # We need to declare id explicitly since we do not use the default

@@ -77,6 +77,14 @@ class UDataMongoEngine(MongoEngine):
             raise ValueError(message)
 
 
+class FieldValidationError(ValidationError):
+    field: str
+
+    def __init__(self, *args, field: str, **kwargs):
+        self.field = field
+        super().__init__(*args, **kwargs)
+
+
 db = UDataMongoEngine()
 session_interface = MongoEngineSessionInterface(db)
 
@@ -110,6 +118,7 @@ import udata.linkchecker.models  # noqa
 
 MONGODB_DEPRECATED_SETTINGS = 'MONGODB_PORT', 'MONGODB_DB'
 MONGODB_DEPRECATED_MSG = '{0} is deprecated, use the MONGODB_HOST url syntax'
+
 
 
 def validate_config(config):

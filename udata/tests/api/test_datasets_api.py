@@ -156,10 +156,10 @@ class DatasetAPITest(APITestCase):
         org_dataset = VisibleDatasetFactory(organization=org)
 
         schema_dataset = VisibleDatasetFactory(resources=[
-            ResourceFactory(schema={'name': 'my-schema', 'version': '1.0.0'})
+            ResourceFactory(schema={'name': 'my-schema', 'url': 'https://example.org', 'version': '1.0.0'})
         ])
         schema_version2_dataset = VisibleDatasetFactory(resources=[
-            ResourceFactory(schema={'name': 'other-schema', 'version': '2.0.0'})
+            ResourceFactory(schema={'name': 'other-schema', 'url': 'https://example.org', 'version': '2.0.0'})
         ])
 
         # filter on tag
@@ -728,17 +728,6 @@ class DatasetAPITest(APITestCase):
         data = dataset.to_dict()
         resource_data = ResourceFactory.as_dict()
 
-        resource_data['schema'] = {
-            'name': 'my-schema',
-            'version': '1.0.0',
-            'url': 'http://example.com'
-        }
-        data['resources'].append(resource_data)
-        response = self.put(url_for('api.dataset', dataset=dataset), data)
-        self.assert400(response)
-        assert response.json['errors']['resources'][0]['schema']['url'] == [_('Having both name and URL is not allowed.')]
-        assert response.json['errors']['resources'][0]['schema']['name'] == [_('Having both name and URL is not allowed.')]
-
         resource_data['schema'] = {'url': 'test'}
         data['resources'].append(resource_data)
         response = self.put(url_for('api.dataset', dataset=dataset), data)
@@ -755,15 +744,16 @@ class DatasetAPITest(APITestCase):
         data['resources'].append(resource_data)
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert400(response)
-        assert response.json['errors']['resources'][0]['schema']['name'] == [_('Version "{version}" is not an allowed value for the schema "{name}". Allowed versions: {values}').format(version='42.0.0', name='etalab/schema-irve-statique', values='2.2.0, 2.2.1, latest')]
+        assert response.json['errors']['resources'][0]['schema']['version'] == [_('Version "{version}" is not an allowed value for the schema "{name}". Allowed versions: {values}').format(version='42.0.0', name='etalab/schema-irve-statique', values='2.2.0, 2.2.1, latest')]
 
-        resource_data['schema'] = {'url': 'http://example.com'}
+        resource_data['schema'] = {'url': 'http://example.com', 'name': 'etalab/schema-irve-statique'}
         data['resources'].append(resource_data)
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert200(response)
         dataset.reload()
         assert dataset.resources[0].schema['url'] == 'http://example.com'
-        assert dataset.resources[0].schema['name'] == None
+        assert dataset.resources[0].schema['name'] == 'etalab/schema-irve-statique'
+        assert dataset.resources[0].schema['version'] == None
 
         resource_data['schema'] = {'name': 'etalab/schema-irve-statique'}
         data['resources'].append(resource_data)
@@ -784,6 +774,16 @@ class DatasetAPITest(APITestCase):
         assert dataset.resources[0].schema['name'] == 'etalab/schema-irve-statique'
         assert dataset.resources[0].schema['url'] == None
         assert dataset.resources[0].schema['version'] == '2.2.0'
+
+        resource_data['schema'] = {'url': 'https://schema.data.gouv.fr/schemas/etalab/schema-irve-statique/2.2.1/schema-statique.json'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+
+        dataset.reload()
+        assert dataset.resources[0].schema['name'] == 'etalab/schema-irve-statique'
+        assert dataset.resources[0].schema['url'] == None
+        assert dataset.resources[0].schema['version'] == '2.2.1'
 
 
 class DatasetBadgeAPITest(APITestCase):

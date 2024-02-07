@@ -136,7 +136,10 @@ class DcatBackendTest:
         assert datasets['1'].resources[0].format == 'json'
         assert datasets['1'].resources[0].mime == 'application/json'
 
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_flat_with_blank_nodes_xml(self, rmock):
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
+
         filename = 'bnodes.xml'
         url = mock_dcat(rmock, filename)
         org = OrganizationFactory()
@@ -168,21 +171,30 @@ class DcatBackendTest:
 
         datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
 
-        assert datasets['3'].schema == None
+        assert datasets['1'].schema == None
+        resources_by_title = { resource['title']: resource for resource in datasets['1'].resources }
+
+        # Schema with wrong version are considered as external. Maybe we could change this in the future
+        assert resources_by_title['Resource 1-2'].schema.url == 'https://schema.data.gouv.fr/schemas/etalab/schema-irve-statique/1337.42.0/schema-statique.json'
+        assert resources_by_title['Resource 1-2'].schema.name == None
+        assert resources_by_title['Resource 1-2'].schema.version == None
+
         assert datasets['2'].schema.name == None
         assert datasets['2'].schema.url == 'https://www.ecologie.gouv.fr/sites/default/files/R%C3%A9glementation%20IRVE.pdf'
-        
         resources_by_title = { resource['title']: resource for resource in datasets['2'].resources }
 
-        assert resources_by_title['Resource 2-1'].schema.name == 'Infrastructures de recharges pour véhicules électriques (IRVE)'
-        assert resources_by_title['Resource 2-1'].schema.url == 'https://schema.data.gouv.fr/schemas/etalab/schema-irve-statique/2.2.1/schema-statique.json'
+        # Unknown schema are kept as they were provided
+        assert resources_by_title['Resource 2-1'].schema.name == 'Example Schema'
+        assert resources_by_title['Resource 2-1'].schema.url == 'https://example.org/schema.json'
         assert resources_by_title['Resource 2-1'].schema.version == None
 
         assert resources_by_title['Resource 2-2'].schema == None
 
+        assert datasets['3'].schema == None
         resources_by_title = { resource['title']: resource for resource in datasets['3'].resources }
 
-        # If there is only an URL and it matches a known schema inside the catalog, only set the name and the version (discard the URL)
+        # If there is just the URL, and it matches a known schema inside the catalog, only set the name and the version
+        # (discard the URL)
         assert resources_by_title['Resource 3-1'].schema.name == 'etalab/schema-irve-statique'
         assert resources_by_title['Resource 3-1'].schema.url == None
         assert resources_by_title['Resource 3-1'].schema.version == '2.2.0'
