@@ -721,7 +721,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     
     @property
     def downloads(self):
-        return sum(map(lambda o: o.metrics.get('views', 0), self.resources))
+        return sum(resource.metrics.get('views', 0) for resource in self.resources)
 
 
     @staticmethod
