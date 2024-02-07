@@ -18,4 +18,3 @@ def migrate(db):
     log.info(f'Fixed {count} Dataset objects from private None to private False.')
 
     log.info('Done')
-    raise 'oups'
