@@ -92,13 +92,20 @@ class DiscussionsTest(APITestCase):
         self.assertFalse(discussion.discussion[0].is_spam())
         self.assertTrue('signal_new' in discussion.spam.callbacks)
 
+        response = self.get(url_for('api.spam'))
+        self.assertStatus(response, 200)
+        self.assertEqual(response.json, [{
+            'title': discussion.spam_report_title(),
+            'link': discussion.spam_report_link(),
+        }])
+
         with assert_not_emit(on_new_discussion):
             response = self.delete(url_for('api.discussion_spam', id=discussion.id))
             self.assertStatus(response, 403)
             self.assertTrue(discussion.reload().is_spam())
 
         with assert_emit(on_new_discussion):
-            admin = self.login(AdminFactory())
+            self.login(AdminFactory())
             response = self.delete(url_for('api.discussion_spam', id=discussion.id))
             self.assertStatus(response, 200)
             self.assertFalse(discussion.reload().is_spam())
@@ -416,8 +423,15 @@ class DiscussionsTest(APITestCase):
         self.assertTrue(discussion.discussion[1].is_spam())
         self.assertTrue('signal_comment' in discussion.discussion[1].spam.callbacks)
 
+        self.login(AdminFactory())
+        response = self.get(url_for('api.spam'))
+        self.assertStatus(response, 200)
+        self.assertEqual(response.json, [{
+            'title': discussion.spam_report_title(),
+            'link': discussion.spam_report_link(),
+        }])
+
         with assert_emit(on_new_discussion_comment):
-            admin = self.login(AdminFactory())
             response = self.delete(url_for('api.discussion_comment_spam', id=discussion.id, cidx=1))
             self.assertStatus(response, 200)
             self.assertFalse(discussion.reload().discussion[1].is_spam())

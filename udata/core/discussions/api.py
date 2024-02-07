@@ -6,7 +6,7 @@ from flask_restx.inputs import boolean
 
 from udata.auth import admin_permission
 from udata.api import api, API, fields
-from udata.core.spam.api import SpamAPI
+from udata.core.spam.api import SpamAPIMixin
 from udata.core.spam.fields import spam_fields
 from udata.utils import id_or_404
 from udata.core.user.api_fields import user_ref_fields
@@ -92,7 +92,7 @@ parser.add_argument(
 
 @ns.route('/<id>/spam/', endpoint='discussion_spam')
 @ns.doc(delete={'id': 'unspam'})
-class DiscussionSpamAPI(SpamAPI):
+class DiscussionSpamAPI(SpamAPIMixin):
     model = Discussion
 
 
@@ -151,7 +151,7 @@ class DiscussionAPI(API):
 
 @ns.route('/<id>/comments/<int:cidx>/spam', endpoint='discussion_comment_spam')
 @ns.doc(delete={'id': 'unspam'})
-class DiscussionSpamAPI(SpamAPI):
+class DiscussionSpamAPI(SpamAPIMixin):
     def get_model(self, id, cidx):
         discussion = Discussion.objects.get_or_404(id=id_or_404(id))
         if len(discussion.discussion) <= cidx:
