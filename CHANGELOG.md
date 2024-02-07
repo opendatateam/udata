@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Fix reuses inside database without private information (default to public)
 - Fix: you can now remove schema from a resource in the admin
 
 ## 7.0.2 (2024-01-23)
