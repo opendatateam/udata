@@ -92,6 +92,12 @@ class DiscussionsTest(APITestCase):
         self.assertFalse(discussion.discussion[0].is_spam())
         self.assertTrue('signal_new' in discussion.spam.callbacks)
 
+        with assert_not_emit(on_new_discussion):
+            response = self.delete(url_for('api.discussion_spam', id=discussion.id))
+            self.assertStatus(response, 403)
+            self.assertTrue(discussion.reload().is_spam())
+
+        self.login(AdminFactory())
         response = self.get(url_for('api.spam'))
         self.assertStatus(response, 200)
         self.assertEqual(response.json, [{
@@ -99,13 +105,7 @@ class DiscussionsTest(APITestCase):
             'link': discussion.spam_report_link(),
         }])
 
-        with assert_not_emit(on_new_discussion):
-            response = self.delete(url_for('api.discussion_spam', id=discussion.id))
-            self.assertStatus(response, 403)
-            self.assertTrue(discussion.reload().is_spam())
-
         with assert_emit(on_new_discussion):
-            self.login(AdminFactory())
             response = self.delete(url_for('api.discussion_spam', id=discussion.id))
             self.assertStatus(response, 200)
             self.assertFalse(discussion.reload().is_spam())
