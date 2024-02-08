@@ -92,7 +92,6 @@ class DiscussionsTest(APITestCase):
         self.assertFalse(discussion.discussion[0].is_spam())
         self.assertTrue('signal_new' in discussion.spam.callbacks)
 
-        # comment
         response = self.get(url_for('api.spam'))
         self.assertStatus(response, 200)
         self.assertEqual(response.json, [{
