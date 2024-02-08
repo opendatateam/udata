@@ -173,6 +173,13 @@ class Schema(db.EmbeddedDocument):
     def clean(self):
         super().clean()
 
+        if not self.url and not self.name:
+            # There is no schema.
+            if self.version:
+                raise FieldValidationError(_('A schema must contains a name or an URL when a version is provided.'), field='version')
+
+            return
+
         # First check if the URL is a known schema
         if self.url:
             info = ResourceSchema.get_existing_schema_info_by_url(self.url)
@@ -180,34 +187,32 @@ class Schema(db.EmbeddedDocument):
                 self.url = None
                 self.name = info[0]
                 self.version = info[1]
-                return
+            
+            # Nothing more to do since an URL can point to anywhere and have a random name/version
+            return
 
         # We know this schema so we can do some checks
-        if not self.url:
-            if not self.name:
-                return
+        existing_schema = ResourceSchema.get_schema_by_name(self.name)
+        if not existing_schema:
+            message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}')
+            raise FieldValidationError(message.format(
+                schema=self.name,
+                values=', '.join(map(lambda schema: schema['name'], ResourceSchema.all()))
+            ), field='name')
 
-            existing_schema = ResourceSchema.get_schema_by_name(self.name)
-            if not existing_schema:
-                message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}')
+        if self.version:
+            allowed_versions = list(map(lambda version: version['version_name'], existing_schema['versions']))
+            allowed_versions.append('latest')
+
+            if self.version not in allowed_versions:
+                message = _(
+                    'Version "{version}" is not an allowed value for the schema "{name}". Allowed versions: {'
+                    'values}')
                 raise FieldValidationError(message.format(
-                    schema=self.name,
-                    values=', '.join(map(lambda schema: schema['name'], ResourceSchema.all()))
-                ), field='name')
-
-            if self.version:
-                allowed_versions = list(map(lambda version: version['version_name'], existing_schema['versions']))
-                allowed_versions.append('latest')
-
-                if self.version not in allowed_versions:
-                    message = _(
-                        'Version "{version}" is not an allowed value for the schema "{name}". Allowed versions: {'
-                        'values}')
-                    raise FieldValidationError(message.format(
-                        version=self.version,
-                        name=self.name,
-                        values=', '.join(allowed_versions)
-                    ), field='version')
+                    version=self.version,
+                    name=self.name,
+                    values=', '.join(allowed_versions)
+                ), field='version')
 
 
 class License(db.Document):
