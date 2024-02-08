@@ -12,6 +12,7 @@ from flask import (
 from flask_storage import UnauthorizedFileType
 from flask_restx import Api, Resource
 from flask_cors import CORS
+from wtforms import fields as WTFields
 
 from udata import tracking, entrypoints
 from udata.app import csrf
@@ -150,8 +151,17 @@ class UDataApi(Api):
         if 'application/json' not in request.headers.get('Content-Type'):
             errors = {'Content-Type': 'expecting application/json'}
             self.abort(400, errors=errors)
-        form = form_cls.from_json(request.json, obj=obj, instance=obj,
-                                  meta={'csrf': False})
+        form = form_cls.from_json(request.json, instance=obj, meta={'csrf': False})
+        if obj:
+            for name in form._fields:
+                if name not in form.formdata and hasattr(obj, name):
+                    field = getattr(form, name)
+                    if isinstance(field, WTFields.FormField):
+                        pass
+                    else:
+                        print(name)
+                        field.data = getattr(obj, name)
+
         if not form.validate():
             self.abort(400, errors=form.errors)
         return form
