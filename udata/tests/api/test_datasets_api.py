@@ -785,6 +785,34 @@ class DatasetAPITest(APITestCase):
         assert dataset.resources[0].schema['url'] == None
         assert dataset.resources[0].schema['version'] == '2.2.1'
 
+        # Putting `None` as the schema argument do not remove the schema
+        # Not sure if it's the correct behaviour but it's the normal behaviour on the API v1… :-(
+        # I think it should be if the key 'schema' is missing, the old value is kept, if the key is present
+        # but `None` update it inside the DB as `None`.
+        data = response.json
+        data['resources'][0]['schema'] = None
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+
+        dataset.reload()
+        assert dataset.resources[0].schema['name'] == 'etalab/schema-irve-statique'
+        assert dataset.resources[0].schema['url'] == None
+        assert dataset.resources[0].schema['version'] == '2.2.1'
+
+        # Putting `None` as the schema name and version remove the schema
+        # This is a workaround for the None on schema behaviour explain above.
+        data = response.json
+        data['resources'][0]['schema']['name'] = None
+        data['resources'][0]['schema']['version'] = None
+
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+
+        dataset.reload()
+        assert dataset.resources[0].schema['name'] == None
+        assert dataset.resources[0].schema['url'] == None
+        assert dataset.resources[0].schema['version'] == None
+
 
 class DatasetBadgeAPITest(APITestCase):
     @classmethod
