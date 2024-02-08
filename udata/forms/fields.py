@@ -182,6 +182,10 @@ class BooleanField(FieldHelper, fields.BooleanField):
 
     def process_formdata(self, valuelist):
         if not valuelist:
+            return 
+
+        if valuelist[0] is None:
+            self.data = self.default
             return
 
         if valuelist[0] in self.false_values:
