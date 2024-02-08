@@ -185,7 +185,7 @@ class Schema(db.EmbeddedDocument):
         # We know this schema so we can do some checks
         if not self.url:
             if not self.name:
-                raise FieldValidationError(_('Name is required when URL is missing.'), field='name')
+                return
 
             existing_schema = ResourceSchema.get_schema_by_name(self.name)
             if not existing_schema:
