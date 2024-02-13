@@ -291,6 +291,18 @@ class DatasetModelTest:
             dataset.title = 'New title'
             dataset.save(signal_kwargs={'ignores': ['post_save']})
 
+    def test_dataset_without_private(self):
+        dataset = DatasetFactory()
+        assert dataset.private == False
+
+        dataset.private = None
+        dataset.save()
+        assert dataset.private == False
+
+        dataset.private = True
+        dataset.save()
+        assert dataset.private == True
+
 
 class ResourceModelTest:
     def test_url_is_required(self):

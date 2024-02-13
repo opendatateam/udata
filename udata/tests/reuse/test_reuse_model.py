@@ -102,3 +102,16 @@ class ReuseModelTest(TestCase, DBTestMixin):
         reuse = ReuseFactory(topic='health')
         self.assertEqual(reuse.topic, 'health')
         self.assertEqual(reuse.topic_label, _('Health'))
+
+    def test_reuse_without_private(self):
+        reuse = ReuseFactory()
+        self.assertEqual(reuse.private, False)
+
+        reuse.private = None
+        reuse.save()
+        self.assertEqual(reuse.private, False)
+
+        reuse.private = True
+        reuse.save()
+        self.assertEqual(reuse.private, True)
+
