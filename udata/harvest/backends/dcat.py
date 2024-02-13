@@ -229,6 +229,10 @@ class CswIsoXsltDcatBackend(DcatBackend):
 
     ISO_SCHEMA = 'http://www.isotc211.org/2005/gmd'
 
+    def get_format(self):
+        # TODO: should we redefine get_format here?
+        return 'xml'
+
     def parse_graph(self, url: str, fmt: str) -> List[Graph]:
         '''
         Parse CSW graph querying ISO schema.
@@ -245,7 +249,7 @@ class CswIsoXsltDcatBackend(DcatBackend):
         body = '''<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
                                   xmlns:gmd="http://www.isotc211.org/2005/gmd"
                                   service="CSW" version="2.0.2" resultType="results"
-                                  startPosition="{start}" maxPosition="200"
+                                  startPosition="{start}" maxPosition="10"
                                   outputSchema="{schema}">
                       <csw:Query typeNames="csw:Record">
                         <csw:ElementSetName>full</csw:ElementSetName>
@@ -277,11 +281,17 @@ class CswIsoXsltDcatBackend(DcatBackend):
                 kwargs['type'] = 'uriref' if isinstance(node, URIRef) else 'blank'
                 self.add_item(id, **kwargs)
                 dataset_found = True
+            graphs.append(subgraph)
 
+            # No dataset returned already
             if not dataset_found:
                 break
-            
-            graphs.append(subgraph)
+
+            # Enough items have been harvested already
+            if self.max_items and len(self.job.items) >= self.max_items:
+                break
+
+            # TODO: use CSW results to deal with pagination
             page += 1
             start = start + page_size
 
