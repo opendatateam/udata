@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Fix reuses inside database without private information (default to public)
 - Fix: you can now remove schema from a resource in the admin
 - Improve documentation for API errors
 
