@@ -2,6 +2,7 @@
 This module centralize dataset helpers for RDF/DCAT serialization and parsing
 '''
 import calendar
+import json
 import logging
 
 from datetime import date
@@ -13,6 +14,7 @@ from rdflib.resource import Resource as RdfResource
 from rdflib.namespace import RDF
 
 from udata import i18n, uris
+from udata.core.spatial.models import SpatialCoverage
 from udata.frontend.markdown import parse_html
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.models import db, ContactPoint
@@ -334,6 +336,23 @@ def contact_point_from_rdf(rdf, dataset):
                     ContactPoint(name=name, email=email, owner=dataset.owner).save())
 
 
+def spatial_from_rdf(term):
+    for object in term.objects():
+        if isinstance(object, Literal):
+            if object.datatype.__str__() == 'https://www.iana.org/assignments/media-types/application/vnd.geo+json':
+                try:
+                    geojson = json.loads(object.toPython())
+                except ValueError as e:
+                    log.warning(f"Invalid JSON in spatial GeoJSON {object.toPython()} {e}")
+                    continue
+
+                if geojson['type'] == 'Polygon':
+                    geojson['type'] = 'MultiPolygon'
+                    geojson['coordinates'] = [geojson['coordinates']]
+                return geojson
+
+    return None
+
 def frequency_from_rdf(term):
     if isinstance(term, str):
         try:
@@ -488,7 +507,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     return resource
 
 
-def dataset_from_rdf(graph, dataset=None, node=None):
+def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     '''
     Create or update a dataset from a RDF/DCAT graph
     '''
@@ -508,6 +527,10 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     schema = schema_from_rdf(d)
     if schema:
         dataset.schema = schema
+
+    geojson = spatial_from_rdf(d.value(DCT.spatial))
+    if geojson:
+        dataset.spatial = SpatialCoverage(geom=geojson)
 
     acronym = rdf_value(d, SKOS.altLabel)
     if acronym:
