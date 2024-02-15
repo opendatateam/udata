@@ -36,6 +36,11 @@ class SpamMixin(object):
     @staticmethod
     def allowed_langs():
         return current_app.config.get('SPAM_ALLOWED_LANGS', [])
+    
+    @staticmethod
+    def minimum_string_length_for_lang_check():
+        return current_app.config.get('SPAM_MINIMUM_STRING_LENGTH_FOR_LANG_CHECK', 30)
+
 
     def clean(self):
         super().clean()
@@ -90,7 +95,7 @@ class SpamMixin(object):
                     return
 
             # Language detection is not working well with texts of a few words.
-            if SpamMixin.allowed_langs() and len(text) > 30:
+            if SpamMixin.allowed_langs() and len(text) > SpamMixin.minimum_string_length_for_lang_check():
                 lang = detect(text)
                 if lang not in SpamMixin.allowed_langs():
                     self.spam.status = POTENTIAL_SPAM

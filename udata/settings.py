@@ -453,6 +453,7 @@ class Defaults(object):
     ###########################################################################
     SPAM_WORDS = []
     SPAM_ALLOWED_LANGS = []
+    SPAM_MINIMUM_STRING_LENGTH_FOR_LANG_CHECK = 30
 
     # Notification settings
     ###########################################################################
