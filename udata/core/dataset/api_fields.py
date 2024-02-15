@@ -133,10 +133,8 @@ upload_fields = api.inherit('UploadedResource', resource_fields, {
 resources_order = api.as_list(fields.String(description='Resource ID'))
 
 temporal_coverage_fields = api.model('TemporalCoverage', {
-    'start': fields.ISODateTime(description='The temporal coverage start date',
-                                required=True),
-    'end': fields.ISODateTime(description='The temporal coverage end date',
-                              required=True),
+    'start': fields.ISODateTime(description='The temporal coverage start date', required=True),
+    'end': fields.ISODateTime(description='The temporal coverage end date'),
 })
 
 dataset_ref_fields = api.inherit('DatasetReference', base_reference, {
