@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 7.0.3 (2024-02-15)
 
 - Add spam detection and prevention logic on discussion model [#2954](https://github.com/opendatateam/udata/pull/2954) [#2963](https://github.com/opendatateam/udata/pull/2963)
 - Fix reuses inside database without private information (default to public) [#2951](https://github.com/opendatateam/udata/pull/2951)
