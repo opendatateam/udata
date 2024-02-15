@@ -449,6 +449,15 @@ class Defaults(object):
     ###########################################################################
     QUALITY_DESCRIPTION_LENGTH = 100
 
+    # Spam settings
+    ###########################################################################
+    SPAM_WORDS = []
+    SPAM_ALLOWED_LANGS = []
+
+    # Notification settings
+    ###########################################################################
+    MATTERMOST_WEBHOOK = None
+
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''
