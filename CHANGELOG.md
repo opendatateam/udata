@@ -4,6 +4,7 @@
 
 - Fix reuses inside database without private information (default to public)
 - Fix: you can now remove schema from a resource in the admin
+- Allow dict in datasets extras
 
 ## 7.0.2 (2024-01-23)
 
