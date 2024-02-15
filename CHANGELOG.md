@@ -5,6 +5,7 @@
 - Fix reuses inside database without private information (default to public)
 - Fix: you can now remove schema from a resource in the admin
 - Add downloads count in datasets' CSV
+- Allow dicts in datasets' extras [#2958](https://github.com/opendatateam/udata/pull/2958/files)
 
 ## 7.0.2 (2024-01-23)
 
