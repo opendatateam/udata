@@ -8,7 +8,7 @@ from mongoengine.fields import DictField, BaseField
 log = logging.getLogger(__name__)
 
 
-ALLOWED_TYPES = (str, int, float, bool, datetime, date, list)
+ALLOWED_TYPES = (str, int, float, bool, datetime, date, list, dict)
 
 
 class ExtrasField(DictField):

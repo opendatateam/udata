@@ -2,7 +2,16 @@
 
 ## Current (in progress)
 
-- Fix: you can now remove schema from a resource in the admin
+- Nothing yet
+
+## 7.0.3 (2024-02-15)
+
+- Add spam detection and prevention logic on discussion model [#2954](https://github.com/opendatateam/udata/pull/2954) [#2963](https://github.com/opendatateam/udata/pull/2963)
+- Fix reuses inside database without private information (default to public) [#2951](https://github.com/opendatateam/udata/pull/2951)
+- Fix: you can now remove schema from a resource in the admin [#2950](https://github.com/opendatateam/udata/pull/2950)
+- Fix: refuse an organisation access request when multiple access requests are pending [#2960](https://github.com/opendatateam/udata/pull/2960)
+- Add downloads count in datasets' CSV [#2953](https://github.com/opendatateam/udata/pull/2953)
+- Allow dicts in datasets' extras [#2958](https://github.com/opendatateam/udata/pull/2958)
 
 ## 7.0.2 (2024-01-23)
 
