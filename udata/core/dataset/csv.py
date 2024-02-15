@@ -33,6 +33,7 @@ class DatasetCsvAdapter(csv.Adapter):
         ('tags', lambda o: ','.join(o.tags)),
         ('archived', lambda o: o.archived or False),
         ('resources_count', lambda o: len(o.resources)),
+        'downloads',
         ('harvest.backend', lambda r: r.harvest and r.harvest.backend),
         ('harvest.domain', lambda r: r.harvest and r.harvest.domain),
         ('harvest.created_at', lambda r: r.harvest and r.harvest.created_at),
