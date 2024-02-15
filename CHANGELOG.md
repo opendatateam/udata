@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Add spam detection and prevention logic on discussion model [#2954](https://github.com/opendatateam/udata/pull/2954)
+- Add spam detection and prevention logic on discussion model [#2954](https://github.com/opendatateam/udata/pull/2954) [#2963](https://github.com/opendatateam/udata/pull/2963)
 - Fix reuses inside database without private information (default to public) [#2951](https://github.com/opendatateam/udata/pull/2951)
 - Fix: you can now remove schema from a resource in the admin [#2950](https://github.com/opendatateam/udata/pull/2950)
 - Fix: refuse an organisation access request when multiple access requests are pending [#2960](https://github.com/opendatateam/udata/pull/2960)

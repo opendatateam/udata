@@ -3,6 +3,7 @@ from langdetect import detect
 
 from udata.models import db
 from .signals import on_new_potential_spam
+from mongoengine import signals
 
 NOT_CHECKED = 'not_checked'
 POTENTIAL_SPAM = 'potential_spam'
@@ -149,17 +150,34 @@ class SpamMixin(object):
         return None
 
     def _report(self, text, breadcrumb, reason):
-        # Note that all the chain should be a SpamMixin, maybe we could filter out if it's not the case here…
-        title = " → ".join(map(lambda o: o.spam_report_title(), breadcrumb))
+        base_model = breadcrumb[0]
 
-        # Select the first link in the embed list (for example message doesn't have a link, so check if discussion
-        # have one)
-        for object in reversed(breadcrumb):
-            link = object.spam_report_link()
-            if link:
-                break
+        def report_after_save(sender, document, **kwargs):
+            # Here we early out to prevent multiple reports if multiple
+            # spam are sent at the same time. Not sure if it's necessary.
+            if document != base_model:
+                return
 
-        on_new_potential_spam.send(self, title=title, link=link, text=text, reason=reason)
+            # Note that all the chain should be a SpamMixin, maybe we could filter out if it's not the case here…
+            title = " → ".join(map(lambda o: o.spam_report_title(), breadcrumb))
+
+            # Select the first link in the embed list (for example message doesn't have a link, so check if discussion
+            # have one)
+            for object in reversed(breadcrumb):
+                link = object.spam_report_link()
+                if link:
+                    break
+
+            on_new_potential_spam.send(self, title=title, link=link, text=text, reason=reason)
+
+            # We clean the listener here. Not sure if it's necessary either.
+            signals.post_save.disconnect(report_after_save)
+
+        # For things like `spam_report_link` we often need the ID of the document so we
+        # must report after saving to have the ID available.
+        # By default the signal is weak so it is dropped at the end of this function and it's
+        # never called. We disconnect the signal in `report_after_save` to avoid leaks.
+        signals.post_save.connect(report_after_save, sender=base_model.__class__, weak=False)
 
 
 def spam_protected(get_model_to_check=None):
