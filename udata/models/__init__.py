@@ -27,7 +27,6 @@ from .document import UDataDocument, DomainModel
 
 log = logging.getLogger(__name__)
 
-
 class UDataMongoEngine(MongoEngine):
     '''Customized mongoengine with extra fields types and helpers'''
     def __init__(self, app=None):
@@ -106,6 +105,7 @@ from udata.core.topic.models import *  # noqa
 from udata.core.post.models import *  # noqa
 from udata.core.jobs.models import *  # noqa
 from udata.core.tags.models import *  # noqa
+from udata.core.spam.models import *  # noqa
 
 from udata.features.transfer.models import *  # noqa
 from udata.features.territories.models import *  # noqa
