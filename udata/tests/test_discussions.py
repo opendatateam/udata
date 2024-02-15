@@ -418,7 +418,10 @@ class DiscussionsTest(APITestCase):
 
         self.login()
         with assert_not_emit(on_new_discussion_comment):
-            with assert_emit(on_new_potential_spam):
+            def check_signal(args):
+                self.assertEqual(args[1]['link'], discussion.external_url)
+
+            with assert_emit(on_new_potential_spam, assertions_callback=check_signal):
                 response = self.post(url_for('api.discussion', id=discussion.id), {
                     'comment': 'spam new bla bla'
                 })

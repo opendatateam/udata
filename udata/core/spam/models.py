@@ -150,10 +150,12 @@ class SpamMixin(object):
         return None
 
     def _report(self, text, breadcrumb, reason):
+        base_model = breadcrumb[0]
+
         def report_after_save(sender, document, **kwargs):
             # Here we early out to prevent multiple reports if multiple
             # spam are sent at the same time. Not sure if it's necessary.
-            if document != self:
+            if document != base_model:
                 return
 
             # Note that all the chain should be a SpamMixin, maybe we could filter out if it's not the case here…
@@ -175,7 +177,7 @@ class SpamMixin(object):
         # must report after saving to have the ID available.
         # By default the signal is weak so it is dropped at the end of this function and it's
         # never called. We disconnect the signal in `report_after_save` to avoid leaks.
-        signals.post_save.connect(report_after_save, sender=self.__class__, weak=False)
+        signals.post_save.connect(report_after_save, sender=base_model.__class__, weak=False)
 
 
 def spam_protected(get_model_to_check=None):
