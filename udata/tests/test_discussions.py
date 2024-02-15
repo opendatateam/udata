@@ -73,7 +73,12 @@ class DiscussionsTest(APITestCase):
         dataset = Dataset.objects.create(title='Test dataset')
 
         with assert_not_emit(on_new_discussion):
-            with assert_emit(on_new_potential_spam):
+            discussion_id = None
+            def check_signal(args):
+                self.assertIsNotNone(discussion_id)
+                self.assertEqual(args[1]['link'], f'http://local.test/api/1/datasets/{dataset.id}/#discussion-{discussion_id}')
+
+            with assert_emit(on_new_potential_spam, assertions_callback=check_signal):
                 response = self.post(url_for('api.discussions'), {
                     'title': 'spam and blah',
                     'comment': 'bla bla',
@@ -83,6 +88,7 @@ class DiscussionsTest(APITestCase):
                     }
                 })
                 self.assertStatus(response, 201)
+                discussion_id = response.json['id']
 
         discussions = Discussion.objects(subject=dataset)
         self.assertEqual(len(discussions), 1)
