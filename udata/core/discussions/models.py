@@ -19,6 +19,26 @@ class Message(SpamMixin, db.EmbeddedDocument):
 
     def texts_to_check_for_spam(self):
         return [self.content]
+    
+    def spam_report_message(self, breadcrumb):
+        message =  f"Spam potentiel dans le message"
+        if self.posted_by:
+            message += f" de [{self.posted_by.fullname}]({self.posted_by.external_url})"
+
+        if len(breadcrumb) != 2:
+            log.warning(f"`spam_report_message` called on message with a breadcrumb of {len(breadcrumb)} elements.", extra={ 'breadcrumb': breadcrumb})
+            return message
+        
+        discussion = breadcrumb[0]
+        if not isinstance(discussion, Discussion):
+            log.warning(f"`spam_report_message` called on message with a breadcrumb not containing a Discussion at index 0.", extra={ 'breadcrumb': breadcrumb})
+            return message
+
+        message += f" sur la discussion « [{discussion.title}]({discussion.external_url}) »"
+        if discussion.user:
+            message += f" de [{discussion.user.fullname}]({discussion.user.external_url})"
+
+        return message
 
 
 class Discussion(SpamMixin, db.Document):
@@ -60,11 +80,12 @@ class Discussion(SpamMixin, db.Document):
             _anchor='discussion-{id}'.format(id=self.id),
             _external=True)
     
-    def spam_report_title(self):
-        return self.title
-    
-    def spam_report_link(self):
-        return self.external_url
+    def spam_report_message(self, breadcrumb):
+        message =  f"Spam potentiel sur la discussion « [{self.title}]({self.external_url}) »"
+        if self.user:
+            message += f" de [{self.user.fullname}]({self.user.external_url})"
+
+        return message
     
     @spam_protected()
     def signal_new(self):
