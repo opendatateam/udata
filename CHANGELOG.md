@@ -2,7 +2,10 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Custom extras metadata [#2921](https://github.com/opendatateam/udata/pull/2921):
+  - Organization can nom define a custom metadata of a choosen type
+  - Dataset belonging to the organization can assign a value to the defined metadata
+  - Metadata value must match the choosen type by the organization
 
 ## 7.0.3 (2024-02-15)
 

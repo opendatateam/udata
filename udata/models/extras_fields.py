@@ -60,3 +60,44 @@ class ExtrasField(DictField):
         if isinstance(value, EmbeddedDocument):
             return value
         return super(ExtrasField, self).to_python(value)
+
+
+class OrganizationExtrasField(ExtrasField):
+    def __init__(self, **kwargs):
+        super(OrganizationExtrasField, self).__init__()
+
+    def validate(self, values):
+        super(ExtrasField, self).validate(values)
+
+        errors = {}
+
+        mandatory_keys = ["title", "description", "type"]
+        optional_keys = ["choices"]
+        valid_types = ["str", "int", "float", "bool", "datetime", "date", "choice"]
+
+        for elem in values.get('custom', []):
+            # Check if all mandatory keys are in the dictionary
+            if not all(key in elem for key in mandatory_keys):
+                errors['custom'] = 'The dictionary does not contain the mandatory keys: \'title\', \'description\', \'type\'.'
+
+            # Check if the dictionary contains only keys that are either mandatory or optional
+            if not all(key in mandatory_keys + optional_keys for key in elem):
+                errors['custom'] = 'The dictionary does contains extra keys than allowed ones.'
+
+            # Check if the "type" value is one of the valid types
+            if elem.get("type") not in valid_types:
+                errors['type'] = ('Type \'{type}\' of \'{title}\' should be one of: {types}'
+                                  .format(type=elem.get("type"), title=elem.get("title"), types=valid_types))
+
+            # Check if the "choices" key is present only if the type is "choice" and it's not an empty list
+            is_choices_valid = True
+            if elem.get("type") == "choice":
+                is_choices_valid = "choices" in elem and isinstance(elem["choices"], list) and len(
+                    elem["choices"]) > 0
+            elif "choices" in elem:
+                is_choices_valid = False
+            if not is_choices_valid:
+                errors['choices'] = 'The \'choices\' key must be an non empty list and can only be present when type \'choice\' is selected.'
+
+        if errors:
+            self.error('Custom extras error', errors=errors)
