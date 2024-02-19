@@ -371,6 +371,9 @@ class DatasetAPITest(APITestCase):
             'integer': 42,
             'float': 42.0,
             'string': 'value',
+            'dict': {
+                'foo': 'bar',
+            }
         }
         with self.api_user():
             response = self.post(url_for('api.datasets'), data)
@@ -381,6 +384,7 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(dataset.extras['integer'], 42)
         self.assertEqual(dataset.extras['float'], 42.0)
         self.assertEqual(dataset.extras['string'], 'value')
+        self.assertEqual(dataset.extras['dict']['foo'], 'bar')
 
     def test_dataset_api_create_with_resources(self):
         '''It should create a dataset with resources from the API'''
