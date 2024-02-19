@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add rotate password command [#2966](https://github.com/opendatateam/udata/pull/2966)
 
 ## 7.0.3 (2024-02-15)
 
