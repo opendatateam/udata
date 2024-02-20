@@ -1,4 +1,5 @@
 import logging
+import mongoengine
 
 from flask import url_for, request, abort
 from flask_restx import marshal
@@ -235,7 +236,10 @@ class DatasetExtrasAPI(API):
             data.pop(key)
         # then update the extras with the remaining payload
         dataset.extras.update(data)
-        dataset.save(signal_kwargs={'ignores': ['post_save']})
+        try:
+            dataset.save(signal_kwargs={'ignores': ['post_save']})
+        except mongoengine.errors.ValidationError as e:
+            apiv2.abort(400, e.message)
         return dataset.extras
 
     @apiv2.secure
@@ -248,11 +252,11 @@ class DatasetExtrasAPI(API):
         if dataset.deleted:
             apiv2.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
-        try:
-            for key in data:
+        for key in data:
+            try:
                 del dataset.extras[key]
-        except KeyError:
-            apiv2.abort(404, 'Key not found in existing extras')
+            except KeyError:
+                pass
         dataset.save(signal_kwargs={'ignores': ['post_save']})
         return dataset.extras, 204
 

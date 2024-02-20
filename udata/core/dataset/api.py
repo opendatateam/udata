@@ -19,6 +19,7 @@ These changes might lead to backward compatibility breakage meaning:
 
 import os
 import logging
+import mongoengine
 from datetime import datetime
 
 from bson.objectid import ObjectId
@@ -229,7 +230,12 @@ class DatasetAPI(API):
         DatasetEditPermission(dataset).test()
         dataset.last_modified_internal = datetime.utcnow()
         form = api.validate(DatasetForm, dataset)
-        return form.save()
+        # As validation for some fields (ie. extras) is at model
+        # level instead form level, we use mongoengine errors here.
+        try:
+            return form.save()
+        except mongoengine.errors.ValidationError as e:
+            api.abort(400, e.message)
 
     @api.secure
     @api.doc('delete_dataset')

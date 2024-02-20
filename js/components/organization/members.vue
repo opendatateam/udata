@@ -104,7 +104,7 @@
                     </button>
                 </div>
             </div>
-            <div v-if="request.refused">
+            <div v-show="request.refused">
                 <form>
                     <textarea v-el:textarea class="form-control" rows="3" required></textarea>
                 </form>

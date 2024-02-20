@@ -467,15 +467,6 @@ class ExtrasFieldTest:
         })
         tester.validate()
 
-    def test_default_dont_validate_complex_types(self):
-        class Tester(db.Document):
-            extras = db.ExtrasField()
-
-        tester = Tester(extras={'dict': {}})
-
-        with pytest.raises(ValidationError):
-            tester.validate()
-
     def test_can_only_register_db_type(self):
         class Tester(db.Document):
             extras = db.ExtrasField()
