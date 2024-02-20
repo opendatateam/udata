@@ -6,7 +6,6 @@ spam_fields = api.model('Spam', {
 })
 
 potential_spam_fields = api.model('PotentialSpam', {
-    'title': fields.String(readonly=True),
-    'link': fields.String(readonly=True),
+    'message': fields.String(readonly=True),
 })
 

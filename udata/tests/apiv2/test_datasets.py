@@ -5,6 +5,7 @@ from udata.tests.api import APITestCase
 from udata.core.dataset.apiv2 import DEFAULT_PAGE_SIZE
 from udata.core.dataset.factories import (
     DatasetFactory, ResourceFactory, CommunityResourceFactory)
+from udata.core.organization.factories import OrganizationFactory, Member
 from udata.models import Dataset
 from udata.tests.helpers import assert_not_emit
 
@@ -251,6 +252,74 @@ class DatasetExtrasAPITest(APITestCase):
         self.dataset.reload()
         assert len(self.dataset.extras) == 1
         assert self.dataset.extras['test::extra'] == 'test-value'
+
+    def test_dataset_custom_extras_str(self):
+        member = Member(user=self.user, role='admin')
+        org = OrganizationFactory(members=[member])
+        org.extras = {
+            "custom": [
+                {
+                    "title": "color",
+                    "description": "the banner color of the dataset (Hex code)",
+                    "type": "str"
+                }
+            ]
+        }
+        org.save()
+        dataset = DatasetFactory(organization=org)
+
+        data = {
+            'custom:test': 'FFFFFFF'
+        }
+        response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
+        self.assert400(response)
+        assert 'Dataset\'s organization did not define the requested custom metadata' in response.json['message']
+
+        data = {
+            'custom:color': 123
+        }
+        response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
+        self.assert400(response)
+        assert 'Custom metadata is not of the right type' in response.json['message']
+
+        data = {
+            'custom:color': 'FFFFFFF'
+        }
+        response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        assert dataset.extras['custom:color'] == 'FFFFFFF'
+
+    def test_dataset_custom_extras_choices(self):
+        member = Member(user=self.user, role='admin')
+        org = OrganizationFactory(members=[member])
+        org.extras = {
+            "custom": [
+                {
+                    "title": "color",
+                    "description": "the colors of the dataset (Hex code)",
+                    "type": "choice",
+                    "choices": ["yellow", "blue"]
+                }
+            ]
+        }
+        org.save()
+        dataset = DatasetFactory(organization=org)
+
+        data = {
+            'custom:color': 'FFFFFFF'
+        }
+        response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
+        self.assert400(response)
+        assert 'Custom metadata choice is not defined by organization' in response.json['message']
+
+        data = {
+            'custom:color': 'yellow'
+        }
+        response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        assert dataset.extras['custom:color'] == 'yellow'
 
 
 class DatasetResourceExtrasAPITest(APITestCase):

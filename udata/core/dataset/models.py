@@ -10,6 +10,7 @@ from flask import current_app
 from mongoengine import DynamicEmbeddedDocument, ValidationError as MongoEngineValidationError
 from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
+from pydoc import locate
 from stringdist import rdlevenshtein
 from werkzeug.utils import cached_property
 import requests
@@ -617,6 +618,31 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         if self.frequency in LEGACY_FREQUENCIES:
             self.frequency = LEGACY_FREQUENCIES[self.frequency]
 
+        for key, value in self.extras.items():
+            if not key.startswith('custom:'):
+                continue
+            if not self.organization:
+                raise MongoEngineValidationError(
+                    'Custom metadatas are only accessible to dataset owned by on organization.')
+            custom_meta = key.split(':')[1]
+            org_custom = self.organization.extras.get('custom', [])
+            custom_present = False
+            for custom in org_custom:
+                if custom['title'] != custom_meta:
+                    continue
+                custom_present = True
+                if custom['type'] == 'choice':
+                    if value not in custom['choices']:
+                        raise MongoEngineValidationError(
+                            'Custom metadata choice is not defined by organization.')
+                else:
+                    if not isinstance(value, locate(custom['type'])):
+                        raise MongoEngineValidationError(
+                            'Custom metadata is not of the right type.')
+            if not custom_present:
+                raise MongoEngineValidationError(
+                    'Dataset\'s organization did not define the requested custom metadata.')
+
     def url_for(self, *args, **kwargs):
         return endpoint_for('datasets.show', 'api.dataset', dataset=self, *args, **kwargs)
 
@@ -782,6 +808,11 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
         result['score'] = self.compute_quality_score(result)
         return result
+    
+    @property
+    def downloads(self):
+        return sum(resource.metrics.get('views', 0) for resource in self.resources)
+
 
     @staticmethod
     def normalize_score(score):

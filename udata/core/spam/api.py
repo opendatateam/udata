@@ -53,6 +53,5 @@ class SpamAPI(API):
         discussions = Discussion.objects(Q(spam__status=POTENTIAL_SPAM) | Q(discussion__spam__status=POTENTIAL_SPAM))
 
         return [{
-            'title': discussion.spam_report_title(),
-            'link': discussion.spam_report_link(),
+            'message': discussion.spam_report_message([discussion]),
         } for discussion in discussions]

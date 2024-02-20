@@ -87,6 +87,7 @@ org_fields = api.model('Organization', {
     'badges': fields.List(fields.Nested(badge_fields),
                           description='The organization badges',
                           readonly=True),
+    'extras': fields.Raw(description='Extras attributes as key-value pairs'),
 })
 
 org_page_fields = api.model('OrganizationPage', fields.pager(org_fields))
