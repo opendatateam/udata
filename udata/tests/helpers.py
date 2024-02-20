@@ -60,12 +60,14 @@ def mock_signals(callback, *signals):
 
 
 @contextmanager
-def assert_emit(*signals):
+def assert_emit(*signals, assertions_callback = None):
     __tracebackhide__ = True
     msg = 'Signal "{0}" should have been emitted'
 
     def callback(name, handler):
         assert handler.called, msg.format(name)
+        if assertions_callback is not None:
+            assertions_callback(handler.call_args)
 
     with mock_signals(callback, *signals):
         yield
