@@ -108,6 +108,8 @@ DEFAULT_CHECKSUM_TYPE = 'sha1'
 
 PIVOTAL_DATA = 'pivotal-data'
 CLOSED_FORMATS = ('pdf', 'doc', 'docx', 'word', 'xls', 'excel', 'xlsx')
+ACCESS_RIGHTS = ('public', 'non-public', 'restricted')
+DEFAULT_ACCESS_RIGHTS = 'public'
 
 # Maximum acceptable Damerau-Levenshtein distance
 # used to guess license
@@ -487,6 +489,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
                                            default=datetime.utcnow, required=True)
     deleted = db.DateTimeField()
     archived = db.DateTimeField()
+
+    access_rights = db.StringField(choices=list(ACCESS_RIGHTS), default=DEFAULT_ACCESS_RIGHTS, required=True)
 
     def __str__(self):
         return self.title or ''
