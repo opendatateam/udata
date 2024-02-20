@@ -16,8 +16,10 @@ log = get_logger(__name__)
 def owner_recipients(discussion):
     if getattr(discussion.subject, 'organization', None):
         return [m.user for m in discussion.subject.organization.members]
-    else:
+    elif getattr(discussion.subject, 'owner', None):
         return [discussion.subject.owner]
+    else:
+        return []
 
 
 @connect(on_new_discussion, by_id=True)
