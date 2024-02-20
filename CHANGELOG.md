@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Add rotate password command [#2966](https://github.com/opendatateam/udata/pull/2966)
 - Custom extras metadata [#2921](https://github.com/opendatateam/udata/pull/2921):
   - Organization can nom define a custom metadata of a choosen type
   - Dataset belonging to the organization can assign a value to the defined metadata

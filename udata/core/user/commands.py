@@ -88,3 +88,15 @@ def password(email):
     password = click.prompt('Enter new password', hide_input=True)
     user.password = hash_password(password)
     user.save()
+
+@grp.command()
+@click.argument('email')
+def rotate_password(email):
+    '''
+    Ask user for password rotation on next login and reset any current session
+    '''
+    user = datastore.find_user(email=email)
+    user.password_rotation_demanded = datetime.utcnow()
+    user.save()
+    # Reset ongoing sessions by uniquifier
+    datastore.set_uniquifier(user)
