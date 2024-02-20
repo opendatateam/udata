@@ -10,7 +10,7 @@
 - Allow dicts in datasets' extras [#2958](https://github.com/opendatateam/udata/pull/2958)
 - Fix: do not send mail about discussions when there is no owner / no organisation members [#2962](https://github.com/opendatateam/udata/pull/2962)
 - Fix: 'backend' is now required in `HarvestSource` [#2962](https://github.com/opendatateam/udata/pull/2962)
-- Fix: URL to organisations in mails are now independent from `udata-front` (show the URL of the API if no `udata-front`) [#2962](https://github.com/opendatateam/udata/pull/2962)
+- Fix: URL to organizations in mails are now independent from `udata-front` (show the URL of the API if no `udata-front`) [#2962](https://github.com/opendatateam/udata/pull/2962)
 
 ## 7.0.2 (2024-01-23)
 
