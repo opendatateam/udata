@@ -6,6 +6,9 @@
   - Organization can nom define a custom metadata of a choosen type
   - Dataset belonging to the organization can assign a value to the defined metadata
   - Metadata value must match the choosen type by the organization
+- Fix: do not send mail about discussions when there is no owner / no organisation members [#2962](https://github.com/opendatateam/udata/pull/2962)
+- Fix: 'backend' is now required in `HarvestSource` [#2962](https://github.com/opendatateam/udata/pull/2962)
+- Fix: URL to organizations in mails are now independent from `udata-front` (show the URL of the API if no `udata-front`) [#2962](https://github.com/opendatateam/udata/pull/2962)
 
 ## 7.0.3 (2024-02-15)
 
@@ -15,9 +18,6 @@
 - Fix: refuse an organisation access request when multiple access requests are pending [#2960](https://github.com/opendatateam/udata/pull/2960)
 - Add downloads count in datasets' CSV [#2953](https://github.com/opendatateam/udata/pull/2953)
 - Allow dicts in datasets' extras [#2958](https://github.com/opendatateam/udata/pull/2958)
-- Fix: do not send mail about discussions when there is no owner / no organisation members [#2962](https://github.com/opendatateam/udata/pull/2962)
-- Fix: 'backend' is now required in `HarvestSource` [#2962](https://github.com/opendatateam/udata/pull/2962)
-- Fix: URL to organizations in mails are now independent from `udata-front` (show the URL of the API if no `udata-front`) [#2962](https://github.com/opendatateam/udata/pull/2962)
 
 ## 7.0.2 (2024-01-23)
 
