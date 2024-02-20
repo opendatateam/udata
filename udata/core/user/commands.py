@@ -98,4 +98,5 @@ def rotate_password(email):
     user = datastore.find_user(email=email)
     user.password_rotation_demanded = datetime.utcnow()
     user.save()
+    # Reset ongoing sessions by uniquifier
     datastore.set_uniquifier(user)
