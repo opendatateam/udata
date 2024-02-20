@@ -35,9 +35,6 @@ class Message(SpamMixin, db.EmbeddedDocument):
             return message
 
         message += f" sur la discussion « [{discussion.title}]({discussion.external_url}) »"
-        if discussion.user:
-            message += f" de [{discussion.user.fullname}]({discussion.user.external_url})"
-
         return message
 
 

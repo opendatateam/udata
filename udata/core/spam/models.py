@@ -97,7 +97,7 @@ class SpamMixin(object):
 
             # Language detection is not working well with texts of a few words.
             if SpamMixin.allowed_langs() and len(text) > SpamMixin.minimum_string_length_for_lang_check():
-                lang = detect(text)
+                lang = detect(text.lower())
                 if lang not in SpamMixin.allowed_langs():
                     self.spam.status = POTENTIAL_SPAM
                     self._report(text=text, breadcrumb=breadcrumb, reason=f"not allowed language \"{lang}\"")

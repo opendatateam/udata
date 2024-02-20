@@ -6,6 +6,8 @@
   - Organization can nom define a custom metadata of a choosen type
   - Dataset belonging to the organization can assign a value to the defined metadata
   - Metadata value must match the choosen type by the organization
+- Better reporting in spam detection (show the writer of the discussion/message) [#2965](https://github.com/opendatateam/udata/pull/2965)
+- Fix: spam lang detection not lowering input resulting in false positives [#2965](https://github.com/opendatateam/udata/pull/2965)
 
 ## 7.0.3 (2024-02-15)
 
