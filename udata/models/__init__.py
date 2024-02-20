@@ -17,7 +17,7 @@ from udata.errors import ConfigError
 from .badges_field import BadgesField
 from .taglist_field import TagListField
 from .datetime_fields import DateField, DateRange, Datetimed
-from .extras_fields import ExtrasField
+from .extras_fields import ExtrasField, OrganizationExtrasField
 from .slug_fields import SlugField
 from .url_field import URLField
 from .uuid_fields import AutoUUIDField
@@ -26,7 +26,6 @@ from .queryset import UDataQuerySet
 from .document import UDataDocument, DomainModel
 
 log = logging.getLogger(__name__)
-
 
 class UDataMongoEngine(MongoEngine):
     '''Customized mongoengine with extra fields types and helpers'''
@@ -37,6 +36,7 @@ class UDataMongoEngine(MongoEngine):
         self.DateField = DateField
         self.Datetimed = Datetimed
         self.ExtrasField = ExtrasField
+        self.OrganizationExtrasField = OrganizationExtrasField
         self.SlugField = SlugField
         self.AutoUUIDField = AutoUUIDField
         self.Document = UDataDocument
@@ -98,6 +98,7 @@ from udata.core.topic.models import *  # noqa
 from udata.core.post.models import *  # noqa
 from udata.core.jobs.models import *  # noqa
 from udata.core.tags.models import *  # noqa
+from udata.core.spam.models import *  # noqa
 
 from udata.features.transfer.models import *  # noqa
 from udata.features.territories.models import *  # noqa

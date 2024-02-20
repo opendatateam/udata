@@ -22,6 +22,7 @@ class HarvestSourceFactory(ModelFactory):
     name = factory.Faker('name')
     url = factory.Faker('url')
     description = factory.Faker('text')
+    backend = 'factory'
 
 
 class HarvestJobFactory(ModelFactory):
