@@ -115,6 +115,7 @@ CLOSED_FORMATS = ('pdf', 'doc', 'docx', 'word', 'xls', 'excel', 'xlsx')
 MAX_DISTANCE = 2
 
 SCHEMA_CACHE_DURATION = 60 * 5  # In seconds
+IGNORED_SCHEMA_TYPES = ('datapackage', )
 
 TITLE_SIZE_LIMIT = 350
 DESCRIPTION_SIZE_LIMIT = 100000
@@ -955,6 +956,7 @@ class ResourceSchema(object):
                     'label': s['title'],
                     'versions': [d['version_name'] for d in s['versions']],
                 } for s in schemas
+                if s.get('schema_type') not in IGNORED_SCHEMA_TYPES
             ]
             cache.set(cache_key, content)
         # no cached version or no content
