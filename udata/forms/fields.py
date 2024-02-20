@@ -181,17 +181,14 @@ class BooleanField(FieldHelper, fields.BooleanField):
         super(BooleanField, self).__init__(*args, **kwargs)
 
     def process_formdata(self, valuelist):
+        # We override this so that when no value is provided
+        # the form doesn't think the value is `False` instead 
+        # the value is not present and the model can keep the
+        # existing value
         if not valuelist:
             return 
 
-        if valuelist[0] is None:
-            self.data = self.default
-            return
-
-        if valuelist[0] in self.false_values:
-            self.data = False
-        else:
-            self.data = True
+        super().process_formdata(valuelist)
 
 
 class RadioField(FieldHelper, fields.RadioField):

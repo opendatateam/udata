@@ -464,11 +464,26 @@ class DatasetAPITest(APITestCase):
         data = dataset.to_dict()
         data['description'] = 'new description'
         del data['private']
+
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert200(response)
-        self.assertEqual(Dataset.objects.count(), 1)
-        self.assertEqual(Dataset.objects.first().description, 'new description')
-        self.assertEqual(Dataset.objects.first().private, True)
+        dataset.reload()
+        self.assertEqual(dataset.description, 'new description')
+        self.assertEqual(dataset.private, True)
+        
+        data['private'] = None
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        self.assertEqual(dataset.private, False)
+
+        data['private'] = True
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        self.assertEqual(dataset.private, True)
+
+
 
     def test_dataset_api_update_new_resource_with_extras(self):
         '''It should update a dataset with a new resource with extras'''
