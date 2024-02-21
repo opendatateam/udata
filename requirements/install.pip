@@ -191,6 +191,8 @@ msgpack==0.6.2
     # via -r requirements/install.in
 netaddr==0.7.19
     # via -r requirements/install.in
+numpy==1.26.4
+    # via shapely
 passlib==1.7.4
     # via flask-security-too
 pillow==9.2.0
@@ -234,6 +236,8 @@ requests==2.24.0
     # via -r requirements/install.in
 s3transfer==0.6.0
     # via boto3
+shapely==2.0.3
+    # via -r requirements/install.in
 simplejson==3.17.0
     # via -r requirements/install.in
 six==1.16.0
