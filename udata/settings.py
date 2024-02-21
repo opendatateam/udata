@@ -422,7 +422,7 @@ class Defaults(object):
 
     # Schemas parameters
     ####################
-    SCHEMA_CATALOG_URL = None
+    SCHEMA_CATALOG_URL = 'https://schema.data.gouv.fr/schemas/schemas.json'
 
     API_DOC_EXTERNAL_LINK = 'https://guides.data.gouv.fr/publier-des-donnees/guide-data.gouv.fr/api/reference'
 
