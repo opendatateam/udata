@@ -192,13 +192,21 @@ class Schema(db.EmbeddedDocument):
             # Nothing more to do since an URL can point to anywhere and have a random name/version
             return
 
+        # All the following checks are only run if there is 
+        # some schemas in the catalog. If there is no catalog
+        # or no schema in the catalog we do not check the validity
+        # of the name and version
+        catalog_schemas = ResourceSchema.all()
+        if not catalog_schemas:
+            return
+
         # We know this schema so we can do some checks
         existing_schema = ResourceSchema.get_schema_by_name(self.name)
         if not existing_schema:
             message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}')
             raise FieldValidationError(message.format(
                 schema=self.name,
-                values=', '.join(map(lambda schema: schema['name'], ResourceSchema.all()))
+                values=', '.join(map(lambda schema: schema['name'], catalog_schemas))
             ), field='name')
 
         if self.version:
