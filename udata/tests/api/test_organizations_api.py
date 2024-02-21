@@ -1,3 +1,4 @@
+import json
 import pytest
 
 from datetime import datetime
@@ -5,13 +6,14 @@ from datetime import datetime
 from flask import url_for
 
 from udata.models import (
-    Organization, Member, MembershipRequest, Follow, Discussion
+    Organization, Member, MembershipRequest, Follow, Discussion, Team
 )
 
 from udata.utils import faker
 from udata.core.badges.factories import badge_factory
 from udata.core.badges.signals import on_badge_added, on_badge_removed
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.team.factories import TeamFactory
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
@@ -870,3 +872,46 @@ class OrganizationContactPointsAPITest:
 
         assert response.json['data'][0]['name'] == data['name']
         assert response.json['data'][0]['email'] == data['email']
+
+
+class OrganizationTeamsAPITest:
+    modules = []
+
+    def test_get(self, api):
+        '''It should fetch a team from the API'''
+        user = api.login()
+        member = Member(user=user, role='admin')
+        org = OrganizationFactory(members=[member])
+        team = TeamFactory(members=[user])
+        org.teams.append(team)
+        org.save()
+        response = api.get(url_for('api.team', org=org, team=team))
+        assert200(response)
+        data = json.loads(response.data)
+        assert data['name'] == team.name
+
+    def test_create(self, api):
+        user = api.login()
+        member = Member(user=user, role='admin')
+        org = OrganizationFactory(members=[member])
+        data = TeamFactory.as_dict()
+        response = api.post(url_for('api.teams', org=org), data)
+        assert201(response)
+        org.reload()
+        assert len(org.teams) == 1
+        assert org.teams[0].name == data['name']
+        assert Team.objects.first().name == data['name']
+
+    def test_delete(self, api):
+        user = api.login()
+        member = Member(user=user, role='admin')
+        org = OrganizationFactory(members=[member])
+        team = TeamFactory(members=[user])
+        org.teams.append(team)
+        org.save()
+
+        response = api.delete(url_for('api.team', org=org, team=team))
+        assert204(response)
+        org.reload()
+        assert len(org.teams) == 0
+        assert Team.objects.first() == None

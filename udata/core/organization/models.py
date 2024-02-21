@@ -13,7 +13,7 @@ from udata.uris import endpoint_for
 
 
 __all__ = (
-    'Organization', 'Team', 'Member', 'MembershipRequest',
+    'Organization', 'Member', 'MembershipRequest',
     'ORG_ROLES', 'MEMBERSHIP_STATUS', 'PUBLIC_SERVICE', 'CERTIFIED'
 )
 
@@ -43,15 +43,10 @@ DESCRIPTION_SIZE_LIMIT = 100000
 ORG_BID_SIZE_LIMIT = 14
 
 
-class Team(db.EmbeddedDocument):
-    name = db.StringField(required=True)
-    slug = db.SlugField(
-        max_length=255, required=True, populate_from='name', update=True,
-        unique=False)
-    description = db.StringField()
-
-    members = db.ListField(db.ReferenceField('User'))
-
+# Si dataset a un owner -> verifie que c'est bien l'utilisateur
+# Si dataset dans orga:
+# Si admin c'est bon
+# Sinon voir si dans la bonne équipe correspondante au dataset
 
 class Member(db.EmbeddedDocument):
     user = db.ReferenceField('User')
@@ -109,8 +104,8 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     business_number_id = db.StringField(max_length=ORG_BID_SIZE_LIMIT)
 
     members = db.ListField(db.EmbeddedDocumentField(Member))
-    teams = db.ListField(db.EmbeddedDocumentField(Team))
     requests = db.ListField(db.EmbeddedDocumentField(MembershipRequest))
+    teams = db.ListField(db.ReferenceField('Team'))
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     zone = db.StringField()

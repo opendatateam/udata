@@ -149,6 +149,10 @@ class ContactPointConverter(ModelConverter):
     model = models.ContactPoint
 
 
+class TeamConverter(ModelConverter):
+    model = models.Team
+
+
 class TerritoryConverter(PathConverter):
     DEFAULT_PREFIX = 'fr'  # TODO: make it a setting parameter
 
@@ -224,6 +228,7 @@ def init_app(app):
     app.url_map.converters['dataset'] = DatasetConverter
     app.url_map.converters['crid'] = CommunityResourceConverter
     app.url_map.converters['org'] = OrganizationConverter
+    app.url_map.converters['team'] = TeamConverter
     app.url_map.converters['reuse'] = ReuseConverter
     app.url_map.converters['user'] = UserConverter
     app.url_map.converters['topic'] = TopicConverter

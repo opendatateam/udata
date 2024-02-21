@@ -2,7 +2,7 @@ import logging
 
 from blinker import signal
 from mongoengine import NULLIFY, Q, post_save
-from mongoengine.fields import ReferenceField
+from mongoengine.fields import ReferenceField, ListField
 
 from .queryset import UDataQuerySet
 
@@ -23,6 +23,7 @@ class Owned(object):
     '''
     owner = ReferenceField('User', reverse_delete_rule=NULLIFY)
     organization = ReferenceField('Organization', reverse_delete_rule=NULLIFY)
+    teams = ListField(ReferenceField('Team', reverse_delete_rule=NULLIFY))
 
     on_owner_change = signal('Owned.on_owner_change')
 
@@ -30,10 +31,11 @@ class Owned(object):
         'indexes': [
             'owner',
             'organization',
+            'teams',
         ],
         'queryset_class': OwnedQuerySet,
     }
-
+    # TODO: Update clean with teams validation
     def clean(self):
         '''
         Verify owner consistency and fetch original owner before the new one erase it.

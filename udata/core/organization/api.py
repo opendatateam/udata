@@ -8,6 +8,10 @@ from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission, current_user
 from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
+from udata.core.user.api_fields import user_fields
+from udata.core.team.api_fields import team_fields
+from udata.core.team.forms import TeamForm
+from udata.core.team.models import Team
 from udata.utils import multi_to_dict
 from udata.rdf import (
     RDF_EXTENSIONS, negociate_content, graph_response
@@ -379,6 +383,89 @@ class MemberAPI(API):
             Organization.objects(id=org.id).update_one(pull__members=member)
             org.reload()
             org.count_members()
+            return '', 204
+        else:
+            api.abort(404)
+
+
+@ns.route('/<org:org>/teams/', endpoint='teams')
+class TeamsAPI(API):
+    @api.secure
+    @api.expect(team_fields)
+    @api.marshal_with(team_fields, code=201)
+    @api.doc('create_organization_team')
+    @api.response(403, 'Not Authorized')
+    @api.response(409, 'Team already exists', team_fields)
+    def post(self, org):
+        '''Create a team for a given organization.'''
+        EditOrganizationPermission(org).test()
+        form = api.validate(TeamForm)
+        team = Team()
+        form.populate_obj(team)
+        org.teams.append(team)
+        team.save()
+        org.save()
+        return team, 201
+
+
+@ns.route('/<org:org>/teams/<team:team>/', endpoint='team')
+class TeamAPI(API):
+    @api.doc('get_team')
+    @api.marshal_with(team_fields)
+    def get(self, org, team):
+        '''Get a team given its identifier'''
+        if org.deleted:
+            api.abort(410, 'Organization has been deleted')
+        return team
+
+    @api.secure
+    @api.doc('update_team')
+    @api.expect(team_fields)
+    @api.marshal_with(team_fields)
+    def put(self, org, team):
+        '''Update a given team on a given organization'''
+        EditOrganizationPermission(org).test()
+        form = api.validate(TeamForm, team)
+        form.populate_obj(team)
+        team.save()
+        return team
+
+    @api.secure
+    @api.doc('delete_team')
+    def delete(self, org, team):
+        '''Delete a given team on a given organization'''
+        EditOrganizationPermission(org).test()
+        org.teams.remove(team)
+        org.save()
+        team.delete()
+        return '', 204
+
+
+@ns.route('/<org:org>/teams/<team:team>/member/<user:user>', endpoint='team_member')
+class TeamMemberAPI(API):
+    @api.secure
+    @api.marshal_with(user_fields, code=201)
+    @api.doc('create_organization_team_member')
+    def post(self, org, team, user):
+        '''Add a member into a given organization's team'''
+        EditOrganizationPermission(org).test()
+        if not org.is_member(user):
+            api.abort(403, 'User is not a member of the organization')
+        team.members.append(user)
+        team.save()
+        return user, 201
+
+    @api.secure
+    @api.doc('delete_organization_team_member')
+    def delete(self, org, team, user):
+        '''Delete member from an organization's team'''
+        EditOrganizationPermission(org).test()
+        if not org.is_member(user):
+            api.abort(403, 'User is not a member of the organization')
+        member = team.member(user)
+        if member:
+            team.remove(user)
+            team.save()
             return '', 204
         else:
             api.abort(404)
