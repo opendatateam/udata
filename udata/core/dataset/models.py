@@ -195,7 +195,7 @@ class Schema(db.EmbeddedDocument):
         # All the following checks are only run if there is 
         # some schemas in the catalog. If there is no catalog
         # or no schema in the catalog we do not check the validity
-        # of the name/url/version
+        # of the name and version
         catalog_schemas = ResourceSchema.all()
         if not catalog_schemas:
             return
