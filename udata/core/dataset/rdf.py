@@ -17,7 +17,7 @@ from udata.frontend.markdown import parse_html
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.models import db, ContactPoint
 from udata.rdf import (
-    DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD,
+    DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD, RDFS,
     namespace_manager, url_from_rdf
 )
 from udata.utils import get_by, safe_unicode
@@ -513,6 +513,14 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
     if temporal_coverage:
         dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
+
+    # Adding some metadata to extras - may be moved to property if relevant
+    access_rights = rdf_value(d, DCT.accessRights)
+    if access_rights:
+        dataset.extras["harvest:dct:accessRights"] = access_rights
+    provenance = [p.value(RDFS.label) for p in d.objects(DCT.provenance)]
+    if provenance:
+        dataset.extras["harvest:dct:provenance"] = provenance
 
     licenses = set()
     for distrib in d.objects(DCAT.distribution | DCAT.distributions):
