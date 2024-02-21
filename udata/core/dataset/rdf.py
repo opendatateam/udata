@@ -517,10 +517,16 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     # Adding some metadata to extras - may be moved to property if relevant
     access_rights = rdf_value(d, DCT.accessRights)
     if access_rights:
-        dataset.extras["harvest:dct:accessRights"] = access_rights
+        dataset.extras["harvest"] = {
+            "dct:accessRights": access_rights,
+            **dataset.extras.get("harvest", {})
+        }
     provenance = [p.value(RDFS.label) for p in d.objects(DCT.provenance)]
     if provenance:
-        dataset.extras["harvest:dct:provenance"] = provenance
+        dataset.extras["harvest"] = {
+            "dct:provenance": provenance,
+            **dataset.extras.get("harvest", {})
+        }
 
     licenses = set()
     for distrib in d.objects(DCAT.distribution | DCAT.distributions):
