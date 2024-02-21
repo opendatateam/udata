@@ -8,6 +8,7 @@
   - Dataset belonging to the organization can assign a value to the defined metadata
   - Metadata value must match the choosen type by the organization
 - Harvest DCAT conformsTo into schemas for resources and datasets
+- Do not check schema's name/version validity if no catalog or empty catalog [#2970](https://github.com/opendatateam/udata/pull/2970)
 - Better reporting in spam detection (show the writer of the discussion/message) [#2965](https://github.com/opendatateam/udata/pull/2965)
 - Fix: spam lang detection not lowering input resulting in false positives [#2965](https://github.com/opendatateam/udata/pull/2965)
 - Fix: do not send mail about discussions when there is no owner / no organisation members [#2962](https://github.com/opendatateam/udata/pull/2962)
