@@ -1,5 +1,4 @@
 import logging
-import mongoengine
 
 from datetime import datetime, timedelta
 from collections import OrderedDict
@@ -15,11 +14,12 @@ from pydoc import locate
 from stringdist import rdlevenshtein
 from werkzeug.utils import cached_property
 import requests
+from typing import Optional, Tuple
 
 from udata.app import cache
 from udata.core import storages
 from udata.frontend.markdown import mdstrip
-from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
+from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage, FieldValidationError
 from udata.i18n import lazy_gettext as _
 from udata.utils import get_by, hash_url, to_naive_datetime
 from udata.uris import ValidationError, endpoint_for
@@ -31,7 +31,7 @@ from .exceptions import (
 )
 
 __all__ = (
-    'License', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
+    'License', 'Resource', 'Schema', 'Dataset', 'Checksum', 'CommunityResource',
     'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_FILETYPES',
     'PIVOTAL_DATA', 'DEFAULT_LICENSE', 'RESOURCE_TYPES',
     'ResourceSchema'
@@ -149,6 +149,71 @@ class HarvestResourceMetadata(DynamicEmbeddedDocument):
     created_at = db.DateTimeField()
     modified_at = db.DateTimeField()
     uri = db.StringField()
+
+
+class Schema(db.EmbeddedDocument):
+    """
+    Schema can only be two things right now:
+    - Known schema: url is not set, name is set, version is maybe set
+    - Unknown schema: url is set, name and version are maybe set
+    """
+    url = db.URLField()
+    name = db.StringField()
+    version = db.StringField()
+
+    def __bool__(self):
+        """
+        In the database, since the schemas were only simple dicts, there is
+        empty `{}` stored. To prevent problems with converting to bool
+        (bool({}) and default bool(Schema) do not yield the same value), we transform
+        empty Schema() to False.
+        It's maybe not necessary but being paranoid here.
+        """
+        return bool(self.name) or bool(self.url)
+
+    def clean(self):
+        super().clean()
+
+        if not self.url and not self.name:
+            # There is no schema.
+            if self.version:
+                raise FieldValidationError(_('A schema must contains a name or an URL when a version is provided.'), field='version')
+
+            return
+
+        # First check if the URL is a known schema
+        if self.url:
+            info = ResourceSchema.get_existing_schema_info_by_url(self.url)
+            if info:
+                self.url = None
+                self.name = info[0]
+                self.version = info[1]
+            
+            # Nothing more to do since an URL can point to anywhere and have a random name/version
+            return
+
+        # We know this schema so we can do some checks
+        existing_schema = ResourceSchema.get_schema_by_name(self.name)
+        if not existing_schema:
+            message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}')
+            raise FieldValidationError(message.format(
+                schema=self.name,
+                values=', '.join(map(lambda schema: schema['name'], ResourceSchema.all()))
+            ), field='name')
+
+        if self.version:
+            allowed_versions = list(map(lambda version: version['version_name'], existing_schema['versions']))
+            allowed_versions.append('latest')
+
+            if self.version not in allowed_versions:
+                message = _(
+                    'Version "{version}" is not an allowed value for the schema "{name}". Allowed versions: {'
+                    'values}')
+                raise FieldValidationError(message.format(
+                    version=self.version,
+                    name=self.name,
+                    values=', '.join(allowed_versions)
+                ), field='version')
 
 
 class License(db.Document):
@@ -290,8 +355,8 @@ class ResourceMixin(object):
     fs_filename = db.StringField()
     extras = db.ExtrasField()
     harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)
-    schema = db.DictField()
-
+    schema = db.EmbeddedDocumentField(Schema)
+    
     created_at_internal = db.DateTimeField(default=datetime.utcnow, required=True)
     last_modified_internal = db.DateTimeField(default=datetime.utcnow, required=True)
     deleted = db.DateTimeField()
@@ -319,8 +384,6 @@ class ResourceMixin(object):
         super(ResourceMixin, self).clean()
         if not self.urlhash or 'url' in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
-        if self.schema and (not bool('name' in self.schema) ^ bool('url' in self.schema)):
-            raise MongoEngineValidationError('Schema must have at least a name or an url. Having both is not allowed.')
 
     @cached_property  # Accessed at least 2 times in front rendering
     def preview_url(self):
@@ -472,6 +535,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     frequency_date = db.DateTimeField(verbose_name=_('Future date of update'))
     temporal_coverage = db.EmbeddedDocumentField(db.DateRange)
     spatial = db.EmbeddedDocumentField(SpatialCoverage)
+    schema = db.EmbeddedDocumentField(Schema)
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()
@@ -921,11 +985,27 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
     def from_community(self):
         return True
 
-
 class ResourceSchema(object):
     @staticmethod
     @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
     def objects():
+        '''
+        This rewrite is used in API returns.
+        It could be possible in the future to change the API with a breaking change to return
+        the full schema information from the catalog.
+        '''
+        schemas = ResourceSchema.all()
+        return [
+            {
+                'id': s['name'],
+                'label': s['title'],
+                'versions': [d['version_name'] for d in s['versions']],
+            } for s in schemas
+        ]
+
+    @staticmethod
+    @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
+    def all():
         '''
         Get a list of schemas from a schema catalog endpoint.
 
@@ -946,24 +1026,39 @@ class ResourceSchema(object):
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             log.exception(f'Error while getting schema catalog from {endpoint}')
-            content = cache.get(cache_key)
+            schemas = cache.get(cache_key)
         else:
             schemas = response.json().get('schemas', [])
-            content = [
-                {
-                    'id': s['name'],
-                    'label': s['title'],
-                    'versions': [d['version_name'] for d in s['versions']],
-                } for s in schemas
-            ]
-            cache.set(cache_key, content)
+            cache.set(cache_key, schemas)
         # no cached version or no content
-        if not content:
+        if not schemas:
             log.error(f'No content found inc. from cache for schema catalog')
             raise SchemasCacheUnavailableException('No content in cache for schema catalog')
-        return content
 
+        return schemas
 
+    def get_schema_by_name(name: str):
+        for schema in ResourceSchema.all():
+            if schema['name'] == name:
+                return schema
+
+    def get_existing_schema_info_by_url(url: str) -> Optional[Tuple[str, Optional[str]]]:
+        '''
+        Returns the name and the version if exists
+        '''
+        for schema in ResourceSchema.all():
+            for version in schema['versions']:
+                if version['schema_url'] == url:
+                    return schema['name'], version['version_name']
+
+            if schema['schema_url'] == url:
+                # The main schema URL is often the 'latest' version but
+                # not sure if it's mandatory everywhere so set the version to
+                # None here.
+                return schema['name'], None
+
+        return None
+    
 def get_resource(id):
     '''Fetch a resource given its UUID'''
     dataset = Dataset.objects(resources__id=id).first()
