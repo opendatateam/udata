@@ -8,12 +8,13 @@ from flask_restx.reqparse import RequestParser
 from unittest.mock import patch
 
 from udata import search
+from udata.core.dataset.models import Schema
 from udata.i18n import gettext as _
 from udata.utils import clean_string
 from udata.search import reindex, as_task_param
 from udata.search.commands import index_model
 from udata.core.dataset.search import DatasetSearch
-from udata.core.dataset.factories import DatasetFactory, VisibleDatasetFactory
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory, VisibleDatasetFactory
 from udata.tests.api import APITestCase
 
 from . import FakeSearch
@@ -118,7 +119,8 @@ class IndexingLifecycleTest(APITestCase):
 
     @patch('requests.post')
     def test_producer_should_send_a_message_with_payload_if_indexable(self, mock_req):
-        fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211')
+        resource = ResourceFactory(schema=Schema(url="http://localhost/my-schema"))
+        fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211', resources=[resource])
 
         reindex.run(*as_task_param(fake_data))
 
