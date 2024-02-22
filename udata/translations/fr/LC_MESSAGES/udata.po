@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2024-02-22 16:16+0100\n"
-"PO-Revision-Date: 2024-02-22 16:17\n"
+"PO-Revision-Date: 2024-02-22 17:13\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -204,15 +204,15 @@ msgstr "Valeur de la somme de contrôle"
 
 #: udata/core/dataset/forms.py:35
 msgid "URL of the schema"
-msgstr ""
+msgstr "URL du schéma"
 
 #: udata/core/dataset/forms.py:36
 msgid "Name of the schema"
-msgstr ""
+msgstr "Nom du schéma"
 
 #: udata/core/dataset/forms.py:37
 msgid "Version of the schema"
-msgstr ""
+msgstr "Version du schéma"
 
 #: udata/core/dataset/forms.py:54 udata/core/dataset/forms.py:122
 #: udata/core/discussions/forms.py:12 udata/core/reuse/forms.py:19
@@ -276,7 +276,7 @@ msgstr "Jeu de données concerné"
 
 #: udata/core/dataset/forms.py:115
 msgid "Wrong contact point id or contact point ownership mismatch"
-msgstr ""
+msgstr "Mauvais ID de point de contact ou incompatibilité de possession du point de contact"
 
 #: udata/core/dataset/forms.py:123 udata/core/organization/forms.py:49
 msgid "Acronym"
@@ -475,7 +475,7 @@ msgstr "Fichier distant"
 
 #: udata/core/dataset/models.py:187
 msgid "A schema must contains a name or an URL when a version is provided."
-msgstr ""
+msgstr "Un schéma doit contenir un nom ou une URL lorsqu'une version est fournie."
 
 #: udata/core/dataset/models.py:213 udata/tests/api/test_datasets_api.py:745
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
@@ -483,7 +483,7 @@ msgstr "Le nom du schéma \"{schema}\" n'est pas une valeur autorisée. Valeurs 
 
 #: udata/core/dataset/models.py:224 udata/tests/api/test_datasets_api.py:751
 msgid "Version \"{version}\" is not an allowed value for the schema \"{name}\". Allowed versions: {values}"
-msgstr ""
+msgstr "La version \"{version}\" n'est pas une valeur autorisée pour le schéma \"{name}\". Versions autorisées : {values}"
 
 #: udata/core/dataset/models.py:475 udata/core/dataset/rdf.py:397
 #: udata/tests/dataset/test_dataset_rdf.py:499
