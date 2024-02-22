@@ -27,6 +27,7 @@ class OrganizationCSVAdapterTest:
             }),
             ResourceFactory(),
         ])
+        DatasetFactory(organization=org_with_dataset, resources=[])
         adapter = OrganizationCsvAdapter(Organization.objects.all())
 
         # Build a dict (Org ID to dict of header name to value) from the CSV values and headers to simplify testing below.
