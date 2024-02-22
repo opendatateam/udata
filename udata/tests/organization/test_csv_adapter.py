@@ -18,7 +18,7 @@ class OrganizationCSVAdapterTest:
         org_with_dataset = OrganizationFactory()
         org_without_dataset = OrganizationFactory()
 
-        resources_dataset = DatasetFactory(organization=org_with_dataset, resources=[
+        DatasetFactory(organization=org_with_dataset, resources=[
             ResourceFactory(metrics={
                 'views': 42,
             }),
@@ -29,7 +29,7 @@ class OrganizationCSVAdapterTest:
         ])
         adapter = OrganizationCsvAdapter(Organization.objects.all())
 
-        # Build a dict (Dataset ID to dict of header name to value) from the CSV values and headers to simplify testing below.
+        # Build a dict (Org ID to dict of header name to value) from the CSV values and headers to simplify testing below.
         csv = {}
         for row in adapter.rows():
             values = dict(zip(adapter.header(), row))
