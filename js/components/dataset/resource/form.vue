@@ -329,7 +329,7 @@ export default {
             let el = this.$refs.form.$form.querySelector("select[name='schema.name']");
             if (! el) return {}
 
-            return el.value ? { schema: { name: el.value } } : { schema: null };
+            return { schema: { name: el.value ? el.value : null } };
         },
         validate() {
             return this.$refs.form.validate();
