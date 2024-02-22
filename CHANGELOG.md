@@ -16,6 +16,7 @@
 - Add harvested dcat properties as extras [#2968](https://github.com/opendatateam/udata/pull/2968):
   - DCT.provenance [0..n]
   - DCT.accessRights [0..1]
+- Generate translations file [#2974](https://github.com/opendatateam/udata/pull/2974)
 
 ## 7.0.3 (2024-02-15)
 
