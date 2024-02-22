@@ -7,11 +7,11 @@ from mongoengine import post_save, ValidationError
 
 from udata.app import cache
 from udata.models import (
-    db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchema, UPDATE_FREQUENCIES
+    db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchema, UPDATE_FREQUENCIES, Schema, FieldValidationError
 )
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.dataset.factories import (
-    ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory
+    ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory, ResourceSchemaMockData
 )
 from udata.core.dataset.exceptions import (
     SchemasCatalogNotFoundException, SchemasCacheUnavailableException
@@ -575,46 +575,38 @@ class ResourceSchemaTest:
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_resource_schema_objects_w_cache(self, rmock, mocker):
         cache_mock_set = mocker.patch.object(cache, 'set')
-        mocker.patch.object(cache, 'get', return_value='dummy_from_cache')
 
         # fill cache
-        rmock.get('https://example.com/schemas', json={
-            "schemas": [
-                {
-                    "name": "etalab/schema-irve",
-                    "title": "Schéma IRVE",
-                    "versions": [
-                        {
-                            "version_name": "1.0.0"
-                        },
-                        {
-                            "version_name": "1.0.1"
-                        },
-                        {
-                            "version_name": "1.0.2"
-                        }
-                    ]
-                }
-            ]
-        })
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
         ResourceSchema.objects()
         assert cache_mock_set.called
 
+        mocker.patch.object(cache, 'get', return_value=ResourceSchemaMockData.get_mock_data()['schemas'])
         rmock.get('https://example.com/schemas', status_code=500)
-        assert 'dummy_from_cache' == ResourceSchema.objects()
+        assert ResourceSchemaMockData.get_expected_v1_result_from_mock_data() == ResourceSchema.objects()
         assert rmock.call_count == 2
 
-    def test_resource_schema_validation(self):
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
+    def test_resource_schema_validation(self, rmock):
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
+
         resource = ResourceFactory()
 
-        resource.schema = {'name': 'etalab/schema-irve'}
+        resource.schema = Schema(name='etalab/schema-irve-statique')
         resource.validate()
 
-        resource.schema = {'url': 'https://example.com'}
+        resource.schema = Schema(url='https://example.com')
         resource.validate()
 
-        resource.schema = {'name': 'etalab/schema-irve', 'url': 'https://example.com'}
-        with pytest.raises(ValidationError):
+        resource.schema = Schema(name='some-name', url='https://example.com')
+        resource.validate()
+
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(name='etalab/schema-irve-statique', version='1337.42.0')
+            resource.validate()
+
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(version='2.0.0')
             resource.validate()
 
 

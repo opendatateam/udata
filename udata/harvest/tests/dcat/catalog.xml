@@ -3,6 +3,7 @@
   xmlns:foaf="http://xmlns.com/foaf/0.1/"
   xmlns:owl="http://www.w3.org/2002/07/owl#"
   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
   xmlns:dcat="http://www.w3.org/ns/dcat#"
   xmlns:dct="http://purl.org/dc/terms/"
   xmlns:dcterms="http://purl.org/dc/terms/"
@@ -24,6 +25,7 @@
         <dcat:keyword>Tag 1</dcat:keyword>
         <dcat:distribution rdf:resource="datasets/3/resources/1"/>
         <dct:license>Licence Ouverte Version 2.0</dct:license>
+        <dct:accessRights rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1e"/>
         <dcat:landingPage>http://data.test.org/datasets/3</dcat:landingPage>
         <dct:accrualPeriodicity xmlns:dct="http://purl.org/dc/terms/">daily</dct:accrualPeriodicity>
         <dct:temporal>
@@ -32,6 +34,11 @@
             <schema:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-05T00:00:00</schema:endDate>
           </dcterms:PeriodOfTime>
         </dct:temporal>
+        <dct:provenance>
+          <dct:ProvenanceStatement>
+            <rdfs:label xml:lang="fr">Description de la provenance des données</rdfs:label>
+          </dct:ProvenanceStatement>
+        </dct:provenance>
       </dcat:Dataset>
     </dcat:dataset>
     <dcterms:title>Sample DCAT Catalog</dcterms:title>
