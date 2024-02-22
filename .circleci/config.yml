@@ -26,6 +26,7 @@ jobs:
           name: Install python dependencies
           # FIXME: For now, we fix setuptools due to https://github.com/etalab/data.gouv.fr/issues/1041
           command: |
+            python --version
             virtualenv venv
             source venv/bin/activate
             pip install --force-reinstall setuptools==66.1.1
