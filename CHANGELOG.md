@@ -13,6 +13,9 @@
 - Fix: do not send mail about discussions when there is no owner / no organisation members [#2962](https://github.com/opendatateam/udata/pull/2962)
 - Fix: 'backend' is now required in `HarvestSource` [#2962](https://github.com/opendatateam/udata/pull/2962)
 - Fix: URL to organizations in mails are now independent from `udata-front` (show the URL of the API if no `udata-front`) [#2962](https://github.com/opendatateam/udata/pull/2962)
+- Add harvested dcat properties as extras [#2968](https://github.com/opendatateam/udata/pull/2968):
+  - DCT.provenance [0..n]
+  - DCT.accessRights [0..1]
 
 ## 7.0.3 (2024-02-15)
 

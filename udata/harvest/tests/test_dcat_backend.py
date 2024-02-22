@@ -335,6 +335,9 @@ class DcatBackendTest:
         assert dataset.temporal_coverage.start == date(2016, 1, 1)
         assert dataset.temporal_coverage.end == date(2016, 12, 5)
 
+        assert dataset.extras["harvest"]["dct:accessRights"] == "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1e"
+        assert dataset.extras["harvest"]["dct:provenance"] == ["Description de la provenance des données"]
+
         dataset = Dataset.objects.get(harvest__dct_identifier='1')
         # test html abstract description support
         assert dataset.description == '# h1 title\n\n## h2 title\n\n **and bold text**'
