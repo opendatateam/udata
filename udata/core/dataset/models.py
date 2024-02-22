@@ -171,6 +171,13 @@ class Schema(db.EmbeddedDocument):
         """
         return bool(self.name) or bool(self.url)
 
+    def to_dict(self):
+        return {
+            'url': self.url,
+            'name': self.name,
+            'version': self.version,
+        }
+
     def clean(self):
         super().clean()
 
