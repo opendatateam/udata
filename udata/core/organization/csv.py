@@ -21,8 +21,11 @@ class OrganizationCsvAdapter(csv.Adapter):
     )
 
     def dynamic_fields(self):
-        self.get_downloads_counts()
-        return csv.metric_fields(Organization)
+        return csv.metric_fields(Organization) | self.get_dynamic_field_downloads()
+    
+    def get_dynamic_field_downloads(self):
+        downloads_counts = self.get_downloads_counts()
+        return { 'downloads': lambda o: downloads_counts[o.id] }
     
     def get_downloads_counts(self):
         if self.downloads_counts is not None:
@@ -37,4 +40,4 @@ class OrganizationCsvAdapter(csv.Adapter):
 
             self.downloads_counts[dataset.organization] += sum(resource.metrics.get('views', 0) for resource in dataset.resources)
 
-        return {}
+        return self.downloads_counts
