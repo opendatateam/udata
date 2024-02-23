@@ -17,6 +17,7 @@
   - DCT.provenance [0..n]
   - DCT.accessRights [0..1]
 - Generate translations file [#2974](https://github.com/opendatateam/udata/pull/2974)
+- Fix contact point test with missing translation [#2977](https://github.com/opendatateam/udata/pull/2977)
 
 ## 7.0.3 (2024-02-15)
 
