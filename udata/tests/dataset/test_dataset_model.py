@@ -601,14 +601,37 @@ class ResourceSchemaTest:
         resource.schema = Schema(name='some-name', url='https://example.com')
         resource.validate()
 
-        with pytest.raises(db.ValidationError):
-            resource.schema = Schema(name='etalab/schema-irve-statique', version='1337.42.0')
-            resource.validate()
+        resource.schema = Schema(name='etalab/schema-irve-statique')
+        resource.schema.clean(check_schema_in_catalog=True)
+
+        resource.schema = Schema(url='https://example.com')
+        resource.schema.clean(check_schema_in_catalog=True)
+
+        resource.schema = Schema(name='some-name', url='https://example.com')
+        resource.schema.clean(check_schema_in_catalog=True)
+
+        # Check that no exception is raised when we do not ask for schema check for schema errors
+        resource.schema = Schema(name='some-name')
+        resource.validate()
+
+        resource.schema = Schema(name='etalab/schema-irve-statique', version='1337.42.0')
+        resource.validate()
 
         with pytest.raises(db.ValidationError):
             resource.schema = Schema(version='2.0.0')
             resource.validate()
 
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(name='some-name')
+            resource.schema.clean(check_schema_in_catalog=True)
+
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(name='etalab/schema-irve-statique', version='1337.42.0')
+            resource.schema.clean(check_schema_in_catalog=True)
+
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(version='2.0.0')
+            resource.schema.clean(check_schema_in_catalog=True)
 
 class HarvestMetadataTest:
     def test_harvest_dataset_metadata_validate_success(self):
