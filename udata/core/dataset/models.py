@@ -211,10 +211,12 @@ class Schema(db.EmbeddedDocument):
         existing_schema = ResourceSchema.get_schema_by_name(self.name)
         if not existing_schema:
             message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}')
-            raise FieldValidationError(message.format(
-                schema=self.name,
-                values=', '.join(map(lambda schema: schema['name'], catalog_schemas))
-            ), field='name')
+            log.warning(message)
+            return
+            # raise FieldValidationError(message.format(
+            #     schema=self.name,
+            #     values=', '.join(map(lambda schema: schema['name'], catalog_schemas))
+            # ), field='name')
 
         if self.version:
             allowed_versions = list(map(lambda version: version['version_name'], existing_schema['versions']))
@@ -224,11 +226,13 @@ class Schema(db.EmbeddedDocument):
                 message = _(
                     'Version "{version}" is not an allowed value for the schema "{name}". Allowed versions: {'
                     'values}')
-                raise FieldValidationError(message.format(
-                    version=self.version,
-                    name=self.name,
-                    values=', '.join(allowed_versions)
-                ), field='version')
+                log.warning(message)
+                return
+                # raise FieldValidationError(message.format(
+                #     version=self.version,
+                #     name=self.name,
+                #     values=', '.join(allowed_versions)
+                # ), field='version')
 
 
 class License(db.Document):
