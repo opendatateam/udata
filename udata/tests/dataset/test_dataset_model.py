@@ -601,9 +601,13 @@ class ResourceSchemaTest:
         resource.schema = Schema(name='some-name', url='https://example.com')
         resource.validate()
 
-        # with pytest.raises(db.ValidationError):
-        resource.schema = Schema(name='etalab/schema-irve-statique', version='1337.42.0')
-        resource.validate()
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(name='some-name')
+            resource.validate()
+
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(name='etalab/schema-irve-statique', version='1337.42.0')
+            resource.validate()
 
         with pytest.raises(db.ValidationError):
             resource.schema = Schema(version='2.0.0')

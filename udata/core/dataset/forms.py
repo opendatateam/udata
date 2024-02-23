@@ -40,7 +40,7 @@ class SchemaForm(ModelForm):
         validation = super().validate(extra_validators)
 
         try:
-            Schema(url=self.url.data, name=self.name.data, version=self.version.data).clean()
+            Schema(url=self.url.data, name=self.name.data, version=self.version.data).clean(check_schema_in_catalog=True)
         except FieldValidationError as err:
             field = getattr(self, err.field)
             field.errors.append(err.message)

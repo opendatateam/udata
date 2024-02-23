@@ -178,8 +178,10 @@ class Schema(db.EmbeddedDocument):
             'version': self.version,
         }
 
-    def clean(self):
+    def clean(self, **kwargs):
         super().clean()
+
+        check_schema_in_catalog = kwargs.get('check_schema_in_catalog', False)
 
         if not self.url and not self.name:
             # There is no schema.
@@ -211,12 +213,14 @@ class Schema(db.EmbeddedDocument):
         existing_schema = ResourceSchema.get_schema_by_name(self.name)
         if not existing_schema:
             message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}')
-            log.warning(message)
-            return
-            # raise FieldValidationError(message.format(
-            #     schema=self.name,
-            #     values=', '.join(map(lambda schema: schema['name'], catalog_schemas))
-            # ), field='name')
+            if check_schema_in_catalog:
+                raise FieldValidationError(message.format(
+                    schema=self.name,
+                    values=', '.join(map(lambda schema: schema['name'], catalog_schemas))
+                ), field='name')
+            else:
+                log.warning(message)
+                return
 
         if self.version:
             allowed_versions = list(map(lambda version: version['version_name'], existing_schema['versions']))
@@ -226,13 +230,15 @@ class Schema(db.EmbeddedDocument):
                 message = _(
                     'Version "{version}" is not an allowed value for the schema "{name}". Allowed versions: {'
                     'values}')
-                log.warning(message)
-                return
-                # raise FieldValidationError(message.format(
-                #     version=self.version,
-                #     name=self.name,
-                #     values=', '.join(allowed_versions)
-                # ), field='version')
+                if check_schema_in_catalog:
+                    raise FieldValidationError(message.format(
+                        version=self.version,
+                        name=self.name,
+                        values=', '.join(allowed_versions)
+                    ), field='version')
+                else:
+                    log.warning(message)
+                    return
 
 
 class License(db.Document):
