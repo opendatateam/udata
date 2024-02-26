@@ -914,4 +914,63 @@ class OrganizationTeamsAPITest:
         assert204(response)
         org.reload()
         assert len(org.teams) == 0
-        assert Team.objects.first() == None
+        assert Team.objects.first() is None
+
+    def test_add_dataset_to_team(self, api):
+        user = api.login()
+        member = Member(user=user, role='admin')
+        org = OrganizationFactory(members=[member])
+        team = TeamFactory(members=[user])
+        dataset = DatasetFactory(organization=org)
+        org.teams.append(team)
+        org.save()
+
+        response = api.post(url_for('api.team_datasets', org=org, team=team), {'datasets': [str(dataset.id)]})
+        assert201(response)
+        dataset.reload()
+        assert len(dataset.teams) == 1
+        assert dataset.teams[0].name == team.name
+
+    def test_add_dataset_to_team_failing(self, api):
+        user = api.login()
+        member = Member(user=user, role='admin')
+        org = OrganizationFactory(members=[member])
+        team = TeamFactory(members=[user])
+        dataset = DatasetFactory()
+        org.teams.append(team)
+        org.save()
+
+        response = api.post(url_for('api.team_datasets', org=org, team=team), {'datasets': [str(dataset.id)]})
+        assert403(response)
+
+    def test_delete_dataset_from_team(self, api):
+        user = api.login()
+        member = Member(user=user, role='admin')
+        org = OrganizationFactory(members=[member])
+        team = TeamFactory(members=[user])
+        dataset = DatasetFactory(organization=org)
+        org.teams.append(team)
+        org.save()
+
+        response = api.post(url_for('api.team_datasets', org=org, team=team), {'datasets': [str(dataset.id)]})
+        assert201(response)
+        dataset.reload()
+        assert len(dataset.teams) == 1
+        assert dataset.teams[0].name == team.name
+
+        response = api.delete(url_for('api.team_datasets', org=org, team=team), {'datasets': [str(dataset.id)]})
+        assert204(response)
+        dataset.reload()
+        assert len(dataset.teams) == 0
+
+    def test_delete_dataset_from_team_failing(self, api):
+        user = api.login()
+        member = Member(user=user, role='admin')
+        org = OrganizationFactory(members=[member])
+        team = TeamFactory(members=[user])
+        dataset = DatasetFactory(organization=org)
+        org.teams.append(team)
+        org.save()
+
+        response = api.delete(url_for('api.team_datasets', org=org, team=team), {'datasets': [str(dataset.id)]})
+        assert400(response)

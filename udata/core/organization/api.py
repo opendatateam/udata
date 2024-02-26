@@ -471,6 +471,48 @@ class TeamMemberAPI(API):
             api.abort(404)
 
 
+@ns.route('/<org:org>/teams/<team:team>/datasets', endpoint='team_datasets')
+class TeamDatasetAPI(API):
+    @api.secure
+    @api.marshal_with(team_fields, code=201)
+    @api.doc('create_organization_team_datasets')
+    def post(self, org, team):
+        '''Add a list of datasets to a organization's team'''
+        EditOrganizationPermission(org).test()
+        data = request.json
+        datasets = data.get('datasets', [])
+        for dataset_id in datasets:
+            dataset = Dataset.objects(id=dataset_id).first()
+            if not dataset:
+                api.abort(404, f'Dataset {dataset_id} not found')
+            if not dataset.organization == org:
+                api.abort(403, f'Dataset {dataset_id} is not part of the organization')
+            dataset.teams.append(team)
+            dataset.save()
+        return team, 201
+
+    @api.secure
+    @api.marshal_with(team_fields, code=201)
+    @api.doc('delete_organization_team_datasets')
+    def delete(self, org, team):
+        '''remove a list of datasets to a organization's team'''
+        EditOrganizationPermission(org).test()
+        data = request.json
+        datasets = data.get('datasets', [])
+        for dataset_id in datasets:
+            dataset = Dataset.objects(id=dataset_id).first()
+            if not dataset:
+                api.abort(404, f'Dataset {dataset_id} not found')
+            if not dataset.organization == org:
+                api.abort(403, f'Dataset {dataset_id} is not part of the organization')
+            try:
+                dataset.teams.remove(team)
+            except ValueError:
+                api.abort(400, f'Dataset {dataset_id} is not part of the team')
+            dataset.save()
+        return team, 204
+
+
 @ns.route('/<id>/followers/', endpoint='organization_followers')
 @ns.doc(get={'id': 'list_organization_followers'},
         post={'id': 'follow_organization'},
