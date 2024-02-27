@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 7.0.4 (2024-02-27)
 
 - Add rotate password command [#2966](https://github.com/opendatateam/udata/pull/2966)
