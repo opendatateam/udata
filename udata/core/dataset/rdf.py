@@ -349,7 +349,7 @@ def spatial_from_rdf(term):
                     continue
             elif object.datatype.__str__() == 'http://www.opengis.net/rdf#wktLiteral':
                 try:
-                    geojson = wkt.loads(object.toPython())
+                    geojson = wkt.loads(object.toPython().strip())
                 except ValueError as e:
                     log.warning(f"Invalid JSON in spatial WKT {object.toPython()} {e}")
                     continue
