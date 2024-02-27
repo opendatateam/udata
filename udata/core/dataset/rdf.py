@@ -352,7 +352,8 @@ def spatial_from_rdf(term):
                     continue
             elif object.datatype.__str__() == 'http://www.opengis.net/rdf#wktLiteral':
                 try:
-                    geojson = wkt.loads(object.toPython().strip())
+                    # .upper() si here because geomet doesn't support Polygon but only POLYGON
+                    geojson = wkt.loads(object.toPython().strip().upper())
                 except ValueError as e:
                     log.warning(f"Invalid JSON in spatial WKT {object.toPython()} {e}")
                     continue
