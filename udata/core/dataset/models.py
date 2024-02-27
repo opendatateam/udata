@@ -594,6 +594,15 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
                 or self.archived)
 
     @property
+    def is_user_in_dataset_team(self, user):
+        permission = False
+        if self.organization:
+            for team in self.teams:
+                if team.is_member(user):
+                    permission = True
+        return permission
+
+    @property
     def full_title(self):
         if not self.acronym:
             return self.title
