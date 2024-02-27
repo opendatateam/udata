@@ -13,6 +13,7 @@ from geomet import wkt
 from rdflib import Graph, URIRef, Literal, BNode
 from rdflib.resource import Resource as RdfResource
 from rdflib.namespace import RDF
+from mongoengine.errors import ValidationError
 
 from udata import i18n, uris
 from udata.core.spatial.models import SpatialCoverage
@@ -362,7 +363,7 @@ def spatial_from_rdf(term):
             try:
                 spatial_coverage.clean()
                 return spatial_coverage
-            except ValueError:
+            except ValidationError:
                 return None
 
     return None
