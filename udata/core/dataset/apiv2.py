@@ -73,10 +73,10 @@ dataset_fields = apiv2.model('Dataset', {
     'description': fields.Markdown(
         description='The dataset description in markdown', required=True),
     'created_at': fields.ISODateTime(
-        description='The dataset creation date', required=True),
+        description='The dataset creation date', required=True, readonly=True),
     'last_modified': fields.ISODateTime(
-        description='The dataset last modification date', required=True),
-    'deleted': fields.ISODateTime(description='The deletion date if deleted'),
+        description='The dataset last modification date', required=True, readonly=True),
+    'deleted': fields.ISODateTime(description='The deletion date if deleted', readonly=True),
     'archived': fields.ISODateTime(description='The archival date if archived'),
     'featured': fields.Boolean(description='Is the dataset featured'),
     'private': fields.Boolean(
