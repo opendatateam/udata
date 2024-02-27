@@ -357,7 +357,13 @@ def spatial_from_rdf(term):
                 geojson['type'] = 'MultiPolygon'
                 geojson['coordinates'] = [geojson['coordinates']]
 
-            return geojson
+            spatial_coverage = SpatialCoverage(geom=geojson)
+
+            try:
+                spatial_coverage.clean()
+                return spatial_coverage
+            except ValueError:
+                return None
 
     return None
 
@@ -536,9 +542,9 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     if schema:
         dataset.schema = schema
 
-    geojson = spatial_from_rdf(d.value(DCT.spatial))
-    if geojson:
-        dataset.spatial = SpatialCoverage(geom=geojson)
+    spatial_coverage = spatial_from_rdf(d.value(DCT.spatial))
+    if spatial_coverage:
+        dataset.spatial = spatial_coverage
 
     acronym = rdf_value(d, SKOS.altLabel)
     if acronym:
