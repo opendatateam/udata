@@ -9,7 +9,7 @@ from datetime import date
 from html.parser import HTMLParser
 from dateutil.parser import parse as parse_dt
 from flask import current_app
-from shapely import from_wkt, to_geojson, GEOSException
+from geomet import wkt
 from rdflib import Graph, URIRef, Literal, BNode
 from rdflib.resource import Resource as RdfResource
 from rdflib.namespace import RDF
@@ -348,8 +348,8 @@ def spatial_from_rdf(term):
                     continue
             elif object.datatype.__str__() == 'http://www.opengis.net/rdf#wktLiteral':
                 try:
-                    geojson = json.loads(to_geojson(from_wkt(object.toPython())))
-                except GEOSException as e:
+                    geojson = wkt.loads(object.toPython())
+                except ValueError as e:
                     log.warning(f"Invalid JSON in spatial WKT {object.toPython()} {e}")
                     continue
 
