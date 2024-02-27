@@ -356,6 +356,8 @@ def spatial_from_rdf(term):
                 except ValueError as e:
                     log.warning(f"Invalid JSON in spatial WKT {object.toPython()} {e}")
                     continue
+            else:
+                continue
 
             if geojson['type'] == 'Polygon':
                 geojson['type'] = 'MultiPolygon'
