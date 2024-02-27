@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 7.0.4 (2024-02-27)
 
 - Add rotate password command [#2966](https://github.com/opendatateam/udata/pull/2966)
 - Custom extras metadata [#2921](https://github.com/opendatateam/udata/pull/2921):
