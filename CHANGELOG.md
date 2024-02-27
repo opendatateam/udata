@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Fix: return the correct error when no `Content-Type` is sent instead of 500 [#2967](https://github.com/opendatateam/udata/pull/2967)
+- Improve documentation for API errors [#2952](https://github.com/opendatateam/udata/pull/2965)
 
 ## 7.0.4 (2024-02-27)
 
@@ -13,7 +14,6 @@
   - Metadata value must match the choosen type by the organization
 - Harvest DCAT conformsTo into schemas for resources and datasets [#2949](https://github.com/opendatateam/udata/pull/2949) [#2970](https://github.com/opendatateam/udata/pull/2970) [#2972](https://github.com/opendatateam/udata/pull/2972) [#2976](https://github.com/opendatateam/udata/pull/2976)
 - Better reporting in spam detection (show the writer of the discussion/message) [#2965](https://github.com/opendatateam/udata/pull/2965)
-- Improve documentation for API errors [#2952](https://github.com/opendatateam/udata/pull/2965)
 - Fix: spam lang detection not lowering input resulting in false positives [#2965](https://github.com/opendatateam/udata/pull/2965)
 - Fix: do not send mail about discussions when there is no owner / no organisation members [#2962](https://github.com/opendatateam/udata/pull/2962)
 - Fix: 'backend' is now required in `HarvestSource` [#2962](https://github.com/opendatateam/udata/pull/2962)
