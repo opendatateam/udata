@@ -339,6 +339,9 @@ def contact_point_from_rdf(rdf, dataset):
 
 
 def spatial_from_rdf(term):
+    if term is None:
+        return None
+
     for object in term.objects():
         if isinstance(object, Literal):
             if object.datatype.__str__() == 'https://www.iana.org/assignments/media-types/application/vnd.geo+json':
