@@ -159,6 +159,8 @@ class DcatBackendTest:
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_harvest_spatial(self, rmock):
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
+
         filename = 'bnodes.xml'
         url = mock_dcat(rmock, filename)
         org = OrganizationFactory()
