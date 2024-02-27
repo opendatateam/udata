@@ -651,7 +651,7 @@ class DatasetAPITest(APITestCase):
         data['contact_point'] = contact_point_id
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert400(response)
-        self.assertEqual(response.json['errors']['contact_point'][0], 'Wrong contact point id or contact point ownership mismatch')
+        self.assertEqual(response.json['errors']['contact_point'][0], _('Wrong contact point id or contact point ownership mismatch'))
 
     def test_dataset_api_delete(self):
         '''It should delete a dataset from the API'''

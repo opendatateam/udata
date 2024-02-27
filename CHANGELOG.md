@@ -2,12 +2,16 @@
 
 ## Current (in progress)
 
+- Fix: return the correct error when no `Content-Type` is sent instead of 500 [#2967](https://github.com/opendatateam/udata/pull/2967)
+
+## 7.0.4 (2024-02-27)
+
 - Add rotate password command [#2966](https://github.com/opendatateam/udata/pull/2966)
 - Custom extras metadata [#2921](https://github.com/opendatateam/udata/pull/2921):
   - Organization can nom define a custom metadata of a choosen type
   - Dataset belonging to the organization can assign a value to the defined metadata
   - Metadata value must match the choosen type by the organization
-- Harvest DCAT conformsTo into schemas for resources and datasets [#2949](https://github.com/opendatateam/udata/pull/2949) [#2970](https://github.com/opendatateam/udata/pull/2970) [#2972](https://github.com/opendatateam/udata/pull/2972)
+- Harvest DCAT conformsTo into schemas for resources and datasets [#2949](https://github.com/opendatateam/udata/pull/2949) [#2970](https://github.com/opendatateam/udata/pull/2970) [#2972](https://github.com/opendatateam/udata/pull/2972) [#2976](https://github.com/opendatateam/udata/pull/2976)
 - Better reporting in spam detection (show the writer of the discussion/message) [#2965](https://github.com/opendatateam/udata/pull/2965)
 - Fix: spam lang detection not lowering input resulting in false positives [#2965](https://github.com/opendatateam/udata/pull/2965)
 - Fix: do not send mail about discussions when there is no owner / no organisation members [#2962](https://github.com/opendatateam/udata/pull/2962)
@@ -16,6 +20,8 @@
 - Add harvested dcat properties as extras [#2968](https://github.com/opendatateam/udata/pull/2968):
   - DCT.provenance [0..n]
   - DCT.accessRights [0..1]
+- Generate translations file [#2974](https://github.com/opendatateam/udata/pull/2974)
+- Fix contact point test with missing translation [#2977](https://github.com/opendatateam/udata/pull/2977)
 
 ## 7.0.3 (2024-02-15)
 
