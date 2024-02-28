@@ -13,6 +13,7 @@ aniso8601==9.0.1
     #   -c requirements/install.pip
     #   flask-restx
 appdirs==1.4.4
+moto==5.0.2
     # via
     #   -c requirements/install.pip
     #   urlextract

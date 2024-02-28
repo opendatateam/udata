@@ -257,6 +257,14 @@ class Defaults(object):
 
     HARVEST_VALIDATION_CONTACT_FORM = None
 
+    HARVEST_MAX_CATALOG_SIZE_IN_MONGO = None # Defaults to the size of a MongoDB document 
+    HARVEST_GRAPHS_S3_BUCKET = None # If the catalog is bigger than `HARVEST_MAX_CATALOG_SIZE_IN_MONGO` store the graph inside S3 instead of MongoDB
+
+    # S3 connection details
+    S3_URL = None
+    S3_ACCESS_KEY_ID = None
+    S3_SECRET_ACCESS_KEY = None 
+
     ACTIVATE_TERRITORIES = False
     # The order is important to compute parents/children, smaller first.
     HANDLED_LEVELS = tuple()

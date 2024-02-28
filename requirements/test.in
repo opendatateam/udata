@@ -3,6 +3,7 @@
 
 httpretty==1.1.4
 mock==5.0.1
+moto==5.0.2
 pytest==7.3.1
 pytest-env==0.8.1
 pytest-flask==1.2.0
