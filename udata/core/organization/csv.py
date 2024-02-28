@@ -25,7 +25,6 @@ class OrganizationCsvAdapter(csv.Adapter):
     
     def get_dynamic_field_downloads(self):
         downloads_counts = self.get_downloads_counts()
-        print(downloads_counts)
         return [('downloads', lambda o: downloads_counts.get(str(o.id), 0))]
     
     def get_downloads_counts(self):
