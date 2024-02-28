@@ -2,7 +2,7 @@ import factory
 
 from udata.factories import ModelFactory
 
-from .models import Organization, Team, Member
+from .models import Organization, Member
 
 
 class OrganizationFactory(ModelFactory):
@@ -22,10 +22,3 @@ class OrganizationFactory(ModelFactory):
     class Params:
         admins = []
         editors = []
-
-
-class TeamFactory(ModelFactory):
-    class Meta:
-        model = Team
-
-    name = factory.Faker('sentence')

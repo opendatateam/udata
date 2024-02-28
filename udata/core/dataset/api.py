@@ -227,6 +227,11 @@ class DatasetAPI(API):
         request_deleted = request.json.get('deleted', True)
         if dataset.deleted and request_deleted is not None:
             api.abort(410, 'Dataset has been deleted')
+        # This line will prevent a user to modify a dataset
+        # if he is not part of the dataset's team.
+        # Will be use for organization's team feature.
+        # if not dataset.is_user_in_dataset_team(current_user):
+        #     api.abort(403, 'User has no right to modify this dataset')
         DatasetEditPermission(dataset).test()
         dataset.last_modified_internal = datetime.utcnow()
         form = api.validate(DatasetForm, dataset)
@@ -244,6 +249,11 @@ class DatasetAPI(API):
         '''Delete a dataset given its identifier'''
         if dataset.deleted:
             api.abort(410, 'Dataset has been deleted')
+        # This line will prevent a user to modify a dataset
+        # if he is not part of the dataset's team.
+        # Will be use for organization's team feature.
+        # if not dataset.is_user_in_dataset_team(current_user):
+        #     api.abort(403, 'User has no right to modify this dataset')
         DatasetEditPermission(dataset).test()
         dataset.deleted = datetime.utcnow()
         dataset.last_modified_internal = datetime.utcnow()
