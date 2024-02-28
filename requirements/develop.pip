@@ -10,7 +10,7 @@ amqp==2.6.1
     #   -c requirements/test.pip
     #   kombu
 aniso8601==9.0.1
-moto==5.0.2
+moto>=4.0.0
 
     # via
     #   -c requirements/install.pip
