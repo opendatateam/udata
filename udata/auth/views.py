@@ -50,7 +50,7 @@ def send_change_email_confirmation_instructions(user, new_email):
 
 def confirm_change_email_token_status(token):
     expired, invalid, user, token_data = check_and_get_token_status(
-        token, 'confirm', 'CONFIRM_EMAIL', return_data=True)
+        token, 'confirm', 'CONFIRM_EMAIL')
     new_email = None
 
     if not invalid and user:
