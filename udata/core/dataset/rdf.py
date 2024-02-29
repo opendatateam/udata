@@ -2,17 +2,21 @@
 This module centralize dataset helpers for RDF/DCAT serialization and parsing
 '''
 import calendar
+import json
 import logging
 
 from datetime import date
 from html.parser import HTMLParser
 from dateutil.parser import parse as parse_dt
 from flask import current_app
+from geomet import wkt
 from rdflib import Graph, URIRef, Literal, BNode
 from rdflib.resource import Resource as RdfResource
 from rdflib.namespace import RDF
+from mongoengine.errors import ValidationError
 
 from udata import i18n, uris
+from udata.core.spatial.models import SpatialCoverage
 from udata.frontend.markdown import parse_html
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.models import db, ContactPoint
@@ -334,6 +338,42 @@ def contact_point_from_rdf(rdf, dataset):
                     ContactPoint(name=name, email=email, owner=dataset.owner).save())
 
 
+def spatial_from_rdf(term):
+    if term is None:
+        return None
+
+    for object in term.objects():
+        if isinstance(object, Literal):
+            if object.datatype.__str__() == 'https://www.iana.org/assignments/media-types/application/vnd.geo+json':
+                try:
+                    geojson = json.loads(object.toPython())
+                except ValueError as e:
+                    log.warning(f"Invalid JSON in spatial GeoJSON {object.toPython()} {e}")
+                    continue
+            elif object.datatype.__str__() == 'http://www.opengis.net/rdf#wktLiteral':
+                try:
+                    # .upper() si here because geomet doesn't support Polygon but only POLYGON
+                    geojson = wkt.loads(object.toPython().strip().upper())
+                except ValueError as e:
+                    log.warning(f"Invalid JSON in spatial WKT {object.toPython()} {e}")
+                    continue
+            else:
+                continue
+
+            if geojson['type'] == 'Polygon':
+                geojson['type'] = 'MultiPolygon'
+                geojson['coordinates'] = [geojson['coordinates']]
+
+            spatial_coverage = SpatialCoverage(geom=geojson)
+
+            try:
+                spatial_coverage.clean()
+                return spatial_coverage
+            except ValidationError:
+                return None
+
+    return None
+
 def frequency_from_rdf(term):
     if isinstance(term, str):
         try:
@@ -488,7 +528,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     return resource
 
 
-def dataset_from_rdf(graph, dataset=None, node=None):
+def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     '''
     Create or update a dataset from a RDF/DCAT graph
     '''
@@ -508,6 +548,10 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     schema = schema_from_rdf(d)
     if schema:
         dataset.schema = schema
+
+    spatial_coverage = spatial_from_rdf(d.value(DCT.spatial))
+    if spatial_coverage:
+        dataset.spatial = spatial_coverage
 
     acronym = rdf_value(d, SKOS.altLabel)
     if acronym:
