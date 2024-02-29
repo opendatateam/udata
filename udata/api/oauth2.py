@@ -118,7 +118,7 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
     def check_client_secret(self, client_secret):
         return self.secret == client_secret
 
-    def check_token_endpoint_auth_method(self, method):
+    def check_endpoint_auth_method(self, method):
         if not self.has_client_secret():
             return method == 'none'
         return method in ('client_secret_post', 'client_secret_basic')
