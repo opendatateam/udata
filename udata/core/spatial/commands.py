@@ -44,7 +44,10 @@ def load_levels(col, json_levels):
 
 
 def load_zones(col, json_geozones):
+    loaded_geozones = 0
     for i, geozone in enumerate(json_geozones):
+        if geozone.get('is_deleted', False):
+            continue
         params = {
             'slug': slugify.slugify(geozone['nom'], separator='-'),
             'level': str(geozone['level']),
@@ -56,11 +59,12 @@ def load_zones(col, json_geozones):
             col.objects(id=geozone['_id']).modify(upsert=True, **{
                 'set__{0}'.format(k): v for k, v in params.items()
             })
+            loaded_geozones += 1
         except errors.ValidationError as e:
             log.warning('Validation error (%s) for %s with %s',
                         e, geozone['nom'], params)
             continue
-    return i
+    return loaded_geozones
 
 
 @contextmanager
