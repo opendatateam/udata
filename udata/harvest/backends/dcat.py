@@ -250,9 +250,18 @@ class CswIsoXsltDcatBackend(DcatBackend):
         See https://github.com/SEMICeu/iso-19139-to-dcat-ap for more information on the XSLT.
         '''
 
+        # The XSLT transform failed on some catalog with "Cannot resolve URI https://ogc.geo-ide.developpement-durable.gouv.fr/csw/all-dataset?REQUEST=GetRecordById&SERVICE=CSW&VERSION=2.0.2&RESULTTYPE=results&elementSetName=full&TYPENAMES=gmd:MD_Metadata&OUTPUTSCHEMA=http://www.isotc211.org/2005/gmd&ID=fr-120066022-jdd-9bffd34b-916b-4dfd-a446-b7c5ec05291a", this EmptyResolver disable something (not sure what) and allow to continue fetching the catalog.
+        class EmptyResolver(lET.Resolver):
+            def resolve(self, url, pubid, context):
+                print(f"Resolve {url} to empty")
+                return self.resolve_empty(context)
+
+        parser = lET.XMLParser()
+        parser.resolvers.add(EmptyResolver())
+
         # Load XSLT
         xslURL = "https://raw.githubusercontent.com/SEMICeu/iso-19139-to-dcat-ap/master/iso-19139-to-dcat-ap.xsl"
-        xsl = lET.fromstring(self.get(xslURL).content)
+        xsl = lET.fromstring(self.get(xslURL).content, parser=parser)
         transform = lET.XSLT(xsl)
 
         # Start querying and parsing graph
@@ -279,6 +288,8 @@ class CswIsoXsltDcatBackend(DcatBackend):
         tree = transform(tree_before_transform)
 
         while tree:
+            i = 1
+
             # We query the tree before the transformation because the XSLT remove the search results
             # infos (useful for pagination)
             search_results = tree_before_transform.find('csw:SearchResults', {'csw': CSW_NAMESPACE})
