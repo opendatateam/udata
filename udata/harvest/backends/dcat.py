@@ -154,6 +154,8 @@ class DcatBackend(BaseBackend):
                 raise ValueError(f"No bucket configured but the harvest job item {item.id} on job {self.job.id} doesn't have a graph in MongoDB.")
 
             graphs = get_from_json(bucket, self.job.data['filename'])
+            if graphs is None:
+                raise ValueError(f"The file '{self.job.data['filename']}' is missing in S3 bucket '{bucket}'")
 
         data = graphs[item.kwargs['page']]
         format = self.job.data['format']
