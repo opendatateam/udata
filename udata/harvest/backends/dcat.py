@@ -197,7 +197,7 @@ class CswDcatBackend(DcatBackend):
         response = self.post(url, data=body.format(start=start, schema=self.DCAT_SCHEMA),
                              headers=headers)
         response.raise_for_status()
-        content = response.text
+        content = response.content
         tree = lET.fromstring(content)
         if tree.tag == '{' + OWS_NAMESPACE + '}ExceptionReport':
             raise ValueError(f'Failed to query CSW:\n{content}')
@@ -228,7 +228,7 @@ class CswDcatBackend(DcatBackend):
 
             tree = lET.fromstring(
                 self.post(url, data=body.format(start=start, schema=self.DCAT_SCHEMA),
-                          headers=headers).text)
+                          headers=headers).content)
 
         return graphs
     
