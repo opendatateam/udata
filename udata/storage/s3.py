@@ -42,3 +42,9 @@ def get_from_json(bucket: str, filename: str) -> Optional[Any]:
         return None
 
     return json.loads(bytes.decode('utf-8'))
+
+def delete_file(bucket: str, filename: str):
+    return get_client().delete_object(
+        Bucket=bucket,
+        Key=filename,
+    )

@@ -73,6 +73,8 @@ class DcatBackend(BaseBackend):
         bucket = current_app.config.get('HARVEST_GRAPHS_S3_BUCKET')
 
         if bucket is not None and sum([len(g.encode('utf-8')) for g in serialized_graphs]) >= max_harvest_graph_size_in_mongo:
+            # TODO: we could store each page in independant files to allow downloading only the require page in
+            # subsequent jobs. (less data to download in each job)
             filename = f'harvest_{self.job.id}_{date.today()}.json'
 
             store_as_json(bucket, filename, serialized_graphs)
