@@ -45,7 +45,7 @@ def load_levels(col, json_levels):
 
 def load_zones(col, json_geozones):
     loaded_geozones = 0
-    for i, geozone in enumerate(json_geozones):
+    for _, geozone in enumerate(json_geozones):
         if geozone.get('is_deleted', False):
             continue
         params = {
