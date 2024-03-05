@@ -2,7 +2,29 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add spatial coverage harvesting [#2959](https://github.com/opendatateam/udata/pull/2959)
+- Fix: updating a dataset without `private` do not reset `private` to `False`, the previous saved value is kept [#2955](https://github.com/opendatateam/udata/pull/2955)
+- Fix: return the correct error when no `Content-Type` is sent instead of 500 [#2967](https://github.com/opendatateam/udata/pull/2967)
+- Improve documentation for API errors [#2952](https://github.com/opendatateam/udata/pull/2965)
+
+## 7.0.4 (2024-02-27)
+
+- Add rotate password command [#2966](https://github.com/opendatateam/udata/pull/2966)
+- Custom extras metadata [#2921](https://github.com/opendatateam/udata/pull/2921):
+  - Organization can nom define a custom metadata of a choosen type
+  - Dataset belonging to the organization can assign a value to the defined metadata
+  - Metadata value must match the choosen type by the organization
+- Harvest DCAT conformsTo into schemas for resources and datasets [#2949](https://github.com/opendatateam/udata/pull/2949) [#2970](https://github.com/opendatateam/udata/pull/2970) [#2972](https://github.com/opendatateam/udata/pull/2972) [#2976](https://github.com/opendatateam/udata/pull/2976)
+- Better reporting in spam detection (show the writer of the discussion/message) [#2965](https://github.com/opendatateam/udata/pull/2965)
+- Fix: spam lang detection not lowering input resulting in false positives [#2965](https://github.com/opendatateam/udata/pull/2965)
+- Fix: do not send mail about discussions when there is no owner / no organisation members [#2962](https://github.com/opendatateam/udata/pull/2962)
+- Fix: 'backend' is now required in `HarvestSource` [#2962](https://github.com/opendatateam/udata/pull/2962)
+- Fix: URL to organizations in mails are now independent from `udata-front` (show the URL of the API if no `udata-front`) [#2962](https://github.com/opendatateam/udata/pull/2962)
+- Add harvested dcat properties as extras [#2968](https://github.com/opendatateam/udata/pull/2968):
+  - DCT.provenance [0..n]
+  - DCT.accessRights [0..1]
+- Generate translations file [#2974](https://github.com/opendatateam/udata/pull/2974)
+- Fix contact point test with missing translation [#2977](https://github.com/opendatateam/udata/pull/2977)
 
 ## 7.0.3 (2024-02-15)
 
@@ -12,6 +34,7 @@
 - Fix: refuse an organisation access request when multiple access requests are pending [#2960](https://github.com/opendatateam/udata/pull/2960)
 - Add downloads count in datasets' CSV [#2953](https://github.com/opendatateam/udata/pull/2953)
 - Allow dicts in datasets' extras [#2958](https://github.com/opendatateam/udata/pull/2958)
+
 
 ## 7.0.2 (2024-01-23)
 

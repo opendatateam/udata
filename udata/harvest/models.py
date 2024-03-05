@@ -94,7 +94,7 @@ class HarvestSource(db.Owned, db.Document):
                         populate_from='name', update=True)
     description = db.StringField()
     url = db.StringField(required=True)
-    backend = db.StringField()
+    backend = db.StringField(required=True)
     config = db.DictField()
     periodic_task = db.ReferenceField('PeriodicTask',
                                       reverse_delete_rule=db.NULLIFY)

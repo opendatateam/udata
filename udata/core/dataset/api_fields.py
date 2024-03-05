@@ -23,12 +23,19 @@ checksum_fields = api.model('Checksum', {
                            required=True)
 })
 
+# Use for schema inside Dataset or Resource
+schema_fields = api.model('Schema', {
+    'name': fields.String(),
+    'version': fields.String(),
+    'url': fields.String(),
+})
+
 dataset_harvest_fields = api.model('HarvestDatasetMetadata', {
     'backend': fields.String(description='Harvest backend used', allow_null=True),
     'created_at': fields.ISODateTime(description='The dataset harvested creation date',
-                                     allow_null=True),
+                                     allow_null=True, readonly=True),
     'modified_at': fields.ISODateTime(description='The dataset harvest last modification date',
-                                      allow_null=True),
+                                      allow_null=True, readonly=True),
     'source_id': fields.String(description='The harvester id', allow_null=True),
     'remote_id': fields.String(description='The dataset remote id on the source portal',
                                allow_null=True),
@@ -47,9 +54,9 @@ dataset_harvest_fields = api.model('HarvestDatasetMetadata', {
 
 resource_harvest_fields = api.model('HarvestResourceMetadata', {
     'created_at': fields.ISODateTime(description='The resource harvested creation date',
-                                     allow_null=True),
+                                     allow_null=True, readonly=True),
     'modified_at': fields.ISODateTime(description='The resource harvest last modification date',
-                                      allow_null=True),
+                                      allow_null=True, readonly=True),
     'uri': fields.String(description='The resource harvest uri', allow_null=True)
 })
 
@@ -119,7 +126,8 @@ resource_fields = api.model('Resource', {
                                  'loaded as a standalone page (ie. iframe or '
                                  'new page)',
                                  readonly=True),
-    'schema': fields.Raw(description='Reference to the associated schema', readonly=True),
+    'schema': fields.Nested(
+        schema_fields, allow_null=True, description='Reference to the associated schema'),
     'internal': fields.Nested(
         resource_internal_fields, readonly=True, description='Site internal and specific object\'s data'),
 })
@@ -171,7 +179,7 @@ community_resource_page_fields = api.model(
 DEFAULT_MASK = ','.join((
     'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
     'private', 'tags', 'badges', 'resources', 'frequency', 'frequency_date', 'extras', 'harvest',
-    'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
+    'metrics', 'organization', 'owner', 'schema', 'temporal_coverage', 'spatial', 'license',
     'uri', 'page', 'last_update', 'archived', 'quality', 'internal', 'contact_point',
 ))
 
@@ -191,10 +199,10 @@ dataset_fields = api.model('Dataset', {
     'description': fields.Markdown(
         description='The dataset description in markdown', required=True),
     'created_at': fields.ISODateTime(
-        description='This date is computed between harvested creation date if any and site\'s internal creation date' , required=True),
+        description='This date is computed between harvested creation date if any and site\'s internal creation date' , required=True, readonly=True),
     'last_modified': fields.ISODateTime(
-        description='The dataset last modification date', required=True),
-    'deleted': fields.ISODateTime(description='The deletion date if deleted'),
+        description='The dataset last modification date', required=True, readonly=True),
+    'deleted': fields.ISODateTime(description='The deletion date if deleted', readonly=True),
     'archived': fields.ISODateTime(description='The archival date if archived'),
     'featured': fields.Boolean(description='Is the dataset featured'),
     'private': fields.Boolean(
@@ -245,6 +253,8 @@ dataset_fields = api.model('Dataset', {
     'quality': fields.Raw(description='The dataset quality', readonly=True),
     'last_update': fields.ISODateTime(
         description='The resources last modification date', required=True),
+    'schema': fields.Nested(
+        schema_fields, allow_null=True, description='Reference to the associated schema'),
     'internal': fields.Nested(
         dataset_internal_fields, readonly=True, description='Site internal and specific object\'s data'),
     'contact_point': fields.Nested(contact_point_fields, allow_null=True, description='The dataset\'s contact points'),
@@ -273,7 +283,7 @@ resource_type_fields = api.model('ResourceType', {
 })
 
 
-schema_fields = api.model('Schema', {
+catalog_schema_fields = api.model('CatalogSchema', {
     'id': fields.String(description='The schema identifier'),
     'label': fields.String(description='The schema display name'),
     'versions': fields.List(fields.String, description='The available versions of the schema'),

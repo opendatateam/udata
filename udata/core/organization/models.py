@@ -114,7 +114,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     zone = db.StringField()
-    extras = db.ExtrasField()
+    extras = db.OrganizationExtrasField()
 
     deleted = db.DateTimeField()
 

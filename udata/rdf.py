@@ -1,6 +1,7 @@
 '''
 This module centralize udata-wide RDF helpers and configuration
 '''
+import logging
 import re
 
 from flask import request, url_for, abort
@@ -11,6 +12,10 @@ from rdflib.namespace import (
     Namespace, NamespaceManager, DCTERMS, SKOS, FOAF, XSD, RDFS, RDF
 )
 from rdflib.util import SUFFIX_FORMAT_MAP, guess_format as raw_guess_format
+from udata.models import FieldValidationError, Schema, ResourceSchema
+from mongoengine import ValidationError
+
+log = logging.getLogger(__name__)
 
 # Extra Namespaces
 ADMS = Namespace('http://www.w3.org/ns/adms#')
@@ -217,6 +222,31 @@ def url_from_rdf(rdf, prop):
     elif isinstance(value, RdfResource):
         return value.identifier.toPython()
 
+
+def schema_from_rdf(rdf):
+    '''
+    Try to extract a schema from a conformsTo property.
+    Currently the "issued" property is not harvest.
+    '''
+    resource = rdf.value(DCT.conformsTo)
+    if not resource:
+        return None
+
+    schema = Schema()
+    if isinstance(resource, (URIRef, Literal)):
+        schema.url = resource.toPython()
+    elif isinstance(resource, RdfResource):
+        schema.url = resource.identifier.toPython()
+        schema.name = resource.value(DCT.title)
+    else:
+        return None
+
+    try:
+        schema.clean()
+        return schema
+    except FieldValidationError as e:
+        log.warning(f"Invalid schema inside RDF {e}")
+        return None
 
 def escape_xml_illegal_chars(val, replacement='?'):
     illegal_xml_chars_RE = re.compile(ILLEGAL_XML_CHARS)

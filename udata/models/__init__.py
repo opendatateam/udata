@@ -17,7 +17,7 @@ from udata.errors import ConfigError
 from .badges_field import BadgesField
 from .taglist_field import TagListField
 from .datetime_fields import DateField, DateRange, Datetimed
-from .extras_fields import ExtrasField
+from .extras_fields import ExtrasField, OrganizationExtrasField
 from .slug_fields import SlugField
 from .url_field import URLField
 from .uuid_fields import AutoUUIDField
@@ -36,6 +36,7 @@ class UDataMongoEngine(MongoEngine):
         self.DateField = DateField
         self.Datetimed = Datetimed
         self.ExtrasField = ExtrasField
+        self.OrganizationExtrasField = OrganizationExtrasField
         self.SlugField = SlugField
         self.AutoUUIDField = AutoUUIDField
         self.Document = UDataDocument
@@ -76,6 +77,14 @@ class UDataMongoEngine(MongoEngine):
             raise ValueError(message)
 
 
+class FieldValidationError(ValidationError):
+    field: str
+
+    def __init__(self, *args, field: str, **kwargs):
+        self.field = field
+        super().__init__(*args, **kwargs)
+
+
 db = UDataMongoEngine()
 session_interface = MongoEngineSessionInterface(db)
 
@@ -110,6 +119,7 @@ import udata.linkchecker.models  # noqa
 
 MONGODB_DEPRECATED_SETTINGS = 'MONGODB_PORT', 'MONGODB_DB'
 MONGODB_DEPRECATED_MSG = '{0} is deprecated, use the MONGODB_HOST url syntax'
+
 
 
 def validate_config(config):

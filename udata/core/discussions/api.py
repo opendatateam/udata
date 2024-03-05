@@ -14,10 +14,8 @@ from udata.core.user.api_fields import user_ref_fields
 from .forms import DiscussionCreateForm, DiscussionCommentForm
 from .models import Message, Discussion
 from .permissions import CloseDiscussionPermission
-from .signals import (
-    on_new_discussion, on_new_discussion_comment, on_discussion_closed,
-    on_discussion_deleted
-)
+from .signals import on_discussion_deleted
+
 
 ns = api.namespace('discussions', 'Discussion related operations')
 

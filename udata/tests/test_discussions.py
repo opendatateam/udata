@@ -76,7 +76,7 @@ class DiscussionsTest(APITestCase):
             discussion_id = None
             def check_signal(args):
                 self.assertIsNotNone(discussion_id)
-                self.assertEqual(args[1]['link'], f'http://local.test/api/1/datasets/{dataset.id}/#discussion-{discussion_id}')
+                self.assertIn(f'http://local.test/api/1/datasets/{dataset.id}/#discussion-{discussion_id}', args[1]['message'])
 
             with assert_emit(on_new_potential_spam, assertions_callback=check_signal):
                 response = self.post(url_for('api.discussions'), {
@@ -107,8 +107,7 @@ class DiscussionsTest(APITestCase):
         response = self.get(url_for('api.spam'))
         self.assertStatus(response, 200)
         self.assertEqual(response.json, [{
-            'title': discussion.spam_report_title(),
-            'link': discussion.spam_report_link(),
+            'message': discussion.spam_report_message([discussion]),
         }])
 
         with assert_emit(on_new_discussion):
@@ -419,7 +418,7 @@ class DiscussionsTest(APITestCase):
         self.login()
         with assert_not_emit(on_new_discussion_comment):
             def check_signal(args):
-                self.assertEqual(args[1]['link'], discussion.external_url)
+                self.assertIn(discussion.external_url, args[1]['message'])
 
             with assert_emit(on_new_potential_spam, assertions_callback=check_signal):
                 response = self.post(url_for('api.discussion', id=discussion.id), {
@@ -436,8 +435,7 @@ class DiscussionsTest(APITestCase):
         response = self.get(url_for('api.spam'))
         self.assertStatus(response, 200)
         self.assertEqual(response.json, [{
-            'title': discussion.spam_report_title(),
-            'link': discussion.spam_report_link(),
+            'message': discussion.spam_report_message([discussion]),
         }])
 
         with assert_emit(on_new_discussion_comment):
