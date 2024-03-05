@@ -173,7 +173,7 @@ def purge_jobs():
 
         delete_file(bucket, job.data['filename'])
 
-    # return HarvestJob.objects(created__lt=expiration).delete()
+    return HarvestJob.objects(created__lt=expiration).delete()
 
 
 def run(ident):
