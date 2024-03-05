@@ -69,7 +69,10 @@ class DcatBackend(BaseBackend):
         serialized_graphs = [graph.serialize(format=fmt, indent=None) for graph in graphs]
 
         # The official MongoDB document size in 16MB. The default value here is 15MB to account for other fields in the document (and for difference between * 1024 vs * 1000).
-        max_harvest_graph_size_in_mongo = current_app.config.get('HARVEST_MAX_CATALOG_SIZE_IN_MONGO') or 15 * 1000 * 1000
+        max_harvest_graph_size_in_mongo = current_app.config.get('HARVEST_MAX_CATALOG_SIZE_IN_MONGO')
+        if max_harvest_graph_size_in_mongo is None:
+            max_harvest_graph_size_in_mongo = 15 * 1000 * 1000
+
         bucket = current_app.config.get('HARVEST_GRAPHS_S3_BUCKET')
 
         if bucket is not None and sum([len(g.encode('utf-8')) for g in serialized_graphs]) >= max_harvest_graph_size_in_mongo:

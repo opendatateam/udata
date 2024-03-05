@@ -1,15 +1,18 @@
 import logging
 import os
+from flask import current_app
 
 import pytest
 
 from datetime import date
 import boto3
 import xml.etree.ElementTree as ET
+from udata.harvest.models import HarvestJob
 
 from udata.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.dataset.factories import LicenseFactory, ResourceSchemaMockData
+from udata.storage.s3 import get_from_json
 
 from .factories import HarvestSourceFactory
 from ..backends.dcat import URIS_TO_REPLACE
@@ -158,7 +161,7 @@ class DcatBackendTest:
         assert len(datasets['2'].resources) == 2
 
     @pytest.mark.skip(reason="Mocking S3 requires `moto` which is not available for our current Python 3.7. We can manually test it.")
-    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas', HARVEST_JOBS_RETENTION_DAYS=0)
     # @mock_s3
     # @pytest.mark.options(HARVEST_MAX_CATALOG_SIZE_IN_MONGO=15, HARVEST_GRAPHS_S3_BUCKET="test_bucket", S3_URL="https://example.org", S3_ACCESS_KEY_ID="myUser", S3_SECRET_ACCESS_KEY="password")
     def test_harvest_big_catalog(self, rmock):
@@ -211,6 +214,16 @@ class DcatBackendTest:
         assert resources_by_title['Resource 3-1'].schema.name == 'etalab/schema-irve-statique'
         assert resources_by_title['Resource 3-1'].schema.url == None
         assert resources_by_title['Resource 3-1'].schema.version == '2.2.0'
+
+        job = HarvestJob.objects.order_by('-id').first()
+
+        assert job.source.slug == source.slug
+        assert get_from_json(current_app.config.get('HARVEST_GRAPHS_S3_BUCKET'), job.data['filename']) is not None
+
+        # Retention is 0 days in config
+        actions.purge_jobs()
+        assert get_from_json(current_app.config.get('HARVEST_GRAPHS_S3_BUCKET'), job.data['filename']) is None
+
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_harvest_spatial(self, rmock):

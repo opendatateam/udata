@@ -34,7 +34,11 @@ def store_as_json(bucket: str, filename: str, value):
     return store_bytes(bucket, filename, bytes(json.dumps(value).encode('UTF-8')))
 
 def get_bytes(bucket: str, filename: str) -> Optional[bytes]:
-    return get_client().get_object(Bucket=bucket, Key=filename)['Body'].read()
+    client = get_client()
+    try:
+        return client.get_object(Bucket=bucket, Key=filename)['Body'].read()
+    except client.exceptions.NoSuchKey:
+        return None
 
 def get_from_json(bucket: str, filename: str) -> Optional[Any]:
     bytes = get_bytes(bucket, filename)
