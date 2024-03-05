@@ -7,6 +7,7 @@
 - Fix: return the correct error when no `Content-Type` is sent instead of 500 [#2967](https://github.com/opendatateam/udata/pull/2967)
 - Improve documentation for API errors [#2952](https://github.com/opendatateam/udata/pull/2965)
 - Add downloads' count to organizations CSV [#2973](https://github.com/opendatateam/udata/pull/2973)
+- Add 3 new badges to the organization model : `company`, `association` and `local authority` [#2984](https://github.com/opendatateam/udata/pull/2984)
 
 ## 7.0.4 (2024-02-27)
 
