@@ -24,7 +24,7 @@ attrs==21.2.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   jsonschema
-authlib==0.14.3
+authlib==1.2.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -115,15 +115,15 @@ click==8.0.0
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   flask
+    #   geomet
 coverage[toml]==7.2.3
     # via
     #   -r requirements/report.in
     #   pytest-cov
-cryptography==2.8
+cryptography==42.0.5
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
-    #   -r requirements/install.in
     #   authlib
 dnspython==2.1.0
     # via
@@ -259,6 +259,11 @@ geojson==2.5.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
+geomet==1.1.0
+    # via
+    #   -c requirements/install.pip
+    #   -c requirements/test.pip
+    #   -r requirements/install.in
 html2text==2019.9.26
     # via
     #   -c requirements/install.pip
@@ -325,6 +330,11 @@ kombu[redis]==4.4.0
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   celery
+langdetect==1.0.9
+    # via
+    #   -c requirements/install.pip
+    #   -c requirements/test.pip
+    #   -r requirements/install.in
 lxml==4.4.2
     # via
     #   -c requirements/install.pip
@@ -503,11 +513,11 @@ six==1.16.0
     #   -c requirements/test.pip
     #   bcrypt
     #   bleach
-    #   cryptography
     #   faker
     #   flask-cors
     #   isodate
     #   jsonschema
+    #   langdetect
     #   python-dateutil
     #   requests-mock
     #   wtforms-json
