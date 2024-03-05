@@ -2,7 +2,6 @@ from typing import Any, Optional
 import boto3
 from flask import current_app
 import json
-from botocore.client import Config
 
 def get_client():
     url = current_app.config.get('S3_URL')
@@ -32,18 +31,13 @@ def store_bytes(bucket: str, filename: str, bytes: bytes):
     )
 
 def store_as_json(bucket: str, filename: str, value):
-    print(f"store_as_json {filename} in {bucket}")
     return store_bytes(bucket, filename, bytes(json.dumps(value).encode('UTF-8')))
 
 def get_bytes(bucket: str, filename: str) -> Optional[bytes]:
     return get_client().get_object(Bucket=bucket, Key=filename)['Body'].read()
 
 def get_from_json(bucket: str, filename: str) -> Optional[Any]:
-    print(f"get_from_json {filename} in {bucket}")
     bytes = get_bytes(bucket, filename)
-    print('---')
-    print(bytes)
-    print('---')
     if bytes is None:
         return None
 
