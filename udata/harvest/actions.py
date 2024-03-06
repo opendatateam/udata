@@ -10,6 +10,7 @@ from flask import current_app
 from udata.auth import current_user
 from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.models import User, Organization, PeriodicTask, Dataset
+from udata.storage.s3 import delete_file
 
 from . import backends, signals
 from .models import (
@@ -162,6 +163,16 @@ def purge_jobs():
     '''Delete jobs older than retention policy'''
     retention = current_app.config['HARVEST_JOBS_RETENTION_DAYS']
     expiration = datetime.utcnow() - timedelta(days=retention)
+
+    jobs_with_external_files = HarvestJob.objects(data__filename__exists=True, created__lt=expiration)
+    for job in jobs_with_external_files:
+        bucket = current_app.config.get('HARVEST_GRAPHS_S3_BUCKET')
+        if bucket is None:
+            log.error(f"Bucket isn't configured anymore, but jobs still exist with external filenames. Could not delete them.")
+            break
+
+        delete_file(bucket, job.data['filename'])
+
     return HarvestJob.objects(created__lt=expiration).delete()
 
 
