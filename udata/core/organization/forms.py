@@ -4,10 +4,8 @@ from udata.auth import current_user
 from udata.forms import Form, ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 
-from .models import (
-    Organization, MembershipRequest, Member, LOGO_SIZES, ORG_ROLES,
-    TITLE_SIZE_LIMIT, DESCRIPTION_SIZE_LIMIT
-)
+from .models import Organization, MembershipRequest, Member
+from .constants import LOGO_SIZES, ORG_ROLES, TITLE_SIZE_LIMIT, DESCRIPTION_SIZE_LIMIT
 
 __all__ = (
     'OrganizationForm',

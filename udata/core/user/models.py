@@ -20,10 +20,9 @@ from udata.models import db, WithMetrics, Follow
 from udata.core.discussions.models import Discussion
 from udata.core.storages import avatars, default_image_basename
 
+from .constants import AVATAR_SIZES
+
 __all__ = ('User', 'Role', 'datastore')
-
-AVATAR_SIZES = [500, 200, 100, 32, 25]
-
 
 # TODO: use simple text for role
 class Role(db.Document, RoleMixin):

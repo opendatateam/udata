@@ -1,6 +1,6 @@
 from udata.api import api, fields, base_reference
 
-from udata.core.badges.api import badge_fields
+from udata.core.badges.fields import badge_fields
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.user.api_fields import user_ref_fields
