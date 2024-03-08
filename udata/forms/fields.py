@@ -180,6 +180,16 @@ class BooleanField(FieldHelper, fields.BooleanField):
         self.stacked = kwargs.pop('stacked', False)
         super(BooleanField, self).__init__(*args, **kwargs)
 
+    def process_formdata(self, valuelist):
+        # We override this so that when no value is provided
+        # the form doesn't think the value is `False` instead 
+        # the value is not present and the model can keep the
+        # existing value
+        if not valuelist:
+            return 
+
+        super().process_formdata(valuelist)
+
 
 class RadioField(FieldHelper, fields.RadioField):
     def __init__(self, *args, **kwargs):

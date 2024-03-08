@@ -1,14 +1,18 @@
 import logging
 import os
+from flask import current_app
 
 import pytest
 
 from datetime import date
+import boto3
 import xml.etree.ElementTree as ET
+from udata.harvest.models import HarvestJob
 
 from udata.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.dataset.factories import LicenseFactory, ResourceSchemaMockData
+from udata.storage.s3 import get_from_json
 
 from .factories import HarvestSourceFactory
 from ..backends.dcat import URIS_TO_REPLACE
@@ -136,7 +140,7 @@ class DcatBackendTest:
         assert datasets['1'].resources[0].format == 'json'
         assert datasets['1'].resources[0].mime == 'application/json'
 
-    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas', HARVEST_MAX_CATALOG_SIZE_IN_MONGO=None, HARVEST_GRAPHS_S3_BUCKET="test_bucket", S3_URL="https://example.org", S3_ACCESS_KEY_ID="myUser", S3_SECRET_ACCESS_KEY="password")
     def test_flat_with_blank_nodes_xml(self, rmock):
         rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
 
@@ -155,6 +159,88 @@ class DcatBackendTest:
         assert len(datasets['3'].resources) == 1
         assert len(datasets['1'].resources) == 2
         assert len(datasets['2'].resources) == 2
+
+    @pytest.mark.skip(reason="Mocking S3 requires `moto` which is not available for our current Python 3.7. We can manually test it.")
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas', HARVEST_JOBS_RETENTION_DAYS=0)
+    # @mock_s3
+    # @pytest.mark.options(HARVEST_MAX_CATALOG_SIZE_IN_MONGO=15, HARVEST_GRAPHS_S3_BUCKET="test_bucket", S3_URL="https://example.org", S3_ACCESS_KEY_ID="myUser", S3_SECRET_ACCESS_KEY="password")
+    def test_harvest_big_catalog(self, rmock):
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
+
+        # We need to create the bucket since this is all in Moto's 'virtual' AWS account
+        # conn = boto3.resource(
+        #     "s3",
+        #     endpoint_url="https://example.org",
+        #     aws_access_key_id="myUser",
+        #     aws_secret_access_key="password",
+        # )
+        # conn.create_bucket(Bucket="test_bucket")
+
+        filename = 'bnodes.xml'
+        url = mock_dcat(rmock, filename)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+
+        actions.run(source.slug)
+
+        datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
+
+        assert datasets['1'].schema == None
+        resources_by_title = { resource['title']: resource for resource in datasets['1'].resources }
+
+        # Schema with wrong version are considered as external. Maybe we could change this in the future
+        assert resources_by_title['Resource 1-2'].schema.url == 'https://schema.data.gouv.fr/schemas/etalab/schema-irve-statique/1337.42.0/schema-statique.json'
+        assert resources_by_title['Resource 1-2'].schema.name == None
+        assert resources_by_title['Resource 1-2'].schema.version == None
+
+        assert datasets['2'].schema.name == None
+        assert datasets['2'].schema.url == 'https://www.ecologie.gouv.fr/sites/default/files/R%C3%A9glementation%20IRVE.pdf'
+        resources_by_title = { resource['title']: resource for resource in datasets['2'].resources }
+
+        # Unknown schema are kept as they were provided
+        assert resources_by_title['Resource 2-1'].schema.name == 'Example Schema'
+        assert resources_by_title['Resource 2-1'].schema.url == 'https://example.org/schema.json'
+        assert resources_by_title['Resource 2-1'].schema.version == None
+
+        assert resources_by_title['Resource 2-2'].schema == None
+
+        assert datasets['3'].schema == None
+        resources_by_title = { resource['title']: resource for resource in datasets['3'].resources }
+
+        # If there is just the URL, and it matches a known schema inside the catalog, only set the name and the version
+        # (discard the URL)
+        assert resources_by_title['Resource 3-1'].schema.name == 'etalab/schema-irve-statique'
+        assert resources_by_title['Resource 3-1'].schema.url == None
+        assert resources_by_title['Resource 3-1'].schema.version == '2.2.0'
+
+        job = HarvestJob.objects.order_by('-id').first()
+
+        assert job.source.slug == source.slug
+        assert get_from_json(current_app.config.get('HARVEST_GRAPHS_S3_BUCKET'), job.data['filename']) is not None
+
+        # Retention is 0 days in config
+        actions.purge_jobs()
+        assert get_from_json(current_app.config.get('HARVEST_GRAPHS_S3_BUCKET'), job.data['filename']) is None
+
+
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
+    def test_harvest_spatial(self, rmock):
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
+
+        filename = 'bnodes.xml'
+        url = mock_dcat(rmock, filename)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat', url=url, organization=org)
+
+        actions.run(source.slug)
+
+        datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
+
+        assert datasets['1'].spatial == None
+        assert datasets['2'].spatial.geom == {'type': 'MultiPolygon', 'coordinates': [[[[4.44641288, 45.54214467], [4.44641288, 46.01316963], [4.75655252, 46.01316963], [4.75655252, 45.54214467], [4.44641288, 45.54214467]]]]}
+        assert datasets['3'].spatial == None
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_harvest_schemas(self, rmock):
