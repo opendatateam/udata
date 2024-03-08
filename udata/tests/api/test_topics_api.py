@@ -65,6 +65,9 @@ class TopicsAPITest(APITestCase):
             self.assertIsNotNone(reuse['page'])
             self.assertIsNotNone(reuse['uri'])
 
+        self.assertIsNotNone(data.get('created_at'))
+        self.assertIsNotNone(data.get('last_modified'))
+
     def test_topic_api_create(self):
         '''It should create a topic from the API'''
         data = TopicFactory.as_dict()
@@ -106,7 +109,9 @@ class TopicsAPITest(APITestCase):
         response = self.put(url_for('api.topic', topic=topic), data)
         self.assert200(response)
         self.assertEqual(Topic.objects.count(), 1)
-        self.assertEqual(Topic.objects.first().description, 'new description')
+        topic = Topic.objects.first()
+        self.assertEqual(topic.description, 'new description')
+        self.assertGreater(topic.last_modified, topic.created_at)
 
     def test_topic_api_update_perm(self):
         '''It should not update a topic from the API'''
