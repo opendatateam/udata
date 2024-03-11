@@ -1,5 +1,5 @@
 from flask import request
-from mongoengine import Q
+import mongoengine
 
 from udata.api import api, API
 from udata.auth import admin_permission
@@ -21,6 +21,10 @@ class DataservicesAPI(API):
     @api.marshal_with(Dataservice.__fields__, code=201)
     def post(self):
         dataservice = Dataservice(**request.json)
-        dataservice.save()
+        try:
+            dataservice.save()
+        except mongoengine.errors.ValidationError as e:
+            api.abort(400, e.message)
+
         return dataservice, 201
 

@@ -41,7 +41,16 @@ class DataserviceAPITest(APITestCase):
     def test_dataset_api_create(self):
         self.login()
         response = self.post(url_for('api.dataservices'), {
-            'title': 'My API'
+            'title': 'My API',
+            'uri': 'https://example.org',
         })
         self.assert201(response)
         self.assertEqual(Dataservice.objects.count(), 1)
+
+    def test_dataset_api_create_with_validation_error(self):
+        self.login()
+        response = self.post(url_for('api.dataservices'), {
+            'uri': 'https://example.org',
+        })
+        self.assert400(response)
+        self.assertEqual(Dataservice.objects.count(), 0)
