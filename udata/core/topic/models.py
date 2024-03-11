@@ -2,7 +2,7 @@ from datetime import datetime
 from flask import url_for
 from mongoengine.fields import DateTimeField
 from mongoengine.signals import pre_save
-from udata.models import db
+from udata.models import db, SpatialCoverage
 from udata.search import reindex
 from udata.tasks import as_task_param
 
@@ -29,6 +29,8 @@ class Topic(db.Document, db.Owned):
     extras = db.ExtrasField()
 
     created_at = DateTimeField(default=datetime.utcnow, required=True)
+
+    spatial = db.EmbeddedDocumentField(SpatialCoverage)
 
     meta = {
         'indexes': [

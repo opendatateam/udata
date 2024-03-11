@@ -1,10 +1,13 @@
 from flask import url_for
 
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.spatial.models import spatial_granularities
 from udata.core.topic.models import Topic
 from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import UserFactory
 from udata.models import Member, Discussion
+from udata.tests.api.test_datasets_api import SAMPLE_GEOM
+from udata.tests.features.territories import create_geozones_fixtures
 
 from . import APITestCase
 
@@ -53,6 +56,8 @@ class TopicsAPITest(APITestCase):
         self.assert200(response)
 
         data = response.json
+        self.assertIn('spatial', data)
+
         for dataset, expected in zip(data['datasets'], [d.fetch() for d in topic.datasets]):
             self.assertEqual(dataset['id'], str(expected.id))
             self.assertEqual(dataset['title'], str(expected.title))
@@ -96,6 +101,26 @@ class TopicsAPITest(APITestCase):
         topic = Topic.objects.first()
         assert topic.owner is None
         assert topic.organization == org
+
+    def test_topic_api_create_spatial(self):
+        paca, _, _ = create_geozones_fixtures()
+        granularity = spatial_granularities[0][0]
+        data = TopicFactory.as_dict()
+        data['datasets'] = [str(d.id) for d in data['datasets']]
+        data['reuses'] = [str(r.id) for r in data['reuses']]
+        data['spatial'] = {
+            'zones': [paca.id],
+            'geom': SAMPLE_GEOM,
+            'granularity': granularity,
+        }
+        self.login()
+        response = self.post(url_for('api.topics'), data)
+        self.assert201(response)
+        self.assertEqual(Topic.objects.count(), 1)
+        topic = Topic.objects.first()
+        self.assertEqual([str(z) for z in topic.spatial.zones], [paca.id])
+        self.assertEqual(topic.spatial.geom, SAMPLE_GEOM)
+        self.assertEqual(topic.spatial.granularity, granularity)
 
     def test_topic_api_update(self):
         '''It should update a topic from the API'''
