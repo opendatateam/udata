@@ -57,14 +57,29 @@ class DataserviceAPITest(APITestCase):
 
         response = self.patch(url_for('api.dataservice', dataservice=dataservice), {
             'title': 'Updated title',
+            'tags': ['hello', 'world'],
+            'private': True,
+            'extras': {
+                'foo': 'bar',
+            }
         })
         self.assert200(response)
 
         self.assertEqual(response.json['title'], 'Updated title')
         self.assertEqual(response.json['uri'], 'https://example.org')
+        self.assertEqual(response.json['tags'], ['hello', 'world'])
+        self.assertEqual(response.json['private'], True)
+        self.assertEqual(response.json['extras'], {
+            'foo': 'bar',
+        })
         dataservice.reload()
         self.assertEqual(dataservice.title, 'Updated title')
         self.assertEqual(dataservice.uri, 'https://example.org')
+        self.assertEqual(dataservice.tags, ['hello', 'world'])
+        self.assertEqual(dataservice.private, True)
+        self.assertEqual(dataservice.extras, {
+            'foo': 'bar',
+        })
 
         response = self.delete(url_for('api.dataservice', dataservice=dataservice))
         self.assert204(response)
@@ -74,7 +89,7 @@ class DataserviceAPITest(APITestCase):
         dataservice.reload()
         self.assertEqual(dataservice.title, 'Updated title')
         self.assertEqual(dataservice.uri, 'https://example.org')
-        self.assertIsNotNone(dataservice.deleted)
+        self.assertIsNotNone(dataservice.deleted_at)
 
         # response = self.get(url_for('api.dataservice', dataservice=dataservice))
         # self.assert410(response)

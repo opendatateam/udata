@@ -45,7 +45,7 @@ class DataserviceAPI(API):
     @api.doc('get_dataservice')
     @api.marshal_with(Dataservice.__fields__)
     def get(self, dataservice):
-        if dataservice.deleted and not OwnablePermission(dataservice).can():
+        if dataservice.deleted_at and not OwnablePermission(dataservice).can():
             api.abort(410, 'Dataservice has been deleted')
         return dataservice
     
@@ -54,13 +54,14 @@ class DataserviceAPI(API):
     @api.expect(Dataservice.__fields__)
     @api.marshal_with(Dataservice.__fields__)
     def patch(self, dataservice):
-        if dataservice.deleted:
+        if dataservice.deleted_at:
             api.abort(410, 'dataservice has been deleted')
 
         OwnablePermission(dataservice).test()
 
         patch(dataservice, request)
-        
+        dataservice.modified_at = datetime.utcnow()
+
         try:
             dataservice.save()
             return dataservice
@@ -71,13 +72,13 @@ class DataserviceAPI(API):
     @api.doc('delete_dataservice')
     @api.response(204, 'dataservice deleted')
     def delete(self, dataservice):
-        if dataservice.deleted:
+        if dataservice.deleted_at:
             api.abort(410, 'dataservice has been deleted')
 
         OwnablePermission(dataservice).test()
 
-        dataservice.deleted = datetime.utcnow()
-        dataservice.last_modified_internal = datetime.utcnow()
+        dataservice.deleted_at = datetime.utcnow()
+        dataservice.modified_at = datetime.utcnow()
         dataservice.save()
 
         return '', 204

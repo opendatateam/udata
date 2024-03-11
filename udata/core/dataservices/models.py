@@ -45,12 +45,22 @@ def generate_fields(cls):
             params['max'] = field.max
         elif isinstance(field, db.BooleanField):
             constructor = fields.Boolean
-        elif isinstance(field, db.ReferenceField):
-            nested_fields = field.__additional_field_info__.get('nested_fields')
-            if nested_fields is None:
-                raise ValueError(f"Reference field for {key} should have a `nested_fields` argument")
+        elif isinstance(field, db.DateTimeField):
+            constructor = fields.ISODateTime
+        elif isinstance(field, db.DictField):
+            constructor = fields.Raw
+        elif isinstance(field, db.ListField):
+            nested_field = field.__additional_field_info__.get('nested_field')
+            if nested_field is None:
+                raise ValueError(f"List field for '{key}' should have a `nested_field` argument")
 
-            constructor = lambda **kwargs: fields.Nested(nested_fields, **kwargs)
+            constructor = lambda **kwargs: fields.List(nested_field, **kwargs)
+        elif isinstance(field, db.ReferenceField):
+            nested_field = field.__additional_field_info__.get('nested_field')
+            if nested_field is None:
+                raise ValueError(f"Reference field for '{key}' should have a `nested_field` argument")
+
+            constructor = lambda **kwargs: fields.Nested(nested_field, **kwargs)
         else:
             raise ValueError(f"Unsupported MongoEngine field type {field.__class__.__name__}")
 
@@ -100,29 +110,37 @@ class Dataservice(WithMetrics, BadgeMixin, db.Owned, db.Document):
         convert_to=fields.String,
     )
 
-    tags = db.TagListField()
+    tags = field(
+        db.TagListField(),
+        nested_field=fields.String,
+    )
 
     private = field(
         db.BooleanField(default=False),
         description='Is the dataservice private to the owner or the organization'
     )
-    # frequency = db.StringField(choices=list(UPDATE_FREQUENCIES.keys()))
-    # temporal_coverage = db.EmbeddedDocumentField(db.DateRange)
-    # spatial = db.EmbeddedDocumentField(SpatialCoverage)
-
-    extras = db.ExtrasField()
-    # harvest = db.EmbeddedDocumentField(HarvestDatasetMetadata)
-
+    
+    extras = field(db.ExtrasField())
 
     contact_point = field(
         db.ReferenceField('ContactPoint', reverse_delete_rule=db.NULLIFY),
-        nested_fields=contact_api_fields.contact_point_fields,
+        nested_field=contact_api_fields.contact_point_fields,
         readonly=True
     )
 
-    created_at_internal = db.DateTimeField(verbose_name=_('Creation date'),
-                                        default=datetime.utcnow, required=True)
-    last_modified_internal = db.DateTimeField(verbose_name=_('Last modification date'),
-                                           default=datetime.utcnow, required=True)
-    deleted = db.DateTimeField()
-    archived = db.DateTimeField()
+    created_at = field(
+        db.DateTimeField(verbose_name=_('Creation date'), default=datetime.utcnow, required=True),
+        readonly=True,
+    )
+    modified_at = field(
+        db.DateTimeField(verbose_name=_('Last modification date'), default=datetime.utcnow, required=True),
+        readonly=True,
+    )
+    deleted_at = field(db.DateTimeField(), readonly=True)
+    archived_at = field(db.DateTimeField(), readonly=True)
+
+    # TODO
+    # frequency = db.StringField(choices=list(UPDATE_FREQUENCIES.keys()))
+    # temporal_coverage = db.EmbeddedDocumentField(db.DateRange)
+    # spatial = db.EmbeddedDocumentField(SpatialCoverage)
+    # harvest = db.EmbeddedDocumentField(HarvestDatasetMetadata)
