@@ -1,4 +1,6 @@
+import datetime
 from flask import request
+from flask_login import current_user
 import mongoengine
 
 from udata.api import api, API
@@ -22,6 +24,8 @@ class DataservicesAPI(API):
     @api.marshal_with(Dataservice.__fields__, code=201)
     def post(self):
         dataservice = Dataservice(**request.json)
+        dataservice.owner = current_user._get_current_object()
+
         try:
             dataservice.save()
         except mongoengine.errors.ValidationError as e:
@@ -29,6 +33,12 @@ class DataservicesAPI(API):
 
         return dataservice, 201
     
+
+def patch(obj, request): 
+    for key, value in request.json.items():
+        field = obj.__fields__.get(key)
+        if field is not None and not field.readonly:
+            setattr(obj, key, value)
 
 @ns.route('/<dataservice:dataservice>/', endpoint='dataservice')
 class DataserviceAPI(API):
@@ -38,4 +48,23 @@ class DataserviceAPI(API):
         if dataservice.deleted and not OwnablePermission(dataservice).can():
             api.abort(410, 'Dataservice has been deleted')
         return dataservice
+    
+    @api.secure
+    @api.doc('update_dataservice', responses={400: 'Validation error'})
+    @api.expect(Dataservice.__fields__)
+    @api.marshal_with(Dataservice.__fields__)
+    def patch(self, dataservice):
+        if dataservice.deleted:
+            api.abort(410, 'dataservice has been deleted')
+
+        OwnablePermission(dataservice).test()
+
+        patch(dataservice, request)
+        
+        try:
+            dataservice.save()
+            return dataservice
+        except mongoengine.errors.ValidationError as e:
+            api.abort(400, e.message)
+
 

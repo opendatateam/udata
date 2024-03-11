@@ -52,6 +52,17 @@ class DataserviceAPITest(APITestCase):
         response = self.get(url_for('api.dataservice', dataservice=dataservice))
         self.assert200(response)
 
+        self.assertEqual(response.json['title'], 'My API')
+        self.assertEqual(response.json['uri'], 'https://example.org')
+
+        response = self.patch(url_for('api.dataservice', dataservice=dataservice), {
+            'title': 'Updated title',
+        })
+        self.assert200(response)
+
+        self.assertEqual(response.json['title'], 'Updated title')
+        self.assertEqual(response.json['uri'], 'https://example.org')
+
     def test_dataset_api_create_with_validation_error(self):
         self.login()
         response = self.post(url_for('api.dataservices'), {
