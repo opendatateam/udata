@@ -9,6 +9,7 @@
 - Allow harvesting of big catalog (bigger than 16MB) [#2980](https://github.com/opendatateam/udata/pull/2980) [2985](https://github.com/opendatateam/udata/pull/2985)
 - Add downloads' count to organizations CSV [#2973](https://github.com/opendatateam/udata/pull/2973)
 - Prevent geozones listed ad `deleted` to be loaded [#2983](https://github.com/opendatateam/udata/pull/2983)
+- Topic: add spatial field [#2988](https://github.com/opendatateam/udata/pull/2988)
 
 ## 7.0.4 (2024-02-27)
 
