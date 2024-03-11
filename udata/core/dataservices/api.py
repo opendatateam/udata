@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from flask import request
 from flask_login import current_user
 import mongoengine
@@ -67,4 +67,18 @@ class DataserviceAPI(API):
         except mongoengine.errors.ValidationError as e:
             api.abort(400, e.message)
 
+    @api.secure
+    @api.doc('delete_dataservice')
+    @api.response(204, 'dataservice deleted')
+    def delete(self, dataservice):
+        if dataservice.deleted:
+            api.abort(410, 'dataservice has been deleted')
+
+        OwnablePermission(dataservice).test()
+
+        dataservice.deleted = datetime.utcnow()
+        dataservice.last_modified_internal = datetime.utcnow()
+        dataservice.save()
+
+        return '', 204
 

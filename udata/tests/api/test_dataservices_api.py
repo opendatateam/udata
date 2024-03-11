@@ -62,6 +62,22 @@ class DataserviceAPITest(APITestCase):
 
         self.assertEqual(response.json['title'], 'Updated title')
         self.assertEqual(response.json['uri'], 'https://example.org')
+        dataservice.reload()
+        self.assertEqual(dataservice.title, 'Updated title')
+        self.assertEqual(dataservice.uri, 'https://example.org')
+
+        response = self.delete(url_for('api.dataservice', dataservice=dataservice))
+        self.assert204(response)
+
+        self.assertEqual(Dataservice.objects.count(), 1)
+
+        dataservice.reload()
+        self.assertEqual(dataservice.title, 'Updated title')
+        self.assertEqual(dataservice.uri, 'https://example.org')
+        self.assertIsNotNone(dataservice.deleted)
+
+        # response = self.get(url_for('api.dataservice', dataservice=dataservice))
+        # self.assert410(response)
 
     def test_dataset_api_create_with_validation_error(self):
         self.login()
