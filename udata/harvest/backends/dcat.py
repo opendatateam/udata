@@ -3,12 +3,17 @@ import logging
 from rdflib import Graph, URIRef
 from rdflib.namespace import RDF
 import xml.etree.ElementTree as ET
+import boto3
+from flask import current_app
+from datetime import date
+import json
 from typing import List
 
 from udata.rdf import (
     DCAT, DCT, HYDRA, SPDX, namespace_manager, guess_format, url_from_rdf
 )
 from udata.core.dataset.rdf import dataset_from_rdf
+from udata.storage.s3 import store_as_json, get_from_json
 
 from .base import BaseBackend
 
@@ -58,10 +63,30 @@ class DcatBackend(BaseBackend):
         '''List all datasets for a given ...'''
         fmt = self.get_format()
         graphs = self.parse_graph(self.source.url, fmt)
-        self.job.data = {
-            'graphs': [graph.serialize(format=fmt, indent=None) for graph in graphs],
-            'format': fmt,
-        }
+
+        self.job.data = { 'format': fmt }
+
+        serialized_graphs = [graph.serialize(format=fmt, indent=None) for graph in graphs]
+
+        # The official MongoDB document size in 16MB. The default value here is 15MB to account for other fields in the document (and for difference between * 1024 vs * 1000).
+        max_harvest_graph_size_in_mongo = current_app.config.get('HARVEST_MAX_CATALOG_SIZE_IN_MONGO')
+        if max_harvest_graph_size_in_mongo is None:
+            max_harvest_graph_size_in_mongo = 15 * 1000 * 1000
+
+        bucket = current_app.config.get('HARVEST_GRAPHS_S3_BUCKET')
+
+        if bucket is not None and sum([len(g.encode('utf-8')) for g in serialized_graphs]) >= max_harvest_graph_size_in_mongo:
+            prefix = current_app.config.get('HARVEST_GRAPHS_S3_FILENAME_PREFIX') or ''
+
+            # TODO: we could store each page in independant files to allow downloading only the require page in
+            # subsequent jobs. (less data to download in each job)
+            filename = f'{prefix}harvest_{self.job.id}_{date.today()}.json'
+
+            store_as_json(bucket, filename, serialized_graphs)
+
+            self.job.data['filename'] = filename
+        else:
+            self.job.data['graphs'] = serialized_graphs
 
     def get_format(self):
         fmt = guess_format(self.source.url)
@@ -127,7 +152,19 @@ class DcatBackend(BaseBackend):
         if item.remote_id == 'None':
             raise ValueError('The DCT.identifier is missing on this DCAT.Dataset record')
         graph = Graph(namespace_manager=namespace_manager)
-        data = self.job.data['graphs'][item.kwargs['page']]
+
+        if self.job.data.get('graphs') is not None:
+            graphs = self.job.data['graphs']
+        else:
+            bucket = current_app.config.get('HARVEST_GRAPHS_S3_BUCKET')
+            if bucket is None:
+                raise ValueError(f"No bucket configured but the harvest job item {item.id} on job {self.job.id} doesn't have a graph in MongoDB.")
+
+            graphs = get_from_json(bucket, self.job.data['filename'])
+            if graphs is None:
+                raise ValueError(f"The file '{self.job.data['filename']}' is missing in S3 bucket '{bucket}'")
+
+        data = graphs[item.kwargs['page']]
         format = self.job.data['format']
 
         graph.parse(data=bytes(data, encoding='utf8'), format=format)

@@ -122,9 +122,12 @@ click==8.0.0
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   flask
+    #   geomet
     #   pip-tools
-colorama==0.4.4
-    # via twine
+colorama==0.4.6
+    # via
+    #   -c requirements/install.pip
+    #   twine
 cryptography==2.8
     # via
     #   -c requirements/install.pip
@@ -270,6 +273,11 @@ geojson==2.5.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
+geomet==1.1.0
+    # via
+    #   -c requirements/install.pip
+    #   -c requirements/test.pip
+    #   -r requirements/install.in
 html2text==2019.9.26
     # via
     #   -c requirements/install.pip
@@ -352,6 +360,11 @@ kombu[redis]==4.4.0
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   celery
+langdetect==1.0.9
+    # via
+    #   -c requirements/install.pip
+    #   -c requirements/test.pip
+    #   -r requirements/install.in
 lxml==4.4.2
     # via
     #   -c requirements/install.pip
@@ -553,6 +566,7 @@ six==1.16.0
     #   flask-cors
     #   isodate
     #   jsonschema
+    #   langdetect
     #   python-dateutil
     #   readme-renderer
     #   requests-mock
@@ -596,7 +610,6 @@ twine==3.3.0
     # via -r requirements/develop.in
 typing-extensions==4.7.1
     # via
-    #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   importlib-metadata
     #   platformdirs
