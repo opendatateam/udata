@@ -40,6 +40,8 @@ class DataserviceAPITest(APITestCase):
 
     def test_dataset_api_create(self):
         self.login()
+        datasets = DatasetFactory.create_batch(3)
+
         response = self.post(url_for('api.dataservices'), {
             'title': 'My API',
             'uri': 'https://example.org',
@@ -59,6 +61,7 @@ class DataserviceAPITest(APITestCase):
             'title': 'Updated title',
             'tags': ['hello', 'world'],
             'private': True,
+            'datasets': [datasets[0].id, datasets[2].id],
             'extras': {
                 'foo': 'bar',
             }
@@ -69,6 +72,8 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(response.json['uri'], 'https://example.org')
         self.assertEqual(response.json['tags'], ['hello', 'world'])
         self.assertEqual(response.json['private'], True)
+        self.assertEqual(response.json['datasets'][0]['title'], datasets[0].title)
+        self.assertEqual(response.json['datasets'][1]['title'], datasets[2].title)
         self.assertEqual(response.json['extras'], {
             'foo': 'bar',
         })
@@ -77,6 +82,8 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(dataservice.uri, 'https://example.org')
         self.assertEqual(dataservice.tags, ['hello', 'world'])
         self.assertEqual(dataservice.private, True)
+        self.assertEqual(dataservice.datasets[0].title, datasets[0].title)
+        self.assertEqual(dataservice.datasets[1].title, datasets[2].title)
         self.assertEqual(dataservice.extras, {
             'foo': 'bar',
         })
@@ -93,6 +100,9 @@ class DataserviceAPITest(APITestCase):
 
         # response = self.get(url_for('api.dataservice', dataservice=dataservice))
         # self.assert410(response)
+
+
+
 
     def test_dataset_api_create_with_validation_error(self):
         self.login()
