@@ -2,13 +2,18 @@ import logging
 
 from rdflib import Graph, URIRef
 from rdflib.namespace import RDF
-import lxml.etree as lET
+import lxml.etree as ET
+import boto3
+from flask import current_app
+from datetime import date
+import json
 from typing import List
 
 from udata.rdf import (
     DCAT, DCT, HYDRA, SPDX, namespace_manager, guess_format, url_from_rdf
 )
 from udata.core.dataset.rdf import dataset_from_rdf
+from udata.storage.s3 import store_as_json, get_from_json
 
 from .base import BaseBackend
 
@@ -58,10 +63,30 @@ class DcatBackend(BaseBackend):
         '''List all datasets for a given ...'''
         fmt = self.get_format()
         graphs = self.parse_graph(self.source.url, fmt)
-        self.job.data = {
-            'graphs': [graph.serialize(format=fmt, indent=None) for graph in graphs],
-            'format': fmt,
-        }
+
+        self.job.data = { 'format': fmt }
+
+        serialized_graphs = [graph.serialize(format=fmt, indent=None) for graph in graphs]
+
+        # The official MongoDB document size in 16MB. The default value here is 15MB to account for other fields in the document (and for difference between * 1024 vs * 1000).
+        max_harvest_graph_size_in_mongo = current_app.config.get('HARVEST_MAX_CATALOG_SIZE_IN_MONGO')
+        if max_harvest_graph_size_in_mongo is None:
+            max_harvest_graph_size_in_mongo = 15 * 1000 * 1000
+
+        bucket = current_app.config.get('HARVEST_GRAPHS_S3_BUCKET')
+
+        if bucket is not None and sum([len(g.encode('utf-8')) for g in serialized_graphs]) >= max_harvest_graph_size_in_mongo:
+            prefix = current_app.config.get('HARVEST_GRAPHS_S3_FILENAME_PREFIX') or ''
+
+            # TODO: we could store each page in independant files to allow downloading only the require page in
+            # subsequent jobs. (less data to download in each job)
+            filename = f'{prefix}harvest_{self.job.id}_{date.today()}.json'
+
+            store_as_json(bucket, filename, serialized_graphs)
+
+            self.job.data['filename'] = filename
+        else:
+            self.job.data['graphs'] = serialized_graphs
 
     def get_format(self):
         fmt = guess_format(self.source.url)
@@ -127,7 +152,19 @@ class DcatBackend(BaseBackend):
         if item.remote_id == 'None':
             raise ValueError('The DCT.identifier is missing on this DCAT.Dataset record')
         graph = Graph(namespace_manager=namespace_manager)
-        data = self.job.data['graphs'][item.kwargs['page']]
+
+        if self.job.data.get('graphs') is not None:
+            graphs = self.job.data['graphs']
+        else:
+            bucket = current_app.config.get('HARVEST_GRAPHS_S3_BUCKET')
+            if bucket is None:
+                raise ValueError(f"No bucket configured but the harvest job item {item.id} on job {self.job.id} doesn't have a graph in MongoDB.")
+
+            graphs = get_from_json(bucket, self.job.data['filename'])
+            if graphs is None:
+                raise ValueError(f"The file '{self.job.data['filename']}' is missing in S3 bucket '{bucket}'")
+
+        data = graphs[item.kwargs['page']]
         format = self.job.data['format']
 
         graph.parse(data=bytes(data, encoding='utf8'), format=format)
@@ -198,7 +235,7 @@ class CswDcatBackend(DcatBackend):
                              headers=headers)
         response.raise_for_status()
         content = response.content
-        tree = lET.fromstring(content)
+        tree = ET.fromstring(content)
         if tree.tag == '{' + OWS_NAMESPACE + '}ExceptionReport':
             raise ValueError(f'Failed to query CSW:\n{content}')
         while tree:
@@ -209,7 +246,7 @@ class CswDcatBackend(DcatBackend):
                 break
             for child in search_results:
                 subgraph = Graph(namespace_manager=namespace_manager)
-                subgraph.parse(data=lET.tostring(child), format=fmt)
+                subgraph.parse(data=ET.tostring(child), format=fmt)
                 graph += subgraph
 
                 for node in subgraph.subjects(RDF.type, DCAT.Dataset):
@@ -226,7 +263,7 @@ class CswDcatBackend(DcatBackend):
             start = next_record
             page += 1
 
-            tree = lET.fromstring(
+            tree = ET.fromstring(
                 self.post(url, data=body.format(start=start, schema=self.DCAT_SCHEMA),
                           headers=headers).content)
 
@@ -251,18 +288,18 @@ class CswIsoXsltDcatBackend(DcatBackend):
         '''
 
         # The XSLT transform failed on some catalog with "Cannot resolve URI https://ogc.geo-ide.developpement-durable.gouv.fr/csw/all-dataset?REQUEST=GetRecordById&SERVICE=CSW&VERSION=2.0.2&RESULTTYPE=results&elementSetName=full&TYPENAMES=gmd:MD_Metadata&OUTPUTSCHEMA=http://www.isotc211.org/2005/gmd&ID=fr-120066022-jdd-9bffd34b-916b-4dfd-a446-b7c5ec05291a", this EmptyResolver disable something (not sure what) and allow to continue fetching the catalog.
-        class EmptyResolver(lET.Resolver):
+        class EmptyResolver(ET.Resolver):
             def resolve(self, url, pubid, context):
                 print(f"Resolve {url} to empty")
                 return self.resolve_empty(context)
 
-        parser = lET.XMLParser()
+        parser = ET.XMLParser()
         parser.resolvers.add(EmptyResolver())
 
         # Load XSLT
         xslURL = "https://raw.githubusercontent.com/SEMICeu/iso-19139-to-dcat-ap/master/iso-19139-to-dcat-ap.xsl"
-        xsl = lET.fromstring(self.get(xslURL).content, parser=parser)
-        transform = lET.XSLT(xsl)
+        xsl = ET.fromstring(self.get(xslURL).content, parser=parser)
+        transform = ET.XSLT(xsl)
 
         # Start querying and parsing graph
         body = '''<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
@@ -284,7 +321,7 @@ class CswIsoXsltDcatBackend(DcatBackend):
                              headers=headers)
         response.raise_for_status()
 
-        tree_before_transform = lET.fromstring(response.content)
+        tree_before_transform = ET.fromstring(response.content)
         tree = transform(tree_before_transform)
 
         while tree:
@@ -298,7 +335,7 @@ class CswIsoXsltDcatBackend(DcatBackend):
                 break
 
             subgraph = Graph(namespace_manager=namespace_manager)
-            subgraph.parse(lET.tostring(tree), format=fmt)
+            subgraph.parse(ET.tostring(tree), format=fmt)
 
             if not subgraph.subjects(RDF.type, DCAT.Dataset):
                 raise ValueError("Failed to fetch CSW content")
@@ -321,7 +358,7 @@ class CswIsoXsltDcatBackend(DcatBackend):
                           headers=headers)
             response.raise_for_status()
 
-            tree_before_transform = lET.fromstring(response.content)
+            tree_before_transform = ET.fromstring(response.content)
             tree = transform(tree_before_transform)
 
         return graphs

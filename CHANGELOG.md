@@ -7,6 +7,9 @@
 - Fix: updating a dataset without `private` do not reset `private` to `False`, the previous saved value is kept [#2955](https://github.com/opendatateam/udata/pull/2955)
 - Fix: return the correct error when no `Content-Type` is sent instead of 500 [#2967](https://github.com/opendatateam/udata/pull/2967)
 - Improve documentation for API errors [#2952](https://github.com/opendatateam/udata/pull/2965)
+- Allow harvesting of big catalog (bigger than 16MB) [#2980](https://github.com/opendatateam/udata/pull/2980) [2985](https://github.com/opendatateam/udata/pull/2985)
+- Add downloads' count to organizations CSV [#2973](https://github.com/opendatateam/udata/pull/2973)
+- Prevent geozones listed ad `deleted` to be loaded [#2983](https://github.com/opendatateam/udata/pull/2983)
 
 ## 7.0.4 (2024-02-27)
 
@@ -26,6 +29,7 @@
   - DCT.accessRights [0..1]
 - Generate translations file [#2974](https://github.com/opendatateam/udata/pull/2974)
 - Fix contact point test with missing translation [#2977](https://github.com/opendatateam/udata/pull/2977)
+- Remove documentation about maintenance branches [#2979](https://github.com/opendatateam/udata/pull/2979)
 
 ## 7.0.3 (2024-02-15)
 
