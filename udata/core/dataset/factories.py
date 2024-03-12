@@ -21,6 +21,10 @@ class DatasetFactory(ModelFactory):
     frequency = 'unknown'
     resources = factory.LazyAttribute(lambda o: ResourceFactory.build_batch(o.nb_resources))
 
+    @factory.lazy_attribute
+    def resources(self):
+        return [ResourceFactory()]
+
     class Params:
         geo = factory.Trait(
             spatial=factory.SubFactory(SpatialCoverageFactory)
@@ -38,6 +42,10 @@ class VisibleDatasetFactory(DatasetFactory):
     @factory.lazy_attribute
     def resources(self):
         return [ResourceFactory()]
+
+
+class HiddenDatasetFactory(DatasetFactory):
+    private = True
 
 
 class ChecksumFactory(ModelFactory):
