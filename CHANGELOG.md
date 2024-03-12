@@ -8,6 +8,7 @@
 - Improve documentation for API errors [#2952](https://github.com/opendatateam/udata/pull/2965)
 - Allow harvesting of big catalog (bigger than 16MB) [#2980](https://github.com/opendatateam/udata/pull/2980) [2985](https://github.com/opendatateam/udata/pull/2985)
 - Add downloads' count to organizations CSV [#2973](https://github.com/opendatateam/udata/pull/2973)
+- Add 3 new badges to the organization model : `company`, `association` and `local authority` [#2984](https://github.com/opendatateam/udata/pull/2984)
 - Prevent geozones listed ad `deleted` to be loaded [#2983](https://github.com/opendatateam/udata/pull/2983)
 
 ## 7.0.4 (2024-02-27)
