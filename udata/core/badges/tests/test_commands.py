@@ -2,7 +2,8 @@ import pytest
 
 from tempfile import NamedTemporaryFile
 
-from udata.models import Badge, CERTIFIED, PUBLIC_SERVICE
+from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
+from udata.models import Badge
 from udata.core.organization.factories import OrganizationFactory
 
 

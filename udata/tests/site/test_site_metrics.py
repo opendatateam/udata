@@ -4,7 +4,8 @@ from udata.core.dataset.factories import DatasetFactory, VisibleDatasetFactory, 
 from udata.core.reuse.factories import VisibleReuseFactory
 from udata.harvest.tests.factories import HarvestSourceFactory
 from udata.core.site.factories import SiteFactory
-from udata.models import Badge, PUBLIC_SERVICE
+from udata.models import Badge
+from udata.core.organization.constants import PUBLIC_SERVICE
 
 
 @pytest.mark.usefixtures('clean_db')
