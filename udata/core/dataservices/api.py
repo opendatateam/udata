@@ -1,18 +1,11 @@
 from datetime import datetime
-from bson import ObjectId
 from flask import request
 from flask_login import current_user
 import mongoengine
-from mongoengine.fields import ListField, StringField
-
 
 from udata.api import api, API
-from udata.auth import admin_permission
+from udata.api_fields import patch
 from udata.core.dataset.permissions import OwnablePermission
-from udata.core.discussions.models import Discussion
-from udata.core.spam.fields import potential_spam_fields
-from udata.core.spam.models import POTENTIAL_SPAM
-from udata.utils import id_or_404
 from .models import Dataservice
 from udata.models import db
 
@@ -35,19 +28,6 @@ class DataservicesAPI(API):
             api.abort(400, e.message)
 
         return dataservice, 201
-
-
-def patch(obj, request): 
-    for key, value in request.json.items():
-        field = obj.__fields__.get(key)
-        if field is not None and not field.readonly:
-            model_attribute = getattr(obj.__class__, key)
-            if isinstance(model_attribute, mongoengine.fields.ListField) and isinstance(model_attribute.field, mongoengine.fields.ReferenceField):
-                value = [ObjectId(id) for id in value]
-            if isinstance(field, mongoengine.fields.ReferenceField):
-                value = ObjectId(value)
-
-            setattr(obj, key, value)
 
 @ns.route('/<dataservice:dataservice>/', endpoint='dataservice')
 class DataserviceAPI(API):
