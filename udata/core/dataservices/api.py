@@ -16,8 +16,8 @@ ns = api.namespace('dataservices', 'Dataservices related operations')
 class DataservicesAPI(API):
     @api.secure
     @api.doc('create_dataservice', responses={400: 'Validation error'})
-    @api.expect(Dataservice.__fields__)
-    @api.marshal_with(Dataservice.__fields__, code=201)
+    @api.expect(Dataservice.__write_fields__)
+    @api.marshal_with(Dataservice.__read_fields__, code=201)
     def post(self):
         dataservice = Dataservice(**request.json)
         dataservice.owner = current_user._get_current_object()
@@ -32,7 +32,7 @@ class DataservicesAPI(API):
 @ns.route('/<dataservice:dataservice>/', endpoint='dataservice')
 class DataserviceAPI(API):
     @api.doc('get_dataservice')
-    @api.marshal_with(Dataservice.__fields__)
+    @api.marshal_with(Dataservice.__read_fields__)
     def get(self, dataservice):
         if dataservice.deleted_at and not OwnablePermission(dataservice).can():
             api.abort(410, 'Dataservice has been deleted')
@@ -40,8 +40,8 @@ class DataserviceAPI(API):
     
     @api.secure
     @api.doc('update_dataservice', responses={400: 'Validation error'})
-    @api.expect(Dataservice.__fields__)
-    @api.marshal_with(Dataservice.__fields__)
+    @api.expect(Dataservice.__write_fields__)
+    @api.marshal_with(Dataservice.__read_fields__)
     def patch(self, dataservice):
         if dataservice.deleted_at:
             api.abort(410, 'dataservice has been deleted')

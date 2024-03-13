@@ -70,8 +70,7 @@ class Dataservice(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     contact_point = field(
         db.ReferenceField('ContactPoint', reverse_delete_rule=db.NULLIFY),
-        convert_to=contact_api_fields.contact_point_fields,
-        readonly=True
+        nested_fields=contact_api_fields.contact_point_fields,
     )
 
     created_at = field(
