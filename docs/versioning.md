@@ -6,8 +6,7 @@ udata follows [Python PEP 440 on versioning][pep440] to version its published re
 
 ### Branches management
 
-There is a main branch on the [udata git repository][github], `master`,
-and some maintenance branches `vX.Y`
+There is a main branch on the [udata git repository][github], `master` and some temporary feature branches.
 
 The `master` is the stable development branch on which:
 
@@ -19,16 +18,11 @@ The `master` is the stable development branch on which:
 - translations are done
 - releases are done
 
-The `vX.Y` maintenance branches host:
-
-- the bug fixes and security upgrades associated to these versions only
-- the backported bug fixes and security upgrades
-
-Every minor version has a maintenance branch `vX.Y` and every version has a git tag `vX.Y.Z`.
+Every version has a git tag `vX.Y.Z`.
 
 Otherwise the version is `X.Y.Z.dev` (1.1.7.dev) so you can easily see when you are not using a stable release.
 
-The contents of each version (expected or real) is tracked trough [issues][], [pull requests][pulls] and [milestones][].
+The contents of each version (expected or real) is tracked trough [issues][], [pull requests][pulls] and sometimes [discussions][].
 
 
 ## Releasing
@@ -65,32 +59,6 @@ The step to make a release are:
 9. check on [PyPI](https://pypi.org/project/udata/#history) that the new release is present
 10. celebrate!
 
-## Branching
-
-We need to branch the master each time a minor version development cycle starts:
-
-- create a branch for the current minor version. **E.g.**: if the current master version is `1.1.8.dev`, create a `v1.1` branch with `git checkout -b v1.1`
-- publish the branch to the official repository: `git push -u origin vX.Y`
-- get the `master` branch back: `git checkout master`
-- increment the version in `udata/__init__.py`: **E.g.** `1.1.8.dev` become `1.2.0.dev`
-
-### Fixing an old version
-
-Switch on the maintenance branch you need:
-
-```shell
-git checkout vX.Y
-```
-
-Create a new branch from the maintenance one and perform a pull request from it:
-
-```shell
-git checkout -b my-fix
-# fix fix fix
-git commit
-git push -u myrepository my-fix
-```
-
 ## Feature branches
 
 Sometimes a new feature or an EPIC requires more than one pull request and a lot of testing.
@@ -110,7 +78,7 @@ It's up to the developers and system administrators to read the [changelog](chan
 [github]: https://github.com/opendatateam/udata
 [issues]: https://github.com/opendatateam/udata/issues
 [pulls]: https://github.com/opendatateam/udata/pulls
-[milestones]: https://github.com/opendatateam/udata/milestones
+[discussions]: https://github.com/opendatateam/udata/discussions
 [CircleCI]: https://circleci.com/gh/opendatateam/udata
 [pep440]: https://www.python.org/dev/peps/pep-0440/
 [pep440-local]: https://www.python.org/dev/peps/pep-0440/#local-version-segments

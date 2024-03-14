@@ -1,0 +1,11 @@
+{% extends 'mail/base.txt' %}
+
+{% block body %}
+{{ _('%(user)s has identified your organization "%(name)s" as an association',
+  name=organization.name,
+  user=badge.created_by.fullname
+) }}.
+
+{{ _('You can see the badge on this page:') }}
+{{ organization.external_url }}
+{% endblock %}
