@@ -63,6 +63,8 @@ topic_fields = apiv2.model('Topic', {
     'private': fields.Boolean(description='Is the topic private'),
     'created_at': fields.ISODateTime(
         description='The topic creation date', readonly=True),
+    'last_modified': fields.ISODateTime(
+        description='The topic last modification date', readonly=True),
     'organization': fields.Nested(
         org_ref_fields, allow_null=True,
         description='The publishing organization', readonly=True),
