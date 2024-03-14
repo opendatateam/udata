@@ -41,6 +41,9 @@ class TopicsAPITest(APITestCase):
         topic_response = self.get(url_for('apiv2.topic', topic=topic))
         assert topic_response.status_code == 200
 
+        assert topic_response.json['created_at'] is not None
+        assert topic_response.json['last_modified'] is not None
+
         response = self.get(topic_response.json['datasets']['href'])
         data = response.json
         assert all(str(d.id) in (_d['id'] for _d in data['data']) for d in topic.datasets)
