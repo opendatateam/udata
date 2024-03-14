@@ -290,16 +290,16 @@ catalog_schema_fields = api.model('CatalogSchema', {
     'schema_url': fields.String(description="Often the link to the latest version"),
     'schema_type': fields.String(enum=['tableschema', 'datapackage', 'jsonschema', 'other']),
     'contact': fields.String(),
-    'examples': fields.List(fields.Nested({
+    'examples': fields.List(fields.Nested(api.model('CatalogSchema.example', {
         'title': fields.String(),
         'path': fields.String(),
-    })),
+    }))),
     'labels': fields.List(fields.String()),
     'consolidation_dataset_id': fields.String(),
-    'versions': fields.List(fields.Nested({
+    'versions': fields.List(fields.Nested(api.model('CatalogSchema.version', {
         'version_name': fields.String(),
         'schema_url': fields.String(),
-    })),
+    }))),
     'external_doc': fields.String(),
     'external_tool': fields.String(description="Link to tools to create a file with this schema"),
     'homepage': fields.String(),
