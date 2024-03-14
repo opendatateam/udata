@@ -282,9 +282,28 @@ resource_type_fields = api.model('ResourceType', {
     'label': fields.String(description='The resource type display name')
 })
 
-
+# follow the specification of https://schema.data.gouv.fr/schemas/schemas.json
 catalog_schema_fields = api.model('CatalogSchema', {
-    'id': fields.String(description='The schema identifier'),
-    'label': fields.String(description='The schema display name'),
-    'versions': fields.List(fields.String, description='The available versions of the schema'),
+    'name': fields.String(),
+    'title': fields.String(),
+    'description': fields.String(),
+    'schema_url': fields.String(description="Often the link to the latest version"),
+    'schema_type': fields.String(enum=['tableschema', 'datapackage', 'jsonschema', 'other']),
+    'contact': fields.String(),
+    'examples': fields.List(fields.Nested({
+        'title': fields.String(),
+        'path': fields.String(),
+    })),
+    'labels': fields.List(fields.String()),
+    'consolidation_dataset_id': fields.String(),
+    'versions': fields.List(fields.Nested({
+        'version_name': fields.String(),
+        'schema_url': fields.String(),
+    })),
+    'external_doc': fields.String(),
+    'external_tool': fields.String(description="Link to tools to create a file with this schema"),
+    'homepage': fields.String(),
+    'datapackage_title': fields.String(description="Only present if the schema is inside a datapackage"),
+    'datapackage_name': fields.String(description="Only present if the schema is inside a datapackage"),
+    'datapackage_description': fields.String(description="Only present if the schema is inside a datapackage"),
 })

@@ -1781,7 +1781,7 @@ class DatasetSchemasAPITest:
         response = api.get(url_for('api.schemas'))
 
         assert200(response)
-        assert response.json == ResourceSchemaMockData.get_expected_v1_result_from_mock_data()
+        assert response.json == ResourceSchemaMockData.get_expected_results_from_mock_data()
 
     @pytest.mark.options(SCHEMA_CATALOG_URL=None)
     def test_dataset_schemas_api_list_no_catalog_url(self, api):
@@ -1811,7 +1811,7 @@ class DatasetSchemasAPITest:
         rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
         response = api.get(url_for('api.schemas'))
         assert200(response)
-        assert response.json == ResourceSchemaMockData.get_expected_v1_result_from_mock_data()
+        assert response.json == ResourceSchemaMockData.get_expected_results_from_mock_data()
         assert cache_mock_set.called
 
         # Endpoint becomes unavailable
@@ -1820,7 +1820,7 @@ class DatasetSchemasAPITest:
         # Long term cache is used
         response = api.get(url_for('api.schemas'))
         assert200(response)
-        assert response.json == ResourceSchemaMockData.get_expected_v1_result_from_mock_data()
+        assert response.json == ResourceSchemaMockData.get_expected_results_from_mock_data()
 
 
 @pytest.mark.usefixtures('clean_db')

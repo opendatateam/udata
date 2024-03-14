@@ -37,6 +37,8 @@ __all__ = (
     'ResourceSchema'
 )
 
+NON_ASSIGNABLE_SCHEMA_TYPES = ['datapackage']
+
 log = logging.getLogger(__name__)
 
 #: Udata frequencies with their labels
@@ -1011,23 +1013,6 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
 class ResourceSchema(object):
     @staticmethod
     @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
-    def objects():
-        '''
-        This rewrite is used in API returns.
-        It could be possible in the future to change the API with a breaking change to return
-        the full schema information from the catalog.
-        '''
-        schemas = ResourceSchema.all()
-        return [
-            {
-                'id': s['name'],
-                'label': s['title'],
-                'versions': [d['version_name'] for d in s['versions']],
-            } for s in schemas
-        ]
-
-    @staticmethod
-    @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
     def all():
         '''
         Get a list of schemas from a schema catalog endpoint.
@@ -1059,6 +1044,9 @@ class ResourceSchema(object):
             raise SchemasCacheUnavailableException('No content in cache for schema catalog')
 
         return schemas
+    
+    def assignable_schemas():
+        return [s for s in ResourceSchema.all() if s.get('schema_type') not in NON_ASSIGNABLE_SCHEMA_TYPES]
 
     def get_schema_by_name(name: str):
         for schema in ResourceSchema.all():
