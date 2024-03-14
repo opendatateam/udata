@@ -589,7 +589,7 @@ class ResourceSchemaTest:
 
         mocker.patch.object(cache, 'get', return_value=ResourceSchemaMockData.get_mock_data()['schemas'])
         rmock.get('https://example.com/schemas', status_code=500)
-        assert ResourceSchemaMockData.get_expected_results_from_mock_data() == ResourceSchema.all()
+        assert ResourceSchemaMockData.get_all_schemas_from_mock_data(with_datapackage_info=False) == ResourceSchema.all()
         assert rmock.call_count == 2
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')

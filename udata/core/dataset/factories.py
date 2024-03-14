@@ -83,8 +83,61 @@ class ResourceSchemaMockData():
         return json.load(open(join(ROOT_DIR, 'tests', 'schemas.json')))
     
     @staticmethod
-    def get_expected_results_from_mock_data():
-        return [
+    def get_all_schemas_from_mock_data(with_datapackage_info = True):
+        '''
+        with_datapackage_info is here to allow testing with or without marshalling (marshalling add None for inexistant datapackage_* fields)
+        '''
+        schemas = ResourceSchemaMockData.get_expected_assignable_schemas_from_mock_data(with_datapackage_info)
+
+        datapackage = {
+            "name": "etalab/schema-irve",
+            "title": "Infrastructures de recharges pour v\u00e9hicules \u00e9lectriques (IRVE)",
+            "description": "data package contenant 2 sch\u00e9mas : IRVE statique et IRVE dynamique",
+            "schema_url": "https://schema.data.gouv.fr/schemas/etalab/schema-irve/latest/datapackage.json",
+            "schema_type": "datapackage",
+            "contact": "contact@transport.beta.gouv.fr",
+            "examples": [],
+            "labels": [
+                "Socle Commun des Donn\u00e9es Locales",
+                "transport.data.gouv.fr"
+            ],
+            "consolidation_dataset_id": "5448d3e0c751df01f85d0572",
+            "versions": [
+                {
+                    "version_name": "2.2.0",
+                    "schema_url": "https://schema.data.gouv.fr/schemas/etalab/schema-irve/2.2.0/datapackage.json"
+                },
+                {
+                    "version_name": "2.2.1",
+                    "schema_url": "https://schema.data.gouv.fr/schemas/etalab/schema-irve/2.2.1/datapackage.json"
+                },
+                {
+                    "version_name": "2.3.0",
+                    "schema_url": "https://schema.data.gouv.fr/schemas/etalab/schema-irve/2.3.0/datapackage.json"
+                },
+                {
+                    "version_name": "2.3.1",
+                    "schema_url": "https://schema.data.gouv.fr/schemas/etalab/schema-irve/2.3.1/datapackage.json"
+                }
+            ],
+            "external_doc": "https://doc.transport.data.gouv.fr/producteurs/infrastructures-de-recharge-de-vehicules-electriques-irve",
+            "external_tool": None,
+            "homepage": "https://github.com/etalab/schema-irve.git",
+        }
+
+        if with_datapackage_info:
+            datapackage["datapackage_title"] = None
+            datapackage["datapackage_name"] = None
+            datapackage["datapackage_description"] = None
+
+        return [datapackage] + schemas
+    
+    @staticmethod
+    def get_expected_assignable_schemas_from_mock_data(with_datapackage_info = True):
+        '''
+        with_datapackage_info is here to allow testing with or without marshalling (marshalling add None for inexistant datapackage_* fields)
+        '''
+        schemas = [
             {
                 "name": "etalab/schema-irve-statique",
                 "title": "IRVE statique",
@@ -155,8 +208,12 @@ class ResourceSchemaMockData():
                 "external_doc": None,
                 "external_tool": None,
                 "homepage": "https://github.com/139bercy/format-commande-publique",
-                "datapackage_title": None,
-                "datapackage_name": None,
-                "datapackage_description": None,
             }
-  ]
+        ]
+
+        if with_datapackage_info:
+            schemas[1]["datapackage_title"] = None
+            schemas[1]["datapackage_name"] = None
+            schemas[1]["datapackage_description"] = None
+
+        return schemas

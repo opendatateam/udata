@@ -207,12 +207,17 @@ class Schema(db.EmbeddedDocument):
         # some schemas in the catalog. If there is no catalog
         # or no schema in the catalog we do not check the validity
         # of the name and version
-        catalog_schemas = ResourceSchema.all()
+        catalog_schemas = ResourceSchema.assignable_schemas()
         if not catalog_schemas:
             return
 
         # We know this schema so we can do some checks
-        existing_schema = ResourceSchema.get_schema_by_name(self.name)
+        existing_schema = None
+        for schema in catalog_schemas:
+            if schema['name'] == self.name:
+                existing_schema = schema
+                break
+
         if not existing_schema:
             message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}').format(
                 schema=self.name,
@@ -1047,11 +1052,6 @@ class ResourceSchema(object):
     
     def assignable_schemas():
         return [s for s in ResourceSchema.all() if s.get('schema_type') not in NON_ASSIGNABLE_SCHEMA_TYPES]
-
-    def get_schema_by_name(name: str):
-        for schema in ResourceSchema.all():
-            if schema['name'] == name:
-                return schema
 
     def get_existing_schema_info_by_url(url: str) -> Optional[Tuple[str, Optional[str]]]:
         '''

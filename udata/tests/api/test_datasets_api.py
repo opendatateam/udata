@@ -771,6 +771,12 @@ class DatasetAPITest(APITestCase):
         self.assert400(response)
         assert response.json['errors']['resources'][0]['schema']['name'] == [_('Schema name "{schema}" is not an allowed value. Allowed values: {values}').format(schema='unknown-schema', values='etalab/schema-irve-statique, 139bercy/format-commande-publique')]
 
+        resource_data['schema'] = {'name': 'etalab/schema-irve'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert400(response)
+        assert response.json['errors']['resources'][0]['schema']['name'] == [_('Schema name "{schema}" is not an allowed value. Allowed values: {values}').format(schema='etalab/schema-irve', values='etalab/schema-irve-statique, 139bercy/format-commande-publique')]
+
         resource_data['schema'] = {'name': 'etalab/schema-irve-statique', 'version': '42.0.0'}
         data['resources'].append(resource_data)
         response = self.put(url_for('api.dataset', dataset=dataset), data)
@@ -1781,7 +1787,7 @@ class DatasetSchemasAPITest:
         response = api.get(url_for('api.schemas'))
 
         assert200(response)
-        assert response.json == ResourceSchemaMockData.get_expected_results_from_mock_data()
+        assert response.json == ResourceSchemaMockData.get_expected_assignable_schemas_from_mock_data()
 
     @pytest.mark.options(SCHEMA_CATALOG_URL=None)
     def test_dataset_schemas_api_list_no_catalog_url(self, api):
@@ -1811,7 +1817,7 @@ class DatasetSchemasAPITest:
         rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
         response = api.get(url_for('api.schemas'))
         assert200(response)
-        assert response.json == ResourceSchemaMockData.get_expected_results_from_mock_data()
+        assert response.json == ResourceSchemaMockData.get_expected_assignable_schemas_from_mock_data()
         assert cache_mock_set.called
 
         # Endpoint becomes unavailable
@@ -1820,7 +1826,7 @@ class DatasetSchemasAPITest:
         # Long term cache is used
         response = api.get(url_for('api.schemas'))
         assert200(response)
-        assert response.json == ResourceSchemaMockData.get_expected_results_from_mock_data()
+        assert response.json == ResourceSchemaMockData.get_expected_assignable_schemas_from_mock_data()
 
 
 @pytest.mark.usefixtures('clean_db')
