@@ -366,7 +366,6 @@ def spatial_from_rdf(graph):
 
                 try:
                     spatial_coverage.clean()
-                    print('Got one!')
                     return spatial_coverage
                 except ValidationError:
                     continue
