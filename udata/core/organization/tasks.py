@@ -7,7 +7,7 @@ from udata.tasks import job, task, get_logger
 
 from udata.core.badges.tasks import notify_new_badge
 
-from .models import Organization, CERTIFIED, PUBLIC_SERVICE
+from .models import Organization, CERTIFIED, PUBLIC_SERVICE, COMPANY, ASSOCIATION, LOCAL_AUTHORITY
 
 log = get_logger(__name__)
 
@@ -113,4 +113,64 @@ def notify_badge_public_service(org_id):
         'badge_added_public_service',
         organization=org,
         badge=org.get_badge(PUBLIC_SERVICE)
+    )
+
+
+@notify_new_badge(Organization, COMPANY)
+def notify_badge_company(org_id):
+    '''
+    Send an email when a `COMPANY` badge is added to an `Organization`
+    '''
+    org = Organization.objects.get(pk=org_id)
+    recipients = [member.user for member in org.members]
+    subject = _(
+        'Your organization "%(name)s" has been identified as a company',
+        name=org.name
+    )
+    mail.send(
+        subject,
+        recipients,
+        'badge_added_company',
+        organization=org,
+        badge=org.get_badge(COMPANY)
+    )
+
+
+@notify_new_badge(Organization, ASSOCIATION)
+def notify_badge_association(org_id):
+    '''
+    Send an email when a `ASSOCIATION` badge is added to an `Organization`
+    '''
+    org = Organization.objects.get(pk=org_id)
+    recipients = [member.user for member in org.members]
+    subject = _(
+        'Your organization "%(name)s" has been identified as an association',
+        name=org.name
+    )
+    mail.send(
+        subject,
+        recipients,
+        'badge_added_association',
+        organization=org,
+        badge=org.get_badge(ASSOCIATION)
+    )
+
+
+@notify_new_badge(Organization, LOCAL_AUTHORITY)
+def notify_badge_local_authority(org_id):
+    '''
+    Send an email when a `LOCAL_AUTHORITY` badge is added to an `Organization`
+    '''
+    org = Organization.objects.get(pk=org_id)
+    recipients = [member.user for member in org.members]
+    subject = _(
+        'Your organization "%(name)s" has been identified as a local authority',
+        name=org.name
+    )
+    mail.send(
+        subject,
+        recipients,
+        'badge_added_local_authority',
+        organization=org,
+        badge=org.get_badge(LOCAL_AUTHORITY)
     )
