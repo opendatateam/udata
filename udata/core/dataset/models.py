@@ -212,11 +212,7 @@ class Schema(db.EmbeddedDocument):
             return
 
         # We know this schema so we can do some checks
-        existing_schema = None
-        for schema in catalog_schemas:
-            if schema['name'] == self.name:
-                existing_schema = schema
-                break
+        existing_schema = next((schema for schema in catalog_schemas if schema['name'] == self.name), None)
 
         if not existing_schema:
             message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}').format(
