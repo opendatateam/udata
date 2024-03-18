@@ -26,7 +26,7 @@ Here a list of known plugins for udata:
 - [`udata-dcat`][udata-dcat], [DCAT][dcat] integration for udata
 - [`dotsat-udata-harvester`][dotsat-udata-harvester], [.stat suite][.stat] integration for udata
 - [`udata-recommendations`][udata-recommendations], a plugin to integrate a recommendation system
-- [`udata-tabular-preview`][udata-tabular-preview], a plugin to preview tabular files (CSV, Excel, ...) using [csvapi][csvapi]
+- [`udata-tabular-preview`][udata-tabular-preview], a plugin to preview tabular files (CSV, Excel, ...) using [api-tabular][api-tabular]
 - [`udata-data-fair`][udata-data-fair], a plugin that use [DataFair][datafair] embeds to preview data
 - [`udata-transport`][udata-transport], a plugin to bind datasets to their counterparts on [transport.data.gouv.fr][transport.data.gouv.fr]
 
@@ -50,6 +50,6 @@ Here a list of known plugins for udata:
 [ods]: https://www.opendatasoft.com/
 [dcat]: https://github.com/opendatateam/udata/blob/master/udata/harvest/backends/dcat.py
 [.stat]: https://siscc.org/stat-suite/
-[csvapi]: https://github.com/opendatateam/csvapi
+[api-tabular]: https://github.com/etalab/api-tabular
 [datafair]: https://data-fair.github.io/3/
 [transport.data.gouv.fr]: https://transport.data.gouv.fr/
