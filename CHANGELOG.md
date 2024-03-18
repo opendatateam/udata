@@ -11,6 +11,7 @@
 - Add 3 new badges to the organization model : `company`, `association` and `local authority` [#2984](https://github.com/opendatateam/udata/pull/2984)
 - Prevent geozones listed ad `deleted` to be loaded [#2983](https://github.com/opendatateam/udata/pull/2983)
 - Topic: add last_modified field [#2987](https://github.com/opendatateam/udata/pull/2987)
+- Replace schemas API with a simple proxy to the `schemas.json` file [#2989](https://github.com/opendatateam/udata/pull/2989)
 
 ## 7.0.4 (2024-02-27)
 
