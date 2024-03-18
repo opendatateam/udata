@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Add spatial coverage harvesting [#2959](https://github.com/opendatateam/udata/pull/2959)
+- Add spatial coverage harvesting [#2959](https://github.com/opendatateam/udata/pull/2959) [#2991](https://github.com/opendatateam/udata/pull/2991)
 - Fix: updating a dataset without `private` do not reset `private` to `False`, the previous saved value is kept [#2955](https://github.com/opendatateam/udata/pull/2955)
 - Fix: return the correct error when no `Content-Type` is sent instead of 500 [#2967](https://github.com/opendatateam/udata/pull/2967)
 - Improve documentation for API errors [#2952](https://github.com/opendatateam/udata/pull/2965)
@@ -12,6 +12,7 @@
 - Prevent geozones listed ad `deleted` to be loaded [#2983](https://github.com/opendatateam/udata/pull/2983)
 - Topic: add last_modified field [#2987](https://github.com/opendatateam/udata/pull/2987)
 - Replace schemas API with a simple proxy to the `schemas.json` file [#2989](https://github.com/opendatateam/udata/pull/2989)
+- Add stacktraces to CSV errors [#2990](https://github.com/opendatateam/udata/pull/2990)
 
 ## 7.0.4 (2024-02-27)
 
