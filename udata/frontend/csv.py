@@ -58,8 +58,8 @@ class Adapter(object):
                     else:
                         field_tuple = (name, self.getter(*field))
                 except Exception as e:  # Catch all errors intentionally.
-                    log.error('Error exporting CSV for {name}: {error_class} {error}'.format(
-                        name=self.__class__.__name__, error_class=e.__class__.__name__, error=e))
+                    log.exception('Error exporting CSV for {name}: {error_class} {error}'.format(
+                        name=self.__class__.__name__, error_class=e.__class__.__name__, error=e), stack_info=True)
                 self._fields.append(field_tuple)
         return self._fields
 
@@ -89,8 +89,8 @@ class Adapter(object):
                 try:
                     content = safestr(getter(obj))
                 except Exception as e:  # Catch all errors intentionally.
-                    log.error('Error exporting CSV for {name}: {error_class} {error}'.format(
-                        name=self.__class__.__name__, error_class=e.__class__.__name__, error=e))
+                    log.exception('Error exporting CSV for {name}: {error_class} {error}'.format(
+                        name=self.__class__.__name__, error_class=e.__class__.__name__, error=e), stack_info=True)
             row.append(content)
         return row
 
@@ -130,8 +130,8 @@ class NestedAdapter(Adapter):
                     else:
                         field_tuple = (name, self.getter(*field))
                 except Exception as e:  # Catch all errors intentionally.
-                    log.error('Error exporting CSV for {name}: {error_class} {error}'.format(
-                        name=self.__class__.__name__, error_class=e.__class__.__name__, error=e))
+                    log.exception('Error exporting CSV for {name}: {error_class} {error}'.format(
+                        name=self.__class__.__name__, error_class=e.__class__.__name__, error=e), stack_info=True)
                 self._nested_fields.append(field_tuple)
         return self._nested_fields
 
@@ -155,8 +155,8 @@ class NestedAdapter(Adapter):
                 try:
                     content = safestr(getter(nested))
                 except Exception as e:  # Catch all errors intentionally.
-                    log.error('Error exporting CSV for {name}: {error_class} {error}'.format(
-                        name=self.__class__.__name__, error_class=e.__class__.__name__, error=e))
+                    log.exception('Error exporting CSV for {name}: {error_class} {error}'.format(
+                        name=self.__class__.__name__, error_class=e.__class__.__name__, error=e), stack_info=True)
             row.append(content)
         return row
 
