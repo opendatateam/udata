@@ -11,6 +11,7 @@
 - Add 3 new badges to the organization model : `company`, `association` and `local authority` [#2984](https://github.com/opendatateam/udata/pull/2984)
 - Prevent geozones listed ad `deleted` to be loaded [#2983](https://github.com/opendatateam/udata/pull/2983)
 - Topic: add last_modified field [#2987](https://github.com/opendatateam/udata/pull/2987)
+- Add stacktraces to CSV errors [#2990](https://github.com/opendatateam/udata/pull/2990)
 
 ## 7.0.4 (2024-02-27)
 
