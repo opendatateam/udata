@@ -278,10 +278,6 @@ class CswIsoXsltDcatBackend(DcatBackend):
 
     XSL_URL = "https://raw.githubusercontent.com/SEMICeu/iso-19139-to-dcat-ap/master/iso-19139-to-dcat-ap.xsl"
 
-    def get_format(self):
-        # TODO: should we redefine get_format here?
-        return 'xml'
-
     def parse_graph(self, url: str, fmt: str) -> List[Graph]:
         '''
         Parse CSW graph querying ISO schema.
@@ -319,7 +315,7 @@ class CswIsoXsltDcatBackend(DcatBackend):
         start = 1
 
         response = self.post(url, data=body.format(start=start, schema=self.ISO_SCHEMA),
-                             headers=headers)
+                            headers=headers)
         response.raise_for_status()
 
         tree_before_transform = ET.fromstring(response.content)

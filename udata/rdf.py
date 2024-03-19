@@ -75,6 +75,7 @@ ACCEPTED_MIME_TYPES = {
     'application/ld+json': 'json-ld',
     'application/json': 'json-ld',
     'application/trig': 'trig',
+    'text/xml': 'xml',
     # Available but not activated
     # 'application/n-quads': 'nquads',
     # 'text/xml': 'trix',
