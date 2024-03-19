@@ -1,21 +1,22 @@
+from datetime import date
 import logging
 import os
-from flask import current_app
+import re
 
 import pytest
 
-from datetime import date
 import boto3
+from flask import current_app
 import xml.etree.ElementTree as ET
-from udata.harvest.models import HarvestJob
 
+from udata.harvest.models import HarvestJob
 from udata.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.dataset.factories import LicenseFactory, ResourceSchemaMockData
 from udata.storage.s3 import get_from_json
 
 from .factories import HarvestSourceFactory
-from ..backends.dcat import URIS_TO_REPLACE
+from ..backends.dcat import URIS_TO_REPLACE, CswIsoXsltDcatBackend
 from .. import actions
 
 log = logging.getLogger(__name__)
@@ -614,7 +615,7 @@ class DcatBackendTest:
 
 
 @pytest.mark.usefixtures('clean_db')
-@pytest.mark.options(PLUGINS=['csw-dcat'])
+@pytest.mark.options(PLUGINS=['csw'])
 class CswDcatBackendTest:
 
     def test_geonetworkv4(self, rmock):
@@ -662,3 +663,60 @@ class CswDcatBackendTest:
 
         assert 'User-Agent' in get_mock.last_request.headers
         assert get_mock.last_request.headers['User-Agent'] == 'uData/0.1 csw-dcat'
+
+
+@pytest.mark.usefixtures('clean_db')
+@pytest.mark.options(PLUGINS=['csw'])
+class CswIsoXsltDcatBackendTest:
+
+    def test_geo2france(self, rmock):
+
+        with open(os.path.join(CSW_DCAT_FILES_DIR, "XSLT.xml"), "r") as f:
+            xslt = f.read()
+        url = mock_csw_pagination(rmock, 'geonetwork/srv/eng/csw.rdf', 'geonetwork-iso-page-{}.xml')
+        rmock.get(CswIsoXsltDcatBackend.XSL_URL, text=xslt)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='csw-iso-xslt-dcat',
+                                      url=url,
+                                      organization=org)
+
+        actions.run(source.slug)
+
+        source.reload()
+
+        job = source.get_last_job()
+        assert len(job.items) == 6
+
+        datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
+
+        assert len(datasets) == 6
+
+        # First dataset
+        # dataset identifier is gmd:RS_Identifier > gmd:codeSpace + gmd:code
+        dataset = datasets['http://catalogue.geo-ide.developpement-durable.gouv.fr/fr-120066022-orphan-residentifier-140d31c6-643d-42a9-85df-2737a118e144']
+        assert dataset.title == "Plan local d'urbanisme de la commune de Cartigny"
+        assert dataset.description == "Le présent standard de données COVADIS concerne les documents de plans locaux d'urbanisme (PLU) et les plans d'occupation des sols (POS qui valent PLU)."
+        assert set(dataset.tags) == set([
+            'amenagement-urbanisme-zonages-planification', 'cartigny',
+            'document-durbanisme', 'donnees-ouvertes', 'plu', 'usage-des-sols'
+        ])
+        assert dataset.harvest.created_at.date() == date(2017, 10, 7)
+        assert dataset.spatial.geom == {'type': 'MultiPolygon', 'coordinates':
+            [[[[3.28133559, 50.48188019], [1.31279111, 50.48188019], [1.31279111, 49.38547516], [3.28133559, 49.38547516], [3.28133559, 50.48188019]]]]
+        }
+        assert dataset.contact_point.name == 'DDTM 80 (Direction Départementale des Territoires et de la Mer de la Somme)'
+        assert dataset.contact_point.email == 'ddtm-sap-bsig@somme.gouv.fr'
+
+        # License is not properly mapped in XSLT conversion
+        assert dataset.license is None
+
+        # Distributions don't get properly mapped to distribution with this XSLT if missing CI_OnLineFunctionCode.
+        # A CI_OnLineFunctionCode was added explicitely on one of the Online Resources.
+        # (See mapping at: https://semiceu.github.io/GeoDCAT-AP/releases/2.0.0/#resource-locator---on-line-resource)
+        assert len(dataset.resources) == 1
+        resource = dataset.resources[0]
+        assert resource.title == 'Téléchargement direct du lot et des documents associés'
+        assert resource.url == 'http://atom.geo-ide.developpement-durable.gouv.fr/atomArchive/GetResource?id=fr-120066022-ldd-cab63273-b3ae-4e8a-ae1c-6192e45faa94&datasetAggregate=true'
+        
+        # Sadly resource format is parsed as a blank node. Format parsing should be improved.
+        assert re.match(r'n[0-9a-f]{32}', resource.format)

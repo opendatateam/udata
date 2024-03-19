@@ -276,6 +276,8 @@ class CswIsoXsltDcatBackend(DcatBackend):
 
     ISO_SCHEMA = 'http://www.isotc211.org/2005/gmd'
 
+    XSL_URL = "https://raw.githubusercontent.com/SEMICeu/iso-19139-to-dcat-ap/master/iso-19139-to-dcat-ap.xsl"
+
     def get_format(self):
         # TODO: should we redefine get_format here?
         return 'xml'
@@ -297,8 +299,7 @@ class CswIsoXsltDcatBackend(DcatBackend):
         parser.resolvers.add(EmptyResolver())
 
         # Load XSLT
-        xslURL = "https://raw.githubusercontent.com/SEMICeu/iso-19139-to-dcat-ap/master/iso-19139-to-dcat-ap.xsl"
-        xsl = ET.fromstring(self.get(xslURL).content, parser=parser)
+        xsl = ET.fromstring(self.get(self.XSL_URL).content, parser=parser)
         transform = ET.XSLT(xsl)
 
         # Start querying and parsing graph
