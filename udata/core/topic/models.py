@@ -1,6 +1,6 @@
 from flask import url_for
 from mongoengine.signals import pre_save
-from udata.models import db
+from udata.models import db, SpatialCoverage
 from udata.search import reindex
 from udata.tasks import as_task_param
 
@@ -25,6 +25,8 @@ class Topic(db.Document, db.Owned, db.Datetimed):
     featured = db.BooleanField()
     private = db.BooleanField()
     extras = db.ExtrasField()
+
+    spatial = db.EmbeddedDocumentField(SpatialCoverage)
 
     meta = {
         'indexes': [
