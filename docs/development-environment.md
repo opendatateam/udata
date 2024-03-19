@@ -38,24 +38,36 @@ $ pip install -r requirements/develop.pip
 $ pip install -e .
 ```
 
-### Macos Big Sur caveat
+### Mac OS caveats
+
+#### Package installation fails
 
 If installing `cryptography` fails:
 
 ```
-brew install openssl
-export LDFLAGS="-L/usr/local/opt/openssl@1.1/lib"
-export CPPFLAGS="-I/usr/local/opt/openssl@1.1/include"
+brew install openssl@1.1
+export LDFLAGS="-L$(brew --prefix openssl@1.1)/lib"
+export CPPFLAGS="-I$(brew --prefix openssl@1.1)/include"
 pip install -r requirements/develop.pip
 ```
 
 If installing `Pillow` fails:
+
 ```
 brew install libjpeg
 pip install -r requirements/develop.pip
 ```
 
-You should be to start using and contributing to udata.
+#### Local web server is slow
+
+If you're using `{something}.local` as your `SITE_NAME`, you need to add an ipv6 resolution to this FQDN:
+
+```
+127.0.0.1   dev.local
+::1         dev.local
+```
+
+[Reference and context here](https://superuser.com/a/1596341).
 
 ## Running the project
 

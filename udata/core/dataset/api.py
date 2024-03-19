@@ -19,8 +19,10 @@ These changes might lead to backward compatibility breakage meaning:
 
 import os
 import logging
+import mongoengine
 from datetime import datetime
 
+from bson.objectid import ObjectId
 from flask import request, current_app, abort, redirect, url_for, make_response
 from flask_security import current_user
 from mongoengine.queryset.visitor import Q
@@ -50,9 +52,10 @@ from .api_fields import (
     resource_fields,
     resource_type_fields,
     upload_fields,
-    schema_fields,
+    catalog_schema_fields,
 )
 from udata.linkchecker.checker import check_resource
+from udata.core.topic.models import Topic
 from .models import (
     Dataset, Resource, Checksum, License, UPDATE_FREQUENCIES,
     CommunityResource, RESOURCE_TYPES, ResourceSchema, get_resource
@@ -94,6 +97,7 @@ class DatasetApiParser(ModelApiParser):
         self.parser.add_argument('format', type=str, location='args')
         self.parser.add_argument('schema', type=str, location='args')
         self.parser.add_argument('schema_version', type=str, location='args')
+        self.parser.add_argument('topic', type=str, location='args')
 
     @staticmethod
     def parse_filters(datasets, args):
@@ -118,8 +122,12 @@ class DatasetApiParser(ModelApiParser):
         if args.get('featured'):
             datasets = datasets.filter(featured=args['featured'])
         if args.get('organization'):
+            if not ObjectId.is_valid(args['organization']):
+                api.abort(400, 'Organization arg must be an identifier')
             datasets = datasets.filter(organization=args['organization'])
         if args.get('owner'):
+            if not ObjectId.is_valid(args['owner']):
+                api.abort(400, 'Owner arg must be an identifier')
             datasets = datasets.filter(owner=args['owner'])
         if args.get('format'):
             datasets = datasets.filter(resources__format=args['format'])
@@ -127,6 +135,15 @@ class DatasetApiParser(ModelApiParser):
             datasets = datasets.filter(resources__schema__name=args['schema'])
         if args.get('schema_version'):
             datasets = datasets.filter(resources__schema__version=args['schema_version'])
+        if args.get('topic'):
+            if not ObjectId.is_valid(args['topic']):
+                api.abort(400, 'Topic arg must be an identifier')
+            try:
+                topic = Topic.objects.get(id=args['topic'])
+            except Topic.DoesNotExist:
+                pass
+            else:
+                datasets = datasets.filter(id__in=[d.id for d in topic.datasets])
         return datasets
 
 
@@ -138,7 +155,7 @@ dataset_parser = DatasetApiParser()
 
 community_parser = api.parser()
 community_parser.add_argument(
-    'sort', type=str, default='-created', location='args',
+    'sort', type=str, default='-created_at_internal', location='args',
     help='The sorting attribute')
 community_parser.add_argument(
     'page', type=int, default=1, location='args', help='The page to fetch')
@@ -180,7 +197,7 @@ class DatasetListAPI(API):
     @api.secure
     @api.doc('create_dataset', responses={400: 'Validation error'})
     @api.expect(dataset_fields)
-    @api.marshal_with(dataset_fields)
+    @api.marshal_with(dataset_fields, code=201)
     def post(self):
         '''Create a new dataset'''
         form = api.validate(DatasetForm)
@@ -213,7 +230,12 @@ class DatasetAPI(API):
         DatasetEditPermission(dataset).test()
         dataset.last_modified_internal = datetime.utcnow()
         form = api.validate(DatasetForm, dataset)
-        return form.save()
+        # As validation for some fields (ie. extras) is at model
+        # level instead form level, we use mongoengine errors here.
+        try:
+            return form.save()
+        except mongoengine.errors.ValidationError as e:
+            api.abort(400, e.message)
 
     @api.secure
     @api.doc('delete_dataset')
@@ -322,9 +344,9 @@ class ResourceRedirectAPI(API):
 @ns.route('/<dataset:dataset>/resources/', endpoint='resources')
 class ResourcesAPI(API):
     @api.secure
-    @api.doc('create_resource', **common_doc)
+    @api.doc('create_resource', **common_doc, responses={400: 'Validation error'})
     @api.expect(resource_fields)
-    @api.marshal_with(resource_fields)
+    @api.marshal_with(resource_fields, code=201)
     def post(self, dataset):
         '''Create a new resource for a given dataset'''
         ResourceEditPermission(dataset).test()
@@ -339,7 +361,7 @@ class ResourcesAPI(API):
         return resource, 201
 
     @api.secure
-    @api.doc('update_resources', **common_doc)
+    @api.doc('update_resources', **common_doc, responses={400: 'Validation error'})
     @api.expect([resource_fields])
     @api.marshal_list_with(resource_fields)
     def put(self, dataset):
@@ -375,9 +397,9 @@ class UploadMixin(object):
 @api.doc(**common_doc)
 class UploadNewDatasetResource(UploadMixin, API):
     @api.secure
-    @api.doc('upload_new_dataset_resource')
+    @api.doc('upload_new_dataset_resource', responses={415: 'Incorrect file content type', 400: 'Upload error'})
     @api.expect(upload_parser)
-    @api.marshal_with(upload_fields)
+    @api.marshal_with(upload_fields, code=201)
     def post(self, dataset):
         '''Upload a new dataset resource'''
         ResourceEditPermission(dataset).test()
@@ -394,9 +416,9 @@ class UploadNewDatasetResource(UploadMixin, API):
 @api.doc(**common_doc)
 class UploadNewCommunityResources(UploadMixin, API):
     @api.secure
-    @api.doc('upload_new_community_resource')
+    @api.doc('upload_new_community_resource', responses={415: 'Incorrect file content type', 400: 'Upload error'})
     @api.expect(upload_parser)
-    @api.marshal_with(upload_fields)
+    @api.marshal_with(upload_fields, code=201)
     def post(self, dataset):
         '''Upload a new community resource'''
         infos = self.handle_upload(dataset)
@@ -420,7 +442,7 @@ class ResourceMixin(object):
 @api.param('rid', 'The resource unique identifier')
 class UploadDatasetResource(ResourceMixin, UploadMixin, API):
     @api.secure
-    @api.doc('upload_dataset_resource')
+    @api.doc('upload_dataset_resource', responses={415: 'Incorrect file content type', 400: 'Upload error'})
     @api.marshal_with(upload_fields)
     def post(self, dataset, rid):
         '''Upload a file related to a given resource on a given dataset'''
@@ -443,7 +465,7 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
 @api.param('community', 'The community resource unique identifier')
 class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
     @api.secure
-    @api.doc('upload_community_resource')
+    @api.doc('upload_community_resource', responses={415: 'Incorrect file content type', 400: 'Upload error'})
     @api.marshal_with(upload_fields)
     def post(self, community):
         '''Update the file related to a given community resource'''
@@ -471,7 +493,7 @@ class ResourceAPI(ResourceMixin, API):
         return resource
 
     @api.secure
-    @api.doc('update_resource')
+    @api.doc('update_resource', responses={400: 'Validation error'})
     @api.expect(resource_fields)
     @api.marshal_with(resource_fields)
     def put(self, dataset, rid):
@@ -524,9 +546,9 @@ class CommunityResourcesAPI(API):
                                    .paginate(args['page'], args['page_size']))
 
     @api.secure
-    @api.doc('create_community_resource')
+    @api.doc('create_community_resource', responses={400: 'Validation error'})
     @api.expect(community_resource_fields)
-    @api.marshal_with(community_resource_fields)
+    @api.marshal_with(community_resource_fields, code=201)
     def post(self):
         '''Create a new community resource'''
         form = api.validate(CommunityResourceForm)
@@ -556,7 +578,7 @@ class CommunityResourceAPI(API):
         return community
 
     @api.secure
-    @api.doc('update_community_resource')
+    @api.doc('update_community_resource', responses={400: 'Validation error'})
     @api.expect(community_resource_fields)
     @api.marshal_with(community_resource_fields)
     def put(self, community):
@@ -706,7 +728,7 @@ class ResourceTypesAPI(API):
 @ns.route('/schemas/', endpoint='schemas')
 class SchemasAPI(API):
     @api.doc('schemas')
-    @api.marshal_list_with(schema_fields)
+    @api.marshal_list_with(catalog_schema_fields)
     def get(self):
         '''List all available schemas'''
         try:

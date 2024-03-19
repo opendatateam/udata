@@ -637,6 +637,34 @@ class MembershipAPITest:
         for suggestion in response.json:
             assert suggestion['name'] == 'homonym'
 
+    def test_suggest_organizations_acronym(self, api):
+        '''Should suggest organizations based on acronym'''
+
+        for i in range(3):
+            OrganizationFactory(
+                name=faker.word(),
+                acronym=f'UDATA{i}' if i % 2 else faker.word(),
+                metrics={"followers": i})
+        max_follower_organization = OrganizationFactory(
+            name=faker.word(),
+            acronym='UDATA4',
+            metrics={"followers": 10}
+        )
+        response = api.get(url_for('api.suggest_organizations'),
+                           qs={'q': 'uDaTa', 'size': '5'})
+        assert200(response)
+
+        assert len(response.json) == 2
+
+        for suggestion in response.json:
+            assert 'id' in suggestion
+            assert 'slug' in suggestion
+            assert 'name' in suggestion
+            assert 'image_url' in suggestion
+            assert 'acronym' in suggestion
+            assert 'UDATA' in suggestion['acronym']
+            assert response.json[0]['id'] == str(max_follower_organization.id)
+
 
 class OrganizationDatasetsAPITest:
     modules = []
@@ -820,3 +848,25 @@ class OrganizationBadgeAPITest:
         url = url_for('api.organization_badge', org=self.organization, badge_kind=kind)
         response = api.delete(url)
         assert404(response)
+
+
+class OrganizationContactPointsAPITest:
+    modules = []
+
+    def test_org_contact_points(self, api):
+        user = api.login()
+        member = Member(user=user, role='admin')
+        org = OrganizationFactory(members=[member])
+        data = {
+            'email': 'mooneywayne@cobb-cochran.com',
+            'name': 'Martin Schultz',
+            'organization': str(org.id)
+        }
+        response = api.post(url_for('api.contact_points'), data)
+        assert201(response)
+
+        response = api.get(url_for('api.org_contact_points', org=org))
+        assert200(response)
+
+        assert response.json['data'][0]['name'] == data['name']
+        assert response.json['data'][0]['email'] == data['email']

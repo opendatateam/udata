@@ -145,6 +145,10 @@ class PostConverter(ModelConverter):
     model = models.Post
 
 
+class ContactPointConverter(ModelConverter):
+    model = models.ContactPoint
+
+
 class TerritoryConverter(PathConverter):
     DEFAULT_PREFIX = 'fr'  # TODO: make it a setting parameter
 
@@ -183,12 +187,10 @@ class TerritoryConverter(PathConverter):
 
         code = getattr(obj, 'code', None)
         slug = getattr(obj, 'slug', None)
-        validity = getattr(obj, 'validity', None)
         if code and slug:
-            return '{level_name}/{code}@{start_date}/{slug}'.format(
+            return '{level_name}/{code}/{slug}'.format(
                 level_name=level_name,
                 code=code,
-                start_date=getattr(validity, 'start', None) or 'latest',
                 slug=slug
             )
         else:
@@ -227,3 +229,4 @@ def init_app(app):
     app.url_map.converters['topic'] = TopicConverter
     app.url_map.converters['post'] = PostConverter
     app.url_map.converters['territory'] = TerritoryConverter
+    app.url_map.converters['contact_point'] = ContactPointConverter

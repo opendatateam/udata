@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<csw:GetRecordsResponse 
+  xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
+  <csw:SearchStatus timestamp="2023-03-03T16:33:45.887333Z" />
+  <csw:SearchResults numberOfRecordsMatched="6" numberOfRecordsReturned="2" elementSet="full" nextRecord="0">
+    <rdf:RDF 
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+      xmlns:skos="http://www.w3.org/2004/02/skos/core#" 
+      xmlns:gmd="http://www.isotc211.org/2005/gmd" 
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" 
+      xmlns:foaf="http://xmlns.com/foaf/0.1/" 
+      xmlns:xslUtils="java:org.fao.geonet.util.XslUtil" 
+      xmlns:void="http://www.w3.org/TR/void/" 
+      xmlns:dct="http://purl.org/dc/terms/" 
+      xmlns:dcat="http://www.w3.org/ns/dcat#">
+      <dcat:CatalogRecord rdf:about="https://dev.geo2france.fr/geonetwork/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848">
+        <foaf:primaryTopic rdf:resource="http://localhost:8080/geonetwork/srv/resources/fr-238000038-oise-ortho-vis-2008" />
+        <dct:conformsTo rdf:resource="https://www.iso.org/standard/32557.html" />
+        <dct:issued>2021-02-03</dct:issued>
+        <dct:modified>2021-02-03</dct:modified>
+        <dct:references>
+          <rdf:Description rdf:about="https://dev.geo2france.fr/geonetwork/srv/api/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848/formatters/xml">
+            <dct:format>
+              <dct:IMT>
+                <rdf:value>application/xml</rdf:value>
+                <rdfs:label>XML</rdfs:label>
+              </dct:IMT>
+            </dct:format>
+          </rdf:Description>
+        </dct:references>
+        <dct:references>
+          <rdf:Description rdf:about="https://dev.geo2france.fr/geonetwork/srv/api/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848">
+            <dct:format>
+              <dct:IMT>
+                <rdf:value>text/html</rdf:value>
+                <rdfs:label>HTML</rdfs:label>
+              </dct:IMT>
+            </dct:format>
+          </rdf:Description>
+        </dct:references>
+      </dcat:CatalogRecord>
+      <dcat:Dataset rdf:about="http://localhost:8080/geonetwork/srv/resources/datasets/fr-238000038-oise-ortho-vis-2008">
+        <dct:identifier>fr-238000038-oise-ortho-vis-2008</dct:identifier>
+        <dct:title>Orthophotographie de l'Oise (2008-2009) - rayonnement visible</dct:title>
+        <dct:abstract>Photographies aériennes ortho-rectifiées de 2008-2009 couvrant l'ensemble du département de l'Oise (rayonnement dans le domaine visible).
+
+La résolution des images est de 34 cm.
+La taille équivalente des pixels une fois projetés sur le sol est de 20 cm.
+
+Cette orthophotographie est cofinancée par l’Union européenne. L’Europe s’engage en Picardie avec le Fonds européen de développement régional.</dct:abstract>
+        <dcat:keyword>orthophotographies</dcat:keyword>
+        <dcat:keyword>images aériennes</dcat:keyword>
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/OISE%20%2860%29" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0%20INSPIRE%20themes/concepts/Ortho-imagerie" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/photographie%20a%C3%A9rienne" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/photographie" />
+        <dcat:theme rdf:resource="https://inspire.ec.europa.eu/metadata-codelist/TopicCategory/imageryBaseMapsEarthCover" />
+        <foaf:thumbnail rdf:resource="https://www.geo2france.fr/geonetwork/srv/api/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848/attachments/apercu_ortho_oise_2008_vis_s.png" />
+        <foaf:thumbnail rdf:resource="https://www.geo2france.fr/geonetwork/srv/api/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848/attachments/apercu_ortho_oise_2008_vis.png" />
+        <dct:spatial>
+          <ogc:Polygon 
+            xmlns:ogc="http://www.opengis.net/rdf#">
+            <geo:asWKT 
+              xmlns:geo="http://www.opengis.net/ont/geosparql#" rdf:datatype="http://www.opengis.net/rdf#wktLiteral">Polygon((1.64053 49.01243, 1.64053 49.774767884053, 3.19423 49.774767884053, 3.19423 49.01243, 1.64053 49.01243))
+            </geo:asWKT>
+          </ogc:Polygon>
+        </dct:spatial>
+        <dct:issued>2009-04-24</dct:issued>
+        <dct:publisher rdf:resource="http://localhost:8080/geonetwork/srv/resources/organizations/G%C3%A9o2France" />
+        <dct:publisher rdf:resource="http://localhost:8080/geonetwork/srv/resources/organizations/R%C3%A9gion%20Hauts-de-France" />
+        <dct:license>license</dct:license>
+        <dct:license>license</dct:license>
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848#OGC%3AWMS-oise_ortho_2008_vis" />
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848#OGC%3AWCS-cr_hdf%3Aoise_ortho_2008_vis" />
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848#WWW%3ALINK-1.0-http--link-Tableau%20des%20licences%20d%27InterAtlas%20%28licence%20L.O.P%203%29" />
+        <dcat:dataQuality>Caractéristiques des images sources :
+- capteur : Caméra Vexcel UltracamX - Focale : 100 mm
+- prise de vue : 29, 28 septembre 2004 et 24 avril 2009
+- résolution native : 34 cm
+- résolution des images livrées : 20 cm (soit 1/800°)
+- précision planimétrique : tolérance 2 pixels (centrale inertielle embarquée)
+- aérotriangulation avec les points GPS sur la couverture de votre zone
+- mosaïquage avec recouvrement 80/30
+- radiométrie : nivellement et homogénéisation des couleurs
+- MNT utilisé pour l'orthorectification : production automatique à partir des images</dcat:dataQuality>
+      </dcat:Dataset>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/OISE%20%2860%29">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements" />
+        <skos:prefLabel>OISE (60)</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0%20INSPIRE%20themes/concepts/Ortho-imagerie">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0%20INSPIRE%20themes" />
+        <skos:prefLabel>Ortho-imagerie</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/photographie%20a%C3%A9rienne">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4" />
+        <skos:prefLabel>photographie aérienne</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/photographie">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4" />
+        <skos:prefLabel>photographie</skos:prefLabel>
+      </skos:Concept>
+      <dcat:Distribution rdf:about="https://dev.geo2france.fr/geonetwork/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848#OGC%3AWMS-oise_ortho_2008_vis">
+        <dcat:accessURL>https://www.geo2france.fr/geoserver/cr_hdf/ows?service=WMS&amp;request=GetCapabilities</dcat:accessURL>
+        <dct:title>oise_ortho_2008_vis</dct:title>
+        <dct:format>OGC:WMS</dct:format>
+      </dcat:Distribution>
+      <dcat:Distribution rdf:about="https://dev.geo2france.fr/geonetwork/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848#OGC%3AWCS-cr_hdf%3Aoise_ortho_2008_vis">
+        <dcat:accessURL>https://www.geo2france.fr/geoserver/cr_hdf/ows?service=WCS&amp;request=GetCapabilities</dcat:accessURL>
+        <dct:title>cr_hdf:oise_ortho_2008_vis</dct:title>
+        <dct:format>OGC:WCS</dct:format>
+      </dcat:Distribution>
+      <dcat:Distribution rdf:about="https://dev.geo2france.fr/geonetwork/records/bd427799-8035-4ff8-b0fb-4c75fe9b4848#WWW%3ALINK-1.0-http--link-Tableau%20des%20licences%20d%27InterAtlas%20%28licence%20L.O.P%203%29">
+        <dcat:accessURL>https://www.geo2france.fr/portail/espace-documentaire/tableau-des-licences-interatlas</dcat:accessURL>
+        <dct:title>Tableau des licences d'InterAtlas (licence L.O.P 3)</dct:title>
+        <dct:format>WWW:LINK-1.0-http--link</dct:format>
+      </dcat:Distribution>
+      <foaf:Organization rdf:about="http://localhost:8080/geonetwork/srv/resources/organizations/G%C3%A9o2France">
+        <foaf:name>Géo2France</foaf:name>
+        <foaf:member rdf:resource="http://localhost:8080/geonetwork/srv/resources/persons/contact%40geo2france.fr" />
+      </foaf:Organization>
+      <foaf:Organization rdf:about="http://localhost:8080/geonetwork/srv/resources/organizations/R%C3%A9gion%20Hauts-de-France">
+        <foaf:name>Région Hauts-de-France</foaf:name>
+        <foaf:member rdf:resource="http://localhost:8080/geonetwork/srv/resources/persons/sig%40hautsdefrance.fr" />
+      </foaf:Organization>
+      <foaf:Agent rdf:about="http://localhost:8080/geonetwork/srv/resources/persons/contact%40geo2france.fr">
+        <foaf:mbox rdf:resource="mailto:contact@geo2france.fr" />
+      </foaf:Agent>
+      <foaf:Agent rdf:about="http://localhost:8080/geonetwork/srv/resources/persons/sig%40hautsdefrance.fr">
+        <foaf:mbox rdf:resource="mailto:sig@hautsdefrance.fr" />
+      </foaf:Agent>
+    </rdf:RDF>
+    <rdf:RDF 
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+      xmlns:skos="http://www.w3.org/2004/02/skos/core#" 
+      xmlns:gmd="http://www.isotc211.org/2005/gmd" 
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" 
+      xmlns:foaf="http://xmlns.com/foaf/0.1/" 
+      xmlns:xslUtils="java:org.fao.geonet.util.XslUtil" 
+      xmlns:void="http://www.w3.org/TR/void/" 
+      xmlns:dct="http://purl.org/dc/terms/" 
+      xmlns:dcat="http://www.w3.org/ns/dcat#">
+      <dcat:CatalogRecord rdf:about="https://dev.geo2france.fr/geonetwork/records/4635b9cc-bc9a-4f25-851e-040cf647d974">
+        <foaf:primaryTopic rdf:resource="http://localhost:8080/geonetwork/srv/resources/https%3A%2F%2Fwww.geo2france.fr%2Fgeonetwork%2Fsrv%2Ffre%2Fcatalog.search%23%2Fmetadata%2F4635b9cc-bc9a-4f25-851e-040cf647d974" />
+        <dct:conformsTo rdf:resource="https://www.iso.org/standard/32557.html" />
+        <dct:issued>2019-11-21</dct:issued>
+        <dct:modified>2019-11-21</dct:modified>
+        <dct:references>
+          <rdf:Description rdf:about="https://dev.geo2france.fr/geonetwork/srv/api/records/4635b9cc-bc9a-4f25-851e-040cf647d974/formatters/xml">
+            <dct:format>
+              <dct:IMT>
+                <rdf:value>application/xml</rdf:value>
+                <rdfs:label>XML</rdfs:label>
+              </dct:IMT>
+            </dct:format>
+          </rdf:Description>
+        </dct:references>
+        <dct:references>
+          <rdf:Description rdf:about="https://dev.geo2france.fr/geonetwork/srv/api/records/4635b9cc-bc9a-4f25-851e-040cf647d974">
+            <dct:format>
+              <dct:IMT>
+                <rdf:value>text/html</rdf:value>
+                <rdfs:label>HTML</rdfs:label>
+              </dct:IMT>
+            </dct:format>
+          </rdf:Description>
+        </dct:references>
+      </dcat:CatalogRecord>
+      <dcat:Dataset rdf:about="http://localhost:8080/geonetwork/srv/resources/datasets/https://www.geo2france.fr/geonetwork/srv/fre/catalog.search#/metadata/4635b9cc-bc9a-4f25-851e-040cf647d974">
+        <dct:identifier>https://www.geo2france.fr/geonetwork/srv/fre/catalog.search#/metadata/4635b9cc-bc9a-4f25-851e-040cf647d974</dct:identifier>
+        <dct:title>Orthophotographie du Département de l'Aisne (2009) - rayonnement infrarouge</dct:title>
+        <dct:abstract>Orthophotographies du Département de l'Aisne réalisée à partir de prises de vues aériennes numériques (pixel 25 cm, rayonnement infrarouge) de 2009 dans le système de projection Lambert 93.
+
+Ces données sont cofinancées par l’Union européenne. L’Europe s’engage en Picardie avec le Fonds européen de développement régional.</dct:abstract>
+        <dcat:keyword>orthophotographies</dcat:keyword>
+        <dcat:keyword>images aériennes</dcat:keyword>
+        <dcat:keyword>ortho-imagerie</dcat:keyword>
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/photographie%20a%C3%A9rienne" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/photographie" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/AISNE%20%2802%29" />
+        <dcat:theme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0%20INSPIRE%20themes/concepts/Ortho-imagerie" />
+        <dcat:theme rdf:resource="https://inspire.ec.europa.eu/metadata-codelist/TopicCategory/imageryBaseMapsEarthCover" />
+        <foaf:thumbnail rdf:resource="https://www.geo2france.fr/geonetwork/srv/api/records/4635b9cc-bc9a-4f25-851e-040cf647d974/attachments/apercu_ortho_aisne_2009_ir_s.png" />
+        <foaf:thumbnail rdf:resource="https://www.geo2france.fr/geonetwork/srv/api/records/4635b9cc-bc9a-4f25-851e-040cf647d974/attachments/apercu_ortho_aisne_2009_ir.png" />
+        <dct:spatial>
+          <ogc:Polygon 
+            xmlns:ogc="http://www.opengis.net/rdf#">
+            <geo:asWKT 
+              xmlns:geo="http://www.opengis.net/ont/geosparql#" rdf:datatype="http://www.opengis.net/rdf#wktLiteral">Polygon((2.9587567567822513 48.838486155984086, 2.9587567567822513 50.06928644841888, 4.2557525169036525 50.06928644841888, 4.2557525169036525 48.838486155984086, 2.9587567567822513 48.838486155984086))
+            </geo:asWKT>
+          </ogc:Polygon>
+        </dct:spatial>
+        <dct:issued>2011-01-20</dct:issued>
+        <dct:publisher rdf:resource="http://localhost:8080/geonetwork/srv/resources/organizations/G%C3%A9o2France" />
+        <dct:publisher rdf:resource="http://localhost:8080/geonetwork/srv/resources/organizations/%C3%89tat" />
+        <dct:publisher rdf:resource="http://localhost:8080/geonetwork/srv/resources/organizations/D%C3%A9partement%20de%20l%27Aisne" />
+        <dct:publisher rdf:resource="http://localhost:8080/geonetwork/srv/resources/organizations/R%C3%A9gion%20Hauts-de-France" />
+        <dct:language>fre</dct:language>
+        <dct:license>license</dct:license>
+        <dct:license>license</dct:license>
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/4635b9cc-bc9a-4f25-851e-040cf647d974#OGC%3AWMS-aisne_ortho_2009_ir" />
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/4635b9cc-bc9a-4f25-851e-040cf647d974#OGC%3AWCS-aisne_ortho_2009_ir" />
+        <dcat:distribution rdf:resource="https://dev.geo2france.fr/geonetwork/records/4635b9cc-bc9a-4f25-851e-040cf647d974#WWW%3ALINK-1.0-http--link-Lien%20vers%20la%20fiche%20de%20m%C3%A9tadonn%C3%A9es%20d%27origine" />
+        <dcat:dataQuality>Orthophotographies du Département de l'Aisne réalisée à partir de prises de vues aériennes numériques (pixel 25 cm, rayonnement visible et proche infrarouge) de 2009.</dcat:dataQuality>
+      </dcat:Dataset>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/photographie%20a%C3%A9rienne">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4" />
+        <skos:prefLabel>photographie aérienne</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4/concepts/photographie">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20Concepts%2C%20version%202.4" />
+        <skos:prefLabel>photographie</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements/concepts/AISNE%20%2802%29">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/D%C3%A9partements" />
+        <skos:prefLabel>AISNE (02)</skos:prefLabel>
+      </skos:Concept>
+      <skos:Concept rdf:about="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0%20INSPIRE%20themes/concepts/Ortho-imagerie">
+        <skos:inScheme rdf:resource="http://localhost:8080/geonetwork/srv/resources/registries/vocabularies/GEMET%20-%20INSPIRE%20themes%2C%20version%201.0%20INSPIRE%20themes" />
+        <skos:prefLabel>Ortho-imagerie</skos:prefLabel>
+      </skos:Concept>
+      <dcat:Distribution rdf:about="https://dev.geo2france.fr/geonetwork/records/4635b9cc-bc9a-4f25-851e-040cf647d974#OGC%3AWMS-aisne_ortho_2009_ir">
+        <dcat:accessURL>https://www.geo2france.fr/geoserver/geopicardie/ows?service=WMS&amp;request=GetCapabilities</dcat:accessURL>
+        <dct:title>aisne_ortho_2009_ir</dct:title>
+        <dct:format>OGC:WMS</dct:format>
+      </dcat:Distribution>
+      <dcat:Distribution rdf:about="https://dev.geo2france.fr/geonetwork/records/4635b9cc-bc9a-4f25-851e-040cf647d974#OGC%3AWCS-aisne_ortho_2009_ir">
+        <dcat:accessURL>https://www.geo2france.fr/geoserver/geopicardie/ows?service=WCS&amp;request=GetCapabilities</dcat:accessURL>
+        <dct:title>aisne_ortho_2009_ir</dct:title>
+        <dct:format>OGC:WCS</dct:format>
+      </dcat:Distribution>
+      <dcat:Distribution rdf:about="https://dev.geo2france.fr/geonetwork/records/4635b9cc-bc9a-4f25-851e-040cf647d974#WWW%3ALINK-1.0-http--link-Lien%20vers%20la%20fiche%20de%20m%C3%A9tadonn%C3%A9es%20d%27origine">
+        <dcat:accessURL>https://www.geo2france.fr/geonetwork/srv/fre/catalog.search#/metadata/4635b9cc-bc9a-4f25-851e-040cf647d974</dcat:accessURL>
+        <dct:title>Lien vers la fiche de métadonnées d'origine</dct:title>
+        <dct:format>WWW:LINK-1.0-http--link</dct:format>
+      </dcat:Distribution>
+      <foaf:Organization rdf:about="http://localhost:8080/geonetwork/srv/resources/organizations/G%C3%A9o2France">
+        <foaf:name>Géo2France</foaf:name>
+        <foaf:member rdf:resource="http://localhost:8080/geonetwork/srv/resources/persons/contact%40geo2france.fr" />
+      </foaf:Organization>
+      <foaf:Organization rdf:about="http://localhost:8080/geonetwork/srv/resources/organizations/%C3%89tat">
+        <foaf:name>État</foaf:name>
+        <foaf:member rdf:resource="http://localhost:8080/geonetwork/srv/resources/persons/d3884010e222" />
+      </foaf:Organization>
+      <foaf:Organization rdf:about="http://localhost:8080/geonetwork/srv/resources/organizations/D%C3%A9partement%20de%20l%27Aisne">
+        <foaf:name>Département de l'Aisne</foaf:name>
+        <foaf:member rdf:resource="http://localhost:8080/geonetwork/srv/resources/persons/sig%40aisne.fr" />
+      </foaf:Organization>
+      <foaf:Organization rdf:about="http://localhost:8080/geonetwork/srv/resources/organizations/R%C3%A9gion%20Hauts-de-France">
+        <foaf:name>Région Hauts-de-France</foaf:name>
+        <foaf:member rdf:resource="http://localhost:8080/geonetwork/srv/resources/persons/sig%40hautsdefrance.fr" />
+      </foaf:Organization>
+      <foaf:Agent rdf:about="http://localhost:8080/geonetwork/srv/resources/persons/contact%40geo2france.fr">
+        <foaf:mbox rdf:resource="mailto:contact@geo2france.fr" />
+      </foaf:Agent>
+      <foaf:Agent rdf:about="http://localhost:8080/geonetwork/srv/resources/persons/d3884010e222">
+        <foaf:mbox rdf:resource="mailto:" />
+      </foaf:Agent>
+      <foaf:Agent rdf:about="http://localhost:8080/geonetwork/srv/resources/persons/sig%40aisne.fr">
+        <foaf:mbox rdf:resource="mailto:sig@aisne.fr" />
+      </foaf:Agent>
+      <foaf:Agent rdf:about="http://localhost:8080/geonetwork/srv/resources/persons/sig%40hautsdefrance.fr">
+        <foaf:mbox rdf:resource="mailto:sig@hautsdefrance.fr" />
+      </foaf:Agent>
+    </rdf:RDF>
+  </csw:SearchResults>
+</csw:GetRecordsResponse>

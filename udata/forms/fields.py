@@ -14,7 +14,7 @@ from wtforms_json import flatten_json
 from . import widgets
 
 from udata.auth import current_user, admin_permission
-from udata.models import db, User, Organization, Dataset, Reuse, datastore
+from udata.models import db, User, Organization, Dataset, Reuse, datastore, ContactPoint
 from udata.core.storages import tmp
 from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.i18n import lazy_gettext as _
@@ -179,6 +179,16 @@ class BooleanField(FieldHelper, fields.BooleanField):
     def __init__(self, *args, **kwargs):
         self.stacked = kwargs.pop('stacked', False)
         super(BooleanField, self).__init__(*args, **kwargs)
+
+    def process_formdata(self, valuelist):
+        # We override this so that when no value is provided
+        # the form doesn't think the value is `False` instead 
+        # the value is not present and the model can keep the
+        # existing value
+        if not valuelist:
+            return 
+
+        super().process_formdata(valuelist)
 
 
 class RadioField(FieldHelper, fields.RadioField):
@@ -759,6 +769,13 @@ class PublishAsField(ModelFieldMixin, Field):
             else:
                 self.data = None
         return True
+
+
+class ContactPointField(ModelFieldMixin, Field):
+    model = ContactPoint
+
+    def __init__(self, *args, **kwargs):
+        super(ContactPointField, self).__init__(*args, **kwargs)
 
 
 def field_parse(cls, value, *args, **kwargs):

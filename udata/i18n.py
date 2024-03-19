@@ -1,27 +1,22 @@
-import pkgutil
+import importlib.util
 
 from contextlib import contextmanager
-from os.path import exists, join, dirname, basename
+from os.path import join, dirname, basename
 from glob import iglob
 
 from flask import (  # noqa
     g, request, current_app, abort, redirect, url_for, has_request_context
 )
 from flask.blueprints import BlueprintSetupState, _endpoint_from_view_func
-try:
-    from flask import _app_ctx_stack as stack
-except ImportError:
-    from flask import _request_ctx_stack as stack
 
-
-from babel.support import NullTranslations, Translations
 from babel.dates import format_timedelta as babel_format_timedelta
 
 from datetime import datetime
 
-from flask_babelex import Babel, Domain, refresh
-from flask_babelex import format_date, format_datetime  # noqa
-from flask_babelex import get_locale as get_current_locale  # noqa
+import flask_babel
+from flask_babel import Babel, refresh
+from flask_babel import format_date, format_datetime  # noqa
+from flask_babel import get_locale as get_current_locale  # noqa
 
 from werkzeug.local import LocalProxy
 
@@ -32,107 +27,79 @@ from udata.errors import ConfigError
 from udata.utils import multi_to_dict
 
 
-class PluggableDomain(Domain):
-    def get_translations(self):
-        """Returns the correct gettext translations that should be used for
-        this request.  This will never fail and return a dummy translation
-        object if used outside of the request or if a translation cannot be
-        found.
-        """
-        ctx = stack.top
-        if ctx is None:
-            return NullTranslations()
+def get_translation_directories_and_domains():
+    translations_dir = []
+    domains = []
 
-        locale = get_locale()
+    # udata and plugin translations
+    for pkg in entrypoints.get_roots(current_app):
+        spec = importlib.util.find_spec(pkg)
+        path = dirname(spec.origin)
+        plugin_domains = [
+            f.replace(path, '').replace('.pot', '')[1:]
+            for f in iglob(join(path, '**/translations/*.pot'), recursive=True)]
+        for domain in plugin_domains:
+            translations_dir.append(join(path, dirname(domain)))
+            domains.append(basename(domain))
 
-        cache = self.get_translations_cache(ctx)
-
-        translations = cache.get(str(locale))
-        if translations is None:
-            translations_dir = self.get_translations_path(ctx)
-            translations = Translations.load(translations_dir, locale,
-                                             domain=self.domain)
-
-            # Load plugins translations
-            if isinstance(translations, Translations):
-                # Load core extensions translations
-                from wtforms.i18n import messages_path
-                wtforms_translations = Translations.load(messages_path(),
-                                                         locale,
-                                                         domain='wtforms')
-                translations.merge(wtforms_translations)
-
-                import flask_security
-                flask_security_translations = Translations.load(
-                    join(flask_security.__path__[0], 'translations'),
-                    locale,
-                    domain='flask_security'
-                )
-                translations.merge(flask_security_translations)
-
-                for pkg in entrypoints.get_roots(current_app):
-                    loader = pkgutil.get_loader(pkg)
-                    path = dirname(loader.path)
-                    domains = [f.replace(path, '').replace('.pot', '')[1:]
-                               for f in iglob(join(path, '**/translations/*.pot'), recursive=True)]
-                    for domain in domains:
-                        domain_path = join(path, dirname(domain))
-                        translations.merge(Translations.load(domain_path, locale,
-                                                             domain=basename(domain)))
-                cache[str(locale)] = translations
-
-        return translations
+    return translations_dir, domains
 
 
-domain = PluggableDomain(domain='udata')
-babel = Babel(default_domain=domain)
+def get_locale():
+    if getattr(g, 'lang_code', None):
+        return g.lang_code
+    return str(default_lang)
+
 
 # Create shortcuts for the default Flask domain
 def gettext(*args, **kwargs):
-    return domain.gettext(*args, **kwargs)
+    return flask_babel.gettext(*args, **kwargs)
 
 
 _ = gettext
 
 
 def ngettext(*args, **kwargs):
-    return domain.ngettext(*args, **kwargs)
+    return flask_babel.ngettext(*args, **kwargs)
 
 
 N_ = ngettext
 
 
 def pgettext(*args, **kwargs):
-    return domain.pgettext(*args, **kwargs)
+    return flask_babel.pgettext(*args, **kwargs)
 
 
 P_ = pgettext
 
 
 def npgettext(*args, **kwargs):
-    return domain.npgettext(*args, **kwargs)
+    return flask_babel.npgettext(*args, **kwargs)
 
 
 def lazy_gettext(*args, **kwargs):
-    return domain.lazy_gettext(*args, **kwargs)
+    return flask_babel.lazy_gettext(*args, **kwargs)
 
 
 L_ = lazy_gettext
 
 
 def lazy_pgettext(*args, **kwargs):
-    return domain.lazy_pgettext(*args, **kwargs)
+    return flask_babel.lazy_pgettext(*args, **kwargs)
 
 
-def format_timedelta(datetime_or_timedelta, granularity='second', add_direction=False, threshold=0.85):
-    '''This is format_timedelta from Flask-Babel, Flask-BabelEx missed the add_direction parameter'''
+def format_timedelta(datetime_or_timedelta, granularity='second',
+                     add_direction=False, threshold=0.85):
+    '''This is format_timedelta from Flask-Babel'''
+    '''Flask-BabelEx missed the add_direction parameter'''
     if isinstance(datetime_or_timedelta, datetime):
         datetime_or_timedelta = datetime.utcnow() - datetime_or_timedelta
-    return babel_format_timedelta(datetime_or_timedelta, 
+    return babel_format_timedelta(datetime_or_timedelta,
                                   granularity,
                                   threshold=threshold,
                                   add_direction=add_direction,
                                   locale=get_current_locale())
+
 
 def _default_lang(user=None):
     lang = getattr(user or current_user, 'prefered_language', None)
@@ -159,13 +126,6 @@ def language(lang_code):
     refresh()
 
 
-@babel.localeselector
-def get_locale():
-    if getattr(g, 'lang_code', None):
-        return g.lang_code
-    return str(default_lang)
-
-
 def check_config(cfg):
     default_language = cfg['DEFAULT_LANGUAGE']
     if default_language not in cfg.get('LANGUAGES', []):
@@ -175,9 +135,14 @@ def check_config(cfg):
 
 def init_app(app):
     check_config(app.config)
-    app.config.setdefault('BABEL_DEFAULT_LOCALE',
-                          app.config['DEFAULT_LANGUAGE'])
-    babel.init_app(app)
+    translations_dir, domains = get_translation_directories_and_domains()
+    Babel(
+        app,
+        default_locale=app.config['DEFAULT_LANGUAGE'],
+        default_translation_directories=';'.join(translations_dir),
+        default_domain=';'.join(domains),
+        locale_selector=get_locale
+    )
 
 
 def _add_language_code(endpoint, values):

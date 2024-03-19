@@ -28,7 +28,6 @@ org_ref_fields = api.inherit('OrganizationReference', base_reference, {
         readonly=True),
 })
 
-
 from udata.core.user.api_fields import user_ref_fields  # noqa: required
 
 request_fields = api.model('MembershipRequest', {
@@ -88,6 +87,7 @@ org_fields = api.model('Organization', {
     'badges': fields.List(fields.Nested(badge_fields),
                           description='The organization badges',
                           readonly=True),
+    'extras': fields.Raw(description='Extras attributes as key-value pairs'),
 })
 
 org_page_fields = api.model('OrganizationPage', fields.pager(org_fields))

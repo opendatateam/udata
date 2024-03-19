@@ -84,6 +84,12 @@ class ReuseAPITest:
         assert len(response.json['data']) == 1
         assert response.json['data'][0]['id'] == str(org_reuse.id)
 
+        response = api.get(url_for('api.reuses', owner='owner-id'))
+        assert400(response)
+
+        response = api.get(url_for('api.reuses', organization='org-id'))
+        assert400(response)
+
     def test_reuse_api_get(self, api):
         '''It should fetch a reuse from the API'''
         reuse = ReuseFactory()
@@ -311,17 +317,17 @@ class ReuseAPITest:
         '''It should suggest reuses'''
         for i in range(3):
             ReuseFactory(
-                title='test-{0}'.format(i) if i % 2 else faker.word(),
+                title='arealtestprefix-{0}'.format(i) if i % 2 else faker.word(),
                 visible=True,
                 metrics={"followers": i})
         max_follower_reuse = ReuseFactory(
-            title='test-4',
+            title='arealtestprefix-4',
             visible=True,
             metrics={"followers": 10}
         )
 
         response = api.get(url_for('api.suggest_reuses'),
-                           qs={'q': 'tes', 'size': '5'})
+                           qs={'q': 'arealtestpref', 'size': '5'})
         assert200(response)
 
         assert len(response.json) <= 5

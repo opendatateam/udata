@@ -96,13 +96,18 @@ class BaseBackend(object):
     def config(self):
         return self.source.config
 
-    def get(self, url, **kwargs):
-        headers = self.get_headers()
+    def head(self, url, headers={}, **kwargs):
+        headers.update(self.get_headers())
+        kwargs['verify'] = kwargs.get('verify', self.verify_ssl)
+        return requests.head(url, headers=headers, **kwargs)
+
+    def get(self, url, headers={}, **kwargs):
+        headers.update(self.get_headers())
         kwargs['verify'] = kwargs.get('verify', self.verify_ssl)
         return requests.get(url, headers=headers, **kwargs)
 
-    def post(self, url, data, **kwargs):
-        headers = self.get_headers()
+    def post(self, url, data, headers={}, **kwargs):
+        headers.update(self.get_headers())
         kwargs['verify'] = kwargs.get('verify', self.verify_ssl)
         return requests.post(url, data=data, headers=headers, **kwargs)
 
@@ -151,7 +156,7 @@ class BaseBackend(object):
             self.job.errors.append(error)
             self.job.status = 'failed'
             self.end()
-            return
+            return None
         except Exception as e:
             self.job.status = 'failed'
             error = HarvestError(message=safe_unicode(e))
@@ -159,7 +164,7 @@ class BaseBackend(object):
             self.end()
             msg = 'Initialization failed for "{0.name}" ({0.backend})'
             log.exception(msg.format(self.source))
-            return
+            return None
 
         if self.max_items:
             self.job.items = self.job.items[:self.max_items]
@@ -268,8 +273,6 @@ class BaseBackend(object):
         raise NotImplementedError
 
     def add_item(self, identifier, *args, **kwargs):
-        if identifier is None:
-            raise ValueError('DCT.identifier is required for all DCAT.Dataset records')
         item = HarvestItem(remote_id=str(identifier), args=args, kwargs=kwargs)
         self.job.items.append(item)
         return item
@@ -299,7 +302,16 @@ class BaseBackend(object):
                 {'harvest.source_id': str(self.source.id)},
             ],
         }).first()
-        return dataset or Dataset()
+
+        if dataset:
+            return dataset
+
+        if self.source.organization:
+            return Dataset(organization=self.source.organization)
+        elif self.source.owner:
+            return Dataset(owner=self.source.owner)
+
+        return Dataset()
 
     def validate(self, data, schema):
         '''Perform a data validation against a given schema.

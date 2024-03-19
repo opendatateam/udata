@@ -14,7 +14,8 @@ from udata.uris import endpoint_for
 
 __all__ = (
     'Organization', 'Team', 'Member', 'MembershipRequest',
-    'ORG_ROLES', 'MEMBERSHIP_STATUS', 'PUBLIC_SERVICE', 'CERTIFIED'
+    'ORG_ROLES', 'MEMBERSHIP_STATUS', 'PUBLIC_SERVICE', 'CERTIFIED',
+    'ASSOCIATION', 'COMPANY', 'LOCAL_AUTHORITY'
 )
 
 
@@ -36,12 +37,14 @@ LOGO_SIZES = [100, 60, 25]
 
 PUBLIC_SERVICE = 'public-service'
 CERTIFIED = 'certified'
+ASSOCIATION = 'Association'
+COMPANY = 'Company'
+LOCAL_AUTHORITY = 'Local authority'
 
 TITLE_SIZE_LIMIT = 350
 DESCRIPTION_SIZE_LIMIT = 100000
 
 ORG_BID_SIZE_LIMIT = 14
-ORG_BID_FORMAT = 'siret'
 
 
 class Team(db.EmbeddedDocument):
@@ -115,7 +118,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     zone = db.StringField()
-    extras = db.ExtrasField()
+    extras = db.OrganizationExtrasField()
 
     deleted = db.DateTimeField()
 
@@ -141,6 +144,9 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     __badges__ = {
         PUBLIC_SERVICE: _('Public Service'),
         CERTIFIED: _('Certified'),
+        ASSOCIATION: _('Association'),
+        COMPANY: _('Company'),
+        LOCAL_AUTHORITY: _('Local authority'),
     }
 
     __metrics_keys__ = [
@@ -199,6 +205,18 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     def public_service(self):
         is_public_service = any(b.kind == PUBLIC_SERVICE for b in self.badges)
         return self.certified and is_public_service
+
+    @property
+    def company(self):
+        return any(b.kind == COMPANY for b in self.badges)
+
+    @property
+    def association(self):
+        return any(b.kind == ASSOCIATION for b in self.badges)
+
+    @property
+    def local_authority(self):
+        return any(b.kind == LOCAL_AUTHORITY for b in self.badges)
 
     def member(self, user):
         for member in self.members:

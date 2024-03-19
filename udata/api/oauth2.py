@@ -13,6 +13,7 @@ Authlib provides SQLAlchemny mixins which help understanding:
 As well as a sample application:
  - https://github.com/authlib/example-oauth2-server
 '''
+import fnmatch
 
 from bson import ObjectId
 
@@ -26,7 +27,7 @@ from authlib.oauth2.rfc7009 import RevocationEndpoint
 from authlib.oauth2.rfc7636 import CodeChallenge
 from authlib.oauth2.rfc6749.util import scope_to_list, list_to_scope
 from authlib.oauth2 import OAuth2Error
-from flask import request, render_template
+from flask import request, render_template, current_app
 from flask_security.utils import verify_password
 from werkzeug.exceptions import Unauthorized
 from werkzeug.security import gen_salt
@@ -107,7 +108,12 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
         return list_to_scope([s for s in scope.split() if s in allowed])
 
     def check_redirect_uri(self, redirect_uri):
-        return redirect_uri in self.redirect_uris
+        if current_app.config.get("OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI"):
+            return any(
+                fnmatch.fnmatch(redirect_uri, pattern) for pattern in self.redirect_uris
+            )
+        else:
+            return redirect_uri in self.redirect_uris
 
     def check_client_secret(self, client_secret):
         return self.secret == client_secret

@@ -19,6 +19,7 @@ class Defaults(object):
         'es': 'Español',
         'pt': 'Português',
         'sr': 'Српски',
+        'de': 'Deutsch',
     }
     DEFAULT_LANGUAGE = 'en'
     SECRET_KEY = 'Default uData secret key'
@@ -73,6 +74,11 @@ class Defaults(object):
 
     # Flask security settings
 
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = None  # Can be set to 'Lax' or 'Strict'. See https://flask.palletsprojects.com/en/2.3.x/security/#security-cookie
+
+    # Flask-Security-Too settings
+
     SECURITY_TRACKABLE = True
     SECURITY_REGISTERABLE = True
     SECURITY_CONFIRMABLE = True
@@ -93,8 +99,6 @@ class Defaults(object):
     SECURITY_REMEMBER_SALT = 'Default uData remember salt'
 
     SECURITY_EMAIL_SENDER = MAIL_DEFAULT_SENDER
-
-    SECURITY_I18N_DOMAIN = 'udata'
 
     SECURITY_EMAIL_SUBJECT_REGISTER = _('Welcome')
     SECURITY_EMAIL_SUBJECT_CONFIRM = _('Please confirm your email')
@@ -147,6 +151,7 @@ class Defaults(object):
         'password': 30 * 24 * HOUR,
         'client_credentials': 30 * 24 * HOUR
     }
+    OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI = False
 
     MD_ALLOWED_TAGS = [
         'a',
@@ -187,6 +192,8 @@ class Defaults(object):
         'tbody',
         'thead',
         'tfooter',
+        'details',
+        'summary'
         # 'title',
     ]
 
@@ -249,6 +256,15 @@ class Defaults(object):
     HARVEST_AUTOARCHIVE_GRACE_DAYS = 7
 
     HARVEST_VALIDATION_CONTACT_FORM = None
+
+    HARVEST_MAX_CATALOG_SIZE_IN_MONGO = None # Defaults to the size of a MongoDB document 
+    HARVEST_GRAPHS_S3_BUCKET = None # If the catalog is bigger than `HARVEST_MAX_CATALOG_SIZE_IN_MONGO` store the graph inside S3 instead of MongoDB
+    HARVEST_GRAPHS_S3_FILENAME_PREFIX = '' # Useful to store the graphs inside a subfolder of the bucket. For example by setting `HARVEST_GRAPHS_S3_FILENAME_PREFIX = 'graphs/'`
+
+    # S3 connection details
+    S3_URL = None
+    S3_ACCESS_KEY_ID = None
+    S3_SECRET_ACCESS_KEY = None 
 
     ACTIVATE_TERRITORIES = False
     # The order is important to compute parents/children, smaller first.
@@ -362,6 +378,11 @@ class Defaults(object):
     # Default pagination size on listing
     POST_DEFAULT_PAGINATION = 20
 
+    # Organization settings
+    ###########################################################################
+    # The business identification format to use for validation
+    ORG_BID_FORMAT = 'siret'
+
     # Dataset settings
     ###########################################################################
     # Max number of resources to display uncollapsed in dataset view
@@ -437,6 +458,16 @@ class Defaults(object):
     ###########################################################################
     QUALITY_DESCRIPTION_LENGTH = 100
 
+    # Spam settings
+    ###########################################################################
+    SPAM_WORDS = []
+    SPAM_ALLOWED_LANGS = []
+    SPAM_MINIMUM_STRING_LENGTH_FOR_LANG_CHECK = 30
+
+    # Notification settings
+    ###########################################################################
+    MATTERMOST_WEBHOOK = None
+
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''
@@ -448,6 +479,7 @@ class Testing(object):
     WTF_CSRF_ENABLED = False
     AUTO_INDEX = False
     CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
     TEST_WITH_PLUGINS = False
     PLUGINS = []
     TEST_WITH_THEME = False

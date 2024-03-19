@@ -6,6 +6,7 @@ from uuid import uuid4
 import pytest
 import pytz
 from flask import url_for
+import requests_mock
 
 from udata.api import fields
 from udata.app import cache
@@ -15,12 +16,13 @@ from udata.core.dataset.api_fields import (dataset_harvest_fields,
                                            resource_harvest_fields)
 from udata.core.dataset.factories import (CommunityResourceFactory,
                                           DatasetFactory, LicenseFactory,
-                                          ResourceFactory,
+                                          ResourceFactory, ResourceSchemaMockData,
                                           VisibleDatasetFactory)
 from udata.core.dataset.models import (HarvestDatasetMetadata,
                                        HarvestResourceMetadata, ResourceMixin)
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
+from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
 from udata.models import (LEGACY_FREQUENCIES, RESOURCE_TYPES,
@@ -28,7 +30,7 @@ from udata.models import (LEGACY_FREQUENCIES, RESOURCE_TYPES,
                           Follow, Member, db)
 from udata.tags import MAX_TAG_LENGTH, MIN_TAG_LENGTH
 from udata.tests.features.territories import create_geozones_fixtures
-from udata.tests.helpers import assert200, assert404
+from udata.tests.helpers import assert200, assert404, assert204
 from udata.utils import faker, unique_string
 
 from . import APITestCase
@@ -41,7 +43,6 @@ SAMPLE_GEOM = {
          [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]]
     ]
 }
-
 
 class DatasetAPITest(APITestCase):
     modules = []
@@ -139,6 +140,8 @@ class DatasetAPITest(APITestCase):
         license_dataset = VisibleDatasetFactory(license=LicenseFactory(id='cc-by'))
         format_dataset = DatasetFactory(resources=[ResourceFactory(format='my-format')])
         featured_dataset = VisibleDatasetFactory(featured=True)
+        topic_dataset = VisibleDatasetFactory()
+        topic = TopicFactory(datasets=[topic_dataset])
 
         paca, _, _ = create_geozones_fixtures()
         geozone_dataset = VisibleDatasetFactory(spatial=SpatialCoverageFactory(zones=[paca.id]))
@@ -153,10 +156,10 @@ class DatasetAPITest(APITestCase):
         org_dataset = VisibleDatasetFactory(organization=org)
 
         schema_dataset = VisibleDatasetFactory(resources=[
-            ResourceFactory(schema={'name': 'my-schema', 'version': '1.0.0'})
+            ResourceFactory(schema={'name': 'my-schema', 'url': 'https://example.org', 'version': '1.0.0'})
         ])
         schema_version2_dataset = VisibleDatasetFactory(resources=[
-            ResourceFactory(schema={'name': 'other-schema', 'version': '2.0.0'})
+            ResourceFactory(schema={'name': 'other-schema', 'url': 'https://example.org', 'version': '2.0.0'})
         ])
 
         # filter on tag
@@ -207,11 +210,17 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(len(response.json['data']), 1)
         self.assertEqual(response.json['data'][0]['id'], str(owner_dataset.id))
 
+        response = self.get(url_for('api.datasets', owner='owner-id'))
+        self.assert400(response)
+
         # filter on organization
         response = self.get(url_for('api.datasets', organization=org.id))
         self.assert200(response)
         self.assertEqual(len(response.json['data']), 1)
         self.assertEqual(response.json['data'][0]['id'], str(org_dataset.id))
+
+        response = self.get(url_for('api.datasets', organization='org-id'))
+        self.assert400(response)
 
         # filter on schema
         response = self.get(url_for('api.datasets', schema='my-schema'))
@@ -225,16 +234,39 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(len(response.json['data']), 1)
         self.assertEqual(response.json['data'][0]['id'], str(schema_version2_dataset.id))
 
+        # filter on topic
+        response = self.get(url_for('api.datasets', topic=topic.id))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(topic_dataset.id))
+
+        # filter on non existing topic
+        response = self.get(url_for('api.datasets', topic=topic_dataset.id))
+        self.assert200(response)
+        self.assertTrue(len(response.json['data']) > 0)
+
+        # filter on non id for topic
+        response = self.get(url_for('api.datasets', topic='xxx'))
+        self.assert400(response)
+
     def test_dataset_api_get(self):
         '''It should fetch a dataset from the API'''
         resources = [ResourceFactory() for _ in range(2)]
         dataset = DatasetFactory(resources=resources)
-
         response = self.get(url_for('api.dataset', dataset=dataset))
         self.assert200(response)
         data = json.loads(response.data)
         self.assertEqual(len(data['resources']), len(resources))
         self.assertTrue('quality' in data)
+        self.assertTrue('internal' in data)
+        # Reloads dataset from mongoDB to get mongoDB's date's milliseconds reset.
+        dataset.reload()
+        self.assertEqual(data['internal']['created_at_internal'], fields.ISODateTime().format(dataset.created_at_internal))
+        self.assertEqual(data['internal']['last_modified_internal'], fields.ISODateTime().format(dataset.last_modified_internal))
+
+        self.assertTrue('internal' in data['resources'][0])
+        self.assertEqual(data['resources'][0]['internal']['created_at_internal'], fields.ISODateTime().format(dataset.resources[0].created_at_internal))
+        self.assertEqual(data['resources'][0]['internal']['last_modified_internal'], fields.ISODateTime().format(dataset.resources[0].last_modified_internal))
 
     def test_dataset_api_get_deleted(self):
         '''It should not fetch a deleted dataset from the API and raise 410'''
@@ -339,6 +371,9 @@ class DatasetAPITest(APITestCase):
             'integer': 42,
             'float': 42.0,
             'string': 'value',
+            'dict': {
+                'foo': 'bar',
+            }
         }
         with self.api_user():
             response = self.post(url_for('api.datasets'), data)
@@ -349,6 +384,7 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(dataset.extras['integer'], 42)
         self.assertEqual(dataset.extras['float'], 42.0)
         self.assertEqual(dataset.extras['string'], 'value')
+        self.assertEqual(dataset.extras['dict']['foo'], 'bar')
 
     def test_dataset_api_create_with_resources(self):
         '''It should create a dataset with resources from the API'''
@@ -425,6 +461,33 @@ class DatasetAPITest(APITestCase):
 
         dataset = Dataset.objects.first()
         self.assertEqual(len(dataset.resources), initial_length + 1)
+
+    def test_dataset_api_update_private(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user, private=True)
+        data = dataset.to_dict()
+        data['description'] = 'new description'
+        del data['private']
+
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        self.assertEqual(dataset.description, 'new description')
+        self.assertEqual(dataset.private, True)
+        
+        data['private'] = None
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        self.assertEqual(dataset.private, False)
+
+        data['private'] = True
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        self.assertEqual(dataset.private, True)
+
+
 
     def test_dataset_api_update_new_resource_with_extras(self):
         '''It should update a dataset with a new resource with extras'''
@@ -552,6 +615,71 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(Dataset.objects.first().description,
                          dataset.description)
 
+    def test_dataset_api_update_contact_point(self):
+        '''It should update a dataset from the API'''
+        self.login()
+
+        # Org and contact point creation
+        member = Member(user=self.user, role='admin')
+        org = OrganizationFactory(members=[member])
+        contact_point_data = {
+            'email': 'mooneywayne@cobb-cochran.com',
+            'name': 'Martin Schultz',
+            'organization': str(org.id)
+        }
+        response = self.post(url_for('api.contact_points'), contact_point_data)
+        self.assert201(response)
+
+        response = self.get(url_for('api.org_contact_points', org=org))
+        assert200(response)
+        contact_point_id = response.json['data'][0]['id']
+
+        # Dataset creation
+        dataset = DatasetFactory(organization=org)
+        data = DatasetFactory.as_dict()
+
+        data['contact_point'] = contact_point_id
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+
+        dataset = Dataset.objects.first()
+        self.assertEqual(dataset.contact_point.name, contact_point_data['name'])
+
+        data['contact_point'] = None
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+
+        dataset.reload()
+        self.assertEqual(dataset.contact_point, None)
+
+    def test_dataset_api_update_contact_point_error(self):
+        '''It should update a dataset from the API'''
+        self.login()
+
+        # Org and contact point creation
+        member = Member(user=self.user, role='admin')
+        org = OrganizationFactory(members=[member])
+        contact_point_data = {
+            'email': 'mooneywayne@cobb-cochran.com',
+            'name': 'Martin Schultz',
+            'organization': str(org.id)
+        }
+        response = self.post(url_for('api.contact_points'), contact_point_data)
+        self.assert201(response)
+
+        response = self.get(url_for('api.org_contact_points', org=org))
+        assert200(response)
+        contact_point_id = response.json['data'][0]['id']
+
+        # Dataset creation
+        dataset = DatasetFactory(owner=self.user)
+        data = DatasetFactory.as_dict()
+
+        data['contact_point'] = contact_point_id
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert400(response)
+        self.assertEqual(response.json['errors']['contact_point'][0], _('Wrong contact point id or contact point ownership mismatch'))
+
     def test_dataset_api_delete(self):
         '''It should delete a dataset from the API'''
         user = self.login()
@@ -620,37 +748,101 @@ class DatasetAPITest(APITestCase):
         dataset.reload()
         self.assertFalse(dataset.featured)
 
-    def test_dataset_new_resource_with_schema(self):
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
+    @requests_mock.Mocker(kw='rmock')
+    def test_dataset_new_resource_with_schema(self, rmock):
         '''Tests api validation to prevent schema creation with a name and a url'''
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
+
         user = self.login()
         dataset = DatasetFactory(owner=user)
         data = dataset.to_dict()
         resource_data = ResourceFactory.as_dict()
 
-        resource_data['schema'] = {
-            'name': 'my-schema',
-            'version': '1.0.0',
-            'url': 'http://example.com'
-        }
-        data['resources'].append(resource_data)
-        response = self.put(url_for('api.dataset', dataset=dataset), data)
-        self.assert400(response)
-        expected = _('Schema must have at least a name or an url. Having both is not allowed.')
-        assert response.json['errors']['resources'][0]['schema'][0] == expected
-
         resource_data['schema'] = {'url': 'test'}
         data['resources'].append(resource_data)
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert400(response)
-        expected_error = _('Provided URL is not valid.')
-        assert response.json['errors']['resources'][0]['schema'][0] == expected_error
+        assert response.json['errors']['resources'][0]['schema']['url'] == [_('Invalid URL')]
 
-        resource_data['schema'] = {'url': 'http://example.com'}
+        resource_data['schema'] = {'name': 'unknown-schema'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert400(response)
+        assert response.json['errors']['resources'][0]['schema']['name'] == [_('Schema name "{schema}" is not an allowed value. Allowed values: {values}').format(schema='unknown-schema', values='etalab/schema-irve-statique, 139bercy/format-commande-publique')]
+
+        resource_data['schema'] = {'name': 'etalab/schema-irve-statique', 'version': '42.0.0'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert400(response)
+        assert response.json['errors']['resources'][0]['schema']['version'] == [_('Version "{version}" is not an allowed value for the schema "{name}". Allowed versions: {values}').format(version='42.0.0', name='etalab/schema-irve-statique', values='2.2.0, 2.2.1, latest')]
+
+        resource_data['schema'] = {'url': 'http://example.com', 'name': 'etalab/schema-irve-statique'}
         data['resources'].append(resource_data)
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert200(response)
         dataset.reload()
         assert dataset.resources[0].schema['url'] == 'http://example.com'
+        assert dataset.resources[0].schema['name'] == 'etalab/schema-irve-statique'
+        assert dataset.resources[0].schema['version'] == None
+
+        resource_data['schema'] = {'name': 'etalab/schema-irve-statique'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+
+        dataset.reload()
+        assert dataset.resources[0].schema['name'] == 'etalab/schema-irve-statique'
+        assert dataset.resources[0].schema['url'] == None
+        assert dataset.resources[0].schema['version'] == None
+
+        resource_data['schema'] = {'name': 'etalab/schema-irve-statique', 'version': '2.2.0'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+
+        dataset.reload()
+        assert dataset.resources[0].schema['name'] == 'etalab/schema-irve-statique'
+        assert dataset.resources[0].schema['url'] == None
+        assert dataset.resources[0].schema['version'] == '2.2.0'
+
+        resource_data['schema'] = {'url': 'https://schema.data.gouv.fr/schemas/etalab/schema-irve-statique/2.2.1/schema-statique.json'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+
+        dataset.reload()
+        assert dataset.resources[0].schema['name'] == 'etalab/schema-irve-statique'
+        assert dataset.resources[0].schema['url'] == None
+        assert dataset.resources[0].schema['version'] == '2.2.1'
+
+        # Putting `None` as the schema argument do not remove the schema
+        # Not sure if it's the correct behaviour but it's the normal behaviour on the API v1… :-(
+        # I think it should be if the key 'schema' is missing, the old value is kept, if the key is present
+        # but `None` update it inside the DB as `None`.
+        data = response.json
+        data['resources'][0]['schema'] = None
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+
+        dataset.reload()
+        assert dataset.resources[0].schema['name'] == 'etalab/schema-irve-statique'
+        assert dataset.resources[0].schema['url'] == None
+        assert dataset.resources[0].schema['version'] == '2.2.1'
+
+        # Putting `None` as the schema name and version remove the schema
+        # This is a workaround for the None on schema behaviour explain above.
+        data = response.json
+        data['resources'][0]['schema']['name'] = None
+        data['resources'][0]['schema']['version'] = None
+
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+
+        dataset.reload()
+        assert dataset.resources[0].schema['name'] == None
+        assert dataset.resources[0].schema['url'] == None
+        assert dataset.resources[0].schema['version'] == None
 
 
 class DatasetBadgeAPITest(APITestCase):
@@ -1309,6 +1501,21 @@ class CommunityResourceAPITest(APITestCase):
         data = json.loads(response.data)
         self.assertEqual(data['id'], str(community_resource.id))
 
+    def test_resources_api_list(self):
+        '''It should list community resources from the API'''
+        community_resources = [CommunityResourceFactory() for _ in range(40)]
+        response = self.get(url_for('api.community_resources'))
+        self.assert200(response)
+        resources = json.loads(response.data)['data']
+
+        response = self.get(url_for('api.community_resources', page=2))
+        self.assert200(response)
+        resources += json.loads(response.data)['data']
+
+        self.assertEqual(len(resources), len(community_resources))
+        # Assert we don't have duplicates
+        self.assertEqual(len(set(res['id'] for res in resources)), len(community_resources))
+
     def test_community_resource_api_get_from_string_id(self):
         '''It should fetch a community resource from the API'''
         community_resource = CommunityResourceFactory()
@@ -1570,39 +1777,11 @@ class DatasetSchemasAPITest:
         # made before setting up rmock at module load, resulting in a 404
         app.config['SCHEMA_CATALOG_URL'] = 'https://example.com/schemas'
 
-        rmock.get('https://example.com/schemas', json={
-            "schemas": [
-                {
-                    "name": "etalab/schema-irve",
-                    "title": "Schéma IRVE",
-                    "versions": [
-                        {
-                            "version_name": "1.0.0"
-                        },
-                        {
-                            "version_name": "1.0.1"
-                        },
-                        {
-                            "version_name": "1.0.2"
-                        }
-                    ]
-                }
-            ]
-        })
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
         response = api.get(url_for('api.schemas'))
 
         assert200(response)
-        assert response.json == [
-            {
-                "id": "etalab/schema-irve",
-                "label": "Schéma IRVE",
-                "versions": [
-                    "1.0.0",
-                    "1.0.1",
-                    "1.0.2"
-                ]
-            }
-        ]
+        assert response.json == ResourceSchemaMockData.get_expected_v1_result_from_mock_data()
 
     @pytest.mark.options(SCHEMA_CATALOG_URL=None)
     def test_dataset_schemas_api_list_no_catalog_url(self, api):
@@ -1626,51 +1805,13 @@ class DatasetSchemasAPITest:
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_dataset_schemas_api_list_error_w_cache(self, api, rmock, mocker):
         cache_mock_set = mocker.patch.object(cache, 'set')
-        mocker.patch.object(cache, 'get', return_value=[
-            {
-                "id": "etalab/schema-irve",
-                "label": "Schéma IRVE",
-                "versions": [
-                    "1.0.0",
-                    "1.0.1",
-                    "1.0.2"
-                ]
-            }
-        ])
+        mocker.patch.object(cache, 'get', return_value=ResourceSchemaMockData.get_mock_data()['schemas'])
 
         # Fill cache
-        rmock.get('https://example.com/schemas', json={
-            "schemas": [
-                {
-                    "name": "etalab/schema-irve",
-                    "title": "Schéma IRVE",
-                    "versions": [
-                        {
-                            "version_name": "1.0.0"
-                        },
-                        {
-                            "version_name": "1.0.1"
-                        },
-                        {
-                            "version_name": "1.0.2"
-                        }
-                    ]
-                }
-            ]
-        })
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
         response = api.get(url_for('api.schemas'))
         assert200(response)
-        assert response.json == [
-            {
-                "id": "etalab/schema-irve",
-                "label": "Schéma IRVE",
-                "versions": [
-                    "1.0.0",
-                    "1.0.1",
-                    "1.0.2"
-                ]
-            }
-        ]
+        assert response.json == ResourceSchemaMockData.get_expected_v1_result_from_mock_data()
         assert cache_mock_set.called
 
         # Endpoint becomes unavailable
@@ -1679,17 +1820,7 @@ class DatasetSchemasAPITest:
         # Long term cache is used
         response = api.get(url_for('api.schemas'))
         assert200(response)
-        assert response.json == [
-            {
-                "id": "etalab/schema-irve",
-                "label": "Schéma IRVE",
-                "versions": [
-                    "1.0.0",
-                    "1.0.1",
-                    "1.0.2"
-                ]
-            }
-        ]
+        assert response.json == ResourceSchemaMockData.get_expected_v1_result_from_mock_data()
 
 
 @pytest.mark.usefixtures('clean_db')
@@ -1810,14 +1941,15 @@ class HarvestMetadataAPITest:
         response = api.get(url_for('api.dataset', dataset=dataset))
         assert200(response)
         assert response.json['created_at'] == creation_date.isoformat()
-        assert response.json['last_modified'] != modification_date.isoformat()
+        assert response.json['last_modified'] == modification_date.isoformat()
 
         resource_harvest_metadata = HarvestResourceMetadata(
             created_at=creation_date,
+            modified_at=modification_date,
         )
         dataset = DatasetFactory(resources=[ResourceFactory(harvest=resource_harvest_metadata)])
 
         response = api.get(url_for('api.dataset', dataset=dataset))
         assert200(response)
         assert response.json['resources'][0]['created_at'] == creation_date.isoformat()
-        assert response.json['resources'][0]['last_modified'] != modification_date.isoformat()
+        assert response.json['resources'][0]['last_modified'] == modification_date.isoformat()
