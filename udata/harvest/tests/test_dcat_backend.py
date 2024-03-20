@@ -16,7 +16,7 @@ from udata.core.dataset.factories import LicenseFactory, ResourceSchemaMockData
 from udata.storage.s3 import get_from_json
 
 from .factories import HarvestSourceFactory
-from ..backends.dcat import URIS_TO_REPLACE, CswIsoXsltDcatBackend
+from ..backends.dcat import URIS_TO_REPLACE, CswIso19139DcatBackend
 from .. import actions
 
 log = logging.getLogger(__name__)
@@ -667,16 +667,16 @@ class CswDcatBackendTest:
 
 @pytest.mark.usefixtures('clean_db')
 @pytest.mark.options(PLUGINS=['csw'])
-class CswIsoXsltDcatBackendTest:
+class CswIso19139DcatBackendTest:
 
     def test_geo2france(self, rmock):
 
         with open(os.path.join(CSW_DCAT_FILES_DIR, "XSLT.xml"), "r") as f:
             xslt = f.read()
         url = mock_csw_pagination(rmock, 'geonetwork/srv/eng/csw.rdf', 'geonetwork-iso-page-{}.xml')
-        rmock.get(CswIsoXsltDcatBackend.XSL_URL, text=xslt)
+        rmock.get(CswIso19139DcatBackend.XSL_URL, text=xslt)
         org = OrganizationFactory()
-        source = HarvestSourceFactory(backend='csw-iso-xslt-dcat',
+        source = HarvestSourceFactory(backend='csw-iso-19139',
                                       url=url,
                                       organization=org)
 

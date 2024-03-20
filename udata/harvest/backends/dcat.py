@@ -271,8 +271,13 @@ class CswDcatBackend(DcatBackend):
     
 
 
-class CswIsoXsltDcatBackend(DcatBackend):
-    display_name = 'CSW-ISO-XSLT-DCAT'
+class CswIso19139DcatBackend(DcatBackend):
+    '''
+    An harvester that takes CSW ISO 19139 as input and transforms it to DCAT using SEMIC GeoDCAT-AP XSLT.
+    The parsing of items is then the same as for the DcatBackend.
+    '''
+
+    display_name = 'CSW-ISO-19139'
 
     ISO_SCHEMA = 'http://www.isotc211.org/2005/gmd'
 
@@ -315,8 +320,6 @@ class CswIsoXsltDcatBackend(DcatBackend):
         tree = transform(tree_before_transform, CoupledResourceLookUp="'disabled'")
 
         while tree:
-            i = 1
-
             # We query the tree before the transformation because the XSLT remove the search results
             # infos (useful for pagination)
             search_results = tree_before_transform.find('csw:SearchResults', {'csw': CSW_NAMESPACE})
