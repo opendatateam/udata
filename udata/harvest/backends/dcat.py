@@ -285,17 +285,8 @@ class CswIsoXsltDcatBackend(DcatBackend):
         See https://github.com/SEMICeu/iso-19139-to-dcat-ap for more information on the XSLT.
         '''
 
-        # The XSLT transform failed on some catalog with "Cannot resolve URI https://ogc.geo-ide.developpement-durable.gouv.fr/csw/all-dataset?REQUEST=GetRecordById&SERVICE=CSW&VERSION=2.0.2&RESULTTYPE=results&elementSetName=full&TYPENAMES=gmd:MD_Metadata&OUTPUTSCHEMA=http://www.isotc211.org/2005/gmd&ID=fr-120066022-jdd-9bffd34b-916b-4dfd-a446-b7c5ec05291a", this EmptyResolver disable something (not sure what) and allow to continue fetching the catalog.
-        class EmptyResolver(ET.Resolver):
-            def resolve(self, url, pubid, context):
-                print(f"Resolve {url} to empty")
-                return self.resolve_empty(context)
-
-        parser = ET.XMLParser()
-        parser.resolvers.add(EmptyResolver())
-
         # Load XSLT
-        xsl = ET.fromstring(self.get(self.XSL_URL).content, parser=parser)
+        xsl = ET.fromstring(self.get(self.XSL_URL).content)
         transform = ET.XSLT(xsl)
 
         # Start querying and parsing graph
@@ -319,7 +310,9 @@ class CswIsoXsltDcatBackend(DcatBackend):
         response.raise_for_status()
 
         tree_before_transform = ET.fromstring(response.content)
-        tree = transform(tree_before_transform)
+        # Disabling CoupledResourceLookUp to prevent failure on xlink:href
+        # https://github.com/SEMICeu/iso-19139-to-dcat-ap/blob/master/documentation/HowTo.md#parameter-coupledresourcelookup
+        tree = transform(tree_before_transform, CoupledResourceLookUp="'disabled'")
 
         while tree:
             i = 1
@@ -356,6 +349,6 @@ class CswIsoXsltDcatBackend(DcatBackend):
             response.raise_for_status()
 
             tree_before_transform = ET.fromstring(response.content)
-            tree = transform(tree_before_transform)
+            tree = transform(tree_before_transform, CoupledResourceLookUp="'disabled'")
 
         return graphs
