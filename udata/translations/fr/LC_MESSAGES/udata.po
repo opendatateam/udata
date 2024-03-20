@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2024-03-20 12:27+0100\n"
-"PO-Revision-Date: 2024-03-20 13:07\n"
+"PO-Revision-Date: 2024-03-20 14:47\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -648,15 +648,15 @@ msgstr "Certifié"
 
 #: udata/core/organization/models.py:147
 msgid "Association"
-msgstr ""
+msgstr "Association"
 
 #: udata/core/organization/models.py:148
 msgid "Company"
-msgstr ""
+msgstr "Entreprise"
 
 #: udata/core/organization/models.py:149
 msgid "Local authority"
-msgstr ""
+msgstr "Collectivité territoriale"
 
 #: udata/core/organization/tasks.py:52
 msgid "New membership request"
@@ -684,17 +684,17 @@ msgstr "Votre organisation \"%(name)s\" a été identifiée comme étant un serv
 #: udata/core/organization/tasks.py:126
 #, python-format
 msgid "Your organization \"%(name)s\" has been identified as a company"
-msgstr ""
+msgstr "Votre organisation \"%(name)s\" a été identifiée comme étant une entreprise"
 
 #: udata/core/organization/tasks.py:146
 #, python-format
 msgid "Your organization \"%(name)s\" has been identified as an association"
-msgstr ""
+msgstr "Votre organisation \"%(name)s\" a été identifiée comme étant une association"
 
 #: udata/core/organization/tasks.py:166
 #, python-format
 msgid "Your organization \"%(name)s\" has been identified as a local authority"
-msgstr ""
+msgstr "Votre organisation \"%(name)s\" a été identifiée comme étant une collectivité territoriale"
 
 #: udata/core/post/forms.py:16
 msgid "Headline"
@@ -1242,7 +1242,7 @@ msgstr "Votre compte est maintenant supprimé"
 #: udata/templates/mail/badge_added_association.html:6
 #, python-format
 msgid "%(user)s has identified your organization \"%(name)s\" as an association"
-msgstr ""
+msgstr "%(user)s a identifié votre organisation \"%(name)s\" comme étant une association"
 
 #: udata/templates/mail/badge_added_association.html:27
 #: udata/templates/mail/badge_added_certified.html:27
@@ -1260,12 +1260,12 @@ msgstr "%(user)s a certifié votre organisation \"%(name)s\""
 #: udata/templates/mail/badge_added_company.html:6
 #, python-format
 msgid "%(user)s has identified your organization \"%(name)s\" as a company"
-msgstr ""
+msgstr "%(user)s a identifié votre organisation \"%(name)s\" comme étant une entreprise"
 
 #: udata/templates/mail/badge_added_local_authority.html:6
 #, python-format
 msgid "%(user)s has identified your organization \"%(name)s\" as a local authority"
-msgstr ""
+msgstr "%(user)s a identifié votre organisation \"%(name)s\" comme étant une collectivité territoriale"
 
 #: udata/templates/mail/badge_added_public_service.html:6
 #, python-format
