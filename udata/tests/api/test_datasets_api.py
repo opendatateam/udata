@@ -44,6 +44,7 @@ SAMPLE_GEOM = {
     ]
 }
 
+
 class DatasetAPITest(APITestCase):
     modules = []
 
@@ -508,7 +509,7 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_update_existing_resource_with_extras(self):
         '''It should update a dataset's existing resource with extras'''
         user = self.login()
-        dataset = VisibleDatasetFactory(owner=user)
+        dataset = DatasetFactory(owner=user, nb_resources=1)
         data = dataset.to_dict()
         data['resources'][0]['extras'] = {'extra:id': 'id'}
         response = self.put(url_for('api.dataset', dataset=dataset), data)
@@ -683,7 +684,7 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_delete(self):
         '''It should delete a dataset from the API'''
         user = self.login()
-        dataset = VisibleDatasetFactory(owner=user)
+        dataset = DatasetFactory(owner=user, nb_resources=1)
         response = self.delete(url_for('api.dataset', dataset=dataset))
 
         self.assertStatus(response, 204)
@@ -697,7 +698,7 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_delete_deleted(self):
         '''It should delete a deleted dataset from the API and raise 410'''
         user = self.login()
-        dataset = VisibleDatasetFactory(owner=user, deleted=datetime.utcnow())
+        dataset = DatasetFactory(owner=user, deleted=datetime.utcnow(), nb_resources=1)
         response = self.delete(url_for('api.dataset', dataset=dataset))
 
         self.assert410(response)
@@ -1472,8 +1473,8 @@ class DatasetArchivedAPITest(APITestCase):
 
     def test_dataset_api_search_archived(self):
         '''It should search datasets from the API, excluding archived ones'''
-        VisibleDatasetFactory(archived=None)
-        dataset = VisibleDatasetFactory(archived=datetime.utcnow())
+        DatasetFactory(archived=None)
+        dataset = DatasetFactory(archived=datetime.utcnow())
 
         response = self.get(url_for('api.datasets', q=''))
         self.assert200(response)
@@ -1483,7 +1484,7 @@ class DatasetArchivedAPITest(APITestCase):
 
     def test_dataset_api_get_archived(self):
         '''It should fetch an archived dataset from the API and return 200'''
-        dataset = VisibleDatasetFactory(archived=datetime.utcnow())
+        dataset = DatasetFactory(archived=datetime.utcnow())
         response = self.get(url_for('api.dataset', dataset=dataset))
         self.assert200(response)
 
@@ -1528,7 +1529,7 @@ class CommunityResourceAPITest(APITestCase):
 
     def test_community_resource_api_create_dataset_binding(self):
         '''It should create a community resource linked to the right dataset'''
-        dataset = VisibleDatasetFactory()
+        dataset = DatasetFactory()
         self.login()
         response = self.post(
             url_for('api.upload_new_community_resource', dataset=dataset),
@@ -1540,7 +1541,7 @@ class CommunityResourceAPITest(APITestCase):
 
     def test_community_resource_api_create(self):
         '''It should create a community resource from the API'''
-        dataset = VisibleDatasetFactory()
+        dataset = DatasetFactory()
         self.login()
         response = self.post(
             url_for('api.upload_new_community_resource', dataset=dataset),
@@ -1560,7 +1561,7 @@ class CommunityResourceAPITest(APITestCase):
 
     def test_community_resource_api_create_as_org(self):
         '''It should create a community resource as org from the API'''
-        dataset = VisibleDatasetFactory()
+        dataset = DatasetFactory()
         user = self.login()
         org = OrganizationFactory(members=[
             Member(user=user, role='admin')
@@ -1612,7 +1613,7 @@ class CommunityResourceAPITest(APITestCase):
 
     def test_community_resource_api_update_with_file(self):
         '''It should update a community resource file from the API'''
-        dataset = VisibleDatasetFactory()
+        dataset = DatasetFactory()
         user = self.login()
         community_resource = CommunityResourceFactory(dataset=dataset,
                                                       owner=user)
@@ -1637,7 +1638,7 @@ class CommunityResourceAPITest(APITestCase):
 
     def test_community_resource_file_update_old_file_deletion(self):
         '''It should update a community resource's file and delete the old one'''
-        dataset = VisibleDatasetFactory()
+        dataset = DatasetFactory()
         user = self.login()
         community_resource = CommunityResourceFactory(dataset=dataset,
                                                       owner=user)
@@ -1664,7 +1665,7 @@ class CommunityResourceAPITest(APITestCase):
     def test_community_resource_api_create_remote(self):
         '''It should create a remote community resource from the API'''
         user = self.login()
-        dataset = VisibleDatasetFactory()
+        dataset = DatasetFactory()
         attrs = CommunityResourceFactory.as_dict()
         attrs['filetype'] = 'remote'
         attrs['dataset'] = str(dataset.id)
@@ -1685,7 +1686,7 @@ class CommunityResourceAPITest(APITestCase):
     def test_community_resource_api_unallowed_create_filetype_file(self):
         '''It should create a remote community resource from the API'''
         self.login()
-        dataset = VisibleDatasetFactory()
+        dataset = DatasetFactory()
         attrs = CommunityResourceFactory.as_dict()
         attrs['filetype'] = 'file'  # to be explicit
         attrs['dataset'] = str(dataset.id)
@@ -1734,7 +1735,7 @@ class CommunityResourceAPITest(APITestCase):
         self.assertEqual(CommunityResource.objects.count(), 0)
 
     def test_community_resource_api_delete(self):
-        dataset = VisibleDatasetFactory()
+        dataset = DatasetFactory()
         self.login()
 
         response = self.post(
