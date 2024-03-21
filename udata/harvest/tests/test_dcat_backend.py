@@ -195,8 +195,8 @@ class DcatBackendTest:
         assert resources_by_title['Resource 1-2'].schema.name == None
         assert resources_by_title['Resource 1-2'].schema.version == None
 
-        assert datasets['2'].schema.name == None
-        assert datasets['2'].schema.url == 'https://www.ecologie.gouv.fr/sites/default/files/R%C3%A9glementation%20IRVE.pdf'
+        assert datasets['2'].schema.name == 'RGF93 / Lambert-93 (EPSG:2154)'
+        assert datasets['2'].schema.url == 'http://inspire.ec.europa.eu/glossary/SpatialReferenceSystem'
         resources_by_title = { resource['title']: resource for resource in datasets['2'].resources }
 
         # Unknown schema are kept as they were provided
@@ -265,8 +265,8 @@ class DcatBackendTest:
         assert resources_by_title['Resource 1-2'].schema.name == None
         assert resources_by_title['Resource 1-2'].schema.version == None
 
-        assert datasets['2'].schema.name == None
-        assert datasets['2'].schema.url == 'https://www.ecologie.gouv.fr/sites/default/files/R%C3%A9glementation%20IRVE.pdf'
+        assert datasets['2'].schema.name == 'RGF93 / Lambert-93 (EPSG:2154)'
+        assert datasets['2'].schema.url == 'http://inspire.ec.europa.eu/glossary/SpatialReferenceSystem'
         resources_by_title = { resource['title']: resource for resource in datasets['2'].resources }
 
         # Unknown schema are kept as they were provided
