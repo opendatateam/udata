@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix, do not fail on spatial coverage harvesting exception [2998](https://github.com/opendatateam/udata/pull/2998)
 
 ## 7.0.5 (2024-03-20)
 
