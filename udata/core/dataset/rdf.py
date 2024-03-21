@@ -340,35 +340,38 @@ def contact_point_from_rdf(rdf, dataset):
 
 def spatial_from_rdf(graph):
     for term in graph.objects(DCT.spatial):
-        for object in term.objects():
-            if isinstance(object, Literal):
-                if object.datatype.__str__() == 'https://www.iana.org/assignments/media-types/application/vnd.geo+json':
-                    try:
-                        geojson = json.loads(object.toPython())
-                    except ValueError as e:
-                        log.warning(f"Invalid JSON in spatial GeoJSON {object.toPython()} {e}")
+        try:
+            for object in term.objects():
+                if isinstance(object, Literal):
+                    if object.datatype.__str__() == 'https://www.iana.org/assignments/media-types/application/vnd.geo+json':
+                        try:
+                            geojson = json.loads(object.toPython())
+                        except ValueError as e:
+                            log.warning(f"Invalid JSON in spatial GeoJSON {object.toPython()} {e}")
+                            continue
+                    elif object.datatype.__str__() == 'http://www.opengis.net/rdf#wktLiteral':
+                        try:
+                            # .upper() si here because geomet doesn't support Polygon but only POLYGON
+                            geojson = wkt.loads(object.toPython().strip().upper())
+                        except ValueError as e:
+                            log.warning(f"Invalid JSON in spatial WKT {object.toPython()} {e}")
+                            continue
+                    else:
                         continue
-                elif object.datatype.__str__() == 'http://www.opengis.net/rdf#wktLiteral':
+
+                    if geojson['type'] == 'Polygon':
+                        geojson['type'] = 'MultiPolygon'
+                        geojson['coordinates'] = [geojson['coordinates']]
+
+                    spatial_coverage = SpatialCoverage(geom=geojson)
+
                     try:
-                        # .upper() si here because geomet doesn't support Polygon but only POLYGON
-                        geojson = wkt.loads(object.toPython().strip().upper())
-                    except ValueError as e:
-                        log.warning(f"Invalid JSON in spatial WKT {object.toPython()} {e}")
+                        spatial_coverage.clean()
+                        return spatial_coverage
+                    except ValidationError:
                         continue
-                else:
-                    continue
-
-                if geojson['type'] == 'Polygon':
-                    geojson['type'] = 'MultiPolygon'
-                    geojson['coordinates'] = [geojson['coordinates']]
-
-                spatial_coverage = SpatialCoverage(geom=geojson)
-
-                try:
-                    spatial_coverage.clean()
-                    return spatial_coverage
-                except ValidationError:
-                    continue
+        except ValidationError:
+            log.exception(f"Exception during `spatial_from_rdf` for term {term}", stack_info=True)
 
     return None
 
