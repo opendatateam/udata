@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Fix, do not fail on spatial coverage harvesting exception and allow literal spatial BBOX from Arcgis [2998](https://github.com/opendatateam/udata/pull/2998)
+- `Activity`: rename `kwargs` into `extras` and make use of it [2999](https://github.com/opendatateam/udata/pull/2999)
 
 ## 7.0.5 (2024-03-20)
 
