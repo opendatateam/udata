@@ -7,6 +7,7 @@ import logging
 
 from datetime import date
 from html.parser import HTMLParser
+from typing import Optional
 from dateutil.parser import parse as parse_dt
 from flask import current_app
 from geomet import wkt
@@ -345,27 +346,10 @@ def spatial_from_rdf(graph):
             # This may not be official in the norm but some ArcGis return 
             # bbox as literal directly in DCT.spatial.
             if isinstance(term, Literal):
-                bbox = term.toPython().strip().split(',')
-                if len(bbox) == 4:
-                    west = float(bbox[0])
-                    south = float(bbox[1])
-                    east = float(bbox[2])
-                    north = float(bbox[3])
-
-                    low_left = [west, south]
-                    top_left = [west, north]
-                    top_right = [east, north]
-                    low_right = [east, south]
-
-                    geojsons.append({
-                        'type': 'MultiPolygon',
-                        'coordinates': [
-                            [
-                                [low_left, low_right, top_right, top_left, low_left],
-                            ], 
-                        ],
-                    })
-
+                geojson = bbox_to_geojson_multipolygon(term.toPython())
+                if geojson is not None:
+                    geojsons.append(geojson)
+                
                 continue
 
             for object in term.objects():
@@ -641,3 +625,27 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     dataset.harvest.modified_at = modified_at
 
     return dataset
+
+def bbox_to_geojson_multipolygon(bbox_as_str: str) -> Optional[dict] : 
+    bbox = bbox_as_str.strip().split(',')
+    if len(bbox) != 4:
+        return None
+    
+    west = float(bbox[0])
+    south = float(bbox[1])
+    east = float(bbox[2])
+    north = float(bbox[3])
+
+    low_left = [west, south]
+    top_left = [west, north]
+    top_right = [east, north]
+    low_right = [east, south]
+
+    return {
+        'type': 'MultiPolygon',
+        'coordinates': [
+            [
+                [low_left, low_right, top_right, top_left, low_left],
+            ], 
+        ],
+    }
