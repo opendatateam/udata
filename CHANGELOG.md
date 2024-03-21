@@ -17,6 +17,7 @@
 - Topic: add spatial field [#2988](https://github.com/opendatateam/udata/pull/2988)
 - Topic: add last_modified field [#2987](https://github.com/opendatateam/udata/pull/2987)
 - Add stacktraces to CSV errors [#2990](https://github.com/opendatateam/udata/pull/2990)
+- Fix harvesting of DCT.conformsTo for complex inner information [#2994](https://github.com/opendatateam/udata/pull/2994)
 
 ## 7.0.4 (2024-02-27)
 
