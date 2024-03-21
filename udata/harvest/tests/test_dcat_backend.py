@@ -160,6 +160,21 @@ class DcatBackendTest:
         assert len(datasets['1'].resources) == 2
         assert len(datasets['2'].resources) == 2
 
+    def test_harvest_literal_spatial(self, rmock):
+        url = mock_dcat(rmock, 'evian.json')
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+        
+        actions.run(source.slug)
+
+        datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
+        assert len(datasets) == 8
+        assert datasets['https://www.arcgis.com/home/item.html?id=f6565516d1354383b25793e630cf3f2b&sublayer=5'].spatial is not None
+        assert datasets['https://www.arcgis.com/home/item.html?id=f6565516d1354383b25793e630cf3f2b&sublayer=5'].spatial.geom == {'type': 'MultiPolygon', 'coordinates': [[[[6.5735, 46.3912], [6.6069, 46.3912], [6.6069, 46.4028], [6.5735, 46.4028], [6.5735, 46.3912]]]]}
+
+
     @pytest.mark.skip(reason="Mocking S3 requires `moto` which is not available for our current Python 3.7. We can manually test it.")
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas', HARVEST_JOBS_RETENTION_DAYS=0)
     # @mock_s3

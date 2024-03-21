@@ -339,8 +339,35 @@ def contact_point_from_rdf(rdf, dataset):
 
 
 def spatial_from_rdf(graph):
+    geojsons = []
     for term in graph.objects(DCT.spatial):
         try:
+            # This may not be official in the norm but some ArcGis return 
+            # bbox as literal directly in DCT.spatial.
+            if isinstance(term, Literal):
+                bbox = term.toPython().strip().split(',')
+                if len(bbox) == 4:
+                    west = float(bbox[0])
+                    south = float(bbox[1])
+                    east = float(bbox[2])
+                    north = float(bbox[3])
+
+                    low_left = [west, south]
+                    top_left = [west, north]
+                    top_right = [east, north]
+                    low_right = [east, south]
+
+                    geojsons.append({
+                        'type': 'MultiPolygon',
+                        'coordinates': [
+                            [
+                                [low_left, low_right, top_right, top_left, low_left],
+                            ], 
+                        ],
+                    })
+
+                continue
+
             for object in term.objects():
                 if isinstance(object, Literal):
                     if object.datatype.__str__() == 'https://www.iana.org/assignments/media-types/application/vnd.geo+json':
@@ -363,15 +390,17 @@ def spatial_from_rdf(graph):
                         geojson['type'] = 'MultiPolygon'
                         geojson['coordinates'] = [geojson['coordinates']]
 
-                    spatial_coverage = SpatialCoverage(geom=geojson)
+                    geojsons.append(geojson)
+        except Exception as e:
+            log.exception(f"Exception during `spatial_from_rdf` for term {term}: {e}", stack_info=True)
 
-                    try:
-                        spatial_coverage.clean()
-                        return spatial_coverage
-                    except ValidationError:
-                        continue
-        except:
-            log.exception(f"Exception during `spatial_from_rdf` for term {term}", stack_info=True)
+    for geojson in geojsons:
+        spatial_coverage = SpatialCoverage(geom=geojson)
+        try:
+            spatial_coverage.clean()
+            return spatial_coverage
+        except ValidationError:
+            continue
 
     return None
 
