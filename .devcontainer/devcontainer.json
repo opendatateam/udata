@@ -1,0 +1,10 @@
+{
+    "dockerComposeFile": ["../docker-compose.yml", "docker-compose.extend.yml"],
+    "workspaceFolder": "/workspace",
+    "service": "udata",
+	"extensions": [
+		"ms-python.python",
+	],
+    "forwardPorts": [27017, 6379, 9200],
+    "postCreateCommand": "python -m pip install -e . && npm install && echo 'Setup is ready!'",
+}
