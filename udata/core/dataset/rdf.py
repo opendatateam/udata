@@ -370,7 +370,7 @@ def spatial_from_rdf(graph):
                         return spatial_coverage
                     except ValidationError:
                         continue
-        except ValidationError:
+        except:
             log.exception(f"Exception during `spatial_from_rdf` for term {term}", stack_info=True)
 
     return None
