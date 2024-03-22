@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add new harvester for ISO DCAT with XSLT transform [#2982](https://github.com/opendatateam/udata/pull/2982)
+- Fix, do not fail on spatial coverage harvesting exception and allow literal spatial BBOX from Arcgis [2998](https://github.com/opendatateam/udata/pull/2998)
 
 ## 7.0.5 (2024-03-20)
 
@@ -17,6 +18,7 @@
 - Topic: add spatial field [#2988](https://github.com/opendatateam/udata/pull/2988)
 - Topic: add last_modified field [#2987](https://github.com/opendatateam/udata/pull/2987)
 - Add stacktraces to CSV errors [#2990](https://github.com/opendatateam/udata/pull/2990)
+- Fix harvesting of DCT.conformsTo for complex inner information [#2994](https://github.com/opendatateam/udata/pull/2994)
 
 ## 7.0.4 (2024-02-27)
 
