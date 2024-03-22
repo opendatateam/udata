@@ -302,6 +302,14 @@ class CswIso19139DcatBackend(DcatBackend):
                                   outputSchema="{schema}">
                       <csw:Query typeNames="csw:Record">
                         <csw:ElementSetName>full</csw:ElementSetName>
+                        <csw:Constraint version="1.1.0">
+                            <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">
+                                <ogc:PropertyIsEqualTo>
+                                    <ogc:PropertyName>dc:type</ogc:PropertyName>
+                                    <ogc:Literal>dataset</ogc:Literal>
+                                </ogc:PropertyIsEqualTo>
+                            </ogc:Filter>
+                        </csw:Constraint>
                     </csw:Query>
                 </csw:GetRecords>'''
         headers = {'Content-Type': 'application/xml'}
