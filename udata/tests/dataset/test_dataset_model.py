@@ -524,7 +524,8 @@ class LicenseModelTest:
 
 class ResourceSchemaTest:
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/notfound')
-    def test_resource_schema_objects_404_endpoint(self):
+    def test_resource_schema_objects_404_endpoint(self, rmock):
+        rmock.get('https://example.com/notfound', status_code=404)
         with pytest.raises(SchemasCatalogNotFoundException):
             ResourceSchema.objects()
 
