@@ -1791,7 +1791,8 @@ class DatasetSchemasAPITest:
         assert response.json == []
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/notfound')
-    def test_dataset_schemas_api_list_not_found(self, api):
+    def test_dataset_schemas_api_list_not_found(self, api, rmock):
+        rmock.get('https://example.com/notfound', status_code=404)
         response = api.get(url_for('api.schemas'))
         assert404(response)
 
