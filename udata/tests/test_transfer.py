@@ -7,12 +7,13 @@ from udata.features.transfer.actions import request_transfer, accept_transfer
 from udata.features.transfer.notifications import (
     transfer_request_notifications
 )
-from udata.models import Member
+from udata.models import Member, Dataset
 
 from udata.utils import faker
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
+from udata.tests.helpers import assert_emit
 
 
 pytestmark = pytest.mark.usefixtures('clean_db')
@@ -110,6 +111,9 @@ class TransferAcceptTest:
                                    recipient=recipient,
                                    subject=subject)
 
+        owner.count_datasets()
+        recipient.count_datasets()
+
         owner.reload()  # Needs updated metrics
         assert owner.get_metrics()['datasets'] == 1
 
@@ -120,6 +124,9 @@ class TransferAcceptTest:
         transfer = accept_transfer(transfer)
 
         assert transfer.status == 'accepted'
+
+        owner.count_datasets()
+        recipient.count_datasets()
 
         subject.reload()
         assert subject.owner == recipient
@@ -138,6 +145,8 @@ class TransferAcceptTest:
         transfer = TransferFactory(owner=owner,
                                    recipient=org,
                                    subject=subject)
+        owner.count_datasets()
+        org.count_datasets()
 
         owner.reload()  # Needs updated metrics
         assert owner.get_metrics()['datasets'] == 1
@@ -156,6 +165,9 @@ class TransferAcceptTest:
         subject.reload()
         assert subject.organization == org
         assert subject.owner is None
+
+        owner.count_datasets()
+        org.count_datasets()
 
         org.reload()
         assert org.get_metrics()['datasets'] == 1
