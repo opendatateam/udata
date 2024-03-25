@@ -7,6 +7,7 @@ import logging
 
 from datetime import date
 from html.parser import HTMLParser
+from typing import Optional
 from dateutil.parser import parse as parse_dt
 from flask import current_app
 from geomet import wkt
@@ -339,36 +340,51 @@ def contact_point_from_rdf(rdf, dataset):
 
 
 def spatial_from_rdf(graph):
+    geojsons = []
     for term in graph.objects(DCT.spatial):
-        for object in term.objects():
-            if isinstance(object, Literal):
-                if object.datatype.__str__() == 'https://www.iana.org/assignments/media-types/application/vnd.geo+json':
-                    try:
-                        geojson = json.loads(object.toPython())
-                    except ValueError as e:
-                        log.warning(f"Invalid JSON in spatial GeoJSON {object.toPython()} {e}")
+        try:
+            # This may not be official in the norm but some ArcGis return 
+            # bbox as literal directly in DCT.spatial.
+            if isinstance(term, Literal):
+                geojson = bbox_to_geojson_multipolygon(term.toPython())
+                if geojson is not None:
+                    geojsons.append(geojson)
+                
+                continue
+
+            for object in term.objects():
+                if isinstance(object, Literal):
+                    if object.datatype.__str__() == 'https://www.iana.org/assignments/media-types/application/vnd.geo+json':
+                        try:
+                            geojson = json.loads(object.toPython())
+                        except ValueError as e:
+                            log.warning(f"Invalid JSON in spatial GeoJSON {object.toPython()} {e}")
+                            continue
+                    elif object.datatype.__str__() == 'http://www.opengis.net/rdf#wktLiteral':
+                        try:
+                            # .upper() si here because geomet doesn't support Polygon but only POLYGON
+                            geojson = wkt.loads(object.toPython().strip().upper())
+                        except ValueError as e:
+                            log.warning(f"Invalid JSON in spatial WKT {object.toPython()} {e}")
+                            continue
+                    else:
                         continue
-                elif object.datatype.__str__() == 'http://www.opengis.net/rdf#wktLiteral':
-                    try:
-                        # .upper() si here because geomet doesn't support Polygon but only POLYGON
-                        geojson = wkt.loads(object.toPython().strip().upper())
-                    except ValueError as e:
-                        log.warning(f"Invalid JSON in spatial WKT {object.toPython()} {e}")
-                        continue
-                else:
-                    continue
 
-                if geojson['type'] == 'Polygon':
-                    geojson['type'] = 'MultiPolygon'
-                    geojson['coordinates'] = [geojson['coordinates']]
+                    if geojson['type'] == 'Polygon':
+                        geojson['type'] = 'MultiPolygon'
+                        geojson['coordinates'] = [geojson['coordinates']]
 
-                spatial_coverage = SpatialCoverage(geom=geojson)
+                    geojsons.append(geojson)
+        except Exception as e:
+            log.exception(f"Exception during `spatial_from_rdf` for term {term}: {e}", stack_info=True)
 
-                try:
-                    spatial_coverage.clean()
-                    return spatial_coverage
-                except ValidationError:
-                    continue
+    for geojson in geojsons:
+        spatial_coverage = SpatialCoverage(geom=geojson)
+        try:
+            spatial_coverage.clean()
+            return spatial_coverage
+        except ValidationError:
+            continue
 
     return None
 
@@ -609,3 +625,27 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     dataset.harvest.modified_at = modified_at
 
     return dataset
+
+def bbox_to_geojson_multipolygon(bbox_as_str: str) -> Optional[dict] : 
+    bbox = bbox_as_str.strip().split(',')
+    if len(bbox) != 4:
+        return None
+    
+    west = float(bbox[0])
+    south = float(bbox[1])
+    east = float(bbox[2])
+    north = float(bbox[3])
+
+    low_left = [west, south]
+    top_left = [west, north]
+    top_right = [east, north]
+    low_right = [east, south]
+
+    return {
+        'type': 'MultiPolygon',
+        'coordinates': [
+            [
+                [low_left, low_right, top_right, top_left, low_left],
+            ], 
+        ],
+    }

@@ -2,6 +2,12 @@
 
 ## Current (in progress)
 
+- Fix, do not fail on spatial coverage harvesting exception and allow literal spatial BBOX from Arcgis [2998](https://github.com/opendatateam/udata/pull/2998)
+- Mock calls to example.com [#3000](https://github.com/opendatateam/udata/pull/3000)
+- Fix duplicate logs in console commands [#2996](https://github.com/opendatateam/udata/pull/2996)
+
+## 7.0.5 (2024-03-20)
+
 - Add spatial coverage harvesting [#2959](https://github.com/opendatateam/udata/pull/2959) [#2991](https://github.com/opendatateam/udata/pull/2991)
 - Fix: updating a dataset without `private` do not reset `private` to `False`, the previous saved value is kept [#2955](https://github.com/opendatateam/udata/pull/2955)
 - Fix: return the correct error when no `Content-Type` is sent instead of 500 [#2967](https://github.com/opendatateam/udata/pull/2967)
@@ -9,10 +15,12 @@
 - Allow harvesting of big catalog (bigger than 16MB) [#2980](https://github.com/opendatateam/udata/pull/2980) [2985](https://github.com/opendatateam/udata/pull/2985)
 - Add downloads' count to organizations CSV [#2973](https://github.com/opendatateam/udata/pull/2973)
 - Add 3 new badges to the organization model : `company`, `association` and `local authority` [#2984](https://github.com/opendatateam/udata/pull/2984)
-- Prevent geozones listed ad `deleted` to be loaded [#2983](https://github.com/opendatateam/udata/pull/2983)
+- Prevent geozones listed ad `deleted` to be loaded [#2983](https://github.com/opendatateam/udata/pull/2983) [#2993](https://github.com/opendatateam/udata/pull/2993)
+- Topic: add spatial field [#2988](https://github.com/opendatateam/udata/pull/2988)
 - Topic: add last_modified field [#2987](https://github.com/opendatateam/udata/pull/2987)
 - Replace schemas API with a simple proxy to the `schemas.json` file [#2989](https://github.com/opendatateam/udata/pull/2989)
 - Add stacktraces to CSV errors [#2990](https://github.com/opendatateam/udata/pull/2990)
+- Fix harvesting of DCT.conformsTo for complex inner information [#2994](https://github.com/opendatateam/udata/pull/2994)
 
 ## 7.0.4 (2024-02-27)
 
