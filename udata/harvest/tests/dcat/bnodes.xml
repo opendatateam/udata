@@ -95,7 +95,7 @@
             </ogc:Polygon>
         </dct:spatial>
         <dcterms:identifier>2</dcterms:identifier>
-        <dct:conformsTo rdf:resource="https://www.ecologie.gouv.fr/sites/default/files/R%C3%A9glementation%20IRVE.pdf" />
+        <dct:conformsTo rdf:nodeID="Ne0189e93917c4f67a412fc44883322e7"/>
       </dcat:Dataset>
     </dcat:dataset>
     <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-15T09:19:51.723691</dcterms:modified>
@@ -154,4 +154,10 @@
   <foaf:Organization rdf:about="http://data.test.org/organizations/1">
     <foaf:name>An Organization</foaf:name>
   </foaf:Organization>
+  <rdf:Description rdf:nodeID="Ne0189e93917c4f67a412fc44883322e7">
+    <rdf:type rdf:resource="http://purl.org/dc/terms/Standard"/>
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <dct:type rdf:resource="http://inspire.ec.europa.eu/glossary/SpatialReferenceSystem"/>
+    <dct:title xml:lang="fr">RGF93 / Lambert-93 (EPSG:2154)</dct:title>
+  </rdf:Description>
 </rdf:RDF>

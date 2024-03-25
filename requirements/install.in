@@ -4,6 +4,7 @@ Babel==2.12.1
 bcrypt==3.1.7
 bleach==3.1.0
 blinker==1.4
+boto3>=1.26
 celery==4.3.0
 celerybeat-mongo==0.2.0
 chardet==3.0.4
