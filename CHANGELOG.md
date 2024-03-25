@@ -2,6 +2,11 @@
 
 ## Current (in progress)
 
+- Fix, do not fail on spatial coverage harvesting exception and allow literal spatial BBOX from Arcgis [2998](https://github.com/opendatateam/udata/pull/2998)
+- Mock calls to example.com [#3000](https://github.com/opendatateam/udata/pull/3000)
+
+## 7.0.5 (2024-03-20)
+
 - Add spatial coverage harvesting [#2959](https://github.com/opendatateam/udata/pull/2959) [#2991](https://github.com/opendatateam/udata/pull/2991)
 - Fix: updating a dataset without `private` do not reset `private` to `False`, the previous saved value is kept [#2955](https://github.com/opendatateam/udata/pull/2955)
 - Fix: return the correct error when no `Content-Type` is sent instead of 500 [#2967](https://github.com/opendatateam/udata/pull/2967)
@@ -13,6 +18,7 @@
 - Topic: add spatial field [#2988](https://github.com/opendatateam/udata/pull/2988)
 - Topic: add last_modified field [#2987](https://github.com/opendatateam/udata/pull/2987)
 - Add stacktraces to CSV errors [#2990](https://github.com/opendatateam/udata/pull/2990)
+- Fix harvesting of DCT.conformsTo for complex inner information [#2994](https://github.com/opendatateam/udata/pull/2994)
 
 ## 7.0.4 (2024-02-27)
 
