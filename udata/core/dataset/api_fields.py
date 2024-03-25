@@ -290,13 +290,13 @@ catalog_schema_fields = api.model('CatalogSchema', {
     'schema_url': fields.String(description="Often the link to the latest version"),
     'schema_type': fields.String(enum=['tableschema', 'datapackage', 'jsonschema', 'other']),
     'contact': fields.String(),
-    'examples': fields.List(fields.Nested(api.model('CatalogSchema.example', {
+    'examples': fields.List(fields.Nested(api.model('CatalogSchemaExample', {
         'title': fields.String(),
         'path': fields.String(),
     }))),
     'labels': fields.List(fields.String()),
     'consolidation_dataset_id': fields.String(),
-    'versions': fields.List(fields.Nested(api.model('CatalogSchema.version', {
+    'versions': fields.List(fields.Nested(api.model('CatalogSchemaVersion', {
         'version_name': fields.String(),
         'schema_url': fields.String(),
     }))),
