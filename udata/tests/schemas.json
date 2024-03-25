@@ -3,6 +3,41 @@
   "version": 1,
   "schemas": [
     {
+      "name": "etalab/schema-irve",
+      "title": "Infrastructures de recharges pour v\u00e9hicules \u00e9lectriques (IRVE)",
+      "description": "data package contenant 2 sch\u00e9mas : IRVE statique et IRVE dynamique",
+      "schema_url": "https://schema.data.gouv.fr/schemas/etalab/schema-irve/latest/datapackage.json",
+      "schema_type": "datapackage",
+      "contact": "contact@transport.beta.gouv.fr",
+      "examples": [],
+      "labels": [
+        "Socle Commun des Donn\u00e9es Locales",
+        "transport.data.gouv.fr"
+      ],
+      "consolidation_dataset_id": "5448d3e0c751df01f85d0572",
+      "versions": [
+        {
+          "version_name": "2.2.0",
+          "schema_url": "https://schema.data.gouv.fr/schemas/etalab/schema-irve/2.2.0/datapackage.json"
+        },
+        {
+          "version_name": "2.2.1",
+          "schema_url": "https://schema.data.gouv.fr/schemas/etalab/schema-irve/2.2.1/datapackage.json"
+        },
+        {
+          "version_name": "2.3.0",
+          "schema_url": "https://schema.data.gouv.fr/schemas/etalab/schema-irve/2.3.0/datapackage.json"
+        },
+        {
+          "version_name": "2.3.1",
+          "schema_url": "https://schema.data.gouv.fr/schemas/etalab/schema-irve/2.3.1/datapackage.json"
+        }
+      ],
+      "external_doc": "https://doc.transport.data.gouv.fr/producteurs/infrastructures-de-recharge-de-vehicules-electriques-irve",
+      "external_tool": null,
+      "homepage": "https://github.com/etalab/schema-irve.git"
+    },
+    {
       "name": "etalab/schema-irve-statique",
       "title": "IRVE statique",
       "description": "Sp\u00e9cification du fichier d'\u00e9change relatif aux donn\u00e9es concernant la localisation g\u00e9ographique et les caract\u00e9ristiques techniques des stations et des points de recharge pour v\u00e9hicules \u00e9lectriques",

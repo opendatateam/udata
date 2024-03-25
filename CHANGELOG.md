@@ -19,6 +19,7 @@
 - Prevent geozones listed ad `deleted` to be loaded [#2983](https://github.com/opendatateam/udata/pull/2983) [#2993](https://github.com/opendatateam/udata/pull/2993)
 - Topic: add spatial field [#2988](https://github.com/opendatateam/udata/pull/2988)
 - Topic: add last_modified field [#2987](https://github.com/opendatateam/udata/pull/2987)
+- Replace schemas API with a simple proxy to the `schemas.json` file [#2989](https://github.com/opendatateam/udata/pull/2989)
 - Add stacktraces to CSV errors [#2990](https://github.com/opendatateam/udata/pull/2990)
 - Fix harvesting of DCT.conformsTo for complex inner information [#2994](https://github.com/opendatateam/udata/pull/2994)
 
