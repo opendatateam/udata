@@ -63,18 +63,12 @@ def convert_db_to_field(key, field):
     return read, write
 
 def generate_fields(cls):
-    document_keys = set(dir(db.Document))
-    keys = [key for key in cls.__dict__.keys() if key not in document_keys]
-
     read_fields = {}
     write_fields = {}
 
     read_fields['id'] = fields.String(required=True)
 
-    for key in keys:
-        if key == 'objects': continue
-
-        field = getattr(cls, key)
+    for key, field in cls._fields.items():
         if not hasattr(field, '__additional_field_info__'): continue 
 
         read, write = convert_db_to_field(key, field)
