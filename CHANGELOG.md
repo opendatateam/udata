@@ -8,7 +8,7 @@
 - Fix duplicate logs in console commands [#2996](https://github.com/opendatateam/udata/pull/2996)
 - Refactor `Activity.kwargs` into `Activity.extras` to facilitate its usage [#2999](https://github.com/opendatateam/udata/pull/2999)
 - :warning: The presence or lack of resources on a dataset is no longer dictating his indexability. [#2997](https://github.com/opendatateam/udata/pull/2997)
-g
+
 ## 7.0.5 (2024-03-20)
 
 - Add spatial coverage harvesting [#2959](https://github.com/opendatateam/udata/pull/2959) [#2991](https://github.com/opendatateam/udata/pull/2991)
