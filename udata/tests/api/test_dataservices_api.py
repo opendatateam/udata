@@ -122,5 +122,5 @@ class DataserviceAPITest(APITestCase):
             'license': 'unwkown-license',
         })
         self.assert400(response)
-        self.assertEqual(response.json['license'], "Unknown reference 'unwkown-license'")
+        self.assertEqual(response.json['errors']['license'], ["Unknown reference 'unwkown-license'"])
         self.assertEqual(Dataservice.objects.count(), 0)

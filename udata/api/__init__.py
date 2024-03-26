@@ -282,12 +282,19 @@ def handle_unauthorized_file_type(error):
     ).format(url=url)
     return {'message': msg}, 400
 
-@api.errorhandler(FieldValidationError)
-def handle_validation_error(error: FieldValidationError):
-    messages = {}
-    messages[error.field] = error.message
 
-    return messages, 400
+validation_error_fields = api.model('ValidationError', {
+    'errors': fields.Raw
+})
+
+@api.errorhandler(FieldValidationError)
+@api.marshal_with(validation_error_fields, code=400)
+def handle_validation_error(error: FieldValidationError):
+    '''A validation error'''
+    errors = {}
+    errors[error.field] = [error.message]
+
+    return { 'errors': errors}, 400
 
 class API(Resource):  # Avoid name collision as resource is a core model
     pass
