@@ -452,7 +452,7 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_update_with_resources(self):
         '''It should update a dataset from the API with resources parameters'''
         user = self.login()
-        dataset = HiddenDatasetFactory(owner=user)
+        dataset = DatasetFactory(owner=user)
         initial_length = len(dataset.resources)
         data = dataset.to_dict()
         data['resources'].append(ResourceFactory.as_dict())
