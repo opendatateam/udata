@@ -84,7 +84,6 @@ class FieldValidationError(ValidationError):
         self.field = field
         super().__init__(*args, **kwargs)
 
-
 db = UDataMongoEngine()
 session_interface = MongoEngineSessionInterface(db)
 

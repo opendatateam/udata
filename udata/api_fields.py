@@ -3,6 +3,8 @@ from udata.models import db
 from bson import ObjectId
 import mongoengine
 
+from udata.models import FieldValidationError
+
 def convert_db_to_field(key, field):
     info = getattr(field, '__additional_field_info__', {})
 
@@ -95,8 +97,33 @@ def patch(obj, request):
         if field is not None and not field.readonly:
             model_attribute = getattr(obj.__class__, key)
             if isinstance(model_attribute, mongoengine.fields.ListField) and isinstance(model_attribute.field, mongoengine.fields.ReferenceField):
-                value = [ObjectId(id) for id in value]
-            if isinstance(field, mongoengine.fields.ReferenceField):
-                value = ObjectId(value)
+                # TODO `wrap_primary_key` do Mongo request, do a first pass to fetch all documents before calling it (to avoid multiple queries).
+                value = [wrap_primary_key(key, model_attribute.field, id) for id in value]
+            if isinstance(model_attribute, mongoengine.fields.ReferenceField):
+                value = wrap_primary_key(key, model_attribute, value)
 
             setattr(obj, key, value)
+
+    return obj
+
+def wrap_primary_key(field_name: str, foreign_field: mongoengine.fields.ReferenceField, value: str):
+    document_type = foreign_field.document_type()
+    id_field_name = document_type.__class__._meta["id_field"]
+
+    id_field = getattr(document_type.__class__, id_field_name)
+
+    if isinstance(id_field, mongoengine.fields.ObjectIdField):
+        return ObjectId(value)
+    elif isinstance(id_field, mongoengine.fields.StringField):
+        # Right now I didn't find a simpler way to make mongoengine happy.
+        # For references, it expects `ObjectId`, `DBRef`, `LazyReference` or `document` but since
+        # the primary key a StringField (not an `ObjectId`) we cannot create an `ObjectId`, I didn't find
+        # a way to create a `DBRef` nor a `LazyReference` so I create a simple document with only the ID field.
+        document = document_type.__class__.objects(**{id_field_name: value}).first()
+        if document is None:
+            raise FieldValidationError(field=field_name, message=f"Unknown reference '{value}'")
+
+        return document.to_dbref()
+    else:
+        raise ValueError(f"Unknown ID field type {id_field.__class__} for {document_type.__class__} (ID field name is {id_field_name}, value was {value})")
+

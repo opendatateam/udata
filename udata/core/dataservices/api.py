@@ -19,7 +19,7 @@ class DataservicesAPI(API):
     @api.expect(Dataservice.__write_fields__)
     @api.marshal_with(Dataservice.__read_fields__, code=201)
     def post(self):
-        dataservice = Dataservice(**request.json)
+        dataservice = patch(Dataservice(), request)
         dataservice.owner = current_user._get_current_object()
 
         try:

@@ -20,6 +20,7 @@ from udata.auth import (
     current_user, login_user, Permission, RoleNeed, PermissionDenied
 )
 from udata.core.user.models import User
+from udata.models import FieldValidationError
 from udata.utils import safe_unicode
 
 from . import fields, oauth2
@@ -281,6 +282,12 @@ def handle_unauthorized_file_type(error):
     ).format(url=url)
     return {'message': msg}, 400
 
+@api.errorhandler(FieldValidationError)
+def handle_validation_error(error: FieldValidationError):
+    messages = {}
+    messages[error.field] = error.message
+
+    return messages, 400
 
 class API(Resource):  # Avoid name collision as resource is a core model
     pass
