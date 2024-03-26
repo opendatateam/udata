@@ -145,9 +145,6 @@ def init_logging(app):
     handler.setFormatter(CliFormatter())
     handler.setLevel(log_level)
 
-    logger = logging.getLogger()
-    logger.addHandler(handler)
-
     logger = logging.getLogger('__main__')
     logger.setLevel(log_level)
     logger.handlers = []
