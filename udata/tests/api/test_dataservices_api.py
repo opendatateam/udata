@@ -79,7 +79,7 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(response.json['extras'], {
             'foo': 'bar',
         })
-        self.assertEqual(response.json['license']['title'], license.title)
+        self.assertEqual(response.json['license'], license.title)
         dataservice.reload()
         self.assertEqual(dataservice.title, 'Updated title')
         self.assertEqual(dataservice.uri, 'https://example.org')

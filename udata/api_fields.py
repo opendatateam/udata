@@ -41,9 +41,11 @@ def convert_db_to_field(key, field):
     elif isinstance(field, db.ReferenceField):
         nested_fields = info.get('nested_fields')
         if nested_fields is None:
-            raise ValueError(f"Reference field for '{key}' should have a `nested_fields` argument")
+            # If there is no `nested_fields` convert the object to the string representation.
+            constructor_read = fields.String
+        else:
+            constructor_read = lambda **kwargs: fields.Nested(nested_fields, **kwargs)
 
-        constructor_read = lambda **kwargs: fields.Nested(nested_fields, **kwargs)
         
         write_params['description'] = "ID of the reference"
         constructor_write = fields.String

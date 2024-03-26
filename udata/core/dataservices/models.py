@@ -52,10 +52,7 @@ class Dataservice(WithMetrics, BadgeMixin, db.Owned, db.Document):
     has_token = field(db.BooleanField())
     format = field(db.StringField(choices=DATASERVICE_FORMATS))
 
-    license = field(
-        db.ReferenceField('License'),
-        nested_fields=datasets_api_fields.license_fields,
-    )
+    license = field(db.ReferenceField('License'))
 
     tags = field(
         db.TagListField(),
