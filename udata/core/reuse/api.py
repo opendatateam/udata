@@ -10,6 +10,7 @@ from udata.models import Dataset
 from udata.utils import id_or_404
 
 from udata.core.badges import api as badges_api
+from udata.core.badges.fields import badge_fields
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.followers.api import FollowAPI
 from udata.core.storages.api import (
@@ -188,8 +189,8 @@ class AvailableDatasetBadgesAPI(API):
 @ns.route('/<reuse:reuse>/badges/', endpoint='reuse_badges')
 class ReuseBadgesAPI(API):
     @api.doc('add_reuse_badge', **common_doc)
-    @api.expect(badges_api.badge_fields)
-    @api.marshal_with(badges_api.badge_fields)
+    @api.expect(badge_fields)
+    @api.marshal_with(badge_fields)
     @api.secure(admin_permission)
     def post(self, reuse):
         '''Create a new badge for a given reuse'''

@@ -2,7 +2,6 @@ from udata.api import api, fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.user.api_fields import user_ref_fields
 
-
 DEFAULT_MASK = ','.join(('id', 'name', 'email'))
 
 contact_point_fields = api.model('ContactPoint', {

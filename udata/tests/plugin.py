@@ -192,6 +192,11 @@ class ApiClient(object):
             return self.client.put(url, data or {}, *args, **kwargs)
         return self.perform('put', url, data=data or {}, *args, **kwargs)
 
+    def patch(self, url, data=None, json=True, *args, **kwargs):
+        if not json:
+            return self.client.patch(url, data or {}, *args, **kwargs)
+        return self.perform('patch', url, data=data or {}, *args, **kwargs)
+
     def delete(self, url, data=None, *args, **kwargs):
         return self.perform('delete', url, data=data or {}, *args, **kwargs)
 

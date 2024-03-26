@@ -20,6 +20,7 @@ from udata.auth import (
     current_user, login_user, Permission, RoleNeed, PermissionDenied
 )
 from udata.core.user.models import User
+from udata.models import FieldValidationError
 from udata.utils import safe_unicode
 
 from . import fields, oauth2
@@ -282,6 +283,19 @@ def handle_unauthorized_file_type(error):
     return {'message': msg}, 400
 
 
+validation_error_fields = api.model('ValidationError', {
+    'errors': fields.Raw
+})
+
+@api.errorhandler(FieldValidationError)
+@api.marshal_with(validation_error_fields, code=400)
+def handle_validation_error(error: FieldValidationError):
+    '''A validation error'''
+    errors = {}
+    errors[error.field] = [error.message]
+
+    return { 'errors': errors}, 400
+
 class API(Resource):  # Avoid name collision as resource is a core model
     pass
 
@@ -310,6 +324,7 @@ def init_app(app):
     import udata.core.user.api  # noqa
     import udata.core.dataset.api  # noqa
     import udata.core.dataset.apiv2  # noqa
+    import udata.core.dataservices.api  # noqa
     import udata.core.discussions.api  # noqa
     import udata.core.reuse.api  # noqa
     import udata.core.reuse.apiv2  # noqa

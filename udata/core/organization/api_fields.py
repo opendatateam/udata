@@ -1,10 +1,7 @@
 from udata.api import api, fields, base_reference
-from udata.core.badges.api import badge_fields
+from udata.core.badges.fields import badge_fields
 
-from .models import ORG_ROLES, DEFAULT_ROLE, MEMBERSHIP_STATUS, LOGO_SIZES
-
-BIGGEST_LOGO_SIZE = LOGO_SIZES[0]
-
+from .constants import ORG_ROLES, DEFAULT_ROLE, MEMBERSHIP_STATUS, BIGGEST_LOGO_SIZE
 
 org_ref_fields = api.inherit('OrganizationReference', base_reference, {
     'name': fields.String(description='The organization name', readonly=True),
@@ -28,11 +25,11 @@ org_ref_fields = api.inherit('OrganizationReference', base_reference, {
         readonly=True),
 })
 
-from udata.core.user.api_fields import user_ref_fields  # noqa: required
+import udata.core.user.api_fields as user_api_fields  # noqa: required
 
 request_fields = api.model('MembershipRequest', {
     'id': fields.String(readonly=True),
-    'user': fields.Nested(user_ref_fields),
+    'user': fields.Nested(user_api_fields.user_ref_fields),
     'created': fields.ISODateTime(
         description='The request creation date', readonly=True),
     'status': fields.String(
@@ -43,7 +40,7 @@ request_fields = api.model('MembershipRequest', {
 })
 
 member_fields = api.model('Member', {
-    'user': fields.Nested(user_ref_fields),
+    'user': fields.Nested(user_api_fields.user_ref_fields),
     'role': fields.String(
         description='The member role in the organization', required=True,
         enum=list(ORG_ROLES), default=DEFAULT_ROLE)

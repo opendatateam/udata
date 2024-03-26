@@ -29,5 +29,8 @@ class APITestCase(FrontTestCase):
     def put(self, url, data=None, json=True, *args, **kwargs):
         return self.api.put(url, data=data, json=json, *args, **kwargs)
 
+    def patch(self, url, data=None, json=True, *args, **kwargs):
+        return self.api.patch(url, data=data, json=json, *args, **kwargs)
+
     def delete(self, url, data=None, *args, **kwargs):
         return self.api.delete(url, data=data, *args, **kwargs)

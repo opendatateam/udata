@@ -84,7 +84,6 @@ class FieldValidationError(ValidationError):
         self.field = field
         super().__init__(*args, **kwargs)
 
-
 db = UDataMongoEngine()
 session_interface = MongoEngineSessionInterface(db)
 
@@ -100,6 +99,7 @@ from udata.core.organization.models import *  # noqa
 from udata.core.contact_point.models import *  # noqa
 from udata.core.site.models import *  # noqa
 from udata.core.dataset.models import *  # noqa
+from udata.core.dataservices.models import *  # noqa
 from udata.core.reuse.models import *  # noqa
 from udata.core.activity.models import *  # noqa
 from udata.core.topic.models import *  # noqa
