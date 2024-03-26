@@ -488,12 +488,10 @@ class DatasetAPITest(APITestCase):
         dataset.reload()
         self.assertEqual(dataset.private, True)
 
-
-
     def test_dataset_api_update_new_resource_with_extras(self):
         '''It should update a dataset with a new resource with extras'''
         user = self.login()
-        dataset = HiddenDatasetFactory(owner=user)
+        dataset = DatasetFactory(owner=user)
         data = dataset.to_dict()
         resource_data = ResourceFactory.as_dict()
         resource_data['extras'] = {'extra:id': 'id'}
