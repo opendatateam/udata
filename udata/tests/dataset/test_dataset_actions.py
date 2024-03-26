@@ -1,7 +1,7 @@
 import pytest
 
 from udata.core.dataset.actions import archive
-from udata.core.dataset.factories import VisibleDatasetFactory
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.models import Discussion
 from udata.core.user.factories import UserFactory
 
@@ -13,7 +13,7 @@ class DatasetActionsTest:
         user = UserFactory()
         app.config['ARCHIVE_COMMENT_USER_ID'] = user.id
 
-        dataset = VisibleDatasetFactory()
+        dataset = DatasetFactory()
 
         archive(dataset, comment=True)
 

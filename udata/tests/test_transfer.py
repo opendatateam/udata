@@ -7,14 +7,13 @@ from udata.features.transfer.actions import request_transfer, accept_transfer
 from udata.features.transfer.notifications import (
     transfer_request_notifications
 )
-from udata.models import Member
-from udata.core.user.metrics import update_owner_metrics
-from udata.core.organization.metrics import update_org_metrics
+from udata.models import Member, Dataset
 
 from udata.utils import faker
-from udata.core.dataset.factories import VisibleDatasetFactory
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
+from udata.tests.helpers import assert_emit
 
 
 pytestmark = pytest.mark.usefixtures('clean_db')
@@ -32,7 +31,7 @@ class TransferStartTest:
 
     def test_request_transfer_owner_to_user(self):
         user = UserFactory()
-        dataset = VisibleDatasetFactory(owner=user)
+        dataset = DatasetFactory(owner=user)
         recipient = UserFactory()
         comment = faker.sentence()
 
@@ -43,7 +42,7 @@ class TransferStartTest:
         user = UserFactory()
         member = Member(user=user, role='admin')
         org = OrganizationFactory(members=[member])
-        dataset = VisibleDatasetFactory(owner=user, organization=org)
+        dataset = DatasetFactory(owner=user, organization=org)
         recipient = UserFactory()
         comment = faker.sentence()
 
@@ -52,7 +51,7 @@ class TransferStartTest:
 
     def test_request_transfer_user_to_organization(self):
         user = UserFactory()
-        dataset = VisibleDatasetFactory(owner=user)
+        dataset = DatasetFactory(owner=user)
         recipient = OrganizationFactory()
         comment = faker.sentence()
 
@@ -61,7 +60,7 @@ class TransferStartTest:
 
     def test_request_transfer_not_authorized_not_owner(self):
         user = UserFactory()
-        dataset = VisibleDatasetFactory(owner=UserFactory())
+        dataset = DatasetFactory(owner=UserFactory())
         recipient = UserFactory()
         comment = faker.sentence()
 
@@ -73,7 +72,7 @@ class TransferStartTest:
         user = UserFactory()
         member = Member(user=user, role='editor')
         org = OrganizationFactory(members=[member])
-        dataset = VisibleDatasetFactory(organization=org)
+        dataset = DatasetFactory(organization=org)
         recipient = UserFactory()
         comment = faker.sentence()
 
@@ -83,7 +82,7 @@ class TransferStartTest:
 
     def test_request_transfer_to_self(self):
         user = UserFactory()
-        dataset = VisibleDatasetFactory(owner=user)
+        dataset = DatasetFactory(owner=user)
         comment = faker.sentence()
 
         login_user(user)
@@ -94,7 +93,7 @@ class TransferStartTest:
         user = UserFactory()
         member = Member(user=user, role='admin')
         org = OrganizationFactory(members=[member])
-        dataset = VisibleDatasetFactory(owner=user, organization=org)
+        dataset = DatasetFactory(owner=user, organization=org)
         comment = faker.sentence()
 
         login_user(user)
@@ -107,10 +106,13 @@ class TransferAcceptTest:
     def test_recipient_user_can_accept_transfer(self):
         owner = UserFactory()
         recipient = UserFactory()
-        subject = VisibleDatasetFactory(owner=owner)
+        subject = DatasetFactory(owner=owner)
         transfer = TransferFactory(owner=owner,
                                    recipient=recipient,
                                    subject=subject)
+
+        owner.count_datasets()
+        recipient.count_datasets()
 
         owner.reload()  # Needs updated metrics
         assert owner.get_metrics()['datasets'] == 1
@@ -122,6 +124,9 @@ class TransferAcceptTest:
         transfer = accept_transfer(transfer)
 
         assert transfer.status == 'accepted'
+
+        owner.count_datasets()
+        recipient.count_datasets()
 
         subject.reload()
         assert subject.owner == recipient
@@ -136,10 +141,12 @@ class TransferAcceptTest:
         owner = UserFactory()
         admin = UserFactory()
         org = OrganizationFactory(members=[Member(user=admin, role='admin')])
-        subject = VisibleDatasetFactory(owner=owner)
+        subject = DatasetFactory(owner=owner)
         transfer = TransferFactory(owner=owner,
                                    recipient=org,
                                    subject=subject)
+        owner.count_datasets()
+        org.count_datasets()
 
         owner.reload()  # Needs updated metrics
         assert owner.get_metrics()['datasets'] == 1
@@ -159,6 +166,9 @@ class TransferAcceptTest:
         assert subject.organization == org
         assert subject.owner is None
 
+        owner.count_datasets()
+        org.count_datasets()
+
         org.reload()
         assert org.get_metrics()['datasets'] == 1
 
@@ -172,7 +182,7 @@ class TransferAcceptTest:
         owner = UserFactory()
         editor = UserFactory()
         org = OrganizationFactory(members=[Member(user=editor, role='editor')])
-        subject = VisibleDatasetFactory(organization=org)
+        subject = DatasetFactory(organization=org)
         transfer = TransferFactory(owner=owner,
                                    recipient=org,
                                    subject=subject)
@@ -185,7 +195,7 @@ class TransferAcceptTest:
 class TransferNotificationsTest:
     def test_pending_transfer_request_for_user(self):
         user = UserFactory()
-        datasets = VisibleDatasetFactory.create_batch(2, owner=user)
+        datasets = DatasetFactory.create_batch(2, owner=user)
         recipient = UserFactory()
         comment = faker.sentence()
         transfers = {}
@@ -206,7 +216,7 @@ class TransferNotificationsTest:
 
     def test_pending_transfer_request_for_org(self):
         user = UserFactory()
-        datasets = VisibleDatasetFactory.create_batch(2, owner=user)
+        datasets = DatasetFactory.create_batch(2, owner=user)
         recipient = UserFactory()
         member = Member(user=recipient, role='editor')
         org = OrganizationFactory(members=[member])

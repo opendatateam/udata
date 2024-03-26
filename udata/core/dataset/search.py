@@ -47,7 +47,6 @@ class DatasetSearch(ModelSearchAdapter):
     @classmethod
     def is_indexable(cls, dataset):
         return (dataset.deleted is None and dataset.archived is None and
-                len(dataset.resources) > 0 and
                 not dataset.private)
 
     @classmethod

@@ -1,15 +1,12 @@
 from flask import url_for
 
-from udata.utils import get_by
-
 from udata.utils import faker
 from udata.tests.api import APITestCase
 from udata.tests.features.territories import (
     create_geozones_fixtures, TerritoriesSettings
 )
-from udata.tests.helpers import assert_json_equal
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.dataset.factories import VisibleDatasetFactory
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.spatial.factories import (
     SpatialCoverageFactory, GeoZoneFactory, GeoLevelFactory
 )
@@ -173,7 +170,7 @@ class SpatialApiTest(APITestCase):
         paca, bdr, arles = create_geozones_fixtures()
         organization = OrganizationFactory()
         for _ in range(3):
-            VisibleDatasetFactory(
+            DatasetFactory(
                 organization=organization,
                 spatial=SpatialCoverageFactory(zones=[paca.id]))
 
@@ -185,7 +182,7 @@ class SpatialApiTest(APITestCase):
         paca, bdr, arles = create_geozones_fixtures()
         organization = OrganizationFactory()
         for _ in range(3):
-            VisibleDatasetFactory(
+            DatasetFactory(
                 organization=organization,
                 spatial=SpatialCoverageFactory(zones=[paca.id]))
 
@@ -198,7 +195,7 @@ class SpatialApiTest(APITestCase):
         paca, bdr, arles = create_geozones_fixtures()
         organization = OrganizationFactory()
         for _ in range(3):
-            VisibleDatasetFactory(
+            DatasetFactory(
                 organization=organization,
                 spatial=SpatialCoverageFactory(zones=[paca.id]))
 
@@ -212,7 +209,7 @@ class SpatialApiTest(APITestCase):
         paca, bdr, arles = create_geozones_fixtures()
         organization = OrganizationFactory()
         for _ in range(3):
-            VisibleDatasetFactory(
+            DatasetFactory(
                 organization=organization,
                 spatial=SpatialCoverageFactory(zones=[paca.id]))
 
@@ -241,7 +238,7 @@ class SpatialTerritoriesApiTest(APITestCase):
         paca, bdr, arles = create_geozones_fixtures()
         organization = OrganizationFactory()
         for _ in range(3):
-            VisibleDatasetFactory(
+            DatasetFactory(
                 organization=organization,
                 spatial=SpatialCoverageFactory(zones=[paca.id]))
 
@@ -255,7 +252,7 @@ class SpatialTerritoriesApiTest(APITestCase):
         paca, bdr, arles = create_geozones_fixtures()
         organization = OrganizationFactory()
         for _ in range(3):
-            VisibleDatasetFactory(
+            DatasetFactory(
                 organization=organization,
                 spatial=SpatialCoverageFactory(zones=[paca.id]))
 

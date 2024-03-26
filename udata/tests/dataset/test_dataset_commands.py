@@ -2,14 +2,14 @@ import pytest
 
 from tempfile import NamedTemporaryFile
 
-from udata.core.dataset.factories import VisibleDatasetFactory
+from udata.core.dataset.factories import DatasetFactory
 
 
 @pytest.mark.usefixtures('clean_db')
 class DatasetCommandTest:
 
     def test_dataset_archive_one(self, cli):
-        dataset = VisibleDatasetFactory()
+        dataset = DatasetFactory()
 
         cli('dataset', 'archive-one', str(dataset.id))
 
@@ -17,7 +17,7 @@ class DatasetCommandTest:
         assert dataset.archived is not None
 
     def test_dataset_archive(self, cli):
-        datasets = [VisibleDatasetFactory() for _ in range(2)]
+        datasets = [DatasetFactory() for _ in range(2)]
 
         with NamedTemporaryFile(mode='w', encoding='utf8') as temp:
             temp.write('\n'.join((str(d.id) for d in datasets)))

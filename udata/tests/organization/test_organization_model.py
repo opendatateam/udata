@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from udata.core.dataset.factories import DatasetFactory, VisibleDatasetFactory
+from udata.core.dataset.factories import DatasetFactory, HiddenDatasetFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.followers.signals import on_follow, on_unfollow
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
@@ -27,8 +27,8 @@ class OrganizationModelTest(TestCase, DBTestMixin):
             reuse = VisibleReuseFactory(organization=org)
             ReuseFactory(organization=org)
         with assert_emit(Dataset.on_create):
-            dataset = VisibleDatasetFactory(organization=org)
-            DatasetFactory(organization=org)
+            dataset = DatasetFactory(organization=org)
+            HiddenDatasetFactory(organization=org)
         with assert_emit(on_follow):
             follow = Follow.objects.create(following=org, follower=UserFactory(),
                                            since=datetime.utcnow())

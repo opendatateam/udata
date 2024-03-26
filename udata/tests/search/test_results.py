@@ -1,6 +1,6 @@
 from udata.tests.api import APITestCase
 from udata.search.result import SearchResult
-from udata.core.dataset.factories import VisibleDatasetFactory
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.search import DatasetSearch
 from udata.models import Dataset
 
@@ -9,7 +9,7 @@ class ResultTest(APITestCase):
     def test_results_get_objects(self):
         data = []
         for _ in range(3):
-            random_dataset = VisibleDatasetFactory()
+            random_dataset = DatasetFactory()
             data.append(DatasetSearch.serialize(random_dataset))
 
         search_class = DatasetSearch.temp_search()
@@ -30,10 +30,10 @@ class ResultTest(APITestCase):
     def test_results_should_not_fail_on_missing_objects(self):
         data = []
         for _ in range(3):
-            random_dataset = VisibleDatasetFactory()
+            random_dataset = DatasetFactory()
             data.append(DatasetSearch.serialize(random_dataset))
 
-        to_delete_random_dataset = VisibleDatasetFactory()
+        to_delete_random_dataset = DatasetFactory()
         data.append(DatasetSearch.serialize(to_delete_random_dataset))
 
         search_class = DatasetSearch.temp_search()

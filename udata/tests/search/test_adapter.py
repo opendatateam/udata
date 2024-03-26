@@ -14,7 +14,7 @@ from udata.utils import clean_string
 from udata.search import reindex, as_task_param
 from udata.search.commands import index_model
 from udata.core.dataset.search import DatasetSearch
-from udata.core.dataset.factories import DatasetFactory, ResourceFactory, VisibleDatasetFactory
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory, HiddenDatasetFactory
 from udata.tests.api import APITestCase
 
 from . import FakeSearch
@@ -104,35 +104,35 @@ class SearchAdaptorTest:
         assertHasArgument(parser, 'page_size', int)
 
 
-@pytest.mark.options(SEARCH_SERVICE_API_URL="smtg")
+@pytest.mark.options(SEARCH_SERVICE_API_URL="smtg/")
 class IndexingLifecycleTest(APITestCase):
 
     @patch('requests.delete')
     def test_producer_should_send_a_message_without_payload_if_not_indexable(self, mock_req):
-        fake_data = DatasetFactory(id='61fd30cb29ea95c7bc0e1211')
+        fake_data = HiddenDatasetFactory(id='61fd30cb29ea95c7bc0e1211')
 
         reindex.run(*as_task_param(fake_data))
 
         search_service_url = current_app.config['SEARCH_SERVICE_API_URL']
-        url = f'{search_service_url}{DatasetSearch.search_url}/{str(fake_data.id)}/unindex'
+        url = f'{search_service_url}{DatasetSearch.search_url}{str(fake_data.id)}/unindex'
         mock_req.assert_called_with(url)
 
     @patch('requests.post')
     def test_producer_should_send_a_message_with_payload_if_indexable(self, mock_req):
         resource = ResourceFactory(schema=Schema(url="http://localhost/my-schema"))
-        fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211', resources=[resource])
+        fake_data = DatasetFactory(id='61fd30cb29ea95c7bc0e1211', resources=[resource])
 
         reindex.run(*as_task_param(fake_data))
 
         expected_value = {
             'document': DatasetSearch.serialize(fake_data)
         }
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{DatasetSearch.search_url}/index"
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{DatasetSearch.search_url}index"
         mock_req.assert_called_with(url, json=expected_value)
 
     @patch('requests.Session.post')
     def test_index_model(self, mock_req):
-        fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211')
+        fake_data = DatasetFactory(id='61fd30cb29ea95c7bc0e1211')
 
         index_model(DatasetSearch, start=None, reindex=False, from_datetime=None)
 
@@ -146,7 +146,7 @@ class IndexingLifecycleTest(APITestCase):
     @patch('requests.post')
     @patch('requests.Session.post')
     def test_reindex_model(self, mock_session, mock_req):
-        fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211')
+        fake_data = DatasetFactory(id='61fd30cb29ea95c7bc0e1211')
 
         index_model(DatasetSearch, start=datetime.datetime(2022, 2, 20, 20, 2), reindex=True)
 
@@ -167,10 +167,10 @@ class IndexingLifecycleTest(APITestCase):
 
     @patch('requests.Session.post')
     def test_index_model_from_datetime(self, mock_req):
-        VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211',
-                              last_modified_internal=datetime.datetime(2020, 1, 1))
-        fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1212',
-                                          last_modified_internal=datetime.datetime(2022, 1, 1))
+        DatasetFactory(id='61fd30cb29ea95c7bc0e1211',
+                       last_modified_internal=datetime.datetime(2020, 1, 1))
+        fake_data = DatasetFactory(id='61fd30cb29ea95c7bc0e1212',
+                                   last_modified_internal=datetime.datetime(2022, 1, 1))
 
         index_model(DatasetSearch, start=None, from_datetime=datetime.datetime(2023, 1, 1))
         mock_req.assert_not_called()
