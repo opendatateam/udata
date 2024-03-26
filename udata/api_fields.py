@@ -65,6 +65,8 @@ def generate_fields(cls):
     read_fields = {}
     write_fields = {}
 
+    read_fields['id'] = fields.String(required=True)
+
     for key in keys:
         if key == 'objects': continue
 
