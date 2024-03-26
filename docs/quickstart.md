@@ -6,7 +6,7 @@ You will need to install [docker]() and [docker-compose][] before getting starte
 ```
 git clone https://github.com/opendatateam/docker-udata
 cd docker-udata
-docker-compose up
+docker compose up
 ```
 
 The platform is available at [http://localhost:7000](http://localhost:7000).
