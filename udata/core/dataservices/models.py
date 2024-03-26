@@ -41,7 +41,7 @@ class Dataservice(WithMetrics, BadgeMixin, db.Owned, db.Document):
         description="In markdown"
     )
     uri = field(db.URLField(required=True))
-    endpoint_description = field(db.URLField())
+    endpoint_description_url = field(db.URLField())
     authorization_request_url = field(db.URLField())
     availability= field(
         db.FloatField(min=0, max=100),
