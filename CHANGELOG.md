@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Add dataservices [#2986](https://github.com/opendatateam/udata/pull/2986)
 - Add spatial coverage harvesting [#2959](https://github.com/opendatateam/udata/pull/2959)
 - Fix: updating a dataset without `private` do not reset `private` to `False`, the previous saved value is kept [#2955](https://github.com/opendatateam/udata/pull/2955)
 - Fix: return the correct error when no `Content-Type` is sent instead of 500 [#2967](https://github.com/opendatateam/udata/pull/2967)
