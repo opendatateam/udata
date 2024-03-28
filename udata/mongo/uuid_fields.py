@@ -5,7 +5,6 @@ from mongoengine.fields import UUIDField
 
 log = logging.getLogger(__name__)
 
-
 class AutoUUIDField(UUIDField):
     '''
     An autopopulated UUID field.

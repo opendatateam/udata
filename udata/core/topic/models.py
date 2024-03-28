@@ -1,6 +1,7 @@
 from flask import url_for
 from mongoengine.signals import pre_save
-from udata.models import db, SpatialCoverage
+from udata.models import SpatialCoverage
+from udata.mongo import db
 from udata.search import reindex
 from udata.tasks import as_task_param
 

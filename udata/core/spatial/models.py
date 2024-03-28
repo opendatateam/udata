@@ -5,7 +5,7 @@ from werkzeug.utils import cached_property
 from udata.app import cache
 from udata.uris import endpoint_for
 from udata.i18n import _, L_, get_locale, language
-from udata.models import db
+from udata.mongo import db
 
 from . import geoids
 

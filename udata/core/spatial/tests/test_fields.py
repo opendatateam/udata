@@ -5,7 +5,7 @@ from datetime import timedelta
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import Form
-from udata.models import db
+from udata.mongo import db
 from udata.tests import TestCase
 from udata.tests.helpers import assert_json_equal
 from udata.utils import faker

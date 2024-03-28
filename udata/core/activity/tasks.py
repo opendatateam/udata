@@ -1,7 +1,8 @@
 import logging
 
-from udata.models import db, User, Organization
-from udata.tasks import task, celery
+from udata.mongo import db
+from udata.models import User, Organization
+from udata.tasks import task
 
 from .signals import new_activity
 

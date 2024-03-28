@@ -1,4 +1,5 @@
-from udata.models import db, Dataset, Reuse, Organization
+from udata.models import Dataset, Reuse, Organization
+from udata.mongo import db
 
 
 @Dataset.on_create.connect

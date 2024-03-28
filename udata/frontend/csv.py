@@ -8,7 +8,7 @@ from datetime import datetime, date
 
 from flask import Response, stream_with_context
 
-from udata.models import db
+from udata.mongo import db
 from udata.utils import recursive_get
 
 

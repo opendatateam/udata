@@ -5,7 +5,8 @@ from werkzeug.utils import cached_property
 from udata.core.storages import images, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.models import db, BadgeMixin, WithMetrics
+from udata.models import BadgeMixin, WithMetrics
+from udata.mongo import db
 from udata.utils import hash_url
 from udata.uris import endpoint_for
 

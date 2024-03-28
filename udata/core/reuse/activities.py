@@ -1,7 +1,8 @@
 from flask_security import current_user
 
 from udata.i18n import lazy_gettext as _
-from udata.models import db, Reuse, Activity
+from udata.models import Reuse, Activity
+from udata.mongo import db
 
 
 __all__ = (

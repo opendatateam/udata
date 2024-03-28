@@ -1,6 +1,7 @@
 from flask import current_app
 
-from udata.models import db, GeoZone
+from udata.models import GeoZone
+from udata.mongo import db
 
 
 def check_for_territories(query):

@@ -16,7 +16,8 @@ from udata import mail
 from udata.uris import endpoint_for
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.models import db, WithMetrics, Follow
+from udata.models import WithMetrics, Follow
+from udata.mongo import db
 from udata.core.discussions.models import Discussion
 from udata.core.storages import avatars, default_image_basename
 

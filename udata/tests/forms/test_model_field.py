@@ -4,7 +4,7 @@ from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
 from udata.i18n import gettext as _
-from udata.models import db
+from udata.mongo import db
 
 
 pytestmark = [

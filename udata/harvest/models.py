@@ -6,7 +6,8 @@ from urllib.parse import urlparse
 from werkzeug.utils import cached_property
 
 from udata.core.dataset.models import HarvestDatasetMetadata
-from udata.models import db, Dataset
+from udata.models import Dataset
+from udata.mongo import db
 from udata.i18n import lazy_gettext as _
 
 log = logging.getLogger(__name__)

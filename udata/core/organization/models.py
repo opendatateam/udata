@@ -7,7 +7,8 @@ from werkzeug.utils import cached_property
 
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
-from udata.models import db, BadgeMixin, WithMetrics
+from udata.models import BadgeMixin, WithMetrics
+from udata.mongo import db
 from udata.i18n import lazy_gettext as _
 from udata.uris import endpoint_for
 

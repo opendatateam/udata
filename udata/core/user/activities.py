@@ -1,7 +1,8 @@
 from flask_security import current_user
 
 from udata.i18n import lazy_gettext as _
-from udata.models import db, User, Dataset, Reuse, Organization, Activity
+from udata.models import User, Dataset, Reuse, Organization, Activity
+from udata.mongo import db
 from udata.core.followers.signals import on_follow
 from udata.core.discussions.signals import (
     on_new_discussion, on_new_discussion_comment
