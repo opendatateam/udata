@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 
 from mongoengine.errors import ValidationError
 
+from udata.mongo import db
 from udata import entrypoints
 from udata.errors import ConfigError
 

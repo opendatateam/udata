@@ -35,7 +35,7 @@ __all__ = (
     'License', 'Resource', 'Schema', 'Dataset', 'Checksum', 'CommunityResource',
     'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_FILETYPES',
     'PIVOTAL_DATA', 'DEFAULT_LICENSE', 'RESOURCE_TYPES',
-    'ResourceSchema'
+    'ResourceSchema', 'HarvestDatasetMetadata'
 )
 
 log = logging.getLogger(__name__)
