@@ -2,8 +2,9 @@ import logging
 
 from mongoengine.errors import DoesNotExist
 
+from udata.mongo import db
 from udata.api import api, API, fields
-from udata.models import db, Activity
+from udata.core.activity.models import Activity
 
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.organization.api_fields import org_ref_fields

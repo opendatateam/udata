@@ -9,7 +9,7 @@ from factory.mongoengine import MongoEngineFactory
 
 from flask import url_for, Blueprint
 
-from udata.models import db
+from udata.mongo import db
 from udata.frontend import csv
 from udata.utils import faker
 

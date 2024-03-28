@@ -16,10 +16,11 @@ from werkzeug.utils import cached_property
 import requests
 from typing import Optional, Tuple
 
+from udata.mongo import db
 from udata.app import cache
 from udata.core import storages
 from udata.frontend.markdown import mdstrip
-from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage, FieldValidationError
+from udata.models import WithMetrics, BadgeMixin, SpatialCoverage, FieldValidationError
 from udata.i18n import lazy_gettext as _
 from udata.utils import get_by, hash_url, to_naive_datetime
 from udata.uris import ValidationError, endpoint_for
@@ -34,7 +35,7 @@ __all__ = (
     'License', 'Resource', 'Schema', 'Dataset', 'Checksum', 'CommunityResource',
     'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_FILETYPES',
     'PIVOTAL_DATA', 'DEFAULT_LICENSE', 'RESOURCE_TYPES',
-    'ResourceSchema'
+    'ResourceSchema', 'HarvestDatasetMetadata'
 )
 
 log = logging.getLogger(__name__)

@@ -1,6 +1,4 @@
-from datetime import date, timedelta
-
-from udata.models import db
+from udata.mongo import db
 
 
 __all__ = ('WithMetrics',)

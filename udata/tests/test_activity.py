@@ -1,4 +1,5 @@
-from udata.models import db, Activity
+from udata.mongo import db
+from udata.models import Activity
 from udata.tests import TestCase, DBTestMixin, WebTestMixin
 from udata.core.user.factories import UserFactory
 from udata.core.organization.factories import OrganizationFactory
