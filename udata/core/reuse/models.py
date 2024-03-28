@@ -10,7 +10,7 @@ from udata.utils import hash_url
 from udata.uris import endpoint_for
 from .constants import IMAGE_MAX_SIZE, IMAGE_SIZES, REUSE_TOPICS, REUSE_TYPES
 
-__all__ = ('Reuse')
+__all__ = ('Reuse',)
 
 
 class ReuseQuerySet(db.OwnedQuerySet):

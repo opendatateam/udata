@@ -3,7 +3,7 @@ from udata.i18n import lazy_gettext as _
 from udata.models import Reuse
 from udata.core.reuse.constants import REUSE_TYPES, REUSE_TOPICS
 
-from .models import IMAGE_SIZES, TITLE_SIZE_LIMIT, DESCRIPTION_SIZE_LIMIT
+from .constants import IMAGE_SIZES, TITLE_SIZE_LIMIT, DESCRIPTION_SIZE_LIMIT
 
 __all__ = ('ReuseForm', )
 
