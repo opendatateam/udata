@@ -74,7 +74,7 @@ class Dataservice(WithMetrics, BadgeMixin, db.Owned, db.Document):
         db.DateTimeField(verbose_name=_('Creation date'), default=datetime.utcnow, required=True),
         readonly=True,
     )
-    modified_at = field(
+    metadata_modified_at = field(
         db.DateTimeField(verbose_name=_('Last modification date'), default=datetime.utcnow, required=True),
         readonly=True,
     )

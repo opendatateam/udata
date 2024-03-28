@@ -77,13 +77,6 @@ class UDataMongoEngine(MongoEngine):
             raise ValueError(message)
 
 
-class FieldValidationError(ValidationError):
-    field: str
-
-    def __init__(self, *args, field: str, **kwargs):
-        self.field = field
-        super().__init__(*args, **kwargs)
-
 db = UDataMongoEngine()
 session_interface = MongoEngineSessionInterface(db)
 

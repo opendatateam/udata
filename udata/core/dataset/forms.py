@@ -14,7 +14,7 @@ from .models import (
 
 __all__ = ('DatasetForm', 'ResourceForm', 'CommunityResourceForm')
 
-from ...models import FieldValidationError
+from ...models.errors import FieldValidationError
 
 
 class ChecksumForm(ModelForm):

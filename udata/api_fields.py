@@ -1,9 +1,11 @@
-from udata.api import api, fields
-from udata.models import db
+from udata.api import api
+import flask_restx.fields as restx_fields
+import udata.api.fields as custom_restx_fields
 from bson import ObjectId
 import mongoengine
+import mongoengine.fields as mongo_fields
 
-from udata.models import FieldValidationError
+from udata.errors2 import FieldValidationError
 
 def convert_db_to_field(key, field):
     info = getattr(field, '__additional_field_info__', {})
@@ -20,35 +22,34 @@ def convert_db_to_field(key, field):
 
     if info.get('convert_to'):
         return info.get('convert_to'), info.get('convert_to')
-    elif isinstance(field, db.StringField):
-        constructor = fields.String
+    elif isinstance(field, mongo_fields.StringField):
+        constructor = restx_fields.String
         params['min_length'] = field.min_length
         params['max_length'] = field.max_length
-    elif isinstance(field, db.FloatField):
-        constructor = fields.Float
-        params['min'] = field.min
+    elif isinstance(field, mongo_fields.FloatField):
+        constructor = restx_fields.Float
+        params['min'] = field.min # TODO min_value?
         params['max'] = field.max
-    elif isinstance(field, db.BooleanField):
-        constructor = fields.Boolean
-    elif isinstance(field, db.DateTimeField):
-        constructor = fields.ISODateTime
-    elif isinstance(field, db.DictField):
-        constructor = fields.Raw
-    elif isinstance(field, db.ListField):
+    elif isinstance(field, mongo_fields.BooleanField):
+        constructor = restx_fields.Boolean
+    elif isinstance(field, mongo_fields.DateTimeField):
+        constructor = custom_restx_fields.ISODateTime
+    elif isinstance(field, mongo_fields.DictField):
+        constructor = restx_fields.Raw
+    elif isinstance(field, mongo_fields.ListField):
         field_read, field_write = convert_db_to_field(f"{key}.inner", field.field)
-        constructor_read = lambda **kwargs: fields.List(field_read, **kwargs)
-        constructor_write = lambda **kwargs: fields.List(field_write, **kwargs)
-    elif isinstance(field, db.ReferenceField):
+        constructor_read = lambda **kwargs: restx_fields.List(field_read, **kwargs)
+        constructor_write = lambda **kwargs: restx_fields.List(field_write, **kwargs)
+    elif isinstance(field, mongo_fields.ReferenceField):
         nested_fields = info.get('nested_fields')
         if nested_fields is None:
             # If there is no `nested_fields` convert the object to the string representation.
-            constructor_read = fields.String
+            constructor_read = restx_fields.String
         else:
-            constructor_read = lambda **kwargs: fields.Nested(nested_fields, **kwargs)
+            constructor_read = lambda **kwargs: restx_fields.Nested(nested_fields, **kwargs)
 
-        
         write_params['description'] = "ID of the reference"
-        constructor_write = fields.String
+        constructor_write = restx_fields.String
     else:
         raise ValueError(f"Unsupported MongoEngine field type {field.__class__.__name__}")
     
@@ -66,7 +67,7 @@ def generate_fields(cls):
     read_fields = {}
     write_fields = {}
 
-    read_fields['id'] = fields.String(required=True)
+    read_fields['id'] = restx_fields.String(required=True)
 
     for key, field in cls._fields.items():
         if not hasattr(field, '__additional_field_info__'): continue 
@@ -111,6 +112,8 @@ def wrap_primary_key(field_name: str, foreign_field: mongoengine.fields.Referenc
     if isinstance(id_field, mongoengine.fields.ObjectIdField):
         return ObjectId(value)
     elif isinstance(id_field, mongoengine.fields.StringField):
+        # { 'id': value }
+
         # Right now I didn't find a simpler way to make mongoengine happy.
         # For references, it expects `ObjectId`, `DBRef`, `LazyReference` or `document` but since
         # the primary key a StringField (not an `ObjectId`) we cannot create an `ObjectId`, I didn't find

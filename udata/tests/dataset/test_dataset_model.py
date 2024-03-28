@@ -7,8 +7,9 @@ from mongoengine import post_save, ValidationError
 
 from udata.app import cache
 from udata.models import (
-    db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchema, UPDATE_FREQUENCIES, Schema, FieldValidationError
+    db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchema, UPDATE_FREQUENCIES, Schema
 )
+from udata.errors2 import FieldValidationError
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.dataset.factories import (
     ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory, ResourceSchemaMockData
