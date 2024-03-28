@@ -1,5 +1,3 @@
-from urllib.parse import urlparse
-
 from bson import ObjectId, DBRef
 from flask_mongoengine import MongoEngine, MongoEngineSessionInterface
 from mongoengine.base import TopLevelDocumentMetaclass, get_document
@@ -7,9 +5,6 @@ from mongoengine.errors import ValidationError
 from mongoengine.signals import pre_save, post_save
 
 from flask_storage.mongo import FileField, ImageField
-
-from udata import entrypoints
-from udata.errors import ConfigError
 
 from .badges_field import BadgesField
 from .taglist_field import TagListField
