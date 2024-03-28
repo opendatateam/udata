@@ -16,7 +16,8 @@ from udata.rdf import (
 from .forms import (
     OrganizationForm, MembershipRequestForm, MembershipRefuseForm, MemberForm
 )
-from .models import Organization, MembershipRequest, Member, ORG_ROLES
+from .models import Organization, MembershipRequest, Member
+from .constants import ORG_ROLES
 from .permissions import (
     EditOrganizationPermission, OrganizationPrivatePermission
 )

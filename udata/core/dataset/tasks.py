@@ -17,7 +17,8 @@ from udata.models import (Follow, Discussion, Activity, Topic,
                           Organization, Transfer, db)
 from udata.tasks import job
 
-from .models import Dataset, Resource, CommunityResource, UPDATE_FREQUENCIES, Checksum
+from .models import Dataset, Resource, CommunityResource, Checksum
+from .constants import UPDATE_FREQUENCIES
 
 log = get_task_logger(__name__)
 

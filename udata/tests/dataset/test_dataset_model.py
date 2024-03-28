@@ -3,12 +3,11 @@ from datetime import datetime, timedelta
 import pytest
 import requests
 from flask import current_app
-from mongoengine import post_save, ValidationError
+from mongoengine import post_save
 
 from udata.app import cache
-from udata.models import (
-    db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchema, UPDATE_FREQUENCIES, Schema, FieldValidationError
-)
+from udata.models import db, Dataset, License, ResourceSchema, Schema
+from udata.core.dataset.constants import LEGACY_FREQUENCIES, UPDATE_FREQUENCIES
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.dataset.factories import (
     ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory, ResourceSchemaMockData

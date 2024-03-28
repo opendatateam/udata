@@ -10,7 +10,8 @@ from udata.core.user.factories import AdminFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
-from udata.models import Reuse, Follow, Member, REUSE_TOPICS, REUSE_TYPES
+from udata.models import Reuse, Follow, Member
+from udata.core.reuse.constants import REUSE_TOPICS, REUSE_TYPES
 from udata.utils import faker
 
 from udata.tests.helpers import (

@@ -1,0 +1,5 @@
+NOT_CHECKED = 'not_checked'
+POTENTIAL_SPAM = 'potential_spam'
+NO_SPAM = 'no_spam'
+
+SPAM_STATUS_CHOICES = [NOT_CHECKED, POTENTIAL_SPAM, NO_SPAM]

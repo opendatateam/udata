@@ -5,11 +5,7 @@ from udata.models import db
 from udata.core.spam.models import SpamMixin, spam_protected
 from .signals import (on_new_discussion, on_discussion_closed, on_new_discussion_comment)
 
-
 log = logging.getLogger(__name__)
-
-
-COMMENT_SIZE_LIMIT = 50000
 
 
 class Message(SpamMixin, db.EmbeddedDocument):

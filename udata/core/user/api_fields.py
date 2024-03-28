@@ -1,9 +1,7 @@
 from udata.auth.helpers import current_user_is_admin_or_self
 from udata.api import api, fields, base_reference
 
-from .models import AVATAR_SIZES
-
-BIGGEST_AVATAR_SIZE = AVATAR_SIZES[0]
+from .constants import BIGGEST_AVATAR_SIZE
 
 
 user_ref_fields = api.inherit('UserReference', base_reference, {

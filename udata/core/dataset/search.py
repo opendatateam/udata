@@ -7,9 +7,8 @@ from udata.search import (
     ModelTermsFilter, BoolFilter, Filter,
     TemporalCoverageFilter
 )
-from udata.core.spatial.models import (
-    admin_levels, ADMIN_LEVEL_MAX
-)
+from udata.core.spatial.models import admin_levels
+from udata.core.spatial.constants import ADMIN_LEVEL_MAX
 from udata.core.dataset.api import DatasetApiParser, DEFAULT_SORTING
 from udata.utils import to_iso_datetime
 
