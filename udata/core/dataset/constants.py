@@ -50,9 +50,6 @@ DEFAULT_LICENSE = {
     'active': True,
 }
 
-# Use CKAN license group from opendefinition as default license list
-DEFAULT_LICENSE_FILE = 'http://licenses.opendefinition.org/licenses/groups/ckan.json'  # noqa
-
 RESOURCE_TYPES = OrderedDict([
     ('main', _('Main file')),
     ('documentation', _('Documentation')),
