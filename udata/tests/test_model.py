@@ -6,9 +6,9 @@ from datetime import date, datetime, timedelta
 from mongoengine.errors import ValidationError
 from mongoengine.fields import BaseField
 
+from udata.mongo import db
 from udata.settings import Defaults
 from udata.models import Dataset, validate_config, build_test_config
-from udata.mongo import db
 from udata.errors import ConfigError
 from udata.tests.helpers import assert_json_equal, assert_equal_dates
 

@@ -1,8 +1,8 @@
 from flask import g, current_app
 from werkzeug.local import LocalProxy
 
-from udata.models import WithMetrics
 from udata.mongo import db
+from udata.models import WithMetrics
 from udata.core.organization.models import Organization
 from udata.core.dataset.models import Dataset
 from udata.core.reuse.models import Reuse

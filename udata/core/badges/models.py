@@ -1,12 +1,11 @@
 import logging
-import weakref
 
 from datetime import datetime
 
 from mongoengine.signals import post_save
 
-from udata.auth import current_user
 from udata.mongo import db
+from udata.auth import current_user
 
 from .signals import on_badge_added, on_badge_removed
 

@@ -2,8 +2,8 @@ from datetime import date, timedelta
 
 from werkzeug.datastructures import MultiDict
 
-from udata.forms import Form, fields
 from udata.mongo import db
+from udata.forms import Form, fields
 from udata.tests import TestCase
 from udata.utils import to_iso_date
 

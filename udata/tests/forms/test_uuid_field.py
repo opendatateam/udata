@@ -2,8 +2,8 @@ import uuid
 
 from werkzeug.datastructures import MultiDict
 
-from udata.forms import Form, fields
 from udata.mongo import db
+from udata.forms import Form, fields
 from udata.tests import TestCase
 
 

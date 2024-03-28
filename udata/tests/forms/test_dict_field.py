@@ -4,8 +4,8 @@ from datetime import date, datetime
 
 from werkzeug.datastructures import MultiDict
 
-from udata.forms import fields, ModelForm
 from udata.mongo import db
+from udata.forms import fields, ModelForm
 
 pytestmark = [
     pytest.mark.usefixtures('app')

@@ -5,10 +5,10 @@ from blinker import Signal
 from mongoengine.signals import pre_save, post_save
 from werkzeug.utils import cached_property
 
+from udata.mongo import db
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.models import BadgeMixin, WithMetrics
-from udata.mongo import db
 from udata.i18n import lazy_gettext as _
 from udata.uris import endpoint_for
 

@@ -1,6 +1,6 @@
+from udata.mongo import db
 from udata.auth import current_user
 from udata.i18n import lazy_gettext as _
-from udata.mongo import db
 from udata.models import Dataset, Activity
 
 

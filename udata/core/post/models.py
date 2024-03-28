@@ -2,9 +2,9 @@ from collections import OrderedDict
 
 from flask import url_for
 
+from udata.mongo import db
 from udata.core.storages import images, default_image_basename
 from udata.i18n import lazy_gettext as _
-from udata.mongo import db
 
 
 __all__ = ('Post', )

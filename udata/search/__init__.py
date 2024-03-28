@@ -1,13 +1,12 @@
 import logging
 import requests
-import udata.event  # noqa
-# Import udata event in order for datasets event hooks to be executed
-
 from flask import current_app
 from mongoengine.signals import post_save, post_delete
 
 from udata.mongo import db
 from udata.tasks import task, as_task_param
+# Import udata event in order for datasets event hooks to be executed
+import udata.event  # noqa
 
 log = logging.getLogger(__name__)
 

@@ -16,12 +16,12 @@ from rdflib.resource import Resource as RdfResource
 from rdflib.namespace import RDF
 from mongoengine.errors import ValidationError
 
+from udata.mongo import db
 from udata import i18n, uris
 from udata.core.spatial.models import SpatialCoverage
 from udata.frontend.markdown import parse_html
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.models import ContactPoint
-from udata.mongo import db
 from udata.rdf import (
     DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD, RDFS,
     namespace_manager, schema_from_rdf, url_from_rdf

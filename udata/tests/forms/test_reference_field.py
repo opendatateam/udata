@@ -1,8 +1,8 @@
 from bson import ObjectId
 from werkzeug.datastructures import MultiDict
 
-from udata.forms import ModelForm, fields
 from udata.mongo import db
+from udata.forms import ModelForm, fields
 from udata.tests import TestCase
 from udata.utils import faker
 

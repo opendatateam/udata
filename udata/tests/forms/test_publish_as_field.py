@@ -2,12 +2,12 @@ from bson import ObjectId
 
 from werkzeug.datastructures import MultiDict
 
+from udata.mongo import db
 from udata.auth import login_user
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.forms import ModelForm, fields
 from udata.models import User, Organization, Member
-from udata.mongo import db
 from udata.tests import TestCase
 
 

@@ -1,5 +1,3 @@
-from datetime import date, timedelta
-
 from udata.mongo import db
 
 

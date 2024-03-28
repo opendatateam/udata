@@ -2,8 +2,8 @@ import factory
 
 from factory.mongoengine import MongoEngineFactory
 
-from udata import search
 from udata.mongo import db
+from udata import search
 
 
 #############################################################################

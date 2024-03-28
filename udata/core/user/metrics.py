@@ -1,5 +1,5 @@
-from udata.models import Dataset, Reuse, User
 from udata.mongo import db
+from udata.models import Dataset, Reuse, User
 from udata.core.followers.signals import on_follow, on_unfollow
 
 

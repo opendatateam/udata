@@ -13,9 +13,9 @@ from wtforms_json import flatten_json
 
 from . import widgets
 
+from udata.mongo import db
 from udata.auth import current_user, admin_permission
 from udata.models import User, Organization, Dataset, Reuse, datastore, ContactPoint
-from udata.mongo import db
 from udata.core.storages import tmp
 from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.i18n import lazy_gettext as _

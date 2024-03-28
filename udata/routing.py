@@ -7,8 +7,8 @@ from werkzeug.exceptions import NotFound
 from werkzeug.routing import BaseConverter, PathConverter
 from werkzeug.urls import url_quote
 
-from udata import models
 from udata.mongo import db
+from udata import models
 from udata.core.spatial.models import GeoZone
 from udata.i18n import ISO_639_1_CODES
 

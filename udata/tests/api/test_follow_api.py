@@ -1,9 +1,8 @@
 from flask import url_for
 
+from udata.mongo import db
 from udata.api import api
 from udata.models import Follow
-from udata.mongo import db
-
 from udata.core.followers.api import FollowAPI
 from udata.core.followers.signals import on_follow, on_unfollow
 
