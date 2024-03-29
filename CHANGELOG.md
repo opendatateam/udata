@@ -7,7 +7,7 @@
 - Mock calls to example.com [#3000](https://github.com/opendatateam/udata/pull/3000)
 - Fix duplicate logs in console commands [#2996](https://github.com/opendatateam/udata/pull/2996)
 - Refactor `Activity.kwargs` into `Activity.extras` to facilitate its usage [#2999](https://github.com/opendatateam/udata/pull/2999)
-- :warning: The presence or lack of resources on a dataset is no longer dictating his indexability. [#2997](https://github.com/opendatateam/udata/pull/2997)
+- :warning: Datasets without resources are now visible and indexable [#2997](https://github.com/opendatateam/udata/pull/2997)
 
 ## 7.0.5 (2024-03-20)
 
