@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 7.0.6 (2024-03-29)
 
 - Add new harvester for ISO DCAT with XSLT transform [#2982](https://github.com/opendatateam/udata/pull/2982)
 - Fix, do not fail on spatial coverage harvesting exception and allow literal spatial BBOX from Arcgis [2998](https://github.com/opendatateam/udata/pull/2998)
