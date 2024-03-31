@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2024-03-20 12:27+0100\n"
-"PO-Revision-Date: 2024-03-20 13:07\n"
+"PO-Revision-Date: 2024-03-31 09:28\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: ar\n"
 "Language-Team: Arabic\n"
@@ -82,11 +82,11 @@ msgstr "اللقب "
 
 #: udata/auth/forms.py:16
 msgid "Last name is required"
-msgstr ""
+msgstr "Degree"
 
 #: udata/auth/forms.py:33 udata/tests/forms/test_current_user_field.py:215
 msgid "Password must be changed for security reasons"
-msgstr ""
+msgstr "Sonyamuse³"
 
 #: udata/auth/forms.py:53
 msgid "New email"
