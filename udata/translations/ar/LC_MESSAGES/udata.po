@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2024-03-20 12:27+0100\n"
-"PO-Revision-Date: 2024-03-31 09:28\n"
+"PO-Revision-Date: 2024-03-31 10:23\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: ar\n"
 "Language-Team: Arabic\n"
@@ -231,7 +231,7 @@ msgstr "وصف"
 
 #: udata/core/dataset/forms.py:58
 msgid "File type"
-msgstr ""
+msgstr "All"
 
 #: udata/core/dataset/forms.py:60
 msgid "Whether the resource is an uploaded file, a remote file or an API"
@@ -452,7 +452,7 @@ msgstr ""
 
 #: udata/core/dataset/models.py:94
 msgid "Update"
-msgstr ""
+msgstr "التحديثات"
 
 #: udata/core/dataset/models.py:95 udata/core/reuse/models.py:16
 msgid "API"
@@ -468,11 +468,11 @@ msgstr "آخر"
 
 #: udata/core/dataset/models.py:102
 msgid "Uploaded file"
-msgstr "الملف الذي تم تحميله"
+msgstr "تم الرفع الملفات"
 
 #: udata/core/dataset/models.py:103
 msgid "Remote file"
-msgstr "ملف بعيد"
+msgstr "Remote Files"
 
 #: udata/core/dataset/models.py:189
 msgid "A schema must contains a name or an URL when a version is provided."
@@ -656,7 +656,7 @@ msgstr ""
 
 #: udata/core/organization/models.py:149
 msgid "Local authority"
-msgstr ""
+msgstr "السلطة المحلية"
 
 #: udata/core/organization/tasks.py:52
 msgid "New membership request"
