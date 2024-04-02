@@ -5,7 +5,7 @@ from udata.models import Reuse
 from udata.core.dataset import tasks as dataset_tasks
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
-from udata.core.dataset.factories import VisibleDatasetFactory
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.user.factories import UserFactory
 from udata.core.discussions.factories import DiscussionFactory
 from udata.i18n import gettext as _
@@ -65,7 +65,7 @@ class ReuseModelTest(TestCase, DBTestMixin):
             reuse.save()
 
     def test_reuse_metrics(self):
-        dataset = VisibleDatasetFactory()
+        dataset = DatasetFactory()
         reuse = VisibleReuseFactory()
         DiscussionFactory(subject=reuse)
 

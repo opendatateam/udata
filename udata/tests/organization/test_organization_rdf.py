@@ -9,7 +9,7 @@ from udata.rdf import DCAT, DCT, HYDRA
 from udata.tests import TestCase, DBTestMixin
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.rdf import organization_to_rdf, build_org_catalog
-from udata.core.dataset.factories import VisibleDatasetFactory
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
 from udata.utils import faker
 
@@ -57,7 +57,7 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
         origin_org = OrganizationFactory()
         uri = url_for('api.organization_rdf', org=origin_org.id, _external=True)
 
-        datasets = VisibleDatasetFactory.create_batch(3, organization=origin_org)
+        datasets = DatasetFactory.create_batch(3, organization=origin_org)
         catalog = build_org_catalog(origin_org, datasets)
 
         graph = catalog.graph
@@ -93,7 +93,7 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
                             page=1, page_size=page_size, _external=True)
         uri_last = url_for('api.organization_rdf_format', org=origin_org.id, format='json',
                            page=2, page_size=page_size, _external=True)
-        VisibleDatasetFactory.create_batch(total, organization=origin_org)
+        DatasetFactory.create_batch(total, organization=origin_org)
 
         # First page
         datasets = Dataset.objects.paginate(1, page_size)

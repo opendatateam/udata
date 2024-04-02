@@ -1,6 +1,6 @@
 import pytest
 
-from udata.core.dataset.factories import DatasetFactory, VisibleDatasetFactory, OrganizationFactory
+from udata.core.dataset.factories import DatasetFactory, HiddenDatasetFactory, OrganizationFactory
 from udata.core.reuse.factories import VisibleReuseFactory
 from udata.harvest.tests.factories import HarvestSourceFactory
 from udata.core.site.factories import SiteFactory
@@ -35,11 +35,11 @@ class SiteMetricTest:
             id=app.config['SITE_ID']
         )
         DatasetFactory.create_batch(2)
-        VisibleDatasetFactory.create_batch(3)
+        HiddenDatasetFactory.create_batch(3)
 
         site.count_datasets()
 
-        assert site.get_metrics()['datasets'] == 3
+        assert site.get_metrics()['datasets'] == 2
 
     def test_resources_metric(self, app):
         site = SiteFactory.create(
