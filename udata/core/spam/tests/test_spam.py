@@ -2,7 +2,7 @@ import logging
 import pytest
 from udata.tests import TestCase
 from udata.tests.helpers import assert_not_emit
-from udata.models import db
+from udata.mongo import db
 
 from ..models import POTENTIAL_SPAM, SpamMixin
 

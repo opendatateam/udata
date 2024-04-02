@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 
 from udata.i18n import lazy_gettext as _
-from udata.models import db
+from udata.mongo import db
 
 log = logging.getLogger(__name__)
 
