@@ -24,7 +24,7 @@ def reindex(classname, id):
     document = adapter_class.serialize(obj)
     if adapter_class.is_indexable(obj):
         log.info('Indexing %s (%s)', model.__name__, obj.id)
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{adapter_class.search_url}/index"
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{adapter_class.search_url}index"
         try:
             payload = {
                 'document': document
@@ -35,7 +35,7 @@ def reindex(classname, id):
             log.exception('Unable to index/unindex %s "%s"', model.__name__, str(obj.id))
     else:
         log.info('Unindexing %s (%s)', model.__name__, obj.id)
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{adapter_class.search_url}/{str(obj.id)}/unindex"
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{adapter_class.search_url}{str(obj.id)}/unindex"
         try:
             r = requests.delete(url)
             if r.status_code == 404:

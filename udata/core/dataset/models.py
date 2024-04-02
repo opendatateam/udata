@@ -345,12 +345,10 @@ class License(db.Document):
 
 class DatasetQuerySet(db.OwnedQuerySet):
     def visible(self):
-        return self(private__ne=True, resources__0__exists=True,
-                    deleted=None, archived=None)
+        return self(private__ne=True, deleted=None, archived=None)
 
     def hidden(self):
         return self(db.Q(private=True) |
-                    db.Q(resources__0__exists=False) |
                     db.Q(deleted__ne=None) |
                     db.Q(archived__ne=None))
 
@@ -680,8 +678,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     @property
     def is_hidden(self):
-        return (len(self.resources) == 0 or self.private or self.deleted
-                or self.archived)
+        return self.private or self.deleted or self.archived
 
     @property
     def full_title(self):
