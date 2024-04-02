@@ -12,6 +12,7 @@ from rdflib.namespace import (
     Namespace, NamespaceManager, DCTERMS, SKOS, FOAF, XSD, RDFS, RDF
 )
 from rdflib.util import SUFFIX_FORMAT_MAP, guess_format as raw_guess_format
+from udata import uris
 from udata.models import FieldValidationError, Schema, ResourceSchema
 from mongoengine import ValidationError
 
@@ -75,6 +76,7 @@ ACCEPTED_MIME_TYPES = {
     'application/ld+json': 'json-ld',
     'application/json': 'json-ld',
     'application/trig': 'trig',
+    'text/xml': 'xml',
     # Available but not activated
     # 'application/n-quads': 'nquads',
     # 'text/xml': 'trix',
@@ -236,7 +238,26 @@ def schema_from_rdf(rdf):
     if isinstance(resource, (URIRef, Literal)):
         schema.url = resource.toPython()
     elif isinstance(resource, RdfResource):
-        schema.url = resource.identifier.toPython()
+        # We try to get the schema "correct" URL.
+        # 1. The identifier of the DCT.conformsTo
+        # 2. The DCT.type inside the DCT.conformsTo (from some example it's the most precise one)
+        # (other not currently used RDF.type)
+        url = None
+        try:
+            url = uris.validate(resource.identifier.toPython())
+        except uris.ValidationError:
+            try:
+                type = resource.value(DCT.type)
+                if type is not None:
+                    url = uris.validate(type.identifier.toPython())
+            except uris.ValidationError:
+                pass
+            pass
+
+        if url is None:
+            return None
+
+        schema.url = url
         schema.name = resource.value(DCT.title)
     else:
         return None

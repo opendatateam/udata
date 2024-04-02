@@ -34,10 +34,8 @@ class DatasetFactory(ModelFactory):
         nb_resources = 0
 
 
-class VisibleDatasetFactory(DatasetFactory):
-    @factory.lazy_attribute
-    def resources(self):
-        return [ResourceFactory()]
+class HiddenDatasetFactory(DatasetFactory):
+    private = True
 
 
 class ChecksumFactory(ModelFactory):

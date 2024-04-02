@@ -1,0 +1,464 @@
+{
+	"@context": "https://project-open-data.cio.gov/v1.1/schema/catalog.jsonld",
+	"@type": "dcat:Catalog",
+	"conformsTo": "https://project-open-data.cio.gov/v1.1/schema",
+	"describedBy": "https://project-open-data.cio.gov/v1.1/schema/catalog.json",
+	"dataset": [
+		{
+			"@type": "dcat:Dataset",
+			"identifier": "https://www.arcgis.com/home/item.html?id=f6565516d1354383b25793e630cf3f2b&sublayer=5",
+			"landingPage": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/maps/f6565516d1354383b25793e630cf3f2b_5",
+			"title": "stationnement velos",
+			"description": "<DIV STYLE=\"text-align:Left;\"><DIV><DIV><P><SPAN>Emplacement et description des stationnement vélos à Evian-les-Bains</SPAN></P></DIV></DIV></DIV>",
+			"keyword": [
+				"mobilite"
+			],
+			"issued": "2022-07-29T10:07:13.000Z",
+			"modified": "2022-07-29T11:29:07.556Z",
+			"publisher": {
+				"name": "Ville d'Evian-les-Bains"
+			},
+			"contactPoint": {
+				"@type": "vcard:Contact",
+				"fn": "sigevian"
+			},
+			"accessLevel": "public",
+			"spatial": "6.5735,46.3912,6.6069,46.4028",
+			"license": "<DIV STYLE=\"text-align:Left;\"><DIV><DIV><P><SPAN>Soumis à la licence Etalab : https://www.etalab.gouv.fr/licence-ouverte-open-licence/</SPAN></P></DIV></DIV></DIV>",
+			"distribution": [
+				{
+					"@type": "dcat:Distribution",
+					"title": "ArcGIS Hub Dataset",
+					"format": "Web Page",
+					"mediaType": "text/html",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/maps/f6565516d1354383b25793e630cf3f2b_5"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "ArcGIS GeoService",
+					"format": "ArcGIS GeoServices REST API",
+					"mediaType": "application/json",
+					"accessURL": "https://services.arcgis.com/Hbks8qlTugfLqQka/arcgis/rest/services/stationnement_velo/FeatureServer/5"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "CSV",
+					"format": "CSV",
+					"mediaType": "text/csv",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/api/download/v1/items/f6565516d1354383b25793e630cf3f2b/csv?layers=5"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "GeoJSON",
+					"format": "GeoJSON",
+					"mediaType": "application/vnd.geo+json",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/api/download/v1/items/f6565516d1354383b25793e630cf3f2b/geojson?layers=5"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "Shapefile",
+					"format": "ZIP",
+					"mediaType": "application/zip",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/api/download/v1/items/f6565516d1354383b25793e630cf3f2b/shapefile?layers=5"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "KML",
+					"format": "KML",
+					"mediaType": "application/vnd.google-earth.kml+xml",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/api/download/v1/items/f6565516d1354383b25793e630cf3f2b/kml?layers=5"
+				}
+			],
+			"theme": [
+				"geospatial"
+			]
+		},
+		{
+			"@type": "dcat:Dataset",
+			"identifier": "https://www.arcgis.com/home/item.html?id=cb6aa94ccb21492396e799d1ad282c02&sublayer=8",
+			"landingPage": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/maps/cb6aa94ccb21492396e799d1ad282c02_8",
+			"title": "poubelles",
+			"description": "<DIV STYLE=\"text-align:Left;\"><DIV><DIV><P><SPAN>Emplacement et description des poubelles à Evian-les-Bains</SPAN></P></DIV></DIV></DIV>",
+			"keyword": [
+				"environnement"
+			],
+			"issued": "2022-07-29T09:08:13.000Z",
+			"modified": "2022-07-29T11:33:36.369Z",
+			"publisher": {
+				"name": "Ville d'Evian-les-Bains"
+			},
+			"contactPoint": {
+				"@type": "vcard:Contact",
+				"fn": "sigevian"
+			},
+			"accessLevel": "public",
+			"spatial": "6.5658,46.3835,6.6141,46.4047",
+			"license": "<DIV STYLE=\"text-align:Left;\"><DIV><DIV><P><SPAN>Soumis à la licence Etalab : https://www.etalab.gouv.fr/licence-ouverte-open-licence/</SPAN></P></DIV></DIV></DIV>",
+			"distribution": [
+				{
+					"@type": "dcat:Distribution",
+					"title": "ArcGIS Hub Dataset",
+					"format": "Web Page",
+					"mediaType": "text/html",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/maps/cb6aa94ccb21492396e799d1ad282c02_8"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "ArcGIS GeoService",
+					"format": "ArcGIS GeoServices REST API",
+					"mediaType": "application/json",
+					"accessURL": "https://services.arcgis.com/Hbks8qlTugfLqQka/arcgis/rest/services/poubelles/FeatureServer/8"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "CSV",
+					"format": "CSV",
+					"mediaType": "text/csv",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/api/download/v1/items/cb6aa94ccb21492396e799d1ad282c02/csv?layers=8"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "GeoJSON",
+					"format": "GeoJSON",
+					"mediaType": "application/vnd.geo+json",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/api/download/v1/items/cb6aa94ccb21492396e799d1ad282c02/geojson?layers=8"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "Shapefile",
+					"format": "ZIP",
+					"mediaType": "application/zip",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/api/download/v1/items/cb6aa94ccb21492396e799d1ad282c02/shapefile?layers=8"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "KML",
+					"format": "KML",
+					"mediaType": "application/vnd.google-earth.kml+xml",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/api/download/v1/items/cb6aa94ccb21492396e799d1ad282c02/kml?layers=8"
+				}
+			],
+			"theme": [
+				"geospatial"
+			]
+		},
+		{
+			"@type": "dcat:Dataset",
+			"identifier": "https://www.arcgis.com/home/item.html?id=b7c181ff568344daae2a77bafbcc7225&sublayer=0",
+			"landingPage": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/maps/b7c181ff568344daae2a77bafbcc7225_0",
+			"title": "defibrillateurs",
+			"description": "<DIV STYLE=\"text-align:Left;\"><DIV><DIV><P><SPAN>défibrillateur</SPAN></P></DIV></DIV></DIV>",
+			"keyword": [
+				"sante"
+			],
+			"issued": "2022-07-29T10:07:44.000Z",
+			"modified": "2023-03-13T14:34:36.923Z",
+			"publisher": {
+				"name": "Mairie Evian-les-Bains"
+			},
+			"contactPoint": {
+				"@type": "vcard:Contact",
+				"fn": "sigevian"
+			},
+			"accessLevel": "public",
+			"spatial": "6.5664,46.3889,6.6088,46.4039",
+			"license": "<DIV STYLE=\"text-align:Left;\"><DIV><DIV><P><SPAN>Soumis à la licence Etalab</SPAN></P></DIV></DIV></DIV>",
+			"distribution": [
+				{
+					"@type": "dcat:Distribution",
+					"title": "ArcGIS Hub Dataset",
+					"format": "Web Page",
+					"mediaType": "text/html",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/maps/b7c181ff568344daae2a77bafbcc7225_0"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "ArcGIS GeoService",
+					"format": "ArcGIS GeoServices REST API",
+					"mediaType": "application/json",
+					"accessURL": "https://services.arcgis.com/Hbks8qlTugfLqQka/arcgis/rest/services/defibrillateurs/FeatureServer/0"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "CSV",
+					"format": "CSV",
+					"mediaType": "text/csv",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/api/download/v1/items/b7c181ff568344daae2a77bafbcc7225/csv?layers=0"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "GeoJSON",
+					"format": "GeoJSON",
+					"mediaType": "application/vnd.geo+json",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/api/download/v1/items/b7c181ff568344daae2a77bafbcc7225/geojson?layers=0"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "Shapefile",
+					"format": "ZIP",
+					"mediaType": "application/zip",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/api/download/v1/items/b7c181ff568344daae2a77bafbcc7225/shapefile?layers=0"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "KML",
+					"format": "KML",
+					"mediaType": "application/vnd.google-earth.kml+xml",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/api/download/v1/items/b7c181ff568344daae2a77bafbcc7225/kml?layers=0"
+				}
+			],
+			"theme": [
+				"geospatial"
+			]
+		},
+		{
+			"@type": "dcat:Dataset",
+			"identifier": "https://www.arcgis.com/home/item.html?id=dcc09451ea4f4c1398584374120137a0&sublayer=6",
+			"landingPage": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/maps/dcc09451ea4f4c1398584374120137a0_6",
+			"title": "places de marche",
+			"description": "<DIV STYLE=\"text-align:Left;\"><DIV><DIV><P><SPAN>Zone et description des emplacements du marché à Evian-les-Bains</SPAN></P></DIV></DIV></DIV>",
+			"keyword": [
+				"environnement"
+			],
+			"issued": "2022-07-29T10:06:57.000Z",
+			"modified": "2024-02-09T14:33:50.766Z",
+			"publisher": {
+				"name": "Ville d'Evian-les-Bains"
+			},
+			"contactPoint": {
+				"@type": "vcard:Contact",
+				"fn": "sigevian"
+			},
+			"accessLevel": "public",
+			"spatial": "6.5873,46.4006,6.5889,46.4020",
+			"license": "",
+			"distribution": [
+				{
+					"@type": "dcat:Distribution",
+					"title": "ArcGIS Hub Dataset",
+					"format": "Web Page",
+					"mediaType": "text/html",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/maps/dcc09451ea4f4c1398584374120137a0_6"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "ArcGIS GeoService",
+					"format": "ArcGIS GeoServices REST API",
+					"mediaType": "application/json",
+					"accessURL": "https://services.arcgis.com/Hbks8qlTugfLqQka/arcgis/rest/services/place_de_marche/FeatureServer/6"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "CSV",
+					"format": "CSV",
+					"mediaType": "text/csv",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/api/download/v1/items/dcc09451ea4f4c1398584374120137a0/csv?layers=6"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "GeoJSON",
+					"format": "GeoJSON",
+					"mediaType": "application/vnd.geo+json",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/api/download/v1/items/dcc09451ea4f4c1398584374120137a0/geojson?layers=6"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "Shapefile",
+					"format": "ZIP",
+					"mediaType": "application/zip",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/api/download/v1/items/dcc09451ea4f4c1398584374120137a0/shapefile?layers=6"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "KML",
+					"format": "KML",
+					"mediaType": "application/vnd.google-earth.kml+xml",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/api/download/v1/items/dcc09451ea4f4c1398584374120137a0/kml?layers=6"
+				}
+			],
+			"theme": [
+				"geospatial"
+			]
+		},
+		{
+			"@type": "dcat:Dataset",
+			"identifier": "https://www.arcgis.com/home/item.html?id=94a712dd0d1747c1b899a58f927a2566&sublayer=4",
+			"landingPage": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/maps/94a712dd0d1747c1b899a58f927a2566_4",
+			"title": "places PMR",
+			"description": "<DIV STYLE=\"text-align:Left;\"><DIV><DIV><P><SPAN>Emplacement et description des places PMR</SPAN></P></DIV></DIV></DIV>",
+			"keyword": [
+				"mobilite"
+			],
+			"issued": "2022-07-29T09:09:31.000Z",
+			"modified": "2022-08-23T11:34:50.466Z",
+			"publisher": {
+				"name": "Ville Evian-les-Bains"
+			},
+			"contactPoint": {
+				"@type": "vcard:Contact",
+				"fn": "sigevian"
+			},
+			"accessLevel": "public",
+			"spatial": "6.5662,46.3885,6.6130,46.4045",
+			"license": "",
+			"distribution": [
+				{
+					"@type": "dcat:Distribution",
+					"title": "ArcGIS Hub Dataset",
+					"format": "Web Page",
+					"mediaType": "text/html",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/maps/94a712dd0d1747c1b899a58f927a2566_4"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "ArcGIS GeoService",
+					"format": "ArcGIS GeoServices REST API",
+					"mediaType": "application/json",
+					"accessURL": "https://services.arcgis.com/Hbks8qlTugfLqQka/arcgis/rest/services/places_PMR/FeatureServer/4"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "CSV",
+					"format": "CSV",
+					"mediaType": "text/csv",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/api/download/v1/items/94a712dd0d1747c1b899a58f927a2566/csv?layers=4"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "GeoJSON",
+					"format": "GeoJSON",
+					"mediaType": "application/vnd.geo+json",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/api/download/v1/items/94a712dd0d1747c1b899a58f927a2566/geojson?layers=4"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "Shapefile",
+					"format": "ZIP",
+					"mediaType": "application/zip",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/api/download/v1/items/94a712dd0d1747c1b899a58f927a2566/shapefile?layers=4"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "KML",
+					"format": "KML",
+					"mediaType": "application/vnd.google-earth.kml+xml",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/api/download/v1/items/94a712dd0d1747c1b899a58f927a2566/kml?layers=4"
+				}
+			],
+			"theme": [
+				"geospatial"
+			]
+		},
+		{
+			"@type": "dcat:Dataset",
+			"identifier": "https://www.arcgis.com/home/item.html?id=92a676a42a864c4baf58856e445b6d41",
+			"landingPage": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/documents/92a676a42a864c4baf58856e445b6d41_1231",
+			"title": "Publication actes dématérialisés",
+			"description": "",
+			"keyword": [
+				"OpenData"
+			],
+			"issued": "2023-10-30T08:48:06.000Z",
+			"modified": "2023-10-30T08:56:01.000Z",
+			"publisher": {
+				"name": "sigevian"
+			},
+			"contactPoint": {
+				"@type": "vcard:Contact",
+				"fn": "sigevian"
+			},
+			"accessLevel": "public",
+			"spatial": "{{extent:computeSpatialProperty}}",
+			"license": "",
+			"distribution": [
+				{
+					"@type": "dcat:Distribution",
+					"title": "ArcGIS Hub Dataset",
+					"format": "Web Page",
+					"mediaType": "text/html",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/documents/92a676a42a864c4baf58856e445b6d41_1231"
+				},
+				{
+					"@type": "dcat:Distribution",
+					"title": "ArcGIS GeoService",
+					"format": "ArcGIS GeoServices REST API",
+					"mediaType": "application/json",
+					"accessURL": "https://publiact.fr/company/1231"
+				}
+			],
+			"theme": [
+				"geospatial"
+			]
+		},
+		{
+			"@type": "dcat:Dataset",
+			"identifier": "https://www.arcgis.com/home/item.html?id=856b7eb926a14f4cb34d95597bafb610",
+			"landingPage": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/documents/856b7eb926a14f4cb34d95597bafb610",
+			"title": "Carte piéton concertation",
+			"description": "",
+			"keyword": [
+				"evian",
+				"mobilite"
+			],
+			"issued": "2022-07-25T14:30:43.000Z",
+			"modified": "2022-08-01T09:26:34.000Z",
+			"publisher": {
+				"name": "sigevian"
+			},
+			"contactPoint": {
+				"@type": "vcard:Contact",
+				"fn": "sigevian"
+			},
+			"accessLevel": "public",
+			"spatial": "{{extent:computeSpatialProperty}}",
+			"license": "",
+			"distribution": [
+				{
+					"@type": "dcat:Distribution",
+					"title": "ArcGIS Hub Dataset",
+					"format": "Web Page",
+					"mediaType": "text/html",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/documents/856b7eb926a14f4cb34d95597bafb610"
+				}
+			],
+			"theme": [
+				"geospatial"
+			]
+		},
+		{
+			"@type": "dcat:Dataset",
+			"identifier": "https://www.arcgis.com/home/item.html?id=8acd3deee8d042538e21925d0640f199",
+			"landingPage": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/documents/8acd3deee8d042538e21925d0640f199",
+			"title": "Carte vélo finale",
+			"description": "",
+			"keyword": [
+				"evian",
+				"mobilite"
+			],
+			"issued": "2022-07-25T14:30:41.000Z",
+			"modified": "2022-07-28T13:29:26.000Z",
+			"publisher": {
+				"name": "sigevian"
+			},
+			"contactPoint": {
+				"@type": "vcard:Contact",
+				"fn": "sigevian"
+			},
+			"accessLevel": "public",
+			"spatial": "{{extent:computeSpatialProperty}}",
+			"license": "",
+			"distribution": [
+				{
+					"@type": "dcat:Distribution",
+					"title": "ArcGIS Hub Dataset",
+					"format": "Web Page",
+					"mediaType": "text/html",
+					"accessURL": "https://ville-d-evian-opendata-ville-evian.hub.arcgis.com/documents/8acd3deee8d042538e21925d0640f199"
+				}
+			],
+			"theme": [
+				"geospatial"
+			]
+		}
+	]
+}
