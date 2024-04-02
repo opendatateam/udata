@@ -1,8 +1,8 @@
 from flask import url_for
 
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.spatial.models import spatial_granularities
-from udata.core.topic.models import Topic
+from udata.models import spatial_granularities
+from udata.models import Topic
 from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import UserFactory
 from udata.models import Member, Discussion

@@ -12,7 +12,7 @@ from udata.models import Dataset, PeriodicTask
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.dataset.models import HarvestDatasetMetadata
+from udata.models import HarvestDatasetMetadata
 from udata.tests.helpers import assert_emit, assert_equal_dates
 from udata.utils import faker, Paginable
 

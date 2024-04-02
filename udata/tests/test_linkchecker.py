@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from udata.auth import login_user
 from udata.tests import TestCase
 from udata.core.activity import init_app as init_activity
-from udata.core.activity.models import Activity
+from udata.models import Activity
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.user.factories import UserFactory
 from udata.linkchecker.checker import check_resource

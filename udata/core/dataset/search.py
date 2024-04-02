@@ -7,7 +7,7 @@ from udata.search import (
     ModelTermsFilter, BoolFilter, Filter,
     TemporalCoverageFilter
 )
-from udata.core.spatial.models import (
+from udata.models import (
     admin_levels, ADMIN_LEVEL_MAX
 )
 from udata.core.dataset.api import DatasetApiParser, DEFAULT_SORTING

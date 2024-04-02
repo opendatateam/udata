@@ -1,4 +1,4 @@
-from udata.core.discussions.models import Discussion
+from udata.models import Discussion
 from udata.frontend import csv
 
 from .models import Dataset, Resource

@@ -18,9 +18,9 @@ from mongoengine.errors import ValidationError
 
 from udata.mongo import db
 from udata import i18n, uris
-from udata.core.spatial.models import SpatialCoverage
+from udata.models import SpatialCoverage
 from udata.frontend.markdown import parse_html
-from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
+from udata.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.models import ContactPoint
 from udata.rdf import (
     DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD, RDFS,

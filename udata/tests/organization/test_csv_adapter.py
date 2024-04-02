@@ -4,10 +4,10 @@ import pytest
 
 from udata.core.dataset.csv import ResourcesCsvAdapter, DatasetCsvAdapter
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
-from udata.core.dataset.models import Dataset
+from udata.models import Dataset
 from udata.core.organization.csv import OrganizationCsvAdapter
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.models import Organization
+from udata.models import Organization
 
 
 @pytest.mark.frontend

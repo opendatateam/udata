@@ -18,7 +18,7 @@ from udata.core.dataset.factories import (CommunityResourceFactory,
                                           DatasetFactory, LicenseFactory,
                                           ResourceFactory, ResourceSchemaMockData,
                                           VisibleDatasetFactory)
-from udata.core.dataset.models import (HarvestDatasetMetadata,
+from udata.models import (HarvestDatasetMetadata,
                                        HarvestResourceMetadata, ResourceMixin)
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import SpatialCoverageFactory

@@ -11,7 +11,7 @@ from rdflib.namespace import FOAF, RDF
 from rdflib.resource import Resource as RdfResource
 
 from udata.mongo import db
-from udata.core.dataset.models import Dataset, Resource, License, Checksum, HarvestDatasetMetadata
+from udata.models import Dataset, Resource, License, Checksum, HarvestDatasetMetadata
 from udata.core.dataset.factories import (
     DatasetFactory, ResourceFactory, LicenseFactory
 )

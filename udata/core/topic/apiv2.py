@@ -8,13 +8,13 @@ from flask import url_for, request
 from udata.api import apiv2, API, fields
 from udata.core.dataset.api import DatasetApiParser
 from udata.core.dataset.apiv2 import dataset_page_fields
-from udata.core.dataset.models import Dataset
+from udata.models import Dataset
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api import ReuseApiParser
 from udata.core.reuse.apiv2 import reuse_page_fields
-from udata.core.reuse.models import Reuse
+from udata.models import Reuse
 from udata.core.spatial.api_fields import spatial_coverage_fields
-from udata.core.topic.models import Topic
+from udata.models import Topic
 from udata.core.topic.parsers import TopicApiParser
 from udata.core.topic.permissions import TopicEditPermission
 from udata.core.user.api_fields import user_ref_fields

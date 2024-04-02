@@ -4,7 +4,7 @@ import pytest
 
 from udata.core.dataset.csv import ResourcesCsvAdapter, DatasetCsvAdapter
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
-from udata.core.dataset.models import Dataset
+from udata.models import Dataset
 
 
 @pytest.mark.frontend

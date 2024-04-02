@@ -4,7 +4,7 @@ from flask import url_for
 import pytest
 
 from udata.models import Dataset, Member
-from udata.core.discussions.models import Message, Discussion
+from udata.models import Message, Discussion
 from udata.core.discussions.metrics import update_discussions_metric  # noqa
 from udata.core.discussions.notifications import discussions_notifications
 from udata.core.discussions.signals import (

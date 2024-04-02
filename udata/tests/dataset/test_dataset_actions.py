@@ -2,7 +2,7 @@ import pytest
 
 from udata.core.dataset.actions import archive
 from udata.core.dataset.factories import VisibleDatasetFactory
-from udata.core.discussions.models import Discussion
+from udata.models import Discussion
 from udata.core.user.factories import UserFactory
 
 

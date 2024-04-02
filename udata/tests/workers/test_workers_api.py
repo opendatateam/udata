@@ -2,7 +2,7 @@ from unittest import skip
 
 from flask import url_for
 
-from udata.core.jobs.models import PeriodicTask
+from udata.models import PeriodicTask
 from udata.core.user.factories import AdminFactory
 from udata.tasks import celery, job
 from udata.utils import faker

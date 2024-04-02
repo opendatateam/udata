@@ -36,7 +36,7 @@ from udata.mongo import db
 from udata.app import csrf
 from udata.auth import current_user, login_required, login_user
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.core.user.models import User
+from udata.models import User
 from udata.core.storages import images, default_image_basename
 
 

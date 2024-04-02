@@ -1,7 +1,7 @@
 from flask import current_app
 import pytest
 from unittest.mock import patch
-from udata.core.dataset.models import Schema
+from udata.models import Schema
 
 from udata.models import Dataset
 from udata.tests.helpers import assert_emit

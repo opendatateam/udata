@@ -3,10 +3,8 @@ import logging
 from rdflib import Graph, URIRef
 from rdflib.namespace import RDF
 import lxml.etree as ET
-import boto3
 from flask import current_app
 from datetime import date
-import json
 from typing import List
 
 from udata.rdf import (

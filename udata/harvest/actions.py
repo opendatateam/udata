@@ -8,7 +8,7 @@ from bson import ObjectId
 from flask import current_app
 
 from udata.auth import current_user
-from udata.core.dataset.models import HarvestDatasetMetadata
+from udata.models import HarvestDatasetMetadata
 from udata.models import User, Organization, PeriodicTask, Dataset
 from udata.storage.s3 import delete_file
 

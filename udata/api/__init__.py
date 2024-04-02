@@ -19,7 +19,7 @@ from udata.i18n import get_locale
 from udata.auth import (
     current_user, login_user, Permission, RoleNeed, PermissionDenied
 )
-from udata.core.user.models import User
+from udata.models import User
 from udata.utils import safe_unicode
 
 from . import fields, oauth2

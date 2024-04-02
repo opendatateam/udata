@@ -31,7 +31,7 @@ from udata.auth import admin_permission
 from udata.api import api, API, errors
 from udata.api.parsers import ModelApiParser
 from udata.core import storages
-from udata.core.dataset.models import CHECKSUM_TYPES
+from udata.models import CHECKSUM_TYPES
 from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
@@ -55,7 +55,7 @@ from .api_fields import (
     catalog_schema_fields,
 )
 from udata.linkchecker.checker import check_resource
-from udata.core.topic.models import Topic
+from udata.models import Topic
 from .models import (
     Dataset, Resource, Checksum, License, UPDATE_FREQUENCIES,
     CommunityResource, RESOURCE_TYPES, ResourceSchema, get_resource

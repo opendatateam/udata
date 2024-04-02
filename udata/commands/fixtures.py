@@ -10,7 +10,7 @@ from udata.core.dataset.factories import (
     DatasetFactory, ResourceFactory, CommunityResourceFactory
 )
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.models import Member, Organization
+from udata.models import Member, Organization
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.core.discussions.factories import (

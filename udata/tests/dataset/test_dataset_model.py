@@ -9,7 +9,7 @@ from udata.app import cache
 from udata.models import (
     db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchema, UPDATE_FREQUENCIES, Schema, FieldValidationError
 )
-from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
+from udata.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.dataset.factories import (
     ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory, ResourceSchemaMockData
 )

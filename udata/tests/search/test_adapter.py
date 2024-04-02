@@ -8,7 +8,7 @@ from flask_restx.reqparse import RequestParser
 from unittest.mock import patch
 
 from udata import search
-from udata.core.dataset.models import Schema
+from udata.models import Schema
 from udata.i18n import gettext as _
 from udata.utils import clean_string
 from udata.search import reindex, as_task_param

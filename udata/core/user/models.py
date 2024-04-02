@@ -18,7 +18,7 @@ from udata.uris import endpoint_for
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.models import WithMetrics, Follow
-from udata.core.discussions.models import Discussion
+from udata.models import Discussion
 from udata.core.storages import avatars, default_image_basename
 
 __all__ = ('User', 'Role', 'datastore')
@@ -114,7 +114,7 @@ class User(WithMetrics, UserMixin, db.Document):
 
     @cached_property
     def organizations(self):
-        from udata.core.organization.models import Organization
+        from udata.models import Organization
         return Organization.objects(members__user=self, deleted__exists=False)
 
     @property

@@ -26,10 +26,10 @@ def render_or_skip(obj, attr):
 @grp.command()
 def render():
     '''Force (re)rendering stored images'''
-    from udata.core.organization.models import Organization
-    from udata.core.post.models import Post
-    from udata.core.reuse.models import Reuse
-    from udata.core.user.models import User
+    from udata.models import Organization
+    from udata.models import Post
+    from udata.models import Reuse
+    from udata.models import User
 
     header('Rendering images')
 

@@ -1,7 +1,7 @@
 from udata.api import api, fields, base_reference
 from udata.core.badges.api import badge_fields
 from udata.core.organization.api_fields import org_ref_fields
-from udata.core.organization.models import LOGO_SIZES
+from udata.models import LOGO_SIZES
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.contact_point.api_fields import contact_point_fields

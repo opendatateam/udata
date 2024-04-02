@@ -9,7 +9,7 @@ import requests
 from flask import current_app
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
-from udata.core.dataset.models import HarvestDatasetMetadata
+from udata.models import HarvestDatasetMetadata
 from udata.models import Dataset
 from udata.utils import safe_unicode
 

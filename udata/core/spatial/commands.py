@@ -16,9 +16,9 @@ from mongoengine import errors
 from mongoengine.context_managers import switch_collection
 
 from udata.commands import cli
-from udata.core.dataset.models import Dataset
+from udata.models import Dataset
 from udata.core.spatial import geoids
-from udata.core.spatial.models import GeoLevel, GeoZone, SpatialCoverage
+from udata.models import GeoLevel, GeoZone, SpatialCoverage
 
 log = logging.getLogger(__name__)
 

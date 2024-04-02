@@ -34,11 +34,11 @@ from .api_fields import (
 
 from udata.core.dataset.api import DatasetApiParser
 from udata.core.dataset.api_fields import dataset_page_fields
-from udata.core.dataset.models import Dataset
+from udata.models import Dataset
 from udata.core.discussions.api import discussion_fields
-from udata.core.discussions.models import Discussion
+from udata.models import Discussion
 from udata.core.reuse.api_fields import reuse_fields
-from udata.core.reuse.models import Reuse
+from udata.models import Reuse
 from udata.core.storages.api import (
     uploaded_image_fields, image_parser, parse_uploaded_image
 )

@@ -6,7 +6,7 @@ import logging
 
 from mongoengine.errors import ValidationError
 from udata.models import Dataset
-from udata.core.dataset.models import HarvestDatasetMetadata
+from udata.models import HarvestDatasetMetadata
 
 log = logging.getLogger(__name__)
 

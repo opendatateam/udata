@@ -1,6 +1,6 @@
 from udata.api import api, fields, API
 from udata.core.dataset.api_fields import dataset_fields
-from udata.core.discussions.models import Discussion
+from udata.models import Discussion
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api_fields import reuse_fields
 from udata.core.spatial.api_fields import spatial_coverage_fields

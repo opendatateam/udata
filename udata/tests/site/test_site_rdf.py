@@ -7,7 +7,7 @@ from rdflib.namespace import RDF, FOAF
 from rdflib.resource import Resource
 
 from udata.core.dataset.factories import VisibleDatasetFactory
-from udata.core.dataset.models import Dataset
+from udata.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.site.factories import SiteFactory
 from udata.core.site.rdf import build_catalog

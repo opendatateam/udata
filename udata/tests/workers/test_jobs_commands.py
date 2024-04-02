@@ -2,7 +2,7 @@ import logging
 import pytest
 
 from udata.core.jobs.commands import job_label
-from udata.core.jobs.models import PeriodicTask
+from udata.models import PeriodicTask
 from udata.tasks import job
 
 log = logging.getLogger(__name__)

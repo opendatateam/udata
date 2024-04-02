@@ -3,9 +3,9 @@ from werkzeug.local import LocalProxy
 
 from udata.mongo import db
 from udata.models import WithMetrics
-from udata.core.organization.models import Organization
-from udata.core.dataset.models import Dataset
-from udata.core.reuse.models import Reuse
+from udata.models import Organization
+from udata.models import Dataset
+from udata.models import Reuse
 
 
 __all__ = ('Site', 'SiteSettings')

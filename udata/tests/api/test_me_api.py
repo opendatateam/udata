@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import url_for
 
 from udata.models import Discussion, Follow, Member, User
-from udata.core.discussions.models import Message as DiscMsg
+from udata.models import Message as DiscMsg
 from udata.core.dataset.factories import (
     CommunityResourceFactory,
     DatasetFactory,

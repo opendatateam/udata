@@ -10,7 +10,7 @@ from udata.tests import TestCase, DBTestMixin
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.rdf import organization_to_rdf, build_org_catalog
 from udata.core.dataset.factories import VisibleDatasetFactory
-from udata.core.dataset.models import Dataset
+from udata.models import Dataset
 from udata.utils import faker
 
 

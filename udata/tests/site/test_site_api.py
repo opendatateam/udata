@@ -2,8 +2,8 @@ from datetime import date
 
 from flask import url_for
 
-from udata.core.site.models import Site
-from udata.core.site.models import current_site
+from udata.models import Site
+from udata.models import current_site
 from udata.core.site.factories import SiteFactory
 from udata.core.dataset.factories import VisibleDatasetFactory
 from udata.core.reuse.factories import VisibleReuseFactory

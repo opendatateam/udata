@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.site.models import current_site
+from udata.models import current_site
 from udata.core.reuse.factories import ReuseFactory
 
 from udata.tests import TestCase, DBTestMixin
