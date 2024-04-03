@@ -1,9 +1,10 @@
 from flask import url_for
 
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.core.spatial.models import spatial_granularities
-from udata.core.topic.models import Topic
 from udata.core.topic.factories import TopicFactory
+from udata.core.topic.models import Topic
 from udata.core.user.factories import UserFactory
 from udata.models import Member, Discussion
 from udata.tests.api.test_datasets_api import SAMPLE_GEOM
@@ -17,13 +18,23 @@ class TopicsAPITest(APITestCase):
 
     def test_topic_api_list(self):
         '''It should fetch a topic list from the API'''
-        TopicFactory.create_batch(3)
+        owner = UserFactory()
+        org = OrganizationFactory()
+        paca, _, _ = create_geozones_fixtures()
+
         tag_topic = TopicFactory(tags=['energy'])
         name_topic = TopicFactory(name='topic-for-query')
+        private_topic = TopicFactory(private=True)
+        geozone_topic = TopicFactory(spatial=SpatialCoverageFactory(zones=[paca.id]))
+        granularity_topic = TopicFactory(
+            spatial=SpatialCoverageFactory(granularity='country')
+        )
+        owner_topic = TopicFactory(owner=owner)
+        org_topic = TopicFactory(organization=org)
 
         response = self.get(url_for('api.topics'))
         self.assert200(response)
-        self.assertEqual(len(response.json['data']), 5)
+        self.assertEqual(len(response.json['data']), 6)
 
         response = self.get(url_for('api.topics', q='topic-for'))
         self.assert200(response)
@@ -48,6 +59,32 @@ class TopicsAPITest(APITestCase):
             self.assertIsNotNone(reuse['page'])
             self.assertIsNotNone(reuse['uri'])
         self.assertEqual(len(reuses), 3)
+
+        response = self.get(url_for('api.topics', include_private='true'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 7)
+        self.assertIn(str(private_topic.id), [t['id'] for t in response.json['data']])
+
+        response = self.get(url_for('api.topics', geozone=paca.id))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertIn(str(geozone_topic.id), [t['id'] for t in response.json['data']])
+
+        response = self.get(url_for('api.topics', granularity='country'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertIn(str(granularity_topic.id), [t['id'] for t in response.json['data']])
+
+        response = self.get(url_for('api.topics', owner=owner.id))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertIn(str(owner_topic.id), [t['id'] for t in response.json['data']])
+
+        response = self.get(url_for('api.topics', organization=org.id))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertIn(str(org_topic.id), [t['id'] for t in response.json['data']])
+
 
     def test_topic_api_get(self):
         '''It should fetch a topic from the API'''
