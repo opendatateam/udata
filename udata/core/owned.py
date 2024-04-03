@@ -4,7 +4,7 @@ from blinker import signal
 from mongoengine import NULLIFY, Q, post_save
 from mongoengine.fields import ReferenceField
 
-from .queryset import UDataQuerySet
+from udata.mongo.queryset import UDataQuerySet
 
 log = logging.getLogger(__name__)
 
