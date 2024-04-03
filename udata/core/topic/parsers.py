@@ -7,7 +7,8 @@ from udata.api.parsers import ModelApiParser
 class TopicApiParser(ModelApiParser):
     sorts = {
         'name': 'name',
-        'created': 'created_at'
+        'created': 'created_at',
+        'last_modified': 'last_modified',
     }
 
     def __init__(self):
