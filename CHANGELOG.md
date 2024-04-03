@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Move `db` and Mongo fields classes outside `udata.models` [#3005](https://github.com/opendatateam/udata/pull/3005)
 
 ## 7.0.6 (2024-03-29)
 
