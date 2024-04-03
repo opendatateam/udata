@@ -17,7 +17,7 @@ from udata.errors import ConfigError
 from .badges_field import BadgesField
 from .taglist_field import TagListField
 from .datetime_fields import DateField, DateRange, Datetimed
-from .extras_fields import ExtrasField
+from .extras_fields import ExtrasField, OrganizationExtrasField
 from .slug_fields import SlugField
 from .url_field import URLField
 from .uuid_fields import AutoUUIDField
@@ -26,7 +26,6 @@ from .queryset import UDataQuerySet
 from .document import UDataDocument, DomainModel
 
 log = logging.getLogger(__name__)
-
 
 class UDataMongoEngine(MongoEngine):
     '''Customized mongoengine with extra fields types and helpers'''
@@ -37,6 +36,7 @@ class UDataMongoEngine(MongoEngine):
         self.DateField = DateField
         self.Datetimed = Datetimed
         self.ExtrasField = ExtrasField
+        self.OrganizationExtrasField = OrganizationExtrasField
         self.SlugField = SlugField
         self.AutoUUIDField = AutoUUIDField
         self.Document = UDataDocument
@@ -77,6 +77,14 @@ class UDataMongoEngine(MongoEngine):
             raise ValueError(message)
 
 
+class FieldValidationError(ValidationError):
+    field: str
+
+    def __init__(self, *args, field: str, **kwargs):
+        self.field = field
+        super().__init__(*args, **kwargs)
+
+
 db = UDataMongoEngine()
 session_interface = MongoEngineSessionInterface(db)
 
@@ -89,6 +97,7 @@ from udata.core.discussions.models import *  # noqa
 from udata.core.followers.models import *  # noqa
 from udata.core.user.models import *  # noqa
 from udata.core.organization.models import *  # noqa
+from udata.core.contact_point.models import *  # noqa
 from udata.core.site.models import *  # noqa
 from udata.core.dataset.models import *  # noqa
 from udata.core.reuse.models import *  # noqa
@@ -97,6 +106,7 @@ from udata.core.topic.models import *  # noqa
 from udata.core.post.models import *  # noqa
 from udata.core.jobs.models import *  # noqa
 from udata.core.tags.models import *  # noqa
+from udata.core.spam.models import *  # noqa
 
 from udata.features.transfer.models import *  # noqa
 from udata.features.territories.models import *  # noqa
@@ -109,6 +119,7 @@ import udata.linkchecker.models  # noqa
 
 MONGODB_DEPRECATED_SETTINGS = 'MONGODB_PORT', 'MONGODB_DB'
 MONGODB_DEPRECATED_MSG = '{0} is deprecated, use the MONGODB_HOST url syntax'
+
 
 
 def validate_config(config):

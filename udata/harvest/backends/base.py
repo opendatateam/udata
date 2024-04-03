@@ -156,7 +156,7 @@ class BaseBackend(object):
             self.job.errors.append(error)
             self.job.status = 'failed'
             self.end()
-            return
+            return None
         except Exception as e:
             self.job.status = 'failed'
             error = HarvestError(message=safe_unicode(e))
@@ -164,7 +164,7 @@ class BaseBackend(object):
             self.end()
             msg = 'Initialization failed for "{0.name}" ({0.backend})'
             log.exception(msg.format(self.source))
-            return
+            return None
 
         if self.max_items:
             self.job.items = self.job.items[:self.max_items]
@@ -302,7 +302,16 @@ class BaseBackend(object):
                 {'harvest.source_id': str(self.source.id)},
             ],
         }).first()
-        return dataset or Dataset()
+
+        if dataset:
+            return dataset
+
+        if self.source.organization:
+            return Dataset(organization=self.source.organization)
+        elif self.source.owner:
+            return Dataset(owner=self.source.owner)
+
+        return Dataset()
 
     def validate(self, data, schema):
         '''Perform a data validation against a given schema.

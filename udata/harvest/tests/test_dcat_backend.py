@@ -1,17 +1,22 @@
+from datetime import date
 import logging
 import os
+import re
 
 import pytest
 
-from datetime import date
+import boto3
+from flask import current_app
 import xml.etree.ElementTree as ET
 
+from udata.harvest.models import HarvestJob
 from udata.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.dataset.factories import LicenseFactory
+from udata.core.dataset.factories import LicenseFactory, ResourceSchemaMockData
+from udata.storage.s3 import get_from_json
 
 from .factories import HarvestSourceFactory
-from ..backends.dcat import URIS_TO_REPLACE
+from ..backends.dcat import URIS_TO_REPLACE, CswIso19139DcatBackend
 from .. import actions
 
 log = logging.getLogger(__name__)
@@ -136,7 +141,10 @@ class DcatBackendTest:
         assert datasets['1'].resources[0].format == 'json'
         assert datasets['1'].resources[0].mime == 'application/json'
 
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas', HARVEST_MAX_CATALOG_SIZE_IN_MONGO=None, HARVEST_GRAPHS_S3_BUCKET="test_bucket", S3_URL="https://example.org", S3_ACCESS_KEY_ID="myUser", S3_SECRET_ACCESS_KEY="password")
     def test_flat_with_blank_nodes_xml(self, rmock):
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
+
         filename = 'bnodes.xml'
         url = mock_dcat(rmock, filename)
         org = OrganizationFactory()
@@ -152,6 +160,146 @@ class DcatBackendTest:
         assert len(datasets['3'].resources) == 1
         assert len(datasets['1'].resources) == 2
         assert len(datasets['2'].resources) == 2
+
+    def test_harvest_literal_spatial(self, rmock):
+        url = mock_dcat(rmock, 'evian.json')
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+        
+        actions.run(source.slug)
+
+        datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
+        assert len(datasets) == 8
+        assert datasets['https://www.arcgis.com/home/item.html?id=f6565516d1354383b25793e630cf3f2b&sublayer=5'].spatial is not None
+        assert datasets['https://www.arcgis.com/home/item.html?id=f6565516d1354383b25793e630cf3f2b&sublayer=5'].spatial.geom == {'type': 'MultiPolygon', 'coordinates': [[[[6.5735, 46.3912], [6.6069, 46.3912], [6.6069, 46.4028], [6.5735, 46.4028], [6.5735, 46.3912]]]]}
+
+
+    @pytest.mark.skip(reason="Mocking S3 requires `moto` which is not available for our current Python 3.7. We can manually test it.")
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas', HARVEST_JOBS_RETENTION_DAYS=0)
+    # @mock_s3
+    # @pytest.mark.options(HARVEST_MAX_CATALOG_SIZE_IN_MONGO=15, HARVEST_GRAPHS_S3_BUCKET="test_bucket", S3_URL="https://example.org", S3_ACCESS_KEY_ID="myUser", S3_SECRET_ACCESS_KEY="password")
+    def test_harvest_big_catalog(self, rmock):
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
+
+        # We need to create the bucket since this is all in Moto's 'virtual' AWS account
+        # conn = boto3.resource(
+        #     "s3",
+        #     endpoint_url="https://example.org",
+        #     aws_access_key_id="myUser",
+        #     aws_secret_access_key="password",
+        # )
+        # conn.create_bucket(Bucket="test_bucket")
+
+        filename = 'bnodes.xml'
+        url = mock_dcat(rmock, filename)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+
+        actions.run(source.slug)
+
+        datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
+
+        assert datasets['1'].schema == None
+        resources_by_title = { resource['title']: resource for resource in datasets['1'].resources }
+
+        # Schema with wrong version are considered as external. Maybe we could change this in the future
+        assert resources_by_title['Resource 1-2'].schema.url == 'https://schema.data.gouv.fr/schemas/etalab/schema-irve-statique/1337.42.0/schema-statique.json'
+        assert resources_by_title['Resource 1-2'].schema.name == None
+        assert resources_by_title['Resource 1-2'].schema.version == None
+
+        assert datasets['2'].schema.name == 'RGF93 / Lambert-93 (EPSG:2154)'
+        assert datasets['2'].schema.url == 'http://inspire.ec.europa.eu/glossary/SpatialReferenceSystem'
+        resources_by_title = { resource['title']: resource for resource in datasets['2'].resources }
+
+        # Unknown schema are kept as they were provided
+        assert resources_by_title['Resource 2-1'].schema.name == 'Example Schema'
+        assert resources_by_title['Resource 2-1'].schema.url == 'https://example.org/schema.json'
+        assert resources_by_title['Resource 2-1'].schema.version == None
+
+        assert resources_by_title['Resource 2-2'].schema == None
+
+        assert datasets['3'].schema == None
+        resources_by_title = { resource['title']: resource for resource in datasets['3'].resources }
+
+        # If there is just the URL, and it matches a known schema inside the catalog, only set the name and the version
+        # (discard the URL)
+        assert resources_by_title['Resource 3-1'].schema.name == 'etalab/schema-irve-statique'
+        assert resources_by_title['Resource 3-1'].schema.url == None
+        assert resources_by_title['Resource 3-1'].schema.version == '2.2.0'
+
+        job = HarvestJob.objects.order_by('-id').first()
+
+        assert job.source.slug == source.slug
+        assert get_from_json(current_app.config.get('HARVEST_GRAPHS_S3_BUCKET'), job.data['filename']) is not None
+
+        # Retention is 0 days in config
+        actions.purge_jobs()
+        assert get_from_json(current_app.config.get('HARVEST_GRAPHS_S3_BUCKET'), job.data['filename']) is None
+
+
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
+    def test_harvest_spatial(self, rmock):
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
+
+        filename = 'bnodes.xml'
+        url = mock_dcat(rmock, filename)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat', url=url, organization=org)
+
+        actions.run(source.slug)
+
+        datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
+
+        assert datasets['1'].spatial == None
+        assert datasets['2'].spatial.geom == {'type': 'MultiPolygon', 'coordinates': [[[[4.44641288, 45.54214467], [4.44641288, 46.01316963], [4.75655252, 46.01316963], [4.75655252, 45.54214467], [4.44641288, 45.54214467]]]]}
+        assert datasets['3'].spatial == None
+
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
+    def test_harvest_schemas(self, rmock):
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
+
+        filename = 'bnodes.xml'
+        url = mock_dcat(rmock, filename)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+
+        actions.run(source.slug)
+
+        datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
+
+        assert datasets['1'].schema == None
+        resources_by_title = { resource['title']: resource for resource in datasets['1'].resources }
+
+        # Schema with wrong version are considered as external. Maybe we could change this in the future
+        assert resources_by_title['Resource 1-2'].schema.url == 'https://schema.data.gouv.fr/schemas/etalab/schema-irve-statique/1337.42.0/schema-statique.json'
+        assert resources_by_title['Resource 1-2'].schema.name == None
+        assert resources_by_title['Resource 1-2'].schema.version == None
+
+        assert datasets['2'].schema.name == 'RGF93 / Lambert-93 (EPSG:2154)'
+        assert datasets['2'].schema.url == 'http://inspire.ec.europa.eu/glossary/SpatialReferenceSystem'
+        resources_by_title = { resource['title']: resource for resource in datasets['2'].resources }
+
+        # Unknown schema are kept as they were provided
+        assert resources_by_title['Resource 2-1'].schema.name == 'Example Schema'
+        assert resources_by_title['Resource 2-1'].schema.url == 'https://example.org/schema.json'
+        assert resources_by_title['Resource 2-1'].schema.version == None
+
+        assert resources_by_title['Resource 2-2'].schema == None
+
+        assert datasets['3'].schema == None
+        resources_by_title = { resource['title']: resource for resource in datasets['3'].resources }
+
+        # If there is just the URL, and it matches a known schema inside the catalog, only set the name and the version
+        # (discard the URL)
+        assert resources_by_title['Resource 3-1'].schema.name == 'etalab/schema-irve-statique'
+        assert resources_by_title['Resource 3-1'].schema.url == None
+        assert resources_by_title['Resource 3-1'].schema.version == '2.2.0'
 
     def test_simple_nested_attributes(self, rmock):
         filename = 'nested.jsonld'
@@ -289,6 +437,9 @@ class DcatBackendTest:
         assert dataset.temporal_coverage.start == date(2016, 1, 1)
         assert dataset.temporal_coverage.end == date(2016, 12, 5)
 
+        assert dataset.extras["harvest"]["dct:accessRights"] == "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1e"
+        assert dataset.extras["harvest"]["dct:provenance"] == ["Description de la provenance des données"]
+
         dataset = Dataset.objects.get(harvest__dct_identifier='1')
         # test html abstract description support
         assert dataset.description == '# h1 title\n\n## h2 title\n\n **and bold text**'
@@ -296,6 +447,8 @@ class DcatBackendTest:
         assert dataset.temporal_coverage is not None
         assert dataset.temporal_coverage.start == date(2016, 1, 1)
         assert dataset.temporal_coverage.end == date(2016, 12, 5)
+        assert dataset.contact_point['email'] == 'hello@its.me'
+        assert dataset.contact_point['name'] == 'Organization contact'
         assert dataset.frequency is None
 
         assert len(dataset.resources) == 3
@@ -477,7 +630,7 @@ class DcatBackendTest:
 
 
 @pytest.mark.usefixtures('clean_db')
-@pytest.mark.options(PLUGINS=['csw-dcat'])
+@pytest.mark.options(PLUGINS=['csw'])
 class CswDcatBackendTest:
 
     def test_geonetworkv4(self, rmock):
@@ -525,3 +678,60 @@ class CswDcatBackendTest:
 
         assert 'User-Agent' in get_mock.last_request.headers
         assert get_mock.last_request.headers['User-Agent'] == 'uData/0.1 csw-dcat'
+
+
+@pytest.mark.usefixtures('clean_db')
+@pytest.mark.options(PLUGINS=['csw'])
+class CswIso19139DcatBackendTest:
+
+    def test_geo2france(self, rmock):
+
+        with open(os.path.join(CSW_DCAT_FILES_DIR, "XSLT.xml"), "r") as f:
+            xslt = f.read()
+        url = mock_csw_pagination(rmock, 'geonetwork/srv/eng/csw.rdf', 'geonetwork-iso-page-{}.xml')
+        rmock.get(CswIso19139DcatBackend.XSL_URL, text=xslt)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='csw-iso-19139',
+                                      url=url,
+                                      organization=org)
+
+        actions.run(source.slug)
+
+        source.reload()
+
+        job = source.get_last_job()
+        assert len(job.items) == 6
+
+        datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
+
+        assert len(datasets) == 6
+
+        # First dataset
+        # dataset identifier is gmd:RS_Identifier > gmd:codeSpace + gmd:code
+        dataset = datasets['http://catalogue.geo-ide.developpement-durable.gouv.fr/fr-120066022-orphan-residentifier-140d31c6-643d-42a9-85df-2737a118e144']
+        assert dataset.title == "Plan local d'urbanisme de la commune de Cartigny"
+        assert dataset.description == "Le présent standard de données COVADIS concerne les documents de plans locaux d'urbanisme (PLU) et les plans d'occupation des sols (POS qui valent PLU)."
+        assert set(dataset.tags) == set([
+            'amenagement-urbanisme-zonages-planification', 'cartigny',
+            'document-durbanisme', 'donnees-ouvertes', 'plu', 'usage-des-sols'
+        ])
+        assert dataset.harvest.created_at.date() == date(2017, 10, 7)
+        assert dataset.spatial.geom == {'type': 'MultiPolygon', 'coordinates':
+            [[[[3.28133559, 50.48188019], [1.31279111, 50.48188019], [1.31279111, 49.38547516], [3.28133559, 49.38547516], [3.28133559, 50.48188019]]]]
+        }
+        assert dataset.contact_point.name == 'DDTM 80 (Direction Départementale des Territoires et de la Mer de la Somme)'
+        assert dataset.contact_point.email == 'ddtm-sap-bsig@somme.gouv.fr'
+
+        # License is not properly mapped in XSLT conversion
+        assert dataset.license is None
+
+        # Distributions don't get properly mapped to distribution with this XSLT if missing CI_OnLineFunctionCode.
+        # A CI_OnLineFunctionCode was added explicitely on one of the Online Resources.
+        # (See mapping at: https://semiceu.github.io/GeoDCAT-AP/releases/2.0.0/#resource-locator---on-line-resource)
+        assert len(dataset.resources) == 1
+        resource = dataset.resources[0]
+        assert resource.title == 'Téléchargement direct du lot et des documents associés'
+        assert resource.url == 'http://atom.geo-ide.developpement-durable.gouv.fr/atomArchive/GetResource?id=fr-120066022-ldd-cab63273-b3ae-4e8a-ae1c-6192e45faa94&datasetAggregate=true'
+        
+        # Sadly resource format is parsed as a blank node. Format parsing should be improved.
+        assert re.match(r'n[0-9a-f]{32}', resource.format)

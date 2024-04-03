@@ -2,7 +2,78 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Topic: add filters in API [#3007](https://github.com/opendatateam/udata/pull/3007)
+
+## 7.0.6 (2024-03-29)
+
+- Add new harvester for ISO DCAT with XSLT transform [#2982](https://github.com/opendatateam/udata/pull/2982)
+- Fix, do not fail on spatial coverage harvesting exception and allow literal spatial BBOX from Arcgis [2998](https://github.com/opendatateam/udata/pull/2998)
+- Mock calls to example.com [#3000](https://github.com/opendatateam/udata/pull/3000)
+- Fix duplicate logs in console commands [#2996](https://github.com/opendatateam/udata/pull/2996)
+- Refactor `Activity.kwargs` into `Activity.extras` to facilitate its usage [#2999](https://github.com/opendatateam/udata/pull/2999)
+- :warning: Datasets without resources are now visible and indexable [#2997](https://github.com/opendatateam/udata/pull/2997)
+
+## 7.0.5 (2024-03-20)
+
+- Add spatial coverage harvesting [#2959](https://github.com/opendatateam/udata/pull/2959) [#2991](https://github.com/opendatateam/udata/pull/2991)
+- Fix: updating a dataset without `private` do not reset `private` to `False`, the previous saved value is kept [#2955](https://github.com/opendatateam/udata/pull/2955)
+- Fix: return the correct error when no `Content-Type` is sent instead of 500 [#2967](https://github.com/opendatateam/udata/pull/2967)
+- Improve documentation for API errors [#2952](https://github.com/opendatateam/udata/pull/2965)
+- Allow harvesting of big catalog (bigger than 16MB) [#2980](https://github.com/opendatateam/udata/pull/2980) [2985](https://github.com/opendatateam/udata/pull/2985)
+- Add downloads' count to organizations CSV [#2973](https://github.com/opendatateam/udata/pull/2973)
+- Add 3 new badges to the organization model : `company`, `association` and `local authority` [#2984](https://github.com/opendatateam/udata/pull/2984)
+- Prevent geozones listed ad `deleted` to be loaded [#2983](https://github.com/opendatateam/udata/pull/2983) [#2993](https://github.com/opendatateam/udata/pull/2993)
+- Topic: add spatial field [#2988](https://github.com/opendatateam/udata/pull/2988)
+- Topic: add last_modified field [#2987](https://github.com/opendatateam/udata/pull/2987)
+- Add stacktraces to CSV errors [#2990](https://github.com/opendatateam/udata/pull/2990)
+- Fix harvesting of DCT.conformsTo for complex inner information [#2994](https://github.com/opendatateam/udata/pull/2994)
+
+## 7.0.4 (2024-02-27)
+
+- Add rotate password command [#2966](https://github.com/opendatateam/udata/pull/2966)
+- Custom extras metadata [#2921](https://github.com/opendatateam/udata/pull/2921):
+  - Organization can nom define a custom metadata of a choosen type
+  - Dataset belonging to the organization can assign a value to the defined metadata
+  - Metadata value must match the choosen type by the organization
+- Harvest DCAT conformsTo into schemas for resources and datasets [#2949](https://github.com/opendatateam/udata/pull/2949) [#2970](https://github.com/opendatateam/udata/pull/2970) [#2972](https://github.com/opendatateam/udata/pull/2972) [#2976](https://github.com/opendatateam/udata/pull/2976)
+- Better reporting in spam detection (show the writer of the discussion/message) [#2965](https://github.com/opendatateam/udata/pull/2965)
+- Fix: spam lang detection not lowering input resulting in false positives [#2965](https://github.com/opendatateam/udata/pull/2965)
+- Fix: do not send mail about discussions when there is no owner / no organisation members [#2962](https://github.com/opendatateam/udata/pull/2962)
+- Fix: 'backend' is now required in `HarvestSource` [#2962](https://github.com/opendatateam/udata/pull/2962)
+- Fix: URL to organizations in mails are now independent from `udata-front` (show the URL of the API if no `udata-front`) [#2962](https://github.com/opendatateam/udata/pull/2962)
+- Add harvested dcat properties as extras [#2968](https://github.com/opendatateam/udata/pull/2968):
+  - DCT.provenance [0..n]
+  - DCT.accessRights [0..1]
+- Generate translations file [#2974](https://github.com/opendatateam/udata/pull/2974)
+- Fix contact point test with missing translation [#2977](https://github.com/opendatateam/udata/pull/2977)
+- Remove documentation about maintenance branches [#2979](https://github.com/opendatateam/udata/pull/2979)
+
+## 7.0.3 (2024-02-15)
+
+- Add spam detection and prevention logic on discussion model [#2954](https://github.com/opendatateam/udata/pull/2954) [#2963](https://github.com/opendatateam/udata/pull/2963)
+- Fix reuses inside database without private information (default to public) [#2951](https://github.com/opendatateam/udata/pull/2951)
+- Fix: you can now remove schema from a resource in the admin [#2950](https://github.com/opendatateam/udata/pull/2950)
+- Fix: refuse an organisation access request when multiple access requests are pending [#2960](https://github.com/opendatateam/udata/pull/2960)
+- Add downloads count in datasets' CSV [#2953](https://github.com/opendatateam/udata/pull/2953)
+- Allow dicts in datasets' extras [#2958](https://github.com/opendatateam/udata/pull/2958)
+
+
+## 7.0.2 (2024-01-23)
+
+- Improve search serialization perfs for datasets in big topics [#2937](https://github.com/opendatateam/udata/pull/2937)
+- Migrate to Flask-Babel because of Flask-BabelEx deprecation [#2897](https://github.com/opendatateam/udata/pull/2897)
+- Contact points feature [#2914](https://github.com/opendatateam/udata/pull/2914) [#2943](https://github.com/opendatateam/udata/pull/2943):
+  - Users and Organizations can now define a list of contact points
+  - Api endpoint for creating, updating and deleting contact points
+  - Datasets can define one contact point, among the list of the organization or the user owning the dataset.
+  - Defining a contact point for a dataset is done throught a form field
+- Allow wildcards in redirect_uris for Oauth2Client [#2935](https://github.com/opendatateam/udata/pull/2935)
+- Allow for being one day late on update fulfilled in time [#2941](https://github.com/opendatateam/udata/pull/2941)
+- When a topic is deleted, corresponding discussions are purged [#2944](https://github.com/opendatateam/udata/pull/2944)
+
+## 7.0.1 (2023-12-06)
+
+- Add sorting in geozone suggest API endpoint to return zones based on their admin level [#2936](https://github.com/opendatateam/udata/pull/2936)
 
 ## 7.0.0 (2023-12-04)
 
@@ -42,6 +113,7 @@
 - Add German to udata translations [2899](https://github.com/opendatateam/udata/pull/2899)[2909](https://github.com/opendatateam/udata/pull/2909)
 - Add harvesters count to site metrics [#2890](https://github.com/opendatateam/udata/pull/2890)
 - Use a single session for reindex [#2891](https://github.com/opendatateam/udata/pull/2891)
+
 - Fix site title and keywords never get updated [#2900](https://github.com/opendatateam/udata/pull/2900)
 - Reuse's extras are now exposed by API [#2905](https://github.com/opendatateam/udata/pull/2905)
 - Add configuration settings to enhance cookies security [#2910](https://github.com/opendatateam/udata/pull/2910)
@@ -57,7 +129,6 @@
 
 - Python 3.7 is now deprecated and will be removed in upcoming release [#2859](https://github.com/opendatateam/udata/pull/2859)
 - GeoZone model will be heavily refactored for a simplified version [#2878](https://github.com/opendatateam/udata/pull/2878)
-
 
 ## 6.1.7 (2023-09-01)
 

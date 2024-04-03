@@ -1,7 +1,9 @@
 from udata.api import api, fields, API
 from udata.core.dataset.api_fields import dataset_fields
+from udata.core.discussions.models import Discussion
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api_fields import reuse_fields
+from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.topic.permissions import TopicEditPermission
 from udata.core.topic.parsers import TopicApiParser
 from udata.core.user.api_fields import user_ref_fields
@@ -36,6 +38,11 @@ topic_fields = api.model('Topic', {
     'private': fields.Boolean(description='Is the topic private'),
     'created_at': fields.ISODateTime(
         description='The topic creation date', readonly=True),
+    'spatial': fields.Nested(
+        spatial_coverage_fields, allow_null=True,
+        description='The spatial coverage'),
+    'last_modified': fields.ISODateTime(
+        description='The topic last modification date', readonly=True),
     'organization': fields.Nested(
         org_ref_fields, allow_null=True,
         description='The publishing organization', readonly=True),
@@ -121,5 +128,7 @@ class TopicAPI(API):
         '''Delete a given topic'''
         if not TopicEditPermission(topic).can():
             api.abort(403, 'Forbidden')
+        # Remove discussions linked to the topic
+        Discussion.objects(subject=topic).delete()
         topic.delete()
         return '', 204

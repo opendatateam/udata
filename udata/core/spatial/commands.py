@@ -44,7 +44,10 @@ def load_levels(col, json_levels):
 
 
 def load_zones(col, json_geozones):
-    for i, geozone in enumerate(json_geozones):
+    loaded_geozones = 0
+    for _, geozone in enumerate(json_geozones):
+        if geozone.get('is_deleted', False):
+            continue
         params = {
             'slug': slugify.slugify(geozone['nom'], separator='-'),
             'level': str(geozone['level']),
@@ -56,11 +59,12 @@ def load_zones(col, json_geozones):
             col.objects(id=geozone['_id']).modify(upsert=True, **{
                 'set__{0}'.format(k): v for k, v in params.items()
             })
+            loaded_geozones += 1
         except errors.ValidationError as e:
             log.warning('Validation error (%s) for %s with %s',
                         e, geozone['nom'], params)
             continue
-    return i
+    return loaded_geozones
 
 
 @contextmanager
@@ -137,6 +141,10 @@ def load(geozones_file, levels_file, drop=False):
             total = load_zones(GeoZone, json_geozones)
     log.info('Loaded {total} zones'.format(total=total))
 
+    log.info('Clean removed geozones in datasets')
+    count = fixup_removed_geozone()
+    log.info(f'{count} geozones removed from datasets')
+
 
 @grp.command()
 def migrate():
@@ -184,3 +192,19 @@ def migrate():
     '''.format(level_summary, **counter)), level_summary])
     log.info(summary)
     log.info('Done')
+
+def fixup_removed_geozone():
+    count = 0
+    all_datasets = Dataset.objects(spatial__zones__0__exists=True).timeout(False)
+    for dataset in all_datasets:
+        zones = dataset.spatial.zones
+        new_zones = [z for z in zones if getattr(z, 'name', None) is not None]
+
+        if len(new_zones) < len(zones):
+            log.debug(f"Removing deleted zones from dataset '{dataset.title}'")
+            count += len(zones) - len(new_zones)
+            dataset.spatial.zones = new_zones
+            dataset.save()
+
+    return count
+        

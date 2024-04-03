@@ -46,7 +46,7 @@ class DatasetSearch(ModelSearchAdapter):
 
     @classmethod
     def is_indexable(cls, dataset):
-        valid_access_rights = ((dataset.access_rights == 'public' and len(dataset.resources) > 0)
+        valid_access_rights = (dataset.access_rights == 'public'
                                or dataset.access_rights == 'non-public'
                                or dataset.access_rights == 'restricted')
         return (dataset.deleted is None and dataset.archived is None and
@@ -66,7 +66,7 @@ class DatasetSearch(ModelSearchAdapter):
         organization = None
         owner = None
 
-        topics = Topic.objects(datasets=dataset)
+        topics = Topic.objects(datasets=dataset).only('id')
 
         if dataset.organization:
             org = Organization.objects(id=dataset.organization.id).first()
@@ -99,7 +99,7 @@ class DatasetSearch(ModelSearchAdapter):
             'organization': organization,
             'owner': str(owner.id) if owner else None,
             'format': [r.format.lower() for r in dataset.resources if r.format],
-            'schema': [r.schema.get('name') for r in dataset.resources if r.schema],
+            'schema': [r.schema.name for r in dataset.resources if r.schema],
             'topics': [str(t.id) for t in topics if topics],
         }
         extras = {}

@@ -1,4 +1,5 @@
 import logging
+import mongoengine
 
 from flask import url_for, request, abort
 from flask_restx import marshal
@@ -18,9 +19,12 @@ from .api_fields import (
     dataset_harvest_fields,
     dataset_internal_fields,
     resource_harvest_fields,
-    resource_internal_fields
+    resource_internal_fields,
+    catalog_schema_fields,
+    schema_fields
 )
 from udata.core.spatial.api_fields import geojson
+from udata.core.contact_point.api_fields import contact_point_fields
 from .models import (
     Dataset, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE, CommunityResource
 )
@@ -35,7 +39,7 @@ DEFAULT_MASK_APIV2 = ','.join((
     'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
     'private', 'tags', 'badges', 'resources', 'community_resources', 'frequency', 'frequency_date',
     'extras', 'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
-    'uri', 'page', 'last_update', 'archived', 'quality', 'harvest', 'internal'
+    'uri', 'page', 'last_update', 'archived', 'quality', 'harvest', 'internal', 'contact_point',
 ))
 
 log = logging.getLogger(__name__)
@@ -69,10 +73,10 @@ dataset_fields = apiv2.model('Dataset', {
     'description': fields.Markdown(
         description='The dataset description in markdown', required=True),
     'created_at': fields.ISODateTime(
-        description='The dataset creation date', required=True),
+        description='The dataset creation date', required=True, readonly=True),
     'last_modified': fields.ISODateTime(
-        description='The dataset last modification date', required=True),
-    'deleted': fields.ISODateTime(description='The deletion date if deleted'),
+        description='The dataset last modification date', required=True, readonly=True),
+    'deleted': fields.ISODateTime(description='The deletion date if deleted', readonly=True),
     'archived': fields.ISODateTime(description='The archival date if archived'),
     'featured': fields.Boolean(description='Is the dataset featured'),
     'private': fields.Boolean(
@@ -132,7 +136,8 @@ dataset_fields = apiv2.model('Dataset', {
     'last_update': fields.ISODateTime(
         description='The resources last modification date', required=True),
     'internal': fields.Nested(
-        dataset_internal_fields, readonly=True, description='Site internal and specific object\'s data')
+        dataset_internal_fields, readonly=True, description='Site internal and specific object\'s data'),
+    'contact_point': fields.Nested(contact_point_fields, allow_null=True, description='The dataset\'s contact point'),
 }, mask=DEFAULT_MASK_APIV2)
 
 
@@ -170,6 +175,9 @@ apiv2.inherit('HarvestDatasetMetadata', dataset_harvest_fields)
 apiv2.inherit('HarvestResourceMetadata', resource_harvest_fields)
 apiv2.inherit('DatasetInternals', dataset_internal_fields)
 apiv2.inherit('ResourceInternals', resource_internal_fields)
+apiv2.inherit('ContactPoint', contact_point_fields)
+apiv2.inherit('Schema', schema_fields)
+apiv2.inherit('CatalogSchema', catalog_schema_fields)
 
 
 @ns.route('/search/', endpoint='dataset_search')
@@ -232,7 +240,10 @@ class DatasetExtrasAPI(API):
             data.pop(key)
         # then update the extras with the remaining payload
         dataset.extras.update(data)
-        dataset.save(signal_kwargs={'ignores': ['post_save']})
+        try:
+            dataset.save(signal_kwargs={'ignores': ['post_save']})
+        except mongoengine.errors.ValidationError as e:
+            apiv2.abort(400, e.message)
         return dataset.extras
 
     @apiv2.secure
@@ -245,11 +256,11 @@ class DatasetExtrasAPI(API):
         if dataset.deleted:
             apiv2.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
-        try:
-            for key in data:
+        for key in data:
+            try:
                 del dataset.extras[key]
-        except KeyError:
-            apiv2.abort(404, 'Key not found in existing extras')
+            except KeyError:
+                pass
         dataset.save(signal_kwargs={'ignores': ['post_save']})
         return dataset.extras, 204
 

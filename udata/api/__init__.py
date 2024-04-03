@@ -147,7 +147,7 @@ class UDataApi(Api):
 
     def validate(self, form_cls, obj=None):
         '''Validate a form from the request and handle errors'''
-        if 'application/json' not in request.headers.get('Content-Type'):
+        if 'application/json' not in request.headers.get('Content-Type', ''):
             errors = {'Content-Type': 'expecting application/json'}
             self.abort(400, errors=errors)
         form = form_cls.from_json(request.json, obj=obj, instance=obj,
@@ -322,6 +322,7 @@ def init_app(app):
     import udata.core.topic.api  # noqa
     import udata.core.topic.apiv2  # noqa
     import udata.core.post.api  # noqa
+    import udata.core.contact_point.api # noqa
     import udata.features.transfer.api  # noqa
     import udata.features.notifications.api  # noqa
     import udata.features.identicon.api  # noqa

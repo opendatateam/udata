@@ -7,11 +7,11 @@ from mongoengine import post_save, ValidationError
 
 from udata.app import cache
 from udata.models import (
-    db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchema, UPDATE_FREQUENCIES
+    db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchema, UPDATE_FREQUENCIES, Schema, FieldValidationError
 )
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.dataset.factories import (
-    ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory
+    ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory, ResourceSchemaMockData
 )
 from udata.core.dataset.exceptions import (
     SchemasCatalogNotFoundException, SchemasCacheUnavailableException
@@ -202,6 +202,22 @@ class DatasetModelTest:
         assert dataset.quality['update_fulfilled_in_time'] is True
         assert dataset.quality['score'] == Dataset.normalize_score(2)
 
+    def test_quality_frequency_update_one_day_late(self):
+        dataset = DatasetFactory(
+            description='', frequency="daily",
+            last_modified_internal=datetime.utcnow() - timedelta(days=1, hours=1))
+        assert dataset.quality['update_frequency'] is True
+        assert dataset.quality['update_fulfilled_in_time'] is True
+        assert dataset.quality['score'] == Dataset.normalize_score(2)
+
+    def test_quality_frequency_update_two_days_late(self):
+        dataset = DatasetFactory(
+            description='', frequency="daily",
+            last_modified_internal=datetime.utcnow() - timedelta(days=2, hours=1))
+        assert dataset.quality['update_frequency'] is True
+        assert dataset.quality['update_fulfilled_in_time'] is False
+        assert dataset.quality['score'] == Dataset.normalize_score(1)
+
     def test_quality_description_length(self):
         dataset = DatasetFactory(description='a' * (current_app.config.get('QUALITY_DESCRIPTION_LENGTH') - 1))
         assert dataset.quality['dataset_description_quality'] is False
@@ -274,6 +290,18 @@ class DatasetModelTest:
         with assert_not_emit(*unexpected_signals), assert_emit(post_save):
             dataset.title = 'New title'
             dataset.save(signal_kwargs={'ignores': ['post_save']})
+
+    def test_dataset_without_private(self):
+        dataset = DatasetFactory()
+        assert dataset.private == False
+
+        dataset.private = None
+        dataset.save()
+        assert dataset.private == False
+
+        dataset.private = True
+        dataset.save()
+        assert dataset.private == True
 
 
 class ResourceModelTest:
@@ -496,7 +524,8 @@ class LicenseModelTest:
 
 class ResourceSchemaTest:
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/notfound')
-    def test_resource_schema_objects_404_endpoint(self):
+    def test_resource_schema_objects_404_endpoint(self, rmock):
+        rmock.get('https://example.com/notfound', status_code=404)
         with pytest.raises(SchemasCatalogNotFoundException):
             ResourceSchema.objects()
 
@@ -547,48 +576,63 @@ class ResourceSchemaTest:
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_resource_schema_objects_w_cache(self, rmock, mocker):
         cache_mock_set = mocker.patch.object(cache, 'set')
-        mocker.patch.object(cache, 'get', return_value='dummy_from_cache')
 
         # fill cache
-        rmock.get('https://example.com/schemas', json={
-            "schemas": [
-                {
-                    "name": "etalab/schema-irve",
-                    "title": "Schéma IRVE",
-                    "versions": [
-                        {
-                            "version_name": "1.0.0"
-                        },
-                        {
-                            "version_name": "1.0.1"
-                        },
-                        {
-                            "version_name": "1.0.2"
-                        }
-                    ]
-                }
-            ]
-        })
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
         ResourceSchema.objects()
         assert cache_mock_set.called
 
+        mocker.patch.object(cache, 'get', return_value=ResourceSchemaMockData.get_mock_data()['schemas'])
         rmock.get('https://example.com/schemas', status_code=500)
-        assert 'dummy_from_cache' == ResourceSchema.objects()
+        assert ResourceSchemaMockData.get_expected_v1_result_from_mock_data() == ResourceSchema.objects()
         assert rmock.call_count == 2
 
-    def test_resource_schema_validation(self):
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
+    def test_resource_schema_validation(self, rmock):
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
+
         resource = ResourceFactory()
 
-        resource.schema = {'name': 'etalab/schema-irve'}
+        resource.schema = Schema(name='etalab/schema-irve-statique')
         resource.validate()
 
-        resource.schema = {'url': 'https://example.com'}
+        resource.schema = Schema(url='https://example.com')
         resource.validate()
 
-        resource.schema = {'name': 'etalab/schema-irve', 'url': 'https://example.com'}
-        with pytest.raises(ValidationError):
+        resource.schema = Schema(name='some-name', url='https://example.com')
+        resource.validate()
+
+        resource.schema = Schema(name='etalab/schema-irve-statique')
+        resource.schema.clean(check_schema_in_catalog=True)
+
+        resource.schema = Schema(url='https://example.com')
+        resource.schema.clean(check_schema_in_catalog=True)
+
+        resource.schema = Schema(name='some-name', url='https://example.com')
+        resource.schema.clean(check_schema_in_catalog=True)
+
+        # Check that no exception is raised when we do not ask for schema check for schema errors
+        resource.schema = Schema(name='some-name')
+        resource.validate()
+
+        resource.schema = Schema(name='etalab/schema-irve-statique', version='1337.42.0')
+        resource.validate()
+
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(version='2.0.0')
             resource.validate()
 
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(name='some-name')
+            resource.schema.clean(check_schema_in_catalog=True)
+
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(name='etalab/schema-irve-statique', version='1337.42.0')
+            resource.schema.clean(check_schema_in_catalog=True)
+
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(version='2.0.0')
+            resource.schema.clean(check_schema_in_catalog=True)
 
 class HarvestMetadataTest:
     def test_harvest_dataset_metadata_validate_success(self):

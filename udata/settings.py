@@ -100,8 +100,6 @@ class Defaults(object):
 
     SECURITY_EMAIL_SENDER = MAIL_DEFAULT_SENDER
 
-    SECURITY_I18N_DOMAIN = 'udata'
-
     SECURITY_EMAIL_SUBJECT_REGISTER = _('Welcome')
     SECURITY_EMAIL_SUBJECT_CONFIRM = _('Please confirm your email')
     SECURITY_EMAIL_SUBJECT_PASSWORDLESS = _('Login instructions')
@@ -153,6 +151,7 @@ class Defaults(object):
         'password': 30 * 24 * HOUR,
         'client_credentials': 30 * 24 * HOUR
     }
+    OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI = False
 
     MD_ALLOWED_TAGS = [
         'a',
@@ -257,6 +256,15 @@ class Defaults(object):
     HARVEST_AUTOARCHIVE_GRACE_DAYS = 7
 
     HARVEST_VALIDATION_CONTACT_FORM = None
+
+    HARVEST_MAX_CATALOG_SIZE_IN_MONGO = None # Defaults to the size of a MongoDB document 
+    HARVEST_GRAPHS_S3_BUCKET = None # If the catalog is bigger than `HARVEST_MAX_CATALOG_SIZE_IN_MONGO` store the graph inside S3 instead of MongoDB
+    HARVEST_GRAPHS_S3_FILENAME_PREFIX = '' # Useful to store the graphs inside a subfolder of the bucket. For example by setting `HARVEST_GRAPHS_S3_FILENAME_PREFIX = 'graphs/'`
+
+    # S3 connection details
+    S3_URL = None
+    S3_ACCESS_KEY_ID = None
+    S3_SECRET_ACCESS_KEY = None 
 
     ACTIVATE_TERRITORIES = False
     # The order is important to compute parents/children, smaller first.
@@ -450,6 +458,16 @@ class Defaults(object):
     ###########################################################################
     QUALITY_DESCRIPTION_LENGTH = 100
 
+    # Spam settings
+    ###########################################################################
+    SPAM_WORDS = []
+    SPAM_ALLOWED_LANGS = []
+    SPAM_MINIMUM_STRING_LENGTH_FOR_LANG_CHECK = 30
+
+    # Notification settings
+    ###########################################################################
+    MATTERMOST_WEBHOOK = None
+
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''
@@ -461,8 +479,7 @@ class Testing(object):
     WTF_CSRF_ENABLED = False
     AUTO_INDEX = False
     CELERY_TASK_ALWAYS_EAGER = True
-    # TODO: ideally, this should be set to True in order to reveal exceptions in delayed tasks
-    CELERY_TASK_EAGER_PROPAGATES = False
+    CELERY_TASK_EAGER_PROPAGATES = True
     TEST_WITH_PLUGINS = False
     PLUGINS = []
     TEST_WITH_THEME = False

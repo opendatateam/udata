@@ -13,6 +13,7 @@ from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api import ReuseApiParser
 from udata.core.reuse.apiv2 import reuse_page_fields
 from udata.core.reuse.models import Reuse
+from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.topic.models import Topic
 from udata.core.topic.parsers import TopicApiParser
 from udata.core.topic.permissions import TopicEditPermission
@@ -63,6 +64,11 @@ topic_fields = apiv2.model('Topic', {
     'private': fields.Boolean(description='Is the topic private'),
     'created_at': fields.ISODateTime(
         description='The topic creation date', readonly=True),
+    'spatial': fields.Nested(
+        spatial_coverage_fields, allow_null=True,
+        description='The spatial coverage'),
+    'last_modified': fields.ISODateTime(
+        description='The topic last modification date', readonly=True),
     'organization': fields.Nested(
         org_ref_fields, allow_null=True,
         description='The publishing organization', readonly=True),
