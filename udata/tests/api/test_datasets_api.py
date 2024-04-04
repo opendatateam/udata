@@ -25,9 +25,8 @@ from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
-from udata.models import (LEGACY_FREQUENCIES, RESOURCE_TYPES,
-                          UPDATE_FREQUENCIES, CommunityResource, Dataset,
-                          Follow, Member, db)
+from udata.models import CommunityResource, Dataset, Follow, Member, db
+from udata.core.dataset.constants import LEGACY_FREQUENCIES, RESOURCE_TYPES, UPDATE_FREQUENCIES
 from udata.tags import MAX_TAG_LENGTH, MIN_TAG_LENGTH
 from udata.tests.features.territories import create_geozones_fixtures
 from udata.tests.helpers import assert200, assert404, assert204
