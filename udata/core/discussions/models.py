@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 
-from udata.models import db
+from udata.mongo import db
 from udata.core.spam.models import SpamMixin, spam_protected
 from .signals import (on_new_discussion, on_discussion_closed, on_new_discussion_comment)
 

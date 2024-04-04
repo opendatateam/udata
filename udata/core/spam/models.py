@@ -1,7 +1,7 @@
 from flask import current_app
 from langdetect import detect
 
-from udata.models import db
+from udata.mongo import db
 from .signals import on_new_potential_spam
 from mongoengine import signals
 

@@ -6,7 +6,7 @@ import udata.event  # noqa
 from flask import current_app
 from mongoengine.signals import post_save, post_delete
 
-from udata.models import db
+from udata.mongo import db
 from udata.tasks import task, as_task_param
 
 log = logging.getLogger(__name__)

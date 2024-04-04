@@ -1,7 +1,7 @@
 import logging
 import pytest
 from udata.tests import TestCase
-from udata.models import db
+from udata.mongo import db
 
 from ..models import SpamMixin
 from ..constants import POTENTIAL_SPAM

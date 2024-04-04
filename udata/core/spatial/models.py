@@ -5,7 +5,7 @@ from werkzeug.utils import cached_property
 from udata.app import cache
 from udata.uris import endpoint_for
 from udata.i18n import _, get_locale, language
-from udata.models import db
+from udata.mongo import db
 
 from . import geoids
 from .constants import ADMIN_LEVEL_MIN, ADMIN_LEVEL_MAX, BASE_GRANULARITIES
