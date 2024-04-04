@@ -1,7 +1,6 @@
 import logging
 
 from datetime import datetime, timedelta
-from collections import OrderedDict
 from urllib.parse import urlparse
 
 from blinker import signal
@@ -24,102 +23,18 @@ from udata.i18n import lazy_gettext as _
 from udata.utils import get_by, hash_url, to_naive_datetime
 from udata.uris import ValidationError, endpoint_for
 from udata.uris import validate as validate_url
+from .constants import CHECKSUM_TYPES, CLOSED_FORMATS, DEFAULT_LICENSE, LEGACY_FREQUENCIES, MAX_DISTANCE, PIVOTAL_DATA, RESOURCE_FILETYPES, RESOURCE_TYPES, SCHEMA_CACHE_DURATION, UPDATE_FREQUENCIES
 
 from .preview import get_preview_url
 from .exceptions import (
     SchemasCatalogNotFoundException, SchemasCacheUnavailableException
 )
 
-__all__ = (
-    'License', 'Resource', 'Schema', 'Dataset', 'Checksum', 'CommunityResource',
-    'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_FILETYPES',
-    'PIVOTAL_DATA', 'DEFAULT_LICENSE', 'RESOURCE_TYPES',
-    'ResourceSchema'
-)
+__all__ = ('License', 'Resource', 'Schema', 'Dataset', 'Checksum', 'CommunityResource', 'ResourceSchema')
 
 NON_ASSIGNABLE_SCHEMA_TYPES = ['datapackage']
 
 log = logging.getLogger(__name__)
-
-#: Udata frequencies with their labels
-#:
-#: See: http://dublincore.org/groups/collections/frequency/
-UPDATE_FREQUENCIES = OrderedDict([                              # Dublin core equivalent
-    ('unknown', _('Unknown')),                        # N/A
-    ('punctual', _('Punctual')),                      # N/A
-    ('continuous', _('Real time')),                   # freq:continuous
-    ('hourly', _('Hourly')),                          # N/A
-    ('fourTimesADay', _('Four times a day')),         # N/A
-    ('threeTimesADay', _('Three times a day')),       # N/A
-    ('semidaily', _('Semidaily')),                    # N/A
-    ('daily', _('Daily')),                            # freq:daily
-    ('fourTimesAWeek', _('Four times a week')),       # N/A
-    ('threeTimesAWeek', _('Three times a week')),     # freq:threeTimesAWeek
-    ('semiweekly', _('Semiweekly')),                  # freq:semiweekly
-    ('weekly', _('Weekly')),                          # freq:weekly
-    ('biweekly', _('Biweekly')),                      # freq:bimonthly
-    ('threeTimesAMonth', _('Three times a month')),   # freq:threeTimesAMonth
-    ('semimonthly', _('Semimonthly')),                # freq:semimonthly
-    ('monthly', _('Monthly')),                        # freq:monthly
-    ('bimonthly', _('Bimonthly')),                    # freq:bimonthly
-    ('quarterly', _('Quarterly')),                    # freq:quarterly
-    ('threeTimesAYear', _('Three times a year')),     # freq:threeTimesAYear
-    ('semiannual', _('Biannual')),                    # freq:semiannual
-    ('annual', _('Annual')),                          # freq:annual
-    ('biennial', _('Biennial')),                      # freq:biennial
-    ('triennial', _('Triennial')),                    # freq:triennial
-    ('quinquennial', _('Quinquennial')),              # N/A
-    ('irregular', _('Irregular')),                    # freq:irregular
-])
-
-#: Map legacy frequencies to currents
-LEGACY_FREQUENCIES = {
-    'fortnighly': 'biweekly',
-    'biannual': 'semiannual',
-    'realtime': 'continuous',
-}
-
-DEFAULT_FREQUENCY = 'unknown'
-
-DEFAULT_LICENSE = {
-    'id': 'notspecified',
-    'title': "License Not Specified",
-    'flags': ["generic"],
-    'maintainer': None,
-    'url': None,
-    'active': True,
-}
-
-RESOURCE_TYPES = OrderedDict([
-    ('main', _('Main file')),
-    ('documentation', _('Documentation')),
-    ('update', _('Update')),
-    ('api', _('API')),
-    ('code', _('Code repository')),
-    ('other', _('Other')),
-])
-
-RESOURCE_FILETYPE_FILE = 'file'
-RESOURCE_FILETYPES = OrderedDict([
-    (RESOURCE_FILETYPE_FILE, _('Uploaded file')),
-    ('remote', _('Remote file')),
-])
-
-CHECKSUM_TYPES = ('sha1', 'sha2', 'sha256', 'md5', 'crc')
-DEFAULT_CHECKSUM_TYPE = 'sha1'
-
-PIVOTAL_DATA = 'pivotal-data'
-CLOSED_FORMATS = ('pdf', 'doc', 'docx', 'word', 'xls', 'excel', 'xlsx')
-
-# Maximum acceptable Damerau-Levenshtein distance
-# used to guess license
-# (ie. number of allowed character changes)
-MAX_DISTANCE = 2
-
-SCHEMA_CACHE_DURATION = 60 * 5  # In seconds
-
-TITLE_SIZE_LIMIT = 350
-DESCRIPTION_SIZE_LIMIT = 100000
 
 
 def get_json_ld_extra(key, value):

@@ -6,7 +6,8 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.factories import ModelFactory
 from udata.utils import faker
 
-from .models import Reuse, REUSE_TYPES, REUSE_TOPICS
+from .models import Reuse
+from .constants import REUSE_TYPES, REUSE_TOPICS
 
 
 class ReuseFactory(ModelFactory):
