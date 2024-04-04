@@ -4,7 +4,7 @@ import click
 
 from flask import current_app
 
-from udata.commands import cli, success, echo, white
+from udata.commands import cli, success
 from udata.models import User, Dataset, Reuse, Organization, Site
 
 log = logging.getLogger(__name__)
@@ -43,6 +43,7 @@ def update(site=False, organizations=False, users=False, datasets=False,
             site.count_reuses()
             site.count_followers()
             site.count_discussions()
+            site.count_harvesters()
             site.count_max_dataset_followers()
             site.count_max_dataset_reuses()
             site.count_max_reuse_datasets()
@@ -53,7 +54,6 @@ def update(site=False, organizations=False, users=False, datasets=False,
         except Exception as e:
             log.info(f'Error during update: {e}')
 
-
     if do_all or datasets:
         log.info('Update datasets metrics')
         all_datasets = Dataset.objects.visible().timeout(False)
@@ -63,7 +63,6 @@ def update(site=False, organizations=False, users=False, datasets=False,
                     if drop:
                         dataset.metrics.clear()
                     dataset.count_discussions()
-                    dataset.count_issues()
                     dataset.count_reuses()
                     dataset.count_followers()
                 except Exception as e:
@@ -79,7 +78,6 @@ def update(site=False, organizations=False, users=False, datasets=False,
                     if drop:
                         reuse.metrics.clear()
                     reuse.count_discussions()
-                    reuse.count_issues()
                     reuse.count_followers()
                 except Exception as e:
                     log.info(f'Error during update: {e}')
@@ -96,6 +94,7 @@ def update(site=False, organizations=False, users=False, datasets=False,
                     organization.count_datasets()
                     organization.count_reuses()
                     organization.count_followers()
+                    organization.count_members()
                 except Exception as e:
                     log.info(f'Error during update: {e}')
                     continue

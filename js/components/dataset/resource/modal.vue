@@ -37,8 +37,9 @@
                 <dd><a :href="resource.url">{{resource.url}}</a></dd>
                 <dt v-if="resource.format">{{ _('Format') }}</dt>
                 <dd v-if="resource.format">{{ resource.format }}</dd>
-                <dt v-if="resource.schema?.name">{{ _('Schema') }}</dt>
+                <dt v-if="resource.schema?.name || resource.schema?.url">{{ _('Schema') }}</dt>
                 <dd v-if="resource.schema?.name">{{ resource.schema.name }}</dd>
+                <dd v-if="resource.schema?.url">{{ resource.schema.url }}</dd>
                 <dt v-if="resource.mime">{{ _('Mime Type') }}</dt>
                 <dd v-if="resource.mime">{{ resource.mime }}</dd>
                 <dt v-if="resource.filesize">{{ _('Size') }}</dt>
@@ -49,8 +50,6 @@
                 <dd v-if="resource.created_at">{{ resource.created_at | dt }}</dd>
                 <dt v-if="resource.last_modified">{{ _('Modified on') }}</dt>
                 <dd v-if="resource.last_modified">{{ resource.last_modified | dt }}</dd>
-                <dt v-if="resource.published">{{ _('Published on') }}</dt>
-                <dd v-if="resource.published">{{ resource.published | dt }}</dd>
                 <dt v-if="resource.metrics && resource.metrics.downloads">{{ _('Downloads') }}</dt>
                 <dd v-if="resource.metrics && resource.metrics.downloads">{{ resource.metrics.downloads }}</dd>
                 <dt v-if="is_community">{{ _('Publish by') }}</dt>

@@ -1,7 +1,7 @@
 import json
 
 from flask import url_for
-from flask_restplus import schemas
+from flask_restx import schemas
 
 from udata.tests.helpers import assert200
 

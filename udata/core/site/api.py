@@ -1,6 +1,6 @@
 from bson import ObjectId
 
-from flask import request, redirect, url_for, json
+from flask import request, redirect, url_for, json, make_response
 
 from udata.api import api, API, fields
 from udata.auth import admin_permission
@@ -107,10 +107,14 @@ class SiteRdfCatalogFormat(API):
         page_size = int(params.get('page_size', 100))
         datasets = Dataset.objects.visible().paginate(page, page_size)
         catalog = build_catalog(current_site, datasets, format=format)
-        return graph_response(catalog, format)
+        # bypass flask-restplus make_response, since graph_response
+        # is handling the content negociation directly
+        return make_response(*graph_response(catalog, format))
 
 
 @api.route('/site/context.jsonld', endpoint='site_jsonld_context')
 class SiteJsonLdContext(API):
     def get(self):
-        return json.dumps(CONTEXT), 200, {'Content-Type': 'application/ld+json'}
+        response = make_response(json.dumps(CONTEXT))
+        response.headers['Content-Type'] = 'application/ld+json'
+        return response

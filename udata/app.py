@@ -15,7 +15,7 @@ from flask_caching import Cache
 
 from flask_wtf.csrf import CSRFProtect
 from speaklater import is_lazy_string
-from werkzeug.contrib.fixers import ProxyFix
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from udata import entrypoints
 
@@ -78,6 +78,13 @@ class UDataApp(Flask):
         return super(UDataApp, self).handle_http_exception(e)
 
     def register_blueprint(self, blueprint, **kwargs):
+
+        if blueprint.name in self.blueprints:
+            # TODO: remove this warning and let Flask return a ValueError once
+            # we can set a custom blueprint name in Flask-storage
+            self.logger.warning('Blueprint already loaded')
+            return self.blueprints[blueprint.name]
+
         if blueprint.has_static_folder and 'url_prefix' in kwargs:
             self.static_prefixes[blueprint.name] = kwargs['url_prefix']
         return super(UDataApp, self).register_blueprint(blueprint, **kwargs)
@@ -123,16 +130,13 @@ class UDataJsonEncoder(json.JSONEncoder):
         # Serialize Raw data for Document and EmbeddedDocument.
         elif hasattr(obj, '_data'):
             return obj._data
-        # Serialize raw data from Elasticsearch DSL AttrList
-        elif hasattr(obj, '_l_'):
-            return obj._l_
         return super(UDataJsonEncoder, self).default(obj)
 
 
 # These loggers are very verbose
 # We need to put them in WARNING level
 # even if the main level is INFO or DEBUG
-VERBOSE_LOGGERS = 'elasticsearch', 'requests'
+VERBOSE_LOGGERS = 'requests',
 
 
 def init_logging(app):
@@ -202,11 +206,12 @@ def standalone(app):
 
 def register_extensions(app):
     from udata import (
-        models, routing, tasks, mail, i18n, auth, search, sitemap,
-        sentry
+        models, mongo, routing, tasks, mail, i18n, auth, search, sitemap,
+        sentry, notifications
     )
     tasks.init_app(app)
     i18n.init_app(app)
+    mongo.init_app(app)
     models.init_app(app)
     routing.init_app(app)
     auth.init_app(app)

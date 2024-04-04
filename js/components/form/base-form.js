@@ -196,7 +196,7 @@ export default {
                     value = value.filter(option => option.selected);
                     value = value.map(option => option.value);
                 } else if (TEXT_TAGS.includes(el.tagName.toLowerCase()) || TEXT_INPUTS.includes(el.type.toLowerCase())) {
-                    value = el.value || undefined;
+                    value = el.value || null;
                 } else if (el.type === 'checkbox') {
                     value = el.checked;
                 } else {

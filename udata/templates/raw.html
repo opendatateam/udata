@@ -8,14 +8,6 @@
     {% from 'macros/metadata.html' import metadata with context %}
     {{ metadata(meta or {}) }}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {% block extra_css %}{% endblock %}
-    {% block theme_css %}
-    {% endblock %}
-
-    {% block extra_head %}{% endblock %}
-
-    {{ hook('header.snippets') }}
-
     {% endblock raw_head %}
 
   </head>
@@ -24,10 +16,5 @@
     <section id="app">
       {% block body %}{% endblock %}
     </section>
-
-    {% block extra_js %}{% endblock %}
-
-    {{ hook('footer.snippets') }}
-
   </body>
 </html>

@@ -12,7 +12,8 @@ from udata.models import Dataset, PeriodicTask
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.core.dataset.factories import DatasetFactory
-from udata.tests.helpers import assert_emit
+from udata.core.dataset.models import HarvestDatasetMetadata
+from udata.tests.helpers import assert_emit, assert_equal_dates
 from udata.utils import faker, Paginable
 
 from .factories import (
@@ -53,7 +54,7 @@ class HarvestActionsTest:
     def test_list_sources_exclude_deleted(self):
         assert actions.list_sources() == []
 
-        now = datetime.now()
+        now = datetime.utcnow()
         sources = HarvestSourceFactory.create_batch(3)
         deleted_sources = HarvestSourceFactory.create_batch(2, deleted=now)
 
@@ -69,7 +70,7 @@ class HarvestActionsTest:
     def test_list_sources_include_deleted(self):
         assert actions.list_sources() == []
 
-        now = datetime.now()
+        now = datetime.utcnow()
         sources = HarvestSourceFactory.create_batch(3)
         sources.extend(HarvestSourceFactory.create_batch(2, deleted=now))
 
@@ -131,7 +132,7 @@ class HarvestActionsTest:
 
     def test_paginate_sources_exclude_deleted(self):
         HarvestSourceFactory.create_batch(2)
-        HarvestSourceFactory(deleted=datetime.now())
+        HarvestSourceFactory(deleted=datetime.utcnow())
 
         result = actions.paginate_sources(page_size=2)
         assert isinstance(result, Paginable)
@@ -142,7 +143,7 @@ class HarvestActionsTest:
 
     def test_paginate_sources_include_deleted(self):
         HarvestSourceFactory.create_batch(2)
-        HarvestSourceFactory(deleted=datetime.now())
+        HarvestSourceFactory(deleted=datetime.utcnow())
 
         result = actions.paginate_sources(page_size=2, deleted=True)
         assert isinstance(result, Paginable)
@@ -290,6 +291,17 @@ class HarvestActionsTest:
         deleted_sources = HarvestSource.objects(deleted__exists=True)
         assert len(deleted_sources) == 1
 
+    @pytest.mark.parametrize('by_attr', ['source.id', 'str(source.id)', 'source.slug'])
+    def test_clean_source(self, by_attr):
+        source = HarvestSourceFactory()
+        for _ in range(5):
+            DatasetFactory(harvest=HarvestDatasetMetadata(source_id=str(source.id)))
+        actions.clean_source(eval(by_attr))
+        datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
+        assert len(datasets) == 5
+        for dataset in datasets:
+            assert dataset.deleted is not None
+
     def test_get_job_by_id(self):
         job = HarvestJobFactory()
         assert actions.get_job(str(job.id)) == job
@@ -369,18 +381,37 @@ class HarvestActionsTest:
         assert source.periodic_task is None
 
     def test_purge_sources(self):
-        now = datetime.now()
-        to_delete = HarvestSourceFactory.create_batch(3, deleted=now)
+        periodic_task = PeriodicTask.objects.create(
+            task='harvest',
+            name=faker.name(),
+            description=faker.sentence(),
+            enabled=True,
+            crontab=PeriodicTask.Crontab()
+        )
+        now = datetime.utcnow()
+        to_delete = HarvestSourceFactory.create_batch(2, deleted=now)
+        to_delete.append(
+            HarvestSourceFactory(periodic_task=periodic_task, deleted=now)
+        )
         to_keep = HarvestSourceFactory.create_batch(2)
+        harvest_job = HarvestJobFactory(source=to_delete[0])
+        dataset_to_archive = DatasetFactory(
+            harvest=HarvestDatasetMetadata(source_id=str(to_delete[0].id))
+        )
 
         result = actions.purge_sources()
+        dataset_to_archive.reload()
 
         assert result == len(to_delete)
         assert len(HarvestSource.objects) == len(to_keep)
+        assert PeriodicTask.objects.filter(id=periodic_task.id).count() == 0
+        assert HarvestJob.objects(id=harvest_job.id).count() == 0
+        assert dataset_to_archive.harvest.archived == 'harvester-deleted'
+        assert_equal_dates(dataset_to_archive.archived, now)
 
     @pytest.mark.options(HARVEST_JOBS_RETENTION_DAYS=2)
     def test_purge_jobs(self):
-        now = datetime.now()
+        now = datetime.utcnow()
         retention = now - timedelta(days=2)
         too_old = retention - timedelta(days=1)
         to_delete = HarvestJobFactory.create_batch(3, created=too_old)
@@ -417,16 +448,18 @@ class HarvestActionsTest:
         assert result.errors == 0
         for index, dataset in enumerate(datasets):
             dataset.reload()
-            assert dataset.extras['harvest:domain'] == 'test.org'
-            assert dataset.extras['harvest:remote_id'] == str(index)
+            assert dataset.harvest.domain == 'test.org'
+            assert dataset.harvest.remote_id == str(index)
 
     def test_attach_does_not_duplicate(self):
         attached_datasets = []
         for i in range(2):
             dataset = DatasetFactory.build()
-            dataset.extras['harvest:domain'] = 'test.org'
-            dataset.extras['harvest:remote_id'] = str(i)
-            dataset.last_modified = datetime.now()
+            dataset.harvest = HarvestDatasetMetadata(
+                domain='test.org',
+                remote_id=str(i)
+            )
+            dataset.last_modified_internal = datetime.utcnow()
             dataset.save()
             attached_datasets.append(dataset)
 
@@ -449,14 +482,14 @@ class HarvestActionsTest:
             result = actions.attach('test.org', csvfile.name)
 
         dbcount = Dataset.objects(**{
-            'extras__harvest:remote_id__exists': True
+            'harvest__remote_id__exists': True
         }).count()
         assert result.success == len(datasets)
         assert dbcount == result.success
         for index, dataset in enumerate(datasets):
             dataset.reload()
-            assert dataset.extras['harvest:domain'] == 'test.org'
-            assert dataset.extras['harvest:remote_id'] == str(index)
+            assert dataset.harvest.domain == 'test.org'
+            assert dataset.harvest.remote_id == str(index)
 
     def test_attach_skip_not_found(self):
         datasets = DatasetFactory.create_batch(3)
@@ -514,9 +547,9 @@ class ExecutionTestMixin(MockBackendsMixin):
             dataset = item.dataset
             assert Dataset.objects(id=dataset.id).first() is not None
             assert dataset.organization == org
-            assert 'harvest:remote_id' in dataset.extras
-            assert 'harvest:last_update' in dataset.extras
-            assert 'harvest:source_id' in dataset.extras
+            assert 'remote_id' in dataset.harvest
+            assert 'last_update' in dataset.harvest
+            assert 'source_id' in dataset.harvest
 
         assert len(HarvestJob.objects) == 1
         assert len(Dataset.objects) == COUNT
@@ -607,6 +640,16 @@ class ExecutionTestMixin(MockBackendsMixin):
         assert len(HarvestJob.objects) == 1
         assert len(Dataset.objects) == 0
 
+    @pytest.mark.options(HARVEST_MAX_ITEMS=5)
+    def test_harvest_max_items(self):
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='factory',
+                                      organization=org,
+                                      config={'count': 10})
+
+        self.action(source.slug)
+        assert len(Dataset.objects) == 5
+
 
 class HarvestLaunchTest(ExecutionTestMixin):
     def action(self, *args, **kwargs):
@@ -640,9 +683,9 @@ class HarvestPreviewTest(MockBackendsMixin):
 
             dataset = item.dataset
             assert dataset.organization == org
-            assert 'harvest:remote_id' in dataset.extras
-            assert 'harvest:last_update' in dataset.extras
-            assert 'harvest:source_id' in dataset.extras
+            assert 'remote_id' in dataset.harvest
+            assert 'last_update' in dataset.harvest
+            assert 'source_id' in dataset.harvest
 
         assert len(HarvestJob.objects) == 0
         assert len(Dataset.objects) == 0
@@ -740,9 +783,9 @@ class HarvestPreviewTest(MockBackendsMixin):
 
             dataset = item.dataset
             assert dataset.organization == org
-            assert 'harvest:remote_id' in dataset.extras
-            assert 'harvest:last_update' in dataset.extras
-            assert 'harvest:source_id' in dataset.extras
+            assert 'remote_id' in dataset.harvest
+            assert 'last_update' in dataset.harvest
+            assert 'source_id' in dataset.harvest
 
         assert len(HarvestJob.objects) == 0
         assert len(Dataset.objects) == 0

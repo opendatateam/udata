@@ -1,6 +1,7 @@
 '''
 This module centralize udata-wide RDF helpers and configuration
 '''
+import logging
 import re
 
 from flask import request, url_for, abort
@@ -11,7 +12,11 @@ from rdflib.namespace import (
     Namespace, NamespaceManager, DCTERMS, SKOS, FOAF, XSD, RDFS, RDF
 )
 from rdflib.util import SUFFIX_FORMAT_MAP, guess_format as raw_guess_format
-from rdflib_jsonld.context import Context
+from udata import uris
+from udata.models import FieldValidationError, Schema, ResourceSchema
+from mongoengine import ValidationError
+
+log = logging.getLogger(__name__)
 
 # Extra Namespaces
 ADMS = Namespace('http://www.w3.org/ns/adms#')
@@ -23,7 +28,10 @@ SPDX = Namespace('http://spdx.org/rdf/terms#')
 VCARD = Namespace('http://www.w3.org/2006/vcard/ns#')
 FREQ = Namespace('http://purl.org/cld/freq/')
 EUFREQ = Namespace('http://publications.europa.eu/resource/authority/frequency/')  # noqa: E501
+EUFORMAT = Namespace('http://publications.europa.eu/resource/authority/file-type/')
+IANAFORMAT = Namespace('https://www.iana.org/assignments/media-types/')
 DCT = DCTERMS  # More common usage
+VCARD = Namespace('http://www.w3.org/2006/vcard/ns#')
 
 namespace_manager = NamespaceManager(Graph())
 namespace_manager.bind('dcat', DCAT)
@@ -68,6 +76,7 @@ ACCEPTED_MIME_TYPES = {
     'application/ld+json': 'json-ld',
     'application/json': 'json-ld',
     'application/trig': 'trig',
+    'text/xml': 'xml',
     # Available but not activated
     # 'application/n-quads': 'nquads',
     # 'text/xml': 'trix',
@@ -204,26 +213,6 @@ CONTEXT = {
 }
 
 
-class UDataContext(Context):
-    '''
-    An hackish way to serialize context as a root relative URL.
-
-    Exploit this issue https://github.com/RDFLib/rdflib-jsonld/issues/37
-    and the fact that this method is used to render the context in the
-    resulting JSON-LD.
-
-    See:
-        https://github.com/RDFLib/rdflib-jsonld/blob/master/rdflib_jsonld/serializer.py#L101-L103
-    '''
-
-    def to_dict(self):
-        '''Hackish way to provide the site context URL'''
-        return url_for('api.site_jsonld_context', _external=True)
-
-
-context = UDataContext(CONTEXT)
-
-
 def url_from_rdf(rdf, prop):
     '''
     Try to extract An URL from a resource property.
@@ -235,6 +224,50 @@ def url_from_rdf(rdf, prop):
     elif isinstance(value, RdfResource):
         return value.identifier.toPython()
 
+
+def schema_from_rdf(rdf):
+    '''
+    Try to extract a schema from a conformsTo property.
+    Currently the "issued" property is not harvest.
+    '''
+    resource = rdf.value(DCT.conformsTo)
+    if not resource:
+        return None
+
+    schema = Schema()
+    if isinstance(resource, (URIRef, Literal)):
+        schema.url = resource.toPython()
+    elif isinstance(resource, RdfResource):
+        # We try to get the schema "correct" URL.
+        # 1. The identifier of the DCT.conformsTo
+        # 2. The DCT.type inside the DCT.conformsTo (from some example it's the most precise one)
+        # (other not currently used RDF.type)
+        url = None
+        try:
+            url = uris.validate(resource.identifier.toPython())
+        except uris.ValidationError:
+            try:
+                type = resource.value(DCT.type)
+                if type is not None:
+                    url = uris.validate(type.identifier.toPython())
+            except uris.ValidationError:
+                pass
+            pass
+
+        if url is None:
+            return None
+
+        schema.url = url
+        schema.name = resource.value(DCT.title)
+    else:
+        return None
+
+    try:
+        schema.clean()
+        return schema
+    except FieldValidationError as e:
+        log.warning(f"Invalid schema inside RDF {e}")
+        return None
 
 def escape_xml_illegal_chars(val, replacement='?'):
     illegal_xml_chars_RE = re.compile(ILLEGAL_XML_CHARS)
@@ -286,7 +319,7 @@ def graph_response(graph, format):
     }
     kwargs = {}
     if fmt == 'json-ld':
-        kwargs['context'] = context
+        kwargs['context'] = CONTEXT
     if isinstance(graph, RdfResource):
         graph = graph.graph
-    return escape_xml_illegal_chars(graph.serialize(format=fmt, **kwargs).decode('utf-8')), 200, headers
+    return escape_xml_illegal_chars(graph.serialize(format=fmt, **kwargs)), 200, headers

@@ -1,7 +1,0 @@
-{% extends 'mail/base.txt' %}
-{% block body %}
-{{ _('Please confirm your email through the link below:') }}
-
-{{ confirmation_link }}
-
-{% endblock %}

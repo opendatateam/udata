@@ -1,0 +1,22 @@
+{% import 'macros/forms.html' as forms with context %}
+
+{% block main_content %}
+
+<div class="container auth-container">
+    <form class="form-horizontal validate col-md-offset-2 col-md-8"
+        action="{{ url_for('security.change_email') }}"
+        method="POST" name="change_email_form">
+        <fieldset>
+            <legend>{{ _('Change email') }}</legend>
+              {{ change_email_form.hidden_tag() }}
+              {{ forms.field(change_email_form.new_email) }}
+              {{ forms.field(change_email_form.new_email_confirm) }}
+            <div class="form-group">
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-primary btn-block">{{ _('Change email') }}</button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
+{% endblock %}

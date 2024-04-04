@@ -1,59 +1,32 @@
-# Development environment
+# Advanced development environment
 
 ## System requirements
 
 See [System dependencies](system-dependencies.md) for base system requirements.
 
-An alternative way to use middlewares (ie. ElasticSearch, Redis, MongoDB) is provided
-for getting started easily so it's not mandatory to install those natively.
-See [Middlewares](#middlewares) for details.
+See [getting-started](getting-started.md) for installation instructions.
 
-## Retrieving the sources
+### Dependency management
 
-You also will need [Git][] to fetch sources and publish your contributions.
-If you use a Debian-like distribution with `apt-get`, the package is named `git-core`.
-If you prefer [Homebrew][] (OSX), the package is named `git`.
+We're using [pip-tools](https://github.com/jazzband/pip-tools/#pip-tools--pip-compile--pip-sync) with [a pre-commit hook](https://github.com/jazzband/pip-tools/#version-control-integration) to help us manage our requirements.
 
-The sources of the project are on [Github][]:
+**This is not mandatory unless you're actively contributing to the project.**
 
 ```shell
-$ git clone https://github.com/opendatateam/udata.git
+$ pre-commit install
 ```
 
-(or clone your own fork if you plan to [contribute](contributing-guide.md))
+`pip-tools` uses the `.in` files in `requirements/` as input to generate the `.pip` files we rely on to install `udata`.
 
-## Middlewares
+If you need to add or modify a dependency, do it in the `.in` files _and commit them_. The pre-commit hook will compile the `.pip` files and warn you.
 
-We will use [docker-compose][] to manage all that.
-[Install Docker-Compose for your system][docker-compose-install]
-then start the services:
+You can also generate the `.pip` files manually from the `.in` files without commiting them beforehand. For example, if you modified `install.in`:
 
 ```shell
-$ cd udata
-$ docker-compose up
+pip-compile requirements/install.in --output-file requirements/install.pip
 ```
 
-On the very first run it will download and install Docker images which takes a while depending of your connection.
-
-!!! warning
-    Test your _docker-compose_ is running successfully entering `curl http://localhost:9200`.
-    It should output a JSON search response.
-    If you have no output at all for too long,
-    check the [IPv6 possible issue](https://github.com/docker/docker/issues/2174#issuecomment-35697655).
-
-## Python and virtual environment
-
-It is recommended to work within a virtualenv to ensure proper dependencies isolation.
-If you're not familiar with that concept, read [Python Virtual Environments - a Primer][].
-
-Alright, now you can type these commands knowing what you are doing:
-
-```shell
-$ python3 -m venv venv
-$ source venv/bin/activate
-$ pip install -r requirements/develop.pip
-$ pip install -e .
-```
+### Optmizing performances with Cython
 
 Some dependencies have an optional compilation support for Cython
 resulting in better performances (mostly XML harvesting).
@@ -65,65 +38,36 @@ $ pip install -r requirements/develop.pip
 $ pip install -e .
 ```
 
-### Macos Big Sur caveat
+### Mac OS caveats
+
+#### Package installation fails
 
 If installing `cryptography` fails:
 
 ```
-brew install openssl
-export LDFLAGS="-L/usr/local/opt/openssl@1.1/lib"
-export CPPFLAGS="-I/usr/local/opt/openssl@1.1/include"
+brew install openssl@1.1
+export LDFLAGS="-L$(brew --prefix openssl@1.1)/lib"
+export CPPFLAGS="-I$(brew --prefix openssl@1.1)/include"
 pip install -r requirements/develop.pip
 ```
 
 If installing `Pillow` fails:
+
 ```
 brew install libjpeg
 pip install -r requirements/develop.pip
 ```
 
-## NodeJS and modules
+#### Local web server is slow
 
-NodeJS is required to build or run the frontend. Please check the .nvmrc at the root of the repository to check the exact version of NodeJS you need.
-you should consider [installing NVM][nvm-install] which uses the existing `.nvmrc`.
+If you're using `{something}.local` as your `SITE_NAME`, you need to add an ipv6 resolution to this FQDN:
 
-```shell
-$ nvm install
-$ nvm use
+```
+127.0.0.1   dev.local
+::1         dev.local
 ```
 
-Then install JavaScript dependencies:
-
-```shell
-$ npm install
-```
-
-Once it's done, you should be able to run the build command for JS and CSS:
-
-```shell
-$ inv assets-build
-$ inv widgets-build
-```
-
-!!! note
-    The **watcher commands** `inv assets-watch` and `inv widgets-watch` will recompile on each save, and only the relevant parts.
-
-## Running the project for the first time
-
-You need to initialize some data before being able to use udata:
-
-```shell
-# Initialize database, indexes...
-$ udata init
-
-# Optionally fetch and load some licenses from another udata instance
-$ udata licenses https://www.data.gouv.fr/api/1/datasets/licenses
-
-# Compile translations
-$ inv i18nc
-```
-
-You should be to start using and contributing to udata.
+[Reference and context here](https://superuser.com/a/1596341).
 
 ## Running the project
 
@@ -138,15 +82,8 @@ $ inv beat          # Start a scheduler process
 
 $ inv assets-watch  # Continously watch and build assets
 $ inv widgets-watch # Continously watch and build widgets
+$ inv oembed-watch # Continously watch and build oembed
 ```
-
-When you have the development server running,
-you can open your browser to <http://localhost:7000>.
-Everything should be up and running!
-
-!!! note "Tell us what you think"
-    You are always welcome to tell us about your experience _installing udata_.
-    Get in touch with us via our [Gitter chatroom][Gitter] or by raising a [new issue][] on [GitHub][].
 
 ## Common tasks
 
@@ -188,7 +125,6 @@ or [the documentation](building-documentation.md).
 [docker-compose]: https://docs.docker.com/compose/
 [git]: https://git-scm.com/
 [github]: https://github.com/opendatateam/udata
-[gitter]: https://gitter.im/opendatateam/udata
 [new issue]: https://github.com/opendatateam/udata/issues/new
 [homebrew]: http://brew.sh/
 [invoke]: http://www.pyinvoke.org/

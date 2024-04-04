@@ -13,10 +13,10 @@ log = logging.getLogger(__name__)
 
 
 class CommonFormMixin(object):
-    def process(self, formdata=None, obj=None, data=None, **kwargs):
+    def process(self, formdata=None, obj=None, data=None, extra_filters=None, **kwargs):
         '''Wrap the process method to store the current object instance'''
         self._obj = obj
-        super(CommonFormMixin, self).process(formdata, obj, data, **kwargs)
+        super(CommonFormMixin, self).process(formdata, obj, data, extra_filters=extra_filters, **kwargs)
 
 
 class Form(CommonFormMixin, FlaskForm):

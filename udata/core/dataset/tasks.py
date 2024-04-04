@@ -13,18 +13,19 @@ from udata.core import storages
 from udata.frontend import csv
 from udata.harvest.models import HarvestJob
 from udata.i18n import lazy_gettext as _
-from udata.models import (Follow, Issue, Discussion, Activity, Topic,
-                          Organization)
+from udata.models import (Follow, Discussion, Activity, Topic,
+                          Organization, Transfer, db)
 from udata.tasks import job
 
-from .models import Dataset, Resource, CommunityResource, UPDATE_FREQUENCIES, Checksum
+from .models import Dataset, Resource, CommunityResource, Checksum
+from .constants import UPDATE_FREQUENCIES
 
 log = get_task_logger(__name__)
 
 
 def flatten(iterable):
     for el in iterable:
-        if isinstance(el, collections.Iterable) and not isinstance(el, str):
+        if isinstance(el, collections.Iterable) and not (isinstance(el, str) or isinstance(el, db.Document)):
             yield from flatten(el)
         else:
             yield el
@@ -36,8 +37,6 @@ def purge_datasets(self):
         log.info(f'Purging dataset {dataset}')
         # Remove followers
         Follow.objects(following=dataset).delete()
-        # Remove issues
-        Issue.objects(subject=dataset).delete()
         # Remove discussions
         Discussion.objects(subject=dataset).delete()
         # Remove activity
@@ -49,11 +48,20 @@ def purge_datasets(self):
             topic.update(datasets=datasets)
         # Remove HarvestItem references
         HarvestJob.objects(items__dataset=dataset).update(set__items__S__dataset=None)
+        # Remove associated Transfers
+        Transfer.objects(subject=dataset).delete()
         # Remove each dataset's resource's file
         storage = storages.resources
         for resource in dataset.resources:
             if resource.fs_filename is not None:
-                storage.delete(resource.fs_filename)
+                try:
+                    storage.delete(resource.fs_filename)
+                except FileNotFoundError as e:
+                    log.warning(e)
+            # Not removing the resource from dataset.resources
+            # with `dataset.remove_resource` as removing elements
+            # from a list while iterating causes random effects.
+            Dataset.on_resource_removed.send(Dataset, document=dataset, resource_id=resource.id)
         # Remove each dataset related community resource and it's file
         community_resources = CommunityResource.objects(dataset=dataset)
         for community_resource in community_resources:
@@ -68,8 +76,8 @@ def purge_datasets(self):
 def send_frequency_reminder(self):
     # We exclude irrelevant frequencies.
     frequencies = [f for f in UPDATE_FREQUENCIES.keys()
-                   if f not in ('unknown', 'realtime', 'punctual')]
-    now = datetime.now()
+                   if f not in ('unknown', 'realtime', 'punctual', 'irregular', 'continuous')]
+    now = datetime.utcnow()
     reminded_orgs = {}
     reminded_people = []
     allowed_delay = current_app.config['DELAY_BEFORE_REMINDER_NOTIFICATION']
@@ -137,19 +145,19 @@ def get_or_create_resource(r_info, model, dataset):
 
 
 def store_resource(csvfile, model, dataset):
-    timestr = datetime.now().strftime('%Y%m%d-%H%M%S')
+    timestr = datetime.utcnow().strftime('%Y%m%d-%H%M%S')
     filename = 'export-%s-%s.csv' % (model, timestr)
     prefix = '/'.join((dataset.slug, timestr))
     storage = storages.resources
     with open(csvfile.name, 'rb') as infile:
         stored_filename = storage.save(infile, prefix=prefix, filename=filename)
     r_info = storage.metadata(stored_filename)
+    r_info['last_modified_internal'] = r_info.pop('modified')
     r_info['fs_filename'] = stored_filename
     checksum = r_info.pop('checksum')
     algo, checksum = checksum.split(':', 1)
-    r_info[algo] = checksum
     r_info['format'] = storages.utils.extension(stored_filename)
-    r_info['checksum'] = Checksum(type='sha1', value=r_info.pop('sha1'))
+    r_info['checksum'] = Checksum(type=algo, value=checksum)
     r_info['filesize'] = r_info.pop('size')
     del r_info['filename']
     r_info['title'] = filename
@@ -177,12 +185,13 @@ def export_csv_for_model(model, dataset):
         writer.writerow(adapter.header())
         for row in adapter.rows():
             writer.writerow(row)
+        csvfile.flush()
         # make a resource from this tmp file
         created, resource = store_resource(csvfile, model, dataset)
         # add it to the dataset
         if created:
             dataset.add_resource(resource)
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.utcnow()
         dataset.save()
     finally:
         csvfile.close()
@@ -204,7 +213,6 @@ def export_csv(self, model=None):
     if not DATASET_ID:
         log.error('EXPORT_CSV_DATASET_ID setting value not set')
         return
-
     try:
         dataset = Dataset.objects.get(id=DATASET_ID)
     except Dataset.DoesNotExist:

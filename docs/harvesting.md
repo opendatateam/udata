@@ -117,7 +117,7 @@ Fields are extracted according these rules:
 | last_modified | dct:modified                       |                                        |
 | format        | dct:format                         |                                        |
 | mime          | dcat:mediaType                     |                                        |
-| filesize      | dcat:bytesSize                     |                                        |
+| filesize      | dcat:byteSize                     |                                        |
 | checksum      | spdx:checksum                      | See [Checksum](#checksum)              |
 
 
@@ -240,3 +240,4 @@ You may take a look at the [existing backends][backends-repository] to see exiti
 [DCAT]: https://www.w3.org/TR/vocab-dcat/
 [backends-repository]: https://github.com/opendatateam/udata/tree/master/udata/harvest/backends
 [gov-uk-references]: http://reference.data.gov.uk/
+[cookiecutter-template]: https://github.com/opendatateam/cookiecutter-udata-harvester

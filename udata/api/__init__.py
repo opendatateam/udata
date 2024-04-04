@@ -7,10 +7,10 @@ from functools import wraps
 from importlib import import_module
 
 from flask import (
-    current_app, g, request, url_for, json, make_response, redirect, Blueprint, render_template
+    current_app, g, request, url_for, json, make_response, redirect, Blueprint
 )
-from flask_fs import UnauthorizedFileType
-from flask_restplus import Api, Resource
+from flask_storage import UnauthorizedFileType
+from flask_restx import Api, Resource
 from flask_cors import CORS
 
 from udata import tracking, entrypoints
@@ -28,7 +28,8 @@ from .signals import on_api_call
 
 log = logging.getLogger(__name__)
 
-apiv1 = Blueprint('api', __name__, url_prefix='/api/1')
+apiv1_blueprint = Blueprint('api', __name__, url_prefix='/api/1')
+apiv2_blueprint = Blueprint('apiv2', __name__, url_prefix='/api/2')
 
 DEFAULT_PAGE_SIZE = 50
 HEADER_API_KEY = 'X-API-KEY'
@@ -104,7 +105,7 @@ class UDataApi(Api):
             if (
                 not current_user.is_anonymous and
                 not current_user.sysadmin and
-                current_app.config['READ_ONLY_MODE'] and 
+                current_app.config['READ_ONLY_MODE'] and
                 any(ext in str(func) for ext in current_app.config['METHOD_BLOCKLIST'])
             ):
                 self.abort(423, 'Due to security reasons, the creation of new content is currently disabled.')
@@ -146,7 +147,7 @@ class UDataApi(Api):
 
     def validate(self, form_cls, obj=None):
         '''Validate a form from the request and handle errors'''
-        if 'application/json' not in request.headers.get('Content-Type'):
+        if 'application/json' not in request.headers.get('Content-Type', ''):
             errors = {'Content-Type': 'expecting application/json'}
             self.abort(400, errors=errors)
         form = form_cls.from_json(request.json, obj=obj, instance=obj,
@@ -176,11 +177,19 @@ class UDataApi(Api):
 
 
 api = UDataApi(
-    apiv1,
+    apiv1_blueprint,
     decorators=[csrf.exempt],
     version='1.0', title='uData API',
     description='uData API', default='site',
     default_label='Site global namespace'
+)
+
+apiv2 = UDataApi(
+    apiv2_blueprint,
+    decorators=[csrf.exempt],
+    version='2.0', title='uData API',
+    description='udata API v2', default='site',
+    default_label='Site global namespace',
 )
 
 
@@ -198,20 +207,8 @@ def output_json(data, code, headers=None):
     return resp
 
 
-@api.representation('application/ld+json')
-@api.representation('application/rdf+xml')
-@api.representation('application/trig')
-@api.representation('application/x-turtle')
-@api.representation('application/n-triples')
-@api.representation('text/n3')
-def output_xml(data, code, headers=None):
-    '''Use Flask XML to serialize'''
-    resp = make_response(data, code)
-    resp.headers.extend(headers or {})
-    return resp
-
-
-@apiv1.before_request
+@apiv1_blueprint.before_request
+@apiv2_blueprint.before_request
 def set_api_language():
     if 'lang' in request.args:
         g.lang_code = request.args['lang']
@@ -227,7 +224,7 @@ def extract_name_from_path(path):
     """
     base_path, query_string = path.split('?')
     infos = base_path.strip('/').split('/')[2:]  # Removes api/version.
-    if base_path == '/api/1/':  # The API root endpoint redirects to swagger doc.
+    if base_path == '/api/1/' or base_path == '/api/2/':  # The API root endpoint redirects to swagger doc.
         return safe_unicode('apidoc')
     if len(infos) > 1:  # This is an object.
         name = '{category} / {name}'.format(
@@ -239,7 +236,8 @@ def extract_name_from_path(path):
     return safe_unicode(name)
 
 
-@apiv1.after_request
+@apiv1_blueprint.after_request
+@apiv2_blueprint.after_request
 def collect_stats(response):
     action_name = extract_name_from_path(request.full_path)
     blacklist = current_app.config.get('TRACKING_BLACKLIST', [])
@@ -311,16 +309,20 @@ def init_app(app):
     import udata.core.metrics.api  # noqa
     import udata.core.user.api  # noqa
     import udata.core.dataset.api  # noqa
-    import udata.core.issues.api  # noqa
+    import udata.core.dataset.apiv2  # noqa
     import udata.core.discussions.api  # noqa
     import udata.core.reuse.api  # noqa
+    import udata.core.reuse.apiv2  # noqa
     import udata.core.organization.api  # noqa
+    import udata.core.organization.apiv2  # noqa
     import udata.core.followers.api  # noqa
     import udata.core.jobs.api  # noqa
     import udata.core.site.api  # noqa
     import udata.core.tags.api  # noqa
     import udata.core.topic.api  # noqa
+    import udata.core.topic.apiv2  # noqa
     import udata.core.post.api  # noqa
+    import udata.core.contact_point.api # noqa
     import udata.features.transfer.api  # noqa
     import udata.features.notifications.api  # noqa
     import udata.features.identicon.api  # noqa
@@ -331,7 +333,8 @@ def init_app(app):
         api_module = module if inspect.ismodule(module) else import_module(module)
 
     # api.init_app(app)
-    app.register_blueprint(apiv1)
+    app.register_blueprint(apiv1_blueprint)
+    app.register_blueprint(apiv2_blueprint)
 
     oauth2.init_app(app)
     cors.init_app(app)

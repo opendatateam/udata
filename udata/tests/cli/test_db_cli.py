@@ -8,7 +8,7 @@ def migrations(db):
     db.migrations.insert_one({
         'plugin': 'udata',
         'filename': 'test.py',
-        'date': datetime.now(),
+        'date': datetime.utcnow(),
         'script': 'print("ok")',
         'output': 'ok',
     })

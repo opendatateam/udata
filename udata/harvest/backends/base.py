@@ -9,11 +9,12 @@ import requests
 from flask import current_app
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
+from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.models import Dataset
 from udata.utils import safe_unicode
 
 from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
-from ..models import HarvestItem, HarvestJob, HarvestError
+from ..models import HarvestItem, HarvestJob, HarvestError, archive_harvested_dataset
 from ..signals import before_harvest_job, after_harvest_job
 
 log = logging.getLogger(__name__)
@@ -89,19 +90,24 @@ class BaseBackend(object):
             self.source = source_or_job
             self.job = None
         self.dryrun = dryrun
-        self.max_items = max_items
+        self.max_items = max_items or current_app.config['HARVEST_MAX_ITEMS']
 
     @property
     def config(self):
         return self.source.config
 
-    def get(self, url, **kwargs):
-        headers = self.get_headers()
+    def head(self, url, headers={}, **kwargs):
+        headers.update(self.get_headers())
+        kwargs['verify'] = kwargs.get('verify', self.verify_ssl)
+        return requests.head(url, headers=headers, **kwargs)
+
+    def get(self, url, headers={}, **kwargs):
+        headers.update(self.get_headers())
         kwargs['verify'] = kwargs.get('verify', self.verify_ssl)
         return requests.get(url, headers=headers, **kwargs)
 
-    def post(self, url, data, **kwargs):
-        headers = self.get_headers()
+    def post(self, url, data, headers={}, **kwargs):
+        headers.update(self.get_headers())
         kwargs['verify'] = kwargs.get('verify', self.verify_ssl)
         return requests.post(url, data=data, headers=headers, **kwargs)
 
@@ -133,7 +139,7 @@ class BaseBackend(object):
         log.debug('Initializing backend')
         factory = HarvestJob if self.dryrun else HarvestJob.objects.create
         self.job = factory(status='initializing',
-                           started=datetime.now(),
+                           started=datetime.utcnow(),
                            source=self.source)
 
         before_harvest_job.send(self)
@@ -150,7 +156,7 @@ class BaseBackend(object):
             self.job.errors.append(error)
             self.job.status = 'failed'
             self.end()
-            return
+            return None
         except Exception as e:
             self.job.status = 'failed'
             error = HarvestError(message=safe_unicode(e))
@@ -158,7 +164,7 @@ class BaseBackend(object):
             self.end()
             msg = 'Initialization failed for "{0.name}" ({0.backend})'
             log.exception(msg.format(self.source))
-            return
+            return None
 
         if self.max_items:
             self.job.items = self.job.items[:self.max_items]
@@ -179,22 +185,25 @@ class BaseBackend(object):
     def process_item(self, item):
         log.debug('Processing: %s', item.remote_id)
         item.status = 'started'
-        item.started = datetime.now()
+        item.started = datetime.utcnow()
         if not self.dryrun:
             self.job.save()
 
         try:
             dataset = self.process(item)
-            dataset.extras['harvest:source_id'] = str(self.source.id)
-            dataset.extras['harvest:remote_id'] = item.remote_id
-            dataset.extras['harvest:domain'] = self.source.domain
-            dataset.extras['harvest:last_update'] = datetime.now().isoformat()
+            if not dataset.harvest:
+                dataset.harvest = HarvestDatasetMetadata()
+            dataset.harvest.domain = self.source.domain
+            dataset.harvest.remote_id = item.remote_id
+            dataset.harvest.source_id = str(self.source.id)
+            dataset.harvest.last_update = datetime.utcnow()
+            dataset.harvest.backend = self.display_name
 
             # unset archived status if needed
-            if dataset.extras.get('harvest:archived_at'):
-                dataset.extras.pop('harvest:archived_at')
-                dataset.extras.pop('harvest:archived')
-                dataset.archived = None
+            if dataset.harvest:
+                dataset.harvest.archived_at = None
+                dataset.harvest.archived = None
+            dataset.archived = None
 
             # TODO permissions checking
             if not dataset.organization and not dataset.owner:
@@ -228,7 +237,7 @@ class BaseBackend(object):
             item.errors.append(error)
             item.status = 'failed'
 
-        item.ended = datetime.now()
+        item.ended = datetime.utcnow()
         if not self.dryrun:
             self.job.save()
 
@@ -242,27 +251,18 @@ class BaseBackend(object):
         limit_date = date.today() - timedelta(days=limit_days)
         remote_ids = [i.remote_id for i in self.job.items if i.status != 'archived']
         q = {
-            'extras__harvest:source_id': str(self.source.id),
-            'extras__harvest:remote_id__nin': remote_ids,
-            'extras__harvest:last_update__lt': limit_date.isoformat()
+            'harvest__source_id': str(self.source.id),
+            'harvest__remote_id__nin': remote_ids,
+            'harvest__last_update__lt': limit_date
         }
         local_items_not_on_remote = Dataset.objects.filter(**q)
 
         for dataset in local_items_not_on_remote:
-            if not dataset.extras.get('harvest:archived_at'):
-                log.debug('Archiving dataset %s', dataset.id)
-                archival_date = datetime.now()
-                dataset.archived = archival_date
-                dataset.extras['harvest:archived'] = 'not-on-remote'
-                dataset.extras['harvest:archived_at'] = archival_date
-                if self.dryrun:
-                    dataset.validate()
-                else:
-                    dataset.save()
-
+            if not dataset.harvest.archived_at:
+                archive_harvested_dataset(dataset, reason='not-on-remote', dryrun=self.dryrun)
             # add a HarvestItem to the job list (useful for report)
             # even when archiving has already been done (useful for debug)
-            item = self.add_item(dataset.extras['harvest:remote_id'])
+            item = self.add_item(dataset.harvest.remote_id)
             item.dataset = dataset
             item.status = 'archived'
 
@@ -286,7 +286,7 @@ class BaseBackend(object):
         self.end()
 
     def end(self):
-        self.job.ended = datetime.now()
+        self.job.ended = datetime.utcnow()
         if not self.dryrun:
             self.job.save()
         after_harvest_job.send(self)
@@ -296,13 +296,22 @@ class BaseBackend(object):
         We first try to match `source_id` to be source domain independent
         '''
         dataset = Dataset.objects(__raw__={
-            'extras.harvest:remote_id': remote_id,
+            'harvest.remote_id': remote_id,
             '$or': [
-                {'extras.harvest:domain': self.source.domain},
-                {'extras.harvest:source_id': str(self.source.id)},
+                {'harvest.domain': self.source.domain},
+                {'harvest.source_id': str(self.source.id)},
             ],
         }).first()
-        return dataset or Dataset()
+
+        if dataset:
+            return dataset
+
+        if self.source.organization:
+            return Dataset(organization=self.source.organization)
+        elif self.source.owner:
+            return Dataset(owner=self.source.owner)
+
+        return Dataset()
 
     def validate(self, data, schema):
         '''Perform a data validation against a given schema.

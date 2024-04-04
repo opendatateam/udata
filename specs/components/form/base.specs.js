@@ -204,9 +204,9 @@ describe('Common Form features', function() {
             ];
 
             expect(this.vm.serialize()).to.eql({
-                input: undefined,
+                input: null,
                 checkbox: false,
-                textarea: undefined,
+                textarea: null,
                 select: 'b',
             });
         });
@@ -296,8 +296,8 @@ describe('Common Form features', function() {
 
                 expect(this.vm.serialize()).to.eql({
                     nested: {
-                        a: undefined,
-                        b: undefined
+                        a: null,
+                        b: null
                     }
                 });
             });

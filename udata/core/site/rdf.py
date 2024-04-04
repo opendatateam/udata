@@ -8,7 +8,7 @@ from rdflib.namespace import RDF, FOAF
 from udata.core.dataset.rdf import dataset_to_rdf
 from udata.core.organization.rdf import organization_to_rdf
 from udata.core.user.rdf import user_to_rdf
-from udata.rdf import DCAT, DCT, HYDRA, namespace_manager, paginate_catalog
+from udata.rdf import DCAT, DCT, namespace_manager, paginate_catalog
 from udata.utils import Paginable
 from udata.uris import endpoint_for
 
@@ -22,6 +22,7 @@ def build_catalog(site, datasets, format=None):
 
     catalog.set(RDF.type, DCAT.Catalog)
     catalog.set(DCT.title, Literal(site.title))
+    catalog.set(DCT.description, Literal(f"{site.title}"))
     catalog.set(DCT.language,
                 Literal(current_app.config['DEFAULT_LANGUAGE']))
     catalog.set(FOAF.homepage, URIRef(site_url))

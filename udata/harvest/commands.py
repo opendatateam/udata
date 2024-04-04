@@ -57,6 +57,15 @@ def delete(identifier):
 
 
 @grp.command()
+@click.argument('identifier')
+def clean(identifier):
+    '''Delete all datasets linked to a harvest source'''
+    log.info(f'Cleaning source "{identifier}"')
+    num_of_datasets = actions.clean_source(identifier)
+    log.info(f'Cleaned source "{identifier}" - deleted {num_of_datasets} dataset(s)')
+
+
+@grp.command()
 @click.option('-s', '--scheduled', is_flag=True,
               help='list only scheduled source')
 def sources(scheduled=False):

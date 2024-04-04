@@ -7,7 +7,7 @@
     type=discussion.subject.verbose_name,
     user=(
         '<a href="'|safe
-        + url_for('users.show', user=discussion.user, _external=True)
+        + url_for('api.user', user=discussion.user, _external=True)
         + '">'|safe
         + discussion.user.fullname
         + '</a>'|safe

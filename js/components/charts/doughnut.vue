@@ -6,6 +6,7 @@
 
 <script>
 import Chart from 'chart.js';
+import config from 'config';
 
 export default {
     name: 'chartjs-doughnut',
@@ -16,16 +17,16 @@ export default {
     methods: {
         build_chart() {
             if (!this.score) return;
- 
+
             const data = {
                 datasets: [{
                     backgroundColor: [ "#3C8DBC", "#F5F5F5" ],
-                    data: [ this.score, 10 - this.score ],
+                    data: [ this.score, 1 - this.score ],
                 }],
             };
 
             const ctx = this.$els.canvas.getContext('2d');
- 
+
             new Chart(ctx, {
                 type: 'doughnut',
                 data: data,

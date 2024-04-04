@@ -1,6 +1,5 @@
 from flask import g, current_app
 from werkzeug.local import LocalProxy
-from werkzeug import cached_property
 
 from udata.models import db, WithMetrics
 from udata.core.organization.models import Organization
@@ -44,16 +43,17 @@ class Site(WithMetrics, db.Document):
         'resources',
         'reuses',
         'users',
+        'harvesters'
     ]
 
     def __str__(self):
         return self.title or ''
-    
+
     def count_users(self):
         from udata.models import User
         self.metrics['users'] = User.objects(confirmed_at__ne=None, deleted=None).count()
         self.save()
-    
+
     def count_org(self):
         from udata.models import Organization
         self.metrics['organizations'] = Organization.objects.visible().count()
@@ -68,11 +68,11 @@ class Site(WithMetrics, db.Document):
         from udata.models import Dataset
         self.metrics['datasets'] = Dataset.objects.visible().count()
         self.save()
-    
+
     def count_resources(self):
         self.metrics['resources'] = next(Dataset.objects.visible().aggregate(
             {'$project': {'resources': 1}},
-            {'$unwind': '$resources' },
+            {'$unwind': '$resources'},
             {'$group': {'_id': 'result', 'count': {'$sum': 1}}}
         ), {}).get('count', 0)
         self.save()
@@ -85,13 +85,18 @@ class Site(WithMetrics, db.Document):
         from udata.models import Follow
         self.metrics['followers'] = Follow.objects(until=None).count()
         self.save()
-    
+
     def count_discussions(self):
         from udata.models import Discussion
         self.metrics['discussions'] = Discussion.objects.count()
         self.save()
-    
-    def count_max_dataset_followers(self): 
+
+    def count_harvesters(self):
+        from udata.harvest.models import HarvestSource
+        self.metrics['harvesters'] = HarvestSource.objects().count()
+        self.save()
+
+    def count_max_dataset_followers(self):
         dataset = (Dataset.objects(metrics__followers__gt=0).visible()
                           .order_by('-metrics.followers').first())
         self.metrics['max_dataset_followers'] = dataset.metrics['followers'] if dataset else 0
@@ -99,10 +104,10 @@ class Site(WithMetrics, db.Document):
 
     def count_max_dataset_reuses(self):
         dataset = (Dataset.objects(metrics__reuses__gt=0).visible()
-                        .order_by('-metrics.reuses').first())
+                   .order_by('-metrics.reuses').first())
         self.metrics['max_dataset_reuses'] = dataset.metrics['reuses'] if dataset else 0
         self.save()
-    
+
     def count_max_reuse_datasets(self):
         reuse = (Reuse.objects(metrics__datasets__gt=0).visible()
                  .order_by('-metrics.datasets').first())
@@ -137,10 +142,17 @@ class Site(WithMetrics, db.Document):
 def get_current_site():
     if getattr(g, 'site', None) is None:
         site_id = current_app.config['SITE_ID']
+        site_title = current_app.config.get('SITE_TITLE')
+        site_keywords = current_app.config.get('SITE_KEYWORDS', [])
         g.site, _ = Site.objects.get_or_create(id=site_id, defaults={
-            'title': current_app.config.get('SITE_TITLE'),
-            'keywords': current_app.config.get('SITE_KEYWORDS', []),
+            'title': site_title,
+            'keywords': site_keywords,
         })
+        if g.site.title != site_title:
+            Site.objects(id=site_id).modify(set__title=site_title)
+        if g.site.keywords != site_keywords:
+            Site.objects(id=site_id).modify(set__keywords=site_keywords)
+
     return g.site
 
 

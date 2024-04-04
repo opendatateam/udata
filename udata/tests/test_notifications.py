@@ -1,11 +1,12 @@
 from datetime import datetime
 
+import pytz
 from flask import url_for
 
-from udata.features.notifications import actions
 from udata.core.user.factories import UserFactory
+from udata.features.notifications import actions
 
-from . import TestCase, DBTestMixin
+from . import DBTestMixin, TestCase
 from .api import APITestCase
 
 
@@ -31,7 +32,7 @@ class NotificationsActionsTest(NotificationsMixin, TestCase, DBTestMixin):
         self.assertIn('fake', actions.list_providers())
 
     def test_registered_provider_provide_values(self):
-        dt = datetime.now()
+        dt = datetime.utcnow()
 
         def fake_provider(user):
             return [(dt, {'some': 'value'})]
@@ -57,7 +58,7 @@ class NotificationsAPITest(NotificationsMixin, APITestCase):
 
     def test_has_notifications(self):
         self.login()
-        dt = datetime.now()
+        dt = datetime.utcnow()
 
         @actions.notifier('fake')
         def fake_notifier(user):
@@ -69,7 +70,7 @@ class NotificationsAPITest(NotificationsMixin, APITestCase):
         self.assertEqual(len(response.json), 2)
 
         for notification in response.json:
-            self.assertEqual(notification['created_on'], dt.isoformat())
+            self.assertEqual(notification['created_on'], pytz.utc.localize(dt).isoformat())
             self.assertEqual(notification['type'], 'fake')
         self.assertEqual(response.json[0]['details'], {'some': 'value'})
         self.assertEqual(response.json[1]['details'], {'another': 'value'})

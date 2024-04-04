@@ -37,7 +37,7 @@ activity_fields = api.model('Activity', {
         description='The key of the activity', required=True),
     'icon': fields.String(
         description='The icon of the activity', required=True),
-    'kwargs': fields.Raw(description='Some action specific context'),
+    'extras': fields.Raw(description='Extras attributes as key-value pairs'),
 })
 
 activity_page_fields = api.model('ActivityPage', fields.pager(activity_fields))
