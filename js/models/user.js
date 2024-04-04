@@ -22,6 +22,7 @@ export default class User extends Model {
     fetch(ident) {
         ident = ident || this.id || this.slug;
         if (ident) {
+            this.loading = true;
             this.$api('users.get_user', {user: ident}, this.on_fetched);
         } else {
             log.error('Unable to fetch User: no identifier specified');
@@ -29,11 +30,12 @@ export default class User extends Model {
         return this;
     }
 
-    update(data, on_success, on_error) {
+    update(data, on_error) {
+        this.loading = true;
         this.$api('users.update_user', {
             user: this.id,
             payload: JSON.stringify(data)
-        }, on_success, on_error);
+        }, this.on_fetched, this.on_error(on_error));
     }
 
     /**
@@ -51,7 +53,9 @@ export default class User extends Model {
      * @return {Boolean}       True if can edit.
      */
     can_edit(object) {
-        if (this.is_admin) {
+        if (object === undefined) {
+            return false;
+        } else if (this.is_admin) {
             return true;
         } else if (object.owner) {
             return object.owner.id === this.id;

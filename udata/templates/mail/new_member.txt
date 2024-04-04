@@ -1,4 +1,4 @@
-{% extends theme('mail/base.txt') %}
+{% extends 'mail/base.txt' %}
 
 {% block body %}
 {{ _('Congratulations, you are now a member of the organization "%(org)s"',
@@ -7,5 +7,5 @@
 
 
 {{ _('You can go on your organization page') }}:
-{{ url_for('organizations.show', org=org, _external=True) }}
+{{ org.url_for(_external=True) }}
 {% endblock %}

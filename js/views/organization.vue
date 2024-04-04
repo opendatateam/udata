@@ -14,15 +14,6 @@
     </div>
 
     <div class="row">
-        <chart id="trafic-widget" class="col-xs-12"
-            :title="charts.traffic.title" :default="charts.traffic.default"
-            :metrics="metrics"
-            x="date" :y="charts.traffic.y"
-            >
-        </chart>
-    </div>
-
-    <div class="row">
         <dataset-list id="datasets-widget" class="col-xs-12" :datasets="datasets"
             :downloads="downloads">
         </dataset-list>
@@ -33,8 +24,7 @@
     </div>
 
     <div class="row">
-        <issue-list id="issues-widget" class="col-xs-12 col-md-6" :issues="issues"></issue-list>
-        <discussion-list id="discussions-widget" class="col-xs-12 col-md-6" :discussions="discussions"></discussion-list>
+        <discussion-list id="discussions-widget" class="col-xs-12" :discussions="discussions"></discussion-list>
     </div>
 
     <div class="row">
@@ -53,15 +43,12 @@
 import moment from 'moment';
 import Vue from 'vue';
 import URLs from 'urls';
-import Followers from 'models/followers';
-import Metrics from 'models/metrics';
 import Organization from 'models/organization';
 import CommunityResources from 'models/communityresources';
 import {PageList, ModelPage} from 'models/base';
 // Widgets
 import DatasetList from 'components/dataset/list.vue';
 import DiscussionList from 'components/discussions/list.vue';
-import IssueList from 'components/issues/list.vue';
 import Layout from 'components/layout.vue';
 import ReuseList from 'components/reuse/list.vue';
 
@@ -70,27 +57,18 @@ export default {
     data() {
         return {
             org: new Organization(),
-            metrics: new Metrics({query: {
-                start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
-                end: moment().format('YYYY-MM-DD')
-            }}),
             reuses: new PageList({
                 ns: 'organizations',
                 fetch: 'list_organization_reuses',
                 search: 'title',
-                mask: ReuseList.MASK
+                mask: ReuseList.MASK.concat(['deleted'])
             }),
             datasets: new ModelPage({
                 query: {page_size: 10, sort: '-created'},
                 ns: 'organizations',
                 fetch: 'list_organization_datasets',
                 search: 'title',
-                mask: DatasetList.MASK
-            }),
-            issues: new PageList({
-                ns: 'organizations',
-                fetch: 'list_organization_issues',
-                mask: IssueList.MASK
+                mask: DatasetList.MASK.concat(['deleted'])
             }),
             discussions: new PageList({
                 ns: 'organizations',
@@ -98,7 +76,11 @@ export default {
                 mask: DiscussionList.MASK
             }),
             communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}}),
-            followers: new Followers({ns: 'organizations', query: {page_size: 10}}),
+            followers: new ModelPage({
+                query: {page_size: 10},
+                ns: 'organizations',
+                fetch: 'list_organization_followers'
+            }),
             badges: [],
             charts: {
                 traffic: {
@@ -131,15 +113,29 @@ export default {
     },
     computed: {
         actions() {
-            const actions = [{
-                    label: this._('Edit'),
+            const actions = []
+
+            if (this.org.is_admin(this.$root.me)) {
+                actions.push({
+                    label: this._('Edit this organization'),
                     icon: 'edit',
                     method: this.edit
-                }, {
-                    label: this._('Delete'),
-                    icon: 'trash',
-                    method: this.confirm_delete
-                }];
+                });
+
+                if(!this.org.deleted) {
+                    actions.push({
+                        label: this._('Delete'),
+                        icon: 'trash',
+                        method: this.confirm_delete
+                    });
+                } else {
+                    actions.push({
+                        label: this._('Restore'),
+                        icon: 'undo',
+                        method: this.confirm_restore
+                    });
+                }
+            }
 
             if (this.$root.me.is_admin) {
                 actions.push({divider: true});
@@ -157,14 +153,14 @@ export default {
             }
             return [{
                 value: this.org.metrics.datasets || 0,
-                label: this.org.metrics.datasets ? this._('Datasets') : this._('Dataset'),
+                label: this.org.metrics.datasets ? this._('Public datasets') : this._('Public dataset'),
                 icon: 'cubes',
                 color: 'aqua',
                 target: '#datasets-widget'
             }, {
                 value: this.org.metrics.reuses || 0,
-                label: this.org.metrics.reuses ? this._('Reuses') : this._('Reuse'),
-                icon: 'retweet',
+                label: this.org.metrics.reuses ? this._('Public reuses') : this._('Public reuse'),
+                icon: 'recycle',
                 color: 'green',
                 target: '#reuses-widget'
             }, {
@@ -202,7 +198,6 @@ export default {
         DiscussionList,
         DatasetList,
         ReuseList,
-        IssueList,
         Layout,
     },
     events: {
@@ -217,6 +212,12 @@ export default {
         confirm_delete() {
             this.$root.$modal(
                 require('components/organization/delete-modal.vue'),
+                {organization: this.org}
+            );
+        },
+        confirm_restore() {
+            this.$root.$modal(
+                require('components/organization/restore-modal.vue'),
                 {organization: this.org}
             );
         },
@@ -238,10 +239,8 @@ export default {
     watch: {
         'org.id': function(id) {
             if (id) {
-                this.metrics.fetch({id: id});
                 this.reuses.clear().fetch({org: id});
                 this.datasets.clear().fetch({org: id});
-                this.issues.clear().fetch({org: id});
                 this.discussions.clear().fetch({org: id});
                 this.followers.fetch({id: id});
                 this.communities.clear().fetch({organization: id});
@@ -258,6 +257,8 @@ export default {
                     class: 'danger',
                     label: this._('Deleted')
                 }];
+            } else {
+                this.badges = [];
             }
         }
     }

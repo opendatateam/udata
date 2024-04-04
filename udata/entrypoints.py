@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
 import pkg_resources
 
 # Here for documentation purpose
@@ -38,7 +35,14 @@ def get_enabled(name, app):
     and enabled for the given app.
     '''
     plugins = app.config['PLUGINS']
-    return dict(_ep_to_kv(e) for e in iter_all(name) if e.name in plugins)
+    return dict(_ep_to_kv(e) for e in iter_all(name) if e.name in plugins or e.name.startswith(tuple(plugins)))
+
+
+def get_plugin_module(name, app, plugin):
+    '''
+    Get the module for a given plugin
+    '''
+    return next((m for p, m in get_enabled(name, app).items() if p == plugin), None)
 
 
 def _ep_to_kv(entrypoint):

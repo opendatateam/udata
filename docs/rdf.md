@@ -1,18 +1,18 @@
 # RDF
 
-uData as built-in [RDF][] support allowing to both expose and harvest RDF metadata.
+udata has built-in [RDF][] support allowing it to both expose and harvest RDF metadata.
 It uses the [Data Catalog Vocabulary][dcat] (or [DCAT][]) as base vocabulary.
 
 ## Endpoints
 
 udata exposes instance metadata through different RDF endpoints
-and try to follow some best practices.
+and tries to follow some best practices.
 
 *All relative URLs are relative to the udata instance root*
 
-### Content Negociation
+### Content Negotiation
 
-The following format supported (default in bold):
+The following formats are supported (default in bold):
 
 | Format             | Extension        | MIME type                                 |
 |--------------------|------------------|-------------------------------------------|
@@ -23,24 +23,42 @@ The following format supported (default in bold):
 | [N-Triples][]      | **nt**           | **application/n-triples**                 |
 | [TriG][]           | **trig**         | **application/trig**                      |
 
-Each endpoint is available through a generic URL which perform content negociation
-and redirect to a set of format specific URLs.
+Each endpoint is available through a generic URL which performs content negotiation
+and redirects to a set of format specific URLs.
 The default format is JSON-LD.
+
+
+### Organization
+
+Organizations are available through the following URL:
+
+    /organization/{id}/catalog
+
+where `id` is the organization's identifier on the udata instance.
+
+This URL performs content negotiation and redirects to:
+
+    /organization/{id}/catalog.{format}
+
+It is exposed as a [DCAT Catalog][dcat-catalog] and a [Hydra Collection][hydra-collection]
+This allows pagination through the `hydra:PartialCollectionView` class.
+
+The organization's catalog embeds the organization's datasets.
 
 
 ### Dataset
 
-Dataset are available through the following URL:
+Datasets are available through the following URL:
 
     /dataset/{id}/rdf
 
-where `id` is dataset identifier on the udata instance.
+where `id` is the dataset's identifier on the udata instance.
 
-This URL performs content negociation and redirect to:
+This URL performs content negotiation and redirects to:
 
     /dataset/{id}/rdf.{format}
 
-The dataset pages serve as identifier and perform content negociation too,
+The dataset pages serves as an identifier and performs content negotiation too,
 so the following URLs will all redirect to the same RDF endpoint:
 
     /dataset/{id}
@@ -49,8 +67,8 @@ so the following URLs will all redirect to the same RDF endpoint:
     /{lang}/dataset/{slug}
 
 
-Dataset is exposed as a [DCAT Dataset][dcat-dataset],
-Resource as [DCAT Distribution][dcat-distribution]
+A Dataset is exposed as a [DCAT Dataset][dcat-dataset],
+a Resource as [DCAT Distribution][dcat-distribution]
 and fields are mapped according to:
 
 | Dataset           | dcat:Dataset            | notes |
@@ -73,11 +91,11 @@ and fields are mapped according to:
 | description       | dct:description         |       |
 | url               | dcat:downloadURL        | as URI reference |
 | permanent url     | dcat:accessURL          | as URI reference |
-| published         | dct:issued              |       |
+| created_at        | dct:issued              |       |
 | last_modified     | dct:modified            |       |
 | format            | dct:format              |       |
 | mime              | dcat:mediaType          |       |
-| filesize          | dcat:bytesSize          |       |
+| filesize          | dcat:byteSize          |       |
 | checksum          | spdx:checksum           |       |
 
 | TemporalCoverage | dct:PeriodOfTime |
@@ -97,7 +115,7 @@ The site catalog is exposed through:
 
     /catalog
 
-and perform content negociation to
+and performs content negotiation to
 
     /catalog.{format}
 
@@ -107,13 +125,13 @@ This allows pagination through the `hydra:PartialCollectionView` class.
 
 ### Dataportal
 
-There is a work in progress [Dataportal specification][dataportal] but as many site
-already uses this formalism,
+There is a work in progress [Dataportal specification][dataportal] but as many sites
+already use this formalism,
 the catalog is also available (as a redirect) on the following URL:
 
     /data.{format}
 
-where format is one of supported format extension.
+where format is one of the supported format extensions.
 
 ### JSON-LD context
 

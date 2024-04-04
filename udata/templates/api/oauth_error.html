@@ -1,10 +1,17 @@
-{% extends theme("base.html") %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
 
-{% block content %}
-<section class="error">
-    <div class="container">
+  <body>
+    {{ hook('oauth_error_theme_raw') }}
 
-        <div class="jumbotron">
+    {% if has_hook('oauth_error_theme_content') %}
+        {{ hook('oauth_error_theme_content') }}
+    {% else %}
+    <section id="app">
+        <div class="container">
             <h1>{{ _('OAuth Authentication Error') }}</h1>
             <p class="lead">{{ request.args.error }}</p>
             <p class="text-center">
@@ -14,7 +21,7 @@
                 </a>
             </p>
         </div>
-
-    </div>
-</section>
-{% endblock %}
+    </section>
+    {% endif %}
+  </body>
+</html>

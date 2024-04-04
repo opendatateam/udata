@@ -23,7 +23,7 @@
                 {{ organization.metrics.datasets || 0 }}
             </li>
             <li v-tooltip :title="_('Reuses')">
-                <span class="fa fa-retweet fa-fw"></span>
+                <span class="fa fa-recycle fa-fw"></span>
                 {{ organization.metrics.reuses || 0 }}
             </li>
             <li v-tooltip :title="_('Followers')">

@@ -63,9 +63,14 @@ export default {
             HAS_FILE_API,
         };
     },
+    computed: {
+        canDrop() {
+            return true;
+        },
+    },
     ready() {
         this.$dnd = new qq.DragAndDrop({
-            dropZoneElements: [this.$el],
+            dropZoneElements: this.canDrop ? [this.$el] : [],
             classes: {
                 dropActive: this.$options.dropActive || 'drop-active'
             },
@@ -77,6 +82,13 @@ export default {
     },
 
     watch: {
+        canDrop(canDrop) {
+            if (canDrop) {
+                this.$dnd.setupExtraDropzone(this.$el);
+            } else {
+                this.$dnd.dispose();
+            }
+        },
         upload_endpoint() {
             this._build_uploader();
         }
@@ -140,9 +152,9 @@ export default {
                     onSubmitted: this.on_submit,
                     onProgress: this.on_progress,
                     onComplete: this.on_complete,
-                    onError: this.on_error,
+                    onError: this.on_upload_error,
                 },
-                validation: {allowedExtensions: allowedExtensions.items},
+                validation: {allowedExtensions: this.$options.allowedExtensions || allowedExtensions.items},
                 messages,
             });
         },
@@ -210,7 +222,9 @@ export default {
          * See: http://docs.fineuploader.com/branch/master/features/drag-and-drop.html#processingDroppedFilesComplete
          */
         on_dropped_files_complete(files) {
-            this.$uploader.addFiles(files); // this submits the dropped files to Fine Uploader
+            if (this.canDrop) {
+                this.$uploader.addFiles(files); // this submits the dropped files to Fine Uploader
+            }
         },
 
         /**
@@ -218,7 +232,7 @@ export default {
          *
          * See: http://docs.fineuploader.com/branch/master/api/events.html#error
          */
-        on_error(id, name, reason, xhr) {
+        on_upload_error(id, name, reason, xhr) {
             if (this.errors.has(id)) return;  // Already notified on first chunk error
             // If there is a JSON message display it instead of the non-explicit default one
             if (xhr) {

@@ -1,8 +1,8 @@
 <template>
 <form role="form" class="clearfix animated" @submit.prevent="submit">
     <div class="form-group">
-        <label for="comment-new-message">{{ _('Comment') }}</label>
-        <textarea v-el:textarea id="comment-new-message" v-model="comment" class="form-control" rows="3" required></textarea>
+        <label :for="id">{{ _('Comment') }}</label>
+        <textarea v-el:textarea :id="id" v-model="comment" class="form-control" rows="3" required></textarea>
     </div>
     <button type="submit" :disabled="this.sending || !this.comment" class="btn btn-primary btn-block pull-right submit-new-message">
         {{ _('Submit your comment') }}
@@ -22,10 +22,11 @@ export default {
           // Flags to `true` when the form is in sending process. This prevents
           // duplicate POSTing.
           sending: false,
-          comment: ''
+          comment: '',
+          id: `new-comment-${this.discussionId}`
       }
   },
-  methods: {
+    methods: {
       /**
        * Prefill the form and focus the comment area
        */

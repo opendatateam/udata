@@ -2,15 +2,8 @@
 <div>
 <form-layout icon="tasks" :title="title" :save="save" :cancel="cancel" footer="true" :model="source">
     <harvest-form v-ref:form :source="source"></harvest-form>
-    <!--div class="row" slot="extras">
-        <div class="col-xs-12">
-            <box :title="_('Filters')">
-                <mappings-form :source="source"></mappings-form>
-            </box>
-        </div>
-    </div-->
-    <div class="row" slot="extras">
-        <preview class="col-xs-12" :source="source"></preview>
+    <div v-if="previewSource" class="row" slot="extras">
+        <preview class="col-xs-12" :source="previewSource" from-config></preview>
     </div>
 </form-layout>
 </div>
@@ -35,6 +28,8 @@ const MASK = [
     'backend',
     'validation{state}',
     'config',
+    'active',
+    'autoarchive',
 ];
 
 export default {
@@ -42,6 +37,7 @@ export default {
     data() {
         return {
             source: new HarvestSource({mask: MASK}),
+            previewSource: undefined,
         };
     },
     components: {Box, FormLayout, HarvestForm, Preview},
@@ -54,15 +50,27 @@ export default {
             }
         }
     },
+    ready() {
+        this.source.$on('updated', () => {
+            this.$nextTick(() => {
+                this.previewSource = Object.assign(new HarvestSource(), this.$refs.form.serialize());
+            });
+        });
+    },
     methods: {
         save() {
-            let form = this.$refs.form;
+            const form = this.$refs.form;
             if (form.validate()) {
-                this.source.update(form.serialize(), (response) => {
-                    this.source.on_fetched(response);
-                    this.$go({name: 'harvester', params: {oid: this.source.id}});
-                }, form.on_error);
+                this.source.update(form.serialize(), form.on_error);
             }
+        },
+        on_success() {
+            this.$dispatch('notify', {
+                autoclose: true,
+                title: this._('Changes saved'),
+                details: this._('The harvester has been updated.')
+            });
+            this.$go({name: 'harvester', params: {oid: this.source.id}});
         },
         cancel() {
             this.$go({name: 'harvester', params: {oid: this.source.id}});
@@ -72,12 +80,24 @@ export default {
         'harvest:job:item:selected': function(item) {
             this.$root.$modal(ItemModal, {item: item});
             return true;
+        },
+        'harvest:source:form:changed': function(data) {
+            this.previewSource = Object.assign(new HarvestSource(), data);
         }
     },
     route: {
         data() {
-            this.source.fetch(this.$route.params.oid);
             this.$scrollTo(this.$el);
+            this.source.fetch(this.$route.params.oid);
+            this.source.$once('updated', () => {
+                this.updHandler = this.source.$once('updated', this.on_success);
+            });
+        },
+        deactivate() {
+            if (this.updHandler) {
+                this.updHandler.remove();
+                this.updHandler = undefined;
+            }
         }
     }
 };

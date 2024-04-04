@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
 from udata.utils import (
     get_by, daterange_start, daterange_end, to_bool, to_iso, to_iso_date,
-    to_iso_datetime, recursive_get, safe_unicode
+    to_iso_datetime, recursive_get, safe_unicode, to_naive_datetime
 )
 
 TEST_LIST = [
@@ -60,11 +57,11 @@ class DateRangeTest:
         assert daterange_end(today) == today
 
     def test_parse_daterange_start_datetime(self):
-        now = datetime.now()
+        now = datetime.utcnow()
         assert daterange_start(now) == now.date()
 
     def test_parse_daterange_end_datetime(self):
-        now = datetime.now()
+        now = datetime.utcnow()
         assert daterange_end(now) == now.date()
 
     def test_parse_daterange_start_full_iso(self):
@@ -150,6 +147,9 @@ class ToIsoTest:
     def test_to_iso_datetime_before_1900(self):
         assert to_iso_datetime(date(1884, 2, 29)) == '1884-02-29T00:00:00'
 
+    def test_to_iso_datetime_before_1000(self):
+        assert to_iso_datetime(date(908, 2, 29)) == '0908-02-29T00:00:00'
+
     def test_to_iso_emtpy(self):
         assert to_iso(None) is None
 
@@ -223,14 +223,27 @@ class RecursiveGetTest:
 
 
 class SafeUnicodeTest(object):
-    def test_unicode_is_encoded(self):
-        assert safe_unicode('ééé') == 'ééé'.encode('utf8')
+    def test_unicode_stays_unicode(self):
+        assert safe_unicode('ééé') == 'ééé'
 
-    def test_bytes_stays_bytes(self):
-        assert safe_unicode(b'xxx') == b'xxx'
+    def test_bytes_is_decoded(self):
+        assert safe_unicode(b'xxx') == 'xxx'
 
     def test_object_to_string(self):
-        assert safe_unicode({}) == b'{}'
+        assert safe_unicode({}) == '{}'
 
     def test_unicode_to_string(self):
-        assert safe_unicode(ValueError('é')) == 'é'.encode('utf8')
+        assert safe_unicode(ValueError('é')) == 'é'
+
+
+class AwareDateTest:
+    def test_aware_datetime_to_naiva_datetime(self):
+        aware_date = datetime.utcnow()
+        naive_date = to_naive_datetime(aware_date)
+        assert naive_date.tzname() is None
+
+    def test_date_to_datetime(self):
+        random_date = date(2023, 1, 15)
+        naive_datetime = to_naive_datetime(random_date)
+        assert isinstance(naive_datetime, datetime)
+        assert naive_datetime.tzname() is None

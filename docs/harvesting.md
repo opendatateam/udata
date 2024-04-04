@@ -117,7 +117,7 @@ Fields are extracted according these rules:
 | last_modified | dct:modified                       |                                        |
 | format        | dct:format                         |                                        |
 | mime          | dcat:mediaType                     |                                        |
-| filesize      | dcat:bytesSize                     |                                        |
+| filesize      | dcat:byteSize                     |                                        |
 | checksum      | spdx:checksum                      | See [Checksum](#checksum)              |
 
 
@@ -161,9 +161,6 @@ and implementing the `initialize()` and `process()` methods.
 A minimal harvester adding fake random datasets might looks like:
 
 ```python
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from udata.models import db, Resource
 from udata.utils import faker
 
@@ -177,7 +174,7 @@ class RandomBackend(BaseBackend):
         '''Generate a list of fake identifiers to harvest'''
         # In a real implementation, you should iter over
         # a remote endpoint to list identifiers to harvest
-        # and optionnaly store extra data
+        # and optionally store extra data
         for _ in range(faker.pyint()):
             self.add_item(faker.uuid4())  # Accept kwargs to store data
 
@@ -243,3 +240,4 @@ You may take a look at the [existing backends][backends-repository] to see exiti
 [DCAT]: https://www.w3.org/TR/vocab-dcat/
 [backends-repository]: https://github.com/opendatateam/udata/tree/master/udata/harvest/backends
 [gov-uk-references]: http://reference.data.gov.uk/
+[cookiecutter-template]: https://github.com/opendatateam/cookiecutter-udata-harvester

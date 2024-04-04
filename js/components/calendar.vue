@@ -241,7 +241,7 @@ export default {
             // Focus active or first button
             const button = this.$el.querySelector('main button.active:not(:disabled)')
                 || this.$el.querySelector('main button:not(:disabled)');
-            button.focus();
+            if (button) button.focus();
         },
 
         clear() {

@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
 import logging
 
-from udata.models import db
+from udata.mongo import db
 
 log = logging.getLogger(__name__)
 

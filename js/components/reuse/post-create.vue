@@ -2,12 +2,6 @@
 <div class="page-header">
 <h1>{{ _('Your reuse has been created') }}</h1>
 </div>
-<div class="row">
-    <div class="col-xs-12 lead text-center">
-        <p>{{ _('You should communicate about it.') }}</p>
-    </div>
-</div>
-<share :url="reuse.page" :title="reuse.title"></share>
 
 <div class="row">
     <div class="col-xs-12 col-md-6 text-center">
@@ -33,8 +27,6 @@ export default {
             default: function() {return {};}
         }
     },
-    components: {
-        share: require('components/widgets/share.vue')
-    }
+    components: {}
 };
 </script>

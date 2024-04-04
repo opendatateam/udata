@@ -1,14 +1,17 @@
 <template>
 <div>
-  <vform v-ref:form :fields="fields" :model="reuse"></vform>
+  <vertical-form v-ref:form :fields="fields" :model="reuse"></vertical-form>
 </div>
 </template>
 
 <script>
 import Reuse from 'models/reuse';
 import reuse_types from 'models/reuse_types';
+import reuse_topics from 'models/reuse_topics';
+import VerticalForm from 'components/form/vertical-form.vue';
 
 export default {
+    components: {VerticalForm},
     props: {
         reuse: {
             type: Object,
@@ -16,13 +19,12 @@ export default {
                 return new Reuse();
             }
         },
-        hideNotifications: false
     },
-    data: function() {
+    data() {
         return {
             fields: [{
                     id: 'title',
-                    label: this._('Name')
+                    label: this._('Title')
                 }, {
                     id: 'url',
                     label: this._('URL'),
@@ -32,7 +34,15 @@ export default {
                     label: this._('Type'),
                     widget: 'select-input',
                     values: reuse_types,
-                    map: function(item) {
+                    map(item) {
+                        return {value: item.id, text: item.label};
+                    }
+                }, {
+                    id: 'topic',
+                    label: this._('Topic'),
+                    widget: 'select-input',
+                    values: reuse_topics,
+                    map(item) {
                         return {value: item.id, text: item.label};
                     }
                 }, {
@@ -48,26 +58,14 @@ export default {
                 }]
         };
     },
-    components: {
-        vform: require('components/form/vertical-form.vue')
-    },
     methods: {
-        serialize: function() {
+        serialize() {
             return this.$refs.form.serialize();
         },
-        validate: function() {
-            const isValid = this.$refs.form.validate();
-
-            if (isValid & !this.hideNotifications) {
-                this.$dispatch('notify', {
-                    autoclose: true,
-                    title: this._('Changes saved'),
-                    details: this._('Your reuse has been updated.')
-                });
-            }
-            return isValid;
+        validate() {
+            return this.$refs.form.validate();
         },
-        on_error: function(response) {
+        on_error(response) {
             return this.$refs.form.on_error(response);
         },
     }

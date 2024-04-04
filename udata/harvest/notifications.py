@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
 from udata.features.notifications.actions import notifier
 
 from .models import HarvestSource, VALIDATION_PENDING

@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-from udata import search
 from udata.api import api, API
 
-from udata.tags import normalize  # TODO: merge this into this package
+from udata.tags import slug  # TODO: merge this into this package
+from udata.models import Tag
 
 DEFAULT_SIZE = 8
 
@@ -12,7 +9,7 @@ ns = api.namespace('tags', 'Tags related operations')
 
 parser = api.parser()
 parser.add_argument(
-    'q', type=unicode, help='The string to autocomplete/suggest',
+    'q', type=str, help='The string to autocomplete/suggest',
     location='args', required=True)
 parser.add_argument(
     'size', type=int, help='The amount of suggestion to fetch',
@@ -21,10 +18,11 @@ parser.add_argument(
 
 @ns.route('/suggest/', endpoint='suggest_tags')
 class SuggestTagsAPI(API):
-    @api.doc(id='suggest_tags', parser=parser)
+    @api.doc('suggest_tags')
+    @api.expect(parser)
     def get(self):
         '''Suggest tags'''
         args = parser.parse_args()
-        q = normalize(args['q'])
-        result = search.suggest(q, 'tag_suggest', args['size'])
-        return sorted(result, key=lambda o: len(o['text']))
+        q = slug(args['q'])
+        results = [{'text': i.name} for i in Tag.objects(name__icontains=q).limit(args['size'])]
+        return sorted(results, key=lambda o: len(o['text']))

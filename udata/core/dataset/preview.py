@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
 import warnings
 
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 
 from flask import current_app
 
@@ -16,7 +13,11 @@ CACHE_DURATION = 60 * 60 * 24
 CACHE_KEY = 'udata.preview.enabled_plugins'
 
 
-class PreviewPlugin:
+class PreviewWarning(UserWarning):
+    pass
+
+
+class PreviewPlugin(ABC):
     '''
     An abstract preview plugin.
 
@@ -26,8 +27,6 @@ class PreviewPlugin:
     - implement abstract methods
     - expose the class on the ``udata.preview`` endpoint
     '''
-    __metaclass__ = ABCMeta
-
     #: Default previews are given only if no specific preview match.
     #: Typically plugins only relying on mimetype or format
     #: should have `fallback = True`
@@ -68,7 +67,8 @@ def get_enabled_plugins():
     for plugin in plugins:
         if plugin not in valid:
             clsname = plugin.__name__
-            warnings.warn('{0} is not a valid preview plugin'.format(clsname))
+            msg = '{0} is not a valid preview plugin'.format(clsname)
+            warnings.warn(msg, PreviewWarning)
     return [p() for p in sorted(valid, key=lambda p: 1 if p.fallback else 0)]
 
 

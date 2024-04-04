@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import re
 
-from flask import current_app
+from werkzeug.routing import BuildError
+from flask import current_app, url_for
 from netaddr import IPAddress, AddrFormatError
 
 from udata.settings import Defaults
@@ -49,7 +47,7 @@ class ValidationError(ValueError):
 
 def error(url, reason=None):
     __tracebackhide__ = True
-    if not isinstance(url, unicode):
+    if not isinstance(url, str):
         url = url.decode('utf8')
     msg = 'Invalid URL "{0}"'.format(url)
     if reason:
@@ -64,6 +62,20 @@ def config_for(value, key):
         return current_app.config[key]
     except RuntimeError:
         return getattr(Defaults, key)
+
+
+def endpoint_for(endpoint, fallback_endpoint=None, **values):
+    try:
+        return url_for(endpoint, **values)
+    except BuildError:
+        if fallback_endpoint:
+            return url_for(fallback_endpoint, **values)
+        return None
+
+
+
+def idna(string):
+    return string.encode('idna').decode('utf8')
 
 
 def validate(url, schemes=None, tlds=None, private=None, local=None,
@@ -95,7 +107,7 @@ def validate(url, schemes=None, tlds=None, private=None, local=None,
         error(url, 'Credentials in URL are not allowed')
 
     tld = match.group('tld')
-    if tld and tld not in tlds and tld.encode('idna') not in tlds:
+    if tld and tld not in tlds and idna(tld) not in tlds:
         error(url, 'Invalid TLD {0}'.format(tld))
 
     ip = match.group('ipv6') or match.group('ipv4')

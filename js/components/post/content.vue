@@ -18,7 +18,7 @@
 <box :title="post.name || ''" icon="newspaper-o"
     boxclass="box-solid post-content-widget">
     <image-button :src="post.image" :size="150"
-        :endpoint="endpoint">
+        :endpoint="endpoint" :editable="$root.me.is_admin">
     </image-button>
     <p v-if="published"><strong>
         {{ _('Published on {date}', {date: published}) }}

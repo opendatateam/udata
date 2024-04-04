@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import bson
 import datetime
 import logging
 import os
+import importlib
 import types
 
 from os.path import abspath, join, dirname, isfile, exists
@@ -16,9 +14,8 @@ from flask import (
 from flask_caching import Cache
 
 from flask_wtf.csrf import CSRFProtect
-from flask_navigation import Navigation
 from speaklater import is_lazy_string
-from werkzeug.contrib.fixers import ProxyFix
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from udata import entrypoints
 
@@ -30,7 +27,6 @@ log = logging.getLogger(__name__)
 
 cache = Cache()
 csrf = CSRFProtect()
-nav = Navigation()
 
 
 def send_static(directory, filename, cache_timeout):
@@ -82,6 +78,13 @@ class UDataApp(Flask):
         return super(UDataApp, self).handle_http_exception(e)
 
     def register_blueprint(self, blueprint, **kwargs):
+
+        if blueprint.name in self.blueprints:
+            # TODO: remove this warning and let Flask return a ValueError once
+            # we can set a custom blueprint name in Flask-storage
+            self.logger.warning('Blueprint already loaded')
+            return self.blueprints[blueprint.name]
+
         if blueprint.has_static_folder and 'url_prefix' in kwargs:
             self.static_prefixes[blueprint.name] = kwargs['url_prefix']
         return super(UDataApp, self).register_blueprint(blueprint, **kwargs)
@@ -115,7 +118,7 @@ class UDataJsonEncoder(json.JSONEncoder):
     '''
     def default(self, obj):
         if is_lazy_string(obj):
-            return unicode(obj)
+            return str(obj)
         elif isinstance(obj, bson.objectid.ObjectId):
             return str(obj)
         elif isinstance(obj, datetime.datetime):
@@ -127,16 +130,13 @@ class UDataJsonEncoder(json.JSONEncoder):
         # Serialize Raw data for Document and EmbeddedDocument.
         elif hasattr(obj, '_data'):
             return obj._data
-        # Serialize raw data from Elasticsearch DSL AttrList
-        elif hasattr(obj, '_l_'):
-            return obj._l_
         return super(UDataJsonEncoder, self).default(obj)
 
 
 # These loggers are very verbose
 # We need to put them in WARNING level
 # even if the main level is INFO or DEBUG
-VERBOSE_LOGGERS = 'elasticsearch', 'requests'
+VERBOSE_LOGGERS = 'requests',
 
 
 def init_logging(app):
@@ -156,6 +156,7 @@ def create_app(config='udata.settings.Defaults', override=None,
     '''Factory for a minimal application'''
     app = UDataApp(APP_NAME)
     app.config.from_object(config)
+
     settings = os.environ.get('UDATA_SETTINGS', join(os.getcwd(), 'udata.cfg'))
     if exists(settings):
         app.settings_file = settings  # Keep track of loaded settings for diagnostic
@@ -163,6 +164,20 @@ def create_app(config='udata.settings.Defaults', override=None,
 
     if override:
         app.config.from_object(override)
+
+    # Loads defaults from plugins
+    for pkg in entrypoints.get_roots(app):
+        if pkg == 'udata':
+            continue  # Defaults are already loaded
+        module = '{}.settings'.format(pkg)
+        try:
+            settings = importlib.import_module(module)
+        except ImportError:
+            continue
+        for key, default in settings.__dict__.items():
+            if key.startswith('__'):
+                continue
+            app.config.setdefault(key, default)
 
     app.json_encoder = UDataJsonEncoder
 
@@ -191,23 +206,21 @@ def standalone(app):
 
 def register_extensions(app):
     from udata import (
-        models, routing, tasks, mail, i18n, auth, theme, search, sitemap,
-        sentry
+        models, mongo, routing, tasks, mail, i18n, auth, search, sitemap,
+        sentry, notifications
     )
+    tasks.init_app(app)
     i18n.init_app(app)
+    mongo.init_app(app)
     models.init_app(app)
     routing.init_app(app)
     auth.init_app(app)
     cache.init_app(app)
-    tasks.init_app(app)
     csrf.init_app(app)
-    nav.init_app(app)
-    theme.init_app(app)
     mail.init_app(app)
     search.init_app(app)
     sitemap.init_app(app)
     sentry.init_app(app)
-    from . import patch_flask_security  # noqa
     return app
 
 

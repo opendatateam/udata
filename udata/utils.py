@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import hashlib
 import math
 import re
 
 import factory
 
+from bson import ObjectId
+from bson.errors import InvalidId
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 from dateutil.parser import parse as parse_dt
@@ -14,8 +13,9 @@ from faker import Faker
 from faker.config import PROVIDERS
 from faker.providers import BaseProvider
 from faker.providers.lorem.la import Provider as LoremProvider
+from flask import abort
 from math import ceil
-from uuid import uuid4
+from uuid import uuid4, UUID
 from xml.sax.saxutils import escape
 
 
@@ -78,7 +78,7 @@ class Paginable(object):
     def iter_pages(self, left_edge=2, left_current=2, right_current=5,
                    right_edge=2):
         last = 0
-        for num in xrange(1, self.pages + 1):
+        for num in range(1, self.pages + 1):
             if (num <= left_edge or
                     (num > self.page - left_current - 1 and
                         num < self.page + right_current) or
@@ -142,6 +142,20 @@ def daterange_end(value):
         return result.replace(month=12, day=31)
 
 
+def to_naive_datetime(given_date):
+    if isinstance(given_date, str):
+        given_date = parse_dt(given_date)
+    if isinstance(given_date, date) and not isinstance(given_date, datetime):
+        return datetime(
+            given_date.year,
+            given_date.month,
+            given_date.day
+        )
+    elif isinstance(given_date, datetime):
+        return given_date.replace(tzinfo=None)
+    return given_date
+
+
 def to_iso(dt):
     '''
     Format a date or datetime into an ISO-8601 string
@@ -161,7 +175,7 @@ def to_iso_date(dt):
     Support dates before 1900.
     '''
     if dt:
-        return '{dt.year:02d}-{dt.month:02d}-{dt.day:02d}'.format(dt=dt)
+        return '{dt.year:04d}-{dt.month:02d}-{dt.day:02d}'.format(dt=dt)
 
 
 def to_iso_datetime(dt):
@@ -190,7 +204,7 @@ def to_bool(value):
     '''
     if isinstance(value, bool):
         return value
-    elif isinstance(value, basestring):
+    elif isinstance(value, str):
         return value.lower() == 'true' or value.lower() == 't'
     elif isinstance(value, int):
         return value > 0
@@ -207,7 +221,7 @@ def clean_string(value):
 
 def not_none_dict(d):
     '''Filter out None values from a dict'''
-    return {k: v for k, v in d.iteritems() if v is not None}
+    return {k: v for k, v in d.items() if v is not None}
 
 
 def hash_url(url):
@@ -226,7 +240,7 @@ def recursive_get(obj, key):
     '''
     if not obj or not key:
         return
-    parts = key.split('.') if isinstance(key, basestring) else key
+    parts = key.split('.') if isinstance(key, str) else key
     key = parts.pop(0)
     if isinstance(obj, dict):
         value = obj.get(key, None)
@@ -240,6 +254,18 @@ def unique_string(length=UUID_LENGTH):
     # We need a string at least as long as length
     string = str(uuid4()) * int(math.ceil(length / float(UUID_LENGTH)))
     return string[:length] if length else string
+
+
+def is_uuid(uuid_string, version=4):
+    try:
+        # If uuid_string is a valid hex code but not a valid uuid,
+        # UUID() will still make a valide uuid out of it.
+        # to prevent this, we check the genuine version (without dashes)
+        # with the generated hex code. They should be similar.
+        uid = UUID(uuid_string, version=version)
+        return uid.hex == uuid_string.replace('-', '')
+    except ValueError:
+        return False
 
 
 # This is the default providers list
@@ -259,7 +285,7 @@ def faker_provider(provider):
 @faker_provider
 class UDataProvider(BaseProvider):
     '''
-    A Faker provider for UData missing requirements.
+    A Faker provider for udata missing requirements.
 
     Might be conributed to upstream Faker project
     '''
@@ -271,13 +297,19 @@ class UDataProvider(BaseProvider):
 @faker_provider  # Replace the default lorem provider with a unicode one
 class UnicodeLoremProvider(LoremProvider):
     '''A Lorem provider that forces unicode in words'''
-    word_list = map(lambda w: w + 'é', LoremProvider.word_list)
+    word_list = [w + 'é' for w in LoremProvider.word_list]
 
 
 def safe_unicode(string):
-    '''Safely transform any object into utf8 encoded bytes'''
-    if not isinstance(string, basestring):
-        string = unicode(string)
-    if isinstance(string, unicode):
-        string = string.encode('utf8')
-    return string
+    '''Safely transform any object into utf8 decoded str'''
+    if string is None:
+        return None
+    return string.decode('utf8') if isinstance(string, bytes) else str(string)
+
+
+def id_or_404(object_id):
+    try:
+        ObjectId(object_id)
+        return object_id
+    except InvalidId:
+        abort(404)

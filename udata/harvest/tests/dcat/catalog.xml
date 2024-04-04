@@ -3,7 +3,9 @@
   xmlns:foaf="http://xmlns.com/foaf/0.1/"
   xmlns:owl="http://www.w3.org/2002/07/owl#"
   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
   xmlns:dcat="http://www.w3.org/ns/dcat#"
+  xmlns:dct="http://purl.org/dc/terms/"
   xmlns:dcterms="http://purl.org/dc/terms/"
   xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
   xmlns:schema="http://schema.org/"
@@ -21,7 +23,22 @@
         <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T18:59:02.737480</dcterms:issued>
         <dcterms:description>Dataset 3 description</dcterms:description>
         <dcat:keyword>Tag 1</dcat:keyword>
-        <dcat:distribution rdf:resource="http://data.test.org/datasets/3/resources/1"/>
+        <dcat:distribution rdf:resource="datasets/3/resources/1"/>
+        <dct:license>Licence Ouverte Version 2.0</dct:license>
+        <dct:accessRights rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1e"/>
+        <dcat:landingPage>http://data.test.org/datasets/3</dcat:landingPage>
+        <dct:accrualPeriodicity xmlns:dct="http://purl.org/dc/terms/">daily</dct:accrualPeriodicity>
+        <dct:temporal>
+          <dcterms:PeriodOfTime>
+            <schema:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-01T00:00:00</schema:startDate>
+            <schema:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-05T00:00:00</schema:endDate>
+          </dcterms:PeriodOfTime>
+        </dct:temporal>
+        <dct:provenance>
+          <dct:ProvenanceStatement>
+            <rdfs:label xml:lang="fr">Description de la provenance des données</rdfs:label>
+          </dct:ProvenanceStatement>
+        </dct:provenance>
       </dcat:Dataset>
     </dcat:dataset>
     <dcterms:title>Sample DCAT Catalog</dcterms:title>
@@ -31,9 +48,15 @@
         <dcat:contactPoint rdf:resource="http://data.test.org/contacts/1"/>
         <dcat:landingPage>http://data.test.org/datasets/1</dcat:landingPage>
         <dcat:keyword>Tag 3</dcat:keyword>
-        <dcterms:description>Dataset 1 description</dcterms:description>
+        <dcterms:abstract><![CDATA[<h1>h1 title</h1><h2>h2 title</h2><b>and bold text</b>]]></dcterms:abstract>
         <dcterms:title>Dataset 1</dcterms:title>
-        <dcterms:temporal rdf:resource="file:///base/data/home/apps/s%7Erdf-translator/2.408516547054015808/temporal-1"/>
+        <dct:accrualPeriodicity><dcterms:Frequency rdf:about="http://purl.org/cld/freq/ThisTermDoesNotExist"></dcterms:Frequency></dct:accrualPeriodicity>
+        <dct:temporal>
+          <dcterms:PeriodOfTime>
+            <dcat:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-01T00:00:00</dcat:startDate>
+            <dcat:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-05T00:00:00</dcat:endDate>
+          </dcterms:PeriodOfTime>
+        </dct:temporal>
         <dcat:theme>Theme 1</dcat:theme>
         <dcterms:publisher rdf:resource="http://data.test.org/organizations/1"/>
         <owl:versionInfo>1.0</owl:versionInfo>
@@ -46,6 +69,7 @@
         <dcat:distribution rdf:resource="http://data.test.org/datasets/1/resources/1"/>
         <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T18:59:02.737480</dcterms:issued>
         <dcterms:identifier>1</dcterms:identifier>
+        <dcterms:hasPart rdf:resource="http://data.test.org/datasets/1/resources/3"/>
       </dcat:Dataset>
     </dcat:dataset>
     <dcat:dataset>
@@ -80,7 +104,7 @@
   </dcat:Distribution>
   <vcard:Organization rdf:about="http://data.test.org/contacts/1">
     <vcard:fn>Organization contact</vcard:fn>
-    <vcard:hasEmail>hello@its.me</vcard:hasEmail>
+    <vcard:hasEmail>mailto: hello@its.me</vcard:hasEmail>
   </vcard:Organization>
   <dcterms:PeriodOfTime rdf:about="file:///base/data/home/apps/s%7Erdf-translator/2.408516547054015808/temporal-2">
     <schema:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-01T00:00:00</schema:startDate>
@@ -88,7 +112,13 @@
   </dcterms:PeriodOfTime>
   <dcat:Distribution rdf:about="http://data.test.org/datasets/1/resources/1">
     <dcterms:title>Resource 1-1</dcterms:title>
-    <dcterms:format>JSON</dcterms:format>
+    <dcterms:format>
+      <dcterms:MediaTypeOrExtent rdf:about="https://www.iana.org/assignments/media-types/application/json">
+        <rdf:type rdf:resource="http://purl.org/dc/terms/MediaTypeOrExtent" />
+      </dcterms:MediaTypeOrExtent>
+    </dcterms:format>
+    <dcat:mediaType rdf:resource="https://www.iana.org/assignments/media-types/application/json" />
+    <dcat:byteSize>12323</dcat:byteSize>
     <dcterms:description>A JSON resource</dcterms:description>
     <dcat:accessURL>http://data.test.org/datasets/1/resources/1/file.json</dcat:accessURL>
   </dcat:Distribution>
@@ -107,12 +137,16 @@
     <dcterms:format>JSON</dcterms:format>
     <dcterms:description>A JSON resource</dcterms:description>
   </dcat:Distribution>
-  <dcat:Distribution rdf:about="http://data.test.org/datasets/3/resources/1">
+  <dcat:Distribution rdf:about="datasets/3/resources/1">
     <dcterms:format>JSON</dcterms:format>
     <dcterms:title>Resource 3-1</dcterms:title>
     <dcterms:description>A JSON resource</dcterms:description>
     <dcat:accessURL>http://data.test.org/datasets/3/resources/1/file.json</dcat:accessURL>
   </dcat:Distribution>
+  <foaf:Document rdf:about="http://data.test.org/datasets/1/resources/3">
+    <dcterms:title>Resource 1-3</dcterms:title>
+    <dcterms:format>JSON</dcterms:format>
+  </foaf:Document>
   <dcterms:Location rdf:about="http://wuEurope.com/"/>
   <foaf:Organization rdf:about="http://data.test.org/organizations/1">
     <foaf:name>An Organization</foaf:name>

@@ -1,5 +1,7 @@
 <!-- Markdown editor widget -->
 <style lang="less">
+@import '~less/udata/markdown';
+
 @padding: 6px 12px;
 
 .md-editor {
@@ -35,6 +37,9 @@
     .md-preview {
         color: black;
         padding: @padding;
+        max-width: 100%;
+
+        .markdown();
     }
 }
 </style>
@@ -54,7 +59,7 @@ import $ from 'jquery';
 import config from 'config';
 import {_} from 'i18n';
 import {FieldComponentMixin} from 'components/form/base-field';
-import commonmark from 'helpers/commonmark';
+import markdown from 'helpers/markdown';
 
 const EXCERPT_TOKEN = '<!--- excerpt -->';
 
@@ -90,7 +95,7 @@ export default {
             savable: false,
             resize: 'both',
             iconlibrary: 'fa',
-            onPreview: (e) => commonmark(e.getContent()),
+            onPreview: (e) => markdown(e.getContent()),
             additionalButtons: [
                 [{
                     name: 'extras',

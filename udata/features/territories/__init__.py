@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from flask import current_app
 
 from udata.models import db, GeoZone
@@ -33,7 +30,7 @@ def check_for_territories(query):
         elif query_length == 5 and level == 'fr:commune' and (
                 is_digit or query.startswith('2a') or query.startswith('2b')):
             # INSEE code then postal codes with Corsica exceptions.
-            q &= db.Q(code=query) | db.Q(keys__postal__contains=query)
+            q &= db.Q(code=query)
         elif query_length >= 4:
             # Check names starting with query or exact match.
             q &= db.Q(name__istartswith=query) | db.Q(name__iexact=query)

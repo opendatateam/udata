@@ -1,18 +1,15 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from flask import url_for
 
 from udata.core.spatial.factories import GeoZoneFactory
 from udata.tests.api import APITestCase
-from udata.tests.features.territories.test_territories_process import (
-    TerritoriesSettings, create_geozones_fixtures,
-    create_old_new_regions_fixtures
+from udata.tests.features.territories import (
+    create_geozones_fixtures, create_old_new_regions_fixtures,
+    TerritoriesSettings
 )
 
 
 class TerritoriesAPITest(APITestCase):
-    modules = ['features.territories']
+    modules = []
     settings = TerritoriesSettings
 
     def setUp(self):
@@ -38,10 +35,8 @@ class TerritoriesAPITest(APITestCase):
         self.assert200(response)
         result = response.json[0]
         self.assertEqual(result['title'], self.arles.name)
-        self.assertEqual(result['parent'], self.bdr.name)
         self.assertEqual(result['id'], self.arles.id)
         self.assertIn('page', result)
-        self.assertIn('image_url', result)
 
     def test_suggest_town_five_letters(self):
         response = self.get(
@@ -49,10 +44,8 @@ class TerritoriesAPITest(APITestCase):
         self.assert200(response)
         result = response.json[0]
         self.assertEqual(result['title'], self.arles.name)
-        self.assertEqual(result['parent'], self.bdr.name)
         self.assertEqual(result['id'], self.arles.id)
         self.assertIn('page', result)
-        self.assertIn('image_url', result)
 
     def test_suggest_town_by_insee_code(self):
         response = self.get(
@@ -61,23 +54,11 @@ class TerritoriesAPITest(APITestCase):
         result = response.json[0]
         self.assertEqual(result['id'], self.arles.id)
         self.assertEqual(result['title'], self.arles.name)
-        self.assertEqual(result['parent'], self.bdr.name)
-
-    def test_suggest_town_by_postal_code(self):
-        response = self.get(
-            url_for('api.suggest_territory'), qs={'q': '13200'})
-        self.assert200(response)
-        result = response.json[0]
-        self.assertEqual(result['id'], self.arles.id)
-        self.assertEqual(result['title'], self.arles.name)
-        self.assertEqual(result['parent'], self.bdr.name)
 
     def test_suggest_towns(self):
         arles_sur_tech = GeoZoneFactory(
-            id='fr:commune:66009@1942-01-01', level='fr:commune',
-            parents=[self.bdr.id], name='Arles-sur-Tech', code='66009',
-            keys={'postal': '66150'}, population=2687, area=0,
-            validity={'start': '1942-01-01', 'end': '9999-12-31'})
+            id='fr:commune:66009', level='fr:commune',
+            name='Arles-sur-Tech', code='66009')
         response = self.get(
             url_for('api.suggest_territory'), qs={'q': 'arles'})
         self.assert200(response)
@@ -93,10 +74,8 @@ class TerritoriesAPITest(APITestCase):
         self.assert200(response)
         result = response.json[0]
         self.assertEqual(result['title'], self.bdr.name)
-        self.assertEqual(result['parent'], self.paca.name)
         self.assertEqual(result['id'], self.bdr.id)
         self.assertIn('page', result)
-        self.assertIn('image_url', result)
 
     def test_suggest_region(self):
         response = self.get(
@@ -105,9 +84,7 @@ class TerritoriesAPITest(APITestCase):
         result = response.json[0]
         self.assertEqual(result['title'], self.paca.name)
         self.assertEqual(result['id'], self.paca.id)
-        self.assertEqual(result['parent'], None)
         self.assertIn('page', result)
-        self.assertIn('image_url', result)
 
     def test_suggest_old_new_region(self):
         lr, occitanie = create_old_new_regions_fixtures()
@@ -115,10 +92,10 @@ class TerritoriesAPITest(APITestCase):
             url_for('api.suggest_territory'), qs={'q': 'langue'})
         self.assert200(response)
         self.assertEqual(len(response.json), 2)
-        result = response.json[0]
+        result = response.json[1]
         self.assertEqual(result['title'], occitanie.name)
         self.assertEqual(result['id'], occitanie.id)
-        result = response.json[1]
+        result = response.json[0]
         self.assertEqual(result['title'], lr.name)
         self.assertEqual(result['id'], lr.id)
 
@@ -129,14 +106,11 @@ class TerritoriesAPITest(APITestCase):
         result = response.json[0]
         self.assertEqual(result['id'], self.bdr.id)
         self.assertEqual(result['title'], self.bdr.name)
-        self.assertEqual(result['parent'], self.paca.name)
 
     def test_suggest_town_and_county(self):
         bouchet = GeoZoneFactory(
-            id='fr:commune:26054@1942-01-01', level='fr:commune',
-            parents=[self.bdr.id], name='Bouchet', code='26054',
-            keys={'postal': '26790'}, population=1305, area=0,
-            validity={'start': '1942-01-01', 'end': '9999-12-31'})
+            id='fr:commune:26054', level='fr:commune',
+            name='Bouchet', code='26054')
         response = self.get(
             url_for('api.suggest_territory'), qs={'q': 'bouche'})
         self.assert200(response)
@@ -148,9 +122,8 @@ class TerritoriesAPITest(APITestCase):
 
     def test_suggest_drom_com(self):
         guyane = GeoZoneFactory(
-            id='fr:departement:973@1860-07-01', level='fr:departement',
-            name='Guyane', code='973', population=250109, area=0,
-            validity={'start': '1860-07-01', 'end': '9999-12-31'})
+            id='fr:departement:973', level='fr:departement',
+            name='Guyane', code='973')
         response = self.get(
             url_for('api.suggest_territory'), qs={'q': 'guya'})
         self.assert200(response)
@@ -160,9 +133,8 @@ class TerritoriesAPITest(APITestCase):
 
     def test_suggest_drom_com_by_code(self):
         guyane = GeoZoneFactory(
-            id='fr:departement:973@1860-07-01', level='fr:departement',
-            name='Guyane', code='973', population=250109, area=0,
-            validity={'start': '1860-07-01', 'end': '9999-12-31'})
+            id='fr:departement:973', level='fr:departement',
+            name='Guyane', code='973')
         response = self.get(
             url_for('api.suggest_territory'), qs={'q': '973'})
         self.assert200(response)
@@ -172,9 +144,8 @@ class TerritoriesAPITest(APITestCase):
 
     def test_suggest_corsica(self):
         bastia = GeoZoneFactory(
-            id='fr:commune:2b033@1976-01-01', level='fr:commune',
-            name='Bastia', code='2b033', population=4479, area=0,
-            validity={'start': '1976-01-01', 'end': '9999-12-31'})
+            id='fr:commune:2b033', level='fr:commune',
+            name='Bastia', code='2b033')
         response = self.get(
             url_for('api.suggest_territory'), qs={'q': 'basti'})
         self.assert200(response)
@@ -184,9 +155,8 @@ class TerritoriesAPITest(APITestCase):
 
     def test_suggest_corsica_by_code(self):
         bastia = GeoZoneFactory(
-            id='fr:commune:2b033@1976-01-01', level='fr:commune',
-            name='Bastia', code='2b033', population=4479, area=0,
-            validity={'start': '1976-01-01', 'end': '9999-12-31'})
+            id='fr:commune:2b033', level='fr:commune',
+            name='Bastia', code='2b033')
         response = self.get(
             url_for('api.suggest_territory'), qs={'q': '2b033'})
         self.assert200(response)
@@ -196,9 +166,8 @@ class TerritoriesAPITest(APITestCase):
 
     def test_suggest_corsica_by_county_code(self):
         haute_corse = GeoZoneFactory(
-            id='fr:departement:2b@1976-01-01', level='fr:departement',
-            name='Haute-Corse', code='2b', population=168640, area=0,
-            validity={'start': '1976-01-01', 'end': '9999-12-31'})
+            id='fr:departement:2b', level='fr:departement',
+            name='Haute-Corse', code='2b')
         response = self.get(
             url_for('api.suggest_territory'), qs={'q': '2b'})
         self.assert200(response)
@@ -233,4 +202,3 @@ class TerritoriesAPITest(APITestCase):
         self.assertEqual(result['title'], self.bdr.name)
         self.assertEqual(result['id'], self.bdr.id)
         self.assertIn('page', result)
-        self.assertIn('image_url', result)

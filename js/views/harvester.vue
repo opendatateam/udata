@@ -45,7 +45,7 @@ import SourceWidget from 'components/harvest/source.vue';
 import JobWidget from 'components/harvest/job.vue';
 import Layout from 'components/layout.vue';
 
-const MASK = ['id', 'name', 'url', 'owner', 'organization', 'backend', 'validation{state}', 'schedule'];
+const MASK = ['id', 'name', 'url', 'owner', 'organization', 'backend', 'validation{state}', 'schedule', 'deleted'];
 
 export default {
     name: 'HarvestSourceView',

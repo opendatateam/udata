@@ -1,0 +1,22 @@
+{% extends 'security/email/base.html' %}
+{% from 'security/email/button.html' import mail_button %}
+
+{% block body %}
+
+<p>{{ _('Your password has been changed.') }}</p>
+<br/>
+
+{% if security.recoverable %}
+<p>{{ _('If you did not change your password, click below to reset it.') }}</p>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td align="center">
+            {{ mail_button(
+                _('Reset password'),
+                url_for('security.forgot_password', _external=True)
+            ) }}
+        </td>
+    </tr>
+</table>
+{% endif %}
+{% endblock %}

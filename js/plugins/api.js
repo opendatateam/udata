@@ -72,7 +72,7 @@ export class Api {
     /**
      * Build a complete URL
      * @param  {String} url     An absolute or API root relative URL
-     * @param  {Object} params  Optionnal query strings parameters
+     * @param  {Object} params  Optional query strings parameters
      * @return {String}         The full URL
      */
     build(url, params) {
@@ -120,8 +120,8 @@ export class Api {
     /**
      * Perform a GET operation
      * @param  {String} url     An absolute or API root relative URL
-     * @param  {Object} params  Optionnal query strings parameters
-     * @param  {[type]} headers Optionnal HTTP headers
+     * @param  {Object} params  Optional query strings parameters
+     * @param  {[type]} headers Optional HTTP headers
      * @return {Promise}        An instanciated fetch promise
      */
     get(url, params, headers) {
@@ -138,7 +138,7 @@ export class Api {
      * Perform a POST operation with a JSON payload
      * @param  {String} url     An absolute or API root relative URL
      * @param  {Object} data    The body payload
-     * @param  {[type]} headers Optionnal HTTP headers
+     * @param  {[type]} headers Optional HTTP headers
      * @return {Promise}        An instanciated fetch promise
      */
     post(url, data, headers) {
@@ -156,7 +156,7 @@ export class Api {
      * Perform a PUT operation
      * @param  {String} url     An absolute or API root relative URL
      * @param  {Object} data    The body payload
-     * @param  {Object} headers Optionnal HTTP headers
+     * @param  {Object} headers Optional HTTP headers
      * @return {Promise}        An instanciated fetch promise
      */
     put(url, data, headers) {
@@ -173,7 +173,7 @@ export class Api {
     /**
      * Perform a DELETE operation
      * @param  {String} url     An absolute or API root relative URL
-     * @param  {Object} headers Optionnal HTTP options
+     * @param  {Object} headers Optional HTTP options
      * @return {Promise}        An instanciated fetch promise
      */
     delete(url, headers) {

@@ -1,3 +1,0 @@
--r test.pip
-invoke==1.1.1
-readme-renderer==21.0

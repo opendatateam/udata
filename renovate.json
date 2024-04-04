@@ -1,0 +1,13 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "baseBranches": ["master"],
+  "pip_requirements": {
+    "fileMatch": ["requirements/install.in", "requirements/test.in"]
+  },
+  "enabledManagers": ["pip_requirements"],
+  "automerge": true,
+  "prHourlyLimit": 5,
+  "masterIssueApproval": true
+}

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
 from datetime import datetime, timedelta
 from dateutil.parser import parse
 
@@ -20,7 +17,7 @@ def purge_chunks(self):
     meta_files = (f for f in chunks.list_files() if f.endswith(META))
     for filename in meta_files:
         metadata = json.loads(chunks.read(filename))
-        if datetime.now() - parse(metadata['lastchunk']) >= max_retention:
+        if datetime.utcnow() - parse(metadata['lastchunk']) >= max_retention:
             uuid = metadata['uuid']
             log.info('Removing %s expired chunks', uuid)
             chunks.delete(uuid)

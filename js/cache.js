@@ -45,13 +45,13 @@ export class ShimStorage {
 }
 
 /**
- * A WebStorage based cache with optionnal TTL (expressed in seconds).
+ * A WebStorage based cache with optional TTL (expressed in seconds).
  */
 export class Cache {
     /**
      * Constructor
      * @param  {String} namespace The namespace key meant to isolate keys
-     * @param  {int} ttl                An optionnal default TTL
+     * @param  {int} ttl                An optional default TTL
      */
     constructor(namespace, ttl) {
         this.namespace = namespace;

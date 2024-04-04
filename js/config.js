@@ -70,6 +70,11 @@ export const csrf_token = _meta('csrf-token');
 export const check_urls = _jsonMeta('check-urls');
 
 /**
+ * Is the check url feature disabled for some resource types ?
+ */
+export const unchecked_types = _jsonMeta('unchecked-types');
+
+/**
  * The API root/base URL
  */
 export const api_root = _meta('api-root');
@@ -130,15 +135,19 @@ export const hidpi = (window.devicePixelRatio > 1 || (
 );
 
 /**
- * Map configuration
+ * Tags constraints
  */
-export const map = _jsonMeta('map-config');
+export const tags = _jsonMeta('tags-config');
 
 /**
- * Tags constraints
- * Should be kept synced with udata/tags.py in case of modification
+ * License groups options
  */
-export const tags = {MIN_LENGTH: 3, MAX_LENGTH: 32};
+export const license_groups = _jsonMeta('license-groups-options') && Object.fromEntries(_jsonMeta('license-groups-options'));
+
+/**
+ * Harvest validation contact form
+ */
+export const harvest_validation_contact_form = _meta('harvest-validation-contact-form')
 
 /**
  * Max number of resources to display uncollapsed in dataset view
@@ -146,9 +155,30 @@ export const tags = {MIN_LENGTH: 3, MAX_LENGTH: 32};
 export const dataset_max_resources_uncollapsed = _jsonMeta('dataset-max-resources-uncollapsed');
 
 /**
+ * The expected business identification format
+ */
+export const org_bid_format = _meta('org-bid-format')
+
+/**
  * Markdown configuration.
  */
 export const markdown = _jsonMeta('markdown-config');
+
+
+/**
+ * Whether the search autocomplete is enabled or not
+ */
+export const is_search_autocomplete_enabled = _jsonMeta('search-autocomplete-enabled');
+
+/**
+ * The search autocomplete  debounce delay
+ */
+export const search_autocomplete_debounce = _jsonMeta('search-autocomplete-debounce');
+
+/**
+ * Whether the 'read only mode' feature is enabled or not.
+ */
+export const read_only_enabled = _jsonMeta('read-only-enabled');
 
 
 export default {
@@ -165,11 +195,17 @@ export default {
     auth_url,
     sentry,
     check_urls,
+    unchecked_types,
     is_territory_enabled,
     is_delete_me_enabled,
     hidpi,
-    map,
     tags,
+    license_groups,
+    harvest_validation_contact_form,
     dataset_max_resources_uncollapsed,
+    org_bid_format,
+    is_search_autocomplete_enabled,
+    search_autocomplete_debounce,
     markdown,
+    read_only_enabled,
 };

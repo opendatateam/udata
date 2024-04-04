@@ -1,17 +1,11 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from flask import url_for
 
 from udata.core.storages import images, default_image_basename
 from udata.i18n import lazy_gettext as _
-from udata.models import db
-
+from udata.mongo import db
+from .constants import BODY_TYPES, IMAGE_SIZES
 
 __all__ = ('Post', )
-
-
-IMAGE_SIZES = [400, 100, 50]
 
 
 class PostQuerySet(db.BaseQuerySet):
@@ -41,6 +35,9 @@ class Post(db.Datetimed, db.Document):
     owner = db.ReferenceField('User')
     published = db.DateTimeField()
 
+    body_type = db.StringField(
+        choices=list(BODY_TYPES), default='markdown', required=False)
+
     meta = {
         'ordering': ['-created_at'],
         'indexes': [
@@ -52,7 +49,7 @@ class Post(db.Datetimed, db.Document):
 
     verbose_name = _('post')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name or ''
 
     def url_for(self, *args, **kwargs):
@@ -65,3 +62,7 @@ class Post(db.Datetimed, db.Document):
     @property
     def external_url(self):
         return self.url_for(_external=True)
+
+    def count_discussions(self):
+        # There are no metrics on Post to store discussions count
+        pass

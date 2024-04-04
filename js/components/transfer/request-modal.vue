@@ -7,7 +7,7 @@
 
             <div class="col-xs-6 pointer" @click="type = 'user'">
                 <span class="fa fa-3x fa-user"></span>
-                <p>{{ _('An user') }}</p>
+                <p>{{ _('A user') }}</p>
             </div>
 
             <div class="col-xs-6 pointer" @click="type = 'organization'">
@@ -51,13 +51,13 @@
     </div>
 
     <footer class="modal-footer text-center">
-        <button v-if="recipient" type="button" class="btn btn-success btn-flat pull-left"
-            @click="confirm">
-            {{ _('Confirm') }}
-        </button>
-        <button v-if="confirm" type="button" class="btn btn-danger btn-flat"
+        <button v-if="confirm" type="button" class="btn btn-info btn-flat pull-left"
             @click="$refs.modal.close">
             {{ _('Cancel') }}
+        </button>
+        <button v-if="recipient" type="button" class="btn btn-outline btn-flat"
+            @click="confirm">
+            {{ _('Confirm') }}
         </button>
     </footer>
 </modal>
@@ -116,7 +116,7 @@ export default {
                 });
                 this.$refs.modal.close();
                 this.$emit('transfer:requested', response.obj);
-            });
+            }, this.$root.handleApiError);
         }
     }
 };

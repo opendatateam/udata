@@ -190,7 +190,7 @@ describe('Common Form features', function() {
 
         it('should serialize all values', function() {
             this.vm.defs = {properties: {
-                // Input is optionnal, just to avoid console warnings
+                // Input is optional, just to avoid console warnings
                 input: {type: 'string'},
                 checkbox: {type: 'boolean'},
                 textarea: {type: 'string', format: 'markdown'},
@@ -204,16 +204,16 @@ describe('Common Form features', function() {
             ];
 
             expect(this.vm.serialize()).to.eql({
-                input: undefined,
+                input: null,
                 checkbox: false,
-                textarea: undefined,
+                textarea: null,
                 select: 'b',
             });
         });
 
         it('should serialize updated values', function() {
             this.vm.defs = {properties: {
-                // Input is optionnal, just to avoid console warnings
+                // Input is optional, just to avoid console warnings
                 input: {type: 'string'},
                 checkbox: {type: 'boolean'},
                 textarea: {type: 'string', format: 'markdown'},
@@ -241,7 +241,7 @@ describe('Common Form features', function() {
 
         describe('Nested values', function() {
             it('should handle nested values', function() {
-                // Defs are optionnal, just here to avoid console warnings
+                // Defs are optional, just here to avoid console warnings
                 this.vm.defs = {properties: {
                     'nested.a': {type: 'string'},
                     'nested.b': {type: 'string'},
@@ -263,7 +263,7 @@ describe('Common Form features', function() {
             });
 
             it('should not serialize empty nested nested object', function() {
-                // Defs are optionnal, just here to avoid console warnings
+                // Defs are optional, just here to avoid console warnings
                 this.vm.defs = {properties: {
                     'nested.a': {type: 'string'},
                     'nested.b': {type: 'string'},
@@ -296,8 +296,8 @@ describe('Common Form features', function() {
 
                 expect(this.vm.serialize()).to.eql({
                     nested: {
-                        a: undefined,
-                        b: undefined
+                        a: null,
+                        b: null
                     }
                 });
             });

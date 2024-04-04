@@ -145,7 +145,7 @@ describe('Common Fields features', function() {
             expect(vm.property).to.eql({type: 'integer', format: 'int64'});
             expect(vm.is_bool).to.be.false;
             expect(vm.placeholder).to.equal('');
-            expect(vm.widget).to.equal('text-input');
+            expect(vm.widget).to.equal('number-input');
         });
     });
 });

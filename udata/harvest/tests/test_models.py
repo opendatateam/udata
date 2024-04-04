@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
 import pytest
 
@@ -15,7 +12,7 @@ log = logging.getLogger(__name__)
 @pytest.mark.usefixtures('clean_db')
 class HarvestSourceTest:
     def test_defaults(self):
-        source = HarvestSource.objects.create(name='Test', url=faker.url())
+        source = HarvestSource.objects.create(name='Test', url=faker.url(), backend='factory')
         assert source.name == 'Test'
         assert source.slug == 'test'
 

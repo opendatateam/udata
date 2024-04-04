@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
+from udata.core.discussions.models import Discussion
 from udata.frontend import csv
 
-from .models import Dataset
+from .models import Dataset, Resource
 
 
 def serialize_spatial_zones(dataset):
@@ -17,6 +15,7 @@ class DatasetCsvAdapter(csv.Adapter):
         'id',
         'title',
         'slug',
+        'acronym',
         ('url', 'external_url'),
         ('organization', 'organization.name'),
         ('organization_id', 'organization.id'),
@@ -32,6 +31,14 @@ class DatasetCsvAdapter(csv.Adapter):
         'created_at',
         'last_modified',
         ('tags', lambda o: ','.join(o.tags)),
+        ('archived', lambda o: o.archived or False),
+        ('resources_count', lambda o: len(o.resources)),
+        'downloads',
+        ('harvest.backend', lambda r: r.harvest and r.harvest.backend),
+        ('harvest.domain', lambda r: r.harvest and r.harvest.domain),
+        ('harvest.created_at', lambda r: r.harvest and r.harvest.created_at),
+        ('harvest.modified_at', lambda r: r.harvest and r.harvest.modified_at),
+        ('quality_score', lambda o: format(o.quality['score'], '.2f')),
     )
 
     def dynamic_fields(self):
@@ -42,6 +49,7 @@ def dataset_field(name, getter=None):
     return ('dataset.{0}'.format(name), getter or name)
 
 
+@csv.adapter(Resource)
 class ResourcesCsvAdapter(csv.NestedAdapter):
     fields = (
         dataset_field('id'),
@@ -56,6 +64,9 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
             lambda r: str(r.organization.id) if r.organization else None),
         dataset_field('license'),
         dataset_field('private'),
+        dataset_field(
+            'archived',
+            lambda r: r.archived or False),
     )
     nested_fields = (
         'id',
@@ -63,19 +74,23 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
         'title',
         'description',
         'filetype',
+        'type',
         'format',
         'mime',
         'filesize',
         ('checksum.type', lambda o: getattr(o.checksum, 'type', None)),
         ('checksum.value', lambda o: getattr(o.checksum, 'value', None)),
         'created_at',
-        'modified',
+        ('modified', lambda o: o.last_modified),
         ('downloads', lambda o: int(o.metrics.get('views', 0))),
+        ('harvest.created_at', lambda o: o.harvest and o.harvest.created_at),
+        ('harvest.modified_at', lambda o: o.harvest and o.harvest.modified_at),
     )
     attribute = 'resources'
 
 
-class IssuesOrDiscussionCsvAdapter(csv.Adapter):
+@csv.adapter(Discussion)
+class DiscussionCsvAdapter(csv.Adapter):
     fields = (
         'id',
         'user',

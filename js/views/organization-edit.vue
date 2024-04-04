@@ -32,11 +32,16 @@ export default {
         save() {
             const form = this.$refs.form;
             if (form.validate()) {
-                this.org.update(form.serialize(), (response) => {
-                    this.org.on_fetched(response);
-                    this.$go({name: 'organization', params: {oid: this.org.id}});
-                }, form.on_error);
+                this.org.update(form.serialize(), form.on_error);
             }
+        },
+        on_success() {
+            this.$dispatch('notify', {
+                autoclose: true,
+                title: this._('Changes saved'),
+                details: this._('Your organization has been updated.')
+            });
+            this.$go({name: 'organization', params: {oid: this.org.id}});
         },
         cancel() {
             this.$go({name: 'organization', params: {oid: this.org.id}});
@@ -45,7 +50,17 @@ export default {
     route: {
         data() {
             if (this.$route.params.oid !== this.org.id) {
+                this.$scrollTo(this.$el);
                 this.org.fetch(this.$route.params.oid);
+                this.org.$once('updated', () => {
+                    this.updHandler = this.org.$once('updated', this.on_success);
+                });
+            }
+        },
+        deactivate() {
+            if (this.updHandler) {
+                this.updHandler.remove();
+                this.updHandler = undefined;
             }
         }
     }

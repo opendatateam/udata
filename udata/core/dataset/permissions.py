@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from udata.auth import Permission, UserNeed
 
 from udata.core.organization.permissions import (
@@ -19,7 +16,7 @@ class OwnablePermission(Permission):
             needs.append(OrganizationAdminNeed(obj.organization.id))
             needs.append(OrganizationEditorNeed(obj.organization.id))
         elif obj.owner:
-            needs.append(UserNeed(obj.owner.id))
+            needs.append(UserNeed(obj.owner.fs_uniquifier))
 
         super(OwnablePermission, self).__init__(*needs)
 

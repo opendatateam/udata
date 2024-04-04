@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
-from udata.models import db
+from udata.mongo import db
 from udata.tests import TestCase
 from udata.utils import faker
 
@@ -27,12 +24,12 @@ class Fake(db.Document):
 
 class SubNestedForm(ModelForm):
     model_class = SubNested
-    name = fields.StringField(validators=[fields.validators.required()])
+    name = fields.StringField(validators=[fields.validators.DataRequired()])
 
 
 class NestedForm(ModelForm):
     model_class = Nested
-    name = fields.StringField(validators=[fields.validators.required()])
+    name = fields.StringField(validators=[fields.validators.DataRequired()])
 
 
 class NestedFormWithId(NestedForm):

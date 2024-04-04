@@ -10,42 +10,16 @@
     </div>
     <div class="row">
         <div class="col-xs-12 col-md-6">
-            <dataset-details :dataset="dataset"></dataset-details>
-            <map-widget :title="_('Spatial coverage')" :geojson="geojson" :footer="map_footer">
-                <ul>
-                    <li v-show="dataset.spatial && dataset.spatial.granularity">
-                        <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                            :title="_('Territorial coverage granularity')">
-                            <span class="fa fa-bullseye fa-fw"></span>
-                            {{ dataset | granularity_label }}
-                        </a>
-                    </li>
-                    <li v-show="territories_labels">
-                        <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                            :title="_('Territorial coverage')">
-                            <span class="fa fa-map-marker fa-fw"></span>
-                            {{ territories_labels }}
-                        </a>
-                    </li>
-                </ul>
-            </map-widget>
+            <dataset-details :dataset="dataset" :spatial-coverage="spatialCoverage"></dataset-details>
         </div>
         <quality-widget :quality="dataset.quality" class="col-xs-12 col-md-6"></quality-widget>
     </div>
     <div class="row">
         <resource-list :dataset="dataset" class="col-xs-12"></resource-list>
     </div>
-    <div class="row">
-        <chart-widget id="trafic" class="col-xs-12" :title="_('Audience')"
-            :metrics="metrics" x="date" :y="y"></chart-widget>
-    </div>
 
     <div class="row">
         <reuse-list id="reuses" class="col-xs-12" :reuses="reuses"></reuse-list>
-    </div>
-
-    <div class="row">
-        <issue-list class="col-xs-12" :issues="issues"></issue-list>
     </div>
 
     <div class="row">
@@ -61,14 +35,10 @@
 </template>
 
 <script>
-import moment from 'moment';
 import API from 'api';
-import Vue from 'vue';
+import {ModelPage} from 'models/base';
 import Dataset from 'models/dataset';
 import Discussions from 'models/discussions';
-import Followers from 'models/followers';
-import Issues from 'models/issues';
-import Metrics from 'models/metrics';
 import Reuses from 'models/reuses';
 import CommunityResources from 'models/communityresources';
 // Widgets
@@ -78,9 +48,7 @@ import DatasetDetails from 'components/dataset/details.vue';
 import DatasetFilters from 'components/dataset/filters';
 import DiscussionList from 'components/discussions/list.vue';
 import FollowerList from 'components/follow/list.vue';
-import IssueList from 'components/issues/list.vue';
 import Layout from 'components/layout.vue';
-import MapWidget from 'components/widgets/map.vue';
 import QualityWidget from 'components/dataset/quality.vue';
 import ResourceList from 'components/dataset/resource/list.vue';
 import ReuseList from 'components/reuse/list.vue';
@@ -95,9 +63,7 @@ export default {
         DatasetDetails,
         DiscussionList,
         FollowerList,
-        IssueList,
         Layout,
-        MapWidget,
         QualityWidget,
         ResourceList,
         ReuseList,
@@ -106,13 +72,12 @@ export default {
     data() {
         return {
             dataset: new Dataset({mask: '*'}),
-            metrics: new Metrics({query: {
-                start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
-                end: moment().format('YYYY-MM-DD')
-            }}),
             reuses: new Reuses({query: {sort: '-created', page_size: 10}, mask: ReuseList.MASK}),
-            followers: new Followers({ns: 'datasets', query: {page_size: 10}}),
-            issues: new Issues({query: {sort: '-created', page_size: 10}, mask: IssueList.MASK}),
+            followers: new ModelPage({
+                query: {page_size: 10},
+                ns: 'datasets',
+                fetch: 'list_dataset_followers'
+            }),
             discussions: new Discussions({query: {sort: '-created', page_size: 10}, mask: DiscussionList.MASK}),
             communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}, mask: CommunityList.MASK}),
             badges:  [],
@@ -130,24 +95,36 @@ export default {
                 id: 'followers',
                 label: this._('Unique visitors')
             }],
-            geojson: null
+            spatialCoverage: []
         };
     },
     computed: {
         actions() {
-            const actions = [{
-                    label: this._('Edit'),
+            const actions = [];
+            if (this.can_edit) {
+                actions.push({
+                    label: this._('Edit this dataset'),
                     icon: 'edit',
                     method: this.edit
                 }, {
                     label: this._('Transfer'),
                     icon: 'send',
                     method: this.transfer_request
-                }, {
-                    label: this._('Delete'),
-                    icon: 'trash',
-                    method: this.confirm_delete
-                }];
+                });
+                if(!this.dataset.deleted) {
+                    actions.push({
+                        label: this._('Delete'),
+                        icon: 'trash',
+                        method: this.confirm_delete
+                    });
+                } else {
+                    actions.push({
+                        label: this._('Restore'),
+                        icon: 'undo',
+                        method: this.confirm_restore
+                    });
+                }
+            }
 
             if (this.$root.me.is_admin) {
                 actions.push({divider: true});
@@ -166,7 +143,7 @@ export default {
             return [{
                 value: this.dataset.metrics.reuses || 0,
                 label: this.dataset.metrics.reuses ? this._('Reuses') : this._('Reuse'),
-                icon: 'retweet',
+                icon: 'recycle',
                 color: 'green',
                 target: '#reuses'
             }, {
@@ -184,13 +161,8 @@ export default {
                 target: '#trafic'
             }];
         },
-        territories_labels() {
-            if (this.geojson && this.geojson.features) {
-                return this.geojson.features.map(feature => feature.properties.name).join(', ');
-            }
-        },
-        map_footer() {
-            return (this.dataset.spatial && this.dataset.spatial.granularity || this.territories_labels) !== undefined;
+        can_edit() {
+            return this.$root.me.can_edit(this.dataset);
         }
     },
     methods: {
@@ -198,8 +170,14 @@ export default {
             this.$go({name: 'dataset-edit', params: {oid: this.dataset.id}});
         },
         confirm_delete() {
-            var m = this.$root.$modal(
+            this.$root.$modal(
                 require('components/dataset/delete-modal.vue'),
+                {dataset: this.dataset}
+            );
+        },
+        confirm_restore() {
+            this.$root.$modal(
+                require('components/dataset/restore-modal.vue'),
                 {dataset: this.dataset}
             );
         },
@@ -214,6 +192,18 @@ export default {
                 require('components/badges/modal.vue'),
                 {subject: this.dataset}
             );
+        },
+        addOrRemoveBadge(id, value, _class, label) {
+            const existing = this.badges.find(b => b.id === id);
+            if (value && !existing) {
+                this.badges.push({
+                    id,
+                    class: _class,
+                    label
+                });
+            } else if (existing) {
+                this.badges.splice(this.badges.indexOf(existing), 1);
+            }
         }
     },
     route: {
@@ -227,10 +217,8 @@ export default {
     watch: {
         'dataset.id': function(id) {
             if (id) {
-                this.metrics.fetch({id: id});
                 this.reuses.clear().fetch({dataset: id});
                 this.followers.fetch({id: id});
-                this.issues.fetch({'for': id});
                 this.discussions.fetch({'for': id});
                 this.communities.clear().fetch({dataset: id});
             } else {
@@ -241,24 +229,24 @@ export default {
         },
         'dataset.spatial': function(coverage) {
             if (!coverage || !(coverage.geom || coverage.zones.length)) {
-                this.geojson = null;
                 return;
             }
             if (coverage.geom) {
-                this.geojson = coverage.geom
-            } else {
-                API.spatial.spatial_zones({ids: coverage.zones}, (response) => {
-                    this.geojson = response.obj;
+                this.spatialCoverage.push(this._('Custom'));
+            }
+            if (coverage.zones) {
+                coverage.zones.forEach(zone => {
+                    API.spatial.spatial_zone({id: zone}, (response) => {
+                        this.spatialCoverage.push(response.obj.properties.name);
+                    });
                 });
             }
         },
         'dataset.deleted': function(deleted) {
-            if (deleted) {
-                this.badges = [{
-                    class: 'danger',
-                    label: this._('Deleted')
-                }];
-            }
+            this.addOrRemoveBadge('deleted', deleted, 'danger', this._('Deleted'));
+        },
+        'dataset.archived': function(archived) {
+            this.addOrRemoveBadge('archived', archived, 'warning', this._('Archived'));
         }
     }
 };

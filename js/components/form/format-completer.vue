@@ -11,7 +11,6 @@ export default {
     selectize: {
         maxItems: 1,
         valueField: 'text',
-        plugins: ['remove_button'],
         create: function(input) {
             return {
                 value: input,

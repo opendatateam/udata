@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from udata.forms import ModelForm, fields, validators
+from udata.core.spatial.forms import SpatialCoverageField
 from udata.i18n import lazy_gettext as _
 
 from .models import Topic
@@ -14,14 +12,20 @@ class TopicForm(ModelForm):
     model_class = Topic
 
     owner = fields.CurrentUserField()
+    organization = fields.PublishAsField(_('Publish as'))
 
-    name = fields.StringField(_('Name'), [validators.required()])
+    name = fields.StringField(_('Name'), [validators.DataRequired()])
     description = fields.MarkdownField(
-        _('Description'), [validators.required()])
+        _('Description'), [validators.DataRequired()])
 
     datasets = fields.DatasetListField(_('Associated datasets'))
     reuses = fields.ReuseListField(_('Associated reuses'))
 
-    tags = fields.TagField(_('Tags'), [validators.required()])
+    spatial = SpatialCoverageField(
+        _('Spatial coverage'),
+        description=_('The geographical area covered by the data.'))
+
+    tags = fields.TagField(_('Tags'), [validators.DataRequired()])
     private = fields.BooleanField(_('Private'))
     featured = fields.BooleanField(_('Featured'))
+    extras = fields.ExtrasField()

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import geojson
 import json
 import logging
@@ -60,7 +57,7 @@ class GeomField(Field):
         if valuelist:
             value = valuelist[0]
             try:
-                if isinstance(value, basestring):
+                if isinstance(value, str):
                     self.data = geojson.loads(value)
                 else:
                     self.data = geojson.GeoJSON.to_instance(value)
@@ -72,7 +69,9 @@ class GeomField(Field):
     def pre_validate(self, form):
         if self.data:
             if not isinstance(self.data, geojson.GeoJSON):
-                raise validators.ValidationError('Not a valid GeoJSON')
+                self.data = geojson.GeoJSON.to_instance(self.data)
+                if not isinstance(self.data, geojson.GeoJSON):
+                    raise validators.ValidationError('Not a valid GeoJSON')
             if not self.data.is_valid:
                 raise validators.ValidationError(self.data.errors())
         return True

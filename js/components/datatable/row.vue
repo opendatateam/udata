@@ -42,7 +42,7 @@ export default {
         /**
          * Asynchronously load view (Webpack Lazy loading compatible)
          * @param  {string}   name     the filename (basename) of the view to load.
-         * @param  {Function} callback An optionnal callback executed
+         * @param  {Function} callback An optional callback executed
          *                             in the application scope when
          *                             the view is loaded
          */

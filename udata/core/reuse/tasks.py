@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
 from udata import mail
 from udata.i18n import lazy_gettext as _
-from udata.models import Activity, Metrics, Issue, Discussion, Follow
+from udata.core import storages
+from udata.models import Activity, Discussion, Follow, Transfer
 from udata.tasks import get_logger, job, task
 
 from .models import Reuse
@@ -14,22 +12,28 @@ log = get_logger(__name__)
 @job('purge-reuses')
 def purge_reuses(self):
     for reuse in Reuse.objects(deleted__ne=None):
-        log.info('Purging reuse "{0}"'.format(reuse))
+        log.info(f'Purging reuse {reuse}')
         # Remove followers
         Follow.objects(following=reuse).delete()
-        # Remove issues
-        Issue.objects(subject=reuse).delete()
         # Remove discussions
         Discussion.objects(subject=reuse).delete()
         # Remove activity
         Activity.objects(related_to=reuse).delete()
-        # Remove metrics
-        Metrics.objects(object_id=reuse.id).delete()
+        # Remove transfers
+        Transfer.objects(subject=reuse).delete()
+        # Remove reuse's logo in all sizes
+        if reuse.image.filename is not None:
+            storage = storages.images
+            storage.delete(reuse.image.filename)
+            storage.delete(reuse.image.original)
+            for key, value in reuse.image.thumbnails.items():
+                storage.delete(value)
         reuse.delete()
 
 
 @task
-def notify_new_reuse(reuse):
+def notify_new_reuse(reuse_id):
+    reuse = Reuse.objects.get(pk=reuse_id)
     for dataset in reuse.datasets:
         if dataset.organization:
             recipients = [m.user for m in dataset.organization.members]

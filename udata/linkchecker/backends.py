@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
 import logging
 from datetime import datetime
 
@@ -21,7 +18,7 @@ class NoCheckLinkchecker(object):
         return {
             'check:status': 204,
             'check:available': True,
-            'check:date': datetime.now()
+            'check:date': datetime.utcnow()
         }
 
 

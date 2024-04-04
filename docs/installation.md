@@ -23,7 +23,7 @@ total 4
 drwxr-xr-x 9 udata udata 4096 Jun 23 05:50 udata
 ```
 
-You can now log into this account to install uData:
+You can now log into this account to install udata:
 
 ```shell
 $ su - udata
@@ -34,13 +34,12 @@ $ pwd
 ## Python and virtual environment
 
 It is recommended to work within a virtualenv to ensure proper dependencies isolation.
-If you're not familiar with that concept, read [Python Virtual Environments - a Primer][].
 
 We create a virtualenv in the `udata` home directory so it is activated each time
 you log into its account:
 
 ```shell
-$ virtualenv --python=python2.7 $HOME
+$ python3 -m venv $HOME
 $ . bin/activate
 $ pip install Cython  # Enable optimizations on some packages
 $ pip install --upgrade setuptools  # Make sure setuptools is up to date
@@ -54,7 +53,7 @@ $ pip install udata-piwik
 
 !!! note
     We install Cython before all other dependencies because
-    some have an optionnal compilation support for Cython
+    some have an optional compilation support for Cython
     resulting in better performances (mostly XML harvesting).
 
 
@@ -84,9 +83,10 @@ $ udata init
 
 ## Sample nginx & uWSGI configuration
 
-You can use whatever stack you want to run uData, nginx or Apache 2 as reverse proxy, supervisord + Gunicorn or uWSGI...
+You can use whatever stack you want to run udata, nginx or Apache 2 as reverse proxy, supervisord + Gunicorn or uWSGI...
 
-All you need to remember is that uData requires at least 3 services to run:
+All you need to remember is that udata requires at least 3 services to run:
+
 - a web frontend using the `udata.wsgi` WSGI entry point.
 - a worker service using [celery][]
 - a beat/cron service using [celery][] too
@@ -117,7 +117,7 @@ Let's start with the uwsgi configuration file:
 master= true
 
 ; Python / Environment configuration
-plugin = python
+plugin = python3
 home = /srv/udata
 chdir = %(home)
 virtualenv = %(home)
@@ -356,7 +356,7 @@ Then create a symlink to activate it:
 $ ln -s /etc/nginx/sites-{available,enabled}/data.example.com
 ```
 
-Before restarting all services to start uData, we need to adjust its configuration
+Before restarting all services to start udata, we need to adjust its configuration
 and collect static assets to make them available for nginx.
 
 ```shell
@@ -366,9 +366,6 @@ su - udata
 Edit your `udata.cfg` configuration with these parameters:
 
 ```python
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 DEBUG = False
 
 SITE_ID = 'data.example.com'  # Used to store metrics and portal configuration
@@ -380,14 +377,12 @@ SECRET_KEY = 'put-some-unique-and-secret-key-here-for-security'
 
 MONGODB_HOST = 'mongodb://localhost:27017/udata'
 
-ELASTICSEARCH_URL = 'localhost:9200'
-
 BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_TASK_RESULT_EXPIRES = 86400
 
 # We use Redis as caching backend but in a separate collection
-CACHE_TYPE = 'redis'
+CACHE_TYPE = 'flask_caching.backends.redis'
 CACHE_REDIS_URL = 'redis://localhost:6379/2'
 
 # The identity used to send mails
@@ -401,13 +396,13 @@ LANGUAGES = {
 # Here is you default language
 DEFAULT_LANGUAGE = 'fr'
 
-# Optionnaly activate some installed plugins
+# Optionally activate some installed plugins
 PLUGINS = (
     'piwik',
 )
 
-# Optionnaly activate an installed theme
-THEME = 'my-theme'
+# Optionally activate an installed theme
+# THEME = 'my-theme'
 
 # Define where resources are stored and exposed
 FS_ROOT = '/srv/udata/fs'
@@ -420,7 +415,7 @@ You can now process static assets in the directory declared in the nginx configu
 $ udata collect -ni $HOME/public
 ```
 
-Alright, everything is ready to run uData so logout from the `udata` account and restart nginx and uWSGI:
+Alright, everything is ready to run udata so logout from the `udata` account and restart nginx and uWSGI:
 
 ```shell
 $ service uwsgi restart

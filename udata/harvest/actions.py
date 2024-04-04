@@ -1,22 +1,21 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
-import unicodecsv as csv
+import csv
 
 from collections import namedtuple
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from bson import ObjectId
 from flask import current_app
 
 from udata.auth import current_user
+from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.models import User, Organization, PeriodicTask, Dataset
+from udata.storage.s3 import delete_file
 
 from . import backends, signals
 from .models import (
     HarvestSource, HarvestJob, DEFAULT_HARVEST_FREQUENCY,
-    VALIDATION_ACCEPTED, VALIDATION_REFUSED
+    VALIDATION_ACCEPTED, VALIDATION_REFUSED, archive_harvested_dataset
 )
 from .tasks import harvest
 
@@ -30,21 +29,23 @@ def list_backends():
     return backends.get_all(current_app).values()
 
 
-def _sources_queryset(owner=None):
-    sources = HarvestSource.objects.visible()
+def _sources_queryset(owner=None, deleted=False):
+    sources = HarvestSource.objects
+    if not deleted:
+        sources = sources.visible()
     if owner:
         sources = sources.owned_by(owner)
     return sources
 
 
-def list_sources(owner=None):
+def list_sources(owner=None, deleted=False):
     '''List all harvest sources'''
-    return list(_sources_queryset(owner=owner))
+    return list(_sources_queryset(owner=owner, deleted=deleted))
 
 
-def paginate_sources(owner=None, page=1, page_size=DEFAULT_PAGE_SIZE):
+def paginate_sources(owner=None, page=1, page_size=DEFAULT_PAGE_SIZE, deleted=False):
     '''Paginate harvest sources'''
-    sources = _sources_queryset(owner=owner)
+    sources = _sources_queryset(owner=owner, deleted=deleted)
     page = max(page or 1, 1)
     return sources.paginate(page, page_size)
 
@@ -65,6 +66,8 @@ def create_source(name, url, backend,
                   owner=None,
                   organization=None,
                   config=None,
+                  active=None,
+                  autoarchive=None,
                   ):
     '''Create a new harvest source'''
     if owner and not isinstance(owner, User):
@@ -82,6 +85,8 @@ def create_source(name, url, backend,
         owner=owner,
         organization=organization,
         config=config,
+        active=active,
+        autoarchive=autoarchive,
     )
     signals.harvest_source_created.send(source)
     return source
@@ -98,7 +103,7 @@ def update_source(ident, data):
 def validate_source(ident, comment=None):
     '''Validate a source for automatic harvesting'''
     source = get_source(ident)
-    source.validation.on = datetime.now()
+    source.validation.on = datetime.utcnow()
     source.validation.comment = comment
     source.validation.state = VALIDATION_ACCEPTED
     if current_user.is_authenticated:
@@ -112,7 +117,7 @@ def validate_source(ident, comment=None):
 def reject_source(ident, comment):
     '''Reject a source for automatic harvesting'''
     source = get_source(ident)
-    source.validation.on = datetime.now()
+    source.validation.on = datetime.utcnow()
     source.validation.comment = comment
     source.validation.state = VALIDATION_REFUSED
     if current_user.is_authenticated:
@@ -124,15 +129,51 @@ def reject_source(ident, comment):
 def delete_source(ident):
     '''Delete an harvest source'''
     source = get_source(ident)
-    source.deleted = datetime.now()
+    source.deleted = datetime.utcnow()
     source.save()
     signals.harvest_source_deleted.send(source)
     return source
 
 
+def clean_source(ident):
+    '''Deletes all datasets linked to a harvest source'''
+    source = get_source(ident)
+    datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
+    for dataset in datasets:
+        dataset.deleted = datetime.utcnow()
+        dataset.save()
+    return len(datasets)
+
+
 def purge_sources():
     '''Permanently remove sources flagged as deleted'''
-    return HarvestSource.objects(deleted__exists=True).delete()
+    sources = HarvestSource.objects(deleted__exists=True)
+    count = sources.count()
+    for source in sources:
+        if source.periodic_task:
+            source.periodic_task.delete()
+        datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
+        for dataset in datasets:
+            archive_harvested_dataset(dataset, reason='harvester-deleted', dryrun=False)
+        source.delete()
+    return count
+
+
+def purge_jobs():
+    '''Delete jobs older than retention policy'''
+    retention = current_app.config['HARVEST_JOBS_RETENTION_DAYS']
+    expiration = datetime.utcnow() - timedelta(days=retention)
+
+    jobs_with_external_files = HarvestJob.objects(data__filename__exists=True, created__lt=expiration)
+    for job in jobs_with_external_files:
+        bucket = current_app.config.get('HARVEST_GRAPHS_S3_BUCKET')
+        if bucket is None:
+            log.error(f"Bucket isn't configured anymore, but jobs still exist with external filenames. Could not delete them.")
+            break
+
+        delete_file(bucket, job.data['filename'])
+
+    return HarvestJob.objects(created__lt=expiration).delete()
 
 
 def run(ident):
@@ -149,8 +190,42 @@ def launch(ident):
 
 
 def preview(ident):
-    '''Launch or resume an harvesting for a given source if none is running'''
+    '''Preview an harvesting for a given source'''
     source = get_source(ident)
+    cls = backends.get(current_app, source.backend)
+    max_items = current_app.config['HARVEST_PREVIEW_MAX_ITEMS']
+    backend = cls(source, dryrun=True, max_items=max_items)
+    return backend.harvest()
+
+
+def preview_from_config(name, url, backend,
+                        description=None,
+                        frequency=DEFAULT_HARVEST_FREQUENCY,
+                        owner=None,
+                        organization=None,
+                        config=None,
+                        active=None,
+                        autoarchive=None,
+                        ):
+    '''Preview an harvesting from a source created with the given parameters'''
+    if owner and not isinstance(owner, User):
+        owner = User.get(owner)
+
+    if organization and not isinstance(organization, Organization):
+        organization = Organization.get(organization)
+
+    source = HarvestSource(
+        name=name,
+        url=url,
+        backend=backend,
+        description=description,
+        frequency=frequency or DEFAULT_HARVEST_FREQUENCY,
+        owner=owner,
+        organization=organization,
+        config=config,
+        active=active,
+        autoarchive=autoarchive,
+    )
     cls = backends.get(current_app, source.backend)
     max_items = current_app.config['HARVEST_PREVIEW_MAX_ITEMS']
     backend = cls(source, dryrun=True, max_items=max_items)
@@ -217,9 +292,7 @@ def attach(domain, filename):
     count = 0
     errors = 0
     with open(filename) as csvfile:
-        reader = csv.DictReader(csvfile,
-                                delimiter=b';',
-                                quotechar=b'"')
+        reader = csv.DictReader(csvfile, delimiter=';', quotechar='"')
         for row in reader:
             try:
                 dataset = Dataset.objects.get(id=ObjectId(row['local']))
@@ -230,16 +303,19 @@ def attach(domain, filename):
 
             # Detach previously attached dataset
             Dataset.objects(**{
-                'extras__harvest:domain': domain,
-                'extras__harvest:remote_id': row['remote']
+                'harvest__domain': domain,
+                'harvest__remote_id': row['remote']
             }).update(**{
-                'unset__extras__harvest:domain': True,
-                'unset__extras__harvest:remote_id': True
+                'unset__harvest__domain': True,
+                'unset__harvest__remote_id': True
             })
 
-            dataset.extras['harvest:domain'] = domain
-            dataset.extras['harvest:remote_id'] = row['remote']
-            dataset.last_modified = datetime.now()
+            if not dataset.harvest:
+                dataset.harvest = HarvestDatasetMetadata()
+            dataset.harvest.domain = domain
+            dataset.harvest.remote_id = row['remote']
+
+            dataset.last_modified_internal = datetime.utcnow()
             dataset.save()
             count += 1
 

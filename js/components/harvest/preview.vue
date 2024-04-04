@@ -27,7 +27,11 @@ export default {
             default() {
                 return new HarvestSource();
             }
-        }
+        },
+        fromConfig: {
+            type: Boolean,
+            default: false,
+        },
     },
     data() {
         return {
@@ -43,14 +47,23 @@ export default {
     methods: {
         preview() {
             this.loading = true;
-            // this.$set('preview_job', job);
-            API.harvest.preview_harvest_source(
-                {ident: this.source.id},
-                (response) => {
-                    this.job.on_fetched(response);
-                    this.loading = false;
-                }
-            );
+            if (this.fromConfig) {
+                API.harvest.preview_harvest_source_config(
+                    {payload: this.source},
+                    this.onPreviewFetch,
+                    this.$root.handleApiError
+                );
+            } else {
+                API.harvest.preview_harvest_source(
+                    {ident: this.source.id},
+                    this.onPreviewFetch,
+                    this.$root.handleApiError
+                );
+            }
+        },
+        onPreviewFetch(response) {
+            this.job.on_fetched(response);
+            this.loading = false;
         }
     }
 };

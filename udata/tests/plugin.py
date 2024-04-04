@@ -1,14 +1,10 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 import shlex
-import sys
 
 from contextlib import contextmanager
-from urlparse import urlparse
+from urllib.parse import urlparse
 
-from flask import json, template_rendered, url_for
+from flask import json, template_rendered, url_for, current_app
 from flask.testing import FlaskClient
 from lxml import etree
 from werkzeug.urls import url_encode
@@ -16,8 +12,7 @@ from werkzeug.urls import url_encode
 from udata import settings
 from udata.app import create_app
 from udata.core.user.factories import UserFactory
-from udata.models import db
-from udata.search import es
+from udata.mongo import db
 
 from .helpers import assert200, assert_command_ok
 
@@ -48,14 +43,19 @@ class TestClient(FlaskClient):
     def login(self, user=None):
         user = user or UserFactory()
         with self.session_transaction() as session:
-            session['user_id'] = str(user.id)
+            # Since flask-security-too 4.0.0, the user.fs_uniquifier is used instead of user.id for auth
+            user_id = getattr(user, current_app.login_manager.id_attribute)()
+            session['user_id'] = user_id
             session['_fresh'] = True
+            session['_id'] = current_app.login_manager._session_identifier_generator()
+            current_app.login_manager._update_request_context_with_user(user)
         return user
 
     def logout(self):
         with self.session_transaction() as session:
             del session['user_id']
             del session['_fresh']
+            del session['_id']
 
 
 @pytest.fixture
@@ -73,16 +73,13 @@ def _load_frontend(request, _configure_application):
     Pass an optionnal list of modules as parameter to restrict loaded modules.
 
     Handle backward compatibility with Class.modules attribute too
-
-    Properly unload themes when enabled.
     '''
     if 'app' not in request.fixturenames:
         return
 
     app = request.getfixturevalue('app')
-    marker = request.node.get_marker('frontend')
+    marker = request.node.get_closest_marker('frontend')
     modules = set(marker.args[0] if marker and marker.args else [])
-
     if getattr(request.cls, 'modules', None):
         modules |= set(request.cls.modules)
 
@@ -90,17 +87,6 @@ def _load_frontend(request, _configure_application):
         from udata import frontend, api
         api.init_app(app)
         frontend.init_app(app, modules)
-
-    if app.config['THEME'] != 'default':
-        # Unload theme to allow multiple run with initialization
-        from udata import theme
-        with app.app_context():
-            theme_module = theme.current.entrypoint.module_name
-
-        def unload_theme():
-            if theme_module in sys.modules:
-                del sys.modules[theme_module]
-        request.addfinalizer(unload_theme)
 
 
 @pytest.fixture
@@ -115,10 +101,19 @@ def get_settings(request):
     '''
     Extract settings from the current test request
     '''
-    marker = request.node.get_marker('settings')
+    marker = request.node.get_closest_marker('settings')
     if marker:
         return marker.args[0]
-    return getattr(request.cls, 'settings', settings.Testing)
+    _settings = getattr(request.cls, 'settings', settings.Testing)
+    # apply the options(plugins) marker from pytest_flask as soon as app is created
+    # https://github.com/pytest-dev/pytest-flask/blob/a62ea18cb0fe89e3f3911192ab9ea4f9b12f8a16/pytest_flask/plugin.py#L126
+    # this lets us have default settings for plugins applied while testing
+    plugins = getattr(_settings, 'PLUGINS', [])
+    for options in request.node.iter_markers('options'):
+        option = options.kwargs.get('plugins', []) or options.kwargs.get('PLUGINS', [])
+        plugins += option
+    setattr(_settings, 'PLUGINS', plugins)
+    return _settings
 
 
 def drop_db(app):
@@ -134,7 +129,21 @@ def drop_db(app):
 def clean_db(app):
     drop_db(app)
     yield
+
+
+@pytest.fixture(name='db')
+def raw_db(app, clean_db):
+    '''Access to raw PyMongo DB client'''
+    from mongoengine.connection import get_db
+    yield get_db()
     drop_db(app)
+
+
+@pytest.fixture
+def enable_resource_event(app):
+    '''Enable resource event'''
+    app.config['PUBLISH_ON_RESOURCE_EVENTS'] = True
+    app.config['RESOURCES_ANALYSER_URI'] = 'http://local.dev'
 
 
 class ApiClient(object):
@@ -193,37 +202,6 @@ def api(client):
     return api_client
 
 
-class AutoIndex(object):
-    '''
-    Allows to write both::
-        with autoindex():
-            pass
-    and::
-        with autoindex:
-            pass
-    '''
-    def __enter__(self):
-        pass
-
-    def __exit__(self, type, value, traceback):
-        es.indices.refresh(index=es.index_name)
-
-    def __call__(self):
-        return self
-
-
-@pytest.fixture
-def autoindex(app, clean_db):
-    app.config['AUTO_INDEX'] = True
-    es.initialize()
-    es.cluster.health(wait_for_status='yellow', request_timeout=10)
-
-    yield AutoIndex()
-
-    if es.indices.exists(index=es.index_name):
-        es.indices.delete(index=es.index_name)
-
-
 @pytest.fixture(name='cli')
 def cli_fixture(app):
 
@@ -256,7 +234,7 @@ def instance_path(app, tmpdir):
         app.config.pop(key.format('ROOT'), None)
 
     storages.init_app(app)
-    app.register_blueprint(blueprint)
+    app.register_blueprint(blueprint, name='test-storage')
 
     return tmpdir
 

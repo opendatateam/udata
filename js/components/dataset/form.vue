@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import config from 'config';
 import Dataset from 'models/dataset';
 import licenses from 'models/licenses';
 import granularities from 'models/geogranularities';
@@ -18,7 +19,6 @@ export default {
             type: Object,
             default: () => new Dataset(),
         },
-        hideNotifications: false
     },
     data() {
         return {
@@ -34,8 +34,9 @@ export default {
                 }, {
                     id: 'license',
                     label: this._('License'),
-                    widget: 'select-input',
+                    widget: config.license_groups ? 'select-input-group' : 'select-input',
                     values: licenses,
+                    groups: config.license_groups,
                     map(item) {
                         return {value: item.id, text: item.title};
                     }
@@ -80,8 +81,7 @@ export default {
             return this.$refs.form.serialize();
         },
         validate() {
-            const isValid = this.$refs.form.validate();
-            return isValid;
+            return this.$refs.form.validate();
         },
         on_error(response) {
             return this.$refs.form.on_error(response);

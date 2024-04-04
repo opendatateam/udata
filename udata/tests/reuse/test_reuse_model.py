@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
 from datetime import datetime
 
 from udata.models import Reuse
 
+from udata.core.dataset import tasks as dataset_tasks
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.reuse.factories import ReuseFactory
+from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.user.factories import UserFactory
+from udata.core.discussions.factories import DiscussionFactory
+from udata.i18n import gettext as _
 from udata.tests.helpers import assert_emit
 
 from .. import TestCase, DBTestMixin
@@ -60,5 +61,57 @@ class ReuseModelTest(TestCase, DBTestMixin):
     def test_send_on_delete(self):
         reuse = ReuseFactory()
         with assert_emit(Reuse.on_delete):
-            reuse.deleted = datetime.now()
+            reuse.deleted = datetime.utcnow()
             reuse.save()
+
+    def test_reuse_metrics(self):
+        dataset = DatasetFactory()
+        reuse = VisibleReuseFactory()
+        DiscussionFactory(subject=reuse)
+
+        reuse.count_datasets()
+        reuse.count_discussions()
+
+        assert reuse.get_metrics()['datasets'] == 1
+        assert reuse.get_metrics()['discussions'] == 1
+
+        with assert_emit(Reuse.on_update):
+            reuse.datasets.append(dataset)
+            reuse.save()
+
+        reuse.count_datasets()
+        assert reuse.get_metrics()['datasets'] == 2
+
+        dataset.count_reuses()
+        assert dataset.get_metrics()['reuses'] == 1
+
+        with assert_emit(Reuse.on_update):
+            reuse.datasets.remove(dataset)
+            reuse.save()
+
+        dataset_tasks.update_datasets_reuses_metrics()
+        dataset.reload()
+        assert dataset.get_metrics()['reuses'] == 0
+
+    def test_reuse_type(self):
+        reuse = ReuseFactory(type='api')
+        self.assertEqual(reuse.type, 'api')
+        self.assertEqual(reuse.type_label, 'API')
+
+    def test_reuse_topic(self):
+        reuse = ReuseFactory(topic='health')
+        self.assertEqual(reuse.topic, 'health')
+        self.assertEqual(reuse.topic_label, _('Health'))
+
+    def test_reuse_without_private(self):
+        reuse = ReuseFactory()
+        self.assertEqual(reuse.private, False)
+
+        reuse.private = None
+        reuse.save()
+        self.assertEqual(reuse.private, False)
+
+        reuse.private = True
+        reuse.save()
+        self.assertEqual(reuse.private, True)
+

@@ -1,11 +1,11 @@
 <style lang="less">
-.checkbox label {
+.checkbox-form-field label {
     font-weight: bold;
 }
 </style>
 
 <template>
-<div class="checkbox">
+<div class="checkbox checkbox-form-field">
     <label :for="field.id" :class="{ 'required': required }">
         <input type="checkbox"
             :id="field.id"

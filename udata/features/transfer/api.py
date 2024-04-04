@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
 from flask import request
 
 from udata.api import api, fields, API, base_reference
@@ -9,6 +6,7 @@ from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api_fields import reuse_ref_fields
 from udata.core.user.api_fields import user_ref_fields
 from udata.models import db, User, Organization, Dataset, Reuse
+from udata.utils import id_or_404
 
 from .actions import request_transfer, accept_transfer, refuse_transfer
 from .models import TRANSFER_STATUS, Transfer
@@ -35,7 +33,7 @@ transfer_response_fields = api.model('TransferResponse', {
     'response': fields.String(description='The response', required=True,
                               enum=RESPONSE_TYPES),
     'comment': fields.String(
-        description='An optionnal comment about the transfer response'),
+        description='An optional comment about the transfer response'),
 })
 
 person_mapping = {
@@ -66,7 +64,7 @@ transfer_fields = api.model('Transfer', {
     'created': fields.ISODateTime(
         description='The transfer request date', readonly=True),
     'status': fields.String(
-        enum=TRANSFER_STATUS.keys(),
+        enum=list(TRANSFER_STATUS),
         description='The current transfer request status'),
     'responded': fields.ISODateTime(
         description='The transfer response date', readonly=True),
@@ -122,14 +120,14 @@ class TransferRequestAPI(API):
     @api.marshal_with(transfer_fields)
     def get(self, id):
         '''Fetch a transfer request given its identifier'''
-        return Transfer.objects.get_or_404(id=id)
+        return Transfer.objects.get_or_404(id=id_or_404(id))
 
     @api.doc('respond_to_transfer')
     @api.expect(transfer_response_fields)
     @api.marshal_with(transfer_fields)
     def post(self, id):
         '''Respond to a transfer request'''
-        transfer = Transfer.objects.get_or_404(id=id)
+        transfer = Transfer.objects.get_or_404(id=id_or_404(id))
 
         data = request.json
         comment = data.get('comment')

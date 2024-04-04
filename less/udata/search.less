@@ -97,18 +97,9 @@ ul.search-results {
             position: absolute;
             bottom: 16px;
 
-            li {
-                margin-left: -5px;
-            }
-
-            .btn {
-                color: @color;
-                text-transform: none;
-
-                .fa {
-                    background: none !important;
-                    color: #bababa;
-                }
+            .fa {
+                background: none !important;
+                color: #bababa;
             }
 
             &:after {
@@ -168,11 +159,15 @@ ul.search-results {
                 padding-right: @padding + 37px;
                 position: relative;
 
-                .badge {
+                .badge, .fa-times {
                     position: absolute;
                     top: 50%;
                     right: @padding;
                     transform: translateY(-50%);
+                }
+
+                .fa-times:hover {
+                    color: red;
                 }
             }
 
@@ -241,17 +236,11 @@ ul.search-results {
         @media (max-width: @screen-md-min) {
             @height: 84px;
             height: @height;
-            .left-bar {
-                min-height: @height;
-            }
         }
 
         @media (max-width: @screen-sm-min) {
             @height: 120px;
             height: @height;
-            .left-bar {
-                min-height: @height;
-            }
         }
     }
 

@@ -1,3 +1,7 @@
+@import '~bootstrap/less/variables';
+@import '~bootstrap/less/mixins';
+@import '~bootstrap/less/tables';
+
 .markdown {
     img {
         /* Prevent larger images to break layout */
@@ -15,5 +19,12 @@
             text-align: center;
             margin: 0.3em 0.1em;
         }
+    }
+
+    table {
+        .table();
+        .table-bordered();
+        .table-striped();
+        .table-hover();
     }
 }

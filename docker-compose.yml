@@ -1,7 +1,7 @@
 version: "3"
 services:
     db:
-        image: mongo:3.2
+        image: mongo:6.0.4
         volumes:
           - ./data/db:/data/db
         expose:
@@ -17,12 +17,3 @@ services:
           - "6379"
         ports:
           - "6379:6379"
-
-    search:
-        image: udata/elasticsearch:2.4.5
-        volumes:
-          - ./data/search/data:/usr/share/elasticsearch/data
-        expose:
-          - "9200"
-        ports:
-          - "9200:9200"

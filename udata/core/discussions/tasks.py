@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
 from udata import mail
 from udata.i18n import lazy_gettext as _
 from udata.core.dataset.models import Dataset
 from udata.core.reuse.models import Reuse
 from udata.core.post.models import Post
-from udata.tasks import task, get_logger
+from udata.tasks import connect, get_logger
 
+from .models import Discussion, Message
 from .signals import (
     on_new_discussion, on_new_discussion_comment, on_discussion_closed
 )
@@ -15,27 +13,18 @@ from .signals import (
 log = get_logger(__name__)
 
 
-def connect(signal):
-    def wrapper(func):
-        t = task(func)
-
-        def call_task(discussion, **kwargs):
-            t.delay(discussion, **kwargs)
-
-        signal.connect(call_task, weak=False)
-        return t
-    return wrapper
-
-
 def owner_recipients(discussion):
     if getattr(discussion.subject, 'organization', None):
         return [m.user for m in discussion.subject.organization.members]
-    else:
+    elif getattr(discussion.subject, 'owner', None):
         return [discussion.subject.owner]
+    else:
+        return []
 
 
-@connect(on_new_discussion)
-def notify_new_discussion(discussion):
+@connect(on_new_discussion, by_id=True)
+def notify_new_discussion(discussion_id):
+    discussion = Discussion.objects.get(pk=discussion_id)
     if isinstance(discussion.subject, (Dataset, Reuse, Post)):
         recipients = owner_recipients(discussion)
         subject = _('Your %(type)s have a new discussion',
@@ -47,15 +36,17 @@ def notify_new_discussion(discussion):
                     type(discussion.subject))
 
 
-@connect(on_new_discussion_comment)
-def notify_new_discussion_comment(discussion, **kwargs):
+@connect(on_new_discussion_comment, by_id=True)
+def notify_new_discussion_comment(discussion_id, message=None):
+    discussion = Discussion.objects.get(pk=discussion_id)
+    message = discussion.discussion[message]
     if isinstance(discussion.subject, (Dataset, Reuse, Post)):
-        message = kwargs['message']
         recipients = owner_recipients(discussion) + [
             m.posted_by for m in discussion.discussion]
-        recipients = [u for u in set(recipients) if u != message.posted_by]
+        recipients = list({u.id: u for u in recipients if u != message.posted_by}.values())
         subject = _('%(user)s commented your discussion',
                     user=message.posted_by.fullname)
+
         mail.send(subject, recipients, 'new_discussion_comment',
                   discussion=discussion, message=message)
     else:
@@ -63,13 +54,14 @@ def notify_new_discussion_comment(discussion, **kwargs):
                     type(discussion.subject))
 
 
-@connect(on_discussion_closed)
-def notify_discussion_closed(discussion, **kwargs):
+@connect(on_discussion_closed, by_id=True)
+def notify_discussion_closed(discussion_id, message=None):
+    discussion = Discussion.objects.get(pk=discussion_id)
+    message = discussion.discussion[message]
     if isinstance(discussion.subject, (Dataset, Reuse, Post)):
-        message = kwargs['message']
         recipients = owner_recipients(discussion) + [
             m.posted_by for m in discussion.discussion]
-        recipients = [u for u in set(recipients) if u != message.posted_by]
+        recipients = list({u.id: u for u in recipients if u != message.posted_by}.values())
         subject = _('A discussion has been closed')
         mail.send(subject, recipients, 'discussion_closed',
                   discussion=discussion, message=message)

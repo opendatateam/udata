@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from udata.forms import ModelForm, fields, validators, widgets
 from udata.i18n import lazy_gettext as _
 
-from .models import Post, IMAGE_SIZES
+from .models import Post
+from .constants import IMAGE_SIZES
 
 
 __all__ = ('PostForm', )
@@ -15,9 +13,9 @@ class PostForm(ModelForm):
 
     owner = fields.CurrentUserField()
 
-    name = fields.StringField(_('Name'), [validators.required()])
+    name = fields.StringField(_('Name'), [validators.DataRequired()])
     headline = fields.StringField(_('Headline'), widget=widgets.TextArea())
-    content = fields.MarkdownField(_('Content'), [validators.required()])
+    content = fields.MarkdownField(_('Content'), [validators.DataRequired()])
 
     datasets = fields.DatasetListField(_('Associated datasets'))
     reuses = fields.ReuseListField(_('Associated reuses'))
@@ -27,3 +25,7 @@ class PostForm(ModelForm):
     credit_url = fields.URLField(_('Credit URL'))
 
     tags = fields.TagField(_('Tags'))
+
+    body_type = fields.StringField(
+        _('body type'),
+        description=_('Specify your body type (HTML or markdown)'))

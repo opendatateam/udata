@@ -16,7 +16,7 @@ import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/job';
 import Datatable from 'components/datatable/widget.vue';
 import placeholders from 'helpers/placeholders';
 
-const MASK = ['id', 'name', 'owner', 'last_job{status,ended}', 'organization{name,logo_thumbnail}', 'backend', 'validation{state}'];
+const MASK = ['id', 'name', 'owner', 'last_job{status,ended}', 'organization{name,logo_thumbnail}', 'backend', 'validation{state}', 'deleted'];
 
 export default {
     MASK,
@@ -30,7 +30,7 @@ export default {
     data() {
         return {
             title: this._('Harvesters'),
-            sources: new HarvestSources({mask: MASK}),
+            sources: new HarvestSources({mask: MASK, query: {deleted: true}}),
         };
     },
     computed: {
@@ -41,7 +41,7 @@ export default {
                 fields.push({
                     key(item) {
                         if (item.organization) {
-                            return item.organization.logo_thumbnail || placeholders.organization;
+                            return placeholders.org_logo(item.organization, 30);
                         } else {
                             return placeholders.user_avatar(item.owner, 30);
                         }
@@ -54,7 +54,7 @@ export default {
                 label: this._('Name'),
                 key: 'name',
                 align: 'left',
-                type: 'text'
+                type: 'deletable-text'
             });
             // Only display owner if not filtered
             if (!(this.owner instanceof Model)) {
@@ -81,7 +81,9 @@ export default {
             }, {
                 label: this._('Status'),
                 key(item) {
-                    if (item.validation.state == 'pending') {
+                    if (item.deleted) {
+                        return 'deleted';
+                    } else if (item.validation.state == 'pending') {
                         return 'validation';
                     } else if (item.validation.state == 'refused') {
                         return 'refused';

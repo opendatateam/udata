@@ -11,6 +11,7 @@ export default class CommunityResource extends Model {
     fetch(ident) {
         ident = ident || this.id;
         if (ident) {
+            this.loading = true;
             this.$api('datasets.retrieve_community_resource', {
                 community: ident
             }, this.on_fetched);
@@ -23,23 +24,29 @@ export default class CommunityResource extends Model {
     /**
      * Create or update the given community resource
      */
-    save() {
+    save(on_error) {
         if (this.id) {
-            this.update(this);
+            this.update(this, on_error);
         } else {
+            this.loading = true;
             this.$api('datasets.create_community_resource', {
                 payload: this
-            },
-            this.on_fetched);
+            }, this.on_fetched, this.on_error(on_error));
         }
     }
 
-    update(data) {
+    update(data, on_error) {
+        this.loading = true;
         this.$api('datasets.update_community_resource', {
             community: this.id,
             payload: data
-        }, () => {
-            this.fetch(this.id);
-        });
+        }, this.on_fetched, this.on_error(on_error));
     }
-};
+
+    delete(on_error) {
+        this.loading = true;
+        this.$api('datasets.delete_community_resource', {
+            community: this.id
+        }, () => this.$emit('updated'), this.on_error(on_error));
+    }
+}

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 
 from datetime import date, datetime
@@ -9,7 +6,7 @@ from uuid import UUID
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import fields, ModelForm
-from udata.models import db
+from udata.mongo import db
 
 pytestmark = [
     pytest.mark.usefixtures('app')
@@ -40,7 +37,7 @@ class ExtrasFieldTest:
     def test_with_valid_data(self):
         Fake, FakeForm = self.factory()
 
-        now = datetime.now()
+        now = datetime.utcnow()
         today = date.today()
 
         fake = Fake()
@@ -51,6 +48,11 @@ class ExtrasFieldTest:
             'datetime': now,
             'date': today,
             'bool': True,
+            'dict': {
+                'integer': 42,
+                'float': 42.0,
+                'string': 'value',
+            }
         }}))
 
         form.validate()
@@ -64,23 +66,25 @@ class ExtrasFieldTest:
             'string': 'value',
             'datetime': now,
             'date': today,
-            'bool': True
-        }
-
-    def test_with_invalid_data(self):
-        Fake, FakeForm = self.factory()
-
-        form = FakeForm(MultiDict({'extras': {
+            'bool': True,
             'dict': {
                 'integer': 42,
                 'float': 42.0,
                 'string': 'value',
             }
-        }}))
+        }
+
+    def test_with_null_data(self):
+        Fake, FakeForm = self.factory()
+
+        fake = Fake()
+        form = FakeForm(MultiDict({'extras': None}))
 
         form.validate()
-        assert 'extras' in form.errors
-        assert len(form.errors['extras']) == 1
+        assert form.errors == {}
+
+        form.populate_obj(fake)
+        assert fake.extras == {}
 
     def test_with_valid_registered_data(self):
         Fake, FakeForm = self.factory()
@@ -117,9 +121,9 @@ class ExtrasFieldTest:
             (db.DateField, '2018-05-29', date, date(2018, 5, 29)),
             (db.BooleanField, 'true', bool, True),
             (db.IntField, 42, int, 42),
-            (db.StringField, '42', basestring, '42'),
+            (db.StringField, '42', str, '42'),
             (db.FloatField, '42.0', float, 42.0),
-            (db.URLField, 'http://test.com', basestring, 'http://test.com'),
+            (db.URLField, 'http://test.com', str, 'http://test.com'),
             (db.UUIDField, 'e3b06d6d-90c0-4407-adc0-de81d327f181', UUID,
                 UUID('e3b06d6d-90c0-4407-adc0-de81d327f181')),
     ]])

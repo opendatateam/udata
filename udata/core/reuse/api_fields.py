@@ -1,14 +1,11 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from udata.api import api, fields, base_reference
 
 from udata.core.badges.api import badge_fields
-from udata.core.dataset.api_fields import dataset_fields, dataset_ref_fields
+from udata.core.dataset.api_fields import dataset_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.user.api_fields import user_ref_fields
 
-from .models import REUSE_TYPES, IMAGE_SIZES
+from .constants import REUSE_TOPICS, REUSE_TYPES, IMAGE_SIZES
 
 BIGGEST_IMAGE_SIZE = IMAGE_SIZES[0]
 
@@ -19,7 +16,7 @@ reuse_fields = api.model('Reuse', {
     'slug': fields.String(
         description='The reuse permalink string', readonly=True),
     'type': fields.String(
-        description='The reuse type', required=True, enum=REUSE_TYPES.keys()),
+        description='The reuse type', required=True, enum=list(REUSE_TYPES)),
     'url': fields.String(
         description='The reuse remote URL (website)', required=True),
     'description': fields.Markdown(
@@ -29,6 +26,8 @@ reuse_fields = api.model('Reuse', {
     'badges': fields.List(fields.Nested(badge_fields),
                           description='The reuse badges',
                           readonly=True),
+    'topic': fields.String(
+        description='The reuse topic', required=True, enum=list(REUSE_TOPICS)),
     'featured': fields.Boolean(
         description='Is the reuse featured', readonly=True),
     'private': fields.Boolean(
@@ -51,29 +50,18 @@ reuse_fields = api.model('Reuse', {
     'owner': fields.Nested(
         user_ref_fields, description='The owner user', readonly=True,
         allow_null=True),
-    'metrics': fields.Raw(description='The reuse metrics', readonly=True),
+    'metrics': fields.Raw(attribute=lambda o: o.get_metrics(),
+        description='The reuse metrics', readonly=True),
     'uri': fields.UrlFor(
         'api.reuse', lambda o: {'reuse': o},
         description='The reuse API URI', readonly=True),
     'page': fields.UrlFor(
         'reuses.show', lambda o: {'reuse': o},
-        description='The reuse page URL', readonly=True),
+        description='The reuse page URL', readonly=True, fallback_endpoint='api.reuse'),
+    'extras': fields.Raw(description='Extras attributes as key-value pairs'),
 }, mask='*,datasets{title,uri,page}')
 
 reuse_page_fields = api.model('ReusePage', fields.pager(reuse_fields))
-
-reuse_suggestion_fields = api.model('ReuseSuggestion', {
-    'id': fields.String(description='The reuse identifier', readonly=True),
-    'title': fields.String(description='The reuse title', readonly=True),
-    'slug': fields.String(
-        description='The reuse permalink string', readonly=True),
-    'image_url': fields.String(description='The reuse thumbnail URL'),
-    'page': fields.UrlFor(
-        'reuses.show_redirect', lambda o: {'reuse': o['slug']},
-        description='The reuse page URL', readonly=True),
-    'score': fields.Float(
-        description='The internal match score', readonly=True),
-})
 
 
 reuse_ref_fields = api.inherit('ReuseReference', base_reference, {
@@ -87,10 +75,29 @@ reuse_ref_fields = api.inherit('ReuseReference', base_reference, {
         description='The reuse API URI', readonly=True),
     'page': fields.UrlFor(
         'reuses.show', lambda o: {'reuse': o},
-        description='The reuse page URL', readonly=True),
+        description='The reuse page URL', readonly=True, fallback_endpoint='api.reuse'),
 })
+
 
 reuse_type_fields = api.model('ReuseType', {
     'id': fields.String(description='The reuse type identifier'),
     'label': fields.String(description='The reuse type display name')
+})
+
+
+reuse_suggestion_fields = api.model('ReuseSuggestion', {
+    'id': fields.String(description='The reuse identifier', readonly=True),
+    'title': fields.String(description='The reuse title', readonly=True),
+    'slug': fields.String(
+        description='The reuse permalink string', readonly=True),
+    'image_url': fields.ImageField(size=BIGGEST_IMAGE_SIZE, description='The reuse thumbnail URL', readonly=True),
+    'page': fields.UrlFor(
+        'reuses.show_redirect', lambda o: {'reuse': o['slug']},
+        description='The reuse page URL', readonly=True, fallback_endpoint='api.reuse')
+})
+
+
+reuse_topic_fields = api.model('ReuseTopic', {
+    'id': fields.String(description='The reuse topic identifier'),
+    'label': fields.String(description='The reuse topic display name')
 })

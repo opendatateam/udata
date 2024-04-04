@@ -51,6 +51,7 @@
 import API from 'api';
 import User from 'models/user';
 import Organization from 'models/organization';
+import organizationRoles from 'models/org_roles';
 import UserModal from 'components/user/modal.vue';
 import RoleForm from 'components/form/horizontal-form.vue';
 
@@ -70,14 +71,18 @@ export default {
             fields: [{
                 id: 'role',
                 label: this._('Role'),
-                widget: 'select-input'
+                widget: 'select-input',
+                values: organizationRoles,
+                map(item) {
+                    return {value: item.id, text: item.label};
+                }
             }],
             defs: API.definitions.Member
         };
     },
     computed: {
         can_edit() {
-            return this.$root.me.is_admin || this.org.is_admin(this.$root.me);
+            return this.org.is_admin(this.$root.me);
         },
         member_exists() {
             return this.org.is_member(this.user);
@@ -90,15 +95,15 @@ export default {
         delete() {
             API.organizations.delete_organization_member(
                 {org: this.org.id, user: this.user.id},
-                this.on_deleted.bind(this)
+                this.on_deleted.bind(this),
+                this.$root.handleApiError
             );
         },
         on_deleted(response) {
             this.org.fetch();
             this.$dispatch('notify', {
                 title: this._('Member deleted'),
-                details: this._('{user} is not a member of this organization anymore')
-                    .replace('{user}', this.user.fullname)
+                details: this._('{user} is not a member of this organization anymore', {user: this.user.fullname})
             });
             this.$refs.modal.close();
         },
@@ -109,18 +114,16 @@ export default {
                 payload: this.$refs.form.serialize()
             };
             if (this.member_exists) {
-                API.organizations.update_organization_member(data, this.on_updated.bind(this));
+                API.organizations.update_organization_member(data, this.on_updated.bind(this), this.$root.handleApiError);
             } else {
-                API.organizations.create_organization_member(data, this.on_created.bind(this));
+                API.organizations.create_organization_member(data, this.on_created.bind(this), this.$root.handleApiError);
             }
         },
         on_created(response) {
             this.org.fetch();
             this.$dispatch('notify', {
                 title: this._('Member added'),
-                details: this._('{user} is now {role} of this organization')
-                    .replace('{user}', this.user.fullname)
-                    .replace('{role}', response.obj.role)
+                details: this._('{user} is now {role} of this organization', {user: this.user.fullname, role: this._(response.obj.role)})
             });
             this.$refs.modal.close();
         },
@@ -128,9 +131,7 @@ export default {
             this.org.fetch();
             this.$dispatch('notify', {
                 title: this._('Member role updated'),
-                details: this._('{user} is now {role} of this organization')
-                    .replace('{user}', this.user.fullname)
-                    .replace('{role}', response.obj.role)
+                details: this._('{user} is now {role} of this organization', {user: this.user.fullname, role: this._(response.obj.role)})
             });
             this.$refs.modal.close();
         }

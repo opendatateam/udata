@@ -37,6 +37,9 @@
                 <dd><a :href="resource.url">{{resource.url}}</a></dd>
                 <dt v-if="resource.format">{{ _('Format') }}</dt>
                 <dd v-if="resource.format">{{ resource.format }}</dd>
+                <dt v-if="resource.schema?.name || resource.schema?.url">{{ _('Schema') }}</dt>
+                <dd v-if="resource.schema?.name">{{ resource.schema.name }}</dd>
+                <dd v-if="resource.schema?.url">{{ resource.schema.url }}</dd>
                 <dt v-if="resource.mime">{{ _('Mime Type') }}</dt>
                 <dd v-if="resource.mime">{{ resource.mime }}</dd>
                 <dt v-if="resource.filesize">{{ _('Size') }}</dt>
@@ -47,8 +50,6 @@
                 <dd v-if="resource.created_at">{{ resource.created_at | dt }}</dd>
                 <dt v-if="resource.last_modified">{{ _('Modified on') }}</dt>
                 <dd v-if="resource.last_modified">{{ resource.last_modified | dt }}</dd>
-                <dt v-if="resource.published">{{ _('Published on') }}</dt>
-                <dd v-if="resource.published">{{ resource.published | dt }}</dd>
                 <dt v-if="resource.metrics && resource.metrics.downloads">{{ _('Downloads') }}</dt>
                 <dd v-if="resource.metrics && resource.metrics.downloads">{{ resource.metrics.downloads }}</dd>
                 <dt v-if="is_community">{{ _('Publish by') }}</dt>
@@ -59,7 +60,7 @@
             </dl>
         </div>
 
-        <resource-form v-if="edit" v-ref:form :dataset="dataset" :resource="resource" :hide-notifications="false"></resource-form>
+        <resource-form v-show="edit" v-ref:form :dataset="dataset" :resource="resource"></resource-form>
 
         <div v-show="confirm">
             <p class="lead text-center">
@@ -72,23 +73,21 @@
     </div>
 
     <footer class="modal-footer text-center">
-        <button type="button" v-show="!edit && !confirm"
-                class="btn btn-primary btn-sm btn-flat pull-left"
+        <!-- Main close button (visible on read-only display) -->
+        <button type="button" v-show="!edit && !confirm && !isUpload"
+                class="btn btn-primary btn-flat pull-left"
                 @click="$refs.modal.close">
             {{ _('Close') }}
         </button>
-        <button type="button" v-show="confirm"
-                class="btn btn-warning btn-sm btn-flat pull-left"
-                @click="confirm = false">
-            {{ _('Cancel') }}
-        </button>
-        <button type="button" v-show="edit"
-                class="btn btn-primary btn-sm btn-flat pull-left"
-                @click="edit = false">
+        <!-- Same cancel button for every action-->
+        <button type="button" v-show="edit || confirm || isUpload"
+                class="btn btn-flat pull-left"
+                :class="{'btn-danger': confirm, 'btn-primary': !confirm}"
+                @click="cancel">
             {{ _('Cancel') }}
         </button>
         <button type="button" v-show="!edit && !confirm && can_edit"
-                class="btn btn-danger btn-xs btn-flat"
+                class="btn btn-danger btn-flat"
                 @click="confirm = true">
             {{ _('Delete') }}
         </button>
@@ -98,11 +97,16 @@
             {{ _('Edit') }}
         </button>
         <button type="button" v-show="confirm"
-                class="btn btn-danger btn-outline btn-flat"
+                class="btn btn-warning btn-flat"
                 @click="delete_confirmed">
             {{ _('Confirm') }}
         </button>
-        <button type="button" v-show="edit"
+        <button type="button" v-show="edit && hasUploadedFile && !isUpload"
+            class="btn btn-outline btn-flat"
+            @click="upload">
+            {{ _('Replace the file') }}
+        </button>
+        <button type="button" v-show="edit && !isUpload"
                 class="btn btn-outline btn-flat"
                 @click="save">
             {{ _('Save') }}
@@ -124,17 +128,22 @@ import OrgCard from 'components/organization/card.vue'
 import UserCard from 'components/user/card.vue'
 import DatasetFilters from 'components/dataset/filters';
 
+import WatchRefs from 'mixins/watch-refs';
+
 export default {
     name: 'resource-modal',
     components: {Modal, ResourceForm, OrgCard, UserCard},
-    mixins: [DatasetFilters],
+    mixins: [DatasetFilters, WatchRefs],
     data() {
         return {
             edit: false,
             confirm: false,
-            dataset: this.$parent.$parent.dataset,
-            resource: new Resource(),
-            next_route: null
+            dataset: this.$parent.$parent.dataset,  // Because this is a nested view
+            resource: {},
+            next_route: null,
+            isUpload: false,
+            hasUploadedFile: false,
+            successMsg: undefined,
         };
     },
     computed: {
@@ -147,7 +156,7 @@ export default {
         },
         is_community() {
             return this.resource instanceof CommunityResource
-        }
+        },
     },
     events: {
         'modal:closed': function() {
@@ -160,8 +169,8 @@ export default {
         data() {
             if (this.$route.matched.length > 1) {
                 // This is a nested view
-                let idx = this.$route.matched.length - 2,
-                    parent = this.$route.matched[idx];
+                const idx = this.$route.matched.length - 2;
+                const parent = this.$route.matched[idx];
                 this.next_route = {
                     name: parent.handler.name,
                     params: parent.params
@@ -170,48 +179,83 @@ export default {
             if (this.$route.name.includes('community')) {
                 this.resource = new CommunityResource();
                 this.resource.fetch(this.$route.params.rid);
+                this.resource.$once('updated', () => {
+                    // Next updated will be on success
+                    this.updHandler = this.resource.$once('updated', this.on_success);
+                });
+            } else if (this.dataset.loading) {
+                // Dataset from parent view is still loading
+                this.updHandler = this.dataset.$once('updated', this.resource_from_dataset);
             } else {
-                this.resource.fetch(this.$route.params.oid, this.$route.params.rid);
+                // Dataset from parent view is already fetched
+                this.resource_from_dataset();
+            }
+        },
+        deactivate() {
+            if (this.updHandler) {
+                this.updHandler.remove();
+                this.updHandler = undefined;
             }
         }
     },
     methods: {
+        cancel() {
+            if (this.confirm) {
+                this.confirm = false;
+            } else if (this.edit && !this.isUpload) {
+                this.edit = false;
+            } else if (this.isUpload) {
+                this.$refs.form.isUpload = false;
+            }
+        },
+        upload() {
+            this.$refs.form.isUpload = true;
+        },
         save() {
-            if (this.$refs.form.validate()) {
+            const $form = this.$refs.form;
+            if ($form.validate()) {
+                this.successMsg = this._('Your resource has been updated.')
                 if (this.is_community) {
-                    Object.assign(this.resource, this.$refs.form.serialize());
-                    this.resource.save();
+                    Object.assign(this.resource, $form.serialize());
+                    this.resource.save($form.on_error);
                 } else {
-                    this.dataset.save_resource(this.$refs.form.serialize());
+                    this.dataset.save_resource($form.serialize(), $form.on_error);
                 }
-                this.$refs.modal.close();
                 return true;
             }
         },
+        on_success() {
+            this.$dispatch('notify', {
+                autoclose: true,
+                title: this._('Changes saved'),
+                details: this.successMsg
+            });
+            this.$refs.modal.close();
+        },
         delete_confirmed() {
+            this.successMsg = this._('Your resource has been deleted.')
             if (this.is_community) {
-                API.datasets.delete_community_resource({community: this.resource.id},
-                    (response) => {
-                        this.$refs.modal.close();
-                    }
-                );
+                this.resource.delete();
             } else {
                 this.dataset.delete_resource(this.resource.id);
-                this.$refs.modal.close();
+            }
+        },
+        resource_from_dataset() {
+            const rid = this.$route.params.rid;
+            const data = this.dataset.resources.find(resource => resource.id === rid);
+            if (data) {
+                this.resource = new Resource({data});
+                this.updHandler = this.dataset.$once('updated', this.on_success)
             }
         }
     },
-    watch: {
-        'dataset.resources': function(resources) {
-            if (!this.is_community) {
-                resources.some((resource) => {
-                    if (resource.id === this.$route.params.rid) {
-                        this.resource = new Resource({data: resource});
-                        return true;
-                    }
-                });
-            }
+    watchRefs: {
+        'form.isUpload': function(isUpload) {
+            this.isUpload = isUpload;
+        },
+        'form.hasUploadedFile': function(hasUploadedFile) {
+            this.hasUploadedFile = hasUploadedFile;
         }
-    }
+    },
 };
 </script>

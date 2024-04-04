@@ -1,13 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from udata.api import api, fields, base_reference
 from udata.core.badges.api import badge_fields
 
-from .models import ORG_ROLES, DEFAULT_ROLE, MEMBERSHIP_STATUS, LOGO_SIZES
-
-BIGGEST_LOGO_SIZE = LOGO_SIZES[0]
-
+from .constants import ORG_ROLES, DEFAULT_ROLE, MEMBERSHIP_STATUS, BIGGEST_LOGO_SIZE
 
 org_ref_fields = api.inherit('OrganizationReference', base_reference, {
     'name': fields.String(description='The organization name', readonly=True),
@@ -20,14 +14,16 @@ org_ref_fields = api.inherit('OrganizationReference', base_reference, {
         required=True),
     'page': fields.UrlFor(
         'organizations.show', lambda o: {'org': o},
-        description='The organization web page URL', readonly=True),
+        description='The organization web page URL', readonly=True, fallback_endpoint='api.organization'),
     'logo': fields.ImageField(original=True,
         description='The organization logo URL'),
     'logo_thumbnail': fields.ImageField(attribute='logo', size=BIGGEST_LOGO_SIZE,
         description='The organization logo thumbnail URL. This is the square '
         '({0}x{0}) and cropped version.'.format(BIGGEST_LOGO_SIZE)),
+    'badges': fields.List(fields.Nested(badge_fields),
+        description='The organization badges',
+        readonly=True),
 })
-
 
 from udata.core.user.api_fields import user_ref_fields  # noqa: required
 
@@ -38,7 +34,7 @@ request_fields = api.model('MembershipRequest', {
         description='The request creation date', readonly=True),
     'status': fields.String(
         description='The current request status', required=True,
-        enum=MEMBERSHIP_STATUS.keys()),
+        enum=list(MEMBERSHIP_STATUS)),
     'comment': fields.String(
         description='A request comment from the user', required=True),
 })
@@ -47,7 +43,7 @@ member_fields = api.model('Member', {
     'user': fields.Nested(user_ref_fields),
     'role': fields.String(
         description='The member role in the organization', required=True,
-        enum=ORG_ROLES.keys(), default=DEFAULT_ROLE)
+        enum=list(ORG_ROLES), default=DEFAULT_ROLE)
 })
 
 org_fields = api.model('Organization', {
@@ -61,6 +57,7 @@ org_fields = api.model('Organization', {
         required=True),
     'description': fields.Markdown(
         description='The organization description in Markdown', required=True),
+    'business_number_id': fields.String(description='The organization\'s business identification number.'),
     'created_at': fields.ISODateTime(
         description='The organization creation date', readonly=True),
     'last_modified': fields.ISODateTime(
@@ -69,13 +66,14 @@ org_fields = api.model('Organization', {
         description='The organization deletion date if deleted',
         readonly=True),
     'metrics': fields.Raw(
+        attribute=lambda o: o.get_metrics(),
         description='The organization metrics', readonly=True),
     'uri': fields.UrlFor(
         'api.organization', lambda o: {'org': o},
         description='The organization API URI', readonly=True),
     'page': fields.UrlFor(
         'organizations.show', lambda o: {'org': o},
-        description='The organization page URL', readonly=True),
+        description='The organization page URL', readonly=True, fallback_endpoint='api.organization'),
     'logo': fields.ImageField(original=True,
         description='The organization logo URL'),
     'logo_thumbnail': fields.ImageField(attribute='logo', size=BIGGEST_LOGO_SIZE,
@@ -86,9 +84,23 @@ org_fields = api.model('Organization', {
     'badges': fields.List(fields.Nested(badge_fields),
                           description='The organization badges',
                           readonly=True),
+    'extras': fields.Raw(description='Extras attributes as key-value pairs'),
 })
 
 org_page_fields = api.model('OrganizationPage', fields.pager(org_fields))
+
+
+refuse_membership_fields = api.model('RefuseMembership', {
+    'comment': fields.String(
+        description='The refusal comment.'),
+})
+
+
+org_role_fields = api.model('OrganizationRole', {
+    'id': fields.String(description='The role identifier'),
+    'label': fields.String(description='The role label')
+})
+
 
 org_suggestion_fields = api.model('OrganizationSuggestion', {
     'id': fields.String(
@@ -98,16 +110,8 @@ org_suggestion_fields = api.model('OrganizationSuggestion', {
         description='The organization acronym', readonly=True),
     'slug': fields.String(
         description='The organization permalink string', readonly=True),
-    'image_url': fields.String(
-        description='The organization logo URL', readonly=True),
+    'image_url': fields.ImageField(size=BIGGEST_LOGO_SIZE, description='The organization logo URL', readonly=True),
     'page': fields.UrlFor(
         'organizations.show_redirect', lambda o: {'org': o['slug']},
-        description='The organization web page URL', readonly=True),
-    'score': fields.Float(
-        description='The internal match score', readonly=True),
-})
-
-refuse_membership_fields = api.model('RefuseMembership', {
-    'comment': fields.String(
-        description='The refusal comment.'),
+        description='The organization web page URL', readonly=True, fallback_endpoint='api.organization')
 })

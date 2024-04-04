@@ -1,9 +1,9 @@
 # Docker deployment
 
-This documents the [Docker][] way to deploy uData.
+This documents the [Docker][] way to deploy udata.
 If you are intending to perform a classic deployment on a server, you should look at the [Installation section](installation.md).
 
-uData and its extensions are packaged and distributed as [Docker images][].
+udata and its extensions are packaged and distributed as [Docker images][].
 Head directly to [the dedicated repository][docker-repository] for an up to date documentation and [configuration samples][].
 
 ## Developing on your machine

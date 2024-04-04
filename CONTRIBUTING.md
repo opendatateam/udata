@@ -2,7 +2,7 @@
 
 **Hello fellow developer/hacker/citizen/peer!**
 
-The uData project welcomes, and depends, on contributions from developers and users in the open source community. Contributions can be made in a number of ways, a few examples are:
+The udata project welcomes, and depends, on contributions from developers and users in the open source community. Contributions can be made in a number of ways, a few examples are:
 
 * Code patches via pull requests
 * Documentation improvements
@@ -63,27 +63,15 @@ and will magicaly close the issue as soon as the commit is merged.
 
 ## Discussing strategies
 
-We’re trying to develop this project in the open as much as possible. We have a dedicated [Gitter channel][gitter] where we discuss each new strategic change and invite the community to give a valuable feedback. You’re encouraged to join and participate.
-
-We also [vote for new features](http://udata.readthedocs.io/en/stable/governance/) in order to include the whole community in the process.
+We’re trying to develop this project in the open as much as possible. We created a dedicated [Github discussions][github-discussions] where we discuss each new strategic change and invite the community to give a valuable feedback. You’re encouraged to join and participate.
 
 ## Code guides
 
 ### Python style guide
 
-We follow the PEP-0008 and PEP-0257 as mush as possible in the respect of PEP-0020.
+We follow the PEP-0008 and PEP-0257 as much as possible in the respect of PEP-0020.
 
 On top of that, we apply the [Python Style Guide][py-style-guide] from Google.
-
-#### Python 3 forward compatible syntax
-
-As it's still planned to migrate to Python 3 some day,
-try to always use a forward compatible syntax in order
-to ensure an easy future migration:
-
-* unicode by default, starts any file with `from __future__ import unicode_literals`
-* Python 3 compatible `print` statement with `from __future__ import print_function`
-* use `io.open` instead of `codecs.open` to manipulate utf-8 files
 
 ### JavaScript style guide
 
@@ -108,4 +96,4 @@ We try to stay as close as possible to [CommonMark][] but use default [extension
 [code-guide]: http://codeguide.co/
 [commonmark]: http://commonmark.org/
 [extensions-mkdocs]: http://www.mkdocs.org/user-guide/writing-your-docs/
-[gitter]: https://gitter.im/opendatateam/udata
+[github-discussions]: https://github.com/opendatateam/udata/discussions/2721

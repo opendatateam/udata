@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from bson import ObjectId
 from mock import patch
 
@@ -15,7 +12,7 @@ from . import APITestCase
 
 
 class TransferAPITest(APITestCase):
-    modules = ['core.user', 'core.dataset']
+    modules = []
 
     @patch('udata.features.transfer.api.request_transfer')
     def test_request_dataset_transfer(self, action):

@@ -14,7 +14,8 @@
 <template>
     <div class="vertical-field" :class="{
         'form-group': !is_bool && !is_hidden,
-        'has-error': errors.length
+        'has-error': errors.length,
+        'has-success': success,
         }">
         <span v-if="!is_hidden" v-show="description" class="form-help"
             v-popover="description" popover-trigger="hover" popover-placement="left">
@@ -30,7 +31,7 @@
             :readonly="readonly">
         </component>
         <label :for="field.id" class="help-block"
-            v-for="error in errors">{{error}}</label>
+            v-for="error in errors" track-by="$index">{{error}}</label>
     </div>
 </template>
 

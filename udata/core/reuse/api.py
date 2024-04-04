@@ -1,50 +1,114 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
+from bson.objectid import ObjectId
 from datetime import datetime
 
 from flask import request
 
-from udata import search
 from udata.api import api, API, errors
+from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission
 from udata.models import Dataset
-from udata.utils import multi_to_dict
+from udata.utils import id_or_404
 
 from udata.core.badges import api as badges_api
+from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.followers.api import FollowAPI
 from udata.core.storages.api import (
     uploaded_image_fields, image_parser, parse_uploaded_image
 )
 
 from .api_fields import (
-    reuse_fields, reuse_page_fields, reuse_suggestion_fields,
-    reuse_type_fields, dataset_ref_fields
+    reuse_fields, reuse_page_fields,
+    reuse_type_fields,
+    reuse_suggestion_fields,
+    reuse_topic_fields
 )
 from .forms import ReuseForm
-from .models import Reuse, REUSE_TYPES
+from .models import Reuse
+from .constants import REUSE_TYPES, REUSE_TOPICS
 from .permissions import ReuseEditPermission
-from .search import ReuseSearch
+
+
+DEFAULT_SORTING = '-created_at'
+SUGGEST_SORTING = '-metrics.followers'
+
+
+class ReuseApiParser(ModelApiParser):
+    sorts = {
+        'title': 'title',
+        'created': 'created_at',
+        'last_modified': 'last_modified',
+        'datasets': 'metrics.datasets',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
+    }
+
+    def __init__(self):
+        super().__init__()
+        self.parser.add_argument('dataset', type=str, location='args')
+        self.parser.add_argument('tag', type=str, location='args')
+        self.parser.add_argument('organization', type=str, location='args')
+        self.parser.add_argument('owner', type=str, location='args')
+        self.parser.add_argument('type', type=str, location='args')
+        self.parser.add_argument('topic', type=str, location='args')
+        self.parser.add_argument('featured', type=bool, location='args')
+
+    @staticmethod
+    def parse_filters(reuses, args):
+        if args.get('q'):
+            # Following code splits the 'q' argument by spaces to surround
+            # every word in it with quotes before rebuild it.
+            # This allows the search_text method to tokenise with an AND
+            # between tokens whereas an OR is used without it.
+            phrase_query = ' '.join([f'"{elem}"' for elem in args['q'].split(' ')])
+            reuses = reuses.search_text(phrase_query)
+        if args.get('dataset'):
+            if not ObjectId.is_valid(args['dataset']):
+                api.abort(400, 'Dataset arg must be an identifier')
+            reuses = reuses.filter(datasets=args['dataset'])
+        if args.get('featured'):
+            reuses = reuses.filter(featured=args['featured'])
+        if args.get('topic'):
+            reuses = reuses.filter(topic=args['topic'])
+        if args.get('type'):
+            reuses = reuses.filter(type=args['type'])
+        if args.get('tag'):
+            reuses = reuses.filter(tags=args['tag'])
+        if args.get('organization'):
+            if not ObjectId.is_valid(args['organization']):
+                api.abort(400, 'Organization arg must be an identifier')
+            reuses = reuses.filter(organization=args['organization'])
+        if args.get('owner'):
+            if not ObjectId.is_valid(args['owner']):
+                api.abort(400, 'Owner arg must be an identifier')
+            reuses = reuses.filter(owner=args['owner'])
+        return reuses
+
 
 ns = api.namespace('reuses', 'Reuse related operations')
 
 common_doc = {
     'params': {'reuse': 'The reuse ID or slug'}
 }
-search_parser = ReuseSearch.as_request_parser()
+
+reuse_parser = ReuseApiParser()
 
 
 @ns.route('/', endpoint='reuses')
 class ReuseListAPI(API):
-    @api.doc('list_reuses', parser=search_parser)
+    @api.doc('list_reuses')
+    @api.expect(reuse_parser.parser)
     @api.marshal_with(reuse_page_fields)
     def get(self):
-        search_parser.parse_args()
-        return search.query(ReuseSearch, **multi_to_dict(request.args))
+        args = reuse_parser.parse()
+        reuses = Reuse.objects(deleted=None, private__ne=True)
+        reuses = reuse_parser.parse_filters(reuses, args)
+        sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
+        return reuses.order_by(sort).paginate(args['page'], args['page_size'])
 
     @api.secure
-    @api.doc('create_reuse', responses={400: 'Validation error'})
+    @api.doc('create_reuse')
     @api.expect(reuse_fields)
+    @api.response(400, 'Validation error')
     @api.marshal_with(reuse_fields)
     def post(self):
         '''Create a new object'''
@@ -71,7 +135,8 @@ class ReuseAPI(API):
     @api.response(400, errors.VALIDATION_ERROR)
     def put(self, reuse):
         '''Update a given reuse'''
-        if reuse.deleted:
+        request_deleted = request.json.get('deleted', True)
+        if reuse.deleted and request_deleted is not None:
             api.abort(410, 'This reuse has been deleted')
         ReuseEditPermission(reuse).test()
         form = api.validate(ReuseForm, reuse)
@@ -85,7 +150,7 @@ class ReuseAPI(API):
         if reuse.deleted:
             api.abort(410, 'This reuse has been deleted')
         ReuseEditPermission(reuse).test()
-        reuse.deleted = datetime.now()
+        reuse.deleted = datetime.utcnow()
         reuse.save()
         return '', 204
 
@@ -102,7 +167,7 @@ class ReuseDatasetsAPI(API):
         if 'id' not in request.json:
             api.abort(400, 'Expect a dataset identifier')
         try:
-            dataset = Dataset.objects.get_or_404(id=request.json['id'])
+            dataset = Dataset.objects.get_or_404(id=id_or_404(request.json['id']))
         except Dataset.DoesNotExist:
             msg = 'Dataset {0} does not exists'.format(request.json['id'])
             api.abort(404, msg)
@@ -164,6 +229,9 @@ class ReuseFeaturedAPI(API):
 
 
 @ns.route('/<id>/followers/', endpoint='reuse_followers')
+@ns.doc(get={'id': 'list_reuse_followers'},
+        post={'id': 'follow_reuse'},
+        delete={'id': 'unfollow_reuse'})
 class FollowReuseAPI(FollowAPI):
     model = Reuse
 
@@ -178,29 +246,31 @@ suggest_parser.add_argument(
 
 
 @ns.route('/suggest/', endpoint='suggest_reuses')
-class SuggestReusesAPI(API):
+class ReusesSuggestAPI(API):
+    @api.doc('suggest_reuses')
+    @api.expect(suggest_parser)
     @api.marshal_list_with(reuse_suggestion_fields)
-    @api.doc(id='suggest_reuses', parser=suggest_parser)
     def get(self):
-        '''Suggest reuses'''
+        '''Reuses suggest endpoint using mongoDB contains'''
         args = suggest_parser.parse_args()
+        reuses = Reuse.objects(deleted=None, private__ne=True, title__icontains=args['q'])
         return [
             {
-                'id': opt['text'],
-                'title': opt['payload']['title'],
-                'score': opt['score'],
-                'slug': opt['payload']['slug'],
-                'image_url': opt['payload']['image_url'],
+                'id': reuse.id,
+                'title': reuse.title,
+                'slug': reuse.slug,
+                'image_url': reuse.image,
             }
-            for opt in search.suggest(args['q'], 'reuse_suggest', args['size'])
+            for reuse in reuses.order_by(SUGGEST_SORTING).limit(args['size'])
         ]
 
 
 @ns.route('/<reuse:reuse>/image', endpoint='reuse_image')
-@api.doc(parser=image_parser, **common_doc)
+@api.doc(**common_doc)
 class ReuseImageAPI(API):
     @api.secure
     @api.doc('reuse_image')
+    @api.expect(image_parser)  # Swagger 2.0 does not support formData at path level
     @api.marshal_with(uploaded_image_fields)
     def post(self, reuse):
         '''Upload a new reuse image'''
@@ -219,3 +289,13 @@ class ReuseTypesAPI(API):
         '''List all reuse types'''
         return [{'id': id, 'label': label}
                 for id, label in REUSE_TYPES.items()]
+
+
+@ns.route('/topics/', endpoint='reuse_topics')
+class ReuseTopicsAPI(API):
+    @api.doc('reuse_topics')
+    @api.marshal_list_with(reuse_topic_fields)
+    def get(self):
+        '''List all reuse topics'''
+        return [{'id': id, 'label': label}
+                for id, label in REUSE_TOPICS.items()]

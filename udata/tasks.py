@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
 
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from celery import Celery, Task
 from celery.utils.log import get_task_logger
@@ -83,24 +80,31 @@ def job(name, **kwargs):
                 bind=True, **kwargs)
 
 
+def as_task_param(obj):
+    '''Pass a document as task parameter'''
+    return obj.__class__.__name__, (obj.pk if isinstance(obj.pk, str) else str(obj.pk))
+
+
 def get_logger(name):
     logger = get_task_logger(name)
     return logger
 
 
-def connect(signal):
+def connect(signal, *args, **kwargs):
+    by_id = kwargs.pop('by_id', False)
+
     def wrapper(func):
-        t = task(func)
+        t = task(func, *args, **kwargs)
 
         def call_task(item, **kwargs):
-            t.delay(item, **kwargs)
+            t.delay(str(item.pk) if by_id else item, **kwargs)
 
         signal.connect(call_task, weak=False)
         return t
     return wrapper
 
 
-@job('log-test')
+@job('test-log')
 def log_test(self):
     self.log.debug('This is a DEBUG message')
     self.log.info('This is an INFO message')
@@ -121,7 +125,7 @@ def queue_test(self, raises=False):
         raise Exception('Test task processing')
 
 
-@job('error-test')
+@job('test-error')
 def error_test(self):
     self.log.info('There should be an error soon')
     raise Exception('There is an error')
@@ -161,8 +165,6 @@ def init_app(app):
     import udata.core.reuse.tasks  # noqa
     import udata.core.user.tasks  # noqa
     import udata.core.organization.tasks  # noqa
-    import udata.core.followers.tasks  # noqa
-    import udata.core.issues.tasks  # noqa
     import udata.core.discussions.tasks  # noqa
     import udata.core.badges.tasks  # noqa
     import udata.core.storages.tasks  # noqa

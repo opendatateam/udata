@@ -19,7 +19,7 @@
         background-color: @overlay-color;
     }
 
-    &:hover {
+    &.editable:hover {
         border: 1px solid @overlay-color;
         background-color: lighten(@overlay-color, 30%);
 
@@ -36,11 +36,11 @@
 </style>
 
 <template>
-<div class="image-button pointer"
+<div class="image-button" :class="{editable: editable, pointer: editable}"
     :style="{width:size+'px', height:size+'px'}"
     @click="click">
     <img :src="src" />
-    <small class="change-overlay">{{ _('change') }}</small>
+    <small v-if="editable" class="change-overlay">{{ _('change') }}</small>
 </div>
 </template>
 
@@ -58,10 +58,12 @@ export default {
             type: Array,
             default: () => [100],
         },
+        editable: Boolean,
         endpoint: null
     },
     methods: {
         click() {
+            if (!this.editable) return;
             this.$root.$modal(
                 require('components/widgets/image-picker-modal.vue'),
                 {endpoint: this.endpoint, sizes: this.sizes}

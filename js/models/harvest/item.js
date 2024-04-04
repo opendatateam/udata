@@ -8,7 +8,8 @@ export const STATUS_CLASSES = {
     'started': 'info',
     'done': 'success',
     'failed': 'danger',
-    'skipped': 'warning'
+    'skipped': 'warning',
+    'archived': 'warning'
 };
 
 export const STATUS_I18N = {
@@ -16,7 +17,8 @@ export const STATUS_I18N = {
     'started': _('Started'),
     'done': _('Done'),
     'failed': _('Failed'),
-    'skipped': _('Skipped')
-}
+    'skipped': _('Skipped'),
+    'archived': _('Archived')
+};
 
 export default class HarvestItem extends Model {};

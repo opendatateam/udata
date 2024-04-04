@@ -74,10 +74,13 @@ import log from 'logger';
 import UploaderMixin from 'mixins/uploader';
 import Thumbnailer from 'components/widgets/thumbnailer.vue';
 
+const IMAGES_ONLY = ['png', 'jpg', 'jpeg', 'webp'];
+
 export default {
     name: 'image-picker',
     autoUpload: false,
     chunk: false,
+    allowedExtensions: IMAGES_ONLY,
     mixins: [UploaderMixin],
     components: {Thumbnailer},
     data() {

@@ -2,8 +2,7 @@
 
 ## Python requirements
 
-uData requires [Python][] 2.7 (installed by default on OSX and many Linux distributions),
-its development tools and some libraries to be installed (with their headers).
+udata requires [Python][] 3.7, its development tools and some libraries to be installed (with their headers).
 Most of them might already be installed as they are common development dependencies.
 The full dependencies list is:
 
@@ -49,15 +48,13 @@ $ brew install automake autoconf libtool pkg-config python \
     libxml2 libxslt xz libyaml
 ```
 
-## MongoDB, ElasticSearch and Redis
+## MongoDB and Redis
 
-The project depends on [MongoDB][] 3.2+, [ElasticSearch][] 2.4 and [Redis][]
+The project depends on [MongoDB][] 3.6+, and [Redis][]
 (beware of the version, it will not work well if they are not respected).
 
-Elasticsearch requires the [Analysis ICU][analysis-icu] plugin for your specific version.
-
 The installation process is very specific to your operating system
-and will depend on your configuration, join us on [Gitter][] if you have any issue.
+and will depend on your configuration, join us via [a Github issue][github-new-issue] or via [a Github discussion][github-discussions] if you have any issue.
 
 ### Redis
 
@@ -73,53 +70,16 @@ On Debian Jessie (cf [mongo-install-instructions][] for other versions), as root
 
 ```
 $ apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
-$ echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.2 main" > /etc/apt/sources.list.d/mongodb-org-3.2.list
+$ echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main" > /etc/apt/sources.list.d/mongodb-org-3.6.list
 $ apt-get update
 $ apt-get install -y mongodb-org
 $ service mongod start
 ```
 
-### ElasticSearch
-
-On Debian, you need to add the appropriate apt repository (cf [elastic-install-instructions][] for more details):
-
-    deb https://packages.elastic.co/elasticsearch/2.x/debian stable main
-
-and install it like any other Debian package (You might need to enable Debian Backport repository)
-The `plugin` command is located in the `/usr/share/elasticsearch/bin` directory.
-
-You need a `java` binary in your path for ElasticSearch to operate properly, for example on Debian (as root):
-
-```shell
-$ apt-get install default-jre
-```
-
-To install ElasticSearch, for example on Debian Jessie, you will have to perform (as root):
-
-```shell
-$ echo "deb https://packages.elastic.co/elasticsearch/2.x/debian stable main" \
-    > /etc/apt/sources.list.d/elasticsearch.list
-$ echo "deb http://http.debian.net/debian jessie-backports main contrib non-free" \
-    > /etc/apt/sources.list.d/debian-backports.list
-$ apt-get update
-$ apt-get install elasticsearch
-$ /usr/share/elasticsearch/bin/plugin install analysis-icu
-$ service elasticsearch restart
-```
-
-If you are using [Homebrew][] (OSX):
-
-```shell
-$ brew install elasticsearch
-$ /usr/local/Cellar/elasticsearch/2.4.1/libexec/bin/plugin install analysis-icu
-```
-
 [mongodb]: https://www.mongodb.org/
-[elasticsearch]: https://www.elastic.co/products/elasticsearch
 [redis]: http://redis.io/
-[gitter]: https://gitter.im/opendatateam/udata
 [homebrew]: http://brew.sh/
 [python]: https://www.python.org/
-[analysis-icu]: https://github.com/elastic/elasticsearch-analysis-icu
-[mongo-install-instructions]: https://docs.mongodb.com/v3.2/tutorial/install-mongodb-on-debian/#install-mongodb-community-edition
-[elastic-install-instructions]: https://www.elastic.co/guide/en/elasticsearch/reference/2.4/setup-repositories.html#_apt
+[mongo-install-instructions]: https://docs.mongodb.com/v3.6/tutorial/install-mongodb-on-debian/#install-mongodb-community-edition
+[github-discussions]: https://github.com/opendatateam/udata/discussions/2721
+[github-new-issue]: https://github.com/opendatateam/udata/issues/new

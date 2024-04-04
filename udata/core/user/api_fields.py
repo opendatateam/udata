@@ -1,11 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
+from udata.auth.helpers import current_user_is_admin_or_self
 from udata.api import api, fields, base_reference
 
-from .models import AVATAR_SIZES
-
-BIGGEST_AVATAR_SIZE = AVATAR_SIZES[0]
+from .constants import BIGGEST_AVATAR_SIZE
 
 
 user_ref_fields = api.inherit('UserReference', base_reference, {
@@ -17,7 +13,7 @@ user_ref_fields = api.inherit('UserReference', base_reference, {
         description='The user permalink string', required=True),
     'page': fields.UrlFor(
         'users.show', lambda u: {'user': u},
-        description='The user profile page URL', readonly=True),
+        description='The user profile page URL', readonly=True, fallback_endpoint='api.user'),
     'uri': fields.UrlFor(
         'api.user', lambda o: {'user': o},
         description='The user API URI', required=True),
@@ -27,7 +23,6 @@ user_ref_fields = api.inherit('UserReference', base_reference, {
         description='The user avatar thumbnail URL. This is the square '
         '({0}x{0}) and cropped version.'.format(BIGGEST_AVATAR_SIZE)),
 })
-
 
 from udata.core.organization.api_fields import org_ref_fields  # noqa
 
@@ -40,6 +35,9 @@ user_fields = api.model('User', {
         description='The user first name', required=True),
     'last_name': fields.String(
         description='The user last name', required=True),
+    'email': fields.Raw(
+        attribute=lambda o: o.email if current_user_is_admin_or_self() else None,
+        description='The user email', readonly=True),
     'avatar': fields.ImageField(original=True,
         description='The user avatar URL'),
     'avatar_thumbnail': fields.ImageField(attribute='avatar', size=BIGGEST_AVATAR_SIZE,
@@ -57,16 +55,15 @@ user_fields = api.model('User', {
         description='The registeration date', required=True),
     'page': fields.UrlFor(
         'users.show', lambda u: {'user': u},
-        description='The user profile page URL', readonly=True),
+        description='The user profile page URL', readonly=True, fallback_endpoint='api.user'),
     'uri': fields.UrlFor(
         'api.user', lambda o: {'user': o},
         description='The user API URI', required=True),
-    'metrics': fields.Raw(
+    'metrics': fields.Raw(attribute=lambda o: o.get_metrics(),
         description='The user metrics', readonly=True),
 })
 
 me_fields = api.inherit('Me', user_fields, {
-    'email': fields.String(description='The user email', required=True),
     'apikey': fields.String(description='The user API Key', readonly=True),
 })
 
@@ -98,13 +95,10 @@ user_suggestion_fields = api.model('UserSuggestion', {
                                 readonly=True),
     'last_name': fields.String(description='The user last name',
                                readonly=True),
-    'avatar_url': fields.String(description='The user avatar URL'),
+    'avatar_url': fields.ImageField(size=BIGGEST_AVATAR_SIZE, description='The user avatar URL', readonly=True),
     'slug': fields.String(
         description='The user permalink string', readonly=True),
-    'score': fields.Float(
-        description='The internal match score', readonly=True),
 })
-
 
 notifications_fields = api.model('Notification', {
     'type': fields.String(description='The notification type', readonly=True),

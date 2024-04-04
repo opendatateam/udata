@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 
 from flask import url_for
 
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.post.factories import PostFactory
 from udata.core.post.models import Post
+from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory
 
 from udata.tests.helpers import assert200, assert201, assert204
@@ -14,15 +13,17 @@ from udata.tests.helpers import assert200, assert201, assert204
 
 @pytest.mark.usefixtures('clean_db')
 class PostsAPITest:
-    modules = ['core.dataset', 'core.reuse', 'core.user', 'core.post']
+    modules = []
 
     def test_post_api_list(self, api):
         '''It should fetch a post list from the API'''
         posts = PostFactory.create_batch(3)
+        posts.append(PostFactory(published=None))
 
         response = api.get(url_for('api.posts'))
         assert200(response)
-        assert len(response.json['data']) == len(posts)
+        # Response should not contain the unpublished post
+        assert len(response.json['data']) == 3
 
     def test_post_api_get(self, api):
         '''It should fetch a post from the API'''
@@ -55,6 +56,27 @@ class PostsAPITest:
         assert200(response)
         assert Post.objects.count() == 1
         assert Post.objects.first().content == 'new content'
+
+    def test_post_api_update_with_related_dataset_and_reuse(self, api):
+        '''It should update a post from the API with related dataset and reuse'''
+        api.login(AdminFactory())
+        post = PostFactory()
+        data = post.to_dict()
+        data['content'] = 'new content'
+
+        # Add datasets
+        data['datasets'] = [DatasetFactory().to_dict()]
+        response = api.put(url_for('api.post', post=post), data)
+        assert200(response)
+
+        # Add reuses to the post value returned by the previous api call
+        data = response.json
+        data['reuses'] = [ReuseFactory().to_dict()]
+        response = api.put(url_for('api.post', post=post), data)
+        assert200(response)
+
+        assert len(response.json['datasets']) == 1
+        assert len(response.json['reuses']) == 1
 
     def test_post_api_delete(self, api):
         '''It should delete a post from the API'''

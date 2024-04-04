@@ -1,24 +1,25 @@
 <template>
 <div>
-    <vform v-ref:form :fields="fields" :model="user"></vform>
+    <v-form v-ref:form :fields="fields" :model="user"></v-form>
 </div>
 </template>
 
 <script>
 import roles from 'models/roles';
 import User from 'models/user';
+import VForm from 'components/form/vertical-form.vue';
 
 export default {
+    components: {VForm},
     props: {
         // Edited user
         user: {
             type: User,
-            default: function() {return new User();}
-        },
-        hideNotifications: false
+            default: () => new User(),
+        }
     },
-    data: function() {
-        let fields = [
+    data() {
+        const fields = [
             {
                 id: 'first_name',
                 label: this._('First name'),
@@ -55,26 +56,14 @@ export default {
         }
         return {fields};
     },
-    components: {
-        vform: require('components/form/vertical-form.vue')
-    },
     methods: {
-        serialize: function() {
+        serialize() {
             return this.$refs.form.serialize();
         },
-        validate: function() {
-            const isValid = this.$refs.form.validate();
-
-            if (isValid & !this.hideNotifications) {
-                this.$dispatch('notify', {
-                    autoclose: true,
-                    title: this._('Changes saved'),
-                    details: this._('Your profile has been updated.')
-                });
-            }
-            return isValid;
+        validate() {
+            return this.$refs.form.validate();
         },
-        on_error: function(response) {
+        on_error(response) {
             return this.$refs.form.on_error(response);
         },
     }

@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
+import pytest
+
+from datetime import datetime
 
 from flask import url_for
 
@@ -25,8 +25,9 @@ from .factories import HarvestSourceFactory, MockBackendsMixin
 log = logging.getLogger(__name__)
 
 
+@pytest.mark.usefixtures('clean_db')
 class HarvestAPITest(MockBackendsMixin):
-    modules = ['core.organization', 'core.user', 'core.dataset']
+    modules = []
 
     def test_list_backends(self, api):
         '''It should fetch the harvest backends list from the API'''
@@ -43,6 +44,22 @@ class HarvestAPITest(MockBackendsMixin):
         sources = HarvestSourceFactory.create_batch(3)
 
         response = api.get(url_for('api.harvest_sources'))
+        assert200(response)
+        assert len(response.json['data']) == len(sources)
+
+    def test_list_sources_exclude_deleted(self, api):
+        sources = HarvestSourceFactory.create_batch(3)
+        HarvestSourceFactory.create_batch(2, deleted=datetime.utcnow())
+
+        response = api.get(url_for('api.harvest_sources'))
+        assert200(response)
+        assert len(response.json['data']) == len(sources)
+
+    def test_list_sources_include_deleted(self, api):
+        sources = HarvestSourceFactory.create_batch(3)
+        sources.extend(HarvestSourceFactory.create_batch(2, deleted=datetime.utcnow()))
+
+        response = api.get(url_for('api.harvest_sources', deleted=True))
         assert200(response)
         assert len(response.json['data']) == len(sources)
 
@@ -131,7 +148,11 @@ class HarvestAPITest(MockBackendsMixin):
                     {'key': 'test', 'value': 1},
                     {'key': 'test', 'value': 42},
                     {'key': 'tag', 'value': 'my-tag'},
-                ]
+                ],
+                'features': {
+                    'test': True,
+                    'toggled': True,
+                }
             }
         }
         response = api.post(url_for('api.harvest_sources'), data)
@@ -144,7 +165,11 @@ class HarvestAPITest(MockBackendsMixin):
                 {'key': 'test', 'value': 1},
                 {'key': 'test', 'value': 42},
                 {'key': 'tag', 'value': 'my-tag'},
-            ]
+            ],
+            'features': {
+                'test': True,
+                'toggled': True,
+            }
         }
 
     def test_create_source_with_unknown_filter(self, api):
@@ -192,6 +217,62 @@ class HarvestAPITest(MockBackendsMixin):
                 'filters': [
                     {'key': 'unknown', 'notvalue': 'any'},
                 ]
+            }
+        }
+        response = api.post(url_for('api.harvest_sources'), data)
+
+        assert400(response)
+
+    def test_create_source_with_unknown_feature(self, api):
+        '''Can only use known features in config'''
+        api.login()
+        data = {
+            'name': faker.word(),
+            'url': faker.url(),
+            'backend': 'factory',
+            'config': {
+                'features': {'unknown': True},
+            }
+        }
+        response = api.post(url_for('api.harvest_sources'), data)
+
+        assert400(response)
+
+    def test_create_source_with_false_feature(self, api):
+        '''It should handled negative values'''
+        api.login()
+        data = {
+            'name': faker.word(),
+            'url': faker.url(),
+            'backend': 'factory',
+            'config': {
+                'features': {
+                    'test': False,
+                    'toggled': False,
+                }
+            }
+        }
+        response = api.post(url_for('api.harvest_sources'), data)
+
+        assert201(response)
+
+        source = response.json
+        assert source['config'] == {'features': {
+            'test': False,
+            'toggled': False,
+        }}
+
+    def test_create_source_with_not_boolean_feature(self, api):
+        '''It should handled negative values'''
+        api.login()
+        data = {
+            'name': faker.word(),
+            'url': faker.url(),
+            'backend': 'factory',
+            'config': {
+                'features': {
+                    'test': 'not a boolean',
+                }
             }
         }
         response = api.post(url_for('api.harvest_sources'), data)
@@ -279,10 +360,21 @@ class HarvestAPITest(MockBackendsMixin):
         assert200(response)
 
     def test_source_preview(self, api):
+        api.login()
         source = HarvestSourceFactory(backend='factory')
 
         url = url_for('api.preview_harvest_source', ident=str(source.id))
         response = api.get(url)
+        assert200(response)
+
+    def test_source_from_config(self, api):
+        api.login()
+        data = {
+            'name': faker.word(),
+            'url': faker.url(),
+            'backend': 'factory'
+        }
+        response = api.post(url_for('api.preview_harvest_source_config'), data)
         assert200(response)
 
     def test_delete_source(self, api):

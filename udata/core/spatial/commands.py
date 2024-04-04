@@ -1,35 +1,30 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-import os
-import contextlib
+import json
 import logging
-import lzma
-import tarfile
-import shutil
+import signal
+import sys
 
 from collections import Counter
-from datetime import date
-from string import Formatter
-from urllib import urlretrieve
+from contextlib import contextmanager
+from datetime import datetime
+from textwrap import dedent
+import requests
 
 import click
-import msgpack
 import slugify
 
-from bson import DBRef
 from mongoengine import errors
+from mongoengine.context_managers import switch_collection
 
 from udata.commands import cli
 from udata.core.dataset.models import Dataset
+from udata.core.spatial import geoids
 from udata.core.spatial.models import GeoLevel, GeoZone, SpatialCoverage
-from udata.core.storages import logos, tmp
 
 log = logging.getLogger(__name__)
 
 
-def level_ref(level):
-    return DBRef(GeoLevel._get_collection_name(), level)
+DEFAULT_GEOZONES_FILE = 'https://www.data.gouv.fr/fr/datasets/r/a1bb263a-6cc7-4871-ab4f-2470235a67bf'
+DEFAULT_LEVELS_FILE = 'https://www.data.gouv.fr/fr/datasets/r/e0206442-78b3-4a00-b71c-c065d20561c8'
 
 
 @cli.group('spatial')
@@ -38,111 +33,117 @@ def grp():
     pass
 
 
+def load_levels(col, json_levels):
+    for i, level in enumerate(json_levels):
+        col.objects(id=level['id']).modify(
+            upsert=True,
+            set__name=level['label'],
+            set__admin_level=level.get('admin_level')
+        )
+    return i
+
+
+def load_zones(col, json_geozones):
+    loaded_geozones = 0
+    for _, geozone in enumerate(json_geozones):
+        if geozone.get('is_deleted', False):
+            continue
+        params = {
+            'slug': slugify.slugify(geozone['nom'], separator='-'),
+            'level': str(geozone['level']),
+            'code': geozone['codeINSEE'],
+            'name': geozone['nom'],
+            'uri': geozone['uri']
+        }
+        try:
+            col.objects(id=geozone['_id']).modify(upsert=True, **{
+                'set__{0}'.format(k): v for k, v in params.items()
+            })
+            loaded_geozones += 1
+        except errors.ValidationError as e:
+            log.warning('Validation error (%s) for %s with %s',
+                        e, geozone['nom'], params)
+            continue
+    return loaded_geozones
+
+
+@contextmanager
+def handle_error(to_delete=None):
+    '''
+    Handle errors while loading.
+    In case of error, properly log it, remove the temporary files and collections and exit.
+    If `to_delete` is given a collection, it will be deleted deleted.
+    '''
+    # Handle keyboard interrupt
+    signal.signal(signal.SIGINT, signal.default_int_handler)
+    signal.signal(signal.SIGTERM, signal.default_int_handler)
+    try:
+        yield
+    except KeyboardInterrupt:
+        print('')  # Proper warning message under the "^C" display
+        log.warning('Interrupted by signal')
+    except Exception as e:
+        log.error(e)
+    else:
+        return  # Nothing to do in case of success
+    if to_delete:
+        log.info('Removing temporary collection %s', to_delete._get_collection_name())
+        to_delete.drop_collection()
+    sys.exit(-1)
+
+
 @grp.command()
-@click.argument('filename', metavar='<filename>')
+@click.argument('geozones-file', default=DEFAULT_GEOZONES_FILE)
+@click.argument('levels-file', default=DEFAULT_LEVELS_FILE)
 @click.option('-d', '--drop', is_flag=True, help='Drop existing data')
-def load(filename, drop=False):
+def load(geozones_file, levels_file, drop=False):
     '''
     Load a geozones archive from <filename>
 
     <filename> can be either a local path or a remote URL.
     '''
-    if filename.startswith('http'):
-        log.info('Downloading GeoZones bundle: %s', filename)
-        filename, _ = urlretrieve(filename, tmp.path('geozones.tar.xz'))
-
-    log.info('Extracting GeoZones bundle')
-    with contextlib.closing(lzma.LZMAFile(filename)) as xz:
-        with tarfile.open(fileobj=xz) as f:
-            f.extractall(tmp.root)
-
     log.info('Loading GeoZones levels')
+    if levels_file.startswith('http'):
+        json_levels = requests.get(levels_file).json()
+    else:
+        with open(levels_file) as f:
+            json_levels = json.load(f)
 
-    if drop:
-        log.info('Dropping existing levels')
-        GeoLevel.drop_collection()
+    ts = datetime.utcnow().isoformat().replace('-', '').replace(':', '').split('.')[0]
+    if drop and GeoLevel.objects.count():
+        name = '_'.join((GeoLevel._get_collection_name(), ts))
+        target = GeoLevel._get_collection_name()
+        with switch_collection(GeoLevel, name):
+            with handle_error(GeoLevel):
+                total = load_levels(GeoLevel, json_levels)
+                GeoLevel.objects._collection.rename(target, dropTarget=True)
+    else:
+        with handle_error():
+            total = load_levels(GeoLevel, json_levels)
+    log.info('Loaded {total} levels'.format(total=total))
 
-    log.info('Loading levels.msgpack')
-    levels_filepath = tmp.path('levels.msgpack')
-    with open(levels_filepath) as fp:
-        unpacker = msgpack.Unpacker(fp, encoding=str('utf-8'))
-        for i, level in enumerate(unpacker, start=1):
-            GeoLevel.objects(id=level['id']).modify(
-                upsert=True,
-                set__name=level['label'],
-                set__parents=[level_ref(p) for p in level['parents']],
-                set__admin_level=level.get('admin_level')
-            )
-    os.remove(levels_filepath)
-    log.info('Loaded {total} levels'.format(total=i))
+    log.info('Loading Zones')
+    if geozones_file.startswith('http'):
+        json_geozones = requests.get(geozones_file).json()
+    else:
+        with open(geozones_file) as f:
+            json_geozones = json.load(f)
 
-    if drop:
-        log.info('Dropping existing spatial zones')
-        GeoZone.drop_collection()
+    if drop and GeoZone.objects.count():
+        name = '_'.join((GeoZone._get_collection_name(), ts))
+        target = GeoZone._get_collection_name()
+        with switch_collection(GeoZone, name):
+            with handle_error(GeoZone):
+                total = load_zones(GeoZone, json_geozones)
+                GeoZone.objects._collection.rename(target, dropTarget=True)
+    else:
+        with handle_error():
+            total = load_zones(GeoZone, json_geozones)
+    log.info('Loaded {total} zones'.format(total=total))
 
-    log.info('Loading zones.msgpack')
-    zones_filepath = tmp.path('zones.msgpack')
-    with open(zones_filepath) as fp:
-        unpacker = msgpack.Unpacker(fp, encoding=str('utf-8'))
-        unpacker.next()  # Skip headers.
-        for i, geozone in enumerate(unpacker):
-            params = {
-                'slug': slugify.slugify(geozone['name'], separator='-'),
-                'level': geozone['level'],
-                'code': geozone['code'],
-                'name': geozone['name'],
-                'keys': geozone.get('keys'),
-                'parents': geozone.get('parents', []),
-                'ancestors': geozone.get('ancestors', []),
-                'successors': geozone.get('successors', []),
-                'validity': geozone.get('validity'),
-                'population': geozone.get('population'),
-                'dbpedia': geozone.get('dbpedia'),
-                'flag': geozone.get('flag'),
-                'blazon': geozone.get('blazon'),
-                'wikipedia': geozone.get('wikipedia'),
-                'area': geozone.get('area'),
-            }
-            if geozone.get('geom') and (
-                geozone['geom']['type'] != 'GeometryCollection' or
-                    geozone['geom']['geometries']):
-                params['geom'] = geozone['geom']
-            try:
-                GeoZone.objects(id=geozone['_id']).modify(upsert=True, **{
-                    'set__{0}'.format(k): v for k, v in params.items()
-                })
-            except errors.ValidationError as e:
-                log.warning('Validation error (%s) for %s with %s',
-                            e, geozone['_id'], params)
-                continue
-    os.remove(zones_filepath)
-    log.info('Loaded {total} zones'.format(total=i))
-
-    shutil.rmtree(tmp.path('translations'))  # Not in use for now.
-
-
-@grp.command()
-@click.argument('filename', metavar='<filename>')
-def load_logos(filename):
-    '''
-    Load logos from a geologos archive from <filename>
-
-    <filename> can be either a local path or a remote URL.
-    '''
-    if filename.startswith('http'):
-        log.info('Downloading GeoLogos bundle: %s', filename)
-        filename, _ = urlretrieve(filename, tmp.path('geologos.tar.xz'))
-
-    log.info('Extracting GeoLogos bundle')
-    with contextlib.closing(lzma.LZMAFile(filename)) as xz:
-        with tarfile.open(fileobj=xz) as f:
-            f.extractall(tmp.root)
-
-    log.info('Moving to the final location and cleaning up')
-    if os.path.exists(logos.root):
-        shutil.rmtree(logos.root)
-    shutil.move(tmp.path('logos'), logos.root)
-    log.info('Done')
+    log.info('Clean removed geozones in datasets')
+    count = fixup_removed_geozone()
+    log.info(f'{count} geozones removed from datasets')
 
 
 @grp.command()
@@ -152,83 +153,58 @@ def migrate():
 
     Should only be run once with the new version of geozones w/ geohisto.
     '''
-    counter = Counter()
-    drom_zone = GeoZone.objects(id='country-subset:fr:drom').first()
-    dromcom_zone = GeoZone.objects(id='country-subset:fr:dromcom').first()
-    # Iter over datasets with zones
+    counter = Counter(['zones', 'datasets'])
+    qs = GeoZone.objects.only('id', 'level')
+    # Fetch datasets with non-empty spatial zones
     for dataset in Dataset.objects(spatial__zones__gt=[]):
         counter['datasets'] += 1
         new_zones = []
-        for zone in dataset.spatial.zones:
-            if zone.id.startswith('fr/'):
-                counter['zones'] += 1
-                country, kind, zone_id = zone.id.split('/')
-                zone_id = zone_id.upper()  # Corsica 2a/b case.
-                if kind == 'town':
-                    counter['towns'] += 1
-                    new_zones.append(
-                        GeoZone
-                        .objects(code=zone_id, level='fr:commune')
-                        .valid_at(date.today())
-                        .first())
-                elif kind == 'county':
-                    counter['counties'] += 1
-                    new_zones.append(
-                        GeoZone
-                        .objects(code=zone_id, level='fr:departement')
-                        .valid_at(date.today())
-                        .first())
-                elif kind == 'region':
-                    counter['regions'] += 1
-                    # Only link to pre-2016 regions which kept the same id.
-                    new_zones.append(
-                        GeoZone
-                        .objects(code=zone_id, level='fr:region')
-                        .first())
-                elif kind == 'epci':
-                    counter['epcis'] += 1
-                    new_zones.append(
-                        GeoZone
-                        .objects(code=zone_id, level='fr:epci')
-                        .valid_at(dataset.created_at.date())
-                        .first())
-                else:
-                    new_zones.append(zone)
-            elif zone.id.startswith('country-subset/fr'):
-                counter['zones'] += 1
-                subset, country, kind = zone.id.split('/')
-                if kind == 'dom':
-                    counter['drom'] += 1
-                    new_zones.append(drom_zone)
-                elif kind == 'domtom':
-                    counter['dromcom'] += 1
-                    new_zones.append(dromcom_zone)
-            elif zone.id.startswith('country/'):
-                counter['zones'] += 1
-                counter['countries'] += 1
-                new_zones.append(zone.id.replace('/', ':'))
-            elif zone.id.startswith('country-group/'):
-                counter['zones'] += 1
-                counter['countrygroups'] += 1
-                new_zones.append(zone.id.replace('/', ':'))
-            else:
-                new_zones.append(zone)
+        for current_zone in dataset.spatial.zones:
+            counter['zones'] += 1
+
+            level, code = geoids.parse(current_zone.id)
+            zone = qs(level=level, code=code).first() or qs(code=code).first()
+
+            if not zone:
+                log.warning('No match for %s: skipped', current_zone.id)
+                counter['skipped'] += 1
+                continue
+
+            new_zones.append(zone.id)
+            counter[zone.level] += 1
+
+        # Update dataset with new spatial zones
         dataset.update(
             spatial=SpatialCoverage(
                 granularity=dataset.spatial.granularity,
-                zones=[getattr(z, 'id', z) for z in new_zones if z]
+                zones=list(new_zones)
             )
         )
-    log.info(Formatter().vformat('''Summary
-    Processed {zones} zones in {datasets} datasets:
-    - {countrygroups} country groups (World/UE)
-    - {countries} countries
-    - France:
-        - {regions} regions
-        - {counties} counties
-        - {epcis} EPCIs
-        - {towns} towns
-        - {drom} DROM
-        - {dromcom} DROM-COM
-    ''', (), counter))
+
+    level_summary = '\n'.join([
+        ' - {0}: {1}'.format(l.id, counter[l.id])
+        for l in GeoLevel.objects.order_by('admin_level')
+    ])
+    summary = '\n'.join([dedent('''\
+    Summary
+    =======
+    Processed {zones} zones in {datasets} datasets:\
+    '''.format(level_summary, **counter)), level_summary])
+    log.info(summary)
     log.info('Done')
+
+def fixup_removed_geozone():
+    count = 0
+    all_datasets = Dataset.objects(spatial__zones__0__exists=True).timeout(False)
+    for dataset in all_datasets:
+        zones = dataset.spatial.zones
+        new_zones = [z for z in zones if getattr(z, 'name', None) is not None]
+
+        if len(new_zones) < len(zones):
+            log.debug(f"Removing deleted zones from dataset '{dataset.title}'")
+            count += len(zones) - len(new_zones)
+            dataset.spatial.zones = new_zones
+            dataset.save()
+
+    return count
+        

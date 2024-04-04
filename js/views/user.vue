@@ -3,8 +3,6 @@
     <layout :title="user.fullname || ''" :subtitle="_('User')" :page="user.page || ''" :actions="actions">
         <div class="row">
             <profile :user="user" class="col-xs-12 col-md-6"></profile>
-            <chart title="Traffic" :metrics="metrics" class="col-xs-12 col-md-6"
-                x="date" :y="y"></chart>
         </div>
 
         <div class="row">
@@ -31,36 +29,22 @@ import moment from 'moment';
 import User from 'models/user';
 import Reuses from 'models/reuses';
 import Datasets from 'models/datasets';
-import Metrics from 'models/metrics';
 import CommunityResources from 'models/communityresources';
-import Layout from 'components/layout.vue';
-import DatasetList from 'components/dataset/list.vue';
-import ReuseList from 'components/reuse/list.vue';
+
+import Chart from 'components/charts/widget.vue';
 import CommunityList from 'components/dataset/communityresource/list.vue';
+import DatasetList from 'components/dataset/list.vue';
+import Harvesters from 'components/harvest/sources.vue';
+import Layout from 'components/layout.vue';
+import Profile from 'components/user/profile.vue';
+import ReuseList from 'components/reuse/list.vue';
+
 
 export default {
     name: 'user-view',
-    data: function() {
+    data() {
         return {
-            actions: [
-                {
-                    label: this._('Edit'),
-                    icon: 'edit',
-                    method: this.edit
-                },
-                {
-                    label: this._('Delete'),
-                    icon: 'trash',
-                    method: this.confirm_delete,
-                }
-            ],
             user: new User(),
-            metrics: new Metrics({
-                query: {
-                    start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
-                    end: moment().format('YYYY-MM-DD')
-                }
-            }),
             reuses: new Reuses({query: {sort: '-created', page_size: 10}, mask: ReuseList.MASK}),
             datasets: new Datasets({query: {sort: '-created', page_size: 10}, mask: DatasetList.MASK}),
             communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}}),
@@ -74,18 +58,37 @@ export default {
         };
     },
     components: {
-        profile: require('components/user/profile.vue'),
-        chart: require('components/charts/widget.vue'),
-        harvesters: require('components/harvest/sources.vue'),
+        Chart,
         CommunityList,
         DatasetList,
+        Harvesters,
+        Layout,
+        Profile,
         ReuseList,
-        Layout
+    },
+    computed: {
+        actions() {
+            const actions = [];
+            if (this.can_edit) {
+                actions.push({
+                    label: this._('Edit this user'),
+                    icon: 'edit',
+                    method: this.edit
+                }, {
+                    label: this._('Delete'),
+                    icon: 'trash',
+                    method: this.confirm_delete,
+                });
+            }
+            return actions;
+        },
+        can_edit() {
+            return this.$root.me.is_admin || this.user.id == this.$root.me;
+        },
     },
     watch: {
         'user.id': function(id) {
             if (id) {
-                this.metrics.fetch({id: id});
                 this.reuses.clear().fetch({owner: id});
                 this.datasets.clear().fetch({owner: id});
                 this.communities.clear().fetch({owner: id});

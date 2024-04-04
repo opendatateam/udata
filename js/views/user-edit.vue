@@ -20,13 +20,16 @@ export default {
         save() {
             const form = this.$refs.form;
             if (form.validate()) {
-                this.user.update(form.serialize(),
-                                 response => {
-                                     this.user.on_fetched(response);
-                                     this.$go({name: 'user'});
-                                 },
-                                 form.on_error);
+                this.user.update(form.serialize(), form.on_error);
             }
+        },
+        on_success() {
+            this.$dispatch('notify', {
+                autoclose: true,
+                title: this._('Changes saved'),
+                details: this._('User has been updated.')
+            });
+            this.$go({name: 'user'});
         },
         cancel() {
             this.$go({name: 'user'});
@@ -35,8 +38,17 @@ export default {
     route: {
         data() {
             if (this.$route.params.oid !== this.user.id) {
-                this.user.fetch(this.$route.params.oid);
                 this.$scrollTo(this.$el);
+                this.user.fetch(this.$route.params.oid);
+                this.user.$once('updated', () => {
+                    this.updHandler = this.user.$once('updated', this.on_success);
+                });
+            }
+        },
+        deactivate() {
+            if (this.updHandler) {
+                this.updHandler.remove();
+                this.updHandler = undefined;
             }
         }
     }

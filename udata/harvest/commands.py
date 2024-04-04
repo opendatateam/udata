@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
 
 import click
@@ -57,6 +54,15 @@ def delete(identifier):
     log.info('Deleting source "%s"', identifier)
     actions.delete_source(identifier)
     log.info('Deleted source "%s"', identifier)
+
+
+@grp.command()
+@click.argument('identifier')
+def clean(identifier):
+    '''Delete all datasets linked to a harvest source'''
+    log.info(f'Cleaning source "{identifier}"')
+    num_of_datasets = actions.clean_source(identifier)
+    log.info(f'Cleaned source "{identifier}" - deleted {num_of_datasets} dataset(s)')
 
 
 @grp.command()

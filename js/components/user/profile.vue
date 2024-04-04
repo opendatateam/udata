@@ -20,13 +20,13 @@
 
 <template>
 <div>
-<box :title="title" icon="user" boxclass="user-profile-widget">
-    <h3>{{user.fullname}}</h3>
+<box :title="user.fullname" icon="user" boxclass="user-profile-widget">
         <div class="profile-body">
             <image-button :src="user | avatar_url 100" :size="100" class="avatar-button"
-                :endpoint="endpoint">
+                :endpoint="endpoint" :editable="can_edit">
             </image-button>
         <div v-markdown="user.about"></div>
+        <h4 v-if="user.email">{{user.email}}</h4>
     </div>
 </box>
 </div>
@@ -47,14 +47,22 @@ export default {
     },
     computed: {
         endpoint() {
-            var operation = API.me.operations.my_avatar;
-            return operation.urlify({});
+            if (this.user.id === this.$root.me.id) {
+                var operation = API.me.operations.my_avatar;
+                return operation.urlify({});
+            } else {
+                var operation = API.users.operations.user_avatar;
+                return operation.urlify({user: this.user.id});
+            }
+        },
+        can_edit() {
+            return this.$root.me.is_admin || this.user.id == this.$root.me.id;
         }
     },
     components: {Box, ImageButton},
     events: {
         'image:saved': function() {
-            this.$root.me.fetch();
+            this.user.fetch();
         }
     },
 };

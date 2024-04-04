@@ -19,13 +19,18 @@ export default {
     components: {FormLayout, UserForm},
     methods: {
         save() {
-            let form = this.$refs.form;
+            const form = this.$refs.form;
             if (form.validate()) {
-                this.me.update(form.serialize(), (response) => {
-                    this.me.on_fetched(response);
-                    this.$go({name: 'me'});
-                }, form.on_error);
+                this.me.update(form.serialize(), form.on_error);
             }
+        },
+        on_success() {
+            this.$dispatch('notify', {
+                autoclose: true,
+                title: this._('Changes saved'),
+                details: this._('Your profile has been updated.')
+            });
+            this.$go({name: 'me'});
         },
         cancel() {
             this.$go({name: 'me'});
@@ -33,8 +38,17 @@ export default {
     },
     route: {
         data() {
-            this.me.fetch();
             this.$scrollTo(this.$el);
+            this.me.fetch();
+            this.me.$once('updated', () => {
+                this.updHandler = this.me.$once('updated', this.on_success);
+            });
+        },
+        deactivate() {
+            if (this.updHandler) {
+                this.updHandler.remove();
+                this.updHandler = undefined;
+            }
         }
     }
 };

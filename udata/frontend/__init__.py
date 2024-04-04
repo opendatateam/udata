@@ -1,59 +1,104 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import inspect
 import logging
+import pkg_resources
 
+from time import time
 from importlib import import_module
-
-from flask import abort, current_app
+from jinja2 import pass_context
+from markupsafe import Markup
+from flask import current_app
 
 from udata import assets, entrypoints
 from udata.i18n import I18nBlueprint
 
-from .markdown import init_app as init_markdown
-
-from .. import theme
+from .markdown import UdataCleaner, init_app as init_markdown
 
 
 log = logging.getLogger(__name__)
 
-front = I18nBlueprint('front', __name__)
 
-_footer_snippets = []
+hook = I18nBlueprint('hook', __name__)
+
 _template_hooks = {}
 
 
-def footer_snippet(func):
-    _footer_snippets.append(func)
+@hook.app_template_global()
+def package_version(name):
+    return pkg_resources.get_distribution(name).version
+
+
+@hook.app_template_global(name='static')
+def static_global(filename, _burst=True, **kwargs):
+    if current_app.config['DEBUG'] or current_app.config['TESTING']:
+        burst = time()
+    else:
+        burst = package_version('udata')
+    if _burst:
+        kwargs['_'] = burst
+    return assets.cdn_for('static', filename=filename, **kwargs)
+
+
+def _wrapper(func, name=None, when=None):
+    name = name or func.__name__
+    if name not in _template_hooks:
+        _template_hooks[name] = []
+    _template_hooks[name].append((func, when))
     return func
 
 
-def template_hook(func):
-    _template_hooks[func.__name__] = func
-    return func
+def template_hook(func_or_name, when=None):
+    if callable(func_or_name):
+        return _wrapper(func_or_name)
+    elif isinstance(func_or_name, str):
+        def wrapper(func):
+            return _wrapper(func, func_or_name, when=when)
+        return wrapper
 
 
-@front.app_context_processor
-def inject_template_hooks():
-    return {'hook_%s' % k: v for (k, v) in _template_hooks.items()}
+def has_template_hook(name):
+    return name in _template_hooks
 
 
-@front.app_context_processor
-def inject_footer_snippets():
-    return {'footer_snippets': _footer_snippets}
+class HookRenderer:
+    def __init__(self, funcs, ctx, *args, **kwargs):
+        self.funcs = funcs
+        self.ctx = ctx
+        self.args = args
+        self.kwargs = kwargs
+
+    def __html__(self):
+        return Markup(''.join(
+            f(self.ctx, *self.args, **self.kwargs)
+            for f, w in self.funcs
+            if w is None or w(self.ctx)
+        ))
+
+    def __iter__(self):
+        for func, when in self.funcs:
+            if when is None or when(self.ctx):
+                yield Markup(func(self.ctx, *self.args, **self.kwargs))
 
 
-@front.app_context_processor
-def inject_current_theme():
-    return {'current_theme': theme.current}
+@pass_context
+def render_template_hook(ctx, name, *args, **kwargs):
+    if not has_template_hook(name):
+        return ''
+    return HookRenderer(_template_hooks[name], ctx, *args, **kwargs)
 
 
-@front.app_context_processor
-def inject_cache_duration():
+@hook.app_context_processor
+def inject_hooks():
     return {
-        'cache_duration': 60 * current_app.config['TEMPLATE_CACHE_DURATION']
+        'hook': render_template_hook,
+        'has_hook': has_template_hook,
     }
+
+
+class SafeMarkup(Markup):
+    '''Markup object bypasses Jinja's escaping. This override allows to sanitize the resulting html.'''
+    def __new__(cls, base, *args, **kwargs):
+        cleaner = UdataCleaner()
+        return super().__new__(cls, cleaner.clean(base), *args, **kwargs)
 
 
 def _load_views(app, module):
@@ -63,10 +108,7 @@ def _load_views(app, module):
         app.register_blueprint(blueprint)
 
 
-VIEWS = ['core.storages', 'core.user', 'core.site', 'core.dataset',
-         'core.reuse', 'core.organization', 'core.followers',
-         'core.topic', 'core.post', 'core.tags', 'admin', 'search',
-         'features.territories']
+VIEWS = ['core.storages', 'core.tags', 'admin']
 
 
 def init_app(app, views=None):
@@ -74,45 +116,17 @@ def init_app(app, views=None):
 
     init_markdown(app)
 
-    from . import helpers, error_handlers  # noqa
-
     for view in views:
         _load_views(app, 'udata.{}.views'.format(view))
+
+    # Load hook blueprint
+    app.register_blueprint(hook)
 
     # Load all plugins views and blueprints
     for module in entrypoints.get_enabled('udata.views', app).values():
         _load_views(app, module)
 
-    # Load core manifest
-    with app.app_context():
-        assets.register_manifest('udata')
-        for dist in entrypoints.get_plugins_dists(app, 'udata.views'):
-            if assets.has_manifest(dist.project_name):
-                assets.register_manifest(dist.project_name)
-
-    # Optionnaly register debug views
-    if app.config.get('DEBUG'):
-        @front.route('/403/')
-        def test_403():
-            abort(403)
-
-        @front.route('/404/')
-        def test_404():
-            abort(404)
-
-        @front.route('/500/')
-        def test_500():
-            abort(500)
-
-    # Load front only views and helpers
-    app.register_blueprint(front)
-
-    # Enable CDN if required
-    if app.config['CDN_DOMAIN'] is not None:
-        from flask_cdn import CDN
-        CDN(app)
-
-    # Load debug toolbar if enabled
-    if app.config.get('DEBUG_TOOLBAR'):
-        from flask_debugtoolbar import DebugToolbarExtension
-        DebugToolbarExtension(app)
+    # Load all plugins views and blueprints
+    for module in entrypoints.get_enabled('udata.front', app).values():
+        front_module = module if inspect.ismodule(module) else import_module(module)
+        front_module.init_app(app)

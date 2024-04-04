@@ -1,15 +1,17 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
 import os
+import time
 
 import click
 
-from flask import json
+from werkzeug.security import gen_salt
+from flask import json, current_app
+from flask_restx import schemas
 
 from udata.api import api
-from udata.commands import cli
+from udata.commands import cli, success, exit_with_error
+from udata.models import User
+from udata.api.oauth2 import OAuth2Client
 
 log = logging.getLogger(__name__)
 
@@ -49,3 +51,45 @@ def postman(filename, pretty, urlvars, swagger):
     '''Dump the API as a Postman collection'''
     data = api.as_postman(urlvars=urlvars, swagger=swagger)
     json_to_file(data, filename, pretty)
+
+
+@grp.command()
+def validate():
+    '''Validate the Swagger/OpenAPI specification with your config'''
+    with current_app.test_request_context():
+        schema = json.loads(json.dumps(api.__schema__))
+    try:
+        schemas.validate(schema)
+        success('API specifications are valid')
+    except schemas.SchemaValidationError as e:
+        exit_with_error('API specifications are not valid', e)
+
+
+@grp.command()
+@click.option('-n', '--client-name', default='client-01', help='Client\'s name')
+@click.option('-u', '--user-email', help='User\'s email')
+@click.option('--uri', multiple=True, default=['http://localhost:8080/login'], help='Client\'s redirect uri')
+@click.option('-g', '--grant-types', multiple=True, default=['authorization_code'], help='Client\'s grant types')
+@click.option('-s', '--scope', default='default', help='Client\'s scope')
+@click.option('-r', '--response-types', multiple=True, default=['code'], help='Client\'s response types')
+def create_oauth_client(client_name, user_email, uri, grant_types, scope, response_types):
+    '''Creates an OAuth2Client instance in DB'''
+    user = User.objects(email=user_email).first()
+    if user is None:
+        exit_with_error('No matching user to email')
+
+    client = OAuth2Client.objects.create(
+        name=client_name,
+        owner=user,
+        grant_types=grant_types,
+        scope=scope,
+        response_types=response_types,
+        redirect_uris=uri
+    )
+
+    click.echo(f'New OAuth client: {client.name}')
+    click.echo(f'Client\'s ID {client.id}')
+    click.echo(f'Client\'s secret {client.secret}')
+    click.echo(f'Client\'s grant_types {client.grant_types}')
+    click.echo(f'Client\'s response_types {client.response_types}')
+    click.echo(f'Client\'s URI {client.redirect_uris}')

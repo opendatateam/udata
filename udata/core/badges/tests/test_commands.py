@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 
 from tempfile import NamedTemporaryFile
 
-from udata.models import Badge, CERTIFIED, PUBLIC_SERVICE
+from udata.models import Badge
+from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
 from udata.core.organization.factories import OrganizationFactory
 
 
@@ -35,7 +33,7 @@ class BadgeCommandTest:
     def test_toggle_badge_on_from_file(self, cli):
         orgs = [OrganizationFactory() for _ in range(2)]
 
-        with NamedTemporaryFile() as temp:
+        with NamedTemporaryFile(mode='w') as temp:
             temp.write('\n'.join((str(org.id) for org in orgs)))
             temp.flush()
 

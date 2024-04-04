@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
 import weakref
 
@@ -9,7 +6,7 @@ from datetime import datetime
 from mongoengine.signals import post_save
 
 from udata.auth import current_user
-from udata.models import db
+from udata.mongo import db
 
 from .signals import on_badge_added, on_badge_removed
 
@@ -20,13 +17,11 @@ __all__ = ('Badge', 'BadgeMixin')
 
 class Badge(db.EmbeddedDocument):
     kind = db.StringField(required=True)
-    created = db.DateTimeField(default=datetime.now, required=True)
+    created = db.DateTimeField(default=datetime.utcnow, required=True)
     created_by = db.ReferenceField('User')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.kind
-
-    __str__ = __unicode__
 
     def validate(self, clean=True):
         badges = getattr(self._instance, '__badges__', {})
@@ -46,13 +41,6 @@ class BadgesList(db.EmbeddedDocumentListField):
                 'Duplicate badges for a given kind is not allowed'
             )
         return super(BadgesList, self).validate(value)
-
-    def __set__(self, instance, value):
-        super(BadgesList, self).__set__(instance, value)
-        # Fix until fix is released.
-        # See: https://github.com/MongoEngine/mongoengine/pull/1131
-        for value in instance._data[self.name]:
-            value._instance = weakref.proxy(instance)
 
 
 class BadgeMixin(object):

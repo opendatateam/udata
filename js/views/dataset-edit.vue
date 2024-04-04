@@ -32,23 +32,16 @@ export default {
         save() {
             const form = this.$refs.form;
             if (form.validate()) {
-                this.dataset.update(form.serialize(), (response) => {
-                    this.dataset.on_fetched(response);
-                    
-                    if (!form.hideNotifications) {
-                        this.$dispatch('notify', {
-                            autoclose: true,
-                            title: this._('Changes saved'),
-                            details: this._('Your dataset has been updated.')
-                        });
-                    }
-
-                    this.$go({name: 'dataset', params: {oid: this.dataset.id}});
-                }, (error) => {
-                    this.dataset.loading = false;
-                    form.on_error(error);
-                });
+                this.dataset.update(form.serialize(), form.on_error);
             }
+        },
+        on_success() {
+            this.$dispatch('notify', {
+                autoclose: true,
+                title: this._('Changes saved'),
+                details: this._('Your dataset has been updated.')
+            });
+            this.$go({name: 'dataset', params: {oid: this.dataset.id}});
         },
         cancel() {
             this.$go({name: 'dataset', params: {oid: this.dataset.id}});
@@ -57,8 +50,17 @@ export default {
     route: {
         data() {
             if (this.$route.params.oid !== this.dataset.id) {
-                this.dataset.fetch(this.$route.params.oid);
                 this.$scrollTo(this.$el);
+                this.dataset.fetch(this.$route.params.oid);
+                this.dataset.$once('updated', () => {
+                    this.updHandler = this.dataset.$once('updated', this.on_success);
+                });
+            }
+        },
+        deactivate() {
+            if (this.updHandler) {
+                this.updHandler.remove();
+                this.updHandler = undefined;
             }
         }
     }

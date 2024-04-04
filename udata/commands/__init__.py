@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function
-
 import logging
 import os
 import pkg_resources
@@ -19,12 +16,12 @@ log = logging.getLogger(__name__)
 
 IS_TTY = sys.__stdin__.isatty()
 
-INFO = '➢'.encode('utf8')
-DEBUG = '⇝'.encode('utf8')
-OK = '✔'.encode('utf8')
-KO = '✘'.encode('utf8')
-WARNING = '⚠'.encode('utf8')
-HEADER = '✯'.encode('utf8')
+INFO = '➢'
+DEBUG = '⇝'
+OK = '✔'
+KO = '✘'
+WARNING = '⚠'
+HEADER = '✯'
 
 NO_CAST = (int, float, bool)
 
@@ -33,11 +30,13 @@ CONTEXT_SETTINGS = {
     'help_option_names': ['-?', '-h', '--help'],
 }
 
+DEFAULT_INFO_SETTINGS = 'udata.settings.Defaults'
+
 click.disable_unicode_literals_warning = True
 
 
 def color(name, **kwargs):
-    return lambda t: click.style(str(t), fg=name, **kwargs).decode('utf8')
+    return lambda t: click.style(str(t), fg=name, **kwargs)
 
 
 green = color('green', bold=True)
@@ -60,11 +59,11 @@ def success(msg):
 
 
 def error(msg, details=None):
-    '''Display an error message with optionnal details'''
+    '''Display an error message with optional details'''
     msg = '{0} {1}'.format(red(KO), white(safe_unicode(msg)))
     msg = safe_unicode(msg)
     if details:
-        msg = b'\n'.join((msg, safe_unicode(details)))
+        msg = '\n'.join((msg, safe_unicode(details)))
     echo(format_multiline(msg))
 
 
@@ -89,7 +88,7 @@ LEVELS_PREFIX = {
 
 def format_multiline(string):
     string = safe_unicode(string)
-    string = string.replace(b'\n', b'\n│ ')
+    string = string.replace('\n', '\n│ ')
     return safe_unicode(replace_last(string, '│', '└'))
 
 
@@ -109,7 +108,7 @@ class CliFormatter(logging.Formatter):
         if not IS_TTY:
             return super(CliFormatter, self).format(record)
         record.msg = format_multiline(record.msg)
-        record.msg = b' '.join((self._prefix(record), record.msg))
+        record.msg = ' '.join((self._prefix(record), record.msg))
         record.args = tuple(a if isinstance(a, NO_CAST) else safe_unicode(a)
                             for a in record.args)
         return super(CliFormatter, self).format(record)
@@ -117,7 +116,7 @@ class CliFormatter(logging.Formatter):
     def formatException(self, ei):
         '''Indent traceback info for better readability'''
         out = super(CliFormatter, self).formatException(ei)
-        return b'│' + format_multiline(out)
+        return '│' + format_multiline(out)
 
     def _prefix(self, record):
         if record.levelno in LEVELS_PREFIX:
@@ -146,9 +145,6 @@ def init_logging(app):
     handler.setFormatter(CliFormatter())
     handler.setLevel(log_level)
 
-    logger = logging.getLogger()
-    logger.addHandler(handler)
-
     logger = logging.getLogger('__main__')
     logger.setLevel(log_level)
     logger.handlers = []
@@ -171,8 +167,13 @@ def init_logging(app):
     return app
 
 
-def create_cli_app(info):
-    app = create_app(info.settings, init_logging=init_logging)
+def create_cli_app():
+    ctx = click.get_current_context(silent=True)
+    if ctx is not None:
+        settings = ctx.obj.settings
+    else:
+        settings = DEFAULT_INFO_SETTINGS
+    app = create_app(settings, init_logging=init_logging)
     return standalone(app)
 
 
@@ -246,7 +247,7 @@ class UdataGroup(FlaskGroup):
         if obj is None:
             obj = ScriptInfo(create_app=self.create_app)
         # This is the import line: allows create_app to access the settings
-        obj.settings = kwargs.pop('settings', 'udata.settings.Defaults')
+        obj.settings = kwargs.pop('settings', DEFAULT_INFO_SETTINGS)
         kwargs['obj'] = obj
         return super(UdataGroup, self).main(*args, **kwargs)
 

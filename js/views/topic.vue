@@ -6,8 +6,8 @@
         <topic-details :topic="topic" class="col-xs-12"></topic-details>
     </div>
     <div class="row">
-        <datasets-list :datasets="topic.datasets" class="col-xs-12 col-md-6"></datasets-list>
-        <reuses-list :reuses="topic.reuses" class="col-xs-12 col-md-6"></reuses-list>
+        <datasets-list editable :datasets="topic.datasets" class="col-xs-12 col-md-6"></datasets-list>
+        <reuses-list editable :reuses="topic.reuses" class="col-xs-12 col-md-6"></reuses-list>
     </div>
 </layout>
 </div>

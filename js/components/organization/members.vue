@@ -16,7 +16,7 @@
         }
     }
 
-    .selectize-control {
+    .form-control.selectize-control {
         height: @field-height;
     }
 
@@ -75,7 +75,7 @@
                 <img class="img-circle" :alt="_('User Image')"
                     :src="member.user | avatar_url 60"/>
                 <strong>{{member.user | display}}</strong>
-                <small class="text-muted">{{member.role}}</small>
+                <small class="text-muted">{{ _(member.role) }}</small>
             </a>
         </div>
         <div v-if="!(org && org.members)" class="col-xs-12 text-center lead">
@@ -93,7 +93,7 @@
                 :src="request.user | avatar_url 40"/>
             <div class="direct-chat-text">
                 {{ request.comment }}
-                <div class="btn-group btn-group-xs pull-right">
+                <div v-if="org.is_admin($root.me)" class="btn-group btn-group-xs pull-right">
                     <button type="button" class="btn btn-success"
                         @click="accept_request(request)">
                         <span class="fa fa-fw fa-check"></span>
@@ -104,7 +104,7 @@
                     </button>
                 </div>
             </div>
-            <div v-if="request.refused">
+            <div v-show="request.refused">
                 <form>
                     <textarea v-el:textarea class="form-control" rows="3" required></textarea>
                 </form>
@@ -121,7 +121,7 @@
              {{ _('No membership requests') }}
         </div>
     </div><!-- /.box-body -->
-    <div class="box-footer" v-if="!validating"
+    <div class="box-footer" v-if="!validating && org.is_admin($root.me)"
         :class="{ 'text-center': !adding, 'search': adding }">
         <a v-if="!adding" class="text-uppercase footer-btn pointer"
             @click="adding = true">{{ _('Add') }}</a>
@@ -129,10 +129,10 @@
             <span class="input-group-addon">
                 <span class="fa fa-user"></span>
             </span>
-            <user-completer v-ref:completer></user-completer>
+            <user-completer v-ref:completer :placeholder="_('Search an user')"></user-completer>
             <span class="input-group-btn">
                 <button class="btn btn-warning" type="button"
-                    @click="adding = false;">
+                    @click="close_completer">
                     <span class="fa fa-close"></span>
                 </button>
             </span>
@@ -144,19 +144,16 @@
 
 <script>
 import Vue from 'vue';
-import log from 'logger';
 
-import User from 'models/user';
 import Requests from 'models/requests';
 
 import BoxContainer from 'components/containers/box.vue';
 import MemberModal from 'components/organization/member-modal.vue';
-import PaginationWidget from 'components/pagination.vue';
 import UserCompleter from 'components/form/user-completer.vue';
 
 export default {
     name: 'members-widget',
-    components: {BoxContainer, PaginationWidget, UserCompleter},
+    components: {BoxContainer, UserCompleter},
     props: {
         org: Object
     },
@@ -180,6 +177,10 @@ export default {
         }
     },
     methods: {
+        close_completer() {
+            this.adding = false;
+            this.$refs.completer.clear(); // Prevent state from persisting
+        },
         member_click(member) {
             this.$root.$modal(MemberModal, {member: member, org: this.org});
         },
@@ -187,7 +188,7 @@ export default {
             this.org.accept_membership(request, (member) => {
                 this.requests.fetch();
                 this.validating = Boolean(this.requests.length);
-            })
+            }, this.$root.handleApiError)
         },
         refuse_request(request) {
             Vue.set(request, 'refused', true);
@@ -197,11 +198,10 @@ export default {
             // let comment = this.$els.textarea[index].value;
             const comment = this.$el.querySelectorAll('textarea')[index].value;
             this.org.refuse_membership(request, comment, (response) => {
-                log.debug('refused', response);
                 Vue.set(request, 'refused', false);
                 this.requests.fetch();
                 this.validating = Boolean(this.requests.length);
-            });
+            }, this.$root.handleApiError);
         },
         toggle_validation() {
             this.validating = !this.validating;

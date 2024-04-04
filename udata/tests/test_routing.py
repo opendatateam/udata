@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 
 from bson import ObjectId
@@ -11,8 +8,8 @@ from flask import url_for
 from udata import routing
 from udata.core.spatial.models import GeoZone
 from udata.core.spatial.factories import GeoZoneFactory
-from udata.models import db
-from udata.models.slug_fields import SlugFollow
+from udata.mongo import db
+from udata.mongo.slug_fields import SlugFollow
 from udata.tests.helpers import assert200, assert404, assert_redirects
 
 
@@ -81,7 +78,7 @@ class ModelConverterMixin:
         @app.route('/model/<tester:model>')
         def model_tester(model):
             assert isinstance(model, self.model)
-            return 'ok'
+            return str(model.id)
 
     def test_serialize_model_id_to_url(self):
         tester = self.model.objects.create()
@@ -162,6 +159,21 @@ class AsSlugMixin(ModelConverterMixin):
         url = url_for('model_tester', model=slug)
         self.model.objects.create(slug=slug)
         assert_redirects(client.get('/model/slüg'), url)
+
+
+class SlugAndIdTest(AsSlugMixin):
+    model = SlugTester
+    converter = SlugTesterConverter
+
+    def test_url_hijack(self, client):
+        """Tests for url hijack. If a object is created with"""
+        """an existing object's id as it's slug,"""
+        """the endpoint should return the first one"""
+        tester = self.model.objects.create(slug='test_slug')
+        tester2 = self.model.objects.create(slug=str(tester.id))
+        model_url = url_for('model_tester', model=tester2)
+        model_id = client.get(model_url)
+        assert model_id.get_data() != str(tester2.id)
 
 
 class SlugAsSlugFieldTest(AsSlugMixin):
@@ -276,74 +288,25 @@ class TerritoryConverterTest:
         @app.route('/territory/<territory:territory>')
         def territory_tester(territory):
             assert isinstance(territory, GeoZone)
-            return 'ok'
+            return territory.id
 
     def test_serialize_zone_with_validity(self):
         zone = GeoZoneFactory()
         url = url_for('territory_tester', territory=zone)
-        expected = '/territory/{level}/{code}@{validity.start}/{slug}'
+        expected = '/territory/{level}/{code}/{slug}'
         assert url == expected.format(**zone._data)
 
-    def test_serialize_zone_without_validity(self):
-        zone = GeoZoneFactory(validity=None)
-        url = url_for('territory_tester', territory=zone)
-        expected = '/territory/{level}/{code}@latest/{slug}'
-        assert url == expected.format(**zone._data)
-
-    def test_serialize_default_prefix_zone_with_validity(self):
-        zone = GeoZoneFactory(level='fr:level')
-        url = url_for('territory_tester', territory=zone)
-        expected = '/territory/level/{code}@{validity.start}/{slug}'
-        assert url == expected.format(**zone._data)
-
-    def test_serialize_default_prefix_zone_without_validity(self):
-        zone = GeoZoneFactory(level='fr:level', validity=None)
-        url = url_for('territory_tester', territory=zone)
-        expected = '/territory/level/{code}@latest/{slug}'
-        assert url == expected.format(**zone._data)
-
-    def test_resolve_default_prefix_zone_with_validity(self, client):
-        zone = GeoZoneFactory(level='fr:level')
-        url = '/territory/level/{code}@{validity.start}/{slug}'
-        response = client.get(url.format(**zone._data))
-        assert200(response)
-
-    def test_resolve_default_prefix_zone_without_validity(self, client):
-        zone = GeoZoneFactory(level='fr:level', validity=None)
-        url = '/territory/level/{code}@latest/{slug}'
-        response = client.get(url.format(**zone._data))
-        assert200(response)
-
-    def test_resolve_zone_with_validity(self, client):
+    def test_resolve_zone_without_optional_slug(self, client):
         zone = GeoZoneFactory()
-        url = '/territory/{level}/{code}@{validity.start}/{slug}'
-        response = client.get(url.format(**zone._data))
-        assert200(response)
-
-    def test_resolve_zone_with_latest_validity(self, client):
-        zone = GeoZoneFactory(validity=None)
-        url = '/territory/{level}/{code}@latest/{slug}'
-        response = client.get(url.format(**zone._data))
-        assert200(response)
-
-    def test_resolve_zone_without_validity(self, client):
-        zone = GeoZoneFactory(validity=None)
-        url = '/territory/{level}/{code}/{slug}'
-        response = client.get(url.format(**zone._data))
-        assert200(response)
-
-    def test_resolve_zone_without_optionnal_slug(self, client):
-        zone = GeoZoneFactory(validity=None)
-        url = '/territory/{level}/{code}@latest/'
+        url = '/territory/{level}/{code}/'
         response = client.get(url.format(**zone._data))
         assert200(response)
 
     def test_resolve_zone_without_slug_nor_trailing_slash(self, client):
-        zone = GeoZoneFactory(validity=None)
-        url = '/territory/{level}/{code}@latest'
+        zone = GeoZoneFactory()
+        url = '/territory/{level}/{code}'
         response = client.get(url.format(**zone._data))
         assert200(response)
 
     def test_model_not_found(self, client):
-        assert404(client.get('/territory/l/c@latest'))
-
+        assert404(client.get('/territory/l/c'))

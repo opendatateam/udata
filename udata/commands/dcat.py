@@ -1,0 +1,92 @@
+import logging
+
+import click
+import mongoengine
+
+from rdflib import Graph
+
+from udata.commands import cli, green, yellow, cyan, echo, magenta
+from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.rdf import dataset_from_rdf
+from udata.harvest.backends.dcat import DcatBackend, CswDcatBackend, CswIso19139DcatBackend
+from udata.rdf import namespace_manager
+
+log = logging.getLogger(__name__)
+
+
+@cli.group('dcat')
+def grp():
+    '''DCAT diagnosis operations'''
+    pass
+
+
+@grp.command()
+@click.argument('url')
+@click.option('-q', '--quiet', is_flag=True, help='Ignore warnings')
+@click.option('-r', '--rid', help='Inspect specific remote id (contains)')
+@click.option('-c', '--csw', is_flag=True, help='The target is a CSW endpoint with DCAT output')
+@click.option('-i', '--iso', is_flag=True, help='The target is a CSW endpoint with ISO output')
+def parse_url(url, csw, iso, quiet=False, rid=''):
+    '''Parse the datasets in a DCAT format located at URL (debug)'''
+    if quiet:
+        verbose_loggers = ['rdflib', 'udata.core.dataset']
+        [logging.getLogger(l).setLevel(logging.ERROR) for l in verbose_loggers]
+
+    class MockSource:
+        url = ''
+
+    class MockJob:
+        items = []
+
+    class MockDatasetFactory(DatasetFactory):
+        '''Use DatasetFactory without .save()'''
+        @classmethod
+        def _create(cls, model_class, *args, **kwargs):
+            instance = model_class(*args, **kwargs)
+            return instance
+
+    echo(cyan('Parsing url {}'.format(url)))
+    source = MockSource()
+    source.url = url
+    if csw:
+        backend = CswDcatBackend(source, dryrun=True)
+    elif iso:
+        backend = CswIso19139DcatBackend(source, dryrun=True)
+    else:
+        backend = DcatBackend(source, dryrun=True)
+    backend.job = MockJob()
+    format = backend.get_format()
+    echo(yellow('Detected format: {}'.format(format)))
+    graphs = backend.parse_graph(url, format)
+
+    # serialize/unserialize graph like in the job mechanism
+    graph = Graph(namespace_manager=namespace_manager)
+    for subgraph in graphs:
+        serialized = subgraph.serialize(format=format, indent=None)
+        _subgraph = Graph(namespace_manager=namespace_manager)
+        graph += _subgraph.parse(data=serialized, format=format)
+
+    for item in backend.job.items:
+        if not rid or rid in item.remote_id:
+            echo(magenta('Processing item {}'.format(item.remote_id)))
+            echo('Item kwargs: {}'.format(yellow(item.kwargs)))
+            node = backend.get_node_from_item(graph, item)
+            dataset = MockDatasetFactory()
+            dataset = dataset_from_rdf(graph, dataset, node=node)
+            echo('')
+            echo(green('Dataset found!'))
+            echo('Title: {}'.format(yellow(dataset)))
+            echo('License: {}'.format(yellow(dataset.license)))
+            echo('Description: {}'.format(yellow(dataset.description)))
+            echo('Tags: {}'.format(yellow(dataset.tags)))
+            echo('Resources: {}'.format(yellow(
+                [(r.title, r.format, r.url) for r in dataset.resources]
+            )))
+
+            try:
+                dataset.validate()
+            except mongoengine.errors.ValidationError as e:
+                log.error(e, exc_info=True)
+            else:
+                echo(green('Dataset is valid ✅'))
+            echo('')

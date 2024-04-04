@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from udata.tests import TestCase
 from udata.settings import Defaults
 from udata.tasks import default_scheduler_config

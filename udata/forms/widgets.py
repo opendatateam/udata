@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
 from wtforms import widgets
 
 MIN_TAG_LENGTH = 2

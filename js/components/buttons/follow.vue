@@ -53,7 +53,7 @@ export default {
             return classes;
         },
         icon() {
-            return this.following ? 'fa-eye-slash': 'fa-eye';
+            return this.following ? 'fa-star': 'fa-star-o';
         },
         label() {
             return this.following ? this._('Unfollow') : this._('Follow');

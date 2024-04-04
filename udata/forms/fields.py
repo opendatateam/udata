@@ -1,27 +1,25 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import uuid
 
 from dateutil.parser import parse
 
 from flask import url_for
 from flask_mongoengine.wtf import fields as mefields
-from flask_fs.mongo import ImageReference
-from wtforms import Form as WTForm, Field as WTField, validators, fields
-from wtforms.ext.dateutil import fields as dtfields
+from flask_storage.mongo import ImageReference
+from speaklater import is_lazy_string
+from wtforms import Form as WTForm, Field as WTField, validators, fields, SubmitField  # noqa
 from wtforms.utils import unset_value
+from wtforms.widgets import TextInput
 from wtforms_json import flatten_json
 
 from . import widgets
 
 from udata.auth import current_user, admin_permission
-from udata.models import db, User, Organization, Dataset, Reuse, datastore
+from udata.models import db, User, Organization, Dataset, Reuse, datastore, ContactPoint
 from udata.core.storages import tmp
 from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.i18n import lazy_gettext as _
 from udata import tags, uris
-from udata.forms import ModelForm, Form
+from udata.forms import ModelForm
 from udata.utils import to_iso_date, get_by
 
 
@@ -44,7 +42,7 @@ class FieldHelper(object):
         return False
 
     def __call__(self, **kwargs):
-        placeholder = kwargs.pop('placeholder', _(self.label.text))
+        placeholder = kwargs.pop('placeholder', self.label.text)
         if placeholder:
             kwargs['placeholder'] = placeholder
         required = kwargs.pop('required', self.flags.required)
@@ -86,8 +84,66 @@ class FloatField(FieldHelper, fields.FloatField):
     pass
 
 
-class DateField(FieldHelper, dtfields.DateField):
-    pass
+class WTFDateTimeField(WTField):
+    """
+    Field copied from the code of wtforms extention dateutil removed in version 3.
+    WTFDateTimeField represented by a text input, accepts all input text formats
+    that `dateutil.parser.parse` will.
+    :param parse_kwargs:
+        A dictionary of keyword args to pass to the dateutil parse() function.
+        See dateutil docs for available keywords.
+    :param display_format:
+        A format string to pass to strftime() to format dates for display.
+    """
+    widget = TextInput()
+
+    def __init__(self, label=None, validators=None, parse_kwargs=None,
+                 display_format='%Y-%m-%d %H:%M', **kwargs):
+        super(WTFDateTimeField, self).__init__(label, validators, **kwargs)
+        if parse_kwargs is None:
+            parse_kwargs = {}
+        self.parse_kwargs = parse_kwargs
+        self.display_format = display_format
+
+    def _value(self):
+        if self.raw_data:
+            return ' '.join(self.raw_data)
+        else:
+            return self.data and self.data.strftime(self.display_format) or ''
+
+    def process_formdata(self, valuelist):
+        if valuelist:
+            date_str = ' '.join(valuelist)
+            if not date_str:
+                self.data = None
+                raise validators.ValidationError(_('Please input a date/time value'))
+
+            parse_kwargs = self.parse_kwargs.copy()
+            if 'default' not in parse_kwargs:
+                try:
+                    parse_kwargs['default'] = self.default()
+                except TypeError:
+                    parse_kwargs['default'] = self.default
+            try:
+                self.data = parse(date_str, **parse_kwargs)
+            except ValueError:
+                self.data = None
+                raise validators.ValidationError(_('Invalid date/time input'))
+
+
+class DateField(WTFDateTimeField):
+    """
+    Same as the DateTimeField, but stores only the date portion.
+    """
+    def __init__(self, label=None, validators=None, parse_kwargs=None,
+                 display_format='%Y-%m-%d', **kwargs):
+        super(DateField, self).__init__(label, validators, parse_kwargs=parse_kwargs,
+                                        display_format=display_format, **kwargs)
+
+    def process_formdata(self, valuelist):
+        super(DateField, self).process_formdata(valuelist)
+        if self.data is not None and hasattr(self.data, 'date'):
+            self.data = self.data.date()
 
 
 class RolesField(Field):
@@ -102,11 +158,11 @@ class RolesField(Field):
                     _('The role {role} does not exist').format(role=name))
 
 
-class DateTimeField(Field, fields.DateTimeField):
+class DateTimeField(Field, WTFDateTimeField):
     def process_formdata(self, valuelist):
         if valuelist:
             dt = valuelist[0]
-            self.data = parse(dt) if isinstance(dt, basestring) else dt
+            self.data = parse(dt) if isinstance(dt, str) else dt
 
 
 class UUIDField(Field):
@@ -123,6 +179,16 @@ class BooleanField(FieldHelper, fields.BooleanField):
     def __init__(self, *args, **kwargs):
         self.stacked = kwargs.pop('stacked', False)
         super(BooleanField, self).__init__(*args, **kwargs)
+
+    def process_formdata(self, valuelist):
+        # We override this so that when no value is provided
+        # the form doesn't think the value is `False` instead 
+        # the value is not present and the model can keep the
+        # existing value
+        if not valuelist:
+            return 
+
+        super().process_formdata(valuelist)
 
 
 class RadioField(FieldHelper, fields.RadioField):
@@ -171,7 +237,8 @@ class FormWrapper(object):
         self.cls = cls
 
     def __call__(self, *args, **kwargs):
-        kwargs['csrf_enabled'] = False
+        meta = kwargs['meta'] = kwargs.get('meta', {})
+        meta['csrf'] = False
         return self.cls(*args, **kwargs)
 
     def __getattr__(self, name):
@@ -185,9 +252,9 @@ class FormField(FieldHelper, fields.FormField):
         self.prefix = '{0}-'.format(self.name)
         self._formdata = None
 
-    def process(self, formdata, data=unset_value):
+    def process(self, formdata, data=unset_value, **kwargs):
         self._formdata = formdata
-        return super(FormField, self).process(formdata, data=data)
+        return super(FormField, self).process(formdata, data=data, **kwargs)
 
     def validate(self, form, extra_validators=tuple()):
         if extra_validators:
@@ -248,9 +315,9 @@ class ImageField(FormField):
         super(ImageField, self).__init__(ImageForm, label, validators,
                                          **kwargs)
 
-    def process(self, formdata, data=unset_value):
+    def process(self, formdata, data=unset_value, **kwargs):
         self.src = data(100) if isinstance(data, ImageReference) else None
-        super(ImageField, self).process(formdata, data)
+        super(ImageField, self).process(formdata, data, **kwargs)
 
     def populate_obj(self, obj, name):
         field = getattr(obj, name)
@@ -267,7 +334,7 @@ class ImageField(FormField):
 
 
 def nullable_text(value):
-    return None if value == 'None' else fields.core.text_type(value)
+    return None if value == 'None' else str(value)
 
 
 class SelectField(FieldHelper, fields.SelectField):
@@ -276,9 +343,17 @@ class SelectField(FieldHelper, fields.SelectField):
         # self._choices = kwargs.pop('choices')
         super(SelectField, self).__init__(label, validators, coerce, **kwargs)
 
+    @staticmethod
+    def localize_label(label):
+        if not label:
+            return ''
+        if is_lazy_string(label):
+            return label
+        return _(label)
+
     def iter_choices(self):
         localized_choices = [
-            (value, _(label) if label else '', selected)
+            (value, self.localize_label(label), selected)
             for value, label, selected
             in super(SelectField, self).iter_choices()
         ]
@@ -353,8 +428,8 @@ def clean_oid(oid, model):
             # and returns the original value on exception
             model.id.validate(oid)
             return model.id.to_python(oid)
-        except:  # Catch all exceptions as model.type is not predefined
-            raise ValueError('Unsupported identifier: ' + oid)
+        except Exception:  # Catch all exceptions as model.type is not predefined
+            raise ValueError('Unsupported identifier: {0}'.format(oid))
 
 
 class ModelFieldMixin(object):
@@ -366,7 +441,7 @@ class ModelFieldMixin(object):
 
     def _value(self):
         if self.data:
-            return unicode(self.data.id)
+            return str(self.data.id)
         else:
             return ''
 
@@ -381,30 +456,62 @@ class ModelFieldMixin(object):
 
 
 class ModelField(Field):
+    def process(self, formdata, data=unset_value, **kwargs):
+        if formdata:
+            # Process prefixed values as in FormField
+            newdata = {}
+            prefix = self.short_name + '-'
+            for key in list(formdata.keys()):
+                if key.startswith(prefix):
+                    value = formdata.pop(key)
+                    newdata[key.replace(prefix, '')] = value
+            if newdata:
+                formdata.add(self.short_name, newdata)
+        super(ModelField, self).process(formdata, data, **kwargs)
+
     def process_formdata(self, valuelist):
-        if valuelist and len(valuelist) == 1 and valuelist[0]:
-            specs = valuelist[0]
-            model_field = getattr(self._form.model_class, self.name)
-            if isinstance(specs, basestring):
-                if isinstance(model_field, db.ReferenceField):
-                    specs = {'class': str(model_field.document_type.__name__), 'id': specs}
-                elif isinstance(model_field, db.GenericReferenceField):
-                    message = _('Expect both class and identifier')
-                    raise validators.ValidationError(message)
+        if not valuelist or len(valuelist) != 1 or not valuelist[0]:
+            return
+        specs = valuelist[0]
+        model_field = getattr(self._form.model_class, self.name)
+        if isinstance(specs, str):
+            specs = {'id': specs}
+        elif not specs.get('id', None):
+            raise validators.ValidationError(_('Missing "id" field'))
 
-            # No try/except required
-            # In case of error, ValueError is raised
-            # and is properly handled as form validation error
-            model = db.resolve_model(specs['class'])
+        if isinstance(model_field, db.ReferenceField):
+            expected_model = str(model_field.document_type.__name__)
+            if 'class' not in specs:
+                specs['class'] = expected_model
+            elif specs['class'] != expected_model:
+                msg = _('Expect a "{0}" class but "{1}" was found').format(
+                    expected_model, specs['class']
+                )
+                raise validators.ValidationError(msg)
+        elif isinstance(model_field, db.GenericReferenceField):
+            if 'class' not in specs:
+                msg = _('Expect both class and identifier')
+                raise validators.ValidationError(msg)
 
-            try:
-                self.data = model.objects.only('id').get(id=clean_oid(specs, model))
-            except db.DoesNotExist:
-                message = _('{0} does not exists').format(model.__name__)
-                raise validators.ValidationError(message)
-            except db.ValidationError:
-                message = _('{0} is not a valid identifier').format(specs['id'])
-                raise validators.ValidationError(message)
+        # No try/except required
+        # In case of error, ValueError is raised
+        # and is properly handled as form validation error
+        model = db.resolve_model(specs['class'])
+        oid = clean_oid(specs, model)
+
+        try:
+            self.data = model.objects.only('id').get(id=oid)
+        except db.DoesNotExist:
+            label = '{0}({1})'.format(model.__name__, oid)
+            msg = _('{0} does not exists').format(label)
+            raise validators.ValidationError(msg)
+
+    def pre_validate(self, form):
+        # If any error happen during process, we raise StopValidation here
+        # to prevent "DataRequired" validator from clearing errors
+        if self.errors:
+            raise validators.StopValidation()
+        super(ModelField, self).pre_validate(form)
 
 
 class ModelChoiceField(StringField):
@@ -416,7 +523,7 @@ class ModelChoiceField(StringField):
 
     def _value(self):
         if self.data:
-            return unicode(self.data.id)
+            return str(self.data.id)
         else:
             return ''
 
@@ -445,7 +552,7 @@ class ModelList(object):
     def process_formdata(self, valuelist):
         if not valuelist:
             return []
-        if len(valuelist) == 1 and isinstance(valuelist[0], basestring):
+        if len(valuelist) == 1 and isinstance(valuelist[0], str):
             oids = [clean_oid(id, self.model)
                     for id in valuelist[0].split(',') if id]
         else:
@@ -482,7 +589,7 @@ class NestedModelList(fields.FieldList):
         self.initial_data = []
         self.prefix = '{0}-'.format(self.name)
 
-    def process(self, formdata, data=unset_value):
+    def process(self, formdata, data=unset_value, **kwargs):
         self._formdata = formdata
         self.initial_data = data
         self.is_list_data = formdata and self.name in formdata
@@ -491,10 +598,10 @@ class NestedModelList(fields.FieldList):
         )
         self.has_data = self.is_list_data or self.is_dict_data
         if self.has_data:
-            super(NestedModelList, self).process(formdata, data)
+            super(NestedModelList, self).process(formdata, data, **kwargs)
         else:
             self.entries = []
-            # super(NestedModelList, self).process(None, data)
+            # super(NestedModelList, self).process(None, data, **kwargs)
 
     def validate(self, form, extra_validators=tuple()):
         '''Perform validation only if data has been submitted'''
@@ -586,7 +693,7 @@ class DateRangeField(Field):
     def process_formdata(self, valuelist):
         if valuelist and valuelist[0]:
             value = valuelist[0]
-            if isinstance(value, basestring):
+            if isinstance(value, str):
                 start, end = value.split(' - ')
                 self.data = db.DateRange(
                     start=parse(start, yearfirst=True).date(),
@@ -617,10 +724,10 @@ class CurrentUserField(ModelFieldMixin, Field):
         kwargs['default'] = kwargs.pop('default', default_owner)
         super(CurrentUserField, self).__init__(*args, **kwargs)
 
-    def process(self, formdata, data=unset_value):
+    def process(self, formdata, data=unset_value, **kwargs):
         if formdata and self.name in formdata and formdata[self.name] is None:
             formdata.pop(self.name)  # None value does not trigger default
-        return super(CurrentUserField, self).process(formdata, data)
+        return super(CurrentUserField, self).process(formdata, data, **kwargs)
 
     def pre_validate(self, form):
         if self.data:
@@ -664,9 +771,16 @@ class PublishAsField(ModelFieldMixin, Field):
         return True
 
 
+class ContactPointField(ModelFieldMixin, Field):
+    model = ContactPoint
+
+    def __init__(self, *args, **kwargs):
+        super(ContactPointField, self).__init__(*args, **kwargs)
+
+
 def field_parse(cls, value, *args, **kwargs):
     kwargs['_form'] = WTForm()
-    kwargs['_name'] = 'extra'
+    kwargs['name'] = 'extra'
     field = cls(*args, **kwargs)
     field.process_formdata([value])
     return field.data
@@ -730,7 +844,7 @@ class ExtrasField(Field):
     def validate(self, form, extra_validators=tuple()):
         if self.process_errors:
             self.errors = list(self.process_errors)
-        elif self.field_errors:
+        elif getattr(self, 'field_errors', None):
             self.errors = self.field_errors
         elif self.data:
             try:

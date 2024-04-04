@@ -80,14 +80,14 @@
                 <reuse-card :reuse="reuse"></reuse-card>
             </div>
         </div>
-        <footer slot="footer">
+        <footer v-if="editable" slot="footer">
             <a v-show="!editing" class="text-uppercase footer-btn pointer"
                 @click="edit">
                 {{ _('Edit') }}
             </a>
             <div v-show="editing" class="input-group input-group-sm text-left">
                 <span class="input-group-addon">
-                    <span class="fa fa-retweet"></span>
+                    <span class="fa fa-recycle"></span>
                 </span>
                 <reuse-completer v-ref:completer></reuse-completer>
                 <span class="input-group-btn">
@@ -124,6 +124,7 @@ export default {
             default() {return this._('Reuses')}
         },
         reuses: Array,
+        editable: Boolean,
         loading: Boolean
     },
     data() {

@@ -8,7 +8,7 @@ export UDATA_SETTINGS=/path/to/my/udata.cfg
 
 The configuration file is simply a Python file declaring variables.
 
-uData uses a few Flask extensions and therefore provides all available options for these extensions.
+udata uses a few Flask extensions and therefore provides all available options for these extensions.
 Most of the time, it tries to provide sane defaults.
 
 ## Flask and global behavior options
@@ -53,7 +53,7 @@ If this is an URL, the content is downloaded on the first terms page display and
 
 **default**: `[]`
 
-A list of enabled uData plugins.
+A list of enabled udata plugins.
 
 ### THEME
 
@@ -113,6 +113,28 @@ Define the resources preview mode. Can be one of:
 
 If you want to disable preview, set `PREVIEW_MODE` to `None`
 
+### ARCHIVE_COMMENT_USER_ID
+
+**default**: `None`
+
+The id of an existing user which will post a comment when a dataset is archived.
+
+### ARCHIVE_COMMENT_TITLE
+
+**default**: `_('This dataset has been archived')`
+
+The title of the comment optionaly posted when a dataset is archived.
+NB: the content of the comment is located in `udata/templates/comments/dataset_archived.txt`.
+
+
+### SCHEMA_CATALOG_URL
+
+**default** : `None`
+
+The URL to a schema catalog, listing schemas resources can conform to. The URL should be a JSON endpoint, returning a schema catalog. Example: https://schema.data.gouv.fr/schemas/schemas.json
+
+NB: this is used by the `datasets/schemas` API to fill the `schema` field of a `Resource`.
+
 ## URLs validation
 
 ### URLS_ALLOW_PRIVATE
@@ -153,55 +175,44 @@ from udata.settings import Defaults
 URLS_ALLOWED_TLDS = Defaults.URLS_ALLOWED_TLDS + set(['custom', 'company'])
 ```
 
-## Map widget configuration
+### EXPORT_CSV_MODELS
 
-### MAP_TILES_URL
+**default**: `('dataset', 'resource', 'discussion', 'organization', 'reuse', 'tag')`
 
-**default**: `'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png'`
+List models that will be exported to CSV by the job `export-csv`.
+You can disable the feature by setting this to an empty list.
 
-Tiles URL for SD displays
+### EXPORT_CSV_DATASET_ID
 
-### MAP_TILES_URL_HIDPI
+**default**: `None`
 
-**default**: `'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}@2x.png'`
+The id of a dataset that should be created before running the `export-csv` job and will hold the CSV exports.
 
-Tiles URL for HD/HiDPI displays
+## Search configuration
 
-### MAP_TILES_CONFIG
+### SEARCH_AUTOCOMPLETE_ENABLED
 
-**default**:
+**default**: `True`
+
+Enables the search autocomplete on frontend if set to `True`, disables otherwise.
+
+### SEARCH_AUTOCOMPLETE_DEBOUNCE
+
+**default**: `200`
+
+### SEARCH_SERVICE_API_URL
+
+**default**: None
+
+The independent search service api url to use if available.
+If not specified, mongo full text search is used.
+
+Ex:
 ```python
-{
-    'subdomains': 'abcd',
-    'attribution': (
-        '&copy;'
-        '<a href="http://openstreetmap.org/copyright">OpenStreetMap</a>'
-        '/'
-        '<a href="https://cartodb.com/attributions">CartoDB</a>'
-    )
-}
+SEARCH_SERVICE_API_URL = 'http://127.0.0.1:5000/api/1/'
 ```
 
-Tiles configuration object given as Leaflet tile layer parameter,
-see https://leafletjs.com/reference-0.7.7.html#tilelayer
-
-### MAP_INITIAL_CENTER
-
-**default**: `[42, 2.4]`
-
-Initial map center position coordinates
-
-### MAP_INITIAL_ZOOM
-
-**default**: `4`
-
-Initial map zoom level
-
-### MAP_INITIAL_LEVEL
-
-**default**: `0`
-
-Initial map territory level
+See [udata-search-service][udata-search-service] for more information on using a search service.
 
 ## Spatial configuration
 
@@ -241,11 +252,23 @@ HANDLED_LEVELS = ('fr:commune', 'fr:departement', 'fr:region')
 
 The number of items to fetch while previewing an harvest source
 
+### HARVEST_MAX_ITEMS
+
+**default**: `None`
+
+The max number of items to fetch when harvesting (development setting)
+
 ### HARVEST_DEFAULT_SCHEDULE
 
 **default**: `0 0 * * *`
 
 A cron expression used as default harvester schedule when validating harvesters.
+
+### HARVEST_JOBS_RETENTION_DAYS
+
+**default**: `365`
+
+The number of days of harvest jobs to keep (ie. number of days of history kept)
 
 ## Link checker configuration
 
@@ -267,6 +290,12 @@ An entrypoint key of `udata.linkcheckers` that will be used as a default link ch
 
 A list of domains to ignore when triggering link checking of resources urls.
 
+### LINKCHECKING_IGNORE_PATTERNS
+
+**default**: ['format=shp']
+
+A list patterns found in checked URL to ignore (ie `pattern in url`).
+
 ### LINKCHECKING_MIN_CACHE_DURATION
 
 **default**: 60
@@ -284,49 +313,6 @@ The maximum time in minutes between two consecutive checks of a resource's url.
 **default**: 100
 
 The number of unavailable checks after which the resource is considered lastingly unavailable and won't be checked as often.
-
-## ElasticSearch configuration
-
-### ELASTICSEARCH_URL
-
-**default**: `'localhost:9200'`
-
-The elasticsearch server url used for search indexing.
-
-```python
-ELASTICSEARCH_URL = 'elasticserver:9200'
-```
-
-RFC-1738 formatted URLs are also supported:
-
-```python
-ELASTICSEARCH_URL = 'http://<user>:<password>@<host>:<port>'
-```
-
-### ELASTICSEARCH_URL_TEST
-
-**default**: same as `ELASTICSEARCH_URL`
-
-An optionnal alternative elasticsearch server url that may be used for testing.
-
-### ELASTICSEARCH_INDEX_BASENAME
-
-**default**: `'udata'`
-
-The base name used to produce elasticsearch index names and alias.
-The default `udata` value will produce:
-- a `udata-{yyyy}-{mm}-{dd}-{HH}-{MM}` index on initialization
-- a `udata` alias on `udata-{yyyy}-{mm}-{dd}-{HH}-{MM}` on initialization
-- a temporary `udata-test` index during each test requiring it
-
-```python
-ELASTICSEARCH_INDEX_BASENAME = 'myindex'
-```
-The above example will produce:
-- a `myindex-{yyyy}-{mm}-{dd}-{HH}-{MM}` index on initialization
-- a `myindex` alias on `myindex-{yyyy}-{mm}-{dd}-{HH}-{MM}` on initialization
-- a temporary `myindex-test` index during each test requiring it
-
 
 ## Mongoengine/Flask-Mongoengine options
 
@@ -350,11 +336,11 @@ MONGODB_HOST = 'mongodb://<user>:<password>@<host>:<port>/<database>'
 
 **default**: same as `MONGODB_HOST` with a `-test` suffix on the collection
 
-An optionnal alternative mongo database used for testing.
+An optional alternative mongo database used for testing.
 
 ## Celery options
 
-By default, uData is configured to use Redis as Celery backend and a customized MongoDB scheduler.
+By default, udata is configured to use Redis as Celery backend and a customized MongoDB scheduler.
 
 The defaults are:
 
@@ -380,9 +366,9 @@ CELERY_BROKER_URL = 'redis://u:<password>@<host>:<port>'
 
 You can see the full list of Celery options in the [Celery official documentation][celery-doc].
 
-**Note** Celery parameters changed in UData 1.2 because Celery has been upgraded to 4.1.0.
+**Note** Celery parameters changed in udata 1.2 because Celery has been upgraded to 4.1.0.
 (You can get the change map [here][celery-conf-map]).
-UData expect Celery parameters to be upper case and prefixed by `CELERY_` in your `udata.cfg`
+udata expect Celery parameters to be upper case and prefixed by `CELERY_` in your `udata.cfg`
 and they will be automatically transformed for Celery 4.x:
 Example:
  - Celery 3.x expected `BROKER_URL` and Celery 4.x expects `broker_url` so you need to change `BROKER_URL` to `CELERY_BROKER_URL` in your settings
@@ -399,15 +385,23 @@ You can see the full configuration option list in
 
 The default identity used for outgoing mails.
 
-## Flask-OAuthlib options
+## Authlib options
 
-uData is Oauthlib to provide OAuth2 on the API.
+udata uses Authlib to provide OAuth2 on the API.
 The full option list is available in
-[the official Flask-OAuthlib documentation][flask-oauthlib-doc]
+[the official Authlib documentation][authlib-doc]
 
-### OAUTH2_PROVIDER_TOKEN_EXPIRES_IN
+### OAUTH2_TOKEN_EXPIRES_IN
 
-**default**: `30 * 24 * 60 * 60` (30 days)
+**default**:
+```python
+    {
+        'authorization_code': 10 * 24 * HOUR,
+        'implicit': 10 * 24 * HOUR,
+        'password': 10 * 24 * HOUR,
+        'client_credentials': 10 * 24 * HOUR
+    }
+```
 
 The OAuth2 token duration.
 
@@ -417,17 +411,49 @@ The OAuth2 token duration.
 
 The OAuth2 error page. Do not modify unless you know what you are doing.
 
+## Flask-Security options
+
+### SECURITY_PASSWORD_LENGTH_MIN
+
+**default**: `6`
+
+The minimum required password length.
+
+### SECURITY_PASSWORD_REQUIREMENTS_LOWERCASE
+
+**default**: `False`
+
+If set to `True`, the new passwords will need to contain at least one lowercase character.
+
+### SECURITY_PASSWORD_REQUIREMENTS_DIGITS
+
+**default**: `False`
+
+If set to `True`, the new passwords will need to contain at least one digit.
+
+### SECURITY_PASSWORD_REQUIREMENTS_UPPERCASE
+
+**default**: `False`
+
+If set to `True`, the new passwords will need to contain at least one uppercase character.
+
+### SECURITY_PASSWORD_REQUIREMENTS_SYMBOLS
+
+**default**: `False`
+
+If set to `True`, the new passwords will need to contain at least one symbol.
+
 ## Flask-Cache options
 
-uData uses Flask-Cache to handle cache and use Redis by default.
+udata uses Flask-Cache to handle cache and use Redis by default.
 You can see the full options list in
 [the official Flask-Cache documentation][flask-cache-doc]
 
 ### CACHE_TYPE
 
-**default**: `'redis'`
+**default**: `'flask_caching.backends.redis'`
 
-The cache type, which can be adjusted to your needs (_ex:_ `null`, `memcached`)
+The cache type, which can be adjusted to your needs (_ex:_ `null`, `flask_caching.backends.memcached`)
 
 ### CACHE_KEY_PREFIX
 
@@ -436,15 +462,9 @@ The cache type, which can be adjusted to your needs (_ex:_ `null`, `memcached`)
 A prefix used for cache keys to avoid conflicts with other middleware.
 It also allows you to use the same backend with different instances.
 
-### USE_METRICS
-
-**default**: `True`
-
-This activates metrics, this is deactivated for tests
-
 ## Flask-FS options
 
-uData use Flask-FS as storage abstraction.
+udata use Flask-FS as storage abstraction.
 
 ## Flask-CDN options
 
@@ -467,11 +487,11 @@ If defined to anything else than a falsy value, theses settings take precedence 
 
 Avatar provider used to render user avatars.
 
-uData provides 3 backends:
+udata provides 3 backends:
 
-- `internal`: uData renders avatars itself using [pydenticon](http://pydenticon.readthedocs.io)
-- `adorable`: uData uses [Adorable Avatars](http://avatars.adorable.io/) to render avatars
-- `robohash`: uData uses [Robohash](https://robohash.org/) to render avatars
+- `internal`: udata renders avatars itself using [pydenticon](http://pydenticon.readthedocs.io)
+- `adorable`: udata uses [Adorable Avatars](http://avatars.adorable.io/) to render avatars
+- `robohash`: udata uses [Robohash](https://robohash.org/) to render avatars
 
 ### AVATAR_INTERNAL_SIZE
 
@@ -479,7 +499,7 @@ uData provides 3 backends:
 
 Number of blocks (the matrix size) used by the internal provider.
 
-*Ex*: `7` will render avatars on a 7x7 matrix
+*E.g.*: `7` will render avatars on a 7x7 matrix
 
 ### AVATAR_INTERNAL_FOREGROUND
 
@@ -546,6 +566,8 @@ Max number of resources to display uncollapsed in dataset view.
 The Sentry DSN associated to this udata instance.
 If defined, the Sentry support is automatically activated.
 
+`sentry-sdk[flask]` needs to be installed for this to work. This requirement is specified in `requirements/sentry.pip`.
+
 ### SENTRY_TAGS
 
 **default**: `{}`
@@ -574,18 +596,34 @@ A list of extra exceptions to ignore.
 udata already ignores Werkzeug `HTTPException` and some internal ones
 that don't need to be listed here.
 
+## Read only mode
+
+### READ_ONLY_MODE
+
+**default**: `False`
+
+Enables the app's read only mode.
+
+### METHOD_BLOCKLIST
+
+**default**: `['OrganizationListAPI.post', 'ReuseListAPI.post', 'DatasetListAPI.post', 'CommunityResourcesAPI.post', 'UploadNewCommunityResources.post', 'DiscussionAPI.post', 'DiscussionsAPI.post', 'IssuesAPI.post', 'IssueAPI.post', 'SourcesAPI.post', 'FollowAPI.post']`
+
+List of API's endpoints to block when `READ_ONLY_MODE` is set to `True`. Endpoints listed here will return a `423` response code to any non-admin request.
+
+## Fixtures
+
+### FIXTURE_DATASET_SLUGS
+
+**default**: `[]`
+
+List of datasets slugs to query to fill the fixture file.
 
 ## Example configuration file
 
 Here a sample configuration file:
 
 ```python
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-
 DEBUG = True
-
 SEND_MAIL = False
 
 SECRET_KEY = 'A unique secret key'
@@ -593,10 +631,9 @@ SECRET_KEY = 'A unique secret key'
 SERVER_NAME = 'www.data.dev'
 
 DEFAULT_LANGUAGE = 'fr'
-PLUGINS =  'gouvfr piwik youckan'.split()
-
+PLUGINS = ['front', 'piwik']
 SITE_ID = 'www.data.dev'
-SITE_TITLE = 'Data.dev'
+SITE_TITLE = 'data.dev'
 SITE_URL = 'www.data.dev'
 
 DEBUG_TOOLBAR = True
@@ -610,4 +647,5 @@ FS_ROOT = '/srv/http/www.data.dev/fs'
 [flask-cache-doc]: https://pythonhosted.org/Flask-Cache/
 [flask-mail-doc]: https://pythonhosted.org/flask-mail/
 [flask-mongoengine-doc]: https://flask-mongoengine.readthedocs.org/
-[flask-oauthlib-doc]: https://flask-oauthlib.readthedocs.org/en/latest/oauth2.html#configuration
+[authlib-doc]: https://docs.authlib.org/en/latest/flask/2/authorization-server.html#server
+[udata-search-service]: https://github.com/opendatateam/udata-search-service

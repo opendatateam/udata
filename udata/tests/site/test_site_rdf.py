@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 
 from flask import url_for
@@ -9,7 +6,7 @@ from rdflib import URIRef, Literal, Graph
 from rdflib.namespace import RDF, FOAF
 from rdflib.resource import Resource
 
-from udata.core.dataset.factories import VisibleDatasetFactory
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.site.factories import SiteFactory
@@ -22,14 +19,14 @@ from udata.tests.helpers import assert200, assert404, assert_redirects
 pytestmark = pytest.mark.usefixtures('clean_db')
 
 
+@pytest.mark.frontend
 class CatalogTest:
-    modules = ['core.dataset', 'core.organization', 'core.user', 'core.site']
 
     def test_minimal(self, app):
         site = SiteFactory()
-        home_url = url_for('site.home_redirect', _external=True)
-        uri = url_for('site.rdf_catalog', _external=True)
-        datasets = VisibleDatasetFactory.create_batch(3)
+        home_url = url_for('api.site', _external=True)
+        uri = url_for('api.site_rdf_catalog', _external=True)
+        datasets = DatasetFactory.create_batch(3)
         catalog = build_catalog(site, datasets)
         graph = catalog.graph
 
@@ -42,6 +39,7 @@ class CatalogTest:
         assert isinstance(catalog.identifier, URIRef)
         assert str(catalog.identifier) == uri
         assert catalog.value(DCT.title) == Literal(site.title)
+        assert catalog.value(DCT.description) == Literal(f"{site.title}")
         lang = app.config['DEFAULT_LANGUAGE']
         assert catalog.value(DCT.language) == Literal(lang)
 
@@ -61,8 +59,8 @@ class CatalogTest:
         site = SiteFactory()
         org = OrganizationFactory()
         user = UserFactory()
-        datasets = VisibleDatasetFactory.create_batch(2, owner=user)
-        datasets += VisibleDatasetFactory.create_batch(2, organization=org)
+        datasets = DatasetFactory.create_batch(2, owner=user)
+        datasets += DatasetFactory.create_batch(2, organization=org)
         catalog = build_catalog(site, datasets)
         graph = catalog.graph
 
@@ -79,12 +77,12 @@ class CatalogTest:
         site = SiteFactory()
         page_size = 3
         total = 4
-        uri = url_for('site.rdf_catalog', _external=True)
-        uri_first = url_for('site.rdf_catalog_format', format='json',
+        uri = url_for('api.site_rdf_catalog', _external=True)
+        uri_first = url_for('api.site_rdf_catalog_format', format='json',
                             page=1, page_size=page_size, _external=True)
-        uri_last = url_for('site.rdf_catalog_format', format='json',
+        uri_last = url_for('api.site_rdf_catalog_format', format='json',
                            page=2, page_size=page_size, _external=True)
-        VisibleDatasetFactory.create_batch(total)
+        DatasetFactory.create_batch(total)
 
         # First page
         datasets = Dataset.objects.paginate(1, page_size)
@@ -137,86 +135,85 @@ class CatalogTest:
         assert HYDRA.next not in pagination
 
 
+@pytest.mark.frontend
 class SiteRdfViewsTest:
-    modules = ['core.site', 'core.dataset']
 
     def test_expose_jsonld_context(self, client):
-        url = url_for('site.jsonld_context')
-        assert url == '/context.jsonld'
+        url = url_for('api.site_jsonld_context')
+        assert url == '/api/1/site/context.jsonld'
 
-        response = client.get(url)
+        response = client.get(url, headers={'Accept': 'application/ld+json'})
         assert200(response)
         assert response.content_type == 'application/ld+json'
         assert response.json == CONTEXT
 
     def test_catalog_default_to_jsonld(self, client):
-        expected = url_for('site.rdf_catalog_format', format='json')
-        response = client.get(url_for('site.rdf_catalog'))
+        expected = url_for('api.site_rdf_catalog_format', format='json')
+        response = client.get(url_for('api.site_rdf_catalog'))
         assert_redirects(response, expected)
 
     def test_rdf_perform_content_negociation(self, client):
-        expected = url_for('site.rdf_catalog_format', format='xml')
-        url = url_for('site.rdf_catalog')
+        expected = url_for('api.site_rdf_catalog_format', format='xml')
+        url = url_for('api.site_rdf_catalog')
         headers = {'accept': 'application/xml'}
         response = client.get(url, headers=headers)
         assert_redirects(response, expected)
 
     @pytest.mark.parametrize('fmt', ('json', 'jsonld'))
     def test_catalog_rdf_json_ld(self, fmt, client):
-        url = url_for('site.rdf_catalog_format', format=fmt)
-        response = client.get(url)
+        url = url_for('api.site_rdf_catalog_format', format=fmt)
+        response = client.get(url, headers={'Accept': 'application/ld+json'})
         assert200(response)
         assert response.content_type == 'application/ld+json'
-        context_url = url_for('site.jsonld_context', _external=True)
-        assert response.json['@context'] == context_url
+        assert response.json['@context']['@vocab'] == 'http://www.w3.org/ns/dcat#'
 
     def test_catalog_rdf_n3(self, client):
-        url = url_for('site.rdf_catalog_format', format='n3')
-        response = client.get(url)
+        url = url_for('api.site_rdf_catalog_format', format='n3')
+        response = client.get(url, headers={'Accept': 'text/n3'})
         assert200(response)
         assert response.content_type == 'text/n3'
 
     def test_catalog_rdf_turtle(self, client):
-        url = url_for('site.rdf_catalog_format', format='ttl')
-        response = client.get(url)
+        url = url_for('api.site_rdf_catalog_format', format='ttl')
+        response = client.get(url, headers={'Accept': 'application/x-turtle'})
         assert200(response)
         assert response.content_type == 'application/x-turtle'
 
-    @pytest.mark.parametrize('fmt', ('xml', 'rdf', 'rdfs', 'owl'))
+    @pytest.mark.parametrize('fmt', ('xml', 'rdf', 'owl'))
     def test_catalog_rdf_rdfxml(self, fmt, client):
-        url = url_for('site.rdf_catalog_format', format=fmt)
-        response = client.get(url)
+        url = url_for('api.site_rdf_catalog_format', format=fmt)
+        response = client.get(url, headers={'Accept': 'application/rdf+xml'})
         assert200(response)
         assert response.content_type == 'application/rdf+xml'
 
     def test_catalog_rdf_n_triples(self, client):
-        url = url_for('site.rdf_catalog_format', format='nt')
-        response = client.get(url)
+        url = url_for('api.site_rdf_catalog_format', format='nt')
+        response = client.get(url, headers={'Accept': 'application/n-triples'})
         assert200(response)
         assert response.content_type == 'application/n-triples'
 
     def test_catalog_rdf_trig(self, client):
-        url = url_for('site.rdf_catalog_format', format='trig')
-        response = client.get(url)
+        url = url_for('api.site_rdf_catalog_format', format='trig')
+        response = client.get(url, headers={'Accept': 'application/trig'})
         assert200(response)
         assert response.content_type == 'application/trig'
 
     @pytest.mark.parametrize('fmt', ('json', 'xml', 'ttl'))
     def test_dataportal_compliance(self, fmt, client):
-        url = url_for('site.dataportal', format=fmt)
-        assert url == '/data.{0}'.format(fmt)
-        expected_url = url_for('site.rdf_catalog_format', format=fmt)
+        url = url_for('api.site_dataportal', format=fmt)
+        assert url == '/api/1/site/data.{0}'.format(fmt)
+        expected_url = url_for('api.site_rdf_catalog_format', format=fmt)
 
         response = client.get(url)
         assert_redirects(response, expected_url)
 
     def test_catalog_rdf_paginate(self, client):
-        VisibleDatasetFactory.create_batch(4)
-        url = url_for('site.rdf_catalog_format', format='n3', page_size=3)
-        next_url = url_for('site.rdf_catalog_format', format='n3',
+        DatasetFactory.create_batch(4)
+        url = url_for('api.site_rdf_catalog_format', format='n3', page_size=3)
+        next_url = url_for('api.site_rdf_catalog_format', format='n3',
                            page=2, page_size=3, _external=True)
 
-        response = client.get(url)
+        response = client.get(url, headers={'Accept': 'text/n3'})
         assert200(response)
 
         graph = Graph().parse(data=response.data, format='n3')
@@ -227,9 +224,7 @@ class SiteRdfViewsTest:
         assert not pagination.value(HYDRA.previous)
         assert pagination.value(HYDRA.next).identifier == URIRef(next_url)
 
-    # 404 page requires these modules to render metadata
-    @pytest.mark.frontend(['admin', 'search', 'core.reuse', 'core.organization'])
     def test_catalog_format_unknown(self, client):
-        url = url_for('site.rdf_catalog_format', format='unknown')
+        url = url_for('api.site_rdf_catalog_format', format='unknown')
         response = client.get(url)
         assert404(response)

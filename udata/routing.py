@@ -1,16 +1,14 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from bson import ObjectId
 from uuid import UUID
 
 from flask import request, redirect, url_for
-from mongoengine.errors import InvalidQueryError
-from werkzeug.routing import BaseConverter, NotFound, PathConverter
+from mongoengine.errors import InvalidQueryError, ValidationError
+from werkzeug.exceptions import NotFound
+from werkzeug.routing import BaseConverter, PathConverter
 from werkzeug.urls import url_quote
 
 from udata import models
-from udata.models import db
+from udata.mongo import db
 from udata.core.spatial.models import GeoZone
 from udata.i18n import ISO_639_1_CODES
 
@@ -64,8 +62,8 @@ class ModelConverter(BaseConverter):
 
     When serializing to python, ir try in the following order:
 
-    * fetch by slug
     * fetch by id
+    * fetch by slug
     * raise 404
     '''
 
@@ -87,26 +85,27 @@ class ModelConverter(BaseConverter):
 
     def to_python(self, value):
         try:
+            return self.model.objects.get_or_404(id=value)
+        except (NotFound, ValidationError):
+            pass
+        try:
             quoted = self.quote(value)
             query = db.Q(slug=value) | db.Q(slug=quoted)
             obj = self.model.objects(query).get()
         except (InvalidQueryError, self.model.DoesNotExist):
             # If the model doesn't have a slug or matching slug doesn't exist.
-            obj = None
-        else:
-            if obj.slug != value:
-                return LazyRedirect(quoted)
-        try:
-            return obj or self.model.objects.get_or_404(id=value)
-        except NotFound as e:
             if self.has_redirected_slug:
                 latest = self.model.slug.latest(value)
                 if latest:
                     return LazyRedirect(latest)
-            return e
+            return NotFound()
+        else:
+            if obj.slug != value:
+                return LazyRedirect(quoted)
+        return obj
 
     def to_url(self, obj):
-        if isinstance(obj, basestring):
+        if isinstance(obj, str):
             return self.quote(obj)
         elif isinstance(obj, (ObjectId, UUID)):
             return str(obj)
@@ -146,6 +145,10 @@ class PostConverter(ModelConverter):
     model = models.Post
 
 
+class ContactPointConverter(ModelConverter):
+    model = models.ContactPoint
+
+
 class TerritoryConverter(PathConverter):
     DEFAULT_PREFIX = 'fr'  # TODO: make it a setting parameter
 
@@ -159,9 +162,9 @@ class TerritoryConverter(PathConverter):
         Note that the slug is not significative but cannot be omitted.
         """
         if '/' not in value:
-            return
+            return NotFound()
 
-        level, code = value.split('/')[:2]  # Ignore optionnal slug
+        level, code = value.split('/')[:2]  # Ignore optional slug
 
         geoid = GeoZone.SEPARATOR.join([level, code])
         zone = GeoZone.objects.resolve(geoid)
@@ -184,12 +187,10 @@ class TerritoryConverter(PathConverter):
 
         code = getattr(obj, 'code', None)
         slug = getattr(obj, 'slug', None)
-        validity = getattr(obj, 'validity', None)
         if code and slug:
-            return '{level_name}/{code}@{start_date}/{slug}'.format(
+            return '{level_name}/{code}/{slug}'.format(
                 level_name=level_name,
                 code=code,
-                start_date=getattr(validity, 'start', None) or 'latest',
                 slug=slug
             )
         else:
@@ -211,7 +212,7 @@ def lazy_raise_or_redirect():
             new_args = request.view_args
             new_args[name] = value.arg
             new_url = url_for(request.endpoint, **new_args)
-            return redirect(new_url)
+            return redirect(new_url, code=308)
 
 
 def init_app(app):
@@ -228,3 +229,4 @@ def init_app(app):
     app.url_map.converters['topic'] = TopicConverter
     app.url_map.converters['post'] = PostConverter
     app.url_map.converters['territory'] = TerritoryConverter
+    app.url_map.converters['contact_point'] = ContactPointConverter

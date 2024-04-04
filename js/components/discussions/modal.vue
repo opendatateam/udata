@@ -8,6 +8,25 @@
         height: auto;
     }
 
+    .direct-chat-delete {
+        padding-left: 10px;
+        text-decoration: underline;
+        color: white;
+    }
+
+    .direct-chat-timestamp {
+        color: #eee;
+    }
+
+    .direct-chat-text {
+        background: #fff;
+        border: 1px solid #fff;
+
+        &:before, &:after {
+            border-right-color: #fff;
+        }
+    }
+
     .card-container {
         margin-bottom: 1em;
     }
@@ -15,8 +34,8 @@
 </style>
 
 <template>
-<modal v-ref:modal :title="title" class="discussion-modal" large
-    :class="{'modal-danger': deleting}">
+<modal v-ref:modal :title="title" class="discussion-modal" :large="!deleting"
+    :class="{'modal-danger': deleting, 'modal-info': !deleting}">
     <div class="modal-body" v-show="!deleting">
         <div class="row card-container">
             <dataset-card class="col-xs-12 col-md-offset-3 col-md-6"
@@ -29,9 +48,10 @@
         <h3>{{ discussion.title }}</h3>
         <div class="direct-chat-messages">
             <div class="direct-chat-msg"
-                v-for="message in discussion.discussion">
+                v-for="(idx, message) in discussion.discussion">
                 <div class="direct-chat-info clearfix">
                     <span class="direct-chat-name pull-left">{{message.posted_by | display}}</span>
+                    <a v-if="$root.me.is_admin && idx !== 0"  @click.prevent="confirm_delete_comment(idx)" href class="direct-chat-name direct-chat-delete">{{ _('Delete comment') }}</a>
                     <span class="direct-chat-timestamp pull-right">{{message.posted_on | dt}}</span>
                 </div>
                 <img class="direct-chat-img"  :alt="_('User Image')"
@@ -50,38 +70,40 @@
     </div>
     <footer class="modal-footer text-center" v-show="!deleting">
         <form v-if="!discussion.closed" v-el:form>
-            <div class="form-group">
+            <div class="form-group" :class="{'has-success': formValid}">
                 <textarea class="form-control" rows="3"
                     :placeholder="_('Type your comment')"
                     v-model="comment" required>
                 </textarea>
             </div>
         </form>
-        <button type="button" class="btn btn-danger btn-flat pull-left"
-            v-if="$root.me.is_admin" @click="confirm_delete">
-            {{ _('Delete') }}
-        </button>
-        <button type="button" class="btn btn-success btn-flat pull-left"
-            @click="comment_discussion" v-if="!discussion.closed">
-            {{ _('Comment the discussion') }}
-        </button>
-        <button type="button" class="btn btn-warning btn-flat pull-left"
-            @click="close_discussion" v-if="!discussion.closed">
-            {{ _('Comment and close discussion') }}
-        </button>
-        <button type="button" class="btn btn-primary btn-flat"
+        <button type="button" class="btn btn-info btn-flat pull-left"
             @click="$refs.modal.close">
             {{ _('Close') }}
         </button>
+        <button type="button" class="btn btn-danger btn-flat"
+            v-if="$root.me.is_admin" @click="confirm_delete">
+            {{ _('Delete') }}
+        </button>
+        <button type="button" class="btn btn-outline btn-flat"
+            :disabled="!formValid"
+            @click="comment_discussion" v-if="!discussion.closed">
+            {{ _('Comment the discussion') }}
+        </button>
+        <button type="button" class="btn btn-outline btn-flat"
+            :disabled="!formValid"
+            @click="close_discussion" v-if="!discussion.closed">
+            {{ _('Comment and close discussion') }}
+        </button>
     </footer>
     <footer class="modal-footer text-center" v-show="deleting">
-        <button type="button" class="btn btn-warning btn-flat pull-left"
-            @click="delete">
-            {{ _('Confirm') }}
-        </button>
-        <button type="button" class="btn btn-danger btn-flat"
+        <button type="button" class="btn btn-danger btn-flat pull-left"
             @click="cancel_delete">
             {{ _('Cancel') }}
+        </button>
+        <button type="button" class="btn btn-warning btn-flat"
+            @click="delete">
+            {{ _('Confirm') }}
         </button>
     </footer>
 </modal>
@@ -90,18 +112,19 @@
 <script>
 import API  from 'api';
 import Vue from 'vue';
-import BaseForm from 'components/form/base-form';
 import Modal from 'components/modal.vue';
 import DatasetCard from 'components/dataset/card.vue';
 import ReuseCard from 'components/reuse/card.vue';
 
 export default {
     name: 'discussion-modal',
-    mixins: [BaseForm],
     components: {Modal, DatasetCard, ReuseCard},
     computed: {
         title() {
             return this.deleting ? this._('Confirm deletion') : this._('Discussion');
+        },
+        formValid() {
+            return this.comment && this.comment.length > 0;
         }
     },
     data() {
@@ -109,7 +132,7 @@ export default {
             discussion: {},
             next_route: null,
             comment: null,
-            deleting: false
+            deleting: false,
         };
     },
     events: {
@@ -141,11 +164,22 @@ export default {
         cancel_delete() {
             this.deleting = false;
         },
+        confirm_delete_comment(cidx) {
+            if(confirm(this._('Are you sure you want to delete this comment?'))) {
+                API.discussions.delete_discussion_comment({id: this.discussion.id, cidx: cidx},
+                    (response) => {
+                        this.discussion.discussion.splice(cidx, 1);
+                    },
+                    this.$root.handleApiError
+                );
+            }
+        },
         delete() {
             API.discussions.delete_discussion({id: this.discussion.id},
                 (response) => {
                     this.$refs.modal.close();
-                }
+                },
+                this.$root.handleApiError
             );
         },
         close_discussion() {
@@ -155,14 +189,14 @@ export default {
             this.send_comment(this.comment);
         },
         send_comment(comment, close) {
-            if (this.validate()) {
+            if (this.formValid) {
                 API.discussions.comment_discussion({id: this.discussion.id, payload: {
                     comment: comment,
                     close: close || false
                 }}, (response) => {
                     this.discussion = response.obj;
                     this.comment = null;
-                });
+                }, this.$root.handleApiError);
             }
         }
     }

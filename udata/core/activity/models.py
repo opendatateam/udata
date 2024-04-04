@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from datetime import datetime
 
 from blinker import Signal
 from mongoengine.signals import post_save
 
-from udata.models import db
+from udata.mongo import db
 from udata.auth import current_user
+
+from .signals import new_activity
 
 
 __all__ = ('Activity', )
@@ -31,18 +30,16 @@ class EmitNewActivityMetaClass(db.BaseDocumentMetaclass):
         sender.on_new.send(sender, activity=document)
 
 
-class Activity(db.Document):
+class Activity(db.Document, metaclass=EmitNewActivityMetaClass):
     '''Store the activity entries for a single related object'''
     actor = db.ReferenceField('User', required=True)
     organization = db.ReferenceField('Organization')
     related_to = db.ReferenceField(db.DomainModel, required=True)
-    created_at = db.DateTimeField(default=datetime.now, required=True)
+    created_at = db.DateTimeField(default=datetime.utcnow, required=True)
 
-    kwargs = db.DictField()
+    extras = db.ExtrasField()
 
     on_new = Signal()
-
-    __metaclass__ = EmitNewActivityMetaClass
 
     meta = {
         'indexes': [
@@ -68,9 +65,9 @@ class Activity(db.Document):
         return cls.on_new.connect(func, sender=cls)
 
     @classmethod
-    def emit(cls, related_to, organization=None, **kwargs):
-        return cls.objects.create(
-            actor=current_user._get_current_object(),
-            related_to=related_to,
-            organization=organization
-        )
+    def emit(cls, related_to, organization=None, extras=None):
+        new_activity.send(cls,
+                          related_to=related_to,
+                          actor=current_user._get_current_object(),
+                          organization=organization,
+                          extras=extras)

@@ -1,4 +1,4 @@
-import {user_avatar} from 'helpers/placeholders';
+import { org_logo, user_avatar} from 'helpers/placeholders';
 
 export function install(Vue) {
     /**
@@ -44,6 +44,11 @@ export function install(Vue) {
      * Get the avatar url given an user and a size
      */
     Vue.filter('avatar_url', user_avatar);
+
+    /**
+     * Get the logo url given an organization and a size
+     */
+    Vue.filter('logo_url', org_logo);
 
     /**
      * Test that object is a given domain model class

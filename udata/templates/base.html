@@ -1,23 +1,21 @@
 {% extends theme('raw.html') %}
 
 {% block body %}
-    {% include theme("header.html") with context %}
-    {% block subnav %}{% endblock %}
-
-    <notification-zone></notification-zone>
-
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
+{% set messages = get_flashed_messages() %}
+{% set login_required = request.args.get('login_required') %}
+{% if login_required %}
+    {% set messages = messages + [_('You must be connected to do this action.')] %}
+{% endif %}
+{% if messages %}
+    <div class="container py-lg">
         {% for message in messages %}
-          <div class="alert alert-warning alert-dismissable">
-            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <div class="well well-secondary-grey-100">
             {{ message }}
-          </div>
+        </div>
         {% endfor %}
-      {% endif %}
-    {% endwith %}
+    </div>
+{% endif %}
+<main>
     {% block content %}{% endblock %}
-    {% include theme('footer.html') %}
-    {% include theme('publish-action-modal.html') %}
-    {% block modals %}{% endblock %}
+</main>
 {% endblock %}

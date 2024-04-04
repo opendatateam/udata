@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from flask import current_app
 
@@ -9,7 +6,7 @@ from .backends import get as get_linkchecker, NoCheckLinkchecker
 
 
 def _get_check_keys(the_dict, resource, previous_status):
-    check_keys = {k: v for k, v in the_dict.iteritems()
+    check_keys = {k: v for k, v in the_dict.items()
                   if k.startswith('check:')}
     check_keys['check:count-availability'] = _compute_count_availability(
             resource, check_keys.get('check:available'), previous_status)
@@ -23,13 +20,16 @@ def _compute_count_availability(resource, status, previous_status):
 
 
 def is_ignored(resource):
-    '''Check of the resource's URL is part of LINKCHECKING_IGNORE_DOMAINS'''
+    '''Check if the resource's URL is to be ignored'''
     ignored_domains = current_app.config['LINKCHECKING_IGNORE_DOMAINS']
+    ignored_patterns = current_app.config['LINKCHECKING_IGNORE_PATTERNS']
     url = resource.url
-    if url:
-        parsed_url = urlparse(url)
-        return parsed_url.netloc in ignored_domains
-    return True
+    if not url:
+        return True
+    parsed_url = urlparse(url)
+    ignored_domains_match = parsed_url.netloc in ignored_domains
+    ignored_patterns_match = any([p in url for p in ignored_patterns])
+    return ignored_domains_match or ignored_patterns_match
 
 
 def dummy_check_response():

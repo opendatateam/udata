@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from datetime import datetime
 
 from udata.core.dataset.factories import DatasetFactory
@@ -17,7 +14,7 @@ class SiteModelTest(DBTestMixin, TestCase):
         current_site.save()
 
         dataset = current_site.settings.home_datasets[1]
-        dataset.deleted = datetime.now()
+        dataset.deleted = datetime.utcnow()
         dataset.save()
 
         current_site.reload()
@@ -31,7 +28,7 @@ class SiteModelTest(DBTestMixin, TestCase):
         current_site.save()
 
         reuse = current_site.settings.home_reuses[1]
-        reuse.deleted = datetime.now()
+        reuse.deleted = datetime.utcnow()
         reuse.save()
 
         current_site.reload()

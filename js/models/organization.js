@@ -11,6 +11,7 @@ export default class Organization extends Model {
     fetch(ident) {
         ident = ident || this.id || this.slug;
         if (ident) {
+            this.loading = true;
             this.$api('organizations.get_organization', {org: ident}, this.on_fetched);
         } else {
             log.error('Unable to fetch Organization: no identifier specified');
@@ -18,23 +19,25 @@ export default class Organization extends Model {
         return this;
     }
 
-    update(data, on_success, on_error) {
+    update(data, on_error) {
+        this.loading = true;
         this.$api('organizations.update_organization', {
             org: this.id,
             payload: JSON.stringify(data)
-        }, on_success, on_error);
+        }, this.on_fetched, this.on_error(on_error));
     }
 
-    save() {
+    save(on_error) {
         if (this.id) {
-            this.update(this, this.on_fetched);
+            this.update(this, on_error);
         } else {
-            this.create();
+            this.create(on_error);
         }
     }
 
-    create() {
-        this.$api('organizations.create_organization', {payload: this}, this.on_fetched);
+    create(on_error) {
+        this.loading = true;
+        this.$api('organizations.create_organization', {payload: this}, this.on_fetched, this.on_error(on_error));
     }
 
     role_for(obj) {
@@ -53,21 +56,21 @@ export default class Organization extends Model {
         return member !== null && member.role === 'admin';
     }
 
-    accept_membership(request, callback) {
+    accept_membership(request, callback, on_error) {
         this.$api('organizations.accept_membership', {
             org: this.id,
             id: request.id
         }, function(response) {
             callback(response.obj);
-        });
+        }, on_error);
     }
 
-    refuse_membership(request, comment, callback) {
+    refuse_membership(request, comment, callback, on_error) {
         this.$api('organizations.refuse_membership', {
             org: this.id,
             id: request.id,
             payload: {comment: comment}
-        }, callback);
+        }, callback, on_error);
     }
 };
 

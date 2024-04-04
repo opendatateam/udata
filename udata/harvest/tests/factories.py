@@ -1,12 +1,8 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import factory
 import pytest
 
 from factory.fuzzy import FuzzyChoice
 from flask.signals import Namespace
-from mock import patch
 
 from udata.factories import ModelFactory
 from udata.core.dataset.factories import DatasetFactory
@@ -26,6 +22,7 @@ class HarvestSourceFactory(ModelFactory):
     name = factory.Faker('name')
     url = factory.Faker('url')
     description = factory.Faker('text')
+    backend = 'factory'
 
 
 class HarvestJobFactory(ModelFactory):
@@ -50,8 +47,12 @@ DEFAULT_COUNT = 3
 class FactoryBackend(backends.BaseBackend):
     name = 'factory'
     filters = (
-        backends.HarvestFilter('Test', 'test', int),
-        backends.HarvestFilter('Tag', 'tag', basestring),
+        backends.HarvestFilter('Test', 'test', int, 'An integer'),
+        backends.HarvestFilter('Tag', 'tag', str),
+    )
+    features = (
+        backends.HarvestFeature('test', 'Test'),
+        backends.HarvestFeature('toggled', 'Toggled', 'A togglable', True),
     )
 
     def initialize(self):

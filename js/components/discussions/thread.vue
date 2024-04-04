@@ -39,7 +39,7 @@
        ></threadmessage>
     </div>
 
-    <div class="add-comment" v-show="detailed && !discussion.closed">
+    <div class="add-comment" v-show="detailed && !discussion.closed && !readOnlyEnabled">
         <button v-show="!formDisplayed && detailed && !discussion.closed"
             type="button"
             class="btn btn-primary"
@@ -59,7 +59,9 @@
     <div class="panel-footer" v-if="discussion.closed">
         <div class="text-muted">
             {{ _('Discussion has been closed') }}
-            {{ _('by') }} <a href="{{ discussion.closed_by.page }}">{{ discussion.closed_by | display }}</a>
+            <span v-if="discussion.closed_by">
+                {{ _('by') }} <a href="{{ discussion.closed_by.page }}">{{ discussion.closed_by | display }}</a>
+            </span>
             {{ _('on') }} {{ closedDate }}
         </div>
     </div>
@@ -84,6 +86,7 @@ export default {
             detailed: true,
             formDisplayed: false,
             currentUser: config.user,
+            readOnlyEnabled: config.read_only_enabled && !config.user.roles.includes('admin')
         }
     },
     events: {

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function
-
 import logging
 
 from . import cli, success, error, header

@@ -1,12 +1,12 @@
 <template>
 <layout :title="_('Editorial')">
     <div class="row">
-        <dataset-card-list class="col-xs-12 col-md-6"
+        <dataset-card-list class="col-xs-12 col-md-6" editable
             :title="_('Featured datasets')"
             :datasets="home_datasets.items"
             :loading="home_datasets.loading">
         </dataset-card-list>
-        <reuse-card-list class="col-xs-12 col-md-6"
+        <reuse-card-list class="col-xs-12 col-md-6" editable
             :title="_('Featured reuses')"
             :reuses="home_reuses.items"
             :loading="home_reuses.loading">
@@ -40,7 +40,7 @@ export default {
     name: 'editorial-view',
     data() {
         return {
-            posts: new Posts({query: {sort: '-created', page_size: 10}, mask: PostList.MASK}),
+            posts: new Posts({query: {sort: '-created_at', page_size: 10}, mask: PostList.MASK}),
             topics: new Topics({query: {sort: '-created', page_size: 10}, mask: TopicList.MASK}),
             home_datasets: new List({ns: 'site', fetch: 'get_home_datasets',
                                      mask: DatasetCardList.MASK, model: Dataset}),
@@ -59,13 +59,15 @@ export default {
         'dataset-card-list:submit': function(order) {
             API.site.set_home_datasets(
                 {payload: order},
-                this.home_datasets.on_fetched.bind(this.home_datasets)
+                this.home_datasets.on_fetched.bind(this.home_datasets),
+                this.$root.handleApiError
             );
         },
         'reuse-card-list:submit': function(order) {
             API.site.set_home_reuses(
                 {payload: order},
-                this.home_reuses.on_fetched.bind(this.home_reuses)
+                this.home_reuses.on_fetched.bind(this.home_reuses),
+                this.$root.handleApiError
             );
         }
     },

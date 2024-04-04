@@ -44,7 +44,7 @@ const MENU = [{
     icon: 'dashboard',
     route: '/'
 }, {
-    label: i18n._('Me'),
+    label: i18n._('Profile'),
     icon: 'male',
     route: '/me/',
     children: [{
@@ -53,7 +53,7 @@ const MENU = [{
         scrollTo: '#datasets'
     }, {
         label: i18n._('Reuses'),
-        icon: 'retweet',
+        icon: 'recycle',
         scrollTo: '#reuses'
     }]
 }];
@@ -67,7 +67,7 @@ const BOTTOM_MENU = [{
         scrollTo: '#datasets'
     }, {
         label: i18n._('Reuses'),
-        icon: 'retweet',
+        icon: 'recycle',
         scrollTo: '#reuses'
     }, {
         label: i18n._('Organizations'),
@@ -116,12 +116,8 @@ export default {
                         scrollTo: '#datasets-widget'
                     }, {
                         label: this._('Reuses'),
-                        icon: 'retweet',
+                        icon: 'recycle',
                         scrollTo: '#reuses-widget'
-                    }, {
-                        label: this._('Issues'),
-                        icon: 'warning',
-                        scrollTo: '#issues-widget'
                     }, {
                         label: this._('Discussions'),
                         icon: 'comment',

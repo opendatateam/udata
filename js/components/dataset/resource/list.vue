@@ -40,7 +40,7 @@
         boxclass="box-solid resources-widget"
         bodyclass="table-responsive no-padding"
         footerclass="text-center"
-        :footer="true" :empty="_('No resources')">
+        :footer="$root.me.can_edit(dataset)" :empty="_('No resources')">
         <table class="table table-hover">
             <thead>
                 <tr>
@@ -99,7 +99,7 @@
         <div class="overlay dropzone" v-if="dropping">
             <span class="fa fa-download fa-2x"></span>
         </div>
-        <footer slot="footer">
+        <footer slot="footer" v-if="$root.me.can_edit(dataset)">
             <button type="button"
                 class="btn btn-primary btn-sm btn-flat pointer"
                 v-show="!reordering"
@@ -135,17 +135,15 @@
 import Vue from 'vue';
 import API from 'api';
 import Sorter from 'mixins/sorter';
-import Uploader from 'mixins/uploader';
-import Resource from 'models/resource';
 import Box from 'components/containers/box.vue';
-import PaginationWidget from 'components/pagination.vue';
 import ResourceAvailability from './availability.vue';
+import UploaderMixin from 'mixins/uploader';
 import DatasetFilters from 'components/dataset/filters';
 
 export default {
     name: 'resources-list',
-    mixins: [Uploader, Sorter, DatasetFilters],
-    components: {Box, PaginationWidget, ResourceAvailability},
+    mixins: [Sorter, UploaderMixin, DatasetFilters],
+    components: {Box, ResourceAvailability},
     props: {
         dataset: {
             type: Object,
@@ -176,13 +174,6 @@ export default {
             // Remove the progressing file (an error is already displayed globally)
             const file = this.$uploader.getFile(id);
             this.files.splice(this.files.indexOf(file), 1);
-        }
-    },
-    ready() {
-        /* In case of a new resource, we display the appropriated popin
-           on load. */
-        if ("new_resource" in this.$route.query) {
-            this.on_new();
         }
     },
     methods: {
@@ -225,6 +216,11 @@ export default {
         'dataset.id': function(id) {
             if (id) {
                 this.upload_endpoint = API.datasets.operations.upload_new_dataset_resource.urlify({dataset: id});
+                if ("new_resource" in this.$route.query) {
+                    /* In case of a new resource and if the dataset is set, we display the appropriated popin
+                      on load. */
+                    this.on_new();
+                }
             }
         }
     }

@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
+import datetime
 
+import pytz
 from dateutil.parser import parse
-
 from flask import request, url_for
-from flask_restplus.fields import *  # noqa
+from flask_restx.fields import *  # noqa
 
+from udata.uris import endpoint_for
 from udata.utils import multi_to_dict
 
 log = logging.getLogger(__name__)
@@ -17,9 +16,11 @@ class ISODateTime(String):
     __schema_format__ = 'date-time'
 
     def format(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             value = parse(value)
-        return value.isoformat()
+        if isinstance(value, datetime.date) and not isinstance(value, datetime.datetime) or value.tzinfo:
+            return value.isoformat()
+        return pytz.utc.localize(value).isoformat()
 
 
 class Markdown(String):
@@ -30,13 +31,14 @@ class UrlFor(String):
     def __init__(self, endpoint, mapper=None, **kwargs):
         super(UrlFor, self).__init__(**kwargs)
         self.endpoint = endpoint
+        self.fallback_endpoint = kwargs.pop('fallback_endpoint', None)
         self.mapper = mapper or self.default_mapper
 
     def default_mapper(self, obj):
         return {'id': str(obj.id)}
 
     def output(self, key, obj, **kwargs):
-        return url_for(self.endpoint, _external=True, **self.mapper(obj))
+        return endpoint_for(self.endpoint, self.fallback_endpoint, _external=True, **self.mapper(obj))
 
 
 class NextPageUrl(String):
@@ -88,7 +90,6 @@ def pager(page_fields):
                          required=True, min=0),
         'next_page': NextPageUrl(description='The next page URL if exists'),
         'previous_page': PreviousPageUrl(
-            description='The previous page URL if exists'),
-        'facets': Raw(description='Search facets results if any'),
+            description='The previous page URL if exists')
     }
     return pager_fields

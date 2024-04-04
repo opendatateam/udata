@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
 from udata.entrypoints import get_enabled, EntrypointError
 
 
@@ -17,4 +14,4 @@ def get_all(app):
     return get_enabled('udata.harvesters', app)
 
 
-from .base import BaseBackend, HarvestFilter  # flake8: noqa
+from .base import BaseBackend, HarvestFilter, HarvestFeature  # flake8: noqa

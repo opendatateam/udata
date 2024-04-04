@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from flask import url_for
 
 from udata.api import api, API
@@ -8,7 +5,7 @@ from udata.forms import Form, fields
 
 from . import APITestCase
 
-ns = api.namespace('fake', 'A Fake namespace')
+ns = api.namespace('fake-ns', 'A Fake namespace')
 
 
 @ns.route('/options', endpoint='fake-options')
@@ -33,10 +30,25 @@ class OptionsCORSTest(APITestCase):
 
         self.assert200(response)
         self.assertEqual(response.headers['Access-Control-Allow-Origin'], '*')
-        allowed_methods = response.headers['Access-Control-Allow-Methods']
+        allowed_methods = response.headers['Allow']
         self.assertIn('HEAD', allowed_methods)
         self.assertIn('OPTIONS', allowed_methods)
         self.assertIn('GET', allowed_methods)
+
+        response = self.client.options(
+            url_for('api.fake-options'),
+            headers={
+                'Access-Control-Request-Method': 'GET',
+                'Authorization': 'Bearer YouWillNeverGuess',
+                'Access-Control-Request-Headers': 'Authorization'
+            }
+        )
+        self.assertEqual(response.headers['Access-Control-Allow-Origin'], '*')
+        self.assertEqual(response.headers['Access-Control-Allow-Headers'], 'Authorization')
+        self.assertEqual(
+            response.headers['Access-Control-Allow-Methods'],
+            'DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT'
+            )
 
 
 class JSONFormRequestTest(APITestCase):
@@ -46,7 +58,7 @@ class JSONFormRequestTest(APITestCase):
             'Content-Type': 'multipart/form-data'
         })
         self.assert400(response)
-        self.assertEquals(
+        self.assertEqual(
             response.json,
             {'errors': {'Content-Type': 'expecting application/json'}}
         )

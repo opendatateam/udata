@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
 
 import pytest
 
-import flask_fs as fs
+import flask_storage as fs
 
-from udata.models import db
+from udata.mongo import db
 from udata.forms import Form
 from udata.forms.fields import ImageField
 from udata.tests.helpers import data_path
@@ -62,7 +59,7 @@ class ImageFieldTest:
 
     def test_with_image(self):
         doc = self.D()
-        with open(data_path('image.png')) as img:
+        with open(data_path('image.png'), 'rb') as img:
             doc.image.save(img, 'image.jpg')
         doc.save()
         form = self.F(None, obj=doc)
@@ -71,7 +68,7 @@ class ImageFieldTest:
 
     def test_with_image_and_bbox(self):
         doc = self.D()
-        with open(data_path('image.png')) as img:
+        with open(data_path('image.png'), 'rb') as img:
             doc.thumbnail.save(img, 'image.jpg', bbox=[10, 10, 100, 100])
         doc.save()
         form = self.F(None, obj=doc)
@@ -80,7 +77,7 @@ class ImageFieldTest:
 
     def test_post_new(self):
         tmp_filename = 'xyz/image.png'
-        with open(data_path('image.png')) as img:
+        with open(data_path('image.png'), 'rb') as img:
             tmp_filename = tmp.save(img, tmp_filename)
 
         form = self.F(PostData({
@@ -100,7 +97,7 @@ class ImageFieldTest:
 
     def test_post_new_with_crop(self):
         tmp_filename = 'xyz/image.png'
-        with open(data_path('image.png')) as img:
+        with open(data_path('image.png'), 'rb') as img:
             tmp_filename = tmp.save(img, tmp_filename)
 
         form = self.F(PostData({

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
 import logging
 
 from udata.frontend import csv
@@ -15,7 +12,7 @@ log = logging.getLogger(__name__)
 blueprint = I18nBlueprint('tags', __name__)
 
 
-@blueprint.route('/tags.csv', endpoint='csv', cors=True)
+@blueprint.route('/tags.csv', endpoint='csv')
 def tags_csv():
     adapter = TagCsvAdapter(Tag.objects.order_by('-total'))
     return csv.stream(adapter, 'tags')

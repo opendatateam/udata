@@ -1,16 +1,18 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import mock
 import os
+
+from io import BytesIO
+
+from PIL import Image
 
 from udata.mail import mail_sent
 
 from contextlib import contextmanager
 from datetime import timedelta
-from urlparse import urljoin, urlparse, parse_qs
+from urllib.parse import urljoin, urlparse, parse_qs
 
-from flask import request, url_for, json
+from flask import request, url_for, json, current_app
+from flask_security.babel import FsDomain
 
 
 def assert_equal_dates(datetime1, datetime2, limit=1):  # Seconds.
@@ -58,12 +60,14 @@ def mock_signals(callback, *signals):
 
 
 @contextmanager
-def assert_emit(*signals):
+def assert_emit(*signals, assertions_callback = None):
     __tracebackhide__ = True
     msg = 'Signal "{0}" should have been emitted'
 
     def callback(name, handler):
         assert handler.called, msg.format(name)
+        if assertions_callback is not None:
+            assertions_callback(handler.call_args)
 
     with mock_signals(callback, *signals):
         yield
@@ -95,7 +99,7 @@ def capture_mails():
     mail_sent.disconnect(on_mail_sent)
 
 
-REDIRECT_CODES = (301, 302, 303, 305, 307)
+REDIRECT_CODES = (301, 302, 303, 305, 307, 308)
 REDIRECT_MSG = 'HTTP Status {} expected but got {{}}'.format(
     ', '.join(str(code) for code in REDIRECT_CODES)
 )
@@ -107,18 +111,13 @@ def assert_redirects(response, location, message=None):
     given location.
     :param response: Flask response
     :param location: relative URL path to SERVER_NAME or an absolute URL
-    :param message: an optionnal failure message
+    :param message: an optional failure message
     """
     __tracebackhide__ = True
-    parts = urlparse(location)
 
-    if parts.netloc:
-        expected_location = location
-    else:
-        expected_location = urljoin('http://local.test', location)
     not_redirect = REDIRECT_MSG.format(response.status_code)
     assert response.status_code in REDIRECT_CODES, message or not_redirect
-    assert response.location == expected_location, message
+    assert response.location == location, message
 
 
 def assert_status(response, status_code, message=None):
@@ -216,3 +215,21 @@ def assert_urls_equal(url1, url2):
     q2 = parse_qs(p2.query)
     assert q1 == q2, 'Query does not match'
     assert p1.fragment == p2.fragment, 'Fragment does not match'
+
+
+def assert_cors(response):
+    '''CORS headers presence assertion'''
+    __tracebackhide__ = True
+    assert 'Access-Control-Allow-Origin' in response.headers
+
+
+def create_test_image():
+    file = BytesIO()
+    image = Image.new('RGBA', size=(50, 50), color=(155, 0, 0))
+    image.save(file, 'png')
+    file.name = 'test.png'
+    file.seek(0)
+    return file
+
+def security_gettext(string):
+    return FsDomain(current_app).gettext(string)

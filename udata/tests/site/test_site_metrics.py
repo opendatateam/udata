@@ -1,56 +1,80 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+import pytest
+
+from udata.core.dataset.factories import DatasetFactory, HiddenDatasetFactory, OrganizationFactory
+from udata.core.reuse.factories import VisibleReuseFactory
+from udata.harvest.tests.factories import HarvestSourceFactory
+from udata.core.site.factories import SiteFactory
+from udata.models import Badge
+from udata.core.organization.constants import PUBLIC_SERVICE
 
 
-from udata.models import db, Metrics, WithMetrics, Site
-from udata.core.site.metrics import SiteMetric
-from udata.tests import TestCase, DBTestMixin
+@pytest.mark.usefixtures('clean_db')
+class SiteMetricTest:
+    def test_orga_metric(self, app):
+        site = SiteFactory.create(
+            id=app.config['SITE_ID']
+        )
+        OrganizationFactory.create_batch(3)
 
+        site.count_org()
 
-class FakeModel(WithMetrics, db.Document):
+        assert site.get_metrics()['organizations'] == 3
 
-    def __unicode__(self):
-        return ''
+    def test_reuse_metric(self, app):
+        site = SiteFactory.create(
+            id=app.config['SITE_ID']
+        )
+        VisibleReuseFactory.create_batch(4)
 
+        site.count_reuses()
 
-FAKE_VALUE = 42
+        assert site.get_metrics()['reuses'] == 4
 
+    def test_dataset_metric(self, app):
+        site = SiteFactory.create(
+            id=app.config['SITE_ID']
+        )
+        DatasetFactory.create_batch(2)
+        HiddenDatasetFactory.create_batch(3)
 
-class FakeSiteMetric(SiteMetric):
-    name = 'fake'
+        site.count_datasets()
 
-    def get_value(self):
-        return FAKE_VALUE
+        assert site.get_metrics()['datasets'] == 2
 
+    def test_resources_metric(self, app):
+        site = SiteFactory.create(
+            id=app.config['SITE_ID']
+        )
 
-class SiteMetricTest(DBTestMixin, TestCase):
-    def setUp(self):
-        self.app.config['USE_METRICS'] = True
-        self.updated_emitted = False
-        self.need_update_emitted = False
+        DatasetFactory.create_batch(3, nb_resources=3)
 
-    def on_need_update(self, metric):
-        self.assertIsInstance(metric, FakeSiteMetric)
-        self.need_update_emitted = True
+        site.count_datasets()
+        site.count_resources()
 
-    def on_updated(self, metric):
-        self.assertIsInstance(metric, FakeSiteMetric)
-        self.assertIsNotNone(metric.value)
-        self.updated_emitted = True
+        assert site.get_metrics()['resources'] == 9
 
-    def test_update(self):
-        '''It should store the updated metric on "updated" signal'''
+    def test_badges_metric(self, app):
+        site = SiteFactory.create(
+            id=app.config['SITE_ID']
+        )
 
-        with FakeSiteMetric.need_update.connected_to(self.on_need_update):
-            with FakeSiteMetric.updated.connected_to(self.on_updated):
-                FakeSiteMetric.update()
-                # metric.notify_update()
+        ps_badge = Badge(kind=PUBLIC_SERVICE)
+        public_services = [
+            OrganizationFactory(badges=[ps_badge]) for _ in range(2)
+        ]
+        for _ in range(3):
+            OrganizationFactory()
 
-        self.assertTrue(self.need_update_emitted)
-        self.assertTrue(self.updated_emitted)
+        site.count_org_for_badge(PUBLIC_SERVICE)
 
-        metrics = Metrics.objects.last_for(self.app.config['SITE_ID'])
-        self.assertEqual(metrics.values['fake'], FAKE_VALUE)
+        assert site.get_metrics()[PUBLIC_SERVICE] == len(public_services)
 
-        site = Site.objects.get(id=self.app.config['SITE_ID'])
-        self.assertEqual(site.metrics['fake'], FAKE_VALUE)
+    def test_harvesters_metric(self, app):
+        site = SiteFactory.create(
+            id=app.config['SITE_ID']
+        )
+        sources = [HarvestSourceFactory() for i in range(10)]
+
+        site.count_harvesters()
+
+        assert site.get_metrics()['harvesters'] == len(sources)

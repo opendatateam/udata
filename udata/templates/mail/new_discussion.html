@@ -1,5 +1,5 @@
-{% extends theme('mail/base.html') %}
-{% from theme('mail/button.html') import mail_button %}
+{% extends 'mail/base.html' %}
+{% from 'mail/button.html' import mail_button %}
 
 {% block body %}
 <p style="margin: 0;padding: 0;">{{
@@ -7,7 +7,7 @@
     type=discussion.subject.verbose_name,
     user=(
         '<a href="'|safe
-        + url_for('users.show', user=discussion.user, _external=True)
+        + url_for('api.user', user=discussion.user, _external=True)
         + '">'|safe
         + discussion.user.fullname
         + '</a>'|safe

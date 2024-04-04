@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import os
 
 from datetime import datetime
@@ -14,6 +11,8 @@ from . import utils, chunks
 
 
 META = 'meta.json'
+
+IMAGES_MIMETYPES = ('image/jpeg', 'image/png', 'image/webp')
 
 
 uploaded_image_fields = api.model('UploadedImage', {
@@ -37,7 +36,7 @@ image_parser.add_argument('bbox', type=str, location='form')
 upload_parser = api.parser()
 upload_parser.add_argument('file', type=FileStorage, location='files')
 upload_parser.add_argument('uuid', type=str, location='form')
-upload_parser.add_argument('filename', type=unicode, location='form')
+upload_parser.add_argument('filename', type=str, location='form')
 upload_parser.add_argument('partindex', type=int, location='form')
 upload_parser.add_argument('partbyteoffset', type=int, location='form')
 upload_parser.add_argument('totalparts', type=int, location='form')
@@ -101,7 +100,7 @@ def save_chunk(file, args):
         'uuid': str(args['uuid']),
         'filename': args['filename'],
         'totalparts': args['totalparts'],
-        'lastchunk': datetime.now(),
+        'lastchunk': datetime.utcnow(),
     }), overwrite=True)
     raise UploadProgress()
 
@@ -119,7 +118,7 @@ def combine_chunks(storage, args, prefix=None):
     if prefix:
         target = os.path.join(prefix, target)
     with storage.open(target, 'wb') as out:
-        for i in xrange(args['totalparts']):
+        for i in range(args['totalparts']):
             partname = chunk_filename(uuid, i)
             out.write(chunks.read(partname))
             chunks.delete(partname)
@@ -129,27 +128,32 @@ def combine_chunks(storage, args, prefix=None):
 
 def handle_upload(storage, prefix=None):
     args = upload_parser.parse_args()
-    is_chunk = args['totalparts'] > 1
+    is_chunk = args['totalparts'] and args['totalparts'] > 1
     uploaded_file = args['file']
 
     if is_chunk:
         if uploaded_file:
             save_chunk(uploaded_file, args)
         else:
-            filename = combine_chunks(storage, args, prefix=prefix)
+            fs_filename = combine_chunks(storage, args, prefix=prefix)
     elif not uploaded_file:
         raise UploadError('Missing file parameter')
     else:
         # Normalize filename including extension
         filename = utils.normalize(uploaded_file.filename)
-        filename = storage.save(uploaded_file, prefix=prefix,
-                                filename=filename)
+        fs_filename = storage.save(
+            uploaded_file,
+            prefix=prefix,
+            filename=filename
+        )
 
-    metadata = storage.metadata(filename)
+    metadata = storage.metadata(fs_filename)
+    metadata['last_modified_internal'] = metadata.pop('modified')
+    metadata['fs_filename'] = fs_filename
     checksum = metadata.pop('checksum')
     algo, checksum = checksum.split(':', 1)
     metadata[algo] = checksum
-    metadata['format'] = utils.extension(filename)
+    metadata['format'] = utils.extension(fs_filename)
     return metadata
 
 
@@ -158,6 +162,8 @@ def parse_uploaded_image(field):
     args = image_parser.parse_args()
 
     image = args['file']
+    if image.mimetype not in IMAGES_MIMETYPES:
+        api.abort(400, 'Unsupported image format')
     bbox = args.get('bbox', None)
     if bbox:
         bbox = [int(float(c)) for c in bbox.split(',')]

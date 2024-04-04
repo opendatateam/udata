@@ -33,14 +33,18 @@ export const BaseField = {
     name: 'base-field',
     data() {
         return {
-            errors: []
+            errors: [],
+            success: undefined,
+            isField: true,
         };
     },
     components: {
         // Only register the common components
         'text-input': require('components/form/text-input.vue'),
+        'number-input': require('components/form/number-input.vue'),
         'hidden-input': require('components/form/hidden-input.vue'),
         'select-input': require('components/form/select-input.vue'),
+        'select-input-group': require('components/form/select-input-group.vue'),
         'markdown-editor': require('components/form/markdown-editor.vue'),
         'date-picker': require('components/form/date-picker.vue'),
         'checkbox': require('components/form/checkbox.vue')
@@ -48,6 +52,7 @@ export const BaseField = {
     events: {
         'field:value-change': function(value) {
             this.$dispatch('field:change', this, value);
+            return true;  // Let the event continue its bubbling
         }
     },
     props: {
@@ -108,7 +113,8 @@ export const BaseField = {
             return this.field.placeholder || this.field.label || '';
         },
         readonly() {
-            return this.field.readonly || false;
+            // $parent is form
+            return this.$parent.readonly || this.field.readonly || false;
         },
         widget() {
             let widget;
@@ -116,6 +122,8 @@ export const BaseField = {
                 widget = this.field.widget;
             } else if (this.property.type === 'boolean') {
                 widget = 'checkbox';
+            } else if (this.property.type === 'integer') {
+                widget = 'number-input';
             } else if (this.property.type === 'string') {
                 if (this.property.format === 'markdown') {
                     widget = 'markdown-editor';

@@ -58,7 +58,7 @@
         <div class="col-lg-10 col-lg-offset-1">
             <div class="input-group">
                 <span class="input-group-addon">
-                    <span class="fa fa-retweet"></span>
+                    <span class="fa fa-recycle"></span>
                 </span>
                 <completer v-ref:completer></completer>
             </div>

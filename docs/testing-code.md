@@ -5,15 +5,13 @@ unit tests for the frontend and integration tests.
 
 ## Test middlewares
 
-If you need to use an alternative Mongo or Elasticsearch instance during tests,
-you can provides the alternate urls in you `udata.cfg`
-with `MONGODB_HOST_TEST` and `ELASTICSEARCH_URL_TEST`.
+If you need to use an alternative Mongo instance during tests, you can provide
+the alternate urls in you `udata.cfg` with `MONGODB_HOST_TEST`.
 
-**ex**: To make use of the tmpfs based middleware provided by docker-compose, use:
+**E.g.**: To make use of the tmpfs based middleware provided by docker-compose, use:
 
 ```python
 MONGODB_HOST_TEST = 'mongodb://localhost:27018/udata'
-ELASTICSEARCH_URL_TEST = 'localhost:9201'
 ```
 
 And then start docker-compose with the extra file:
@@ -22,32 +20,35 @@ And then start docker-compose with the extra file:
 $ docker-compose -f docker-compose.yml -f docker-compose.test.yml up
 ```
 
-This will start 2 extra services, an Elasticsearch and a MongoDB,
-both tmpfs based and your tests will make use of it and run faster.
+This will start a MongoDB extra service, tmpfs based and your tests will
+make use of it and run faster.
 
 
 ## Backend unit tests
 
-The easiest way is to run Python tests with [nosetest][].
+The easiest way is to run Python tests with pytest.
 
 ```shell
-$ nosetests --immediate udata
+$ pytest
 ```
 
 You can launch a unique test too:
 
 ```shell
-$ nosetests --immediate --stop --tests=udata/tests/api/test_datasets_api.py:DatasetResourceAPITest.test_reorder
+$ pytest udata/tests/api/test_me_api.py -k test_get_profile
 ```
 
-If you want a fancy display, you can use the [nose-mocha-reporter][] (not installed by default)
-with the dedicated option:
+To launch tests with coverage report:
 
 ```shell
-$ nosetests --with-mocha-reporter --immediate --stop --tests=udata/tests/api/test_datasets_api.py:DatasetResourceAPITest
+$ pip install requirements/report.pip
+$ inv cover
 ```
 
 ## Frontend unit tests
+
+!!! warning
+    This part is obsolete and should be rewritten.
 
 For frontend (and administration) testing, we use the following tools:
 
@@ -111,7 +112,7 @@ $ npm -s run test:unit -- --browsers 'IE11 - Win7'
 ```
 
 !!! note
-    uData tests ensure the compatibility with IE version(s) [officially supported by Microsoft][ie-support].
+    udata tests ensure the compatibility with IE version(s) [officially supported by Microsoft][ie-support].
     Right now, it’s IE11.
 
 You maybe need to manually close the first time popup on first run.

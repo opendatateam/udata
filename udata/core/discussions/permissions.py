@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from udata.auth import Permission, UserNeed
 
 from udata.core.organization.permissions import (
@@ -17,6 +14,6 @@ class CloseDiscussionPermission(Permission):
             needs.append(OrganizationAdminNeed(subject.organization.id))
             needs.append(OrganizationEditorNeed(subject.organization.id))
         elif subject.owner:
-            needs.append(UserNeed(subject.owner.id))
+            needs.append(UserNeed(subject.owner.fs_uniquifier))
 
         super(CloseDiscussionPermission, self).__init__(*needs)

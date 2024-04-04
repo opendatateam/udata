@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
 import logging
 
 import click
@@ -80,7 +77,7 @@ def schedule(cron, name, params):
     Jobs args and kwargs are given as parameters without dashes.
 
     Ex:
-        udata job schedule my-job "* * 0 * *" arg1 arg2 key1=value key2=value
+        udata job schedule "* * 0 * *" my-job arg1 arg2 key1=value key2=value
     '''
     if name not in celery.tasks:
         exit_with_error('Job %s not found', name)
@@ -145,7 +142,7 @@ def scheduled():
         for task in PeriodicTask.objects(task=job.name):
             label = job_label(task.task, task.args, task.kwargs)
             echo(SCHEDULE_LINE.format(
-                name=white(task.name.encode('utf8')),
+                name=white(task.name),
                 label=label,
                 schedule=task.schedule_display
-            ).encode('utf8'))
+            ))

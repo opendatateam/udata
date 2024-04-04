@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import re
-import StringIO
+from io import StringIO
 
 import factory
 
@@ -12,8 +9,7 @@ from factory.mongoengine import MongoEngineFactory
 
 from flask import url_for, Blueprint
 
-from udata.models import db
-from udata.core.metrics import Metric, init_app as init_metrics
+from udata.mongo import db
 from udata.frontend import csv
 from udata.utils import faker
 
@@ -42,19 +38,16 @@ class Fake(db.Document):
     sub = db.EmbeddedDocumentField(NestedFake)
     metrics = db.DictField()
 
-    def __unicode__(self):
+    __metrics_keys__ = [
+        'fake-metric-int',
+        'fake-metric-float',
+    ]
+
+    def __str__(self):
         return 'fake'
 
-
-class FakeMetricInt(Metric):
-    model = Fake
-    name = 'fake-metric-int'
-
-
-class FakeMetricFloat(Metric):
-    model = Fake
-    name = 'fake-metric-float'
-    value_type = float
+    def get_metrics(self):
+        return self.metrics
 
 
 class NestedFactory(MongoEngineFactory):
@@ -121,12 +114,10 @@ def with_basename():
 
 
 class CsvTest(FrontTestCase):
-    modules = ['admin', 'core.dataset', 'core.reuse', 'core.site',
-               'core.organization', 'search']
+    modules = ['admin']
 
     def create_app(self):
         app = super(CsvTest, self).create_app()
-        init_metrics(app)
         app.register_blueprint(blueprint)
         return app
 
@@ -296,9 +287,9 @@ class CsvTest(FrontTestCase):
         self.assertEqual(response.mimetype, 'text/csv')
         self.assertEqual(response.charset, 'utf-8')
 
-        csvfile = StringIO.StringIO(response.data)
+        csvfile = StringIO(response.data.decode('utf8'))
         reader = csv.get_reader(csvfile)
-        header = reader.next()
+        header = next(reader)
         self.assertEqual(header, ['title', 'description'])
 
         rows = list(reader)
@@ -345,9 +336,6 @@ class CsvTest(FrontTestCase):
         response = self.assert_empty_stream_csv('testcsv.from_queryset')
         self.assert_filename(response, 'export')
 
-    def test_empty_stream_from_list(self):
-        self.assert400(self.get(url_for('testcsv.from_list')))
-
     def test_stream_nested_from_adapter(self):
         fake = FakeFactory.build()
         for i in range(3):
@@ -359,9 +347,9 @@ class CsvTest(FrontTestCase):
         self.assertEqual(response.mimetype, 'text/csv')
         self.assertEqual(response.charset, 'utf-8')
 
-        csvfile = StringIO.StringIO(response.data)
+        csvfile = StringIO(response.data.decode('utf8'))
         reader = csv.get_reader(csvfile)
-        header = reader.next()
+        header = next(reader)
         self.assertEqual(header, ['title', 'description', 'key', 'alias'])
 
         rows = list(reader)
@@ -381,12 +369,12 @@ class CsvTest(FrontTestCase):
         self.assertEqual(response.mimetype, 'text/csv')
         self.assertEqual(response.charset, 'utf-8')
 
-        csvfile = StringIO.StringIO(response.data)
+        csvfile = StringIO(response.data.decode('utf8'))
         reader = csv.get_reader(csvfile)
-        header = reader.next()
+        header = next(reader)
         self.assertEqual(header, ['title', 'description'])
 
-        row = reader.next()
+        row = next(reader)
         self.assertEqual(len(row), len(header))
         self.assertEqual(row[0], fake.title)
         self.assertEqual(row[1], fake.description)

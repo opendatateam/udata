@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 
 from datetime import datetime, timedelta
-from StringIO import StringIO
+from io import BytesIO
 from uuid import uuid4
 
 from flask import url_for, json
@@ -35,7 +32,7 @@ class StorageUtilsTest:
         self.file = self.filestorage(str(tmpfile))
 
     def filestorage(self, filename):
-        data = open(filename)
+        data = open(filename, 'rb')
         builder = EnvironBuilder(method='POST', data={
             'file': (data, basename(filename))
         })
@@ -60,16 +57,24 @@ class StorageUtilsTest:
         assert utils.mime('test.txt') == 'text/plain'
         assert utils.mime('test') is None
 
-    def test_extension_default(self):
+    def test_extension_default(self, app):
         assert utils.extension('test.txt') == 'txt'
         assert utils.extension('prefix/test.txt') == 'txt'
         assert utils.extension('prefix.with.dot/test.txt') == 'txt'
 
-    def test_extension_compound(self):
+    def test_extension_compound(self, app):
         assert utils.extension('test.tar.gz') == 'tar.gz'
         assert utils.extension('prefix.with.dot/test.tar.gz') == 'tar.gz'
 
-    def test_no_extension(self):
+    def test_extension_compound_with_allowed_extension(self, app):
+        assert utils.extension('test.2022.csv.tar.gz') == 'csv.tar.gz'
+        assert utils.extension('prefix.with.dot/test.2022.csv.tar.gz') == 'csv.tar.gz'
+
+    def test_extension_compound_without_allowed_extension(self, app):
+        assert utils.extension('test.2022.tar.gz') == 'tar.gz'
+        assert utils.extension('prefix.with.dot/test.2022.tar.gz') == 'tar.gz'
+
+    def test_no_extension(self, app):
         assert utils.extension('test') is None
         assert utils.extension('prefix/test') is None
 
@@ -110,8 +115,8 @@ class StorageUploadViewTest:
     def test_standard_upload(self, client):
         client.login()
         response = client.post(
-            url_for('storage.upload', name='resources'),
-            {'file': (StringIO(b'aaa'), 'Test with  spaces.TXT')})
+            url_for('test-storage.upload', name='resources'),
+            {'file': (BytesIO(b'aaa'), 'Test with  spaces.TXT')})
 
         assert200(response)
         assert response.json['success']
@@ -127,13 +132,13 @@ class StorageUploadViewTest:
 
     def test_chunked_upload(self, client):
         client.login()
-        url = url_for('storage.upload', name='tmp')
+        url = url_for('test-storage.upload', name='tmp')
         uuid = str(uuid4())
         parts = 4
 
         for i in range(parts):
             response = client.post(url, {
-                'file': (StringIO(b'a'), 'blob'),
+                'file': (BytesIO(b'a'), 'blob'),
                 'uuid': uuid,
                 'filename': 'Test with  spaces.TXT',
                 'partindex': i,
@@ -168,17 +173,17 @@ class StorageUploadViewTest:
         expected_url = storages.tmp.url(filename, external=True)
         assert response.json['url'] == expected_url
         assert response.json['mime'] == 'text/plain'
-        assert storages.tmp.read(filename) == 'aaaa'
+        assert storages.tmp.read(filename) == b'aaaa'
         assert list(storages.chunks.list_files()) == []
 
     def test_chunked_upload_bad_chunk(self, client):
         client.login()
-        url = url_for('storage.upload', name='tmp')
+        url = url_for('test-storage.upload', name='tmp')
         uuid = str(uuid4())
         parts = 4
 
         response = client.post(url, {
-            'file': (StringIO(b'a'), 'blob'),
+            'file': (BytesIO(b'a'), 'blob'),
             'uuid': uuid,
             'filename': 'test.txt',
             'partindex': 0,
@@ -201,8 +206,8 @@ class StorageUploadViewTest:
     def test_upload_resource_bad_request(self, client):
         client.login()
         response = client.post(
-            url_for('storage.upload', name='tmp'),
-            {'bad': (StringIO(b'aaa'), 'test.txt')})
+            url_for('test-storage.upload', name='tmp'),
+            {'bad': (BytesIO(b'aaa'), 'test.txt')})
 
         assert400(response)
         assert not response.json['success']
@@ -218,7 +223,7 @@ class ChunksRetentionTest:
             'uuid': str(uuid),
             'filename': faker.file_name(),
             'totalparts': nb + 1,
-            'lastchunk': last or datetime.now(),
+            'lastchunk': last or datetime.utcnow(),
         }))
 
     @pytest.mark.options(UPLOAD_MAX_RETENTION=0)
@@ -231,8 +236,8 @@ class ChunksRetentionTest:
 
     @pytest.mark.options(UPLOAD_MAX_RETENTION=60 * 60)  # 1 hour
     def test_chunks_kept_before_max_retention(self, client):
-        not_expired = datetime.now()
-        expired = datetime.now() - timedelta(hours=2)
+        not_expired = datetime.utcnow()
+        expired = datetime.utcnow() - timedelta(hours=2)
         expired_uuid = str(uuid4())
         active_uuid = str(uuid4())
         parts = 3

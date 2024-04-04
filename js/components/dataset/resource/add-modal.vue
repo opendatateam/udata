@@ -4,11 +4,11 @@
     :title="_('Add a resource')" :large="editing">
 
     <div class="modal-body">
-        <resource-form v-ref:form :dataset="dataset"></resource-form>
+        <resource-form v-ref:form :dataset="dataset" is-upload></resource-form>
     </div>
 
     <footer class="modal-footer text-center">
-        <button type="button" class="btn btn-sm btn-primary btn-flat pull-left"
+        <button type="button" class="btn btn-primary btn-flat pull-left"
             @click="$refs.modal.close">
             {{ _('Cancel') }}
         </button>
@@ -27,9 +27,11 @@
 import Dataset from 'models/dataset';
 import Modal from 'components/modal.vue';
 import ResourceForm from 'components/dataset/resource/form.vue';
+import WatchRefs from 'mixins/watch-refs';
 
 export default {
     name: 'add-resource-modal',
+    mixins: [WatchRefs],
     props: {
         dataset: {
             type: Dataset,
@@ -38,24 +40,45 @@ export default {
     },
     components: {Modal, ResourceForm},
     data() {
-        return {ready: false};
-    },
-    computed: {
-        editing() {
-            return this.ready && this.$refs && this.$refs.form && this.$refs.form.hasData;
-        }
+        return {editing: false, submitted: false};
     },
     ready() {
-        this.ready = true; // Artificially force editing update because $refs is not reactive
+        // Avoid multiple handlers in case of error
+        this.updHandler = this.dataset.$on('updated', this.on_success);
+    },
+    beforeDestroy() {
+        if (this.updHandler) {
+            this.updHandler.remove();
+            this.updHandler = undefined;
+        }
     },
     methods: {
+        upload() {
+            this.$refs.form.isUpload = true;
+        },
         save() {
-            if (this.$refs.form.validate()) {
-                this.dataset.save_resource(this.$refs.form.serialize());
-                this.$refs.modal.close();
+            const $form = this.$refs.form
+            if ($form.validate()) {
+                this.submitted = true;
+                this.dataset.save_resource($form.serialize(), $form.on_error);
                 return true;
             }
+        },
+        on_success() {
+            if (this.submitted) {
+                this.$dispatch('notify', {
+                    autoclose: true,
+                    title: this._('Changes saved'),
+                    details: this._('Your resource has been added.')
+                });
+                this.$refs.modal.close();
+            }
         }
-    }
+    },
+    watchRefs: {
+        'form.hasData': function(hasData) {
+            this.editing = hasData;
+        },
+    },
 };
 </script>

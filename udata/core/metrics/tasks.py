@@ -1,61 +1,27 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from flask import current_app
 
-from datetime import date, timedelta
-
-from celery.utils.log import get_task_logger
-
-from udata.tasks import celery, job
-
-log = get_task_logger(__name__)
+from udata.models import Site
+from udata.tasks import job
+from udata.core.metrics.signals import on_site_metrics_computed
 
 
-@celery.task
-def update_metric(metric):
-    log.debug('Update metric %s for %s', metric.name, metric.target)
-    metric.compute()
-
-
-@celery.task
-def archive_metric(metric):
-    log.debug('Store metric %s for %s', metric.name, metric.target)
-    metric.store()
-
-
-@job('bump-metrics')
-def bump_metrics(self):
-    from .models import Metrics
-    today = date.today().isoformat()
-    yesterday = (date.today() - timedelta(1)).isoformat()
-    self.log.info('Bumping metrics from to %s to %s', yesterday, today)
-    script = '''
-    function() {
-        var processed = 0;
-        db[collection].find(query).forEach(function(doc) {
-            delete doc._id;
-            doc.date = options.today;
-            db[collection].save(doc);
-            processed += 1;
-        });
-        return processed;
-    }
-    '''
-    processed = Metrics.objects(date=yesterday).exec_js(script, today=today)
-    log.info('Processed %s document(s)', processed)
-
-
-@celery.task
-def update_metrics_for(obj):
-    from udata.core.metrics import Metric
-    metrics = Metric.get_for(obj.__class__)
-    for metric in metrics.values():
-        metric(obj).compute()
-
-
-@celery.task
-def update_site_metrics():
-    from udata.core.metrics import Metric
-    from udata.models import Site
-    metrics = Metric.get_for(Site)
-    for metric in metrics.values():
-        metric.update()
+@job('compute-site-metrics')
+def compute_site_metrics(self):
+    site = Site.objects(id=current_app.config['SITE_ID']).first()
+    site.count_users()
+    site.count_org()
+    site.count_datasets()
+    site.count_resources()
+    site.count_reuses()
+    site.count_followers()
+    site.count_discussions()
+    site.count_harvesters()
+    site.count_max_dataset_followers()
+    site.count_max_dataset_reuses()
+    site.count_max_reuse_datasets()
+    site.count_max_reuse_followers()
+    site.count_max_org_followers()
+    site.count_max_org_reuses()
+    site.count_max_org_datasets()
+    # Sending signal
+    on_site_metrics_computed.send(site)

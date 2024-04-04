@@ -1,29 +1,25 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import itertools
+import inspect
 import logging
-import urllib
+import urllib.parse
 
-from bson import ObjectId
 from functools import wraps
+from importlib import import_module
 
 from flask import (
     current_app, g, request, url_for, json, make_response, redirect, Blueprint
 )
-from flask_fs import UnauthorizedFileType
-from flask_restplus import Api, Resource, cors
+from flask_storage import UnauthorizedFileType
+from flask_restx import Api, Resource
+from flask_cors import CORS
 
-from udata import search, theme, tracking
+from udata import tracking, entrypoints
 from udata.app import csrf
-from udata.i18n import I18nBlueprint, get_locale
+from udata.i18n import get_locale
 from udata.auth import (
     current_user, login_user, Permission, RoleNeed, PermissionDenied
 )
 from udata.core.user.models import User
-from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.models import Organization
-from udata.sitemap import sitemap
 from udata.utils import safe_unicode
 
 from . import fields, oauth2
@@ -32,9 +28,8 @@ from .signals import on_api_call
 
 log = logging.getLogger(__name__)
 
-apiv1 = Blueprint('api', __name__, url_prefix='/api/1')
-apidoc = I18nBlueprint('apidoc', __name__)
-
+apiv1_blueprint = Blueprint('api', __name__, url_prefix='/api/1')
+apiv2_blueprint = Blueprint('apiv2', __name__, url_prefix='/api/2')
 
 DEFAULT_PAGE_SIZE = 50
 HEADER_API_KEY = 'X-API-KEY'
@@ -49,6 +44,7 @@ PREFLIGHT_HEADERS = (
     'Accept',
     'Accept-Charset',
     'Accept-Language',
+    'Authorization',
     'Cache-Control',
     'Content-Encoding',
     'Content-Length',
@@ -68,6 +64,8 @@ PREFLIGHT_HEADERS = (
     'X-Forwarded-Proto',
 )
 
+cors = CORS(allow_headers=PREFLIGHT_HEADERS)
+
 
 class UDataApi(Api):
     def __init__(self, app=None, **kwargs):
@@ -84,9 +82,9 @@ class UDataApi(Api):
 
     def secure(self, func):
         '''Enforce authentication on a given method/verb
-        and optionnaly check a given permission
+        and optionally check a given permission
         '''
-        if isinstance(func, basestring):
+        if isinstance(func, str):
             return self._apply_permission(Permission(RoleNeed(func)))
         elif isinstance(func, Permission):
             return self._apply_permission(func)
@@ -100,11 +98,22 @@ class UDataApi(Api):
 
     def _apply_secure(self, func, permission=None):
         '''Enforce authentication on a given method/verb'''
-        self._handle_api_doc(func, {'security': 'apikey'})
+        self._build_doc(func, {'security': 'apikey'})
 
         @wraps(func)
         def wrapper(*args, **kwargs):
+            if (
+                not current_user.is_anonymous and
+                not current_user.sysadmin and
+                current_app.config['READ_ONLY_MODE'] and
+                any(ext in str(func) for ext in current_app.config['METHOD_BLOCKLIST'])
+            ):
+                self.abort(423, 'Due to security reasons, the creation of new content is currently disabled.')
+
             if not current_user.is_authenticated:
+                self.abort(401)
+
+            if current_user.deleted:
                 self.abort(401)
 
             if permission is not None:
@@ -138,17 +147,17 @@ class UDataApi(Api):
 
     def validate(self, form_cls, obj=None):
         '''Validate a form from the request and handle errors'''
-        if 'application/json' not in request.headers.get('Content-Type'):
+        if 'application/json' not in request.headers.get('Content-Type', ''):
             errors = {'Content-Type': 'expecting application/json'}
             self.abort(400, errors=errors)
         form = form_cls.from_json(request.json, obj=obj, instance=obj,
-                                  csrf_enabled=False)
+                                  meta={'csrf': False})
         if not form.validate():
             self.abort(400, errors=form.errors)
         return form
 
     def render_ui(self):
-        return redirect(url_for('apii18n.apidoc'))
+        return redirect(current_app.config.get('API_DOC_EXTERNAL_LINK'))
 
     def unauthorized(self, response):
         '''Override to change the WWW-Authenticate challenge'''
@@ -168,16 +177,19 @@ class UDataApi(Api):
 
 
 api = UDataApi(
-    apiv1,
-    decorators=[csrf.exempt,
-                cors.crossdomain(origin='*',
-                                 credentials=True,
-                                 headers=PREFLIGHT_HEADERS
-                )
-    ],
+    apiv1_blueprint,
+    decorators=[csrf.exempt],
     version='1.0', title='uData API',
     description='uData API', default='site',
     default_label='Site global namespace'
+)
+
+apiv2 = UDataApi(
+    apiv2_blueprint,
+    decorators=[csrf.exempt],
+    version='2.0', title='uData API',
+    description='udata API v2', default='site',
+    default_label='Site global namespace',
 )
 
 
@@ -195,7 +207,8 @@ def output_json(data, code, headers=None):
     return resp
 
 
-@apiv1.before_request
+@apiv1_blueprint.before_request
+@apiv2_blueprint.before_request
 def set_api_language():
     if 'lang' in request.args:
         g.lang_code = request.args['lang']
@@ -211,6 +224,8 @@ def extract_name_from_path(path):
     """
     base_path, query_string = path.split('?')
     infos = base_path.strip('/').split('/')[2:]  # Removes api/version.
+    if base_path == '/api/1/' or base_path == '/api/2/':  # The API root endpoint redirects to swagger doc.
+        return safe_unicode('apidoc')
     if len(infos) > 1:  # This is an object.
         name = '{category} / {name}'.format(
             category=infos[0].title(),
@@ -221,14 +236,15 @@ def extract_name_from_path(path):
     return safe_unicode(name)
 
 
-@apiv1.after_request
+@apiv1_blueprint.after_request
+@apiv2_blueprint.after_request
 def collect_stats(response):
     action_name = extract_name_from_path(request.full_path)
     blacklist = current_app.config.get('TRACKING_BLACKLIST', [])
     if (not current_app.config['TESTING'] and
             request.endpoint not in blacklist):
         extras = {
-            'action_name': urllib.quote(action_name),
+            'action_name': urllib.parse.quote(action_name),
         }
         tracking.send_signal(on_api_call, request, current_user, **extras)
     return response
@@ -266,51 +282,8 @@ def handle_unauthorized_file_type(error):
     return {'message': msg}, 400
 
 
-@apidoc.route('/api/')
-@apidoc.route('/api/1/')
-@api.documentation
-def default_api():
-    return redirect(url_for('apidoc.swaggerui'))
-
-
-@apidoc.route('/apidoc/')
-def swaggerui():
-    page_size = 10
-    params = {"datasets": "many"}
-    organizations = search.iter(Organization)
-    organizations = list(itertools.islice(organizations, page_size))
-    if len(organizations) < page_size:
-        # Fill with dummy values
-        needs = page_size - len(organizations)
-        extra_orgs = OrganizationFactory.build_batch(needs)
-        for org in extra_orgs:
-            org.id = ObjectId()
-            Organization.slug.generate()
-        organizations.extend(extra_orgs)
-    return theme.render('apidoc.html', specs_url=api.specs_url, organizations=organizations)
-
-
-@sitemap.register_generator
-def api_sitemap_urls():
-    yield 'apidoc.swaggerui_redirect', {}, None, 'weekly', 0.9
-
-
-@apidoc.route('/apidoc/images/<path:path>')
-def images(path):
-    return redirect(url_for('static',
-                    filename='bower/swagger-ui/dist/images/' + path))
-
-
-@apidoc.route('/static/images/throbber.gif')
-def fix_apidoc_throbber():
-    return redirect(url_for('static',
-                    filename='bower/swagger-ui/dist/images/throbber.gif'))
-
-
 class API(Resource):  # Avoid name collision as resource is a core model
-    @api.hide
-    def options(self):
-        pass  # Only here to allow default Flask response
+    pass
 
 
 base_reference = api.model('BaseReference', {
@@ -336,25 +309,32 @@ def init_app(app):
     import udata.core.metrics.api  # noqa
     import udata.core.user.api  # noqa
     import udata.core.dataset.api  # noqa
-    import udata.core.issues.api  # noqa
+    import udata.core.dataset.apiv2  # noqa
     import udata.core.discussions.api  # noqa
     import udata.core.reuse.api  # noqa
+    import udata.core.reuse.apiv2  # noqa
     import udata.core.organization.api  # noqa
+    import udata.core.organization.apiv2  # noqa
     import udata.core.followers.api  # noqa
     import udata.core.jobs.api  # noqa
     import udata.core.site.api  # noqa
     import udata.core.tags.api  # noqa
     import udata.core.topic.api  # noqa
+    import udata.core.topic.apiv2  # noqa
     import udata.core.post.api  # noqa
+    import udata.core.contact_point.api # noqa
     import udata.features.transfer.api  # noqa
     import udata.features.notifications.api  # noqa
-    import udata.features.oembed.api  # noqa
     import udata.features.identicon.api  # noqa
     import udata.features.territories.api  # noqa
     import udata.harvest.api  # noqa
 
+    for module in entrypoints.get_enabled('udata.apis', app).values():
+        api_module = module if inspect.ismodule(module) else import_module(module)
+
     # api.init_app(app)
-    app.register_blueprint(apidoc)
-    app.register_blueprint(apiv1)
+    app.register_blueprint(apiv1_blueprint)
+    app.register_blueprint(apiv2_blueprint)
 
     oauth2.init_app(app)
+    cors.init_app(app)

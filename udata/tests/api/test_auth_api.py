@@ -1,12 +1,14 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 
 from base64 import b64encode
-from urlparse import parse_qs
+from urllib.parse import parse_qs
 
 from flask import url_for
+from authlib.common.security import generate_token
+from authlib.common.urls import urlparse, url_decode
+from authlib.oauth2.rfc7636 import (
+    create_s256_code_challenge,
+)
 
 from udata.api import api, API
 from udata.api.oauth2 import OAuth2Client, OAuth2Token
@@ -21,7 +23,7 @@ ns = api.namespace('fake', 'A Fake namespace')
 
 
 class FakeForm(Form):
-    required = fields.StringField(validators=[validators.required()])
+    required = fields.StringField(validators=[validators.DataRequired()])
     choices = fields.SelectField(choices=(('first', ''), ('second', '')))
     email = fields.StringField(validators=[validators.Email()])
 
@@ -41,20 +43,22 @@ class FakeAPI(API):
 
 
 def basic_header(client):
-        payload = ':'.join((client.client_id, client.secret))
-        return {'Authorization': 'Basic ' + b64encode(payload)}
+    payload = ':'.join((client.client_id, client.secret))
+    token = b64encode(payload.encode('utf-8')).decode('utf8')
+    return {'Authorization': 'Basic {}'.format(token)}
 
 
 @pytest.fixture
 def oauth(app, request):
-    marker = request.node.get_marker('oauth')
-    kwargs = marker.kwargs if marker else {}
-    return OAuth2Client.objects.create(
+    marker = request.node.get_closest_marker('oauth')
+    custom_kwargs = marker.kwargs if marker else {}
+    kwargs = dict(
         name='test-client',
         owner=UserFactory(),
         redirect_uris=['https://test.org/callback'],
-        **kwargs
     )
+    kwargs.update(custom_kwargs)
+    return OAuth2Client.objects.create(**kwargs)
 
 
 @pytest.mark.usefixtures('clean_db')
@@ -90,7 +94,7 @@ class APIAuthTest:
         assert response.json == {'success': True}
 
     def test_oauth_auth(self, api, oauth):
-        '''Should handle  OAuth header authentication'''
+        '''Should handle OAuth header authentication'''
         user = UserFactory()
         token = OAuth2Token.objects.create(
             client=oauth,
@@ -143,6 +147,18 @@ class APIAuthTest:
     def test_inactive_user(self, api):
         '''Should raise a HTTP 401 if the user is inactive'''
         user = UserFactory(active=False)
+        with api.user(user) as user:
+            response = api.post(url_for('api.fake'),
+                                headers={'X-API-KEY': user.apikey})
+
+        assert401(response)
+        assert response.content_type == 'application/json'
+        assert 'message' in response.json
+
+    def test_deleted_user(self, api):
+        '''Should raise a HTTP 401 if the user is deleted'''
+        user = UserFactory()
+        user.mark_as_deleted()
         with api.user(user) as user:
             response = api.post(url_for('api.fake'),
                                 headers={'X-API-KEY': user.apikey})
@@ -220,7 +236,78 @@ class APIAuthTest:
 
         assert_status(response, 302)
         uri, params = response.location.split('?')
+
         assert uri == oauth.default_redirect_uri
+
+    @pytest.mark.options(OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI=True)
+    @pytest.mark.oauth(redirect_uris=['https://*.test.org/callback'])
+    def test_authorization_accept_wildcard(self, client, oauth):
+        '''Should redirect to the redirect_uri on authorization accepted
+        with wildcard enabled and used in config'''
+        client.login()
+
+        redirect_uri = 'https://subdomain.test.org/callback'
+
+        response = client.post(url_for(
+            'oauth.authorize',
+            response_type='code',
+            client_id=oauth.client_id,
+            redirect_uri=redirect_uri,
+        ), {
+            'scope': 'default',
+            'accept': '',
+        })
+
+        assert_status(response, 302)
+        uri, _ = response.location.split('?')
+
+        assert uri == redirect_uri
+
+    @pytest.mark.options(OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI=False)
+    @pytest.mark.oauth(redirect_uris=['https://*.test.org/callback'])
+    def test_authorization_accept_no_wildcard(self, client, oauth):
+        '''Should not redirect to the redirect_uri on authorization accepted
+        without wildcard enabled while used in config'''
+        client.login()
+
+        redirect_uri = 'https://subdomain.test.org/callback'
+
+        response = client.post(url_for(
+            'oauth.authorize',
+            response_type='code',
+            client_id=oauth.client_id,
+            redirect_uri=redirect_uri,
+        ), {
+            'scope': 'default',
+            'accept': '',
+        })
+
+        assert_status(response, 400)
+        assert 'error' in response.json
+        assert 'redirect_uri' in response.json['error_description']
+
+    @pytest.mark.options(OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI=True)
+    @pytest.mark.oauth(redirect_uris=['https://*.test.org/callback'])
+    def test_authorization_accept_wrong_wildcard(self, client, oauth):
+        '''Should not redirect to the redirect_uri on authorization accepted
+        with wildcard enabled but mismatched from config'''
+        client.login()
+
+        redirect_uri = 'https://subdomain.example.com/callback'
+
+        response = client.post(url_for(
+            'oauth.authorize',
+            response_type='code',
+            client_id=oauth.client_id,
+            redirect_uri=redirect_uri,
+        ), {
+            'scope': 'default',
+            'accept': '',
+        })
+
+        assert_status(response, 400)
+        assert 'error' in response.json
+        assert 'redirect_uri' in response.json['error_description']
 
     def test_authorization_grant_token(self, client, oauth):
         client.login()
@@ -246,6 +333,90 @@ class APIAuthTest:
         assert200(response)
         assert response.content_type == 'application/json'
         assert 'access_token' in response.json
+
+    def test_s256_code_challenge_success_client_secret_basic(self, client, oauth):
+        code_verifier = generate_token(48)
+        code_challenge = create_s256_code_challenge(code_verifier)
+
+        client.login()
+
+        response = client.post(url_for(
+            'oauth.authorize',
+            response_type='code',
+            client_id=oauth.client_id,
+            code_challenge=code_challenge,
+            code_challenge_method='S256'
+        ), {
+            'scope': 'default',
+            'accept': '',
+        })
+        assert 'code=' in response.location
+
+        params = dict(url_decode(urlparse.urlparse(response.location).query))
+        code = params['code']
+
+        response = client.post(url_for('oauth.token'), {
+            'grant_type': 'authorization_code',
+            'code': code,
+            'code_verifier': code_verifier
+        }, headers=basic_header(oauth))
+
+        assert200(response)
+        assert response.content_type == 'application/json'
+        assert 'access_token' in response.json
+
+        token = response.json['access_token']
+
+        response = client.post(url_for('api.fake'), headers={
+            'Authorization': ' '.join(['Bearer', token])
+        })
+
+        assert200(response)
+        assert response.content_type == 'application/json'
+        assert response.json == {'success': True}
+
+    def test_s256_code_challenge_success_client_secret_post(self, client, oauth):
+        code_verifier = generate_token(48)
+        code_challenge = create_s256_code_challenge(code_verifier)
+
+        client.login()
+
+        response = client.post(url_for(
+            'oauth.authorize',
+            response_type='code',
+            client_id=oauth.client_id,
+            code_challenge=code_challenge,
+            code_challenge_method='S256'
+        ), {
+            'scope': 'default',
+            'accept': '',
+        })
+        assert 'code=' in response.location
+
+        params = dict(url_decode(urlparse.urlparse(response.location).query))
+        code = params['code']
+
+        response = client.post(url_for('oauth.token'), {
+            'grant_type': 'authorization_code',
+            'code': code,
+            'code_verifier': code_verifier,
+            'client_id': oauth.client_id,
+            'client_secret': oauth.secret
+        })
+
+        assert200(response)
+        assert response.content_type == 'application/json'
+        assert 'access_token' in response.json
+
+        token = response.json['access_token']
+
+        response = client.post(url_for('api.fake'), headers={
+            'Authorization': ' '.join(['Bearer', token])
+        })
+
+        assert200(response)
+        assert response.content_type == 'application/json'
+        assert response.json == {'success': True}
 
     def test_authorization_multiple_grant_token(self, client, oauth):
 
@@ -339,8 +510,7 @@ class APIAuthTest:
         assert response.content_type == 'application/json'
         assert 'access_token' in response.json
 
-    @pytest.mark.oauth(secret='')
-    def test_implicit_grant_token(self, client, oauth):
+    def test_invalid_implicit_grant_token(self, client, oauth):
         client.login()
         response = client.post(url_for(
             'oauth.authorize',
@@ -350,8 +520,8 @@ class APIAuthTest:
             'accept': '',
         })
 
-        assert_status(response, 302)
-        assert 'access_token=' in response.location
+        assert_status(response, 400)
+        assert response.json['error'] == 'invalid_grant'
 
     @pytest.mark.oauth(confidential=True)
     def test_refresh_token(self, client, oauth):
@@ -386,7 +556,9 @@ class APIAuthTest:
         }, headers=basic_header(oauth))
 
         assert200(response)
-        assert OAuth2Token.objects(pk=token.pk).first() is None
+
+        tok = OAuth2Token.objects(pk=token.pk).first()
+        assert tok.revoked is True
 
     @pytest.mark.parametrize('token_type', ['access_token', 'refresh_token'])
     def test_revoke_token_with_hint(self, client, oauth, token_type):
@@ -401,9 +573,10 @@ class APIAuthTest:
             'token': getattr(token, token_type),
             'token_type_hint': token_type
         }, headers=basic_header(oauth))
-
         assert200(response)
-        assert OAuth2Token.objects(pk=token.pk).first() is None
+
+        tok = OAuth2Token.objects(pk=token.pk).first()
+        assert tok.revoked is True
 
     def test_revoke_token_with_bad_hint(self, client, oauth):
         user = UserFactory()
@@ -413,13 +586,15 @@ class APIAuthTest:
             access_token='access-token',
             refresh_token='refresh-token',
         )
+
         response = client.post(url_for('oauth.revoke_token'), {
             'token': token.access_token,
             'token_type_hint': 'refresh_token',
         }, headers=basic_header(oauth))
+        assert200(response)
 
-        assert400(response)
-        assert OAuth2Token.objects(pk=token.pk).first() == token
+        tok = OAuth2Token.objects(pk=token.pk).first()
+        assert tok.revoked is False
 
     def test_value_error(self, api):
         @ns.route('/exception', endpoint='exception')
