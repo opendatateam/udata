@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Topic: add filters in API [#3007](https://github.com/opendatateam/udata/pull/3007)
+- Move constants outside `models.py` files to `constants.py` [#3001](https://github.com/opendatateam/udata/pull/3001)
 
 ## 7.0.6 (2024-03-29)
 
