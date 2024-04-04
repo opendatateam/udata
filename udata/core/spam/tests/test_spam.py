@@ -1,10 +1,10 @@
 import logging
 import pytest
 from udata.tests import TestCase
-from udata.tests.helpers import assert_not_emit
 from udata.mongo import db
 
-from ..models import POTENTIAL_SPAM, SpamMixin
+from ..models import SpamMixin
+from ..constants import POTENTIAL_SPAM
 
 
 log = logging.getLogger(__name__)

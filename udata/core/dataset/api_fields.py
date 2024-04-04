@@ -1,18 +1,15 @@
 from udata.api import api, fields, base_reference
 from udata.core.badges.api import badge_fields
 from udata.core.organization.api_fields import org_ref_fields
-from udata.core.organization.models import LOGO_SIZES
+from udata.core.organization.constants import BIGGEST_LOGO_SIZE
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.contact_point.api_fields import contact_point_fields
 
-from .models import (
+from .constants import (
     UPDATE_FREQUENCIES, RESOURCE_FILETYPES, DEFAULT_FREQUENCY,
     CHECKSUM_TYPES, DEFAULT_CHECKSUM_TYPE, DEFAULT_LICENSE, RESOURCE_TYPES
 )
-
-
-BIGGEST_LOGO_SIZE = LOGO_SIZES[0]
 
 
 checksum_fields = api.model('Checksum', {

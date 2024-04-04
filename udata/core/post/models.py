@@ -1,21 +1,11 @@
-from collections import OrderedDict
-
 from flask import url_for
 
 from udata.core.storages import images, default_image_basename
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
-
+from .constants import BODY_TYPES, IMAGE_SIZES
 
 __all__ = ('Post', )
-
-
-IMAGE_SIZES = [400, 100, 50]
-
-BODY_TYPES = OrderedDict([
-    ('markdown', _('Markdown')),
-    ('html', _('HTML')),
-])
 
 
 class PostQuerySet(db.BaseQuerySet):

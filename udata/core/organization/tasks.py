@@ -7,7 +7,8 @@ from udata.tasks import job, task, get_logger
 
 from udata.core.badges.tasks import notify_new_badge
 
-from .models import Organization, CERTIFIED, PUBLIC_SERVICE, COMPANY, ASSOCIATION, LOCAL_AUTHORITY
+from .models import Organization
+from .constants import CERTIFIED, PUBLIC_SERVICE, COMPANY, ASSOCIATION, LOCAL_AUTHORITY
 
 log = get_logger(__name__)
 

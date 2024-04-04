@@ -10,42 +10,10 @@ from udata.frontend.markdown import mdstrip
 from udata.models import db, BadgeMixin, WithMetrics
 from udata.i18n import lazy_gettext as _
 from udata.uris import endpoint_for
+from .constants import ASSOCIATION, CERTIFIED, COMPANY, LOCAL_AUTHORITY, LOGO_SIZES, ORG_BID_SIZE_LIMIT, ORG_ROLES, DEFAULT_ROLE, MEMBERSHIP_STATUS, LOGO_MAX_SIZE, PUBLIC_SERVICE
 
 
-__all__ = (
-    'Organization', 'Team', 'Member', 'MembershipRequest',
-    'ORG_ROLES', 'MEMBERSHIP_STATUS', 'PUBLIC_SERVICE', 'CERTIFIED',
-    'ASSOCIATION', 'COMPANY', 'LOCAL_AUTHORITY'
-)
-
-
-ORG_ROLES = {
-    'admin': _('Administrator'),
-    'editor': _('Editor'),
-}
-DEFAULT_ROLE = 'editor'
-
-
-MEMBERSHIP_STATUS = {
-    'pending': _('Pending'),
-    'accepted': _('Accepted'),
-    'refused': _('Refused'),
-}
-
-LOGO_MAX_SIZE = 500
-LOGO_SIZES = [100, 60, 25]
-
-PUBLIC_SERVICE = 'public-service'
-CERTIFIED = 'certified'
-ASSOCIATION = 'Association'
-COMPANY = 'Company'
-LOCAL_AUTHORITY = 'Local authority'
-
-TITLE_SIZE_LIMIT = 350
-DESCRIPTION_SIZE_LIMIT = 100000
-
-ORG_BID_SIZE_LIMIT = 14
-
+__all__ = ('Organization', 'Team', 'Member', 'MembershipRequest')
 
 class Team(db.EmbeddedDocument):
     name = db.StringField(required=True)

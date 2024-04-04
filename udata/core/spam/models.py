@@ -5,11 +5,7 @@ from udata.mongo import db
 from .signals import on_new_potential_spam
 from mongoengine import signals
 
-NOT_CHECKED = 'not_checked'
-POTENTIAL_SPAM = 'potential_spam'
-NO_SPAM = 'no_spam'
-
-SPAM_STATUS_CHOICES = [NOT_CHECKED, POTENTIAL_SPAM, NO_SPAM]
+from .constants import NO_SPAM, POTENTIAL_SPAM, SPAM_STATUS_CHOICES, NOT_CHECKED
 
 
 class SpamInfo(db.EmbeddedDocument):
