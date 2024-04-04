@@ -1,10 +1,13 @@
 from flask import url_for
 
-from udata.tests.api import APITestCase
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.topic.factories import TopicFactory
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.core.reuse.factories import ReuseFactory
+from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import UserFactory
+from udata.tests.api import APITestCase
+from udata.tests.features.territories import create_geozones_fixtures
 
 
 class TopicsAPITest(APITestCase):
@@ -12,14 +15,24 @@ class TopicsAPITest(APITestCase):
 
     def test_topic_api_list(self):
         '''It should fetch a topic list from the API'''
-        TopicFactory.create_batch(3)
+        owner = UserFactory()
+        org = OrganizationFactory()
+        paca, _, _ = create_geozones_fixtures()
+
         tag_topic = TopicFactory(tags=['energy'])
         name_topic = TopicFactory(name='topic-for-query')
+        private_topic = TopicFactory(private=True)
+        geozone_topic = TopicFactory(spatial=SpatialCoverageFactory(zones=[paca.id]))
+        granularity_topic = TopicFactory(
+            spatial=SpatialCoverageFactory(granularity='country')
+        )
+        owner_topic = TopicFactory(owner=owner)
+        org_topic = TopicFactory(organization=org)
 
         response = self.get(url_for('apiv2.topics_list'))
         assert response.status_code == 200
         data = response.json['data']
-        assert len(data) == 5
+        assert len(data) == 6
 
         hateoas_fields = ["rel", "href", "type", "total"]
         assert all(k in data[0]["datasets"] for k in hateoas_fields)
@@ -34,6 +47,31 @@ class TopicsAPITest(APITestCase):
         assert response.status_code == 200
         assert len(response.json['data']) == 1
         assert response.json['data'][0]['id'] == str(tag_topic.id)
+
+        response = self.get(url_for('api.topics', include_private='true'))
+        assert response.status_code == 200
+        assert len(response.json['data']) == 7
+        assert str(private_topic.id) in [t['id'] for t in response.json['data']]
+
+        response = self.get(url_for('api.topics', geozone=paca.id))
+        assert response.status_code == 200
+        assert len(response.json['data']) == 1
+        assert str(geozone_topic.id) in [t['id'] for t in response.json['data']]
+
+        response = self.get(url_for('api.topics', granularity='country'))
+        assert response.status_code == 200
+        assert len(response.json['data']) == 1
+        assert str(granularity_topic.id) in [t['id'] for t in response.json['data']]
+
+        response = self.get(url_for('api.topics', owner=owner.id))
+        assert response.status_code == 200
+        assert len(response.json['data']) == 1
+        assert str(owner_topic.id) in [t['id'] for t in response.json['data']]
+
+        response = self.get(url_for('api.topics', organization=org.id))
+        assert response.status_code == 200
+        assert len(response.json['data']) == 1
+        assert str(org_topic.id) in [t['id'] for t in response.json['data']]
 
     def test_topic_api_get(self):
         '''It should fetch a topic from the API'''
