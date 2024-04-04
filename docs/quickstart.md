@@ -1,7 +1,7 @@
 The prefered way to test udata is to use the [docker images][]
 to easily have an up and ready udata instance.
 Pre-configured udata with needed middlewares are given as examples.
-You will need to install [docker]() and [docker-compose][] before getting started.
+You will need to install [docker][] and [docker-compose][] before getting started.
 
 ```
 git clone https://github.com/opendatateam/docker-udata
