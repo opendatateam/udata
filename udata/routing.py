@@ -2,12 +2,13 @@ from bson import ObjectId
 from uuid import UUID
 
 from flask import request, redirect, url_for
-from mongoengine.errors import InvalidQueryError
-from werkzeug.routing import BaseConverter, NotFound, PathConverter
+from mongoengine.errors import InvalidQueryError, ValidationError
+from werkzeug.exceptions import NotFound
+from werkzeug.routing import BaseConverter, PathConverter
 from werkzeug.urls import url_quote
 
 from udata import models
-from udata.models import db
+from udata.mongo import db
 from udata.core.spatial.models import GeoZone
 from udata.i18n import ISO_639_1_CODES
 
@@ -85,7 +86,7 @@ class ModelConverter(BaseConverter):
     def to_python(self, value):
         try:
             return self.model.objects.get_or_404(id=value)
-        except NotFound:
+        except (NotFound, ValidationError):
             pass
         try:
             quoted = self.quote(value)
@@ -144,6 +145,10 @@ class PostConverter(ModelConverter):
     model = models.Post
 
 
+class ContactPointConverter(ModelConverter):
+    model = models.ContactPoint
+
+
 class TerritoryConverter(PathConverter):
     DEFAULT_PREFIX = 'fr'  # TODO: make it a setting parameter
 
@@ -182,12 +187,10 @@ class TerritoryConverter(PathConverter):
 
         code = getattr(obj, 'code', None)
         slug = getattr(obj, 'slug', None)
-        validity = getattr(obj, 'validity', None)
         if code and slug:
-            return '{level_name}/{code}@{start_date}/{slug}'.format(
+            return '{level_name}/{code}/{slug}'.format(
                 level_name=level_name,
                 code=code,
-                start_date=getattr(validity, 'start', None) or 'latest',
                 slug=slug
             )
         else:
@@ -226,3 +229,4 @@ def init_app(app):
     app.url_map.converters['topic'] = TopicConverter
     app.url_map.converters['post'] = PostConverter
     app.url_map.converters['territory'] = TerritoryConverter
+    app.url_map.converters['contact_point'] = ContactPointConverter

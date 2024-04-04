@@ -1,7 +1,8 @@
 import logging
+import mongoengine
 
 from flask import url_for, request, abort
-from flask_restplus import marshal
+from flask_restx import marshal
 
 from udata import search
 from udata.api import apiv2, API, fields
@@ -14,24 +15,30 @@ from .api_fields import (
     spatial_coverage_fields,
     temporal_coverage_fields,
     user_ref_fields,
-    checksum_fields
+    checksum_fields,
+    dataset_harvest_fields,
+    dataset_internal_fields,
+    resource_harvest_fields,
+    resource_internal_fields,
+    catalog_schema_fields,
+    schema_fields
 )
 from udata.core.spatial.api_fields import geojson
-from .models import (
-    Dataset, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE, CommunityResource
-)
-from .permissions import DatasetEditPermission
+from udata.core.contact_point.api_fields import contact_point_fields
+from .models import Dataset, CommunityResource
+from .constants import UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE
+from .api import ResourceMixin
+from .permissions import DatasetEditPermission, ResourceEditPermission
 from .search import DatasetSearch
 
 DEFAULT_PAGE_SIZE = 50
-DEFAULT_SORTING = '-created_at'
 
 #: Default mask to make it lightweight by default
 DEFAULT_MASK_APIV2 = ','.join((
     'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
-    'private', 'tags', 'badges', 'resources', 'community_resources', 'frequency', 'frequency_date', 'extras',
-    'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
-    'uri', 'page', 'last_update', 'archived', 'quality'
+    'private', 'tags', 'badges', 'resources', 'community_resources', 'frequency', 'frequency_date',
+    'extras', 'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
+    'uri', 'page', 'last_update', 'archived', 'quality', 'harvest', 'internal', 'contact_point',
 ))
 
 log = logging.getLogger(__name__)
@@ -65,10 +72,10 @@ dataset_fields = apiv2.model('Dataset', {
     'description': fields.Markdown(
         description='The dataset description in markdown', required=True),
     'created_at': fields.ISODateTime(
-        description='The dataset creation date', required=True),
+        description='The dataset creation date', required=True, readonly=True),
     'last_modified': fields.ISODateTime(
-        description='The dataset last modification date', required=True),
-    'deleted': fields.ISODateTime(description='The deletion date if deleted'),
+        description='The dataset last modification date', required=True, readonly=True),
+    'deleted': fields.ISODateTime(description='The deletion date if deleted', readonly=True),
     'archived': fields.ISODateTime(description='The archival date if archived'),
     'featured': fields.Boolean(description='Is the dataset featured'),
     'private': fields.Boolean(
@@ -79,13 +86,15 @@ dataset_fields = apiv2.model('Dataset', {
                           readonly=True),
     'resources': fields.Raw(attribute=lambda o: {
         'rel': 'subsection',
-        'href': url_for('apiv2.resources', dataset=o.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True),
+        'href': url_for('apiv2.resources', dataset=o.id, page=1,
+                        page_size=DEFAULT_PAGE_SIZE, _external=True),
         'type': 'GET',
         'total': len(o.resources)
         }, description='Link to the dataset resources'),
     'community_resources': fields.Raw(attribute=lambda o: {
         'rel': 'subsection',
-        'href': url_for('api.community_resources', dataset=o.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True),
+        'href': url_for('api.community_resources', dataset=o.id, page=1,
+                        page_size=DEFAULT_PAGE_SIZE, _external=True),
         'type': 'GET',
         'total': len(o.community_resources)
         }, description='Link to the dataset community resources'),
@@ -95,6 +104,11 @@ dataset_fields = apiv2.model('Dataset', {
     'frequency_date': fields.ISODateTime(
         description=('Next expected update date, you will be notified '
                      'once that date is reached.')),
+    'harvest': fields.Nested(
+        dataset_harvest_fields, readonly=True, allow_null=True,
+        description='Dataset harvest metadata attributes',
+        skip_none=True
+    ),
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
     'metrics': fields.Raw(attribute=lambda o: o.get_metrics(), description='The dataset metrics'),
     'organization': fields.Nested(
@@ -120,6 +134,9 @@ dataset_fields = apiv2.model('Dataset', {
     'quality': fields.Raw(description='The dataset quality', readonly=True),
     'last_update': fields.ISODateTime(
         description='The resources last modification date', required=True),
+    'internal': fields.Nested(
+        dataset_internal_fields, readonly=True, description='Site internal and specific object\'s data'),
+    'contact_point': fields.Nested(contact_point_fields, allow_null=True, description='The dataset\'s contact point'),
 }, mask=DEFAULT_MASK_APIV2)
 
 
@@ -153,6 +170,13 @@ apiv2.inherit('SpatialCoverage', spatial_coverage_fields)
 apiv2.inherit('TemporalCoverage', temporal_coverage_fields)
 apiv2.inherit('GeoJSON', geojson)
 apiv2.inherit('Checksum', checksum_fields)
+apiv2.inherit('HarvestDatasetMetadata', dataset_harvest_fields)
+apiv2.inherit('HarvestResourceMetadata', resource_harvest_fields)
+apiv2.inherit('DatasetInternals', dataset_internal_fields)
+apiv2.inherit('ResourceInternals', resource_internal_fields)
+apiv2.inherit('ContactPoint', contact_point_fields)
+apiv2.inherit('Schema', schema_fields)
+apiv2.inherit('CatalogSchema', catalog_schema_fields)
 
 
 @ns.route('/search/', endpoint='dataset_search')
@@ -185,6 +209,61 @@ class DatasetAPI(API):
         return dataset
 
 
+@ns.route('/<dataset:dataset>/extras/', endpoint='dataset_extras',
+          doc=common_doc)
+@apiv2.response(400, 'Wrong payload format, dict expected')
+@apiv2.response(400, 'Wrong payload format, list expected')
+@apiv2.response(404, 'Dataset not found')
+@apiv2.response(410, 'Dataset has been deleted')
+class DatasetExtrasAPI(API):
+    @apiv2.doc('get_dataset_extras')
+    def get(self, dataset):
+        '''Get a dataset extras given its identifier'''
+        if dataset.deleted and not DatasetEditPermission(dataset).can():
+            apiv2.abort(410, 'Dataset has been deleted')
+        return dataset.extras
+
+    @apiv2.secure
+    @apiv2.doc('update_dataset_extras')
+    def put(self, dataset):
+        '''Update a given dataset extras'''
+        data = request.json
+        if not isinstance(data, dict):
+            apiv2.abort(400, 'Wrong payload format, dict expected')
+        if dataset.deleted:
+            apiv2.abort(410, 'Dataset has been deleted')
+        DatasetEditPermission(dataset).test()
+        # first remove extras key associated to a None value in payload
+        for key in [k for k in data if data[k] is None]:
+            dataset.extras.pop(key, None)
+            data.pop(key)
+        # then update the extras with the remaining payload
+        dataset.extras.update(data)
+        try:
+            dataset.save(signal_kwargs={'ignores': ['post_save']})
+        except mongoengine.errors.ValidationError as e:
+            apiv2.abort(400, e.message)
+        return dataset.extras
+
+    @apiv2.secure
+    @apiv2.doc('delete_dataset_extras')
+    def delete(self, dataset):
+        '''Delete a given dataset extras key on a given dataset'''
+        data = request.json
+        if not isinstance(data, list):
+            apiv2.abort(400, 'Wrong payload format, list expected')
+        if dataset.deleted:
+            apiv2.abort(410, 'Dataset has been deleted')
+        DatasetEditPermission(dataset).test()
+        for key in data:
+            try:
+                del dataset.extras[key]
+            except KeyError:
+                pass
+        dataset.save(signal_kwargs={'ignores': ['post_save']})
+        return dataset.extras, 204
+
+
 @ns.route('/<dataset:dataset>/resources/', endpoint='resources')
 class ResourcesAPI(API):
     @apiv2.doc('list_resources')
@@ -195,8 +274,9 @@ class ResourcesAPI(API):
         args = resources_parser.parse_args()
         page = args['page']
         page_size = args['page_size']
-        next_page = f"{url_for('apiv2.resources', dataset=dataset.id, _external=True)}?page={page + 1}&page_size={page_size}"
-        previous_page = f"{url_for('apiv2.resources', dataset=dataset.id, _external=True)}?page={page - 1}&page_size={page_size}"
+        list_resources_url = url_for('apiv2.resources', dataset=dataset.id, _external=True)
+        next_page = f"{list_resources_url}?page={page + 1}&page_size={page_size}"
+        previous_page = f"{list_resources_url}?page={page - 1}&page_size={page_size}"
         res = dataset.resources
 
         if args['type']:
@@ -243,3 +323,59 @@ class ResourceAPI(API):
             'resource': resource,
             'dataset_id': dataset.id if dataset else None
         }, specific_resource_fields)
+
+
+@ns.route('/<dataset:dataset>/resources/<uuid:rid>/extras/', endpoint='resource_extras',
+          doc=common_doc)
+@apiv2.param('rid', 'The resource unique identifier')
+@apiv2.response(400, 'Wrong payload format, dict expected')
+@apiv2.response(400, 'Wrong payload format, list expected')
+@apiv2.response(404, 'Key not found in existing extras')
+@apiv2.response(410, 'Dataset has been deleted')
+class ResourceExtrasAPI(ResourceMixin, API):
+    @apiv2.doc('get_resource_extras')
+    def get(self, dataset, rid):
+        '''Get a resource extras given its identifier'''
+        if dataset.deleted and not DatasetEditPermission(dataset).can():
+            apiv2.abort(410, 'Dataset has been deleted')
+        resource = self.get_resource_or_404(dataset, rid)
+        return resource.extras
+
+    @apiv2.secure
+    @apiv2.doc('update_resource_extras')
+    def put(self, dataset, rid):
+        '''Update a given resource extras on a given dataset'''
+        data = request.json
+        if not isinstance(data, dict):
+            apiv2.abort(400, 'Wrong payload format, dict expected')
+        if dataset.deleted:
+            apiv2.abort(410, 'Dataset has been deleted')
+        ResourceEditPermission(dataset).test()
+        resource = self.get_resource_or_404(dataset, rid)
+        # first remove extras key associated to a None value in payload
+        for key in [k for k in data if data[k] is None]:
+            resource.extras.pop(key, None)
+            data.pop(key)
+        # then update the extras with the remaining payload
+        resource.extras.update(data)
+        resource.save(signal_kwargs={'ignores': ['post_save']})
+        return resource.extras
+
+    @apiv2.secure
+    @apiv2.doc('delete_resource_extras')
+    def delete(self, dataset, rid):
+        '''Delete a given resource extras key on a given dataset'''
+        data = request.json
+        if not isinstance(data, list):
+            apiv2.abort(400, 'Wrong payload format, list expected')
+        if dataset.deleted:
+            apiv2.abort(410, 'Dataset has been deleted')
+        ResourceEditPermission(dataset).test()
+        resource = self.get_resource_or_404(dataset, rid)
+        try:
+            for key in data:
+                del resource.extras[key]
+        except KeyError:
+            apiv2.abort(404, 'Key not found in existing extras')
+        resource.save(signal_kwargs={'ignores': ['post_save']})
+        return resource.extras, 204

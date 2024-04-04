@@ -5,12 +5,14 @@ import Dataset from 'models/dataset';
 import BaseCompleter from 'components/form/base-completer.vue';
 import DatasetCard from 'components/dataset/card.vue';
 
-const optTpl = `<div class="selectize-option">
-    <div class="logo pull-left">
-        <img src="{{image_url}}"/>
-    </div>
-    {{title}}
-</div>`;
+function render(data, escape) {
+    return `<div class="selectize-option">
+        <div class="logo pull-left">
+            <img src=" ${data.image_url} "/>
+        </div>
+        ${escape(data.title)}
+    </div>`;
+}
 
 
 function cardify(value, $el) {
@@ -50,11 +52,9 @@ export default {
             });
         },
         render: {
-            option: function(data, escape) {
-                return new Vue({data: data}).$interpolate(optTpl);
-            },
+            option: render,
             item: function(data, escape) {
-                return `<div class="card-input">${data.title}</div>`;
+                return `<div class="card-input">${escape(data.title)}</div>`;
             }
         },
     }

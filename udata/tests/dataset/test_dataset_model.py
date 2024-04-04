@@ -6,11 +6,11 @@ from flask import current_app
 from mongoengine import post_save
 
 from udata.app import cache
-from udata.models import (
-    db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchema
-)
+from udata.models import db, Dataset, License, ResourceSchema, Schema
+from udata.core.dataset.constants import LEGACY_FREQUENCIES, UPDATE_FREQUENCIES
+from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.dataset.factories import (
-    ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory
+    ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory, ResourceSchemaMockData
 )
 from udata.core.dataset.exceptions import (
     SchemasCatalogNotFoundException, SchemasCacheUnavailableException
@@ -93,7 +93,7 @@ class DatasetModelTest:
         dataset = DatasetFactory(owner=user)
         resource = ResourceFactory()
         dataset.add_resource(resource)
-        assert_equal_dates(dataset.last_update, resource.published)
+        assert_equal_dates(dataset.last_update, resource.created_at)
 
     def test_last_update_without_resource(self):
         user = UserFactory()
@@ -126,10 +126,58 @@ class DatasetModelTest:
         dataset = DatasetFactory()
         assert dataset.next_update is None
 
-    def test_next_update_weekly(self):
-        dataset = DatasetFactory(frequency='weekly')
+    def test_next_update_hourly(self):
+        dataset = DatasetFactory(frequency='hourly')
         assert_equal_dates(dataset.next_update,
-                           datetime.now() + timedelta(days=7))
+                           datetime.utcnow() + timedelta(hours=1))
+
+    @pytest.mark.parametrize('freq', ['fourTimesADay', 'threeTimesADay', 'semidaily', 'daily'])
+    def test_next_update_daily(self, freq):
+        dataset = DatasetFactory(frequency=freq)
+        assert_equal_dates(dataset.next_update,
+                           datetime.utcnow() + timedelta(days=1))
+
+    @pytest.mark.parametrize('freq', ['fourTimesAWeek', 'threeTimesAWeek', 'semiweekly', 'weekly'])
+    def test_next_update_weekly(self, freq):
+        dataset = DatasetFactory(frequency=freq)
+        assert_equal_dates(dataset.next_update,
+                           datetime.utcnow() + timedelta(days=7))
+
+    def test_next_update_biweekly(self):
+        dataset = DatasetFactory(frequency='biweekly')
+        assert_equal_dates(dataset.next_update,
+                           datetime.utcnow() + timedelta(weeks=2))
+
+    def test_next_update_quarterly(self):
+        dataset = DatasetFactory(frequency='quarterly')
+        assert_equal_dates(dataset.next_update,
+                           datetime.utcnow() + timedelta(days=365/4))
+
+    @pytest.mark.parametrize('freq', ['threeTimesAYear', 'semiannual', 'annual'])
+    def test_next_update_annual(self, freq):
+        dataset = DatasetFactory(frequency=freq)
+        assert_equal_dates(dataset.next_update,
+                           datetime.utcnow() + timedelta(days=365))
+
+    def test_next_update_biennial(self):
+        dataset = DatasetFactory(frequency='biennial')
+        assert_equal_dates(dataset.next_update,
+                           datetime.utcnow() + timedelta(days=365*2))
+
+    def test_next_update_triennial(self):
+        dataset = DatasetFactory(frequency='triennial')
+        assert_equal_dates(dataset.next_update,
+                           datetime.utcnow() + timedelta(days=365*3))
+
+    def test_next_update_quinquennial(self):
+        dataset = DatasetFactory(frequency='quinquennial')
+        assert_equal_dates(dataset.next_update,
+                           datetime.utcnow() + timedelta(days=365*5))
+
+    @pytest.mark.parametrize('freq', ['continuous', 'punctual', 'irregular', 'unknown'])
+    def test_next_update_undefined(self, freq):
+        dataset = DatasetFactory(frequency=freq)
+        assert dataset.next_update is None
 
     def test_quality_default(self):
         dataset = DatasetFactory(description='')
@@ -142,11 +190,32 @@ class DatasetModelTest:
             'score': 0
         }
 
-    def test_quality_next_update(self):
-        dataset = DatasetFactory(description='', frequency='weekly')
-        assert dataset.quality['update_fulfilled_in_time'] is True
+    @pytest.mark.parametrize('freq', UPDATE_FREQUENCIES)
+    def test_quality_frequency_update(self, freq):
+        dataset = DatasetFactory(description='', frequency=freq)
+        if freq == 'unknown':
+            assert dataset.quality['update_frequency'] is False
+            assert 'update_fulfilled_in_time' not in dataset.quality
+            return
         assert dataset.quality['update_frequency'] is True
+        assert dataset.quality['update_fulfilled_in_time'] is True
         assert dataset.quality['score'] == Dataset.normalize_score(2)
+
+    def test_quality_frequency_update_one_day_late(self):
+        dataset = DatasetFactory(
+            description='', frequency="daily",
+            last_modified_internal=datetime.utcnow() - timedelta(days=1, hours=1))
+        assert dataset.quality['update_frequency'] is True
+        assert dataset.quality['update_fulfilled_in_time'] is True
+        assert dataset.quality['score'] == Dataset.normalize_score(2)
+
+    def test_quality_frequency_update_two_days_late(self):
+        dataset = DatasetFactory(
+            description='', frequency="daily",
+            last_modified_internal=datetime.utcnow() - timedelta(days=2, hours=1))
+        assert dataset.quality['update_frequency'] is True
+        assert dataset.quality['update_fulfilled_in_time'] is False
+        assert dataset.quality['score'] == Dataset.normalize_score(1)
 
     def test_quality_description_length(self):
         dataset = DatasetFactory(description='a' * (current_app.config.get('QUALITY_DESCRIPTION_LENGTH') - 1))
@@ -210,7 +279,7 @@ class DatasetModelTest:
     def test_send_on_delete(self):
         dataset = DatasetFactory()
         with assert_emit(Dataset.on_delete):
-            dataset.deleted = datetime.now()
+            dataset.deleted = datetime.utcnow()
             dataset.save()
 
     def test_ignore_post_save_signal(self):
@@ -220,6 +289,18 @@ class DatasetModelTest:
         with assert_not_emit(*unexpected_signals), assert_emit(post_save):
             dataset.title = 'New title'
             dataset.save(signal_kwargs={'ignores': ['post_save']})
+
+    def test_dataset_without_private(self):
+        dataset = DatasetFactory()
+        assert dataset.private == False
+
+        dataset.private = None
+        dataset.save()
+        assert dataset.private == False
+
+        dataset.private = True
+        dataset.save()
+        assert dataset.private == True
 
 
 class ResourceModelTest:
@@ -442,7 +523,8 @@ class LicenseModelTest:
 
 class ResourceSchemaTest:
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/notfound')
-    def test_resource_schema_objects_404_endpoint(self):
+    def test_resource_schema_objects_404_endpoint(self, rmock):
+        rmock.get('https://example.com/notfound', status_code=404)
         with pytest.raises(SchemasCatalogNotFoundException):
             ResourceSchema.objects()
 
@@ -493,31 +575,167 @@ class ResourceSchemaTest:
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_resource_schema_objects_w_cache(self, rmock, mocker):
         cache_mock_set = mocker.patch.object(cache, 'set')
-        mocker.patch.object(cache, 'get', return_value='dummy_from_cache')
 
         # fill cache
-        rmock.get('https://example.com/schemas', json={
-            "schemas": [
-                {
-                    "name": "etalab/schema-irve",
-                    "title": "Schéma IRVE",
-                    "versions": [
-                        {
-                            "version_name": "1.0.0"
-                        },
-                        {
-                            "version_name": "1.0.1"
-                        },
-                        {
-                            "version_name": "1.0.2"
-                        }
-                    ]
-                }
-            ]
-        })
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
         ResourceSchema.objects()
         assert cache_mock_set.called
 
+        mocker.patch.object(cache, 'get', return_value=ResourceSchemaMockData.get_mock_data()['schemas'])
         rmock.get('https://example.com/schemas', status_code=500)
-        assert 'dummy_from_cache' == ResourceSchema.objects()
+        assert ResourceSchemaMockData.get_expected_v1_result_from_mock_data() == ResourceSchema.objects()
         assert rmock.call_count == 2
+
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
+    def test_resource_schema_validation(self, rmock):
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
+
+        resource = ResourceFactory()
+
+        resource.schema = Schema(name='etalab/schema-irve-statique')
+        resource.validate()
+
+        resource.schema = Schema(url='https://example.com')
+        resource.validate()
+
+        resource.schema = Schema(name='some-name', url='https://example.com')
+        resource.validate()
+
+        resource.schema = Schema(name='etalab/schema-irve-statique')
+        resource.schema.clean(check_schema_in_catalog=True)
+
+        resource.schema = Schema(url='https://example.com')
+        resource.schema.clean(check_schema_in_catalog=True)
+
+        resource.schema = Schema(name='some-name', url='https://example.com')
+        resource.schema.clean(check_schema_in_catalog=True)
+
+        # Check that no exception is raised when we do not ask for schema check for schema errors
+        resource.schema = Schema(name='some-name')
+        resource.validate()
+
+        resource.schema = Schema(name='etalab/schema-irve-statique', version='1337.42.0')
+        resource.validate()
+
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(version='2.0.0')
+            resource.validate()
+
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(name='some-name')
+            resource.schema.clean(check_schema_in_catalog=True)
+
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(name='etalab/schema-irve-statique', version='1337.42.0')
+            resource.schema.clean(check_schema_in_catalog=True)
+
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(version='2.0.0')
+            resource.schema.clean(check_schema_in_catalog=True)
+
+class HarvestMetadataTest:
+    def test_harvest_dataset_metadata_validate_success(self):
+        dataset = DatasetFactory()
+
+        harvest_metadata = HarvestDatasetMetadata(
+            backend='DCAT',
+            created_at=datetime.utcnow(),
+            modified_at=datetime.utcnow(),
+            source_id='source_id',
+            remote_id='remote_id',
+            domain='domain.gouv.fr',
+            last_update=datetime.utcnow(),
+            remote_url='http://domain.gouv.fr/dataset/remote_url',
+            uri='http://domain.gouv.fr/dataset/uri',
+            dct_identifier='http://domain.gouv.fr/dataset/identifier',
+            archived_at=datetime.utcnow(),
+            archived='not-on-remote'
+        )
+        dataset.harvest = harvest_metadata
+        dataset.save()
+
+    def test_harvest_dataset_metadata_validation_error(self):
+        harvest_metadata = HarvestDatasetMetadata(created_at='maintenant')
+        dataset = DatasetFactory()
+        dataset.harvest = harvest_metadata
+        with pytest.raises(db.ValidationError):
+            dataset.save()
+
+    def test_harvest_dataset_metadata_no_validation_dynamic(self):
+        # Adding a dynamic field (not defined in HarvestDatasetMetadata) does not raise error
+        # at validation time
+        harvest_metadata = HarvestDatasetMetadata(dynamic_created_at='maintenant')
+        dataset = DatasetFactory()
+        dataset.harvest = harvest_metadata
+        dataset.save()
+
+    def test_harvest_dataset_metadata_future_modifed_at(self):
+        dataset = DatasetFactory()
+
+        harvest_metadata = HarvestDatasetMetadata(
+            created_at=datetime.utcnow(),
+            modified_at=datetime.utcnow()+timedelta(days=1)
+        )
+        dataset.harvest = harvest_metadata
+        dataset.save()
+        assert dataset.last_modified == dataset.last_modified_internal
+
+    def test_harvest_dataset_metadata_past_modifed_at(self):
+        dataset = DatasetFactory()
+
+        harvest_metadata = HarvestDatasetMetadata(
+            created_at=datetime.utcnow(),
+            modified_at=datetime.utcnow(),
+        )
+        dataset.harvest = harvest_metadata
+        dataset.save()
+        assert dataset.last_modified == harvest_metadata.modified_at
+
+    def test_harvest_resource_metadata_validate_success(self):
+        resource = ResourceFactory()
+
+        harvest_metadata = HarvestResourceMetadata(
+            created_at=datetime.utcnow(),
+            modified_at=datetime.utcnow(),
+            uri='http://domain.gouv.fr/dataset/uri'
+        )
+        resource.harvest = harvest_metadata
+        resource.validate()
+
+    def test_harvest_resource_metadata_validation_error(self):
+        harvest_metadata = HarvestResourceMetadata(created_at='maintenant')
+        resource = ResourceFactory()
+        resource.harvest = harvest_metadata
+        with pytest.raises(db.ValidationError):
+            resource.validate()
+
+    def test_harvest_resource_metadata_no_validation_dynamic(self):
+        # Adding a dynamic field (not defined in HarvestResourceMetadata) does not raise error
+        # at validation time
+        harvest_metadata = HarvestResourceMetadata(dynamic_created_at='maintenant')
+        resource = ResourceFactory()
+        resource.harvest = harvest_metadata
+        resource.validate()
+
+    def test_harvest_resource_metadata_future_modifed_at(self):
+        resource = ResourceFactory()
+        harvest_metadata = HarvestResourceMetadata(modified_at=datetime.utcnow()+timedelta(days=1))
+        resource.harvest = harvest_metadata
+        resource.validate()
+
+        assert resource.last_modified == resource.last_modified_internal
+
+    def test_harvest_resource_metadata_past_modifed_at(self):
+        resource = ResourceFactory()
+        harvest_metadata = HarvestResourceMetadata(modified_at=datetime.utcnow())
+        resource.harvest = harvest_metadata
+        resource.validate()
+
+        assert resource.last_modified == harvest_metadata.modified_at
+
+    def test_resource_metadata_extra_modifed_at(self):
+        resource = ResourceFactory(filetype='remote')
+        resource.extras.update({'analysis:last-modified-at': datetime(2023,1,1)})
+        resource.validate()
+
+        assert resource.last_modified == resource.extras['analysis:last-modified-at']

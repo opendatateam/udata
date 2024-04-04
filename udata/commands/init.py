@@ -1,6 +1,7 @@
 import logging
 
 import click
+from flask import current_app
 
 from udata.commands import cli, success, IS_TTY
 from udata.core.dataset.commands import licenses
@@ -23,7 +24,9 @@ def init(ctx):
     log.info('Apply DB migrations if needed')
     ctx.invoke(migrate, record=True)
 
-    ctx.invoke(index)
+    if current_app.config['SEARCH_SERVICE_API_URL']:
+        log.info('Preparing index')
+        ctx.invoke(index)
 
     if IS_TTY:
         text = _('Do you want to create a superadmin user?')

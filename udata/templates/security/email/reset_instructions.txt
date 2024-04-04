@@ -1,0 +1,9 @@
+{% extends 'security/email/base.txt' %}
+{% block body %}
+{{ _('Someone has requested a password reset for your %(site)s account. If you didn\'t, please ignore this email.', site=config.SITE_TITLE) }}
+
+{{ _('To reset your password, please confirm your request through the link below:') }}
+
+{{ reset_link }}
+
+{% endblock %}

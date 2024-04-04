@@ -24,6 +24,7 @@ Here a list of known plugins for udata:
 - [`udata-ckan`][udata-ckan], [CKAN][ckan] integration for udata
 - [`udata-ods`][udata-ods], [OpenDataSoft][ods] integration for udata
 - [`udata-dcat`][udata-dcat], [DCAT][dcat] integration for udata
+- [`dotsat-udata-harvester`][dotsat-udata-harvester], [.stat suite][.stat] integration for udata
 - [`udata-recommendations`][udata-recommendations], a plugin to integrate a recommendation system
 - [`udata-tabular-preview`][udata-tabular-preview], a plugin to preview tabular files (CSV, Excel, ...) using [csvapi][csvapi]
 - [`udata-data-fair`][udata-data-fair], a plugin that use [DataFair][datafair] embeds to preview data
@@ -39,6 +40,7 @@ Here a list of known plugins for udata:
 [udata-ckan]: https://github.com/opendatateam/udata-ckan
 [udata-ods]: https://github.com/opendatateam/udata-ods
 [udata-dcat]: https://github.com/opendatateam/udata-dcat
+[dotsat-udata-harvester]: https://github.com/opendatalu/dotstat-udata-harvester
 [udata-recommendations]: https://github.com/opendatateam/udata-recommendations
 [udata-tabular-preview]: https://github.com/opendatateam/udata-tabular-preview
 [udata-data-fair]: https://github.com/koumoul-dev/udata-data-fair
@@ -47,6 +49,7 @@ Here a list of known plugins for udata:
 [ckan]: https://ckan.org/
 [ods]: https://www.opendatasoft.com/
 [dcat]: https://github.com/opendatateam/udata/blob/master/udata/harvest/backends/dcat.py
+[.stat]: https://siscc.org/stat-suite/
 [csvapi]: https://github.com/opendatateam/csvapi
 [datafair]: https://data-fair.github.io/3/
 [transport.data.gouv.fr]: https://transport.data.gouv.fr/

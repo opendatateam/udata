@@ -19,6 +19,7 @@ class Defaults(object):
         'es': 'Español',
         'pt': 'Português',
         'sr': 'Српски',
+        'de': 'Deutsch',
     }
     DEFAULT_LANGUAGE = 'en'
     SECRET_KEY = 'Default uData secret key'
@@ -31,9 +32,6 @@ class Defaults(object):
     # Search service configuration
     SEARCH_SERVICE_API_URL = None
     SEARCH_SERVICE_REQUEST_TIMEOUT = 20
-
-    # Kafka configuration
-    KAFKA_URI = None
 
     # BROKER_TRANSPORT = 'redis'
     CELERY_BROKER_URL = 'redis://localhost:6379'
@@ -68,13 +66,18 @@ class Defaults(object):
     CELERY_TASK_ROUTES = 'udata.tasks.router'
 
     CACHE_KEY_PREFIX = 'udata-cache'
-    CACHE_TYPE = 'redis'
+    CACHE_TYPE = 'flask_caching.backends.redis'
 
     # Flask mail settings
 
     MAIL_DEFAULT_SENDER = 'webmaster@udata'
 
     # Flask security settings
+
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = None  # Can be set to 'Lax' or 'Strict'. See https://flask.palletsprojects.com/en/2.3.x/security/#security-cookie
+
+    # Flask-Security-Too settings
 
     SECURITY_TRACKABLE = True
     SECURITY_REGISTERABLE = True
@@ -83,6 +86,7 @@ class Defaults(object):
     SECURITY_CHANGEABLE = True
 
     SECURITY_PASSWORD_HASH = 'bcrypt'
+    SECURITY_PASSWORD_NORMALIZE_FORM = 'NFKD'
     SECURITY_PASSWORD_LENGTH_MIN = 8
     SECURITY_PASSWORD_REQUIREMENTS_LOWERCASE = True
     SECURITY_PASSWORD_REQUIREMENTS_DIGITS = True
@@ -103,6 +107,8 @@ class Defaults(object):
     SECURITY_EMAIL_SUBJECT_PASSWORD_CHANGE_NOTICE = _(
                                     'Your password has been changed')
     SECURITY_EMAIL_SUBJECT_PASSWORD_RESET = _('Password reset instructions')
+
+    SECURITY_RETURN_GENERIC_RESPONSES = False
 
     # Sentry configuration
     SENTRY_DSN = None
@@ -145,6 +151,7 @@ class Defaults(object):
         'password': 30 * 24 * HOUR,
         'client_credentials': 30 * 24 * HOUR
     }
+    OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI = False
 
     MD_ALLOWED_TAGS = [
         'a',
@@ -185,6 +192,8 @@ class Defaults(object):
         'tbody',
         'thead',
         'tfooter',
+        'details',
+        'summary'
         # 'title',
     ]
 
@@ -192,7 +201,7 @@ class Defaults(object):
         'a': ['href', 'title', 'rel', 'data-tooltip'],
         'abbr': ['title'],
         'acronym': ['title'],
-        'img': ['src', 'title']
+        'img': ['alt', 'src', 'title']
     }
 
     MD_ALLOWED_STYLES = []
@@ -216,12 +225,27 @@ class Defaults(object):
     TAG_MIN_LENGTH = 3
     TAG_MAX_LENGTH = 96
 
+    # Optionnal license groups used for a select input group widget
+    # in admin dataset edit view.
+    # A list of tuples, each tuple describing a group with its title and
+    # a list of licenses associated. Translations are not supported.
+    # Example:
+    # LICENSE_GROUPS = [
+    #    ('Administrative authorities', ['lov2', 'odc-odbl']),
+    #    ('All producers', ['lov2', 'cc-by', 'cc-by-sa', 'cc-zero'])
+    # ]
+    LICENSE_GROUPS = None
+
     # Cache duration for templates.
     TEMPLATE_CACHE_DURATION = 5  # Minutes.
 
     DELAY_BEFORE_REMINDER_NOTIFICATION = 30  # Days
 
     HARVEST_PREVIEW_MAX_ITEMS = 20
+
+    # Development setting to allow minimizing the number of harvested items
+    HARVEST_MAX_ITEMS = None
+
     # Harvesters are scheduled at midnight by default
     HARVEST_DEFAULT_SCHEDULE = '0 0 * * *'
 
@@ -230,6 +254,17 @@ class Defaults(object):
 
     # The number of days since last harvesting date when a missing dataset is archived
     HARVEST_AUTOARCHIVE_GRACE_DAYS = 7
+
+    HARVEST_VALIDATION_CONTACT_FORM = None
+
+    HARVEST_MAX_CATALOG_SIZE_IN_MONGO = None # Defaults to the size of a MongoDB document 
+    HARVEST_GRAPHS_S3_BUCKET = None # If the catalog is bigger than `HARVEST_MAX_CATALOG_SIZE_IN_MONGO` store the graph inside S3 instead of MongoDB
+    HARVEST_GRAPHS_S3_FILENAME_PREFIX = '' # Useful to store the graphs inside a subfolder of the bucket. For example by setting `HARVEST_GRAPHS_S3_FILENAME_PREFIX = 'graphs/'`
+
+    # S3 connection details
+    S3_URL = None
+    S3_ACCESS_KEY_ID = None
+    S3_SECRET_ACCESS_KEY = None 
 
     ACTIVATE_TERRITORIES = False
     # The order is important to compute parents/children, smaller first.
@@ -282,7 +317,7 @@ class Defaults(object):
         'rdf', 'ttl', 'n3',
         # Misc
         'dbf', 'prj', 'sql', 'sqlite', 'db', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl', 'dxf',
-        'ics', 'other'
+        'ics', 'ssim', 'other'
     ]
 
     ALLOWED_RESOURCES_MIMES = [
@@ -343,6 +378,11 @@ class Defaults(object):
     # Default pagination size on listing
     POST_DEFAULT_PAGINATION = 20
 
+    # Organization settings
+    ###########################################################################
+    # The business identification format to use for validation
+    ORG_BID_FORMAT = 'siret'
+
     # Dataset settings
     ###########################################################################
     # Max number of resources to display uncollapsed in dataset view
@@ -393,7 +433,7 @@ class Defaults(object):
     ####################
     SCHEMA_CATALOG_URL = None
 
-    API_DOC_EXTERNAL_LINK = 'https://doc.data.gouv.fr/api/reference/'
+    API_DOC_EXTERNAL_LINK = 'https://guides.data.gouv.fr/publier-des-donnees/guide-data.gouv.fr/api/reference'
 
     # Read Only Mode
     ####################
@@ -412,10 +452,21 @@ class Defaults(object):
 
     FIXTURE_DATASET_SLUGS = []
     PUBLISH_ON_RESOURCE_EVENTS = False
+    RESOURCES_ANALYSER_URI = 'http://localhost:8000'
 
     # Datasets quality settings
     ###########################################################################
     QUALITY_DESCRIPTION_LENGTH = 100
+
+    # Spam settings
+    ###########################################################################
+    SPAM_WORDS = []
+    SPAM_ALLOWED_LANGS = []
+    SPAM_MINIMUM_STRING_LENGTH_FOR_LANG_CHECK = 30
+
+    # Notification settings
+    ###########################################################################
+    MATTERMOST_WEBHOOK = None
 
 
 class Testing(object):
@@ -428,15 +479,16 @@ class Testing(object):
     WTF_CSRF_ENABLED = False
     AUTO_INDEX = False
     CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
     TEST_WITH_PLUGINS = False
     PLUGINS = []
     TEST_WITH_THEME = False
     THEME = 'testing'
-    CACHE_TYPE = 'null'
+    CACHE_TYPE = 'flask_caching.backends.null'
     CACHE_NO_NULL_WARNING = True
     DEBUG_TOOLBAR = False
     SERVER_NAME = 'local.test'
-    DEFAULT_LANGUAGE = 'en'
+    DEFAULT_LANGUAGE = 'fr'
     ACTIVATE_TERRITORIES = False
     LOGGER_HANDLER_POLICY = 'never'
     CELERYD_HIJACK_ROOT_LOGGER = False
@@ -444,6 +496,8 @@ class Testing(object):
     URLS_ALLOWED_TLDS = tld_set | set(['test'])
     URLS_ALLOW_PRIVATE = False
     FS_IMAGES_OPTIMIZE = True
+    SECURITY_EMAIL_VALIDATOR_ARGS = {"check_deliverability": False}  # Disables deliverability for email domain name
+    PUBLISH_ON_RESOURCE_EVENTS = False
 
 
 class Debug(Defaults):
@@ -461,5 +515,5 @@ class Debug(Defaults):
         'flask_debugtoolbar.panels.profiler.ProfilerDebugPanel',
         'flask_mongoengine.panels.MongoDebugPanel',
     )
-    CACHE_TYPE = 'null'
+    CACHE_TYPE = 'flask_caching.backends.null'
     CACHE_NO_NULL_WARNING = True

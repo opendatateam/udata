@@ -1,15 +1,12 @@
 from flask import url_for
 
-from udata.utils import get_by
-
 from udata.utils import faker
 from udata.tests.api import APITestCase
 from udata.tests.features.territories import (
     create_geozones_fixtures, TerritoriesSettings
 )
-from udata.tests.helpers import assert_json_equal
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.dataset.factories import VisibleDatasetFactory
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.spatial.factories import (
     SpatialCoverageFactory, GeoZoneFactory, GeoLevelFactory
 )
@@ -29,45 +26,13 @@ class SpatialApiTest(APITestCase):
 
         feature = response.json['features'][0]
         self.assertEqual(feature['type'], 'Feature')
-        assert_json_equal(feature['geometry'], zone.geom)
         self.assertEqual(feature['id'], zone.id)
 
         properties = feature['properties']
         self.assertEqual(properties['name'], zone.name)
         self.assertEqual(properties['code'], zone.code)
         self.assertEqual(properties['level'], zone.level)
-        self.assertEqual(properties['parents'], zone.parents)
-        self.assertEqual(properties['population'], zone.population)
-        self.assertEqual(properties['area'], zone.area)
-        self.assertEqual(properties['keys'], zone.keys)
-        self.assertEqual(properties['logo'], zone.logo_url(external=True))
-
-    def test_zones_api_no_geom(self):
-        zone = GeoZoneFactory(geom=None)
-
-        url = url_for('api.zones', ids=[zone.id])
-        response = self.get(url)
-        self.assert200(response)
-
-        self.assertEqual(len(response.json['features']), 1)
-
-        feature = response.json['features'][0]
-        self.assertEqual(feature['type'], 'Feature')
-        assert_json_equal(feature['geometry'], {
-            'type': 'MultiPolygon',
-            'coordinates': [],
-        })
-        self.assertEqual(feature['id'], zone.id)
-
-        properties = feature['properties']
-        self.assertEqual(properties['name'], zone.name)
-        self.assertEqual(properties['code'], zone.code)
-        self.assertEqual(properties['level'], zone.level)
-        self.assertEqual(properties['parents'], zone.parents)
-        self.assertEqual(properties['population'], zone.population)
-        self.assertEqual(properties['area'], zone.area)
-        self.assertEqual(properties['keys'], zone.keys)
-        self.assertEqual(properties['logo'], zone.logo_url(external=True))
+        self.assertEqual(properties['uri'], zone.uri)
 
     def test_zones_api_many(self):
         zones = [GeoZoneFactory() for _ in range(3)]
@@ -80,28 +45,22 @@ class SpatialApiTest(APITestCase):
 
         for zone, feature in zip(zones, response.json['features']):
             self.assertEqual(feature['type'], 'Feature')
-            assert_json_equal(feature['geometry'], zone.geom)
             self.assertEqual(feature['id'], zone.id)
 
             properties = feature['properties']
             self.assertEqual(properties['name'], zone.name)
             self.assertEqual(properties['code'], zone.code)
             self.assertEqual(properties['level'], zone.level)
-            self.assertEqual(properties['parents'], zone.parents)
-            self.assertEqual(properties['population'], zone.population)
-            self.assertEqual(properties['area'], zone.area)
-            self.assertEqual(properties['keys'], zone.keys)
-            self.assertEqual(properties['logo'], zone.logo_url(external=True))
+            self.assertEqual(properties['uri'], zone.uri)
 
     def test_suggest_zones_on_name(self):
         '''It should suggest zones based on its name'''
         for i in range(4):
-            GeoZoneFactory(name='test-{0}'.format(i)
-                           if i % 2 else faker.word(),
-                           is_current=True)
+            GeoZoneFactory(name='name-test-{0}'.format(i)
+                           if i % 2 else faker.word())
 
         response = self.get(
-            url_for('api.suggest_zones'), qs={'q': 'test', 'size': '5'})
+            url_for('api.suggest_zones'), qs={'q': 'name-test', 'size': '5'})
         self.assert200(response)
 
         self.assertEqual(len(response.json), 2)
@@ -110,20 +69,33 @@ class SpatialApiTest(APITestCase):
             self.assertIn('id', suggestion)
             self.assertIn('name', suggestion)
             self.assertIn('code', suggestion)
+            self.assertIn('uri', suggestion)
             self.assertIn('level', suggestion)
-            self.assertIn('keys', suggestion)
-            self.assertIsInstance(suggestion['keys'], dict)
-            self.assertIn('test', suggestion['name'])
+            self.assertIn('name-test', suggestion['name'])
+
+    def test_suggest_zones_sorted(self):
+        '''It should suggest zones based on its name'''
+        country_level = GeoLevelFactory(id='country', name='country', admin_level=10)
+        region_level = GeoLevelFactory(id='region', name='region', admin_level=20)
+        country_zone = GeoZoneFactory(name='name-test-country', level=country_level.id)
+        region_zone = GeoZoneFactory(name='name-test-region', level=region_level.id)
+
+        response = self.get(
+            url_for('api.suggest_zones'), qs={'q': 'name-test', 'size': '5'})
+        self.assert200(response)
+
+        self.assertEqual(len(response.json), 2)
+        self.assertEqual((response.json[0]['id']), country_zone.id)
+        self.assertEqual((response.json[1]['id']), region_zone.id)
 
     def test_suggest_zones_on_code(self):
         '''It should suggest zones based on its code'''
         for i in range(4):
-            GeoZoneFactory(code='test-{0}'.format(i)
-                           if i % 2 else faker.word(),
-                           is_current=True)
+            GeoZoneFactory(code='code-test-{0}'.format(i)
+                           if i % 2 else faker.word())
 
         response = self.get(
-            url_for('api.suggest_zones'), qs={'q': 'test', 'size': '5'})
+            url_for('api.suggest_zones'), qs={'q': 'code-test', 'size': '5'})
         self.assert200(response)
 
         self.assertEqual(len(response.json), 2)
@@ -133,16 +105,14 @@ class SpatialApiTest(APITestCase):
             self.assertIn('name', suggestion)
             self.assertIn('code', suggestion)
             self.assertIn('level', suggestion)
-            self.assertIn('keys', suggestion)
-            self.assertIsInstance(suggestion['keys'], dict)
-            self.assertIn('test', suggestion['code'])
+            self.assertIn('uri', suggestion)
+            self.assertIn('code-test', suggestion['code'])
 
     def test_suggest_zones_no_match(self):
         '''It should not provide zones suggestions if no match'''
         for i in range(3):
             GeoZoneFactory(name=5 * '{0}'.format(i),
-                           code=3 * '{0}'.format(i),
-                           is_current=True)
+                           code=3 * '{0}'.format(i))
 
         response = self.get(
             url_for('api.suggest_zones'), qs={'q': 'xxxxxx', 'size': '5'})
@@ -152,12 +122,11 @@ class SpatialApiTest(APITestCase):
     def test_suggest_zones_unicode(self):
         '''It should suggest zones based on its name'''
         for i in range(4):
-            GeoZoneFactory(name='testé-{0}'.format(i)
-                           if i % 2 else faker.word(),
-                           is_current=True)
+            GeoZoneFactory(name='name-testé-{0}'.format(i)
+                           if i % 2 else faker.word())
 
         response = self.get(
-            url_for('api.suggest_zones'), qs={'q': 'testé', 'size': '5'})
+            url_for('api.suggest_zones'), qs={'q': 'name-testé', 'size': '5'})
         self.assert200(response)
 
         self.assertEqual(len(response.json), 2)
@@ -167,9 +136,8 @@ class SpatialApiTest(APITestCase):
             self.assertIn('name', suggestion)
             self.assertIn('code', suggestion)
             self.assertIn('level', suggestion)
-            self.assertIn('keys', suggestion)
-            self.assertIsInstance(suggestion['keys'], dict)
-            self.assertIn('testé', suggestion['name'])
+            self.assertIn('uri', suggestion)
+            self.assertIn('name-testé', suggestion['name'])
 
     def test_suggest_zones_empty(self):
         '''It should not provide zones suggestion if no data is present'''
@@ -177,27 +145,6 @@ class SpatialApiTest(APITestCase):
             url_for('api.suggest_zones'), qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
-
-    def test_only_suggest_current_zones(self):
-        '''It should only suggest current zones'''
-        for i in range(4):
-            GeoZoneFactory(name='test-{0}-{1}'.format(i, 'current' if i % 2 else 'legacy'),
-                           is_current=i % 2)
-
-        response = self.get(
-            url_for('api.suggest_zones'), qs={'q': 'test', 'size': '5'})
-        self.assert200(response)
-
-        self.assertEqual(len(response.json), 2)
-
-        for suggestion in response.json:
-            self.assertIn('id', suggestion)
-            self.assertIn('name', suggestion)
-            self.assertIn('code', suggestion)
-            self.assertIn('level', suggestion)
-            self.assertIn('keys', suggestion)
-            self.assertIsInstance(suggestion['keys'], dict)
-            self.assertTrue(suggestion['name'].endswith('-current'))
 
     def test_spatial_levels(self):
         levels = [GeoLevelFactory() for _ in range(3)]
@@ -223,7 +170,7 @@ class SpatialApiTest(APITestCase):
         paca, bdr, arles = create_geozones_fixtures()
         organization = OrganizationFactory()
         for _ in range(3):
-            VisibleDatasetFactory(
+            DatasetFactory(
                 organization=organization,
                 spatial=SpatialCoverageFactory(zones=[paca.id]))
 
@@ -235,7 +182,7 @@ class SpatialApiTest(APITestCase):
         paca, bdr, arles = create_geozones_fixtures()
         organization = OrganizationFactory()
         for _ in range(3):
-            VisibleDatasetFactory(
+            DatasetFactory(
                 organization=organization,
                 spatial=SpatialCoverageFactory(zones=[paca.id]))
 
@@ -248,7 +195,7 @@ class SpatialApiTest(APITestCase):
         paca, bdr, arles = create_geozones_fixtures()
         organization = OrganizationFactory()
         for _ in range(3):
-            VisibleDatasetFactory(
+            DatasetFactory(
                 organization=organization,
                 spatial=SpatialCoverageFactory(zones=[paca.id]))
 
@@ -262,7 +209,7 @@ class SpatialApiTest(APITestCase):
         paca, bdr, arles = create_geozones_fixtures()
         organization = OrganizationFactory()
         for _ in range(3):
-            VisibleDatasetFactory(
+            DatasetFactory(
                 organization=organization,
                 spatial=SpatialCoverageFactory(zones=[paca.id]))
 
@@ -282,55 +229,6 @@ class SpatialApiTest(APITestCase):
             'features': [],
         })
 
-    def test_coverage_for_level(self):
-        GeoLevelFactory(id='top')
-        GeoLevelFactory(id='sub', parents=['top'])
-        GeoLevelFactory(id='child', parents=['sub'])
-
-        topzones, subzones, childzones = [], [], []
-        for _ in range(2):
-            zone = GeoZoneFactory(level='top')
-            topzones.append(zone)
-            for _ in range(2):
-                subzone = GeoZoneFactory(level='sub', parents=[zone.id])
-                subzones.append(subzone)
-                for _ in range(2):
-                    childzone = GeoZoneFactory(
-                        level='child', parents=[zone.id, subzone.id])
-                    childzones.append(childzone)
-
-        for zone in topzones + subzones + childzones:
-            VisibleDatasetFactory(
-                spatial=SpatialCoverageFactory(zones=[zone.id]))
-
-        response = self.get(url_for('api.spatial_coverage', level='sub'))
-        self.assert200(response)
-        self.assertEqual(len(response.json['features']), len(subzones))
-
-        for feature in response.json['features']:
-            self.assertEqual(feature['type'], 'Feature')
-
-            zone = get_by(subzones, 'id', feature['id'])
-            self.assertIsNotNone(zone)
-            assert_json_equal(feature['geometry'], zone.geom)
-
-            properties = feature['properties']
-            self.assertEqual(properties['name'], zone.name)
-            self.assertEqual(properties['code'], zone.code)
-            self.assertEqual(properties['level'], 'sub')
-            # Nested levels datasets should be counted
-            self.assertEqual(properties['datasets'], 3)
-
-    def test_zone_children(self):
-        paca, bdr, arles = create_geozones_fixtures()
-
-        response = self.get(url_for('api.zone_children', id=paca.id))
-        self.assertStatus(response, 501)
-        response = self.get(url_for('api.zone_children', id=bdr.id))
-        self.assertStatus(response, 501)
-        response = self.get(url_for('api.zone_children', id=arles.id))
-        self.assertStatus(response, 501)
-
 
 class SpatialTerritoriesApiTest(APITestCase):
     modules = []
@@ -340,7 +238,7 @@ class SpatialTerritoriesApiTest(APITestCase):
         paca, bdr, arles = create_geozones_fixtures()
         organization = OrganizationFactory()
         for _ in range(3):
-            VisibleDatasetFactory(
+            DatasetFactory(
                 organization=organization,
                 spatial=SpatialCoverageFactory(zones=[paca.id]))
 
@@ -354,7 +252,7 @@ class SpatialTerritoriesApiTest(APITestCase):
         paca, bdr, arles = create_geozones_fixtures()
         organization = OrganizationFactory()
         for _ in range(3):
-            VisibleDatasetFactory(
+            DatasetFactory(
                 organization=organization,
                 spatial=SpatialCoverageFactory(zones=[paca.id]))
 

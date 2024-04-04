@@ -1,8 +1,8 @@
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
 from udata.utils import (
     get_by, daterange_start, daterange_end, to_bool, to_iso, to_iso_date,
-    to_iso_datetime, recursive_get, safe_unicode
+    to_iso_datetime, recursive_get, safe_unicode, to_naive_datetime
 )
 
 TEST_LIST = [
@@ -57,11 +57,11 @@ class DateRangeTest:
         assert daterange_end(today) == today
 
     def test_parse_daterange_start_datetime(self):
-        now = datetime.now()
+        now = datetime.utcnow()
         assert daterange_start(now) == now.date()
 
     def test_parse_daterange_end_datetime(self):
-        now = datetime.now()
+        now = datetime.utcnow()
         assert daterange_end(now) == now.date()
 
     def test_parse_daterange_start_full_iso(self):
@@ -234,3 +234,16 @@ class SafeUnicodeTest(object):
 
     def test_unicode_to_string(self):
         assert safe_unicode(ValueError('é')) == 'é'
+
+
+class AwareDateTest:
+    def test_aware_datetime_to_naiva_datetime(self):
+        aware_date = datetime.utcnow()
+        naive_date = to_naive_datetime(aware_date)
+        assert naive_date.tzname() is None
+
+    def test_date_to_datetime(self):
+        random_date = date(2023, 1, 15)
+        naive_datetime = to_naive_datetime(random_date)
+        assert isinstance(naive_datetime, datetime)
+        assert naive_datetime.tzname() is None

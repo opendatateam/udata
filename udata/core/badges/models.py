@@ -6,7 +6,7 @@ from datetime import datetime
 from mongoengine.signals import post_save
 
 from udata.auth import current_user
-from udata.models import db
+from udata.mongo import db
 
 from .signals import on_badge_added, on_badge_removed
 
@@ -17,7 +17,7 @@ __all__ = ('Badge', 'BadgeMixin')
 
 class Badge(db.EmbeddedDocument):
     kind = db.StringField(required=True)
-    created = db.DateTimeField(default=datetime.now, required=True)
+    created = db.DateTimeField(default=datetime.utcnow, required=True)
     created_by = db.ReferenceField('User')
 
     def __str__(self):

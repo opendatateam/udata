@@ -2,9 +2,9 @@ import logging
 
 import pytest
 
-import flask_fs as fs
+import flask_storage as fs
 
-from udata.models import db
+from udata.mongo import db
 from udata.forms import Form
 from udata.forms.fields import ImageField
 from udata.tests.helpers import data_path

@@ -1,4 +1,4 @@
-from udata.models import db
+from udata.mongo import db
 from udata.core.dataset.models import ResourceMixin
 
 # Register harvest extras

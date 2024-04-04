@@ -1,18 +1,20 @@
 import datetime
+
 import pytest
 
-from flask_restplus import inputs
-from flask_restplus.reqparse import RequestParser
-from unittest.mock import Mock
+from flask import current_app
+from flask_restx import inputs
+from flask_restx.reqparse import RequestParser
+from unittest.mock import patch
 
 from udata import search
+from udata.core.dataset.models import Schema
 from udata.i18n import gettext as _
 from udata.utils import clean_string
-from udata_event_service.producer import KafkaProducerSingleton
 from udata.search import reindex, as_task_param
 from udata.search.commands import index_model
 from udata.core.dataset.search import DatasetSearch
-from udata.core.dataset.factories import DatasetFactory, VisibleDatasetFactory
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory, HiddenDatasetFactory
 from udata.tests.api import APITestCase
 
 from . import FakeSearch
@@ -102,107 +104,82 @@ class SearchAdaptorTest:
         assertHasArgument(parser, 'page_size', int)
 
 
-@pytest.mark.usefixtures('enable_kafka')
+@pytest.mark.options(SEARCH_SERVICE_API_URL="smtg/")
 class IndexingLifecycleTest(APITestCase):
 
-    def test_producer_should_send_a_message_without_payload_if_not_indexable(self):
-        KafkaProducerSingleton.get_instance = Mock()
+    @patch('requests.delete')
+    def test_producer_should_send_a_message_without_payload_if_not_indexable(self, mock_req):
+        fake_data = HiddenDatasetFactory(id='61fd30cb29ea95c7bc0e1211')
+
+        reindex.run(*as_task_param(fake_data))
+
+        search_service_url = current_app.config['SEARCH_SERVICE_API_URL']
+        url = f'{search_service_url}{DatasetSearch.search_url}{str(fake_data.id)}/unindex'
+        mock_req.assert_called_with(url)
+
+    @patch('requests.post')
+    def test_producer_should_send_a_message_with_payload_if_indexable(self, mock_req):
+        resource = ResourceFactory(schema=Schema(url="http://localhost/my-schema"))
+        fake_data = DatasetFactory(id='61fd30cb29ea95c7bc0e1211', resources=[resource])
+
+        reindex.run(*as_task_param(fake_data))
+
+        expected_value = {
+            'document': DatasetSearch.serialize(fake_data)
+        }
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{DatasetSearch.search_url}index"
+        mock_req.assert_called_with(url, json=expected_value)
+
+    @patch('requests.Session.post')
+    def test_index_model(self, mock_req):
         fake_data = DatasetFactory(id='61fd30cb29ea95c7bc0e1211')
-
-        reindex.run(*as_task_param(fake_data))
-        producer = KafkaProducerSingleton.get_instance(None)
-
-        expected_value = {
-            'service': 'udata',
-            'value': DatasetSearch.serialize(fake_data),
-            'meta': {
-                'message_type': 'dataset.unindex',
-                'index': 'dataset'
-            }
-        }
-        topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset.unindex'
-        producer.send.assert_called_with(topic=topic, value=expected_value,
-                                         key=b'61fd30cb29ea95c7bc0e1211')
-
-    def test_producer_should_send_a_message_with_payload_if_indexable(self):
-        KafkaProducerSingleton.get_instance = Mock()
-        fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211')
-
-        reindex.run(*as_task_param(fake_data))
-        producer = KafkaProducerSingleton.get_instance(None)
-
-        expected_value = {
-            'service': 'udata',
-            'value': DatasetSearch.serialize(fake_data),
-            'meta': {
-                'message_type': 'dataset.index',
-                'index': 'dataset'
-            }
-        }
-        topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset.index'
-        producer.send.assert_called_with(topic=topic, value=expected_value,
-                                         key=b'61fd30cb29ea95c7bc0e1211')
-
-    def test_index_model(self):
-        KafkaProducerSingleton.get_instance = Mock()
-        fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211')
-
-        producer = KafkaProducerSingleton.get_instance(None)
 
         index_model(DatasetSearch, start=None, reindex=False, from_datetime=None)
 
         expected_value = {
-            'service': 'udata',
-            'value': DatasetSearch.serialize(fake_data),
-            'meta': {
-                'message_type': 'dataset.index',
-                'index': 'dataset'
-            }
+            'document': DatasetSearch.serialize(fake_data),
+            'index': 'dataset'
         }
-        topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset.index'
-        producer.send.assert_called_with(topic=topic, value=expected_value,
-                                         key=b'61fd30cb29ea95c7bc0e1211')
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/datasets/index"
+        mock_req.assert_called_with(url, json=expected_value)
 
-    def test_reindex_model(self):
-        KafkaProducerSingleton.get_instance = Mock()
-        fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211')
-
-        producer = KafkaProducerSingleton.get_instance(None)
+    @patch('requests.post')
+    @patch('requests.Session.post')
+    def test_reindex_model(self, mock_session, mock_req):
+        fake_data = DatasetFactory(id='61fd30cb29ea95c7bc0e1211')
 
         index_model(DatasetSearch, start=datetime.datetime(2022, 2, 20, 20, 2), reindex=True)
 
+        # Create index
         expected_value = {
-            'service': 'udata',
-            'value': DatasetSearch.serialize(fake_data),
-            'meta': {
-                'message_type': 'dataset.reindex',
-                'index': 'dataset-2022-02-20-20-02'
-            }
+            'index': 'dataset-2022-02-20-20-02'
         }
-        topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset.reindex'
-        producer.send.assert_called_with(topic=topic, value=expected_value,
-                                         key=b'61fd30cb29ea95c7bc0e1211')
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/create-index"
+        mock_req.assert_called_with(url, json=expected_value)
 
-    def test_index_model_from_datetime(self):
-        KafkaProducerSingleton.get_instance = Mock()
-        VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211', last_modified=datetime.datetime(2020, 1, 1))
-        fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1212', last_modified = datetime.datetime(2022, 1, 1))
+        # Index document
+        expected_value = {
+            'document': DatasetSearch.serialize(fake_data),
+            'index': 'dataset-2022-02-20-20-02'
+        }
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/datasets/index"
+        mock_session.assert_called_with(url, json=expected_value)
 
-        producer = KafkaProducerSingleton.get_instance(None)
+    @patch('requests.Session.post')
+    def test_index_model_from_datetime(self, mock_req):
+        DatasetFactory(id='61fd30cb29ea95c7bc0e1211',
+                       last_modified_internal=datetime.datetime(2020, 1, 1))
+        fake_data = DatasetFactory(id='61fd30cb29ea95c7bc0e1212',
+                                   last_modified_internal=datetime.datetime(2022, 1, 1))
 
         index_model(DatasetSearch, start=None, from_datetime=datetime.datetime(2023, 1, 1))
-        producer.send.assert_not_called()
+        mock_req.assert_not_called()
 
         index_model(DatasetSearch, start=None, from_datetime=datetime.datetime(2021, 1, 1))
 
         expected_value = {
-            'service': 'udata',
-            'value': DatasetSearch.serialize(fake_data),
-            'meta': {
-                'message_type': 'dataset.index',
-                'index': 'dataset'
-            }
+            'document': DatasetSearch.serialize(fake_data),
+            'index': 'dataset'
         }
-        topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset.index'
-        producer.send.assert_called_with(topic=topic, value=expected_value,
-                                         key=b'61fd30cb29ea95c7bc0e1212')
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/datasets/index"
+        mock_req.assert_called_with(url, json=expected_value)

@@ -2,13 +2,12 @@ from datetime import datetime
 from flask import current_app
 import logging
 import sys
+import requests
 
 import click
-from udata_event_service.producer import produce
 
 from udata.commands import cli
-from udata.event.producer import get_topic
-from udata.search import adapter_catalog, KafkaMessageType
+from udata.search import adapter_catalog
 
 
 log = logging.getLogger(__name__)
@@ -50,49 +49,70 @@ def iter_qs(qs, adapter):
 def index_model(adapter, start, reindex=False, from_datetime=None):
     '''Index or unindex all objects given a model'''
     model = adapter.model
+    search_service_url = current_app.config['SEARCH_SERVICE_API_URL']
     log.info('Indexing %s objects', model.__name__)
     qs = model.objects
     if from_datetime:
-        qs = qs.filter(last_modified__gte=from_datetime)
-    index_name = adapter.model.__name__.lower()
+        date_property = ('last_modified_internal'
+                         if model.__name__.lower() in ['dataset']
+                         else 'last_modified')
+        qs = qs.filter(**{f'{date_property}__gte': from_datetime})
+    model_name = adapter.model.__name__.lower()
+    index_name = model_name
     if reindex:
         index_name += '-' + default_index_suffix_name(start)
+        payload = {
+            'index': index_name
+        }
+        url = f"{search_service_url}/create-index"
+        r = requests.post(url, json=payload)
+        r.raise_for_status()
 
     docs = iter_qs(qs, adapter)
     for indexable, doc in docs:
-        try:
-            if indexable:
-                action = KafkaMessageType.REINDEX if reindex else KafkaMessageType.INDEX
-            elif not indexable and not reindex:
-                action = KafkaMessageType.UNINDEX
-            else:
-                continue
-            message_type = f'{adapter.model.__name__.lower()}.{action.value}'
-            produce(
-                kafka_uri=current_app.config.get('KAFKA_URI'),
-                topic=get_topic(message_type),
-                service='udata',
-                key_id=doc['id'],
-                document=doc,
-                meta={'message_type': message_type, 'index': index_name}
-            )
-        except Exception as e:
-            log.error('Unable to index %s "%s": %s', model, str(doc['id']),
-                      str(e), exc_info=True)
+        with requests.Session() as session:
+            try:
+                if indexable:
+                    payload = {
+                        'document': doc,
+                        'index': index_name
+                    }
+                    url = f"{search_service_url}/{model_name}s/index"
+                    r = session.post(url, json=payload)
+                    r.raise_for_status()
+                elif not indexable and not reindex:
+                    url = f"{search_service_url}/{model_name}s/{doc['id']}/unindex"
+                    r = session.delete(url)
+                    if r.status_code != 404:  # We don't want to raise on 404
+                        r.raise_for_status()
+                else:
+                    continue
+            except Exception as e:
+                log.error('Unable to index %s "%s": %s', model, str(doc['id']),
+                          str(e), exc_info=True)
 
 
 def finalize_reindex(models, start):
-    models_str = " " + " ".join(models) if models else ""
-    log.warning(
-        f'In order to use the newly created index, you should set the alias '
-        f'on the search service. Ex on `udata-search-service`, run:\n'
-        f'`udata-search-service set-alias {default_index_suffix_name(start)}{models_str}`'
-    )
+    try:
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/set-index-alias"
+        payload = {
+            'index_suffix_name': default_index_suffix_name(start),
+            'indices': models
+        }
+        r = requests.post(url, json=payload)
+        r.raise_for_status()
+    except Exception:
+        log.exception(f'Unable to set alias for index')
 
     modified_since_reindex = 0
     for adapter in iter_adapters():
         if not models or adapter.model.__name__.lower() in models:
-            modified_since_reindex += adapter.model.objects(last_modified__gte=start).count()
+            date_property = ('last_modified_internal'
+                             if adapter.model.__name__.lower() in ['dataset']
+                             else 'last_modified')
+            modified_since_reindex += adapter.model.objects(
+                **{f'{date_property}__gte': start}
+            ).count()
 
     log.warning(
         f'{modified_since_reindex} documents have been modified since reindexation start. '
@@ -117,8 +137,11 @@ def index(models=None, reindex=True, from_datetime=None):
 
     If from_datetime is specified, only models modified since this datetime will be indexed.
     '''
+    if not current_app.config['SEARCH_SERVICE_API_URL']:
+        log.error('Missing URL for search service')
+        sys.exit(-1)
 
-    start = datetime.now()
+    start = datetime.utcnow()
     if from_datetime:
         from_datetime = datetime.strptime(from_datetime, TIMESTAMP_FORMAT)
 

@@ -100,7 +100,7 @@ def save_chunk(file, args):
         'uuid': str(args['uuid']),
         'filename': args['filename'],
         'totalparts': args['totalparts'],
-        'lastchunk': datetime.now(),
+        'lastchunk': datetime.utcnow(),
     }), overwrite=True)
     raise UploadProgress()
 
@@ -148,6 +148,7 @@ def handle_upload(storage, prefix=None):
         )
 
     metadata = storage.metadata(fs_filename)
+    metadata['last_modified_internal'] = metadata.pop('modified')
     metadata['fs_filename'] = fs_filename
     checksum = metadata.pop('checksum')
     algo, checksum = checksum.split(':', 1)

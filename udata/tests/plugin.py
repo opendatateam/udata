@@ -4,7 +4,7 @@ import shlex
 from contextlib import contextmanager
 from urllib.parse import urlparse
 
-from flask import json, template_rendered, url_for
+from flask import json, template_rendered, url_for, current_app
 from flask.testing import FlaskClient
 from lxml import etree
 from werkzeug.urls import url_encode
@@ -12,7 +12,7 @@ from werkzeug.urls import url_encode
 from udata import settings
 from udata.app import create_app
 from udata.core.user.factories import UserFactory
-from udata.models import db
+from udata.mongo import db
 
 from .helpers import assert200, assert_command_ok
 
@@ -43,14 +43,19 @@ class TestClient(FlaskClient):
     def login(self, user=None):
         user = user or UserFactory()
         with self.session_transaction() as session:
-            session['user_id'] = str(user.id)
+            # Since flask-security-too 4.0.0, the user.fs_uniquifier is used instead of user.id for auth
+            user_id = getattr(user, current_app.login_manager.id_attribute)()
+            session['user_id'] = user_id
             session['_fresh'] = True
+            session['_id'] = current_app.login_manager._session_identifier_generator()
+            current_app.login_manager._update_request_context_with_user(user)
         return user
 
     def logout(self):
         with self.session_transaction() as session:
             del session['user_id']
             del session['_fresh']
+            del session['_id']
 
 
 @pytest.fixture
@@ -138,12 +143,7 @@ def raw_db(app, clean_db):
 def enable_resource_event(app):
     '''Enable resource event'''
     app.config['PUBLISH_ON_RESOURCE_EVENTS'] = True
-
-
-@pytest.fixture
-def enable_kafka(app):
-    '''Enable resource event'''
-    app.config['KAFKA_URI'] = 'localhost:9092'
+    app.config['RESOURCES_ANALYSER_URI'] = 'http://local.dev'
 
 
 class ApiClient(object):
@@ -234,7 +234,7 @@ def instance_path(app, tmpdir):
         app.config.pop(key.format('ROOT'), None)
 
     storages.init_app(app)
-    app.register_blueprint(blueprint)
+    app.register_blueprint(blueprint, name='test-storage')
 
     return tmpdir
 

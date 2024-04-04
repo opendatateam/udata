@@ -89,7 +89,8 @@ class MarkdownTest:
         assert el.firstChild.data == 'http://example.net/path'
 
     @pytest.mark.parametrize('link,expected', [
-        ('/', 'http://local.test/'), ('bar', 'http://local.test/bar')
+        ('/', 'http://local.test/'), ('bar', 'http://local.test/bar'),
+        ('/?tag=test&sort=-followers', 'http://local.test/?tag=test&sort=-followers')
     ])
     def test_markdown_linkify_relative(self, md2dom, link, expected):
         '''Markdown filter should transform relative urls to external ones'''
@@ -218,6 +219,21 @@ class MarkdownTest:
         ))
         assert_md(text, expected)
 
+    def test_collapsible(self, assert_md):
+        '''It should not escape the collabsible HTML elem'''
+        text = '\n'.join((
+            '<details>',
+            '<summary>TITLE</summary>',
+            'BODY CONTENT',
+            '</details>',
+        ))
+        expected = '\n'.join((
+            '<details>',
+            '<summary>TITLE</summary>',
+            'BODY CONTENT',
+            '</details>',
+        ))
+        assert_md(text, expected)
 
 @pytest.mark.frontend
 class MdStripTest:

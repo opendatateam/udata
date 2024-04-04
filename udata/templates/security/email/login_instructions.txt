@@ -1,0 +1,7 @@
+{% extends 'security/email/base.txt' %}
+{% block body %}
+{{ _('You can log into your account through the link below:') }}
+
+{{ login_link }}
+
+{% endblock %}

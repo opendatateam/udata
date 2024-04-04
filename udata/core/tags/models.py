@@ -1,6 +1,6 @@
 import logging
 
-from udata.models import db
+from udata.mongo import db
 
 log = logging.getLogger(__name__)
 

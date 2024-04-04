@@ -1,6 +1,6 @@
 from blinker import Signal
 from mongoengine.signals import pre_save, post_save
-from werkzeug import cached_property
+from werkzeug.utils import cached_property
 
 from udata.core.storages import images, default_image_basename
 from udata.frontend.markdown import mdstrip
@@ -8,45 +8,9 @@ from udata.i18n import lazy_gettext as _
 from udata.models import db, BadgeMixin, WithMetrics
 from udata.utils import hash_url
 from udata.uris import endpoint_for
+from .constants import IMAGE_MAX_SIZE, IMAGE_SIZES, REUSE_TOPICS, REUSE_TYPES
 
-__all__ = ('Reuse', 'REUSE_TYPES', 'REUSE_TOPICS')
-
-
-REUSE_TYPES = {
-    'api': _('API'),
-    'application': _('Application'),
-    'idea': _('Idea'),
-    'news_article': _('News Article'),
-    'paper': _('Paper'),
-    'post': _('Post'),
-    'visualization': _('Visualization'),
-    'hardware': _('Connected device'),
-}
-
-REUSE_TOPICS = {
-    'health': _('Health'),
-    'transport_and_mobility': _('Transport and mobility'),
-    'housing_and_development': _('Housing and development'),
-    'food_and_agriculture': _('Food and agriculture'),
-    'culture_and_recreation': _('Culture and recreation'),
-    'economy_and_business': _('Economy and business'),
-    'environment_and_energy': _('Environment and energy'),
-    'work_and_training': _('Work and training'),
-    'politics_and_public_life': _('Politics and public life'),
-    'safety_and_security': _('Safety and security'),
-    'education_and_research': _('Education and research'),
-    'society_and_demography': _('Society and demography'),
-    'law_and_justice': _('Law and justice'),
-    'open_data_tools': _('Open data tools'),
-    'others': _('Others'),
-}
-
-
-IMAGE_SIZES = [500, 100, 50, 25]
-IMAGE_MAX_SIZE = 800
-
-TITLE_SIZE_LIMIT = 350
-DESCRIPTION_SIZE_LIMIT = 100000
+__all__ = ('Reuse',)
 
 
 class ReuseQuerySet(db.OwnedQuerySet):
@@ -77,7 +41,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
     topic = db.StringField(required=True, choices=list(REUSE_TOPICS))
     # badges = db.ListField(db.EmbeddedDocumentField(ReuseBadge))
 
-    private = db.BooleanField()
+    private = db.BooleanField(default=False)
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()
@@ -107,6 +71,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
                     'urlhash'] + db.Owned.meta['indexes'],
         'ordering': ['-created_at'],
         'queryset_class': ReuseQuerySet,
+        'auto_create_index_on_save': True
     }
 
     before_save = Signal()

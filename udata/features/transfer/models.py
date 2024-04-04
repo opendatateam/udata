@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 
 from udata.i18n import lazy_gettext as _
-from udata.models import db
+from udata.mongo import db
 
 log = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class Transfer(db.Document):
     comment = db.StringField()
     status = db.StringField(choices=list(TRANSFER_STATUS), default='pending')
 
-    created = db.DateTimeField(default=datetime.now, required=True)
+    created = db.DateTimeField(default=datetime.utcnow, required=True)
 
     responded = db.DateTimeField()
     responder = db.ReferenceField('User')

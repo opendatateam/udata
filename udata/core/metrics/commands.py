@@ -4,7 +4,7 @@ import click
 
 from flask import current_app
 
-from udata.commands import cli, success, echo, white
+from udata.commands import cli, success
 from udata.models import User, Dataset, Reuse, Organization, Site
 
 log = logging.getLogger(__name__)
@@ -43,6 +43,7 @@ def update(site=False, organizations=False, users=False, datasets=False,
             site.count_reuses()
             site.count_followers()
             site.count_discussions()
+            site.count_harvesters()
             site.count_max_dataset_followers()
             site.count_max_dataset_reuses()
             site.count_max_reuse_datasets()
@@ -52,7 +53,6 @@ def update(site=False, organizations=False, users=False, datasets=False,
             site.count_max_org_datasets()
         except Exception as e:
             log.info(f'Error during update: {e}')
-
 
     if do_all or datasets:
         log.info('Update datasets metrics')
@@ -94,6 +94,7 @@ def update(site=False, organizations=False, users=False, datasets=False,
                     organization.count_datasets()
                     organization.count_reuses()
                     organization.count_followers()
+                    organization.count_members()
                 except Exception as e:
                     log.info(f'Error during update: {e}')
                     continue

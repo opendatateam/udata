@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from flask import request, url_for, redirect, make_response
+from mongoengine.queryset.visitor import Q
 
 from udata.api import api, API, errors
 from udata.api.parsers import ModelApiParser
@@ -15,7 +16,8 @@ from udata.rdf import (
 from .forms import (
     OrganizationForm, MembershipRequestForm, MembershipRefuseForm, MemberForm
 )
-from .models import Organization, MembershipRequest, Member, ORG_ROLES
+from .models import Organization, MembershipRequest, Member
+from .constants import ORG_ROLES
 from .permissions import (
     EditOrganizationPermission, OrganizationPrivatePermission
 )
@@ -144,7 +146,7 @@ class OrganizationAPI(API):
         if org.deleted:
             api.abort(410, 'Organization has been deleted')
         EditOrganizationPermission(org).test()
-        org.deleted = datetime.now()
+        org.deleted = datetime.utcnow()
         org.save()
         return '', 204
 
@@ -204,6 +206,25 @@ class OrganizationBadgeAPI(API):
     def delete(self, org, badge_kind):
         '''Delete a badge for a given organization'''
         return badges_api.remove(org, badge_kind)
+
+
+from udata.models import ContactPoint
+from udata.core.contact_point.api import ContactPointApiParser
+from udata.core.contact_point.api_fields import contact_point_page_fields
+
+
+contact_point_parser = ContactPointApiParser()
+
+
+@ns.route('/<org:org>/contacts/', endpoint='org_contact_points')
+class OrgContactAPI(API):
+    @api.doc('get_organization_contact_point')
+    @api.marshal_with(contact_point_page_fields)
+    def get(self, org):
+        '''List all organization contact points'''
+        args = contact_point_parser.parse()
+        contact_points = ContactPoint.objects.owned_by(org)
+        return contact_points.paginate(args['page'], args['page_size'])
 
 
 requests_parser = api.parser()
@@ -278,7 +299,7 @@ class MembershipAcceptAPI(MembershipAPI):
 
         membership_request.status = 'accepted'
         membership_request.handled_by = current_user._get_current_object()
-        membership_request.handled_on = datetime.now()
+        membership_request.handled_on = datetime.utcnow()
         member = Member(user=membership_request.user, role='editor')
 
         org.members.append(member)
@@ -303,7 +324,7 @@ class MembershipRefuseAPI(MembershipAPI):
         form = api.validate(MembershipRefuseForm)
         membership_request.status = 'refused'
         membership_request.handled_by = current_user._get_current_object()
-        membership_request.handled_on = datetime.now()
+        membership_request.handled_on = datetime.utcnow()
         membership_request.refusal_comment = form.comment.data
 
         org.save()
@@ -357,6 +378,7 @@ class MemberAPI(API):
         member = org.member(user)
         if member:
             Organization.objects(id=org.id).update_one(pull__members=member)
+            org.reload()
             org.count_members()
             return '', 204
         else:
@@ -388,7 +410,7 @@ class OrganizationSuggestAPI(API):
     def get(self):
         '''Organizations suggest endpoint using mongoDB contains'''
         args = suggest_parser.parse_args()
-        orgs = Organization.objects(deleted=None, name__icontains=args['q'])
+        orgs = Organization.objects(Q(name__icontains=args['q']) | Q(acronym__icontains=args['q']), deleted=None)
         return [
             {
                 'id': org.id,

@@ -7,7 +7,6 @@ from flask import url_for
 from authlib.common.security import generate_token
 from authlib.common.urls import urlparse, url_decode
 from authlib.oauth2.rfc7636 import (
-    CodeChallenge as _CodeChallenge,
     create_s256_code_challenge,
 )
 
@@ -52,13 +51,14 @@ def basic_header(client):
 @pytest.fixture
 def oauth(app, request):
     marker = request.node.get_closest_marker('oauth')
-    kwargs = marker.kwargs if marker else {}
-    return OAuth2Client.objects.create(
+    custom_kwargs = marker.kwargs if marker else {}
+    kwargs = dict(
         name='test-client',
         owner=UserFactory(),
         redirect_uris=['https://test.org/callback'],
-        **kwargs
     )
+    kwargs.update(custom_kwargs)
+    return OAuth2Client.objects.create(**kwargs)
 
 
 @pytest.mark.usefixtures('clean_db')
@@ -154,7 +154,7 @@ class APIAuthTest:
         assert401(response)
         assert response.content_type == 'application/json'
         assert 'message' in response.json
-    
+
     def test_deleted_user(self, api):
         '''Should raise a HTTP 401 if the user is deleted'''
         user = UserFactory()
@@ -238,6 +238,76 @@ class APIAuthTest:
         uri, params = response.location.split('?')
 
         assert uri == oauth.default_redirect_uri
+
+    @pytest.mark.options(OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI=True)
+    @pytest.mark.oauth(redirect_uris=['https://*.test.org/callback'])
+    def test_authorization_accept_wildcard(self, client, oauth):
+        '''Should redirect to the redirect_uri on authorization accepted
+        with wildcard enabled and used in config'''
+        client.login()
+
+        redirect_uri = 'https://subdomain.test.org/callback'
+
+        response = client.post(url_for(
+            'oauth.authorize',
+            response_type='code',
+            client_id=oauth.client_id,
+            redirect_uri=redirect_uri,
+        ), {
+            'scope': 'default',
+            'accept': '',
+        })
+
+        assert_status(response, 302)
+        uri, _ = response.location.split('?')
+
+        assert uri == redirect_uri
+
+    @pytest.mark.options(OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI=False)
+    @pytest.mark.oauth(redirect_uris=['https://*.test.org/callback'])
+    def test_authorization_accept_no_wildcard(self, client, oauth):
+        '''Should not redirect to the redirect_uri on authorization accepted
+        without wildcard enabled while used in config'''
+        client.login()
+
+        redirect_uri = 'https://subdomain.test.org/callback'
+
+        response = client.post(url_for(
+            'oauth.authorize',
+            response_type='code',
+            client_id=oauth.client_id,
+            redirect_uri=redirect_uri,
+        ), {
+            'scope': 'default',
+            'accept': '',
+        })
+
+        assert_status(response, 400)
+        assert 'error' in response.json
+        assert 'redirect_uri' in response.json['error_description']
+
+    @pytest.mark.options(OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI=True)
+    @pytest.mark.oauth(redirect_uris=['https://*.test.org/callback'])
+    def test_authorization_accept_wrong_wildcard(self, client, oauth):
+        '''Should not redirect to the redirect_uri on authorization accepted
+        with wildcard enabled but mismatched from config'''
+        client.login()
+
+        redirect_uri = 'https://subdomain.example.com/callback'
+
+        response = client.post(url_for(
+            'oauth.authorize',
+            response_type='code',
+            client_id=oauth.client_id,
+            redirect_uri=redirect_uri,
+        ), {
+            'scope': 'default',
+            'accept': '',
+        })
+
+        assert_status(response, 400)
+        assert 'error' in response.json
+        assert 'redirect_uri' in response.json['error_description']
 
     def test_authorization_grant_token(self, client, oauth):
         client.login()

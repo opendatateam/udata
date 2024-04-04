@@ -1,15 +1,14 @@
 import datetime
 from udata.models import (
-    Dataset, Organization, User, GeoZone, License
+    Dataset, Organization, User, GeoZone, License, Topic
 )
 from udata.search import (
     ModelSearchAdapter, register,
     ModelTermsFilter, BoolFilter, Filter,
     TemporalCoverageFilter
 )
-from udata.core.spatial.models import (
-    admin_levels, ADMIN_LEVEL_MAX
-)
+from udata.core.spatial.models import admin_levels
+from udata.core.spatial.constants import ADMIN_LEVEL_MAX
 from udata.core.dataset.api import DatasetApiParser, DEFAULT_SORTING
 from udata.utils import to_iso_datetime
 
@@ -22,7 +21,8 @@ class DatasetSearch(ModelSearchAdapter):
     search_url = 'datasets/'
 
     sorts = {
-        'created': 'created_at',
+        'created': 'created_at_internal',
+        'last_update': 'last_modified_internal',
         'reuses': 'metrics.reuses',
         'followers': 'metrics.followers',
         'views': 'metrics.views',
@@ -40,12 +40,12 @@ class DatasetSearch(ModelSearchAdapter):
         'schema': Filter(),
         'temporal_coverage': TemporalCoverageFilter(),
         'featured': BoolFilter(),
+        'topic': ModelTermsFilter(model=Topic),
     }
 
     @classmethod
     def is_indexable(cls, dataset):
         return (dataset.deleted is None and dataset.archived is None and
-                len(dataset.resources) > 0 and
                 not dataset.private)
 
     @classmethod
@@ -61,6 +61,8 @@ class DatasetSearch(ModelSearchAdapter):
     def serialize(cls, dataset):
         organization = None
         owner = None
+
+        topics = Topic.objects(datasets=dataset).only('id')
 
         if dataset.organization:
             org = Organization.objects(id=dataset.organization.id).first()
@@ -84,6 +86,7 @@ class DatasetSearch(ModelSearchAdapter):
             'badges': [badge.kind for badge in dataset.badges],
             'frequency': dataset.frequency,
             'created_at': to_iso_datetime(dataset.created_at),
+            'last_update': to_iso_datetime(dataset.last_update),
             'views': dataset.metrics.get('views', 0),
             'followers': dataset.metrics.get('followers', 0),
             'reuses': dataset.metrics.get('reuses', 0),
@@ -92,12 +95,18 @@ class DatasetSearch(ModelSearchAdapter):
             'organization': organization,
             'owner': str(owner.id) if owner else None,
             'format': [r.format.lower() for r in dataset.resources if r.format],
-            'schema': [r.schema.get('name') for r in dataset.resources if r.schema]
+            'schema': [r.schema.name for r in dataset.resources if r.schema],
+            'topics': [str(t.id) for t in topics if topics],
         }
         extras = {}
         for key, value in dataset.extras.items():
             extras[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
         document.update({'extras': extras})
+        if dataset.harvest:
+            harvest = {}
+            for key, value in dataset.harvest._data.items():
+                harvest[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
+            document.update({'harvest': harvest})
 
         if (dataset.temporal_coverage is not None and
                 dataset.temporal_coverage.start and
@@ -110,23 +119,17 @@ class DatasetSearch(ModelSearchAdapter):
             })
 
         if dataset.spatial is not None:
-            # Index precise zone labels and parents zone identifiers
-            # to allow fast filtering.
+            # Index precise zone labels to allow fast filtering.
             zone_ids = [z.id for z in dataset.spatial.zones]
-            zones = GeoZone.objects(id__in=zone_ids).exclude('geom')
-            parents = set()
+            zones = GeoZone.objects(id__in=zone_ids)
             geozones = []
             coverage_level = ADMIN_LEVEL_MAX
             for zone in zones:
                 geozones.append({
                     'id': zone.id,
                     'name': zone.name,
-                    'keys': zone.keys_values
                 })
-                parents |= set(zone.parents)
                 coverage_level = min(coverage_level, admin_levels[zone.level])
-
-            geozones.extend([{'id': p} for p in parents])
             document.update({
                 'geozones': geozones,
                 'granularity': dataset.spatial.granularity,

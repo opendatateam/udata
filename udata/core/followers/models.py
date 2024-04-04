@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from udata.models import db
+from udata.mongo import db
 from .signals import on_follow, on_unfollow
 
 
@@ -21,7 +21,7 @@ class FollowQuerySet(db.BaseQuerySet):
 class Follow(db.Document):
     follower = db.ReferenceField('User', required=True)
     following = db.GenericReferenceField()
-    since = db.DateTimeField(required=True, default=datetime.now)
+    since = db.DateTimeField(required=True, default=datetime.utcnow)
     until = db.DateTimeField()
 
     meta = {

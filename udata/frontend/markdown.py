@@ -44,10 +44,11 @@ def nofollow_callback(attrs, new=False):
     parsed_url = urlparse(attrs[(None, 'href')])
     if parsed_url.netloc in ('', current_app.config['SERVER_NAME']):
         path = parsed_url.path
-        attrs[(None, 'href')] = '{scheme}://{netloc}{path}'.format(
+        attrs[(None, 'href')] = '{scheme}://{netloc}{path}{query}'.format(
             scheme='https' if request.is_secure else 'http',
             netloc=current_app.config['SERVER_NAME'],
-            path=path if path.startswith('/') else f'/{path}')
+            path=path if path.startswith('/') else f'/{path}',
+            query='?' + parsed_url.query if parsed_url.query else '')
         return attrs
     else:
         rel = [x for x in attrs.get((None, 'rel'), '').split(' ') if x]

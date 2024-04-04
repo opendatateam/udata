@@ -1,12 +1,13 @@
 from flask import url_for
-import pytest
 
 from udata.tests.api import APITestCase
 
 from udata.core.dataset.apiv2 import DEFAULT_PAGE_SIZE
 from udata.core.dataset.factories import (
     DatasetFactory, ResourceFactory, CommunityResourceFactory)
-
+from udata.core.organization.factories import OrganizationFactory, Member
+from udata.models import Dataset
+from udata.tests.helpers import assert_not_emit
 
 class DatasetAPIV2Test(APITestCase):
 
@@ -181,3 +182,220 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data['page_size'] == DEFAULT_PAGE_SIZE
         assert data['next_page'] is None
         assert data['previous_page'] is None
+
+
+class DatasetExtrasAPITest(APITestCase):
+    modules = None
+
+    def setUp(self):
+        self.login()
+        self.dataset = DatasetFactory(owner=self.user)
+
+    def test_get_dataset_extras(self):
+        self.dataset.extras = {'test::extra': 'test-value'}
+        self.dataset.save()
+        response = self.get(url_for('apiv2.dataset_extras', dataset=self.dataset))
+        self.assert200(response)
+        data = response.json
+        assert data['test::extra'] == 'test-value'
+
+    def test_update_dataset_extras(self):
+        self.dataset.extras = {
+            'test::extra': 'test-value',
+            'test::extra-second': 'test-value-second',
+            'test::none-will-be-deleted': 'test-value',
+        }
+        self.dataset.save()
+
+        data = ['test::extra-second', 'another::key']
+        response = self.put(url_for('apiv2.dataset_extras', dataset=self.dataset), data)
+        self.assert400(response)
+        assert response.json['message'] == 'Wrong payload format, dict expected'
+
+        data = {
+            'test::extra-second': 'test-value-changed',
+            'another::key': 'another-value',
+            'test::none': None,
+            'test::none-will-be-deleted': None,
+        }
+
+        # We don't expect post save signals on extras update
+        unexpected_signals = Dataset.after_save, Dataset.on_update
+        with assert_not_emit(*unexpected_signals):
+            response = self.put(url_for('apiv2.dataset_extras', dataset=self.dataset), data)
+        self.assert200(response)
+
+        self.dataset.reload()
+        assert self.dataset.extras['test::extra'] == 'test-value'
+        assert self.dataset.extras['test::extra-second'] == 'test-value-changed'
+        assert self.dataset.extras['another::key'] == 'another-value'
+        assert 'test::none' not in self.dataset.extras
+        assert 'test::none-will-be-deleted' not in self.dataset.extras
+
+    def test_delete_dataset_extras(self):
+        self.dataset.extras = {'test::extra': 'test-value', 'another::key': 'another-value'}
+        self.dataset.save()
+
+        data = {'another::key': 'another-value'}
+        response = self.delete(url_for('apiv2.dataset_extras', dataset=self.dataset), data)
+        self.assert400(response)
+        assert response.json['message'] == 'Wrong payload format, list expected'
+
+        data = ['another::key']
+
+        # We don't expect post save signals on extras update
+        unexpected_signals = Dataset.after_save, Dataset.on_update
+        with assert_not_emit(*unexpected_signals):
+            response = self.delete(url_for('apiv2.dataset_extras', dataset=self.dataset), data)
+        self.assert204(response)
+
+        self.dataset.reload()
+        assert len(self.dataset.extras) == 1
+        assert self.dataset.extras['test::extra'] == 'test-value'
+
+    def test_dataset_custom_extras_str(self):
+        member = Member(user=self.user, role='admin')
+        org = OrganizationFactory(members=[member])
+        org.extras = {
+            "custom": [
+                {
+                    "title": "color",
+                    "description": "the banner color of the dataset (Hex code)",
+                    "type": "str"
+                }
+            ]
+        }
+        org.save()
+        dataset = DatasetFactory(organization=org)
+
+        data = {
+            'custom:test': 'FFFFFFF'
+        }
+        response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
+        self.assert400(response)
+        assert 'Dataset\'s organization did not define the requested custom metadata' in response.json['message']
+
+        data = {
+            'custom:color': 123
+        }
+        response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
+        self.assert400(response)
+        assert 'Custom metadata is not of the right type' in response.json['message']
+
+        data = {
+            'custom:color': 'FFFFFFF'
+        }
+        response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        assert dataset.extras['custom:color'] == 'FFFFFFF'
+
+    def test_dataset_custom_extras_choices(self):
+        member = Member(user=self.user, role='admin')
+        org = OrganizationFactory(members=[member])
+        org.extras = {
+            "custom": [
+                {
+                    "title": "color",
+                    "description": "the colors of the dataset (Hex code)",
+                    "type": "choice",
+                    "choices": ["yellow", "blue"]
+                }
+            ]
+        }
+        org.save()
+        dataset = DatasetFactory(organization=org)
+
+        data = {
+            'custom:color': 'FFFFFFF'
+        }
+        response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
+        self.assert400(response)
+        assert 'Custom metadata choice is not defined by organization' in response.json['message']
+
+        data = {
+            'custom:color': 'yellow'
+        }
+        response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        assert dataset.extras['custom:color'] == 'yellow'
+
+
+class DatasetResourceExtrasAPITest(APITestCase):
+    modules = None
+
+    def setUp(self):
+        self.login()
+        self.dataset = DatasetFactory(owner=self.user)
+
+    def test_get_ressource_extras(self):
+        '''It should fetch a resource from the API'''
+        resource = ResourceFactory()
+        resource.extras = {'test::extra': 'test-value'}
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        response = self.get(url_for('apiv2.resource_extras', dataset=self.dataset,
+                                    rid=resource.id))
+        self.assert200(response)
+        data = response.json
+        assert data['test::extra'] == 'test-value'
+
+    def test_update_resource_extras(self):
+        resource = ResourceFactory()
+        resource.extras = {
+            'test::extra': 'test-value',
+            'test::extra-second': 'test-value-second',
+            'test::none-will-be-deleted': 'test-value',
+        }
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+
+        data = ['test::extra-second', 'another::key']
+        response = self.put(url_for('apiv2.resource_extras', dataset=self.dataset,
+                                    rid=resource.id), data)
+        self.assert400(response)
+        assert response.json['message'] == 'Wrong payload format, dict expected'
+
+        data = {
+            'test::extra-second': 'test-value-changed',
+            'another::key': 'another-value',
+            'test::none': None,
+            'test::none-will-be-deleted': None,
+        }
+        # We don't expect post save signals on extras update
+        unexpected_signals = Dataset.after_save, Dataset.on_update
+        with assert_not_emit(*unexpected_signals):
+            response = self.put(url_for('apiv2.resource_extras', dataset=self.dataset,
+                                        rid=resource.id), data)
+        self.assert200(response)
+
+        self.dataset.reload()
+        assert self.dataset.resources[0].extras['test::extra'] == 'test-value'
+        assert self.dataset.resources[0].extras['test::extra-second'] == 'test-value-changed'
+        assert self.dataset.resources[0].extras['another::key'] == 'another-value'
+        assert 'test::none' not in self.dataset.resources[0].extras
+        assert 'test::none-will-be-deleted' not in self.dataset.resources[0].extras
+
+    def test_delete_resource_extras(self):
+        resource = ResourceFactory()
+        resource.extras = {'test::extra': 'test-value', 'another::key': 'another-value'}
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+
+        data = {'another::key': 'another-value'}
+        response = self.delete(url_for('apiv2.resource_extras', dataset=self.dataset,
+                                       rid=resource.id), data)
+        self.assert400(response)
+        assert response.json['message'] == 'Wrong payload format, list expected'
+
+        data = ['another::key']
+        # We don't expect post save signals on extras update
+        unexpected_signals = Dataset.after_save, Dataset.on_update
+        with assert_not_emit(*unexpected_signals):
+            response = self.delete(url_for('apiv2.resource_extras', dataset=self.dataset,
+                                        rid=resource.id), data)
+        self.assert204(response)
+        self.dataset.reload()
+        assert len(self.dataset.resources[0].extras) == 1
+        assert self.dataset.resources[0].extras['test::extra'] == 'test-value'

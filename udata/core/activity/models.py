@@ -3,7 +3,7 @@ from datetime import datetime
 from blinker import Signal
 from mongoengine.signals import post_save
 
-from udata.models import db
+from udata.mongo import db
 from udata.auth import current_user
 
 from .signals import new_activity
@@ -35,9 +35,9 @@ class Activity(db.Document, metaclass=EmitNewActivityMetaClass):
     actor = db.ReferenceField('User', required=True)
     organization = db.ReferenceField('Organization')
     related_to = db.ReferenceField(db.DomainModel, required=True)
-    created_at = db.DateTimeField(default=datetime.now, required=True)
+    created_at = db.DateTimeField(default=datetime.utcnow, required=True)
 
-    kwargs = db.DictField()
+    extras = db.ExtrasField()
 
     on_new = Signal()
 
@@ -65,8 +65,9 @@ class Activity(db.Document, metaclass=EmitNewActivityMetaClass):
         return cls.on_new.connect(func, sender=cls)
 
     @classmethod
-    def emit(cls, related_to, organization=None, **kwargs):
+    def emit(cls, related_to, organization=None, extras=None):
         new_activity.send(cls,
                           related_to=related_to,
                           actor=current_user._get_current_object(),
-                          organization=organization)
+                          organization=organization,
+                          extras=extras)

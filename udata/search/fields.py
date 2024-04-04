@@ -3,7 +3,7 @@ import re
 
 from bson.objectid import ObjectId
 
-from flask_restplus import inputs
+from flask_restx import inputs
 
 from udata.utils import clean_string
 

@@ -15,11 +15,12 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
+from udata.i18n import _
 
 from udata.tests.helpers import (
     assert_emit, assert_not_emit,
-    assert200, assert201, assert204, assert403, assert404, assert410,
-    assert_status
+    assert200, assert201, assert204, assert403, assert400, assert404,
+    assert410, assert_status
 )
 
 pytestmark = [
@@ -51,7 +52,7 @@ class OrganizationAPITest:
 
     def test_organization_api_get_deleted(self, api):
         '''It should not fetch a deleted organization from the API'''
-        organization = OrganizationFactory(deleted=datetime.now())
+        organization = OrganizationFactory(deleted=datetime.utcnow())
         response = api.get(url_for('api.organization', org=organization))
         assert410(response)
 
@@ -59,7 +60,7 @@ class OrganizationAPITest:
         '''It should fetch a deleted organization from the API if authorized'''
         user = api.login()
         member = Member(user=user, role='editor')
-        organization = OrganizationFactory(deleted=datetime.now(),
+        organization = OrganizationFactory(deleted=datetime.utcnow(),
                                            members=[member])
         response = api.get(url_for('api.organization', org=organization))
         assert200(response)
@@ -76,6 +77,7 @@ class OrganizationAPITest:
         member = org.member(user)
         assert member is not None, 'Current user should be a member'
         assert member.role == 'admin', 'Current user should be an administrator'
+        assert org.get_metrics()['members'] == 1
 
     def test_organization_api_update(self, api):
         '''It should update an organization from the API'''
@@ -89,9 +91,42 @@ class OrganizationAPITest:
         assert Organization.objects.count() is 1
         assert Organization.objects.first().description == 'new description'
 
+    def test_organization_api_update_business_number_id(self, api):
+        '''It should update an organization from the API by adding a business number id'''
+        user = api.login()
+        member = Member(user=user, role='admin')
+        org = OrganizationFactory(members=[member])
+        data = org.to_dict()
+        data['business_number_id'] = '13002526500013'
+        response = api.put(url_for('api.organization', org=org), data)
+        assert200(response)
+        assert Organization.objects.count() is 1
+        assert Organization.objects.first().business_number_id == '13002526500013'
+
+    def test_organization_api_update_business_number_id_failing(self, api):
+        '''It should update an organization from the API by adding a business number id'''
+        user = api.login()
+        member = Member(user=user, role='admin')
+        org = OrganizationFactory(members=[member])
+        data = org.to_dict()
+        data['business_number_id'] = '110014016'
+        response = api.put(url_for('api.organization', org=org), data)
+        assert400(response)
+        assert response.json['errors']['business_number_id'][0] == _('A siret number is made of 14 digits')
+
+        data['business_number_id'] = '12345678901234'
+        response = api.put(url_for('api.organization', org=org), data)
+        assert400(response)
+        assert response.json['errors']['business_number_id'][0] == _('Invalid Siret number')
+
+        data['business_number_id'] = 'tttttttttttttt'
+        response = api.put(url_for('api.organization', org=org), data)
+        assert400(response)
+        assert response.json['errors']['business_number_id'][0] == _('A siret number is only made of digits')
+
     def test_organization_api_update_deleted(self, api):
         '''It should not update a deleted organization from the API'''
-        org = OrganizationFactory(deleted=datetime.now())
+        org = OrganizationFactory(deleted=datetime.utcnow())
         data = org.to_dict()
         data['description'] = 'new description'
         api.login()
@@ -123,7 +158,7 @@ class OrganizationAPITest:
     def test_organization_api_delete_deleted(self, api):
         '''It should not delete a deleted organization from the API'''
         api.login()
-        organization = OrganizationFactory(deleted=datetime.now())
+        organization = OrganizationFactory(deleted=datetime.utcnow())
         response = api.delete(url_for('api.organization', org=organization))
         assert410(response)
         assert Organization.objects[0].deleted is not None
@@ -345,6 +380,7 @@ class MembershipAPITest:
         organization.reload()
         assert organization.is_member(added_user)
         assert organization.is_admin(added_user)
+        assert organization.get_metrics()['members'] == 2
 
     def test_only_admin_can_create_member(self, api):
         user = api.login()
@@ -430,6 +466,7 @@ class MembershipAPITest:
 
         organization.reload()
         assert not organization.is_member(deleted_user)
+        assert organization.get_metrics()['members'] == 1
 
     def test_only_admin_can_delete_member(self, api):
         user = api.login()
@@ -599,6 +636,34 @@ class MembershipAPITest:
 
         for suggestion in response.json:
             assert suggestion['name'] == 'homonym'
+
+    def test_suggest_organizations_acronym(self, api):
+        '''Should suggest organizations based on acronym'''
+
+        for i in range(3):
+            OrganizationFactory(
+                name=faker.word(),
+                acronym=f'UDATA{i}' if i % 2 else faker.word(),
+                metrics={"followers": i})
+        max_follower_organization = OrganizationFactory(
+            name=faker.word(),
+            acronym='UDATA4',
+            metrics={"followers": 10}
+        )
+        response = api.get(url_for('api.suggest_organizations'),
+                           qs={'q': 'uDaTa', 'size': '5'})
+        assert200(response)
+
+        assert len(response.json) == 2
+
+        for suggestion in response.json:
+            assert 'id' in suggestion
+            assert 'slug' in suggestion
+            assert 'name' in suggestion
+            assert 'image_url' in suggestion
+            assert 'acronym' in suggestion
+            assert 'UDATA' in suggestion['acronym']
+            assert response.json[0]['id'] == str(max_follower_organization.id)
 
 
 class OrganizationDatasetsAPITest:
@@ -783,3 +848,25 @@ class OrganizationBadgeAPITest:
         url = url_for('api.organization_badge', org=self.organization, badge_kind=kind)
         response = api.delete(url)
         assert404(response)
+
+
+class OrganizationContactPointsAPITest:
+    modules = []
+
+    def test_org_contact_points(self, api):
+        user = api.login()
+        member = Member(user=user, role='admin')
+        org = OrganizationFactory(members=[member])
+        data = {
+            'email': 'mooneywayne@cobb-cochran.com',
+            'name': 'Martin Schultz',
+            'organization': str(org.id)
+        }
+        response = api.post(url_for('api.contact_points'), data)
+        assert201(response)
+
+        response = api.get(url_for('api.org_contact_points', org=org))
+        assert200(response)
+
+        assert response.json['data'][0]['name'] == data['name']
+        assert response.json['data'][0]['email'] == data['email']

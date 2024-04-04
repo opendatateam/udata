@@ -48,6 +48,9 @@
 <meta name="search-autocomplete-enabled" content="{{ 'true' if config.SEARCH_AUTOCOMPLETE_ENABLED else 'false' }}">
 <meta name="search-autocomplete-debounce" content="{{ config.SEARCH_AUTOCOMPLETE_DEBOUNCE }}">
 <meta name="dataset-max-resources-uncollapsed" content="{{ config.DATASET_MAX_RESOURCES_UNCOLLAPSED }}">
+{% if config.ORG_BID_FORMAT %}
+    <meta name="org-bid-format" content="{{ config.ORG_BID_FORMAT }}">
+{% endif %}
 <meta name="markdown-config" content="{{ {
     'tags': config.MD_ALLOWED_TAGS,
     'attributes': config.MD_ALLOWED_ATTRIBUTES,
@@ -58,6 +61,12 @@
     'MIN_LENGTH': config.TAG_MIN_LENGTH,
     'MAX_LENGTH': config.TAG_MAX_LENGTH,
 }|tojson|urlencode }}" />
+<meta name="license-groups-options" content={{
+    config.LICENSE_GROUPS|tojson|urlencode
+}} />
 <meta name="read-only-enabled" content="{{ 'true' if config.READ_ONLY_MODE else 'false' }}">
+{% if config.HARVEST_VALIDATION_CONTACT_FORM %}
+<meta name="harvest-validation-contact-form" content="{{config.HARVEST_VALIDATION_CONTACT_FORM}}">
+{% endif %}
 
 {% endmacro %}

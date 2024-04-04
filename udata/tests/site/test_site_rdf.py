@@ -6,7 +6,7 @@ from rdflib import URIRef, Literal, Graph
 from rdflib.namespace import RDF, FOAF
 from rdflib.resource import Resource
 
-from udata.core.dataset.factories import VisibleDatasetFactory
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.site.factories import SiteFactory
@@ -26,7 +26,7 @@ class CatalogTest:
         site = SiteFactory()
         home_url = url_for('api.site', _external=True)
         uri = url_for('api.site_rdf_catalog', _external=True)
-        datasets = VisibleDatasetFactory.create_batch(3)
+        datasets = DatasetFactory.create_batch(3)
         catalog = build_catalog(site, datasets)
         graph = catalog.graph
 
@@ -39,6 +39,7 @@ class CatalogTest:
         assert isinstance(catalog.identifier, URIRef)
         assert str(catalog.identifier) == uri
         assert catalog.value(DCT.title) == Literal(site.title)
+        assert catalog.value(DCT.description) == Literal(f"{site.title}")
         lang = app.config['DEFAULT_LANGUAGE']
         assert catalog.value(DCT.language) == Literal(lang)
 
@@ -58,8 +59,8 @@ class CatalogTest:
         site = SiteFactory()
         org = OrganizationFactory()
         user = UserFactory()
-        datasets = VisibleDatasetFactory.create_batch(2, owner=user)
-        datasets += VisibleDatasetFactory.create_batch(2, organization=org)
+        datasets = DatasetFactory.create_batch(2, owner=user)
+        datasets += DatasetFactory.create_batch(2, organization=org)
         catalog = build_catalog(site, datasets)
         graph = catalog.graph
 
@@ -81,7 +82,7 @@ class CatalogTest:
                             page=1, page_size=page_size, _external=True)
         uri_last = url_for('api.site_rdf_catalog_format', format='json',
                            page=2, page_size=page_size, _external=True)
-        VisibleDatasetFactory.create_batch(total)
+        DatasetFactory.create_batch(total)
 
         # First page
         datasets = Dataset.objects.paginate(1, page_size)
@@ -207,7 +208,7 @@ class SiteRdfViewsTest:
         assert_redirects(response, expected_url)
 
     def test_catalog_rdf_paginate(self, client):
-        VisibleDatasetFactory.create_batch(4)
+        DatasetFactory.create_batch(4)
         url = url_for('api.site_rdf_catalog_format', format='n3', page_size=3)
         next_url = url_for('api.site_rdf_catalog_format', format='n3',
                            page=2, page_size=3, _external=True)

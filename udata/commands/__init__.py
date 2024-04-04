@@ -30,6 +30,8 @@ CONTEXT_SETTINGS = {
     'help_option_names': ['-?', '-h', '--help'],
 }
 
+DEFAULT_INFO_SETTINGS = 'udata.settings.Defaults'
+
 click.disable_unicode_literals_warning = True
 
 
@@ -143,9 +145,6 @@ def init_logging(app):
     handler.setFormatter(CliFormatter())
     handler.setLevel(log_level)
 
-    logger = logging.getLogger()
-    logger.addHandler(handler)
-
     logger = logging.getLogger('__main__')
     logger.setLevel(log_level)
     logger.handlers = []
@@ -168,8 +167,13 @@ def init_logging(app):
     return app
 
 
-def create_cli_app(info):
-    app = create_app(info.settings, init_logging=init_logging)
+def create_cli_app():
+    ctx = click.get_current_context(silent=True)
+    if ctx is not None:
+        settings = ctx.obj.settings
+    else:
+        settings = DEFAULT_INFO_SETTINGS
+    app = create_app(settings, init_logging=init_logging)
     return standalone(app)
 
 
@@ -243,7 +247,7 @@ class UdataGroup(FlaskGroup):
         if obj is None:
             obj = ScriptInfo(create_app=self.create_app)
         # This is the import line: allows create_app to access the settings
-        obj.settings = kwargs.pop('settings', 'udata.settings.Defaults')
+        obj.settings = kwargs.pop('settings', DEFAULT_INFO_SETTINGS)
         kwargs['obj'] = obj
         return super(UdataGroup, self).main(*args, **kwargs)
 

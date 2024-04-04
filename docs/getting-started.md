@@ -10,7 +10,7 @@ We’ll use the following repositories:
 # Check the system requirements
 
 !!! info
-    Be aware that udata now requires Python **>3.7** to work. 
+    Be aware that udata now requires Python **>3.7,<3.10** to work. 
 
 udata requires several libraries to be installed to work. You can see them on the udata documentation link below.
 
@@ -103,6 +103,14 @@ inv assets-build
 inv widgets-build
 ```
 
+### Alternative to nvm
+
+If you don't want to use nvm and are not actively contributing to the frontend part of udata, you shoud be able to install the dependencies with this command on a modern node version (tested on v20):
+
+```bash
+npm install --legacy-peer-deps
+```
+
 ## Configure udata
 
 udata uses a config file called `udata.cfg` and a custom directory as base for its filesystem, we’ll call it `fs`. You can put them as shown below.
@@ -124,7 +132,7 @@ from udata.settings import Defaults
 DEBUG = True
 SEND_MAIL = False
 SERVER_NAME ='dev.local:7000'
-CACHE_TYPE = 'null'
+CACHE_TYPE = 'flask_caching.backends.null'
 
 URLS_ALLOW_PRIVATE = True
 URLS_ALLOW_LOCAL = True
@@ -133,6 +141,8 @@ URLS_ALLOWED_TLDS = Defaults.URLS_ALLOWED_TLDS | set(['local'])
 RESOURCES_FILE_ALLOWED_DOMAINS = ['*']
 PLUGINS = []
 FS_ROOT = 'fs'
+
+SESSION_COOKIE_SECURE = False
 ```
 
 This define `dev.local:7000` as the URL for your local setup. You’ll have to edit your `/etc/hosts` to add this rule.

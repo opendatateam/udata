@@ -10,7 +10,8 @@ from udata.core.user.factories import AdminFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
-from udata.models import Reuse, Follow, Member, REUSE_TOPICS, REUSE_TYPES
+from udata.models import Reuse, Follow, Member
+from udata.core.reuse.constants import REUSE_TOPICS, REUSE_TYPES
 from udata.utils import faker
 
 from udata.tests.helpers import (
@@ -84,6 +85,12 @@ class ReuseAPITest:
         assert len(response.json['data']) == 1
         assert response.json['data'][0]['id'] == str(org_reuse.id)
 
+        response = api.get(url_for('api.reuses', owner='owner-id'))
+        assert400(response)
+
+        response = api.get(url_for('api.reuses', organization='org-id'))
+        assert400(response)
+
     def test_reuse_api_get(self, api):
         '''It should fetch a reuse from the API'''
         reuse = ReuseFactory()
@@ -92,14 +99,14 @@ class ReuseAPITest:
 
     def test_reuse_api_get_deleted(self, api):
         '''It should not fetch a deleted reuse from the API and raise 410'''
-        reuse = ReuseFactory(deleted=datetime.now())
+        reuse = ReuseFactory(deleted=datetime.utcnow())
         response = api.get(url_for('api.reuse', reuse=reuse))
         assert410(response)
 
     def test_reuse_api_get_deleted_but_authorized(self, api):
         '''It should fetch a deleted reuse from the API if authorized'''
         user = api.login()
-        reuse = ReuseFactory(deleted=datetime.now(), owner=user)
+        reuse = ReuseFactory(deleted=datetime.utcnow(), owner=user)
         response = api.get(url_for('api.reuse', reuse=reuse))
         assert200(response)
 
@@ -157,7 +164,7 @@ class ReuseAPITest:
     def test_reuse_api_update_deleted(self, api):
         '''It should not update a deleted reuse from the API and raise 410'''
         api.login()
-        reuse = ReuseFactory(deleted=datetime.now())
+        reuse = ReuseFactory(deleted=datetime.utcnow())
         response = api.put(url_for('api.reuse', reuse=reuse), {})
         assert410(response)
 
@@ -173,7 +180,7 @@ class ReuseAPITest:
     def test_reuse_api_delete_deleted(self, api):
         '''It should not delete a deleted reuse from the API and raise 410'''
         api.login()
-        reuse = ReuseFactory(deleted=datetime.now())
+        reuse = ReuseFactory(deleted=datetime.utcnow())
         response = api.delete(url_for('api.reuse', reuse=reuse))
         assert410(response)
 
@@ -311,17 +318,17 @@ class ReuseAPITest:
         '''It should suggest reuses'''
         for i in range(3):
             ReuseFactory(
-                title='test-{0}'.format(i) if i % 2 else faker.word(),
+                title='arealtestprefix-{0}'.format(i) if i % 2 else faker.word(),
                 visible=True,
                 metrics={"followers": i})
         max_follower_reuse = ReuseFactory(
-            title='test-4',
+            title='arealtestprefix-4',
             visible=True,
             metrics={"followers": 10}
         )
 
         response = api.get(url_for('api.suggest_reuses'),
-                           qs={'q': 'tes', 'size': '5'})
+                           qs={'q': 'arealtestpref', 'size': '5'})
         assert200(response)
 
         assert len(response.json) <= 5

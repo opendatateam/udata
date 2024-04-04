@@ -1,0 +1,20 @@
+{% extends 'security/email/base.html' %}
+{% from 'security/email/button.html' import mail_button %}
+
+{% block body %}
+
+<p>{{ _('Please confirm your email through the link below:') }}</p>
+
+<br/>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td align="center">
+            {{ mail_button(
+                _('Confirm my account'),
+                confirmation_link
+            ) }}
+        </td>
+    </tr>
+</table>
+{% endblock %}

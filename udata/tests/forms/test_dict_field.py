@@ -5,7 +5,7 @@ from datetime import date, datetime
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import fields, ModelForm
-from udata.models import db
+from udata.mongo import db
 
 pytestmark = [
     pytest.mark.usefixtures('app')
@@ -36,7 +36,7 @@ class DictFieldTest:
     def test_with_valid_data(self):
         Fake, FakeForm = self.factory()
 
-        now = datetime.now()
+        now = datetime.utcnow()
         today = date.today()
 
         fake = Fake()

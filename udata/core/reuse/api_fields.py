@@ -5,7 +5,7 @@ from udata.core.dataset.api_fields import dataset_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.user.api_fields import user_ref_fields
 
-from .models import REUSE_TOPICS, REUSE_TYPES, IMAGE_SIZES
+from .constants import REUSE_TOPICS, REUSE_TYPES, IMAGE_SIZES
 
 BIGGEST_IMAGE_SIZE = IMAGE_SIZES[0]
 
@@ -58,6 +58,7 @@ reuse_fields = api.model('Reuse', {
     'page': fields.UrlFor(
         'reuses.show', lambda o: {'reuse': o},
         description='The reuse page URL', readonly=True, fallback_endpoint='api.reuse'),
+    'extras': fields.Raw(description='Extras attributes as key-value pairs'),
 }, mask='*,datasets{title,uri,page}')
 
 reuse_page_fields = api.model('ReusePage', fields.pager(reuse_fields))
