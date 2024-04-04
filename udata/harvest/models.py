@@ -1,19 +1,15 @@
 from collections import OrderedDict
 from datetime import datetime
+import logging
 from urllib.parse import urlparse
 
-from werkzeug import cached_property
+from werkzeug.utils import cached_property
 
+from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.models import db, Dataset
 from udata.i18n import lazy_gettext as _
 
-# Register harvest extras
-Dataset.extras.register('harvest:source_id', db.StringField)
-Dataset.extras.register('harvest:remote_id', db.StringField)
-Dataset.extras.register('harvest:domain', db.StringField)
-Dataset.extras.register('harvest:last_update', db.DateTimeField)
-Dataset.extras.register('remote_url', db.URLField)
-
+log = logging.getLogger(__name__)
 
 HARVEST_FREQUENCIES = OrderedDict((
     ('manual', _('Manual')),
@@ -48,7 +44,7 @@ DEFAULT_HARVEST_ITEM_STATUS = 'pending'
 
 class HarvestError(db.EmbeddedDocument):
     '''Store harvesting errors'''
-    created_at = db.DateTimeField(default=datetime.now, required=True)
+    created_at = db.DateTimeField(default=datetime.utcnow, required=True)
     message = db.StringField()
     details = db.StringField()
 
@@ -58,7 +54,7 @@ class HarvestItem(db.EmbeddedDocument):
     dataset = db.ReferenceField(Dataset)
     status = db.StringField(choices=list(HARVEST_ITEM_STATUS),
                             default=DEFAULT_HARVEST_ITEM_STATUS, required=True)
-    created = db.DateTimeField(default=datetime.now, required=True)
+    created = db.DateTimeField(default=datetime.utcnow, required=True)
     started = db.DateTimeField()
     ended = db.DateTimeField()
     errors = db.ListField(db.EmbeddedDocumentField(HarvestError))
@@ -98,11 +94,11 @@ class HarvestSource(db.Owned, db.Document):
                         populate_from='name', update=True)
     description = db.StringField()
     url = db.StringField(required=True)
-    backend = db.StringField()
+    backend = db.StringField(required=True)
     config = db.DictField()
     periodic_task = db.ReferenceField('PeriodicTask',
                                       reverse_delete_rule=db.NULLIFY)
-    created_at = db.DateTimeField(default=datetime.now, required=True)
+    created_at = db.DateTimeField(default=datetime.utcnow, required=True)
     frequency = db.StringField(choices=list(HARVEST_FREQUENCIES),
                                default=DEFAULT_HARVEST_FREQUENCY,
                                required=True)
@@ -155,7 +151,7 @@ class HarvestSource(db.Owned, db.Document):
 
 class HarvestJob(db.Document):
     '''Keep track of harvestings'''
-    created = db.DateTimeField(default=datetime.now, required=True)
+    created = db.DateTimeField(default=datetime.utcnow, required=True)
     started = db.DateTimeField()
     ended = db.DateTimeField()
     status = db.StringField(choices=list(HARVEST_JOB_STATUS),
@@ -169,7 +165,26 @@ class HarvestJob(db.Document):
         'indexes': [
             '-created',
             'source',
-            ('source', '-created')
+            ('source', '-created'),
+            'items.dataset'
         ],
         'ordering': ['-created'],
     }
+
+
+def archive_harvested_dataset(dataset, reason, dryrun=False):
+    '''
+    Archive an harvested dataset, setting extras accordingly.
+    If `dryrun` is True, the dataset is not saved but validated only.
+    '''
+    log.debug('Archiving dataset %s', dataset.id)
+    archival_date = datetime.utcnow()
+    dataset.archived = archival_date
+    if not dataset.harvest:
+        dataset.harvest = HarvestDatasetMetadata()
+    dataset.harvest.archived = reason
+    dataset.harvest.archived_at = archival_date
+    if dryrun:
+        dataset.validate()
+    else:
+        dataset.save()

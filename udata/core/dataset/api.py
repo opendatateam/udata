@@ -19,21 +19,25 @@ These changes might lead to backward compatibility breakage meaning:
 
 import os
 import logging
+import mongoengine
 from datetime import datetime
 
+from bson.objectid import ObjectId
 from flask import request, current_app, abort, redirect, url_for, make_response
 from flask_security import current_user
+from mongoengine.queryset.visitor import Q
 
-from udata import search
 from udata.auth import admin_permission
 from udata.api import api, API, errors
+from udata.api.parsers import ModelApiParser
 from udata.core import storages
+from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
-from udata.utils import get_by, multi_to_dict
+from udata.utils import get_by
 from udata.rdf import (
-    RDF_MIME_TYPES, RDF_EXTENSIONS,
+    RDF_EXTENSIONS,
     negociate_content, graph_response
 )
 
@@ -48,30 +52,111 @@ from .api_fields import (
     resource_fields,
     resource_type_fields,
     upload_fields,
-    schema_fields,
+    catalog_schema_fields,
 )
 from udata.linkchecker.checker import check_resource
+from udata.core.topic.models import Topic
 from .models import (
-    Dataset, Resource, Checksum, License, UPDATE_FREQUENCIES,
-    CommunityResource, RESOURCE_TYPES, ResourceSchema, get_resource
+    Dataset, Resource, Checksum, License, 
+    CommunityResource, ResourceSchema, get_resource
 )
+from .constants import UPDATE_FREQUENCIES, RESOURCE_TYPES
 from .permissions import DatasetEditPermission, ResourceEditPermission
 from .forms import (
     ResourceForm, DatasetForm, CommunityResourceForm, ResourcesListForm
 )
-from .search import DatasetSearch
 from .exceptions import (
     SchemasCatalogNotFoundException, SchemasCacheUnavailableException
 )
 from .rdf import dataset_to_rdf
 
+
+DEFAULT_SORTING = '-created_at_internal'
+SUGGEST_SORTING = '-metrics.followers'
+
+
+class DatasetApiParser(ModelApiParser):
+    sorts = {
+        'title': 'title',
+        'created': 'created_at_internal',
+        'last_update': 'last_modified_internal',
+        'reuses': 'metrics.reuses',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
+    }
+
+    def __init__(self):
+        super().__init__()
+        self.parser.add_argument('tag', type=str, location='args')
+        self.parser.add_argument('license', type=str, location='args')
+        self.parser.add_argument('featured', type=bool, location='args')
+        self.parser.add_argument('geozone', type=str, location='args')
+        self.parser.add_argument('granularity', type=str, location='args')
+        self.parser.add_argument('temporal_coverage', type=str, location='args')
+        self.parser.add_argument('organization', type=str, location='args')
+        self.parser.add_argument('owner', type=str, location='args')
+        self.parser.add_argument('format', type=str, location='args')
+        self.parser.add_argument('schema', type=str, location='args')
+        self.parser.add_argument('schema_version', type=str, location='args')
+        self.parser.add_argument('topic', type=str, location='args')
+
+    @staticmethod
+    def parse_filters(datasets, args):
+        if args.get('q'):
+            # Following code splits the 'q' argument by spaces to surround
+            # every word in it with quotes before rebuild it.
+            # This allows the search_text method to tokenise with an AND
+            # between tokens whereas an OR is used without it.
+            phrase_query = ' '.join([f'"{elem}"' for elem in args['q'].split(' ')])
+            datasets = datasets.search_text(phrase_query)
+        if args.get('tag'):
+            datasets = datasets.filter(tags=args['tag'])
+        if args.get('license'):
+            datasets = datasets.filter(license__in=License.objects.filter(id=args['license']))
+        if args.get('geozone'):
+            datasets = datasets.filter(spatial__zones=args['geozone'])
+        if args.get('granularity'):
+            datasets = datasets.filter(spatial__granularity=args['granularity'])
+        if args.get('temporal_coverage'):
+            datasets = datasets.filter(temporal_coverage__start__gte=args['temporal_coverage'][:9],
+                                       temporal_coverage__start__lte=args['temporal_coverage'][11:])
+        if args.get('featured'):
+            datasets = datasets.filter(featured=args['featured'])
+        if args.get('organization'):
+            if not ObjectId.is_valid(args['organization']):
+                api.abort(400, 'Organization arg must be an identifier')
+            datasets = datasets.filter(organization=args['organization'])
+        if args.get('owner'):
+            if not ObjectId.is_valid(args['owner']):
+                api.abort(400, 'Owner arg must be an identifier')
+            datasets = datasets.filter(owner=args['owner'])
+        if args.get('format'):
+            datasets = datasets.filter(resources__format=args['format'])
+        if args.get('schema'):
+            datasets = datasets.filter(resources__schema__name=args['schema'])
+        if args.get('schema_version'):
+            datasets = datasets.filter(resources__schema__version=args['schema_version'])
+        if args.get('topic'):
+            if not ObjectId.is_valid(args['topic']):
+                api.abort(400, 'Topic arg must be an identifier')
+            try:
+                topic = Topic.objects.get(id=args['topic'])
+            except Topic.DoesNotExist:
+                pass
+            else:
+                datasets = datasets.filter(id__in=[d.id for d in topic.datasets])
+        return datasets
+
+
 log = logging.getLogger(__name__)
 
 ns = api.namespace('datasets', 'Dataset related operations')
-search_parser = DatasetSearch.as_request_parser()
+
+dataset_parser = DatasetApiParser()
+
 community_parser = api.parser()
 community_parser.add_argument(
-    'sort', type=str, default='-created', location='args',
+    'sort', type=str, default='-created_at_internal', location='args',
     help='The sorting attribute')
 community_parser.add_argument(
     'page', type=int, default=1, location='args', help='The page to fetch')
@@ -100,17 +185,20 @@ common_doc = {
 class DatasetListAPI(API):
     '''Datasets collection endpoint'''
     @api.doc('list_datasets')
-    @api.expect(search_parser)
+    @api.expect(dataset_parser.parser)
     @api.marshal_with(dataset_page_fields)
     def get(self):
         '''List or search all datasets'''
-        search_parser.parse_args()
-        return search.query(Dataset, **multi_to_dict(request.args))
+        args = dataset_parser.parse()
+        datasets = Dataset.objects(archived=None, deleted=None, private=False)
+        datasets = dataset_parser.parse_filters(datasets, args)
+        sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
+        return datasets.order_by(sort).paginate(args['page'], args['page_size'])
 
     @api.secure
     @api.doc('create_dataset', responses={400: 'Validation error'})
     @api.expect(dataset_fields)
-    @api.marshal_with(dataset_fields)
+    @api.marshal_with(dataset_fields, code=201)
     def post(self):
         '''Create a new dataset'''
         form = api.validate(DatasetForm)
@@ -141,9 +229,14 @@ class DatasetAPI(API):
         if dataset.deleted and request_deleted is not None:
             api.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.utcnow()
         form = api.validate(DatasetForm, dataset)
-        return form.save()
+        # As validation for some fields (ie. extras) is at model
+        # level instead form level, we use mongoengine errors here.
+        try:
+            return form.save()
+        except mongoengine.errors.ValidationError as e:
+            api.abort(400, e.message)
 
     @api.secure
     @api.doc('delete_dataset')
@@ -153,8 +246,8 @@ class DatasetAPI(API):
         if dataset.deleted:
             api.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
-        dataset.deleted = datetime.now()
-        dataset.last_modified = datetime.now()
+        dataset.deleted = datetime.utcnow()
+        dataset.last_modified_internal = datetime.utcnow()
         dataset.save()
         return '', 204
 
@@ -196,7 +289,7 @@ class DatasetRdfAPI(API):
 @api.response(404, 'Dataset not found')
 @api.response(410, 'Dataset has been deleted')
 class DatasetRdfFormatAPI(API):
-    @api.doc('rdf_dataset')
+    @api.doc('rdf_dataset_format')
     def get(self, dataset, format):
         if not DatasetEditPermission(dataset).can():
             if dataset.private:
@@ -252,24 +345,24 @@ class ResourceRedirectAPI(API):
 @ns.route('/<dataset:dataset>/resources/', endpoint='resources')
 class ResourcesAPI(API):
     @api.secure
-    @api.doc('create_resource', **common_doc)
+    @api.doc('create_resource', **common_doc, responses={400: 'Validation error'})
     @api.expect(resource_fields)
-    @api.marshal_with(resource_fields)
+    @api.marshal_with(resource_fields, code=201)
     def post(self, dataset):
         '''Create a new resource for a given dataset'''
         ResourceEditPermission(dataset).test()
         form = api.validate(ResourceForm)
         resource = Resource()
         if form._fields.get('filetype').data != 'remote':
-            return 'This endpoint only supports remote resources', 400
+            api.abort(400, 'This endpoint only supports remote resources')
         form.populate_obj(resource)
         dataset.add_resource(resource)
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.utcnow()
         dataset.save()
         return resource, 201
 
     @api.secure
-    @api.doc('update_resources', **common_doc)
+    @api.doc('update_resources', **common_doc, responses={400: 'Validation error'})
     @api.expect([resource_fields])
     @api.marshal_list_with(resource_fields)
     def put(self, dataset):
@@ -288,12 +381,14 @@ class ResourcesAPI(API):
 class UploadMixin(object):
     def handle_upload(self, dataset):
         prefix = '/'.join((dataset.slug,
-                           datetime.now().strftime('%Y%m%d-%H%M%S')))
+                           datetime.utcnow().strftime('%Y%m%d-%H%M%S')))
         infos = handle_upload(storages.resources, prefix)
         if 'html' in infos['mime']:
             api.abort(415, 'Incorrect file content type: HTML')
         infos['title'] = os.path.basename(infos['filename'])
-        infos['checksum'] = Checksum(type='sha1', value=infos.pop('sha1'))
+        checksum_type = next(checksum_type for checksum_type in CHECKSUM_TYPES
+                             if checksum_type in infos)
+        infos['checksum'] = Checksum(type=checksum_type, value=infos.pop(checksum_type))
         infos['filesize'] = infos.pop('size')
         del infos['filename']
         return infos
@@ -303,16 +398,16 @@ class UploadMixin(object):
 @api.doc(**common_doc)
 class UploadNewDatasetResource(UploadMixin, API):
     @api.secure
-    @api.doc('upload_new_dataset_resource')
+    @api.doc('upload_new_dataset_resource', responses={415: 'Incorrect file content type', 400: 'Upload error'})
     @api.expect(upload_parser)
-    @api.marshal_with(upload_fields)
+    @api.marshal_with(upload_fields, code=201)
     def post(self, dataset):
         '''Upload a new dataset resource'''
         ResourceEditPermission(dataset).test()
         infos = self.handle_upload(dataset)
         resource = Resource(**infos)
         dataset.add_resource(resource)
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.utcnow()
         dataset.save()
         return resource, 201
 
@@ -322,9 +417,9 @@ class UploadNewDatasetResource(UploadMixin, API):
 @api.doc(**common_doc)
 class UploadNewCommunityResources(UploadMixin, API):
     @api.secure
-    @api.doc('upload_new_community_resource')
+    @api.doc('upload_new_community_resource', responses={415: 'Incorrect file content type', 400: 'Upload error'})
     @api.expect(upload_parser)
-    @api.marshal_with(upload_fields)
+    @api.marshal_with(upload_fields, code=201)
     def post(self, dataset):
         '''Upload a new community resource'''
         infos = self.handle_upload(dataset)
@@ -348,7 +443,7 @@ class ResourceMixin(object):
 @api.param('rid', 'The resource unique identifier')
 class UploadDatasetResource(ResourceMixin, UploadMixin, API):
     @api.secure
-    @api.doc('upload_dataset_resource')
+    @api.doc('upload_dataset_resource', responses={415: 'Incorrect file content type', 400: 'Upload error'})
     @api.marshal_with(upload_fields)
     def post(self, dataset, rid):
         '''Upload a file related to a given resource on a given dataset'''
@@ -359,7 +454,7 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
         for k, v in infos.items():
             resource[k] = v
         dataset.update_resource(resource)
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.utcnow()
         dataset.save()
         if fs_filename_to_remove is not None:
             storages.resources.delete(fs_filename_to_remove)
@@ -371,7 +466,7 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
 @api.param('community', 'The community resource unique identifier')
 class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
     @api.secure
-    @api.doc('upload_community_resource')
+    @api.doc('upload_community_resource', responses={415: 'Incorrect file content type', 400: 'Upload error'})
     @api.marshal_with(upload_fields)
     def post(self, community):
         '''Update the file related to a given community resource'''
@@ -399,7 +494,7 @@ class ResourceAPI(ResourceMixin, API):
         return resource
 
     @api.secure
-    @api.doc('update_resource')
+    @api.doc('update_resource', responses={400: 'Validation error'})
     @api.expect(resource_fields)
     @api.marshal_with(resource_fields)
     def put(self, dataset, rid):
@@ -407,12 +502,16 @@ class ResourceAPI(ResourceMixin, API):
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         form = api.validate(ResourceForm, resource)
-         # ensure API client does not override url on self-hosted resources
+        # ensure API client does not override url on self-hosted resources
         if resource.filetype == 'file':
             form._fields.get('url').data = resource.url
+        # populate_obj populates existing resource object with the content of the form.
+        # update_resource saves the updated resource dict to the database
+        # the additional dataset.save is required as we update the last_modified date.
         form.populate_obj(resource)
-        resource.modified = datetime.now()
-        dataset.last_modified = datetime.now()
+        resource.last_modified_internal = datetime.utcnow()
+        dataset.update_resource(resource)
+        dataset.last_modified_internal = datetime.utcnow()
         dataset.save()
         return resource
 
@@ -423,7 +522,7 @@ class ResourceAPI(ResourceMixin, API):
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         dataset.remove_resource(resource)
-        dataset.last_modified = datetime.now()
+        dataset.last_modified_internal = datetime.utcnow()
         dataset.save()
         return '', 204
 
@@ -448,14 +547,14 @@ class CommunityResourcesAPI(API):
                                    .paginate(args['page'], args['page_size']))
 
     @api.secure
-    @api.doc('create_community_resource')
+    @api.doc('create_community_resource', responses={400: 'Validation error'})
     @api.expect(community_resource_fields)
-    @api.marshal_with(community_resource_fields)
+    @api.marshal_with(community_resource_fields, code=201)
     def post(self):
         '''Create a new community resource'''
         form = api.validate(CommunityResourceForm)
         if form._fields.get('filetype').data != 'remote':
-            return 'This endpoint only supports remote community resources', 400
+            api.abort(400, 'This endpoint only supports remote community resources')
         resource = CommunityResource()
         form.populate_obj(resource)
         if not resource.dataset:
@@ -464,7 +563,7 @@ class CommunityResourcesAPI(API):
             })
         if not resource.organization:
             resource.owner = current_user._get_current_object()
-        resource.modified = datetime.now()
+        resource.last_modified_internal = datetime.utcnow()
         resource.save()
         return resource, 201
 
@@ -480,7 +579,7 @@ class CommunityResourceAPI(API):
         return community
 
     @api.secure
-    @api.doc('update_community_resource')
+    @api.doc('update_community_resource', responses={400: 'Validation error'})
     @api.expect(community_resource_fields)
     @api.marshal_with(community_resource_fields)
     def put(self, community):
@@ -492,13 +591,12 @@ class CommunityResourceAPI(API):
         form.populate_obj(community)
         if not community.organization and not community.owner:
             community.owner = current_user._get_current_object()
-        community.modified = datetime.now()
+        community.last_modified_internal = datetime.utcnow()
         community.save()
         return community
 
     @api.secure
     @api.doc('delete_community_resource')
-    @api.marshal_with(community_resource_fields)
     def delete(self, community):
         '''Delete a given community resource'''
         ResourceEditPermission(community).test()
@@ -527,47 +625,55 @@ suggest_parser.add_argument(
 
 
 @ns.route('/suggest/', endpoint='suggest_datasets')
-class SuggestDatasetsAPI(API):
+class DatasetSuggestAPI(API):
     @api.doc('suggest_datasets')
     @api.expect(suggest_parser)
-    @api.marshal_list_with(dataset_suggestion_fields)
+    @api.marshal_with(dataset_suggestion_fields)
     def get(self):
-        '''Suggest datasets'''
+        '''Datasets suggest endpoint using mongoDB contains'''
         args = suggest_parser.parse_args()
+        datasets_query = Dataset.objects(archived=None, deleted=None, private=False)
+        datasets = datasets_query.filter(
+            Q(title__icontains=args['q']) | Q(acronym__icontains=args['q']))
         return [
             {
-                'id': opt['payload']['id'],
-                'title': opt['text'],
-                'acronym': opt['payload'].get('acronym'),
-                'score': opt['score'],
-                'slug': opt['payload']['slug'],
-                'image_url': opt['payload']['image_url'],
+                'id': dataset.id,
+                'title': dataset.title,
+                'acronym': dataset.acronym,
+                'slug': dataset.slug,
+                'image_url': (
+                    dataset.organization.logo if dataset.organization
+                    else dataset.owner.avatar if dataset.owner else None
+                )
             }
-            for opt in search.suggest(args['q'], 'dataset_suggest',
-                                      args['size'])
+            for dataset in datasets.order_by(SUGGEST_SORTING).limit(args['size'])
         ]
 
 
 @ns.route('/suggest/formats/', endpoint='suggest_formats')
-class SuggestFormatsAPI(API):
+class FormatsSuggestAPI(API):
     @api.doc('suggest_formats')
     @api.expect(suggest_parser)
     def get(self):
         '''Suggest file formats'''
         args = suggest_parser.parse_args()
-        result = search.suggest(args['q'], 'format_suggest', args['size'])
-        return sorted(result, key=lambda o: len(o['text']))
+        results = [{'text': i} for i in current_app.config['ALLOWED_RESOURCES_EXTENSIONS']
+                   if args['q'] in i]
+        results = results[:args['size']]
+        return sorted(results, key=lambda o: len(o['text']))
 
 
 @ns.route('/suggest/mime/', endpoint='suggest_mime')
-class SuggestFormatsAPI(API):
+class MimesSuggestAPI(API):
     @api.doc('suggest_mime')
     @api.expect(suggest_parser)
     def get(self):
         '''Suggest mime types'''
         args = suggest_parser.parse_args()
-        result = search.suggest(args['q'], 'mime_suggest', args['size'])
-        return sorted(result, key=lambda o: len(o['text']))
+        results = [{'text': i} for i in current_app.config['ALLOWED_RESOURCES_MIMES']
+                   if args['q'] in i]
+        results = results[:args['size']]
+        return sorted(results, key=lambda o: len(o['text']))
 
 
 @ns.route('/licenses/', endpoint='licenses')
@@ -619,15 +725,16 @@ class ResourceTypesAPI(API):
         return [{'id': id, 'label': label}
                 for id, label in RESOURCE_TYPES.items()]
 
+
 @ns.route('/schemas/', endpoint='schemas')
 class SchemasAPI(API):
     @api.doc('schemas')
-    @api.marshal_list_with(schema_fields)
+    @api.marshal_list_with(catalog_schema_fields)
     def get(self):
         '''List all available schemas'''
         try:
             # This method call is cached as it makes HTTP requests
-            return ResourceSchema.objects()
+            return ResourceSchema.assignable_schemas()
         except SchemasCacheUnavailableException:
             abort(503, description='No schemas in cache and endpoint unavailable')
         except SchemasCatalogNotFoundException:

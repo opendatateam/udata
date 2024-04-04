@@ -49,7 +49,7 @@ class HarvestAPITest(MockBackendsMixin):
 
     def test_list_sources_exclude_deleted(self, api):
         sources = HarvestSourceFactory.create_batch(3)
-        HarvestSourceFactory.create_batch(2, deleted=datetime.now())
+        HarvestSourceFactory.create_batch(2, deleted=datetime.utcnow())
 
         response = api.get(url_for('api.harvest_sources'))
         assert200(response)
@@ -57,7 +57,7 @@ class HarvestAPITest(MockBackendsMixin):
 
     def test_list_sources_include_deleted(self, api):
         sources = HarvestSourceFactory.create_batch(3)
-        sources.extend(HarvestSourceFactory.create_batch(2, deleted=datetime.now()))
+        sources.extend(HarvestSourceFactory.create_batch(2, deleted=datetime.utcnow()))
 
         response = api.get(url_for('api.harvest_sources', deleted=True))
         assert200(response)

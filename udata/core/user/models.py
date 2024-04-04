@@ -1,16 +1,16 @@
 from copy import copy
 from datetime import datetime
 from itertools import chain
+import json
 from time import time
 
+from authlib.jose import JsonWebSignature
 from blinker import Signal
 from flask import current_app
 from flask_security import UserMixin, RoleMixin, MongoEngineUserDatastore
 from mongoengine.signals import pre_save, post_save
-from itsdangerous import JSONWebSignatureSerializer
-from elasticsearch_dsl import Integer, Object
 
-from werkzeug import cached_property
+from werkzeug.utils import cached_property
 
 from udata import mail
 from udata.uris import endpoint_for
@@ -19,10 +19,10 @@ from udata.i18n import lazy_gettext as _
 from udata.models import db, WithMetrics, Follow
 from udata.core.discussions.models import Discussion
 from udata.core.storages import avatars, default_image_basename
+from .constants import AVATAR_SIZES
 
 __all__ = ('User', 'Role', 'datastore')
 
-AVATAR_SIZES = [500, 200, 100, 32, 25]
 
 
 # TODO: use simple text for role
@@ -30,6 +30,7 @@ class Role(db.Document, RoleMixin):
     ADMIN = 'admin'
     name = db.StringField(max_length=80, unique=True)
     description = db.StringField(max_length=255)
+    permissions = db.ListField()
 
     def __str__(self):
         return self.name
@@ -45,6 +46,7 @@ class User(WithMetrics, UserMixin, db.Document):
     email = db.StringField(max_length=255, required=True, unique=True)
     password = db.StringField()
     active = db.BooleanField()
+    fs_uniquifier = db.StringField(max_length=64, unique=True, sparse=True)
     roles = db.ListField(db.ReferenceField(Role), default=[])
 
     first_name = db.StringField(max_length=255, required=True)
@@ -60,7 +62,7 @@ class User(WithMetrics, UserMixin, db.Document):
 
     apikey = db.StringField()
 
-    created_at = db.DateTimeField(default=datetime.now, required=True)
+    created_at = db.DateTimeField(default=datetime.utcnow, required=True)
 
     # The field below is required for Flask-security
     # when SECURITY_CONFIRMABLE is True
@@ -90,16 +92,10 @@ class User(WithMetrics, UserMixin, db.Document):
     on_delete = Signal()
 
     meta = {
-        'indexes': ['-created_at', 'slug', 'apikey'],
-        'ordering': ['-created_at']
+        'indexes': ['$slug', '-created_at', 'slug', 'apikey'],
+        'ordering': ['-created_at'],
+        'auto_create_index_on_save': True
     }
-
-    __search_metrics__ = Object(properties={
-        'datasets': Integer(),
-        'reuses': Integer(),
-        'followers': Integer(),
-        'views': Integer()
-    })
 
     __metrics_keys__ = [
         'datasets',
@@ -180,12 +176,15 @@ class User(WithMetrics, UserMixin, db.Document):
         return self.metrics.get('followers', 0)
 
     def generate_api_key(self):
-        s = JSONWebSignatureSerializer(current_app.config['SECRET_KEY'])
-        byte_str = s.dumps({
+        payload = {
             'user': str(self.id),
             'time': time(),
-        })
-        self.apikey = byte_str.decode()
+        }
+        s = JsonWebSignature(algorithms=['HS512']).serialize_compact(
+            {'alg': 'HS512'},
+            json.dumps(payload, separators=(',', ':')),
+            current_app.config['SECRET_KEY'])
+        self.apikey = s.decode()
 
     def clear_api_key(self):
         self.apikey = None
@@ -248,7 +247,7 @@ class User(WithMetrics, UserMixin, db.Document):
         self.about = None
         self.extras = None
         self.apikey = None
-        self.deleted = datetime.now()
+        self.deleted = datetime.utcnow()
         self.save()
         for organization in self.organizations:
             organization.members = [member
@@ -256,12 +255,21 @@ class User(WithMetrics, UserMixin, db.Document):
                                     if member.user != self]
             organization.save()
         for discussion in Discussion.objects(discussion__posted_by=self):
+            # Remove all discussions with current user as only participant
+            if all(message.posted_by == self for message in discussion.discussion):
+                discussion.delete()
+                continue
+
             for message in discussion.discussion:
                 if message.posted_by == self:
                     message.content = 'DELETED'
             discussion.save()
         Follow.objects(follower=self).delete()
         Follow.objects(following=self).delete()
+
+        from udata.models import ContactPoint
+        ContactPoint.objects(owner=self).delete()
+
         mail.send(_('Account deletion'), copied_user, 'account_deleted')
 
     def count_datasets(self):

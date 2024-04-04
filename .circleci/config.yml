@@ -5,9 +5,8 @@ jobs:
   python:
     docker:
       - image: udata/circleci:2-alpine
-      - image: circleci/mongo:3.6-stretch-ram
+      - image: mongo:6.0.4
       - image: redis:alpine
-      - image: udata/elasticsearch:2.4.5
     environment:
        BASH_ENV: /root/.bashrc
     steps:
@@ -20,22 +19,24 @@ jobs:
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
-          - py3-cache-v9-{{ arch }}-{{ checksum "python.deps" }}
-          - py3-cache-v9-{{ arch }}-{{ .Branch }}
-          - py3-cache-v9-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+          - py3-cache-v10-{{ arch }}-{{ checksum "python.deps" }}
+          - py3-cache-v10-{{ arch }}-{{ .Branch }}
+          - py3-cache-v10-{{ arch }}-{{ .Environment.BASE_BRANCH }}
       - run:
           name: Install python dependencies
+          # FIXME: For now, we fix setuptools due to https://github.com/etalab/data.gouv.fr/issues/1041
           command: |
             virtualenv venv
             source venv/bin/activate
+            pip install --force-reinstall setuptools==66.1.1
             pip install -r requirements/develop.pip
             pip install -e .
       - save_cache:
-          key: py3-cache-v9-{{ arch }}-{{ checksum "python.deps" }}
+          key: py3-cache-v10-{{ arch }}-{{ checksum "python.deps" }}
           paths:
           - venv
       - save_cache:
-          key: py3-cache-v9-{{ arch }}-{{ .Branch }}
+          key: py3-cache-v10-{{ arch }}-{{ .Branch }}
           paths:
           - venv
       - run:
@@ -99,7 +100,6 @@ jobs:
           root: .
           paths:
             - udata/static
-            - udata/manifest.json
 
   dist:
     docker:

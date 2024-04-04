@@ -8,7 +8,7 @@ from datetime import datetime, date
 
 from flask import Response, stream_with_context
 
-from udata.models import db
+from udata.mongo import db
 from udata.utils import recursive_get
 
 
@@ -58,8 +58,8 @@ class Adapter(object):
                     else:
                         field_tuple = (name, self.getter(*field))
                 except Exception as e:  # Catch all errors intentionally.
-                    log.error('Error exporting CSV for {name}: {error}'.format(
-                        name=self.__class__.__name__, error=e))
+                    log.exception('Error exporting CSV for {name}: {error_class} {error}'.format(
+                        name=self.__class__.__name__, error_class=e.__class__.__name__, error=e), stack_info=True)
                 self._fields.append(field_tuple)
         return self._fields
 
@@ -89,8 +89,8 @@ class Adapter(object):
                 try:
                     content = safestr(getter(obj))
                 except Exception as e:  # Catch all errors intentionally.
-                    log.error('Error exporting CSV for {name}: {error}'.format(
-                        name=self.__class__.__name__, error=e))
+                    log.exception('Error exporting CSV for {name}: {error_class} {error}'.format(
+                        name=self.__class__.__name__, error_class=e.__class__.__name__, error=e), stack_info=True)
             row.append(content)
         return row
 
@@ -130,8 +130,8 @@ class NestedAdapter(Adapter):
                     else:
                         field_tuple = (name, self.getter(*field))
                 except Exception as e:  # Catch all errors intentionally.
-                    log.error('Error exporting CSV for {name}: {error}'.format(
-                        name=self.__class__.__name__, error=e))
+                    log.exception('Error exporting CSV for {name}: {error_class} {error}'.format(
+                        name=self.__class__.__name__, error_class=e.__class__.__name__, error=e), stack_info=True)
                 self._nested_fields.append(field_tuple)
         return self._nested_fields
 
@@ -155,8 +155,8 @@ class NestedAdapter(Adapter):
                 try:
                     content = safestr(getter(nested))
                 except Exception as e:  # Catch all errors intentionally.
-                    log.error('Error exporting CSV for {name}: {error}'.format(
-                        name=self.__class__.__name__, error=e))
+                    log.exception('Error exporting CSV for {name}: {error_class} {error}'.format(
+                        name=self.__class__.__name__, error_class=e.__class__.__name__, error=e), stack_info=True)
             row.append(content)
         return row
 
@@ -233,7 +233,7 @@ def stream(queryset_or_adapter, basename=None):
     else:
         raise ValueError('Unsupported object type')
 
-    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M')
+    timestamp = datetime.utcnow().strftime('%Y-%m-%d-%H-%M')
     headers = {
         'Content-Disposition': 'attachment; filename={0}-{1}.csv'.format(
             basename or 'export', timestamp),

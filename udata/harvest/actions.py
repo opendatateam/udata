@@ -8,12 +8,14 @@ from bson import ObjectId
 from flask import current_app
 
 from udata.auth import current_user
+from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.models import User, Organization, PeriodicTask, Dataset
+from udata.storage.s3 import delete_file
 
 from . import backends, signals
 from .models import (
     HarvestSource, HarvestJob, DEFAULT_HARVEST_FREQUENCY,
-    VALIDATION_ACCEPTED, VALIDATION_REFUSED
+    VALIDATION_ACCEPTED, VALIDATION_REFUSED, archive_harvested_dataset
 )
 from .tasks import harvest
 
@@ -101,7 +103,7 @@ def update_source(ident, data):
 def validate_source(ident, comment=None):
     '''Validate a source for automatic harvesting'''
     source = get_source(ident)
-    source.validation.on = datetime.now()
+    source.validation.on = datetime.utcnow()
     source.validation.comment = comment
     source.validation.state = VALIDATION_ACCEPTED
     if current_user.is_authenticated:
@@ -115,7 +117,7 @@ def validate_source(ident, comment=None):
 def reject_source(ident, comment):
     '''Reject a source for automatic harvesting'''
     source = get_source(ident)
-    source.validation.on = datetime.now()
+    source.validation.on = datetime.utcnow()
     source.validation.comment = comment
     source.validation.state = VALIDATION_REFUSED
     if current_user.is_authenticated:
@@ -127,10 +129,20 @@ def reject_source(ident, comment):
 def delete_source(ident):
     '''Delete an harvest source'''
     source = get_source(ident)
-    source.deleted = datetime.now()
+    source.deleted = datetime.utcnow()
     source.save()
     signals.harvest_source_deleted.send(source)
     return source
+
+
+def clean_source(ident):
+    '''Deletes all datasets linked to a harvest source'''
+    source = get_source(ident)
+    datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
+    for dataset in datasets:
+        dataset.deleted = datetime.utcnow()
+        dataset.save()
+    return len(datasets)
 
 
 def purge_sources():
@@ -140,6 +152,9 @@ def purge_sources():
     for source in sources:
         if source.periodic_task:
             source.periodic_task.delete()
+        datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
+        for dataset in datasets:
+            archive_harvested_dataset(dataset, reason='harvester-deleted', dryrun=False)
         source.delete()
     return count
 
@@ -147,7 +162,17 @@ def purge_sources():
 def purge_jobs():
     '''Delete jobs older than retention policy'''
     retention = current_app.config['HARVEST_JOBS_RETENTION_DAYS']
-    expiration = datetime.now() - timedelta(days=retention)
+    expiration = datetime.utcnow() - timedelta(days=retention)
+
+    jobs_with_external_files = HarvestJob.objects(data__filename__exists=True, created__lt=expiration)
+    for job in jobs_with_external_files:
+        bucket = current_app.config.get('HARVEST_GRAPHS_S3_BUCKET')
+        if bucket is None:
+            log.error(f"Bucket isn't configured anymore, but jobs still exist with external filenames. Could not delete them.")
+            break
+
+        delete_file(bucket, job.data['filename'])
+
     return HarvestJob.objects(created__lt=expiration).delete()
 
 
@@ -278,16 +303,19 @@ def attach(domain, filename):
 
             # Detach previously attached dataset
             Dataset.objects(**{
-                'extras__harvest:domain': domain,
-                'extras__harvest:remote_id': row['remote']
+                'harvest__domain': domain,
+                'harvest__remote_id': row['remote']
             }).update(**{
-                'unset__extras__harvest:domain': True,
-                'unset__extras__harvest:remote_id': True
+                'unset__harvest__domain': True,
+                'unset__harvest__remote_id': True
             })
 
-            dataset.extras['harvest:domain'] = domain
-            dataset.extras['harvest:remote_id'] = row['remote']
-            dataset.last_modified = datetime.now()
+            if not dataset.harvest:
+                dataset.harvest = HarvestDatasetMetadata()
+            dataset.harvest.domain = domain
+            dataset.harvest.remote_id = row['remote']
+
+            dataset.last_modified_internal = datetime.utcnow()
             dataset.save()
             count += 1
 

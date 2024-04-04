@@ -14,6 +14,7 @@ class UserFactory(ModelFactory):
     first_name = factory.Faker('first_name')
     last_name = factory.Faker('last_name')
     email = factory.Faker('email')
+    fs_uniquifier = factory.Faker('uuid4')
     active = True
 
     @classmethod

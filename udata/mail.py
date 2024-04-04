@@ -6,6 +6,8 @@ from blinker import signal
 from flask import current_app, render_template
 from flask_mail import Mail, Message
 
+from smtplib import SMTPException
+
 from udata import i18n
 
 
@@ -45,6 +47,8 @@ def send(subject, recipients, template_base, **kwargs):
     if not isinstance(recipients, (list, tuple)):
         recipients = [recipients]
 
+    tpl_path = f'mail/{template_base}'
+
     debug = current_app.config.get('DEBUG', False)
     send_mail = current_app.config.get('SEND_MAIL', not debug)
     connection = send_mail and mail.connect or dummyconnection
@@ -58,9 +62,12 @@ def send(subject, recipients, template_base, **kwargs):
                 msg = Message(subject, sender=sender,
                               recipients=[recipient.email])
                 msg.body = render_template(
-                    'mail/{0}.txt'.format(template_base), subject=subject,
+                    f'{tpl_path}.txt', subject=subject,
                     sender=sender, recipient=recipient, **kwargs)
                 msg.html = render_template(
-                    'mail/{0}.html'.format(template_base), subject=subject,
+                    f'{tpl_path}.html', subject=subject,
                     sender=sender, recipient=recipient, **kwargs)
-                conn.send(msg)
+                try:
+                    conn.send(msg)
+                except SMTPException as e:
+                    log.error(f'Error sending mail {e}')

@@ -1,4 +1,4 @@
-from flask import g, url_for
+from flask import g, url_for, render_template_string
 from werkzeug.routing import BuildError
 
 from udata.i18n import I18nBlueprint, language
@@ -89,3 +89,8 @@ class I18nBlueprintTest(WebTestMixin, DBTestMixin, TestCase):
 
         response = self.get(url)
         self.assertRedirects(response, '/not-localized/')
+
+    def test_render_template_translation(self):
+        '''It should render the dataset page'''
+        self.app.config['DEFAULT_LANGUAGE'] = 'fr'
+        self.assertEqual("Bienvenue", render_template_string('{{ _("Welcome") }}'))

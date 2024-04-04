@@ -29,25 +29,17 @@ feature_collection_fields = api.model('GeoJSONFeatureCollection', {
 
 level_fields = api.model('GeoLevel', {
     'id': fields.String(description='The level identifier', required=True),
-    'name': fields.String(description='The level name', required=True),
-    'parents': fields.List(fields.String, description='The parent levels'),
+    'name': fields.String(description='The level name', required=True)
 })
 
 zone_fields = api.model('GeoZone', {
     'id': fields.String(description='The zone identifier', required=True),
     'name': fields.String(description='The zone name', required=True),
+    'slug': fields.String(description='The zone slug', required=True),
     'code': fields.String(
         description='The zone unique code in the level', required=True),
     'level': fields.String(description='The zone level', required=True),
-    'parents': fields.List(
-        fields.String, description='Every known parent zones'),
-    'keys': fields.Raw(
-        description='Some arbitry key-value identifying the zone'),
-    'population': fields.Integer(
-        description='An estimated/approximative population'),
-    'area': fields.Integer(description='An estimated/approximative area'),
-    'geom': fields.Nested(
-        geojson, description='A multipolygon for the whole coverage'),
+    'uri': fields.String(description='The zone uri', required=True)
 })
 
 granularity_fields = api.model('GeoGranularity', {
@@ -67,6 +59,7 @@ spatial_coverage_fields = api.model('SpatialCoverage', {
         description='The spatial/territorial granularity'),
 })
 
+
 zone_suggestion_fields = api.model('TerritorySuggestion', {
     'id': fields.String(description='The territory identifier', required=True),
     'name': fields.String(description='The territory name', required=True),
@@ -74,7 +67,5 @@ zone_suggestion_fields = api.model('TerritorySuggestion', {
         description='The territory main code', required=True),
     'level': fields.String(
         description='The territory administrative level', required=True),
-    'keys': fields.Raw(description='The territory known codes'),
-    'score': fields.Float(
-        description='The internal match score', required=True),
+    'uri': fields.String(description='The zone uri', required=True)
 })

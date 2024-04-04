@@ -4,7 +4,7 @@ import shlex
 from contextlib import contextmanager
 from urllib.parse import urlparse
 
-from flask import json, template_rendered, url_for
+from flask import json, template_rendered, url_for, current_app
 from flask.testing import FlaskClient
 from lxml import etree
 from werkzeug.urls import url_encode
@@ -12,8 +12,7 @@ from werkzeug.urls import url_encode
 from udata import settings
 from udata.app import create_app
 from udata.core.user.factories import UserFactory
-from udata.models import db
-from udata.search import es
+from udata.mongo import db
 
 from .helpers import assert200, assert_command_ok
 
@@ -44,14 +43,19 @@ class TestClient(FlaskClient):
     def login(self, user=None):
         user = user or UserFactory()
         with self.session_transaction() as session:
-            session['user_id'] = str(user.id)
+            # Since flask-security-too 4.0.0, the user.fs_uniquifier is used instead of user.id for auth
+            user_id = getattr(user, current_app.login_manager.id_attribute)()
+            session['user_id'] = user_id
             session['_fresh'] = True
+            session['_id'] = current_app.login_manager._session_identifier_generator()
+            current_app.login_manager._update_request_context_with_user(user)
         return user
 
     def logout(self):
         with self.session_transaction() as session:
             del session['user_id']
             del session['_fresh']
+            del session['_id']
 
 
 @pytest.fixture
@@ -135,6 +139,13 @@ def raw_db(app, clean_db):
     drop_db(app)
 
 
+@pytest.fixture
+def enable_resource_event(app):
+    '''Enable resource event'''
+    app.config['PUBLISH_ON_RESOURCE_EVENTS'] = True
+    app.config['RESOURCES_ANALYSER_URI'] = 'http://local.dev'
+
+
 class ApiClient(object):
     def __init__(self, client):
         self.client = client
@@ -191,42 +202,6 @@ def api(client):
     return api_client
 
 
-class AutoIndex(object):
-    '''
-    Allows to write both::
-        with autoindex():
-            pass
-    and::
-        with autoindex:
-            pass
-    '''
-    def __enter__(self):
-        pass
-
-    def __exit__(self, type, value, traceback):
-        es.indices.refresh(index=es.index_name)
-
-    def __call__(self):
-        return self
-
-
-def _clean_es():
-    if es.indices.exists(index=es.index_name):
-        es.indices.delete(index=es.index_name)
-
-
-@pytest.fixture
-def autoindex(app, clean_db):
-    app.config['AUTO_INDEX'] = True
-    _clean_es()
-    es.initialize()
-    es.cluster.health(wait_for_status='yellow', request_timeout=10)
-
-    yield AutoIndex()
-
-    _clean_es()
-
-
 @pytest.fixture(name='cli')
 def cli_fixture(app):
 
@@ -259,7 +234,7 @@ def instance_path(app, tmpdir):
         app.config.pop(key.format('ROOT'), None)
 
     storages.init_app(app)
-    app.register_blueprint(blueprint)
+    app.register_blueprint(blueprint, name='test-storage')
 
     return tmpdir
 

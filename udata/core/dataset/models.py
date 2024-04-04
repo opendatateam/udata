@@ -1,118 +1,40 @@
-from datetime import datetime, timedelta
-from collections import OrderedDict
 import logging
+
+from datetime import datetime, timedelta
+from urllib.parse import urlparse
 
 from blinker import signal
 from dateutil.parser import parse as parse_dt
 from flask import current_app
+from mongoengine import DynamicEmbeddedDocument, ValidationError as MongoEngineValidationError
 from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
+from pydoc import locate
 from stringdist import rdlevenshtein
-from werkzeug import cached_property
-from elasticsearch_dsl import Integer, Object
+from werkzeug.utils import cached_property
 import requests
+from typing import Optional, Tuple
 
 from udata.app import cache
 from udata.core import storages
 from udata.frontend.markdown import mdstrip
-from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
+from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage, FieldValidationError
 from udata.i18n import lazy_gettext as _
-from udata.utils import get_by, hash_url
-from udata.uris import endpoint_for
+from udata.utils import get_by, hash_url, to_naive_datetime
+from udata.uris import ValidationError, endpoint_for
+from udata.uris import validate as validate_url
+from .constants import CHECKSUM_TYPES, CLOSED_FORMATS, DEFAULT_LICENSE, LEGACY_FREQUENCIES, MAX_DISTANCE, PIVOTAL_DATA, RESOURCE_FILETYPES, RESOURCE_TYPES, SCHEMA_CACHE_DURATION, UPDATE_FREQUENCIES
 
 from .preview import get_preview_url
 from .exceptions import (
     SchemasCatalogNotFoundException, SchemasCacheUnavailableException
 )
 
-__all__ = (
-    'License', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
-    'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_FILETYPES',
-    'PIVOTAL_DATA', 'DEFAULT_LICENSE', 'RESOURCE_TYPES',
-    'ResourceSchema'
-)
+__all__ = ('License', 'Resource', 'Schema', 'Dataset', 'Checksum', 'CommunityResource', 'ResourceSchema')
+
+NON_ASSIGNABLE_SCHEMA_TYPES = ['datapackage']
 
 log = logging.getLogger(__name__)
-
-#: Udata frequencies with their labels
-#:
-#: See: http://dublincore.org/groups/collections/frequency/
-UPDATE_FREQUENCIES = OrderedDict([                              # Dublin core equivalent
-    ('unknown', _('Unknown')),                        # N/A
-    ('punctual', _('Punctual')),                      # N/A
-    ('continuous', _('Real time')),                   # freq:continuous
-    ('hourly', _('Hourly')),                          # N/A
-    ('fourTimesADay', _('Four times a day')),         # N/A
-    ('threeTimesADay', _('Three times a day')),       # N/A
-    ('semidaily', _('Semidaily')),                    # N/A
-    ('daily', _('Daily')),                            # freq:daily
-    ('fourTimesAWeek', _('Four times a week')),       # N/A
-    ('threeTimesAWeek', _('Three times a week')),     # freq:threeTimesAWeek
-    ('semiweekly', _('Semiweekly')),                  # freq:semiweekly
-    ('weekly', _('Weekly')),                          # freq:weekly
-    ('biweekly', _('Biweekly')),                      # freq:bimonthly
-    ('threeTimesAMonth', _('Three times a month')),   # freq:threeTimesAMonth
-    ('semimonthly', _('Semimonthly')),                # freq:semimonthly
-    ('monthly', _('Monthly')),                        # freq:monthly
-    ('bimonthly', _('Bimonthly')),                    # freq:bimonthly
-    ('quarterly', _('Quarterly')),                    # freq:quarterly
-    ('threeTimesAYear', _('Three times a year')),     # freq:threeTimesAYear
-    ('semiannual', _('Biannual')),                    # freq:semiannual
-    ('annual', _('Annual')),                          # freq:annual
-    ('biennial', _('Biennial')),                      # freq:biennial
-    ('triennial', _('Triennial')),                    # freq:triennial
-    ('quinquennial', _('Quinquennial')),              # N/A
-    ('irregular', _('Irregular')),                    # freq:irregular
-])
-
-#: Map legacy frequencies to currents
-LEGACY_FREQUENCIES = {
-    'fortnighly': 'biweekly',
-    'biannual': 'semiannual',
-    'realtime': 'continuous',
-}
-
-DEFAULT_FREQUENCY = 'unknown'
-
-DEFAULT_LICENSE = {
-    'id': 'notspecified',
-    'title': "License Not Specified",
-    'flags': ["generic"],
-    'maintainer': None,
-    'url': None,
-    'active': True,
-}
-
-RESOURCE_TYPES = OrderedDict([
-    ('main', _('Main file')),
-    ('documentation', _('Documentation')),
-    ('update', _('Update')),
-    ('api', _('API')),
-    ('code', _('Code repository')),
-    ('other', _('Other')),
-])
-
-RESOURCE_FILETYPE_FILE = 'file'
-RESOURCE_FILETYPES = OrderedDict([
-    (RESOURCE_FILETYPE_FILE, _('Uploaded file')),
-    ('remote', _('Remote file')),
-])
-
-CHECKSUM_TYPES = ('sha1', 'sha2', 'sha256', 'md5', 'crc')
-DEFAULT_CHECKSUM_TYPE = 'sha1'
-
-PIVOTAL_DATA = 'pivotal-data'
-CLOSED_FORMATS = ('pdf', 'doc', 'word', 'xls', 'excel')
-
-# Maximum acceptable Damerau-Levenshtein distance
-# used to guess license
-# (ie. number of allowed character changes)
-MAX_DISTANCE = 2
-
-SCHEMA_CACHE_DURATION = 60 * 5  # In seconds
-
-TITLE_SIZE_LIMIT = 350
-DESCRIPTION_SIZE_LIMIT = 100000
 
 
 def get_json_ld_extra(key, value):
@@ -125,11 +47,121 @@ def get_json_ld_extra(key, value):
     }
 
 
+class HarvestDatasetMetadata(DynamicEmbeddedDocument):
+    backend = db.StringField()
+    created_at = db.DateTimeField()
+    modified_at = db.DateTimeField()
+    source_id = db.StringField()
+    remote_id = db.StringField()
+    domain = db.StringField()
+    last_update = db.DateTimeField()
+    remote_url = db.URLField()
+    uri = db.StringField()
+    dct_identifier = db.StringField()
+    archived_at = db.DateTimeField()
+    archived = db.StringField()
+
+
+class HarvestResourceMetadata(DynamicEmbeddedDocument):
+    created_at = db.DateTimeField()
+    modified_at = db.DateTimeField()
+    uri = db.StringField()
+
+
+class Schema(db.EmbeddedDocument):
+    """
+    Schema can only be two things right now:
+    - Known schema: url is not set, name is set, version is maybe set
+    - Unknown schema: url is set, name and version are maybe set
+    """
+    url = db.URLField()
+    name = db.StringField()
+    version = db.StringField()
+
+    def __bool__(self):
+        """
+        In the database, since the schemas were only simple dicts, there is
+        empty `{}` stored. To prevent problems with converting to bool
+        (bool({}) and default bool(Schema) do not yield the same value), we transform
+        empty Schema() to False.
+        It's maybe not necessary but being paranoid here.
+        """
+        return bool(self.name) or bool(self.url)
+
+    def to_dict(self):
+        return {
+            'url': self.url,
+            'name': self.name,
+            'version': self.version,
+        }
+
+    def clean(self, **kwargs):
+        super().clean()
+
+        check_schema_in_catalog = kwargs.get('check_schema_in_catalog', False)
+
+        if not self.url and not self.name:
+            # There is no schema.
+            if self.version:
+                raise FieldValidationError(_('A schema must contains a name or an URL when a version is provided.'), field='version')
+
+            return
+
+        # First check if the URL is a known schema
+        if self.url:
+            info = ResourceSchema.get_existing_schema_info_by_url(self.url)
+            if info:
+                self.url = None
+                self.name = info[0]
+                self.version = info[1]
+            
+            # Nothing more to do since an URL can point to anywhere and have a random name/version
+            return
+
+        # All the following checks are only run if there is 
+        # some schemas in the catalog. If there is no catalog
+        # or no schema in the catalog we do not check the validity
+        # of the name and version
+        catalog_schemas = ResourceSchema.assignable_schemas()
+        if not catalog_schemas:
+            return
+
+        # We know this schema so we can do some checks
+        existing_schema = next((schema for schema in catalog_schemas if schema['name'] == self.name), None)
+
+        if not existing_schema:
+            message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}').format(
+                schema=self.name,
+                values=', '.join(map(lambda schema: schema['name'], catalog_schemas))
+            )
+            if check_schema_in_catalog:
+                raise FieldValidationError(message, field='name')
+            else:
+                log.warning(message)
+                return
+
+        if self.version:
+            allowed_versions = list(map(lambda version: version['version_name'], existing_schema['versions']))
+            allowed_versions.append('latest')
+
+            if self.version not in allowed_versions:
+                message = _('Version "{version}" is not an allowed value for the schema "{name}". Allowed versions: {values}').format(
+                    version=self.version,
+                    name=self.name,
+                    values=', '.join(allowed_versions)
+                )
+                if check_schema_in_catalog:
+                    raise FieldValidationError(message, field='version')
+                else:
+                    log.warning(message)
+                    return
+
+
 class License(db.Document):
     # We need to declare id explicitly since we do not use the default
     # value set by Mongo.
     id = db.StringField(primary_key=True)
-    created_at = db.DateTimeField(default=datetime.now, required=True)
+    created_at = db.DateTimeField(default=datetime.utcnow, required=True)
     title = db.StringField(required=True)
     alternate_titles = db.ListField(db.StringField())
     slug = db.SlugField(required=True, populate_from='title')
@@ -175,25 +207,49 @@ class License(db.Document):
             db.Q(id__iexact=text) | db.Q(slug=slug) | db.Q(url__iexact=text)
             | db.Q(alternate_urls__iexact=text)
         ).first()
+
         if license is None:
-            # Try to single match with a low Damerau-Levenshtein distance
+            # If we're dealing with an URL, let's try some specific stuff
+            # like getting rid of trailing slash and scheme mismatch
+            try:
+                url = validate_url(text)
+            except ValidationError:
+                pass
+            else:
+                parsed = urlparse(url)
+                path = parsed.path.rstrip('/')
+                query = f'{parsed.netloc}{path}'
+                license = qs(db.Q(url__icontains=query) | db.Q(alternate_urls__contains=query)).first()
+
+        if license is None:
+            # Try to single match `slug` with a low Damerau-Levenshtein distance
             computed = ((l, rdlevenshtein(l.slug, slug)) for l in cls.objects)
             candidates = [l for l, d in computed if d <= MAX_DISTANCE]
             # If there is more that one match, we cannot determinate
             # which one is closer to safely choose between candidates
             if len(candidates) == 1:
                 license = candidates[0]
+
         if license is None:
-            # Try to single match with a low Damerau-Levenshtein distance
+            # Try to match `title` with a low Damerau-Levenshtein distance
+            computed = ((l, rdlevenshtein(l.title.lower(), text)) for l in cls.objects)
+            candidates = [l for l, d in computed if d <= MAX_DISTANCE]
+            # If there is more that one match, we cannot determinate
+            # which one is closer to safely choose between candidates
+            if len(candidates) == 1:
+                license = candidates[0]
+
+        if license is None:
+            # Try to single match `alternate_titles` with a low Damerau-Levenshtein distance
             computed = (
                 (l, rdlevenshtein(cls.slug.slugify(t), slug))
                 for l in cls.objects
                 for t in l.alternate_titles
             )
             candidates = [l for l, d in computed if d <= MAX_DISTANCE]
-            # If there is more that one match, we cannot determinate
+            # If there is more that one license matching, we cannot determinate
             # which one is closer to safely choose between candidates
-            if len(candidates) == 1:
+            if len(set(candidates)) == 1:
                 license = candidates[0]
         return license
 
@@ -204,12 +260,10 @@ class License(db.Document):
 
 class DatasetQuerySet(db.OwnedQuerySet):
     def visible(self):
-        return self(private__ne=True, resources__0__exists=True,
-                    deleted=None, archived=None)
+        return self(private__ne=True, deleted=None, archived=None)
 
     def hidden(self):
         return self(db.Q(private=True) |
-                    db.Q(resources__0__exists=False) |
                     db.Q(deleted__ne=None) |
                     db.Q(archived__ne=None))
 
@@ -239,12 +293,31 @@ class ResourceMixin(object):
     filesize = db.IntField()  # `size` is a reserved keyword for mongoengine.
     fs_filename = db.StringField()
     extras = db.ExtrasField()
-    schema = db.DictField()
-
-    created_at = db.DateTimeField(default=datetime.now, required=True)
-    modified = db.DateTimeField(default=datetime.now, required=True)
-    published = db.DateTimeField(default=datetime.now, required=True)
+    harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)
+    schema = db.EmbeddedDocumentField(Schema)
+    
+    created_at_internal = db.DateTimeField(default=datetime.utcnow, required=True)
+    last_modified_internal = db.DateTimeField(default=datetime.utcnow, required=True)
     deleted = db.DateTimeField()
+
+    @property
+    def internal(self):
+        return {
+            'created_at_internal': self.created_at_internal,
+            'last_modified_internal': self.last_modified_internal
+        }
+
+    @property
+    def created_at(self):
+        return self.harvest.created_at if self.harvest and self.harvest.created_at else self.created_at_internal
+
+    @property
+    def last_modified(self):
+        if self.harvest and self.harvest.modified_at and to_naive_datetime(self.harvest.modified_at) < datetime.utcnow():
+            return to_naive_datetime(self.harvest.modified_at)
+        if self.filetype == 'remote' and self.extras.get('analysis:last-modified-at'):
+            return to_naive_datetime(self.extras.get('analysis:last-modified-at'))
+        return self.last_modified_internal
 
     def clean(self):
         super(ResourceMixin, self).clean()
@@ -296,7 +369,7 @@ class ResourceMixin(object):
         else:
             delta = min_cache_duration
         if self.extras.get('check:date'):
-            limit_date = datetime.now() - timedelta(minutes=delta)
+            limit_date = datetime.utcnow() - timedelta(minutes=delta)
             check_date = self.extras['check:date']
             if not isinstance(check_date, datetime):
                 try:
@@ -326,8 +399,7 @@ class ResourceMixin(object):
             'name': self.title or _('Nameless resource'),
             'contentUrl': self.url,
             'dateCreated': self.created_at.isoformat(),
-            'dateModified': self.modified.isoformat(),
-            'datePublished': self.published.isoformat(),
+            'dateModified': self.last_modified.isoformat(),
             'extras': [get_json_ld_extra(*item)
                        for item in self.extras.items()],
         }
@@ -370,7 +442,13 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
 
     @property
     def dataset(self):
-        return self._instance
+        try:
+            self._instance.id  # try to access attr from parent instance
+            return self._instance
+        except ReferenceError:  # weakly-referenced object no longer exists
+            log.warning('Weakly referenced object for resource.dataset no longer exists, '
+                        'using a poor performance query instead.')
+            return Dataset.objects(resources__id=self.id).first()
 
     def save(self, *args, **kwargs):
         if not self.dataset:
@@ -379,10 +457,6 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
 
 
 class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
-    created_at = DateTimeField(verbose_name=_('Creation date'),
-                               default=datetime.now, required=True)
-    last_modified = DateTimeField(verbose_name=_('Last modification date'),
-                                  default=datetime.now, required=True)
     title = db.StringField(required=True)
     acronym = db.StringField(max_length=128)
     # /!\ do not set directly the slug when creating or updating a dataset
@@ -400,12 +474,20 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     frequency_date = db.DateTimeField(verbose_name=_('Future date of update'))
     temporal_coverage = db.EmbeddedDocumentField(db.DateRange)
     spatial = db.EmbeddedDocumentField(SpatialCoverage)
+    schema = db.EmbeddedDocumentField(Schema)
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()
+    harvest = db.EmbeddedDocumentField(HarvestDatasetMetadata)
 
     featured = db.BooleanField(required=True, default=False)
 
+    contact_point = db.ReferenceField('ContactPoint', reverse_delete_rule=db.NULLIFY)
+
+    created_at_internal = DateTimeField(verbose_name=_('Creation date'),
+                                        default=datetime.utcnow, required=True)
+    last_modified_internal = DateTimeField(verbose_name=_('Last modification date'),
+                                           default=datetime.utcnow, required=True)
     deleted = db.DateTimeField()
     archived = db.DateTimeField()
 
@@ -416,15 +498,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         PIVOTAL_DATA: _('Pivotal data'),
     }
 
-    __search_metrics__ = Object(properties={
-        'reuses': Integer(),
-        'followers': Integer(),
-        'views': Integer(),
-    })
-
     __metrics_keys__ = [
         'discussions',
-        'issues',
         'reuses',
         'followers',
         'views',
@@ -432,13 +507,19 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     meta = {
         'indexes': [
-            '-created_at',
+            '$title',
+            'created_at_internal',
+            'last_modified_internal',
+            'metrics.reuses',
+            'metrics.followers',
+            'metrics.views',
             'slug',
             'resources.id',
             'resources.urlhash',
         ] + db.Owned.meta['indexes'],
-        'ordering': ['-created_at'],
+        'ordering': ['-created_at_internal'],
         'queryset_class': DatasetQuerySet,
+        'auto_create_index_on_save': True
     }
 
     before_save = signal('Dataset.before_save')
@@ -450,6 +531,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     on_delete = signal('Dataset.on_delete')
     on_archive = signal('Dataset.on_archive')
     on_resource_added = signal('Dataset.on_resource_added')
+    on_resource_updated = signal('Dataset.on_resource_updated')
+    on_resource_removed = signal('Dataset.on_resource_removed')
 
     verbose_name = _('dataset')
 
@@ -468,15 +551,36 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             cls.on_update.send(document)
         if document.deleted:
             cls.on_delete.send(document)
-        if document.archived:
-            cls.on_archive.send(document)
-        if kwargs.get('resource_added'):
-            cls.on_resource_added.send(document,
-                                       resource_id=kwargs['resource_added'])
 
     def clean(self):
+        super(Dataset, self).clean()
         if self.frequency in LEGACY_FREQUENCIES:
             self.frequency = LEGACY_FREQUENCIES[self.frequency]
+
+        for key, value in self.extras.items():
+            if not key.startswith('custom:'):
+                continue
+            if not self.organization:
+                raise MongoEngineValidationError(
+                    'Custom metadatas are only accessible to dataset owned by on organization.')
+            custom_meta = key.split(':')[1]
+            org_custom = self.organization.extras.get('custom', [])
+            custom_present = False
+            for custom in org_custom:
+                if custom['title'] != custom_meta:
+                    continue
+                custom_present = True
+                if custom['type'] == 'choice':
+                    if value not in custom['choices']:
+                        raise MongoEngineValidationError(
+                            'Custom metadata choice is not defined by organization.')
+                else:
+                    if not isinstance(value, locate(custom['type'])):
+                        raise MongoEngineValidationError(
+                            'Custom metadata is not of the right type.')
+            if not custom_present:
+                raise MongoEngineValidationError(
+                    'Dataset\'s organization did not define the requested custom metadata.')
 
     def url_for(self, *args, **kwargs):
         return endpoint_for('datasets.show', 'api.dataset', dataset=self, *args, **kwargs)
@@ -489,8 +593,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     @property
     def is_hidden(self):
-        return (len(self.resources) == 0 or self.private or self.deleted
-                or self.archived)
+        return self.private or self.deleted or self.archived
 
     @property
     def full_title(self):
@@ -528,42 +631,64 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         return [resource.check_availability() for resource in remote_resources]
 
     @property
+    def created_at(self):
+        return self.harvest.created_at if self.harvest and self.harvest.created_at else self.created_at_internal
+
+    @property
+    def last_modified(self):
+        if (self.harvest and self.harvest.modified_at and
+                to_naive_datetime(self.harvest.modified_at) < datetime.utcnow()):
+            return to_naive_datetime(self.harvest.modified_at)
+        return self.last_modified_internal
+
+    @property
     def last_update(self):
+        """
+        Use the more recent date we would have on resources (harvest, modified).
+        Default to dataset last_modified if no resource.
+        """
         if self.resources:
-            return max(resource.published for resource in self.resources)
+            return max([res.last_modified for res in self.resources])
         else:
             return self.last_modified
 
     @property
     def next_update(self):
         """Compute the next expected update date,
-
         given the frequency and last_update.
         Return None if the frequency is not handled.
+
+        We consider frequencies that have a number of
+        occurences on a timespan to be irregularry divided
+        in the timespan and expect a next update before the end
+        of the timespan.
+
+        Ex: the next update for a threeTimesAday freq is not
+        every 8 hours, but is maximum 24 hours later.
         """
         delta = None
-        if self.frequency == 'daily':
+        if self.frequency == 'hourly':
+            delta = timedelta(hours=1)
+        elif self.frequency in ['fourTimesADay', 'threeTimesADay', 'semidaily', 'daily']:
             delta = timedelta(days=1)
-        elif self.frequency == 'weekly':
+        elif self.frequency in ['fourTimesAWeek', 'threeTimesAWeek', 'semiweekly', 'weekly']:
             delta = timedelta(weeks=1)
-        elif self.frequency == 'fortnighly':
+        elif self.frequency == 'biweekly':
             delta = timedelta(weeks=2)
-        elif self.frequency == 'monthly':
-            delta = timedelta(weeks=4)
+        elif self.frequency in ['threeTimesAMonth', 'semimonthly', 'monthly']:
+            delta = timedelta(days=31)
         elif self.frequency == 'bimonthly':
-            delta = timedelta(weeks=4 * 2)
+            delta = timedelta(days=31 * 2)
         elif self.frequency == 'quarterly':
-            delta = timedelta(weeks=52 / 4)
-        elif self.frequency == 'biannual':
-            delta = timedelta(weeks=52 / 2)
-        elif self.frequency == 'annual':
-            delta = timedelta(weeks=52)
+            delta = timedelta(days=365 / 4)
+        elif self.frequency in ['threeTimesAYear', 'semiannual', 'annual']:
+            delta = timedelta(days=365)
         elif self.frequency == 'biennial':
-            delta = timedelta(weeks=52 * 2)
+            delta = timedelta(days=365 * 2)
         elif self.frequency == 'triennial':
-            delta = timedelta(weeks=52 * 3)
+            delta = timedelta(days=365 * 3)
         elif self.frequency == 'quinquennial':
-            delta = timedelta(weeks=52 * 5)
+            delta = timedelta(days=365 * 5)
         if delta is None:
             return
         else:
@@ -579,67 +704,93 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             * description length
             * and so on
         """
-        from udata.models import Discussion  # noqa: Prevent circular imports
         result = {}
         if not self.id:
             # Quality is only relevant on saved Datasets
             return result
-        if self.frequency != 'unknown':
-            result['frequency'] = self.frequency
+
+        result['license'] = True if self.license else False
+        result['temporal_coverage'] = True if self.temporal_coverage else False
+        result['spatial'] = True if self.spatial else False
+
+        result['update_frequency'] = self.frequency and self.frequency != 'unknown'
         if self.next_update:
-            result['update_in'] = -(self.next_update - datetime.now()).days
-        if self.tags:
-            result['tags_count'] = len(self.tags)
-        if self.description:
-            result['description_length'] = len(self.description)
+            # Allow for being one day late on update.
+            # We may have up to one day delay due to harvesting for example
+            result['update_fulfilled_in_time'] = (
+                True if (self.next_update - datetime.utcnow()).days >= -1 else False
+            )
+        elif self.frequency in ['continuous', 'irregular', 'punctual']:
+            # For these frequencies, we don't expect regular updates or can't quantify them.
+            # Thus we consider the update_fulfilled_in_time quality criterion to be true.
+            result['update_fulfilled_in_time'] = True
+
+        result['dataset_description_quality'] = (
+            True if len(self.description) > current_app.config.get('QUALITY_DESCRIPTION_LENGTH')
+            else False
+        )
+
         if self.resources:
             result['has_resources'] = True
-            result['has_only_closed_or_no_formats'] = all(
+            result['has_open_format'] = not all(
                 resource.closed_or_no_format for resource in self.resources)
-            result['has_unavailable_resources'] = not all(
-                self.check_availability())
-        discussions = Discussion.objects(subject=self)
-        if discussions:
-            result['discussions'] = len(discussions)
-            result['has_untreated_discussions'] = not all(
-                discussion.person_involved(self.owner)
-                for discussion in discussions)
+            result['all_resources_available'] = all(self.check_availability())
+            resource_doc = False
+            resource_desc = False
+            for resource in self.resources:
+                if resource.type == 'documentation':
+                    resource_doc = True
+                if resource.description:
+                    resource_desc = True
+            result['resources_documentation'] = resource_doc or resource_desc
+
         result['score'] = self.compute_quality_score(result)
         return result
+    
+    @property
+    def downloads(self):
+        return sum(resource.metrics.get('views', 0) for resource in self.resources)
+
+
+    @staticmethod
+    def normalize_score(score):
+        """
+        Normalize score by dividing it by the quality max score.
+        Make sure to update QUALITY_MAX_SCORE accordingly if the max score changes.
+        """
+        QUALITY_MAX_SCORE = 9
+        return score / QUALITY_MAX_SCORE
 
     def compute_quality_score(self, quality):
-        """Compute the score related to the quality of that dataset."""
+        """
+        Compute the score related to the quality of that dataset.
+        The score is normalized between 0 and 1.
+
+        Make sure to update normalize_score if the max score changes.
+        """
         score = 0
-        UNIT = 2
-        if 'update_in' in quality:
-            # TODO: should be related to frequency.
-            if quality['update_in'] < 0:
+        UNIT = 1
+        if quality['license']:
+            score += UNIT
+        if quality['temporal_coverage']:
+            score += UNIT
+        if quality['spatial']:
+            score += UNIT
+        if quality['update_frequency']:
+            score += UNIT
+        if 'update_fulfilled_in_time' in quality:
+            if quality['update_fulfilled_in_time']:
                 score += UNIT
-            else:
-                score -= UNIT
-        if 'tags_count' in quality:
-            if quality['tags_count'] > 3:
-                score += UNIT
-        if 'description_length' in quality:
-            if quality['description_length'] > 100:
-                score += UNIT
+        if quality['dataset_description_quality']:
+            score += UNIT
         if 'has_resources' in quality:
-            if quality['has_only_closed_or_no_formats']:
-                score -= UNIT
-            else:
+            if quality['has_open_format']:
                 score += UNIT
-            if quality['has_unavailable_resources']:
-                score -= UNIT
-            else:
+            if quality['all_resources_available']:
                 score += UNIT
-        if 'discussions' in quality:
-            if quality['has_untreated_discussions']:
-                score -= UNIT
-            else:
+            if quality['resources_documentation']:
                 score += UNIT
-        if score < 0:
-            return 0
-        return score
+        return self.normalize_score(score)
 
     @classmethod
     def get(cls, id_or_slug):
@@ -658,8 +809,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             }
         })
         self.reload()
-        post_save.send(self.__class__, document=self,
-                       resource_added=resource.id)
+        self.on_resource_added.send(self.__class__, document=self, resource_id=resource.id)
 
     def update_resource(self, resource):
         '''Perform an atomic update for an existing resource'''
@@ -669,7 +819,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         }
         self.update(**data)
         self.reload()
-        post_save.send(self.__class__, document=self)
+        self.on_resource_updated.send(self.__class__, document=self, resource_id=resource.id)
 
     def remove_resource(self, resource):
         # Deletes resource's file from file storage
@@ -677,6 +827,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             storages.resources.delete(resource.fs_filename)
 
         self.resources.remove(resource)
+        self.on_resource_removed.send(self.__class__, document=self, resource_id=resource.id)
 
     @property
     def community_resources(self):
@@ -722,17 +873,19 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         return result
 
     @property
+    def internal(self):
+        return {
+            'created_at_internal': self.created_at_internal,
+            'last_modified_internal': self.last_modified_internal
+        }
+
+    @property
     def views_count(self):
         return self.metrics.get('views', 0)
 
     def count_discussions(self):
         from udata.models import Discussion
         self.metrics['discussions'] = Discussion.objects(subject=self, closed=None).count()
-        self.save()
-
-    def count_issues(self):
-        from udata.models import Issue
-        self.metrics['issues'] = Issue.objects(subject=self, closed=None).count()
         self.save()
 
     def count_reuses(self):
@@ -762,7 +915,7 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
     ]
 
     meta = {
-        'ordering': ['-created_at'],
+        'ordering': ['-created_at_internal'],
         'queryset_class': db.OwnedQuerySet,
     }
 
@@ -770,11 +923,10 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
     def from_community(self):
         return True
 
-
 class ResourceSchema(object):
     @staticmethod
     @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
-    def objects():
+    def all():
         '''
         Get a list of schemas from a schema catalog endpoint.
 
@@ -795,25 +947,37 @@ class ResourceSchema(object):
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             log.exception(f'Error while getting schema catalog from {endpoint}')
-            content = cache.get(cache_key)
+            schemas = cache.get(cache_key)
         else:
             schemas = response.json().get('schemas', [])
-            content = [
-                {
-                    'id': s['name'],
-                    'label': s['title'],
-                    'versions': [d['version_name'] for d in s['versions']],
-                } for s in schemas
-            ]
-            cache.set(cache_key, content)
+            cache.set(cache_key, schemas)
         # no cached version or no content
-        if not content:
+        if not schemas:
             log.error(f'No content found inc. from cache for schema catalog')
             raise SchemasCacheUnavailableException('No content in cache for schema catalog')
 
-        return content
+        return schemas
+    
+    def assignable_schemas():
+        return [s for s in ResourceSchema.all() if s.get('schema_type') not in NON_ASSIGNABLE_SCHEMA_TYPES]
 
+    def get_existing_schema_info_by_url(url: str) -> Optional[Tuple[str, Optional[str]]]:
+        '''
+        Returns the name and the version if exists
+        '''
+        for schema in ResourceSchema.all():
+            for version in schema['versions']:
+                if version['schema_url'] == url:
+                    return schema['name'], version['version_name']
 
+            if schema['schema_url'] == url:
+                # The main schema URL is often the 'latest' version but
+                # not sure if it's mandatory everywhere so set the version to
+                # None here.
+                return schema['name'], None
+
+        return None
+    
 def get_resource(id):
     '''Fetch a resource given its UUID'''
     dataset = Dataset.objects(resources__id=id).first()

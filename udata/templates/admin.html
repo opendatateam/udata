@@ -10,18 +10,12 @@
             'robots': 'noindex',
         }) }}
         <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport' />
-        {% if 'common.css' is in_manifest %}
-        <link href="{{ manifest('udata', 'common.css') }}" rel="stylesheet" />
-        {% endif %}
-        <link href="{{ manifest('udata', 'admin.css') }}" rel="stylesheet" />
-        {% block theme_css %}{% endblock %}
-        {% block extra_head %}{% endblock %}
+        <link href="{{ static('admin.css') }}" rel="stylesheet" />
         {% endblock raw_head %}
     </head>
     <body class="skin-blue fixed sidebar-mini">
         <div id="app"></div>
-        <script src="{{ manifest('udata', 'common.js') }}"></script>
-        <script src="{{ manifest('udata', 'admin.js') }}"></script>
-        {% block theme_js %}{% endblock %}
+        <script src="{{ static('common.js') }}"></script>
+        <script src="{{ static('admin.js') }}"></script>
     </body>
 </html>

@@ -2,17 +2,14 @@ from datetime import datetime
 
 from flask import url_for
 
-from udata.models import Discussion, Follow, Issue, Member, User
+from udata.models import Discussion, Follow, Member, User
 from udata.core.discussions.models import Message as DiscMsg
-from udata.core.issues.models import Message as IssueMsg
 from udata.core.dataset.factories import (
     CommunityResourceFactory,
-    DatasetFactory,
-    VisibleDatasetFactory,
+    DatasetFactory
 )
 from udata.core.dataset.activities import UserCreatedDataset
 from udata.core.discussions.factories import DiscussionFactory
-from udata.core.issues.factories import IssueFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
@@ -41,7 +38,7 @@ class MeAPITest(APITestCase):
         member = Member(user=user, role='editor')
         org = OrganizationFactory(members=[member])
         deleted_org = OrganizationFactory(members=[member],
-                                          deleted=datetime.now())
+                                          deleted=datetime.utcnow())
         response = self.get(url_for('api.me'))
         self.assert200(response)
         orgs = [o['id'] for o in response.json['organizations']]
@@ -91,9 +88,9 @@ class MeAPITest(APITestCase):
         member = Member(user=user, role='editor')
         organization = OrganizationFactory(members=[member])
         community_resources = [
-            VisibleDatasetFactory(owner=user) for _ in range(2)]
+            DatasetFactory(owner=user) for _ in range(2)]
         org_datasets = [
-            VisibleDatasetFactory(organization=organization)
+            DatasetFactory(organization=organization)
             for _ in range(2)]
 
         response = self.get(url_for('api.my_org_datasets'))
@@ -107,15 +104,15 @@ class MeAPITest(APITestCase):
         member = Member(user=user, role='editor')
         organization = OrganizationFactory(members=[member])
         datasets = [
-            VisibleDatasetFactory(owner=user, title='foô'),
+            DatasetFactory(owner=user, title='foô'),
         ]
         org_datasets = [
-            VisibleDatasetFactory(organization=organization, title='foô'),
+            DatasetFactory(organization=organization, title='foô'),
         ]
 
         # Should not be listed.
-        VisibleDatasetFactory(owner=user)
-        VisibleDatasetFactory(organization=organization)
+        DatasetFactory(owner=user)
+        DatasetFactory(organization=organization)
 
         response = self.get(url_for('api.my_org_datasets'),
                             qs={'q': 'foô'})
@@ -191,63 +188,14 @@ class MeAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json), len(reuses) + len(org_reuses))
 
-    def test_my_org_issues(self):
-        user = self.login()
-        member = Member(user=user, role='editor')
-        organization = OrganizationFactory(members=[member])
-        reuse = ReuseFactory(owner=user)
-        org_reuse = ReuseFactory(organization=organization)
-        dataset = VisibleDatasetFactory(owner=user)
-        org_dataset = VisibleDatasetFactory(organization=organization)
-
-        sender = UserFactory()
-        issues = [
-            Issue.objects.create(subject=s, title='', user=sender)
-            for s in (dataset, org_dataset, reuse, org_reuse)
-        ]
-
-        # Should not be listed
-        Issue.objects.create(subject=VisibleDatasetFactory(), title='', user=sender)
-        Issue.objects.create(subject=ReuseFactory(), title='', user=sender)
-
-        response = self.get(url_for('api.my_org_issues'))
-        self.assert200(response)
-        self.assertEqual(len(response.json), len(issues))
-
-    def test_my_org_issues_with_search(self):
-        user = self.login()
-        member = Member(user=user, role='editor')
-        organization = OrganizationFactory(members=[member])
-        reuse = ReuseFactory(owner=user)
-        org_reuse = ReuseFactory(organization=organization)
-        dataset = VisibleDatasetFactory(owner=user)
-        org_dataset = VisibleDatasetFactory(organization=organization)
-
-        issues = [
-            Issue.objects.create(subject=org_dataset, title='foô', user=user),
-            Issue.objects.create(subject=reuse, title='foô', user=user),
-        ]
-
-        # Should not be listed.
-        Issue.objects.create(subject=dataset, title='', user=user),
-        Issue.objects.create(subject=org_reuse, title='', user=user),
-
-        # Should really not be listed.
-        Issue.objects.create(subject=VisibleDatasetFactory(), title='', user=user)
-        Issue.objects.create(subject=ReuseFactory(), title='', user=user)
-
-        response = self.get(url_for('api.my_org_issues'), qs={'q': 'foô'})
-        self.assert200(response)
-        self.assertEqual(len(response.json), len(issues))
-
     def test_my_org_discussions(self):
         user = self.login()
         member = Member(user=user, role='editor')
         organization = OrganizationFactory(members=[member])
         reuse = ReuseFactory(owner=user)
         org_reuse = ReuseFactory(organization=organization)
-        dataset = VisibleDatasetFactory(owner=user)
-        org_dataset = VisibleDatasetFactory(organization=organization)
+        dataset = DatasetFactory(owner=user)
+        org_dataset = DatasetFactory(organization=organization)
 
         discussions = [
             Discussion.objects.create(subject=dataset, title='', user=user),
@@ -257,7 +205,7 @@ class MeAPITest(APITestCase):
         ]
 
         # Should not be listed
-        Discussion.objects.create(subject=VisibleDatasetFactory(), title='', user=user)
+        Discussion.objects.create(subject=DatasetFactory(), title='', user=user)
         Discussion.objects.create(subject=ReuseFactory(), title='', user=user)
 
         response = self.get(url_for('api.my_org_discussions'))
@@ -270,8 +218,8 @@ class MeAPITest(APITestCase):
         organization = OrganizationFactory(members=[member])
         reuse = ReuseFactory(owner=user)
         org_reuse = ReuseFactory(organization=organization)
-        dataset = VisibleDatasetFactory(owner=user)
-        org_dataset = VisibleDatasetFactory(organization=organization)
+        dataset = DatasetFactory(owner=user)
+        org_dataset = DatasetFactory(organization=organization)
 
         discussions = [
             Discussion.objects.create(subject=dataset, title='foô', user=user),
@@ -283,7 +231,7 @@ class MeAPITest(APITestCase):
         Discussion.objects.create(subject=org_dataset, title='', user=user),
 
         # Should really not be listed.
-        Discussion.objects.create(subject=VisibleDatasetFactory(), title='foô', user=user)
+        Discussion.objects.create(subject=DatasetFactory(), title='foô', user=user)
         Discussion.objects.create(subject=ReuseFactory(), title='foô', user=user)
 
         response = self.get(url_for('api.my_org_discussions'), qs={'q': 'foô'})
@@ -337,6 +285,7 @@ class MeAPITest(APITestCase):
     def test_delete(self):
         '''It should delete the connected user'''
         user = self.login()
+        user_email = user.email
         self.assertIsNone(user.deleted)
         other_user = UserFactory()
         members = [Member(user=user), Member(user=other_user)]
@@ -349,14 +298,6 @@ class MeAPITest(APITestCase):
                                  posted_by=other_user)
         discussion = DiscussionFactory(user=user,
                                        discussion=[disc_msg, other_disc_msg])
-        issue_msg_content = faker.sentence()
-        issue_msg = IssueMsg(content=issue_msg_content,
-                             posted_by=user)
-        other_issue_msg_content = faker.sentence()
-        other_issue_msg = IssueMsg(content=other_issue_msg_content,
-                                   posted_by=other_user)
-        issue = IssueFactory(user=user,
-                             discussion=[issue_msg, other_issue_msg])
         dataset = DatasetFactory(owner=user)
         reuse = ReuseFactory(owner=user)
         resource = CommunityResourceFactory(owner=user)
@@ -368,14 +309,13 @@ class MeAPITest(APITestCase):
         with capture_mails() as mails:
             response = self.delete(url_for('api.me'))
         self.assertEqual(len(mails), 1)
-        self.assertEqual(mails[0].send_to, set([user.email]))
+        self.assertEqual(mails[0].send_to, set([user_email]))
         self.assertEqual(mails[0].subject, _('Account deletion'))
         self.assert204(response)
 
         user.reload()
         organization.reload()
         discussion.reload()
-        issue.reload()
         dataset.reload()
         reuse.reload()
         resource.reload()
@@ -411,12 +351,6 @@ class MeAPITest(APITestCase):
         self.assertEqual(discussion.discussion[0].content, 'DELETED')
         self.assertEqual(discussion.discussion[1].content,
                          other_disc_msg_content)
-
-        # The issues are kept and the messages are not anonymized
-        self.assertEqual(len(issue.discussion), 2)
-        self.assertEqual(issue.discussion[0].content, issue_msg_content)
-        self.assertEqual(issue.discussion[1].content,
-                         other_issue_msg_content)
 
         # The datasets are unchanged
         self.assertEqual(dataset.owner, user)

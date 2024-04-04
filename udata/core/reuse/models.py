@@ -1,7 +1,6 @@
 from blinker import Signal
 from mongoengine.signals import pre_save, post_save
-from werkzeug import cached_property
-from elasticsearch_dsl import Integer, Object
+from werkzeug.utils import cached_property
 
 from udata.core.storages import images, default_image_basename
 from udata.frontend.markdown import mdstrip
@@ -9,27 +8,9 @@ from udata.i18n import lazy_gettext as _
 from udata.models import db, BadgeMixin, WithMetrics
 from udata.utils import hash_url
 from udata.uris import endpoint_for
+from .constants import IMAGE_MAX_SIZE, IMAGE_SIZES, REUSE_TOPICS, REUSE_TYPES
 
-__all__ = ('Reuse', 'REUSE_TYPES')
-
-
-REUSE_TYPES = {
-    'api': _('API'),
-    'application': _('Application'),
-    'idea': _('Idea'),
-    'news_article': _('News Article'),
-    'paper': _('Paper'),
-    'post': _('Post'),
-    'visualization': _('Visualization'),
-    'hardware': _('Connected device'),
-}
-
-
-IMAGE_SIZES = [500, 100, 50, 25]
-IMAGE_MAX_SIZE = 800
-
-TITLE_SIZE_LIMIT = 350
-DESCRIPTION_SIZE_LIMIT = 100000
+__all__ = ('Reuse',)
 
 
 class ReuseQuerySet(db.OwnedQuerySet):
@@ -57,9 +38,10 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
     datasets = db.ListField(
         db.ReferenceField('Dataset', reverse_delete_rule=db.PULL))
     tags = db.TagListField()
+    topic = db.StringField(required=True, choices=list(REUSE_TOPICS))
     # badges = db.ListField(db.EmbeddedDocumentField(ReuseBadge))
 
-    private = db.BooleanField()
+    private = db.BooleanField(default=False)
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()
@@ -72,24 +54,24 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     __badges__ = {}
 
-    __search_metrics__ = Object(properties={
-        'datasets': Integer(),
-        'followers': Integer(),
-        'views': Integer(),
-    })
-
     __metrics_keys__ = [
         'discussions',
-        'issues',
         'datasets',
         'followers',
         'views',
     ]
 
     meta = {
-        'indexes': ['-created_at', 'urlhash'] + db.Owned.meta['indexes'],
+        'indexes': ['$title',
+                    'created_at',
+                    'last_modified',
+                    'metrics.datasets',
+                    'metrics.followers',
+                    'metrics.views',
+                    'urlhash'] + db.Owned.meta['indexes'],
         'ordering': ['-created_at'],
         'queryset_class': ReuseQuerySet,
+        'auto_create_index_on_save': True
     }
 
     before_save = Signal()
@@ -140,7 +122,12 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
     def type_label(self):
         return REUSE_TYPES[self.type]
 
+    @property
+    def topic_label(self):
+        return REUSE_TOPICS[self.topic]
+
     def clean(self):
+        super(Reuse, self).clean()
         '''Auto populate urlhash from url'''
         if not self.urlhash or 'url' in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
@@ -194,11 +181,6 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
     def count_discussions(self):
         from udata.models import Discussion
         self.metrics['discussions'] = Discussion.objects(subject=self, closed=None).count()
-        self.save()
-
-    def count_issues(self):
-        from udata.models import Issue
-        self.metrics['issues'] = Issue.objects(subject=self, closed=None).count()
         self.save()
 
     def count_followers(self):

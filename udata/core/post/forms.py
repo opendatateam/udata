@@ -1,7 +1,8 @@
 from udata.forms import ModelForm, fields, validators, widgets
 from udata.i18n import lazy_gettext as _
 
-from .models import Post, IMAGE_SIZES
+from .models import Post
+from .constants import IMAGE_SIZES
 
 
 __all__ = ('PostForm', )
@@ -24,3 +25,7 @@ class PostForm(ModelForm):
     credit_url = fields.URLField(_('Credit URL'))
 
     tags = fields.TagField(_('Tags'))
+
+    body_type = fields.StringField(
+        _('body type'),
+        description=_('Specify your body type (HTML or markdown)'))

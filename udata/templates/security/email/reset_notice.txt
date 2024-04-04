@@ -1,0 +1,4 @@
+{% extends 'security/email/base.txt' %}
+{% block body %}
+    {{ _('Your password for %(site)s has been reset.', site=config.SITE_TITLE) }}
+{% endblock %}

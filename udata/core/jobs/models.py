@@ -1,7 +1,7 @@
 from celerybeatmongo.models import PeriodicTask as BasePeriodicTask, PERIODS
 
 from udata.i18n import lazy_gettext as _
-from udata.models import db
+from udata.mongo import db
 
 
 __all__ = ('PeriodicTask', 'PERIODS')

@@ -6,6 +6,7 @@
 
 <script>
 import Post from 'models/post';
+import post_types from 'models/post_types';
 import VerticalForm from 'components/form/vertical-form.vue';
 
 export default {
@@ -31,6 +32,14 @@ export default {
                     id: 'tags',
                     label: this._('Tags'),
                     widget: 'tag-completer'
+                }, {
+                    id: 'body_type',
+                    label: this._('Body Type'),
+                    widget: 'select-input',
+                    values: post_types,
+                    map: function(item) {
+                        return {value: item.id, text: item.label};
+                    }
                 }]
         };
     },

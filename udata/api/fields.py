@@ -1,12 +1,13 @@
 import logging
+import datetime
 
+import pytz
 from dateutil.parser import parse
-
 from flask import request, url_for
-from flask_restplus.fields import *  # noqa
+from flask_restx.fields import *  # noqa
 
-from udata.utils import multi_to_dict
 from udata.uris import endpoint_for
+from udata.utils import multi_to_dict
 
 log = logging.getLogger(__name__)
 
@@ -17,7 +18,9 @@ class ISODateTime(String):
     def format(self, value):
         if isinstance(value, str):
             value = parse(value)
-        return value.isoformat()
+        if isinstance(value, datetime.date) and not isinstance(value, datetime.datetime) or value.tzinfo:
+            return value.isoformat()
+        return pytz.utc.localize(value).isoformat()
 
 
 class Markdown(String):
@@ -87,7 +90,6 @@ def pager(page_fields):
                          required=True, min=0),
         'next_page': NextPageUrl(description='The next page URL if exists'),
         'previous_page': PreviousPageUrl(
-            description='The previous page URL if exists'),
-        'facets': Raw(description='Search facets results if any'),
+            description='The previous page URL if exists')
     }
     return pager_fields

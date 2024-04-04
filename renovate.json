@@ -2,9 +2,9 @@
   "extends": [
     "config:base"
   ],
-  "baseBranches": ["py3"],
+  "baseBranches": ["master"],
   "pip_requirements": {
-    "fileMatch": ["requirements/install.pip", "requirements/test.pip"]
+    "fileMatch": ["requirements/install.in", "requirements/test.in"]
   },
   "enabledManagers": ["pip_requirements"],
   "automerge": true,

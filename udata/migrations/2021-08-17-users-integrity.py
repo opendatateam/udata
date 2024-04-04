@@ -1,11 +1,11 @@
 '''
-Remove User db integrity problems, and Issue.subject and Discussion.subject in the process
+Remove User db integrity problems, and Discussion.subject in the process
 '''
 import logging
 
 import mongoengine
 
-from udata.models import Discussion, Organization, Issue
+from udata.models import Discussion, Organization
 
 log = logging.getLogger(__name__)
 
@@ -68,25 +68,3 @@ def migrate(db):
                 org.save()
 
     log.info(f'Modified {count} requests')
-
-    log.info('Processing Issues user references.')
-
-    count = 0
-    issues = Issue.objects.no_cache().all()
-    for issue in issues:
-        try:
-            issue.user.id
-            issue.subject.id
-        except mongoengine.errors.DoesNotExist:
-            issue.delete()
-            count += 1
-            continue
-        for message in issue.discussion:
-            try:
-                message.posted_by.id
-            except mongoengine.errors.DoesNotExist:
-                # Issues are not that important, we can delete them
-                issue.delete()
-                count += 1
-
-    log.info(f'Deleted {count} issues')

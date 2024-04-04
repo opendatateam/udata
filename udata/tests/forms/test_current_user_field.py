@@ -4,14 +4,16 @@ from bson import ObjectId
 from werkzeug.datastructures import MultiDict
 
 from udata.auth import login_user
-from udata.auth.forms import ExtendedLoginForm, ExtendedResetPasswordForm
+from udata.auth.forms import ExtendedLoginForm, ExtendedRegisterForm
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.forms import ModelForm, fields
+from udata.i18n import gettext as _
 from udata.models import db, User
-from udata.tests import TestCase
+from udata.tests import TestCase, DBTestMixin
+from udata.tests.helpers import security_gettext
 
 
-class CurrentUserFieldTest(TestCase):
+class CurrentUserFieldTest(TestCase, DBTestMixin):
     def factory(self, *args, **kwargs):
         class Ownable(db.Document):
             owner = db.ReferenceField(User)
@@ -196,8 +198,12 @@ class CurrentUserFieldTest(TestCase):
         self.assertEqual(len(form.errors['owner']), 1)
 
     def test_password_rotation(self):
-        today = datetime.datetime.now()
-        user = UserFactory(password='password', password_rotation_demanded=today, confirmed_at=today)
+        today = datetime.datetime.utcnow()
+        user = UserFactory(
+            password='password',
+            password_rotation_demanded=today,
+            confirmed_at=today
+        )
 
         form = ExtendedLoginForm.from_json({
             'email': user.email,
@@ -206,4 +212,37 @@ class CurrentUserFieldTest(TestCase):
 
         form.validate()
 
-        self.assertIn('Password must be changed for security reasons', form.errors['password'])
+        self.assertIn(_('Password must be changed for security reasons'), form.errors['password'])
+
+    def test_user_without_password(self):
+        user = UserFactory(password=None)
+
+        form = ExtendedLoginForm.from_json({
+            'email': user.email,
+            'password': ''
+        })
+
+        form.validate()
+
+        self.assertIn(security_gettext('Password not provided'), form.errors['password'])
+
+    def test_email_validation(self):
+        self.app.config['SECURITY_EMAIL_VALIDATOR_ARGS'] = None
+        form = ExtendedRegisterForm.from_json({
+            'email': 'a@test.notreal',
+            'password': 'passpass',
+            'password_confirm': 'passpass',
+            'first_name': 'azeaezr',
+            'last_name': 'azeaze',
+        })
+        form.validate()
+        self.assertIn(security_gettext('Invalid email address'), form.errors['email'])
+
+        today = datetime.datetime.utcnow()
+        user = UserFactory(email='b@fake.com', password='password', confirmed_at=today)
+        form = ExtendedLoginForm.from_json({
+            'email': user.email,
+            'password': 'password'
+        })
+        form.validate()
+        assert not form.errors

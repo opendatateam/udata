@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from flask import current_app
 
-import flask_fs as fs
+import flask_storage as fs
 
 AUTHORIZED_TYPES = fs.AllExcept(fs.SCRIPTS + fs.EXECUTABLES)
 

@@ -25,7 +25,7 @@ def backends_ids():
 
 error_fields = api.model('HarvestError', {
     'created_at': fields.ISODateTime(description='The error creation date',
-                                     required=True),
+                                     required=True, readonly=True),
     'message': fields.String(description='The error short message',
                              required=True),
     'details': fields.String(description='Optional details (ie. stacktrace)'),
@@ -99,7 +99,7 @@ source_fields = api.model('HarvestSource', {
                              required=True),
     'config': fields.Raw(description='The configuration as key-value pairs'),
     'created_at': fields.ISODateTime(description='The source creation date',
-                                     required=True),
+                                     required=True, readonly=True),
     'active': fields.Boolean(description='Is this source active',
                              required=True, default=False),
     'autoarchive': fields.Boolean(
@@ -114,7 +114,7 @@ source_fields = api.model('HarvestSource', {
                            description='The owner information'),
     'organization': fields.Nested(org_ref_fields, allow_null=True,
                                   description='The producer organization'),
-    'deleted': fields.ISODateTime(description='The source deletion date'),
+    'deleted': fields.ISODateTime(description='The source deletion date', readonly=True),
     'schedule': fields.String(description='The source schedule (interval or cron expression)',
                               readonly=True),
 })

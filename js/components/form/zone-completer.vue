@@ -76,7 +76,7 @@ export default {
         return {
             valueField: 'id',
             labelField: 'name',
-            searchField: ['name', 'code', 'extraKeys'],
+            searchField: ['name', 'code'],
             plugins: ['remove_button'],
             create(input, callback) {
                 if (utils.isString(input)) {
@@ -105,17 +105,6 @@ export default {
                             this.levelLabel(data),
                             '</span>'
                         ];
-                    if (data.keys) {
-                        opt.push('<ul>');
-                        Object.keys(data.keys).map(key => {
-                            opt.push('<li><span class="text-uppercase">');
-                            opt.push(escape(key));
-                            opt.push('</span>: <span class="value">');
-                            opt.push(escape(data.keys[key]));
-                            opt.push('</span></li>');
-                        });
-                        opt.push('</ul>');
-                    }
                     opt.push('</div>');
                     return opt.join('');
                 },
@@ -137,7 +126,6 @@ export default {
     },
     dataLoaded(data) {
         return data.map(item => {
-            item.extraKeys = Object.keys(item.keys).map(key => item.keys[key]);
             return item;
         });
     },

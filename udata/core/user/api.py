@@ -1,8 +1,8 @@
-from flask import request
 from flask_security import current_user, logout_user
+from slugify import slugify
 
-from udata import search
 from udata.api import api, API
+from udata.api.parsers import ModelApiParser
 from udata.core import storages
 from udata.auth import admin_permission
 from udata.models import CommunityResource, Dataset, Reuse, User
@@ -11,8 +11,6 @@ from udata.core.dataset.api_fields import (
     community_resource_fields, dataset_fields
 )
 from udata.core.followers.api import FollowAPI
-from udata.core.issues.actions import issues_for
-from udata.core.issues.api import issue_fields
 from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields
 from udata.core.reuse.api_fields import reuse_fields
@@ -20,7 +18,6 @@ from udata.core.storages.api import (
     uploaded_image_fields, image_parser, parse_uploaded_image
 )
 from udata.core.user.models import Role
-from udata.utils import multi_to_dict
 
 from .api_fields import (
     apikey_fields,
@@ -28,15 +25,32 @@ from .api_fields import (
     me_metrics_fields,
     user_fields,
     user_page_fields,
-    user_suggestion_fields,
     user_role_fields,
+    user_suggestion_fields
 )
 from .forms import UserProfileForm, UserProfileAdminForm
-from .search import UserSearch
+
+
+DEFAULT_SORTING = '-created_at'
+
+
+class UserApiParser(ModelApiParser):
+    sorts = {
+        'last_name': 'last_name',
+        'first_name': 'first_name',
+        'datasets': 'metrics.datasets',
+        'reuses': 'metrics.reuses',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
+        'created': 'created_at',
+    }
+
 
 ns = api.namespace('users', 'User related operations')
 me = api.namespace('me', 'Connected user related operations')
-search_parser = UserSearch.as_request_parser()
+
+user_parser = UserApiParser()
+
 filter_parser = api.parser()
 filter_parser.add_argument(
     'q', type=str, help='The string to filter items',
@@ -167,22 +181,6 @@ class MyOrgReusesAPI(API):
         return list(reuses)
 
 
-@me.route('/org_issues/', endpoint='my_org_issues')
-class MyOrgIssuesAPI(API):
-    @api.secure
-    @api.doc('my_org_issues')
-    @api.expect(filter_parser)
-    @api.marshal_list_with(issue_fields)
-    def get(self):
-        '''List all issues related to my organizations.'''
-        q = filter_parser.parse_args().get('q')
-        issues = issues_for(current_user._get_current_object())
-        issues = issues.order_by('-created')
-        if q:
-            issues = issues.filter(title__icontains=q)
-        return list(issues)
-
-
 @me.route('/org_discussions/', endpoint='my_org_discussions')
 class MyOrgDiscussionsAPI(API):
     @api.secure
@@ -227,15 +225,24 @@ class UserListAPI(API):
     model = User
     fields = user_fields
     form = UserProfileForm
-    search_adapter = UserSearch
 
     @api.doc('list_users')
-    @api.expect(search_parser)
+    @api.expect(user_parser.parser)
     @api.marshal_with(user_page_fields)
     def get(self):
         '''List all users'''
-        search_parser.parse_args()
-        return search.query(UserSearch, **multi_to_dict(request.args))
+        args = user_parser.parse()
+        users = User.objects(deleted=None)
+        if args['q']:
+            search_users = users.search_text(args['q'])
+            if args['sort']:
+                return search_users.order_by(args['sort']).paginate(args['page'], args['page_size'])
+            else:
+                return search_users.order_by('$text_score').paginate(args['page'], args['page_size'])
+        if args['sort']:
+            return users.order_by(args['sort']).paginate(args['page'], args['page_size'])
+        return users.order_by(DEFAULT_SORTING).paginate(args['page'], args['page_size'])
+
 
     @api.secure(admin_permission)
     @api.doc('create_user')
@@ -309,6 +316,25 @@ class UserAPI(API):
         return '', 204
 
 
+from udata.models import ContactPoint
+from udata.core.contact_point.api import ContactPointApiParser
+from udata.core.contact_point.api_fields import contact_point_page_fields
+
+
+contact_point_parser = ContactPointApiParser()
+
+
+@ns.route('/<user:user>/contacts/', endpoint='user_contact_points')
+class OrgContactAPI(API):
+    @api.doc('get_user_contact_point')
+    @api.marshal_with(contact_point_page_fields)
+    def get(self, user):
+        '''List all user contact points'''
+        args = contact_point_parser.parse()
+        contact_points = ContactPoint.objects.owned_by(user)
+        return contact_points.paginate(args['page'], args['page_size'])
+
+
 @ns.route('/<id>/followers/', endpoint='user_followers')
 @ns.doc(get={'id': 'list_user_followers'},
         post={'id': 'follow_user'},
@@ -343,16 +369,19 @@ class SuggestUsersAPI(API):
     def get(self):
         '''Suggest users'''
         args = suggest_parser.parse_args()
+        users = User.objects(
+            deleted=None,
+            slug__icontains=slugify(args['q'], separator='-', to_lower=True)
+        )
         return [
             {
-                'id': opt['text'],
-                'first_name': opt['payload']['first_name'],
-                'last_name': opt['payload']['last_name'],
-                'avatar_url': opt['payload']['avatar_url'],
-                'slug': opt['payload']['slug'],
-                'score': opt['score'],
+                'id': user.id,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'avatar_url': user.avatar,
+                'slug': user.slug,
             }
-            for opt in search.suggest(args['q'], 'user_suggest', args['size'])
+            for user in users.order_by(DEFAULT_SORTING).limit(args['size'])
         ]
 
 

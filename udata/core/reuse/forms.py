@@ -1,8 +1,9 @@
 from udata.forms import ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
-from udata.models import Reuse, REUSE_TYPES
+from udata.models import Reuse
+from udata.core.reuse.constants import REUSE_TYPES, REUSE_TOPICS
 
-from .models import IMAGE_SIZES, TITLE_SIZE_LIMIT, DESCRIPTION_SIZE_LIMIT
+from .constants import IMAGE_SIZES, TITLE_SIZE_LIMIT, DESCRIPTION_SIZE_LIMIT
 
 __all__ = ('ReuseForm', )
 
@@ -32,7 +33,9 @@ class ReuseForm(ModelForm):
         _('Private'),
         description=_('Restrict the dataset visibility to you or '
                       'your organization only.'))
+    topic = fields.SelectField(_('Topic'), choices=list(REUSE_TOPICS.items()))
 
     owner = fields.CurrentUserField()
     organization = fields.PublishAsField(_('Publish as'))
     deleted = fields.DateTimeField()
+    extras = fields.ExtrasField()

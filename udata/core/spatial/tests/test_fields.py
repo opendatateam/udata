@@ -5,14 +5,13 @@ from datetime import timedelta
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import Form
-from udata.models import db
+from udata.mongo import db
 from udata.tests import TestCase
 from udata.tests.helpers import assert_json_equal
 from udata.utils import faker
 
 from ..factories import GeoZoneFactory
 from ..forms import SpatialCoverageField
-from ..geoids import END_OF_TIME
 from ..models import SpatialCoverage
 
 
@@ -297,16 +296,11 @@ class SpatialCoverageFieldTest(TestCase):
         Fake, FakeForm = self.factory()
         zone = GeoZoneFactory()
 
-        zone = GeoZoneFactory(validity__end=END_OF_TIME)
+        zone = GeoZoneFactory()
         for i in range(3):
-            start = zone.validity.start - (i + 1) * A_YEAR
-            end = zone.validity.start - i * A_YEAR
-            GeoZoneFactory(code=zone.code,
-                           validity__start=start, validity__end=end)
+            GeoZoneFactory(code=zone.code)
 
-        validity = faker.date_between(start_date=zone.validity.start,
-                                      end_date=zone.validity.end)
-        geoid = '{0.level}:{0.code}@{1}'.format(zone, validity.isoformat())
+        geoid = '{0.level}:{0.code}'.format(zone)
 
         fake = Fake()
         form = FakeForm.from_json({

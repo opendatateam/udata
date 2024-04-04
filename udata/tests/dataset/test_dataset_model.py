@@ -2,21 +2,18 @@ from datetime import datetime, timedelta
 
 import pytest
 import requests
-
+from flask import current_app
 from mongoengine import post_save
 
 from udata.app import cache
-from udata.models import (
-    db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchema
-)
+from udata.models import db, Dataset, License, ResourceSchema, Schema
+from udata.core.dataset.constants import LEGACY_FREQUENCIES, UPDATE_FREQUENCIES
+from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.dataset.factories import (
-    ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory
+    ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory, ResourceSchemaMockData
 )
 from udata.core.dataset.exceptions import (
     SchemasCatalogNotFoundException, SchemasCacheUnavailableException
-)
-from udata.core.discussions.factories import (
-    MessageDiscussionFactory, DiscussionFactory
 )
 from udata.core.user.factories import UserFactory
 from udata.utils import faker
@@ -32,8 +29,7 @@ class DatasetModelTest:
         user = UserFactory()
         dataset = DatasetFactory(owner=user)
         resource = ResourceFactory()
-        expected_signals = (post_save, Dataset.after_save, Dataset.on_update,
-                            Dataset.on_resource_added)
+        expected_signals = (Dataset.on_resource_added,)
 
         with assert_emit(*expected_signals):
             dataset.add_resource(ResourceFactory())
@@ -49,7 +45,7 @@ class DatasetModelTest:
         user = UserFactory()
         dataset = DatasetFactory(owner=user)
         resource = ResourceFactory(checksum=None)
-        expected_signals = post_save, Dataset.after_save, Dataset.on_update
+        expected_signals = (Dataset.on_resource_added,)
 
         with assert_emit(*expected_signals):
             dataset.add_resource(ResourceFactory(checksum=None))
@@ -73,7 +69,7 @@ class DatasetModelTest:
         user = UserFactory()
         resource = ResourceFactory()
         dataset = DatasetFactory(owner=user, resources=[resource])
-        expected_signals = post_save, Dataset.after_save, Dataset.on_update
+        expected_signals = (Dataset.on_resource_updated,)
 
         resource.description = 'New description'
 
@@ -97,7 +93,7 @@ class DatasetModelTest:
         dataset = DatasetFactory(owner=user)
         resource = ResourceFactory()
         dataset.add_resource(resource)
-        assert_equal_dates(dataset.last_update, resource.published)
+        assert_equal_dates(dataset.last_update, resource.created_at)
 
     def test_last_update_without_resource(self):
         user = UserFactory()
@@ -130,101 +126,143 @@ class DatasetModelTest:
         dataset = DatasetFactory()
         assert dataset.next_update is None
 
-    def test_next_update_weekly(self):
-        dataset = DatasetFactory(frequency='weekly')
+    def test_next_update_hourly(self):
+        dataset = DatasetFactory(frequency='hourly')
         assert_equal_dates(dataset.next_update,
-                           datetime.now() + timedelta(days=7))
+                           datetime.utcnow() + timedelta(hours=1))
+
+    @pytest.mark.parametrize('freq', ['fourTimesADay', 'threeTimesADay', 'semidaily', 'daily'])
+    def test_next_update_daily(self, freq):
+        dataset = DatasetFactory(frequency=freq)
+        assert_equal_dates(dataset.next_update,
+                           datetime.utcnow() + timedelta(days=1))
+
+    @pytest.mark.parametrize('freq', ['fourTimesAWeek', 'threeTimesAWeek', 'semiweekly', 'weekly'])
+    def test_next_update_weekly(self, freq):
+        dataset = DatasetFactory(frequency=freq)
+        assert_equal_dates(dataset.next_update,
+                           datetime.utcnow() + timedelta(days=7))
+
+    def test_next_update_biweekly(self):
+        dataset = DatasetFactory(frequency='biweekly')
+        assert_equal_dates(dataset.next_update,
+                           datetime.utcnow() + timedelta(weeks=2))
+
+    def test_next_update_quarterly(self):
+        dataset = DatasetFactory(frequency='quarterly')
+        assert_equal_dates(dataset.next_update,
+                           datetime.utcnow() + timedelta(days=365/4))
+
+    @pytest.mark.parametrize('freq', ['threeTimesAYear', 'semiannual', 'annual'])
+    def test_next_update_annual(self, freq):
+        dataset = DatasetFactory(frequency=freq)
+        assert_equal_dates(dataset.next_update,
+                           datetime.utcnow() + timedelta(days=365))
+
+    def test_next_update_biennial(self):
+        dataset = DatasetFactory(frequency='biennial')
+        assert_equal_dates(dataset.next_update,
+                           datetime.utcnow() + timedelta(days=365*2))
+
+    def test_next_update_triennial(self):
+        dataset = DatasetFactory(frequency='triennial')
+        assert_equal_dates(dataset.next_update,
+                           datetime.utcnow() + timedelta(days=365*3))
+
+    def test_next_update_quinquennial(self):
+        dataset = DatasetFactory(frequency='quinquennial')
+        assert_equal_dates(dataset.next_update,
+                           datetime.utcnow() + timedelta(days=365*5))
+
+    @pytest.mark.parametrize('freq', ['continuous', 'punctual', 'irregular', 'unknown'])
+    def test_next_update_undefined(self, freq):
+        dataset = DatasetFactory(frequency=freq)
+        assert dataset.next_update is None
 
     def test_quality_default(self):
         dataset = DatasetFactory(description='')
-        assert dataset.quality == {'score': 0}
+        assert dataset.quality == {
+            'license': False,
+            'temporal_coverage': False,
+            'spatial': False,
+            'update_frequency': False,
+            'dataset_description_quality': False,
+            'score': 0
+        }
 
-    def test_quality_next_update(self):
-        dataset = DatasetFactory(description='', frequency='weekly')
-        assert -6 == dataset.quality['update_in']
-        assert dataset.quality['frequency'] == 'weekly'
-        assert dataset.quality['score'] == 2
+    @pytest.mark.parametrize('freq', UPDATE_FREQUENCIES)
+    def test_quality_frequency_update(self, freq):
+        dataset = DatasetFactory(description='', frequency=freq)
+        if freq == 'unknown':
+            assert dataset.quality['update_frequency'] is False
+            assert 'update_fulfilled_in_time' not in dataset.quality
+            return
+        assert dataset.quality['update_frequency'] is True
+        assert dataset.quality['update_fulfilled_in_time'] is True
+        assert dataset.quality['score'] == Dataset.normalize_score(2)
 
-    def test_quality_tags_count(self):
-        dataset = DatasetFactory(description='', tags=['foo', 'bar'])
-        assert dataset.quality['tags_count'] == 2
-        assert dataset.quality['score'] == 0
-        dataset = DatasetFactory(description='',
-                                 tags=['foo', 'bar', 'baz', 'quux'])
-        assert dataset.quality['score'] == 2
+    def test_quality_frequency_update_one_day_late(self):
+        dataset = DatasetFactory(
+            description='', frequency="daily",
+            last_modified_internal=datetime.utcnow() - timedelta(days=1, hours=1))
+        assert dataset.quality['update_frequency'] is True
+        assert dataset.quality['update_fulfilled_in_time'] is True
+        assert dataset.quality['score'] == Dataset.normalize_score(2)
+
+    def test_quality_frequency_update_two_days_late(self):
+        dataset = DatasetFactory(
+            description='', frequency="daily",
+            last_modified_internal=datetime.utcnow() - timedelta(days=2, hours=1))
+        assert dataset.quality['update_frequency'] is True
+        assert dataset.quality['update_fulfilled_in_time'] is False
+        assert dataset.quality['score'] == Dataset.normalize_score(1)
 
     def test_quality_description_length(self):
-        dataset = DatasetFactory(description='a' * 42)
-        assert dataset.quality['description_length'] == 42
+        dataset = DatasetFactory(description='a' * (current_app.config.get('QUALITY_DESCRIPTION_LENGTH') - 1))
+        assert dataset.quality['dataset_description_quality'] is False
         assert dataset.quality['score'] == 0
-        dataset = DatasetFactory(description='a' * 420)
-        assert dataset.quality['score'] == 2
+        dataset = DatasetFactory(description='a' * (current_app.config.get('QUALITY_DESCRIPTION_LENGTH') + 1))
+        assert dataset.quality['dataset_description_quality'] is True
+        assert dataset.quality['score'] == Dataset.normalize_score(1)
 
-    def test_quality_has_only_closed_formats(self):
+    def test_quality_has_open_formats(self):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format='pdf'))
-        assert dataset.quality['has_only_closed_or_no_formats']
-        assert dataset.quality['score'] == 0
+        assert not dataset.quality['has_open_format']
+        assert dataset.quality['score'] == Dataset.normalize_score(2)
 
     def test_quality_has_opened_formats(self):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format='pdf'))
         dataset.add_resource(ResourceFactory(format='csv'))
-        assert not dataset.quality['has_only_closed_or_no_formats']
-        assert dataset.quality['score'] == 4
+        assert dataset.quality['has_open_format']
+        assert dataset.quality['score'] == Dataset.normalize_score(3)
 
     def test_quality_has_undefined_and_closed_format(self):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format=None))
         dataset.add_resource(ResourceFactory(format='xls'))
-        assert dataset.quality['has_only_closed_or_no_formats']
-        assert dataset.quality['score'] == 0
-
-    def test_quality_has_untreated_discussions(self):
-        user = UserFactory()
-        visitor = UserFactory()
-        dataset = DatasetFactory(description='', owner=user)
-        messages = MessageDiscussionFactory.build_batch(2, posted_by=visitor)
-        DiscussionFactory(subject=dataset, user=visitor, discussion=messages)
-        assert dataset.quality['discussions'] == 1
-        assert dataset.quality['has_untreated_discussions']
-        assert dataset.quality['score'] == 0
-
-    def test_quality_has_treated_discussions(self):
-        user = UserFactory()
-        visitor = UserFactory()
-        dataset = DatasetFactory(description='', owner=user)
-        DiscussionFactory(
-            subject=dataset, user=visitor,
-            discussion=[
-                MessageDiscussionFactory(posted_by=user)
-            ] + MessageDiscussionFactory.build_batch(2, posted_by=visitor)
-        )
-        assert dataset.quality['discussions'] == 1
-        assert not dataset.quality['has_untreated_discussions']
-        assert dataset.quality['score'] == 2
+        assert not dataset.quality['has_open_format']
+        assert dataset.quality['score'] == Dataset.normalize_score(2)
 
     def test_quality_all(self):
         user = UserFactory()
-        visitor = UserFactory()
         dataset = DatasetFactory(owner=user, frequency='weekly',
                                  tags=['foo', 'bar'], description='a' * 42)
         dataset.add_resource(ResourceFactory(format='pdf'))
-        DiscussionFactory(
-            subject=dataset, user=visitor,
-            discussion=[MessageDiscussionFactory(posted_by=visitor)])
-        assert dataset.quality['score'] == 0
+        assert dataset.quality['score'] == Dataset.normalize_score(4)
         assert sorted(dataset.quality.keys()) == [
-            'description_length',
-            'discussions',
-            'frequency',
-            'has_only_closed_or_no_formats',
+            'all_resources_available',
+            'dataset_description_quality',
+            'has_open_format',
             'has_resources',
-            'has_unavailable_resources',
-            'has_untreated_discussions',
+            'license',
+            'resources_documentation',
             'score',
-            'tags_count',
-            'update_in'
+            'spatial',
+            'temporal_coverage',
+            'update_frequency',
+            'update_fulfilled_in_time'
         ]
 
     def test_tags_normalized(self):
@@ -241,7 +279,7 @@ class DatasetModelTest:
     def test_send_on_delete(self):
         dataset = DatasetFactory()
         with assert_emit(Dataset.on_delete):
-            dataset.deleted = datetime.now()
+            dataset.deleted = datetime.utcnow()
             dataset.save()
 
     def test_ignore_post_save_signal(self):
@@ -251,6 +289,18 @@ class DatasetModelTest:
         with assert_not_emit(*unexpected_signals), assert_emit(post_save):
             dataset.title = 'New title'
             dataset.save(signal_kwargs={'ignores': ['post_save']})
+
+    def test_dataset_without_private(self):
+        dataset = DatasetFactory()
+        assert dataset.private == False
+
+        dataset.private = None
+        dataset.save()
+        assert dataset.private == False
+
+        dataset.private = True
+        dataset.save()
+        assert dataset.private == True
 
 
 class ResourceModelTest:
@@ -325,6 +375,29 @@ class LicenseModelTest:
         assert isinstance(found, License)
         assert license.id == found.id
 
+    def test_match_by_url_with_final_slash(self):
+        license = LicenseFactory(url='https://example.com/license')
+        found = License.guess('https://example.com/license/')
+        assert isinstance(found, License)
+        assert license.id == found.id
+
+    def test_match_by_url_without_final_slash(self):
+        license = LicenseFactory(url='https://example.com/license/')
+        found = License.guess('https://example.com/license')
+        assert isinstance(found, License)
+        assert license.id == found.id
+
+    def test_match_by_url_not_too_fuzzy(self):
+        LicenseFactory(url='https://example.com/licensea')
+        found = License.guess('https://example.com/licenseb')
+        assert found is None
+
+    def test_match_by_url_scheme_mismatch(self):
+        license = LicenseFactory(url='https://example.com/license')
+        found = License.guess('http://example.com/license')
+        assert isinstance(found, License)
+        assert license.id == found.id
+
     def test_imatch_by_url(self):
         url = '%s/CAPS.php' % faker.uri()
         license = LicenseFactory(url=url)
@@ -346,8 +419,21 @@ class LicenseModelTest:
         assert isinstance(found, License)
         assert license.id == found.id
 
+    def test_match_by_alternate_url_scheme_slash_mismatch(self):
+        alternate_url = 'https://example.com/license'
+        license = LicenseFactory(alternate_urls=[alternate_url])
+        found = License.guess('http://example.com/license/')
+        assert isinstance(found, License)
+        assert license.id == found.id
+
     def test_exact_match_by_title(self):
         license = LicenseFactory()
+        found = License.guess(license.title)
+        assert isinstance(found, License)
+        assert license.id == found.id
+
+    def test_exact_match_by_title_with_mismatch_slug(self):
+        license = LicenseFactory(title="Licence Ouverte v2", slug="licence-2")
         found = License.guess(license.title)
         assert isinstance(found, License)
         assert license.id == found.id
@@ -408,6 +494,18 @@ class LicenseModelTest:
         assert isinstance(found, License)
         assert license.id == found.id
 
+    def test_match_by_alternate_title_with_multiple_candidates_from_one_licence(self):
+        license = LicenseFactory(alternate_titles=['Licence Ouverte v2', 'Licence Ouverte v2.0'])
+        found = License.guess('Licence Ouverte v2.0')
+        assert isinstance(found, License)
+        assert license.id == found.id
+
+    def test_no_with_multiple_alternate_titles_from_different_licences(self):
+        LicenseFactory(alternate_titles=['Licence Ouverte v2'])
+        LicenseFactory(alternate_titles=['Licence Ouverte v2.0'])
+        found = License.guess('Licence Ouverte v2.0')
+        assert found is None
+
     def test_prioritize_title_over_alternate_title(self):
         title = faker.sentence()
         license = LicenseFactory(title=title)
@@ -425,15 +523,16 @@ class LicenseModelTest:
 
 class ResourceSchemaTest:
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/notfound')
-    def test_resource_schema_objects_404_endpoint(self):
+    def test_resource_schema_objects_404_endpoint(self, rmock):
+        rmock.get('https://example.com/notfound', status_code=404)
         with pytest.raises(SchemasCatalogNotFoundException):
-            ResourceSchema.objects()
+            ResourceSchema.all()
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_resource_schema_objects_timeout_no_cache(self, client, rmock):
         rmock.get('https://example.com/schemas', exc=requests.exceptions.ConnectTimeout)
         with pytest.raises(SchemasCacheUnavailableException):
-            ResourceSchema.objects()
+            ResourceSchema.all()
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_resource_schema_objects(self, app, rmock):
@@ -457,50 +556,192 @@ class ResourceSchemaTest:
             ]
         })
 
-        assert ResourceSchema.objects() == [
+        assert ResourceSchema.all() == [
             {
-                "id": "etalab/schema-irve",
-                "label": "Schéma IRVE",
+                "name": "etalab/schema-irve",
+                "title": "Schéma IRVE",
                 "versions": [
-                    "1.0.0",
-                    "1.0.1",
-                    "1.0.2"
+                    {
+                        "version_name": "1.0.0"
+                    },
+                    {
+                        "version_name": "1.0.1"
+                    },
+                    {
+                        "version_name": "1.0.2"
+                    }
                 ]
             }
         ]
 
     @pytest.mark.options(SCHEMA_CATALOG_URL=None)
     def test_resource_schema_objects_no_catalog_url(self):
-        assert ResourceSchema.objects() == []
+        assert ResourceSchema.all() == []
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_resource_schema_objects_w_cache(self, rmock, mocker):
         cache_mock_set = mocker.patch.object(cache, 'set')
-        mocker.patch.object(cache, 'get', return_value='dummy_from_cache')
 
         # fill cache
-        rmock.get('https://example.com/schemas', json={
-            "schemas": [
-                {
-                    "name": "etalab/schema-irve",
-                    "title": "Schéma IRVE",
-                    "versions": [
-                        {
-                            "version_name": "1.0.0"
-                        },
-                        {
-                            "version_name": "1.0.1"
-                        },
-                        {
-                            "version_name": "1.0.2"
-                        }
-                    ]
-                }
-            ]
-        })
-        ResourceSchema.objects()
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
+        ResourceSchema.all()
         assert cache_mock_set.called
 
+        mocker.patch.object(cache, 'get', return_value=ResourceSchemaMockData.get_mock_data()['schemas'])
         rmock.get('https://example.com/schemas', status_code=500)
-        assert 'dummy_from_cache' == ResourceSchema.objects()
+        assert ResourceSchemaMockData.get_all_schemas_from_mock_data(with_datapackage_info=False) == ResourceSchema.all()
         assert rmock.call_count == 2
+
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
+    def test_resource_schema_validation(self, rmock):
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
+
+        resource = ResourceFactory()
+
+        resource.schema = Schema(name='etalab/schema-irve-statique')
+        resource.validate()
+
+        resource.schema = Schema(url='https://example.com')
+        resource.validate()
+
+        resource.schema = Schema(name='some-name', url='https://example.com')
+        resource.validate()
+
+        resource.schema = Schema(name='etalab/schema-irve-statique')
+        resource.schema.clean(check_schema_in_catalog=True)
+
+        resource.schema = Schema(url='https://example.com')
+        resource.schema.clean(check_schema_in_catalog=True)
+
+        resource.schema = Schema(name='some-name', url='https://example.com')
+        resource.schema.clean(check_schema_in_catalog=True)
+
+        # Check that no exception is raised when we do not ask for schema check for schema errors
+        resource.schema = Schema(name='some-name')
+        resource.validate()
+
+        resource.schema = Schema(name='etalab/schema-irve-statique', version='1337.42.0')
+        resource.validate()
+
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(version='2.0.0')
+            resource.validate()
+
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(name='some-name')
+            resource.schema.clean(check_schema_in_catalog=True)
+
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(name='etalab/schema-irve-statique', version='1337.42.0')
+            resource.schema.clean(check_schema_in_catalog=True)
+
+        with pytest.raises(db.ValidationError):
+            resource.schema = Schema(version='2.0.0')
+            resource.schema.clean(check_schema_in_catalog=True)
+
+class HarvestMetadataTest:
+    def test_harvest_dataset_metadata_validate_success(self):
+        dataset = DatasetFactory()
+
+        harvest_metadata = HarvestDatasetMetadata(
+            backend='DCAT',
+            created_at=datetime.utcnow(),
+            modified_at=datetime.utcnow(),
+            source_id='source_id',
+            remote_id='remote_id',
+            domain='domain.gouv.fr',
+            last_update=datetime.utcnow(),
+            remote_url='http://domain.gouv.fr/dataset/remote_url',
+            uri='http://domain.gouv.fr/dataset/uri',
+            dct_identifier='http://domain.gouv.fr/dataset/identifier',
+            archived_at=datetime.utcnow(),
+            archived='not-on-remote'
+        )
+        dataset.harvest = harvest_metadata
+        dataset.save()
+
+    def test_harvest_dataset_metadata_validation_error(self):
+        harvest_metadata = HarvestDatasetMetadata(created_at='maintenant')
+        dataset = DatasetFactory()
+        dataset.harvest = harvest_metadata
+        with pytest.raises(db.ValidationError):
+            dataset.save()
+
+    def test_harvest_dataset_metadata_no_validation_dynamic(self):
+        # Adding a dynamic field (not defined in HarvestDatasetMetadata) does not raise error
+        # at validation time
+        harvest_metadata = HarvestDatasetMetadata(dynamic_created_at='maintenant')
+        dataset = DatasetFactory()
+        dataset.harvest = harvest_metadata
+        dataset.save()
+
+    def test_harvest_dataset_metadata_future_modifed_at(self):
+        dataset = DatasetFactory()
+
+        harvest_metadata = HarvestDatasetMetadata(
+            created_at=datetime.utcnow(),
+            modified_at=datetime.utcnow()+timedelta(days=1)
+        )
+        dataset.harvest = harvest_metadata
+        dataset.save()
+        assert dataset.last_modified == dataset.last_modified_internal
+
+    def test_harvest_dataset_metadata_past_modifed_at(self):
+        dataset = DatasetFactory()
+
+        harvest_metadata = HarvestDatasetMetadata(
+            created_at=datetime.utcnow(),
+            modified_at=datetime.utcnow(),
+        )
+        dataset.harvest = harvest_metadata
+        dataset.save()
+        assert dataset.last_modified == harvest_metadata.modified_at
+
+    def test_harvest_resource_metadata_validate_success(self):
+        resource = ResourceFactory()
+
+        harvest_metadata = HarvestResourceMetadata(
+            created_at=datetime.utcnow(),
+            modified_at=datetime.utcnow(),
+            uri='http://domain.gouv.fr/dataset/uri'
+        )
+        resource.harvest = harvest_metadata
+        resource.validate()
+
+    def test_harvest_resource_metadata_validation_error(self):
+        harvest_metadata = HarvestResourceMetadata(created_at='maintenant')
+        resource = ResourceFactory()
+        resource.harvest = harvest_metadata
+        with pytest.raises(db.ValidationError):
+            resource.validate()
+
+    def test_harvest_resource_metadata_no_validation_dynamic(self):
+        # Adding a dynamic field (not defined in HarvestResourceMetadata) does not raise error
+        # at validation time
+        harvest_metadata = HarvestResourceMetadata(dynamic_created_at='maintenant')
+        resource = ResourceFactory()
+        resource.harvest = harvest_metadata
+        resource.validate()
+
+    def test_harvest_resource_metadata_future_modifed_at(self):
+        resource = ResourceFactory()
+        harvest_metadata = HarvestResourceMetadata(modified_at=datetime.utcnow()+timedelta(days=1))
+        resource.harvest = harvest_metadata
+        resource.validate()
+
+        assert resource.last_modified == resource.last_modified_internal
+
+    def test_harvest_resource_metadata_past_modifed_at(self):
+        resource = ResourceFactory()
+        harvest_metadata = HarvestResourceMetadata(modified_at=datetime.utcnow())
+        resource.harvest = harvest_metadata
+        resource.validate()
+
+        assert resource.last_modified == harvest_metadata.modified_at
+
+    def test_resource_metadata_extra_modifed_at(self):
+        resource = ResourceFactory(filetype='remote')
+        resource.extras.update({'analysis:last-modified-at': datetime(2023,1,1)})
+        resource.validate()
+
+        assert resource.last_modified == resource.extras['analysis:last-modified-at']

@@ -135,14 +135,24 @@ export const hidpi = (window.devicePixelRatio > 1 || (
 );
 
 /**
- * Map configuration
- */
-export const map = _jsonMeta('map-config');
-
-/**
  * Tags constraints
  */
 export const tags = _jsonMeta('tags-config');
+
+/**
+ * License groups options
+ */
+export const license_groups = _jsonMeta('license-groups-options') && Object.fromEntries(_jsonMeta('license-groups-options'));
+
+/**
+ * Harvest validation contact form
+ */
+export const harvest_validation_contact_form = _meta('harvest-validation-contact-form')
+
+/**
+ * The expected business identification format
+ */
+export const org_bid_format = _meta('org-bid-format')
 
 /**
  * Markdown configuration.
@@ -184,8 +194,10 @@ export default {
     is_territory_enabled,
     is_delete_me_enabled,
     hidpi,
-    map,
     tags,
+    license_groups,
+    harvest_validation_contact_form,
+    org_bid_format,
     is_search_autocomplete_enabled,
     search_autocomplete_debounce,
     markdown,
