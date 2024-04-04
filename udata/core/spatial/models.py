@@ -4,25 +4,14 @@ from werkzeug.utils import cached_property
 
 from udata.app import cache
 from udata.uris import endpoint_for
-from udata.i18n import _, L_, get_locale, language
-from udata.models import db
+from udata.i18n import _, get_locale, language
+from udata.mongo import db
 
 from . import geoids
+from .constants import ADMIN_LEVEL_MIN, ADMIN_LEVEL_MAX, BASE_GRANULARITIES
 
 
-__all__ = (
-    'GeoLevel', 'GeoZone', 'SpatialCoverage', 'BASE_GRANULARITIES',
-    'spatial_granularities',
-)
-
-
-BASE_GRANULARITIES = [
-    ('poi', L_('POI')),
-    ('other', L_('Other')),
-]
-
-ADMIN_LEVEL_MIN = 1
-ADMIN_LEVEL_MAX = 110
+__all__ = ('GeoLevel', 'GeoZone', 'SpatialCoverage', 'spatial_granularities')
 
 
 class GeoLevel(db.Document):

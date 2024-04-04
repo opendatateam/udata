@@ -206,11 +206,12 @@ def standalone(app):
 
 def register_extensions(app):
     from udata import (
-        models, routing, tasks, mail, i18n, auth, search, sitemap,
+        models, mongo, routing, tasks, mail, i18n, auth, search, sitemap,
         sentry, notifications
     )
     tasks.init_app(app)
     i18n.init_app(app)
+    mongo.init_app(app)
     models.init_app(app)
     routing.init_app(app)
     auth.init_app(app)

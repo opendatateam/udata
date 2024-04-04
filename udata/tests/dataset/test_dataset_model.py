@@ -3,12 +3,11 @@ from datetime import datetime, timedelta
 import pytest
 import requests
 from flask import current_app
-from mongoengine import post_save, ValidationError
+from mongoengine import post_save
 
 from udata.app import cache
-from udata.models import (
-    db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchema, UPDATE_FREQUENCIES, Schema, FieldValidationError
-)
+from udata.models import db, Dataset, License, ResourceSchema, Schema
+from udata.core.dataset.constants import LEGACY_FREQUENCIES, UPDATE_FREQUENCIES
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.dataset.factories import (
     ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory, ResourceSchemaMockData
@@ -527,13 +526,13 @@ class ResourceSchemaTest:
     def test_resource_schema_objects_404_endpoint(self, rmock):
         rmock.get('https://example.com/notfound', status_code=404)
         with pytest.raises(SchemasCatalogNotFoundException):
-            ResourceSchema.objects()
+            ResourceSchema.all()
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_resource_schema_objects_timeout_no_cache(self, client, rmock):
         rmock.get('https://example.com/schemas', exc=requests.exceptions.ConnectTimeout)
         with pytest.raises(SchemasCacheUnavailableException):
-            ResourceSchema.objects()
+            ResourceSchema.all()
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_resource_schema_objects(self, app, rmock):
@@ -557,21 +556,27 @@ class ResourceSchemaTest:
             ]
         })
 
-        assert ResourceSchema.objects() == [
+        assert ResourceSchema.all() == [
             {
-                "id": "etalab/schema-irve",
-                "label": "Schéma IRVE",
+                "name": "etalab/schema-irve",
+                "title": "Schéma IRVE",
                 "versions": [
-                    "1.0.0",
-                    "1.0.1",
-                    "1.0.2"
+                    {
+                        "version_name": "1.0.0"
+                    },
+                    {
+                        "version_name": "1.0.1"
+                    },
+                    {
+                        "version_name": "1.0.2"
+                    }
                 ]
             }
         ]
 
     @pytest.mark.options(SCHEMA_CATALOG_URL=None)
     def test_resource_schema_objects_no_catalog_url(self):
-        assert ResourceSchema.objects() == []
+        assert ResourceSchema.all() == []
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_resource_schema_objects_w_cache(self, rmock, mocker):
@@ -579,12 +584,12 @@ class ResourceSchemaTest:
 
         # fill cache
         rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
-        ResourceSchema.objects()
+        ResourceSchema.all()
         assert cache_mock_set.called
 
         mocker.patch.object(cache, 'get', return_value=ResourceSchemaMockData.get_mock_data()['schemas'])
         rmock.get('https://example.com/schemas', status_code=500)
-        assert ResourceSchemaMockData.get_expected_v1_result_from_mock_data() == ResourceSchema.objects()
+        assert ResourceSchemaMockData.get_all_schemas_from_mock_data(with_datapackage_info=False) == ResourceSchema.all()
         assert rmock.call_count == 2
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')

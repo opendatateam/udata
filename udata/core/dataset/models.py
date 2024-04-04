@@ -1,7 +1,6 @@
 import logging
 
 from datetime import datetime, timedelta
-from collections import OrderedDict
 from urllib.parse import urlparse
 
 from blinker import signal
@@ -24,102 +23,19 @@ from udata.i18n import lazy_gettext as _
 from udata.utils import get_by, hash_url, to_naive_datetime
 from udata.uris import ValidationError, endpoint_for
 from udata.uris import validate as validate_url
+from .constants import CHECKSUM_TYPES, CLOSED_FORMATS, DEFAULT_LICENSE, LEGACY_FREQUENCIES, MAX_DISTANCE, PIVOTAL_DATA, RESOURCE_FILETYPES, RESOURCE_TYPES, SCHEMA_CACHE_DURATION, UPDATE_FREQUENCIES
 
 from .preview import get_preview_url
 from .exceptions import (
     SchemasCatalogNotFoundException, SchemasCacheUnavailableException
 )
 
-__all__ = (
-    'License', 'Resource', 'Schema', 'Dataset', 'Checksum', 'CommunityResource',
-    'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_FILETYPES',
-    'PIVOTAL_DATA', 'DEFAULT_LICENSE', 'RESOURCE_TYPES',
-    'ResourceSchema'
-)
+__all__ = ('License', 'Resource', 'Schema', 'Dataset', 'Checksum', 'CommunityResource', 'ResourceSchema')
+
+NON_ASSIGNABLE_SCHEMA_TYPES = ['datapackage']
+
 
 log = logging.getLogger(__name__)
-
-#: Udata frequencies with their labels
-#:
-#: See: http://dublincore.org/groups/collections/frequency/
-UPDATE_FREQUENCIES = OrderedDict([                              # Dublin core equivalent
-    ('unknown', _('Unknown')),                        # N/A
-    ('punctual', _('Punctual')),                      # N/A
-    ('continuous', _('Real time')),                   # freq:continuous
-    ('hourly', _('Hourly')),                          # N/A
-    ('fourTimesADay', _('Four times a day')),         # N/A
-    ('threeTimesADay', _('Three times a day')),       # N/A
-    ('semidaily', _('Semidaily')),                    # N/A
-    ('daily', _('Daily')),                            # freq:daily
-    ('fourTimesAWeek', _('Four times a week')),       # N/A
-    ('threeTimesAWeek', _('Three times a week')),     # freq:threeTimesAWeek
-    ('semiweekly', _('Semiweekly')),                  # freq:semiweekly
-    ('weekly', _('Weekly')),                          # freq:weekly
-    ('biweekly', _('Biweekly')),                      # freq:bimonthly
-    ('threeTimesAMonth', _('Three times a month')),   # freq:threeTimesAMonth
-    ('semimonthly', _('Semimonthly')),                # freq:semimonthly
-    ('monthly', _('Monthly')),                        # freq:monthly
-    ('bimonthly', _('Bimonthly')),                    # freq:bimonthly
-    ('quarterly', _('Quarterly')),                    # freq:quarterly
-    ('threeTimesAYear', _('Three times a year')),     # freq:threeTimesAYear
-    ('semiannual', _('Biannual')),                    # freq:semiannual
-    ('annual', _('Annual')),                          # freq:annual
-    ('biennial', _('Biennial')),                      # freq:biennial
-    ('triennial', _('Triennial')),                    # freq:triennial
-    ('quinquennial', _('Quinquennial')),              # N/A
-    ('irregular', _('Irregular')),                    # freq:irregular
-])
-
-#: Map legacy frequencies to currents
-LEGACY_FREQUENCIES = {
-    'fortnighly': 'biweekly',
-    'biannual': 'semiannual',
-    'realtime': 'continuous',
-}
-
-DEFAULT_FREQUENCY = 'unknown'
-
-DEFAULT_LICENSE = {
-    'id': 'notspecified',
-    'title': "License Not Specified",
-    'flags': ["generic"],
-    'maintainer': None,
-    'url': None,
-    'active': True,
-}
-
-RESOURCE_TYPES = OrderedDict([
-    ('main', _('Main file')),
-    ('documentation', _('Documentation')),
-    ('update', _('Update')),
-    ('api', _('API')),
-    ('code', _('Code repository')),
-    ('other', _('Other')),
-])
-
-RESOURCE_FILETYPE_FILE = 'file'
-RESOURCE_FILETYPES = OrderedDict([
-    (RESOURCE_FILETYPE_FILE, _('Uploaded file')),
-    ('remote', _('Remote file')),
-])
-
-CHECKSUM_TYPES = ('sha1', 'sha2', 'sha256', 'md5', 'crc')
-DEFAULT_CHECKSUM_TYPE = 'sha1'
-
-PIVOTAL_DATA = 'pivotal-data'
-CLOSED_FORMATS = ('pdf', 'doc', 'docx', 'word', 'xls', 'excel', 'xlsx')
-ACCESS_RIGHTS = ('public', 'non-public', 'restricted')
-DEFAULT_ACCESS_RIGHTS = 'public'
-
-# Maximum acceptable Damerau-Levenshtein distance
-# used to guess license
-# (ie. number of allowed character changes)
-MAX_DISTANCE = 2
-
-SCHEMA_CACHE_DURATION = 60 * 5  # In seconds
-
-TITLE_SIZE_LIMIT = 350
-DESCRIPTION_SIZE_LIMIT = 100000
 
 
 def get_json_ld_extra(key, value):
@@ -207,12 +123,13 @@ class Schema(db.EmbeddedDocument):
         # some schemas in the catalog. If there is no catalog
         # or no schema in the catalog we do not check the validity
         # of the name and version
-        catalog_schemas = ResourceSchema.all()
+        catalog_schemas = ResourceSchema.assignable_schemas()
         if not catalog_schemas:
             return
 
         # We know this schema so we can do some checks
-        existing_schema = ResourceSchema.get_schema_by_name(self.name)
+        existing_schema = next((schema for schema in catalog_schemas if schema['name'] == self.name), None)
+
         if not existing_schema:
             message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}').format(
                 schema=self.name,
@@ -1012,23 +929,6 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
 class ResourceSchema(object):
     @staticmethod
     @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
-    def objects():
-        '''
-        This rewrite is used in API returns.
-        It could be possible in the future to change the API with a breaking change to return
-        the full schema information from the catalog.
-        '''
-        schemas = ResourceSchema.all()
-        return [
-            {
-                'id': s['name'],
-                'label': s['title'],
-                'versions': [d['version_name'] for d in s['versions']],
-            } for s in schemas
-        ]
-
-    @staticmethod
-    @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
     def all():
         '''
         Get a list of schemas from a schema catalog endpoint.
@@ -1060,11 +960,9 @@ class ResourceSchema(object):
             raise SchemasCacheUnavailableException('No content in cache for schema catalog')
 
         return schemas
-
-    def get_schema_by_name(name: str):
-        for schema in ResourceSchema.all():
-            if schema['name'] == name:
-                return schema
+    
+    def assignable_schemas():
+        return [s for s in ResourceSchema.all() if s.get('schema_type') not in NON_ASSIGNABLE_SCHEMA_TYPES]
 
     def get_existing_schema_info_by_url(url: str) -> Optional[Tuple[str, Optional[str]]]:
         '''

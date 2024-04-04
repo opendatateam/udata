@@ -25,9 +25,8 @@ from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
-from udata.models import (LEGACY_FREQUENCIES, RESOURCE_TYPES,
-                          UPDATE_FREQUENCIES, CommunityResource, Dataset,
-                          Follow, Member, db)
+from udata.models import CommunityResource, Dataset, Follow, Member, db
+from udata.core.dataset.constants import LEGACY_FREQUENCIES, RESOURCE_TYPES, UPDATE_FREQUENCIES
 from udata.tags import MAX_TAG_LENGTH, MIN_TAG_LENGTH
 from udata.tests.features.territories import create_geozones_fixtures
 from udata.tests.helpers import assert200, assert404, assert204
@@ -769,6 +768,12 @@ class DatasetAPITest(APITestCase):
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert400(response)
         assert response.json['errors']['resources'][0]['schema']['name'] == [_('Schema name "{schema}" is not an allowed value. Allowed values: {values}').format(schema='unknown-schema', values='etalab/schema-irve-statique, 139bercy/format-commande-publique')]
+
+        resource_data['schema'] = {'name': 'etalab/schema-irve'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert400(response)
+        assert response.json['errors']['resources'][0]['schema']['name'] == [_('Schema name "{schema}" is not an allowed value. Allowed values: {values}').format(schema='etalab/schema-irve', values='etalab/schema-irve-statique, 139bercy/format-commande-publique')]
 
         resource_data['schema'] = {'name': 'etalab/schema-irve-statique', 'version': '42.0.0'}
         data['resources'].append(resource_data)
@@ -1780,7 +1785,7 @@ class DatasetSchemasAPITest:
         response = api.get(url_for('api.schemas'))
 
         assert200(response)
-        assert response.json == ResourceSchemaMockData.get_expected_v1_result_from_mock_data()
+        assert response.json == ResourceSchemaMockData.get_expected_assignable_schemas_from_mock_data()
 
     @pytest.mark.options(SCHEMA_CATALOG_URL=None)
     def test_dataset_schemas_api_list_no_catalog_url(self, api):
@@ -1811,7 +1816,7 @@ class DatasetSchemasAPITest:
         rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
         response = api.get(url_for('api.schemas'))
         assert200(response)
-        assert response.json == ResourceSchemaMockData.get_expected_v1_result_from_mock_data()
+        assert response.json == ResourceSchemaMockData.get_expected_assignable_schemas_from_mock_data()
         assert cache_mock_set.called
 
         # Endpoint becomes unavailable
@@ -1820,7 +1825,7 @@ class DatasetSchemasAPITest:
         # Long term cache is used
         response = api.get(url_for('api.schemas'))
         assert200(response)
-        assert response.json == ResourceSchemaMockData.get_expected_v1_result_from_mock_data()
+        assert response.json == ResourceSchemaMockData.get_expected_assignable_schemas_from_mock_data()
 
 
 @pytest.mark.usefixtures('clean_db')

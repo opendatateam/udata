@@ -3,7 +3,7 @@ import factory
 from factory.mongoengine import MongoEngineFactory
 
 from udata import search
-from udata.models import db
+from udata.mongo import db
 
 
 #############################################################################

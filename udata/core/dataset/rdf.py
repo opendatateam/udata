@@ -28,7 +28,8 @@ from udata.rdf import (
 from udata.utils import get_by, safe_unicode
 from udata.uris import endpoint_for
 
-from .models import Dataset, Resource, Checksum, License, UPDATE_FREQUENCIES
+from .models import Dataset, Resource, Checksum, License
+from .constants import UPDATE_FREQUENCIES
 
 log = logging.getLogger(__name__)
 

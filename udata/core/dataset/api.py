@@ -57,9 +57,10 @@ from .api_fields import (
 from udata.linkchecker.checker import check_resource
 from udata.core.topic.models import Topic
 from .models import (
-    Dataset, Resource, Checksum, License, UPDATE_FREQUENCIES,
-    CommunityResource, RESOURCE_TYPES, ResourceSchema, get_resource
+    Dataset, Resource, Checksum, License, 
+    CommunityResource, ResourceSchema, get_resource
 )
+from .constants import UPDATE_FREQUENCIES, RESOURCE_TYPES
 from .permissions import DatasetEditPermission, ResourceEditPermission
 from .forms import (
     ResourceForm, DatasetForm, CommunityResourceForm, ResourcesListForm
@@ -733,7 +734,7 @@ class SchemasAPI(API):
         '''List all available schemas'''
         try:
             # This method call is cached as it makes HTTP requests
-            return ResourceSchema.objects()
+            return ResourceSchema.assignable_schemas()
         except SchemasCacheUnavailableException:
             abort(503, description='No schemas in cache and endpoint unavailable')
         except SchemasCatalogNotFoundException:

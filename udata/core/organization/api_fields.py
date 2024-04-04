@@ -1,10 +1,7 @@
 from udata.api import api, fields, base_reference
 from udata.core.badges.api import badge_fields
 
-from .models import ORG_ROLES, DEFAULT_ROLE, MEMBERSHIP_STATUS, LOGO_SIZES
-
-BIGGEST_LOGO_SIZE = LOGO_SIZES[0]
-
+from .constants import ORG_ROLES, DEFAULT_ROLE, MEMBERSHIP_STATUS, BIGGEST_LOGO_SIZE
 
 org_ref_fields = api.inherit('OrganizationReference', base_reference, {
     'name': fields.String(description='The organization name', readonly=True),
