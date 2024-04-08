@@ -5,6 +5,7 @@ from mongoengine import NULLIFY, Q, post_save
 from mongoengine.fields import ReferenceField
 
 from udata.core.user.models import User
+from udata.core.organization.models import Organization
 from udata.mongo.queryset import UDataQuerySet
 
 log = logging.getLogger(__name__)
@@ -23,7 +24,7 @@ class Owned(object):
     A mixin to factorize owning behvaior between users and organizations.
     '''
     owner = ReferenceField(User, reverse_delete_rule=NULLIFY)
-    organization = ReferenceField('Organization', reverse_delete_rule=NULLIFY)
+    organization = ReferenceField(Organization, reverse_delete_rule=NULLIFY)
 
     on_owner_change = signal('Owned.on_owner_change')
 
