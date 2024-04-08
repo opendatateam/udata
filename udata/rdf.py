@@ -14,7 +14,7 @@ from rdflib.namespace import (
 from rdflib.util import SUFFIX_FORMAT_MAP, guess_format as raw_guess_format
 from udata import uris
 from udata.models import Schema
-from udata.errors2 import FieldValidationError
+from udata.mongo.errors import FieldValidationError
 
 log = logging.getLogger(__name__)
 

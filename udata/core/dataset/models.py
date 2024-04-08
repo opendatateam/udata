@@ -19,7 +19,7 @@ from udata.app import cache
 from udata.core import storages
 from udata.frontend.markdown import mdstrip
 from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
-from udata.errors2 import FieldValidationError
+from udata.mongo.errors import FieldValidationError
 from udata.i18n import lazy_gettext as _
 from udata.utils import get_by, hash_url, to_naive_datetime
 from udata.uris import ValidationError, endpoint_for

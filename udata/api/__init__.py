@@ -20,7 +20,7 @@ from udata.auth import (
     current_user, login_user, Permission, RoleNeed, PermissionDenied
 )
 from udata.core.user.models import User
-from udata.errors2 import FieldValidationError
+from udata.mongo.errors import FieldValidationError
 from udata.utils import safe_unicode
 
 from . import fields, oauth2

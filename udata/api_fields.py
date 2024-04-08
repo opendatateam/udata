@@ -5,7 +5,7 @@ from bson import ObjectId
 import mongoengine
 import mongoengine.fields as mongo_fields
 
-from udata.errors2 import FieldValidationError
+from udata.mongo.errors import FieldValidationError
 
 def convert_db_to_field(key, field):
     info = getattr(field, '__additional_field_info__', {})
