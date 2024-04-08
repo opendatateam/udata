@@ -4,6 +4,7 @@ Babel==2.12.1
 bcrypt==3.1.7
 bleach==3.1.0
 blinker==1.4
+boto3>=1.26
 celery==4.3.0
 celerybeat-mongo==0.2.0
 chardet==3.0.4
@@ -27,10 +28,12 @@ Flask-Sitemap==0.3.0
 Flask-WTF==1.0.1
 Flask==2.1.2
 geojson==2.5.0
+geomet==1.1.0
 html2text==2019.9.26
 Jinja2==3.1.2
 jsonschema==3.2.0
 kombu[redis]==4.4.0
+langdetect==1.0.9
 lxml==4.4.2
 mistune==0.8.4
 mongoengine==0.27.0

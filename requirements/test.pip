@@ -95,6 +95,7 @@ click==8.0.0
     #   -c requirements/install.pip
     #   -r requirements/install.in
     #   flask
+    #   geomet
 cryptography==2.8
     # via
     #   -c requirements/install.pip
@@ -209,6 +210,10 @@ geojson==2.5.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
+geomet==1.1.0
+    # via
+    #   -c requirements/install.pip
+    #   -r requirements/install.in
 html2text==2019.9.26
     # via
     #   -c requirements/install.pip
@@ -261,6 +266,10 @@ kombu[redis]==4.4.0
     #   -c requirements/install.pip
     #   -r requirements/install.in
     #   celery
+langdetect==1.0.9
+    # via
+    #   -c requirements/install.pip
+    #   -r requirements/install.in
 lxml==4.4.2
     # via
     #   -c requirements/install.pip
@@ -397,6 +406,7 @@ six==1.16.0
     #   flask-cors
     #   isodate
     #   jsonschema
+    #   langdetect
     #   python-dateutil
     #   requests-mock
     #   wtforms-json
@@ -421,9 +431,7 @@ tlds==2021080800
 tomli==2.0.1
     # via pytest
 typing-extensions==4.7.1
-    # via
-    #   -c requirements/install.pip
-    #   importlib-metadata
+    # via importlib-metadata
 ujson==1.35
     # via
     #   -c requirements/install.pip

@@ -6,7 +6,7 @@ from uuid import UUID
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import fields, ModelForm
-from udata.models import db
+from udata.mongo import db
 
 pytestmark = [
     pytest.mark.usefixtures('app')
@@ -48,6 +48,11 @@ class ExtrasFieldTest:
             'datetime': now,
             'date': today,
             'bool': True,
+            'dict': {
+                'integer': 42,
+                'float': 42.0,
+                'string': 'value',
+            }
         }}))
 
         form.validate()
@@ -61,23 +66,13 @@ class ExtrasFieldTest:
             'string': 'value',
             'datetime': now,
             'date': today,
-            'bool': True
-        }
-
-    def test_with_invalid_data(self):
-        Fake, FakeForm = self.factory()
-
-        form = FakeForm(MultiDict({'extras': {
+            'bool': True,
             'dict': {
                 'integer': 42,
                 'float': 42.0,
                 'string': 'value',
             }
-        }}))
-
-        form.validate()
-        assert 'extras' in form.errors
-        assert len(form.errors['extras']) == 1
+        }
 
     def test_with_null_data(self):
         Fake, FakeForm = self.factory()

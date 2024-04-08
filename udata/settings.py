@@ -257,6 +257,15 @@ class Defaults(object):
 
     HARVEST_VALIDATION_CONTACT_FORM = None
 
+    HARVEST_MAX_CATALOG_SIZE_IN_MONGO = None # Defaults to the size of a MongoDB document 
+    HARVEST_GRAPHS_S3_BUCKET = None # If the catalog is bigger than `HARVEST_MAX_CATALOG_SIZE_IN_MONGO` store the graph inside S3 instead of MongoDB
+    HARVEST_GRAPHS_S3_FILENAME_PREFIX = '' # Useful to store the graphs inside a subfolder of the bucket. For example by setting `HARVEST_GRAPHS_S3_FILENAME_PREFIX = 'graphs/'`
+
+    # S3 connection details
+    S3_URL = None
+    S3_ACCESS_KEY_ID = None
+    S3_SECRET_ACCESS_KEY = None 
+
     ACTIVATE_TERRITORIES = False
     # The order is important to compute parents/children, smaller first.
     HANDLED_LEVELS = tuple()
@@ -374,11 +383,6 @@ class Defaults(object):
     # The business identification format to use for validation
     ORG_BID_FORMAT = 'siret'
 
-    # Dataset settings
-    ###########################################################################
-    # Max number of resources to display uncollapsed in dataset view
-    DATASET_MAX_RESOURCES_UNCOLLAPSED = 6
-
     # Preview settings
     ###########################################################################
     # Preview mode can be either `iframe` or `page` or `None`
@@ -449,6 +453,16 @@ class Defaults(object):
     ###########################################################################
     QUALITY_DESCRIPTION_LENGTH = 100
 
+    # Spam settings
+    ###########################################################################
+    SPAM_WORDS = []
+    SPAM_ALLOWED_LANGS = []
+    SPAM_MINIMUM_STRING_LENGTH_FOR_LANG_CHECK = 30
+
+    # Notification settings
+    ###########################################################################
+    MATTERMOST_WEBHOOK = None
+
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''
@@ -460,8 +474,7 @@ class Testing(object):
     WTF_CSRF_ENABLED = False
     AUTO_INDEX = False
     CELERY_TASK_ALWAYS_EAGER = True
-    # TODO: ideally, this should be set to True in order to reveal exceptions in delayed tasks
-    CELERY_TASK_EAGER_PROPAGATES = False
+    CELERY_TASK_EAGER_PROPAGATES = True
     TEST_WITH_PLUGINS = False
     PLUGINS = []
     TEST_WITH_THEME = False

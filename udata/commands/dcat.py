@@ -8,7 +8,7 @@ from rdflib import Graph
 from udata.commands import cli, green, yellow, cyan, echo, magenta
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.rdf import dataset_from_rdf
-from udata.harvest.backends.dcat import DcatBackend, CswDcatBackend
+from udata.harvest.backends.dcat import DcatBackend, CswDcatBackend, CswIso19139DcatBackend
 from udata.rdf import namespace_manager
 
 log = logging.getLogger(__name__)
@@ -23,9 +23,10 @@ def grp():
 @grp.command()
 @click.argument('url')
 @click.option('-q', '--quiet', is_flag=True, help='Ignore warnings')
-@click.option('-i', '--rid', help='Inspect specific remote id (contains)')
-@click.option('-c', '--csw', is_flag=True, help='The target is a CSW endpoint')
-def parse_url(url, csw, quiet=False, rid=''):
+@click.option('-r', '--rid', help='Inspect specific remote id (contains)')
+@click.option('-c', '--csw', is_flag=True, help='The target is a CSW endpoint with DCAT output')
+@click.option('-i', '--iso', is_flag=True, help='The target is a CSW endpoint with ISO output')
+def parse_url(url, csw, iso, quiet=False, rid=''):
     '''Parse the datasets in a DCAT format located at URL (debug)'''
     if quiet:
         verbose_loggers = ['rdflib', 'udata.core.dataset']
@@ -49,6 +50,8 @@ def parse_url(url, csw, quiet=False, rid=''):
     source.url = url
     if csw:
         backend = CswDcatBackend(source, dryrun=True)
+    elif iso:
+        backend = CswIso19139DcatBackend(source, dryrun=True)
     else:
         backend = DcatBackend(source, dryrun=True)
     backend.job = MockJob()

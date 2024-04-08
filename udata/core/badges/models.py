@@ -6,7 +6,7 @@ from datetime import datetime
 from mongoengine.signals import post_save
 
 from udata.auth import current_user
-from udata.models import db
+from udata.mongo import db
 
 from .signals import on_badge_added, on_badge_removed
 

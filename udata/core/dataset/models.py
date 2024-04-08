@@ -1,8 +1,6 @@
 import logging
-import mongoengine
 
 from datetime import datetime, timedelta
-from collections import OrderedDict
 from urllib.parse import urlparse
 
 from blinker import signal
@@ -11,112 +9,32 @@ from flask import current_app
 from mongoengine import DynamicEmbeddedDocument, ValidationError as MongoEngineValidationError
 from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
+from pydoc import locate
 from stringdist import rdlevenshtein
 from werkzeug.utils import cached_property
 import requests
+from typing import Optional, Tuple
 
 from udata.app import cache
 from udata.core import storages
 from udata.frontend.markdown import mdstrip
-from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
+from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage, FieldValidationError
 from udata.i18n import lazy_gettext as _
 from udata.utils import get_by, hash_url, to_naive_datetime
 from udata.uris import ValidationError, endpoint_for
 from udata.uris import validate as validate_url
+from .constants import CHECKSUM_TYPES, CLOSED_FORMATS, DEFAULT_LICENSE, LEGACY_FREQUENCIES, MAX_DISTANCE, PIVOTAL_DATA, RESOURCE_FILETYPES, RESOURCE_TYPES, SCHEMA_CACHE_DURATION, UPDATE_FREQUENCIES
 
 from .preview import get_preview_url
 from .exceptions import (
     SchemasCatalogNotFoundException, SchemasCacheUnavailableException
 )
 
-__all__ = (
-    'License', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
-    'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_FILETYPES',
-    'PIVOTAL_DATA', 'DEFAULT_LICENSE', 'RESOURCE_TYPES',
-    'ResourceSchema'
-)
+__all__ = ('License', 'Resource', 'Schema', 'Dataset', 'Checksum', 'CommunityResource', 'ResourceSchema')
+
+NON_ASSIGNABLE_SCHEMA_TYPES = ['datapackage']
 
 log = logging.getLogger(__name__)
-
-#: Udata frequencies with their labels
-#:
-#: See: http://dublincore.org/groups/collections/frequency/
-UPDATE_FREQUENCIES = OrderedDict([                              # Dublin core equivalent
-    ('unknown', _('Unknown')),                        # N/A
-    ('punctual', _('Punctual')),                      # N/A
-    ('continuous', _('Real time')),                   # freq:continuous
-    ('hourly', _('Hourly')),                          # N/A
-    ('fourTimesADay', _('Four times a day')),         # N/A
-    ('threeTimesADay', _('Three times a day')),       # N/A
-    ('semidaily', _('Semidaily')),                    # N/A
-    ('daily', _('Daily')),                            # freq:daily
-    ('fourTimesAWeek', _('Four times a week')),       # N/A
-    ('threeTimesAWeek', _('Three times a week')),     # freq:threeTimesAWeek
-    ('semiweekly', _('Semiweekly')),                  # freq:semiweekly
-    ('weekly', _('Weekly')),                          # freq:weekly
-    ('biweekly', _('Biweekly')),                      # freq:bimonthly
-    ('threeTimesAMonth', _('Three times a month')),   # freq:threeTimesAMonth
-    ('semimonthly', _('Semimonthly')),                # freq:semimonthly
-    ('monthly', _('Monthly')),                        # freq:monthly
-    ('bimonthly', _('Bimonthly')),                    # freq:bimonthly
-    ('quarterly', _('Quarterly')),                    # freq:quarterly
-    ('threeTimesAYear', _('Three times a year')),     # freq:threeTimesAYear
-    ('semiannual', _('Biannual')),                    # freq:semiannual
-    ('annual', _('Annual')),                          # freq:annual
-    ('biennial', _('Biennial')),                      # freq:biennial
-    ('triennial', _('Triennial')),                    # freq:triennial
-    ('quinquennial', _('Quinquennial')),              # N/A
-    ('irregular', _('Irregular')),                    # freq:irregular
-])
-
-#: Map legacy frequencies to currents
-LEGACY_FREQUENCIES = {
-    'fortnighly': 'biweekly',
-    'biannual': 'semiannual',
-    'realtime': 'continuous',
-}
-
-DEFAULT_FREQUENCY = 'unknown'
-
-DEFAULT_LICENSE = {
-    'id': 'notspecified',
-    'title': "License Not Specified",
-    'flags': ["generic"],
-    'maintainer': None,
-    'url': None,
-    'active': True,
-}
-
-RESOURCE_TYPES = OrderedDict([
-    ('main', _('Main file')),
-    ('documentation', _('Documentation')),
-    ('update', _('Update')),
-    ('api', _('API')),
-    ('code', _('Code repository')),
-    ('other', _('Other')),
-])
-
-RESOURCE_FILETYPE_FILE = 'file'
-RESOURCE_FILETYPES = OrderedDict([
-    (RESOURCE_FILETYPE_FILE, _('Uploaded file')),
-    ('remote', _('Remote file')),
-])
-
-CHECKSUM_TYPES = ('sha1', 'sha2', 'sha256', 'md5', 'crc')
-DEFAULT_CHECKSUM_TYPE = 'sha1'
-
-PIVOTAL_DATA = 'pivotal-data'
-CLOSED_FORMATS = ('pdf', 'doc', 'docx', 'word', 'xls', 'excel', 'xlsx')
-
-# Maximum acceptable Damerau-Levenshtein distance
-# used to guess license
-# (ie. number of allowed character changes)
-MAX_DISTANCE = 2
-
-SCHEMA_CACHE_DURATION = 60 * 5  # In seconds
-
-TITLE_SIZE_LIMIT = 350
-DESCRIPTION_SIZE_LIMIT = 100000
 
 
 def get_json_ld_extra(key, value):
@@ -148,6 +66,95 @@ class HarvestResourceMetadata(DynamicEmbeddedDocument):
     created_at = db.DateTimeField()
     modified_at = db.DateTimeField()
     uri = db.StringField()
+
+
+class Schema(db.EmbeddedDocument):
+    """
+    Schema can only be two things right now:
+    - Known schema: url is not set, name is set, version is maybe set
+    - Unknown schema: url is set, name and version are maybe set
+    """
+    url = db.URLField()
+    name = db.StringField()
+    version = db.StringField()
+
+    def __bool__(self):
+        """
+        In the database, since the schemas were only simple dicts, there is
+        empty `{}` stored. To prevent problems with converting to bool
+        (bool({}) and default bool(Schema) do not yield the same value), we transform
+        empty Schema() to False.
+        It's maybe not necessary but being paranoid here.
+        """
+        return bool(self.name) or bool(self.url)
+
+    def to_dict(self):
+        return {
+            'url': self.url,
+            'name': self.name,
+            'version': self.version,
+        }
+
+    def clean(self, **kwargs):
+        super().clean()
+
+        check_schema_in_catalog = kwargs.get('check_schema_in_catalog', False)
+
+        if not self.url and not self.name:
+            # There is no schema.
+            if self.version:
+                raise FieldValidationError(_('A schema must contains a name or an URL when a version is provided.'), field='version')
+
+            return
+
+        # First check if the URL is a known schema
+        if self.url:
+            info = ResourceSchema.get_existing_schema_info_by_url(self.url)
+            if info:
+                self.url = None
+                self.name = info[0]
+                self.version = info[1]
+            
+            # Nothing more to do since an URL can point to anywhere and have a random name/version
+            return
+
+        # All the following checks are only run if there is 
+        # some schemas in the catalog. If there is no catalog
+        # or no schema in the catalog we do not check the validity
+        # of the name and version
+        catalog_schemas = ResourceSchema.assignable_schemas()
+        if not catalog_schemas:
+            return
+
+        # We know this schema so we can do some checks
+        existing_schema = next((schema for schema in catalog_schemas if schema['name'] == self.name), None)
+
+        if not existing_schema:
+            message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}').format(
+                schema=self.name,
+                values=', '.join(map(lambda schema: schema['name'], catalog_schemas))
+            )
+            if check_schema_in_catalog:
+                raise FieldValidationError(message, field='name')
+            else:
+                log.warning(message)
+                return
+
+        if self.version:
+            allowed_versions = list(map(lambda version: version['version_name'], existing_schema['versions']))
+            allowed_versions.append('latest')
+
+            if self.version not in allowed_versions:
+                message = _('Version "{version}" is not an allowed value for the schema "{name}". Allowed versions: {values}').format(
+                    version=self.version,
+                    name=self.name,
+                    values=', '.join(allowed_versions)
+                )
+                if check_schema_in_catalog:
+                    raise FieldValidationError(message, field='version')
+                else:
+                    log.warning(message)
+                    return
 
 
 class License(db.Document):
@@ -253,12 +260,10 @@ class License(db.Document):
 
 class DatasetQuerySet(db.OwnedQuerySet):
     def visible(self):
-        return self(private__ne=True, resources__0__exists=True,
-                    deleted=None, archived=None)
+        return self(private__ne=True, deleted=None, archived=None)
 
     def hidden(self):
         return self(db.Q(private=True) |
-                    db.Q(resources__0__exists=False) |
                     db.Q(deleted__ne=None) |
                     db.Q(archived__ne=None))
 
@@ -289,8 +294,8 @@ class ResourceMixin(object):
     fs_filename = db.StringField()
     extras = db.ExtrasField()
     harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)
-    schema = db.DictField()
-
+    schema = db.EmbeddedDocumentField(Schema)
+    
     created_at_internal = db.DateTimeField(default=datetime.utcnow, required=True)
     last_modified_internal = db.DateTimeField(default=datetime.utcnow, required=True)
     deleted = db.DateTimeField()
@@ -318,8 +323,6 @@ class ResourceMixin(object):
         super(ResourceMixin, self).clean()
         if not self.urlhash or 'url' in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
-        if self.schema and (not bool('name' in self.schema) ^ bool('url' in self.schema)):
-            raise MongoEngineValidationError('Schema must have at least a name or an url. Having both is not allowed.')
 
     @cached_property  # Accessed at least 2 times in front rendering
     def preview_url(self):
@@ -471,6 +474,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     frequency_date = db.DateTimeField(verbose_name=_('Future date of update'))
     temporal_coverage = db.EmbeddedDocumentField(db.DateRange)
     spatial = db.EmbeddedDocumentField(SpatialCoverage)
+    schema = db.EmbeddedDocumentField(Schema)
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()
@@ -553,6 +557,31 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         if self.frequency in LEGACY_FREQUENCIES:
             self.frequency = LEGACY_FREQUENCIES[self.frequency]
 
+        for key, value in self.extras.items():
+            if not key.startswith('custom:'):
+                continue
+            if not self.organization:
+                raise MongoEngineValidationError(
+                    'Custom metadatas are only accessible to dataset owned by on organization.')
+            custom_meta = key.split(':')[1]
+            org_custom = self.organization.extras.get('custom', [])
+            custom_present = False
+            for custom in org_custom:
+                if custom['title'] != custom_meta:
+                    continue
+                custom_present = True
+                if custom['type'] == 'choice':
+                    if value not in custom['choices']:
+                        raise MongoEngineValidationError(
+                            'Custom metadata choice is not defined by organization.')
+                else:
+                    if not isinstance(value, locate(custom['type'])):
+                        raise MongoEngineValidationError(
+                            'Custom metadata is not of the right type.')
+            if not custom_present:
+                raise MongoEngineValidationError(
+                    'Dataset\'s organization did not define the requested custom metadata.')
+
     def url_for(self, *args, **kwargs):
         return endpoint_for('datasets.show', 'api.dataset', dataset=self, *args, **kwargs)
 
@@ -564,8 +593,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     @property
     def is_hidden(self):
-        return (len(self.resources) == 0 or self.private or self.deleted
-                or self.archived)
+        return self.private or self.deleted or self.archived
 
     @property
     def full_title(self):
@@ -718,6 +746,11 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
         result['score'] = self.compute_quality_score(result)
         return result
+    
+    @property
+    def downloads(self):
+        return sum(resource.metrics.get('views', 0) for resource in self.resources)
+
 
     @staticmethod
     def normalize_score(score):
@@ -890,11 +923,10 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
     def from_community(self):
         return True
 
-
 class ResourceSchema(object):
     @staticmethod
     @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
-    def objects():
+    def all():
         '''
         Get a list of schemas from a schema catalog endpoint.
 
@@ -915,24 +947,37 @@ class ResourceSchema(object):
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             log.exception(f'Error while getting schema catalog from {endpoint}')
-            content = cache.get(cache_key)
+            schemas = cache.get(cache_key)
         else:
             schemas = response.json().get('schemas', [])
-            content = [
-                {
-                    'id': s['name'],
-                    'label': s['title'],
-                    'versions': [d['version_name'] for d in s['versions']],
-                } for s in schemas
-            ]
-            cache.set(cache_key, content)
+            cache.set(cache_key, schemas)
         # no cached version or no content
-        if not content:
+        if not schemas:
             log.error(f'No content found inc. from cache for schema catalog')
             raise SchemasCacheUnavailableException('No content in cache for schema catalog')
-        return content
 
+        return schemas
+    
+    def assignable_schemas():
+        return [s for s in ResourceSchema.all() if s.get('schema_type') not in NON_ASSIGNABLE_SCHEMA_TYPES]
 
+    def get_existing_schema_info_by_url(url: str) -> Optional[Tuple[str, Optional[str]]]:
+        '''
+        Returns the name and the version if exists
+        '''
+        for schema in ResourceSchema.all():
+            for version in schema['versions']:
+                if version['schema_url'] == url:
+                    return schema['name'], version['version_name']
+
+            if schema['schema_url'] == url:
+                # The main schema URL is often the 'latest' version but
+                # not sure if it's mandatory everywhere so set the version to
+                # None here.
+                return schema['name'], None
+
+        return None
+    
 def get_resource(id):
     '''Fetch a resource given its UUID'''
     dataset = Dataset.objects(resources__id=id).first()

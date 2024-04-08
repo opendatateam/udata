@@ -6,16 +6,16 @@ from flask_restx.inputs import boolean
 
 from udata.auth import admin_permission
 from udata.api import api, API, fields
+from udata.core.spam.api import SpamAPIMixin
+from udata.core.spam.fields import spam_fields
 from udata.utils import id_or_404
 from udata.core.user.api_fields import user_ref_fields
 
 from .forms import DiscussionCreateForm, DiscussionCommentForm
 from .models import Message, Discussion
 from .permissions import CloseDiscussionPermission
-from .signals import (
-    on_new_discussion, on_new_discussion_comment, on_discussion_closed,
-    on_discussion_deleted
-)
+from .signals import on_discussion_deleted
+
 
 ns = api.namespace('discussions', 'Discussion related operations')
 
@@ -24,6 +24,7 @@ message_fields = api.model('DiscussionMessage', {
     'posted_by': fields.Nested(user_ref_fields,
                                description='The message author'),
     'posted_on': fields.ISODateTime(description='The message posting date'),
+    'spam': fields.Nested(spam_fields),
 })
 
 discussion_fields = api.model('Discussion', {
@@ -43,6 +44,7 @@ discussion_fields = api.model('Discussion', {
     'url': fields.UrlFor('api.discussion',
                          description='The discussion API URI'),
     'extras': fields.Raw(description='Extra attributes as key-value pairs'),
+    'spam': fields.Nested(spam_fields),
 })
 
 start_discussion_fields = api.model('DiscussionStart', {
@@ -86,6 +88,12 @@ parser.add_argument(
     help='The page size to fetch')
 
 
+@ns.route('/<id>/spam/', endpoint='discussion_spam')
+@ns.doc(delete={'id': 'unspam'})
+class DiscussionSpamAPI(SpamAPIMixin):
+    model = Discussion
+
+
 @ns.route('/<id>/', endpoint='discussion')
 class DiscussionAPI(API):
     '''
@@ -123,9 +131,9 @@ class DiscussionAPI(API):
             discussion.closed = datetime.utcnow()
         discussion.save()
         if close:
-            on_discussion_closed.send(discussion, message=message_idx)
+            discussion.signal_close(message=message_idx)
         else:
-            on_new_discussion_comment.send(discussion, message=message_idx)
+            discussion.signal_comment(message=message_idx)
         return discussion
 
     @api.secure(admin_permission)
@@ -138,6 +146,17 @@ class DiscussionAPI(API):
         on_discussion_deleted.send(discussion)
         return '', 204
 
+
+@ns.route('/<id>/comments/<int:cidx>/spam', endpoint='discussion_comment_spam')
+@ns.doc(delete={'id': 'unspam'})
+class DiscussionSpamAPI(SpamAPIMixin):
+    def get_model(self, id, cidx):
+        discussion = Discussion.objects.get_or_404(id=id_or_404(id))
+        if len(discussion.discussion) <= cidx:
+            api.abort(404, 'Comment does not exist')
+        elif cidx == 0:
+            api.abort(400, 'You cannot unspam the first comment of a discussion')
+        return discussion, discussion.discussion[cidx]
 
 @ns.route('/<id>/comments/<int:cidx>', endpoint='discussion_comment')
 class DiscussionCommentAPI(API):
@@ -196,6 +215,7 @@ class DiscussionsAPI(API):
         discussion = Discussion(user=current_user.id, discussion=[message])
         form.populate_obj(discussion)
         discussion.save()
-        on_new_discussion.send(discussion)
+
+        discussion.signal_new()
 
         return discussion, 201

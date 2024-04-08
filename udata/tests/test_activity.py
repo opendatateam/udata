@@ -27,6 +27,18 @@ class ActivityTest(WebTestMixin, DBTestMixin, TestCase):
         self.assertEqual(len(activities), 1)
         self.assertIsInstance(activities[0], FakeActivity)
 
+    def test_create_and_retrieve_with_extras(self):
+        FakeActivity.objects.create(actor=self.user, related_to=self.fake, extras={'some_key': 'some_value',
+                                                                                   'other_key': 'other_value'})
+
+        activities = Activity.objects(actor=self.user)
+
+        self.assertEqual(len(activities), 1)
+        self.assertEqual(activities[0].extras['some_key'], 'some_value')
+        self.assertEqual(activities[0].extras['other_key'], 'other_value')
+        self.assertIsInstance(activities[0], FakeActivity)
+
+
     def test_create_and_retrieve_for_org(self):
         org = OrganizationFactory()
         FakeActivity.objects.create(

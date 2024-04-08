@@ -35,7 +35,9 @@ blinker==1.4
     #   flask-security-too
     #   flask-sitemap
 boto3==1.26.102
-    # via flask-storage
+    # via
+    #   -r requirements/install.in
+    #   flask-storage
 botocore==1.29.104
     # via
     #   boto3
@@ -62,6 +64,7 @@ click==8.0.0
     # via
     #   -r requirements/install.in
     #   flask
+    #   geomet
 cryptography==2.8
     # via
     #   -r requirements/install.in
@@ -137,6 +140,8 @@ flask-wtf==1.0.1
     #   flask-security-too
 geojson==2.5.0
     # via -r requirements/install.in
+geomet==1.1.0
+    # via -r requirements/install.in
 html2text==2019.9.26
     # via -r requirements/install.in
 idna==2.10
@@ -172,6 +177,8 @@ kombu[redis]==4.4.0
     # via
     #   -r requirements/install.in
     #   celery
+langdetect==1.0.9
+    # via -r requirements/install.in
 lxml==4.4.2
     # via -r requirements/install.in
 markupsafe==2.1.2
@@ -246,6 +253,7 @@ six==1.16.0
     #   flask-cors
     #   isodate
     #   jsonschema
+    #   langdetect
     #   python-dateutil
     #   wtforms-json
 speaklater==1.3

@@ -6,11 +6,15 @@ import requests
 from bson import ObjectId
 
 from udata.commands import cli, success, exit_with_error
-from udata.models import License, DEFAULT_LICENSE, Dataset
+from udata.models import License, Dataset
+from udata.core.dataset.constants import DEFAULT_LICENSE
 from .tasks import send_frequency_reminder
 from . import actions
 
 log = logging.getLogger(__name__)
+
+# Use CKAN license group from opendefinition as default license list
+DEFAULT_LICENSE_FILE = 'http://licenses.opendefinition.org/licenses/groups/ckan.json'  # noqa
 
 FLAGS_MAP = {
     'domain_content': 'domain_content',
@@ -20,10 +24,6 @@ FLAGS_MAP = {
     'is_okd_compliant': 'okd_compliant',
     'is_osi_compliant': 'osi_compliant',
 }
-
-# Use CKAN license group from opendefinition as default license list
-DEFAULT_LICENSE_FILE = 'http://licenses.opendefinition.org/licenses/groups/ckan.json'  # noqa
-
 
 @cli.command()
 @click.argument('source', default=DEFAULT_LICENSE_FILE)

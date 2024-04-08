@@ -5,7 +5,7 @@ from udata.core.organization.models import Organization
 from udata.core.user.factories import UserFactory
 from udata.core.user.models import User
 
-from udata.models import db
+from udata.mongo import db
 
 from udata.tests import TestCase, DBTestMixin
 

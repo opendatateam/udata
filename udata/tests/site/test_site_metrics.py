@@ -1,10 +1,11 @@
 import pytest
 
-from udata.core.dataset.factories import DatasetFactory, VisibleDatasetFactory, OrganizationFactory
+from udata.core.dataset.factories import DatasetFactory, HiddenDatasetFactory, OrganizationFactory
 from udata.core.reuse.factories import VisibleReuseFactory
 from udata.harvest.tests.factories import HarvestSourceFactory
 from udata.core.site.factories import SiteFactory
-from udata.models import Badge, PUBLIC_SERVICE
+from udata.models import Badge
+from udata.core.organization.constants import PUBLIC_SERVICE
 
 
 @pytest.mark.usefixtures('clean_db')
@@ -34,11 +35,11 @@ class SiteMetricTest:
             id=app.config['SITE_ID']
         )
         DatasetFactory.create_batch(2)
-        VisibleDatasetFactory.create_batch(3)
+        HiddenDatasetFactory.create_batch(3)
 
         site.count_datasets()
 
-        assert site.get_metrics()['datasets'] == 3
+        assert site.get_metrics()['datasets'] == 2
 
     def test_resources_metric(self, app):
         site = SiteFactory.create(

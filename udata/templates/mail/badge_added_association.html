@@ -1,0 +1,33 @@
+{% extends 'mail/base.html' %}
+{% from 'mail/button.html' import mail_button %}
+
+{% block body %}
+<p style="margin: 0;padding: 0;">{{
+    _('%(user)s has identified your organization "%(name)s" as an association',
+    user=(
+        '<a href="'|safe
+        + url_for('api.user', user=badge.created_by, _external=True)
+        + '">'|safe
+        + badge.created_by.fullname
+        + '</a>'|safe
+    ),
+    name=(
+        '<a href="'|safe
+        + organization.external_url
+        + '">'|safe
+        + organization.name|string
+        + '</a>'|safe
+    )
+) }}.</p>
+<br/>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td align="center">
+            {{ mail_button(
+                _('See the badge'),
+                organization.external_url
+            ) }}
+        </td>
+    </tr>
+</table>
+{% endblock %}

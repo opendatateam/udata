@@ -7,9 +7,8 @@ from udata.search import (
     ModelTermsFilter, BoolFilter, Filter,
     TemporalCoverageFilter
 )
-from udata.core.spatial.models import (
-    admin_levels, ADMIN_LEVEL_MAX
-)
+from udata.core.spatial.models import admin_levels
+from udata.core.spatial.constants import ADMIN_LEVEL_MAX
 from udata.core.dataset.api import DatasetApiParser, DEFAULT_SORTING
 from udata.utils import to_iso_datetime
 
@@ -47,7 +46,6 @@ class DatasetSearch(ModelSearchAdapter):
     @classmethod
     def is_indexable(cls, dataset):
         return (dataset.deleted is None and dataset.archived is None and
-                len(dataset.resources) > 0 and
                 not dataset.private)
 
     @classmethod
@@ -97,7 +95,7 @@ class DatasetSearch(ModelSearchAdapter):
             'organization': organization,
             'owner': str(owner.id) if owner else None,
             'format': [r.format.lower() for r in dataset.resources if r.format],
-            'schema': [r.schema.get('name') for r in dataset.resources if r.schema],
+            'schema': [r.schema.name for r in dataset.resources if r.schema],
             'topics': [str(t.id) for t in topics if topics],
         }
         extras = {}
