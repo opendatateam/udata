@@ -190,8 +190,8 @@ class AvailableDatasetBadgesAPI(API):
 @ns.route('/<reuse:reuse>/badges/', endpoint='reuse_badges')
 class ReuseBadgesAPI(API):
     @api.doc('add_reuse_badge', **common_doc)
-    @api.expect(badge_fields.badge_fields)
-    @api.marshal_with(badge_fields.badge_fields)
+    @api.expect(badge_fields)
+    @api.marshal_with(badge_fields)
     @api.secure(admin_permission)
     def post(self, reuse):
         '''Create a new badge for a given reuse'''

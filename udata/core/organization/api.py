@@ -192,8 +192,8 @@ class AvailableOrganizationBadgesAPI(API):
 @ns.route('/<org:org>/badges/', endpoint='organization_badges')
 class OrganizationBadgesAPI(API):
     @api.doc('add_organization_badge', **common_doc)
-    @api.expect(badge_fields.badge_fields)
-    @api.marshal_with(badge_fields.badge_fields)
+    @api.expect(badge_fields)
+    @api.marshal_with(badge_fields)
     @api.secure(admin_permission)
     def post(self, org):
         '''Create a new badge for a given organization'''
