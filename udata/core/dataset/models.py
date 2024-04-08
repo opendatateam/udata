@@ -32,6 +32,8 @@ from .exceptions import (
 
 __all__ = ('License', 'Resource', 'Schema', 'Dataset', 'Checksum', 'CommunityResource', 'ResourceSchema')
 
+NON_ASSIGNABLE_SCHEMA_TYPES = ['datapackage']
+
 log = logging.getLogger(__name__)
 
 
@@ -120,12 +122,13 @@ class Schema(db.EmbeddedDocument):
         # some schemas in the catalog. If there is no catalog
         # or no schema in the catalog we do not check the validity
         # of the name and version
-        catalog_schemas = ResourceSchema.all()
+        catalog_schemas = ResourceSchema.assignable_schemas()
         if not catalog_schemas:
             return
 
         # We know this schema so we can do some checks
-        existing_schema = ResourceSchema.get_schema_by_name(self.name)
+        existing_schema = next((schema for schema in catalog_schemas if schema['name'] == self.name), None)
+
         if not existing_schema:
             message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}').format(
                 schema=self.name,
@@ -923,23 +926,6 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
 class ResourceSchema(object):
     @staticmethod
     @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
-    def objects():
-        '''
-        This rewrite is used in API returns.
-        It could be possible in the future to change the API with a breaking change to return
-        the full schema information from the catalog.
-        '''
-        schemas = ResourceSchema.all()
-        return [
-            {
-                'id': s['name'],
-                'label': s['title'],
-                'versions': [d['version_name'] for d in s['versions']],
-            } for s in schemas
-        ]
-
-    @staticmethod
-    @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
     def all():
         '''
         Get a list of schemas from a schema catalog endpoint.
@@ -971,11 +957,9 @@ class ResourceSchema(object):
             raise SchemasCacheUnavailableException('No content in cache for schema catalog')
 
         return schemas
-
-    def get_schema_by_name(name: str):
-        for schema in ResourceSchema.all():
-            if schema['name'] == name:
-                return schema
+    
+    def assignable_schemas():
+        return [s for s in ResourceSchema.all() if s.get('schema_type') not in NON_ASSIGNABLE_SCHEMA_TYPES]
 
     def get_existing_schema_info_by_url(url: str) -> Optional[Tuple[str, Optional[str]]]:
         '''

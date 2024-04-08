@@ -734,7 +734,7 @@ class SchemasAPI(API):
         '''List all available schemas'''
         try:
             # This method call is cached as it makes HTTP requests
-            return ResourceSchema.objects()
+            return ResourceSchema.assignable_schemas()
         except SchemasCacheUnavailableException:
             abort(503, description='No schemas in cache and endpoint unavailable')
         except SchemasCatalogNotFoundException:
