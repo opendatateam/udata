@@ -121,8 +121,6 @@ or [the documentation](building-documentation.md).
 
 [Python Virtual Environments - a Primer]: https://realpython.com/blog/python/python-virtual-environments-a-primer/
 [dev-server]: http://localhost:7000/
-[docker-compose-install]: https://docs.docker.com/compose/install/
-[docker-compose]: https://docs.docker.com/compose/
 [git]: https://git-scm.com/
 [github]: https://github.com/opendatateam/udata
 [new issue]: https://github.com/opendatateam/udata/issues/new
