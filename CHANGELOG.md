@@ -9,6 +9,7 @@
 - Move `db` and Mongo fields classes outside `udata.models` [#3005](https://github.com/opendatateam/udata/pull/3005)
 - Remove unused dependencies [#3006](https://github.com/opendatateam/udata/pull/3006)
 - Move some `import User` to runtime imports [#3013](https://github.com/opendatateam/udata/pull/3013)
+- Move `badge_fields` to separate module than `models.py` [#3011](https://github.com/opendatateam/udata/pull/3011)
 
 ## 7.0.6 (2024-03-29)
 
