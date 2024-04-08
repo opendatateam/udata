@@ -8,6 +8,7 @@
 - Move constants outside `models.py` files to `constants.py` [#3001](https://github.com/opendatateam/udata/pull/3001)
 - Move `db` and Mongo fields classes outside `udata.models` [#3005](https://github.com/opendatateam/udata/pull/3005)
 - Remove unused dependencies [#3006](https://github.com/opendatateam/udata/pull/3006)
+- Move `FieldValidationError` into its own module and add an error handler [#3012](https://github.com/opendatateam/udata/pull/3012)
 
 ## 7.0.6 (2024-03-29)
 
