@@ -19,10 +19,11 @@ from udata.i18n import lazy_gettext as _
 from udata.models import db, WithMetrics, Follow
 from udata.core.discussions.models import Discussion
 from udata.core.storages import avatars, default_image_basename
-
 from .constants import AVATAR_SIZES
 
 __all__ = ('User', 'Role', 'datastore')
+
+
 
 # TODO: use simple text for role
 class Role(db.Document, RoleMixin):

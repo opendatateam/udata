@@ -10,12 +10,10 @@ from udata.frontend.markdown import mdstrip
 from udata.models import db, BadgeMixin, WithMetrics
 from udata.i18n import lazy_gettext as _
 from udata.uris import endpoint_for
-from .constants import CERTIFIED, DEFAULT_ROLE, LOGO_MAX_SIZE, LOGO_SIZES, MEMBERSHIP_STATUS, ORG_BID_SIZE_LIMIT, ORG_ROLES, PUBLIC_SERVICE, ASSOCIATION, COMPANY, LOCAL_AUTHORITY
+from .constants import ASSOCIATION, CERTIFIED, COMPANY, LOCAL_AUTHORITY, LOGO_SIZES, ORG_BID_SIZE_LIMIT, ORG_ROLES, DEFAULT_ROLE, MEMBERSHIP_STATUS, LOGO_MAX_SIZE, PUBLIC_SERVICE
 
 
-__all__ = (
-    'Organization', 'Team', 'Member', 'MembershipRequest',
-)
+__all__ = ('Organization', 'Team', 'Member', 'MembershipRequest')
 
 class Team(db.EmbeddedDocument):
     name = db.StringField(required=True)

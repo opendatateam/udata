@@ -5,7 +5,7 @@ from udata.forms import Form, ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 
 from .models import Organization, MembershipRequest, Member
-from .constants import LOGO_SIZES, ORG_ROLES, TITLE_SIZE_LIMIT, DESCRIPTION_SIZE_LIMIT
+from .constants import DESCRIPTION_SIZE_LIMIT, LOGO_SIZES, ORG_ROLES, TITLE_SIZE_LIMIT
 
 __all__ = (
     'OrganizationForm',

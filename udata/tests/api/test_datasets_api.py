@@ -17,7 +17,7 @@ from udata.core.dataset.api_fields import (dataset_harvest_fields,
 from udata.core.dataset.factories import (CommunityResourceFactory,
                                           DatasetFactory, LicenseFactory,
                                           ResourceFactory, ResourceSchemaMockData,
-                                          VisibleDatasetFactory)
+                                          HiddenDatasetFactory)
 from udata.core.dataset.models import (HarvestDatasetMetadata,
                                        HarvestResourceMetadata, ResourceMixin)
 from udata.core.organization.factories import OrganizationFactory
@@ -25,9 +25,8 @@ from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
-from udata.models import (LEGACY_FREQUENCIES, RESOURCE_TYPES,
-                          UPDATE_FREQUENCIES, CommunityResource, Dataset,
-                          Follow, Member, db)
+from udata.models import CommunityResource, Dataset, Follow, Member, db
+from udata.core.dataset.constants import LEGACY_FREQUENCIES, RESOURCE_TYPES, UPDATE_FREQUENCIES
 from udata.tags import MAX_TAG_LENGTH, MIN_TAG_LENGTH
 from udata.tests.features.territories import create_geozones_fixtures
 from udata.tests.helpers import assert200, assert404, assert204
@@ -44,12 +43,13 @@ SAMPLE_GEOM = {
     ]
 }
 
+
 class DatasetAPITest(APITestCase):
     modules = []
 
     def test_dataset_api_list(self):
         '''It should fetch a dataset list from the API'''
-        datasets = [VisibleDatasetFactory() for i in range(2)]
+        datasets = [DatasetFactory() for i in range(2)]
 
         response = self.get(url_for('api.datasets'))
         self.assert200(response)
@@ -58,10 +58,10 @@ class DatasetAPITest(APITestCase):
 
     def test_dataset_api_full_text_search(self):
         '''Should proceed to full text search on datasets'''
-        [VisibleDatasetFactory() for i in range(2)]
-        VisibleDatasetFactory(title="some spécial integer")
-        VisibleDatasetFactory(title="some spécial float")
-        dataset = VisibleDatasetFactory(title="some spécial chars")
+        [DatasetFactory() for i in range(2)]
+        DatasetFactory(title="some spécial integer")
+        DatasetFactory(title="some spécial float")
+        dataset = DatasetFactory(title="some spécial chars")
 
         # with accent
         response = self.get(url_for('api.datasets', q='some spécial chars'))
@@ -82,9 +82,9 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_sorting(self):
         '''Should sort datasets results from the API'''
         self.login()
-        [VisibleDatasetFactory() for i in range(2)]
+        [DatasetFactory() for i in range(2)]
 
-        to_follow = VisibleDatasetFactory(title="dataset to follow")
+        to_follow = DatasetFactory(title="dataset to follow")
 
         response = self.post(url_for('api.dataset_followers', id=to_follow.id))
         self.assert201(response)
@@ -100,8 +100,8 @@ class DatasetAPITest(APITestCase):
 
     def test_dataset_api_sorting_created(self):
         self.login()
-        first = VisibleDatasetFactory(title="first created dataset")
-        second = VisibleDatasetFactory(title="second created dataset")
+        first = DatasetFactory(title="first created dataset")
+        second = DatasetFactory(title="second created dataset")
         response = self.get(url_for('api.datasets', sort='created'))
         self.assert200(response)
         self.assertEqual(response.json['data'][0]['id'], str(first.id))
@@ -123,8 +123,8 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_default_sorting(self):
         # Default sort should be -created
         self.login()
-        [VisibleDatasetFactory(title="some created dataset") for i in range(10)]
-        last = VisibleDatasetFactory(title="last created dataset")
+        [DatasetFactory(title="some created dataset") for i in range(10)]
+        last = DatasetFactory(title="last created dataset")
         response = self.get(url_for('api.datasets'))
         self.assert200(response)
         self.assertEqual(response.json['data'][0]['id'], str(last.id))
@@ -134,31 +134,31 @@ class DatasetAPITest(APITestCase):
         owner = UserFactory()
         org = OrganizationFactory()
 
-        [VisibleDatasetFactory() for i in range(2)]
+        [DatasetFactory() for i in range(2)]
 
-        tag_dataset = VisibleDatasetFactory(tags=['my-tag', 'other'])
-        license_dataset = VisibleDatasetFactory(license=LicenseFactory(id='cc-by'))
+        tag_dataset = DatasetFactory(tags=['my-tag', 'other'])
+        license_dataset = DatasetFactory(license=LicenseFactory(id='cc-by'))
         format_dataset = DatasetFactory(resources=[ResourceFactory(format='my-format')])
-        featured_dataset = VisibleDatasetFactory(featured=True)
-        topic_dataset = VisibleDatasetFactory()
+        featured_dataset = DatasetFactory(featured=True)
+        topic_dataset = DatasetFactory()
         topic = TopicFactory(datasets=[topic_dataset])
 
         paca, _, _ = create_geozones_fixtures()
-        geozone_dataset = VisibleDatasetFactory(spatial=SpatialCoverageFactory(zones=[paca.id]))
-        granularity_dataset = VisibleDatasetFactory(
+        geozone_dataset = DatasetFactory(spatial=SpatialCoverageFactory(zones=[paca.id]))
+        granularity_dataset = DatasetFactory(
             spatial=SpatialCoverageFactory(granularity='country')
         )
 
         temporal_coverage = db.DateRange(start='2022-05-03', end='2022-05-04')
         temporal_coverage_dataset = DatasetFactory(temporal_coverage=temporal_coverage)
 
-        owner_dataset = VisibleDatasetFactory(owner=owner)
-        org_dataset = VisibleDatasetFactory(organization=org)
+        owner_dataset = DatasetFactory(owner=owner)
+        org_dataset = DatasetFactory(organization=org)
 
-        schema_dataset = VisibleDatasetFactory(resources=[
+        schema_dataset = DatasetFactory(resources=[
             ResourceFactory(schema={'name': 'my-schema', 'url': 'https://example.org', 'version': '1.0.0'})
         ])
-        schema_version2_dataset = VisibleDatasetFactory(resources=[
+        schema_version2_dataset = DatasetFactory(resources=[
             ResourceFactory(schema={'name': 'other-schema', 'url': 'https://example.org', 'version': '2.0.0'})
         ])
 
@@ -270,7 +270,7 @@ class DatasetAPITest(APITestCase):
 
     def test_dataset_api_get_deleted(self):
         '''It should not fetch a deleted dataset from the API and raise 410'''
-        dataset = VisibleDatasetFactory(deleted=datetime.utcnow())
+        dataset = DatasetFactory(deleted=datetime.utcnow())
 
         response = self.get(url_for('api.dataset', dataset=dataset))
         self.assert410(response)
@@ -278,7 +278,7 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_get_deleted_but_authorized(self):
         '''It should a deleted dataset from the API if user is authorized'''
         self.login()
-        dataset = VisibleDatasetFactory(owner=self.user,
+        dataset = DatasetFactory(owner=self.user,
                                         deleted=datetime.utcnow())
 
         response = self.get(url_for('api.dataset', dataset=dataset))
@@ -451,7 +451,7 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_update_with_resources(self):
         '''It should update a dataset from the API with resources parameters'''
         user = self.login()
-        dataset = VisibleDatasetFactory(owner=user)
+        dataset = DatasetFactory(owner=user)
         initial_length = len(dataset.resources)
         data = dataset.to_dict()
         data['resources'].append(ResourceFactory.as_dict())
@@ -464,7 +464,7 @@ class DatasetAPITest(APITestCase):
 
     def test_dataset_api_update_private(self):
         user = self.login()
-        dataset = DatasetFactory(owner=user, private=True)
+        dataset = HiddenDatasetFactory(owner=user)
         data = dataset.to_dict()
         data['description'] = 'new description'
         del data['private']
@@ -487,12 +487,10 @@ class DatasetAPITest(APITestCase):
         dataset.reload()
         self.assertEqual(dataset.private, True)
 
-
-
     def test_dataset_api_update_new_resource_with_extras(self):
         '''It should update a dataset with a new resource with extras'''
         user = self.login()
-        dataset = VisibleDatasetFactory(owner=user)
+        dataset = DatasetFactory(owner=user)
         data = dataset.to_dict()
         resource_data = ResourceFactory.as_dict()
         resource_data['extras'] = {'extra:id': 'id'}
@@ -508,7 +506,7 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_update_existing_resource_with_extras(self):
         '''It should update a dataset's existing resource with extras'''
         user = self.login()
-        dataset = VisibleDatasetFactory(owner=user)
+        dataset = DatasetFactory(owner=user, nb_resources=1)
         data = dataset.to_dict()
         data['resources'][0]['extras'] = {'extra:id': 'id'}
         response = self.put(url_for('api.dataset', dataset=dataset), data)
@@ -683,7 +681,7 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_delete(self):
         '''It should delete a dataset from the API'''
         user = self.login()
-        dataset = VisibleDatasetFactory(owner=user)
+        dataset = DatasetFactory(owner=user, nb_resources=1)
         response = self.delete(url_for('api.dataset', dataset=dataset))
 
         self.assertStatus(response, 204)
@@ -697,7 +695,7 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_delete_deleted(self):
         '''It should delete a deleted dataset from the API and raise 410'''
         user = self.login()
-        dataset = VisibleDatasetFactory(owner=user, deleted=datetime.utcnow())
+        dataset = DatasetFactory(owner=user, deleted=datetime.utcnow(), nb_resources=1)
         response = self.delete(url_for('api.dataset', dataset=dataset))
 
         self.assert410(response)
@@ -770,6 +768,12 @@ class DatasetAPITest(APITestCase):
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert400(response)
         assert response.json['errors']['resources'][0]['schema']['name'] == [_('Schema name "{schema}" is not an allowed value. Allowed values: {values}').format(schema='unknown-schema', values='etalab/schema-irve-statique, 139bercy/format-commande-publique')]
+
+        resource_data['schema'] = {'name': 'etalab/schema-irve'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert400(response)
+        assert response.json['errors']['resources'][0]['schema']['name'] == [_('Schema name "{schema}" is not an allowed value. Allowed values: {values}').format(schema='etalab/schema-irve', values='etalab/schema-irve-statique, 139bercy/format-commande-publique')]
 
         resource_data['schema'] = {'name': 'etalab/schema-irve-statique', 'version': '42.0.0'}
         data['resources'].append(resource_data)
@@ -1472,8 +1476,8 @@ class DatasetArchivedAPITest(APITestCase):
 
     def test_dataset_api_search_archived(self):
         '''It should search datasets from the API, excluding archived ones'''
-        VisibleDatasetFactory(archived=None)
-        dataset = VisibleDatasetFactory(archived=datetime.utcnow())
+        DatasetFactory(archived=None)
+        dataset = DatasetFactory(archived=datetime.utcnow())
 
         response = self.get(url_for('api.datasets', q=''))
         self.assert200(response)
@@ -1483,7 +1487,7 @@ class DatasetArchivedAPITest(APITestCase):
 
     def test_dataset_api_get_archived(self):
         '''It should fetch an archived dataset from the API and return 200'''
-        dataset = VisibleDatasetFactory(archived=datetime.utcnow())
+        dataset = DatasetFactory(archived=datetime.utcnow())
         response = self.get(url_for('api.dataset', dataset=dataset))
         self.assert200(response)
 
@@ -1528,7 +1532,7 @@ class CommunityResourceAPITest(APITestCase):
 
     def test_community_resource_api_create_dataset_binding(self):
         '''It should create a community resource linked to the right dataset'''
-        dataset = VisibleDatasetFactory()
+        dataset = DatasetFactory()
         self.login()
         response = self.post(
             url_for('api.upload_new_community_resource', dataset=dataset),
@@ -1540,7 +1544,7 @@ class CommunityResourceAPITest(APITestCase):
 
     def test_community_resource_api_create(self):
         '''It should create a community resource from the API'''
-        dataset = VisibleDatasetFactory()
+        dataset = DatasetFactory()
         self.login()
         response = self.post(
             url_for('api.upload_new_community_resource', dataset=dataset),
@@ -1560,7 +1564,7 @@ class CommunityResourceAPITest(APITestCase):
 
     def test_community_resource_api_create_as_org(self):
         '''It should create a community resource as org from the API'''
-        dataset = VisibleDatasetFactory()
+        dataset = DatasetFactory()
         user = self.login()
         org = OrganizationFactory(members=[
             Member(user=user, role='admin')
@@ -1612,7 +1616,7 @@ class CommunityResourceAPITest(APITestCase):
 
     def test_community_resource_api_update_with_file(self):
         '''It should update a community resource file from the API'''
-        dataset = VisibleDatasetFactory()
+        dataset = DatasetFactory()
         user = self.login()
         community_resource = CommunityResourceFactory(dataset=dataset,
                                                       owner=user)
@@ -1637,7 +1641,7 @@ class CommunityResourceAPITest(APITestCase):
 
     def test_community_resource_file_update_old_file_deletion(self):
         '''It should update a community resource's file and delete the old one'''
-        dataset = VisibleDatasetFactory()
+        dataset = DatasetFactory()
         user = self.login()
         community_resource = CommunityResourceFactory(dataset=dataset,
                                                       owner=user)
@@ -1664,7 +1668,7 @@ class CommunityResourceAPITest(APITestCase):
     def test_community_resource_api_create_remote(self):
         '''It should create a remote community resource from the API'''
         user = self.login()
-        dataset = VisibleDatasetFactory()
+        dataset = DatasetFactory()
         attrs = CommunityResourceFactory.as_dict()
         attrs['filetype'] = 'remote'
         attrs['dataset'] = str(dataset.id)
@@ -1685,7 +1689,7 @@ class CommunityResourceAPITest(APITestCase):
     def test_community_resource_api_unallowed_create_filetype_file(self):
         '''It should create a remote community resource from the API'''
         self.login()
-        dataset = VisibleDatasetFactory()
+        dataset = DatasetFactory()
         attrs = CommunityResourceFactory.as_dict()
         attrs['filetype'] = 'file'  # to be explicit
         attrs['dataset'] = str(dataset.id)
@@ -1734,7 +1738,7 @@ class CommunityResourceAPITest(APITestCase):
         self.assertEqual(CommunityResource.objects.count(), 0)
 
     def test_community_resource_api_delete(self):
-        dataset = VisibleDatasetFactory()
+        dataset = DatasetFactory()
         self.login()
 
         response = self.post(
@@ -1781,7 +1785,7 @@ class DatasetSchemasAPITest:
         response = api.get(url_for('api.schemas'))
 
         assert200(response)
-        assert response.json == ResourceSchemaMockData.get_expected_v1_result_from_mock_data()
+        assert response.json == ResourceSchemaMockData.get_expected_assignable_schemas_from_mock_data()
 
     @pytest.mark.options(SCHEMA_CATALOG_URL=None)
     def test_dataset_schemas_api_list_no_catalog_url(self, api):
@@ -1812,7 +1816,7 @@ class DatasetSchemasAPITest:
         rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
         response = api.get(url_for('api.schemas'))
         assert200(response)
-        assert response.json == ResourceSchemaMockData.get_expected_v1_result_from_mock_data()
+        assert response.json == ResourceSchemaMockData.get_expected_assignable_schemas_from_mock_data()
         assert cache_mock_set.called
 
         # Endpoint becomes unavailable
@@ -1821,7 +1825,7 @@ class DatasetSchemasAPITest:
         # Long term cache is used
         response = api.get(url_for('api.schemas'))
         assert200(response)
-        assert response.json == ResourceSchemaMockData.get_expected_v1_result_from_mock_data()
+        assert response.json == ResourceSchemaMockData.get_expected_assignable_schemas_from_mock_data()
 
 
 @pytest.mark.usefixtures('clean_db')

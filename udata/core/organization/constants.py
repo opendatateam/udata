@@ -1,10 +1,5 @@
 from udata.i18n import lazy_gettext as _
 
-__all__ = (
-    'ORG_ROLES', 'DEFAULT_ROLE', 'MEMBERSHIP_STATUS', 'PUBLIC_SERVICE', 'CERTIFIED', 'LOGO_MAX_SIZE', 'LOGO_SIZES', 'BIGGEST_LOGO_SIZE'
-    'ASSOCIATION', 'COMPANY', 'LOCAL_AUTHORITY', 'TITLE_SIZE_LIMIT', 'DESCRIPTION_SIZE_LIMIT', 'ORG_BID_SIZE_LIMIT'
-)
-
 ORG_ROLES = {
     'admin': _('Administrator'),
     'editor': _('Editor'),

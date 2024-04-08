@@ -8,6 +8,8 @@ from udata.core.spatial.forms import SpatialCoverageField
 
 from .models import (
     Dataset, Resource, Schema, License, Checksum, CommunityResource,
+)
+from .constants import (
     UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, RESOURCE_FILETYPES, CHECKSUM_TYPES,
     LEGACY_FREQUENCIES, RESOURCE_TYPES, TITLE_SIZE_LIMIT, DESCRIPTION_SIZE_LIMIT,
 )

@@ -249,14 +249,14 @@ export default {
         },
         schema_field() {
             if (this.hasSchemas) {
-                const values = [{id: '', label: ''}].concat(schemas.data);
+                const values = [{name: '', title: ''}].concat(schemas.data);
                 return [{
                     id: 'schema.name',
                     label: (this.resource.schema && this.resource.schema.url) ? this._('Schema (Url already set)') : this._('Schema'),
                     widget: 'select-input',
                     values,
                     map: function(item) {
-                        return {value: item.id, text: item.label};
+                        return {value: item.name, text: item.title};
                     }
                 }];
             }

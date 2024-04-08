@@ -12,7 +12,7 @@ from werkzeug.urls import url_encode
 from udata import settings
 from udata.app import create_app
 from udata.core.user.factories import UserFactory
-from udata.models import db
+from udata.mongo import db
 
 from .helpers import assert200, assert_command_ok
 
