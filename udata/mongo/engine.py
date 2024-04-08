@@ -40,8 +40,6 @@ class UDataMongoEngine(MongoEngine):
         self.ValidationError = ValidationError
         self.ObjectId = ObjectId
         self.DBRef = DBRef
-        # self.Owned = Owned
-        # self.OwnedQuerySet = OwnedQuerySet
         self.post_save = post_save
         self.pre_save = pre_save
 
