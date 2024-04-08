@@ -8,16 +8,16 @@ unit tests for the frontend and integration tests.
 If you need to use an alternative Mongo instance during tests, you can provide
 the alternate urls in you `udata.cfg` with `MONGODB_HOST_TEST`.
 
-**E.g.**: To make use of the tmpfs based middleware provided by docker-compose, use:
+**E.g.**: To make use of the tmpfs based middleware provided by docker compose, use:
 
 ```python
 MONGODB_HOST_TEST = 'mongodb://localhost:27018/udata'
 ```
 
-And then start docker-compose with the extra file:
+And then start docker compose with the extra file:
 
 ```shell
-$ docker-compose -f docker-compose.yml -f docker-compose.test.yml up
+$ docker compose -f docker-compose.yml -f docker-compose.test.yml up
 ```
 
 This will start a MongoDB extra service, tmpfs based and your tests will
