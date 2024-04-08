@@ -36,7 +36,6 @@ from udata.app import csrf
 from udata.auth import current_user, login_required, login_user
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.mongo import db
-from udata.core.user.models import User
 from udata.core.storages import images, default_image_basename
 
 
@@ -244,6 +243,8 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
 
 class PasswordGrant(grants.ResourceOwnerPasswordCredentialsGrant):
     def authenticate_user(self, username, password):
+        from udata.core.user.models import User
+
         user = User.objects(email=username).first()
         if user and verify_password(password, user.password):
             return user
