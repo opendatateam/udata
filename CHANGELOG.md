@@ -2,6 +2,8 @@
 
 ## Current (in progress)
 
+- :warning: **breaking change** `DATASET_MAX_RESOURCES_UNCOLLAPSED` config is removed.
+- Replace schemas API with a simple proxy to the `schemas.json` file [#2989](https://github.com/opendatateam/udata/pull/2989)
 - Topic: add filters in API [#3007](https://github.com/opendatateam/udata/pull/3007)
 - Move constants outside `models.py` files to `constants.py` [#3001](https://github.com/opendatateam/udata/pull/3001)
 - Move `db` and Mongo fields classes outside `udata.models` [#3005](https://github.com/opendatateam/udata/pull/3005)
@@ -863,7 +865,6 @@ Search refactor [#2680](https://github.com/opendatateam/udata/pull/2680)
 
 - Harvest sources are now filterable through the harvest source create/edit admin form [#1812](https://github.com/opendatateam/udata/pull/1812)
 - Harvest sources can now enable or disable some optional backend features [#1875](https://github.com/opendatateam/udata/pull/1875)
-- Static assets are now compatible with long-term caching (ie. their hash is present in the filename) [#1826](https://github.com/opendatateam/udata/pull/1826)
 - Post UIs have been reworked: publication date, publish/unpublish action, save and continue editing, dynamic sidebar, alignments fixes... [#1857](https://github.com/opendatateam/udata/pull/1857)
 
 ### Minor changes
@@ -879,6 +880,7 @@ Search refactor [#2680](https://github.com/opendatateam/udata/pull/2680)
 
 ### Breaking changes
 
+- Static assets are now compatible with long-term caching (ie. their hash is present in the filename). :warning: On your development environment you need to run `inv assets-build` to generate an initial `manifest.json`, both in `udata` and in your theme extension if it uses manifest. See [#1826](https://github.com/opendatateam/udata/pull/1826) for full details.
 - Theme are now responsible for adding their CSS markup on template (no more assumptions on `theme.css` and `admin.css`). Most of the time, overriding `raw.html` and `admin.html` should be sufficient
 - The discussions API `posted_by` attribute is now an embedded user instead of an user ID to avoid extra API calls [#1839](https://github.com/opendatateam/udata/pull/1839)
 
