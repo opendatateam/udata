@@ -383,11 +383,6 @@ class Defaults(object):
     # The business identification format to use for validation
     ORG_BID_FORMAT = 'siret'
 
-    # Dataset settings
-    ###########################################################################
-    # Max number of resources to display uncollapsed in dataset view
-    DATASET_MAX_RESOURCES_UNCOLLAPSED = 6
-
     # Preview settings
     ###########################################################################
     # Preview mode can be either `iframe` or `page` or `None`

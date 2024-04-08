@@ -9,7 +9,7 @@ from udata import migrations, models as core_models
 from udata.api import oauth2 as oauth2_models
 from udata.commands import cli, green, yellow, cyan, red, magenta, white, echo
 from udata.harvest import models as harvest_models
-from udata.models import db
+from udata.mongo import db
 
 
 # Date format used to for display

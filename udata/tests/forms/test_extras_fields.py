@@ -6,7 +6,7 @@ from uuid import UUID
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import fields, ModelForm
-from udata.models import db
+from udata.mongo import db
 
 pytestmark = [
     pytest.mark.usefixtures('app')

@@ -23,7 +23,8 @@ from .api_fields import (
     reuse_topic_fields
 )
 from .forms import ReuseForm
-from .models import Reuse, REUSE_TYPES, REUSE_TOPICS
+from .models import Reuse
+from .constants import REUSE_TYPES, REUSE_TOPICS
 from .permissions import ReuseEditPermission
 
 
