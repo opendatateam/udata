@@ -1,5 +1,5 @@
 from udata.api import api, fields, base_reference
-from udata.core.badges.api import badge_fields
+from udata.core.badges.fields import badge_fields
 
 from .constants import ORG_ROLES, DEFAULT_ROLE, MEMBERSHIP_STATUS, BIGGEST_LOGO_SIZE
 
