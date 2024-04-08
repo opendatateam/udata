@@ -3,7 +3,7 @@ from datetime import datetime
 from blinker import Signal
 from mongoengine.signals import post_save
 
-from udata.models import db
+from udata.mongo import db
 from udata.auth import current_user
 
 from .signals import new_activity

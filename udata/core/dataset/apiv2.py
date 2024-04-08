@@ -25,9 +25,8 @@ from .api_fields import (
 )
 from udata.core.spatial.api_fields import geojson
 from udata.core.contact_point.api_fields import contact_point_fields
-from .models import (
-    Dataset, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE, CommunityResource
-)
+from .models import Dataset, CommunityResource
+from .constants import UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE
 from .api import ResourceMixin
 from .permissions import DatasetEditPermission, ResourceEditPermission
 from .search import DatasetSearch

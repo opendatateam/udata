@@ -4,7 +4,7 @@ from udata.api import api, API
 from udata.auth import admin_permission
 from udata.core.discussions.models import Discussion
 from udata.core.spam.fields import potential_spam_fields
-from udata.core.spam.models import POTENTIAL_SPAM
+from udata.core.spam.constants import POTENTIAL_SPAM
 from udata.utils import id_or_404
 
 
