@@ -2,6 +2,7 @@ from udata.api import api
 
 from .forms import badge_form
 
+
 def add(obj):
     '''
     Handle a badge add API.
