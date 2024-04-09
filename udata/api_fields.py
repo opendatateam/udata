@@ -8,6 +8,16 @@ import mongoengine.fields as mongo_fields
 from udata.mongo.errors import FieldValidationError
 
 def convert_db_to_field(key, field):
+    '''
+    This function maps a Mongo field to a Flask RestX field.
+    Most of the types are a simple 1-to-1 mapping except lists and references that requires
+    more work.
+    We currently only map the params that we use from Mongo to RestX (for example min_length / max_length…).
+
+    In the first part of the function we save the RestX constructor as a lambda because we need to call it with the
+    params. Since merging the params involve a litte bit of work (merging default params with read/write params and then with
+    user-supplied overrides, setting the readonly flag…), it's easier to have do this one time at the end of the function.
+    '''
     info = getattr(field, '__additional_field_info__', {})
 
     params = {}
@@ -37,10 +47,16 @@ def convert_db_to_field(key, field):
     elif isinstance(field, mongo_fields.DictField):
         constructor = restx_fields.Raw
     elif isinstance(field, mongo_fields.ListField):
+        # For lists, we convert the inner value from Mongo to RestX then we create
+        # the `List` RestX type with this converted inner value.
         field_read, field_write = convert_db_to_field(f"{key}.inner", field.field)
         constructor_read = lambda **kwargs: restx_fields.List(field_read, **kwargs)
         constructor_write = lambda **kwargs: restx_fields.List(field_write, **kwargs)
     elif isinstance(field, mongo_fields.ReferenceField):
+        # For reference we accept while writing a String representing the ID of the referenced model.
+        # For reading, if the user supplied a `nested_fields` (RestX model), we use it to convert
+        # the referenced model, if not we return a String (and RestX will call the `str()` of the model
+        # when returning from an endpoint)
         nested_fields = info.get('nested_fields')
         if nested_fields is None:
             # If there is no `nested_fields` convert the object to the string representation.
@@ -64,6 +80,10 @@ def convert_db_to_field(key, field):
     return read, write
 
 def generate_fields(cls):
+    '''
+    This decorator will create two auto-generated attributes on the class `__read_fields__` and `__write_fields__`
+    that can be used in API endpoint inside `except()` and `marshall_with()`.
+    '''
     read_fields = {}
     write_fields = {}
 
@@ -84,11 +104,19 @@ def generate_fields(cls):
     return cls
 
 def field(inner, **kwargs):
+    '''
+    Simple decorator to mark a field as visible for the API fields.
+    We can pass additional arguments that will be forward to the RestX field constructor.
+    '''
     inner.__additional_field_info__ = kwargs
     return inner
 
 
 def patch(obj, request): 
+    '''
+    Patch the object with the data from the request.
+    Only fields decorated with the `field()` decorator will be read (and not readonly).
+    '''
     for key, value in request.json.items():
         field = obj.__write_fields__.get(key)
         if field is not None and not field.readonly:
@@ -104,6 +132,12 @@ def patch(obj, request):
     return obj
 
 def wrap_primary_key(field_name: str, foreign_field: mongoengine.fields.ReferenceField, value: str):
+    '''
+    We need to wrap the `String` inside an `ObjectId` most of the time. If the foreign ID is a `String` we need to get 
+    a `DBRef` from the database.
+
+    TODO: we only check the document reference if the ID is a `String` field (not in the case of a classic `ObjectId`).
+    '''
     document_type = foreign_field.document_type()
     id_field_name = document_type.__class__._meta["id_field"]
 
@@ -112,12 +146,13 @@ def wrap_primary_key(field_name: str, foreign_field: mongoengine.fields.Referenc
     if isinstance(id_field, mongoengine.fields.ObjectIdField):
         return ObjectId(value)
     elif isinstance(id_field, mongoengine.fields.StringField):
-        # { 'id': value }
-
         # Right now I didn't find a simpler way to make mongoengine happy.
         # For references, it expects `ObjectId`, `DBRef`, `LazyReference` or `document` but since
         # the primary key a StringField (not an `ObjectId`) we cannot create an `ObjectId`, I didn't find
         # a way to create a `DBRef` nor a `LazyReference` so I create a simple document with only the ID field.
+        # We could use a simple dict as follow instead:
+        # { 'id': value }
+        # … but it may be important to check before-hand that the reference point to a correct document.
         document = document_type.__class__.objects(**{id_field_name: value}).first()
         if document is None:
             raise FieldValidationError(field=field_name, message=f"Unknown reference '{value}'")
