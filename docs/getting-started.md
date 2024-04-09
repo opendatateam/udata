@@ -14,7 +14,7 @@ We’ll use the following repositories:
 
 udata requires several libraries to be installed to work. You can see them on the udata documentation link below.
 
-We’ll use [docker-compose](https://docs.docker.com/compose/) to manage external services so you don’t have to install native mongodb and redis.
+We’ll use [docker compose](https://docs.docker.com/compose/) to manage external services so you don’t have to install native mongodb and redis.
 
 # Setup udata
 
@@ -50,11 +50,11 @@ In this new directory, clone udata :
 git clone git@github.com:opendatateam/udata.git
 ```
 
-You can start your local development environment with docker-compose.
+You can start your local development environment with docker compose.
 
 ```bash
 cd udata
-docker-compose up
+docker compose up
 ```
 
 !!! warning

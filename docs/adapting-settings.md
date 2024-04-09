@@ -549,14 +549,6 @@ Whether or not discussions should be enabled on posts
 
 The default page size for post listing
 
-## Datasets configuration
-
-### DATASET_MAX_RESOURCES_UNCOLLAPSED
-
-**default** `6`
-
-Max number of resources to display uncollapsed in dataset view.
-
 ## Sentry configuration
 
 ### SENTRY_DSN

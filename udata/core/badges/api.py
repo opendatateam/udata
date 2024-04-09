@@ -1,13 +1,6 @@
-from udata.api import api, fields
+from udata.api import api
 
 from .forms import badge_form
-
-
-badge_fields = api.model('Badge', {
-    'kind': fields.String(description=('Kind of badge (certified, etc), '
-                                       'specific to each model'),
-                          required=True),
-})
 
 
 def add(obj):
