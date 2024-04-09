@@ -1,3 +1,4 @@
+from functools import wraps
 from udata.api import api
 import flask_restx.fields as restx_fields
 import udata.api.fields as custom_restx_fields
@@ -79,29 +80,31 @@ def convert_db_to_field(key, field):
         write = constructor_write(**write_params) if constructor_write else constructor(**write_params)
     return read, write
 
-def generate_fields(cls):
+def generate_fields(**kwargs):
     '''
     This decorator will create two auto-generated attributes on the class `__read_fields__` and `__write_fields__`
     that can be used in API endpoint inside `except()` and `marshall_with()`.
     '''
-    read_fields = {}
-    write_fields = {}
+    def wrapper(cls):
+        read_fields = {}
+        write_fields = {}
 
-    read_fields['id'] = restx_fields.String(required=True)
+        read_fields['id'] = restx_fields.String(required=True)
 
-    for key, field in cls._fields.items():
-        if not hasattr(field, '__additional_field_info__'): continue 
+        for key, field in cls._fields.items():
+            if not hasattr(field, '__additional_field_info__'): continue 
 
-        read, write = convert_db_to_field(key, field)
+            read, write = convert_db_to_field(key, field)
 
-        if read:
-            read_fields[key] = read
-        if write:
-            write_fields[key] = write
+            if read:
+                read_fields[key] = read
+            if write:
+                write_fields[key] = write
 
-    cls.__read_fields__ = api.model(f"{cls.__name__} (read)", read_fields)
-    cls.__write_fields__ = api.model(f"{cls.__name__} (write)", write_fields)
-    return cls
+        cls.__read_fields__ = api.model(f"{cls.__name__} (read)", read_fields, **kwargs)
+        cls.__write_fields__ = api.model(f"{cls.__name__} (write)", write_fields, **kwargs)
+        return cls
+    return wrapper
 
 def field(inner, **kwargs):
     '''

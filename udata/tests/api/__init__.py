@@ -21,6 +21,7 @@ class APITestCase(FrontTestCase):
             yield user
 
     def get(self, url, *args, **kwargs):
+        print(self.api.__class__)
         return self.api.get(url, *args, **kwargs)
 
     def post(self, url, data=None, json=True, *args, **kwargs):

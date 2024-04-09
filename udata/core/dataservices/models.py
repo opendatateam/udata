@@ -21,7 +21,7 @@ from udata.models import db
 DATASERVICE_FORMATS = ['REST', 'WMS', 'WSL']
 
 
-@generate_fields
+@generate_fields(mask=','.join(('id', 'title')))
 class Dataservice(WithMetrics, BadgeMixin, db.Owned, db.Document):
     title = field(
         db.StringField(required=True),

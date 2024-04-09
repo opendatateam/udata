@@ -164,6 +164,7 @@ class ApiClient(object):
 
     def perform(self, verb, url, **kwargs):
         headers = kwargs.pop('headers', {})
+        print(headers)
         headers['Content-Type'] = 'application/json'
 
         data = kwargs.get('data')

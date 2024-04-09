@@ -23,7 +23,9 @@ class DataserviceAPITest(APITestCase):
 
         dataservice = Dataservice.objects.first()
 
-        response = self.get(url_for('api.dataservice', dataservice=dataservice))
+        response = self.get(url_for('api.dataservice', dataservice=dataservice), headers={
+            'X-Fields': ['title', 'base_api_url', 'tags', 'private', 'datasets', 'license', 'extras']
+        })
         self.assert200(response)
 
         self.assertEqual(response.json['title'], 'My API')
@@ -38,6 +40,8 @@ class DataserviceAPITest(APITestCase):
             'extras': {
                 'foo': 'bar',
             }
+        }, headers={
+            'X-Fields': ['title', 'base_api_url', 'tags', 'private', 'datasets', 'license', 'extras']
         })
         self.assert200(response)
 
