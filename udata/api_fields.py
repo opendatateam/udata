@@ -32,6 +32,8 @@ def convert_db_to_field(key, field):
     constructor_write = None
 
     if info.get('convert_to'):
+        # TODO: this is currently never used. We may remove it if the auto-conversion
+        # is always good enough.
         return info.get('convert_to'), info.get('convert_to')
     elif isinstance(field, mongo_fields.StringField):
         constructor = restx_fields.String
