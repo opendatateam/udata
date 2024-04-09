@@ -16,7 +16,7 @@ class DataserviceAPITest(APITestCase):
 
         response = self.post(url_for('api.dataservices'), {
             'title': 'My API',
-            'uri': 'https://example.org',
+            'base_api_url': 'https://example.org',
         })
         self.assert201(response)
         self.assertEqual(Dataservice.objects.count(), 1)
@@ -27,7 +27,7 @@ class DataserviceAPITest(APITestCase):
         self.assert200(response)
 
         self.assertEqual(response.json['title'], 'My API')
-        self.assertEqual(response.json['uri'], 'https://example.org')
+        self.assertEqual(response.json['base_api_url'], 'https://example.org')
 
         response = self.patch(url_for('api.dataservice', dataservice=dataservice), {
             'title': 'Updated title',
@@ -42,7 +42,7 @@ class DataserviceAPITest(APITestCase):
         self.assert200(response)
 
         self.assertEqual(response.json['title'], 'Updated title')
-        self.assertEqual(response.json['uri'], 'https://example.org')
+        self.assertEqual(response.json['base_api_url'], 'https://example.org')
         self.assertEqual(response.json['tags'], ['hello', 'world'])
         self.assertEqual(response.json['private'], True)
         self.assertEqual(response.json['datasets'][0]['title'], datasets[0].title)
@@ -53,7 +53,7 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(response.json['license'], license.title)
         dataservice.reload()
         self.assertEqual(dataservice.title, 'Updated title')
-        self.assertEqual(dataservice.uri, 'https://example.org')
+        self.assertEqual(dataservice.base_api_url, 'https://example.org')
         self.assertEqual(dataservice.tags, ['hello', 'world'])
         self.assertEqual(dataservice.private, True)
         self.assertEqual(dataservice.datasets[0].title, datasets[0].title)
@@ -70,7 +70,7 @@ class DataserviceAPITest(APITestCase):
 
         dataservice.reload()
         self.assertEqual(dataservice.title, 'Updated title')
-        self.assertEqual(dataservice.uri, 'https://example.org')
+        self.assertEqual(dataservice.base_api_url, 'https://example.org')
         self.assertIsNotNone(dataservice.deleted_at)
 
         # response = self.get(url_for('api.dataservice', dataservice=dataservice))
@@ -80,7 +80,7 @@ class DataserviceAPITest(APITestCase):
     def test_dataset_api_create_with_validation_error(self):
         self.login()
         response = self.post(url_for('api.dataservices'), {
-            'uri': 'https://example.org',
+            'base_api_url': 'https://example.org',
         })
         self.assert400(response)
         self.assertEqual(Dataservice.objects.count(), 0)
@@ -89,7 +89,7 @@ class DataserviceAPITest(APITestCase):
         self.login()
         response = self.post(url_for('api.dataservices'), {
             'title': 'My title',
-            'uri': 'https://example.org',
+            'base_api_url': 'https://example.org',
             'license': 'unwkown-license',
         })
         self.assert400(response)
