@@ -14,12 +14,12 @@ ns = api.namespace('dataservices', 'Dataservices related operations')
 
 @ns.route('/', endpoint='dataservices')
 class DataservicesAPI(API):
-    '''Datasets collection endpoint'''
+    '''Dataservices collection endpoint'''
     @api.doc('list_dataservices')
     @api.expect(Dataservice.__index_parser__)
     @api.marshal_with(Dataservice.__page_fields__)
     def get(self):
-        '''List or search all datasets'''
+        '''List or search all dataservices'''
         query = Dataservice.objects(archived_at=None, deleted_at=None, private=False)
 
         return Dataservice.apply_sort_filters_and_pagination(query)
