@@ -109,7 +109,7 @@ def generate_fields(**kwargs):
         mask = kwargs.pop('mask')
         if mask is not None:
             mask = 'data{{{0}}},*'.format(mask)
-        cls.__page_fields__ = api.model(f"{cls.__name__}Page", custom_restx_fields.pager(read_fields), mask=mask, **kwargs)
+        cls.__page_fields__ = api.model(f"{cls.__name__}Page", custom_restx_fields.pager(cls.__read_fields__), mask=mask, **kwargs)
         return cls
     return wrapper
 
