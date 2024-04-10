@@ -90,11 +90,16 @@ def generate_fields(**kwargs):
     def wrapper(cls):
         read_fields = {}
         write_fields = {}
+        sortables = []
 
         read_fields['id'] = restx_fields.String(required=True)
 
         for key, field in cls._fields.items():
-            if not hasattr(field, '__additional_field_info__'): continue 
+            info = getattr(field, '__additional_field_info__', None)
+            if info is None: continue 
+
+            if info.get('sortable', False):
+                sortables.append(key)
 
             read, write = convert_db_to_field(key, field)
 
@@ -110,6 +115,32 @@ def generate_fields(**kwargs):
         if mask is not None:
             mask = 'data{{{0}}},*'.format(mask)
         cls.__page_fields__ = api.model(f"{cls.__name__}Page", custom_restx_fields.pager(cls.__read_fields__), mask=mask, **kwargs)
+
+        paginable = kwargs.get('paginable', True)
+        # Parser for index sort/filters
+        parser = api.parser()
+
+        if paginable:
+            parser.add_argument('page', type=int, location='args', default=1, help='The page to display')
+            parser.add_argument('page_size', type=int, location='args', default=20, help='The page size')
+        
+        if sortables:
+            choices = sortables + ['-' + k for k in sortables]
+            parser.add_argument('sort', type=str, location='args', choices=choices, help='The field (and direction) on which sorting apply')
+
+        cls.__index_parser__ = parser
+        def apply_sort_filters_and_pagination(base_query):
+            args = cls.__index_parser__.parse_args()
+
+            if sortables and args['sort']:
+                base_query = base_query.order_by(args['sort'])
+
+            if paginable:
+                base_query = base_query.paginate(args['page'], args['page_size'])
+
+            return base_query
+
+        cls.apply_sort_filters_and_pagination = apply_sort_filters_and_pagination
         return cls
     return wrapper
 

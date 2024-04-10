@@ -16,10 +16,13 @@ ns = api.namespace('dataservices', 'Dataservices related operations')
 class DataservicesAPI(API):
     '''Datasets collection endpoint'''
     @api.doc('list_dataservices')
+    @api.expect(Dataservice.__index_parser__)
     @api.marshal_with(Dataservice.__page_fields__)
     def get(self):
         '''List or search all datasets'''
-        return Dataservice.objects(archived=None, deleted=None, private=False).paginate(1, 10)
+        query = Dataservice.objects(archived_at=None, deleted_at=None, private=False)
+
+        return Dataservice.apply_sort_filters_and_pagination(query)
 
     @api.secure
     @api.doc('create_dataservice', responses={400: 'Validation error'})

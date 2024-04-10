@@ -9,7 +9,7 @@ from . import APITestCase
 class DataserviceAPITest(APITestCase):
     modules = []
 
-    def test_dataset_api_create(self):
+    def test_dataservice_api_create(self):
         self.login()
         datasets = DatasetFactory.create_batch(3)
         license = LicenseFactory.create()
@@ -81,7 +81,71 @@ class DataserviceAPITest(APITestCase):
         # self.assert410(response)
 
 
-    def test_dataset_api_create_with_validation_error(self):
+    def test_dataservice_api_index(self):
+        self.login()
+        self.post(url_for('api.dataservices'), {
+            'title': 'B',
+            'base_api_url': 'https://example.org/B',
+        })
+        self.post(url_for('api.dataservices'), {
+            'title': 'C',
+            'base_api_url': 'https://example.org/C',
+        })
+        self.post(url_for('api.dataservices'), {
+            'title': 'A',
+            'base_api_url': 'https://example.org/A',
+        })
+
+        self.assertEqual(Dataservice.objects.count(), 3)
+
+        response = self.get(url_for('api.dataservices'))
+        self.assert200(response)
+
+        self.assertEqual(response.json['previous_page'], None)
+        self.assertEqual(response.json['next_page'], None)
+        self.assertEqual(response.json['page'], 1)
+        self.assertEqual(response.json['total'], 3)
+        self.assertEqual(len(response.json['data']), 3)
+        self.assertEqual(response.json['data'][0]['title'], 'B')
+        self.assertEqual(response.json['data'][1]['title'], 'C')
+        self.assertEqual(response.json['data'][2]['title'], 'A')
+
+        response = self.get(url_for('api.dataservices', sort='title'))
+        self.assert200(response)
+
+        self.assertEqual(response.json['previous_page'], None)
+        self.assertEqual(response.json['next_page'], None)
+        self.assertEqual(response.json['page'], 1)
+        self.assertEqual(response.json['total'], 3)
+        self.assertEqual(len(response.json['data']), 3)
+        self.assertEqual(response.json['data'][0]['title'], 'A')
+        self.assertEqual(response.json['data'][1]['title'], 'B')
+        self.assertEqual(response.json['data'][2]['title'], 'C')
+
+        response = self.get(url_for('api.dataservices', sort='-title'))
+        self.assert200(response)
+
+        self.assertEqual(response.json['previous_page'], None)
+        self.assertEqual(response.json['next_page'], None)
+        self.assertEqual(response.json['page'], 1)
+        self.assertEqual(response.json['total'], 3)
+        self.assertEqual(len(response.json['data']), 3)
+        self.assertEqual(response.json['data'][0]['title'], 'C')
+        self.assertEqual(response.json['data'][1]['title'], 'B')
+        self.assertEqual(response.json['data'][2]['title'], 'A')
+
+
+        response = self.get(url_for('api.dataservices', page_size=1))
+        self.assert200(response)
+
+        self.assertEqual(response.json['previous_page'], None)
+        assert response.json['next_page'].endswith(url_for('api.dataservices', page_size=1, page=2))
+        self.assertEqual(response.json['page'], 1)
+        self.assertEqual(response.json['total'], 3)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['title'], 'B')
+
+    def test_dataservice_api_create_with_validation_error(self):
         self.login()
         response = self.post(url_for('api.dataservices'), {
             'base_api_url': 'https://example.org',
@@ -89,7 +153,7 @@ class DataserviceAPITest(APITestCase):
         self.assert400(response)
         self.assertEqual(Dataservice.objects.count(), 0)
 
-    def test_dataset_api_create_with_unkwown_license(self):
+    def test_dataservice_api_create_with_unkwown_license(self):
         self.login()
         response = self.post(url_for('api.dataservices'), {
             'title': 'My title',

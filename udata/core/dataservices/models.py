@@ -26,6 +26,7 @@ class Dataservice(WithMetrics, BadgeMixin, db.Owned, db.Document):
     title = field(
         db.StringField(required=True),
         example="My awesome API",
+        sortable=True,
     )
     acronym = field(
         db.StringField(max_length=128),
@@ -40,7 +41,10 @@ class Dataservice(WithMetrics, BadgeMixin, db.Owned, db.Document):
         db.StringField(default=''),
         description="In markdown"
     )
-    base_api_url = field(db.URLField(required=True))
+    base_api_url = field(
+        db.URLField(required=True),
+        sortable=True,
+    )
     endpoint_description_url = field(db.URLField())
     authorization_request_url = field(db.URLField())
     availability= field(
