@@ -14,6 +14,13 @@ ns = api.namespace('dataservices', 'Dataservices related operations')
 
 @ns.route('/', endpoint='dataservices')
 class DataservicesAPI(API):
+    '''Datasets collection endpoint'''
+    @api.doc('list_dataservices')
+    @api.marshal_with(Dataservice.__page_fields__)
+    def get(self):
+        '''List or search all datasets'''
+        return Dataservice.objects(archived=None, deleted=None, private=False).paginate(1, 10)
+
     @api.secure
     @api.doc('create_dataservice', responses={400: 'Validation error'})
     @api.expect(Dataservice.__write_fields__)
