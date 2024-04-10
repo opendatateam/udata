@@ -7,6 +7,7 @@
 - Topic: add filters in API [#3007](https://github.com/opendatateam/udata/pull/3007)
 - Move constants outside `models.py` files to `constants.py` [#3001](https://github.com/opendatateam/udata/pull/3001)
 - Move `db` and Mongo fields classes outside `udata.models` [#3005](https://github.com/opendatateam/udata/pull/3005)
+- :warning: Update LICENSE_GROUPS config layout [#3010](https://github.com/opendatateam/udata/pull/3010)
 - Remove unused dependencies [#3006](https://github.com/opendatateam/udata/pull/3006)
 - Move `badge_fields` to separate module than `models.py` [#3011](https://github.com/opendatateam/udata/pull/3011)
 
