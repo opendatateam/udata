@@ -183,3 +183,12 @@ class IndexingLifecycleTest(APITestCase):
         }
         url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/datasets/index"
         mock_req.assert_called_with(url, json=expected_value)
+
+    def test_dataset_adapter(self):
+        public_dataset = DatasetFactory(id='61fd30cb29ea95c7bc0e1211', access_rights='public')
+        non_public_dataset = DatasetFactory(id='61fd30cb29ea95c7bc0e1211', access_rights='non-public')
+        restricted_dataset = DatasetFactory(id='61fd30cb29ea95c7bc0e1211', access_rights='restricted')
+
+        assert DatasetSearch.is_indexable(public_dataset)
+        assert DatasetSearch.is_indexable(non_public_dataset)
+        assert DatasetSearch.is_indexable(restricted_dataset)

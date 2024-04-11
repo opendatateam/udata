@@ -70,6 +70,8 @@ DEFAULT_CHECKSUM_TYPE = 'sha1'
 
 PIVOTAL_DATA = 'pivotal-data'
 CLOSED_FORMATS = ('pdf', 'doc', 'docx', 'word', 'xls', 'excel', 'xlsx')
+ACCESS_RIGHTS = ('public', 'non-public', 'restricted')
+DEFAULT_ACCESS_RIGHTS = 'public'
 
 # Maximum acceptable Damerau-Levenshtein distance
 # used to guess license

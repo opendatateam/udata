@@ -23,7 +23,7 @@ from udata.i18n import lazy_gettext as _
 from udata.utils import get_by, hash_url, to_naive_datetime
 from udata.uris import ValidationError, endpoint_for
 from udata.uris import validate as validate_url
-from .constants import CHECKSUM_TYPES, CLOSED_FORMATS, DEFAULT_LICENSE, LEGACY_FREQUENCIES, MAX_DISTANCE, PIVOTAL_DATA, RESOURCE_FILETYPES, RESOURCE_TYPES, SCHEMA_CACHE_DURATION, UPDATE_FREQUENCIES
+from .constants import CHECKSUM_TYPES, CLOSED_FORMATS, DEFAULT_LICENSE, LEGACY_FREQUENCIES, MAX_DISTANCE, PIVOTAL_DATA, RESOURCE_FILETYPES, RESOURCE_TYPES, SCHEMA_CACHE_DURATION, UPDATE_FREQUENCIES, ACCESS_RIGHTS, DEFAULT_ACCESS_RIGHTS
 
 from .preview import get_preview_url
 from .exceptions import (
@@ -33,6 +33,7 @@ from .exceptions import (
 __all__ = ('License', 'Resource', 'Schema', 'Dataset', 'Checksum', 'CommunityResource', 'ResourceSchema')
 
 NON_ASSIGNABLE_SCHEMA_TYPES = ['datapackage']
+
 
 log = logging.getLogger(__name__)
 
@@ -490,6 +491,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
                                            default=datetime.utcnow, required=True)
     deleted = db.DateTimeField()
     archived = db.DateTimeField()
+
+    access_rights = db.StringField(choices=list(ACCESS_RIGHTS), default=DEFAULT_ACCESS_RIGHTS, required=True)
 
     def __str__(self):
         return self.title or ''
