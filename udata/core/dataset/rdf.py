@@ -76,6 +76,16 @@ EU_RDF_REQUENCIES = {
     EUFREQ.NEVER: 'punctual',
 }
 
+# Map High Value Datasets URIs to keyword categories
+EU_HVD_CATEGORIES = {
+    "http://data.europa.eu/bna/c_164e0bf5": "Météorologiques",
+    "http://data.europa.eu/bna/c_a9135398": "Entreprises et propriété d'entreprises",
+    "http://data.europa.eu/bna/c_ac64a52d": "Géospatiales",
+    "http://data.europa.eu/bna/c_b79e35eb": "Mobilité",
+    "http://data.europa.eu/bna/c_dd313021": "Observation de la terre et environnement",
+    "http://data.europa.eu/bna/c_e1da4e07": "Statistiques"
+}
+
 
 class HTMLDetector(HTMLParser):
     def __init__(self, *args, **kwargs):
@@ -469,9 +479,19 @@ def remote_url_from_rdf(rdf):
 
 
 def theme_labels_from_rdf(rdf):
+    '''
+    Get theme labels to use as keywords.
+    Map HVD keywords from known URIs resources.
+    '''
     for theme in rdf.objects(DCAT.theme):
         if isinstance(theme, RdfResource):
-            label = rdf_value(theme, SKOS.prefLabel)
+            uri = theme.identifier.toPython()
+            if uri in EU_HVD_CATEGORIES:
+                label = EU_HVD_CATEGORIES[uri]
+                # Additionnally yield hvd keyword
+                yield 'hvd'
+            else:
+                label = rdf_value(theme, SKOS.prefLabel)
         else:
             label = theme.toPython()
         if label:

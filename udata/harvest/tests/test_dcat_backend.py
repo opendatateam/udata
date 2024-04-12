@@ -440,6 +440,9 @@ class DcatBackendTest:
         assert dataset.extras["harvest"]["dct:accessRights"] == "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1e"
         assert dataset.extras["harvest"]["dct:provenance"] == ["Description de la provenance des données"]
 
+        assert 'observation-de-la-terre-et-environnement' in dataset.tags
+        assert 'hvd' in dataset.tags
+
         dataset = Dataset.objects.get(harvest__dct_identifier='1')
         # test html abstract description support
         assert dataset.description == '# h1 title\n\n## h2 title\n\n **and bold text**'
