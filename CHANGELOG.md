@@ -9,6 +9,7 @@
 - Move `db` and Mongo fields classes outside `udata.models` [#3005](https://github.com/opendatateam/udata/pull/3005)
 - :warning: Update LICENSE_GROUPS config layout [#3010](https://github.com/opendatateam/udata/pull/3010)
 - Remove unused dependencies [#3006](https://github.com/opendatateam/udata/pull/3006)
+- Move `FieldValidationError` into its own module and add an error handler [#3012](https://github.com/opendatateam/udata/pull/3012)
 - Move some `import User` to runtime imports [#3013](https://github.com/opendatateam/udata/pull/3013)
 - Move `Owned` mixin to its own module [#3008](https://github.com/opendatateam/udata/pull/3008)
 - Move `badge_fields` to separate module than `models.py` [#3011](https://github.com/opendatateam/udata/pull/3011)

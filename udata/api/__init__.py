@@ -20,6 +20,7 @@ from udata.auth import (
     current_user, login_user, Permission, RoleNeed, PermissionDenied
 )
 from udata.utils import safe_unicode
+from udata.mongo.errors import FieldValidationError
 
 from . import fields, oauth2
 from .signals import on_api_call
@@ -282,6 +283,19 @@ def handle_unauthorized_file_type(error):
     ).format(url=url)
     return {'message': msg}, 400
 
+
+validation_error_fields = api.model('ValidationError', {
+    'errors': fields.Raw
+})
+
+@api.errorhandler(FieldValidationError)
+@api.marshal_with(validation_error_fields, code=400)
+def handle_validation_error(error: FieldValidationError):
+    '''A validation error'''
+    errors = {}
+    errors[error.field] = [error.message]
+
+    return { 'errors': errors}, 400
 
 class API(Resource):  # Avoid name collision as resource is a core model
     pass
