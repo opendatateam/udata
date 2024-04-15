@@ -3,6 +3,7 @@ from udata.api_fields import field, generate_fields
 from udata.core.badges.models import BadgeMixin
 from udata.core.dataset.models import Dataset
 from udata.core.metrics.models import WithMetrics
+from udata.core.owned import Owned
 from udata.i18n import lazy_gettext as _
 import udata.core.contact_point.api_fields as contact_api_fields
 import udata.core.dataset.api_fields as datasets_api_fields
@@ -22,7 +23,7 @@ DATASERVICE_FORMATS = ['REST', 'WMS', 'WSL']
 
 
 @generate_fields(mask=','.join(('id', 'title')))
-class Dataservice(WithMetrics, BadgeMixin, db.Owned, db.Document):
+class Dataservice(WithMetrics, BadgeMixin, Owned, db.Document):
     title = field(
         db.StringField(required=True),
         example="My awesome API",
