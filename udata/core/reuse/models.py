@@ -8,12 +8,13 @@ from udata.i18n import lazy_gettext as _
 from udata.models import db, BadgeMixin, WithMetrics
 from udata.utils import hash_url
 from udata.uris import endpoint_for
+from udata.core.owned import Owned, OwnedQuerySet
 from .constants import IMAGE_MAX_SIZE, IMAGE_SIZES, REUSE_TOPICS, REUSE_TYPES
 
 __all__ = ('Reuse',)
 
 
-class ReuseQuerySet(db.OwnedQuerySet):
+class ReuseQuerySet(OwnedQuerySet):
     def visible(self):
         return self(private__ne=True, datasets__0__exists=True, deleted=None)
 
@@ -23,7 +24,7 @@ class ReuseQuerySet(db.OwnedQuerySet):
                     db.Q(deleted__ne=None))
 
 
-class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
+class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
     title = db.StringField(required=True)
     slug = db.SlugField(max_length=255, required=True, populate_from='title',
                         update=True, follow=True)
@@ -68,7 +69,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
                     'metrics.datasets',
                     'metrics.followers',
                     'metrics.views',
-                    'urlhash'] + db.Owned.meta['indexes'],
+                    'urlhash'] + Owned.meta['indexes'],
         'ordering': ['-created_at'],
         'queryset_class': ReuseQuerySet,
         'auto_create_index_on_save': True
