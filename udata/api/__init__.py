@@ -22,7 +22,7 @@ from udata.auth import (
 from udata.utils import safe_unicode
 from udata.mongo.errors import FieldValidationError
 
-from . import fields, oauth2
+from . import fields
 from .signals import on_api_call
 
 
@@ -129,6 +129,7 @@ class UDataApi(Api):
         @wraps(func)
         def wrapper(*args, **kwargs):
             from udata.core.user.models import User
+            from udata.api.oauth2 import check_credentials
 
             if current_user.is_authenticated:
                 return func(*args, **kwargs)
@@ -143,7 +144,7 @@ class UDataApi(Api):
                 if not login_user(user, False):
                     self.abort(401, 'Inactive user')
             else:
-                oauth2.check_credentials()
+                check_credentials()
             return func(*args, **kwargs)
         return wrapper
 
@@ -352,5 +353,6 @@ def init_app(app):
     app.register_blueprint(apiv1_blueprint)
     app.register_blueprint(apiv2_blueprint)
 
-    oauth2.init_app(app)
+    from udata.api.oauth2 import init_app as oauth2_init_app
+    oauth2_init_app(app)
     cors.init_app(app)
