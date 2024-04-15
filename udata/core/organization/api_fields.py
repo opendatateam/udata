@@ -25,11 +25,11 @@ org_ref_fields = api.inherit('OrganizationReference', base_reference, {
         readonly=True),
 })
 
-import udata.core.user.api_fields as user_api_fields  # noqa: required
+from udata.core.user.api_fields import user_ref_fields  # noqa: required
 
 request_fields = api.model('MembershipRequest', {
     'id': fields.String(readonly=True),
-    'user': fields.Nested(user_api_fields.user_ref_fields),
+    'user': fields.Nested(user_ref_fields),
     'created': fields.ISODateTime(
         description='The request creation date', readonly=True),
     'status': fields.String(
@@ -40,7 +40,7 @@ request_fields = api.model('MembershipRequest', {
 })
 
 member_fields = api.model('Member', {
-    'user': fields.Nested(user_api_fields.user_ref_fields),
+    'user': fields.Nested(user_ref_fields),
     'role': fields.String(
         description='The member role in the organization', required=True,
         enum=list(ORG_ROLES), default=DEFAULT_ROLE)

@@ -17,8 +17,6 @@ from .constants import (
 
 __all__ = ('DatasetForm', 'ResourceForm', 'CommunityResourceForm')
 
-
-
 class ChecksumForm(ModelForm):
     model_class = Checksum
     choices = list(zip(CHECKSUM_TYPES, CHECKSUM_TYPES))
