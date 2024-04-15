@@ -7,7 +7,7 @@ import mongoengine.fields as mongo_fields
 
 from udata.mongo.errors import FieldValidationError
 
-def convert_db_to_field(key, field):
+def convert_db_to_field(key, field, info = None):
     '''
     This function maps a Mongo field to a Flask RestX field.
     Most of the types are a simple 1-to-1 mapping except lists and references that requires
@@ -18,7 +18,7 @@ def convert_db_to_field(key, field):
     params. Since merging the params involve a litte bit of work (merging default params with read/write params and then with
     user-supplied overrides, setting the readonly flag…), it's easier to have do this one time at the end of the function.
     '''
-    info = getattr(field, '__additional_field_info__', {})
+    info = getattr(field, '__additional_field_info__', {}) if info is None else info
 
     params = {}
     params['required'] = field.required
@@ -51,7 +51,7 @@ def convert_db_to_field(key, field):
     elif isinstance(field, mongo_fields.ListField):
         # For lists, we convert the inner value from Mongo to RestX then we create
         # the `List` RestX type with this converted inner value.
-        field_read, field_write = convert_db_to_field(f"{key}.inner", field.field)
+        field_read, field_write = convert_db_to_field(f"{key}.inner", field.field, info.get('inner_field_info', {}))
         constructor_read = lambda **kwargs: restx_fields.List(field_read, **kwargs)
         constructor_write = lambda **kwargs: restx_fields.List(field_write, **kwargs)
     elif isinstance(field, mongo_fields.ReferenceField):
@@ -68,7 +68,17 @@ def convert_db_to_field(key, field):
 
         write_params['description'] = "ID of the reference"
         constructor_write = restx_fields.String
+    elif isinstance(field, mongo_fields.EmbeddedDocumentField):
+        nested_fields = info.get('nested_fields')
+        if nested_fields is None:
+            raise ValueError(f"EmbeddedDocumentField `{key}` requires a `nested_fields` param to serialize/deserialize.")
+
+        constructor = lambda **kwargs: restx_fields.Nested(nested_fields, **kwargs)
     else:
+        print(field.__class__)
+        print(field.__class__.__bases__)
+        print(isinstance(field, mongo_fields.ListField))
+        print(isinstance(field, mongoengine.ListField))
         raise ValueError(f"Unsupported MongoEngine field type {field.__class__.__name__}")
     
     read_params = {**params, **read_params, **info}

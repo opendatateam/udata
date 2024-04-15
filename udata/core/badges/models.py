@@ -1,14 +1,15 @@
 import logging
-import weakref
 
 from datetime import datetime
 
 from mongoengine.signals import post_save
 
+from udata.api_fields import field
 from udata.auth import current_user
 from udata.mongo import db
 
 from .signals import on_badge_added, on_badge_removed
+from .fields import badge_fields
 
 log = logging.getLogger(__name__)
 
@@ -44,7 +45,12 @@ class BadgesList(db.EmbeddedDocumentListField):
 
 
 class BadgeMixin(object):
-    badges = BadgesList()
+    badges = field(
+        BadgesList(),
+        inner_field_info={
+            'nested_fields': badge_fields,
+        },
+    )
 
     def get_badge(self, kind):
         ''' Get a badge given its kind if present'''
