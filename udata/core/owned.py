@@ -4,7 +4,10 @@ from blinker import signal
 from mongoengine import NULLIFY, Q, post_save
 from mongoengine.fields import ReferenceField
 
+from udata.api_fields import field
 from udata.mongo.queryset import UDataQuerySet
+from udata.core.user.api_fields import user_ref_fields
+from udata.core.organization.api_fields import org_ref_fields
 
 log = logging.getLogger(__name__)
 
@@ -21,8 +24,16 @@ class Owned(object):
     '''
     A mixin to factorize owning behvaior between users and organizations.
     '''
-    owner = ReferenceField('User', reverse_delete_rule=NULLIFY)
-    organization = ReferenceField('Organization', reverse_delete_rule=NULLIFY)
+    owner = field(
+        ReferenceField('User', reverse_delete_rule=NULLIFY),
+        nested_fields=user_ref_fields,
+        readonly=True,
+    )
+    organization = field(
+        ReferenceField('Organization', reverse_delete_rule=NULLIFY),
+        nested_fields=org_ref_fields,
+        readonly=True,
+    )
 
     on_owner_change = signal('Owned.on_owner_change')
 

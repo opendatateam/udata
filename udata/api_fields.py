@@ -1,4 +1,3 @@
-from functools import wraps
 from udata.api import api
 import flask_restx.fields as restx_fields
 import udata.api.fields as custom_restx_fields
