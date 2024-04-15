@@ -19,9 +19,8 @@ from udata.i18n import get_locale
 from udata.auth import (
     current_user, login_user, Permission, RoleNeed, PermissionDenied
 )
-from udata.core.user.models import User
-from udata.mongo.errors import FieldValidationError
 from udata.utils import safe_unicode
+from udata.mongo.errors import FieldValidationError
 
 from . import fields, oauth2
 from .signals import on_api_call
@@ -129,6 +128,8 @@ class UDataApi(Api):
         '''Authentify the user if credentials are given'''
         @wraps(func)
         def wrapper(*args, **kwargs):
+            from udata.core.user.models import User
+
             if current_user.is_authenticated:
                 return func(*args, **kwargs)
 

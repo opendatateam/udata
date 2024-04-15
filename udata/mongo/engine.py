@@ -13,7 +13,6 @@ from .extras_fields import ExtrasField, OrganizationExtrasField
 from .slug_fields import SlugField
 from .url_field import URLField
 from .uuid_fields import AutoUUIDField
-from .owned import Owned, OwnedQuerySet
 from .queryset import UDataQuerySet
 from .document import UDataDocument, DomainModel
 
@@ -41,8 +40,6 @@ class UDataMongoEngine(MongoEngine):
         self.ValidationError = ValidationError
         self.ObjectId = ObjectId
         self.DBRef = DBRef
-        self.Owned = Owned
-        self.OwnedQuerySet = OwnedQuerySet
         self.post_save = post_save
         self.pre_save = pre_save
 
