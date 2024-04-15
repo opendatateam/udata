@@ -7,7 +7,7 @@ import mongoengine.fields as mongo_fields
 
 from udata.mongo.errors import FieldValidationError
 
-def convert_db_to_field(key, field, info = None):
+def convert_db_to_field(key, field, info = {}):
     '''
     This function maps a Mongo field to a Flask RestX field.
     Most of the types are a simple 1-to-1 mapping except lists and references that requires
@@ -18,7 +18,7 @@ def convert_db_to_field(key, field, info = None):
     params. Since merging the params involve a litte bit of work (merging default params with read/write params and then with
     user-supplied overrides, setting the readonly flag…), it's easier to have do this one time at the end of the function.
     '''
-    info = getattr(field, '__additional_field_info__', {}) if info is None else info
+    info = { **getattr(field, '__additional_field_info__', {}), **info }
 
     params = {}
     params['required'] = field.required
