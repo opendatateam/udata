@@ -116,8 +116,8 @@ def generate_fields(**kwargs):
             mask = 'data{{{0}}},*'.format(mask)
         cls.__page_fields__ = api.model(f"{cls.__name__}Page", custom_restx_fields.pager(cls.__read_fields__), mask=mask, **kwargs)
 
-        paginable = kwargs.get('paginable', True)
         # Parser for index sort/filters
+        paginable = kwargs.get('paginable', True)
         parser = api.parser()
 
         if paginable:
