@@ -75,10 +75,6 @@ def convert_db_to_field(key, field, info = {}):
 
         constructor = lambda **kwargs: restx_fields.Nested(nested_fields, **kwargs)
     else:
-        print(field.__class__)
-        print(field.__class__.__bases__)
-        print(isinstance(field, mongo_fields.ListField))
-        print(isinstance(field, mongoengine.ListField))
         raise ValueError(f"Unsupported MongoEngine field type {field.__class__.__name__}")
     
     read_params = {**params, **read_params, **info}
@@ -117,6 +113,18 @@ def generate_fields(**kwargs):
             if write:
                 write_fields[key] = write
 
+        for method_name in dir(cls):
+            if method_name == 'objects': continue
+            if method_name.startswith('_'): continue
+
+            method = getattr(cls, method_name)
+            if not callable(method): continue
+
+            info = getattr(method, '__additional_field_info__', None)
+            if info is None: continue
+            read_fields[method_name] = restx_fields.String(attribute=lambda o: method(o), **{ 'readonly':True, **info })
+
+
         cls.__read_fields__ = api.model(f"{cls.__name__} (read)", read_fields, **kwargs)
         cls.__write_fields__ = api.model(f"{cls.__name__} (write)", write_fields, **kwargs)
 
@@ -152,6 +160,14 @@ def generate_fields(**kwargs):
         cls.apply_sort_filters_and_pagination = apply_sort_filters_and_pagination
         return cls
     return wrapper
+
+
+def function_field(**info):
+    def inner(func):
+        func.__additional_field_info__ = info
+        return func
+
+    return inner
 
 def field(inner, **kwargs):
     '''

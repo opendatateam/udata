@@ -1,5 +1,5 @@
 from datetime import datetime
-from udata.api_fields import field, generate_fields
+from udata.api_fields import field, function_field, generate_fields
 from udata.core.badges.models import BadgeMixin
 from udata.core.dataset.models import Dataset
 from udata.core.metrics.models import WithMetrics
@@ -9,6 +9,7 @@ import udata.core.contact_point.api_fields as contact_api_fields
 import udata.core.dataset.api_fields as datasets_api_fields
 
 from udata.models import db
+from udata.uris import endpoint_for
 
 # "frequency"
 # "harvest"
@@ -94,6 +95,13 @@ class Dataservice(WithMetrics, BadgeMixin, Owned, db.Document):
             )
         )
     )
+
+    @function_field(description="Link to the API endpoint for this dataservice")
+    def resource_api_uri(self):
+        return endpoint_for('api.dataservice', dataservice=self, _external=True)
+
+    def resource_web_uri():
+        pass
 
     # TODO
     # frequency = db.StringField(choices=list(UPDATE_FREQUENCIES.keys()))
