@@ -3,6 +3,7 @@ from werkzeug.local import LocalProxy
 from werkzeug.utils import cached_property
 
 from udata.app import cache
+from udata.core.metrics.models import WithMetrics
 from udata.uris import endpoint_for
 from udata.i18n import _, get_locale, language
 from udata.mongo import db
@@ -14,12 +15,17 @@ from .constants import ADMIN_LEVEL_MIN, ADMIN_LEVEL_MAX, BASE_GRANULARITIES
 __all__ = ('GeoLevel', 'GeoZone', 'SpatialCoverage', 'spatial_granularities')
 
 
-class GeoLevel(db.Document):
+class GeoLevel(WithMetrics, db.Document):
     id = db.StringField(primary_key=True)
     name = db.StringField(required=True)
     admin_level = db.IntField(min_value=ADMIN_LEVEL_MIN,
                               max_value=ADMIN_LEVEL_MAX,
                               default=100)
+    
+    def count_datasets(self):
+        from udata.models import Dataset
+        self.metrics['datasets'] = Dataset.objects(spatial__zones__in=self.id).visible().count()
+        self.save()
 
 
 class GeoZoneQuerySet(db.BaseQuerySet):

@@ -5,7 +5,7 @@ import click
 from flask import current_app
 
 from udata.commands import cli, success
-from udata.models import User, Dataset, Reuse, Organization, Site
+from udata.models import User, Dataset, Reuse, Organization, Site, GeoLevel
 
 log = logging.getLogger(__name__)
 
@@ -24,11 +24,12 @@ def grp():
               help='Compute datasets metrics')
 @click.option('-r', '--reuses', is_flag=True, help='Compute reuses metrics')
 @click.option('-u', '--users', is_flag=True, help='Compute users metrics')
+@click.option('-g', '--geolevels', is_flag=True, help='Compute geo levels metrics')
 @click.option('--drop', is_flag=True, help='Clear old metrics before computing new ones')
 def update(site=False, organizations=False, users=False, datasets=False,
-           reuses=False, drop=False):
+           reuses=False, geolevels = False, drop=False):
     '''Update all metrics for the current date'''
-    do_all = not any((site, organizations, users, datasets, reuses))
+    do_all = not any((site, organizations, users, datasets, reuses, geolevels))
 
     if do_all or site:
         log.info('Update site metrics')
@@ -114,4 +115,18 @@ def update(site=False, organizations=False, users=False, datasets=False,
                 except Exception as e:
                     log.info(f'Error during update: {e}')
                     continue
+
+    if do_all or geolevels:
+        log.info('Update GeoLevel metrics')
+        all_geolevels = GeoLevel.objects.timeout(False)
+        with click.progressbar(all_geolevels, length=GeoLevel.objects.count()) as geolevels_bar:
+            for geolevel in geolevels_bar:
+                try:
+                    if drop:
+                        geolevel.metrics.clear()
+                    geolevel.count_datasets()
+                except Exception as e:
+                    log.info(f'Error during update: {e}')
+                    continue
+
     success('All metrics have been updated')
