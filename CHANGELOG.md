@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 7.0.7 (2024-04-16)
 
 - :warning: **breaking change** `DATASET_MAX_RESOURCES_UNCOLLAPSED` config is removed.
 - Replace schemas API with a simple proxy to the `schemas.json` file [#2989](https://github.com/opendatateam/udata/pull/2989)
