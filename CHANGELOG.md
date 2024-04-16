@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 7.0.7 (2024-04-16)
 
 - :warning: **breaking change** `DATASET_MAX_RESOURCES_UNCOLLAPSED` config is removed.
