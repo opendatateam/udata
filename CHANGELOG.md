@@ -3,6 +3,9 @@
 ## Current (in progress)
 
 - Add dataservices [#2986](https://github.com/opendatateam/udata/pull/2986)
+
+## 7.0.7 (2024-04-16)
+
 - :warning: **breaking change** `DATASET_MAX_RESOURCES_UNCOLLAPSED` config is removed.
 - Replace schemas API with a simple proxy to the `schemas.json` file [#2989](https://github.com/opendatateam/udata/pull/2989)
 - Topic: add filters in API [#3007](https://github.com/opendatateam/udata/pull/3007)
