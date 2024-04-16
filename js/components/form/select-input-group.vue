@@ -56,7 +56,7 @@ export default {
         extract: function(items, group) {
             if (this.field.map) {
                 items = items.map(this.field.map);
-                return items.filter(item => this.field.groups[group].includes(item.value));
+                return items.filter(item => this.field.groups[group].map(license => license.value).includes(item.value));
             }
             return items;
         }

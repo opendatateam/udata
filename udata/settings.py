@@ -230,9 +230,14 @@ class Defaults(object):
     # A list of tuples, each tuple describing a group with its title and
     # a list of licenses associated. Translations are not supported.
     # Example:
-    # LICENSE_GROUPS = [
-    #    ('Administrative authorities', ['lov2', 'odc-odbl']),
-    #    ('All producers', ['lov2', 'cc-by', 'cc-by-sa', 'cc-zero'])
+    # LICENSE_GROUPS = [ 
+    #     ("Autorités administratives", [
+    #         {"value": "lov2", "recommended": True, "description": "Recommandée", "code": "etalab-2.0"},
+    #         {"value": "notspecified", "description": "Le Code des relations entre le public et l’administration ne s’applique pas"}]),
+    #     ("Tous producteurs", [
+    #         {"value": "lov2", "recommended": True, "description": "Recommandée"},
+    #         {"value": "cc-by", "code": "CC-BY"},
+    #         {"value": "notspecified"}])
     # ]
     LICENSE_GROUPS = None
 

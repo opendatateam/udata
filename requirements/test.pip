@@ -33,10 +33,6 @@ babel==2.12.1
     #   -c requirements/install.pip
     #   -r requirements/install.in
     #   flask-babel
-bcrypt==3.1.7
-    # via
-    #   -c requirements/install.pip
-    #   -r requirements/install.in
 billiard==4.2.0
     # via
     #   -c requirements/install.pip
@@ -84,12 +80,10 @@ certifi==2024.2.2
 cffi==1.16.0
     # via
     #   -c requirements/install.pip
-    #   bcrypt
     #   cryptography
 chardet==3.0.4
     # via
     #   -c requirements/install.pip
-    #   -r requirements/install.in
     #   requests
 click==8.1.2
     # via
@@ -267,7 +261,6 @@ jmespath==1.0.1
 jsonschema==3.2.0
     # via
     #   -c requirements/install.pip
-    #   -r requirements/install.in
     #   flask-restx
 kombu[redis]==5.3.1
     # via
@@ -301,10 +294,6 @@ mongoengine==0.27.0
     #   -r requirements/install.in
     #   celerybeat-mongo
     #   flask-mongoengine
-msgpack==0.6.2
-    # via
-    #   -c requirements/install.pip
-    #   -r requirements/install.in
 netaddr==0.7.19
     # via
     #   -c requirements/install.pip
@@ -322,7 +311,6 @@ passlib==1.7.4
 pillow==9.2.0
     # via
     #   -c requirements/install.pip
-    #   -r requirements/install.in
     #   flask-storage
     #   pydenticon
 pluggy==1.4.0
@@ -405,14 +393,9 @@ s3transfer==0.6.2
     # via
     #   -c requirements/install.pip
     #   boto3
-simplejson==3.17.0
-    # via
-    #   -c requirements/install.pip
-    #   -r requirements/install.in
 six==1.16.0
     # via
     #   -c requirements/install.pip
-    #   bcrypt
     #   bleach
     #   cryptography
     #   faker
@@ -445,14 +428,6 @@ tzdata==2024.1
     # via
     #   -c requirements/install.pip
     #   celery
-ujson==1.35
-    # via
-    #   -c requirements/install.pip
-    #   -r requirements/install.in
-unicodecsv==0.14.1
-    # via
-    #   -c requirements/install.pip
-    #   -r requirements/install.in
 unidecode==0.4.21
     # via
     #   -c requirements/install.pip
@@ -505,10 +480,6 @@ wtforms[email]==3.0.1
     #   flask-wtf
     #   wtforms-json
 wtforms-json==0.3.5
-    # via
-    #   -c requirements/install.pip
-    #   -r requirements/install.in
-xmltodict==0.12.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
