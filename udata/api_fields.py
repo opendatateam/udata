@@ -116,13 +116,23 @@ def generate_fields(**kwargs):
         for method_name in dir(cls):
             if method_name == 'objects': continue
             if method_name.startswith('_'): continue
+            if method_name in read_fields: continue # Do not override if the attribute is also callable like for Extras
 
             method = getattr(cls, method_name)
             if not callable(method): continue
 
             info = getattr(method, '__additional_field_info__', None)
             if info is None: continue
-            read_fields[method_name] = restx_fields.String(attribute=lambda o: method(o), **{ 'readonly':True, **info })
+
+            def make_lambda(method):
+                '''
+                Factory function to create a lambda with the correct scope.
+                If we don't have this factory function, the `method` will be the 
+                last method assigned in this loop?
+                '''
+                return lambda o: method(o)
+
+            read_fields[method_name] = restx_fields.String(attribute=make_lambda(method), **{ 'readonly':True, **info })
 
 
         cls.__read_fields__ = api.model(f"{cls.__name__} (read)", read_fields, **kwargs)

@@ -1,3 +1,4 @@
+from pprint import pprint
 from flask import url_for
 
 from udata.core.dataservices.models import Dataservice
@@ -39,9 +40,9 @@ class DataserviceAPITest(APITestCase):
             'license': license.id,
             'extras': {
                 'foo': 'bar',
-            }
+            },
         }, headers={
-            'X-Fields': ['title', 'base_api_url', 'tags', 'private', 'datasets', 'license', 'extras']
+            'X-Fields': ['title', 'base_api_url', 'tags', 'private', 'datasets', 'license', 'extras', 'resource_api_url']
         })
         self.assert200(response)
 
@@ -55,6 +56,7 @@ class DataserviceAPITest(APITestCase):
             'foo': 'bar',
         })
         self.assertEqual(response.json['license'], license.title)
+        self.assertEqual(response.json['resource_api_url'], 'http://local.test/api/1/dataservices/updated-title/')
         dataservice.reload()
         self.assertEqual(dataservice.title, 'Updated title')
         self.assertEqual(dataservice.base_api_url, 'https://example.org')
@@ -66,6 +68,7 @@ class DataserviceAPITest(APITestCase):
             'foo': 'bar',
         })
         self.assertEqual(dataservice.license.title, license.title)
+        self.assertEqual(dataservice.resource_api_url(), 'http://local.test/api/1/dataservices/updated-title/')
 
         response = self.delete(url_for('api.dataservice', dataservice=dataservice))
         self.assert204(response)

@@ -97,10 +97,10 @@ class Dataservice(WithMetrics, BadgeMixin, Owned, db.Document):
     )
 
     @function_field(description="Link to the API endpoint for this dataservice")
-    def resource_api_uri(self):
+    def resource_api_url(self):
         return endpoint_for('api.dataservice', dataservice=self, _external=True)
 
-    def resource_web_uri():
+    def resource_web_url():
         pass
 
     # TODO
