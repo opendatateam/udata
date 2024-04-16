@@ -1,6 +1,5 @@
 from datetime import datetime
 from udata.api_fields import field, function_field, generate_fields
-from udata.core.badges.models import BadgeMixin
 from udata.core.dataset.models import Dataset
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned
@@ -24,7 +23,7 @@ DATASERVICE_FORMATS = ['REST', 'WMS', 'WSL']
 
 
 @generate_fields(mask=','.join(('id', 'title')))
-class Dataservice(WithMetrics, BadgeMixin, Owned, db.Document):
+class Dataservice(WithMetrics, Owned, db.Document):
     title = field(
         db.StringField(required=True),
         example="My awesome API",
