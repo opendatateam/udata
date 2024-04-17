@@ -201,7 +201,7 @@ class DatasetExtrasAPITest(APITestCase):
         self.assert200(response)
         data = response.json
         assert data['test::extra'] == 'test-value'
-        assert data['check::date'] == 1713076920
+        assert data['check::date'] == '2024-04-14T08:42:00'
 
     def test_update_dataset_extras(self):
         self.dataset.extras = {
@@ -346,7 +346,7 @@ class DatasetResourceExtrasAPITest(APITestCase):
         self.assert200(response)
         data = response.json
         assert data['test::extra'] == 'test-value'
-        assert data['check:date'] == 1681991851
+        assert data['check:date'] == '2023-04-20T13:57:31.289000'
 
     def test_update_resource_extras(self):
         resource = ResourceFactory()

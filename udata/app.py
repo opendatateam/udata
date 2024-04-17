@@ -122,7 +122,7 @@ class UDataJsonEncoder(json.JSONEncoder):
         elif isinstance(obj, bson.objectid.ObjectId):
             return str(obj)
         elif isinstance(obj, datetime.datetime):
-            return round(obj.timestamp())
+            return obj.isoformat()
         elif hasattr(obj, 'to_dict'):
             return obj.to_dict()
         elif hasattr(obj, 'serialize'):
