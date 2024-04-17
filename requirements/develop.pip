@@ -42,6 +42,10 @@ babel==2.12.1
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   flask-babel
+bcrypt==3.1.7
+    # via
+    #   -c requirements/test.pip
+    #   -r requirements/install.in
 billiard==4.2.0
     # via
     #   -c requirements/install.pip
@@ -101,6 +105,7 @@ cffi==1.16.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
+    #   bcrypt
     #   cryptography
 cfgv==3.4.0
     # via pre-commit
@@ -578,6 +583,7 @@ six==1.16.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   asttokens
+    #   bcrypt
     #   bleach
     #   cryptography
     #   faker

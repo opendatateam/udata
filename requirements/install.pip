@@ -20,6 +20,8 @@ babel==2.12.1
     # via
     #   -r requirements/install.in
     #   flask-babel
+bcrypt==3.1.7
+    # via -r requirements/install.in
 billiard==4.2.0
     # via celery
 bleach==3.3.1
@@ -51,7 +53,9 @@ celerybeat-mongo==0.2.0
 certifi==2024.2.2
     # via requests
 cffi==1.16.0
-    # via cryptography
+    # via
+    #   bcrypt
+    #   cryptography
 chardet==3.0.4
     # via requests
 click==8.1.2
@@ -242,6 +246,7 @@ s3transfer==0.6.2
     # via boto3
 six==1.16.0
     # via
+    #   bcrypt
     #   bleach
     #   cryptography
     #   faker
