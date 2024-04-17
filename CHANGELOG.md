@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- **breaking change** Fix datetime serialization in extras (return ISO string in JSON) [#3019](https://github.com/opendatateam/udata/pull/3019)
 
 ## 7.0.7 (2024-04-16)
 
