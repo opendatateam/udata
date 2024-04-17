@@ -19,9 +19,9 @@ jobs:
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
-          - py3-cache-v11-{{ arch }}-{{ checksum "python.deps" }}
-          - py3-cache-v11-{{ arch }}-{{ .Branch }}
-          - py3-cache-v11-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+          - py3-cache-v12-{{ arch }}-{{ checksum "python.deps" }}
+          - py3-cache-v12-{{ arch }}-{{ .Branch }}
+          - py3-cache-v12-{{ arch }}-{{ .Environment.BASE_BRANCH }}
       - run:
           name: Install python dependencies
           # FIXME: For now, we fix setuptools due to https://github.com/etalab/data.gouv.fr/issues/1041
@@ -32,11 +32,11 @@ jobs:
             pip install -r requirements/develop.pip
             pip install -e .
       - save_cache:
-          key: py3-cache-v11-{{ arch }}-{{ checksum "python.deps" }}
+          key: py3-cache-v12-{{ arch }}-{{ checksum "python.deps" }}
           paths:
           - venv
       - save_cache:
-          key: py3-cache-v11-{{ arch }}-{{ .Branch }}
+          key: py3-cache-v12-{{ arch }}-{{ .Branch }}
           paths:
           - venv
       - run:
