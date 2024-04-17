@@ -42,6 +42,11 @@ babel==2.12.1
     #   flask-babel
 backports-entry-points-selectable==1.2.0
     # via virtualenv
+bcrypt==3.1.7
+    # via
+    #   -c requirements/install.pip
+    #   -c requirements/test.pip
+    #   -r requirements/install.in
 billiard==3.6.4.0
     # via
     #   -c requirements/install.pip
@@ -102,6 +107,7 @@ cffi==1.14.6
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
+    #   bcrypt
     #   cryptography
 cfgv==3.3.0
     # via pre-commit
@@ -539,6 +545,7 @@ six==1.16.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
+    #   bcrypt
     #   bleach
     #   cryptography
     #   faker
