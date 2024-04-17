@@ -122,7 +122,7 @@ class UDataJsonEncoder(json.JSONEncoder):
         elif isinstance(obj, bson.objectid.ObjectId):
             return str(obj)
         elif isinstance(obj, datetime.datetime):
-            return obj.isoformat()
+            return round(obj.timestamp())
         elif hasattr(obj, 'to_dict'):
             return obj.to_dict()
         elif hasattr(obj, 'serialize'):
@@ -180,6 +180,7 @@ def create_app(config='udata.settings.Defaults', override=None,
             app.config.setdefault(key, default)
 
     app.json_encoder = UDataJsonEncoder
+    app.config['RESTX_JSON'] = { 'cls': UDataJsonEncoder }
 
     app.debug = app.config['DEBUG'] and not app.config['TESTING']
 
