@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Fix spatial coverage fetching perfs [#3018](https://github.com/opendatateam/udata/pull/3018)
+- Fix spatial coverage fetching perfs. Need to schedule `compute-geozones-metrics` [#3018](https://github.com/opendatateam/udata/pull/3018)
 
 ## 7.0.7 (2024-04-16)
 
