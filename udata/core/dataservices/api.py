@@ -19,7 +19,7 @@ class DataservicesAPI(API):
     @api.marshal_with(Dataservice.__page_fields__)
     def get(self):
         '''List or search all dataservices'''
-        query = Dataservice.objects(archived_at=None, deleted_at=None, private=False)
+        query = Dataservice.objects.visible()
 
         return Dataservice.apply_sort_filters_and_pagination(query)
 

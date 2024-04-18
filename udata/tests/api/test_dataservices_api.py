@@ -103,8 +103,13 @@ class DataserviceAPITest(APITestCase):
             'title': 'A',
             'base_api_url': 'https://example.org/A',
         })
+        response = self.post(url_for('api.dataservices'), {
+            'title': 'X',
+            'base_api_url': 'https://example.org/X',
+            'private': True,
+        })
 
-        self.assertEqual(Dataservice.objects.count(), 3)
+        self.assertEqual(Dataservice.objects.count(), 4)
 
         response = self.get(url_for('api.dataservices'))
         self.assert200(response)

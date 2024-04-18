@@ -2,7 +2,7 @@ from datetime import datetime
 from udata.api_fields import field, function_field, generate_fields
 from udata.core.dataset.models import Dataset
 from udata.core.metrics.models import WithMetrics
-from udata.core.owned import Owned
+from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
 import udata.core.contact_point.api_fields as contact_api_fields
 import udata.core.dataset.api_fields as datasets_api_fields
@@ -22,8 +22,25 @@ from udata.uris import endpoint_for
 DATASERVICE_FORMATS = ['REST', 'WMS', 'WSL']
 
 
+class DataserviceQuerySet(OwnedQuerySet):
+    def visible(self):
+        return self(archived_at=None, deleted_at=None, private=False)
+
+    def hidden(self):
+        return self(db.Q(private=True) |
+                    db.Q(deleted_at__ne=None) |
+                    db.Q(archived_at__ne=None))
+
 @generate_fields(mask=','.join(('id', 'title')))
 class Dataservice(WithMetrics, Owned, db.Document):
+    meta = {
+        'indexes': [
+            '$title',
+        ] + Owned.meta['indexes'],
+        'queryset_class': DataserviceQuerySet,
+        'auto_create_index_on_save': True
+    }
+
     title = field(
         db.StringField(required=True),
         example="My awesome API",
