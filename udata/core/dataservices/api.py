@@ -9,7 +9,7 @@ from udata.core.dataset.permissions import OwnablePermission
 from .models import Dataservice
 from udata.models import db
 
-ns = api.namespace('dataservices (beta)', 'Dataservices related operations')
+ns = api.namespace('dataservices', 'Dataservices related operations (beta)')
 
 @ns.route('/', endpoint='dataservices')
 class DataservicesAPI(API):
