@@ -208,7 +208,7 @@ def patch(obj, request):
             check = info.get('check', None)
             if check is not None:
                 check(**{key: value}) # TODO add other model attributes in function parameters
-                
+
             setattr(obj, key, value)
 
     return obj
@@ -225,6 +225,12 @@ def wrap_primary_key(field_name: str, foreign_field: mongoengine.fields.Referenc
 
     id_field = getattr(document_type.__class__, id_field_name)
 
+    # Get the foreign document from MongoDB because the othewise it fails during read
+    # Also useful to get a DBRef for non ObjectId references (see below)
+    foreign_document = document_type.__class__.objects(**{id_field_name: value}).first()
+    if foreign_document is None:
+        raise FieldValidationError(field=field_name, message=f"Unknown reference '{value}'")
+    
     if isinstance(id_field, mongoengine.fields.ObjectIdField):
         return ObjectId(value)
     elif isinstance(id_field, mongoengine.fields.StringField):
@@ -235,11 +241,7 @@ def wrap_primary_key(field_name: str, foreign_field: mongoengine.fields.Referenc
         # We could use a simple dict as follow instead:
         # { 'id': value }
         # … but it may be important to check before-hand that the reference point to a correct document.
-        document = document_type.__class__.objects(**{id_field_name: value}).first()
-        if document is None:
-            raise FieldValidationError(field=field_name, message=f"Unknown reference '{value}'")
-
-        return document.to_dbref()
+        return foreign_document.to_dbref()
     else:
         raise ValueError(f"Unknown ID field type {id_field.__class__} for {document_type.__class__} (ID field name is {id_field_name}, value was {value})")
 
