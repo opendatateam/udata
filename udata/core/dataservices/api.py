@@ -29,7 +29,8 @@ class DataservicesAPI(API):
     @api.marshal_with(Dataservice.__read_fields__, code=201)
     def post(self):
         dataservice = patch(Dataservice(), request)
-        dataservice.owner = current_user._get_current_object()
+        if not dataservice.owner and not dataservice.organization:
+            dataservice.owner = current_user._get_current_object()
 
         try:
             dataservice.save()

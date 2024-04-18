@@ -4,6 +4,7 @@ from flask import url_for
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import (DatasetFactory, LicenseFactory)
 from udata.i18n import gettext as _
+from udata.core.user.factories import UserFactory
 
 from . import APITestCase
 

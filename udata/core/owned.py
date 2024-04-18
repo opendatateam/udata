@@ -61,7 +61,7 @@ class Owned(object):
             # Ownership changes (org to owner or the other way around) have already been made
             return
         if 'organization' in changed_fields:
-            if self.owner.organization and not OrganizationPrivatePermission(self.owner.organization).can():
+            if current_user.is_authenticated and self.owner.organization and not OrganizationPrivatePermission(self.owner.organization).can():
                 raise FieldValidationError(_("Permission denied for this organization"), field="organization")
 
             if self.owner:
@@ -74,7 +74,7 @@ class Owned(object):
                 original = self.__class__.objects.only('organization').get(pk=self.pk)
                 self._previous_owner = original.organization
         elif 'owner' in changed_fields:
-            if current_user.id and self.owner.user and not admin_permission and current_user.id != self.owner.user:
+            if current_user.is_authenticated and self.owner.user and not admin_permission and current_user.id != self.owner.user:
                 raise FieldValidationError(_('You can only set yourself as owner'), field="owner")
 
             if self.organization:
