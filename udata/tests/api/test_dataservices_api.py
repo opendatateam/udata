@@ -11,7 +11,7 @@ class DataserviceAPITest(APITestCase):
     modules = []
 
     def test_dataservice_api_create(self):
-        self.login()
+        user = self.login()
         datasets = DatasetFactory.create_batch(3)
         license = LicenseFactory.create()
 
@@ -25,12 +25,14 @@ class DataserviceAPITest(APITestCase):
         dataservice = Dataservice.objects.first()
 
         response = self.get(url_for('api.dataservice', dataservice=dataservice), headers={
-            'X-Fields': ['title', 'base_api_url', 'tags', 'private', 'datasets', 'license', 'extras']
+            'X-Fields': ['owner', 'title', 'base_api_url', 'tags', 'private', 'datasets', 'license', 'extras']
         })
         self.assert200(response)
 
         self.assertEqual(response.json['title'], 'My API')
         self.assertEqual(response.json['base_api_url'], 'https://example.org')
+        self.assertEqual(response.json['base_api_url'], 'https://example.org')
+        self.assertEqual(response.json['owner']['id'], user.id)
 
         response = self.patch(url_for('api.dataservice', dataservice=dataservice), {
             'title': 'Updated title',
