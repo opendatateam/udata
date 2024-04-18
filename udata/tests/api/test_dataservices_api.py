@@ -187,7 +187,7 @@ class DataserviceAPITest(APITestCase):
             'owner': other.id,
         })
         self.assert400(response)
-        self.assertEqual(response.json['errors']['owner'], ["You can only set yourself as owner"])
+        self.assertEqual(response.json['errors']['owner'], [_("You can only set yourself as owner")])
         self.assertEqual(Dataservice.objects.count(), 0)
 
         response = self.post(url_for('api.dataservices'), {
@@ -196,7 +196,7 @@ class DataserviceAPITest(APITestCase):
             'organization': other_org.id,
         })
         self.assert400(response)
-        self.assertEqual(response.json['errors']['organization'], ["Permission denied for this organization"])
+        self.assertEqual(response.json['errors']['organization'], [_("Permission denied for this organization")])
         self.assertEqual(Dataservice.objects.count(), 0)
 
 
