@@ -1,6 +1,7 @@
 authlib==0.14.3
 awesome-slugify==1.6.5
 Babel==2.12.1
+bcrypt==3.1.7
 bleach==3.1.0
 blinker==1.4
 boto3>=1.26
