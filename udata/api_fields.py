@@ -203,6 +203,12 @@ def patch(obj, request):
             if isinstance(model_attribute, mongoengine.fields.ReferenceField):
                 value = wrap_primary_key(key, model_attribute, value)
 
+
+            info = getattr(model_attribute, '__additional_field_info__', {})
+            check = info.get('check', None)
+            if check is not None:
+                check(**{key: value}) # TODO add other model attributes in function parameters
+                
             setattr(obj, key, value)
 
     return obj

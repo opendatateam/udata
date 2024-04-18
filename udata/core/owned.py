@@ -23,6 +23,16 @@ class OwnedQuerySet(UDataQuerySet):
         for owner in owners:
             qs |= Q(owner=owner) | Q(organization=owner)
         return self(qs)
+    
+def check_owner_is_current_user(owner):
+    from udata.auth import current_user, admin_permission
+    if current_user.is_authenticated and owner and not admin_permission and current_user.id != owner:
+        raise FieldValidationError(_('You can only set yourself as owner'), field="owner")
+
+def check_organization_is_valid_for_current_user(organization):
+    from udata.auth import current_user, admin_permission
+    if current_user.is_authenticated and organization and not OrganizationPrivatePermission(organization).can():
+        raise FieldValidationError(_("Permission denied for this organization"), field="organization")
 
 
 class Owned(object):
@@ -33,11 +43,13 @@ class Owned(object):
         ReferenceField(User, reverse_delete_rule=NULLIFY),
         nested_fields=user_ref_fields,
         description="Only present if organization is not set. Can only be set to the current authenticated user.",
+        check=check_owner_is_current_user
     )
     organization = field(
         ReferenceField(Organization, reverse_delete_rule=NULLIFY),
         nested_fields=org_ref_fields,
         description="Only present if owner is not set. Can only be set to an organization of the current authenticated user.",
+        check=check_organization_is_valid_for_current_user,
     )
 
     on_owner_change = signal('Owned.on_owner_change')
@@ -54,16 +66,12 @@ class Owned(object):
         '''
         Verify owner consistency and fetch original owner before the new one erase it.
         '''
-        from udata.auth import current_user, admin_permission
 
         changed_fields = self._get_changed_fields()
         if 'organization' in changed_fields and 'owner' in changed_fields:
             # Ownership changes (org to owner or the other way around) have already been made
             return
         if 'organization' in changed_fields:
-            if current_user.is_authenticated and self.owner.organization and not OrganizationPrivatePermission(self.owner.organization).can():
-                raise FieldValidationError(_("Permission denied for this organization"), field="organization")
-
             if self.owner:
                 # Change from owner to organization
                 self._previous_owner = self.owner
@@ -74,9 +82,6 @@ class Owned(object):
                 original = self.__class__.objects.only('organization').get(pk=self.pk)
                 self._previous_owner = original.organization
         elif 'owner' in changed_fields:
-            if current_user.is_authenticated and self.owner.user and not admin_permission and current_user.id != self.owner.user:
-                raise FieldValidationError(_('You can only set yourself as owner'), field="owner")
-
             if self.organization:
                 # Change from organization to owner
                 self._previous_owner = self.organization

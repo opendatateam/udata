@@ -169,3 +169,15 @@ class DataserviceAPITest(APITestCase):
         self.assert400(response)
         self.assertEqual(response.json['errors']['license'], ["Unknown reference 'unwkown-license'"])
         self.assertEqual(Dataservice.objects.count(), 0)
+
+    def test_dataservice_api_create_with_custom_user_or_org(self):
+        other = UserFactory()
+        self.login()
+        response = self.post(url_for('api.dataservices'), {
+            'title': 'My title',
+            'base_api_url': 'https://example.org',
+            'owner': other.id,
+        })
+        self.assert400(response)
+        self.assertEqual(response.json['errors']['owner'], ["You can only set yourself as owner"])
+        self.assertEqual(Dataservice.objects.count(), 0)
