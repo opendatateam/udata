@@ -206,8 +206,9 @@ class DataserviceAPITest(APITestCase):
             'owner': me.id,
         })
         self.assert201(response)
-        self.assertEqual(Dataservice.objects(id=response.json['id']).first().owner.id, me.id)
-        self.assertEqual(Dataservice.objects(id=response.json['id']).first().organization, None)
+        dataservice = Dataservice.objects(id=response.json['id']).first()
+        self.assertEqual(dataservice.owner.id, me.id)
+        self.assertEqual(dataservice.organization, None)
 
 
         response = self.post(url_for('api.dataservices'), {
@@ -216,5 +217,6 @@ class DataserviceAPITest(APITestCase):
             'organization': me_org.id,
         })
         self.assert201(response)
-        self.assertEqual(Dataservice.objects(id=response.json['id']).first().owner, None)
-        self.assertEqual(Dataservice.objects(id=response.json['id']).first().organization.id, me_org.id)
+        dataservice = Dataservice.objects(id=response.json['id']).first()
+        self.assertEqual(dataservice.owner, None)
+        self.assertEqual(dataservice.organization.id, me_org.id)
