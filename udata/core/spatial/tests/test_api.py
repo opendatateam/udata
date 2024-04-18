@@ -10,6 +10,7 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.spatial.factories import (
     SpatialCoverageFactory, GeoZoneFactory, GeoLevelFactory
 )
+from udata.core.spatial.tasks import compute_geozones_metrics
 
 
 class SpatialApiTest(APITestCase):
@@ -245,8 +246,7 @@ class SpatialApiTest(APITestCase):
             DatasetFactory(
                 spatial=SpatialCoverageFactory(zones=[arles.id]))
                     
-        paris.count_datasets()
-        arles.count_datasets()
+        compute_geozones_metrics()
 
         response = self.get(url_for('api.spatial_coverage', level='fr:commune'))
         self.assert200(response)
