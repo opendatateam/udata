@@ -32,7 +32,7 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(response.json['title'], 'My API')
         self.assertEqual(response.json['base_api_url'], 'https://example.org')
         self.assertEqual(response.json['base_api_url'], 'https://example.org')
-        self.assertEqual(response.json['owner']['id'], user.id)
+        self.assertEqual(response.json['owner']['id'], str(user.id))
 
         response = self.patch(url_for('api.dataservice', dataservice=dataservice), {
             'title': 'Updated title',
