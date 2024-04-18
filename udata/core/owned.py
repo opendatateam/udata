@@ -10,8 +10,8 @@ from udata.core.user.models import User
 from udata.mongo.queryset import UDataQuerySet
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.organization.api_fields import org_ref_fields
-from udata.udata.core.organization.permissions import OrganizationPrivatePermission
-from udata.udata.mongo.errors import FieldValidationError
+from udata.core.organization.permissions import OrganizationPrivatePermission
+from udata.mongo.errors import FieldValidationError
 from udata.i18n import lazy_gettext as _
 
 log = logging.getLogger(__name__)
