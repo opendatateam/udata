@@ -3,6 +3,8 @@
 ## Current (in progress)
 
 - Fix spatial coverage fetching perfs. Need to schedule `compute-geozones-metrics` [#3018](https://github.com/opendatateam/udata/pull/3018)
+- **breaking change** Fix datetime serialization in extras (return ISO string in JSON). Warning, `ujson` shouldn't be installed anymore on the project to allow `cls` parameter to override the JSONEncoder [#3019](https://github.com/opendatateam/udata/pull/3019)
+- Fix missing `bcrypt` dependency [#3019](https://github.com/opendatateam/udata/pull/3019)
 
 ## 7.0.7 (2024-04-16)
 
