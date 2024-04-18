@@ -30,8 +30,14 @@ def check_owner_is_current_user(owner):
         raise FieldValidationError(_('You can only set yourself as owner'), field="owner")
 
 def check_organization_is_valid_for_current_user(organization):
-    from udata.auth import current_user, admin_permission
-    if current_user.is_authenticated and organization and not OrganizationPrivatePermission(organization).can():
+    from udata.auth import current_user
+    from udata.models import Organization
+
+    org = Organization.objects(id=organization).first()
+    if org is None:
+        raise FieldValidationError(_("Unknown organization"), field="organization")
+
+    if current_user.is_authenticated and org and not OrganizationPrivatePermission(org).can():
         raise FieldValidationError(_("Permission denied for this organization"), field="organization")
 
 

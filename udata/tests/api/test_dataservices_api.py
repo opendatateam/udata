@@ -5,6 +5,8 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import (DatasetFactory, LicenseFactory)
 from udata.i18n import gettext as _
 from udata.core.user.factories import UserFactory
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.models import Member
 
 from . import APITestCase
 
@@ -172,7 +174,13 @@ class DataserviceAPITest(APITestCase):
 
     def test_dataservice_api_create_with_custom_user_or_org(self):
         other = UserFactory()
-        self.login()
+        other_member = Member(user=other, role='editor')
+        other_org = OrganizationFactory(members=[other_member])
+
+        me = self.login()
+        me_member = Member(user=me, role='editor')
+        me_org = OrganizationFactory(members=[me_member])
+
         response = self.post(url_for('api.dataservices'), {
             'title': 'My title',
             'base_api_url': 'https://example.org',
@@ -181,3 +189,32 @@ class DataserviceAPITest(APITestCase):
         self.assert400(response)
         self.assertEqual(response.json['errors']['owner'], ["You can only set yourself as owner"])
         self.assertEqual(Dataservice.objects.count(), 0)
+
+        response = self.post(url_for('api.dataservices'), {
+            'title': 'My title',
+            'base_api_url': 'https://example.org',
+            'organization': other_org.id,
+        })
+        self.assert400(response)
+        self.assertEqual(response.json['errors']['organization'], ["Permission denied for this organization"])
+        self.assertEqual(Dataservice.objects.count(), 0)
+
+
+        response = self.post(url_for('api.dataservices'), {
+            'title': 'My title',
+            'base_api_url': 'https://example.org',
+            'owner': me.id,
+        })
+        self.assert201(response)
+        self.assertEqual(Dataservice.objects(id=response.json['id']).first().owner.id, me.id)
+        self.assertEqual(Dataservice.objects(id=response.json['id']).first().organization, None)
+
+
+        response = self.post(url_for('api.dataservices'), {
+            'title': 'My title',
+            'base_api_url': 'https://example.org',
+            'organization': me_org.id,
+        })
+        self.assert201(response)
+        self.assertEqual(Dataservice.objects(id=response.json['id']).first().owner, None)
+        self.assertEqual(Dataservice.objects(id=response.json['id']).first().organization.id, me_org.id)
