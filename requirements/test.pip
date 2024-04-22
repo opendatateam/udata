@@ -34,7 +34,9 @@ babel==2.12.1
     #   -r requirements/install.in
     #   flask-babel
 bcrypt==3.1.7
-    # via -r requirements/install.in
+    # via
+    #   -c requirements/install.pip
+    #   -r requirements/install.in
 billiard==4.2.0
     # via
     #   -c requirements/install.pip
@@ -48,7 +50,7 @@ blinker==1.4
     #   -c requirements/install.pip
     #   -r requirements/install.in
     #   flask-mail
-    #   flask-navigation
+    #   flask-navigation-temp-python-311
     #   flask-principal
     #   flask-security-too
     #   flask-sitemap
@@ -146,7 +148,7 @@ flask==2.1.2
     #   flask-login
     #   flask-mail
     #   flask-mongoengine
-    #   flask-navigation
+    #   flask-navigation-temp-python-311
     #   flask-principal
     #   flask-restx
     #   flask-security-too
@@ -188,10 +190,8 @@ flask-mongoengine==1.0.0
     #   -c requirements/install.pip
     #   -r requirements/install.in
     #   flask-storage
-flask-navigation @ git+https://github.com/krs-novice/flask-navigation-ks.git@develop
-    # via
-    #   -c requirements/install.pip
-    #   -r requirements/install.in
+flask-navigation-temp-python-311==0.2.1.dev0
+    # via -r requirements/install.in
 flask-principal==0.4.0
     # via
     #   -c requirements/install.pip
