@@ -1,6 +1,6 @@
 import logging
 
-from collections import Iterable
+from collections.abc import Iterable
 
 from flask_mongoengine import Document
 
