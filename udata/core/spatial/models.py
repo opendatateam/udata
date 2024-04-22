@@ -103,7 +103,7 @@ class GeoZone(WithMetrics, db.Document):
 
     def count_datasets(self):
         from udata.models import Dataset
-        self.metrics['datasets'] = Dataset.objects(spatial__zones__contains=self.id).visible().count()
+        self.metrics['datasets'] = Dataset.objects(spatial__zones=self.id).visible().count()
         self.save()
 
     def toGeoJSON(self):
