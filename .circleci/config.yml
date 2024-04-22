@@ -4,7 +4,7 @@ version: 2
 jobs:
   python:
     docker:
-      - image: udata/circleci:2-alpine
+      - image: udata/circleci:py3.11
       - image: mongo:6.0.4
       - image: redis:alpine
     environment:
@@ -24,11 +24,10 @@ jobs:
           - py3-cache-v12-{{ arch }}-{{ .Environment.BASE_BRANCH }}
       - run:
           name: Install python dependencies
-          # FIXME: For now, we fix setuptools due to https://github.com/etalab/data.gouv.fr/issues/1041
           command: |
-            virtualenv venv
+            python -m venv venv
             source venv/bin/activate
-            pip install --force-reinstall setuptools==66.1.1
+            pip install --upgrade wheel
             pip install -r requirements/develop.pip
             pip install -e .
       - save_cache:
@@ -59,7 +58,7 @@ jobs:
   assets:
     docker:
       # TODO make an image based on 2-alpine w/ nvm and phantom deps
-      - image: udata/circleci:py3
+      - image: udata/circleci:py3.11
     environment:
        BASH_ENV: /root/.bashrc
     steps:
@@ -103,7 +102,7 @@ jobs:
 
   dist:
     docker:
-      - image: udata/circleci:2-alpine
+      - image: udata/circleci:py3.11
     environment:
        BASH_ENV: /root/.bashrc
     steps:
@@ -134,7 +133,7 @@ jobs:
 
   publish:
     docker:
-      - image: udata/circleci:2-alpine
+      - image: udata/circleci:py3.11
     steps:
       - attach_workspace:
           at: .
