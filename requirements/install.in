@@ -20,7 +20,7 @@ Flask-Gravatar==0.5.0
 Flask-Login==0.6.2
 Flask-Mail==0.9.1
 flask-mongoengine==1.0.0
-Flask-Navigation@git+https://github.com/krs-novice/flask-navigation-ks.git@develop
+flask-navigation-temp-python-311==0.2.1.dev0
 flask-restx==1.0.5
 Flask-Security-Too==5.1.2
 Flask-Sitemap==0.4.0
