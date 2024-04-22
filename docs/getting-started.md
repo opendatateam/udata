@@ -5,7 +5,7 @@ This guide is about starting a udata and udata-front environment for local devel
 We’ll use the following repositories:
 
 - [https://github.com/opendatateam/udata](https://github.com/opendatateam/udata)
-- [https://github.com/etalab/udata-front](https://github.com/etalab/udata-front)
+- [https://github.com/datagouv/udata-front](https://github.com/datagouv/udata-front)
 
 # Check the system requirements
 
@@ -204,7 +204,7 @@ First, clone udata-front in your workspace.
 
 ```bash
 cd $UDATA_WORKSPACE
-git clone git@github.com:etalab/udata-front.git
+git clone git@github.com:datagouv/udata-front.git
 ```
 
 Modify your `udata.cfg` with the following lines.
