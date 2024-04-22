@@ -227,8 +227,11 @@ flask-mongoengine==1.0.0
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   flask-storage
-flask-navigation-temp-python-311==0.2.1.dev0
-    # via -r requirements/install.in
+flask-navigation-temp-python-311==0.2.1
+    # via
+    #   -c requirements/install.pip
+    #   -c requirements/test.pip
+    #   -r requirements/install.in
 flask-principal==0.4.0
     # via
     #   -c requirements/install.pip
