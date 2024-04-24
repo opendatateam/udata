@@ -138,7 +138,7 @@ def display_op(op):
     echo('{label:.<70} [{date}]'.format(label=label, date=timestamp))
     format_output(op['output'], success=op['success'], traceback=op.get('traceback'))
 
-def check_references(models_to_check):
+def check_references(models_to_check, fix = False):
     # Cannot modify local scope from Python… :-(
     class Log: content = ''
 
@@ -268,7 +268,19 @@ def check_references(models_to_check):
                             _ = getattr(obj, reference['name'])
                         except mongoengine.errors.DoesNotExist:
                             errors[model][key] += 1
-                            print(f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}')
+                            print(f'\t{model.__name__}#{obj.id} have a broken reference for `{reference["name"]}`')
+                            if fix:
+                                field = getattr(model, reference['name'])
+
+                                if field.reverse_delete_rule == db.NULLIFY:
+                                    print(f"\t\t…fixing by setting to Null (db.NULLIFY)")
+                                    setattr(obj, reference['name'], None)
+                                    obj.save()
+                                elif field.reverse_delete_rule == db.CASCADE:
+                                    print(f"\t\t…fixing by deleting (db.CASCADE)")
+                                    obj.delete()
+                                else:
+                                    print(f"\t\tcannot fix because unknown `reverse_delete_rule` {field.reverse_delete_rule}")
                     elif reference['type'] == 'list':
                         for i, sub in enumerate(getattr(obj, reference['name'])):
                             try:
@@ -278,12 +290,20 @@ def check_references(models_to_check):
                                 print(f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}[{i}]')
                     elif reference['type'] == 'embed_list':
                         p1, p2 = reference['name'].split('__')
-                        for i, sub in enumerate(getattr(obj, p1, [])):
+                        attr_list = getattr(obj, p1, [])
+                        to_remove = set()
+                        for i, sub in enumerate(attr_list):
                             try:
                                 getattr(sub, p2)
                             except mongoengine.errors.DoesNotExist:
                                 errors[model][key] += 1
-                                print(f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}.{p1}[{i}]{p2}')
+                                to_remove.add(i)
+                                print(f'\t{model.__name__}#{obj.id} have a broken reference for {p1}[{i}].{p2}')
+                        if fix and len(to_remove) > 0:
+                            print(f"\t\t…fixing the list by removing {len(to_remove)} elements")
+                            attr_list[:] = [i for j, i in enumerate(attr_list) if j not in to_remove]
+                            obj.save()
+
                     elif reference['type'] == 'embed':
                         p1, p2 = reference['name'].split('__')
                         sub = getattr(obj, p1)
@@ -292,7 +312,7 @@ def check_references(models_to_check):
                             getattr(sub, p2)
                         except mongoengine.errors.DoesNotExist:
                             errors[model][key] += 1
-                            print(f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}.{p1}.{p2}')
+                            print(f'\t{model.__name__}#{obj.id} have a broken reference for {p1}.{p2}')
                     elif reference['type'] == 'embed_list_ref':
                         p1, p2 = reference['name'].split('__')
                         a = getattr(obj, p1)
@@ -303,7 +323,7 @@ def check_references(models_to_check):
                                 child.id
                             except mongoengine.errors.DoesNotExist:
                                 errors[model][key] += 1
-                                print(f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}.{p1}.{p2}[{i}]')
+                                print(f'\t{model.__name__}#{obj.id} have a broken reference for {p1}.{p2}[{i}]')
                     else:
                         print_and_save(f'Unknown ref type {reference["type"]}')
                 except mongoengine.errors.FieldDoesNotExist as e:
@@ -320,6 +340,7 @@ def check_references(models_to_check):
 
 @grp.command()
 @click.option('--models', multiple=True, default=[], help='Model(s) to check')
-def check_integrity(models):
+@click.option('--fix', default=False, is_flag=True, help='Try to fix integrity problems')
+def check_integrity(models, fix):
     '''Check the integrity of the database from a business perspective'''
-    check_references(models)
+    check_references(models, fix)
