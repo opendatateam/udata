@@ -1,6 +1,8 @@
 import collections
+from itertools import groupby
 import logging
 import os
+import traceback
 
 import click
 import mongoengine
@@ -247,52 +249,64 @@ def check_references(models_to_check):
         print_and_save(f'- {reference["repr"]}({reference["destination"]}) — {reference["type"]}')
     print_and_save('')
 
-    for reference in references:
-        print_and_save(f'- {reference["repr"]}({reference["destination"]}) — {reference["type"]}...')
-        query = {f'{reference["name"]}__ne': None}
-        qs = reference['model'].objects(**query).no_cache().all()
-        try:
-            for obj in qs:
-                if reference['type'] == 'direct':
-                    try:
-                        _ = getattr(obj, reference['name'])
-                    except mongoengine.errors.DoesNotExist:
-                        errors[reference["repr"]] += 1
-                elif reference['type'] == 'list':
-                    for sub in getattr(obj, reference['name']):
+    total = 0
+    for model, model_references in groupby(references, lambda i: i["model"]):
+        model_references = list(model_references)
+        print_and_save(f'- doing {model.__name__}…')
+        errors[model] = {}
+
+        qs = model.objects().no_cache().all()
+        for obj in qs:
+            for reference in model_references:
+                key = f'\t- {reference["repr"]}({reference["destination"]}) — {reference["type"]}…'
+
+                try:
+                    if reference['type'] == 'direct':
                         try:
-                            _ = sub.id
+                            _ = getattr(obj, reference['name'])
                         except mongoengine.errors.DoesNotExist:
-                            errors[reference["repr"]] += 1
-                elif reference['type'] == 'embed_list':
-                    p1, p2 = reference['name'].split('__')
-                    for sub in getattr(obj, p1):
+                            errors[model][key] += 1
+                    elif reference['type'] == 'list':
+                        for sub in getattr(obj, reference['name']):
+                            try:
+                                _ = sub.id
+                            except mongoengine.errors.DoesNotExist:
+                                errors[model][key] += 1
+                    elif reference['type'] == 'embed_list':
+                        p1, p2 = reference['name'].split('__')
+                        for sub in getattr(obj, p1, []):
+                            try:
+                                getattr(sub, p2)
+                            except mongoengine.errors.DoesNotExist:
+                                errors[model][key] += 1
+                    elif reference['type'] == 'embed':
+                        p1, p2 = reference['name'].split('__')
+                        sub = getattr(obj, p1)
+                        if sub is None: continue
                         try:
                             getattr(sub, p2)
                         except mongoengine.errors.DoesNotExist:
-                            errors[reference["repr"]] += 1
-                elif reference['type'] == 'embed':
-                    p1, p2 = reference['name'].split('__')
-                    sub = getattr(obj, p1)
-                    try:
-                        getattr(sub, p2)
-                    except mongoengine.errors.DoesNotExist:
-                        errors[reference["repr"]] += 1
-                elif reference['type'] == 'embed_list_ref':
-                    p1, p2 = reference['name'].split('__')
-                    sub = getattr(getattr(obj, p1), p2)
-                    for obj in sub:
-                        try:
-                            obj.id
-                        except mongoengine.errors.DoesNotExist:
-                            errors[reference["repr"]] += 1
-                else:
-                    print_and_save(f'Unknown ref type {reference["type"]}')
-            print_and_save(f'Errors: {errors[reference["repr"]]}')
-        except mongoengine.errors.FieldDoesNotExist as e:
-            print_and_save(f'[ERROR] {e}')
+                            errors[model][key] += 1
+                    elif reference['type'] == 'embed_list_ref':
+                        p1, p2 = reference['name'].split('__')
+                        a = getattr(obj, p1)
+                        if a is None: continue
+                        sub = getattr(a, p2, [])
+                        for child in sub:
+                            try:
+                                child.id
+                            except mongoengine.errors.DoesNotExist:
+                                errors[model][key] += 1
+                    else:
+                        print_and_save(f'Unknown ref type {reference["type"]}')
+                except mongoengine.errors.FieldDoesNotExist as e:
+                    print_and_save(f'[ERROR for {model.__name__} {obj.id}] {traceback.format_exc()}')
 
-    total = sum(errors.values())
+            for key, errors in errors[model]:
+                print_and_save(f'- {key}: {errors}')
+                total += errors
+       
+
     print_and_save(f'\n Total errors: {total}')
 
     if total > 0:
