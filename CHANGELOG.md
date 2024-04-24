@@ -2,6 +2,10 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 8.0.0 (2024-04-23)
+
 - **breaking change** Migrate to Python 3.11 [#2992](https://github.com/opendatateam/udata/pull/2992) [#3021](https://github.com/opendatateam/udata/pull/3021)
 - **breaking change** Fix datetime serialization in extras (return ISO string in JSON). Warning, `ujson` shouldn't be installed anymore on the project to allow `cls` parameter to override the JSONEncoder [#3019](https://github.com/opendatateam/udata/pull/3019)
 - Fix missing `bcrypt` dependency [#3019](https://github.com/opendatateam/udata/pull/3019)
