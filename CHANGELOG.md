@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Remove deprecated `metrics_for` route [#3022](https://github.com/opendatateam/udata/pull/3022)
 
 ## 8.0.0 (2024-04-23)
 
