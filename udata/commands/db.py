@@ -259,7 +259,8 @@ def check_references(models_to_check):
         for obj in qs:
             for reference in model_references:
                 key = f'\t- {reference["repr"]}({reference["destination"]}) — {reference["type"]}…'
-                errors[model][key] = 0
+                if key not in errors[model]:
+                    errors[model][key] = 0
 
                 try:
                     if reference['type'] == 'direct':
@@ -267,19 +268,22 @@ def check_references(models_to_check):
                             _ = getattr(obj, reference['name'])
                         except mongoengine.errors.DoesNotExist:
                             errors[model][key] += 1
+                            print(f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}')
                     elif reference['type'] == 'list':
-                        for sub in getattr(obj, reference['name']):
+                        for i, sub in enumerate(getattr(obj, reference['name'])):
                             try:
                                 _ = sub.id
                             except mongoengine.errors.DoesNotExist:
                                 errors[model][key] += 1
+                                print(f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}[{i}]')
                     elif reference['type'] == 'embed_list':
                         p1, p2 = reference['name'].split('__')
-                        for sub in getattr(obj, p1, []):
+                        for i, sub in enumerate(getattr(obj, p1, [])):
                             try:
                                 getattr(sub, p2)
                             except mongoengine.errors.DoesNotExist:
                                 errors[model][key] += 1
+                                print(f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}.{p1}[{i}]{p2}')
                     elif reference['type'] == 'embed':
                         p1, p2 = reference['name'].split('__')
                         sub = getattr(obj, p1)
@@ -288,22 +292,24 @@ def check_references(models_to_check):
                             getattr(sub, p2)
                         except mongoengine.errors.DoesNotExist:
                             errors[model][key] += 1
+                            print(f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}.{p1}.{p2}')
                     elif reference['type'] == 'embed_list_ref':
                         p1, p2 = reference['name'].split('__')
                         a = getattr(obj, p1)
                         if a is None: continue
                         sub = getattr(a, p2, [])
-                        for child in sub:
+                        for i, child in enumerate(sub):
                             try:
                                 child.id
                             except mongoengine.errors.DoesNotExist:
                                 errors[model][key] += 1
+                                print(f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}.{p1}.{p2}[{i}]')
                     else:
                         print_and_save(f'Unknown ref type {reference["type"]}')
                 except mongoengine.errors.FieldDoesNotExist as e:
                     print_and_save(f'[ERROR for {model.__name__} {obj.id}] {traceback.format_exc()}')
         for key, nb_errors in errors[model].items():
-            print_and_save(f'- {key}: {nb_errors}')
+            print_and_save(f'{key}: {nb_errors}')
             total += nb_errors
 
     print_and_save(f'\n Total errors: {total}')
