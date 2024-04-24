@@ -10,6 +10,7 @@ from udata.api import oauth2 as oauth2_models
 from udata.commands import cli, green, yellow, cyan, red, magenta, white, echo
 from udata.harvest import models as harvest_models
 from udata.mongo import db
+from udata.notifications.mattermost import send_message
 
 
 # Date format used to for display
@@ -135,8 +136,14 @@ def display_op(op):
     echo('{label:.<70} [{date}]'.format(label=label, date=timestamp))
     format_output(op['output'], success=op['success'], traceback=op.get('traceback'))
 
-
 def check_references(models_to_check):
+    # Cannot modify local scope from Python… :-(
+    class Log: content = ''
+
+    def print_and_save(text):
+        Log.content += text + '\n'
+        print(text) 
+
     errors = collections.defaultdict(int)
 
     _models = []
@@ -235,13 +242,13 @@ def check_references(models_to_check):
                 'type': 'embed_list_ref',
             } for lr in elists_refs]
 
-    print('Those references will be inspected:')
+    print_and_save('Those references will be inspected:')
     for reference in references:
-        print(f'- {reference["repr"]}({reference["destination"]}) — {reference["type"]}')
-    print('')
+        print_and_save(f'- {reference["repr"]}({reference["destination"]}) — {reference["type"]}')
+    print_and_save('')
 
     for reference in references:
-        print(f'- {reference["repr"]}({reference["destination"]}) — {reference["type"]}...')
+        print_and_save(f'- {reference["repr"]}({reference["destination"]}) — {reference["type"]}...')
         query = {f'{reference["name"]}__ne': None}
         qs = reference['model'].objects(**query).no_cache().all()
         try:
@@ -280,12 +287,16 @@ def check_references(models_to_check):
                         except mongoengine.errors.DoesNotExist:
                             errors[reference["repr"]] += 1
                 else:
-                    print(f'Unknown ref type {reference["type"]}')
-            print('Errors:', errors[reference["repr"]])
+                    print_and_save(f'Unknown ref type {reference["type"]}')
+            print_and_save(f'Errors: {errors[reference["repr"]]}')
         except mongoengine.errors.FieldDoesNotExist as e:
-            print('[ERROR]', e)
+            print_and_save(f'[ERROR] {e}')
 
-    print(f'\n Total errors: {sum(errors.values())}')
+    total = sum(errors.values())
+    print_and_save(f'\n Total errors: {total}')
+
+    if total > 0:
+        send_message(Log.content)
 
 
 @grp.command()
