@@ -28,7 +28,7 @@ class DataserviceAPITest(APITestCase):
         dataservice = Dataservice.objects.first()
 
         response = self.get(url_for('api.dataservice', dataservice=dataservice), headers={
-            'X-Fields': ['owner', 'title', 'base_api_url', 'tags', 'private', 'datasets', 'license', 'extras']
+            'X-Fields': ['owner', 'organization', 'title', 'base_api_url', 'tags', 'private', 'datasets', 'license', 'extras']
         })
         self.assert200(response)
 

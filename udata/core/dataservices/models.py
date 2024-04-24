@@ -74,7 +74,10 @@ class Dataservice(WithMetrics, Owned, db.Document):
     has_token = field(db.BooleanField())
     format = field(db.StringField(choices=DATASERVICE_FORMATS))
 
-    license = field(db.ReferenceField('License'))
+    license = field(
+        db.ReferenceField('License'),
+        allow_null=True,
+    )
 
     tags = field(
         db.TagListField(),
@@ -90,6 +93,7 @@ class Dataservice(WithMetrics, Owned, db.Document):
     contact_point = field(
         db.ReferenceField('ContactPoint', reverse_delete_rule=db.NULLIFY),
         nested_fields=contact_api_fields.contact_point_fields,
+        allow_null=True,
     )
 
     created_at = field(
