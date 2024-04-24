@@ -259,6 +259,7 @@ def check_references(models_to_check):
         for obj in qs:
             for reference in model_references:
                 key = f'\t- {reference["repr"]}({reference["destination"]}) — {reference["type"]}…'
+                errors[model][key] = 0
 
                 try:
                     if reference['type'] == 'direct':
@@ -301,11 +302,9 @@ def check_references(models_to_check):
                         print_and_save(f'Unknown ref type {reference["type"]}')
                 except mongoengine.errors.FieldDoesNotExist as e:
                     print_and_save(f'[ERROR for {model.__name__} {obj.id}] {traceback.format_exc()}')
-
-            for key, errors in errors[model]:
-                print_and_save(f'- {key}: {errors}')
-                total += errors
-       
+        for key, nb_errors in errors[model].items():
+            print_and_save(f'- {key}: {nb_errors}')
+            total += nb_errors
 
     print_and_save(f'\n Total errors: {total}')
 
