@@ -3,6 +3,7 @@ from werkzeug.local import LocalProxy
 from werkzeug.utils import cached_property
 
 from udata.app import cache
+from udata.core.metrics.models import WithMetrics
 from udata.uris import endpoint_for
 from udata.i18n import _, get_locale, language
 from udata.mongo import db
@@ -20,7 +21,6 @@ class GeoLevel(db.Document):
     admin_level = db.IntField(min_value=ADMIN_LEVEL_MIN,
                               max_value=ADMIN_LEVEL_MAX,
                               default=100)
-
 
 class GeoZoneQuerySet(db.BaseQuerySet):
 
@@ -40,7 +40,7 @@ class GeoZoneQuerySet(db.BaseQuerySet):
         return result.id if id_only and result else result
 
 
-class GeoZone(db.Document):
+class GeoZone(WithMetrics, db.Document):
     SEPARATOR = ':'
 
     id = db.StringField(primary_key=True)
@@ -100,6 +100,11 @@ class GeoZone(db.Document):
     @property
     def external_url(self):
         return endpoint_for('territories.territory', territory=self, _external=True)
+
+    def count_datasets(self):
+        from udata.models import Dataset
+        self.metrics['datasets'] = Dataset.objects(spatial__zones=self.id).visible().count()
+        self.save()
 
     def toGeoJSON(self):
         return {
