@@ -90,7 +90,7 @@ def convert_db_to_field(key, field, info = {}):
 def generate_fields(**kwargs):
     '''
     This decorator will create two auto-generated attributes on the class `__read_fields__` and `__write_fields__`
-    that can be used in API endpoint inside `except()` and `marshall_with()`.
+    that can be used in API endpoint inside `expect()` and `marshall_with()`.
     '''
     def wrapper(cls):
         read_fields = {}
