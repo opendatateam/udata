@@ -13,9 +13,10 @@ from udata.rdf import (
     DCAT, DCT, HYDRA, SPDX, namespace_manager, guess_format, url_from_rdf
 )
 from udata.core.dataset.rdf import dataset_from_rdf
+from udata.i18n import gettext as _
 from udata.storage.s3 import store_as_json, get_from_json
 
-from .base import BaseBackend
+from .base import BaseBackend, HarvestFeature
 
 log = logging.getLogger(__name__)
 
@@ -207,9 +208,22 @@ class DcatBackend(BaseBackend):
 class CswDcatBackend(DcatBackend):
     display_name = 'CSW-DCAT'
 
-    DCAT_SCHEMA = 'http://www.w3.org/ns/dcat#'
+    features = (
+        HarvestFeature('geodcat_ap', _('Use GeoDCAT-AP schema (experimental)'),
+            _('If enabled, use GeoDCAT-AP schema instead of default.'), default=False),
+    )
+
+    DEFAULT_CSW_SCHEMA = 'http://www.w3.org/ns/dcat#'
 
     def parse_graph(self, url: str, fmt: str) -> List[Graph]:
+
+        if self.has_feature('geodcat_ap'):
+            schema = 'http://data.europa.eu/930/'
+        else:
+            schema = self.DEFAULT_CSW_SCHEMA
+
+        print(schema)
+
         body = '''<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
                                   xmlns:gmd="http://www.isotc211.org/2005/gmd"
                                   service="CSW" version="2.0.2" resultType="results"
@@ -231,7 +245,7 @@ class CswDcatBackend(DcatBackend):
         page = 0
         start = 1
 
-        response = self.post(url, data=body.format(start=start, schema=self.DCAT_SCHEMA),
+        response = self.post(url, data=body.format(start=start, schema=schema),
                              headers=headers)
         response.raise_for_status()
         content = response.content
@@ -264,7 +278,7 @@ class CswDcatBackend(DcatBackend):
             page += 1
 
             tree = ET.fromstring(
-                self.post(url, data=body.format(start=start, schema=self.DCAT_SCHEMA),
+                self.post(url, data=body.format(start=start, schema=schema),
                           headers=headers).content)
 
         return graphs
