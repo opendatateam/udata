@@ -113,6 +113,10 @@ def generate_fields(**kwargs):
             if write:
                 write_fields[key] = write
 
+        # The goal of this loop is to fetch all functions (getters) of the class
+        # If a function has an `__additional_field_info__` attribute it means 
+        # it has been decorated with `@function_field()` and should be included
+        # in the API response.
         for method_name in dir(cls):
             if method_name == 'objects': continue
             if method_name.startswith('_'): continue
