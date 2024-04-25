@@ -45,12 +45,7 @@ class BadgesList(db.EmbeddedDocumentListField):
 
 
 class BadgeMixin(object):
-    badges = field(
-        BadgesList(),
-        inner_field_info={
-            'nested_fields': badge_fields,
-        },
-    )
+    badges = BadgesList()
 
     def get_badge(self, kind):
         ''' Get a badge given its kind if present'''
