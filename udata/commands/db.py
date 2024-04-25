@@ -156,7 +156,7 @@ def check_references(models_to_check, fix = False):
         ]
 
     references = []
-    for model in _models:
+    for model in set(_models):
         if model.__name__ == 'Activity':
             print(f'Skipping Activity model, scheduled for deprecation')
             continue
@@ -252,90 +252,93 @@ def check_references(models_to_check, fix = False):
     total = 0
     for model, model_references in groupby(references, lambda i: i["model"]):
         model_references = list(model_references)
-        print_and_save(f'- doing {model.__name__}…')
+        count = model.objects.count()
+        print_and_save(f'- doing {count} {model.__name__}…')
         errors[model] = {}
 
         qs = model.objects().no_cache().all()
-        for obj in qs:
-            for reference in model_references:
-                key = f'\t- {reference["repr"]}({reference["destination"]}) — {reference["type"]}…'
-                if key not in errors[model]:
-                    errors[model][key] = 0
+        with click.progressbar(qs, length=count) as models:
+            for obj in models:
+                for reference in model_references:
+                    key = f'\t- {reference["repr"]}({reference["destination"]}) — {reference["type"]}…'
+                    if key not in errors[model]:
+                        errors[model][key] = 0
 
-                try:
-                    if reference['type'] == 'direct':
-                        try:
-                            _ = getattr(obj, reference['name'])
-                        except mongoengine.errors.DoesNotExist:
-                            errors[model][key] += 1
-                            print(f'\t{model.__name__}#{obj.id} have a broken reference for `{reference["name"]}` (fixable with `--fix`)')
-                            if fix:
-                                field = getattr(model, reference['name'])
-
-                                if field.reverse_delete_rule == db.NULLIFY:
-                                    print(f"\t\t…fixing by setting to NULL (db.NULLIFY)")
-                                    setattr(obj, reference['name'], None)
-                                    obj.save()
-                                elif field.reverse_delete_rule == db.CASCADE:
-                                    print(f"\t\t…fixing by deleting (db.CASCADE)")
-                                    obj.delete()
-                                else:
-                                    print(f"\t\tcannot fix because unknown `reverse_delete_rule` {field.reverse_delete_rule}")
-                    elif reference['type'] == 'list':
-                        to_remove = set()
-                        attr_list = getattr(obj, reference['name'], [])
-                        for i, sub in enumerate(attr_list):
+                    try:
+                        if reference['type'] == 'direct':
                             try:
-                                _ = sub.id
+                                _ = getattr(obj, reference['name'])
                             except mongoengine.errors.DoesNotExist:
                                 errors[model][key] += 1
-                                print(f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}[{i}] (fixable with `--fix`)')
-                                to_remove.add(i)
-                                
-                        if fix and len(to_remove) > 0:
-                            print(f"\t\t…fixing the list by removing {len(to_remove)} elements")
-                            attr_list[:] = [i for j, i in enumerate(attr_list) if j not in to_remove]
-                            obj.save()
-                    elif reference['type'] == 'embed_list':
-                        p1, p2 = reference['name'].split('__')
-                        attr_list = getattr(obj, p1, [])
-                        to_remove = set()
-                        for i, sub in enumerate(attr_list):
+                                print(f'\t{model.__name__}#{obj.id} have a broken reference for `{reference["name"]}` (fixable with `--fix`)')
+                                if fix:
+                                    field = getattr(model, reference['name'])
+
+                                    if field.reverse_delete_rule == db.NULLIFY:
+                                        print(f"\t\t…fixing by setting to NULL (db.NULLIFY)")
+                                        setattr(obj, reference['name'], None)
+                                        obj.save()
+                                    elif field.reverse_delete_rule == db.CASCADE:
+                                        print(f"\t\t…fixing by deleting (db.CASCADE)")
+                                        obj.delete()
+                                    else:
+                                        print(f"\t\tcannot fix because unknown `reverse_delete_rule` {field.reverse_delete_rule}")
+                        elif reference['type'] == 'list':
+                            to_remove = set()
+                            attr_list = getattr(obj, reference['name'], [])
+                            for i, sub in enumerate(attr_list):
+                                try:
+                                    _ = sub.id
+                                except mongoengine.errors.DoesNotExist:
+                                    errors[model][key] += 1
+                                    print(f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}[{i}] (fixable with `--fix`)')
+                                    to_remove.add(i)
+                                    
+                            if fix and len(to_remove) > 0:
+                                print(f"\t\t…fixing the list by removing {len(to_remove)} elements")
+                                attr_list[:] = [i for j, i in enumerate(attr_list) if j not in to_remove]
+                                obj.save()
+                        elif reference['type'] == 'embed_list':
+                            p1, p2 = reference['name'].split('__')
+                            attr_list = getattr(obj, p1, [])
+                            to_remove = set()
+                            for i, sub in enumerate(attr_list):
+                                try:
+                                    getattr(sub, p2)
+                                except mongoengine.errors.DoesNotExist:
+                                    errors[model][key] += 1
+                                    to_remove.add(i)
+                                    print(f'\t{model.__name__}#{obj.id} have a broken reference for {p1}[{i}].{p2} (fixable with `--fix`)')
+
+                            if fix and len(to_remove) > 0:
+                                print(f"\t\t…fixing the list by removing {len(to_remove)} elements")
+                                attr_list[:] = [i for j, i in enumerate(attr_list) if j not in to_remove]
+                                obj.save()
+                        elif reference['type'] == 'embed':
+                            p1, p2 = reference['name'].split('__')
+                            sub = getattr(obj, p1)
+                            if sub is None: continue
                             try:
                                 getattr(sub, p2)
                             except mongoengine.errors.DoesNotExist:
                                 errors[model][key] += 1
-                                to_remove.add(i)
-                                print(f'\t{model.__name__}#{obj.id} have a broken reference for {p1}[{i}].{p2} (fixable with `--fix`)')
+                                print(f'\t{model.__name__}#{obj.id} have a broken reference for {p1}.{p2}')
+                        elif reference['type'] == 'embed_list_ref':
+                            p1, p2 = reference['name'].split('__')
+                            a = getattr(obj, p1)
+                            if a is None: continue
+                            sub = getattr(a, p2, [])
+                            for i, child in enumerate(sub):
+                                try:
+                                    child.id
+                                except mongoengine.errors.DoesNotExist:
+                                    errors[model][key] += 1
+                                    print(f'\t{model.__name__}#{obj.id} have a broken reference for {p1}.{p2}[{i}]')
+                        else:
+                            print_and_save(f'Unknown ref type {reference["type"]}')
+                    except mongoengine.errors.FieldDoesNotExist as e:
+                        print_and_save(f'[ERROR for {model.__name__} {obj.id}] {traceback.format_exc()}')
 
-                        if fix and len(to_remove) > 0:
-                            print(f"\t\t…fixing the list by removing {len(to_remove)} elements")
-                            attr_list[:] = [i for j, i in enumerate(attr_list) if j not in to_remove]
-                            obj.save()
-                    elif reference['type'] == 'embed':
-                        p1, p2 = reference['name'].split('__')
-                        sub = getattr(obj, p1)
-                        if sub is None: continue
-                        try:
-                            getattr(sub, p2)
-                        except mongoengine.errors.DoesNotExist:
-                            errors[model][key] += 1
-                            print(f'\t{model.__name__}#{obj.id} have a broken reference for {p1}.{p2}')
-                    elif reference['type'] == 'embed_list_ref':
-                        p1, p2 = reference['name'].split('__')
-                        a = getattr(obj, p1)
-                        if a is None: continue
-                        sub = getattr(a, p2, [])
-                        for i, child in enumerate(sub):
-                            try:
-                                child.id
-                            except mongoengine.errors.DoesNotExist:
-                                errors[model][key] += 1
-                                print(f'\t{model.__name__}#{obj.id} have a broken reference for {p1}.{p2}[{i}]')
-                    else:
-                        print_and_save(f'Unknown ref type {reference["type"]}')
-                except mongoengine.errors.FieldDoesNotExist as e:
-                    print_and_save(f'[ERROR for {model.__name__} {obj.id}] {traceback.format_exc()}')
         for key, nb_errors in errors[model].items():
             print_and_save(f'{key}: {nb_errors}')
             total += nb_errors
