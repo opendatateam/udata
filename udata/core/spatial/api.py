@@ -162,11 +162,6 @@ class SpatialCoverageAPI(API):
         features = []
 
         for zone in GeoZone.objects(level=level.id):
-            # fetch nested levels IDs
-            ids = []
-            ids.append(zone.id)
-            # Count datasets in zone
-            nb_datasets = Dataset.objects(spatial__zones__in=ids).count()
             features.append({
                 'id': zone.id,
                 'type': 'Feature',
@@ -174,7 +169,7 @@ class SpatialCoverageAPI(API):
                     'name': _(zone.name),
                     'code': zone.code,
                     'uri': zone.uri,
-                    'datasets': nb_datasets
+                    'datasets': zone.metrics.get('datasets', 0)
                 }
             })
 

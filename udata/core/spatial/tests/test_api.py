@@ -10,6 +10,7 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.spatial.factories import (
     SpatialCoverageFactory, GeoZoneFactory, GeoLevelFactory
 )
+from udata.core.spatial.tasks import compute_geozones_metrics
 
 
 class SpatialApiTest(APITestCase):
@@ -228,6 +229,31 @@ class SpatialApiTest(APITestCase):
             'type': 'FeatureCollection',
             'features': [],
         })
+
+    def test_coverage_datasets_count(self):
+        GeoLevelFactory(id='fr:commune')
+        paris = GeoZoneFactory(
+            id='fr:commune:75056', level='fr:commune',
+            name='Paris', code='75056')
+        arles = GeoZoneFactory(
+            id='fr:commune:13004', level='fr:commune',
+            name='Arles', code='13004')
+
+        for _ in range(3):
+            DatasetFactory(
+                spatial=SpatialCoverageFactory(zones=[paris.id]))
+        for _ in range(2):
+            DatasetFactory(
+                spatial=SpatialCoverageFactory(zones=[arles.id]))
+                    
+        compute_geozones_metrics()
+
+        response = self.get(url_for('api.spatial_coverage', level='fr:commune'))
+        self.assert200(response)
+        self.assertEqual(response.json['features'][0]['id'], 'fr:commune:13004')
+        self.assertEqual(response.json['features'][0]['properties']['datasets'], 2)
+        self.assertEqual(response.json['features'][1]['id'], 'fr:commune:75056')
+        self.assertEqual(response.json['features'][1]['properties']['datasets'], 3)
 
 
 class SpatialTerritoriesApiTest(APITestCase):
