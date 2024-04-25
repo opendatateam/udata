@@ -56,7 +56,7 @@ class DataserviceAPITest(APITestCase):
             'foo': 'bar',
         })
         self.assertEqual(response.json['license'], license.title)
-        self.assertEqual(response.json['resource_api_url'], 'http://local.test/api/1/dataservices/updated-title/')
+        self.assertEqual(response.json['self_api_url'], 'http://local.test/api/1/dataservices/updated-title/')
         dataservice.reload()
         self.assertEqual(dataservice.title, 'Updated title')
         self.assertEqual(dataservice.base_api_url, 'https://example.org')
@@ -68,7 +68,7 @@ class DataserviceAPITest(APITestCase):
             'foo': 'bar',
         })
         self.assertEqual(dataservice.license.title, license.title)
-        self.assertEqual(dataservice.resource_api_url(), 'http://local.test/api/1/dataservices/updated-title/')
+        self.assertEqual(dataservice.self_api_url(), 'http://local.test/api/1/dataservices/updated-title/')
 
         response = self.delete(url_for('api.dataservice', dataservice=dataservice))
         self.assert204(response)
