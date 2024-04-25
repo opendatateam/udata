@@ -10,6 +10,7 @@ from werkzeug.urls import url_quote
 from udata import models
 from udata.mongo import db
 from udata.core.spatial.models import GeoZone
+from udata.core.dataservices.models import Dataservice
 from udata.i18n import ISO_639_1_CODES
 
 
@@ -121,6 +122,10 @@ class DatasetConverter(ModelConverter):
     model = models.Dataset
 
 
+class DataserviceConverter(ModelConverter):
+    model = Dataservice
+
+
 class CommunityResourceConverter(ModelConverter):
     model = models.CommunityResource
 
@@ -222,6 +227,7 @@ def init_app(app):
     app.url_map.converters['pathlist'] = PathListConverter
     app.url_map.converters['uuid'] = UUIDConverter
     app.url_map.converters['dataset'] = DatasetConverter
+    app.url_map.converters['dataservice'] = DataserviceConverter
     app.url_map.converters['crid'] = CommunityResourceConverter
     app.url_map.converters['org'] = OrganizationConverter
     app.url_map.converters['reuse'] = ReuseConverter

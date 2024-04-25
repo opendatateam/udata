@@ -5,9 +5,11 @@ from blinker import Signal
 from mongoengine.signals import pre_save, post_save
 from werkzeug.utils import cached_property
 
+from udata.core.badges.models import BadgeMixin
+from udata.core.metrics.models import WithMetrics
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
-from udata.models import db, BadgeMixin, WithMetrics
+from udata.mongo import db
 from udata.i18n import lazy_gettext as _
 from udata.uris import endpoint_for
 from .constants import ASSOCIATION, CERTIFIED, COMPANY, LOCAL_AUTHORITY, LOGO_SIZES, ORG_BID_SIZE_LIMIT, ORG_ROLES, DEFAULT_ROLE, MEMBERSHIP_STATUS, LOGO_MAX_SIZE, PUBLIC_SERVICE
