@@ -31,7 +31,7 @@ class DataserviceQuerySet(OwnedQuerySet):
                     db.Q(deleted_at__ne=None) |
                     db.Q(archived_at__ne=None))
 
-@generate_fields(mask=','.join(('id', 'title')))
+@generate_fields()
 class Dataservice(WithMetrics, Owned, db.Document):
     meta = {
         'indexes': [
