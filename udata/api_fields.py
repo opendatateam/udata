@@ -209,6 +209,9 @@ def patch(obj, request):
 
 
             info = getattr(model_attribute, '__additional_field_info__', {})
+
+            # `check` field attribute allows to do validation from the request before setting
+            # the attribute
             check = info.get('check', None)
             if check is not None:
                 check(**{key: value}) # TODO add other model attributes in function parameters
