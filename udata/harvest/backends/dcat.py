@@ -268,7 +268,6 @@ class CswDcatBackend(DcatBackend):
                           headers=headers).content)
 
         return graphs
-    
 
 
 class CswIso19139DcatBackend(DcatBackend):
@@ -295,6 +294,7 @@ class CswIso19139DcatBackend(DcatBackend):
         transform = ET.XSLT(xsl)
 
         # Start querying and parsing graph
+        # Filter on dataset or serie records
         body = '''<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
                                   xmlns:gmd="http://www.isotc211.org/2005/gmd"
                                   service="CSW" version="2.0.2" resultType="results"
@@ -304,10 +304,16 @@ class CswIso19139DcatBackend(DcatBackend):
                         <csw:ElementSetName>full</csw:ElementSetName>
                         <csw:Constraint version="1.1.0">
                             <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">
+                                <ogc:Or xmlns:ogc="http://www.opengis.net/ogc">
                                 <ogc:PropertyIsEqualTo>
                                     <ogc:PropertyName>dc:type</ogc:PropertyName>
                                     <ogc:Literal>dataset</ogc:Literal>
                                 </ogc:PropertyIsEqualTo>
+                                <ogc:PropertyIsEqualTo>
+                                    <ogc:PropertyName>dc:type</ogc:PropertyName>
+                                    <ogc:Literal>series</ogc:Literal>
+                                </ogc:PropertyIsEqualTo>
+                                </ogc:Or>
                             </ogc:Filter>
                         </csw:Constraint>
                     </csw:Query>
@@ -319,7 +325,7 @@ class CswIso19139DcatBackend(DcatBackend):
         start = 1
 
         response = self.post(url, data=body.format(start=start, schema=self.ISO_SCHEMA),
-                            headers=headers)
+                             headers=headers)
         response.raise_for_status()
 
         tree_before_transform = ET.fromstring(response.content)
@@ -351,12 +357,12 @@ class CswIso19139DcatBackend(DcatBackend):
             next_record = self.next_record_if_should_continue(start, search_results)
             if not next_record:
                 break
-            
+
             start = next_record
             page += 1
 
             response = self.post(url, data=body.format(start=start, schema=self.ISO_SCHEMA),
-                          headers=headers)
+                                 headers=headers)
             response.raise_for_status()
 
             tree_before_transform = ET.fromstring(response.content)
