@@ -305,14 +305,14 @@ class CswIso19139DcatBackend(DcatBackend):
                         <csw:Constraint version="1.1.0">
                             <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">
                                 <ogc:Or xmlns:ogc="http://www.opengis.net/ogc">
-                                <ogc:PropertyIsEqualTo>
-                                    <ogc:PropertyName>dc:type</ogc:PropertyName>
-                                    <ogc:Literal>dataset</ogc:Literal>
-                                </ogc:PropertyIsEqualTo>
-                                <ogc:PropertyIsEqualTo>
-                                    <ogc:PropertyName>dc:type</ogc:PropertyName>
-                                    <ogc:Literal>series</ogc:Literal>
-                                </ogc:PropertyIsEqualTo>
+                                    <ogc:PropertyIsEqualTo>
+                                        <ogc:PropertyName>dc:type</ogc:PropertyName>
+                                        <ogc:Literal>dataset</ogc:Literal>
+                                    </ogc:PropertyIsEqualTo>
+                                    <ogc:PropertyIsEqualTo>
+                                        <ogc:PropertyName>dc:type</ogc:PropertyName>
+                                        <ogc:Literal>series</ogc:Literal>
+                                    </ogc:PropertyIsEqualTo>
                                 </ogc:Or>
                             </ogc:Filter>
                         </csw:Constraint>
