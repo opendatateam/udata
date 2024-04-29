@@ -1,6 +1,7 @@
 '''
 This module centralize udata-wide RDF helpers and configuration
 '''
+from html.parser import HTMLParser
 import logging
 import re
 
@@ -13,8 +14,10 @@ from rdflib.namespace import (
 )
 from rdflib.util import SUFFIX_FORMAT_MAP, guess_format as raw_guess_format
 from udata import uris
+from udata.core.contact_point.models import ContactPoint
 from udata.models import Schema
 from udata.mongo.errors import FieldValidationError
+from udata.frontend.markdown import parse_html
 
 log = logging.getLogger(__name__)
 
@@ -212,6 +215,42 @@ CONTEXT = {
     'totalItems': 'hydra:totalItems',
 }
 
+def serialize_value(value):
+    if isinstance(value, (URIRef, Literal)):
+        return value.toPython()
+    elif isinstance(value, RdfResource):
+        return value.identifier.toPython()
+
+
+def rdf_value(obj, predicate, default=None):
+    value = obj.value(predicate)
+    return serialize_value(value) if value else default
+
+class HTMLDetector(HTMLParser):
+    def __init__(self, *args, **kwargs):
+        HTMLParser.__init__(self, *args, **kwargs)
+        self.elements = set()
+
+    def handle_starttag(self, tag, attrs):
+        self.elements.add(tag)
+
+    def handle_endtag(self, tag):
+        self.elements.add(tag)
+
+
+def is_html(text):
+    parser = HTMLDetector()
+    parser.feed(text)
+    return bool(parser.elements)
+
+
+def sanitize_html(text):
+    text = text.toPython() if isinstance(text, Literal) else ''
+    if is_html(text):
+        return parse_html(text)
+    else:
+        return text.strip()
+
 
 def url_from_rdf(rdf, prop):
     '''
@@ -224,6 +263,40 @@ def url_from_rdf(rdf, prop):
     elif isinstance(value, RdfResource):
         return value.identifier.toPython()
 
+def theme_labels_from_rdf(rdf):
+    for theme in rdf.objects(DCAT.theme):
+        if isinstance(theme, RdfResource):
+            label = rdf_value(theme, SKOS.prefLabel)
+        else:
+            label = theme.toPython()
+        if label:
+            yield label
+
+def themes_from_rdf(rdf):
+    tags = [tag.toPython() for tag in rdf.objects(DCAT.keyword)]
+    tags += theme_labels_from_rdf(rdf)
+    return list(set(tags))
+
+def contact_point_from_rdf(rdf, dataset):
+    contact_point = rdf.value(DCAT.contactPoint)
+    if contact_point:
+        name = rdf_value(contact_point, VCARD.fn) or ''
+        email = (rdf_value(contact_point, VCARD.hasEmail)
+                 or rdf_value(contact_point, VCARD.email)
+                 or rdf_value(contact_point, DCAT.email))
+        if not email:
+            return
+        email = email.replace('mailto:', '').strip()
+        if dataset.organization:
+            contact_point = ContactPoint.objects(
+                name=name, email=email, organization=dataset.organization).first()
+            return (contact_point or
+                    ContactPoint(name=name, email=email, organization=dataset.organization).save())
+        elif dataset.owner:
+            contact_point = ContactPoint.objects(
+                name=name, email=email, owner=dataset.owner).first()
+            return (contact_point or
+                    ContactPoint(name=name, email=email, owner=dataset.owner).save())
 
 def schema_from_rdf(rdf):
     '''

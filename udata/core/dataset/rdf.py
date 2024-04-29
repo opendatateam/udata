@@ -18,12 +18,11 @@ from mongoengine.errors import ValidationError
 
 from udata import i18n, uris
 from udata.core.spatial.models import SpatialCoverage
-from udata.frontend.markdown import parse_html
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.models import db, ContactPoint
 from udata.rdf import (
-    DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD, RDFS,
-    namespace_manager, schema_from_rdf, url_from_rdf
+    DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD, RDFS, contact_point_from_rdf,
+    namespace_manager, rdf_value, sanitize_html, schema_from_rdf, theme_labels_from_rdf, themes_from_rdf, url_from_rdf
 )
 from udata.utils import get_by, safe_unicode
 from udata.uris import endpoint_for
@@ -85,32 +84,6 @@ EU_HVD_CATEGORIES = {
     "http://data.europa.eu/bna/c_dd313021": "Observation de la terre et environnement",
     "http://data.europa.eu/bna/c_e1da4e07": "Statistiques"
 }
-
-
-class HTMLDetector(HTMLParser):
-    def __init__(self, *args, **kwargs):
-        HTMLParser.__init__(self, *args, **kwargs)
-        self.elements = set()
-
-    def handle_starttag(self, tag, attrs):
-        self.elements.add(tag)
-
-    def handle_endtag(self, tag):
-        self.elements.add(tag)
-
-
-def is_html(text):
-    parser = HTMLDetector()
-    parser.feed(text)
-    return bool(parser.elements)
-
-
-def sanitize_html(text):
-    text = text.toPython() if isinstance(text, Literal) else ''
-    if is_html(text):
-        return parse_html(text)
-    else:
-        return text.strip()
 
 
 def temporal_to_rdf(daterange, graph=None):
@@ -241,18 +214,6 @@ CHECKSUM_ALGORITHMS = {
 }
 
 
-def serialize_value(value):
-    if isinstance(value, (URIRef, Literal)):
-        return value.toPython()
-    elif isinstance(value, RdfResource):
-        return value.identifier.toPython()
-
-
-def rdf_value(obj, predicate, default=None):
-    value = obj.value(predicate)
-    return serialize_value(value) if value else default
-
-
 def temporal_from_literal(text):
     '''
     Parse a temporal coverage from a literal ie. either:
@@ -326,29 +287,6 @@ def temporal_from_rdf(period_of_time):
         # but we never want to break the whole dataset parsing
         # so we log the error for future investigation and improvement
         log.warning('Unable to parse temporal coverage', exc_info=True)
-
-
-def contact_point_from_rdf(rdf, dataset):
-    contact_point = rdf.value(DCAT.contactPoint)
-    if contact_point:
-        name = rdf_value(contact_point, VCARD.fn) or ''
-        email = (rdf_value(contact_point, VCARD.hasEmail)
-                 or rdf_value(contact_point, VCARD.email)
-                 or rdf_value(contact_point, DCAT.email))
-        if not email:
-            return
-        email = email.replace('mailto:', '').strip()
-        if dataset.organization:
-            contact_point = ContactPoint.objects(
-                name=name, email=email, organization=dataset.organization).first()
-            return (contact_point or
-                    ContactPoint(name=name, email=email, organization=dataset.organization).save())
-        elif dataset.owner:
-            contact_point = ContactPoint.objects(
-                name=name, email=email, owner=dataset.owner).first()
-            return (contact_point or
-                    ContactPoint(name=name, email=email, owner=dataset.owner).save())
-
 
 def spatial_from_rdf(graph):
     geojsons = []
@@ -592,9 +530,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     if acronym:
         dataset.acronym = acronym
 
-    tags = [tag.toPython() for tag in d.objects(DCAT.keyword)]
-    tags += theme_labels_from_rdf(d)
-    dataset.tags = list(set(tags))
+    dataset.tags = themes_from_rdf(d)
 
     temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
     if temporal_coverage:
