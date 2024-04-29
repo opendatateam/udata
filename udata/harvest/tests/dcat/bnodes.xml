@@ -98,6 +98,21 @@
         <dct:conformsTo rdf:nodeID="Ne0189e93917c4f67a412fc44883322e7"/>
       </dcat:Dataset>
     </dcat:dataset>
+    <dcat:service>
+      <dcat:DataService rdf:about="https://data.paris2024.org/api/explore/v2.1/">
+        <dcterms:title xml:lang="en"><![CDATA[Explore API v2]]></dcterms:title>
+        <dcterms:identifier>https://data.paris2024.org/api/explore/v2.1/</dcterms:identifier>
+        <dcat:endpointURL rdf:resource="https://data.paris2024.org/api/explore/v2.1/" />
+        <dcat:endpointDescription rdf:resource="https://data.paris2024.org/api/explore/v2.1/swagger.json" />
+        <dcat:landingPage rdf:resource="https://data.paris2024.org/api/explore/v2.1/console" />
+        <dcat:servesDataset rdf:resource="https://data.paris2024.org/explore/dataset/paris-2024-centres-de-preparation-aux-jeux/" />
+        <dcat:servesDataset rdf:resource="https://data.paris2024.org/explore/dataset/paris-2024-evenements-olympiade-culturelle/" />
+        <dcat:servesDataset rdf:resource="https://data.paris2024.org/explore/dataset/paris-2024-boutiques-officielles/" />
+        <dcat:servesDataset rdf:resource="https://data.paris2024.org/explore/dataset/paris-2024-sites-de-competition/" />
+        <dcat:servesDataset rdf:resource="https://data.paris2024.org/explore/dataset/paris-2024-parkings-velo-spectateurs-en-idf/" />
+        <dcat:servesDataset rdf:resource="https://data.paris2024.org/explore/dataset/paris-2024-faq/" />
+      </dcat:DataService>
+    </dcat:service>
     <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-15T09:19:51.723691</dcterms:modified>
     <foaf:homepage>http://data.test.org</foaf:homepage>
     <dcterms:language>en</dcterms:language>
