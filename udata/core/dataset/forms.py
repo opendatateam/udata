@@ -5,6 +5,7 @@ from udata.i18n import lazy_gettext as _
 
 from udata.core.storages import resources
 from udata.core.spatial.forms import SpatialCoverageField
+from udata.mongo.errors import FieldValidationError
 
 from .models import (
     Dataset, Resource, Schema, License, Checksum, CommunityResource,
@@ -15,9 +16,6 @@ from .constants import (
 )
 
 __all__ = ('DatasetForm', 'ResourceForm', 'CommunityResourceForm')
-
-from ...models import FieldValidationError
-
 
 class ChecksumForm(ModelForm):
     model_class = Checksum

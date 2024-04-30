@@ -18,11 +18,13 @@ from typing import Optional, Tuple
 from udata.app import cache
 from udata.core import storages
 from udata.frontend.markdown import mdstrip
-from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage, FieldValidationError
+from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
+from udata.mongo.errors import FieldValidationError
 from udata.i18n import lazy_gettext as _
 from udata.utils import get_by, hash_url, to_naive_datetime
 from udata.uris import ValidationError, endpoint_for
 from udata.uris import validate as validate_url
+from udata.core.owned import Owned, OwnedQuerySet
 from .constants import CHECKSUM_TYPES, CLOSED_FORMATS, DEFAULT_LICENSE, LEGACY_FREQUENCIES, MAX_DISTANCE, PIVOTAL_DATA, RESOURCE_FILETYPES, RESOURCE_TYPES, SCHEMA_CACHE_DURATION, UPDATE_FREQUENCIES
 
 from .preview import get_preview_url
@@ -258,7 +260,7 @@ class License(db.Document):
         return cls.objects(id=DEFAULT_LICENSE['id']).first()
 
 
-class DatasetQuerySet(db.OwnedQuerySet):
+class DatasetQuerySet(OwnedQuerySet):
     def visible(self):
         return self(private__ne=True, deleted=None, archived=None)
 
@@ -456,7 +458,7 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
         self.dataset.save(*args, **kwargs)
 
 
-class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
+class Dataset(WithMetrics, BadgeMixin, Owned, db.Document):
     title = db.StringField(required=True)
     acronym = db.StringField(max_length=128)
     # /!\ do not set directly the slug when creating or updating a dataset
@@ -516,7 +518,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             'slug',
             'resources.id',
             'resources.urlhash',
-        ] + db.Owned.meta['indexes'],
+        ] + Owned.meta['indexes'],
         'ordering': ['-created_at_internal'],
         'queryset_class': DatasetQuerySet,
         'auto_create_index_on_save': True
@@ -903,7 +905,7 @@ pre_save.connect(Dataset.pre_save, sender=Dataset)
 post_save.connect(Dataset.post_save, sender=Dataset)
 
 
-class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
+class CommunityResource(ResourceMixin, WithMetrics, Owned, db.Document):
     '''
     Local file, remote file or API added by the community of the users to the
     original dataset
@@ -916,7 +918,7 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
 
     meta = {
         'ordering': ['-created_at_internal'],
-        'queryset_class': db.OwnedQuerySet,
+        'queryset_class': OwnedQuerySet,
     }
 
     @property

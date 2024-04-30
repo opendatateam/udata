@@ -2,6 +2,18 @@
 
 ## Current (in progress)
 
+- Add dataservices in beta [#2986](https://github.com/opendatateam/udata/pull/2986)
+- Remove deprecated `metrics_for` route [#3022](https://github.com/opendatateam/udata/pull/3022)
+- Fix spatial coverage fetching perfs. Need to schedule `compute-geozones-metrics` [#3018](https://github.com/opendatateam/udata/pull/3018)
+
+## 8.0.0 (2024-04-23)
+
+- **breaking change** Migrate to Python 3.11 [#2992](https://github.com/opendatateam/udata/pull/2992) [#3021](https://github.com/opendatateam/udata/pull/3021)
+- **breaking change** Fix datetime serialization in extras (return ISO string in JSON). Warning, `ujson` shouldn't be installed anymore on the project to allow `cls` parameter to override the JSONEncoder [#3019](https://github.com/opendatateam/udata/pull/3019)
+- Fix missing `bcrypt` dependency [#3019](https://github.com/opendatateam/udata/pull/3019)
+
+## 7.0.7 (2024-04-16)
+
 - :warning: **breaking change** `DATASET_MAX_RESOURCES_UNCOLLAPSED` config is removed.
 - Replace schemas API with a simple proxy to the `schemas.json` file [#2989](https://github.com/opendatateam/udata/pull/2989)
 - Topic: add filters in API [#3007](https://github.com/opendatateam/udata/pull/3007)
@@ -9,6 +21,9 @@
 - Move `db` and Mongo fields classes outside `udata.models` [#3005](https://github.com/opendatateam/udata/pull/3005)
 - :warning: Update LICENSE_GROUPS config layout [#3010](https://github.com/opendatateam/udata/pull/3010)
 - Remove unused dependencies [#3006](https://github.com/opendatateam/udata/pull/3006)
+- Move `FieldValidationError` into its own module and add an error handler [#3012](https://github.com/opendatateam/udata/pull/3012)
+- Move some `import User` to runtime imports [#3013](https://github.com/opendatateam/udata/pull/3013)
+- Move `Owned` mixin to its own module [#3008](https://github.com/opendatateam/udata/pull/3008)
 - Move `badge_fields` to separate module than `models.py` [#3011](https://github.com/opendatateam/udata/pull/3011)
 
 ## 7.0.6 (2024-03-29)

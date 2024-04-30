@@ -34,9 +34,9 @@ from werkzeug.security import gen_salt
 
 from udata.app import csrf
 from udata.auth import current_user, login_required, login_user
+from udata.core.organization.models import Organization
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.mongo import db
-from udata.core.user.models import User
 from udata.core.storages import images, default_image_basename
 
 
@@ -67,7 +67,7 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
     description = db.StringField()
 
     owner = db.ReferenceField('User')
-    organization = db.ReferenceField('Organization', reverse_delete_rule=db.NULLIFY)
+    organization = db.ReferenceField(Organization, reverse_delete_rule=db.NULLIFY)
     image = db.ImageField(fs=images, basename=default_image_basename,
                           thumbnails=[150, 25])
 
@@ -244,6 +244,8 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
 
 class PasswordGrant(grants.ResourceOwnerPasswordCredentialsGrant):
     def authenticate_user(self, username, password):
+        from udata.core.user.models import User
+
         user = User.objects(email=username).first()
         if user and verify_password(password, user.password):
             return user
