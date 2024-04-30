@@ -5,6 +5,7 @@
 - Add dataservices in beta [#2986](https://github.com/opendatateam/udata/pull/2986)
 - Remove deprecated `metrics_for` route [#3022](https://github.com/opendatateam/udata/pull/3022)
 - Fix spatial coverage fetching perfs. Need to schedule `compute-geozones-metrics` [#3018](https://github.com/opendatateam/udata/pull/3018)
+- Allow for series in CSW ISO 19139 DCAT backend [#3028](https://github.com/opendatateam/udata/pull/3028)
 
 ## 8.0.0 (2024-04-23)
 
