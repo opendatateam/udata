@@ -235,6 +235,14 @@ class User(WithMetrics, UserMixin, db.Document):
         Use `mark_as_deleted` (or `_delete` if you know what you're doing)''')
 
     def mark_as_deleted(self, notify: bool = True):
+        if self.avatar.filename is not None:
+            storage = storages.avatars
+            storage.delete(self.avatar.filename)
+            storage.delete(self.avatar.original)
+            for key, value in self.avatar.thumbnails.items():
+                storage.delete(value)
+
+
         copied_user = copy(self)
         self.email = '{}@deleted'.format(self.id)
         self.slug = 'deleted'
@@ -271,12 +279,6 @@ class User(WithMetrics, UserMixin, db.Document):
         from udata.models import ContactPoint
         ContactPoint.objects(owner=self).delete()
 
-        if self.avatar.filename is not None:
-            storage = storages.avatars
-            storage.delete(self.avatar.filename)
-            storage.delete(self.avatar.original)
-            for key, value in self.avatar.thumbnails.items():
-                storage.delete(value)
 
         if notify:
             mail.send(_('Account deletion'), copied_user, 'account_deleted')
