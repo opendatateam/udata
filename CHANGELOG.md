@@ -5,6 +5,7 @@
 - Add dataservices in beta [#2986](https://github.com/opendatateam/udata/pull/2986)
 - Remove deprecated `metrics_for` route [#3022](https://github.com/opendatateam/udata/pull/3022)
 - Fix spatial coverage fetching perfs. Need to schedule `compute-geozones-metrics` [#3018](https://github.com/opendatateam/udata/pull/3018)
+- Delete a user without sending mail [#3031](https://github.com/opendatateam/udata/pull/3031)
 
 ## 8.0.0 (2024-04-23)
 
