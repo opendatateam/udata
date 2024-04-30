@@ -13,6 +13,7 @@ from mongoengine.signals import pre_save, post_save
 from werkzeug.utils import cached_property
 
 from udata import mail
+from udata.core import storages
 from udata.uris import endpoint_for
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -233,7 +234,7 @@ class User(WithMetrics, UserMixin, db.Document):
         raise NotImplementedError('''This method should not be using directly.
         Use `mark_as_deleted` (or `_delete` if you know what you're doing)''')
 
-    def mark_as_deleted(self):
+    def mark_as_deleted(self, notify: bool = True):
         copied_user = copy(self)
         self.email = '{}@deleted'.format(self.id)
         self.slug = 'deleted'
@@ -270,7 +271,15 @@ class User(WithMetrics, UserMixin, db.Document):
         from udata.models import ContactPoint
         ContactPoint.objects(owner=self).delete()
 
-        mail.send(_('Account deletion'), copied_user, 'account_deleted')
+        if self.avatar.filename is not None:
+            storage = storages.avatars
+            storage.delete(self.avatar.filename)
+            storage.delete(self.avatar.original)
+            for key, value in self.avatar.thumbnails.items():
+                storage.delete(value)
+
+        if notify:
+            mail.send(_('Account deletion'), copied_user, 'account_deleted')
 
     def count_datasets(self):
         from udata.models import Dataset
