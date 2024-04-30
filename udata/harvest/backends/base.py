@@ -388,7 +388,14 @@ class BaseSyncBackend(BaseBackend):
 
         try:
             self.inner_harvest()
+
+            if self.source.autoarchive:
+                self.autoarchive()
+
             self.job.status = 'done'
+
+            if any(i.status == 'failed' for i in self.job.items):
+                self.job.status += '-errors'
         except HarvestValidationError as e:
             log.info(f'Harvesting validation failed for "{safe_unicode(self.source.name)}" ({self.source.backend})')
 
