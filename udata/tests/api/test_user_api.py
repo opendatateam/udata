@@ -4,7 +4,7 @@ from udata.core import storages
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.models import Follow
 from udata.utils import faker
-from udata.tests.helpers import create_test_image
+from udata.tests.helpers import capture_mails, create_test_image
 
 from . import APITestCase
 
@@ -335,14 +335,28 @@ class UserAPITest(APITestCase):
             {'file': (file, 'test.png')},
             json=False,
         )
-        response = self.delete(url_for('api.user', user=other_user))
-        self.assertEqual(list(storages.avatars.list_files()), [])
-        self.assert204(response)
+        with capture_mails() as mails:
+            response = self.delete(url_for('api.user', user=other_user))
+            self.assertEqual(list(storages.avatars.list_files()), [])
+            self.assert204(response)
+            self.assertEquals(len(mails), 1)
+
         other_user.reload()
         response = self.delete(url_for('api.user', user=other_user))
         self.assert410(response)
         response = self.delete(url_for('api.user', user=user))
         self.assert403(response)
+
+    def test_delete_user_without_notify(self):
+        user = AdminFactory()
+        self.login(user)
+        other_user = UserFactory()
+
+        with capture_mails() as mails:
+            response = self.delete(url_for('api.user', user=other_user, no_mail=True))
+            self.assert204(response)
+            self.assertEqual(len(mails), 0)
+       
 
     def test_contact_points(self):
         user = AdminFactory()

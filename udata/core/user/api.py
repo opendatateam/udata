@@ -272,8 +272,8 @@ class UserAvatarAPI(API):
 
 delete_parser = api.parser()
 delete_parser.add_argument(
-    'notify', type=bool, help='Send a mail to notify the user of the deletion',
-    location='args', default=True)
+    'no_mail', type=bool, help='Do not send a mail to notify the user of the deletion',
+    location='args', default=False)
 
 @ns.route('/<user:user>/', endpoint='user')
 @api.response(404, 'User not found')
@@ -315,7 +315,7 @@ class UserAPI(API):
             api.abort(403, 'You cannot delete yourself with this API. ' +
                       'Use the "me" API instead.')
         
-        user.mark_as_deleted(notify=args['notify'])
+        user.mark_as_deleted(notify=not args['no_mail'])
         return '', 204
 
 
