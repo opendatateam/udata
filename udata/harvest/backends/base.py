@@ -416,39 +416,11 @@ class BaseSyncBackend(BaseBackend):
         self.save_job()
 
         try:
-            dataset = Dataset.objects(__raw__={
-                'harvest.remote_id': remote_id,
-                '$or': [
-                    {'harvest.domain': self.source.domain},
-                    {'harvest.source_id': str(self.source.id)},
-                ],
-            }).first()
-
-            # TODO check that the existing dataset belongs to the same owner/organization than
-            # the `HarvestSource`. Or is it always the case?
-
-            if dataset is None:
-                if self.source.organization:
-                    dataset = Dataset(organization=self.source.organization)
-                elif self.source.owner:
-                    dataset = Dataset(owner=self.source.owner)
-                else:
-                    raise Exception(f"HarvestSource#{self.source.id} doesn't have an owner nor an organization")
+            dataset = self.get_dataset(remote_id)
 
             dataset = self.inner_process_dataset(dataset, **kwargs)
 
-            if not dataset.harvest:
-                dataset.harvest = HarvestDatasetMetadata()
-            dataset.harvest.domain = self.source.domain
-            dataset.harvest.remote_id = item.remote_id
-            dataset.harvest.source_id = str(self.source.id)
-            dataset.harvest.last_update = datetime.utcnow()
-            dataset.harvest.backend = self.display_name
-
-            # unset archived status if needed
-            if dataset.harvest:
-                dataset.harvest.archived_at = None
-                dataset.harvest.archived = None
+            dataset.harvest = self.update_harvest_info(dataset.harvest, remote_id)
             dataset.archived = None
 
             # TODO: Apply editable mappings
@@ -478,6 +450,20 @@ class BaseSyncBackend(BaseBackend):
         finally:
             item.ended = datetime.utcnow()
             self.save_job()
+
+    def update_harvest_info(self, harvest: Optional[HarvestDatasetMetadata], remote_id: int):
+        if not harvest:
+            harvest = HarvestDatasetMetadata()
+        harvest.domain = self.source.domain
+        harvest.remote_id = remote_id
+        harvest.source_id = str(self.source.id)
+        harvest.last_update = datetime.utcnow()
+        harvest.backend = self.display_name
+
+        harvest.archived_at = None
+        harvest.archived = None
+
+        return harvest
 
     def save_job(self):
         if not self.dryrun:
