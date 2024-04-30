@@ -407,7 +407,11 @@ class BaseSyncBackend(BaseBackend):
             self.end_job()
         
 
-    def process_dataset(self, remote_id: str, debug_data: dict, **kwargs):
+    def process_dataset(self, remote_id: str, debug_data: dict, **kwargs) -> bool :
+        '''
+        Return `True` if the parent should stop iterating because we exceed the number
+        of items to process.
+        '''
         log.debug(f'Processing dataset {remote_id}…')
 
         # TODO add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
@@ -450,6 +454,9 @@ class BaseSyncBackend(BaseBackend):
         finally:
             item.ended = datetime.utcnow()
             self.save_job()
+
+        return self.max_items and len(self.job.items) >= self.max_items
+
 
     def update_harvest_info(self, harvest: Optional[HarvestDatasetMetadata], remote_id: int):
         if not harvest:
