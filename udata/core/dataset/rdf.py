@@ -481,12 +481,12 @@ def remote_url_from_rdf(rdf):
 def theme_labels_from_rdf(rdf):
     '''
     Get theme labels to use as keywords.
-    Map HVD keywords from known URIs resources.
+    Map HVD keywords from known URIs resources if HVD support is activated.
     '''
     for theme in rdf.objects(DCAT.theme):
         if isinstance(theme, RdfResource):
             uri = theme.identifier.toPython()
-            if uri in EU_HVD_CATEGORIES:
+            if current_app.config['HVD_SUPPORT'] and uri in EU_HVD_CATEGORIES:
                 label = EU_HVD_CATEGORIES[uri]
                 # Additionnally yield hvd keyword
                 yield 'hvd'
