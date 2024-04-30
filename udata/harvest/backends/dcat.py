@@ -9,13 +9,14 @@ from datetime import date
 import json
 from typing import List
 
+from udata.core.dataset.models import Dataset
 from udata.rdf import (
     DCAT, DCT, HYDRA, SPDX, namespace_manager, guess_format, url_from_rdf
 )
 from udata.core.dataset.rdf import dataset_from_rdf
 from udata.storage.s3 import store_as_json, get_from_json
 
-from .base import BaseBackend
+from .base import BaseBackend, BaseSyncBackend
 
 log = logging.getLogger(__name__)
 
@@ -56,15 +57,20 @@ def extract_graph(source, target, node, specs):
             extract_graph(source, target, o, specs[p])
 
 
-class DcatBackend(BaseBackend):
+class DcatBackend(BaseSyncBackend):
     display_name = 'DCAT'
 
-    def initialize(self):
-        '''List all datasets for a given ...'''
+    def inner_harvest(self):
         fmt = self.get_format()
-        graphs = self.parse_graph(self.source.url, fmt)
-
         self.job.data = { 'format': fmt }
+
+        graphs = self.walk_graph(
+            self.source.url,
+            fmt,
+            lambda page_number, page: self.process_datasets(page_number, page),
+        )
+
+        # TODO call `walk_graph` with `process_dataservices`
 
         serialized_graphs = [graph.serialize(format=fmt, indent=None) for graph in graphs]
 
@@ -105,13 +111,15 @@ class DcatBackend(BaseBackend):
                 raise ValueError(msg)
         return fmt
 
-    def parse_graph(self, url, fmt) -> List[Graph]:
+    def walk_graph(self, url: str, fmt: str, do) -> List[Graph]:
         """
-        Returns an instance of rdflib.Graph for each detected page
-        The index in the list is the page number
+        Process the graphs by executing the `do()` callback on each page.
+
+        Returns all the pages in an array (index is the page number, value is 
+        the rdflib.Graph of the page) for debug purposes (saved in `HarvestJob`)
         """
         graphs = []
-        page = 0
+        page_number = 0
         while url:
             subgraph = Graph(namespace_manager=namespace_manager)
             response = self.get(url)
@@ -130,17 +138,24 @@ class DcatBackend(BaseBackend):
                     break
             graphs.append(subgraph)
 
-            for node in subgraph.subjects(RDF.type, DCAT.Dataset):
-                id = subgraph.value(node, DCT.identifier)
-                kwargs = {'page': page}
-                self.add_item(id, **kwargs)
-                if self.max_items and len(self.job.items) >= self.max_items:
-                    # this will stop iterating on pagination
-                    url = None
+            should_stop = do(page_number, subgraph)
+            if should_stop:
+                return
 
-            page += 1
+            page_number += 1
 
         return graphs
+    
+    def process_datasets(self, page_number, page):
+        for node in page.subjects(RDF.type, DCAT.Dataset):
+            remote_id = page.value(node, DCT.identifier)
+            should_stop = self.process_dataset(remote_id, debug_data = {'page_number': page_number}, page=page, node=node)
+
+            if should_stop:
+                return True
+            
+    def inner_process_dataset(self, dataset: Dataset, page, node):
+        return dataset_from_rdf(page, dataset, node=node)
 
     def get_node_from_item(self, graph, item):
         for node in graph.subjects(RDF.type, DCAT.Dataset):
@@ -209,7 +224,13 @@ class CswDcatBackend(DcatBackend):
 
     DCAT_SCHEMA = 'http://www.w3.org/ns/dcat#'
 
-    def parse_graph(self, url: str, fmt: str) -> List[Graph]:
+    def walk_graph(self, url: str, fmt: str, do) -> List[Graph]:
+        """
+        Process the graphs by executing the `do()` callback on each page.
+
+        Returns all the pages in an array (index is the page number, value is 
+        the rdflib.Graph of the page) for debug purposes (saved in `HarvestJob`)
+        """
         body = '''<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
                                   xmlns:gmd="http://www.isotc211.org/2005/gmd"
                                   service="CSW" version="2.0.2" resultType="results"
@@ -228,7 +249,7 @@ class CswDcatBackend(DcatBackend):
         headers = {'Content-Type': 'application/xml'}
 
         graphs = []
-        page = 0
+        page_number = 0
         start = 1
 
         response = self.post(url, data=body.format(start=start, schema=self.DCAT_SCHEMA),
@@ -242,18 +263,17 @@ class CswDcatBackend(DcatBackend):
             graph = Graph(namespace_manager=namespace_manager)
             search_results = tree.find('csw:SearchResults', {'csw': CSW_NAMESPACE})
             if search_results is None:
-                log.error(f'No search results found for {url} on page {page}')
+                log.error(f'No search results found for {url} on page {page_number}')
                 break
             for child in search_results:
                 subgraph = Graph(namespace_manager=namespace_manager)
                 subgraph.parse(data=ET.tostring(child), format=fmt)
                 graph += subgraph
 
-                for node in subgraph.subjects(RDF.type, DCAT.Dataset):
-                    id = subgraph.value(node, DCT.identifier)
-                    kwargs = {'nid': str(node), 'page': page}
-                    kwargs['type'] = 'uriref' if isinstance(node, URIRef) else 'blank'
-                    self.add_item(id, **kwargs)
+                should_stop = do(page_number, subgraph)
+                if should_stop:
+                    return
+
             graphs.append(graph)
 
             next_record = self.next_record_if_should_continue(start, search_results)
@@ -261,7 +281,7 @@ class CswDcatBackend(DcatBackend):
                 break
 
             start = next_record
-            page += 1
+            page_number += 1
 
             tree = ET.fromstring(
                 self.post(url, data=body.format(start=start, schema=self.DCAT_SCHEMA),
@@ -283,12 +303,17 @@ class CswIso19139DcatBackend(DcatBackend):
 
     XSL_URL = "https://raw.githubusercontent.com/SEMICeu/iso-19139-to-dcat-ap/master/iso-19139-to-dcat-ap.xsl"
 
-    def parse_graph(self, url: str, fmt: str) -> List[Graph]:
-        '''
+    def walk_graph(self, url: str, fmt: str, do) -> List[Graph]:
+        """
+        Process the graphs by executing the `do()` callback on each page.
+
+        Returns all the pages in an array (index is the page number, value is 
+        the rdflib.Graph of the page) for debug purposes (saved in `HarvestJob`)
+
         Parse CSW graph querying ISO schema.
         Use SEMIC GeoDCAT-AP XSLT to map it to a correct version.
         See https://github.com/SEMICeu/iso-19139-to-dcat-ap for more information on the XSLT.
-        '''
+        """
 
         # Load XSLT
         xsl = ET.fromstring(self.get(self.XSL_URL).content)
@@ -315,7 +340,7 @@ class CswIso19139DcatBackend(DcatBackend):
         headers = {'Content-Type': 'application/xml'}
 
         graphs = []
-        page = 0
+        page_number = 0
         start = 1
 
         response = self.post(url, data=body.format(start=start, schema=self.ISO_SCHEMA),
@@ -332,7 +357,7 @@ class CswIso19139DcatBackend(DcatBackend):
             # infos (useful for pagination)
             search_results = tree_before_transform.find('csw:SearchResults', {'csw': CSW_NAMESPACE})
             if search_results is None:
-                log.error(f'No search results found for {url} on page {page}')
+                log.error(f'No search results found for {url} on page {page_number}')
                 break
 
             subgraph = Graph(namespace_manager=namespace_manager)
@@ -341,19 +366,18 @@ class CswIso19139DcatBackend(DcatBackend):
             if not subgraph.subjects(RDF.type, DCAT.Dataset):
                 raise ValueError("Failed to fetch CSW content")
 
-            for node in subgraph.subjects(RDF.type, DCAT.Dataset):
-                id = subgraph.value(node, DCT.identifier)
-                kwargs = {'nid': str(node), 'page': page}
-                kwargs['type'] = 'uriref' if isinstance(node, URIRef) else 'blank'
-                self.add_item(id, **kwargs)
             graphs.append(subgraph)
+
+            should_stop = do(page_number, subgraph)
+            if should_stop:
+                return
 
             next_record = self.next_record_if_should_continue(start, search_results)
             if not next_record:
                 break
             
             start = next_record
-            page += 1
+            page_number += 1
 
             response = self.post(url, data=body.format(start=start, schema=self.ISO_SCHEMA),
                           headers=headers)

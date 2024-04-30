@@ -560,6 +560,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
     dataset.contact_point = contact_point_from_rdf(d, dataset) or dataset.contact_point
+    print(dataset.contact_point)
     schema = schema_from_rdf(d)
     if schema:
         dataset.schema = schema
