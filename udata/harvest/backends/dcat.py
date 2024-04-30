@@ -148,7 +148,6 @@ class DcatBackend(BaseSyncBackend):
     
     def process_datasets(self, page_number: int, page: Graph):
         for node in page.subjects(RDF.type, DCAT.Dataset):
-            print(node.__class__)
             remote_id = page.value(node, DCT.identifier)
             should_stop = self.process_dataset(remote_id, debug_data = {'page_number': page_number}, page=page, node=node)
 

@@ -320,13 +320,11 @@ def temporal_from_rdf(period_of_time):
 
 def contact_point_from_rdf(rdf, dataset):
     contact_point = rdf.value(DCAT.contactPoint)
-    print(contact_point)
     if contact_point:
         name = rdf_value(contact_point, VCARD.fn) or ''
         email = (rdf_value(contact_point, VCARD.hasEmail)
                  or rdf_value(contact_point, VCARD.email)
                  or rdf_value(contact_point, DCAT.email))
-        print(name)
         if not email:
             return
         email = email.replace('mailto:', '').strip()
@@ -562,7 +560,6 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
     dataset.contact_point = contact_point_from_rdf(d, dataset) or dataset.contact_point
-    print(dataset.contact_point)
     schema = schema_from_rdf(d)
     if schema:
         dataset.schema = schema
