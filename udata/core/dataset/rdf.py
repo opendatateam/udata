@@ -320,11 +320,13 @@ def temporal_from_rdf(period_of_time):
 
 def contact_point_from_rdf(rdf, dataset):
     contact_point = rdf.value(DCAT.contactPoint)
+    print(contact_point)
     if contact_point:
         name = rdf_value(contact_point, VCARD.fn) or ''
         email = (rdf_value(contact_point, VCARD.hasEmail)
                  or rdf_value(contact_point, VCARD.email)
                  or rdf_value(contact_point, DCAT.email))
+        print(name)
         if not email:
             return
         email = email.replace('mailto:', '').strip()

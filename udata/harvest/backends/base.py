@@ -378,7 +378,7 @@ class BaseSyncBackend(BaseBackend):
         raise NotImplementedError
 
     def harvest(self):
-        log.debug(f'Starting harvesting f{self.source.name} (f{self.source.url})…')
+        log.debug(f'Starting harvesting {self.source.name} ({self.source.url})…')
         factory = HarvestJob if self.dryrun else HarvestJob.objects.create
         self.job = factory(status='initialized',
                            started=datetime.utcnow(),
@@ -390,25 +390,25 @@ class BaseSyncBackend(BaseBackend):
             self.inner_harvest()
             self.job.status = 'done'
         except HarvestValidationError as e:
-            log.info(f'Harvesting validation failed for "{safe_unicode(self.source.name)}" (f{self.source.backend})')
+            log.info(f'Harvesting validation failed for "{safe_unicode(self.source.name)}" ({self.source.backend})')
 
             self.job.status = 'failed'
 
             error = HarvestError(message=safe_unicode(e))
             self.job.errors.append(error)
         except Exception as e:
-            log.exception(f'Harvesting failed for "{safe_unicode(self.source.name)}" (f{self.source.backend})')
+            log.exception(f'Harvesting failed for "{safe_unicode(self.source.name)}" ({self.source.backend})')
 
             self.job.status = 'failed'
 
-            error = HarvestError(message=safe_unicode(e))
+            error = HarvestError(message=safe_unicode(e), details=traceback.format_exc())
             self.job.errors.append(error)
         finally:
             self.end_job()
         
 
     def process_dataset(self, remote_id: str, debug_data: dict, **kwargs):
-        log.debug(f'Processing dataset f{remote_id}…')
+        log.debug(f'Processing dataset {remote_id}…')
 
         # TODO add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
         item = HarvestItem(status='started', started=datetime.utcnow(), remote_id=remote_id, kwargs=debug_data)
@@ -423,6 +423,17 @@ class BaseSyncBackend(BaseBackend):
                     {'harvest.source_id': str(self.source.id)},
                 ],
             }).first()
+
+            # TODO check that the existing dataset belongs to the same owner/organization than
+            # the `HarvestSource`. Or is it always the case?
+
+            if dataset is None:
+                if self.source.organization:
+                    dataset = Dataset(organization=self.source.organization)
+                elif self.source.owner:
+                    dataset = Dataset(owner=self.source.owner)
+                else:
+                    raise Exception(f"HarvestSource#{self.source.id} doesn't have an owner nor an organization")
 
             dataset = self.inner_process_dataset(dataset, **kwargs)
 
@@ -440,13 +451,6 @@ class BaseSyncBackend(BaseBackend):
                 dataset.harvest.archived = None
             dataset.archived = None
 
-            # TODO permissions checking
-            if not dataset.organization and not dataset.owner:
-                if self.source.organization:
-                    dataset.organization = self.source.organization
-                elif self.source.owner:
-                    dataset.owner = self.source.owner
-
             # TODO: Apply editable mappings
 
             if self.dryrun:
@@ -456,25 +460,24 @@ class BaseSyncBackend(BaseBackend):
             item.dataset = dataset
             item.status = 'done'
         except HarvestSkipException as e:
-            log.info('Skipped item %s : %s', item.remote_id, safe_unicode(e))
             item.status = 'skipped'
+
+            log.info(f'Skipped item {item.remote_id} : {safe_unicode(e)}')
             item.errors.append(HarvestError(message=safe_unicode(e)))
         except HarvestValidationError as e:
-            log.info('Error validating item %s : %s', item.remote_id, safe_unicode(e))
             item.status = 'failed'
+
+            log.info(f'Error validating item {item.remote_id} : {safe_unicode(e)}')
             item.errors.append(HarvestError(message=safe_unicode(e)))
         except Exception as e:
-            log.exception('Error while processing %s : %s',
-                          item.remote_id,
-                          safe_unicode(e))
-            error = HarvestError(message=safe_unicode(e),
-                                 details=traceback.format_exc())
-            item.errors.append(error)
             item.status = 'failed'
+            log.exception(f'Error while processing {item.remote_id} : {safe_unicode(e)}')
 
-        item.ended = datetime.utcnow()
-        self.save_job()
-
+            error = HarvestError(message=safe_unicode(e), details=traceback.format_exc())
+            item.errors.append(error)
+        finally:
+            item.ended = datetime.utcnow()
+            self.save_job()
 
     def save_job(self):
         if not self.dryrun:

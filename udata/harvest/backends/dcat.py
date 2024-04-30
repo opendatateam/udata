@@ -146,15 +146,16 @@ class DcatBackend(BaseSyncBackend):
 
         return graphs
     
-    def process_datasets(self, page_number, page):
+    def process_datasets(self, page_number: int, page: Graph):
         for node in page.subjects(RDF.type, DCAT.Dataset):
+            print(node.__class__)
             remote_id = page.value(node, DCT.identifier)
             should_stop = self.process_dataset(remote_id, debug_data = {'page_number': page_number}, page=page, node=node)
 
             if should_stop:
                 return True
             
-    def inner_process_dataset(self, dataset: Dataset, page, node):
+    def inner_process_dataset(self, dataset: Dataset, page: Graph, node):
         return dataset_from_rdf(page, dataset, node=node)
 
     def get_node_from_item(self, graph, item):
