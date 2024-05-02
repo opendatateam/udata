@@ -4,6 +4,7 @@ import logging
 import os
 import traceback
 
+from bson import DBRef
 import click
 import mongoengine
 
@@ -287,9 +288,9 @@ def check_references(models_to_check, fix = False):
                             to_remove = set()
                             attr_list = getattr(obj, reference['name'], [])
                             for i, sub in enumerate(attr_list):
-                                try:
-                                    _ = sub.id
-                                except mongoengine.errors.DoesNotExist:
+                                # If it's still an instance of DBRef it means that it failed to
+                                # dereference the ID.
+                                if isinstance(sub, DBRef):
                                     errors[model][key] += 1
                                     print(f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}[{i}] (fixable with `--fix`)')
                                     to_remove.add(i)
@@ -329,9 +330,9 @@ def check_references(models_to_check, fix = False):
                             if a is None: continue
                             sub = getattr(a, p2, [])
                             for i, child in enumerate(sub):
-                                try:
-                                    child.id
-                                except mongoengine.errors.DoesNotExist:
+                                # If it's still an instance of DBRef it means that it failed to
+                                # dereference the ID.
+                                if isinstance(child, DBRef):
                                     errors[model][key] += 1
                                     print(f'\t{model.__name__}#{obj.id} have a broken reference for {p1}.{p2}[{i}]')
                         else:
