@@ -140,7 +140,7 @@ class DcatBackend(BaseSyncBackend):
 
             should_stop = do(page_number, subgraph)
             if should_stop:
-                return
+                return graphs
 
             page_number += 1
 
@@ -261,6 +261,8 @@ class CswDcatBackend(DcatBackend):
             raise ValueError(f'Failed to query CSW:\n{content}')
         while tree:
             graph = Graph(namespace_manager=namespace_manager)
+            graphs.append(graph)
+
             search_results = tree.find('csw:SearchResults', {'csw': CSW_NAMESPACE})
             if search_results is None:
                 log.error(f'No search results found for {url} on page {page_number}')
@@ -272,9 +274,7 @@ class CswDcatBackend(DcatBackend):
 
                 should_stop = do(page_number, subgraph)
                 if should_stop:
-                    return
-
-            graphs.append(graph)
+                    return graphs
 
             next_record = self.next_record_if_should_continue(start, search_results)
             if not next_record:
@@ -376,7 +376,7 @@ class CswIso19139DcatBackend(DcatBackend):
 
             should_stop = do(page_number, subgraph)
             if should_stop:
-                return
+                return graphs
 
             next_record = self.next_record_if_should_continue(start, search_results)
             if not next_record:
