@@ -191,8 +191,7 @@ class MembershipAPITest:
         user = api.login()
         data = {'comment': 'a comment'}
 
-        api_url = url_for('api.request_membership', org=organization)
-        response = api.post(api_url, data)
+        response = api.post(url_for('api.request_membership', org=organization), data)
         assert201(response)
 
         organization.reload()
@@ -209,14 +208,13 @@ class MembershipAPITest:
         assert request.handled_by is None
         assert request.refusal_comment is None
 
-    def test_request_existing_pending_membership(self, api):
+    def test_request_existing_pending_membership_do_not_duplicate_it(self, api):
         user = api.login()
         previous_request = MembershipRequest(user=user, comment='previous')
         organization = OrganizationFactory(requests=[previous_request])
         data = {'comment': 'a comment'}
 
-        api_url = url_for('api.request_membership', org=organization)
-        response = api.post(api_url, data)
+        response = api.post(url_for('api.request_membership', org=organization), data)
         assert200(response)
 
         organization.reload()
@@ -232,6 +230,48 @@ class MembershipAPITest:
         assert request.handled_on is None
         assert request.handled_by is None
         assert request.refusal_comment is None
+
+    def test_get_membership_requests(self, api):
+        user = api.login()
+        applicant = UserFactory(email="thibaud@example.org")
+        membership_request = MembershipRequest(user=applicant, comment='test')
+        member = Member(user=user, role='admin')
+        organization = OrganizationFactory(
+            members=[member], requests=[membership_request])
+
+        response = api.get(url_for('api.request_membership', org=organization))
+        assert200(response)
+
+        assert len(response.json) == 1
+        assert response.json[0]['comment'] == 'test'
+        assert response.json[0]['user']['email'] == 'thibaud@example.org' # Can see email of applicant
+
+    def test_only_org_member_can_get_membership_requests(self, api):
+        api.login()
+        applicant = UserFactory(email="thibaud@example.org")
+        membership_request = MembershipRequest(user=applicant, comment='test')
+        organization = OrganizationFactory(
+            members=[], requests=[membership_request])
+
+        response = api.get(url_for('api.request_membership', org=organization))
+        assert403(response)
+
+
+    def test_get_members(self, api):
+        other_member = Member(user=UserFactory(email="thibaud@example.org"), role='editor')
+        user = api.login()
+        member = Member(user=user, role='admin', since="2024-04-14")
+        organization = OrganizationFactory(members=[member, other_member])
+
+        response = api.get(url_for('api.members', org=organization))
+        assert200(response)
+
+        assert len(response.json) == 2
+        assert response.json[0]['role'] == 'admin'
+        assert response.json[0]['since'] == '2024-04-14T00:00:00+00:00'
+
+        assert response.json[1]['role'] == 'editor'
+        assert response.json[1]['user']['email'] == 'thibaud@example.org' # Can see email of members
 
     def test_accept_membership(self, api):
         user = api.login()
