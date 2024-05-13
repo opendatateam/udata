@@ -381,23 +381,48 @@ def spatial_from_rdf(graph):
                     else:
                         continue
 
-                    if geojson['type'] == 'Polygon':
-                        geojson['type'] = 'MultiPolygon'
-                        geojson['coordinates'] = [geojson['coordinates']]
-
                     geojsons.append(geojson)
         except Exception as e:
             log.exception(f"Exception during `spatial_from_rdf` for term {term}: {e}", stack_info=True)
 
+    if not geojsons:
+        return None
+
+    # We first try to build a big MultiPolygon with all the spatial coverages found in RDF.
+    # We deduplicate the coordinates because some backend provides the same coordinates multiple
+    # times in different format. We only support in this first pass Polygons and MultiPolygons. Not sure
+    # if there is other types of spatial coverage worth integrating (points? line strings?). But these other
+    # formats are not compatible to be merge in the unique stored representation in MongoDB, we'll deal with them in a second pass.
+    # The merging lose the properties and other information inside the GeoJSON…
+    polygons = []
     for geojson in geojsons:
-        spatial_coverage = SpatialCoverage(geom=geojson)
-        try:
-            spatial_coverage.clean()
-            return spatial_coverage
-        except ValidationError:
+        if geojson['type'] == 'Polygon':
+            if geojson['coordinates'] not in polygons:
+                polygons.append(geojson['coordinates'])
+        elif geojson['type'] == 'MultiPolygon':
+            for coordinates in geojson['coordinates']:
+                if coordinates not in polygons:
+                    polygons.append(coordinates)
+        else:
+            log.warning(f"Unknown GeoJSON type '{geojson['type']}'")
             continue
 
-    return None
+    if not polygons:
+        log.warning(f"Only unknown types inside GeoJSON data.")
+        return None
+
+    spatial_coverage = SpatialCoverage(geom={
+        'type': 'MultiPolygon',
+        'coordinates': polygons,
+    })
+
+    try:
+        spatial_coverage.clean()
+        return spatial_coverage
+    except ValidationError as e:
+        log.warning(f"Cannot save the spatial coverage {coordinates} (error was {e})")
+        return None
+
 
 def frequency_from_rdf(term):
     if isinstance(term, str):
