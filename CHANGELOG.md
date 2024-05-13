@@ -8,6 +8,7 @@
 - Delete a user without sending mail [#3031](https://github.com/opendatateam/udata/pull/3031)
 - Convert known HVD categories used as theme to keywords [#3014](https://github.com/opendatateam/udata/pull/3014)
 - Allow for series in CSW ISO 19139 DCAT backend [#3028](https://github.com/opendatateam/udata/pull/3028)
+- Add `email` to membership request list API response, add `since` to org members API responses, add new private endpoint to get members of org with their `email` [#3038](https://github.com/opendatateam/udata/pull/3038)
 
 ## 8.0.0 (2024-04-23)
 
