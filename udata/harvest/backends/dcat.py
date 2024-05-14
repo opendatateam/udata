@@ -16,7 +16,7 @@ from udata.rdf import (
 from udata.core.dataset.rdf import dataset_from_rdf
 from udata.storage.s3 import store_as_json, get_from_json
 
-from .base import BaseBackend, BaseSyncBackend
+from .base import BaseSyncBackend
 
 log = logging.getLogger(__name__)
 

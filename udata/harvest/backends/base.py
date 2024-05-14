@@ -413,8 +413,10 @@ class BaseSyncBackend(BaseBackend):
         finally:
             self.end_job()
         
+        return self.job
+        
 
-    def process_dataset(self, remote_id: str, debug_data: dict, **kwargs) -> bool :
+    def process_dataset(self, remote_id: str, debug_data: dict = {}, **kwargs) -> bool :
         '''
         Return `True` if the parent should stop iterating because we exceed the number
         of items to process.

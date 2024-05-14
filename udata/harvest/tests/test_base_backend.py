@@ -13,7 +13,7 @@ from udata.tests.helpers import assert_equal_dates
 
 from .factories import HarvestSourceFactory
 
-from ..backends import BaseBackend, HarvestFilter, HarvestFeature
+from ..backends import BaseSyncBackend, HarvestFilter, HarvestFeature
 from ..exceptions import HarvestException
 
 
@@ -21,7 +21,7 @@ class Unknown:
     pass
 
 
-class FakeBackend(BaseBackend):
+class FakeBackend(BaseSyncBackend):
     filters = (
         HarvestFilter('First filter', 'first', str),
         HarvestFilter('Second filter', 'second', str),
@@ -31,12 +31,12 @@ class FakeBackend(BaseBackend):
         HarvestFeature('enabled', 'A test feature enabled by default', default=True),
     )
 
-    def initialize(self):
+    def inner_harvest(self):
         for i in range(self.source.config.get('nb_datasets', 3)):
-            self.add_item('fake-{0}'.format(i))
+            remote_id = f'fake-{i}'
+            self.process_dataset(remote_id)
 
-    def process(self, item):
-        dataset = self.get_dataset(item.remote_id)
+    def inner_process_dataset(self, dataset):
         for key, value in DatasetFactory.as_dict(visible=True).items():
             setattr(dataset, key, value)
         if self.source.config.get('last_modified'):

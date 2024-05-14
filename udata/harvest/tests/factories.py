@@ -44,7 +44,7 @@ mock_process = ns.signal('backend:process')
 DEFAULT_COUNT = 3
 
 
-class FactoryBackend(backends.BaseBackend):
+class FactoryBackend(backends.BaseSyncBackend):
     name = 'factory'
     filters = (
         backends.HarvestFilter('Test', 'test', int, 'An integer'),
@@ -55,14 +55,16 @@ class FactoryBackend(backends.BaseBackend):
         backends.HarvestFeature('toggled', 'Toggled', 'A togglable', True),
     )
 
-    def initialize(self):
+    def inner_harvest(self):
         mock_initialize.send(self)
         for i in range(self.config.get('count', DEFAULT_COUNT)):
-            self.add_item(i)
+            self.process_dataset(i, item=i)
 
-    def process(self, item):
+    def inner_process_dataset(self, dataset, item):
         mock_process.send(self, item=item)
-        return DatasetFactory.build(title='dataset-{0}'.format(item.remote_id))
+
+        dataset.title = f'dataset-{item}'
+        dataset.save()
 
 
 class MockBackendsMixin(object):
