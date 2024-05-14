@@ -374,7 +374,7 @@ class BaseSyncBackend(BaseBackend):
     def inner_harvest(self):
         raise NotImplementedError
     
-    def inner_process_dataset(self, dataset: Optional[Dataset]) -> Dataset:
+    def inner_process_dataset(self, item: HarvestItem) -> Dataset:
         raise NotImplementedError
 
     def harvest(self):
@@ -397,7 +397,7 @@ class BaseSyncBackend(BaseBackend):
             if any(i.status == 'failed' for i in self.job.items):
                 self.job.status += '-errors'
         except HarvestValidationError as e:
-            log.info(f'Harvesting validation failed for "{safe_unicode(self.source.name)}" ({self.source.backend})')
+            log.exception(f'Harvesting validation failed for "{safe_unicode(self.source.name)}" ({self.source.backend})')
 
             self.job.status = 'failed'
 
@@ -416,7 +416,7 @@ class BaseSyncBackend(BaseBackend):
         return self.job
         
 
-    def process_dataset(self, remote_id: str, debug_data: dict = {}, **kwargs) -> bool :
+    def process_dataset(self, remote_id: str, **kwargs) -> bool :
         '''
         Return `True` if the parent should stop iterating because we exceed the number
         of items to process.
@@ -424,14 +424,12 @@ class BaseSyncBackend(BaseBackend):
         log.debug(f'Processing dataset {remote_id}…')
 
         # TODO add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
-        item = HarvestItem(status='started', started=datetime.utcnow(), remote_id=remote_id, kwargs=debug_data)
+        item = HarvestItem(status='started', started=datetime.utcnow(), remote_id=remote_id)
         self.job.items.append(item)
         self.save_job()
 
         try:
-            dataset = self.get_dataset(remote_id)
-
-            dataset = self.inner_process_dataset(dataset, **kwargs)
+            dataset = self.inner_process_dataset(item, **kwargs)
 
             dataset.harvest = self.update_harvest_info(dataset.harvest, remote_id)
             dataset.archived = None

@@ -6,9 +6,10 @@ from flask.signals import Namespace
 
 from udata.factories import ModelFactory
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.models import Dataset
 
 from .. import backends
-from ..models import HarvestSource, HarvestJob
+from ..models import HarvestItem, HarvestSource, HarvestJob
 
 
 def dtfactory(start, end):
@@ -58,15 +59,15 @@ class FactoryBackend(backends.BaseSyncBackend):
     def inner_harvest(self):
         mock_initialize.send(self)
         for i in range(self.config.get('count', DEFAULT_COUNT)):
-            remote_id = f'{i}'
-            should_stop = self.process_dataset(remote_id, id=remote_id)
+            should_stop = self.process_dataset(str(i))
             if should_stop:
                 return
 
-    def inner_process_dataset(self, dataset, id):
-        mock_process.send(self, item=id)
+    def inner_process_dataset(self, item: HarvestItem):
+        mock_process.send(self, item=item.remote_id)
 
-        dataset.title = f'dataset-{id}'
+        dataset = self.get_dataset(item.remote_id)
+        dataset.title = f'dataset-{item.remote_id}'
 
         return dataset
 

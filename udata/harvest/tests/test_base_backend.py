@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 from dateutil.parser import parse
 from voluptuous import Schema
 
+from udata.harvest.models import HarvestItem
 from udata.utils import faker
 from udata.core.dataset import tasks
 from udata.core.dataset.factories import DatasetFactory
@@ -38,7 +39,9 @@ class FakeBackend(BaseSyncBackend):
             if should_stop:
                 return
 
-    def inner_process_dataset(self, dataset):
+    def inner_process_dataset(self, item: HarvestItem):
+        dataset = self.get_dataset(item.remote_id)
+
         for key, value in DatasetFactory.as_dict(visible=True).items():
             setattr(dataset, key, value)
         if self.source.config.get('last_modified'):

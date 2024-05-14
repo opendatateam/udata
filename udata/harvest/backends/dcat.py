@@ -15,6 +15,7 @@ from udata.rdf import (
 )
 from udata.core.dataset.rdf import dataset_from_rdf
 from udata.storage.s3 import store_as_json, get_from_json
+from udata.harvest.models import HarvestItem
 
 from .base import BaseSyncBackend
 
@@ -149,12 +150,15 @@ class DcatBackend(BaseSyncBackend):
     def process_datasets(self, page_number: int, page: Graph):
         for node in page.subjects(RDF.type, DCAT.Dataset):
             remote_id = page.value(node, DCT.identifier)
-            should_stop = self.process_dataset(remote_id, debug_data = {'page_number': page_number}, page=page, node=node)
+            should_stop = self.process_dataset(remote_id, page_number=page_number, page=page, node=node)
 
             if should_stop:
                 return True
             
-    def inner_process_dataset(self, dataset: Dataset, page: Graph, node):
+    def inner_process_dataset(self, item: HarvestItem, page_number: int, page: Graph, node):
+        item.kwargs['page_number'] = page_number
+
+        dataset = self.get_dataset(item.remote_id)
         return dataset_from_rdf(page, dataset, node=node)
 
     def get_node_from_item(self, graph, item):
