@@ -33,7 +33,7 @@ class FakeBackend(BaseSyncBackend):
 
     def inner_harvest(self):
         for i in range(self.source.config.get('nb_datasets', 3)):
-            remote_id = f'{i}'
+            remote_id = f'fake-{i}'
             should_stop = self.process_dataset(remote_id)
             if should_stop:
                 return
