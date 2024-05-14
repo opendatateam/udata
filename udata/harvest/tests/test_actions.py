@@ -580,7 +580,7 @@ class ExecutionTestMixin(MockBackendsMixin):
 
     def test_error_on_item(self):
         def process(self, item):
-            if item.remote_id == '1':
+            if item == '1':
                 raise ValueError('test')
 
         source = HarvestSourceFactory(backend='factory')
@@ -723,7 +723,7 @@ class HarvestPreviewTest(MockBackendsMixin):
 
     def test_preview_with_error_on_item(self):
         def process(self, item):
-            if item.remote_id == '1':
+            if item == '1':
                 raise ValueError('test')
 
         source = HarvestSourceFactory(backend='factory')

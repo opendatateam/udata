@@ -58,13 +58,17 @@ class FactoryBackend(backends.BaseSyncBackend):
     def inner_harvest(self):
         mock_initialize.send(self)
         for i in range(self.config.get('count', DEFAULT_COUNT)):
-            self.process_dataset(i, item=i)
+            remote_id = f'{i}'
+            should_stop = self.process_dataset(remote_id, id=remote_id)
+            if should_stop:
+                return
 
-    def inner_process_dataset(self, dataset, item):
-        mock_process.send(self, item=item)
+    def inner_process_dataset(self, dataset, id):
+        mock_process.send(self, item=id)
 
-        dataset.title = f'dataset-{item}'
-        dataset.save()
+        dataset.title = f'dataset-{id}'
+
+        return dataset
 
 
 class MockBackendsMixin(object):

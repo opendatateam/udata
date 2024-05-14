@@ -374,7 +374,7 @@ class BaseSyncBackend(BaseBackend):
     def inner_harvest(self):
         raise NotImplementedError
     
-    def inner_process_dataset(self, dataset: Optional[Dataset]):
+    def inner_process_dataset(self, dataset: Optional[Dataset]) -> Dataset:
         raise NotImplementedError
 
     def harvest(self):

@@ -33,8 +33,10 @@ class FakeBackend(BaseSyncBackend):
 
     def inner_harvest(self):
         for i in range(self.source.config.get('nb_datasets', 3)):
-            remote_id = f'fake-{i}'
-            self.process_dataset(remote_id)
+            remote_id = f'{i}'
+            should_stop = self.process_dataset(remote_id)
+            if should_stop:
+                return
 
     def inner_process_dataset(self, dataset):
         for key, value in DatasetFactory.as_dict(visible=True).items():
@@ -219,8 +221,7 @@ class BaseBackendTest:
         assert 'archived_at' not in dataset_no_arch.harvest
 
         # test unarchive: archive manually then relaunch harvest
-        q = {'harvest__remote_id': 'fake-1'}
-        dataset = Dataset.objects.get(**q)
+        dataset = Dataset.objects.get(**{'harvest__remote_id': 'fake-1'})
         dataset.archived = datetime.utcnow()
         dataset.harvest.archived = 'not-on-remote'
         dataset.harvest.archived_at = datetime.utcnow()
