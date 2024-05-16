@@ -30,7 +30,6 @@ from .api_fields import (
     org_role_fields,
     request_fields,
     member_fields,
-    private_member_fields,
     refuse_membership_fields,
     org_suggestion_fields
 )
@@ -335,18 +334,6 @@ class MembershipRefuseAPI(MembershipAPI):
 
         return {}, 200
 
-
-
-@ns.route('/<org:org>/member', endpoint='members', doc=common_doc)
-class MembersAPI(API):
-    @api.secure
-    @api.marshal_list_with(private_member_fields, code=201)
-    @api.doc('get_organization_members')
-    @api.response(403, 'Not Authorized')
-    def get(self, org):
-        '''Get the list of members of an organization with their private fields (email).'''
-        EditOrganizationPermission(org).test()
-        return org.members, 200
 
 @ns.route('/<org:org>/member/<user:user>', endpoint='member', doc=common_doc)
 class MemberAPI(API):

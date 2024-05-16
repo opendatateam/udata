@@ -1,5 +1,8 @@
+from flask import request
+
 from udata.api import api, fields, base_reference
 from udata.core.badges.fields import badge_fields
+from udata.core.organization.permissions import OrganizationPrivatePermission
 
 from .constants import ORG_ROLES, DEFAULT_ROLE, MEMBERSHIP_STATUS, BIGGEST_LOGO_SIZE
 
@@ -27,14 +30,33 @@ org_ref_fields = api.inherit('OrganizationReference', base_reference, {
 
 from udata.core.user.api_fields import user_ref_fields  # noqa: required
 
-user_in_org_with_email_fields = api.inherit('UserWithEmail', user_ref_fields, {
-    'email': fields.String(
-        description='The user email', readonly=True),
+def check_can_access_email():
+    if request.endpoint != 'api.organization':
+        return False
+
+    org = request.view_args.get('org')
+    if org is None:
+        return False
+    
+    return OrganizationPrivatePermission(org).can()
+
+# To use on public endpoint to show the email only to editor of the org (currently working only with `api.organization` endpoint, see above)
+user_in_org_with_email_fields_if_permissions = api.inherit('UserWithEmail', user_ref_fields, {
+    'email': fields.Raw(
+        attribute=lambda o: o.email if check_can_access_email() else None,
+        description='The user email (only present on show organization endpoint if the current user has edit permission on the org)', readonly=True),
+})
+
+# To use on private endpoint where the current user is checked to be editor of the org
+user_in_org_with_always_email_fields = api.inherit('UserWithEmail', user_ref_fields, {
+    'email': fields.Raw(
+        attribute=lambda o: o.email if check_can_access_email() else None,
+        description='The user email (only present on show organization endpoint if the current user has edit permission on the org)', readonly=True),
 })
 
 request_fields = api.model('MembershipRequest', {
     'id': fields.String(readonly=True),
-    'user': fields.Nested(user_in_org_with_email_fields),
+    'user': fields.Nested(user_in_org_with_always_email_fields),
     'created': fields.ISODateTime(
         description='The request creation date', readonly=True),
     'status': fields.String(
@@ -45,16 +67,7 @@ request_fields = api.model('MembershipRequest', {
 })
 
 member_fields = api.model('Member', {
-    'user': fields.Nested(user_ref_fields),
-    'role': fields.String(
-        description='The member role in the organization', required=True,
-        enum=list(ORG_ROLES), default=DEFAULT_ROLE),
-    'since': fields.ISODateTime(
-        description='The date the user joined the organization', readonly=True),
-})
-
-private_member_fields = api.model('PrivateMember', {
-    'user': fields.Nested(user_in_org_with_email_fields),
+    'user': fields.Nested(user_in_org_with_email_fields_if_permissions),
     'role': fields.String(
         description='The member role in the organization', required=True,
         enum=list(ORG_ROLES), default=DEFAULT_ROLE),

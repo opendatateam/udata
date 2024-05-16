@@ -1,3 +1,4 @@
+from pprint import pprint
 import pytest
 
 from datetime import datetime
@@ -257,21 +258,56 @@ class MembershipAPITest:
         assert403(response)
 
 
-    def test_get_members(self, api):
-        other_member = Member(user=UserFactory(email="thibaud@example.org"), role='editor')
-        user = api.login()
-        member = Member(user=user, role='admin', since="2024-04-14")
-        organization = OrganizationFactory(members=[member, other_member])
+    def test_get_members_with_or_without_email(self, api):
+        admin = Member(user=UserFactory(email="admin@example.org"), role='admin', since="2024-04-14")
+        editor = Member(user=UserFactory(email="editor@example.org"), role='editor')
+        other = UserFactory(email="other@example.org")
 
-        response = api.get(url_for('api.members', org=organization))
+        organization = OrganizationFactory(members=[admin, editor])
+
+        # Admin can see emails
+        api.login(admin.user)
+        response = api.get(url_for('api.organization', org=organization))
         assert200(response)
 
-        assert len(response.json) == 2
-        assert response.json[0]['role'] == 'admin'
-        assert response.json[0]['since'] == '2024-04-14T00:00:00+00:00'
+        members = response.json['members']
+        assert len(members) == 2
+        assert members[0]['role'] == 'admin'
+        assert members[0]['since'] == '2024-04-14T00:00:00+00:00'
+        assert members[0]['user']['email'] == 'admin@example.org'
 
-        assert response.json[1]['role'] == 'editor'
-        assert response.json[1]['user']['email'] == 'thibaud@example.org' # Can see email of members
+        assert members[1]['role'] == 'editor'
+        assert members[1]['user']['email'] == 'editor@example.org'
+
+        # Editor can see emails
+        api.login(editor.user)
+        response = api.get(url_for('api.organization', org=organization))
+        assert200(response)
+
+        members = response.json['members']
+        assert len(members) == 2
+        assert members[0]['role'] == 'admin'
+        assert members[0]['since'] == '2024-04-14T00:00:00+00:00'
+        assert members[0]['user']['email'] == 'admin@example.org'
+
+        assert members[1]['role'] == 'editor'
+        assert members[1]['user']['email'] == 'editor@example.org'
+        
+        # Others cannot see emails
+        api.login(other)
+        response = api.get(url_for('api.organization', org=organization))
+        assert200(response)
+
+        members = response.json['members']
+        assert len(members) == 2
+        assert members[0]['role'] == 'admin'
+        assert members[0]['since'] == '2024-04-14T00:00:00+00:00'
+        assert members[0]['user']['email'] is None
+
+        assert members[1]['role'] == 'editor'
+        assert members[1]['user']['email'] is None
+
+
 
     def test_accept_membership(self, api):
         user = api.login()
