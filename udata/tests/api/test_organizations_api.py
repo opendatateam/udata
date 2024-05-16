@@ -1,4 +1,3 @@
-from pprint import pprint
 import pytest
 
 from datetime import datetime
@@ -306,8 +305,6 @@ class MembershipAPITest:
 
         assert members[1]['role'] == 'editor'
         assert members[1]['user']['email'] is None
-
-
 
     def test_accept_membership(self, api):
         user = api.login()
