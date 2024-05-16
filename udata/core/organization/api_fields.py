@@ -47,7 +47,7 @@ user_in_org_with_email_fields_if_permissions = api.inherit('UserReference', user
         description='The user email (only present on show organization endpoint if the current user has edit permission on the org)', readonly=True),
 })
 
-# To use on private endpoint where the current user is checked to be editor of the org
+# To use on private endpoints where the current user is already checked to be admin/editor of the org
 user_in_org_with_always_email_fields = api.inherit('UserReference', user_ref_fields, {
     'email': fields.String(readonly=True),
 })
