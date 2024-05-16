@@ -22,7 +22,7 @@ from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMet
 from udata.models import db, ContactPoint
 from udata.rdf import (
     DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD, RDFS, contact_point_from_rdf,
-    namespace_manager, rdf_value, sanitize_html, schema_from_rdf, theme_labels_from_rdf, themes_from_rdf, url_from_rdf
+    namespace_manager, rdf_value, sanitize_html, schema_from_rdf, themes_from_rdf, url_from_rdf
 )
 from udata.utils import get_by, safe_unicode
 from udata.uris import endpoint_for
@@ -414,27 +414,6 @@ def remote_url_from_rdf(rdf):
                 return candidate
             except uris.ValidationError:
                 pass
-
-
-def theme_labels_from_rdf(rdf):
-    '''
-    Get theme labels to use as keywords.
-    Map HVD keywords from known URIs resources if HVD support is activated.
-    '''
-    for theme in rdf.objects(DCAT.theme):
-        if isinstance(theme, RdfResource):
-            uri = theme.identifier.toPython()
-            if current_app.config['HVD_SUPPORT'] and uri in EU_HVD_CATEGORIES:
-                label = EU_HVD_CATEGORIES[uri]
-                # Additionnally yield hvd keyword
-                yield 'hvd'
-            else:
-                label = rdf_value(theme, SKOS.prefLabel)
-        else:
-            label = theme.toPython()
-        if label:
-            yield label
-
 
 def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     '''
