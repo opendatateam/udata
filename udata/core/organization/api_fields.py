@@ -41,17 +41,15 @@ def check_can_access_email():
     return OrganizationPrivatePermission(org).can()
 
 # To use on public endpoint to show the email only to editor of the org (currently working only with `api.organization` endpoint, see above)
-user_in_org_with_email_fields_if_permissions = api.inherit('UserWithEmail', user_ref_fields, {
+user_in_org_with_email_fields_if_permissions = api.inherit('UserReference', user_ref_fields, {
     'email': fields.Raw(
         attribute=lambda o: o.email if check_can_access_email() else None,
         description='The user email (only present on show organization endpoint if the current user has edit permission on the org)', readonly=True),
 })
 
 # To use on private endpoint where the current user is checked to be editor of the org
-user_in_org_with_always_email_fields = api.inherit('UserWithEmail', user_ref_fields, {
-    'email': fields.Raw(
-        attribute=lambda o: o.email if check_can_access_email() else None,
-        description='The user email (only present on show organization endpoint if the current user has edit permission on the org)', readonly=True),
+user_in_org_with_always_email_fields = api.inherit('UserReference', user_ref_fields, {
+    'email': fields.String(readonly=True),
 })
 
 request_fields = api.model('MembershipRequest', {
