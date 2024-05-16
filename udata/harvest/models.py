@@ -8,6 +8,7 @@ from werkzeug.utils import cached_property
 from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.models import db, Dataset
 from udata.i18n import lazy_gettext as _
+from udata.core.owned import Owned, OwnedQuerySet
 
 log = logging.getLogger(__name__)
 
@@ -83,18 +84,18 @@ class HarvestSourceValidation(db.EmbeddedDocument):
     comment = db.StringField()
 
 
-class HarvestSourceQuerySet(db.OwnedQuerySet):
+class HarvestSourceQuerySet(OwnedQuerySet):
     def visible(self):
         return self(deleted=None)
 
 
-class HarvestSource(db.Owned, db.Document):
+class HarvestSource(Owned, db.Document):
     name = db.StringField(max_length=255)
     slug = db.SlugField(max_length=255, required=True, unique=True,
                         populate_from='name', update=True)
     description = db.StringField()
     url = db.StringField(required=True)
-    backend = db.StringField()
+    backend = db.StringField(required=True)
     config = db.DictField()
     periodic_task = db.ReferenceField('PeriodicTask',
                                       reverse_delete_rule=db.NULLIFY)
@@ -140,7 +141,7 @@ class HarvestSource(db.Owned, db.Document):
             '-created_at',
             'slug',
             ('deleted', '-created_at'),
-        ] + db.Owned.meta['indexes'],
+        ] + Owned.meta['indexes'],
         'ordering': ['-created_at'],
         'queryset_class': HarvestSourceQuerySet,
     }

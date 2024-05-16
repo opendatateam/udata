@@ -7,6 +7,7 @@ from udata.api import api, API, errors
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission, current_user
 from udata.core.badges import api as badges_api
+from udata.core.badges.fields import badge_fields
 from udata.core.followers.api import FollowAPI
 from udata.utils import multi_to_dict
 from udata.rdf import (
@@ -16,7 +17,8 @@ from udata.rdf import (
 from .forms import (
     OrganizationForm, MembershipRequestForm, MembershipRefuseForm, MemberForm
 )
-from .models import Organization, MembershipRequest, Member, ORG_ROLES
+from .models import Organization, MembershipRequest, Member
+from .constants import ORG_ROLES
 from .permissions import (
     EditOrganizationPermission, OrganizationPrivatePermission
 )
@@ -190,8 +192,8 @@ class AvailableOrganizationBadgesAPI(API):
 @ns.route('/<org:org>/badges/', endpoint='organization_badges')
 class OrganizationBadgesAPI(API):
     @api.doc('add_organization_badge', **common_doc)
-    @api.expect(badges_api.badge_fields)
-    @api.marshal_with(badges_api.badge_fields)
+    @api.expect(badge_fields)
+    @api.marshal_with(badge_fields)
     @api.secure(admin_permission)
     def post(self, org):
         '''Create a new badge for a given organization'''

@@ -3,26 +3,16 @@ from werkzeug.local import LocalProxy
 from werkzeug.utils import cached_property
 
 from udata.app import cache
+from udata.core.metrics.models import WithMetrics
 from udata.uris import endpoint_for
-from udata.i18n import _, L_, get_locale, language
-from udata.models import db
+from udata.i18n import _, get_locale, language
+from udata.mongo import db
 
 from . import geoids
+from .constants import ADMIN_LEVEL_MIN, ADMIN_LEVEL_MAX, BASE_GRANULARITIES
 
 
-__all__ = (
-    'GeoLevel', 'GeoZone', 'SpatialCoverage', 'BASE_GRANULARITIES',
-    'spatial_granularities',
-)
-
-
-BASE_GRANULARITIES = [
-    ('poi', L_('POI')),
-    ('other', L_('Other')),
-]
-
-ADMIN_LEVEL_MIN = 1
-ADMIN_LEVEL_MAX = 110
+__all__ = ('GeoLevel', 'GeoZone', 'SpatialCoverage', 'spatial_granularities')
 
 
 class GeoLevel(db.Document):
@@ -31,7 +21,6 @@ class GeoLevel(db.Document):
     admin_level = db.IntField(min_value=ADMIN_LEVEL_MIN,
                               max_value=ADMIN_LEVEL_MAX,
                               default=100)
-
 
 class GeoZoneQuerySet(db.BaseQuerySet):
 
@@ -51,7 +40,7 @@ class GeoZoneQuerySet(db.BaseQuerySet):
         return result.id if id_only and result else result
 
 
-class GeoZone(db.Document):
+class GeoZone(WithMetrics, db.Document):
     SEPARATOR = ':'
 
     id = db.StringField(primary_key=True)
@@ -111,6 +100,11 @@ class GeoZone(db.Document):
     @property
     def external_url(self):
         return endpoint_for('territories.territory', territory=self, _external=True)
+
+    def count_datasets(self):
+        from udata.models import Dataset
+        self.metrics['datasets'] = Dataset.objects(spatial__zones=self.id).visible().count()
+        self.save()
 
     def toGeoJSON(self):
         return {

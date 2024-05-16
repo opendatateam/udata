@@ -8,8 +8,8 @@ from flask import url_for
 from udata import routing
 from udata.core.spatial.models import GeoZone
 from udata.core.spatial.factories import GeoZoneFactory
-from udata.models import db
-from udata.models.slug_fields import SlugFollow
+from udata.mongo import db
+from udata.mongo.slug_fields import SlugFollow
 from udata.tests.helpers import assert200, assert404, assert_redirects
 
 

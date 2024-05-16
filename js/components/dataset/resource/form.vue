@@ -249,14 +249,14 @@ export default {
         },
         schema_field() {
             if (this.hasSchemas) {
-                const values = [{id: '', label: ''}].concat(schemas.data);
+                const values = [{name: '', title: ''}].concat(schemas.data);
                 return [{
                     id: 'schema.name',
                     label: (this.resource.schema && this.resource.schema.url) ? this._('Schema (Url already set)') : this._('Schema'),
                     widget: 'select-input',
                     values,
                     map: function(item) {
-                        return {value: item.id, text: item.label};
+                        return {value: item.name, text: item.title};
                     }
                 }];
             }
@@ -329,7 +329,7 @@ export default {
             let el = this.$refs.form.$form.querySelector("select[name='schema.name']");
             if (! el) return {}
 
-            return el.value ? { schema: { name: el.value } } : { schema: null };
+            return { schema: { name: el.value ? el.value : null } };
         },
         validate() {
             return this.$refs.form.validate();

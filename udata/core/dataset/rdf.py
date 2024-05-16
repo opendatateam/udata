@@ -2,28 +2,34 @@
 This module centralize dataset helpers for RDF/DCAT serialization and parsing
 '''
 import calendar
+import json
 import logging
 
 from datetime import date
 from html.parser import HTMLParser
+from typing import Optional
 from dateutil.parser import parse as parse_dt
 from flask import current_app
+from geomet import wkt
 from rdflib import Graph, URIRef, Literal, BNode
 from rdflib.resource import Resource as RdfResource
 from rdflib.namespace import RDF
+from mongoengine.errors import ValidationError
 
 from udata import i18n, uris
+from udata.core.spatial.models import SpatialCoverage
 from udata.frontend.markdown import parse_html
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.models import db, ContactPoint
 from udata.rdf import (
-    DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD,
-    namespace_manager, url_from_rdf
+    DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD, RDFS,
+    namespace_manager, schema_from_rdf, url_from_rdf
 )
 from udata.utils import get_by, safe_unicode
 from udata.uris import endpoint_for
 
-from .models import Dataset, Resource, Checksum, License, UPDATE_FREQUENCIES
+from .models import Dataset, Resource, Checksum, License
+from .constants import UPDATE_FREQUENCIES
 
 log = logging.getLogger(__name__)
 
@@ -68,6 +74,16 @@ EU_RDF_REQUENCIES = {
     EUFREQ.UNKNOWN: 'unknown',
     EUFREQ.OTHER: 'unknown',
     EUFREQ.NEVER: 'punctual',
+}
+
+# Map High Value Datasets URIs to keyword categories
+EU_HVD_CATEGORIES = {
+    "http://data.europa.eu/bna/c_164e0bf5": "Météorologiques",
+    "http://data.europa.eu/bna/c_a9135398": "Entreprises et propriété d'entreprises",
+    "http://data.europa.eu/bna/c_ac64a52d": "Géospatiales",
+    "http://data.europa.eu/bna/c_b79e35eb": "Mobilité",
+    "http://data.europa.eu/bna/c_dd313021": "Observation de la terre et environnement",
+    "http://data.europa.eu/bna/c_e1da4e07": "Statistiques"
 }
 
 
@@ -334,6 +350,55 @@ def contact_point_from_rdf(rdf, dataset):
                     ContactPoint(name=name, email=email, owner=dataset.owner).save())
 
 
+def spatial_from_rdf(graph):
+    geojsons = []
+    for term in graph.objects(DCT.spatial):
+        try:
+            # This may not be official in the norm but some ArcGis return 
+            # bbox as literal directly in DCT.spatial.
+            if isinstance(term, Literal):
+                geojson = bbox_to_geojson_multipolygon(term.toPython())
+                if geojson is not None:
+                    geojsons.append(geojson)
+                
+                continue
+
+            for object in term.objects():
+                if isinstance(object, Literal):
+                    if object.datatype.__str__() == 'https://www.iana.org/assignments/media-types/application/vnd.geo+json':
+                        try:
+                            geojson = json.loads(object.toPython())
+                        except ValueError as e:
+                            log.warning(f"Invalid JSON in spatial GeoJSON {object.toPython()} {e}")
+                            continue
+                    elif object.datatype.__str__() == 'http://www.opengis.net/rdf#wktLiteral':
+                        try:
+                            # .upper() si here because geomet doesn't support Polygon but only POLYGON
+                            geojson = wkt.loads(object.toPython().strip().upper())
+                        except ValueError as e:
+                            log.warning(f"Invalid JSON in spatial WKT {object.toPython()} {e}")
+                            continue
+                    else:
+                        continue
+
+                    if geojson['type'] == 'Polygon':
+                        geojson['type'] = 'MultiPolygon'
+                        geojson['coordinates'] = [geojson['coordinates']]
+
+                    geojsons.append(geojson)
+        except Exception as e:
+            log.exception(f"Exception during `spatial_from_rdf` for term {term}: {e}", stack_info=True)
+
+    for geojson in geojsons:
+        spatial_coverage = SpatialCoverage(geom=geojson)
+        try:
+            spatial_coverage.clean()
+            return spatial_coverage
+        except ValidationError:
+            continue
+
+    return None
+
 def frequency_from_rdf(term):
     if isinstance(term, str):
         try:
@@ -414,9 +479,19 @@ def remote_url_from_rdf(rdf):
 
 
 def theme_labels_from_rdf(rdf):
+    '''
+    Get theme labels to use as keywords.
+    Map HVD keywords from known URIs resources if HVD support is activated.
+    '''
     for theme in rdf.objects(DCAT.theme):
         if isinstance(theme, RdfResource):
-            label = rdf_value(theme, SKOS.prefLabel)
+            uri = theme.identifier.toPython()
+            if current_app.config['HVD_SUPPORT'] and uri in EU_HVD_CATEGORIES:
+                label = EU_HVD_CATEGORIES[uri]
+                # Additionnally yield hvd keyword
+                yield 'hvd'
+            else:
+                label = rdf_value(theme, SKOS.prefLabel)
         else:
             label = theme.toPython()
         if label:
@@ -458,6 +533,10 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     resource.filesize = rdf_value(distrib, DCAT.byteSize)
     resource.mime = mime_from_rdf(distrib)
     resource.format = format_from_rdf(distrib)
+    schema = schema_from_rdf(distrib)
+    if schema:
+        resource.schema = schema
+
     checksum = distrib.value(SPDX.checksum)
     if checksum:
         algorithm = checksum.value(SPDX.algorithm).identifier
@@ -484,7 +563,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     return resource
 
 
-def dataset_from_rdf(graph, dataset=None, node=None):
+def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     '''
     Create or update a dataset from a RDF/DCAT graph
     '''
@@ -501,6 +580,13 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
     dataset.contact_point = contact_point_from_rdf(d, dataset) or dataset.contact_point
+    schema = schema_from_rdf(d)
+    if schema:
+        dataset.schema = schema
+
+    spatial_coverage = spatial_from_rdf(d)
+    if spatial_coverage:
+        dataset.spatial = spatial_coverage
 
     acronym = rdf_value(d, SKOS.altLabel)
     if acronym:
@@ -513,6 +599,20 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
     if temporal_coverage:
         dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
+
+    # Adding some metadata to extras - may be moved to property if relevant
+    access_rights = rdf_value(d, DCT.accessRights)
+    if access_rights:
+        dataset.extras["harvest"] = {
+            "dct:accessRights": access_rights,
+            **dataset.extras.get("harvest", {})
+        }
+    provenance = [p.value(RDFS.label) for p in d.objects(DCT.provenance)]
+    if provenance:
+        dataset.extras["harvest"] = {
+            "dct:provenance": provenance,
+            **dataset.extras.get("harvest", {})
+        }
 
     licenses = set()
     for distrib in d.objects(DCAT.distribution | DCAT.distributions):
@@ -546,3 +646,27 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     dataset.harvest.modified_at = modified_at
 
     return dataset
+
+def bbox_to_geojson_multipolygon(bbox_as_str: str) -> Optional[dict] : 
+    bbox = bbox_as_str.strip().split(',')
+    if len(bbox) != 4:
+        return None
+    
+    west = float(bbox[0])
+    south = float(bbox[1])
+    east = float(bbox[2])
+    north = float(bbox[3])
+
+    low_left = [west, south]
+    top_left = [west, north]
+    top_right = [east, north]
+    low_right = [east, south]
+
+    return {
+        'type': 'MultiPolygon',
+        'coordinates': [
+            [
+                [low_left, low_right, top_right, top_left, low_left],
+            ], 
+        ],
+    }

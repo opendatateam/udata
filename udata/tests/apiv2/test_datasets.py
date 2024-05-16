@@ -1,11 +1,14 @@
+from datetime import datetime
 from flask import url_for
 
+from udata.core.dataset.models import ResourceMixin
 from udata.tests.api import APITestCase
 
 from udata.core.dataset.apiv2 import DEFAULT_PAGE_SIZE
 from udata.core.dataset.factories import (
     DatasetFactory, ResourceFactory, CommunityResourceFactory)
-from udata.models import Dataset
+from udata.core.organization.factories import OrganizationFactory, Member
+from udata.models import db, Dataset
 from udata.tests.helpers import assert_not_emit
 
 class DatasetAPIV2Test(APITestCase):
@@ -191,12 +194,14 @@ class DatasetExtrasAPITest(APITestCase):
         self.dataset = DatasetFactory(owner=self.user)
 
     def test_get_dataset_extras(self):
-        self.dataset.extras = {'test::extra': 'test-value'}
+        Dataset.extras.register('check::date', db.DateTimeField)
+        self.dataset.extras = {'test::extra': 'test-value', 'check::date': datetime.fromisoformat('2024-04-14 08:42:00')}
         self.dataset.save()
         response = self.get(url_for('apiv2.dataset_extras', dataset=self.dataset))
         self.assert200(response)
         data = response.json
         assert data['test::extra'] == 'test-value'
+        assert data['check::date'] == '2024-04-14T08:42:00'
 
     def test_update_dataset_extras(self):
         self.dataset.extras = {
@@ -252,6 +257,74 @@ class DatasetExtrasAPITest(APITestCase):
         assert len(self.dataset.extras) == 1
         assert self.dataset.extras['test::extra'] == 'test-value'
 
+    def test_dataset_custom_extras_str(self):
+        member = Member(user=self.user, role='admin')
+        org = OrganizationFactory(members=[member])
+        org.extras = {
+            "custom": [
+                {
+                    "title": "color",
+                    "description": "the banner color of the dataset (Hex code)",
+                    "type": "str"
+                }
+            ]
+        }
+        org.save()
+        dataset = DatasetFactory(organization=org)
+
+        data = {
+            'custom:test': 'FFFFFFF'
+        }
+        response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
+        self.assert400(response)
+        assert 'Dataset\'s organization did not define the requested custom metadata' in response.json['message']
+
+        data = {
+            'custom:color': 123
+        }
+        response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
+        self.assert400(response)
+        assert 'Custom metadata is not of the right type' in response.json['message']
+
+        data = {
+            'custom:color': 'FFFFFFF'
+        }
+        response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        assert dataset.extras['custom:color'] == 'FFFFFFF'
+
+    def test_dataset_custom_extras_choices(self):
+        member = Member(user=self.user, role='admin')
+        org = OrganizationFactory(members=[member])
+        org.extras = {
+            "custom": [
+                {
+                    "title": "color",
+                    "description": "the colors of the dataset (Hex code)",
+                    "type": "choice",
+                    "choices": ["yellow", "blue"]
+                }
+            ]
+        }
+        org.save()
+        dataset = DatasetFactory(organization=org)
+
+        data = {
+            'custom:color': 'FFFFFFF'
+        }
+        response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
+        self.assert400(response)
+        assert 'Custom metadata choice is not defined by organization' in response.json['message']
+
+        data = {
+            'custom:color': 'yellow'
+        }
+        response = self.put(url_for('apiv2.dataset_extras', dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        assert dataset.extras['custom:color'] == 'yellow'
+
 
 class DatasetResourceExtrasAPITest(APITestCase):
     modules = None
@@ -262,8 +335,10 @@ class DatasetResourceExtrasAPITest(APITestCase):
 
     def test_get_ressource_extras(self):
         '''It should fetch a resource from the API'''
+        ResourceMixin.extras.register('check:date', db.DateTimeField)
+
         resource = ResourceFactory()
-        resource.extras = {'test::extra': 'test-value'}
+        resource.extras = {'test::extra': 'test-value', 'check:date': datetime(2023, 4, 20, 13, 57, 31, 289000)}
         self.dataset.resources.append(resource)
         self.dataset.save()
         response = self.get(url_for('apiv2.resource_extras', dataset=self.dataset,
@@ -271,6 +346,7 @@ class DatasetResourceExtrasAPITest(APITestCase):
         self.assert200(response)
         data = response.json
         assert data['test::extra'] == 'test-value'
+        assert data['check:date'] == '2023-04-20T13:57:31.289000'
 
     def test_update_resource_extras(self):
         resource = ResourceFactory()

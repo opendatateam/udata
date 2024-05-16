@@ -1,6 +1,7 @@
 '''
 This module centralize udata-wide RDF helpers and configuration
 '''
+import logging
 import re
 
 from flask import request, url_for, abort
@@ -11,6 +12,11 @@ from rdflib.namespace import (
     Namespace, NamespaceManager, DCTERMS, SKOS, FOAF, XSD, RDFS, RDF
 )
 from rdflib.util import SUFFIX_FORMAT_MAP, guess_format as raw_guess_format
+from udata import uris
+from udata.models import Schema
+from udata.mongo.errors import FieldValidationError
+
+log = logging.getLogger(__name__)
 
 # Extra Namespaces
 ADMS = Namespace('http://www.w3.org/ns/adms#')
@@ -70,6 +76,7 @@ ACCEPTED_MIME_TYPES = {
     'application/ld+json': 'json-ld',
     'application/json': 'json-ld',
     'application/trig': 'trig',
+    'text/xml': 'xml',
     # Available but not activated
     # 'application/n-quads': 'nquads',
     # 'text/xml': 'trix',
@@ -217,6 +224,50 @@ def url_from_rdf(rdf, prop):
     elif isinstance(value, RdfResource):
         return value.identifier.toPython()
 
+
+def schema_from_rdf(rdf):
+    '''
+    Try to extract a schema from a conformsTo property.
+    Currently the "issued" property is not harvest.
+    '''
+    resource = rdf.value(DCT.conformsTo)
+    if not resource:
+        return None
+
+    schema = Schema()
+    if isinstance(resource, (URIRef, Literal)):
+        schema.url = resource.toPython()
+    elif isinstance(resource, RdfResource):
+        # We try to get the schema "correct" URL.
+        # 1. The identifier of the DCT.conformsTo
+        # 2. The DCT.type inside the DCT.conformsTo (from some example it's the most precise one)
+        # (other not currently used RDF.type)
+        url = None
+        try:
+            url = uris.validate(resource.identifier.toPython())
+        except uris.ValidationError:
+            try:
+                type = resource.value(DCT.type)
+                if type is not None:
+                    url = uris.validate(type.identifier.toPython())
+            except uris.ValidationError:
+                pass
+            pass
+
+        if url is None:
+            return None
+
+        schema.url = url
+        schema.name = resource.value(DCT.title)
+    else:
+        return None
+
+    try:
+        schema.clean()
+        return schema
+    except FieldValidationError as e:
+        log.warning(f"Invalid schema inside RDF {e}")
+        return None
 
 def escape_xml_illegal_chars(val, replacement='?'):
     illegal_xml_chars_RE = re.compile(ILLEGAL_XML_CHARS)

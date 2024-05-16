@@ -3,7 +3,7 @@ import uuid
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import Form, fields
-from udata.models import db
+from udata.mongo import db
 from udata.tests import TestCase
 
 

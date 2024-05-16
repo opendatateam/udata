@@ -14,7 +14,7 @@ def serialize_resource_for_event(resource):
         'url': resource.url,
         'format': resource.format,
         'title': resource.title,
-        'schema': resource.schema,
+        'schema': resource.schema.to_dict() if resource.schema else None,
         'description': resource.description,
         'filetype': resource.filetype,
         'type': resource.type,

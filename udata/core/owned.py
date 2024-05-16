@@ -4,7 +4,15 @@ from blinker import signal
 from mongoengine import NULLIFY, Q, post_save
 from mongoengine.fields import ReferenceField
 
-from .queryset import UDataQuerySet
+from udata.api_fields import field
+from udata.core.organization.models import Organization
+from udata.core.user.models import User
+from udata.mongo.queryset import UDataQuerySet
+from udata.core.user.api_fields import user_ref_fields
+from udata.core.organization.api_fields import org_ref_fields
+from udata.core.organization.permissions import OrganizationPrivatePermission
+from udata.mongo.errors import FieldValidationError
+from udata.i18n import lazy_gettext as _
 
 log = logging.getLogger(__name__)
 
@@ -15,14 +23,42 @@ class OwnedQuerySet(UDataQuerySet):
         for owner in owners:
             qs |= Q(owner=owner) | Q(organization=owner)
         return self(qs)
+    
+def check_owner_is_current_user(owner):
+    from udata.auth import current_user, admin_permission
+    if current_user.is_authenticated and owner and not admin_permission and current_user.id != owner:
+        raise FieldValidationError(_('You can only set yourself as owner'), field="owner")
+
+def check_organization_is_valid_for_current_user(organization):
+    from udata.auth import current_user
+    from udata.models import Organization
+
+    org = Organization.objects(id=organization).first()
+    if org is None:
+        raise FieldValidationError(_("Unknown organization"), field="organization")
+
+    if current_user.is_authenticated and org and not OrganizationPrivatePermission(org).can():
+        raise FieldValidationError(_("Permission denied for this organization"), field="organization")
 
 
 class Owned(object):
     '''
     A mixin to factorize owning behvaior between users and organizations.
     '''
-    owner = ReferenceField('User', reverse_delete_rule=NULLIFY)
-    organization = ReferenceField('Organization', reverse_delete_rule=NULLIFY)
+    owner = field(
+        ReferenceField(User, reverse_delete_rule=NULLIFY),
+        nested_fields=user_ref_fields,
+        description="Only present if organization is not set. Can only be set to the current authenticated user.",
+        check=check_owner_is_current_user,
+        allow_null=True,
+    )
+    organization = field(
+        ReferenceField(Organization, reverse_delete_rule=NULLIFY),
+        nested_fields=org_ref_fields,
+        description="Only present if owner is not set. Can only be set to an organization of the current authenticated user.",
+        check=check_organization_is_valid_for_current_user,
+        allow_null=True,
+    )
 
     on_owner_change = signal('Owned.on_owner_change')
 
@@ -38,6 +74,7 @@ class Owned(object):
         '''
         Verify owner consistency and fetch original owner before the new one erase it.
         '''
+
         changed_fields = self._get_changed_fields()
         if 'organization' in changed_fields and 'owner' in changed_fields:
             # Ownership changes (org to owner or the other way around) have already been made

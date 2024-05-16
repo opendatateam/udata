@@ -181,6 +181,9 @@ def create_app(config='udata.settings.Defaults', override=None,
 
     app.json_encoder = UDataJsonEncoder
 
+    # `ujson` doesn't support `cls` parameter https://github.com/ultrajson/ultrajson/issues/124
+    app.config['RESTX_JSON'] = { 'cls': UDataJsonEncoder }
+
     app.debug = app.config['DEBUG'] and not app.config['TESTING']
 
     app.wsgi_app = ProxyFix(app.wsgi_app)
@@ -206,11 +209,12 @@ def standalone(app):
 
 def register_extensions(app):
     from udata import (
-        models, routing, tasks, mail, i18n, auth, search, sitemap,
+        models, mongo, routing, tasks, mail, i18n, auth, search, sitemap,
         sentry, notifications
     )
     tasks.init_app(app)
     i18n.init_app(app)
+    mongo.init_app(app)
     models.init_app(app)
     routing.init_app(app)
     auth.init_app(app)

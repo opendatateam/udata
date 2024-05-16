@@ -5,7 +5,7 @@ from flask import url_for
 from udata.core.site.models import Site
 from udata.core.site.models import current_site
 from udata.core.site.factories import SiteFactory
-from udata.core.dataset.factories import VisibleDatasetFactory
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import VisibleReuseFactory
 from udata.core.user.factories import AdminFactory
 
@@ -22,7 +22,7 @@ class SiteAPITest(APITestCase):
     def test_get_home_datasets(self):
         site = SiteFactory.create(
             id=self.app.config['SITE_ID'],
-            settings__home_datasets=VisibleDatasetFactory.create_batch(3)
+            settings__home_datasets=DatasetFactory.create_batch(3)
         )
         current_site.reload()
 
@@ -46,7 +46,7 @@ class SiteAPITest(APITestCase):
         self.assertEqual(len(response.json), len(site.settings.home_reuses))
 
     def test_set_home_datasets(self):
-        ids = [d.id for d in VisibleDatasetFactory.create_batch(3)]
+        ids = [d.id for d in DatasetFactory.create_batch(3)]
 
         self.login(AdminFactory())
         response = self.put(url_for('api.home_datasets'), ids)

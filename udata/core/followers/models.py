@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from udata.models import db
+from udata.mongo import db
 from .signals import on_follow, on_unfollow
 
 

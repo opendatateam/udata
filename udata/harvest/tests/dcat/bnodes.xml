@@ -5,6 +5,8 @@
   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
   xmlns:dcat="http://www.w3.org/ns/dcat#"
   xmlns:dct="http://purl.org/dc/terms/"
+  xmlns:ogc="http://www.opengis.net/ogc"
+  xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
   xmlns:dcterms="http://purl.org/dc/terms/"
   xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
   xmlns:schema="http://schema.org/"
@@ -54,7 +56,13 @@
         <owl:versionInfo>1.0</owl:versionInfo>
         <dcat:distribution rdf:resource="http://data.test.org/datasets/1/resources/2"/>
         <dcat:keyword>Tag 4</dcat:keyword>
-        <dcterms:spatial rdf:resource="http://wuEurope.com/"/>
+        <dct:spatial>
+            <ogc:Polygon>
+                <geo:asWKT rdf:datatype="http://www.opengis.net/rdf#wktLiteral">
+                    wrong wkt
+                </geo:asWKT>
+            </ogc:Polygon>
+        </dct:spatial>
         <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T19:01:24.184120</dcterms:modified>
         <dcat:keyword>Tag 2</dcat:keyword>
         <dcat:keyword>Tag 1</dcat:keyword>
@@ -79,8 +87,15 @@
         <dcat:keyword>Tag 3</dcat:keyword>
         <dcat:distribution rdf:resource="http://data.test.org/datasets/2/resources/2"/>
         <dcterms:title>Dataset 2</dcterms:title>
-        <dcterms:spatial rdf:resource="http://wuEurope.com/"/>
+        <dct:spatial>
+            <ogc:Polygon>
+                <geo:asWKT rdf:datatype="http://www.opengis.net/rdf#wktLiteral">
+                    Polygon((4.44641288 45.54214467, 4.44641288 46.01316963, 4.75655252 46.01316963, 4.75655252 45.54214467, 4.44641288 45.54214467))
+                </geo:asWKT>
+            </ogc:Polygon>
+        </dct:spatial>
         <dcterms:identifier>2</dcterms:identifier>
+        <dct:conformsTo rdf:nodeID="Ne0189e93917c4f67a412fc44883322e7"/>
       </dcat:Dataset>
     </dcat:dataset>
     <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-15T09:19:51.723691</dcterms:modified>
@@ -115,21 +130,34 @@
     <dcterms:format>JSON</dcterms:format>
     <dcterms:title>Resource 1-2</dcterms:title>
     <dcat:accessURL>http://data.test.org/datasets/1/resources/2/file.json</dcat:accessURL>
+    <dct:conformsTo rdf:resource="https://schema.data.gouv.fr/schemas/etalab/schema-irve-statique/1337.42.0/schema-statique.json" />
   </dcat:Distribution>
   <dcat:Distribution rdf:about="http://data.test.org/datasets/2/resources/1">
     <dcat:accessURL>http://data.test.org/datasets/2/resources/1/file.json</dcat:accessURL>
     <dcterms:title>Resource 2-1</dcterms:title>
     <dcterms:format>JSON</dcterms:format>
     <dcterms:description>A JSON resource</dcterms:description>
+    <dct:conformsTo rdf:resource="https://example.org/schema.json" />
   </dcat:Distribution>
   <dcat:Distribution rdf:about="datasets/3/resources/1">
     <dcterms:format>JSON</dcterms:format>
     <dcterms:title>Resource 3-1</dcterms:title>
     <dcterms:description>A JSON resource</dcterms:description>
     <dcat:accessURL>http://data.test.org/datasets/3/resources/1/file.json</dcat:accessURL>
+    <dct:conformsTo rdf:resource="https://schema.data.gouv.fr/schemas/etalab/schema-irve-statique/2.2.0/schema-statique.json" />
   </dcat:Distribution>
   <dcterms:Location rdf:about="http://wuEurope.com/"/>
+  <dcterms:Standard rdf:about="https://example.org/schema.json">
+    <dcterms:title>Example Schema</dcterms:title>
+    <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-01-23T18:59:02.737480</dcterms:issued>
+  </dcterms:Standard>
   <foaf:Organization rdf:about="http://data.test.org/organizations/1">
     <foaf:name>An Organization</foaf:name>
   </foaf:Organization>
+  <rdf:Description rdf:nodeID="Ne0189e93917c4f67a412fc44883322e7">
+    <rdf:type rdf:resource="http://purl.org/dc/terms/Standard"/>
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <dct:type rdf:resource="http://inspire.ec.europa.eu/glossary/SpatialReferenceSystem"/>
+    <dct:title xml:lang="fr">RGF93 / Lambert-93 (EPSG:2154)</dct:title>
+  </rdf:Description>
 </rdf:RDF>

@@ -12,7 +12,7 @@ from werkzeug.urls import url_encode
 from udata import settings
 from udata.app import create_app
 from udata.core.user.factories import UserFactory
-from udata.models import db
+from udata.mongo import db
 
 from .helpers import assert200, assert_command_ok
 
@@ -191,6 +191,11 @@ class ApiClient(object):
         if not json:
             return self.client.put(url, data or {}, *args, **kwargs)
         return self.perform('put', url, data=data or {}, *args, **kwargs)
+
+    def patch(self, url, data=None, json=True, *args, **kwargs):
+        if not json:
+            return self.client.patch(url, data or {}, *args, **kwargs)
+        return self.perform('patch', url, data=data or {}, *args, **kwargs)
 
     def delete(self, url, data=None, *args, **kwargs):
         return self.perform('delete', url, data=data or {}, *args, **kwargs)

@@ -1,11 +1,11 @@
 from udata.api import api, fields, base_reference
 
-from udata.core.badges.api import badge_fields
+from udata.core.badges.fields import badge_fields
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.user.api_fields import user_ref_fields
 
-from .models import REUSE_TOPICS, REUSE_TYPES, IMAGE_SIZES
+from .constants import REUSE_TOPICS, REUSE_TYPES, IMAGE_SIZES
 
 BIGGEST_IMAGE_SIZE = IMAGE_SIZES[0]
 

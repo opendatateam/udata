@@ -5,16 +5,11 @@ from flask import current_app
 
 @on_new_potential_spam.connect
 def notify_potential_spam(sender, **kwargs):
-    title = kwargs.get('title', 'no title')
-    link = kwargs.get('link')
+    message = kwargs.get('message')
     reason = kwargs.get('reason')
     text = kwargs.get('text')
 
-    message = ':warning: @all Spam potentiel sur '
-    if link:
-        message += f'[{title}]({link})'
-    else:
-        message += title
+    message = f':warning: @all {message}'
 
     if reason:
         message += f' ({reason})'

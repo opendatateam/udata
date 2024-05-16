@@ -5,43 +5,17 @@ from blinker import Signal
 from mongoengine.signals import pre_save, post_save
 from werkzeug.utils import cached_property
 
+from udata.core.badges.models import BadgeMixin
+from udata.core.metrics.models import WithMetrics
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
-from udata.models import db, BadgeMixin, WithMetrics
+from udata.mongo import db
 from udata.i18n import lazy_gettext as _
 from udata.uris import endpoint_for
+from .constants import ASSOCIATION, CERTIFIED, COMPANY, LOCAL_AUTHORITY, LOGO_SIZES, ORG_BID_SIZE_LIMIT, ORG_ROLES, DEFAULT_ROLE, MEMBERSHIP_STATUS, LOGO_MAX_SIZE, PUBLIC_SERVICE
 
 
-__all__ = (
-    'Organization', 'Team', 'Member', 'MembershipRequest',
-    'ORG_ROLES', 'MEMBERSHIP_STATUS', 'PUBLIC_SERVICE', 'CERTIFIED'
-)
-
-
-ORG_ROLES = {
-    'admin': _('Administrator'),
-    'editor': _('Editor'),
-}
-DEFAULT_ROLE = 'editor'
-
-
-MEMBERSHIP_STATUS = {
-    'pending': _('Pending'),
-    'accepted': _('Accepted'),
-    'refused': _('Refused'),
-}
-
-LOGO_MAX_SIZE = 500
-LOGO_SIZES = [100, 60, 25]
-
-PUBLIC_SERVICE = 'public-service'
-CERTIFIED = 'certified'
-
-TITLE_SIZE_LIMIT = 350
-DESCRIPTION_SIZE_LIMIT = 100000
-
-ORG_BID_SIZE_LIMIT = 14
-
+__all__ = ('Organization', 'Team', 'Member', 'MembershipRequest')
 
 class Team(db.EmbeddedDocument):
     name = db.StringField(required=True)
@@ -114,7 +88,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     zone = db.StringField()
-    extras = db.ExtrasField()
+    extras = db.OrganizationExtrasField()
 
     deleted = db.DateTimeField()
 
@@ -140,6 +114,9 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     __badges__ = {
         PUBLIC_SERVICE: _('Public Service'),
         CERTIFIED: _('Certified'),
+        ASSOCIATION: _('Association'),
+        COMPANY: _('Company'),
+        LOCAL_AUTHORITY: _('Local authority'),
     }
 
     __metrics_keys__ = [
@@ -198,6 +175,18 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     def public_service(self):
         is_public_service = any(b.kind == PUBLIC_SERVICE for b in self.badges)
         return self.certified and is_public_service
+
+    @property
+    def company(self):
+        return any(b.kind == COMPANY for b in self.badges)
+
+    @property
+    def association(self):
+        return any(b.kind == ASSOCIATION for b in self.badges)
+
+    @property
+    def local_authority(self):
+        return any(b.kind == LOCAL_AUTHORITY for b in self.badges)
 
     def member(self, user):
         for member in self.members:

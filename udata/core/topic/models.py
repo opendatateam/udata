@@ -1,16 +1,15 @@
-from datetime import datetime
 from flask import url_for
-from mongoengine.fields import DateTimeField
 from mongoengine.signals import pre_save
-from udata.models import db
+from udata.models import db, SpatialCoverage
 from udata.search import reindex
 from udata.tasks import as_task_param
+from udata.core.owned import Owned
 
 
 __all__ = ('Topic', )
 
 
-class Topic(db.Document, db.Owned):
+class Topic(db.Document, Owned, db.Datetimed):
     name = db.StringField(required=True)
     slug = db.SlugField(max_length=255, required=True, populate_from='name',
                         update=True, follow=True)
@@ -28,14 +27,14 @@ class Topic(db.Document, db.Owned):
     private = db.BooleanField()
     extras = db.ExtrasField()
 
-    created_at = DateTimeField(default=datetime.utcnow, required=True)
+    spatial = db.EmbeddedDocumentField(SpatialCoverage)
 
     meta = {
         'indexes': [
             '$name',
             'created_at',
             'slug'
-        ] + db.Owned.meta['indexes'],
+        ] + Owned.meta['indexes'],
         'ordering': ['-created_at'],
         'auto_create_index_on_save': True
     }

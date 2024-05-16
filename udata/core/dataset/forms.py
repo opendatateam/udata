@@ -1,23 +1,21 @@
-from urllib.parse import urlparse
-
-from flask import current_app
+from mongoengine import ValidationError
 
 from udata.forms import ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
-from udata.uris import validate as validate_url, ValidationError
 
 from udata.core.storages import resources
 from udata.core.spatial.forms import SpatialCoverageField
+from udata.mongo.errors import FieldValidationError
 
 from .models import (
-    Dataset, Resource, License, Checksum, CommunityResource,
+    Dataset, Resource, Schema, License, Checksum, CommunityResource,
+)
+from .constants import (
     UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, RESOURCE_FILETYPES, CHECKSUM_TYPES,
     LEGACY_FREQUENCIES, RESOURCE_TYPES, TITLE_SIZE_LIMIT, DESCRIPTION_SIZE_LIMIT,
-    ResourceSchema,
 )
 
 __all__ = ('DatasetForm', 'ResourceForm', 'CommunityResourceForm')
-
 
 class ChecksumForm(ModelForm):
     model_class = Checksum
@@ -32,46 +30,23 @@ def normalize_format(data):
         return data.strip().lower()
 
 
-def enforce_allowed_schemas(form, field):
-    schema = field.data
-    if schema:
-        allowed_schemas = [s['id'] for s in ResourceSchema.objects()]
+class SchemaForm(ModelForm):
+    model_class = Schema
+    url = fields.URLField(_('URL of the schema'))
+    name = fields.StringField(_('Name of the schema'))
+    version = fields.StringField(_('Version of the schema'))
 
-        if not bool('name' in schema) ^ bool('url' in schema):
-            raise validators.ValidationError(_('Schema must have at least a name or an url. Having both is not allowed.'))
+    def validate(self, extra_validators = None):
+        validation = super().validate(extra_validators)
 
-        if 'url' in schema:
-            try:
-                validate_url(schema.get('url'))
-            except ValidationError:
-                raise validators.ValidationError(_('Provided URL is not valid.'))
+        try:
+            Schema(url=self.url.data, name=self.name.data, version=self.version.data).clean(check_schema_in_catalog=True)
+        except FieldValidationError as err:
+            field = getattr(self, err.field)
+            field.errors.append(err.message)
+            return False
 
-        if 'name' in schema and schema.get('name') not in allowed_schemas:
-            message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}')
-            raise validators.ValidationError(message.format(
-                schema=schema.get('name'),
-                values=', '.join(allowed_schemas)
-            ))
-
-        schema_versions = [d['versions'] for d in ResourceSchema.objects() if d['id'] == schema.get('name')]
-        allowed_versions = schema_versions[0] if schema_versions else []
-        allowed_versions.append('latest')
-        if 'version' in schema:
-            if schema.get('version') not in allowed_versions:
-                message = _('Version "{version}" is not an allowed value. Allowed values: {values}')
-                raise validators.ValidationError(message.format(
-                    version=schema.get('version'),
-                    values=', '.join(allowed_versions)
-                ))
-
-        properties = ['name', 'version', 'url']
-        for prop in schema:
-            if prop not in properties:
-                message = _('Sub-property "{prop}" is not allowed value in schema field. Allowed values is : {properties}')
-                raise validators.ValidationError(message.format(
-                    prop=prop,
-                    properties=', '.join(properties),
-                ))
+        return validation
 
 
 class BaseResourceForm(ModelForm):
@@ -103,11 +78,7 @@ class BaseResourceForm(ModelForm):
         _('Size'), [validators.optional()],
         description=_('The file size in bytes'))
     extras = fields.ExtrasField()
-    schema = fields.DictField(
-        _('Schema'),
-        default={},
-        validators=[validators.optional(), enforce_allowed_schemas],
-        description=_('The schema slug the resource adheres to'))
+    schema = fields.FormField(SchemaForm)
 
 
 class ResourceForm(BaseResourceForm):

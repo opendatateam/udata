@@ -5,16 +5,16 @@ from udata.core.organization.models import Organization
 from udata.core.user.factories import UserFactory
 from udata.core.user.models import User
 
-from udata.models import db
-
+from udata.mongo import db
+import udata.core.owned as owned
 from udata.tests import TestCase, DBTestMixin
 
 
-class Owned(db.Owned, db.Document):
+class Owned(owned.Owned, db.Document):
     name = db.StringField()
 
 
-class OwnedPostSave(db.Owned, db.Document):
+class OwnedPostSave(owned.Owned, db.Document):
     @classmethod
     def post_save(cls, sender, document, **kwargs):
         if 'post_save' in kwargs.get('ignores', []):
@@ -128,7 +128,7 @@ class TestOwnedMixin(DBTestMixin, TestCase):
 
 class OwnedQuerysetTest(DBTestMixin, TestCase):
     def test_queryset_type(self):
-        self.assertIsInstance(Owned.objects, db.OwnedQuerySet)
+        self.assertIsInstance(Owned.objects, owned.OwnedQuerySet)
 
     def test_owned_by_user(self):
         user = UserFactory()

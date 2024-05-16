@@ -36,7 +36,7 @@ setup(
     author_email='opendatateam@data.gouv.fr',
     packages=find_packages(),
     include_package_data=True,
-    python_requires='>=3.7,<3.10',
+    python_requires='>=3.8',
     install_requires=install_requires,
     entry_points={
         'console_scripts': [
@@ -45,6 +45,7 @@ setup(
         'udata.harvesters': [
             'dcat = udata.harvest.backends.dcat:DcatBackend',
             'csw-dcat = udata.harvest.backends.dcat:CswDcatBackend',
+            'csw-iso-19139 = udata.harvest.backends.dcat:CswIso19139DcatBackend'
         ],
         'udata.avatars': [
             'internal = udata.features.identicon.backends:internal',

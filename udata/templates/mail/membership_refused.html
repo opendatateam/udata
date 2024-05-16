@@ -7,7 +7,7 @@
 {{ _('Your membership for the organization "%(org)s" has been refused',
     org=(
         '<a href="'|safe
-        + url_for('organizations.show', org=org, _external=True)
+        + org.url_for(_external=True)
         + '">'|safe
         + org.name
         + '</a>'|safe

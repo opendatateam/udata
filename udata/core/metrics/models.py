@@ -1,13 +1,12 @@
-from datetime import date, timedelta
-
-from udata.models import db
+from udata.api_fields import field
+from udata.mongo import db
 
 
 __all__ = ('WithMetrics',)
 
 
 class WithMetrics(object):
-    metrics = db.DictField()
+    metrics = field(db.DictField())
 
     __metrics_keys__ = []
 

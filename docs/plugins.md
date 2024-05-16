@@ -18,7 +18,7 @@ See [extending udata](extending.md) guide to create your own plugin.
 
 Here a list of known plugins for udata:
 
-- [`udata-front`][udata-front], a plugin for a udata fronted
+- [`udata-front`][udata-front], a plugin for a udata frontend
 - [`udata-piwik`][udata-piwik], a plugin for integration between udata and [Piwik/Matomo][matomo]
 - [`udata-metrics`][udata-metrics], a plugin that handles a connexion to an InfluxDB service for udata metrics (number of hits, downloads, etc.)
 - [`udata-ckan`][udata-ckan], [CKAN][ckan] integration for udata
@@ -26,7 +26,7 @@ Here a list of known plugins for udata:
 - [`udata-dcat`][udata-dcat], [DCAT][dcat] integration for udata
 - [`dotsat-udata-harvester`][dotsat-udata-harvester], [.stat suite][.stat] integration for udata
 - [`udata-recommendations`][udata-recommendations], a plugin to integrate a recommendation system
-- [`udata-tabular-preview`][udata-tabular-preview], a plugin to preview tabular files (CSV, Excel, ...) using [csvapi][csvapi]
+- [`udata-tabular-preview`][udata-tabular-preview], a plugin to preview tabular files (CSV, Excel, ...) using [api-tabular][api-tabular]
 - [`udata-data-fair`][udata-data-fair], a plugin that use [DataFair][datafair] embeds to preview data
 - [`udata-transport`][udata-transport], a plugin to bind datasets to their counterparts on [transport.data.gouv.fr][transport.data.gouv.fr]
 
@@ -34,7 +34,7 @@ Here a list of known plugins for udata:
 !!! note
     Don't hesitate to submit a pull-request to add your udata plugin to this list.
 
-[udata-front]: https://github.com/etalab/udata-front
+[udata-front]: https://github.com/datagouv/udata-front
 [udata-piwik]: https://github.com/opendatateam/udata-piwik
 [udata-metrics]: https://github.com/opendatateam/udata-metrics
 [udata-ckan]: https://github.com/opendatateam/udata-ckan
@@ -50,6 +50,6 @@ Here a list of known plugins for udata:
 [ods]: https://www.opendatasoft.com/
 [dcat]: https://github.com/opendatateam/udata/blob/master/udata/harvest/backends/dcat.py
 [.stat]: https://siscc.org/stat-suite/
-[csvapi]: https://github.com/opendatateam/csvapi
+[api-tabular]: https://github.com/datagouv/api-tabular
 [datafair]: https://data-fair.github.io/3/
 [transport.data.gouv.fr]: https://transport.data.gouv.fr/

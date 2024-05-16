@@ -230,9 +230,14 @@ class Defaults(object):
     # A list of tuples, each tuple describing a group with its title and
     # a list of licenses associated. Translations are not supported.
     # Example:
-    # LICENSE_GROUPS = [
-    #    ('Administrative authorities', ['lov2', 'odc-odbl']),
-    #    ('All producers', ['lov2', 'cc-by', 'cc-by-sa', 'cc-zero'])
+    # LICENSE_GROUPS = [ 
+    #     ("Autorités administratives", [
+    #         {"value": "lov2", "recommended": True, "description": "Recommandée", "code": "etalab-2.0"},
+    #         {"value": "notspecified", "description": "Le Code des relations entre le public et l’administration ne s’applique pas"}]),
+    #     ("Tous producteurs", [
+    #         {"value": "lov2", "recommended": True, "description": "Recommandée"},
+    #         {"value": "cc-by", "code": "CC-BY"},
+    #         {"value": "notspecified"}])
     # ]
     LICENSE_GROUPS = None
 
@@ -256,6 +261,18 @@ class Defaults(object):
     HARVEST_AUTOARCHIVE_GRACE_DAYS = 7
 
     HARVEST_VALIDATION_CONTACT_FORM = None
+
+    HARVEST_MAX_CATALOG_SIZE_IN_MONGO = None # Defaults to the size of a MongoDB document 
+    HARVEST_GRAPHS_S3_BUCKET = None # If the catalog is bigger than `HARVEST_MAX_CATALOG_SIZE_IN_MONGO` store the graph inside S3 instead of MongoDB
+    HARVEST_GRAPHS_S3_FILENAME_PREFIX = '' # Useful to store the graphs inside a subfolder of the bucket. For example by setting `HARVEST_GRAPHS_S3_FILENAME_PREFIX = 'graphs/'`
+
+    # S3 connection details
+    S3_URL = None
+    S3_ACCESS_KEY_ID = None
+    S3_SECRET_ACCESS_KEY = None
+
+    # Specific support for hvd (map HVD categories URIs to keywords)
+    HVD_SUPPORT = True
 
     ACTIVATE_TERRITORIES = False
     # The order is important to compute parents/children, smaller first.
@@ -374,11 +391,6 @@ class Defaults(object):
     # The business identification format to use for validation
     ORG_BID_FORMAT = 'siret'
 
-    # Dataset settings
-    ###########################################################################
-    # Max number of resources to display uncollapsed in dataset view
-    DATASET_MAX_RESOURCES_UNCOLLAPSED = 6
-
     # Preview settings
     ###########################################################################
     # Preview mode can be either `iframe` or `page` or `None`
@@ -470,8 +482,7 @@ class Testing(object):
     WTF_CSRF_ENABLED = False
     AUTO_INDEX = False
     CELERY_TASK_ALWAYS_EAGER = True
-    # TODO: ideally, this should be set to True in order to reveal exceptions in delayed tasks
-    CELERY_TASK_EAGER_PROPAGATES = False
+    CELERY_TASK_EAGER_PROPAGATES = True
     TEST_WITH_PLUGINS = False
     PLUGINS = []
     TEST_WITH_THEME = False
