@@ -1,19 +1,17 @@
 import logging
 
-from rdflib import Graph, URIRef
+from rdflib import Graph
 from rdflib.namespace import RDF
 import lxml.etree as ET
-import boto3
 from flask import current_app
 from datetime import date
-import json
-from typing import Generator, List
+from typing import Generator
 
-from udata.core.dataset.models import Dataset
 from udata.rdf import (
     DCAT, DCT, HYDRA, SPDX, namespace_manager, guess_format, url_from_rdf
 )
 from udata.core.dataset.rdf import dataset_from_rdf
+from udata.core.dataservices.rdf import dataservice_from_rdf
 from udata.storage.s3 import store_as_json, get_from_json
 from udata.harvest.models import HarvestItem
 
@@ -71,7 +69,8 @@ class DcatBackend(BaseBackend):
             self.process_one_datasets_page(page_number, page)
             serialized_graphs.append(page.serialize(format=fmt, indent=None))
 
-        # TODO call `walk_graph` with `process_dataservices`
+        for page_number, page in self.walk_graph(self.source.url, fmt):
+            self.process_one_dataservices_page(page_number, page)
 
         # The official MongoDB document size in 16MB. The default value here is 15MB to account for other fields in the document (and for difference between * 1024 vs * 1000).
         max_harvest_graph_size_in_mongo = current_app.config.get('HARVEST_MAX_CATALOG_SIZE_IN_MONGO')
@@ -152,12 +151,26 @@ class DcatBackend(BaseBackend):
 
             if self.is_done():
                 return
+
+    def process_one_dataservices_page(self, page_number: int, page: Graph):
+        for node in page.subjects(RDF.type, DCAT.DataService):
+            remote_id = page.value(node, DCT.identifier)
+            self.process_dataservice(remote_id, page_number=page_number, page=page, node=node)
+
+            if self.is_done():
+                return
             
     def inner_process_dataset(self, item: HarvestItem, page_number: int, page: Graph, node):
         item.kwargs['page_number'] = page_number
 
         dataset = self.get_dataset(item.remote_id)
         return dataset_from_rdf(page, dataset, node=node)
+
+    def inner_process_dataservice(self, item: HarvestItem, page_number: int, page: Graph, node):
+        item.kwargs['page_number'] = page_number
+
+        dataservice = self.get_dataservice(item.remote_id)
+        return dataservice_from_rdf(page, dataservice, node=node)
 
     def get_node_from_item(self, graph, item):
         for node in graph.subjects(RDF.type, DCAT.Dataset):
