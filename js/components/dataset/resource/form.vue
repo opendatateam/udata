@@ -320,8 +320,8 @@ export default {
             let result = Object.assign({}, this.resource, this.$refs.form.serialize(), this.getSchemaValue());
 
             // We remove extras to avoid overriding extras wrote by automatic processes (since it's not possible to edit extras anyway
-            // on the UI. We could also merge provided extras with existing extras on the backend but it's a little bit hard with the current
-            // flask-restx automatic `populate_obj()`. Maybe in the future if we generalize the new API system introduced with dataservices.
+            // on the UI). We could also merge provided extras with existing extras on the backend but it's a little bit hard with the current
+            // flask-restx/wtform automatic `populate_obj()`. Maybe in the future if we generalize the new API system introduced with dataservices.
             delete result.extras
             return result
         },
