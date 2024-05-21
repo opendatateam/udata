@@ -8,6 +8,7 @@
 - Delete a user without sending mail [#3031](https://github.com/opendatateam/udata/pull/3031)
 - Convert known HVD categories used as theme to keywords [#3014](https://github.com/opendatateam/udata/pull/3014)
 - Allow for series in CSW ISO 19139 DCAT backend [#3028](https://github.com/opendatateam/udata/pull/3028)
+- Fix do not override resources extras on admin during update [#3043](https://github.com/opendatateam/udata/pull/3043) 
 
 ## 8.0.0 (2024-04-23)
 
