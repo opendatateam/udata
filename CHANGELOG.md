@@ -5,8 +5,11 @@
 - Add dataservices in beta [#2986](https://github.com/opendatateam/udata/pull/2986)
 - Remove deprecated `metrics_for` route [#3022](https://github.com/opendatateam/udata/pull/3022)
 - Fix spatial coverage fetching perfs. Need to schedule `compute-geozones-metrics` [#3018](https://github.com/opendatateam/udata/pull/3018)
+- Delete a user without sending mail [#3031](https://github.com/opendatateam/udata/pull/3031)
 - Convert known HVD categories used as theme to keywords [#3014](https://github.com/opendatateam/udata/pull/3014)
 - Allow for series in CSW ISO 19139 DCAT backend [#3028](https://github.com/opendatateam/udata/pull/3028)
+- Add `resources_downloads` to datasets metrics [#3042](https://github.com/opendatateam/udata/pull/3042)
+- Fix do not override resources extras on admin during update [#3043](https://github.com/opendatateam/udata/pull/3043) 
 
 ## 8.0.0 (2024-04-23)
 
