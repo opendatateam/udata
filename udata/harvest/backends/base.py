@@ -431,7 +431,8 @@ class BaseSyncBackend(BaseBackend):
         try:
             dataset = self.inner_process_dataset(item, **kwargs)
 
-            dataset.harvest = self.update_harvest_info(dataset.harvest, remote_id)
+            # Use `item.remote_id` because `inner_process_dataset` could have modified it.
+            dataset.harvest = self.update_harvest_info(dataset.harvest, item.remote_id)
             dataset.archived = None
 
             # TODO: Apply editable mappings
