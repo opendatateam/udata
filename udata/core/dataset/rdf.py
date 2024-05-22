@@ -394,6 +394,9 @@ def spatial_from_rdf(graph):
     # if there is other types of spatial coverage worth integrating (points? line strings?). But these other
     # formats are not compatible to be merge in the unique stored representation in MongoDB, we'll deal with them in a second pass.
     # The merging lose the properties and other information inside the GeoJSON…
+    # Note that having multiple `Polygon` is not really the DCAT way of doing things, the standard require that you use 
+    # a `MultiPolygon` in this case. We support this right now, and wait and see if it raises problems in the future for
+    # people following the standard. (see https://github.com/datagouv/data.gouv.fr/issues/1362#issuecomment-2112774115)
     polygons = []
     for geojson in geojsons:
         if geojson['type'] == 'Polygon':
