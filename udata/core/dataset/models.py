@@ -505,6 +505,7 @@ class Dataset(WithMetrics, BadgeMixin, Owned, db.Document):
         'reuses',
         'followers',
         'views',
+        'resources_downloads',
     ]
 
     meta = {
