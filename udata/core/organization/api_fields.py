@@ -32,7 +32,7 @@ from udata.core.user.api_fields import user_ref_fields  # noqa: required
 
 def check_can_access_email():
     # This endpoint is secure, only organization member has access.
-    if request.endpoint == 'request_membership':
+    if request.endpoint == 'api.request_membership':
         return True
 
     if request.endpoint != 'api.organization':
