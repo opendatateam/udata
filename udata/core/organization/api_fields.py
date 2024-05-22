@@ -31,6 +31,10 @@ org_ref_fields = api.inherit('OrganizationReference', base_reference, {
 from udata.core.user.api_fields import user_ref_fields  # noqa: required
 
 def check_can_access_email():
+    # This endpoint is secure, only organization member has access.
+    if request.endpoint == 'request_membership':
+        return True
+
     if request.endpoint != 'api.organization':
         return False
 
@@ -40,21 +44,15 @@ def check_can_access_email():
     
     return OrganizationPrivatePermission(org).can()
 
-# To use on public endpoint to show the email only to editor of the org (currently working only with `api.organization` endpoint, see above)
-user_in_org_with_email_fields_if_permissions = api.inherit('UserReference', user_ref_fields, {
+user_in_org_with_email_fields = api.inherit('UserReference', user_ref_fields, {
     'email': fields.Raw(
         attribute=lambda o: o.email if check_can_access_email() else None,
         description='The user email (only present on show organization endpoint if the current user has edit permission on the org)', readonly=True),
 })
 
-# To use on private endpoints where the current user is already checked to be admin/editor of the org
-user_in_org_with_always_email_fields = api.inherit('UserReference', user_ref_fields, {
-    'email': fields.String(readonly=True),
-})
-
 request_fields = api.model('MembershipRequest', {
     'id': fields.String(readonly=True),
-    'user': fields.Nested(user_in_org_with_always_email_fields),
+    'user': fields.Nested(user_in_org_with_email_fields),
     'created': fields.ISODateTime(
         description='The request creation date', readonly=True),
     'status': fields.String(
@@ -65,7 +63,7 @@ request_fields = api.model('MembershipRequest', {
 })
 
 member_fields = api.model('Member', {
-    'user': fields.Nested(user_in_org_with_email_fields_if_permissions),
+    'user': fields.Nested(user_in_org_with_email_fields),
     'role': fields.String(
         description='The member role in the organization', required=True,
         enum=list(ORG_ROLES), default=DEFAULT_ROLE),
