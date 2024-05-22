@@ -16,16 +16,23 @@ def on_dataset_create(dataset):
 
 @Dataset.on_delete.connect
 def on_dataset_delete(dataset):
-    dispatch('datagouvfr.dataset.deleted', dataset.to_json())
+    if not dataset.private:
+        dispatch('datagouvfr.dataset.deleted', dataset.to_json())
 
 
 @Dataset.on_update.connect
 def on_dataset_update(dataset):
     updates, _ = dataset._delta()
-    if 'private' in updates and not dataset.private:
-        dispatch('datagouvfr.dataset.created', dataset.to_json())
+    if dataset.private:
+        # Notify if newly private but not otherwise
+        if 'private' in updates:
+            # Do we want to send the full dataset (because the private update can add private information?)
+            dispatch('datagouvfr.dataset.deleted', dataset.to_json())
     else:
-        dispatch('datagouvfr.dataset.updated', dataset.to_json())
+        if 'private' in updates:
+            dispatch('datagouvfr.dataset.created', dataset.to_json())
+        else:
+            dispatch('datagouvfr.dataset.updated', dataset.to_json())
 
 
 @on_new_discussion.connect
