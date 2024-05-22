@@ -10,6 +10,7 @@
 - Allow for series in CSW ISO 19139 DCAT backend [#3028](https://github.com/opendatateam/udata/pull/3028)
 - Add `resources_downloads` to datasets metrics [#3042](https://github.com/opendatateam/udata/pull/3042)
 - Fix do not override resources extras on admin during update [#3043](https://github.com/opendatateam/udata/pull/3043) 
+- Merge multiple polygons in spatial coverage harvesting [#3039](https://github.com/opendatateam/udata/pull/3039)
 
 ## 8.0.0 (2024-04-23)
 
