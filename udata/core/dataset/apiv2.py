@@ -8,6 +8,7 @@ from udata import search
 from udata.api import apiv2, API, fields
 from udata.utils import multi_to_dict, get_by
 
+from udata.core.organization.api_fields import member_user_with_email_fields
 from .api_fields import (
     badge_fields,
     org_ref_fields,
@@ -165,6 +166,7 @@ specific_resource_fields = apiv2.model('SpecificResource', {
 apiv2.inherit('Badge', badge_fields)
 apiv2.inherit('OrganizationReference', org_ref_fields)
 apiv2.inherit('UserReference', user_ref_fields)
+apiv2.inherit('MemberUserWithEmail', member_user_with_email_fields)
 apiv2.inherit('Resource', resource_fields)
 apiv2.inherit('SpatialCoverage', spatial_coverage_fields)
 apiv2.inherit('TemporalCoverage', temporal_coverage_fields)
