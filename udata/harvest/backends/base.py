@@ -137,9 +137,16 @@ class BaseBackend(object):
 
         harvest         ->    inner_harvest()
                                  /
-        process_dataset  <------
+        process_dataset (create HarvestItem)  <------
                     \
-                      --------> inner_process_dataset()
+                      --------> inner_process_dataset() (call get_dataset() and update object)
+
+
+        process_dataset:
+            1. Create HarvestItem
+            2. Call inner_process_dataset(item)
+            3. Save HarvestItem (dryrun)
+            4. Save dataset (dryrun)
 
     """
 
