@@ -17,7 +17,7 @@ from udata.core.dataset.rdf import dataset_from_rdf
 from udata.storage.s3 import store_as_json, get_from_json
 from udata.harvest.models import HarvestItem
 
-from .base import BaseSyncBackend
+from .base import BaseBackend
 
 log = logging.getLogger(__name__)
 
@@ -58,7 +58,7 @@ def extract_graph(source, target, node, specs):
             extract_graph(source, target, o, specs[p])
 
 
-class DcatBackend(BaseSyncBackend):
+class DcatBackend(BaseBackend):
     display_name = 'DCAT'
 
     def inner_harvest(self):

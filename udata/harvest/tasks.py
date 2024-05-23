@@ -1,7 +1,6 @@
 from celery import chord
 from flask import current_app
 
-from udata.harvest.backends.base import BaseSyncBackend
 from udata.tasks import job, get_logger, task
 
 from . import backends
@@ -20,21 +19,8 @@ def harvest(self, ident):
     Backend = backends.get(current_app, source.backend)
     backend = Backend(source)
 
-    if isinstance(backend, BaseSyncBackend):
-        backend.harvest()
-    else:
-        items = backend.perform_initialization()
-        if items is None:
-            pass
-        elif items == 0:
-            backend.finalize()
-        else:
-            finalize = harvest_job_finalize.s(backend.job.id)
-            items = [
-                harvest_job_item.s(backend.job.id, item.remote_id)
-                for item in backend.job.items
-            ]
-            chord(items)(finalize)
+    backend.harvest()
+
     
 
 @task(ignore_result=False, route='low.harvest')

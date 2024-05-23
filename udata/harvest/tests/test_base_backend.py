@@ -14,7 +14,7 @@ from udata.tests.helpers import assert_equal_dates
 
 from .factories import HarvestSourceFactory
 
-from ..backends import BaseSyncBackend, HarvestFilter, HarvestFeature
+from ..backends import BaseBackend, HarvestFilter, HarvestFeature
 from ..exceptions import HarvestException
 
 
@@ -22,7 +22,7 @@ class Unknown:
     pass
 
 
-class FakeBackend(BaseSyncBackend):
+class FakeBackend(BaseBackend):
     filters = (
         HarvestFilter('First filter', 'first', str),
         HarvestFilter('Second filter', 'second', str),

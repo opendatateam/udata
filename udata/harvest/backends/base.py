@@ -128,235 +128,7 @@ class BaseBackend(object):
     def get_filters(self):
         return self.config.get('filters', [])
 
-    def harvest(self):
-        '''Start the harvesting process'''
-        if self.perform_initialization() is not None:
-            self.process_items()
-            self.finalize()
-        return self.job
 
-    def perform_initialization(self):
-        '''Initialize the harvesting for a given job'''
-        log.debug('Initializing backend')
-        factory = HarvestJob if self.dryrun else HarvestJob.objects.create
-        self.job = factory(status='initializing',
-                           started=datetime.utcnow(),
-                           source=self.source)
-
-        before_harvest_job.send(self)
-
-        try:
-            self.initialize()
-            self.job.status = 'initialized'
-            if not self.dryrun:
-                self.job.save()
-        except HarvestValidationError as e:
-            log.info('Initialization failed for "%s" (%s)',
-                     safe_unicode(self.source.name), self.source.backend)
-            error = HarvestError(message=safe_unicode(e))
-            self.job.errors.append(error)
-            self.job.status = 'failed'
-            self.end()
-            return None
-        except Exception as e:
-            self.job.status = 'failed'
-            error = HarvestError(message=safe_unicode(e))
-            self.job.errors.append(error)
-            self.end()
-            msg = 'Initialization failed for "{0.name}" ({0.backend})'
-            log.exception(msg.format(self.source))
-            return None
-
-        if self.max_items:
-            self.job.items = self.job.items[:self.max_items]
-
-        if self.job.items:
-            log.debug('Queued %s items', len(self.job.items))
-
-        return len(self.job.items)
-
-    def initialize(self):
-        raise NotImplementedError
-
-    def process_items(self):
-        '''Process the data identified in the initialize stage'''
-        for item in self.job.items:
-            self.process_item(item)
-
-    def process_item(self, item):
-        log.debug('Processing: %s', item.remote_id)
-        item.status = 'started'
-        item.started = datetime.utcnow()
-        if not self.dryrun:
-            self.job.save()
-
-        try:
-            dataset = self.process(item)
-            if not dataset.harvest:
-                dataset.harvest = HarvestDatasetMetadata()
-            dataset.harvest.domain = self.source.domain
-            dataset.harvest.remote_id = item.remote_id
-            dataset.harvest.source_id = str(self.source.id)
-            dataset.harvest.last_update = datetime.utcnow()
-            dataset.harvest.backend = self.display_name
-
-            # unset archived status if needed
-            if dataset.harvest:
-                dataset.harvest.archived_at = None
-                dataset.harvest.archived = None
-            dataset.archived = None
-
-            # TODO permissions checking
-            if not dataset.organization and not dataset.owner:
-                if self.source.organization:
-                    dataset.organization = self.source.organization
-                elif self.source.owner:
-                    dataset.owner = self.source.owner
-
-            # TODO: Apply editble mappings
-
-            if self.dryrun:
-                dataset.validate()
-            else:
-                dataset.save()
-            item.dataset = dataset
-            item.status = 'done'
-        except HarvestSkipException as e:
-            log.info('Skipped item %s : %s', item.remote_id, safe_unicode(e))
-            item.status = 'skipped'
-            item.errors.append(HarvestError(message=safe_unicode(e)))
-        except HarvestValidationError as e:
-            log.info('Error validating item %s : %s', item.remote_id, safe_unicode(e))
-            item.status = 'failed'
-            item.errors.append(HarvestError(message=safe_unicode(e)))
-        except Exception as e:
-            log.exception('Error while processing %s : %s',
-                          item.remote_id,
-                          safe_unicode(e))
-            error = HarvestError(message=safe_unicode(e),
-                                 details=traceback.format_exc())
-            item.errors.append(error)
-            item.status = 'failed'
-
-        item.ended = datetime.utcnow()
-        if not self.dryrun:
-            self.job.save()
-
-    def autoarchive(self):
-        '''
-        Archive items that exist on the local instance but not on remote platform
-        after a grace period of HARVEST_AUTOARCHIVE_GRACE_DAYS days.
-        '''
-        log.debug('Running autoarchive')
-        limit_days = current_app.config['HARVEST_AUTOARCHIVE_GRACE_DAYS']
-        limit_date = date.today() - timedelta(days=limit_days)
-        remote_ids = [i.remote_id for i in self.job.items if i.status != 'archived']
-        q = {
-            'harvest__source_id': str(self.source.id),
-            'harvest__remote_id__nin': remote_ids,
-            'harvest__last_update__lt': limit_date
-        }
-        local_items_not_on_remote = Dataset.objects.filter(**q)
-
-        for dataset in local_items_not_on_remote:
-            if not dataset.harvest.archived_at:
-                archive_harvested_dataset(dataset, reason='not-on-remote', dryrun=self.dryrun)
-            # add a HarvestItem to the job list (useful for report)
-            # even when archiving has already been done (useful for debug)
-            item = self.add_item(dataset.harvest.remote_id)
-            item.dataset = dataset
-            item.status = 'archived'
-
-            if not self.dryrun:
-                self.job.save()
-
-    def process(self, item):
-        raise NotImplementedError
-
-    def add_item(self, identifier, *args, **kwargs):
-        item = HarvestItem(remote_id=str(identifier), args=args, kwargs=kwargs)
-        self.job.items.append(item)
-        return item
-
-    def finalize(self):
-        if self.source.autoarchive:
-            self.autoarchive()
-        self.job.status = 'done'
-        if any(i.status == 'failed' for i in self.job.items):
-            self.job.status += '-errors'
-        self.end()
-
-    def end(self):
-        self.job.ended = datetime.utcnow()
-        if not self.dryrun:
-            self.job.save()
-        after_harvest_job.send(self)
-
-    def get_dataset(self, remote_id):
-        '''Get or create a dataset given its remote ID (and its source)
-        We first try to match `source_id` to be source domain independent
-        '''
-        dataset = Dataset.objects(__raw__={
-            'harvest.remote_id': remote_id,
-            '$or': [
-                {'harvest.domain': self.source.domain},
-                {'harvest.source_id': str(self.source.id)},
-            ],
-        }).first()
-
-        if dataset:
-            return dataset
-
-        if self.source.organization:
-            return Dataset(organization=self.source.organization)
-        elif self.source.owner:
-            return Dataset(owner=self.source.owner)
-
-        return Dataset()
-
-    def validate(self, data, schema):
-        '''Perform a data validation against a given schema.
-
-        :param data: an object to validate
-        :param schema: a Voluptous schema to validate against
-        '''
-        try:
-            return schema(data)
-        except MultipleInvalid as ie:
-            errors = []
-            for error in ie.errors:
-                if error.path:
-                    field = '.'.join(str(p) for p in error.path)
-                    path = error.path
-                    value = data
-                    while path:
-                        attr = path.pop(0)
-                        try:
-                            if isinstance(value, (list, tuple)):
-                                attr = int(attr)
-                            value = value[attr]
-                        except Exception:
-                            value = None
-
-                    txt = safe_unicode(error).replace('for dictionary value', '')
-                    txt = txt.strip()
-                    if isinstance(error, RequiredFieldInvalid):
-                        msg = '[{0}] {1}'
-                    else:
-                        msg = '[{0}] {1}: {2}'
-                    try:
-                        msg = msg.format(field, txt, str(value))
-                    except Exception:
-                        msg = '[{0}] {1}'.format(field, txt)
-
-                else:
-                    msg = str(error)
-                errors.append(msg)
-            msg = '\n- '.join(['Validation error:'] + errors)
-            raise HarvestValidationError(msg)
-
-
-class BaseSyncBackend(BaseBackend):
     """
     Parent class that wrap children methods to add error management and debug logs.
 
@@ -414,7 +186,6 @@ class BaseSyncBackend(BaseBackend):
             self.end_job()
         
         return self.job
-        
 
     def process_dataset(self, remote_id: str, **kwargs) -> bool :
         '''
@@ -490,3 +261,95 @@ class BaseSyncBackend(BaseBackend):
             self.job.save()
 
         after_harvest_job.send(self)
+
+    def autoarchive(self):
+        '''
+        Archive items that exist on the local instance but not on remote platform
+        after a grace period of HARVEST_AUTOARCHIVE_GRACE_DAYS days.
+        '''
+        log.debug('Running autoarchive')
+        limit_days = current_app.config['HARVEST_AUTOARCHIVE_GRACE_DAYS']
+        limit_date = date.today() - timedelta(days=limit_days)
+        remote_ids = [i.remote_id for i in self.job.items if i.status != 'archived']
+        q = {
+            'harvest__source_id': str(self.source.id),
+            'harvest__remote_id__nin': remote_ids,
+            'harvest__last_update__lt': limit_date
+        }
+        local_items_not_on_remote = Dataset.objects.filter(**q)
+
+        for dataset in local_items_not_on_remote:
+            if not dataset.harvest.archived_at:
+                archive_harvested_dataset(dataset, reason='not-on-remote', dryrun=self.dryrun)
+            # add a HarvestItem to the job list (useful for report)
+            # even when archiving has already been done (useful for debug)
+            self.job.items.append(HarvestItem(
+                remote_id=str(dataset.harvest.remote_id),
+                dataset=dataset,
+                status='archived'
+            ))
+
+            self.save_job()
+
+    def get_dataset(self, remote_id):
+        '''Get or create a dataset given its remote ID (and its source)
+        We first try to match `source_id` to be source domain independent
+        '''
+        dataset = Dataset.objects(__raw__={
+            'harvest.remote_id': remote_id,
+            '$or': [
+                {'harvest.domain': self.source.domain},
+                {'harvest.source_id': str(self.source.id)},
+            ],
+        }).first()
+
+        if dataset:
+            return dataset
+
+        if self.source.organization:
+            return Dataset(organization=self.source.organization)
+        elif self.source.owner:
+            return Dataset(owner=self.source.owner)
+
+        return Dataset()
+
+    def validate(self, data, schema):
+        '''Perform a data validation against a given schema.
+
+        :param data: an object to validate
+        :param schema: a Voluptous schema to validate against
+        '''
+        try:
+            return schema(data)
+        except MultipleInvalid as ie:
+            errors = []
+            for error in ie.errors:
+                if error.path:
+                    field = '.'.join(str(p) for p in error.path)
+                    path = error.path
+                    value = data
+                    while path:
+                        attr = path.pop(0)
+                        try:
+                            if isinstance(value, (list, tuple)):
+                                attr = int(attr)
+                            value = value[attr]
+                        except Exception:
+                            value = None
+
+                    txt = safe_unicode(error).replace('for dictionary value', '')
+                    txt = txt.strip()
+                    if isinstance(error, RequiredFieldInvalid):
+                        msg = '[{0}] {1}'
+                    else:
+                        msg = '[{0}] {1}: {2}'
+                    try:
+                        msg = msg.format(field, txt, str(value))
+                    except Exception:
+                        msg = '[{0}] {1}'.format(field, txt)
+
+                else:
+                    msg = str(error)
+                errors.append(msg)
+            msg = '\n- '.join(['Validation error:'] + errors)
+            raise HarvestValidationError(msg)

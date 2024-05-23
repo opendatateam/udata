@@ -45,7 +45,7 @@ mock_process = ns.signal('backend:process')
 DEFAULT_COUNT = 3
 
 
-class FactoryBackend(backends.BaseSyncBackend):
+class FactoryBackend(backends.BaseBackend):
     name = 'factory'
     filters = (
         backends.HarvestFilter('Test', 'test', int, 'An integer'),

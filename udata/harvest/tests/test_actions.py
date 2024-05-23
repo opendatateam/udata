@@ -24,7 +24,7 @@ from ..models import (
     HarvestSource, HarvestJob, HarvestError,
     VALIDATION_PENDING, VALIDATION_ACCEPTED, VALIDATION_REFUSED
 )
-from ..backends import BaseSyncBackend
+from ..backends import BaseBackend
 from .. import actions, signals
 
 
@@ -38,7 +38,7 @@ pytestmark = [
 class HarvestActionsTest:
     def test_list_backends(self):
         for backend in actions.list_backends():
-            assert issubclass(backend, BaseSyncBackend)
+            assert issubclass(backend, BaseBackend)
 
     def test_list_sources(self):
         assert actions.list_sources() == []
