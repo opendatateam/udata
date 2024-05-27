@@ -59,8 +59,8 @@ class FactoryBackend(backends.BaseBackend):
     def inner_harvest(self):
         mock_initialize.send(self)
         for i in range(self.config.get('count', DEFAULT_COUNT)):
-            should_stop = self.process_dataset(str(i))
-            if should_stop:
+            self.process_dataset(str(i))
+            if self.is_done():
                 return
 
     def inner_process_dataset(self, item: HarvestItem):

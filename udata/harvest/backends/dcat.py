@@ -150,9 +150,9 @@ class DcatBackend(BaseBackend):
     def process_datasets(self, page_number: int, page: Graph):
         for node in page.subjects(RDF.type, DCAT.Dataset):
             remote_id = page.value(node, DCT.identifier)
-            should_stop = self.process_dataset(remote_id, page_number=page_number, page=page, node=node)
+            self.process_dataset(remote_id, page_number=page_number, page=page, node=node)
 
-            if should_stop:
+            if self.is_done():
                 return True
             
     def inner_process_dataset(self, item: HarvestItem, page_number: int, page: Graph, node):
