@@ -69,7 +69,26 @@ class HarvestFeature(object):
 
 
 class BaseBackend(object):
-    '''Base class for Harvester implementations'''
+    """
+    Base class that wrap children methods to add error management and debug logs.
+    Also provides a few helpers needed on all or some backends.
+
+    The flow is the following:
+        Parent                    Child
+
+        harvest         ->    inner_harvest()
+                                 /
+        process_dataset (create HarvestItem)  <------
+                    \
+                      --------> inner_process_dataset() (call get_dataset() and update object)
+
+
+        process_dataset:
+            1. Create HarvestItem
+            2. Call inner_process_dataset(item)
+            3. Save HarvestItem (dryrun)
+            4. Save dataset (dryrun)
+    """
 
     name = None
     display_name = None
@@ -127,28 +146,6 @@ class BaseBackend(object):
 
     def get_filters(self):
         return self.config.get('filters', [])
-
-
-    """
-    Parent class that wrap children methods to add error management and debug logs.
-
-    The flow is the following:
-        Parent                    Child
-
-        harvest         ->    inner_harvest()
-                                 /
-        process_dataset (create HarvestItem)  <------
-                    \
-                      --------> inner_process_dataset() (call get_dataset() and update object)
-
-
-        process_dataset:
-            1. Create HarvestItem
-            2. Call inner_process_dataset(item)
-            3. Save HarvestItem (dryrun)
-            4. Save dataset (dryrun)
-
-    """
 
     def inner_harvest(self):
         raise NotImplementedError
