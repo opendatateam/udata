@@ -385,28 +385,6 @@ class BaseBackend(object):
             return Dataservice(owner=self.source.owner)
 
         return Dataservice()
-    
-    def get_dataservice(self, remote_id):
-        '''Get or create a dataservice given its remote ID (and its source)
-        We first try to match `source_id` to be source domain independent
-        '''
-        dataservice = Dataservice.objects(__raw__={
-            'harvest.remote_id': remote_id,
-            '$or': [
-                {'harvest.domain': self.source.domain},
-                {'harvest.source_id': str(self.source.id)},
-            ],
-        }).first()
-
-        if dataservice:
-            return dataservice
-
-        if self.source.organization:
-            return Dataservice(organization=self.source.organization)
-        elif self.source.owner:
-            return Dataservice(owner=self.source.owner)
-
-        return Dataservice()
 
     def validate(self, data, schema):
         '''Perform a data validation against a given schema.
