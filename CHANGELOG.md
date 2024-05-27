@@ -12,6 +12,7 @@
 - Add `resources_downloads` to datasets metrics [#3042](https://github.com/opendatateam/udata/pull/3042)
 - Fix do not override resources extras on admin during update [#3043](https://github.com/opendatateam/udata/pull/3043) 
 - Endpoint /users is now protected by admin permissions [#3047](https://github.com/opendatateam/udata/pull/3047)
+- Fix trailing `/` inside `GeoZone` routes not redirecting. Disallow `/` inside `GeoZone` ids [#3045](https://github.com/opendatateam/udata/pull/3045)
 
 ## 8.0.0 (2024-04-23)
 
