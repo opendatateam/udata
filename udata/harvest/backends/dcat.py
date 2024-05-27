@@ -222,7 +222,7 @@ class CswDcatBackend(DcatBackend):
 
     DCAT_SCHEMA = 'http://www.w3.org/ns/dcat#'
 
-    def walk_graph(self, url: str, fmt: str, do) -> List[Graph]:
+    def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
         """
         Process the graphs by executing the `do()` callback on each page.
 
@@ -246,7 +246,6 @@ class CswDcatBackend(DcatBackend):
                 </csw:GetRecords>'''
         headers = {'Content-Type': 'application/xml'}
 
-        graphs = []
         page_number = 0
         start = 1
 
@@ -258,9 +257,6 @@ class CswDcatBackend(DcatBackend):
         if tree.tag == '{' + OWS_NAMESPACE + '}ExceptionReport':
             raise ValueError(f'Failed to query CSW:\n{content}')
         while tree:
-            graph = Graph(namespace_manager=namespace_manager)
-            graphs.append(graph)
-
             search_results = tree.find('csw:SearchResults', {'csw': CSW_NAMESPACE})
             if search_results is None:
                 log.error(f'No search results found for {url} on page {page_number}')
@@ -268,11 +264,10 @@ class CswDcatBackend(DcatBackend):
             for child in search_results:
                 subgraph = Graph(namespace_manager=namespace_manager)
                 subgraph.parse(data=ET.tostring(child), format=fmt)
-                graph += subgraph
 
-                should_stop = do(page_number, subgraph)
-                if should_stop:
-                    return graphs
+                yield page_number, subgraph
+                if self.is_done():
+                    return
 
             next_record = self.next_record_if_should_continue(start, search_results)
             if not next_record:
@@ -284,8 +279,6 @@ class CswDcatBackend(DcatBackend):
             tree = ET.fromstring(
                 self.post(url, data=body.format(start=start, schema=self.DCAT_SCHEMA),
                           headers=headers).content)
-
-        return graphs
 
 
 class CswIso19139DcatBackend(DcatBackend):
@@ -300,7 +293,7 @@ class CswIso19139DcatBackend(DcatBackend):
 
     XSL_URL = "https://raw.githubusercontent.com/SEMICeu/iso-19139-to-dcat-ap/master/iso-19139-to-dcat-ap.xsl"
 
-    def walk_graph(self, url: str, fmt: str, do) -> List[Graph]:
+    def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
         """
         Process the graphs by executing the `do()` callback on each page.
 
@@ -343,7 +336,6 @@ class CswIso19139DcatBackend(DcatBackend):
                 </csw:GetRecords>'''
         headers = {'Content-Type': 'application/xml'}
 
-        graphs = []
         page_number = 0
         start = 1
 
@@ -370,11 +362,9 @@ class CswIso19139DcatBackend(DcatBackend):
             if not subgraph.subjects(RDF.type, DCAT.Dataset):
                 raise ValueError("Failed to fetch CSW content")
 
-            graphs.append(subgraph)
-
-            should_stop = do(page_number, subgraph)
-            if should_stop:
-                return graphs
+            yield page_number, subgraph
+            if self.is_done():
+                return
 
             next_record = self.next_record_if_should_continue(start, search_results)
             if not next_record:
@@ -389,5 +379,3 @@ class CswIso19139DcatBackend(DcatBackend):
 
             tree_before_transform = ET.fromstring(response.content)
             tree = transform(tree_before_transform, CoupledResourceLookUp="'disabled'")
-
-        return graphs
