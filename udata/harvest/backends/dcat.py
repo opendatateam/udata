@@ -7,7 +7,7 @@ import boto3
 from flask import current_app
 from datetime import date
 import json
-from typing import List
+from typing import Generator, List
 
 from udata.core.dataset.models import Dataset
 from udata.rdf import (
@@ -65,15 +65,13 @@ class DcatBackend(BaseBackend):
         fmt = self.get_format()
         self.job.data = { 'format': fmt }
 
-        graphs = self.walk_graph(
-            self.source.url,
-            fmt,
-            lambda page_number, page: self.process_one_datasets_page(page_number, page),
-        )
+        serialized_graphs = []
+
+        for page_number, page in self.walk_graph(self.source.url, fmt):
+            self.process_one_datasets_page(page_number, page)
+            serialized_graphs.append(page.serialize(format=fmt, indent=None))
 
         # TODO call `walk_graph` with `process_dataservices`
-
-        serialized_graphs = [graph.serialize(format=fmt, indent=None) for graph in graphs]
 
         # The official MongoDB document size in 16MB. The default value here is 15MB to account for other fields in the document (and for difference between * 1024 vs * 1000).
         max_harvest_graph_size_in_mongo = current_app.config.get('HARVEST_MAX_CATALOG_SIZE_IN_MONGO')
@@ -112,14 +110,13 @@ class DcatBackend(BaseBackend):
                 raise ValueError(msg)
         return fmt
 
-    def walk_graph(self, url: str, fmt: str, do) -> List[Graph]:
+    def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
         """
         Process the graphs by executing the `do()` callback on each page.
 
         Returns all the pages in an array (index is the page number, value is 
         the rdflib.Graph of the page) for debug purposes (saved in `HarvestJob`)
         """
-        graphs = []
         page_number = 0
         while url:
             subgraph = Graph(namespace_manager=namespace_manager)
@@ -137,15 +134,12 @@ class DcatBackend(BaseBackend):
                     pagination = subgraph.resource(pagination)
                     url = url_from_rdf(pagination, prop)
                     break
-            graphs.append(subgraph)
 
-            should_stop = do(page_number, subgraph)
-            if should_stop:
-                return graphs
+            yield page_number, subgraph
+            if self.is_done():
+                return
 
             page_number += 1
-
-        return graphs
     
     def process_one_datasets_page(self, page_number: int, page: Graph):
         for node in page.subjects(RDF.type, DCAT.Dataset):
@@ -153,7 +147,7 @@ class DcatBackend(BaseBackend):
             self.process_dataset(remote_id, page_number=page_number, page=page, node=node)
 
             if self.is_done():
-                return True
+                return
             
     def inner_process_dataset(self, item: HarvestItem, page_number: int, page: Graph, node):
         item.kwargs['page_number'] = page_number
