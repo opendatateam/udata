@@ -11,6 +11,7 @@
 - Add `email` to membership request list API response, add `since` to org members API responses, add `email` to members of org on show org endpoint for org's admins and editors [#3038](https://github.com/opendatateam/udata/pull/3038)
 - Add `resources_downloads` to datasets metrics [#3042](https://github.com/opendatateam/udata/pull/3042)
 - Fix do not override resources extras on admin during update [#3043](https://github.com/opendatateam/udata/pull/3043) 
+- Endpoint /users is now protected by admin permissions [#3047](https://github.com/opendatateam/udata/pull/3047)
 
 ## 8.0.0 (2024-04-23)
 
