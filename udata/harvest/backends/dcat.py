@@ -68,7 +68,7 @@ class DcatBackend(BaseBackend):
         graphs = self.walk_graph(
             self.source.url,
             fmt,
-            lambda page_number, page: self.process_datasets(page_number, page),
+            lambda page_number, page: self.process_one_datasets_page(page_number, page),
         )
 
         # TODO call `walk_graph` with `process_dataservices`
@@ -147,7 +147,7 @@ class DcatBackend(BaseBackend):
 
         return graphs
     
-    def process_datasets(self, page_number: int, page: Graph):
+    def process_one_datasets_page(self, page_number: int, page: Graph):
         for node in page.subjects(RDF.type, DCAT.Dataset):
             remote_id = page.value(node, DCT.identifier)
             self.process_dataset(remote_id, page_number=page_number, page=page, node=node)
