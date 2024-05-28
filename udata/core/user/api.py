@@ -226,6 +226,7 @@ class UserListAPI(API):
     fields = user_fields
     form = UserProfileForm
 
+    @api.secure(admin_permission)
     @api.doc('list_users')
     @api.expect(user_parser.parser)
     @api.marshal_with(user_page_fields)
@@ -269,6 +270,12 @@ class UserAvatarAPI(API):
         return {'image': user.avatar}
 
 
+
+delete_parser = api.parser()
+delete_parser.add_argument(
+    'no_mail', type=bool, help='Do not send a mail to notify the user of the deletion',
+    location='args', default=False)
+
 @ns.route('/<user:user>/', endpoint='user')
 @api.response(404, 'User not found')
 @api.response(410, 'User is not active or has been deleted')
@@ -297,22 +304,19 @@ class UserAPI(API):
 
     @api.secure(admin_permission)
     @api.doc('delete_user')
+    @api.expect(delete_parser)
     @api.response(204, 'Object deleted')
     @api.response(403, 'When trying to delete yourself')
     def delete(self, user):
         '''Delete a user given its identifier'''
+        args = delete_parser.parse_args()
         if user.deleted:
             api.abort(410, 'User has already been deleted')
         if user == current_user._get_current_object():
             api.abort(403, 'You cannot delete yourself with this API. ' +
                       'Use the "me" API instead.')
-        if user.avatar.filename is not None:
-            storage = storages.avatars
-            storage.delete(user.avatar.filename)
-            storage.delete(user.avatar.original)
-            for key, value in user.avatar.thumbnails.items():
-                storage.delete(value)
-        user.mark_as_deleted()
+        
+        user.mark_as_deleted(notify=not args['no_mail'])
         return '', 204
 
 

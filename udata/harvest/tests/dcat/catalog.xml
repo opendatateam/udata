@@ -23,6 +23,7 @@
         <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T18:59:02.737480</dcterms:issued>
         <dcterms:description>Dataset 3 description</dcterms:description>
         <dcat:keyword>Tag 1</dcat:keyword>
+        <dcat:theme rdf:resource="http://data.europa.eu/bna/c_dd313021"/>
         <dcat:distribution rdf:resource="datasets/3/resources/1"/>
         <dct:license>Licence Ouverte Version 2.0</dct:license>
         <dct:accessRights rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1e"/>
