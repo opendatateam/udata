@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 8.0.1 (2024-05-28)
 
 - Add dataservices in beta [#2986](https://github.com/opendatateam/udata/pull/2986)
