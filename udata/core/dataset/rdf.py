@@ -22,7 +22,7 @@ from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMet
 from udata.models import db, ContactPoint
 from udata.rdf import (
     DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD, RDFS, contact_point_from_rdf,
-    namespace_manager, rdf_value, sanitize_html, schema_from_rdf, themes_from_rdf, url_from_rdf
+    namespace_manager, print_graph, rdf_value, sanitize_html, schema_from_rdf, themes_from_rdf, url_from_rdf
 )
 from udata.utils import get_by, safe_unicode
 from udata.uris import endpoint_for
@@ -480,7 +480,12 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
 
     d = graph.resource(node)
 
+    print_graph(graph, d)
+
     dataset.title = rdf_value(d, DCT.title)
+    if not dataset.title:
+        return None
+
     # Support dct:abstract if dct:description is missing (sometimes used instead)
     description = d.value(DCT.description) or d.value(DCT.abstract)
     dataset.description = sanitize_html(description)

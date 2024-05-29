@@ -317,6 +317,10 @@ class CswIso19139DcatBackend(DcatBackend):
                                     </ogc:PropertyIsEqualTo>
                                     <ogc:PropertyIsEqualTo>
                                         <ogc:PropertyName>dc:type</ogc:PropertyName>
+                                        <ogc:Literal>service</ogc:Literal>
+                                    </ogc:PropertyIsEqualTo>
+                                    <ogc:PropertyIsEqualTo>
+                                        <ogc:PropertyName>dc:type</ogc:PropertyName>
                                         <ogc:Literal>series</ogc:Literal>
                                     </ogc:PropertyIsEqualTo>
                                 </ogc:Or>
