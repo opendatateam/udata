@@ -51,15 +51,4 @@ def dataservice_from_rdf(graph: Graph, dataservice: Optional[Dataservice] = None
 
     dataservice.tags = themes_from_rdf(d)
 
-    if not dataservice.harvest:
-        dataservice.harvest = HarvestMetadata()
-
-    if source is not None:
-        dataservice.harvest.backend = source.backend
-
-        dataservice.harvest.source_id = source.id
-        dataservice.harvest.source_url = source.url
-
-    dataservice.harvest.last_harvested_at = datetime.utcnow()
-
     return dataservice
