@@ -161,33 +161,6 @@ class DcatBackend(BaseBackend):
                 return node
         raise ValueError(f'Unable to find dataset with DCT.identifier:{item.remote_id}')
 
-    def process(self, item):
-        if item.remote_id == 'None':
-            raise ValueError('The DCT.identifier is missing on this DCAT.Dataset record')
-        graph = Graph(namespace_manager=namespace_manager)
-
-        if self.job.data.get('graphs') is not None:
-            graphs = self.job.data['graphs']
-        else:
-            bucket = current_app.config.get('HARVEST_GRAPHS_S3_BUCKET')
-            if bucket is None:
-                raise ValueError(f"No bucket configured but the harvest job item {item.id} on job {self.job.id} doesn't have a graph in MongoDB.")
-
-            graphs = get_from_json(bucket, self.job.data['filename'])
-            if graphs is None:
-                raise ValueError(f"The file '{self.job.data['filename']}' is missing in S3 bucket '{bucket}'")
-
-        data = graphs[item.kwargs['page']]
-        format = self.job.data['format']
-
-        graph.parse(data=bytes(data, encoding='utf8'), format=format)
-        node = self.get_node_from_item(graph, item)
-
-        dataset = self.get_dataset(item.remote_id)
-        dataset = dataset_from_rdf(graph, dataset, node=node)
-        return dataset
-    
-
     def next_record_if_should_continue(self, start, search_results):
         next_record = int(search_results.attrib['nextRecord'])
         matched_count = int(search_results.attrib['numberOfRecordsMatched'])
