@@ -1,27 +1,23 @@
 
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 from rdflib import RDF, Graph
 
 from udata.core.dataservices.models import Dataservice, HarvestMetadata
-from udata.core.dataset.models import License
+from udata.core.dataset.models import Dataset, License
 from udata.core.dataset.rdf import sanitize_html
 from udata.harvest.models import HarvestSource
 from udata.rdf import DCAT, DCT, contact_point_from_rdf, print_graph, rdf_value, theme_labels_from_rdf, themes_from_rdf, url_from_rdf
 
 
-def dataservice_from_rdf(graph: Graph, dataservice: Optional[Dataservice] = None, node=None, source: Optional[HarvestSource] = None):
+def dataservice_from_rdf(graph: Graph, dataservice: Dataservice, node, datasets: List[Dataset]) -> Dataservice :
     '''
     Create or update a dataset from a RDF/DCAT graph
     '''
-    dataservice = dataservice or Dataservice()
-
     if node is None:  # Assume first match is the only match
         node = graph.value(predicate=RDF.type, object=DCAT.DataService)
 
     d = graph.resource(node)
-
-    print_graph(graph, d)
 
     dataservice.title = rdf_value(d, DCT.title)
     dataservice.description = sanitize_html(d.value(DCT.description) or d.value(DCT.abstract))
@@ -31,16 +27,19 @@ def dataservice_from_rdf(graph: Graph, dataservice: Optional[Dataservice] = None
 
     dataservice.contact_point = contact_point_from_rdf(d, dataservice) or dataservice.contact_point
 
-    print('----')
-    print('----')
-    print('----')
-    for test in d.objects(DCAT.servesDataset):
-        print(test.value(DCT.identifier))
-        # for x, y, z in test:
-        #     print(x, y, z)
-    print('----')
-    print('----')
-    print('----')
+    for dataset_node in d.objects(DCAT.servesDataset):
+        id = dataset_node.value(DCT.identifier)
+        dataset = next((d for d in datasets if d is not None and d.harvest.remote_id == id.toPython()), None)
+        print('---')
+        print(id)
+        print_graph(graph, dataset_node)
+        print('---')
+        for d in datasets:
+            if d is not None:
+                print(d.harvest.remote_id)
+        if dataset is not None:
+            print('found dataset!')
+            dataservice.datasets.append(dataset.id)
 
     license = rdf_value(d, DCT.license)
     if license is not None:

@@ -170,7 +170,7 @@ class DcatBackend(BaseBackend):
         item.kwargs['page_number'] = page_number
 
         dataservice = self.get_dataservice(item.remote_id)
-        return dataservice_from_rdf(page, dataservice, node=node)
+        return dataservice_from_rdf(page, dataservice, node, [item.dataset for item in self.job.items])
 
     def get_node_from_item(self, graph, item):
         for node in graph.subjects(RDF.type, DCAT.Dataset):
