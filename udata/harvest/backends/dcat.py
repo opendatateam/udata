@@ -155,6 +155,10 @@ class DcatBackend(BaseBackend):
     def process_one_dataservices_page(self, page_number: int, page: Graph):
         for node in page.subjects(RDF.type, DCAT.DataService):
             remote_id = page.value(node, DCT.identifier)
+            if not remote_id:
+                log.warning(f"Skipping dataservice because no `remote_id`")
+                continue
+            
             self.process_dataservice(remote_id, page_number=page_number, page=page, node=node)
 
             if self.is_done():
@@ -336,6 +340,7 @@ class CswIso19139DcatBackend(DcatBackend):
         response = self.post(url, data=body.format(start=start, schema=self.ISO_SCHEMA),
                              headers=headers)
         response.raise_for_status()
+
 
         tree_before_transform = ET.fromstring(response.content)
         # Disabling CoupledResourceLookUp to prevent failure on xlink:href

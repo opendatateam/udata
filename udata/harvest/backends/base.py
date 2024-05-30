@@ -12,6 +12,7 @@ from udata.core.dataservices.models import Dataservice
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
 from udata.core.dataset.models import HarvestDatasetMetadata
+from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.models import Dataset
 from udata.utils import safe_unicode
 
@@ -207,7 +208,7 @@ class BaseBackend(object):
             dataset = self.inner_process_dataset(item, **kwargs)
 
             # Use `item.remote_id` because `inner_process_dataset` could have modified it.
-            dataset.harvest = self.update_harvest_info(dataset.harvest, item.remote_id)
+            dataset.harvest = self.update_harvest_info(HarvestDatasetMetadata, dataset.harvest, item.remote_id)
             dataset.archived = None
 
             # TODO: Apply editable mappings
@@ -257,7 +258,7 @@ class BaseBackend(object):
         try:
             dataservice = self.inner_process_dataservice(item, **kwargs)
 
-            dataservice.harvest = self.update_harvest_info(dataservice.harvest, remote_id)
+            dataservice.harvest = self.update_harvest_info(HarvestDataserviceMetadata, dataservice.harvest, remote_id)
             dataservice.archived = None
 
             # TODO: Apply editable mappings
@@ -288,9 +289,9 @@ class BaseBackend(object):
             item.ended = datetime.utcnow()
             self.save_job()
 
-    def update_harvest_info(self, harvest: Optional[HarvestDatasetMetadata], remote_id: int):
+    def update_harvest_info(self, default, harvest: Optional[HarvestDatasetMetadata], remote_id: int):
         if not harvest:
-            harvest = HarvestDatasetMetadata()
+            harvest = default()
         harvest.domain = self.source.domain
         harvest.remote_id = remote_id
         harvest.source_id = str(self.source.id)
