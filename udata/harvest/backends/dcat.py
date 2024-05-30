@@ -144,6 +144,10 @@ class DcatBackend(BaseBackend):
     def process_one_datasets_page(self, page_number: int, page: Graph):
         for node in page.subjects(RDF.type, DCAT.Dataset):
             remote_id = page.value(node, DCT.identifier)
+            if not remote_id:
+                log.warning(f"Skipping dataset because no `remote_id`")
+                continue
+
             self.process_dataset(remote_id, page_number=page_number, page=page, node=node)
 
             if self.is_done():
