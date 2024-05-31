@@ -6,6 +6,7 @@ import mongoengine
 from udata.api import api, API
 from udata.api_fields import patch
 from udata.core.dataset.permissions import OwnablePermission
+from udata.core.followers.api import FollowAPI
 from .models import Dataservice
 from udata.models import db
 
@@ -82,3 +83,10 @@ class DataserviceAPI(API):
 
         return '', 204
 
+
+@ns.route('/<id>/followers/', endpoint='dataservice_followers')
+@ns.doc(get={'id': 'list_dataservice_followers'},
+        post={'id': 'follow_dataservice'},
+        delete={'id': 'unfollow_dataservice'})
+class DataserviceFollowersAPI(FollowAPI):
+    model = Dataservice
