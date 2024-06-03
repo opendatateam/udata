@@ -112,10 +112,7 @@ class DcatBackend(BaseBackend):
 
     def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
         """
-        Process the graphs by executing the `do()` callback on each page.
-
-        Returns all the pages in an array (index is the page number, value is 
-        the rdflib.Graph of the page) for debug purposes (saved in `HarvestJob`)
+        Yield all RDF pages as `Graph` from the source
         """
         page_number = 0
         while url:
@@ -197,10 +194,7 @@ class CswDcatBackend(DcatBackend):
 
     def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
         """
-        Process the graphs by executing the `do()` callback on each page.
-
-        Returns all the pages in an array (index is the page number, value is 
-        the rdflib.Graph of the page) for debug purposes (saved in `HarvestJob`)
+        Yield all RDF pages as `Graph` from the source
         """
         body = '''<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
                                   xmlns:gmd="http://www.isotc211.org/2005/gmd"
@@ -268,16 +262,8 @@ class CswIso19139DcatBackend(DcatBackend):
 
     def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
         """
-        Process the graphs by executing the `do()` callback on each page.
-
-        Returns all the pages in an array (index is the page number, value is 
-        the rdflib.Graph of the page) for debug purposes (saved in `HarvestJob`)
-
-        Parse CSW graph querying ISO schema.
-        Use SEMIC GeoDCAT-AP XSLT to map it to a correct version.
-        See https://github.com/SEMICeu/iso-19139-to-dcat-ap for more information on the XSLT.
+        Yield all RDF pages as `Graph` from the source
         """
-
         # Load XSLT
         xsl = ET.fromstring(self.get(self.XSL_URL).content)
         transform = ET.XSLT(xsl)
