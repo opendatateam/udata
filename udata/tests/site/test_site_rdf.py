@@ -228,3 +228,19 @@ class SiteRdfViewsTest:
         url = url_for('api.site_rdf_catalog_format', format='unknown')
         response = client.get(url)
         assert404(response)
+
+    def test_catalog_rdf_filter_tag(self, client):
+        DatasetFactory.create_batch(4, tags=['my-tag'])
+        DatasetFactory.create_batch(3)
+        url = url_for('api.site_rdf_catalog_format', format='xml', tag='my-tag')
+
+        response = client.get(url, headers={'Accept': 'application/xml'})
+        assert200(response)
+
+        graph = Graph().parse(data=response.data, format='xml')
+
+        datasets = list(graph.subjects(RDF.type, DCAT.Dataset))
+        assert len(datasets) == 4
+
+        for dat in datasets:
+            assert graph.value(dat, DCAT.keyword) == Literal('my-tag')

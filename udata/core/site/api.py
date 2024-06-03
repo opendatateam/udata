@@ -105,7 +105,10 @@ class SiteRdfCatalogFormat(API):
         params = multi_to_dict(request.args)
         page = int(params.get('page', 1))
         page_size = int(params.get('page_size', 100))
-        datasets = Dataset.objects.visible().paginate(page, page_size)
+        datasets = Dataset.objects.visible()
+        if 'tag' in params:
+            datasets = datasets.filter(tags=params.get('tag', ''))
+        datasets = datasets.paginate(page, page_size)
         catalog = build_catalog(current_site, datasets, format=format)
         # bypass flask-restplus make_response, since graph_response
         # is handling the content negociation directly
