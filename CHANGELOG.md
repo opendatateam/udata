@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add DCAT-AP HVD properties in RDF output if the dataset is tagged hvd [#3050](https://github.com/opendatateam/udata/pull/3050)
 
 ## 8.0.1 (2024-05-28)
 
