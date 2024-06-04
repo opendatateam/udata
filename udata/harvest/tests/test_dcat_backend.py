@@ -240,6 +240,19 @@ class DcatBackendTest:
         actions.purge_jobs()
         assert get_from_json(current_app.config.get('HARVEST_GRAPHS_S3_BUCKET'), job.data['filename']) is None
 
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas', HARVEST_MAX_ITEMS=2)
+    def test_harvest_max_items(self, rmock):
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
+
+        filename = 'bnodes.xml'
+        url = mock_dcat(rmock, filename)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat', url=url, organization=org)
+
+        actions.run(source.slug)
+
+        assert Dataset.objects.count() == 2
+        assert HarvestJob.objects.first().status == 'done'
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_harvest_spatial(self, rmock):
