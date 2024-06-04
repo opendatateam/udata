@@ -13,7 +13,7 @@
 >
   <dcat:Catalog rdf:about="http://data.test.org/">
     <dcat:dataset>
-      <dcat:Dataset>
+      <dcat:Dataset rdf:about="dataset-3">
         <dcterms:title>Dataset 3</dcterms:title>
         <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T19:01:24.184120</dcterms:modified>
         <owl:versionInfo>1.0</owl:versionInfo>
@@ -72,7 +72,7 @@
       </dcat:Dataset>
     </dcat:dataset>
     <dcat:dataset>
-      <dcat:Dataset>
+      <dcat:Dataset rdf:about="dataset-2">
         <dcat:keyword>Tag 1</dcat:keyword>
         <dcat:distribution rdf:resource="http://data.test.org/datasets/2/resources/1"/>
         <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T19:01:24.184120</dcterms:modified>
@@ -105,12 +105,8 @@
         <dcat:endpointURL rdf:resource="https://data.paris2024.org/api/explore/v2.1/" />
         <dcat:endpointDescription rdf:resource="https://data.paris2024.org/api/explore/v2.1/swagger.json" />
         <dcat:landingPage rdf:resource="https://data.paris2024.org/api/explore/v2.1/console" />
-        <dcat:servesDataset rdf:resource="https://data.paris2024.org/explore/dataset/paris-2024-centres-de-preparation-aux-jeux/" />
-        <dcat:servesDataset rdf:resource="https://data.paris2024.org/explore/dataset/paris-2024-evenements-olympiade-culturelle/" />
-        <dcat:servesDataset rdf:resource="https://data.paris2024.org/explore/dataset/paris-2024-boutiques-officielles/" />
-        <dcat:servesDataset rdf:resource="https://data.paris2024.org/explore/dataset/paris-2024-sites-de-competition/" />
-        <dcat:servesDataset rdf:resource="https://data.paris2024.org/explore/dataset/paris-2024-parkings-velo-spectateurs-en-idf/" />
-        <dcat:servesDataset rdf:resource="https://data.paris2024.org/explore/dataset/paris-2024-faq/" />
+        <dcat:servesDataset rdf:resource="dataset-2" />
+        <dcat:servesDataset rdf:resource="dataset-3" />
       </dcat:DataService>
     </dcat:service>
     <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-15T09:19:51.723691</dcterms:modified>
