@@ -6,6 +6,7 @@
 - Add DCAT-AP HVD properties in RDF output if the dataset is tagged hvd [#3050](https://github.com/opendatateam/udata/pull/3050)
 - Allow dataservices to be discussed and followed [#3049](https://github.com/opendatateam/udata/pull/3049)
 - Add purge-dataservices job [#3049](https://github.com/opendatateam/udata/pull/3049)
+- Harvest all the available polygons from a spatial coverage [#3039](https://github.com/opendatateam/udata/pull/3039)
 
 ## 8.0.1 (2024-05-28)
 
