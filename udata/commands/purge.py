@@ -5,6 +5,7 @@ import click
 from udata.commands import cli, success
 
 from udata.core.dataset.tasks import purge_datasets
+from udata.core.dataservices.tasks import purge_dataservices
 from udata.core.organization.tasks import purge_organizations
 from udata.core.reuse.tasks import purge_reuses
 
@@ -15,7 +16,8 @@ log = logging.getLogger(__name__)
 @click.option('-d', '--datasets', is_flag=True)
 @click.option('-r', '--reuses', is_flag=True)
 @click.option('-o', '--organizations', is_flag=True)
-def purge(datasets, reuses, organizations):
+@click.option('--dataservices', is_flag=True)
+def purge(datasets, reuses, organizations, dataservices):
     '''
     Permanently remove data flagged as deleted.
 
@@ -34,5 +36,9 @@ def purge(datasets, reuses, organizations):
     if purge_all or organizations:
         log.info('Purging organizations')
         purge_organizations()
+
+    if purge_all or dataservices:
+        log.info('Purging dataservices')
+        purge_dataservices()
 
     success('Done')
