@@ -6,9 +6,10 @@ from flask.signals import Namespace
 
 from udata.factories import ModelFactory
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.models import Dataset
 
 from .. import backends
-from ..models import HarvestSource, HarvestJob
+from ..models import HarvestItem, HarvestSource, HarvestJob
 
 
 def dtfactory(start, end):
@@ -55,14 +56,20 @@ class FactoryBackend(backends.BaseBackend):
         backends.HarvestFeature('toggled', 'Toggled', 'A togglable', True),
     )
 
-    def initialize(self):
+    def inner_harvest(self):
         mock_initialize.send(self)
         for i in range(self.config.get('count', DEFAULT_COUNT)):
-            self.add_item(i)
+            self.process_dataset(str(i))
+            if self.is_done():
+                return
 
-    def process(self, item):
-        mock_process.send(self, item=item)
-        return DatasetFactory.build(title='dataset-{0}'.format(item.remote_id))
+    def inner_process_dataset(self, item: HarvestItem):
+        mock_process.send(self, item=item.remote_id)
+
+        dataset = self.get_dataset(item.remote_id)
+        dataset.title = f'dataset-{item.remote_id}'
+
+        return dataset
 
 
 class MockBackendsMixin(object):

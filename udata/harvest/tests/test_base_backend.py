@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 from dateutil.parser import parse
 from voluptuous import Schema
 
+from udata.harvest.models import HarvestItem
 from udata.utils import faker
 from udata.core.dataset import tasks
 from udata.core.dataset.factories import DatasetFactory
@@ -31,12 +32,16 @@ class FakeBackend(BaseBackend):
         HarvestFeature('enabled', 'A test feature enabled by default', default=True),
     )
 
-    def initialize(self):
+    def inner_harvest(self):
         for i in range(self.source.config.get('nb_datasets', 3)):
-            self.add_item('fake-{0}'.format(i))
+            remote_id = f'fake-{i}'
+            self.process_dataset(remote_id)
+            if self.is_done():
+                return
 
-    def process(self, item):
+    def inner_process_dataset(self, item: HarvestItem):
         dataset = self.get_dataset(item.remote_id)
+
         for key, value in DatasetFactory.as_dict(visible=True).items():
             setattr(dataset, key, value)
         if self.source.config.get('last_modified'):
@@ -219,8 +224,7 @@ class BaseBackendTest:
         assert 'archived_at' not in dataset_no_arch.harvest
 
         # test unarchive: archive manually then relaunch harvest
-        q = {'harvest__remote_id': 'fake-1'}
-        dataset = Dataset.objects.get(**q)
+        dataset = Dataset.objects.get(**{'harvest__remote_id': 'fake-1'})
         dataset.archived = datetime.utcnow()
         dataset.harvest.archived = 'not-on-remote'
         dataset.harvest.archived_at = datetime.utcnow()

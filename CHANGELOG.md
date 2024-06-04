@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- **breaking change** Harvest backend is now sync [#3030](https://github.com/opendatateam/udata/pull/3030)
 
 ## 8.0.1 (2024-05-28)
 
