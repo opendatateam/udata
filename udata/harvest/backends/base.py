@@ -209,8 +209,6 @@ class BaseBackend(object):
         self.save_job()
 
         try:
-            # Use `item.remote_id` because `inner_process_dataset` could have modified it.
-            dataset.harvest = self.update_harvest_info(HarvestDatasetMetadata, dataset.harvest, item.remote_id)
             if not remote_id:
                 raise HarvestSkipException("missing identifier")
 
@@ -265,6 +263,9 @@ class BaseBackend(object):
         self.save_job()
 
         try:
+            if not remote_id:
+                raise HarvestSkipException("missing identifier")
+
             dataservice = self.inner_process_dataservice(item, **kwargs)
 
             dataservice.harvest = self.update_harvest_info(HarvestDataserviceMetadata, dataservice.harvest, remote_id)
