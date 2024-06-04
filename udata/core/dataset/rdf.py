@@ -391,8 +391,8 @@ def spatial_from_rdf(graph):
     # We first try to build a big MultiPolygon with all the spatial coverages found in RDF.
     # We deduplicate the coordinates because some backend provides the same coordinates multiple
     # times in different format. We only support in this first pass Polygons and MultiPolygons. Not sure
-    # if there is other types of spatial coverage worth integrating (points? line strings?). But these other
-    # formats are not compatible to be merge in the unique stored representation in MongoDB, we'll deal with them in a second pass.
+    # if there are other types of spatial coverage worth integrating (points? line strings?). But these other
+    # formats are not compatible to be merged in the unique stored representation in MongoDB, we'll deal with them in a second pass.
     # The merging lose the properties and other information inside the GeoJSON…
     # Note that having multiple `Polygon` is not really the DCAT way of doing things, the standard require that you use 
     # a `MultiPolygon` in this case. We support this right now, and wait and see if it raises problems in the future for
@@ -407,11 +407,11 @@ def spatial_from_rdf(graph):
                 if coordinates not in polygons:
                     polygons.append(coordinates)
         else:
-            log.warning(f"Unknown GeoJSON type '{geojson['type']}'")
+            log.warning(f"Unsupported GeoJSON type '{geojson['type']}'")
             continue
 
     if not polygons:
-        log.warning(f"Only unknown types inside GeoJSON data.")
+        log.warning(f"No supported types found in the GeoJSON data.")
         return None
 
     spatial_coverage = SpatialCoverage(geom={
