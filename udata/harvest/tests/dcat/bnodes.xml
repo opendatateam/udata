@@ -90,16 +90,16 @@
         <dcterms:title>Dataset 2</dcterms:title>
         <dct:spatial>
             <ogc:Polygon>
-                <locn:geometry rdf:datatype="https://www.iana.org/assignments/media-types/application/vnd.geo+json"><![CDATA[{"type":"Polygon","coordinates":[[[-6.4664422,51.91456168],[10.99449709,51.91456168],[10.99449709,40.9877682],[-6.4664422,40.9877682],[-6.4664422,51.91456168]]]}]]></locn:geometry>
+                <locn:geometry rdf:datatype="https://www.iana.org/assignments/media-types/application/vnd.geo+json"><![CDATA[{"type":"Polygon","coordinates":[[[-6,51],[10,51],[10,40],[-6,40],[-6,51]]]}]]></locn:geometry>
                 <geo:asWKT rdf:datatype="http://www.opengis.net/rdf#wktLiteral">
-                    Polygon((159.35111223 -25.02143478, 159.35111223 -11.252615, 212.55423544 -11.252615, 212.55423544 -25.02143478, 159.35111223 -25.02143478))
+                    Polygon((159 -25, 159 -11, 212 -11, 212 -25, 159 -25))
                 </geo:asWKT>
                 <geo:asWKT rdf:datatype="http://www.opengis.net/rdf#wktLiteral">
-                    Polygon((4.44641288 45.54214467, 4.44641288 46.01316963, 4.75655252 46.01316963, 4.75655252 45.54214467, 4.44641288 45.54214467))
+                    Polygon((4 45, 4 46, 4 46, 4 45, 4 45))
                 </geo:asWKT>
-                <locn:geometry rdf:datatype="https://www.iana.org/assignments/media-types/application/vnd.geo+json"><![CDATA[{"type":"Polygon","coordinates":[[[4.44641288, 45.54214467], [4.44641288, 46.01316963], [4.75655252, 46.01316963], [4.75655252, 45.54214467], [4.44641288, 45.54214467]]]}]]></locn:geometry>
+                <locn:geometry rdf:datatype="https://www.iana.org/assignments/media-types/application/vnd.geo+json"><![CDATA[{"type":"Polygon","coordinates":[[[4, 45], [4, 46], [4, 46], [4, 45], [4, 45]]]}]]></locn:geometry>
                 <geo:asWKT rdf:datatype="http://www.opengis.net/rdf#wktLiteral">
-                    Polygon((159.35111223 -25.02143478, 159.35111223 -11.252615, 212.55423544 -11.252615, 212.55423544 -25.02143478, 159.35111223 -25.02143478))
+                    Polygon((159 -25, 159 -11, 212 -11, 212 -25, 159 -25))
                 </geo:asWKT>
             </ogc:Polygon>
         </dct:spatial>

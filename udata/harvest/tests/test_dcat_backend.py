@@ -268,7 +268,7 @@ class DcatBackendTest:
         datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
 
         assert datasets['1'].spatial == None
-        assert datasets['2'].spatial.geom == {'type': 'MultiPolygon', 'coordinates': [[[[-6.4664422,51.91456168],[10.99449709,51.91456168],[10.99449709,40.9877682],[-6.4664422,40.9877682],[-6.4664422,51.91456168]]], [[[4.44641288, 45.54214467], [4.44641288, 46.01316963], [4.75655252, 46.01316963], [4.75655252, 45.54214467], [4.44641288, 45.54214467]]], [[[159.35111223, -25.02143478], [159.35111223, -11.252615], [212.55423544, -11.252615], [212.55423544, -25.02143478], [159.35111223, -25.02143478]]]]}
+        assert datasets['2'].spatial.geom == {'type': 'MultiPolygon', 'coordinates': [[[[-6,51],[10,51],[10,40],[-6,40],[-6,51]]], [[[4, 45], [4, 46], [4, 46], [4, 45], [4, 45]]], [[[159, -25.], [159, -11], [212, -11], [212, -25.], [159, -25.]]]]}
         assert datasets['3'].spatial == None
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
