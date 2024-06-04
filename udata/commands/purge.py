@@ -23,7 +23,7 @@ def purge(datasets, reuses, organizations, dataservices):
 
     If no model flag is given, all models are purged.
     '''
-    purge_all = not any((datasets, reuses, organizations))
+    purge_all = not any((datasets, reuses, organizations, dataservices))
 
     if purge_all or datasets:
         log.info('Purging datasets')
