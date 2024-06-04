@@ -75,6 +75,7 @@ class BaseBackend(object):
     Base class that wrap children methods to add error management and debug logs.
     Also provides a few helpers needed on all or some backends.
 
+<<<<<<< HEAD
     The flow is the following:
         Parent                    Child
 
@@ -90,6 +91,9 @@ class BaseBackend(object):
             2. Call inner_process_dataset(item)
             3. Save HarvestItem (dryrun)
             4. Save dataset (dryrun)
+=======
+
+>>>>>>> master
     """
 
     name = None
@@ -205,6 +209,11 @@ class BaseBackend(object):
         self.save_job()
 
         try:
+            # Use `item.remote_id` because `inner_process_dataset` could have modified it.
+            dataset.harvest = self.update_harvest_info(HarvestDatasetMetadata, dataset.harvest, item.remote_id)
+            if not remote_id:
+                raise HarvestSkipException("missing identifier")
+
             dataset = self.inner_process_dataset(item, **kwargs)
 
             # Use `item.remote_id` because `inner_process_dataset` could have modified it.
@@ -292,6 +301,7 @@ class BaseBackend(object):
     def update_harvest_info(self, default, harvest: Optional[HarvestDatasetMetadata], remote_id: int):
         if not harvest:
             harvest = default()
+
         harvest.domain = self.source.domain
         harvest.remote_id = remote_id
         harvest.source_id = str(self.source.id)
