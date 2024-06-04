@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- **breaking change** Harvest backend is now sync [#3030](https://github.com/opendatateam/udata/pull/3030)
 - Allow dataservices to be discussed and followed [#3049](https://github.com/opendatateam/udata/pull/3049)
 
 ## 8.0.1 (2024-05-28)
