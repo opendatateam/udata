@@ -16,9 +16,6 @@ def purge_dataservices(self):
         Follow.objects(following=dataservice).delete()
         # Remove discussions
         Discussion.objects(subject=dataservice).delete()
-        # Remove activity
-        # TODO: any activity created for dataservices?
-        Activity.objects(related_to=dataservice).delete()
         # Remove HarvestItem references
         # TODO: uncomment when adding dataservice harvest
         # HarvestJob.objects(items__dataservice=dataservice).update(set__items__S__dataservice=None)
