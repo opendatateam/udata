@@ -426,6 +426,12 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     if not url:
         log.warning(f'Resource without url: {distrib}')
         return
+    
+    try:
+        url = uris.validate(url)
+    except uris.ValidationError:
+        log.warning(f'Resource with invalid url: {url}')
+        return
 
     if dataset:
         resource = get_by(dataset.resources, 'url', url)
@@ -483,7 +489,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
 
     dataset.title = rdf_value(d, DCT.title)
     if not dataset.title:
-        raise HarvestSkipException
+        raise HarvestSkipException("missing title")
 
     # Support dct:abstract if dct:description is missing (sometimes used instead)
     description = d.value(DCT.description) or d.value(DCT.abstract)
