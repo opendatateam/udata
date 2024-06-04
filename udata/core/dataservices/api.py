@@ -6,6 +6,7 @@ import mongoengine
 from udata.api import api, API
 from udata.api_fields import patch
 from udata.core.dataset.permissions import OwnablePermission
+from udata.core.discussions.models import Discussion
 from udata.core.followers.api import FollowAPI
 from .models import Dataservice
 from udata.models import db
@@ -76,7 +77,8 @@ class DataserviceAPI(API):
             api.abort(410, 'dataservice has been deleted')
 
         OwnablePermission(dataservice).test()
-
+        # Remove discussions linked to the topic
+        Discussion.objects(subject=dataservice).delete()
         dataservice.deleted_at = datetime.utcnow()
         dataservice.modified_at = datetime.utcnow()
         dataservice.save()
