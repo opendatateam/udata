@@ -10,7 +10,7 @@ from udata.harvest.models import HarvestSource
 from udata.rdf import DCAT, DCT, contact_point_from_rdf, rdf_value, theme_labels_from_rdf, themes_from_rdf, url_from_rdf
 
 
-def dataservice_from_rdf(graph: Graph, dataservice: Dataservice, node, datasets: List[Dataset]) -> Dataservice :
+def dataservice_from_rdf(graph: Graph, dataservice: Dataservice, node, all_datasets: List[Dataset]) -> Dataservice :
     '''
     Create or update a dataset from a RDF/DCAT graph
     '''
@@ -27,16 +27,19 @@ def dataservice_from_rdf(graph: Graph, dataservice: Dataservice, node, datasets:
 
     dataservice.contact_point = contact_point_from_rdf(d, dataservice) or dataservice.contact_point
 
+    datasets = []
     for dataset_node in d.objects(DCAT.servesDataset):
         id = dataset_node.value(DCT.identifier)
-        dataset = next((d for d in datasets if d is not None and d.harvest.remote_id == id), None)
+        dataset = next((d for d in all_datasets if d is not None and d.harvest.remote_id == id), None)
 
         if dataset is None:
             # We try with `endswith` because Europe XSLT have problems with IDs. Sometimes they are prefixed with the domain of the catalog, sometimes not.
-            dataset = next((d for d in datasets if d is not None and d.harvest.remote_id.endswith(id)), None)
+            dataset = next((d for d in all_datasets if d is not None and d.harvest.remote_id.endswith(id)), None)
 
         if dataset is not None:
-            dataservice.datasets.append(dataset.id)
+            datasets.append(dataset.id)
+
+    dataservice.datasets = datasets
 
     license = rdf_value(d, DCT.license)
     if license is not None:
