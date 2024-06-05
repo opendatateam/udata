@@ -134,8 +134,9 @@ class Dataservice(WithMetrics, Owned, db.Document):
     def self_api_url(self):
         return endpoint_for('api.dataservice', dataservice=self, _external=True)
 
-    def self_web_url():
-        pass
+    @function_field(description="Link to the udata web page for this dataservice")
+    def self_web_url(self):
+        return endpoint_for('dataservices.show', dataservice=self)
 
     # TODO
     # frequency = db.StringField(choices=list(UPDATE_FREQUENCIES.keys()))
