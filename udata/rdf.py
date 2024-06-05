@@ -21,6 +21,7 @@ log = logging.getLogger(__name__)
 # Extra Namespaces
 ADMS = Namespace('http://www.w3.org/ns/adms#')
 DCAT = Namespace('http://www.w3.org/ns/dcat#')
+DCATAP = Namespace('http://data.europa.eu/r5r/')
 HYDRA = Namespace('http://www.w3.org/ns/hydra/core#')
 SCHEMA = Namespace('http://schema.org/')
 SCV = Namespace('http://purl.org/NET/scovo#')
@@ -35,6 +36,7 @@ VCARD = Namespace('http://www.w3.org/2006/vcard/ns#')
 
 namespace_manager = NamespaceManager(Graph())
 namespace_manager.bind('dcat', DCAT)
+namespace_manager.bind('dcatap', DCATAP)
 namespace_manager.bind('dct', DCT)
 namespace_manager.bind('foaf', FOAF)
 namespace_manager.bind('foaf', FOAF)
@@ -97,6 +99,8 @@ RDF_EXTENSIONS = {
 
 # Includes control characters, unicode surrogate characters and unicode end-of-plane non-characters
 ILLEGAL_XML_CHARS = '[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]'
+
+HVD_LEGISLATION = 'http://data.europa.eu/eli/reg_impl/2023/138/oj'
 
 
 def guess_format(string):
