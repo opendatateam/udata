@@ -426,12 +426,6 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     if not url:
         log.warning(f'Resource without url: {distrib}')
         return
-    
-    try:
-        url = uris.validate(url)
-    except uris.ValidationError:
-        log.warning(f'Resource with invalid url: {url}')
-        return
 
     if dataset:
         resource = get_by(dataset.resources, 'url', url)
