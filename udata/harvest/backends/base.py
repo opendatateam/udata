@@ -284,17 +284,14 @@ class BaseBackend(object):
             harvest = HarvestDatasetMetadata()
 
         harvest.backend = self.display_name
-        # created_at
-        # modified_at
         harvest.source_id = str(self.source.id)
         harvest.remote_id = remote_id
         harvest.domain = self.source.domain
         harvest.last_update = datetime.utcnow()
-        # remote_url
-        # uri
-        # dct_identifier
         harvest.archived_at = None
         harvest.archived = None
+
+        # created_at, modified_at, remote_url, uri, dct_identifier are set in `dataset_from_rdf`
 
         return harvest
 
