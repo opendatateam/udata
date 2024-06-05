@@ -195,7 +195,7 @@ class BaseBackend(object):
             dataset = self.inner_process_dataset(item, **kwargs)
 
             # Use `item.remote_id` because `inner_process_dataset` could have modified it.
-            dataset.harvest = self.update_harvest_info(HarvestDatasetMetadata, dataset.harvest, item.remote_id)
+            dataset.harvest = self.update_dataset_harvest_info(dataset.harvest, item.remote_id)
             dataset.archived = None
 
             # TODO: Apply editable mappings
@@ -248,8 +248,8 @@ class BaseBackend(object):
 
             dataservice = self.inner_process_dataservice(item, **kwargs)
 
-            dataservice.harvest = self.update_harvest_info(HarvestDataserviceMetadata, dataservice.harvest, remote_id)
-            dataservice.archived = None
+            dataservice.harvest = self.update_dataservice_harvest_info(dataservice.harvest, remote_id)
+            dataservice.archived_at = None
 
             # TODO: Apply editable mappings
 
@@ -279,18 +279,39 @@ class BaseBackend(object):
             item.ended = datetime.utcnow()
             self.save_job()
 
-    def update_harvest_info(self, default, harvest: Optional[HarvestDatasetMetadata], remote_id: int):
+    def update_dataset_harvest_info(self, harvest: Optional[HarvestDatasetMetadata], remote_id: int):
         if not harvest:
-            harvest = default()
+            harvest = HarvestDatasetMetadata()
 
-        harvest.domain = self.source.domain
-        harvest.remote_id = remote_id
-        harvest.source_id = str(self.source.id)
-        harvest.last_update = datetime.utcnow()
         harvest.backend = self.display_name
-
+        # created_at
+        # modified_at
+        harvest.source_id = str(self.source.id)
+        harvest.remote_id = remote_id
+        harvest.domain = self.source.domain
+        harvest.last_update = datetime.utcnow()
+        # remote_url
+        # uri
+        # dct_identifier
         harvest.archived_at = None
         harvest.archived = None
+
+        return harvest
+
+    def update_dataservice_harvest_info(self, harvest: Optional[HarvestDataserviceMetadata], remote_id: int):
+        if not harvest:
+            harvest = HarvestDataserviceMetadata()
+
+        harvest.backend = self.display_name
+        harvest.domain = self.source.domain
+
+        harvest.source_id = str(self.source.id)
+        harvest.source_id = str(self.source.url)
+
+        harvest.remote_id = remote_id
+        harvest.last_harvested_at = datetime.utcnow()
+
+        harvest.archived_at = None
 
         return harvest
 

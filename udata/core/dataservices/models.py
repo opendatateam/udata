@@ -33,16 +33,15 @@ class DataserviceQuerySet(OwnedQuerySet):
 
 class HarvestMetadata(db.DynamicEmbeddedDocument):
     backend = db.StringField()
+    domain = db.StringField()
 
     source_id = db.StringField()
-    source_url = db.StringField()
+    source_url = db.URLField()
 
-    dct_identifier = db.StringField()
-    
     remote_id = db.StringField()
-    remote_url = db.URLField()
 
     last_harvested_at = db.DateTimeField()
+    archived_at = db.DateTimeField()
 
 @generate_fields()
 class Dataservice(WithMetrics, Owned, db.Document):
