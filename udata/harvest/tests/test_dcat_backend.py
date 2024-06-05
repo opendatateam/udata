@@ -143,7 +143,6 @@ class DcatBackendTest:
         assert datasets['1'].resources[0].mime == 'application/json'
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas', HARVEST_MAX_CATALOG_SIZE_IN_MONGO=None, HARVEST_GRAPHS_S3_BUCKET="test_bucket", S3_URL="https://example.org", S3_ACCESS_KEY_ID="myUser", S3_SECRET_ACCESS_KEY="password")
-
     def test_flat_with_blank_nodes_xml(self, rmock):
         rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
 

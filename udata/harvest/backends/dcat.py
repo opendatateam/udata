@@ -324,7 +324,6 @@ class CswIso19139DcatBackend(DcatBackend):
                              headers=headers)
         response.raise_for_status()
 
-
         tree_before_transform = ET.fromstring(response.content)
         # Disabling CoupledResourceLookUp to prevent failure on xlink:href
         # https://github.com/SEMICeu/iso-19139-to-dcat-ap/blob/master/documentation/HowTo.md#parameter-coupledresourcelookup
