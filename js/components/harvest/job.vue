@@ -85,6 +85,9 @@ export default {
                 sort: 'remote_id',
                 ellipsis: true
             }, {
+                label: this._('Logs'),
+                key: (item) => item.logs.length ? item.logs.length + ' ' + this._('logs') : '',
+            }, {
                 label: this._('Status'),
                 key: 'status',
                 sort: 'status',
