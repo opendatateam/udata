@@ -22,7 +22,7 @@ from udata.frontend.markdown import parse_html
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.models import db, ContactPoint
 from udata.rdf import (
-    DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD, RDFS,
+    DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, UDATA, VCARD, RDFS,
     namespace_manager, schema_from_rdf, url_from_rdf
 )
 from udata.utils import get_by, safe_unicode
@@ -570,6 +570,12 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     schema = schema_from_rdf(distrib)
     if schema:
         resource.schema = schema
+
+    function = distrib.value(UDATA.function)
+    # If the special UDATA.function tag is not present we're not using the XSLT
+    # so no warning is require.
+    if function is not None and not function:
+        log.warning("Distribution without `gmd:function`. If it's a distribution, you should use 'download', 'offlineAccess' or 'order'.")
 
     checksum = distrib.value(SPDX.checksum)
     if checksum:

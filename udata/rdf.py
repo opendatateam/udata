@@ -30,6 +30,7 @@ FREQ = Namespace('http://purl.org/cld/freq/')
 EUFREQ = Namespace('http://publications.europa.eu/resource/authority/frequency/')  # noqa: E501
 EUFORMAT = Namespace('http://publications.europa.eu/resource/authority/file-type/')
 IANAFORMAT = Namespace('https://www.iana.org/assignments/media-types/')
+UDATA = Namespace('https://github.com/opendatateam/udata')
 DCT = DCTERMS  # More common usage
 VCARD = Namespace('http://www.w3.org/2006/vcard/ns#')
 
