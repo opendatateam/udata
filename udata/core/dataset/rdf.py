@@ -573,8 +573,10 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     # Adding some metadata to extras - may be moved to property if relevant
     access_rights = rdf_value(d, DCT.accessRights)
     if access_rights:
+        ar = dataset.extras["harvest"].get("dct:accessRights", {})
+        ar['dataset'] = str(access_rights.value())
         dataset.extras["harvest"] = {
-            "dct:accessRights": access_rights,
+            "dct:accessRights": ar
             **dataset.extras.get("harvest", {}),
         }
     provenance = [p.value(RDFS.label) for p in d.objects(DCT.provenance)]
@@ -585,7 +587,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
         }
 
     licenses = set()
-    for distrib in d.objects(DCAT.distribution | DCAT.distributions):
+    for i, distrib in enumerate(d.objects(DCAT.distribution | DCAT.distributions)):
         resource_from_rdf(distrib, dataset)
         for predicate in DCT.license, DCT.rights:
             value = distrib.value(predicate)
@@ -593,6 +595,14 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
                 licenses.add(value.toPython())
             elif isinstance(value, RdfResource):
                 licenses.add(value.identifier.toPython())
+        access_rights = [p.value(RDFS.label) for p in distrib.objects(DCT.accessRights)]
+        if access_rights:
+            ar = dataset.extras["harvest"].get("dct:accessRights", {})
+            ar[str(i)] = access_rights
+            dataset.extras["harvest"] = {
+                **dataset.extras.get("harvest", {}),
+                "dct:accessRights": ar
+            }
 
     for additionnal in d.objects(DCT.hasPart):
         resource_from_rdf(additionnal, dataset, is_additionnal=True)
