@@ -3,11 +3,11 @@ from udata.api_fields import field, function_field, generate_fields
 from udata.core.dataset.models import Dataset
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
-from udata.i18n import lazy_gettext as _
 import udata.core.contact_point.api_fields as contact_api_fields
 import udata.core.dataset.api_fields as datasets_api_fields
+from udata.i18n import lazy_gettext as _
 
-from udata.models import db
+from udata.models import db, Discussion, Follow
 from udata.uris import endpoint_for
 
 # "frequency"
@@ -128,3 +128,15 @@ class Dataservice(WithMetrics, Owned, db.Document):
     # temporal_coverage = db.EmbeddedDocumentField(db.DateRange)
     # spatial = db.EmbeddedDocumentField(SpatialCoverage)
     # harvest = db.EmbeddedDocumentField(HarvestDatasetMetadata)
+
+    @property
+    def is_hidden(self):
+        return self.private or self.deleted_at or self.archived_at
+
+    def count_discussions(self):
+        self.metrics['discussions'] = Discussion.objects(subject=self, closed=None).count()
+        self.save()
+
+    def count_followers(self):
+        self.metrics['followers'] = Follow.objects(until=None).followers(self).count()
+        self.save()

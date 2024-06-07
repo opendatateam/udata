@@ -4,6 +4,14 @@
 
 - Nothing yet
 
+## 9.0.0 (2024-06-07)
+
+- **breaking change** Harvest backend is now sync [#3030](https://github.com/opendatateam/udata/pull/3030)
+- Add DCAT-AP HVD properties in RDF output if the dataset is tagged hvd [#3050](https://github.com/opendatateam/udata/pull/3050)
+- Allow dataservices to be discussed and followed [#3049](https://github.com/opendatateam/udata/pull/3049)
+- Add purge-dataservices job [#3049](https://github.com/opendatateam/udata/pull/3049)
+- Harvest all the available polygons from a spatial coverage [#3039](https://github.com/opendatateam/udata/pull/3039)
+
 ## 8.0.1 (2024-05-28)
 
 - Add dataservices in beta [#2986](https://github.com/opendatateam/udata/pull/2986)
