@@ -18,6 +18,7 @@ from udata.core.contact_point.models import ContactPoint
 from udata.models import Schema
 from udata.mongo.errors import FieldValidationError
 from udata.frontend.markdown import parse_html
+from udata.tags import slug as slugify_tag
 
 log = logging.getLogger(__name__)
 
@@ -113,7 +114,7 @@ EU_HVD_CATEGORIES = {
     "http://data.europa.eu/bna/c_e1da4e07": "Statistiques"
 }
 HVD_LEGISLATION = 'http://data.europa.eu/eli/reg_impl/2023/138/oj'
-
+TAG_TO_EU_HVD_CATEGORIES = {slugify_tag(EU_HVD_CATEGORIES[uri]): uri for uri in EU_HVD_CATEGORIES}
 
 def guess_format(string):
     '''Guess format given an extension or a mime-type'''

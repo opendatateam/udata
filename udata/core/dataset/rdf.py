@@ -21,8 +21,9 @@ from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMet
 from udata.harvest.exceptions import HarvestSkipException
 from udata.models import db
 from udata.rdf import (
-    DCAT, DCATAP, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD, RDFS, contact_point_from_rdf,
-    namespace_manager, rdf_value, sanitize_html, schema_from_rdf, themes_from_rdf, url_from_rdf, HVD_LEGISLATION
+    DCAT, DCATAP, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, TAG_TO_EU_HVD_CATEGORIES, RDFS, 
+    namespace_manager, rdf_value, sanitize_html, schema_from_rdf, themes_from_rdf, url_from_rdf, HVD_LEGISLATION,
+    contact_point_from_rdf,
 )
 from udata.utils import get_by, safe_unicode
 from udata.uris import endpoint_for
