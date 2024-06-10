@@ -108,8 +108,6 @@ def generate_fields(**kwargs):
                 sortables.append(key)
 
             filterable = info.get('filterable', None)
-            print(key)
-            print(filterable)
             if filterable is not None:
                 if 'key' not in filterable:
                     filterable['key'] = key
@@ -181,8 +179,6 @@ def generate_fields(**kwargs):
         cls.__index_parser__ = parser
         def apply_sort_filters_and_pagination(base_query):
             args = cls.__index_parser__.parse_args()
-
-            print(filterables)
 
             if sortables and args['sort']:
                 base_query = base_query.order_by(args['sort'])
