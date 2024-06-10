@@ -19,6 +19,9 @@ class DatasetCsvAdapter(csv.Adapter):
         ('url', 'external_url'),
         ('organization', 'organization.name'),
         ('organization_id', 'organization.id'),
+        ('owner', 'owner.slug'),  # in case it's owned by a user, or introduce 'owner_type'?
+        ('owner_id', 'owner.id'),
+        # 'contact_point', #  ?
         'description',
         'frequency',
         'license',
@@ -26,19 +29,20 @@ class DatasetCsvAdapter(csv.Adapter):
         'temporal_coverage.end',
         'spatial.granularity',
         ('spatial.zones', serialize_spatial_zones),
-        'private',
         ('featured', lambda o: o.featured or False),
         'created_at',
         'last_modified',
         ('tags', lambda o: ','.join(o.tags)),
         ('archived', lambda o: o.archived or False),
         ('resources_count', lambda o: len(o.resources)),
+        ('main_resources_count', lambda o: len([r for r in o.resources if r.type == 'main'])),
         'downloads',
         ('harvest.backend', lambda r: r.harvest and r.harvest.backend),
         ('harvest.domain', lambda r: r.harvest and r.harvest.domain),
         ('harvest.created_at', lambda r: r.harvest and r.harvest.created_at),
         ('harvest.modified_at', lambda r: r.harvest and r.harvest.modified_at),
         ('quality_score', lambda o: format(o.quality['score'], '.2f')),
+        # schema? what is the schema of a dataset?
     )
 
     def dynamic_fields(self):
@@ -85,6 +89,9 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
         ('downloads', lambda o: int(o.metrics.get('views', 0))),
         ('harvest.created_at', lambda o: o.harvest and o.harvest.created_at),
         ('harvest.modified_at', lambda o: o.harvest and o.harvest.modified_at),
+        ('schema_name', 'schema.name'),
+        ('schema_version', 'schema.version'),
+        ('preview_url', lambda o: o.preview_url or False),
     )
     attribute = 'resources'
 
