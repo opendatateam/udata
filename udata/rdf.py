@@ -24,6 +24,7 @@ log = logging.getLogger(__name__)
 # Extra Namespaces
 ADMS = Namespace('http://www.w3.org/ns/adms#')
 DCAT = Namespace('http://www.w3.org/ns/dcat#')
+DCATAP = Namespace('http://data.europa.eu/r5r/')
 HYDRA = Namespace('http://www.w3.org/ns/hydra/core#')
 SCHEMA = Namespace('http://schema.org/')
 SCV = Namespace('http://purl.org/NET/scovo#')
@@ -38,6 +39,7 @@ VCARD = Namespace('http://www.w3.org/2006/vcard/ns#')
 
 namespace_manager = NamespaceManager(Graph())
 namespace_manager.bind('dcat', DCAT)
+namespace_manager.bind('dcatap', DCATAP)
 namespace_manager.bind('dct', DCT)
 namespace_manager.bind('foaf', FOAF)
 namespace_manager.bind('foaf', FOAF)
@@ -110,6 +112,8 @@ EU_HVD_CATEGORIES = {
     "http://data.europa.eu/bna/c_dd313021": "Observation de la terre et environnement",
     "http://data.europa.eu/bna/c_e1da4e07": "Statistiques"
 }
+HVD_LEGISLATION = 'http://data.europa.eu/eli/reg_impl/2023/138/oj'
+
 
 def guess_format(string):
     '''Guess format given an extension or a mime-type'''

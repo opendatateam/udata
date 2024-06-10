@@ -24,7 +24,10 @@ from udata.models import db, ContactPoint
 from udata.rdf import (
     DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD, RDFS, contact_point_from_rdf,
     namespace_manager, rdf_value, sanitize_html, schema_from_rdf, themes_from_rdf, url_from_rdf
+    , DCATAP, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD, RDFS,
+    HVD_LEGISLATION, namespace_manager, schema_from_rdf, url_from_rdf
 )
+from udata.tags import slug as slugify_tag
 from udata.utils import get_by, safe_unicode
 from udata.uris import endpoint_for
 
@@ -104,7 +107,7 @@ def owner_to_rdf(dataset, graph=None):
     return
 
 
-def resource_to_rdf(resource, dataset=None, graph=None):
+def resource_to_rdf(resource, dataset=None, graph=None, is_hvd=False):
     '''
     Map a Resource domain model to a DCAT/RDF graph
     '''
@@ -143,6 +146,9 @@ def resource_to_rdf(resource, dataset=None, graph=None):
         checksum.add(SPDX.algorithm, getattr(SPDX, algorithm))
         checksum.add(SPDX.checksumValue, Literal(resource.checksum.value))
         r.add(SPDX.checksum, checksum)
+    if is_hvd:
+        # DCAT-AP HVD applicable legislation is also expected at the distribution level
+        r.add(DCATAP.applicableLegislation, URIRef(HVD_LEGISLATION))
     return r
 
 
@@ -177,11 +183,20 @@ def dataset_to_rdf(dataset, graph=None):
     if dataset.acronym:
         d.set(SKOS.altLabel, Literal(dataset.acronym))
 
+    # Add DCAT-AP HVD properties if the dataset is tagged hvd.
+    # See https://semiceu.github.io/DCAT-AP/releases/2.2.0-hvd/
+    is_hvd = current_app.config['HVD_SUPPORT'] and 'hvd' in dataset.tags
+    if is_hvd:
+        d.add(DCATAP.applicableLegislation, URIRef(HVD_LEGISLATION))
+
     for tag in dataset.tags:
         d.add(DCAT.keyword, Literal(tag))
+        # Add HVD category if this dataset is tagged HVD
+        if is_hvd and tag in TAG_TO_EU_HVD_CATEGORIES:
+            d.add(DCATAP.hvdCategory, URIRef(TAG_TO_EU_HVD_CATEGORIES[tag]))
 
     for resource in dataset.resources:
-        d.add(DCAT.distribution, resource_to_rdf(resource, dataset, graph))
+        d.add(DCAT.distribution, resource_to_rdf(resource, dataset, graph, is_hvd))
 
     if dataset.temporal_coverage:
         d.set(DCT.temporal, temporal_to_rdf(dataset.temporal_coverage, graph))
