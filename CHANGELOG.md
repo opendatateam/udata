@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Refactor catalog exports [#3052](https://github.com/opendatateam/udata/pull/3052)
+- Add a filter to filter dataservices by dataset [#3056](https://github.com/opendatateam/udata/pull/3056)
 
 ## 9.0.0 (2024-06-07)
 
