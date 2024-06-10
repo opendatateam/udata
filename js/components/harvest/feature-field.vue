@@ -21,7 +21,11 @@ export default {
     },
     computed: {
         checked() {
-            return this.key in this.features ? this.features[this.key] : this.feature.default;
+            if (this.key in this.features)
+                return this.features[this.key]
+            if (this.feature.default === "False")
+                return false
+            return this.feature.default
         },
         features() {
             return this.config.features || {};

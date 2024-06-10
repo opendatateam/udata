@@ -6,10 +6,10 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: udata 7.0.7.dev0\n"
+"Project-Id-Version: udata 8.0.1.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2024-04-15 12:06+0200\n"
-"PO-Revision-Date: 2024-04-15 12:06+0200\n"
+"POT-Creation-Date: 2024-04-25 17:58+0200\n"
+"PO-Revision-Date: 2024-04-25 17:58+0200\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -132,17 +132,17 @@ msgstr ""
 msgid "Confirm change of email instructions"
 msgstr ""
 
-#: udata/auth/views.py:72
+#: udata/auth/views.py:73
 msgid ""
 "You did not confirm your change of email within {email_within}. New "
 "instructions to confirm your change of email have been sent to {new_email}."
 msgstr ""
 
-#: udata/auth/views.py:82
+#: udata/auth/views.py:83
 msgid "Thank you. Your change of email has been confirmed."
 msgstr ""
 
-#: udata/auth/views.py:97
+#: udata/auth/views.py:98
 msgid ""
 "Thank you. Confirmation instructions for changing your email have been sent "
 "to {new_email}."
@@ -1160,6 +1160,14 @@ msgstr ""
 
 #: udata/harvest/models.py:38
 msgid "Archived"
+msgstr ""
+
+#: udata/harvest/backends/dcat.py:212
+msgid "Use GeoDCAT-AP schema (experimental)"
+msgstr ""
+
+#: udata/harvest/backends/dcat.py:213
+msgid "If enabled, use GeoDCAT-AP schema instead of default."
 msgstr ""
 
 #: udata/templates/admin.html:7
