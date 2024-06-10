@@ -2,10 +2,30 @@
 
 ## Current (in progress)
 
+- Improve `udata db check-integrity` (perfs, add `--fix` option, Mattermost notifications…) [#3026](https://github.com/opendatateam/udata/pull/3026)
+
+## 9.0.0 (2024-06-07)
+
+- **breaking change** Harvest backend is now sync [#3030](https://github.com/opendatateam/udata/pull/3030)
+- Add DCAT-AP HVD properties in RDF output if the dataset is tagged hvd [#3050](https://github.com/opendatateam/udata/pull/3050)
+- Allow dataservices to be discussed and followed [#3049](https://github.com/opendatateam/udata/pull/3049)
+- Add purge-dataservices job [#3049](https://github.com/opendatateam/udata/pull/3049)
+- Harvest all the available polygons from a spatial coverage [#3039](https://github.com/opendatateam/udata/pull/3039)
+- Refactor catalog exports [#3052](https://github.com/opendatateam/udata/pull/3052)
+
+## 8.0.1 (2024-05-28)
+
 - Add dataservices in beta [#2986](https://github.com/opendatateam/udata/pull/2986)
 - Remove deprecated `metrics_for` route [#3022](https://github.com/opendatateam/udata/pull/3022)
 - Fix spatial coverage fetching perfs. Need to schedule `compute-geozones-metrics` [#3018](https://github.com/opendatateam/udata/pull/3018)
-- Improve `udata db check-integrity` (perfs, add `--fix` option, Mattermost notifications…) [#3026](https://github.com/opendatateam/udata/pull/3026)
+- Delete a user without sending mail [#3031](https://github.com/opendatateam/udata/pull/3031)
+- Convert known HVD categories used as theme to keywords [#3014](https://github.com/opendatateam/udata/pull/3014)
+- Allow for series in CSW ISO 19139 DCAT backend [#3028](https://github.com/opendatateam/udata/pull/3028)
+- Add `email` to membership request list API response, add `since` to org members API responses, add `email` to members of org on show org endpoint for org's admins and editors [#3038](https://github.com/opendatateam/udata/pull/3038)
+- Add `resources_downloads` to datasets metrics [#3042](https://github.com/opendatateam/udata/pull/3042)
+- Fix do not override resources extras on admin during update [#3043](https://github.com/opendatateam/udata/pull/3043) 
+- Endpoint /users is now protected by admin permissions [#3047](https://github.com/opendatateam/udata/pull/3047)
+- Fix trailing `/` inside `GeoZone` routes not redirecting. Disallow `/` inside `GeoZone` ids [#3045](https://github.com/opendatateam/udata/pull/3045)
 
 ## 8.0.0 (2024-04-23)
 

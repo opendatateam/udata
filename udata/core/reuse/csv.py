@@ -15,10 +15,13 @@ class ReuseCsvAdapter(csv.Adapter):
         ('remote_url', 'url'),
         ('organization', 'organization.name'),
         ('organization_id', 'organization.id'),
+        ('owner', 'owner.slug'),  # in case it's owned by a user
+        ('owner_id', 'owner.id'),
         ('image', lambda r: r.image(external=True)),
         ('featured', lambda r: r.featured or False),
         'created_at',
         'last_modified',
+        'topic',
         ('tags', lambda r: ','.join(r.tags)),
         ('datasets', lambda r: ','.join([str(d.id) for d in r.datasets])),
     )

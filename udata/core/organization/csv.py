@@ -15,18 +15,20 @@ class OrganizationCsvAdapter(csv.Adapter):
         ('url', 'external_url'),
         'description',
         ('logo', lambda o: o.logo(external=True)),
-        ('badges', lambda o: [badge.kind for badge in o.badges]),
+        ('badges', lambda o: ','.join([badge.kind for badge in o.badges])),
         'created_at',
         'last_modified',
+        'business_number_id',
+        ('members_count', lambda o: len(o.members)),
     )
 
     def dynamic_fields(self):
         return csv.metric_fields(Organization) + self.get_dynamic_field_downloads()
-    
+
     def get_dynamic_field_downloads(self):
         downloads_counts = self.get_downloads_counts()
         return [('downloads', lambda o: downloads_counts.get(str(o.id), 0))]
-    
+
     def get_downloads_counts(self):
         '''
         Prefetch all the resources' downloads for all selected organization into memory

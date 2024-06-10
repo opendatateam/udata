@@ -22,9 +22,10 @@ from udata.frontend.markdown import parse_html
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.models import db, ContactPoint
 from udata.rdf import (
-    DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD, RDFS,
-    namespace_manager, schema_from_rdf, url_from_rdf
+    DCAT, DCATAP, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD, RDFS,
+    HVD_LEGISLATION, namespace_manager, schema_from_rdf, url_from_rdf
 )
+from udata.tags import slug as slugify_tag
 from udata.utils import get_by, safe_unicode
 from udata.uris import endpoint_for
 
@@ -75,6 +76,17 @@ EU_RDF_REQUENCIES = {
     EUFREQ.OTHER: 'unknown',
     EUFREQ.NEVER: 'punctual',
 }
+
+# Map High Value Datasets URIs to keyword categories
+EU_HVD_CATEGORIES = {
+    "http://data.europa.eu/bna/c_164e0bf5": "Météorologiques",
+    "http://data.europa.eu/bna/c_a9135398": "Entreprises et propriété d'entreprises",
+    "http://data.europa.eu/bna/c_ac64a52d": "Géospatiales",
+    "http://data.europa.eu/bna/c_b79e35eb": "Mobilité",
+    "http://data.europa.eu/bna/c_dd313021": "Observation de la terre et environnement",
+    "http://data.europa.eu/bna/c_e1da4e07": "Statistiques"
+}
+TAG_TO_EU_HVD_CATEGORIES = {slugify_tag(EU_HVD_CATEGORIES[uri]): uri for uri in EU_HVD_CATEGORIES}
 
 
 class HTMLDetector(HTMLParser):
@@ -131,7 +143,7 @@ def owner_to_rdf(dataset, graph=None):
     return
 
 
-def resource_to_rdf(resource, dataset=None, graph=None):
+def resource_to_rdf(resource, dataset=None, graph=None, is_hvd=False):
     '''
     Map a Resource domain model to a DCAT/RDF graph
     '''
@@ -170,6 +182,9 @@ def resource_to_rdf(resource, dataset=None, graph=None):
         checksum.add(SPDX.algorithm, getattr(SPDX, algorithm))
         checksum.add(SPDX.checksumValue, Literal(resource.checksum.value))
         r.add(SPDX.checksum, checksum)
+    if is_hvd:
+        # DCAT-AP HVD applicable legislation is also expected at the distribution level
+        r.add(DCATAP.applicableLegislation, URIRef(HVD_LEGISLATION))
     return r
 
 
@@ -204,11 +219,20 @@ def dataset_to_rdf(dataset, graph=None):
     if dataset.acronym:
         d.set(SKOS.altLabel, Literal(dataset.acronym))
 
+    # Add DCAT-AP HVD properties if the dataset is tagged hvd.
+    # See https://semiceu.github.io/DCAT-AP/releases/2.2.0-hvd/
+    is_hvd = current_app.config['HVD_SUPPORT'] and 'hvd' in dataset.tags
+    if is_hvd:
+        d.add(DCATAP.applicableLegislation, URIRef(HVD_LEGISLATION))
+
     for tag in dataset.tags:
         d.add(DCAT.keyword, Literal(tag))
+        # Add HVD category if this dataset is tagged HVD
+        if is_hvd and tag in TAG_TO_EU_HVD_CATEGORIES:
+            d.add(DCATAP.hvdCategory, URIRef(TAG_TO_EU_HVD_CATEGORIES[tag]))
 
     for resource in dataset.resources:
-        d.add(DCAT.distribution, resource_to_rdf(resource, dataset, graph))
+        d.add(DCAT.distribution, resource_to_rdf(resource, dataset, graph, is_hvd))
 
     if dataset.temporal_coverage:
         d.set(DCT.temporal, temporal_to_rdf(dataset.temporal_coverage, graph))
@@ -371,23 +395,51 @@ def spatial_from_rdf(graph):
                     else:
                         continue
 
-                    if geojson['type'] == 'Polygon':
-                        geojson['type'] = 'MultiPolygon'
-                        geojson['coordinates'] = [geojson['coordinates']]
-
                     geojsons.append(geojson)
         except Exception as e:
             log.exception(f"Exception during `spatial_from_rdf` for term {term}: {e}", stack_info=True)
 
+    if not geojsons:
+        return None
+
+    # We first try to build a big MultiPolygon with all the spatial coverages found in RDF.
+    # We deduplicate the coordinates because some backend provides the same coordinates multiple
+    # times in different format. We only support in this first pass Polygons and MultiPolygons. Not sure
+    # if there are other types of spatial coverage worth integrating (points? line strings?). But these other
+    # formats are not compatible to be merged in the unique stored representation in MongoDB, we'll deal with them in a second pass.
+    # The merging lose the properties and other information inside the GeoJSON…
+    # Note that having multiple `Polygon` is not really the DCAT way of doing things, the standard require that you use 
+    # a `MultiPolygon` in this case. We support this right now, and wait and see if it raises problems in the future for
+    # people following the standard. (see https://github.com/datagouv/data.gouv.fr/issues/1362#issuecomment-2112774115)
+    polygons = []
     for geojson in geojsons:
-        spatial_coverage = SpatialCoverage(geom=geojson)
-        try:
-            spatial_coverage.clean()
-            return spatial_coverage
-        except ValidationError:
+        if geojson['type'] == 'Polygon':
+            if geojson['coordinates'] not in polygons:
+                polygons.append(geojson['coordinates'])
+        elif geojson['type'] == 'MultiPolygon':
+            for coordinates in geojson['coordinates']:
+                if coordinates not in polygons:
+                    polygons.append(coordinates)
+        else:
+            log.warning(f"Unsupported GeoJSON type '{geojson['type']}'")
             continue
 
-    return None
+    if not polygons:
+        log.warning(f"No supported types found in the GeoJSON data.")
+        return None
+
+    spatial_coverage = SpatialCoverage(geom={
+        'type': 'MultiPolygon',
+        'coordinates': polygons,
+    })
+
+    try:
+        spatial_coverage.clean()
+        return spatial_coverage
+    except ValidationError as e:
+        log.warning(f"Cannot save the spatial coverage {coordinates} (error was {e})")
+        return None
+
 
 def frequency_from_rdf(term):
     if isinstance(term, str):
@@ -469,9 +521,19 @@ def remote_url_from_rdf(rdf):
 
 
 def theme_labels_from_rdf(rdf):
+    '''
+    Get theme labels to use as keywords.
+    Map HVD keywords from known URIs resources if HVD support is activated.
+    '''
     for theme in rdf.objects(DCAT.theme):
         if isinstance(theme, RdfResource):
-            label = rdf_value(theme, SKOS.prefLabel)
+            uri = theme.identifier.toPython()
+            if current_app.config['HVD_SUPPORT'] and uri in EU_HVD_CATEGORIES:
+                label = EU_HVD_CATEGORIES[uri]
+                # Additionnally yield hvd keyword
+                yield 'hvd'
+            else:
+                label = rdf_value(theme, SKOS.prefLabel)
         else:
             label = theme.toPython()
         if label:
