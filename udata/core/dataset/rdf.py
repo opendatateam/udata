@@ -6,7 +6,6 @@ import json
 import logging
 
 from datetime import date
-from html.parser import HTMLParser
 from typing import Optional
 from dateutil.parser import parse as parse_dt
 from flask import current_app
@@ -20,14 +19,11 @@ from udata import i18n, uris
 from udata.core.spatial.models import SpatialCoverage
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.harvest.exceptions import HarvestSkipException
-from udata.models import db, ContactPoint
+from udata.models import db
 from udata.rdf import (
-    DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD, RDFS, contact_point_from_rdf,
-    namespace_manager, rdf_value, sanitize_html, schema_from_rdf, themes_from_rdf, url_from_rdf
-    , DCATAP, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD, RDFS,
-    HVD_LEGISLATION, namespace_manager, schema_from_rdf, url_from_rdf
+    DCAT, DCATAP, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD, RDFS, contact_point_from_rdf,
+    namespace_manager, rdf_value, sanitize_html, schema_from_rdf, themes_from_rdf, url_from_rdf, HVD_LEGISLATION
 )
-from udata.tags import slug as slugify_tag
 from udata.utils import get_by, safe_unicode
 from udata.uris import endpoint_for
 
