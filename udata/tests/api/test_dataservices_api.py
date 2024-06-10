@@ -85,23 +85,30 @@ class DataserviceAPITest(APITestCase):
 
 
     def test_dataservice_api_index(self):
+        dataset_a = DatasetFactory()
+        dataset_b = DatasetFactory()
+
         self.login()
         self.post(url_for('api.dataservices'), {
             'title': 'B',
             'base_api_url': 'https://example.org/B',
+            'datasets': [dataset_b.id],
         })
         self.post(url_for('api.dataservices'), {
             'title': 'C',
             'base_api_url': 'https://example.org/C',
+            'datasets': [dataset_a.id, dataset_b.id],
         })
         self.post(url_for('api.dataservices'), {
             'title': 'A',
             'base_api_url': 'https://example.org/A',
+            'datasets': [dataset_a.id],
         })
-        response = self.post(url_for('api.dataservices'), {
+        self.post(url_for('api.dataservices'), {
             'title': 'X',
             'base_api_url': 'https://example.org/X',
             'private': True,
+            'datasets': [dataset_a.id],
         })
 
         self.assertEqual(Dataservice.objects.count(), 4)
@@ -115,8 +122,12 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(response.json['total'], 3)
         self.assertEqual(len(response.json['data']), 3)
         self.assertEqual(response.json['data'][0]['title'], 'B')
+        self.assertEqual(response.json['data'][0]['datasets'][0]['id'], str(dataset_b.id))
         self.assertEqual(response.json['data'][1]['title'], 'C')
+        self.assertEqual(response.json['data'][1]['datasets'][0]['id'], str(dataset_a.id))
+        self.assertEqual(response.json['data'][1]['datasets'][1]['id'], str(dataset_b.id))
         self.assertEqual(response.json['data'][2]['title'], 'A')
+        self.assertEqual(response.json['data'][2]['datasets'][0]['id'], str(dataset_a.id))
 
         response = self.get(url_for('api.dataservices', sort='title'))
         self.assert200(response)
@@ -152,6 +163,17 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(response.json['total'], 3)
         self.assertEqual(len(response.json['data']), 1)
         self.assertEqual(response.json['data'][0]['title'], 'B')
+
+        response = self.get(url_for('api.dataservices', sort='title', dataset=str(dataset_a.id)))
+        self.assert200(response)
+
+        self.assertEqual(response.json['total'], 2)
+        self.assertEqual(response.json['data'][0]['title'], 'A')
+        self.assertEqual(response.json['data'][0]['datasets'][0]['id'], str(dataset_a.id))
+        self.assertEqual(response.json['data'][1]['title'], 'C')
+        self.assertEqual(response.json['data'][1]['datasets'][0]['id'], str(dataset_a.id))
+        self.assertEqual(response.json['data'][1]['datasets'][1]['id'], str(dataset_b.id))
+
 
     def test_dataservice_api_create_with_validation_error(self):
         self.login()
