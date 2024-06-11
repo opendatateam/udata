@@ -2,6 +2,7 @@ from datetime import datetime
 
 import pytest
 
+
 @pytest.fixture
 def migrations(db):
     db.migrations.insert_one({
