@@ -4,6 +4,7 @@ from flask import request, redirect, url_for, json, make_response
 
 from udata.api import api, API, fields
 from udata.auth import admin_permission
+from udata.core.dataservices.models import Dataservice
 from udata.models import Dataset, Reuse
 from udata.utils import multi_to_dict
 from udata.rdf import (
@@ -109,7 +110,9 @@ class SiteRdfCatalogFormat(API):
         if 'tag' in params:
             datasets = datasets.filter(tags=params.get('tag', ''))
         datasets = datasets.paginate(page, page_size)
-        catalog = build_catalog(current_site, datasets, format=format)
+        dataservices = Dataservice.objects.visible().filter(datasets__in=[d.id for d in datasets])
+
+        catalog = build_catalog(current_site, datasets, dataservices=dataservices, format=format)
         # bypass flask-restplus make_response, since graph_response
         # is handling the content negociation directly
         return make_response(*graph_response(catalog, format))

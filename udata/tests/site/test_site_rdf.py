@@ -6,6 +6,7 @@ from rdflib import URIRef, Literal, Graph
 from rdflib.namespace import RDF, FOAF
 from rdflib.resource import Resource
 
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
@@ -166,6 +167,7 @@ class SiteRdfViewsTest:
         assert200(response)
         assert response.content_type == 'application/ld+json'
         assert response.json['@context']['@vocab'] == 'http://www.w3.org/ns/dcat#'
+        assert False
 
     def test_catalog_rdf_n3(self, client):
         url = url_for('api.site_rdf_catalog_format', format='n3')
@@ -244,3 +246,26 @@ class SiteRdfViewsTest:
 
         for dat in datasets:
             assert graph.value(dat, DCAT.keyword) == Literal('my-tag')
+
+    def test_catalog_rdf_dataservices(self, client):
+        dataset_a = DatasetFactory.create()
+        dataset_b = DatasetFactory.create()
+        dataset_c = DatasetFactory.create()
+
+        dataservice_a = DataserviceFactory.create(datasets=[dataset_a.id])
+        dataservice_b = DataserviceFactory.create(datasets=[dataset_b.id])
+        dataservice_x = DataserviceFactory.create(datasets=[dataset_a.id, dataset_c.id])
+        dataservice_y = DataserviceFactory.create(datasets=[])
+
+        url = url_for('api.site_rdf_catalog_format', format='xml')
+
+        response = client.get(url, headers={'Accept': 'application/xml'})
+        assert200(response)
+
+        graph = Graph().parse(data=response.data, format='xml')
+
+        datasets = list(graph.subjects(RDF.type, DCAT.Dataset))
+        assert len(datasets) == 3
+
+        dataservices = list(graph.subjects(RDF.type, DCAT.DataService))
+        assert len(dataservices) == 3

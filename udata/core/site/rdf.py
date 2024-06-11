@@ -13,7 +13,7 @@ from udata.utils import Paginable
 from udata.uris import endpoint_for
 
 
-def build_catalog(site, datasets, format=None):
+def build_catalog(site, datasets, dataservices = [], format=None):
     '''Build the DCAT catalog for this site'''
     site_url = endpoint_for('site.home_redirect', 'api.site', _external=True)
     catalog_url = url_for('api.site_rdf_catalog', _external=True)
@@ -39,6 +39,27 @@ def build_catalog(site, datasets, format=None):
         elif dataset.organization:
             rdf_dataset.add(DCT.publisher, organization_to_rdf(dataset.organization, graph))
         catalog.add(DCAT.dataset, rdf_dataset)
+
+    for dataservice in dataservices:
+        if dataservice.harvest and dataservice.harvest.uri:
+            id = URIRef(dataservice.harvest.uri)
+        elif dataservice.id:
+            id = URIRef(endpoint_for('dataservices.show_redirect', 'api.dataservice',
+                        dataservice=dataservice.id, _external=True))
+
+        if dataservice.harvest and dataservice.harvest.dct_identifier:
+            identifier = dataservice.harvest.dct_identifier
+        else:
+            identifier = dataservice.id
+
+        d = graph.resource(id)
+        d.set(RDF.type, DCAT.DataService)
+        d.set(DCT.identifier, Literal(identifier))
+        d.set(DCT.title, Literal(dataservice.title))
+        d.set(DCT.description, Literal(dataservice.description))
+        for serve in dataset.dataservices:
+            d.add(DCAT.Serves, URIRef('http://example.org'))
+
 
     if isinstance(datasets, Paginable):
         paginate_catalog(catalog, graph, datasets, format, 'api.site_rdf_catalog_format')
