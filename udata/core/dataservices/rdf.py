@@ -39,7 +39,8 @@ def dataservice_from_rdf(graph: Graph, dataservice: Dataservice, node, all_datas
         if dataset is not None:
             datasets.append(dataset.id)
 
-    dataservice.datasets = datasets
+    if datasets:
+        dataservice.datasets = datasets
 
     license = rdf_value(d, DCT.license)
     if license is not None:
