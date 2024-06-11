@@ -4,6 +4,7 @@
 
 - Refactor catalog exports [#3052](https://github.com/opendatateam/udata/pull/3052)
 - Fix reuses' datasets references [#3057](https://github.com/opendatateam/udata/pull/3057)
+- Save and show harvest logs [#3053](https://github.com/opendatateam/udata/pull/3053)
 
 ## 9.0.0 (2024-06-07)
 
