@@ -6,7 +6,7 @@ import json
 import logging
 
 from datetime import date
-from typing import Optional
+from typing import Optional, Union
 from dateutil.parser import parse as parse_dt
 from flask import current_app
 from geomet import wkt
@@ -149,13 +149,15 @@ def resource_to_rdf(resource, dataset=None, graph=None, is_hvd=False):
     return r
 
 
-def dataset_to_graph_id(dataset: Dataset) -> URIRef: 
+def dataset_to_graph_id(dataset: Dataset) -> Union[URIRef, BNode]: 
     if dataset.harvest and dataset.harvest.uri:
         return URIRef(dataset.harvest.uri)
     elif dataset.id:
         return URIRef(endpoint_for('datasets.show_redirect', 'api.dataset',
             dataset=dataset.id, _external=True))
     else:
+        # Should not happen in production. Some test only
+        # `build()` a dataset without saving it to the DB.
         return BNode()
 
 def dataset_to_rdf(dataset, graph=None):
