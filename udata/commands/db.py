@@ -7,7 +7,6 @@ import traceback
 from bson import DBRef
 import click
 import mongoengine
-import sentry_sdk
 
 from udata import migrations, models as core_models
 from udata.api import oauth2 as oauth2_models
@@ -321,10 +320,13 @@ def check_references(models_to_check):
     print(f'\n Total errors: {total}')
 
     if total > 0:
-        with sentry_sdk.push_scope() as scope:
-            scope.set_extra("errors", Log.errors)
-            sentry_sdk.capture_message("{total} integrity errors", "fatal")
-
+        try:
+            import sentry_sdk
+            with sentry_sdk.push_scope() as scope:
+                scope.set_extra("errors", Log.errors)
+                sentry_sdk.capture_message("{total} integrity errors", "fatal")
+        except ImportError:
+            print("`sentry_sdk` not installed. The errors weren't reported")
 
 @grp.command()
 @click.option('--models', multiple=True, default=[], help='Model(s) to check')
