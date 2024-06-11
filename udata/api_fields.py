@@ -70,10 +70,14 @@ def convert_db_to_field(key, field, info = {}):
         constructor_write = restx_fields.String
     elif isinstance(field, mongo_fields.EmbeddedDocumentField):
         nested_fields = info.get('nested_fields')
-        if nested_fields is None:
-            raise ValueError(f"EmbeddedDocumentField `{key}` requires a `nested_fields` param to serialize/deserialize.")
+        if nested_fields is not None:
+            constructor = lambda **kwargs: restx_fields.Nested(nested_fields, **kwargs)
+        elif hasattr(field.document_type_obj, '__read_fields__'):
+            constructor_read = lambda **kwargs: restx_fields.Nested(field.document_type_obj.__read_fields__, **kwargs)
+            constructor_write = lambda **kwargs: restx_fields.Nested(field.document_type_obj.__write_fields__, **kwargs)
+        else:
+            raise ValueError(f"EmbeddedDocumentField `{key}` requires a `nested_fields` param to serialize/deserialize or a `@generate_fields()` definition.")
 
-        constructor = lambda **kwargs: restx_fields.Nested(nested_fields, **kwargs)
     else:
         raise ValueError(f"Unsupported MongoEngine field type {field.__class__.__name__}")
     

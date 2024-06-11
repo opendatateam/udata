@@ -31,17 +31,18 @@ class DataserviceQuerySet(OwnedQuerySet):
                     db.Q(deleted_at__ne=None) |
                     db.Q(archived_at__ne=None))
 
+@generate_fields()
 class HarvestMetadata(db.DynamicEmbeddedDocument):
-    backend = db.StringField()
-    domain = db.StringField()
+    backend = field(db.StringField())
+    domain = field(db.StringField())
 
-    source_id = db.StringField()
-    source_url = db.URLField()
+    source_id = field(db.StringField())
+    source_url = field(db.URLField())
 
-    remote_id = db.StringField()
+    remote_id = field(db.StringField())
 
-    last_harvested_at = db.DateTimeField()
-    archived_at = db.DateTimeField()
+    last_harvested_at = field(db.DateTimeField())
+    archived_at = field(db.DateTimeField())
 
 @generate_fields()
 class Dataservice(WithMetrics, Owned, db.Document):
@@ -128,7 +129,7 @@ class Dataservice(WithMetrics, Owned, db.Document):
         )
     )
 
-    harvest = db.EmbeddedDocumentField(HarvestMetadata)
+    harvest = field(db.EmbeddedDocumentField(HarvestMetadata))
 
     @function_field(description="Link to the API endpoint for this dataservice")
     def self_api_url(self):
