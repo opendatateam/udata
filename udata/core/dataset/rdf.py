@@ -103,6 +103,7 @@ def owner_to_rdf(dataset, graph=None):
         return organization_to_rdf(dataset.organization, graph)
     return
 
+
 def resource_to_rdf(resource, dataset=None, graph=None, is_hvd=False):
     '''
     Map a Resource domain model to a DCAT/RDF graph
