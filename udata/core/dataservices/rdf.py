@@ -89,6 +89,11 @@ def dataservice_to_rdf(dataservice, graph=None):
     for tag in dataservice.tags:
         d.add(DCAT.keyword, Literal(tag))
 
+    # `dataset_to_graph_id(dataset)` URIRef may not exist in the current page
+    # but should exists in the catalog somewhere. Maybe we should create a Node 
+    # with some basic information about this dataset (but this will return a page 
+    # with more datasets than the page size… and could be problematic when processing the
+    # correct Node with all the information in a future page)
     for dataset in dataservice.datasets:
         d.add(DCAT.servesDataset, dataset_to_graph_id(dataset))
 
