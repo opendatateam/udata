@@ -139,7 +139,7 @@ def display_op(op):
     echo('{label:.<70} [{date}]'.format(label=label, date=timestamp))
     format_output(op['output'], success=op['success'], traceback=op.get('traceback'))
 
-def check_references(models_to_check, fix = False):
+def check_references(models_to_check):
     # Cannot modify local scope from Python… :-(
     class Log: content = ''
 
@@ -271,50 +271,24 @@ def check_references(models_to_check, fix = False):
                                 _ = getattr(obj, reference['name'])
                             except mongoengine.errors.DoesNotExist:
                                 errors[model][key] += 1
-                                print(f'\t{model.__name__}#{obj.id} have a broken reference for `{reference["name"]}` (fixable with `--fix`)')
-                                if fix:
-                                    field = getattr(model, reference['name'])
-
-                                    if field.reverse_delete_rule == db.NULLIFY:
-                                        print(f"\t\t…fixing by setting to NULL (db.NULLIFY)")
-                                        setattr(obj, reference['name'], None)
-                                        obj.save()
-                                    elif field.reverse_delete_rule == db.CASCADE:
-                                        print(f"\t\t…fixing by deleting (db.CASCADE)")
-                                        obj.delete()
-                                    else:
-                                        print(f"\t\tcannot fix because unknown `reverse_delete_rule` {field.reverse_delete_rule}")
+                                print(f'\t{model.__name__}#{obj.id} have a broken reference for `{reference["name"]}`')
                         elif reference['type'] == 'list':
-                            to_remove = set()
                             attr_list = getattr(obj, reference['name'], [])
                             for i, sub in enumerate(attr_list):
                                 # If it's still an instance of DBRef it means that it failed to
                                 # dereference the ID.
                                 if isinstance(sub, DBRef):
                                     errors[model][key] += 1
-                                    print(f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}[{i}] (fixable with `--fix`)')
-                                    to_remove.add(i)
-                                    
-                            if fix and len(to_remove) > 0:
-                                print(f"\t\t…fixing the list by removing {len(to_remove)} elements")
-                                attr_list[:] = [i for j, i in enumerate(attr_list) if j not in to_remove]
-                                obj.save()
+                                    print(f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}[{i}]')
                         elif reference['type'] == 'embed_list':
                             p1, p2 = reference['name'].split('__')
                             attr_list = getattr(obj, p1, [])
-                            to_remove = set()
                             for i, sub in enumerate(attr_list):
                                 try:
                                     getattr(sub, p2)
                                 except mongoengine.errors.DoesNotExist:
                                     errors[model][key] += 1
-                                    to_remove.add(i)
-                                    print(f'\t{model.__name__}#{obj.id} have a broken reference for {p1}[{i}].{p2} (fixable with `--fix`)')
-
-                            if fix and len(to_remove) > 0:
-                                print(f"\t\t…fixing the list by removing {len(to_remove)} elements")
-                                attr_list[:] = [i for j, i in enumerate(attr_list) if j not in to_remove]
-                                obj.save()
+                                    print(f'\t{model.__name__}#{obj.id} have a broken reference for {p1}[{i}].{p2}')
                         elif reference['type'] == 'embed':
                             p1, p2 = reference['name'].split('__')
                             sub = getattr(obj, p1)
@@ -352,7 +326,6 @@ def check_references(models_to_check, fix = False):
 
 @grp.command()
 @click.option('--models', multiple=True, default=[], help='Model(s) to check')
-@click.option('--fix', default=False, is_flag=True, help='Try to fix integrity problems')
-def check_integrity(models, fix):
+def check_integrity(models):
     '''Check the integrity of the database from a business perspective'''
-    check_references(models, fix)
+    check_references(models)
