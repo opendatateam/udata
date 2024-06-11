@@ -31,6 +31,13 @@ error_fields = api.model('HarvestError', {
     'details': fields.String(description='Optional details (ie. stacktrace)'),
 })
 
+
+log_fields = api.model('HarvestError', {
+    'level': fields.String(required=True),
+    'message': fields.String(required=True),
+})
+
+
 item_fields = api.model('HarvestItem', {
     'remote_id': fields.String(description='The item remote ID to process',
                                required=True),
@@ -46,6 +53,8 @@ item_fields = api.model('HarvestItem', {
     'ended': fields.ISODateTime(description='The item end date'),
     'errors': fields.List(fields.Nested(error_fields),
                           description='The item errors'),
+    'logs': fields.List(fields.Nested(log_fields),
+                          description='The item logs'),
     'args': fields.List(fields.String,
                         description='The item positional arguments',
                         default=[]),
