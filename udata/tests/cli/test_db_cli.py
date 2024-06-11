@@ -1,15 +1,6 @@
 from datetime import datetime
 
-from bson import ObjectId
 import pytest
-
-from udata.core.dataset.factories import DatasetFactory
-from udata.mongo import db
-from udata.commands.db import check_references
-from udata.harvest.models import HarvestItem, HarvestJob, HarvestSource
-from udata.harvest.tests.factories import HarvestJobFactory
-from udata.tests.api import APITestCase
-
 
 @pytest.fixture
 def migrations(db):
