@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Improve `udata db check-integrity` (perfs, add `--fix` option, Mattermost notifications…) [#3026](https://github.com/opendatateam/udata/pull/3026)
+- Improve `udata db check-integrity` (perfs, Sentry notifications…) [#3026](https://github.com/opendatateam/udata/pull/3026)
+- Refactor catalog exports [#3052](https://github.com/opendatateam/udata/pull/3052)
 
 ## 9.0.0 (2024-06-07)
 
@@ -11,7 +12,6 @@
 - Allow dataservices to be discussed and followed [#3049](https://github.com/opendatateam/udata/pull/3049)
 - Add purge-dataservices job [#3049](https://github.com/opendatateam/udata/pull/3049)
 - Harvest all the available polygons from a spatial coverage [#3039](https://github.com/opendatateam/udata/pull/3039)
-- Refactor catalog exports [#3052](https://github.com/opendatateam/udata/pull/3052)
 
 ## 8.0.1 (2024-05-28)
 
