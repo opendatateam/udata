@@ -54,6 +54,13 @@
                     <pre>{{error.details}}</pre>
                 </div>
             </dd>
+            <dt v-if="item.logs.length">{{ _('Logs') }}</dt>
+            <dd v-if="item.logs.length">
+                <div v-for="log in item.logs">
+                    {{log.level}}
+                    <div>{{log.message}}</div>
+                </div>
+            </dd>
         </dl>
     </div>
     <footer class="modal-footer">

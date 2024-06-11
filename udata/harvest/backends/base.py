@@ -2,7 +2,7 @@ import logging
 import traceback
 
 from datetime import datetime, date, timedelta
-from typing import Optional
+from typing import List, Optional
 from uuid import UUID
 
 import requests
@@ -17,7 +17,7 @@ from udata.models import Dataset
 from udata.utils import safe_unicode
 
 from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
-from ..models import HarvestItem, HarvestJob, HarvestError, archive_harvested_dataset
+from ..models import HarvestItem, HarvestJob, HarvestError, HarvestLog, archive_harvested_dataset
 from ..signals import before_harvest_job, after_harvest_job
 
 log = logging.getLogger(__name__)
@@ -188,10 +188,13 @@ class BaseBackend(object):
         self.job.items.append(item)
         self.save_job()
 
+        log_catcher = LogCatcher()
+
         try:
             if not remote_id:
                 raise HarvestSkipException("missing identifier")
 
+            current_app.logger.addHandler(log_catcher)
             dataset = self.inner_process_dataset(item, **kwargs)
 
             # Use `item.remote_id` because `inner_process_dataset` could have modified it.
@@ -223,7 +226,9 @@ class BaseBackend(object):
             error = HarvestError(message=safe_unicode(e), details=traceback.format_exc())
             item.errors.append(error)
         finally:
+            current_app.logger.removeHandler(log_catcher)
             item.ended = datetime.utcnow()
+            item.logs = [HarvestLog(level=record.levelname, message=record.getMessage()) for record in log_catcher.records]
             self.save_job()
 
     def is_done(self) -> bool:
@@ -436,3 +441,14 @@ class BaseBackend(object):
                 errors.append(msg)
             msg = '\n- '.join(['Validation error:'] + errors)
             raise HarvestValidationError(msg)
+
+
+class LogCatcher(logging.Handler):
+    records: List[logging.LogRecord]
+
+    def __init__(self):
+        self.records = []
+        super().__init__()
+
+    def emit(self, record):
+        self.records.append(record)

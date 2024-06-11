@@ -3,6 +3,8 @@
 ## Current (in progress)
 
 - Harvest dataservices [#3029](https://github.com/opendatateam/udata/pull/3029)
+- Refactor catalog exports [#3052](https://github.com/opendatateam/udata/pull/3052)
+- Save and show harvest logs [#3053](https://github.com/opendatateam/udata/pull/3053)
 
 ## 9.0.0 (2024-06-07)
 
@@ -11,7 +13,6 @@
 - Allow dataservices to be discussed and followed [#3049](https://github.com/opendatateam/udata/pull/3049)
 - Add purge-dataservices job [#3049](https://github.com/opendatateam/udata/pull/3049)
 - Harvest all the available polygons from a spatial coverage [#3039](https://github.com/opendatateam/udata/pull/3039)
-- Refactor catalog exports [#3052](https://github.com/opendatateam/udata/pull/3052)
 
 ## 8.0.1 (2024-05-28)
 
