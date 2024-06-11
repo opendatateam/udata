@@ -114,8 +114,12 @@ def generate_fields(**kwargs):
                 if 'column' not in filterable:
                     filterable['column'] = key
 
+                if 'constraints' not in filterable:
+                    filterable['constraints'] = []
+                    if isinstance(field, mongo_fields.ReferenceField) or (isinstance(field, mongo_fields.ListField) and isinstance(field.field, mongo_fields.ReferenceField)):
+                        filterable['constraints'].append('objectid')
+
                 # We may add more information later here:
-                # - constraints based on inner type (ObjectId?)
                 # - type of mongo query to execute (right now only simple =)
 
                 filterables.append(filterable)
@@ -185,6 +189,10 @@ def generate_fields(**kwargs):
 
             for filterable in filterables:
                 if args.get(filterable['key']):
+                    for constraint in filterable['constraints']:
+                        if constraint == 'objectid' and not ObjectId.is_valid(args[filterable['key']]):
+                            api.abort(400, f'`{filterable["key"]}` must be an identifier')
+
                     base_query = base_query.filter(**{
                         filterable['column']: args[filterable['key']],
                     })
