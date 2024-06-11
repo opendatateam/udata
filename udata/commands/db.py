@@ -324,7 +324,7 @@ def check_references(models_to_check):
             import sentry_sdk
             with sentry_sdk.push_scope() as scope:
                 scope.set_extra("errors", Log.errors)
-                sentry_sdk.capture_message("{total} integrity errors", "fatal")
+                sentry_sdk.capture_message(f"{total} integrity errors", "fatal")
         except ImportError:
             print("`sentry_sdk` not installed. The errors weren't reported")
 
