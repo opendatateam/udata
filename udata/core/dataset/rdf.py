@@ -152,9 +152,11 @@ def resource_to_rdf(resource, dataset=None, graph=None, is_hvd=False):
 def dataset_to_graph_id(dataset: Dataset) -> URIRef: 
     if dataset.harvest and dataset.harvest.uri:
         return URIRef(dataset.harvest.uri)
-    else:
+    elif dataset.id:
         return URIRef(endpoint_for('datasets.show_redirect', 'api.dataset',
             dataset=dataset.id, _external=True))
+    else:
+        return BNode()
 
 def dataset_to_rdf(dataset, graph=None):
     '''
@@ -164,13 +166,6 @@ def dataset_to_rdf(dataset, graph=None):
     # unless there is already an upstream URI
     id = dataset_to_graph_id(dataset)
 
-    if dataset.harvest and dataset.harvest.uri:
-        id = URIRef(dataset.harvest.uri)
-    elif dataset.id:
-        id = URIRef(endpoint_for('datasets.show_redirect', 'api.dataset',
-                    dataset=dataset.id, _external=True))
-    else:
-        id = BNode()
     # Expose upstream identifier if present
     if dataset.harvest and dataset.harvest.dct_identifier:
         identifier = dataset.harvest.dct_identifier
