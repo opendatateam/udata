@@ -308,7 +308,7 @@ class BaseBackend(object):
         harvest.domain = self.source.domain
 
         harvest.source_id = str(self.source.id)
-        harvest.source_id = str(self.source.url)
+        harvest.source_url = str(self.source.url)
 
         harvest.remote_id = remote_id
         harvest.last_harvested_at = datetime.utcnow()

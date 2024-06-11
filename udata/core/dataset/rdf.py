@@ -523,7 +523,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
 
     dataset.title = rdf_value(d, DCT.title)
     if not dataset.title:
-        raise HarvestSkipException("missing title")
+        raise HarvestSkipException("missing title on dataset")
 
     # Support dct:abstract if dct:description is missing (sometimes used instead)
     description = d.value(DCT.description) or d.value(DCT.abstract)
