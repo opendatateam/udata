@@ -251,6 +251,9 @@ class BaseBackend(object):
             if not remote_id:
                 raise HarvestSkipException("missing identifier")
 
+            if not dataservice.harvest:
+                dataservice.harvest = HarvestDataserviceMetadata()
+
             dataservice = self.inner_process_dataservice(item, **kwargs)
 
             dataservice.harvest = self.update_dataservice_harvest_info(dataservice.harvest, remote_id)
@@ -300,10 +303,7 @@ class BaseBackend(object):
 
         return harvest
 
-    def update_dataservice_harvest_info(self, harvest: Optional[HarvestDataserviceMetadata], remote_id: int):
-        if not harvest:
-            harvest = HarvestDataserviceMetadata()
-
+    def update_dataservice_harvest_info(self, harvest: HarvestDataserviceMetadata, remote_id: int):
         harvest.backend = self.display_name
         harvest.domain = self.source.domain
 

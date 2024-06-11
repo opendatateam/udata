@@ -41,7 +41,14 @@ class HarvestMetadata(db.DynamicEmbeddedDocument):
 
     remote_id = field(db.StringField())
 
-    last_harvested_at = field(db.DateTimeField())
+    created_at = field(
+        db.DatetimeField(),
+        description="Date of the creation as provided by the harvested catalog"
+    )
+    last_update = field(
+        db.DateTimeField(),
+        description="Date of the last harvesting"
+    )
     archived_at = field(db.DateTimeField())
 
 @generate_fields()

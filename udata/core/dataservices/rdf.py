@@ -45,7 +45,7 @@ def dataservice_from_rdf(graph: Graph, dataservice: Dataservice, node, all_datas
     if license is not None:
         dataservice.license = License.guess(license)
 
-    dataservice.created_at = rdf_value(d, DCT.issued)
+    dataservice.harvest.created_at = rdf_value(d, DCT.issued)
     dataservice.metadata_modified_at = rdf_value(d, DCT.modified)
 
     dataservice.tags = themes_from_rdf(d)
