@@ -96,6 +96,7 @@ def generate_fields(**kwargs):
         read_fields = {}
         write_fields = {}
         sortables = []
+        filterables = []
 
         read_fields['id'] = restx_fields.String(required=True)
 
@@ -105,6 +106,23 @@ def generate_fields(**kwargs):
 
             if info.get('sortable', False):
                 sortables.append(key)
+
+            filterable = info.get('filterable', None)
+            if filterable is not None:
+                if 'key' not in filterable:
+                    filterable['key'] = key
+                if 'column' not in filterable:
+                    filterable['column'] = key
+
+                if 'constraints' not in filterable:
+                    filterable['constraints'] = []
+                    if isinstance(field, mongo_fields.ReferenceField) or (isinstance(field, mongo_fields.ListField) and isinstance(field.field, mongo_fields.ReferenceField)):
+                        filterable['constraints'].append('objectid')
+
+                # We may add more information later here:
+                # - type of mongo query to execute (right now only simple =)
+
+                filterables.append(filterable)
 
             read, write = convert_db_to_field(key, field)
 
@@ -159,12 +177,25 @@ def generate_fields(**kwargs):
             choices = sortables + ['-' + k for k in sortables]
             parser.add_argument('sort', type=str, location='args', choices=choices, help='The field (and direction) on which sorting apply')
 
+        for filterable in filterables:
+            parser.add_argument(filterable['key'], type=str, location='args')
+
         cls.__index_parser__ = parser
         def apply_sort_filters_and_pagination(base_query):
             args = cls.__index_parser__.parse_args()
 
             if sortables and args['sort']:
                 base_query = base_query.order_by(args['sort'])
+
+            for filterable in filterables:
+                if args.get(filterable['key']):
+                    for constraint in filterable['constraints']:
+                        if constraint == 'objectid' and not ObjectId.is_valid(args[filterable['key']]):
+                            api.abort(400, f'`{filterable["key"]}` must be an identifier')
+
+                    base_query = base_query.filter(**{
+                        filterable['column']: args[filterable['key']],
+                    })
 
             if paginable:
                 base_query = base_query.paginate(args['page'], args['page_size'])
