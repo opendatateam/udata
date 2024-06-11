@@ -129,7 +129,10 @@ class Dataservice(WithMetrics, Owned, db.Document):
         )
     )
 
-    harvest = field(db.EmbeddedDocumentField(HarvestMetadata))
+    harvest = field(
+        db.EmbeddedDocumentField(HarvestMetadata),
+        readonly=True,
+    )
 
     @function_field(description="Link to the API endpoint for this dataservice")
     def self_api_url(self):
