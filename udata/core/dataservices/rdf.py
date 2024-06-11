@@ -3,12 +3,11 @@ from datetime import datetime
 from typing import List, Optional
 from rdflib import RDF, Graph
 
-from udata.core.dataservices.models import Dataservice, HarvestMetadata
+from udata.core.dataservices.models import Dataservice, HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset.models import Dataset, License
 from udata.core.dataset.rdf import sanitize_html
 from udata.harvest.models import HarvestSource
 from udata.rdf import DCAT, DCT, contact_point_from_rdf, rdf_value, theme_labels_from_rdf, themes_from_rdf, url_from_rdf
-
 
 def dataservice_from_rdf(graph: Graph, dataservice: Dataservice, node, all_datasets: List[Dataset]) -> Dataservice :
     '''
@@ -45,6 +44,9 @@ def dataservice_from_rdf(graph: Graph, dataservice: Dataservice, node, all_datas
     license = rdf_value(d, DCT.license)
     if license is not None:
         dataservice.license = License.guess(license)
+
+    if not dataservice.harvest:
+        dataservice.harvest = HarvestDataserviceMetadata()
 
     dataservice.harvest.created_at = rdf_value(d, DCT.issued)
     dataservice.metadata_modified_at = rdf_value(d, DCT.modified)

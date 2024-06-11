@@ -194,9 +194,6 @@ class BaseBackend(object):
             if not remote_id:
                 raise HarvestSkipException("missing identifier")
 
-            if not dataset.harvest:
-                dataset.harvest = HarvestDatasetMetadata()
-
             current_app.logger.addHandler(log_catcher)
             dataset = self.inner_process_dataset(item, **kwargs)
 
@@ -254,9 +251,6 @@ class BaseBackend(object):
             if not remote_id:
                 raise HarvestSkipException("missing identifier")
 
-            if not dataservice.harvest:
-                dataservice.harvest = HarvestDataserviceMetadata()
-
             dataservice = self.inner_process_dataservice(item, **kwargs)
 
             dataservice.harvest = self.update_dataservice_harvest_info(dataservice.harvest, remote_id)
@@ -290,7 +284,10 @@ class BaseBackend(object):
             item.ended = datetime.utcnow()
             self.save_job()
 
-    def update_dataset_harvest_info(self, harvest: HarvestDatasetMetadata, remote_id: int):
+    def update_dataset_harvest_info(self, harvest: Optional[HarvestDatasetMetadata], remote_id: int):
+        if not harvest:
+            harvest = HarvestDatasetMetadata()
+
         harvest.backend = self.display_name
         harvest.source_id = str(self.source.id)
         harvest.remote_id = remote_id
@@ -303,7 +300,10 @@ class BaseBackend(object):
 
         return harvest
 
-    def update_dataservice_harvest_info(self, harvest: HarvestDataserviceMetadata, remote_id: int):
+    def update_dataservice_harvest_info(self, harvest: Optional[HarvestDataserviceMetadata], remote_id: int):
+        if not harvest:
+            harvest = HarvestDataserviceMetadata()
+
         harvest.backend = self.display_name
         harvest.domain = self.source.domain
 
