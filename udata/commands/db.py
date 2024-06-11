@@ -7,13 +7,13 @@ import traceback
 from bson import DBRef
 import click
 import mongoengine
+from sentry_sdk import capture_message
 
 from udata import migrations, models as core_models
 from udata.api import oauth2 as oauth2_models
 from udata.commands import cli, green, yellow, cyan, red, magenta, white, echo
 from udata.harvest import models as harvest_models
 from udata.mongo import db
-from udata.notifications.mattermost import send_message
 
 
 # Date format used to for display
@@ -321,7 +321,7 @@ def check_references(models_to_check):
     print_and_save(f'\n Total errors: {total}')
 
     if total > 0:
-        send_message(Log.content)
+        capture_message(Log.content)
 
 
 @grp.command()
