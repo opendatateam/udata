@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Refactor catalog exports [#3052](https://github.com/opendatateam/udata/pull/3052)
+- Save and show harvest logs [#3053](https://github.com/opendatateam/udata/pull/3053)
 
 ## 9.0.0 (2024-06-07)
 
