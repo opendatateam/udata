@@ -7,7 +7,7 @@ import traceback
 from bson import DBRef
 import click
 import mongoengine
-from sentry_sdk import capture_message
+import sentry_sdk
 
 from udata import migrations, models as core_models
 from udata.api import oauth2 as oauth2_models
@@ -141,10 +141,10 @@ def display_op(op):
 
 def check_references(models_to_check):
     # Cannot modify local scope from Python… :-(
-    class Log: content = ''
+    class Log: errors = []
 
-    def print_and_save(text):
-        Log.content += text + '\n'
+    def print_and_save(text: str):
+        Log.errors.append(text.strip())
         print(text) 
 
     errors = collections.defaultdict(int)
@@ -245,16 +245,16 @@ def check_references(models_to_check):
                 'type': 'embed_list_ref',
             } for lr in elists_refs]
 
-    print_and_save('Those references will be inspected:')
+    print('Those references will be inspected:')
     for reference in references:
-        print_and_save(f'- {reference["repr"]}({reference["destination"]}) — {reference["type"]}')
-    print_and_save('')
+        print(f'- {reference["repr"]}({reference["destination"]}) — {reference["type"]}')
+    print('')
 
     total = 0
     for model, model_references in groupby(references, lambda i: i["model"]):
         model_references = list(model_references)
         count = model.objects.count()
-        print_and_save(f'- doing {count} {model.__name__}…')
+        print(f'- doing {count} {model.__name__}…')
         errors[model] = {}
 
         qs = model.objects().no_cache().all()
@@ -271,7 +271,7 @@ def check_references(models_to_check):
                                 _ = getattr(obj, reference['name'])
                             except mongoengine.errors.DoesNotExist:
                                 errors[model][key] += 1
-                                print(f'\t{model.__name__}#{obj.id} have a broken reference for `{reference["name"]}`')
+                                print_and_save(f'\t{model.__name__}#{obj.id} have a broken reference for `{reference["name"]}`')
                         elif reference['type'] == 'list':
                             attr_list = getattr(obj, reference['name'], [])
                             for i, sub in enumerate(attr_list):
@@ -279,7 +279,7 @@ def check_references(models_to_check):
                                 # dereference the ID.
                                 if isinstance(sub, DBRef):
                                     errors[model][key] += 1
-                                    print(f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}[{i}]')
+                                    print_and_save(f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}[{i}]')
                         elif reference['type'] == 'embed_list':
                             p1, p2 = reference['name'].split('__')
                             attr_list = getattr(obj, p1, [])
@@ -288,7 +288,7 @@ def check_references(models_to_check):
                                     getattr(sub, p2)
                                 except mongoengine.errors.DoesNotExist:
                                     errors[model][key] += 1
-                                    print(f'\t{model.__name__}#{obj.id} have a broken reference for {p1}[{i}].{p2}')
+                                    print_and_save(f'\t{model.__name__}#{obj.id} have a broken reference for {p1}[{i}].{p2}')
                         elif reference['type'] == 'embed':
                             p1, p2 = reference['name'].split('__')
                             sub = getattr(obj, p1)
@@ -297,7 +297,7 @@ def check_references(models_to_check):
                                 getattr(sub, p2)
                             except mongoengine.errors.DoesNotExist:
                                 errors[model][key] += 1
-                                print(f'\t{model.__name__}#{obj.id} have a broken reference for {p1}.{p2}')
+                                print_and_save(f'\t{model.__name__}#{obj.id} have a broken reference for {p1}.{p2}')
                         elif reference['type'] == 'embed_list_ref':
                             p1, p2 = reference['name'].split('__')
                             a = getattr(obj, p1)
@@ -308,20 +308,22 @@ def check_references(models_to_check):
                                 # dereference the ID.
                                 if isinstance(child, DBRef):
                                     errors[model][key] += 1
-                                    print(f'\t{model.__name__}#{obj.id} have a broken reference for {p1}.{p2}[{i}]')
+                                    print_and_save(f'\t{model.__name__}#{obj.id} have a broken reference for {p1}.{p2}[{i}]')
                         else:
                             print_and_save(f'Unknown ref type {reference["type"]}')
                     except mongoengine.errors.FieldDoesNotExist as e:
                         print_and_save(f'[ERROR for {model.__name__} {obj.id}] {traceback.format_exc()}')
 
         for key, nb_errors in errors[model].items():
-            print_and_save(f'{key}: {nb_errors}')
+            print(f'{key}: {nb_errors}')
             total += nb_errors
 
-    print_and_save(f'\n Total errors: {total}')
+    print(f'\n Total errors: {total}')
 
     if total > 0:
-        capture_message(Log.content)
+        with sentry_sdk.push_scope() as scope:
+            scope.set_extra("errors", Log.errors)
+            sentry_sdk.capture_message("{total} integrity errors", "fatal")
 
 
 @grp.command()
