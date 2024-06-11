@@ -49,6 +49,9 @@ class HarvestError(db.EmbeddedDocument):
     message = db.StringField()
     details = db.StringField()
 
+class HarvestLog(db.EmbeddedDocument):
+    level = db.StringField()
+    message = db.StringField()
 
 class HarvestItem(db.EmbeddedDocument):
     remote_id = db.StringField()
@@ -59,6 +62,7 @@ class HarvestItem(db.EmbeddedDocument):
     started = db.DateTimeField()
     ended = db.DateTimeField()
     errors = db.ListField(db.EmbeddedDocumentField(HarvestError))
+    logs = db.ListField(db.EmbeddedDocumentField(HarvestLog), default=[])
     args = db.ListField(db.StringField())
     kwargs = db.DictField()
 

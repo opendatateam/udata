@@ -4,6 +4,7 @@
 
 - Improve `udata db check-integrity` (perfs, Sentry notifications…) [#3026](https://github.com/opendatateam/udata/pull/3026)
 - Refactor catalog exports [#3052](https://github.com/opendatateam/udata/pull/3052)
+- Save and show harvest logs [#3053](https://github.com/opendatateam/udata/pull/3053)
 
 ## 9.0.0 (2024-06-07)
 
