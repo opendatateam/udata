@@ -103,7 +103,6 @@ def owner_to_rdf(dataset, graph=None):
         return organization_to_rdf(dataset.organization, graph)
     return
 
-
 def resource_to_rdf(resource, dataset=None, graph=None, is_hvd=False):
     '''
     Map a Resource domain model to a DCAT/RDF graph
@@ -149,12 +148,21 @@ def resource_to_rdf(resource, dataset=None, graph=None, is_hvd=False):
     return r
 
 
+def dataset_to_graph_id(dataset: Dataset) -> URIRef: 
+    if dataset.harvest and dataset.harvest.uri:
+        return URIRef(dataset.harvest.uri)
+    else:
+        return URIRef(endpoint_for('datasets.show_redirect', 'api.dataset',
+            dataset=dataset.id, _external=True))
+
 def dataset_to_rdf(dataset, graph=None):
     '''
     Map a dataset domain model to a DCAT/RDF graph
     '''
     # Use the unlocalized permalink to the dataset as URI when available
     # unless there is already an upstream URI
+    id = dataset_to_graph_id(dataset)
+
     if dataset.harvest and dataset.harvest.uri:
         id = URIRef(dataset.harvest.uri)
     elif dataset.id:

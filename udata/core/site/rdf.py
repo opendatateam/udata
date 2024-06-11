@@ -5,6 +5,7 @@ from flask import url_for, current_app
 from rdflib import Graph, URIRef, Literal, BNode
 from rdflib.namespace import RDF, FOAF
 
+from udata.core.dataservices.rdf import dataservice_to_rdf
 from udata.core.dataset.rdf import dataset_to_rdf
 from udata.core.organization.rdf import organization_to_rdf
 from udata.core.user.rdf import user_to_rdf
@@ -41,25 +42,8 @@ def build_catalog(site, datasets, dataservices = [], format=None):
         catalog.add(DCAT.dataset, rdf_dataset)
 
     for dataservice in dataservices:
-        if dataservice.harvest and dataservice.harvest.uri:
-            id = URIRef(dataservice.harvest.uri)
-        elif dataservice.id:
-            id = URIRef(endpoint_for('dataservices.show_redirect', 'api.dataservice',
-                        dataservice=dataservice.id, _external=True))
-
-        if dataservice.harvest and dataservice.harvest.dct_identifier:
-            identifier = dataservice.harvest.dct_identifier
-        else:
-            identifier = dataservice.id
-
-        d = graph.resource(id)
-        d.set(RDF.type, DCAT.DataService)
-        d.set(DCT.identifier, Literal(identifier))
-        d.set(DCT.title, Literal(dataservice.title))
-        d.set(DCT.description, Literal(dataservice.description))
-        for serve in dataset.dataservices:
-            d.add(DCAT.Serves, URIRef('http://example.org'))
-
+        rdf_dataservice = dataservice_to_rdf(dataservice, graph)
+        catalog.add(DCAT.DataService, rdf_dataservice)
 
     if isinstance(datasets, Paginable):
         paginate_catalog(catalog, graph, datasets, format, 'api.site_rdf_catalog_format')
