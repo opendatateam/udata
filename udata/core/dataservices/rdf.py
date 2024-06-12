@@ -1,7 +1,7 @@
 
 from datetime import datetime
 from typing import List, Optional
-from rdflib import RDF, Graph
+from rdflib import RDF, Graph, URIRef
 
 from udata.core.dataservices.models import Dataservice, HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset.models import Dataset, License
@@ -48,6 +48,10 @@ def dataservice_from_rdf(graph: Graph, dataservice: Dataservice, node, all_datas
     if not dataservice.harvest:
         dataservice.harvest = HarvestDataserviceMetadata()
 
+    # If the node ID is a `URIRef` it means it links to something external, if it's not an URIRef it's often a
+    # auto-generated ID just to link multiple RDF node togethers. When exporting as RDF to other catalogs, we 
+    # want to re-use this node ID (only if it's not auto-generated) to improve compatibility.
+    dataservice.harvest.rdf_node_id_as_url = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
     dataservice.harvest.created_at = rdf_value(d, DCT.issued)
     dataservice.metadata_modified_at = rdf_value(d, DCT.modified)
 
