@@ -4,6 +4,7 @@ from datetime import datetime
 
 from flask import url_for
 
+from udata.core.user.models import Role
 from udata.models import (
     Organization, Member, MembershipRequest, Follow, Discussion
 )
@@ -78,6 +79,14 @@ class OrganizationAPITest:
         assert member is not None, 'Current user should be a member'
         assert member.role == 'admin', 'Current user should be an administrator'
         assert org.get_metrics()['members'] == 1
+
+    def test_organization_api_cannot_create_with_role_no_org(self, api):
+        data = OrganizationFactory.as_dict()
+        no_org, _ = Role.objects.get_or_create(name='no_org')
+        api.login(UserFactory(roles=[no_org]))
+        response = api.post(url_for('api.organizations'), data)
+        assert403(response)
+        assert Organization.objects.count() is 0
 
     def test_organization_api_update(self, api):
         '''It should update an organization from the API'''

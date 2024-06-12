@@ -103,6 +103,9 @@ class OrganizationListAPI(API):
     @api.marshal_with(org_fields, code=201)
     def post(self):
         '''Create a new organization'''
+        if current_user.has_role('no_org'):
+            api.abort(403, 'Your account cannot create new organization. Please contact support.')
+
         form = api.validate(OrganizationForm)
         organization = form.save()
         return organization, 201
