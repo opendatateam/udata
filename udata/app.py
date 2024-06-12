@@ -229,6 +229,9 @@ def register_extensions(app):
 
 def register_features(app):
     from udata.features import notifications
+    from udata.features import webhooks
+
+    webhooks.init_app(app)
 
     notifications.init_app(app)
 

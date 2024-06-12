@@ -389,7 +389,10 @@ class ResourceMixin(object):
 
         If this resource is updated and `url` changes, this property won't.
         '''
-        return endpoint_for('datasets.resource', 'api.resource_redirect', id=self.id, _external=True)
+        return endpoint_for(
+            'datasets.resource', 'api.resource_redirect',
+            id=self.id, _external=True
+        )
 
     @cached_property
     def json_ld(self):
@@ -911,6 +914,9 @@ class CommunityResource(ResourceMixin, WithMetrics, Owned, db.Document):
     Local file, remote file or API added by the community of the users to the
     original dataset
     '''
+    on_create = signal('CommunityResource.on_create')
+    on_update = signal('CommunityResource.on_update')
+
     dataset = db.ReferenceField(Dataset, reverse_delete_rule=db.NULLIFY)
 
     __metrics_keys__ = [
@@ -925,6 +931,19 @@ class CommunityResource(ResourceMixin, WithMetrics, Owned, db.Document):
     @property
     def from_community(self):
         return True
+
+    @classmethod
+    def post_save(cls, _, document, **kwargs):
+        if 'post_save' in kwargs.get('ignores', []):
+            return
+        if kwargs.get('created'):
+            cls.on_create.send(document)
+        else:
+            cls.on_update.send(document)
+
+
+post_save.connect(CommunityResource.post_save, sender=CommunityResource)
+
 
 class ResourceSchema(object):
     @staticmethod
@@ -946,9 +965,10 @@ class ResourceSchema(object):
             response = requests.get(endpoint, timeout=5)
             # do not cache 404 and forward status code
             if response.status_code == 404:
-                raise SchemasCatalogNotFoundException(f'Schemas catalog does not exist at {endpoint}')
+                msg = f'Schemas catalog does not exist at {endpoint}'
+                raise SchemasCatalogNotFoundException(msg)
             response.raise_for_status()
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             log.exception(f'Error while getting schema catalog from {endpoint}')
             schemas = cache.get(cache_key)
         else:

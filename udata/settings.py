@@ -453,6 +453,17 @@ class Defaults(object):
                         'SourcesAPI.post',
                         'FollowAPI.post']
 
+    # Webhooks
+    ##########
+    # expects a list of {
+    #   'url': 'https://example.com/webhook',
+    #   'secret': '{secret shared with webhook recipient}',
+    #   # list of events to which the webhook recipient subscribes
+    #   # available events are in `udata/tests/features/webhooks/test_webhooks@WebhookIntegrationTest`  # noqa
+    #   'events': [],
+    # }
+    WEBHOOKS = []
+
     FIXTURE_DATASET_SLUGS = []
     PUBLISH_ON_RESOURCE_EVENTS = False
     RESOURCES_ANALYSER_URI = 'http://localhost:8000'
@@ -476,7 +487,7 @@ class Testing(object):
     '''Sane values for testing. Should be applied as override'''
     TESTING = True
     # related to https://github.com/noirbizarre/flask-restplus/commit/93e412789f1ef8d1d2eab837f15535cf79bd144d#diff-68876137696247abc8c123622c73a11f  # noqa
-    # this keeps our legacy tests from failing, we should probably fix the tests instead someday
+    # FIXME: this keeps our legacy tests from failing, we should probably fix the tests instead
     PROPAGATE_EXCEPTIONS = False
     SEND_MAIL = False
     WTF_CSRF_ENABLED = False
