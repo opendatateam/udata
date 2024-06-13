@@ -40,6 +40,7 @@ class HarvestMetadata(db.DynamicEmbeddedDocument):
     source_url = field(db.URLField())
 
     remote_id = field(db.StringField())
+    remote_url = field(db.URLField())
 
     created_at = field(
         db.DateTimeField(),

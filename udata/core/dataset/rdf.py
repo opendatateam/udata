@@ -22,7 +22,7 @@ from udata.harvest.exceptions import HarvestSkipException
 from udata.models import db
 from udata.rdf import (
     DCAT, DCATAP, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, TAG_TO_EU_HVD_CATEGORIES, RDFS, 
-    namespace_manager, rdf_value, sanitize_html, schema_from_rdf, themes_from_rdf, url_from_rdf, HVD_LEGISLATION,
+    namespace_manager, rdf_value, remote_url_from_rdf, sanitize_html, schema_from_rdf, themes_from_rdf, url_from_rdf, HVD_LEGISLATION,
     contact_point_from_rdf,
 )
 from udata.utils import get_by, safe_unicode
@@ -428,22 +428,6 @@ def title_from_rdf(rdf, url):
             return i18n._('{format} resource').format(format=fmt.lower())
         else:
             return i18n._('Nameless resource')
-
-
-def remote_url_from_rdf(rdf):
-    '''
-    Return DCAT.landingPage if found and uri validation succeeds.
-    Use RDF identifier as fallback if uri validation succeeds.
-    '''
-    landing_page = url_from_rdf(rdf, DCAT.landingPage)
-    uri = rdf.identifier.toPython()
-    for candidate in [landing_page, uri]:
-        if candidate:
-            try:
-                uris.validate(candidate)
-                return candidate
-            except uris.ValidationError:
-                pass
 
 def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     '''

@@ -322,6 +322,21 @@ def contact_point_from_rdf(rdf, dataset):
             return (contact_point or
                     ContactPoint(name=name, email=email, owner=dataset.owner).save())
 
+def remote_url_from_rdf(rdf):
+    '''
+    Return DCAT.landingPage if found and uri validation succeeds.
+    Use RDF identifier as fallback if uri validation succeeds.
+    '''
+    landing_page = url_from_rdf(rdf, DCAT.landingPage)
+    uri = rdf.identifier.toPython()
+    for candidate in [landing_page, uri]:
+        if candidate:
+            try:
+                uris.validate(candidate)
+                return candidate
+            except uris.ValidationError:
+                pass
+
 def schema_from_rdf(rdf):
     '''
     Try to extract a schema from a conformsTo property.

@@ -7,7 +7,7 @@ from udata.core.dataservices.models import Dataservice, HarvestMetadata as Harve
 from udata.core.dataset.models import Dataset, License
 from udata.core.dataset.rdf import sanitize_html
 from udata.harvest.models import HarvestSource
-from udata.rdf import DCAT, DCT, contact_point_from_rdf, rdf_value, theme_labels_from_rdf, themes_from_rdf, url_from_rdf
+from udata.rdf import DCAT, DCT, contact_point_from_rdf, rdf_value, remote_url_from_rdf, theme_labels_from_rdf, themes_from_rdf, url_from_rdf
 
 def dataservice_from_rdf(graph: Graph, dataservice: Dataservice, node, all_datasets: List[Dataset]) -> Dataservice :
     '''
@@ -52,6 +52,7 @@ def dataservice_from_rdf(graph: Graph, dataservice: Dataservice, node, all_datas
     # auto-generated ID just to link multiple RDF node togethers. When exporting as RDF to other catalogs, we 
     # want to re-use this node ID (only if it's not auto-generated) to improve compatibility.
     dataservice.harvest.rdf_node_id_as_url = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
+    dataservice.harvest.remote_url = remote_url_from_rdf(d)
     dataservice.harvest.created_at = rdf_value(d, DCT.issued)
     dataservice.metadata_modified_at = rdf_value(d, DCT.modified)
 
