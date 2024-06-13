@@ -7,6 +7,7 @@
 - Add a filter to filter dataservices by dataset [#3056](https://github.com/opendatateam/udata/pull/3056)
 - Fix reuses' datasets references [#3057](https://github.com/opendatateam/udata/pull/3057)
 - Save and show harvest logs [#3053](https://github.com/opendatateam/udata/pull/3053)
+- Fix missing `ObjectId` validation on `/sources` endpoint [#3060](https://github.com/opendatateam/udata/pull/3060)
 
 ## 9.0.0 (2024-06-07)
 
