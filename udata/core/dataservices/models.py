@@ -134,7 +134,10 @@ class Dataservice(WithMetrics, Owned, db.Document):
                 db.ReferenceField(Dataset),
                 nested_fields=datasets_api_fields.dataset_fields,
             )
-        )
+        ),
+        filterable={
+            'key': 'dataset',
+        },
     )
 
     harvest = field(

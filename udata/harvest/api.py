@@ -1,3 +1,4 @@
+from bson import ObjectId
 from werkzeug.exceptions import BadRequest
 from flask import request
 
@@ -194,6 +195,10 @@ class SourcesAPI(API):
     def get(self):
         '''List all harvest sources'''
         args = source_parser.parse_args()
+
+        if args.get('owner') and not ObjectId.is_valid(args.get('owner')):
+            api.abort(400, '`owner` arg must be an identifier')
+
         return actions.paginate_sources(args.get('owner'),
                                         page=args['page'],
                                         page_size=args['page_size'],
