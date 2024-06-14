@@ -1575,8 +1575,8 @@ msgstr ""
 msgid "Heavily reused"
 msgstr ""
 
-#: udata/uris.py:53
-msgid "Invalid URL: %(reason)s"
+#: udata/uris.py:51
+msgid "Invalid URL \"{url}\": {reason}"
 msgstr ""
 
 #: udata/uris.py:103

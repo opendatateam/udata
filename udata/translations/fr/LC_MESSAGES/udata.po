@@ -1555,9 +1555,9 @@ msgstr "Assez réutilisé"
 msgid "Heavily reused"
 msgstr "Souvent réutilisé"
 
-#: udata/uris.py:53
-msgid "URL invalide : %(reason)s"
-msgstr ""
+#: udata/uris.py:51
+msgid "Invalid URL \"{url}\": {reason}"
+msgstr "URL invalide \"{url}\" : {reason}"
 
 #: udata/uris.py:103
 msgid "Schéma invalide {0}, schémas autorisés : {1}"
