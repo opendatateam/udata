@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Improve `udata db check-integrity` (perfs, Sentry notifications…) [#3026](https://github.com/opendatateam/udata/pull/3026)
 - Harvest dataservices [#3029](https://github.com/opendatateam/udata/pull/3029)
 - Refactor catalog exports [#3052](https://github.com/opendatateam/udata/pull/3052)
 - Add a filter to filter dataservices by dataset [#3056](https://github.com/opendatateam/udata/pull/3056)
