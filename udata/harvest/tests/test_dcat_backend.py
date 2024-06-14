@@ -9,6 +9,7 @@ import boto3
 from flask import current_app
 import xml.etree.ElementTree as ET
 
+from udata.core.dataservices.models import Dataservice
 from udata.harvest.models import HarvestJob
 from udata.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
@@ -160,6 +161,26 @@ class DcatBackendTest:
         assert len(datasets['3'].resources) == 1
         assert len(datasets['1'].resources) == 2
         assert len(datasets['2'].resources) == 2
+
+    def test_harvest_dataservices(self, rmock):
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
+
+        filename = 'bnodes.xml'
+        url = mock_dcat(rmock, filename)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+
+        actions.run(source.slug)
+
+        dataservices = Dataservice.objects
+
+        assert len(dataservices) == 1
+        assert dataservices[0].title == "Explore API v2"
+        assert dataservices[0].base_api_url == "https://data.paris2024.org/api/explore/v2.1/"
+        assert dataservices[0].endpoint_description_url == "https://data.paris2024.org/api/explore/v2.1/swagger.json"
+        assert dataservices[0].harvest.remote_url == "https://data.paris2024.org/api/explore/v2.1/console"
 
     def test_harvest_literal_spatial(self, rmock):
         url = mock_dcat(rmock, 'evian.json')

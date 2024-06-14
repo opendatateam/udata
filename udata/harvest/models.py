@@ -3,6 +3,7 @@ from datetime import datetime
 import logging
 from urllib.parse import urlparse
 
+from udata.core.dataservices.models import Dataservice
 from werkzeug.utils import cached_property
 
 from udata.core.dataset.models import HarvestDatasetMetadata
@@ -56,6 +57,7 @@ class HarvestLog(db.EmbeddedDocument):
 class HarvestItem(db.EmbeddedDocument):
     remote_id = db.StringField()
     dataset = db.ReferenceField(Dataset)
+    dataservice = db.ReferenceField(Dataservice)
     status = db.StringField(choices=list(HARVEST_ITEM_STATUS),
                             default=DEFAULT_HARVEST_ITEM_STATUS, required=True)
     created = db.DateTimeField(default=datetime.utcnow, required=True)

@@ -18,7 +18,10 @@ from udata.core.dataset.factories import (
 from udata.core.dataset.rdf import (
     dataset_to_rdf, dataset_from_rdf, resource_to_rdf, resource_from_rdf,
     temporal_from_rdf, frequency_to_rdf, frequency_from_rdf,
-    EU_RDF_REQUENCIES, TAG_TO_EU_HVD_CATEGORIES
+    EU_RDF_REQUENCIES
+)
+from udata.rdf import (
+    TAG_TO_EU_HVD_CATEGORIES
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.i18n import gettext as _
