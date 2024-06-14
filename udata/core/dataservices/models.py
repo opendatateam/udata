@@ -42,6 +42,14 @@ class HarvestMetadata(db.DynamicEmbeddedDocument):
     remote_id = field(db.StringField())
     remote_url = field(db.URLField())
 
+    # If the node ID is a `URIRef` it means it links to something external, if it's not an `URIRef` it's often a
+    # auto-generated ID just to link multiple RDF node togethers. When exporting as RDF to other catalogs, we 
+    # want to re-use this node ID (only if it's not auto-generated) to improve compatibility.
+    uri = field(
+        db.URLField(),
+        description="RDF node ID if it's an `URIRef`. `None` if it's not present or if it's a random auto-generated ID inside the graph.",
+    )
+
     created_at = field(
         db.DateTimeField(),
         description="Date of the creation as provided by the harvested catalog"
