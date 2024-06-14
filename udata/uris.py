@@ -3,6 +3,7 @@ import re
 from werkzeug.routing import BuildError
 from flask import current_app, url_for
 from netaddr import IPAddress, AddrFormatError
+from udata.i18n import _
 
 from udata.settings import Defaults
 
@@ -47,12 +48,12 @@ class ValidationError(ValueError):
 
 def error(url, reason=None):
     __tracebackhide__ = True
-    if not isinstance(url, str):
-        url = url.decode('utf8')
-    msg = 'Invalid URL "{0}"'.format(url)
-    if reason:
-        msg = ': '.join((msg, reason))
-    raise ValidationError(msg.encode('utf8'))
+    if reason is not None:
+        msg = _('Invalid URL "{url}": {reason}').format(url=url, reason=reason)
+    else:
+        msg = _('Invalid URL "{url}"').format(url=url)
+
+    raise ValidationError(msg)
 
 
 def config_for(value, key):
@@ -101,14 +102,14 @@ def validate(url, schemes=None, tlds=None, private=None, local=None,
 
     scheme = (match.group('scheme') or '').lower()
     if scheme and scheme not in schemes:
-        error(url, 'Invalid scheme {0}'.format(scheme))
+        error(url, _('Invalid scheme {0}, allowed schemes: {1}').format(scheme, ", ".join(schemes)))
 
     if not credentials and match.group('credentials'):
-        error(url, 'Credentials in URL are not allowed')
+        error(url, _('Credentials in URL are not allowed'))
 
     tld = match.group('tld')
     if tld and tld not in tlds and idna(tld) not in tlds:
-        error(url, 'Invalid TLD {0}'.format(tld))
+        error(url, _('Invalid TLD {0}').format(tld))
 
     ip = match.group('ipv6') or match.group('ipv4')
     if ip:
@@ -117,15 +118,15 @@ def validate(url, schemes=None, tlds=None, private=None, local=None,
         except AddrFormatError:
             error(url)
         if ip.is_multicast():
-            error(url, '{0} is a multicast IP'.format(ip))
+            error(url, _('{0} is a multicast IP').format(ip))
         elif not ip.is_loopback() and ip.is_hostmask() or ip.is_netmask():
-            error(url, '{0} is a mask IP'.format(ip))
+            error(url, _('{0} is a mask IP').format(ip))
 
     if not local:
         if ip and ip.is_loopback() or match.group('localhost'):
-            error(url, 'is a local URL')
+            error(url, _('is a local URL'))
 
     if not private and ip and ip.is_private():
-        error(url, 'is a private URL')
+        error(url, _('is a private URL'))
 
     return url

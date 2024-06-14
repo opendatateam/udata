@@ -206,8 +206,8 @@ class URLField(EmptyNone, Field):
         if self.data:
             try:
                 uris.validate(self.data)
-            except uris.ValidationError:
-                raise validators.ValidationError(_('Invalid URL'))
+            except uris.ValidationError as e:
+                raise validators.ValidationError(str(e))
         return True
 
     def process_formdata(self, valuelist):
