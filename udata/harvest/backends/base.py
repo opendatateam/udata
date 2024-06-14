@@ -8,9 +8,11 @@ from uuid import UUID
 import requests
 
 from flask import current_app
+from udata.core.dataservices.models import Dataservice
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
 from udata.core.dataset.models import HarvestDatasetMetadata
+from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.models import Dataset
 from udata.utils import safe_unicode
 
@@ -72,8 +74,6 @@ class BaseBackend(object):
     """
     Base class that wrap children methods to add error management and debug logs.
     Also provides a few helpers needed on all or some backends.
-
-
     """
 
     name = None
@@ -139,6 +139,9 @@ class BaseBackend(object):
     def inner_process_dataset(self, item: HarvestItem) -> Dataset:
         raise NotImplementedError
 
+    def inner_process_dataservice(self, item: HarvestItem) -> Dataservice:
+        raise NotImplementedError
+
     def harvest(self):
         log.debug(f'Starting harvesting {self.source.name} ({self.source.url})…')
         factory = HarvestJob if self.dryrun else HarvestJob.objects.create
@@ -195,7 +198,7 @@ class BaseBackend(object):
             dataset = self.inner_process_dataset(item, **kwargs)
 
             # Use `item.remote_id` because `inner_process_dataset` could have modified it.
-            dataset.harvest = self.update_harvest_info(dataset.harvest, item.remote_id)
+            dataset.harvest = self.update_dataset_harvest_info(dataset.harvest, item.remote_id)
             dataset.archived = None
 
             # TODO: Apply editable mappings
@@ -232,17 +235,85 @@ class BaseBackend(object):
         '''Should be called after process_dataset to know if we reach the max items'''
         return self.max_items and len(self.job.items) >= self.max_items
 
-    def update_harvest_info(self, harvest: Optional[HarvestDatasetMetadata], remote_id: int):
+    def process_dataservice(self, remote_id: str, **kwargs) -> bool :
+        '''
+        Return `True` if the parent should stop iterating because we exceed the number
+        of items to process.
+        '''
+        log.debug(f'Processing dataservice {remote_id}…')
+
+        # TODO add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
+        item = HarvestItem(status='started', started=datetime.utcnow(), remote_id=remote_id)
+        self.job.items.append(item)
+        self.save_job()
+
+        try:
+            if not remote_id:
+                raise HarvestSkipException("missing identifier")
+
+            dataservice = self.inner_process_dataservice(item, **kwargs)
+
+            dataservice.harvest = self.update_dataservice_harvest_info(dataservice.harvest, remote_id)
+            dataservice.archived_at = None
+
+            # TODO: Apply editable mappings
+
+            if self.dryrun:
+                dataservice.validate()
+            else:
+                dataservice.save()
+            item.dataservice = dataservice
+            item.status = 'done'
+        except HarvestSkipException as e:
+            item.status = 'skipped'
+
+            log.info(f'Skipped item {item.remote_id} : {safe_unicode(e)}')
+            item.errors.append(HarvestError(message=safe_unicode(e)))
+        except HarvestValidationError as e:
+            item.status = 'failed'
+
+            log.info(f'Error validating item {item.remote_id} : {safe_unicode(e)}')
+            item.errors.append(HarvestError(message=safe_unicode(e)))
+        except Exception as e:
+            item.status = 'failed'
+            log.exception(f'Error while processing {item.remote_id} : {safe_unicode(e)}')
+
+            error = HarvestError(message=safe_unicode(e), details=traceback.format_exc())
+            item.errors.append(error)
+        finally:
+            item.ended = datetime.utcnow()
+            self.save_job()
+
+    def update_dataset_harvest_info(self, harvest: Optional[HarvestDatasetMetadata], remote_id: int):
         if not harvest:
             harvest = HarvestDatasetMetadata()
-        harvest.domain = self.source.domain
-        harvest.remote_id = remote_id
-        harvest.source_id = str(self.source.id)
-        harvest.last_update = datetime.utcnow()
-        harvest.backend = self.display_name
 
+        harvest.backend = self.display_name
+        harvest.source_id = str(self.source.id)
+        harvest.remote_id = remote_id
+        harvest.domain = self.source.domain
+        harvest.last_update = datetime.utcnow()
         harvest.archived_at = None
         harvest.archived = None
+
+        # created_at, modified_at, remote_url, uri, dct_identifier are set in `dataset_from_rdf`
+
+        return harvest
+
+    def update_dataservice_harvest_info(self, harvest: Optional[HarvestDataserviceMetadata], remote_id: int):
+        if not harvest:
+            harvest = HarvestDataserviceMetadata()
+
+        harvest.backend = self.display_name
+        harvest.domain = self.source.domain
+
+        harvest.source_id = str(self.source.id)
+        harvest.source_url = str(self.source.url)
+
+        harvest.remote_id = remote_id
+        harvest.last_update = datetime.utcnow()
+
+        harvest.archived_at = None
 
         return harvest
 
@@ -307,6 +378,28 @@ class BaseBackend(object):
             return Dataset(owner=self.source.owner)
 
         return Dataset()
+    
+    def get_dataservice(self, remote_id):
+        '''Get or create a dataservice given its remote ID (and its source)
+        We first try to match `source_id` to be source domain independent
+        '''
+        dataservice = Dataservice.objects(__raw__={
+            'harvest.remote_id': remote_id,
+            '$or': [
+                {'harvest.domain': self.source.domain},
+                {'harvest.source_id': str(self.source.id)},
+            ],
+        }).first()
+
+        if dataservice:
+            return dataservice
+
+        if self.source.organization:
+            return Dataservice(organization=self.source.organization)
+        elif self.source.owner:
+            return Dataservice(owner=self.source.owner)
+
+        return Dataservice()
 
     def validate(self, data, schema):
         '''Perform a data validation against a given schema.

@@ -34,6 +34,19 @@
                     :dataset="item.dataset">
                 </dataset-card>
             </dd>
+            <dt v-if="item.dataservice">{{ _('Dataservice') }}</dt>
+            <dd v-if="item.dataservice">
+                <div class="card">
+                    <div class="card-body">
+                        <h4>
+                            <a :title="item.dataservice.title" :href="item.dataservice.self_web_url">
+                                {{ item.dataservice.title | truncate 80 }}
+                            </a>
+                            <div class="clamp-3">{{{ item.dataservice.description | markdown 180 }}}</div>
+                        </h4>
+                    </div>
+                </div>
+            </dd>
             <dt v-if="item.errors.length">{{ _('Errors') }}</dt>
             <dd v-if="item.errors.length">
                 <div v-for="error in item.errors">

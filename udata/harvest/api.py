@@ -5,6 +5,7 @@ from flask import request
 from udata.api import api, API, fields
 from udata.auth import admin_permission
 
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_ref_fields, dataset_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.permissions import EditOrganizationPermission
@@ -44,6 +45,9 @@ item_fields = api.model('HarvestItem', {
                                required=True),
     'dataset': fields.Nested(dataset_ref_fields,
                              description='The processed dataset',
+                             allow_null=True),
+    'dataservice': fields.Nested(Dataservice.__read_fields__,
+                             description='The processed dataservice',
                              allow_null=True),
     'status': fields.String(description='The item status',
                             required=True,

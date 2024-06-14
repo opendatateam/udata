@@ -32,6 +32,35 @@ class DataserviceQuerySet(OwnedQuerySet):
                     db.Q(archived_at__ne=None))
 
 @generate_fields()
+class HarvestMetadata(db.EmbeddedDocument):
+    backend = field(db.StringField())
+    domain = field(db.StringField())
+
+    source_id = field(db.StringField())
+    source_url = field(db.URLField())
+
+    remote_id = field(db.StringField())
+    remote_url = field(db.URLField())
+
+    # If the node ID is a `URIRef` it means it links to something external, if it's not an `URIRef` it's often a
+    # auto-generated ID just to link multiple RDF node togethers. When exporting as RDF to other catalogs, we 
+    # want to re-use this node ID (only if it's not auto-generated) to improve compatibility.
+    uri = field(
+        db.URLField(),
+        description="RDF node ID if it's an `URIRef`. `None` if it's not present or if it's a random auto-generated ID inside the graph.",
+    )
+
+    created_at = field(
+        db.DateTimeField(),
+        description="Date of the creation as provided by the harvested catalog"
+    )
+    last_update = field(
+        db.DateTimeField(),
+        description="Date of the last harvesting"
+    )
+    archived_at = field(db.DateTimeField())
+
+@generate_fields()
 class Dataservice(WithMetrics, Owned, db.Document):
     meta = {
         'indexes': [
@@ -119,12 +148,18 @@ class Dataservice(WithMetrics, Owned, db.Document):
         },
     )
 
+    harvest = field(
+        db.EmbeddedDocumentField(HarvestMetadata),
+        readonly=True,
+    )
+
     @function_field(description="Link to the API endpoint for this dataservice")
     def self_api_url(self):
         return endpoint_for('api.dataservice', dataservice=self, _external=True)
 
-    def self_web_url():
-        pass
+    @function_field(description="Link to the udata web page for this dataservice")
+    def self_web_url(self):
+        return endpoint_for('dataservices.show', dataservice=self, _external=True)
 
     # TODO
     # frequency = db.StringField(choices=list(UPDATE_FREQUENCIES.keys()))
