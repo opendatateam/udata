@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 9.0.1.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2024-06-14 10:51+0200\n"
-"PO-Revision-Date: 2024-06-14 10:51+0200\n"
+"POT-Creation-Date: 2024-06-14 11:31+0200\n"
+"PO-Revision-Date: 2024-06-14 11:31+0200\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -47,35 +47,39 @@ msgstr ""
 msgid "This dataset has been archived"
 msgstr ""
 
-#: udata/uris.py:51
+#: udata/uris.py:52
 msgid "Invalid URL \"{url}\": {reason}"
 msgstr ""
 
-#: udata/uris.py:101
+#: udata/uris.py:54
+msgid "Invalid URL \"{url}\""
+msgstr ""
+
+#: udata/uris.py:105
 msgid "Invalid scheme {0}, allowed schemes: {1}"
 msgstr ""
 
-#: udata/uris.py:104
+#: udata/uris.py:108
 msgid "Credentials in URL are not allowed"
 msgstr ""
 
-#: udata/uris.py:108
+#: udata/uris.py:112
 msgid "Invalid TLD {0}"
 msgstr ""
 
-#: udata/uris.py:117
+#: udata/uris.py:121
 msgid "{0} is a multicast IP"
 msgstr ""
 
-#: udata/uris.py:119
+#: udata/uris.py:123
 msgid "{0} is a mask IP"
 msgstr ""
 
-#: udata/uris.py:123
+#: udata/uris.py:127
 msgid "is a local URL"
 msgstr ""
 
-#: udata/uris.py:126
+#: udata/uris.py:130
 msgid "is a private URL"
 msgstr ""
 

@@ -48,7 +48,11 @@ class ValidationError(ValueError):
 
 def error(url, reason=None):
     __tracebackhide__ = True
-    msg = _('Invalid URL "{url}": {reason}').format(url=url, reason=reason)
+    if reason is not None:
+        msg = _('Invalid URL "{url}": {reason}').format(url=url, reason=reason)
+    else:
+        msg = _('Invalid URL "{url}"').format(url=url)
+
     raise ValidationError(msg)
 
 
