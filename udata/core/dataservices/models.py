@@ -32,7 +32,7 @@ class DataserviceQuerySet(OwnedQuerySet):
                     db.Q(archived_at__ne=None))
 
 @generate_fields()
-class HarvestMetadata(db.DynamicEmbeddedDocument):
+class HarvestMetadata(db.EmbeddedDocument):
     backend = field(db.StringField())
     domain = field(db.StringField())
 
