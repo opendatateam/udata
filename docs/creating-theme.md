@@ -269,6 +269,6 @@ Please report any difficulty you encounter with a dedicated [Github issue][githu
 [Jinja documentation]: https://jinja.pocoo.org/docs/
 [github-new-issue]: https://github.com/opendatateam/udata/issues/new
 [PyPI]: https://pypi.org/
-[front-hooks]: https://github.com/etalab/udata-front/blob/master/udata_front/theme/__init__.py
-[front-project]: https://github.com/etalab/udata-front/
+[front-hooks]: https://github.com/datagouv/udata-front/blob/master/udata_front/theme/__init__.py
+[front-project]: https://github.com/datagouv/udata-front/
 [github-discussions]: https://github.com/opendatateam/udata/discussions/2721

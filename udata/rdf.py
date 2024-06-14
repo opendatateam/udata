@@ -1,10 +1,11 @@
 '''
 This module centralize udata-wide RDF helpers and configuration
 '''
+from html.parser import HTMLParser
 import logging
 import re
 
-from flask import request, url_for, abort
+from flask import request, url_for, abort, current_app
 
 from rdflib import Graph, Literal, URIRef
 from rdflib.resource import Resource as RdfResource
@@ -13,14 +14,18 @@ from rdflib.namespace import (
 )
 from rdflib.util import SUFFIX_FORMAT_MAP, guess_format as raw_guess_format
 from udata import uris
-from udata.models import FieldValidationError, Schema, ResourceSchema
-from mongoengine import ValidationError
+from udata.core.contact_point.models import ContactPoint
+from udata.models import Schema
+from udata.mongo.errors import FieldValidationError
+from udata.frontend.markdown import parse_html
+from udata.tags import slug as slugify_tag
 
 log = logging.getLogger(__name__)
 
 # Extra Namespaces
 ADMS = Namespace('http://www.w3.org/ns/adms#')
 DCAT = Namespace('http://www.w3.org/ns/dcat#')
+DCATAP = Namespace('http://data.europa.eu/r5r/')
 HYDRA = Namespace('http://www.w3.org/ns/hydra/core#')
 SCHEMA = Namespace('http://schema.org/')
 SCV = Namespace('http://purl.org/NET/scovo#')
@@ -35,6 +40,7 @@ VCARD = Namespace('http://www.w3.org/2006/vcard/ns#')
 
 namespace_manager = NamespaceManager(Graph())
 namespace_manager.bind('dcat', DCAT)
+namespace_manager.bind('dcatap', DCATAP)
 namespace_manager.bind('dct', DCT)
 namespace_manager.bind('foaf', FOAF)
 namespace_manager.bind('foaf', FOAF)
@@ -98,6 +104,17 @@ RDF_EXTENSIONS = {
 # Includes control characters, unicode surrogate characters and unicode end-of-plane non-characters
 ILLEGAL_XML_CHARS = '[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]'
 
+# Map High Value Datasets URIs to keyword categories
+EU_HVD_CATEGORIES = {
+    "http://data.europa.eu/bna/c_164e0bf5": "Météorologiques",
+    "http://data.europa.eu/bna/c_a9135398": "Entreprises et propriété d'entreprises",
+    "http://data.europa.eu/bna/c_ac64a52d": "Géospatiales",
+    "http://data.europa.eu/bna/c_b79e35eb": "Mobilité",
+    "http://data.europa.eu/bna/c_dd313021": "Observation de la terre et environnement",
+    "http://data.europa.eu/bna/c_e1da4e07": "Statistiques"
+}
+HVD_LEGISLATION = 'http://data.europa.eu/eli/reg_impl/2023/138/oj'
+TAG_TO_EU_HVD_CATEGORIES = {slugify_tag(EU_HVD_CATEGORIES[uri]): uri for uri in EU_HVD_CATEGORIES}
 
 def guess_format(string):
     '''Guess format given an extension or a mime-type'''
@@ -212,6 +229,42 @@ CONTEXT = {
     'totalItems': 'hydra:totalItems',
 }
 
+def serialize_value(value):
+    if isinstance(value, (URIRef, Literal)):
+        return value.toPython()
+    elif isinstance(value, RdfResource):
+        return value.identifier.toPython()
+
+
+def rdf_value(obj, predicate, default=None):
+    value = obj.value(predicate)
+    return serialize_value(value) if value else default
+
+class HTMLDetector(HTMLParser):
+    def __init__(self, *args, **kwargs):
+        HTMLParser.__init__(self, *args, **kwargs)
+        self.elements = set()
+
+    def handle_starttag(self, tag, attrs):
+        self.elements.add(tag)
+
+    def handle_endtag(self, tag):
+        self.elements.add(tag)
+
+
+def is_html(text):
+    parser = HTMLDetector()
+    parser.feed(text)
+    return bool(parser.elements)
+
+
+def sanitize_html(text):
+    text = text.toPython() if isinstance(text, Literal) else ''
+    if is_html(text):
+        return parse_html(text)
+    else:
+        return text.strip()
+
 
 def url_from_rdf(rdf, prop):
     '''
@@ -224,6 +277,65 @@ def url_from_rdf(rdf, prop):
     elif isinstance(value, RdfResource):
         return value.identifier.toPython()
 
+def theme_labels_from_rdf(rdf):
+    '''
+    Get theme labels to use as keywords.
+    Map HVD keywords from known URIs resources if HVD support is activated.
+    '''
+    for theme in rdf.objects(DCAT.theme):
+        if isinstance(theme, RdfResource):
+            uri = theme.identifier.toPython()
+            if current_app.config['HVD_SUPPORT'] and uri in EU_HVD_CATEGORIES:
+                label = EU_HVD_CATEGORIES[uri]
+                # Additionnally yield hvd keyword
+                yield 'hvd'
+            else:
+                label = rdf_value(theme, SKOS.prefLabel)
+        else:
+            label = theme.toPython()
+        if label:
+            yield label
+
+def themes_from_rdf(rdf):
+    tags = [tag.toPython() for tag in rdf.objects(DCAT.keyword)]
+    tags += theme_labels_from_rdf(rdf)
+    return list(set(tags))
+
+def contact_point_from_rdf(rdf, dataset):
+    contact_point = rdf.value(DCAT.contactPoint)
+    if contact_point:
+        name = rdf_value(contact_point, VCARD.fn) or ''
+        email = (rdf_value(contact_point, VCARD.hasEmail)
+                 or rdf_value(contact_point, VCARD.email)
+                 or rdf_value(contact_point, DCAT.email))
+        if not email:
+            return
+        email = email.replace('mailto:', '').strip()
+        if dataset.organization:
+            contact_point = ContactPoint.objects(
+                name=name, email=email, organization=dataset.organization).first()
+            return (contact_point or
+                    ContactPoint(name=name, email=email, organization=dataset.organization).save())
+        elif dataset.owner:
+            contact_point = ContactPoint.objects(
+                name=name, email=email, owner=dataset.owner).first()
+            return (contact_point or
+                    ContactPoint(name=name, email=email, owner=dataset.owner).save())
+
+def remote_url_from_rdf(rdf):
+    '''
+    Return DCAT.landingPage if found and uri validation succeeds.
+    Use RDF identifier as fallback if uri validation succeeds.
+    '''
+    landing_page = url_from_rdf(rdf, DCAT.landingPage)
+    uri = rdf.identifier.toPython()
+    for candidate in [landing_page, uri]:
+        if candidate:
+            try:
+                uris.validate(candidate)
+                return candidate
+            except uris.ValidationError:
+                pass
 
 def schema_from_rdf(rdf):
     '''

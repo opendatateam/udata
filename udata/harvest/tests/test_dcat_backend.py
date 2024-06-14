@@ -9,6 +9,7 @@ import boto3
 from flask import current_app
 import xml.etree.ElementTree as ET
 
+from udata.core.dataservices.models import Dataservice
 from udata.harvest.models import HarvestJob
 from udata.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
@@ -161,6 +162,26 @@ class DcatBackendTest:
         assert len(datasets['1'].resources) == 2
         assert len(datasets['2'].resources) == 2
 
+    def test_harvest_dataservices(self, rmock):
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
+
+        filename = 'bnodes.xml'
+        url = mock_dcat(rmock, filename)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+
+        actions.run(source.slug)
+
+        dataservices = Dataservice.objects
+
+        assert len(dataservices) == 1
+        assert dataservices[0].title == "Explore API v2"
+        assert dataservices[0].base_api_url == "https://data.paris2024.org/api/explore/v2.1/"
+        assert dataservices[0].endpoint_description_url == "https://data.paris2024.org/api/explore/v2.1/swagger.json"
+        assert dataservices[0].harvest.remote_url == "https://data.paris2024.org/api/explore/v2.1/console"
+
     def test_harvest_literal_spatial(self, rmock):
         url = mock_dcat(rmock, 'evian.json')
         org = OrganizationFactory()
@@ -240,6 +261,19 @@ class DcatBackendTest:
         actions.purge_jobs()
         assert get_from_json(current_app.config.get('HARVEST_GRAPHS_S3_BUCKET'), job.data['filename']) is None
 
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas', HARVEST_MAX_ITEMS=2)
+    def test_harvest_max_items(self, rmock):
+        rmock.get('https://example.com/schemas', json=ResourceSchemaMockData.get_mock_data())
+
+        filename = 'bnodes.xml'
+        url = mock_dcat(rmock, filename)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat', url=url, organization=org)
+
+        actions.run(source.slug)
+
+        assert Dataset.objects.count() == 2
+        assert HarvestJob.objects.first().status == 'done'
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_harvest_spatial(self, rmock):
@@ -255,7 +289,7 @@ class DcatBackendTest:
         datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
 
         assert datasets['1'].spatial == None
-        assert datasets['2'].spatial.geom == {'type': 'MultiPolygon', 'coordinates': [[[[4.44641288, 45.54214467], [4.44641288, 46.01316963], [4.75655252, 46.01316963], [4.75655252, 45.54214467], [4.44641288, 45.54214467]]]]}
+        assert datasets['2'].spatial.geom == {'type': 'MultiPolygon', 'coordinates': [[[[-6,51],[10,51],[10,40],[-6,40],[-6,51]]], [[[4, 45], [4, 46], [4, 46], [4, 45], [4, 45]]], [[[159, -25.], [159, -11], [212, -11], [212, -25.], [159, -25.]]]]}
         assert datasets['3'].spatial == None
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
@@ -439,6 +473,9 @@ class DcatBackendTest:
 
         assert dataset.extras["harvest"]["dct:accessRights"] == "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1e"
         assert dataset.extras["harvest"]["dct:provenance"] == ["Description de la provenance des données"]
+
+        assert 'observation-de-la-terre-et-environnement' in dataset.tags
+        assert 'hvd' in dataset.tags
 
         dataset = Dataset.objects.get(harvest__dct_identifier='1')
         # test html abstract description support

@@ -18,20 +18,10 @@ def harvest(self, ident):
         return  # Ignore deleted sources
     Backend = backends.get(current_app, source.backend)
     backend = Backend(source)
-    items = backend.perform_initialization()
-    if items is None:
-        pass
-    elif items == 0:
-        backend.finalize()
-    else:
-        finalize = harvest_job_finalize.s(backend.job.id)
-        items = [
-            harvest_job_item.s(backend.job.id, item.remote_id)
-            for item in backend.job.items
-        ]
-        chord(items)(finalize)
-    
 
+    backend.harvest()
+
+    
 
 @task(ignore_result=False, route='low.harvest')
 def harvest_job_item(job_id, item_id):

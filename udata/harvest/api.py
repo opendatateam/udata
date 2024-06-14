@@ -1,9 +1,11 @@
+from bson import ObjectId
 from werkzeug.exceptions import BadRequest
 from flask import request
 
 from udata.api import api, API, fields
 from udata.auth import admin_permission
 
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_ref_fields, dataset_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.permissions import EditOrganizationPermission
@@ -31,11 +33,21 @@ error_fields = api.model('HarvestError', {
     'details': fields.String(description='Optional details (ie. stacktrace)'),
 })
 
+
+log_fields = api.model('HarvestError', {
+    'level': fields.String(required=True),
+    'message': fields.String(required=True),
+})
+
+
 item_fields = api.model('HarvestItem', {
     'remote_id': fields.String(description='The item remote ID to process',
                                required=True),
     'dataset': fields.Nested(dataset_ref_fields,
                              description='The processed dataset',
+                             allow_null=True),
+    'dataservice': fields.Nested(Dataservice.__read_fields__,
+                             description='The processed dataservice',
                              allow_null=True),
     'status': fields.String(description='The item status',
                             required=True,
@@ -46,6 +58,8 @@ item_fields = api.model('HarvestItem', {
     'ended': fields.ISODateTime(description='The item end date'),
     'errors': fields.List(fields.Nested(error_fields),
                           description='The item errors'),
+    'logs': fields.List(fields.Nested(log_fields),
+                          description='The item logs'),
     'args': fields.List(fields.String,
                         description='The item positional arguments',
                         default=[]),
@@ -181,6 +195,10 @@ class SourcesAPI(API):
     def get(self):
         '''List all harvest sources'''
         args = source_parser.parse_args()
+
+        if args.get('owner') and not ObjectId.is_valid(args.get('owner')):
+            api.abort(400, '`owner` arg must be an identifier')
+
         return actions.paginate_sources(args.get('owner'),
                                         page=args['page'],
                                         page_size=args['page_size'],

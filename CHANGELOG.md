@@ -2,9 +2,55 @@
 
 ## Current (in progress)
 
+- Improve `udata db check-integrity` (perfs, Sentry notifications…) [#3026](https://github.com/opendatateam/udata/pull/3026)
+- Harvest dataservices [#3029](https://github.com/opendatateam/udata/pull/3029)
+- Refactor catalog exports [#3052](https://github.com/opendatateam/udata/pull/3052)
+- Add a filter to filter dataservices by dataset [#3056](https://github.com/opendatateam/udata/pull/3056)
+- Fix reuses' datasets references [#3057](https://github.com/opendatateam/udata/pull/3057)
+- Save and show harvest logs [#3053](https://github.com/opendatateam/udata/pull/3053)
+- Fix missing `ObjectId` validation on `/sources` endpoint [#3060](https://github.com/opendatateam/udata/pull/3060)
+
+## 9.0.0 (2024-06-07)
+
+- **breaking change** Harvest backend is now sync [#3030](https://github.com/opendatateam/udata/pull/3030)
+- Add DCAT-AP HVD properties in RDF output if the dataset is tagged hvd [#3050](https://github.com/opendatateam/udata/pull/3050)
+- Allow dataservices to be discussed and followed [#3049](https://github.com/opendatateam/udata/pull/3049)
+- Add purge-dataservices job [#3049](https://github.com/opendatateam/udata/pull/3049)
+- Harvest all the available polygons from a spatial coverage [#3039](https://github.com/opendatateam/udata/pull/3039)
+
+## 8.0.1 (2024-05-28)
+
+- Add dataservices in beta [#2986](https://github.com/opendatateam/udata/pull/2986)
+- Remove deprecated `metrics_for` route [#3022](https://github.com/opendatateam/udata/pull/3022)
+- Fix spatial coverage fetching perfs. Need to schedule `compute-geozones-metrics` [#3018](https://github.com/opendatateam/udata/pull/3018)
+- Delete a user without sending mail [#3031](https://github.com/opendatateam/udata/pull/3031)
+- Convert known HVD categories used as theme to keywords [#3014](https://github.com/opendatateam/udata/pull/3014)
+- Allow for series in CSW ISO 19139 DCAT backend [#3028](https://github.com/opendatateam/udata/pull/3028)
+- Add `email` to membership request list API response, add `since` to org members API responses, add `email` to members of org on show org endpoint for org's admins and editors [#3038](https://github.com/opendatateam/udata/pull/3038)
+- Add `resources_downloads` to datasets metrics [#3042](https://github.com/opendatateam/udata/pull/3042)
+- Fix do not override resources extras on admin during update [#3043](https://github.com/opendatateam/udata/pull/3043) 
+- Endpoint /users is now protected by admin permissions [#3047](https://github.com/opendatateam/udata/pull/3047)
+- Fix trailing `/` inside `GeoZone` routes not redirecting. Disallow `/` inside `GeoZone` ids [#3045](https://github.com/opendatateam/udata/pull/3045)
+
+## 8.0.0 (2024-04-23)
+
+- **breaking change** Migrate to Python 3.11 [#2992](https://github.com/opendatateam/udata/pull/2992) [#3021](https://github.com/opendatateam/udata/pull/3021)
+- **breaking change** Fix datetime serialization in extras (return ISO string in JSON). Warning, `ujson` shouldn't be installed anymore on the project to allow `cls` parameter to override the JSONEncoder [#3019](https://github.com/opendatateam/udata/pull/3019)
+- Fix missing `bcrypt` dependency [#3019](https://github.com/opendatateam/udata/pull/3019)
+
+## 7.0.7 (2024-04-16)
+
+- :warning: **breaking change** `DATASET_MAX_RESOURCES_UNCOLLAPSED` config is removed.
+- Replace schemas API with a simple proxy to the `schemas.json` file [#2989](https://github.com/opendatateam/udata/pull/2989)
 - Topic: add filters in API [#3007](https://github.com/opendatateam/udata/pull/3007)
 - Move constants outside `models.py` files to `constants.py` [#3001](https://github.com/opendatateam/udata/pull/3001)
 - Move `db` and Mongo fields classes outside `udata.models` [#3005](https://github.com/opendatateam/udata/pull/3005)
+- :warning: Update LICENSE_GROUPS config layout [#3010](https://github.com/opendatateam/udata/pull/3010)
+- Remove unused dependencies [#3006](https://github.com/opendatateam/udata/pull/3006)
+- Move `FieldValidationError` into its own module and add an error handler [#3012](https://github.com/opendatateam/udata/pull/3012)
+- Move some `import User` to runtime imports [#3013](https://github.com/opendatateam/udata/pull/3013)
+- Move `Owned` mixin to its own module [#3008](https://github.com/opendatateam/udata/pull/3008)
+- Move `badge_fields` to separate module than `models.py` [#3011](https://github.com/opendatateam/udata/pull/3011)
 
 ## 7.0.6 (2024-03-29)
 

@@ -18,11 +18,13 @@ from typing import Optional, Tuple
 from udata.app import cache
 from udata.core import storages
 from udata.frontend.markdown import mdstrip
-from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage, FieldValidationError
+from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
+from udata.mongo.errors import FieldValidationError
 from udata.i18n import lazy_gettext as _
 from udata.utils import get_by, hash_url, to_naive_datetime
 from udata.uris import ValidationError, endpoint_for
 from udata.uris import validate as validate_url
+from udata.core.owned import Owned, OwnedQuerySet
 from .constants import CHECKSUM_TYPES, CLOSED_FORMATS, DEFAULT_LICENSE, LEGACY_FREQUENCIES, MAX_DISTANCE, PIVOTAL_DATA, RESOURCE_FILETYPES, RESOURCE_TYPES, SCHEMA_CACHE_DURATION, UPDATE_FREQUENCIES
 
 from .preview import get_preview_url
@@ -31,6 +33,8 @@ from .exceptions import (
 )
 
 __all__ = ('License', 'Resource', 'Schema', 'Dataset', 'Checksum', 'CommunityResource', 'ResourceSchema')
+
+NON_ASSIGNABLE_SCHEMA_TYPES = ['datapackage']
 
 log = logging.getLogger(__name__)
 
@@ -120,12 +124,13 @@ class Schema(db.EmbeddedDocument):
         # some schemas in the catalog. If there is no catalog
         # or no schema in the catalog we do not check the validity
         # of the name and version
-        catalog_schemas = ResourceSchema.all()
+        catalog_schemas = ResourceSchema.assignable_schemas()
         if not catalog_schemas:
             return
 
         # We know this schema so we can do some checks
-        existing_schema = ResourceSchema.get_schema_by_name(self.name)
+        existing_schema = next((schema for schema in catalog_schemas if schema['name'] == self.name), None)
+
         if not existing_schema:
             message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}').format(
                 schema=self.name,
@@ -255,7 +260,7 @@ class License(db.Document):
         return cls.objects(id=DEFAULT_LICENSE['id']).first()
 
 
-class DatasetQuerySet(db.OwnedQuerySet):
+class DatasetQuerySet(OwnedQuerySet):
     def visible(self):
         return self(private__ne=True, deleted=None, archived=None)
 
@@ -453,7 +458,7 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
         self.dataset.save(*args, **kwargs)
 
 
-class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
+class Dataset(WithMetrics, BadgeMixin, Owned, db.Document):
     title = db.StringField(required=True)
     acronym = db.StringField(max_length=128)
     # /!\ do not set directly the slug when creating or updating a dataset
@@ -500,6 +505,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         'reuses',
         'followers',
         'views',
+        'resources_downloads',
     ]
 
     meta = {
@@ -513,7 +519,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             'slug',
             'resources.id',
             'resources.urlhash',
-        ] + db.Owned.meta['indexes'],
+        ] + Owned.meta['indexes'],
         'ordering': ['-created_at_internal'],
         'queryset_class': DatasetQuerySet,
         'auto_create_index_on_save': True
@@ -900,7 +906,7 @@ pre_save.connect(Dataset.pre_save, sender=Dataset)
 post_save.connect(Dataset.post_save, sender=Dataset)
 
 
-class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
+class CommunityResource(ResourceMixin, WithMetrics, Owned, db.Document):
     '''
     Local file, remote file or API added by the community of the users to the
     original dataset
@@ -913,7 +919,7 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
 
     meta = {
         'ordering': ['-created_at_internal'],
-        'queryset_class': db.OwnedQuerySet,
+        'queryset_class': OwnedQuerySet,
     }
 
     @property
@@ -921,23 +927,6 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
         return True
 
 class ResourceSchema(object):
-    @staticmethod
-    @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
-    def objects():
-        '''
-        This rewrite is used in API returns.
-        It could be possible in the future to change the API with a breaking change to return
-        the full schema information from the catalog.
-        '''
-        schemas = ResourceSchema.all()
-        return [
-            {
-                'id': s['name'],
-                'label': s['title'],
-                'versions': [d['version_name'] for d in s['versions']],
-            } for s in schemas
-        ]
-
     @staticmethod
     @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
     def all():
@@ -971,11 +960,9 @@ class ResourceSchema(object):
             raise SchemasCacheUnavailableException('No content in cache for schema catalog')
 
         return schemas
-
-    def get_schema_by_name(name: str):
-        for schema in ResourceSchema.all():
-            if schema['name'] == name:
-                return schema
+    
+    def assignable_schemas():
+        return [s for s in ResourceSchema.all() if s.get('schema_type') not in NON_ASSIGNABLE_SCHEMA_TYPES]
 
     def get_existing_schema_info_by_url(url: str) -> Optional[Tuple[str, Optional[str]]]:
         '''

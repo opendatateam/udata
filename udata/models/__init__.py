@@ -3,13 +3,6 @@ from mongoengine.errors import ValidationError
 from udata import entrypoints
 from udata.mongo import *
 
-class FieldValidationError(ValidationError):
-    field: str
-
-    def __init__(self, *args, field: str, **kwargs):
-        self.field = field
-        super().__init__(*args, **kwargs)
-
 # Load all core models and mixins
 from udata.core.spatial.models import *  # noqa
 from udata.core.metrics.models import *  # noqa
