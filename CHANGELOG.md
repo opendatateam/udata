@@ -9,6 +9,7 @@
 - Fix reuses' datasets references [#3057](https://github.com/opendatateam/udata/pull/3057)
 - Save and show harvest logs [#3053](https://github.com/opendatateam/udata/pull/3053)
 - Fix missing `ObjectId` validation on `/sources` endpoint [#3060](https://github.com/opendatateam/udata/pull/3060)
+- Improve URL validation errors [#3063](https://github.com/opendatateam/udata/pull/3063) [#2768](https://github.com/opendatateam/udata/pull/2768)
 
 ## 9.0.0 (2024-06-07)
 
