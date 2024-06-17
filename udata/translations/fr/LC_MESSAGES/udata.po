@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2024-04-15 12:06+0200\n"
-"PO-Revision-Date: 2024-04-15 10:07\n"
+"POT-Creation-Date: 2024-06-14 11:31+0200\n"
+"PO-Revision-Date: 2024-06-14 11:37\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -42,23 +42,59 @@ msgstr "Votre mot de passe a été modifié"
 msgid "Password reset instructions"
 msgstr "Instructions de réinitialisation du mot de passe"
 
-#: udata/settings.py:430
+#: udata/settings.py:433
 msgid "This dataset has been archived"
 msgstr "Ce jeu de données a été archivé"
+
+#: udata/uris.py:52
+msgid "Invalid URL \"{url}\": {reason}"
+msgstr ""
+
+#: udata/uris.py:54
+msgid "Invalid URL \"{url}\""
+msgstr ""
+
+#: udata/uris.py:105
+msgid "Invalid scheme {0}, allowed schemes: {1}"
+msgstr ""
+
+#: udata/uris.py:108
+msgid "Credentials in URL are not allowed"
+msgstr ""
+
+#: udata/uris.py:112
+msgid "Invalid TLD {0}"
+msgstr ""
+
+#: udata/uris.py:121
+msgid "{0} is a multicast IP"
+msgstr ""
+
+#: udata/uris.py:123
+msgid "{0} is a mask IP"
+msgstr ""
+
+#: udata/uris.py:127
+msgid "is a local URL"
+msgstr ""
+
+#: udata/uris.py:130
+msgid "is a private URL"
+msgstr ""
 
 #: udata/api/errors.py:4
 msgid "Validation error: your data cannot be updated for now, we have been notified of the error and we will fix it as soon as possible."
 msgstr "Erreur de validation : vos données ne peuvent être sauvegardées pour l'instant, nous avons été avertis de cette erreur et la corrigeons dans les plus brefs délais."
 
-#: udata/api/oauth2.py:53
+#: udata/api/oauth2.py:54
 msgid "Bearer Token"
 msgstr "Bearer Token"
 
-#: udata/api/oauth2.py:57
+#: udata/api/oauth2.py:58
 msgid "Default scope"
 msgstr "Scope par défaut"
 
-#: udata/api/oauth2.py:58
+#: udata/api/oauth2.py:59
 msgid "System administrator rights"
 msgstr "Droits de l'administrateur système"
 
@@ -129,15 +165,15 @@ msgstr "Le mot de passe doit contenir des caractères spéciaux"
 msgid "Confirm change of email instructions"
 msgstr "Instructions pour confirmer le changement d'email"
 
-#: udata/auth/views.py:72
+#: udata/auth/views.py:73
 msgid "You did not confirm your change of email within {email_within}. New instructions to confirm your change of email have been sent to {new_email}."
 msgstr "Vous n'avez pas confirmé le changement d'adresse email en moins de {email_within}. De nouvelles instructions pour confirmer votre changement d'email ont été envoyées à  {new_email}."
 
-#: udata/auth/views.py:82
+#: udata/auth/views.py:83
 msgid "Thank you. Your change of email has been confirmed."
 msgstr "Merci. Votre changement d'email a été confirmé."
 
-#: udata/auth/views.py:97
+#: udata/auth/views.py:98
 msgid "Thank you. Confirmation instructions for changing your email have been sent to {new_email}."
 msgstr "Merci. Les instructions de confirmation pour changer votre adresse email ont été envoyées à {new_email}."
 
@@ -160,6 +196,20 @@ msgstr "Souhaitez-vous générer des données d'exemple ?"
 #: udata/commands/init.py:49
 msgid "Your udata instance is ready!"
 msgstr "Votre instance udata est prête !"
+
+#: udata/core/owned.py:30 udata/forms/fields.py:739
+#: udata/tests/api/test_dataservices_api.py:229
+msgid "You can only set yourself as owner"
+msgstr "Vous ne pouvez définir que vous-même en tant que propriétaire"
+
+#: udata/core/owned.py:38
+msgid "Unknown organization"
+msgstr ""
+
+#: udata/core/owned.py:41 udata/forms/fields.py:762
+#: udata/tests/api/test_dataservices_api.py:238
+msgid "Permission denied for this organization"
+msgstr "Permission refusée pour cette organisation"
 
 #: udata/core/badges/forms.py:14
 msgid "Kind"
@@ -185,6 +235,16 @@ msgstr "Email"
 #: udata/core/topic/forms.py:15 udata/harvest/forms.py:69
 msgid "Publish as"
 msgstr "Publier en tant que"
+
+#: udata/core/dataservices/models.py:129 udata/core/dataset/models.py:489
+#: udata/mongo/datetime_fields.py:59
+msgid "Creation date"
+msgstr "Date de création"
+
+#: udata/core/dataservices/models.py:133 udata/core/dataset/models.py:491
+#: udata/mongo/datetime_fields.py:61
+msgid "Last modification date"
+msgstr "Date de dernière modification"
 
 #: udata/core/dataset/activities.py:21
 msgid "created a dataset"
@@ -226,7 +286,7 @@ msgstr "Trois fois par jour"
 msgid "Semidaily"
 msgstr "Deux fois par jour"
 
-#: udata/core/dataset/constants.py:15 udata/harvest/models.py:19
+#: udata/core/dataset/constants.py:15 udata/harvest/models.py:20
 msgid "Daily"
 msgstr "Quotidienne"
 
@@ -242,7 +302,7 @@ msgstr "Trois fois par semaine"
 msgid "Semiweekly"
 msgstr "Deux fois par semaine"
 
-#: udata/core/dataset/constants.py:19 udata/harvest/models.py:18
+#: udata/core/dataset/constants.py:19 udata/harvest/models.py:19
 msgid "Weekly"
 msgstr "Hebdomadaire"
 
@@ -258,7 +318,7 @@ msgstr "Trois fois par mois"
 msgid "Semimonthly"
 msgstr "Deux fois par mois"
 
-#: udata/core/dataset/constants.py:23 udata/harvest/models.py:17
+#: udata/core/dataset/constants.py:23 udata/harvest/models.py:18
 msgid "Monthly"
 msgstr "Mensuelle"
 
@@ -487,9 +547,9 @@ msgstr "Le nom du schéma \"{schema}\" n'est pas une valeur autorisée. Valeurs 
 msgid "Version \"{version}\" is not an allowed value for the schema \"{name}\". Allowed versions: {values}"
 msgstr "La version \"{version}\" n'est pas une valeur autorisée pour le schéma \"{name}\". Versions autorisées : {values}"
 
-#: udata/core/dataset/models.py:401 udata/core/dataset/rdf.py:452
-#: udata/tests/dataset/test_dataset_rdf.py:499
-#: udata/tests/dataset/test_dataset_rdf.py:512
+#: udata/core/dataset/models.py:401 udata/core/dataset/rdf.py:430
+#: udata/tests/dataset/test_dataset_rdf.py:517
+#: udata/tests/dataset/test_dataset_rdf.py:530
 msgid "Nameless resource"
 msgstr "Ressource sans nom"
 
@@ -497,23 +557,15 @@ msgstr "Ressource sans nom"
 msgid "Future date of update"
 msgstr "Future date de mise à jour"
 
-#: udata/core/dataset/models.py:489 udata/mongo/datetime_fields.py:59
-msgid "Creation date"
-msgstr "Date de création"
-
-#: udata/core/dataset/models.py:491 udata/mongo/datetime_fields.py:61
-msgid "Last modification date"
-msgstr "Date de dernière modification"
-
 #: udata/core/dataset/models.py:500
 msgid "Pivotal data"
 msgstr "Données pivot"
 
-#: udata/core/dataset/models.py:539
+#: udata/core/dataset/models.py:540
 msgid "dataset"
 msgstr "jeu de données"
 
-#: udata/core/dataset/rdf.py:450 udata/tests/dataset/test_dataset_rdf.py:486
+#: udata/core/dataset/rdf.py:428 udata/tests/dataset/test_dataset_rdf.py:504
 msgid "{format} resource"
 msgstr "Ressource {format}"
 
@@ -578,17 +630,17 @@ msgid "Editor"
 msgstr "Éditeur"
 
 #: udata/core/organization/constants.py:11 udata/features/transfer/models.py:14
-#: udata/harvest/models.py:23 udata/harvest/models.py:33 udata/harvest/models.py:71
+#: udata/harvest/models.py:24 udata/harvest/models.py:34 udata/harvest/models.py:77
 msgid "Pending"
 msgstr "En attente"
 
 #: udata/core/organization/constants.py:12 udata/features/transfer/models.py:15
-#: udata/harvest/models.py:72
+#: udata/harvest/models.py:78
 msgid "Accepted"
 msgstr "Acceptée"
 
 #: udata/core/organization/constants.py:13 udata/features/transfer/models.py:16
-#: udata/harvest/models.py:73
+#: udata/harvest/models.py:79
 msgid "Refused"
 msgstr "Refusée"
 
@@ -639,23 +691,23 @@ msgstr "Numéro d'identification d'entreprise"
 msgid "Role"
 msgstr "Rôle"
 
-#: udata/core/organization/models.py:113
+#: udata/core/organization/models.py:115
 msgid "Public Service"
 msgstr "Service Public"
 
-#: udata/core/organization/models.py:114
+#: udata/core/organization/models.py:116
 msgid "Certified"
 msgstr "Certifié"
 
-#: udata/core/organization/models.py:115
+#: udata/core/organization/models.py:117
 msgid "Association"
 msgstr "Association"
 
-#: udata/core/organization/models.py:116
+#: udata/core/organization/models.py:118
 msgid "Company"
 msgstr "Entreprise"
 
-#: udata/core/organization/models.py:117
+#: udata/core/organization/models.py:119
 msgid "Local authority"
 msgstr "Collectivité territoriale"
 
@@ -1009,7 +1061,7 @@ msgstr "À propos"
 msgid "Roles"
 msgstr "Rôles"
 
-#: udata/core/user/models.py:273 udata/tests/api/test_me_api.py:313
+#: udata/core/user/models.py:284 udata/tests/api/test_me_api.py:313
 msgid "Account deletion"
 msgstr "Suppression de compte"
 
@@ -1044,10 +1096,6 @@ msgstr "Le rôle {role} n'existe pas"
 #: udata/forms/fields.py:175
 msgid "Not a valid UUID"
 msgstr "N'est pas un UUID"
-
-#: udata/forms/fields.py:210 udata/tests/api/test_datasets_api.py:764
-msgid "Invalid URL"
-msgstr "URL invalide"
 
 #: udata/forms/fields.py:414
 #, python-format
@@ -1088,14 +1136,6 @@ msgstr "Incapable de comprendre la date"
 msgid "You must be authenticated"
 msgstr "Vous devez être authentifié"
 
-#: udata/forms/fields.py:739
-msgid "You can only set yourself as owner"
-msgstr "Vous ne pouvez définir que vous-même en tant que propriétaire"
-
-#: udata/forms/fields.py:762
-msgid "Permission denied for this organization"
-msgstr "Permission refusée pour cette organisation"
-
 #: udata/forms/validators.py:59
 #, python-format
 msgid "This field requires \"%(name)s\" to be set"
@@ -1113,43 +1153,43 @@ msgstr "Des détails optionnels sur votre moissonneur"
 msgid "Backend"
 msgstr "Implémentation"
 
-#: udata/harvest/models.py:16
+#: udata/harvest/models.py:17
 msgid "Manual"
 msgstr "Manuel"
 
-#: udata/harvest/models.py:24
+#: udata/harvest/models.py:25
 msgid "Initializing"
 msgstr "En cours de démarrage"
 
-#: udata/harvest/models.py:25
+#: udata/harvest/models.py:26
 msgid "Initialized"
 msgstr "Démarré"
 
-#: udata/harvest/models.py:26
+#: udata/harvest/models.py:27
 msgid "Processing"
 msgstr "En cours de traitement"
 
-#: udata/harvest/models.py:27 udata/harvest/models.py:35
+#: udata/harvest/models.py:28 udata/harvest/models.py:36
 msgid "Done"
 msgstr "Terminé"
 
-#: udata/harvest/models.py:28
+#: udata/harvest/models.py:29
 msgid "Done with errors"
 msgstr "Terminé avec erreurs"
 
-#: udata/harvest/models.py:29 udata/harvest/models.py:36
+#: udata/harvest/models.py:30 udata/harvest/models.py:37
 msgid "Failed"
 msgstr "Échec"
 
-#: udata/harvest/models.py:34
+#: udata/harvest/models.py:35
 msgid "Started"
 msgstr "Démarré"
 
-#: udata/harvest/models.py:37
+#: udata/harvest/models.py:38
 msgid "Skipped"
 msgstr "Ignoré"
 
-#: udata/harvest/models.py:38
+#: udata/harvest/models.py:39
 msgid "Archived"
 msgstr "Archivé"
 
@@ -1535,6 +1575,10 @@ msgstr "Si vous avez oublié votre mot de passe, vous pouvez le réinitialiser"
 msgid "Here"
 msgstr "Ici"
 
+#: udata/tests/api/test_datasets_api.py:764
+msgid "Invalid URL"
+msgstr "URL invalide"
+
 #: udata/tests/forms/test_model_field.py:155
 msgid "Expect a \"Target\" class but \"Wrong\" was found"
 msgstr "Attend une classe \"Target\" mais \"Wrong\" a été trouvée"
@@ -1555,34 +1599,3 @@ msgstr "Assez réutilisé"
 msgid "Heavily reused"
 msgstr "Souvent réutilisé"
 
-#: udata/uris.py:51
-msgid "Invalid URL \"{url}\": {reason}"
-msgstr "URL invalide \"{url}\" : {reason}"
-
-#: udata/uris.py:103
-msgid "Schéma invalide {0}, schémas autorisés : {1}"
-msgstr ""
-
-#: udata/uris.py:106
-msgid "Les informations d'identification dans l'URL ne sont pas autorisées"
-msgstr ""
-
-#: udata/uris.py:110
-msgid "TLD invalide {0}"
-msgstr ""
-
-#: udata/uris.py:119
-msgid "{0} est une IP multicast"
-msgstr ""
-
-#: udata/uris.py:121
-msgid "{0} est un masque IP"
-msgstr ""
-
-#: udata/uris.py:125
-msgid "est une URL locale"
-msgstr ""
-
-#: udata/uris.py:128
-msgid "est une URL privée"
-msgstr ""
