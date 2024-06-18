@@ -2,6 +2,7 @@ from blinker import Signal
 from mongoengine.signals import pre_save, post_save
 from werkzeug.utils import cached_property
 
+from udata.api_fields import field, generate_fields
 from udata.core.storages import images, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -23,32 +24,53 @@ class ReuseQuerySet(OwnedQuerySet):
                     db.Q(datasets__0__exists=False) |
                     db.Q(deleted__ne=None))
 
-
+@generate_fields(searchable=True)
 class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
-    title = db.StringField(required=True)
-    slug = db.SlugField(max_length=255, required=True, populate_from='title',
-                        update=True, follow=True)
-    description = db.StringField(required=True)
-    type = db.StringField(required=True, choices=list(REUSE_TYPES))
-    url = db.StringField(required=True)
-    urlhash = db.StringField(required=True, unique=True)
-    image_url = db.StringField()
+    title = field(
+        db.StringField(required=True),
+        sortable=True,
+    )
+    slug = field(db.SlugField(max_length=255, required=True, populate_from='title',
+                        update=True, follow=True))
+    description = field(db.StringField(required=True))
+    type = field(
+        db.StringField(required=True, choices=list(REUSE_TYPES)),
+        filterable={},
+    )
+    url = field(db.StringField(required=True))
+    urlhash = field(db.StringField(required=True, unique=True))
+    image_url = field(db.StringField())
     image = db.ImageField(
         fs=images, basename=default_image_basename, max_size=IMAGE_MAX_SIZE,
         thumbnails=IMAGE_SIZES)
-    datasets = db.ListField(
-        db.ReferenceField('Dataset', reverse_delete_rule=db.PULL))
-    tags = db.TagListField()
-    topic = db.StringField(required=True, choices=list(REUSE_TOPICS))
+    datasets = field(
+        db.ListField(db.ReferenceField('Dataset', reverse_delete_rule=db.PULL)),
+        filterable={
+            'key': 'dataset',
+        },
+    )
+    tags = field(
+        db.TagListField(),
+        filterable={
+            'key': 'tag',
+        },
+    )
+    topic = field(
+        db.StringField(required=True, choices=list(REUSE_TOPICS)),
+        filterable={},
+    )
     # badges = db.ListField(db.EmbeddedDocumentField(ReuseBadge))
 
-    private = db.BooleanField(default=False)
+    private = field(db.BooleanField(default=False))
 
-    ext = db.MapField(db.GenericEmbeddedDocumentField())
-    extras = db.ExtrasField()
+    ext = field(db.MapField(db.GenericEmbeddedDocumentField()))
+    extras = field(db.ExtrasField())
 
-    featured = db.BooleanField()
-    deleted = db.DateTimeField()
+    featured = field(
+        db.BooleanField(),
+        filterable={},
+    )
+    deleted = field(db.DateTimeField())
 
     def __str__(self):
         return self.title or ''

@@ -123,6 +123,11 @@ def generate_fields(**kwargs):
                     if isinstance(field, mongo_fields.ReferenceField) or (isinstance(field, mongo_fields.ListField) and isinstance(field.field, mongo_fields.ReferenceField)):
                         filterable['constraints'].append('objectid')
 
+                if 'type' not in filterable:
+                    filterable['type'] = str
+                    if isinstance(field, mongo_fields.BooleanField):
+                        filterable['type'] = bool
+
                 # We may add more information later here:
                 # - type of mongo query to execute (right now only simple =)
 
@@ -181,8 +186,12 @@ def generate_fields(**kwargs):
             choices = sortables + ['-' + k for k in sortables]
             parser.add_argument('sort', type=str, location='args', choices=choices, help='The field (and direction) on which sorting apply')
 
+        searchable = kwargs.pop('searchable', False)
+        if searchable:
+            parser.add_argument('q', type=str, location='args')
+
         for filterable in filterables:
-            parser.add_argument(filterable['key'], type=str, location='args')
+            parser.add_argument(filterable['key'], type=filterable['type'], location='args')
 
         cls.__index_parser__ = parser
         def apply_sort_filters_and_pagination(base_query):
@@ -190,6 +199,10 @@ def generate_fields(**kwargs):
 
             if sortables and args['sort']:
                 base_query = base_query.order_by(args['sort'])
+
+            if searchable and args.get('q'):
+                phrase_query = ' '.join([f'"{elem}"' for elem in args['q'].split(' ')])
+                base_query = base_query.search_text(phrase_query)
 
             for filterable in filterables:
                 if args.get(filterable['key']):
@@ -252,6 +265,16 @@ def patch(obj, request):
                 check(**{key: value}) # TODO add other model attributes in function parameters
 
             setattr(obj, key, value)
+
+    return obj
+
+def patch_and_save(obj, request):
+    obj = patch(obj, request)
+
+    try:
+        obj.save()
+    except mongoengine.errors.ValidationError as e:
+        api.abort(400, e.message)
 
     return obj
 

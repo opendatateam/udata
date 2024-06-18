@@ -51,6 +51,7 @@ class Owned(object):
         description="Only present if organization is not set. Can only be set to the current authenticated user.",
         check=check_owner_is_current_user,
         allow_null=True,
+        filterable={},
     )
     organization = field(
         ReferenceField(Organization, reverse_delete_rule=NULLIFY),
@@ -58,6 +59,7 @@ class Owned(object):
         description="Only present if owner is not set. Can only be set to an organization of the current authenticated user.",
         check=check_organization_is_valid_for_current_user,
         allow_null=True,
+        filterable={},
     )
 
     on_owner_change = signal('Owned.on_owner_change')

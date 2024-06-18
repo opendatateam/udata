@@ -154,8 +154,10 @@ class ReuseAPITest:
         '''It should update a reuse from the API'''
         user = api.login()
         reuse = ReuseFactory(owner=user)
+        print(reuse.extras)
         data = reuse.to_dict()
         data['description'] = 'new description'
+        print(data)
         response = api.put(url_for('api.reuse', reuse=reuse), data)
         assert200(response)
         assert Reuse.objects.count() == 1
