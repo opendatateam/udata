@@ -297,7 +297,7 @@ def wrap_primary_key(field_name: str, foreign_field: mongoengine.fields.Referenc
         raise FieldValidationError(field=field_name, message=f"Unknown reference '{value}'")
     
     if isinstance(id_field, mongoengine.fields.ObjectIdField):
-        return ObjectId(value)
+        return foreign_document.to_dbref()
     elif isinstance(id_field, mongoengine.fields.StringField):
         # Right now I didn't find a simpler way to make mongoengine happy.
         # For references, it expects `ObjectId`, `DBRef`, `LazyReference` or `document` but since

@@ -13,6 +13,8 @@ from udata.core.user.factories import UserFactory
 from udata.models import Reuse, Follow, Member
 from udata.core.reuse.constants import REUSE_TOPICS, REUSE_TYPES
 from udata.utils import faker
+from udata.core.organization import metrics
+from udata.core.user import metrics
 
 from udata.tests.helpers import (
     assert200, assert201, assert204, assert400, assert404, assert410
