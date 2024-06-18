@@ -171,8 +171,8 @@ class ReuseDatasetsAPI(API):
     @api.secure
     @api.doc('reuse_add_dataset', **common_doc)
     @api.expect(dataset_ref_fields)
-    @api.response(200, 'The dataset is already present', reuse_fields)
-    @api.marshal_with(reuse_fields, code=201)
+    @api.response(200, 'The dataset is already present', Reuse.__read_fields__)
+    @api.marshal_with(Reuse.__read_fields__, code=201)
     def post(self, reuse):
         '''Add a dataset to a given reuse'''
         if 'id' not in request.json:
@@ -222,7 +222,7 @@ class ReuseBadgeAPI(API):
 class ReuseFeaturedAPI(API):
     @api.doc('feature_reuse')
     @api.secure(admin_permission)
-    @api.marshal_with(reuse_fields)
+    @api.marshal_with(Reuse.__read_fields__)
     def post(self, reuse):
         '''Mark a reuse as featured'''
         reuse.featured = True
@@ -231,7 +231,7 @@ class ReuseFeaturedAPI(API):
 
     @api.doc('unfeature_reuse')
     @api.secure(admin_permission)
-    @api.marshal_with(reuse_fields)
+    @api.marshal_with(Reuse.__read_fields__)
     def delete(self, reuse):
         '''Unmark a reuse as featured'''
         reuse.featured = False
