@@ -8,7 +8,7 @@ from udata.utils import multi_to_dict
 from .search import ReuseSearch
 
 apiv2.inherit('ReusePage', Reuse.__page_fields__)
-apiv2.inherit('Reuse', Reuse.__read_fields__)
+apiv2.inherit('Reuse (read)', Reuse.__read_fields__)
 
 ns = apiv2.namespace('reuses', 'Reuse related operations')
 
