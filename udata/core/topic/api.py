@@ -2,7 +2,7 @@ from udata.api import api, fields, API
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.discussions.models import Discussion
 from udata.core.organization.api_fields import org_ref_fields
-from udata.core.reuse.api_fields import reuse_fields
+from udata.core.reuse.models import Reuse
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.topic.permissions import TopicEditPermission
 from udata.core.topic.parsers import TopicApiParser
@@ -30,7 +30,7 @@ topic_fields = api.model('Topic', {
         attribute=lambda o: [d.fetch() for d in o.datasets],
     ),
     'reuses': fields.List(
-        fields.Nested(reuse_fields),
+        fields.Nested(Reuse.__read_fields__),
         description='The topic reuses',
         attribute=lambda o: [r.fetch() for r in o.reuses],
     ),

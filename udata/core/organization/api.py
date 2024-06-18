@@ -39,7 +39,6 @@ from udata.core.dataset.api_fields import dataset_page_fields
 from udata.core.dataset.models import Dataset
 from udata.core.discussions.api import discussion_fields
 from udata.core.discussions.models import Discussion
-from udata.core.reuse.api_fields import reuse_fields
 from udata.core.reuse.models import Reuse
 from udata.core.storages.api import (
     uploaded_image_fields, image_parser, parse_uploaded_image
@@ -470,7 +469,7 @@ class OrgDatasetsAPI(API):
 @ns.route('/<org:org>/reuses/', endpoint='org_reuses')
 class OrgReusesAPI(API):
     @api.doc('list_organization_reuses')
-    @api.marshal_list_with(reuse_fields)
+    @api.marshal_list_with(Reuse.__read_fields__)
     def get(self, org):
         '''List organization reuses (including private ones when member)'''
         qs = Reuse.objects.owned_by(org)

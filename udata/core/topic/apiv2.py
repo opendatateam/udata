@@ -11,7 +11,6 @@ from udata.core.dataset.apiv2 import dataset_page_fields
 from udata.core.dataset.models import Dataset
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api import ReuseApiParser
-from udata.core.reuse.apiv2 import reuse_page_fields
 from udata.core.reuse.models import Reuse
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.topic.models import Topic
@@ -188,7 +187,7 @@ class TopicDatasetAPI(API):
 class TopicReusesAPI(API):
     @apiv2.doc('topic_reuses')
     @apiv2.expect(reuse_parser.parser)
-    @apiv2.marshal_with(reuse_page_fields)
+    @apiv2.marshal_with(Reuse.__page_fields__)
     def get(self, topic):
         '''Get a given topic reuses, with filters'''
         args = reuse_parser.parse()

@@ -12,7 +12,6 @@ from udata.rdf import (
 )
 
 from udata.core.dataset.api_fields import dataset_fields
-from udata.core.reuse.api_fields import reuse_fields
 
 from .models import current_site
 from .rdf import build_catalog
@@ -63,7 +62,7 @@ class SiteHomeDatasetsAPI(API):
 class SiteHomeReusesAPI(API):
     @api.doc('get_home_reuses')
     @api.secure(admin_permission)
-    @api.marshal_list_with(reuse_fields)
+    @api.marshal_list_with(Reuse.__read_fields__)
     def get(self):
         '''List homepage featured reuses'''
         return current_site.settings.home_reuses
@@ -71,7 +70,7 @@ class SiteHomeReusesAPI(API):
     @api.secure(admin_permission)
     @api.doc('set_home_reuses')
     @api.expect(([str], 'Reuse IDs to put in homepage'))
-    @api.marshal_list_with(reuse_fields)
+    @api.marshal_list_with(Reuse.__read_fields__)
     def put(self):
         '''Set the homepage reuses editorial selection'''
         if not isinstance(request.json, list):

@@ -4,7 +4,7 @@ from udata.api import api, fields, API
 from udata.auth import admin_permission
 
 from udata.core.dataset.api_fields import dataset_fields
-from udata.core.reuse.api_fields import reuse_fields
+from udata.core.reuse.models import Reuse
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.storages.api import (
     uploaded_image_fields, image_parser, parse_uploaded_image
@@ -35,7 +35,7 @@ post_fields = api.model('Post', {
     'datasets': fields.List(
         fields.Nested(dataset_fields), description='The post datasets'),
     'reuses': fields.List(
-        fields.Nested(reuse_fields), description='The post reuses'),
+        fields.Nested(Reuse.__read_fields__), description='The post reuses'),
 
     'owner': fields.Nested(
         user_ref_fields, description='The owner user',
