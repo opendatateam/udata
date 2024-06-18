@@ -21,12 +21,10 @@ from udata.core.storages.api import (
 )
 
 from .api_fields import (
-    reuse_fields, reuse_page_fields,
     reuse_type_fields,
     reuse_suggestion_fields,
     reuse_topic_fields
 )
-from .forms import ReuseForm
 from .models import Reuse
 from .constants import REUSE_TYPES, REUSE_TOPICS
 from .permissions import ReuseEditPermission

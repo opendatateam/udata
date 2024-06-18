@@ -7,6 +7,7 @@ from udata.core.storages import images, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.models import db, BadgeMixin, WithMetrics
+from udata.mongo.errors import FieldValidationError
 from udata.utils import hash_url
 from udata.uris import endpoint_for
 from udata.core.owned import Owned, OwnedQuerySet
@@ -24,6 +25,11 @@ class ReuseQuerySet(OwnedQuerySet):
                     db.Q(datasets__0__exists=False) |
                     db.Q(deleted__ne=None))
 
+def check_url_does_not_exists(url):
+    '''Ensure a reuse URL is not yet registered'''
+    if url and Reuse.url_exists(url):
+        raise FieldValidationError(_('This URL is already registered'), field="url")
+
 @generate_fields(searchable=True)
 class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
     title = field(
@@ -37,7 +43,10 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
         db.StringField(required=True, choices=list(REUSE_TYPES)),
         filterable={},
     )
-    url = field(db.StringField(required=True))
+    url = field(
+        db.StringField(required=True),
+        check=check_url_does_not_exists,
+    )
     urlhash = field(db.StringField(required=True, unique=True))
     image_url = field(db.StringField())
     image = db.ImageField(

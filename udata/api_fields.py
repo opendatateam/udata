@@ -261,7 +261,7 @@ def patch(obj, request):
             # `check` field attribute allows to do validation from the request before setting
             # the attribute
             check = info.get('check', None)
-            if check is not None:
+            if check is not None and value != getattr(obj, key):
                 check(**{key: value}) # TODO add other model attributes in function parameters
 
             setattr(obj, key, value)
