@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Add reports backend [#3069](https://github.com/opendatateam/udata/pull/3069)
 - Improve `udata db check-integrity` (perfs, Sentry notifications…) [#3026](https://github.com/opendatateam/udata/pull/3026)
 - Harvest dataservices [#3029](https://github.com/opendatateam/udata/pull/3029)
 - Refactor catalog exports [#3052](https://github.com/opendatateam/udata/pull/3052)
