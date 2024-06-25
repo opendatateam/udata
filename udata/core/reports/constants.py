@@ -1,4 +1,7 @@
 
+from udata.core.dataset.models import Dataset
+
+
 REASON_SPAM = 'spam'
 REASON_PERSONAL_DATA = 'personal_data'
 REASON_EXPLICIT_CONTENT = 'explicit_content'
@@ -13,3 +16,5 @@ REPORT_REASONS_CHOICES = [
     REASON_SECURITY,
     REASON_OTHERS,
 ]
+
+REPORTABLE_MODELS = [Dataset]
