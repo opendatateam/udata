@@ -12,6 +12,10 @@ class OwnablePermission(Permission):
     def __init__(self, obj):
         needs = []
 
+        print(obj.__class__)
+        print(obj.organization)
+        print(obj.owner)
+
         if obj.organization:
             needs.append(OrganizationAdminNeed(obj.organization.id))
             needs.append(OrganizationEditorNeed(obj.organization.id))
