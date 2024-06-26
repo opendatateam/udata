@@ -67,6 +67,17 @@ class Discussion(SpamMixin, db.Document):
     def embeds_to_check_for_spam(self):
         return self.discussion[1:]
 
+    def spam_is_whitelisted(self) -> bool:
+        from udata.core.owned import OwnablePermission
+
+        # When creating a new Discussion the `subject` is an empty model
+        # with only `id`. We need to fetch it from the database to have
+        # all the required information
+        if not self.subject.owner or not self.subject.organization:
+            self.subject.reload()
+
+        return OwnablePermission(self.subject).can()
+
     @property
     def external_url(self):
         return self.subject.url_for(

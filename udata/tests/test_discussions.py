@@ -122,6 +122,29 @@ class DiscussionsTest(APITestCase):
         self.assertStatus(response, 200)
         self.assertFalse(discussion.reload().is_spam())
 
+
+    @pytest.mark.options(SPAM_WORDS=['spam'])
+    def test_spam_by_owner(self):
+        user = self.login()
+        dataset = Dataset.objects.create(title='Test dataset', owner=user)
+
+        with assert_not_emit(on_new_potential_spam):
+            response = self.post(url_for('api.discussions'), {
+                'title': 'spam and blah',
+                'comment': 'bla bla',
+                'subject': {
+                    'class': 'Dataset',
+                    'id': dataset.id,
+                }
+            })
+            self.assertStatus(response, 201)
+            
+        with assert_not_emit(on_new_potential_spam):
+            response = self.post(url_for('api.discussion', id=response.json['id']), {
+                'comment': 'A comment with spam by owner'
+            })
+            self.assertStatus(response, 200)
+
     @pytest.mark.options(SPAM_WORDS=['spam'])
     def test_spam_in_new_discussion_comment(self):
         self.login()

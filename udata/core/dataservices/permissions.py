@@ -1,6 +1,4 @@
-from udata.core.dataset.permissions import (
-    OwnablePermission
-)
+from udata.core.owned import OwnablePermission
 
 class DataserviceEditPermission(OwnablePermission):
     '''Permissions to edit a Dataservice'''

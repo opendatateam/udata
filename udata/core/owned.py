@@ -5,17 +5,31 @@ from mongoengine import NULLIFY, Q, post_save
 from mongoengine.fields import ReferenceField
 
 from udata.api_fields import field
+from udata.auth import Permission, UserNeed
 from udata.core.organization.models import Organization
 from udata.core.user.models import User
 from udata.mongo.queryset import UDataQuerySet
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.organization.api_fields import org_ref_fields
-from udata.core.organization.permissions import OrganizationPrivatePermission
+from udata.core.organization.permissions import OrganizationAdminNeed, OrganizationEditorNeed, OrganizationPrivatePermission
 from udata.mongo.errors import FieldValidationError
 from udata.i18n import lazy_gettext as _
 
 log = logging.getLogger(__name__)
 
+
+class OwnablePermission(Permission):
+    '''A generic permission for ownable objects (with owner or organization)'''
+    def __init__(self, obj):
+        needs = []
+
+        if obj.organization:
+            needs.append(OrganizationAdminNeed(obj.organization.id))
+            needs.append(OrganizationEditorNeed(obj.organization.id))
+        elif obj.owner:
+            needs.append(UserNeed(obj.owner.fs_uniquifier))
+
+        super(OwnablePermission, self).__init__(*needs)
 
 class OwnedQuerySet(UDataQuerySet):
     def owned_by(self, *owners):

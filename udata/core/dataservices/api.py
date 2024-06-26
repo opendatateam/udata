@@ -5,7 +5,7 @@ import mongoengine
 
 from udata.api import api, API
 from udata.api_fields import patch
-from udata.core.dataset.permissions import OwnablePermission
+from udata.core.owned import OwnablePermission
 from udata.core.followers.api import FollowAPI
 from .models import Dataservice
 
