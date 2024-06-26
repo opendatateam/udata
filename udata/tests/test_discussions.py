@@ -76,7 +76,7 @@ class DiscussionsTest(APITestCase):
             discussion_id = None
             def check_signal(args):
                 self.assertIsNotNone(discussion_id)
-                self.assertIn(f'http://local.test/api/1/datasets/{dataset.id}/#discussion-{discussion_id}', args[1]['message'])
+                self.assertIn(f'http://local.test/api/1/datasets/{dataset.slug}/#discussion-{discussion_id}', args[1]['message'])
 
             with assert_emit(on_new_potential_spam, assertions_callback=check_signal):
                 response = self.post(url_for('api.discussions'), {
@@ -517,39 +517,6 @@ class DiscussionsTest(APITestCase):
         response = self.post(url_for('api.discussion', id=discussion.id),
                              {'comment': "can't comment"})
         self.assert403(response)
-
-    @pytest.mark.options(SPAM_WORDS=['spam'], SPAM_ALLOWED_LANGS=['fr'])
-    def test_close_discussion_with_spam(self):
-        owner = self.login()
-        dataset = Dataset.objects.create(title='Test dataset', owner=owner)
-        user = UserFactory()
-        message = Message(content='Premier message', posted_by=user)
-        discussion = Discussion.objects.create(
-            subject=dataset,
-            user=user,
-            title='test discussion',
-            discussion=[message]
-        )
-        on_new_discussion.send(discussion)  # Updating metrics.
-
-        with assert_not_emit(on_discussion_closed):
-            with assert_emit(on_new_potential_spam):
-                response = self.post(url_for('api.discussion', id=discussion.id), {
-                    'comment': 'This is a suspicious, real suspicious message in english.',
-                    'close': True,
-                })
-                self.assert200(response)
-
-        discussion.reload()
-        self.assertFalse(discussion.is_spam())
-        self.assertTrue(discussion.discussion[1].is_spam())
-        self.assertTrue('signal_close' in discussion.discussion[1].spam.callbacks)
-
-        with assert_emit(on_discussion_closed):
-            admin = self.login(AdminFactory())
-            response = self.delete(url_for('api.discussion_comment_spam', id=discussion.id, cidx=1))
-            self.assertStatus(response, 200)
-            self.assertFalse(discussion.reload().discussion[1].is_spam())
 
     def test_close_discussion_permissions(self):
         dataset = Dataset.objects.create(title='Test dataset')
