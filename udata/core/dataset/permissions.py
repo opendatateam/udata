@@ -1,6 +1,24 @@
-from udata.core.owned import OwnablePermission
+from udata.auth import Permission, UserNeed
+
+from udata.core.organization.permissions import (
+    OrganizationAdminNeed, OrganizationEditorNeed
+)
 
 from .models import Resource
+
+
+class OwnablePermission(Permission):
+    '''A generic permission for ownable objects (with owner or organization)'''
+    def __init__(self, obj):
+        needs = []
+
+        if obj.organization:
+            needs.append(OrganizationAdminNeed(obj.organization.id))
+            needs.append(OrganizationEditorNeed(obj.organization.id))
+        elif obj.owner:
+            needs.append(UserNeed(obj.owner.fs_uniquifier))
+
+        super(OwnablePermission, self).__init__(*needs)
 
 
 class DatasetEditPermission(OwnablePermission):

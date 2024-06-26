@@ -68,7 +68,7 @@ class Discussion(SpamMixin, db.Document):
         return self.discussion[1:]
 
     def spam_is_whitelisted(self) -> bool:
-        from udata.core.owned import OwnablePermission
+        from udata.core.dataset.permissions import OwnablePermission
 
         # When creating a new Discussion the `subject` is an empty model
         # with only `id`. We need to fetch it from the database to have

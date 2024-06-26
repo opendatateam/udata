@@ -1,4 +1,3 @@
-from pprint import pprint
 from flask import current_app
 from langdetect import detect
 
