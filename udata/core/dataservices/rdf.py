@@ -71,7 +71,10 @@ def dataservice_to_rdf(dataservice, graph=None):
         id = URIRef(endpoint_for('dataservices.show_redirect', 'api.dataservice',
                     dataservice=dataservice.id, _external=True))
     else:
+        # Should not happen in production. Some test only
+        # `build()` a dataset without saving it to the DB.
         id = BNode()
+
     # Expose upstream identifier if present
     if dataservice.harvest and dataservice.harvest.dct_identifier:
         identifier = dataservice.harvest.dct_identifier
@@ -85,6 +88,12 @@ def dataservice_to_rdf(dataservice, graph=None):
     d.set(DCT.title, Literal(dataservice.title))
     d.set(DCT.description, Literal(dataservice.description))
     d.set(DCT.issued, Literal(dataservice.created_at))
+    
+    if dataservice.base_api_url:
+        d.set(DCAT.endpointURL, Literal(dataservice.base_api_url))
+    
+    if dataservice.endpoint_description_url:
+        d.set(DCAT.endpointDescription, Literal(dataservice.endpoint_description_url))
 
     for tag in dataservice.tags:
         d.add(DCAT.keyword, Literal(tag))
