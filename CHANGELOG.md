@@ -13,6 +13,7 @@
 - Do not return full dataset objects on dataservices endpoints [#3068](https://github.com/opendatateam/udata/pull/3068)
 - Update markdown base settings [#3067](https://github.com/opendatateam/udata/pull/3067)
 - Add api endpoint /me/org_topics/ [#3070](https://github.com/opendatateam/udata/pull/3070)
+- Expose dataservices in RDF catalog [#3058](https://github.com/opendatateam/udata/pull/3058)
 
 ## 9.0.0 (2024-06-07)
 
