@@ -12,7 +12,7 @@
 - Improve URL validation errors [#3063](https://github.com/opendatateam/udata/pull/3063) [#2768](https://github.com/opendatateam/udata/pull/2768)
 - Do not return full dataset objects on dataservices endpoints [#3068](https://github.com/opendatateam/udata/pull/3068)
 - Update markdown base settings [#3067](https://github.com/opendatateam/udata/pull/3067)
-- Add api endpoint /me/org_topics/ [#370](https://github.com/opendatateam/udata/pull/3070)
+- Add api endpoint /me/org_topics/ [#3070](https://github.com/opendatateam/udata/pull/3070)
 
 ## 9.0.0 (2024-06-07)
 
