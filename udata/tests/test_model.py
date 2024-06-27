@@ -6,6 +6,7 @@ from datetime import date, datetime, timedelta
 from mongoengine.errors import ValidationError
 from mongoengine.fields import BaseField
 
+from udata.forms.validators import _
 from udata.settings import Defaults
 from udata.models import Dataset
 from udata.mongo import db, validate_config, build_test_config
@@ -366,7 +367,7 @@ class URLFieldTest:
 
     def test_not_valid(self):
         obj = URLTester(url='invalid')
-        with pytest.raises(ValidationError, match='Invalid URL'):
+        with pytest.raises(ValidationError, match=_('Invalid URL "{url}"').format(url="invalid")):
             obj.save()
 
     def test_strip_spaces(self):
