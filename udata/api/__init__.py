@@ -323,6 +323,7 @@ def init_app(app):
     import udata.core.activity.api  # noqa
     import udata.core.spatial.api  # noqa
     import udata.core.user.api  # noqa
+    import udata.core.user.apiv2  # noqa
     import udata.core.dataset.api  # noqa
     import udata.core.dataset.apiv2  # noqa
     import udata.core.dataservices.api  # noqa

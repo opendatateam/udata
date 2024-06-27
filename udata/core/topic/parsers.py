@@ -11,10 +11,11 @@ class TopicApiParser(ModelApiParser):
         'last_modified': 'last_modified',
     }
 
-    def __init__(self):
+    def __init__(self, with_include_private=True):
         super().__init__()
+        if with_include_private:
+            self.parser.add_argument('include_private', type=bool, location='args')
         self.parser.add_argument('tag', type=str, location='args')
-        self.parser.add_argument('include_private', type=bool, location='args')
         self.parser.add_argument('geozone', type=str, location='args')
         self.parser.add_argument('granularity', type=str, location='args')
         self.parser.add_argument('organization', type=str, location='args')
