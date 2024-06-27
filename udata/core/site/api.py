@@ -1,6 +1,7 @@
 from bson import ObjectId
 
 from flask import request, redirect, url_for, json, make_response
+from mongoengine import Q
 
 from udata.api import api, API, fields
 from udata.auth import admin_permission
@@ -128,7 +129,13 @@ class SiteRdfCatalogFormat(API):
         # Another option is to do some tricky Mongo requests to order/group datasets by their presence in some dataservices but 
         # it could be really hard to do with a n..n relation.
         # Let's keep this solution simple right now and iterate on it in the future.
-        dataservices = Dataservice.objects.visible().filter(datasets__in=[d.id for d in datasets])
+        dataservices_filter = Q(datasets__in=[d.id for d in datasets])
+
+        # On the first page, add all dataservices without datasets
+        if page == 1:
+            dataservices_filter = dataservices_filter | Q(datasets__size=0)
+
+        dataservices = Dataservice.objects.visible().filter(dataservices_filter)
 
         catalog = build_catalog(current_site, datasets, dataservices=dataservices, format=format)
         # bypass flask-restplus make_response, since graph_response

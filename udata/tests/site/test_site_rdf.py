@@ -256,9 +256,7 @@ class SiteRdfViewsTest:
         dataservice_x = DataserviceFactory.create(datasets=[dataset_a.id, dataset_c.id])
         dataservice_y = DataserviceFactory.create(datasets=[])
 
-        url = url_for('api.site_rdf_catalog_format', format='xml')
-
-        response = client.get(url, headers={'Accept': 'application/xml'})
+        response = client.get(url_for('api.site_rdf_catalog_format', format='xml'), headers={'Accept': 'application/xml'})
         assert200(response)
 
         graph = Graph().parse(data=response.data, format='xml')
@@ -267,4 +265,32 @@ class SiteRdfViewsTest:
         assert len(datasets) == 3
 
         dataservices = list(graph.subjects(RDF.type, DCAT.DataService))
-        assert len(dataservices) == 3
+        assert len(dataservices) == 4
+
+        # Test first page contains the dataservice without dataset
+        response = client.get(url_for('api.site_rdf_catalog_format', format='xml', page_size=1), headers={'Accept': 'application/xml'})
+        assert200(response)
+
+        graph = Graph().parse(data=response.data, format='xml')
+
+        datasets = list(graph.subjects(RDF.type, DCAT.Dataset))
+        assert len(datasets) == 1
+        assert str(graph.value(datasets[0], DCT.identifier)) == str(dataset_c.id)
+
+        dataservices = list(graph.subjects(RDF.type, DCAT.DataService))
+        assert len(dataservices) == 2
+        assert sorted([str(d.id) for d in [dataservice_x, dataservice_y]]) == sorted([str(graph.value(d, DCT.identifier)) for d in dataservices])
+
+        # Test second page doesn't contains the dataservice without dataset
+        response = client.get(url_for('api.site_rdf_catalog_format', format='xml', page_size=1, page=2), headers={'Accept': 'application/xml'})
+        assert200(response)
+
+        graph = Graph().parse(data=response.data, format='xml')
+
+        datasets = list(graph.subjects(RDF.type, DCAT.Dataset))
+        assert len(datasets) == 1
+        assert str(graph.value(datasets[0], DCT.identifier)) == str(dataset_b.id)
+
+        dataservices = list(graph.subjects(RDF.type, DCAT.DataService))
+        assert len(dataservices) == 1
+        assert str(graph.value(dataservices[0], DCT.identifier)) == str(dataservice_b.id)
