@@ -12,6 +12,7 @@
 - Improve URL validation errors [#3063](https://github.com/opendatateam/udata/pull/3063) [#2768](https://github.com/opendatateam/udata/pull/2768)
 - Do not return full dataset objects on dataservices endpoints [#3068](https://github.com/opendatateam/udata/pull/3068)
 - Update markdown base settings [#3067](https://github.com/opendatateam/udata/pull/3067)
+- Add api endpoint /me/org_topics/ [#3070](https://github.com/opendatateam/udata/pull/3070)
 
 ## 9.0.0 (2024-06-07)
 
@@ -31,7 +32,7 @@
 - Allow for series in CSW ISO 19139 DCAT backend [#3028](https://github.com/opendatateam/udata/pull/3028)
 - Add `email` to membership request list API response, add `since` to org members API responses, add `email` to members of org on show org endpoint for org's admins and editors [#3038](https://github.com/opendatateam/udata/pull/3038)
 - Add `resources_downloads` to datasets metrics [#3042](https://github.com/opendatateam/udata/pull/3042)
-- Fix do not override resources extras on admin during update [#3043](https://github.com/opendatateam/udata/pull/3043) 
+- Fix do not override resources extras on admin during update [#3043](https://github.com/opendatateam/udata/pull/3043)
 - Endpoint /users is now protected by admin permissions [#3047](https://github.com/opendatateam/udata/pull/3047)
 - Fix trailing `/` inside `GeoZone` routes not redirecting. Disallow `/` inside `GeoZone` ids [#3045](https://github.com/opendatateam/udata/pull/3045)
 
