@@ -65,8 +65,8 @@ def dataservice_to_rdf(dataservice, graph=None):
     '''
     # Use the unlocalized permalink to the dataset as URI when available
     # unless there is already an upstream URI
-    if dataservice.harvest and dataservice.harvest.rdf_node_id_as_url:
-        id = URIRef(dataservice.harvest.rdf_node_id_as_url)
+    if dataservice.harvest and dataservice.harvest.uri:
+        id = URIRef(dataservice.harvest.uri)
     elif dataservice.id:
         id = URIRef(endpoint_for('dataservices.show_redirect', 'api.dataservice',
                     dataservice=dataservice.id, _external=True))
