@@ -6,7 +6,7 @@ import json
 import logging
 
 from datetime import date
-from typing import Optional
+from typing import Optional, Union
 from dateutil.parser import parse as parse_dt
 from flask import current_app
 from geomet import wkt
@@ -149,19 +149,25 @@ def resource_to_rdf(resource, dataset=None, graph=None, is_hvd=False):
     return r
 
 
+def dataset_to_graph_id(dataset: Dataset) -> Union[URIRef, BNode]: 
+    if dataset.harvest and dataset.harvest.uri:
+        return URIRef(dataset.harvest.uri)
+    elif dataset.id:
+        return URIRef(endpoint_for('datasets.show_redirect', 'api.dataset',
+            dataset=dataset.id, _external=True))
+    else:
+        # Should not happen in production. Some test only
+        # `build()` a dataset without saving it to the DB.
+        return BNode()
+
 def dataset_to_rdf(dataset, graph=None):
     '''
     Map a dataset domain model to a DCAT/RDF graph
     '''
     # Use the unlocalized permalink to the dataset as URI when available
     # unless there is already an upstream URI
-    if dataset.harvest and dataset.harvest.uri:
-        id = URIRef(dataset.harvest.uri)
-    elif dataset.id:
-        id = URIRef(endpoint_for('datasets.show_redirect', 'api.dataset',
-                    dataset=dataset.id, _external=True))
-    else:
-        id = BNode()
+    id = dataset_to_graph_id(dataset)
+
     # Expose upstream identifier if present
     if dataset.harvest and dataset.harvest.dct_identifier:
         identifier = dataset.harvest.dct_identifier
