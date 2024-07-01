@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2024-06-14 11:31+0200\n"
-"PO-Revision-Date: 2024-06-14 11:37\n"
+"POT-Creation-Date: 2024-07-01 13:45+0200\n"
+"PO-Revision-Date: 2024-07-01 14:35\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -42,7 +42,7 @@ msgstr "Votre mot de passe a été modifié"
 msgid "Password reset instructions"
 msgstr "Instructions de réinitialisation du mot de passe"
 
-#: udata/settings.py:433
+#: udata/settings.py:435
 msgid "This dataset has been archived"
 msgstr "Ce jeu de données a été archivé"
 
@@ -50,7 +50,7 @@ msgstr "Ce jeu de données a été archivé"
 msgid "Invalid URL \"{url}\": {reason}"
 msgstr ""
 
-#: udata/uris.py:54
+#: udata/tests/test_model.py:370 udata/uris.py:54
 msgid "Invalid URL \"{url}\""
 msgstr ""
 
@@ -547,7 +547,7 @@ msgstr "Le nom du schéma \"{schema}\" n'est pas une valeur autorisée. Valeurs 
 msgid "Version \"{version}\" is not an allowed value for the schema \"{name}\". Allowed versions: {values}"
 msgstr "La version \"{version}\" n'est pas une valeur autorisée pour le schéma \"{name}\". Versions autorisées : {values}"
 
-#: udata/core/dataset/models.py:401 udata/core/dataset/rdf.py:430
+#: udata/core/dataset/models.py:401 udata/core/dataset/rdf.py:436
 #: udata/tests/dataset/test_dataset_rdf.py:517
 #: udata/tests/dataset/test_dataset_rdf.py:530
 msgid "Nameless resource"
@@ -565,7 +565,7 @@ msgstr "Données pivot"
 msgid "dataset"
 msgstr "jeu de données"
 
-#: udata/core/dataset/rdf.py:428 udata/tests/dataset/test_dataset_rdf.py:504
+#: udata/core/dataset/rdf.py:434 udata/tests/dataset/test_dataset_rdf.py:504
 msgid "{format} resource"
 msgstr "Ressource {format}"
 
@@ -797,6 +797,30 @@ msgstr "Spécifiez votre type de contenu (HTML ou markdown)"
 msgid "post"
 msgstr "article"
 
+#: udata/core/reports/constants.py:19
+msgid "Spam"
+msgstr ""
+
+#: udata/core/reports/constants.py:20
+msgid "Personal data"
+msgstr ""
+
+#: udata/core/reports/constants.py:21
+msgid "Explicit content"
+msgstr ""
+
+#: udata/core/reports/constants.py:22
+msgid "Illegal content"
+msgstr ""
+
+#: udata/core/reports/constants.py:23
+msgid "Security"
+msgstr ""
+
+#: udata/core/reports/constants.py:24 udata/core/reuse/constants.py:29
+msgid "Others"
+msgstr "Autres"
+
 #: udata/core/reuse/activities.py:22
 msgid "created a reuse"
 msgstr "a créé une réutilisation"
@@ -892,10 +916,6 @@ msgstr "Droit et justice"
 #: udata/core/reuse/constants.py:28
 msgid "Open data tools"
 msgstr "Outils open data"
-
-#: udata/core/reuse/constants.py:29
-msgid "Others"
-msgstr "Autres"
 
 #: udata/core/reuse/forms.py:14
 msgid "This URL is already registered"
@@ -1576,8 +1596,8 @@ msgid "Here"
 msgstr "Ici"
 
 #: udata/tests/api/test_datasets_api.py:764
-msgid "Invalid URL"
-msgstr "URL invalide"
+msgid "Invalid URL \"test\""
+msgstr ""
 
 #: udata/tests/forms/test_model_field.py:155
 msgid "Expect a \"Target\" class but \"Wrong\" was found"
