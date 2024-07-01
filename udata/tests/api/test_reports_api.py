@@ -4,10 +4,19 @@ from flask import url_for
 from udata.core.dataset.factories import (DatasetFactory)
 from udata.core.dataset.models import Dataset
 from udata.core.reports.models import Report
-from udata.core.reports.constants import REASON_ILLEGAL_CONTENT, REASON_SPAM
+from udata.core.reports.constants import REASON_ILLEGAL_CONTENT, REASON_SPAM, reports_reasons_translations
 from udata.i18n import gettext as _
 
 from . import APITestCase
+
+
+class ReportsReasonsAPITest(APITestCase):
+    modules = []
+
+    def test_reports_reasons_api(self):
+        response = self.get(url_for('api.reports_reasons'))
+        self.assert200(response)
+        self.assertEqual(response.json, reports_reasons_translations())
 
 class ReportsAPITest(APITestCase):
     modules = []
@@ -75,6 +84,5 @@ class ReportsAPITest(APITestCase):
 
         response = self.get(url_for('api.reports'))
         self.assert200(response)
-        print(response.json)
         self.assertEqual(len(response.json['data']), 2)
 

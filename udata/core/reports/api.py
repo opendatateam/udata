@@ -2,9 +2,10 @@ from flask import request
 from flask_login import current_user
 import mongoengine
 
-from udata.api import api, API
+from udata.api import api, API, fields
 from udata.api_fields import patch
 from .models import Report
+from .constants import reports_reasons_translations
 
 ns = api.namespace('reports', 'User reported objects related operations (beta)')
 
@@ -32,3 +33,11 @@ class ReportsAPI(API):
             api.abort(400, e.message)
 
         return report, 201
+    
+
+@ns.route('/reasons', endpoint='reports_reasons')
+class ReportsReasonsAPI(API):
+    @api.doc('list_reports_reasons')
+    @ns.response(200, "dictionnary of available reasons associated with their labels", fields.Raw)
+    def get(self):
+        return reports_reasons_translations()
