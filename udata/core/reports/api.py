@@ -35,7 +35,7 @@ class ReportsAPI(API):
         return report, 201
     
 
-@ns.route('/reasons', endpoint='reports_reasons')
+@ns.route('/reasons/', endpoint='reports_reasons')
 class ReportsReasonsAPI(API):
     @api.doc('list_reports_reasons')
     @ns.response(200, "dictionnary of available reasons associated with their labels", fields.Raw)
