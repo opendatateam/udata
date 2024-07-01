@@ -15,6 +15,7 @@
 - Prevent tagging as spam owners' messages [#3071](https://github.com/opendatateam/udata/pull/3071)
 - Add api endpoint /me/org_topics/ [#3070](https://github.com/opendatateam/udata/pull/3070)
 - Expose dataservices in RDF catalog [#3058](https://github.com/opendatateam/udata/pull/3058)
+- Allow discussion notification customization [#3072](https://github.com/opendatateam/udata/pull/3072)
 
 ## 9.0.0 (2024-06-07)
 
