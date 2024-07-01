@@ -14,7 +14,7 @@ class ReportsAPI(API):
     @api.expect(Report.__index_parser__)
     @api.marshal_with(Report.__page_fields__)
     def get(self):
-        query = Report.objects.visible()
+        query = Report.objects
 
         return Report.apply_sort_filters_and_pagination(query)
 

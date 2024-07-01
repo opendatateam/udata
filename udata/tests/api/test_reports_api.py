@@ -73,3 +73,8 @@ class ReportsAPITest(APITestCase):
         reports[1].reload()
         self.assertIsNotNone(reports[1].object_deleted_at)
 
+        response = self.get(url_for('api.reports'))
+        self.assert200(response)
+        print(response.json)
+        self.assertEqual(len(response.json['data']), 2)
+
