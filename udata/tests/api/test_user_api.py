@@ -153,6 +153,8 @@ class UserAPITest(APITestCase):
 
     def test_user_api_full_text_search_first_name(self):
         '''It should find users based on first name'''
+        self.login(AdminFactory())
+
         for i in range(4):
             UserFactory(
                 first_name='test-{0}'.format(i) if i % 2 else faker.word())
@@ -164,6 +166,8 @@ class UserAPITest(APITestCase):
 
     def test_user_api_full_text_search_last_name(self):
         '''It should find users based on last name'''
+        self.login(AdminFactory())
+
         for i in range(4):
             UserFactory(
                 last_name='test-{0}'.format(i) if i % 2 else faker.word())
@@ -175,6 +179,8 @@ class UserAPITest(APITestCase):
 
     def test_user_api_full_text_search_unicode(self):
         '''It should find user with special characters'''
+        self.login(AdminFactory())
+
         for i in range(4):
             UserFactory(
                 first_name='test-{0}'.format(i) if i % 2 else faker.word())
@@ -189,14 +195,17 @@ class UserAPITest(APITestCase):
 
     def test_find_users_api_no_match(self):
         '''It should not find user if no match'''
+        self.login(AdminFactory())
         UserFactory.create_batch(3)
 
         response = self.get(url_for('api.users', q='xxxxxx'))
         self.assert200(response)
         self.assertEqual(len(response.json['data']), 0)
 
-    def test_users(self):
+    def test_users_as_admin(self):
         '''It should provide a list of users'''
+        self.login(AdminFactory(email="thibaud@example.org"))
+
         user = UserFactory(
             about=faker.paragraph(),
             website=faker.url(),
@@ -204,14 +213,25 @@ class UserAPITest(APITestCase):
             metrics={'datasets': 10, 'followers': 1, 'following': 0, 'reuses': 2})
         response = self.get(url_for('api.users'))
         self.assert200(response)
-        [json] = response.json['data']
-        self.assertEqual(json['id'], str(user.id))
-        self.assertEqual(json['slug'], user.slug)
-        self.assertEqual(json['first_name'], user.first_name)
-        self.assertEqual(json['last_name'], user.last_name)
-        self.assertEqual(json['website'], user.website)
-        self.assertEqual(json['about'], user.about)
-        self.assertEqual(json['metrics'], user.metrics)
+        users = response.json['data']
+        self.assertEqual(users[1]['email'], "thibaud@example.org") # Admin user created for login
+        self.assertEqual(users[0]['id'], str(user.id))
+        self.assertEqual(users[0]['slug'], user.slug)
+        self.assertEqual(users[0]['first_name'], user.first_name)
+        self.assertEqual(users[0]['last_name'], user.last_name)
+        self.assertEqual(users[0]['website'], user.website)
+        self.assertEqual(users[0]['about'], user.about)
+        self.assertEqual(users[0]['metrics'], user.metrics)
+
+    def test_users_forbidden(self):
+        UserFactory()
+        
+        response = self.get(url_for('api.users'))
+        self.assert401(response)
+
+        self.login()
+        response = self.get(url_for('api.users'))
+        self.assert403(response)
 
     def test_get_user(self):
         '''It should get a user'''

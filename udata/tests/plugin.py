@@ -8,6 +8,7 @@ from flask import json, template_rendered, url_for, current_app
 from flask.testing import FlaskClient
 from lxml import etree
 from werkzeug.urls import url_encode
+from flask_principal import Identity, identity_changed
 
 from udata import settings
 from udata.app import create_app
@@ -49,6 +50,7 @@ class TestClient(FlaskClient):
             session['_fresh'] = True
             session['_id'] = current_app.login_manager._session_identifier_generator()
             current_app.login_manager._update_request_context_with_user(user)
+            identity_changed.send(current_app._get_current_object(), identity=Identity(user.id))
         return user
 
     def logout(self):

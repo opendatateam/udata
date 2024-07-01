@@ -6,8 +6,7 @@ import json
 import logging
 
 from datetime import date
-from html.parser import HTMLParser
-from typing import Optional
+from typing import Optional, Union
 from dateutil.parser import parse as parse_dt
 from flask import current_app
 from geomet import wkt
@@ -18,12 +17,13 @@ from mongoengine.errors import ValidationError
 
 from udata import i18n, uris
 from udata.core.spatial.models import SpatialCoverage
-from udata.frontend.markdown import parse_html
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
-from udata.models import db, ContactPoint
+from udata.harvest.exceptions import HarvestSkipException
+from udata.models import db
 from udata.rdf import (
-    DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, VCARD, RDFS,
-    namespace_manager, schema_from_rdf, url_from_rdf
+    DCAT, DCATAP, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, TAG_TO_EU_HVD_CATEGORIES, RDFS, 
+    namespace_manager, rdf_value, remote_url_from_rdf, sanitize_html, schema_from_rdf, themes_from_rdf, url_from_rdf, HVD_LEGISLATION,
+    contact_point_from_rdf,
 )
 from udata.utils import get_by, safe_unicode
 from udata.uris import endpoint_for
@@ -76,43 +76,6 @@ EU_RDF_REQUENCIES = {
     EUFREQ.NEVER: 'punctual',
 }
 
-# Map High Value Datasets URIs to keyword categories
-EU_HVD_CATEGORIES = {
-    "http://data.europa.eu/bna/c_164e0bf5": "Météorologiques",
-    "http://data.europa.eu/bna/c_a9135398": "Entreprises et propriété d'entreprises",
-    "http://data.europa.eu/bna/c_ac64a52d": "Géospatiales",
-    "http://data.europa.eu/bna/c_b79e35eb": "Mobilité",
-    "http://data.europa.eu/bna/c_dd313021": "Observation de la terre et environnement",
-    "http://data.europa.eu/bna/c_e1da4e07": "Statistiques"
-}
-
-
-class HTMLDetector(HTMLParser):
-    def __init__(self, *args, **kwargs):
-        HTMLParser.__init__(self, *args, **kwargs)
-        self.elements = set()
-
-    def handle_starttag(self, tag, attrs):
-        self.elements.add(tag)
-
-    def handle_endtag(self, tag):
-        self.elements.add(tag)
-
-
-def is_html(text):
-    parser = HTMLDetector()
-    parser.feed(text)
-    return bool(parser.elements)
-
-
-def sanitize_html(text):
-    text = text.toPython() if isinstance(text, Literal) else ''
-    if is_html(text):
-        return parse_html(text)
-    else:
-        return text.strip()
-
-
 def temporal_to_rdf(daterange, graph=None):
     if not daterange:
         return
@@ -141,7 +104,7 @@ def owner_to_rdf(dataset, graph=None):
     return
 
 
-def resource_to_rdf(resource, dataset=None, graph=None):
+def resource_to_rdf(resource, dataset=None, graph=None, is_hvd=False):
     '''
     Map a Resource domain model to a DCAT/RDF graph
     '''
@@ -180,8 +143,22 @@ def resource_to_rdf(resource, dataset=None, graph=None):
         checksum.add(SPDX.algorithm, getattr(SPDX, algorithm))
         checksum.add(SPDX.checksumValue, Literal(resource.checksum.value))
         r.add(SPDX.checksum, checksum)
+    if is_hvd:
+        # DCAT-AP HVD applicable legislation is also expected at the distribution level
+        r.add(DCATAP.applicableLegislation, URIRef(HVD_LEGISLATION))
     return r
 
+
+def dataset_to_graph_id(dataset: Dataset) -> Union[URIRef, BNode]: 
+    if dataset.harvest and dataset.harvest.uri:
+        return URIRef(dataset.harvest.uri)
+    elif dataset.id:
+        return URIRef(endpoint_for('datasets.show_redirect', 'api.dataset',
+            dataset=dataset.id, _external=True))
+    else:
+        # Should not happen in production. Some test only
+        # `build()` a dataset without saving it to the DB.
+        return BNode()
 
 def dataset_to_rdf(dataset, graph=None):
     '''
@@ -189,13 +166,8 @@ def dataset_to_rdf(dataset, graph=None):
     '''
     # Use the unlocalized permalink to the dataset as URI when available
     # unless there is already an upstream URI
-    if dataset.harvest and dataset.harvest.uri:
-        id = URIRef(dataset.harvest.uri)
-    elif dataset.id:
-        id = URIRef(endpoint_for('datasets.show_redirect', 'api.dataset',
-                    dataset=dataset.id, _external=True))
-    else:
-        id = BNode()
+    id = dataset_to_graph_id(dataset)
+
     # Expose upstream identifier if present
     if dataset.harvest and dataset.harvest.dct_identifier:
         identifier = dataset.harvest.dct_identifier
@@ -214,11 +186,20 @@ def dataset_to_rdf(dataset, graph=None):
     if dataset.acronym:
         d.set(SKOS.altLabel, Literal(dataset.acronym))
 
+    # Add DCAT-AP HVD properties if the dataset is tagged hvd.
+    # See https://semiceu.github.io/DCAT-AP/releases/2.2.0-hvd/
+    is_hvd = current_app.config['HVD_SUPPORT'] and 'hvd' in dataset.tags
+    if is_hvd:
+        d.add(DCATAP.applicableLegislation, URIRef(HVD_LEGISLATION))
+
     for tag in dataset.tags:
         d.add(DCAT.keyword, Literal(tag))
+        # Add HVD category if this dataset is tagged HVD
+        if is_hvd and tag in TAG_TO_EU_HVD_CATEGORIES:
+            d.add(DCATAP.hvdCategory, URIRef(TAG_TO_EU_HVD_CATEGORIES[tag]))
 
     for resource in dataset.resources:
-        d.add(DCAT.distribution, resource_to_rdf(resource, dataset, graph))
+        d.add(DCAT.distribution, resource_to_rdf(resource, dataset, graph, is_hvd))
 
     if dataset.temporal_coverage:
         d.set(DCT.temporal, temporal_to_rdf(dataset.temporal_coverage, graph))
@@ -239,18 +220,6 @@ CHECKSUM_ALGORITHMS = {
     SPDX.checksumAlgorithm_sha1: 'sha1',
     SPDX.checksumAlgorithm_sha256: 'sha256',
 }
-
-
-def serialize_value(value):
-    if isinstance(value, (URIRef, Literal)):
-        return value.toPython()
-    elif isinstance(value, RdfResource):
-        return value.identifier.toPython()
-
-
-def rdf_value(obj, predicate, default=None):
-    value = obj.value(predicate)
-    return serialize_value(value) if value else default
 
 
 def temporal_from_literal(text):
@@ -327,29 +296,6 @@ def temporal_from_rdf(period_of_time):
         # so we log the error for future investigation and improvement
         log.warning('Unable to parse temporal coverage', exc_info=True)
 
-
-def contact_point_from_rdf(rdf, dataset):
-    contact_point = rdf.value(DCAT.contactPoint)
-    if contact_point:
-        name = rdf_value(contact_point, VCARD.fn) or ''
-        email = (rdf_value(contact_point, VCARD.hasEmail)
-                 or rdf_value(contact_point, VCARD.email)
-                 or rdf_value(contact_point, DCAT.email))
-        if not email:
-            return
-        email = email.replace('mailto:', '').strip()
-        if dataset.organization:
-            contact_point = ContactPoint.objects(
-                name=name, email=email, organization=dataset.organization).first()
-            return (contact_point or
-                    ContactPoint(name=name, email=email, organization=dataset.organization).save())
-        elif dataset.owner:
-            contact_point = ContactPoint.objects(
-                name=name, email=email, owner=dataset.owner).first()
-            return (contact_point or
-                    ContactPoint(name=name, email=email, owner=dataset.owner).save())
-
-
 def spatial_from_rdf(graph):
     geojsons = []
     for term in graph.objects(DCT.spatial):
@@ -381,23 +327,51 @@ def spatial_from_rdf(graph):
                     else:
                         continue
 
-                    if geojson['type'] == 'Polygon':
-                        geojson['type'] = 'MultiPolygon'
-                        geojson['coordinates'] = [geojson['coordinates']]
-
                     geojsons.append(geojson)
         except Exception as e:
             log.exception(f"Exception during `spatial_from_rdf` for term {term}: {e}", stack_info=True)
 
+    if not geojsons:
+        return None
+
+    # We first try to build a big MultiPolygon with all the spatial coverages found in RDF.
+    # We deduplicate the coordinates because some backend provides the same coordinates multiple
+    # times in different format. We only support in this first pass Polygons and MultiPolygons. Not sure
+    # if there are other types of spatial coverage worth integrating (points? line strings?). But these other
+    # formats are not compatible to be merged in the unique stored representation in MongoDB, we'll deal with them in a second pass.
+    # The merging lose the properties and other information inside the GeoJSON…
+    # Note that having multiple `Polygon` is not really the DCAT way of doing things, the standard require that you use 
+    # a `MultiPolygon` in this case. We support this right now, and wait and see if it raises problems in the future for
+    # people following the standard. (see https://github.com/datagouv/data.gouv.fr/issues/1362#issuecomment-2112774115)
+    polygons = []
     for geojson in geojsons:
-        spatial_coverage = SpatialCoverage(geom=geojson)
-        try:
-            spatial_coverage.clean()
-            return spatial_coverage
-        except ValidationError:
+        if geojson['type'] == 'Polygon':
+            if geojson['coordinates'] not in polygons:
+                polygons.append(geojson['coordinates'])
+        elif geojson['type'] == 'MultiPolygon':
+            for coordinates in geojson['coordinates']:
+                if coordinates not in polygons:
+                    polygons.append(coordinates)
+        else:
+            log.warning(f"Unsupported GeoJSON type '{geojson['type']}'")
             continue
 
-    return None
+    if not polygons:
+        log.warning(f"No supported types found in the GeoJSON data.")
+        return None
+
+    spatial_coverage = SpatialCoverage(geom={
+        'type': 'MultiPolygon',
+        'coordinates': polygons,
+    })
+
+    try:
+        spatial_coverage.clean()
+        return spatial_coverage
+    except ValidationError as e:
+        log.warning(f"Cannot save the spatial coverage {coordinates} (error was {e})")
+        return None
+
 
 def frequency_from_rdf(term):
     if isinstance(term, str):
@@ -460,43 +434,6 @@ def title_from_rdf(rdf, url):
             return i18n._('{format} resource').format(format=fmt.lower())
         else:
             return i18n._('Nameless resource')
-
-
-def remote_url_from_rdf(rdf):
-    '''
-    Return DCAT.landingPage if found and uri validation succeeds.
-    Use RDF identifier as fallback if uri validation succeeds.
-    '''
-    landing_page = url_from_rdf(rdf, DCAT.landingPage)
-    uri = rdf.identifier.toPython()
-    for candidate in [landing_page, uri]:
-        if candidate:
-            try:
-                uris.validate(candidate)
-                return candidate
-            except uris.ValidationError:
-                pass
-
-
-def theme_labels_from_rdf(rdf):
-    '''
-    Get theme labels to use as keywords.
-    Map HVD keywords from known URIs resources if HVD support is activated.
-    '''
-    for theme in rdf.objects(DCAT.theme):
-        if isinstance(theme, RdfResource):
-            uri = theme.identifier.toPython()
-            if current_app.config['HVD_SUPPORT'] and uri in EU_HVD_CATEGORIES:
-                label = EU_HVD_CATEGORIES[uri]
-                # Additionnally yield hvd keyword
-                yield 'hvd'
-            else:
-                label = rdf_value(theme, SKOS.prefLabel)
-        else:
-            label = theme.toPython()
-        if label:
-            yield label
-
 
 def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     '''
@@ -575,6 +512,9 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     d = graph.resource(node)
 
     dataset.title = rdf_value(d, DCT.title)
+    if not dataset.title:
+        raise HarvestSkipException("missing title on dataset")
+
     # Support dct:abstract if dct:description is missing (sometimes used instead)
     description = d.value(DCT.description) or d.value(DCT.abstract)
     dataset.description = sanitize_html(description)
@@ -592,9 +532,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     if acronym:
         dataset.acronym = acronym
 
-    tags = [tag.toPython() for tag in d.objects(DCAT.keyword)]
-    tags += theme_labels_from_rdf(d)
-    dataset.tags = list(set(tags))
+    dataset.tags = themes_from_rdf(d)
 
     temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
     if temporal_coverage:

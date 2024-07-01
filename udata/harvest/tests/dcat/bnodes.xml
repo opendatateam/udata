@@ -7,13 +7,14 @@
   xmlns:dct="http://purl.org/dc/terms/"
   xmlns:ogc="http://www.opengis.net/ogc"
   xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
+  xmlns:locn="http://www.w3.org/ns/locn#"
   xmlns:dcterms="http://purl.org/dc/terms/"
   xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
   xmlns:schema="http://schema.org/"
 >
   <dcat:Catalog rdf:about="http://data.test.org/">
     <dcat:dataset>
-      <dcat:Dataset>
+      <dcat:Dataset rdf:about="dataset-3">
         <dcterms:title>Dataset 3</dcterms:title>
         <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T19:01:24.184120</dcterms:modified>
         <owl:versionInfo>1.0</owl:versionInfo>
@@ -72,7 +73,7 @@
       </dcat:Dataset>
     </dcat:dataset>
     <dcat:dataset>
-      <dcat:Dataset>
+      <dcat:Dataset rdf:about="dataset-2">
         <dcat:keyword>Tag 1</dcat:keyword>
         <dcat:distribution rdf:resource="http://data.test.org/datasets/2/resources/1"/>
         <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T19:01:24.184120</dcterms:modified>
@@ -89,8 +90,16 @@
         <dcterms:title>Dataset 2</dcterms:title>
         <dct:spatial>
             <ogc:Polygon>
+                <locn:geometry rdf:datatype="https://www.iana.org/assignments/media-types/application/vnd.geo+json"><![CDATA[{"type":"Polygon","coordinates":[[[-6,51],[10,51],[10,40],[-6,40],[-6,51]]]}]]></locn:geometry>
                 <geo:asWKT rdf:datatype="http://www.opengis.net/rdf#wktLiteral">
-                    Polygon((4.44641288 45.54214467, 4.44641288 46.01316963, 4.75655252 46.01316963, 4.75655252 45.54214467, 4.44641288 45.54214467))
+                    Polygon((159 -25, 159 -11, 212 -11, 212 -25, 159 -25))
+                </geo:asWKT>
+                <geo:asWKT rdf:datatype="http://www.opengis.net/rdf#wktLiteral">
+                    Polygon((4 45, 4 46, 4 46, 4 45, 4 45))
+                </geo:asWKT>
+                <locn:geometry rdf:datatype="https://www.iana.org/assignments/media-types/application/vnd.geo+json"><![CDATA[{"type":"Polygon","coordinates":[[[4, 45], [4, 46], [4, 46], [4, 45], [4, 45]]]}]]></locn:geometry>
+                <geo:asWKT rdf:datatype="http://www.opengis.net/rdf#wktLiteral">
+                    Polygon((159 -25, 159 -11, 212 -11, 212 -25, 159 -25))
                 </geo:asWKT>
             </ogc:Polygon>
         </dct:spatial>
@@ -98,6 +107,17 @@
         <dct:conformsTo rdf:nodeID="Ne0189e93917c4f67a412fc44883322e7"/>
       </dcat:Dataset>
     </dcat:dataset>
+    <dcat:service>
+      <dcat:DataService rdf:about="https://data.paris2024.org/api/explore/v2.1/">
+        <dcterms:title xml:lang="en"><![CDATA[Explore API v2]]></dcterms:title>
+        <dcterms:identifier>https://data.paris2024.org/api/explore/v2.1/</dcterms:identifier>
+        <dcat:endpointURL rdf:resource="https://data.paris2024.org/api/explore/v2.1/" />
+        <dcat:endpointDescription rdf:resource="https://data.paris2024.org/api/explore/v2.1/swagger.json" />
+        <dcat:landingPage rdf:resource="https://data.paris2024.org/api/explore/v2.1/console" />
+        <dcat:servesDataset rdf:resource="dataset-2" />
+        <dcat:servesDataset rdf:resource="dataset-3" />
+      </dcat:DataService>
+    </dcat:service>
     <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-15T09:19:51.723691</dcterms:modified>
     <foaf:homepage>http://data.test.org</foaf:homepage>
     <dcterms:language>en</dcterms:language>

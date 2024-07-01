@@ -6,10 +6,11 @@ import mongoengine
 from udata.api import api, API
 from udata.api_fields import patch
 from udata.core.dataset.permissions import OwnablePermission
+from udata.core.followers.api import FollowAPI
 from .models import Dataservice
-from udata.models import db
 
 ns = api.namespace('dataservices', 'Dataservices related operations (beta)')
+
 
 @ns.route('/', endpoint='dataservices')
 class DataservicesAPI(API):
@@ -39,6 +40,7 @@ class DataservicesAPI(API):
 
         return dataservice, 201
 
+
 @ns.route('/<dataservice:dataservice>/', endpoint='dataservice')
 class DataserviceAPI(API):
     @api.doc('get_dataservice')
@@ -47,7 +49,7 @@ class DataserviceAPI(API):
         if dataservice.deleted_at and not OwnablePermission(dataservice).can():
             api.abort(410, 'Dataservice has been deleted')
         return dataservice
-    
+
     @api.secure
     @api.doc('update_dataservice', responses={400: 'Validation error'})
     @api.expect(Dataservice.__write_fields__)
@@ -75,10 +77,16 @@ class DataserviceAPI(API):
             api.abort(410, 'dataservice has been deleted')
 
         OwnablePermission(dataservice).test()
-
         dataservice.deleted_at = datetime.utcnow()
         dataservice.modified_at = datetime.utcnow()
         dataservice.save()
 
         return '', 204
 
+
+@ns.route('/<id>/followers/', endpoint='dataservice_followers')
+@ns.doc(get={'id': 'list_dataservice_followers'},
+        post={'id': 'follow_dataservice'},
+        delete={'id': 'unfollow_dataservice'})
+class DataserviceFollowersAPI(FollowAPI):
+    model = Dataservice

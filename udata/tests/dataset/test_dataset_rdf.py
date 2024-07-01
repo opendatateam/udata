@@ -20,9 +20,12 @@ from udata.core.dataset.rdf import (
     temporal_from_rdf, frequency_to_rdf, frequency_from_rdf,
     EU_RDF_REQUENCIES
 )
+from udata.rdf import (
+    TAG_TO_EU_HVD_CATEGORIES
+)
 from udata.core.organization.factories import OrganizationFactory
 from udata.i18n import gettext as _
-from udata.rdf import DCAT, DCT, FREQ, SPDX, SCHEMA, SKOS
+from udata.rdf import DCAT, DCATAP, DCT, FREQ, SPDX, SCHEMA, SKOS, HVD_LEGISLATION
 from udata.utils import faker
 from udata.tests.helpers import assert200, assert_redirects
 
@@ -180,6 +183,21 @@ class DatasetToRdfTest:
         assert isinstance(d.identifier, URIRef)
         assert str(d.identifier) == 'https://somewhere.org/dataset'
         assert d.value(DCT.identifier) == Literal('an-identifier')
+
+    def test_hvd_dataset(self):
+        '''Test that a dataset tagged hvd has appropriate DCAT-AP HVD properties'''
+        dataset = DatasetFactory(
+            resources=ResourceFactory.build_batch(3),
+            tags=['hvd', 'mobilite', 'test']
+        )
+        d = dataset_to_rdf(dataset)
+
+        assert d.value(DCATAP.applicableLegislation).identifier == URIRef(HVD_LEGISLATION)
+        assert d.value(DCATAP.hvdCategory).identifier == URIRef(
+            TAG_TO_EU_HVD_CATEGORIES['mobilite']
+        )
+        for distrib in d.objects(DCAT.distribution):
+            assert distrib.value(DCATAP.applicableLegislation).identifier == URIRef(HVD_LEGISLATION)
 
 
 @pytest.mark.usefixtures('clean_db')

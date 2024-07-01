@@ -3,6 +3,7 @@ from datetime import datetime
 import logging
 from urllib.parse import urlparse
 
+from udata.core.dataservices.models import Dataservice
 from werkzeug.utils import cached_property
 
 from udata.core.dataset.models import HarvestDatasetMetadata
@@ -49,16 +50,21 @@ class HarvestError(db.EmbeddedDocument):
     message = db.StringField()
     details = db.StringField()
 
+class HarvestLog(db.EmbeddedDocument):
+    level = db.StringField()
+    message = db.StringField()
 
 class HarvestItem(db.EmbeddedDocument):
     remote_id = db.StringField()
     dataset = db.ReferenceField(Dataset)
+    dataservice = db.ReferenceField(Dataservice)
     status = db.StringField(choices=list(HARVEST_ITEM_STATUS),
                             default=DEFAULT_HARVEST_ITEM_STATUS, required=True)
     created = db.DateTimeField(default=datetime.utcnow, required=True)
     started = db.DateTimeField()
     ended = db.DateTimeField()
     errors = db.ListField(db.EmbeddedDocumentField(HarvestError))
+    logs = db.ListField(db.EmbeddedDocumentField(HarvestLog), default=[])
     args = db.ListField(db.StringField())
     kwargs = db.DictField()
 

@@ -23,7 +23,7 @@ Here a list of known plugins for udata:
 - [`udata-metrics`][udata-metrics], a plugin that handles a connexion to an InfluxDB service for udata metrics (number of hits, downloads, etc.)
 - [`udata-ckan`][udata-ckan], [CKAN][ckan] integration for udata
 - [`udata-ods`][udata-ods], [OpenDataSoft][ods] integration for udata
-- [`udata-dcat`][udata-dcat], [DCAT][dcat] integration for udata
+- [`dcat`][dcat] in the udata main code, a [DCAT][dcat-w3c] integration for udata
 - [`dotsat-udata-harvester`][dotsat-udata-harvester], [.stat suite][.stat] integration for udata
 - [`udata-recommendations`][udata-recommendations], a plugin to integrate a recommendation system
 - [`udata-tabular-preview`][udata-tabular-preview], a plugin to preview tabular files (CSV, Excel, ...) using [api-tabular][api-tabular]
@@ -39,7 +39,7 @@ Here a list of known plugins for udata:
 [udata-metrics]: https://github.com/opendatateam/udata-metrics
 [udata-ckan]: https://github.com/opendatateam/udata-ckan
 [udata-ods]: https://github.com/opendatateam/udata-ods
-[udata-dcat]: https://github.com/opendatateam/udata-dcat
+[dcat]: https://github.com/opendatateam/udata/blob/master/udata/harvest/backends/dcat.py
 [dotsat-udata-harvester]: https://github.com/opendatalu/dotstat-udata-harvester
 [udata-recommendations]: https://github.com/opendatateam/udata-recommendations
 [udata-tabular-preview]: https://github.com/opendatateam/udata-tabular-preview
@@ -48,7 +48,7 @@ Here a list of known plugins for udata:
 [matomo]: https://matomo.org/
 [ckan]: https://ckan.org/
 [ods]: https://www.opendatasoft.com/
-[dcat]: https://github.com/opendatateam/udata/blob/master/udata/harvest/backends/dcat.py
+[dcat-w3c]: https://w3c.github.io/dxwg/dcat/
 [.stat]: https://siscc.org/stat-suite/
 [api-tabular]: https://github.com/datagouv/api-tabular
 [datafair]: https://data-fair.github.io/3/

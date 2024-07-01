@@ -1,19 +1,20 @@
 import logging
 
-from rdflib import Graph, URIRef
+from rdflib import Graph
 from rdflib.namespace import RDF
 import lxml.etree as ET
-import boto3
 from flask import current_app
 from datetime import date
-import json
-from typing import List
+from typing import Generator
+from typing import Generator
 
 from udata.rdf import (
     DCAT, DCT, HYDRA, SPDX, namespace_manager, guess_format, url_from_rdf
 )
 from udata.core.dataset.rdf import dataset_from_rdf
-from udata.storage.s3 import store_as_json, get_from_json
+from udata.core.dataservices.rdf import dataservice_from_rdf
+from udata.storage.s3 import store_as_json
+from udata.harvest.models import HarvestItem
 
 from .base import BaseBackend
 
@@ -59,14 +60,18 @@ def extract_graph(source, target, node, specs):
 class DcatBackend(BaseBackend):
     display_name = 'DCAT'
 
-    def initialize(self):
-        '''List all datasets for a given ...'''
+    def inner_harvest(self):
         fmt = self.get_format()
-        graphs = self.parse_graph(self.source.url, fmt)
-
         self.job.data = { 'format': fmt }
 
-        serialized_graphs = [graph.serialize(format=fmt, indent=None) for graph in graphs]
+        serialized_graphs = []
+
+        for page_number, page in self.walk_graph(self.source.url, fmt):
+            self.process_one_datasets_page(page_number, page)
+            serialized_graphs.append(page.serialize(format=fmt, indent=None))
+
+        for page_number, page in self.walk_graph(self.source.url, fmt):
+            self.process_one_dataservices_page(page_number, page)
 
         # The official MongoDB document size in 16MB. The default value here is 15MB to account for other fields in the document (and for difference between * 1024 vs * 1000).
         max_harvest_graph_size_in_mongo = current_app.config.get('HARVEST_MAX_CATALOG_SIZE_IN_MONGO')
@@ -105,13 +110,11 @@ class DcatBackend(BaseBackend):
                 raise ValueError(msg)
         return fmt
 
-    def parse_graph(self, url, fmt) -> List[Graph]:
+    def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
         """
-        Returns an instance of rdflib.Graph for each detected page
-        The index in the list is the page number
+        Yield all RDF pages as `Graph` from the source
         """
-        graphs = []
-        page = 0
+        page_number = 0
         while url:
             subgraph = Graph(namespace_manager=namespace_manager)
             response = self.get(url)
@@ -128,52 +131,46 @@ class DcatBackend(BaseBackend):
                     pagination = subgraph.resource(pagination)
                     url = url_from_rdf(pagination, prop)
                     break
-            graphs.append(subgraph)
 
-            for node in subgraph.subjects(RDF.type, DCAT.Dataset):
-                id = subgraph.value(node, DCT.identifier)
-                kwargs = {'page': page}
-                self.add_item(id, **kwargs)
-                if self.max_items and len(self.job.items) >= self.max_items:
-                    # this will stop iterating on pagination
-                    url = None
+            yield page_number, subgraph
+            if self.is_done():
+                return
 
-            page += 1
+            page_number += 1
+    
+    def process_one_datasets_page(self, page_number: int, page: Graph):
+        for node in page.subjects(RDF.type, DCAT.Dataset):
+            remote_id = page.value(node, DCT.identifier)
+            self.process_dataset(remote_id, page_number=page_number, page=page, node=node)
 
-        return graphs
+            if self.is_done():
+                return
+
+    def process_one_dataservices_page(self, page_number: int, page: Graph):
+        for node in page.subjects(RDF.type, DCAT.DataService):
+            remote_id = page.value(node, DCT.identifier)
+            self.process_dataservice(remote_id, page_number=page_number, page=page, node=node)
+
+            if self.is_done():
+                return
+            
+    def inner_process_dataset(self, item: HarvestItem, page_number: int, page: Graph, node):
+        item.kwargs['page_number'] = page_number
+
+        dataset = self.get_dataset(item.remote_id)
+        return dataset_from_rdf(page, dataset, node=node)
+
+    def inner_process_dataservice(self, item: HarvestItem, page_number: int, page: Graph, node):
+        item.kwargs['page_number'] = page_number
+
+        dataservice = self.get_dataservice(item.remote_id)
+        return dataservice_from_rdf(page, dataservice, node, [item.dataset for item in self.job.items])
 
     def get_node_from_item(self, graph, item):
         for node in graph.subjects(RDF.type, DCAT.Dataset):
             if str(graph.value(node, DCT.identifier)) == item.remote_id:
                 return node
         raise ValueError(f'Unable to find dataset with DCT.identifier:{item.remote_id}')
-
-    def process(self, item):
-        if item.remote_id == 'None':
-            raise ValueError('The DCT.identifier is missing on this DCAT.Dataset record')
-        graph = Graph(namespace_manager=namespace_manager)
-
-        if self.job.data.get('graphs') is not None:
-            graphs = self.job.data['graphs']
-        else:
-            bucket = current_app.config.get('HARVEST_GRAPHS_S3_BUCKET')
-            if bucket is None:
-                raise ValueError(f"No bucket configured but the harvest job item {item.id} on job {self.job.id} doesn't have a graph in MongoDB.")
-
-            graphs = get_from_json(bucket, self.job.data['filename'])
-            if graphs is None:
-                raise ValueError(f"The file '{self.job.data['filename']}' is missing in S3 bucket '{bucket}'")
-
-        data = graphs[item.kwargs['page']]
-        format = self.job.data['format']
-
-        graph.parse(data=bytes(data, encoding='utf8'), format=format)
-        node = self.get_node_from_item(graph, item)
-
-        dataset = self.get_dataset(item.remote_id)
-        dataset = dataset_from_rdf(graph, dataset, node=node)
-        return dataset
-    
 
     def next_record_if_should_continue(self, start, search_results):
         next_record = int(search_results.attrib['nextRecord'])
@@ -209,7 +206,10 @@ class CswDcatBackend(DcatBackend):
 
     DCAT_SCHEMA = 'http://www.w3.org/ns/dcat#'
 
-    def parse_graph(self, url: str, fmt: str) -> List[Graph]:
+    def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
+        """
+        Yield all RDF pages as `Graph` from the source
+        """
         body = '''<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
                                   xmlns:gmd="http://www.isotc211.org/2005/gmd"
                                   service="CSW" version="2.0.2" resultType="results"
@@ -227,8 +227,7 @@ class CswDcatBackend(DcatBackend):
                 </csw:GetRecords>'''
         headers = {'Content-Type': 'application/xml'}
 
-        graphs = []
-        page = 0
+        page_number = 0
         start = 1
 
         response = self.post(url, data=body.format(start=start, schema=self.DCAT_SCHEMA),
@@ -239,35 +238,28 @@ class CswDcatBackend(DcatBackend):
         if tree.tag == '{' + OWS_NAMESPACE + '}ExceptionReport':
             raise ValueError(f'Failed to query CSW:\n{content}')
         while tree:
-            graph = Graph(namespace_manager=namespace_manager)
             search_results = tree.find('csw:SearchResults', {'csw': CSW_NAMESPACE})
             if search_results is None:
-                log.error(f'No search results found for {url} on page {page}')
+                log.error(f'No search results found for {url} on page {page_number}')
                 break
             for child in search_results:
                 subgraph = Graph(namespace_manager=namespace_manager)
                 subgraph.parse(data=ET.tostring(child), format=fmt)
-                graph += subgraph
 
-                for node in subgraph.subjects(RDF.type, DCAT.Dataset):
-                    id = subgraph.value(node, DCT.identifier)
-                    kwargs = {'nid': str(node), 'page': page}
-                    kwargs['type'] = 'uriref' if isinstance(node, URIRef) else 'blank'
-                    self.add_item(id, **kwargs)
-            graphs.append(graph)
+                yield page_number, subgraph
+                if self.is_done():
+                    return
 
             next_record = self.next_record_if_should_continue(start, search_results)
             if not next_record:
                 break
 
             start = next_record
-            page += 1
+            page_number += 1
 
             tree = ET.fromstring(
                 self.post(url, data=body.format(start=start, schema=self.DCAT_SCHEMA),
                           headers=headers).content)
-
-        return graphs
 
 
 class CswIso19139DcatBackend(DcatBackend):
@@ -282,13 +274,14 @@ class CswIso19139DcatBackend(DcatBackend):
 
     XSL_URL = "https://raw.githubusercontent.com/SEMICeu/iso-19139-to-dcat-ap/master/iso-19139-to-dcat-ap.xsl"
 
-    def parse_graph(self, url: str, fmt: str) -> List[Graph]:
-        '''
+    def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
+        """
+        Yield all RDF pages as `Graph` from the source
+
         Parse CSW graph querying ISO schema.
         Use SEMIC GeoDCAT-AP XSLT to map it to a correct version.
         See https://github.com/SEMICeu/iso-19139-to-dcat-ap for more information on the XSLT.
-        '''
-
+        """
         # Load XSLT
         xsl = ET.fromstring(self.get(self.XSL_URL).content)
         transform = ET.XSLT(xsl)
@@ -311,6 +304,10 @@ class CswIso19139DcatBackend(DcatBackend):
                                     </ogc:PropertyIsEqualTo>
                                     <ogc:PropertyIsEqualTo>
                                         <ogc:PropertyName>dc:type</ogc:PropertyName>
+                                        <ogc:Literal>service</ogc:Literal>
+                                    </ogc:PropertyIsEqualTo>
+                                    <ogc:PropertyIsEqualTo>
+                                        <ogc:PropertyName>dc:type</ogc:PropertyName>
                                         <ogc:Literal>series</ogc:Literal>
                                     </ogc:PropertyIsEqualTo>
                                 </ogc:Or>
@@ -320,8 +317,7 @@ class CswIso19139DcatBackend(DcatBackend):
                 </csw:GetRecords>'''
         headers = {'Content-Type': 'application/xml'}
 
-        graphs = []
-        page = 0
+        page_number = 0
         start = 1
 
         response = self.post(url, data=body.format(start=start, schema=self.ISO_SCHEMA),
@@ -338,7 +334,7 @@ class CswIso19139DcatBackend(DcatBackend):
             # infos (useful for pagination)
             search_results = tree_before_transform.find('csw:SearchResults', {'csw': CSW_NAMESPACE})
             if search_results is None:
-                log.error(f'No search results found for {url} on page {page}')
+                log.error(f'No search results found for {url} on page {page_number}')
                 break
 
             subgraph = Graph(namespace_manager=namespace_manager)
@@ -347,19 +343,16 @@ class CswIso19139DcatBackend(DcatBackend):
             if not subgraph.subjects(RDF.type, DCAT.Dataset):
                 raise ValueError("Failed to fetch CSW content")
 
-            for node in subgraph.subjects(RDF.type, DCAT.Dataset):
-                id = subgraph.value(node, DCT.identifier)
-                kwargs = {'nid': str(node), 'page': page}
-                kwargs['type'] = 'uriref' if isinstance(node, URIRef) else 'blank'
-                self.add_item(id, **kwargs)
-            graphs.append(subgraph)
+            yield page_number, subgraph
+            if self.is_done():
+                return
 
             next_record = self.next_record_if_should_continue(start, search_results)
             if not next_record:
                 break
 
             start = next_record
-            page += 1
+            page_number += 1
 
             response = self.post(url, data=body.format(start=start, schema=self.ISO_SCHEMA),
                                  headers=headers)
@@ -367,5 +360,3 @@ class CswIso19139DcatBackend(DcatBackend):
 
             tree_before_transform = ET.fromstring(response.content)
             tree = transform(tree_before_transform, CoupledResourceLookUp="'disabled'")
-
-        return graphs

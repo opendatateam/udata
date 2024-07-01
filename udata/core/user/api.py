@@ -226,6 +226,7 @@ class UserListAPI(API):
     fields = user_fields
     form = UserProfileForm
 
+    @api.secure(admin_permission)
     @api.doc('list_users')
     @api.expect(user_parser.parser)
     @api.marshal_with(user_page_fields)

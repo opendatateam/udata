@@ -6,6 +6,7 @@ from rdflib import URIRef, Literal, Graph
 from rdflib.namespace import RDF, FOAF
 from rdflib.resource import Resource
 
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
@@ -228,3 +229,68 @@ class SiteRdfViewsTest:
         url = url_for('api.site_rdf_catalog_format', format='unknown')
         response = client.get(url)
         assert404(response)
+
+    def test_catalog_rdf_filter_tag(self, client):
+        DatasetFactory.create_batch(4, tags=['my-tag'])
+        DatasetFactory.create_batch(3)
+        url = url_for('api.site_rdf_catalog_format', format='xml', tag='my-tag')
+
+        response = client.get(url, headers={'Accept': 'application/xml'})
+        assert200(response)
+
+        graph = Graph().parse(data=response.data, format='xml')
+
+        datasets = list(graph.subjects(RDF.type, DCAT.Dataset))
+        assert len(datasets) == 4
+
+        for dat in datasets:
+            assert graph.value(dat, DCAT.keyword) == Literal('my-tag')
+
+    def test_catalog_rdf_dataservices(self, client):
+        dataset_a = DatasetFactory.create()
+        dataset_b = DatasetFactory.create()
+        dataset_c = DatasetFactory.create()
+
+        dataservice_a = DataserviceFactory.create(datasets=[dataset_a.id])
+        dataservice_b = DataserviceFactory.create(datasets=[dataset_b.id])
+        dataservice_x = DataserviceFactory.create(datasets=[dataset_a.id, dataset_c.id])
+        dataservice_y = DataserviceFactory.create(datasets=[])
+
+        response = client.get(url_for('api.site_rdf_catalog_format', format='xml'), headers={'Accept': 'application/xml'})
+        assert200(response)
+
+        graph = Graph().parse(data=response.data, format='xml')
+
+        datasets = list(graph.subjects(RDF.type, DCAT.Dataset))
+        assert len(datasets) == 3
+
+        dataservices = list(graph.subjects(RDF.type, DCAT.DataService))
+        assert len(dataservices) == 4
+
+        # Test first page contains the dataservice without dataset
+        response = client.get(url_for('api.site_rdf_catalog_format', format='xml', page_size=1), headers={'Accept': 'application/xml'})
+        assert200(response)
+
+        graph = Graph().parse(data=response.data, format='xml')
+
+        datasets = list(graph.subjects(RDF.type, DCAT.Dataset))
+        assert len(datasets) == 1
+        assert str(graph.value(datasets[0], DCT.identifier)) == str(dataset_c.id)
+
+        dataservices = list(graph.subjects(RDF.type, DCAT.DataService))
+        assert len(dataservices) == 2
+        assert sorted([str(d.id) for d in [dataservice_x, dataservice_y]]) == sorted([str(graph.value(d, DCT.identifier)) for d in dataservices])
+
+        # Test second page doesn't contains the dataservice without dataset
+        response = client.get(url_for('api.site_rdf_catalog_format', format='xml', page_size=1, page=2), headers={'Accept': 'application/xml'})
+        assert200(response)
+
+        graph = Graph().parse(data=response.data, format='xml')
+
+        datasets = list(graph.subjects(RDF.type, DCAT.Dataset))
+        assert len(datasets) == 1
+        assert str(graph.value(datasets[0], DCT.identifier)) == str(dataset_b.id)
+
+        dataservices = list(graph.subjects(RDF.type, DCAT.DataService))
+        assert len(dataservices) == 1
+        assert str(graph.value(dataservices[0], DCT.identifier)) == str(dataservice_b.id)
