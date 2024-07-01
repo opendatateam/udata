@@ -232,7 +232,7 @@ class Defaults(object):
     # A list of tuples, each tuple describing a group with its title and
     # a list of licenses associated. Translations are not supported.
     # Example:
-    # LICENSE_GROUPS = [ 
+    # LICENSE_GROUPS = [
     #     ("Autorités administratives", [
     #         {"value": "lov2", "recommended": True, "description": "Recommandée", "code": "etalab-2.0"},
     #         {"value": "notspecified", "description": "Le Code des relations entre le public et l’administration ne s’applique pas"}]),
@@ -264,7 +264,7 @@ class Defaults(object):
 
     HARVEST_VALIDATION_CONTACT_FORM = None
 
-    HARVEST_MAX_CATALOG_SIZE_IN_MONGO = None # Defaults to the size of a MongoDB document 
+    HARVEST_MAX_CATALOG_SIZE_IN_MONGO = None # Defaults to the size of a MongoDB document
     HARVEST_GRAPHS_S3_BUCKET = None # If the catalog is bigger than `HARVEST_MAX_CATALOG_SIZE_IN_MONGO` store the graph inside S3 instead of MongoDB
     HARVEST_GRAPHS_S3_FILENAME_PREFIX = '' # Useful to store the graphs inside a subfolder of the bucket. For example by setting `HARVEST_GRAPHS_S3_FILENAME_PREFIX = 'graphs/'`
 
@@ -472,6 +472,11 @@ class Defaults(object):
     # Notification settings
     ###########################################################################
     MATTERMOST_WEBHOOK = None
+
+    # Discussion settings
+    ###########################################################################
+    DISCUSSION_ALLOWED_EXTERNAL_DOMAINS = ['*.data.gouv.fr']
+    DISCUSSION_ALTERNATE_MODEL_NAMES = []
 
 
 class Testing(object):

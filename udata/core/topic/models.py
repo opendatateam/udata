@@ -1,5 +1,6 @@
 from flask import url_for
 from mongoengine.signals import pre_save
+from udata.i18n import lazy_gettext as _
 from udata.models import db, SpatialCoverage
 from udata.search import reindex
 from udata.tasks import as_task_param
@@ -39,6 +40,8 @@ class Topic(db.Document, Owned, db.Datetimed):
         'auto_create_index_on_save': True,
         'queryset_class': OwnedQuerySet,
     }
+
+    verbose_name = _('topic')
 
     def __str__(self):
         return self.name
