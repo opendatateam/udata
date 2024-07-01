@@ -21,6 +21,7 @@ from udata.core.post.models import *  # noqa
 from udata.core.jobs.models import *  # noqa
 from udata.core.tags.models import *  # noqa
 from udata.core.spam.models import *  # noqa
+from udata.core.reports.models import *  # noqa
 
 from udata.features.transfer.models import *  # noqa
 from udata.features.territories.models import *  # noqa
