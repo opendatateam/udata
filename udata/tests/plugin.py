@@ -202,6 +202,9 @@ class ApiClient(object):
     def delete(self, url, data=None, *args, **kwargs):
         return self.perform('delete', url, data=data or {}, *args, **kwargs)
 
+    def options(self, url, data=None, *args, **kwargs):
+        return self.perform('options', url, data=data or {}, *args, **kwargs)
+
 
 @pytest.fixture
 def api(client):

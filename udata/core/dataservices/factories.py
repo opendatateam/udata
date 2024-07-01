@@ -4,7 +4,6 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.organization.factories import OrganizationFactory
 from udata.factories import ModelFactory
 
-
 class DataserviceFactory(ModelFactory):
     class Meta:
         model = Dataservice

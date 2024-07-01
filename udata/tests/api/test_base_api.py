@@ -28,12 +28,8 @@ class OptionsCORSTest(APITestCase):
         '''Should allow OPTIONS operation and give cors parameters'''
         response = self.client.options(url_for('api.fake-options'))
 
-        self.assert200(response)
+        self.assert204(response)
         self.assertEqual(response.headers['Access-Control-Allow-Origin'], '*')
-        allowed_methods = response.headers['Allow']
-        self.assertIn('HEAD', allowed_methods)
-        self.assertIn('OPTIONS', allowed_methods)
-        self.assertIn('GET', allowed_methods)
 
         response = self.client.options(
             url_for('api.fake-options'),
@@ -45,10 +41,7 @@ class OptionsCORSTest(APITestCase):
         )
         self.assertEqual(response.headers['Access-Control-Allow-Origin'], '*')
         self.assertEqual(response.headers['Access-Control-Allow-Headers'], 'Authorization')
-        self.assertEqual(
-            response.headers['Access-Control-Allow-Methods'],
-            'DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT'
-            )
+        self.assertEqual(response.headers['Access-Control-Allow-Methods'], 'GET')
 
 
 class JSONFormRequestTest(APITestCase):
