@@ -67,6 +67,9 @@ class SpamMixin(object):
         if not self.spam:
             self.spam = SpamInfo(status=NOT_CHECKED, callbacks={})
 
+        if self.spam_is_whitelisted():
+            return
+
         # The breadcrumb is useful during reporting to know where we came from
         # in case of a potential spam inside an embed.
         if breadcrumb is None:
@@ -138,6 +141,9 @@ class SpamMixin(object):
 
     def embeds_to_check_for_spam(self):
         return []
+
+    def spam_is_whitelisted(self) -> bool :
+        return False
 
     def spam_report_message(self):
         return f"Spam potentiel sur {type(self).__name__}"
