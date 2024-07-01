@@ -59,7 +59,7 @@ def dataservice_from_rdf(graph: Graph, dataservice: Dataservice, node, all_datas
     return dataservice
 
 
-def dataservice_to_rdf(dataservice, graph=None):
+def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     '''
     Map a dataservice domain model to a DCAT/RDF graph
     '''
