@@ -217,7 +217,7 @@ def lazy_raise_or_redirect():
             new_args = request.view_args
             new_args[name] = value.arg
             new_url = url_for(request.endpoint, **new_args)
-            return redirect(new_url, code=204 if request.method == 'OPTIONS' else 308)
+            return redirect(new_url, 308)
 
 
 def init_app(app):

@@ -1,5 +1,8 @@
+import logging
 from werkzeug.datastructures import Headers
 from flask import request
+
+log = logging.getLogger(__name__)
 
 def add_vary(headers: Headers, header: str):
     values = headers.getlist('Vary')
@@ -20,6 +23,9 @@ def add_actual_request_headers(headers: Headers) -> Headers :
 def is_preflight_request() -> bool:
     return request.method == 'OPTIONS' and request.headers.get('Access-Control-Request-Method', None) is not None
 
+def is_api():
+    return request.path.startswith('/api/')
+
 def add_preflight_request_headers(headers: Headers) -> Headers:
     origin = request.headers.get('Origin', None)
     if origin:
@@ -39,7 +45,9 @@ def add_preflight_request_headers(headers: Headers) -> Headers:
 
 def init_app(app):
     '''
-    For OPTIONS requests, we do not call the backend API code at all.
+    The CORS should be enabled before routing to trigger before some redirects.
+
+        For OPTIONS requests, we do not call the backend API code at all.
     We just return the access-control headers.
 
     For other requests, we append the access-control headers to the original
@@ -51,12 +59,18 @@ def init_app(app):
     '''
     @app.before_request
     def bypass_code_for_options_requests():
+        if not is_api():
+            return
+
         if is_preflight_request():
             headers = add_preflight_request_headers(Headers())
             return '', 204, headers
 
     @app.after_request
     def add_cors_headers(response):
+        if not is_api():
+            return response
+
         if request.method == 'OPTIONS':
             add_vary(response.headers, 'Access-Control-Request-Method')
 

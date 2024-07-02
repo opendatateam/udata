@@ -323,4 +323,3 @@ def init_app(app):
 
     from udata.api.oauth2 import init_app as oauth2_init_app
     oauth2_init_app(app)
-    cors.init_app(app)
