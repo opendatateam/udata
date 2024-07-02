@@ -22,14 +22,20 @@ class CorsTest(APITestCase):
         response = self.get(url_for('api.dataset', dataset=old_slug))
         assert_status(response, 308)
 
-        response = self.options(url_for('api.dataset', dataset=old_slug))
+        response = self.options(url_for('api.dataset', dataset=old_slug), headers={
+            'Origin': 'http://localhost',
+            'Access-Control-Request-Method': 'GET',
+        })
         assert_status(response, 204)
 
     def test_cors_404(self):
         response = self.get(url_for('api.dataset', dataset="unknown-dataset"))
         assert_status(response, 404)
 
-        response = self.options(url_for('api.dataset', dataset="unknown-dataset"))
+        response = self.options(url_for('api.dataset', dataset="unknown-dataset"), headers={
+            'Origin': 'http://localhost',
+            'Access-Control-Request-Method': 'GET',
+        })
         assert_status(response, 204)
 
     def test_cors_410_with_api_abort(self):
@@ -38,5 +44,8 @@ class CorsTest(APITestCase):
         response = self.get(url_for('api.dataset', dataset=dataset.id))
         assert_status(response, 410)
 
-        response = self.options(url_for('api.dataset', dataset=dataset.id))
+        response = self.options(url_for('api.dataset', dataset=dataset.id), headers={
+            'Origin': 'http://localhost',
+            'Access-Control-Request-Method': 'GET',
+        })
         assert_status(response, 204)

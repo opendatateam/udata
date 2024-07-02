@@ -1,45 +1,43 @@
 from werkzeug.datastructures import Headers
 from flask import request
 
-HEADER_API_KEY = 'X-API-KEY'
+def add_vary(headers: Headers, header: str):
+    values = headers.getlist('Vary')
+    if header not in values:
+        values.append(header)
+    headers.set('Vary', ', '.join(values))
 
-PREFLIGHT_HEADERS = (
-    HEADER_API_KEY,
-    'X-Fields',
-    'Content-Type',
-    'Accept',
-    'Accept-Charset',
-    'Accept-Language',
-    'Authorization',
-    'Cache-Control',
-    'Content-Encoding',
-    'Content-Length',
-    'Content-Security-Policy',
-    'Content-Type',
-    'Cookie',
-    'ETag',
-    'Host',
-    'If-Modified-Since',
-    'Keep-Alive',
-    'Last-Modified',
-    'Origin',
-    'Referer',
-    'User-Agent',
-    'X-Forwarded-For',
-    'X-Forwarded-Port',
-    'X-Forwarded-Proto',
-)
+def add_actual_request_headers(headers: Headers) -> Headers :
+    origin = request.headers.get('Origin', None)
+    print('add_actual_request_headers')
+    print(origin)
+    if origin:
+        headers.set("Access-Control-Allow-Origin", origin)
+        add_vary(headers, "Origin")
 
-def add_headers(headers):
-    # Since we are an API, we accept all origins.
-    headers.add("Access-Control-Allow-Origin", "*")
+        headers.set("Access-Control-Allow-Credentials", "true")
 
-    headers.add("Access-Control-Allow-Headers", request.headers.get('Access-Control-Request-Headers', ''))
-    # headers.add("Access-Control-Allow-Headers", ','.join(PREFLIGHT_HEADERS))
-    headers.add("Access-Control-Allow-Credentials", "true")
+    return headers
 
-    # The API allows all methods, so just copy the browser requested methods from the request headers.
-    headers.add("Access-Control-Allow-Methods", request.headers.get('Access-Control-Request-Method', ''))
+def is_preflight_request() -> bool:
+    return request.method == 'OPTIONS' and request.headers.get('Access-Control-Request-Method', None) is not None
+
+def add_preflight_request_headers(headers: Headers) -> Headers:
+    origin = request.headers.get('Origin', None)
+    print('add_preflight_request_headers')
+    print(origin)
+    if origin:
+        headers.set("Access-Control-Allow-Origin", origin)
+        add_vary(headers, "Origin")
+
+        headers.set("Access-Control-Allow-Credentials", "true")
+ 
+        # The API allows all methods, so just copy the browser requested methods from the request headers.
+        headers.set("Access-Control-Allow-Methods", request.headers.get('Access-Control-Request-Method', ''))
+        add_vary(headers, "Access-Control-Request-Method")
+
+        headers.set("Access-Control-Allow-Headers", request.headers.get('Access-Control-Request-Headers', ''))
+        add_vary(headers, "Access-Control-Request-Headers")
 
     return headers
 
@@ -57,12 +55,15 @@ def init_app(app):
     '''
     @app.before_request
     def bypass_code_for_options_requests():
-        if request.method == 'OPTIONS':
-            headers = add_headers(Headers())
+        if is_preflight_request():
+            headers = add_preflight_request_headers(Headers())
             return '', 204, headers
 
     @app.after_request
     def add_cors_headers(response):
-        add_headers(response.headers)
+        if request.method == 'OPTIONS':
+            add_vary(response.headers, 'Access-Control-Request-Method')
+
+        add_actual_request_headers(response.headers)
 
         return response

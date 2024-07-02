@@ -26,20 +26,24 @@ class FakeFormAPI(API):
 class OptionsCORSTest(APITestCase):
     def test_should_allow_options_and_cors(self):
         '''Should allow OPTIONS operation and give cors parameters'''
-        response = self.client.options(url_for('api.fake-options'))
+        response = self.client.options(url_for('api.fake-options'), headers={
+            'Origin': 'http://localhost',
+            'Access-Control-Request-Method': 'GET',
+        })
 
         self.assert204(response)
-        self.assertEqual(response.headers['Access-Control-Allow-Origin'], '*')
+        self.assertEqual(response.headers['Access-Control-Allow-Origin'], 'http://localhost')
 
         response = self.client.options(
             url_for('api.fake-options'),
             headers={
+                'Origin': 'http://localhost',
                 'Access-Control-Request-Method': 'GET',
                 'Authorization': 'Bearer YouWillNeverGuess',
                 'Access-Control-Request-Headers': 'Authorization'
             }
         )
-        self.assertEqual(response.headers['Access-Control-Allow-Origin'], '*')
+        self.assertEqual(response.headers['Access-Control-Allow-Origin'], 'http://localhost')
         self.assertEqual(response.headers['Access-Control-Allow-Headers'], 'Authorization')
         self.assertEqual(response.headers['Access-Control-Allow-Methods'], 'GET')
 
