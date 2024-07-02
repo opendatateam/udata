@@ -73,7 +73,7 @@ class Discussion(SpamMixin, db.Document):
         from udata.core.dataset.permissions import OwnablePermission
         from udata.core.owned import Owned
 
-        if not current_user.is_authenticated:
+        if not current_user or not current_user.is_authenticated:
             return False
 
         if not isinstance(self.subject, Owned):
