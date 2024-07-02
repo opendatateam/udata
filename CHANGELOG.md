@@ -15,7 +15,7 @@
 - Update markdown base settings [#3067](https://github.com/opendatateam/udata/pull/3067)
 - Prevent tagging as spam owners' messages [#3071](https://github.com/opendatateam/udata/pull/3071)
 - Add api endpoint /me/org_topics/ [#3070](https://github.com/opendatateam/udata/pull/3070)
-- Expose dataservices in RDF catalog [#3058](https://github.com/opendatateam/udata/pull/3058)
+- Expose dataservices in RDF catalog [#3058](https://github.com/opendatateam/udata/pull/3058) [#3075](https://github.com/opendatateam/udata/pull/3075)
 - CORS: always returns 204 on OPTIONS request [#3046](https://github.com/opendatateam/udata/pull/3046) 
 
 ## 9.0.0 (2024-06-07)
