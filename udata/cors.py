@@ -9,8 +9,6 @@ def add_vary(headers: Headers, header: str):
 
 def add_actual_request_headers(headers: Headers) -> Headers :
     origin = request.headers.get('Origin', None)
-    print('add_actual_request_headers')
-    print(origin)
     if origin:
         headers.set("Access-Control-Allow-Origin", origin)
         add_vary(headers, "Origin")
@@ -24,8 +22,6 @@ def is_preflight_request() -> bool:
 
 def add_preflight_request_headers(headers: Headers) -> Headers:
     origin = request.headers.get('Origin', None)
-    print('add_preflight_request_headers')
-    print(origin)
     if origin:
         headers.set("Access-Control-Allow-Origin", origin)
         add_vary(headers, "Origin")
