@@ -38,6 +38,9 @@ def convert_db_to_field(key, field, info = {}):
         constructor = restx_fields.String
         params['min_length'] = field.min_length
         params['max_length'] = field.max_length
+        params['enum'] = field.choices
+    elif isinstance(field, mongo_fields.ObjectIdField):
+        constructor = restx_fields.String
     elif isinstance(field, mongo_fields.FloatField):
         constructor = restx_fields.Float
         params['min'] = field.min # TODO min_value?
