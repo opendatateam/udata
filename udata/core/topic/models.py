@@ -3,7 +3,7 @@ from mongoengine.signals import pre_save
 from udata.models import db, SpatialCoverage
 from udata.search import reindex
 from udata.tasks import as_task_param
-from udata.core.owned import Owned
+from udata.core.owned import Owned, OwnedQuerySet
 
 
 __all__ = ('Topic', )
@@ -36,7 +36,8 @@ class Topic(db.Document, Owned, db.Datetimed):
             'slug'
         ] + Owned.meta['indexes'],
         'ordering': ['-created_at'],
-        'auto_create_index_on_save': True
+        'auto_create_index_on_save': True,
+        'queryset_class': OwnedQuerySet,
     }
 
     def __str__(self):

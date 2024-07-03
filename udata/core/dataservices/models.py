@@ -140,7 +140,7 @@ class Dataservice(WithMetrics, Owned, db.Document):
         db.ListField(
             field(
                 db.ReferenceField(Dataset),
-                nested_fields=datasets_api_fields.dataset_fields,
+                nested_fields=datasets_api_fields.dataset_ref_fields,
             )
         ),
         filterable={

@@ -163,6 +163,7 @@ class Defaults(object):
         'code',
         'dd',
         'del',
+        'div',
         'dl',
         'dt',
         'em',
@@ -201,6 +202,7 @@ class Defaults(object):
         'a': ['href', 'title', 'rel', 'data-tooltip'],
         'abbr': ['title'],
         'acronym': ['title'],
+        'div': ['class'],
         'img': ['alt', 'src', 'title']
     }
 

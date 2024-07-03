@@ -5,6 +5,7 @@ from flask import url_for, current_app
 from rdflib import Graph, URIRef, Literal, BNode
 from rdflib.namespace import RDF, FOAF
 
+from udata.core.dataservices.rdf import dataservice_to_rdf
 from udata.core.dataset.rdf import dataset_to_rdf
 from udata.core.organization.rdf import organization_to_rdf
 from udata.core.user.rdf import user_to_rdf
@@ -13,7 +14,7 @@ from udata.utils import Paginable
 from udata.uris import endpoint_for
 
 
-def build_catalog(site, datasets, format=None):
+def build_catalog(site, datasets, dataservices = [], format=None):
     '''Build the DCAT catalog for this site'''
     site_url = endpoint_for('site.home_redirect', 'api.site', _external=True)
     catalog_url = url_for('api.site_rdf_catalog', _external=True)
@@ -39,6 +40,10 @@ def build_catalog(site, datasets, format=None):
         elif dataset.organization:
             rdf_dataset.add(DCT.publisher, organization_to_rdf(dataset.organization, graph))
         catalog.add(DCAT.dataset, rdf_dataset)
+
+    for dataservice in dataservices:
+        rdf_dataservice = dataservice_to_rdf(dataservice, graph)
+        catalog.add(DCAT.DataService, rdf_dataservice)
 
     if isinstance(datasets, Paginable):
         paginate_catalog(catalog, graph, datasets, format, 'api.site_rdf_catalog_format')
