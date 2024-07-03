@@ -1,6 +1,8 @@
 import logging
 from datetime import datetime
 
+from flask_login import current_user
+
 from udata.mongo import db
 from udata.core.spam.models import SpamMixin, spam_protected
 from .signals import (on_new_discussion, on_discussion_closed, on_new_discussion_comment)
@@ -66,6 +68,24 @@ class Discussion(SpamMixin, db.Document):
     
     def embeds_to_check_for_spam(self):
         return self.discussion[1:]
+
+    def spam_is_whitelisted(self) -> bool:
+        from udata.core.dataset.permissions import OwnablePermission
+        from udata.core.owned import Owned
+
+        if not current_user or not current_user.is_authenticated:
+            return False
+
+        if not isinstance(self.subject, Owned):
+            return False
+
+        # When creating a new Discussion the `subject` is an empty model
+        # with only `id`. We need to fetch it from the database to have
+        # all the required information
+        if not self.subject.owner or not self.subject.organization:
+            self.subject.reload()
+
+        return OwnablePermission(self.subject).can()
 
     @property
     def external_url(self):

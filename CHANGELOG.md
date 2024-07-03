@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Add reports backend [#3069](https://github.com/opendatateam/udata/pull/3069)
 - Improve `udata db check-integrity` (perfs, Sentry notifications…) [#3026](https://github.com/opendatateam/udata/pull/3026)
 - Harvest dataservices [#3029](https://github.com/opendatateam/udata/pull/3029)
 - Refactor catalog exports [#3052](https://github.com/opendatateam/udata/pull/3052)
@@ -10,6 +11,12 @@
 - Save and show harvest logs [#3053](https://github.com/opendatateam/udata/pull/3053)
 - Fix missing `ObjectId` validation on `/sources` endpoint [#3060](https://github.com/opendatateam/udata/pull/3060)
 - Improve URL validation errors [#3063](https://github.com/opendatateam/udata/pull/3063) [#2768](https://github.com/opendatateam/udata/pull/2768)
+- Do not return full dataset objects on dataservices endpoints [#3068](https://github.com/opendatateam/udata/pull/3068)
+- Update markdown base settings [#3067](https://github.com/opendatateam/udata/pull/3067)
+- Prevent tagging as spam owners' messages [#3071](https://github.com/opendatateam/udata/pull/3071)[#3076](https://github.com/opendatateam/udata/pull/3076)
+- Add api endpoint /me/org_topics/ [#3070](https://github.com/opendatateam/udata/pull/3070)
+- Expose dataservices in RDF catalog [#3058](https://github.com/opendatateam/udata/pull/3058) [#3075](https://github.com/opendatateam/udata/pull/3075)
+- CORS: always returns 204 on OPTIONS request [#3046](https://github.com/opendatateam/udata/pull/3046) 
 
 ## 9.0.0 (2024-06-07)
 
@@ -29,7 +36,7 @@
 - Allow for series in CSW ISO 19139 DCAT backend [#3028](https://github.com/opendatateam/udata/pull/3028)
 - Add `email` to membership request list API response, add `since` to org members API responses, add `email` to members of org on show org endpoint for org's admins and editors [#3038](https://github.com/opendatateam/udata/pull/3038)
 - Add `resources_downloads` to datasets metrics [#3042](https://github.com/opendatateam/udata/pull/3042)
-- Fix do not override resources extras on admin during update [#3043](https://github.com/opendatateam/udata/pull/3043) 
+- Fix do not override resources extras on admin during update [#3043](https://github.com/opendatateam/udata/pull/3043)
 - Endpoint /users is now protected by admin permissions [#3047](https://github.com/opendatateam/udata/pull/3047)
 - Fix trailing `/` inside `GeoZone` routes not redirecting. Disallow `/` inside `GeoZone` ids [#3045](https://github.com/opendatateam/udata/pull/3045)
 
