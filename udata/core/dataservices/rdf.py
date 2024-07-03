@@ -59,14 +59,14 @@ def dataservice_from_rdf(graph: Graph, dataservice: Dataservice, node, all_datas
     return dataservice
 
 
-def dataservice_to_rdf(dataservice, graph=None):
+def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     '''
     Map a dataservice domain model to a DCAT/RDF graph
     '''
     # Use the unlocalized permalink to the dataset as URI when available
     # unless there is already an upstream URI
-    if dataservice.harvest and dataservice.harvest.rdf_node_id_as_url:
-        id = URIRef(dataservice.harvest.rdf_node_id_as_url)
+    if dataservice.harvest and dataservice.harvest.uri:
+        id = URIRef(dataservice.harvest.uri)
     elif dataservice.id:
         id = URIRef(endpoint_for('dataservices.show_redirect', 'api.dataservice',
                     dataservice=dataservice.id, _external=True))
@@ -76,8 +76,8 @@ def dataservice_to_rdf(dataservice, graph=None):
         id = BNode()
 
     # Expose upstream identifier if present
-    if dataservice.harvest and dataservice.harvest.dct_identifier:
-        identifier = dataservice.harvest.dct_identifier
+    if dataservice.harvest:
+        identifier = dataservice.harvest.remote_id
     else:
         identifier = dataservice.id
     graph = graph or Graph(namespace_manager=namespace_manager)
