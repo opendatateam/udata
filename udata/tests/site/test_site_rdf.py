@@ -6,7 +6,7 @@ from rdflib import URIRef, Literal, Graph
 from rdflib.namespace import RDF, FOAF
 from rdflib.resource import Resource
 
-from udata.core.dataservices.factories import DataserviceFactory
+from udata.core.dataservices.factories import DataserviceFactory, HarvestMetadataFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
@@ -251,7 +251,7 @@ class SiteRdfViewsTest:
         dataset_b = DatasetFactory.create()
         dataset_c = DatasetFactory.create()
 
-        dataservice_a = DataserviceFactory.create(datasets=[dataset_a.id])
+        dataservice_a = DataserviceFactory.create(datasets=[dataset_a.id], harvest=HarvestMetadataFactory())
         dataservice_b = DataserviceFactory.create(datasets=[dataset_b.id])
         dataservice_x = DataserviceFactory.create(datasets=[dataset_a.id, dataset_c.id])
         dataservice_y = DataserviceFactory.create(datasets=[])

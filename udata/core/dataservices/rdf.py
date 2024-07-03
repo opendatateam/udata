@@ -76,8 +76,8 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
         id = BNode()
 
     # Expose upstream identifier if present
-    if dataservice.harvest and dataservice.harvest.dct_identifier:
-        identifier = dataservice.harvest.dct_identifier
+    if dataservice.harvest:
+        identifier = dataservice.harvest.remote_id
     else:
         identifier = dataservice.id
     graph = graph or Graph(namespace_manager=namespace_manager)
