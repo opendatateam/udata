@@ -1,13 +1,14 @@
 from datetime import datetime
-from mongoengine import signals, NULLIFY
+
+from mongoengine import NULLIFY, signals
 
 from udata.api_fields import field, generate_fields
-from udata.core.dataset.models import Dataset
+from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.mongo import db
-from udata.core.user.api_fields import user_ref_fields
 
 from .constants import REPORT_REASONS_CHOICES, REPORTABLE_MODELS
+
 
 @generate_fields()
 class Report(db.Document):

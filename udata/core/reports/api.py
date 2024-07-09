@@ -1,11 +1,12 @@
+import mongoengine
 from flask import request
 from flask_login import current_user
-import mongoengine
 
-from udata.api import api, API, fields
+from udata.api import API, api, fields
 from udata.api_fields import patch
-from .models import Report
+
 from .constants import reports_reasons_translations
+from .models import Report
 
 ns = api.namespace('reports', 'User reported objects related operations (beta)')
 
