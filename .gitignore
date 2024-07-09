@@ -82,3 +82,9 @@ data
 
 # Pyenv
 .python-version
+
+# Ruff
+.ruff_cache
+
+# VSCode
+.vscode
