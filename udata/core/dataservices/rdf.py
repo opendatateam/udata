@@ -1,16 +1,13 @@
 
-from datetime import datetime
-from typing import List, Optional
 from rdflib import RDF, BNode, Graph, Literal, URIRef
 
 from udata.core.dataservices.models import Dataservice, HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset.models import Dataset, License
 from udata.core.dataset.rdf import dataset_to_graph_id, sanitize_html
-from udata.harvest.models import HarvestSource
-from udata.rdf import DCATAP, TAG_TO_EU_HVD_CATEGORIES, namespace_manager, DCAT, DCT, contact_point_from_rdf, rdf_value, remote_url_from_rdf, themes_from_rdf, url_from_rdf
+from udata.rdf import namespace_manager, DCAT, DCT, contact_point_from_rdf, rdf_value, remote_url_from_rdf, themes_from_rdf, url_from_rdf
 from udata.uris import endpoint_for
 
-def dataservice_from_rdf(graph: Graph, dataservice: Dataservice, node, all_datasets: List[Dataset]) -> Dataservice :
+def dataservice_from_rdf(graph: Graph, dataservice: Dataservice, node, all_datasets: list[Dataset]) -> Dataservice :
     '''
     Create or update a dataset from a RDF/DCAT graph
     '''
