@@ -1,11 +1,14 @@
-from udata.api import api
+from udata.api import api, base_reference
+
 import flask_restx.fields as restx_fields
 import udata.api.fields as custom_restx_fields
 from bson import ObjectId
 import mongoengine
 import mongoengine.fields as mongo_fields
+from flask_storage.mongo import ImageField as FlaskStorageImageField
 
 from udata.mongo.errors import FieldValidationError
+
 
 def convert_db_to_field(key, field, info = {}):
     '''
@@ -51,6 +54,8 @@ def convert_db_to_field(key, field, info = {}):
         constructor = custom_restx_fields.ISODateTime
     elif isinstance(field, mongo_fields.DictField):
         constructor = restx_fields.Raw
+    elif isinstance(field, mongo_fields.ImageField) or isinstance(field, FlaskStorageImageField):
+        constructor = custom_restx_fields.ImageField
     elif isinstance(field, mongo_fields.ListField):
         # For lists, we convert the inner value from Mongo to RestX then we create
         # the `List` RestX type with this converted inner value.
@@ -82,7 +87,7 @@ def convert_db_to_field(key, field, info = {}):
             raise ValueError(f"EmbeddedDocumentField `{key}` requires a `nested_fields` param to serialize/deserialize or a `@generate_fields()` definition.")
 
     else:
-        raise ValueError(f"Unsupported MongoEngine field type {field.__class__.__name__}")
+        raise ValueError(f"Unsupported MongoEngine field type {field.__class__}")
     
     read_params = {**params, **read_params, **info}
     write_params = {**params, **write_params, **info}
@@ -102,6 +107,7 @@ def generate_fields(**kwargs):
     def wrapper(cls):
         read_fields = {}
         write_fields = {}
+        ref_fields = {}
         sortables = []
         filterables = []
 
@@ -143,6 +149,9 @@ def generate_fields(**kwargs):
             if write:
                 write_fields[key] = write
 
+            if read and info.get('show_as_ref', False):
+                ref_fields[key] = read
+
         # The goal of this loop is to fetch all functions (getters) of the class
         # If a function has an `__additional_field_info__` attribute it means 
         # it has been decorated with `@function_field()` and should be included
@@ -167,10 +176,13 @@ def generate_fields(**kwargs):
                 return lambda o: method(o)
 
             read_fields[method_name] = restx_fields.String(attribute=make_lambda(method), **{ 'readonly':True, **info })
+            if info.get('show_as_ref', False):
+                ref_fields[key] = read_fields[method_name]
 
 
         cls.__read_fields__ = api.model(f"{cls.__name__} (read)", read_fields, **kwargs)
         cls.__write_fields__ = api.model(f"{cls.__name__} (write)", write_fields, **kwargs)
+        cls.__ref_fields__ = api.inherit(f"{cls.__name__}Reference", base_reference, ref_fields)
 
         mask = kwargs.pop('mask', None)
         if mask is not None:

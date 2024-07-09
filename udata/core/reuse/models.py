@@ -2,7 +2,7 @@ from blinker import Signal
 from mongoengine.signals import pre_save, post_save
 from werkzeug.utils import cached_property
 
-from udata.api_fields import field, generate_fields
+from udata.api_fields import field, function_field, generate_fields
 from udata.core.storages import images, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -35,6 +35,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
     title = field(
         db.StringField(required=True),
         sortable=True,
+        show_as_ref=True,
     )
     slug = field(db.SlugField(max_length=255, required=True, populate_from='title',
                         update=True, follow=True))
@@ -48,10 +49,11 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
         check=check_url_does_not_exists,
     )
     urlhash = field(db.StringField(required=True, unique=True))
-    image_url = field(db.StringField())
-    image = db.ImageField(
-        fs=images, basename=default_image_basename, max_size=IMAGE_MAX_SIZE,
-        thumbnails=IMAGE_SIZES)
+    image_url = db.StringField()
+    image = field(
+        db.ImageField(fs=images, basename=default_image_basename, max_size=IMAGE_MAX_SIZE, thumbnails=IMAGE_SIZES),
+        show_as_ref=True,
+    )
     datasets = field(
         db.ListField(db.ReferenceField('Dataset', reverse_delete_rule=db.PULL)),
         filterable={
@@ -137,6 +139,14 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
         return endpoint_for('reuses.show', 'api.reuse', reuse=self, *args, **kwargs)
 
     display_url = property(url_for)
+
+    @function_field(description="Link to the API endpoint for this reuse", show_as_ref=True)
+    def uri(self):
+        return endpoint_for('api.reuse', reuse=self, _external=True)
+
+    @function_field(description="Link to the udata web page for this reuse", show_as_ref=True)
+    def page(self):
+        return endpoint_for('reuses.show', reuse=self, _external=True, fallback_endpoint='api.reuse')
 
     @property
     def is_visible(self):

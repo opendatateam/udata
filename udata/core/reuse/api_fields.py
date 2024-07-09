@@ -9,21 +9,6 @@ from .constants import REUSE_TOPICS, REUSE_TYPES, IMAGE_SIZES
 
 BIGGEST_IMAGE_SIZE = IMAGE_SIZES[0]
 
-reuse_ref_fields = api.inherit('ReuseReference', base_reference, {
-    'title': fields.String(description='The reuse title', readonly=True),
-    'image': fields.ImageField(description='The reuse thumbnail thumbnail (cropped) URL'),
-    'image_thumbnail': fields.ImageField(attribute='image', size=BIGGEST_IMAGE_SIZE,
-        description='The reuse thumbnail thumbnail URL. This is the square '
-        '({0}x{0}) and cropped version.'.format(BIGGEST_IMAGE_SIZE)),
-    'uri': fields.UrlFor(
-        'api.reuse', lambda o: {'reuse': o},
-        description='The reuse API URI', readonly=True),
-    'page': fields.UrlFor(
-        'reuses.show', lambda o: {'reuse': o},
-        description='The reuse page URL', readonly=True, fallback_endpoint='api.reuse'),
-})
-
-
 reuse_type_fields = api.model('ReuseType', {
     'id': fields.String(description='The reuse type identifier'),
     'label': fields.String(description='The reuse type display name')
