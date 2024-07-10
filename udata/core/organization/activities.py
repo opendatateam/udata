@@ -1,31 +1,28 @@
 from flask_security import current_user
 
 from udata.i18n import lazy_gettext as _
-from udata.models import db, Organization, Activity
+from udata.models import Activity, Organization, db
 
-
-__all__ = (
-    'UserCreatedOrganization', 'UserUpdatedOrganization', 'OrgRelatedActivity'
-)
+__all__ = ("UserCreatedOrganization", "UserUpdatedOrganization", "OrgRelatedActivity")
 
 
 class OrgRelatedActivity(object):
-    related_to = db.ReferenceField('Organization')
-    template = 'activity/organization.html'
+    related_to = db.ReferenceField("Organization")
+    template = "activity/organization.html"
 
 
 class UserCreatedOrganization(OrgRelatedActivity, Activity):
-    key = 'organization:created'
-    icon = 'fa fa-plus'
-    badge_type = 'success'
-    label = _('created an organization')
+    key = "organization:created"
+    icon = "fa fa-plus"
+    badge_type = "success"
+    label = _("created an organization")
 
 
 class UserUpdatedOrganization(OrgRelatedActivity, Activity):
-    key = 'organization:updated'
-    icon = 'fa fa-pencil'
-    badge_type = 'error'
-    label = _('updated an organization')
+    key = "organization:updated"
+    icon = "fa fa-pencil"
+    badge_type = "error"
+    label = _("updated an organization")
 
 
 @Organization.on_create.connect

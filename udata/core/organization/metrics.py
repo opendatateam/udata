@@ -1,5 +1,6 @@
-from udata.models import Dataset, Reuse, Organization
 from udata.core.owned import Owned
+from udata.models import Dataset, Organization, Reuse
+
 
 @Dataset.on_create.connect
 @Dataset.on_update.connect

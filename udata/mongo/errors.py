@@ -1,5 +1,6 @@
 from mongoengine.errors import ValidationError
 
+
 class FieldValidationError(ValidationError):
     field: str
 

@@ -1,6 +1,6 @@
 from udata import mail
-from udata.i18n import lazy_gettext as _
 from udata.core import storages
+from udata.i18n import lazy_gettext as _
 from udata.models import Activity, Discussion, Follow, Transfer
 from udata.tasks import get_logger, job, task
 
@@ -9,10 +9,10 @@ from .models import Reuse
 log = get_logger(__name__)
 
 
-@job('purge-reuses')
+@job("purge-reuses")
 def purge_reuses(self):
     for reuse in Reuse.objects(deleted__ne=None):
-        log.info(f'Purging reuse {reuse}')
+        log.info(f"Purging reuse {reuse}")
         # Remove followers
         Follow.objects(following=reuse).delete()
         # Remove discussions
@@ -42,5 +42,6 @@ def notify_new_reuse(reuse_id):
         else:
             recipients = None
         if recipients:
-            mail.send(_('New reuse'), recipients, 'new_reuse', reuse=reuse,
-                      dataset=dataset)
+            mail.send(
+                _("New reuse"), recipients, "new_reuse", reuse=reuse, dataset=dataset
+            )

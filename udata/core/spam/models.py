@@ -1,11 +1,11 @@
 from flask import current_app
 from langdetect import detect
-
-from udata.mongo import db
-from .signals import on_new_potential_spam
 from mongoengine import signals
 
-from .constants import NO_SPAM, POTENTIAL_SPAM, SPAM_STATUS_CHOICES, NOT_CHECKED
+from udata.mongo import db
+
+from .constants import NO_SPAM, NOT_CHECKED, POTENTIAL_SPAM, SPAM_STATUS_CHOICES
+from .signals import on_new_potential_spam
 
 
 class SpamInfo(db.EmbeddedDocument):
@@ -28,16 +28,15 @@ class SpamMixin(object):
 
     @staticmethod
     def spam_words():
-        return current_app.config.get('SPAM_WORDS', [])
+        return current_app.config.get("SPAM_WORDS", [])
 
     @staticmethod
     def allowed_langs():
-        return current_app.config.get('SPAM_ALLOWED_LANGS', [])
-    
+        return current_app.config.get("SPAM_ALLOWED_LANGS", [])
+
     @staticmethod
     def minimum_string_length_for_lang_check():
-        return current_app.config.get('SPAM_MINIMUM_STRING_LENGTH_FOR_LANG_CHECK', 30)
-
+        return current_app.config.get("SPAM_MINIMUM_STRING_LENGTH_FOR_LANG_CHECK", 30)
 
     def clean(self):
         super().clean()
@@ -91,15 +90,26 @@ class SpamMixin(object):
             for word in SpamMixin.spam_words():
                 if word in text.lower():
                     self.spam.status = POTENTIAL_SPAM
-                    self._report(text=text, breadcrumb=breadcrumb, reason=f"contains spam words \"{word}\"")
+                    self._report(
+                        text=text,
+                        breadcrumb=breadcrumb,
+                        reason=f'contains spam words "{word}"',
+                    )
                     return
 
             # Language detection is not working well with texts of a few words.
-            if SpamMixin.allowed_langs() and len(text) > SpamMixin.minimum_string_length_for_lang_check():
+            if (
+                SpamMixin.allowed_langs()
+                and len(text) > SpamMixin.minimum_string_length_for_lang_check()
+            ):
                 lang = detect(text.lower())
                 if lang not in SpamMixin.allowed_langs():
                     self.spam.status = POTENTIAL_SPAM
-                    self._report(text=text, breadcrumb=breadcrumb, reason=f"not allowed language \"{lang}\"")
+                    self._report(
+                        text=text,
+                        breadcrumb=breadcrumb,
+                        reason=f'not allowed language "{lang}"',
+                    )
                     return
 
         for embed in self.embeds_to_check_for_spam():
@@ -130,19 +140,20 @@ class SpamMixin(object):
 
         for name, args in callbacks.items():
             callback = getattr(base_model, name)
-            callback(*args['args'], **args['kwargs'])
+            callback(*args["args"], **args["kwargs"])
 
     def is_spam(self):
         return self.spam and self.spam.status == POTENTIAL_SPAM
 
     def texts_to_check_for_spam(self):
         raise NotImplementedError(
-            "Please implement the `texts_to_check_for_spam` method. Should return a list of strings to check.")
+            "Please implement the `texts_to_check_for_spam` method. Should return a list of strings to check."
+        )
 
     def embeds_to_check_for_spam(self):
         return []
 
-    def spam_is_whitelisted(self) -> bool :
+    def spam_is_whitelisted(self) -> bool:
         return False
 
     def spam_report_message(self):
@@ -168,7 +179,9 @@ class SpamMixin(object):
         # must report after saving to have the ID available.
         # By default the signal is weak so it is dropped at the end of this function and it's
         # never called. We disconnect the signal in `report_after_save` to avoid leaks.
-        signals.post_save.connect(report_after_save, sender=base_model.__class__, weak=False)
+        signals.post_save.connect(
+            report_after_save, sender=base_model.__class__, weak=False
+        )
 
 
 def spam_protected(get_model_to_check=None):
@@ -177,7 +190,7 @@ def spam_protected(get_model_to_check=None):
     It will save the class method called with its arguments inside the `SpamInfo` object to be
     called later if needed (in case of false positive).
     The decorator accept an argument, a function to get the model to check when we are doing an operation
-    on an embed document. The class method should always take a `self` as a first argument which is the base 
+    on an embed document. The class method should always take a `self` as a first argument which is the base
     model to allow saving the callbacks back into Mongo (we cannot .save() an embed document).
     """
 
@@ -191,12 +204,15 @@ def spam_protected(get_model_to_check=None):
 
             if not isinstance(model_to_check, SpamMixin):
                 raise ValueError(
-                    "@spam_protected should be called within a SpamMixin. " + type(model_to_check).__name__ + " given.")
+                    "@spam_protected should be called within a SpamMixin. "
+                    + type(model_to_check).__name__
+                    + " given."
+                )
 
             if model_to_check.is_spam():
                 model_to_check.spam.callbacks[f.__name__] = {
-                    'args': args[1:],
-                    'kwargs': kwargs
+                    "args": args[1:],
+                    "kwargs": kwargs,
                 }
                 base_model.save_without_spam_detection()
             else:

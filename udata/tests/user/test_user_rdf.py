@@ -1,13 +1,12 @@
 from flask import url_for
-
-from rdflib import URIRef, Literal, BNode
-from rdflib.namespace import RDF, FOAF, RDFS
+from rdflib import BNode, Literal, URIRef
+from rdflib.namespace import FOAF, RDF, RDFS
 from rdflib.resource import Resource as RdfResource
 
 from udata import api
-from udata.tests import TestCase, DBTestMixin
 from udata.core.user.factories import UserFactory
 from udata.core.user.rdf import user_to_rdf
+from udata.tests import DBTestMixin, TestCase
 from udata.utils import faker
 
 
@@ -33,9 +32,7 @@ class UserToRdfTest(DBTestMixin, TestCase):
 
     def test_all_fields(self):
         user = UserFactory(website=faker.uri())
-        user_url = url_for('api.user',
-                           user=user.id,
-                           _external=True)
+        user_url = url_for("api.user", user=user.id, _external=True)
         u = user_to_rdf(user)
         g = u.graph
 
@@ -48,5 +45,4 @@ class UserToRdfTest(DBTestMixin, TestCase):
         self.assertEqual(u.identifier.toPython(), user_url)
         self.assertEqual(u.value(FOAF.name), Literal(user.fullname))
         self.assertEqual(u.value(RDFS.label), Literal(user.fullname))
-        self.assertEqual(u.value(FOAF.homepage).identifier,
-                         URIRef(user.website))
+        self.assertEqual(u.value(FOAF.homepage).identifier, URIRef(user.website))

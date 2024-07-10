@@ -10,8 +10,8 @@ def counts(name):
 @csv.adapter(Tag)
 class TagCsvAdapter(csv.Adapter):
     fields = (
-        'name',
-        counts('datasets'),
-        counts('reuses'),
-        'total',
+        "name",
+        counts("datasets"),
+        counts("reuses"),
+        "total",
     )

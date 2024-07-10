@@ -1,27 +1,28 @@
 from flask import url_for
 from mongoengine.signals import pre_save
-from udata.models import db, SpatialCoverage
+
+from udata.core.owned import Owned, OwnedQuerySet
+from udata.models import SpatialCoverage, db
 from udata.search import reindex
 from udata.tasks import as_task_param
-from udata.core.owned import Owned, OwnedQuerySet
 
-
-__all__ = ('Topic', )
+__all__ = ("Topic",)
 
 
 class Topic(db.Document, Owned, db.Datetimed):
     name = db.StringField(required=True)
-    slug = db.SlugField(max_length=255, required=True, populate_from='name',
-                        update=True, follow=True)
+    slug = db.SlugField(
+        max_length=255, required=True, populate_from="name", update=True, follow=True
+    )
     description = db.StringField()
     tags = db.ListField(db.StringField())
     color = db.IntField()
 
     tags = db.ListField(db.StringField())
     datasets = db.ListField(
-        db.LazyReferenceField('Dataset', reverse_delete_rule=db.PULL))
-    reuses = db.ListField(
-        db.LazyReferenceField('Reuse', reverse_delete_rule=db.PULL))
+        db.LazyReferenceField("Dataset", reverse_delete_rule=db.PULL)
+    )
+    reuses = db.ListField(db.LazyReferenceField("Reuse", reverse_delete_rule=db.PULL))
 
     featured = db.BooleanField()
     private = db.BooleanField()
@@ -30,14 +31,10 @@ class Topic(db.Document, Owned, db.Datetimed):
     spatial = db.EmbeddedDocumentField(SpatialCoverage)
 
     meta = {
-        'indexes': [
-            '$name',
-            'created_at',
-            'slug'
-        ] + Owned.meta['indexes'],
-        'ordering': ['-created_at'],
-        'auto_create_index_on_save': True,
-        'queryset_class': OwnedQuerySet,
+        "indexes": ["$name", "created_at", "slug"] + Owned.meta["indexes"],
+        "ordering": ["-created_at"],
+        "auto_create_index_on_save": True,
+        "queryset_class": OwnedQuerySet,
     }
 
     def __str__(self):
@@ -58,7 +55,7 @@ class Topic(db.Document, Owned, db.Datetimed):
 
     @property
     def display_url(self):
-        return url_for('topics.display', topic=self)
+        return url_for("topics.display", topic=self)
 
     def count_discussions(self):
         # There are no metrics on Topic to store discussions count
