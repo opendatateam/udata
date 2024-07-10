@@ -570,6 +570,8 @@ requests-mock==1.10.0
     #   -r requirements/test.in
 requests-toolbelt==1.0.0
     # via twine
+ruff==0.5.1
+    # via -r requirements/develop.in
 rfc3986==2.0.0
     # via twine
 s3transfer==0.6.2
