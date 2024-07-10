@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2024-07-01 13:45+0200\n"
-"PO-Revision-Date: 2024-07-01 14:35\n"
+"POT-Creation-Date: 2024-07-10 14:52+0200\n"
+"PO-Revision-Date: 2024-07-10 13:16\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -48,39 +48,39 @@ msgstr "Ce jeu de données a été archivé"
 
 #: udata/uris.py:52
 msgid "Invalid URL \"{url}\": {reason}"
-msgstr ""
+msgstr "URL invalide \"{url}\" : {reason}"
 
 #: udata/tests/test_model.py:370 udata/uris.py:54
 msgid "Invalid URL \"{url}\""
-msgstr ""
+msgstr "Invalide URL \"{url}\""
 
 #: udata/uris.py:105
 msgid "Invalid scheme {0}, allowed schemes: {1}"
-msgstr ""
+msgstr "Schéma invalide {0}, schémas autorisés : {1}"
 
 #: udata/uris.py:108
 msgid "Credentials in URL are not allowed"
-msgstr ""
+msgstr "Les identifiants dans l'URL ne sont pas autorisés"
 
 #: udata/uris.py:112
 msgid "Invalid TLD {0}"
-msgstr ""
+msgstr "Domaine invalide {0}"
 
 #: udata/uris.py:121
 msgid "{0} is a multicast IP"
-msgstr ""
+msgstr "{0} est une IP multicast"
 
 #: udata/uris.py:123
 msgid "{0} is a mask IP"
-msgstr ""
+msgstr "{0} est une IP de masque"
 
 #: udata/uris.py:127
 msgid "is a local URL"
-msgstr ""
+msgstr "est une URL locale"
 
 #: udata/uris.py:130
 msgid "is a private URL"
-msgstr ""
+msgstr "est une URL privée"
 
 #: udata/api/errors.py:4
 msgid "Validation error: your data cannot be updated for now, we have been notified of the error and we will fix it as soon as possible."
@@ -198,16 +198,16 @@ msgid "Your udata instance is ready!"
 msgstr "Votre instance udata est prête !"
 
 #: udata/core/owned.py:30 udata/forms/fields.py:739
-#: udata/tests/api/test_dataservices_api.py:229
+#: udata/tests/api/test_dataservices_api.py:228
 msgid "You can only set yourself as owner"
 msgstr "Vous ne pouvez définir que vous-même en tant que propriétaire"
 
 #: udata/core/owned.py:38
 msgid "Unknown organization"
-msgstr ""
+msgstr "Organisation inconnue"
 
 #: udata/core/owned.py:41 udata/forms/fields.py:762
-#: udata/tests/api/test_dataservices_api.py:238
+#: udata/tests/api/test_dataservices_api.py:237
 msgid "Permission denied for this organization"
 msgstr "Permission refusée pour cette organisation"
 
@@ -236,12 +236,12 @@ msgstr "Email"
 msgid "Publish as"
 msgstr "Publier en tant que"
 
-#: udata/core/dataservices/models.py:129 udata/core/dataset/models.py:489
+#: udata/core/dataservices/models.py:129 udata/core/dataset/models.py:488
 #: udata/mongo/datetime_fields.py:59
 msgid "Creation date"
 msgstr "Date de création"
 
-#: udata/core/dataservices/models.py:133 udata/core/dataset/models.py:491
+#: udata/core/dataservices/models.py:133 udata/core/dataset/models.py:490
 #: udata/mongo/datetime_fields.py:61
 msgid "Last modification date"
 msgstr "Date de dernière modification"
@@ -534,38 +534,38 @@ msgstr "Privé"
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "Restreint la visibilité du jeu de données à vous ou votre organisation seulement."
 
-#: udata/core/dataset/models.py:108
+#: udata/core/dataset/models.py:107
 msgid "A schema must contains a name or an URL when a version is provided."
 msgstr "Un schéma doit contenir un nom ou une URL lorsqu'une version est fournie."
 
-#: udata/core/dataset/models.py:135 udata/tests/api/test_datasets_api.py:770
+#: udata/core/dataset/models.py:134 udata/tests/api/test_datasets_api.py:770
 #: udata/tests/api/test_datasets_api.py:776
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr "Le nom du schéma \"{schema}\" n'est pas une valeur autorisée. Valeurs autorisées : {values}"
 
-#: udata/core/dataset/models.py:150 udata/tests/api/test_datasets_api.py:782
+#: udata/core/dataset/models.py:149 udata/tests/api/test_datasets_api.py:782
 msgid "Version \"{version}\" is not an allowed value for the schema \"{name}\". Allowed versions: {values}"
 msgstr "La version \"{version}\" n'est pas une valeur autorisée pour le schéma \"{name}\". Versions autorisées : {values}"
 
-#: udata/core/dataset/models.py:401 udata/core/dataset/rdf.py:436
+#: udata/core/dataset/models.py:400 udata/core/dataset/rdf.py:435
 #: udata/tests/dataset/test_dataset_rdf.py:517
 #: udata/tests/dataset/test_dataset_rdf.py:530
 msgid "Nameless resource"
 msgstr "Ressource sans nom"
 
-#: udata/core/dataset/models.py:476
+#: udata/core/dataset/models.py:475
 msgid "Future date of update"
 msgstr "Future date de mise à jour"
 
-#: udata/core/dataset/models.py:500
+#: udata/core/dataset/models.py:499
 msgid "Pivotal data"
 msgstr "Données pivot"
 
-#: udata/core/dataset/models.py:540
+#: udata/core/dataset/models.py:539
 msgid "dataset"
 msgstr "jeu de données"
 
-#: udata/core/dataset/rdf.py:434 udata/tests/dataset/test_dataset_rdf.py:504
+#: udata/core/dataset/rdf.py:433 udata/tests/dataset/test_dataset_rdf.py:504
 msgid "{format} resource"
 msgstr "Ressource {format}"
 
@@ -797,29 +797,29 @@ msgstr "Spécifiez votre type de contenu (HTML ou markdown)"
 msgid "post"
 msgstr "article"
 
-#: udata/core/reports/constants.py:19
-msgid "Spam"
-msgstr ""
-
-#: udata/core/reports/constants.py:20
-msgid "Personal data"
-msgstr ""
-
-#: udata/core/reports/constants.py:21
+#: udata/core/reports/constants.py:18
 msgid "Explicit content"
-msgstr ""
+msgstr "Contenu sexuel"
 
-#: udata/core/reports/constants.py:22
+#: udata/core/reports/constants.py:19
 msgid "Illegal content"
-msgstr ""
+msgstr "Contenu illégal"
 
-#: udata/core/reports/constants.py:23
-msgid "Security"
-msgstr ""
-
-#: udata/core/reports/constants.py:24 udata/core/reuse/constants.py:29
+#: udata/core/reports/constants.py:20 udata/core/reuse/constants.py:29
 msgid "Others"
 msgstr "Autres"
+
+#: udata/core/reports/constants.py:21
+msgid "Personal data"
+msgstr "Données personnelles"
+
+#: udata/core/reports/constants.py:22
+msgid "Security"
+msgstr "Sécurité"
+
+#: udata/core/reports/constants.py:23
+msgid "Spam"
+msgstr "Spam"
 
 #: udata/core/reuse/activities.py:22
 msgid "created a reuse"
