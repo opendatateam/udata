@@ -1,4 +1,5 @@
 repos:
+
   - repo: https://github.com/jazzband/pip-tools
     rev: 6.2.0
     hooks:
@@ -22,3 +23,23 @@ repos:
         name: pip-compile report.in
         args: [requirements/report.in, --output-file=requirements/report.pip]
         files: ^requirements/(install|test|report)\.(in|pip)$
+
+  # https://github.com/pre-commit/pre-commit-hooks#pre-commit-hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-added-large-files
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.1 # Ruff version
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.1 # Ruff version
+    hooks:
+      - id: ruff-format
