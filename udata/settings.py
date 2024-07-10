@@ -132,7 +132,7 @@ class Defaults(object):
     SITE_KEYWORDS = ['opendata', 'udata']
     SITE_AUTHOR_URL = None
     SITE_AUTHOR = 'Udata'
-    SITE_GITHUB_URL = "https://github.com/opendatateam/udata"
+    SITE_GITHUB_URL = 'https://github.com/opendatateam/udata'
     SITE_TERMS_LOCATION = pkg_resources.resource_filename(__name__, 'terms.md')
 
     UDATA_INSTANCE_NAME = 'udata'
