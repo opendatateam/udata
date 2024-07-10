@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2024-07-10 14:52+0200\n"
-"PO-Revision-Date: 2024-07-10 13:16\n"
+"PO-Revision-Date: 2024-07-10 14:25\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -52,7 +52,7 @@ msgstr "URL invalide \"{url}\" : {reason}"
 
 #: udata/tests/test_model.py:370 udata/uris.py:54
 msgid "Invalid URL \"{url}\""
-msgstr "Invalide URL \"{url}\""
+msgstr "URL invalide \"{url}\""
 
 #: udata/uris.py:105
 msgid "Invalid scheme {0}, allowed schemes: {1}"
@@ -799,7 +799,7 @@ msgstr "article"
 
 #: udata/core/reports/constants.py:18
 msgid "Explicit content"
-msgstr "Contenu sexuel"
+msgstr "Contenu inapproprié"
 
 #: udata/core/reports/constants.py:19
 msgid "Illegal content"
