@@ -6,8 +6,8 @@ from flask_mongoengine.wtf import fields as mefields
 from flask_storage.mongo import ImageReference
 from speaklater import is_lazy_string
 from wtforms import Field as WTField
-from wtforms import Form as WTForm  # noqa
-from wtforms import SubmitField, fields, validators
+from wtforms import Form as WTForm
+from wtforms import SubmitField, fields, validators  # noqa
 from wtforms.utils import unset_value
 from wtforms.widgets import TextInput
 from wtforms_json import flatten_json
