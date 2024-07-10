@@ -10,7 +10,7 @@ from flask_storage.mongo import ImageField as FlaskStorageImageField
 from udata.mongo.errors import FieldValidationError
 
 
-def convert_db_to_field(key, field, info = {}):
+def convert_db_to_field(key, field, info):
     '''
     This function maps a Mongo field to a Flask RestX field.
     Most of the types are a simple 1-to-1 mapping except lists and references that requires
@@ -21,8 +21,6 @@ def convert_db_to_field(key, field, info = {}):
     params. Since merging the params involve a litte bit of work (merging default params with read/write params and then with
     user-supplied overrides, setting the readonly flag…), it's easier to have do this one time at the end of the function.
     '''
-    info = { **getattr(field, '__additional_field_info__', {}), **info }
-
     params = {}
     params['required'] = field.required
 
@@ -55,11 +53,22 @@ def convert_db_to_field(key, field, info = {}):
     elif isinstance(field, mongo_fields.DictField):
         constructor = restx_fields.Raw
     elif isinstance(field, mongo_fields.ImageField) or isinstance(field, FlaskStorageImageField):
-        constructor = custom_restx_fields.ImageField
+        size = info.get('size', None)
+        if size:
+            params['description'] = f"URL of the cropped and squared image ({size}x{size})"
+        else:
+            params['description'] = f"URL of the image"
+
+        if info.get('is_thumbnail', False):
+            constructor_read = custom_restx_fields.ImageField
+            write_params['read_only'] = True
+        else:
+            constructor = custom_restx_fields.ImageField
+
     elif isinstance(field, mongo_fields.ListField):
         # For lists, we convert the inner value from Mongo to RestX then we create
         # the `List` RestX type with this converted inner value.
-        field_read, field_write = convert_db_to_field(f"{key}.inner", field.field, info.get('inner_field_info', {}))
+        field_read, field_write = convert_db_to_field(f"{key}.inner", field.field, { **info, **info.get('inner_field_info', {}) })
         constructor_read = lambda **kwargs: restx_fields.List(field_read, **kwargs)
         constructor_write = lambda **kwargs: restx_fields.List(field_write, **kwargs)
     elif isinstance(field, mongo_fields.ReferenceField):
@@ -93,7 +102,7 @@ def convert_db_to_field(key, field, info = {}):
     write_params = {**params, **write_params, **info}
 
     read = constructor_read(**read_params) if constructor_read else constructor(**read_params)
-    if write_params.get('readonly', False):
+    if write_params.get('readonly', False) or (constructor_write is None and constructor is None):
         write = None
     else:
         write = constructor_write(**write_params) if constructor_write else constructor(**write_params)
@@ -101,13 +110,13 @@ def convert_db_to_field(key, field, info = {}):
 
 def get_fields(cls):
     for key, field in cls._fields.items():
-        info = getattr(field, '__additional_field_info__', None)
+        info: dict | None = getattr(field, '__additional_field_info__', None)
         if info is None: continue 
 
         yield key, field, info
 
         if isinstance(field, mongo_fields.ImageField) or isinstance(field, FlaskStorageImageField):
-            yield f"{key}_thumbnail", field, info
+            yield f"{key}_thumbnail", field, { **info, **info.get('thumbnail_info', {}), 'is_thumbnail': True }
 
 def generate_fields(**kwargs):
     '''
@@ -149,7 +158,7 @@ def generate_fields(**kwargs):
 
                 filterables.append(filterable)
 
-            read, write = convert_db_to_field(key, field)
+            read, write = convert_db_to_field(key, field, info)
 
             if read:
                 read_fields[key] = read

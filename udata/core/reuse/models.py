@@ -2,7 +2,9 @@ from blinker import Signal
 from mongoengine.signals import pre_save, post_save
 from werkzeug.utils import cached_property
 
+from udata.core.dataset.api_fields import dataset_fields
 from udata.api_fields import field, function_field, generate_fields
+from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE
 from udata.core.storages import images, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -48,14 +50,22 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
         db.StringField(required=True),
         check=check_url_does_not_exists,
     )
-    urlhash = field(db.StringField(required=True, unique=True))
+    urlhash = db.StringField(required=True, unique=True)
     image_url = db.StringField()
     image = field(
         db.ImageField(fs=images, basename=default_image_basename, max_size=IMAGE_MAX_SIZE, thumbnails=IMAGE_SIZES),
         show_as_ref=True,
+        thumbnail_info={
+            'size': BIGGEST_IMAGE_SIZE,
+        },
     )
     datasets = field(
-        db.ListField(db.ReferenceField('Dataset', reverse_delete_rule=db.PULL)),
+        db.ListField(
+            field(
+                db.ReferenceField('Dataset', reverse_delete_rule=db.PULL),
+                nested_fields=dataset_fields,
+            ),
+        ),
         filterable={
             'key': 'dataset',
         },
