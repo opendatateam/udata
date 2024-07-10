@@ -23,7 +23,7 @@ jobs:
           - py3-cache-v12-{{ arch }}-{{ .Branch }}
           - py3-cache-v12-{{ arch }}-{{ .Environment.BASE_BRANCH }}
       - run:
-          name: Install python dependencies
+          name: Install Python dependencies
           command: |
             python -m venv venv
             source venv/bin/activate
@@ -38,6 +38,12 @@ jobs:
           key: py3-cache-v12-{{ arch }}-{{ .Branch }}
           paths:
           - venv
+      - run:
+          name: Lint and format code and sort imports
+          command: |
+            source venv/bin/activate
+            ruff check --fix --select I .
+            ruff format .
       - run:
           name: Run tests
           command: |
