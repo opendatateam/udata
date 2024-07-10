@@ -99,6 +99,16 @@ def convert_db_to_field(key, field, info = {}):
         write = constructor_write(**write_params) if constructor_write else constructor(**write_params)
     return read, write
 
+def get_fields(cls):
+    for key, field in cls._fields.items():
+        info = getattr(field, '__additional_field_info__', None)
+        if info is None: continue 
+
+        yield key, field, info
+
+        if isinstance(field, mongo_fields.ImageField) or isinstance(field, FlaskStorageImageField):
+            yield f"{key}_thumbnail", field, info
+
 def generate_fields(**kwargs):
     '''
     This decorator will create two auto-generated attributes on the class `__read_fields__` and `__write_fields__`
@@ -113,10 +123,7 @@ def generate_fields(**kwargs):
 
         read_fields['id'] = restx_fields.String(required=True)
 
-        for key, field in cls._fields.items():
-            info = getattr(field, '__additional_field_info__', None)
-            if info is None: continue 
-
+        for key, field, info in get_fields(cls):
             if info.get('sortable', False):
                 sortables.append(key)
 
