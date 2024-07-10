@@ -1,7 +1,7 @@
 site_name: udata Documentation
 site_description: udata Open Data Portal Documentation
-site_author: Etalab
-repo_url: https://github.com/etalab/udata
+site_author: data.gouv.fr
+repo_url: https://github.com/opendatateam/udata
 
 theme:
     name: readthedocs
