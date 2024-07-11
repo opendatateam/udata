@@ -6,7 +6,10 @@ __all__ = ('WithMetrics',)
 
 
 class WithMetrics(object):
-    metrics = field(db.DictField())
+    metrics = field(
+        db.DictField(),
+        readonly=True,
+    )
 
     __metrics_keys__ = []
 

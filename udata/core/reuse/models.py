@@ -39,9 +39,14 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
         sortable=True,
         show_as_ref=True,
     )
-    slug = field(db.SlugField(max_length=255, required=True, populate_from='title',
-                        update=True, follow=True))
-    description = field(db.StringField(required=True))
+    slug = field(
+        db.SlugField(max_length=255, required=True, populate_from='title', update=True, follow=True),
+        readonly=True,
+    )
+    description = field(
+        db.StringField(required=True),
+        format="markdown",
+    )
     type = field(
         db.StringField(required=True, choices=list(REUSE_TYPES)),
         filterable={},
@@ -90,8 +95,12 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
     featured = field(
         db.BooleanField(),
         filterable={},
+        readonly=True,
     )
-    deleted = field(db.DateTimeField())
+    deleted = field(
+        db.DateTimeField(),
+        readonly=True,
+    )
 
     def __str__(self):
         return self.title or ''

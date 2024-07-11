@@ -86,6 +86,9 @@ def convert_db_to_field(key, field, info):
         write_params['description'] = "ID of the reference"
         constructor_write = restx_fields.String
     elif isinstance(field, mongo_fields.EmbeddedDocumentField):
+        print(key)
+        print(field)
+        print(info)
         nested_fields = info.get('nested_fields')
         if nested_fields is not None:
             constructor = lambda **kwargs: restx_fields.Nested(nested_fields, **kwargs)
@@ -130,7 +133,7 @@ def generate_fields(**kwargs):
         sortables = []
         filterables = []
 
-        read_fields['id'] = restx_fields.String(required=True)
+        read_fields['id'] = restx_fields.String(required=True, readonly=True)
 
         for key, field, info in get_fields(cls):
             if info.get('sortable', False):
