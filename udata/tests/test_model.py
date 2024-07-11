@@ -6,11 +6,13 @@ from datetime import date, datetime, timedelta
 from mongoengine.errors import ValidationError
 from mongoengine.fields import BaseField
 
-from udata.forms.validators import _
+from udata.i18n import get_locale, _
 from udata.settings import Defaults
 from udata.models import Dataset
 from udata.mongo import db, validate_config, build_test_config
 from udata.errors import ConfigError
+from udata.tests import TestCase
+from udata.tests.api import APITestCase
 from udata.tests.helpers import assert_json_equal, assert_equal_dates
 
 pytestmark = [
@@ -357,7 +359,7 @@ class DateRangeFieldTest:
         assert obj.temporal.end == end
 
 
-class URLFieldTest:
+class URLFieldTest(APITestCase):
     def test_none_if_empty_and_not_required(self):
         obj = URLTester()
         assert obj.url is None
@@ -366,9 +368,19 @@ class URLFieldTest:
         assert obj.url is None
 
     def test_not_valid(self):
+        print('before')
+        print(get_locale())
         obj = URLTester(url='invalid')
-        with pytest.raises(ValidationError, match=_('Invalid URL "{url}"').format(url="invalid")):
+
+        expected_msg = _('Invalid URL "{url}"').format(url="invalid")
+        print('--- after')
+        print(get_locale())
+        print(expected_msg)
+        print('---')
+        with pytest.raises(ValidationError, match=expected_msg):
             obj.save()
+
+        assert False
 
     def test_strip_spaces(self):
         url = '  https://www.somewhere.com/with/spaces/   '
@@ -385,7 +397,7 @@ class URLFieldTest:
     def test_public_private(self):
         url = 'http://10.10.0.2/path/'
         PrivateURLTester(url=url).save()
-        with pytest.raises(ValidationError, match='private URL'):
+        with pytest.raises(ValidationError, match=_('is a private URL')):
             URLTester(url=url).save()
 
 
