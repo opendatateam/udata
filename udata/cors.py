@@ -24,7 +24,7 @@ def is_preflight_request() -> bool:
     return request.method == 'OPTIONS' and request.headers.get('Access-Control-Request-Method', None) is not None
 
 def is_api():
-    return request.path.startswith('/api/')
+    return request.path.startswith('/api') or request.path.startswith('/oauth')
 
 def add_preflight_request_headers(headers: Headers) -> Headers:
     origin = request.headers.get('Origin', None)
