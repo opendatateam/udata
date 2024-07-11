@@ -3,7 +3,7 @@ import re
 from werkzeug.routing import BuildError
 from flask import current_app, url_for
 from netaddr import IPAddress, AddrFormatError
-from udata.i18n import _, get_locale
+from udata.i18n import _
 
 from udata.settings import Defaults
 
@@ -52,13 +52,6 @@ def error(url, reason=None):
         msg = _('Invalid URL "{url}": {reason}').format(url=url, reason=reason)
     else:
         msg = _('Invalid URL "{url}"').format(url=url)
-        print('***')
-        try:
-            print(get_locale())
-        except:
-            print('no locale')
-        print(msg)
-        print('***')
 
     raise ValidationError(msg)
 
