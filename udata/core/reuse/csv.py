@@ -21,6 +21,7 @@ class ReuseCsvAdapter(csv.Adapter):
         ("featured", lambda r: r.featured or False),
         "created_at",
         "last_modified",
+        ("archived", lambda r: r.archived or False),
         "topic",
         ("tags", lambda r: ",".join(r.tags)),
         ("datasets", lambda r: ",".join([str(d.id) for d in r.datasets])),

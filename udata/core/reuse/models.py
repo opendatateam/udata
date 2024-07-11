@@ -48,6 +48,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
 
     featured = db.BooleanField()
     deleted = db.DateTimeField()
+    archived = db.DateTimeField()
 
     def __str__(self):
         return self.title or ""
@@ -115,7 +116,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
 
     @property
     def is_hidden(self):
-        return len(self.datasets) == 0 or self.private or self.deleted
+        return len(self.datasets) == 0 or self.private or self.deleted or self.archived
 
     @property
     def external_url(self):

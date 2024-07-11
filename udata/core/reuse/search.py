@@ -42,7 +42,7 @@ class ReuseSearch(ModelSearchAdapter):
 
     @classmethod
     def mongo_search(cls, args):
-        reuses = Reuse.objects(deleted=None, private__ne=True)
+        reuses = Reuse.objects(archived=None, deleted=None, private__ne=True)
         reuses = ReuseApiParser.parse_filters(reuses, args)
 
         sort = (
@@ -78,6 +78,7 @@ class ReuseSearch(ModelSearchAdapter):
             "description": reuse.description,
             "url": reuse.url,
             "created_at": to_iso_datetime(reuse.created_at),
+            "archived": to_iso_datetime(reuse.archived) if reuse.archived else None,
             "views": reuse.metrics.get("views", 0),
             "followers": reuse.metrics.get("followers", 0),
             "datasets": reuse.metrics.get("datasets", 0),

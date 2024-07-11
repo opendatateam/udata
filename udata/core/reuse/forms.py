@@ -41,4 +41,5 @@ class ReuseForm(ModelForm):
     owner = fields.CurrentUserField()
     organization = fields.PublishAsField(_("Publish as"))
     deleted = fields.DateTimeField()
+    archived = fields.DateTimeField()
     extras = fields.ExtrasField()
