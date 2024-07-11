@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 9.1.0 (2024-07-11)
 
 - Add reports backend [#3069](https://github.com/opendatateam/udata/pull/3069) and [#3078](https://github.com/opendatateam/udata/pull/3078)
