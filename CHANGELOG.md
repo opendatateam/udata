@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 9.1.0 (2024-07-11)
 
 - Add reports backend [#3069](https://github.com/opendatateam/udata/pull/3069) and [#3078](https://github.com/opendatateam/udata/pull/3078)
 - Improve `udata db check-integrity` (perfs, Sentry notifications…) [#3026](https://github.com/opendatateam/udata/pull/3026)
