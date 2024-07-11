@@ -34,6 +34,7 @@ class ReuseSearch(ModelSearchAdapter):
         "badge": Filter(),
         "featured": BoolFilter(),
         "topic": Filter(),
+        "archived": BoolFilter(),
     }
 
     @classmethod
