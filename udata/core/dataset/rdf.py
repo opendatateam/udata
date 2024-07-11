@@ -6,7 +6,6 @@ import json
 import logging
 
 from datetime import date
-from typing import Optional, Union
 from dateutil.parser import parse as parse_dt
 from flask import current_app
 from geomet import wkt
@@ -149,7 +148,7 @@ def resource_to_rdf(resource, dataset=None, graph=None, is_hvd=False):
     return r
 
 
-def dataset_to_graph_id(dataset: Dataset) -> Union[URIRef, BNode]: 
+def dataset_to_graph_id(dataset: Dataset) -> URIRef | BNode: 
     if dataset.harvest and dataset.harvest.uri:
         return URIRef(dataset.harvest.uri)
     elif dataset.id:
@@ -585,7 +584,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
 
     return dataset
 
-def bbox_to_geojson_multipolygon(bbox_as_str: str) -> Optional[dict] : 
+def bbox_to_geojson_multipolygon(bbox_as_str: str) -> dict | None: 
     bbox = bbox_as_str.strip().split(',')
     if len(bbox) != 4:
         return None

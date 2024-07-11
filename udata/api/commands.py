@@ -1,6 +1,5 @@
 import logging
 import os
-import time
 
 import click
 
@@ -19,7 +18,6 @@ log = logging.getLogger(__name__)
 @cli.group('api')
 def grp():
     '''API related operations'''
-    pass
 
 
 def json_to_file(data, filename, pretty=False):

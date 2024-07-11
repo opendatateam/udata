@@ -1,8 +1,5 @@
-from unittest.mock import patch
-from flask import url_for, current_app, get_flashed_messages
-from flask_login import current_user
+from flask import url_for, current_app
 from flask_security.utils import hash_data
-from udata.auth.views import send_change_email_confirmation_instructions
 from udata.core.user.factories import AdminFactory
 
 from . import FrontTestCase

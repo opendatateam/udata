@@ -1,4 +1,3 @@
-from pprint import pprint
 from flask import url_for
 
 from udata.core.dataservices.models import Dataservice
