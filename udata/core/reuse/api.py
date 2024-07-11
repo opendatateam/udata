@@ -100,7 +100,7 @@ class ReuseListAPI(API):
     @api.marshal_with(reuse_page_fields)
     def get(self):
         args = reuse_parser.parse()
-        reuses = Reuse.objects(deleted=None, private__ne=True)
+        reuses = Reuse.objects(archived=None, deleted=None, private__ne=True)
         reuses = reuse_parser.parse_filters(reuses, args)
         sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
         return reuses.order_by(sort).paginate(args["page"], args["page_size"])
@@ -253,7 +253,9 @@ class ReusesSuggestAPI(API):
     def get(self):
         """Reuses suggest endpoint using mongoDB contains"""
         args = suggest_parser.parse_args()
-        reuses = Reuse.objects(deleted=None, private__ne=True, title__icontains=args["q"])
+        reuses = Reuse.objects(
+            archived=None, deleted=None, private__ne=True, title__icontains=args["q"]
+        )
         return [
             {
                 "id": reuse.id,
