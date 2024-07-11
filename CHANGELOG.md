@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Revamp CORS: remove flask-cors to always returns 204 on OPTIONS request [#3074](https://github.com/opendatateam/udata/pull/3074)
 
 ## 9.1.0 (2024-07-11)
 
@@ -19,8 +19,8 @@
 - Update markdown base settings [#3067](https://github.com/opendatateam/udata/pull/3067)
 - Prevent tagging as spam owners' messages [#3071](https://github.com/opendatateam/udata/pull/3071)[#3076](https://github.com/opendatateam/udata/pull/3076)
 - Add api endpoint /me/org_topics/ [#3070](https://github.com/opendatateam/udata/pull/3070)
-- Revamp CORS: remove flask-cors to always returns 204 on OPTIONS request [#3046](https://github.com/opendatateam/udata/pull/3046) [#3074](https://github.com/opendatateam/udata/pull/3074)
 - Expose dataservices in RDF catalog [#3058](https://github.com/opendatateam/udata/pull/3058) [#3075](https://github.com/opendatateam/udata/pull/3075)
+- CORS: always returns 204 on OPTIONS request [#3046](https://github.com/opendatateam/udata/pull/3046) 
 
 ## 9.0.0 (2024-06-07)
 
