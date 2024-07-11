@@ -45,7 +45,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
     )
     description = field(
         db.StringField(required=True),
-        format="markdown",
+        markdown=True,
     )
     type = field(
         db.StringField(required=True, choices=list(REUSE_TYPES)),
@@ -53,6 +53,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
     )
     url = field(
         db.StringField(required=True),
+        description="The remote URL (website)",
         check=check_url_does_not_exists,
     )
     urlhash = db.StringField(required=True, unique=True)
@@ -89,7 +90,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
 
     private = field(db.BooleanField(default=False))
 
-    ext = field(db.MapField(db.GenericEmbeddedDocumentField()))
+    ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = field(db.ExtrasField())
 
     featured = field(

@@ -36,7 +36,7 @@ def convert_db_to_field(key, field, info):
         # is always good enough.
         return info.get('convert_to'), info.get('convert_to')
     elif isinstance(field, mongo_fields.StringField):
-        constructor = restx_fields.String
+        constructor = custom_restx_fields.Markdown if info.get('markdown', False)  else restx_fields.String
         params['min_length'] = field.min_length
         params['max_length'] = field.max_length
         params['enum'] = field.choices
@@ -68,7 +68,12 @@ def convert_db_to_field(key, field, info):
     elif isinstance(field, mongo_fields.ListField):
         # For lists, we convert the inner value from Mongo to RestX then we create
         # the `List` RestX type with this converted inner value.
-        field_read, field_write = convert_db_to_field(f"{key}.inner", field.field, { **info, **info.get('inner_field_info', {}) })
+        # There is three level of information, from most important to least
+        #     1. `inner_field_info` inside `__additional_field_info__` on the parent
+        #     2. `__additional_field_info__` of the inner field
+        #     3. `__additional_field_info__` of the parent 
+        inner_info = getattr(field.field, '__additional_field_info__', {})
+        field_read, field_write = convert_db_to_field(f"{key}.inner", field.field, { **info, **inner_info, **info.get('inner_field_info', {}) })
         constructor_read = lambda **kwargs: restx_fields.List(field_read, **kwargs)
         constructor_write = lambda **kwargs: restx_fields.List(field_write, **kwargs)
     elif isinstance(field, mongo_fields.ReferenceField):
