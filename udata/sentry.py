@@ -26,7 +26,7 @@ ERROR_PARSE_DSN_MSG = "Unable to parse Sentry DSN"
 IGNORED_EXCEPTIONS = HTTPException, PermissionDenied, UploadProgress
 
 
-def public_dsn(dsn: str):
+def public_dsn(dsn: str) -> str | None:
     """Check if DSN is public or raise a warning and turn it into a public one"""
     m = RE_DSN.match(dsn)
     if not m:

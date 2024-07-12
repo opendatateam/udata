@@ -23,7 +23,7 @@ _template_hooks = {}
 
 
 @hook.app_template_global()
-def package_version(name: str):
+def package_version(name: str) -> str:
     return pkg_resources.get_distribution(name).version
 
 
