@@ -61,7 +61,7 @@ def init_app(app: UDataApp):
             exceptions.add(exception)
 
         sentry_sample_rate: float = 0.1
-        if app.config.get("DEBUG"):
+        if app.config.get("DEBUG", None):
             sentry_sample_rate = 1.0
 
         sentry_sdk.init(
@@ -69,7 +69,7 @@ def init_app(app: UDataApp):
             integrations=[FlaskIntegration(), CeleryIntegration()],
             ignore_errors=list(exceptions),
             release=f"udata@{package_version('udata')}",
-            environment=app.config["SITE_ID"],
+            environment=app.config.get("SITE_ID", None),
             # Set traces_sample_rate to 1.0 to capture 100%
             # of transactions for performance monitoring.
             # Sentry recommends adjusting this value in production.
