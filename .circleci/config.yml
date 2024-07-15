@@ -29,7 +29,7 @@ jobs:
             source venv/bin/activate
             pip install --upgrade wheel
             pip install -r requirements/develop.pip
-            pip install -e .
+            pip install -e setup.py
       - save_cache:
           key: py3-cache-v12-{{ arch }}-{{ checksum "python.deps" }}
           paths:
