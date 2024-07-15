@@ -28,7 +28,6 @@ jobs:
             python -m venv venv
             source venv/bin/activate
             pip install --upgrade wheel pip
-            pip install -r requirements/develop.pip
             pip install -e .
       - save_cache:
           key: py3-cache-v12-{{ arch }}-{{ checksum "python.deps" }}
