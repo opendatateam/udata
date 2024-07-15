@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Update pinned dependencies according to project dependencies, without updating any project dependencies [#3089](https://github.com/opendatateam/udata/pull/3089)
 
 ## 9.1.0 (2024-07-11)
 
