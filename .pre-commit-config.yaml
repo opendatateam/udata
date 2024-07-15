@@ -36,10 +36,8 @@ repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.5.1 # Ruff version
     hooks:
+      # Run the linter
       - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
-
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.5.1 # Ruff version
-    hooks:
+        args: [--fix, --exit-non-zero-on-fix, --select, I]
+      # Run the formatter
       - id: ruff-format
