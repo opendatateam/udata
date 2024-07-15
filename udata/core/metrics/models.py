@@ -1,7 +1,8 @@
 from udata.api_fields import field
 from udata.mongo import db
 
-__all__ = ("WithMetrics",)
+
+__all__ = ('WithMetrics',)
 
 
 class WithMetrics(object):
@@ -10,4 +11,5 @@ class WithMetrics(object):
     __metrics_keys__ = []
 
     def get_metrics(self):
-        return {key: self.metrics.get(key, 0) for key in self.__metrics_keys__}
+        return {key:self.metrics.get(key, 0) for key in self.__metrics_keys__}
+

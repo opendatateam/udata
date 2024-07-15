@@ -20,16 +20,15 @@ class BadgesField(ListField):
 
         for key in value:
             if key not in self.registered:
-                errors[key] = "Badge {0} is not registered".format(key)
+                errors[key] = 'Badge {0} is not registered'.format(key)
 
         if errors:
-            self.error("Unknown badges types", errors=errors)
+            self.error('Unknown badges types', errors=errors)
 
     def __call__(self, key):
         def inner(cls):
             self.register(key, cls)
             return cls
-
         return inner
 
 

@@ -1,10 +1,10 @@
 from mongoengine import Q
 
-from udata.api import API, api
+from udata.api import api, API
 from udata.auth import admin_permission
 from udata.core.discussions.models import Discussion
-from udata.core.spam.constants import POTENTIAL_SPAM
 from udata.core.spam.fields import potential_spam_fields
+from udata.core.spam.constants import POTENTIAL_SPAM
 from udata.utils import id_or_404
 
 
@@ -12,7 +12,6 @@ class SpamAPIMixin(API):
     """
     Base Spam Model API.
     """
-
     model = None
 
     def get_model(self, id):
@@ -38,27 +37,21 @@ class SpamAPIMixin(API):
         return {}, 200
 
 
-ns = api.namespace("spam", "Spam related operations")
+ns = api.namespace('spam', 'Spam related operations')
 
 
-@ns.route("/", endpoint="spam")
+@ns.route('/', endpoint='spam')
 class SpamAPI(API):
     """
     Base class for a discussion thread.
     """
-
-    @api.doc("get_potential_spams")
+    @api.doc('get_potential_spams')
     @api.secure(admin_permission)
     @api.marshal_with(potential_spam_fields)
     def get(self):
         """Get all potential spam objects"""
-        discussions = Discussion.objects(
-            Q(spam__status=POTENTIAL_SPAM) | Q(discussion__spam__status=POTENTIAL_SPAM)
-        )
+        discussions = Discussion.objects(Q(spam__status=POTENTIAL_SPAM) | Q(discussion__spam__status=POTENTIAL_SPAM))
 
-        return [
-            {
-                "message": discussion.spam_report_message([discussion]),
-            }
-            for discussion in discussions
-        ]
+        return [{
+            'message': discussion.spam_report_message([discussion]),
+        } for discussion in discussions]

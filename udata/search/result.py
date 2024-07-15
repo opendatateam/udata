@@ -4,19 +4,19 @@ from bson.objectid import ObjectId
 
 from udata.utils import Paginable
 
+
 log = logging.getLogger(__name__)
 
 
 class SearchResult(Paginable):
-    """An ElasticSearch result wrapper for easy property access"""
-
+    '''An ElasticSearch result wrapper for easy property access'''
     def __init__(self, query, **kwargs):
         self.query = query
-        self.result = kwargs.get("result", None)
-        self.mongo_objects = kwargs.get("mongo_objects", None)
-        self._page = kwargs.pop("page")
-        self._page_size = kwargs.pop("page_size")
-        self._total = kwargs.pop("total")
+        self.result = kwargs.get('result', None)
+        self.mongo_objects = kwargs.get('mongo_objects', None)
+        self._page = kwargs.pop('page')
+        self._page_size = kwargs.pop('page_size')
+        self._total = kwargs.pop('total')
 
     @property
     def query_string(self):
@@ -43,7 +43,7 @@ class SearchResult(Paginable):
 
     def get_ids(self):
         try:
-            return [elem["id"] for elem in self.result]
+            return [elem['id'] for elem in self.result]
         except (KeyError, TypeError):
             return []
 
@@ -53,9 +53,8 @@ class SearchResult(Paginable):
             objects = self.query.model.objects.in_bulk(ids)
             self.mongo_objects = [objects.get(id) for id in ids]
             # Filter out DBref ie. indexed object not found in DB
-            self.mongo_objects = [
-                o for o in self.mongo_objects if isinstance(o, self.query.model)
-            ]
+            self.mongo_objects = [o for o in self.mongo_objects
+                                    if isinstance(o, self.query.model)]
         return self.mongo_objects
 
     @property

@@ -1,8 +1,8 @@
+from udata.tests.api import APITestCase
+from udata.search.result import SearchResult
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.search import DatasetSearch
 from udata.models import Dataset
-from udata.search.result import SearchResult
-from udata.tests.api import APITestCase
 
 
 class ResultTest(APITestCase):
@@ -21,11 +21,9 @@ class ResultTest(APITestCase):
             "previous_page": None,
             "page_size": 20,
             "total_pages": 1,
-            "total": 3,
+            "total": 3
         }
-        search_results = SearchResult(
-            query=search_query, result=service_result.pop("data"), **service_result
-        )
+        search_results = SearchResult(query=search_query, result=service_result.pop('data'), **service_result)
 
         assert len(search_results.get_objects()) == 3
 
@@ -47,11 +45,9 @@ class ResultTest(APITestCase):
             "previous_page": None,
             "page_size": 20,
             "total_pages": 1,
-            "total": 3,
+            "total": 3
         }
-        search_results = SearchResult(
-            query=search_query, result=service_result.pop("data"), **service_result
-        )
+        search_results = SearchResult(query=search_query, result=service_result.pop('data'), **service_result)
 
         to_delete_random_dataset.delete()
         assert len(search_results.get_objects()) == 3
@@ -60,3 +56,4 @@ class ResultTest(APITestCase):
         objects = search_results.objects
         for o in objects:
             assert isinstance(o, Dataset)
+

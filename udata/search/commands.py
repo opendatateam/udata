@@ -1,39 +1,40 @@
+from datetime import datetime
+from flask import current_app
 import logging
 import sys
-from datetime import datetime
+import requests
 
 import click
-import requests
-from flask import current_app
 
 from udata.commands import cli
 from udata.search import adapter_catalog
 
+
 log = logging.getLogger(__name__)
 
 
-@cli.group("search")
+@cli.group('search')
 def grp():
-    """Search/Indexation related operations"""
+    '''Search/Indexation related operations'''
     pass
 
 
-TIMESTAMP_FORMAT = "%Y-%m-%d-%H-%M"
+TIMESTAMP_FORMAT = '%Y-%m-%d-%H-%M'
 
 
 def default_index_suffix_name(now):
-    """Build a time based index suffix name"""
+    '''Build a time based index suffix name'''
     return now.strftime(TIMESTAMP_FORMAT)
 
 
 def iter_adapters():
-    """Iter over adapter in predictable way"""
+    '''Iter over adapter in predictable way'''
     adapters = adapter_catalog.values()
     return sorted(adapters, key=lambda a: a.model.__name__)
 
 
 def iter_qs(qs, adapter):
-    """Safely iterate over a DB QuerySet yielding a tuple (indexability, serialized documents)"""
+    '''Safely iterate over a DB QuerySet yielding a tuple (indexability, serialized documents)'''
     for obj in qs.no_cache().timeout(False):
         indexable = adapter.is_indexable(obj)
         try:
@@ -41,29 +42,28 @@ def iter_qs(qs, adapter):
             yield indexable, doc
         except Exception as e:
             model = adapter.model.__name__
-            log.error(
-                'Unable to index %s "%s": %s', model, str(obj.id), str(e), exc_info=True
-            )
+            log.error('Unable to index %s "%s": %s', model, str(obj.id),
+                      str(e), exc_info=True)
 
 
 def index_model(adapter, start, reindex=False, from_datetime=None):
-    """Index or unindex all objects given a model"""
+    '''Index or unindex all objects given a model'''
     model = adapter.model
-    search_service_url = current_app.config["SEARCH_SERVICE_API_URL"]
-    log.info("Indexing %s objects", model.__name__)
+    search_service_url = current_app.config['SEARCH_SERVICE_API_URL']
+    log.info('Indexing %s objects', model.__name__)
     qs = model.objects
     if from_datetime:
-        date_property = (
-            "last_modified_internal"
-            if model.__name__.lower() in ["dataset"]
-            else "last_modified"
-        )
-        qs = qs.filter(**{f"{date_property}__gte": from_datetime})
+        date_property = ('last_modified_internal'
+                         if model.__name__.lower() in ['dataset']
+                         else 'last_modified')
+        qs = qs.filter(**{f'{date_property}__gte': from_datetime})
     model_name = adapter.model.__name__.lower()
     index_name = model_name
     if reindex:
-        index_name += "-" + default_index_suffix_name(start)
-        payload = {"index": index_name}
+        index_name += '-' + default_index_suffix_name(start)
+        payload = {
+            'index': index_name
+        }
         url = f"{search_service_url}/create-index"
         r = requests.post(url, json=payload)
         r.raise_for_status()
@@ -73,7 +73,10 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
         with requests.Session() as session:
             try:
                 if indexable:
-                    payload = {"document": doc, "index": index_name}
+                    payload = {
+                        'document': doc,
+                        'index': index_name
+                    }
                     url = f"{search_service_url}/{model_name}s/index"
                     r = session.post(url, json=payload)
                     r.raise_for_status()
@@ -85,53 +88,46 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
                 else:
                     continue
             except Exception as e:
-                log.error(
-                    'Unable to index %s "%s": %s',
-                    model,
-                    str(doc["id"]),
-                    str(e),
-                    exc_info=True,
-                )
+                log.error('Unable to index %s "%s": %s', model, str(doc['id']),
+                          str(e), exc_info=True)
 
 
 def finalize_reindex(models, start):
     try:
         url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/set-index-alias"
         payload = {
-            "index_suffix_name": default_index_suffix_name(start),
-            "indices": models,
+            'index_suffix_name': default_index_suffix_name(start),
+            'indices': models
         }
         r = requests.post(url, json=payload)
         r.raise_for_status()
     except Exception:
-        log.exception("Unable to set alias for index")
+        log.exception(f'Unable to set alias for index')
 
     modified_since_reindex = 0
     for adapter in iter_adapters():
         if not models or adapter.model.__name__.lower() in models:
-            date_property = (
-                "last_modified_internal"
-                if adapter.model.__name__.lower() in ["dataset"]
-                else "last_modified"
-            )
+            date_property = ('last_modified_internal'
+                             if adapter.model.__name__.lower() in ['dataset']
+                             else 'last_modified')
             modified_since_reindex += adapter.model.objects(
-                **{f"{date_property}__gte": start}
+                **{f'{date_property}__gte': start}
             ).count()
 
     log.warning(
-        f"{modified_since_reindex} documents have been modified since reindexation start. "
-        f"After having set the appropriate alias, you can index last changes since the "
-        f"beginning of the indexation. Example, you can run:\n"
-        f"`udata search index -f {default_index_suffix_name(start)}`"
+        f'{modified_since_reindex} documents have been modified since reindexation start. '
+        f'After having set the appropriate alias, you can index last changes since the '
+        f'beginning of the indexation. Example, you can run:\n'
+        f'`udata search index -f {default_index_suffix_name(start)}`'
     )
 
 
 @grp.command()
-@click.argument("models", nargs=-1, metavar="[<model> ...]")
-@click.option("-r", "--reindex", default=False, type=bool)
-@click.option("-f", "--from_datetime", type=str)
+@click.argument('models', nargs=-1, metavar='[<model> ...]')
+@click.option('-r', '--reindex', default=False, type=bool)
+@click.option('-f', '--from_datetime', type=str)
 def index(models=None, reindex=True, from_datetime=None):
-    """
+    '''
     Initialize or rebuild the search index
 
     Models to reindex can optionally be specified as arguments.
@@ -140,9 +136,9 @@ def index(models=None, reindex=True, from_datetime=None):
     If reindex is true, indexation will be made on a new index and unindexable documents ignored.
 
     If from_datetime is specified, only models modified since this datetime will be indexed.
-    """
-    if not current_app.config["SEARCH_SERVICE_API_URL"]:
-        log.error("Missing URL for search service")
+    '''
+    if not current_app.config['SEARCH_SERVICE_API_URL']:
+        log.error('Missing URL for search service')
         sys.exit(-1)
 
     start = datetime.utcnow()
@@ -150,10 +146,10 @@ def index(models=None, reindex=True, from_datetime=None):
         from_datetime = datetime.strptime(from_datetime, TIMESTAMP_FORMAT)
 
     doc_types_names = [m.__name__.lower() for m in adapter_catalog.keys()]
-    models = [model.lower().rstrip("s") for model in (models or [])]
+    models = [model.lower().rstrip('s') for model in (models or [])]
     for model in models:
         if model not in doc_types_names:
-            log.error("Unknown model %s", model)
+            log.error('Unknown model %s', model)
             sys.exit(-1)
 
     for adapter in iter_adapters():

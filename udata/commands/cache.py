@@ -1,22 +1,22 @@
 import logging
 
-from udata.app import cache
 from udata.commands import cli, success
+from udata.app import cache
 
 log = logging.getLogger(__name__)
 
 
-@cli.group("cache")
+@cli.group('cache')
 def grp():
-    """
+    '''
     Cache related operations.
-    """
+    '''
     pass
 
 
 @grp.command()
 def flush():
-    """Flush the cache"""
-    log.info("Flushing cache")
+    '''Flush the cache'''
+    log.info('Flushing cache')
     cache.clear()
-    success("Cache flushed")
+    success('Cache flushed')

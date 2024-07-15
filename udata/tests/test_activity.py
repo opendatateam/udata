@@ -1,8 +1,8 @@
-from udata.auth import login_user
-from udata.core.organization.factories import OrganizationFactory
+from udata.models import db, Activity
+from udata.tests import TestCase, DBTestMixin, WebTestMixin
 from udata.core.user.factories import UserFactory
-from udata.models import Activity, db
-from udata.tests import DBTestMixin, TestCase, WebTestMixin
+from udata.core.organization.factories import OrganizationFactory
+from udata.auth import login_user
 
 
 class FakeSubject(db.Document):
@@ -10,13 +10,13 @@ class FakeSubject(db.Document):
 
 
 class FakeActivity(Activity):
-    key = "fake"
+    key = 'fake'
     related_to = db.ReferenceField(FakeSubject)
 
 
 class ActivityTest(WebTestMixin, DBTestMixin, TestCase):
     def setUp(self):
-        self.fake = FakeSubject.objects.create(name="fake")
+        self.fake = FakeSubject.objects.create(name='fake')
         self.login()
 
     def test_create_and_retrieve_for_user(self):
@@ -28,24 +28,21 @@ class ActivityTest(WebTestMixin, DBTestMixin, TestCase):
         self.assertIsInstance(activities[0], FakeActivity)
 
     def test_create_and_retrieve_with_extras(self):
-        FakeActivity.objects.create(
-            actor=self.user,
-            related_to=self.fake,
-            extras={"some_key": "some_value", "other_key": "other_value"},
-        )
+        FakeActivity.objects.create(actor=self.user, related_to=self.fake, extras={'some_key': 'some_value',
+                                                                                   'other_key': 'other_value'})
 
         activities = Activity.objects(actor=self.user)
 
         self.assertEqual(len(activities), 1)
-        self.assertEqual(activities[0].extras["some_key"], "some_value")
-        self.assertEqual(activities[0].extras["other_key"], "other_value")
+        self.assertEqual(activities[0].extras['some_key'], 'some_value')
+        self.assertEqual(activities[0].extras['other_key'], 'other_value')
         self.assertIsInstance(activities[0], FakeActivity)
+
 
     def test_create_and_retrieve_for_org(self):
         org = OrganizationFactory()
         FakeActivity.objects.create(
-            actor=self.user, related_to=self.fake, organization=org
-        )
+            actor=self.user, related_to=self.fake, organization=org)
 
         activities = Activity.objects(organization=org)
 
@@ -55,8 +52,7 @@ class ActivityTest(WebTestMixin, DBTestMixin, TestCase):
     def test_create_and_retrieve_for_related(self):
         org = OrganizationFactory()
         FakeActivity.objects.create(
-            actor=self.user, related_to=self.fake, organization=org
-        )
+            actor=self.user, related_to=self.fake, organization=org)
         FakeActivity.objects.create(actor=UserFactory(), related_to=self.fake)
 
         activities = Activity.objects(related_to=self.fake)
@@ -71,7 +67,7 @@ class ActivityTest(WebTestMixin, DBTestMixin, TestCase):
         self.emitted = True
 
     def test_emit_signal(self):
-        """It should emit a signal on new activity"""
+        '''It should emit a signal on new activity'''
         self.emitted = False
         with FakeActivity.on_new.connected_to(self.check_emitted):
             FakeActivity.objects.create(actor=self.user, related_to=self.fake)
@@ -79,7 +75,7 @@ class ActivityTest(WebTestMixin, DBTestMixin, TestCase):
         self.assertTrue(self.emitted)
 
     def test_class_shortcut(self):
-        """It should emit a signal on new activity"""
+        '''It should emit a signal on new activity'''
         self.emitted = False
         self.login()
         with self.app.app_context():

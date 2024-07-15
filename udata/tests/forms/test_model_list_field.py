@@ -36,7 +36,7 @@ class ModelListFieldTest(TestCase):
     def test_with_one_valid_data(self):
         nested = Nested.objects.create(name=faker.name())
         fake = Fake()
-        form = FakeForm(MultiDict({"nested": str(nested.id)}))
+        form = FakeForm(MultiDict({'nested': str(nested.id)}))
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -51,7 +51,7 @@ class ModelListFieldTest(TestCase):
         nesteds = [Nested.objects.create(name=faker.name()) for _ in range(3)]
         ids = [str(n.id) for n in nesteds]
         fake = Fake()
-        form = FakeForm(MultiDict({"nested": ",".join(ids)}))
+        form = FakeForm(MultiDict({'nested': ','.join(ids)}))
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -65,7 +65,7 @@ class ModelListFieldTest(TestCase):
     def test_with_one_valid_json_id(self):
         nested = Nested.objects.create(name=faker.name())
         fake = Fake()
-        form = FakeForm.from_json({"nested": [str(nested.id)]})
+        form = FakeForm.from_json({'nested': [str(nested.id)]})
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -79,7 +79,7 @@ class ModelListFieldTest(TestCase):
     def test_with_one_valid_json_object(self):
         nested = Nested.objects.create(name=faker.name())
         fake = Fake()
-        form = FakeForm.from_json({"nested": [{"id": str(nested.id)}]})
+        form = FakeForm.from_json({'nested': [{'id': str(nested.id)}]})
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -94,7 +94,7 @@ class ModelListFieldTest(TestCase):
         nested = [Nested.objects.create(name=faker.name()) for _ in range(3)]
         ids = [str(n.id) for n in nested]
         fake = Fake()
-        form = FakeForm.from_json({"nested": ids})
+        form = FakeForm.from_json({'nested': ids})
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -107,9 +107,9 @@ class ModelListFieldTest(TestCase):
 
     def test_with_multiple_valid_json_object(self):
         nested = [Nested.objects.create(name=faker.name()) for _ in range(3)]
-        ids = [{"id": str(n.id)} for n in nested]
+        ids = [{'id': str(n.id)} for n in nested]
         fake = Fake()
-        form = FakeForm.from_json({"nested": ids})
+        form = FakeForm.from_json({'nested': ids})
 
         form.validate()
         self.assertEqual(form.errors, {})

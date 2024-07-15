@@ -1,10 +1,11 @@
 from udata.forms import ModelForm, fields, validators, widgets
 from udata.i18n import lazy_gettext as _
 
-from .constants import IMAGE_SIZES
 from .models import Post
+from .constants import IMAGE_SIZES
 
-__all__ = ("PostForm",)
+
+__all__ = ('PostForm', )
 
 
 class PostForm(ModelForm):
@@ -12,19 +13,19 @@ class PostForm(ModelForm):
 
     owner = fields.CurrentUserField()
 
-    name = fields.StringField(_("Name"), [validators.DataRequired()])
-    headline = fields.StringField(_("Headline"), widget=widgets.TextArea())
-    content = fields.MarkdownField(_("Content"), [validators.DataRequired()])
+    name = fields.StringField(_('Name'), [validators.DataRequired()])
+    headline = fields.StringField(_('Headline'), widget=widgets.TextArea())
+    content = fields.MarkdownField(_('Content'), [validators.DataRequired()])
 
-    datasets = fields.DatasetListField(_("Associated datasets"))
-    reuses = fields.ReuseListField(_("Associated reuses"))
+    datasets = fields.DatasetListField(_('Associated datasets'))
+    reuses = fields.ReuseListField(_('Associated reuses'))
 
-    image = fields.ImageField(_("Image"), sizes=IMAGE_SIZES)
-    credit_to = fields.StringField(_("Image credits"))
-    credit_url = fields.URLField(_("Credit URL"))
+    image = fields.ImageField(_('Image'), sizes=IMAGE_SIZES)
+    credit_to = fields.StringField(_('Image credits'))
+    credit_url = fields.URLField(_('Credit URL'))
 
-    tags = fields.TagField(_("Tags"))
+    tags = fields.TagField(_('Tags'))
 
     body_type = fields.StringField(
-        _("body type"), description=_("Specify your body type (HTML or markdown)")
-    )
+        _('body type'),
+        description=_('Specify your body type (HTML or markdown)'))

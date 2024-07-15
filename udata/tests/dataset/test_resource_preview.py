@@ -1,12 +1,14 @@
 import pytest
 
-from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.preview import PreviewPlugin, PreviewWarning
+from udata.core.dataset.factories import DatasetFactory
 
-pytestmark = [pytest.mark.usefixtures("clean_db")]
+pytestmark = [
+    pytest.mark.usefixtures('clean_db')
+]
 
-PREVIEW_URL = "http://preview"
-FALLBACK_PREVIEW_URL = "http://preview/default"
+PREVIEW_URL = 'http://preview'
+FALLBACK_PREVIEW_URL = 'http://preview/default'
 
 
 class AlwaysPreview(PreviewPlugin):
@@ -30,7 +32,7 @@ class PreviewFromDataset(PreviewPlugin):
         return True
 
     def preview_url(self, resource):
-        return resource.dataset.extras["preview"]
+        return resource.dataset.extras['preview']
 
 
 class FallbackPreview(PreviewPlugin):
@@ -56,12 +58,12 @@ class NotAValidPlugin(object):
 class ResourcePreviewTest:
     @pytest.fixture(autouse=True)
     def patch_entrypoint(self, request, mocker, app):
-        marker = request.node.get_closest_marker("preview")
+        marker = request.node.get_closest_marker('preview')
         plugins = marker.args[0] if marker else []
-        m = mocker.patch("udata.entrypoints.get_enabled")
+        m = mocker.patch('udata.entrypoints.get_enabled')
         m.return_value.values.return_value = plugins  # Keep order
         yield
-        m.assert_called_with("udata.preview", app)
+        m.assert_called_with('udata.preview', app)
 
     def test_preview_is_none_by_default(self):
         dataset = DatasetFactory(visible=True)
@@ -88,7 +90,8 @@ class ResourcePreviewTest:
 
     @pytest.mark.preview([PreviewFromDataset])
     def test_can_access_dataset_metadata(self):
-        dataset = DatasetFactory(visible=True, extras={"preview": PREVIEW_URL})
+        dataset = DatasetFactory(visible=True,
+                                 extras={'preview': PREVIEW_URL})
         resource = dataset.resources[0]
         assert resource.preview_url == PREVIEW_URL
 
@@ -113,7 +116,7 @@ class ResourcePreviewTest:
 
     @pytest.mark.preview([NotAValidPlugin])
     def test_warn_but_ignore_invalid_plugins(self):
-        expected_msg = "NotAValidPlugin is not a valid preview plugin"
+        expected_msg = 'NotAValidPlugin is not a valid preview plugin'
         with pytest.warns(PreviewWarning, match=expected_msg):
             dataset = DatasetFactory(visible=True)
             resource = dataset.resources[0]

@@ -39,7 +39,9 @@ class UUIDFieldTest(TestCase):
 
         fake = Fake()
         id = uuid.uuid4()
-        form = FakeForm(MultiDict({"id": str(id)}))
+        form = FakeForm(MultiDict({
+            'id': str(id)
+        }))
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -53,9 +55,11 @@ class UUIDFieldTest(TestCase):
 
         fake = Fake()
         id = uuid.uuid4()
-        form = FakeForm(MultiDict({"id": str(id)}))
+        form = FakeForm(MultiDict({
+            'id': str(id)
+        }))
 
-        form = FakeForm.from_json({"id": str(id)})
+        form = FakeForm.from_json({'id': str(id)})
         form.validate()
         self.assertEqual(form.errors, {})
 
@@ -66,8 +70,8 @@ class UUIDFieldTest(TestCase):
     def test_with_invalid_uuid_string(self):
         Fake, FakeForm = self.factory()
 
-        form = FakeForm(MultiDict({"id": "not-an-uuid"}))
+        form = FakeForm(MultiDict({'id': 'not-an-uuid'}))
 
         form.validate()
-        self.assertIn("id", form.errors)
-        self.assertEqual(len(form.errors["id"]), 1)
+        self.assertIn('id', form.errors)
+        self.assertEqual(len(form.errors['id']), 1)

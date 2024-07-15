@@ -1,10 +1,9 @@
+import geojson
 import json
 import logging
 
-import geojson
-
-from udata.forms import ModelForm, validators, widgets
-from udata.forms.fields import Field, FormField, ModelList, SelectField
+from udata.forms import widgets, ModelForm, validators
+from udata.forms.fields import ModelList, Field, SelectField, FormField
 from udata.i18n import lazy_gettext as _
 
 from .models import GeoZone, SpatialCoverage, spatial_granularities
@@ -13,14 +12,15 @@ log = logging.getLogger(__name__)
 
 
 class ZonesAutocompleter(widgets.TextInput):
-    classes = "zone-completer"
+    classes = 'zone-completer'
 
     def __call__(self, field, **kwargs):
-        """Store the values as JSON to prefeed selectize"""
+        '''Store the values as JSON to prefeed selectize'''
         if field.data:
-            kwargs["data-values"] = json.dumps(
-                [{"id": zone.id, "name": zone.name} for zone in field.data]
-            )
+            kwargs['data-values'] = json.dumps([{
+                'id': zone.id,
+                'name': zone.name
+            } for zone in field.data])
         return super(ZonesAutocompleter, self).__call__(field, **kwargs)
 
 
@@ -29,12 +29,12 @@ class ZonesField(ModelList, Field):
     widget = ZonesAutocompleter()
 
     def fetch_objects(self, geoids):
-        """
+        '''
         Custom object retrieval.
 
         Zones are resolved from their identifier
         instead of the default bulk fetch by ID.
-        """
+        '''
         zones = []
         no_match = []
         for geoid in geoids:
@@ -45,9 +45,8 @@ class ZonesField(ModelList, Field):
                 no_match.append(geoid)
 
         if no_match:
-            msg = _("Unknown geoid(s): {identifiers}").format(
-                identifiers=", ".join(str(id) for id in no_match)
-            )
+            msg = _('Unknown geoid(s): {identifiers}').format(
+                identifiers=', '.join(str(id) for id in no_match))
             raise validators.ValidationError(msg)
 
         return zones
@@ -64,15 +63,15 @@ class GeomField(Field):
                     self.data = geojson.GeoJSON.to_instance(value)
             except:
                 self.data = None
-                log.exception("Unable to parse GeoJSON")
-                raise ValueError(self.gettext("Not a valid GeoJSON"))
+                log.exception('Unable to parse GeoJSON')
+                raise ValueError(self.gettext('Not a valid GeoJSON'))
 
     def pre_validate(self, form):
         if self.data:
             if not isinstance(self.data, geojson.GeoJSON):
                 self.data = geojson.GeoJSON.to_instance(self.data)
                 if not isinstance(self.data, geojson.GeoJSON):
-                    raise validators.ValidationError("Not a valid GeoJSON")
+                    raise validators.ValidationError('Not a valid GeoJSON')
             if not self.data.is_valid:
                 raise validators.ValidationError(self.data.errors())
         return True
@@ -81,20 +80,18 @@ class GeomField(Field):
 class SpatialCoverageForm(ModelForm):
     model_class = SpatialCoverage
 
-    zones = ZonesField(
-        _("Spatial coverage"),
-        description=_("A list of covered territories"),
-        default=[],
-    )
-    granularity = SelectField(
-        _("Spatial granularity"),
-        description=_("The size of the data increment"),
-        choices=lambda: spatial_granularities,
-        default="other",
-    )
+    zones = ZonesField(_('Spatial coverage'),
+                       description=_('A list of covered territories'),
+                       default=[])
+    granularity = SelectField(_('Spatial granularity'),
+                              description=_('The size of the data increment'),
+                              choices=lambda: spatial_granularities,
+                              default='other')
     geom = GeomField()
 
 
 class SpatialCoverageField(FormField):
     def __init__(self, *args, **kwargs):
-        super(SpatialCoverageField, self).__init__(SpatialCoverageForm, *args, **kwargs)
+        super(SpatialCoverageField, self).__init__(SpatialCoverageForm,
+                                                   *args,
+                                                   **kwargs)

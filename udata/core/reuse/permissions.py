@@ -1,7 +1,7 @@
 from udata.auth import Permission, UserNeed
+
 from udata.core.organization.permissions import (
-    OrganizationAdminNeed,
-    OrganizationEditorNeed,
+    OrganizationAdminNeed, OrganizationEditorNeed
 )
 
 

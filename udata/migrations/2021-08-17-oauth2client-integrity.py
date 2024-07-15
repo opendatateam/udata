@@ -1,7 +1,6 @@
-"""
+'''
 Remove Oauth2Client db integrity problems
-"""
-
+'''
 import logging
 
 import mongoengine
@@ -12,7 +11,7 @@ log = logging.getLogger(__name__)
 
 
 def migrate(db):
-    log.info("Processing Transfer objects.")
+    log.info('Processing Transfer objects.')
 
     clients = OAuth2Client.objects.no_cache().all()
 
@@ -25,4 +24,4 @@ def migrate(db):
             client.organization = None
             client.save()
 
-    log.info(f"Completed, modified {count} OAuth2Client objects")
+    log.info(f'Completed, modified {count} OAuth2Client objects')

@@ -6,11 +6,12 @@ from udata.core.discussions.models import Discussion
 from udata.core.user.factories import UserFactory
 
 
-@pytest.mark.usefixtures("clean_db")
+@pytest.mark.usefixtures('clean_db')
 class DatasetActionsTest:
+
     def test_dataset_archive(self, app):
         user = UserFactory()
-        app.config["ARCHIVE_COMMENT_USER_ID"] = user.id
+        app.config['ARCHIVE_COMMENT_USER_ID'] = user.id
 
         dataset = DatasetFactory()
 

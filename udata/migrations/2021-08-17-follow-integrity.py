@@ -1,8 +1,7 @@
-"""
+'''
 Remove Follow integrity problems
 ⚠️ long migration
-"""
-
+'''
 import logging
 
 import mongoengine
@@ -13,7 +12,7 @@ log = logging.getLogger(__name__)
 
 
 def migrate(db):
-    log.info("Processing Follow references.")
+    log.info('Processing Follow references.')
 
     count = 0
     follows = Follow.objects(following__ne=None).no_cache().all()
@@ -24,4 +23,4 @@ def migrate(db):
             count += 1
             follow.delete()
 
-    log.info(f"Delete {count} Follow objects")
+    log.info(f'Delete {count} Follow objects')

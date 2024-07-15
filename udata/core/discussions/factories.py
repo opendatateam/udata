@@ -9,11 +9,11 @@ class DiscussionFactory(ModelFactory):
     class Meta:
         model = Discussion
 
-    title = factory.Faker("sentence")
+    title = factory.Faker('sentence')
 
 
 class MessageDiscussionFactory(ModelFactory):
     class Meta:
         model = Message
 
-    content = factory.Faker("sentence")
+    content = factory.Faker('sentence')

@@ -1,7 +1,7 @@
 import logging
 
-from udata.models import Organization, User, db
-from udata.tasks import task
+from udata.models import db, User, Organization
+from udata.tasks import task, celery
 
 from .signals import new_activity
 
@@ -16,28 +16,16 @@ def delay_activity(cls, related_to, actor, organization=None, extras=None):
         related_to_cls=related_to.__class__.__name__,
         related_to_id=str(related_to.id),
         organization_id=str(organization.id) if organization else None,
-        extras=extras,
+        extras=extras
     )
 
 
 @task
-def emit_activity(
-    classname,
-    actor_id,
-    related_to_cls,
-    related_to_id,
-    organization_id=None,
-    extras=None,
-):
-    log.debug(
-        "Emit new activity: %s %s %s %s %s %s",
-        classname,
-        actor_id,
-        related_to_cls,
-        related_to_id,
-        organization_id,
-        extras,
-    )
+def emit_activity(classname, actor_id, related_to_cls, related_to_id,
+                  organization_id=None, extras=None):
+    log.debug('Emit new activity: %s %s %s %s %s %s',
+              classname, actor_id, related_to_cls,
+              related_to_id, organization_id, extras)
     cls = db.resolve_model(classname)
     actor = User.objects.get(pk=actor_id)
     related_to = db.resolve_model(related_to_cls).objects.get(pk=related_to_id)
@@ -45,6 +33,5 @@ def emit_activity(
         organization = Organization.objects.get(pk=organization_id)
     else:
         organization = None
-    cls.objects.create(
-        actor=actor, related_to=related_to, organization=organization, extras=extras
-    )
+    cls.objects.create(actor=actor, related_to=related_to,
+                       organization=organization, extras=extras)

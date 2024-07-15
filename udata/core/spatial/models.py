@@ -4,43 +4,44 @@ from werkzeug.utils import cached_property
 
 from udata.app import cache
 from udata.core.metrics.models import WithMetrics
+from udata.uris import endpoint_for
 from udata.i18n import _, get_locale, language
 from udata.mongo import db
-from udata.uris import endpoint_for
 
 from . import geoids
-from .constants import ADMIN_LEVEL_MAX, ADMIN_LEVEL_MIN, BASE_GRANULARITIES
+from .constants import ADMIN_LEVEL_MIN, ADMIN_LEVEL_MAX, BASE_GRANULARITIES
 
-__all__ = ("GeoLevel", "GeoZone", "SpatialCoverage", "spatial_granularities")
+
+__all__ = ('GeoLevel', 'GeoZone', 'SpatialCoverage', 'spatial_granularities')
 
 
 class GeoLevel(db.Document):
     id = db.StringField(primary_key=True)
     name = db.StringField(required=True)
-    admin_level = db.IntField(
-        min_value=ADMIN_LEVEL_MIN, max_value=ADMIN_LEVEL_MAX, default=100
-    )
-
+    admin_level = db.IntField(min_value=ADMIN_LEVEL_MIN,
+                              max_value=ADMIN_LEVEL_MAX,
+                              default=100)
 
 class GeoZoneQuerySet(db.BaseQuerySet):
+
     def resolve(self, geoid, id_only=False):
-        """
+        '''
         Resolve a GeoZone given a GeoID.
 
         If `id_only` is True,
         the result will be the resolved GeoID
         instead of the resolved zone.
-        """
+        '''
         level, code = geoids.parse(geoid)
         qs = self(level=level, code=code)
         if id_only:
-            qs = qs.only("id")
+            qs = qs.only('id')
         result = qs.first()
         return result.id if id_only and result else result
 
 
 class GeoZone(WithMetrics, db.Document):
-    SEPARATOR = ":"
+    SEPARATOR = ':'
 
     id = db.StringField(primary_key=True)
     slug = db.StringField(required=True)
@@ -50,11 +51,11 @@ class GeoZone(WithMetrics, db.Document):
     uri = db.StringField()
 
     meta = {
-        "indexes": [
-            "name",
-            ("level", "code"),
+        'indexes': [
+            'name',
+            ('level', 'code'),
         ],
-        "queryset_class": GeoZoneQuerySet,
+        'queryset_class': GeoZoneQuerySet
     }
 
     def __str__(self):
@@ -62,19 +63,20 @@ class GeoZone(WithMetrics, db.Document):
 
     def __html__(self):
         """In use within the admin."""
-        return "{name} <i>({code})</i>".format(name=_(self.name), code=self.code)
+        return '{name} <i>({code})</i>'.format(
+            name=_(self.name), code=self.code)
 
     @cached_property
     def level_code(self):
         """Truncated level code for the sake of readability."""
         # Either 'region', 'departement' or 'commune',
         # useful to match TERRITORY_DATASETS keys.
-        return self.id.split(":")[1]
+        return self.id.split(':')[1]
 
     @cached_property
     def level_name(self):
         """Truncated level name for the sake of readability."""
-        if self.level.startswith("fr:"):
+        if self.level.startswith('fr:'):
             return self.level[3:]
         # Keep the whole level name as a fallback (e.g. `country:fr`)
         return self.level
@@ -89,50 +91,48 @@ class GeoZone(WithMetrics, db.Document):
 
     @property
     def handled_level(self):
-        return self.level in current_app.config.get("HANDLED_LEVELS")
+        return self.level in current_app.config.get('HANDLED_LEVELS')
 
     @property
     def url(self):
-        return endpoint_for("territories.territory", territory=self)
+        return endpoint_for('territories.territory', territory=self)
 
     @property
     def external_url(self):
-        return endpoint_for("territories.territory", territory=self, _external=True)
+        return endpoint_for('territories.territory', territory=self, _external=True)
 
     def count_datasets(self):
         from udata.models import Dataset
-
-        self.metrics["datasets"] = (
-            Dataset.objects(spatial__zones=self.id).visible().count()
-        )
+        self.metrics['datasets'] = Dataset.objects(spatial__zones=self.id).visible().count()
         self.save()
 
     def toGeoJSON(self):
         return {
-            "id": self.id,
-            "type": "Feature",
-            "properties": {
-                "slug": self.slug,
-                "name": _(self.name),
-                "code": self.code,
-                "uri": self.uri,
-                "level": self.level,
-            },
+            'id': self.id,
+            'type': 'Feature',
+            'properties': {
+                'slug': self.slug,
+                'name': _(self.name),
+                'code': self.code,
+                'uri': self.uri,
+                'level': self.level,
+            }
         }
 
 
 @cache.memoize()
 def get_spatial_granularities(lang):
     with language(lang):
-        return [(l.id, _(l.name)) for l in GeoLevel.objects] + [
-            (id, str(label)) for id, label in BASE_GRANULARITIES
-        ]
+        return [
+            (l.id, _(l.name)) for l in GeoLevel.objects
+        ] + [(id, str(label)) for id, label in BASE_GRANULARITIES]
 
 
-spatial_granularities = LocalProxy(lambda: get_spatial_granularities(get_locale()))
+spatial_granularities = LocalProxy(
+    lambda: get_spatial_granularities(get_locale()))
 
 
-@cache.cached(timeout=50, key_prefix="admin_levels")
+@cache.cached(timeout=50, key_prefix='admin_levels')
 def get_spatial_admin_levels():
     return dict((l.id, l.admin_level) for l in GeoLevel.objects)
 
@@ -141,15 +141,15 @@ admin_levels = LocalProxy(get_spatial_admin_levels)
 
 
 class SpatialCoverage(db.EmbeddedDocument):
-    """Represent a spatial coverage as a list of territories and/or a geometry."""
-
+    """Represent a spatial coverage as a list of territories and/or a geometry.
+    """
     geom = db.MultiPolygonField()
     zones = db.ListField(db.ReferenceField(GeoZone))
-    granularity = db.StringField(default="other")
+    granularity = db.StringField(default='other')
 
     @property
     def granularity_label(self):
-        return dict(spatial_granularities).get(self.granularity or "other", "other")
+        return dict(spatial_granularities).get(self.granularity or 'other', 'other')
 
     @property
     def top_label(self):
@@ -168,9 +168,9 @@ class SpatialCoverage(db.EmbeddedDocument):
         return [zone for zone in self.zones if zone.handled_level]
 
     def clean(self):
-        if "geom" in self._get_changed_fields():
+        if 'geom' in self._get_changed_fields():
             if self.zones:
-                raise db.ValidationError("The spatial coverage already has a Geozone")
-        if "zones" in self._get_changed_fields():
+                raise db.ValidationError('The spatial coverage already has a Geozone')
+        if 'zones' in self._get_changed_fields():
             if self.geom:
-                raise db.ValidationError("The spatial coverage already has a Geometry")
+                raise db.ValidationError('The spatial coverage already has a Geometry')

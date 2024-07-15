@@ -2,20 +2,27 @@ from flask import url_for
 
 from udata.models import License, Organization
 
-__all__ = ("TerritoryDataset", "ResourceBasedTerritoryDataset", "TERRITORY_DATASETS")
+__all__ = (
+    'TerritoryDataset', 'ResourceBasedTerritoryDataset', 'TERRITORY_DATASETS'
+)
 
 
-TERRITORY_DATASETS = {"commune": {}, "departement": {}, "region": {}, "country": {}}
+TERRITORY_DATASETS = {
+    'commune': {},
+    'departement': {},
+    'region': {},
+    'country': {}
+}
 
 
 class TerritoryDataset(object):
     order = 0
-    id = ""
-    title = ""
-    organization_id = ""
-    url_template = ""
-    description = ""
-    license_id = "fr-lo"
+    id = ''
+    title = ''
+    organization_id = ''
+    url_template = ''
+    description = ''
+    license_id = 'fr-lo'
 
     def __init__(self, territory):
         self.territory = territory
@@ -26,7 +33,8 @@ class TerritoryDataset(object):
 
     @property
     def slug(self):
-        return "{territory_id}:{id}".format(territory_id=self.territory.id, id=self.id)
+        return '{territory_id}:{id}'.format(
+            territory_id=self.territory.id, id=self.id)
 
     @property
     def organization(self):
@@ -38,22 +46,19 @@ class TerritoryDataset(object):
 
 
 class ResourceBasedTerritoryDataset(TerritoryDataset):
-    dataset_id = ""
-    resource_id = ""
-    territory_attr = ""
-    csv_column = ""
+    dataset_id = ''
+    resource_id = ''
+    territory_attr = ''
+    csv_column = ''
 
     def url_for(self, external=False):
-        return url_for(
-            "territories.territory_dataset_resource",
-            territory=self.territory,
-            dataset=self.dataset_id,
-            resource_id=self.resource_id,
-            territory_attr=self.territory_attr,
-            csv_column=self.csv_column,
-            _external=external,
-        )
-
+        return url_for('territories.territory_dataset_resource',
+                       territory=self.territory,
+                       dataset=self.dataset_id,
+                       resource_id=self.resource_id,
+                       territory_attr=self.territory_attr,
+                       csv_column=self.csv_column,
+                       _external=external)
     url = property(url_for)
 
     @property

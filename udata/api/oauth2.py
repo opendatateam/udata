@@ -1,4 +1,4 @@
-"""
+'''
 OAuth 2 serveur implementation based on Authlib.
 
 See the documentatiosn here:
@@ -12,23 +12,22 @@ Authlib provides SQLAlchemny mixins which help understanding:
 
 As well as a sample application:
  - https://github.com/authlib/example-oauth2-server
-"""
-
+'''
 import fnmatch
+
+from bson import ObjectId
+
 from datetime import datetime, timedelta
 
+from authlib.integrations.flask_oauth2.errors import _HTTPException as AuthlibFlaskException
 from authlib.integrations.flask_oauth2 import AuthorizationServer, ResourceProtector
-from authlib.integrations.flask_oauth2.errors import (
-    _HTTPException as AuthlibFlaskException,
-)
-from authlib.oauth2 import OAuth2Error
-from authlib.oauth2.rfc6749 import ClientMixin, grants
-from authlib.oauth2.rfc6749.util import list_to_scope, scope_to_list
+from authlib.oauth2.rfc6749 import grants, ClientMixin
 from authlib.oauth2.rfc6750 import BearerTokenValidator
 from authlib.oauth2.rfc7009 import RevocationEndpoint
 from authlib.oauth2.rfc7636 import CodeChallenge
-from bson import ObjectId
-from flask import current_app, render_template, request
+from authlib.oauth2.rfc6749.util import scope_to_list, list_to_scope
+from authlib.oauth2 import OAuth2Error
+from flask import request, render_template, current_app
 from flask_security.utils import verify_password
 from werkzeug.exceptions import Unauthorized
 from werkzeug.security import gen_salt
@@ -36,12 +35,12 @@ from werkzeug.security import gen_salt
 from udata.app import csrf
 from udata.auth import current_user, login_required, login_user
 from udata.core.organization.models import Organization
-from udata.core.storages import default_image_basename, images
-from udata.i18n import I18nBlueprint
-from udata.i18n import lazy_gettext as _
+from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.mongo import db
+from udata.core.storages import images, default_image_basename
 
-blueprint = I18nBlueprint("oauth", __name__, url_prefix="/oauth")
+
+blueprint = I18nBlueprint('oauth', __name__, url_prefix='/oauth')
 oauth = AuthorizationServer()
 require_oauth = ResourceProtector()
 
@@ -52,10 +51,13 @@ REFRESH_EXPIRATION = 30  # days
 EPOCH = datetime.fromtimestamp(0)
 
 TOKEN_TYPES = {
-    "Bearer": _("Bearer Token"),
+    'Bearer': _('Bearer Token'),
 }
 
-SCOPES = {"default": _("Default scope"), "admin": _("System administrator rights")}
+SCOPES = {
+    'default': _('Default scope'),
+    'admin': _('System administrator rights')
+}
 
 
 class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
@@ -64,21 +66,22 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
     name = db.StringField(required=True)
     description = db.StringField()
 
-    owner = db.ReferenceField("User")
+    owner = db.ReferenceField('User')
     organization = db.ReferenceField(Organization, reverse_delete_rule=db.NULLIFY)
-    image = db.ImageField(
-        fs=images, basename=default_image_basename, thumbnails=[150, 25]
-    )
+    image = db.ImageField(fs=images, basename=default_image_basename,
+                          thumbnails=[150, 25])
 
     redirect_uris = db.ListField(db.StringField())
-    scope = db.StringField(default="default")
+    scope = db.StringField(default='default')
     grant_types = db.ListField(db.StringField())
     response_types = db.ListField(db.StringField())
 
     confidential = db.BooleanField(default=False)
     internal = db.BooleanField(default=False)
 
-    meta = {"collection": "oauth2_client"}
+    meta = {
+        'collection': 'oauth2_client'
+    }
 
     def get_client_id(self):
         return str(self.id)
@@ -100,7 +103,7 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
 
     def get_allowed_scope(self, scope):
         if not scope:
-            return ""
+            return ''
         allowed = set(scope_to_list(self.scope))
         return list_to_scope([s for s in scope.split() if s in allowed])
 
@@ -117,8 +120,8 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
 
     def check_token_endpoint_auth_method(self, method):
         if not self.has_client_secret():
-            return method == "none"
-        return method in ("client_secret_post", "client_secret_basic")
+            return method == 'none'
+        return method in ('client_secret_post', 'client_secret_basic')
 
     def check_response_type(self, response_type):
         return True
@@ -135,23 +138,25 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
 
 
 class OAuth2Token(db.Document):
-    client = db.ReferenceField("OAuth2Client", required=True)
-    user = db.ReferenceField("User")
+    client = db.ReferenceField('OAuth2Client', required=True)
+    user = db.ReferenceField('User')
 
     # currently only bearer is supported
-    token_type = db.StringField(choices=list(TOKEN_TYPES), default="Bearer")
+    token_type = db.StringField(choices=list(TOKEN_TYPES), default='Bearer')
 
     access_token = db.StringField(unique=True)
     refresh_token = db.StringField(unique=True, sparse=True)
     created_at = db.DateTimeField(default=datetime.utcnow, required=True)
     expires_in = db.IntField(required=True, default=TOKEN_EXPIRATION)
-    scope = db.StringField(default="")
+    scope = db.StringField(default='')
     revoked = db.BooleanField(default=False)
 
-    meta = {"collection": "oauth2_token"}
+    meta = {
+        'collection': 'oauth2_token'
+    }
 
     def __str__(self):
-        return "<OAuth2Token({0.client.name})>".format(self)
+        return '<OAuth2Token({0.client.name})>'.format(self)
 
     def get_scope(self):
         return self.scope
@@ -174,22 +179,24 @@ class OAuth2Token(db.Document):
 
 
 class OAuth2Code(db.Document):
-    user = db.ReferenceField("User", required=True)
-    client = db.ReferenceField("OAuth2Client", required=True)
+    user = db.ReferenceField('User', required=True)
+    client = db.ReferenceField('OAuth2Client', required=True)
 
     code = db.StringField(required=True)
 
     redirect_uri = db.StringField()
     expires = db.DateTimeField()
 
-    scope = db.StringField(default="")
+    scope = db.StringField(default='')
     code_challenge = db.StringField()
     code_challenge_method = db.StringField()
 
-    meta = {"collection": "oauth2_code"}
+    meta = {
+        'collection': 'oauth2_code'
+    }
 
     def __str__(self):
-        return "<OAuth2Code({0.client.name}, {0.user.fullname})>".format(self)
+        return '<OAuth2Code({0.client.name}, {0.user.fullname})>'.format(self)
 
     def is_expired(self):
         return self.expires < datetime.utcnow()
@@ -202,11 +209,14 @@ class OAuth2Code(db.Document):
 
 
 class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
-    TOKEN_ENDPOINT_AUTH_METHODS = ["client_secret_basic", "client_secret_post"]
+    TOKEN_ENDPOINT_AUTH_METHODS = [
+        'client_secret_basic',
+        'client_secret_post'
+    ]
 
     def save_authorization_code(self, code, request):
-        code_challenge = request.data.get("code_challenge")
-        code_challenge_method = request.data.get("code_challenge_method")
+        code_challenge = request.data.get('code_challenge')
+        code_challenge_method = request.data.get('code_challenge_method')
         expires = datetime.utcnow() + timedelta(seconds=GRANT_EXPIRATION)
         auth_code = OAuth2Code.objects.create(
             code=code,
@@ -258,9 +268,9 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
 class RevokeToken(RevocationEndpoint):
     def query_token(self, token, token_type_hint, client):
         qs = OAuth2Token.objects(client=client)
-        if token_type_hint == "access_token":
+        if token_type_hint == 'access_token':
             return qs.filter(access_token=token).first()
-        elif token_type_hint == "refresh_token":
+        elif token_type_hint == 'refresh_token':
             return qs.filter(refresh_token=token).first()
         else:
             qs = qs(db.Q(access_token=token) | db.Q(refresh_token=token))
@@ -282,22 +292,22 @@ class BearerToken(BearerTokenValidator):
         return token.revoked
 
 
-@blueprint.route("/token", methods=["POST"], localize=False, endpoint="token")
+@blueprint.route('/token', methods=['POST'], localize=False, endpoint='token')
 @csrf.exempt
 def access_token():
     return oauth.create_token_response()
 
 
-@blueprint.route("/revoke", methods=["POST"], localize=False)
+@blueprint.route('/revoke', methods=['POST'], localize=False)
 @csrf.exempt
 def revoke_token():
     return oauth.create_endpoint_response(RevokeToken.ENDPOINT_NAME)
 
 
-@blueprint.route("/authorize", methods=["GET", "POST"])
+@blueprint.route('/authorize', methods=['GET', 'POST'])
 @login_required
 def authorize(*args, **kwargs):
-    if request.method == "GET":
+    if request.method == 'GET':
         try:
             grant = oauth.validate_consent_request(end_user=current_user)
         except OAuth2Error as error:
@@ -305,10 +315,10 @@ def authorize(*args, **kwargs):
         # Bypass authorization screen for internal clients
         if grant.client.internal:
             return oauth.create_authorization_response(grant_user=current_user)
-        return render_template("api/oauth_authorize.html", grant=grant)
-    elif request.method == "POST":
-        accept = "accept" in request.form
-        decline = "decline" in request.form
+        return render_template('api/oauth_authorize.html', grant=grant)
+    elif request.method == 'POST':
+        accept = 'accept' in request.form
+        decline = 'decline' in request.form
         if accept and not decline:
             grant_user = current_user
         else:
@@ -316,25 +326,30 @@ def authorize(*args, **kwargs):
         return oauth.create_authorization_response(grant_user=grant_user)
 
 
-@blueprint.route("/error")
+@blueprint.route('/error')
 def oauth_error():
-    return render_template("api/oauth_error.html")
+    return render_template('api/oauth_error.html')
 
 
 def query_client(client_id):
-    """Fetch client by ID"""
+    '''Fetch client by ID'''
     return OAuth2Client.objects(id=ObjectId(client_id)).first()
 
 
 def save_token(token, request):
-    scope = token.pop("scope", "")
-    if request.grant_type == "refresh_token":
+    scope = token.pop('scope', '')
+    if request.grant_type == 'refresh_token':
         credential = request.credential
         credential.update(scope=scope, **token)
     else:
         client = request.client
         user = request.user or client.owner
-        OAuth2Token.objects.create(client=client, user=user.id, scope=scope, **token)
+        OAuth2Token.objects.create(
+            client=client,
+            user=user.id,
+            scope=scope,
+            **token
+        )
 
 
 def check_credentials():

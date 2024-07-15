@@ -1,7 +1,6 @@
-"""
+'''
 Remove User db integrity problems, and Discussion.subject in the process
-"""
-
+'''
 import logging
 
 import mongoengine
@@ -12,7 +11,7 @@ log = logging.getLogger(__name__)
 
 
 def migrate(db):
-    log.info("Processing Discussion user references.")
+    log.info('Processing Discussion user references.')
 
     discussions = Discussion.objects(user__ne=None).no_cache().all()
     remove_count = 0
@@ -38,9 +37,9 @@ def migrate(db):
             discussion.save()
             modif_count += 1
 
-    log.info(f"Modified {modif_count} Discussion objects, deleted {remove_count}")
+    log.info(f'Modified {modif_count} Discussion objects, deleted {remove_count}')
 
-    log.info("Processing Badges user references.")
+    log.info('Processing Badges user references.')
 
     organizations = Organization.objects.filter(badges__0__exists=True)
     count = 0
@@ -53,9 +52,9 @@ def migrate(db):
                 badge.created_by = None
                 org.save()
 
-    log.info(f"Modified {count} badges")
+    log.info(f'Modified {count} badges')
 
-    log.info("Processing Request user references.")
+    log.info('Processing Request user references.')
 
     organizations = Organization.objects.filter(requests__0__exists=True)
     count = 0
@@ -68,4 +67,4 @@ def migrate(db):
                 request.handled_by = None
                 org.save()
 
-    log.info(f"Modified {count} requests")
+    log.info(f'Modified {count} requests')

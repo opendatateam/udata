@@ -50,9 +50,10 @@ class ModelFieldTestMixin(object):
     def test_with_valid_json_data_ref(self):
         nested = Nested.objects.create(name=faker.name())
         model = self.model()
-        form = self.form.from_json(
-            {"nested": {"class": "Nested", "id": str(nested.id)}}
-        )
+        form = self.form.from_json({'nested': {
+            'class': 'Nested',
+            'id': str(nested.id)
+        }})
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -65,28 +66,35 @@ class ModelFieldTestMixin(object):
 
     def test_with_invalid_ref_class(self):
         nested = Nested.objects.create(name=faker.name())
-        form = self.form.from_json({"nested": {"class": "Bad", "id": str(nested.id)}})
+        form = self.form.from_json({'nested': {
+            'class': 'Bad',
+            'id': str(nested.id)
+        }})
 
         form.validate()
-        self.assertIn("nested", form.errors)
-        self.assertEqual(len(form.errors["nested"]), 1)
+        self.assertIn('nested', form.errors)
+        self.assertEqual(len(form.errors['nested']), 1)
 
     def test_with_invalid_ref_id(self):
         Nested.objects.create(name=faker.name())
-        form = self.form.from_json({"nested": {"class": "Nested", "id": "bad"}})
+        form = self.form.from_json({'nested': {
+            'class': 'Nested',
+            'id': 'bad'
+        }})
 
         form.validate()
-        self.assertIn("nested", form.errors)
-        self.assertEqual(len(form.errors["nested"]), 1)
+        self.assertIn('nested', form.errors)
+        self.assertEqual(len(form.errors['nested']), 1)
 
     def test_not_found(self):
-        form = self.form.from_json(
-            {"nested": {"class": "Nested", "id": str(ObjectId())}}
-        )
+        form = self.form.from_json({'nested': {
+            'class': 'Nested',
+            'id': str(ObjectId())
+        }})
 
         form.validate()
-        self.assertIn("nested", form.errors)
-        self.assertEqual(len(form.errors["nested"]), 1)
+        self.assertIn('nested', form.errors)
+        self.assertEqual(len(form.errors['nested']), 1)
 
 
 class ModelFieldWithReferenceTest(ModelFieldTestMixin, TestCase):
@@ -96,7 +104,9 @@ class ModelFieldWithReferenceTest(ModelFieldTestMixin, TestCase):
     def test_with_valid_form_data_id_only(self):
         nested = Nested.objects.create(name=faker.name())
         model = WithReference()
-        form = WithReferenceForm(MultiDict({"nested": str(nested.id)}))
+        form = WithReferenceForm(MultiDict({
+            'nested': str(nested.id)
+        }))
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -110,7 +120,7 @@ class ModelFieldWithReferenceTest(ModelFieldTestMixin, TestCase):
     def test_with_valid_json_data_id_only(self):
         nested = Nested.objects.create(name=faker.name())
         model = WithReference()
-        form = WithReferenceForm.from_json({"nested": str(nested.id)})
+        form = WithReferenceForm.from_json({'nested': str(nested.id)})
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -123,22 +133,20 @@ class ModelFieldWithReferenceTest(ModelFieldTestMixin, TestCase):
 
     def test_with_invalid_id(self):
         Nested.objects.create(name=faker.name())
-        form = WithReferenceForm.from_json({"nested": "bad"})
+        form = WithReferenceForm.from_json({'nested': 'bad'})
 
         form.validate()
-        self.assertIn("nested", form.errors)
-        self.assertEqual(len(form.errors["nested"]), 1)
+        self.assertIn('nested', form.errors)
+        self.assertEqual(len(form.errors['nested']), 1)
 
 
 class Nested2(db.Document):
-    """A dummy model just to nesting/ReferenceField"""
-
+    '''A dummy model just to nesting/ReferenceField'''
     name = db.StringField()
 
 
 class Nested3(db.Document):
-    """A dummy model just to nesting/ReferenceField"""
-
+    '''A dummy model just to nesting/ReferenceField'''
     name = db.StringField()
 
 
@@ -170,19 +178,21 @@ class ModelFieldWithGenericTest(ModelFieldTestMixin, TestCase):
 
     def test_with_valid_form_data_id_only(self):
         nested = Nested.objects.create(name=faker.name())
-        form = WithGenericForm(MultiDict({"nested": str(nested.id)}))
+        form = WithGenericForm(MultiDict({
+            'nested': str(nested.id)
+        }))
 
         form.validate()
-        self.assertIn("nested", form.errors)
-        self.assertEqual(len(form.errors["nested"]), 1)
+        self.assertIn('nested', form.errors)
+        self.assertEqual(len(form.errors['nested']), 1)
 
     def test_with_valid_json_data_id_only(self):
         nested = Nested.objects.create(name=faker.name())
-        form = WithGenericForm.from_json({"nested": str(nested.id)})
+        form = WithGenericForm.from_json({'nested': str(nested.id)})
 
         form.validate()
-        self.assertIn("nested", form.errors)
-        self.assertEqual(len(form.errors["nested"]), 1)
+        self.assertIn('nested', form.errors)
+        self.assertEqual(len(form.errors['nested']), 1)
 
 
 class ModelFieldWithGenericChoicesTest(ModelFieldTestMixin, TestCase):
@@ -191,26 +201,29 @@ class ModelFieldWithGenericChoicesTest(ModelFieldTestMixin, TestCase):
 
     def test_with_valid_form_data_id_only(self):
         nested = Nested.objects.create(name=faker.name())
-        form = WithGenericChoicesForm(MultiDict({"nested": str(nested.id)}))
+        form = WithGenericChoicesForm(MultiDict({
+            'nested': str(nested.id)
+        }))
 
         form.validate()
-        self.assertIn("nested", form.errors)
-        self.assertEqual(len(form.errors["nested"]), 1)
+        self.assertIn('nested', form.errors)
+        self.assertEqual(len(form.errors['nested']), 1)
 
     def test_with_valid_json_data_id_only(self):
         nested = Nested.objects.create(name=faker.name())
-        form = WithGenericChoicesForm.from_json({"nested": str(nested.id)})
+        form = WithGenericChoicesForm.from_json({'nested': str(nested.id)})
 
         form.validate()
-        self.assertIn("nested", form.errors)
-        self.assertEqual(len(form.errors["nested"]), 1)
+        self.assertIn('nested', form.errors)
+        self.assertEqual(len(form.errors['nested']), 1)
 
     def test_with_ref_class_not_in_choices(self):
         nested = Nested.objects.create(name=faker.name())
-        form = self.form.from_json(
-            {"nested": {"class": "Nested3", "id": str(nested.id)}}
-        )
+        form = self.form.from_json({'nested': {
+            'class': 'Nested3',
+            'id': str(nested.id)
+        }})
 
         form.validate()
-        self.assertIn("nested", form.errors)
-        self.assertEqual(len(form.errors["nested"]), 1)
+        self.assertIn('nested', form.errors)
+        self.assertEqual(len(form.errors['nested']), 1)

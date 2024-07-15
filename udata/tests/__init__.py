@@ -1,9 +1,6 @@
 import unittest
-
 import pytest
-
 from udata import settings
-
 from . import helpers
 
 
@@ -16,9 +13,9 @@ class TestCase(unittest.TestCase):
         return self.create_app()
 
     def create_app(self):
-        """
+        '''
         Here for compatibility legacy test classes
-        """
+        '''
         return self.app
 
     def assertEqualDates(self, datetime1, datetime2, limit=1):  # Seconds.
@@ -32,9 +29,9 @@ class WebTestMixin(object):
 
     @pytest.fixture(autouse=True)
     def inject_client(self, client):
-        """
+        '''
         Inject test client for compatibility with Flask-Testing.
-        """
+        '''
         self.client = client
 
     def get(self, url, **kwargs):
@@ -73,11 +70,11 @@ class WebTestMixin(object):
 
 
 for code in 200, 201, 204, 400, 401, 403, 404, 410, 500:
-    name = "assert{0}".format(code)
+    name = 'assert{0}'.format(code)
     helper = getattr(helpers, name)
     setattr(WebTestMixin, name, lambda s, r, h=helper: h(r))
 
 
-@pytest.mark.usefixtures("clean_db")
+@pytest.mark.usefixtures('clean_db')
 class DBTestMixin(object):
     pass

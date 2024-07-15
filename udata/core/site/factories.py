@@ -14,6 +14,6 @@ class SiteFactory(ModelFactory):
     class Meta:
         model = Site
 
-    id = factory.Faker("word")
-    title = factory.Faker("name")
+    id = factory.Faker('word')
+    title = factory.Faker('name')
     settings = factory.SubFactory(SiteSettingsFactory)

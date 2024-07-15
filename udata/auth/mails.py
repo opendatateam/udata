@@ -1,25 +1,23 @@
 import email_validator
 from flask import current_app
-
 from udata.tasks import task
 
 
 @task
 def sendmail(msg):
-    debug = current_app.config.get("DEBUG", False)
-    send_mail = current_app.config.get("SEND_MAIL", not debug)
+    debug = current_app.config.get('DEBUG', False)
+    send_mail = current_app.config.get('SEND_MAIL', not debug)
     if send_mail:
         mail = current_app.extensions.get("mail")
         mail.send(msg)
 
 
 class UdataMailUtil:
+
     def __init__(self, app):
         self.app = app
 
-    def send_mail(
-        self, template, subject, recipient, sender, body, html, user, **kwargs
-    ):
+    def send_mail(self, template, subject, recipient, sender, body, html, user, **kwargs):
         from flask_mail import Message
 
         # In Flask-Mail, sender can be a two element tuple -- (name, address)
