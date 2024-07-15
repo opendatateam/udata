@@ -127,6 +127,4 @@ dev-dependencies = []
 
 [tool.setuptools]
 include-package-data = false
-
-[tool.wheel]
-universal = "1"
+packages = ["udata", "tasks"]
