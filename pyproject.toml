@@ -117,27 +117,6 @@ markers = [
     "oauth: inject an OAuth client",
 ]
 
-[tool.flake8]
-max-line-length = "100"
-exclude = """
-.cache,
-.git,
-__pycache__,
-build,
-data,
-dist,
-docs,
-instance,
-js,
-less,
-node_modules,
-reports,
-requirements,
-specs,
-udata/static,
-udata/templates"""
-
-
 [tool.ruff]
 lint = { select = ["I"] } # also sort imports with an isort rule
 line-length = 100
