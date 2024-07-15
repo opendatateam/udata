@@ -26,7 +26,7 @@ def inner_harvest():
 def inner_process_dataset(item: HarvestItem, args1, args2, args3):
     dataset = self.get_dataset(item.remote_id)
 
-    update_dataset(dataset, args1, args2) 
+    update_dataset(dataset, args1, args2)
 
     return dataset
 ```
@@ -225,18 +225,13 @@ class RandomBackend(BaseBackend):
 
 ```
 
-You need to properly expose the harvester as a `udata.harvesters` entrypoint in your `setup.py`:
+You need to properly expose the harvester as a `udata.harvesters` entrypoint in your `pyproject.toml`:
 
-```python
-setup(
-    '...'
-    entry_points={
-        'udata.harvesters': [
-            'random = canonical.path.to_the:RandomBackend',
-        ]
-    },
-    '...'
-)
+```toml
+[project.entry-points."udata.harvesters"]
+csw-dcat = "udata.harvest.backends.dcat:CswDcatBackend"
+csw-iso-19139 = "udata.harvest.backends.dcat:CswIso19139DcatBackend"
+dcat = "udata.harvest.backends.dcat:DcatBackend"
 ```
 
 The easiest way is to start from the

@@ -10,7 +10,7 @@ We’ll use the following repositories:
 # Check the system requirements
 
 !!! info
-    Be aware that udata now requires Python **>3.9,<=3.11** to work. 
+    Be aware that udata now requires Python **>3.9,<=3.11** to work.
 
 udata requires several libraries to be installed to work. You can see them on the udata documentation link below.
 
@@ -27,7 +27,7 @@ $UDATA_WORKSPACE
 ├── fs
 ├── udata
 │   ├── ...
-│   ├── setup.py
+│   ├── pyproject.toml
 │	└── udata.cfg
 └── udata-front
     ├── ...
@@ -259,7 +259,7 @@ You can now visit `dev.local:7000/` in your browser and start playing with your 
 You can use parcel to watch for file changes in udata or udata-front directory with
 
 ```bash
-inv assets-watch 
+inv assets-watch
 ```
 
 !!! note "Tell us what you think"
