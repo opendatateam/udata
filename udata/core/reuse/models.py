@@ -116,7 +116,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
 
     @property
     def is_hidden(self):
-        return len(self.datasets) == 0 or self.private or self.deleted or self.archived
+        return len(self.datasets) == 0 or self.private or self.deleted
 
     @property
     def external_url(self):
