@@ -11,5 +11,5 @@ requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [tool.ruff]
-lint = { select = ["I"] }
+lint = { select = ["I"] } # also sort imports with an isort rule
 line-length = 100
