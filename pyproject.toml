@@ -1,8 +1,21 @@
 [project]
 name = "udata"
-version = "2.0.4"
 description = "Customizable and skinnable social platform dedicated to (open) data"
+keywords = ["udata opendata portal data"]
 authors = [{ name = "Opendata Team", email = "opendatateam@data.gouv.fr" }]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Software Distribution",
+]
 dependencies = [
     "Babel==2.12.1",
     "Faker==3.0.0",
@@ -62,6 +75,26 @@ readme = "README.md"
 requires-python = ">= 3.9"
 license = { file = "LICENSE" }
 dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/opendatateam/udata"
+
+[project.scripts]
+udata = "udata.commands:cli"
+
+[project.entry-points]
+[project.entry-points.pytest11]
+udata = "udata.tests.plugin"
+
+[project.entry-points."udata.avatars"]
+adorable = "udata.features.identicon.backends:adorable"
+internal = "udata.features.identicon.backends:internal"
+robohash = "udata.features.identicon.backends:robohash"
+
+[project.entry-points."udata.harvesters"]
+csw-dcat = "udata.harvest.backends.dcat:CswDcatBackend"
+csw-iso-19139 = "udata.harvest.backends.dcat:CswIso19139DcatBackend"
+dcat = "udata.harvest.backends.dcat:DcatBackend"
 
 [build-system]
 requires = ["setuptools>=61.2"]
