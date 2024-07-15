@@ -1,0 +1,15 @@
+[project]
+name = "udata"
+version = "2.0.4"
+description = "Customizable and skinnable social platform dedicated to (open) data"
+authors = [{ name = "Opendata Team", email = "opendatateam@data.gouv.fr" }]
+readme = "README.md"
+requires-python = ">= 3.9"
+
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+format = { quote-style = "single" }
+lint = { select = ["I"] }
