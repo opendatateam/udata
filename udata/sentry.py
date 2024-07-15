@@ -73,10 +73,10 @@ def init_app(app: UDataApp):
             # Set traces_sample_rate to 1.0 to capture 100%
             # of transactions for performance monitoring.
             # Sentry recommends adjusting this value in production.
-            traces_sample_rate=sentry_sample_rate,
+            traces_sample_rate=app.config.get("SENTRY_SAMPLE_RATE", None),
             # Experimental profiling
             _experiments={
-                "profiles_sample_rate": sentry_sample_rate,
+                "profiles_sample_rate": app.config.get("SENTRY_SAMPLE_RATE", None),
             },
         )
 
