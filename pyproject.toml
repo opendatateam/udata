@@ -6,10 +6,6 @@ authors = [{ name = "Opendata Team", email = "opendatateam@data.gouv.fr" }]
 readme = "README.md"
 requires-python = ">= 3.9"
 
-[build-system]
-requires = ["setuptools", "setuptools-scm"]
-build-backend = "setuptools.build_meta"
-
 [tool.ruff]
 lint = { select = ["I"] } # also sort imports with an isort rule
 line-length = 100
