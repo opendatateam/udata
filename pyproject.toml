@@ -61,17 +61,93 @@ dependencies = [
 readme = "README.md"
 requires-python = ">= 3.11"
 license = { file = "LICENSE" }
+dynamic = ["version"]
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools>=61.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.distutils.compile_catalog]
+domain = "udata"
+directory = "udata/translations"
+statistics = true
+
+[tool.distutils.extract_messages]
+keywords = "_ N_:1,2 P_:1c,2 L_ gettext ngettext:1,2 pgettext:1c,2 npgettext:1c,2,3 lazy_gettext lazy_pgettext:1c,2"
+mapping-file = "babel.cfg"
+add-comments = "TRANSLATORS:"
+output-file = "udata/translations/udata.pot"
+width = 80
+
+[tool.distutils.init_catalog]
+domain = "udata"
+input-file = "udata/translations/udata.pot"
+output-dir = "udata/translations"
+
+[tool.distutils.update_catalog]
+domain = "udata"
+input-file = "udata/translations/udata.pot"
+output-dir = "udata/translations"
+previous = true
+
+[tool.pytest.ini_options]
+norecursedirs = [
+    ".git",
+    "build",
+    ".tox",
+    "specs",
+    ".cache",
+    "udata/static",
+    "udata/templates",
+    "udata/translations",
+]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+python_classes = ["*Test"]
+env = """
+# See: https://docs.authlib.org/en/latest/flask/oauth2.html
+AUTHLIB_INSECURE_TRANSPORT=true"""
+mock_use_standalone_module = true
+# See: https://docs.pytest.org/en/latest/warnings.html#deprecationwarning-and-pendingdeprecationwarning
+filterwarnings = ["ignore::DeprecationWarning:mongoengine"]
+# See: https://docs.pytest.org/en/latest/example/markers.html#registering-markers
+markers = [
+    "frontend: load the frontend stack",
+    "preview: mock a preview backend",
+    "oauth: inject an OAuth client",
+]
+
+[tool.flake8]
+max-line-length = "100"
+exclude = """
+.cache,
+.git,
+__pycache__,
+build,
+data,
+dist,
+docs,
+instance,
+js,
+less,
+node_modules,
+reports,
+requirements,
+specs,
+udata/static,
+udata/templates"""
+
+
+[tool.ruff]
+lint = { select = ["I"] } # also sort imports with an isort rule
+line-length = 100
 
 [tool.rye]
 managed = true
 dev-dependencies = []
 
-[tool.hatch.metadata]
-allow-direct-references = true
+[tool.setuptools]
+include-package-data = false
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/udata"]
+[tool.wheel]
+universal = "1"
