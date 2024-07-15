@@ -5,7 +5,7 @@ description = "Customizable and skinnable social platform dedicated to (open) da
 authors = [{ name = "Opendata Team", email = "opendatateam@data.gouv.fr" }]
 readme = "README.md"
 requires-python = ">= 3.9"
-license = { text = "GNU Affero General Public License v3.0" }
+license = { file = "LICENSE" }
 
 [build-system]
 requires = ["setuptools"]
