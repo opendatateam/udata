@@ -8,6 +8,7 @@ from udata.mongo import db
 #                           Fake object for testing                         #
 #############################################################################
 
+
 class FakeSearchable(db.Document):
     title = db.StringField()
     description = db.StringField()
@@ -15,7 +16,7 @@ class FakeSearchable(db.Document):
     other = db.ListField(db.StringField())
     indexable = db.BooleanField(default=True)
 
-    meta = {'allow_inheritance': True}
+    meta = {"allow_inheritance": True}
 
     def __unicode__(self):
         return self.title
@@ -24,11 +25,11 @@ class FakeSearchable(db.Document):
         return self.title
 
     def __html__(self):
-        return '<span>{0}</span>'.format(self.title)
+        return "<span>{0}</span>".format(self.title)
 
 
 class FakeFactory(MongoEngineFactory):
-    title = factory.Faker('sentence')
+    title = factory.Faker("sentence")
 
     class Meta:
         model = FakeSearchable
@@ -37,14 +38,14 @@ class FakeFactory(MongoEngineFactory):
 @search.register
 class FakeSearch(search.ModelSearchAdapter):
     model = FakeSearchable
-    search_url = 'mock://test.com/fakeable/'
+    search_url = "mock://test.com/fakeable/"
     filters = {
-        'tag': search.Filter(),
-        'other': search.Filter(),
+        "tag": search.Filter(),
+        "other": search.Filter(),
     }
     sorts = {
-        'title': 'title.raw',
-        'description': 'description.raw',
+        "title": "title.raw",
+        "description": "description.raw",
     }
 
     @classmethod
@@ -54,6 +55,6 @@ class FakeSearch(search.ModelSearchAdapter):
     @classmethod
     def serialize(cls, fake):
         return {
-            'title': fake.title,
-            'description': fake.description,
+            "title": fake.title,
+            "description": fake.description,
         }

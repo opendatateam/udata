@@ -32,9 +32,7 @@ class UserToRdfTest(DBTestMixin, TestCase):
 
     def test_all_fields(self):
         user = UserFactory(website=faker.uri())
-        user_url = url_for('api.user',
-                           user=user.id,
-                           _external=True)
+        user_url = url_for("api.user", user=user.id, _external=True)
         u = user_to_rdf(user)
         g = u.graph
 
@@ -47,5 +45,4 @@ class UserToRdfTest(DBTestMixin, TestCase):
         self.assertEqual(u.identifier.toPython(), user_url)
         self.assertEqual(u.value(FOAF.name), Literal(user.fullname))
         self.assertEqual(u.value(RDFS.label), Literal(user.fullname))
-        self.assertEqual(u.value(FOAF.homepage).identifier,
-                         URIRef(user.website))
+        self.assertEqual(u.value(FOAF.homepage).identifier, URIRef(user.website))

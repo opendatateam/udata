@@ -38,7 +38,7 @@ class UrlFieldTest(TestCase):
 
         fake = Fake()
         url = faker.url()
-        form = FakeForm(MultiDict({'url': url}))
+        form = FakeForm(MultiDict({"url": url}))
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -52,7 +52,7 @@ class UrlFieldTest(TestCase):
 
         fake = Fake()
         url = faker.url()
-        form = FakeForm(MultiDict({'url': url + '   '}))
+        form = FakeForm(MultiDict({"url": url + "   "}))
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -64,18 +64,18 @@ class UrlFieldTest(TestCase):
     def test_with_invalid_url(self):
         Fake, FakeForm = self.factory()
 
-        form = FakeForm(MultiDict({'url': 'this-is-not-an-url'}))
+        form = FakeForm(MultiDict({"url": "this-is-not-an-url"}))
 
         form.validate()
-        self.assertIn('url', form.errors)
-        self.assertEqual(len(form.errors['url']), 1)
+        self.assertIn("url", form.errors)
+        self.assertEqual(len(form.errors["url"]), 1)
 
     def test_with_unicode_url(self):
         Fake, FakeForm = self.factory()
 
         fake = Fake()
-        url = 'https://www.somewhère.com/with/accënts/'
-        form = FakeForm(MultiDict({'url': url}))
+        url = "https://www.somewhère.com/with/accënts/"
+        form = FakeForm(MultiDict({"url": url}))
 
         form.validate()
         self.assertEqual(form.errors, {})

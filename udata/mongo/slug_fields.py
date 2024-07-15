@@ -13,16 +13,24 @@ log = logging.getLogger(__name__)
 
 
 class SlugField(StringField):
-    '''
+    """
     A field that that produces a slug from the inputs and auto-
     increments the slug if the value already exists.
-    '''
+    """
+
     # Do not remove, this is required to trigger field population
     _auto_gen = True
 
-    def __init__(self, populate_from=None, update=False, lower_case=True,
-                 separator='-', follow=False, **kwargs):
-        kwargs.setdefault('unique', True)
+    def __init__(
+        self,
+        populate_from=None,
+        update=False,
+        lower_case=True,
+        separator="-",
+        follow=False,
+        **kwargs,
+    ):
+        kwargs.setdefault("unique", True)
         self.populate_from = populate_from
         self.update = update
         self.lower_case = lower_case
@@ -34,7 +42,7 @@ class SlugField(StringField):
     def __get__(self, instance, owner):
         # mongoengine calls this after document initialization
         # We register signals handlers here to have a owner reference
-        if not hasattr(self, 'owner'):
+        if not hasattr(self, "owner"):
             self.owner = owner
             pre_save.connect(self.populate_on_pre_save, sender=owner)
             if self.follow:
@@ -52,20 +60,20 @@ class SlugField(StringField):
         pass
 
     def slugify(self, value):
-        '''
+        """
         Apply slugification according to specified field rules
-        '''
+        """
         if value is None:
             return
 
-        return slugify.slugify(value, max_length=self.max_length,
-                               separator=self.separator,
-                               to_lower=self.lower_case)
+        return slugify.slugify(
+            value, max_length=self.max_length, separator=self.separator, to_lower=self.lower_case
+        )
 
     def latest(self, value):
-        '''
+        """
         Get the latest object for a given old slug
-        '''
+        """
         namespace = self.owner_document.__name__
         follow = SlugFollow.objects(namespace=namespace, old_slug=value).first()
         if follow:
@@ -73,9 +81,9 @@ class SlugField(StringField):
         return None
 
     def cleanup_on_delete(self, sender, document, **kwargs):
-        '''
+        """
         Clean up slug redirections on object deletion
-        '''
+        """
         if not self.follow or sender is not self.owner_document:
             return
         slug = getattr(document, self.db_field)
@@ -89,30 +97,31 @@ class SlugField(StringField):
 
 
 class SlugFollow(Document):
-    '''
+    """
     Keeps track of slug changes for a given namespace/class.
     Fields are:
         * namespace - A namespace under which this slug falls
             (e.g. match, team, user etc)
         * old_slug - Before change slug.
         * new_slug - After change slug
-    '''
+    """
+
     namespace = StringField(required=True)
     old_slug = StringField(required=True)
     new_slug = StringField(required=True)
 
     meta = {
-        'indexes': [
-            ('namespace', 'old_slug'),
+        "indexes": [
+            ("namespace", "old_slug"),
         ],
-        'queryset_class': UDataQuerySet,
+        "queryset_class": UDataQuerySet,
     }
 
 
 def populate_slug(instance, field):
-    '''
+    """
     Populate a slug field if needed.
-    '''
+    """
     value = getattr(instance, field.db_field)
 
     try:
@@ -165,14 +174,14 @@ def populate_slug(instance, field):
 
         while exists(slug):
             # keep space for index suffix, trim slug if needed
-            slug_overflow = len('{0}-{1}'.format(base_slug, index)) - field.max_length
+            slug_overflow = len("{0}-{1}".format(base_slug, index)) - field.max_length
             if slug_overflow >= 1:
                 base_slug = base_slug[:-slug_overflow]
-            slug = '{0}-{1}'.format(base_slug, index)
+            slug = "{0}-{1}".format(base_slug, index)
             index += 1
 
         if is_uuid(slug):
-            slug = '{0}-uuid'.format(slug)
+            slug = "{0}-uuid".format(slug)
 
     # Track old slugs for this class
     if field.follow and old_slug != slug:

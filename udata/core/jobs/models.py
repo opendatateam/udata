@@ -4,9 +4,9 @@ from celerybeatmongo.models import PeriodicTask as BasePeriodicTask
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
 
-__all__ = ('PeriodicTask', 'PERIODS')
+__all__ = ("PeriodicTask", "PERIODS")
 
-CRON = '{minute} {hour} {day_of_month} {month_of_year} {day_of_week}'
+CRON = "{minute} {hour} {day_of_month} {month_of_year} {day_of_week}"
 
 
 class PeriodicTask(BasePeriodicTask):
@@ -15,8 +15,8 @@ class PeriodicTask(BasePeriodicTask):
     class Interval(BasePeriodicTask.Interval):
         def __str__(self):
             if self.every == 1:
-                return _('every {0.period_singular}').format(self)
-            return _('every {0.every} {0.period}').format(self)
+                return _("every {0.period_singular}").format(self)
+            return _("every {0.every} {0.period}").format(self)
 
     class Crontab(BasePeriodicTask.Crontab):
         def __str__(self):

@@ -8,7 +8,7 @@ from udata.tests import DBTestMixin, TestCase
 
 class SiteModelTest(DBTestMixin, TestCase):
     def test_delete_home_dataset(self):
-        '''Should pull home datasets on deletion'''
+        """Should pull home datasets on deletion"""
         current_site.settings.home_datasets = DatasetFactory.create_batch(3)
         current_site.save()
 
@@ -22,7 +22,7 @@ class SiteModelTest(DBTestMixin, TestCase):
         self.assertNotIn(dataset.id, home_datasets)
 
     def test_delete_home_reuse(self):
-        '''Should pull home reuses on deletion'''
+        """Should pull home reuses on deletion"""
         current_site.settings.home_reuses = ReuseFactory.create_batch(3)
         current_site.save()
 

@@ -25,7 +25,7 @@ class ContextTask(Task):
 
 class JobTask(ContextTask):
     abstract = True
-    default_queue = 'low'
+    default_queue = "low"
 
     @property
     def log(self):
@@ -34,7 +34,7 @@ class JobTask(ContextTask):
 
 class Scheduler(MongoScheduler):
     def apply_async(self, entry, **kwargs):
-        '''A MongoScheduler storing the last task_id'''
+        """A MongoScheduler storing the last task_id"""
         result = super(Scheduler, self).apply_async(entry, **kwargs)
         entry._task.last_run_id = result.id
         return result
@@ -44,43 +44,42 @@ celery = Celery(task_cls=ContextTask)
 
 
 def router(name, args, kwargs, options, task=None, **kw):
-    '''
+    """
     A celery router using the predeclared :class:`ContextTask`
     attributes (`router` or `default_queue` and/or `default routing_key`).
-    '''
+    """
     # Fetch task by name if necessary
     task = task or celery.tasks.get(name)
     if not task:
         return
     # Single route param override everything
     if task.route:
-        queue = task.route.split('.', 1)[0]
-        return {'queue': queue, 'routing_key': task.route}
+        queue = task.route.split(".", 1)[0]
+        return {"queue": queue, "routing_key": task.route}
     # queue parameter, routing_key computed if not present
     if task.default_queue:
         key = task.default_routing_key
-        key = key or '{0.default_queue}.{0.name}'.format(task)
-        return {'queue': task.default_queue, 'routing_key': key}
+        key = key or "{0.default_queue}.{0.name}".format(task)
+        return {"queue": task.default_queue, "routing_key": key}
     # only routing_key, queue should not be returned to fallback on default
     elif task.default_routing_key:
-        return {'routing_key': task.default_routing_key}
+        return {"routing_key": task.default_routing_key}
 
 
 def task(*args, **kwargs):
-    for arg in 'queue', 'routing_key':
+    for arg in "queue", "routing_key":
         if arg in kwargs:
-            kwargs['default_{0}'.format(arg)] = kwargs.pop(arg)
+            kwargs["default_{0}".format(arg)] = kwargs.pop(arg)
     return celery.task(*args, **kwargs)
 
 
 def job(name, **kwargs):
-    '''A shortcut decorator for declaring jobs'''
-    return task(name=name, schedulable=True, base=JobTask,
-                bind=True, **kwargs)
+    """A shortcut decorator for declaring jobs"""
+    return task(name=name, schedulable=True, base=JobTask, bind=True, **kwargs)
 
 
 def as_task_param(obj):
-    '''Pass a document as task parameter'''
+    """Pass a document as task parameter"""
     return obj.__class__.__name__, (obj.pk if isinstance(obj.pk, str) else str(obj.pk))
 
 
@@ -90,7 +89,7 @@ def get_logger(name):
 
 
 def connect(signal, *args, **kwargs):
-    by_id = kwargs.pop('by_id', False)
+    by_id = kwargs.pop("by_id", False)
 
     def wrapper(func):
         t = task(func, *args, **kwargs)
@@ -100,34 +99,35 @@ def connect(signal, *args, **kwargs):
 
         signal.connect(call_task, weak=False)
         return t
+
     return wrapper
 
 
-@job('test-log')
+@job("test-log")
 def log_test(self):
-    self.log.debug('This is a DEBUG message')
-    self.log.info('This is an INFO message')
-    self.log.warning('This is a WARNING message')
-    self.log.error('This is a ERROR message')
+    self.log.debug("This is a DEBUG message")
+    self.log.info("This is an INFO message")
+    self.log.warning("This is a WARNING message")
+    self.log.error("This is a ERROR message")
 
 
-@job('test-low-queue', queue='low')
-@job('test-default-queue', queue='default')
-@job('test-high-queue', queue='high')
+@job("test-low-queue", queue="low")
+@job("test-default-queue", queue="default")
+@job("test-high-queue", queue="high")
 def queue_test(self, raises=False):
-    '''
+    """
     An empty task to test the queues.
     Set raise to True if you want a notification (ie. Sentry)
-    '''
-    self.log.info('Just a test task')
+    """
+    self.log.info("Just a test task")
     if raises:
-        raise Exception('Test task processing')
+        raise Exception("Test task processing")
 
 
-@job('test-error')
+@job("test-error")
 def error_test(self):
-    self.log.info('There should be an error soon')
-    raise Exception('There is an error')
+    self.log.info("There should be an error soon")
+    raise Exception("There is an error")
 
 
 def schedulables():
@@ -136,23 +136,25 @@ def schedulables():
 
 def default_scheduler_config(url):
     parsed_url = urlparse(url)
-    default_url = '{0}://{1}'.format(*parsed_url)
+    default_url = "{0}://{1}".format(*parsed_url)
     return parsed_url.path[1:], default_url
 
 
 def init_app(app):
     celery.main = app.import_name
 
-    db, url = default_scheduler_config(app.config['MONGODB_HOST'])
+    db, url = default_scheduler_config(app.config["MONGODB_HOST"])
 
-    app.config.setdefault('CELERY_MONGODB_SCHEDULER_DB', db)
-    app.config.setdefault('CELERY_MONGODB_SCHEDULER_URL', url)
+    app.config.setdefault("CELERY_MONGODB_SCHEDULER_DB", db)
+    app.config.setdefault("CELERY_MONGODB_SCHEDULER_URL", url)
 
-    celery.conf.update(**dict(
-        (k.replace('CELERY_', '').lower(), v)
-        for k, v in app.config.items()
-        if k.startswith('CELERY_')
-    ))
+    celery.conf.update(
+        **dict(
+            (k.replace("CELERY_", "").lower(), v)
+            for k, v in app.config.items()
+            if k.startswith("CELERY_")
+        )
+    )
 
     ContextTask.current_app = app
 
@@ -171,6 +173,6 @@ def init_app(app):
     import udata.harvest.tasks  # noqa
     import udata.db.tasks  # noqa
 
-    entrypoints.get_enabled('udata.tasks', app)
+    entrypoints.get_enabled("udata.tasks", app)
 
     return celery

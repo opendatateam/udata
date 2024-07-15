@@ -31,4 +31,4 @@ from udata.mongo import *
 
 
 def init_app(app):
-    entrypoints.get_enabled('udata.models', app)
+    entrypoints.get_enabled("udata.models", app)

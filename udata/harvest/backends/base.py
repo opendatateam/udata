@@ -31,18 +31,18 @@ requests.packages.urllib3.disable_warnings()
 
 class HarvestFilter(object):
     TYPES = {
-        str: 'string',
-        bytes: 'string',
-        int: 'integer',
-        bool: 'boolean',
-        UUID: 'uuid',
-        datetime: 'date-time',
-        date: 'date',
+        str: "string",
+        bytes: "string",
+        int: "integer",
+        bool: "boolean",
+        UUID: "uuid",
+        datetime: "date-time",
+        date: "date",
     }
 
     def __init__(self, label, key, type, description=None):
         if type not in self.TYPES:
-            raise TypeError('Unsupported type {0}'.format(type))
+            raise TypeError("Unsupported type {0}".format(type))
         self.label = label
         self.key = key
         self.type = type
@@ -50,10 +50,10 @@ class HarvestFilter(object):
 
     def as_dict(self):
         return {
-            'label': self.label,
-            'key': self.key,
-            'type': self.TYPES[self.type],
-            'description': self.description,
+            "label": self.label,
+            "key": self.key,
+            "type": self.TYPES[self.type],
+            "description": self.description,
         }
 
 
@@ -66,10 +66,10 @@ class HarvestFeature(object):
 
     def as_dict(self):
         return {
-            'key': self.key,
-            'label': self.label,
-            'description': self.description,
-            'default': self.default,
+            "key": self.key,
+            "label": self.label,
+            "description": self.description,
+            "default": self.default,
         }
 
 
@@ -99,7 +99,7 @@ class BaseBackend(object):
             self.source = source_or_job
             self.job = None
         self.dryrun = dryrun
-        self.max_items = max_items or current_app.config['HARVEST_MAX_ITEMS']
+        self.max_items = max_items or current_app.config["HARVEST_MAX_ITEMS"]
 
     @property
     def config(self):
@@ -107,38 +107,38 @@ class BaseBackend(object):
 
     def head(self, url, headers={}, **kwargs):
         headers.update(self.get_headers())
-        kwargs['verify'] = kwargs.get('verify', self.verify_ssl)
+        kwargs["verify"] = kwargs.get("verify", self.verify_ssl)
         return requests.head(url, headers=headers, **kwargs)
 
     def get(self, url, headers={}, **kwargs):
         headers.update(self.get_headers())
-        kwargs['verify'] = kwargs.get('verify', self.verify_ssl)
+        kwargs["verify"] = kwargs.get("verify", self.verify_ssl)
         return requests.get(url, headers=headers, **kwargs)
 
     def post(self, url, data, headers={}, **kwargs):
         headers.update(self.get_headers())
-        kwargs['verify'] = kwargs.get('verify', self.verify_ssl)
+        kwargs["verify"] = kwargs.get("verify", self.verify_ssl)
         return requests.post(url, data=data, headers=headers, **kwargs)
 
     def get_headers(self):
         return {
             # TODO: extract site title and version
-            'User-Agent': 'uData/0.1 {0.name}'.format(self),
+            "User-Agent": "uData/0.1 {0.name}".format(self),
         }
 
     def has_feature(self, key):
         try:
             feature = next(f for f in self.features if f.key == key)
         except StopIteration:
-            raise HarvestException('Unknown feature {}'.format(key))
-        return self.config.get('features', {}).get(key, feature.default)
+            raise HarvestException("Unknown feature {}".format(key))
+        return self.config.get("features", {}).get(key, feature.default)
 
     def get_filters(self):
-        return self.config.get('filters', [])
+        return self.config.get("filters", [])
 
     def inner_harvest(self):
         raise NotImplementedError
-    
+
     def inner_process_dataset(self, item: HarvestItem) -> Dataset:
         raise NotImplementedError
 
@@ -146,11 +146,9 @@ class BaseBackend(object):
         raise NotImplementedError
 
     def harvest(self):
-        log.debug(f'Starting harvesting {self.source.name} ({self.source.url})…')
+        log.debug(f"Starting harvesting {self.source.name} ({self.source.url})…")
         factory = HarvestJob if self.dryrun else HarvestJob.objects.create
-        self.job = factory(status='initialized',
-                           started=datetime.utcnow(),
-                           source=self.source)
+        self.job = factory(status="initialized", started=datetime.utcnow(), source=self.source)
 
         before_harvest_job.send(self)
 
@@ -160,34 +158,38 @@ class BaseBackend(object):
             if self.source.autoarchive:
                 self.autoarchive()
 
-            self.job.status = 'done'
+            self.job.status = "done"
 
-            if any(i.status == 'failed' for i in self.job.items):
-                self.job.status += '-errors'
+            if any(i.status == "failed" for i in self.job.items):
+                self.job.status += "-errors"
         except HarvestValidationError as e:
-            log.exception(f'Harvesting validation failed for "{safe_unicode(self.source.name)}" ({self.source.backend})')
+            log.exception(
+                f'Harvesting validation failed for "{safe_unicode(self.source.name)}" ({self.source.backend})'
+            )
 
-            self.job.status = 'failed'
+            self.job.status = "failed"
 
             error = HarvestError(message=safe_unicode(e))
             self.job.errors.append(error)
         except Exception as e:
-            log.exception(f'Harvesting failed for "{safe_unicode(self.source.name)}" ({self.source.backend})')
+            log.exception(
+                f'Harvesting failed for "{safe_unicode(self.source.name)}" ({self.source.backend})'
+            )
 
-            self.job.status = 'failed'
+            self.job.status = "failed"
 
             error = HarvestError(message=safe_unicode(e), details=traceback.format_exc())
             self.job.errors.append(error)
         finally:
             self.end_job()
-        
+
         return self.job
 
     def process_dataset(self, remote_id: str, **kwargs):
-        log.debug(f'Processing dataset {remote_id}…')
+        log.debug(f"Processing dataset {remote_id}…")
 
         # TODO add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
-        item = HarvestItem(status='started', started=datetime.utcnow(), remote_id=remote_id)
+        item = HarvestItem(status="started", started=datetime.utcnow(), remote_id=remote_id)
         self.job.items.append(item)
         self.save_job()
 
@@ -211,42 +213,45 @@ class BaseBackend(object):
             else:
                 dataset.save()
             item.dataset = dataset
-            item.status = 'done'
+            item.status = "done"
         except HarvestSkipException as e:
-            item.status = 'skipped'
+            item.status = "skipped"
 
-            log.info(f'Skipped item {item.remote_id} : {safe_unicode(e)}')
+            log.info(f"Skipped item {item.remote_id} : {safe_unicode(e)}")
             item.errors.append(HarvestError(message=safe_unicode(e)))
         except HarvestValidationError as e:
-            item.status = 'failed'
+            item.status = "failed"
 
-            log.info(f'Error validating item {item.remote_id} : {safe_unicode(e)}')
+            log.info(f"Error validating item {item.remote_id} : {safe_unicode(e)}")
             item.errors.append(HarvestError(message=safe_unicode(e)))
         except Exception as e:
-            item.status = 'failed'
-            log.exception(f'Error while processing {item.remote_id} : {safe_unicode(e)}')
+            item.status = "failed"
+            log.exception(f"Error while processing {item.remote_id} : {safe_unicode(e)}")
 
             error = HarvestError(message=safe_unicode(e), details=traceback.format_exc())
             item.errors.append(error)
         finally:
             current_app.logger.removeHandler(log_catcher)
             item.ended = datetime.utcnow()
-            item.logs = [HarvestLog(level=record.levelname, message=record.getMessage()) for record in log_catcher.records]
+            item.logs = [
+                HarvestLog(level=record.levelname, message=record.getMessage())
+                for record in log_catcher.records
+            ]
             self.save_job()
 
     def is_done(self) -> bool:
-        '''Should be called after process_dataset to know if we reach the max items'''
+        """Should be called after process_dataset to know if we reach the max items"""
         return self.max_items and len(self.job.items) >= self.max_items
 
-    def process_dataservice(self, remote_id: str, **kwargs) -> bool :
-        '''
+    def process_dataservice(self, remote_id: str, **kwargs) -> bool:
+        """
         Return `True` if the parent should stop iterating because we exceed the number
         of items to process.
-        '''
-        log.debug(f'Processing dataservice {remote_id}…')
+        """
+        log.debug(f"Processing dataservice {remote_id}…")
 
         # TODO add `type` to `HarvestItem` to differentiate `Dataset` from `Dataservice`
-        item = HarvestItem(status='started', started=datetime.utcnow(), remote_id=remote_id)
+        item = HarvestItem(status="started", started=datetime.utcnow(), remote_id=remote_id)
         self.job.items.append(item)
         self.save_job()
 
@@ -256,7 +261,9 @@ class BaseBackend(object):
 
             dataservice = self.inner_process_dataservice(item, **kwargs)
 
-            dataservice.harvest = self.update_dataservice_harvest_info(dataservice.harvest, remote_id)
+            dataservice.harvest = self.update_dataservice_harvest_info(
+                dataservice.harvest, remote_id
+            )
             dataservice.archived_at = None
 
             # TODO: Apply editable mappings
@@ -266,20 +273,20 @@ class BaseBackend(object):
             else:
                 dataservice.save()
             item.dataservice = dataservice
-            item.status = 'done'
+            item.status = "done"
         except HarvestSkipException as e:
-            item.status = 'skipped'
+            item.status = "skipped"
 
-            log.info(f'Skipped item {item.remote_id} : {safe_unicode(e)}')
+            log.info(f"Skipped item {item.remote_id} : {safe_unicode(e)}")
             item.errors.append(HarvestError(message=safe_unicode(e)))
         except HarvestValidationError as e:
-            item.status = 'failed'
+            item.status = "failed"
 
-            log.info(f'Error validating item {item.remote_id} : {safe_unicode(e)}')
+            log.info(f"Error validating item {item.remote_id} : {safe_unicode(e)}")
             item.errors.append(HarvestError(message=safe_unicode(e)))
         except Exception as e:
-            item.status = 'failed'
-            log.exception(f'Error while processing {item.remote_id} : {safe_unicode(e)}')
+            item.status = "failed"
+            log.exception(f"Error while processing {item.remote_id} : {safe_unicode(e)}")
 
             error = HarvestError(message=safe_unicode(e), details=traceback.format_exc())
             item.errors.append(error)
@@ -303,7 +310,9 @@ class BaseBackend(object):
 
         return harvest
 
-    def update_dataservice_harvest_info(self, harvest: HarvestDataserviceMetadata | None, remote_id: int):
+    def update_dataservice_harvest_info(
+        self, harvest: HarvestDataserviceMetadata | None, remote_id: int
+    ):
         if not harvest:
             harvest = HarvestDataserviceMetadata()
 
@@ -332,45 +341,47 @@ class BaseBackend(object):
         after_harvest_job.send(self)
 
     def autoarchive(self):
-        '''
+        """
         Archive items that exist on the local instance but not on remote platform
         after a grace period of HARVEST_AUTOARCHIVE_GRACE_DAYS days.
-        '''
-        log.debug('Running autoarchive')
-        limit_days = current_app.config['HARVEST_AUTOARCHIVE_GRACE_DAYS']
+        """
+        log.debug("Running autoarchive")
+        limit_days = current_app.config["HARVEST_AUTOARCHIVE_GRACE_DAYS"]
         limit_date = date.today() - timedelta(days=limit_days)
-        remote_ids = [i.remote_id for i in self.job.items if i.status != 'archived']
+        remote_ids = [i.remote_id for i in self.job.items if i.status != "archived"]
         q = {
-            'harvest__source_id': str(self.source.id),
-            'harvest__remote_id__nin': remote_ids,
-            'harvest__last_update__lt': limit_date
+            "harvest__source_id": str(self.source.id),
+            "harvest__remote_id__nin": remote_ids,
+            "harvest__last_update__lt": limit_date,
         }
         local_items_not_on_remote = Dataset.objects.filter(**q)
 
         for dataset in local_items_not_on_remote:
             if not dataset.harvest.archived_at:
-                archive_harvested_dataset(dataset, reason='not-on-remote', dryrun=self.dryrun)
+                archive_harvested_dataset(dataset, reason="not-on-remote", dryrun=self.dryrun)
             # add a HarvestItem to the job list (useful for report)
             # even when archiving has already been done (useful for debug)
-            self.job.items.append(HarvestItem(
-                remote_id=str(dataset.harvest.remote_id),
-                dataset=dataset,
-                status='archived'
-            ))
+            self.job.items.append(
+                HarvestItem(
+                    remote_id=str(dataset.harvest.remote_id), dataset=dataset, status="archived"
+                )
+            )
 
             self.save_job()
 
     def get_dataset(self, remote_id):
-        '''Get or create a dataset given its remote ID (and its source)
+        """Get or create a dataset given its remote ID (and its source)
         We first try to match `source_id` to be source domain independent
-        '''
-        dataset = Dataset.objects(__raw__={
-            'harvest.remote_id': remote_id,
-            '$or': [
-                {'harvest.domain': self.source.domain},
-                {'harvest.source_id': str(self.source.id)},
-            ],
-        }).first()
+        """
+        dataset = Dataset.objects(
+            __raw__={
+                "harvest.remote_id": remote_id,
+                "$or": [
+                    {"harvest.domain": self.source.domain},
+                    {"harvest.source_id": str(self.source.id)},
+                ],
+            }
+        ).first()
 
         if dataset:
             return dataset
@@ -381,18 +392,20 @@ class BaseBackend(object):
             return Dataset(owner=self.source.owner)
 
         return Dataset()
-    
+
     def get_dataservice(self, remote_id):
-        '''Get or create a dataservice given its remote ID (and its source)
+        """Get or create a dataservice given its remote ID (and its source)
         We first try to match `source_id` to be source domain independent
-        '''
-        dataservice = Dataservice.objects(__raw__={
-            'harvest.remote_id': remote_id,
-            '$or': [
-                {'harvest.domain': self.source.domain},
-                {'harvest.source_id': str(self.source.id)},
-            ],
-        }).first()
+        """
+        dataservice = Dataservice.objects(
+            __raw__={
+                "harvest.remote_id": remote_id,
+                "$or": [
+                    {"harvest.domain": self.source.domain},
+                    {"harvest.source_id": str(self.source.id)},
+                ],
+            }
+        ).first()
 
         if dataservice:
             return dataservice
@@ -405,18 +418,18 @@ class BaseBackend(object):
         return Dataservice()
 
     def validate(self, data, schema):
-        '''Perform a data validation against a given schema.
+        """Perform a data validation against a given schema.
 
         :param data: an object to validate
         :param schema: a Voluptous schema to validate against
-        '''
+        """
         try:
             return schema(data)
         except MultipleInvalid as ie:
             errors = []
             for error in ie.errors:
                 if error.path:
-                    field = '.'.join(str(p) for p in error.path)
+                    field = ".".join(str(p) for p in error.path)
                     path = error.path
                     value = data
                     while path:
@@ -428,21 +441,21 @@ class BaseBackend(object):
                         except Exception:
                             value = None
 
-                    txt = safe_unicode(error).replace('for dictionary value', '')
+                    txt = safe_unicode(error).replace("for dictionary value", "")
                     txt = txt.strip()
                     if isinstance(error, RequiredFieldInvalid):
-                        msg = '[{0}] {1}'
+                        msg = "[{0}] {1}"
                     else:
-                        msg = '[{0}] {1}: {2}'
+                        msg = "[{0}] {1}: {2}"
                     try:
                         msg = msg.format(field, txt, str(value))
                     except Exception:
-                        msg = '[{0}] {1}'.format(field, txt)
+                        msg = "[{0}] {1}".format(field, txt)
 
                 else:
                     msg = str(error)
                 errors.append(msg)
-            msg = '\n- '.join(['Validation error:'] + errors)
+            msg = "\n- ".join(["Validation error:"] + errors)
             raise HarvestValidationError(msg)
 
 

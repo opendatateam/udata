@@ -33,4 +33,3 @@ def update_owner_metrics(document, previous):
         previous.count_datasets()
     elif isinstance(document, Reuse):
         previous.count_reuses()
-

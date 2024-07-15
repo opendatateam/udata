@@ -13,51 +13,57 @@ log = logging.getLogger(__name__)
 
 
 class ISODateTime(String):
-    __schema_format__ = 'date-time'
+    __schema_format__ = "date-time"
 
     def format(self, value):
         if isinstance(value, str):
             value = parse(value)
-        if isinstance(value, datetime.date) and not isinstance(value, datetime.datetime) or value.tzinfo:
+        if (
+            isinstance(value, datetime.date)
+            and not isinstance(value, datetime.datetime)
+            or value.tzinfo
+        ):
             return value.isoformat()
         return pytz.utc.localize(value).isoformat()
 
 
 class Markdown(String):
-    __schema_format__ = 'markdown'
+    __schema_format__ = "markdown"
 
 
 class UrlFor(String):
     def __init__(self, endpoint, mapper=None, **kwargs):
         super(UrlFor, self).__init__(**kwargs)
         self.endpoint = endpoint
-        self.fallback_endpoint = kwargs.pop('fallback_endpoint', None)
+        self.fallback_endpoint = kwargs.pop("fallback_endpoint", None)
         self.mapper = mapper or self.default_mapper
 
     def default_mapper(self, obj):
-        return {'id': str(obj.id)}
+        return {"id": str(obj.id)}
 
     def output(self, key, obj, **kwargs):
-        return endpoint_for(self.endpoint, self.fallback_endpoint, _external=True, **self.mapper(obj))
+        return endpoint_for(
+            self.endpoint, self.fallback_endpoint, _external=True, **self.mapper(obj)
+        )
 
 
 class NextPageUrl(String):
     def output(self, key, obj, **kwargs):
-        if not getattr(obj, 'has_next', None):
+        if not getattr(obj, "has_next", None):
             return None
         args = multi_to_dict(request.args)
         args.update(request.view_args)
-        args['page'] = obj.page + 1
+        args["page"] = obj.page + 1
         return url_for(request.endpoint, _external=True, **args)
 
 
 class PreviousPageUrl(String):
     def output(self, key, obj, **kwargs):
-        if not getattr(obj, 'has_prev', None):
+        if not getattr(obj, "has_prev", None):
             return None
         args = multi_to_dict(request.args)
         args.update(request.view_args)
-        args['page'] = obj.page - 1
+        args["page"] = obj.page - 1
         return url_for(request.endpoint, _external=True, **args)
 
 
@@ -81,15 +87,11 @@ class ImageField(String):
 
 def pager(page_fields):
     pager_fields = {
-        'data': List(Nested(page_fields), attribute='objects',
-                     description='The page data'),
-        'page': Integer(description='The current page', required=True, min=1),
-        'page_size': Integer(description='The page size used for pagination',
-                             required=True, min=0),
-        'total': Integer(description='The total paginated items',
-                         required=True, min=0),
-        'next_page': NextPageUrl(description='The next page URL if exists'),
-        'previous_page': PreviousPageUrl(
-            description='The previous page URL if exists')
+        "data": List(Nested(page_fields), attribute="objects", description="The page data"),
+        "page": Integer(description="The current page", required=True, min=1),
+        "page_size": Integer(description="The page size used for pagination", required=True, min=0),
+        "total": Integer(description="The total paginated items", required=True, min=0),
+        "next_page": NextPageUrl(description="The next page URL if exists"),
+        "previous_page": PreviousPageUrl(description="The previous page URL if exists"),
     }
     return pager_fields

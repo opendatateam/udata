@@ -1,7 +1,8 @@
-'''
+"""
 Remove Harvest db integrity problems
 ⚠️ long migration
-'''
+"""
+
 import logging
 
 import mongoengine
@@ -13,8 +14,7 @@ log = logging.getLogger(__name__)
 
 
 def migrate(db):
-
-    log.info('Processing HarvestJob source references.')
+    log.info("Processing HarvestJob source references.")
 
     harvest_jobs = HarvestJob.objects().no_cache().all()
     count = 0
@@ -25,9 +25,9 @@ def migrate(db):
             count += 1
             harvest_job.delete()
 
-    log.info(f'Completed, removed {count} HarvestJob objects')
+    log.info(f"Completed, removed {count} HarvestJob objects")
 
-    log.info('Processing HarvestJob items references.')
+    log.info("Processing HarvestJob items references.")
 
     harvest_jobs = HarvestJob.objects.filter(items__0__exists=True).no_cache().all()
     count = 0
@@ -40,14 +40,15 @@ def migrate(db):
                 item.dataset = None
                 harvest_job.save()
 
-    log.info(f'Completed, modified {count} HarvestJob objects')
+    log.info(f"Completed, modified {count} HarvestJob objects")
 
-    log.info('Processing PeriodicTask objects.')
+    log.info("Processing PeriodicTask objects.")
 
-    harvest_schedules = PeriodicTask.objects.filter(name__startswith='Harvest',
-                                                    description='Periodic Harvesting')
+    harvest_schedules = PeriodicTask.objects.filter(
+        name__startswith="Harvest", description="Periodic Harvesting"
+    )
     hs = HarvestSource.objects.filter(periodic_task__in=harvest_schedules)
     unlegit_schedules = harvest_schedules.filter(id__nin=[h.periodic_task.id for h in hs])
     count = unlegit_schedules.delete()
 
-    log.info(f'Completed, removed {count} PeriodicTask objects')
+    log.info(f"Completed, removed {count} PeriodicTask objects")

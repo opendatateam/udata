@@ -2,12 +2,12 @@ from udata.auth import Permission, RoleNeed, UserNeed
 from udata.i18n import lazy_gettext as _
 
 ROLES = {
-    'admin': _('System administrator'),
-    'editor': _('Site editorialist'),
-    'moderator': _('Site moderator'),
+    "admin": _("System administrator"),
+    "editor": _("Site editorialist"),
+    "moderator": _("Site moderator"),
 }
 
-sysadmin = Permission(RoleNeed('admin'))
+sysadmin = Permission(RoleNeed("admin"))
 
 
 class UserEditPermission(Permission):

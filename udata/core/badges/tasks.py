@@ -10,9 +10,10 @@ def notify_new_badge(cls, kind):
         t = task(func)
 
         def call_task(sender, **kwargs):
-            if isinstance(sender, cls) and kwargs.get('kind') == kind:
+            if isinstance(sender, cls) and kwargs.get("kind") == kind:
                 t.delay(str(sender.pk))
 
         on_badge_added.connect(call_task, weak=False)
         return t
+
     return wrapper

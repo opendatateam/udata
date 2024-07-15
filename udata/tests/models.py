@@ -8,4 +8,4 @@ class FakeModel(WithMetrics, db.Document):
     name = db.StringField()
 
     def __unicode__(self):
-        return self.name or ''
+        return self.name or ""

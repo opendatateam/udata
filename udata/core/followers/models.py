@@ -4,7 +4,7 @@ from udata.mongo import db
 
 from .signals import on_follow, on_unfollow
 
-__all__ = ('Follow', )
+__all__ = ("Follow",)
 
 
 class FollowQuerySet(db.BaseQuerySet):
@@ -19,19 +19,19 @@ class FollowQuerySet(db.BaseQuerySet):
 
 
 class Follow(db.Document):
-    follower = db.ReferenceField('User', required=True)
+    follower = db.ReferenceField("User", required=True)
     following = db.GenericReferenceField()
     since = db.DateTimeField(required=True, default=datetime.utcnow)
     until = db.DateTimeField()
 
     meta = {
-        'indexes': [
-            'follower',
-            'following',
-            ('follower', 'until'),
-            ('following', 'until'),
+        "indexes": [
+            "follower",
+            "following",
+            ("follower", "until"),
+            ("following", "until"),
         ],
-        'queryset_class': FollowQuerySet,
+        "queryset_class": FollowQuerySet,
     }
 
 
