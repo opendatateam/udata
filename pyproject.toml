@@ -11,5 +11,5 @@ requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [tool.ruff]
-format = { quote-style = "single" }
 lint = { select = ["I"] }
+line-length = 100
