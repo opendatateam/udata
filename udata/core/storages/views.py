@@ -1,9 +1,8 @@
+import flask_storage as fs
 from flask import Blueprint, jsonify
 from flask_security import login_required
-import flask_storage as fs
 
-from .api import handle_upload, on_upload_status, UploadStatus
-
+from .api import UploadStatus, handle_upload, on_upload_status
 
 blueprint = Blueprint('storage', __name__)
 

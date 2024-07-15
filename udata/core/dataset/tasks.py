@@ -1,6 +1,5 @@
 import collections
 import os
-
 from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
 
@@ -13,12 +12,11 @@ from udata.core import storages
 from udata.frontend import csv
 from udata.harvest.models import HarvestJob
 from udata.i18n import lazy_gettext as _
-from udata.models import (Follow, Discussion, Activity, Topic,
-                          Organization, Transfer, db)
+from udata.models import Activity, Discussion, Follow, Organization, Topic, Transfer, db
 from udata.tasks import job
 
-from .models import Dataset, Resource, CommunityResource, Checksum
 from .constants import UPDATE_FREQUENCIES
+from .models import Checksum, CommunityResource, Dataset, Resource
 
 log = get_task_logger(__name__)
 

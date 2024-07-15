@@ -1,4 +1,4 @@
-from os.path import join, abspath, dirname
+from os.path import abspath, dirname, join
 
 #: Project absolute root path
 ROOT = abspath(join(dirname(__file__), '..'))

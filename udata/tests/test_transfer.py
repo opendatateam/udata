@@ -1,22 +1,21 @@
 import pytest
 
-from udata.auth import login_user, PermissionDenied
-
-from udata.features.transfer.factories import TransferFactory
-from udata.features.transfer.actions import request_transfer, accept_transfer
-from udata.features.transfer.notifications import (
-    transfer_request_notifications
-)
-from udata.models import Member, Dataset
-
-from udata.utils import faker
+from udata.auth import PermissionDenied, login_user
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.metrics import update_org_metrics  # noqa needed to register signals
-from udata.core.user.factories import UserFactory 
-from udata.core.user.metrics import update_owner_metrics  # noqa needed to register signals
+from udata.core.organization.metrics import (
+    update_org_metrics,  # noqa needed to register signals
+)
+from udata.core.user.factories import UserFactory
+from udata.core.user.metrics import (
+    update_owner_metrics,  # noqa needed to register signals
+)
+from udata.features.transfer.actions import accept_transfer, request_transfer
+from udata.features.transfer.factories import TransferFactory
+from udata.features.transfer.notifications import transfer_request_notifications
+from udata.models import Dataset, Member
 from udata.tests.helpers import assert_emit
-
+from udata.utils import faker
 
 pytestmark = pytest.mark.usefixtures('clean_db')
 

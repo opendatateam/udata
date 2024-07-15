@@ -1,17 +1,17 @@
-from udata.core.user.factories import UserFactory
 import pytest
 
-from udata.models import Dataset, Topic, CommunityResource, Transfer
 from udata.core.dataset import tasks
-from udata.core.dataset.factories import DatasetFactory, CommunityResourceFactory
+
 # Those imports seem mandatory for the csv adapters to be registered.
 # This might be because of the decorator mechanism.
 from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter  # noqa
+from udata.core.dataset.factories import CommunityResourceFactory, DatasetFactory
 from udata.core.organization.csv import OrganizationCsvAdapter  # noqa
 from udata.core.reuse.csv import ReuseCsvAdapter  # noqa
 from udata.core.tags.csv import TagCsvAdapter  # noqa
+from udata.core.user.factories import UserFactory
 from udata.harvest.csv import HarvestSourceCsvAdapter  # noqa
-
+from udata.models import CommunityResource, Dataset, Topic, Transfer
 
 pytestmark = pytest.mark.usefixtures('clean_db')
 

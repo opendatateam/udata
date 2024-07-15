@@ -1,10 +1,10 @@
 from flask import request
 
-from udata.api import api, fields, base_reference
+from udata.api import api, base_reference, fields
 from udata.core.badges.fields import badge_fields
 from udata.core.organization.permissions import OrganizationPrivatePermission
 
-from .constants import ORG_ROLES, DEFAULT_ROLE, MEMBERSHIP_STATUS, BIGGEST_LOGO_SIZE
+from .constants import BIGGEST_LOGO_SIZE, DEFAULT_ROLE, MEMBERSHIP_STATUS, ORG_ROLES
 
 org_ref_fields = api.inherit('OrganizationReference', base_reference, {
     'name': fields.String(description='The organization name', readonly=True),
@@ -29,6 +29,7 @@ org_ref_fields = api.inherit('OrganizationReference', base_reference, {
 })
 
 from udata.core.user.api_fields import user_ref_fields  # noqa: required
+
 
 def check_can_access_email():
     # This endpoint is secure, only organization member has access.

@@ -7,7 +7,7 @@ import logging
 import mongoengine
 
 from udata.core.jobs.models import PeriodicTask
-from udata.harvest.models import HarvestSource, HarvestJob
+from udata.harvest.models import HarvestJob, HarvestSource
 
 log = logging.getLogger(__name__)
 

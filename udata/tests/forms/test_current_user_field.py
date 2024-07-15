@@ -1,15 +1,15 @@
 import datetime
-from bson import ObjectId
 
+from bson import ObjectId
 from werkzeug.datastructures import MultiDict
 
 from udata.auth import login_user
 from udata.auth.forms import ExtendedLoginForm, ExtendedRegisterForm
-from udata.core.user.factories import UserFactory, AdminFactory
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.forms import ModelForm, fields
 from udata.i18n import gettext as _
-from udata.models import db, User
-from udata.tests import TestCase, DBTestMixin
+from udata.models import User, db
+from udata.tests import DBTestMixin, TestCase
 from udata.tests.helpers import security_gettext
 
 

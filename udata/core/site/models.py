@@ -1,11 +1,10 @@
-from flask import g, current_app
+from flask import current_app, g
 from werkzeug.local import LocalProxy
 
-from udata.models import db, WithMetrics
-from udata.core.organization.models import Organization
 from udata.core.dataset.models import Dataset
+from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
-
+from udata.models import WithMetrics, db
 
 __all__ = ('Site', 'SiteSettings')
 

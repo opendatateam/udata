@@ -1,14 +1,13 @@
-import pytest
 import shlex
-
 from contextlib import contextmanager
 from urllib.parse import urlparse
 
-from flask import json, template_rendered, url_for, current_app
+import pytest
+from flask import current_app, json, template_rendered, url_for
 from flask.testing import FlaskClient
+from flask_principal import Identity, identity_changed
 from lxml import etree
 from werkzeug.urls import url_encode
-from flask_principal import Identity, identity_changed
 
 from udata import settings
 from udata.app import create_app
@@ -86,7 +85,7 @@ def _load_frontend(request, _configure_application):
         modules |= set(request.cls.modules)
 
     if marker or hasattr(request.cls, 'modules'):
-        from udata import frontend, api
+        from udata import api, frontend
         api.init_app(app)
         frontend.init_app(app, modules)
 

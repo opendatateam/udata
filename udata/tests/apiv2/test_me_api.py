@@ -1,8 +1,8 @@
 from flask import url_for
 
-from udata.models import Member
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.topic.factories import TopicFactory
+from udata.models import Member
 from udata.tests.api import APITestCase
 
 

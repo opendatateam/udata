@@ -1,10 +1,10 @@
 import datetime
+
 from udata import search
+from udata.core.organization.api import DEFAULT_SORTING, OrgApiParser
 from udata.models import Organization
 from udata.search.fields import Filter
-from udata.core.organization.api import OrgApiParser, DEFAULT_SORTING
 from udata.utils import to_iso_datetime
-
 
 __all__ = ('OrganizationSearch', )
 

@@ -1,7 +1,6 @@
 from udata.api_fields import field
 from udata.mongo import db
 
-
 __all__ = ('WithMetrics',)
 
 

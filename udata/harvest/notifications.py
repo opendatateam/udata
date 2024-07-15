@@ -1,8 +1,8 @@
+import logging
+
 from udata.features.notifications.actions import notifier
 
-from .models import HarvestSource, VALIDATION_PENDING
-
-import logging
+from .models import VALIDATION_PENDING, HarvestSource
 
 log = logging.getLogger(__name__)
 

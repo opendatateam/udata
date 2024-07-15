@@ -1,5 +1,5 @@
-from udata.mongo import db
 from udata.core.owned import Owned, OwnedQuerySet
+from udata.mongo import db
 
 __all__ = ('ContactPoint', )
 

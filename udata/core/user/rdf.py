@@ -2,8 +2,8 @@
 This module centralize user helpers for RDF/DCAT serialization and parsing
 '''
 
-from rdflib import Graph, URIRef, Literal, BNode
-from rdflib.namespace import RDF, RDFS, FOAF
+from rdflib import BNode, Graph, Literal, URIRef
+from rdflib.namespace import FOAF, RDF, RDFS
 
 from udata.rdf import namespace_manager
 from udata.uris import endpoint_for

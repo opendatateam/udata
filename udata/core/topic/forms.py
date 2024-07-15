@@ -1,9 +1,8 @@
-from udata.forms import ModelForm, fields, validators
 from udata.core.spatial.forms import SpatialCoverageField
+from udata.forms import ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 
 from .models import Topic
-
 
 __all__ = ('TopicForm', )
 

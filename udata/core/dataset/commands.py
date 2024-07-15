@@ -1,15 +1,16 @@
-import click
 import json
 import logging
-import requests
 
+import click
+import requests
 from bson import ObjectId
 
-from udata.commands import cli, success, exit_with_error
-from udata.models import License, Dataset
+from udata.commands import cli, exit_with_error, success
 from udata.core.dataset.constants import DEFAULT_LICENSE
-from .tasks import send_frequency_reminder
+from udata.models import Dataset, License
+
 from . import actions
+from .tasks import send_frequency_reminder
 
 log = logging.getLogger(__name__)
 

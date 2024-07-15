@@ -1,24 +1,34 @@
-from flask import flash, redirect, current_app, url_for
+from flask import current_app, flash, redirect, url_for
 from flask_login import current_user, login_required
-from flask_security.views import change_password
-from flask_security.views import confirm_email
-from flask_security.views import forgot_password
-from flask_security.views import login
-from flask_security.views import logout
-from flask_security.views import register
-from flask_security.views import reset_password
-from flask_security.views import send_confirmation
-from flask_security.views import send_login
-from flask_security.views import token_login
 from flask_security.utils import (
-    check_and_get_token_status, do_flash, get_message, get_within_delta, hash_data,
-    login_user, logout_user, send_mail, verify_hash)
+    check_and_get_token_status,
+    do_flash,
+    get_message,
+    get_within_delta,
+    hash_data,
+    login_user,
+    logout_user,
+    send_mail,
+    verify_hash,
+)
+from flask_security.views import (
+    change_password,
+    confirm_email,
+    forgot_password,
+    login,
+    logout,
+    register,
+    reset_password,
+    send_confirmation,
+    send_login,
+    token_login,
+)
 from werkzeug.local import LocalProxy
+
 from udata.i18n import lazy_gettext as _
 from udata.uris import endpoint_for
 
 from .forms import ChangeEmailForm
-
 
 _security = LocalProxy(lambda: current_app.extensions['security'])
 _datastore = LocalProxy(lambda: _security.datastore)

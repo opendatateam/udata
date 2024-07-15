@@ -3,7 +3,6 @@ import pytest
 from udata import uris
 from udata.settings import Defaults
 
-
 PUBLIC_HOSTS = [
     'http://foo.com/blah_blah',
     'http://foo.com/blah_blah/',

@@ -3,7 +3,7 @@ from tempfile import NamedTemporaryFile
 
 from udata import models
 from udata.commands.fixtures import generate_fixtures
-from udata.tests import TestCase, DBTestMixin
+from udata.tests import DBTestMixin, TestCase
 
 
 class FixturesTest(DBTestMixin, TestCase):

@@ -1,23 +1,22 @@
 from flask_security import current_user, logout_user
 from slugify import slugify
 
-from udata.api import api, API
+from udata.api import API, api
 from udata.api.parsers import ModelApiParser
-from udata.core import storages
 from udata.auth import admin_permission
-from udata.models import CommunityResource, Dataset, Reuse, User
-
-from udata.core.dataset.api_fields import (
-    community_resource_fields, dataset_fields
-)
-from udata.core.followers.api import FollowAPI
+from udata.core import storages
+from udata.core.dataset.api_fields import community_resource_fields, dataset_fields
 from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields
+from udata.core.followers.api import FollowAPI
 from udata.core.reuse.api_fields import reuse_fields
 from udata.core.storages.api import (
-    uploaded_image_fields, image_parser, parse_uploaded_image
+    image_parser,
+    parse_uploaded_image,
+    uploaded_image_fields,
 )
 from udata.core.user.models import Role
+from udata.models import CommunityResource, Dataset, Reuse, User
 
 from .api_fields import (
     apikey_fields,
@@ -26,10 +25,9 @@ from .api_fields import (
     user_fields,
     user_page_fields,
     user_role_fields,
-    user_suggestion_fields
+    user_suggestion_fields,
 )
-from .forms import UserProfileForm, UserProfileAdminForm
-
+from .forms import UserProfileAdminForm, UserProfileForm
 
 DEFAULT_SORTING = '-created_at'
 
@@ -320,10 +318,9 @@ class UserAPI(API):
         return '', 204
 
 
-from udata.models import ContactPoint
 from udata.core.contact_point.api import ContactPointApiParser
 from udata.core.contact_point.api_fields import contact_point_page_fields
-
+from udata.models import ContactPoint
 
 contact_point_parser = ContactPointApiParser()
 

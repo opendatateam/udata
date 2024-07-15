@@ -1,25 +1,25 @@
+import json
 from copy import copy
 from datetime import datetime
 from itertools import chain
-import json
 from time import time
 
 from authlib.jose import JsonWebSignature
 from blinker import Signal
 from flask import current_app
-from flask_security import UserMixin, RoleMixin, MongoEngineUserDatastore
-from mongoengine.signals import pre_save, post_save
-
+from flask_security import MongoEngineUserDatastore, RoleMixin, UserMixin
+from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
 from udata import mail
 from udata.core import storages
-from udata.uris import endpoint_for
-from udata.frontend.markdown import mdstrip
-from udata.i18n import lazy_gettext as _
-from udata.models import db, WithMetrics, Follow
 from udata.core.discussions.models import Discussion
 from udata.core.storages import avatars, default_image_basename
+from udata.frontend.markdown import mdstrip
+from udata.i18n import lazy_gettext as _
+from udata.models import Follow, WithMetrics, db
+from udata.uris import endpoint_for
+
 from .constants import AVATAR_SIZES
 
 __all__ = ('User', 'Role', 'datastore')

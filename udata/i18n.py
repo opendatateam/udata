@@ -1,23 +1,23 @@
 import importlib.util
-
 from contextlib import contextmanager
-from os.path import join, dirname, basename
-from glob import iglob
-
-from flask import (  # noqa
-    g, request, current_app, abort, redirect, url_for, has_request_context
-)
-from flask.blueprints import BlueprintSetupState, _endpoint_from_view_func
-
-from babel.dates import format_timedelta as babel_format_timedelta
-
 from datetime import datetime
+from glob import iglob
+from os.path import basename, dirname, join
 
 import flask_babel
-from flask_babel import Babel, refresh
-from flask_babel import format_date, format_datetime  # noqa
+from babel.dates import format_timedelta as babel_format_timedelta
+from flask import (  # noqa
+    abort,
+    current_app,
+    g,
+    has_request_context,
+    redirect,
+    request,
+    url_for,
+)
+from flask.blueprints import BlueprintSetupState, _endpoint_from_view_func
+from flask_babel import Babel, format_date, format_datetime, refresh  # noqa
 from flask_babel import get_locale as get_current_locale  # noqa
-
 from werkzeug.local import LocalProxy
 
 from udata import entrypoints

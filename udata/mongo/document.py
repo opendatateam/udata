@@ -1,5 +1,4 @@
 import logging
-
 from collections.abc import Iterable
 
 from flask_mongoengine import Document

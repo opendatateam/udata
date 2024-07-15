@@ -1,4 +1,4 @@
-from udata.models import Reuse, Dataset
+from udata.models import Dataset, Reuse
 
 from .models import Discussion
 

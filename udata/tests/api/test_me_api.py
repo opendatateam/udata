@@ -2,18 +2,15 @@ from datetime import datetime
 
 from flask import url_for
 
-from udata.models import Discussion, Follow, Member, User
-from udata.core.discussions.models import Message as DiscMsg
-from udata.core.dataset.factories import (
-    CommunityResourceFactory,
-    DatasetFactory
-)
 from udata.core.dataset.activities import UserCreatedDataset
+from udata.core.dataset.factories import CommunityResourceFactory, DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory
-from udata.core.reuse.factories import ReuseFactory
+from udata.core.discussions.models import Message as DiscMsg
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.i18n import _
+from udata.models import Discussion, Follow, Member, User
 from udata.tests.helpers import capture_mails
 from udata.utils import faker
 

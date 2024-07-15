@@ -1,10 +1,10 @@
 import logging
+
 import pytest
 
 from udata.utils import faker
 
 from ..models import HarvestSource
-
 
 log = logging.getLogger(__name__)
 

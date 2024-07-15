@@ -2,14 +2,13 @@ import mongoengine
 from flask import request
 
 from udata import search
-from udata.api import apiv2, API
-from udata.utils import multi_to_dict
+from udata.api import API, apiv2
 from udata.core.contact_point.api_fields import contact_point_fields
+from udata.utils import multi_to_dict
+
+from .api_fields import member_fields, org_fields, org_page_fields
+from .permissions import EditOrganizationPermission, OrganizationPrivatePermission
 from .search import OrganizationSearch
-from .api_fields import org_page_fields, org_fields, member_fields
-from .permissions import (
-    EditOrganizationPermission, OrganizationPrivatePermission
-)
 
 apiv2.inherit('OrganizationPage', org_page_fields)
 apiv2.inherit('Organization', org_fields)

@@ -1,13 +1,12 @@
 from flask import url_for
-
-from rdflib import URIRef, Literal, BNode
-from rdflib.namespace import RDF, FOAF, RDFS
+from rdflib import BNode, Literal, URIRef
+from rdflib.namespace import FOAF, RDF, RDFS
 from rdflib.resource import Resource as RdfResource
 
 from udata import api
-from udata.tests import TestCase, DBTestMixin
 from udata.core.user.factories import UserFactory
 from udata.core.user.rdf import user_to_rdf
+from udata.tests import DBTestMixin, TestCase
 from udata.utils import faker
 
 

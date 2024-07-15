@@ -1,16 +1,20 @@
-from udata.api import api, fields, base_reference
+from udata.api import api, base_reference, fields
 from udata.core.badges.fields import badge_fields
+from udata.core.contact_point.api_fields import contact_point_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.constants import BIGGEST_LOGO_SIZE
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.user.api_fields import user_ref_fields
-from udata.core.contact_point.api_fields import contact_point_fields
 
 from .constants import (
-    UPDATE_FREQUENCIES, RESOURCE_FILETYPES, DEFAULT_FREQUENCY,
-    CHECKSUM_TYPES, DEFAULT_CHECKSUM_TYPE, DEFAULT_LICENSE, RESOURCE_TYPES
+    CHECKSUM_TYPES,
+    DEFAULT_CHECKSUM_TYPE,
+    DEFAULT_FREQUENCY,
+    DEFAULT_LICENSE,
+    RESOURCE_FILETYPES,
+    RESOURCE_TYPES,
+    UPDATE_FREQUENCIES,
 )
-
 
 checksum_fields = api.model('Checksum', {
     'type': fields.String(

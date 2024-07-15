@@ -1,18 +1,16 @@
+import re
 from functools import partial
 from urllib.parse import urlparse
 
 import bleach
 import html2text
 import mistune
-import re
-
 from bleach.linkifier import LinkifyFilter
-from flask import current_app, Markup, request
+from flask import Markup, current_app, request
+from jinja2.filters import do_striptags, do_truncate
 from werkzeug.local import LocalProxy
-from jinja2.filters import do_truncate, do_striptags
 
 from udata.i18n import _
-
 
 md = LocalProxy(lambda: current_app.extensions['markdown'])
 

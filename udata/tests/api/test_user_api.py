@@ -3,8 +3,8 @@ from flask import url_for
 from udata.core import storages
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.models import Follow
-from udata.utils import faker
 from udata.tests.helpers import capture_mails, create_test_image
+from udata.utils import faker
 
 from . import APITestCase
 

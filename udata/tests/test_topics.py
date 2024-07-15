@@ -1,8 +1,8 @@
 import pytest
 
-from udata.search import reindex
-from udata.core.topic.factories import TopicFactory
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.topic.factories import TopicFactory
+from udata.search import reindex
 
 
 @pytest.fixture

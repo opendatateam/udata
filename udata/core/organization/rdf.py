@@ -4,14 +4,13 @@ for RDF/DCAT serialization and parsing
 '''
 
 from flask import url_for
-from rdflib import Graph, URIRef, Literal, BNode
-from rdflib.namespace import RDF, RDFS, FOAF
-
-from udata.rdf import DCAT, DCT, namespace_manager, paginate_catalog
+from rdflib import BNode, Graph, Literal, URIRef
+from rdflib.namespace import FOAF, RDF, RDFS
 
 from udata.core.dataset.rdf import dataset_to_rdf
-from udata.utils import Paginable
+from udata.rdf import DCAT, DCT, namespace_manager, paginate_catalog
 from udata.uris import endpoint_for
+from udata.utils import Paginable
 
 
 def organization_to_rdf(org, graph=None):

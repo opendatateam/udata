@@ -1,9 +1,10 @@
-import geojson
 import json
 import logging
 
-from udata.forms import widgets, ModelForm, validators
-from udata.forms.fields import ModelList, Field, SelectField, FormField
+import geojson
+
+from udata.forms import ModelForm, validators, widgets
+from udata.forms.fields import Field, FormField, ModelList, SelectField
 from udata.i18n import lazy_gettext as _
 
 from .models import GeoZone, SpatialCoverage, spatial_granularities

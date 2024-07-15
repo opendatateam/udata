@@ -1,5 +1,6 @@
 import email_validator
 from flask import current_app
+
 from udata.tasks import task
 
 

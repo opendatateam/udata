@@ -1,21 +1,20 @@
-from bson import ObjectId
 from datetime import datetime
 
-from flask_security import current_user
+from bson import ObjectId
 from flask_restx.inputs import boolean
+from flask_security import current_user
 
+from udata.api import API, api, fields
 from udata.auth import admin_permission
-from udata.api import api, API, fields
 from udata.core.spam.api import SpamAPIMixin
 from udata.core.spam.fields import spam_fields
-from udata.utils import id_or_404
 from udata.core.user.api_fields import user_ref_fields
+from udata.utils import id_or_404
 
-from .forms import DiscussionCreateForm, DiscussionCommentForm
-from .models import Message, Discussion
+from .forms import DiscussionCommentForm, DiscussionCreateForm
+from .models import Discussion, Message
 from .permissions import CloseDiscussionPermission
 from .signals import on_discussion_deleted
-
 
 ns = api.namespace('discussions', 'Discussion related operations')
 

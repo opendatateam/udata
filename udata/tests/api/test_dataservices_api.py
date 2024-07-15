@@ -1,13 +1,14 @@
 from flask import url_for
 
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataset.factories import (DatasetFactory, LicenseFactory)
-from udata.i18n import gettext as _
-from udata.core.user.factories import UserFactory
+from udata.core.dataset.factories import DatasetFactory, LicenseFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
+from udata.core.user.factories import UserFactory
+from udata.i18n import gettext as _
 
 from . import APITestCase
+
 
 class DataserviceAPITest(APITestCase):
     modules = []

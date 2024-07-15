@@ -4,31 +4,50 @@ This module centralize dataset helpers for RDF/DCAT serialization and parsing
 import calendar
 import json
 import logging
-
 from datetime import date
+
 from dateutil.parser import parse as parse_dt
 from flask import current_app
 from geomet import wkt
-from rdflib import Graph, URIRef, Literal, BNode
-from rdflib.resource import Resource as RdfResource
-from rdflib.namespace import RDF
 from mongoengine.errors import ValidationError
+from rdflib import BNode, Graph, Literal, URIRef
+from rdflib.namespace import RDF
+from rdflib.resource import Resource as RdfResource
 
 from udata import i18n, uris
-from udata.core.spatial.models import SpatialCoverage
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
+from udata.core.spatial.models import SpatialCoverage
 from udata.harvest.exceptions import HarvestSkipException
 from udata.models import db
 from udata.rdf import (
-    DCAT, DCATAP, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ, EUFORMAT, IANAFORMAT, TAG_TO_EU_HVD_CATEGORIES, RDFS, 
-    namespace_manager, rdf_value, remote_url_from_rdf, sanitize_html, schema_from_rdf, themes_from_rdf, url_from_rdf, HVD_LEGISLATION,
+    DCAT,
+    DCATAP,
+    DCT,
+    EUFORMAT,
+    EUFREQ,
+    FREQ,
+    HVD_LEGISLATION,
+    IANAFORMAT,
+    RDFS,
+    SCHEMA,
+    SCV,
+    SKOS,
+    SPDX,
+    TAG_TO_EU_HVD_CATEGORIES,
     contact_point_from_rdf,
+    namespace_manager,
+    rdf_value,
+    remote_url_from_rdf,
+    sanitize_html,
+    schema_from_rdf,
+    themes_from_rdf,
+    url_from_rdf,
 )
-from udata.utils import get_by, safe_unicode
 from udata.uris import endpoint_for
+from udata.utils import get_by, safe_unicode
 
-from .models import Dataset, Resource, Checksum, License
 from .constants import UPDATE_FREQUENCIES
+from .models import Checksum, Dataset, License, Resource
 
 log = logging.getLogger(__name__)
 

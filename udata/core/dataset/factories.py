@@ -1,15 +1,14 @@
-import factory
-
 import json
 from os.path import join
 
+import factory
+
 from udata.app import ROOT_DIR
-from udata.factories import ModelFactory
-
-from .models import Dataset, Resource, Checksum, CommunityResource, License
-
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
+from udata.factories import ModelFactory
+
+from .models import Checksum, CommunityResource, Dataset, License, Resource
 
 
 class DatasetFactory(ModelFactory):

@@ -1,13 +1,12 @@
 from flask import url_for
 
-from udata.tests.api import APITestCase
-
 from udata.core import storages
-from udata.tests.helpers import create_test_image
-from udata.models import Reuse, Transfer
-from udata.core.user.factories import AdminFactory, UserFactory
-from udata.core.reuse.factories import ReuseFactory
 from udata.core.reuse import tasks
+from udata.core.reuse.factories import ReuseFactory
+from udata.core.user.factories import AdminFactory, UserFactory
+from udata.models import Reuse, Transfer
+from udata.tests.api import APITestCase
+from udata.tests.helpers import create_test_image
 
 
 class ReuseTasksTest(APITestCase):

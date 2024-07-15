@@ -1,8 +1,8 @@
 import importlib.util
-import pytest
-
 from datetime import datetime
 from textwrap import dedent
+
+import pytest
 
 from udata import migrations
 from udata.tests.helpers import assert_equal_dates

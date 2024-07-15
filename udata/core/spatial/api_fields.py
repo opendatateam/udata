@@ -1,6 +1,5 @@
 from udata.api import api, fields
 
-
 GEOM_TYPES = (
     'Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString',
     'MultiPolygon'

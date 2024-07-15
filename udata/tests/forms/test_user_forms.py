@@ -1,7 +1,7 @@
+import pytest
+
 from udata.auth.forms import ExtendedRegisterForm
 from udata.core.user.forms import UserProfileForm
-
-import pytest
 
 pytestmark = [
     pytest.mark.usefixtures('clean_db')

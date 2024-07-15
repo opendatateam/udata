@@ -3,9 +3,9 @@ from flask import url_for
 from udata.api.oauth2 import OAuth2Client
 from udata.core import storages
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
-from udata.core.user.factories import AdminFactory
 from udata.core.organization import tasks
-from udata.models import Dataset, Organization, Transfer, Member, ContactPoint
+from udata.core.user.factories import AdminFactory
+from udata.models import ContactPoint, Dataset, Member, Organization, Transfer
 from udata.tests.api import APITestCase
 from udata.tests.helpers import create_test_image
 

@@ -1,18 +1,15 @@
-import mock
 import os
-
+from contextlib import contextmanager
+from datetime import timedelta
 from io import BytesIO
+from urllib.parse import parse_qs, urljoin, urlparse
 
+import mock
+from flask import current_app, json, request, url_for
+from flask_security.babel import FsDomain
 from PIL import Image
 
 from udata.mail import mail_sent
-
-from contextlib import contextmanager
-from datetime import timedelta
-from urllib.parse import urljoin, urlparse, parse_qs
-
-from flask import request, url_for, json, current_app
-from flask_security.babel import FsDomain
 
 
 def assert_equal_dates(datetime1, datetime2, limit=1):  # Seconds.

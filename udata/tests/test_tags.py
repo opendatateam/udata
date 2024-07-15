@@ -1,17 +1,16 @@
 import logging
-import pytest
 from io import StringIO
 
+import pytest
 from flask import url_for
 
-from udata.frontend import csv
-
-from udata.tests.helpers import assert200
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.tags.models import Tag
 from udata.core.tags.tasks import count_tags
-from udata.tags import tags_list, normalize, slug
+from udata.frontend import csv
+from udata.tags import normalize, slug, tags_list
+from udata.tests.helpers import assert200
 
 log = logging.getLogger(__name__)
 

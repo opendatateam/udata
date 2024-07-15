@@ -1,13 +1,11 @@
 import logging
 import os
 import shutil
-
-import click
-
 from glob import iglob
 from os import makedirs
-from os.path import exists, join, isdir
+from os.path import exists, isdir, join
 
+import click
 from flask import current_app
 
 from udata.commands import cli

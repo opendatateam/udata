@@ -1,13 +1,14 @@
 import logging
-import pkg_resources
 import re
 import warnings
 
+import pkg_resources
 from werkzeug.exceptions import HTTPException
+
 from udata import entrypoints
 from udata.core.storages.api import UploadProgress
-from .auth import PermissionDenied
 
+from .auth import PermissionDenied
 
 log = logging.getLogger(__name__)
 
@@ -43,8 +44,8 @@ def init_app(app):
     if app.config['SENTRY_DSN']:
         try:
             import sentry_sdk
-            from sentry_sdk.integrations.flask import FlaskIntegration
             from sentry_sdk.integrations.celery import CeleryIntegration
+            from sentry_sdk.integrations.flask import FlaskIntegration
         except ImportError:
             log.error('sentry-sdk is required to use Sentry')
             return

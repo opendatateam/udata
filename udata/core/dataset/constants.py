@@ -1,4 +1,5 @@
 from collections import OrderedDict
+
 from udata.i18n import lazy_gettext as _
 
 #: Udata frequencies with their labels

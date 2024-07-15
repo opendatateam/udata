@@ -2,8 +2,7 @@ import hashlib
 import io
 
 import pydenticon
-
-from flask import redirect, send_file, current_app
+from flask import current_app, redirect, send_file
 
 from udata import entrypoints
 from udata.app import cache

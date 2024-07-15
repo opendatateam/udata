@@ -1,8 +1,6 @@
 from udata.auth import Permission, UserNeed
-
-from udata.models import User, Organization
-
 from udata.core.organization.permissions import OrganizationAdminNeed
+from udata.models import Organization, User
 
 
 class TransferPermission(Permission):

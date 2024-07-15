@@ -1,5 +1,4 @@
 from udata.auth import Permission
-
 from udata.core.organization.permissions import OrganizationAdminNeed
 
 

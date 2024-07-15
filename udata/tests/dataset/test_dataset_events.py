@@ -1,13 +1,15 @@
-from flask import current_app
-import pytest
 from unittest.mock import patch
-from udata.core.dataset.models import Schema
 
+import pytest
+from flask import current_app
+from requests.compat import json as complexjson
+
+from udata.core.dataset.events import serialize_resource_for_event
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.dataset.models import Schema
 from udata.models import Dataset
 from udata.tests.helpers import assert_emit
-from udata.core.dataset.events import serialize_resource_for_event
-from udata.core.dataset.factories import ResourceFactory, DatasetFactory
-from requests.compat import json as complexjson
+
 
 @pytest.mark.usefixtures('clean_db')
 @pytest.mark.usefixtures('enable_resource_event')

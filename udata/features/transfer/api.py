@@ -1,16 +1,15 @@
 from flask import request
 
-from udata.api import api, fields, API, base_reference
+from udata.api import API, api, base_reference, fields
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api_fields import reuse_ref_fields
 from udata.core.user.api_fields import user_ref_fields
-from udata.models import db, User, Organization, Dataset, Reuse
+from udata.models import Dataset, Organization, Reuse, User, db
 from udata.utils import id_or_404
 
-from .actions import request_transfer, accept_transfer, refuse_transfer
+from .actions import accept_transfer, refuse_transfer, request_transfer
 from .models import TRANSFER_STATUS, Transfer
-
 
 RESPONSE_TYPES = ['accept', 'refuse']
 

@@ -1,14 +1,12 @@
 import logging
-
 from datetime import date, datetime
-from dateutil.parser import parse
 
+from dateutil.parser import parse
 from mongoengine import EmbeddedDocument
 from mongoengine.fields import BaseField, DateTimeField
 from mongoengine.signals import pre_save
 
 from udata.i18n import lazy_gettext as _
-
 
 log = logging.getLogger(__name__)
 

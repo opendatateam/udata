@@ -1,50 +1,49 @@
 from datetime import datetime
 
-from flask import request, url_for, redirect, make_response
+from flask import make_response, redirect, request, url_for
 from mongoengine.queryset.visitor import Q
 
-from udata.api import api, API, errors
+from udata.api import API, api, errors
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission, current_user
 from udata.core.badges import api as badges_api
 from udata.core.badges.fields import badge_fields
-from udata.core.followers.api import FollowAPI
-from udata.utils import multi_to_dict
-from udata.rdf import (
-    RDF_EXTENSIONS, negociate_content, graph_response
-)
-
-from .forms import (
-    OrganizationForm, MembershipRequestForm, MembershipRefuseForm, MemberForm
-)
-from .models import Organization, MembershipRequest, Member
-from .constants import ORG_ROLES
-from .permissions import (
-    EditOrganizationPermission, OrganizationPrivatePermission
-)
-from .rdf import build_org_catalog
-from .tasks import notify_membership_request, notify_membership_response
-from .api_fields import (
-    org_fields,
-    org_page_fields,
-    org_role_fields,
-    request_fields,
-    member_fields,
-    refuse_membership_fields,
-    org_suggestion_fields
-)
-
 from udata.core.dataset.api import DatasetApiParser
 from udata.core.dataset.api_fields import dataset_page_fields
 from udata.core.dataset.models import Dataset
 from udata.core.discussions.api import discussion_fields
 from udata.core.discussions.models import Discussion
+from udata.core.followers.api import FollowAPI
 from udata.core.reuse.api_fields import reuse_fields
 from udata.core.reuse.models import Reuse
 from udata.core.storages.api import (
-    uploaded_image_fields, image_parser, parse_uploaded_image
+    image_parser,
+    parse_uploaded_image,
+    uploaded_image_fields,
 )
+from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
+from udata.utils import multi_to_dict
 
+from .api_fields import (
+    member_fields,
+    org_fields,
+    org_page_fields,
+    org_role_fields,
+    org_suggestion_fields,
+    refuse_membership_fields,
+    request_fields,
+)
+from .constants import ORG_ROLES
+from .forms import (
+    MemberForm,
+    MembershipRefuseForm,
+    MembershipRequestForm,
+    OrganizationForm,
+)
+from .models import Member, MembershipRequest, Organization
+from .permissions import EditOrganizationPermission, OrganizationPrivatePermission
+from .rdf import build_org_catalog
+from .tasks import notify_membership_request, notify_membership_response
 
 DEFAULT_SORTING = '-created_at'
 SUGGEST_SORTING = '-metrics.followers'
@@ -209,10 +208,9 @@ class OrganizationBadgeAPI(API):
         return badges_api.remove(org, badge_kind)
 
 
-from udata.models import ContactPoint
 from udata.core.contact_point.api import ContactPointApiParser
 from udata.core.contact_point.api_fields import contact_point_page_fields
-
+from udata.models import ContactPoint
 
 contact_point_parser = ContactPointApiParser()
 

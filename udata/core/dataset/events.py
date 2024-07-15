@@ -1,11 +1,12 @@
 import datetime
+
 import requests
 from flask import current_app
 
-from udata.utils import to_iso_datetime, get_by
+from udata.event.values import EventMessageType
 from udata.models import Dataset
 from udata.tasks import task
-from udata.event.values import EventMessageType
+from udata.utils import get_by, to_iso_datetime
 
 
 def serialize_resource_for_event(resource):

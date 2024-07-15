@@ -1,9 +1,9 @@
 from functools import wraps
+
 from flask import current_app, request
 from flask_sitemap import Sitemap, sitemap_page_needed
 
 from udata.app import cache
-
 
 sitemap = Sitemap()
 

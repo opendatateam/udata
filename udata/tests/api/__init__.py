@@ -1,6 +1,6 @@
-import pytest
-
 from contextlib import contextmanager
+
+import pytest
 
 from ..frontend import FrontTestCase
 

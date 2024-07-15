@@ -1,4 +1,4 @@
-from udata.api import api, fields, API
+from udata.api import API, api, fields
 from udata.auth import current_user
 
 from .actions import get_notifications

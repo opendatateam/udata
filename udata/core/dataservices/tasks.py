@@ -1,8 +1,9 @@
 from celery.utils.log import get_task_logger
 
 from udata.core.dataservices.models import Dataservice
+
 # from udata.harvest.models import HarvestJob
-from udata.models import (Follow, Discussion, Activity, Transfer)
+from udata.models import Activity, Discussion, Follow, Transfer
 from udata.tasks import job
 
 log = get_task_logger(__name__)

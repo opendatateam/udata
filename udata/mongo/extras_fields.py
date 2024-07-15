@@ -1,9 +1,8 @@
 import logging
-
 from datetime import date, datetime
 
 from mongoengine import EmbeddedDocument
-from mongoengine.fields import DictField, BaseField
+from mongoengine.fields import BaseField, DictField
 
 log = logging.getLogger(__name__)
 

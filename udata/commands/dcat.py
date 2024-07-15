@@ -2,13 +2,16 @@ import logging
 
 import click
 import mongoengine
-
 from rdflib import Graph
 
-from udata.commands import cli, green, yellow, cyan, echo, magenta
+from udata.commands import cli, cyan, echo, green, magenta, yellow
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.rdf import dataset_from_rdf
-from udata.harvest.backends.dcat import DcatBackend, CswDcatBackend, CswIso19139DcatBackend
+from udata.harvest.backends.dcat import (
+    CswDcatBackend,
+    CswIso19139DcatBackend,
+    DcatBackend,
+)
 from udata.rdf import namespace_manager
 
 log = logging.getLogger(__name__)

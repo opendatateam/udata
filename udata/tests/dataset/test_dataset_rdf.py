@@ -1,34 +1,47 @@
-import pytest
-import requests
-
 from datetime import date
 from xml.etree.ElementTree import XML
 
+import pytest
+import requests
 from flask import url_for
-
-from rdflib import Graph, URIRef, Literal, BNode
+from rdflib import BNode, Graph, Literal, URIRef
 from rdflib.namespace import FOAF, RDF
 from rdflib.resource import Resource as RdfResource
 
-from udata.mongo import db
-from udata.core.dataset.models import Dataset, Resource, License, Checksum, HarvestDatasetMetadata
-from udata.core.dataset.factories import (
-    DatasetFactory, ResourceFactory, LicenseFactory
+from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceFactory
+from udata.core.dataset.models import (
+    Checksum,
+    Dataset,
+    HarvestDatasetMetadata,
+    License,
+    Resource,
 )
 from udata.core.dataset.rdf import (
-    dataset_to_rdf, dataset_from_rdf, resource_to_rdf, resource_from_rdf,
-    temporal_from_rdf, frequency_to_rdf, frequency_from_rdf,
-    EU_RDF_REQUENCIES
-)
-from udata.rdf import (
-    TAG_TO_EU_HVD_CATEGORIES
+    EU_RDF_REQUENCIES,
+    dataset_from_rdf,
+    dataset_to_rdf,
+    frequency_from_rdf,
+    frequency_to_rdf,
+    resource_from_rdf,
+    resource_to_rdf,
+    temporal_from_rdf,
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.i18n import gettext as _
-from udata.rdf import DCAT, DCATAP, DCT, FREQ, SPDX, SCHEMA, SKOS, HVD_LEGISLATION
-from udata.utils import faker
+from udata.mongo import db
+from udata.rdf import (
+    DCAT,
+    DCATAP,
+    DCT,
+    FREQ,
+    HVD_LEGISLATION,
+    SCHEMA,
+    SKOS,
+    SPDX,
+    TAG_TO_EU_HVD_CATEGORIES,
+)
 from udata.tests.helpers import assert200, assert_redirects
-
+from udata.utils import faker
 
 pytestmark = pytest.mark.usefixtures('app')
 

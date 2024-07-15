@@ -1,4 +1,4 @@
-from udata.api import api, API
+from udata.api import API, api
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission
 

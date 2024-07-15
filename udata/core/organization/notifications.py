@@ -1,7 +1,6 @@
-from udata.features.notifications.actions import notifier
-
-
 import logging
+
+from udata.features.notifications.actions import notifier
 
 log = logging.getLogger(__name__)
 

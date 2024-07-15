@@ -1,12 +1,13 @@
 import logging
-import slugify
 
+import slugify
 from flask_mongoengine import Document
 from mongoengine.fields import StringField
-from mongoengine.signals import pre_save, post_delete
+from mongoengine.signals import post_delete, pre_save
+
+from udata.utils import is_uuid
 
 from .queryset import UDataQuerySet
-from udata.utils import is_uuid
 
 log = logging.getLogger(__name__)
 

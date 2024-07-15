@@ -1,32 +1,37 @@
 import csv
 import logging
-import pytest
-
 from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
 
+import pytest
 from mock import patch
 
-from udata.models import Dataset, PeriodicTask
-
-from udata.core.organization.factories import OrganizationFactory
-from udata.core.user.factories import UserFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import HarvestDatasetMetadata
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.user.factories import UserFactory
+from udata.models import Dataset, PeriodicTask
 from udata.tests.helpers import assert_emit, assert_equal_dates
-from udata.utils import faker, Paginable
+from udata.utils import Paginable, faker
 
-from .factories import (
-    HarvestSourceFactory, HarvestJobFactory, MockBackendsMixin,
-    mock_initialize, mock_process, DEFAULT_COUNT as COUNT
-)
-from ..models import (
-    HarvestSource, HarvestJob, HarvestError,
-    VALIDATION_PENDING, VALIDATION_ACCEPTED, VALIDATION_REFUSED
-)
-from ..backends import BaseBackend
 from .. import actions, signals
-
+from ..backends import BaseBackend
+from ..models import (
+    VALIDATION_ACCEPTED,
+    VALIDATION_PENDING,
+    VALIDATION_REFUSED,
+    HarvestError,
+    HarvestJob,
+    HarvestSource,
+)
+from .factories import DEFAULT_COUNT as COUNT
+from .factories import (
+    HarvestJobFactory,
+    HarvestSourceFactory,
+    MockBackendsMixin,
+    mock_initialize,
+    mock_process,
+)
 
 log = logging.getLogger(__name__)
 

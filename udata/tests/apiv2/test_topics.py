@@ -2,8 +2,8 @@ from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.core.reuse.factories import ReuseFactory
+from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import UserFactory
 from udata.tests.api import APITestCase

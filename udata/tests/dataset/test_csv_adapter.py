@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from udata.core.dataset.csv import ResourcesCsvAdapter, DatasetCsvAdapter
+from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.dataset.models import Dataset
 

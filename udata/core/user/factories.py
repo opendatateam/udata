@@ -1,10 +1,9 @@
 import factory
-
 from flask_security.utils import hash_password
 
 from udata.factories import ModelFactory
 
-from .models import User, Role
+from .models import Role, User
 
 
 class UserFactory(ModelFactory):

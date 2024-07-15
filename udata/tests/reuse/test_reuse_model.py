@@ -1,17 +1,16 @@
 from datetime import datetime
 
-from udata.models import Reuse
-
 from udata.core.dataset import tasks as dataset_tasks
+from udata.core.dataset.factories import DatasetFactory
+from udata.core.discussions.factories import DiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
-from udata.core.dataset.factories import DatasetFactory
 from udata.core.user.factories import UserFactory
-from udata.core.discussions.factories import DiscussionFactory
 from udata.i18n import gettext as _
+from udata.models import Reuse
 from udata.tests.helpers import assert_emit
 
-from .. import TestCase, DBTestMixin
+from .. import DBTestMixin, TestCase
 
 
 class ReuseModelTest(TestCase, DBTestMixin):

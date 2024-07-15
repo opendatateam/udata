@@ -1,5 +1,4 @@
-from udata.api import api, API
-
+from udata.api import API, api
 
 from . import backends
 

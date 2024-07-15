@@ -1,8 +1,8 @@
-from udata.forms import ModelForm, Form, fields, validators
+from udata.forms import Form, ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 
-from .models import Discussion
 from .constants import COMMENT_SIZE_LIMIT
+from .models import Discussion
 
 __all__ = ('DiscussionCreateForm', 'DiscussionCommentForm')
 

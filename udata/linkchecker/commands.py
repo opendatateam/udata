@@ -5,7 +5,6 @@ import click
 from udata.commands import cli
 from udata.linkchecker.tasks import check_resources
 
-
 log = logging.getLogger(__name__)
 
 

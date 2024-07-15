@@ -6,7 +6,7 @@ from udata.core.spatial.models import spatial_granularities
 from udata.core.topic.factories import TopicFactory
 from udata.core.topic.models import Topic
 from udata.core.user.factories import UserFactory
-from udata.models import Member, Discussion
+from udata.models import Discussion, Member
 from udata.tests.api.test_datasets_api import SAMPLE_GEOM
 from udata.tests.features.territories import create_geozones_fixtures
 

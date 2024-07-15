@@ -1,10 +1,9 @@
 import pytest
-
 from bleach._vendor import html5lib
 from flask import render_template_string
 
+from udata.frontend.markdown import EXCERPT_TOKEN, md, parse_html
 from udata.utils import faker
-from udata.frontend.markdown import md, parse_html, EXCERPT_TOKEN
 
 parser = html5lib.HTMLParser(tree=html5lib.getTreeBuilder("dom"))
 

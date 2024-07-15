@@ -1,14 +1,12 @@
 from udata import mail
-from udata.i18n import lazy_gettext as _
 from udata.core.dataset.models import Dataset
-from udata.core.reuse.models import Reuse
 from udata.core.post.models import Post
+from udata.core.reuse.models import Reuse
+from udata.i18n import lazy_gettext as _
 from udata.tasks import connect, get_logger
 
 from .models import Discussion, Message
-from .signals import (
-    on_new_discussion, on_new_discussion_comment, on_discussion_closed
-)
+from .signals import on_discussion_closed, on_new_discussion, on_new_discussion_comment
 
 log = get_logger(__name__)
 

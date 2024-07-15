@@ -1,9 +1,9 @@
 import copy
 import logging
-import requests
 import urllib.parse
 
-from flask import request, current_app, url_for
+import requests
+from flask import current_app, request, url_for
 
 from udata.search.result import SearchResult
 

@@ -1,10 +1,9 @@
 from flask import url_for
 
 from udata.api import api
-from udata.models import db, Follow
-
 from udata.core.followers.api import FollowAPI
 from udata.core.followers.signals import on_follow, on_unfollow
+from udata.models import Follow, db
 
 from . import APITestCase
 

@@ -1,15 +1,12 @@
 import logging
 from contextlib import contextmanager
+from smtplib import SMTPException
 
 from blinker import signal
-
 from flask import current_app, render_template
 from flask_mail import Mail, Message
 
-from smtplib import SMTPException
-
 from udata import i18n
-
 
 log = logging.getLogger(__name__)
 

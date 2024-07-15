@@ -1,12 +1,11 @@
 import pytest
-
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.tags.tasks import count_tags
-from udata.utils import faker
 from udata.tests.helpers import assert200
+from udata.utils import faker
 
 
 @pytest.mark.frontend

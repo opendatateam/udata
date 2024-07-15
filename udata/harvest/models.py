@@ -1,15 +1,15 @@
+import logging
 from collections import OrderedDict
 from datetime import datetime
-import logging
 from urllib.parse import urlparse
 
-from udata.core.dataservices.models import Dataservice
 from werkzeug.utils import cached_property
 
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import HarvestDatasetMetadata
-from udata.models import db, Dataset
-from udata.i18n import lazy_gettext as _
 from udata.core.owned import Owned, OwnedQuerySet
+from udata.i18n import lazy_gettext as _
+from udata.models import Dataset, db
 
 log = logging.getLogger(__name__)
 

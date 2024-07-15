@@ -1,5 +1,4 @@
 import logging
-
 from urllib.parse import urlparse
 
 from celery import Celery, Task

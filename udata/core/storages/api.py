@@ -1,5 +1,4 @@
 import os
-
 from datetime import datetime
 
 from flask import json
@@ -7,8 +6,7 @@ from werkzeug.datastructures import FileStorage
 
 from udata.api import api, fields
 
-from . import utils, chunks
-
+from . import chunks, utils
 
 META = 'meta.json'
 

@@ -1,5 +1,6 @@
-from flask import url_for, current_app
+from flask import current_app, url_for
 from flask_security.utils import hash_data
+
 from udata.core.user.factories import AdminFactory
 
 from . import FrontTestCase

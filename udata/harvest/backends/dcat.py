@@ -1,19 +1,25 @@
 import logging
-
-from rdflib import Graph
-from rdflib.namespace import RDF
-import lxml.etree as ET
-from flask import current_app
 from datetime import date
 from typing import Generator
 
-from udata.rdf import (
-    DCAT, DCT, HYDRA, SPDX, namespace_manager, guess_format, url_from_rdf
-)
-from udata.core.dataset.rdf import dataset_from_rdf
+import lxml.etree as ET
+from flask import current_app
+from rdflib import Graph
+from rdflib.namespace import RDF
+
 from udata.core.dataservices.rdf import dataservice_from_rdf
-from udata.storage.s3 import store_as_json
+from udata.core.dataset.rdf import dataset_from_rdf
 from udata.harvest.models import HarvestItem
+from udata.rdf import (
+    DCAT,
+    DCT,
+    HYDRA,
+    SPDX,
+    guess_format,
+    namespace_manager,
+    url_from_rdf,
+)
+from udata.storage.s3 import store_as_json
 
 from .base import BaseBackend
 

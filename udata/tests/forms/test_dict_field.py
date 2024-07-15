@@ -1,10 +1,9 @@
-import pytest
-
 from datetime import date, datetime
 
+import pytest
 from werkzeug.datastructures import MultiDict
 
-from udata.forms import fields, ModelForm
+from udata.forms import ModelForm, fields
 from udata.mongo import db
 
 pytestmark = [

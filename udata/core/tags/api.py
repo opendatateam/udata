@@ -1,7 +1,6 @@
-from udata.api import api, API
-
-from udata.tags import slug  # TODO: merge this into this package
+from udata.api import API, api
 from udata.models import Tag
+from udata.tags import slug  # TODO: merge this into this package
 
 DEFAULT_SIZE = 8
 

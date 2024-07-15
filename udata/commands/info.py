@@ -1,14 +1,11 @@
 import logging
 
 from click import echo
-
 from flask import current_app
 
 from udata import entrypoints
-from udata.commands import cli, white, OK, KO, green, red
-
+from udata.commands import KO, OK, cli, green, red, white
 from udata.features.identicon.backends import get_config as avatar_config
-
 
 log = logging.getLogger(__name__)
 

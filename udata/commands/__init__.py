@@ -1,15 +1,14 @@
 import logging
 import os
-import pkg_resources
 import sys
-
 from glob import iglob
 
 import click
+import pkg_resources
+from flask.cli import FlaskGroup, ScriptInfo, shell_command
 
-from flask.cli import FlaskGroup, shell_command, ScriptInfo
 from udata import entrypoints
-from udata.app import create_app, standalone, VERBOSE_LOGGERS
+from udata.app import VERBOSE_LOGGERS, create_app, standalone
 from udata.utils import safe_unicode
 
 log = logging.getLogger(__name__)

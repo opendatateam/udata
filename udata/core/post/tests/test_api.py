@@ -1,5 +1,4 @@
 import pytest
-
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
@@ -7,7 +6,6 @@ from udata.core.post.factories import PostFactory
 from udata.core.post.models import Post
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory
-
 from udata.tests.helpers import assert200, assert201, assert204
 
 

@@ -1,11 +1,10 @@
 import logging
 
 import mongoengine
-
 from bson import ObjectId
-from flask import url_for, request
+from flask import request, url_for
 
-from udata.api import apiv2, API, fields
+from udata.api import API, apiv2, fields
 from udata.core.dataset.api import DatasetApiParser
 from udata.core.dataset.apiv2 import dataset_page_fields
 from udata.core.dataset.models import Dataset

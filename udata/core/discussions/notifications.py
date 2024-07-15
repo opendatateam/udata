@@ -1,9 +1,8 @@
+import logging
+
 from udata.features.notifications.actions import notifier
 
 from .actions import discussions_for
-
-
-import logging
 
 log = logging.getLogger(__name__)
 

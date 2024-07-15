@@ -17,32 +17,32 @@ These changes might lead to backward compatibility breakage meaning:
 - admin changes
 '''
 
-import os
 import logging
-import mongoengine
+import os
 from datetime import datetime
 
+import mongoengine
 from bson.objectid import ObjectId
-from flask import request, current_app, abort, redirect, url_for, make_response
+from flask import abort, current_app, make_response, redirect, request, url_for
 from flask_security import current_user
 from mongoengine.queryset.visitor import Q
 
-from udata.auth import admin_permission
-from udata.api import api, API, errors
+from udata.api import API, api, errors
 from udata.api.parsers import ModelApiParser
+from udata.auth import admin_permission
 from udata.core import storages
-from udata.core.dataset.models import CHECKSUM_TYPES
-from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.badges import api as badges_api
 from udata.core.badges.fields import badge_fields
+from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.followers.api import FollowAPI
+from udata.core.storages.api import handle_upload, upload_parser
+from udata.core.topic.models import Topic
+from udata.linkchecker.checker import check_resource
+from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
 from udata.utils import get_by
-from udata.rdf import (
-    RDF_EXTENSIONS,
-    negociate_content, graph_response
-)
 
 from .api_fields import (
+    catalog_schema_fields,
     community_resource_fields,
     community_resource_page_fields,
     dataset_fields,
@@ -53,24 +53,24 @@ from .api_fields import (
     resource_fields,
     resource_type_fields,
     upload_fields,
-    catalog_schema_fields,
 )
-from udata.linkchecker.checker import check_resource
-from udata.core.topic.models import Topic
-from .models import (
-    Dataset, Resource, Checksum, License, 
-    CommunityResource, ResourceSchema, get_resource
-)
-from .constants import UPDATE_FREQUENCIES, RESOURCE_TYPES
-from .permissions import DatasetEditPermission, ResourceEditPermission
-from .forms import (
-    ResourceForm, DatasetForm, CommunityResourceForm, ResourcesListForm
-)
+from .constants import RESOURCE_TYPES, UPDATE_FREQUENCIES
 from .exceptions import (
-    SchemasCatalogNotFoundException, SchemasCacheUnavailableException
+    SchemasCacheUnavailableException,
+    SchemasCatalogNotFoundException,
 )
+from .forms import CommunityResourceForm, DatasetForm, ResourceForm, ResourcesListForm
+from .models import (
+    Checksum,
+    CommunityResource,
+    Dataset,
+    License,
+    Resource,
+    ResourceSchema,
+    get_resource,
+)
+from .permissions import DatasetEditPermission, ResourceEditPermission
 from .rdf import dataset_to_rdf
-
 
 DEFAULT_SORTING = '-created_at_internal'
 SUGGEST_SORTING = '-metrics.followers'

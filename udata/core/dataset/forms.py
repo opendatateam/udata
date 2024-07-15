@@ -1,18 +1,28 @@
 from mongoengine import ValidationError
 
+from udata.core.spatial.forms import SpatialCoverageField
+from udata.core.storages import resources
 from udata.forms import ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
-
-from udata.core.storages import resources
-from udata.core.spatial.forms import SpatialCoverageField
 from udata.mongo.errors import FieldValidationError
 
-from .models import (
-    Dataset, Resource, Schema, License, Checksum, CommunityResource,
-)
 from .constants import (
-    UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, RESOURCE_FILETYPES, CHECKSUM_TYPES,
-    LEGACY_FREQUENCIES, RESOURCE_TYPES, TITLE_SIZE_LIMIT, DESCRIPTION_SIZE_LIMIT,
+    CHECKSUM_TYPES,
+    DEFAULT_FREQUENCY,
+    DESCRIPTION_SIZE_LIMIT,
+    LEGACY_FREQUENCIES,
+    RESOURCE_FILETYPES,
+    RESOURCE_TYPES,
+    TITLE_SIZE_LIMIT,
+    UPDATE_FREQUENCIES,
+)
+from .models import (
+    Checksum,
+    CommunityResource,
+    Dataset,
+    License,
+    Resource,
+    Schema,
 )
 
 __all__ = ('DatasetForm', 'ResourceForm', 'CommunityResourceForm')

@@ -1,16 +1,16 @@
 from celery import states
 from celery.result import AsyncResult
 from celery.utils import get_full_cls_name
-from kombu.utils.encoding import safe_repr
 from flask import request
+from kombu.utils.encoding import safe_repr
 
-from udata.api import api, API, fields
+from udata.api import API, api, fields
 from udata.auth import admin_permission
-from udata.tasks import schedulables, celery
+from udata.tasks import celery, schedulables
 from udata.utils import id_or_404
 
 from .forms import CrontabTaskForm, IntervalTaskForm
-from .models import PeriodicTask, PERIODS
+from .models import PERIODS, PeriodicTask
 
 ns = api.namespace(
     'workers', 'Asynchronous workers related operations', path='')

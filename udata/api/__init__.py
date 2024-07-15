@@ -1,30 +1,33 @@
-import itertools
 import inspect
+import itertools
 import logging
 import urllib.parse
-
 from functools import wraps
 from importlib import import_module
 
 from flask import (
-    current_app, g, request, url_for, json, make_response, redirect, Blueprint
+    Blueprint,
+    current_app,
+    g,
+    json,
+    make_response,
+    redirect,
+    request,
+    url_for,
 )
-from flask_storage import UnauthorizedFileType
-from flask_restx import Api, Resource
 from flask_cors import CORS
+from flask_restx import Api, Resource
+from flask_storage import UnauthorizedFileType
 
-from udata import tracking, entrypoints
+from udata import entrypoints, tracking
 from udata.app import csrf
+from udata.auth import Permission, PermissionDenied, RoleNeed, current_user, login_user
 from udata.i18n import get_locale
-from udata.auth import (
-    current_user, login_user, Permission, RoleNeed, PermissionDenied
-)
-from udata.utils import safe_unicode
 from udata.mongo.errors import FieldValidationError
+from udata.utils import safe_unicode
 
 from . import fields
 from .signals import on_api_call
-
 
 log = logging.getLogger(__name__)
 
@@ -128,8 +131,8 @@ class UDataApi(Api):
         '''Authentify the user if credentials are given'''
         @wraps(func)
         def wrapper(*args, **kwargs):
-            from udata.core.user.models import User
             from udata.api.oauth2 import check_credentials
+            from udata.core.user.models import User
 
             if current_user.is_authenticated:
                 return func(*args, **kwargs)

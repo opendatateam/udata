@@ -1,11 +1,12 @@
-from udata.api import api
 import flask_restx.fields as restx_fields
-import udata.api.fields as custom_restx_fields
-from bson import ObjectId
 import mongoengine
 import mongoengine.fields as mongo_fields
+from bson import ObjectId
 
+import udata.api.fields as custom_restx_fields
+from udata.api import api
 from udata.mongo.errors import FieldValidationError
+
 
 def convert_db_to_field(key, field, info = {}):
     '''

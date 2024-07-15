@@ -1,6 +1,6 @@
 from udata import mail
-from udata.i18n import lazy_gettext as _
 from udata.core import storages
+from udata.i18n import lazy_gettext as _
 from udata.models import Activity, Discussion, Follow, Transfer
 from udata.tasks import get_logger, job, task
 

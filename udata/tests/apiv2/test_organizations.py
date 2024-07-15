@@ -1,8 +1,7 @@
 from flask import url_for
 
+from udata.core.organization.factories import Member, OrganizationFactory
 from udata.tests.api import APITestCase
-
-from udata.core.organization.factories import OrganizationFactory, Member
 
 
 class OrganizationExtrasAPITest(APITestCase):

@@ -3,8 +3,8 @@ Add a default topic to all reuses in db
 '''
 import logging
 
-from bson import DBRef
 import mongoengine
+from bson import DBRef
 
 from udata.models import Reuse
 

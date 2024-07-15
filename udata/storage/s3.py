@@ -1,7 +1,9 @@
+import json
 from typing import Any
+
 import boto3
 from flask import current_app
-import json
+
 
 def get_client():
     url = current_app.config.get('S3_URL')

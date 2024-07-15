@@ -1,4 +1,5 @@
 from udata.api import api, fields
+
 from .constants import SPAM_STATUS_CHOICES
 
 spam_fields = api.model('Spam', {

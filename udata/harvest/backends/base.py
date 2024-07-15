@@ -1,23 +1,27 @@
 import logging
 import traceback
-
-from datetime import datetime, date, timedelta
+from datetime import date, datetime, timedelta
 from uuid import UUID
 
 import requests
-
 from flask import current_app
-from udata.core.dataservices.models import Dataservice
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
-from udata.core.dataset.models import HarvestDatasetMetadata
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
+from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.models import Dataset
 from udata.utils import safe_unicode
 
 from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
-from ..models import HarvestItem, HarvestJob, HarvestError, HarvestLog, archive_harvested_dataset
-from ..signals import before_harvest_job, after_harvest_job
+from ..models import (
+    HarvestError,
+    HarvestItem,
+    HarvestJob,
+    HarvestLog,
+    archive_harvested_dataset,
+)
+from ..signals import after_harvest_job, before_harvest_job
 
 log = logging.getLogger(__name__)
 

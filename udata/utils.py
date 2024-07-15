@@ -1,22 +1,21 @@
 import hashlib
 import math
 import re
+from datetime import date, datetime
+from math import ceil
+from uuid import UUID, uuid4
+from xml.sax.saxutils import escape
 
 import factory
-
 from bson import ObjectId
 from bson.errors import InvalidId
-from datetime import date, datetime
-from dateutil.relativedelta import relativedelta
 from dateutil.parser import parse as parse_dt
+from dateutil.relativedelta import relativedelta
 from faker import Faker
 from faker.config import PROVIDERS
 from faker.providers import BaseProvider
 from faker.providers.lorem.la import Provider as LoremProvider
 from flask import abort
-from math import ceil
-from uuid import uuid4, UUID
-from xml.sax.saxutils import escape
 
 
 def get_by(lst, field, value):

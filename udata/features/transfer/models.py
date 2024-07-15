@@ -1,5 +1,4 @@
 import logging
-
 from datetime import datetime
 
 from udata.i18n import lazy_gettext as _

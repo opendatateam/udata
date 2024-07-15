@@ -1,13 +1,12 @@
 import factory
-
 from factory.fuzzy import FuzzyChoice
 
 from udata.core.dataset.factories import DatasetFactory
 from udata.factories import ModelFactory
 from udata.utils import faker
 
+from .constants import REUSE_TOPICS, REUSE_TYPES
 from .models import Reuse
-from .constants import REUSE_TYPES, REUSE_TOPICS
 
 
 class ReuseFactory(ModelFactory):

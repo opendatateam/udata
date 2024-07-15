@@ -3,9 +3,10 @@ from datetime import datetime
 
 from flask_login import current_user
 
-from udata.mongo import db
 from udata.core.spam.models import SpamMixin, spam_protected
-from .signals import (on_new_discussion, on_discussion_closed, on_new_discussion_comment)
+from udata.mongo import db
+
+from .signals import on_discussion_closed, on_new_discussion, on_new_discussion_comment
 
 log = logging.getLogger(__name__)
 

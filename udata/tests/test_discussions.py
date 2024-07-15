@@ -1,28 +1,31 @@
 from datetime import datetime
 
-from flask import url_for
 import pytest
+from flask import url_for
 
-from udata.models import Dataset, Member
-from udata.core.discussions.models import Message, Discussion
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.metrics import update_discussions_metric  # noqa
+from udata.core.discussions.models import Discussion, Message
 from udata.core.discussions.notifications import discussions_notifications
 from udata.core.discussions.signals import (
-    on_new_discussion, on_new_discussion_comment,
-    on_discussion_closed, on_discussion_deleted,
+    on_discussion_closed,
+    on_discussion_deleted,
+    on_new_discussion,
+    on_new_discussion_comment,
 )
-from udata.core.spam.signals import on_new_potential_spam
 from udata.core.discussions.tasks import (
-    notify_new_discussion, notify_new_discussion_comment,
-    notify_discussion_closed
+    notify_discussion_closed,
+    notify_new_discussion,
+    notify_new_discussion_comment,
 )
-from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.user.factories import UserFactory, AdminFactory
+from udata.core.spam.signals import on_new_potential_spam
+from udata.core.user.factories import AdminFactory, UserFactory
+from udata.models import Dataset, Member
 from udata.tests.helpers import capture_mails
 from udata.utils import faker
 
-from . import TestCase, DBTestMixin
+from . import DBTestMixin, TestCase
 from .api import APITestCase
 from .helpers import assert_emit, assert_not_emit
 

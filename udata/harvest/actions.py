@@ -1,6 +1,5 @@
-import logging
 import csv
-
+import logging
 from collections import namedtuple
 from datetime import datetime, timedelta
 
@@ -9,13 +8,17 @@ from flask import current_app
 
 from udata.auth import current_user
 from udata.core.dataset.models import HarvestDatasetMetadata
-from udata.models import User, Organization, PeriodicTask, Dataset
+from udata.models import Dataset, Organization, PeriodicTask, User
 from udata.storage.s3 import delete_file
 
 from . import backends, signals
 from .models import (
-    HarvestSource, HarvestJob, DEFAULT_HARVEST_FREQUENCY,
-    VALIDATION_ACCEPTED, VALIDATION_REFUSED, archive_harvested_dataset
+    DEFAULT_HARVEST_FREQUENCY,
+    VALIDATION_ACCEPTED,
+    VALIDATION_REFUSED,
+    HarvestJob,
+    HarvestSource,
+    archive_harvested_dataset,
 )
 from .tasks import harvest
 

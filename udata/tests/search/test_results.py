@@ -1,8 +1,8 @@
-from udata.tests.api import APITestCase
-from udata.search.result import SearchResult
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.search import DatasetSearch
 from udata.models import Dataset
+from udata.search.result import SearchResult
+from udata.tests.api import APITestCase
 
 
 class ResultTest(APITestCase):

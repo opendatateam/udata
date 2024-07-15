@@ -1,8 +1,8 @@
 from datetime import datetime
 
 from udata.mongo import db
-from .signals import on_follow, on_unfollow
 
+from .signals import on_follow, on_unfollow
 
 __all__ = ('Follow', )
 

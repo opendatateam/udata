@@ -1,6 +1,6 @@
 import logging
 
-from . import cli, success, error, header
+from . import cli, error, header, success
 
 logger = logging.getLogger(__name__)
 

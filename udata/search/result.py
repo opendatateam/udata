@@ -4,7 +4,6 @@ from bson.objectid import ObjectId
 
 from udata.utils import Paginable
 
-
 log = logging.getLogger(__name__)
 
 

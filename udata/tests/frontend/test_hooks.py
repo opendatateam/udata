@@ -1,6 +1,6 @@
 import pytest
-
 from flask import Blueprint, render_template_string, url_for
+
 from udata.frontend import template_hook
 from udata.tests.helpers import assert200
 

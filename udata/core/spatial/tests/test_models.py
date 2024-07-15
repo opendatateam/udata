@@ -1,10 +1,9 @@
 from datetime import timedelta
 
-from udata.tests import TestCase, DBTestMixin
+from udata.tests import DBTestMixin, TestCase
 
-from ..factories import GeoZoneFactory, GeoLevelFactory
+from ..factories import GeoLevelFactory, GeoZoneFactory
 from ..models import GeoZone, SpatialCoverage
-
 
 A_YEAR = timedelta(days=365)
 

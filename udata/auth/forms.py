@@ -2,9 +2,9 @@ import datetime
 
 from flask import current_app
 from flask_login import current_user
-from flask_security.forms import RegisterForm, LoginForm, ResetPasswordForm, Form
-from udata.forms import fields
-from udata.forms import validators
+from flask_security.forms import Form, LoginForm, RegisterForm, ResetPasswordForm
+
+from udata.forms import fields, validators
 from udata.i18n import lazy_gettext as _
 
 

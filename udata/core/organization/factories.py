@@ -2,7 +2,7 @@ import factory
 
 from udata.factories import ModelFactory
 
-from .models import Organization, Team, Member
+from .models import Member, Organization, Team
 
 
 class OrganizationFactory(ModelFactory):

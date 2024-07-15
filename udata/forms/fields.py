@@ -1,26 +1,27 @@
 import uuid
 
 from dateutil.parser import parse
-
 from flask import url_for
 from flask_mongoengine.wtf import fields as mefields
 from flask_storage.mongo import ImageReference
 from speaklater import is_lazy_string
-from wtforms import Form as WTForm, Field as WTField, validators, fields, SubmitField  # noqa
+from wtforms import Field as WTField
+from wtforms import Form as WTForm  # noqa
+from wtforms import SubmitField, fields, validators
 from wtforms.utils import unset_value
 from wtforms.widgets import TextInput
 from wtforms_json import flatten_json
 
-from . import widgets
-
-from udata.auth import current_user, admin_permission
-from udata.models import db, User, Organization, Dataset, Reuse, datastore, ContactPoint
-from udata.core.storages import tmp
-from udata.core.organization.permissions import OrganizationPrivatePermission
-from udata.i18n import lazy_gettext as _
 from udata import tags, uris
+from udata.auth import admin_permission, current_user
+from udata.core.organization.permissions import OrganizationPrivatePermission
+from udata.core.storages import tmp
 from udata.forms import ModelForm
-from udata.utils import to_iso_date, get_by
+from udata.i18n import lazy_gettext as _
+from udata.models import ContactPoint, Dataset, Organization, Reuse, User, datastore, db
+from udata.utils import get_by, to_iso_date
+
+from . import widgets
 
 
 class FieldHelper(object):

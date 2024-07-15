@@ -3,11 +3,10 @@ from datetime import datetime
 from blinker import Signal
 from mongoengine.signals import post_save
 
-from udata.mongo import db
 from udata.auth import current_user
+from udata.mongo import db
 
 from .signals import new_activity
-
 
 __all__ = ('Activity', )
 

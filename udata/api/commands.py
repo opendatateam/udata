@@ -2,15 +2,14 @@ import logging
 import os
 
 import click
-
-from werkzeug.security import gen_salt
-from flask import json, current_app
+from flask import current_app, json
 from flask_restx import schemas
+from werkzeug.security import gen_salt
 
 from udata.api import api
-from udata.commands import cli, success, exit_with_error
-from udata.models import User
 from udata.api.oauth2 import OAuth2Client
+from udata.commands import cli, exit_with_error, success
+from udata.models import User
 
 log = logging.getLogger(__name__)
 

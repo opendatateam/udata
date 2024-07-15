@@ -1,18 +1,18 @@
 import inspect
 import logging
-import pkg_resources
-
-from time import time
 from importlib import import_module
+from time import time
+
+import pkg_resources
+from flask import current_app
 from jinja2 import pass_context
 from markupsafe import Markup
-from flask import current_app
 
 from udata import assets, entrypoints
 from udata.i18n import I18nBlueprint
 
-from .markdown import UdataCleaner, init_app as init_markdown
-
+from .markdown import UdataCleaner
+from .markdown import init_app as init_markdown
 
 log = logging.getLogger(__name__)
 

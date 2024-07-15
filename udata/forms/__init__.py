@@ -1,6 +1,7 @@
 import logging
 
 import wtforms_json
+
 wtforms_json.init()
 from flask_mongoengine.wtf import model_form  # noqa
 

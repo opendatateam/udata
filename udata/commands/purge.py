@@ -3,9 +3,8 @@ import logging
 import click
 
 from udata.commands import cli, success
-
-from udata.core.dataset.tasks import purge_datasets
 from udata.core.dataservices.tasks import purge_dataservices
+from udata.core.dataset.tasks import purge_datasets
 from udata.core.organization.tasks import purge_organizations
 from udata.core.reuse.tasks import purge_reuses
 

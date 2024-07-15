@@ -1,21 +1,24 @@
 import datetime
+from unittest.mock import patch
 
 import pytest
-
 from flask import current_app
 from flask_restx import inputs
 from flask_restx.reqparse import RequestParser
-from unittest.mock import patch
 
 from udata import search
+from udata.core.dataset.factories import (
+    DatasetFactory,
+    HiddenDatasetFactory,
+    ResourceFactory,
+)
 from udata.core.dataset.models import Schema
-from udata.i18n import gettext as _
-from udata.utils import clean_string
-from udata.search import reindex, as_task_param
-from udata.search.commands import index_model
 from udata.core.dataset.search import DatasetSearch
-from udata.core.dataset.factories import DatasetFactory, ResourceFactory, HiddenDatasetFactory
+from udata.i18n import gettext as _
+from udata.search import as_task_param, reindex
+from udata.search.commands import index_model
 from udata.tests.api import APITestCase
+from udata.utils import clean_string
 
 from . import FakeSearch
 

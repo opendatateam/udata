@@ -1,5 +1,4 @@
 import dateutil.parser
-
 from voluptuous import Invalid
 
 from udata import tags, uris

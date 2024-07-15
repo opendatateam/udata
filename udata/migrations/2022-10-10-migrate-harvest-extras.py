@@ -5,8 +5,9 @@ Clean other extras set at harvest time, they will be re-created if needed.
 import logging
 
 from mongoengine.errors import ValidationError
-from udata.models import Dataset
+
 from udata.core.dataset.models import HarvestDatasetMetadata
+from udata.models import Dataset
 
 log = logging.getLogger(__name__)
 

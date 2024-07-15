@@ -1,17 +1,16 @@
-import pytest
-
-from uuid import uuid4, UUID
 from datetime import date, datetime, timedelta
+from uuid import UUID, uuid4
 
+import pytest
 from mongoengine.errors import ValidationError
 from mongoengine.fields import BaseField
 
-from udata.i18n import _
-from udata.settings import Defaults
-from udata.models import Dataset
-from udata.mongo import db, validate_config, build_test_config
 from udata.errors import ConfigError
-from udata.tests.helpers import assert_json_equal, assert_equal_dates
+from udata.i18n import _
+from udata.models import Dataset
+from udata.mongo import build_test_config, db, validate_config
+from udata.settings import Defaults
+from udata.tests.helpers import assert_equal_dates, assert_json_equal
 
 pytestmark = [
     pytest.mark.usefixtures('clean_db')

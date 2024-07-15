@@ -1,13 +1,11 @@
 import pytest
 
-from udata.core.discussions.factories import (
-    MessageDiscussionFactory, DiscussionFactory
-)
+from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
+from udata.core.discussions.models import Discussion
 from udata.core.followers.models import Follow
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.core.user.models import User
-from udata.core.discussions.models import Discussion
-from udata.core.organization.factories import OrganizationFactory
 
 pytestmark = pytest.mark.usefixtures('clean_db')
 

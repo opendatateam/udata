@@ -1,26 +1,23 @@
 import logging
-import pytest
-
 from datetime import datetime
 
+import pytest
 from flask import url_for
 
-from .. import actions
-
-from udata.models import Member, PeriodicTask
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.models import Member, PeriodicTask
+from udata.tests.helpers import assert200, assert201, assert204, assert400, assert403
 from udata.utils import faker
-from udata.tests.helpers import (
-    assert200, assert201, assert204, assert400, assert403
-)
 
+from .. import actions
 from ..models import (
-    HarvestSource, VALIDATION_ACCEPTED, VALIDATION_REFUSED, VALIDATION_PENDING,
-
+    VALIDATION_ACCEPTED,
+    VALIDATION_PENDING,
+    VALIDATION_REFUSED,
+    HarvestSource,
 )
 from .factories import HarvestSourceFactory, MockBackendsMixin
-
 
 log = logging.getLogger(__name__)
 

@@ -1,11 +1,11 @@
 from flask import current_app
 from langdetect import detect
-
-from udata.mongo import db
-from .signals import on_new_potential_spam
 from mongoengine import signals
 
-from .constants import NO_SPAM, POTENTIAL_SPAM, SPAM_STATUS_CHOICES, NOT_CHECKED
+from udata.mongo import db
+
+from .constants import NO_SPAM, NOT_CHECKED, POTENTIAL_SPAM, SPAM_STATUS_CHOICES
+from .signals import on_new_potential_spam
 
 
 class SpamInfo(db.EmbeddedDocument):

@@ -1,14 +1,15 @@
 from blinker import Signal
-from mongoengine.signals import pre_save, post_save
+from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
-from udata.core.storages import images, default_image_basename
+from udata.core.owned import Owned, OwnedQuerySet
+from udata.core.storages import default_image_basename, images
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.models import db, BadgeMixin, WithMetrics
-from udata.utils import hash_url
+from udata.models import BadgeMixin, WithMetrics, db
 from udata.uris import endpoint_for
-from udata.core.owned import Owned, OwnedQuerySet
+from udata.utils import hash_url
+
 from .constants import IMAGE_MAX_SIZE, IMAGE_SIZES, REUSE_TOPICS, REUSE_TYPES
 
 __all__ = ('Reuse',)

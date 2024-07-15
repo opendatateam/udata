@@ -1,8 +1,9 @@
 import json
 import re
+
 import pytest
 
-from udata.tests import TestCase, WebTestMixin, DBTestMixin
+from udata.tests import DBTestMixin, TestCase, WebTestMixin
 
 
 class FrontTestCase(WebTestMixin, DBTestMixin, TestCase):

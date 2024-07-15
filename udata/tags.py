@@ -2,7 +2,6 @@ from flask import current_app
 from slugify import slugify
 from werkzeug.local import LocalProxy
 
-
 MIN_TAG_LENGTH = LocalProxy(lambda: current_app.config['TAG_MIN_LENGTH'])
 MAX_TAG_LENGTH = LocalProxy(lambda: current_app.config['TAG_MAX_LENGTH'])
 

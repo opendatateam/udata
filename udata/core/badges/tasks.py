@@ -1,4 +1,4 @@
-from udata.tasks import task, get_logger
+from udata.tasks import get_logger, task
 
 from .signals import on_badge_added
 

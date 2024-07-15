@@ -1,15 +1,14 @@
-import click
 import logging
-
 from datetime import datetime
+
+import click
 from flask import current_app
 from flask_security.forms import RegisterForm
 from flask_security.utils import hash_password
 from werkzeug.datastructures import MultiDict
 
+from udata.commands import cli, exit_with_error, success
 from udata.models import User, datastore
-
-from udata.commands import cli, success, exit_with_error
 
 log = logging.getLogger(__name__)
 

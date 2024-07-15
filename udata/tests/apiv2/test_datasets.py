@@ -1,15 +1,19 @@
 from datetime import datetime
-from flask import url_for
 
-from udata.core.dataset.models import ResourceMixin
-from udata.tests.api import APITestCase
+from flask import url_for
 
 from udata.core.dataset.apiv2 import DEFAULT_PAGE_SIZE
 from udata.core.dataset.factories import (
-    DatasetFactory, ResourceFactory, CommunityResourceFactory)
-from udata.core.organization.factories import OrganizationFactory, Member
-from udata.models import db, Dataset
+    CommunityResourceFactory,
+    DatasetFactory,
+    ResourceFactory,
+)
+from udata.core.dataset.models import ResourceMixin
+from udata.core.organization.factories import Member, OrganizationFactory
+from udata.models import Dataset, db
+from udata.tests.api import APITestCase
 from udata.tests.helpers import assert_not_emit
+
 
 class DatasetAPIV2Test(APITestCase):
 

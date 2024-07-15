@@ -5,7 +5,7 @@ import logging
 from urllib.parse import urlparse
 
 from udata.core import storages
-from udata.models import Dataset, CommunityResource
+from udata.models import CommunityResource, Dataset
 
 log = logging.getLogger(__name__)
 

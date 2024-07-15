@@ -1,8 +1,8 @@
 from flask import current_app
 
+from udata.core.metrics.signals import on_site_metrics_computed
 from udata.models import Site
 from udata.tasks import job
-from udata.core.metrics.signals import on_site_metrics_computed
 
 
 @job('compute-site-metrics')

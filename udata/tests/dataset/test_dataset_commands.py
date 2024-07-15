@@ -1,6 +1,6 @@
-import pytest
-
 from tempfile import NamedTemporaryFile
+
+import pytest
 
 from udata.core.dataset.factories import DatasetFactory
 

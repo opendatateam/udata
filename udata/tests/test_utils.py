@@ -1,8 +1,16 @@
 from datetime import date, datetime
 
 from udata.utils import (
-    get_by, daterange_start, daterange_end, to_bool, to_iso, to_iso_date,
-    to_iso_datetime, recursive_get, safe_unicode, to_naive_datetime
+    daterange_end,
+    daterange_start,
+    get_by,
+    recursive_get,
+    safe_unicode,
+    to_bool,
+    to_iso,
+    to_iso_date,
+    to_iso_datetime,
+    to_naive_datetime,
 )
 
 TEST_LIST = [

@@ -2,16 +2,14 @@ import json
 import logging
 import signal
 import sys
-
 from collections import Counter
 from contextlib import contextmanager
 from datetime import datetime
 from textwrap import dedent
-import requests
 
 import click
+import requests
 import slugify
-
 from mongoengine import errors
 from mongoengine.context_managers import switch_collection
 

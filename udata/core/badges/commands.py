@@ -1,7 +1,7 @@
-import click
 import logging
-
 from os.path import exists
+
+import click
 
 from udata.commands import cli
 from udata.models import Organization

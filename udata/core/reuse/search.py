@@ -1,14 +1,15 @@
 import datetime
-from udata.models import (
-    Reuse, Organization, User
-)
-from udata.search import (
-    ModelSearchAdapter, register,
-    ModelTermsFilter, BoolFilter, Filter
-)
-from udata.core.reuse.api import ReuseApiParser, DEFAULT_SORTING
-from udata.utils import to_iso_datetime
 
+from udata.core.reuse.api import DEFAULT_SORTING, ReuseApiParser
+from udata.models import Organization, Reuse, User
+from udata.search import (
+    BoolFilter,
+    Filter,
+    ModelSearchAdapter,
+    ModelTermsFilter,
+    register,
+)
+from udata.utils import to_iso_datetime
 
 __all__ = ('ReuseSearch', )
 

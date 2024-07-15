@@ -1,21 +1,20 @@
 import re
-from mongoengine.queryset.visitor import Q
 
 from flask_restx import inputs
+from mongoengine.queryset.visitor import Q
 
-from udata.api import api, API
+from udata.api import API, api
+from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.i18n import _
 from udata.models import Dataset
-from udata.core.dataset.api_fields import dataset_ref_fields
 
 from .api_fields import (
-    level_fields,
-    granularity_fields,
     feature_collection_fields,
-    zone_suggestion_fields
+    granularity_fields,
+    level_fields,
+    zone_suggestion_fields,
 )
-from .models import GeoZone, GeoLevel, spatial_granularities
-
+from .models import GeoLevel, GeoZone, spatial_granularities
 
 GEOM_TYPES = (
     'Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString',

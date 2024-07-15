@@ -1,4 +1,5 @@
 import logging
+
 import pytest
 
 from udata.core.jobs.commands import job_label

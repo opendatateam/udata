@@ -1,17 +1,17 @@
 '''
 This module centralize site helpers for RDF/DCAT serialization and parsing
 '''
-from flask import url_for, current_app
-from rdflib import Graph, URIRef, Literal, BNode
-from rdflib.namespace import RDF, FOAF
+from flask import current_app, url_for
+from rdflib import BNode, Graph, Literal, URIRef
+from rdflib.namespace import FOAF, RDF
 
 from udata.core.dataservices.rdf import dataservice_to_rdf
 from udata.core.dataset.rdf import dataset_to_rdf
 from udata.core.organization.rdf import organization_to_rdf
 from udata.core.user.rdf import user_to_rdf
 from udata.rdf import DCAT, DCT, namespace_manager, paginate_catalog
-from udata.utils import Paginable
 from udata.uris import endpoint_for
+from udata.utils import Paginable
 
 
 def build_catalog(site, datasets, dataservices = [], format=None):

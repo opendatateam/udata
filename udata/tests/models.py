@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.models import db, WithMetrics
+from udata.models import WithMetrics, db
 
 
 class FakeModel(WithMetrics, db.Document):

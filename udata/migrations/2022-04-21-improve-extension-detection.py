@@ -3,8 +3,8 @@ Recompute resources extension with improved detection
 '''
 import logging
 
-from udata.models import Dataset
 from udata.core.storages.utils import extension
+from udata.models import Dataset
 
 log = logging.getLogger(__name__)
 

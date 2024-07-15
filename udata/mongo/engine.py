@@ -1,20 +1,19 @@
-from bson import ObjectId, DBRef
+from bson import DBRef, ObjectId
 from flask_mongoengine import MongoEngine, MongoEngineSessionInterface
+from flask_storage.mongo import FileField, ImageField
 from mongoengine.base import TopLevelDocumentMetaclass, get_document
 from mongoengine.errors import ValidationError
-from mongoengine.signals import pre_save, post_save
-
-from flask_storage.mongo import FileField, ImageField
+from mongoengine.signals import post_save, pre_save
 
 from .badges_field import BadgesField
-from .taglist_field import TagListField
 from .datetime_fields import DateField, DateRange, Datetimed
+from .document import DomainModel, UDataDocument
 from .extras_fields import ExtrasField, OrganizationExtrasField
+from .queryset import UDataQuerySet
 from .slug_fields import SlugField
+from .taglist_field import TagListField
 from .url_field import URLField
 from .uuid_fields import AutoUUIDField
-from .queryset import UDataQuerySet
-from .document import UDataDocument, DomainModel
 
 
 class UDataMongoEngine(MongoEngine):

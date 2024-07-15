@@ -1,35 +1,47 @@
 import logging
-
 from datetime import datetime, timedelta
+from pydoc import locate
 from urllib.parse import urlparse
 
+import requests
 from blinker import signal
 from dateutil.parser import parse as parse_dt
 from flask import current_app
-from mongoengine import DynamicEmbeddedDocument, ValidationError as MongoEngineValidationError
-from mongoengine.signals import pre_save, post_save
+from mongoengine import DynamicEmbeddedDocument
+from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import DateTimeField
-from pydoc import locate
+from mongoengine.signals import post_save, pre_save
 from stringdist import rdlevenshtein
 from werkzeug.utils import cached_property
-import requests
 
 from udata.app import cache
 from udata.core import storages
+from udata.core.owned import Owned, OwnedQuerySet
 from udata.frontend.markdown import mdstrip
-from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
-from udata.mongo.errors import FieldValidationError
 from udata.i18n import lazy_gettext as _
-from udata.utils import get_by, hash_url, to_naive_datetime
+from udata.models import BadgeMixin, SpatialCoverage, WithMetrics, db
+from udata.mongo.errors import FieldValidationError
 from udata.uris import ValidationError, endpoint_for
 from udata.uris import validate as validate_url
-from udata.core.owned import Owned, OwnedQuerySet
-from .constants import CHECKSUM_TYPES, CLOSED_FORMATS, DEFAULT_LICENSE, LEGACY_FREQUENCIES, MAX_DISTANCE, PIVOTAL_DATA, RESOURCE_FILETYPES, RESOURCE_TYPES, SCHEMA_CACHE_DURATION, UPDATE_FREQUENCIES
+from udata.utils import get_by, hash_url, to_naive_datetime
 
-from .preview import get_preview_url
-from .exceptions import (
-    SchemasCatalogNotFoundException, SchemasCacheUnavailableException
+from .constants import (
+    CHECKSUM_TYPES,
+    CLOSED_FORMATS,
+    DEFAULT_LICENSE,
+    LEGACY_FREQUENCIES,
+    MAX_DISTANCE,
+    PIVOTAL_DATA,
+    RESOURCE_FILETYPES,
+    RESOURCE_TYPES,
+    SCHEMA_CACHE_DURATION,
+    UPDATE_FREQUENCIES,
 )
+from .exceptions import (
+    SchemasCacheUnavailableException,
+    SchemasCatalogNotFoundException,
+)
+from .preview import get_preview_url
 
 __all__ = ('License', 'Resource', 'Schema', 'Dataset', 'Checksum', 'CommunityResource', 'ResourceSchema')
 

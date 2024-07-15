@@ -1,6 +1,6 @@
 import logging
-import pytest
 
+import pytest
 from voluptuous import Invalid
 
 from udata.harvest import filters

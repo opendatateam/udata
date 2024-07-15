@@ -1,20 +1,16 @@
 import re
 from io import StringIO
-
-import factory
-
 from random import randint
 
+import factory
 from factory.mongoengine import MongoEngineFactory
+from flask import Blueprint, url_for
 
-from flask import url_for, Blueprint
-
-from udata.mongo import db
 from udata.frontend import csv
+from udata.mongo import db
 from udata.utils import faker
 
 from . import FrontTestCase
-
 
 RE_ATTACHMENT = re.compile(r'^attachment; filename=(?P<filename>.*)$')
 RE_FILENAME = re.compile(

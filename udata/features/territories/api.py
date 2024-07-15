@@ -1,4 +1,4 @@
-from udata.api import api, API
+from udata.api import API, api
 from udata.features.territories import check_for_territories
 
 suggest_parser = api.parser()

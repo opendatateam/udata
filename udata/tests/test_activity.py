@@ -1,8 +1,8 @@
-from udata.models import db, Activity
-from udata.tests import TestCase, DBTestMixin, WebTestMixin
-from udata.core.user.factories import UserFactory
-from udata.core.organization.factories import OrganizationFactory
 from udata.auth import login_user
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.user.factories import UserFactory
+from udata.models import Activity, db
+from udata.tests import DBTestMixin, TestCase, WebTestMixin
 
 
 class FakeSubject(db.Document):

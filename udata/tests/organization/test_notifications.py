@@ -1,13 +1,9 @@
 import pytest
 
-from udata.models import MembershipRequest, Member
-
-from udata.core.user.factories import UserFactory
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.notifications import (
-    membership_request_notifications
-)
-
+from udata.core.organization.notifications import membership_request_notifications
+from udata.core.user.factories import UserFactory
+from udata.models import Member, MembershipRequest
 from udata.tests.helpers import assert_equal_dates
 
 

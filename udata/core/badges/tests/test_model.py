@@ -1,10 +1,9 @@
 from udata.auth import login_user
-from udata.mongo import db
-from udata.tests import TestCase, DBTestMixin
 from udata.core.user.factories import UserFactory
+from udata.mongo import db
+from udata.tests import DBTestMixin, TestCase
 
 from ..models import Badge, BadgeMixin
-
 
 TEST = 'test'
 OTHER = 'other'

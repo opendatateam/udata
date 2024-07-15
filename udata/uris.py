@@ -1,10 +1,10 @@
 import re
 
-from werkzeug.routing import BuildError
 from flask import current_app, url_for
-from netaddr import IPAddress, AddrFormatError
-from udata.i18n import _
+from netaddr import AddrFormatError, IPAddress
+from werkzeug.routing import BuildError
 
+from udata.i18n import _
 from udata.settings import Defaults
 
 URL_REGEX = re.compile(

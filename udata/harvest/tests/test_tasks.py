@@ -1,7 +1,8 @@
 import logging
+
 import pytest
 
-from ..tasks import purge_harvest_sources, purge_harvest_jobs
+from ..tasks import purge_harvest_jobs, purge_harvest_sources
 
 log = logging.getLogger(__name__)
 

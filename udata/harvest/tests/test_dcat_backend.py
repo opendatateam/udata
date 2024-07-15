@@ -1,24 +1,23 @@
-from datetime import date
 import logging
 import os
 import re
-
-import pytest
+import xml.etree.ElementTree as ET
+from datetime import date
 
 import boto3
+import pytest
 from flask import current_app
-import xml.etree.ElementTree as ET
 
 from udata.core.dataservices.models import Dataservice
+from udata.core.dataset.factories import LicenseFactory, ResourceSchemaMockData
+from udata.core.organization.factories import OrganizationFactory
 from udata.harvest.models import HarvestJob
 from udata.models import Dataset
-from udata.core.organization.factories import OrganizationFactory
-from udata.core.dataset.factories import LicenseFactory, ResourceSchemaMockData
 from udata.storage.s3 import get_from_json
 
-from .factories import HarvestSourceFactory
-from ..backends.dcat import URIS_TO_REPLACE, CswIso19139DcatBackend
 from .. import actions
+from ..backends.dcat import URIS_TO_REPLACE, CswIso19139DcatBackend
+from .factories import HarvestSourceFactory
 
 log = logging.getLogger(__name__)
 

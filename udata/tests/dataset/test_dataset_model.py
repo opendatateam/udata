@@ -6,20 +6,23 @@ from flask import current_app
 from mongoengine import post_save
 
 from udata.app import cache
-from udata.models import db, Dataset, License, ResourceSchema, Schema
 from udata.core.dataset.constants import LEGACY_FREQUENCIES, UPDATE_FREQUENCIES
-from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
-from udata.core.dataset.factories import (
-    ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory, ResourceSchemaMockData
-)
 from udata.core.dataset.exceptions import (
-    SchemasCatalogNotFoundException, SchemasCacheUnavailableException
+    SchemasCacheUnavailableException,
+    SchemasCatalogNotFoundException,
 )
+from udata.core.dataset.factories import (
+    CommunityResourceFactory,
+    DatasetFactory,
+    LicenseFactory,
+    ResourceFactory,
+    ResourceSchemaMockData,
+)
+from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.user.factories import UserFactory
+from udata.models import Dataset, License, ResourceSchema, Schema, db
+from udata.tests.helpers import assert_emit, assert_equal_dates, assert_not_emit
 from udata.utils import faker
-from udata.tests.helpers import (
-    assert_emit, assert_not_emit, assert_equal_dates
-)
 
 pytestmark = pytest.mark.usefixtures('clean_db')
 

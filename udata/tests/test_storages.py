@@ -1,23 +1,20 @@
-import pytest
-
 from datetime import datetime, timedelta
 from io import BytesIO
+from os.path import basename
 from uuid import uuid4
 
-from flask import url_for, json
+import pytest
+from flask import json, url_for
+from werkzeug.test import EnvironBuilder
+from werkzeug.wrappers import Request
 
 from udata.core import storages
 from udata.core.storages import utils
-from udata.core.storages.api import chunk_filename, META
+from udata.core.storages.api import META, chunk_filename
 from udata.core.storages.tasks import purge_chunks
 from udata.utils import faker
 
 from .helpers import assert200, assert400
-
-from os.path import basename
-
-from werkzeug.test import EnvironBuilder
-from werkzeug.wrappers import Request
 
 
 class StorageUtilsTest:

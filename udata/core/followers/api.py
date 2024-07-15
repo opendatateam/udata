@@ -4,13 +4,12 @@ from flask import current_app, request
 from flask_security import current_user
 
 from udata import tracking
-from udata.api import api, API, fields
-from udata.models import Follow
+from udata.api import API, api, fields
 from udata.core.user.api_fields import user_ref_fields
+from udata.models import Follow
 from udata.utils import id_or_404
 
 from .signals import on_new_follow
-
 
 follow_fields = api.model('Follow', {
     'id': fields.String(

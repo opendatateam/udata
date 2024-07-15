@@ -7,13 +7,18 @@ import logging
 import os
 import queue
 import traceback
-
 from datetime import datetime
 from logging.handlers import QueueHandler
+
 from flask import current_app
 from mongoengine.connection import get_db
+from pkg_resources import (
+    resource_filename,
+    resource_isdir,
+    resource_listdir,
+    resource_string,
+)
 from pymongo import ReturnDocument
-from pkg_resources import resource_isdir, resource_listdir, resource_filename, resource_string
 
 from udata import entrypoints
 

@@ -1,24 +1,19 @@
-import bson
 import datetime
+import importlib
 import logging
 import os
-import importlib
 import types
+from os.path import abspath, dirname, exists, isfile, join
 
-from os.path import abspath, join, dirname, isfile, exists
-
-from flask import (
-    Flask, abort, g, send_from_directory, json, Blueprint as BaseBlueprint,
-    make_response
-)
+import bson
+from flask import Blueprint as BaseBlueprint
+from flask import Flask, abort, g, json, make_response, send_from_directory
 from flask_caching import Cache
-
 from flask_wtf.csrf import CSRFProtect
 from speaklater import is_lazy_string
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from udata import entrypoints
-
 
 APP_NAME = __name__.split('.')[0]
 ROOT_DIR = abspath(join(dirname(__file__)))
@@ -209,8 +204,17 @@ def standalone(app):
 
 def register_extensions(app):
     from udata import (
-        models, mongo, routing, tasks, mail, i18n, auth, search, sitemap,
-        sentry, notifications
+        auth,
+        i18n,
+        mail,
+        models,
+        mongo,
+        notifications,
+        routing,
+        search,
+        sentry,
+        sitemap,
+        tasks,
     )
     tasks.init_app(app)
     i18n.init_app(app)

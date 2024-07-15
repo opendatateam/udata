@@ -1,14 +1,13 @@
 import logging
 
+import flask_storage as fs
 import pytest
 
-import flask_storage as fs
-
-from udata.mongo import db
+from udata.core.storages import tmp
 from udata.forms import Form
 from udata.forms.fields import ImageField
+from udata.mongo import db
 from udata.tests.helpers import data_path
-from udata.core.storages import tmp
 
 log = logging.getLogger(__name__)
 

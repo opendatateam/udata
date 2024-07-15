@@ -4,10 +4,9 @@ from smtplib import SMTPRecipientsRefused
 import pytest
 
 from udata.core.user.factories import UserFactory
-from udata.mail import send, mail_sent
-from udata.tests import TestCase, DBTestMixin
+from udata.mail import mail_sent, send
+from udata.tests import DBTestMixin, TestCase
 from udata.tests.helpers import assert_emit, assert_not_emit
-
 
 SMTPRecipientsRefusedList = [
     'not-found@udata',

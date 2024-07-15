@@ -1,13 +1,13 @@
 from datetime import datetime
+
+import udata.core.contact_point.api_fields as contact_api_fields
+import udata.core.dataset.api_fields as datasets_api_fields
 from udata.api_fields import field, function_field, generate_fields
 from udata.core.dataset.models import Dataset
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
-import udata.core.contact_point.api_fields as contact_api_fields
-import udata.core.dataset.api_fields as datasets_api_fields
 from udata.i18n import lazy_gettext as _
-
-from udata.models import db, Discussion, Follow
+from udata.models import Discussion, Follow, db
 from udata.uris import endpoint_for
 
 # "frequency"

@@ -1,11 +1,13 @@
 import pytest
 
-from udata.tests import TestCase
-
-
 from udata.rdf import (
-    guess_format, negociate_content, want_rdf, ACCEPTED_MIME_TYPES, FORMAT_MAP
+    ACCEPTED_MIME_TYPES,
+    FORMAT_MAP,
+    guess_format,
+    negociate_content,
+    want_rdf,
 )
+from udata.tests import TestCase
 
 
 class ContentNegociationTest(TestCase):

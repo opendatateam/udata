@@ -1,16 +1,18 @@
 import logging
 
-from flask import current_app
-from flask import render_template
-
-from flask_principal import identity_loaded  # noqa: facade pattern
+from flask import current_app, render_template
 from flask_principal import Permission as BasePermission
-from flask_principal import PermissionDenied  # noqa: facade pattern
-from flask_principal import RoleNeed
-from flask_principal import UserNeed  # noqa: facade pattern
-
-from flask_security import ( # noqa
-    Security, current_user, login_required, login_user # noqa
+from flask_principal import (
+    PermissionDenied,  # noqa: facade pattern
+    RoleNeed,
+    UserNeed,  # noqa: facade pattern
+    identity_loaded,  # noqa: facade pattern
+)
+from flask_security import (  # noqa
+    Security,  # noqa
+    current_user,
+    login_required,
+    login_user,
 )
 from werkzeug.utils import import_string
 
@@ -38,11 +40,16 @@ admin_permission = Permission()
 
 
 def init_app(app):
-    from .forms import ExtendedRegisterForm, ExtendedLoginForm, ExtendedResetPasswordForm
+    from udata.models import datastore
+
+    from .forms import (
+        ExtendedLoginForm,
+        ExtendedRegisterForm,
+        ExtendedResetPasswordForm,
+    )
     from .mails import UdataMailUtil
     from .password_validation import UdataPasswordUtil
     from .views import create_security_blueprint
-    from udata.models import datastore
     security.init_app(app, datastore,
                       register_blueprint=False,
                       render_template=render_security_template,

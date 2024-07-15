@@ -1,21 +1,20 @@
-import pytest
-
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
+
+import pytest
 from dateutil.parser import parse
 from voluptuous import Schema
 
-from udata.harvest.models import HarvestItem
-from udata.utils import faker
 from udata.core.dataset import tasks
 from udata.core.dataset.factories import DatasetFactory
+from udata.harvest.models import HarvestItem
 from udata.models import Dataset
 from udata.tests.helpers import assert_equal_dates
+from udata.utils import faker
 
-from .factories import HarvestSourceFactory
-
-from ..backends import BaseBackend, HarvestFilter, HarvestFeature
+from ..backends import BaseBackend, HarvestFeature, HarvestFilter
 from ..exceptions import HarvestException
+from .factories import HarvestSourceFactory
 
 
 class Unknown:

@@ -1,10 +1,10 @@
 from celery import chord
 from flask import current_app
 
-from udata.tasks import job, get_logger, task
+from udata.tasks import get_logger, job, task
 
 from . import backends
-from .models import HarvestSource, HarvestJob
+from .models import HarvestJob, HarvestSource
 
 log = get_logger(__name__)
 

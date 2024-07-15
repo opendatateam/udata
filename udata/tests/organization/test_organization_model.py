@@ -1,14 +1,14 @@
 from datetime import datetime
 
 from udata.core.dataset.factories import DatasetFactory, HiddenDatasetFactory
-from udata.core.organization.factories import OrganizationFactory
 from udata.core.followers.signals import on_follow, on_unfollow
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.user.factories import UserFactory
-from udata.models import Dataset, Reuse, Follow, Member
+from udata.models import Dataset, Follow, Member, Reuse
 from udata.tests.helpers import assert_emit
 
-from .. import TestCase, DBTestMixin
+from .. import DBTestMixin, TestCase
 
 
 class OrganizationModelTest(TestCase, DBTestMixin):

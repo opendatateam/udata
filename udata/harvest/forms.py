@@ -1,10 +1,9 @@
-from udata.utils import safe_unicode
 from udata.forms import Form, fields, validators
 from udata.i18n import lazy_gettext as _
-
+from udata.utils import safe_unicode
 
 from .actions import list_backends
-from .models import VALIDATION_STATES, VALIDATION_REFUSED
+from .models import VALIDATION_REFUSED, VALIDATION_STATES
 
 __all__ = 'HarvestSourceForm', 'HarvestSourceValidationForm'
 

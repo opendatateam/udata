@@ -4,6 +4,7 @@ from udata.core.dataservices.models import Dataservice, HarvestMetadata
 from udata.core.organization.factories import OrganizationFactory
 from udata.factories import ModelFactory
 
+
 class HarvestMetadataFactory(ModelFactory):
     class Meta:
         model = HarvestMetadata

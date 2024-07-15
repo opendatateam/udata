@@ -1,14 +1,13 @@
 from udata import mail
-from udata.i18n import lazy_gettext as _
 from udata.core import storages
-from udata.models import Follow, Activity, Dataset, Transfer, ContactPoint
-from udata.search import reindex
-from udata.tasks import job, task, get_logger
-
 from udata.core.badges.tasks import notify_new_badge
+from udata.i18n import lazy_gettext as _
+from udata.models import Activity, ContactPoint, Dataset, Follow, Transfer
+from udata.search import reindex
+from udata.tasks import get_logger, job, task
 
+from .constants import ASSOCIATION, CERTIFIED, COMPANY, LOCAL_AUTHORITY, PUBLIC_SERVICE
 from .models import Organization
-from .constants import CERTIFIED, PUBLIC_SERVICE, COMPANY, ASSOCIATION, LOCAL_AUTHORITY
 
 log = get_logger(__name__)
 

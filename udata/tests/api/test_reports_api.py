@@ -1,9 +1,13 @@
 from flask import url_for
 
-from udata.core.dataset.factories import (DatasetFactory)
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
+from udata.core.reports.constants import (
+    REASON_ILLEGAL_CONTENT,
+    REASON_SPAM,
+    reports_reasons_translations,
+)
 from udata.core.reports.models import Report
-from udata.core.reports.constants import REASON_ILLEGAL_CONTENT, REASON_SPAM, reports_reasons_translations
 from udata.i18n import gettext as _
 
 from . import APITestCase

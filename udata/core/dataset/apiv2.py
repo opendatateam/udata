@@ -1,34 +1,34 @@
 import logging
-import mongoengine
 
-from flask import url_for, request, abort
+import mongoengine
+from flask import abort, request, url_for
 from flask_restx import marshal
 
 from udata import search
-from udata.api import apiv2, API, fields
-from udata.utils import multi_to_dict, get_by
-
+from udata.api import API, apiv2, fields
+from udata.core.contact_point.api_fields import contact_point_fields
 from udata.core.organization.api_fields import member_user_with_email_fields
+from udata.core.spatial.api_fields import geojson
+from udata.utils import get_by, multi_to_dict
+
+from .api import ResourceMixin
 from .api_fields import (
     badge_fields,
-    org_ref_fields,
-    resource_fields,
-    spatial_coverage_fields,
-    temporal_coverage_fields,
-    user_ref_fields,
+    catalog_schema_fields,
     checksum_fields,
     dataset_harvest_fields,
     dataset_internal_fields,
+    org_ref_fields,
+    resource_fields,
     resource_harvest_fields,
     resource_internal_fields,
-    catalog_schema_fields,
-    schema_fields
+    schema_fields,
+    spatial_coverage_fields,
+    temporal_coverage_fields,
+    user_ref_fields,
 )
-from udata.core.spatial.api_fields import geojson
-from udata.core.contact_point.api_fields import contact_point_fields
-from .models import Dataset, CommunityResource
-from .constants import UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE
-from .api import ResourceMixin
+from .constants import DEFAULT_FREQUENCY, DEFAULT_LICENSE, UPDATE_FREQUENCIES
+from .models import CommunityResource, Dataset
 from .permissions import DatasetEditPermission, ResourceEditPermission
 from .search import DatasetSearch
 

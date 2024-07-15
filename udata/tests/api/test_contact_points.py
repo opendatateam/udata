@@ -1,10 +1,8 @@
 import pytest
-
 from flask import url_for
 
-from udata.models import ContactPoint
 from udata.core.contact_point.factories import ContactPointFactory
-
+from udata.models import ContactPoint
 from udata.tests.helpers import assert200, assert204
 
 pytestmark = [

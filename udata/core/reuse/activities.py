@@ -1,8 +1,7 @@
 from flask_security import current_user
 
 from udata.i18n import lazy_gettext as _
-from udata.models import db, Reuse, Activity
-
+from udata.models import Activity, Reuse, db
 
 __all__ = (
     'UserCreatedReuse', 'UserUpdatedReuse', 'UserDeletedReuse',

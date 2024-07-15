@@ -5,9 +5,8 @@ from flask import url_for
 from udata.core.jobs.models import PeriodicTask
 from udata.core.user.factories import AdminFactory
 from udata.tasks import celery, job
-from udata.utils import faker
-
 from udata.tests.api import APITestCase
+from udata.utils import faker
 
 
 class JobsAPITest(APITestCase):

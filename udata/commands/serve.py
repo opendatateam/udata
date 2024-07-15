@@ -2,14 +2,11 @@ import logging
 import os
 
 import click
-
 from flask import current_app
-from flask.cli import pass_script_info, DispatchingApp
-
+from flask.cli import DispatchingApp, pass_script_info
 from werkzeug.serving import run_simple
 
 from udata.commands import cli
-
 
 log = logging.getLogger(__name__)
 

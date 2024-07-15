@@ -1,9 +1,8 @@
 from udata.forms import ModelForm, fields, validators, widgets
 from udata.i18n import lazy_gettext as _
 
-from .models import Post
 from .constants import IMAGE_SIZES
-
+from .models import Post
 
 __all__ = ('PostForm', )
 

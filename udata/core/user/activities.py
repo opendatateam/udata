@@ -1,15 +1,12 @@
 from flask_security import current_user
 
-from udata.i18n import lazy_gettext as _
-from udata.models import db, User, Dataset, Reuse, Organization, Activity
-from udata.core.followers.signals import on_follow
-from udata.core.discussions.signals import (
-    on_new_discussion, on_new_discussion_comment
-)
 from udata.core.dataset.activities import DatasetRelatedActivity
-from udata.core.reuse.activities import ReuseRelatedActivity
+from udata.core.discussions.signals import on_new_discussion, on_new_discussion_comment
+from udata.core.followers.signals import on_follow
 from udata.core.organization.activities import OrgRelatedActivity
-
+from udata.core.reuse.activities import ReuseRelatedActivity
+from udata.i18n import lazy_gettext as _
+from udata.models import Activity, Dataset, Organization, Reuse, User, db
 
 __all__ = (
     'UserFollowedDataset', 'UserFollowedReuse', 'UserFollowedOrganization',

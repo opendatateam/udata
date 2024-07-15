@@ -1,5 +1,4 @@
 import logging
-
 from collections import Counter
 
 from udata.commands import cli, header, success

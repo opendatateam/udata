@@ -1,8 +1,7 @@
 import pytest
 
-from udata.tasks import celery, task, job
+from udata.tasks import celery, job, task
 from udata.utils import unique_string
-
 
 TASKS = [
     ({}, 'default', None),

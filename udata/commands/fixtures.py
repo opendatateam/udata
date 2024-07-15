@@ -1,5 +1,5 @@
-import logging
 import json
+import logging
 
 import click
 import requests
@@ -7,15 +7,15 @@ from flask import current_app
 
 from udata.commands import cli
 from udata.core.dataset.factories import (
-    DatasetFactory, ResourceFactory, CommunityResourceFactory
+    CommunityResourceFactory,
+    DatasetFactory,
+    ResourceFactory,
 )
+from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member, Organization
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
-from udata.core.discussions.factories import (
-    MessageDiscussionFactory, DiscussionFactory
-)
 
 log = logging.getLogger(__name__)
 

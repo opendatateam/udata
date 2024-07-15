@@ -1,23 +1,31 @@
 '''
 This module centralize udata-wide RDF helpers and configuration
 '''
-from html.parser import HTMLParser
 import logging
 import re
+from html.parser import HTMLParser
 
-from flask import request, url_for, abort, current_app
-
+from flask import abort, current_app, request, url_for
 from rdflib import Graph, Literal, URIRef
-from rdflib.resource import Resource as RdfResource
 from rdflib.namespace import (
-    Namespace, NamespaceManager, DCTERMS, SKOS, FOAF, XSD, RDFS, RDF
+    DCTERMS,
+    FOAF,
+    RDF,
+    RDFS,
+    SKOS,
+    XSD,
+    Namespace,
+    NamespaceManager,
 )
-from rdflib.util import SUFFIX_FORMAT_MAP, guess_format as raw_guess_format
+from rdflib.resource import Resource as RdfResource
+from rdflib.util import SUFFIX_FORMAT_MAP
+from rdflib.util import guess_format as raw_guess_format
+
 from udata import uris
 from udata.core.contact_point.models import ContactPoint
+from udata.frontend.markdown import parse_html
 from udata.models import Schema
 from udata.mongo.errors import FieldValidationError
-from udata.frontend.markdown import parse_html
 from udata.tags import slug as slugify_tag
 
 log = logging.getLogger(__name__)

@@ -1,10 +1,10 @@
-import pytest
-
 from tempfile import NamedTemporaryFile
 
-from udata.models import Badge
+import pytest
+
 from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
 from udata.core.organization.factories import OrganizationFactory
+from udata.models import Badge
 
 
 @pytest.mark.usefixtures('clean_db')

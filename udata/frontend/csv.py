@@ -1,16 +1,13 @@
-import logging
-
-from io import StringIO
-import itertools
 import csv
-
-from datetime import datetime, date
+import itertools
+import logging
+from datetime import date, datetime
+from io import StringIO
 
 from flask import Response, stream_with_context
 
 from udata.mongo import db
 from udata.utils import recursive_get
-
 
 log = logging.getLogger(__name__)
 

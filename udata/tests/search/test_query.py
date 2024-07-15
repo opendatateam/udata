@@ -1,5 +1,5 @@
+from udata.search.query import DEFAULT_PAGE_SIZE, SearchQuery
 from udata.tests.api import APITestCase
-from udata.search.query import SearchQuery, DEFAULT_PAGE_SIZE
 
 
 class QueryTest(APITestCase):

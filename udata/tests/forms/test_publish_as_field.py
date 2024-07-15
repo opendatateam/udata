@@ -1,12 +1,11 @@
 from bson import ObjectId
-
 from werkzeug.datastructures import MultiDict
 
 from udata.auth import login_user
-from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.forms import ModelForm, fields
-from udata.models import db, User, Organization, Member
+from udata.models import Member, Organization, User, db
 from udata.tests import TestCase
 
 

@@ -1,12 +1,14 @@
 from datetime import datetime
+
+import mongoengine
 from flask import request
 from flask_login import current_user
-import mongoengine
 
-from udata.api import api, API
+from udata.api import API, api
 from udata.api_fields import patch
 from udata.core.dataset.permissions import OwnablePermission
 from udata.core.followers.api import FollowAPI
+
 from .models import Dataservice
 
 ns = api.namespace('dataservices', 'Dataservices related operations (beta)')

@@ -1,7 +1,7 @@
 import logging
 
-from udata.commands import cli, success
 from udata.app import cache
+from udata.commands import cli, success
 
 log = logging.getLogger(__name__)
 

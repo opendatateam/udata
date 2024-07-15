@@ -1,22 +1,25 @@
-import pytest
-
 from base64 import b64encode
 from urllib.parse import parse_qs
 
-from flask import url_for
+import pytest
 from authlib.common.security import generate_token
-from authlib.common.urls import urlparse, url_decode
+from authlib.common.urls import url_decode, urlparse
 from authlib.oauth2.rfc7636 import (
     create_s256_code_challenge,
 )
+from flask import url_for
 
-from udata.api import api, API
+from udata.api import API, api
 from udata.api.oauth2 import OAuth2Client, OAuth2Token
 from udata.auth import PermissionDenied
 from udata.core.user.factories import UserFactory
 from udata.forms import Form, fields, validators
 from udata.tests.helpers import (
-    assert200, assert400, assert401, assert403, assert_status
+    assert200,
+    assert400,
+    assert401,
+    assert403,
+    assert_status,
 )
 
 ns = api.namespace('fake', 'A Fake namespace')

@@ -4,7 +4,6 @@ from udata.models import User
 
 from .constants import AVATAR_SIZES
 
-
 __all__ = ('UserProfileForm', 'UserProfileAdminForm')
 
 

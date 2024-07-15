@@ -2,8 +2,8 @@ import logging
 
 import click
 
-from udata.commands import cli, exit_with_error, echo, white
-from udata.tasks import schedulables, celery
+from udata.commands import cli, echo, exit_with_error, white
+from udata.tasks import celery, schedulables
 
 from .models import PeriodicTask
 

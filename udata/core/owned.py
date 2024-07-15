@@ -5,14 +5,14 @@ from mongoengine import NULLIFY, Q, post_save
 from mongoengine.fields import ReferenceField
 
 from udata.api_fields import field
-from udata.core.organization.models import Organization
-from udata.core.user.models import User
-from udata.mongo.queryset import UDataQuerySet
-from udata.core.user.api_fields import user_ref_fields
 from udata.core.organization.api_fields import org_ref_fields
+from udata.core.organization.models import Organization
 from udata.core.organization.permissions import OrganizationPrivatePermission
-from udata.mongo.errors import FieldValidationError
+from udata.core.user.api_fields import user_ref_fields
+from udata.core.user.models import User
 from udata.i18n import lazy_gettext as _
+from udata.mongo.errors import FieldValidationError
+from udata.mongo.queryset import UDataQuerySet
 
 log = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class OwnedQuerySet(UDataQuerySet):
         return self(qs)
     
 def check_owner_is_current_user(owner):
-    from udata.auth import current_user, admin_permission
+    from udata.auth import admin_permission, current_user
     if current_user.is_authenticated and owner and not admin_permission and current_user.id != owner:
         raise FieldValidationError(_('You can only set yourself as owner'), field="owner")
 

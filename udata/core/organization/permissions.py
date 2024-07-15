@@ -1,10 +1,9 @@
 from collections import namedtuple
 from functools import partial
 
-from udata.auth import current_user, identity_loaded, Permission
+from udata.auth import Permission, current_user, identity_loaded
 from udata.models import Organization
 from udata.utils import get_by
-
 
 OrganizationNeed = namedtuple('organization', ('role', 'value'))
 OrganizationAdminNeed = partial(OrganizationNeed, 'admin')

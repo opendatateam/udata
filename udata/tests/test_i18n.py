@@ -1,11 +1,10 @@
-from flask import g, url_for, render_template_string
+from flask import g, render_template_string, url_for
 from werkzeug.routing import BuildError
 
+from udata.core.user.factories import UserFactory
 from udata.i18n import I18nBlueprint, language
 
-from . import DBTestMixin, WebTestMixin, TestCase
-from udata.core.user.factories import UserFactory
-
+from . import DBTestMixin, TestCase, WebTestMixin
 
 bp = I18nBlueprint('i18nbp', __name__, static_folder='static')
 

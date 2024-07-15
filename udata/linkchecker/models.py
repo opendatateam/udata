@@ -1,5 +1,5 @@
-from udata.mongo import db
 from udata.core.dataset.models import ResourceMixin
+from udata.mongo import db
 
 # Register harvest extras
 ResourceMixin.extras.register('check:available', db.BooleanField)

@@ -1,7 +1,7 @@
 import pytest
 
-from udata.core.dataset.preview import PreviewPlugin, PreviewWarning
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.preview import PreviewPlugin, PreviewWarning
 
 pytestmark = [
     pytest.mark.usefixtures('clean_db')

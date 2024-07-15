@@ -2,17 +2,16 @@ import itertools
 import json
 import os
 import re
-
 from datetime import datetime
 from glob import iglob
-from os.path import join, exists
+from os.path import exists, join
 from sys import exit
 
 from babel.messages.pofile import read_po, write_po
 from babel.util import LOCALTZ
 from invoke import task
 
-from .helpers import ROOT, info, header, success, cyan
+from .helpers import ROOT, cyan, header, info, success
 
 I18N_DOMAIN = 'udata'
 

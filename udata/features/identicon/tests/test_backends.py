@@ -1,8 +1,8 @@
 import pytest
 
 from udata.features.identicon.backends import internal
-from udata.utils import faker
 from udata.tests.helpers import assert200
+from udata.utils import faker
 
 pytestmark = pytest.mark.usefixtures('app')
 

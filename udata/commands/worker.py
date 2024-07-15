@@ -5,7 +5,6 @@ from urllib.parse import urlparse
 
 import click
 import redis
-
 from flask import current_app
 
 from udata.commands import cli, exit_with_error

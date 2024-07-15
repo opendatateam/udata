@@ -1,8 +1,7 @@
-from udata.models import Transfer
-from udata.features.notifications.actions import notifier
-
-
 import logging
+
+from udata.features.notifications.actions import notifier
+from udata.models import Transfer
 
 log = logging.getLogger(__name__)
 

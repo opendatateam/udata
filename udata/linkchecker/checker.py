@@ -2,7 +2,8 @@ from urllib.parse import urlparse
 
 from flask import current_app
 
-from .backends import get as get_linkchecker, NoCheckLinkchecker
+from .backends import NoCheckLinkchecker
+from .backends import get as get_linkchecker
 
 
 def _get_check_keys(the_dict, resource, previous_status):

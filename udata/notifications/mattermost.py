@@ -1,6 +1,7 @@
 import requests
-from udata.core.spam.signals import on_new_potential_spam
 from flask import current_app
+
+from udata.core.spam.signals import on_new_potential_spam
 
 
 @on_new_potential_spam.connect

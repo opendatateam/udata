@@ -1,17 +1,18 @@
 from datetime import datetime
 
-from udata.api import api, fields, API
+from udata.api import API, api, fields
 from udata.auth import admin_permission
-
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.reuse.api_fields import reuse_fields
-from udata.core.user.api_fields import user_ref_fields
 from udata.core.storages.api import (
-    uploaded_image_fields, image_parser, parse_uploaded_image
+    image_parser,
+    parse_uploaded_image,
+    uploaded_image_fields,
 )
+from udata.core.user.api_fields import user_ref_fields
 
-from .models import Post
 from .forms import PostForm
+from .models import Post
 
 ns = api.namespace('posts', 'Posts related operations')
 

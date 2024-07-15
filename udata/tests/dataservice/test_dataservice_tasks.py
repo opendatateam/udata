@@ -1,11 +1,10 @@
 import pytest
 
+from udata.core.dataservices import tasks
 from udata.core.dataservices.models import Dataservice
 from udata.core.user.factories import UserFactory
-from udata.core.dataservices import tasks
 from udata.models import Discussion, Follow, Message, Transfer
 from udata.utils import faker
-
 
 pytestmark = pytest.mark.usefixtures('clean_db')
 

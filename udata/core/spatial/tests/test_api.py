@@ -1,16 +1,19 @@
 from flask import url_for
 
-from udata.utils import faker
-from udata.tests.api import APITestCase
-from udata.tests.features.territories import (
-    create_geozones_fixtures, TerritoriesSettings
-)
-from udata.core.organization.factories import OrganizationFactory
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import (
-    SpatialCoverageFactory, GeoZoneFactory, GeoLevelFactory
+    GeoLevelFactory,
+    GeoZoneFactory,
+    SpatialCoverageFactory,
 )
 from udata.core.spatial.tasks import compute_geozones_metrics
+from udata.tests.api import APITestCase
+from udata.tests.features.territories import (
+    TerritoriesSettings,
+    create_geozones_fixtures,
+)
+from udata.utils import faker
 
 
 class SpatialApiTest(APITestCase):

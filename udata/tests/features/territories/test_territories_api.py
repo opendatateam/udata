@@ -3,8 +3,9 @@ from flask import url_for
 from udata.core.spatial.factories import GeoZoneFactory
 from udata.tests.api import APITestCase
 from udata.tests.features.territories import (
-    create_geozones_fixtures, create_old_new_regions_fixtures,
-    TerritoriesSettings
+    TerritoriesSettings,
+    create_geozones_fixtures,
+    create_old_new_regions_fixtures,
 )
 
 

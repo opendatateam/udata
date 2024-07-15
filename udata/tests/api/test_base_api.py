@@ -1,6 +1,6 @@
 from flask import url_for
 
-from udata.api import api, API
+from udata.api import API, api
 from udata.forms import Form, fields
 
 from . import APITestCase

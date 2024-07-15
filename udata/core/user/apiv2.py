@@ -1,6 +1,6 @@
 from flask_security import current_user
 
-from udata.api import apiv2, API
+from udata.api import API, apiv2
 from udata.core.topic.apiv2 import topic_page_fields
 from udata.core.topic.parsers import TopicApiParser
 from udata.models import Topic

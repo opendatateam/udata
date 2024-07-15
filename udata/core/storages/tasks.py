@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
-from dateutil.parser import parse
 
+from dateutil.parser import parse
 from flask import current_app, json
 
 from udata.core.storages import chunks

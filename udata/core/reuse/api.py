@@ -1,33 +1,34 @@
-from bson.objectid import ObjectId
 from datetime import datetime
 
+from bson.objectid import ObjectId
 from flask import request
 
-from udata.api import api, API, errors
+from udata.api import API, api, errors
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission
-from udata.models import Dataset
-from udata.utils import id_or_404
-
 from udata.core.badges import api as badges_api
 from udata.core.badges.fields import badge_fields
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.followers.api import FollowAPI
 from udata.core.storages.api import (
-    uploaded_image_fields, image_parser, parse_uploaded_image
+    image_parser,
+    parse_uploaded_image,
+    uploaded_image_fields,
 )
+from udata.models import Dataset
+from udata.utils import id_or_404
 
 from .api_fields import (
-    reuse_fields, reuse_page_fields,
-    reuse_type_fields,
+    reuse_fields,
+    reuse_page_fields,
     reuse_suggestion_fields,
-    reuse_topic_fields
+    reuse_topic_fields,
+    reuse_type_fields,
 )
+from .constants import REUSE_TOPICS, REUSE_TYPES
 from .forms import ReuseForm
 from .models import Reuse
-from .constants import REUSE_TYPES, REUSE_TOPICS
 from .permissions import ReuseEditPermission
-
 
 DEFAULT_SORTING = '-created_at'
 SUGGEST_SORTING = '-metrics.followers'

@@ -1,15 +1,17 @@
 import datetime
-from udata.models import (
-    Dataset, Organization, User, GeoZone, License, Topic
-)
-from udata.search import (
-    ModelSearchAdapter, register,
-    ModelTermsFilter, BoolFilter, Filter,
-    TemporalCoverageFilter
-)
-from udata.core.spatial.models import admin_levels
+
+from udata.core.dataset.api import DEFAULT_SORTING, DatasetApiParser
 from udata.core.spatial.constants import ADMIN_LEVEL_MAX
-from udata.core.dataset.api import DatasetApiParser, DEFAULT_SORTING
+from udata.core.spatial.models import admin_levels
+from udata.models import Dataset, GeoZone, License, Organization, Topic, User
+from udata.search import (
+    BoolFilter,
+    Filter,
+    ModelSearchAdapter,
+    ModelTermsFilter,
+    TemporalCoverageFilter,
+    register,
+)
 from udata.utils import to_iso_datetime
 
 __all__ = ('DatasetSearch', )

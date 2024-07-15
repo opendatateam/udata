@@ -6,7 +6,6 @@ from udata.commands import cli
 
 from . import actions
 
-
 log = logging.getLogger(__name__)
 
 

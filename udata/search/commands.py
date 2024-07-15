@@ -1,14 +1,13 @@
-from datetime import datetime
-from flask import current_app
 import logging
 import sys
-import requests
+from datetime import datetime
 
 import click
+import requests
+from flask import current_app
 
 from udata.commands import cli
 from udata.search import adapter_catalog
-
 
 log = logging.getLogger(__name__)
 

@@ -14,20 +14,20 @@ As well as a sample application:
  - https://github.com/authlib/example-oauth2-server
 '''
 import fnmatch
-
-from bson import ObjectId
-
 from datetime import datetime, timedelta
 
-from authlib.integrations.flask_oauth2.errors import _HTTPException as AuthlibFlaskException
 from authlib.integrations.flask_oauth2 import AuthorizationServer, ResourceProtector
-from authlib.oauth2.rfc6749 import grants, ClientMixin
+from authlib.integrations.flask_oauth2.errors import (
+    _HTTPException as AuthlibFlaskException,
+)
+from authlib.oauth2 import OAuth2Error
+from authlib.oauth2.rfc6749 import ClientMixin, grants
+from authlib.oauth2.rfc6749.util import list_to_scope, scope_to_list
 from authlib.oauth2.rfc6750 import BearerTokenValidator
 from authlib.oauth2.rfc7009 import RevocationEndpoint
 from authlib.oauth2.rfc7636 import CodeChallenge
-from authlib.oauth2.rfc6749.util import scope_to_list, list_to_scope
-from authlib.oauth2 import OAuth2Error
-from flask import request, render_template, current_app
+from bson import ObjectId
+from flask import current_app, render_template, request
 from flask_security.utils import verify_password
 from werkzeug.exceptions import Unauthorized
 from werkzeug.security import gen_salt
@@ -35,10 +35,10 @@ from werkzeug.security import gen_salt
 from udata.app import csrf
 from udata.auth import current_user, login_required, login_user
 from udata.core.organization.models import Organization
-from udata.i18n import I18nBlueprint, lazy_gettext as _
+from udata.core.storages import default_image_basename, images
+from udata.i18n import I18nBlueprint
+from udata.i18n import lazy_gettext as _
 from udata.mongo import db
-from udata.core.storages import images, default_image_basename
-
 
 blueprint = I18nBlueprint('oauth', __name__, url_prefix='/oauth')
 oauth = AuthorizationServer()

@@ -1,9 +1,7 @@
 import pytest
-
 from flask import url_for
-
-from rdflib import URIRef, Literal, Graph
-from rdflib.namespace import RDF, FOAF
+from rdflib import Graph, Literal, URIRef
+from rdflib.namespace import FOAF, RDF
 from rdflib.resource import Resource
 
 from udata.core.dataservices.factories import DataserviceFactory, HarvestMetadataFactory
@@ -15,7 +13,6 @@ from udata.core.site.rdf import build_catalog
 from udata.core.user.factories import UserFactory
 from udata.rdf import CONTEXT, DCAT, DCT, HYDRA
 from udata.tests.helpers import assert200, assert404, assert_redirects
-
 
 pytestmark = pytest.mark.usefixtures('clean_db')
 

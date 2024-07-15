@@ -1,27 +1,29 @@
-import pytest
-
 from datetime import datetime
 
+import pytest
 from flask import url_for
 
-from udata.models import (
-    Organization, Member, MembershipRequest, Follow, Discussion
-)
-
-from udata.utils import faker
 from udata.core.badges.factories import badge_factory
 from udata.core.badges.signals import on_badge_added, on_badge_removed
-from udata.core.organization.factories import OrganizationFactory
-from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import _
-
+from udata.models import Discussion, Follow, Member, MembershipRequest, Organization
 from udata.tests.helpers import (
-    assert_emit, assert_not_emit,
-    assert200, assert201, assert204, assert403, assert400, assert404,
-    assert410, assert_status
+    assert200,
+    assert201,
+    assert204,
+    assert400,
+    assert403,
+    assert404,
+    assert410,
+    assert_emit,
+    assert_not_emit,
+    assert_status,
 )
+from udata.utils import faker
 
 pytestmark = [
     pytest.mark.usefixtures('clean_db'),

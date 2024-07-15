@@ -3,7 +3,7 @@ Some old dataset/reuse don't have a `private` field. It should be False by defau
 '''
 import logging
 
-from udata.models import Reuse, Dataset
+from udata.models import Dataset, Reuse
 
 log = logging.getLogger(__name__)
 

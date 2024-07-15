@@ -1,16 +1,15 @@
 from flask import url_for
-
-from rdflib import URIRef, Literal, BNode
-from rdflib.namespace import RDF, FOAF, RDFS
+from rdflib import BNode, Literal, URIRef
+from rdflib.namespace import FOAF, RDF, RDFS
 from rdflib.resource import Resource as RdfResource
 
 from udata import api
-from udata.rdf import DCAT, DCT, HYDRA
-from udata.tests import TestCase, DBTestMixin
-from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.rdf import organization_to_rdf, build_org_catalog
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.rdf import build_org_catalog, organization_to_rdf
+from udata.rdf import DCAT, DCT, HYDRA
+from udata.tests import DBTestMixin, TestCase
 from udata.utils import faker
 
 

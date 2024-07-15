@@ -1,17 +1,17 @@
-from bson import ObjectId
 from uuid import UUID
 
-from flask import request, redirect, url_for
+from bson import ObjectId
+from flask import redirect, request, url_for
 from mongoengine.errors import InvalidQueryError, ValidationError
 from werkzeug.exceptions import NotFound
 from werkzeug.routing import BaseConverter, PathConverter
 from werkzeug.urls import url_quote
 
 from udata import models
-from udata.mongo import db
-from udata.core.spatial.models import GeoZone
 from udata.core.dataservices.models import Dataservice
+from udata.core.spatial.models import GeoZone
 from udata.i18n import ISO_639_1_CODES
+from udata.mongo import db
 
 
 class LazyRedirect(object):

@@ -1,10 +1,10 @@
 from flask import request
 
 from udata import search
-from udata.api import apiv2, API
+from udata.api import API, apiv2
 from udata.utils import multi_to_dict
 
-from .api_fields import reuse_page_fields, reuse_fields
+from .api_fields import reuse_fields, reuse_page_fields
 from .search import ReuseSearch
 
 apiv2.inherit('ReusePage', reuse_page_fields)

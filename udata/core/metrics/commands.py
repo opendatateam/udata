@@ -1,11 +1,10 @@
 import logging
 
 import click
-
 from flask import current_app
 
 from udata.commands import cli, success
-from udata.models import User, Dataset, Reuse, Organization, Site, GeoZone
+from udata.models import Dataset, GeoZone, Organization, Reuse, Site, User
 
 log = logging.getLogger(__name__)
 

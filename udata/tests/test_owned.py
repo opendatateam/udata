@@ -1,13 +1,12 @@
 from mongoengine import post_save
 
+import udata.core.owned as owned
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
 from udata.core.user.factories import UserFactory
 from udata.core.user.models import User
-
 from udata.mongo import db
-import udata.core.owned as owned
-from udata.tests import TestCase, DBTestMixin
+from udata.tests import DBTestMixin, TestCase
 
 
 class Owned(owned.Owned, db.Document):

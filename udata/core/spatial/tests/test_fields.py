@@ -1,5 +1,4 @@
 import json
-
 from datetime import timedelta
 
 from werkzeug.datastructures import MultiDict
@@ -13,7 +12,6 @@ from udata.utils import faker
 from ..factories import GeoZoneFactory
 from ..forms import SpatialCoverageField
 from ..models import SpatialCoverage
-
 
 A_YEAR = timedelta(days=365)
 
