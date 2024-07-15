@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Add linter and formatter with `pyproject.toml` config, add lint and formatting step in CI, add pre-commit hook to lint and format, update docs and lint and format the code [#3085]([https://](https://github.com/opendatateam/udata/pull/3085)
+- Add linter and formatter with `pyproject.toml` config, add lint and formatting step in CI, add pre-commit hook to lint and format, update docs and lint and format the code [#3085](https://github.com/opendatateam/udata/pull/3085)
 
 ## 9.1.0 (2024-07-11)
 
