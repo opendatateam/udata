@@ -43,7 +43,7 @@ class ReuseSearch(ModelSearchAdapter):
 
     @classmethod
     def mongo_search(cls, args):
-        reuses = Reuse.objects(archived=None, deleted=None, private__ne=True)
+        reuses = Reuse.objects(deleted=None, private__ne=True)
         reuses = ReuseApiParser.parse_filters(reuses, args)
 
         sort = (
