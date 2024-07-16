@@ -15,7 +15,7 @@ from udata.core.user.api_fields import user_ref_fields
 from . import actions
 from .forms import HarvestSourceForm, HarvestSourceValidationForm
 from .models import (
-    HARVEST_JOB_STATUS, HARVEST_ITEM_STATUS, HarvestJob,
+    HARVEST_JOB_STATUS, HARVEST_ITEM_STATUS, HarvestJob, HarvestSource,
     VALIDATION_STATES, VALIDATION_ACCEPTED
 )
 
@@ -243,7 +243,7 @@ class SourceAPI(API):
     @api.doc('delete_harvest_source')
     @api.marshal_with(source_fields)
     def delete(self, ident):
-        source = actions.get_source(ident)
+        source: HarvestSource = actions.get_source(ident)
         OwnablePermission(source).test()
         return actions.delete_source(ident), 204
 

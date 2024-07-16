@@ -321,14 +321,14 @@ class HarvestAPITest(MockBackendsMixin):
         '''It should not update a source if not the owner'''
         api.login()
         source = HarvestSourceFactory()
-        new_url = faker.url()
+        new_url: str = faker.url()
         data = {
             'name': source.name,
             'description': source.description,
             'url': new_url,
             'backend': 'factory',
         }
-        api_url = url_for('api.harvest_source', ident=str(source.id))
+        api_url: str = url_for('api.harvest_source', ident=str(source.id))
         response = api.put(api_url, data)
 
         assert403(response)
