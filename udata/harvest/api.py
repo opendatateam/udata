@@ -6,8 +6,8 @@ from udata.api import API, api, fields
 from udata.auth import admin_permission
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields, dataset_ref_fields
-from udata.core.organization.api_fields import org_ref_fields
 from udata.core.dataset.permissions import OwnablePermission
+from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.permissions import EditOrganizationPermission
 from udata.core.user.api_fields import user_ref_fields
 

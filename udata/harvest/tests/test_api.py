@@ -303,12 +303,12 @@ class HarvestAPITest(MockBackendsMixin):
         api_url = url_for("api.harvest_source", ident=str(source.id))
         response = api.put(api_url, data)
         assert200(response)
-        assert response.json['url'] == new_url
+        assert response.json["url"] == new_url
 
         # Source is now owned by orga, with user as member
         source.organization = OrganizationFactory(members=[Member(user=user)])
         source.save()
-        api_url = url_for('api.harvest_source', ident=str(source.id))
+        api_url = url_for("api.harvest_source", ident=str(source.id))
         response = api.put(api_url, data)
         assert200(response)
 
@@ -318,12 +318,12 @@ class HarvestAPITest(MockBackendsMixin):
         source = HarvestSourceFactory()
         new_url: str = faker.url()
         data = {
-            'name': source.name,
-            'description': source.description,
-            'url': new_url,
-            'backend': 'factory',
+            "name": source.name,
+            "description": source.description,
+            "url": new_url,
+            "backend": "factory",
         }
-        api_url: str = url_for('api.harvest_source', ident=str(source.id))
+        api_url: str = url_for("api.harvest_source", ident=str(source.id))
         response = api.put(api_url, data)
 
         assert403(response)
@@ -400,11 +400,11 @@ class HarvestAPITest(MockBackendsMixin):
         assert len(deleted_sources) == 1
 
     def test_delete_source_require_permission(self, api):
-        '''It should not delete a source if not the owner'''
+        """It should not delete a source if not the owner"""
         api.login()
         source = HarvestSourceFactory()
 
-        url = url_for('api.harvest_source', ident=str(source.id))
+        url = url_for("api.harvest_source", ident=str(source.id))
         response = api.delete(url)
 
         assert403(response)
