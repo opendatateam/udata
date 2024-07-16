@@ -70,10 +70,7 @@ def init_app(app: UDataApp):
             # of transactions for performance monitoring.
             # Sentry recommends adjusting this value in production.
             traces_sample_rate=app.config.get("SENTRY_SAMPLE_RATE", None),
-            # Experimental profiling
-            _experiments={
-                "profiles_sample_rate": app.config.get("SENTRY_SAMPLE_RATE", None),
-            },
+            profiles_sample_rate=app.config.get("SENTRY_SAMPLE_RATE", None),
         )
 
         # Set log level
