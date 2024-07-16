@@ -8,13 +8,14 @@ from udata.auth import admin_permission
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_ref_fields, dataset_fields
 from udata.core.organization.api_fields import org_ref_fields
+from udata.core.dataset.permissions import OwnablePermission
 from udata.core.organization.permissions import EditOrganizationPermission
 from udata.core.user.api_fields import user_ref_fields
 
 from . import actions
 from .forms import HarvestSourceForm, HarvestSourceValidationForm
 from .models import (
-    HARVEST_JOB_STATUS, HARVEST_ITEM_STATUS, HarvestJob,
+    HARVEST_JOB_STATUS, HARVEST_ITEM_STATUS, HarvestJob, HarvestSource,
     VALIDATION_STATES, VALIDATION_ACCEPTED
 )
 
@@ -233,6 +234,7 @@ class SourceAPI(API):
     def put(self, ident):
         '''Update a harvest source'''
         source = actions.get_source(ident)
+        OwnablePermission(source).test()
         form = api.validate(HarvestSourceForm, source)
         source = actions.update_source(ident, form.data)
         return source
@@ -241,6 +243,8 @@ class SourceAPI(API):
     @api.doc('delete_harvest_source')
     @api.marshal_with(source_fields)
     def delete(self, ident):
+        source: HarvestSource = actions.get_source(ident)
+        OwnablePermission(source).test()
         return actions.delete_source(ident), 204
 
 

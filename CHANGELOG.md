@@ -4,6 +4,10 @@
 
 - Revamp CORS: remove flask-cors to always returns 204 on OPTIONS request [#3074](https://github.com/opendatateam/udata/pull/3074)
 
+## 9.1.1 (2024-07-16)
+
+- Add correct owner permissions on harvest sources [#3091](https://github.com/opendatateam/udata/pull/3091)
+
 ## 9.1.0 (2024-07-11)
 
 - Add reports backend [#3069](https://github.com/opendatateam/udata/pull/3069) and [#3078](https://github.com/opendatateam/udata/pull/3078)
