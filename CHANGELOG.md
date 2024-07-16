@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add correct owner permissions on harvest sources [#3091](https://github.com/opendatateam/udata/pull/3091)
 
 ## 9.1.0 (2024-07-11)
 
