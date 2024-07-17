@@ -19,6 +19,7 @@ from udata.core.discussions.tasks import (
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory, AdminFactory
+from udata.core.topic.factories import TopicFactory
 from udata.tests.helpers import capture_mails
 from udata.utils import faker
 
@@ -138,7 +139,7 @@ class DiscussionsTest(APITestCase):
                 }
             })
             self.assertStatus(response, 201)
-            
+
         with assert_not_emit(on_new_potential_spam):
             response = self.post(url_for('api.discussion', id=response.json['id']), {
                 'comment': 'A comment with spam by owner'
@@ -735,6 +736,130 @@ class DiscussionsMailsTest(APITestCase):
         self.assertEqual(len(mails), 1)
         self.assertEqual(mails[0].recipients[0], owner.email)
 
+    @pytest.mark.options(
+        DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=['*.example.com'],
+        DISCUSSION_ALTERNATE_MODEL_NAMES=['CUSTOM_MODEL']
+    )
+    def test_new_discussion_mail_with_extras(self):
+        user = UserFactory()
+        owner = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=user)
+        discussion = Discussion.objects.create(
+            # Topic will be able to nofify if an external url is provided
+            subject=TopicFactory(owner=owner),
+            user=user,
+            title=faker.sentence(),
+            discussion=[message],
+            extras={
+                'notification': {
+                    'model_name': 'CUSTOM_MODEL',
+                    'external_url': 'https://sub.example.com/custom/'
+                }
+            },
+        )
+
+        with capture_mails() as mails:
+            notify_new_discussion(discussion.id)
+
+        mail = mails[0]
+        assert 'CUSTOM_MODEL' in mail.subject
+        assert 'CUSTOM_MODEL' in mail.body
+        assert f'https://sub.example.com/custom/#discussion-{discussion.id}' in mail.body
+
+    @pytest.mark.options(
+        DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=['*.example.com'],
+    )
+    def test_new_discussion_mail_with_extras_no_model_name(self):
+        user = UserFactory()
+        owner = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=user)
+        discussion = Discussion.objects.create(
+            # Topic will be able to nofify if an external url is provided
+            subject=TopicFactory(owner=owner),
+            user=user,
+            title=faker.sentence(),
+            discussion=[message],
+            extras={
+                'notification': {
+                    'external_url': 'https://sub.example.com/custom/'
+                }
+            },
+        )
+
+        with capture_mails() as mails:
+            notify_new_discussion(discussion.id)
+
+        mail = mails[0]
+        assert 'topic' in mail.subject
+        assert f'https://sub.example.com/custom/#discussion-{discussion.id}' in mail.body
+
+    def test_new_discussion_mail_with_extras_not_allowed(self):
+        user = UserFactory()
+        owner = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=user)
+        discussion = Discussion.objects.create(
+            # Topic has no external_url, so we're testing this case with Dataset
+            subject=DatasetFactory(owner=owner),
+            user=user,
+            title=faker.sentence(),
+            discussion=[message],
+            extras={
+                'notification': {
+                    'model_name': 'CUSTOM_MODEL',
+                    'external_url': 'https://sub.example.com/custom/'
+                }
+            },
+        )
+
+        with capture_mails() as mails:
+            notify_new_discussion(discussion.id)
+
+        mail = mails[0]
+        assert 'CUSTOM_MODEL' not in mail.subject
+        assert 'https://sub.example.com/custom/' not in mail.body
+
+    def test_new_discussion_mail_with_extras_not_an_url(self):
+        user = UserFactory()
+        owner = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=user)
+        discussion = Discussion.objects.create(
+            # Topic has no external_url, so we're testing this case with Dataset
+            subject=DatasetFactory(owner=owner),
+            user=user,
+            title=faker.sentence(),
+            discussion=[message],
+            extras={
+                'notification': {
+                    'external_url': 'xxx'
+                }
+            },
+        )
+
+        with capture_mails() as mails:
+            notify_new_discussion(discussion.id)
+
+        mail = mails[0]
+        assert 'xxx' not in mail.body
+        assert f"/{discussion.subject.slug}/#" in mail.body
+
+    def test_new_discussion_mail_topic_no_extras(self):
+        user = UserFactory()
+        owner = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=TopicFactory(owner=owner),
+            user=user,
+            title=faker.sentence(),
+            discussion=[message],
+        )
+
+        with capture_mails() as mails:
+            notify_new_discussion(discussion.id)
+
+        # Topic has no external_url, no email should be sent and no error thrown
+        assert len(mails) == 0
+
+
     def test_new_discussion_comment_mail(self):
         owner = UserFactory()
         poster = UserFactory()
@@ -761,6 +886,80 @@ class DiscussionsMailsTest(APITestCase):
             self.assertIn(mail.recipients[0], expected_recipients)
             self.assertNotIn(commenter.email, mail.recipients)
 
+    @pytest.mark.options(
+        DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=['*.example.com'],
+        DISCUSSION_ALTERNATE_MODEL_NAMES=['CUSTOM_MODEL']
+    )
+    def test_new_discussion_comment_mail_with_extras(self):
+        owner = UserFactory()
+        poster = UserFactory()
+        commenter = UserFactory()
+        new_message = Message(content=faker.sentence(), posted_by=commenter)
+        discussion = Discussion.objects.create(
+            # Topic will be able to nofify if an external url is provided
+            subject=TopicFactory(owner=owner),
+            user=poster,
+            title=faker.sentence(),
+            discussion=[new_message],
+            extras={
+                'notification': {
+                    'model_name': 'CUSTOM_MODEL',
+                    'external_url': 'https://sub.example.com/custom/'
+                }
+            },
+        )
+
+        with capture_mails() as mails:
+            notify_new_discussion_comment(discussion.id, message=0)
+
+        mail = mails[0]
+        assert 'CUSTOM_MODEL' in mail.body
+        assert f'https://sub.example.com/custom/#discussion-{discussion.id}' in mail.body
+
+    def test_new_discussion_comment_mail_with_extras_not_allowed(self):
+        owner = UserFactory()
+        poster = UserFactory()
+        commenter = UserFactory()
+        new_message = Message(content=faker.sentence(), posted_by=commenter)
+        discussion = Discussion.objects.create(
+            # Topic has no external_url, so we're testing this case with Dataset
+            subject=DatasetFactory(owner=owner),
+            user=poster,
+            title=faker.sentence(),
+            discussion=[new_message],
+            extras={
+                'notification': {
+                    'model_name': 'CUSTOM_MODEL',
+                    'external_url': 'https://sub.example.com/custom/'
+                }
+            },
+        )
+
+        with capture_mails() as mails:
+            notify_new_discussion_comment(discussion.id, message=0)
+
+        mail = mails[0]
+        assert 'CUSTOM_MODEL' not in mail.body
+        assert 'https://sub.example.com/custom/' not in mail.body
+
+    def test_new_discussion_comment_mail_topic_no_extras(self):
+        owner = UserFactory()
+        poster = UserFactory()
+        commenter = UserFactory()
+        new_message = Message(content=faker.sentence(), posted_by=commenter)
+        discussion = Discussion.objects.create(
+            subject=TopicFactory(owner=owner),
+            user=poster,
+            title=faker.sentence(),
+            discussion=[new_message],
+        )
+
+        with capture_mails() as mails:
+            notify_new_discussion_comment(discussion.id, message=0)
+
+        # Topic has no external_url, no email should be sent and no error thrown
+        assert len(mails) == 0
+
     def test_closed_discussion_mail(self):
         owner = UserFactory()
         poster = UserFactory()
@@ -785,3 +984,79 @@ class DiscussionsMailsTest(APITestCase):
         for mail in mails:
             self.assertIn(mail.recipients[0], expected_recipients)
             self.assertNotIn(owner.email, mail.recipients)
+
+    @pytest.mark.options(
+        DISCUSSION_ALLOWED_EXTERNAL_DOMAINS=['*.example.com'],
+        DISCUSSION_ALTERNATE_MODEL_NAMES=['CUSTOM_MODEL']
+    )
+    def test_closed_discussion_mail_with_extras(self):
+        owner = UserFactory()
+        poster = UserFactory()
+        commenter = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=commenter)
+        closing_message = Message(content=faker.sentence(), posted_by=owner)
+        discussion = Discussion.objects.create(
+            subject=TopicFactory(owner=owner),
+            user=poster,
+            title=faker.sentence(),
+            discussion=[message, closing_message],
+            extras={
+                'notification': {
+                    'model_name': 'CUSTOM_MODEL',
+                    'external_url': 'https://sub.example.com/custom/'
+                }
+            },
+        )
+
+        with capture_mails() as mails:
+            notify_discussion_closed(discussion.id, message=0)
+
+        mail = mails[0]
+        assert 'CUSTOM_MODEL' in mail.body
+        assert f'https://sub.example.com/custom/#discussion-{discussion.id}' in mail.body
+
+    def test_closed_discussion_mail_with_extras_not_allowed(self):
+        owner = UserFactory()
+        poster = UserFactory()
+        commenter = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=commenter)
+        closing_message = Message(content=faker.sentence(), posted_by=owner)
+        discussion = Discussion.objects.create(
+            # Topic has no external_url, so we're testing this case with Dataset
+            subject=DatasetFactory(owner=owner),
+            user=poster,
+            title=faker.sentence(),
+            discussion=[message, closing_message],
+            extras={
+                'notification': {
+                    'model_name': 'CUSTOM_MODEL',
+                    'external_url': 'https://sub.example.com/custom/'
+                }
+            },
+        )
+
+        with capture_mails() as mails:
+            notify_discussion_closed(discussion.id, message=0)
+
+        mail = mails[0]
+        assert 'CUSTOM_MODEL' not in mail.body
+        assert 'https://sub.example.com/custom/' not in mail.body
+
+    def test_closed_discussion_mail_topic_no_extras(self):
+        owner = UserFactory()
+        poster = UserFactory()
+        commenter = UserFactory()
+        message = Message(content=faker.sentence(), posted_by=commenter)
+        closing_message = Message(content=faker.sentence(), posted_by=owner)
+        discussion = Discussion.objects.create(
+            subject=TopicFactory(owner=owner),
+            user=poster,
+            title=faker.sentence(),
+            discussion=[message, closing_message],
+        )
+
+        with capture_mails() as mails:
+            notify_discussion_closed(discussion.id, message=0)
+
+        # Topic has no external_url, no email should be sent and no error thrown
+        assert len(mails) == 0

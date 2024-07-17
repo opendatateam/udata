@@ -4,7 +4,7 @@
 {% block body %}
 <p style="margin: 0;padding: 0;">{{
     _('%(user)s submitted a new discussion on your %(type)s %(subject)s',
-    type=discussion.subject.verbose_name,
+    type=subject_type,
     user=(
         '<a href="'|safe
         + url_for('api.user', user=discussion.user, _external=True)
@@ -14,7 +14,7 @@
     ),
     subject=(
         '<a href="'|safe
-        + discussion.external_url
+        + external_url
         + '">'|safe
         + discussion.subject|string
         + '</a>'|safe
@@ -36,7 +36,7 @@
         <td align="center">
             {{ mail_button(
                 _('See the discussion'),
-                discussion.external_url
+                external_url
             ) }}
         </td>
     </tr>
