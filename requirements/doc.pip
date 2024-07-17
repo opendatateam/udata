@@ -317,7 +317,7 @@ pytz==2019.3
     #   babel
     #   celery
     #   flask-restx
-pyyaml==5.4.1
+pyyaml==6.0.1
     # via
     #   mkdocs
     #   pyyaml-env-tag
