@@ -276,6 +276,9 @@ class RunSourceAPI(API):
         if not enabled:
             api.abort(400, 'Cannot run source manually. Please schedule the source instead.')
 
+        source: HarvestSource = actions.get_source(ident)
+        OwnablePermission(source).test()
+
         if source.validation.state != VALIDATION_ACCEPTED:
             api.abort(400, 'Source is not validated. Please validate the source before running.')
 
