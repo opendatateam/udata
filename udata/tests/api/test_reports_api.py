@@ -6,6 +6,7 @@ from udata.core.reports.models import Report
 from udata.core.reports.constants import REASON_ILLEGAL_CONTENT, REASON_SPAM, reports_reasons_translations
 from udata.i18n import gettext as _
 
+from mongoengine.base.datastructures import LazyReference
 from . import APITestCase
 
 
@@ -26,8 +27,10 @@ class ReportsAPITest(APITestCase):
         spam_dataset = DatasetFactory.create(owner=user)
 
         response = self.post(url_for('api.reports'), {
-            'object_type': 'Dataset',
-            'object_id': illegal_dataset.id,
+            'subject': {
+                'class': 'Dataset',
+                'id': illegal_dataset.id,
+            },
             'message': 'This is not appropriate',
             'reason': REASON_ILLEGAL_CONTENT,
         })
@@ -35,8 +38,10 @@ class ReportsAPITest(APITestCase):
         self.assertEqual(Report.objects.count(), 1)
 
         response = self.post(url_for('api.reports'), {
-            'object_type': 'Dataset',
-            'object_id': spam_dataset.id,
+            'subject': {
+                'class': 'Dataset',
+                'id': spam_dataset.id,
+            },
             'message': 'This is spammy',
             'reason': REASON_SPAM,
         })
@@ -44,14 +49,14 @@ class ReportsAPITest(APITestCase):
         self.assertEqual(Report.objects.count(), 2)
 
         reports: list[Report] = list(Report.objects())
-        self.assertEqual(Dataset.__name__, reports[0].object_type)
-        self.assertEqual(illegal_dataset.id, reports[0].object_id)
+        self.assertEqual(Dataset, reports[0].subject.document_type)
+        self.assertEqual(illegal_dataset.id, reports[0].subject.pk)
         self.assertEqual('This is not appropriate', reports[0].message)
         self.assertEqual(REASON_ILLEGAL_CONTENT, reports[0].reason)
         self.assertEqual(user.id, reports[0].by.id)
         
-        self.assertEqual(Dataset.__name__, reports[1].object_type)
-        self.assertEqual(spam_dataset.id, reports[1].object_id)
+        self.assertEqual(Dataset, reports[1].subject.document_type)
+        self.assertEqual(spam_dataset.id, reports[1].subject.pk)
         self.assertEqual('This is spammy', reports[1].message)
         self.assertEqual(REASON_SPAM, reports[1].reason)
         self.assertEqual(user.id, reports[1].by.id)
@@ -60,26 +65,26 @@ class ReportsAPITest(APITestCase):
         self.assert204(response)
         
         reports[0].reload()
-        self.assertEqual(Dataset.__name__, reports[0].object_type)
-        self.assertEqual(illegal_dataset.id, reports[0].object_id)
+        self.assertEqual(Dataset, reports[0].subject.document_type)
+        self.assertEqual(illegal_dataset.id, reports[0].subject.pk)
         self.assertEqual('This is not appropriate', reports[0].message)
         self.assertEqual(REASON_ILLEGAL_CONTENT, reports[0].reason)
         self.assertEqual(user.id, reports[0].by.id)
-        self.assertIsNotNone(reports[0].object_deleted_at)
+        self.assertIsNotNone(reports[0].subject_deleted_at)
 
         reports[1].reload()
-        self.assertEqual(Dataset.__name__, reports[1].object_type)
-        self.assertEqual(spam_dataset.id, reports[1].object_id)
+        self.assertEqual(Dataset, reports[1].subject.document_type)
+        self.assertEqual(spam_dataset.id, reports[1].subject.pk)
         self.assertEqual('This is spammy', reports[1].message)
         self.assertEqual(REASON_SPAM, reports[1].reason)
         self.assertEqual(user.id, reports[1].by.id)
-        self.assertIsNone(reports[1].object_deleted_at)
+        self.assertIsNone(reports[1].subject_deleted_at)
 
         # We should take action on manual delete in the database too
         spam_dataset.delete()
 
         reports[1].reload()
-        self.assertIsNotNone(reports[1].object_deleted_at)
+        self.assertIsNotNone(reports[1].subject_deleted_at)
 
         response = self.get(url_for('api.reports'))
         self.assert200(response)

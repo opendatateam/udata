@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from mongoengine import NULLIFY, signals
+from bson import DBRef
+from mongoengine import NULLIFY, DO_NOTHING, signals
 
 from udata.api_fields import field, generate_fields
 from udata.core.user.api_fields import user_ref_fields
@@ -20,13 +21,11 @@ class Report(db.Document):
         allow_null=True,
     )
 
-    object_type = field(
-        db.StringField(choices=[m.__name__ for m in REPORTABLE_MODELS])
-    )
-    object_id = field(
-        db.ObjectIdField()
-    )
-    object_deleted_at = field(
+    # Here we use the lazy version of `GenericReferenceField` because we could point to a 
+    # non existant model (if it was deleted we want to keep the report data).
+    subject = field(db.GenericLazyReferenceField(reverse_delete_rule=DO_NOTHING))
+
+    subject_deleted_at = field(
         db.DateTimeField(),
         allow_null=True,
         readonly=True,
@@ -46,11 +45,32 @@ class Report(db.Document):
 
     @classmethod
     def mark_as_deleted_soft_delete(cls, sender, document, **kwargs):
+        '''
+        Called when updating a model (maybe updating the `deleted` date)
+        '''
         if document.deleted:
-            Report.objects(object_type=sender.__name__, object_id=document.id, object_deleted_at=None).update(object_deleted_at=datetime.utcnow)
+            # It's a little bit hard to query the GenericReferenceField,
+            # we could do it without extra request with `DBRef(sender.__name__.lower(), document.id)`
+            # but I'm not a big fan of the `.lower()` to get the correct DBRef. Fetching the model
+            # and asking MongoDB for the DBRef with `.to_dbref()` seems more robust.
+            subject = sender.objects(id=document.id).first()
+            Report.objects(
+                subject=subject.to_dbref(),
+                subject_deleted_at=None
+            ).update(subject_deleted_at=datetime.utcnow)
     
-    def mark_as_deleted_hard_delete(cls, document, **kwargs):
-        Report.objects(object_type=document.__class__.__name__, object_id=document.id, object_deleted_at=None).update(object_deleted_at=datetime.utcnow)
+    @classmethod
+    def mark_as_deleted_hard_delete(cls, sender, document, **kwargs):
+        '''
+        Call when really deleting a model from the database.
+        '''
+
+        # Here we are forced to do a manual `DBRef(sender.__name__.lower(), document.id)`
+        # because the document doesn't exist anymore…
+        Report.objects(
+            subject=DBRef(sender.__name__.lower(), document.id),
+            subject_deleted_at=None
+        ).update(subject_deleted_at=datetime.utcnow)
 
 
 for model in REPORTABLE_MODELS:
