@@ -2,7 +2,6 @@ import logging
 import traceback
 
 from datetime import datetime, date, timedelta
-from typing import List, Optional
 from uuid import UUID
 
 import requests
@@ -284,7 +283,7 @@ class BaseBackend(object):
             item.ended = datetime.utcnow()
             self.save_job()
 
-    def update_dataset_harvest_info(self, harvest: Optional[HarvestDatasetMetadata], remote_id: int):
+    def update_dataset_harvest_info(self, harvest: HarvestDatasetMetadata | None, remote_id: int):
         if not harvest:
             harvest = HarvestDatasetMetadata()
 
@@ -300,7 +299,7 @@ class BaseBackend(object):
 
         return harvest
 
-    def update_dataservice_harvest_info(self, harvest: Optional[HarvestDataserviceMetadata], remote_id: int):
+    def update_dataservice_harvest_info(self, harvest: HarvestDataserviceMetadata | None, remote_id: int):
         if not harvest:
             harvest = HarvestDataserviceMetadata()
 
@@ -444,7 +443,7 @@ class BaseBackend(object):
 
 
 class LogCatcher(logging.Handler):
-    records: List[logging.LogRecord]
+    records: list[logging.LogRecord]
 
     def __init__(self):
         self.records = []

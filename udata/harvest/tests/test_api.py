@@ -295,7 +295,7 @@ class HarvestAPITest(MockBackendsMixin):
         assert source['config'] == {'custom': 'value'}
 
     def test_update_source(self, api):
-        '''It should update a source'''
+        '''It should update a source if owner or orga member'''
         user = api.login()
         source = HarvestSourceFactory(owner=user)
         new_url = faker.url()
@@ -307,11 +307,31 @@ class HarvestAPITest(MockBackendsMixin):
         }
         api_url = url_for('api.harvest_source', ident=str(source.id))
         response = api.put(api_url, data)
+        assert200(response)
+        assert response.json['url'] == new_url
 
+        # Source is now owned by orga, with user as member
+        source.organization = OrganizationFactory(members=[Member(user=user)])
+        source.save()
+        api_url = url_for('api.harvest_source', ident=str(source.id))
+        response = api.put(api_url, data)
         assert200(response)
 
-        source = response.json
-        assert source['url'] == new_url
+    def test_update_source_require_permission(self, api):
+        '''It should not update a source if not the owner'''
+        api.login()
+        source = HarvestSourceFactory()
+        new_url: str = faker.url()
+        data = {
+            'name': source.name,
+            'description': source.description,
+            'url': new_url,
+            'backend': 'factory',
+        }
+        api_url: str = url_for('api.harvest_source', ident=str(source.id))
+        response = api.put(api_url, data)
+
+        assert403(response)
 
     def test_validate_source(self, api):
         '''It should allow to validate a source if admin'''
@@ -387,6 +407,16 @@ class HarvestAPITest(MockBackendsMixin):
 
         deleted_sources = HarvestSource.objects(deleted__exists=True)
         assert len(deleted_sources) == 1
+
+    def test_delete_source_require_permission(self, api):
+        '''It should not delete a source if not the owner'''
+        api.login()
+        source = HarvestSourceFactory()
+
+        url = url_for('api.harvest_source', ident=str(source.id))
+        response = api.delete(url)
+
+        assert403(response)
 
     def test_schedule_source(self, api):
         '''It should allow to schedule a source if admin'''

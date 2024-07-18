@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 import boto3
 from flask import current_app
 import json
@@ -33,14 +33,14 @@ def store_bytes(bucket: str, filename: str, bytes: bytes):
 def store_as_json(bucket: str, filename: str, value):
     return store_bytes(bucket, filename, bytes(json.dumps(value).encode('UTF-8')))
 
-def get_bytes(bucket: str, filename: str) -> Optional[bytes]:
+def get_bytes(bucket: str, filename: str) -> bytes | None:
     client = get_client()
     try:
         return client.get_object(Bucket=bucket, Key=filename)['Body'].read()
     except client.exceptions.NoSuchKey:
         return None
 
-def get_from_json(bucket: str, filename: str) -> Optional[Any]:
+def get_from_json(bucket: str, filename: str) -> Any | None:
     bytes = get_bytes(bucket, filename)
     if bytes is None:
         return None

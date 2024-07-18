@@ -13,7 +13,6 @@ from pydoc import locate
 from stringdist import rdlevenshtein
 from werkzeug.utils import cached_property
 import requests
-from typing import Optional, Tuple
 
 from udata.app import cache
 from udata.core import storages
@@ -964,7 +963,7 @@ class ResourceSchema(object):
     def assignable_schemas():
         return [s for s in ResourceSchema.all() if s.get('schema_type') not in NON_ASSIGNABLE_SCHEMA_TYPES]
 
-    def get_existing_schema_info_by_url(url: str) -> Optional[Tuple[str, Optional[str]]]:
+    def get_existing_schema_info_by_url(url: str) -> tuple[str, str | None] | None:
         '''
         Returns the name and the version if exists
         '''
