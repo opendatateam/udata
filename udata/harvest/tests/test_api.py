@@ -4,6 +4,9 @@ import pytest
 from datetime import datetime
 
 from flask import url_for
+from pytest_mock import MockerFixture
+
+from udata.tests.plugin import ApiClient
 
 from .. import actions
 
@@ -389,7 +392,7 @@ class HarvestAPITest(MockBackendsMixin):
         assert200(response)
 
     @pytest.mark.options(HARVEST_ENABLE_MANUAL_RUN=True)
-    def test_run_source(self, mocker, api):
+    def test_run_source(self, mocker: MockerFixture, api: ApiClient):
         launch = mocker.patch.object(actions.harvest, 'delay')
         user = api.login()
 
@@ -402,7 +405,7 @@ class HarvestAPITest(MockBackendsMixin):
         launch.assert_called()
 
     @pytest.mark.options(HARVEST_ENABLE_MANUAL_RUN=False)
-    def test_cannot_run_source_if_disabled(self, mocker, api):
+    def test_cannot_run_source_if_disabled(self, mocker: MockerFixture, api: ApiClient):
         launch = mocker.patch.object(actions.harvest, 'delay')
         user = api.login()
 
@@ -415,7 +418,7 @@ class HarvestAPITest(MockBackendsMixin):
         launch.assert_not_called()
 
     @pytest.mark.options(HARVEST_ENABLE_MANUAL_RUN=True)
-    def test_cannot_run_source_if_not_owned(self, mocker, api):
+    def test_cannot_run_source_if_not_owned(self, mocker: MockerFixture, api: ApiClient):
         launch = mocker.patch.object(actions.harvest, 'delay')
         other_user = UserFactory()
         api.login()
@@ -429,7 +432,7 @@ class HarvestAPITest(MockBackendsMixin):
         launch.assert_not_called()
 
     @pytest.mark.options(HARVEST_ENABLE_MANUAL_RUN=True)
-    def test_cannot_run_source_if_not_validated(self, mocker, api):
+    def test_cannot_run_source_if_not_validated(self, mocker: MockerFixture, api: ApiClient):
         launch = mocker.patch.object(actions.harvest, 'delay')
         user = api.login()
 
