@@ -91,9 +91,6 @@ def convert_db_to_field(key, field, info):
         write_params['description'] = "ID of the reference"
         constructor_write = restx_fields.String
     elif isinstance(field, mongo_fields.EmbeddedDocumentField):
-        print(key)
-        print(field)
-        print(info)
         nested_fields = info.get('nested_fields')
         if nested_fields is not None:
             constructor = lambda **kwargs: restx_fields.Nested(nested_fields, **kwargs)
@@ -117,6 +114,10 @@ def convert_db_to_field(key, field, info):
     return read, write
 
 def get_fields(cls):
+    '''
+    Returns all the exposed fields of the class (fields decorated with `field()`)
+    It also expends image fields to add thumbnail fields.
+    '''
     for key, field in cls._fields.items():
         info: dict | None = getattr(field, '__additional_field_info__', None)
         if info is None: continue 
