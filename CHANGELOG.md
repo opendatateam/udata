@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Revamp CORS: remove flask-cors to always returns 204 on OPTIONS request [#3074](https://github.com/opendatateam/udata/pull/3074)
+- Update pinned dependencies according to project dependencies, without updating any project dependencies [#3089](https://github.com/opendatateam/udata/pull/3089)
 
 ## 9.1.1 (2024-07-16)
 
