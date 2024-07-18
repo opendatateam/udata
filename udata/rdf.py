@@ -364,7 +364,6 @@ def schema_from_rdf(rdf):
                     url = uris.validate(type.identifier.toPython())
             except uris.ValidationError:
                 pass
-            pass
 
         if url is None:
             return None

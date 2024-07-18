@@ -177,4 +177,4 @@ Take a look at [adding-translations](adding-translations.md) to set up translati
 Last but not least, if none of the above match your needs,
 you can also contribute to the core udata project and submit some contributions.
 
-See [the Contributing Guide](contributing-guide)
+See [the Contributing Guide](contributing-guide.md).

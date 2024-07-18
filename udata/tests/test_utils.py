@@ -1,4 +1,4 @@
-from datetime import date, datetime, timezone
+from datetime import date, datetime
 
 from udata.utils import (
     get_by, daterange_start, daterange_end, to_bool, to_iso, to_iso_date,

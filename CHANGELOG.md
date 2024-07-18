@@ -2,7 +2,15 @@
 
 ## Current (in progress)
 
-- Add reports backend [#3069](https://github.com/opendatateam/udata/pull/3069)
+- Update pinned dependencies according to project dependencies, without updating any project dependencies [#3089](https://github.com/opendatateam/udata/pull/3089)
+
+## 9.1.1 (2024-07-16)
+
+- Add correct owner permissions on harvest sources [#3091](https://github.com/opendatateam/udata/pull/3091)
+
+## 9.1.0 (2024-07-11)
+
+- Add reports backend [#3069](https://github.com/opendatateam/udata/pull/3069) and [#3078](https://github.com/opendatateam/udata/pull/3078)
 - Improve `udata db check-integrity` (perfs, Sentry notifications…) [#3026](https://github.com/opendatateam/udata/pull/3026)
 - Harvest dataservices [#3029](https://github.com/opendatateam/udata/pull/3029)
 - Refactor catalog exports [#3052](https://github.com/opendatateam/udata/pull/3052)

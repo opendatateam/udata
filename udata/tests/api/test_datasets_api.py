@@ -761,7 +761,7 @@ class DatasetAPITest(APITestCase):
         data['resources'].append(resource_data)
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert400(response)
-        assert response.json['errors']['resources'][0]['schema']['url'] == [_('Invalid URL "test"')]
+        assert response.json['errors']['resources'][0]['schema']['url'] == [_('Invalid URL "{url}"').format(url="test")]
 
         resource_data['schema'] = {'name': 'unknown-schema'}
         data['resources'].append(resource_data)

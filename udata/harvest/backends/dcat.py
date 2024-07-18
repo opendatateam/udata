@@ -6,7 +6,6 @@ import lxml.etree as ET
 from flask import current_app
 from datetime import date
 from typing import Generator
-from typing import Generator
 
 from udata.rdf import (
     DCAT, DCT, HYDRA, SPDX, namespace_manager, guess_format, url_from_rdf

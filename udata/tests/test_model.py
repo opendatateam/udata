@@ -6,7 +6,7 @@ from datetime import date, datetime, timedelta
 from mongoengine.errors import ValidationError
 from mongoengine.fields import BaseField
 
-from udata.forms.validators import _
+from udata.i18n import _
 from udata.settings import Defaults
 from udata.models import Dataset
 from udata.mongo import db, validate_config, build_test_config
@@ -385,7 +385,7 @@ class URLFieldTest:
     def test_public_private(self):
         url = 'http://10.10.0.2/path/'
         PrivateURLTester(url=url).save()
-        with pytest.raises(ValidationError, match='private URL'):
+        with pytest.raises(ValidationError, match=_('is a private URL')):
             URLTester(url=url).save()
 
 

@@ -17,7 +17,7 @@ Start with [getting started](getting-started.md).
 See [system dependencies](system-dependencies.md) and [installation](installation.md).
 We can help you to set up your infrastructure, you can contact the team via [a Github issue][github-new-issue] or via [a Github discussion][github-discussions].
 
-## I found a bug or I want to propose an improvement
+## I found a bug or I want to suggest an improvement
 
 For a bug, please [report it directly as a Github issue][github-new-issue] following the proposed template. We’ll answer you as soon as possible.
 

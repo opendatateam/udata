@@ -42,6 +42,7 @@ js-built
 /jsdoc/
 *.rdb
 venv
+.venv
 
 # Installer logs
 pip-log.txt
@@ -81,3 +82,9 @@ data
 
 # Pyenv
 .python-version
+
+# Ruff
+.ruff_cache
+
+# VSCode
+.vscode

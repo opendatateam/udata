@@ -1,4 +1,3 @@
-from typing import List
 from flask import url_for
 
 from udata.core.dataset.factories import (DatasetFactory)
@@ -44,7 +43,7 @@ class ReportsAPITest(APITestCase):
         self.assert201(response)
         self.assertEqual(Report.objects.count(), 2)
 
-        reports: List[Report] = list(Report.objects())
+        reports: list[Report] = list(Report.objects())
         self.assertEqual(Dataset.__name__, reports[0].object_type)
         self.assertEqual(illegal_dataset.id, reports[0].object_id)
         self.assertEqual('This is not appropriate', reports[0].message)

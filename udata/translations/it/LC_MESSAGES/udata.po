@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2024-07-01 13:45+0200\n"
-"PO-Revision-Date: 2024-07-01 14:36\n"
+"POT-Creation-Date: 2024-07-10 14:52+0200\n"
+"PO-Revision-Date: 2024-07-10 13:16\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: it\n"
 "Language-Team: Italian\n"
@@ -198,7 +198,7 @@ msgid "Your udata instance is ready!"
 msgstr "La tua istanza udata è pronta!"
 
 #: udata/core/owned.py:30 udata/forms/fields.py:739
-#: udata/tests/api/test_dataservices_api.py:229
+#: udata/tests/api/test_dataservices_api.py:228
 msgid "You can only set yourself as owner"
 msgstr "Puoi solo impostare te stessə come proprietariə"
 
@@ -207,7 +207,7 @@ msgid "Unknown organization"
 msgstr ""
 
 #: udata/core/owned.py:41 udata/forms/fields.py:762
-#: udata/tests/api/test_dataservices_api.py:238
+#: udata/tests/api/test_dataservices_api.py:237
 msgid "Permission denied for this organization"
 msgstr "Permesso negato per questa organizzazione"
 
@@ -236,12 +236,12 @@ msgstr "Email"
 msgid "Publish as"
 msgstr "Pubblica come"
 
-#: udata/core/dataservices/models.py:129 udata/core/dataset/models.py:489
+#: udata/core/dataservices/models.py:129 udata/core/dataset/models.py:488
 #: udata/mongo/datetime_fields.py:59
 msgid "Creation date"
 msgstr "Data di creazione"
 
-#: udata/core/dataservices/models.py:133 udata/core/dataset/models.py:491
+#: udata/core/dataservices/models.py:133 udata/core/dataset/models.py:490
 #: udata/mongo/datetime_fields.py:61
 msgid "Last modification date"
 msgstr "Data dell'ultima modifica"
@@ -534,38 +534,38 @@ msgstr "Privato"
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "Limita la visibilità del dataset solo a te o alla tua organizzazione."
 
-#: udata/core/dataset/models.py:108
+#: udata/core/dataset/models.py:107
 msgid "A schema must contains a name or an URL when a version is provided."
 msgstr ""
 
-#: udata/core/dataset/models.py:135 udata/tests/api/test_datasets_api.py:770
+#: udata/core/dataset/models.py:134 udata/tests/api/test_datasets_api.py:770
 #: udata/tests/api/test_datasets_api.py:776
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr "Il nome dello schema \"{schema}\" non è un valore consentito. Valori consentiti: {values}"
 
-#: udata/core/dataset/models.py:150 udata/tests/api/test_datasets_api.py:782
+#: udata/core/dataset/models.py:149 udata/tests/api/test_datasets_api.py:782
 msgid "Version \"{version}\" is not an allowed value for the schema \"{name}\". Allowed versions: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:401 udata/core/dataset/rdf.py:436
+#: udata/core/dataset/models.py:400 udata/core/dataset/rdf.py:435
 #: udata/tests/dataset/test_dataset_rdf.py:517
 #: udata/tests/dataset/test_dataset_rdf.py:530
 msgid "Nameless resource"
 msgstr "File senza nome"
 
-#: udata/core/dataset/models.py:476
+#: udata/core/dataset/models.py:475
 msgid "Future date of update"
 msgstr "Data di aggiornamento futura"
 
-#: udata/core/dataset/models.py:500
+#: udata/core/dataset/models.py:499
 msgid "Pivotal data"
 msgstr "Dati cardine"
 
-#: udata/core/dataset/models.py:540
+#: udata/core/dataset/models.py:539
 msgid "dataset"
 msgstr "dataset"
 
-#: udata/core/dataset/rdf.py:434 udata/tests/dataset/test_dataset_rdf.py:504
+#: udata/core/dataset/rdf.py:433 udata/tests/dataset/test_dataset_rdf.py:504
 msgid "{format} resource"
 msgstr "File {format}"
 
@@ -797,29 +797,29 @@ msgstr "Specifica il tipo di corpo (HTML o markdown)"
 msgid "post"
 msgstr "articolo"
 
-#: udata/core/reports/constants.py:19
-msgid "Spam"
-msgstr ""
-
-#: udata/core/reports/constants.py:20
-msgid "Personal data"
-msgstr ""
-
-#: udata/core/reports/constants.py:21
+#: udata/core/reports/constants.py:18
 msgid "Explicit content"
 msgstr ""
 
-#: udata/core/reports/constants.py:22
+#: udata/core/reports/constants.py:19
 msgid "Illegal content"
 msgstr ""
 
-#: udata/core/reports/constants.py:23
+#: udata/core/reports/constants.py:20 udata/core/reuse/constants.py:29
+msgid "Others"
+msgstr "Altri"
+
+#: udata/core/reports/constants.py:21
+msgid "Personal data"
+msgstr ""
+
+#: udata/core/reports/constants.py:22
 msgid "Security"
 msgstr ""
 
-#: udata/core/reports/constants.py:24 udata/core/reuse/constants.py:29
-msgid "Others"
-msgstr "Altri"
+#: udata/core/reports/constants.py:23
+msgid "Spam"
+msgstr ""
 
 #: udata/core/reuse/activities.py:22
 msgid "created a reuse"
