@@ -53,11 +53,9 @@
 </template>
 
 <script>
-import moment from 'moment'
+import API from 'api';
 import { ModelPage } from 'models/base'
 import Reuse from 'models/reuse'
-import Dataset from 'models/dataset'
-import Vue from 'vue'
 import Discussions from 'models/discussions'
 import mask from 'models/mask'
 // Widgets
@@ -123,6 +121,19 @@ export default {
             method: this.transfer_request
           }
         )
+        if (!this.reuse.archived) {
+          actions.push({
+            label: this._('Archive'),
+            icon: 'archive',
+            method: this.archive
+          })
+        } else {
+          actions.push({
+            label: this._('Unarchive'),
+            icon: 'undo',
+            method: this.unarchive
+          })
+        }
         if (!this.reuse.deleted) {
           actions.push({
             label: this._('Delete'),
@@ -193,6 +204,24 @@ export default {
   methods: {
     edit() {
       this.$go({ name: 'reuse-edit', params: { oid: this.reuse.id } })
+    },
+    archive() {
+      const archived_reuse = this.reuse;
+      archived_reuse.archived = new Date().toISOString();
+      API.reuses.update_reuse({reuse: this.reuse.id, payload: archived_reuse},
+          (response) => {
+              this.reuse.on_fetched(response);
+          }
+      );
+    },
+    unarchive() {
+      const archived_reuse = this.reuse;
+      archived_reuse.archived = null;
+      API.reuses.update_reuse({reuse: this.reuse.id, payload: archived_reuse},
+          (response) => {
+              this.reuse.on_fetched(response);
+          }
+      );
     },
     confirm_delete() {
       this.$root.$modal(require('components/reuse/delete-modal.vue'), {
