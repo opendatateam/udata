@@ -213,6 +213,7 @@ def register_extensions(app):
         sitemap,
         tasks,
     )
+
     cors.init_app(app)
     tasks.init_app(app)
     i18n.init_app(app)
