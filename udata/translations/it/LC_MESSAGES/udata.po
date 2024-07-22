@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2024-07-10 14:52+0200\n"
-"PO-Revision-Date: 2024-07-10 13:16\n"
+"POT-Creation-Date: 2024-07-22 08:45+0200\n"
+"PO-Revision-Date: 2024-07-22 07:02\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: it\n"
 "Language-Team: Italian\n"
@@ -42,7 +42,7 @@ msgstr "La tua password è stata modificata"
 msgid "Password reset instructions"
 msgstr "Istruzioni per reimpostare la password"
 
-#: udata/settings.py:435
+#: udata/settings.py:437
 msgid "This dataset has been archived"
 msgstr "Questo dataset è stato archiviato"
 
@@ -50,7 +50,8 @@ msgstr "Questo dataset è stato archiviato"
 msgid "Invalid URL \"{url}\": {reason}"
 msgstr ""
 
-#: udata/tests/test_model.py:370 udata/uris.py:54
+#: udata/tests/api/test_datasets_api.py:764 udata/tests/test_model.py:370
+#: udata/uris.py:54
 msgid "Invalid URL \"{url}\""
 msgstr ""
 
@@ -78,7 +79,7 @@ msgstr ""
 msgid "is a local URL"
 msgstr ""
 
-#: udata/uris.py:130
+#: udata/tests/test_model.py:388 udata/uris.py:130
 msgid "is a private URL"
 msgstr ""
 
@@ -1590,10 +1591,6 @@ msgstr ""
 
 #: udata/templates/security/email/welcome_existing.html:25
 msgid "Here"
-msgstr ""
-
-#: udata/tests/api/test_datasets_api.py:764
-msgid "Invalid URL \"test\""
 msgstr ""
 
 #: udata/tests/forms/test_model_field.py:155
