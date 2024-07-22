@@ -15,10 +15,10 @@ from flask import (
     request,
     url_for,
 )
-from flask_storage import UnauthorizedFileType
 from flask_restx import Api, Resource
+from flask_storage import UnauthorizedFileType
 
-from udata import tracking, entrypoints, cors
+from udata import cors, entrypoints, tracking
 from udata.app import csrf
 from udata.auth import Permission, PermissionDenied, RoleNeed, current_user, login_user
 from udata.i18n import get_locale

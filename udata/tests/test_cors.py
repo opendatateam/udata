@@ -1,10 +1,11 @@
 from datetime import datetime
-from flask import url_for
-import pytest
 
-from udata.search import reindex
-from udata.core.topic.factories import TopicFactory
+import pytest
+from flask import url_for
+
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.topic.factories import TopicFactory
+from udata.search import reindex
 from udata.tests.api import APITestCase
 from udata.tests.helpers import assert_status
 
