@@ -80,7 +80,6 @@ class ReportsAPITest(APITestCase):
         self.assertEqual(user.id, reports[1].by.id)
         self.assertIsNone(reports[1].subject_deleted_at)
 
-        # We should take action on manual delete in the database too
         spam_dataset.delete()
 
         reports[1].reload()
@@ -88,5 +87,21 @@ class ReportsAPITest(APITestCase):
 
         response = self.get(url_for('api.reports'))
         self.assert200(response)
-        self.assertEqual(len(response.json['data']), 2)
+
+        reports = response.json['data']
+        self.assertEqual(len(reports), 2)
+        
+        self.assertEqual('Dataset', reports[0]['subject']['class'])
+        self.assertEqual(str(illegal_dataset.id), reports[0]['subject']['id'])
+        self.assertEqual('This is not appropriate', reports[0]['message'])
+        self.assertEqual(REASON_ILLEGAL_CONTENT, reports[0]['reason'])
+        self.assertEqual(str(user.id), reports[0]['by']['id'])
+        self.assertIsNotNone(reports[0]['subject_deleted_at'])
+
+        self.assertEqual('Dataset', reports[1]['subject']['class'])
+        self.assertEqual(str(spam_dataset.id), reports[1]['subject']['id'])
+        self.assertEqual('This is spammy', reports[1]['message'])
+        self.assertEqual(REASON_SPAM, reports[1]['reason'])
+        self.assertEqual(str(user.id), reports[1]['by']['id'])
+        self.assertIsNotNone(reports[1]['subject_deleted_at'])
 
