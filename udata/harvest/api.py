@@ -1,5 +1,5 @@
 from bson import ObjectId
-from flask import request
+from flask import current_app, request
 from werkzeug.exceptions import BadRequest
 
 from udata.api import API, api, fields
@@ -314,22 +314,26 @@ class ValidateSourceAPI(API):
         else:
             return actions.reject_source(ident, form.comment.data)
 
-@ns.route('/source/<string:ident>/run', endpoint='run_harvest_source')
-@api.param('ident', 'A source ID or slug')
+
+@ns.route("/source/<string:ident>/run", endpoint="run_harvest_source")
+@api.param("ident", "A source ID or slug")
 class RunSourceAPI(API):
-    @api.doc('run_harvest_source')
+    @api.doc("run_harvest_source")
     @api.secure
     @api.marshal_with(source_fields)
     def post(self, ident):
-        enabled = current_app.config.get('HARVEST_ENABLE_MANUAL_RUN')
+        enabled = current_app.config.get("HARVEST_ENABLE_MANUAL_RUN")
         if not enabled:
-            api.abort(400, 'Cannot run source manually. Please contact the platform if you need to reschedule the harvester.')
+            api.abort(
+                400,
+                "Cannot run source manually. Please contact the platform if you need to reschedule the harvester.",
+            )
 
         source: HarvestSource = actions.get_source(ident)
         OwnablePermission(source).test()
 
         if source.validation.state != VALIDATION_ACCEPTED:
-            api.abort(400, 'Source is not validated. Please validate the source before running.')
+            api.abort(400, "Source is not validated. Please validate the source before running.")
 
         actions.launch(ident)
 
