@@ -1,16 +1,17 @@
-'''
+"""
 Recompute resources extension with improved detection
-'''
+"""
+
 import logging
 
-from udata.models import Dataset
 from udata.core.storages.utils import extension
+from udata.models import Dataset
 
 log = logging.getLogger(__name__)
 
 
 def migrate(db):
-    log.info('Processing Datasets.')
+    log.info("Processing Datasets.")
 
     datasets = Dataset.objects().no_cache().timeout(False)
     count = 0
@@ -23,7 +24,7 @@ def migrate(db):
                 resource.format = detected_format
                 count += 1
         if save_dataset:
-            dataset.save(signal_kwargs={'ignores': ['post_save']})
+            dataset.save(signal_kwargs={"ignores": ["post_save"]})
 
-    log.info(f'Modified {count} resource objects')
-    log.info('Done')
+    log.info(f"Modified {count} resource objects")
+    log.info("Done")

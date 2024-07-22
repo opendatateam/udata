@@ -51,7 +51,7 @@ class FormFieldTest(TestCase):
 
     def test_with_one_valid_data(self):
         fake = Fake()
-        form = self.factory(MultiDict({'nested-name': 'John Doe'}))
+        form = self.factory(MultiDict({"nested-name": "John Doe"}))
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -59,11 +59,11 @@ class FormFieldTest(TestCase):
         form.populate_obj(fake)
 
         self.assertIsInstance(fake.nested, Nested)
-        self.assertEqual(fake.nested.name, 'John Doe')
+        self.assertEqual(fake.nested.name, "John Doe")
 
     def test_with_one_valid_json(self):
         fake = Fake()
-        form = self.factory({'nested': {'name': 'John Doe'}})
+        form = self.factory({"nested": {"name": "John Doe"}})
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -71,12 +71,12 @@ class FormFieldTest(TestCase):
         form.populate_obj(fake)
 
         self.assertIsInstance(fake.nested, Nested)
-        self.assertEqual(fake.nested.name, 'John Doe')
+        self.assertEqual(fake.nested.name, "John Doe")
 
     def test_with_initial_elements(self):
         fake = Fake.objects.create(nested=Nested(name=faker.name()))
         new_name = faker.name()
-        form = self.factory({'nested': {'name': new_name}}, fake)
+        form = self.factory({"nested": {"name": new_name}}, fake)
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -90,7 +90,7 @@ class FormFieldTest(TestCase):
         fake = Fake.objects.create(nested=Nested(name=faker.name()))
         initial_id = fake.nested.id
         initial_name = fake.nested.name
-        form = self.factory({'name': faker.word()}, fake)
+        form = self.factory({"name": faker.word()}, fake)
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -104,7 +104,7 @@ class FormFieldTest(TestCase):
         fake = Fake.objects.create(nested=Nested(name=faker.name()))
         initial_id = fake.nested.id
         new_name = faker.name()
-        form = self.factory({'nested': {'name': new_name}}, fake)
+        form = self.factory({"nested": {"name": new_name}}, fake)
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -115,7 +115,7 @@ class FormFieldTest(TestCase):
         self.assertEqual(fake.nested.name, new_name)
 
     def test_create_with_non_submitted_elements(self):
-        form = self.factory({'name': faker.word()})
+        form = self.factory({"name": faker.word()})
 
         form.validate()
         self.assertEqual(form.errors, {})

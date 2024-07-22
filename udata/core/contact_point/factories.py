@@ -9,5 +9,5 @@ class ContactPointFactory(ModelFactory):
     class Meta:
         model = ContactPoint
 
-    name = factory.Faker('name')
-    email = factory.Faker('email')
+    name = factory.Faker("name")
+    email = factory.Faker("email")

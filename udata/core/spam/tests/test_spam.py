@@ -1,13 +1,15 @@
 import logging
+
 import pytest
-from udata.tests import TestCase
+
 from udata.mongo import db
+from udata.tests import TestCase
 
-from ..models import SpamMixin
 from ..constants import POTENTIAL_SPAM
-
+from ..models import SpamMixin
 
 log = logging.getLogger(__name__)
+
 
 class TestModel(SpamMixin, db.Document):
     text = db.StringField(required=True)
@@ -18,9 +20,8 @@ class TestModel(SpamMixin, db.Document):
 
 
 class SpamTest(TestCase):
-    @pytest.mark.options(SPAM_WORDS=['spam'], SPAM_ALLOWED_LANGS=['fr'])
+    @pytest.mark.options(SPAM_WORDS=["spam"], SPAM_ALLOWED_LANGS=["fr"])
     def test_uppercase_lang_detect(self):
         model = TestModel(text="DONNEES DE RECENSEMENT - MARCHES PUBLICS")
         model.detect_spam()
         self.assertNotEqual(model.spam.status, POTENTIAL_SPAM)
-

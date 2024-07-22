@@ -8,3 +8,4 @@ twine==3.3.0
 pre-commit==2.14.0
 pip-tools==6.13.0
 flask-shell-ipython==0.5.1
+ruff==0.5.1

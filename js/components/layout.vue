@@ -8,6 +8,12 @@
         }
     }
 }
+
+.btn-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
 </style>
 
 <template>
@@ -20,6 +26,7 @@
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <div class="btn-group btn-group-sm btn-actions pull-right clearfix">
+            <slot name="buttons"></slot>
             <div v-if="menu_actions" class="btn-group btn-group-sm" role="group">
                 <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
                     {{_('Edit')}}
