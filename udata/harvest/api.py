@@ -274,7 +274,7 @@ class RunSourceAPI(API):
     def post(self, ident):
         enabled = current_app.config.get('HARVEST_ENABLE_MANUAL_RUN')
         if not enabled:
-            api.abort(400, 'Cannot run source manually. Please schedule the source instead.')
+            api.abort(400, 'Cannot run source manually. Please contact the platform if you need to reschedule the harvester.')
 
         source: HarvestSource = actions.get_source(ident)
         OwnablePermission(source).test()
