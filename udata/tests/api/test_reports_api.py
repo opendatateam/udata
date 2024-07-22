@@ -1,4 +1,5 @@
 from flask import url_for
+from mongoengine.base.datastructures import LazyReference
 
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
@@ -10,7 +11,6 @@ from udata.core.reports.constants import (
 from udata.core.reports.models import Report
 from udata.i18n import gettext as _
 
-from mongoengine.base.datastructures import LazyReference
 from . import APITestCase
 
 
