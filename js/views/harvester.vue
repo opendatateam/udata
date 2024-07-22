@@ -1,6 +1,14 @@
 <template>
 <div>
 <layout :title="source.name || ''" :subtitle="source.backend || ''" :actions="actions" :badges="badges" >
+    <div slot="buttons">
+        <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-info" @click="run" v-if="can_run">
+                {{_('Run')}}
+            </button>
+        </div>
+    </div>
+
     <div class="alert alert-info" v-if="should_validate">
         <div class="btn-toolbar pull-right">
             <div class="btn-group">
@@ -39,7 +47,7 @@
 import HarvestSource from 'models/harvest/source';
 import HarvestJob from 'models/harvest/job';
 import ItemModal from 'components/harvest/item.vue';
-import Vue from 'vue';
+import {harvest_enable_manual_run} from "config";
 import Preview from 'components/harvest/preview.vue';
 import SourceWidget from 'components/harvest/source.vue';
 import JobWidget from 'components/harvest/job.vue';
@@ -58,6 +66,9 @@ export default {
         };
     },
     computed: {
+        can_run() {
+            return this.source && this.source.validation && this.source.validation.state === 'accepted' && harvest_enable_manual_run
+        },
         is_validation_pending() {
             return this.source && this.source.validation
                 && this.source.validation.state === 'pending';
@@ -111,6 +122,15 @@ export default {
         }
     },
     methods: {
+        run() {
+            this.source.run(() => {
+                this.$dispatch('notify', {
+                    autoclose: true,
+                    title: this._('Run requested'),
+                    details: this._('The run will soon appear in the list. You will need to reload the page to see it.')
+                });
+            })
+        },
         edit() {
             this.$go({name: 'harvester-edit', params: {oid: this.source.id}});
         },
