@@ -321,9 +321,11 @@ def patch(obj, request):
             elif isinstance(model_attribute, mongoengine.fields.ReferenceField):
                 value = wrap_primary_key(key, model_attribute, value)
             elif isinstance(
-                model_attribute, mongoengine.fields.GenericReferenceField
-            ) or isinstance(
-                model_attribute, mongoengine.fields.GenericLazyReferenceField
+                model_attribute,
+                (
+                    mongoengine.fields.GenericReferenceField,
+                    mongoengine.fields.GenericLazyReferenceField,
+                ),
             ):
                 value = wrap_primary_key(
                     key,
@@ -375,8 +377,12 @@ def wrap_primary_key(
 
     # GenericReferenceField only accepts document (not dbref / objectid)
     if isinstance(
-        foreign_field, mongoengine.fields.GenericReferenceField
-    ) or isinstance(foreign_field, mongoengine.fields.GenericLazyReferenceField):
+        foreign_field,
+        (
+            mongoengine.fields.GenericReferenceField,
+            mongoengine.fields.GenericLazyReferenceField,
+        ),
+    ):
         return foreign_document
 
     if isinstance(id_field, mongoengine.fields.ObjectIdField):
