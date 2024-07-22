@@ -4,6 +4,9 @@ import pytest
 from datetime import datetime
 
 from flask import url_for
+from pytest_mock import MockerFixture
+
+from udata.tests.plugin import ApiClient
 
 from .. import actions
 
@@ -16,13 +19,14 @@ from udata.tests.helpers import (
 )
 
 from ..models import (
-    HarvestSource, VALIDATION_ACCEPTED, VALIDATION_REFUSED, VALIDATION_PENDING,
+    HarvestSource, VALIDATION_ACCEPTED, VALIDATION_REFUSED, VALIDATION_PENDING, HarvestSourceValidation,
 
 )
 from .factories import HarvestSourceFactory, MockBackendsMixin
 
 
 log = logging.getLogger(__name__)
+
 
 
 @pytest.mark.usefixtures('clean_db')
@@ -386,6 +390,59 @@ class HarvestAPITest(MockBackendsMixin):
         url = url_for('api.preview_harvest_source', ident=str(source.id))
         response = api.get(url)
         assert200(response)
+
+    @pytest.mark.options(HARVEST_ENABLE_MANUAL_RUN=True)
+    def test_run_source(self, mocker: MockerFixture, api: ApiClient):
+        launch = mocker.patch.object(actions.harvest, 'delay')
+        user = api.login()
+
+        source = HarvestSourceFactory(backend='factory', owner=user, validation=HarvestSourceValidation(state=VALIDATION_ACCEPTED))
+
+        url = url_for('api.run_harvest_source', ident=str(source.id))
+        response = api.post(url)
+        assert200(response)
+
+        launch.assert_called()
+
+    @pytest.mark.options(HARVEST_ENABLE_MANUAL_RUN=False)
+    def test_cannot_run_source_if_disabled(self, mocker: MockerFixture, api: ApiClient):
+        launch = mocker.patch.object(actions.harvest, 'delay')
+        user = api.login()
+
+        source = HarvestSourceFactory(backend='factory', owner=user, validation=HarvestSourceValidation(state=VALIDATION_ACCEPTED))
+
+        url = url_for('api.run_harvest_source', ident=str(source.id))
+        response = api.post(url)
+        assert400(response)
+
+        launch.assert_not_called()
+
+    @pytest.mark.options(HARVEST_ENABLE_MANUAL_RUN=True)
+    def test_cannot_run_source_if_not_owned(self, mocker: MockerFixture, api: ApiClient):
+        launch = mocker.patch.object(actions.harvest, 'delay')
+        other_user = UserFactory()
+        api.login()
+
+        source = HarvestSourceFactory(backend='factory', owner=other_user, validation=HarvestSourceValidation(state=VALIDATION_ACCEPTED))
+
+        url = url_for('api.run_harvest_source', ident=str(source.id))
+        response = api.post(url)
+        assert403(response)
+
+        launch.assert_not_called()
+
+    @pytest.mark.options(HARVEST_ENABLE_MANUAL_RUN=True)
+    def test_cannot_run_source_if_not_validated(self, mocker: MockerFixture, api: ApiClient):
+        launch = mocker.patch.object(actions.harvest, 'delay')
+        user = api.login()
+
+        source = HarvestSourceFactory(backend='factory', owner=user, validation=HarvestSourceValidation(state=VALIDATION_PENDING))
+
+        url = url_for('api.run_harvest_source', ident=str(source.id))
+        response = api.post(url)
+        assert400(response)
+
+        launch.assert_not_called()
 
     def test_source_from_config(self, api):
         api.login()
