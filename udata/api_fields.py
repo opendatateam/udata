@@ -1,6 +1,7 @@
 import flask_restx.fields as restx_fields
 import mongoengine
 import mongoengine.fields as mongo_fields
+from bson import ObjectId
 from flask_storage.mongo import ImageField as FlaskStorageImageField
 
 import udata.api.fields as custom_restx_fields
