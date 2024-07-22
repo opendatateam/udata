@@ -6,7 +6,9 @@ from udata.api import API, api, fields
 from udata.auth import admin_permission
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields
-from udata.core.reuse.models import Reuse
+from udata.models import Dataset, Reuse
+from udata.rdf import CONTEXT, RDF_EXTENSIONS, graph_response, negociate_content
+from udata.utils import multi_to_dict
 
 from .models import current_site
 from .rdf import build_catalog
