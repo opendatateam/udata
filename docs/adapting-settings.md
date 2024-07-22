@@ -213,6 +213,16 @@ SEARCH_SERVICE_API_URL = 'http://127.0.0.1:5000/api/1/'
 ```
 
 See [udata-search-service][udata-search-service] for more information on using a search service.
+You'll need a Kakfa broker for the search service to work. See `KAFKA_URI`.
+
+## Kafka configuration
+
+### KAFKA_URI
+
+**default**: None
+
+Optionnal Kafka URI to use. If specified, messages can be consumed and produced in udata workers.
+It is required for an independent search service.
 
 ## Spatial configuration
 
@@ -251,12 +261,6 @@ HANDLED_LEVELS = ('fr:commune', 'fr:departement', 'fr:region')
 **default**: `20`
 
 The number of items to fetch while previewing an harvest source
-
-### HARVEST_MAX_ITEMS
-
-**default**: `None`
-
-The max number of items to fetch when harvesting (development setting)
 
 ### HARVEST_DEFAULT_SCHEDULE
 
@@ -451,9 +455,9 @@ You can see the full options list in
 
 ### CACHE_TYPE
 
-**default**: `'flask_caching.backends.redis'`
+**default**: `'redis'`
 
-The cache type, which can be adjusted to your needs (_ex:_ `null`, `flask_caching.backends.memcached`)
+The cache type, which can be adjusted to your needs (_ex:_ `null`, `memcached`)
 
 ### CACHE_KEY_PREFIX
 
@@ -549,6 +553,14 @@ Whether or not discussions should be enabled on posts
 
 The default page size for post listing
 
+## Datasets configuration
+
+### DATASET_MAX_RESOURCES_UNCOLLAPSED
+
+**default** `6`
+
+Max number of resources to display uncollapsed in dataset view.
+
 ## Sentry configuration
 
 ### SENTRY_DSN
@@ -558,7 +570,7 @@ The default page size for post listing
 The Sentry DSN associated to this udata instance.
 If defined, the Sentry support is automatically activated.
 
-`sentry-sdk[flask]` needs to be installed for this to work. This requirement is specified in `requirements/sentry.pip`.
+`sentry-sdk[flask]` needs to be installed for this to work. This requirement is specified in `pyproject.toml`.
 
 ### SENTRY_TAGS
 

@@ -73,7 +73,7 @@ click-plugins==1.1.1
     # via celery
 click-repl==0.3.0
     # via celery
-cryptography==2.8
+cryptography==42.0.8
     # via
     #   -r requirements/install.in
     #   authlib
