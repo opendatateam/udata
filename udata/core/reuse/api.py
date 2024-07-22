@@ -1,9 +1,9 @@
 from datetime import datetime
 
+import mongoengine
 from bson.objectid import ObjectId
 from flask import request
 from flask_login import current_user
-import mongoengine
 
 from udata.api import API, api, errors
 from udata.api.parsers import ModelApiParser
@@ -22,7 +22,6 @@ from udata.models import Dataset
 from udata.utils import id_or_404
 
 from .api_fields import (
-    reuse_type_fields,
     reuse_suggestion_fields,
     reuse_topic_fields,
     reuse_type_fields,
@@ -95,7 +94,7 @@ reuse_parser = ReuseApiParser()
 
 @ns.route("/", endpoint="reuses")
 class ReuseListAPI(API):
-    @api.doc('list_reuses')
+    @api.doc("list_reuses")
     @api.expect(Reuse.__index_parser__)
     @api.marshal_with(Reuse.__page_fields__)
     def get(self):
@@ -104,9 +103,9 @@ class ReuseListAPI(API):
         return Reuse.apply_sort_filters_and_pagination(query)
 
     @api.secure
-    @api.doc('create_reuse')
+    @api.doc("create_reuse")
     @api.expect(Reuse.__write_fields__)
-    @api.response(400, 'Validation error')
+    @api.response(400, "Validation error")
     @api.marshal_with(Reuse.__read_fields__, code=201)
     def post(self):
         reuse = patch(Reuse(), request)
@@ -126,7 +125,7 @@ class ReuseListAPI(API):
 @api.response(404, "Reuse not found")
 @api.response(410, "Reuse has been deleted")
 class ReuseAPI(API):
-    @api.doc('get_reuse')
+    @api.doc("get_reuse")
     @api.marshal_with(Reuse.__read_fields__)
     def get(self, reuse):
         """Fetch a given reuse"""
@@ -135,7 +134,7 @@ class ReuseAPI(API):
         return reuse
 
     @api.secure
-    @api.doc('update_reuse')
+    @api.doc("update_reuse")
     @api.expect(Reuse.__write_fields__)
     @api.marshal_with(Reuse.__read_fields__)
     @api.response(400, errors.VALIDATION_ERROR)
@@ -167,7 +166,7 @@ class ReuseDatasetsAPI(API):
     @api.secure
     @api.doc("reuse_add_dataset", **common_doc)
     @api.expect(dataset_ref_fields)
-    @api.response(200, 'The dataset is already present', Reuse.__read_fields__)
+    @api.response(200, "The dataset is already present", Reuse.__read_fields__)
     @api.marshal_with(Reuse.__read_fields__, code=201)
     def post(self, reuse):
         """Add a dataset to a given reuse"""

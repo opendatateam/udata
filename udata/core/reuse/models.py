@@ -2,15 +2,14 @@ from blinker import Signal
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
-from udata.core.dataset.api_fields import dataset_fields
 from udata.api_fields import field, function_field, generate_fields
+from udata.core.dataset.api_fields import dataset_fields
 from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE
-from udata.core.storages import images, default_image_basename
+from udata.core.storages import default_image_basename, images
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.models import db, BadgeMixin, WithMetrics
+from udata.models import BadgeMixin, WithMetrics, db
 from udata.mongo.errors import FieldValidationError
-from udata.utils import hash_url
 from udata.uris import endpoint_for
 from udata.utils import hash_url
 
@@ -26,10 +25,12 @@ class ReuseQuerySet(OwnedQuerySet):
     def hidden(self):
         return self(db.Q(private=True) | db.Q(datasets__0__exists=False) | db.Q(deleted__ne=None))
 
+
 def check_url_does_not_exists(url):
-    '''Ensure a reuse URL is not yet registered'''
+    """Ensure a reuse URL is not yet registered"""
     if url and Reuse.url_exists(url):
-        raise FieldValidationError(_('This URL is already registered'), field="url")
+        raise FieldValidationError(_("This URL is already registered"), field="url")
+
 
 @generate_fields(searchable=True)
 class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
@@ -39,7 +40,9 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
         show_as_ref=True,
     )
     slug = field(
-        db.SlugField(max_length=255, required=True, populate_from='title', update=True, follow=True),
+        db.SlugField(
+            max_length=255, required=True, populate_from="title", update=True, follow=True
+        ),
         readonly=True,
     )
     description = field(
@@ -58,27 +61,32 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
     urlhash = db.StringField(required=True, unique=True)
     image_url = db.StringField()
     image = field(
-        db.ImageField(fs=images, basename=default_image_basename, max_size=IMAGE_MAX_SIZE, thumbnails=IMAGE_SIZES),
+        db.ImageField(
+            fs=images,
+            basename=default_image_basename,
+            max_size=IMAGE_MAX_SIZE,
+            thumbnails=IMAGE_SIZES,
+        ),
         show_as_ref=True,
         thumbnail_info={
-            'size': BIGGEST_IMAGE_SIZE,
+            "size": BIGGEST_IMAGE_SIZE,
         },
     )
     datasets = field(
         db.ListField(
             field(
-                db.ReferenceField('Dataset', reverse_delete_rule=db.PULL),
+                db.ReferenceField("Dataset", reverse_delete_rule=db.PULL),
                 nested_fields=dataset_fields,
             ),
         ),
         filterable={
-            'key': 'dataset',
+            "key": "dataset",
         },
     )
     tags = field(
         db.TagListField(),
         filterable={
-            'key': 'tag',
+            "key": "tag",
         },
     )
     topic = field(
@@ -164,11 +172,13 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
 
     @function_field(description="Link to the API endpoint for this reuse", show_as_ref=True)
     def uri(self):
-        return endpoint_for('api.reuse', reuse=self, _external=True)
+        return endpoint_for("api.reuse", reuse=self, _external=True)
 
     @function_field(description="Link to the udata web page for this reuse", show_as_ref=True)
     def page(self):
-        return endpoint_for('reuses.show', reuse=self, _external=True, fallback_endpoint='api.reuse')
+        return endpoint_for(
+            "reuses.show", reuse=self, _external=True, fallback_endpoint="api.reuse"
+        )
 
     @property
     def is_visible(self):

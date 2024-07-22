@@ -100,7 +100,7 @@ class AvatarAPI(API):
 @me.route("/reuses/", endpoint="my_reuses")
 class MyReusesAPI(API):
     @api.secure
-    @api.doc('my_reuses')
+    @api.doc("my_reuses")
     @api.marshal_list_with(Reuse.__read_fields__)
     def get(self):
         """List all my reuses (including private ones)"""

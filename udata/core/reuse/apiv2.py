@@ -1,14 +1,14 @@
 from flask import request
 
 from udata import search
-from udata.api import apiv2, API
+from udata.api import API, apiv2
 from udata.core.reuse.models import Reuse
 from udata.utils import multi_to_dict
 
 from .search import ReuseSearch
 
-apiv2.inherit('ReusePage', Reuse.__page_fields__)
-apiv2.inherit('Reuse (read)', Reuse.__read_fields__)
+apiv2.inherit("ReusePage", Reuse.__page_fields__)
+apiv2.inherit("Reuse (read)", Reuse.__read_fields__)
 
 ns = apiv2.namespace("reuses", "Reuse related operations")
 

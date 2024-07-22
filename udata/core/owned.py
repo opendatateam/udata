@@ -26,10 +26,16 @@ class OwnedQuerySet(UDataQuerySet):
 
 
 def check_owner_is_current_user(owner):
-    from udata.auth import current_user, admin_permission
+    from udata.auth import admin_permission, current_user
 
-    if current_user.is_authenticated and owner and not admin_permission and current_user.id != owner.id:
-        raise FieldValidationError(_('You can only set yourself as owner'), field="owner")
+    if (
+        current_user.is_authenticated
+        and owner
+        and not admin_permission
+        and current_user.id != owner.id
+    ):
+        raise FieldValidationError(_("You can only set yourself as owner"), field="owner")
+
 
 def check_organization_is_valid_for_current_user(organization):
     from udata.auth import current_user

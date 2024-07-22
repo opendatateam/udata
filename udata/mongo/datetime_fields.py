@@ -57,12 +57,14 @@ class DateRange(EmbeddedDocument):
 
 class Datetimed(object):
     created_at = field(
-        DateTimeField(verbose_name=_('Creation date'), default=datetime.utcnow, required=True),
+        DateTimeField(verbose_name=_("Creation date"), default=datetime.utcnow, required=True),
         sortable=True,
         readonly=True,
     )
     last_modified = field(
-        DateTimeField(verbose_name=_('Last modification date'), default=datetime.utcnow, required=True),
+        DateTimeField(
+            verbose_name=_("Last modification date"), default=datetime.utcnow, required=True
+        ),
         sortable=True,
         readonly=True,
     )

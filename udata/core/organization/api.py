@@ -460,7 +460,7 @@ class OrgDatasetsAPI(API):
 
 @ns.route("/<org:org>/reuses/", endpoint="org_reuses")
 class OrgReusesAPI(API):
-    @api.doc('list_organization_reuses')
+    @api.doc("list_organization_reuses")
     @api.marshal_list_with(Reuse.__read_fields__)
     def get(self, org):
         """List organization reuses (including private ones when member)"""

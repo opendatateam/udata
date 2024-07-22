@@ -8,10 +8,13 @@ from .constants import IMAGE_SIZES, REUSE_TOPICS, REUSE_TYPES
 
 BIGGEST_IMAGE_SIZE = IMAGE_SIZES[0]
 
-reuse_type_fields = api.model('ReuseType', {
-    'id': fields.String(description='The reuse type identifier'),
-    'label': fields.String(description='The reuse type display name')
-})
+reuse_type_fields = api.model(
+    "ReuseType",
+    {
+        "id": fields.String(description="The reuse type identifier"),
+        "label": fields.String(description="The reuse type display name"),
+    },
+)
 
 
 reuse_suggestion_fields = api.model(

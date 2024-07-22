@@ -4,7 +4,6 @@ from udata.api import API, api, fields
 from udata.auth import admin_permission
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.reuse.models import Reuse
-from udata.core.user.api_fields import user_ref_fields
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
@@ -30,7 +29,7 @@ post_fields = api.model(
         "credit_url": fields.String(description="An optional link associated to the credits"),
         "tags": fields.List(fields.String, description="Some keywords to help in search"),
         "datasets": fields.List(fields.Nested(dataset_fields), description="The post datasets"),
-        "reuses": fields.List(fields.Nested(reuse_fields), description="The post reuses"),
+        "reuses": fields.List(fields.Nested(Reuse.__read_fields__), description="The post reuses"),
         "owner": fields.Nested(
             user_ref_fields, description="The owner user", readonly=True, allow_null=True
         ),
@@ -51,55 +50,10 @@ post_fields = api.model(
             fallback_endpoint="api.post",
         ),
     },
-    mask="*,datasets{id,title,acronym,uri,page},reuses{id,title,image,image_thumbnail,uri,page}",
+    mask="*,datasets{id,title,acronym,uri,page},reuses{id,title,image,uri,page}",
 )
 
-from .models import Post
-from .forms import PostForm
-
-ns = api.namespace('posts', 'Posts related operations')
-
-post_fields = api.model('Post', {
-    'id': fields.String(description='The post identifier'),
-    'name': fields.String(description='The post name', required=True),
-    'slug': fields.String(
-        description='The post permalink string', readonly=True),
-    'headline': fields.String(description='The post headline', required=True),
-    'content': fields.Markdown(
-        description='The post content in Markdown', required=True),
-
-    'image': fields.ImageField(description='The post image', readonly=True),
-    'credit_to': fields.String(
-        description='An optional credit line (associated to the image)'),
-    'credit_url': fields.String(
-        description='An optional link associated to the credits'),
-
-    'tags': fields.List(
-        fields.String, description='Some keywords to help in search'),
-    'datasets': fields.List(
-        fields.Nested(dataset_fields), description='The post datasets'),
-    'reuses': fields.List(
-        fields.Nested(Reuse.__read_fields__), description='The post reuses'),
-
-    'owner': fields.Nested(
-        user_ref_fields, description='The owner user',
-        readonly=True, allow_null=True),
-    'created_at': fields.ISODateTime(
-        description='The post creation date', readonly=True),
-    'last_modified': fields.ISODateTime(
-        description='The post last modification date', readonly=True),
-    'published': fields.ISODateTime(
-        description='The post publication date', readonly=True),
-    'body_type': fields.String(description='HTML or markdown body type', default='markdown'),
-    'uri': fields.UrlFor(
-        'api.post', lambda o: {'post': o},
-        description='The post API URI', readonly=True),
-    'page': fields.UrlFor(
-        'posts.show', lambda o: {'post': o},
-        description='The post page URL', readonly=True, fallback_endpoint='api.post'),
-}, mask='*,datasets{id,title,acronym,uri,page},reuses{id,title,image,uri,page}')
-
-post_page_fields = api.model('PostPage', fields.pager(post_fields))
+post_page_fields = api.model("PostPage", fields.pager(post_fields))
 
 parser = api.page_parser()
 

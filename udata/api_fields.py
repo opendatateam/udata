@@ -1,17 +1,15 @@
-from udata.api import api, base_reference
-
 import flask_restx.fields as restx_fields
 import mongoengine
 import mongoengine.fields as mongo_fields
 from flask_storage.mongo import ImageField as FlaskStorageImageField
 
 import udata.api.fields as custom_restx_fields
-from udata.api import api
+from udata.api import api, base_reference
 from udata.mongo.errors import FieldValidationError
 
 
 def convert_db_to_field(key, field, info):
-    '''
+    """
     This function maps a Mongo field to a Flask RestX field.
     Most of the types are a simple 1-to-1 mapping except lists and references that requires
     more work.
@@ -20,7 +18,7 @@ def convert_db_to_field(key, field, info):
     In the first part of the function we save the RestX constructor as a lambda because we need to call it with the
     params. Since merging the params involve a litte bit of work (merging default params with read/write params and then with
     user-supplied overrides, setting the readonly flag…), it's easier to have do this one time at the end of the function.
-    '''
+    """
     params = {}
     params["required"] = field.required
 
@@ -36,10 +34,12 @@ def convert_db_to_field(key, field, info):
         # is always good enough.
         return info.get("convert_to"), info.get("convert_to")
     elif isinstance(field, mongo_fields.StringField):
-        constructor = custom_restx_fields.Markdown if info.get('markdown', False)  else restx_fields.String
-        params['min_length'] = field.min_length
-        params['max_length'] = field.max_length
-        params['enum'] = field.choices
+        constructor = (
+            custom_restx_fields.Markdown if info.get("markdown", False) else restx_fields.String
+        )
+        params["min_length"] = field.min_length
+        params["max_length"] = field.max_length
+        params["enum"] = field.choices
     elif isinstance(field, mongo_fields.ObjectIdField):
         constructor = restx_fields.String
     elif isinstance(field, mongo_fields.FloatField):
@@ -53,15 +53,15 @@ def convert_db_to_field(key, field, info):
     elif isinstance(field, mongo_fields.DictField):
         constructor = restx_fields.Raw
     elif isinstance(field, mongo_fields.ImageField) or isinstance(field, FlaskStorageImageField):
-        size = info.get('size', None)
+        size = info.get("size", None)
         if size:
-            params['description'] = f"URL of the cropped and squared image ({size}x{size})"
+            params["description"] = f"URL of the cropped and squared image ({size}x{size})"
         else:
-            params['description'] = f"URL of the image"
+            params["description"] = f"URL of the image"
 
-        if info.get('is_thumbnail', False):
+        if info.get("is_thumbnail", False):
             constructor_read = custom_restx_fields.ImageField
-            write_params['read_only'] = True
+            write_params["read_only"] = True
         else:
             constructor = custom_restx_fields.ImageField
 
@@ -71,9 +71,11 @@ def convert_db_to_field(key, field, info):
         # There is three level of information, from most important to least
         #     1. `inner_field_info` inside `__additional_field_info__` on the parent
         #     2. `__additional_field_info__` of the inner field
-        #     3. `__additional_field_info__` of the parent 
-        inner_info = getattr(field.field, '__additional_field_info__', {})
-        field_read, field_write = convert_db_to_field(f"{key}.inner", field.field, { **info, **inner_info, **info.get('inner_field_info', {}) })
+        #     3. `__additional_field_info__` of the parent
+        inner_info = getattr(field.field, "__additional_field_info__", {})
+        field_read, field_write = convert_db_to_field(
+            f"{key}.inner", field.field, {**info, **inner_info, **info.get("inner_field_info", {})}
+        )
         constructor_read = lambda **kwargs: restx_fields.List(field_read, **kwargs)
         constructor_write = lambda **kwargs: restx_fields.List(field_write, **kwargs)
     elif isinstance(field, mongo_fields.ReferenceField):
@@ -108,12 +110,12 @@ def convert_db_to_field(key, field, info):
 
     else:
         raise ValueError(f"Unsupported MongoEngine field type {field.__class__}")
-    
+
     read_params = {**params, **read_params, **info}
     write_params = {**params, **write_params, **info}
 
     read = constructor_read(**read_params) if constructor_read else constructor(**read_params)
-    if write_params.get('readonly', False) or (constructor_write is None and constructor is None):
+    if write_params.get("readonly", False) or (constructor_write is None and constructor is None):
         write = None
     else:
         write = (
@@ -121,19 +123,26 @@ def convert_db_to_field(key, field, info):
         )
     return read, write
 
+
 def get_fields(cls):
-    '''
+    """
     Returns all the exposed fields of the class (fields decorated with `field()`)
     It also expends image fields to add thumbnail fields.
-    '''
+    """
     for key, field in cls._fields.items():
-        info: dict | None = getattr(field, '__additional_field_info__', None)
-        if info is None: continue 
+        info: dict | None = getattr(field, "__additional_field_info__", None)
+        if info is None:
+            continue
 
         yield key, field, info
 
         if isinstance(field, mongo_fields.ImageField) or isinstance(field, FlaskStorageImageField):
-            yield f"{key}_thumbnail", field, { **info, **info.get('thumbnail_info', {}), 'is_thumbnail': True }
+            yield (
+                f"{key}_thumbnail",
+                field,
+                {**info, **info.get("thumbnail_info", {}), "is_thumbnail": True},
+            )
+
 
 def generate_fields(**kwargs):
     """
@@ -148,10 +157,10 @@ def generate_fields(**kwargs):
         sortables = []
         filterables = []
 
-        read_fields['id'] = restx_fields.String(required=True, readonly=True)
+        read_fields["id"] = restx_fields.String(required=True, readonly=True)
 
         for key, field, info in get_fields(cls):
-            if info.get('sortable', False):
+            if info.get("sortable", False):
                 sortables.append(key)
 
             filterable = info.get("filterable", None)
@@ -169,10 +178,10 @@ def generate_fields(**kwargs):
                     ):
                         filterable["constraints"].append("objectid")
 
-                if 'type' not in filterable:
-                    filterable['type'] = str
+                if "type" not in filterable:
+                    filterable["type"] = str
                     if isinstance(field, mongo_fields.BooleanField):
-                        filterable['type'] = bool
+                        filterable["type"] = bool
 
                 # We may add more information later here:
                 # - type of mongo query to execute (right now only simple =)
@@ -186,7 +195,7 @@ def generate_fields(**kwargs):
             if write:
                 write_fields[key] = write
 
-            if read and info.get('show_as_ref', False):
+            if read and info.get("show_as_ref", False):
                 ref_fields[key] = read
 
         # The goal of this loop is to fetch all functions (getters) of the class
@@ -217,10 +226,11 @@ def generate_fields(**kwargs):
                 """
                 return lambda o: method(o)
 
-            read_fields[method_name] = restx_fields.String(attribute=make_lambda(method), **{ 'readonly':True, **info })
-            if info.get('show_as_ref', False):
+            read_fields[method_name] = restx_fields.String(
+                attribute=make_lambda(method), **{"readonly": True, **info}
+            )
+            if info.get("show_as_ref", False):
                 ref_fields[key] = read_fields[method_name]
-
 
         cls.__read_fields__ = api.model(f"{cls.__name__} (read)", read_fields, **kwargs)
         cls.__write_fields__ = api.model(f"{cls.__name__} (write)", write_fields, **kwargs)
@@ -258,12 +268,12 @@ def generate_fields(**kwargs):
                 help="The field (and direction) on which sorting apply",
             )
 
-        searchable = kwargs.pop('searchable', False)
+        searchable = kwargs.pop("searchable", False)
         if searchable:
-            parser.add_argument('q', type=str, location='args')
+            parser.add_argument("q", type=str, location="args")
 
         for filterable in filterables:
-            parser.add_argument(filterable['key'], type=filterable['type'], location='args')
+            parser.add_argument(filterable["key"], type=filterable["type"], location="args")
 
         cls.__index_parser__ = parser
 
@@ -273,8 +283,8 @@ def generate_fields(**kwargs):
             if sortables and args["sort"]:
                 base_query = base_query.order_by(args["sort"])
 
-            if searchable and args.get('q'):
-                phrase_query = ' '.join([f'"{elem}"' for elem in args['q'].split(' ')])
+            if searchable and args.get("q"):
+                phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
                 base_query = base_query.search_text(phrase_query)
 
             for filterable in filterables:
@@ -340,13 +350,14 @@ def patch(obj, request):
 
             # `check` field attribute allows to do validation from the request before setting
             # the attribute
-            check = info.get('check', None)
+            check = info.get("check", None)
             if check is not None and value != getattr(obj, key):
-                check(**{key: value}) # TODO add other model attributes in function parameters
+                check(**{key: value})  # TODO add other model attributes in function parameters
 
             setattr(obj, key, value)
 
     return obj
+
 
 def patch_and_save(obj, request):
     obj = patch(obj, request)
@@ -357,6 +368,7 @@ def patch_and_save(obj, request):
         api.abort(400, e.message)
 
     return obj
+
 
 def wrap_primary_key(field_name: str, foreign_field: mongoengine.fields.ReferenceField, value: str):
     """

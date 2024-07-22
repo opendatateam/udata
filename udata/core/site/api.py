@@ -64,8 +64,8 @@ class SiteHomeReusesAPI(API):
         return current_site.settings.home_reuses
 
     @api.secure(admin_permission)
-    @api.doc('set_home_reuses')
-    @api.expect(([str], 'Reuse IDs to put in homepage'))
+    @api.doc("set_home_reuses")
+    @api.expect(([str], "Reuse IDs to put in homepage"))
     @api.marshal_list_with(Reuse.__read_fields__)
     def put(self):
         """Set the homepage reuses editorial selection"""
