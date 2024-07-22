@@ -1,5 +1,3 @@
-from udata.mongo.engine import db
-from udata.api import api
 import flask_restx.fields as restx_fields
 import mongoengine
 import mongoengine.fields as mongo_fields
@@ -7,6 +5,7 @@ from bson import ObjectId
 
 import udata.api.fields as custom_restx_fields
 from udata.api import api
+from udata.mongo.engine import db
 from udata.mongo.errors import FieldValidationError
 
 lazy_reference = api.model(
@@ -70,8 +69,8 @@ def convert_db_to_field(key, field, info={}):
         )
         constructor_read = lambda **kwargs: restx_fields.List(field_read, **kwargs)
         constructor_write = lambda **kwargs: restx_fields.List(field_write, **kwargs)
-    elif isinstance(field, mongo_fields.GenericReferenceField) or isinstance(
-        field, mongoengine.fields.GenericLazyReferenceField
+    elif isinstance(
+        field, (mongo_fields.GenericReferenceField, mongoengine.fields.GenericLazyReferenceField)
     ):
         constructor = lambda **kwargs: restx_fields.Nested(lazy_reference, **kwargs)
     elif isinstance(field, mongo_fields.ReferenceField):
