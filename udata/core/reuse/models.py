@@ -4,6 +4,7 @@ from werkzeug.utils import cached_property
 
 from udata.api_fields import field, function_field, generate_fields
 from udata.core.dataset.api_fields import dataset_fields
+from udata.core.owned import Owned, OwnedQuerySet
 from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE
 from udata.core.storages import default_image_basename, images
 from udata.frontend.markdown import mdstrip

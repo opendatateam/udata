@@ -8,6 +8,7 @@ from udata.core import storages
 from udata.core.dataset.api_fields import community_resource_fields, dataset_fields
 from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields
+from udata.core.followers.api import FollowAPI
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
