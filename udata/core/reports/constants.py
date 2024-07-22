@@ -24,7 +24,5 @@ def reports_reasons_translations() -> list:
     ]
 
 
-REPORT_REASONS_CHOICES: list[str] = [
-    item["value"] for item in reports_reasons_translations()
-]
+REPORT_REASONS_CHOICES: list[str] = [item["value"] for item in reports_reasons_translations()]
 REPORTABLE_MODELS = [Dataset]

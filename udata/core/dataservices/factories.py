@@ -9,24 +9,25 @@ class HarvestMetadataFactory(ModelFactory):
     class Meta:
         model = HarvestMetadata
 
-    backend = 'csw-dcat'
-    domain = 'data.gouv.fr'
+    backend = "csw-dcat"
+    domain = "data.gouv.fr"
 
-    source_id = factory.Faker('unique_string')
-    source_url = factory.Faker('url')
+    source_id = factory.Faker("unique_string")
+    source_url = factory.Faker("url")
 
-    remote_id = factory.Faker('unique_string')
-    remote_url = factory.Faker('url')
+    remote_id = factory.Faker("unique_string")
+    remote_url = factory.Faker("url")
 
-    uri = factory.Faker('url')
+    uri = factory.Faker("url")
+
 
 class DataserviceFactory(ModelFactory):
     class Meta:
         model = Dataservice
 
-    title = factory.Faker('sentence')
-    description = factory.Faker('text')
-    base_api_url = factory.Faker('url')
+    title = factory.Faker("sentence")
+    description = factory.Faker("text")
+    base_api_url = factory.Faker("url")
 
     class Params:
         org = factory.Trait(

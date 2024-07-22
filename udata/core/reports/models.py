@@ -20,12 +20,8 @@ class Report(db.Document):
         allow_null=True,
     )
 
-    object_type = field(
-        db.StringField(choices=[m.__name__ for m in REPORTABLE_MODELS])
-    )
-    object_id = field(
-        db.ObjectIdField()
-    )
+    object_type = field(db.StringField(choices=[m.__name__ for m in REPORTABLE_MODELS]))
+    object_id = field(db.ObjectIdField())
     object_deleted_at = field(
         db.DateTimeField(),
         allow_null=True,
@@ -47,10 +43,14 @@ class Report(db.Document):
     @classmethod
     def mark_as_deleted_soft_delete(cls, sender, document, **kwargs):
         if document.deleted:
-            Report.objects(object_type=sender.__name__, object_id=document.id, object_deleted_at=None).update(object_deleted_at=datetime.utcnow)
-    
+            Report.objects(
+                object_type=sender.__name__, object_id=document.id, object_deleted_at=None
+            ).update(object_deleted_at=datetime.utcnow)
+
     def mark_as_deleted_hard_delete(cls, document, **kwargs):
-        Report.objects(object_type=document.__class__.__name__, object_id=document.id, object_deleted_at=None).update(object_deleted_at=datetime.utcnow)
+        Report.objects(
+            object_type=document.__class__.__name__, object_id=document.id, object_deleted_at=None
+        ).update(object_deleted_at=datetime.utcnow)
 
 
 for model in REPORTABLE_MODELS:

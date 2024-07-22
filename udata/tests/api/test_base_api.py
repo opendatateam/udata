@@ -1,26 +1,27 @@
 from flask import url_for
 
-from udata.api import api, API
+from udata.api import API, api
 from udata.forms import Form, fields
 
 from . import APITestCase
 
-ns = api.namespace('fake-ns', 'A Fake namespace')
+ns = api.namespace("fake-ns", "A Fake namespace")
 
 
-@ns.route('/options', endpoint='fake-options')
+@ns.route("/options", endpoint="fake-options")
 class FakeAPI(API):
     def get(self):
-        return {'success': True}
+        return {"success": True}
 
 
-@ns.route('/fake-form', endpoint='fake-form')
+@ns.route("/fake-form", endpoint="fake-form")
 class FakeFormAPI(API):
     def post(self):
         class FakeForm(Form):
             pass
+
         api.validate(FakeForm)
-        return {'success': True}
+        return {"success": True}
 
 
 class OptionsCORSTest(APITestCase):
@@ -35,7 +36,7 @@ class OptionsCORSTest(APITestCase):
         self.assertEqual(response.headers['Access-Control-Allow-Origin'], 'http://localhost')
 
         response = self.client.options(
-            url_for('api.fake-options'),
+            url_for("api.fake-options"),
             headers={
                 'Origin': 'http://localhost',
                 'Access-Control-Request-Method': 'GET',
@@ -50,17 +51,14 @@ class OptionsCORSTest(APITestCase):
 
 class JSONFormRequestTest(APITestCase):
     def test_non_json_content_type(self):
-        '''We expect JSON requests for forms and enforce it'''
-        response = self.client.post(url_for('api.fake-form'), {}, headers={
-            'Content-Type': 'multipart/form-data'
-        })
-        self.assert400(response)
-        self.assertEqual(
-            response.json,
-            {'errors': {'Content-Type': 'expecting application/json'}}
+        """We expect JSON requests for forms and enforce it"""
+        response = self.client.post(
+            url_for("api.fake-form"), {}, headers={"Content-Type": "multipart/form-data"}
         )
+        self.assert400(response)
+        self.assertEqual(response.json, {"errors": {"Content-Type": "expecting application/json"}})
 
     def test_json_content_type(self):
-        '''We expect JSON requests for forms and enforce it'''
-        response = self.post(url_for('api.fake-form'), {})
+        """We expect JSON requests for forms and enforce it"""
+        response = self.post(url_for("api.fake-form"), {})
         self.assert200(response)

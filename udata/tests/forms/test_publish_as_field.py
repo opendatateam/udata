@@ -1,12 +1,11 @@
 from bson import ObjectId
-
 from werkzeug.datastructures import MultiDict
 
 from udata.auth import login_user
-from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.forms import ModelForm, fields
-from udata.models import db, User, Organization, Member
+from udata.models import Member, Organization, User, db
 from udata.tests import TestCase
 
 
@@ -86,14 +85,12 @@ class PublishFieldTest(TestCase):
     def test_with_valid_organization(self):
         Ownable, OwnableForm = self.factory()
         user = UserFactory()
-        member = Member(user=user, role='editor')
+        member = Member(user=user, role="editor")
         org = OrganizationFactory(members=[member])
 
         login_user(user)
 
-        form = OwnableForm(MultiDict({
-            'organization': str(org.id)
-        }))
+        form = OwnableForm(MultiDict({"organization": str(org.id)}))
 
         self.assertEqual(form.owner.data, user)
         self.assertEqual(form.organization.data, org)
@@ -112,15 +109,12 @@ class PublishFieldTest(TestCase):
     def test_organization_over_owner(self):
         Ownable, OwnableForm = self.factory()
         user = UserFactory()
-        member = Member(user=user, role='editor')
+        member = Member(user=user, role="editor")
         org = OrganizationFactory(members=[member])
 
         login_user(user)
 
-        form = OwnableForm(MultiDict({
-            'owner': str(user.id),
-            'organization': str(org.id)
-        }))
+        form = OwnableForm(MultiDict({"owner": str(user.id), "organization": str(org.id)}))
 
         self.assertEqual(form.owner.data, user)
         self.assertEqual(form.organization.data, org)
@@ -139,14 +133,12 @@ class PublishFieldTest(TestCase):
     def test_with_valid_organization_from_json(self):
         Ownable, OwnableForm = self.factory()
         user = UserFactory()
-        member = Member(user=user, role='editor')
+        member = Member(user=user, role="editor")
         org = OrganizationFactory(members=[member])
 
         login_user(user)
 
-        form = OwnableForm.from_json({
-            'organization': str(org.id)
-        })
+        form = OwnableForm.from_json({"organization": str(org.id)})
 
         self.assertEqual(form.owner.data, user)
         self.assertEqual(form.organization.data, org)
@@ -165,14 +157,12 @@ class PublishFieldTest(TestCase):
     def test_with_organization_object_from_json(self):
         Ownable, OwnableForm = self.factory()
         user = UserFactory()
-        member = Member(user=user, role='editor')
+        member = Member(user=user, role="editor")
         org = OrganizationFactory(members=[member])
 
         login_user(user)
 
-        form = OwnableForm.from_json({
-            'organization': {'id': str(org.id)}
-        })
+        form = OwnableForm.from_json({"organization": {"id": str(org.id)}})
 
         self.assertEqual(form.organization.data, org)
 
@@ -187,36 +177,29 @@ class PublishFieldTest(TestCase):
     def test_with_invalid_data(self):
         Ownable, OwnableForm = self.factory()
 
-        form = OwnableForm(MultiDict({
-            'organization': str('wrongwith12c')
-        }))
+        form = OwnableForm(MultiDict({"organization": str("wrongwith12c")}))
 
         form.validate()
-        self.assertIn('organization', form.errors)
-        self.assertEqual(len(form.errors['organization']), 1)
+        self.assertIn("organization", form.errors)
+        self.assertEqual(len(form.errors["organization"]), 1)
 
     def test_with_organization_not_found(self):
         Ownable, OwnableForm = self.factory()
 
-        form = OwnableForm(MultiDict({
-            'organization': str(ObjectId())
-        }))
+        form = OwnableForm(MultiDict({"organization": str(ObjectId())}))
 
         form.validate()
-        self.assertIn('organization', form.errors)
-        self.assertEqual(len(form.errors['organization']), 1)
+        self.assertIn("organization", form.errors)
+        self.assertEqual(len(form.errors["organization"]), 1)
 
     def test_with_initial_and_both_member(self):
         Ownable, OwnableForm = self.factory()
         user = UserFactory()
-        org = OrganizationFactory(members=[Member(user=user, role='editor')])
-        neworg = OrganizationFactory(
-            members=[Member(user=user, role='editor')])
+        org = OrganizationFactory(members=[Member(user=user, role="editor")])
+        neworg = OrganizationFactory(members=[Member(user=user, role="editor")])
         ownable = Ownable(organization=org)
 
-        form = OwnableForm(MultiDict({
-            'organization': str(neworg.id)
-        }), obj=ownable)
+        form = OwnableForm(MultiDict({"organization": str(neworg.id)}), obj=ownable)
 
         self.assertEqual(form.organization.data, neworg)
 
@@ -231,65 +214,57 @@ class PublishFieldTest(TestCase):
     def test_with_initial_and_not_member(self):
         Ownable, OwnableForm = self.factory()
         user = UserFactory()
-        org = OrganizationFactory(members=[Member(user=user, role='editor')])
+        org = OrganizationFactory(members=[Member(user=user, role="editor")])
         neworg = OrganizationFactory()
         ownable = Ownable(organization=org)
 
-        form = OwnableForm(MultiDict({
-            'organization': str(neworg.id)
-        }), obj=ownable)
+        form = OwnableForm(MultiDict({"organization": str(neworg.id)}), obj=ownable)
 
         self.assertEqual(form.organization.data, neworg)
 
         login_user(user)
         form.validate()
-        self.assertIn('organization', form.errors)
-        self.assertEqual(len(form.errors['organization']), 1)
+        self.assertIn("organization", form.errors)
+        self.assertEqual(len(form.errors["organization"]), 1)
 
     def test_not_member(self):
         Ownable, OwnableForm = self.factory()
-        member = Member(user=UserFactory(), role='editor')
+        member = Member(user=UserFactory(), role="editor")
         org = OrganizationFactory(members=[member])
 
         login_user(UserFactory())
 
-        form = OwnableForm(MultiDict({
-            'organization': str(org.id)
-        }))
+        form = OwnableForm(MultiDict({"organization": str(org.id)}))
 
         self.assertEqual(form.organization.data, org)
 
         self.assertFalse(form.validate())
-        self.assertIn('organization', form.errors)
-        self.assertEqual(len(form.errors['organization']), 1)
+        self.assertIn("organization", form.errors)
+        self.assertEqual(len(form.errors["organization"]), 1)
 
     def test_no_user_logged_in_permission(self):
         Ownable, OwnableForm = self.factory()
-        member = Member(user=UserFactory(), role='editor')
+        member = Member(user=UserFactory(), role="editor")
         org = OrganizationFactory(members=[member])
 
-        form = OwnableForm(MultiDict({
-            'organization': str(org.id)
-        }))
+        form = OwnableForm(MultiDict({"organization": str(org.id)}))
 
         self.assertEqual(form.organization.data, org)
 
         self.assertFalse(form.validate())
-        self.assertIn('organization', form.errors)
-        self.assertEqual(len(form.errors['organization']), 1)
+        self.assertIn("organization", form.errors)
+        self.assertEqual(len(form.errors["organization"]), 1)
 
     def test_set_organization_if_permissions(self):
         Ownable, OwnableForm = self.factory()
         user = UserFactory()
-        member = Member(user=user, role='editor')
+        member = Member(user=user, role="editor")
         org = OrganizationFactory(members=[member])
         ownable = Ownable(owner=user)
 
         login_user(user)
 
-        form = OwnableForm(MultiDict({
-            'organization': str(org.id)
-        }), obj=ownable)
+        form = OwnableForm(MultiDict({"organization": str(org.id)}), obj=ownable)
 
         self.assertTrue(form.validate())
         self.assertEqual(form.errors, {})
@@ -306,9 +281,7 @@ class PublishFieldTest(TestCase):
 
         login_user(AdminFactory())
 
-        form = OwnableForm(MultiDict({
-            'owner': str(user.id)
-        }), obj=ownable)
+        form = OwnableForm(MultiDict({"owner": str(user.id)}), obj=ownable)
 
         self.assertEqual(form.owner.data, user)
         self.assertEqual(form.organization.data, org)
@@ -331,9 +304,7 @@ class PublishFieldTest(TestCase):
 
         login_user(AdminFactory())
 
-        form = OwnableForm(MultiDict({
-            'organization': str(org.id)
-        }), obj=ownable)
+        form = OwnableForm(MultiDict({"organization": str(org.id)}), obj=ownable)
 
         self.assertEqual(form.owner.data, user)
         self.assertEqual(form.organization.data, org)
@@ -351,7 +322,7 @@ class PublishFieldTest(TestCase):
     def test_with_initial_org_and_no_data_provided(self):
         Ownable, OwnableForm = self.factory()
         user = UserFactory()
-        org = OrganizationFactory(members=[Member(user=user, role='editor')])
+        org = OrganizationFactory(members=[Member(user=user, role="editor")])
         ownable = Ownable(organization=org)
 
         form = OwnableForm(MultiDict({}), obj=ownable)

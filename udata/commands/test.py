@@ -1,33 +1,33 @@
 import logging
 
-from . import cli, success, error, header
+from . import cli, error, header, success
 
 logger = logging.getLogger(__name__)
 
 
-@cli.group('test')
+@cli.group("test")
 def test():
-    '''Some commands for testing purpose'''
+    """Some commands for testing purpose"""
 
 
 @test.command()
 def log():
-    '''Test logging'''
-    header('header é')
-    success('success é')
-    error('error é')
-    error('error with string details é', 'ééé')
-    error('error with object details é', Exception('ééé'))
-    logger.debug('debug é')
-    logger.info('info é')
-    logger.info('info é with unicode interpolation %s', 'ééé')
-    logger.info('info é with interpolations %s %d %f', 'ééé', 10, .1)
-    logger.info('success é')
-    logger.info('info\nmulti\nlines é')
-    logger.warning('warning é')
-    logger.error('error é')
-    logger.critical('critical é')
+    """Test logging"""
+    header("header é")
+    success("success é")
+    error("error é")
+    error("error with string details é", "ééé")
+    error("error with object details é", Exception("ééé"))
+    logger.debug("debug é")
+    logger.info("info é")
+    logger.info("info é with unicode interpolation %s", "ééé")
+    logger.info("info é with interpolations %s %d %f", "ééé", 10, 0.1)
+    logger.info("success é")
+    logger.info("info\nmulti\nlines é")
+    logger.warning("warning é")
+    logger.error("error é")
+    logger.critical("critical é")
     try:
-        raise Exception('An exception é')
+        raise Exception("An exception é")
     except Exception:
-        logger.exception('exception é')
+        logger.exception("exception é")

@@ -48,6 +48,13 @@ export class HarvestSource extends Model {
             payload: data
         }, this.on_fetched, this.on_error(on_error));
     }
+
+    run(on_success) {
+        this.$api('harvest.run_harvest_source', { ident: this.id }, (data) => {
+            this.on_fetched(data);
+            on_success()
+        }, this.on_error(() => {}));
+    }
 }
 
 export default HarvestSource;
