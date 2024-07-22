@@ -1,7 +1,8 @@
-'''
+"""
 Remove Transfer db integrity problems
 ⚠️ long migration
-'''
+"""
+
 import logging
 
 import mongoengine
@@ -12,7 +13,7 @@ log = logging.getLogger(__name__)
 
 
 def migrate(db):
-    log.info('Processing Transfer objects.')
+    log.info("Processing Transfer objects.")
 
     transfers = Transfer.objects.no_cache().all()
 
@@ -26,4 +27,4 @@ def migrate(db):
             transfer.delete()
             count += 1
 
-    log.info(f'Completed, removed {count} Transfer objects')
+    log.info(f"Completed, removed {count} Transfer objects")

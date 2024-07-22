@@ -7,11 +7,12 @@ log = logging.getLogger(__name__)
 
 
 class AutoUUIDField(UUIDField):
-    '''
+    """
     An autopopulated UUID field.
-    '''
+    """
+
     def __init__(self, **kwargs):
-        kwargs.setdefault('binary', False)
+        kwargs.setdefault("binary", False)
         super(AutoUUIDField, self).__init__(**kwargs)
 
     def __set__(self, instance, value):

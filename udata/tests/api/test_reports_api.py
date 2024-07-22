@@ -1,9 +1,13 @@
 from flask import url_for
 
-from udata.core.dataset.factories import (DatasetFactory)
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
+from udata.core.reports.constants import (
+    REASON_ILLEGAL_CONTENT,
+    REASON_SPAM,
+    reports_reasons_translations,
+)
 from udata.core.reports.models import Report
-from udata.core.reports.constants import REASON_ILLEGAL_CONTENT, REASON_SPAM, reports_reasons_translations
 from udata.i18n import gettext as _
 
 from mongoengine.base.datastructures import LazyReference
@@ -14,9 +18,10 @@ class ReportsReasonsAPITest(APITestCase):
     modules = []
 
     def test_reports_reasons_api(self):
-        response = self.get(url_for('api.reports_reasons'))
+        response = self.get(url_for("api.reports_reasons"))
         self.assert200(response)
         self.assertEqual(response.json, reports_reasons_translations())
+
 
 class ReportsAPITest(APITestCase):
     modules = []
@@ -61,9 +66,9 @@ class ReportsAPITest(APITestCase):
         self.assertEqual(REASON_SPAM, reports[1].reason)
         self.assertEqual(user.id, reports[1].by.id)
 
-        response = self.delete(url_for('api.dataset', dataset=illegal_dataset))
+        response = self.delete(url_for("api.dataset", dataset=illegal_dataset))
         self.assert204(response)
-        
+
         reports[0].reload()
         self.assertEqual(Dataset, reports[0].subject.document_type)
         self.assertEqual(illegal_dataset.id, reports[0].subject.pk)
@@ -85,7 +90,7 @@ class ReportsAPITest(APITestCase):
         reports[1].reload()
         self.assertIsNotNone(reports[1].subject_deleted_at)
 
-        response = self.get(url_for('api.reports'))
+        response = self.get(url_for("api.reports"))
         self.assert200(response)
 
         reports = response.json['data']

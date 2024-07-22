@@ -1,17 +1,16 @@
 from datetime import datetime
 
-from udata.models import Reuse
-
 from udata.core.dataset import tasks as dataset_tasks
+from udata.core.dataset.factories import DatasetFactory
+from udata.core.discussions.factories import DiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
-from udata.core.dataset.factories import DatasetFactory
 from udata.core.user.factories import UserFactory
-from udata.core.discussions.factories import DiscussionFactory
 from udata.i18n import gettext as _
+from udata.models import Reuse
 from udata.tests.helpers import assert_emit
 
-from .. import TestCase, DBTestMixin
+from .. import DBTestMixin, TestCase
 
 
 class ReuseModelTest(TestCase, DBTestMixin):
@@ -39,8 +38,10 @@ class ReuseModelTest(TestCase, DBTestMixin):
         user = UserFactory()
         org = OrganizationFactory()
         reuses = [ReuseFactory(owner=user), ReuseFactory(organization=org)]
-        excluded = [ReuseFactory(owner=UserFactory()),
-                    ReuseFactory(organization=OrganizationFactory())]
+        excluded = [
+            ReuseFactory(owner=UserFactory()),
+            ReuseFactory(organization=OrganizationFactory()),
+        ]
 
         result = Reuse.objects.owned_by(org, user)
 
@@ -53,10 +54,10 @@ class ReuseModelTest(TestCase, DBTestMixin):
 
     def test_tags_normalized(self):
         user = UserFactory()
-        tags = [' one another!', ' one another!', 'This IS a "tag"…']
+        tags = [" one another!", " one another!", 'This IS a "tag"…']
         reuse = ReuseFactory(owner=user, tags=tags)
         self.assertEqual(len(reuse.tags), 2)
-        self.assertEqual(reuse.tags[1], 'this-is-a-tag')
+        self.assertEqual(reuse.tags[1], "this-is-a-tag")
 
     def test_send_on_delete(self):
         reuse = ReuseFactory()
@@ -72,18 +73,18 @@ class ReuseModelTest(TestCase, DBTestMixin):
         reuse.count_datasets()
         reuse.count_discussions()
 
-        assert reuse.get_metrics()['datasets'] == 1
-        assert reuse.get_metrics()['discussions'] == 1
+        assert reuse.get_metrics()["datasets"] == 1
+        assert reuse.get_metrics()["discussions"] == 1
 
         with assert_emit(Reuse.on_update):
             reuse.datasets.append(dataset)
             reuse.save()
 
         reuse.count_datasets()
-        assert reuse.get_metrics()['datasets'] == 2
+        assert reuse.get_metrics()["datasets"] == 2
 
         dataset.count_reuses()
-        assert dataset.get_metrics()['reuses'] == 1
+        assert dataset.get_metrics()["reuses"] == 1
 
         with assert_emit(Reuse.on_update):
             reuse.datasets.remove(dataset)
@@ -91,17 +92,17 @@ class ReuseModelTest(TestCase, DBTestMixin):
 
         dataset_tasks.update_datasets_reuses_metrics()
         dataset.reload()
-        assert dataset.get_metrics()['reuses'] == 0
+        assert dataset.get_metrics()["reuses"] == 0
 
     def test_reuse_type(self):
-        reuse = ReuseFactory(type='api')
-        self.assertEqual(reuse.type, 'api')
-        self.assertEqual(reuse.type_label, 'API')
+        reuse = ReuseFactory(type="api")
+        self.assertEqual(reuse.type, "api")
+        self.assertEqual(reuse.type_label, "API")
 
     def test_reuse_topic(self):
-        reuse = ReuseFactory(topic='health')
-        self.assertEqual(reuse.topic, 'health')
-        self.assertEqual(reuse.topic_label, _('Health'))
+        reuse = ReuseFactory(topic="health")
+        self.assertEqual(reuse.topic, "health")
+        self.assertEqual(reuse.topic_label, _("Health"))
 
     def test_reuse_without_private(self):
         reuse = ReuseFactory()
@@ -114,4 +115,3 @@ class ReuseModelTest(TestCase, DBTestMixin):
         reuse.private = True
         reuse.save()
         self.assertEqual(reuse.private, True)
-

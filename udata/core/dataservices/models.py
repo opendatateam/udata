@@ -1,13 +1,13 @@
 from datetime import datetime
+
+import udata.core.contact_point.api_fields as contact_api_fields
+import udata.core.dataset.api_fields as datasets_api_fields
 from udata.api_fields import field, function_field, generate_fields
 from udata.core.dataset.models import Dataset
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
-import udata.core.contact_point.api_fields as contact_api_fields
-import udata.core.dataset.api_fields as datasets_api_fields
 from udata.i18n import lazy_gettext as _
-
-from udata.models import db, Discussion, Follow
+from udata.models import Discussion, Follow, db
 from udata.uris import endpoint_for
 
 # "frequency"
@@ -19,7 +19,7 @@ from udata.uris import endpoint_for
 # "spatial"
 # "temporal_coverage"
 
-DATASERVICE_FORMATS = ['REST', 'WMS', 'WSL']
+DATASERVICE_FORMATS = ["REST", "WMS", "WSL"]
 
 
 class DataserviceQuerySet(OwnedQuerySet):
@@ -27,9 +27,8 @@ class DataserviceQuerySet(OwnedQuerySet):
         return self(archived_at=None, deleted_at=None, private=False)
 
     def hidden(self):
-        return self(db.Q(private=True) |
-                    db.Q(deleted_at__ne=None) |
-                    db.Q(archived_at__ne=None))
+        return self(db.Q(private=True) | db.Q(deleted_at__ne=None) | db.Q(archived_at__ne=None))
+
 
 @generate_fields()
 class HarvestMetadata(db.EmbeddedDocument):
@@ -43,7 +42,7 @@ class HarvestMetadata(db.EmbeddedDocument):
     remote_url = field(db.URLField())
 
     # If the node ID is a `URIRef` it means it links to something external, if it's not an `URIRef` it's often a
-    # auto-generated ID just to link multiple RDF node togethers. When exporting as RDF to other catalogs, we 
+    # auto-generated ID just to link multiple RDF node togethers. When exporting as RDF to other catalogs, we
     # want to re-use this node ID (only if it's not auto-generated) to improve compatibility.
     uri = field(
         db.URLField(),
@@ -51,23 +50,21 @@ class HarvestMetadata(db.EmbeddedDocument):
     )
 
     created_at = field(
-        db.DateTimeField(),
-        description="Date of the creation as provided by the harvested catalog"
+        db.DateTimeField(), description="Date of the creation as provided by the harvested catalog"
     )
-    last_update = field(
-        db.DateTimeField(),
-        description="Date of the last harvesting"
-    )
+    last_update = field(db.DateTimeField(), description="Date of the last harvesting")
     archived_at = field(db.DateTimeField())
+
 
 @generate_fields()
 class Dataservice(WithMetrics, Owned, db.Document):
     meta = {
-        'indexes': [
-            '$title',
-        ] + Owned.meta['indexes'],
-        'queryset_class': DataserviceQuerySet,
-        'auto_create_index_on_save': True
+        "indexes": [
+            "$title",
+        ]
+        + Owned.meta["indexes"],
+        "queryset_class": DataserviceQuerySet,
+        "auto_create_index_on_save": True,
     }
 
     title = field(
@@ -81,30 +78,26 @@ class Dataservice(WithMetrics, Owned, db.Document):
     # /!\ do not set directly the slug when creating or updating a dataset
     # this will break the search indexation
     slug = field(
-        db.SlugField(max_length=255, required=True, populate_from='title', update=True, follow=True),
+        db.SlugField(
+            max_length=255, required=True, populate_from="title", update=True, follow=True
+        ),
         readonly=True,
     )
-    description = field(
-        db.StringField(default=''),
-        description="In markdown"
-    )
+    description = field(db.StringField(default=""), description="In markdown")
     base_api_url = field(
         db.URLField(required=True),
         sortable=True,
     )
     endpoint_description_url = field(db.URLField())
     authorization_request_url = field(db.URLField())
-    availability= field(
-        db.FloatField(min=0, max=100),
-        example='99.99'
-    )
+    availability = field(db.FloatField(min=0, max=100), example="99.99")
     rate_limiting = field(db.StringField())
     is_restricted = field(db.BooleanField())
     has_token = field(db.BooleanField())
     format = field(db.StringField(choices=DATASERVICE_FORMATS))
 
     license = field(
-        db.ReferenceField('License'),
+        db.ReferenceField("License"),
         allow_null=True,
     )
 
@@ -114,23 +107,25 @@ class Dataservice(WithMetrics, Owned, db.Document):
 
     private = field(
         db.BooleanField(default=False),
-        description='Is the dataservice private to the owner or the organization'
+        description="Is the dataservice private to the owner or the organization",
     )
-    
+
     extras = field(db.ExtrasField())
 
     contact_point = field(
-        db.ReferenceField('ContactPoint', reverse_delete_rule=db.NULLIFY),
+        db.ReferenceField("ContactPoint", reverse_delete_rule=db.NULLIFY),
         nested_fields=contact_api_fields.contact_point_fields,
         allow_null=True,
     )
 
     created_at = field(
-        db.DateTimeField(verbose_name=_('Creation date'), default=datetime.utcnow, required=True),
+        db.DateTimeField(verbose_name=_("Creation date"), default=datetime.utcnow, required=True),
         readonly=True,
     )
     metadata_modified_at = field(
-        db.DateTimeField(verbose_name=_('Last modification date'), default=datetime.utcnow, required=True),
+        db.DateTimeField(
+            verbose_name=_("Last modification date"), default=datetime.utcnow, required=True
+        ),
         readonly=True,
     )
     deleted_at = field(db.DateTimeField(), readonly=True)
@@ -144,7 +139,7 @@ class Dataservice(WithMetrics, Owned, db.Document):
             )
         ),
         filterable={
-            'key': 'dataset',
+            "key": "dataset",
         },
     )
 
@@ -155,11 +150,11 @@ class Dataservice(WithMetrics, Owned, db.Document):
 
     @function_field(description="Link to the API endpoint for this dataservice")
     def self_api_url(self):
-        return endpoint_for('api.dataservice', dataservice=self, _external=True)
+        return endpoint_for("api.dataservice", dataservice=self, _external=True)
 
     @function_field(description="Link to the udata web page for this dataservice")
     def self_web_url(self):
-        return endpoint_for('dataservices.show', dataservice=self, _external=True)
+        return endpoint_for("dataservices.show", dataservice=self, _external=True)
 
     # TODO
     # frequency = db.StringField(choices=list(UPDATE_FREQUENCIES.keys()))
@@ -172,9 +167,9 @@ class Dataservice(WithMetrics, Owned, db.Document):
         return self.private or self.deleted_at or self.archived_at
 
     def count_discussions(self):
-        self.metrics['discussions'] = Discussion.objects(subject=self, closed=None).count()
+        self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()
         self.save()
 
     def count_followers(self):
-        self.metrics['followers'] = Follow.objects(until=None).followers(self).count()
+        self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
         self.save()

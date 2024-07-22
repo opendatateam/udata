@@ -11,10 +11,10 @@ class PostFactory(ModelFactory):
     class Meta:
         model = Post
 
-    name = factory.Faker('sentence')
-    headline = factory.Faker('sentence')
-    content = factory.Faker('text')
-    published = factory.Faker('past_datetime')
+    name = factory.Faker("sentence")
+    headline = factory.Faker("sentence")
+    content = factory.Faker("text")
+    published = factory.Faker("past_datetime")
 
     @factory.lazy_attribute
     def datasets(self):
