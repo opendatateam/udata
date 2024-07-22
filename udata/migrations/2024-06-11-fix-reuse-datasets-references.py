@@ -1,10 +1,11 @@
-'''
+"""
 Add a default topic to all reuses in db
-'''
+"""
+
 import logging
 
-from bson import DBRef
 import mongoengine
+from bson import DBRef
 
 from udata.models import Reuse
 
@@ -12,7 +13,7 @@ log = logging.getLogger(__name__)
 
 
 def migrate(db):
-    log.info('Processing Reuse.')
+    log.info("Processing Reuse.")
 
     reuses = Reuse.objects().no_cache().timeout(False)
     count = 0
@@ -31,5 +32,5 @@ def migrate(db):
             reuse.save()
             count += 1
 
-    log.info(f'Modified {count} Reuses objects (removed {errors} datasets)')
-    log.info('Done')
+    log.info(f"Modified {count} Reuses objects (removed {errors} datasets)")
+    log.info("Done")

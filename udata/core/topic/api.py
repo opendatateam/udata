@@ -1,19 +1,19 @@
-from udata.api import api, fields, API
+from udata.api import API, api, fields
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.discussions.models import Discussion
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.models import Reuse
 from udata.core.spatial.api_fields import spatial_coverage_fields
-from udata.core.topic.permissions import TopicEditPermission
 from udata.core.topic.parsers import TopicApiParser
+from udata.core.topic.permissions import TopicEditPermission
 from udata.core.user.api_fields import user_ref_fields
 
-from .models import Topic
 from .forms import TopicForm
+from .models import Topic
 
-DEFAULT_SORTING = '-created_at'
+DEFAULT_SORTING = "-created_at"
 
-ns = api.namespace('topics', 'Topics related operations')
+ns = api.namespace("topics", "Topics related operations")
 
 topic_fields = api.model('Topic', {
     'id': fields.String(description='The topic identifier'),
@@ -58,77 +58,76 @@ topic_fields = api.model('Topic', {
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
 }, mask='*,datasets{id,title,uri,page},reuses{id,title,image,uri,page}')
 
-topic_page_fields = api.model('TopicPage', fields.pager(topic_fields))
+topic_page_fields = api.model("TopicPage", fields.pager(topic_fields))
 
 topic_parser = TopicApiParser()
 
 
-@ns.route('/', endpoint='topics')
+@ns.route("/", endpoint="topics")
 class TopicsAPI(API):
     """
     Warning: querying a list with a topic containing a lot of related objects (datasets, reuses)
     will fail/take a lot of time because every object is dereferenced. Use api v2 if you can.
     """
 
-    @api.doc('list_topics')
+    @api.doc("list_topics")
     @api.expect(topic_parser.parser)
     @api.marshal_with(topic_page_fields)
     def get(self):
-        '''List all topics'''
+        """List all topics"""
         args = topic_parser.parse()
         topics = Topic.objects()
         topics = topic_parser.parse_filters(topics, args)
-        sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
-        return (topics.order_by(sort)
-                .paginate(args['page'], args['page_size']))
+        sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
+        return topics.order_by(sort).paginate(args["page"], args["page_size"])
 
-    @api.doc('create_topic')
+    @api.doc("create_topic")
     @api.expect(topic_fields)
     @api.marshal_with(topic_fields)
-    @api.response(400, 'Validation error')
+    @api.response(400, "Validation error")
     def post(self):
-        '''Create a topic'''
+        """Create a topic"""
         form = api.validate(TopicForm)
         return form.save(), 201
 
 
-@ns.route('/<topic:topic>/', endpoint='topic')
-@api.param('topic', 'The topic ID or slug')
-@api.response(404, 'Object not found')
+@ns.route("/<topic:topic>/", endpoint="topic")
+@api.param("topic", "The topic ID or slug")
+@api.response(404, "Object not found")
 class TopicAPI(API):
     """
     Warning: querying a topic containing a lot of related objects (datasets, reuses)
     will fail/take a lot of time because every object is dereferenced. Use api v2 if you can.
     """
 
-    @api.doc('get_topic')
+    @api.doc("get_topic")
     @api.marshal_with(topic_fields)
     def get(self, topic):
-        '''Get a given topic'''
+        """Get a given topic"""
         return topic
 
     @api.secure
-    @api.doc('update_topic')
+    @api.doc("update_topic")
     @api.expect(topic_fields)
     @api.marshal_with(topic_fields)
-    @api.response(400, 'Validation error')
-    @api.response(403, 'Forbidden')
+    @api.response(400, "Validation error")
+    @api.response(403, "Forbidden")
     def put(self, topic):
-        '''Update a given topic'''
+        """Update a given topic"""
         if not TopicEditPermission(topic).can():
-            api.abort(403, 'Forbidden')
+            api.abort(403, "Forbidden")
         form = api.validate(TopicForm, topic)
         return form.save()
 
     @api.secure
-    @api.doc('delete_topic')
-    @api.response(204, 'Object deleted')
-    @api.response(403, 'Forbidden')
+    @api.doc("delete_topic")
+    @api.response(204, "Object deleted")
+    @api.response(403, "Forbidden")
     def delete(self, topic):
-        '''Delete a given topic'''
+        """Delete a given topic"""
         if not TopicEditPermission(topic).can():
-            api.abort(403, 'Forbidden')
+            api.abort(403, "Forbidden")
         # Remove discussions linked to the topic
         Discussion.objects(subject=topic).delete()
         topic.delete()
-        return '', 204
+        return "", 204

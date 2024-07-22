@@ -1,6 +1,4 @@
-from .signals import (
-    on_new_discussion, on_discussion_closed, on_discussion_deleted
-)
+from .signals import on_discussion_closed, on_discussion_deleted, on_new_discussion
 
 
 @on_new_discussion.connect

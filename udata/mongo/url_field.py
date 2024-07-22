@@ -4,7 +4,7 @@ from udata import uris
 
 
 class URLField(StringField):
-    '''
+    """
     An URL field using the udata URL normalization and validation rules.
 
     The URL spaces are automatically stripped.
@@ -18,9 +18,9 @@ class URLField(StringField):
     :params list schemes: List of allowed schemes
     :params list tlds: List of allowed TLDs
 
-    '''
-    def __init__(self, private=None, local=None, schemes=None, tlds=None,
-                 **kwargs):
+    """
+
+    def __init__(self, private=None, local=None, schemes=None, tlds=None, **kwargs):
         super(URLField, self).__init__(**kwargs)
         self.private = private
         self.local = local
@@ -36,7 +36,7 @@ class URLField(StringField):
         super(URLField, self).validate(value)
         kwargs = {
             a: getattr(self, a)
-            for a in ('private', 'local', 'schemes', 'tlds')
+            for a in ("private", "local", "schemes", "tlds")
             if getattr(self, a) is not None
         }
         try:

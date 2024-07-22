@@ -68,7 +68,7 @@ class NestedModelListFieldTest(TestCase):
 
     def test_with_one_valid_data(self):
         fake = Fake()
-        form = self.factory(MultiDict({'nested-0-name': 'John Doe'}))
+        form = self.factory(MultiDict({"nested-0-name": "John Doe"}))
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -77,11 +77,11 @@ class NestedModelListFieldTest(TestCase):
 
         self.assertEqual(len(fake.nested), 1)
         self.assertIsInstance(fake.nested[0], Nested)
-        self.assertEqual(fake.nested[0].name, 'John Doe')
+        self.assertEqual(fake.nested[0].name, "John Doe")
 
     def test_with_one_valid_json(self):
         fake = Fake()
-        form = self.factory({'nested': [{'name': 'John Doe'}]})
+        form = self.factory({"nested": [{"name": "John Doe"}]})
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -90,15 +90,19 @@ class NestedModelListFieldTest(TestCase):
 
         self.assertEqual(len(fake.nested), 1)
         self.assertIsInstance(fake.nested[0], Nested)
-        self.assertEqual(fake.nested[0].name, 'John Doe')
+        self.assertEqual(fake.nested[0].name, "John Doe")
 
     def test_with_multiple_valid_data(self):
         fake = Fake()
-        form = self.factory(MultiDict([
-            ('nested-0-name', faker.name()),
-            ('nested-1-name', faker.name()),
-            ('nested-2-name', faker.name()),
-        ]))
+        form = self.factory(
+            MultiDict(
+                [
+                    ("nested-0-name", faker.name()),
+                    ("nested-1-name", faker.name()),
+                    ("nested-2-name", faker.name()),
+                ]
+            )
+        )
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -111,11 +115,15 @@ class NestedModelListFieldTest(TestCase):
 
     def test_with_multiple_valid_json(self):
         fake = Fake()
-        form = self.factory({'nested': [
-            {'name': faker.name()},
-            {'name': faker.name()},
-            {'name': faker.name()},
-        ]})
+        form = self.factory(
+            {
+                "nested": [
+                    {"name": faker.name()},
+                    {"name": faker.name()},
+                    {"name": faker.name()},
+                ]
+            }
+        )
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -127,16 +135,23 @@ class NestedModelListFieldTest(TestCase):
             self.assertIsInstance(nested, Nested)
 
     def test_with_initial_elements(self):
-        fake = Fake.objects.create(nested=[
-            Nested(name=faker.name()),
-            Nested(name=faker.name()),
-        ])
+        fake = Fake.objects.create(
+            nested=[
+                Nested(name=faker.name()),
+                Nested(name=faker.name()),
+            ]
+        )
         order = [n.id for n in fake.nested]
-        form = self.factory({'nested': [
-            {'id': str(fake.nested[0].id)},
-            {'id': str(fake.nested[1].id)},
-            {'name': faker.name()},
-        ]}, fake)
+        form = self.factory(
+            {
+                "nested": [
+                    {"id": str(fake.nested[0].id)},
+                    {"id": str(fake.nested[1].id)},
+                    {"name": faker.name()},
+                ]
+            },
+            fake,
+        )
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -149,17 +164,19 @@ class NestedModelListFieldTest(TestCase):
         self.assertIsNotNone(fake.nested[2].id)
 
     def test_with_nested_initial_elements(self):
-        fake = Fake.objects.create(nested=[
-            Nested(name=faker.name(), sub=SubNested(name=faker.word())),
-            Nested(name=faker.name(), sub=SubNested(name=faker.word())),
-        ])
+        fake = Fake.objects.create(
+            nested=[
+                Nested(name=faker.name(), sub=SubNested(name=faker.word())),
+                Nested(name=faker.name(), sub=SubNested(name=faker.word())),
+            ]
+        )
         order = [n.id for n in fake.nested]
         data = [
-            {'id': str(fake.nested[0].id)},
-            {'id': str(fake.nested[1].id)},
-            {'name': faker.name(), 'sub': {'name': faker.name()}},
+            {"id": str(fake.nested[0].id)},
+            {"id": str(fake.nested[1].id)},
+            {"name": faker.name(), "sub": {"name": faker.name()}},
         ]
-        form = self.factory({'nested': data}, fake, sub=True)
+        form = self.factory({"nested": data}, fake, sub=True)
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -173,19 +190,26 @@ class NestedModelListFieldTest(TestCase):
             self.assertIsNotNone(nested.sub)
             self.assertIsNotNone(nested.sub.name)
         self.assertIsNotNone(fake.nested[2].id)
-        self.assertEqual(fake.nested[2].sub.name, data[2]['sub']['name'])
+        self.assertEqual(fake.nested[2].sub.name, data[2]["sub"]["name"])
 
     def test_with_initial_elements_as_ids(self):
-        fake = Fake.objects.create(nested=[
-            Nested(name=faker.name()),
-            Nested(name=faker.name()),
-        ])
+        fake = Fake.objects.create(
+            nested=[
+                Nested(name=faker.name()),
+                Nested(name=faker.name()),
+            ]
+        )
         order = [n.id for n in fake.nested]
-        form = self.factory({'nested': [
-            str(fake.nested[0].id),
-            str(fake.nested[1].id),
-            {'name': faker.name()},
-        ]}, fake)
+        form = self.factory(
+            {
+                "nested": [
+                    str(fake.nested[0].id),
+                    str(fake.nested[1].id),
+                    {"name": faker.name()},
+                ]
+            },
+            fake,
+        )
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -198,12 +222,14 @@ class NestedModelListFieldTest(TestCase):
         self.assertIsNotNone(fake.nested[2].id)
 
     def test_with_non_submitted_initial_elements(self):
-        fake = Fake.objects.create(nested=[
-            Nested(name=faker.name()),
-            Nested(name=faker.name()),
-        ])
+        fake = Fake.objects.create(
+            nested=[
+                Nested(name=faker.name()),
+                Nested(name=faker.name()),
+            ]
+        )
         initial = [(n.id, n.name) for n in fake.nested]
-        form = self.factory({'name': faker.word()}, fake)
+        form = self.factory({"name": faker.word()}, fake)
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -217,17 +243,24 @@ class NestedModelListFieldTest(TestCase):
             self.assertEqual(nested.name, name)
 
     def test_update_initial_elements(self):
-        fake = Fake.objects.create(nested=[
-            Nested(name=faker.name()),
-            Nested(name=faker.name()),
-        ])
+        fake = Fake.objects.create(
+            nested=[
+                Nested(name=faker.name()),
+                Nested(name=faker.name()),
+            ]
+        )
         initial = [n.id for n in fake.nested]
-        form = self.factory({'nested': [
-            {'id': str(fake.nested[0].id), 'name': faker.name()},
-            {'id': str(fake.nested[1].id), 'name': faker.name()},
-            {'name': faker.name()},
-        ]}, fake)
-        names = [n['name'] for n in form.data['nested']]
+        form = self.factory(
+            {
+                "nested": [
+                    {"id": str(fake.nested[0].id), "name": faker.name()},
+                    {"id": str(fake.nested[1].id), "name": faker.name()},
+                    {"name": faker.name()},
+                ]
+            },
+            fake,
+        )
+        names = [n["name"] for n in form.data["nested"]]
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -242,10 +275,15 @@ class NestedModelListFieldTest(TestCase):
         self.assertIsNotNone(fake.nested[2].id)
 
     def test_non_submitted_subnested(self):
-        form = self.factory({'nested': [
-            {'name': faker.name()},
-            {'name': faker.name(), 'sub': {'name': faker.name()}},
-        ]}, sub=True)
+        form = self.factory(
+            {
+                "nested": [
+                    {"name": faker.name()},
+                    {"name": faker.name(), "sub": {"name": faker.name()}},
+                ]
+            },
+            sub=True,
+        )
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -257,17 +295,17 @@ class NestedModelListFieldTest(TestCase):
         self.assertIsNotNone(fake.nested[1].sub)
 
     def test_reorder_initial_elements(self):
-        fake = Fake.objects.create(nested=[
-            Nested(name=faker.name()),
-            Nested(name=faker.name()),
-            Nested(name=faker.name()),
-            Nested(name=faker.name()),
-        ])
+        fake = Fake.objects.create(
+            nested=[
+                Nested(name=faker.name()),
+                Nested(name=faker.name()),
+                Nested(name=faker.name()),
+                Nested(name=faker.name()),
+            ]
+        )
         initial = [(n.id, n.name) for n in fake.nested]
         new_order = [1, 2, 3, 0]
-        form = self.factory({'nested': [
-            {'id': str(fake.nested[i].id)} for i in new_order
-        ]}, fake)
+        form = self.factory({"nested": [{"id": str(fake.nested[i].id)} for i in new_order]}, fake)
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -281,18 +319,18 @@ class NestedModelListFieldTest(TestCase):
             self.assertEqual(nested.name, name)
 
     def test_reorder_initial_elements_with_raw(self):
-        fake = Fake.objects.create(nested=[
-            Nested(name=faker.name(), raw={'test': 0}),
-            Nested(name=faker.name(), raw={'test': 1}),
-            Nested(name=faker.name(), raw={'test': 2}),
-            Nested(name=faker.name(), raw={'test': 3}),
-        ])
+        fake = Fake.objects.create(
+            nested=[
+                Nested(name=faker.name(), raw={"test": 0}),
+                Nested(name=faker.name(), raw={"test": 1}),
+                Nested(name=faker.name(), raw={"test": 2}),
+                Nested(name=faker.name(), raw={"test": 3}),
+            ]
+        )
         initial = [(n.id, n.name) for n in fake.nested]
 
         new_order = [1, 2, 3, 0]
-        form = self.factory({'nested': [
-            {'id': str(fake.nested[i].id)} for i in new_order
-        ]}, fake)
+        form = self.factory({"nested": [{"id": str(fake.nested[i].id)} for i in new_order]}, fake)
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -304,4 +342,4 @@ class NestedModelListFieldTest(TestCase):
             id, name = initial[old_idx]
             self.assertEqual(nested.id, id)
             self.assertEqual(nested.name, name)
-            self.assertEqual(nested.raw['test'], old_idx)
+            self.assertEqual(nested.raw["test"], old_idx)
