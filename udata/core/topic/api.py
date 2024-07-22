@@ -67,7 +67,7 @@ topic_fields = api.model(
         ),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),
     },
-    mask="*,datasets{id,title,uri,page},reuses{id,title,image,uri,page}",
+    mask="*,datasets{id,title,uri,page},reuses{id,title,image,image_thumbnail,uri,page}",
 )
 
 topic_page_fields = api.model("TopicPage", fields.pager(topic_fields))

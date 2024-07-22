@@ -50,7 +50,7 @@ post_fields = api.model(
             fallback_endpoint="api.post",
         ),
     },
-    mask="*,datasets{id,title,acronym,uri,page},reuses{id,title,image,uri,page}",
+    mask="*,datasets{id,title,acronym,uri,page},reuses{id,title,image,image_thumbnail,uri,page}",
 )
 
 post_page_fields = api.model("PostPage", fields.pager(post_fields))

@@ -12,7 +12,6 @@ def serialize(value):
     if hasattr(value, "to_dict"):
         return value.to_dict()
     elif isinstance(value, dict):
-        print(value)
         return {key: serialize(val) for key, val in value.items()}
     elif isinstance(value, Iterable) and not isinstance(value, str):
         return [serialize(val) for val in value]
