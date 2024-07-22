@@ -150,7 +150,7 @@ export const license_groups = _jsonMeta('license-groups-options') && Object.from
 export const harvest_validation_contact_form = _meta('harvest-validation-contact-form')
 
 /**
- * Harvest validation contact form
+ * Harvest : enable manual run from producers
  */
 export const harvest_enable_manual_run = _jsonMeta('harvest-enable-manual-run')
 
