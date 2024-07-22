@@ -1,6 +1,7 @@
 import logging
-from werkzeug.datastructures import Headers
+
 from flask import request
+from werkzeug.datastructures import Headers
 
 log = logging.getLogger(__name__)
 
@@ -30,8 +31,12 @@ def is_preflight_request() -> bool:
     )
 
 
-def is_api():
-    return request.path.startswith("/api") or request.path.startswith("/oauth")
+def is_allowed_cors_route():
+    return (
+        request.path.endswith((".js", ".css", ".woff", ".woff2", ".png", ".jpg", ".jpeg"))
+        or request.path.startswith("/api")
+        or request.path.startswith("/oauth")
+    )
 
 
 def add_preflight_request_headers(headers: Headers) -> Headers:
@@ -74,7 +79,7 @@ def init_app(app):
 
     @app.before_request
     def bypass_code_for_options_requests():
-        if not is_api():
+        if not is_allowed_cors_route():
             return
 
         if is_preflight_request():
@@ -83,7 +88,7 @@ def init_app(app):
 
     @app.after_request
     def add_cors_headers(response):
-        if not is_api():
+        if not is_allowed_cors_route():
             return response
 
         if request.method == "OPTIONS":
