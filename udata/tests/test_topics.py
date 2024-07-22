@@ -1,22 +1,23 @@
 import pytest
 
-from udata.search import reindex
-from udata.core.topic.factories import TopicFactory
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.topic.factories import TopicFactory
+from udata.search import reindex
 
 
 @pytest.fixture
 def job_reindex(mocker):
-    return mocker.patch.object(reindex, 'delay')
+    return mocker.patch.object(reindex, "delay")
 
 
 @pytest.fixture
 def job_reindex_undelayed(mocker):
     """Mock the reindex.delay fn to access the underlying reindex fn"""
-    return mocker.patch.object(reindex, 'delay', side_effect=reindex)
+    return mocker.patch.object(reindex, "delay", side_effect=reindex)
 
 
-pytestmark = pytest.mark.usefixtures('clean_db')
+pytestmark = pytest.mark.usefixtures("clean_db")
+
 
 class TopicModelTest:
     # allows url_for with correct context when calling reindex
@@ -26,7 +27,7 @@ class TopicModelTest:
         topic = TopicFactory(datasets=[])
         dataset = DatasetFactory()
 
-        topic.name = 'new_name'
+        topic.name = "new_name"
         topic.save()
         job_reindex.assert_not_called()
 
@@ -44,4 +45,3 @@ class TopicModelTest:
         # creates a topic with datasets, thus calls reindex
         TopicFactory()
         job_reindex_undelayed.assert_called()
-

@@ -1,14 +1,15 @@
 from udata.auth import Permission, UserNeed
-
 from udata.core.organization.permissions import (
-    OrganizationAdminNeed, OrganizationEditorNeed
+    OrganizationAdminNeed,
+    OrganizationEditorNeed,
 )
 
 from .models import Resource
 
 
 class OwnablePermission(Permission):
-    '''A generic permission for ownable objects (with owner or organization)'''
+    """A generic permission for ownable objects (with owner or organization)"""
+
     def __init__(self, obj):
         needs = []
 
@@ -22,13 +23,15 @@ class OwnablePermission(Permission):
 
 
 class DatasetEditPermission(OwnablePermission):
-    '''Permissions to edit a Dataset'''
+    """Permissions to edit a Dataset"""
+
     pass
 
 
 class ResourceEditPermission(OwnablePermission):
-    '''Permissions to edit a Resource (aka. its dataset) or community resource'''
+    """Permissions to edit a Resource (aka. its dataset) or community resource"""
+
     def __init__(self, obj):
         if isinstance(obj, Resource):
-            raise ValueError('Resource permissions are holded by its dataset')
+            raise ValueError("Resource permissions are holded by its dataset")
         super(ResourceEditPermission, self).__init__(obj)

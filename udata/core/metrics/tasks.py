@@ -1,13 +1,13 @@
 from flask import current_app
 
+from udata.core.metrics.signals import on_site_metrics_computed
 from udata.models import Site
 from udata.tasks import job
-from udata.core.metrics.signals import on_site_metrics_computed
 
 
-@job('compute-site-metrics')
+@job("compute-site-metrics")
 def compute_site_metrics(self):
-    site = Site.objects(id=current_app.config['SITE_ID']).first()
+    site = Site.objects(id=current_app.config["SITE_ID"]).first()
     site.count_users()
     site.count_org()
     site.count_datasets()

@@ -1,6 +1,5 @@
-from slugify import slugify
-
 from mongoengine.fields import ListField, StringField
+from slugify import slugify
 
 
 class TagListField(ListField):

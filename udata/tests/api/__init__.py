@@ -1,18 +1,17 @@
-import pytest
-
 from contextlib import contextmanager
+
+import pytest
 
 from ..frontend import FrontTestCase
 
 
-@pytest.mark.usefixtures('instance_path')
+@pytest.mark.usefixtures("instance_path")
 class APITestCase(FrontTestCase):
-
     @pytest.fixture(autouse=True)
     def inject_api(self, api):
-        '''
+        """
         Inject API test client for compatibility with legacy tests.
-        '''
+        """
         self.api = api
 
     @contextmanager

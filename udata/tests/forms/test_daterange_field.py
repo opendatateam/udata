@@ -22,7 +22,7 @@ class DateRangeFieldTest(TestCase):
         Fake, FakeForm = self.factory()
 
         form = FakeForm()
-        self.assertEqual(form.daterange._value(), '')
+        self.assertEqual(form.daterange._value(), "")
         self.assertEqual(form.daterange.data, None)
 
         fake = Fake()
@@ -31,24 +31,21 @@ class DateRangeFieldTest(TestCase):
 
     def test_initial_values(self):
         Fake, FakeForm = self.factory()
-        dr = db.DateRange(start=date.today() - timedelta(days=1),
-                          end=date.today())
+        dr = db.DateRange(start=date.today() - timedelta(days=1), end=date.today())
 
         fake = Fake(daterange=dr)
         form = FakeForm(None, obj=fake)
-        expected = ' - '.join([to_iso_date(dr.start), to_iso_date(dr.end)])
+        expected = " - ".join([to_iso_date(dr.start), to_iso_date(dr.end)])
         self.assertEqual(form.daterange._value(), expected)
 
     def test_with_valid_dates(self):
         Fake, FakeForm = self.factory()
         start = date.today() - timedelta(days=1)
         end = date.today()
-        expected = ' - '.join([to_iso_date(start), to_iso_date(end)])
+        expected = " - ".join([to_iso_date(start), to_iso_date(end)])
 
         fake = Fake()
-        form = FakeForm(MultiDict({
-            'daterange': expected
-        }))
+        form = FakeForm(MultiDict({"daterange": expected}))
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -63,12 +60,14 @@ class DateRangeFieldTest(TestCase):
         end = date.today()
 
         fake = Fake()
-        form = FakeForm.from_json({
-            'daterange': {
-                'start': to_iso_date(start),
-                'end': to_iso_date(end),
+        form = FakeForm.from_json(
+            {
+                "daterange": {
+                    "start": to_iso_date(start),
+                    "end": to_iso_date(end),
+                }
             }
-        })
+        )
 
         form.validate()
         self.assertEqual(form.errors, {})
@@ -80,54 +79,47 @@ class DateRangeFieldTest(TestCase):
     def test_with_invalid_dates(self):
         Fake, FakeForm = self.factory()
 
-        form = FakeForm(MultiDict({
-            'daterange': 'XXX - ZZZ'
-        }))
+        form = FakeForm(MultiDict({"daterange": "XXX - ZZZ"}))
 
         form.validate()
-        self.assertIn('daterange', form.errors)
-        self.assertEqual(len(form.errors['daterange']), 1)
+        self.assertIn("daterange", form.errors)
+        self.assertEqual(len(form.errors["daterange"]), 1)
 
     def test_with_invalid_format(self):
         Fake, FakeForm = self.factory()
         start = date.today() - timedelta(days=1)
         end = date.today()
-        wrong = ' xx '.join([to_iso_date(start), to_iso_date(end)])
+        wrong = " xx ".join([to_iso_date(start), to_iso_date(end)])
 
-        form = FakeForm(MultiDict({
-            'daterange': wrong
-        }))
+        form = FakeForm(MultiDict({"daterange": wrong}))
 
         form.validate()
-        self.assertIn('daterange', form.errors)
-        self.assertEqual(len(form.errors['daterange']), 1)
+        self.assertIn("daterange", form.errors)
+        self.assertEqual(len(form.errors["daterange"]), 1)
 
     def test_with_invalid_dates_from_json(self):
         Fake, FakeForm = self.factory()
 
-        form = FakeForm.from_json({
-            'daterange': {
-                'start': 'XXX',
-                'end': 'ZZZ'
-            }
-        })
+        form = FakeForm.from_json({"daterange": {"start": "XXX", "end": "ZZZ"}})
 
         form.validate()
-        self.assertIn('daterange', form.errors)
-        self.assertEqual(len(form.errors['daterange']), 1)
+        self.assertIn("daterange", form.errors)
+        self.assertEqual(len(form.errors["daterange"]), 1)
 
     def test_with_invalid_json_format(self):
         Fake, FakeForm = self.factory()
         start = date.today() - timedelta(days=1)
         end = date.today()
 
-        form = FakeForm.from_json({
-            'daterange': {
-                'a': to_iso_date(start),
-                'b': to_iso_date(end),
+        form = FakeForm.from_json(
+            {
+                "daterange": {
+                    "a": to_iso_date(start),
+                    "b": to_iso_date(end),
+                }
             }
-        })
+        )
 
         form.validate()
-        self.assertIn('daterange', form.errors)
-        self.assertEqual(len(form.errors['daterange']), 1)
+        self.assertIn("daterange", form.errors)
+        self.assertEqual(len(form.errors["daterange"]), 1)
