@@ -23,7 +23,9 @@ class Report(db.Document):
 
     # Here we use the lazy version of `GenericReferenceField` because we could point to a
     # non existant model (if it was deleted we want to keep the report data).
-    subject = field(db.GenericLazyReferenceField(reverse_delete_rule=DO_NOTHING))
+    subject = field(
+        db.GenericLazyReferenceField(reverse_delete_rule=DO_NOTHING, choices=REPORTABLE_MODELS)
+    )
 
     subject_deleted_at = field(
         db.DateTimeField(),
