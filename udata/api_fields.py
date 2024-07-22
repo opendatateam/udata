@@ -84,9 +84,7 @@ def convert_db_to_field(key, field, info={}):
             # If there is no `nested_fields` convert the object to the string representation.
             constructor_read = restx_fields.String
         else:
-            constructor_read = lambda **kwargs: restx_fields.Nested(
-                nested_fields, **kwargs
-            )
+            constructor_read = lambda **kwargs: restx_fields.Nested(nested_fields, **kwargs)
 
         write_params["description"] = "ID of the reference"
         constructor_write = restx_fields.String
@@ -107,25 +105,17 @@ def convert_db_to_field(key, field, info={}):
             )
 
     else:
-        raise ValueError(
-            f"Unsupported MongoEngine field type {field.__class__.__name__}"
-        )
+        raise ValueError(f"Unsupported MongoEngine field type {field.__class__.__name__}")
 
     read_params = {**params, **read_params, **info}
     write_params = {**params, **write_params, **info}
 
-    read = (
-        constructor_read(**read_params)
-        if constructor_read
-        else constructor(**read_params)
-    )
+    read = constructor_read(**read_params) if constructor_read else constructor(**read_params)
     if write_params.get("readonly", False):
         write = None
     else:
         write = (
-            constructor_write(**write_params)
-            if constructor_write
-            else constructor(**write_params)
+            constructor_write(**write_params) if constructor_write else constructor(**write_params)
         )
     return read, write
 
@@ -212,9 +202,7 @@ def generate_fields(**kwargs):
             )
 
         cls.__read_fields__ = api.model(f"{cls.__name__} (read)", read_fields, **kwargs)
-        cls.__write_fields__ = api.model(
-            f"{cls.__name__} (write)", write_fields, **kwargs
-        )
+        cls.__write_fields__ = api.model(f"{cls.__name__} (write)", write_fields, **kwargs)
 
         mask = kwargs.pop("mask", None)
         if mask is not None:
@@ -265,9 +253,7 @@ def generate_fields(**kwargs):
                         if constraint == "objectid" and not ObjectId.is_valid(
                             args[filterable["key"]]
                         ):
-                            api.abort(
-                                400, f'`{filterable["key"]}` must be an identifier'
-                            )
+                            api.abort(400, f'`{filterable["key"]}` must be an identifier')
 
                     base_query = base_query.filter(
                         **{
@@ -316,9 +302,7 @@ def patch(obj, request):
                 model_attribute.field, mongoengine.fields.ReferenceField
             ):
                 # TODO `wrap_primary_key` do Mongo request, do a first pass to fetch all documents before calling it (to avoid multiple queries).
-                value = [
-                    wrap_primary_key(key, model_attribute.field, id) for id in value
-                ]
+                value = [wrap_primary_key(key, model_attribute.field, id) for id in value]
             elif isinstance(model_attribute, mongoengine.fields.ReferenceField):
                 value = wrap_primary_key(key, model_attribute, value)
             elif isinstance(
@@ -341,9 +325,7 @@ def patch(obj, request):
             # the attribute
             check = info.get("check", None)
             if check is not None:
-                check(
-                    **{key: value}
-                )  # TODO add other model attributes in function parameters
+                check(**{key: value})  # TODO add other model attributes in function parameters
 
             setattr(obj, key, value)
 
@@ -352,8 +334,7 @@ def patch(obj, request):
 
 def wrap_primary_key(
     field_name: str,
-    foreign_field: mongoengine.fields.ReferenceField
-    | mongoengine.fields.GenericReferenceField,
+    foreign_field: mongoengine.fields.ReferenceField | mongoengine.fields.GenericReferenceField,
     value: str,
     document_type: type = None,
 ):
@@ -372,9 +353,7 @@ def wrap_primary_key(
     # Also useful to get a DBRef for non ObjectId references (see below)
     foreign_document = document_type.objects(**{id_field_name: value}).first()
     if foreign_document is None:
-        raise FieldValidationError(
-            field=field_name, message=f"Unknown reference '{value}'"
-        )
+        raise FieldValidationError(field=field_name, message=f"Unknown reference '{value}'")
 
     # GenericReferenceField only accepts document (not dbref / objectid)
     if isinstance(

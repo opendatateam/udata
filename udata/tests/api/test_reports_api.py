@@ -31,38 +31,44 @@ class ReportsAPITest(APITestCase):
         illegal_dataset = DatasetFactory.create(owner=user)
         spam_dataset = DatasetFactory.create(owner=user)
 
-        response = self.post(url_for('api.reports'), {
-            'subject': {
-                'class': 'Dataset',
-                'id': illegal_dataset.id,
+        response = self.post(
+            url_for("api.reports"),
+            {
+                "subject": {
+                    "class": "Dataset",
+                    "id": illegal_dataset.id,
+                },
+                "message": "This is not appropriate",
+                "reason": REASON_ILLEGAL_CONTENT,
             },
-            'message': 'This is not appropriate',
-            'reason': REASON_ILLEGAL_CONTENT,
-        })
+        )
         self.assert201(response)
         self.assertEqual(Report.objects.count(), 1)
 
-        response = self.post(url_for('api.reports'), {
-            'subject': {
-                'class': 'Dataset',
-                'id': spam_dataset.id,
+        response = self.post(
+            url_for("api.reports"),
+            {
+                "subject": {
+                    "class": "Dataset",
+                    "id": spam_dataset.id,
+                },
+                "message": "This is spammy",
+                "reason": REASON_SPAM,
             },
-            'message': 'This is spammy',
-            'reason': REASON_SPAM,
-        })
+        )
         self.assert201(response)
         self.assertEqual(Report.objects.count(), 2)
 
         reports: list[Report] = list(Report.objects())
         self.assertEqual(Dataset, reports[0].subject.document_type)
         self.assertEqual(illegal_dataset.id, reports[0].subject.pk)
-        self.assertEqual('This is not appropriate', reports[0].message)
+        self.assertEqual("This is not appropriate", reports[0].message)
         self.assertEqual(REASON_ILLEGAL_CONTENT, reports[0].reason)
         self.assertEqual(user.id, reports[0].by.id)
-        
+
         self.assertEqual(Dataset, reports[1].subject.document_type)
         self.assertEqual(spam_dataset.id, reports[1].subject.pk)
-        self.assertEqual('This is spammy', reports[1].message)
+        self.assertEqual("This is spammy", reports[1].message)
         self.assertEqual(REASON_SPAM, reports[1].reason)
         self.assertEqual(user.id, reports[1].by.id)
 
@@ -72,7 +78,7 @@ class ReportsAPITest(APITestCase):
         reports[0].reload()
         self.assertEqual(Dataset, reports[0].subject.document_type)
         self.assertEqual(illegal_dataset.id, reports[0].subject.pk)
-        self.assertEqual('This is not appropriate', reports[0].message)
+        self.assertEqual("This is not appropriate", reports[0].message)
         self.assertEqual(REASON_ILLEGAL_CONTENT, reports[0].reason)
         self.assertEqual(user.id, reports[0].by.id)
         self.assertIsNotNone(reports[0].subject_deleted_at)
@@ -80,7 +86,7 @@ class ReportsAPITest(APITestCase):
         reports[1].reload()
         self.assertEqual(Dataset, reports[1].subject.document_type)
         self.assertEqual(spam_dataset.id, reports[1].subject.pk)
-        self.assertEqual('This is spammy', reports[1].message)
+        self.assertEqual("This is spammy", reports[1].message)
         self.assertEqual(REASON_SPAM, reports[1].reason)
         self.assertEqual(user.id, reports[1].by.id)
         self.assertIsNone(reports[1].subject_deleted_at)
@@ -93,20 +99,19 @@ class ReportsAPITest(APITestCase):
         response = self.get(url_for("api.reports"))
         self.assert200(response)
 
-        reports = response.json['data']
+        reports = response.json["data"]
         self.assertEqual(len(reports), 2)
-        
-        self.assertEqual('Dataset', reports[0]['subject']['class'])
-        self.assertEqual(str(illegal_dataset.id), reports[0]['subject']['id'])
-        self.assertEqual('This is not appropriate', reports[0]['message'])
-        self.assertEqual(REASON_ILLEGAL_CONTENT, reports[0]['reason'])
-        self.assertEqual(str(user.id), reports[0]['by']['id'])
-        self.assertIsNotNone(reports[0]['subject_deleted_at'])
 
-        self.assertEqual('Dataset', reports[1]['subject']['class'])
-        self.assertEqual(str(spam_dataset.id), reports[1]['subject']['id'])
-        self.assertEqual('This is spammy', reports[1]['message'])
-        self.assertEqual(REASON_SPAM, reports[1]['reason'])
-        self.assertEqual(str(user.id), reports[1]['by']['id'])
-        self.assertIsNotNone(reports[1]['subject_deleted_at'])
+        self.assertEqual("Dataset", reports[0]["subject"]["class"])
+        self.assertEqual(str(illegal_dataset.id), reports[0]["subject"]["id"])
+        self.assertEqual("This is not appropriate", reports[0]["message"])
+        self.assertEqual(REASON_ILLEGAL_CONTENT, reports[0]["reason"])
+        self.assertEqual(str(user.id), reports[0]["by"]["id"])
+        self.assertIsNotNone(reports[0]["subject_deleted_at"])
 
+        self.assertEqual("Dataset", reports[1]["subject"]["class"])
+        self.assertEqual(str(spam_dataset.id), reports[1]["subject"]["id"])
+        self.assertEqual("This is spammy", reports[1]["message"])
+        self.assertEqual(REASON_SPAM, reports[1]["reason"])
+        self.assertEqual(str(user.id), reports[1]["by"]["id"])
+        self.assertIsNotNone(reports[1]["subject_deleted_at"])

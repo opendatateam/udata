@@ -21,7 +21,7 @@ class Report(db.Document):
         allow_null=True,
     )
 
-    # Here we use the lazy version of `GenericReferenceField` because we could point to a 
+    # Here we use the lazy version of `GenericReferenceField` because we could point to a
     # non existant model (if it was deleted we want to keep the report data).
     subject = field(db.GenericLazyReferenceField(reverse_delete_rule=DO_NOTHING))
 
@@ -45,31 +45,29 @@ class Report(db.Document):
 
     @classmethod
     def mark_as_deleted_soft_delete(cls, sender, document, **kwargs):
-        '''
+        """
         Called when updating a model (maybe updating the `deleted` date)
-        '''
+        """
         if document.deleted:
             # It's a little bit hard to query the GenericReferenceField,
             # we could do it without extra request with `DBRef(sender.__name__.lower(), document.id)`
             # but I'm not a big fan of the `.lower()` to get the correct DBRef. Fetching the model
             # and asking MongoDB for the DBRef with `.to_dbref()` seems more robust.
             subject = sender.objects(id=document.id).first()
-            Report.objects(
-                subject=subject.to_dbref(),
-                subject_deleted_at=None
-            ).update(subject_deleted_at=datetime.utcnow)
-    
+            Report.objects(subject=subject.to_dbref(), subject_deleted_at=None).update(
+                subject_deleted_at=datetime.utcnow
+            )
+
     @classmethod
     def mark_as_deleted_hard_delete(cls, sender, document, **kwargs):
-        '''
+        """
         Call when really deleting a model from the database.
-        '''
+        """
 
         # Here we are forced to do a manual `DBRef(sender.__name__.lower(), document.id)`
         # because the document doesn't exist anymore…
         Report.objects(
-            subject=DBRef(sender.__name__.lower(), document.id),
-            subject_deleted_at=None
+            subject=DBRef(sender.__name__.lower(), document.id), subject_deleted_at=None
         ).update(subject_deleted_at=datetime.utcnow)
 
 
