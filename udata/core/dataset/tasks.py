@@ -1,6 +1,5 @@
 import collections
 import os
-
 from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
 
@@ -13,28 +12,29 @@ from udata.core import storages
 from udata.frontend import csv
 from udata.harvest.models import HarvestJob
 from udata.i18n import lazy_gettext as _
-from udata.models import (Follow, Discussion, Activity, Topic,
-                          Organization, Transfer, db)
+from udata.models import Activity, Discussion, Follow, Organization, Topic, Transfer, db
 from udata.tasks import job
 
-from .models import Dataset, Resource, CommunityResource, Checksum
 from .constants import UPDATE_FREQUENCIES
+from .models import Checksum, CommunityResource, Dataset, Resource
 
 log = get_task_logger(__name__)
 
 
 def flatten(iterable):
     for el in iterable:
-        if isinstance(el, collections.Iterable) and not (isinstance(el, str) or isinstance(el, db.Document)):
+        if isinstance(el, collections.Iterable) and not (
+            isinstance(el, str) or isinstance(el, db.Document)
+        ):
             yield from flatten(el)
         else:
             yield el
 
 
-@job('purge-datasets')
+@job("purge-datasets")
 def purge_datasets(self):
     for dataset in Dataset.objects(deleted__ne=None):
-        log.info(f'Purging dataset {dataset}')
+        log.info(f"Purging dataset {dataset}")
         # Remove followers
         Follow.objects(following=dataset).delete()
         # Remove discussions
@@ -72,19 +72,23 @@ def purge_datasets(self):
         dataset.delete()
 
 
-@job('send-frequency-reminder')
+@job("send-frequency-reminder")
 def send_frequency_reminder(self):
     # We exclude irrelevant frequencies.
-    frequencies = [f for f in UPDATE_FREQUENCIES.keys()
-                   if f not in ('unknown', 'realtime', 'punctual', 'irregular', 'continuous')]
+    frequencies = [
+        f
+        for f in UPDATE_FREQUENCIES.keys()
+        if f not in ("unknown", "realtime", "punctual", "irregular", "continuous")
+    ]
     now = datetime.utcnow()
     reminded_orgs = {}
     reminded_people = []
-    allowed_delay = current_app.config['DELAY_BEFORE_REMINDER_NOTIFICATION']
+    allowed_delay = current_app.config["DELAY_BEFORE_REMINDER_NOTIFICATION"]
     for org in Organization.objects.visible():
         outdated_datasets = []
         for dataset in Dataset.objects.filter(
-                frequency__in=frequencies, organization=org).visible():
+            frequency__in=frequencies, organization=org
+        ).visible():
             if dataset.next_update + timedelta(days=allowed_delay) < now:
                 dataset.outdated = now - dataset.next_update
                 dataset.frequency_str = UPDATE_FREQUENCIES[dataset.frequency]
@@ -92,23 +96,28 @@ def send_frequency_reminder(self):
         if outdated_datasets:
             reminded_orgs[org] = outdated_datasets
     for reminded_org, datasets in reminded_orgs.items():
-        print('{org.name} will be emailed for {datasets_nb} datasets'.format(
-              org=reminded_org, datasets_nb=len(datasets)))
+        print(
+            "{org.name} will be emailed for {datasets_nb} datasets".format(
+                org=reminded_org, datasets_nb=len(datasets)
+            )
+        )
         recipients = [m.user for m in reminded_org.members]
         reminded_people.append(recipients)
-        subject = _('You need to update some frequency-based datasets')
-        mail.send(subject, recipients, 'frequency_reminder',
-                  org=reminded_org, datasets=datasets)
+        subject = _("You need to update some frequency-based datasets")
+        mail.send(subject, recipients, "frequency_reminder", org=reminded_org, datasets=datasets)
 
-    print('{nb_orgs} orgs concerned'.format(nb_orgs=len(reminded_orgs)))
+    print("{nb_orgs} orgs concerned".format(nb_orgs=len(reminded_orgs)))
     reminded_people = list(flatten(reminded_people))
-    print('{nb_emails} people contacted ({nb_emails_twice} twice)'.format(
-        nb_emails=len(reminded_people),
-        nb_emails_twice=len(reminded_people) - len(set(reminded_people))))
-    print('Done')
+    print(
+        "{nb_emails} people contacted ({nb_emails_twice} twice)".format(
+            nb_emails=len(reminded_people),
+            nb_emails_twice=len(reminded_people) - len(set(reminded_people)),
+        )
+    )
+    print("Done")
 
 
-@job('update-datasets-reuses-metrics')
+@job("update-datasets-reuses-metrics")
 def update_datasets_reuses_metrics(self):
     all_datasets = Dataset.objects.visible().timeout(False)
     for dataset in all_datasets:
@@ -117,10 +126,10 @@ def update_datasets_reuses_metrics(self):
 
 def get_queryset(model_cls):
     # special case for resources
-    if model_cls.__name__ == 'Resource':
-        model_cls = getattr(udata_models, 'Dataset')
+    if model_cls.__name__ == "Resource":
+        model_cls = getattr(udata_models, "Dataset")
     params = {}
-    attrs = ('private', 'deleted')
+    attrs = ("private", "deleted")
     for attr in attrs:
         if getattr(model_cls, attr, None):
             params[attr] = False
@@ -131,7 +140,7 @@ def get_queryset(model_cls):
 def get_or_create_resource(r_info, model, dataset):
     resource = None
     for r in dataset.resources:
-        if r.extras.get('csv-export:model', '') == model:
+        if r.extras.get("csv-export:model", "") == model:
             resource = r
             break
     if resource:
@@ -140,45 +149,45 @@ def get_or_create_resource(r_info, model, dataset):
         resource.save()
         return False, resource
     else:
-        r_info['extras'] = {'csv-export:model': model}
+        r_info["extras"] = {"csv-export:model": model}
         return True, Resource(**r_info)
 
 
 def store_resource(csvfile, model, dataset):
-    timestr = datetime.utcnow().strftime('%Y%m%d-%H%M%S')
-    filename = 'export-%s-%s.csv' % (model, timestr)
-    prefix = '/'.join((dataset.slug, timestr))
+    timestr = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
+    filename = "export-%s-%s.csv" % (model, timestr)
+    prefix = "/".join((dataset.slug, timestr))
     storage = storages.resources
-    with open(csvfile.name, 'rb') as infile:
+    with open(csvfile.name, "rb") as infile:
         stored_filename = storage.save(infile, prefix=prefix, filename=filename)
     r_info = storage.metadata(stored_filename)
-    r_info['last_modified_internal'] = r_info.pop('modified')
-    r_info['fs_filename'] = stored_filename
-    checksum = r_info.pop('checksum')
-    algo, checksum = checksum.split(':', 1)
-    r_info['format'] = storages.utils.extension(stored_filename)
-    r_info['checksum'] = Checksum(type=algo, value=checksum)
-    r_info['filesize'] = r_info.pop('size')
-    del r_info['filename']
-    r_info['title'] = filename
+    r_info["last_modified_internal"] = r_info.pop("modified")
+    r_info["fs_filename"] = stored_filename
+    checksum = r_info.pop("checksum")
+    algo, checksum = checksum.split(":", 1)
+    r_info["format"] = storages.utils.extension(stored_filename)
+    r_info["checksum"] = Checksum(type=algo, value=checksum)
+    r_info["filesize"] = r_info.pop("size")
+    del r_info["filename"]
+    r_info["title"] = filename
     return get_or_create_resource(r_info, model, dataset)
 
 
 def export_csv_for_model(model, dataset):
     model_cls = getattr(udata_models, model.capitalize(), None)
     if not model_cls:
-        log.error('Unknow model %s' % model)
+        log.error("Unknow model %s" % model)
         return
     queryset = get_queryset(model_cls)
     adapter = csv.get_adapter(model_cls)
     if not adapter:
-        log.error('No adapter found for %s' % model)
+        log.error("No adapter found for %s" % model)
         return
     adapter = adapter(queryset)
 
-    log.info('Exporting CSV for %s...' % model)
+    log.info("Exporting CSV for %s..." % model)
 
-    csvfile = NamedTemporaryFile(mode='w', encoding='utf8', delete=False)
+    csvfile = NamedTemporaryFile(mode="w", encoding="utf8", delete=False)
     try:
         # write adapter results into a tmp file
         writer = csv.get_writer(csvfile)
@@ -198,27 +207,27 @@ def export_csv_for_model(model, dataset):
         os.unlink(csvfile.name)
 
 
-@job('export-csv')
+@job("export-csv")
 def export_csv(self, model=None):
-    '''
+    """
     Generates a CSV export of all model objects as a resource of a dataset
-    '''
-    ALLOWED_MODELS = current_app.config.get('EXPORT_CSV_MODELS', [])
-    DATASET_ID = current_app.config.get('EXPORT_CSV_DATASET_ID')
+    """
+    ALLOWED_MODELS = current_app.config.get("EXPORT_CSV_MODELS", [])
+    DATASET_ID = current_app.config.get("EXPORT_CSV_DATASET_ID")
 
     if model and model not in ALLOWED_MODELS:
-        log.error('Unknown or unallowed model: %s' % model)
+        log.error("Unknown or unallowed model: %s" % model)
         return
 
     if not DATASET_ID:
-        log.error('EXPORT_CSV_DATASET_ID setting value not set')
+        log.error("EXPORT_CSV_DATASET_ID setting value not set")
         return
     try:
         dataset = Dataset.objects.get(id=DATASET_ID)
     except Dataset.DoesNotExist:
-        log.error('EXPORT_CSV_DATASET_ID points to a non existent dataset')
+        log.error("EXPORT_CSV_DATASET_ID points to a non existent dataset")
         return
 
-    models = (model, ) if model else ALLOWED_MODELS
+    models = (model,) if model else ALLOWED_MODELS
     for model in models:
         export_csv_for_model(model, dataset)

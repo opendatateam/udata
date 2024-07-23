@@ -1,6 +1,7 @@
-from udata.models import db, Dataset, Reuse, User
 from udata.core.followers.signals import on_follow, on_unfollow
 from udata.core.owned import Owned
+from udata.models import Dataset, Reuse, User, db
+
 
 @Dataset.on_create.connect
 @Dataset.on_update.connect
@@ -32,4 +33,3 @@ def update_owner_metrics(document, previous):
         previous.count_datasets()
     elif isinstance(document, Reuse):
         previous.count_reuses()
-

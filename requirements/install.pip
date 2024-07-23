@@ -11,7 +11,9 @@ aniso8601==9.0.1
 appdirs==1.4.4
     # via urlextract
 attrs==23.2.0
-    # via jsonschema
+    # via
+    #   jsonschema
+    #   referencing
 authlib==0.14.3
     # via -r requirements/install.in
 awesome-slugify==1.6.5
@@ -97,7 +99,6 @@ flask==2.1.2
     #   flask-babel
     #   flask-caching
     #   flask-cdn
-    #   flask-cors
     #   flask-gravatar
     #   flask-login
     #   flask-mail
@@ -114,8 +115,6 @@ flask-babel==4.0.0
 flask-caching==2.0.2
     # via -r requirements/install.in
 flask-cdn==1.5.3
-    # via -r requirements/install.in
-flask-cors==3.0.8
     # via -r requirements/install.in
 flask-gravatar==0.5.0
     # via -r requirements/install.in
@@ -208,6 +207,8 @@ pillow==9.2.0
     # via
     #   flask-storage
     #   pydenticon
+ply==3.11
+    # via pycparser
 prompt-toolkit==3.0.47
     # via click-repl
 pycparser==2.2
@@ -238,10 +239,18 @@ redis==4.5.2
     # via
     #   -r requirements/install.in
     #   kombu
+referencing==0.35.1
+    # via
+    #   jsonschema
+    #   jsonschema-specifications
 regex==2024.5.15
     # via awesome-slugify
 requests==2.24.0
     # via -r requirements/install.in
+rpds-py==0.19.0
+    # via
+    #   jsonschema
+    #   referencing
 s3transfer==0.6.2
     # via boto3
 six==1.16.0
@@ -250,9 +259,7 @@ six==1.16.0
     #   bleach
     #   cryptography
     #   faker
-    #   flask-cors
     #   isodate
-    #   jsonschema
     #   langdetect
     #   python-dateutil
     #   wtforms-json

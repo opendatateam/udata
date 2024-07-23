@@ -2,8 +2,12 @@
 
 ## Current (in progress)
 
+- Add linter and formatter with `pyproject.toml` config, add lint and formatting step in CI, add pre-commit hook to lint and format, update docs and lint and format the code [#3085](https://github.com/opendatateam/udata/pull/3085)
+- Revamp CORS: remove flask-cors to always returns 204 on OPTIONS request [#3074](https://github.com/opendatateam/udata/pull/3074)
 - Update pinned dependencies according to project dependencies, without updating any project dependencies [#3089](https://github.com/opendatateam/udata/pull/3089)
 - Add "run" button to harvesters (configurable with `HARVEST_ENABLE_MANUAL_RUN`) [#3092](https://github.com/opendatateam/udata/pull/3092)
+- Move from `object_type` / `object_id` to `subject_type` / `subject_id` in reports API [#3094](https://github.com/opendatateam/udata/pull/3094)
+- Allow to report without being authenticated [#3096](https://github.com/opendatateam/udata/pull/3096)
 
 ## 9.1.1 (2024-07-16)
 
@@ -25,7 +29,7 @@
 - Prevent tagging as spam owners' messages [#3071](https://github.com/opendatateam/udata/pull/3071)[#3076](https://github.com/opendatateam/udata/pull/3076)
 - Add api endpoint /me/org_topics/ [#3070](https://github.com/opendatateam/udata/pull/3070)
 - Expose dataservices in RDF catalog [#3058](https://github.com/opendatateam/udata/pull/3058) [#3075](https://github.com/opendatateam/udata/pull/3075)
-- CORS: always returns 204 on OPTIONS request [#3046](https://github.com/opendatateam/udata/pull/3046) 
+- CORS: always returns 204 on OPTIONS request [#3046](https://github.com/opendatateam/udata/pull/3046)
 
 ## 9.0.0 (2024-06-07)
 
