@@ -110,7 +110,7 @@ class ReportsAPITest(APITestCase):
         self.assertEqual(str(illegal_dataset.id), reports[0]["subject"]["id"])
         self.assertEqual("This is not appropriate", reports[0]["message"])
         self.assertEqual(REASON_ILLEGAL_CONTENT, reports[0]["reason"])
-        self.assertEqual(str(user.id), reports[0]["by"]["id"])
+        self.assertIsNone(reports[0]["by"])
         self.assertIsNotNone(reports[0]["subject_deleted_at"])
 
         self.assertEqual("Dataset", reports[1]["subject"]["class"])
