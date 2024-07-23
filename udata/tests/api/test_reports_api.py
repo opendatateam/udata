@@ -87,7 +87,6 @@ class ReportsAPITest(APITestCase):
         self.assertIsNone(reports[0].by)
         self.assertIsNotNone(reports[0].subject_deleted_at)
 
-
         reports[1].reload()
         self.assertEqual(Dataset, reports[1].subject.document_type)
         self.assertEqual(spam_dataset.id, reports[1].subject.pk)
