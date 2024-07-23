@@ -15,11 +15,10 @@ from flask import (
     request,
     url_for,
 )
-from flask_cors import CORS
 from flask_restx import Api, Resource
 from flask_storage import UnauthorizedFileType
 
-from udata import entrypoints, tracking
+from udata import cors, entrypoints, tracking
 from udata.app import csrf
 from udata.auth import Permission, PermissionDenied, RoleNeed, current_user, login_user
 from udata.i18n import get_locale
@@ -36,38 +35,6 @@ apiv2_blueprint = Blueprint("apiv2", __name__, url_prefix="/api/2")
 
 DEFAULT_PAGE_SIZE = 50
 HEADER_API_KEY = "X-API-KEY"
-
-# TODO: make upstream flask-restplus automatically handle
-# flask-restplus headers and allow lazy evaluation
-# of headers (ie. callable)
-PREFLIGHT_HEADERS = (
-    HEADER_API_KEY,
-    "X-Fields",
-    "Content-Type",
-    "Accept",
-    "Accept-Charset",
-    "Accept-Language",
-    "Authorization",
-    "Cache-Control",
-    "Content-Encoding",
-    "Content-Length",
-    "Content-Security-Policy",
-    "Content-Type",
-    "Cookie",
-    "ETag",
-    "Host",
-    "If-Modified-Since",
-    "Keep-Alive",
-    "Last-Modified",
-    "Origin",
-    "Referer",
-    "User-Agent",
-    "X-Forwarded-For",
-    "X-Forwarded-Port",
-    "X-Forwarded-Proto",
-)
-
-cors = CORS(allow_headers=PREFLIGHT_HEADERS)
 
 
 class UDataApi(Api):
@@ -367,4 +334,3 @@ def init_app(app):
     from udata.api.oauth2 import init_app as oauth2_init_app
 
     oauth2_init_app(app)
-    cors.init_app(app)
