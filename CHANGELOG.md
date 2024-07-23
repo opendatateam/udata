@@ -7,6 +7,7 @@
 - Update pinned dependencies according to project dependencies, without updating any project dependencies [#3089](https://github.com/opendatateam/udata/pull/3089)
 - Add "run" button to harvesters (configurable with `HARVEST_ENABLE_MANUAL_RUN`) [#3092](https://github.com/opendatateam/udata/pull/3092)
 - Move from `object_type` / `object_id` to `subject_type` / `subject_id` in reports API [#3094](https://github.com/opendatateam/udata/pull/3094)
+- Allow to report without being authenticated [#3096](https://github.com/opendatateam/udata/pull/3096)
 
 ## 9.1.1 (2024-07-16)
 

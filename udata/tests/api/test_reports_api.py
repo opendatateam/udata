@@ -9,6 +9,7 @@ from udata.core.reports.constants import (
     reports_reasons_translations,
 )
 from udata.core.reports.models import Report
+from udata.core.user.factories import UserFactory
 from udata.i18n import gettext as _
 
 from . import APITestCase
@@ -27,7 +28,8 @@ class ReportsAPITest(APITestCase):
     modules = []
 
     def test_reports_api_create(self):
-        user = self.login()
+        user = UserFactory()
+
         illegal_dataset = DatasetFactory.create(owner=user)
         spam_dataset = DatasetFactory.create(owner=user)
 
@@ -44,6 +46,8 @@ class ReportsAPITest(APITestCase):
         )
         self.assert201(response)
         self.assertEqual(Report.objects.count(), 1)
+
+        self.login(user)
 
         response = self.post(
             url_for("api.reports"),
@@ -64,7 +68,7 @@ class ReportsAPITest(APITestCase):
         self.assertEqual(illegal_dataset.id, reports[0].subject.pk)
         self.assertEqual("This is not appropriate", reports[0].message)
         self.assertEqual(REASON_ILLEGAL_CONTENT, reports[0].reason)
-        self.assertEqual(user.id, reports[0].by.id)
+        self.assertIsNone(reports[0].by)
 
         self.assertEqual(Dataset, reports[1].subject.document_type)
         self.assertEqual(spam_dataset.id, reports[1].subject.pk)
@@ -80,8 +84,9 @@ class ReportsAPITest(APITestCase):
         self.assertEqual(illegal_dataset.id, reports[0].subject.pk)
         self.assertEqual("This is not appropriate", reports[0].message)
         self.assertEqual(REASON_ILLEGAL_CONTENT, reports[0].reason)
-        self.assertEqual(user.id, reports[0].by.id)
+        self.assertIsNone(reports[0].by)
         self.assertIsNotNone(reports[0].subject_deleted_at)
+
 
         reports[1].reload()
         self.assertEqual(Dataset, reports[1].subject.document_type)
