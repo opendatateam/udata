@@ -33,3 +33,6 @@ class APITestCase(FrontTestCase):
 
     def delete(self, url, data=None, *args, **kwargs):
         return self.api.delete(url, data=data, *args, **kwargs)
+
+    def options(self, url, data=None, *args, **kwargs):
+        return self.api.options(url, data=data, *args, **kwargs)
