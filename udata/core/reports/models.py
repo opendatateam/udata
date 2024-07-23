@@ -49,8 +49,9 @@ class Report(db.Document):
     def mark_as_deleted_soft_delete(cls, sender, document, **kwargs):
         """
         Called when updating a model (maybe updating the `deleted` date)
+        Some documents like Discussion do not have a `deleted` attribute.
         """
-        if document.deleted:
+        if hasattr(document, "deleted") and document.deleted:
             # It's a little bit hard to query the GenericReferenceField,
             # we could do it without extra request with `DBRef(sender.__name__.lower(), document.id)`
             # but I'm not a big fan of the `.lower()` to get the correct DBRef. Fetching the model
