@@ -1,10 +1,10 @@
 # Changelog
 
-## 6.0.4 (2024-07-17)
+## 6.0.5 (2024-07-23)
 
 - Add correct owner permissions on harvest sources [master PR #3091](https://github.com/opendatateam/udata/pull/3091)
 
-## 6.0.3 (never published)
+## 6.0.3 / 6.0.4 (never published)
 
 ## 6.0.2 (2023-02-06)
 
