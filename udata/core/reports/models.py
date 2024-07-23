@@ -52,12 +52,7 @@ class Report(db.Document):
         Some documents like Discussion do not have a `deleted` attribute.
         """
         if hasattr(document, "deleted") and document.deleted:
-            # It's a little bit hard to query the GenericReferenceField,
-            # we could do it without extra request with `DBRef(sender.__name__.lower(), document.id)`
-            # but I'm not a big fan of the `.lower()` to get the correct DBRef. Fetching the model
-            # and asking MongoDB for the DBRef with `.to_dbref()` seems more robust.
-            subject = sender.objects(id=document.id).first()
-            Report.objects(subject=subject.to_dbref(), subject_deleted_at=None).update(
+            Report.objects(subject=document, subject_deleted_at=None).update(
                 subject_deleted_at=datetime.utcnow
             )
 
@@ -66,7 +61,6 @@ class Report(db.Document):
         """
         Call when really deleting a model from the database.
         """
-
         # Here we are forced to do a manual `DBRef(sender.__name__.lower(), document.id)`
         # because the document doesn't exist anymore…
         Report.objects(
