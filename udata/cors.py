@@ -33,7 +33,7 @@ def is_preflight_request() -> bool:
 
 def is_allowed_cors_route():
     return (
-        request.path.endswith((".js", ".css", ".woff", ".woff2", ".png", ".jpg", ".jpeg"))
+        request.path.endswith((".js", ".css", ".woff", ".woff2", ".png", ".jpg", ".jpeg", ".svg"))
         or request.path.startswith("/api")
         or request.path.startswith("/oauth")
     )
