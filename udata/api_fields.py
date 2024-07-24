@@ -6,7 +6,6 @@ from flask_storage.mongo import ImageField as FlaskStorageImageField
 
 import udata.api.fields as custom_restx_fields
 from udata.api import api, base_reference
-from udata.mongo.engine import db
 from udata.mongo.errors import FieldValidationError
 
 lazy_reference = api.model(
@@ -348,6 +347,8 @@ def patch(obj, request):
     Patch the object with the data from the request.
     Only fields decorated with the `field()` decorator will be read (and not readonly).
     """
+    from udata.mongo.engine import db
+
     for key, value in request.json.items():
         field = obj.__write_fields__.get(key)
         if field is not None and not field.readonly:
