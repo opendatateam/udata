@@ -10,6 +10,7 @@
 - Allow to report without being authenticated [#3096](https://github.com/opendatateam/udata/pull/3096)
 - Add a warning on harvest source deletion [#3098](https://github.com/opendatateam/udata/pull/3098)
 - Fix license in dataservices API (now returns ID instead of title) [#3097](https://github.com/opendatateam/udata/pull/3097)
+- Fix missing title on new dataset preview [#3100](https://github.com/opendatateam/udata/pull/3100)
 
 ## 9.1.1 (2024-07-16)
 
