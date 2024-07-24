@@ -64,7 +64,7 @@ class DataserviceAPITest(APITestCase):
                 "foo": "bar",
             },
         )
-        self.assertEqual(response.json["license"], license.title)
+        self.assertEqual(response.json["license"], license.id)
         self.assertEqual(
             response.json["self_api_url"], "http://local.test/api/1/dataservices/updated-title/"
         )
