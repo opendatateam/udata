@@ -13,7 +13,7 @@ from flask_wtf.csrf import CSRFProtect
 from speaklater import is_lazy_string
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from udata import entrypoints
+from udata import cors, entrypoints
 
 APP_NAME = __name__.split(".")[0]
 ROOT_DIR = abspath(join(dirname(__file__)))
@@ -214,6 +214,7 @@ def register_extensions(app):
         tasks,
     )
 
+    cors.init_app(app)
     tasks.init_app(app)
     i18n.init_app(app)
     mongo.init_app(app)
