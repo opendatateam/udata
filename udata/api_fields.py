@@ -5,7 +5,16 @@ from bson import ObjectId
 
 import udata.api.fields as custom_restx_fields
 from udata.api import api
+from udata.mongo.engine import db
 from udata.mongo.errors import FieldValidationError
+
+lazy_reference = api.model(
+    "LazyReference",
+    {
+        "class": restx_fields.Raw(attribute=lambda ref: ref.document_type.__name__),
+        "id": restx_fields.Raw(attribute=lambda ref: ref.pk),
+    },
+)
 
 
 def convert_db_to_field(key, field, info={}):
@@ -60,6 +69,10 @@ def convert_db_to_field(key, field, info={}):
         )
         constructor_read = lambda **kwargs: restx_fields.List(field_read, **kwargs)
         constructor_write = lambda **kwargs: restx_fields.List(field_write, **kwargs)
+    elif isinstance(
+        field, (mongo_fields.GenericReferenceField, mongoengine.fields.GenericLazyReferenceField)
+    ):
+        constructor = lambda **kwargs: restx_fields.Nested(lazy_reference, **kwargs)
     elif isinstance(field, mongo_fields.ReferenceField):
         # For reference we accept while writing a String representing the ID of the referenced model.
         # For reading, if the user supplied a `nested_fields` (RestX model), we use it to convert
@@ -289,8 +302,21 @@ def patch(obj, request):
             ):
                 # TODO `wrap_primary_key` do Mongo request, do a first pass to fetch all documents before calling it (to avoid multiple queries).
                 value = [wrap_primary_key(key, model_attribute.field, id) for id in value]
-            if isinstance(model_attribute, mongoengine.fields.ReferenceField):
+            elif isinstance(model_attribute, mongoengine.fields.ReferenceField):
                 value = wrap_primary_key(key, model_attribute, value)
+            elif isinstance(
+                model_attribute,
+                (
+                    mongoengine.fields.GenericReferenceField,
+                    mongoengine.fields.GenericLazyReferenceField,
+                ),
+            ):
+                value = wrap_primary_key(
+                    key,
+                    model_attribute,
+                    value["id"],
+                    document_type=db.resolve_model(value["class"]),
+                )
 
             info = getattr(model_attribute, "__additional_field_info__", {})
 
@@ -305,23 +331,38 @@ def patch(obj, request):
     return obj
 
 
-def wrap_primary_key(field_name: str, foreign_field: mongoengine.fields.ReferenceField, value: str):
+def wrap_primary_key(
+    field_name: str,
+    foreign_field: mongoengine.fields.ReferenceField | mongoengine.fields.GenericReferenceField,
+    value: str,
+    document_type: type = None,
+):
     """
     We need to wrap the `String` inside an `ObjectId` most of the time. If the foreign ID is a `String` we need to get
     a `DBRef` from the database.
 
     TODO: we only check the document reference if the ID is a `String` field (not in the case of a classic `ObjectId`).
     """
-    document_type = foreign_field.document_type()
-    id_field_name = document_type.__class__._meta["id_field"]
+    document_type = document_type or foreign_field.document_type().__class__
+    id_field_name = document_type._meta["id_field"]
 
-    id_field = getattr(document_type.__class__, id_field_name)
+    id_field = getattr(document_type, id_field_name)
 
     # Get the foreign document from MongoDB because the othewise it fails during read
     # Also useful to get a DBRef for non ObjectId references (see below)
-    foreign_document = document_type.__class__.objects(**{id_field_name: value}).first()
+    foreign_document = document_type.objects(**{id_field_name: value}).first()
     if foreign_document is None:
         raise FieldValidationError(field=field_name, message=f"Unknown reference '{value}'")
+
+    # GenericReferenceField only accepts document (not dbref / objectid)
+    if isinstance(
+        foreign_field,
+        (
+            mongoengine.fields.GenericReferenceField,
+            mongoengine.fields.GenericLazyReferenceField,
+        ),
+    ):
+        return foreign_document
 
     if isinstance(id_field, mongoengine.fields.ObjectIdField):
         return ObjectId(value)
@@ -336,5 +377,5 @@ def wrap_primary_key(field_name: str, foreign_field: mongoengine.fields.Referenc
         return foreign_document.to_dbref()
     else:
         raise ValueError(
-            f"Unknown ID field type {id_field.__class__} for {document_type.__class__} (ID field name is {id_field_name}, value was {value})"
+            f"Unknown ID field type {id_field.__class__} for {document_type} (ID field name is {id_field_name}, value was {value})"
         )
