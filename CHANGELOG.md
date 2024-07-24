@@ -9,6 +9,7 @@
 - Move from `object_type` / `object_id` to `subject_type` / `subject_id` in reports API [#3094](https://github.com/opendatateam/udata/pull/3094)
 - Allow to report without being authenticated [#3096](https://github.com/opendatateam/udata/pull/3096)
 - Add a warning on harvest source deletion [#3098](https://github.com/opendatateam/udata/pull/3098)
+- Fix license in dataservices API (now returns ID instead of title) [#3097](https://github.com/opendatateam/udata/pull/3097)
 
 ## 9.1.1 (2024-07-16)
 

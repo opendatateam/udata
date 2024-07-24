@@ -99,6 +99,8 @@ class Dataservice(WithMetrics, Owned, db.Document):
     license = field(
         db.ReferenceField("License"),
         allow_null=True,
+        attribute="license.id",
+        description="The ID of the license",
     )
 
     tags = field(
