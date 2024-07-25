@@ -41,7 +41,6 @@
 </template>
 
 <script>
-import API from 'api';
 import {badges} from 'models/badges';
 import Modal from 'components/modal.vue';
 

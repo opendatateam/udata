@@ -26,7 +26,6 @@
 
 <script>
 import {Model} from 'models/base';
-import Alert from 'components/alert.vue';
 import NotificationZone from 'components/notification-zone.vue';
 import Box from 'components/containers/box.vue';
 
@@ -65,4 +64,3 @@ export default {
     }
 }
 </style>
-

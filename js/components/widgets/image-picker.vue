@@ -69,7 +69,6 @@
 </template>
 
 <script>
-import API from 'api';
 import log from 'logger';
 import UploaderMixin from 'mixins/uploader';
 import Thumbnailer from 'components/widgets/thumbnailer.vue';

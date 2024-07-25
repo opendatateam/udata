@@ -11,7 +11,6 @@
 <script>
 import {Model} from 'models/base';
 import HarvestSources from 'models/harvest/sources';
-import {VALIDATION_STATUS_I18N, VALIDATION_STATUS_CLASSES} from 'models/harvest/source';
 import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/job';
 import Datatable from 'components/datatable/widget.vue';
 import placeholders from 'helpers/placeholders';

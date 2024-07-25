@@ -13,7 +13,6 @@
 </template>
 
 <script>
-import moment from 'moment';
 import Post from 'models/post';
 import Layout from 'components/layout.vue';
 

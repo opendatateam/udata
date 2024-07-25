@@ -111,7 +111,6 @@
 
 <script>
 import API  from 'api';
-import Vue from 'vue';
 import Modal from 'components/modal.vue';
 import DatasetCard from 'components/dataset/card.vue';
 import ReuseCard from 'components/reuse/card.vue';
