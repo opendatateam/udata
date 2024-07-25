@@ -111,6 +111,19 @@ export default {
                     icon: 'send',
                     method: this.transfer_request
                 });
+                if (!this.dataset.archived) {
+                actions.push({
+                    label: this._('Archive'),
+                    icon: 'archive',
+                    method: this.archive
+                })
+                } else {
+                actions.push({
+                    label: this._('Unarchive'),
+                    icon: 'undo',
+                    method: this.unarchive
+                });
+                }
                 if(!this.dataset.deleted) {
                     actions.push({
                         label: this._('Delete'),
@@ -168,6 +181,22 @@ export default {
     methods: {
         edit() {
             this.$go({name: 'dataset-edit', params: {oid: this.dataset.id}});
+        },
+        archive() {
+        this.dataset.archived = new Date().toISOString();
+        API.datasets.update_dataset({dataset: this.dataset.id, payload: this.dataset},
+            (response) => {
+                this.dataset.on_fetched(response);
+            }
+        );
+        },
+        unarchive() {
+        this.dataset.archived = null;
+        API.datasets.update_dataset({dataset: this.dataset.id, payload: this.dataset},
+            (response) => {
+                this.dataset.on_fetched(response);
+            }
+        );
         },
         confirm_delete() {
             this.$root.$modal(
