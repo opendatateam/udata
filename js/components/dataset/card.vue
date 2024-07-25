@@ -12,7 +12,7 @@
         popover-trigger="hover"/>
 
     <div class="card-body">
-        <h4>{{ dataset.full_title | truncate 80 }}</h4>
+        <h4>{{ (dataset.full_title || dataset.title) | truncate 80 }}</h4>
         <div class="clamp-3">{{{ dataset.description | markdown 180 }}}</div>
     </div>
 
