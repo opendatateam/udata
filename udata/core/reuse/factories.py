@@ -18,6 +18,7 @@ class ReuseFactory(ModelFactory):
     url = factory.LazyAttribute(lambda o: "/".join([faker.url(), faker.unique_string()]))
     type = FuzzyChoice(REUSE_TYPES.keys())
     topic = FuzzyChoice(REUSE_TOPICS.keys())
+    archived = None
 
     class Params:
         visible = factory.Trait(datasets=factory.LazyAttribute(lambda o: [DatasetFactory()]))

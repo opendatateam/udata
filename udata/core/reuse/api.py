@@ -260,7 +260,9 @@ class ReusesSuggestAPI(API):
     def get(self):
         """Reuses suggest endpoint using mongoDB contains"""
         args = suggest_parser.parse_args()
-        reuses = Reuse.objects(deleted=None, private__ne=True, title__icontains=args["q"])
+        reuses = Reuse.objects(
+            archived=None, deleted=None, private__ne=True, title__icontains=args["q"]
+        )
         return [
             {
                 "id": reuse.id,

@@ -110,6 +110,9 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
         db.DateTimeField(),
         readonly=True,
     )
+    archived = field(
+        db.DateTimeField(),
+    )
 
     def __str__(self):
         return self.title or ""
