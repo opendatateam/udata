@@ -34,6 +34,7 @@ class ReuseSearch(ModelSearchAdapter):
         "badge": Filter(),
         "featured": BoolFilter(),
         "topic": Filter(),
+        "archived": BoolFilter(),
     }
 
     @classmethod
@@ -78,6 +79,7 @@ class ReuseSearch(ModelSearchAdapter):
             "description": reuse.description,
             "url": reuse.url,
             "created_at": to_iso_datetime(reuse.created_at),
+            "archived": to_iso_datetime(reuse.archived) if reuse.archived else None,
             "views": reuse.metrics.get("views", 0),
             "followers": reuse.metrics.get("followers", 0),
             "datasets": reuse.metrics.get("datasets", 0),
