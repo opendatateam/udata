@@ -1,5 +1,6 @@
 import json
 import logging
+import pathlib
 
 import click
 import requests
@@ -27,13 +28,13 @@ COMMUNITY_RES_URL = "/api/1/datasets/community_resources"
 DISCUSSION_URL = "/api/1/discussions"
 
 
-DEFAULT_FIXTURE_FILE = (
+DEFAULT_FIXTURE_FILE: str = (
     "https://raw.githubusercontent.com/opendatateam/udata-fixtures/main/results.json"  # noqa
 )
-DEFAULT_FIXTURES_RESULTS_FILE = "results.json"
+DEFAULT_FIXTURES_RESULTS_FILENAME: str = "results.json"
 
 
-def fix_dates(obj):
+def fix_dates(obj: dict) -> dict:
     """Fix dates from the fixtures so they can be safely reloaded later on."""
     obj["created_at_internal"] = obj["internal"]["created_at_internal"]
     obj["last_modified_internal"] = obj["internal"]["last_modified_internal"]
@@ -43,9 +44,10 @@ def fix_dates(obj):
 
 @cli.command()
 @click.argument("data-source")
-@click.argument("results-file", default=DEFAULT_FIXTURES_RESULTS_FILE)
-def generate_fixtures_file(data_source, results_file):
+@click.argument("results-filename", default=DEFAULT_FIXTURES_RESULTS_FILENAME)
+def generate_fixtures_file(data_source: str, results_filename: str) -> None:
     """Build sample fixture file based on datasets slugs list (users, datasets, reuses)."""
+    results_file = pathlib.Path(results_filename)
     datasets_slugs = current_app.config["FIXTURE_DATASET_SLUGS"]
     json_result = []
 
@@ -122,14 +124,14 @@ def generate_fixtures_file(data_source, results_file):
 
             json_result.append(json_fixture)
 
-    with open(results_file, "w") as f:
-        json.dump(json_result, f)
-        print(f"Fixtures saved to file {results_file}")
+    with results_file.open("w") as f:
+        json.dump(json_result, f, indent=2)
+        print(f"Fixtures saved to file {results_filename}")
 
 
 @cli.command()
 @click.argument("source", default=DEFAULT_FIXTURE_FILE)
-def generate_fixtures(source):
+def generate_fixtures(source: str) -> None:
     """Build sample fixture data (users, datasets, reuses) from local or remote file."""
     if source.startswith("http"):
         json_fixtures = requests.get(source).json()
