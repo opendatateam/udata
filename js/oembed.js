@@ -13,7 +13,7 @@
  *      <div data-udata-organization="slug-or-id"></div>
  */
 import 'whatwg-fetch';
-import 'less/oembed.less';
+import '../less/oembed.less';
 
 /**
  * Extract the base URL from the URL of the current script
