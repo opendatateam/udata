@@ -206,8 +206,7 @@ export default {
       this.$go({ name: 'reuse-edit', params: { oid: this.reuse.id } })
     },
     archive() {
-      const archived_reuse = this.reuse;
-      archived_reuse.archived = new Date().toISOString();
+      this.reuse.archived = new Date().toISOString();
       API.reuses.update_reuse({reuse: this.reuse.id, payload: archived_reuse},
           (response) => {
               this.reuse.on_fetched(response);
@@ -215,8 +214,7 @@ export default {
       );
     },
     unarchive() {
-      const archived_reuse = this.reuse;
-      archived_reuse.archived = null;
+      this.reuse.archived = null;
       API.reuses.update_reuse({reuse: this.reuse.id, payload: archived_reuse},
           (response) => {
               this.reuse.on_fetched(response);
