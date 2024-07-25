@@ -30,11 +30,21 @@ DISCUSSION_URL = "/api/1/discussions"
 DEFAULT_FIXTURE_FILE = (
     "https://raw.githubusercontent.com/opendatateam/udata-fixtures/main/results.json"  # noqa
 )
+DEFAULT_FIXTURES_RESULTS_FILE = "results.json"
+
+
+def fix_dates(obj):
+    """Fix dates from the fixtures so they can be safely reloaded later on."""
+    obj["created_at_internal"] = obj["internal"]["created_at_internal"]
+    obj["last_modified_internal"] = obj["internal"]["last_modified_internal"]
+    del obj["internal"]
+    del obj["created_at"]
 
 
 @cli.command()
 @click.argument("data-source")
-def generate_fixtures_file(data_source):
+@click.argument("results-file", default=DEFAULT_FIXTURES_RESULTS_FILE)
+def generate_fixtures_file(data_source, results_file):
     """Build sample fixture file based on datasets slugs list (users, datasets, reuses)."""
     datasets_slugs = current_app.config["FIXTURE_DATASET_SLUGS"]
     json_result = []
@@ -52,13 +62,13 @@ def generate_fixtures_file(data_source):
             del json_dataset["badges"]
             del json_dataset["spatial"]
             del json_dataset["quality"]
-            json_dataset["created_at_internal"] = json_dataset.pop("created_at")
+            fix_dates(json_dataset)
             json_resources = json_dataset.pop("resources")
             for res in json_resources:
                 del res["latest"]
                 del res["preview_url"]
                 del res["last_modified"]
-                res["created_at_internal"] = res.pop("created_at")
+                fix_dates(res)
             if json_dataset["organization"] is None:
                 json_owner = json_dataset.pop("owner")
                 json_dataset["owner"] = json_owner["id"]
@@ -95,7 +105,7 @@ def generate_fixtures_file(data_source):
                 del com["latest"]
                 del com["last_modified"]
                 del com["preview_url"]
-                com["created_at_internal"] = com.pop("created_at")
+                fix_dates(com)
             json_fixture["community_resources"] = json_community
 
             json_discussion = requests.get(
@@ -112,8 +122,9 @@ def generate_fixtures_file(data_source):
 
             json_result.append(json_fixture)
 
-    with open("results.json", "w") as f:
+    with open(results_file, "w") as f:
         json.dump(json_result, f)
+        print(f"Fixtures saved to file {results_file}")
 
 
 @cli.command()
