@@ -335,8 +335,8 @@ def wrap_primary_key(
     field_name: str,
     foreign_field: mongoengine.fields.ReferenceField | mongoengine.fields.GenericReferenceField,
     value: str,
-    document_type: type = None,
-):
+    document_type: type | None = None,
+) -> type | None:
     """
     We need to wrap the `String` inside an `ObjectId` most of the time. If the foreign ID is a `String` we need to get
     a `DBRef` from the database.

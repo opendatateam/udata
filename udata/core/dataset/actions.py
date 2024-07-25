@@ -4,12 +4,12 @@ from datetime import datetime
 from flask import current_app, render_template
 
 from udata import i18n
-from udata.models import Discussion, Message
+from udata.models import Dataset, Discussion, Message
 
 log = logging.getLogger(__name__)
 
 
-def archive(dataset, comment=False):
+def archive(dataset: Dataset, comment=False) -> None:
     """Archive a dataset"""
     if dataset.archived:
         log.warning("Dataset %s already archived, bumping date", dataset)

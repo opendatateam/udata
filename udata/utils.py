@@ -3,6 +3,7 @@ import math
 import re
 from datetime import date, datetime
 from math import ceil
+from typing import Any
 from uuid import UUID, uuid4
 from xml.sax.saxutils import escape
 
@@ -120,7 +121,7 @@ def daterange_start(value):
         return result.replace(day=1, month=1)
 
 
-def daterange_end(value):
+def daterange_end(value: date | datetime | str | None) -> date:
     """Parse a date range end boundary"""
     if not value:
         return None
@@ -143,7 +144,7 @@ def daterange_end(value):
         return result.replace(month=12, day=31)
 
 
-def to_naive_datetime(given_date):
+def to_naive_datetime(given_date: Any) -> datetime:
     if isinstance(given_date, str):
         given_date = parse_dt(given_date)
     if isinstance(given_date, date) and not isinstance(given_date, datetime):
@@ -153,7 +154,7 @@ def to_naive_datetime(given_date):
     return given_date
 
 
-def to_iso(dt):
+def to_iso(dt: date | datetime) -> str:
     """
     Format a date or datetime into an ISO-8601 string
 
@@ -165,7 +166,7 @@ def to_iso(dt):
         return to_iso_date(dt)
 
 
-def to_iso_date(dt):
+def to_iso_date(dt: date | datetime) -> str:
     """
     Format a date or datetime into an ISO-8601 date string.
 
@@ -175,7 +176,7 @@ def to_iso_date(dt):
         return "{dt.year:04d}-{dt.month:02d}-{dt.day:02d}".format(dt=dt)
 
 
-def to_iso_datetime(dt):
+def to_iso_datetime(dt: date | datetime) -> str:
     """
     Format a date or datetime into an ISO-8601 datetime string.
 
@@ -193,7 +194,7 @@ def to_iso_datetime(dt):
         return "T".join((date_str, time_str))
 
 
-def to_bool(value):
+def to_bool(value: bool | str | int) -> bool:
     """
     Transform a value into a boolean with the following rules:
 
@@ -212,24 +213,24 @@ def to_bool(value):
         return False
 
 
-def clean_string(value):
+def clean_string(value: str):
     """
     Clean an user input string (Prevent it from containing XSS)
     """
     return escape(value)
 
 
-def not_none_dict(d):
+def not_none_dict(d: dict) -> dict:
     """Filter out None values from a dict"""
     return {k: v for k, v in d.items() if v is not None}
 
 
-def hash_url(url):
+def hash_url(url: str) -> str | None:
     """Hash an URL to make it indexable"""
     return hashlib.sha1(url.encode("utf-8")).hexdigest() if url else None
 
 
-def recursive_get(obj, key):
+def recursive_get(obj: Any, key: Any):
     """
     Get an attribute or a key recursively.
 
@@ -249,14 +250,14 @@ def recursive_get(obj, key):
     return recursive_get(value, parts) if parts else value
 
 
-def unique_string(length=UUID_LENGTH):
+def unique_string(length: int = UUID_LENGTH) -> str:
     """Generate a unique string"""
     # We need a string at least as long as length
     string = str(uuid4()) * int(math.ceil(length / float(UUID_LENGTH)))
     return string[:length] if length else string
 
 
-def is_uuid(uuid_string, version=4):
+def is_uuid(uuid_string: str, version: int = 4) -> bool:
     try:
         # If uuid_string is a valid hex code but not a valid uuid,
         # UUID() will still make a valide uuid out of it.
@@ -290,7 +291,7 @@ class UDataProvider(BaseProvider):
     Might be conributed to upstream Faker project
     """
 
-    def unique_string(self, length=UUID_LENGTH):
+    def unique_string(self, length: int = UUID_LENGTH) -> str:
         """Generate a unique string"""
         return unique_string(length)
 
@@ -302,7 +303,7 @@ class UnicodeLoremProvider(LoremProvider):
     word_list = [w + "é" for w in LoremProvider.word_list]
 
 
-def safe_unicode(string):
+def safe_unicode(string: str) -> str | None:
     """Safely transform any object into utf8 decoded str"""
     if string is None:
         return None
