@@ -43,6 +43,9 @@ reuse_fields = api.model(
             description="The reuse last modification date", readonly=True
         ),
         "deleted": fields.ISODateTime(description="The deletion date if deleted", readonly=True),
+        "archived": fields.ISODateTime(
+            description="The archivation date if archived", allow_null=True
+        ),
         "datasets": fields.List(fields.Nested(dataset_fields), description="The reused datasets"),
         "organization": fields.Nested(
             org_ref_fields,

@@ -48,6 +48,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
 
     featured = db.BooleanField()
     deleted = db.DateTimeField()
+    archived = db.DateTimeField()
 
     def __str__(self):
         return self.title or ""

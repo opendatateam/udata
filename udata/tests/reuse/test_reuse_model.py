@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 
 from udata.core.dataset import tasks as dataset_tasks
@@ -103,6 +104,15 @@ class ReuseModelTest(TestCase, DBTestMixin):
         reuse = ReuseFactory(topic="health")
         self.assertEqual(reuse.topic, "health")
         self.assertEqual(reuse.topic_label, _("Health"))
+
+    def test_reuse_archived(self):
+        reuse = ReuseFactory(archived=datetime.utcnow())
+        reuse.save()
+        self.assertLess(reuse.archived, datetime.utcnow())
+
+        reuse.archived = None
+        reuse.save()
+        self.assertIsNone(reuse.archived)
 
     def test_reuse_without_private(self):
         reuse = ReuseFactory()

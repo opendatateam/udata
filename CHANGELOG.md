@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Add a `archived` field for reuses [#3088](https://github.com/opendatateam/udata/pull/3088)
 - Add linter and formatter with `pyproject.toml` config, add lint and formatting step in CI, add pre-commit hook to lint and format, update docs and lint and format the code [#3085](https://github.com/opendatateam/udata/pull/3085)
 - Revamp CORS: remove flask-cors to always returns 204 on OPTIONS request [#3074](https://github.com/opendatateam/udata/pull/3074)
 - Update pinned dependencies according to project dependencies, without updating any project dependencies [#3089](https://github.com/opendatateam/udata/pull/3089)

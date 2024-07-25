@@ -88,3 +88,6 @@ data
 
 # VSCode
 .vscode
+
+# Project specific
+fs/resources/
