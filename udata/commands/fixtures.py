@@ -123,7 +123,7 @@ def generate_fixtures_file(data_source):
 
 @cli.command()
 @click.argument("source", default=DEFAULT_FIXTURE_FILE)
-def generate_fixtures(source):
+def import_fixtures(source):
     """Build sample fixture data (users, datasets, reuses) from local or remote file."""
     if source.startswith("http"):
         json_fixtures = requests.get(source).json()

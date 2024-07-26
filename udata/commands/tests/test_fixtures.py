@@ -6,8 +6,8 @@ from udata.tests import DBTestMixin, TestCase
 
 
 class FixturesTest(DBTestMixin):
-    def test_generate_fixtures(self, cli):
-        cli("generate-fixtures")
+    def test_import_fixtures(self, cli):
+        cli("import-fixtures")
         assert models.Organization.objects.count() > 0
         assert models.Dataset.objects.count() > 0
         assert models.Reuse.objects.count() > 0
