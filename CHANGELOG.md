@@ -12,6 +12,7 @@
 - Add a warning on harvest source deletion [#3098](https://github.com/opendatateam/udata/pull/3098)
 - Fix license in dataservices API (now returns ID instead of title) [#3097](https://github.com/opendatateam/udata/pull/3097)
 - Fix missing title on new dataset preview [#3100](https://github.com/opendatateam/udata/pull/3100)
+- Fix the fixtures tests which was not running, and then was failing [#3105](https://github.com/opendatateam/udata/pull/3105)
 
 ## 9.1.1 (2024-07-16)
 
