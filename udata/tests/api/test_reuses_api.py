@@ -5,11 +5,9 @@ from flask import url_for
 
 from udata.core.badges.factories import badge_factory
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.organization import metrics
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.constants import REUSE_TOPICS, REUSE_TYPES
 from udata.core.reuse.factories import ReuseFactory
-from udata.core.user import metrics
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.models import Follow, Member, Reuse
 from udata.tests.helpers import (
