@@ -5,7 +5,6 @@
 <script>
 import CommunityResource from 'models/communityresource';
 import Dataset from 'models/dataset';
-import API from 'api';
 
 export default {
     data: function() {

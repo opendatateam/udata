@@ -6,7 +6,6 @@
 
 <script>
 import Dataset from 'models/dataset';
-import Vue from 'vue';
 import Wizard from 'components/widgets/wizard.vue';
 // Steps
 import PublishAs from 'components/widgets/publish-as.vue';

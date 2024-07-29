@@ -38,7 +38,6 @@ import Reuse from 'models/reuse';
 import reuse_types from 'models/reuse_types';
 import reuse_topics from 'models/reuse_topics';
 import placeholders from 'helpers/placeholders';
-import moment from 'moment';
 import config from 'config';
 
 const MASK = [

@@ -40,8 +40,6 @@
 </template>
 
 <script>
-import moment from 'moment';
-import Vue from 'vue';
 import URLs from 'urls';
 import Organization from 'models/organization';
 import CommunityResources from 'models/communityresources';

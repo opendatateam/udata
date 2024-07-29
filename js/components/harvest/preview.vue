@@ -13,7 +13,6 @@
 
 <script>
 import API from 'api';
-import backends from 'models/harvest/backends';
 import HarvestJob from 'models/harvest/job';
 import HarvestSource from 'models/harvest/source';
 import JobWidget from 'components/harvest/job.vue';

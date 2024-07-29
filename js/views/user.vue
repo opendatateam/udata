@@ -25,7 +25,6 @@
 </template>
 
 <script>
-import moment from 'moment';
 import User from 'models/user';
 import Reuses from 'models/reuses';
 import Datasets from 'models/datasets';
