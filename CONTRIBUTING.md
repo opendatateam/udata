@@ -66,7 +66,7 @@ and will magicaly close the issue as soon as the commit is merged.
 
 When the PR has been approved (at least once), you are free to merge it
 in master. We have a squash & merge strategy and pay attention to having
-a clean  commit message. You can then delete the branch. If linked with
+a clean commit message. You can then delete the branch. If linked with
 an issue, the issue should be closed automatically.
 
 ## Discussing strategies
