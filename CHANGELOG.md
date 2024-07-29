@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 9.1.2 (2024-07-29)
 
 - Add a `archived` field for reuses [#3088](https://github.com/opendatateam/udata/pull/3088)
