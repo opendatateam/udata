@@ -1,7 +1,5 @@
 <!-- MIME type autocompleter -->
 <script>
-import Vue from 'vue';
-import API from 'api';
 import BaseCompleter from 'components/form/base-completer.vue';
 
 export default {

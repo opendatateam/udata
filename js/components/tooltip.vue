@@ -6,7 +6,6 @@
 </div>
 </template>
 <script>
-import log from 'logger';
 import TooltipMixin from 'mixins/tooltip';
 
 import 'vue-strap/src/Tooltip.vue'; // Needed for style

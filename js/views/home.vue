@@ -24,7 +24,6 @@
 </template>
 
 <script>
-import moment from 'moment';
 import {PageList} from 'models/base';
 import MyMetrics from 'models/mymetrics';
 // Widgets
