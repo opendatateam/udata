@@ -6,6 +6,7 @@
 - Fix the version of udata-fixtures used by `udata import-fixtures` [#3114](https://github.com/opendatateam/udata/pull/3114)
 - Update to the version v2.0.0 of udata-fixtures (with the dataservices)
 - Add type hints [#3111](https://github.com/opendatateam/udata/pull/3111)
+- Add a `archived` button for datasets and reuses on frontend admin [#3104](https://github.com/opendatateam/udata/pull/3104)
 
 ## 9.1.2 (2024-07-29)
 
