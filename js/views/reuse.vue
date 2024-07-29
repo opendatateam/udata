@@ -207,7 +207,7 @@ export default {
     },
     archive() {
       this.reuse.archived = new Date().toISOString();
-      API.reuses.update_reuse({reuse: this.reuse.id, payload: archived_reuse},
+      API.reuses.update_reuse({reuse: this.reuse.id, payload: this.reuse},
           (response) => {
               this.reuse.on_fetched(response);
           }
@@ -215,7 +215,7 @@ export default {
     },
     unarchive() {
       this.reuse.archived = null;
-      API.reuses.update_reuse({reuse: this.reuse.id, payload: archived_reuse},
+      API.reuses.update_reuse({reuse: this.reuse.id, payload: this.reuse},
           (response) => {
               this.reuse.on_fetched(response);
           }
