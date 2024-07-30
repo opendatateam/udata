@@ -245,7 +245,7 @@ referencing==0.35.1
     #   jsonschema-specifications
 regex==2024.5.15
     # via awesome-slugify
-requests==2.24.0
+requests==2.32.3
     # via -r requirements/install.in
 rpds-py==0.19.0
     # via
@@ -253,6 +253,8 @@ rpds-py==0.19.0
     #   referencing
 s3transfer==0.6.2
     # via boto3
+sentry-sdk==2.9.0
+    # via -r requirements/install.in
 six==1.16.0
     # via
     #   bcrypt
@@ -279,7 +281,7 @@ uritools==4.0.3
     # via urlextract
 urlextract==0.14.0
     # via -r requirements/install.in
-urllib3==1.25.11
+urllib3==1.26.19
     # via
     #   botocore
     #   requests
