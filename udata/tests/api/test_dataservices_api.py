@@ -1,5 +1,11 @@
+import random
+import string
+import time
+
+from elasticsearch_dsl import analyzer, token_filter, tokenizer
 from flask import url_for
 
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory
 from udata.core.organization.factories import OrganizationFactory
@@ -311,3 +317,109 @@ class DataserviceAPITest(APITestCase):
         dataservice = Dataservice.objects(id=response.json["id"]).first()
         self.assertEqual(dataservice.owner, None)
         self.assertEqual(dataservice.organization.id, me_org.id)
+
+    def test_elasticsearch(self):
+        from datetime import datetime
+
+        from elasticsearch import Elasticsearch
+        from elasticsearch_dsl import Date, Document, Integer, Keyword, Search, Text, connections
+
+        french_elision = token_filter(
+            "french_elision",
+            type="elision",
+            articles_case=True,
+            articles=[
+                "l",
+                "m",
+                "t",
+                "qu",
+                "n",
+                "s",
+                "j",
+                "d",
+                "c",
+                "jusqu",
+                "quoiqu",
+                "lorsqu",
+                "puisqu",
+            ],
+        )
+        SEARCH_SYNONYMS = [
+            "AMD, administrateur ministériel des données, AMDAC",
+            "lolf, loi de finance",
+            "waldec, RNA, répertoire national des associations",
+            "ovq, baromètre des résultats",
+            "contour, découpage",
+            "rp, recensement de la population",
+        ]
+        french_stop = token_filter("french_stop", type="stop", stopwords="_french_")
+        french_stemmer = token_filter("french_stemmer", type="stemmer", language="light_french")
+        french_synonym = token_filter(
+            "french_synonym",
+            type="synonym",
+            ignore_case=True,
+            expand=True,
+            synonyms=SEARCH_SYNONYMS,
+        )
+
+        dgv_analyzer = analyzer(
+            "french_dgv",
+            tokenizer=tokenizer("standard"),
+            filter=[french_elision, french_synonym, french_stemmer, french_stop],
+        )
+
+        # Define a default Elasticsearch client
+        client = connections.create_connection(hosts=["localhost"])
+
+        alias = "".join(random.choices(string.ascii_lowercase, k=10))
+        now = datetime.utcnow().strftime("%Y-%m-%d-%H-%M")
+        index_name_with_suffix = f"{alias}-{now}"
+        pattern = f"{alias}-*"
+
+        class Index:
+            name = alias
+
+        attributes = {"Index": Index}
+        attributes["title"] = Text(analyzer=dgv_analyzer)
+
+        Article = type("Article", (Document,), attributes)
+
+        print("exporting template")
+        index_template = Article._index.as_template(alias, pattern)
+        index_template.save()
+
+        print("creating index")
+        client.indices.create(index=index_name_with_suffix)
+        print("creating alias")
+        client.indices.put_alias(index=index_name_with_suffix, name=alias)
+        print("done")
+
+        # create and save and article
+        article = Article(meta={"id": 42}, title="Hello AMD world!", tags=["test"])
+        article.body = """ looong text """
+        article.published_from = datetime.now()
+        article.save()
+
+        article = Article.get(id=42)
+        print(article.title)
+
+        # Display cluster health
+        print(connections.get_connection().cluster.health())
+
+        print("sleeping")
+        time.sleep(1)
+        print("go!")
+
+        s = Search(using=client, index=alias).query("match", title="AMDAC")
+
+        # s.aggs.bucket("per_tag", "terms", field="tags").metric("max_lines", "max", field="lines")
+
+        response = s.execute()
+
+        print("hit in response")
+
+        for hit in response:
+            print(hit.meta.score, hit.title)
+
+        assert len(response) == 1
+        assert response[0].title == "Hello AMD world!"

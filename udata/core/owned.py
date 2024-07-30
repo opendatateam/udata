@@ -71,6 +71,7 @@ class Owned(object):
         check=check_organization_is_valid_for_current_user,
         allow_null=True,
         filterable={},
+        searchable=True,
     )
 
     on_owner_change = signal("Owned.on_owner_change")

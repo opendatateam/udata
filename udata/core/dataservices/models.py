@@ -4,6 +4,7 @@ import udata.core.contact_point.api_fields as contact_api_fields
 import udata.core.dataset.api_fields as datasets_api_fields
 from udata.api_fields import field, function_field, generate_fields
 from udata.core.dataset.models import Dataset
+from udata.core.elasticsearch import elasticsearch
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
@@ -57,6 +58,7 @@ class HarvestMetadata(db.EmbeddedDocument):
 
 
 @generate_fields()
+@elasticsearch()
 class Dataservice(WithMetrics, Owned, db.Document):
     meta = {
         "indexes": [
@@ -71,9 +73,11 @@ class Dataservice(WithMetrics, Owned, db.Document):
         db.StringField(required=True),
         example="My awesome API",
         sortable=True,
+        searchable=True,
     )
     acronym = field(
         db.StringField(max_length=128),
+        searchable=True,
     )
     # /!\ do not set directly the slug when creating or updating a dataset
     # this will break the search indexation
@@ -83,28 +87,54 @@ class Dataservice(WithMetrics, Owned, db.Document):
         ),
         readonly=True,
     )
-    description = field(db.StringField(default=""), description="In markdown")
+    description = field(
+        db.StringField(default=""),
+        description="In markdown",
+        searchable=True,
+    )
     base_api_url = field(
         db.URLField(required=True),
         sortable=True,
+        searchable=True,
     )
-    endpoint_description_url = field(db.URLField())
-    authorization_request_url = field(db.URLField())
-    availability = field(db.FloatField(min=0, max=100), example="99.99")
+    endpoint_description_url = field(
+        db.URLField(),
+        searchable=True,
+    )
+    authorization_request_url = field(
+        db.URLField(),
+        searchable=True,
+    )
+    availability = field(
+        db.FloatField(min=0, max=100),
+        example="99.99",
+        searchable=True,
+    )
     rate_limiting = field(db.StringField())
-    is_restricted = field(db.BooleanField())
-    has_token = field(db.BooleanField())
-    format = field(db.StringField(choices=DATASERVICE_FORMATS))
+    is_restricted = field(
+        db.BooleanField(),
+        searchable=True,
+    )
+    has_token = field(
+        db.BooleanField(),
+        searchable=True,
+    )
+    format = field(
+        db.StringField(choices=DATASERVICE_FORMATS),
+        searchable=True,
+    )
 
     license = field(
         db.ReferenceField("License"),
         allow_null=True,
         attribute="license.id",
         description="The ID of the license",
+        searchable="keyword",
     )
 
     tags = field(
         db.TagListField(),
+        searchable="keyword",
     )
 
     private = field(
@@ -123,12 +153,14 @@ class Dataservice(WithMetrics, Owned, db.Document):
     created_at = field(
         db.DateTimeField(verbose_name=_("Creation date"), default=datetime.utcnow, required=True),
         readonly=True,
+        searchable=True,
     )
     metadata_modified_at = field(
         db.DateTimeField(
             verbose_name=_("Last modification date"), default=datetime.utcnow, required=True
         ),
         readonly=True,
+        searchable=True,
     )
     deleted_at = field(db.DateTimeField(), readonly=True)
     archived_at = field(db.DateTimeField(), readonly=True)

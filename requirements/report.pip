@@ -99,6 +99,7 @@ certifi==2024.7.4
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
+    #   elasticsearch
     #   requests
     #   sentry-sdk
 cffi==1.16.0
@@ -154,6 +155,15 @@ dnspython==2.6.1
     #   -c requirements/test.pip
     #   email-validator
     #   pymongo
+elasticsearch==7.15.0
+    # via
+    #   -c requirements/test.pip
+    #   -r requirements/install.in
+    #   elasticsearch-dsl
+elasticsearch-dsl==7.4.0
+    # via
+    #   -c requirements/test.pip
+    #   -r requirements/install.in
 email-validator==2.2.0
     # via
     #   -c requirements/install.pip
@@ -473,6 +483,7 @@ python-dateutil==2.8.2
     #   -r requirements/install.in
     #   botocore
     #   celery
+    #   elasticsearch-dsl
     #   faker
 pytz==2024.1
     # via
@@ -536,6 +547,7 @@ six==1.16.0
     #   bcrypt
     #   bleach
     #   cryptography
+    #   elasticsearch-dsl
     #   faker
     #   isodate
     #   langdetect
@@ -591,6 +603,7 @@ urllib3==1.26.19
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   botocore
+    #   elasticsearch
     #   requests
     #   sentry-sdk
 vine==5.1.0
