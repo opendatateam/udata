@@ -17,6 +17,7 @@
 - Fix license in dataservices API (now returns ID instead of title) [#3097](https://github.com/opendatateam/udata/pull/3097)
 - Fix missing title on new dataset preview [#3100](https://github.com/opendatateam/udata/pull/3100)
 - Fix the fixtures tests which was not running, and then was failing [#3105](https://github.com/opendatateam/udata/pull/3105)
+- Refactoring of the fixtures, the `generate-fixtures` command has been renamed to `import-fixtures` [#3106](https://github.com/opendatateam/udata/pull/3106)
 
 ## 9.1.1 (2024-07-16)
 
