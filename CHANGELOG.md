@@ -3,6 +3,8 @@
 ## Current (in progress)
 
 - Adds latest `sentry-sdk[flask]` as an install dependency, and update Sentry logic to be able to send environment, app version and profiling/performance info [#3086](https://github.com/opendatateam/udata/pull/3086)
+- Fix the version of udata-fixtures used by `udata import-fixtures`
+- Update to the version v2.0.0 of udata-fixtures (with the dataservices)
 
 ## 9.1.2 (2024-07-29)
 
