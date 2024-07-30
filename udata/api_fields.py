@@ -353,7 +353,10 @@ def patch(obj, request):
         field = obj.__write_fields__.get(key)
         if field is not None and not field.readonly:
             model_attribute = getattr(obj.__class__, key)
-            if isinstance(model_attribute, mongoengine.fields.ListField) and isinstance(
+
+            if hasattr(model_attribute, "from_input"):
+                value = model_attribute.from_input(value)
+            elif isinstance(model_attribute, mongoengine.fields.ListField) and isinstance(
                 model_attribute.field, mongoengine.fields.ReferenceField
             ):
                 # TODO `wrap_primary_key` do Mongo request, do a first pass to fetch all documents before calling it (to avoid multiple queries).
