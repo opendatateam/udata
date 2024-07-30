@@ -11,6 +11,7 @@ from elasticsearch_dsl import (
     Document,
     Field,
     Float,
+    Index,
     Integer,
     Keyword,
     Nested,
@@ -21,6 +22,7 @@ from elasticsearch_dsl import (
     token_filter,
     tokenizer,
 )
+from mongoengine import Document as MongoDocument
 from mongoengine import signals
 
 log = logging.getLogger(__name__)
@@ -89,6 +91,41 @@ def generate_elasticsearch_model(cls: type) -> type:
 
     attributes = {"Index": Index}
 
+    for key, field, searchable in get_searchable_fields(cls):
+        attributes[key] = convert_db_field_to_elasticsearch(field, searchable)
+
+    ElasticSearchModel = type(f"{cls.__name__}ElasticsearchModel", (Document,), attributes)
+
+    ensure_index_exists(ElasticSearchModel._index, index_name)
+
+    def elasticsearch_index(cls, document, **kwargs):
+        print("calling it!")
+        print(document.id)
+        print(document.title)
+        convert_mongo_document_to_elasticsearch_document(document).save()
+
+    def elasticsearch_search(query_text):
+        s = Search(using=client, index=index_name).query("match", title=query_text)
+        response = s.execute()
+        print(response)
+
+        # Get all the models from MongoDB to fetch all the correct fields.
+        models = {
+            str(model.id): model for model in cls.objects(id__in=[hit.id for hit in response])
+        }
+
+        # Map these object to the response array in order to preserve the sort order
+        # returned by Elasticsearch
+        return [models[hit.id] for hit in response]
+
+    cls.__elasticsearch_model__ = ElasticSearchModel
+    cls.__elasticsearch_index__ = elasticsearch_index
+    cls.__elasticsearch_search__ = elasticsearch_search
+
+    signals.post_save.connect(cls.__elasticsearch_index__, sender=cls)
+
+
+def get_searchable_fields(cls):
     for key, field in cls._fields.items():
         info = getattr(field, "__additional_field_info__", None)
         if info is None:
@@ -99,17 +136,7 @@ def generate_elasticsearch_model(cls: type) -> type:
         if not searchable:
             continue
 
-        attributes[key] = convert_db_field_to_elasticsearch(field, searchable)
-
-    ElasticSearchModel = type(f"{cls.__name__}ElasticsearchModel", (Document,), attributes)
-
-    def elasticsearch_index():
-        pass
-
-    cls.__elasticsearch_model__ = ElasticSearchModel
-    cls.__elasticsearch_index__ = elasticsearch_index
-
-    signals.post_save.connect(cls.__elasticsearch_index__, sender=cls)
+        yield key, field, searchable
 
 
 def convert_db_field_to_elasticsearch(field, searchable: bool | str) -> Field:
@@ -131,9 +158,27 @@ def convert_db_field_to_elasticsearch(field, searchable: bool | str) -> Field:
         raise ValueError(f"Unsupported MongoEngine field type {field.__class__.__name__}")
 
 
-# def ensure_index_exists(cls: type) -> None:
-#     now = datetime.utcnow().strftime("%Y-%m-%d-%H-%M")
-#     index_name_with_suffix = f"{alias}-{now}"
-#     pattern = f"{alias}-*"
+def convert_mongo_document_to_elasticsearch_document(document: MongoDocument) -> Document:
+    attributes = {}
+    attributes["id"] = str(document.id)
 
-#     pass
+    for key, field, searchable in get_searchable_fields(document.__class__):
+        attributes[key] = getattr(document, key)
+
+    return document.__elasticsearch_model__(**attributes)
+
+
+def ensure_index_exists(index: Index, index_name: str) -> None:
+    now = datetime.utcnow().strftime("%Y-%m-%d-%H-%M")
+    index_name_with_suffix = f"{index_name}-{now}"
+    pattern = f"{index_name}-*"
+
+    print("exporting template")
+    index_template = index.as_template(index_name, pattern)
+    index_template.save()
+
+    print("creating index")
+    client.indices.create(index=index_name_with_suffix)
+    print("creating alias")
+    client.indices.put_alias(index=index_name_with_suffix, name=index_name)
+    print("done")
