@@ -31,8 +31,6 @@
 </template>
 
 <script>
-import moment from 'moment';
-
 import Reuses from 'models/reuses';
 import Datasets from 'models/datasets';
 import Discussions from 'models/discussions';

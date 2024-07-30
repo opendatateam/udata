@@ -73,7 +73,6 @@ import config from 'config';
 import ThreadMessage from 'components/discussions/message.vue';
 import ThreadForm from 'components/discussions/thread-form.vue';
 import moment from 'moment';
-import Avatar from 'components/avatar.vue';
 
 export default {
     components: {ThreadMessage, ThreadForm},

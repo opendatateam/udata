@@ -18,8 +18,6 @@
 </template>
 
 <script>
-import Reuse from 'models/reuse';
-
 export default {
     props: {
         reuse: {

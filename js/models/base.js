@@ -4,7 +4,7 @@ import Vue from 'vue';
 import API from 'api';
 import i18n from 'i18n';
 import config from 'config';
-import mask from './mask';
+import mask from 'models/mask';
 import Raven from 'raven';
 import validator from 'models/validator';
 import {isString} from 'utils';
