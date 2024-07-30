@@ -7,6 +7,7 @@ import werkzeug.test
 from pytest_mock import MockerFixture
 from werkzeug.wrappers.response import Response
 
+import udata.commands.fixtures
 from udata import models
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import (
@@ -69,4 +70,5 @@ class FixturesTest:
         assert models.Dataset.objects.count() > 0
         assert models.Reuse.objects.count() > 0
         assert models.User.objects.count() > 0
-        assert models.Dataservice.objects.count() > 0
+        if udata.commands.fixtures.DEFAULT_FIXTURE_FILE_TAG > "v1.0.0":
+            assert models.Dataservice.objects.count() > 0
