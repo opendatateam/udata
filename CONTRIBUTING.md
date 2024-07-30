@@ -58,8 +58,16 @@ If you’re not familiar with open-source workflows or our set of technologies, 
 
 **NOTE**: If you are fixing an existing issue,
 don't forget to end your commit message with `(fix #XXX)`
-where `XXX` is the original issue number. This will improve the tracability
+where `XXX` is the original issue number. You can also add
+`fix #XXX` in the PR description. This will improve the tracability
 and will magicaly close the issue as soon as the commit is merged.
+
+### Merging
+
+When the PR has been approved (at least once), you are free to merge it
+in master. We have a squash & merge strategy and pay attention to having
+a clean commit message. You can then delete the branch. If linked with
+an issue, the issue should be closed automatically.
 
 ## Discussing strategies
 

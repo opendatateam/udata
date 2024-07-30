@@ -56,7 +56,6 @@
 </style>
 
 <script>
-import Vue from 'vue';
 import API from 'api';
 import BaseCompleter from 'components/form/base-completer.vue';
 import GeoLevels from 'models/geolevels';

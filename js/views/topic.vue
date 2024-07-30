@@ -14,11 +14,7 @@
 </template>
 
 <script>
-import moment from 'moment';
-
 import Topic from 'models/topic';
-import Dataset from 'models/dataset';
-import Reuse from 'models/reuse';
 import mask from 'models/mask';
 
 import Layout from 'components/layout.vue';

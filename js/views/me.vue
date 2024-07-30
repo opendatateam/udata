@@ -35,8 +35,6 @@
 
 <script>
 import config from 'config'
-import moment from 'moment'
-import API from 'api'
 import { PageList } from 'models/base'
 import Layout from 'components/layout.vue'
 
