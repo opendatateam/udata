@@ -183,20 +183,20 @@ export default {
             this.$go({name: 'dataset-edit', params: {oid: this.dataset.id}});
         },
         archive() {
-        this.dataset.archived = new Date().toISOString();
-        API.datasets.update_dataset({dataset: this.dataset.id, payload: this.dataset},
-            (response) => {
-                this.dataset.on_fetched(response);
-            }
-        );
+            this.dataset.archived = new Date().toISOString();
+            API.datasets.update_dataset({dataset: this.dataset.id, payload: this.dataset},
+                (response) => {
+                    this.dataset.on_fetched(response);
+                }
+            );
         },
         unarchive() {
-        this.dataset.archived = null;
-        API.datasets.update_dataset({dataset: this.dataset.id, payload: this.dataset},
-            (response) => {
-                this.dataset.on_fetched(response);
-            }
-        );
+            this.dataset.archived = null;
+            API.datasets.update_dataset({dataset: this.dataset.id, payload: this.dataset},
+                (response) => {
+                    this.dataset.on_fetched(response);
+                }
+            );
         },
         confirm_delete() {
             this.$root.$modal(
