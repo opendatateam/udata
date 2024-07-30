@@ -121,7 +121,7 @@ def daterange_start(value):
         return result.replace(day=1, month=1)
 
 
-def daterange_end(value: date | datetime | str | None) -> date:
+def daterange_end(value: date | datetime | str | None) -> date | None:
     """Parse a date range end boundary"""
     if not value:
         return None
@@ -154,7 +154,7 @@ def to_naive_datetime(given_date: Any) -> datetime:
     return given_date
 
 
-def to_iso(dt: date | datetime) -> str:
+def to_iso(dt: date | datetime) -> str | None:
     """
     Format a date or datetime into an ISO-8601 string
 
@@ -166,7 +166,7 @@ def to_iso(dt: date | datetime) -> str:
         return to_iso_date(dt)
 
 
-def to_iso_date(dt: date | datetime) -> str:
+def to_iso_date(dt: date | datetime) -> str | None:
     """
     Format a date or datetime into an ISO-8601 date string.
 
@@ -176,7 +176,7 @@ def to_iso_date(dt: date | datetime) -> str:
         return "{dt.year:04d}-{dt.month:02d}-{dt.day:02d}".format(dt=dt)
 
 
-def to_iso_datetime(dt: date | datetime) -> str:
+def to_iso_datetime(dt: date | datetime) -> str | None:
     """
     Format a date or datetime into an ISO-8601 datetime string.
 
@@ -303,7 +303,7 @@ class UnicodeLoremProvider(LoremProvider):
     word_list = [w + "é" for w in LoremProvider.word_list]
 
 
-def safe_unicode(string: str) -> str | None:
+def safe_unicode(string: bytes) -> str | None:
     """Safely transform any object into utf8 decoded str"""
     if string is None:
         return None
