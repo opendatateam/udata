@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from elasticsearch_dsl import Search, query
+
 import udata.core.contact_point.api_fields as contact_api_fields
 import udata.core.dataset.api_fields as datasets_api_fields
 from udata.api_fields import field, function_field, generate_fields
@@ -21,6 +23,42 @@ from udata.uris import endpoint_for
 # "temporal_coverage"
 
 DATASERVICE_FORMATS = ["REST", "WMS", "WSL"]
+
+
+def build_search_query(query_text: str, score_functions):
+    return query.Q(
+        "bool",
+        should=[
+            query.Q(
+                "function_score",
+                query=query.Bool(
+                    should=[
+                        query.MultiMatch(
+                            query=query_text,
+                            type="phrase",
+                            fields=["title^15", "acronym^15", "description^8"],
+                        )
+                    ]
+                ),
+                functions=score_functions,
+            ),
+            query.Q(
+                "function_score",
+                query=query.Bool(
+                    should=[
+                        query.MultiMatch(
+                            query=query_text,
+                            type="cross_fields",
+                            fields=["title^7", "acronym^7", "description^4"],
+                            operator="and",
+                        )
+                    ]
+                ),
+                functions=score_functions,
+            ),
+            # query.Match(title={"query": query_text, "fuzziness": "AUTO:4,6"}),
+        ],
+    )
 
 
 class DataserviceQuerySet(OwnedQuerySet):
@@ -58,7 +96,12 @@ class HarvestMetadata(db.EmbeddedDocument):
 
 
 @generate_fields()
-@elasticsearch()
+@elasticsearch(
+    score_functions_description={
+        "metrics.followers": {"factor": 4, "modifier": "sqrt", "missing": 1}
+    },
+    build_search_query=build_search_query,
+)
 class Dataservice(WithMetrics, Owned, db.Document):
     meta = {
         "indexes": [
