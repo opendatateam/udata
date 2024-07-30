@@ -8,6 +8,7 @@ from pytest_mock import MockerFixture
 from werkzeug.wrappers.response import Response
 
 from udata import models
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import (
     CommunityResourceFactory,
     DatasetFactory,
@@ -42,6 +43,7 @@ class FixturesTest:
             user=user,
             discussion=[MessageDiscussionFactory(**{}, posted_by=user)],
         )
+        DataserviceFactory(**{}, datasets=[dataset])
 
         with NamedTemporaryFile(mode="w+", delete=True) as fixtures_fd:
             # Get the fixtures from the local instance.
@@ -58,6 +60,7 @@ class FixturesTest:
         assert models.Discussion.objects.count() > 0
         assert models.CommunityResource.objects.count() > 0
         assert models.User.objects.count() > 0
+        assert models.Dataservice.objects.count() > 0
 
     def test_import_fixtures_from_default_file(self, cli):
         """Test importing fixtures from udata.commands.fixture.DEFAULT_FIXTURE_FILE."""
@@ -66,3 +69,4 @@ class FixturesTest:
         assert models.Dataset.objects.count() > 0
         assert models.Reuse.objects.count() > 0
         assert models.User.objects.count() > 0
+        assert models.Dataservice.objects.count() > 0
