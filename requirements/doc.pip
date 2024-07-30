@@ -98,6 +98,7 @@ certifi==2024.7.4
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
+    #   elasticsearch
     #   requests
 cffi==1.16.0
     # via
@@ -149,6 +150,12 @@ dnspython==2.6.1
     #   -c requirements/test.pip
     #   email-validator
     #   pymongo
+elasticsearch==7.15.0
+    # via
+    #   -r requirements/install.in
+    #   elasticsearch-dsl
+elasticsearch-dsl==7.4.0
+    # via -r requirements/install.in
 email-validator==2.2.0
     # via
     #   -c requirements/install.pip
@@ -427,6 +434,7 @@ python-dateutil==2.8.2
     #   -r requirements/install.in
     #   botocore
     #   celery
+    #   elasticsearch-dsl
     #   faker
     #   ghp-import
 pytz==2024.1
@@ -487,6 +495,7 @@ six==1.16.0
     #   bcrypt
     #   bleach
     #   cryptography
+    #   elasticsearch-dsl
     #   faker
     #   isodate
     #   langdetect
@@ -537,6 +546,7 @@ urllib3==1.25.11
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   botocore
+    #   elasticsearch
     #   requests
 vine==5.1.0
     # via
