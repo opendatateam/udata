@@ -1,3 +1,9 @@
+"""Commands to download fixtures from the udata-fixtures repository, import them locally.
+
+When "downloading" (generating) the fixtures, save the json as is.
+When "importing" the fixtures, massage them so then can be loaded properly.
+"""
+
 import json
 import logging
 import pathlib
