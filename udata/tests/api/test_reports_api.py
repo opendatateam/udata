@@ -136,6 +136,11 @@ class ReportsAPITest(APITestCase):
         self.assertEqual(payload["total"], 2)
         # Returned by order of creation by default
         self.assertEqual(payload["data"][0]["subject"]["id"], str(spam_dataset.id))
+        self.assertEqual(
+            payload["data"][0]["self_api_url"],
+            url_for("api.report", report=payload["data"][0]["id"], _external=True),
+        )
+
         self.assertEqual(payload["data"][1]["subject"]["id"], str(spam_reuse.id))
 
     def test_reports_api_get(self):

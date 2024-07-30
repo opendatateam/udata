@@ -3,10 +3,11 @@ from datetime import datetime
 from bson import DBRef
 from mongoengine import DO_NOTHING, NULLIFY, signals
 
-from udata.api_fields import field, generate_fields
+from udata.api_fields import field, function_field, generate_fields
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.mongo import db
+from udata.uris import endpoint_for
 
 from .constants import REPORT_REASONS_CHOICES, REPORTABLE_MODELS
 
@@ -44,6 +45,10 @@ class Report(db.Document):
         db.DateTimeField(default=datetime.utcnow, required=True),
         readonly=True,
     )
+
+    @function_field(description="Link to the API endpoint for this report")
+    def self_api_url(self):
+        return endpoint_for("api.report", report=self, _external=True)
 
     @classmethod
     def mark_as_deleted_soft_delete(cls, sender, document, **kwargs):
