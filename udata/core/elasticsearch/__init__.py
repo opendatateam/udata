@@ -84,6 +84,8 @@ def elasticsearch(**kwargs):
 
 def generate_elasticsearch_model(cls: type) -> type:
     index_name = cls._get_collection_name()
+
+    # Testing name to have a new index in each test.
     index_name = "".join(random.choices(string.ascii_lowercase, k=10))
 
     class Index:
@@ -99,9 +101,6 @@ def generate_elasticsearch_model(cls: type) -> type:
     ensure_index_exists(ElasticSearchModel._index, index_name)
 
     def elasticsearch_index(cls, document, **kwargs):
-        print("calling it!")
-        print(document.id)
-        print(document.title)
         convert_mongo_document_to_elasticsearch_document(document).save()
 
     def elasticsearch_search(query_text):
@@ -169,16 +168,33 @@ def convert_mongo_document_to_elasticsearch_document(document: MongoDocument) ->
 
 
 def ensure_index_exists(index: Index, index_name: str) -> None:
-    now = datetime.utcnow().strftime("%Y-%m-%d-%H-%M")
-    index_name_with_suffix = f"{index_name}-{now}"
-    pattern = f"{index_name}-*"
+    """
+    The goal of this function is to create the index with the correct
+    attributes informations (schema) and alias.
 
-    print("exporting template")
-    index_template = index.as_template(index_name, pattern)
+    We create the index with a date suffix (like `dataset-2024-07-30-13-12`)
+    and we link an alias to the index (`dataset`). This way we can change the index
+    schema and point the alias to the new index/schema without breaking (and then
+    delete the old index).
+    """
+    if index.exists():
+        return
+
+    now = datetime.now(datetime.UTC).strftime("%Y-%m-%d-%H-%M")
+    index_name_with_suffix = f"{index_name}-{now}"
+
+    # Because we create the index manually (`elasticsearch_dsl` creates an index
+    # with the default name and not with our system suffix + alias), we don't have
+    # any attribute information / schema set in Elasticsearch.
+    # So we export the `elasticsearch_dsl` generated schema information as a template
+    # and we save it with a pattern matching the naming scheme of the index. So when
+    # we create the index below, the template is used by Elasticsearch.
+    index_template = index.as_template(index_name, pattern=f"{index_name}-*")
     index_template.save()
 
-    print("creating index")
+    # Then we create the index with the suffix (Elasticsearch will use the template because
+    # the name is matching the template pattern above)
     client.indices.create(index=index_name_with_suffix)
-    print("creating alias")
+
+    # And then we create the alias pointing to the index.
     client.indices.put_alias(index=index_name_with_suffix, name=index_name)
-    print("done")
