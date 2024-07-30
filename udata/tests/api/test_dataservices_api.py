@@ -319,8 +319,18 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(dataservice.organization.id, me_org.id)
 
     def test_elasticsearch(self):
-        dataservice_a = DataserviceFactory(title="Hello AMD world!")
-        dataservice_b = DataserviceFactory(title="Other one")
+        dataservice_a = DataserviceFactory(
+            title="Hello AMD world!",
+            metrics={
+                "followers": 42,
+            },
+        )
+        dataservice_b = DataserviceFactory(
+            title="Other one",
+            metrics={
+                "followers": 1337,
+            },
+        )
         time.sleep(1)
 
         dataservices = Dataservice.__elasticsearch_search__("AMDAC")
@@ -330,10 +340,12 @@ class DataserviceAPITest(APITestCase):
 
         dataservice_b.title = "Hello AMD world!"
         dataservice_b.save()
-        time.sleep(1)
+        time.sleep(3)
 
         dataservices = Dataservice.__elasticsearch_search__("AMDAC")
 
         assert len(dataservices) == 2
-        assert dataservices[0].id == dataservice_a.id
-        assert dataservices[1].id == dataservice_b.id
+
+        # `dataservice_b` should be first because it has a lot of followers
+        assert dataservices[0].id == dataservice_b.id
+        assert dataservices[1].id == dataservice_a.id

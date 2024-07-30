@@ -1,3 +1,4 @@
+import json
 import logging
 import random
 import string
@@ -12,13 +13,17 @@ from elasticsearch_dsl import (
     Field,
     Float,
     Index,
+    InnerDoc,
     Integer,
     Keyword,
     Nested,
+    Object,
+    Q,
     Search,
     Text,
     analyzer,
     connections,
+    query,
     token_filter,
     tokenizer,
 )
@@ -74,15 +79,21 @@ dgv_analyzer = analyzer(
 client = connections.create_connection(hosts=["localhost"])
 
 
-def elasticsearch(**kwargs):
+def elasticsearch(score_functions_description={}, build_search_query=None, **kwargs):
     def wrapper(cls):
-        cls.elasticsearch = generate_elasticsearch_model(cls)
+        cls.elasticsearch = generate_elasticsearch_model(
+            cls,
+            score_functions_description=score_functions_description,
+            build_search_query=build_search_query,
+        )
         return cls
 
     return wrapper
 
 
-def generate_elasticsearch_model(cls: type) -> type:
+def generate_elasticsearch_model(
+    cls: type, score_functions_description, build_search_query
+) -> type:
     index_name = cls._get_collection_name()
 
     # Testing name to have a new index in each test.
@@ -103,10 +114,45 @@ def generate_elasticsearch_model(cls: type) -> type:
     def elasticsearch_index(cls, document, **kwargs):
         convert_mongo_document_to_elasticsearch_document(document).save()
 
+    score_functions = [
+        query.SF("field_value_factor", field=key, **value)
+        for key, value in score_functions_description.items()
+    ]
+
     def elasticsearch_search(query_text):
-        s = Search(using=client, index=index_name).query("match", title=query_text)
-        response = s.execute()
-        print(response)
+        s: Search = ElasticSearchModel.search()
+
+        if query_text:
+            query = build_search_query(query_text, score_functions)
+        else:
+            query = Q(
+                "function_score",
+                query=query.MatchAll(),
+                functions=score_functions,
+            )
+
+        print("---------------------")
+        print("---------------------")
+        print("---------------------")
+        print("---------------------")
+        print("---------------------")
+        print(score_functions_description)
+        for field in score_functions_description.keys():
+            print(field)
+            levels = field.split(".")
+            print(levels)
+
+            if len(levels) == 1:
+                pass
+            elif len(levels) == 2:
+                query = Q("nested", path=levels[0], query=query)
+            else:
+                raise RuntimeError(
+                    f"This system only support one level deep score function fields. '{field}' contains two or more dots."
+                )
+
+        print(json.dumps(s.query(query).to_dict(), indent=2))
+        response = s.query(query).execute()
 
         # Get all the models from MongoDB to fetch all the correct fields.
         models = {
@@ -151,6 +197,8 @@ def convert_db_field_to_elasticsearch(field, searchable: bool | str) -> Field:
         return Boolean()
     elif isinstance(field, mongo_fields.DateTimeField):
         return Date()
+    elif isinstance(field, mongo_fields.DictField):
+        return Nested()
     elif isinstance(field, mongo_fields.ReferenceField):
         return Nested(field.document_type_obj.__elasticsearch_model__)
     else:
@@ -160,6 +208,7 @@ def convert_db_field_to_elasticsearch(field, searchable: bool | str) -> Field:
 def convert_mongo_document_to_elasticsearch_document(document: MongoDocument) -> Document:
     attributes = {}
     attributes["id"] = str(document.id)
+    attributes["meta"] = {"id": str(document.id)}
 
     for key, field, searchable in get_searchable_fields(document.__class__):
         attributes[key] = getattr(document, key)
@@ -180,7 +229,7 @@ def ensure_index_exists(index: Index, index_name: str) -> None:
     if index.exists():
         return
 
-    now = datetime.now(datetime.UTC).strftime("%Y-%m-%d-%H-%M")
+    now = datetime.utcnow().strftime("%Y-%m-%d-%H-%M")
     index_name_with_suffix = f"{index_name}-{now}"
 
     # Because we create the index manually (`elasticsearch_dsl` creates an index
