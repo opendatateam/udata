@@ -39,7 +39,7 @@ COMMUNITY_RES_URL = "/api/1/datasets/community_resources"
 DISCUSSION_URL = "/api/1/discussions"
 
 
-DEFAULT_FIXTURE_FILE_TAG: str = "v1.0.0"
+DEFAULT_FIXTURE_FILE_TAG: str = "v2.0.0"
 DEFAULT_FIXTURE_FILE: str = f"https://raw.githubusercontent.com/opendatateam/udata-fixtures/{DEFAULT_FIXTURE_FILE_TAG}/results.json"  # noqa
 
 DEFAULT_FIXTURES_RESULTS_FILENAME: str = "results.json"
@@ -198,8 +198,7 @@ def import_fixtures(source):
                         MessageDiscussionFactory(**message, posted_by=user) for message in messages
                     ],
                 )
-            for dataservice in fixture.get("dataservices", []):
-                # We may be missing dataservices in older fixtures.
+            for dataservice in fixture["dataservices"]:
                 dataservice = remove_unwanted_keys(dataservice, "dataservice")
                 if not dataservice["contact_point"]:
                     DataserviceFactory(**dataservice, datasets=[dataset])
