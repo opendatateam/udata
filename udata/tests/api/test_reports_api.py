@@ -9,6 +9,7 @@ from udata.core.reports.constants import (
     reports_reasons_translations,
 )
 from udata.core.reports.models import Report
+from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.i18n import gettext as _
 
@@ -119,3 +120,33 @@ class ReportsAPITest(APITestCase):
         self.assertEqual(REASON_SPAM, reports[1]["reason"])
         self.assertEqual(str(user.id), reports[1]["by"]["id"])
         self.assertIsNotNone(reports[1]["subject_deleted_at"])
+
+    def test_reports_api_list(self):
+        user = UserFactory()
+
+        spam_dataset = DatasetFactory.create(owner=user)
+        spam_reuse = ReuseFactory.create(owner=user)
+
+        Report(subject=spam_dataset, reason="spam").save()
+        Report(subject=spam_reuse, reason="spam").save()
+
+        response = self.get(url_for("api.reports"))
+        self.assert200(response)
+        payload = response.json
+        self.assertEqual(payload["total"], 2)
+        # Returned by order of creation by default
+        self.assertEqual(payload["data"][0]["subject"]["id"], str(spam_dataset.id))
+        self.assertEqual(payload["data"][1]["subject"]["id"], str(spam_reuse.id))
+
+    def test_reports_api_get(self):
+        user = UserFactory()
+
+        spam_dataset = DatasetFactory.create(owner=user)
+
+        report = Report(subject=spam_dataset, reason="spam").save()
+
+        response = self.get(url_for("api.report", report=report))
+
+        self.assert200(response)
+        payload = response.json
+        self.assertEqual(payload["subject"]["id"], str(spam_dataset.id))

@@ -37,6 +37,14 @@ class ReportsAPI(API):
         return report, 201
 
 
+@ns.route("/<report:report>/", endpoint="report")
+class DataserviceAPI(API):
+    @api.doc("get_report")
+    @api.marshal_with(Report.__read_fields__)
+    def get(self, report):
+        return report
+
+
 @ns.route("/reasons/", endpoint="reports_reasons")
 class ReportsReasonsAPI(API):
     @api.doc("list_reports_reasons")
