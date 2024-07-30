@@ -10,7 +10,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import CommunityResources from 'models/communityresources';
 import Datatable from 'components/datatable/widget.vue';
 

@@ -1,7 +1,5 @@
 <script>
 import Vue from 'vue';
-import API from 'api';
-import Reuse from 'models/reuse';
 import BaseCompleter from 'components/form/base-completer.vue';
 import ReuseCard from 'components/reuse/card.vue';
 

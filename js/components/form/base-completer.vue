@@ -12,7 +12,6 @@
 
 <script>
 import API from 'api';
-import Vue from 'vue';
 import $ from 'jquery';
 import log from 'logger';
 import CustomError from 'error';

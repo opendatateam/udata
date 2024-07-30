@@ -6,7 +6,6 @@
 
 <script>
 import Chart from 'chart.js';
-import config from 'config';
 
 export default {
     name: 'chartjs-doughnut',

@@ -72,7 +72,6 @@
 
 <script>
 import API from 'api';
-import Vue from 'vue';
 import Modal from 'components/modal.vue';
 import OrgCard from 'components/organization/card.vue';
 import UserCard from 'components/user/card.vue';
