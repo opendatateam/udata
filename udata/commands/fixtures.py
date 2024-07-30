@@ -198,10 +198,8 @@ def import_fixtures(source):
                         MessageDiscussionFactory(**message, posted_by=user) for message in messages
                     ],
                 )
-            if "dataservices" not in fixture:
-                # For backwards compatibility.
-                continue
-            for dataservice in fixture["dataservices"]:
+            for dataservice in fixture.get("dataservices", []):
+                # We may be missing dataservices in older fixtures.
                 dataservice = remove_unwanted_keys(dataservice, "dataservice")
                 if not dataservice["contact_point"]:
                     DataserviceFactory(**dataservice, datasets=[dataset])
