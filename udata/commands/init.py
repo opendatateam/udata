@@ -11,7 +11,7 @@ from udata.i18n import gettext as _
 from udata.search.commands import index
 
 from .db import migrate
-from .fixtures import generate_fixtures
+from .fixtures import import_fixtures
 
 log = logging.getLogger(__name__)
 
@@ -44,6 +44,6 @@ def init(ctx):
 
         text = _("Do you want to create some sample data?")
         if click.confirm(text, default=True):
-            ctx.invoke(generate_fixtures)
+            ctx.invoke(import_fixtures)
 
     success(_("Your udata instance is ready!"))
