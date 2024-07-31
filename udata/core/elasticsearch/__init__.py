@@ -131,27 +131,6 @@ def generate_elasticsearch_model(
                 functions=score_functions,
             )
 
-        print("---------------------")
-        print("---------------------")
-        print("---------------------")
-        print("---------------------")
-        print("---------------------")
-        print(score_functions_description)
-        for field in score_functions_description.keys():
-            print(field)
-            levels = field.split(".")
-            print(levels)
-
-            if len(levels) == 1:
-                pass
-            elif len(levels) == 2:
-                query = Q("nested", path=levels[0], query=query)
-            else:
-                raise RuntimeError(
-                    f"This system only support one level deep score function fields. '{field}' contains two or more dots."
-                )
-
-        print(json.dumps(s.query(query).to_dict(), indent=2))
         response = s.query(query).execute()
 
         # Get all the models from MongoDB to fetch all the correct fields.
@@ -198,7 +177,7 @@ def convert_db_field_to_elasticsearch(field, searchable: bool | str) -> Field:
     elif isinstance(field, mongo_fields.DateTimeField):
         return Date()
     elif isinstance(field, mongo_fields.DictField):
-        return Nested()
+        return Object()
     elif isinstance(field, mongo_fields.ReferenceField):
         return Nested(field.document_type_obj.__elasticsearch_model__)
     else:
