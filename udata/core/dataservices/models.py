@@ -98,7 +98,9 @@ class HarvestMetadata(db.EmbeddedDocument):
 @generate_fields()
 @elasticsearch(
     score_functions_description={
-        "metrics.followers": {"factor": 4, "modifier": "sqrt", "missing": 1}
+        "public_service_score": {"factor": 8, "modifier": "sqrt", "missing": 1},
+        "metrics.followers": {"factor": 4, "modifier": "sqrt", "missing": 1},
+        "metrics.views": {"factor": 1, "modifier": "sqrt", "missing": 1},
     },
     build_search_query=build_search_query,
 )
@@ -242,6 +244,16 @@ class Dataservice(WithMetrics, Owned, db.Document):
     @property
     def is_hidden(self):
         return self.private or self.deleted_at or self.archived_at
+
+    @function_field(indexable=True, api=False)
+    def public_service_score(self):
+        """
+        Boolean `field_value_score` doesn't work well because False is 0 and `0*other_scores`
+        always give a 0 score for the all query. So we set `4` and `1` for public service orgs.
+        (`4` was choosen based on the value in `udata-search-service` but could maybe be `2` and
+        then work with the `factor` of the `score_functions_description` definition.)
+        """
+        return 4 if (self.organization and self.organization.public_service) else 1
 
     def count_discussions(self):
         self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()

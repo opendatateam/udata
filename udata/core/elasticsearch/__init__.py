@@ -3,6 +3,8 @@ import logging
 import random
 import string
 from datetime import datetime
+from pprint import pprint
+from typing import Optional
 
 import mongoengine.fields as mongo_fields
 from elasticsearch import Elasticsearch
@@ -132,6 +134,9 @@ def generate_elasticsearch_model(
             )
 
         response = s.query(query).execute()
+        for hit in response:
+            print(hit.title)
+            print(hit.meta.score)
 
         # Get all the models from MongoDB to fetch all the correct fields.
         models = {
@@ -163,6 +168,27 @@ def get_searchable_fields(cls):
         yield key, field, searchable
 
 
+def get_indexable_methods(cls):
+    for method_name in dir(cls):
+        if method_name == "objects":
+            continue
+        if method_name.startswith("_"):
+            continue
+
+        method = getattr(cls, method_name)
+        if not callable(method):
+            continue
+
+        info = getattr(method, "__additional_field_info__", None)
+        if info is None:
+            continue
+
+        if not info.get("indexable", False):
+            continue
+
+        yield method_name
+
+
 def convert_db_field_to_elasticsearch(field, searchable: bool | str) -> Field:
     if isinstance(searchable, str):
         return {
@@ -184,13 +210,27 @@ def convert_db_field_to_elasticsearch(field, searchable: bool | str) -> Field:
         raise ValueError(f"Unsupported MongoEngine field type {field.__class__.__name__}")
 
 
-def convert_mongo_document_to_elasticsearch_document(document: MongoDocument) -> Document:
+def convert_mongo_document_to_elasticsearch_document(
+    document: Optional[MongoDocument],
+) -> Optional[Document]:
+    if document is None:
+        return None
+
     attributes = {}
     attributes["id"] = str(document.id)
     attributes["meta"] = {"id": str(document.id)}
 
     for key, field, searchable in get_searchable_fields(document.__class__):
-        attributes[key] = getattr(document, key)
+        if isinstance(field, mongo_fields.ReferenceField):
+            attributes[key] = convert_mongo_document_to_elasticsearch_document(
+                getattr(document, key)
+            )
+        else:
+            attributes[key] = getattr(document, key)
+
+    for method_name in get_indexable_methods(document.__class__):
+        print(method_name, getattr(document, method_name)())
+        attributes[method_name] = getattr(document, method_name)()
 
     return document.__elasticsearch_model__(**attributes)
 
