@@ -5,11 +5,13 @@ import time
 from elasticsearch_dsl import analyzer, token_filter, tokenizer
 from flask import url_for
 
+from udata.core.badges.models import Badge
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory
+from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.models import Member
+from udata.core.organization.models import Member, Organization
 from udata.core.user.factories import UserFactory
 from udata.i18n import gettext as _
 
@@ -319,33 +321,66 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(dataservice.organization.id, me_org.id)
 
     def test_elasticsearch(self):
+        orga_sp = OrganizationFactory(badges=[Badge(kind=CERTIFIED), Badge(kind=PUBLIC_SERVICE)])
+        orga_unknown = OrganizationFactory()
+        assert orga_sp.public_service
+        assert not orga_unknown.public_service
+
         dataservice_a = DataserviceFactory(
-            title="Hello AMD world!",
+            organization=orga_unknown,
+            title="A - Hello AMD world!",
             metrics={
                 "followers": 42,
+                "views": 1337,
             },
         )
         dataservice_b = DataserviceFactory(
-            title="Other one",
+            organization=orga_unknown,
+            title="B - Other one",
             metrics={
                 "followers": 1337,
+                "views": 1000,
+            },
+        )
+        dataservice_c = DataserviceFactory(
+            organization=orga_unknown,
+            title="C - AMD",
+            metrics={
+                "followers": 41,
+                "views": 1345,
             },
         )
         time.sleep(1)
 
         dataservices = Dataservice.__elasticsearch_search__("AMDAC")
 
-        assert len(dataservices) == 1
-        assert dataservices[0].id == dataservice_a.id
+        assert len(dataservices) == 2
+        assert dataservices[0].title == dataservice_c.title
+        assert dataservices[1].title == dataservice_a.title
 
-        dataservice_b.title = "Hello AMD world!"
+        dataservice_b.title = "B - Hello AMD world!"
         dataservice_b.save()
         time.sleep(3)
 
         dataservices = Dataservice.__elasticsearch_search__("AMDAC")
 
-        assert len(dataservices) == 2
+        assert len(dataservices) == 3
 
         # `dataservice_b` should be first because it has a lot of followers
-        assert dataservices[0].id == dataservice_b.id
-        assert dataservices[1].id == dataservice_a.id
+        assert dataservices[0].title == dataservice_b.title
+        assert dataservices[1].title == dataservice_c.title
+        assert dataservices[2].title == dataservice_a.title
+
+        dataservice_a.organization = orga_sp
+        dataservice_a.save()
+        assert dataservice_a.public_service_score() == 4
+        time.sleep(3)
+
+        dataservices = Dataservice.__elasticsearch_search__("AMDAC")
+
+        assert len(dataservices) == 3
+
+        # `dataservice_b` should be first because it has a lot of followers
+        assert dataservices[0].title == dataservice_b.title
+        assert dataservices[1].title == dataservice_a.title
+        assert dataservices[2].title == dataservice_c.title
