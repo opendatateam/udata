@@ -113,6 +113,7 @@ class Defaults(object):
     SENTRY_USER_ATTRS = ["slug", "email", "fullname"]
     SENTRY_LOGGING = "WARNING"
     SENTRY_IGNORE_EXCEPTIONS = []
+    SENTRY_SAMPLE_RATE: float = 1.0
 
     # Flask WTF settings
     CSRF_SESSION_KEY = "Default uData csrf key"

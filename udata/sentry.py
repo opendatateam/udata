@@ -8,7 +8,9 @@ from werkzeug.exceptions import HTTPException
 from udata import entrypoints
 from udata.core.storages.api import UploadProgress
 
+from .app import UDataApp
 from .auth import PermissionDenied
+from .frontend import package_version
 
 log = logging.getLogger(__name__)
 
@@ -24,7 +26,7 @@ ERROR_PARSE_DSN_MSG = "Unable to parse Sentry DSN"
 IGNORED_EXCEPTIONS = HTTPException, PermissionDenied, UploadProgress
 
 
-def public_dsn(dsn):
+def public_dsn(dsn: str) -> str | None:
     """Check if DSN is public or raise a warning and turn it into a public one"""
     m = RE_DSN.match(dsn)
     if not m:
@@ -41,7 +43,7 @@ def public_dsn(dsn):
     return public
 
 
-def init_app(app):
+def init_app(app: UDataApp):
     if app.config["SENTRY_DSN"]:
         try:
             import sentry_sdk
@@ -62,6 +64,13 @@ def init_app(app):
             dsn=app.config["SENTRY_PUBLIC_DSN"],
             integrations=[FlaskIntegration(), CeleryIntegration()],
             ignore_errors=list(exceptions),
+            release=f"udata@{package_version('udata')}",
+            environment=app.config.get("SITE_ID", None),
+            # Set traces_sample_rate to 1.0 to capture 100%
+            # of transactions for performance monitoring.
+            # Sentry recommends adjusting this value in production.
+            traces_sample_rate=app.config.get("SENTRY_SAMPLE_RATE", None),
+            profiles_sample_rate=app.config.get("SENTRY_SAMPLE_RATE", None),
         )
 
         # Set log level

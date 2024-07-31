@@ -10,7 +10,7 @@ We’ll use the following repositories:
 # Check the system requirements
 
 !!! info
-    Be aware that udata now requires Python **>3.9,<=3.11** to work. 
+    Be aware that udata now requires Python **>3.9,<=3.11** to work.
 
 udata requires several libraries to be installed to work. You can see them on the udata documentation link below.
 
@@ -160,6 +160,11 @@ will initalize database, indexes, create fixtures, etc.
 udata init
 ```
 
+!!! note "Fixtures loading"
+    Loading fixtures is done hunder the hood using the `import-fixtures` command,
+    which relies on the [udata-fixtures][] repository, and will import the fixtures
+    declared in the `FIXTURE_DATASET_SLUGS` config.
+
 You can then start udata server with the `serve` subcommand.
 
 ```bash
@@ -259,7 +264,7 @@ You can now visit `dev.local:7000/` in your browser and start playing with your 
 You can use parcel to watch for file changes in udata or udata-front directory with
 
 ```bash
-inv assets-watch 
+inv assets-watch
 ```
 
 !!! note "Tell us what you think"
@@ -283,3 +288,4 @@ Once the project is up and running, it’s time to customize it! Take a look at 
 [github]: https://github.com/opendatateam/udata
 [new issue]: https://github.com/opendatateam/udata/issues/new
 [udata-search-service]: https://github.com/opendatateam/udata-search-service
+[udata-fixtures]: https://github.com/opendatateam/udata-fixtures

@@ -6,11 +6,11 @@ MIN_TAG_LENGTH = LocalProxy(lambda: current_app.config["TAG_MIN_LENGTH"])
 MAX_TAG_LENGTH = LocalProxy(lambda: current_app.config["TAG_MAX_LENGTH"])
 
 
-def slug(value):
+def slug(value: str) -> str:
     return slugify(value.lower())
 
 
-def normalize(value):
+def normalize(value: str) -> str:
     value = slug(value)
     if len(value) < MIN_TAG_LENGTH:
         value = ""
@@ -19,5 +19,5 @@ def normalize(value):
     return value
 
 
-def tags_list(value):
+def tags_list(value: str) -> list:
     return list(set(slug(tag) for tag in value.split(",") if tag.strip()))

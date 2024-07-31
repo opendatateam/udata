@@ -1,7 +1,7 @@
 repos:
 
   - repo: https://github.com/jazzband/pip-tools
-    rev: 6.2.0
+    rev: 7.4.1
     hooks:
       - id: pip-compile
         name: pip-compile install.in
