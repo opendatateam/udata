@@ -1,4 +1,3 @@
-from celery import chord
 from flask import current_app
 
 from udata.tasks import get_logger, job, task

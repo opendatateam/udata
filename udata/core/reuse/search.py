@@ -38,7 +38,7 @@ class ReuseSearch(ModelSearchAdapter):
     }
 
     @classmethod
-    def is_indexable(cls, reuse):
+    def is_indexable(cls, reuse: Reuse) -> bool:
         return reuse.deleted is None and len(reuse.datasets) > 0 and not reuse.private
 
     @classmethod
@@ -55,7 +55,7 @@ class ReuseSearch(ModelSearchAdapter):
         return reuses.order_by(sort).skip(offset).limit(args["page_size"]), reuses.count()
 
     @classmethod
-    def serialize(cls, reuse):
+    def serialize(cls, reuse: Reuse) -> dict:
         organization = None
         owner = None
         if reuse.organization:

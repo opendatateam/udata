@@ -2,7 +2,20 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix many linting issues reported by ruff [#3118](https://github.com/opendatateam/udata/pull/3118)
+- Import the dataservice's organization from the fixtures [#3121](https://github.com/opendatateam/udata/pull/3121)
+- Convert reuse to new API system [#3066](https://github.com/opendatateam/udata/pull/3066)
+- Fix circular import error [#3128](https://github.com/opendatateam/udata/pull/3128)
+- Add an option to specify the port when using `inv serve` [#3123](https://github.com/opendatateam/udata/pull/3123)
+
+## 9.1.3 (2024-08-01)
+
+- Adds latest `sentry-sdk[flask]` as an install dependency, and update Sentry logic to be able to send environment, app version and profiling/performance info [#3086](https://github.com/opendatateam/udata/pull/3086)
+- Add report get endpoint and make report get and list admin only [#3115](https://github.com/opendatateam/udata/pull/3115)
+- Fix the version of udata-fixtures used by `udata import-fixtures` [#3114](https://github.com/opendatateam/udata/pull/3114)
+- Update to the version v2.0.0 of udata-fixtures (with the dataservices)
+- Add type hints [#3111](https://github.com/opendatateam/udata/pull/3111)
+- Make sure requests v2.32.3 is used everywhere consistently [#3116](https://github.com/opendatateam/udata/pull/3116)
 
 ## 9.1.2 (2024-07-29)
 

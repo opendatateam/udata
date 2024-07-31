@@ -301,15 +301,15 @@ class DatasetModelTest:
 
     def test_dataset_without_private(self):
         dataset = DatasetFactory()
-        assert dataset.private == False
+        assert dataset.private is False
 
         dataset.private = None
         dataset.save()
-        assert dataset.private == False
+        assert dataset.private is False
 
         dataset.private = True
         dataset.save()
-        assert dataset.private == True
+        assert dataset.private is True
 
 
 class ResourceModelTest:

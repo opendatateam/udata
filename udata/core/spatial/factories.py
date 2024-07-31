@@ -2,7 +2,7 @@ import factory
 from faker.providers import BaseProvider
 from geojson.utils import generate_random
 
-from udata.factories import DateRangeFactory, ModelFactory
+from udata.factories import ModelFactory
 from udata.utils import faker_provider
 
 from . import geoids

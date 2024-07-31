@@ -4,12 +4,10 @@ from slugify import slugify
 from udata.api import API, api
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission
-from udata.core import storages
 from udata.core.dataset.api_fields import community_resource_fields, dataset_fields
 from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields
 from udata.core.followers.api import FollowAPI
-from udata.core.reuse.api_fields import reuse_fields
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
@@ -103,7 +101,7 @@ class AvatarAPI(API):
 class MyReusesAPI(API):
     @api.secure
     @api.doc("my_reuses")
-    @api.marshal_list_with(reuse_fields)
+    @api.marshal_list_with(Reuse.__read_fields__)
     def get(self):
         """List all my reuses (including private ones)"""
         return list(Reuse.objects.owned_by(current_user.id))
@@ -166,7 +164,7 @@ class MyOrgReusesAPI(API):
     @api.secure
     @api.doc("my_org_reuses")
     @api.expect(filter_parser)
-    @api.marshal_list_with(reuse_fields)
+    @api.marshal_list_with(Reuse.__read_fields__)
     def get(self):
         """List all reuses related to me and my organizations."""
         q = filter_parser.parse_args().get("q")
@@ -321,9 +319,10 @@ class UserAPI(API):
         return "", 204
 
 
-from udata.core.contact_point.api import ContactPointApiParser
-from udata.core.contact_point.api_fields import contact_point_page_fields
-from udata.models import ContactPoint
+# These imports are not at the top of the file to avoid circular imports
+from udata.core.contact_point.api import ContactPointApiParser  # noqa
+from udata.core.contact_point.api_fields import contact_point_page_fields  # noqa
+from udata.models import ContactPoint  # noqa
 
 contact_point_parser = ContactPointApiParser()
 

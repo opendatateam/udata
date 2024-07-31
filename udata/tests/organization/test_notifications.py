@@ -17,11 +17,11 @@ class OrganizationNotificationsTest:
         members = [Member(user=editor, role="editor"), Member(user=admin, role="admin")]
         org = OrganizationFactory(members=members, requests=[request])
 
-        assert len(membership_request_notifications(applicant)) is 0
-        assert len(membership_request_notifications(editor)) is 0
+        assert len(membership_request_notifications(applicant)) == 0
+        assert len(membership_request_notifications(editor)) == 0
 
         notifications = membership_request_notifications(admin)
-        assert len(notifications) is 1
+        assert len(notifications) == 1
         dt, details = notifications[0]
         assert_equal_dates(dt, request.created)
         assert details["id"] == request.id

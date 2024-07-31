@@ -2,7 +2,7 @@ from flask import current_app, url_for
 from flask_cdn import url_for as cdn_url_for
 
 
-def cdn_for(endpoint, **kwargs):
+def cdn_for(endpoint: str, **kwargs) -> str:
     """
     Get a CDN URL for a static assets.
 

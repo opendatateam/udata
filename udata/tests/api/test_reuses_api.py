@@ -36,6 +36,27 @@ class ReuseAPITest:
         assert200(response)
         assert len(response.json["data"]) == len(reuses)
 
+    def test_reuse_api_list_with_sorts(self, api):
+        ReuseFactory(title="A", created_at="2024-03-01")
+        ReuseFactory(title="B", metrics={"views": 42}, created_at="2024-02-01")
+        ReuseFactory(title="C", metrics={"views": 1337}, created_at="2024-05-01")
+        ReuseFactory(title="D", created_at="2024-04-01")
+
+        response = api.get(url_for("api.reuses", sort="views"))
+        assert200(response)
+
+        assert [reuse["title"] for reuse in response.json["data"]] == ["A", "D", "B", "C"]
+
+        response = api.get(url_for("api.reuses", sort="-views"))
+        assert200(response)
+
+        assert [reuse["title"] for reuse in response.json["data"]] == ["C", "B", "D", "A"]
+
+        response = api.get(url_for("api.reuses", sort="created"))
+        assert200(response)
+
+        assert [reuse["title"] for reuse in response.json["data"]] == ["B", "A", "D", "C"]
+
     def test_reuse_api_list_with_filters(self, api):
         """Should filters reuses results based on query filters"""
         owner = UserFactory()
@@ -161,6 +182,34 @@ class ReuseAPITest:
         assert200(response)
         assert Reuse.objects.count() == 1
         assert Reuse.objects.first().description == "new description"
+
+    def test_reuse_api_remove_org(self, api):
+        user = api.login()
+        reuse = ReuseFactory(owner=user)
+        data = reuse.to_dict()
+        data["organization"] = None
+        response = api.put(url_for("api.reuse", reuse=reuse), data)
+        assert200(response)
+        assert Reuse.objects.count() == 1
+        assert Reuse.objects.first().organization is None
+
+    def test_reuse_api_update_org_with_full_object(self, api):
+        """We can send the full org object (not only the ID) to update to an org"""
+        user = api.login()
+        reuse = ReuseFactory(owner=user)
+        member = Member(user=user, role="admin")
+        org = OrganizationFactory(members=[member])
+
+        data = reuse.to_dict()
+        data["owner"] = None
+        data["organization"] = org.to_dict()
+
+        response = api.put(url_for("api.reuse", reuse=reuse), data)
+        assert200(response)
+
+        assert Reuse.objects.count() == 1
+        assert Reuse.objects.first().owner is None
+        assert Reuse.objects.first().organization.id == org.id
 
     def test_reuse_api_update_deleted(self, api):
         """It should not update a deleted reuse from the API and raise 410"""

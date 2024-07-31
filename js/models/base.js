@@ -190,7 +190,7 @@ export class Model extends Base {
      * @return {Object} A JSON schema
      */
     get __schema__() {
-        return API.definitions[this.__class__] || {};
+        return API.definitions[this.__class__] || API.definitions[this.__class__ + ' (write)'] || {};
     }
 
     /**

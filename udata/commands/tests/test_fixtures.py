@@ -1,13 +1,12 @@
-import json
 from tempfile import NamedTemporaryFile
 
 import pytest
 import requests
-import werkzeug.test
-from pytest_mock import MockerFixture
 from werkzeug.wrappers.response import Response
 
+import udata.commands.fixtures
 from udata import models
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import (
     CommunityResourceFactory,
     DatasetFactory,
@@ -15,7 +14,7 @@ from udata.core.dataset.factories import (
 )
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.models import Member, Organization
+from udata.core.organization.models import Member
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
 
@@ -42,6 +41,7 @@ class FixturesTest:
             user=user,
             discussion=[MessageDiscussionFactory(**{}, posted_by=user)],
         )
+        DataserviceFactory(**{}, datasets=[dataset])
 
         with NamedTemporaryFile(mode="w+", delete=True) as fixtures_fd:
             # Get the fixtures from the local instance.
@@ -51,6 +51,21 @@ class FixturesTest:
             fixtures_fd.flush()
             assert "Fixtures saved to file " in result.output
 
+            # Delete everything, so we can make sure the objects are imported.
+            models.Organization.drop_collection()
+            models.Dataset.drop_collection()
+            models.Discussion.drop_collection()
+            models.CommunityResource.drop_collection()
+            models.User.drop_collection()
+            models.Dataservice.drop_collection()
+
+            assert models.Organization.objects(slug=org.slug).count() == 0
+            assert models.Dataset.objects.count() == 0
+            assert models.Discussion.objects.count() == 0
+            assert models.CommunityResource.objects.count() == 0
+            assert models.User.objects.count() == 0
+            assert models.Dataservice.objects.count() == 0
+
             # Then load them in the database to make sure they're correct.
             result = cli("import-fixtures", fixtures_fd.name)
         assert models.Organization.objects(slug=org.slug).count() > 0
@@ -58,6 +73,9 @@ class FixturesTest:
         assert models.Discussion.objects.count() > 0
         assert models.CommunityResource.objects.count() > 0
         assert models.User.objects.count() > 0
+        assert models.Dataservice.objects.count() > 0
+        # Make sure we also import the dataservice organization
+        assert models.Dataservice.objects(organization__exists=True).count() > 0
 
     def test_import_fixtures_from_default_file(self, cli):
         """Test importing fixtures from udata.commands.fixture.DEFAULT_FIXTURE_FILE."""
@@ -66,3 +84,5 @@ class FixturesTest:
         assert models.Dataset.objects.count() > 0
         assert models.Reuse.objects.count() > 0
         assert models.User.objects.count() > 0
+        if udata.commands.fixtures.DEFAULT_FIXTURE_FILE_TAG > "v1.0.0":
+            assert models.Dataservice.objects.count() > 0

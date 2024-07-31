@@ -10,7 +10,7 @@ We’ll use the following repositories:
 # Check the system requirements
 
 !!! info
-    Be aware that udata now requires Python **>3.9,<=3.11** to work. 
+    Be aware that udata now requires Python **>3.9,<=3.11** to work.
 
 udata requires several libraries to be installed to work. You can see them on the udata documentation link below.
 
@@ -151,6 +151,10 @@ This define `dev.local:7000` as the URL for your local setup. You’ll have to e
 127.0.0.1       dev.local
 ```
 
+!!! WARNING
+    For MacOS users, please note that the [control center is listening on port 7000](https://discussions.apple.com/thread/250472145?sortBy=rank),
+    so the above won't work. Instead, configure for example port `7001` in the `udata.cfg` file.
+
 ## Running the project for the first time
 
 You need to initialize some data before being able to use udata. The following command
@@ -160,11 +164,25 @@ will initalize database, indexes, create fixtures, etc.
 udata init
 ```
 
+!!! note "Fixtures loading"
+    Loading fixtures is done hunder the hood using the `import-fixtures` command,
+    which relies on the [udata-fixtures][] repository, and will import the fixtures
+    declared in the `FIXTURE_DATASET_SLUGS` config.
+
 You can then start udata server with the `serve` subcommand.
 
 ```bash
 inv serve
 ```
+
+!!! WARNING
+    For MacOS users, this won't work as the port `7000` is already used, as explained above. If you've changed the `udata.cfg` to
+    have a `SERVER_NAME=dev.local:7001`, use the following command instead, and make sure to use the port `7001` throughout the rest
+    of the documentation and examples.
+
+    ```bash
+    inv serve --port 7001
+    ```
 
 Now, you can use your udata api !
 
@@ -259,7 +277,7 @@ You can now visit `dev.local:7000/` in your browser and start playing with your 
 You can use parcel to watch for file changes in udata or udata-front directory with
 
 ```bash
-inv assets-watch 
+inv assets-watch
 ```
 
 !!! note "Tell us what you think"
@@ -283,3 +301,4 @@ Once the project is up and running, it’s time to customize it! Take a look at 
 [github]: https://github.com/opendatateam/udata
 [new issue]: https://github.com/opendatateam/udata/issues/new
 [udata-search-service]: https://github.com/opendatateam/udata-search-service
+[udata-fixtures]: https://github.com/opendatateam/udata-fixtures

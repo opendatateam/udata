@@ -1,3 +1,9 @@
+"""Commands to download fixtures from the udata-fixtures repository, import them locally.
+
+When "downloading" (generating) the fixtures, save the json as is.
+When "importing" the fixtures, massage them so then can be loaded properly.
+"""
+
 import json
 import logging
 import pathlib
@@ -7,6 +13,9 @@ import requests
 from flask import current_app
 
 from udata.commands import cli
+from udata.core.contact_point.factories import ContactPointFactory
+from udata.core.contact_point.models import ContactPoint
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import (
     CommunityResourceFactory,
     DatasetFactory,
@@ -22,15 +31,15 @@ log = logging.getLogger(__name__)
 
 
 DATASET_URL = "/api/1/datasets"
+DATASERVICES_URL = "/api/1/dataservices"
 ORG_URL = "/api/1/organizations"
 REUSE_URL = "/api/1/reuses"
 COMMUNITY_RES_URL = "/api/1/datasets/community_resources"
 DISCUSSION_URL = "/api/1/discussions"
 
 
-DEFAULT_FIXTURE_FILE: str = (
-    "https://raw.githubusercontent.com/opendatateam/udata-fixtures/main/results.json"  # noqa
-)
+DEFAULT_FIXTURE_FILE_TAG: str = "v2.0.0"
+DEFAULT_FIXTURE_FILE: str = f"https://raw.githubusercontent.com/opendatateam/udata-fixtures/{DEFAULT_FIXTURE_FILE_TAG}/results.json"  # noqa
 
 DEFAULT_FIXTURES_RESULTS_FILENAME: str = "results.json"
 
@@ -58,6 +67,14 @@ UNWANTED_KEYS: dict[str, list[str]] = {
     ],
     "discussion": ["subject", "user", "url", "class"],
     "message": ["posted_by"],
+    "dataservice": [
+        "datasets",
+        "license",
+        "organization",
+        "owner",
+        "self_api_url",
+        "self_web_url",
+    ],
 }
 
 
@@ -85,7 +102,7 @@ def fix_dates(obj: dict) -> dict:
 @click.argument("data-source")
 @click.argument("results-filename", default=DEFAULT_FIXTURES_RESULTS_FILENAME)
 def generate_fixtures_file(data_source: str, results_filename: str) -> None:
-    """Build sample fixture file based on datasets slugs list (users, datasets, reuses)."""
+    """Build sample fixture file based on datasets slugs list (users, datasets, reuses, dataservices)."""
     results_file = pathlib.Path(results_filename)
     datasets_slugs = current_app.config["FIXTURE_DATASET_SLUGS"]
     json_result = []
@@ -121,6 +138,11 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
             ).json()["data"]
             json_fixture["discussions"] = json_discussion
 
+            json_dataservices = requests.get(
+                f"{data_source}{DATASERVICES_URL}/?dataset={json_dataset['id']}"
+            ).json()["data"]
+            json_fixture["dataservices"] = json_dataservices
+
             json_result.append(json_fixture)
 
     with results_file.open("w") as f:
@@ -131,7 +153,7 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
 @cli.command()
 @click.argument("source", default=DEFAULT_FIXTURE_FILE)
 def import_fixtures(source):
-    """Build sample fixture data (users, datasets, reuses) from local or remote file."""
+    """Build sample fixture data (users, datasets, reuses, dataservices) from local or remote file."""
     if source.startswith("http"):
         json_fixtures = requests.get(source).json()
     else:
@@ -175,3 +197,20 @@ def import_fixtures(source):
                         MessageDiscussionFactory(**message, posted_by=user) for message in messages
                     ],
                 )
+            for dataservice in fixture["dataservices"]:
+                dataservice = remove_unwanted_keys(dataservice, "dataservice")
+                if not dataservice["contact_point"]:
+                    DataserviceFactory(**dataservice, datasets=[dataset], organization=org)
+                else:
+                    contact_point = ContactPoint.objects(
+                        id=dataservice["contact_point"]["id"]
+                    ).first()
+                    if not contact_point:
+                        contact_point = ContactPointFactory(**dataservice["contact_point"])
+                    dataservice.pop("contact_point")
+                    DataserviceFactory(
+                        **dataservice,
+                        datasets=[dataset],
+                        organization=org,
+                        contact_point=contact_point,
+                    )

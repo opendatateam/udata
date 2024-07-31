@@ -152,7 +152,7 @@ class DiscussionAPI(API):
 
 @ns.route("/<id>/comments/<int:cidx>/spam", endpoint="discussion_comment_spam")
 @ns.doc(delete={"id": "unspam"})
-class DiscussionSpamAPI(SpamAPIMixin):
+class DiscussionCommentSpamAPI(SpamAPIMixin):
     def get_model(self, id, cidx):
         discussion = Discussion.objects.get_or_404(id=id_or_404(id))
         if len(discussion.discussion) <= cidx:

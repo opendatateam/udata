@@ -1,8 +1,6 @@
 import pytest
 
-from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
-from udata.core.dataset.models import Dataset
 from udata.core.organization.csv import OrganizationCsvAdapter
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization

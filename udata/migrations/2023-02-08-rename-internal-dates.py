@@ -6,8 +6,6 @@ import logging
 
 from mongoengine.connection import get_db
 
-from udata.models import Dataset
-
 log = logging.getLogger(__name__)
 
 

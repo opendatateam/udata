@@ -3,7 +3,7 @@ import logging
 import urllib.parse
 
 import requests
-from flask import current_app, request, url_for
+from flask import current_app, request
 
 from udata.search.result import SearchResult
 

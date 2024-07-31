@@ -120,7 +120,7 @@ class GeoZone(WithMetrics, db.Document):
 @cache.memoize()
 def get_spatial_granularities(lang):
     with language(lang):
-        return [(l.id, _(l.name)) for l in GeoLevel.objects] + [
+        return [(geolevel.id, _(geolevel.name)) for geolevel in GeoLevel.objects] + [
             (id, str(label)) for id, label in BASE_GRANULARITIES
         ]
 
@@ -130,7 +130,7 @@ spatial_granularities = LocalProxy(lambda: get_spatial_granularities(get_locale(
 
 @cache.cached(timeout=50, key_prefix="admin_levels")
 def get_spatial_admin_levels():
-    return dict((l.id, l.admin_level) for l in GeoLevel.objects)
+    return dict((geolevel.id, geolevel.admin_level) for geolevel in GeoLevel.objects)
 
 
 admin_levels = LocalProxy(get_spatial_admin_levels)
