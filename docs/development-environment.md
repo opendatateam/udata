@@ -26,7 +26,7 @@ You can also generate the `.pip` files manually from the `.in` files without com
 pip-compile requirements/install.in --output-file requirements/install.pip
 ```
 
-> WARNING: whenever the dependencies change, the `udata.pip` needs to be manually recompiled on plugins that use the same virtualenv, like
+> WARNING: whenever the dependencies change, the `udata.pip` needs to be manually recompiled on plugins that use the same virtualenv and pip-compile against udata, like
   [the udata-front project](https://github.com/datagouv/udata-front), eg:
 
   ```shell
