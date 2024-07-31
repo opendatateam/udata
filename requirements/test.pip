@@ -55,6 +55,7 @@ blinker==1.4
     #   flask-principal
     #   flask-security-too
     #   flask-sitemap
+    #   sentry-sdk
 boto3==1.26.102
     # via
     #   -c requirements/install.pip
@@ -82,12 +83,13 @@ certifi==2024.7.4
     # via
     #   -c requirements/install.pip
     #   requests
+    #   sentry-sdk
 cffi==1.16.0
     # via
     #   -c requirements/install.pip
     #   bcrypt
     #   cryptography
-chardet==3.0.4
+charset-normalizer==3.3.2
     # via
     #   -c requirements/install.pip
     #   requests
@@ -156,6 +158,7 @@ flask==2.1.2
     #   flask-storage
     #   flask-wtf
     #   pytest-flask
+    #   sentry-sdk
 flask-babel==4.0.0
     # via
     #   -c requirements/install.pip
@@ -285,6 +288,7 @@ markupsafe==2.1.2
     #   -c requirements/install.pip
     #   flask-storage
     #   jinja2
+    #   sentry-sdk
     #   werkzeug
     #   wtforms
 mistune==0.8.4
@@ -321,7 +325,9 @@ pillow==9.2.0
 pluggy==1.4.0
     # via pytest
 ply==3.11
-    # via pycparser
+    # via
+    #   -c requirements/install.pip
+    #   pycparser
 prompt-toolkit==3.0.47
     # via
     #   -c requirements/install.pip
@@ -383,13 +389,14 @@ redis==4.5.2
     #   kombu
 referencing==0.35.1
     # via
+    #   -c requirements/install.pip
     #   jsonschema
     #   jsonschema-specifications
 regex==2024.5.15
     # via
     #   -c requirements/install.pip
     #   awesome-slugify
-requests==2.24.0
+requests==2.32.3
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -398,12 +405,17 @@ requests-mock==1.10.0
     # via -r requirements/test.in
 rpds-py==0.19.0
     # via
+    #   -c requirements/install.pip
     #   jsonschema
     #   referencing
 s3transfer==0.6.2
     # via
     #   -c requirements/install.pip
     #   boto3
+sentry-sdk[flask]==2.9.0
+    # via
+    #   -c requirements/install.pip
+    #   -r requirements/install.in
 six==1.16.0
     # via
     #   -c requirements/install.pip
@@ -450,11 +462,12 @@ urlextract==0.14.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-urllib3==1.25.11
+urllib3==1.26.19
     # via
     #   -c requirements/install.pip
     #   botocore
     #   requests
+    #   sentry-sdk
 vine==5.1.0
     # via
     #   -c requirements/install.pip
