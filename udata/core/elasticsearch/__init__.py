@@ -81,12 +81,15 @@ dgv_analyzer = analyzer(
 client = connections.create_connection(hosts=["localhost"])
 
 
-def elasticsearch(score_functions_description={}, build_search_query=None, **kwargs):
+def elasticsearch(
+    score_functions_description={}, build_search_query=None, indexable=None, **kwargs
+):
     def wrapper(cls):
         cls.elasticsearch = generate_elasticsearch_model(
             cls,
             score_functions_description=score_functions_description,
             build_search_query=build_search_query,
+            indexable=indexable,
         )
         return cls
 
@@ -94,7 +97,7 @@ def elasticsearch(score_functions_description={}, build_search_query=None, **kwa
 
 
 def generate_elasticsearch_model(
-    cls: type, score_functions_description, build_search_query
+    cls: type, score_functions_description, build_search_query, indexable
 ) -> type:
     index_name = cls._get_collection_name()
 
@@ -114,7 +117,12 @@ def generate_elasticsearch_model(
     ensure_index_exists(ElasticSearchModel._index, index_name)
 
     def elasticsearch_index(cls, document, **kwargs):
-        convert_mongo_document_to_elasticsearch_document(document).save()
+        elasticsearch_document = convert_mongo_document_to_elasticsearch_document(document)
+
+        if not indexable or indexable(document):
+            elasticsearch_document.save()
+        else:
+            elasticsearch_document.delete()
 
     score_functions = [
         query.SF("field_value_factor", field=key, **value)
@@ -134,9 +142,6 @@ def generate_elasticsearch_model(
             )
 
         response = s.query(query).execute()
-        for hit in response:
-            print(hit.title)
-            print(hit.meta.score)
 
         # Get all the models from MongoDB to fetch all the correct fields.
         models = {
@@ -229,7 +234,6 @@ def convert_mongo_document_to_elasticsearch_document(
             attributes[key] = getattr(document, key)
 
     for method_name in get_indexable_methods(document.__class__):
-        print(method_name, getattr(document, method_name)())
         attributes[method_name] = getattr(document, method_name)()
 
     return document.__elasticsearch_model__(**attributes)
