@@ -1,6 +1,7 @@
 import random
 import string
 import time
+from datetime import datetime
 
 from elasticsearch_dsl import analyzer, token_filter, tokenizer
 from flask import url_for
@@ -380,7 +381,17 @@ class DataserviceAPITest(APITestCase):
 
         assert len(dataservices) == 3
 
-        # `dataservice_b` should be first because it has a lot of followers
         assert dataservices[0].title == dataservice_b.title
         assert dataservices[1].title == dataservice_a.title
         assert dataservices[2].title == dataservice_c.title
+
+        dataservice_b.archived_at = datetime.utcnow()
+        dataservice_b.save()
+        time.sleep(3)
+
+        dataservices = Dataservice.__elasticsearch_search__("AMDAC")
+
+        assert len(dataservices) == 2
+
+        assert dataservices[0].title == dataservice_a.title
+        assert dataservices[1].title == dataservice_c.title

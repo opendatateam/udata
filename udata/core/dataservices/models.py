@@ -103,6 +103,9 @@ class HarvestMetadata(db.EmbeddedDocument):
         "metrics.views": {"factor": 1, "modifier": "sqrt", "missing": 1},
     },
     build_search_query=build_search_query,
+    indexable=lambda dataservice: (
+        not dataservice.archived_at and not dataservice.deleted_at and not dataservice.private
+    ),
 )
 class Dataservice(WithMetrics, Owned, db.Document):
     meta = {
