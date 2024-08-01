@@ -6,7 +6,7 @@ tag = true
 tag_format = v{version}
 push = true
 clean = inv clean
-tests = inv test jstest
+tests = inv test
 publish = inv dist
 files =
     README.md
