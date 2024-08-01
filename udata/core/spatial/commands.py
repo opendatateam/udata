@@ -188,7 +188,7 @@ def migrate():
     Summary
     =======
     Processed {zones} zones in {datasets} datasets:\
-    """.format(level_summary, **counter)
+    """.format(**counter)
             ),
             level_summary,
         ]

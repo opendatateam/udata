@@ -42,7 +42,7 @@ from udata.i18n import gettext as _
 from udata.models import CommunityResource, Dataset, Follow, Member, db
 from udata.tags import MAX_TAG_LENGTH, MIN_TAG_LENGTH
 from udata.tests.features.territories import create_geozones_fixtures
-from udata.tests.helpers import assert200, assert204, assert404
+from udata.tests.helpers import assert200, assert404
 from udata.utils import faker, unique_string
 
 from . import APITestCase

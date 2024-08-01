@@ -1,10 +1,7 @@
-import json
 from tempfile import NamedTemporaryFile
 
 import pytest
 import requests
-import werkzeug.test
-from pytest_mock import MockerFixture
 from werkzeug.wrappers.response import Response
 
 import udata.commands.fixtures
@@ -17,7 +14,7 @@ from udata.core.dataset.factories import (
 )
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.models import Member, Organization
+from udata.core.organization.models import Member
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
 

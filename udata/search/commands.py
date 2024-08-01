@@ -93,7 +93,7 @@ def finalize_reindex(models, start):
         r = requests.post(url, json=payload)
         r.raise_for_status()
     except Exception:
-        log.exception(f"Unable to set alias for index")
+        log.exception("Unable to set alias for index")
 
     modified_since_reindex = 0
     for adapter in iter_adapters():

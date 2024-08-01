@@ -206,7 +206,6 @@ def register_extensions(app):
         mail,
         models,
         mongo,
-        notifications,
         routing,
         search,
         sentry,

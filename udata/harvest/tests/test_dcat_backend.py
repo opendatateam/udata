@@ -4,7 +4,6 @@ import re
 import xml.etree.ElementTree as ET
 from datetime import date
 
-import boto3
 import pytest
 from flask import current_app
 

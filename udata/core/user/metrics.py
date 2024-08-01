@@ -1,6 +1,6 @@
 from udata.core.followers.signals import on_follow, on_unfollow
 from udata.core.owned import Owned
-from udata.models import Dataset, Reuse, User, db
+from udata.models import Dataset, Reuse, User
 
 
 @Dataset.on_create.connect

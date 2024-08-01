@@ -4,7 +4,6 @@ from slugify import slugify
 from udata.api import API, api
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission
-from udata.core import storages
 from udata.core.dataset.api_fields import community_resource_fields, dataset_fields
 from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields

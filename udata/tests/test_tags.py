@@ -38,7 +38,7 @@ class TagsTests:
         rows = list(reader)
 
         assert header == ["name", "datasets", "reuses", "total"]
-        assert len(rows) is 3
+        assert len(rows) == 3
         assert rows[0] == ["both", "15", "10", "25"]
         assert rows[1] == ["datasets-only", "15", "0", "15"]
         assert rows[2] == ["reuses-only", "0", "10", "10"]

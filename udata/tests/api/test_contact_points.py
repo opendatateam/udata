@@ -20,7 +20,7 @@ class ContactPointAPITest:
         data["email"] = "new.email@newdomain.com"
         response = api.put(url_for("api.contact_point", contact_point=contact_point), data)
         assert200(response)
-        assert ContactPoint.objects.count() is 1
+        assert ContactPoint.objects.count() == 1
         assert ContactPoint.objects.first().email == "new.email@newdomain.com"
 
     def test_contact_point_api_delete(self, api):
@@ -28,4 +28,4 @@ class ContactPointAPITest:
         contact_point = ContactPointFactory()
         response = api.delete(url_for("api.contact_point", contact_point=contact_point))
         assert204(response)
-        assert ContactPoint.objects.count() is 0
+        assert ContactPoint.objects.count() == 0

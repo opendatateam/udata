@@ -998,7 +998,7 @@ class ResourceSchema(object):
                     f"Schemas catalog does not exist at {endpoint}"
                 )
             response.raise_for_status()
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             log.exception(f"Error while getting schema catalog from {endpoint}")
             schemas = cache.get(cache_key)
         else:
@@ -1006,7 +1006,7 @@ class ResourceSchema(object):
             cache.set(cache_key, schemas)
         # no cached version or no content
         if not schemas:
-            log.error(f"No content found inc. from cache for schema catalog")
+            log.error("No content found inc. from cache for schema catalog")
             raise SchemasCacheUnavailableException("No content in cache for schema catalog")
 
         return schemas

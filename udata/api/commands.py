@@ -4,7 +4,6 @@ import os
 import click
 from flask import current_app, json
 from flask_restx import schemas
-from werkzeug.security import gen_salt
 
 from udata.api import api
 from udata.api.oauth2 import OAuth2Client
