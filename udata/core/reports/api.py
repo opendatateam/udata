@@ -4,6 +4,7 @@ from flask_login import current_user
 
 from udata.api import API, api, fields
 from udata.api_fields import patch
+from udata.auth import admin_permission
 
 from .constants import reports_reasons_translations
 from .models import Report
@@ -16,6 +17,7 @@ class ReportsAPI(API):
     @api.doc("list_reports")
     @api.expect(Report.__index_parser__)
     @api.marshal_with(Report.__page_fields__)
+    @api.secure(admin_permission)
     def get(self):
         query = Report.objects
 
@@ -38,9 +40,10 @@ class ReportsAPI(API):
 
 
 @ns.route("/<report:report>/", endpoint="report")
-class DataserviceAPI(API):
+class ReportAPI(API):
     @api.doc("get_report")
     @api.marshal_with(Report.__read_fields__)
+    @api.secure(admin_permission)
     def get(self, report):
         return report
 

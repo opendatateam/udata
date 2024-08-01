@@ -1,5 +1,4 @@
 from flask import url_for
-from mongoengine.base.datastructures import LazyReference
 
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
@@ -10,8 +9,7 @@ from udata.core.reports.constants import (
 )
 from udata.core.reports.models import Report
 from udata.core.reuse.factories import ReuseFactory
-from udata.core.user.factories import UserFactory
-from udata.i18n import gettext as _
+from udata.core.user.factories import AdminFactory, UserFactory
 
 from . import APITestCase
 
@@ -101,6 +99,11 @@ class ReportsAPITest(APITestCase):
         reports[1].reload()
         self.assertIsNotNone(reports[1].subject_deleted_at)
 
+        # Should be logged as admin
+        response = self.get(url_for("api.reports"))
+        self.assert403(response)
+
+        self.login(AdminFactory())
         response = self.get(url_for("api.reports"))
         self.assert200(response)
 
@@ -130,8 +133,14 @@ class ReportsAPITest(APITestCase):
         Report(subject=spam_dataset, reason="spam").save()
         Report(subject=spam_reuse, reason="spam").save()
 
+        # Should be logged as admin
+        response = self.get(url_for("api.reports"))
+        self.assert401(response)
+
+        self.login(AdminFactory())
         response = self.get(url_for("api.reports"))
         self.assert200(response)
+
         payload = response.json
         self.assertEqual(payload["total"], 2)
         # Returned by order of creation by default
@@ -150,8 +159,13 @@ class ReportsAPITest(APITestCase):
 
         report = Report(subject=spam_dataset, reason="spam").save()
 
+        # Should be logged as admin
         response = self.get(url_for("api.report", report=report))
+        self.assert401(response)
 
+        self.login(AdminFactory())
+        response = self.get(url_for("api.report", report=report))
         self.assert200(response)
+
         payload = response.json
         self.assertEqual(payload["subject"]["id"], str(spam_dataset.id))
