@@ -66,6 +66,7 @@ blinker==1.4
     #   flask-principal
     #   flask-security-too
     #   flask-sitemap
+    #   sentry-sdk
 boto3==1.26.102
     # via
     #   -c requirements/install.pip
@@ -99,13 +100,14 @@ certifi==2024.7.4
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   requests
+    #   sentry-sdk
 cffi==1.16.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   bcrypt
     #   cryptography
-chardet==3.0.4
+charset-normalizer==3.3.2
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -185,6 +187,7 @@ flask==2.1.2
     #   flask-sitemap
     #   flask-storage
     #   flask-wtf
+    #   sentry-sdk
 flask-babel==4.0.0
     # via
     #   -c requirements/install.pip
@@ -344,6 +347,7 @@ markupsafe==2.1.2
     #   flask-storage
     #   jinja2
     #   mkdocs
+    #   sentry-sdk
     #   werkzeug
     #   wtforms
 mergedeep==1.3.4
@@ -464,7 +468,7 @@ regex==2024.5.15
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   awesome-slugify
-requests==2.24.0
+requests==2.32.3
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -480,6 +484,11 @@ s3transfer==0.6.2
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   boto3
+sentry-sdk[flask]==2.9.0
+    # via
+    #   -c requirements/install.pip
+    #   -c requirements/test.pip
+    #   -r requirements/install.in
 six==1.16.0
     # via
     #   -c requirements/install.pip
@@ -532,12 +541,13 @@ urlextract==0.14.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-urllib3==1.25.11
+urllib3==1.26.19
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   botocore
     #   requests
+    #   sentry-sdk
 vine==5.1.0
     # via
     #   -c requirements/install.pip

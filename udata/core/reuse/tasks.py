@@ -10,7 +10,7 @@ log = get_logger(__name__)
 
 
 @job("purge-reuses")
-def purge_reuses(self):
+def purge_reuses(self) -> None:
     for reuse in Reuse.objects(deleted__ne=None):
         log.info(f"Purging reuse {reuse}")
         # Remove followers
@@ -32,7 +32,7 @@ def purge_reuses(self):
 
 
 @task
-def notify_new_reuse(reuse_id):
+def notify_new_reuse(reuse_id: int) -> None:
     reuse = Reuse.objects.get(pk=reuse_id)
     for dataset in reuse.datasets:
         if dataset.organization:

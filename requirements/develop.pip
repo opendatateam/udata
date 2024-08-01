@@ -68,6 +68,7 @@ blinker==1.4
     #   flask-principal
     #   flask-security-too
     #   flask-sitemap
+    #   sentry-sdk
 boto3==1.26.102
     # via
     #   -c requirements/install.pip
@@ -103,6 +104,7 @@ certifi==2024.7.4
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   requests
+    #   sentry-sdk
 cffi==1.16.0
     # via
     #   -c requirements/install.pip
@@ -111,7 +113,7 @@ cffi==1.16.0
     #   cryptography
 cfgv==3.4.0
     # via pre-commit
-chardet==3.0.4
+charset-normalizer==3.3.2
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -152,7 +154,6 @@ cryptography==2.8
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   authlib
-    #   secretstorage
 decorator==5.1.1
     # via ipython
 distlib==0.3.8
@@ -207,6 +208,7 @@ flask==2.1.2
     #   flask-storage
     #   flask-wtf
     #   pytest-flask
+    #   sentry-sdk
 flask-babel==4.0.0
     # via
     #   -c requirements/install.pip
@@ -337,10 +339,6 @@ jaraco-classes==3.3.1
     # via keyring
 jedi==0.19.1
     # via ipython
-jeepney==0.8.0
-    # via
-    #   keyring
-    #   secretstorage
 jinja2==3.1.2
     # via
     #   -c requirements/install.pip
@@ -388,6 +386,7 @@ markupsafe==2.1.2
     #   -c requirements/test.pip
     #   flask-storage
     #   jinja2
+    #   sentry-sdk
     #   werkzeug
     #   wtforms
 matplotlib-inline==0.1.6
@@ -454,6 +453,7 @@ pluggy==1.4.0
     #   pytest
 ply==3.11
     # via
+    #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   pycparser
 pre-commit==2.14.0
@@ -552,6 +552,7 @@ redis==4.5.2
     #   kombu
 referencing==0.35.1
     # via
+    #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   jsonschema
     #   jsonschema-specifications
@@ -560,7 +561,7 @@ regex==2024.5.15
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   awesome-slugify
-requests==2.24.0
+requests==2.32.3
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -578,6 +579,7 @@ rfc3986==2.0.0
     # via twine
 rpds-py==0.19.0
     # via
+    #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   jsonschema
     #   referencing
@@ -588,8 +590,11 @@ s3transfer==0.6.2
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   boto3
-secretstorage==3.3.3
-    # via keyring
+sentry-sdk[flask]==2.9.0
+    # via
+    #   -c requirements/install.pip
+    #   -c requirements/test.pip
+    #   -r requirements/install.in
 six==1.16.0
     # via
     #   -c requirements/install.pip
@@ -660,12 +665,13 @@ urlextract==0.14.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-urllib3==1.25.11
+urllib3==1.26.19
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   botocore
     #   requests
+    #   sentry-sdk
 vine==5.1.0
     # via
     #   -c requirements/install.pip
