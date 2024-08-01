@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 9.1.3 (2024-08-01)
 
 - Adds latest `sentry-sdk[flask]` as an install dependency, and update Sentry logic to be able to send environment, app version and profiling/performance info [#3086](https://github.com/opendatateam/udata/pull/3086)
 - Add report get endpoint and make report get and list admin only [#3115](https://github.com/opendatateam/udata/pull/3115)
