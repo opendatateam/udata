@@ -81,6 +81,7 @@ celerybeat-mongo==0.2.0
 certifi==2024.7.4
     # via
     #   -c requirements/install.pip
+    #   elasticsearch
     #   requests
 cffi==1.16.0
     # via
@@ -123,6 +124,12 @@ dnspython==2.6.1
     #   -c requirements/install.pip
     #   email-validator
     #   pymongo
+elasticsearch==7.15.0
+    # via
+    #   -r requirements/install.in
+    #   elasticsearch-dsl
+elasticsearch-dsl==7.4.0
+    # via -r requirements/install.in
 email-validator==2.2.0
     # via
     #   -c requirements/install.pip
@@ -321,7 +328,9 @@ pillow==9.2.0
 pluggy==1.4.0
     # via pytest
 ply==3.11
-    # via pycparser
+    # via
+    #   -c requirements/install.pip
+    #   pycparser
 prompt-toolkit==3.0.47
     # via
     #   -c requirements/install.pip
@@ -365,6 +374,7 @@ python-dateutil==2.8.2
     #   -r requirements/install.in
     #   botocore
     #   celery
+    #   elasticsearch-dsl
     #   faker
 pytz==2024.1
     # via
@@ -383,6 +393,7 @@ redis==4.5.2
     #   kombu
 referencing==0.35.1
     # via
+    #   -c requirements/install.pip
     #   jsonschema
     #   jsonschema-specifications
 regex==2024.5.15
@@ -398,6 +409,7 @@ requests-mock==1.10.0
     # via -r requirements/test.in
 rpds-py==0.19.0
     # via
+    #   -c requirements/install.pip
     #   jsonschema
     #   referencing
 s3transfer==0.6.2
@@ -410,6 +422,7 @@ six==1.16.0
     #   bcrypt
     #   bleach
     #   cryptography
+    #   elasticsearch-dsl
     #   faker
     #   isodate
     #   langdetect
@@ -454,6 +467,7 @@ urllib3==1.25.11
     # via
     #   -c requirements/install.pip
     #   botocore
+    #   elasticsearch
     #   requests
 vine==5.1.0
     # via
