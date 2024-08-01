@@ -1,13 +1,10 @@
-import json
 import logging
 import random
 import string
 from datetime import datetime
-from pprint import pprint
-from typing import Optional
+from typing import Callable, Optional, Type, TypeVar
 
 import mongoengine.fields as mongo_fields
-from elasticsearch import Elasticsearch
 from elasticsearch_dsl import (
     Boolean,
     Date,
@@ -15,8 +12,6 @@ from elasticsearch_dsl import (
     Field,
     Float,
     Index,
-    InnerDoc,
-    Integer,
     Keyword,
     Nested,
     Object,
@@ -25,7 +20,6 @@ from elasticsearch_dsl import (
     Text,
     analyzer,
     connections,
-    query,
     token_filter,
     tokenizer,
 )
@@ -81,10 +75,30 @@ dgv_analyzer = analyzer(
 client = connections.create_connection(hosts=["localhost"])
 
 
+T = TypeVar("T")
+
+
 def elasticsearch(
-    score_functions_description={}, build_search_query=None, indexable=None, **kwargs
+    score_functions_description: dict[str, dict] = {},
+    build_search_query=None,
+    indexable: Optional[Callable[[T], bool]] = None,
+    **kwargs,
 ):
-    def wrapper(cls):
+    """
+    This decorator activates Elasticsearch features for this model.
+    The model will be indexed / updated in Elasticsearch.
+    Three elements will be added to the model:
+    - `cls.__elasticsearch_model__` the Elasticsearch DSL model class
+    - `cls.__elasticsearch_index__` the method to index one model (useful to do manual indexing but should be done automaticaly with MongoDB events)
+    - `cls.__elasticsearch_search__` to search the model with a query
+
+    The fields used have three statuses:
+    - `searchable`: indexed and searchable via Elasticsearch
+    - `indexable`: indexed but not searchable (useful for stuff like `score_functions`, for exemple a "orga is public service" value)
+    - `filterable`: indexed to be able to filter on this fields in the query but not searchable (for exemple `organization.id`).
+    """
+
+    def wrapper(cls: Type[T]):
         cls.elasticsearch = generate_elasticsearch_model(
             cls,
             score_functions_description=score_functions_description,
@@ -97,7 +111,10 @@ def elasticsearch(
 
 
 def generate_elasticsearch_model(
-    cls: type, score_functions_description, build_search_query, indexable
+    cls: Type[T],
+    score_functions_description: dict[str, dict],
+    build_search_query,
+    indexable: Optional[Callable[[T], bool]],
 ) -> type:
     index_name = cls._get_collection_name()
 
@@ -107,6 +124,11 @@ def generate_elasticsearch_model(
     class Index:
         name = index_name
 
+    # We'll generate a new Python object from scratch (based on a `dict` of attributes)
+    # When inheriting from `elasticsearch_dsl.Document` at the initialiation of the class
+    # some code is run, so we can't create an empty class and add attributes latter. That's
+    # why we create the class from a `dict` of attributes so that during initialisation every
+    # properties are there.
     attributes = {"Index": Index}
 
     for key, field, searchable in get_searchable_fields(cls):
@@ -114,9 +136,13 @@ def generate_elasticsearch_model(
 
     ElasticSearchModel = type(f"{cls.__name__}ElasticsearchModel", (Document,), attributes)
 
+    # Create the index if it doesn't exist
     ensure_index_exists(ElasticSearchModel._index, index_name)
 
     def elasticsearch_index(cls, document, **kwargs):
+        """
+        Index the document if indexable, remove from index if not.
+        """
         elasticsearch_document = convert_mongo_document_to_elasticsearch_document(document)
 
         if not indexable or indexable(document):
@@ -124,13 +150,15 @@ def generate_elasticsearch_model(
         else:
             elasticsearch_document.delete()
 
-    score_functions = [
-        query.SF("field_value_factor", field=key, **value)
-        for key, value in score_functions_description.items()
-    ]
+    signals.post_save.connect(cls.__elasticsearch_index__, sender=cls)
 
-    def elasticsearch_search(query_text):
+    def elasticsearch_search(query_text: str):
         s: Search = ElasticSearchModel.search()
+
+        score_functions = [
+            query.SF("field_value_factor", field=key, **value)
+            for key, value in score_functions_description.items()
+        ]
 
         if query_text:
             query = build_search_query(query_text, score_functions)
@@ -143,7 +171,8 @@ def generate_elasticsearch_model(
 
         response = s.query(query).execute()
 
-        # Get all the models from MongoDB to fetch all the correct fields.
+        # Get all the models from MongoDB to fetch all the correct fields (the Elasticsearch model
+        # doesn't contains all the information).
         models = {
             str(model.id): model for model in cls.objects(id__in=[hit.id for hit in response])
         }
@@ -155,8 +184,6 @@ def generate_elasticsearch_model(
     cls.__elasticsearch_model__ = ElasticSearchModel
     cls.__elasticsearch_index__ = elasticsearch_index
     cls.__elasticsearch_search__ = elasticsearch_search
-
-    signals.post_save.connect(cls.__elasticsearch_index__, sender=cls)
 
 
 def get_searchable_fields(cls):
@@ -174,6 +201,9 @@ def get_searchable_fields(cls):
 
 
 def get_indexable_methods(cls):
+    """
+    Currently only fetching `indexable` methods but will do `searchable` and `filterable`
+    """
     for method_name in dir(cls):
         if method_name == "objects":
             continue
