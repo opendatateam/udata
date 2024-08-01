@@ -62,7 +62,7 @@ class GeomField(Field):
                     self.data = geojson.loads(value)
                 else:
                     self.data = geojson.GeoJSON.to_instance(value)
-            except:
+            except Exception:
                 self.data = None
                 log.exception("Unable to parse GeoJSON")
                 raise ValueError(self.gettext("Not a valid GeoJSON"))

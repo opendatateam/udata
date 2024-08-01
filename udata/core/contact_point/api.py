@@ -1,10 +1,8 @@
 from udata.api import API, api
 from udata.api.parsers import ModelApiParser
-from udata.auth import admin_permission
 
-from .api_fields import contact_point_fields, contact_point_page_fields
+from .api_fields import contact_point_fields
 from .forms import ContactPointForm
-from .models import ContactPoint
 
 
 class ContactPointApiParser(ModelApiParser):

@@ -159,10 +159,10 @@ def check_references(models_to_check):
     references = []
     for model in set(_models):
         if model.__name__ == "Activity":
-            print(f"Skipping Activity model, scheduled for deprecation")
+            print("Skipping Activity model, scheduled for deprecation")
             continue
         if model.__name__ == "GeoLevel":
-            print(f"Skipping GeoLevel model, scheduled for deprecation")
+            print("Skipping GeoLevel model, scheduled for deprecation")
             continue
 
         if models_to_check and model.__name__ not in models_to_check:
@@ -367,7 +367,7 @@ def check_references(models_to_check):
                                     )
                         else:
                             print_and_save(f'Unknown ref type {reference["type"]}')
-                    except mongoengine.errors.FieldDoesNotExist as e:
+                    except mongoengine.errors.FieldDoesNotExist:
                         print_and_save(
                             f"[ERROR for {model.__name__} {obj.id}] {traceback.format_exc()}"
                         )

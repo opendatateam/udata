@@ -2,18 +2,14 @@ import logging
 
 from flask import current_app, render_template
 from flask_principal import Permission as BasePermission
-from flask_principal import (
-    PermissionDenied,  # noqa: facade pattern
-    RoleNeed,
-    UserNeed,  # noqa: facade pattern
-    identity_loaded,  # noqa: facade pattern
-)
-from flask_security import (  # noqa
-    Security,  # noqa
-    current_user,
-    login_required,
-    login_user,
-)
+from flask_principal import PermissionDenied as PermissionDenied
+from flask_principal import RoleNeed as RoleNeed
+from flask_principal import UserNeed as UserNeed
+from flask_principal import identity_loaded as identity_loaded
+from flask_security import Security as Security
+from flask_security import current_user as current_user
+from flask_security import login_required as login_required
+from flask_security import login_user as login_user
 from werkzeug.utils import import_string
 
 log = logging.getLogger(__name__)

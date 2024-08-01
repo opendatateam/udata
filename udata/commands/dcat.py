@@ -33,7 +33,7 @@ def parse_url(url, csw, iso, quiet=False, rid=""):
     """Parse the datasets in a DCAT format located at URL (debug)"""
     if quiet:
         verbose_loggers = ["rdflib", "udata.core.dataset"]
-        [logging.getLogger(l).setLevel(logging.ERROR) for l in verbose_loggers]
+        [logging.getLogger(logger).setLevel(logging.ERROR) for logger in verbose_loggers]
 
     class MockSource:
         url = ""

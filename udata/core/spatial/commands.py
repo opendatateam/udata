@@ -177,8 +177,8 @@ def migrate():
 
     level_summary = "\n".join(
         [
-            " - {0}: {1}".format(l.id, counter[l.id])
-            for l in GeoLevel.objects.order_by("admin_level")
+            " - {0}: {1}".format(geolevel.id, counter[geolevel.id])
+            for geolevel in GeoLevel.objects.order_by("admin_level")
         ]
     )
     summary = "\n".join(
@@ -188,7 +188,7 @@ def migrate():
     Summary
     =======
     Processed {zones} zones in {datasets} datasets:\
-    """.format(level_summary, **counter)
+    """.format(**counter)
             ),
             level_summary,
         ]

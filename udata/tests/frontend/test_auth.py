@@ -11,7 +11,6 @@ class AuthTest(FrontTestCase):
 
     def test_change_mail(self):
         user = self.login(AdminFactory())
-        url = url_for("security.change_email")
 
         new_email = "test@test.com"
 

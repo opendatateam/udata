@@ -41,7 +41,8 @@ org_ref_fields = api.inherit(
     },
 )
 
-from udata.core.user.api_fields import user_ref_fields  # noqa: required
+# This import is not at the top of the file to avoid circular imports
+from udata.core.user.api_fields import user_ref_fields  # noqa
 
 
 def check_can_access_email():

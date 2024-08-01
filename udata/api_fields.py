@@ -67,12 +67,18 @@ def convert_db_to_field(key, field, info={}):
         field_read, field_write = convert_db_to_field(
             f"{key}.inner", field.field, info.get("inner_field_info", {})
         )
-        constructor_read = lambda **kwargs: restx_fields.List(field_read, **kwargs)
-        constructor_write = lambda **kwargs: restx_fields.List(field_write, **kwargs)
+
+        def constructor_read(**kwargs):
+            return restx_fields.List(field_read, **kwargs)
+
+        def constructor_write(**kwargs):
+            return restx_fields.List(field_write, **kwargs)
     elif isinstance(
         field, (mongo_fields.GenericReferenceField, mongoengine.fields.GenericLazyReferenceField)
     ):
-        constructor = lambda **kwargs: restx_fields.Nested(lazy_reference, **kwargs)
+
+        def constructor(**kwargs):
+            return restx_fields.Nested(lazy_reference, **kwargs)
     elif isinstance(field, mongo_fields.ReferenceField):
         # For reference we accept while writing a String representing the ID of the referenced model.
         # For reading, if the user supplied a `nested_fields` (RestX model), we use it to convert
@@ -83,21 +89,25 @@ def convert_db_to_field(key, field, info={}):
             # If there is no `nested_fields` convert the object to the string representation.
             constructor_read = restx_fields.String
         else:
-            constructor_read = lambda **kwargs: restx_fields.Nested(nested_fields, **kwargs)
+
+            def constructor_read(**kwargs):
+                return restx_fields.Nested(nested_fields, **kwargs)
 
         write_params["description"] = "ID of the reference"
         constructor_write = restx_fields.String
     elif isinstance(field, mongo_fields.EmbeddedDocumentField):
         nested_fields = info.get("nested_fields")
         if nested_fields is not None:
-            constructor = lambda **kwargs: restx_fields.Nested(nested_fields, **kwargs)
+
+            def constructor(**kwargs):
+                return restx_fields.Nested(nested_fields, **kwargs)
         elif hasattr(field.document_type_obj, "__read_fields__"):
-            constructor_read = lambda **kwargs: restx_fields.Nested(
-                field.document_type_obj.__read_fields__, **kwargs
-            )
-            constructor_write = lambda **kwargs: restx_fields.Nested(
-                field.document_type_obj.__write_fields__, **kwargs
-            )
+
+            def constructor_read(**kwargs):
+                return restx_fields.Nested(field.document_type_obj.__read_fields__, **kwargs)
+
+            def constructor_write(**kwargs):
+                return restx_fields.Nested(field.document_type_obj.__write_fields__, **kwargs)
         else:
             raise ValueError(
                 f"EmbeddedDocumentField `{key}` requires a `nested_fields` param to serialize/deserialize or a `@generate_fields()` definition."

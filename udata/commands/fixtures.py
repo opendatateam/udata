@@ -16,7 +16,6 @@ from udata.commands import cli
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.contact_point.models import ContactPoint
 from udata.core.dataservices.factories import DataserviceFactory
-from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import (
     CommunityResourceFactory,
     DatasetFactory,
