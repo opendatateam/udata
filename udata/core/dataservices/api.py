@@ -25,7 +25,11 @@ class DataservicesAPI(API):
         """List or search all dataservices"""
         query = Dataservice.objects.visible()
 
-        return Dataservice.apply_sort_filters_and_pagination(query)
+        results = Dataservice.apply_sort_filters_and_pagination(query)
+        print(results)
+
+        print("here")
+        return results
 
     @api.secure
     @api.doc("create_dataservice", responses={400: "Validation error"})

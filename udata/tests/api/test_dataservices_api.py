@@ -353,48 +353,50 @@ class DataserviceAPITest(APITestCase):
         )
         time.sleep(1)
 
-        dataservices = Dataservice.__elasticsearch_search__("AMDAC")
+        print(self.get(url_for("api.dataservices", q="AMDAC")).json)
+
+        dataservices = self.get(url_for("api.dataservices", q="AMDAC")).json["data"]
 
         assert len(dataservices) == 3
-        assert dataservices[0].title == dataservice_c.title
-        assert dataservices[1].title == dataservice_a.title
+        assert dataservices[0]["title"] == dataservice_c.title
+        assert dataservices[1]["title"] == dataservice_a.title
         assert (
-            dataservices[2].title == dataservice_b.title
+            dataservices[2]["title"] == dataservice_b.title
         )  # b is last even if it doesn't really match.
 
         dataservice_b.title = "B - Hello AMD world!"
         dataservice_b.save()
         time.sleep(3)
 
-        dataservices = Dataservice.__elasticsearch_search__("AMDAC")
+        dataservices = self.get(url_for("api.dataservices", q="AMDAC")).json["data"]
 
         assert len(dataservices) == 3
 
         # `dataservice_b` should be first because it has a lot of followers
-        assert dataservices[0].title == dataservice_b.title
-        assert dataservices[1].title == dataservice_c.title
-        assert dataservices[2].title == dataservice_a.title
+        assert dataservices[0]["title"] == dataservice_b.title
+        assert dataservices[1]["title"] == dataservice_c.title
+        assert dataservices[2]["title"] == dataservice_a.title
 
         dataservice_a.organization = orga_sp
         dataservice_a.save()
         assert dataservice_a.public_service_score() == 4
         time.sleep(3)
 
-        dataservices = Dataservice.__elasticsearch_search__("AMDAC")
+        dataservices = self.get(url_for("api.dataservices", q="AMDAC")).json["data"]
 
         assert len(dataservices) == 3
 
-        assert dataservices[0].title == dataservice_b.title
-        assert dataservices[1].title == dataservice_a.title
-        assert dataservices[2].title == dataservice_c.title
+        assert dataservices[0]["title"] == dataservice_b.title
+        assert dataservices[1]["title"] == dataservice_a.title
+        assert dataservices[2]["title"] == dataservice_c.title
 
         dataservice_b.archived_at = datetime.utcnow()
         dataservice_b.save()
         time.sleep(3)
 
-        dataservices = Dataservice.__elasticsearch_search__("AMDAC")
+        dataservices = self.get(url_for("api.dataservices", q="AMDAC")).json["data"]
 
         assert len(dataservices) == 2
 
-        assert dataservices[0].title == dataservice_a.title
-        assert dataservices[1].title == dataservice_c.title
+        assert dataservices[0]["title"] == dataservice_a.title
+        assert dataservices[1]["title"] == dataservice_c.title

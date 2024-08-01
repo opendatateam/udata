@@ -79,6 +79,10 @@ client = connections.create_connection(hosts=["localhost"])
 T = TypeVar("T")
 
 
+def is_elasticsearch_enable() -> bool:
+    return True
+
+
 def elasticsearch(
     score_functions_description: dict[str, dict] = {},
     build_search_query=None,
@@ -166,7 +170,7 @@ def generate_elasticsearch_model(
         else:
             query = Q(
                 "function_score",
-                query=query.MatchAll(),
+                query=query.MatchAll(),  # todo only match `searchable` field and not `indexable` / `filterable`
                 functions=score_functions,
             )
 

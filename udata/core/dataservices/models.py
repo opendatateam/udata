@@ -95,7 +95,7 @@ class HarvestMetadata(db.EmbeddedDocument):
     archived_at = field(db.DateTimeField())
 
 
-@generate_fields()
+@generate_fields(searchable=True)
 @elasticsearch(
     score_functions_description={
         "public_service_score": {"factor": 8, "modifier": "sqrt", "missing": 1},
