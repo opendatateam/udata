@@ -153,6 +153,10 @@ class ContactPointConverter(ModelConverter):
     model = models.ContactPoint
 
 
+class ReportConverter(ModelConverter):
+    model = models.Report
+
+
 class TerritoryConverter(PathConverter):
     DEFAULT_PREFIX = "fr"  # TODO: make it a setting parameter
 
@@ -231,3 +235,4 @@ def init_app(app):
     app.url_map.converters["post"] = PostConverter
     app.url_map.converters["territory"] = TerritoryConverter
     app.url_map.converters["contact_point"] = ContactPointConverter
+    app.url_map.converters["report"] = ReportConverter
