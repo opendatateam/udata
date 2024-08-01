@@ -4,7 +4,6 @@ The purpose here is to update every resource's metadata 'schema' name.
 
 import logging
 
-from udata.core.reuse.models import Reuse
 from udata.models import Dataset, Reuse
 
 log = logging.getLogger(__name__)

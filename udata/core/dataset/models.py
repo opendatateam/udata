@@ -256,8 +256,8 @@ class License(db.Document):
 
         if license is None:
             # Try to single match `slug` with a low Damerau-Levenshtein distance
-            computed = ((l, rdlevenshtein(l.slug, slug)) for l in cls.objects)
-            candidates = [l for l, d in computed if d <= MAX_DISTANCE]
+            computed = ((license_, rdlevenshtein(license_.slug, slug)) for license_ in cls.objects)
+            candidates = [license_ for license_, d in computed if d <= MAX_DISTANCE]
             # If there is more that one match, we cannot determinate
             # which one is closer to safely choose between candidates
             if len(candidates) == 1:
@@ -265,8 +265,10 @@ class License(db.Document):
 
         if license is None:
             # Try to match `title` with a low Damerau-Levenshtein distance
-            computed = ((l, rdlevenshtein(l.title.lower(), text)) for l in cls.objects)
-            candidates = [l for l, d in computed if d <= MAX_DISTANCE]
+            computed = (
+                (license_, rdlevenshtein(license_.title.lower(), text)) for license_ in cls.objects
+            )
+            candidates = [license_ for license_, d in computed if d <= MAX_DISTANCE]
             # If there is more that one match, we cannot determinate
             # which one is closer to safely choose between candidates
             if len(candidates) == 1:
@@ -275,11 +277,11 @@ class License(db.Document):
         if license is None:
             # Try to single match `alternate_titles` with a low Damerau-Levenshtein distance
             computed = (
-                (l, rdlevenshtein(cls.slug.slugify(t), slug))
-                for l in cls.objects
-                for t in l.alternate_titles
+                (license_, rdlevenshtein(cls.slug.slugify(title_), slug))
+                for license_ in cls.objects
+                for title_ in license_.alternate_titles
             )
-            candidates = [l for l, d in computed if d <= MAX_DISTANCE]
+            candidates = [license_ for license_, distance_ in computed if distance_ <= MAX_DISTANCE]
             # If there is more that one license matching, we cannot determinate
             # which one is closer to safely choose between candidates
             if len(set(candidates)) == 1:

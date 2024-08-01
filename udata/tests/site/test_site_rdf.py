@@ -254,9 +254,7 @@ class SiteRdfViewsTest:
         dataset_b = DatasetFactory.create()
         dataset_c = DatasetFactory.create()
 
-        DataserviceFactory.create(
-            datasets=[dataset_a.id], harvest=HarvestMetadataFactory()
-        )
+        DataserviceFactory.create(datasets=[dataset_a.id], harvest=HarvestMetadataFactory())
         dataservice_b = DataserviceFactory.create(datasets=[dataset_b.id])
         dataservice_x = DataserviceFactory.create(datasets=[dataset_a.id, dataset_c.id])
         dataservice_y = DataserviceFactory.create(datasets=[])

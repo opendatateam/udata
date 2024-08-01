@@ -320,9 +320,10 @@ class UserAPI(API):
         return "", 204
 
 
-from udata.core.contact_point.api import ContactPointApiParser
-from udata.core.contact_point.api_fields import contact_point_page_fields
-from udata.models import ContactPoint
+# These imports are not at the top of the file to avoid circular imports
+from udata.core.contact_point.api import ContactPointApiParser  # noqa
+from udata.core.contact_point.api_fields import contact_point_page_fields  # noqa
+from udata.models import ContactPoint  # noqa
 
 contact_point_parser = ContactPointApiParser()
 

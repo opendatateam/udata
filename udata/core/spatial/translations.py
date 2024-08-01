@@ -2,6 +2,7 @@
 def _(s):
     return s  # noqa: force translations
 
+
 TRANSLATIONS = (
     _("French region"),
     _("French intermunicipal (EPCI)"),
