@@ -56,7 +56,7 @@ def build_search_query(query_text: str, score_functions):
                 ),
                 functions=score_functions,
             ),
-            # query.Match(title={"query": query_text, "fuzziness": "AUTO:4,6"}),
+            query.Match(title={"query": query_text, "fuzziness": "AUTO:4,6"}),
         ],
     )
 

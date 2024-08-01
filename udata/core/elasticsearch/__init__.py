@@ -6,6 +6,7 @@ from typing import Callable, Optional, Type, TypeVar
 
 import mongoengine.fields as mongo_fields
 from elasticsearch_dsl import (
+    SF,
     Boolean,
     Date,
     Document,
@@ -150,13 +151,13 @@ def generate_elasticsearch_model(
         else:
             elasticsearch_document.delete()
 
-    signals.post_save.connect(cls.__elasticsearch_index__, sender=cls)
+    signals.post_save.connect(elasticsearch_index, sender=cls)
 
     def elasticsearch_search(query_text: str):
         s: Search = ElasticSearchModel.search()
 
         score_functions = [
-            query.SF("field_value_factor", field=key, **value)
+            SF("field_value_factor", field=key, **value)
             for key, value in score_functions_description.items()
         ]
 
@@ -181,6 +182,9 @@ def generate_elasticsearch_model(
         # returned by Elasticsearch
         return [models[hit.id] for hit in response]
 
+    cls.__elasticsearch_model__ = ElasticSearchModel
+    cls.__elasticsearch_index__ = elasticsearch_index
+    cls.__elasticsearch_search__ = elasticsearch_search
     cls.__elasticsearch_model__ = ElasticSearchModel
     cls.__elasticsearch_index__ = elasticsearch_index
     cls.__elasticsearch_search__ = elasticsearch_search
