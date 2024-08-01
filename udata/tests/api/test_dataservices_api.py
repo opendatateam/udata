@@ -355,9 +355,12 @@ class DataserviceAPITest(APITestCase):
 
         dataservices = Dataservice.__elasticsearch_search__("AMDAC")
 
-        assert len(dataservices) == 2
+        assert len(dataservices) == 3
         assert dataservices[0].title == dataservice_c.title
         assert dataservices[1].title == dataservice_a.title
+        assert (
+            dataservices[2].title == dataservice_b.title
+        )  # b is last even if it doesn't really match.
 
         dataservice_b.title = "B - Hello AMD world!"
         dataservice_b.save()
