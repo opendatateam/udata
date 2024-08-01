@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix many linting issues reported by ruff [#3118](https://github.com/opendatateam/udata/pull/3118)
 
 ## 9.1.3 (2024-08-01)
 
