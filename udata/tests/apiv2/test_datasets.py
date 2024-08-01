@@ -83,7 +83,7 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data["total"] == len(resources)
         assert data["page"] == 1
         assert data["page_size"] == DEFAULT_PAGE_SIZE
-        assert data["next_page"] == None
+        assert data["next_page"] is None
         assert data["previous_page"] is None
 
     def test_get_missing_param(self):
@@ -97,7 +97,7 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data["total"] == len(resources)
         assert data["page"] == 1
         assert data["page_size"] == DEFAULT_PAGE_SIZE
-        assert data["next_page"] == None
+        assert data["next_page"] is None
         assert data["previous_page"] is None
 
     def test_get_next_page(self):
@@ -129,7 +129,7 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data["total"] == len(resources)
         assert data["page"] == 2
         assert data["page_size"] == DEFAULT_PAGE_SIZE
-        assert data["next_page"] == None
+        assert data["next_page"] is None
         assert data["previous_page"] == url_for(
             "apiv2.resources",
             dataset=dataset.id,
@@ -196,7 +196,7 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data["total"] == nb_resources__of_specific_type
         assert data["page"] == 2
         assert data["page_size"] == DEFAULT_PAGE_SIZE
-        assert data["next_page"] == None
+        assert data["next_page"] is None
         assert data["previous_page"] == url_for(
             "apiv2.resources",
             dataset=dataset.id,

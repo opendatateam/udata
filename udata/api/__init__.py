@@ -325,7 +325,7 @@ def init_app(app):
     import udata.harvest.api  # noqa
 
     for module in entrypoints.get_enabled("udata.apis", app).values():
-        api_module = module if inspect.ismodule(module) else import_module(module)
+        module if inspect.ismodule(module) else import_module(module)
 
     # api.init_app(app)
     app.register_blueprint(apiv1_blueprint)

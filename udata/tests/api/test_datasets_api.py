@@ -839,7 +839,7 @@ class DatasetAPITest(APITestCase):
         dataset.reload()
         assert dataset.resources[0].schema["url"] == "http://example.com"
         assert dataset.resources[0].schema["name"] == "etalab/schema-irve-statique"
-        assert dataset.resources[0].schema["version"] == None
+        assert dataset.resources[0].schema["version"] is None
 
         resource_data["schema"] = {"name": "etalab/schema-irve-statique"}
         data["resources"].append(resource_data)
@@ -848,8 +848,8 @@ class DatasetAPITest(APITestCase):
 
         dataset.reload()
         assert dataset.resources[0].schema["name"] == "etalab/schema-irve-statique"
-        assert dataset.resources[0].schema["url"] == None
-        assert dataset.resources[0].schema["version"] == None
+        assert dataset.resources[0].schema["url"] is None
+        assert dataset.resources[0].schema["version"] is None
 
         resource_data["schema"] = {"name": "etalab/schema-irve-statique", "version": "2.2.0"}
         data["resources"].append(resource_data)
@@ -858,7 +858,7 @@ class DatasetAPITest(APITestCase):
 
         dataset.reload()
         assert dataset.resources[0].schema["name"] == "etalab/schema-irve-statique"
-        assert dataset.resources[0].schema["url"] == None
+        assert dataset.resources[0].schema["url"] is None
         assert dataset.resources[0].schema["version"] == "2.2.0"
 
         resource_data["schema"] = {
@@ -870,7 +870,7 @@ class DatasetAPITest(APITestCase):
 
         dataset.reload()
         assert dataset.resources[0].schema["name"] == "etalab/schema-irve-statique"
-        assert dataset.resources[0].schema["url"] == None
+        assert dataset.resources[0].schema["url"] is None
         assert dataset.resources[0].schema["version"] == "2.2.1"
 
         # Putting `None` as the schema argument do not remove the schema
@@ -884,7 +884,7 @@ class DatasetAPITest(APITestCase):
 
         dataset.reload()
         assert dataset.resources[0].schema["name"] == "etalab/schema-irve-statique"
-        assert dataset.resources[0].schema["url"] == None
+        assert dataset.resources[0].schema["url"] is None
         assert dataset.resources[0].schema["version"] == "2.2.1"
 
         # Putting `None` as the schema name and version remove the schema
@@ -897,9 +897,9 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
 
         dataset.reload()
-        assert dataset.resources[0].schema["name"] == None
-        assert dataset.resources[0].schema["url"] == None
-        assert dataset.resources[0].schema["version"] == None
+        assert dataset.resources[0].schema["name"] is None
+        assert dataset.resources[0].schema["url"] is None
+        assert dataset.resources[0].schema["version"] is None
 
 
 class DatasetBadgeAPITest(APITestCase):

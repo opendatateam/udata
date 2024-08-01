@@ -1,5 +1,6 @@
 # Here to force translations by gettext
-_ = lambda s: s  # noqa: force translations
+def _(s):
+    return s  # noqa: force translations
 
 TRANSLATIONS = (
     _("French region"),
