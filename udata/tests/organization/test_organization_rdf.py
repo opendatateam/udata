@@ -4,6 +4,8 @@ from rdflib.namespace import FOAF, RDF, RDFS
 from rdflib.resource import Resource as RdfResource
 
 from udata import api
+from udata.core.dataservices.factories import DataserviceFactory
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
@@ -55,7 +57,8 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
         uri = url_for("api.organization_rdf", org=origin_org.id, _external=True)
 
         datasets = DatasetFactory.create_batch(3, organization=origin_org)
-        catalog = build_org_catalog(origin_org, datasets)
+        dataservices = DataserviceFactory.create_batch(3, organization=origin_org)
+        catalog = build_org_catalog(origin_org, datasets, dataservices)
 
         graph = catalog.graph
 
@@ -69,6 +72,7 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
         self.assertEqual(str(catalog.identifier), uri)
 
         self.assertEqual(len(list(catalog.objects(DCAT.dataset))), len(datasets))
+        self.assertEqual(len(list(catalog.objects(DCAT.dataservice))), len(dataservices))
 
         org = catalog.value(DCT.publisher)
         self.assertEqual(org.value(RDF.type).identifier, FOAF.Organization)
@@ -80,6 +84,8 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
         graph = catalog.graph
         graph_datasets = graph.subjects(RDF.type, DCAT.Dataset)
         self.assertEqual(len(list(graph_datasets)), len(datasets))
+        graph_dataservices = graph.subjects(RDF.type, DCAT.DataService)
+        self.assertEqual(len(list(graph_dataservices)), len(dataservices))
 
     def test_catalog_pagination(self):
         origin_org = OrganizationFactory()
@@ -103,10 +109,12 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
             _external=True,
         )
         DatasetFactory.create_batch(total, organization=origin_org)
+        DataserviceFactory.create_batch(total, organization=origin_org)
 
         # First page
         datasets = Dataset.objects.paginate(1, page_size)
-        catalog = build_org_catalog(origin_org, datasets, format="json")
+        dataservices = Dataservice.objects.paginate(1, page_size)
+        catalog = build_org_catalog(origin_org, datasets, dataservices, format="json")
         graph = catalog.graph
 
         self.assertIsInstance(catalog, RdfResource)
@@ -130,7 +138,8 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
 
         # Second page
         datasets = Dataset.objects.paginate(2, page_size)
-        catalog = build_org_catalog(origin_org, datasets, format="json")
+        dataservices = Dataservice.objects.paginate(2, page_size)
+        catalog = build_org_catalog(origin_org, datasets, dataservices, format="json")
         graph = catalog.graph
 
         self.assertIsInstance(catalog, RdfResource)
