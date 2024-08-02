@@ -7,6 +7,7 @@ from flask import url_for
 from rdflib import BNode, Graph, Literal, URIRef
 from rdflib.namespace import FOAF, RDF, RDFS
 
+from udata.core.dataservices.rdf import dataservice_to_rdf
 from udata.core.dataset.rdf import dataset_to_rdf
 from udata.rdf import DCAT, DCT, namespace_manager, paginate_catalog
 from udata.uris import endpoint_for
@@ -35,7 +36,7 @@ def organization_to_rdf(org, graph=None):
     return o
 
 
-def build_org_catalog(org, datasets, format=None):
+def build_org_catalog(org, datasets, dataservices, format=None):
     graph = Graph(namespace_manager=namespace_manager)
     org_catalog_url = url_for("api.organization_rdf", org=org.id, _external=True)
 
@@ -47,6 +48,8 @@ def build_org_catalog(org, datasets, format=None):
 
     for dataset in datasets:
         catalog.add(DCAT.dataset, dataset_to_rdf(dataset, graph))
+    for dataservice in dataservices:
+        catalog.add(DCAT.dataservice, dataservice_to_rdf(dataservice, graph))
 
     values = {"org": org.id}
 
