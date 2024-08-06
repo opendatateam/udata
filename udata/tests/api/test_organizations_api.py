@@ -812,6 +812,57 @@ class OrganizationDiscussionsAPITest:
         for discussion in response.json:
             assert discussion["id"] in discussions_ids
 
+    def test_list_org_discussions_sorted(self, api):
+        """Should list organization discussions according to the provided sort"""
+        user = UserFactory()
+        org = OrganizationFactory()
+        reuse = ReuseFactory(organization=org)
+        dataset = DatasetFactory(organization=org)
+        discussions = [
+            Discussion.objects.create(
+                subject=dataset, title="", user=user, created="2020-01-01T00:00:00+00:00"
+            ),
+            Discussion.objects.create(
+                subject=reuse, title="", user=user, created="2024-12-31T00:00:00+00:00"
+            ),
+        ]
+
+        # By default, the sort is by `-created`
+        response = api.get(url_for("api.org_discussions", org=org))
+        # The first is the newest
+        assert response.json[0]["created"] == discussions[1].created
+
+        response = api.get(url_for("api.org_discussions", org=org, sort="created"))
+        # The first is the oldest
+        assert response.json[0]["created"] == discussions[0].created
+
+    def test_list_org_discussions_paginated(self, api):
+        """Should list organization discussions and paginate the results"""
+        user = UserFactory()
+        org = OrganizationFactory()
+        reuse = ReuseFactory(organization=org)
+        dataset = DatasetFactory(organization=org)
+        discussions = [
+            Discussion.objects.create(
+                subject=reuse, title="", user=user, created="2024-12-31T00:00:00+00:00"
+            ),
+            Discussion.objects.create(
+                subject=dataset, title="", user=user, created="2020-01-01T00:00:00+00:00"
+            ),
+        ]
+
+        # By default, there is no pagination so all the discussions are listed
+        response = api.get(url_for("api.org_discussions", org=org))
+        assert len(response.json) == len(discussions)
+
+        response = api.get(url_for("api.org_discussions", org=org, page_size=1))
+        assert len(response.json) == 1
+        assert response.json[0]["created"] == discussions[0].created
+
+        response = api.get(url_for("api.org_discussions", org=org, page_size=1, page=2))
+        assert len(response.json) == 1
+        assert response.json[0]["created"] == discussions[1].created
+
 
 class OrganizationBadgeAPITest:
     modules = []
