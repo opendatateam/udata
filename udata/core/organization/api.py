@@ -491,8 +491,8 @@ class OrgDiscussionsAPI(API):
     def get(self, org):
         """List organization discussions"""
         args = discussion_parser.parse_args()
-        reuses = Reuse.objects(organization=org).only("id")
-        datasets = Dataset.objects(organization=org).only("id")
+        reuses = Reuse.objects.owned_by(org).only("id")
+        datasets = Dataset.objects.owned_by(org).only("id")
         subjects = list(reuses) + list(datasets)
         qs = Discussion.objects(subject__in=subjects).order_by(args["sort"])
         if args["page_size"]:
