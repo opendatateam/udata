@@ -13,8 +13,8 @@ from udata.core.contact_point.api_fields import contact_point_page_fields
 from udata.core.dataset.api import DatasetApiParser
 from udata.core.dataset.api_fields import dataset_page_fields
 from udata.core.dataset.models import Dataset
-from udata.core.discussions.api import discussion_fields
-from udata.core.discussions.models import Discussion
+from udata.core.discussions.api import discussion_fields, get_discussion_list
+from udata.core.discussions.api import parser as discussion_parser
 from udata.core.followers.api import FollowAPI
 from udata.core.reuse.models import Reuse
 from udata.core.storages.api import (
@@ -470,31 +470,15 @@ class OrgReusesAPI(API):
         return list(qs)
 
 
-discussion_parser = api.parser()
-discussion_parser.add_argument(
-    "sort", type=str, default="-created", location="args", help="The sorting attribute"
-)
-discussion_parser.add_argument(
-    "page", type=int, default=1, location="args", help="The page to fetch"
-)
-# The admin isn't paginated, so if there's no `page_size` parameter, don't set a default.
-discussion_parser.add_argument(
-    "page_size", type=int, location="args", help="The page size to fetch"
-)
-
-
 @ns.route("/<org:org>/discussions/", endpoint="org_discussions")
 class OrgDiscussionsAPI(API):
     @api.doc("list_organization_discussions")
-    @api.expect(discussion_parser)
     @api.marshal_list_with(discussion_fields)
     def get(self, org):
         """List organization discussions"""
         args = discussion_parser.parse_args()
-        reuses = Reuse.objects.owned_by(org).only("id")
-        datasets = Dataset.objects.owned_by(org).only("id")
-        subjects = list(reuses) + list(datasets)
-        qs = Discussion.objects(subject__in=subjects).order_by(args["sort"])
+        args["org"] = org
+        qs = get_discussion_list(args)
         if args["page_size"]:
             qs = qs.paginate(args["page"], args["page_size"])
         return list(qs)
