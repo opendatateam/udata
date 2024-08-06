@@ -189,6 +189,8 @@ def import_fixtures(source):
                 messages = discussion.pop("discussion")
                 for message in messages:
                     message = remove_unwanted_keys(message, "message")
+                if "closed_by" in discussion and discussion["closed_by"]:
+                    discussion["closed_by"] = user
                 DiscussionFactory(
                     **discussion,
                     subject=dataset,
