@@ -56,7 +56,7 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "quality",
     ],
     "resource": ["latest", "preview_url", "last_modified"],
-    "organization": ["class", "members", "page", "uri", "logo_thumbnail"],
+    "organization": ["class", "page", "uri", "logo_thumbnail"],
     "reuse": ["datasets", "image_thumbnail", "page", "uri", "owner"],
     "community": [
         "dataset",
@@ -65,8 +65,9 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "last_modified",
         "preview_url",
     ],
-    "discussion": ["subject", "user", "url", "class"],
-    "message": ["posted_by"],
+    "discussion": ["subject", "url", "class"],
+    "user": ["uri", "page", "class", "avatar_thumbnail", "email"],
+    "posted_by": ["uri", "page", "class", "avatar_thumbnail", "email"],
     "dataservice": [
         "datasets",
         "license",
@@ -170,6 +171,10 @@ def get_or_create_owner(data):
     return get_or_create(data, "owner", User, UserFactory)
 
 
+def get_or_create_user(data):
+    return get_or_create(data, "user", User, UserFactory)
+
+
 @cli.command()
 @click.argument("source", default=DEFAULT_FIXTURE_FILE)
 def import_fixtures(source):
@@ -187,8 +192,11 @@ def import_fixtures(source):
             dataset = remove_unwanted_keys(dataset, "dataset")
             if fixture["organization"]:
                 organization = fixture["organization"]
-                # TODO: find a way for the factory to get or create objects for reference fields like "members"
-                organization["members"] = [Member(user=user)]
+                organization["members"] = [
+                    Member(user=get_or_create_user(member), role=member["role"])
+                    for member in organization["members"]
+                ]
+                fixture["organization"] = organization
                 org = get_or_create_organization(fixture)
                 dataset = DatasetFactory(**dataset, organization=org)
             else:
@@ -209,19 +217,13 @@ def import_fixtures(source):
                 CommunityResourceFactory(**community, dataset=dataset)
             for discussion in fixture["discussions"]:
                 discussion = remove_unwanted_keys(discussion, "discussion")
-                messages = discussion.pop("discussion")
-                for message in messages:
-                    message = remove_unwanted_keys(message, "message")
-                if "closed_by" in discussion and discussion["closed_by"]:
-                    discussion["closed_by"] = user
-                DiscussionFactory(
-                    **discussion,
-                    subject=dataset,
-                    user=user,
-                    discussion=[
-                        MessageDiscussionFactory(**message, posted_by=user) for message in messages
-                    ],
-                )
+                for message in discussion["discussion"]:
+                    message["posted_by"] = get_or_create(message, "posted_by", User, UserFactory)
+                discussion["discussion"] = [
+                    MessageDiscussionFactory(**message) for message in discussion["discussion"]
+                ]
+                discussion["user"] = get_or_create_user(discussion)
+                DiscussionFactory(**discussion, subject=dataset)
             for dataservice in fixture["dataservices"]:
                 dataservice = remove_unwanted_keys(dataservice, "dataservice")
                 dataservice["contact_point"] = get_or_create(
