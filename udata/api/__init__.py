@@ -15,6 +15,7 @@ from flask import (
     url_for,
 )
 from flask_restx import Api, Resource
+from flask_restx.reqparse import RequestParser
 from flask_storage import UnauthorizedFileType
 
 from udata import entrypoints, tracking
@@ -145,6 +146,20 @@ class UDataApi(Api):
             "page_size", type=int, default=20, location="args", help="The page size to fetch"
         )
         return parser
+
+
+def adminified_parser(parser: RequestParser) -> RequestParser:
+    """The admin has some constraints. Make sure the parser respects them.
+
+    This returns a new copy of the parser, leaving the original one untouched."""
+    # The admin isn't paginated, so if there's a `page_size` arg, remove its default
+    # value so the all the results are returned if no `page_size` is provided.
+    new_parser = parser.copy()
+    if [arg for arg in new_parser.args if arg.name == "page_size"]:
+        new_parser.replace_argument(
+            "page_size", type=int, location="args", help="The page size to fetch"
+        )
+    return new_parser
 
 
 api = UDataApi(
