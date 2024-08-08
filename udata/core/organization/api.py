@@ -470,14 +470,19 @@ class OrgReusesAPI(API):
         return list(qs)
 
 
+adminified_discussion_parser = adminified_parser(discussion_parser)
+# The `org` argument is part of the path in this API, so shouldn't be in the query parameters.
+adminified_discussion_parser.remove_argument("org")
+
+
 @ns.route("/<org:org>/discussions/", endpoint="org_discussions")
 class OrgDiscussionsAPI(API):
     @api.doc("list_organization_discussions")
+    @api.expect(adminified_discussion_parser)
     @api.marshal_list_with(discussion_fields)
     def get(self, org):
         """List organization discussions"""
-        parser = adminified_parser(discussion_parser)
-        args = parser.parse_args()
+        args = adminified_discussion_parser.parse_args()
         args["org"] = org
         qs = get_discussion_list(args)
         if args["page_size"]:
