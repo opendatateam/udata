@@ -3,7 +3,7 @@ from datetime import datetime
 from udata.api import API, api, fields
 from udata.auth import admin_permission
 from udata.core.dataset.api_fields import dataset_fields
-from udata.core.reuse.api_fields import reuse_fields
+from udata.core.reuse.models import Reuse
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
@@ -29,7 +29,7 @@ post_fields = api.model(
         "credit_url": fields.String(description="An optional link associated to the credits"),
         "tags": fields.List(fields.String, description="Some keywords to help in search"),
         "datasets": fields.List(fields.Nested(dataset_fields), description="The post datasets"),
-        "reuses": fields.List(fields.Nested(reuse_fields), description="The post reuses"),
+        "reuses": fields.List(fields.Nested(Reuse.__read_fields__), description="The post reuses"),
         "owner": fields.Nested(
             user_ref_fields, description="The owner user", readonly=True, allow_null=True
         ),

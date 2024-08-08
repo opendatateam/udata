@@ -3,7 +3,6 @@ from flask import request
 from udata.api import API, api, base_reference, fields
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.organization.api_fields import org_ref_fields
-from udata.core.reuse.api_fields import reuse_ref_fields
 from udata.core.user.api_fields import user_ref_fields
 from udata.models import Dataset, Organization, Reuse, User, db
 from udata.utils import id_or_404
@@ -47,7 +46,7 @@ person_mapping = {
 
 subject_mapping = {
     Dataset: dataset_ref_fields,
-    Reuse: reuse_ref_fields,
+    Reuse: Reuse.__ref_fields__,
 }
 
 transfer_fields = api.model(

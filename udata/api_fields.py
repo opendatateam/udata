@@ -2,10 +2,10 @@ import flask_restx.fields as restx_fields
 import mongoengine
 import mongoengine.fields as mongo_fields
 from bson import ObjectId
+from flask_storage.mongo import ImageField as FlaskStorageImageField
 
 import udata.api.fields as custom_restx_fields
-from udata.api import api
-from udata.mongo.engine import db
+from udata.api import api, base_reference
 from udata.mongo.errors import FieldValidationError
 
 lazy_reference = api.model(
@@ -17,7 +17,7 @@ lazy_reference = api.model(
 )
 
 
-def convert_db_to_field(key, field, info={}):
+def convert_db_to_field(key, field, info):
     """
     This function maps a Mongo field to a Flask RestX field.
     Most of the types are a simple 1-to-1 mapping except lists and references that requires
@@ -28,8 +28,6 @@ def convert_db_to_field(key, field, info={}):
     params. Since merging the params involve a litte bit of work (merging default params with read/write params and then with
     user-supplied overrides, setting the readonly flag…), it's easier to have do this one time at the end of the function.
     """
-    info = {**getattr(field, "__additional_field_info__", {}), **info}
-
     params = {}
     params["required"] = field.required
 
@@ -45,7 +43,9 @@ def convert_db_to_field(key, field, info={}):
         # is always good enough.
         return info.get("convert_to"), info.get("convert_to")
     elif isinstance(field, mongo_fields.StringField):
-        constructor = restx_fields.String
+        constructor = (
+            custom_restx_fields.Markdown if info.get("markdown", False) else restx_fields.String
+        )
         params["min_length"] = field.min_length
         params["max_length"] = field.max_length
         params["enum"] = field.choices
@@ -61,11 +61,29 @@ def convert_db_to_field(key, field, info={}):
         constructor = custom_restx_fields.ISODateTime
     elif isinstance(field, mongo_fields.DictField):
         constructor = restx_fields.Raw
+    elif isinstance(field, mongo_fields.ImageField) or isinstance(field, FlaskStorageImageField):
+        size = info.get("size", None)
+        if size:
+            params["description"] = f"URL of the cropped and squared image ({size}x{size})"
+        else:
+            params["description"] = f"URL of the image"
+
+        if info.get("is_thumbnail", False):
+            constructor_read = custom_restx_fields.ImageField
+            write_params["read_only"] = True
+        else:
+            constructor = custom_restx_fields.ImageField
+
     elif isinstance(field, mongo_fields.ListField):
         # For lists, we convert the inner value from Mongo to RestX then we create
         # the `List` RestX type with this converted inner value.
+        # There is three level of information, from most important to least
+        #     1. `inner_field_info` inside `__additional_field_info__` on the parent
+        #     2. `__additional_field_info__` of the inner field
+        #     3. `__additional_field_info__` of the parent
+        inner_info = getattr(field.field, "__additional_field_info__", {})
         field_read, field_write = convert_db_to_field(
-            f"{key}.inner", field.field, info.get("inner_field_info", {})
+            f"{key}.inner", field.field, {**info, **inner_info, **info.get("inner_field_info", {})}
         )
 
         def constructor_read(**kwargs):
@@ -114,19 +132,39 @@ def convert_db_to_field(key, field, info={}):
             )
 
     else:
-        raise ValueError(f"Unsupported MongoEngine field type {field.__class__.__name__}")
+        raise ValueError(f"Unsupported MongoEngine field type {field.__class__}")
 
     read_params = {**params, **read_params, **info}
     write_params = {**params, **write_params, **info}
 
     read = constructor_read(**read_params) if constructor_read else constructor(**read_params)
-    if write_params.get("readonly", False):
+    if write_params.get("readonly", False) or (constructor_write is None and constructor is None):
         write = None
     else:
         write = (
             constructor_write(**write_params) if constructor_write else constructor(**write_params)
         )
     return read, write
+
+
+def get_fields(cls):
+    """
+    Returns all the exposed fields of the class (fields decorated with `field()`)
+    It also expends image fields to add thumbnail fields.
+    """
+    for key, field in cls._fields.items():
+        info: dict | None = getattr(field, "__additional_field_info__", None)
+        if info is None:
+            continue
+
+        yield key, field, info
+
+        if isinstance(field, mongo_fields.ImageField) or isinstance(field, FlaskStorageImageField):
+            yield (
+                f"{key}_thumbnail",
+                field,
+                {**info, **info.get("thumbnail_info", {}), "is_thumbnail": True},
+            )
 
 
 def generate_fields(**kwargs):
@@ -138,16 +176,13 @@ def generate_fields(**kwargs):
     def wrapper(cls):
         read_fields = {}
         write_fields = {}
+        ref_fields = {}
         sortables = []
         filterables = []
 
-        read_fields["id"] = restx_fields.String(required=True)
+        read_fields["id"] = restx_fields.String(required=True, readonly=True)
 
-        for key, field in cls._fields.items():
-            info = getattr(field, "__additional_field_info__", None)
-            if info is None:
-                continue
-
+        for key, field, info in get_fields(cls):
             if info.get("sortable", False):
                 sortables.append(key)
 
@@ -166,17 +201,25 @@ def generate_fields(**kwargs):
                     ):
                         filterable["constraints"].append("objectid")
 
+                if "type" not in filterable:
+                    filterable["type"] = str
+                    if isinstance(field, mongo_fields.BooleanField):
+                        filterable["type"] = bool
+
                 # We may add more information later here:
                 # - type of mongo query to execute (right now only simple =)
 
                 filterables.append(filterable)
 
-            read, write = convert_db_to_field(key, field)
+            read, write = convert_db_to_field(key, field, info)
 
             if read:
                 read_fields[key] = read
             if write:
                 write_fields[key] = write
+
+            if read and info.get("show_as_ref", False):
+                ref_fields[key] = read
 
         # The goal of this loop is to fetch all functions (getters) of the class
         # If a function has an `__additional_field_info__` attribute it means
@@ -209,9 +252,12 @@ def generate_fields(**kwargs):
             read_fields[method_name] = restx_fields.String(
                 attribute=make_lambda(method), **{"readonly": True, **info}
             )
+            if info.get("show_as_ref", False):
+                ref_fields[key] = read_fields[method_name]
 
         cls.__read_fields__ = api.model(f"{cls.__name__} (read)", read_fields, **kwargs)
         cls.__write_fields__ = api.model(f"{cls.__name__} (write)", write_fields, **kwargs)
+        cls.__ref_fields__ = api.inherit(f"{cls.__name__}Reference", base_reference, ref_fields)
 
         mask = kwargs.pop("mask", None)
         if mask is not None:
@@ -245,8 +291,12 @@ def generate_fields(**kwargs):
                 help="The field (and direction) on which sorting apply",
             )
 
+        searchable = kwargs.pop("searchable", False)
+        if searchable:
+            parser.add_argument("q", type=str, location="args")
+
         for filterable in filterables:
-            parser.add_argument(filterable["key"], type=str, location="args")
+            parser.add_argument(filterable["key"], type=filterable["type"], location="args")
 
         cls.__index_parser__ = parser
 
@@ -255,6 +305,10 @@ def generate_fields(**kwargs):
 
             if sortables and args["sort"]:
                 base_query = base_query.order_by(args["sort"])
+
+            if searchable and args.get("q"):
+                phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
+                base_query = base_query.search_text(phrase_query)
 
             for filterable in filterables:
                 if args.get(filterable["key"]):
@@ -303,11 +357,16 @@ def patch(obj, request):
     Patch the object with the data from the request.
     Only fields decorated with the `field()` decorator will be read (and not readonly).
     """
+    from udata.mongo.engine import db
+
     for key, value in request.json.items():
         field = obj.__write_fields__.get(key)
         if field is not None and not field.readonly:
             model_attribute = getattr(obj.__class__, key)
-            if isinstance(model_attribute, mongoengine.fields.ListField) and isinstance(
+
+            if hasattr(model_attribute, "from_input"):
+                value = model_attribute.from_input(value)
+            elif isinstance(model_attribute, mongoengine.fields.ListField) and isinstance(
                 model_attribute.field, mongoengine.fields.ReferenceField
             ):
                 # TODO `wrap_primary_key` do Mongo request, do a first pass to fetch all documents before calling it (to avoid multiple queries).
@@ -333,10 +392,21 @@ def patch(obj, request):
             # `check` field attribute allows to do validation from the request before setting
             # the attribute
             check = info.get("check", None)
-            if check is not None:
+            if check is not None and value != getattr(obj, key):
                 check(**{key: value})  # TODO add other model attributes in function parameters
 
             setattr(obj, key, value)
+
+    return obj
+
+
+def patch_and_save(obj, request):
+    obj = patch(obj, request)
+
+    try:
+        obj.save()
+    except mongoengine.errors.ValidationError as e:
+        api.abort(400, e.message)
 
     return obj
 
@@ -375,7 +445,7 @@ def wrap_primary_key(
         return foreign_document
 
     if isinstance(id_field, mongoengine.fields.ObjectIdField):
-        return ObjectId(value)
+        return foreign_document.to_dbref()
     elif isinstance(id_field, mongoengine.fields.StringField):
         # Right now I didn't find a simpler way to make mongoengine happy.
         # For references, it expects `ObjectId`, `DBRef`, `LazyReference` or `document` but since
