@@ -89,9 +89,9 @@ parser.add_argument(
 )
 parser.add_argument("user", type=str, location="args", help="Filter discussions created by a user")
 parser.add_argument("page", type=int, default=1, location="args", help="The page to fetch")
-# The admin isn't paginated, so if there's no `page_size` parameter, don't set a default, and return
-# all the discussions. If there's a need for a default value, set it after the `parse_args()`.
-parser.add_argument("page_size", type=int, location="args", help="The page size to fetch")
+parser.add_argument(
+    "page_size", type=int, default=20, location="args", help="The page size to fetch"
+)
 parser.add_argument(
     "org", type=str, location="args", help="Filter discussions created for an organization"
 )
@@ -221,8 +221,7 @@ class DiscussionsAPI(API):
     def get(self):
         """List all Discussions"""
         args = parser.parse_args()
-        page_size = args.get("page_size") or 20
-        return get_discussion_list(args).paginate(args["page"], page_size)
+        return get_discussion_list(args).paginate(args["page"], args["page_size"])
 
     @api.secure
     @api.doc("create_discussion")

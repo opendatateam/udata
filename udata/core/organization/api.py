@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import make_response, redirect, request, url_for
 from mongoengine.queryset.visitor import Q
 
-from udata.api import API, api, errors
+from udata.api import API, adminified_parser, api, errors
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission, current_user
 from udata.core.badges import api as badges_api
@@ -476,7 +476,8 @@ class OrgDiscussionsAPI(API):
     @api.marshal_list_with(discussion_fields)
     def get(self, org):
         """List organization discussions"""
-        args = discussion_parser.parse_args()
+        parser = adminified_parser(discussion_parser)
+        args = parser.parse_args()
         args["org"] = org
         qs = get_discussion_list(args)
         if args["page_size"]:
