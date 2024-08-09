@@ -290,8 +290,9 @@ def generate_fields(**kwargs):
 
         cls.__index_parser__ = parser
 
-        def apply_sort_filters_and_pagination(base_query):
-            args = cls.__index_parser__.parse_args()
+        def apply_sort_filters_and_pagination(base_query, custom_parser=None):
+            parser_to_use = custom_parser or cls.__index_parser__
+            args = parser_to_use.parse_args()
 
             if sortables and args["sort"]:
                 base_query = base_query.order_by(args["sort"])
@@ -314,7 +315,7 @@ def generate_fields(**kwargs):
                         }
                     )
 
-            if paginable:
+            if paginable and "page_size" in args and args["page_size"]:
                 base_query = base_query.paginate(args["page"], args["page_size"])
 
             return base_query
