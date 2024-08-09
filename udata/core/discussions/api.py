@@ -6,6 +6,8 @@ from flask_security import current_user
 
 from udata.api import API, api, fields
 from udata.auth import admin_permission
+from udata.core.dataset.models import Dataset
+from udata.core.reuse.models import Reuse
 from udata.core.spam.api import SpamAPIMixin
 from udata.core.spam.fields import spam_fields
 from udata.core.user.api_fields import user_ref_fields
@@ -89,6 +91,9 @@ parser.add_argument("user", type=str, location="args", help="Filter discussions 
 parser.add_argument("page", type=int, default=1, location="args", help="The page to fetch")
 parser.add_argument(
     "page_size", type=int, default=20, location="args", help="The page size to fetch"
+)
+parser.add_argument(
+    "org", type=str, location="args", help="Filter discussions created for an organization"
 )
 
 
@@ -183,6 +188,27 @@ class DiscussionCommentAPI(API):
         return "", 204
 
 
+def get_discussion_list(args):
+    """List all Discussions corresponding to the given filters."""
+    discussions = Discussion.objects
+    if args["for"]:
+        discussions = discussions.generic_in(subject=args["for"])
+    if args["user"]:
+        discussions = discussions(discussion__posted_by=ObjectId(args["user"]))
+    if args["closed"] is False:
+        discussions = discussions(closed=None)
+    elif args["closed"] is True:
+        discussions = discussions(closed__ne=None)
+    if args["org"]:
+        org = args["org"]
+        reuses = Reuse.objects.owned_by(org).only("id")
+        datasets = Dataset.objects.owned_by(org).only("id")
+        subjects = list(reuses) + list(datasets)
+        discussions = discussions(subject__in=subjects)
+    discussions = discussions.order_by(args["sort"])
+    return discussions
+
+
 @ns.route("/", endpoint="discussions")
 class DiscussionsAPI(API):
     """
@@ -195,17 +221,7 @@ class DiscussionsAPI(API):
     def get(self):
         """List all Discussions"""
         args = parser.parse_args()
-        discussions = Discussion.objects
-        if args["for"]:
-            discussions = discussions.generic_in(subject=args["for"])
-        if args["user"]:
-            discussions = discussions(discussion__posted_by=ObjectId(args["user"]))
-        if args["closed"] is False:
-            discussions = discussions(closed=None)
-        elif args["closed"] is True:
-            discussions = discussions(closed__ne=None)
-        discussions = discussions.order_by(args["sort"])
-        return discussions.paginate(args["page"], args["page_size"])
+        return get_discussion_list(args).paginate(args["page"], args["page_size"])
 
     @api.secure
     @api.doc("create_discussion")

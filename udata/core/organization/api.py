@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import make_response, redirect, request, url_for
 from mongoengine.queryset.visitor import Q
 
-from udata.api import API, api, errors
+from udata.api import API, adminified_parser, api, errors
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission, current_user
 from udata.core.badges import api as badges_api
@@ -13,8 +13,8 @@ from udata.core.contact_point.api_fields import contact_point_page_fields
 from udata.core.dataset.api import DatasetApiParser
 from udata.core.dataset.api_fields import dataset_page_fields
 from udata.core.dataset.models import Dataset
-from udata.core.discussions.api import discussion_fields
-from udata.core.discussions.models import Discussion
+from udata.core.discussions.api import discussion_fields, get_discussion_list
+from udata.core.discussions.api import parser as discussion_parser
 from udata.core.followers.api import FollowAPI
 from udata.core.reuse.api_fields import reuse_fields
 from udata.core.reuse.models import Reuse
@@ -471,16 +471,23 @@ class OrgReusesAPI(API):
         return list(qs)
 
 
+adminified_discussion_parser = adminified_parser(discussion_parser)
+# The `org` argument is part of the path in this API, so shouldn't be in the query parameters.
+adminified_discussion_parser.remove_argument("org")
+
+
 @ns.route("/<org:org>/discussions/", endpoint="org_discussions")
 class OrgDiscussionsAPI(API):
     @api.doc("list_organization_discussions")
+    @api.expect(adminified_discussion_parser)
     @api.marshal_list_with(discussion_fields)
     def get(self, org):
         """List organization discussions"""
-        reuses = Reuse.objects(organization=org).only("id")
-        datasets = Dataset.objects(organization=org).only("id")
-        subjects = list(reuses) + list(datasets)
-        qs = Discussion.objects(subject__in=subjects).order_by("-created")
+        args = adminified_discussion_parser.parse_args()
+        args["org"] = org
+        qs = get_discussion_list(args)
+        if args["page_size"]:
+            qs = qs.paginate(args["page"], args["page_size"])
         return list(qs)
 
 
