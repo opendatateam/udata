@@ -803,7 +803,7 @@ class OrganizationDiscussionsAPITest:
             Discussion.objects.create(subject=reuse, title="", user=user),
         ]
 
-        response = api.get(url_for("api.org_discussions", org=org), follow_redirects=True)
+        response = api.get(url_for("api.org_discussions", org=org))
 
         assert200(response)
         assert len(response.json) == len(discussions)
@@ -828,13 +828,11 @@ class OrganizationDiscussionsAPITest:
         ]
 
         # By default, the sort is by `-created`
-        response = api.get(url_for("api.org_discussions", org=org), follow_redirects=True)
+        response = api.get(url_for("api.org_discussions", org=org))
         # The first is the newest
         assert response.json[0]["created"] == discussions[1].created
 
-        response = api.get(
-            url_for("api.org_discussions", org=org, sort="created"), follow_redirects=True
-        )
+        response = api.get(url_for("api.org_discussions", org=org, sort="created"))
         # The first is the oldest
         assert response.json[0]["created"] == discussions[0].created
 
@@ -848,13 +846,10 @@ class OrganizationDiscussionsAPITest:
         ]
 
         # By default, there is no pagination so all the discussions are listed
-        response = api.get(url_for("api.org_discussions", org=org), follow_redirects=True)
+        response = api.get(url_for("api.org_discussions", org=org))
         assert len(response.json) == len(discussions)
 
-        response = api.get(
-            url_for("api.org_discussions", org=org, page_size=1, sort="-created"),
-            follow_redirects=True,
-        )
+        response = api.get(url_for("api.org_discussions", org=org, page_size=1, sort="-created"))
         assert len(response.json) == 1
 
 
