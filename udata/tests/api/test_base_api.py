@@ -1,6 +1,7 @@
 from flask import url_for
+from flask_restx.reqparse import RequestParser
 
-from udata.api import API, api
+from udata.api import API, adminified_parser, api
 from udata.forms import Form
 
 from . import APITestCase
@@ -65,3 +66,19 @@ class JSONFormRequestTest(APITestCase):
         """We expect JSON requests for forms and enforce it"""
         response = self.post(url_for("api.fake-form"), {})
         self.assert200(response)
+
+
+class ParserTest:
+    def test_adminified_parser(self):
+        parser = RequestParser()
+        parser.add_argument("some_arg", type=int, default=42, location="args", help="foobar")
+        parser.add_argument(
+            "page_size", type=int, default=20, location="args", help="The page size to fetch"
+        )
+        adminified = adminified_parser(parser)
+        # We still have all the arguments.
+        assert len(adminified.args) == 2
+        # We still have the default value of the `some_arg` argument.
+        assert adminified.args[0].default == 42
+        # But the default value of the `page_size` has been "adminified": set to None.
+        assert adminified.args[1].default is None

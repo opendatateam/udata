@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import make_response, redirect, request, url_for
 from mongoengine.queryset.visitor import Q
 
-from udata.api import API, api, errors
+from udata.api import API, adminified_parser, api, errors
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission, current_user
 from udata.core.badges import api as badges_api
@@ -16,6 +16,7 @@ from udata.core.dataset.models import Dataset
 from udata.core.discussions.api import discussion_fields
 from udata.core.discussions.models import Discussion
 from udata.core.followers.api import FollowAPI
+from udata.core.reuse.api import ReuseApiParser
 from udata.core.reuse.models import Reuse
 from udata.core.storages.api import (
     image_parser,
@@ -458,16 +459,24 @@ class OrgDatasetsAPI(API):
         return qs.order_by(args["sort"]).paginate(args["page"], args["page_size"])
 
 
+adminified_reuse_parser = adminified_parser(Reuse.__index_parser__)
+# The `org` argument is part of the path in this API, so shouldn't be in the query parameters.
+adminified_reuse_parser.remove_argument("organization")
+
+
 @ns.route("/<org:org>/reuses/", endpoint="org_reuses")
 class OrgReusesAPI(API):
     @api.doc("list_organization_reuses")
+    @api.expect(adminified_reuse_parser)
     @api.marshal_list_with(Reuse.__read_fields__)
     def get(self, org):
         """List organization reuses (including private ones when member)"""
+        args = adminified_reuse_parser.parse_args()
+        args["organization"] = org
         qs = Reuse.objects.owned_by(org)
         if not OrganizationPrivatePermission(org).can():
             qs = qs(private__ne=True)
-        return list(qs)
+        return list(Reuse.apply_sort_filters_and_pagination(qs, adminified_reuse_parser))
 
 
 @ns.route("/<org:org>/discussions/", endpoint="org_discussions")

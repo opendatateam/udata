@@ -788,6 +788,32 @@ class OrganizationReusesAPITest:
         assert200(response)
         assert len(response.json) == len(reuses)
 
+    def test_list_org_reuses_sorted(self, api):
+        """Should list organization reuses according to the provided sort"""
+        org = OrganizationFactory()
+        oldest = ReuseFactory(organization=org, created_at="2020-01-01T00:00:00+00:00")
+        latest = ReuseFactory(organization=org, created_at="2024-12-31T00:00:00+00:00")
+
+        response = api.get(url_for("api.org_reuses", org=org, sort="created"))
+        # The first is the newest
+        assert response.json[0]["created_at"] == oldest.created_at
+
+        response = api.get(url_for("api.org_reuses", org=org, sort="-created"))
+        # The first is the oldest
+        assert response.json[0]["created_at"] == latest.created_at
+
+    def test_list_org_reuses_paginated(self, api):
+        """Should list organization reuses and paginate the results"""
+        org = OrganizationFactory()
+        reuses = ReuseFactory.create_batch(30, organization=org)
+
+        # By default, there is no pagination so all the discussions are listed
+        response = api.get(url_for("api.org_reuses", org=org))
+        assert len(response.json) == len(reuses) == 30
+
+        response = api.get(url_for("api.org_reuses", org=org, page_size=1))
+        assert len(response.json) == 1
+
 
 class OrganizationDiscussionsAPITest:
     modules = []
