@@ -479,7 +479,7 @@ adminified_discussion_parser.remove_argument("org")
 class OrgDiscussionsAPI(API):
     @api.doc("list_organization_discussions")
     @api.expect(adminified_discussion_parser)
-    @api.marshal_list_with(discussion_fields)
+    @api.marshal_list_for_old_admin_with(discussion_fields)
     def get(self, org):
         """List organization discussions"""
         args = adminified_discussion_parser.parse_args()
@@ -487,7 +487,9 @@ class OrgDiscussionsAPI(API):
         qs = get_discussion_list(args)
         if args["page_size"]:
             qs = qs.paginate(args["page"], args["page_size"])
-        return list(qs)
+            return qs
+        else:
+            return list(qs)
 
 
 @ns.route("/roles/", endpoint="org_roles")

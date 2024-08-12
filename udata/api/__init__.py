@@ -147,6 +147,51 @@ class UDataApi(Api):
         )
         return parser
 
+    def marshal_list_for_old_admin_with(self, fields_, **marshal_kwargs):
+        """Take a list of fields, and add pager fields if there is a `page_size` parameter provided.
+
+        The old admin isn't paginated, so it doesn't provide a `page_size` parameter, and it expects
+        a list of entries.
+
+        The new admin (and API) is standardizing on providing a `page_size` parameter, and expects
+        a pager of entries.
+
+        This decorator will take a list of fields, and if needed (if there's a `page_size` provided)
+        will add "pager fields".
+        """
+
+        # This implementation is convoluted because it's a decorator with parameters, and we need
+        # access to the decorated function itself in order to call it ourself, so as to check its
+        # return type and pass it to the proper `marshal_*` decorator.
+        def decorator(func):  # `func` is the function being decorated
+            # Return this wrapper in place of the function being decorated: we want to return a
+            # decorated function instead with the appropriate `marshal_` decorator.
+            def wrapper(*args, **kwargs):
+                # This is when the real function being decorated is called, with its parameters.
+                response = func(*args, **kwargs)
+
+                def return_response(*args, **kwargs):
+                    """Dummy function that returns the response we already have.
+
+                    This is needed because `marshal_list_with` is a decorator that will itself
+                    call the decorated function. But we already did, and wouldn't want it to
+                    uselessly call it again."""
+                    return response
+
+                if type(response) is list:
+                    # Not a pager, this is for the old admin.
+                    return api.marshal_list_with(fields_, **marshal_kwargs)(return_response)(
+                        *args, **kwargs
+                    )
+                # It should be a pager, for the new admin and API.
+                return api.marshal_list_with(fields.pager(fields_), **marshal_kwargs)(
+                    return_response
+                )(*args, **kwargs)
+
+            return wrapper
+
+        return decorator
+
 
 def adminified_parser(parser: RequestParser) -> RequestParser:
     """The admin has some constraints. Make sure the parser respects them.

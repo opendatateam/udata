@@ -849,8 +849,13 @@ class OrganizationDiscussionsAPITest:
         response = api.get(url_for("api.org_discussions", org=org))
         assert len(response.json) == len(discussions)
 
+        # If there's a `page_size` parameter, paginated and return a pager
         response = api.get(url_for("api.org_discussions", org=org, page_size=1, sort="-created"))
-        assert len(response.json) == 1
+        assert "data" in response.json
+        assert "page_size" in response.json
+        assert "page" in response.json
+        assert "next_page" in response.json
+        assert len(response.json["data"]) == 1
 
 
 class OrganizationBadgeAPITest:
