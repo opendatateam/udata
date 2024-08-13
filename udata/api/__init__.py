@@ -15,7 +15,9 @@ from flask import (
     url_for,
 )
 from flask_restx import Api, Resource
+from flask_restx._http import HTTPStatus
 from flask_restx.reqparse import RequestParser
+from flask_restx.utils import merge
 from flask_storage import UnauthorizedFileType
 
 from udata import entrypoints, tracking
@@ -147,7 +149,9 @@ class UDataApi(Api):
         )
         return parser
 
-    def marshal_list_for_old_admin_with(self, fields_, **marshal_kwargs):
+    def marshal_list_for_old_admin_with(
+        self, fields_, code=HTTPStatus.OK, description=None, **marshal_kwargs
+    ):
         """Take a list of fields, and add pager fields if there is a `page_size` parameter provided.
 
         The old admin isn't paginated, so it doesn't provide a `page_size` parameter, and it expects
@@ -166,6 +170,15 @@ class UDataApi(Api):
         def decorator(func):  # `func` is the function being decorated
             # Return this wrapper in place of the function being decorated: we want to return a
             # decorated function instead with the appropriate `marshal_` decorator.
+            doc = {
+                "responses": {str(code): (description, [fields_], marshal_kwargs)},
+                "__mask__": marshal_kwargs.get(
+                    "mask", True
+                ),  # Mask values can't be determined outside app context
+            }
+            func.__apidoc__ = merge(getattr(func, "__apidoc__", {}), doc)
+
+            @wraps(func)
             def wrapper(*args, **kwargs):
                 # This is when the real function being decorated is called, with its parameters.
                 response = func(*args, **kwargs)
@@ -202,7 +215,10 @@ def adminified_parser(parser: RequestParser) -> RequestParser:
     new_parser = parser.copy()
     if [arg for arg in new_parser.args if arg.name == "page_size"]:
         new_parser.replace_argument(
-            "page_size", type=int, location="args", help="The page size to fetch"
+            "page_size",
+            type=int,
+            location="args",
+            help="The page size to fetch. Providing this parameter will change the return type to be a pager instead of a flat list.",
         )
     return new_parser
 
