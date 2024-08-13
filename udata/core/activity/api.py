@@ -61,6 +61,12 @@ activity_parser.add_argument(
     help="Filter activities for that particular organization",
     location="args",
 )
+activity_parser.add_argument(
+    "related_to",
+    type=str,
+    help="Filter activities for that particular reuse or dataset id",
+    location="args",
+)
 
 
 @api.route("/activity", endpoint="activity")
@@ -78,6 +84,9 @@ class SiteActivityAPI(API):
 
         if args["user"]:
             qs = qs(actor=args["user"])
+
+        if args["related_to"]:
+            qs = qs(related_to=args["related_to"])
 
         qs = qs.order_by("-created_at")
         qs = qs.paginate(args["page"], args["page_size"])
