@@ -1,5 +1,3 @@
-from mongoengine import ValidationError
-
 from udata.core.spatial.forms import SpatialCoverageField
 from udata.core.storages import resources
 from udata.forms import ModelForm, fields, validators

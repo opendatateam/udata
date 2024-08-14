@@ -58,7 +58,7 @@ class TransferAPITest(APITestCase):
         self.assertEqual(data["status"], "pending")
 
     def test_400_on_bad_subject(self):
-        user = self.login()
+        self.login()
         recipient = UserFactory()
         comment = faker.sentence()
 

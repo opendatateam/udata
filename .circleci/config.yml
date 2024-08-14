@@ -44,7 +44,7 @@ jobs:
           # ruff format --check . : check code formatting without fixing (to fix, remove --check)
           command: |
             source venv/bin/activate
-            ruff check --select I .
+            ruff check .
             ruff format --check .
       - run:
           name: Run tests

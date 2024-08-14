@@ -1,8 +1,6 @@
 import json
 import re
 
-import pytest
-
 from udata.tests import DBTestMixin, TestCase, WebTestMixin
 
 

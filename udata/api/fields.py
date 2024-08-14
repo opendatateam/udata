@@ -4,7 +4,28 @@ import logging
 import pytz
 from dateutil.parser import parse
 from flask import request, url_for
-from flask_restx.fields import *  # noqa
+
+# Explicitly import all of flask_restx fields so they're available throughout the codebase as api.fields
+from flask_restx.fields import Arbitrary as Arbitrary
+from flask_restx.fields import Boolean as Boolean
+from flask_restx.fields import ClassName as ClassName
+from flask_restx.fields import Date as Date
+from flask_restx.fields import DateTime as DateTime
+from flask_restx.fields import Fixed as Fixed
+from flask_restx.fields import Float as Float
+from flask_restx.fields import FormattedString as FormattedString
+from flask_restx.fields import Integer as Integer
+from flask_restx.fields import List as List
+from flask_restx.fields import MarshallingError as MarshallingError
+from flask_restx.fields import MinMaxMixin as MinMaxMixin
+from flask_restx.fields import Nested as Nested
+from flask_restx.fields import NumberMixin as NumberMixin
+from flask_restx.fields import Polymorph as Polymorph
+from flask_restx.fields import Raw as Raw
+from flask_restx.fields import String as String
+from flask_restx.fields import StringMixin as StringMixin
+from flask_restx.fields import Url as Url
+from flask_restx.fields import Wildcard as Wildcard
 
 from udata.uris import endpoint_for
 from udata.utils import multi_to_dict

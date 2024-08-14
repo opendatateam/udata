@@ -3,8 +3,6 @@ import pytest
 from factory.fuzzy import FuzzyChoice
 from flask.signals import Namespace
 
-from udata.core.dataset.factories import DatasetFactory
-from udata.core.dataset.models import Dataset
 from udata.factories import ModelFactory
 
 from .. import backends

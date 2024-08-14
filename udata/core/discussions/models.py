@@ -20,7 +20,7 @@ class Message(SpamMixin, db.EmbeddedDocument):
         return [self.content]
 
     def spam_report_message(self, breadcrumb):
-        message = f"Spam potentiel dans le message"
+        message = "Spam potentiel dans le message"
         if self.posted_by:
             message += f" de [{self.posted_by.fullname}]({self.posted_by.external_url})"
 
@@ -34,7 +34,7 @@ class Message(SpamMixin, db.EmbeddedDocument):
         discussion = breadcrumb[0]
         if not isinstance(discussion, Discussion):
             log.warning(
-                f"`spam_report_message` called on message with a breadcrumb not containing a Discussion at index 0.",
+                "`spam_report_message` called on message with a breadcrumb not containing a Discussion at index 0.",
                 extra={"breadcrumb": breadcrumb},
             )
             return message

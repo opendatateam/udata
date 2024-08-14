@@ -18,7 +18,7 @@ def migrate(db):
     oauth_clients = db.oauth2_client
     oauth_clients.update_many({}, {"$rename": {"scopes": "scope"}})
     for client in oauth_clients.find():
-        if type(client["scope"]) == list:
+        if type(client["scope"]) is list:
             scope_str = " ".join(client["scope"])
             client["scope"] = scope_str
             oauth_clients.save(client)

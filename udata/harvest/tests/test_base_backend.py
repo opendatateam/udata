@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
 import pytest
-from dateutil.parser import parse
 from voluptuous import Schema
 
 from udata.core.dataset import tasks

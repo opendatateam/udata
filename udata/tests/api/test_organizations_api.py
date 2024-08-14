@@ -72,7 +72,7 @@ class OrganizationAPITest:
         user = api.login()
         response = api.post(url_for("api.organizations"), data)
         assert201(response)
-        assert Organization.objects.count() is 1
+        assert Organization.objects.count() == 1
 
         org = Organization.objects.first()
         member = org.member(user)
@@ -89,7 +89,7 @@ class OrganizationAPITest:
         data["description"] = "new description"
         response = api.put(url_for("api.organization", org=org), data)
         assert200(response)
-        assert Organization.objects.count() is 1
+        assert Organization.objects.count() == 1
         assert Organization.objects.first().description == "new description"
 
     def test_organization_api_update_business_number_id(self, api):
@@ -101,7 +101,7 @@ class OrganizationAPITest:
         data["business_number_id"] = "13002526500013"
         response = api.put(url_for("api.organization", org=org), data)
         assert200(response)
-        assert Organization.objects.count() is 1
+        assert Organization.objects.count() == 1
         assert Organization.objects.first().business_number_id == "13002526500013"
 
     def test_organization_api_update_business_number_id_failing(self, api):
@@ -147,7 +147,7 @@ class OrganizationAPITest:
         api.login()
         response = api.put(url_for("api.organization", org=org), data)
         assert403(response)
-        assert Organization.objects.count() is 1
+        assert Organization.objects.count() == 1
         assert Organization.objects.first().description == org.description
 
     def test_organization_api_delete(self, api):
@@ -157,7 +157,7 @@ class OrganizationAPITest:
         org = OrganizationFactory(members=[member])
         response = api.delete(url_for("api.organization", org=org))
         assert204(response)
-        assert Organization.objects.count() is 1
+        assert Organization.objects.count() == 1
         assert Organization.objects[0].deleted is not None
 
     def test_organization_api_delete_deleted(self, api):
@@ -175,7 +175,7 @@ class OrganizationAPITest:
         org = OrganizationFactory(members=[member])
         response = api.delete(url_for("api.organization", org=org))
         assert403(response)
-        assert Organization.objects.count() is 1
+        assert Organization.objects.count() == 1
         assert Organization.objects[0].deleted is None
 
     def test_organization_api_delete_as_non_member_forbidden(self, api):
@@ -184,7 +184,7 @@ class OrganizationAPITest:
         org = OrganizationFactory()
         response = api.delete(url_for("api.organization", org=org))
         assert403(response)
-        assert Organization.objects.count() is 1
+        assert Organization.objects.count() == 1
         assert Organization.objects[0].deleted is None
 
 
@@ -200,10 +200,10 @@ class MembershipAPITest:
         assert201(response)
 
         organization.reload()
-        assert len(organization.requests) is 1
-        assert len(organization.pending_requests) is 1
-        assert len(organization.refused_requests) is 0
-        assert len(organization.accepted_requests) is 0
+        assert len(organization.requests) == 1
+        assert len(organization.pending_requests) == 1
+        assert len(organization.refused_requests) == 0
+        assert len(organization.accepted_requests) == 0
 
         request = organization.requests[0]
         assert request.user == user
@@ -223,10 +223,10 @@ class MembershipAPITest:
         assert200(response)
 
         organization.reload()
-        assert len(organization.requests) is 1
-        assert len(organization.pending_requests) is 1
-        assert len(organization.refused_requests) is 0
-        assert len(organization.accepted_requests) is 0
+        assert len(organization.requests) == 1
+        assert len(organization.pending_requests) == 1
+        assert len(organization.refused_requests) == 0
+        assert len(organization.accepted_requests) == 0
 
         request = organization.requests[0]
         assert request.user == user
@@ -326,10 +326,10 @@ class MembershipAPITest:
         assert response.json["role"] == "editor"
 
         organization.reload()
-        assert len(organization.requests) is 1
-        assert len(organization.pending_requests) is 0
-        assert len(organization.refused_requests) is 0
-        assert len(organization.accepted_requests) is 1
+        assert len(organization.requests) == 1
+        assert len(organization.pending_requests) == 0
+        assert len(organization.refused_requests) == 0
+        assert len(organization.accepted_requests) == 1
         assert organization.is_member(applicant)
 
         request = organization.requests[0]
@@ -380,10 +380,10 @@ class MembershipAPITest:
         assert200(response)
 
         organization.reload()
-        assert len(organization.requests) is 1
-        assert len(organization.pending_requests) is 0
-        assert len(organization.refused_requests) is 1
-        assert len(organization.accepted_requests) is 0
+        assert len(organization.requests) == 1
+        assert len(organization.pending_requests) == 0
+        assert len(organization.refused_requests) == 1
+        assert len(organization.accepted_requests) == 0
         assert not organization.is_member(applicant)
 
         request = organization.requests[0]
@@ -548,12 +548,12 @@ class MembershipAPITest:
         to_follow.count_followers()
         assert to_follow.get_metrics()["followers"] == 1
 
-        assert Follow.objects.following(to_follow).count() is 0
-        assert Follow.objects.followers(to_follow).count() is 1
+        assert Follow.objects.following(to_follow).count() == 0
+        assert Follow.objects.followers(to_follow).count() == 1
         follow = Follow.objects.followers(to_follow).first()
         assert isinstance(follow.following, Organization)
-        assert Follow.objects.following(user).count() is 1
-        assert Follow.objects.followers(user).count() is 0
+        assert Follow.objects.following(user).count() == 1
+        assert Follow.objects.followers(user).count() == 0
 
     def test_unfollow_org(self, api):
         """It should unfollow the organization on DELETE"""
@@ -567,12 +567,12 @@ class MembershipAPITest:
 
         nb_followers = Follow.objects.followers(to_follow).count()
 
-        assert nb_followers is 0
+        assert nb_followers == 0
         assert response.json["followers"] == nb_followers
 
-        assert Follow.objects.following(to_follow).count() is 0
-        assert Follow.objects.following(user).count() is 0
-        assert Follow.objects.followers(user).count() is 0
+        assert Follow.objects.following(to_follow).count() == 0
+        assert Follow.objects.following(user).count() == 0
+        assert Follow.objects.followers(user).count() == 0
 
     def test_suggest_organizations_api(self, api):
         """It should suggest organizations"""
@@ -658,13 +658,13 @@ class MembershipAPITest:
 
         response = api.get(url_for("api.suggest_organizations"), qs={"q": "xxxxxx", "size": "5"})
         assert200(response)
-        assert len(response.json) is 0
+        assert len(response.json) == 0
 
     def test_suggest_organizations_api_empty(self, api):
         """It should not provide organization suggestion if no data"""
         response = api.get(url_for("api.suggest_organizations"), qs={"q": "xxxxxx", "size": "5"})
         assert200(response)
-        assert len(response.json) is 0
+        assert len(response.json) == 0
 
     def test_suggest_organizations_homonyms(self, api):
         """It should suggest organizations and not deduplicate homonyms"""
@@ -673,7 +673,7 @@ class MembershipAPITest:
         response = api.get(url_for("api.suggest_organizations"), qs={"q": "homonym", "size": "5"})
         assert200(response)
 
-        assert len(response.json) is 2
+        assert len(response.json) == 2
 
         for suggestion in response.json:
             assert suggestion["name"] == "homonym"
@@ -749,7 +749,7 @@ class OrganizationDatasetsAPITest:
         response = api.get(url_for("api.org_datasets", org=org), qs={"page_size": 2})
 
         assert200(response)
-        assert len(response.json["data"]) is 2
+        assert len(response.json["data"]) == 2
 
 
 class OrganizationReusesAPITest:
@@ -841,7 +841,7 @@ class OrganizationBadgeAPITest:
             response = api.post(url, data)
             assert201(response)
         self.organization.reload()
-        assert len(self.organization.badges) is 1
+        assert len(self.organization.badges) == 1
 
     def test_create_same(self, api):
         data = self.factory.as_dict()
@@ -852,7 +852,7 @@ class OrganizationBadgeAPITest:
             response = api.post(url, data)
             assert200(response)
         self.organization.reload()
-        assert len(self.organization.badges) is 1
+        assert len(self.organization.badges) == 1
 
     def test_create_2nd(self, api):
         # Explicitely setting the kind to avoid collisions given the
@@ -865,7 +865,7 @@ class OrganizationBadgeAPITest:
         response = api.post(url, data)
         assert201(response)
         self.organization.reload()
-        assert len(self.organization.badges) is 2
+        assert len(self.organization.badges) == 2
 
     def test_delete(self, api):
         badge = self.factory()
@@ -876,7 +876,7 @@ class OrganizationBadgeAPITest:
             response = api.delete(url)
             assert204(response)
         self.organization.reload()
-        assert len(self.organization.badges) is 0
+        assert len(self.organization.badges) == 0
 
     def test_delete_404(self, api):
         kind = str(self.factory().kind)

@@ -3,11 +3,9 @@ from datetime import datetime
 
 from mongoengine.signals import post_save
 
-from udata.api_fields import field
 from udata.auth import current_user
 from udata.mongo import db
 
-from .fields import badge_fields
 from .signals import on_badge_added, on_badge_removed
 
 log = logging.getLogger(__name__)

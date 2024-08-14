@@ -177,7 +177,7 @@ def purge_jobs():
         bucket = current_app.config.get("HARVEST_GRAPHS_S3_BUCKET")
         if bucket is None:
             log.error(
-                f"Bucket isn't configured anymore, but jobs still exist with external filenames. Could not delete them."
+                "Bucket isn't configured anymore, but jobs still exist with external filenames. Could not delete them."
             )
             break
 

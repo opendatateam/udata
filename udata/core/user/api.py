@@ -4,7 +4,6 @@ from slugify import slugify
 from udata.api import API, api
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission
-from udata.core import storages
 from udata.core.dataset.api_fields import community_resource_fields, dataset_fields
 from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields
@@ -320,9 +319,10 @@ class UserAPI(API):
         return "", 204
 
 
-from udata.core.contact_point.api import ContactPointApiParser
-from udata.core.contact_point.api_fields import contact_point_page_fields
-from udata.models import ContactPoint
+# These imports are not at the top of the file to avoid circular imports
+from udata.core.contact_point.api import ContactPointApiParser  # noqa
+from udata.core.contact_point.api_fields import contact_point_page_fields  # noqa
+from udata.models import ContactPoint  # noqa
 
 contact_point_parser = ContactPointApiParser()
 
