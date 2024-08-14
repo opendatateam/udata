@@ -200,7 +200,7 @@ def import_fixtures(source):
             for dataservice in fixture["dataservices"]:
                 dataservice = remove_unwanted_keys(dataservice, "dataservice")
                 if not dataservice["contact_point"]:
-                    DataserviceFactory(**dataservice, datasets=[dataset])
+                    DataserviceFactory(**dataservice, datasets=[dataset], organization=org)
                 else:
                     contact_point = ContactPoint.objects(
                         id=dataservice["contact_point"]["id"]
@@ -209,5 +209,8 @@ def import_fixtures(source):
                         contact_point = ContactPointFactory(**dataservice["contact_point"])
                     dataservice.pop("contact_point")
                     DataserviceFactory(
-                        **dataservice, datasets=[dataset], contact_point=contact_point
+                        **dataservice,
+                        datasets=[dataset],
+                        organization=org,
+                        contact_point=contact_point,
                     )
