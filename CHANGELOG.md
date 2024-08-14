@@ -13,7 +13,6 @@
 - Update to the version v2.0.0 of udata-fixtures (with the dataservices)
 - Add type hints [#3111](https://github.com/opendatateam/udata/pull/3111)
 - Make sure requests v2.32.3 is used everywhere consistently [#3116](https://github.com/opendatateam/udata/pull/3116)
-- Expose a dataservice in its organization's catalog, and expose a dataservice's catalog [#3122](https://github.com/opendatateam/udata/pull/3122)
 
 ## 9.1.2 (2024-07-29)
 
