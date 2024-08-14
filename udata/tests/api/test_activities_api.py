@@ -1,5 +1,6 @@
 import pytest
 from flask import url_for
+from werkzeug.test import TestResponse
 
 from udata.core.activity.models import Activity
 from udata.core.dataset.factories import DatasetFactory
@@ -28,36 +29,36 @@ class FakeReuseActivity(Activity):
 class ActivityAPITest:
     modules = []
 
-    def test_activity_api_list(self, api):
+    def test_activity_api_list(self, api) -> None:
         """It should fetch an activity list from the API"""
-        activities = [
+        activities: list[Activity] = [
             FakeDatasetActivity.objects.create(actor=UserFactory(), related_to=DatasetFactory()),
             FakeReuseActivity.objects.create(actor=UserFactory(), related_to=ReuseFactory()),
         ]
 
-        response = api.get(url_for("api.activity"))
+        response: TestResponse = api.get(url_for("api.activity"))
         assert200(response)
         assert len(response.json["data"]) == len(activities)
 
-    def test_activity_api_list_filtered_by_related_to(self, api):
+    def test_activity_api_list_filtered_by_related_to(self, api) -> None:
         """It should only return activities that correspond to the `related_to` parameter."""
-        dataset1 = DatasetFactory()
-        dataset2 = DatasetFactory()
-        reuse = ReuseFactory()
-        _activities = [
+        dataset1: Dataset = DatasetFactory()
+        dataset2: Dataset = DatasetFactory()
+        reuse: Reuse = ReuseFactory()
+        _activities: list[Activity] = [
             FakeDatasetActivity.objects.create(actor=UserFactory(), related_to=dataset1),
             FakeDatasetActivity.objects.create(actor=UserFactory(), related_to=dataset1),
             FakeDatasetActivity.objects.create(actor=UserFactory(), related_to=dataset2),
             FakeReuseActivity.objects.create(actor=UserFactory(), related_to=reuse),
         ]
 
-        response = api.get(url_for("api.activity", related_to=dataset1.id))
+        response: TestResponse = api.get(url_for("api.activity", related_to=dataset1.id))
         assert200(response)
         len(response.json["data"]) == 2
         assert response.json["data"][0]["related_to"] == dataset1.title
         assert response.json["data"][1]["related_to"] == dataset1.title
 
-        response = api.get(url_for("api.activity", related_to=reuse.id))
+        response: TestResponse = api.get(url_for("api.activity", related_to=reuse.id))
         assert200(response)
         len(response.json["data"]) == 1
         assert response.json["data"][0]["related_to"] == reuse.title
