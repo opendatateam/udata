@@ -66,7 +66,7 @@ def convert_db_to_field(key, field, info):
         if size:
             params["description"] = f"URL of the cropped and squared image ({size}x{size})"
         else:
-            params["description"] = f"URL of the image"
+            params["description"] = "URL of the image"
 
         if info.get("is_thumbnail", False):
             constructor_read = custom_restx_fields.ImageField
