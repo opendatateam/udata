@@ -32,7 +32,7 @@ def check_owner_is_current_user(owner):
         current_user.is_authenticated
         and owner
         and not admin_permission
-        and current_user.id != owner
+        and current_user.id != owner.id
     ):
         raise FieldValidationError(_("You can only set yourself as owner"), field="owner")
 
@@ -41,7 +41,7 @@ def check_organization_is_valid_for_current_user(organization):
     from udata.auth import current_user
     from udata.models import Organization
 
-    org = Organization.objects(id=organization).first()
+    org = Organization.objects(id=organization.id).first()
     if org is None:
         raise FieldValidationError(_("Unknown organization"), field="organization")
 
@@ -62,6 +62,7 @@ class Owned(object):
         description="Only present if organization is not set. Can only be set to the current authenticated user.",
         check=check_owner_is_current_user,
         allow_null=True,
+        filterable={},
     )
     organization = field(
         ReferenceField(Organization, reverse_delete_rule=NULLIFY),
@@ -69,6 +70,7 @@ class Owned(object):
         description="Only present if owner is not set. Can only be set to an organization of the current authenticated user.",
         check=check_organization_is_valid_for_current_user,
         allow_null=True,
+        filterable={},
     )
 
     on_owner_change = signal("Owned.on_owner_change")

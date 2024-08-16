@@ -54,7 +54,8 @@ export default {
                     widget: 'tag-completer'
                 }, {
                     id: 'private',
-                    label: this._('Private')
+                    label: this._('Private'),
+                    widget: 'checkbox',
                 }]
         };
     },

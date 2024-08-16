@@ -2,11 +2,15 @@ from blinker import Signal
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
+from udata.api_fields import field, function_field, generate_fields
+from udata.core.dataset.api_fields import dataset_fields
 from udata.core.owned import Owned, OwnedQuerySet
+from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE
 from udata.core.storages import default_image_basename, images
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.models import BadgeMixin, WithMetrics, db
+from udata.mongo.errors import FieldValidationError
 from udata.uris import endpoint_for
 from udata.utils import hash_url
 
@@ -23,32 +27,100 @@ class ReuseQuerySet(OwnedQuerySet):
         return self(db.Q(private=True) | db.Q(datasets__0__exists=False) | db.Q(deleted__ne=None))
 
 
+def check_url_does_not_exists(url):
+    """Ensure a reuse URL is not yet registered"""
+    if url and Reuse.url_exists(url):
+        raise FieldValidationError(_("This URL is already registered"), field="url")
+
+
+@generate_fields(
+    searchable=True,
+    additionalSorts=[
+        {"key": "datasets", "value": "metrics.datasets"},
+        {"key": "followers", "value": "metrics.followers"},
+        {"key": "views", "value": "metrics.views"},
+    ],
+)
 class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
-    title = db.StringField(required=True)
-    slug = db.SlugField(
-        max_length=255, required=True, populate_from="title", update=True, follow=True
+    title = field(
+        db.StringField(required=True),
+        sortable=True,
+        show_as_ref=True,
     )
-    description = db.StringField(required=True)
-    type = db.StringField(required=True, choices=list(REUSE_TYPES))
-    url = db.StringField(required=True)
+    slug = field(
+        db.SlugField(
+            max_length=255, required=True, populate_from="title", update=True, follow=True
+        ),
+        readonly=True,
+    )
+    description = field(
+        db.StringField(required=True),
+        markdown=True,
+    )
+    type = field(
+        db.StringField(required=True, choices=list(REUSE_TYPES)),
+        filterable={},
+    )
+    url = field(
+        db.StringField(required=True),
+        description="The remote URL (website)",
+        check=check_url_does_not_exists,
+    )
     urlhash = db.StringField(required=True, unique=True)
     image_url = db.StringField()
-    image = db.ImageField(
-        fs=images, basename=default_image_basename, max_size=IMAGE_MAX_SIZE, thumbnails=IMAGE_SIZES
+    image = field(
+        db.ImageField(
+            fs=images,
+            basename=default_image_basename,
+            max_size=IMAGE_MAX_SIZE,
+            thumbnails=IMAGE_SIZES,
+        ),
+        readonly=True,
+        show_as_ref=True,
+        thumbnail_info={
+            "size": BIGGEST_IMAGE_SIZE,
+        },
     )
-    datasets = db.ListField(db.ReferenceField("Dataset", reverse_delete_rule=db.PULL))
-    tags = db.TagListField()
-    topic = db.StringField(required=True, choices=list(REUSE_TOPICS))
+    datasets = field(
+        db.ListField(
+            field(
+                db.ReferenceField("Dataset", reverse_delete_rule=db.PULL),
+                nested_fields=dataset_fields,
+            ),
+        ),
+        filterable={
+            "key": "dataset",
+        },
+    )
+    tags = field(
+        db.TagListField(),
+        filterable={
+            "key": "tag",
+        },
+    )
+    topic = field(
+        db.StringField(required=True, choices=list(REUSE_TOPICS)),
+        filterable={},
+    )
     # badges = db.ListField(db.EmbeddedDocumentField(ReuseBadge))
 
-    private = db.BooleanField(default=False)
+    private = field(db.BooleanField(default=False))
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
-    extras = db.ExtrasField()
+    extras = field(db.ExtrasField())
 
-    featured = db.BooleanField()
-    deleted = db.DateTimeField()
-    archived = db.DateTimeField()
+    featured = field(
+        db.BooleanField(),
+        filterable={},
+        readonly=True,
+    )
+    deleted = field(
+        db.DateTimeField(),
+        readonly=True,
+    )
+    archived = field(
+        db.DateTimeField(),
+    )
 
     def __str__(self):
         return self.title or ""
@@ -109,6 +181,16 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
         return endpoint_for("reuses.show", "api.reuse", reuse=self, *args, **kwargs)
 
     display_url = property(url_for)
+
+    @function_field(description="Link to the API endpoint for this reuse", show_as_ref=True)
+    def uri(self):
+        return endpoint_for("api.reuse", reuse=self, _external=True)
+
+    @function_field(description="Link to the udata web page for this reuse", show_as_ref=True)
+    def page(self):
+        return endpoint_for(
+            "reuses.show", reuse=self, _external=True, fallback_endpoint="api.reuse"
+        )
 
     @property
     def is_visible(self):
