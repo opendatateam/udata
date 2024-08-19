@@ -431,7 +431,7 @@ def patch_and_save(obj, request):
 def wrap_primary_key(
     field_name: str,
     foreign_field: mongoengine.fields.ReferenceField | mongoengine.fields.GenericReferenceField,
-    value: str,
+    value: str | None,
     document_type=None,
 ):
     """
@@ -440,6 +440,9 @@ def wrap_primary_key(
 
     TODO: we only check the document reference if the ID is a `String` field (not in the case of a classic `ObjectId`).
     """
+    if value is None:
+        return value
+
     document_type = document_type or foreign_field.document_type().__class__
     id_field_name = document_type._meta["id_field"]
 

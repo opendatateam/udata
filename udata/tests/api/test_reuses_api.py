@@ -183,6 +183,17 @@ class ReuseAPITest:
         assert Reuse.objects.count() == 1
         assert Reuse.objects.first().description == "new description"
 
+    def test_reuse_api_remove_org(self, api):
+        """It should update a reuse from the API"""
+        user = api.login()
+        reuse = ReuseFactory(owner=user)
+        data = reuse.to_dict()
+        data["organization"] = None
+        response = api.put(url_for("api.reuse", reuse=reuse), data)
+        assert200(response)
+        assert Reuse.objects.count() == 1
+        assert Reuse.objects.first().organization is None
+
     def test_reuse_api_update_deleted(self, api):
         """It should not update a deleted reuse from the API and raise 410"""
         api.login()
