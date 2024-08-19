@@ -37,10 +37,10 @@ class ReuseAPITest:
         assert len(response.json["data"]) == len(reuses)
 
     def test_reuse_api_list_with_sorts(self, api):
-        ReuseFactory(title="A")
-        ReuseFactory(title="B", metrics={"views": 42})
-        ReuseFactory(title="C", metrics={"views": 1337})
-        ReuseFactory(title="D")
+        ReuseFactory(title="A", created_at="2024-03-01")
+        ReuseFactory(title="B", metrics={"views": 42}, created_at="2024-02-01")
+        ReuseFactory(title="C", metrics={"views": 1337}, created_at="2024-05-01")
+        ReuseFactory(title="D", created_at="2024-04-01")
 
         response = api.get(url_for("api.reuses", sort="views"))
         assert200(response)
@@ -51,6 +51,11 @@ class ReuseAPITest:
         assert200(response)
 
         assert [reuse["title"] for reuse in response.json["data"]] == ["C", "B", "D", "A"]
+
+        response = api.get(url_for("api.reuses", sort="created"))
+        assert200(response)
+
+        assert [reuse["title"] for reuse in response.json["data"]] == ["B", "A", "D", "C"]
 
     def test_reuse_api_list_with_filters(self, api):
         """Should filters reuses results based on query filters"""

@@ -183,8 +183,11 @@ def generate_fields(**kwargs):
         read_fields["id"] = restx_fields.String(required=True, readonly=True)
 
         for key, field, info in get_fields(cls):
-            if info.get("sortable", False):
-                sortables.append({"key": key, "value": key})
+            sortable_key = info.get("sortable", False)
+            if sortable_key:
+                sortables.append(
+                    {"key": sortable_key if isinstance(sortable_key, str) else key, "value": key}
+                )
 
             filterable = info.get("filterable", None)
             if filterable is not None:
