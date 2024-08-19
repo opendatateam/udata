@@ -4,7 +4,6 @@
 
 - Fix many linting issues reported by ruff [#3118](https://github.com/opendatateam/udata/pull/3118)
 - Import the dataservice's organization from the fixtures [#3121](https://github.com/opendatateam/udata/pull/3121)
-- Fix circular import error [#3128](https://github.com/opendatateam/udata/pull/3128)
 
 ## 9.1.3 (2024-08-01)
 
