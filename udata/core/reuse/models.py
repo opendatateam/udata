@@ -33,7 +33,14 @@ def check_url_does_not_exists(url):
         raise FieldValidationError(_("This URL is already registered"), field="url")
 
 
-@generate_fields(searchable=True)
+@generate_fields(
+    searchable=True,
+    additionalSorts=[
+        {"key": "datasets", "value": "metrics.datasets"},
+        {"key": "followers", "value": "metrics.followers"},
+        {"key": "views", "value": "metrics.views"},
+    ],
+)
 class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
     title = field(
         db.StringField(required=True),

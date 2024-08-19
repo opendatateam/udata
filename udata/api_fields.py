@@ -177,14 +177,14 @@ def generate_fields(**kwargs):
         read_fields = {}
         write_fields = {}
         ref_fields = {}
-        sortables = []
+        sortables = kwargs.get("additionalSorts", [])
         filterables = []
 
         read_fields["id"] = restx_fields.String(required=True, readonly=True)
 
         for key, field, info in get_fields(cls):
             if info.get("sortable", False):
-                sortables.append(key)
+                sortables.append({"key": key, "value": key})
 
             filterable = info.get("filterable", None)
             if filterable is not None:
@@ -282,7 +282,9 @@ def generate_fields(**kwargs):
             )
 
         if sortables:
-            choices = sortables + ["-" + k for k in sortables]
+            choices = [sortable["key"] for sortable in sortables] + [
+                "-" + sortable["key"] for sortable in sortables
+            ]
             parser.add_argument(
                 "sort",
                 type=str,
@@ -304,7 +306,19 @@ def generate_fields(**kwargs):
             args = cls.__index_parser__.parse_args()
 
             if sortables and args["sort"]:
-                base_query = base_query.order_by(args["sort"])
+                negate = args["sort"].startswith("-")
+                sort_key = args["sort"][1:] if negate else args["sort"]
+
+                sort_by = next(
+                    (sortable["value"] for sortable in sortables if sortable["key"] == sort_key),
+                    None,
+                )
+
+                if sort_by:
+                    if negate:
+                        sort_by = "-" + sort_by
+
+                    base_query = base_query.order_by(sort_by)
 
             if searchable and args.get("q"):
                 phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
