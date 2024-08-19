@@ -443,6 +443,9 @@ def wrap_primary_key(
     if value is None:
         return value
 
+    if isinstance(value, dict) and "id" in value:
+        return wrap_primary_key(field_name, foreign_field, value["id"], document_type)
+
     document_type = document_type or foreign_field.document_type().__class__
     id_field_name = document_type._meta["id_field"]
 
