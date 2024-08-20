@@ -176,7 +176,11 @@ class OrganizationRdfFormatAPI(API):
         page = int(params.get("page", 1))
         page_size = int(params.get("page_size", 100))
         datasets = Dataset.objects(organization=org).visible().paginate(page, page_size)
-        dataservices = Dataservice.objects(organization=org).visible().paginate(page, page_size)
+        dataservices = (
+            Dataservice.objects(organization=org)
+            .visible()
+            .filter_by_dataset_pagination(datasets, page)
+        )
         catalog = build_org_catalog(org, datasets, dataservices, format=format)
         # bypass flask-restplus make_response, since graph_response
         # is handling the content negociation directly
