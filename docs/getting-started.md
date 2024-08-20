@@ -151,6 +151,10 @@ This define `dev.local:7000` as the URL for your local setup. You’ll have to e
 127.0.0.1       dev.local
 ```
 
+!!! WARNING
+    For MacOS users, please note that the [control center is listening on port 7000](https://discussions.apple.com/thread/250472145?sortBy=rank),
+    so the above won't work. Instead, configure for example port `7001` in the `udata.cfg` file.
+
 ## Running the project for the first time
 
 You need to initialize some data before being able to use udata. The following command
@@ -170,6 +174,15 @@ You can then start udata server with the `serve` subcommand.
 ```bash
 inv serve
 ```
+
+!!! WARNING
+    For MacOS users, this won't work as the port `7000` is already used, as explained above. If you've changed the `udata.cfg` to
+    have a `SERVER_NAME=dev.local:7001`, use the following command instead, and make sure to use the port `7001` throughout the rest
+    of the documentation and examples.
+
+    ```bash
+    inv serve --port 7001
+    ```
 
 Now, you can use your udata api !
 
