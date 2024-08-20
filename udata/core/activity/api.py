@@ -64,7 +64,7 @@ activity_parser.add_argument(
 activity_parser.add_argument(
     "related_to",
     type=str,
-    help="Filter activities for that particular reuse or dataset id",
+    help="Filter activities for that particular object id (ex : reuse, dataset, etc.)",
     location="args",
 )
 
