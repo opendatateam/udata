@@ -1,5 +1,6 @@
 import logging
 
+from bson import ObjectId
 from mongoengine.errors import DoesNotExist
 
 from udata.api import API, api, fields
@@ -86,6 +87,9 @@ class SiteActivityAPI(API):
             qs = qs(actor=args["user"])
 
         if args["related_to"]:
+            if not ObjectId.is_valid(args["related_to"]):
+                api.abort(400, "`related_to` arg must be an identifier")
+
             qs = qs(related_to=args["related_to"])
 
         qs = qs.order_by("-created_at")

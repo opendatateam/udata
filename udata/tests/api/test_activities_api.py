@@ -9,7 +9,7 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.reuse.models import Reuse
 from udata.core.user.factories import UserFactory
 from udata.mongo import db
-from udata.tests.helpers import assert200
+from udata.tests.helpers import assert200, assert400
 
 pytestmark = [
     pytest.mark.usefixtures("clean_db"),
@@ -39,6 +39,11 @@ class ActivityAPITest:
         response: TestResponse = api.get(url_for("api.activity"))
         assert200(response)
         assert len(response.json["data"]) == len(activities)
+
+    def test_activity_api_list_filter_by_bogus_related_to(self, api) -> None:
+        """It should return a 400 error if the `related_to` parameter isn't a valid ObjectId."""
+        response: TestResponse = api.get(url_for("api.activity", related_to="foobar"))
+        assert400(response)
 
     def test_activity_api_list_filtered_by_related_to(self, api) -> None:
         """It should only return activities that correspond to the `related_to` parameter."""
