@@ -75,6 +75,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
             max_size=IMAGE_MAX_SIZE,
             thumbnails=IMAGE_SIZES,
         ),
+        readonly=True,
         show_as_ref=True,
         thumbnail_info={
             "size": BIGGEST_IMAGE_SIZE,
