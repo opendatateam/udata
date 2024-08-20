@@ -1,15 +1,19 @@
 from datetime import datetime
 
+import mongoengine
 from bson.objectid import ObjectId
 from flask import request
+from flask_login import current_user
 
 from udata.api import API, api, errors
 from udata.api.parsers import ModelApiParser
+from udata.api_fields import patch, patch_and_save
 from udata.auth import admin_permission
 from udata.core.badges import api as badges_api
 from udata.core.badges.fields import badge_fields
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.followers.api import FollowAPI
+from udata.core.reuse.constants import REUSE_TOPICS, REUSE_TYPES
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
@@ -19,14 +23,10 @@ from udata.models import Dataset
 from udata.utils import id_or_404
 
 from .api_fields import (
-    reuse_fields,
-    reuse_page_fields,
     reuse_suggestion_fields,
     reuse_topic_fields,
     reuse_type_fields,
 )
-from .constants import REUSE_TOPICS, REUSE_TYPES
-from .forms import ReuseForm
 from .models import Reuse
 from .permissions import ReuseEditPermission
 
@@ -96,24 +96,30 @@ reuse_parser = ReuseApiParser()
 @ns.route("/", endpoint="reuses")
 class ReuseListAPI(API):
     @api.doc("list_reuses")
-    @api.expect(reuse_parser.parser)
-    @api.marshal_with(reuse_page_fields)
+    @api.expect(Reuse.__index_parser__)
+    @api.marshal_with(Reuse.__page_fields__)
     def get(self):
-        args = reuse_parser.parse()
-        reuses = Reuse.objects(deleted=None, private__ne=True)
-        reuses = reuse_parser.parse_filters(reuses, args)
-        sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
-        return reuses.order_by(sort).paginate(args["page"], args["page_size"])
+        query = Reuse.objects(deleted=None, private__ne=True)
+
+        return Reuse.apply_sort_filters_and_pagination(query)
 
     @api.secure
     @api.doc("create_reuse")
-    @api.expect(reuse_fields)
+    @api.expect(Reuse.__write_fields__)
     @api.response(400, "Validation error")
-    @api.marshal_with(reuse_fields)
+    @api.marshal_with(Reuse.__read_fields__, code=201)
     def post(self):
-        """Create a new object"""
-        form = api.validate(ReuseForm)
-        return form.save(), 201
+        reuse = patch(Reuse(), request)
+
+        if not reuse.owner and not reuse.organization:
+            reuse.owner = current_user._get_current_object()
+
+        try:
+            reuse.save()
+        except mongoengine.errors.ValidationError as e:
+            api.abort(400, e.message)
+
+        return patch_and_save(reuse, request), 201
 
 
 @ns.route("/<reuse:reuse>/", endpoint="reuse", doc=common_doc)
@@ -121,7 +127,7 @@ class ReuseListAPI(API):
 @api.response(410, "Reuse has been deleted")
 class ReuseAPI(API):
     @api.doc("get_reuse")
-    @api.marshal_with(reuse_fields)
+    @api.marshal_with(Reuse.__read_fields__)
     def get(self, reuse):
         """Fetch a given reuse"""
         if reuse.deleted and not ReuseEditPermission(reuse).can():
@@ -130,8 +136,8 @@ class ReuseAPI(API):
 
     @api.secure
     @api.doc("update_reuse")
-    @api.expect(reuse_fields)
-    @api.marshal_with(reuse_fields)
+    @api.expect(Reuse.__write_fields__)
+    @api.marshal_with(Reuse.__read_fields__)
     @api.response(400, errors.VALIDATION_ERROR)
     def put(self, reuse):
         """Update a given reuse"""
@@ -139,8 +145,9 @@ class ReuseAPI(API):
         if reuse.deleted and request_deleted is not None:
             api.abort(410, "This reuse has been deleted")
         ReuseEditPermission(reuse).test()
-        form = api.validate(ReuseForm, reuse)
-        return form.save()
+
+        # This is a patch but old API acted like PATCH on PUT requests.
+        return patch_and_save(reuse, request)
 
     @api.secure
     @api.doc("delete_reuse")
@@ -160,8 +167,8 @@ class ReuseDatasetsAPI(API):
     @api.secure
     @api.doc("reuse_add_dataset", **common_doc)
     @api.expect(dataset_ref_fields)
-    @api.response(200, "The dataset is already present", reuse_fields)
-    @api.marshal_with(reuse_fields, code=201)
+    @api.response(200, "The dataset is already present", Reuse.__read_fields__)
+    @api.marshal_with(Reuse.__read_fields__, code=201)
     def post(self, reuse):
         """Add a dataset to a given reuse"""
         if "id" not in request.json:
@@ -211,7 +218,7 @@ class ReuseBadgeAPI(API):
 class ReuseFeaturedAPI(API):
     @api.doc("feature_reuse")
     @api.secure(admin_permission)
-    @api.marshal_with(reuse_fields)
+    @api.marshal_with(Reuse.__read_fields__)
     def post(self, reuse):
         """Mark a reuse as featured"""
         reuse.featured = True
@@ -220,7 +227,7 @@ class ReuseFeaturedAPI(API):
 
     @api.doc("unfeature_reuse")
     @api.secure(admin_permission)
-    @api.marshal_with(reuse_fields)
+    @api.marshal_with(Reuse.__read_fields__)
     def delete(self, reuse):
         """Unmark a reuse as featured"""
         reuse.featured = False

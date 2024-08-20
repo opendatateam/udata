@@ -6,6 +6,7 @@ from mongoengine import EmbeddedDocument
 from mongoengine.fields import BaseField, DateTimeField
 from mongoengine.signals import pre_save
 
+from udata.api_fields import field
 from udata.i18n import lazy_gettext as _
 
 log = logging.getLogger(__name__)
@@ -55,11 +56,17 @@ class DateRange(EmbeddedDocument):
 
 
 class Datetimed(object):
-    created_at = DateTimeField(
-        verbose_name=_("Creation date"), default=datetime.utcnow, required=True
+    created_at = field(
+        DateTimeField(verbose_name=_("Creation date"), default=datetime.utcnow, required=True),
+        sortable="created",
+        readonly=True,
     )
-    last_modified = DateTimeField(
-        verbose_name=_("Last modification date"), default=datetime.utcnow, required=True
+    last_modified = field(
+        DateTimeField(
+            verbose_name=_("Last modification date"), default=datetime.utcnow, required=True
+        ),
+        sortable=True,
+        readonly=True,
     )
 
 
