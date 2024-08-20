@@ -163,7 +163,7 @@ def get_fields(cls):
             yield (
                 f"{key}_thumbnail",
                 field,
-                {**info, **info.get("thumbnail_info", {}), "is_thumbnail": True},
+                {**info, **info.get("thumbnail_info", {}), "is_thumbnail": True, "attribute": key},
             )
 
 
