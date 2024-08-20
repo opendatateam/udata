@@ -1,9 +1,6 @@
-import random
-import string
 import time
 from datetime import datetime
 
-from elasticsearch_dsl import analyzer, token_filter, tokenizer
 from flask import url_for
 
 from udata.core.badges.models import Badge
@@ -12,7 +9,7 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory
 from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.models import Member, Organization
+from udata.core.organization.models import Member
 from udata.core.user.factories import UserFactory
 from udata.i18n import gettext as _
 

@@ -318,15 +318,16 @@ def generate_fields(**kwargs):
                 and getattr(cls, "__elasticsearch_search__", None) is not None
             ):
                 # Do an Elasticsearch query
-                print(cls.__elasticsearch_search__(args.get("q")))
-                print(
-                    {
-                        "data": cls.__elasticsearch_search__(args.get("q")),
+                results = cls.__elasticsearch_search__(args.get("q"))
+                if paginable:
+                    return {
+                        "objects": results,  # restx pager rename `objects` into `data`
+                        "total": len(results),
+                        "page": 1,
+                        "page_size": len(results),
                     }
-                )
-                return {
-                    "data": cls.__elasticsearch_search__(args.get("q")),
-                }
+                else:
+                    return results
             else:
                 # Do a regular MongoDB query
                 if sortables and args["sort"]:
