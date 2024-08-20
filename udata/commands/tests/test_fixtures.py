@@ -46,6 +46,7 @@ class FixturesTest:
                 MessageDiscussionFactory(posted_by=user),
                 MessageDiscussionFactory(posted_by=admin),
             ],
+            closed_by=admin,
         )
         DataserviceFactory(datasets=[dataset], organization=org)
 
@@ -76,17 +77,18 @@ class FixturesTest:
             result = cli("import-fixtures", fixtures_fd.name)
         assert models.Organization.objects(slug=org.slug).count() > 0
         result_org = models.Organization.objects.get(slug=org.slug)
-        assert result_org.members[0].user == user
+        assert result_org.members[0].user.id == user.id
         assert result_org.members[0].role == "editor"
-        assert result_org.members[1].user == admin
+        assert result_org.members[1].user.id == admin.id
         assert result_org.members[1].role == "admin"
         assert models.Dataset.objects.count() > 0
         assert models.Discussion.objects.count() > 0
         result_discussion = models.Discussion.objects.first()
-        assert result_discussion.user == user
+        assert result_discussion.user.id == user.id
+        assert result_discussion.closed_by.id == admin.id
         assert len(result_discussion.discussion) == 2
-        assert result_discussion.discussion[0].posted_by == user
-        assert result_discussion.discussion[1].posted_by == admin
+        assert result_discussion.discussion[0].posted_by.id == user.id
+        assert result_discussion.discussion[1].posted_by.id == admin.id
         assert models.CommunityResource.objects.count() > 0
         assert models.User.objects.count() > 0
         assert models.Dataservice.objects.count() > 0

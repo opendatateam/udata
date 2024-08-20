@@ -217,6 +217,7 @@ def import_fixtures(source):
                 CommunityResourceFactory(**community, dataset=dataset)
             for discussion in fixture["discussions"]:
                 discussion = remove_unwanted_keys(discussion, "discussion")
+                discussion["closed_by"] = get_or_create(discussion, "closed_by", User, UserFactory)
                 for message in discussion["discussion"]:
                     message["posted_by"] = get_or_create(message, "posted_by", User, UserFactory)
                 discussion["discussion"] = [
