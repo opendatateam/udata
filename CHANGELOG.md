@@ -7,6 +7,7 @@
 - Convert reuse to new API system [#3066](https://github.com/opendatateam/udata/pull/3066)
 - Fix circular import error [#3128](https://github.com/opendatateam/udata/pull/3128)
 - Add an option to specify the port when using `inv serve` [#3123](https://github.com/opendatateam/udata/pull/3123)
+- Add sort and pagination parameters to the organization reuses API [#3126](https://github.com/opendatateam/udata/pull/3126)
 
 ## 9.1.3 (2024-08-01)
 
