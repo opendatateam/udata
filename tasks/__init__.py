@@ -194,10 +194,10 @@ def qa(ctx):
 
 
 @task
-def serve(ctx, host="localhost"):
+def serve(ctx, host="localhost", port="7000"):
     """Run a development server"""
     with ctx.cd(ROOT):
-        ctx.run("python manage.py serve -d -r -h %s" % host)
+        ctx.run(f"python manage.py serve -d -r -h {host} -p {port}")
 
 
 @task
