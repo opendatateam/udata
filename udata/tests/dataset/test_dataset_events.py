@@ -32,6 +32,7 @@ class DatasetEventsTest:
         mock_req.assert_called_with(
             f"{current_app.config['RESOURCES_ANALYSER_URI']}/api/resource/created/",
             json=expected_value,
+            headers={"Authorization": f"Bearer {current_app.config['RESOURCES_ANALYSER_API_KEY']}"},
         )
 
     @patch("requests.post")
@@ -54,6 +55,7 @@ class DatasetEventsTest:
         mock_req.assert_called_with(
             f"{current_app.config['RESOURCES_ANALYSER_URI']}/api/resource/updated/",
             json=expected_value,
+            headers={"Authorization": f"Bearer {current_app.config['RESOURCES_ANALYSER_API_KEY']}"},
         )
 
         # Mocking requests call doesn't call the JSON encoder
@@ -79,4 +81,5 @@ class DatasetEventsTest:
         mock_req.assert_called_with(
             f"{current_app.config['RESOURCES_ANALYSER_URI']}/api/resource/deleted/",
             json=expected_value,
+            headers={"Authorization": f"Bearer {current_app.config['RESOURCES_ANALYSER_API_KEY']}"},
         )
