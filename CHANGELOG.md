@@ -8,6 +8,7 @@
 - Fix circular import error [#3128](https://github.com/opendatateam/udata/pull/3128)
 - Add an option to specify the port when using `inv serve` [#3123](https://github.com/opendatateam/udata/pull/3123)
 - Add a new `related_to` filter parameter to the activities API endpoint [#3127](https://github.com/opendatateam/udata/pull/3127)
+- Properly import the `Discussion.closed_by` from the fixtures [#3125](https://github.com/opendatateam/udata/pull/3125)
 
 ## 9.1.3 (2024-08-01)
 
