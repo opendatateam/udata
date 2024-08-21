@@ -31,7 +31,7 @@ class DataserviceQuerySet(OwnedQuerySet):
     def hidden(self):
         return self(db.Q(private=True) | db.Q(deleted_at__ne=None) | db.Q(archived_at__ne=None))
 
-    def filter_by_dataset_pagination(self, datasets, page):
+    def filter_by_dataset_pagination(self, datasets: list[Dataset], page: int):
         """Paginate the dataservices on the datasets provided.
 
         This is a workaround, used (at least) in the catalogs for sites and organizations.
@@ -63,7 +63,9 @@ class DataserviceQuerySet(OwnedQuerySet):
 
         # On the first page, add all dataservices without datasets
         if page == 1:
-            dataservices_filter = dataservices_filter | Q(datasets__size=0)
+            dataservices_filter = (
+                dataservices_filter | Q(datasets__size=0) | Q(datasets__exists=False)
+            )
 
         return self(dataservices_filter)
 

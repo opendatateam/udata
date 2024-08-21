@@ -108,12 +108,22 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
             page_size=page_size,
             _external=True,
         )
+        # First create a dataset and it's associated dataservice, which should be listed
+        # last, and thus on the second page.
+        extra_dataset = DatasetFactory.create(organization=origin_org)
+        _extra_dataservice = DataserviceFactory.create(
+            datasets=[extra_dataset], organization=origin_org
+        )
+
+        # Create `total` datasets that should be listed on the first page up to `page_size`
         DatasetFactory.create_batch(total, organization=origin_org)
+        # And all the dataservices with no datasets, which will all be listed on the first page.
+        # See DataserviceQuerySet.filter_by_dataset_pagination.
         DataserviceFactory.create_batch(total, organization=origin_org)
 
         # First page
         datasets = Dataset.objects.paginate(1, page_size)
-        dataservices = Dataservice.objects.paginate(1, page_size)
+        dataservices = Dataservice.objects.filter_by_dataset_pagination(datasets, 1)
         catalog = build_org_catalog(origin_org, datasets, dataservices, format="json")
         graph = catalog.graph
 
@@ -123,9 +133,12 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
         self.assertIn(DCAT.Catalog, types)
         self.assertIn(HYDRA.Collection, types)
 
-        self.assertEqual(catalog.value(HYDRA.totalItems), Literal(total))
+        self.assertEqual(catalog.value(HYDRA.totalItems), Literal(total + 1))
 
         self.assertEqual(len(list(catalog.objects(DCAT.dataset))), page_size)
+        # All dataservices that are not linked to a dataset are listed in the first page.
+        # See DataserviceQuerySet.filter_by_dataset_pagination.
+        self.assertEqual(len(list(catalog.objects(DCAT.dataservice))), total)
 
         paginations = list(graph.subjects(RDF.type, HYDRA.PartialCollectionView))
         self.assertEqual(len(paginations), 1)
@@ -138,7 +151,7 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
 
         # Second page
         datasets = Dataset.objects.paginate(2, page_size)
-        dataservices = Dataservice.objects.paginate(2, page_size)
+        dataservices = Dataservice.objects.filter_by_dataset_pagination(datasets, 2)
         catalog = build_org_catalog(origin_org, datasets, dataservices, format="json")
         graph = catalog.graph
 
@@ -148,9 +161,12 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
         self.assertIn(DCAT.Catalog, types)
         self.assertIn(HYDRA.Collection, types)
 
-        self.assertEqual(catalog.value(HYDRA.totalItems), Literal(total))
+        self.assertEqual(catalog.value(HYDRA.totalItems), Literal(total + 1))
 
-        self.assertEqual(len(list(catalog.objects(DCAT.dataset))), 1)
+        # 5 datasets total, 3 on the first page, 2 on the second.
+        self.assertEqual(len(list(catalog.objects(DCAT.dataset))), 2)
+        # 1 extra_dataservice, listed on the same page as its associated extra_dataset.
+        self.assertEqual(len(list(catalog.objects(DCAT.dataservice))), 1)
 
         paginations = list(graph.subjects(RDF.type, HYDRA.PartialCollectionView))
         self.assertEqual(len(paginations), 1)
