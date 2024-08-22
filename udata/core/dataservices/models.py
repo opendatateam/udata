@@ -63,9 +63,7 @@ class DataserviceQuerySet(OwnedQuerySet):
 
         # On the first page, add all dataservices without datasets
         if page == 1:
-            dataservices_filter = (
-                dataservices_filter | Q(datasets__size=0) | Q(datasets__exists=False)
-            )
+            dataservices_filter = dataservices_filter | Q(datasets__size=0)
 
         return self(dataservices_filter)
 
