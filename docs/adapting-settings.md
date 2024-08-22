@@ -644,7 +644,7 @@ FS_ROOT = '/srv/http/www.data.dev/fs'
 
 ## Resources modifications publishing
 
-Udata may publish modifications to resources, for example to an [hydra](https://github.com/datagouv/hydra)
+udata may notify external services (ex: [hydra](https://github.com/datagouv/hydra)) about resources modification on the platform.
 install, or any other service.
 
 
