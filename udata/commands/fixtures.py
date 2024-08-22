@@ -26,6 +26,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member, Organization
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
+from udata.core.user.models import User
 
 log = logging.getLogger(__name__)
 
@@ -55,22 +56,21 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "quality",
     ],
     "resource": ["latest", "preview_url", "last_modified"],
-    "organization": ["members", "page", "uri", "logo_thumbnail"],
-    "reuse": ["datasets", "image_thumbnail", "page", "uri", "organization", "owner"],
+    "organization": ["class", "page", "uri", "logo_thumbnail"],
+    "reuse": ["datasets", "image_thumbnail", "page", "uri", "owner"],
     "community": [
         "dataset",
-        "organization",
         "owner",
         "latest",
         "last_modified",
         "preview_url",
     ],
-    "discussion": ["subject", "user", "url", "class"],
-    "message": ["posted_by"],
+    "discussion": ["subject", "url", "class"],
+    "user": ["uri", "page", "class", "avatar_thumbnail", "email"],
+    "posted_by": ["uri", "page", "class", "avatar_thumbnail", "email"],
     "dataservice": [
         "datasets",
         "license",
-        "organization",
         "owner",
         "self_api_url",
         "self_web_url",
@@ -80,6 +80,8 @@ UNWANTED_KEYS: dict[str, list[str]] = {
 
 def remove_unwanted_keys(obj: dict, filter_type: str) -> dict:
     """Remove UNWANTED_KEYS from a dict."""
+    if filter_type not in UNWANTED_KEYS:
+        return obj
     for unwanted_key in UNWANTED_KEYS[filter_type]:
         if unwanted_key in obj:
             del obj[unwanted_key]
@@ -150,6 +152,29 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
         print(f"Fixtures saved to file {results_filename}")
 
 
+def get_or_create(data, key, model, factory):
+    """Try getting the object. If it doesn't exist yet, create it with the provided factory."""
+    if key not in data or data[key] is None:
+        return
+    data[key] = remove_unwanted_keys(data[key], key)
+    obj = model.objects(id=data[key]["id"]).first()
+    if not obj:
+        obj = factory(**data[key])
+    return obj
+
+
+def get_or_create_organization(data):
+    return get_or_create(data, "organization", Organization, OrganizationFactory)
+
+
+def get_or_create_owner(data):
+    return get_or_create(data, "owner", User, UserFactory)
+
+
+def get_or_create_user(data):
+    return get_or_create(data, "user", User, UserFactory)
+
+
 @cli.command()
 @click.argument("source", default=DEFAULT_FIXTURE_FILE)
 def import_fixtures(source):
@@ -165,52 +190,45 @@ def import_fixtures(source):
             user = UserFactory()
             dataset = fixture["dataset"]
             dataset = remove_unwanted_keys(dataset, "dataset")
-            if not fixture["organization"]:
-                dataset = DatasetFactory(**dataset, owner=user)
-            else:
-                org = Organization.objects(id=fixture["organization"]["id"]).first()
-                if not org:
-                    organization = fixture["organization"]
-                    organization = remove_unwanted_keys(organization, "organization")
-                    org = OrganizationFactory(**organization, members=[Member(user=user)])
+            if fixture["organization"]:
+                organization = fixture["organization"]
+                organization["members"] = [
+                    Member(user=get_or_create_user(member), role=member["role"])
+                    for member in organization["members"]
+                ]
+                fixture["organization"] = organization
+                org = get_or_create_organization(fixture)
                 dataset = DatasetFactory(**dataset, organization=org)
+            else:
+                dataset = DatasetFactory(**dataset, owner=user)
             for resource in fixture["resources"]:
                 resource = remove_unwanted_keys(resource, "resource")
                 res = ResourceFactory(**resource)
                 dataset.add_resource(res)
             for reuse in fixture["reuses"]:
                 reuse = remove_unwanted_keys(reuse, "reuse")
-                ReuseFactory(**reuse, datasets=[dataset], owner=user)
+                reuse["owner"] = get_or_create_owner(reuse)
+                reuse["organization"] = get_or_create_organization(reuse)
+                ReuseFactory(**reuse, datasets=[dataset])
             for community in fixture["community_resources"]:
                 community = remove_unwanted_keys(community, "community")
-                CommunityResourceFactory(**community, dataset=dataset, owner=user)
+                community["owner"] = get_or_create_owner(community)
+                community["organization"] = get_or_create_organization(community)
+                CommunityResourceFactory(**community, dataset=dataset)
             for discussion in fixture["discussions"]:
                 discussion = remove_unwanted_keys(discussion, "discussion")
-                messages = discussion.pop("discussion")
-                for message in messages:
-                    message = remove_unwanted_keys(message, "message")
-                DiscussionFactory(
-                    **discussion,
-                    subject=dataset,
-                    user=user,
-                    discussion=[
-                        MessageDiscussionFactory(**message, posted_by=user) for message in messages
-                    ],
-                )
+                discussion["closed_by"] = get_or_create(discussion, "closed_by", User, UserFactory)
+                for message in discussion["discussion"]:
+                    message["posted_by"] = get_or_create(message, "posted_by", User, UserFactory)
+                discussion["discussion"] = [
+                    MessageDiscussionFactory(**message) for message in discussion["discussion"]
+                ]
+                discussion["user"] = get_or_create_user(discussion)
+                DiscussionFactory(**discussion, subject=dataset)
             for dataservice in fixture["dataservices"]:
                 dataservice = remove_unwanted_keys(dataservice, "dataservice")
-                if not dataservice["contact_point"]:
-                    DataserviceFactory(**dataservice, datasets=[dataset], organization=org)
-                else:
-                    contact_point = ContactPoint.objects(
-                        id=dataservice["contact_point"]["id"]
-                    ).first()
-                    if not contact_point:
-                        contact_point = ContactPointFactory(**dataservice["contact_point"])
-                    dataservice.pop("contact_point")
-                    DataserviceFactory(
-                        **dataservice,
-                        datasets=[dataset],
-                        organization=org,
-                        contact_point=contact_point,
-                    )
+                dataservice["contact_point"] = get_or_create(
+                    dataservice, "contact_point", ContactPoint, ContactPointFactory
+                )
+                dataservice["organization"] = get_or_create_organization(dataservice)
+                DataserviceFactory(**dataservice, datasets=[dataset])
