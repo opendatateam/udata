@@ -15,10 +15,10 @@ def add_vary(headers: Headers, header: str):
 
 def add_actual_request_headers(headers: Headers) -> Headers:
     origin = request.headers.get("Origin", None)
+    add_vary(headers, "Origin")
+
     if origin:
         headers.set("Access-Control-Allow-Origin", origin)
-        add_vary(headers, "Origin")
-
         headers.set("Access-Control-Allow-Credentials", "true")
 
     return headers
@@ -41,10 +41,10 @@ def is_allowed_cors_route():
 
 def add_preflight_request_headers(headers: Headers) -> Headers:
     origin = request.headers.get("Origin", None)
+    add_vary(headers, "Origin")
+
     if origin:
         headers.set("Access-Control-Allow-Origin", origin)
-        add_vary(headers, "Origin")
-
         headers.set("Access-Control-Allow-Credentials", "true")
 
         # The API allows all methods, so just copy the browser requested methods from the request headers.
