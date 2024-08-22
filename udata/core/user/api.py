@@ -364,14 +364,14 @@ suggest_parser.add_argument(
 
 
 def suggest_size(value: str) -> Optional[int]:
-    """Parse an integer that must be between 1 and 100."""
-    help_message = "The size must be an integer between 1 and 100."
+    """Parse an integer that must be between 1 and 20."""
+    help_message = "The size must be an integer between 1 and 20."
     try:
         parsed = int(value)
     except ValueError:
         raise ValueError(help_message)
 
-    if parsed < 1 or parsed > 100:
+    if parsed < 1 or parsed > 20:
         raise ValueError(help_message)
     return parsed
 
@@ -379,7 +379,7 @@ def suggest_size(value: str) -> Optional[int]:
 suggest_parser.add_argument(
     "size",
     type=suggest_size,
-    help="The amount of suggestion to fetch (between 1 and 100)",
+    help="The amount of suggestion to fetch (between 1 and 20)",
     location="args",
     default=10,
 )
