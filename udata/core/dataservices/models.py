@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from mongoengine import Q
+
 import udata.core.contact_point.api_fields as contact_api_fields
 import udata.core.dataset.api_fields as datasets_api_fields
 from udata.api_fields import field, function_field, generate_fields
@@ -28,6 +30,42 @@ class DataserviceQuerySet(OwnedQuerySet):
 
     def hidden(self):
         return self(db.Q(private=True) | db.Q(deleted_at__ne=None) | db.Q(archived_at__ne=None))
+
+    def filter_by_dataset_pagination(self, datasets: list[Dataset], page: int):
+        """Paginate the dataservices on the datasets provided.
+
+        This is a workaround, used (at least) in the catalogs for sites and organizations.
+        We paginate those kinda weirdly, on their datasets. So a given organization or site
+        catalog will only list a `page_size` number of datasets, but we'd still want to display
+        the site's or org's dataservices.
+        We can't "double paginate", so instead:
+        - only if it's the first page, list all the dataservices that serve no dataset
+        - list all the dataservices that serve the datasets in this page
+        """
+        # We need to add Dataservice to the catalog.
+        # In the best world, we want:
+        # - Keep the correct number of datasets on the page (if the requested page size is 100, we should have 100 datasets)
+        # - Have simple MongoDB queries
+        # - Do not duplicate the datasets (each dataset is present once in the catalog)
+        # - Do not duplicate the dataservices (each dataservice is present once in the catalog)
+        # - Every referenced dataset for one dataservices present on the page (hard to do)
+        #
+        # Multiple solutions are possible but none check all the constraints.
+        # The selected one is to put all the dataservices referencing at least one of the dataset on
+        # the page at the end of it. It means dataservices could be duplicated (present on multiple pages)
+        # and these dataservices may referenced some datasets not present in the current page. It's working
+        # if somebody is doing the same thing as us (keeping the list of all the datasets IDs for the entire catalog then
+        # listing all dataservices in a second pass)
+        # Another option is to do some tricky Mongo requests to order/group datasets by their presence in some dataservices but
+        # it could be really hard to do with a n..n relation.
+        # Let's keep this solution simple right now and iterate on it in the future.
+        dataservices_filter = Q(datasets__in=[d.id for d in datasets])
+
+        # On the first page, add all dataservices without datasets
+        if page == 1:
+            dataservices_filter = dataservices_filter | Q(datasets__size=0)
+
+        return self(dataservices_filter)
 
 
 @generate_fields()
