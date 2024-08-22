@@ -522,6 +522,7 @@ class Defaults(object):
     FIXTURE_DATASET_SLUGS = []
     PUBLISH_ON_RESOURCE_EVENTS = False
     RESOURCES_ANALYSER_URI = "http://localhost:8000"
+    RESOURCES_ANALYSER_API_KEY = None
 
     # Datasets quality settings
     ###########################################################################
