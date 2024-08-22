@@ -10,6 +10,7 @@
 - Add a new `related_to` filter parameter to the activities API endpoint [#3127](https://github.com/opendatateam/udata/pull/3127)
 - Properly import the `Discussion.closed_by` from the fixtures [#3125](https://github.com/opendatateam/udata/pull/3125)
 - Send an API token to Hydra when publishing resource events [#3130](https://github.com/opendatateam/udata/pull/3130)
+- Always add Vary even for non CORS requests [#3132](https://github.com/opendatateam/udata/pull/3132)
 
 ## 9.1.3 (2024-08-01)
 
