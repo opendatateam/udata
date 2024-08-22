@@ -357,20 +357,9 @@ class FollowUserAPI(FollowAPI):
         return super(FollowUserAPI, self).post(id)
 
 
-def suggest_query(value: str) -> Optional[str]:
-    """Parse a string that must be at least two characters long."""
-    if len(value) < 2:
-        raise ValueError("The query must be at least two characters long.")
-    return value
-
-
 suggest_parser = api.parser()
 suggest_parser.add_argument(
-    "q",
-    type=suggest_query,
-    help="The string to autocomplete/suggest (at least two characters)",
-    location="args",
-    required=True,
+    "q", help="The string to autocomplete/suggest", location="args", required=True
 )
 
 

@@ -141,15 +141,6 @@ class UserAPITest(APITestCase):
             self.assertEqual(suggestion["first_name"], "test")
             self.assertEqual(suggestion["last_name"], "homonym")
 
-    def test_suggest_users_api_query_validation(self):
-        """It should validate that the query parameter is at least two characters long."""
-        response = self.get(url_for("api.suggest_users"), qs={"q": "f"})
-        self.assert400(response)
-        self.assertIn("two characters", response.json["errors"]["q"])
-
-        response = self.get(url_for("api.suggest_users"), qs={"q": "fo"})
-        self.assert200(response)
-
     def test_suggest_users_api_size_validation(self):
         """It should validate that the size parameter is between 1 and 100."""
         response = self.get(url_for("api.suggest_users"), qs={"q": "foobar", "size": "0"})
