@@ -11,6 +11,7 @@
 - Properly import the `Discussion.closed_by` from the fixtures [#3125](https://github.com/opendatateam/udata/pull/3125)
 - Send an API token to Hydra when publishing resource events [#3130](https://github.com/opendatateam/udata/pull/3130)
 - Always add Vary even for non CORS requests [#3132](https://github.com/opendatateam/udata/pull/3132)
+- Update authlib dependency from 0.14.3 to 1.3.1 [#3135](https://github.com/opendatateam/udata/pull/3135)
 
 ## 9.1.3 (2024-08-01)
 

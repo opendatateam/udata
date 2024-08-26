@@ -15,6 +15,7 @@ As well as a sample application:
 """
 
 import fnmatch
+import time
 from datetime import datetime, timedelta
 
 from authlib.integrations.flask_oauth2 import AuthorizationServer, ResourceProtector
@@ -111,7 +112,7 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
     def check_client_secret(self, client_secret):
         return self.secret == client_secret
 
-    def check_token_endpoint_auth_method(self, method):
+    def check_endpoint_auth_method(self, method, _endpoint):
         if not self.has_client_secret():
             return method == "none"
         return method in ("client_secret_post", "client_secret_basic")
@@ -149,6 +150,9 @@ class OAuth2Token(db.Document):
     def __str__(self):
         return "<OAuth2Token({0.client.name})>".format(self)
 
+    def check_client(self, client):
+        return self.client == client
+
     def get_scope(self):
         return self.scope
 
@@ -160,6 +164,13 @@ class OAuth2Token(db.Document):
 
     def get_client_id(self):
         return str(self.client.id)
+
+    def is_expired(self):
+        now = time.time()
+        return self.get_expires_at() < now
+
+    def is_revoked(self):
+        return self.revoked
 
     def is_refresh_token_valid(self):
         if self.revoked:
@@ -252,17 +263,17 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
 
 
 class RevokeToken(RevocationEndpoint):
-    def query_token(self, token, token_type_hint, client):
-        qs = OAuth2Token.objects(client=client)
+    def query_token(self, token_string, token_type_hint):
+        qs = OAuth2Token.objects()
         if token_type_hint == "access_token":
-            return qs.filter(access_token=token).first()
+            return qs.filter(access_token=token_string).first()
         elif token_type_hint == "refresh_token":
-            return qs.filter(refresh_token=token).first()
+            return qs.filter(refresh_token=token_string).first()
         else:
-            qs = qs(db.Q(access_token=token) | db.Q(refresh_token=token))
+            qs = qs(db.Q(access_token=token_string) | db.Q(refresh_token=token_string))
             return qs.first()
 
-    def revoke_token(self, token):
+    def revoke_token(self, token, _request):
         token.revoked = True
         token.save()
 
@@ -295,7 +306,7 @@ def revoke_token():
 def authorize(*args, **kwargs):
     if request.method == "GET":
         try:
-            grant = oauth.validate_consent_request(end_user=current_user)
+            grant = oauth.get_consent_grant(end_user=current_user)
         except OAuth2Error as error:
             return error.error
         # Bypass authorization screen for internal clients
@@ -324,13 +335,9 @@ def query_client(client_id):
 
 def save_token(token, request):
     scope = token.pop("scope", "")
-    if request.grant_type == "refresh_token":
-        credential = request.credential
-        credential.update(scope=scope, **token)
-    else:
-        client = request.client
-        user = request.user or client.owner
-        OAuth2Token.objects.create(client=client, user=user.id, scope=scope, **token)
+    client = request.client
+    user = request.user or client.owner
+    OAuth2Token.objects(client=client, user=user, scope=scope, upsert=True, **token)
 
 
 def check_credentials():

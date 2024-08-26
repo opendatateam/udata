@@ -301,7 +301,7 @@ class APIAuthTest:
 
         assert_status(response, 400)
         assert "error" in response.json
-        assert "redirect_uri" in response.json["error_description"]
+        assert "Redirect URI" in response.json["error_description"]
 
     @pytest.mark.options(OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI=True)
     @pytest.mark.oauth(redirect_uris=["https://*.test.org/callback"])
@@ -327,7 +327,7 @@ class APIAuthTest:
 
         assert_status(response, 400)
         assert "error" in response.json
-        assert "redirect_uri" in response.json["error_description"]
+        assert "Redirect URI" in response.json["error_description"]
 
     def test_authorization_grant_token(self, client, oauth):
         client.login()
@@ -582,7 +582,7 @@ class APIAuthTest:
         )
 
         assert_status(response, 400)
-        assert response.json["error"] == "invalid_grant"
+        assert response.json["error"] == "unsupported_response_type"
 
     @pytest.mark.oauth(confidential=True)
     def test_refresh_token(self, client, oauth):
