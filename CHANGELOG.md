@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 9.1.4 (2024-08-26)
 
 - Fix many linting issues reported by ruff [#3118](https://github.com/opendatateam/udata/pull/3118)
 - Import the dataservice's organization from the fixtures [#3121](https://github.com/opendatateam/udata/pull/3121)
