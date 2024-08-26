@@ -71,7 +71,7 @@ member_user_with_email_fields = api.inherit(
         ),
         "last_login_at": fields.Raw(
             attribute=lambda o: o.last_login_at if check_can_access_user_private_info() else None,
-            description="The user last connection date (only present on show organization endpoint if the current user has edit permission on the org)",
+            description="The user last connection date (only present on show organization endpoint if the current user is member of the organization)",
             readonly=True,
         ),
     },
