@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 9.1.4 (2024-08-26)
 
 - Fix many linting issues reported by ruff [#3118](https://github.com/opendatateam/udata/pull/3118)
