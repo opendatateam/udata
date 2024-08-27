@@ -154,10 +154,9 @@ def adminified_parser(parser: RequestParser) -> RequestParser:
     # The admin isn't paginated, so if there's a `page_size` arg, remove its default
     # value so the all the results are returned if no `page_size` is provided.
     new_parser = parser.copy()
-    if [arg for arg in new_parser.args if arg.name == "page_size"]:
-        new_parser.replace_argument(
-            "page_size", type=int, location="args", help="The page size to fetch"
-        )
+    new_parser.replace_argument(
+        "page_size", type=int, location="args", help="The page size to fetch"
+    )
     return new_parser
 
 
