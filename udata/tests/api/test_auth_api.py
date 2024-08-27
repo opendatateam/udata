@@ -360,6 +360,8 @@ class APIAuthTest:
         assert200(response)
         assert response.content_type == "application/json"
         assert "access_token" in response.json
+        tokens = OAuth2Token.objects(access_token=response.json["access_token"])
+        assert len(tokens) == 1  # A token has been created and saved.
 
     def test_s256_code_challenge_success_client_secret_basic(self, client, oauth):
         code_verifier = generate_token(48)
@@ -606,6 +608,11 @@ class APIAuthTest:
         assert200(response)
         assert response.content_type == "application/json"
         assert "access_token" in response.json
+        new_access_token = response.json["access_token"]
+        assert new_access_token != "access-token"  # The access token has been refreshed.
+        tokens = OAuth2Token.objects(client=oauth, user=user)
+        assert len(tokens) == 1  # No new token has been created.
+        assert tokens.first().access_token == new_access_token
 
     @pytest.mark.parametrize("token_type", ["access_token", "refresh_token"])
     def test_revoke_token(self, client, oauth, token_type):

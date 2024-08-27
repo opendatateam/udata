@@ -337,7 +337,11 @@ def save_token(token, request):
     scope = token.pop("scope", "")
     client = request.client
     user = request.user or client.owner
-    OAuth2Token.objects(client=client, user=user, scope=scope, upsert=True, **token)
+    if request.grant_type == "refresh_token":
+        old_token = OAuth2Token.objects(client=client, user=user, scope=scope).first()
+        old_token.update(**token)
+    else:
+        OAuth2Token.objects.create(client=client, user=user, scope=scope, **token)
 
 
 def check_credentials():
