@@ -18,6 +18,7 @@
 - Always add Vary even for non CORS requests [#3132](https://github.com/opendatateam/udata/pull/3132)
 - Add acronym in organization csv catalog [#3134](https://github.com/opendatateam/udata/pull/3134)
 - Limit the number of user suggestions [#3131](https://github.com/opendatateam/udata/pull/3131)
+- Update authlib dependency from 0.14.3 to 1.3.1 [#3135](https://github.com/opendatateam/udata/pull/3135)
 
 ## 9.1.3 (2024-08-01)
 
