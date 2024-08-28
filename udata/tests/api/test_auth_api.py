@@ -589,18 +589,31 @@ class APIAuthTest:
     @pytest.mark.oauth(confidential=True)
     def test_refresh_token(self, client, oauth):
         user = UserFactory()
-        token = OAuth2Token.objects.create(
+        token_to_be_refreshed = OAuth2Token.objects.create(
             client=oauth,
             user=user,
             access_token="access-token",
             refresh_token="refresh-token",
         )
+        token_same_user_not_refreshed = OAuth2Token.objects.create(
+            client=oauth,
+            user=user,
+            access_token="same-user-access-token",
+            refresh_token="same-user-refresh-token",
+        )
+        other_token = OAuth2Token.objects.create(
+            client=oauth,
+            user=UserFactory(),
+            access_token="other-access-token",
+            refresh_token="other-refresh-token",
+        )
+        tokens_count = OAuth2Token.objects.count()
 
         response = client.post(
             url_for("oauth.token"),
             {
                 "grant_type": "refresh_token",
-                "refresh_token": token.refresh_token,
+                "refresh_token": token_to_be_refreshed.refresh_token,
             },
             headers=basic_header(oauth),
         )
@@ -608,11 +621,25 @@ class APIAuthTest:
         assert200(response)
         assert response.content_type == "application/json"
         assert "access_token" in response.json
-        new_access_token = response.json["access_token"]
-        assert new_access_token != "access-token"  # The access token has been refreshed.
-        tokens = OAuth2Token.objects(client=oauth, user=user)
-        assert len(tokens) == 1  # No new token has been created.
-        assert tokens.first().access_token == new_access_token
+
+        # Reload from the DB.
+        token_to_be_refreshed.reload()
+        other_token.reload()
+
+        assert tokens_count == OAuth2Token.objects.count()  # No new token created.
+
+        # The access token has been refreshed.
+        assert token_to_be_refreshed.access_token != "access-token"
+        # The refresh token is still the same.
+        assert token_to_be_refreshed.refresh_token == "refresh-token"
+
+        # No change to the user's other token.
+        assert token_same_user_not_refreshed.access_token == "same-user-access-token"
+        assert token_same_user_not_refreshed.refresh_token == "same-user-refresh-token"
+
+        # No change to other token.
+        assert other_token.access_token == "other-access-token"
+        assert other_token.refresh_token == "other-refresh-token"
 
     @pytest.mark.parametrize("token_type", ["access_token", "refresh_token"])
     def test_revoke_token(self, client, oauth, token_type):

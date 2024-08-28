@@ -338,7 +338,9 @@ def save_token(token, request):
     client = request.client
     user = request.user or client.owner
     if request.grant_type == "refresh_token":
-        old_token = OAuth2Token.objects(client=client, user=user, scope=scope).first()
+        old_token = OAuth2Token.objects(
+            refresh_token=request.refresh_token.refresh_token, client=client, user=user, scope=scope
+        ).first()
         old_token.update(**token)
     else:
         OAuth2Token.objects.create(client=client, user=user, scope=scope, **token)
