@@ -2,6 +2,10 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 9.1.4 (2024-08-26)
+
 - Fix many linting issues reported by ruff [#3118](https://github.com/opendatateam/udata/pull/3118)
 - Import the dataservice's organization from the fixtures [#3121](https://github.com/opendatateam/udata/pull/3121)
 - Convert reuse to new API system [#3066](https://github.com/opendatateam/udata/pull/3066)
@@ -10,7 +14,10 @@
 - Add a new `related_to` filter parameter to the activities API endpoint [#3127](https://github.com/opendatateam/udata/pull/3127)
 - Properly import the `Discussion.closed_by` from the fixtures [#3125](https://github.com/opendatateam/udata/pull/3125)
 - Send an API token to Hydra when publishing resource events [#3130](https://github.com/opendatateam/udata/pull/3130)
+- Add `last_login_at` to org members API [#3133](https://github.com/opendatateam/udata/pull/3133)
 - Always add Vary even for non CORS requests [#3132](https://github.com/opendatateam/udata/pull/3132)
+- Add acronym in organization csv catalog [#3134](https://github.com/opendatateam/udata/pull/3134)
+- Limit the number of user suggestions [#3131](https://github.com/opendatateam/udata/pull/3131)
 - Update authlib dependency from 0.14.3 to 1.3.1 [#3135](https://github.com/opendatateam/udata/pull/3135)
 
 ## 9.1.3 (2024-08-01)
