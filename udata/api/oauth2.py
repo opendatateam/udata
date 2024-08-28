@@ -249,6 +249,8 @@ class PasswordGrant(grants.ResourceOwnerPasswordCredentialsGrant):
 
 
 class RefreshTokenGrant(grants.RefreshTokenGrant):
+    INCLUDE_NEW_REFRESH_TOKEN = True
+
     def authenticate_refresh_token(self, refresh_token):
         item = OAuth2Token.objects(refresh_token=refresh_token).first()
         if item and item.is_refresh_token_valid():

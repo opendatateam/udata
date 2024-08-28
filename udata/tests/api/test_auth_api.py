@@ -624,14 +624,15 @@ class APIAuthTest:
 
         # Reload from the DB.
         token_to_be_refreshed.reload()
+        token_same_user_not_refreshed.reload()
         other_token.reload()
 
         assert tokens_count == OAuth2Token.objects.count()  # No new token created.
 
         # The access token has been refreshed.
         assert token_to_be_refreshed.access_token != "access-token"
-        # The refresh token is still the same.
-        assert token_to_be_refreshed.refresh_token == "refresh-token"
+        # The refresh token is also updated.
+        assert token_to_be_refreshed.refresh_token != "refresh-token"
 
         # No change to the user's other token.
         assert token_same_user_not_refreshed.access_token == "same-user-access-token"
