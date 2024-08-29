@@ -26,7 +26,7 @@ def inner_harvest():
 def inner_process_dataset(item: HarvestItem, args1, args2, args3):
     dataset = self.get_dataset(item.remote_id)
 
-    update_dataset(dataset, args1, args2) 
+    update_dataset(dataset, args1, args2)
 
     return dataset
 ```
@@ -207,7 +207,7 @@ class RandomBackend(BaseBackend):
 
         dataset.title = faker.sentence()
         dataset.description = faker.text()
-        dataset.tags = list(set(faker.words(nb=faker.pyint())))
+        dataset.tags = list(set(faker.tags(nb=faker.pyint())))
 
         # Resources
         for i in range(faker.pyint()):
