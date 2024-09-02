@@ -249,7 +249,7 @@ export default {
                 class: _class,
                 label
             });
-        } else if (existing) {
+        } else if (!value && existing) {
             this.badges.splice(this.badges.indexOf(existing), 1);
         }
     }
