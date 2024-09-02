@@ -329,7 +329,7 @@ def generate_fields(**kwargs):
                 base_query = base_query.search_text(phrase_query)
 
             for filterable in filterables:
-                if args.get(filterable["key"]):
+                if args.get(filterable["key"]) is not None:
                     for constraint in filterable["constraints"]:
                         if constraint == "objectid" and not ObjectId.is_valid(
                             args[filterable["key"]]
