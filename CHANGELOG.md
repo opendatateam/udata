@@ -19,6 +19,7 @@
 - Add acronym in organization csv catalog [#3134](https://github.com/opendatateam/udata/pull/3134)
 - Limit the number of user suggestions [#3131](https://github.com/opendatateam/udata/pull/3131)
 - Update authlib dependency from 0.14.3 to 1.3.1 [#3135](https://github.com/opendatateam/udata/pull/3135)
+- Fix the boolean filters in the API for the "new system" endpoints [#3139](https://github.com/opendatateam/udata/pull/3139)
 
 ## 9.1.3 (2024-08-01)
 
