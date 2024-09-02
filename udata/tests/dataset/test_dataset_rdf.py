@@ -348,7 +348,7 @@ class RdfToDatasetTest:
         g = Graph()
 
         tags = faker.tags(nb=3)
-        themes = faker.words(nb=3)
+        themes = faker.tags(nb=3)
         g.add((node, RDF.type, DCAT.Dataset))
         g.add((node, DCT.title, Literal(faker.sentence())))
         for tag in tags:
