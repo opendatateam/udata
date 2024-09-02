@@ -161,8 +161,8 @@ class OwnedQuerysetTest(DBTestMixin, TestCase):
         result = Owned.objects.owned_by(org, user)
 
         self.assertEqual(len(result), 2)
-        for owned in result:
-            self.assertIn(owned, owneds)
+        for owned_ in result:
+            self.assertIn(owned_, owneds)
 
-        for owned in excluded:
-            self.assertNotIn(owned, result)
+        for owned_ in excluded:
+            self.assertNotIn(owned_, result)

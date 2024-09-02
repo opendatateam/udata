@@ -13,8 +13,7 @@ from udata.core.user.metrics import (
 from udata.features.transfer.actions import accept_transfer, request_transfer
 from udata.features.transfer.factories import TransferFactory
 from udata.features.transfer.notifications import transfer_request_notifications
-from udata.models import Dataset, Member
-from udata.tests.helpers import assert_emit
+from udata.models import Member
 from udata.utils import faker
 
 pytestmark = pytest.mark.usefixtures("clean_db")

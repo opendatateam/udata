@@ -1,15 +1,15 @@
+from typing import Optional
+
 from flask_security import current_user, logout_user
 from slugify import slugify
 
 from udata.api import API, api
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission
-from udata.core import storages
 from udata.core.dataset.api_fields import community_resource_fields, dataset_fields
 from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields
 from udata.core.followers.api import FollowAPI
-from udata.core.reuse.api_fields import reuse_fields
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
@@ -103,7 +103,7 @@ class AvatarAPI(API):
 class MyReusesAPI(API):
     @api.secure
     @api.doc("my_reuses")
-    @api.marshal_list_with(reuse_fields)
+    @api.marshal_list_with(Reuse.__read_fields__)
     def get(self):
         """List all my reuses (including private ones)"""
         return list(Reuse.objects.owned_by(current_user.id))
@@ -166,7 +166,7 @@ class MyOrgReusesAPI(API):
     @api.secure
     @api.doc("my_org_reuses")
     @api.expect(filter_parser)
-    @api.marshal_list_with(reuse_fields)
+    @api.marshal_list_with(Reuse.__read_fields__)
     def get(self):
         """List all reuses related to me and my organizations."""
         q = filter_parser.parse_args().get("q")
@@ -321,9 +321,10 @@ class UserAPI(API):
         return "", 204
 
 
-from udata.core.contact_point.api import ContactPointApiParser
-from udata.core.contact_point.api_fields import contact_point_page_fields
-from udata.models import ContactPoint
+# These imports are not at the top of the file to avoid circular imports
+from udata.core.contact_point.api import ContactPointApiParser  # noqa
+from udata.core.contact_point.api_fields import contact_point_page_fields  # noqa
+from udata.models import ContactPoint  # noqa
 
 contact_point_parser = ContactPointApiParser()
 
@@ -360,8 +361,27 @@ suggest_parser = api.parser()
 suggest_parser.add_argument(
     "q", help="The string to autocomplete/suggest", location="args", required=True
 )
+
+
+def suggest_size(value: str) -> Optional[int]:
+    """Parse an integer that must be between 1 and 20."""
+    help_message = "The size must be an integer between 1 and 20."
+    try:
+        parsed = int(value)
+    except ValueError:
+        raise ValueError(help_message)
+
+    if parsed < 1 or parsed > 20:
+        raise ValueError(help_message)
+    return parsed
+
+
 suggest_parser.add_argument(
-    "size", type=int, help="The amount of suggestion to fetch", location="args", default=10
+    "size",
+    type=suggest_size,
+    help="The amount of suggestion to fetch (between 1 and 20)",
+    location="args",
+    default=10,
 )
 
 

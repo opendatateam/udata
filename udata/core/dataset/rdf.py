@@ -387,7 +387,7 @@ def spatial_from_rdf(graph):
             continue
 
     if not polygons:
-        log.warning(f"No supported types found in the GeoJSON data.")
+        log.warning("No supported types found in the GeoJSON data.")
         return None
 
     spatial_coverage = SpatialCoverage(

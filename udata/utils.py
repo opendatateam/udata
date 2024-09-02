@@ -18,6 +18,8 @@ from faker.providers import BaseProvider
 from faker.providers.lorem.la import Provider as LoremProvider
 from flask import abort
 
+from udata import tags
+
 
 def get_by(lst, field, value):
     """Find an object in a list given a field value"""
@@ -275,6 +277,21 @@ def is_uuid(uuid_string: str, version: int = 4) -> bool:
 PROVIDERS.remove("faker.providers.lorem")
 
 faker = Faker("fr_FR")  # Use a unicode/utf-8 based locale
+
+
+def generate_tags(nb=3) -> [str]:
+    return [generate_tag() for _ in range(nb)]
+
+
+def generate_tag() -> str:
+    fake_tag: str = faker.word()
+    while len(fake_tag) < tags.MIN_TAG_LENGTH:
+        fake_tag = faker.word()
+    return fake_tag
+
+
+faker.tag = generate_tag
+faker.tags = generate_tags
 
 
 def faker_provider(provider):

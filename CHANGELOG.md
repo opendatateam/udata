@@ -2,12 +2,33 @@
 
 ## Current (in progress)
 
+- Add a `archived` button for datasets and reuses on frontend admin [#3104](https://github.com/opendatateam/udata/pull/3104)
+
+## 9.1.4 (2024-08-26)
+
+- Fix many linting issues reported by ruff [#3118](https://github.com/opendatateam/udata/pull/3118)
+- Import the dataservice's organization from the fixtures [#3121](https://github.com/opendatateam/udata/pull/3121)
+- Convert reuse to new API system [#3066](https://github.com/opendatateam/udata/pull/3066)
+- Fix circular import error [#3128](https://github.com/opendatateam/udata/pull/3128)
+- Add an option to specify the port when using `inv serve` [#3123](https://github.com/opendatateam/udata/pull/3123)
+- Add a new `related_to` filter parameter to the activities API endpoint [#3127](https://github.com/opendatateam/udata/pull/3127)
+- Properly import the `Discussion.closed_by` from the fixtures [#3125](https://github.com/opendatateam/udata/pull/3125)
+- Send an API token to Hydra when publishing resource events [#3130](https://github.com/opendatateam/udata/pull/3130)
+- Add `last_login_at` to org members API [#3133](https://github.com/opendatateam/udata/pull/3133)
+- Always add Vary even for non CORS requests [#3132](https://github.com/opendatateam/udata/pull/3132)
+- Add acronym in organization csv catalog [#3134](https://github.com/opendatateam/udata/pull/3134)
+- Limit the number of user suggestions [#3131](https://github.com/opendatateam/udata/pull/3131)
+- Update authlib dependency from 0.14.3 to 1.3.1 [#3135](https://github.com/opendatateam/udata/pull/3135)
+
+## 9.1.3 (2024-08-01)
+
 - Adds latest `sentry-sdk[flask]` as an install dependency, and update Sentry logic to be able to send environment, app version and profiling/performance info [#3086](https://github.com/opendatateam/udata/pull/3086)
+- Add report get endpoint and make report get and list admin only [#3115](https://github.com/opendatateam/udata/pull/3115)
 - Fix the version of udata-fixtures used by `udata import-fixtures` [#3114](https://github.com/opendatateam/udata/pull/3114)
 - Update to the version v2.0.0 of udata-fixtures (with the dataservices)
 - Add type hints [#3111](https://github.com/opendatateam/udata/pull/3111)
 - Make sure requests v2.32.3 is used everywhere consistently [#3116](https://github.com/opendatateam/udata/pull/3116)
-- Add a `archived` button for datasets and reuses on frontend admin [#3104](https://github.com/opendatateam/udata/pull/3104)
+- Expose a dataservice in its organization's catalog, and expose a dataservice's catalog [#3122](https://github.com/opendatateam/udata/pull/3122)
 
 ## 9.1.2 (2024-07-29)
 

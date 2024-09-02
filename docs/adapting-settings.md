@@ -641,3 +641,27 @@ FS_ROOT = '/srv/http/www.data.dev/fs'
 [flask-mongoengine-doc]: https://flask-mongoengine.readthedocs.org/
 [authlib-doc]: https://docs.authlib.org/en/latest/flask/2/authorization-server.html#server
 [udata-search-service]: https://github.com/opendatateam/udata-search-service
+
+## Resources modifications publishing
+
+udata may notify external services (ex: [hydra](https://github.com/datagouv/hydra)) about resources modification on the platform.
+install, or any other service.
+
+
+### PUBLISH_ON_RESOURCE_EVENTS
+
+**default**: `False`
+
+Publish resource events to an external service.
+
+### RESOURCES_ANALYSER_URI
+
+**default**: `http://localhost:8000`
+
+URI of the external service receiving the resource events.
+
+### RESOURCES_ANALYSER_API_KEY
+
+**default**: `api_key_to_change`
+
+API key sent in the headers of the endpoint requests as a Bearer token.

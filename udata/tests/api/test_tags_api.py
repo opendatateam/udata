@@ -13,7 +13,7 @@ class TagsAPITest:
     def test_suggest_tags_api(self, api):
         """It should suggest tags"""
         for i in range(3):
-            tags = [faker.word(), faker.word(), "test", "test-{0}".format(i)]
+            tags = [faker.tag(), faker.tag(), "test", "test-{0}".format(i)]
             ReuseFactory(tags=tags, visible=True)
             DatasetFactory(tags=tags, visible=True)
 
@@ -33,7 +33,7 @@ class TagsAPITest:
     def test_suggest_tags_api_with_unicode(self, api):
         """It should suggest tags"""
         for i in range(3):
-            tags = [faker.word(), faker.word(), "testé", "testé-{0}".format(i)]
+            tags = [faker.tag(), faker.tag(), "testé", "testé-{0}".format(i)]
             ReuseFactory(tags=tags, visible=True)
             DatasetFactory(tags=tags, visible=True)
 
@@ -61,10 +61,10 @@ class TagsAPITest:
 
         response = api.get(url_for("api.suggest_tags"), qs={"q": "bbbb", "size": "5"})
         assert200(response)
-        assert len(response.json) is 0
+        assert len(response.json) == 0
 
     def test_suggest_tags_api_empty(self, api):
         """It should not provide tag suggestion if no data"""
         response = api.get(url_for("api.suggest_tags"), qs={"q": "bbbb", "size": "5"})
         assert200(response)
-        assert len(response.json) is 0
+        assert len(response.json) == 0

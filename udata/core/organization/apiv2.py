@@ -7,7 +7,7 @@ from udata.core.contact_point.api_fields import contact_point_fields
 from udata.utils import multi_to_dict
 
 from .api_fields import member_fields, org_fields, org_page_fields
-from .permissions import EditOrganizationPermission, OrganizationPrivatePermission
+from .permissions import EditOrganizationPermission
 from .search import OrganizationSearch
 
 apiv2.inherit("OrganizationPage", org_page_fields)

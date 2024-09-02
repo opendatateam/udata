@@ -273,7 +273,7 @@ class SlugAsSLugFieldWithFollowTest(AsSlugMixin):
         assert404(client.get(second_url))
         assert404(client.get(last_url))
 
-        assert SlugFollow.objects.count() is 0
+        assert SlugFollow.objects.count() == 0
 
 
 @pytest.mark.usefixtures("clean_db")
