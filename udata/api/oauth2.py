@@ -32,7 +32,6 @@ from bson import ObjectId
 from flask import current_app, render_template, request
 from flask_security.utils import verify_password
 from werkzeug.exceptions import Unauthorized
-from werkzeug.security import gen_salt
 
 from udata.app import csrf
 from udata.auth import current_user, login_required, login_user
@@ -60,7 +59,7 @@ SCOPES = {"default": _("Default scope"), "admin": _("System administrator rights
 
 
 class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
-    secret = db.StringField(default=lambda: gen_salt(50))
+    secret = db.StringField(default=None)
 
     name = db.StringField(required=True)
     description = db.StringField()
@@ -209,7 +208,7 @@ class OAuth2Code(db.Document):
 
 
 class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
-    TOKEN_ENDPOINT_AUTH_METHODS = ["client_secret_basic", "client_secret_post"]
+    TOKEN_ENDPOINT_AUTH_METHODS = ["none", "client_secret_basic", "client_secret_post"]
 
     def save_authorization_code(self, code, request):
         code_challenge = request.data.get("code_challenge")
@@ -265,6 +264,8 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
 
 
 class RevokeToken(RevocationEndpoint):
+    CLIENT_AUTH_METHODS = ["none", "client_secret_basic"]
+
     def query_token(self, token_string, token_type_hint):
         qs = OAuth2Token.objects()
         if token_type_hint == "access_token":
