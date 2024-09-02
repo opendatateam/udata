@@ -83,6 +83,11 @@ class ReuseAPITest:
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(featured_reuse.id)
 
+        response = api.get(url_for("api.reuses", featured="false"))
+        assert200(response)
+        # Keep only featured reuses (if any)
+        data = [reuse for reuse in response.json["data"] if reuse["featured"]]
+        assert len(data) == 0  # It did not return any featured reuse
         # filter on topic
         response = api.get(url_for("api.reuses", topic=topic_reuse.topic))
         assert200(response)

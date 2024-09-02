@@ -2,6 +2,7 @@ import flask_restx.fields as restx_fields
 import mongoengine
 import mongoengine.fields as mongo_fields
 from bson import ObjectId
+from flask_restx.inputs import boolean
 from flask_storage.mongo import ImageField as FlaskStorageImageField
 
 import udata.api.fields as custom_restx_fields
@@ -207,7 +208,7 @@ def generate_fields(**kwargs):
                 if "type" not in filterable:
                     filterable["type"] = str
                     if isinstance(field, mongo_fields.BooleanField):
-                        filterable["type"] = bool
+                        filterable["type"] = boolean
 
                 # We may add more information later here:
                 # - type of mongo query to execute (right now only simple =)
