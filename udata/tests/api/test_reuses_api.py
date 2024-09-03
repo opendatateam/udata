@@ -2,6 +2,7 @@ from datetime import datetime
 
 import pytest
 from flask import url_for
+from werkzeug.test import TestResponse
 
 from udata.core.badges.factories import badge_factory
 from udata.core.dataset.factories import DatasetFactory
@@ -23,6 +24,11 @@ from udata.utils import faker
 pytestmark = [
     pytest.mark.usefixtures("clean_db"),
 ]
+
+
+def reuse_in_response(response: TestResponse, reuse: Reuse) -> bool:
+    only_reuse = [r for r in response.json["data"] if r["id"] == str(reuse.id)]
+    return len(only_reuse) > 0
 
 
 class ReuseAPITest:
@@ -88,6 +94,7 @@ class ReuseAPITest:
         # Keep only featured reuses (if any)
         data = [reuse for reuse in response.json["data"] if reuse["featured"]]
         assert len(data) == 0  # It did not return any featured reuse
+
         # filter on topic
         response = api.get(url_for("api.reuses", topic=topic_reuse.topic))
         assert200(response)
@@ -117,6 +124,56 @@ class ReuseAPITest:
 
         response = api.get(url_for("api.reuses", organization="org-id"))
         assert400(response)
+
+    def test_reuse_api_list_filter_private(self, api) -> None:
+        """Should filters reuses results based on the `private` filter"""
+        public_reuse: Reuse = ReuseFactory()
+        private_reuse: Reuse = ReuseFactory(private=True)
+
+        # all the reuses (by default)
+        response: TestResponse = api.get(url_for("api.reuses"))
+        assert200(response)
+        assert len(response.json["data"]) == 2  # Return everything
+
+        # only public
+        response = api.get(url_for("api.reuses", private="false"))
+        assert200(response)
+        assert len(response.json["data"]) == 1  # Don't return the private reuse
+        assert reuse_in_response(response, public_reuse)
+
+        # only private
+        response = api.get(url_for("api.reuses", private="true"))
+        assert200(response)
+        assert len(response.json["data"]) == 1  # Return only the private
+        assert reuse_in_response(response, private_reuse)
+
+    def test_reuse_api_list_filter_private_only_owner(self, api) -> None:
+        """Should only return private reuses that are owned."""
+        user = api.login()
+        member = Member(user=user, role="editor")
+        org = OrganizationFactory(members=[member])
+        private_owned: Reuse = ReuseFactory(private=True, owner=user)
+        private_owned_through_org: Reuse = ReuseFactory(private=True, organization=org)
+        private_not_owned: Reuse = ReuseFactory(private=True)
+
+        response: TestResponse = api.get(url_for("api.reuses"))
+        assert len(response.json["data"]) == 2  # Only the owned reuses
+        assert reuse_in_response(response, private_owned)
+        assert reuse_in_response(response, private_owned_through_org)
+        assert not reuse_in_response(response, private_not_owned)
+
+        # Still no private returned if `private=False`
+        response = api.get(url_for("api.reuses", private=False))
+        assert200(response)
+        assert len(response.json["data"]) == 0
+
+        # Still only return owned private reuses
+        response = api.get(url_for("api.reuses", private=True))
+        assert200(response)
+        assert len(response.json["data"]) == 2  # Only the owned reuses
+        assert reuse_in_response(response, private_owned)
+        assert reuse_in_response(response, private_owned_through_org)
+        assert not reuse_in_response(response, private_not_owned)
 
     def test_reuse_api_get(self, api):
         """It should fetch a reuse from the API"""
