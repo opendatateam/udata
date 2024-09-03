@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- **breaking change** Return all the reuses available to a user, including the private, deleted and archived one they own [#3140](https://github.com/opendatateam/udata/pull/3140)
 
 ## 9.1.4 (2024-08-26)
 

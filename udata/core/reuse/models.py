@@ -27,11 +27,9 @@ class ReuseQuerySet(OwnedQuerySet):
 
     def visible_by_user(self, user: User) -> OwnedQuerySet:
         """Return EVERYTHING visible to the user."""
-        public_qs: OwnedQuerySet = db.Q(private__ne=True, deleted=None)
+        public_qs: OwnedQuerySet = db.Q(private__ne=True, deleted=None, archived=None)
         if user.is_anonymous:
             return self(public_qs)
-
-        public_qs = db.Q(private__ne=True, deleted=None)
 
         owners: list[User | Organization] = []
         owned_qs: OwnedQuerySet = db.Q()
