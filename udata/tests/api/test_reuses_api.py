@@ -232,6 +232,11 @@ class ReuseAPITest:
         assert Reuse.objects.count() == 1
         assert Reuse.objects[0].deleted is not None
 
+        response = api.put(url_for("api.reuse", reuse=reuse), {"deleted": None})
+        assert200(response)
+        assert Reuse.objects.count() == 1
+        assert Reuse.objects[0].deleted is None
+
     def test_reuse_api_delete_deleted(self, api):
         """It should not delete a deleted reuse from the API and raise 410"""
         api.login()

@@ -101,8 +101,29 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(dataservice.base_api_url, "https://example.org")
         self.assertIsNotNone(dataservice.deleted_at)
 
-        # response = self.get(url_for('api.dataservice', dataservice=dataservice))
-        # self.assert410(response)
+        # We can access deleted element as the creator
+        response = self.get(url_for("api.dataservice", dataservice=dataservice))
+        self.assert200(response)
+
+        # We cannot access deleted element as random user
+        self.login()
+        response = self.get(url_for("api.dataservice", dataservice=dataservice))
+        self.assert410(response)
+
+        # We can undelete with a patch
+        self.login(user)
+        response = self.patch(
+            url_for("api.dataservice", dataservice=dataservice),
+            {
+                "title": "Undeleted title",
+                "deleted_at": None,
+            },
+        )
+        self.assert200(response)
+
+        dataservice.reload()
+        self.assertEqual(dataservice.title, "Undeleted title")
+        self.assertIsNone(dataservice.deleted_at)
 
     def test_dataservice_api_index(self):
         dataset_a = DatasetFactory()
