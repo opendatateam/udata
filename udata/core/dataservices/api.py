@@ -63,15 +63,6 @@ class DataserviceAPI(API):
     @api.expect(Dataservice.__write_fields__)
     @api.marshal_with(Dataservice.__read_fields__)
     def patch(self, dataservice):
-        print("here")
-        print("here")
-        print("here")
-        print("here")
-        print("here")
-        print(request.json)
-        print("deleted_at" in request.json)
-        print(request.json.get("deleted_at") is None)
-        print("deleted_at" in request.json and request.json.get("deleted_at") is None)
         if dataservice.deleted_at and not (
             # Allow requests containing "deleted_at: None" to undelete.
             "deleted_at" in request.json and request.json.get("deleted_at") is None
