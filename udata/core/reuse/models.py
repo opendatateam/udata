@@ -1,4 +1,5 @@
 from blinker import Signal
+from flask_restx.inputs import boolean
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
@@ -133,9 +134,11 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
     deleted = field(
         db.DateTimeField(),
         readonly=True,
+        filterable={"type": boolean},
     )
     archived = field(
         db.DateTimeField(),
+        filterable={"type": boolean},
     )
 
     def __str__(self):

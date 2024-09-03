@@ -125,70 +125,91 @@ class ReuseAPITest:
         response = api.get(url_for("api.reuses", organization="org-id"))
         assert400(response)
 
-    def test_reuse_api_list_filter_private(self, api) -> None:
-        """Should filters reuses results based on the `private` filter"""
+    @pytest.mark.parametrize(
+        "filter_name, value",
+        [("private", True), ("deleted", "2024-09-03"), ("archived", "2024-09-03")],
+    )
+    def test_reuse_api_list_filter_hidden(self, api, filter_name, value) -> None:
+        """Should filters reuses results based on the "hidden" filters like `private`, `deleted` and `archived`."""
         user = api.login()
         public_reuse: Reuse = ReuseFactory()
-        private_reuse: Reuse = ReuseFactory(private=True, owner=user)
+        query_kwarg: dict = {filter_name: value}
+        hidden_reuse: Reuse = ReuseFactory(owner=user, **query_kwarg)
 
         # all the reuses (by default)
         response: TestResponse = api.get(url_for("api.reuses"))
         assert200(response)
         assert len(response.json["data"]) == 2  # Return everything
         assert reuse_in_response(response, public_reuse)
-        assert reuse_in_response(response, private_reuse)
+        assert reuse_in_response(response, hidden_reuse)
 
         # only public
-        response = api.get(url_for("api.reuses", private="false"))
+        filter_param: dict = {filter_name: "false"}
+        response = api.get(url_for("api.reuses", **filter_param))
         assert200(response)
-        assert len(response.json["data"]) == 1  # Don't return the private reuse
+        assert len(response.json["data"]) == 1  # Don't return the hidden reuse
         assert reuse_in_response(response, public_reuse)
 
         # only private
-        response = api.get(url_for("api.reuses", private="true"))
+        filter_param = {filter_name: "true"}
+        response = api.get(url_for("api.reuses", **filter_param))
         assert200(response)
-        assert len(response.json["data"]) == 1  # Return only the private
-        assert reuse_in_response(response, private_reuse)
+        assert len(response.json["data"]) == 1  # Return only the hidden reuse
+        assert reuse_in_response(response, hidden_reuse)
 
-    def test_reuse_api_list_filter_private_only_owned_by_user(self, api) -> None:
-        """Should only return private reuses that are owned."""
+    @pytest.mark.parametrize(
+        "filter_name, value",
+        [("private", True), ("deleted", "2024-09-03"), ("archived", "2024-09-03")],
+    )
+    def test_reuse_api_list_filter_hidden_only_owned_by_user(self, api, filter_name, value) -> None:
+        """Should only return "hidden" (`private`, `deleted`, `archived`) reuses that are owned."""
         user = api.login()
         member = Member(user=user, role="editor")
         org = OrganizationFactory(members=[member])
-        private_owned: Reuse = ReuseFactory(private=True, owner=user)
-        private_owned_through_org: Reuse = ReuseFactory(private=True, organization=org)
-        private_not_owned: Reuse = ReuseFactory(private=True)
+        query_kwarg: dict = {filter_name: value}
+        hidden_owned: Reuse = ReuseFactory(owner=user, **query_kwarg)
+        hidden_owned_through_org: Reuse = ReuseFactory(organization=org, **query_kwarg)
+        hidden_not_owned: Reuse = ReuseFactory(**query_kwarg)
 
         response: TestResponse = api.get(url_for("api.reuses"))
         assert200(response)
         assert len(response.json["data"]) == 2  # Only the owned reuses
-        assert reuse_in_response(response, private_owned)
-        assert reuse_in_response(response, private_owned_through_org)
-        assert not reuse_in_response(response, private_not_owned)
+        assert reuse_in_response(response, hidden_owned)
+        assert reuse_in_response(response, hidden_owned_through_org)
+        assert not reuse_in_response(response, hidden_not_owned)
 
-        # Still no private returned if `private=False`
-        response = api.get(url_for("api.reuses", private=False))
+        # Still no hidden returned if `(private|deleted|archived)=False`
+        filter_param: dict = {filter_name: "false"}
+        response = api.get(url_for("api.reuses", **filter_param))
         assert200(response)
         assert len(response.json["data"]) == 0
 
-        # Still only return owned private reuses
-        response = api.get(url_for("api.reuses", private=True))
+        # Still only return owned "hidden" reuses
+        filter_param = {filter_name: "true"}
+        response = api.get(url_for("api.reuses", **filter_param))
         assert200(response)
         assert len(response.json["data"]) == 2  # Only the owned reuses
-        assert reuse_in_response(response, private_owned)
-        assert reuse_in_response(response, private_owned_through_org)
-        assert not reuse_in_response(response, private_not_owned)
+        assert reuse_in_response(response, hidden_owned)
+        assert reuse_in_response(response, hidden_owned_through_org)
+        assert not reuse_in_response(response, hidden_not_owned)
 
-    def test_reuse_api_list_filter_private_only_owned_by_user_no_user(self, api) -> None:
-        """Shouldn't return any private reuses for non logged in users."""
+    @pytest.mark.parametrize(
+        "filter_name, value",
+        [("private", True), ("deleted", "2024-09-03"), ("archived", "2024-09-03")],
+    )
+    def test_reuse_api_list_filter_hidden_only_owned_by_user_no_user(
+        self, api, filter_name, value
+    ) -> None:
+        """Shouldn't return any "hidden" (`private`, `deleted`, `archived`) reuses for non logged in users."""
         user = UserFactory()
         member = Member(user=user, role="editor")
         org = OrganizationFactory(members=[member])
+        query_kwarg: dict = {filter_name: value}
         public_owned: Reuse = ReuseFactory(owner=user)
         public_not_owned: Reuse = ReuseFactory()
-        _private_owned: Reuse = ReuseFactory(private=True, owner=user)
-        _private_owned_through_org: Reuse = ReuseFactory(private=True, organization=org)
-        _private_not_owned: Reuse = ReuseFactory(private=True)
+        _private_owned: Reuse = ReuseFactory(owner=user, **query_kwarg)
+        _private_owned_through_org: Reuse = ReuseFactory(organization=org, **query_kwarg)
+        _private_not_owned: Reuse = ReuseFactory(**query_kwarg)
 
         response: TestResponse = api.get(url_for("api.reuses"))
         assert200(response)
@@ -196,15 +217,17 @@ class ReuseAPITest:
         assert reuse_in_response(response, public_owned)
         assert reuse_in_response(response, public_not_owned)
 
-        # Still no private returned if `private=False`
-        response = api.get(url_for("api.reuses", private=False))
+        # Still no "hidden" returned if `(private|deleted|archived)=False`
+        filter_param: dict = {filter_name: "false"}
+        response = api.get(url_for("api.reuses", **filter_param))
         assert200(response)
         assert len(response.json["data"]) == 2
         assert reuse_in_response(response, public_owned)
         assert reuse_in_response(response, public_not_owned)
 
-        # Still no private returned if `private=True`
-        response = api.get(url_for("api.reuses", private=True))
+        # Still no "hidden" returned if `(private|deleted|archived)=True`
+        filter_param = {filter_name: "true"}
+        response = api.get(url_for("api.reuses", **filter_param))
         assert200(response)
         assert len(response.json["data"]) == 0
 

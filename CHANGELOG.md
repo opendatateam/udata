@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- **breaking change** Return all the reuses available to a user, including the private, deleted and archived one they own [#3140](https://github.com/opendatateam/udata/pull/3140)
+- **breaking change** Return all the reuses available to a user, including the private, deleted and archived ones they own, and allow filtering on `private=true|false`, `deleted=true|false`and `archived=true|false` [#3140](https://github.com/opendatateam/udata/pull/3140)
 
 ## 9.1.4 (2024-08-26)
 

@@ -209,6 +209,8 @@ def generate_fields(**kwargs):
                     filterable["type"] = str
                     if isinstance(field, mongo_fields.BooleanField):
                         filterable["type"] = boolean
+                if filterable["type"] == boolean and isinstance(field, mongo_fields.DateTimeField):
+                    filterable["datetime_as_boolean"] = True
 
                 # We may add more information later here:
                 # - type of mongo query to execute (right now only simple =)
@@ -342,11 +344,19 @@ def generate_fields(**kwargs):
                         ):
                             api.abort(400, f'`{filterable["key"]}` must be an identifier')
 
-                    base_query = base_query.filter(
-                        **{
-                            filterable["column"]: args[filterable["key"]],
-                        }
-                    )
+                    filter_value = args[filterable["key"]]
+                    filter_column = filterable["column"]
+
+                    if filterable.get("datetime_as_boolean"):
+                        # It's a datetime field, but we filter it as a bool, so we convert
+                        # - True -> field__ne=None (objects which have a `deleted` datetime set)
+                        # - False -> field=None (objects without a `deleted` datetime set)
+                        if filter_value:
+                            filter_column += "__ne"
+                        filter_value = None
+
+                    filter = {filter_column: filter_value}
+                    base_query = base_query.filter(**filter)
 
             if paginable:
                 base_query = base_query.paginate(args["page"], args["page_size"])
