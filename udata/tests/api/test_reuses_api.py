@@ -127,13 +127,16 @@ class ReuseAPITest:
 
     def test_reuse_api_list_filter_private(self, api) -> None:
         """Should filters reuses results based on the `private` filter"""
+        user = api.login()
         public_reuse: Reuse = ReuseFactory()
-        private_reuse: Reuse = ReuseFactory(private=True)
+        private_reuse: Reuse = ReuseFactory(private=True, owner=user)
 
         # all the reuses (by default)
         response: TestResponse = api.get(url_for("api.reuses"))
         assert200(response)
         assert len(response.json["data"]) == 2  # Return everything
+        assert reuse_in_response(response, public_reuse)
+        assert reuse_in_response(response, private_reuse)
 
         # only public
         response = api.get(url_for("api.reuses", private="false"))
@@ -147,7 +150,7 @@ class ReuseAPITest:
         assert len(response.json["data"]) == 1  # Return only the private
         assert reuse_in_response(response, private_reuse)
 
-    def test_reuse_api_list_filter_private_only_owner(self, api) -> None:
+    def test_reuse_api_list_filter_private_only_owned_by_user(self, api) -> None:
         """Should only return private reuses that are owned."""
         user = api.login()
         member = Member(user=user, role="editor")
@@ -157,6 +160,7 @@ class ReuseAPITest:
         private_not_owned: Reuse = ReuseFactory(private=True)
 
         response: TestResponse = api.get(url_for("api.reuses"))
+        assert200(response)
         assert len(response.json["data"]) == 2  # Only the owned reuses
         assert reuse_in_response(response, private_owned)
         assert reuse_in_response(response, private_owned_through_org)
@@ -174,6 +178,35 @@ class ReuseAPITest:
         assert reuse_in_response(response, private_owned)
         assert reuse_in_response(response, private_owned_through_org)
         assert not reuse_in_response(response, private_not_owned)
+
+    def test_reuse_api_list_filter_private_only_owned_by_user_no_user(self, api) -> None:
+        """Shouldn't return any private reuses for non logged in users."""
+        user = UserFactory()
+        member = Member(user=user, role="editor")
+        org = OrganizationFactory(members=[member])
+        public_owned: Reuse = ReuseFactory(owner=user)
+        public_not_owned: Reuse = ReuseFactory()
+        _private_owned: Reuse = ReuseFactory(private=True, owner=user)
+        _private_owned_through_org: Reuse = ReuseFactory(private=True, organization=org)
+        _private_not_owned: Reuse = ReuseFactory(private=True)
+
+        response: TestResponse = api.get(url_for("api.reuses"))
+        assert200(response)
+        assert len(response.json["data"]) == 2
+        assert reuse_in_response(response, public_owned)
+        assert reuse_in_response(response, public_not_owned)
+
+        # Still no private returned if `private=False`
+        response = api.get(url_for("api.reuses", private=False))
+        assert200(response)
+        assert len(response.json["data"]) == 2
+        assert reuse_in_response(response, public_owned)
+        assert reuse_in_response(response, public_not_owned)
+
+        # Still no private returned if `private=True`
+        response = api.get(url_for("api.reuses", private=True))
+        assert200(response)
+        assert len(response.json["data"]) == 0
 
     def test_reuse_api_get(self, api):
         """It should fetch a reuse from the API"""

@@ -99,9 +99,7 @@ class ReuseListAPI(API):
     @api.expect(Reuse.__index_parser__)
     @api.marshal_with(Reuse.__page_fields__)
     def get(self):
-        owners = list(current_user.organizations) + [current_user.id]
-        query = Reuse.objects(deleted=None).owned_by(*owners)
-
+        query = Reuse.objects.visible_by_user(current_user)
         return Reuse.apply_sort_filters_and_pagination(query)
 
     @api.secure

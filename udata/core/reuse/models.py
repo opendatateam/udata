@@ -4,9 +4,11 @@ from werkzeug.utils import cached_property
 
 from udata.api_fields import field, function_field, generate_fields
 from udata.core.dataset.api_fields import dataset_fields
+from udata.core.organization.models import Organization
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE
 from udata.core.storages import default_image_basename, images
+from udata.core.user.models import User
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.models import BadgeMixin, WithMetrics, db
@@ -22,6 +24,22 @@ __all__ = ("Reuse",)
 class ReuseQuerySet(OwnedQuerySet):
     def visible(self):
         return self(private__ne=True, datasets__0__exists=True, deleted=None)
+
+    def visible_by_user(self, user: User) -> OwnedQuerySet:
+        """Return EVERYTHING visible to the user."""
+        public_qs: OwnedQuerySet = db.Q(private__ne=True, deleted=None)
+        if user.is_anonymous:
+            return self(public_qs)
+
+        public_qs = db.Q(private__ne=True, deleted=None)
+
+        owners: list[User | Organization] = []
+        owned_qs: OwnedQuerySet = db.Q()
+        owners = list(user.organizations) + [user.id]
+        for owner in owners:
+            owned_qs |= db.Q(owner=owner) | db.Q(organization=owner)
+
+        return self(public_qs | owned_qs)
 
     def hidden(self):
         return self(db.Q(private=True) | db.Q(datasets__0__exists=False) | db.Q(deleted__ne=None))
