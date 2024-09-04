@@ -305,8 +305,6 @@ def generate_fields(**kwargs):
             parser.add_argument(
                 filterable["key"],
                 type=filterable["type"],
-                default=filterable.get("default"),
-                choices=filterable.get("choices"),
                 location="args",
             )
 
