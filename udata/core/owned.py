@@ -24,6 +24,26 @@ class OwnedQuerySet(UDataQuerySet):
             qs |= Q(owner=owner) | Q(organization=owner)
         return self(qs)
 
+    def visible(self):
+        raise NotImplementedError
+
+    def visible_by_user(self, user: User):
+        """Return EVERYTHING visible to the user."""
+        if user.is_anonymous:
+            return self.visible()
+
+        owners: list[User | Organization] = list(user.organizations) + [user.id]
+        owned_qs: OwnedQuerySet = self.__class__(self._document, self._collection_obj).owned_by(
+            *owners
+        )
+
+        # We need to build a new "visible queryset" as each new query is combined
+        # with `&` to the previous one, but we want a `|`.
+        return self(
+            self.__class__(self._document, self._collection_obj).visible()._query_obj
+            | owned_qs._query_obj
+        )
+
 
 def check_owner_is_current_user(owner):
     from udata.auth import admin_permission, current_user
