@@ -27,17 +27,20 @@ class ReuseQuerySet(OwnedQuerySet):
 
     def visible_by_user(self, user: User) -> OwnedQuerySet:
         """Return EVERYTHING visible to the user."""
-        public_qs: OwnedQuerySet = db.Q(private__ne=True, deleted=None, archived=None)
         if user.is_anonymous:
-            return self(public_qs)
+            return self.visible()
 
-        owners: list[User | Organization] = []
-        owned_qs: OwnedQuerySet = db.Q()
-        owners = list(user.organizations) + [user.id]
-        for owner in owners:
-            owned_qs |= db.Q(owner=owner) | db.Q(organization=owner)
+        owners: list[User | Organization] = list(user.organizations) + [user.id]
+        owned_qs: ReuseQuerySet = ReuseQuerySet(self._document, self._collection_obj).owned_by(
+            *owners
+        )
 
-        return self(public_qs | owned_qs)
+        # We need to build a new "visible queryset" as each new query is combined
+        # with `&` to the previous one, but we want a `|`.
+        return self(
+            ReuseQuerySet(self._document, self._collection_obj).visible()._query_obj
+            | owned_qs._query_obj
+        )
 
     def hidden(self):
         return self(db.Q(private=True) | db.Q(datasets__0__exists=False) | db.Q(deleted__ne=None))
