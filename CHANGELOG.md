@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Fix undelete reuse and dataservices [#3141](https://github.com/opendatateam/udata/pull/3141)
+- Use hydra's RESTful endpoint URLs [#3142](https://github.com/opendatateam/udata/pull/3142)
 
 ## 9.1.4 (2024-08-26)
 
