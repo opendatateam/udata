@@ -161,7 +161,6 @@ class ReuseAPITest:
     def test_reuse_api_list_filter_private_only_owned_by_user(self, api) -> None:
         """Should only return private reuses that are owned."""
         user = UserFactory()
-        breakpoint()
         member = Member(user=user, role="editor")
         org = OrganizationFactory(members=[member])
         private_owned: Reuse = ReuseFactory(private=True, owner=user)
