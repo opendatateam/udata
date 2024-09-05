@@ -127,12 +127,20 @@ class ReuseAPITest:
 
     def test_reuse_api_list_filter_private(self, api) -> None:
         """Should filters reuses results based on the `private` filter"""
-        user = api.login()
+        user = UserFactory()
         public_reuse: Reuse = ReuseFactory()
         private_reuse: Reuse = ReuseFactory(private=True, owner=user)
 
-        # all the reuses (by default)
+        # Only public reuses for non-authenticated user.
         response: TestResponse = api.get(url_for("api.reuses"))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert reuse_in_response(response, public_reuse)
+
+        # With an authenticated user.
+        api.login(user)
+        # all the reuses (by default)
+        response = api.get(url_for("api.reuses"))
         assert200(response)
         assert len(response.json["data"]) == 2  # Return everything
         assert reuse_in_response(response, public_reuse)
@@ -152,14 +160,22 @@ class ReuseAPITest:
 
     def test_reuse_api_list_filter_private_only_owned_by_user(self, api) -> None:
         """Should only return private reuses that are owned."""
-        user = api.login()
+        user = UserFactory()
+        breakpoint()
         member = Member(user=user, role="editor")
         org = OrganizationFactory(members=[member])
         private_owned: Reuse = ReuseFactory(private=True, owner=user)
         private_owned_through_org: Reuse = ReuseFactory(private=True, organization=org)
         private_not_owned: Reuse = ReuseFactory(private=True)
 
+        # Only public reuses for non-authenticated user.
         response: TestResponse = api.get(url_for("api.reuses"))
+        assert200(response)
+        assert len(response.json["data"]) == 0
+
+        # With an authenticated user.
+        api.login(user)
+        response = api.get(url_for("api.reuses"))
         assert200(response)
         assert len(response.json["data"]) == 2  # Only the owned reuses
         assert reuse_in_response(response, private_owned)

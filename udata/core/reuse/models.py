@@ -21,10 +21,10 @@ __all__ = ("Reuse",)
 
 class ReuseQuerySet(OwnedQuerySet):
     def visible(self):
-        return self(private__ne=True, datasets__0__exists=True, deleted=None)
+        return self(private__ne=True, deleted=None)
 
     def hidden(self):
-        return self(db.Q(private=True) | db.Q(datasets__0__exists=False) | db.Q(deleted__ne=None))
+        return self(db.Q(private=True) | db.Q(deleted__ne=None))
 
 
 def check_url_does_not_exists(url):

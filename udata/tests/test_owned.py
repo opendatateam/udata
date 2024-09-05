@@ -1,4 +1,4 @@
-from mongoengine import Q, post_save
+from mongoengine import post_save
 
 import udata.core.owned as owned
 from udata.core.organization.factories import OrganizationFactory
@@ -10,9 +10,18 @@ from udata.mongo import db
 from udata.tests import DBTestMixin, TestCase
 
 
+class CustomQuerySet(owned.OwnedQuerySet):
+    def visible(self):
+        return self(private__ne=True)
+
+
 class Owned(owned.Owned, db.Document):
     name = db.StringField()
     private = db.BooleanField()
+
+    meta = {
+        "queryset_class": CustomQuerySet,
+    }
 
 
 class OwnedPostSave(owned.Owned, db.Document):
@@ -205,38 +214,28 @@ class OwnedQuerysetTest(DBTestMixin, TestCase):
             private_owned_by_org,
         ]
 
-        result: owned.OwnedQuerySet = Owned.objects.visible_by_user(user, Q(private__ne=True))
+        result: owned.OwnedQuerySet = Owned.objects.visible_by_user(user)
         # 4 public + 1 private owned by user + 1 private owned by the user's org.
         self.assertEqual(len(result), 6)
         for owned_ in visible_by_user:
             self.assertIn(owned_, result)
 
         # `.visible_by_user` does not reset other queries.
-        result = Owned.objects(name="owned_by_user").visible_by_user(user, Q(private__ne=True))
+        result = Owned.objects(name="owned_by_user").visible_by_user(user)
         self.assertEqual(len(result), 1)
         self.assertIn(owned_by_user, result)
-        result = Owned.objects.visible_by_user(user, Q(private__ne=True)).filter(
-            name="owned_by_user"
-        )
+        result = Owned.objects.visible_by_user(user).filter(name="owned_by_user")
         self.assertEqual(len(result), 1)
         self.assertIn(owned_by_user, result)
 
-        result = Owned.objects(name="private_owned_by_user").visible_by_user(
-            user, Q(private__ne=True)
-        )
+        result = Owned.objects(name="private_owned_by_user").visible_by_user(user)
         self.assertEqual(len(result), 1)
         self.assertIn(private_owned_by_user, result)
-        result = Owned.objects.visible_by_user(user, Q(private__ne=True)).filter(
-            name="private_owned_by_user"
-        )
+        result = Owned.objects.visible_by_user(user).filter(name="private_owned_by_user")
         self.assertEqual(len(result), 1)
         self.assertIn(private_owned_by_user, result)
 
-        result = Owned.objects(name="private_owned_by_other_user").visible_by_user(
-            user, Q(private__ne=True)
-        )
+        result = Owned.objects(name="private_owned_by_other_user").visible_by_user(user)
         self.assertEqual(len(result), 0)
-        result = Owned.objects.visible_by_user(user, Q(private__ne=True)).filter(
-            name="private_owned_by_other_user"
-        )
+        result = Owned.objects.visible_by_user(user).filter(name="private_owned_by_other_user")
         self.assertEqual(len(result), 0)
