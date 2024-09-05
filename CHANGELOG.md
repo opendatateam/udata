@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Fix undelete reuse and dataservices [#3141](https://github.com/opendatateam/udata/pull/3141)
+- Add a minimal publiccode.yml [#3144](https://github.com/opendatateam/udata/pull/3144)
 
 ## 9.1.4 (2024-08-26)
 
