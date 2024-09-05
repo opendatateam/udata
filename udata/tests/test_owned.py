@@ -3,7 +3,7 @@ from mongoengine import post_save
 import udata.core.owned as owned
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
-from udata.core.user.factories import UserFactory
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
 from udata.models import Member
 from udata.mongo import db
@@ -179,6 +179,7 @@ class OwnedQuerysetTest(DBTestMixin, TestCase):
             self.assertNotIn(owned_, result)
 
     def test_visible_by_user(self) -> None:
+        admin: User = AdminFactory()
         user: User = UserFactory()
         member = Member(user=user, role="editor")
         other_user: User = UserFactory()
@@ -198,10 +199,10 @@ class OwnedQuerysetTest(DBTestMixin, TestCase):
         private_owned_by_org: Owned = Owned.objects.create(
             organization=org, private=True, name="private_owned_by_org"
         )
-        _private_owned_by_other_user: Owned = Owned.objects.create(
+        private_owned_by_other_user: Owned = Owned.objects.create(
             owner=other_user, private=True, name="private_owned_by_other_user"
         )
-        _private_owned_by_other_org: Owned = Owned.objects.create(
+        private_owned_by_other_org: Owned = Owned.objects.create(
             organization=other_org, private=True, name="private_owned_by_other_org"
         )
 
@@ -213,10 +214,21 @@ class OwnedQuerysetTest(DBTestMixin, TestCase):
             private_owned_by_user,
             private_owned_by_org,
         ]
+        visible_by_other_user: list[Owned] = [
+            private_owned_by_other_user,
+            private_owned_by_other_org,
+        ]
 
+        # Admin can view everything.
         result: owned.OwnedQuerySet = Owned.objects.visible_by_user(
-            user, Owned.objects.visible()._query_obj
+            admin, Owned.objects.visible()._query_obj
         )
+        # 4 public + 1 private owned by user + 1 private owned by the user's org.
+        self.assertEqual(len(result), 8)
+        for owned_ in visible_by_user + visible_by_other_user:
+            self.assertIn(owned_, result)
+
+        result = Owned.objects.visible_by_user(user, Owned.objects.visible()._query_obj)
         # 4 public + 1 private owned by user + 1 private owned by the user's org.
         self.assertEqual(len(result), 6)
         for owned_ in visible_by_user:

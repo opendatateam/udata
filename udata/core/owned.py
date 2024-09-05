@@ -26,6 +26,9 @@ class OwnedQuerySet(UDataQuerySet):
 
     def visible_by_user(self, user: User, visible_query: Q):
         """Return EVERYTHING visible to the user."""
+        if user.sysadmin:
+            return self()
+
         if user.is_anonymous:
             return self(visible_query)
 
