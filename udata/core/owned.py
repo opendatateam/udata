@@ -24,13 +24,10 @@ class OwnedQuerySet(UDataQuerySet):
             qs |= Q(owner=owner) | Q(organization=owner)
         return self(qs)
 
-    def visible(self):
-        raise NotImplementedError
-
-    def visible_by_user(self, user: User):
+    def visible_by_user(self, user: User, visible_query: Q):
         """Return EVERYTHING visible to the user."""
         if user.is_anonymous:
-            return self.visible()
+            return self(visible_query)
 
         owners: list[User | Organization] = list(user.organizations) + [user.id]
         # We create a new queryset because we want a pristine self._query_obj.
@@ -38,10 +35,7 @@ class OwnedQuerySet(UDataQuerySet):
             *owners
         )
 
-        # We create a new queryset because we want a pristine self._query_obj.
-        visible_queryset = self.__class__(self._document, self._collection_obj).visible()
-
-        return self(visible_queryset._query_obj | owned_qs._query_obj)
+        return self(visible_query | owned_qs._query_obj)
 
 
 def check_owner_is_current_user(owner):

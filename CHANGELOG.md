@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- **breaking change** Return all the reuses available to a user, including the private and deleted ones they own [#3140](https://github.com/opendatateam/udata/pull/3140). Reuses without datasets will be also now be counted in the "visible" reuses, and thus added to the metrics.
+- **breaking change** Return all the reuses available to a user on the /reuses endpoint, including the private and deleted ones they own [#3140](https://github.com/opendatateam/udata/pull/3140).
 
 ## 9.1.4 (2024-08-26)
 

@@ -214,28 +214,42 @@ class OwnedQuerysetTest(DBTestMixin, TestCase):
             private_owned_by_org,
         ]
 
-        result: owned.OwnedQuerySet = Owned.objects.visible_by_user(user)
+        result: owned.OwnedQuerySet = Owned.objects.visible_by_user(
+            user, Owned.objects.visible()._query_obj
+        )
         # 4 public + 1 private owned by user + 1 private owned by the user's org.
         self.assertEqual(len(result), 6)
         for owned_ in visible_by_user:
             self.assertIn(owned_, result)
 
         # `.visible_by_user` does not reset other queries.
-        result = Owned.objects(name="owned_by_user").visible_by_user(user)
+        result = Owned.objects(name="owned_by_user").visible_by_user(
+            user, Owned.objects.visible()._query_obj
+        )
         self.assertEqual(len(result), 1)
         self.assertIn(owned_by_user, result)
-        result = Owned.objects.visible_by_user(user).filter(name="owned_by_user")
+        result = Owned.objects.visible_by_user(user, Owned.objects.visible()._query_obj).filter(
+            name="owned_by_user"
+        )
         self.assertEqual(len(result), 1)
         self.assertIn(owned_by_user, result)
 
-        result = Owned.objects(name="private_owned_by_user").visible_by_user(user)
+        result = Owned.objects(name="private_owned_by_user").visible_by_user(
+            user, Owned.objects.visible()._query_obj
+        )
         self.assertEqual(len(result), 1)
         self.assertIn(private_owned_by_user, result)
-        result = Owned.objects.visible_by_user(user).filter(name="private_owned_by_user")
+        result = Owned.objects.visible_by_user(user, Owned.objects.visible()._query_obj).filter(
+            name="private_owned_by_user"
+        )
         self.assertEqual(len(result), 1)
         self.assertIn(private_owned_by_user, result)
 
-        result = Owned.objects(name="private_owned_by_other_user").visible_by_user(user)
+        result = Owned.objects(name="private_owned_by_other_user").visible_by_user(
+            user, Owned.objects.visible()._query_obj
+        )
         self.assertEqual(len(result), 0)
-        result = Owned.objects.visible_by_user(user).filter(name="private_owned_by_other_user")
+        result = Owned.objects.visible_by_user(user, Owned.objects.visible()._query_obj).filter(
+            name="private_owned_by_other_user"
+        )
         self.assertEqual(len(result), 0)
