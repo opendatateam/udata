@@ -27,22 +27,18 @@ class OwnedQuerySet(UDataQuerySet):
     def visible(self):
         raise NotImplementedError
 
-    def visible_by_user(self, user: User):
+    def visible_by_user(self, user: User, visible_query: Q):
         """Return EVERYTHING visible to the user."""
+        visible_queryset = self.__class__(self._document, self._collection_obj)(visible_query)
         if user.is_anonymous:
-            return self.visible()
+            return visible_queryset
 
         owners: list[User | Organization] = list(user.organizations) + [user.id]
         owned_qs: OwnedQuerySet = self.__class__(self._document, self._collection_obj).owned_by(
             *owners
         )
 
-        # We need to build a new "visible queryset" as each new query is combined
-        # with `&` to the previous one, but we want a `|`.
-        return self(
-            self.__class__(self._document, self._collection_obj).visible()._query_obj
-            | owned_qs._query_obj
-        )
+        return self(visible_query | owned_qs._query_obj)
 
 
 def check_owner_is_current_user(owner):

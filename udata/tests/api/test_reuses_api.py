@@ -43,10 +43,10 @@ class ReuseAPITest:
         assert len(response.json["data"]) == len(reuses)
 
     def test_reuse_api_list_with_sorts(self, api):
-        ReuseFactory(title="A", created_at="2024-03-01", visible=True)
-        ReuseFactory(title="B", metrics={"views": 42}, created_at="2024-02-01", visible=True)
-        ReuseFactory(title="C", metrics={"views": 1337}, created_at="2024-05-01", visible=True)
-        ReuseFactory(title="D", created_at="2024-04-01", visible=True)
+        ReuseFactory(title="A", created_at="2024-03-01")
+        ReuseFactory(title="B", metrics={"views": 42}, created_at="2024-02-01")
+        ReuseFactory(title="C", metrics={"views": 1337}, created_at="2024-05-01")
+        ReuseFactory(title="D", created_at="2024-04-01")
 
         response = api.get(url_for("api.reuses", sort="views"))
         assert200(response)
@@ -70,12 +70,12 @@ class ReuseAPITest:
 
         [ReuseFactory(topic="health", type="api") for i in range(2)]
 
-        tag_reuse = ReuseFactory(tags=["my-tag", "other"], topic="health", type="api", visible=True)
-        owner_reuse = ReuseFactory(owner=owner, topic="health", type="api", visible=True)
-        org_reuse = ReuseFactory(organization=org, topic="health", type="api", visible=True)
-        featured_reuse = ReuseFactory(featured=True, topic="health", type="api", visible=True)
-        topic_reuse = ReuseFactory(topic="transport_and_mobility", type="api", visible=True)
-        type_reuse = ReuseFactory(topic="health", type="application", visible=True)
+        tag_reuse = ReuseFactory(tags=["my-tag", "other"], topic="health", type="api")
+        owner_reuse = ReuseFactory(owner=owner, topic="health", type="api")
+        org_reuse = ReuseFactory(organization=org, topic="health", type="api")
+        featured_reuse = ReuseFactory(featured=True, topic="health", type="api")
+        topic_reuse = ReuseFactory(topic="transport_and_mobility", type="api")
+        type_reuse = ReuseFactory(topic="health", type="application")
 
         # filter on tag
         response = api.get(url_for("api.reuses", tag="my-tag"))
@@ -128,8 +128,8 @@ class ReuseAPITest:
     def test_reuse_api_list_filter_private(self, api) -> None:
         """Should filters reuses results based on the `private` filter"""
         user = api.login()
-        public_reuse: Reuse = ReuseFactory(visible=True)
-        private_reuse: Reuse = ReuseFactory(private=True, owner=user, visible=True)
+        public_reuse: Reuse = ReuseFactory()
+        private_reuse: Reuse = ReuseFactory(private=True, owner=user)
 
         # all the reuses (by default)
         response: TestResponse = api.get(url_for("api.reuses"))
@@ -155,11 +155,9 @@ class ReuseAPITest:
         user = api.login()
         member = Member(user=user, role="editor")
         org = OrganizationFactory(members=[member])
-        private_owned: Reuse = ReuseFactory(private=True, owner=user, visible=True)
-        private_owned_through_org: Reuse = ReuseFactory(
-            private=True, organization=org, visible=True
-        )
-        private_not_owned: Reuse = ReuseFactory(private=True, visible=True)
+        private_owned: Reuse = ReuseFactory(private=True, owner=user)
+        private_owned_through_org: Reuse = ReuseFactory(private=True, organization=org)
+        private_not_owned: Reuse = ReuseFactory(private=True)
 
         response: TestResponse = api.get(url_for("api.reuses"))
         assert200(response)
@@ -186,13 +184,11 @@ class ReuseAPITest:
         user = UserFactory()
         member = Member(user=user, role="editor")
         org = OrganizationFactory(members=[member])
-        public_owned: Reuse = ReuseFactory(owner=user, visible=True)
-        public_not_owned: Reuse = ReuseFactory(visible=True)
-        _private_owned: Reuse = ReuseFactory(private=True, owner=user, visible=True)
-        _private_owned_through_org: Reuse = ReuseFactory(
-            private=True, organization=org, visible=True
-        )
-        _private_not_owned: Reuse = ReuseFactory(private=True, visible=True)
+        public_owned: Reuse = ReuseFactory(owner=user)
+        public_not_owned: Reuse = ReuseFactory()
+        _private_owned: Reuse = ReuseFactory(private=True, owner=user)
+        _private_owned_through_org: Reuse = ReuseFactory(private=True, organization=org)
+        _private_not_owned: Reuse = ReuseFactory(private=True)
 
         response: TestResponse = api.get(url_for("api.reuses"))
         assert200(response)
