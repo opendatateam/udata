@@ -1,0 +1,25 @@
+publiccodeYmlVersion: "0.2"
+name: udata
+url: https://github.com/opendatateam/udata
+landingURL: http://udata.readthedocs.org
+creationDate: 2014-04-25
+latestRelease:
+  date: ""
+  version: ""
+logo: https://github.com/opendatateam.png
+usedBy: []
+fundedBy: []
+roadmap: ""
+softwareType: ""
+description:
+  en:
+    shortDescription: Customizable and skinnable social platform dedicated to open data.
+    documentation: ""
+legal:
+  license: agpl-3.0
+  authorsFile: ""
+maintenance:
+  type: community
+  contacts:
+    - name: ""
+      email: ""
