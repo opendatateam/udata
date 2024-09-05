@@ -26,11 +26,11 @@ class OwnedQuerySet(UDataQuerySet):
 
     def visible_by_user(self, user: User, visible_query: Q):
         """Return EVERYTHING visible to the user."""
-        if user.sysadmin:
-            return self()
-
         if user.is_anonymous:
             return self(visible_query)
+
+        if user.sysadmin:
+            return self()
 
         owners: list[User | Organization] = list(user.organizations) + [user.id]
         # We create a new queryset because we want a pristine self._query_obj.
