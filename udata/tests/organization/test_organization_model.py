@@ -34,7 +34,7 @@ class OrganizationModelTest(TestCase, DBTestMixin):
             )
 
         assert org.get_metrics()["datasets"] == 1
-        assert org.get_metrics()["reuses"] == 1
+        assert org.get_metrics()["reuses"] == 2
         assert org.get_metrics()["followers"] == 1
 
         with assert_emit(Reuse.on_delete):
