@@ -7,6 +7,7 @@
 - Add a minimal publiccode.yml [#3144](https://github.com/opendatateam/udata/pull/3144)
 - Fix the boolean filters in the API for the "new system" endpoints [#3139](https://github.com/opendatateam/udata/pull/3139)
 - Update authlib dependency from 0.14.3 to 1.3.1 [#3135](https://github.com/opendatateam/udata/pull/3135)
+- Use hydra's RESTful endpoint URLs [#3142](https://github.com/opendatateam/udata/pull/3142)
 
 ## 9.1.4 (2024-08-26)
 
