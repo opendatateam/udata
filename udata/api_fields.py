@@ -302,7 +302,11 @@ def generate_fields(**kwargs):
             parser.add_argument("q", type=str, location="args")
 
         for filterable in filterables:
-            parser.add_argument(filterable["key"], type=filterable["type"], location="args")
+            parser.add_argument(
+                filterable["key"],
+                type=filterable["type"],
+                location="args",
+            )
 
         cls.__index_parser__ = parser
 
