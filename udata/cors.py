@@ -33,9 +33,9 @@ def is_preflight_request() -> bool:
 
 def is_allowed_cors_route():
     if g and hasattr(g, "lang_code"):
-        path = request.path.replace(f"/{g.lang_code}", "")
+        path: str = request.path.removeprefix(f"/{g.lang_code}")
     else:
-        path = request.path
+        path: str = request.path
     return (
         path.endswith((".js", ".css", ".woff", ".woff2", ".png", ".jpg", ".jpeg", ".svg"))
         or path.startswith("/api")
