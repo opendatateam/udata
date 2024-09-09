@@ -1,6 +1,6 @@
 import logging
 
-from flask import request
+from flask import g, request
 from werkzeug.datastructures import Headers
 
 log = logging.getLogger(__name__)
@@ -32,10 +32,15 @@ def is_preflight_request() -> bool:
 
 
 def is_allowed_cors_route():
+    if g and hasattr(g, "lang_code"):
+        path = request.path.replace(f"/{g.lang_code}", "")
+    else:
+        path = request.path
     return (
-        request.path.endswith((".js", ".css", ".woff", ".woff2", ".png", ".jpg", ".jpeg", ".svg"))
-        or request.path.startswith("/api")
-        or request.path.startswith("/oauth")
+        path.endswith((".js", ".css", ".woff", ".woff2", ".png", ".jpg", ".jpeg", ".svg"))
+        or path.startswith("/api")
+        or path.startswith("/oauth")
+        or path.startswith("/datasets/r/")
     )
 
 
