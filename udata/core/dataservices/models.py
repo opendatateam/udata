@@ -168,7 +168,7 @@ class Dataservice(WithMetrics, Owned, db.Document):
         ),
         readonly=True,
     )
-    deleted_at = field(db.DateTimeField(), readonly=True)
+    deleted_at = field(db.DateTimeField())
     archived_at = field(db.DateTimeField(), readonly=True)
 
     datasets = field(

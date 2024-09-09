@@ -116,7 +116,6 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
     )
     deleted = field(
         db.DateTimeField(),
-        readonly=True,
     )
     archived = field(
         db.DateTimeField(),
