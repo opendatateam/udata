@@ -2,7 +2,11 @@
 
 ## Current (in progress)
 
+- **breaking change** Return all the reuses available to a user on the /reuses endpoint, including the private and deleted ones they own [#3140](https://github.com/opendatateam/udata/pull/3140).
 - Fix undelete reuse and dataservices [#3141](https://github.com/opendatateam/udata/pull/3141)
+- Add a minimal publiccode.yml [#3144](https://github.com/opendatateam/udata/pull/3144)
+- Fix the boolean filters in the API for the "new system" endpoints [#3139](https://github.com/opendatateam/udata/pull/3139)
+- Update authlib dependency from 0.14.3 to 1.3.1 [#3135](https://github.com/opendatateam/udata/pull/3135)
 - Use hydra's RESTful endpoint URLs [#3142](https://github.com/opendatateam/udata/pull/3142)
 
 ## 9.1.4 (2024-08-26)
@@ -19,8 +23,6 @@
 - Always add Vary even for non CORS requests [#3132](https://github.com/opendatateam/udata/pull/3132)
 - Add acronym in organization csv catalog [#3134](https://github.com/opendatateam/udata/pull/3134)
 - Limit the number of user suggestions [#3131](https://github.com/opendatateam/udata/pull/3131)
-- Update authlib dependency from 0.14.3 to 1.3.1 [#3135](https://github.com/opendatateam/udata/pull/3135)
-- Fix the boolean filters in the API for the "new system" endpoints [#3139](https://github.com/opendatateam/udata/pull/3139)
 
 ## 9.1.3 (2024-08-01)
 
