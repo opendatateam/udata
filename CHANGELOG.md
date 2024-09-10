@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Add a `archived` button for datasets and reuses on frontend admin [#3104](https://github.com/opendatateam/udata/pull/3104)
 - **breaking change** Return all the reuses available to a user on the /reuses endpoint, including the private and deleted ones they own [#3140](https://github.com/opendatateam/udata/pull/3140).
 - Fix undelete reuse and dataservices [#3141](https://github.com/opendatateam/udata/pull/3141)
 - Add a minimal publiccode.yml [#3144](https://github.com/opendatateam/udata/pull/3144)
