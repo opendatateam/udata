@@ -40,16 +40,10 @@ def serialize_resource_for_event(resource):
 
 @task(route="high.resource")
 def publish(url, document, resource_id, action):
-    match action:
-        case EventMessageType.CREATED:
-            method = requests.post
-            resource = serialize_resource_for_event(get_by(document.resources, "id", resource_id))
-        case EventMessageType.MODIFIED:
-            method = requests.put
-            resource = serialize_resource_for_event(get_by(document.resources, "id", resource_id))
-        case EventMessageType.DELETED:
-            method = requests.delete
-            resource = None
+    if action == EventMessageType.DELETED:
+        resource = None
+    else:
+        resource = serialize_resource_for_event(get_by(document.resources, "id", resource_id))
     payload = {
         "resource_id": str(resource_id),
         "dataset_id": str(document.id),
@@ -58,7 +52,7 @@ def publish(url, document, resource_id, action):
     headers = {}
     if current_app.config["RESOURCES_ANALYSER_API_KEY"]:
         headers = {"Authorization": f"Bearer {current_app.config['RESOURCES_ANALYSER_API_KEY']}"}
-    r = method(url, json=payload, headers=headers)
+    r = requests.post(url, json=payload, headers=headers)
     r.raise_for_status()
 
 
@@ -68,7 +62,7 @@ def publish_added_resource_message(sender, document, **kwargs):
         "RESOURCES_ANALYSER_URI"
     ):
         publish.delay(
-            f"{current_app.config.get('RESOURCES_ANALYSER_URI')}/api/resources/",
+            f"{current_app.config.get('RESOURCES_ANALYSER_URI')}/api/resource/created/",
             document,
             kwargs["resource_id"],
             EventMessageType.CREATED,
@@ -81,7 +75,7 @@ def publish_updated_resource_message(sender, document, **kwargs):
         "RESOURCES_ANALYSER_URI"
     ):
         publish.delay(
-            f"{current_app.config.get('RESOURCES_ANALYSER_URI')}/api/resources/",
+            f"{current_app.config.get('RESOURCES_ANALYSER_URI')}/api/resource/updated/",
             document,
             kwargs["resource_id"],
             EventMessageType.MODIFIED,
@@ -94,7 +88,7 @@ def publish_removed_resource_message(sender, document, **kwargs):
         "RESOURCES_ANALYSER_URI"
     ):
         publish.delay(
-            f"{current_app.config.get('RESOURCES_ANALYSER_URI')}/api/resources/",
+            f"{current_app.config.get('RESOURCES_ANALYSER_URI')}/api/resource/deleted/",
             document,
             kwargs["resource_id"],
             EventMessageType.DELETED,

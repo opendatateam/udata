@@ -31,7 +31,7 @@ class DatasetEventsTest:
         }
 
         mock_req.assert_called_with(
-            f"{current_app.config['RESOURCES_ANALYSER_URI']}/api/resources/",
+            f"{current_app.config['RESOURCES_ANALYSER_URI']}/api/resource/created/",
             json=expected_value,
             headers={},  # No RESOURCES_ANALYSER_API_KEY, no headers.
         )
@@ -53,12 +53,12 @@ class DatasetEventsTest:
             dataset.add_resource(resource)
 
         mock_req.assert_called_with(
-            f"{current_app.config['RESOURCES_ANALYSER_URI']}/api/resources/",
+            f"{current_app.config['RESOURCES_ANALYSER_URI']}/api/resource/created/",
             json=expected_value,
             headers={"Authorization": "Bearer foobar-api-key"},
         )
 
-    @patch("requests.put")
+    @patch("requests.post")
     @pytest.mark.options(RESOURCES_ANALYSER_API_KEY="foobar-api-key")
     def test_publish_message_resource_modified(self, mock_req):
         resource = ResourceFactory(schema=Schema(url="http://localhost/my-schema"))
@@ -77,7 +77,7 @@ class DatasetEventsTest:
             dataset.update_resource(resource)
 
         mock_req.assert_called_with(
-            f"{current_app.config['RESOURCES_ANALYSER_URI']}/api/resources/",
+            f"{current_app.config['RESOURCES_ANALYSER_URI']}/api/resource/updated/",
             json=expected_value,
             headers={"Authorization": "Bearer foobar-api-key"},
         )
@@ -87,7 +87,7 @@ class DatasetEventsTest:
         # (for example, encoding Embeds fails)
         complexjson.dumps(expected_value)
 
-    @patch("requests.delete")
+    @patch("requests.post")
     @pytest.mark.options(RESOURCES_ANALYSER_API_KEY="foobar-api-key")
     def test_publish_message_resource_removed(self, mock_req):
         resource = ResourceFactory()
@@ -104,7 +104,7 @@ class DatasetEventsTest:
             dataset.remove_resource(resource)
 
         mock_req.assert_called_with(
-            f"{current_app.config['RESOURCES_ANALYSER_URI']}/api/resources/",
+            f"{current_app.config['RESOURCES_ANALYSER_URI']}/api/resource/deleted/",
             json=expected_value,
             headers={"Authorization": "Bearer foobar-api-key"},
         )
