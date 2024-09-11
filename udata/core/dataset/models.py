@@ -16,6 +16,7 @@ from werkzeug.utils import cached_property
 
 from udata.app import cache
 from udata.core import storages
+from udata.core.elasticsearch import elasticsearch
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -186,6 +187,7 @@ class Schema(db.EmbeddedDocument):
                     return
 
 
+@elasticsearch()
 class License(db.Document):
     # We need to declare id explicitly since we do not use the default
     # value set by Mongo.

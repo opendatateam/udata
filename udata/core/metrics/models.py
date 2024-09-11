@@ -8,6 +8,7 @@ class WithMetrics(object):
     metrics = field(
         db.DictField(),
         readonly=True,
+        searchable=True,  # TODO change to indexable
     )
 
     __metrics_keys__ = []

@@ -7,6 +7,7 @@ from flask_storage.mongo import ImageField as FlaskStorageImageField
 
 import udata.api.fields as custom_restx_fields
 from udata.api import api, base_reference
+from udata.core.elasticsearch import is_elasticsearch_enable
 from udata.mongo.errors import FieldValidationError
 
 lazy_reference = api.model(
@@ -92,12 +93,14 @@ def convert_db_to_field(key, field, info):
 
         def constructor_write(**kwargs):
             return restx_fields.List(field_write, **kwargs)
+
     elif isinstance(
         field, (mongo_fields.GenericReferenceField, mongoengine.fields.GenericLazyReferenceField)
     ):
 
         def constructor(**kwargs):
             return restx_fields.Nested(lazy_reference, **kwargs)
+
     elif isinstance(field, mongo_fields.ReferenceField):
         # For reference we accept while writing a String representing the ID of the referenced model.
         # For reading, if the user supplied a `nested_fields` (RestX model), we use it to convert
@@ -120,6 +123,7 @@ def convert_db_to_field(key, field, info):
 
             def constructor(**kwargs):
                 return restx_fields.Nested(nested_fields, **kwargs)
+
         elif hasattr(field.document_type_obj, "__read_fields__"):
 
             def constructor_read(**kwargs):
@@ -127,6 +131,7 @@ def convert_db_to_field(key, field, info):
 
             def constructor_write(**kwargs):
                 return restx_fields.Nested(field.document_type_obj.__write_fields__, **kwargs)
+
         else:
             raise ValueError(
                 f"EmbeddedDocumentField `{key}` requires a `nested_fields` param to serialize/deserialize or a `@generate_fields()` definition."
@@ -187,7 +192,10 @@ def generate_fields(**kwargs):
             sortable_key = info.get("sortable", False)
             if sortable_key:
                 sortables.append(
-                    {"key": sortable_key if isinstance(sortable_key, str) else key, "value": key}
+                    {
+                        "key": sortable_key if isinstance(sortable_key, str) else key,
+                        "value": key,
+                    }
                 )
 
             filterable = info.get("filterable", None)
@@ -243,6 +251,9 @@ def generate_fields(**kwargs):
 
             info = getattr(method, "__additional_field_info__", None)
             if info is None:
+                continue
+
+            if not info.get("api", True):
                 continue
 
             def make_lambda(method):
@@ -313,43 +324,65 @@ def generate_fields(**kwargs):
         def apply_sort_filters_and_pagination(base_query):
             args = cls.__index_parser__.parse_args()
 
-            if sortables and args["sort"]:
-                negate = args["sort"].startswith("-")
-                sort_key = args["sort"][1:] if negate else args["sort"]
+            if (
+                args.get("q")
+                and is_elasticsearch_enable()
+                and getattr(cls, "__elasticsearch_search__", None) is not None
+            ):
+                # Do an Elasticsearch query
+                results = cls.__elasticsearch_search__(args.get("q"))
+                if paginable:
+                    return {
+                        "objects": results,  # restx pager rename `objects` into `data`
+                        "total": len(results),
+                        "page": 1,
+                        "page_size": len(results),
+                    }
+                else:
+                    return results
+            else:
+                # Do a regular MongoDB query
+                if sortables and args["sort"]:
+                    negate = args["sort"].startswith("-")
+                    sort_key = args["sort"][1:] if negate else args["sort"]
 
-                sort_by = next(
-                    (sortable["value"] for sortable in sortables if sortable["key"] == sort_key),
-                    None,
-                )
-
-                if sort_by:
-                    if negate:
-                        sort_by = "-" + sort_by
-
-                    base_query = base_query.order_by(sort_by)
-
-            if searchable and args.get("q"):
-                phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
-                base_query = base_query.search_text(phrase_query)
-
-            for filterable in filterables:
-                if args.get(filterable["key"]) is not None:
-                    for constraint in filterable["constraints"]:
-                        if constraint == "objectid" and not ObjectId.is_valid(
-                            args[filterable["key"]]
-                        ):
-                            api.abort(400, f'`{filterable["key"]}` must be an identifier')
-
-                    base_query = base_query.filter(
-                        **{
-                            filterable["column"]: args[filterable["key"]],
-                        }
+                    sort_by = next(
+                        (
+                            sortable["value"]
+                            for sortable in sortables
+                            if sortable["key"] == sort_key
+                        ),
+                        None,
                     )
 
-            if paginable:
-                base_query = base_query.paginate(args["page"], args["page_size"])
+                    if sort_by:
+                        if negate:
+                            sort_by = "-" + sort_by
 
-            return base_query
+                        base_query = base_query.order_by(sort_by)
+
+                if searchable and args.get("q"):
+                    phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
+                    base_query = base_query.search_text(phrase_query)
+
+                for filterable in filterables:
+                    if args.get(filterable["key"]) is not None:
+                        for constraint in filterable["constraints"]:
+                            if constraint == "objectid" and not ObjectId.is_valid(
+                                args[filterable["key"]]
+                            ):
+                                api.abort(400, f'`{filterable["key"]}` must be an identifier')
+
+                        base_query = base_query.filter(
+                            **{
+                                filterable["column"]: args[filterable["key"]],
+                            }
+                        )
+
+                if paginable:
+                    base_query = base_query.paginate(args["page"], args["page_size"])
+
+                return base_query
 
         cls.apply_sort_filters_and_pagination = apply_sort_filters_and_pagination
         return cls

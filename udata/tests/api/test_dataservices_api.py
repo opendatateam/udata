@@ -1,11 +1,15 @@
+import time
+from datetime import datetime
 from xml.etree.ElementTree import XML
 
 import pytest
 from flask import url_for
 
+from udata.core.badges.models import Badge
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory
+from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.user.factories import UserFactory
@@ -337,6 +341,98 @@ class DataserviceAPITest(APITestCase):
         dataservice = Dataservice.objects(id=response.json["id"]).first()
         self.assertEqual(dataservice.owner, None)
         self.assertEqual(dataservice.organization.id, me_org.id)
+
+    def test_elasticsearch(self):
+        orga_sp = OrganizationFactory(badges=[Badge(kind=CERTIFIED), Badge(kind=PUBLIC_SERVICE)])
+        orga_unknown = OrganizationFactory()
+        assert orga_sp.public_service
+        assert not orga_unknown.public_service
+
+        dataservice_a = DataserviceFactory(
+            organization=orga_unknown,
+            title="A - Hello AMD world!",
+            metrics={
+                "followers": 42,
+                "views": 1337,
+            },
+        )
+        dataservice_b = DataserviceFactory(
+            organization=orga_unknown,
+            title="B - Other one",
+            metrics={
+                "followers": 1337,
+                "views": 1000,
+            },
+        )
+        dataservice_c = DataserviceFactory(
+            organization=orga_unknown,
+            title="C - AMD",
+            metrics={
+                "followers": 41,
+                "views": 1345,
+            },
+        )
+        time.sleep(1)
+
+        print(self.get(url_for("api.dataservices", q="AMDAC")).json)
+
+        dataservices = self.get(url_for("api.dataservices", q="AMDAC")).json["data"]
+
+        assert len(dataservices) == 3
+        assert dataservices[0]["title"] == dataservice_c.title
+        assert dataservices[1]["title"] == dataservice_a.title
+        assert (
+            dataservices[2]["title"] == dataservice_b.title
+        )  # b is last even if it doesn't really match.
+
+        dataservice_b.title = "B - Hello AMD world!"
+        dataservice_b.save()
+        time.sleep(3)
+
+        dataservices = self.get(url_for("api.dataservices", q="AMDAC")).json["data"]
+
+        assert len(dataservices) == 3
+
+        # `dataservice_b` should be first because it has a lot of followers
+        assert dataservices[0]["title"] == dataservice_b.title
+        assert dataservices[1]["title"] == dataservice_c.title
+        assert dataservices[2]["title"] == dataservice_a.title
+
+        dataservice_a.organization = orga_sp
+        dataservice_a.save()
+        assert dataservice_a.public_service_score() == 4
+        time.sleep(3)
+
+        dataservices = self.get(url_for("api.dataservices", q="AMDAC")).json["data"]
+
+        assert len(dataservices) == 3
+
+        assert dataservices[0]["title"] == dataservice_b.title
+        assert dataservices[1]["title"] == dataservice_a.title
+        assert dataservices[2]["title"] == dataservice_c.title
+
+        dataservice_b.archived_at = datetime.utcnow()
+        dataservice_b.save()
+        time.sleep(3)
+
+        dataservices = self.get(url_for("api.dataservices", q="AMDAC")).json["data"]
+
+        assert len(dataservices) == 2
+
+        assert dataservices[0]["title"] == dataservice_a.title
+        assert dataservices[1]["title"] == dataservice_c.title
+
+        dataservice_b.deleted_at = datetime.utcnow()
+        dataservice_b.save()
+
+        time.sleep(3)
+
+        dataservices = self.get(url_for("api.dataservices", q="AMDAC")).json["data"]
+
+        assert len(dataservices) == 2
+
+        assert dataservices[0]["title"] == dataservice_a.title
+        assert dataservices[1]["title"] == dataservice_c.title
 
 
 @pytest.mark.frontend

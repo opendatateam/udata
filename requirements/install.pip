@@ -55,6 +55,7 @@ celerybeat-mongo==0.2.0
     # via -r requirements/install.in
 certifi==2024.7.4
     # via
+    #   elasticsearch
     #   requests
     #   sentry-sdk
 cffi==1.16.0
@@ -86,6 +87,12 @@ dnspython==2.6.1
     # via
     #   email-validator
     #   pymongo
+elasticsearch==7.15.0
+    # via
+    #   -r requirements/install.in
+    #   elasticsearch-dsl
+elasticsearch-dsl==7.4.0
+    # via -r requirements/install.in
 email-validator==2.2.0
     # via
     #   flask-security-too
@@ -232,6 +239,7 @@ python-dateutil==2.8.2
     #   -r requirements/install.in
     #   botocore
     #   celery
+    #   elasticsearch-dsl
     #   faker
 pytz==2024.1
     # via
@@ -265,6 +273,7 @@ six==1.16.0
     #   bcrypt
     #   bleach
     #   cryptography
+    #   elasticsearch-dsl
     #   faker
     #   isodate
     #   langdetect
@@ -289,6 +298,7 @@ urlextract==0.14.0
 urllib3==1.26.19
     # via
     #   botocore
+    #   elasticsearch
     #   requests
     #   sentry-sdk
 vine==5.1.0

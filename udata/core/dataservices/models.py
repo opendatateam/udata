@@ -1,11 +1,13 @@
 from datetime import datetime
 
+from elasticsearch_dsl import query
 from mongoengine import Q
 
 import udata.core.contact_point.api_fields as contact_api_fields
 import udata.core.dataset.api_fields as datasets_api_fields
 from udata.api_fields import field, function_field, generate_fields
 from udata.core.dataset.models import Dataset
+from udata.core.elasticsearch import elasticsearch
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
@@ -22,6 +24,42 @@ from udata.uris import endpoint_for
 # "temporal_coverage"
 
 DATASERVICE_FORMATS = ["REST", "WMS", "WSL"]
+
+
+def build_search_query(query_text: str, score_functions):
+    return query.Q(
+        "bool",
+        should=[
+            query.Q(
+                "function_score",
+                query=query.Bool(
+                    should=[
+                        query.MultiMatch(
+                            query=query_text,
+                            type="phrase",
+                            fields=["title^15", "acronym^15", "description^8"],
+                        )
+                    ]
+                ),
+                functions=score_functions,
+            ),
+            query.Q(
+                "function_score",
+                query=query.Bool(
+                    should=[
+                        query.MultiMatch(
+                            query=query_text,
+                            type="cross_fields",
+                            fields=["title^7", "acronym^7", "description^4"],
+                            operator="and",
+                        )
+                    ]
+                ),
+                functions=score_functions,
+            ),
+            query.Match(title={"query": query_text, "fuzziness": "AUTO:4,6"}),
+        ],
+    )
 
 
 class DataserviceQuerySet(OwnedQuerySet):
@@ -94,7 +132,18 @@ class HarvestMetadata(db.EmbeddedDocument):
     archived_at = field(db.DateTimeField())
 
 
-@generate_fields()
+@generate_fields(searchable=True)
+@elasticsearch(
+    score_functions_description={
+        "public_service_score": {"factor": 8, "modifier": "sqrt", "missing": 1},
+        "metrics.followers": {"factor": 4, "modifier": "sqrt", "missing": 1},
+        "metrics.views": {"factor": 1, "modifier": "sqrt", "missing": 1},
+    },
+    build_search_query=build_search_query,
+    indexable=lambda dataservice: (
+        not dataservice.archived_at and not dataservice.deleted_at and not dataservice.private
+    ),
+)
 class Dataservice(WithMetrics, Owned, db.Document):
     meta = {
         "indexes": [
@@ -109,9 +158,11 @@ class Dataservice(WithMetrics, Owned, db.Document):
         db.StringField(required=True),
         example="My awesome API",
         sortable=True,
+        searchable=True,
     )
     acronym = field(
         db.StringField(max_length=128),
+        searchable=True,
     )
     # /!\ do not set directly the slug when creating or updating a dataset
     # this will break the search indexation
@@ -121,28 +172,54 @@ class Dataservice(WithMetrics, Owned, db.Document):
         ),
         readonly=True,
     )
-    description = field(db.StringField(default=""), description="In markdown")
+    description = field(
+        db.StringField(default=""),
+        description="In markdown",
+        searchable=True,
+    )
     base_api_url = field(
         db.URLField(required=True),
         sortable=True,
+        searchable=True,
     )
-    endpoint_description_url = field(db.URLField())
-    authorization_request_url = field(db.URLField())
-    availability = field(db.FloatField(min=0, max=100), example="99.99")
+    endpoint_description_url = field(
+        db.URLField(),
+        searchable=True,
+    )
+    authorization_request_url = field(
+        db.URLField(),
+        searchable=True,
+    )
+    availability = field(
+        db.FloatField(min=0, max=100),
+        example="99.99",
+        searchable=True,
+    )
     rate_limiting = field(db.StringField())
-    is_restricted = field(db.BooleanField())
-    has_token = field(db.BooleanField())
-    format = field(db.StringField(choices=DATASERVICE_FORMATS))
+    is_restricted = field(
+        db.BooleanField(),
+        searchable=True,
+    )
+    has_token = field(
+        db.BooleanField(),
+        searchable=True,
+    )
+    format = field(
+        db.StringField(choices=DATASERVICE_FORMATS),
+        searchable=True,
+    )
 
     license = field(
         db.ReferenceField("License"),
         allow_null=True,
         attribute="license.id",
         description="The ID of the license",
+        searchable="keyword",
     )
 
     tags = field(
         db.TagListField(),
+        searchable="keyword",
     )
 
     private = field(
@@ -161,12 +238,14 @@ class Dataservice(WithMetrics, Owned, db.Document):
     created_at = field(
         db.DateTimeField(verbose_name=_("Creation date"), default=datetime.utcnow, required=True),
         readonly=True,
+        searchable=True,
     )
     metadata_modified_at = field(
         db.DateTimeField(
             verbose_name=_("Last modification date"), default=datetime.utcnow, required=True
         ),
         readonly=True,
+        searchable=True,
     )
     deleted_at = field(db.DateTimeField())
     archived_at = field(db.DateTimeField(), readonly=True)
@@ -205,6 +284,16 @@ class Dataservice(WithMetrics, Owned, db.Document):
     @property
     def is_hidden(self):
         return self.private or self.deleted_at or self.archived_at
+
+    @function_field(indexable=True, api=False)
+    def public_service_score(self):
+        """
+        Boolean `field_value_score` doesn't work well because False is 0 and `0*other_scores`
+        always give a 0 score for the all query. So we set `4` and `1` for public service orgs.
+        (`4` was choosen based on the value in `udata-search-service` but could maybe be `2` and
+        then work with the `factor` of the `score_functions_description` definition.)
+        """
+        return 4 if (self.organization and self.organization.public_service) else 1
 
     def count_discussions(self):
         self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()
