@@ -397,3 +397,15 @@ class DataserviceAPITest(APITestCase):
 
         assert dataservices[0]["title"] == dataservice_a.title
         assert dataservices[1]["title"] == dataservice_c.title
+
+        dataservice_b.deleted_at = datetime.utcnow()
+        dataservice_b.save()
+
+        time.sleep(3)
+
+        dataservices = self.get(url_for("api.dataservices", q="AMDAC")).json["data"]
+
+        assert len(dataservices) == 2
+
+        assert dataservices[0]["title"] == dataservice_a.title
+        assert dataservices[1]["title"] == dataservice_c.title

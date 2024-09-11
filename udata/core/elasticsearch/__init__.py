@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Callable, Optional, Type, TypeVar
 
 import mongoengine.fields as mongo_fields
+from elasticsearch import NotFoundError
 from elasticsearch_dsl import (
     SF,
     Boolean,
@@ -124,7 +125,7 @@ def generate_elasticsearch_model(
     index_name = cls._get_collection_name()
 
     # Testing name to have a new index in each test.
-    index_name = "".join(random.choices(string.ascii_lowercase, k=10))
+    index_name = index_name + "".join(random.choices(string.ascii_lowercase, k=10))
 
     class Index:
         name = index_name
@@ -153,7 +154,10 @@ def generate_elasticsearch_model(
         if not indexable or indexable(document):
             elasticsearch_document.save()
         else:
-            elasticsearch_document.delete()
+            try:
+                elasticsearch_document.delete()
+            except NotFoundError:
+                pass
 
     signals.post_save.connect(elasticsearch_index, sender=cls)
 
@@ -192,6 +196,7 @@ def generate_elasticsearch_model(
     cls.__elasticsearch_model__ = ElasticSearchModel
     cls.__elasticsearch_index__ = elasticsearch_index
     cls.__elasticsearch_search__ = elasticsearch_search
+    return cls
 
 
 def get_searchable_fields(cls):
