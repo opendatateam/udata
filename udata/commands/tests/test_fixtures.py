@@ -27,21 +27,28 @@ class FixturesTest:
         """Test generating fixtures from the current env, then importing them back."""
         assert models.Dataset.objects.count() == 0  # Start with a clean slate.
         user = UserFactory()
-        org = OrganizationFactory(**{}, members=[Member(user=user)])
+        admin = UserFactory()
+        org = OrganizationFactory(
+            members=[Member(user=user, role="editor"), Member(user=admin, role="admin")]
+        )
         # Set the same slug we're 'exporting' from the FIXTURE_DATASET_SLUG config, see the
         # @pytest.mark.options above.
-        dataset = DatasetFactory(**{}, slug="some-test-dataset-slug", organization=org)
-        res = ResourceFactory(**{})
+        dataset = DatasetFactory(slug="some-test-dataset-slug", organization=org)
+        res = ResourceFactory()
         dataset.add_resource(res)
-        ReuseFactory(**{}, datasets=[dataset], owner=user)
-        CommunityResourceFactory(**{}, dataset=dataset, owner=user)
+        ReuseFactory(datasets=[dataset], owner=user)
+        CommunityResourceFactory(dataset=dataset, owner=user)
         DiscussionFactory(
             **{},
             subject=dataset,
             user=user,
-            discussion=[MessageDiscussionFactory(**{}, posted_by=user)],
+            discussion=[
+                MessageDiscussionFactory(posted_by=user),
+                MessageDiscussionFactory(posted_by=admin),
+            ],
+            closed_by=admin,
         )
-        DataserviceFactory(**{}, datasets=[dataset])
+        DataserviceFactory(datasets=[dataset], organization=org)
 
         with NamedTemporaryFile(mode="w+", delete=True) as fixtures_fd:
             # Get the fixtures from the local instance.
@@ -69,13 +76,25 @@ class FixturesTest:
             # Then load them in the database to make sure they're correct.
             result = cli("import-fixtures", fixtures_fd.name)
         assert models.Organization.objects(slug=org.slug).count() > 0
+        result_org = models.Organization.objects.get(slug=org.slug)
+        assert result_org.members[0].user.id == user.id
+        assert result_org.members[0].role == "editor"
+        assert result_org.members[1].user.id == admin.id
+        assert result_org.members[1].role == "admin"
         assert models.Dataset.objects.count() > 0
         assert models.Discussion.objects.count() > 0
+        result_discussion = models.Discussion.objects.first()
+        assert result_discussion.user.id == user.id
+        assert result_discussion.closed_by.id == admin.id
+        assert len(result_discussion.discussion) == 2
+        assert result_discussion.discussion[0].posted_by.id == user.id
+        assert result_discussion.discussion[1].posted_by.id == admin.id
         assert models.CommunityResource.objects.count() > 0
         assert models.User.objects.count() > 0
         assert models.Dataservice.objects.count() > 0
         # Make sure we also import the dataservice organization
-        assert models.Dataservice.objects(organization__exists=True).count() > 0
+        result_dataservice = models.Dataservice.objects.first()
+        assert result_dataservice.organization == org
 
     def test_import_fixtures_from_default_file(self, cli):
         """Test importing fixtures from udata.commands.fixture.DEFAULT_FIXTURE_FILE."""

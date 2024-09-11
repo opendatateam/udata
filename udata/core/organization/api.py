@@ -10,6 +10,7 @@ from udata.core.badges import api as badges_api
 from udata.core.badges.fields import badge_fields
 from udata.core.contact_point.api import ContactPointApiParser
 from udata.core.contact_point.api_fields import contact_point_page_fields
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api import DatasetApiParser
 from udata.core.dataset.api_fields import dataset_page_fields
 from udata.core.dataset.models import Dataset
@@ -175,7 +176,12 @@ class OrganizationRdfFormatAPI(API):
         page = int(params.get("page", 1))
         page_size = int(params.get("page_size", 100))
         datasets = Dataset.objects(organization=org).visible().paginate(page, page_size)
-        catalog = build_org_catalog(org, datasets, format=format)
+        dataservices = (
+            Dataservice.objects(organization=org)
+            .visible()
+            .filter_by_dataset_pagination(datasets, page)
+        )
+        catalog = build_org_catalog(org, datasets, dataservices, format=format)
         # bypass flask-restplus make_response, since graph_response
         # is handling the content negociation directly
         return make_response(*graph_response(catalog, format))

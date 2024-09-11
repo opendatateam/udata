@@ -84,7 +84,7 @@ class DatasetToRdfTest:
         resources = ResourceFactory.build_batch(3)
         org = OrganizationFactory(name="organization")
         dataset = DatasetFactory(
-            tags=faker.words(nb=3),
+            tags=faker.tags(nb=3),
             resources=resources,
             frequency="daily",
             acronym="acro",
@@ -295,7 +295,7 @@ class RdfToDatasetTest:
         title = faker.sentence()
         acronym = faker.word()
         description = faker.paragraph()
-        tags = faker.words(nb=3)
+        tags = faker.tags(nb=3)
         start = faker.past_date(start_date="-30d")
         end = faker.future_date(end_date="+30d")
         g.set((node, RDF.type, DCAT.Dataset))
@@ -347,8 +347,8 @@ class RdfToDatasetTest:
         node = BNode()
         g = Graph()
 
-        tags = faker.words(nb=3)
-        themes = faker.words(nb=3)
+        tags = faker.tags(nb=3)
+        themes = faker.tags(nb=3)
         g.add((node, RDF.type, DCAT.Dataset))
         g.add((node, DCT.title, Literal(faker.sentence())))
         for tag in tags:

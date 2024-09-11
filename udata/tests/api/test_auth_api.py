@@ -59,6 +59,7 @@ def oauth(app, request):
         name="test-client",
         owner=UserFactory(),
         redirect_uris=["https://test.org/callback"],
+        secret="suchs3cr3t",
     )
     kwargs.update(custom_kwargs)
     return OAuth2Client.objects.create(**kwargs)
@@ -301,7 +302,7 @@ class APIAuthTest:
 
         assert_status(response, 400)
         assert "error" in response.json
-        assert "redirect_uri" in response.json["error_description"]
+        assert "Redirect URI" in response.json["error_description"]
 
     @pytest.mark.options(OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI=True)
     @pytest.mark.oauth(redirect_uris=["https://*.test.org/callback"])
@@ -327,7 +328,7 @@ class APIAuthTest:
 
         assert_status(response, 400)
         assert "error" in response.json
-        assert "redirect_uri" in response.json["error_description"]
+        assert "Redirect URI" in response.json["error_description"]
 
     def test_authorization_grant_token(self, client, oauth):
         client.login()
@@ -360,6 +361,8 @@ class APIAuthTest:
         assert200(response)
         assert response.content_type == "application/json"
         assert "access_token" in response.json
+        tokens = OAuth2Token.objects(access_token=response.json["access_token"])
+        assert len(tokens) == 1  # A token has been created and saved.
 
     def test_s256_code_challenge_success_client_secret_basic(self, client, oauth):
         code_verifier = generate_token(48)
@@ -453,6 +456,93 @@ class APIAuthTest:
         assert200(response)
         assert response.content_type == "application/json"
         assert response.json == {"success": True}
+
+    @pytest.mark.oauth(secret=None)
+    def test_s256_code_challenge_success_no_client_secret(self, client, oauth):
+        """Authenticate through an OAuth client that has no secret associated (public client)"""
+        code_verifier = generate_token(48)
+        code_challenge = create_s256_code_challenge(code_verifier)
+
+        client.login()
+
+        response = client.post(
+            url_for(
+                "oauth.authorize",
+                response_type="code",
+                client_id=oauth.client_id,
+                code_challenge=code_challenge,
+                code_challenge_method="S256",
+            ),
+            {
+                "scope": "default",
+                "accept": "",
+            },
+        )
+        assert "code=" in response.location
+
+        params = dict(url_decode(urlparse.urlparse(response.location).query))
+        code = params["code"]
+
+        response = client.post(
+            url_for("oauth.token"),
+            {
+                "grant_type": "authorization_code",
+                "code": code,
+                "code_verifier": code_verifier,
+                "client_id": oauth.client_id,
+            },
+        )
+
+        assert200(response)
+        assert response.content_type == "application/json"
+        assert "access_token" in response.json
+
+        token = response.json["access_token"]
+
+        response = client.post(
+            url_for("api.fake"), headers={"Authorization": " ".join(["Bearer", token])}
+        )
+
+        assert200(response)
+        assert response.content_type == "application/json"
+        assert response.json == {"success": True}
+
+    def test_s256_code_challenge_missing_client_secret(self, client, oauth):
+        """Fail authentication through an OAuth client with missing secret"""
+        code_verifier = generate_token(48)
+        code_challenge = create_s256_code_challenge(code_verifier)
+
+        client.login()
+
+        response = client.post(
+            url_for(
+                "oauth.authorize",
+                response_type="code",
+                client_id=oauth.client_id,
+                code_challenge=code_challenge,
+                code_challenge_method="S256",
+            ),
+            {
+                "scope": "default",
+                "accept": "",
+            },
+        )
+        assert "code=" in response.location
+
+        params = dict(url_decode(urlparse.urlparse(response.location).query))
+        code = params["code"]
+
+        response = client.post(
+            url_for("oauth.token"),
+            {
+                "grant_type": "authorization_code",
+                "code": code,
+                "code_verifier": code_verifier,
+                "client_id": oauth.client_id,
+            },
+        )
+
+        assert401(response)
 
     def test_authorization_multiple_grant_token(self, client, oauth):
         for i in range(3):
@@ -582,23 +672,36 @@ class APIAuthTest:
         )
 
         assert_status(response, 400)
-        assert response.json["error"] == "invalid_grant"
+        assert response.json["error"] == "unsupported_response_type"
 
     @pytest.mark.oauth(confidential=True)
     def test_refresh_token(self, client, oauth):
         user = UserFactory()
-        token = OAuth2Token.objects.create(
+        token_to_be_refreshed = OAuth2Token.objects.create(
             client=oauth,
             user=user,
             access_token="access-token",
             refresh_token="refresh-token",
         )
+        token_same_user_not_refreshed = OAuth2Token.objects.create(
+            client=oauth,
+            user=user,
+            access_token="same-user-access-token",
+            refresh_token="same-user-refresh-token",
+        )
+        other_token = OAuth2Token.objects.create(
+            client=oauth,
+            user=UserFactory(),
+            access_token="other-access-token",
+            refresh_token="other-refresh-token",
+        )
+        tokens_count = OAuth2Token.objects.count()
 
         response = client.post(
             url_for("oauth.token"),
             {
                 "grant_type": "refresh_token",
-                "refresh_token": token.refresh_token,
+                "refresh_token": token_to_be_refreshed.refresh_token,
             },
             headers=basic_header(oauth),
         )
@@ -606,6 +709,26 @@ class APIAuthTest:
         assert200(response)
         assert response.content_type == "application/json"
         assert "access_token" in response.json
+
+        # Reload from the DB.
+        token_to_be_refreshed.reload()
+        token_same_user_not_refreshed.reload()
+        other_token.reload()
+
+        assert tokens_count == OAuth2Token.objects.count()  # No new token created.
+
+        # The access token has been refreshed.
+        assert token_to_be_refreshed.access_token != "access-token"
+        # The refresh token is also updated.
+        assert token_to_be_refreshed.refresh_token != "refresh-token"
+
+        # No change to the user's other token.
+        assert token_same_user_not_refreshed.access_token == "same-user-access-token"
+        assert token_same_user_not_refreshed.refresh_token == "same-user-refresh-token"
+
+        # No change to other token.
+        assert other_token.access_token == "other-access-token"
+        assert other_token.refresh_token == "other-refresh-token"
 
     @pytest.mark.parametrize("token_type", ["access_token", "refresh_token"])
     def test_revoke_token(self, client, oauth, token_type):

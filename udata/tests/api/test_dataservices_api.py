@@ -1,6 +1,8 @@
 import time
 from datetime import datetime
+from xml.etree.ElementTree import XML
 
+import pytest
 from flask import url_for
 
 from udata.core.badges.models import Badge
@@ -12,6 +14,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.user.factories import UserFactory
 from udata.i18n import gettext as _
+from udata.tests.helpers import assert200, assert_redirects
 
 from . import APITestCase
 
@@ -102,8 +105,29 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(dataservice.base_api_url, "https://example.org")
         self.assertIsNotNone(dataservice.deleted_at)
 
-        # response = self.get(url_for('api.dataservice', dataservice=dataservice))
-        # self.assert410(response)
+        # We can access deleted element as the creator
+        response = self.get(url_for("api.dataservice", dataservice=dataservice))
+        self.assert200(response)
+
+        # We cannot access deleted element as random user
+        self.login()
+        response = self.get(url_for("api.dataservice", dataservice=dataservice))
+        self.assert410(response)
+
+        # We can undelete with a patch
+        self.login(user)
+        response = self.patch(
+            url_for("api.dataservice", dataservice=dataservice),
+            {
+                "title": "Undeleted title",
+                "deleted_at": None,
+            },
+        )
+        self.assert200(response)
+
+        dataservice.reload()
+        self.assertEqual(dataservice.title, "Undeleted title")
+        self.assertIsNone(dataservice.deleted_at)
 
     def test_dataservice_api_index(self):
         dataset_a = DatasetFactory()
@@ -409,3 +433,57 @@ class DataserviceAPITest(APITestCase):
 
         assert dataservices[0]["title"] == dataservice_a.title
         assert dataservices[1]["title"] == dataservice_c.title
+
+
+@pytest.mark.frontend
+class DataserviceRdfViewsTest:
+    def test_rdf_default_to_jsonld(self, client):
+        dataservice = DataserviceFactory()
+        expected = url_for("api.dataservice_rdf_format", dataservice=dataservice.id, format="json")
+        response = client.get(url_for("api.dataservice_rdf", dataservice=dataservice))
+        assert_redirects(response, expected)
+
+    def test_rdf_perform_content_negociation(self, client):
+        dataservice = DataserviceFactory()
+        expected = url_for("api.dataservice_rdf_format", dataservice=dataservice.id, format="xml")
+        url = url_for("api.dataservice_rdf", dataservice=dataservice)
+        headers = {"accept": "application/xml"}
+        response = client.get(url, headers=headers)
+        assert_redirects(response, expected)
+
+    def test_rdf_perform_content_negociation_response(self, client):
+        """Check we have valid XML as output"""
+        dataservice = DataserviceFactory()
+        url = url_for("api.dataservice_rdf", dataservice=dataservice)
+        headers = {"accept": "application/xml"}
+        response = client.get(url, headers=headers, follow_redirects=True)
+        element = XML(response.data)
+        assert element.tag == "{http://www.w3.org/1999/02/22-rdf-syntax-ns#}RDF"
+
+    def test_dataservice_rdf_json_ld(self, client):
+        dataservice = DataserviceFactory()
+        for fmt in "json", "jsonld":
+            url = url_for("api.dataservice_rdf_format", dataservice=dataservice, format=fmt)
+            response = client.get(url, headers={"Accept": "application/ld+json"})
+            assert200(response)
+            assert response.content_type == "application/ld+json"
+            assert response.json["@context"]["@vocab"] == "http://www.w3.org/ns/dcat#"
+
+    @pytest.mark.parametrize(
+        "fmt,mime",
+        [
+            ("n3", "text/n3"),
+            ("nt", "application/n-triples"),
+            ("ttl", "application/x-turtle"),
+            ("xml", "application/rdf+xml"),
+            ("rdf", "application/rdf+xml"),
+            ("owl", "application/rdf+xml"),
+            ("trig", "application/trig"),
+        ],
+    )
+    def test_dataservice_rdf_formats(self, client, fmt, mime):
+        dataservice = DataserviceFactory()
+        url = url_for("api.dataservice_rdf_format", dataservice=dataservice, format=fmt)
+        response = client.get(url, headers={"Accept": mime})
+        assert200(response)
+        assert response.content_type == mime

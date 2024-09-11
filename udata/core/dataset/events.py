@@ -49,7 +49,10 @@ def publish(url, document, resource_id, action):
         "dataset_id": str(document.id),
         "document": resource,
     }
-    r = requests.post(url, json=payload)
+    headers = {}
+    if current_app.config["RESOURCES_ANALYSER_API_KEY"]:
+        headers = {"Authorization": f"Bearer {current_app.config['RESOURCES_ANALYSER_API_KEY']}"}
+    r = requests.post(url, json=payload, headers=headers)
     r.raise_for_status()
 
 

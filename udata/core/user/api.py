@@ -1,3 +1,5 @@
+from typing import Optional
+
 from flask_security import current_user, logout_user
 from slugify import slugify
 
@@ -359,8 +361,27 @@ suggest_parser = api.parser()
 suggest_parser.add_argument(
     "q", help="The string to autocomplete/suggest", location="args", required=True
 )
+
+
+def suggest_size(value: str) -> Optional[int]:
+    """Parse an integer that must be between 1 and 20."""
+    help_message = "The size must be an integer between 1 and 20."
+    try:
+        parsed = int(value)
+    except ValueError:
+        raise ValueError(help_message)
+
+    if parsed < 1 or parsed > 20:
+        raise ValueError(help_message)
+    return parsed
+
+
 suggest_parser.add_argument(
-    "size", type=int, help="The amount of suggestion to fetch", location="args", default=10
+    "size",
+    type=suggest_size,
+    help="The amount of suggestion to fetch (between 1 and 20)",
+    location="args",
+    default=10,
 )
 
 

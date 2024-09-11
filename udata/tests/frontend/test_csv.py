@@ -59,7 +59,7 @@ class FakeFactory(MongoEngineFactory):
 
     title = factory.LazyAttribute(lambda o: faker.sentence())
     description = factory.LazyAttribute(lambda o: faker.paragraph())
-    tags = factory.LazyAttribute(lambda o: [faker.word() for _ in range(1, randint(1, 4))])
+    tags = factory.LazyAttribute(lambda o: faker.tags(randint(1, 4)))
     sub = factory.SubFactory(NestedFactory)
 
 

@@ -1,17 +1,22 @@
 from datetime import datetime
 
 import mongoengine
-from flask import request
+from flask import make_response, redirect, request, url_for
 from flask_login import current_user
 
 from udata.api import API, api
 from udata.api_fields import patch
 from udata.core.dataset.permissions import OwnablePermission
 from udata.core.followers.api import FollowAPI
+from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
 
 from .models import Dataservice
+from .permissions import DataserviceEditPermission
+from .rdf import dataservice_to_rdf
 
 ns = api.namespace("dataservices", "Dataservices related operations (beta)")
+
+common_doc = {"params": {"dataservice": "The dataservice ID or slug"}}
 
 
 @ns.route("/", endpoint="dataservices")
@@ -58,7 +63,10 @@ class DataserviceAPI(API):
     @api.expect(Dataservice.__write_fields__)
     @api.marshal_with(Dataservice.__read_fields__)
     def patch(self, dataservice):
-        if dataservice.deleted_at:
+        if dataservice.deleted_at and not (
+            # Allow requests containing "deleted_at: None" to undelete.
+            "deleted_at" in request.json and request.json.get("deleted_at") is None
+        ):
             api.abort(410, "dataservice has been deleted")
 
         OwnablePermission(dataservice).test()
@@ -85,6 +93,37 @@ class DataserviceAPI(API):
         dataservice.save()
 
         return "", 204
+
+
+@ns.route("/<dataservice:dataservice>/rdf", endpoint="dataservice_rdf", doc=common_doc)
+@api.response(404, "Dataservice not found")
+@api.response(410, "Dataservice has been deleted")
+class DataserviceRdfAPI(API):
+    @api.doc("rdf_dataservice")
+    def get(self, dataservice):
+        format = RDF_EXTENSIONS[negociate_content()]
+        url = url_for("api.dataservice_rdf_format", dataservice=dataservice.id, format=format)
+        return redirect(url)
+
+
+@ns.route(
+    "/<dataservice:dataservice>/rdf.<format>", endpoint="dataservice_rdf_format", doc=common_doc
+)
+@api.response(404, "Dataservice not found")
+@api.response(410, "Dataservice has been deleted")
+class DataserviceRdfFormatAPI(API):
+    @api.doc("rdf_dataservice_format")
+    def get(self, dataservice, format):
+        if not DataserviceEditPermission(dataservice).can():
+            if dataservice.private:
+                api.abort(404)
+            elif dataservice.deleted_at:
+                api.abort(410)
+
+        resource = dataservice_to_rdf(dataservice)
+        # bypass flask-restplus make_response, since graph_response
+        # is handling the content negociation directly
+        return make_response(*graph_response(resource, format))
 
 
 @ns.route("/<id>/followers/", endpoint="dataservice_followers")

@@ -1,6 +1,6 @@
 import logging
 
-from flask import request
+from flask import g, request
 from werkzeug.datastructures import Headers
 
 log = logging.getLogger(__name__)
@@ -15,10 +15,10 @@ def add_vary(headers: Headers, header: str):
 
 def add_actual_request_headers(headers: Headers) -> Headers:
     origin = request.headers.get("Origin", None)
+    add_vary(headers, "Origin")
+
     if origin:
         headers.set("Access-Control-Allow-Origin", origin)
-        add_vary(headers, "Origin")
-
         headers.set("Access-Control-Allow-Credentials", "true")
 
     return headers
@@ -32,19 +32,24 @@ def is_preflight_request() -> bool:
 
 
 def is_allowed_cors_route():
+    if g and hasattr(g, "lang_code"):
+        path: str = request.path.removeprefix(f"/{g.lang_code}")
+    else:
+        path: str = request.path
     return (
-        request.path.endswith((".js", ".css", ".woff", ".woff2", ".png", ".jpg", ".jpeg", ".svg"))
-        or request.path.startswith("/api")
-        or request.path.startswith("/oauth")
+        path.endswith((".js", ".css", ".woff", ".woff2", ".png", ".jpg", ".jpeg", ".svg"))
+        or path.startswith("/api")
+        or path.startswith("/oauth")
+        or path.startswith("/datasets/r/")
     )
 
 
 def add_preflight_request_headers(headers: Headers) -> Headers:
     origin = request.headers.get("Origin", None)
+    add_vary(headers, "Origin")
+
     if origin:
         headers.set("Access-Control-Allow-Origin", origin)
-        add_vary(headers, "Origin")
-
         headers.set("Access-Control-Allow-Credentials", "true")
 
         # The API allows all methods, so just copy the browser requested methods from the request headers.

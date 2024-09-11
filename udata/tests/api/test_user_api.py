@@ -141,6 +141,17 @@ class UserAPITest(APITestCase):
             self.assertEqual(suggestion["first_name"], "test")
             self.assertEqual(suggestion["last_name"], "homonym")
 
+    def test_suggest_users_api_size_validation(self):
+        """It should validate that the size parameter is between 1 and 20."""
+        response = self.get(url_for("api.suggest_users"), qs={"q": "foobar", "size": "0"})
+        self.assert400(response)
+        self.assertIn("between 1 and 20", response.json["errors"]["size"])
+
+        response = self.get(url_for("api.suggest_users"), qs={"q": "foobar", "size": "21"})
+
+        self.assert400(response)
+        self.assertIn("between 1 and 20", response.json["errors"]["size"])
+
     def test_user_api_full_text_search_first_name(self):
         """It should find users based on first name"""
         self.login(AdminFactory())

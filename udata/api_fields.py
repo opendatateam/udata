@@ -2,6 +2,7 @@ import flask_restx.fields as restx_fields
 import mongoengine
 import mongoengine.fields as mongo_fields
 from bson import ObjectId
+from flask_restx.inputs import boolean
 from flask_storage.mongo import ImageField as FlaskStorageImageField
 
 import udata.api.fields as custom_restx_fields
@@ -92,12 +93,14 @@ def convert_db_to_field(key, field, info):
 
         def constructor_write(**kwargs):
             return restx_fields.List(field_write, **kwargs)
+
     elif isinstance(
         field, (mongo_fields.GenericReferenceField, mongoengine.fields.GenericLazyReferenceField)
     ):
 
         def constructor(**kwargs):
             return restx_fields.Nested(lazy_reference, **kwargs)
+
     elif isinstance(field, mongo_fields.ReferenceField):
         # For reference we accept while writing a String representing the ID of the referenced model.
         # For reading, if the user supplied a `nested_fields` (RestX model), we use it to convert
@@ -120,6 +123,7 @@ def convert_db_to_field(key, field, info):
 
             def constructor(**kwargs):
                 return restx_fields.Nested(nested_fields, **kwargs)
+
         elif hasattr(field.document_type_obj, "__read_fields__"):
 
             def constructor_read(**kwargs):
@@ -127,6 +131,7 @@ def convert_db_to_field(key, field, info):
 
             def constructor_write(**kwargs):
                 return restx_fields.Nested(field.document_type_obj.__write_fields__, **kwargs)
+
         else:
             raise ValueError(
                 f"EmbeddedDocumentField `{key}` requires a `nested_fields` param to serialize/deserialize or a `@generate_fields()` definition."
@@ -187,7 +192,10 @@ def generate_fields(**kwargs):
             sortable_key = info.get("sortable", False)
             if sortable_key:
                 sortables.append(
-                    {"key": sortable_key if isinstance(sortable_key, str) else key, "value": key}
+                    {
+                        "key": sortable_key if isinstance(sortable_key, str) else key,
+                        "value": key,
+                    }
                 )
 
             filterable = info.get("filterable", None)
@@ -208,7 +216,7 @@ def generate_fields(**kwargs):
                 if "type" not in filterable:
                     filterable["type"] = str
                     if isinstance(field, mongo_fields.BooleanField):
-                        filterable["type"] = bool
+                        filterable["type"] = boolean
 
                 # We may add more information later here:
                 # - type of mongo query to execute (right now only simple =)
@@ -305,7 +313,11 @@ def generate_fields(**kwargs):
             parser.add_argument("q", type=str, location="args")
 
         for filterable in filterables:
-            parser.add_argument(filterable["key"], type=filterable["type"], location="args")
+            parser.add_argument(
+                filterable["key"],
+                type=filterable["type"],
+                location="args",
+            )
 
         cls.__index_parser__ = parser
 
@@ -354,7 +366,7 @@ def generate_fields(**kwargs):
                     base_query = base_query.search_text(phrase_query)
 
                 for filterable in filterables:
-                    if args.get(filterable["key"]):
+                    if args.get(filterable["key"]) is not None:
                         for constraint in filterable["constraints"]:
                             if constraint == "objectid" and not ObjectId.is_valid(
                                 args[filterable["key"]]

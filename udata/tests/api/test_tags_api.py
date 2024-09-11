@@ -13,7 +13,7 @@ class TagsAPITest:
     def test_suggest_tags_api(self, api):
         """It should suggest tags"""
         for i in range(3):
-            tags = [faker.word(), faker.word(), "test", "test-{0}".format(i)]
+            tags = [faker.tag(), faker.tag(), "test", "test-{0}".format(i)]
             ReuseFactory(tags=tags, visible=True)
             DatasetFactory(tags=tags, visible=True)
 
@@ -33,7 +33,7 @@ class TagsAPITest:
     def test_suggest_tags_api_with_unicode(self, api):
         """It should suggest tags"""
         for i in range(3):
-            tags = [faker.word(), faker.word(), "testé", "testé-{0}".format(i)]
+            tags = [faker.tag(), faker.tag(), "testé", "testé-{0}".format(i)]
             ReuseFactory(tags=tags, visible=True)
             DatasetFactory(tags=tags, visible=True)
 

@@ -1,5 +1,6 @@
 import logging
 
+from bson import ObjectId
 from mongoengine.errors import DoesNotExist
 
 from udata.api import API, api, fields
@@ -61,13 +62,19 @@ activity_parser.add_argument(
     help="Filter activities for that particular organization",
     location="args",
 )
+activity_parser.add_argument(
+    "related_to",
+    type=str,
+    help="Filter activities for that particular object id (ex : reuse, dataset, etc.)",
+    location="args",
+)
 
 
 @api.route("/activity", endpoint="activity")
 class SiteActivityAPI(API):
     @api.doc("activity")
     @api.expect(activity_parser)
-    @api.marshal_list_with(activity_page_fields)
+    @api.marshal_with(activity_page_fields)
     def get(self):
         """Fetch site activity, optionally filtered by user of org."""
         args = activity_parser.parse_args()
@@ -78,6 +85,12 @@ class SiteActivityAPI(API):
 
         if args["user"]:
             qs = qs(actor=args["user"])
+
+        if args["related_to"]:
+            if not ObjectId.is_valid(args["related_to"]):
+                api.abort(400, "`related_to` arg must be an identifier")
+
+            qs = qs(related_to=args["related_to"])
 
         qs = qs.order_by("-created_at")
         qs = qs.paginate(args["page"], args["page_size"])

@@ -11,6 +11,7 @@ class OrganizationCsvAdapter(csv.Adapter):
     fields = (
         "id",
         "name",
+        "acronym",
         "slug",
         ("url", "external_url"),
         "description",

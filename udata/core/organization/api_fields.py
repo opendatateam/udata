@@ -45,7 +45,7 @@ org_ref_fields = api.inherit(
 from udata.core.user.api_fields import user_ref_fields  # noqa
 
 
-def check_can_access_email():
+def check_can_access_user_private_info():
     # This endpoint is secure, only organization member has access.
     if request.endpoint == "api.request_membership":
         return True
@@ -65,8 +65,13 @@ member_user_with_email_fields = api.inherit(
     user_ref_fields,
     {
         "email": fields.Raw(
-            attribute=lambda o: o.email if check_can_access_email() else None,
-            description="The user email (only present on show organization endpoint if the current user has edit permission on the org)",
+            attribute=lambda o: o.email if check_can_access_user_private_info() else None,
+            description="The user email (only present on show organization endpoint if the current user is member of the organization: admin or editor)",
+            readonly=True,
+        ),
+        "last_login_at": fields.Raw(
+            attribute=lambda o: o.last_login_at if check_can_access_user_private_info() else None,
+            description="The user last connection date (only present on show organization endpoint if the current user is member of the organization: admin or editor)",
             readonly=True,
         ),
     },
