@@ -2,6 +2,7 @@ from datetime import datetime
 
 import pytest
 from flask import url_for
+from werkzeug.test import TestResponse
 
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory
@@ -20,8 +21,10 @@ from udata.core.discussions.tasks import (
     notify_new_discussion_comment,
 )
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.models import Organization
 from udata.core.spam.signals import on_new_potential_spam
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.core.user.models import User
 from udata.models import Dataset, Member
 from udata.tests.helpers import capture_mails
 from udata.utils import faker
@@ -359,16 +362,43 @@ class DiscussionsTest(APITestCase):
 
         self.assertEqual(len(response.json["data"]), len(discussions))
 
-    def test_list_discussions_org(self):
-        organization = OrganizationFactory()
-        user = UserFactory()
-        _discussion = DiscussionFactory(user=user)
-        discussion_for_org = DiscussionFactory(subject=organization, user=user)
+    def test_list_discussions_org(self) -> None:
+        organization: Organization = OrganizationFactory()
+        user: User = UserFactory()
+        _discussion: Discussion = DiscussionFactory(user=user)
+        discussion_for_org: Discussion = DiscussionFactory(subject=organization, user=user)
 
-        response = self.get(url_for("api.discussions", org=organization.id))
+        response: TestResponse = self.get(url_for("api.discussions", org=organization.id))
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(response.json["data"][0]["id"], str(discussion_for_org.id))
+
+    def test_list_discussions_sort(self) -> None:
+        user: User = UserFactory()
+        sorting_keys_dict: dict = {
+            "title": ["aaa", "bbb"],
+            "created": ["2023-12-12", "2024-01-01"],
+            "closed": ["2023-12-12", "2024-01-01"],
+        }
+        for sorting_key, values in sorting_keys_dict.items():
+            discussion1: Discussion = DiscussionFactory(user=user, **{sorting_key: values[0]})
+            discussion2: Discussion = DiscussionFactory(user=user, **{sorting_key: values[1]})
+
+            response: TestResponse = self.get(url_for("api.discussions", sort=sorting_key))
+            self.assert200(response)
+            self.assertEqual(len(response.json["data"]), 2)
+            self.assertEqual(response.json["data"][0]["id"], str(discussion1.id))
+            self.assertEqual(response.json["data"][1]["id"], str(discussion2.id))
+
+            # Reverse sort
+            response: TestResponse = self.get(url_for("api.discussions", sort="-" + sorting_key))
+            self.assert200(response)
+            self.assertEqual(len(response.json["data"]), 2)
+            self.assertEqual(response.json["data"][0]["id"], str(discussion2.id))
+            self.assertEqual(response.json["data"][1]["id"], str(discussion1.id))
+
+            # Clean slate
+            Discussion.objects.delete()
 
     def test_list_discussions_user(self):
         dataset = DatasetFactory()

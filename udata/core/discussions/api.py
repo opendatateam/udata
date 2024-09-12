@@ -74,8 +74,15 @@ comment_discussion_fields = api.model(
 discussion_page_fields = api.model("DiscussionPage", fields.pager(discussion_fields))
 
 parser = api.parser()
+sorting_keys: list[str] = ["created", "title", "closed"]
+sorting_choices: list[str] = sorting_keys + ["-" + k for k in sorting_keys]
 parser.add_argument(
-    "sort", type=str, default="-created", location="args", help="The sorting attribute"
+    "sort",
+    type=str,
+    default="-created",
+    choices=sorting_choices,
+    location="args",
+    help="The field (and direction) on which sorting apply",
 )
 parser.add_argument(
     "closed",
