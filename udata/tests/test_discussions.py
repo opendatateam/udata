@@ -4,6 +4,7 @@ import pytest
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.discussions.factories import DiscussionFactory
 from udata.core.discussions.metrics import update_discussions_metric  # noqa
 from udata.core.discussions.models import Discussion, Message
 from udata.core.discussions.notifications import discussions_notifications
@@ -357,6 +358,17 @@ class DiscussionsTest(APITestCase):
         self.assert200(response)
 
         self.assertEqual(len(response.json["data"]), len(discussions))
+
+    def test_list_discussions_org(self):
+        organization = OrganizationFactory()
+        user = UserFactory()
+        _discussion = DiscussionFactory(user=user)
+        discussion_for_org = DiscussionFactory(subject=organization, user=user)
+
+        response = self.get(url_for("api.discussions", org=organization.id))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(response.json["data"][0]["id"], str(discussion_for_org.id))
 
     def test_list_discussions_user(self):
         dataset = DatasetFactory()

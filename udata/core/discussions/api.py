@@ -6,6 +6,7 @@ from flask_security import current_user
 
 from udata.api import API, api, fields
 from udata.auth import admin_permission
+from udata.core.organization.models import Organization
 from udata.core.spam.api import SpamAPIMixin
 from udata.core.spam.fields import spam_fields
 from udata.core.user.api_fields import user_ref_fields
@@ -84,6 +85,9 @@ parser.add_argument(
 )
 parser.add_argument(
     "for", type=str, location="args", action="append", help="Filter discussions for a given subject"
+)
+parser.add_argument(
+    "org", type=str, location="args", help="Filter discussions for a given organization"
 )
 parser.add_argument("user", type=str, location="args", help="Filter discussions created by a user")
 parser.add_argument("page", type=int, default=1, location="args", help="The page to fetch")
@@ -198,6 +202,9 @@ class DiscussionsAPI(API):
         discussions = Discussion.objects
         if args["for"]:
             discussions = discussions.generic_in(subject=args["for"])
+        if args["org"]:
+            org = Organization.objects.get(id=ObjectId(args["org"]))
+            discussions = discussions(subject=org)
         if args["user"]:
             discussions = discussions(discussion__posted_by=ObjectId(args["user"]))
         if args["closed"] is False:
