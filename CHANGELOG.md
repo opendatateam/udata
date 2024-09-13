@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 9.2.0 (2024-09-13)
 
 - Allow OAuth clients without secrets [#3138](https://github.com/opendatateam/udata/pull/3138)
 - Add a `archived` button for datasets and reuses on frontend admin [#3104](https://github.com/opendatateam/udata/pull/3104)
