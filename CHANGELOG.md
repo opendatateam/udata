@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 9.2.0 (2024-09-13)
 
 - Allow OAuth clients without secrets [#3138](https://github.com/opendatateam/udata/pull/3138)
