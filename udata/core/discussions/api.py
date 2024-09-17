@@ -6,7 +6,10 @@ from flask_security import current_user
 
 from udata.api import API, api, fields
 from udata.auth import admin_permission
+from udata.core.dataservices.models import Dataservice
+from udata.core.dataset.models import Dataset
 from udata.core.organization.models import Organization
+from udata.core.reuse.models import Reuse
 from udata.core.spam.api import SpamAPIMixin
 from udata.core.spam.fields import spam_fields
 from udata.core.user.api_fields import user_ref_fields
@@ -211,7 +214,11 @@ class DiscussionsAPI(API):
             discussions = discussions.generic_in(subject=args["for"])
         if args["org"]:
             org = Organization.objects.get(id=ObjectId(args["org"]))
-            discussions = discussions(subject=org)
+            reuses = Reuse.objects(organization=org).only("id")
+            datasets = Dataset.objects(organization=org).only("id")
+            dataservices = Dataservice.objects(organization=org).only("id")
+            subjects = list(reuses) + list(datasets) + list(dataservices)
+            discussions = discussions(subject__in=subjects).order_by("-created")
         if args["user"]:
             discussions = discussions(discussion__posted_by=ObjectId(args["user"]))
         if args["closed"] is False:
