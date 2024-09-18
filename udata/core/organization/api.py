@@ -422,6 +422,27 @@ class OrganizationSuggestAPI(API):
         ]
 
 
+@ns.route("/suggest_credits/", endpoint="suggest_credits")
+class SuggestCreditsAPI(API):
+    @api.doc("suggest_credits")
+    @api.expect(suggest_parser)
+    def get(self):
+        """Organizations credits suggest endpoint using mongoDB contains"""
+        args = suggest_parser.parse_args()
+        credits = set(
+            credit
+            for dat in Dataset.objects(
+                Q(**{"extras__harvest__dct:publishers__icontains": args["q"]})
+                | Q(**{"extras__harvest__dct:creators__icontains": args["q"]})
+                | Q(**{"extras__harvest__dct:contributors__icontains": args["q"]})
+            ).only("extras")
+            for credit in dat.credits
+            if args["q"].lower() in credit.lower()
+        )
+        results = [{"text": credit} for credit in credits]
+        return sorted(results, key=lambda o: len(o["text"]))
+
+
 @ns.route("/<org:org>/logo", endpoint="organization_logo")
 @api.doc(**common_doc)
 class AvatarAPI(API):

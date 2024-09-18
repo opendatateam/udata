@@ -928,6 +928,14 @@ class Dataset(WithMetrics, BadgeMixin, Owned, db.Document):
         }
 
     @property
+    def credits(self):
+        return (
+            self.extras.get("harvest", {}).get("dct:publishers", [])
+            + self.extras.get("harvest", {}).get("dct:creators", [])
+            + self.extras.get("harvest", {}).get("dct:contributors", [])
+        )
+
+    @property
     def views_count(self):
         return self.metrics.get("views", 0)
 
