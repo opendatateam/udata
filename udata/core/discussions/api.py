@@ -6,6 +6,10 @@ from flask_security import current_user
 
 from udata.api import API, api, fields
 from udata.auth import admin_permission
+from udata.core.dataservices.models import Dataservice
+from udata.core.dataset.models import Dataset
+from udata.core.organization.models import Organization
+from udata.core.reuse.models import Reuse
 from udata.core.spam.api import SpamAPIMixin
 from udata.core.spam.fields import spam_fields
 from udata.core.user.api_fields import user_ref_fields
@@ -73,8 +77,15 @@ comment_discussion_fields = api.model(
 discussion_page_fields = api.model("DiscussionPage", fields.pager(discussion_fields))
 
 parser = api.parser()
+sorting_keys: list[str] = ["created", "title", "closed"]
+sorting_choices: list[str] = sorting_keys + ["-" + k for k in sorting_keys]
 parser.add_argument(
-    "sort", type=str, default="-created", location="args", help="The sorting attribute"
+    "sort",
+    type=str,
+    default="-created",
+    choices=sorting_choices,
+    location="args",
+    help="The field (and direction) on which sorting apply",
 )
 parser.add_argument(
     "closed",
@@ -84,6 +95,9 @@ parser.add_argument(
 )
 parser.add_argument(
     "for", type=str, location="args", action="append", help="Filter discussions for a given subject"
+)
+parser.add_argument(
+    "org", type=str, location="args", help="Filter discussions for a given organization"
 )
 parser.add_argument("user", type=str, location="args", help="Filter discussions created by a user")
 parser.add_argument("page", type=int, default=1, location="args", help="The page to fetch")
@@ -198,6 +212,15 @@ class DiscussionsAPI(API):
         discussions = Discussion.objects
         if args["for"]:
             discussions = discussions.generic_in(subject=args["for"])
+        if args["org"]:
+            org = Organization.objects.get_or_404(id=id_or_404(args["org"]))
+            if not org:
+                api.abort(404, "Organization does not exist")
+            reuses = Reuse.objects(organization=org).only("id")
+            datasets = Dataset.objects(organization=org).only("id")
+            dataservices = Dataservice.objects(organization=org).only("id")
+            subjects = list(reuses) + list(datasets) + list(dataservices)
+            discussions = discussions(subject__in=subjects)
         if args["user"]:
             discussions = discussions(discussion__posted_by=ObjectId(args["user"]))
         if args["closed"] is False:
