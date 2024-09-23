@@ -100,6 +100,7 @@ class DatasetApiParser(ModelApiParser):
         self.parser.add_argument("schema", type=str, location="args")
         self.parser.add_argument("schema_version", type=str, location="args")
         self.parser.add_argument("topic", type=str, location="args")
+        self.parser.add_argument("credit", type=str, location="args")
 
     @staticmethod
     def parse_filters(datasets, args):
@@ -148,6 +149,12 @@ class DatasetApiParser(ModelApiParser):
                 pass
             else:
                 datasets = datasets.filter(id__in=[d.id for d in topic.datasets])
+        if args.get("credit"):
+            datasets = datasets.filter(
+                Q(**{"extras__harvest__dct:publishers": args.get("credit")})
+                | Q(**{"extras__harvest__dct:creators": args.get("credit")})
+                | Q(**{"extras__harvest__dct:contributors": args.get("credit")})
+            )
         return datasets
 
 

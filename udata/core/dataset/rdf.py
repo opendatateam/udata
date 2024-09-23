@@ -26,6 +26,7 @@ from udata.rdf import (
     DCT,
     EUFORMAT,
     EUFREQ,
+    FOAF,
     FREQ,
     HVD_LEGISLATION,
     IANAFORMAT,
@@ -35,6 +36,7 @@ from udata.rdf import (
     SKOS,
     SPDX,
     TAG_TO_EU_HVD_CATEGORIES,
+    VCARD,
     contact_point_from_rdf,
     namespace_manager,
     rdf_value,
@@ -532,6 +534,41 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     return resource
 
 
+def additionnal_extras_from_rdf(d: Graph):
+    extras = {}
+
+    # Responsible Party Roles
+    def generic_contact(d, node):
+        for contact in d.objects(node):
+            if rdf_value(contact, FOAF.name):
+                yield rdf_value(contact, FOAF.name)
+            elif rdf_value(contact, VCARD.fn):
+                yield rdf_value(contact, VCARD.fn)
+            else:
+                yield contact.identifier.toPython()
+
+    publishers = list(generic_contact(d, DCT.publisher))
+    if publishers:
+        extras["dct:publishers"] = publishers
+    creators = list(generic_contact(d, DCT.creator))
+    if creators:
+        extras["dct:creators"] = creators
+    contributors = list(generic_contact(d, DCT.contributor))
+    if contributors:
+        extras["dct:contributors"] = contributors
+
+    # Access Rights
+    access_rights = rdf_value(d, DCT.accessRights)
+    if access_rights:
+        extras["dct:accessRights"] = access_rights
+
+    # Provenance
+    provenance = [p.value(RDFS.label) for p in d.objects(DCT.provenance)]
+    if provenance:
+        extras["dct:provenance"] = provenance
+    return extras
+
+
 def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     """
     Create or update a dataset from a RDF/DCAT graph
@@ -571,18 +608,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
         dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
 
     # Adding some metadata to extras - may be moved to property if relevant
-    access_rights = rdf_value(d, DCT.accessRights)
-    if access_rights:
-        dataset.extras["harvest"] = {
-            "dct:accessRights": access_rights,
-            **dataset.extras.get("harvest", {}),
-        }
-    provenance = [p.value(RDFS.label) for p in d.objects(DCT.provenance)]
-    if provenance:
-        dataset.extras["harvest"] = {
-            "dct:provenance": provenance,
-            **dataset.extras.get("harvest", {}),
-        }
+    dataset.extras["harvest"] = additionnal_extras_from_rdf(d)
 
     licenses = set()
     for distrib in d.objects(DCAT.distribution | DCAT.distributions):
