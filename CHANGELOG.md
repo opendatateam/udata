@@ -2,6 +2,10 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 9.2.1 (2024-09-23)
+
 - Enable basic search on dataservices [#3148](https://github.com/opendatateam/udata/pull/3148)
 
 ## 9.2.0 (2024-09-13)
