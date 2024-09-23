@@ -471,7 +471,8 @@ def title_from_rdf(rdf, url):
 def access_rights_from_rdf(resource: RdfResource):
     top_el = resource.value(DCT.accessRights)
     if top_el:
-        return rdf_value(top_el, RDFS.label)
+        # try to find a structured label or fallback on the raw value
+        return rdf_value(top_el, RDFS.label) or rdf_value(resource, DCT.accessRights)
 
 
 def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
