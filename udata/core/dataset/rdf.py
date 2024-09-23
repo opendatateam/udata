@@ -607,8 +607,9 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     dataset_access_rights = access_rights_from_rdf(d)
     if not dataset_access_rights:
         distribs_access_rights = set(
-            resource.extras.get("harvest", {}).get("dct:accessRights")
+            resource.extras["harvest"]["dct:accessRights"]
             for resource in dataset.resources
+            if resource.extras.get("harvest", {}).get("dct:accessRights") is not None
         )
         if len(distribs_access_rights) == 1:
             dataset_access_rights = distribs_access_rights.pop()
