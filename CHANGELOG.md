@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 9.2.1 (2024-09-23)
 
 - Enable basic search on dataservices [#3148](https://github.com/opendatateam/udata/pull/3148)
 
