@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add a filter on organization and document sort parameters in the `/discussions` endpoint [#3147](https://github.com/opendatateam/udata/pull/3147)
 
 ## 9.2.1 (2024-09-23)
 
@@ -18,7 +18,6 @@
 - Fix the boolean filters in the API for the "new system" endpoints [#3139](https://github.com/opendatateam/udata/pull/3139)
 - Update authlib dependency from 0.14.3 to 1.3.1 [#3135](https://github.com/opendatateam/udata/pull/3135)
 - Add CORS on resource redirect [#3145](https://github.com/opendatateam/udata/pull/3145)
-- Add a filter on organization and document sort parameters in the `/discussions` endpoint [#3147](https://github.com/opendatateam/udata/pull/3147)
 
 ## 9.1.4 (2024-08-26)
 
