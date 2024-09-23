@@ -468,6 +468,12 @@ def title_from_rdf(rdf, url):
             return i18n._("Nameless resource")
 
 
+def access_rights_from_rdf(resource: RdfResource):
+    top_el = resource.value(DCT.accessRights)
+    if top_el:
+        return rdf_value(top_el, RDFS.label)
+
+
 def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     """
     Map a Resource domain model to a DCAT/RDF graph
@@ -505,6 +511,13 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     schema = schema_from_rdf(distrib)
     if schema:
         resource.schema = schema
+
+    access_rights = access_rights_from_rdf(distrib)
+    if access_rights:
+        resource.extras["harvest"] = {
+            **resource.extras.get("harvest", {}),
+            "dct:accessRights": access_rights,
+        }
 
     checksum = distrib.value(SPDX.checksum)
     if checksum:
@@ -571,14 +584,6 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
         dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
 
     # Adding some metadata to extras - may be moved to property if relevant
-    access_rights = rdf_value(d, DCT.accessRights)
-    if access_rights:
-        ar = dataset.extras["harvest"].get("dct:accessRights", {})
-        ar['dataset'] = str(access_rights.value())
-        dataset.extras["harvest"] = {
-            "dct:accessRights": ar
-            **dataset.extras.get("harvest", {}),
-        }
     provenance = [p.value(RDFS.label) for p in d.objects(DCT.provenance)]
     if provenance:
         dataset.extras["harvest"] = {
@@ -587,7 +592,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
         }
 
     licenses = set()
-    for i, distrib in enumerate(d.objects(DCAT.distribution | DCAT.distributions)):
+    for distrib in d.objects(DCAT.distribution | DCAT.distributions):
         resource_from_rdf(distrib, dataset)
         for predicate in DCT.license, DCT.rights:
             value = distrib.value(predicate)
@@ -595,14 +600,23 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
                 licenses.add(value.toPython())
             elif isinstance(value, RdfResource):
                 licenses.add(value.identifier.toPython())
-        access_rights = [p.value(RDFS.label) for p in distrib.objects(DCT.accessRights)]
-        if access_rights:
-            ar = dataset.extras["harvest"].get("dct:accessRights", {})
-            ar[str(i)] = access_rights
-            dataset.extras["harvest"] = {
-                **dataset.extras.get("harvest", {}),
-                "dct:accessRights": ar
-            }
+
+    # assign the distribution accessRights to the dataset if all distribs have the same accessRights
+    # and the dataset doesn't have accessRights
+    dataset_access_rights = access_rights_from_rdf(d)
+    if not dataset_access_rights:
+        distribs_access_rights = set(
+            resource.extras.get("harvest", {}).get("dct:accessRights")
+            for resource in dataset.resources
+        )
+        if len(distribs_access_rights) == 1:
+            dataset_access_rights = distribs_access_rights.pop()
+
+    if dataset_access_rights:
+        dataset.extras["harvest"] = {
+            **dataset.extras.get("harvest", {}),
+            "dct:accessRights": dataset_access_rights,
+        }
 
     for additionnal in d.objects(DCT.hasPart):
         resource_from_rdf(additionnal, dataset, is_additionnal=True)

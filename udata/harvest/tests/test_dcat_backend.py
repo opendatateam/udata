@@ -843,3 +843,9 @@ class CswIso19139DcatBackendTest:
 
         # Sadly resource format is parsed as a blank node. Format parsing should be improved.
         assert re.match(r"n[0-9a-f]{32}", resource.format)
+
+        # accessRights is gotten from the only resource that is recognized as a distribution and copied to the dataset level
+        access_right = "Pas de restriction d'accès public selon INSPIRE"
+        assert dataset.extras["harvest"]["dct:accessRights"] == access_right
+        # also present on the resource level
+        assert resource.extras["harvest"]["dct:accessRights"] == access_right
