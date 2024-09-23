@@ -370,6 +370,10 @@ class DiscussionsTest(APITestCase):
                 return
         self.fail(f"id {id_} not in {json_data}")
 
+    def test_list_discussions_org_does_not_exist(self) -> None:
+        response: TestResponse = self.get(url_for("api.discussions", org="bad org id"))
+        self.assert404(response)
+
     def test_list_discussions_org(self) -> None:
         organization: Organization = OrganizationFactory()
         user: User = UserFactory()

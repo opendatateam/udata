@@ -213,12 +213,14 @@ class DiscussionsAPI(API):
         if args["for"]:
             discussions = discussions.generic_in(subject=args["for"])
         if args["org"]:
-            org = Organization.objects.get(id=ObjectId(args["org"]))
+            org = Organization.objects.get_or_404(id=id_or_404(args["org"]))
+            if not org:
+                api.abort(404, "Organization does not exist")
             reuses = Reuse.objects(organization=org).only("id")
             datasets = Dataset.objects(organization=org).only("id")
             dataservices = Dataservice.objects(organization=org).only("id")
             subjects = list(reuses) + list(datasets) + list(dataservices)
-            discussions = discussions(subject__in=subjects).order_by("-created")
+            discussions = discussions(subject__in=subjects)
         if args["user"]:
             discussions = discussions(discussion__posted_by=ObjectId(args["user"]))
         if args["closed"] is False:
