@@ -1,4 +1,3 @@
-from udata.core.discussions.models import Discussion
 from udata.frontend import csv
 
 from .models import Dataset, Resource
@@ -90,18 +89,3 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
         ("preview_url", lambda o: o.preview_url or False),
     )
     attribute = "resources"
-
-
-@csv.adapter(Discussion)
-class DiscussionCsvAdapter(csv.Adapter):
-    fields = (
-        "id",
-        "user",
-        "subject",
-        "title",
-        ("size", lambda o: len(o.discussion)),
-        ("messages", lambda o: "\n".join(msg.content for msg in o.discussion)),
-        "created",
-        "closed",
-        "closed_by",
-    )
