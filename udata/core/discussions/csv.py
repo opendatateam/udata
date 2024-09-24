@@ -1,5 +1,6 @@
-from .models import Discussion
 from udata.frontend import csv
+
+from .models import Discussion
 
 
 @csv.adapter(Discussion)
