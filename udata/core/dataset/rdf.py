@@ -619,9 +619,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     resources_licenses = set()
     for distrib in d.objects(DCAT.distribution | DCAT.distributions):
         resource_from_rdf(distrib, dataset)
-        distrib_licenses = licenses_from_rdf(distrib)
-        if distrib_licenses:
-            resources_licenses |= distrib_licenses
+        resources_licenses |= licenses_from_rdf(distrib)
 
     # assign the distribution accessRights to the dataset if all distribs have the same accessRights
     # and the dataset doesn't have accessRights

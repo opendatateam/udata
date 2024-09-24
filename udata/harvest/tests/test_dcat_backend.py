@@ -882,7 +882,7 @@ class CswIso19139DcatBackendTest:
         assert len(dataset.resources) == 6
         assert dataset.license == lov1
 
-        # accessRights is gotten from the resources
+        # accessRights is retrieved from the resources
         access_right = "Pas de restriction d'accès public selon INSPIRE"
         assert dataset.extras["harvest"]["dct:accessRights"] == access_right
         # also present on the resource level
