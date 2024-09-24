@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add a filter on organization and document sort parameters in the `/discussions` endpoint [#3147](https://github.com/opendatateam/udata/pull/3147)
+- Move discussion catalog creation and add fields [#3152](https://github.com/opendatateam/udata/pull/3152)
 
 ## 9.2.1 (2024-09-23)
 
