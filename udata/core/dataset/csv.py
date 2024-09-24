@@ -1,3 +1,4 @@
+from udata.core.discussions.csv import DiscussionCsvAdapter
 from udata.frontend import csv
 
 from .models import Dataset, Resource
