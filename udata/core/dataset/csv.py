@@ -1,4 +1,4 @@
-from udata.core.discussions.csv import DiscussionCsvAdapter
+from udata.core.discussions.csv import DiscussionCsvAdapter  # noqa: F401
 from udata.frontend import csv
 
 from .models import Dataset, Resource
