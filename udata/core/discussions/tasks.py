@@ -1,11 +1,20 @@
+import os
+from datetime import datetime
+from tempfile import NamedTemporaryFile
+
+from flask import current_app
+
 from udata import mail
+from udata import models as udata_models
+from udata.core import storages
 from udata.core.dataset.models import Dataset
 from udata.core.post.models import Post
 from udata.core.reuse.models import Reuse
+from udata.frontend import csv
 from udata.i18n import lazy_gettext as _
-from udata.tasks import connect, get_logger
+from udata.tasks import connect, get_logger, job
 
-from .models import Discussion
+from .models import Discussion, Resource, Checksum
 from .signals import on_discussion_closed, on_new_discussion, on_new_discussion_comment
 
 log = get_logger(__name__)
@@ -66,6 +75,55 @@ def notify_discussion_closed(discussion_id, message=None):
         log.warning("Unrecognized discussion subject type %s", type(discussion.subject))
 
 
+def get_queryset(model_cls):
+    # special case for resources
+    if model_cls.__name__ == "Resource":
+        model_cls = getattr(udata_models, "Dataset")
+    params = {}
+    attrs = ("private", "deleted")
+    for attr in attrs:
+        if getattr(model_cls, attr, None):
+            params[attr] = False
+    # no_cache to avoid eating up too much RAM
+    return model_cls.objects.filter(**params).no_cache()
+
+
+def get_or_create_resource(r_info, model, dataset):
+    resource = None
+    for r in dataset.resources:
+        if r.extras.get("csv-export:model", "") == model:
+            resource = r
+            break
+    if resource:
+        for k, v in r_info.items():
+            setattr(resource, k, v)
+        resource.save()
+        return False, resource
+    else:
+        r_info["extras"] = {"csv-export:model": model}
+        return True, Resource(**r_info)
+
+
+def store_resource(csvfile, model, dataset):
+    timestr = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
+    filename = "export-%s-%s.csv" % (model, timestr)
+    prefix = "/".join((dataset.slug, timestr))
+    storage = storages.resources
+    with open(csvfile.name, "rb") as infile:
+        stored_filename = storage.save(infile, prefix=prefix, filename=filename)
+    r_info = storage.metadata(stored_filename)
+    r_info["last_modified_internal"] = r_info.pop("modified")
+    r_info["fs_filename"] = stored_filename
+    checksum = r_info.pop("checksum")
+    algo, checksum = checksum.split(":", 1)
+    r_info["format"] = storages.utils.extension(stored_filename)
+    r_info["checksum"] = Checksum(type=algo, value=checksum)
+    r_info["filesize"] = r_info.pop("size")
+    del r_info["filename"]
+    r_info["title"] = filename
+    return get_or_create_resource(r_info, model, dataset)
+
+
 def export_csv_for_model(model, dataset):
     model_cls = getattr(udata_models, model.capitalize(), None)
     if not model_cls:
@@ -124,4 +182,3 @@ def export_csv(self, model=None):
     models = (model,) if model else ALLOWED_MODELS
     for model in models:
         export_csv_for_model(model, dataset)
-
