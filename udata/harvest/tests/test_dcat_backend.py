@@ -6,12 +6,16 @@ from datetime import date
 
 import pytest
 from flask import current_app
+from lxml import etree
+from rdflib import Graph
 
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import LicenseFactory, ResourceSchemaMockData
+from udata.core.dataset.rdf import dataset_from_rdf
 from udata.core.organization.factories import OrganizationFactory
 from udata.harvest.models import HarvestJob
 from udata.models import Dataset
+from udata.rdf import DCAT, RDF, namespace_manager
 from udata.storage.s3 import get_from_json
 
 from .. import actions
@@ -476,6 +480,7 @@ class DcatBackendTest:
 
     def test_xml_catalog(self, rmock):
         LicenseFactory(id="lov2", title="Licence Ouverte Version 2.0")
+        LicenseFactory(id="lov1", title="Licence Ouverte Version 1.0")
 
         url = mock_dcat(rmock, "catalog.xml", path="catalog.xml")
         org = OrganizationFactory()
@@ -518,6 +523,8 @@ class DcatBackendTest:
         assert dataset.contact_point["email"] == "hello@its.me"
         assert dataset.contact_point["name"] == "Organization contact"
         assert dataset.frequency is None
+        # test dct:license nested in distribution
+        assert dataset.license.id == "lov1"
 
         assert len(dataset.resources) == 3
 
@@ -849,3 +856,35 @@ class CswIso19139DcatBackendTest:
         assert dataset.extras["harvest"]["dct:accessRights"] == access_right
         # also present on the resource level
         assert resource.extras["harvest"]["dct:accessRights"] == access_right
+
+    def test_geo_ide(self):
+        # this is the string used in geo-ide for now
+        lov1 = LicenseFactory(
+            id="lov1",
+            title="Licence Ouverte 1.0 http://www.data.gouv.fr/Licence-Ouverte-Open-Licence",
+        )
+
+        with open(os.path.join(CSW_DCAT_FILES_DIR, "XSLT.xml"), "rb") as f:
+            xslt = f.read()
+        with open(os.path.join(CSW_DCAT_FILES_DIR, "geo-ide_single-dataset.xml"), "rb") as f:
+            csw = f.read()
+
+        # apply xslt transformation manually instead of using the harvest backend since we're only processing one dataset
+        transform = etree.XSLT(etree.fromstring(xslt))
+        tree_before_transform = etree.fromstring(csw)
+        tree = transform(tree_before_transform, CoupledResourceLookUp="'disabled'")
+        subgraph = Graph(namespace_manager=namespace_manager)
+        subgraph.parse(etree.tostring(tree), format="application/rdf+xml")
+        node = next(subgraph.subjects(RDF.type, DCAT.Dataset))
+
+        dataset = dataset_from_rdf(subgraph, dataset=None, node=node)
+        assert dataset.title == "Plan local d'urbanisme de la commune de Combles"
+        assert len(dataset.resources) == 6
+        assert dataset.license == lov1
+
+        # accessRights is gotten from the resources
+        access_right = "Pas de restriction d'accès public selon INSPIRE"
+        assert dataset.extras["harvest"]["dct:accessRights"] == access_right
+        # also present on the resource level
+        for resource in dataset.resources:
+            assert resource.extras["harvest"]["dct:accessRights"] == access_right

@@ -475,6 +475,30 @@ def access_rights_from_rdf(resource: RdfResource):
         return rdf_value(top_el, RDFS.label) or rdf_value(resource, DCT.accessRights)
 
 
+def licenses_from_rdf(resource: RdfResource) -> set[str]:
+    """
+    Extract licences from a RDF distribution.
+
+    Will match at least the following:
+    +   <dct:license>
+            <dct:LicenseDocument>
+                <rdfs:label xml:lang="fr">license</rdfs:label>
+            </dct:LicenseDocument>
+        </dct:license>
+    +   <dct:license>license</dct:license>
+    """
+    licenses = set()
+    for predicate in DCT.license, DCT.rights:
+        for license_info in resource.objects(predicate=predicate):
+            if isinstance(license_info, (URIRef, Literal)):
+                licenses.add(license_info.toPython())
+            elif isinstance(license_info, RdfResource):
+                rdfs_label = rdf_value(license_info, RDFS.label)
+                if rdfs_label:
+                    licenses.add(rdfs_label)
+    return licenses
+
+
 def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     """
     Map a Resource domain model to a DCAT/RDF graph
@@ -592,15 +616,12 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
             **dataset.extras.get("harvest", {}),
         }
 
-    licenses = set()
+    resources_licenses = set()
     for distrib in d.objects(DCAT.distribution | DCAT.distributions):
         resource_from_rdf(distrib, dataset)
-        for predicate in DCT.license, DCT.rights:
-            value = distrib.value(predicate)
-            if isinstance(value, (URIRef, Literal)):
-                licenses.add(value.toPython())
-            elif isinstance(value, RdfResource):
-                licenses.add(value.identifier.toPython())
+        distrib_licenses = licenses_from_rdf(distrib)
+        if distrib_licenses:
+            resources_licenses |= distrib_licenses
 
     # assign the distribution accessRights to the dataset if all distribs have the same accessRights
     # and the dataset doesn't have accessRights
@@ -625,7 +646,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
 
     default_license = dataset.license or License.default()
     dataset_license = rdf_value(d, DCT.license)
-    dataset.license = License.guess(dataset_license, *licenses, default=default_license)
+    dataset.license = License.guess(dataset_license, *resources_licenses, default=default_license)
 
     identifier = rdf_value(d, DCT.identifier)
     uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
