@@ -64,3 +64,64 @@ def notify_discussion_closed(discussion_id, message=None):
         mail.send(subject, recipients, "discussion_closed", discussion=discussion, message=message)
     else:
         log.warning("Unrecognized discussion subject type %s", type(discussion.subject))
+
+
+def export_csv_for_model(model, dataset):
+    model_cls = getattr(udata_models, model.capitalize(), None)
+    if not model_cls:
+        log.error("Unknow model %s" % model)
+        return
+    queryset = get_queryset(model_cls)
+    adapter = csv.get_adapter(model_cls)
+    if not adapter:
+        log.error("No adapter found for %s" % model)
+        return
+    adapter = adapter(queryset)
+
+    log.info("Exporting CSV for %s..." % model)
+
+    csvfile = NamedTemporaryFile(mode="w", encoding="utf8", delete=False)
+    try:
+        # write adapter results into a tmp file
+        writer = csv.get_writer(csvfile)
+        writer.writerow(adapter.header())
+        for row in adapter.rows():
+            writer.writerow(row)
+        csvfile.flush()
+        # make a resource from this tmp file
+        created, resource = store_resource(csvfile, model, dataset)
+        # add it to the dataset
+        if created:
+            dataset.add_resource(resource)
+        dataset.last_modified_internal = datetime.utcnow()
+        dataset.save()
+    finally:
+        csvfile.close()
+        os.unlink(csvfile.name)
+
+
+@job("export-csv")
+def export_csv(self, model=None):
+    """
+    Generates a CSV export of all model objects as a resource of a dataset
+    """
+    ALLOWED_MODELS = current_app.config.get("EXPORT_CSV_MODELS", [])
+    DATASET_ID = current_app.config.get("EXPORT_CSV_DATASET_ID")
+
+    if model and model not in ALLOWED_MODELS:
+        log.error("Unknown or unallowed model: %s" % model)
+        return
+
+    if not DATASET_ID:
+        log.error("EXPORT_CSV_DATASET_ID setting value not set")
+        return
+    try:
+        dataset = Dataset.objects.get(id=DATASET_ID)
+    except Dataset.DoesNotExist:
+        log.error("EXPORT_CSV_DATASET_ID points to a non existent dataset")
+        return
+
+    models = (model,) if model else ALLOWED_MODELS
+    for model in models:
+        export_csv_for_model(model, dataset)
+
