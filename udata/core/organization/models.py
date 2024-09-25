@@ -82,6 +82,9 @@ class OrganizationQuerySet(db.BaseQuerySet):
     def get_by_id_or_slug(self, id_or_slug):
         return self(slug=id_or_slug).first() or self(id=id_or_slug).first()
 
+    def with_badge(self, kind):
+        return self(badges__kind=kind)
+
 
 class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     name = db.StringField(required=True)
