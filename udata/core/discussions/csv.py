@@ -17,6 +17,6 @@ class DiscussionCsvAdapter(csv.Adapter):
         ("messages", lambda o: "\n".join(msg.content.replace("\n", " ") for msg in o.discussion)),
         "created",
         "closed",
-        ("closed_by_fullname", "closed_by"),
+        "closed_by",
         ("closed_by_id", "closed_by.id"),
     )
