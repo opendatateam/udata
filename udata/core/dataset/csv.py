@@ -1,3 +1,4 @@
+# for backwards compatibility (see https://github.com/opendatateam/udata/pull/3152)
 from udata.core.discussions.csv import DiscussionCsvAdapter  # noqa: F401
 from udata.frontend import csv
 
