@@ -34,6 +34,9 @@ class DatasetSearch(ModelSearchAdapter):
         "tag": Filter(),
         "badge": Filter(),
         "organization": ModelTermsFilter(model=Organization),
+        "organization_badge": ModelTermsFilter(
+            model=Organization, field_name="badges", choices=list(Organization.__badges__)
+        ),
         "owner": ModelTermsFilter(model=User),
         "license": ModelTermsFilter(model=License),
         "geozone": ModelTermsFilter(model=GeoZone),
@@ -76,6 +79,7 @@ class DatasetSearch(ModelSearchAdapter):
                 "name": org.name,
                 "public_service": 1 if org.public_service else 0,
                 "followers": org.metrics.get("followers", 0),
+                "badges": ", ".join(org.badge_label(badge) for badge in org.badges),
             }
         elif dataset.owner:
             owner = User.objects(id=dataset.owner.id).first()
