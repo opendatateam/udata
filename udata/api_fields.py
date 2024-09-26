@@ -92,12 +92,14 @@ def convert_db_to_field(key, field, info):
 
         def constructor_write(**kwargs):
             return restx_fields.List(field_write, **kwargs)
+
     elif isinstance(
         field, (mongo_fields.GenericReferenceField, mongoengine.fields.GenericLazyReferenceField)
     ):
 
         def constructor(**kwargs):
             return restx_fields.Nested(lazy_reference, **kwargs)
+
     elif isinstance(field, mongo_fields.ReferenceField):
         # For reference we accept while writing a String representing the ID of the referenced model.
         # For reading, if the user supplied a `nested_fields` (RestX model), we use it to convert
@@ -120,6 +122,7 @@ def convert_db_to_field(key, field, info):
 
             def constructor(**kwargs):
                 return restx_fields.Nested(nested_fields, **kwargs)
+
         elif hasattr(field.document_type_obj, "__read_fields__"):
 
             def constructor_read(**kwargs):
@@ -127,6 +130,7 @@ def convert_db_to_field(key, field, info):
 
             def constructor_write(**kwargs):
                 return restx_fields.Nested(field.document_type_obj.__write_fields__, **kwargs)
+
         else:
             raise ValueError(
                 f"EmbeddedDocumentField `{key}` requires a `nested_fields` param to serialize/deserialize or a `@generate_fields()` definition."
@@ -178,7 +182,7 @@ def generate_fields(**kwargs):
         read_fields = {}
         write_fields = {}
         ref_fields = {}
-        sortables = kwargs.get("additionalSorts", [])
+        sortables = kwargs.get("additional_sorts", [])
         filterables = []
 
         read_fields["id"] = restx_fields.String(required=True, readonly=True)
@@ -187,7 +191,10 @@ def generate_fields(**kwargs):
             sortable_key = info.get("sortable", False)
             if sortable_key:
                 sortables.append(
-                    {"key": sortable_key if isinstance(sortable_key, str) else key, "value": key}
+                    {
+                        "key": sortable_key if isinstance(sortable_key, str) else key,
+                        "value": key,
+                    }
                 )
 
             filterable = info.get("filterable", None)
@@ -209,6 +216,10 @@ def generate_fields(**kwargs):
                     filterable["type"] = str
                     if isinstance(field, mongo_fields.BooleanField):
                         filterable["type"] = boolean
+
+                filterable["choices"] = info.get("choices", None)
+                if hasattr(field, "choices") and field.choices:
+                    filterable["choices"] = field.choices
 
                 # We may add more information later here:
                 # - type of mongo query to execute (right now only simple =)
@@ -306,6 +317,7 @@ def generate_fields(**kwargs):
                 filterable["key"],
                 type=filterable["type"],
                 location="args",
+                choices=filterable["choices"],
             )
 
         cls.__index_parser__ = parser

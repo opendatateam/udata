@@ -35,7 +35,7 @@ def check_url_does_not_exists(url):
 
 @generate_fields(
     searchable=True,
-    additionalSorts=[
+    additional_sorts=[
         {"key": "datasets", "value": "metrics.datasets"},
         {"key": "followers", "value": "metrics.followers"},
         {"key": "views", "value": "metrics.views"},
