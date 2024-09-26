@@ -4,6 +4,7 @@ from werkzeug.utils import cached_property
 
 from udata.api_fields import field, function_field, generate_fields
 from udata.core.dataset.api_fields import dataset_fields
+from udata.core.organization.models import Organization
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE
 from udata.core.storages import default_image_basename, images
@@ -39,6 +40,15 @@ def check_url_does_not_exists(url):
         {"key": "datasets", "value": "metrics.datasets"},
         {"key": "followers", "value": "metrics.followers"},
         {"key": "views", "value": "metrics.views"},
+    ],
+    related_filters=[
+        {
+            "key": "organization_badge",
+            "lookup": "organization__in",
+            "object": Organization,
+            "queryset": "with_badge",
+            "choices": list(Organization.__badges__),
+        },
     ],
 )
 class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):

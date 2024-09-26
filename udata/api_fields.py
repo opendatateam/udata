@@ -183,6 +183,7 @@ def generate_fields(**kwargs):
         write_fields = {}
         ref_fields = {}
         sortables = kwargs.get("additional_sorts", [])
+        related_filters = kwargs.get("related_filters", [])
         filterables = []
 
         read_fields["id"] = restx_fields.String(required=True, readonly=True)
@@ -320,6 +321,14 @@ def generate_fields(**kwargs):
                 choices=filterable["choices"],
             )
 
+        for related_filter in related_filters:
+            parser.add_argument(
+                related_filter["key"],
+                type=related_filter.get("type", str),
+                location="args",
+                choices=related_filter.get("choices"),
+            )
+
         cls.__index_parser__ = parser
 
         def apply_sort_filters_and_pagination(base_query):
@@ -356,6 +365,31 @@ def generate_fields(**kwargs):
                         **{
                             filterable["column"]: args[filterable["key"]],
                         }
+                    )
+
+            for related_filter in related_filters:
+                # This allows to define a query like so:
+                # related_filters=[
+                #     {
+                #         "key": "organization_badge",
+                #         "lookup": "organization__in",
+                #         "object": Organization,
+                #         "queryset": "with_badge",
+                #         "choices": list(Organization.__badges__),
+                #     },
+                # ]
+                # This will return reuses with an organization that have the badge provided in the
+                # `organization_badge` parameter:
+                # - referenced_object: Organization
+                # - queryset: Organization.objects.with_badge
+                # - filtered_objects: Organization.objects.with_badge(<value of the parameter `organization_badge`>)
+                # - Reuse.objects.filter(organization__in=list(filtered_objects))
+                if args.get(related_filter["key"]) is not None:
+                    referenced_object = related_filter["object"]
+                    queryset = getattr(referenced_object.objects, related_filter["queryset"])
+                    filtered_objects = queryset(args[related_filter["key"]])
+                    base_query = base_query.filter(
+                        **{related_filter["lookup"]: list(filtered_objects)}
                     )
 
             if paginable:
