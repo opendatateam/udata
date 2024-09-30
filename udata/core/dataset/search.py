@@ -79,7 +79,7 @@ class DatasetSearch(ModelSearchAdapter):
                 "name": org.name,
                 "public_service": 1 if org.public_service else 0,
                 "followers": org.metrics.get("followers", 0),
-                "badges": ", ".join(org.badge_label(badge) for badge in org.badges),
+                "badges": [badge.kind for badge in org.badges],
             }
         elif dataset.owner:
             owner = User.objects(id=dataset.owner.id).first()
