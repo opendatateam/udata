@@ -7,6 +7,7 @@ import udata.core.dataset.api_fields as datasets_api_fields
 from udata.api_fields import field, function_field, generate_fields
 from udata.core.dataset.models import Dataset
 from udata.core.metrics.models import WithMetrics
+from udata.core.organization.models import Organization
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
 from udata.models import Discussion, Follow, db
@@ -94,7 +95,18 @@ class HarvestMetadata(db.EmbeddedDocument):
     archived_at = field(db.DateTimeField())
 
 
-@generate_fields(searchable=True)
+@generate_fields(
+    searchable=True,
+    related_filters=[
+        {
+            "key": "organization_badge",
+            "lookup": "organization__in",
+            "object": Organization,
+            "queryset": "with_badge",
+            "choices": list(Organization.__badges__),
+        },
+    ],
+)
 class Dataservice(WithMetrics, Owned, db.Document):
     meta = {
         "indexes": [

@@ -4,6 +4,7 @@ import pytest
 from flask import url_for
 from werkzeug.test import TestResponse
 
+import udata.core.organization.constants as org_constants
 from udata.core.badges.factories import badge_factory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
@@ -67,12 +68,17 @@ class ReuseAPITest:
         """Should filters reuses results based on query filters"""
         owner = UserFactory()
         org = OrganizationFactory()
+        org_public_service = OrganizationFactory()
+        org_public_service.add_badge(org_constants.PUBLIC_SERVICE)
 
         [ReuseFactory(topic="health", type="api") for i in range(2)]
 
         tag_reuse = ReuseFactory(tags=["my-tag", "other"], topic="health", type="api")
         owner_reuse = ReuseFactory(owner=owner, topic="health", type="api")
         org_reuse = ReuseFactory(organization=org, topic="health", type="api")
+        org_reuse_public_service = ReuseFactory(
+            organization=org_public_service, topic="health", type="api"
+        )
         featured_reuse = ReuseFactory(featured=True, topic="health", type="api")
         topic_reuse = ReuseFactory(topic="transport_and_mobility", type="api")
         type_reuse = ReuseFactory(topic="health", type="application")
@@ -123,6 +129,15 @@ class ReuseAPITest:
         assert400(response)
 
         response = api.get(url_for("api.reuses", organization="org-id"))
+        assert400(response)
+
+        # filter on organization badge
+        response = api.get(url_for("api.reuses", organization_badge=org_constants.PUBLIC_SERVICE))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(org_reuse_public_service.id)
+
+        response = api.get(url_for("api.reuses", organization_badge="bad-badge"))
         assert400(response)
 
     def test_reuse_api_list_filter_private(self, api) -> None:
