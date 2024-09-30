@@ -92,6 +92,26 @@ class DataserviceAPITest(APITestCase):
             dataservice.self_api_url(), "http://local.test/api/1/dataservices/updated-title/"
         )
 
+        response = self.post(
+            url_for("api.dataservice_datasets", dataservice=dataservice),
+            [{"id": datasets[0].id}, {"id": datasets[1].id}],
+        )
+        self.assert201(response)
+        self.assertEqual(response.json["datasets"]["total"], 3)
+        dataservice.reload()
+        self.assertEqual(dataservice.datasets[0].title, datasets[0].title)
+        self.assertEqual(dataservice.datasets[1].title, datasets[2].title)
+        self.assertEqual(dataservice.datasets[2].title, datasets[1].title)
+
+        response = self.delete(
+            url_for("api.dataservice_dataset", dataservice=dataservice, dataset=datasets[0])
+        )
+        self.assert204(response)
+        dataservice.reload()
+        self.assertEqual(len(dataservice.datasets), 2)
+        self.assertEqual(dataservice.datasets[0].title, datasets[2].title)
+        self.assertEqual(dataservice.datasets[1].title, datasets[1].title)
+
         response = self.delete(url_for("api.dataservice", dataservice=dataservice))
         self.assert204(response)
 
