@@ -3,6 +3,7 @@ from datetime import datetime
 import pytest
 from flask import url_for
 
+import udata.core.organization.constants as org_constants
 from udata.core.badges.factories import badge_factory
 from udata.core.badges.signals import on_badge_added, on_badge_removed
 from udata.core.dataset.factories import DatasetFactory
@@ -40,6 +41,20 @@ class OrganizationAPITest:
         response = api.get(url_for("api.organizations"))
         assert200(response)
         len(response.json["data"]) == len(organizations)
+
+    def test_organization_api_list_with_filters(self, api):
+        """It should filter the organization list"""
+        _org = OrganizationFactory()
+        org_public_service = OrganizationFactory()
+        org_public_service.add_badge(org_constants.PUBLIC_SERVICE)
+
+        response = api.get(url_for("api.organizations", badge=org_constants.PUBLIC_SERVICE))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(org_public_service.id)
+
+        response = api.get(url_for("api.organizations", badge="bad-badge"))
+        assert400(response)
 
     def test_organization_role_api_get(self, api):
         """It should fetch an organization's roles list from the API"""
