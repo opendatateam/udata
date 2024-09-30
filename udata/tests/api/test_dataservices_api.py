@@ -147,8 +147,8 @@ class DataserviceAPITest(APITestCase):
         self.assertIsNone(dataservice.deleted_at)
 
     def test_dataservice_api_index(self):
-        dataset_a = DatasetFactory()
-        dataset_b = DatasetFactory()
+        dataset_a = DatasetFactory(title="Dataset A")
+        dataset_b = DatasetFactory(title="Dataset B")
 
         self.login()
         self.post(
@@ -196,12 +196,24 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(response.json["total"], 3)
         self.assertEqual(len(response.json["data"]), 3)
         self.assertEqual(response.json["data"][0]["title"], "B")
-        self.assertEqual(response.json["data"][0]["datasets"][0]["id"], str(dataset_b.id))
         self.assertEqual(response.json["data"][1]["title"], "C")
-        self.assertEqual(response.json["data"][1]["datasets"][0]["id"], str(dataset_a.id))
-        self.assertEqual(response.json["data"][1]["datasets"][1]["id"], str(dataset_b.id))
         self.assertEqual(response.json["data"][2]["title"], "A")
-        self.assertEqual(response.json["data"][2]["datasets"][0]["id"], str(dataset_a.id))
+
+        response_datasets = self.get(response.json["data"][0]["datasets"]["href"])
+        self.assert200(response_datasets)
+        self.assertEqual(response_datasets.json["total"], 1)
+        self.assertEqual(response_datasets.json["data"][0]["id"], str(dataset_b.id))
+
+        response_datasets = self.get(response.json["data"][1]["datasets"]["href"])
+        self.assert200(response_datasets)
+        self.assertEqual(response_datasets.json["total"], 2)
+        self.assertEqual(response_datasets.json["data"][0]["id"], str(dataset_b.id))
+        self.assertEqual(response_datasets.json["data"][1]["id"], str(dataset_a.id))
+
+        response_datasets = self.get(response.json["data"][2]["datasets"]["href"])
+        self.assert200(response_datasets)
+        self.assertEqual(response_datasets.json["total"], 1)
+        self.assertEqual(response_datasets.json["data"][0]["id"], str(dataset_a.id))
 
         response = self.get(url_for("api.dataservices", sort="title"))
         self.assert200(response)
@@ -242,10 +254,7 @@ class DataserviceAPITest(APITestCase):
 
         self.assertEqual(response.json["total"], 2)
         self.assertEqual(response.json["data"][0]["title"], "A")
-        self.assertEqual(response.json["data"][0]["datasets"][0]["id"], str(dataset_a.id))
         self.assertEqual(response.json["data"][1]["title"], "C")
-        self.assertEqual(response.json["data"][1]["datasets"][0]["id"], str(dataset_a.id))
-        self.assertEqual(response.json["data"][1]["datasets"][1]["id"], str(dataset_b.id))
 
     def test_dataservice_api_index_with_wrong_dataset_id(self):
         response = self.get(url_for("api.dataservices", sort="title", dataset=str("xxx")))
