@@ -76,7 +76,25 @@ def convert_db_to_field(key, field, info):
             constructor = custom_restx_fields.ImageField
 
     elif isinstance(field, mongo_fields.ListField):
-        # For lists, we convert the inner value from Mongo to RestX then we create
+        # For lists, we can expose them only by showing a link to the API
+        # with the results of the list to avoid listing a lot of sub-ressources
+        # (for example for a dataservices with thousands of datasets).
+        by_link = info.get("by_link", None)
+        if by_link:
+
+            def constructor_read(**kwargs):
+                return restx_fields.Raw(
+                    attribute=lambda o: {
+                        "rel": "subsection",
+                        "href": by_link(o),
+                        "type": "GET",
+                        "total": len(o[key]),
+                    },
+                    description="Visit this API link to see the list.",
+                    **kwargs,
+                )
+
+        # If it's a standard list, we convert the inner value from Mongo to RestX then we create
         # the `List` RestX type with this converted inner value.
         # There is three level of information, from most important to least
         #     1. `inner_field_info` inside `__additional_field_info__` on the parent
@@ -87,9 +105,13 @@ def convert_db_to_field(key, field, info):
             f"{key}.inner", field.field, {**info, **inner_info, **info.get("inner_field_info", {})}
         )
 
-        def constructor_read(**kwargs):
-            return restx_fields.List(field_read, **kwargs)
+        if constructor_read is None:
+            # We don't want to set the `constructor_read` if it's already set
+            # by the `by_link` code above.
+            def constructor_read(**kwargs):
+                return restx_fields.List(field_read, **kwargs)
 
+        # But we want to keep the `constructor_write` to allow changing the list.
         def constructor_write(**kwargs):
             return restx_fields.List(field_write, **kwargs)
     elif isinstance(

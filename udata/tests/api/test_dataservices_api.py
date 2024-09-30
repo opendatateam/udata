@@ -61,18 +61,19 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(response.json["base_api_url"], "https://example.org")
         self.assertEqual(response.json["tags"], ["hello", "world"])
         self.assertEqual(response.json["private"], True)
-        self.assertEqual(response.json["datasets"][0]["title"], datasets[0].title)
-        self.assertEqual(response.json["datasets"][1]["title"], datasets[2].title)
-        self.assertEqual(
-            response.json["extras"],
-            {
-                "foo": "bar",
-            },
-        )
+        self.assertEqual(response.json["extras"], {"foo": "bar"})
         self.assertEqual(response.json["license"], license.id)
         self.assertEqual(
             response.json["self_api_url"], "http://local.test/api/1/dataservices/updated-title/"
         )
+
+        self.assertEqual(response.json["datasets"]["total"], 2)
+        response_datasets = self.get(response.json["datasets"]["href"])
+        self.assert200(response_datasets)
+        self.assertEqual(response_datasets.json["total"], 2)
+        self.assertEqual(response_datasets.json["data"][0]["title"], datasets[2].title)
+        self.assertEqual(response_datasets.json["data"][1]["title"], datasets[0].title)
+
         dataservice.reload()
         self.assertEqual(dataservice.title, "Updated title")
         self.assertEqual(dataservice.base_api_url, "https://example.org")
