@@ -259,7 +259,7 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(response.json["data"][0]["id"], str(org_dataset_public_service.id))
 
-        response = self.get(url_for("api.datasets", organization="org-id"))
+        response = self.get(url_for("api.datasets", organization_badge="bad-badge"))
         self.assert400(response)
 
         # filter on schema
