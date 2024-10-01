@@ -767,13 +767,35 @@ class CswDcatBackendTest:
 @pytest.mark.usefixtures("clean_db")
 @pytest.mark.options(PLUGINS=["csw"])
 class CswIso19139DcatBackendTest:
-    def test_geo2france(self, rmock):
+    @pytest.mark.parametrize(
+        "remote_url_prefix",
+        [
+            None,
+            # trailing slash
+            "http://catalogue.geo-ide.developpement-durable.gouv.fr/catalogue/srv/fre/catalog.search#/metadata/",
+            # no trailing slash
+            "http://catalogue.geo-ide.developpement-durable.gouv.fr/catalogue/srv/fre/catalog.search#/metadata",
+        ],
+    )
+    def test_geo2france(self, rmock, remote_url_prefix: str):
         with open(os.path.join(CSW_DCAT_FILES_DIR, "XSLT.xml"), "r") as f:
             xslt = f.read()
         url = mock_csw_pagination(rmock, "geonetwork/srv/eng/csw.rdf", "geonetwork-iso-page-{}.xml")
         rmock.get(CswIso19139DcatBackend.XSL_URL, text=xslt)
         org = OrganizationFactory()
-        source = HarvestSourceFactory(backend="csw-iso-19139", url=url, organization=org)
+        source = HarvestSourceFactory(
+            backend="csw-iso-19139",
+            url=url,
+            organization=org,
+            config={
+                "extra_configs": [
+                    {
+                        "key": "remote_url_prefix",
+                        "value": remote_url_prefix,
+                    }
+                ]
+            },
+        )
 
         actions.run(source.slug)
 
@@ -843,3 +865,17 @@ class CswIso19139DcatBackendTest:
 
         # Sadly resource format is parsed as a blank node. Format parsing should be improved.
         assert re.match(r"n[0-9a-f]{32}", resource.format)
+
+        # Computed from source config `remote_url_prefix` + `dct:identifier` from `isPrimaryTopicOf`
+        if remote_url_prefix:
+            assert (
+                dataset.harvest.remote_url
+                == "http://catalogue.geo-ide.developpement-durable.gouv.fr/catalogue/srv/fre/catalog.search#/metadata/fr-120066022-ldd-56fce164-04b2-41ae-be87-9f256f39dd44"
+            )
+        else:
+            # this is the first dct:landingPage found in the node
+            # if it breaks, it's not necessarily a bug — this acts as a demonstration of current behavior
+            assert (
+                dataset.harvest.remote_url
+                == "https://ogc.geo-ide.developpement-durable.gouv.fr/csw/all-dataset?REQUEST=GetRecordById&SERVICE=CSW&VERSION=2.0.2&RESULTTYPE=results&elementSetName=full&TYPENAMES=gmd:MD_Metadata&OUTPUTSCHEMA=http://www.isotc211.org/2005/gmd&ID=fr-120066022-ldd-56fce164-04b2-41ae-be87-9f256f39dd44"
+            )

@@ -57,6 +57,10 @@ class HarvestFilter(object):
         }
 
 
+class HarvestExtraConfig(HarvestFilter):
+    pass
+
+
 class HarvestFeature(object):
     def __init__(self, key, label, description=None, default=False):
         self.key = key
@@ -90,6 +94,10 @@ class BaseBackend(object):
     # Define some allowed filters on the backend
     # This a Sequence[HarvestFeature]
     features = tuple()
+
+    # Define some allowed extras config variables on the backend
+    # This a Sequence[HarvestExtraConfig]
+    extra_configs = tuple()
 
     def __init__(self, source_or_job, dryrun=False, max_items=None):
         if isinstance(source_or_job, HarvestJob):
@@ -135,6 +143,13 @@ class BaseBackend(object):
 
     def get_filters(self):
         return self.config.get("filters", [])
+
+    def get_extra_config_value(self, key: str):
+        try:
+            extra_config = next(c for c in self.config.get("extra_configs", []) if c["key"] == key)
+            return extra_config["value"]
+        except StopIteration:
+            return None
 
     def inner_harvest(self):
         raise NotImplementedError

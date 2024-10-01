@@ -10,6 +10,7 @@ from rdflib.namespace import RDF
 from udata.core.dataservices.rdf import dataservice_from_rdf
 from udata.core.dataset.rdf import dataset_from_rdf
 from udata.harvest.models import HarvestItem
+from udata.i18n import gettext as _
 from udata.rdf import (
     DCAT,
     DCT,
@@ -21,7 +22,7 @@ from udata.rdf import (
 )
 from udata.storage.s3 import store_as_json
 
-from .base import BaseBackend
+from .base import BaseBackend, HarvestExtraConfig
 
 log = logging.getLogger(__name__)
 
@@ -167,7 +168,8 @@ class DcatBackend(BaseBackend):
         item.kwargs["page_number"] = page_number
 
         dataset = self.get_dataset(item.remote_id)
-        return dataset_from_rdf(page, dataset, node=node)
+        remote_url_prefix = self.get_extra_config_value("remote_url_prefix")
+        return dataset_from_rdf(page, dataset, node=node, remote_url_prefix=remote_url_prefix)
 
     def inner_process_dataservice(self, item: HarvestItem, page_number: int, page: Graph, node):
         item.kwargs["page_number"] = page_number
@@ -246,7 +248,7 @@ class CswDcatBackend(DcatBackend):
         tree = ET.fromstring(content)
         if tree.tag == "{" + OWS_NAMESPACE + "}ExceptionReport":
             raise ValueError(f"Failed to query CSW:\n{content}")
-        while tree:
+        while tree is not None:
             search_results = tree.find("csw:SearchResults", {"csw": CSW_NAMESPACE})
             if search_results is None:
                 log.error(f"No search results found for {url} on page {page_number}")
@@ -280,6 +282,14 @@ class CswIso19139DcatBackend(DcatBackend):
     """
 
     display_name = "CSW-ISO-19139"
+    extra_configs = (
+        HarvestExtraConfig(
+            _("Remote URL prefix"),
+            "remote_url_prefix",
+            str,
+            _("A prefix used to build the remote URL of the harvested items."),
+        ),
+    )
 
     ISO_SCHEMA = "http://www.isotc211.org/2005/gmd"
 

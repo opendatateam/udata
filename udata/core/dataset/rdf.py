@@ -26,6 +26,7 @@ from udata.rdf import (
     DCT,
     EUFORMAT,
     EUFREQ,
+    FOAF,
     FREQ,
     HVD_LEGISLATION,
     IANAFORMAT,
@@ -468,6 +469,31 @@ def title_from_rdf(rdf, url):
             return i18n._("Nameless resource")
 
 
+def primary_topic_identifier_from_rdf(rdf: RdfResource):
+    """
+    Extract the primary topic identifier from a RDF resource.
+
+    <foaf:isPrimaryTopicOf>
+      <rdf:Description>
+        <dct:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">fr-120066022-ldd-56fce164-04b2-41ae-be87-9f256f39dd44</dct:identifier>
+        <dct:source rdf:parseType="Resource">
+          <rdf:type rdf:resource="http://www.w3.org/ns/dcat#CatalogRecord"/>
+          <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2019-03-25T22:55:41.312+01:00</dct:modified>
+          <dct:conformsTo rdf:parseType="Resource">
+            <rdf:type rdf:resource="http://purl.org/dc/terms/Standard"/>
+            <dct:title xml:lang="fr">ISO 19115</dct:title>
+            <owl:versionInfo xml:lang="fr">2003 Cor.1:2006</owl:versionInfo>
+          </dct:conformsTo>
+        </dct:source>
+      </rdf:Description>
+    </foaf:isPrimaryTopicOf>
+    """
+    primary_topic = rdf.value(FOAF.isPrimaryTopicOf)
+    if not primary_topic:
+        return
+    return rdf_value(primary_topic, DCT.identifier)
+
+
 def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     """
     Map a Resource domain model to a DCAT/RDF graph
@@ -532,7 +558,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     return resource
 
 
-def dataset_from_rdf(graph: Graph, dataset=None, node=None):
+def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: str | None = None):
     """
     Create or update a dataset from a RDF/DCAT graph
     """
@@ -603,7 +629,18 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
 
     identifier = rdf_value(d, DCT.identifier)
     uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
-    remote_url = remote_url_from_rdf(d)
+
+    # compute remote_url, either with specified prefix or directly from RDF
+    primary_topic_identifier = primary_topic_identifier_from_rdf(d)
+    if remote_url_prefix and primary_topic_identifier:
+        primary_topic_identifier = primary_topic_identifier_from_rdf(d)
+        remote_url_prefix = (
+            f"{remote_url_prefix}/" if not remote_url_prefix.endswith("/") else remote_url_prefix
+        )
+        remote_url = f"{remote_url_prefix}{primary_topic_identifier}"
+    else:
+        remote_url = remote_url_from_rdf(d)
+
     created_at = rdf_value(d, DCT.issued)
     modified_at = rdf_value(d, DCT.modified)
 
