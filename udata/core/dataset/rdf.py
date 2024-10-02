@@ -469,10 +469,20 @@ def title_from_rdf(rdf, url):
 
 
 def access_rights_from_rdf(resource: RdfResource):
-    top_el = resource.value(DCT.accessRights)
-    if top_el:
-        # try to find a structured label or fallback on the raw value
-        return rdf_value(top_el, RDFS.label) or rdf_value(resource, DCT.accessRights)
+    """
+    Extract the access rights from a RdfResource
+    If the access rights is a URIRef, return it as a string.
+    If the access rights is a RdfResource, return the label of the RdfResource if any, or the identifier of the RdfResource.
+    """
+    access_right_info = resource.value(DCT.accessRights)
+    if isinstance(access_right_info, (URIRef, Literal)):
+        return access_right_info.toPython()
+    elif isinstance(access_right_info, RdfResource):
+        rdfs_label = rdf_value(access_right_info, RDFS.label)
+        if rdfs_label:
+            return rdfs_label
+        else:
+            return access_right_info.identifier.toPython()
 
 
 def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
