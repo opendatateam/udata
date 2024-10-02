@@ -37,11 +37,13 @@ class DatasetCsvAdapter(csv.Adapter):
         ("archived", lambda o: o.archived or False),
         ("resources_count", lambda o: len(o.resources)),
         ("main_resources_count", lambda o: len([r for r in o.resources if r.type == "main"])),
+        ("format", lambda o: ",".join(set(r.format for r in o.resources))),
         "downloads",
         ("harvest.backend", lambda r: r.harvest and r.harvest.backend),
         ("harvest.domain", lambda r: r.harvest and r.harvest.domain),
         ("harvest.created_at", lambda r: r.harvest and r.harvest.created_at),
         ("harvest.modified_at", lambda r: r.harvest and r.harvest.modified_at),
+        ("harvest.remote_url", lambda r: r.harvest and r.harvest.remote_url),
         ("quality_score", lambda o: format(o.quality["score"], ".2f")),
         # schema? what is the schema of a dataset?
     )
