@@ -612,7 +612,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
             elif isinstance(value, RdfResource):
                 licenses.add(value.identifier.toPython())
 
-    # assign the distribution accessRights to the dataset if all distribs have the same accessRights
+    # assign the distribution accessRights to the dataset if all distribs that have an accessRights have the same accessRights
     # and the dataset doesn't have accessRights
     dataset_access_rights = access_rights_from_rdf(d)
     if not dataset_access_rights:
