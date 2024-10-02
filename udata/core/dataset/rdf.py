@@ -478,14 +478,7 @@ def access_rights_from_rdf(resource: RdfResource):
 def licenses_from_rdf(resource: RdfResource) -> set[str]:
     """
     Extract licences from a RDF distribution.
-
-    Will match at least the following:
-    +   <dct:license>
-            <dct:LicenseDocument>
-                <rdfs:label xml:lang="fr">license</rdfs:label>
-            </dct:LicenseDocument>
-        </dct:license>
-    +   <dct:license>license</dct:license>
+    See `test_dataset_rdf.py > test_licenses_from_rdf` for examples of supported formats.
     """
     licenses = set()
     for predicate in DCT.license, DCT.rights:
@@ -496,6 +489,8 @@ def licenses_from_rdf(resource: RdfResource) -> set[str]:
                 rdfs_label = rdf_value(license_info, RDFS.label)
                 if rdfs_label:
                     licenses.add(rdfs_label)
+                else:
+                    licenses.add(license_info.identifier.toPython())
     return licenses
 
 
