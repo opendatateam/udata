@@ -32,11 +32,9 @@ class DatasetSearch(ModelSearchAdapter):
 
     filters = {
         "tag": Filter(),
-        "badge": Filter(),
+        "badge": Filter(choices=list(Dataset.__badges__)),
         "organization": ModelTermsFilter(model=Organization),
-        "organization_badge": ModelTermsFilter(
-            model=Organization, field_name="badges", choices=list(Organization.__badges__)
-        ),
+        "organization_badge": Filter(choices=list(Organization.__badges__)),
         "owner": ModelTermsFilter(model=User),
         "license": ModelTermsFilter(model=License),
         "geozone": ModelTermsFilter(model=GeoZone),

@@ -387,7 +387,7 @@ def generate_fields(**kwargs):
                 if args.get(related_filter["key"]) is not None:
                     referenced_object = related_filter["object"]
                     queryset = getattr(referenced_object.objects, related_filter["queryset"])
-                    filtered_objects = queryset(args[related_filter["key"]])
+                    filtered_objects = queryset(args[related_filter["key"]]).only("id")
                     base_query = base_query.filter(
                         **{related_filter["lookup"]: list(filtered_objects)}
                     )

@@ -29,12 +29,10 @@ class ReuseSearch(ModelSearchAdapter):
     filters = {
         "tag": Filter(),
         "organization": ModelTermsFilter(model=Organization),
-        "organization_badge": ModelTermsFilter(
-            model=Organization, field_name="badges", choices=list(Organization.__badges__)
-        ),
+        "organization_badge": Filter(choices=list(Organization.__badges__)),
         "owner": ModelTermsFilter(model=User),
         "type": Filter(),
-        "badge": Filter(),
+        "badge": Filter(choices=list(Reuse.__badges__)),
         "featured": BoolFilter(),
         "topic": Filter(),
         "archived": BoolFilter(),

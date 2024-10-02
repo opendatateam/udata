@@ -137,7 +137,7 @@ class DatasetApiParser(ModelApiParser):
                 api.abort(400, "Organization arg must be an identifier")
             datasets = datasets.filter(organization=args["organization"])
         if args.get("organization_badge"):
-            orgs = Organization.objects.with_badge(args["organization_badge"])
+            orgs = Organization.objects.with_badge(args["organization_badge"]).only("id")
             datasets = datasets.filter(organization__in=orgs)
         if args.get("owner"):
             if not ObjectId.is_valid(args["owner"]):
