@@ -5,10 +5,12 @@ from tempfile import NamedTemporaryFile
 
 from celery.utils.log import get_task_logger
 from flask import current_app
+from mongoengine import ValidationError
 
 from udata import mail
 from udata import models as udata_models
 from udata.core import storages
+from udata.core.dataservices.models import Dataservice
 from udata.frontend import csv
 from udata.harvest.models import HarvestJob
 from udata.i18n import lazy_gettext as _
@@ -231,3 +233,38 @@ def export_csv(self, model=None):
     models = (model,) if model else ALLOWED_MODELS
     for model in models:
         export_csv_for_model(model, dataset)
+
+
+@job("bind-tabular-dataservice")
+def bind_tabular_dataservice(self, model=None):
+    """
+    Bind the datasets served by TabularAPI to its dataservice objects
+    """
+    TABULAR_API_DATASERVICE_ID = current_app.config.get("TABULAR_API_DATASERVICE_ID", [])
+
+    if not TABULAR_API_DATASERVICE_ID:
+        log.error("TABULAR_API_DATASERVICE_ID setting value not set")
+        return
+    try:
+        dataservice = Dataservice.objects.get(id=TABULAR_API_DATASERVICE_ID)
+    except Dataservice.DoesNotExist:
+        log.error("TABULAR_API_DATASERVICE_ID points to a non existent dataset")
+        return
+
+    datasets = Dataset.objects(
+        **{
+            "resources__extras__analysis:parsing:finished_at__exists": True,
+            "resources__extras__analysis:parsing:error": None,
+        }
+    ).visible()
+
+    dataservice.datasets = []
+    for dat in datasets:
+        dataservice.datasets.append(dat)
+
+    try:
+        dataservice.save()
+    except ValidationError as e:
+        log.error(exc_info=e)
+
+    log.info(f"Bound {datasets.count()} datasets to TabularAPI dataservice")
