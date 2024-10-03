@@ -1,3 +1,6 @@
+import functools
+from typing import Dict, List
+
 import flask_restx.fields as restx_fields
 import mongoengine
 import mongoengine.fields as mongo_fields
@@ -183,8 +186,11 @@ def generate_fields(**kwargs):
         write_fields = {}
         ref_fields = {}
         sortables = kwargs.get("additional_sorts", [])
-        related_filters = kwargs.get("related_filters", [])
+
         filterables = []
+        additional_filters = get_fields_with_additional_filters(
+            kwargs.get("additional_filters", [])
+        )
 
         read_fields["id"] = restx_fields.String(required=True, readonly=True)
 
@@ -200,32 +206,37 @@ def generate_fields(**kwargs):
 
             filterable = info.get("filterable", None)
             if filterable is not None:
-                if "key" not in filterable:
-                    filterable["key"] = key
-                if "column" not in filterable:
-                    filterable["column"] = key
+                filterables.append(compute_filter(key, field, info, filterable))
 
-                if "constraints" not in filterable:
-                    filterable["constraints"] = []
-                    if isinstance(field, mongo_fields.ReferenceField) or (
-                        isinstance(field, mongo_fields.ListField)
-                        and isinstance(field.field, mongo_fields.ReferenceField)
-                    ):
-                        filterable["constraints"].append("objectid")
+            additional_filter = additional_filters.get(key, None)
+            if additional_filter:
+                if not isinstance(field, mongo_fields.ReferenceField):
+                    raise Exception("Cannot use additional_filters on not a ref.")
 
-                if "type" not in filterable:
-                    filterable["type"] = str
-                    if isinstance(field, mongo_fields.BooleanField):
-                        filterable["type"] = boolean
+                ref_model = field.document_type
 
-                filterable["choices"] = info.get("choices", None)
-                if hasattr(field, "choices") and field.choices:
-                    filterable["choices"] = field.choices
+                for child in additional_filter.get("children", []):
+                    inner_field = getattr(ref_model, child["key"])
 
-                # We may add more information later here:
-                # - type of mongo query to execute (right now only simple =)
+                    column = f"{key}__{child['key']}"
+                    child["key"] = f"{key}_{child['key']}"
+                    filterable = compute_filter(column, inner_field, info, child)
 
-                filterables.append(filterable)
+                    # Since MongoDB is not capable of doing joins with a column like `organization__slug` we need to
+                    # do a custom filter by splitting the query in two.
+
+                    def query(filterable, query, value):
+                        # We use the computed `filterable["column"]` here because the `compute_filter` function
+                        # could have add default filter at the end (for example `organization__badges` converted
+                        # in `organization__badges__kind`)
+                        parts = filterable["column"].split("__", 1)
+                        models = ref_model.objects.filter(**{parts[1]: value}).only("id")
+                        return query.filter(**{f"{parts[0]}__in": models})
+
+                    # do a query-based filter instead of a column based one
+                    filterable["query"] = functools.partial(query, filterable)
+
+                    filterables.append(filterable)
 
             read, write = convert_db_to_field(key, field, info)
 
@@ -318,15 +329,7 @@ def generate_fields(**kwargs):
                 filterable["key"],
                 type=filterable["type"],
                 location="args",
-                choices=filterable["choices"],
-            )
-
-        for related_filter in related_filters:
-            parser.add_argument(
-                related_filter["key"],
-                type=related_filter.get("type", str),
-                location="args",
-                choices=related_filter.get("choices"),
+                choices=filterable.get("choices", None),
             )
 
         cls.__index_parser__ = parser
@@ -355,42 +358,21 @@ def generate_fields(**kwargs):
 
             for filterable in filterables:
                 if args.get(filterable["key"]) is not None:
-                    for constraint in filterable["constraints"]:
+                    for constraint in filterable.get("constraints", []):
                         if constraint == "objectid" and not ObjectId.is_valid(
                             args[filterable["key"]]
                         ):
                             api.abort(400, f'`{filterable["key"]}` must be an identifier')
 
-                    base_query = base_query.filter(
-                        **{
-                            filterable["column"]: args[filterable["key"]],
-                        }
-                    )
-
-            for related_filter in related_filters:
-                # This allows to define a query like so:
-                # related_filters=[
-                #     {
-                #         "key": "organization_badge",
-                #         "lookup": "organization__in",
-                #         "object": Organization,
-                #         "queryset": "with_badge",
-                #         "choices": list(Organization.__badges__),
-                #     },
-                # ]
-                # This will return reuses with an organization that have the badge provided in the
-                # `organization_badge` parameter:
-                # - referenced_object: Organization
-                # - queryset: Organization.objects.with_badge
-                # - filtered_objects: Organization.objects.with_badge(<value of the parameter `organization_badge`>)
-                # - Reuse.objects.filter(organization__in=list(filtered_objects))
-                if args.get(related_filter["key"]) is not None:
-                    referenced_object = related_filter["object"]
-                    queryset = getattr(referenced_object.objects, related_filter["queryset"])
-                    filtered_objects = queryset(args[related_filter["key"]]).only("id")
-                    base_query = base_query.filter(
-                        **{related_filter["lookup"]: list(filtered_objects)}
-                    )
+                    query = filterable.get("query", None)
+                    if query:
+                        base_query = filterable["query"](base_query, args[filterable["key"]])
+                    else:
+                        base_query = base_query.filter(
+                            **{
+                                filterable["column"]: args[filterable["key"]],
+                            }
+                        )
 
             if paginable:
                 base_query = base_query.paginate(args["page"], args["page_size"])
@@ -398,6 +380,7 @@ def generate_fields(**kwargs):
             return base_query
 
         cls.apply_sort_filters_and_pagination = apply_sort_filters_and_pagination
+        cls.__additional_class_info__ = kwargs
         return cls
 
     return wrapper
@@ -533,3 +516,75 @@ def wrap_primary_key(
         raise ValueError(
             f"Unknown ID field type {id_field.__class__} for {document_type} (ID field name is {id_field_name}, value was {value})"
         )
+
+
+def get_fields_with_additional_filters(additional_filters: List[str]) -> Dict[str, any]:
+    """
+    Right now we only support additional filters like "organization.badges"
+    The goal of this function is to keyby the additional filters by the first part (`organization`) to
+    be able to compute them when we loop over all the fields (`title`, `organization`…)
+    """
+    results = {}
+    for key in additional_filters:
+        parts = key.split(".")
+        if len(parts) == 2:
+            parent = parts[0]
+            child = parts[1]
+
+            if parent not in results:
+                results[parent] = {"children": []}
+
+            results[parent]["children"].append(
+                {
+                    "key": child,
+                    "type": str,
+                }
+            )
+        else:
+            raise Exception(f"Do not support `additional_filters` without two parts: {key}.")
+
+    return results
+
+
+def compute_filter(column: str, field, info, filterable):
+    # "key" is the param key in the URL
+    if "key" not in filterable:
+        filterable["key"] = column
+
+    # If we do a filter on a embed document, get the class info
+    # of this document to see if there is a default filter value
+    embed_info = None
+    if isinstance(field, mongo_fields.EmbeddedDocumentField):
+        embed_info = field.get("__additional_class_info__", None)
+    elif isinstance(field, mongo_fields.EmbeddedDocumentListField):
+        embed_info = getattr(field.field.document_type, "__additional_class_info__", None)
+
+    if embed_info and embed_info.get("default_filterable_field", None):
+        # There is a default filterable field so append it to the column and replace the
+        # field to use the inner one (for example using the `kind` `StringField` instead of
+        # the embed `Badge` field.)
+        filterable["column"] = f"{column}__{embed_info['default_filterable_field']}"
+        field = getattr(field.field.document_type, embed_info["default_filterable_field"])
+    else:
+        filterable["column"] = column
+
+    if "constraints" not in filterable:
+        filterable["constraints"] = []
+
+    if isinstance(field, mongo_fields.ReferenceField) or (
+        isinstance(field, mongo_fields.ListField)
+        and isinstance(field.field, mongo_fields.ReferenceField)
+    ):
+        filterable["constraints"].append("objectid")
+
+    if "type" not in filterable:
+        if isinstance(field, mongo_fields.BooleanField):
+            filterable["type"] = boolean
+        else:
+            filterable["type"] = str
+
+    filterable["choices"] = info.get("choices", None)
+    if hasattr(field, "choices") and field.choices:
+        filterable["choices"] = field.choices
+
+    return filterable
