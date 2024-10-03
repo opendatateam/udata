@@ -5,7 +5,7 @@ from blinker import Signal
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
-from udata.core.badges.models import BadgeMixin
+from udata.core.badges.models import badge_mixin
 from udata.core.metrics.models import WithMetrics
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
@@ -86,7 +86,20 @@ class OrganizationQuerySet(db.BaseQuerySet):
         return self(badges__kind=kind)
 
 
-class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
+class Organization(
+    WithMetrics,
+    badge_mixin(
+        [
+            PUBLIC_SERVICE,
+            CERTIFIED,
+            ASSOCIATION,
+            COMPANY,
+            LOCAL_AUTHORITY,
+        ]
+    ),
+    db.Datetimed,
+    db.Document,
+):
     name = db.StringField(required=True)
     acronym = db.StringField(max_length=128)
     slug = db.SlugField(

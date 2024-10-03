@@ -132,12 +132,12 @@ class ReuseAPITest:
         assert400(response)
 
         # filter on organization badge
-        response = api.get(url_for("api.reuses", organization_badge=org_constants.PUBLIC_SERVICE))
+        response = api.get(url_for("api.reuses", organization_badges=org_constants.PUBLIC_SERVICE))
         assert200(response)
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(org_reuse_public_service.id)
 
-        response = api.get(url_for("api.reuses", organization_badge="bad-badge"))
+        response = api.get(url_for("api.reuses", organization_badges="bad-badge"))
         assert400(response)
 
     def test_reuse_api_list_filter_private(self, api) -> None:
