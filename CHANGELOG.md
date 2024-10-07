@@ -5,6 +5,7 @@
 - Add a filter on organization and document sort parameters in the `/discussions` endpoint [#3147](https://github.com/opendatateam/udata/pull/3147)
 - Move discussion catalog creation and add fields [#3152](https://github.com/opendatateam/udata/pull/3152) and [#3154](https://github.com/opendatateam/udata/pull/3154)
 - Add resources formats and harvest remote_url on dataset catalog [#3159](https://github.com/opendatateam/udata/pull/3159)
+- Make base_api_url optional in dataservice [https://github.com/opendatateam/udata/pull/3163](#3163)
 
 ## 9.2.1 (2024-09-23)
 
