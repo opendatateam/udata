@@ -22,6 +22,18 @@ class ContactPointAPITest:
         assert201(response)
         assert ContactPoint.objects.count() == 1
 
+    def test_contact_point_api_create_email_or_contact_form(self, api):
+        api.login()
+        data = {"name": faker.word(), "contact_form": faker.url()}
+        response = api.post(url_for("api.contact_points"), data=data)
+        assert201(response)
+        assert ContactPoint.objects.count() == 1
+
+        data = {"name": faker.word(), "email": faker.email()}
+        response = api.post(url_for("api.contact_points"), data=data)
+        assert201(response)
+        assert ContactPoint.objects.count() == 2
+
     def test_contact_point_api_invalid_email(self, api):
         api.login()
         data = {"name": faker.word(), "email": faker.word()}
