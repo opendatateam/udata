@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2024-10-07 15:16+0200\n"
-"PO-Revision-Date: 2024-10-07 13:18\n"
+"PO-Revision-Date: 2024-10-07 13:19\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -233,11 +233,11 @@ msgstr "Email"
 
 #: udata/core/contact_point/forms.py:17
 msgid "Contact form"
-msgstr ""
+msgstr "Formulaire de contact"
 
 #: udata/core/contact_point/forms.py:17
 msgid "The organization web contact form"
-msgstr ""
+msgstr "Formulaire de contact web de l'organisation"
 
 #: udata/core/contact_point/forms.py:20 udata/core/dataset/forms.py:112
 #: udata/core/dataset/forms.py:175 udata/core/topic/forms.py:14
@@ -1590,7 +1590,7 @@ msgstr "Ici"
 
 #: udata/tests/api/test_contact_points.py:50
 msgid "At least an email or a contact form is required for a contact point"
-msgstr ""
+msgstr "Au moins un e-mail ou un formulaire de contact est requis pour un point de contact"
 
 #: udata/tests/forms/test_model_field.py:165
 msgid "Expect a \"Target\" class but \"Wrong\" was found"
