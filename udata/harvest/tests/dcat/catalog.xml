@@ -122,6 +122,7 @@
     <dcat:byteSize>12323</dcat:byteSize>
     <dcterms:description>A JSON resource</dcterms:description>
     <dcat:accessURL>http://data.test.org/datasets/1/resources/1/file.json</dcat:accessURL>
+    <dct:license>Licence Ouverte Version 1.0</dct:license>
   </dcat:Distribution>
   <dcterms:PeriodOfTime rdf:about="file:///base/data/home/apps/s%7Erdf-translator/2.408516547054015808/temporal-1">
     <schema:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-05T00:00:00</schema:startDate>
