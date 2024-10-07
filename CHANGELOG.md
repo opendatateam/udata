@@ -7,6 +7,7 @@
 - Add resources formats and harvest remote_url on dataset catalog [#3159](https://github.com/opendatateam/udata/pull/3159)
 - Add contact form in contact point model [#3164](https://github.com/opendatateam/udata/pull/3164)
 - Make base_api_url optional in dataservice [https://github.com/opendatateam/udata/pull/3163](#3163)
+- DCAT harvest : fetch licenses and access rights from proper locations [#3054](https://github.com/opendatateam/udata/pull/3054)
 
 ## 9.2.1 (2024-09-23)
 
