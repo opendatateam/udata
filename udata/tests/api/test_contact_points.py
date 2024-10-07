@@ -2,6 +2,7 @@ import pytest
 from flask import url_for
 
 from udata.core.contact_point.factories import ContactPointFactory
+from udata.i18n import gettext as _
 from udata.models import ContactPoint
 from udata.tests.helpers import assert200, assert201, assert204, assert400
 from udata.utils import faker
@@ -27,6 +28,16 @@ class ContactPointAPITest:
         response = api.post(url_for("api.contact_points"), data=data)
         assert400(response)
         assert "email" in response.json["errors"]
+        assert ContactPoint.objects.count() == 0
+
+    def test_contact_point_missing_contact_information(self, api):
+        api.login()
+        data = {"name": faker.word()}
+        response = api.post(url_for("api.contact_points"), data=data)
+        assert400(response)
+        assert response.json["message"] == _(
+            "At least an email or a contact form is required for a contact point"
+        )
         assert ContactPoint.objects.count() == 0
 
     def test_contact_point_api_update(self, api):

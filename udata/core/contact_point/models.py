@@ -10,3 +10,10 @@ class ContactPoint(db.Document, Owned):
     contact_form = db.URLField()
 
     meta = {"queryset_class": OwnedQuerySet}
+
+    def validate(self, clean=True):
+        if not self.email and not self.contact_form:
+            raise db.ValidationError(
+                "At least an email or a contact form is required for a contact point"
+            )
+        return super().validate(clean=clean)
