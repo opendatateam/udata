@@ -1,3 +1,5 @@
+import mongoengine
+
 from udata.api import API, api
 from udata.api.parsers import ModelApiParser
 
@@ -29,7 +31,10 @@ class ContactPointsListAPI(API):
     def post(self):
         """Creates a contact point"""
         form = api.validate(ContactPointForm)
-        contact_point = form.save()
+        try:
+            contact_point = form.save()
+        except mongoengine.errors.ValidationError as e:
+            api.abort(400, e.message)
         return contact_point, 201
 
 

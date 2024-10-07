@@ -59,6 +59,7 @@ def oauth(app, request):
         name="test-client",
         owner=UserFactory(),
         redirect_uris=["https://test.org/callback"],
+        secret="suchs3cr3t",
     )
     kwargs.update(custom_kwargs)
     return OAuth2Client.objects.create(**kwargs)
@@ -455,6 +456,93 @@ class APIAuthTest:
         assert200(response)
         assert response.content_type == "application/json"
         assert response.json == {"success": True}
+
+    @pytest.mark.oauth(secret=None)
+    def test_s256_code_challenge_success_no_client_secret(self, client, oauth):
+        """Authenticate through an OAuth client that has no secret associated (public client)"""
+        code_verifier = generate_token(48)
+        code_challenge = create_s256_code_challenge(code_verifier)
+
+        client.login()
+
+        response = client.post(
+            url_for(
+                "oauth.authorize",
+                response_type="code",
+                client_id=oauth.client_id,
+                code_challenge=code_challenge,
+                code_challenge_method="S256",
+            ),
+            {
+                "scope": "default",
+                "accept": "",
+            },
+        )
+        assert "code=" in response.location
+
+        params = dict(url_decode(urlparse.urlparse(response.location).query))
+        code = params["code"]
+
+        response = client.post(
+            url_for("oauth.token"),
+            {
+                "grant_type": "authorization_code",
+                "code": code,
+                "code_verifier": code_verifier,
+                "client_id": oauth.client_id,
+            },
+        )
+
+        assert200(response)
+        assert response.content_type == "application/json"
+        assert "access_token" in response.json
+
+        token = response.json["access_token"]
+
+        response = client.post(
+            url_for("api.fake"), headers={"Authorization": " ".join(["Bearer", token])}
+        )
+
+        assert200(response)
+        assert response.content_type == "application/json"
+        assert response.json == {"success": True}
+
+    def test_s256_code_challenge_missing_client_secret(self, client, oauth):
+        """Fail authentication through an OAuth client with missing secret"""
+        code_verifier = generate_token(48)
+        code_challenge = create_s256_code_challenge(code_verifier)
+
+        client.login()
+
+        response = client.post(
+            url_for(
+                "oauth.authorize",
+                response_type="code",
+                client_id=oauth.client_id,
+                code_challenge=code_challenge,
+                code_challenge_method="S256",
+            ),
+            {
+                "scope": "default",
+                "accept": "",
+            },
+        )
+        assert "code=" in response.location
+
+        params = dict(url_decode(urlparse.urlparse(response.location).query))
+        code = params["code"]
+
+        response = client.post(
+            url_for("oauth.token"),
+            {
+                "grant_type": "authorization_code",
+                "code": code,
+                "code_verifier": code_verifier,
+                "client_id": oauth.client_id,
+            },
+        )
+
+        assert401(response)
 
     def test_authorization_multiple_grant_token(self, client, oauth):
         for i in range(3):

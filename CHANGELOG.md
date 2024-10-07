@@ -2,6 +2,19 @@
 
 ## Current (in progress)
 
+- Add a filter on organization and document sort parameters in the `/discussions` endpoint [#3147](https://github.com/opendatateam/udata/pull/3147)
+- Move discussion catalog creation and add fields [#3152](https://github.com/opendatateam/udata/pull/3152) and [#3154](https://github.com/opendatateam/udata/pull/3154)
+- Add resources formats and harvest remote_url on dataset catalog [#3159](https://github.com/opendatateam/udata/pull/3159)
+- Add contact form in contact point model [#3164](https://github.com/opendatateam/udata/pull/3164)
+- Make base_api_url optional in dataservice [https://github.com/opendatateam/udata/pull/3163](#3163)
+
+## 9.2.1 (2024-09-23)
+
+- Enable basic search on dataservices [#3148](https://github.com/opendatateam/udata/pull/3148)
+
+## 9.2.0 (2024-09-13)
+
+- Allow OAuth clients without secrets [#3138](https://github.com/opendatateam/udata/pull/3138)
 - Add a `archived` button for datasets and reuses on frontend admin [#3104](https://github.com/opendatateam/udata/pull/3104)
 - **breaking change** Return all the reuses available to a user on the /reuses endpoint, including the private and deleted ones they own [#3140](https://github.com/opendatateam/udata/pull/3140).
 - Fix undelete reuse and dataservices [#3141](https://github.com/opendatateam/udata/pull/3141)

@@ -94,7 +94,7 @@ class HarvestMetadata(db.EmbeddedDocument):
     archived_at = field(db.DateTimeField())
 
 
-@generate_fields()
+@generate_fields(searchable=True)
 class Dataservice(WithMetrics, Owned, db.Document):
     meta = {
         "indexes": [
@@ -122,15 +122,12 @@ class Dataservice(WithMetrics, Owned, db.Document):
         readonly=True,
     )
     description = field(db.StringField(default=""), description="In markdown")
-    base_api_url = field(
-        db.URLField(required=True),
-        sortable=True,
-    )
+    base_api_url = field(db.URLField(), sortable=True)
     endpoint_description_url = field(db.URLField())
     authorization_request_url = field(db.URLField())
     availability = field(db.FloatField(min=0, max=100), example="99.99")
     rate_limiting = field(db.StringField())
-    is_restricted = field(db.BooleanField())
+    is_restricted = field(db.BooleanField(), filterable={})
     has_token = field(db.BooleanField())
     format = field(db.StringField(choices=DATASERVICE_FORMATS))
 
