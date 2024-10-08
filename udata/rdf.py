@@ -200,7 +200,7 @@ CONTEXT = {
 
 def serialize_value(value, parse_label=False):
     """
-    If the value is a URIRef, return it as a string.
+    If the value is a URIRef or a Literal, return it as a string.
     If the value is a RdfResource:
         - Return the label of the RdfResource if any and `parse_label`,
         - or the identifier of the RdfResource.
