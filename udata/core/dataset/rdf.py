@@ -38,6 +38,7 @@ from udata.rdf import (
     contact_point_from_rdf,
     namespace_manager,
     rdf_value,
+    rdf_values,
     remote_url_from_rdf,
     sanitize_html,
     schema_from_rdf,
@@ -468,56 +469,29 @@ def title_from_rdf(rdf, url):
             return i18n._("Nameless resource")
 
 
-def access_rights_from_rdf(resource: RdfResource):
+def access_rights_from_rdf(resource: RdfResource) -> str | None:
     """
     Extract the access rights from a RdfResource
-    If the access rights is a URIRef, return it as a string.
-    If the access rights is a RdfResource, return the label of the RdfResource if any, or the identifier of the RdfResource.
+    Cardinality is 0..1.
     """
-    access_right_info = resource.value(DCT.accessRights)
-    if isinstance(access_right_info, (URIRef, Literal)):
-        return access_right_info.toPython()
-    elif isinstance(access_right_info, RdfResource):
-        rdfs_label = rdf_value(access_right_info, RDFS.label)
-        if rdfs_label:
-            return rdfs_label
-        else:
-            return access_right_info.identifier.toPython()
+    return rdf_value(resource, DCT.accessRights, parse_label=True)
 
 
 def licenses_from_rdf(resource: RdfResource) -> set[str]:
     """
     Extract licences from a RDF distribution.
     See `test_dataset_rdf.py > test_licenses_from_rdf` for examples of supported formats.
+    Cardinality is 0..n (although it should be 0..1 per the spec).
     """
-    licenses = set()
-    for license_info in resource.objects(predicate=DCT.license):
-        if isinstance(license_info, (URIRef, Literal)):
-            licenses.add(license_info.toPython())
-        elif isinstance(license_info, RdfResource):
-            rdfs_label = rdf_value(license_info, RDFS.label)
-            if rdfs_label:
-                licenses.add(rdfs_label)
-            else:
-                licenses.add(license_info.identifier.toPython())
-    return licenses
+    return rdf_values(resource, DCT.license, parse_label=True)
 
 
 def rights_from_rdf(resource: RdfResource) -> set[str]:
     """
     Extract rights from a RDF distribution.
+    Cardinality is 0..n.
     """
-    rights = set()
-    for right_info in resource.objects(predicate=DCT.rights):
-        if isinstance(right_info, (URIRef, Literal)):
-            rights.add(right_info.toPython())
-        elif isinstance(right_info, RdfResource):
-            rdfs_label = rdf_value(right_info, RDFS.label)
-            if rdfs_label:
-                rights.add(rdfs_label)
-            else:
-                rights.add(right_info.identifier.toPython())
-    return rights
+    return rdf_values(resource, DCT.rights, parse_label=True)
 
 
 def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
@@ -680,18 +654,18 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
         resource_from_rdf(additionnal, dataset, is_additionnal=True)
 
     default_license = dataset.license or License.default()
-    dataset_canonical_license = rdf_value(d, DCT.license)
+    dataset_canonical_license = rdf_value(d, DCT.license, parse_label=True)
     dataset_licenses = licenses_from_rdf(d)
     if dataset_licenses:
         dataset.extras["harvest"] = {
             **dataset.extras.get("harvest", {}),
-            "dct:license": dataset_licenses,
+            "dct:license": list(dataset_licenses),
         }
     dataset_rights = rights_from_rdf(d)
     if dataset_rights:
         dataset.extras["harvest"] = {
             **dataset.extras.get("harvest", {}),
-            "dct:rights": dataset_rights,
+            "dct:rights": list(dataset_rights),
         }
     dataset.license = License.guess(
         dataset_canonical_license,

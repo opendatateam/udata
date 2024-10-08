@@ -198,16 +198,36 @@ CONTEXT = {
 }
 
 
-def serialize_value(value):
+def serialize_value(value, parse_label=False):
+    """
+    If the value is a URIRef, return it as a string.
+    If the value is a RdfResource:
+        - Return the label of the RdfResource if any and `parse_label`,
+        - or the identifier of the RdfResource.
+    """
     if isinstance(value, (URIRef, Literal)):
         return value.toPython()
     elif isinstance(value, RdfResource):
+        if parse_label:
+            rdfs_label = rdf_value(value, RDFS.label)
+            if rdfs_label:
+                return rdfs_label
         return value.identifier.toPython()
 
 
-def rdf_value(obj, predicate, default=None):
+def rdf_values(resource, predicate, parse_label=False) -> set[str]:
+    """Returns a set of serialized values for a predicate from a RdfResource"""
+    return {
+        value
+        for info in resource.objects(predicate=predicate)
+        if (value := serialize_value(info, parse_label=parse_label))
+    }
+
+
+def rdf_value(obj, predicate, default=None, parse_label=False):
+    """Serialize the value for a predicate on a RdfResource"""
     value = obj.value(predicate)
-    return serialize_value(value) if value else default
+    return serialize_value(value, parse_label=parse_label) if value else default
 
 
 class HTMLDetector(HTMLParser):
