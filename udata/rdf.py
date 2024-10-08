@@ -208,10 +208,8 @@ def serialize_value(value, parse_label=False):
     if isinstance(value, (URIRef, Literal)):
         return value.toPython()
     elif isinstance(value, RdfResource):
-        if parse_label:
-            rdfs_label = rdf_value(value, RDFS.label)
-            if rdfs_label:
-                return rdfs_label
+        if parse_label and (rdfs_label := rdf_value(value, RDFS.label)):
+            return rdfs_label
         return value.identifier.toPython()
 
 
