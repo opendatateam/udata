@@ -625,12 +625,12 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
             **dataset.extras.get("harvest", {}),
         }
 
-    resources_licenses = set()
+    resources_licenses_hints = set()
     for distrib in d.objects(DCAT.distribution | DCAT.distributions):
         resource_from_rdf(distrib, dataset)
         # include both dct:license and dct:rights as licenses hints from resources
-        resources_licenses |= licenses_from_rdf(distrib)
-        resources_licenses |= rights_from_rdf(distrib)
+        resources_licenses_hints |= licenses_from_rdf(distrib)
+        resources_licenses_hints |= rights_from_rdf(distrib)
 
     # assign the distribution accessRights to the dataset if all distribs that have an accessRights have the same accessRights
     # and the dataset doesn't have accessRights
@@ -671,7 +671,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
         dataset_canonical_license,
         *dataset_licenses,
         *dataset_rights,
-        *resources_licenses,
+        *resources_licenses_hints,
         default=default_license,
     )
 
