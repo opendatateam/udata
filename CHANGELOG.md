@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 9.2.2 (2024-10-08)
 
 - Add a filter on organization and document sort parameters in the `/discussions` endpoint [#3147](https://github.com/opendatateam/udata/pull/3147)
