@@ -9,6 +9,7 @@ from flask import current_app
 from udata import mail
 from udata import models as udata_models
 from udata.core import storages
+from udata.core.dataservices.models import Dataservice
 from udata.frontend import csv
 from udata.harvest.models import HarvestJob
 from udata.i18n import lazy_gettext as _
@@ -46,6 +47,11 @@ def purge_datasets(self):
             datasets = topic.datasets
             datasets.remove(dataset)
             topic.update(datasets=datasets)
+        # Remove dataservices related dataset
+        for dataservice in Dataservice.objects(datasets=dataset):
+            datasets = dataservice.datasets
+            datasets.remove(dataset)
+            dataservice.update(datasets=datasets)
         # Remove HarvestItem references
         HarvestJob.objects(items__dataset=dataset).update(set__items__S__dataset=None)
         # Remove associated Transfers
