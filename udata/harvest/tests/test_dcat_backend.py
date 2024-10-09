@@ -502,12 +502,10 @@ class DcatBackendTest:
         assert dataset.temporal_coverage.start == date(2016, 1, 1)
         assert dataset.temporal_coverage.end == date(2016, 12, 5)
 
-        assert dataset.extras["harvest"]["dct:accessRights"] == [
+        assert dataset.extras["dcat"]["accessRights"] == [
             "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1e"
         ]
-        assert dataset.extras["harvest"]["dct:provenance"] == [
-            "Description de la provenance des données"
-        ]
+        assert dataset.extras["dcat"]["provenance"] == ["Description de la provenance des données"]
 
         assert "observation-de-la-terre-et-environnement" in dataset.tags
         assert "hvd" in dataset.tags
@@ -553,11 +551,11 @@ class DcatBackendTest:
         # test dct:rights -> license support from dataset
         dataset = Dataset.objects.get(harvest__dct_identifier="2")
         assert dataset.license.id == "lov2"
-        assert dataset.extras["harvest"]["dct:rights"] == ["Licence Ouverte Version 2.0"]
+        assert dataset.extras["dcat"]["rights"] == ["Licence Ouverte Version 2.0"]
 
         # test dct:rights storage in resource
         resource_2 = next(res for res in dataset.resources if res.title == "Resource 2-2")
-        assert resource_2.extras["harvest"]["dct:rights"] == ["Rights on nested resource"]
+        assert resource_2.extras["dcat"]["rights"] == ["Rights on nested resource"]
 
     def test_geonetwork_xml_catalog(self, rmock):
         url = mock_dcat(rmock, "geonetwork.xml", path="catalog.xml")
@@ -861,15 +859,15 @@ class CswIso19139DcatBackendTest:
 
         # accessRights is gotten from the only resource that is recognized as a distribution and copied to the dataset level
         access_right = ["Pas de restriction d'accès public selon INSPIRE"]
-        assert dataset.extras["harvest"]["dct:accessRights"] == access_right
+        assert dataset.extras["dcat"]["accessRights"] == access_right
         # also present on the resource level
-        assert resource.extras["harvest"]["dct:accessRights"] == access_right
+        assert resource.extras["dcat"]["accessRights"] == access_right
 
         # see `test_geo_ide` for detailed explanation of the following
-        assert dataset.extras["harvest"].get("dct:license") is None
-        assert len(resource.extras["harvest"]["dct:license"]) == 6
-        assert dataset.extras["harvest"].get("dct:rights") is None
-        assert resource.extras["harvest"].get("dct:rights") is None
+        assert dataset.extras["dcat"].get("license") is None
+        assert len(resource.extras["dcat"]["license"]) == 6
+        assert dataset.extras["dcat"].get("rights") is None
+        assert resource.extras["dcat"].get("rights") is None
 
     def test_geo_ide(self):
         # this is the string used in geo-ide for now
@@ -898,20 +896,20 @@ class CswIso19139DcatBackendTest:
 
         # accessRights is retrieved from the resources
         access_right = ["Pas de restriction d'accès public selon INSPIRE"]
-        assert dataset.extras["harvest"]["dct:accessRights"] == access_right
+        assert dataset.extras["dcat"]["accessRights"] == access_right
         # also present on the resource level
         for resource in dataset.resources:
-            assert resource.extras["harvest"]["dct:accessRights"] == access_right
+            assert resource.extras["dcat"]["accessRights"] == access_right
 
         # _no_ licence extra on dataset level, since they're in resources
-        assert dataset.extras["harvest"].get("dct:license") is None
+        assert dataset.extras["dcat"].get("license") is None
         # all useLimitations have been duplicated on resources as dct:license
         for resource in dataset.resources:
-            r_licenses = resource.extras["harvest"]["dct:license"]
+            r_licenses = resource.extras["dcat"]["license"]
             assert len(r_licenses) == 6
             assert any("Licence Ouverte 1.0" in x for x in r_licenses)
 
         # no dct:rights anywhere, everything is in dct:license (at least for now)
-        assert dataset.extras["harvest"].get("dct:rights") is None
+        assert dataset.extras["dcat"].get("rights") is None
         for resource in dataset.resources:
-            assert resource.extras["harvest"].get("dct:rights") is None
+            assert resource.extras["dcat"].get("rights") is None

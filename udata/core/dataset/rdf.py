@@ -493,6 +493,18 @@ def rights_from_rdf(resource: RdfResource) -> set[str]:
     return rdf_values(resource, DCT.rights, parse_label=True)
 
 
+def add_dcat_extra(
+    obj: Dataset | Resource, key: str, value: str | set | list
+) -> Dataset | Resource:
+    if type(value) is set:
+        value = list(value)
+    obj.extras["dcat"] = {
+        **obj.extras.get("dcat", {}),
+        key: value,
+    }
+    return obj
+
+
 def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     """
     Map a Resource domain model to a DCAT/RDF graph
@@ -533,24 +545,15 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
 
     access_rights = access_rights_from_rdf(distrib)
     if access_rights:
-        resource.extras["harvest"] = {
-            **resource.extras.get("harvest", {}),
-            "dct:accessRights": list(access_rights),
-        }
+        add_dcat_extra(resource, "accessRights", access_rights)
 
     licenses = licenses_from_rdf(distrib)
     if licenses:
-        resource.extras["harvest"] = {
-            **resource.extras.get("harvest", {}),
-            "dct:license": list(licenses),
-        }
+        add_dcat_extra(resource, "license", licenses)
 
     rights = rights_from_rdf(distrib)
     if rights:
-        resource.extras["harvest"] = {
-            **resource.extras.get("harvest", {}),
-            "dct:rights": list(rights),
-        }
+        add_dcat_extra(resource, "rights", rights)
 
     checksum = distrib.value(SPDX.checksum)
     if checksum:
@@ -619,10 +622,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     # Adding some metadata to extras - may be moved to property if relevant
     provenance = rdf_values(d, DCT.provenance, parse_label=True)
     if provenance:
-        dataset.extras["harvest"] = {
-            **dataset.extras.get("harvest", {}),
-            "dct:provenance": list(provenance),
-        }
+        add_dcat_extra(dataset, "provenance", provenance)
 
     resources_licenses_hints = set()
     resources_access_rights = []
@@ -637,12 +637,8 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     dataset_access_rights = access_rights_from_rdf(d)
     if not dataset_access_rights and resources_access_rights:
         dataset_access_rights = set.intersection(*resources_access_rights)
-
     if dataset_access_rights:
-        dataset.extras["harvest"] = {
-            **dataset.extras.get("harvest", {}),
-            "dct:accessRights": list(dataset_access_rights),
-        }
+        add_dcat_extra(dataset, "accessRights", dataset_access_rights)
 
     for additionnal in d.objects(DCT.hasPart):
         resource_from_rdf(additionnal, dataset, is_additionnal=True)
@@ -651,16 +647,10 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     dataset_canonical_license = rdf_value(d, DCT.license, parse_label=True)
     dataset_licenses = licenses_from_rdf(d)
     if dataset_licenses:
-        dataset.extras["harvest"] = {
-            **dataset.extras.get("harvest", {}),
-            "dct:license": list(dataset_licenses),
-        }
+        add_dcat_extra(dataset, "license", dataset_licenses)
     dataset_rights = rights_from_rdf(d)
     if dataset_rights:
-        dataset.extras["harvest"] = {
-            **dataset.extras.get("harvest", {}),
-            "dct:rights": list(dataset_rights),
-        }
+        add_dcat_extra(dataset, "rights", dataset_rights)
     dataset.license = License.guess(
         dataset_canonical_license,
         *dataset_licenses,
