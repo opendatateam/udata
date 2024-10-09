@@ -77,7 +77,7 @@ comment_discussion_fields = api.model(
 discussion_page_fields = api.model("DiscussionPage", fields.pager(discussion_fields))
 
 parser = api.parser()
-sorting_keys: list[str] = ["created", "title", "closed"]
+sorting_keys: list[str] = ["created", "title", "closed", "discussion.posted_on"]
 sorting_choices: list[str] = sorting_keys + ["-" + k for k in sorting_keys]
 parser.add_argument(
     "sort",
