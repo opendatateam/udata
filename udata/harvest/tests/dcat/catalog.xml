@@ -75,6 +75,7 @@
     </dcat:dataset>
     <dcat:dataset>
       <dcat:Dataset rdf:about="http://data.test.org/datasets/2">
+        <dct:rights>Licence Ouverte Version 2.0</dct:rights>
         <dcat:keyword>Tag 1</dcat:keyword>
         <dcat:distribution rdf:resource="http://data.test.org/datasets/2/resources/1"/>
         <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T19:01:24.184120</dcterms:modified>
@@ -102,6 +103,7 @@
     <dcterms:title>Resource 2-2</dcterms:title>
     <dcterms:format>JSON</dcterms:format>
     <dcat:accessURL>http://data.test.org/datasets/2/resources/2/file.json</dcat:accessURL>
+    <dct:rights>Rights on nested resource</dct:rights>
   </dcat:Distribution>
   <vcard:Organization rdf:about="http://data.test.org/contacts/1">
     <vcard:fn>Organization contact</vcard:fn>
