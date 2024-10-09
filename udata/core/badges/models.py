@@ -3,7 +3,7 @@ from datetime import datetime
 
 from mongoengine.signals import post_save
 
-from udata.api_fields import field
+from udata.api_fields import field, generate_fields
 from udata.auth import current_user
 from udata.core.badges.fields import badge_fields
 from udata.mongo import db
@@ -17,8 +17,9 @@ __all__ = ["get_badge_mixin", "get_badge"]
 
 
 def get_badge(choices=None):
+    @generate_fields(default_filterable_field="kind")
     class Badge(db.EmbeddedDocument):
-        kind = db.StringField(required=True, choices=choices)
+        kind = db.StringField(required=True, choices=list(choices.keys()) if choices else None)
         created = db.DateTimeField(default=datetime.utcnow, required=True)
         created_by = db.ReferenceField("User")
 

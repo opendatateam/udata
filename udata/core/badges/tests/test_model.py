@@ -26,7 +26,9 @@ class BadgeMixinTest(DBTestMixin, TestCase):
 
     def test_choices(self):
         """It should have a choice list on the badge field."""
-        self.assertEqual(Fake._fields["badges"].field.document_type.kind.choices, Fake.__badges__)
+        self.assertEqual(
+            Fake._fields["badges"].field.document_type.kind.choices, list(Fake.__badges__.keys())
+        )
 
     def test_get_badge_found(self):
         """It allow to get a badge by kind if present"""
