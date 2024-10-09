@@ -16,11 +16,7 @@ def migrate(db):
 
     datasets = (
         Dataset.objects(
-            __raw__={
-                "$or": [
-                    {"extras.harvest": {"$exists": True}},
-                ],
-            }
+            __raw__={"extras.harvest": {"$exists": True}},
         )
         .no_cache()
         .timeout(False)
