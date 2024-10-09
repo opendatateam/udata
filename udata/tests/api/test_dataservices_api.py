@@ -19,7 +19,7 @@ from . import APITestCase
 class DataserviceAPITest(APITestCase):
     modules = []
 
-    def test_reuse_api_list_with_filters(self):
+    def test_dataservices_api_list_with_filters(self):
         """Should filters dataservices results based on query filters"""
         org = OrganizationFactory()
         org_public_service = OrganizationFactory()

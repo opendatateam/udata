@@ -1,15 +1,16 @@
 from udata.forms import ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
-from udata.models import Badge
+from udata.models import get_badge
 
 __all__ = ("badge_form",)
 
 
 def badge_form(model):
     """A form factory for a given model badges"""
+    badge = get_badge()
 
     class BadgeForm(ModelForm):
-        model_class = Badge
+        model_class = badge
 
         kind = fields.RadioField(
             _("Kind"),

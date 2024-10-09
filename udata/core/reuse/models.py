@@ -10,7 +10,7 @@ from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE
 from udata.core.storages import default_image_basename, images
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.models import BadgeMixin, WithMetrics, db
+from udata.models import WithMetrics, db, get_badge_mixin
 from udata.mongo.errors import FieldValidationError
 from udata.uris import endpoint_for
 from udata.utils import hash_url
@@ -18,6 +18,8 @@ from udata.utils import hash_url
 from .constants import IMAGE_MAX_SIZE, IMAGE_SIZES, REUSE_TOPICS, REUSE_TYPES
 
 __all__ = ("Reuse",)
+
+BADGES: dict[str, str] = {}
 
 
 class ReuseQuerySet(OwnedQuerySet):
@@ -51,7 +53,7 @@ def check_url_does_not_exists(url):
         },
     ],
 )
-class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
+class Reuse(db.Datetimed, WithMetrics, get_badge_mixin(BADGES), Owned, db.Document):
     title = field(
         db.StringField(required=True),
         sortable=True,
@@ -133,8 +135,6 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
 
     def __str__(self):
         return self.title or ""
-
-    __badges__ = {}
 
     __metrics_keys__ = [
         "discussions",

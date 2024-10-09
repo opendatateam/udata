@@ -19,7 +19,7 @@ from udata.core import storages
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.models import BadgeMixin, SpatialCoverage, WithMetrics, db
+from udata.models import SpatialCoverage, WithMetrics, db, get_badge_mixin
 from udata.mongo.errors import FieldValidationError
 from udata.uris import ValidationError, endpoint_for
 from udata.uris import validate as validate_url
@@ -52,6 +52,10 @@ __all__ = (
     "CommunityResource",
     "ResourceSchema",
 )
+
+BADGES: dict[str, str] = {
+    PIVOTAL_DATA: _("Pivotal data"),
+}
 
 NON_ASSIGNABLE_SCHEMA_TYPES = ["datapackage"]
 
@@ -498,7 +502,7 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
         self.dataset.save(*args, **kwargs)
 
 
-class Dataset(WithMetrics, BadgeMixin, Owned, db.Document):
+class Dataset(WithMetrics, get_badge_mixin(BADGES), Owned, db.Document):
     title = db.StringField(required=True)
     acronym = db.StringField(max_length=128)
     # /!\ do not set directly the slug when creating or updating a dataset
@@ -538,10 +542,6 @@ class Dataset(WithMetrics, BadgeMixin, Owned, db.Document):
 
     def __str__(self):
         return self.title or ""
-
-    __badges__ = {
-        PIVOTAL_DATA: _("Pivotal data"),
-    }
 
     __metrics_keys__ = [
         "discussions",
