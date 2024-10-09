@@ -29,7 +29,7 @@ def migrate(db):
         }
         for resource in dataset.resources:
             resource.extras = {
-                extra: resource.extras[extra] for extra in dataset.extras if extra != "harvest"
+                extra: resource.extras[extra] for extra in resource.extras if extra != "harvest"
             }
 
         try:
