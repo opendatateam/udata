@@ -29,7 +29,6 @@ from udata.rdf import (
     FREQ,
     HVD_LEGISLATION,
     IANAFORMAT,
-    RDFS,
     SCHEMA,
     SCV,
     SKOS,
@@ -618,11 +617,11 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
         dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
 
     # Adding some metadata to extras - may be moved to property if relevant
-    provenance = [p.value(RDFS.label) for p in d.objects(DCT.provenance)]
+    provenance = rdf_values(d, DCT.provenance, parse_label=True)
     if provenance:
         dataset.extras["harvest"] = {
-            "dct:provenance": provenance,
             **dataset.extras.get("harvest", {}),
+            "dct:provenance": list(provenance),
         }
 
     resources_licenses_hints = set()
