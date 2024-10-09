@@ -502,10 +502,9 @@ class DcatBackendTest:
         assert dataset.temporal_coverage.start == date(2016, 1, 1)
         assert dataset.temporal_coverage.end == date(2016, 12, 5)
 
-        assert (
-            dataset.extras["harvest"]["dct:accessRights"]
-            == "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1e"
-        )
+        assert dataset.extras["harvest"]["dct:accessRights"] == [
+            "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1e"
+        ]
         assert dataset.extras["harvest"]["dct:provenance"] == [
             "Description de la provenance des données"
         ]
@@ -861,7 +860,7 @@ class CswIso19139DcatBackendTest:
         assert re.match(r"n[0-9a-f]{32}", resource.format)
 
         # accessRights is gotten from the only resource that is recognized as a distribution and copied to the dataset level
-        access_right = "Pas de restriction d'accès public selon INSPIRE"
+        access_right = ["Pas de restriction d'accès public selon INSPIRE"]
         assert dataset.extras["harvest"]["dct:accessRights"] == access_right
         # also present on the resource level
         assert resource.extras["harvest"]["dct:accessRights"] == access_right
@@ -898,7 +897,7 @@ class CswIso19139DcatBackendTest:
         assert dataset.license == lov1
 
         # accessRights is retrieved from the resources
-        access_right = "Pas de restriction d'accès public selon INSPIRE"
+        access_right = ["Pas de restriction d'accès public selon INSPIRE"]
         assert dataset.extras["harvest"]["dct:accessRights"] == access_right
         # also present on the resource level
         for resource in dataset.resources:

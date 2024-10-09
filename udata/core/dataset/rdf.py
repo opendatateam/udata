@@ -469,12 +469,12 @@ def title_from_rdf(rdf, url):
             return i18n._("Nameless resource")
 
 
-def access_rights_from_rdf(resource: RdfResource) -> str | None:
+def access_rights_from_rdf(resource: RdfResource) -> set[str]:
     """
     Extract the access rights from a RdfResource
-    Cardinality is 0..1.
+    Cardinality is 0..n (although it should be 0..1 per the spec).
     """
-    return rdf_value(resource, DCT.accessRights, parse_label=True)
+    return rdf_values(resource, DCT.accessRights, parse_label=True)
 
 
 def licenses_from_rdf(resource: RdfResource) -> set[str]:
@@ -536,7 +536,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     if access_rights:
         resource.extras["harvest"] = {
             **resource.extras.get("harvest", {}),
-            "dct:accessRights": access_rights,
+            "dct:accessRights": list(access_rights),
         }
 
     licenses = licenses_from_rdf(distrib)
@@ -626,28 +626,23 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
         }
 
     resources_licenses_hints = set()
+    resources_access_rights = []
     for distrib in d.objects(DCAT.distribution | DCAT.distributions):
         resource_from_rdf(distrib, dataset)
+        resources_access_rights.append(access_rights_from_rdf(distrib))
         # include both dct:license and dct:rights as licenses hints from resources
         resources_licenses_hints |= licenses_from_rdf(distrib)
         resources_licenses_hints |= rights_from_rdf(distrib)
 
-    # assign the distribution accessRights to the dataset if all distribs that have an accessRights have the same accessRights
-    # and the dataset doesn't have accessRights
+    # assign the common resources accessRights to the dataset if it doesn't have accessRights
     dataset_access_rights = access_rights_from_rdf(d)
-    if not dataset_access_rights:
-        distribs_access_rights = set(
-            resource.extras["harvest"]["dct:accessRights"]
-            for resource in dataset.resources
-            if resource.extras.get("harvest", {}).get("dct:accessRights") is not None
-        )
-        if len(distribs_access_rights) == 1:
-            dataset_access_rights = distribs_access_rights.pop()
+    if not dataset_access_rights and resources_access_rights:
+        dataset_access_rights = set.intersection(*resources_access_rights)
 
     if dataset_access_rights:
         dataset.extras["harvest"] = {
             **dataset.extras.get("harvest", {}),
-            "dct:accessRights": dataset_access_rights,
+            "dct:accessRights": list(dataset_access_rights),
         }
 
     for additionnal in d.objects(DCT.hasPart):
