@@ -619,7 +619,6 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     if temporal_coverage:
         dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
 
-    # Adding some metadata to extras - may be moved to property if relevant
     provenance = rdf_values(d, DCT.provenance, parse_label=True)
     if provenance:
         add_dcat_extra(dataset, "provenance", provenance)
