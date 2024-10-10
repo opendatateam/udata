@@ -632,6 +632,9 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
         resources_licenses_hints |= licenses_from_rdf(distrib)
         resources_licenses_hints |= rights_from_rdf(distrib)
 
+    for additionnal in d.objects(DCT.hasPart):
+        resource_from_rdf(additionnal, dataset, is_additionnal=True)
+
     # assign the common resources accessRights to the dataset if it doesn't have accessRights
     dataset_access_rights = access_rights_from_rdf(d)
     if not dataset_access_rights and resources_access_rights:
@@ -639,11 +642,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     if dataset_access_rights:
         add_dcat_extra(dataset, "accessRights", dataset_access_rights)
 
-    for additionnal in d.objects(DCT.hasPart):
-        resource_from_rdf(additionnal, dataset, is_additionnal=True)
-
     default_license = dataset.license or License.default()
-    dataset_canonical_license = rdf_value(d, DCT.license, parse_label=True)
     dataset_licenses = licenses_from_rdf(d)
     if dataset_licenses:
         add_dcat_extra(dataset, "license", dataset_licenses)
@@ -651,7 +650,6 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     if dataset_rights:
         add_dcat_extra(dataset, "rights", dataset_rights)
     dataset.license = License.guess(
-        dataset_canonical_license,
         *dataset_licenses,
         *dataset_rights,
         *resources_licenses_hints,
