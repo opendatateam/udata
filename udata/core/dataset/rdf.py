@@ -493,6 +493,26 @@ def rights_from_rdf(resource: RdfResource) -> set[str]:
     return rdf_values(resource, DCT.rights, parse_label=True)
 
 
+def provenances_from_rdf(resource: RdfResource) -> set[str]:
+    """
+    Extract provenance from a RDF distribution.
+    Cardinality is 0..n.
+    """
+    return rdf_values(resource, DCT.provenance, parse_label=True)
+
+
+def infer_dataset_access_rights(resources_access_rights: list[set]) -> set | None:
+    """
+    Infer the dataset access rights from a list of resources access rights.
+    If all resources have the same set of access rights return it.
+    """
+    if not resources_access_rights:
+        return
+    first_set = resources_access_rights[0]
+    if all(x == first_set for x in resources_access_rights):
+        return first_set
+
+
 def add_dcat_extra(
     obj: Dataset | Resource, key: str, value: str | set | list
 ) -> Dataset | Resource:
@@ -619,9 +639,9 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     if temporal_coverage:
         dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
 
-    provenance = rdf_values(d, DCT.provenance, parse_label=True)
-    if provenance:
-        add_dcat_extra(dataset, "provenance", provenance)
+    provenances = provenances_from_rdf(d)
+    if provenances:
+        add_dcat_extra(dataset, "provenance", provenances)
 
     resources_licenses_hints = set()
     resources_access_rights = []
@@ -635,10 +655,9 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     for additionnal in d.objects(DCT.hasPart):
         resource_from_rdf(additionnal, dataset, is_additionnal=True)
 
-    # assign the common resources accessRights to the dataset if it doesn't have accessRights
     dataset_access_rights = access_rights_from_rdf(d)
     if not dataset_access_rights and resources_access_rights:
-        dataset_access_rights = set.intersection(*resources_access_rights)
+        dataset_access_rights = infer_dataset_access_rights(resources_access_rights)
     if dataset_access_rights:
         add_dcat_extra(dataset, "accessRights", dataset_access_rights)
 

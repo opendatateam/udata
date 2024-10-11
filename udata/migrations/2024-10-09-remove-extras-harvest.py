@@ -24,14 +24,9 @@ def migrate(db):
 
     datasets_count = datasets.count()
     for dataset in datasets:
-        dataset.extras = {
-            extra: dataset.extras[extra] for extra in dataset.extras if extra != "harvest"
-        }
+        dataset.extras.pop("harvest", None)
         for resource in dataset.resources:
-            resource.extras = {
-                extra: resource.extras[extra] for extra in resource.extras if extra != "harvest"
-            }
-
+            resource.extras.pop("harvest", None)
         try:
             dataset.save()
         except ValidationError as e:
