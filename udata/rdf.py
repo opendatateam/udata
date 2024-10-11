@@ -213,7 +213,7 @@ def serialize_value(value, parse_label=False):
         return value.identifier.toPython()
 
 
-def rdf_values(resource, predicate, parse_label=False) -> set[str]:
+def rdf_unique_values(resource, predicate, parse_label=False) -> set[str]:
     """Returns a set of serialized values for a predicate from a RdfResource"""
     return {
         value

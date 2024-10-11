@@ -36,8 +36,8 @@ from udata.rdf import (
     TAG_TO_EU_HVD_CATEGORIES,
     contact_point_from_rdf,
     namespace_manager,
+    rdf_unique_values,
     rdf_value,
-    rdf_values,
     remote_url_from_rdf,
     sanitize_html,
     schema_from_rdf,
@@ -473,7 +473,7 @@ def access_rights_from_rdf(resource: RdfResource) -> set[str]:
     Extract the access rights from a RdfResource
     Cardinality is 0..n (although it should be 0..1 per the spec).
     """
-    return rdf_values(resource, DCT.accessRights, parse_label=True)
+    return rdf_unique_values(resource, DCT.accessRights, parse_label=True)
 
 
 def licenses_from_rdf(resource: RdfResource) -> set[str]:
@@ -482,7 +482,7 @@ def licenses_from_rdf(resource: RdfResource) -> set[str]:
     See `test_dataset_rdf.py > test_licenses_from_rdf` for examples of supported formats.
     Cardinality is 0..n (although it should be 0..1 per the spec).
     """
-    return rdf_values(resource, DCT.license, parse_label=True)
+    return rdf_unique_values(resource, DCT.license, parse_label=True)
 
 
 def rights_from_rdf(resource: RdfResource) -> set[str]:
@@ -490,7 +490,7 @@ def rights_from_rdf(resource: RdfResource) -> set[str]:
     Extract rights from a RDF distribution.
     Cardinality is 0..n.
     """
-    return rdf_values(resource, DCT.rights, parse_label=True)
+    return rdf_unique_values(resource, DCT.rights, parse_label=True)
 
 
 def provenances_from_rdf(resource: RdfResource) -> set[str]:
@@ -498,7 +498,7 @@ def provenances_from_rdf(resource: RdfResource) -> set[str]:
     Extract provenance from a RDF distribution.
     Cardinality is 0..n.
     """
-    return rdf_values(resource, DCT.provenance, parse_label=True)
+    return rdf_unique_values(resource, DCT.provenance, parse_label=True)
 
 
 def infer_dataset_access_rights(resources_access_rights: list[set]) -> set | None:
