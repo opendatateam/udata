@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add discussion.posted_on in discussion sort choices [3168](https://github.com/opendatateam/udata/pull/3168)
 
 ## 9.2.2 (2024-10-08)
 
