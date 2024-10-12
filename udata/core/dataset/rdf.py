@@ -508,9 +508,8 @@ def infer_dataset_access_rights(resources_access_rights: list[set]) -> set | Non
     """
     if not resources_access_rights:
         return
-    first_set = resources_access_rights[0]
-    if all(x == first_set for x in resources_access_rights):
-        return first_set
+    if resources_access_rights[0] == set.intersection(*resources_access_rights):
+        return resources_access_rights[0]
 
 
 def add_dcat_extra(

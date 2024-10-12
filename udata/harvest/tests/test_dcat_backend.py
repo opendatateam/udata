@@ -557,6 +557,14 @@ class DcatBackendTest:
         resource_2 = next(res for res in dataset.resources if res.title == "Resource 2-2")
         assert resource_2.extras["dcat"]["rights"] == ["Rights on nested resource"]
 
+        # test different dct:accessRights on resources _not_ bubbling up to dataset
+        dataset = Dataset.objects.get(harvest__dct_identifier="4")
+        assert dataset.extras["dcat"].get("accessRights") is None
+        # test dct:accessRights storage in resource
+        for resource in dataset.resources:
+            assert len(resource.extras["dcat"]["accessRights"]) == 2
+            assert "Access right 4" in resource.extras["dcat"]["accessRights"]
+
     def test_geonetwork_xml_catalog(self, rmock):
         url = mock_dcat(rmock, "geonetwork.xml", path="catalog.xml")
         org = OrganizationFactory()
