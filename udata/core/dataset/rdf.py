@@ -29,7 +29,6 @@ from udata.rdf import (
     FREQ,
     HVD_LEGISLATION,
     IANAFORMAT,
-    RDFS,
     SCHEMA,
     SCV,
     SKOS,
@@ -37,6 +36,7 @@ from udata.rdf import (
     TAG_TO_EU_HVD_CATEGORIES,
     contact_point_from_rdf,
     namespace_manager,
+    rdf_unique_values,
     rdf_value,
     remote_url_from_rdf,
     sanitize_html,
@@ -468,40 +468,60 @@ def title_from_rdf(rdf, url):
             return i18n._("Nameless resource")
 
 
-def access_rights_from_rdf(resource: RdfResource):
+def access_rights_from_rdf(resource: RdfResource) -> set[str]:
     """
     Extract the access rights from a RdfResource
-    If the access rights is a URIRef, return it as a string.
-    If the access rights is a RdfResource, return the label of the RdfResource if any, or the identifier of the RdfResource.
+    Cardinality is 0..n (although it should be 0..1 per the spec).
     """
-    access_right_info = resource.value(DCT.accessRights)
-    if isinstance(access_right_info, (URIRef, Literal)):
-        return access_right_info.toPython()
-    elif isinstance(access_right_info, RdfResource):
-        rdfs_label = rdf_value(access_right_info, RDFS.label)
-        if rdfs_label:
-            return rdfs_label
-        else:
-            return access_right_info.identifier.toPython()
+    return rdf_unique_values(resource, DCT.accessRights, parse_label=True)
 
 
 def licenses_from_rdf(resource: RdfResource) -> set[str]:
     """
     Extract licences from a RDF distribution.
     See `test_dataset_rdf.py > test_licenses_from_rdf` for examples of supported formats.
+    Cardinality is 0..n (although it should be 0..1 per the spec).
     """
-    licenses = set()
-    for predicate in DCT.license, DCT.rights:
-        for license_info in resource.objects(predicate=predicate):
-            if isinstance(license_info, (URIRef, Literal)):
-                licenses.add(license_info.toPython())
-            elif isinstance(license_info, RdfResource):
-                rdfs_label = rdf_value(license_info, RDFS.label)
-                if rdfs_label:
-                    licenses.add(rdfs_label)
-                else:
-                    licenses.add(license_info.identifier.toPython())
-    return licenses
+    return rdf_unique_values(resource, DCT.license, parse_label=True)
+
+
+def rights_from_rdf(resource: RdfResource) -> set[str]:
+    """
+    Extract rights from a RDF distribution.
+    Cardinality is 0..n.
+    """
+    return rdf_unique_values(resource, DCT.rights, parse_label=True)
+
+
+def provenances_from_rdf(resource: RdfResource) -> set[str]:
+    """
+    Extract provenance from a RDF distribution.
+    Cardinality is 0..n.
+    """
+    return rdf_unique_values(resource, DCT.provenance, parse_label=True)
+
+
+def infer_dataset_access_rights(resources_access_rights: list[set]) -> set | None:
+    """
+    Infer the dataset access rights from a list of resources access rights.
+    If all resources have the same set of access rights return it.
+    """
+    if not resources_access_rights:
+        return
+    if resources_access_rights[0] == set.intersection(*resources_access_rights):
+        return resources_access_rights[0]
+
+
+def add_dcat_extra(
+    obj: Dataset | Resource, key: str, value: str | set | list
+) -> Dataset | Resource:
+    if type(value) is set:
+        value = list(value)
+    obj.extras["dcat"] = {
+        **obj.extras.get("dcat", {}),
+        key: value,
+    }
+    return obj
 
 
 def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
@@ -544,10 +564,15 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
 
     access_rights = access_rights_from_rdf(distrib)
     if access_rights:
-        resource.extras["harvest"] = {
-            **resource.extras.get("harvest", {}),
-            "dct:accessRights": access_rights,
-        }
+        add_dcat_extra(resource, "accessRights", access_rights)
+
+    licenses = licenses_from_rdf(distrib)
+    if licenses:
+        add_dcat_extra(resource, "license", licenses)
+
+    rights = rights_from_rdf(distrib)
+    if rights:
+        add_dcat_extra(resource, "rights", rights)
 
     checksum = distrib.value(SPDX.checksum)
     if checksum:
@@ -613,43 +638,41 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     if temporal_coverage:
         dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
 
-    # Adding some metadata to extras - may be moved to property if relevant
-    provenance = [p.value(RDFS.label) for p in d.objects(DCT.provenance)]
-    if provenance:
-        dataset.extras["harvest"] = {
-            "dct:provenance": provenance,
-            **dataset.extras.get("harvest", {}),
-        }
+    provenances = provenances_from_rdf(d)
+    if provenances:
+        add_dcat_extra(dataset, "provenance", provenances)
 
-    resources_licenses = set()
+    resources_licenses_hints = set()
+    resources_access_rights = []
     for distrib in d.objects(DCAT.distribution | DCAT.distributions):
         resource_from_rdf(distrib, dataset)
-        resources_licenses |= licenses_from_rdf(distrib)
-
-    # assign the distribution accessRights to the dataset if all distribs that have an accessRights have the same accessRights
-    # and the dataset doesn't have accessRights
-    dataset_access_rights = access_rights_from_rdf(d)
-    if not dataset_access_rights:
-        distribs_access_rights = set(
-            resource.extras["harvest"]["dct:accessRights"]
-            for resource in dataset.resources
-            if resource.extras.get("harvest", {}).get("dct:accessRights") is not None
-        )
-        if len(distribs_access_rights) == 1:
-            dataset_access_rights = distribs_access_rights.pop()
-
-    if dataset_access_rights:
-        dataset.extras["harvest"] = {
-            **dataset.extras.get("harvest", {}),
-            "dct:accessRights": dataset_access_rights,
-        }
+        resources_access_rights.append(access_rights_from_rdf(distrib))
+        # include both dct:license and dct:rights as licenses hints from resources
+        resources_licenses_hints |= licenses_from_rdf(distrib)
+        resources_licenses_hints |= rights_from_rdf(distrib)
 
     for additionnal in d.objects(DCT.hasPart):
         resource_from_rdf(additionnal, dataset, is_additionnal=True)
 
+    dataset_access_rights = access_rights_from_rdf(d)
+    if not dataset_access_rights and resources_access_rights:
+        dataset_access_rights = infer_dataset_access_rights(resources_access_rights)
+    if dataset_access_rights:
+        add_dcat_extra(dataset, "accessRights", dataset_access_rights)
+
     default_license = dataset.license or License.default()
-    dataset_license = rdf_value(d, DCT.license)
-    dataset.license = License.guess(dataset_license, *resources_licenses, default=default_license)
+    dataset_licenses = licenses_from_rdf(d)
+    if dataset_licenses:
+        add_dcat_extra(dataset, "license", dataset_licenses)
+    dataset_rights = rights_from_rdf(d)
+    if dataset_rights:
+        add_dcat_extra(dataset, "rights", dataset_rights)
+    dataset.license = License.guess(
+        *dataset_licenses,
+        *dataset_rights,
+        *resources_licenses_hints,
+        default=default_license,
+    )
 
     identifier = rdf_value(d, DCT.identifier)
     uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
