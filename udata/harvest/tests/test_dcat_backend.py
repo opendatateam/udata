@@ -476,7 +476,7 @@ class DcatBackendTest:
 
         assert job.status == "done"
         assert job.errors == []
-        assert len(job.items) == 3
+        assert len(job.items) == 4
 
     def test_xml_catalog(self, rmock):
         LicenseFactory(id="lov2", title="Licence Ouverte Version 2.0")
