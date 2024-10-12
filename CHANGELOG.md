@@ -2,6 +2,11 @@
 
 ## Current (in progress)
 
+- Add migration to delete duplicate resources due to ODS harvesting [#3158](https://github.com/opendatateam/udata/pull/3158)
+- Add discussion.posted_on in discussion sort choices [3168](https://github.com/opendatateam/udata/pull/3168)
+
+## 9.2.2 (2024-10-08)
+
 - Add a filter on organization and document sort parameters in the `/discussions` endpoint [#3147](https://github.com/opendatateam/udata/pull/3147)
 - Move discussion catalog creation and add fields [#3152](https://github.com/opendatateam/udata/pull/3152) and [#3154](https://github.com/opendatateam/udata/pull/3154)
 - Add resources formats and harvest remote_url on dataset catalog [#3159](https://github.com/opendatateam/udata/pull/3159)
