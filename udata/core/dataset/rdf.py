@@ -26,7 +26,6 @@ from udata.rdf import (
     DCT,
     EUFORMAT,
     EUFREQ,
-    FOAF,
     FREQ,
     HVD_LEGISLATION,
     IANAFORMAT,
@@ -469,29 +468,15 @@ def title_from_rdf(rdf, url):
             return i18n._("Nameless resource")
 
 
-def primary_topic_identifier_from_rdf(rdf: RdfResource):
+def catalog_record_identifier_from_rdf(graph: Graph):
     """
-    Extract the primary topic identifier from a RDF resource.
-
-    <foaf:isPrimaryTopicOf>
-      <rdf:Description>
-        <dct:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">fr-120066022-ldd-56fce164-04b2-41ae-be87-9f256f39dd44</dct:identifier>
-        <dct:source rdf:parseType="Resource">
-          <rdf:type rdf:resource="http://www.w3.org/ns/dcat#CatalogRecord"/>
-          <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2019-03-25T22:55:41.312+01:00</dct:modified>
-          <dct:conformsTo rdf:parseType="Resource">
-            <rdf:type rdf:resource="http://purl.org/dc/terms/Standard"/>
-            <dct:title xml:lang="fr">ISO 19115</dct:title>
-            <owl:versionInfo xml:lang="fr">2003 Cor.1:2006</owl:versionInfo>
-          </dct:conformsTo>
-        </dct:source>
-      </rdf:Description>
-    </foaf:isPrimaryTopicOf>
+    Extract the dct:identifier of a CatalogRecord from an RDF graph
     """
-    primary_topic = rdf.value(FOAF.isPrimaryTopicOf)
-    if not primary_topic:
-        return
-    return rdf_value(primary_topic, DCT.identifier)
+    node_catalog_record = graph.value(predicate=RDF.type, object=DCAT.CatalogRecord)
+    if node_catalog_record:
+        catalog_record = graph.resource(node_catalog_record)
+        if catalog_record:
+            return rdf_value(catalog_record, DCT.identifier)
 
 
 def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
@@ -631,13 +616,12 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
     uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
 
     # compute remote_url, either with specified prefix or directly from RDF
-    primary_topic_identifier = primary_topic_identifier_from_rdf(d)
-    if remote_url_prefix and primary_topic_identifier:
-        primary_topic_identifier = primary_topic_identifier_from_rdf(d)
+    catalog_record_identifier = catalog_record_identifier_from_rdf(graph)
+    if remote_url_prefix and catalog_record_identifier:
         remote_url_prefix = (
             f"{remote_url_prefix}/" if not remote_url_prefix.endswith("/") else remote_url_prefix
         )
-        remote_url = f"{remote_url_prefix}{primary_topic_identifier}"
+        remote_url = f"{remote_url_prefix}{catalog_record_identifier}"
     else:
         remote_url = remote_url_from_rdf(d)
 
