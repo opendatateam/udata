@@ -119,10 +119,7 @@ class DataserviceDatasetsAPI(API):
     @api.response(403, "Forbidden")
     @api.response(410, "Dataservice has been deleted")
     def post(self, dataservice):
-        if dataservice.deleted_at and not (
-            # Allow requests containing "deleted_at: None" to undelete.
-            "deleted_at" in request.json and request.json.get("deleted_at") is None
-        ):
+        if dataservice.deleted_at:
             api.abort(410, "Dataservice has been deleted")
 
         OwnablePermission(dataservice).test()
@@ -157,10 +154,7 @@ class DataserviceDatasetAPI(API):
     @api.response(404, "Dataservice not found")
     @api.response(404, "Dataset not found in dataservice")
     def delete(self, dataservice, dataset):
-        if dataservice.deleted_at and not (
-            # Allow requests containing "deleted_at: None" to undelete.
-            "deleted_at" in request.json and request.json.get("deleted_at") is None
-        ):
+        if dataservice.deleted_at:
             api.abort(410, "Dataservice has been deleted")
 
         OwnablePermission(dataservice).test()
