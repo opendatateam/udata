@@ -508,7 +508,7 @@ def infer_dataset_access_rights(resources_access_rights: list[set]) -> set | Non
     """
     if not resources_access_rights:
         return
-    if resources_access_rights[0] == set.intersection(*resources_access_rights):
+    if set.union(*resources_access_rights) == set.intersection(*resources_access_rights):
         return resources_access_rights[0]
 
 
