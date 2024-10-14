@@ -175,7 +175,7 @@ class Dataservice(WithMetrics, Owned, db.Document):
     datasets = field(
         db.ListField(
             field(
-                db.LazyReferenceField(Dataset),
+                db.LazyReferenceField(Dataset, passthrough=True),
                 nested_fields=datasets_api_fields.dataset_ref_fields,
             )
         ),
