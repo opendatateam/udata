@@ -1,11 +1,13 @@
 from datetime import datetime
 
 import mongoengine
+from bson import ObjectId
 from flask import make_response, redirect, request, url_for
 from flask_login import current_user
 
-from udata.api import API, api
+from udata.api import API, api, fields
 from udata.api_fields import patch
+from udata.core.dataset.models import Dataset
 from udata.core.dataset.permissions import OwnablePermission
 from udata.core.followers.api import FollowAPI
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
@@ -93,6 +95,76 @@ class DataserviceAPI(API):
         dataservice.save()
 
         return "", 204
+
+
+dataservice_add_datasets_fields = api.model(
+    "DataserviceDatasetsAdd",
+    {
+        "id": fields.String(description="Id of the dataset to add", required=True),
+    },
+    location="json",
+)
+
+
+@ns.route("/<dataservice:dataservice>/datasets/", endpoint="dataservice_datasets", doc=common_doc)
+class DataserviceDatasetsAPI(API):
+    @api.secure
+    @api.doc("dataservice_datasets_create")
+    @api.expect([dataservice_add_datasets_fields])
+    @api.marshal_with(Dataservice.__read_fields__)
+    @api.response(400, "Malformed object id(s) in request")
+    @api.response(400, "Expecting a list")
+    @api.response(400, "Expecting a list of dicts with id attribute")
+    @api.response(404, "Dataservice not found")
+    @api.response(403, "Forbidden")
+    @api.response(410, "Dataservice has been deleted")
+    def post(self, dataservice):
+        if dataservice.deleted_at:
+            api.abort(410, "Dataservice has been deleted")
+
+        OwnablePermission(dataservice).test()
+
+        data = request.json
+
+        if not isinstance(data, list):
+            api.abort(400, "Expecting a list")
+        if not all(isinstance(d, dict) and d.get("id") for d in data):
+            api.abort(400, "Expecting a list of dicts with id attribute")
+
+        try:
+            datasets = Dataset.objects.filter(id__in=[d["id"] for d in data]).only("id")
+            diff = set(d.id for d in datasets) - set(d.id for d in dataservice.datasets)
+        except mongoengine.errors.ValidationError:
+            api.abort(400, "Malformed object id(s) in request")
+
+        if diff:
+            dataservice.datasets += [ObjectId(did) for did in diff]
+            dataservice.save()
+
+        return dataservice, 201
+
+
+@ns.route(
+    "/<dataservice:dataservice>/datasets/<dataset:dataset>/",
+    endpoint="dataservice_dataset",
+    doc=common_doc,
+)
+class DataserviceDatasetAPI(API):
+    @api.secure
+    @api.response(404, "Dataservice not found")
+    @api.response(404, "Dataset not found in dataservice")
+    def delete(self, dataservice, dataset):
+        if dataservice.deleted_at:
+            api.abort(410, "Dataservice has been deleted")
+
+        OwnablePermission(dataservice).test()
+
+        if dataset not in dataservice.datasets:
+            api.abort(404, "Dataset not found in dataservice")
+        dataservice.datasets = [d for d in dataservice.datasets if d.id != dataset.id]
+        dataservice.save()
+
+        return None, 204
 
 
 @ns.route("/<dataservice:dataservice>/rdf", endpoint="dataservice_rdf", doc=common_doc)
