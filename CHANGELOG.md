@@ -8,6 +8,7 @@
 
 - Add migration to delete duplicate resources due to ODS harvesting [#3158](https://github.com/opendatateam/udata/pull/3158)
 - Add discussion.posted_on in discussion sort choices [3168](https://github.com/opendatateam/udata/pull/3168)
+- DCAT harvest : Refactor DCAT extras handling in rdf parsing [#3054](https://github.com/opendatateam/udata/pull/3054). `accesRights`, `rights` and `license` are now in `extras["dcat"]` for both datasets and resources. `accessRights` can be infered for a dataset from its resources.
 
 ## 9.2.2 (2024-10-08)
 
