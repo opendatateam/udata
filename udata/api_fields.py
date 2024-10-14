@@ -79,14 +79,14 @@ def convert_db_to_field(key, field, info):
         # For lists, we can expose them only by showing a link to the API
         # with the results of the list to avoid listing a lot of sub-ressources
         # (for example for a dataservices with thousands of datasets).
-        by_link = info.get("by_link", None)
-        if by_link:
+        href = info.get("href", None)
+        if href:
 
             def constructor_read(**kwargs):
                 return restx_fields.Raw(
                     attribute=lambda o: {
                         "rel": "subsection",
-                        "href": by_link(o),
+                        "href": href(o),
                         "type": "GET",
                         "total": len(o[key]),
                     },
@@ -107,7 +107,7 @@ def convert_db_to_field(key, field, info):
 
         if constructor_read is None:
             # We don't want to set the `constructor_read` if it's already set
-            # by the `by_link` code above.
+            # by the `href` code above.
             def constructor_read(**kwargs):
                 return restx_fields.List(field_read, **kwargs)
 

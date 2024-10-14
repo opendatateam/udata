@@ -182,7 +182,7 @@ class Dataservice(WithMetrics, Owned, db.Document):
         filterable={
             "key": "dataset",
         },
-        by_link=lambda dataservice: url_for(
+        href=lambda dataservice: url_for(
             "api.datasets", dataservice=dataservice.id, _external=True
         ),
     )
