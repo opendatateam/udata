@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2024-07-23 18:05+0200\n"
-"PO-Revision-Date: 2024-07-24 13:11\n"
+"POT-Creation-Date: 2024-10-07 15:16+0200\n"
+"PO-Revision-Date: 2024-10-07 13:18\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: sr\n"
 "Language-Team: Serbian (Cyrillic)\n"
@@ -42,7 +42,7 @@ msgstr "Ваша лозинка је промењена"
 msgid "Password reset instructions"
 msgstr "Инструкције за ресетовање лозинке"
 
-#: udata/settings.py:494
+#: udata/settings.py:495
 msgid "This dataset has been archived"
 msgstr "Овај скуп података је архивиран"
 
@@ -198,17 +198,17 @@ msgstr "Да ли желите да креирате нешто података
 msgid "Your udata instance is ready!"
 msgstr "Ваша платформа ја спремна!"
 
-#: udata/core/owned.py:37 udata/forms/fields.py:735
-#: udata/tests/api/test_dataservices_api.py:271
+#: udata/core/owned.py:53 udata/forms/fields.py:735
+#: udata/tests/api/test_dataservices_api.py:297
 msgid "You can only set yourself as owner"
 msgstr "Само себе можете да означите као власника"
 
-#: udata/core/owned.py:46
+#: udata/core/owned.py:62
 msgid "Unknown organization"
 msgstr ""
 
-#: udata/core/owned.py:50 udata/forms/fields.py:756
-#: udata/tests/api/test_dataservices_api.py:285
+#: udata/core/owned.py:66 udata/forms/fields.py:756
+#: udata/tests/api/test_dataservices_api.py:311
 msgid "Permission denied for this organization"
 msgstr "Дозвола ја ову организацију је одбијена"
 
@@ -231,19 +231,27 @@ msgstr "Име"
 msgid "Email"
 msgstr "Имејл"
 
-#: udata/core/contact_point/forms.py:17 udata/core/dataset/forms.py:114
-#: udata/core/dataset/forms.py:177 udata/core/reuse/forms.py:42
-#: udata/core/topic/forms.py:14 udata/harvest/forms.py:69
+#: udata/core/contact_point/forms.py:17
+msgid "Contact form"
+msgstr ""
+
+#: udata/core/contact_point/forms.py:17
+msgid "The organization web contact form"
+msgstr ""
+
+#: udata/core/contact_point/forms.py:20 udata/core/dataset/forms.py:112
+#: udata/core/dataset/forms.py:175 udata/core/topic/forms.py:14
+#: udata/harvest/forms.py:69
 msgid "Publish as"
 msgstr "Објављено као"
 
-#: udata/core/dataservices/models.py:122 udata/core/dataset/models.py:529
-#: udata/mongo/datetime_fields.py:59
+#: udata/core/dataservices/models.py:159 udata/core/dataset/models.py:531
+#: udata/mongo/datetime_fields.py:60
 msgid "Creation date"
 msgstr "Датум креирања"
 
-#: udata/core/dataservices/models.py:127 udata/core/dataset/models.py:532
-#: udata/mongo/datetime_fields.py:62
+#: udata/core/dataservices/models.py:164 udata/core/dataset/models.py:534
+#: udata/mongo/datetime_fields.py:66
 msgid "Last modification date"
 msgstr "Датум последње измене"
 
@@ -391,147 +399,143 @@ msgstr "Отпремљена датотека"
 msgid "Remote file"
 msgstr "Удаљена датотека"
 
-#: udata/core/dataset/forms.py:35
+#: udata/core/dataset/forms.py:33
 msgid "Checksum value"
 msgstr "Чексума"
 
-#: udata/core/dataset/forms.py:46
+#: udata/core/dataset/forms.py:44
 msgid "URL of the schema"
 msgstr ""
 
-#: udata/core/dataset/forms.py:47
+#: udata/core/dataset/forms.py:45
 msgid "Name of the schema"
 msgstr ""
 
-#: udata/core/dataset/forms.py:48
+#: udata/core/dataset/forms.py:46
 msgid "Version of the schema"
 msgstr ""
 
-#: udata/core/dataset/forms.py:67 udata/core/dataset/forms.py:144
-#: udata/core/discussions/forms.py:13 udata/core/reuse/forms.py:21
-#: udata/core/site/forms.py:12 udata/templates/mail/discussion_closed.html:26
+#: udata/core/dataset/forms.py:65 udata/core/dataset/forms.py:142
+#: udata/core/discussions/forms.py:13 udata/core/site/forms.py:12
+#: udata/templates/mail/discussion_closed.html:26
 #: udata/templates/mail/new_discussion.html:25
 #: udata/templates/mail/new_discussion_comment.html:26
 msgid "Title"
 msgstr "Наслов"
 
-#: udata/core/dataset/forms.py:70 udata/core/dataset/forms.py:148
+#: udata/core/dataset/forms.py:68 udata/core/dataset/forms.py:146
 #: udata/core/jobs/forms.py:28 udata/core/organization/forms.py:50
-#: udata/core/reuse/forms.py:24 udata/core/topic/forms.py:17
-#: udata/harvest/forms.py:62
+#: udata/core/topic/forms.py:17 udata/harvest/forms.py:62
 msgid "Description"
 msgstr "Опис"
 
-#: udata/core/dataset/forms.py:73
+#: udata/core/dataset/forms.py:71
 msgid "File type"
 msgstr "Тип податка"
 
-#: udata/core/dataset/forms.py:77
+#: udata/core/dataset/forms.py:75
 msgid "Whether the resource is an uploaded file, a remote file or an API"
 msgstr "Да ли је ресурс отпремљена датотека, удаљена датотека или API"
 
-#: udata/core/dataset/forms.py:80 udata/core/reuse/forms.py:30
+#: udata/core/dataset/forms.py:78
 msgid "Type"
 msgstr "Тип"
 
-#: udata/core/dataset/forms.py:84
+#: udata/core/dataset/forms.py:82
 msgid "Resource type (documentation, API...)"
 msgstr "Тип ресурса (документација, API...)"
 
-#: udata/core/dataset/forms.py:86 udata/core/reuse/forms.py:31
-#: udata/harvest/forms.py:64
+#: udata/core/dataset/forms.py:84 udata/harvest/forms.py:64
 msgid "URL"
 msgstr "URL"
 
-#: udata/core/dataset/forms.py:88
+#: udata/core/dataset/forms.py:86
 msgid "Format"
 msgstr "Формат"
 
-#: udata/core/dataset/forms.py:93
+#: udata/core/dataset/forms.py:91
 msgid "Mime type"
 msgstr "MIME тип"
 
-#: udata/core/dataset/forms.py:94
+#: udata/core/dataset/forms.py:92
 msgid "The mime type associated to the extension. (ex: text/plain)"
 msgstr "MIME тип повезан са екстензијом (нпр: text/plain)"
 
-#: udata/core/dataset/forms.py:97
+#: udata/core/dataset/forms.py:95
 msgid "Size"
 msgstr "Величина"
 
-#: udata/core/dataset/forms.py:97
+#: udata/core/dataset/forms.py:95
 msgid "The file size in bytes"
 msgstr "Величина датотеке у бајтовима"
 
-#: udata/core/dataset/forms.py:112
+#: udata/core/dataset/forms.py:110
 msgid "Related dataset"
 msgstr "Повезани скуп података"
 
-#: udata/core/dataset/forms.py:136 udata/tests/api/test_datasets_api.py:710
+#: udata/core/dataset/forms.py:134 udata/tests/api/test_datasets_api.py:710
 msgid "Wrong contact point id or contact point ownership mismatch"
 msgstr ""
 
-#: udata/core/dataset/forms.py:146 udata/core/organization/forms.py:48
+#: udata/core/dataset/forms.py:144 udata/core/organization/forms.py:48
 msgid "Acronym"
 msgstr "Акроним"
 
-#: udata/core/dataset/forms.py:146
+#: udata/core/dataset/forms.py:144
 msgid "An optional acronym"
 msgstr "Опциони акроним"
 
-#: udata/core/dataset/forms.py:150
+#: udata/core/dataset/forms.py:148
 msgid "The details about the dataset (collection process, specifics...)."
 msgstr "Детаљи о скупу података (процес прикупљања, спецификација…)."
 
-#: udata/core/dataset/forms.py:152
+#: udata/core/dataset/forms.py:150
 msgid "License"
 msgstr "Лиценца"
 
-#: udata/core/dataset/forms.py:154
+#: udata/core/dataset/forms.py:152
 msgid "Update frequency"
 msgstr "Фреквенција ажурирања"
 
-#: udata/core/dataset/forms.py:159
+#: udata/core/dataset/forms.py:157
 msgid "The frequency at which data are updated."
 msgstr "Фреквенција којом се подаци ажурирају."
 
-#: udata/core/dataset/forms.py:161
+#: udata/core/dataset/forms.py:159
 msgid "Expected frequency date"
 msgstr "Датум очекиване фреквенције"
 
-#: udata/core/dataset/forms.py:165
+#: udata/core/dataset/forms.py:163
 msgid "Temporal coverage"
 msgstr "Временска покривеност"
 
-#: udata/core/dataset/forms.py:165
+#: udata/core/dataset/forms.py:163
 msgid "The period covered by the data"
 msgstr "Период покривен подацима"
 
-#: udata/core/dataset/forms.py:168 udata/core/spatial/forms.py:85
+#: udata/core/dataset/forms.py:166 udata/core/spatial/forms.py:85
 #: udata/core/topic/forms.py:23
 msgid "Spatial coverage"
 msgstr "Просторна покривеност"
 
-#: udata/core/dataset/forms.py:168 udata/core/topic/forms.py:23
+#: udata/core/dataset/forms.py:166 udata/core/topic/forms.py:23
 msgid "The geographical area covered by the data."
 msgstr "Географска област покривена подацима."
 
-#: udata/core/dataset/forms.py:170 udata/core/post/forms.py:26
-#: udata/core/reuse/forms.py:33 udata/core/site/forms.py:13
-#: udata/core/topic/forms.py:26
+#: udata/core/dataset/forms.py:168 udata/core/post/forms.py:26
+#: udata/core/site/forms.py:13 udata/core/topic/forms.py:26
 msgid "Tags"
 msgstr "Ознаке"
 
-#: udata/core/dataset/forms.py:170 udata/core/reuse/forms.py:33
+#: udata/core/dataset/forms.py:168
 msgid "Some taxonomy keywords"
 msgstr "Неке кључне речи у таксономији"
 
-#: udata/core/dataset/forms.py:172 udata/core/reuse/forms.py:36
-#: udata/core/topic/forms.py:27
+#: udata/core/dataset/forms.py:170 udata/core/topic/forms.py:27
 msgid "Private"
 msgstr "Приватно"
 
-#: udata/core/dataset/forms.py:173 udata/core/reuse/forms.py:37
+#: udata/core/dataset/forms.py:171
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "Ограничите видљивост скупа података само на себе или своју организацију."
 
@@ -548,21 +552,21 @@ msgstr "Име шеме \"{schema}\" није дозвољена вреднос�
 msgid "Version \"{version}\" is not an allowed value for the schema \"{name}\". Allowed versions: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:437 udata/core/dataset/rdf.py:468
+#: udata/core/dataset/models.py:439 udata/core/dataset/rdf.py:468
 #: udata/tests/dataset/test_dataset_rdf.py:529
 #: udata/tests/dataset/test_dataset_rdf.py:542
 msgid "Nameless resource"
 msgstr "Ресурс без имена"
 
-#: udata/core/dataset/models.py:515
+#: udata/core/dataset/models.py:517
 msgid "Future date of update"
 msgstr "Будући датум ажурирања"
 
-#: udata/core/dataset/models.py:541
+#: udata/core/dataset/models.py:543
 msgid "Pivotal data"
 msgstr "Кључни подаци"
 
-#: udata/core/dataset/models.py:582
+#: udata/core/dataset/models.py:584
 msgid "dataset"
 msgstr "скуп података"
 
@@ -774,7 +778,7 @@ msgstr "Повезани скупови података"
 msgid "Associated reuses"
 msgstr "Повезани примери употребе"
 
-#: udata/core/post/forms.py:22 udata/core/reuse/forms.py:32
+#: udata/core/post/forms.py:22
 msgid "Image"
 msgstr "Слика"
 
@@ -918,23 +922,11 @@ msgstr "Закон и право"
 msgid "Open data tools"
 msgstr "Алати отворених података"
 
-#: udata/core/reuse/forms.py:14
+#: udata/core/reuse/models.py:33
 msgid "This URL is already registered"
 msgstr "Овај URL је већ регистрован"
 
-#: udata/core/reuse/forms.py:26
-msgid "The details about the reuse (build process, specifics, self-critics...)."
-msgstr "Детаљи о примеру употребе (процес креирања, спецификације, самокритика…)."
-
-#: udata/core/reuse/forms.py:34
-msgid "Used datasets"
-msgstr "Коришћени скупови података"
-
-#: udata/core/reuse/forms.py:39
-msgid "Topic"
-msgstr "Тема"
-
-#: udata/core/reuse/models.py:88
+#: udata/core/reuse/models.py:160
 msgid "reuse"
 msgstr "пример употребе"
 
@@ -978,67 +970,67 @@ msgstr "Просторна грануларност"
 msgid "The size of the data increment"
 msgstr "Величина инкремента података"
 
-#: udata/core/spatial/translations.py:5
+#: udata/core/spatial/translations.py:7
 msgid "French region"
 msgstr "Француска област"
 
-#: udata/core/spatial/translations.py:6
+#: udata/core/spatial/translations.py:8
 msgid "French intermunicipal (EPCI)"
 msgstr "Међуопштинска сарадња у Француској (EPCI)"
 
-#: udata/core/spatial/translations.py:7
+#: udata/core/spatial/translations.py:9
 msgid "French county"
 msgstr "Француски округ"
 
-#: udata/core/spatial/translations.py:8
+#: udata/core/spatial/translations.py:10
 msgid "French district"
 msgstr "Француски дистрикт"
 
-#: udata/core/spatial/translations.py:9
+#: udata/core/spatial/translations.py:11
 msgid "French town"
 msgstr "Француски град"
 
-#: udata/core/spatial/translations.py:10
+#: udata/core/spatial/translations.py:12
 msgid "French canton"
 msgstr "Француски кантон"
 
-#: udata/core/spatial/translations.py:11
+#: udata/core/spatial/translations.py:13
 msgid "Iris (Insee districts)"
 msgstr "Iris (Insee дистрикти)"
 
-#: udata/core/spatial/translations.py:12
+#: udata/core/spatial/translations.py:14
 msgid "Country"
 msgstr "Земља"
 
-#: udata/core/spatial/translations.py:13
+#: udata/core/spatial/translations.py:15
 msgid "World"
 msgstr "Свет"
 
-#: udata/core/spatial/translations.py:14
+#: udata/core/spatial/translations.py:16
 msgid "Country group"
 msgstr "Група земаља"
 
-#: udata/core/spatial/translations.py:15
+#: udata/core/spatial/translations.py:17
 msgid "Country subset"
 msgstr "Подскуп земаља"
 
-#: udata/core/spatial/translations.py:16
+#: udata/core/spatial/translations.py:18
 msgid "European Union"
 msgstr "Европска унија"
 
-#: udata/core/spatial/translations.py:17
+#: udata/core/spatial/translations.py:19
 msgid "Metropolitan France"
 msgstr "Метрополитанска Француска"
 
-#: udata/core/spatial/translations.py:18
+#: udata/core/spatial/translations.py:20
 msgid "Overseas France"
 msgstr "Француске прекоморске територије"
 
-#: udata/core/spatial/translations.py:19
+#: udata/core/spatial/translations.py:21
 msgid "French overseas collectivities"
 msgstr "Француске прекоморске територије"
 
-#: udata/core/spatial/translations.py:20
+#: udata/core/spatial/translations.py:22
 msgid "French arrondissement"
 msgstr "Француски арондисман"
 
@@ -1118,7 +1110,7 @@ msgstr "Улога {role} не постоји"
 msgid "Not a valid UUID"
 msgstr "UUID није важећи"
 
-#: udata/forms/fields.py:420
+#: udata/forms/fields.py:420 udata/mongo/taglist_field.py:37
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
 msgstr "Ознака \"%(tag)s\" мора да буде дужине између %(min)d и %(max)d знакова."
@@ -1594,6 +1586,10 @@ msgstr ""
 
 #: udata/templates/security/email/welcome_existing.html:25
 msgid "Here"
+msgstr ""
+
+#: udata/tests/api/test_contact_points.py:50
+msgid "At least an email or a contact form is required for a contact point"
 msgstr ""
 
 #: udata/tests/forms/test_model_field.py:165
