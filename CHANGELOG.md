@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 9.2.3 (2024-10-14)
 
 - Add migration to delete duplicate resources due to ODS harvesting [#3158](https://github.com/opendatateam/udata/pull/3158)
