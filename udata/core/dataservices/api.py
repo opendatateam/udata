@@ -159,7 +159,7 @@ class DataserviceDatasetAPI(API):
 
         OwnablePermission(dataservice).test()
 
-        if dataset.id not in (d.id for d in dataservice.datasets):
+        if dataset not in dataservice.datasets:
             api.abort(404, "Dataset not found in dataservice")
         dataservice.datasets = [d for d in dataservice.datasets if d.id != dataset.id]
         dataservice.save()
