@@ -468,17 +468,6 @@ def title_from_rdf(rdf, url):
             return i18n._("Nameless resource")
 
 
-def catalog_record_identifier_from_rdf(graph: Graph):
-    """
-    Extract the dct:identifier of a CatalogRecord from an RDF graph
-    """
-    node_catalog_record = graph.value(predicate=RDF.type, object=DCAT.CatalogRecord)
-    if node_catalog_record:
-        catalog_record = graph.resource(node_catalog_record)
-        if catalog_record:
-            return rdf_value(catalog_record, DCT.identifier)
-
-
 def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     """
     Map a Resource domain model to a DCAT/RDF graph
@@ -615,15 +604,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
     identifier = rdf_value(d, DCT.identifier)
     uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
 
-    # compute remote_url, either with specified prefix or directly from RDF
-    catalog_record_identifier = catalog_record_identifier_from_rdf(graph)
-    if remote_url_prefix and catalog_record_identifier:
-        remote_url_prefix = (
-            f"{remote_url_prefix}/" if not remote_url_prefix.endswith("/") else remote_url_prefix
-        )
-        remote_url = f"{remote_url_prefix}{catalog_record_identifier}"
-    else:
-        remote_url = remote_url_from_rdf(d)
+    remote_url = remote_url_from_rdf(d, graph, remote_url_prefix=remote_url_prefix)
 
     created_at = rdf_value(d, DCT.issued)
     modified_at = rdf_value(d, DCT.modified)

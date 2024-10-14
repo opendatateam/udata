@@ -175,8 +175,13 @@ class DcatBackend(BaseBackend):
         item.kwargs["page_number"] = page_number
 
         dataservice = self.get_dataservice(item.remote_id)
+        remote_url_prefix = self.get_extra_config_value("remote_url_prefix")
         return dataservice_from_rdf(
-            page, dataservice, node, [item.dataset for item in self.job.items]
+            page,
+            dataservice,
+            node,
+            [item.dataset for item in self.job.items],
+            remote_url_prefix=remote_url_prefix,
         )
 
     def get_node_from_item(self, graph, item):

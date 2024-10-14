@@ -301,11 +301,33 @@ def contact_point_from_rdf(rdf, dataset):
             return contact_point or ContactPoint(name=name, email=email, owner=dataset.owner).save()
 
 
-def remote_url_from_rdf(rdf):
+def catalog_record_identifier_from_rdf(graph: Graph):
     """
-    Return DCAT.landingPage if found and uri validation succeeds.
+    Extract the dct:identifier of a CatalogRecord from an RDF graph
+    """
+    node_catalog_record = graph.value(predicate=RDF.type, object=DCAT.CatalogRecord)
+    if node_catalog_record:
+        catalog_record = graph.resource(node_catalog_record)
+        if catalog_record:
+            return rdf_value(catalog_record, DCT.identifier)
+
+
+def remote_url_from_rdf(rdf: RdfResource, graph: Graph, remote_url_prefix: str | None = None):
+    """
+    Compute from remote_url_prefix and CatalogRecord identifier if provided and found, respectively.
+    Or use DCAT.landingPage if found and uri validation succeeds.
     Use RDF identifier as fallback if uri validation succeeds.
     """
+    if remote_url_prefix:
+        catalog_record_identifier = catalog_record_identifier_from_rdf(graph)
+        if catalog_record_identifier:
+            remote_url_prefix = (
+                f"{remote_url_prefix}/"
+                if not remote_url_prefix.endswith("/")
+                else remote_url_prefix
+            )
+            return f"{remote_url_prefix}{catalog_record_identifier}"
+
     landing_page = url_from_rdf(rdf, DCAT.landingPage)
     uri = rdf.identifier.toPython()
     for candidate in [landing_page, uri]:
