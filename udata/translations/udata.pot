@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 9.2.2.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2024-10-01 15:35+0200\n"
-"PO-Revision-Date: 2024-10-01 15:35+0200\n"
+"POT-Creation-Date: 2024-10-14 16:49+0200\n"
+"PO-Revision-Date: 2024-10-14 16:49+0200\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -553,7 +553,7 @@ msgid ""
 "Allowed versions: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:439 udata/core/dataset/rdf.py:469
+#: udata/core/dataset/models.py:439 udata/core/dataset/rdf.py:468
 #: udata/tests/dataset/test_dataset_rdf.py:529
 #: udata/tests/dataset/test_dataset_rdf.py:542
 msgid "Nameless resource"
@@ -571,7 +571,7 @@ msgstr ""
 msgid "dataset"
 msgstr ""
 
-#: udata/core/dataset/rdf.py:467 udata/tests/dataset/test_dataset_rdf.py:516
+#: udata/core/dataset/rdf.py:466 udata/tests/dataset/test_dataset_rdf.py:516
 msgid "{format} resource"
 msgstr ""
 
@@ -1207,11 +1207,11 @@ msgstr ""
 msgid "Archived"
 msgstr ""
 
-#: udata/harvest/backends/dcat.py:287
+#: udata/harvest/backends/dcat.py:292
 msgid "Remote URL prefix"
 msgstr ""
 
-#: udata/harvest/backends/dcat.py:290
+#: udata/harvest/backends/dcat.py:295
 msgid "A prefix used to build the remote URL of the harvested items."
 msgstr ""
 
