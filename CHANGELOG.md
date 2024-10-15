@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- CSW ISO Harvest: add extra_configs.remote_url_prefix [#3157](https://github.com/opendatateam/udata/pull/3157)
 
 ## 9.2.3 (2024-10-14)
 

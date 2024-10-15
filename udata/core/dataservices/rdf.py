@@ -18,7 +18,11 @@ from udata.uris import endpoint_for
 
 
 def dataservice_from_rdf(
-    graph: Graph, dataservice: Dataservice, node, all_datasets: list[Dataset]
+    graph: Graph,
+    dataservice: Dataservice,
+    node,
+    all_datasets: list[Dataset],
+    remote_url_prefix: str | None = None,
 ) -> Dataservice:
     """
     Create or update a dataset from a RDF/DCAT graph
@@ -64,7 +68,9 @@ def dataservice_from_rdf(
         dataservice.harvest = HarvestDataserviceMetadata()
 
     dataservice.harvest.uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
-    dataservice.harvest.remote_url = remote_url_from_rdf(d)
+    dataservice.harvest.remote_url = remote_url_from_rdf(
+        d, graph, remote_url_prefix=remote_url_prefix
+    )
     dataservice.harvest.created_at = rdf_value(d, DCT.issued)
     dataservice.metadata_modified_at = rdf_value(d, DCT.modified)
 

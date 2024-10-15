@@ -39,6 +39,7 @@ class HarvestAPITest(MockBackendsMixin):
             assert "label" in data
             assert "filters" in data
             assert isinstance(data["filters"], (list, tuple))
+            assert "extra_configs" in data
 
     def test_list_sources(self, api):
         sources = HarvestSourceFactory.create_batch(3)
@@ -149,6 +150,10 @@ class HarvestAPITest(MockBackendsMixin):
                     "test": True,
                     "toggled": True,
                 },
+                "extra_configs": [
+                    {"key": "test_int", "value": 1},
+                    {"key": "test_str", "value": "test"},
+                ],
             },
         }
         response = api.post(url_for("api.harvest_sources"), data)
@@ -166,6 +171,10 @@ class HarvestAPITest(MockBackendsMixin):
                 "test": True,
                 "toggled": True,
             },
+            "extra_configs": [
+                {"key": "test_int", "value": 1},
+                {"key": "test_str", "value": "test"},
+            ],
         }
 
     def test_create_source_with_unknown_filter(self, api):
@@ -211,6 +220,57 @@ class HarvestAPITest(MockBackendsMixin):
             "backend": "factory",
             "config": {
                 "filters": [
+                    {"key": "unknown", "notvalue": "any"},
+                ]
+            },
+        }
+        response = api.post(url_for("api.harvest_sources"), data)
+
+        assert400(response)
+
+    def test_create_source_with_unknown_extra_config(self, api):
+        """Can only use known extra config in config"""
+        api.login()
+        data = {
+            "name": faker.word(),
+            "url": faker.url(),
+            "backend": "factory",
+            "config": {
+                "extra_configs": [
+                    {"key": "unknown", "value": "any"},
+                ]
+            },
+        }
+        response = api.post(url_for("api.harvest_sources"), data)
+
+        assert400(response)
+
+    def test_create_source_with_bad_extra_config_type(self, api):
+        """Can only use the expected extra config type"""
+        api.login()
+        data = {
+            "name": faker.word(),
+            "url": faker.url(),
+            "backend": "factory",
+            "config": {
+                "extra_configs": [
+                    {"key": "test_int", "value": "not-an-integer"},
+                ]
+            },
+        }
+        response = api.post(url_for("api.harvest_sources"), data)
+
+        assert400(response)
+
+    def test_create_source_with_bad_extra_config_format(self, api):
+        """Extra config should have the right format"""
+        api.login()
+        data = {
+            "name": faker.word(),
+            "url": faker.url(),
+            "backend": "factory",
+            "config": {
+                "extra_configs": [
                     {"key": "unknown", "notvalue": "any"},
                 ]
             },
