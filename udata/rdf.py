@@ -326,10 +326,7 @@ def remote_url_from_rdf(rdf: RdfResource, graph: Graph, remote_url_prefix: str |
     if remote_url_prefix and (
         primary_topic_identifier := primary_topic_identifier_from_rdf(graph, rdf)
     ):
-        remote_url_prefix = (
-            f"{remote_url_prefix}/" if not remote_url_prefix.endswith("/") else remote_url_prefix
-        )
-        return f"{remote_url_prefix}{primary_topic_identifier}"
+        return f"{remote_url_prefix.rstrip('/')}/{primary_topic_identifier}"
 
     landing_page = url_from_rdf(rdf, DCAT.landingPage)
     uri = rdf.identifier.toPython()
