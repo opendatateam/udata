@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add default class sort on reuses and dataservices [#3170](https://github.com/opendatateam/udata/pull/3170)
 
 ## 9.2.3 (2024-10-14)
 
