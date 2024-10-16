@@ -13,7 +13,7 @@ from udata.core.badges import api as badges_api
 from udata.core.badges.fields import badge_fields
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.followers.api import FollowAPI
-from udata.core.reuse.constants import REUSE_TOPICS, REUSE_TYPES
+from udata.core.reuse.constants import REUSE_TOPICS, REUSE_TYPES, SUGGEST_SORTING
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
@@ -29,9 +29,6 @@ from .api_fields import (
 )
 from .models import Reuse
 from .permissions import ReuseEditPermission
-
-DEFAULT_SORTING = "-created_at"
-SUGGEST_SORTING = "-metrics.followers"
 
 
 class ReuseApiParser(ModelApiParser):

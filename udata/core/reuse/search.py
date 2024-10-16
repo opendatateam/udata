@@ -1,6 +1,7 @@
 import datetime
 
-from udata.core.reuse.api import DEFAULT_SORTING, ReuseApiParser
+from udata.core.reuse.api import ReuseApiParser
+from udata.core.reuse.constants import DEFAULT_SORTING
 from udata.models import Organization, Reuse, User
 from udata.search import (
     BoolFilter,
