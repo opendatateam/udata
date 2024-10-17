@@ -1,9 +1,10 @@
+from udata.api_fields import field
 from udata.auth import login_user
 from udata.core.user.factories import UserFactory
 from udata.mongo import db
 from udata.tests import DBTestMixin, TestCase
 
-from ..models import get_badge_mixin
+from ..models import Badge, BadgeMixin, BadgesList
 
 TEST = "test"
 OTHER = "other"
@@ -14,7 +15,16 @@ BADGES = {
 }
 
 
-class Fake(db.Document, get_badge_mixin(BADGES)):
+class FakeBadge(Badge):
+    kind = db.StringField(required=True, choices=list(BADGES.keys()))
+
+
+class FakeBadgeMixin(BadgeMixin):
+    badges = field(BadgesList(FakeBadge), **BadgeMixin.default_badges_list_params)
+    __badges__ = BADGES
+
+
+class Fake(db.Document, FakeBadgeMixin):
     pass
 
 

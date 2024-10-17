@@ -9,7 +9,7 @@ from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE
 from udata.core.storages import default_image_basename, images
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.models import WithMetrics, db, get_badge_mixin
+from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics, db
 from udata.mongo.errors import FieldValidationError
 from udata.uris import endpoint_for
 from udata.utils import hash_url
@@ -35,6 +35,15 @@ def check_url_does_not_exists(url):
         raise FieldValidationError(_("This URL is already registered"), field="url")
 
 
+class ReuseBadge(Badge):
+    kind = db.StringField(required=True, choices=list(BADGES.keys()))
+
+
+class ReuseBadgeMixin(BadgeMixin):
+    badges = field(BadgesList(ReuseBadge), **BadgeMixin.default_badges_list_params)
+    __badges__ = BADGES
+
+
 @generate_fields(
     searchable=True,
     additional_sorts=[
@@ -46,7 +55,7 @@ def check_url_does_not_exists(url):
         "organization.badges",
     ],
 )
-class Reuse(db.Datetimed, WithMetrics, get_badge_mixin(BADGES), Owned, db.Document):
+class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
     title = field(
         db.StringField(required=True),
         sortable=True,

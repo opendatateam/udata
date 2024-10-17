@@ -2,13 +2,11 @@ from factory.fuzzy import FuzzyChoice
 
 from udata.factories import ModelFactory
 
-from .models import get_badge
-
 
 def badge_factory(model_):
     class BadgeFactory(ModelFactory):
         class Meta:
-            model = get_badge(model_.__badges__)
+            model = model_._fields["badges"].field.document_type
 
         kind = FuzzyChoice(model_.__badges__)
 

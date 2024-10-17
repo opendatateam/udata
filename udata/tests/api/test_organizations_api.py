@@ -833,10 +833,6 @@ class OrganizationBadgeAPITest:
 
     @pytest.fixture(autouse=True)
     def setUp(self, api, clean_db):
-        # Register at least two badges
-        Organization.__badges__["test-1"] = "Test 1"
-        Organization.__badges__["test-2"] = "Test 2"
-
         self.factory = badge_factory(Organization)
         self.user = api.login(AdminFactory())
         self.organization = OrganizationFactory()
