@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add a job to bind Tabular API to its datasets [#3162](https://github.com/opendatateam/udata/pull/3162)
 
 ## 9.2.3 (2024-10-14)
 
