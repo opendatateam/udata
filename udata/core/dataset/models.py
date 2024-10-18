@@ -71,6 +71,7 @@ def get_json_ld_extra(key, value):
 class HarvestDatasetMetadata(DynamicEmbeddedDocument):
     backend = db.StringField()
     created_at = db.DateTimeField()
+    issued_at = db.DateTimeField()
     modified_at = db.DateTimeField()
     source_id = db.StringField()
     remote_id = db.StringField()
@@ -86,6 +87,7 @@ class HarvestDatasetMetadata(DynamicEmbeddedDocument):
 class HarvestResourceMetadata(DynamicEmbeddedDocument):
     created_at = db.DateTimeField()
     modified_at = db.DateTimeField()
+    issued_at = db.DateTimeField()
     uri = db.StringField()
 
 
