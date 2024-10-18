@@ -494,6 +494,7 @@ class DcatBackendTest:
         assert dataset.harvest.remote_url == "http://data.test.org/datasets/3"
         assert dataset.harvest.remote_id == "3"
         assert dataset.harvest.created_at.date() == date(2016, 12, 14)
+        assert dataset.harvest.issued_at.date() == date(2017, 12, 14)
         assert dataset.harvest.modified_at.date() == date(2016, 12, 14)
         assert dataset.frequency == "daily"
         assert dataset.description == "Dataset 3 description"
@@ -827,7 +828,8 @@ class CswIso19139DcatBackendTest:
                 "usage-des-sols",
             ]
         )
-        assert dataset.harvest.created_at.date() == date(2017, 10, 7)
+        assert dataset.harvest.created_at.date() == date(2013, 3, 8)
+        assert dataset.harvest.issued_at.date() == date(2017, 10, 7)
         assert dataset.spatial.geom == {
             "type": "MultiPolygon",
             "coordinates": [
@@ -921,3 +923,7 @@ class CswIso19139DcatBackendTest:
         assert dataset.extras["dcat"].get("rights") is None
         for resource in dataset.resources:
             assert resource.extras["dcat"].get("rights") is None
+
+        # dates are correctly mapped
+        assert dataset.harvest.issued_at == date(2017, 10, 7)
+        assert dataset.harvest.created_at == date(2003, 6, 2)

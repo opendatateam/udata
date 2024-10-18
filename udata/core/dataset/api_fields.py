@@ -45,6 +45,11 @@ dataset_harvest_fields = api.model(
         "created_at": fields.ISODateTime(
             description="The dataset harvested creation date", allow_null=True, readonly=True
         ),
+        "issued_at": fields.ISODateTime(
+            description="The dataset harvested issuance (publication) date",
+            allow_null=True,
+            readonly=True,
+        ),
         "modified_at": fields.ISODateTime(
             description="The dataset harvest last modification date", allow_null=True, readonly=True
         ),
@@ -71,6 +76,11 @@ resource_harvest_fields = api.model(
     {
         "created_at": fields.ISODateTime(
             description="The resource harvested creation date", allow_null=True, readonly=True
+        ),
+        "issued_at": fields.ISODateTime(
+            description="The dataset harvested issuance (publication) date",
+            allow_null=True,
+            readonly=True,
         ),
         "modified_at": fields.ISODateTime(
             description="The resource harvest last modification date",

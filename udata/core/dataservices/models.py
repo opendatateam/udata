@@ -90,6 +90,10 @@ class HarvestMetadata(db.EmbeddedDocument):
     created_at = field(
         db.DateTimeField(), description="Date of the creation as provided by the harvested catalog"
     )
+    issued_at = field(
+        db.DateTimeField(),
+        description="Date of formal issuance (publication) as provided by the harvested catalog",
+    )
     last_update = field(db.DateTimeField(), description="Date of the last harvesting")
     archived_at = field(db.DateTimeField())
 

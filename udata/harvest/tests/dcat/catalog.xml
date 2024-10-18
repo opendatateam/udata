@@ -20,7 +20,8 @@
         <dcterms:spatial rdf:resource="http://wuEurope.com/"/>
         <dcat:keyword>Tag 2</dcat:keyword>
         <dcterms:publisher rdf:resource="http://data.test.org/organizations/1"/>
-        <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T18:59:02.737480</dcterms:issued>
+        <dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T18:59:02.737480</dcterms:created>
+        <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2017-12-14T18:59:02.737480</dcterms:issued>
         <dcterms:description>Dataset 3 description</dcterms:description>
         <dcat:keyword>Tag 1</dcat:keyword>
         <dcat:theme rdf:resource="http://data.europa.eu/bna/c_dd313021"/>
@@ -68,7 +69,7 @@
         <dcat:keyword>Tag 2</dcat:keyword>
         <dcat:keyword>Tag 1</dcat:keyword>
         <dcat:distribution rdf:resource="http://data.test.org/datasets/1/resources/1"/>
-        <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T18:59:02.737480</dcterms:issued>
+        <dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T18:59:02.737480</dcterms:created>
         <dcterms:identifier>1</dcterms:identifier>
         <dcterms:hasPart rdf:resource="http://data.test.org/datasets/1/resources/3"/>
       </dcat:Dataset>
@@ -84,7 +85,7 @@
         <dcterms:temporal rdf:resource="file:///base/data/home/apps/s%7Erdf-translator/2.408516547054015808/temporal-2"/>
         <dcat:contactPoint rdf:resource="http://data.test.org/contacts/1"/>
         <owl:versionInfo>1.0</owl:versionInfo>
-        <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T18:59:02.737480</dcterms:issued>
+        <dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T18:59:02.737480</dcterms:created>
         <dcat:landingPage>http://data.test.org/datasets/2</dcat:landingPage>
         <dcat:keyword>Tag 2</dcat:keyword>
         <dcat:keyword>Tag 3</dcat:keyword>
