@@ -145,11 +145,11 @@ class BaseBackend(object):
         return self.config.get("filters", [])
 
     def get_extra_config_value(self, key: str):
-        try:
-            extra_config = next(c for c in self.config.get("extra_configs", []) if c["key"] == key)
+        extra_config = next(
+            (c for c in self.config.get("extra_configs", []) if c["key"] == key), None
+        )
+        if extra_config:
             return extra_config["value"]
-        except StopIteration:
-            return None
 
     def inner_harvest(self):
         raise NotImplementedError
