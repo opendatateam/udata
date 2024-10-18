@@ -501,15 +501,18 @@ def provenances_from_rdf(resource: RdfResource) -> set[str]:
     return rdf_unique_values(resource, DCT.provenance, parse_label=True)
 
 
-def infer_dataset_access_rights(resources_access_rights: list[set]) -> set | None:
+def infer_dataset_access_rights(
+    dataset: RdfResource, resources_access_rights: list[set]
+) -> set | None:
     """
-    Infer the dataset access rights from a list of resources access rights.
-    If all resources have the same set of access rights return it.
+    Infer the dataset access rights from a RDF dataset or a list of resources access rights.
+    If the dataset does not have access rights and all resources have the same set of access rights return it.
     """
-    if not resources_access_rights:
-        return
-    if set.union(*resources_access_rights) == set.intersection(*resources_access_rights):
-        return resources_access_rights[0]
+    dataset_access_rights = access_rights_from_rdf(dataset)
+    if not dataset_access_rights and resources_access_rights:
+        if set.union(*resources_access_rights) == set.intersection(*resources_access_rights):
+            dataset_access_rights = resources_access_rights[0]
+    return dataset_access_rights
 
 
 def add_dcat_extra(
@@ -654,9 +657,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
     for additionnal in d.objects(DCT.hasPart):
         resource_from_rdf(additionnal, dataset, is_additionnal=True)
 
-    dataset_access_rights = access_rights_from_rdf(d)
-    if not dataset_access_rights and resources_access_rights:
-        dataset_access_rights = infer_dataset_access_rights(resources_access_rights)
+    dataset_access_rights = infer_dataset_access_rights(d, resources_access_rights)
     if dataset_access_rights:
         add_dcat_extra(dataset, "accessRights", dataset_access_rights)
 
