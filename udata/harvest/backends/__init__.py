@@ -14,4 +14,4 @@ def get_all(app):
     return get_enabled("udata.harvesters", app)
 
 
-from .base import BaseBackend, HarvestFeature, HarvestFilter  # noqa
+from .base import BaseBackend, HarvestFeature, HarvestFilter, HarvestExtraConfig  # noqa
