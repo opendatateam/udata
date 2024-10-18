@@ -236,7 +236,7 @@ def export_csv(self, model=None):
 
 
 @job("bind-tabular-dataservice")
-def bind_tabular_dataservice(self, model=None):
+def bind_tabular_dataservice(self):
     """
     Bind the datasets served by TabularAPI to its dataservice objects
     """
@@ -248,7 +248,7 @@ def bind_tabular_dataservice(self, model=None):
     try:
         dataservice = Dataservice.objects.get(id=TABULAR_API_DATASERVICE_ID)
     except Dataservice.DoesNotExist:
-        log.error("TABULAR_API_DATASERVICE_ID points to a non existent dataset")
+        log.error("TABULAR_API_DATASERVICE_ID points to a non existent dataservice")
         return
 
     datasets = Dataset.objects(
@@ -258,9 +258,7 @@ def bind_tabular_dataservice(self, model=None):
         }
     ).visible()
 
-    dataservice.datasets = []
-    for dat in datasets:
-        dataservice.datasets.append(dat)
+    dataservice.datasets = datasets
 
     try:
         dataservice.save()
