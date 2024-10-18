@@ -6,12 +6,16 @@ from datetime import date
 
 import pytest
 from flask import current_app
+from lxml import etree
+from rdflib import Graph
 
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import LicenseFactory, ResourceSchemaMockData
+from udata.core.dataset.rdf import dataset_from_rdf
 from udata.core.organization.factories import OrganizationFactory
 from udata.harvest.models import HarvestJob
 from udata.models import Dataset
+from udata.rdf import DCAT, RDF, namespace_manager
 from udata.storage.s3 import get_from_json
 
 from .. import actions
@@ -472,10 +476,11 @@ class DcatBackendTest:
 
         assert job.status == "done"
         assert job.errors == []
-        assert len(job.items) == 3
+        assert len(job.items) == 4
 
     def test_xml_catalog(self, rmock):
         LicenseFactory(id="lov2", title="Licence Ouverte Version 2.0")
+        LicenseFactory(id="lov1", title="Licence Ouverte Version 1.0")
 
         url = mock_dcat(rmock, "catalog.xml", path="catalog.xml")
         org = OrganizationFactory()
@@ -497,13 +502,10 @@ class DcatBackendTest:
         assert dataset.temporal_coverage.start == date(2016, 1, 1)
         assert dataset.temporal_coverage.end == date(2016, 12, 5)
 
-        assert (
-            dataset.extras["harvest"]["dct:accessRights"]
-            == "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1e"
-        )
-        assert dataset.extras["harvest"]["dct:provenance"] == [
-            "Description de la provenance des données"
+        assert dataset.extras["dcat"]["accessRights"] == [
+            "http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1e"
         ]
+        assert dataset.extras["dcat"]["provenance"] == ["Description de la provenance des données"]
 
         assert "observation-de-la-terre-et-environnement" in dataset.tags
         assert "hvd" in dataset.tags
@@ -518,6 +520,8 @@ class DcatBackendTest:
         assert dataset.contact_point["email"] == "hello@its.me"
         assert dataset.contact_point["name"] == "Organization contact"
         assert dataset.frequency is None
+        # test dct:license nested in distribution
+        assert dataset.license.id == "lov1"
 
         assert len(dataset.resources) == 3
 
@@ -543,6 +547,23 @@ class DcatBackendTest:
         assert resource_3.description == ""
         assert resource_3.url == "http://data.test.org/datasets/1/resources/3"
         assert resource_3.type == "other"
+
+        # test dct:rights -> license support from dataset
+        dataset = Dataset.objects.get(harvest__dct_identifier="2")
+        assert dataset.license.id == "lov2"
+        assert dataset.extras["dcat"]["rights"] == ["Licence Ouverte Version 2.0"]
+
+        # test dct:rights storage in resource
+        resource_2 = next(res for res in dataset.resources if res.title == "Resource 2-2")
+        assert resource_2.extras["dcat"]["rights"] == ["Rights on nested resource"]
+
+        # test different dct:accessRights on resources _not_ bubbling up to dataset
+        dataset = Dataset.objects.get(harvest__dct_identifier="4")
+        assert dataset.extras["dcat"].get("accessRights") is None
+        # test dct:accessRights storage in resource
+        for resource in dataset.resources:
+            assert len(resource.extras["dcat"]["accessRights"]) == 2
+            assert "Access right 4" in resource.extras["dcat"]["accessRights"]
 
     def test_geonetwork_xml_catalog(self, rmock):
         url = mock_dcat(rmock, "geonetwork.xml", path="catalog.xml")
@@ -879,3 +900,60 @@ class CswIso19139DcatBackendTest:
                 dataset.harvest.remote_url
                 == "https://ogc.geo-ide.developpement-durable.gouv.fr/csw/all-dataset?REQUEST=GetRecordById&SERVICE=CSW&VERSION=2.0.2&RESULTTYPE=results&elementSetName=full&TYPENAMES=gmd:MD_Metadata&OUTPUTSCHEMA=http://www.isotc211.org/2005/gmd&ID=fr-120066022-ldd-56fce164-04b2-41ae-be87-9f256f39dd44"
             )
+
+        # accessRights is gotten from the only resource that is recognized as a distribution and copied to the dataset level
+        access_right = ["Pas de restriction d'accès public selon INSPIRE"]
+        assert dataset.extras["dcat"]["accessRights"] == access_right
+        # also present on the resource level
+        assert resource.extras["dcat"]["accessRights"] == access_right
+
+        # see `test_geo_ide` for detailed explanation of the following
+        assert dataset.extras["dcat"].get("license") is None
+        assert len(resource.extras["dcat"]["license"]) == 6
+        assert dataset.extras["dcat"].get("rights") is None
+        assert resource.extras["dcat"].get("rights") is None
+
+    def test_geo_ide(self):
+        # this is the string used in geo-ide for now
+        lov1 = LicenseFactory(
+            id="lov1",
+            title="Licence Ouverte 1.0 http://www.data.gouv.fr/Licence-Ouverte-Open-Licence",
+        )
+
+        with open(os.path.join(CSW_DCAT_FILES_DIR, "XSLT.xml"), "rb") as f:
+            xslt = f.read()
+        with open(os.path.join(CSW_DCAT_FILES_DIR, "geo-ide_single-dataset.xml"), "rb") as f:
+            csw = f.read()
+
+        # apply xslt transformation manually instead of using the harvest backend since we're only processing one dataset
+        transform = etree.XSLT(etree.fromstring(xslt))
+        tree_before_transform = etree.fromstring(csw)
+        tree = transform(tree_before_transform, CoupledResourceLookUp="'disabled'")
+        subgraph = Graph(namespace_manager=namespace_manager)
+        subgraph.parse(etree.tostring(tree), format="application/rdf+xml")
+        node = next(subgraph.subjects(RDF.type, DCAT.Dataset))
+
+        dataset = dataset_from_rdf(subgraph, dataset=None, node=node)
+        assert dataset.title == "Plan local d'urbanisme de la commune de Combles"
+        assert len(dataset.resources) == 6
+        assert dataset.license == lov1
+
+        # accessRights is retrieved from the resources
+        access_right = ["Pas de restriction d'accès public selon INSPIRE"]
+        assert dataset.extras["dcat"]["accessRights"] == access_right
+        # also present on the resource level
+        for resource in dataset.resources:
+            assert resource.extras["dcat"]["accessRights"] == access_right
+
+        # _no_ licence extra on dataset level, since they're in resources
+        assert dataset.extras["dcat"].get("license") is None
+        # all useLimitations have been duplicated on resources as dct:license
+        for resource in dataset.resources:
+            r_licenses = resource.extras["dcat"]["license"]
+            assert len(r_licenses) == 6
+            assert any("Licence Ouverte 1.0" in x for x in r_licenses)
+
+        # no dct:rights anywhere, everything is in dct:license (at least for now)
+        assert dataset.extras["dcat"].get("rights") is None
+        for resource in dataset.resources:
+            assert resource.extras["dcat"].get("rights") is None
