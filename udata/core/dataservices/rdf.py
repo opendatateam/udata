@@ -65,7 +65,13 @@ def dataservice_from_rdf(
 
     dataservice.harvest.uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
     dataservice.harvest.remote_url = remote_url_from_rdf(d)
-    dataservice.harvest.created_at = rdf_value(d, DCT.issued)
+    created_at = rdf_value(d, DCT.created)
+    issued_at = rdf_value(d, DCT.issued)
+    # fallback on issuance date if no creation date found
+    if not created_at and issued_at:
+        created_at = issued_at
+    dataservice.harvest.created_at = created_at
+    dataservice.harvest.issued_at = issued_at
     dataservice.metadata_modified_at = rdf_value(d, DCT.modified)
 
     dataservice.tags = themes_from_rdf(d)

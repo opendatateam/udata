@@ -592,6 +592,9 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     uri = distrib.identifier.toPython() if isinstance(distrib.identifier, URIRef) else None
     created_at = rdf_value(distrib, DCT.created)
     issued_at = rdf_value(distrib, DCT.issued)
+    # fallback on issuance date if no creation date found
+    if not created_at and issued_at:
+        created_at = issued_at
     modified_at = rdf_value(distrib, DCT.modified)
 
     if not resource.harvest:
