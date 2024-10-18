@@ -39,6 +39,7 @@ from udata.rdf import (
     SKOS,
     SPDX,
     TAG_TO_EU_HVD_CATEGORIES,
+    primary_topic_identifier_from_rdf,
 )
 from udata.tests.helpers import assert200, assert_redirects
 from udata.utils import faker
@@ -798,6 +799,39 @@ class RdfToDatasetTest:
         resource = dataset.resources[0]
         assert resource.title == title
         assert resource.description == description
+
+    def test_primary_topic_identifier_from_rdf_outer(self):
+        """Check that a CatalogRecord node that is primaryTopic of a dataset is found and parsed"""
+        node = BNode()
+        g = Graph()
+
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+
+        primary_topic_node = BNode()
+        g.add((primary_topic_node, RDF.type, DCAT.CatalogRecord))
+        g.add((primary_topic_node, DCT.identifier, Literal("primary-topic-identifier")))
+        g.add((primary_topic_node, FOAF.primaryTopic, node))
+
+        pti = primary_topic_identifier_from_rdf(g, g.resource(node))
+        assert pti == Literal("primary-topic-identifier")
+
+    def test_primary_topic_identifier_from_rdf_inner(self):
+        """Check that a nested isPrimaryTopicOf of a dataset is found and parsed"""
+        node = BNode()
+        g = Graph()
+
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+
+        primary_topic_node = BNode()
+        g.add((primary_topic_node, RDF.type, DCAT.CatalogRecord))
+        g.add((primary_topic_node, DCT.identifier, Literal("primary-topic-identifier")))
+
+        g.add((node, FOAF.isPrimaryTopicOf, primary_topic_node))
+
+        pti = primary_topic_identifier_from_rdf(g, g.resource(node))
+        assert pti == Literal("primary-topic-identifier")
 
 
 @pytest.mark.frontend
