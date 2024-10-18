@@ -538,6 +538,10 @@ class Defaults(object):
     ###########################################################################
     MATTERMOST_WEBHOOK = None
 
+    # Tabular API Dataservice ID
+    ###########################################################################
+    TABULAR_API_DATASERVICE_ID = None
+
 
 class Testing(object):
     """Sane values for testing. Should be applied as override"""
