@@ -319,11 +319,33 @@ def contact_point_from_rdf(rdf, dataset):
             return contact_point or ContactPoint(name=name, email=email, owner=dataset.owner).save()
 
 
-def remote_url_from_rdf(rdf):
+def primary_topic_identifier_from_rdf(graph: Graph, resource: RdfResource):
     """
-    Return DCAT.landingPage if found and uri validation succeeds.
-    Use RDF identifier as fallback if uri validation succeeds.
+    Extract the dct:identifier from a primaryTopic of a RdfResource `resource` via an RDF `graph`.
+    The primary topic might be identified by a FOAF:isPrimaryTopicOf from the Resource, or by a FOAF:primaryTopic to the Resource.
+    In DCAT, the primary topic should be a unique CatalogRecord (if any), but nothing here prevents it to be something else.
     """
+    # look for "inner" primaryTopic linking to Dataset via isPrimaryTopicOf
+    is_primary_topic_of = graph.value(subject=resource.identifier, predicate=FOAF.isPrimaryTopicOf)
+    if is_primary_topic_of:
+        return graph.value(is_primary_topic_of, DCT.identifier)
+    # look for "outer" primaryTopic linking to Dataset via primaryTopic
+    primary_topic = graph.value(predicate=FOAF.primaryTopic, object=resource.identifier)
+    if primary_topic:
+        return graph.value(primary_topic, DCT.identifier)
+
+
+def remote_url_from_rdf(rdf: RdfResource, graph: Graph, remote_url_prefix: str | None = None):
+    """
+    Compute from `remote_url_prefix` if provided and primaryTopic identifier if found.
+    Otherwise, use DCAT.landingPage if found and uri validation succeeds.
+    In this latter case, use RDF identifier as fallback if uri validation succeeds.
+    """
+    if remote_url_prefix and (
+        primary_topic_identifier := primary_topic_identifier_from_rdf(graph, rdf)
+    ):
+        return f"{remote_url_prefix.rstrip('/')}/{primary_topic_identifier}"
+
     landing_page = url_from_rdf(rdf, DCAT.landingPage)
     uri = rdf.identifier.toPython()
     for candidate in [landing_page, uri]:

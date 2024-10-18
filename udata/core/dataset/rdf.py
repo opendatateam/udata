@@ -603,7 +603,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     return resource
 
 
-def dataset_from_rdf(graph: Graph, dataset=None, node=None):
+def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: str | None = None):
     """
     Create or update a dataset from a RDF/DCAT graph
     """
@@ -677,7 +677,9 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None):
 
     identifier = rdf_value(d, DCT.identifier)
     uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
-    remote_url = remote_url_from_rdf(d)
+
+    remote_url = remote_url_from_rdf(d, graph, remote_url_prefix=remote_url_prefix)
+
     created_at = rdf_value(d, DCT.issued)
     modified_at = rdf_value(d, DCT.modified)
 
