@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2024-10-14 16:52+0200\n"
-"PO-Revision-Date: 2024-10-18 15:53\n"
+"PO-Revision-Date: 2024-10-18 16:34\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -1212,11 +1212,11 @@ msgstr "Archivé"
 
 #: udata/harvest/backends/dcat.py:292
 msgid "Remote URL prefix"
-msgstr ""
+msgstr "Préfixe d'URL distante"
 
 #: udata/harvest/backends/dcat.py:295
 msgid "A prefix used to build the remote URL of the harvested items."
-msgstr ""
+msgstr "Un préfixe utilisé pour construire l'URL distante des éléments récoltés."
 
 #: udata/templates/admin.html:7
 msgid "Admin"
