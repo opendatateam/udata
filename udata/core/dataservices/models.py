@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from flask import url_for
 from mongoengine import Q
 
 import udata.core.contact_point.api_fields as contact_api_fields
@@ -171,13 +172,16 @@ class Dataservice(WithMetrics, Owned, db.Document):
     datasets = field(
         db.ListField(
             field(
-                db.ReferenceField(Dataset),
+                db.LazyReferenceField(Dataset, passthrough=True),
                 nested_fields=datasets_api_fields.dataset_ref_fields,
             )
         ),
         filterable={
             "key": "dataset",
         },
+        href=lambda dataservice: url_for(
+            "api.datasets", dataservice=dataservice.id, _external=True
+        ),
     )
 
     harvest = field(

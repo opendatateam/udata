@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Expose dataservices' datasets by link instead of list [#3156](https://github.com/opendatateam/udata/pull/3156)
 - CSW ISO Harvest: add extra_configs.remote_url_prefix [#3157](https://github.com/opendatateam/udata/pull/3157)
 - DCAT harvest : Refactor DCAT extras handling in rdf parsing [#3054](https://github.com/opendatateam/udata/pull/3054). `accesRights`, `rights` and `license` are now in `extras["dcat"]` for both datasets and resources. `accessRights` can be infered for a dataset from its resources.
 
