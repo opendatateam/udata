@@ -33,6 +33,7 @@ from udata.auth import admin_permission
 from udata.core import storages
 from udata.core.badges import api as badges_api
 from udata.core.badges.fields import badge_fields
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.followers.api import FollowAPI
 from udata.core.storages.api import handle_upload, upload_parser
@@ -100,6 +101,7 @@ class DatasetApiParser(ModelApiParser):
         self.parser.add_argument("schema", type=str, location="args")
         self.parser.add_argument("schema_version", type=str, location="args")
         self.parser.add_argument("topic", type=str, location="args")
+        self.parser.add_argument("dataservice", type=str, location="args")
 
     @staticmethod
     def parse_filters(datasets, args):
@@ -148,6 +150,15 @@ class DatasetApiParser(ModelApiParser):
                 pass
             else:
                 datasets = datasets.filter(id__in=[d.id for d in topic.datasets])
+        if args.get("dataservice"):
+            if not ObjectId.is_valid(args["dataservice"]):
+                api.abort(400, "Dataservice arg must be an identifier")
+            try:
+                dataservice = Dataservice.objects.get(id=args["dataservice"])
+            except Dataservice.DoesNotExist:
+                pass
+            else:
+                datasets = datasets.filter(id__in=[d.id for d in dataservice.datasets])
         return datasets
 
 
