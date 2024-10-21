@@ -221,9 +221,14 @@ def generate_fields(**kwargs):
 
                 if "constraints" not in filterable:
                     filterable["constraints"] = []
-                    if isinstance(field, (mongo_fields.ReferenceField, mongo_fields.LazyReferenceField)) or (
+                    if isinstance(
+                        field, (mongo_fields.ReferenceField, mongo_fields.LazyReferenceField)
+                    ) or (
                         isinstance(field, mongo_fields.ListField)
-                        and isinstance(field.field, (mongo_fields.ReferenceField, mongo_fields.LazyReferenceField))
+                        and isinstance(
+                            field.field,
+                            (mongo_fields.ReferenceField, mongo_fields.LazyReferenceField),
+                        )
                     ):
                         filterable["constraints"].append("objectid")
 
@@ -411,11 +416,14 @@ def patch(obj, request):
             if hasattr(model_attribute, "from_input"):
                 value = model_attribute.from_input(value)
             elif isinstance(model_attribute, mongoengine.fields.ListField) and isinstance(
-                model_attribute.field, (mongo_fields.ReferenceField, mongo_fields.LazyReferenceField)
+                model_attribute.field,
+                (mongo_fields.ReferenceField, mongo_fields.LazyReferenceField),
             ):
                 # TODO `wrap_primary_key` do Mongo request, do a first pass to fetch all documents before calling it (to avoid multiple queries).
                 value = [wrap_primary_key(key, model_attribute.field, id) for id in value]
-            elif isinstance(model_attribute, (mongo_fields.ReferenceField, mongo_fields.LazyReferenceField)):
+            elif isinstance(
+                model_attribute, (mongo_fields.ReferenceField, mongo_fields.LazyReferenceField)
+            ):
                 value = wrap_primary_key(key, model_attribute, value)
             elif isinstance(
                 model_attribute,

@@ -112,7 +112,6 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(dataservice.datasets[0].title, datasets[2].title)
         self.assertEqual(dataservice.datasets[1].title, datasets[1].title)
 
-
         response = self.delete(
             url_for("api.dataservice_dataset", dataservice=dataservice, dataset=datasets[0])
         )
