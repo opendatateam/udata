@@ -1,3 +1,41 @@
+"""Enhance a MongoEngine document class to give it super powers by decorating it with @generate_fields.
+
+The main goal of `generate_fields` is to remove duplication: we used to have fields declaration in
+- models.py
+- forms.py
+- api_fields.py
+
+Now they're defined in models.py, and adding the `generate_fields` decorator makes them available in the format we need them for the forms or the API.
+
+- default_filterable_field: which field in this document should be the default filter, eg when filtering by Badge, you're actually filtering on `Badge.kind`
+- searchable: boolean, if True, the document can be full-text searched using MongoEngine text search
+- additional_sorts: add more sorts than the already available ones based on fields (see below). Eg, sort by metrics.
+- additional_filters: filter on a field of a field (aka "join"), eg filter on `Reuse__organization__badge=PUBLIC_SERVICE`.
+
+
+On top of those functionalities added to the document by the `@generate_fields` decorator parameters,
+the document fields are parsed and enhanced if they are wrapped in the `field` helper.
+
+- sortable: boolean, if True, it'll be available in the list of sort options
+- show_as_ref: add to the list of `ref_fields` (see below)
+- readonly: don't add this field to the `write_fields`
+- markdown: use Mardown to format this field instead of plain old text
+- filterable: this field can be filtered on. It's either an empty dictionnary, either {`key`: `field_name`} if the `field_name` to use is different from the original field, eg `dataset` instead of `datasets`.
+- description: use as the info on the field in the swagger forms.
+- check: provide a function to validate the content of the field.
+- thumbnail_info: add additional info for a thumbnail, eg `{ "size": BIGGEST_IMAGE_SIZE }`.
+
+You may also use the `@function_field` decorator to treat a document method as a field.
+
+
+The following fields are added on the document class once decorated:
+
+- ref_fields: list of fields to return when embedding/referencing a document, eg when querying Reuse.organization, only return a subset of the org fields
+- read_fields: all of the fields to return when querying a document
+- write_fields: list of fields to provide when creating a document, eg when creating a Reuse, we only provide organization IDs, not all the org fields
+
+"""
+
 import functools
 from typing import Any, Dict
 
@@ -22,15 +60,16 @@ lazy_reference = api.model(
 
 
 def convert_db_to_field(key, field, info):
-    """
-    This function maps a Mongo field to a Flask RestX field.
+    """Map a Mongo field to a Flask RestX field.
+
     Most of the types are a simple 1-to-1 mapping except lists and references that requires
     more work.
     We currently only map the params that we use from Mongo to RestX (for example min_length / max_length…).
 
     In the first part of the function we save the RestX constructor as a lambda because we need to call it with the
     params. Since merging the params involve a litte bit of work (merging default params with read/write params and then with
-    user-supplied overrides, setting the readonly flag…), it's easier to have do this one time at the end of the function.
+    user-supplied overrides, setting the readonly flag…), it's easier to have to do this only once at the end of the function.
+
     """
     params = {}
     params["required"] = field.required
@@ -178,9 +217,10 @@ def convert_db_to_field(key, field, info):
 
 
 def get_fields(cls):
-    """
-    Returns all the exposed fields of the class (fields decorated with `field()`)
-    It also expends image fields to add thumbnail fields.
+    """Return all the document fields that are wrapped with the `field()` helper.
+
+    Also expand image fields to add thumbnail fields.
+
     """
     for key, field in cls._fields.items():
         info: dict | None = getattr(field, "__additional_field_info__", None)
@@ -198,9 +238,15 @@ def get_fields(cls):
 
 
 def generate_fields(**kwargs):
-    """
+    """Mongoengine document decorator.
+
     This decorator will create two auto-generated attributes on the class `__read_fields__` and `__write_fields__`
     that can be used in API endpoint inside `expect()` and `marshall_with()`.
+
+    It will also
+    - generate an API parameter parser
+    - sort and filter a list of documents with the provided params using the `apply_sort_filters_and_pagination` helper
+
     """
 
     def wrapper(cls):
@@ -351,6 +397,7 @@ def generate_fields(**kwargs):
 
         for filterable in filterables:
             parser.add_argument(
+                # Use the custom label from `additional_filters` if there's one.
                 filterable.get("label", filterable["key"]),
                 type=filterable["type"],
                 location="args",
@@ -382,6 +429,9 @@ def generate_fields(**kwargs):
                 base_query = base_query.search_text(phrase_query)
 
             for filterable in filterables:
+                # If it's from an `additional_filter`, use the custom label instead of the key,
+                # eg use `organization_badge` instead of `organization.badges` which is
+                # computed to `organization_badges`.
                 filter = args.get(filterable.get("label", filterable["key"]))
                 if filter is not None:
                     for constraint in filterable.get("constraints", []):
@@ -421,18 +471,20 @@ def function_field(**info):
 
 
 def field(inner, **kwargs):
-    """
-    Simple decorator to mark a field as visible for the API fields.
-    We can pass additional arguments that will be forward to the RestX field constructor.
+    """Simple wrapper to make a document field visible for the API.
+
+    We can pass additional arguments that will be forwarded to the RestX field constructor.
+
     """
     inner.__additional_field_info__ = kwargs
     return inner
 
 
 def patch(obj, request):
-    """
-    Patch the object with the data from the request.
+    """Patch the object with the data from the request.
+
     Only fields decorated with the `field()` decorator will be read (and not readonly).
+
     """
     from udata.mongo.engine import db
 
@@ -497,11 +549,12 @@ def wrap_primary_key(
     value: str | None,
     document_type=None,
 ):
-    """
-    We need to wrap the `String` inside an `ObjectId` most of the time. If the foreign ID is a `String` we need to get
-    a `DBRef` from the database.
+    """Wrap the `String` inside an `ObjectId`.
+
+    If the foreign ID is a `String`, get a `DBRef` from the database.
 
     TODO: we only check the document reference if the ID is a `String` field (not in the case of a classic `ObjectId`).
+
     """
     if value is None:
         return value
@@ -548,11 +601,13 @@ def wrap_primary_key(
 
 
 def get_fields_with_additional_filters(additional_filters: Dict[str, str]) -> Dict[str, Any]:
-    """
-    Right now we only support additional filters like "organization.badges".
+    """Filter on additional related fields.
 
-    The goal of this function is to key the additional filters by the first part (`organization`) to
+    Right now we only support additional filters with a depth of two, eg "organization.badges".
+
+    The goal of this function is to key by the additional filters by the first part (`organization`) to
     be able to compute them when we loop over all the fields (`title`, `organization`…)
+
 
     The `additional_filters` property is a dict: {"label": "key"}, for example {"organization_badge": "organization.badges"}.
     The `label` will be the name of the parser arg, like `?organization_badge=public-service`, which makes more
@@ -570,6 +625,7 @@ def get_fields_with_additional_filters(additional_filters: Dict[str, str]) -> Di
 
             results[parent]["children"].append(
                 {
+                    # The name for the parser argument, so `organization_badge` instead of `organization_badges`.
                     "label": label,
                     "key": child,
                     "type": str,
