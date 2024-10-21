@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2024-10-07 15:16+0200\n"
-"PO-Revision-Date: 2024-10-07 13:18\n"
+"POT-Creation-Date: 2024-10-14 16:52+0200\n"
+"PO-Revision-Date: 2024-10-18 15:53\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: sr\n"
 "Language-Team: Serbian (Cyrillic)\n"
@@ -222,7 +222,7 @@ msgstr "Врста беџа (сертификовано итд.)"
 
 #: udata/core/contact_point/forms.py:12 udata/core/jobs/forms.py:27
 #: udata/core/organization/forms.py:46 udata/core/post/forms.py:15
-#: udata/core/topic/forms.py:16 udata/harvest/forms.py:60
+#: udata/core/topic/forms.py:16 udata/harvest/forms.py:78
 #: udata/templates/api/admin.html:10
 msgid "Name"
 msgstr "Име"
@@ -241,9 +241,13 @@ msgstr ""
 
 #: udata/core/contact_point/forms.py:20 udata/core/dataset/forms.py:112
 #: udata/core/dataset/forms.py:175 udata/core/topic/forms.py:14
-#: udata/harvest/forms.py:69
+#: udata/harvest/forms.py:87
 msgid "Publish as"
 msgstr "Објављено као"
+
+#: udata/core/contact_point/models.py:18 udata/tests/api/test_contact_points.py:50
+msgid "At least an email or a contact form is required for a contact point"
+msgstr ""
 
 #: udata/core/dataservices/models.py:159 udata/core/dataset/models.py:531
 #: udata/mongo/datetime_fields.py:60
@@ -425,7 +429,7 @@ msgstr "Наслов"
 
 #: udata/core/dataset/forms.py:68 udata/core/dataset/forms.py:146
 #: udata/core/jobs/forms.py:28 udata/core/organization/forms.py:50
-#: udata/core/topic/forms.py:17 udata/harvest/forms.py:62
+#: udata/core/topic/forms.py:17 udata/harvest/forms.py:80
 msgid "Description"
 msgstr "Опис"
 
@@ -445,7 +449,7 @@ msgstr "Тип"
 msgid "Resource type (documentation, API...)"
 msgstr "Тип ресурса (документација, API...)"
 
-#: udata/core/dataset/forms.py:84 udata/harvest/forms.py:64
+#: udata/core/dataset/forms.py:84 udata/harvest/forms.py:82
 msgid "URL"
 msgstr "URL"
 
@@ -580,7 +584,7 @@ msgstr "Потребно је да ажурирате неке скупове п
 
 #: udata/core/discussions/forms.py:15 udata/core/discussions/forms.py:23
 #: udata/core/organization/forms.py:83 udata/core/organization/forms.py:87
-#: udata/harvest/forms.py:79
+#: udata/harvest/forms.py:97
 msgid "Comment"
 msgstr "Коментар"
 
@@ -1158,11 +1162,11 @@ msgstr "Ово поље захтева да се подесе \"%(name)s\""
 msgid "Source"
 msgstr "Извор"
 
-#: udata/harvest/forms.py:62
+#: udata/harvest/forms.py:80
 msgid "Some optional details about this harvester"
 msgstr "Детаљи харвестера"
 
-#: udata/harvest/forms.py:66
+#: udata/harvest/forms.py:84
 msgid "Backend"
 msgstr "Позадинска компонента"
 
@@ -1205,6 +1209,14 @@ msgstr "Прескочено"
 #: udata/harvest/models.py:44
 msgid "Archived"
 msgstr "Архивирано"
+
+#: udata/harvest/backends/dcat.py:292
+msgid "Remote URL prefix"
+msgstr ""
+
+#: udata/harvest/backends/dcat.py:295
+msgid "A prefix used to build the remote URL of the harvested items."
+msgstr ""
 
 #: udata/templates/admin.html:7
 msgid "Admin"
@@ -1586,10 +1598,6 @@ msgstr ""
 
 #: udata/templates/security/email/welcome_existing.html:25
 msgid "Here"
-msgstr ""
-
-#: udata/tests/api/test_contact_points.py:50
-msgid "At least an email or a contact form is required for a contact point"
 msgstr ""
 
 #: udata/tests/forms/test_model_field.py:165
