@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 9.2.4 (2024-10-22)
 
 - Add a job to bind Tabular API to its datasets [#3162](https://github.com/opendatateam/udata/pull/3162)
 - Expose dataservices' datasets by link instead of list [#3156](https://github.com/opendatateam/udata/pull/3156)
