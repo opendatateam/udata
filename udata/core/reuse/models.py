@@ -14,7 +14,7 @@ from udata.mongo.errors import FieldValidationError
 from udata.uris import endpoint_for
 from udata.utils import hash_url
 
-from .constants import IMAGE_MAX_SIZE, IMAGE_SIZES, REUSE_TOPICS, REUSE_TYPES
+from .constants import DEFAULT_SORTING, IMAGE_MAX_SIZE, IMAGE_SIZES, REUSE_TOPICS, REUSE_TYPES
 
 __all__ = ("Reuse",)
 
@@ -35,6 +35,7 @@ def check_url_does_not_exists(url):
 
 @generate_fields(
     searchable=True,
+    default_sort=DEFAULT_SORTING,
     additionalSorts=[
         {"key": "datasets", "value": "metrics.datasets"},
         {"key": "followers", "value": "metrics.followers"},

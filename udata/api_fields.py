@@ -322,6 +322,7 @@ def generate_fields(**kwargs):
                 location="args",
                 choices=choices,
                 help="The field (and direction) on which sorting apply",
+                default=kwargs.get("default_sort"),
             )
 
         searchable = kwargs.pop("searchable", False)
