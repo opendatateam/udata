@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add contact_form in ContactPoint api fields [#3175](https://github.com/opendatateam/udata/pull/3175)
 
 ## 9.2.4 (2024-10-22)
 
