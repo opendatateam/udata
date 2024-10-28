@@ -2,8 +2,11 @@ from datetime import datetime
 
 import pytest
 from flask import url_for
+from werkzeug.test import TestResponse
 
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.discussions.factories import DiscussionFactory
 from udata.core.discussions.metrics import update_discussions_metric  # noqa
 from udata.core.discussions.models import Discussion, Message
 from udata.core.discussions.notifications import discussions_notifications
@@ -19,8 +22,11 @@ from udata.core.discussions.tasks import (
     notify_new_discussion_comment,
 )
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.models import Organization
+from udata.core.reuse.factories import ReuseFactory
 from udata.core.spam.signals import on_new_potential_spam
 from udata.core.user.factories import AdminFactory, UserFactory
+from udata.core.user.models import User
 from udata.models import Dataset, Member
 from udata.tests.helpers import capture_mails
 from udata.utils import faker
@@ -357,6 +363,61 @@ class DiscussionsTest(APITestCase):
         self.assert200(response)
 
         self.assertEqual(len(response.json["data"]), len(discussions))
+
+    def assertIdIn(self, json_data: dict, id_: str) -> None:
+        for item in json_data:
+            if item["id"] == id_:
+                return
+        self.fail(f"id {id_} not in {json_data}")
+
+    def test_list_discussions_org_does_not_exist(self) -> None:
+        response: TestResponse = self.get(url_for("api.discussions", org="bad org id"))
+        self.assert404(response)
+
+    def test_list_discussions_org(self) -> None:
+        organization: Organization = OrganizationFactory()
+        user: User = UserFactory()
+        _discussion: Discussion = DiscussionFactory(user=user)
+        dataset = DatasetFactory(organization=organization)
+        dataservice = DataserviceFactory(organization=organization)
+        reuse = ReuseFactory(organization=organization)
+        discussion_for_dataset: Discussion = DiscussionFactory(subject=dataset, user=user)
+        discussion_for_dataservice: Discussion = DiscussionFactory(subject=dataservice, user=user)
+        discussion_for_reuse: Discussion = DiscussionFactory(subject=reuse, user=user)
+
+        response: TestResponse = self.get(url_for("api.discussions", org=organization.id))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), 3)
+        self.assertIdIn(response.json["data"], str(discussion_for_dataset.id))
+        self.assertIdIn(response.json["data"], str(discussion_for_dataservice.id))
+        self.assertIdIn(response.json["data"], str(discussion_for_reuse.id))
+
+    def test_list_discussions_sort(self) -> None:
+        user: User = UserFactory()
+        sorting_keys_dict: dict = {
+            "title": ["aaa", "bbb"],
+            "created": ["2023-12-12", "2024-01-01"],
+            "closed": ["2023-12-12", "2024-01-01"],
+        }
+        for sorting_key, values in sorting_keys_dict.items():
+            discussion1: Discussion = DiscussionFactory(user=user, **{sorting_key: values[0]})
+            discussion2: Discussion = DiscussionFactory(user=user, **{sorting_key: values[1]})
+
+            response: TestResponse = self.get(url_for("api.discussions", sort=sorting_key))
+            self.assert200(response)
+            self.assertEqual(len(response.json["data"]), 2)
+            self.assertEqual(response.json["data"][0]["id"], str(discussion1.id))
+            self.assertEqual(response.json["data"][1]["id"], str(discussion2.id))
+
+            # Reverse sort
+            response: TestResponse = self.get(url_for("api.discussions", sort="-" + sorting_key))
+            self.assert200(response)
+            self.assertEqual(len(response.json["data"]), 2)
+            self.assertEqual(response.json["data"][0]["id"], str(discussion2.id))
+            self.assertEqual(response.json["data"][1]["id"], str(discussion1.id))
+
+            # Clean slate
+            Discussion.objects.delete()
 
     def test_list_discussions_user(self):
         dataset = DatasetFactory()

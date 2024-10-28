@@ -4,6 +4,7 @@ import os
 import click
 from flask import current_app, json
 from flask_restx import schemas
+from werkzeug.security import gen_salt
 
 from udata.api import api
 from udata.api.oauth2 import OAuth2Client
@@ -77,11 +78,14 @@ def validate():
 @click.option(
     "-r", "--response-types", multiple=True, default=["code"], help="Client's response types"
 )
-def create_oauth_client(client_name, user_email, uri, grant_types, scope, response_types):
+@click.option("-p", "--public", is_flag=True, help="Public client (SPA)")
+def create_oauth_client(client_name, user_email, uri, grant_types, scope, response_types, public):
     """Creates an OAuth2Client instance in DB"""
     user = User.objects(email=user_email).first()
     if user is None:
         exit_with_error("No matching user to email")
+
+    client_secret = gen_salt(50) if not public else None
 
     client = OAuth2Client.objects.create(
         name=client_name,
@@ -90,11 +94,15 @@ def create_oauth_client(client_name, user_email, uri, grant_types, scope, respon
         scope=scope,
         response_types=response_types,
         redirect_uris=uri,
+        secret=client_secret,
     )
 
     click.echo(f"New OAuth client: {client.name}")
     click.echo(f"Client's ID {client.id}")
-    click.echo(f"Client's secret {client.secret}")
+    if public:
+        click.echo("Client is public and has no secret.")
+    else:
+        click.echo(f"Client's secret {client.secret}")
     click.echo(f"Client's grant_types {client.grant_types}")
     click.echo(f"Client's response_types {client.response_types}")
     click.echo(f"Client's URI {client.redirect_uris}")

@@ -176,6 +176,16 @@ feature_fields = api.model(
     },
 )
 
+harvest_extra_fields = api.model(
+    "HarvestExtraConfig",
+    {
+        "label": fields.String(description="A localized human-readable and descriptive label"),
+        "key": fields.String(description="The config key"),
+        "description": fields.String(description="Some details about the behavior"),
+        "default": fields.String(description="The config default value"),
+    },
+)
+
 backend_fields = api.model(
     "HarvestBackend",
     {
@@ -186,6 +196,10 @@ backend_fields = api.model(
         ),
         "features": fields.List(
             fields.Nested(feature_fields), description="The backend optional features"
+        ),
+        "extra_configs": fields.List(
+            fields.Nested(harvest_extra_fields),
+            description="The backend extra configuration variables",
         ),
     },
 )
@@ -432,6 +446,7 @@ class ListBackendsAPI(API):
                     "label": b.display_name,
                     "filters": [f.as_dict() for f in b.filters],
                     "features": [f.as_dict() for f in b.features],
+                    "extra_configs": [f.as_dict() for f in b.extra_configs],
                 }
                 for b in actions.list_backends()
             ],
