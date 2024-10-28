@@ -51,6 +51,7 @@ class DatasetCSVAdapterTest:
                 "backend": "dummy_backend",
                 "modified_at": date_modified,
                 "created_at": date_created,
+                "remote_url": "https://www.example.com/",
             },
         )
         resources_dataset = DatasetFactory(
@@ -58,12 +59,15 @@ class DatasetCSVAdapterTest:
                 ResourceFactory(
                     metrics={
                         "views": 42,
-                    }
+                    },
+                    format="csv",
+                    type="main",
                 ),
                 ResourceFactory(
                     metrics={
                         "views": 1337,
-                    }
+                    },
+                    format="json",
                 ),
                 ResourceFactory(),
             ]
@@ -81,9 +85,12 @@ class DatasetCSVAdapterTest:
         assert harvest_dataset_values["harvest.modified_at"] == date_modified.isoformat()
         assert harvest_dataset_values["harvest.backend"] == "dummy_backend"
         assert harvest_dataset_values["harvest.domain"] == "example.com"
+        assert harvest_dataset_values["harvest.remote_url"] == "https://www.example.com/"
         assert harvest_dataset_values["resources_count"] == 0
         assert harvest_dataset_values["downloads"] == 0
 
         resources_dataset_values = csv[str(resources_dataset.id)]
         assert resources_dataset_values["resources_count"] == 3
+        assert resources_dataset_values["main_resources_count"] == 1
+        assert set(resources_dataset_values["resources_formats"].split(",")) == set(["csv", "json"])
         assert resources_dataset_values["downloads"] == 1337 + 42

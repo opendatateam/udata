@@ -11,7 +11,7 @@ from udata.models import Dataset
 from udata.tests.helpers import assert_equal_dates
 from udata.utils import faker
 
-from ..backends import BaseBackend, HarvestFeature, HarvestFilter
+from ..backends import BaseBackend, HarvestExtraConfig, HarvestFeature, HarvestFilter
 from ..exceptions import HarvestException
 from .factories import HarvestSourceFactory
 
@@ -28,6 +28,10 @@ class FakeBackend(BaseBackend):
     features = (
         HarvestFeature("feature", "A test feature"),
         HarvestFeature("enabled", "A test feature enabled by default", default=True),
+    )
+    extra_configs = (
+        HarvestExtraConfig("Test Int", "test_int", int, "An integer"),
+        HarvestExtraConfig("Test Str", "test_str", str),
     )
 
     def inner_harvest(self):
@@ -132,6 +136,22 @@ class BaseBackendTest:
         backend = FakeBackend(source)
 
         assert [f["key"] for f in backend.get_filters()] == ["second", "first"]
+
+    def test_get_extra_config_not_in_source(self):
+        source = HarvestSourceFactory()
+        backend = FakeBackend(source)
+        assert backend.get_extra_config_value("test_str") is None
+
+    def test_get_extra_config_value(self):
+        source = HarvestSourceFactory(
+            config={
+                "extra_configs": [
+                    {"key": "test_str", "value": "test"},
+                ]
+            }
+        )
+        backend = FakeBackend(source)
+        assert backend.get_extra_config_value("test_str") == "test"
 
     def test_harvest_source_id(self):
         nb_datasets = 3

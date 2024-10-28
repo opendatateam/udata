@@ -4,7 +4,7 @@ from xml.etree.ElementTree import XML
 import pytest
 import requests
 from flask import url_for
-from rdflib import BNode, Graph, Literal, URIRef
+from rdflib import BNode, Graph, Literal, Namespace, URIRef
 from rdflib.namespace import FOAF, RDF
 from rdflib.resource import Resource as RdfResource
 
@@ -22,6 +22,7 @@ from udata.core.dataset.rdf import (
     dataset_to_rdf,
     frequency_from_rdf,
     frequency_to_rdf,
+    licenses_from_rdf,
     resource_from_rdf,
     resource_to_rdf,
     temporal_from_rdf,
@@ -39,6 +40,7 @@ from udata.rdf import (
     SKOS,
     SPDX,
     TAG_TO_EU_HVD_CATEGORIES,
+    primary_topic_identifier_from_rdf,
 )
 from udata.tests.helpers import assert200, assert_redirects
 from udata.utils import faker
@@ -799,6 +801,39 @@ class RdfToDatasetTest:
         assert resource.title == title
         assert resource.description == description
 
+    def test_primary_topic_identifier_from_rdf_outer(self):
+        """Check that a CatalogRecord node that is primaryTopic of a dataset is found and parsed"""
+        node = BNode()
+        g = Graph()
+
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+
+        primary_topic_node = BNode()
+        g.add((primary_topic_node, RDF.type, DCAT.CatalogRecord))
+        g.add((primary_topic_node, DCT.identifier, Literal("primary-topic-identifier")))
+        g.add((primary_topic_node, FOAF.primaryTopic, node))
+
+        pti = primary_topic_identifier_from_rdf(g, g.resource(node))
+        assert pti == Literal("primary-topic-identifier")
+
+    def test_primary_topic_identifier_from_rdf_inner(self):
+        """Check that a nested isPrimaryTopicOf of a dataset is found and parsed"""
+        node = BNode()
+        g = Graph()
+
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+
+        primary_topic_node = BNode()
+        g.add((primary_topic_node, RDF.type, DCAT.CatalogRecord))
+        g.add((primary_topic_node, DCT.identifier, Literal("primary-topic-identifier")))
+
+        g.add((node, FOAF.isPrimaryTopicOf, primary_topic_node))
+
+        pti = primary_topic_identifier_from_rdf(g, g.resource(node))
+        assert pti == Literal("primary-topic-identifier")
+
 
 @pytest.mark.frontend
 class DatasetRdfViewsTest:
@@ -852,3 +887,57 @@ class DatasetRdfViewsTest:
         response = client.get(url, headers={"Accept": mime})
         assert200(response)
         assert response.content_type == mime
+
+
+class DatasetFromRdfUtilsTest:
+    def test_licenses_from_rdf(self):
+        """Test a bunch of cases of licenses detection from RDF"""
+        rdf_xml_data = """<?xml version="1.0" encoding="UTF-8"?>
+            <rdf:RDF
+            xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+            xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+            xmlns:foaf="http://xmlns.com/foaf/0.1/"
+            xmlns:dct="http://purl.org/dc/terms/"
+            xmlns:cc="http://creativecommons.org/ns#"
+            xmlns:ex="http://example.org/">
+
+            <rdf:Description rdf:about="http://example.org/dataset1">
+                <dct:title>Comprehensive License Example Dataset</dct:title>
+                <dct:license rdf:resource="http://example.org/custom-license"/>
+                <dct:license>This is a literal license statement</dct:license>
+                <dct:license>
+                    <rdf:Description>
+                        <rdfs:label>Embedded License Description</rdfs:label>
+                    </rdf:Description>
+                </dct:license>
+                <dct:license
+                    xmlns:dct="http://purl.org/dc/terms/"
+                    rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply"
+                >
+                    No conditions apply to access and use.
+                </dct:license>
+                <dct:license rdf:resource="https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"/>
+            </rdf:Description>
+
+            <rdf:Description rdf:about="http://example.org/custom-license">
+                <rdfs:label>Custom Organizational License</rdfs:label>
+                <dct:description>A license specific to our organization</dct:description>
+            </rdf:Description>
+
+            </rdf:RDF>
+        """
+        g = Graph()
+        g.parse(data=rdf_xml_data, format="xml")
+        ex = Namespace("http://example.org/")
+        dataset = RdfResource(g, ex.dataset1)
+        licences = licenses_from_rdf(dataset)
+        expected_licences = set(
+            [
+                "Custom Organizational License",
+                "This is a literal license statement",
+                "Embedded License Description",
+                "https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf",
+                "http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply",
+            ]
+        )
+        assert expected_licences == licences
