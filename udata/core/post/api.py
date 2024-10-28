@@ -135,7 +135,7 @@ class PublishPostAPI(API):
         return post
 
 
-@ns.route("/<post:post>/image", endpoint="post_image")
+@ns.route("/<post:post>/image/", endpoint="post_image")
 class PostImageAPI(API):
     @api.secure(admin_permission)
     @api.doc("post_image")
