@@ -11,3 +11,4 @@ class ContactPointFactory(ModelFactory):
 
     name = factory.Faker("name")
     email = factory.Faker("email")
+    contact_form = factory.Faker("url")

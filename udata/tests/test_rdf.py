@@ -1,8 +1,16 @@
 import pytest
+from rdflib import (
+    Literal,
+    URIRef,
+)
 
+from udata.models import ContactPoint
 from udata.rdf import (
     ACCEPTED_MIME_TYPES,
     FORMAT_MAP,
+    RDF,
+    VCARD,
+    contact_point_to_rdf,
     guess_format,
     negociate_content,
     want_rdf,
@@ -71,3 +79,19 @@ class GuessFormatTest(object):
 
     def test_unkown_mime(self):
         assert guess_format("unknown/mime") is None
+
+
+class ContactToRdfTest:
+    def test_contact_point_to_rdf(self):
+        contact = ContactPoint(
+            name="Organization contact",
+            email="hello@its.me",
+            contact_form="https://data.support.com",
+        )
+
+        c = contact_point_to_rdf(contact, None)
+
+        assert c.value(RDF.type).identifier == VCARD.Kind
+        assert c.value(VCARD.fn) == Literal("Organization contact")
+        assert c.value(VCARD.hasEmail) == Literal("hello@its.me")
+        assert c.value(VCARD.hasUrl).identifier == URIRef("https://data.support.com")

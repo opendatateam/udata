@@ -8,6 +8,7 @@ from rdflib import BNode, Graph, Literal, Namespace, URIRef
 from rdflib.namespace import FOAF, RDF
 from rdflib.resource import Resource as RdfResource
 
+from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceFactory
 from udata.core.dataset.models import (
     Checksum,
@@ -40,6 +41,7 @@ from udata.rdf import (
     SKOS,
     SPDX,
     TAG_TO_EU_HVD_CATEGORIES,
+    VCARD,
     primary_topic_identifier_from_rdf,
 )
 from udata.tests.helpers import assert200, assert_redirects
@@ -85,12 +87,18 @@ class DatasetToRdfTest:
     def test_all_dataset_fields(self):
         resources = ResourceFactory.build_batch(3)
         org = OrganizationFactory(name="organization")
+        contact = ContactPointFactory(
+            name="Organization contact",
+            email="hello@its.me",
+            contact_form="https://data.support.com",
+        )
         dataset = DatasetFactory(
             tags=faker.tags(nb=3),
             resources=resources,
             frequency="daily",
             acronym="acro",
             organization=org,
+            contact_point=contact,
         )
         d = dataset_to_rdf(dataset)
         g = d.graph
@@ -116,6 +124,11 @@ class DatasetToRdfTest:
         org = d.value(DCT.publisher)
         assert org.value(RDF.type).identifier == FOAF.Organization
         assert org.value(FOAF.name) == Literal("organization")
+        c = d.value(DCAT.contactPoint)
+        assert c.value(RDF.type).identifier == VCARD.Kind
+        assert c.value(VCARD.fn) == Literal("Organization contact")
+        assert c.value(VCARD.hasEmail) == Literal("hello@its.me")
+        assert c.value(VCARD.hasUrl).identifier == URIRef("https://data.support.com")
 
     def test_map_unkownn_frequencies(self):
         assert frequency_to_rdf("hourly") == FREQ.continuous

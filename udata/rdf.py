@@ -358,7 +358,7 @@ def contact_point_to_rdf(contact, graph=None):
     if contact.email:
         node.set(VCARD.hasEmail, Literal(contact.email))
     if contact.contact_form:
-        node.set(VCARD.hasUrl, Literal(contact.contact_form))
+        node.set(VCARD.hasUrl, URIRef(contact.contact_form))
     return node
 
 
