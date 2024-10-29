@@ -86,7 +86,7 @@ class MeAPI(API):
         return "", 204
 
 
-@me.route("/avatar", endpoint="my_avatar")
+@me.route("/avatar/", endpoint="my_avatar")
 class AvatarAPI(API):
     @api.secure
     @api.doc("my_avatar")
@@ -254,7 +254,7 @@ class UserListAPI(API):
         return user, 201
 
 
-@ns.route("/<user:user>/avatar", endpoint="user_avatar")
+@ns.route("/<user:user>/avatar/", endpoint="user_avatar")
 class UserAvatarAPI(API):
     @api.secure(admin_permission)
     @api.doc("user_avatar")
