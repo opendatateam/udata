@@ -308,7 +308,7 @@ def contact_point_from_rdf(rdf, dataset):
             return
         if dataset.organization:
             contact_point = ContactPoint.objects(
-                name=name, email=email, organization=dataset.organization
+                name=name, email=email, contact_form=contact_form, organization=dataset.organization
             ).first()
             return (
                 contact_point
@@ -321,7 +321,7 @@ def contact_point_from_rdf(rdf, dataset):
             )
         elif dataset.owner:
             contact_point = ContactPoint.objects(
-                name=name, email=email, owner=dataset.owner
+                name=name, email=email, contact_form=contact_form, owner=dataset.owner
             ).first()
             return (
                 contact_point
