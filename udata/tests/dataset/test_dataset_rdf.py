@@ -127,7 +127,7 @@ class DatasetToRdfTest:
         c = d.value(DCAT.contactPoint)
         assert c.value(RDF.type).identifier == VCARD.Kind
         assert c.value(VCARD.fn) == Literal("Organization contact")
-        assert c.value(VCARD.hasEmail) == Literal("hello@its.me")
+        assert c.value(VCARD.hasEmail).identifier == URIRef("mailto:hello@its.me")
         assert c.value(VCARD.hasUrl).identifier == URIRef("https://data.support.com")
 
     def test_map_unkownn_frequencies(self):
