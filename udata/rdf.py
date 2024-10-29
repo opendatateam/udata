@@ -302,7 +302,7 @@ def contact_point_from_rdf(rdf, dataset):
             or rdf_value(contact_point, VCARD.email)
             or rdf_value(contact_point, DCAT.email)
         )
-        email = email.replace("mailto:", "").strip()
+        email = email.replace("mailto:", "").strip() if email else None
         contact_form = rdf_value(contact_point, VCARD.hasUrl)
         if not email and not contact_form:
             return
