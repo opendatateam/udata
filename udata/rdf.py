@@ -7,7 +7,7 @@ import re
 from html.parser import HTMLParser
 
 from flask import abort, current_app, request, url_for
-from rdflib import Graph, Literal, URIRef
+from rdflib import BNode, Graph, Literal, URIRef
 from rdflib.namespace import (
     DCTERMS,
     FOAF,
@@ -28,6 +28,7 @@ from udata.frontend.markdown import parse_html
 from udata.models import Schema
 from udata.mongo.errors import FieldValidationError
 from udata.tags import slug as slugify_tag
+from udata.uris import endpoint_for
 
 log = logging.getLogger(__name__)
 
@@ -328,6 +329,37 @@ def contact_point_from_rdf(rdf, dataset):
                     name=name, email=email, contact_form=contact_form, owner=dataset.owner
                 ).save()
             )
+
+
+def contact_point_to_rdf(contact, graph=None):
+    """
+    Map a contact point to a DCAT/RDF graph
+    """
+    if not contact:
+        return None
+
+    graph = graph or Graph(namespace_manager=namespace_manager)
+
+    if contact.id:
+        id = URIRef(
+            endpoint_for(
+                "api.contact_point",
+                contact_point=contact.id,
+                _external=True,
+            )
+        )
+    else:
+        id = BNode()
+
+    node = graph.resource(id)
+    node.set(RDF.type, VCARD.Kind)
+    if contact.name:
+        node.set(VCARD.fn, Literal(contact.name))
+    if contact.email:
+        node.set(VCARD.hasEmail, Literal(contact.email))
+    if contact.contact_form:
+        node.set(VCARD.hasUrl, Literal(contact.contact_form))
+    return node
 
 
 def primary_topic_identifier_from_rdf(graph: Graph, resource: RdfResource):
