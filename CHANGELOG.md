@@ -4,6 +4,7 @@
 
 - Add contact_form in ContactPoint api fields [#3175](https://github.com/opendatateam/udata/pull/3175)
 - Expose contact point in DCAT RDF [#3179](https://github.com/opendatateam/udata/pull/3179)
+- Use trailing slashes for the upload files URLs [#3177](https://github.com/opendatateam/udata/pull/3177)
 
 ## 9.2.4 (2024-10-22)
 
