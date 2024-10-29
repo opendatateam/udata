@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add contact_form in ContactPoint api fields [#3175](https://github.com/opendatateam/udata/pull/3175)
+- Use proper RESTful Hydra API endpoints [#3178](https://github.com/opendatateam/udata/pull/3178)
 
 ## 9.2.4 (2024-10-22)
 
