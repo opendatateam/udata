@@ -304,19 +304,30 @@ def contact_point_from_rdf(rdf, dataset):
         if not email:
             return
         email = email.replace("mailto:", "").strip()
+        contact_form = rdf_value(contact_point, VCARD.hasUrl)
         if dataset.organization:
             contact_point = ContactPoint.objects(
                 name=name, email=email, organization=dataset.organization
             ).first()
             return (
                 contact_point
-                or ContactPoint(name=name, email=email, organization=dataset.organization).save()
+                or ContactPoint(
+                    name=name,
+                    email=email,
+                    contact_form=contact_form,
+                    organization=dataset.organization,
+                ).save()
             )
         elif dataset.owner:
             contact_point = ContactPoint.objects(
                 name=name, email=email, owner=dataset.owner
             ).first()
-            return contact_point or ContactPoint(name=name, email=email, owner=dataset.owner).save()
+            return (
+                contact_point
+                or ContactPoint(
+                    name=name, email=email, contact_form=contact_form, owner=dataset.owner
+                ).save()
+            )
 
 
 def primary_topic_identifier_from_rdf(graph: Graph, resource: RdfResource):
