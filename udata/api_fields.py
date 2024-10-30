@@ -76,7 +76,25 @@ def convert_db_to_field(key, field, info):
             constructor = custom_restx_fields.ImageField
 
     elif isinstance(field, mongo_fields.ListField):
-        # For lists, we convert the inner value from Mongo to RestX then we create
+        # For lists, we can expose them only by showing a link to the API
+        # with the results of the list to avoid listing a lot of sub-ressources
+        # (for example for a dataservices with thousands of datasets).
+        href = info.get("href", None)
+        if href:
+
+            def constructor_read(**kwargs):
+                return restx_fields.Raw(
+                    attribute=lambda o: {
+                        "rel": "subsection",
+                        "href": href(o),
+                        "type": "GET",
+                        "total": len(o[key]),
+                    },
+                    description="Visit this API link to see the list.",
+                    **kwargs,
+                )
+
+        # If it's a standard list, we convert the inner value from Mongo to RestX then we create
         # the `List` RestX type with this converted inner value.
         # There is three level of information, from most important to least
         #     1. `inner_field_info` inside `__additional_field_info__` on the parent
@@ -87,9 +105,13 @@ def convert_db_to_field(key, field, info):
             f"{key}.inner", field.field, {**info, **inner_info, **info.get("inner_field_info", {})}
         )
 
-        def constructor_read(**kwargs):
-            return restx_fields.List(field_read, **kwargs)
+        if constructor_read is None:
+            # We don't want to set the `constructor_read` if it's already set
+            # by the `href` code above.
+            def constructor_read(**kwargs):
+                return restx_fields.List(field_read, **kwargs)
 
+        # But we want to keep the `constructor_write` to allow changing the list.
         def constructor_write(**kwargs):
             return restx_fields.List(field_write, **kwargs)
     elif isinstance(
@@ -98,7 +120,7 @@ def convert_db_to_field(key, field, info):
 
         def constructor(**kwargs):
             return restx_fields.Nested(lazy_reference, **kwargs)
-    elif isinstance(field, mongo_fields.ReferenceField):
+    elif isinstance(field, (mongo_fields.ReferenceField, mongo_fields.LazyReferenceField)):
         # For reference we accept while writing a String representing the ID of the referenced model.
         # For reading, if the user supplied a `nested_fields` (RestX model), we use it to convert
         # the referenced model, if not we return a String (and RestX will call the `str()` of the model
@@ -199,9 +221,14 @@ def generate_fields(**kwargs):
 
                 if "constraints" not in filterable:
                     filterable["constraints"] = []
-                    if isinstance(field, mongo_fields.ReferenceField) or (
+                    if isinstance(
+                        field, (mongo_fields.ReferenceField, mongo_fields.LazyReferenceField)
+                    ) or (
                         isinstance(field, mongo_fields.ListField)
-                        and isinstance(field.field, mongo_fields.ReferenceField)
+                        and isinstance(
+                            field.field,
+                            (mongo_fields.ReferenceField, mongo_fields.LazyReferenceField),
+                        )
                     ):
                         filterable["constraints"].append("objectid")
 
@@ -389,11 +416,14 @@ def patch(obj, request):
             if hasattr(model_attribute, "from_input"):
                 value = model_attribute.from_input(value)
             elif isinstance(model_attribute, mongoengine.fields.ListField) and isinstance(
-                model_attribute.field, mongoengine.fields.ReferenceField
+                model_attribute.field,
+                (mongo_fields.ReferenceField, mongo_fields.LazyReferenceField),
             ):
                 # TODO `wrap_primary_key` do Mongo request, do a first pass to fetch all documents before calling it (to avoid multiple queries).
                 value = [wrap_primary_key(key, model_attribute.field, id) for id in value]
-            elif isinstance(model_attribute, mongoengine.fields.ReferenceField):
+            elif isinstance(
+                model_attribute, (mongo_fields.ReferenceField, mongo_fields.LazyReferenceField)
+            ):
                 value = wrap_primary_key(key, model_attribute, value)
             elif isinstance(
                 model_attribute,
