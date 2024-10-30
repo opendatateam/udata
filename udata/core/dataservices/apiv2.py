@@ -2,13 +2,14 @@ from flask import request
 
 from udata import search
 from udata.api import API, apiv2
-from udata.core.dataservices.models import Dataservice
+from udata.core.dataservices.models import Dataservice, HarvestMetadata
 from udata.utils import multi_to_dict
 
 from .search import DataserviceSearch
 
 apiv2.inherit("DataservicePage", Dataservice.__page_fields__)
 apiv2.inherit("Dataservice (read)", Dataservice.__read_fields__)
+apiv2.inherit("HarvestMetadata (read)", HarvestMetadata.__read_fields__)
 
 ns = apiv2.namespace("dataservices", "Dataservice related operations")
 
