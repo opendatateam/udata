@@ -1,6 +1,7 @@
 import datetime
 
 from bson.objectid import ObjectId
+from flask_restx.inputs import boolean
 
 from udata.api import api
 from udata.api.parsers import ModelApiParser
@@ -28,6 +29,7 @@ class DataserviceApiParser(ModelApiParser):
         super().__init__()
         self.parser.add_argument("tag", type=str, location="args")
         self.parser.add_argument("organization", type=str, location="args")
+        self.parser.add_argument("is_restricted", type=bool, location="args")
 
     @staticmethod
     def parse_filters(dataservices, args):
@@ -44,6 +46,8 @@ class DataserviceApiParser(ModelApiParser):
             if not ObjectId.is_valid(args["organization"]):
                 api.abort(400, "Organization arg must be an identifier")
             dataservices = dataservices.filter(organization=args["organization"])
+        if "is_restricted" in args:
+            dataservices = dataservices.filter(is_restricted=boolean(args["is_restricted"]))
         return dataservices
 
 
