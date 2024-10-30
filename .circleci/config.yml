@@ -153,6 +153,7 @@ jobs:
             twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
 
 workflows:
+  version: 2
   build:
     jobs:
       - python:
