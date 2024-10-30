@@ -6,6 +6,7 @@
 - Use trailing slashes for the upload files URLs [#3177](https://github.com/opendatateam/udata/pull/3177)
 - Use hydra's RESTful endpoint URLs [#3146](https://github.com/opendatateam/udata/pull/3146)
 - Fix flaky "duplicated email" importing fixtures tests [#3176](https://github.com/opendatateam/udata/pull/3176)
+- Fix deprecated CircleCI config [#3181](https://github.com/opendatateam/udata/pull/3181)
 
 ## 9.2.4 (2024-10-22)
 
