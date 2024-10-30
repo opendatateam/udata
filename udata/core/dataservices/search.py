@@ -112,4 +112,6 @@ class DataserviceSearch(ModelSearchAdapter):
             "owner": str(owner.id) if owner else None,
             "tags": dataservice.tags,
             "extras": extras,
+            "followers": dataservice.metrics.get("followers", 0),
+            "is_restricted": dataservice.is_restricted or False,
         }
