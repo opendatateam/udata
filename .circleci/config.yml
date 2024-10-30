@@ -8,7 +8,7 @@ jobs:
       - image: mongo:6.0.4
       - image: redis:alpine
     environment:
-       BASH_ENV: /root/.bashrc
+      BASH_ENV: /root/.bashrc
     steps:
       - checkout
       - run:
@@ -68,7 +68,7 @@ jobs:
       # TODO make an image based on 2-alpine w/ nvm and phantom deps
       - image: udata/circleci:py3.11
     environment:
-       BASH_ENV: /root/.bashrc
+      BASH_ENV: /root/.bashrc
     steps:
       - checkout
       - run:
@@ -112,7 +112,7 @@ jobs:
     docker:
       - image: udata/circleci:py3.11
     environment:
-       BASH_ENV: /root/.bashrc
+      BASH_ENV: /root/.bashrc
     steps:
       - checkout
       - attach_workspace:
@@ -145,7 +145,7 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - deploy:
+      - run:
           name: Publish on PyPI
           command: |
             source venv/bin/activate
