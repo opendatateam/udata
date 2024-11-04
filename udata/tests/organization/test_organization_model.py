@@ -1,8 +1,10 @@
 from datetime import datetime
 
+import udata.core.organization.constants as org_constants
 from udata.core.dataset.factories import DatasetFactory, HiddenDatasetFactory
 from udata.core.followers.signals import on_follow, on_unfollow
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.models import Organization
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.models import Dataset, Follow, Member, Reuse
@@ -50,3 +52,22 @@ class OrganizationModelTest(TestCase, DBTestMixin):
         assert org.get_metrics()["datasets"] == 0
         assert org.get_metrics()["reuses"] == 0
         assert org.get_metrics()["followers"] == 0
+
+    def test_organization_queryset_with_badge(self):
+        org_public_service = OrganizationFactory()
+        org_public_service.add_badge(org_constants.PUBLIC_SERVICE)
+        org_certified_association = OrganizationFactory()
+        org_certified_association.add_badge(org_constants.CERTIFIED)
+        org_certified_association.add_badge(org_constants.ASSOCIATION)
+
+        public_services = list(Organization.objects.with_badge(org_constants.PUBLIC_SERVICE))
+        assert len(public_services) == 1
+        assert org_public_service in public_services
+
+        certified = list(Organization.objects.with_badge(org_constants.CERTIFIED))
+        assert len(certified) == 1
+        assert org_certified_association in certified
+
+        associations = list(Organization.objects.with_badge(org_constants.ASSOCIATION))
+        assert len(associations) == 1
+        assert org_certified_association in associations

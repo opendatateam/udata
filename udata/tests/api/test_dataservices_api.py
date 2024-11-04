@@ -3,6 +3,7 @@ from xml.etree.ElementTree import XML
 import pytest
 from flask import url_for
 
+import udata.core.organization.constants as org_constants
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory
@@ -10,13 +11,32 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.user.factories import UserFactory
 from udata.i18n import gettext as _
-from udata.tests.helpers import assert200, assert_redirects
+from udata.tests.helpers import assert200, assert400, assert_redirects
 
 from . import APITestCase
 
 
 class DataserviceAPITest(APITestCase):
     modules = []
+
+    def test_dataservices_api_list_with_filters(self):
+        """Should filters dataservices results based on query filters"""
+        org = OrganizationFactory()
+        org_public_service = OrganizationFactory()
+        org_public_service.add_badge(org_constants.PUBLIC_SERVICE)
+
+        _dataservice = DataserviceFactory(organization=org)
+        dataservice_public_service = DataserviceFactory(organization=org_public_service)
+
+        response = self.get(
+            url_for("api.dataservices", organization_badge=org_constants.PUBLIC_SERVICE)
+        )
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(dataservice_public_service.id)
+
+        response = self.get(url_for("api.dataservices", organization_badge="bad-badge"))
+        assert400(response)
 
     def test_dataservice_api_create(self):
         user = self.login()

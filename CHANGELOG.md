@@ -8,6 +8,7 @@
 - Fix flaky "duplicated email" importing fixtures tests [#3176](https://github.com/opendatateam/udata/pull/3176)
 - Fix deprecated CircleCI config [#3181](https://github.com/opendatateam/udata/pull/3181)
 - Use proper RESTful Hydra API endpoints [#3178](https://github.com/opendatateam/udata/pull/3178)
+- Add a "filter by organization badge" for datasets, dataservices, reuses and organizations [#3155](https://github.com/opendatateam/udata/pull/3155]
 
 ## 9.2.4 (2024-10-22)
 
