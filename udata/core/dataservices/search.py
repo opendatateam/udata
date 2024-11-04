@@ -107,7 +107,7 @@ class DataserviceSearch(ModelSearchAdapter):
             "id": str(dataservice.id),
             "title": dataservice.title,
             "description": dataservice.description,
-            "base_api_url	": dataservice.base_api_url,
+            "base_api_url": dataservice.base_api_url,
             "created_at": to_iso_datetime(dataservice.created_at),
             "archived": to_iso_datetime(dataservice.archived_at)
             if dataservice.archived_at
