@@ -29,13 +29,13 @@ class DataserviceAPITest(APITestCase):
         dataservice_public_service = DataserviceFactory(organization=org_public_service)
 
         response = self.get(
-            url_for("api.dataservices", organization_badges=org_constants.PUBLIC_SERVICE)
+            url_for("api.dataservices", organization_badge=org_constants.PUBLIC_SERVICE)
         )
         assert200(response)
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(dataservice_public_service.id)
 
-        response = self.get(url_for("api.dataservices", organization_badges="bad-badge"))
+        response = self.get(url_for("api.dataservices", organization_badge="bad-badge"))
         assert400(response)
 
     def test_dataservice_api_create(self):

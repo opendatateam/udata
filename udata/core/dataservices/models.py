@@ -97,9 +97,7 @@ class HarvestMetadata(db.EmbeddedDocument):
 
 @generate_fields(
     searchable=True,
-    additional_filters=[
-        "organization.badges",
-    ],
+    additional_filters={"organization_badge": "organization.badges"},
 )
 class Dataservice(WithMetrics, Owned, db.Document):
     meta = {

@@ -1,5 +1,5 @@
 import functools
-from typing import Dict, List
+from typing import Any, Dict
 
 import flask_restx.fields as restx_fields
 import mongoengine
@@ -211,7 +211,7 @@ def generate_fields(**kwargs):
 
         filterables = []
         additional_filters = get_fields_with_additional_filters(
-            kwargs.get("additional_filters", [])
+            kwargs.get("additional_filters", {})
         )
 
         read_fields["id"] = restx_fields.String(required=True, readonly=True)
@@ -252,7 +252,7 @@ def generate_fields(**kwargs):
 
                     def query(filterable, query, value):
                         # We use the computed `filterable["column"]` here because the `compute_filter` function
-                        # could have add default filter at the end (for example `organization__badges` converted
+                        # could have added a default filter at the end (for example `organization__badges` converted
                         # in `organization__badges__kind`)
                         parts = filterable["column"].split("__", 1)
                         models = ref_model.objects.filter(**{parts[1]: value}).only("id")
@@ -351,7 +351,7 @@ def generate_fields(**kwargs):
 
         for filterable in filterables:
             parser.add_argument(
-                filterable["key"],
+                filterable.get("label", filterable["key"]),
                 type=filterable["type"],
                 location="args",
                 choices=filterable.get("choices", None),
@@ -382,7 +382,8 @@ def generate_fields(**kwargs):
                 base_query = base_query.search_text(phrase_query)
 
             for filterable in filterables:
-                if args.get(filterable["key"]) is not None:
+                filter = args.get(filterable.get("label", filterable["key"]))
+                if filter is not None:
                     for constraint in filterable.get("constraints", []):
                         if constraint == "objectid" and not ObjectId.is_valid(
                             args[filterable["key"]]
@@ -391,11 +392,11 @@ def generate_fields(**kwargs):
 
                     query = filterable.get("query", None)
                     if query:
-                        base_query = filterable["query"](base_query, args[filterable["key"]])
+                        base_query = filterable["query"](base_query, filter)
                     else:
                         base_query = base_query.filter(
                             **{
-                                filterable["column"]: args[filterable["key"]],
+                                filterable["column"]: filter,
                             }
                         )
 
@@ -546,14 +547,19 @@ def wrap_primary_key(
         )
 
 
-def get_fields_with_additional_filters(additional_filters: List[str]) -> Dict[str, any]:
+def get_fields_with_additional_filters(additional_filters: Dict[str, str]) -> Dict[str, Any]:
     """
-    Right now we only support additional filters like "organization.badges"
-    The goal of this function is to keyby the additional filters by the first part (`organization`) to
+    Right now we only support additional filters like "organization.badges".
+
+    The goal of this function is to key the additional filters by the first part (`organization`) to
     be able to compute them when we loop over all the fields (`title`, `organization`…)
+
+    The `additional_filters` property is a dict: {"label": "key"}, for example {"organization_badge": "organization.badges"}.
+    The `label` will be the name of the parser arg, like `?organization_badge=public-service`, which makes more
+    sense than `?organization_badges=public-service`.
     """
-    results = {}
-    for key in additional_filters:
+    results: dict = {}
+    for label, key in additional_filters.items():
         parts = key.split(".")
         if len(parts) == 2:
             parent = parts[0]
@@ -564,6 +570,7 @@ def get_fields_with_additional_filters(additional_filters: List[str]) -> Dict[st
 
             results[parent]["children"].append(
                 {
+                    "label": label,
                     "key": child,
                     "type": str,
                 }
