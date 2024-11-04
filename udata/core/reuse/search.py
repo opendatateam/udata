@@ -51,8 +51,7 @@ class ReuseSearch(ModelSearchAdapter):
             or ("$text_score" if args["q"] else None)
             or DEFAULT_SORTING
         )
-        offset = (args["page"] - 1) * args["page_size"]
-        return reuses.order_by(sort).skip(offset).limit(args["page_size"]), reuses.count()
+        return reuses.order_by(sort).paginate(args["page"], args["page_size"])
 
     @classmethod
     def serialize(cls, reuse: Reuse) -> dict:
