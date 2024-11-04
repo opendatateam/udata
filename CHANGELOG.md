@@ -8,6 +8,7 @@
 - Fix flaky "duplicated email" importing fixtures tests [#3176](https://github.com/opendatateam/udata/pull/3176)
 - Fix deprecated CircleCI config [#3181](https://github.com/opendatateam/udata/pull/3181)
 - Use proper RESTful Hydra API endpoints [#3178](https://github.com/opendatateam/udata/pull/3178)
+- Migrate organization badges label to lowercase [#3182](https://github.com/opendatateam/udata/pull/3182)
 
 ## 9.2.4 (2024-10-22)
 
