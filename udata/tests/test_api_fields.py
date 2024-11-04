@@ -52,9 +52,7 @@ class FakeBadgeMixin(BadgeMixin):
         {"key": "followers", "value": "metrics.followers"},
         {"key": "views", "value": "metrics.views"},
     ],
-    additional_filters=[
-        "organization.badges",
-    ],
+    additional_filters={"organization_badge": "organization.badges"},
 )
 class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
     filter_field = field(db.StringField(), filterable={"key": "filter_field_name"})
@@ -180,7 +178,7 @@ class IndexParserTest:
 
     def test_additional_filters_in_parser(self) -> None:
         """Filterable fields from the `additional_filters` decorater parameter should have a parser arg."""
-        assert "organization_badges" in self.index_parser_args_names
+        assert "organization_badge" in self.index_parser_args_names
 
     def test_pagination_fields_in_parser(self) -> None:
         """Pagination fields should have a parser arg."""
@@ -249,7 +247,7 @@ class ApplySortAndFiltersTest:
         fake1: Fake = FakeFactory(organization=org_public_service)
         fake2: Fake = FakeFactory(organization=org_company)
         with app.test_request_context(
-            "/foobar", query_string={"organization_badges": org_constants.PUBLIC_SERVICE}
+            "/foobar", query_string={"organization_badge": org_constants.PUBLIC_SERVICE}
         ):
             results: DBPaginator = Fake.apply_sort_filters_and_pagination(Fake.objects)
             assert fake1 in results
