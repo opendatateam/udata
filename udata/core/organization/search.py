@@ -30,7 +30,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
 
     @classmethod
     def mongo_search(cls, args):
-        orgs = Organization.objects(deleted=None)
+        orgs = Organization.objects.visible()
         orgs = OrgApiParser.parse_filters(orgs, args)
 
         sort = (

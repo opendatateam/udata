@@ -51,7 +51,7 @@ class DatasetSearch(ModelSearchAdapter):
 
     @classmethod
     def mongo_search(cls, args):
-        datasets = Dataset.objects(archived=None, deleted=None, private=False)
+        datasets = Dataset.objects.visible()
         datasets = DatasetApiParser.parse_filters(datasets, args)
 
         sort = (

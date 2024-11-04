@@ -72,7 +72,7 @@ class DataserviceSearch(ModelSearchAdapter):
 
     @classmethod
     def mongo_search(cls, args):
-        dataservices = Dataservice.objects(deleted_at=None, private__ne=True)
+        dataservices = Dataservice.objects.visible()
         dataservices = DataserviceApiParser.parse_filters(dataservices, args)
 
         sort = (
