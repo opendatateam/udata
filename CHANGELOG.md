@@ -11,6 +11,7 @@
 - Add a "filter by organization badge" for datasets, dataservices, reuses and organizations [#3155](https://github.com/opendatateam/udata/pull/3155]
 - Add dataservices search with search-service [#3171](https://github.com/opendatateam/udata/pull/3171)
     * you will need https://github.com/opendatateam/udata-search-service/pull/48
+- Expose the "landingPage" in DCAT RDF [#3183](https://github.com/opendatateam/udata/pull/3183)
 
 ## 9.2.4 (2024-10-22)
 
