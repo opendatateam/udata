@@ -285,7 +285,7 @@ class ReusesSuggestAPI(API):
         ]
 
 
-@ns.route("/<reuse:reuse>/image", endpoint="reuse_image")
+@ns.route("/<reuse:reuse>/image/", endpoint="reuse_image")
 @api.doc(**common_doc)
 class ReuseImageAPI(API):
     @api.secure

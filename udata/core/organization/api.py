@@ -433,7 +433,7 @@ class OrganizationSuggestAPI(API):
         ]
 
 
-@ns.route("/<org:org>/logo", endpoint="organization_logo")
+@ns.route("/<org:org>/logo/", endpoint="organization_logo")
 @api.doc(**common_doc)
 class AvatarAPI(API):
     @api.secure
