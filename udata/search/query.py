@@ -54,8 +54,10 @@ class SearchQuery:
                 "sort": self.sort,
             }
             query_args.update(self._filters)
-            result, total = self.adapter.mongo_search(query_args)
-            return SearchResult(query=self, mongo_objects=result, total=total, **query_args)
+            result = self.adapter.mongo_search(query_args)
+            return SearchResult(
+                query=self, mongo_objects=list(result), total=result.total, **query_args
+            )
 
     def to_url(self, url=None, replace=False, **kwargs):
         """Serialize the query into an URL"""
