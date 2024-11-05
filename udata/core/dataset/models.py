@@ -218,7 +218,7 @@ class License(db.Document):
         if text is None:
             return tuple()
         url_pattern = r"(https?://\S+)"
-        match = re.search(url_pattern, text)
+        match = re.search(url_pattern, text.rstrip("."))
         if match:
             url = match.group(1)
             remaining_text = text.replace(url, "").strip()
@@ -236,7 +236,6 @@ class License(db.Document):
         """
         license = None
         for string in strings:
-            print("input string", string)
             for prepared_string in cls.extract_first_url(string):
                 license = cls.guess_one(prepared_string)
                 if license:
@@ -253,9 +252,9 @@ class License(db.Document):
         """
         if not text:
             return
+        qs = cls.objects
         text = text.strip().lower()  # Stored identifiers are lower case
         slug = cls.slug.slugify(text)  # Use slug as it normalize string
-        qs = cls.objects
         license = qs(
             db.Q(id__iexact=text)
             | db.Q(slug=slug)
