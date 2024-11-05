@@ -384,6 +384,20 @@ class LicenseModelTest:
         assert isinstance(found, License)
         assert license.id == found.id
 
+    def test_exact_match_by_url_in_string(self):
+        license = LicenseFactory()
+        found = License.guess(f"Here is my license: {license.url}")
+        assert isinstance(found, License)
+        assert license.id == found.id
+
+    def test_exact_match_by_url_in_string_two_urls(self):
+        license = LicenseFactory()
+        found = License.guess(
+            f"Here is my license: {license.url} and another link: https://example.com/license"
+        )
+        assert isinstance(found, License)
+        assert license.id == found.id
+
     def test_match_by_url_with_final_slash(self):
         license = LicenseFactory(url="https://example.com/license")
         found = License.guess("https://example.com/license/")
