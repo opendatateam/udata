@@ -52,7 +52,7 @@ class DatasetSearch(ModelSearchAdapter):
 
     @classmethod
     def mongo_search(cls, args):
-        datasets = Dataset.objects(archived=None, deleted=None, private=False)
+        datasets = Dataset.objects.visible()
         datasets = DatasetApiParser.parse_filters(datasets, args)
 
         sort = (
@@ -60,8 +60,7 @@ class DatasetSearch(ModelSearchAdapter):
             or ("$text_score" if args["q"] else None)
             or DEFAULT_SORTING
         )
-        offset = (args["page"] - 1) * args["page_size"]
-        return datasets.order_by(sort).skip(offset).limit(args["page_size"]), datasets.count()
+        return datasets.order_by(sort).paginate(args["page"], args["page_size"])
 
     @classmethod
     def serialize(cls, dataset):
