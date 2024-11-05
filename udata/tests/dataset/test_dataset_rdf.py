@@ -81,6 +81,7 @@ class DatasetToRdfTest:
         assert d.value(DCT.title) == Literal(dataset.title)
         assert d.value(DCT.issued) == Literal(dataset.created_at)
         assert d.value(DCT.modified) == Literal(dataset.last_modified)
+        assert d.value(DCAT.landingPage) is None
 
     def test_all_dataset_fields(self):
         resources = ResourceFactory.build_batch(3)

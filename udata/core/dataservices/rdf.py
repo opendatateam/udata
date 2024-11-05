@@ -125,7 +125,7 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
             DCAT.landingPage,
             URIRef(
                 endpoint_for(
-                    "dataservice.show_redirect",
+                    "dataservices.show_redirect",
                     "api.dataservice",
                     dataservice=dataservice.id,
                     _external=True,
