@@ -36,6 +36,7 @@ from udata.core.badges.fields import badge_fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.followers.api import FollowAPI
+from udata.core.organization.models import Organization
 from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.topic.models import Topic
 from udata.linkchecker.checker import check_resource
@@ -96,6 +97,12 @@ class DatasetApiParser(ModelApiParser):
         self.parser.add_argument("granularity", type=str, location="args")
         self.parser.add_argument("temporal_coverage", type=str, location="args")
         self.parser.add_argument("organization", type=str, location="args")
+        self.parser.add_argument(
+            "organization_badge",
+            type=str,
+            choices=list(Organization.__badges__),
+            location="args",
+        )
         self.parser.add_argument("owner", type=str, location="args")
         self.parser.add_argument("format", type=str, location="args")
         self.parser.add_argument("schema", type=str, location="args")
@@ -131,6 +138,9 @@ class DatasetApiParser(ModelApiParser):
             if not ObjectId.is_valid(args["organization"]):
                 api.abort(400, "Organization arg must be an identifier")
             datasets = datasets.filter(organization=args["organization"])
+        if args.get("organization_badge"):
+            orgs = Organization.objects.with_badge(args["organization_badge"]).only("id")
+            datasets = datasets.filter(organization__in=orgs)
         if args.get("owner"):
             if not ObjectId.is_valid(args["owner"]):
                 api.abort(400, "Owner arg must be an identifier")

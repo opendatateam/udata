@@ -95,7 +95,10 @@ class HarvestMetadata(db.EmbeddedDocument):
     archived_at = field(db.DateTimeField())
 
 
-@generate_fields(searchable=True)
+@generate_fields(
+    searchable=True,
+    additional_filters={"organization_badge": "organization.badges"},
+)
 class Dataservice(WithMetrics, Owned, db.Document):
     meta = {
         "indexes": [

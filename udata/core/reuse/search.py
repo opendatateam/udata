@@ -29,9 +29,10 @@ class ReuseSearch(ModelSearchAdapter):
     filters = {
         "tag": Filter(),
         "organization": ModelTermsFilter(model=Organization),
+        "organization_badge": Filter(choices=list(Organization.__badges__)),
         "owner": ModelTermsFilter(model=User),
         "type": Filter(),
-        "badge": Filter(),
+        "badge": Filter(choices=list(Reuse.__badges__)),
         "featured": BoolFilter(),
         "topic": Filter(),
         "archived": BoolFilter(),
@@ -64,6 +65,7 @@ class ReuseSearch(ModelSearchAdapter):
                 "name": org.name,
                 "public_service": 1 if org.public_service else 0,
                 "followers": org.metrics.get("followers", 0),
+                "badges": [badge.kind for badge in org.badges],
             }
         elif reuse.owner:
             owner = User.objects(id=reuse.owner.id).first()
