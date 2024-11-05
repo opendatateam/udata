@@ -21,6 +21,7 @@ from udata.core.spatial.models import SpatialCoverage
 from udata.harvest.exceptions import HarvestSkipException
 from udata.models import db
 from udata.rdf import (
+    ADMS,
     DCAT,
     DCATAP,
     DCT,
@@ -191,6 +192,26 @@ def dataset_to_graph_id(dataset: Dataset) -> URIRef | BNode:
         return BNode()
 
 
+def set_identifier(dataset: Dataset, graph: Graph, dataset_rdf: Resource) -> None:
+    # Expose upstream identifier if present
+    if dataset.harvest and dataset.harvest.dct_identifier:
+        dataset_rdf.set(DCT.identifier, Literal(dataset.harvest.dct_identifier))
+        alternative_id = URIRef(
+            endpoint_for(
+                "datasets.show_redirect",
+                "api.dataset",
+                dataset=dataset.id,
+                _external=True,
+            )
+        )
+        adms_identifier = graph.resource(BNode())
+        adms_identifier.set(DCT.creator, URIRef("https://data.gouv.fr"))
+        adms_identifier.set(SKOS.notation, alternative_id)
+        dataset_rdf.add(ADMS.identifier, adms_identifier)
+    else:
+        dataset_rdf.set(DCT.identifier, Literal(dataset.id))
+
+
 def dataset_to_rdf(dataset, graph=None):
     """
     Map a dataset domain model to a DCAT/RDF graph
@@ -199,16 +220,12 @@ def dataset_to_rdf(dataset, graph=None):
     # unless there is already an upstream URI
     id = dataset_to_graph_id(dataset)
 
-    # Expose upstream identifier if present
-    if dataset.harvest and dataset.harvest.dct_identifier:
-        identifier = dataset.harvest.dct_identifier
-    else:
-        identifier = dataset.id
     graph = graph or Graph(namespace_manager=namespace_manager)
-
     d = graph.resource(id)
+
+    set_identifier(dataset, graph, d)
+
     d.set(RDF.type, DCAT.Dataset)
-    d.set(DCT.identifier, Literal(identifier))
     d.set(DCT.title, Literal(dataset.title))
     d.set(DCT.description, Literal(dataset.description))
     d.set(DCT.issued, Literal(dataset.created_at))
