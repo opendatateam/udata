@@ -239,8 +239,8 @@ class License(db.Document):
             for prepared_string in cls.extract_first_url(string):
                 license = cls.guess_one(prepared_string)
                 if license:
-                    break
-        return license or kwargs.get("default")
+                    return license
+        return kwargs.get("default")
 
     @classmethod
     def guess_one(cls, text):

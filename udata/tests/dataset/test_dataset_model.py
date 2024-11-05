@@ -551,6 +551,12 @@ class LicenseModelTest:
         assert isinstance(found, License)
         assert license.id == found.id
 
+    def test_multiple_strings_reverse(self):
+        license = LicenseFactory()
+        found = License.guess(license.id, "should not match")
+        assert isinstance(found, License)
+        assert license.id == found.id
+
 
 class ResourceSchemaTest:
     @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/notfound")
