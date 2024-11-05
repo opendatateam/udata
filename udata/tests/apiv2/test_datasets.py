@@ -2,6 +2,7 @@ from datetime import datetime
 
 from flask import url_for
 
+import udata.core.organization.constants as org_constants
 from udata.core.dataset.apiv2 import DEFAULT_PAGE_SIZE
 from udata.core.dataset.factories import (
     CommunityResourceFactory,
@@ -43,6 +44,22 @@ class DatasetAPIV2Test(APITestCase):
         )
         assert data["community_resources"]["type"] == "GET"
         assert data["community_resources"]["total"] == 0
+
+    def test_search_dataset(self):
+        org = OrganizationFactory()
+        org.add_badge(org_constants.CERTIFIED)
+        org_public_service = OrganizationFactory()
+        org_public_service.add_badge(org_constants.PUBLIC_SERVICE)
+        _dataset_org = DatasetFactory(organization=org)
+        dataset_org_public_service = DatasetFactory(organization=org_public_service)
+
+        response = self.get(
+            url_for("apiv2.dataset_search", organization_badge=org_constants.PUBLIC_SERVICE)
+        )
+        self.assert200(response)
+        data = response.json["data"]
+        assert len(data) == 1
+        assert data[0]["id"] == str(dataset_org_public_service.id)
 
 
 class DatasetResourceAPIV2Test(APITestCase):
