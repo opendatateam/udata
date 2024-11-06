@@ -104,7 +104,7 @@
         <dcat:landingPage>http://data.test.org/datasets/2</dcat:landingPage>
         <dcat:distribution rdf:resource="http://data.test.org/datasets/4/resources/1"/>
         <dcat:distribution rdf:resource="http://data.test.org/datasets/4/resources/2"/>
-        <dcterms:title>Dataset 2</dcterms:title>
+        <dcterms:title>Dataset 4</dcterms:title>
         <dcterms:identifier>4</dcterms:identifier>
       </dcat:Dataset>
     </dcat:dataset>
