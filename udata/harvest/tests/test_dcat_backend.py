@@ -918,7 +918,7 @@ class CswIso19139DcatBackendTest:
         # this is the string used in geo-ide for now
         lov1 = LicenseFactory(
             id="lov1",
-            title="Licence Ouverte 1.0 http://www.data.gouv.fr/Licence-Ouverte-Open-Licence",
+            url="http://www.data.gouv.fr/Licence-Ouverte-Open-Licence",
         )
 
         with open(os.path.join(CSW_DCAT_FILES_DIR, "XSLT.xml"), "rb") as f:
