@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add contact_form in ContactPoint api fields [#3175](https://github.com/opendatateam/udata/pull/3175)
+- Expose contact point in DCAT RDF [#3179](https://github.com/opendatateam/udata/pull/3179)
 - Use trailing slashes for the upload files URLs [#3177](https://github.com/opendatateam/udata/pull/3177)
 - Use hydra's RESTful endpoint URLs [#3146](https://github.com/opendatateam/udata/pull/3146)
 - Return dataservices visible to the user [#3180](https://github.com/opendatateam/udata/pull/3180)
@@ -14,6 +15,7 @@
 - Add dataservices search with search-service [#3171](https://github.com/opendatateam/udata/pull/3171)
     * you will need https://github.com/opendatateam/udata-search-service/pull/48
 - Expose the "landingPage" in DCAT RDF [#3183](https://github.com/opendatateam/udata/pull/3183)
+- Licence.guess: extract first URL for better matching [#3185](https://github.com/opendatateam/udata/pull/3185)
 
 ## 9.2.4 (2024-10-22)
 
