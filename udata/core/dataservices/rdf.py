@@ -12,6 +12,7 @@ from udata.rdf import (
     HVD_LEGISLATION,
     TAG_TO_EU_HVD_CATEGORIES,
     contact_point_from_rdf,
+    contact_point_to_rdf,
     namespace_manager,
     rdf_value,
     remote_url_from_rdf,
@@ -120,7 +121,7 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     d.set(DCT.issued, Literal(dataservice.created_at))
 
     if dataservice.base_api_url:
-        d.set(DCAT.endpointURL, Literal(dataservice.base_api_url))
+        d.set(DCAT.endpointURL, URIRef(dataservice.base_api_url))
 
     if dataservice.harvest and dataservice.harvest.remote_url:
         d.set(DCAT.landingPage, URIRef(dataservice.harvest.remote_url))
@@ -138,7 +139,7 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
         )
 
     if dataservice.endpoint_description_url:
-        d.set(DCAT.endpointDescription, Literal(dataservice.endpoint_description_url))
+        d.set(DCAT.endpointDescription, URIRef(dataservice.endpoint_description_url))
 
     # Add DCAT-AP HVD properties if the dataservice is tagged hvd.
     # See https://semiceu.github.io/DCAT-AP/releases/2.2.0-hvd/
@@ -160,5 +161,9 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     # correct Node with all the information in a future page)
     for dataset in dataservice.datasets:
         d.add(DCAT.servesDataset, dataset_to_graph_id(dataset))
+
+    contact_point = contact_point_to_rdf(dataservice.contact_point, graph)
+    if contact_point:
+        d.set(DCAT.contactPoint, contact_point)
 
     return d
