@@ -1,4 +1,5 @@
 import logging
+import re
 from datetime import datetime, timedelta
 from pydoc import locate
 from urllib.parse import urlparse
@@ -210,6 +211,22 @@ class License(db.Document):
         return self.title
 
     @classmethod
+    def extract_first_url(cls, text: str) -> tuple[str]:
+        """
+        Extracts the first URL from a given text string and returns the URL and the remaining text.
+        """
+        if text is None:
+            return tuple()
+        url_pattern = r"(https?://\S+)"
+        match = re.search(url_pattern, text.rstrip("."))
+        if match:
+            url = match.group(1)
+            remaining_text = text.replace(url, "").strip()
+            return url, remaining_text
+        else:
+            return (text,)
+
+    @classmethod
     def guess(cls, *strings, **kwargs):
         """
         Try to guess a license from a list of strings.
@@ -219,10 +236,11 @@ class License(db.Document):
         """
         license = None
         for string in strings:
-            license = cls.guess_one(string)
-            if license:
-                break
-        return license or kwargs.get("default")
+            for prepared_string in cls.extract_first_url(string):
+                license = cls.guess_one(prepared_string)
+                if license:
+                    return license
+        return kwargs.get("default")
 
     @classmethod
     def guess_one(cls, text):
