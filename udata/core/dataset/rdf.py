@@ -36,6 +36,7 @@ from udata.rdf import (
     SPDX,
     TAG_TO_EU_HVD_CATEGORIES,
     contact_point_from_rdf,
+    contact_point_to_rdf,
     namespace_manager,
     rdf_unique_values,
     rdf_value,
@@ -267,6 +268,10 @@ def dataset_to_rdf(dataset, graph=None):
     publisher = owner_to_rdf(dataset, graph)
     if publisher:
         d.set(DCT.publisher, publisher)
+
+    contact_point = contact_point_to_rdf(dataset.contact_point, graph)
+    if contact_point:
+        d.set(DCAT.contactPoint, contact_point)
 
     return d
 

@@ -115,6 +115,7 @@
   <vcard:Organization rdf:about="http://data.test.org/contacts/1">
     <vcard:fn>Organization contact</vcard:fn>
     <vcard:hasEmail>mailto: hello@its.me</vcard:hasEmail>
+    <vcard:hasUrl>https://data.support.com</vcard:hasUrl>
   </vcard:Organization>
   <dcterms:PeriodOfTime rdf:about="file:///base/data/home/apps/s%7Erdf-translator/2.408516547054015808/temporal-1">
     <schema:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-05T00:00:00</schema:startDate>
