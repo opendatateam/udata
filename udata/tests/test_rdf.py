@@ -89,9 +89,9 @@ class ContactToRdfTest:
             contact_form="https://data.support.com",
         )
 
-        c = contact_point_to_rdf(contact, None)
+        contact_rdf = contact_point_to_rdf(contact, None)
 
-        assert c.value(RDF.type).identifier == VCARD.Kind
-        assert c.value(VCARD.fn) == Literal("Organization contact")
-        assert c.value(VCARD.hasEmail).identifier == URIRef("mailto:hello@its.me")
-        assert c.value(VCARD.hasUrl).identifier == URIRef("https://data.support.com")
+        assert contact_rdf.value(RDF.type).identifier == VCARD.Kind
+        assert contact_rdf.value(VCARD.fn) == Literal("Organization contact")
+        assert contact_rdf.value(VCARD.hasEmail).identifier == URIRef("mailto:hello@its.me")
+        assert contact_rdf.value(VCARD.hasUrl).identifier == URIRef("https://data.support.com")

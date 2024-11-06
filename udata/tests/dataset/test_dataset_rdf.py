@@ -124,11 +124,11 @@ class DatasetToRdfTest:
         org = d.value(DCT.publisher)
         assert org.value(RDF.type).identifier == FOAF.Organization
         assert org.value(FOAF.name) == Literal("organization")
-        c = d.value(DCAT.contactPoint)
-        assert c.value(RDF.type).identifier == VCARD.Kind
-        assert c.value(VCARD.fn) == Literal("Organization contact")
-        assert c.value(VCARD.hasEmail).identifier == URIRef("mailto:hello@its.me")
-        assert c.value(VCARD.hasUrl).identifier == URIRef("https://data.support.com")
+        contact_rdf = d.value(DCAT.contactPoint)
+        assert contact_rdf.value(RDF.type).identifier == VCARD.Kind
+        assert contact_rdf.value(VCARD.fn) == Literal("Organization contact")
+        assert contact_rdf.value(VCARD.hasEmail).identifier == URIRef("mailto:hello@its.me")
+        assert contact_rdf.value(VCARD.hasUrl).identifier == URIRef("https://data.support.com")
 
     def test_map_unkownn_frequencies(self):
         assert frequency_to_rdf("hourly") == FREQ.continuous
