@@ -192,24 +192,19 @@ def dataset_to_graph_id(dataset: Dataset) -> URIRef | BNode:
         return BNode()
 
 
-def set_identifier(dataset: Dataset, graph: Graph, dataset_rdf: Resource) -> None:
-    # Expose upstream identifier if present
-    if dataset.harvest and dataset.harvest.dct_identifier:
-        dataset_rdf.set(DCT.identifier, Literal(dataset.harvest.dct_identifier))
-        alternative_id = URIRef(
-            endpoint_for(
-                "datasets.show_redirect",
-                "api.dataset",
-                dataset=dataset.id,
-                _external=True,
-            )
+def alternate_identifier(dataset: Dataset, graph: Graph) -> None:
+    alternative_id = URIRef(
+        endpoint_for(
+            "datasets.show_redirect",
+            "api.dataset",
+            dataset=dataset.id,
+            _external=True,
         )
-        adms_identifier = graph.resource(BNode())
-        adms_identifier.set(DCT.creator, URIRef("https://data.gouv.fr"))
-        adms_identifier.set(SKOS.notation, alternative_id)
-        dataset_rdf.add(ADMS.identifier, adms_identifier)
-    else:
-        dataset_rdf.set(DCT.identifier, Literal(dataset.id))
+    )
+    adms_identifier = graph.resource(BNode())
+    adms_identifier.set(DCT.creator, URIRef("https://data.gouv.fr"))
+    adms_identifier.set(SKOS.notation, alternative_id)
+    return adms_identifier
 
 
 def dataset_to_rdf(dataset, graph=None):
@@ -223,7 +218,12 @@ def dataset_to_rdf(dataset, graph=None):
     graph = graph or Graph(namespace_manager=namespace_manager)
     d = graph.resource(id)
 
-    set_identifier(dataset, graph, d)
+    # Expose upstream identifier if present
+    if dataset.harvest and dataset.harvest.dct_identifier:
+        d.set(DCT.identifier, Literal(dataset.harvest.dct_identifier))
+        d.add(ADMS.identifier, alternate_identifier(dataset, graph))
+    else:
+        d.set(DCT.identifier, Literal(dataset.id))
 
     d.set(RDF.type, DCAT.Dataset)
     d.set(DCT.title, Literal(dataset.title))
