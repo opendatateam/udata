@@ -192,21 +192,6 @@ def dataset_to_graph_id(dataset: Dataset) -> URIRef | BNode:
         return BNode()
 
 
-def alternate_identifier(dataset: Dataset, graph: Graph) -> None:
-    alternative_id = URIRef(
-        endpoint_for(
-            "datasets.show_redirect",
-            "api.dataset",
-            dataset=dataset.id,
-            _external=True,
-        )
-    )
-    adms_identifier = graph.resource(BNode())
-    adms_identifier.set(DCT.creator, URIRef("https://data.gouv.fr"))
-    adms_identifier.set(SKOS.notation, alternative_id)
-    return adms_identifier
-
-
 def dataset_to_rdf(dataset, graph=None):
     """
     Map a dataset domain model to a DCAT/RDF graph
@@ -221,7 +206,15 @@ def dataset_to_rdf(dataset, graph=None):
     # Expose upstream identifier if present
     if dataset.harvest and dataset.harvest.dct_identifier:
         d.set(DCT.identifier, Literal(dataset.harvest.dct_identifier))
-        d.add(ADMS.identifier, alternate_identifier(dataset, graph))
+        alternate_identifier = URIRef(
+            endpoint_for(
+                "datasets.show_redirect",
+                "api.dataset",
+                dataset=dataset.id,
+                _external=True,
+            )
+        )
+        d.add(ADMS.identifier, alternate_identifier)
     else:
         d.set(DCT.identifier, Literal(dataset.id))
 
