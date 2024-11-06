@@ -5,6 +5,7 @@
 - Add contact_form in ContactPoint api fields [#3175](https://github.com/opendatateam/udata/pull/3175)
 - Use trailing slashes for the upload files URLs [#3177](https://github.com/opendatateam/udata/pull/3177)
 - Use hydra's RESTful endpoint URLs [#3146](https://github.com/opendatateam/udata/pull/3146)
+- Return dataservices visible to the user [#3180](https://github.com/opendatateam/udata/pull/3180)
 - Fix flaky "duplicated email" importing fixtures tests [#3176](https://github.com/opendatateam/udata/pull/3176)
 - Fix deprecated CircleCI config [#3181](https://github.com/opendatateam/udata/pull/3181)
 - Use proper RESTful Hydra API endpoints [#3178](https://github.com/opendatateam/udata/pull/3178)
