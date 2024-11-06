@@ -14,6 +14,7 @@
     * you will need https://github.com/opendatateam/udata-search-service/pull/48
 - Expose the "landingPage" in DCAT RDF [#3183](https://github.com/opendatateam/udata/pull/3183)
 - Licence.guess: extract first URL for better matching [#3185](https://github.com/opendatateam/udata/pull/3185)
+- Add DCAT-AP HVD properties in RDF output if the dataservice or its datasets are tagged hvd [#3187](https://github.com/opendatateam/udata/pull/3187)
 
 ## 9.2.4 (2024-10-22)
 
