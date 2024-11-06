@@ -1,3 +1,4 @@
+from flask import current_app
 from rdflib import RDF, BNode, Graph, Literal, URIRef
 
 from udata.core.dataservices.models import Dataservice
@@ -6,7 +7,10 @@ from udata.core.dataset.models import Dataset, License
 from udata.core.dataset.rdf import dataset_to_graph_id, sanitize_html
 from udata.rdf import (
     DCAT,
+    DCATAP,
     DCT,
+    HVD_LEGISLATION,
+    TAG_TO_EU_HVD_CATEGORIES,
     contact_point_from_rdf,
     namespace_manager,
     rdf_value,
@@ -136,8 +140,18 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     if dataservice.endpoint_description_url:
         d.set(DCAT.endpointDescription, Literal(dataservice.endpoint_description_url))
 
+    # Add DCAT-AP HVD properties if the dataservice is tagged hvd.
+    # See https://semiceu.github.io/DCAT-AP/releases/2.2.0-hvd/
+    is_dataset_hvd = any(["hvd" in dataset.tags for dataset in dataservice.datasets])
+    is_hvd = current_app.config["HVD_SUPPORT"] and ("hvd" in dataservice.tags or is_dataset_hvd)
+    if is_hvd:
+        d.add(DCATAP.applicableLegislation, URIRef(HVD_LEGISLATION))
+
     for tag in dataservice.tags:
         d.add(DCAT.keyword, Literal(tag))
+        # Add HVD category if this dataset is tagged HVD
+        if is_hvd and tag in TAG_TO_EU_HVD_CATEGORIES:
+            d.add(DCATAP.hvdCategory, URIRef(TAG_TO_EU_HVD_CATEGORIES[tag]))
 
     # `dataset_to_graph_id(dataset)` URIRef may not exist in the current page
     # but should exists in the catalog somewhere. Maybe we should create a Node
