@@ -83,6 +83,7 @@ class DatasetToRdfTest:
         assert d.value(DCT.title) == Literal(dataset.title)
         assert d.value(DCT.issued) == Literal(dataset.created_at)
         assert d.value(DCT.modified) == Literal(dataset.last_modified)
+        assert d.value(DCAT.landingPage) is None
 
     def test_all_dataset_fields(self):
         resources = ResourceFactory.build_batch(3)
@@ -92,6 +93,7 @@ class DatasetToRdfTest:
             email="hello@its.me",
             contact_form="https://data.support.com",
         )
+        remote_url = "https://somewhere.org/dataset"
         dataset = DatasetFactory(
             tags=faker.tags(nb=3),
             resources=resources,
@@ -99,6 +101,7 @@ class DatasetToRdfTest:
             acronym="acro",
             organization=org,
             contact_point=contact,
+            harvest=HarvestDatasetMetadata(remote_url=remote_url),
         )
         d = dataset_to_rdf(dataset)
         g = d.graph
@@ -118,6 +121,7 @@ class DatasetToRdfTest:
         assert d.value(DCT.issued) == Literal(dataset.created_at)
         assert d.value(DCT.modified) == Literal(dataset.last_modified)
         assert d.value(DCT.accrualPeriodicity).identifier == FREQ.daily
+        assert d.value(DCAT.landingPage).identifier == URIRef(remote_url)
         expected_tags = set(Literal(t) for t in dataset.tags)
         assert set(d.objects(DCAT.keyword)) == expected_tags
         assert len(list(d.objects(DCAT.distribution))) == len(resources)

@@ -215,6 +215,21 @@ def dataset_to_rdf(dataset, graph=None):
     d.set(DCT.issued, Literal(dataset.created_at))
     d.set(DCT.modified, Literal(dataset.last_modified))
 
+    if dataset.harvest and dataset.harvest.remote_url:
+        d.set(DCAT.landingPage, URIRef(dataset.harvest.remote_url))
+    elif dataset.id:
+        d.set(
+            DCAT.landingPage,
+            URIRef(
+                endpoint_for(
+                    "datasets.show_redirect",
+                    "api.dataset",
+                    dataset=dataset.id,
+                    _external=True,
+                )
+            ),
+        )
+
     if dataset.acronym:
         d.set(SKOS.altLabel, Literal(dataset.acronym))
 

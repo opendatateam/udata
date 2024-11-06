@@ -119,6 +119,21 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     if dataservice.base_api_url:
         d.set(DCAT.endpointURL, URIRef(dataservice.base_api_url))
 
+    if dataservice.harvest and dataservice.harvest.remote_url:
+        d.set(DCAT.landingPage, URIRef(dataservice.harvest.remote_url))
+    elif dataservice.id:
+        d.set(
+            DCAT.landingPage,
+            URIRef(
+                endpoint_for(
+                    "dataservices.show_redirect",
+                    "api.dataservice",
+                    dataservice=dataservice.id,
+                    _external=True,
+                )
+            ),
+        )
+
     if dataservice.endpoint_description_url:
         d.set(DCAT.endpointDescription, URIRef(dataservice.endpoint_description_url))
 

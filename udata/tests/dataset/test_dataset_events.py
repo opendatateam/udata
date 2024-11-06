@@ -2,7 +2,6 @@ from unittest.mock import patch
 
 import pytest
 from flask import current_app
-from requests.compat import json as complexjson
 
 from udata.core.dataset.events import serialize_resource_for_event
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
@@ -77,15 +76,10 @@ class DatasetEventsTest:
             dataset.update_resource(resource)
 
         mock_req.assert_called_with(
-            f"{current_app.config['RESOURCES_ANALYSER_URI']}/api/resources/",
+            f"{current_app.config['RESOURCES_ANALYSER_URI']}/api/resources/{resource.id}",
             json=expected_value,
             headers={"Authorization": "Bearer foobar-api-key"},
         )
-
-        # Mocking requests call doesn't call the JSON encoder
-        # so calling it manually here to prevent encoding errors.
-        # (for example, encoding Embeds fails)
-        complexjson.dumps(expected_value)
 
     @patch("requests.delete")
     @pytest.mark.options(RESOURCES_ANALYSER_API_KEY="foobar-api-key")
@@ -94,17 +88,11 @@ class DatasetEventsTest:
         dataset = DatasetFactory(resources=[resource])
         expected_signals = (Dataset.on_resource_removed,)
 
-        expected_value = {
-            "resource_id": str(resource.id),
-            "dataset_id": str(dataset.id),
-            "document": None,
-        }
-
         with assert_emit(*expected_signals):
             dataset.remove_resource(resource)
 
         mock_req.assert_called_with(
-            f"{current_app.config['RESOURCES_ANALYSER_URI']}/api/resources/",
-            json=expected_value,
+            f"{current_app.config['RESOURCES_ANALYSER_URI']}/api/resources/{resource.id}",
+            json=None,
             headers={"Authorization": "Bearer foobar-api-key"},
         )

@@ -5,6 +5,14 @@
 - Add contact_form in ContactPoint api fields [#3175](https://github.com/opendatateam/udata/pull/3175)
 - Expose contact point in DCAT RDF [#3179](https://github.com/opendatateam/udata/pull/3179)
 - Use trailing slashes for the upload files URLs [#3177](https://github.com/opendatateam/udata/pull/3177)
+- Use hydra's RESTful endpoint URLs [#3146](https://github.com/opendatateam/udata/pull/3146)
+- Fix flaky "duplicated email" importing fixtures tests [#3176](https://github.com/opendatateam/udata/pull/3176)
+- Fix deprecated CircleCI config [#3181](https://github.com/opendatateam/udata/pull/3181)
+- Use proper RESTful Hydra API endpoints [#3178](https://github.com/opendatateam/udata/pull/3178)
+- Add a "filter by organization badge" for datasets, dataservices, reuses and organizations [#3155](https://github.com/opendatateam/udata/pull/3155]
+- Add dataservices search with search-service [#3171](https://github.com/opendatateam/udata/pull/3171)
+    * you will need https://github.com/opendatateam/udata-search-service/pull/48
+- Expose the "landingPage" in DCAT RDF [#3183](https://github.com/opendatateam/udata/pull/3183)
 
 ## 9.2.4 (2024-10-22)
 
@@ -40,7 +48,6 @@
 - Fix the boolean filters in the API for the "new system" endpoints [#3139](https://github.com/opendatateam/udata/pull/3139)
 - Update authlib dependency from 0.14.3 to 1.3.1 [#3135](https://github.com/opendatateam/udata/pull/3135)
 - Add CORS on resource redirect [#3145](https://github.com/opendatateam/udata/pull/3145)
-- Use hydra's RESTful endpoint URLs [#3142](https://github.com/opendatateam/udata/pull/3142)
 
 ## 9.1.4 (2024-08-26)
 
