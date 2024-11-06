@@ -307,28 +307,16 @@ def contact_point_from_rdf(rdf, dataset):
         if not email and not contact_form:
             return
         if dataset.organization:
-            contact_point = ContactPoint.objects(
+            contact, _ = ContactPoint.objects.get_or_create(
                 name=name, email=email, contact_form=contact_form, organization=dataset.organization
-            ).first()
-            return (
-                contact_point
-                or ContactPoint(
-                    name=name,
-                    email=email,
-                    contact_form=contact_form,
-                    organization=dataset.organization,
-                ).save()
             )
         elif dataset.owner:
-            contact_point = ContactPoint.objects(
+            contact, _ = ContactPoint.objects.get_or_create(
                 name=name, email=email, contact_form=contact_form, owner=dataset.owner
-            ).first()
-            return (
-                contact_point
-                or ContactPoint(
-                    name=name, email=email, contact_form=contact_form, owner=dataset.owner
-                ).save()
             )
+        else:
+            contact = None
+        return contact
 
 
 def contact_point_to_rdf(contact, graph=None):
