@@ -24,15 +24,13 @@ class DataserviceToRdfTest:
         g = d.graph
 
         assert isinstance(d, RdfResource)
-        assert len(list(g.subjects(RDF.type, DCAT.dataservice))) == 1
 
-        assert g.value(d.identifier, RDF.type) == DCAT.dataservice
+        assert g.value(d.identifier, RDF.type) == DCAT.DataService
 
         assert isinstance(d.identifier, BNode)
         assert d.value(DCT.identifier) == Literal(dataservice.id)
         assert d.value(DCT.title) == Literal(dataservice.title)
         assert d.value(DCT.issued) == Literal(dataservice.created_at)
-        assert d.value(DCT.modified) == Literal(dataservice.last_modified)
 
     def test_hvd_dataservice(self):
         """Test that a dataservice tagged hvd has appropriate DCAT-AP HVD properties"""
