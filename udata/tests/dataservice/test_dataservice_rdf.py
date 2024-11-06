@@ -5,6 +5,7 @@ from rdflib.resource import Resource as RdfResource
 
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.rdf import dataservice_to_rdf
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.rdf import (
     DCAT,
     DCATAP,
@@ -46,4 +47,10 @@ class DataserviceToRdfTest:
 
     def test_dataservice_with_hvd_datasets(self):
         """Test that a dataservice that serves a dataset tagged hvd has appropriate DCAT-AP HVD properties"""
-        pass
+        dataset = DatasetFactory(
+            resources=ResourceFactory.build_batch(3), tags=["hvd", "mobilite", "test"]
+        )
+        dataservice = DataserviceFactory(datasets=[dataset])
+        d = dataservice_to_rdf(dataservice)
+
+        assert d.value(DCATAP.applicableLegislation).identifier == URIRef(HVD_LEGISLATION)
