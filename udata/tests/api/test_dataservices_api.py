@@ -158,7 +158,7 @@ class DataserviceAPITest(APITestCase):
         self.assertIsNone(dataservice.deleted_at)
 
     def test_dataservice_api_list_owned(self) -> None:
-        """Should filters out private dataservices if not owner"""
+        """Should filter out private dataservices if not owner"""
         owner = UserFactory()
         org = OrganizationFactory()
         public_dataservice = DataserviceFactory()
@@ -244,7 +244,7 @@ class DataserviceAPITest(APITestCase):
 
         self.assertEqual(Dataservice.objects.count(), 4)
 
-        # Login with a distinct user
+        # Login with a distinct user, without visibility on the private dataservice
         self.login(UserFactory())
 
         response = self.get(url_for("api.dataservices"))
