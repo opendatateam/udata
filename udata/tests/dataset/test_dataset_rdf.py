@@ -31,6 +31,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.i18n import gettext as _
 from udata.mongo import db
 from udata.rdf import (
+    ADMS,
     DCAT,
     DCATAP,
     DCT,
@@ -93,7 +94,9 @@ class DatasetToRdfTest:
             frequency="daily",
             acronym="acro",
             organization=org,
-            harvest=HarvestDatasetMetadata(remote_url=remote_url),
+            harvest=HarvestDatasetMetadata(
+                remote_url=remote_url, dct_identifier="foobar-identifier"
+            ),
         )
         d = dataset_to_rdf(dataset)
         g = d.graph
@@ -106,7 +109,10 @@ class DatasetToRdfTest:
         assert isinstance(d.identifier, URIRef)
         uri = url_for("api.dataset", dataset=dataset.id, _external=True)
         assert str(d.identifier) == uri
-        assert d.value(DCT.identifier) == Literal(dataset.id)
+        assert d.value(DCT.identifier) == Literal("foobar-identifier")
+        alternate_identifier = d.value(ADMS.identifier)
+        assert alternate_identifier.value(DCT.creator).identifier == URIRef("https://data.gouv.fr")
+        assert f"datasets/{dataset.id}" in alternate_identifier.value(SKOS.notation).identifier
         assert d.value(DCT.title) == Literal(dataset.title)
         assert d.value(SKOS.altLabel) == Literal(dataset.acronym)
         assert d.value(DCT.description) == Literal(dataset.description)
