@@ -7,8 +7,8 @@ from flask_login import current_user
 
 from udata.api import API, api, fields
 from udata.api_fields import patch
+from udata.core.dataservices.permissions import OwnablePermission
 from udata.core.dataset.models import Dataset
-from udata.core.dataset.permissions import OwnablePermission
 from udata.core.followers.api import FollowAPI
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
 

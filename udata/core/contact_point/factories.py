@@ -10,4 +10,4 @@ class ContactPointFactory(ModelFactory):
         model = ContactPoint
 
     name = factory.Faker("name")
-    email = factory.Faker("email")
+    email = factory.Sequence(lambda n: "contact_point{}@example.com".format(n))

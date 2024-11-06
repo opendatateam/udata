@@ -9,7 +9,6 @@ from udata.core.organization.constants import PUBLIC_SERVICE
 from udata.core.reuse.factories import VisibleReuseFactory
 from udata.core.site.factories import SiteFactory
 from udata.harvest.tests.factories import HarvestSourceFactory
-from udata.models import Badge
 
 
 @pytest.mark.usefixtures("clean_db")
@@ -52,8 +51,7 @@ class SiteMetricTest:
     def test_badges_metric(self, app):
         site = SiteFactory.create(id=app.config["SITE_ID"])
 
-        ps_badge = Badge(kind=PUBLIC_SERVICE)
-        public_services = [OrganizationFactory(badges=[ps_badge]) for _ in range(2)]
+        public_services = [OrganizationFactory().add_badge(PUBLIC_SERVICE) for _ in range(2)]
         for _ in range(3):
             OrganizationFactory()
 

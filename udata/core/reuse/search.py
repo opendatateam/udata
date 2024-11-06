@@ -29,9 +29,10 @@ class ReuseSearch(ModelSearchAdapter):
     filters = {
         "tag": Filter(),
         "organization": ModelTermsFilter(model=Organization),
+        "organization_badge": Filter(choices=list(Organization.__badges__)),
         "owner": ModelTermsFilter(model=User),
         "type": Filter(),
-        "badge": Filter(),
+        "badge": Filter(choices=list(Reuse.__badges__)),
         "featured": BoolFilter(),
         "topic": Filter(),
         "archived": BoolFilter(),
@@ -43,7 +44,7 @@ class ReuseSearch(ModelSearchAdapter):
 
     @classmethod
     def mongo_search(cls, args):
-        reuses = Reuse.objects(deleted=None, private__ne=True)
+        reuses = Reuse.objects.visible()
         reuses = ReuseApiParser.parse_filters(reuses, args)
 
         sort = (
@@ -51,8 +52,7 @@ class ReuseSearch(ModelSearchAdapter):
             or ("$text_score" if args["q"] else None)
             or DEFAULT_SORTING
         )
-        offset = (args["page"] - 1) * args["page_size"]
-        return reuses.order_by(sort).skip(offset).limit(args["page_size"]), reuses.count()
+        return reuses.order_by(sort).paginate(args["page"], args["page_size"])
 
     @classmethod
     def serialize(cls, reuse: Reuse) -> dict:
@@ -65,6 +65,7 @@ class ReuseSearch(ModelSearchAdapter):
                 "name": org.name,
                 "public_service": 1 if org.public_service else 0,
                 "followers": org.metrics.get("followers", 0),
+                "badges": [badge.kind for badge in org.badges],
             }
         elif reuse.owner:
             owner = User.objects(id=reuse.owner.id).first()
