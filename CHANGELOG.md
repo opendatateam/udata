@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 10.0.0 (2024-11-07)
 
 - **breaking change** Migrate organization badges label to lowercase [#3182](https://github.com/opendatateam/udata/pull/3182)
 - Add contact_form in ContactPoint api fields [#3175](https://github.com/opendatateam/udata/pull/3175)

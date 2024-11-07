@@ -4,5 +4,5 @@
 udata
 """
 
-__version__ = "9.2.5.dev"
+__version__ = "10.0.0"
 __description__ = "Open data portal"
