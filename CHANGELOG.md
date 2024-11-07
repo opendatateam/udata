@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 10.0.0 (2024-11-07)
 
 - **breaking change** Migrate organization badges label to lowercase [#3182](https://github.com/opendatateam/udata/pull/3182)
