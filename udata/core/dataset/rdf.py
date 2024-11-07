@@ -207,7 +207,9 @@ def dataset_to_rdf(dataset, graph=None):
     # Expose upstream identifier if present
     if dataset.harvest and dataset.harvest.dct_identifier:
         d.set(DCT.identifier, Literal(dataset.harvest.dct_identifier))
-        alternate_identifier = URIRef(
+
+        alt = graph.resource(BNode())
+        alternate_identifier = Literal(
             endpoint_for(
                 "datasets.show_redirect",
                 "api.dataset",
@@ -215,7 +217,10 @@ def dataset_to_rdf(dataset, graph=None):
                 _external=True,
             )
         )
-        d.add(ADMS.identifier, alternate_identifier)
+        alt.set(RDF.type, ADMS.Identifier)
+        alt.set(DCT.creator, Literal("https://data.gouv.fr"))
+        alt.set(SKOS.notation, alternate_identifier)
+        d.set(ADMS.identifier, alt)
     else:
         d.set(DCT.identifier, Literal(dataset.id))
 

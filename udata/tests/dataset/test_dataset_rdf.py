@@ -118,7 +118,10 @@ class DatasetToRdfTest:
         uri = url_for("api.dataset", dataset=dataset.id, _external=True)
         assert str(d.identifier) == uri
         assert d.value(DCT.identifier) == Literal("foobar-identifier")
-        assert f"datasets/{dataset.id}" in d.value(ADMS.identifier).identifier
+        alternate_identifier = d.value(ADMS.identifier)
+        assert alternate_identifier.value(RDF.type).identifier == ADMS.Identifier
+        assert f"datasets/{dataset.id}" in alternate_identifier.value(SKOS.notation)
+        assert alternate_identifier.value(DCT.creator) == Literal("https://data.gouv.fr")
         assert d.value(DCT.title) == Literal(dataset.title)
         assert d.value(SKOS.altLabel) == Literal(dataset.acronym)
         assert d.value(DCT.description) == Literal(dataset.description)
