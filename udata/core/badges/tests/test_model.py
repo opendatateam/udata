@@ -1,5 +1,6 @@
 from udata.api_fields import field
 from udata.auth import login_user
+from udata.core.dataset.models import Dataset, DatasetBadge
 from udata.core.user.factories import UserFactory
 from udata.mongo import db
 from udata.tests import DBTestMixin, TestCase
@@ -155,3 +156,21 @@ class BadgeMixinTest(DBTestMixin, TestCase):
         with self.assertRaises(db.ValidationError):
             fake = Fake.objects.create()
             fake.add_badge("unknown")
+
+
+class DatasetBadgeTest(DBTestMixin, TestCase):
+    # Model badges can be extended in plugins, for example in udata-front
+    # for french only badges.
+    Dataset.__badges__["new"] = "new"
+
+    def test_validation(self):
+        """It should validate default badges as well as extended ones"""
+        badge = DatasetBadge(kind="pivotal-data")
+        badge.validate()
+
+        badge = DatasetBadge(kind="new")
+        badge.validate()
+
+        with self.assertRaises(db.ValidationError):
+            badge = DatasetBadge(kind="doesnotexist")
+            badge.validate()
