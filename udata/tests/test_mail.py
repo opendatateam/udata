@@ -102,7 +102,6 @@ class MailCampaignTest:
         message = outbox[0]
         assert "mtm_campaign" not in message.body
         assert "mtm_campaign" not in message.html
-        breakpoint()
 
         app.config["MAIL_CAMPAIGN"] = "data-gouv-fr"
         with mail.record_messages() as outbox:
@@ -111,4 +110,3 @@ class MailCampaignTest:
         message = outbox[0]
         assert "mtm_campaign=data-gouv-fr" in message.body
         assert "mtm_campaign=data-gouv-fr" in message.html
-        breakpoint()
