@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add more comments and types in the `api_field.py` "lib" [#3174](https://github.com/opendatateam/udata/pull/3174)
 
 ## 10.0.0 (2024-11-07)
 
@@ -21,6 +21,7 @@
     * you will need https://github.com/opendatateam/udata-search-service/pull/48
 - Expose the "landingPage" in DCAT RDF [#3183](https://github.com/opendatateam/udata/pull/3183)
 - Licence.guess: extract first URL for better matching [#3185](https://github.com/opendatateam/udata/pull/3185)
+- Expose the dataset's alternate identifier in RDF [#3186](https://github.com/opendatateam/udata/pull/3186)
 
 ## 9.2.4 (2024-10-22)
 

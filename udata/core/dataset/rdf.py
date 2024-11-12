@@ -21,6 +21,7 @@ from udata.core.spatial.models import SpatialCoverage
 from udata.harvest.exceptions import HarvestSkipException
 from udata.models import db
 from udata.rdf import (
+    ADMS,
     DCAT,
     DCATAP,
     DCT,
@@ -200,16 +201,30 @@ def dataset_to_rdf(dataset, graph=None):
     # unless there is already an upstream URI
     id = dataset_to_graph_id(dataset)
 
+    graph = graph or Graph(namespace_manager=namespace_manager)
+    d = graph.resource(id)
+
     # Expose upstream identifier if present
     if dataset.harvest and dataset.harvest.dct_identifier:
-        identifier = dataset.harvest.dct_identifier
-    else:
-        identifier = dataset.id
-    graph = graph or Graph(namespace_manager=namespace_manager)
+        d.set(DCT.identifier, Literal(dataset.harvest.dct_identifier))
 
-    d = graph.resource(id)
+        alt = graph.resource(BNode())
+        alternate_identifier = Literal(
+            endpoint_for(
+                "datasets.show_redirect",
+                "api.dataset",
+                dataset=dataset.id,
+                _external=True,
+            )
+        )
+        alt.set(RDF.type, ADMS.Identifier)
+        alt.set(DCT.creator, Literal(current_app.config["SITE_TITLE"]))
+        alt.set(SKOS.notation, alternate_identifier)
+        d.set(ADMS.identifier, alt)
+    else:
+        d.set(DCT.identifier, Literal(dataset.id))
+
     d.set(RDF.type, DCAT.Dataset)
-    d.set(DCT.identifier, Literal(identifier))
     d.set(DCT.title, Literal(dataset.title))
     d.set(DCT.description, Literal(dataset.description))
     d.set(DCT.issued, Literal(dataset.created_at))
