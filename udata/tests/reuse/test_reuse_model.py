@@ -5,9 +5,10 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
+from udata.core.reuse.models import Reuse, ReuseBadge
 from udata.core.user.factories import UserFactory
 from udata.i18n import gettext as _
-from udata.models import Reuse
+from udata.models import db
 from udata.tests.helpers import assert_emit
 
 from .. import DBTestMixin, TestCase
@@ -124,3 +125,18 @@ class ReuseModelTest(TestCase, DBTestMixin):
         reuse.private = True
         reuse.save()
         self.assertEqual(reuse.private, True)
+
+
+class ReuseBadgeTest(DBTestMixin, TestCase):
+    # Model badges can be extended in plugins, for example in udata-front
+    # for french only badges.
+    Reuse.__badges__["new"] = "new"
+
+    def test_validation(self):
+        """It should validate default badges as well as extended ones"""
+        badge = ReuseBadge(kind="new")
+        badge.validate()
+
+        with self.assertRaises(db.ValidationError):
+            badge = ReuseBadge(kind="doesnotexist")
+            badge.validate()
