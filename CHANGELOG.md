@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add more comments and types in the `api_field.py` "lib" [#3174](https://github.com/opendatateam/udata/pull/3174)
+- Add a matomo "campaign" parameter on links in emails if `MAIL_CAMPAIGN` is configured [#3190](https://github.com/opendatateam/udata/pull/3190)
 
 ## 10.0.0 (2024-11-07)
 
