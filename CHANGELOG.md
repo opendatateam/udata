@@ -2,6 +2,11 @@
 
 ## Current (in progress)
 
+- Add more comments and types in the `api_field.py` "lib" [#3174](https://github.com/opendatateam/udata/pull/3174)
+
+## 10.0.0 (2024-11-07)
+
+- **breaking change** Migrate organization badges label to lowercase [#3182](https://github.com/opendatateam/udata/pull/3182)
 - Add contact_form in ContactPoint api fields [#3175](https://github.com/opendatateam/udata/pull/3175)
 - Expose contact point in DCAT RDF [#3179](https://github.com/opendatateam/udata/pull/3179)
 - Use trailing slashes for the upload files URLs [#3177](https://github.com/opendatateam/udata/pull/3177)
@@ -10,8 +15,8 @@
 - Fix flaky "duplicated email" importing fixtures tests [#3176](https://github.com/opendatateam/udata/pull/3176)
 - Fix deprecated CircleCI config [#3181](https://github.com/opendatateam/udata/pull/3181)
 - Use proper RESTful Hydra API endpoints [#3178](https://github.com/opendatateam/udata/pull/3178)
-- Migrate organization badges label to lowercase [#3182](https://github.com/opendatateam/udata/pull/3182)
-- Add a "filter by organization badge" for datasets, dataservices, reuses and organizations [#3155](https://github.com/opendatateam/udata/pull/3155]
+- Add a "filter by organization badge" for datasets, dataservices, reuses and organizations [#3155](https://github.com/opendatateam/udata/pull/3155)
+    * you will need https://github.com/opendatateam/udata-search-service/pull/49 for the search service
 - Add dataservices search with search-service [#3171](https://github.com/opendatateam/udata/pull/3171)
     * you will need https://github.com/opendatateam/udata-search-service/pull/48
 - Expose the "landingPage" in DCAT RDF [#3183](https://github.com/opendatateam/udata/pull/3183)
