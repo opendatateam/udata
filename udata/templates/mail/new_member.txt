@@ -7,5 +7,5 @@
 
 
 {{ _('You can go on your organization page') }}:
-{{ org.url_for(_external=True) }}
+{{ org.url_for(_external=True, **extras) }}
 {% endblock %}

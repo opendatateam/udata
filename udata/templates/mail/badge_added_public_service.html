@@ -6,7 +6,7 @@
     _('%(user)s has identified your organization "%(name)s" as public service',
     user=(
         '<a href="'|safe
-        + url_for('api.user', user=badge.created_by, _external=True)
+        + url_for('api.user', user=badge.created_by, _external=True, **extras)
         + '">'|safe
         + badge.created_by.fullname
         + '</a>'|safe
@@ -14,6 +14,7 @@
     name=(
         '<a href="'|safe
         + organization.external_url
+        + ('?mtm_campaign=' + extras.get('mtm_campaign')) if extras.get('mtm_campaign') else ''
         + '">'|safe
         + organization.name|string
         + '</a>'|safe
@@ -26,6 +27,7 @@
             {{ mail_button(
                 _('See the badge'),
                 organization.external_url
+                + ('?mtm_campaign=' + extras.get('mtm_campaign')) if extras.get('mtm_campaign') else ''
             ) }}
         </td>
     </tr>

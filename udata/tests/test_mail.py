@@ -3,8 +3,9 @@ from smtplib import SMTPRecipientsRefused
 
 import pytest
 
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
-from udata.mail import mail_sent, send
+from udata.mail import mail, mail_sent, send
 from udata.tests import DBTestMixin, TestCase
 from udata.tests.helpers import assert_emit, assert_not_emit
 
@@ -50,3 +51,64 @@ class MailSendTest(TestCase, DBTestMixin):
         ]
         with assert_emit(mail_sent):
             send("subject", recipients, "base")
+
+
+@pytest.mark.usefixtures("clean_db")
+@pytest.mark.frontend
+class MailCampaignTest:
+    def test_send_mail_campaign_link_new_member(self, app):
+        org = OrganizationFactory()
+        recipient = UserFactory(email="recipient@udata")
+
+        app.config["SEND_MAIL"] = True
+        app.config["MAIL_CAMPAIGN"] = ""
+        with mail.record_messages() as outbox:
+            send(
+                "subject",
+                [recipient],
+                "new_member",
+                org=org,
+            )
+        assert len(outbox) == 1
+        message = outbox[0]
+        assert "mtm_campaign" not in message.body
+        assert "mtm_campaign" not in message.html
+
+        app.config["MAIL_CAMPAIGN"] = "data-gouv-fr"
+        with mail.record_messages() as outbox:
+            send(
+                "subject",
+                [recipient],
+                "new_member",
+                org=org,
+            )
+        assert len(outbox) == 1
+        message = outbox[0]
+        assert "mtm_campaign=data-gouv-fr" in message.body
+        assert "mtm_campaign=data-gouv-fr" in message.html
+
+    def test_send_mail_campaign_link_badge_added_company(self, app):
+        app.config["SEND_MAIL"] = True
+        org = OrganizationFactory()
+        org.add_badge("company")
+        badge = org.badges[0]
+        badge.created_by = UserFactory()
+        recipient = UserFactory(email="recipient@udata")
+
+        app.config["MAIL_CAMPAIGN"] = ""
+        with mail.record_messages() as outbox:
+            send("subject", [recipient], "badge_added_company", organization=org, badge=badge)
+        assert len(outbox) == 1
+        message = outbox[0]
+        assert "mtm_campaign" not in message.body
+        assert "mtm_campaign" not in message.html
+        breakpoint()
+
+        app.config["MAIL_CAMPAIGN"] = "data-gouv-fr"
+        with mail.record_messages() as outbox:
+            send("subject", [recipient], "badge_added_company", organization=org, badge=badge)
+        assert len(outbox) == 1
+        message = outbox[0]
+        assert "mtm_campaign=data-gouv-fr" in message.body
+        assert "mtm_campaign=data-gouv-fr" in message.html
+        breakpoint()

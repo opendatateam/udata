@@ -7,7 +7,7 @@
         type=discussion.subject.verbose_name,
         user=(
             '<a href="'|safe
-            + url_for('api.user', user=message.posted_by, _external=True)
+            + url_for('api.user', user=message.posted_by, _external=True, **extras)
             + '">'|safe
             + message.posted_by.fullname
             + '</a>'|safe
@@ -15,6 +15,7 @@
         subject=(
             '<a href="'|safe
             + discussion.external_url
+            + ('?mtm_campaign=' + extras.get('mtm_campaign')) if extras.get('mtm_campaign') else ''
             + '">'|safe
             + discussion.subject|string
             + '</a>'|safe
@@ -38,6 +39,7 @@
             {{ mail_button(
                 _('See the discussion'),
                 discussion.external_url
+                + ('?mtm_campaign=' + extras.get('mtm_campaign')) if extras.get('mtm_campaign') else ''
             ) }}
         </td>
     </tr>
