@@ -218,7 +218,7 @@ def dataset_to_rdf(dataset, graph=None):
             )
         )
         alt.set(RDF.type, ADMS.Identifier)
-        alt.set(DCT.creator, Literal("https://data.gouv.fr"))
+        alt.set(DCT.creator, Literal(current_app.config["SITE_TITLE"]))
         alt.set(SKOS.notation, alternate_identifier)
         d.set(ADMS.identifier, alt)
     else:
