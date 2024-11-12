@@ -7,8 +7,8 @@ from flask_login import current_user
 
 from udata.api import API, api, fields
 from udata.api_fields import patch
+from udata.core.dataservices.permissions import OwnablePermission
 from udata.core.dataset.models import Dataset
-from udata.core.dataset.permissions import OwnablePermission
 from udata.core.followers.api import FollowAPI
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
 
@@ -30,7 +30,9 @@ class DataservicesAPI(API):
     @api.marshal_with(Dataservice.__page_fields__)
     def get(self):
         """List or search all dataservices"""
-        query = Dataservice.objects.visible()
+        query = Dataservice.objects.visible_by_user(
+            current_user, mongoengine.Q(private__ne=True, archived_at=None, deleted_at=None)
+        )
 
         return Dataservice.apply_sort_filters_and_pagination(query)
 

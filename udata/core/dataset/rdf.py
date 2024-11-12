@@ -35,6 +35,7 @@ from udata.rdf import (
     SPDX,
     TAG_TO_EU_HVD_CATEGORIES,
     contact_point_from_rdf,
+    contact_point_to_rdf,
     namespace_manager,
     rdf_unique_values,
     rdf_value,
@@ -214,6 +215,21 @@ def dataset_to_rdf(dataset, graph=None):
     d.set(DCT.issued, Literal(dataset.created_at))
     d.set(DCT.modified, Literal(dataset.last_modified))
 
+    if dataset.harvest and dataset.harvest.remote_url:
+        d.set(DCAT.landingPage, URIRef(dataset.harvest.remote_url))
+    elif dataset.id:
+        d.set(
+            DCAT.landingPage,
+            URIRef(
+                endpoint_for(
+                    "datasets.show_redirect",
+                    "api.dataset",
+                    dataset=dataset.id,
+                    _external=True,
+                )
+            ),
+        )
+
     if dataset.acronym:
         d.set(SKOS.altLabel, Literal(dataset.acronym))
 
@@ -242,6 +258,10 @@ def dataset_to_rdf(dataset, graph=None):
     publisher = owner_to_rdf(dataset, graph)
     if publisher:
         d.set(DCT.publisher, publisher)
+
+    contact_point = contact_point_to_rdf(dataset.contact_point, graph)
+    if contact_point:
+        d.set(DCAT.contactPoint, contact_point)
 
     return d
 

@@ -2,6 +2,7 @@ from xml.etree.ElementTree import XML
 
 import pytest
 from flask import url_for
+from werkzeug.test import TestResponse
 
 import udata.core.organization.constants as org_constants
 from udata.core.dataservices.factories import DataserviceFactory
@@ -14,6 +15,11 @@ from udata.i18n import gettext as _
 from udata.tests.helpers import assert200, assert400, assert_redirects
 
 from . import APITestCase
+
+
+def dataservice_in_response(response: TestResponse, dataservice: Dataservice) -> bool:
+    only_dataservice = [r for r in response.json["data"] if r["id"] == str(dataservice.id)]
+    return len(only_dataservice) > 0
 
 
 class DataserviceAPITest(APITestCase):
@@ -171,6 +177,52 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(dataservice.title, "Undeleted title")
         self.assertIsNone(dataservice.deleted_at)
 
+    def test_dataservice_api_list_owned(self) -> None:
+        """Should filter out private dataservices if not owner"""
+        owner = UserFactory()
+        org = OrganizationFactory()
+        public_dataservice = DataserviceFactory()
+        private_user_dataservice = DataserviceFactory(private=True, owner=owner)
+        private_org_dataservice = DataserviceFactory(private=True, organization=org)
+
+        # Only public dataservices for non-authenticated user.
+        response = self.get(url_for("api.dataservices"))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert dataservice_in_response(response, public_dataservice)
+
+        # Only public dataservices for a non-owner authenticated user.
+        self.login(UserFactory())
+        response = self.get(url_for("api.dataservices"))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert dataservice_in_response(response, public_dataservice)
+
+        # Authenticated user is the owner
+        self.login(owner)
+
+        # Public and 1 private dataservice for the owner
+        response = self.get(url_for("api.dataservices"))
+        assert200(response)
+        assert len(response.json["data"]) == 2  # Return everything
+        assert dataservice_in_response(response, public_dataservice)
+        assert dataservice_in_response(response, private_user_dataservice)
+
+        # Authenticated user is now also member of the organization
+        member = Member(user=owner, role="editor")
+        org.members = [member]
+        org.save()
+        del owner.organizations  # clear user.organizations cached property
+        owner.reload()
+
+        # Public and 2 private dataservices for the owner + organization member
+        response = self.get(url_for("api.dataservices"))
+        assert200(response)
+        assert len(response.json["data"]) == 3  # Return everything
+        assert dataservice_in_response(response, public_dataservice)
+        assert dataservice_in_response(response, private_user_dataservice)
+        assert dataservice_in_response(response, private_org_dataservice)
+
     def test_dataservice_api_index(self):
         dataset_a = DatasetFactory(title="Dataset A")
         dataset_b = DatasetFactory(title="Dataset B")
@@ -211,6 +263,9 @@ class DataserviceAPITest(APITestCase):
         )
 
         self.assertEqual(Dataservice.objects.count(), 4)
+
+        # Login with a distinct user, without visibility on the private dataservice
+        self.login(UserFactory())
 
         response = self.get(url_for("api.dataservices"))
         self.assert200(response)

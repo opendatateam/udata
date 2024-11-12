@@ -517,8 +517,9 @@ class DcatBackendTest:
         assert dataset.temporal_coverage is not None
         assert dataset.temporal_coverage.start == date(2016, 1, 1)
         assert dataset.temporal_coverage.end == date(2016, 12, 5)
-        assert dataset.contact_point["email"] == "hello@its.me"
-        assert dataset.contact_point["name"] == "Organization contact"
+        assert dataset.contact_point.email == "hello@its.me"
+        assert dataset.contact_point.name == "Organization contact"
+        assert dataset.contact_point.contact_form == "https://data.support.com"
         assert dataset.frequency is None
         # test dct:license nested in distribution
         assert dataset.license.id == "lov1"
@@ -917,7 +918,7 @@ class CswIso19139DcatBackendTest:
         # this is the string used in geo-ide for now
         lov1 = LicenseFactory(
             id="lov1",
-            title="Licence Ouverte 1.0 http://www.data.gouv.fr/Licence-Ouverte-Open-Licence",
+            url="http://www.data.gouv.fr/Licence-Ouverte-Open-Licence",
         )
 
         with open(os.path.join(CSW_DCAT_FILES_DIR, "XSLT.xml"), "rb") as f:

@@ -8,6 +8,7 @@ from udata.rdf import (
     DCAT,
     DCT,
     contact_point_from_rdf,
+    contact_point_to_rdf,
     namespace_manager,
     rdf_value,
     remote_url_from_rdf,
@@ -116,10 +117,25 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     d.set(DCT.issued, Literal(dataservice.created_at))
 
     if dataservice.base_api_url:
-        d.set(DCAT.endpointURL, Literal(dataservice.base_api_url))
+        d.set(DCAT.endpointURL, URIRef(dataservice.base_api_url))
+
+    if dataservice.harvest and dataservice.harvest.remote_url:
+        d.set(DCAT.landingPage, URIRef(dataservice.harvest.remote_url))
+    elif dataservice.id:
+        d.set(
+            DCAT.landingPage,
+            URIRef(
+                endpoint_for(
+                    "dataservices.show_redirect",
+                    "api.dataservice",
+                    dataservice=dataservice.id,
+                    _external=True,
+                )
+            ),
+        )
 
     if dataservice.endpoint_description_url:
-        d.set(DCAT.endpointDescription, Literal(dataservice.endpoint_description_url))
+        d.set(DCAT.endpointDescription, URIRef(dataservice.endpoint_description_url))
 
     for tag in dataservice.tags:
         d.add(DCAT.keyword, Literal(tag))
@@ -131,5 +147,9 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     # correct Node with all the information in a future page)
     for dataset in dataservice.datasets:
         d.add(DCAT.servesDataset, dataset_to_graph_id(dataset))
+
+    contact_point = contact_point_to_rdf(dataservice.contact_point, graph)
+    if contact_point:
+        d.set(DCAT.contactPoint, contact_point)
 
     return d

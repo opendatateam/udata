@@ -313,7 +313,6 @@ def generate_fields(**kwargs) -> Callable:
 
                     # do a query-based filter instead of a column based one
                     filterable["query"] = functools.partial(query, filterable)
-
                     filterables.append(filterable)
 
             read, write = convert_db_to_field(key, field, info)

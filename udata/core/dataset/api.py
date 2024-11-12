@@ -430,7 +430,7 @@ class UploadNewDatasetResource(UploadMixin, API):
     @api.expect(upload_parser)
     @api.marshal_with(upload_fields, code=201)
     def post(self, dataset):
-        """Upload a new dataset resource"""
+        """Upload a file for a new dataset resource"""
         ResourceEditPermission(dataset).test()
         infos = self.handle_upload(dataset)
         resource = Resource(**infos)
