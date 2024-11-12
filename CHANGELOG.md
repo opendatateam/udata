@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add more comments and types in the `api_field.py` "lib" [#3174](https://github.com/opendatateam/udata/pull/3174)
 
 ## 10.0.0 (2024-11-07)
 
