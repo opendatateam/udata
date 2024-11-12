@@ -32,6 +32,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.i18n import gettext as _
 from udata.mongo import db
 from udata.rdf import (
+    ADMS,
     DCAT,
     DCATAP,
     DCT,
@@ -85,7 +86,7 @@ class DatasetToRdfTest:
         assert d.value(DCT.modified) == Literal(dataset.last_modified)
         assert d.value(DCAT.landingPage) is None
 
-    def test_all_dataset_fields(self):
+    def test_all_dataset_fields(self, app):
         resources = ResourceFactory.build_batch(3)
         org = OrganizationFactory(name="organization")
         contact = ContactPointFactory(
@@ -101,8 +102,11 @@ class DatasetToRdfTest:
             acronym="acro",
             organization=org,
             contact_point=contact,
-            harvest=HarvestDatasetMetadata(remote_url=remote_url),
+            harvest=HarvestDatasetMetadata(
+                remote_url=remote_url, dct_identifier="foobar-identifier"
+            ),
         )
+        app.config["SITE_TITLE"] = "Test site title"
         d = dataset_to_rdf(dataset)
         g = d.graph
 
@@ -114,7 +118,11 @@ class DatasetToRdfTest:
         assert isinstance(d.identifier, URIRef)
         uri = url_for("api.dataset", dataset=dataset.id, _external=True)
         assert str(d.identifier) == uri
-        assert d.value(DCT.identifier) == Literal(dataset.id)
+        assert d.value(DCT.identifier) == Literal("foobar-identifier")
+        alternate_identifier = d.value(ADMS.identifier)
+        assert alternate_identifier.value(RDF.type).identifier == ADMS.Identifier
+        assert f"datasets/{dataset.id}" in alternate_identifier.value(SKOS.notation)
+        assert alternate_identifier.value(DCT.creator) == Literal("Test site title")
         assert d.value(DCT.title) == Literal(dataset.title)
         assert d.value(SKOS.altLabel) == Literal(dataset.acronym)
         assert d.value(DCT.description) == Literal(dataset.description)
