@@ -1,6 +1,5 @@
 from udata.api_fields import field
 from udata.auth import login_user
-from udata.core.dataset.models import Dataset, DatasetBadge
 from udata.core.user.factories import UserFactory
 from udata.mongo import db
 from udata.tests import DBTestMixin, TestCase
@@ -16,8 +15,13 @@ BADGES = {
 }
 
 
+def validate_badge(value):
+    if value not in Fake.__badges__.keys():
+        raise db.ValidationError("Unknown badge type")
+
+
 class FakeBadge(Badge):
-    kind = db.StringField(required=True, choices=list(BADGES.keys()))
+    kind = db.StringField(required=True, validation=validate_badge)
 
 
 class FakeBadgeMixin(BadgeMixin):
@@ -34,12 +38,6 @@ class BadgeMixinTest(DBTestMixin, TestCase):
         """It should have a badge list"""
         fake = Fake.objects.create()
         self.assertIsInstance(fake.badges, (list, tuple))
-
-    def test_choices(self):
-        """It should have a choice list on the badge field."""
-        self.assertEqual(
-            Fake._fields["badges"].field.document_type.kind.choices, list(Fake.__badges__.keys())
-        )
 
     def test_get_badge_found(self):
         """It allow to get a badge by kind if present"""
@@ -157,20 +155,18 @@ class BadgeMixinTest(DBTestMixin, TestCase):
             fake = Fake.objects.create()
             fake.add_badge("unknown")
 
-
-class DatasetBadgeTest(DBTestMixin, TestCase):
-    # Model badges can be extended in plugins, for example in udata-front
-    # for french only badges.
-    Dataset.__badges__["new"] = "new"
-
     def test_validation(self):
         """It should validate default badges as well as extended ones"""
-        badge = DatasetBadge(kind="pivotal-data")
-        badge.validate()
+        # Model badges can be extended in plugins, for example in udata-front
+        # for french only badges.
+        Fake.__badges__["new"] = "new"
 
-        badge = DatasetBadge(kind="new")
-        badge.validate()
+        fake = FakeBadge(kind="test")
+        fake.validate()
+
+        fake = FakeBadge(kind="new")
+        fake.validate()
 
         with self.assertRaises(db.ValidationError):
-            badge = DatasetBadge(kind="doesnotexist")
-            badge.validate()
+            fake = FakeBadge(kind="doesnotexist")
+            fake.validate()
