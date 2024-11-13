@@ -211,6 +211,19 @@ class DatasetToRdfTest:
         assert pot.value(DCAT.startDate).toPython() == start
         assert pot.value(DCAT.endDate).toPython() == end
 
+    def test_temporal_coverage_only_start(self):
+        start = faker.past_date(start_date="-30d")
+        temporal_coverage = db.DateRange(start=start)
+        dataset = DatasetFactory(temporal_coverage=temporal_coverage)
+
+        d = dataset_to_rdf(dataset)
+
+        pot = d.value(DCT.temporal)
+
+        assert pot.value(RDF.type).identifier == DCT.PeriodOfTime
+        assert pot.value(DCAT.startDate).toPython() == start
+        assert pot.value(DCAT.endDate) is None
+
     def test_from_external_repository(self):
         dataset = DatasetFactory(
             harvest=HarvestDatasetMetadata(
@@ -747,6 +760,20 @@ class RdfToDatasetTest:
         assert isinstance(daterange, db.DateRange)
         assert daterange.start == start
         assert daterange.end == end
+
+    def test_parse_temporal_as_schema_format_only_start_date(self):
+        node = BNode()
+        g = Graph()
+        start = faker.past_date(start_date="-30d")
+
+        g.set((node, RDF.type, DCT.PeriodOfTime))
+        g.set((node, SCHEMA.startDate, Literal(start)))
+
+        daterange = temporal_from_rdf(g.resource(node))
+
+        assert isinstance(daterange, db.DateRange)
+        assert daterange.start == start
+        assert daterange.end is None
 
     def test_parse_temporal_as_iso_interval(self):
         start = faker.past_date(start_date="-30d")
