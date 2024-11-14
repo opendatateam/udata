@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add more comments and types in the `api_field.py` "lib" [#3174](https://github.com/opendatateam/udata/pull/3174)
+- Allow temporal coverage with only a start date [#3192](https://github.com/opendatateam/udata/pull/3192)
 
 ## 10.0.0 (2024-11-07)
 
