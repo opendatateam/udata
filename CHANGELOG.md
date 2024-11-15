@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 10.0.1 (2024-11-15)
 
 - Add more comments and types in the `api_field.py` "lib" [#3174](https://github.com/opendatateam/udata/pull/3174)
 - Allow overriding of badges (for example in plugins like udata-front) [#3191](https://github.com/opendatateam/udata/pull/3191)
