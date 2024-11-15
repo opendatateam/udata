@@ -6,6 +6,7 @@
 - Allow overriding of badges (for example in plugins like udata-front) [#3191](https://github.com/opendatateam/udata/pull/3191)
 - Add link to new admin in existing udata admin based on `NEW_ADMIN_URL` setting [#3194](https://github.com/opendatateam/udata/pull/3194)
 - Add business documentation url property on dataservice [#3193](https://github.com/opendatateam/udata/pull/3193)
+- Expose the dataset's alternate identifier in RDF [#3186](https://github.com/opendatateam/udata/pull/3186)
 
 ## 10.0.0 (2024-11-07)
 
@@ -24,7 +25,6 @@
     * you will need https://github.com/opendatateam/udata-search-service/pull/48
 - Expose the "landingPage" in DCAT RDF [#3183](https://github.com/opendatateam/udata/pull/3183)
 - Licence.guess: extract first URL for better matching [#3185](https://github.com/opendatateam/udata/pull/3185)
-- Expose the dataset's alternate identifier in RDF [#3186](https://github.com/opendatateam/udata/pull/3186)
 
 ## 9.2.4 (2024-10-22)
 
