@@ -520,5 +520,6 @@
     "{name} has been unscheduled": "{name} отказан",
     "{start} to {end}": "од {start} до {end}",
     "{user} is not a member of this organization anymore": "{user} више није члан ове организације",
-    "{user} is now {role} of this organization": "{user} је сада {role} у овој организацији"
+    "{user} is now {role} of this organization": "{user} је сада {role} у овој организацији",
+    "✨ Come and discover the new version of the back office": "✨ Come and discover the new version of the back office"
 }
