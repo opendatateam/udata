@@ -2,7 +2,7 @@
 <div>
     <!-- Placeholder for non-routable modals -->
     <div v-el:modal></div>
-    <app-header></app-header>
+    <app-header :new-admin-url="newAdminUrl"></app-header>
     <sidebar></sidebar>
     <router-view></router-view>
 </div>
@@ -27,6 +27,7 @@ export default {
             notifications: [],
             site, me, config,
             readOnlyEnabled: config.read_only_enabled,
+            newAdminUrl: config.new_admin_url,
         };
     },
     components: {AppHeader, Sidebar},

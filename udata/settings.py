@@ -519,6 +519,11 @@ class Defaults(object):
         "FollowAPI.post",
     ]
 
+    # New admin URL
+    ####################
+    # This setting will add a banner on the old udata admin with a link to a new admin
+    NEW_ADMIN_URL = None
+
     FIXTURE_DATASET_SLUGS = []
     PUBLISH_ON_RESOURCE_EVENTS = False
     RESOURCES_ANALYSER_URI = "http://localhost:8000"
