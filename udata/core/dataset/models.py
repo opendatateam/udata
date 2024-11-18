@@ -21,6 +21,7 @@ from udata.core import storages
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
+from udata.mail import get_mail_campaign_dict
 from udata.models import Badge, BadgeMixin, BadgesList, SpatialCoverage, WithMetrics, db
 from udata.mongo.errors import FieldValidationError
 from udata.uris import ValidationError, endpoint_for
@@ -683,6 +684,11 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
     @property
     def external_url(self):
         return self.url_for(_external=True)
+
+    @property
+    def external_url_with_campaign(self):
+        extras = get_mail_campaign_dict()
+        return self.url_for(_external=True, **extras)
 
     @property
     def image_url(self):

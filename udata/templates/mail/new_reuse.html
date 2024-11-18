@@ -7,8 +7,7 @@
     _('A new reuse of your dataset %(dataset)s has been published',
         dataset=(
             '<a href="'|safe
-            + dataset.external_url
-            + ('?mtm_campaign=' + extras.get('mtm_campaign')) if extras.get('mtm_campaign') else ''
+            + dataset.external_url_with_campaign
             + '" style="text-decoration: none;">'|safe
             + dataset.title
             + '</a>'|safe

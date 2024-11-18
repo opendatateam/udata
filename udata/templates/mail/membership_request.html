@@ -8,14 +8,14 @@
 {{ _('As an administrator of "%(org)s" you are being informed than a new membership request from %(user)s is pending for validation',
     user=(
         '<a href="'|safe
-        + url_for('api.user', user=request.user, _external=True, **extras)
+        + request.user.external_url_with_campaign
         + '">'|safe
         + request.user.fullname
         + '</a>'|safe
     ),
     org=(
         '<a href="'|safe
-        + org.url_for(_external=True, **extras)
+        + org.external_url_with_campaign
         + '">'|safe
         + org.name
         + '</a>'|safe

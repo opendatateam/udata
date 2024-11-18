@@ -6,15 +6,14 @@
     _('%(user)s has identified your organization "%(name)s" as a company',
     user=(
         '<a href="'|safe
-        + url_for('api.user', user=badge.created_by, _external=True, **extras)
+        + badge.created_by.external_url_with_campaign
         + '">'|safe
         + badge.created_by.fullname
         + '</a>'|safe
     ),
     name=(
         '<a href="'|safe
-        + organization.external_url
-        + ('?mtm_campaign=' + extras.get('mtm_campaign')) if extras.get('mtm_campaign') else ''
+        + organization.external_url_with_campaign
         + '">'|safe
         + organization.name|string
         + '</a>'|safe
@@ -26,8 +25,7 @@
         <td align="center">
             {{ mail_button(
                 _('See the badge'),
-                organization.external_url
-                + ('?mtm_campaign=' + extras.get('mtm_campaign')) if extras.get('mtm_campaign') else ''
+                organization.external_url_with_campaign
             ) }}
         </td>
     </tr>

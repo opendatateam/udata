@@ -11,5 +11,5 @@
 {{ _('Title') }}: {{ discussion.title }}
 
 {{ _('You can see the discussion on this page:') }}
-{{ discussion.subject.external_url }}{% if extras.get('mtm_campaign') %}?mtm_campaign={{ extras.get('mtm_campaign') }}{% endif %}
+{{ discussion.subject.external_url_with_campaign }}
 {% endblock %}

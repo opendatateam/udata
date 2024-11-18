@@ -7,15 +7,14 @@
         type=discussion.subject.verbose_name,
         user=(
             '<a href="'|safe
-            + url_for('api.user', user=message.posted_by, _external=True, **extras)
+            + message.posted_by.external_url_with_campaign
             + '">'|safe
             + message.posted_by.fullname
             + '</a>'|safe
         ),
         subject=(
             '<a href="'|safe
-            + discussion.external_url
-            + ('?mtm_campaign=' + extras.get('mtm_campaign')) if extras.get('mtm_campaign') else ''
+            + discussion.external_url_with_campaign
             + '">'|safe
             + discussion.subject|string
             + '</a>'|safe
@@ -39,8 +38,7 @@
         <td align="center">
             {{ mail_button(
                 _('See the discussion'),
-                discussion.external_url
-                + ('?mtm_campaign=' + extras.get('mtm_campaign')) if extras.get('mtm_campaign') else ''
+                discussion.external_url_with_campaign
             ) }}
         </td>
     </tr>

@@ -9,6 +9,7 @@ from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE
 from udata.core.storages import default_image_basename, images
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
+from udata.mail import get_mail_campaign_dict
 from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics, db
 from udata.mongo.errors import FieldValidationError
 from udata.uris import endpoint_for
@@ -212,6 +213,11 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
     @property
     def external_url(self):
         return self.url_for(_external=True)
+
+    @property
+    def external_url_with_campaign(self):
+        extras = get_mail_campaign_dict()
+        return self.url_for(_external=True, **extras)
 
     @property
     def type_label(self):
