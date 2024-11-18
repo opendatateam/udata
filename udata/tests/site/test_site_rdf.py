@@ -270,8 +270,13 @@ class SiteRdfViewsTest:
         datasets = list(graph.subjects(RDF.type, DCAT.Dataset))
         assert len(datasets) == 3
 
+        # 4 objects of RDF.type DCAT.DataService
         dataservices = list(graph.subjects(RDF.type, DCAT.DataService))
         assert len(dataservices) == 4
+
+        # these 4 objects are also bound to catalog by DCAT.service predicate
+        catalog = graph.resource(next(graph.subjects(RDF.type, DCAT.Catalog)))
+        assert len(list(catalog.objects(DCAT.service))) == 4
 
         # Test first page contains the dataservice without dataset
         response = client.get(
