@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix the Badge.badge_label method [#3198](https://github.com/opendatateam/udata/pull/3198)
 
 ## 10.0.1 (2024-11-15)
 
