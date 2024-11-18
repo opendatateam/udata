@@ -2,6 +2,10 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 10.0.1 (2024-11-15)
+
 - Add more comments and types in the `api_field.py` "lib" [#3174](https://github.com/opendatateam/udata/pull/3174)
 - Allow overriding of badges (for example in plugins like udata-front) [#3191](https://github.com/opendatateam/udata/pull/3191)
 - Add link to new admin in existing udata admin based on `NEW_ADMIN_URL` setting [#3194](https://github.com/opendatateam/udata/pull/3194)
