@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Use correct DCAT.service predicate in RDF output [#3199](https://github.com/opendatateam/udata/pull/3199)
 
 ## 10.0.1 (2024-11-15)
 
