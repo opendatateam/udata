@@ -170,3 +170,11 @@ class BadgeMixinTest(DBTestMixin, TestCase):
         with self.assertRaises(db.ValidationError):
             fake = FakeBadge(kind="doesnotexist")
             fake.validate()
+
+    def test_badge_label(self):
+        """Should return the label for a given badge."""
+        fake = Fake.objects.create()
+        fake.add_badge(TEST)
+        assert fake.badge_label(TEST) == "Test"
+        badge = fake.badges[0]
+        assert fake.badge_label(badge) == "Test"
