@@ -6,10 +6,10 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: udata 10.0.1.dev0\n"
+"Project-Id-Version: udata 10.0.2.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2024-11-14 11:21+0100\n"
-"PO-Revision-Date: 2024-11-14 11:21+0100\n"
+"POT-Creation-Date: 2024-11-19 11:00+0100\n"
+"PO-Revision-Date: 2024-11-19 11:00+0100\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -256,12 +256,12 @@ msgstr ""
 msgid "At least an email or a contact form is required for a contact point"
 msgstr ""
 
-#: udata/core/dataservices/models.py:163 udata/core/dataset/models.py:563
+#: udata/core/dataservices/models.py:164 udata/core/dataset/models.py:568
 #: udata/mongo/datetime_fields.py:60
 msgid "Creation date"
 msgstr ""
 
-#: udata/core/dataservices/models.py:168 udata/core/dataset/models.py:566
+#: udata/core/dataservices/models.py:169 udata/core/dataset/models.py:571
 #: udata/mongo/datetime_fields.py:66
 msgid "Last modification date"
 msgstr ""
@@ -575,11 +575,11 @@ msgstr ""
 msgid "Nameless resource"
 msgstr ""
 
-#: udata/core/dataset/models.py:549
+#: udata/core/dataset/models.py:554
 msgid "Future date of update"
 msgstr ""
 
-#: udata/core/dataset/models.py:612
+#: udata/core/dataset/models.py:617
 msgid "dataset"
 msgstr ""
 
@@ -879,7 +879,7 @@ msgstr ""
 msgid "Connected device"
 msgstr ""
 
-#: udata/core/reuse/constants.py:15 udata/tests/reuse/test_reuse_model.py:105
+#: udata/core/reuse/constants.py:15 udata/tests/reuse/test_reuse_model.py:106
 msgid "Health"
 msgstr ""
 
@@ -939,11 +939,11 @@ msgstr ""
 msgid "This URL is already registered"
 msgstr ""
 
-#: udata/core/reuse/models.py:170
+#: udata/core/reuse/models.py:175
 msgid "reuse"
 msgstr ""
 
-#: udata/core/reuse/tasks.py:45
+#: udata/core/reuse/tasks.py:46
 msgid "New reuse"
 msgstr ""
 

@@ -94,6 +94,8 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         params["min_length"] = field.min_length
         params["max_length"] = field.max_length
         params["enum"] = field.choices
+        if field.validation:
+            params["validation"] = validation_to_type(field.validation)
     elif isinstance(field, mongo_fields.ObjectIdField):
         constructor = restx_fields.String
     elif isinstance(field, mongo_fields.FloatField):
@@ -287,7 +289,7 @@ def generate_fields(**kwargs) -> Callable:
                 if not isinstance(
                     field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField
                 ):
-                    raise Exception("Cannot use additional_filters on not a ref.")
+                    raise Exception("Cannot use additional_filters on a field that is not a ref.")
 
                 ref_model: db.Document = field.document_type
 
@@ -678,9 +680,34 @@ def compute_filter(column: str, field, info, filterable) -> dict:
             filterable["type"] = boolean
         else:
             filterable["type"] = str
+    if field.validation:
+        filterable["type"] = validation_to_type(field.validation)
 
     filterable["choices"] = info.get("choices", None)
     if hasattr(field, "choices") and field.choices:
         filterable["choices"] = field.choices
 
     return filterable
+
+
+def validation_to_type(validation: Callable) -> Callable:
+    """Convert a mongo field's validation function to a ReqParser's type.
+
+    In flask_restx.ReqParser, validation is done by setting the param's type to
+    a callable that will either raise, or return the parsed value.
+
+    In mongo, a field's validation function cannot return anything, so this
+    helper wraps the mongo field's validation to return the value if it validated.
+    """
+    from udata.models import db
+
+    def wrapper(value: str) -> str:
+        try:
+            validation(value)
+        except db.ValidationError:
+            raise
+        return value
+
+    wrapper.__schema__ = {"type": "string", "format": "my-custom-format"}
+
+    return wrapper

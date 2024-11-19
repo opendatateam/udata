@@ -4,10 +4,10 @@ import udata.core.organization.constants as org_constants
 from udata.core.dataset.factories import DatasetFactory, HiddenDatasetFactory
 from udata.core.followers.signals import on_follow, on_unfollow
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.models import Organization
+from udata.core.organization.models import Organization, OrganizationBadge
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.user.factories import UserFactory
-from udata.models import Dataset, Follow, Member, Reuse
+from udata.models import Dataset, Follow, Member, Reuse, db
 from udata.tests.helpers import assert_emit
 
 from .. import DBTestMixin, TestCase
@@ -71,3 +71,21 @@ class OrganizationModelTest(TestCase, DBTestMixin):
         associations = list(Organization.objects.with_badge(org_constants.ASSOCIATION))
         assert len(associations) == 1
         assert org_certified_association in associations
+
+
+class OrganizationBadgeTest(DBTestMixin, TestCase):
+    # Model badges can be extended in plugins, for example in udata-front
+    # for french only badges.
+    Organization.__badges__["new"] = "new"
+
+    def test_validation(self):
+        """It should validate default badges as well as extended ones"""
+        badge = OrganizationBadge(kind="public-service")
+        badge.validate()
+
+        badge = OrganizationBadge(kind="new")
+        badge.validate()
+
+        with self.assertRaises(db.ValidationError):
+            badge = OrganizationBadge(kind="doesnotexist")
+            badge.validate()
