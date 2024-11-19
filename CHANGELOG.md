@@ -4,6 +4,7 @@
 
 - Use correct DCAT.service predicate in RDF output [#3199](https://github.com/opendatateam/udata/pull/3199)
 - Fix the Badge.badge_label method [#3198](https://github.com/opendatateam/udata/pull/3198)
+- Only keep the "local authority" org badge if it's also a "public service" [#3200](https://github.com/opendatateam/udata/pull/3200)
 
 ## 10.0.1 (2024-11-15)
 
