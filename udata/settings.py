@@ -109,7 +109,6 @@ class Defaults(object):
 
     # Sentry configuration
     SENTRY_DSN = None
-    SENTRY_TAGS = {}
     SENTRY_USER_ATTRS = ["slug", "email", "fullname"]
     SENTRY_LOGGING = "WARNING"
     SENTRY_IGNORE_EXCEPTIONS = []

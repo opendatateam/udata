@@ -22,8 +22,8 @@
 <meta name="apiv2-specs" content="{{ url_for('apiv2.specs', _external=True) }}"/>
 <meta name="auth-url" content="{{ url_for('security.login') }}" />
 <meta name="github" content="{{ config.SITE_GITHUB_URL }}" />
-{% if config.SENTRY_PUBLIC_DSN %}
-<meta name="sentry" content="{{config.SENTRY_PUBLIC_DSN}}"
+{% if config.SENTRY_DSN %}
+<meta name="sentry" content="{{config.SENTRY_DSN}}"
     data-release="{{config.SENTRY_RELEASE}}"
     data-tags="{{config.SENTRY_TAGS|default({})|tojson|urlencode}}"
 />
