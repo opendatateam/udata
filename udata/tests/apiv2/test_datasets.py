@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import url_for
+from flask import current_app, url_for
 
 import udata.core.organization.constants as org_constants
 from udata.core.dataset.apiv2 import DEFAULT_PAGE_SIZE
@@ -53,6 +53,8 @@ class DatasetAPIV2Test(APITestCase):
         _dataset_org = DatasetFactory(organization=org)
         dataset_org_public_service = DatasetFactory(organization=org_public_service)
 
+        # This is needed or the test will fail if you have a search service configured in your udata.cfg file.
+        current_app.config["SEARCH_SERVICE_API_URL"] = ""
         response = self.get(
             url_for("apiv2.dataset_search", organization_badge=org_constants.PUBLIC_SERVICE)
         )
