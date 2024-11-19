@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Convert bool filters to 0 or 1 when querying the search service [#3202](https://github.com/opendatateam/udata/pull/3202)
 
 ## 10.0.2 (2024-11-19)
 
