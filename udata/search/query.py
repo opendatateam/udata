@@ -41,7 +41,12 @@ class SearchQuery:
             if self.sort:
                 url = url + f"&sort={self.sort}"
             for name, value in self._filters.items():
-                url = url + f"&{name}={value}"
+                param_value = value
+                # HACK: use the `.__class__.__name__` to avoid having to import `BoolFilter` here, as importing it at the top would make a import loop.
+                if self.adapter.filters[name].__class__.__name__ == "BoolFilter":
+                    # The search service uses 1 and 0 for booleans.
+                    param_value = 1 if value == "true" else 0
+                url = url + f"&{name}={param_value}"
             r = requests.get(url, timeout=current_app.config["SEARCH_SERVICE_REQUEST_TIMEOUT"])
             r.raise_for_status()
             result = r.json()
