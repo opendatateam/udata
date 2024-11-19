@@ -83,5 +83,6 @@ class BadgeMixin:
 
     def badge_label(self, badge):
         """Display the badge label for a given kind"""
-        kind = badge.kind if isinstance(badge, self.badge) else badge
+        badge_model = self._fields["badges"].field.document_type
+        kind = badge.kind if isinstance(badge, badge_model) else badge
         return self.__badges__[kind]

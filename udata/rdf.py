@@ -49,6 +49,7 @@ DCT = DCTERMS  # More common usage
 VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
 
 namespace_manager = NamespaceManager(Graph())
+namespace_manager.bind("adms", ADMS)
 namespace_manager.bind("dcat", DCAT)
 namespace_manager.bind("dcatap", DCATAP)
 namespace_manager.bind("dct", DCT)

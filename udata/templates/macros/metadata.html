@@ -64,6 +64,7 @@
     config.LICENSE_GROUPS|tojson|urlencode
 }} />
 <meta name="read-only-enabled" content="{{ 'true' if config.READ_ONLY_MODE else 'false' }}">
+<meta name="new-admin-url" content="{{ config.NEW_ADMIN_URL or '' }}">
 <meta name="harvest-enable-manual-run" content="{{ 'true' if config.HARVEST_ENABLE_MANUAL_RUN else 'false' }}">
 {% if config.HARVEST_VALIDATION_CONTACT_FORM %}
 <meta name="harvest-validation-contact-form" content="{{config.HARVEST_VALIDATION_CONTACT_FORM}}">
