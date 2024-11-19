@@ -180,7 +180,11 @@ def get_or_create_user(data):
 def import_fixtures(source):
     """Build sample fixture data (users, datasets, reuses, dataservices) from local or remote file."""
     if source.startswith("http"):
-        json_fixtures = requests.get(source).json()
+        response = requests.get(source)
+        if response.ok:
+            json_fixtures = response.json()
+        else:
+            response.raise_for_status()
     else:
         with open(source) as f:
             json_fixtures = json.load(f)
