@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Create custom exception with contextual Sentry tags and clean Sentry config [#3201](https://github.com/opendatateam/udata/pull/3201)
 
 ## 10.0.2 (2024-11-19)
 
