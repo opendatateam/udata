@@ -54,5 +54,3 @@ def init_app(app: UDataApp):
         for dist in entrypoints.get_plugins_dists(app):
             if dist.version:
                 sentry_sdk.set_tag(dist.project_name, dist.version)
-        # Do not forget udata itself (is that necessary since we already have the release?)
-        sentry_sdk.set_tag("udata", package_version("udata"))
