@@ -514,7 +514,7 @@ def mime_from_rdf(resource):
 
 
 def format_from_rdf(resource):
-    format = rdf_value(resource, DCT.format, parse_label=True)
+    format = rdf_value(resource, DCT.format)
     if not format:
         return
     if EUFORMAT in format or IANAFORMAT in format:
