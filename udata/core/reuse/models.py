@@ -36,8 +36,13 @@ def check_url_does_not_exists(url):
         raise FieldValidationError(_("This URL is already registered"), field="url")
 
 
+def validate_badge(value):
+    if value not in Reuse.__badges__.keys():
+        raise db.ValidationError("Unknown badge type")
+
+
 class ReuseBadge(Badge):
-    kind = db.StringField(required=True, choices=list(BADGES.keys()))
+    kind = db.StringField(required=True, validation=validate_badge)
 
 
 class ReuseBadgeMixin(BadgeMixin):

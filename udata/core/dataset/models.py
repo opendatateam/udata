@@ -522,8 +522,13 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
         self.dataset.save(*args, **kwargs)
 
 
+def validate_badge(value):
+    if value not in Dataset.__badges__.keys():
+        raise db.ValidationError("Unknown badge type")
+
+
 class DatasetBadge(Badge):
-    kind = db.StringField(required=True, choices=list(BADGES.keys()))
+    kind = db.StringField(required=True, validation=validate_badge)
 
 
 class DatasetBadgeMixin(BadgeMixin):

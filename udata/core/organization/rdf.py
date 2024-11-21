@@ -49,7 +49,7 @@ def build_org_catalog(org, datasets, dataservices, format=None):
     for dataset in datasets:
         catalog.add(DCAT.dataset, dataset_to_rdf(dataset, graph))
     for dataservice in dataservices:
-        catalog.add(DCAT.dataservice, dataservice_to_rdf(dataservice, graph))
+        catalog.add(DCAT.service, dataservice_to_rdf(dataservice, graph))
 
     values = {"org": org.id}
 

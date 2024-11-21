@@ -96,8 +96,13 @@ class OrganizationQuerySet(db.BaseQuerySet):
         return self(badges__kind=kind)
 
 
+def validate_badge(value):
+    if value not in Organization.__badges__.keys():
+        raise db.ValidationError("Unknown badge type")
+
+
 class OrganizationBadge(Badge):
-    kind = db.StringField(required=True, choices=list(BADGES.keys()))
+    kind = db.StringField(required=True, validation=validate_badge)
 
 
 class OrganizationBadgeMixin(BadgeMixin):
