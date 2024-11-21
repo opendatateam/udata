@@ -2,9 +2,13 @@
 
 ## Current (in progress)
 
+- Allow temporal coverage with only a start date [#3192](https://github.com/opendatateam/udata/pull/3192)
+
+## 10.0.2 (2024-11-19)
+
 - Use correct DCAT.service predicate in RDF output [#3199](https://github.com/opendatateam/udata/pull/3199)
 - Fix the Badge.badge_label method [#3198](https://github.com/opendatateam/udata/pull/3198)
-- Allow temporal coverage with only a start date [#3192](https://github.com/opendatateam/udata/pull/3192)
+- Skip servesDataset for tabular API dataservice (temporary fix) [#3196](https://github.com/opendatateam/udata/pull/3196)
 
 ## 10.0.1 (2024-11-15)
 
