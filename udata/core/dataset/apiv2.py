@@ -267,7 +267,7 @@ class DatasetSearchAPI(API):
         """List or search all datasets"""
         args = search_parser.parse_args()
         try:
-            return search.query(Dataset, **args)
+            return search.query(Dataset, **{k: v for k, v in args.items() if v is not None})
         except NotImplementedError:
             abort(501, "Search endpoint not enabled")
         except RuntimeError:
