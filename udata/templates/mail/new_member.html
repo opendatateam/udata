@@ -7,7 +7,7 @@
 {{ _('Congratulations, you are now a member of the organization "%(org)s"',
     org=(
         '<a href="'|safe
-        + org.url_for(_external=True)
+        + org.external_url_with_campaign
         + '">'|safe
         + org.name
         + '</a>'|safe
@@ -19,7 +19,7 @@
         <td align="center">
             {{ mail_button(
                 _('See the organization page'),
-                org.url_for(_external=True)
+                org.external_url_with_campaign
             ) }}
         </td>
     </tr>

@@ -7,7 +7,7 @@
     _('A new reuse of your dataset %(dataset)s has been published',
         dataset=(
             '<a href="'|safe
-            + dataset.external_url
+            + dataset.external_url_with_campaign
             + '" style="text-decoration: none;">'|safe
             + dataset.title
             + '</a>'|safe
@@ -29,14 +29,14 @@
         <td align="center">
             {{ mail_button(
                 _('See the reuse'),
-                url_for('reuses.show', reuse=reuse.id, _external=True)
+                url_for('reuses.show', reuse=reuse.id, _external=True, **extras)
             ) }}
         </td>
         <td align="center">
             {{ mail_button(
                 _('See on the dataset page'),
                 (
-                    url_for('datasets.show', dataset=dataset.id, _external=True)
+                    url_for('datasets.show', dataset=dataset.id, _external=True, **extras)
                     + '#reuse-'|safe
                     + reuse.id|string
                 )

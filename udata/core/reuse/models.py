@@ -9,6 +9,7 @@ from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE
 from udata.core.storages import default_image_basename, images
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
+from udata.mail import get_mail_campaign_dict
 from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics, db
 from udata.mongo.errors import FieldValidationError
 from udata.uris import endpoint_for
@@ -35,8 +36,13 @@ def check_url_does_not_exists(url):
         raise FieldValidationError(_("This URL is already registered"), field="url")
 
 
+def validate_badge(value):
+    if value not in Reuse.__badges__.keys():
+        raise db.ValidationError("Unknown badge type")
+
+
 class ReuseBadge(Badge):
-    kind = db.StringField(required=True, choices=list(BADGES.keys()))
+    kind = db.StringField(required=True, validation=validate_badge)
 
 
 class ReuseBadgeMixin(BadgeMixin):
@@ -212,6 +218,11 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
     @property
     def external_url(self):
         return self.url_for(_external=True)
+
+    @property
+    def external_url_with_campaign(self):
+        extras = get_mail_campaign_dict()
+        return self.url_for(_external=True, **extras)
 
     @property
     def type_label(self):

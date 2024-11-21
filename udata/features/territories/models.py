@@ -1,5 +1,6 @@
 from flask import url_for
 
+from udata.mail import get_mail_campaign_dict
 from udata.models import License, Organization
 
 __all__ = ("TerritoryDataset", "ResourceBasedTerritoryDataset", "TERRITORY_DATASETS")
@@ -59,3 +60,8 @@ class ResourceBasedTerritoryDataset(TerritoryDataset):
     @property
     def external_url(self):
         return self.url_for(external=True)
+
+    @property
+    def external_url_with_campaign(self):
+        extras = get_mail_campaign_dict()
+        return self.url_for(_external=True, **extras)

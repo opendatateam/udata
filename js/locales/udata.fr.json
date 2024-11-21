@@ -520,5 +520,6 @@
     "{name} has been unscheduled": "{name} a été déplanifié",
     "{start} to {end}": "{start} à {end}",
     "{user} is not a member of this organization anymore": "{user} n'es plus membre de cette organisation",
-    "{user} is now {role} of this organization": "{user} est maintenant {role} de cette organisation"
+    "{user} is now {role} of this organization": "{user} est maintenant {role} de cette organisation",
+    "✨ Come and discover the new version of the back office": "✨ Venez découvrir la nouvelle version de l'administration"
 }

@@ -170,8 +170,13 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     # with some basic information about this dataset (but this will return a page
     # with more datasets than the page size… and could be problematic when processing the
     # correct Node with all the information in a future page)
-    for dataset in dataservice.datasets:
-        d.add(DCAT.servesDataset, dataset_to_graph_id(dataset))
+    if str(dataservice.id) == current_app.config["TABULAR_API_DATASERVICE_ID"]:
+        # TODO: remove this condition on TABULAR_API_DATASERVICE_ID.
+        # It is made to prevent having the graph explode due to too many datasets being served.
+        pass
+    else:
+        for dataset in dataservice.datasets:
+            d.add(DCAT.servesDataset, dataset_to_graph_id(dataset))
 
     contact_point = contact_point_to_rdf(dataservice.contact_point, graph)
     if contact_point:

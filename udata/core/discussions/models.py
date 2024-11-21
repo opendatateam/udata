@@ -4,6 +4,7 @@ from datetime import datetime
 from flask_login import current_user
 
 from udata.core.spam.models import SpamMixin, spam_protected
+from udata.mail import get_mail_campaign_dict
 from udata.mongo import db
 
 from .signals import on_discussion_closed, on_new_discussion, on_new_discussion_comment
@@ -93,6 +94,13 @@ class Discussion(SpamMixin, db.Document):
     @property
     def external_url(self):
         return self.subject.url_for(_anchor="discussion-{id}".format(id=self.id), _external=True)
+
+    @property
+    def external_url_with_campaign(self):
+        extras = get_mail_campaign_dict()
+        return self.subject.url_for(
+            _anchor="discussion-{id}".format(id=self.id), _external=True, **extras
+        )
 
     def spam_report_message(self, breadcrumb):
         message = f"Spam potentiel sur la discussion « [{self.title}]({self.external_url}) »"

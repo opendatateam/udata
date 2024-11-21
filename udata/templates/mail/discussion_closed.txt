@@ -12,5 +12,5 @@
 
 
 {{ _('You can see the discussion on this page:') }}
-{{ discussion.external_url }}
+{{ discussion.external_url_with_campaign }}
 {% endblock %}
