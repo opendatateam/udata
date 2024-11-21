@@ -40,7 +40,7 @@ class TopicsAPITest(APITestCase):
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(response.json["data"][0]["id"], str(name_topic.id))
 
-        response = self.get(url_for("api.topics", tag="my-tag-1"))
+        response = self.get(url_for("api.topics", tag=["my-tag-shared", "my-tag-1"]))
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(response.json["data"][0]["id"], str(tag_topic_1.id))

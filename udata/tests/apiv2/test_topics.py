@@ -19,7 +19,8 @@ class TopicsAPITest(APITestCase):
         org = OrganizationFactory()
         paca, _, _ = create_geozones_fixtures()
 
-        tag_topic = TopicFactory(tags=["energy"])
+        tag_topic_1 = TopicFactory(tags=["my-tag-shared", "my-tag-1"])
+        tag_topic_2 = TopicFactory(tags=["my-tag-shared", "my-tag-2"])
         name_topic = TopicFactory(name="topic-for-query")
         private_topic = TopicFactory(private=True)
         geozone_topic = TopicFactory(spatial=SpatialCoverageFactory(zones=[paca.id]))
@@ -30,7 +31,7 @@ class TopicsAPITest(APITestCase):
         response = self.get(url_for("apiv2.topics_list"))
         assert response.status_code == 200
         data = response.json["data"]
-        assert len(data) == 6
+        assert len(data) == 7
 
         hateoas_fields = ["rel", "href", "type", "total"]
         assert all(k in data[0]["datasets"] for k in hateoas_fields)
@@ -41,14 +42,22 @@ class TopicsAPITest(APITestCase):
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(name_topic.id)
 
-        response = self.get(url_for("apiv2.topics_list", tag="energy"))
+        response = self.get(url_for("apiv2.topics_list", tag=["my-tag-shared", "my-tag-1"]))
         assert response.status_code == 200
         assert len(response.json["data"]) == 1
-        assert response.json["data"][0]["id"] == str(tag_topic.id)
+        assert response.json["data"][0]["id"] == str(tag_topic_1.id)
+
+        response = self.get(url_for("apiv2.topics_list", tag=["my-tag-shared"]))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 2
+        self.assertEqual(
+            set([str(tag_topic_1.id), str(tag_topic_2.id)]),
+            set([t["id"] for t in response.json["data"]]),
+        )
 
         response = self.get(url_for("api.topics", include_private="true"))
         assert response.status_code == 200
-        assert len(response.json["data"]) == 7
+        assert len(response.json["data"]) == 8
         assert str(private_topic.id) in [t["id"] for t in response.json["data"]]
 
         response = self.get(url_for("api.topics", geozone=paca.id))
