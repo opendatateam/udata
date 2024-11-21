@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Allow temporal coverage with only a start date [#3192](https://github.com/opendatateam/udata/pull/3192)
+- Add a matomo "campaign" parameter on links in emails if `MAIL_CAMPAIGN` is configured [#3190](https://github.com/opendatateam/udata/pull/3190)
 
 ## 10.0.2 (2024-11-19)
 
