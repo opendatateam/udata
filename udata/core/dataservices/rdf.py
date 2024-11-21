@@ -147,11 +147,21 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     if is_hvd:
         d.add(DCATAP.applicableLegislation, URIRef(HVD_LEGISLATION))
 
+    hvd_category_tags = set()
     for tag in dataservice.tags:
         d.add(DCAT.keyword, Literal(tag))
         # Add HVD category if this dataservice is tagged HVD
         if is_hvd and tag in TAG_TO_EU_HVD_CATEGORIES:
-            d.add(DCATAP.hvdCategory, URIRef(TAG_TO_EU_HVD_CATEGORIES[tag]))
+            hvd_category_tags.add(tag)
+
+    if is_hvd:
+        # We also want to automatically add any HVD category tags of the dataservice's datasets.
+        for dataset in dataservice.datasets:
+            for tag in dataset.tags:
+                if tag in TAG_TO_EU_HVD_CATEGORIES:
+                    hvd_category_tags.add(tag)
+    for tag in hvd_category_tags:
+        d.add(DCATAP.hvdCategory, URIRef(TAG_TO_EU_HVD_CATEGORIES[tag]))
 
     # `dataset_to_graph_id(dataset)` URIRef may not exist in the current page
     # but should exists in the catalog somewhere. Maybe we should create a Node
