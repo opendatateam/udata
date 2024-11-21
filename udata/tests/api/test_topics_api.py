@@ -22,7 +22,8 @@ class TopicsAPITest(APITestCase):
         org = OrganizationFactory()
         paca, _, _ = create_geozones_fixtures()
 
-        tag_topic = TopicFactory(tags=["energy"])
+        tag_topic_1 = TopicFactory(tags=["my-tag-shared", "my-tag-1"])
+        tag_topic_2 = TopicFactory(tags=["my-tag-shared", "my-tag-2"])
         name_topic = TopicFactory(name="topic-for-query")
         private_topic = TopicFactory(private=True)
         geozone_topic = TopicFactory(spatial=SpatialCoverageFactory(zones=[paca.id]))
@@ -32,35 +33,43 @@ class TopicsAPITest(APITestCase):
 
         response = self.get(url_for("api.topics"))
         self.assert200(response)
-        self.assertEqual(len(response.json["data"]), 6)
+        self.assertEqual(len(response.json["data"]), 7)
 
         response = self.get(url_for("api.topics", q="topic-for"))
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(response.json["data"][0]["id"], str(name_topic.id))
 
-        response = self.get(url_for("api.topics", tag="energy"))
+        response = self.get(url_for("api.topics", tag="my-tag-1"))
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), 1)
-        self.assertEqual(response.json["data"][0]["id"], str(tag_topic.id))
+        self.assertEqual(response.json["data"][0]["id"], str(tag_topic_1.id))
         datasets = response.json["data"][0]["datasets"]
         self.assertEqual(len(datasets), 3)
-        for dataset, expected in zip(datasets, [d.fetch() for d in tag_topic.datasets]):
+        for dataset, expected in zip(datasets, [d.fetch() for d in tag_topic_1.datasets]):
             self.assertEqual(dataset["id"], str(expected.id))
             self.assertEqual(dataset["title"], str(expected.title))
             self.assertIsNotNone(dataset["page"])
             self.assertIsNotNone(dataset["uri"])
         reuses = response.json["data"][0]["reuses"]
-        for reuse, expected in zip(reuses, [r.fetch() for r in tag_topic.reuses]):
+        for reuse, expected in zip(reuses, [r.fetch() for r in tag_topic_1.reuses]):
             self.assertEqual(reuse["id"], str(expected.id))
             self.assertEqual(reuse["title"], str(expected.title))
             self.assertIsNotNone(reuse["page"])
             self.assertIsNotNone(reuse["uri"])
         self.assertEqual(len(reuses), 3)
 
+        response = self.get(url_for("api.topics", tag="my-tag-shared"))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), 2)
+        self.assertEqual(
+            set([str(tag_topic_1.id), str(tag_topic_2.id)]),
+            set([t["id"] for t in response.json["data"]]),
+        )
+
         response = self.get(url_for("api.topics", include_private="true"))
         self.assert200(response)
-        self.assertEqual(len(response.json["data"]), 7)
+        self.assertEqual(len(response.json["data"]), 8)
         self.assertIn(str(private_topic.id), [t["id"] for t in response.json["data"]])
 
         response = self.get(url_for("api.topics", geozone=paca.id))
