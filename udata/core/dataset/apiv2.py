@@ -9,7 +9,7 @@ from udata.api import API, apiv2, fields
 from udata.core.contact_point.api_fields import contact_point_fields
 from udata.core.organization.api_fields import member_user_with_email_fields
 from udata.core.spatial.api_fields import geojson
-from udata.utils import get_by, multi_to_dict
+from udata.utils import get_by
 
 from .api import ResourceMixin
 from .api_fields import (
@@ -265,9 +265,9 @@ class DatasetSearchAPI(API):
     @apiv2.marshal_with(dataset_page_fields)
     def get(self):
         """List or search all datasets"""
-        search_parser.parse_args()
+        args = search_parser.parse_args()
         try:
-            return search.query(Dataset, **multi_to_dict(request.args))
+            return search.query(Dataset, **args)
         except NotImplementedError:
             abort(501, "Search endpoint not enabled")
         except RuntimeError:
