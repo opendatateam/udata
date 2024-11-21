@@ -90,7 +90,7 @@ class DatasetApiParser(ModelApiParser):
 
     def __init__(self):
         super().__init__()
-        self.parser.add_argument("tag", type=str, location="args")
+        self.parser.add_argument("tag", type=str, location="args", action="append")
         self.parser.add_argument("license", type=str, location="args")
         self.parser.add_argument("featured", type=bool, location="args")
         self.parser.add_argument("geozone", type=str, location="args")
@@ -120,7 +120,7 @@ class DatasetApiParser(ModelApiParser):
             phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
             datasets = datasets.search_text(phrase_query)
         if args.get("tag"):
-            datasets = datasets.filter(tags=args["tag"])
+            datasets = datasets.filter(tags__all=args["tag"])
         if args.get("license"):
             datasets = datasets.filter(license__in=License.objects.filter(id=args["license"]))
         if args.get("geozone"):
