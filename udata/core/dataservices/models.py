@@ -163,12 +163,14 @@ class Dataservice(WithMetrics, Owned, db.Document):
     created_at = field(
         db.DateTimeField(verbose_name=_("Creation date"), default=datetime.utcnow, required=True),
         readonly=True,
+        sortable="created",
     )
     metadata_modified_at = field(
         db.DateTimeField(
             verbose_name=_("Last modification date"), default=datetime.utcnow, required=True
         ),
         readonly=True,
+        sortable="last_modified",
     )
     deleted_at = field(db.DateTimeField())
     archived_at = field(db.DateTimeField(), readonly=True)
