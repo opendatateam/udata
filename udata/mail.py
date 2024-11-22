@@ -50,6 +50,7 @@ def send(subject, recipients, template_base, **kwargs):
     debug = current_app.config.get("DEBUG", False)
     send_mail = current_app.config.get("SEND_MAIL", not debug)
     connection = send_mail and mail.connect or dummyconnection
+    extras = get_mail_campaign_dict()
 
     with connection() as conn:
         for recipient in recipients:
@@ -58,16 +59,31 @@ def send(subject, recipients, template_base, **kwargs):
                 log.debug('Sending mail "%s" to recipient "%s"', subject, recipient)
                 msg = Message(subject, sender=sender, recipients=[recipient.email])
                 msg.body = render_template(
-                    f"{tpl_path}.txt", subject=subject, sender=sender, recipient=recipient, **kwargs
+                    f"{tpl_path}.txt",
+                    subject=subject,
+                    sender=sender,
+                    recipient=recipient,
+                    extras=extras,
+                    **kwargs,
                 )
                 msg.html = render_template(
                     f"{tpl_path}.html",
                     subject=subject,
                     sender=sender,
                     recipient=recipient,
+                    extras=extras,
                     **kwargs,
                 )
                 try:
                     conn.send(msg)
                 except SMTPException as e:
                     log.error(f"Error sending mail {e}")
+
+
+def get_mail_campaign_dict() -> dict:
+    """Return a dict with the `mtm_campaign` key set if there is a `MAIL_CAMPAIGN` configured in udata.cfg."""
+    extras = {}
+    mail_campaign = current_app.config.get("MAIL_CAMPAIGN")
+    if mail_campaign:
+        extras["mtm_campaign"] = mail_campaign
+    return extras

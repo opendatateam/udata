@@ -7,5 +7,5 @@
 ) }}.
 
 {{ _('You can see the badge on this page:') }}
-{{ organization.external_url }}
+{{ organization.external_url_with_campaign }}
 {% endblock %}
