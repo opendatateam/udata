@@ -73,7 +73,7 @@ DEFAULT_MASK_APIV2 = ",".join(
 log = logging.getLogger(__name__)
 
 ns = apiv2.namespace("datasets", "Dataset related operations")
-search_parser = DatasetSearch.as_request_parser()
+search_parser = DatasetSearch.as_request_parser(store_missing=False)
 resources_parser = apiv2.parser()
 resources_parser.add_argument(
     "page", type=int, default=1, location="args", help="The page to fetch"
@@ -267,7 +267,7 @@ class DatasetSearchAPI(API):
         """List or search all datasets"""
         args = search_parser.parse_args()
         try:
-            return search.query(Dataset, **{k: v for k, v in args.items() if v is not None})
+            return search.query(Dataset, **args)
         except NotImplementedError:
             abort(501, "Search endpoint not enabled")
         except RuntimeError:
