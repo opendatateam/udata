@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add a matomo "campaign" parameter on links in emails if `MAIL_CAMPAIGN` is configured [#3190](https://github.com/opendatateam/udata/pull/3190)
+- Add created and last_modified sorts on dataservice list [#3206](https://github.com/opendatateam/udata/pull/3206)
 
 ## 10.0.2 (2024-11-19)
 
