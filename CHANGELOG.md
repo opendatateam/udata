@@ -4,6 +4,7 @@
 
 - Add a matomo "campaign" parameter on links in emails if `MAIL_CAMPAIGN` is configured [#3190](https://github.com/opendatateam/udata/pull/3190)
 - Use a safe XML parser that doesn't resolve entities, update lxml to 5.3.0 [#3205](https://github.com/opendatateam/udata/pull/3205)
+- Add DCAT-AP HVD properties in RDF output if the dataservice or its datasets are tagged hvd [#3187](https://github.com/opendatateam/udata/pull/3187)
 
 ## 10.0.2 (2024-11-19)
 
