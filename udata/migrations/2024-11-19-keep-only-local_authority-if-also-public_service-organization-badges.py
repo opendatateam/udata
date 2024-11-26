@@ -16,7 +16,7 @@ def migrate(db):
     log.info("Processing Organizations...")
     query = Q(badges__kind=LOCAL_AUTHORITY) & Q(badges__kind=PUBLIC_SERVICE)
 
-    count = Organization.objects(query).update(set__badges__S__kind=LOCAL_AUTHORITY)
+    count = Organization.objects(query).update(pull__badges__kind=PUBLIC_SERVICE)
     log.info(f"Removed badge {PUBLIC_SERVICE} for {count} Organization objects.")
 
     log.info("Done")
