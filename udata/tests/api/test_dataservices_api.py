@@ -92,6 +92,11 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(
             response.json["self_api_url"], "http://local.test/api/1/dataservices/updated-title/"
         )
+        # metadata_modified_at should have been updated during the patch
+        self.assertNotEqual(
+            response.json["metadata_modified_at"].split("+")[0],
+            dataservice.metadata_modified_at.isoformat(),
+        )
 
         self.assertEqual(response.json["datasets"]["total"], 2)
         response_datasets = self.get(response.json["datasets"]["href"])
