@@ -1,4 +1,5 @@
 import pytest
+from flask import current_app
 
 from udata.core.dataset import tasks
 
@@ -21,6 +22,9 @@ def test_purge_datasets():
         Dataset.objects.create(title="delete me", deleted="2016-01-01"),
         Dataset.objects.create(title="keep me"),
     ]
+
+    # This is needed or the test will fail if you have a search service configured in your udata.cfg file.
+    current_app.config["SEARCH_SERVICE_API_URL"] = ""
 
     topic = Topic.objects.create(name="test topic", datasets=datasets)
 
