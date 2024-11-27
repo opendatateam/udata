@@ -197,6 +197,34 @@ class DatasetToRdfTest:
         assert r.graph.value(checksum.identifier, SPDX.algorithm) == SPDX.checksumAlgorithm_sha1
         assert checksum.value(SPDX.checksumValue) == Literal(resource.checksum.value)
 
+    def test_ogc_resource_access_service(self):
+        license = LicenseFactory()
+        resource = ResourceFactory(
+            format="ogc:wms",
+            url="https://services.data.shom.fr/INSPIRE/wms/r?service=WMS&request=GetCapabilities&version=1.3.0",
+        )
+        contact = ContactPointFactory()
+        dataset = DatasetFactory(resources=[resource], license=license, contact_point=contact)
+
+        r = resource_to_rdf(resource, dataset)
+
+        service = r.value(DCAT.accessService)
+        assert service.value(RDF.type).identifier == DCAT.DataService
+        assert service.value(DCT.title) == Literal(resource.title)
+        assert service.value(DCAT.endpointDescription).identifier == URIRef(
+            "https://services.data.shom.fr/INSPIRE/wms/r?service=WMS&request=GetCapabilities&version=1.3.0"
+        )
+        assert service.value(DCAT.endpointURL).identifier == URIRef(
+            "https://services.data.shom.fr/INSPIRE/wms/r"
+        )
+        assert service.value(DCT.conformsTo).identifier == URIRef(
+            "http://www.opengeospatial.org/standards/wms"
+        )
+        assert service.value(DCT.license).identifier == URIRef(license.url)
+
+        contact_rdf = service.value(DCAT.contactPoint)
+        assert contact_rdf.value(RDF.type).identifier == VCARD.Kind
+
     def test_temporal_coverage(self):
         start = faker.past_date(start_date="-30d")
         end = faker.future_date(end_date="+30d")
