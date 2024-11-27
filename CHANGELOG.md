@@ -2,9 +2,16 @@
 
 ## Current (in progress)
 
+- Expose OGC services distributions as dataservice [#3203](https://github.com/opendatateam/udata/pull/3203)
+- Add a matomo "campaign" parameter on links in emails if `MAIL_CAMPAIGN` is configured [#3190](https://github.com/opendatateam/udata/pull/3190)
+- Add DCAT-AP HVD properties in RDF output if the dataservice or its datasets are tagged hvd [#3187](https://github.com/opendatateam/udata/pull/3187)
+- Only keep the "local authority" org badge if it's also a "public service" [#3200](https://github.com/opendatateam/udata/pull/3200)
+
+## 10.0.2 (2024-11-19)
+
 - Use correct DCAT.service predicate in RDF output [#3199](https://github.com/opendatateam/udata/pull/3199)
 - Fix the Badge.badge_label method [#3198](https://github.com/opendatateam/udata/pull/3198)
-- Only keep the "local authority" org badge if it's also a "public service" [#3200](https://github.com/opendatateam/udata/pull/3200)
+- Skip servesDataset for tabular API dataservice (temporary fix) [#3196](https://github.com/opendatateam/udata/pull/3196)
 
 ## 10.0.1 (2024-11-15)
 

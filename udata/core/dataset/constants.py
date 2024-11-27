@@ -72,6 +72,8 @@ RESOURCE_FILETYPES = OrderedDict(
     ]
 )
 
+OGC_SERVICE_FORMATS = ["ogc:wms", "ogc:wfs", "wms", "wfs"]
+
 CHECKSUM_TYPES = ("sha1", "sha2", "sha256", "md5", "crc")
 DEFAULT_CHECKSUM_TYPE = "sha1"
 
