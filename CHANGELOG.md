@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 10.0.3 (2024-11-27)
 
 - Expose OGC services distributions as dataservice [#3203](https://github.com/opendatateam/udata/pull/3203)
 - Add a matomo "campaign" parameter on links in emails if `MAIL_CAMPAIGN` is configured [#3190](https://github.com/opendatateam/udata/pull/3190)
