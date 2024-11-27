@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 10.0.3 (2024-11-27)
 
 - Expose OGC services distributions as dataservice [#3203](https://github.com/opendatateam/udata/pull/3203)
