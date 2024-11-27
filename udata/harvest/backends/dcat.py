@@ -54,6 +54,9 @@ URIS_TO_REPLACE = {
 }
 
 
+SAFE_PARSER = ET.XMLParser(resolve_entities=False)
+
+
 def extract_graph(source, target, node, specs):
     for p, o in source.predicate_objects(node):
         target.add((node, p, o))
@@ -250,7 +253,7 @@ class CswDcatBackend(DcatBackend):
         )
         response.raise_for_status()
         content = response.content
-        tree = ET.fromstring(content)
+        tree = ET.fromstring(content, parser=SAFE_PARSER)
         if tree.tag == "{" + OWS_NAMESPACE + "}ExceptionReport":
             raise ValueError(f"Failed to query CSW:\n{content}")
         while tree is not None:
@@ -276,7 +279,8 @@ class CswDcatBackend(DcatBackend):
             tree = ET.fromstring(
                 self.post(
                     url, data=body.format(start=start, schema=self.DCAT_SCHEMA), headers=headers
-                ).content
+                ).content,
+                parser=SAFE_PARSER,
             )
 
 
@@ -309,7 +313,7 @@ class CswIso19139DcatBackend(DcatBackend):
         See https://github.com/SEMICeu/iso-19139-to-dcat-ap for more information on the XSLT.
         """
         # Load XSLT
-        xsl = ET.fromstring(self.get(self.XSL_URL).content)
+        xsl = ET.fromstring(self.get(self.XSL_URL).content, parser=SAFE_PARSER)
         transform = ET.XSLT(xsl)
 
         # Start querying and parsing graph
@@ -351,7 +355,7 @@ class CswIso19139DcatBackend(DcatBackend):
         )
         response.raise_for_status()
 
-        tree_before_transform = ET.fromstring(response.content)
+        tree_before_transform = ET.fromstring(response.content, parser=SAFE_PARSER)
         # Disabling CoupledResourceLookUp to prevent failure on xlink:href
         # https://github.com/SEMICeu/iso-19139-to-dcat-ap/blob/master/documentation/HowTo.md#parameter-coupledresourcelookup
         tree = transform(tree_before_transform, CoupledResourceLookUp="'disabled'")
@@ -386,5 +390,5 @@ class CswIso19139DcatBackend(DcatBackend):
             )
             response.raise_for_status()
 
-            tree_before_transform = ET.fromstring(response.content)
+            tree_before_transform = ET.fromstring(response.content, parser=SAFE_PARSER)
             tree = transform(tree_before_transform, CoupledResourceLookUp="'disabled'")

@@ -4,6 +4,7 @@
 
 - Expose OGC services distributions as dataservice [#3203](https://github.com/opendatateam/udata/pull/3203)
 - Add a matomo "campaign" parameter on links in emails if `MAIL_CAMPAIGN` is configured [#3190](https://github.com/opendatateam/udata/pull/3190)
+- Use a safe XML parser that doesn't resolve entities, update lxml to 5.3.0 [#3205](https://github.com/opendatateam/udata/pull/3205)
 - Add DCAT-AP HVD properties in RDF output if the dataservice or its datasets are tagged hvd [#3187](https://github.com/opendatateam/udata/pull/3187)
 - Only keep the "local authority" org badge if it's also a "public service" [#3200](https://github.com/opendatateam/udata/pull/3200)
 
