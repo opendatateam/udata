@@ -2,6 +2,11 @@
 
 ## Current (in progress)
 
+- Add created and last_modified sorts on dataservice list [#3206](https://github.com/opendatateam/udata/pull/3206)
+- Fix dataservice metadata_modified_at update in API [#3207](https://github.com/opendatateam/udata/pull/3207)
+
+## 10.0.3 (2024-11-27)
+
 - Expose OGC services distributions as dataservice [#3203](https://github.com/opendatateam/udata/pull/3203)
 - Add a matomo "campaign" parameter on links in emails if `MAIL_CAMPAIGN` is configured [#3190](https://github.com/opendatateam/udata/pull/3190)
 - Use a safe XML parser that doesn't resolve entities, update lxml to 5.3.0 [#3205](https://github.com/opendatateam/udata/pull/3205)
