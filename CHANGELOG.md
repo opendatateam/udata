@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add created and last_modified sorts on dataservice list [#3206](https://github.com/opendatateam/udata/pull/3206)
 
 ## 10.0.3 (2024-11-27)
 
