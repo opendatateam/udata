@@ -4,6 +4,7 @@
 
 - Add created and last_modified sorts on dataservice list [#3206](https://github.com/opendatateam/udata/pull/3206)
 - Fix dataservice metadata_modified_at update in API [#3207](https://github.com/opendatateam/udata/pull/3207)
+- Compute dataservices metrics on org, user and site [#3209](https://github.com/opendatateam/udata/pull/3209)
 
 ## 10.0.3 (2024-11-27)
 
