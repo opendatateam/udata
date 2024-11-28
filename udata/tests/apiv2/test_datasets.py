@@ -61,6 +61,21 @@ class DatasetAPIV2Test(APITestCase):
         assert len(data) == 1
         assert data[0]["id"] == str(dataset_org_public_service.id)
 
+    def test_search_dataset_tags(self):
+        tag_dataset_1 = DatasetFactory(tags=["my-tag-shared", "my-tag-1"])
+        DatasetFactory(tags=["my-tag-shared", "my-tag-2"])
+
+        response = self.get(url_for("apiv2.dataset_search", tag="my-tag-shared"))
+        self.assert200(response)
+        data = response.json["data"]
+        assert len(data) == 2
+
+        response = self.get(url_for("apiv2.dataset_search", tag=["my-tag-shared", "my-tag-1"]))
+        self.assert200(response)
+        data = response.json["data"]
+        assert len(data) == 1
+        assert data[0]["id"] == str(tag_dataset_1.id)
+
 
 class DatasetResourceAPIV2Test(APITestCase):
     def test_get_specific(self):

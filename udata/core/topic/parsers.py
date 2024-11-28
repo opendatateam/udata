@@ -15,7 +15,7 @@ class TopicApiParser(ModelApiParser):
         super().__init__()
         if with_include_private:
             self.parser.add_argument("include_private", type=bool, location="args")
-        self.parser.add_argument("tag", type=str, location="args")
+        self.parser.add_argument("tag", type=str, location="args", action="append")
         self.parser.add_argument("geozone", type=str, location="args")
         self.parser.add_argument("granularity", type=str, location="args")
         self.parser.add_argument("organization", type=str, location="args")
@@ -31,7 +31,7 @@ class TopicApiParser(ModelApiParser):
             phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
             topics = topics.search_text(phrase_query)
         if args.get("tag"):
-            topics = topics.filter(tags=args["tag"])
+            topics = topics.filter(tags__all=args["tag"])
         if not args.get("include_private"):
             topics = topics.filter(private=False)
         if args.get("geozone"):
