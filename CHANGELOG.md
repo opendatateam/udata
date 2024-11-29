@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 10.0.4 (2024-11-29)
 
 - Add created and last_modified sorts on dataservice list [#3206](https://github.com/opendatateam/udata/pull/3206)
 - Fix dataservice metadata_modified_at update in API [#3207](https://github.com/opendatateam/udata/pull/3207)
