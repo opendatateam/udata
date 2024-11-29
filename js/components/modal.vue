@@ -9,7 +9,7 @@
                     <span aria-hidden="true">&times;</span>
                     <span class="sr-only" v-i18n="Close"></span>
                 </button>
-                <h4 class="modal-title" id="modal-title">{{{title}}}</h4>
+                <h4 class="modal-title" id="modal-title">{{title}}</h4>
             </div>
             <slot></slot>
         </div>
