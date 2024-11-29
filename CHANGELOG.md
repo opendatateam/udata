@@ -5,6 +5,7 @@
 - Add created and last_modified sorts on dataservice list [#3206](https://github.com/opendatateam/udata/pull/3206)
 - Fix dataservice metadata_modified_at update in API [#3207](https://github.com/opendatateam/udata/pull/3207)
 - Escape modal title in admin [#3210](https://github.com/opendatateam/udata/pull/3210)
+- feat: handle multiple tags on datasets and topics apis [#3204](https://github.com/opendatateam/udata/pull/3204)
 
 ## 10.0.3 (2024-11-27)
 
@@ -13,7 +14,6 @@
 - Use a safe XML parser that doesn't resolve entities, update lxml to 5.3.0 [#3205](https://github.com/opendatateam/udata/pull/3205)
 - Add DCAT-AP HVD properties in RDF output if the dataservice or its datasets are tagged hvd [#3187](https://github.com/opendatateam/udata/pull/3187)
 - Only keep the "local authority" org badge if it's also a "public service" [#3200](https://github.com/opendatateam/udata/pull/3200)
-- feat: handle multiple tags on datasets and topics apis [#3204](https://github.com/opendatateam/udata/pull/3204)
 
 ## 10.0.2 (2024-11-19)
 
