@@ -5,7 +5,7 @@
             <span class="icon fa fa-{{alert.icon || 'check'}}"></span>
             {{alert.title}}
         </h4>
-        {{{ details }}}
+        {{{ details | markdown }}}
     </div>
 </template>
 
@@ -37,7 +37,7 @@ export default {
         },
         details() {
             if (this.alert && this.alert.details) {
-                return this.alert.details.replace(/\n/g, '<br/>');
+                return this.alert.details;
             }
         }
     },
