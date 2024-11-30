@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Resource catalog: fix preview_url and add extras [#3188](https://github.com/opendatateam/udata/pull/3188)
 
 ## 10.0.4 (2024-11-29)
 
