@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add a matomo "campaign" parameter on links in emails if `MAIL_CAMPAIGN` is configured [#3190](https://github.com/opendatateam/udata/pull/3190)
+- Add list transfer endpoint [#3211](https://github.com/opendatateam/udata/pull/3211)
 
 ## 10.0.2 (2024-11-19)
 
