@@ -39,7 +39,7 @@ COMMUNITY_RES_URL = "/api/1/datasets/community_resources"
 DISCUSSION_URL = "/api/1/discussions"
 
 
-DEFAULT_FIXTURE_FILE_TAG: str = "v3.0.0"
+DEFAULT_FIXTURE_FILE_TAG: str = "v4.0.0"
 DEFAULT_FIXTURE_FILE: str = f"https://raw.githubusercontent.com/opendatateam/udata-fixtures/{DEFAULT_FIXTURE_FILE_TAG}/results.json"  # noqa
 
 DEFAULT_FIXTURES_RESULTS_FILENAME: str = "results.json"
@@ -180,7 +180,9 @@ def get_or_create_user(data):
 def import_fixtures(source):
     """Build sample fixture data (users, datasets, reuses, dataservices) from local or remote file."""
     if source.startswith("http"):
-        json_fixtures = requests.get(source).json()
+        response = requests.get(source)
+        response.raise_for_status()
+        json_fixtures = response.json()
     else:
         with open(source) as f:
             json_fixtures = json.load(f)

@@ -31,7 +31,7 @@ html2text==2019.9.26
 Jinja2==3.1.2
 kombu[redis]==5.3.1
 langdetect==1.0.9
-lxml==4.9.3
+lxml==5.3.0
 mistune==0.8.4
 mongoengine==0.27.0
 netaddr==0.7.19

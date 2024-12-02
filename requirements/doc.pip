@@ -333,7 +333,7 @@ langdetect==1.0.9
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-lxml==4.9.3
+lxml==5.3.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip

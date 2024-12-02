@@ -8,7 +8,7 @@ from udata.utils import clean_string
 
 log = logging.getLogger(__name__)
 
-__all__ = ("BoolFilter", "ModelTermsFilter", "TemporalCoverageFilter", "Filter")
+__all__ = ("BoolFilter", "ModelTermsFilter", "TemporalCoverageFilter", "Filter", "ListFilter")
 
 
 ES_NUM_FAILURES = "-Infinity", "Infinity", "NaN", None
@@ -26,6 +26,12 @@ class Filter:
         if self.choices:
             return {"type": clean_string, "choices": self.choices}
         return {"type": clean_string}
+
+
+class ListFilter:
+    @classmethod
+    def as_request_parser_kwargs(self):
+        return {"action": "append"}
 
 
 class BoolFilter(Filter):
