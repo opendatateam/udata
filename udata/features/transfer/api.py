@@ -90,6 +90,7 @@ class TransferRequestsAPI(API):
         """List all transfer requests"""
         pass
 
+    @api.secure
     @api.doc("request_transfer")
     @api.expect(transfer_request_fields)
     @api.marshal_with(transfer_fields)
@@ -128,6 +129,7 @@ class TransferRequestAPI(API):
         """Fetch a transfer request given its identifier"""
         return Transfer.objects.get_or_404(id=id_or_404(id))
 
+    @api.secure
     @api.doc("respond_to_transfer")
     @api.expect(transfer_response_fields)
     @api.marshal_with(transfer_fields)
