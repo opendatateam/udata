@@ -96,7 +96,7 @@ class DatasetSearch(ModelSearchAdapter):
             "views": dataset.metrics.get("views", 0),
             "followers": dataset.metrics.get("followers", 0),
             "reuses": dataset.metrics.get("reuses", 0),
-            "featured": 1 if dataset.featured else 0,
+            "featured": "true" if dataset.featured else "false",
             "resources_count": len(dataset.resources),
             "organization": organization,
             "owner": str(owner.id) if owner else None,
