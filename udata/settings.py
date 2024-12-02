@@ -526,7 +526,6 @@ class Defaults(object):
         "DataservicesAPI.post",
         "TopicsAPI.post",
         "TransferRequestsAPI.post",
-        # "ReportsAPI.post",
     ]
 
     # New admin URL

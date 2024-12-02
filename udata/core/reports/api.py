@@ -23,7 +23,6 @@ class ReportsAPI(API):
 
         return Report.apply_sort_filters_and_pagination(query)
 
-    @api.secure
     @api.doc("create_report", responses={400: "Validation error"})
     @api.expect(Report.__write_fields__)
     @api.marshal_with(Report.__read_fields__, code=201)
