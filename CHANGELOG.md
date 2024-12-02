@@ -10,6 +10,7 @@
 - Fix dataservice metadata_modified_at update in API [#3207](https://github.com/opendatateam/udata/pull/3207)
 - Escape modal title in admin [#3210](https://github.com/opendatateam/udata/pull/3210)
 - feat: handle multiple tags on datasets and topics apis [#3204](https://github.com/opendatateam/udata/pull/3204)
+- Update default method blocklist for READ ONLY mode [#3212](https://github.com/opendatateam/udata/pull/3212)
 
 ## 10.0.3 (2024-11-27)
 
