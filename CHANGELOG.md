@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add dataservice csv adapter [#3208](https://github.com/opendatateam/udata/pull/3208)
+- Update purge tasks [#3167](https://github.com/opendatateam/udata/pull/3167)
 
 ## 10.0.4 (2024-11-29)
 
