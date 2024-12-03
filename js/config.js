@@ -180,6 +180,11 @@ export const search_autocomplete_debounce = _jsonMeta('search-autocomplete-debou
  */
 export const read_only_enabled = _jsonMeta('read-only-enabled');
 
+/**
+ * Whether to add a banner towards a new admin
+ */
+export const new_admin_url = _meta('new-admin-url');
+
 
 export default {
     user,
@@ -207,4 +212,5 @@ export default {
     search_autocomplete_debounce,
     markdown,
     read_only_enabled,
+    new_admin_url,
 };

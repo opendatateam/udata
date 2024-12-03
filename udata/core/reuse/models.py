@@ -9,7 +9,8 @@ from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE
 from udata.core.storages import default_image_basename, images
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.models import BadgeMixin, WithMetrics, db
+from udata.mail import get_mail_campaign_dict
+from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics, db
 from udata.mongo.errors import FieldValidationError
 from udata.uris import endpoint_for
 from udata.utils import hash_url
@@ -17,6 +18,8 @@ from udata.utils import hash_url
 from .constants import IMAGE_MAX_SIZE, IMAGE_SIZES, REUSE_TOPICS, REUSE_TYPES
 
 __all__ = ("Reuse",)
+
+BADGES: dict[str, str] = {}
 
 
 class ReuseQuerySet(OwnedQuerySet):
@@ -33,15 +36,30 @@ def check_url_does_not_exists(url):
         raise FieldValidationError(_("This URL is already registered"), field="url")
 
 
+def validate_badge(value):
+    if value not in Reuse.__badges__.keys():
+        raise db.ValidationError("Unknown badge type")
+
+
+class ReuseBadge(Badge):
+    kind = db.StringField(required=True, validation=validate_badge)
+
+
+class ReuseBadgeMixin(BadgeMixin):
+    badges = field(BadgesList(ReuseBadge), **BadgeMixin.default_badges_list_params)
+    __badges__ = BADGES
+
+
 @generate_fields(
     searchable=True,
-    additionalSorts=[
+    additional_sorts=[
         {"key": "datasets", "value": "metrics.datasets"},
         {"key": "followers", "value": "metrics.followers"},
         {"key": "views", "value": "metrics.views"},
     ],
+    additional_filters={"organization_badge": "organization.badges"},
 )
-class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
+class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
     title = field(
         db.StringField(required=True),
         sortable=True,
@@ -124,8 +142,6 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
     def __str__(self):
         return self.title or ""
 
-    __badges__ = {}
-
     __metrics_keys__ = [
         "discussions",
         "datasets",
@@ -202,6 +218,11 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, Owned, db.Document):
     @property
     def external_url(self):
         return self.url_for(_external=True)
+
+    @property
+    def external_url_with_campaign(self):
+        extras = get_mail_campaign_dict()
+        return self.url_for(_external=True, **extras)
 
     @property
     def type_label(self):

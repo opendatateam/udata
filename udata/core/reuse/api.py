@@ -13,6 +13,7 @@ from udata.core.badges import api as badges_api
 from udata.core.badges.fields import badge_fields
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.followers.api import FollowAPI
+from udata.core.organization.models import Organization
 from udata.core.reuse.constants import REUSE_TOPICS, REUSE_TYPES
 from udata.core.storages.api import (
     image_parser,
@@ -49,6 +50,12 @@ class ReuseApiParser(ModelApiParser):
         self.parser.add_argument("dataset", type=str, location="args")
         self.parser.add_argument("tag", type=str, location="args")
         self.parser.add_argument("organization", type=str, location="args")
+        self.parser.add_argument(
+            "organization_badge",
+            type=str,
+            choices=list(Organization.__badges__),
+            location="args",
+        )
         self.parser.add_argument("owner", type=str, location="args")
         self.parser.add_argument("type", type=str, location="args")
         self.parser.add_argument("topic", type=str, location="args")
@@ -79,6 +86,9 @@ class ReuseApiParser(ModelApiParser):
             if not ObjectId.is_valid(args["organization"]):
                 api.abort(400, "Organization arg must be an identifier")
             reuses = reuses.filter(organization=args["organization"])
+        if args.get("organization_badge"):
+            orgs = Organization.objects.with_badge(args["organization_badge"])
+            reuses = reuses.filter(organization__in=orgs)
         if args.get("owner"):
             if not ObjectId.is_valid(args["owner"]):
                 api.abort(400, "Owner arg must be an identifier")
@@ -102,7 +112,7 @@ class ReuseListAPI(API):
         query = Reuse.objects.visible_by_user(
             current_user, mongoengine.Q(private__ne=True, deleted=None)
         )
-        return Reuse.apply_sort_filters_and_pagination(query)
+        return Reuse.apply_pagination(Reuse.apply_sort_filters(query))
 
     @api.secure
     @api.doc("create_reuse")
@@ -275,7 +285,7 @@ class ReusesSuggestAPI(API):
         ]
 
 
-@ns.route("/<reuse:reuse>/image", endpoint="reuse_image")
+@ns.route("/<reuse:reuse>/image/", endpoint="reuse_image")
 @api.doc(**common_doc)
 class ReuseImageAPI(API):
     @api.secure

@@ -25,6 +25,12 @@
             <span class="sr-only">Toggle navigation</span>
             <span :class="['fa', $root.toggled ? 'fa-angle-double-left' : 'fa-angle-double-right']"></span>
         </a>
+        <span class="navbar-banner" v-if="newAdminUrl">
+            <a :href="newAdminUrl" target="_blank">
+                {{ _("✨ Come and discover the new version of the back office") }}
+                <span class="fa fa-external-link"></span>
+            </a>
+        </span>
       <div class="navbar-custom-menu">
           <ul class="nav navbar-nav">
             <notification-menu></notification-menu>
@@ -41,6 +47,9 @@
 'use strict';
 
 module.exports = {
+    props: {
+        newAdminUrl: String,
+    },
     components: {
         'user-menu': require('components/user-menu.vue'),
         'notification-menu': require('components/notification-menu.vue'),

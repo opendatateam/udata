@@ -5,6 +5,7 @@
     "A post": "Um artigo",
     "A reuse": "Uma reutilização",
     "A set of boolean parameters to toggle": "Um conjunto de parâmetros booleanos para alternar",
+    "A set of extra configuration variables": "A set of extra configuration variables",
     "A set of filters to apply": "Um conjunto de filtros para aplicar",
     "A topic": "Um tema",
     "A user": "Um utilizador",
@@ -18,6 +19,7 @@
     "Add a comment": "Adicionar comentário",
     "Add a filter": "Adicionar filtro",
     "Add a resource": "Adicionar recurso",
+    "Add an extra configuration variable": "Add an extra configuration variable",
     "Add some related datasets": "Adicionar conjuntos de dados relacionados",
     "Add some related reuses": "Adicionar reutilizações relacionadas",
     "Add your first resources": "Adicione os seus primeiros recursos",
@@ -137,6 +139,7 @@
     "Explain why you request this transfer": "Explique porque solicitou essa transferência",
     "Explain your response": "Explique a sua resposta",
     "Explain your validation": "Explique a sua validação",
+    "Extra configuration variables": "Extra configuration variables",
     "Failed": "Falhou",
     "Feature this content": "Destacar este conteúdo",
     "Featured": "Em destaque",
@@ -517,5 +520,6 @@
     "{name} has been unscheduled": "{name} foi removido da agenda",
     "{start} to {end}": "{start} até {end}",
     "{user} is not a member of this organization anymore": "{user} não é mais membro desta organização",
-    "{user} is now {role} of this organization": "{user} é agora um {role} desta organização"
+    "{user} is now {role} of this organization": "{user} é agora um {role} desta organização",
+    "✨ Come and discover the new version of the back office": "✨ Come and discover the new version of the back office"
 }

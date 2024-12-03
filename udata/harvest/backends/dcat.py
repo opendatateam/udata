@@ -10,6 +10,7 @@ from rdflib.namespace import RDF
 from udata.core.dataservices.rdf import dataservice_from_rdf
 from udata.core.dataset.rdf import dataset_from_rdf
 from udata.harvest.models import HarvestItem
+from udata.i18n import gettext as _
 from udata.rdf import (
     DCAT,
     DCT,
@@ -21,7 +22,7 @@ from udata.rdf import (
 )
 from udata.storage.s3 import store_as_json
 
-from .base import BaseBackend
+from .base import BaseBackend, HarvestExtraConfig
 
 log = logging.getLogger(__name__)
 
@@ -51,6 +52,9 @@ URIS_TO_REPLACE = {
     # See https://github.com/etalab/data.gouv.fr/issues/1151
     "https://project-open-data.cio.gov/v1.1/schema/catalog.jsonld": "https://gist.githubusercontent.com/maudetes/f019586185d6f59dcfb07f97148a1973/raw/585c3c7bf602b5a4e635b137257d0619792e2c1f/gistfile1.txt"  # noqa
 }
+
+
+SAFE_PARSER = ET.XMLParser(resolve_entities=False)
 
 
 def extract_graph(source, target, node, specs):
@@ -167,14 +171,20 @@ class DcatBackend(BaseBackend):
         item.kwargs["page_number"] = page_number
 
         dataset = self.get_dataset(item.remote_id)
-        return dataset_from_rdf(page, dataset, node=node)
+        remote_url_prefix = self.get_extra_config_value("remote_url_prefix")
+        return dataset_from_rdf(page, dataset, node=node, remote_url_prefix=remote_url_prefix)
 
     def inner_process_dataservice(self, item: HarvestItem, page_number: int, page: Graph, node):
         item.kwargs["page_number"] = page_number
 
         dataservice = self.get_dataservice(item.remote_id)
+        remote_url_prefix = self.get_extra_config_value("remote_url_prefix")
         return dataservice_from_rdf(
-            page, dataservice, node, [item.dataset for item in self.job.items]
+            page,
+            dataservice,
+            node,
+            [item.dataset for item in self.job.items],
+            remote_url_prefix=remote_url_prefix,
         )
 
     def get_node_from_item(self, graph, item):
@@ -243,10 +253,10 @@ class CswDcatBackend(DcatBackend):
         )
         response.raise_for_status()
         content = response.content
-        tree = ET.fromstring(content)
+        tree = ET.fromstring(content, parser=SAFE_PARSER)
         if tree.tag == "{" + OWS_NAMESPACE + "}ExceptionReport":
             raise ValueError(f"Failed to query CSW:\n{content}")
-        while tree:
+        while tree is not None:
             search_results = tree.find("csw:SearchResults", {"csw": CSW_NAMESPACE})
             if search_results is None:
                 log.error(f"No search results found for {url} on page {page_number}")
@@ -269,7 +279,8 @@ class CswDcatBackend(DcatBackend):
             tree = ET.fromstring(
                 self.post(
                     url, data=body.format(start=start, schema=self.DCAT_SCHEMA), headers=headers
-                ).content
+                ).content,
+                parser=SAFE_PARSER,
             )
 
 
@@ -280,6 +291,14 @@ class CswIso19139DcatBackend(DcatBackend):
     """
 
     display_name = "CSW-ISO-19139"
+    extra_configs = (
+        HarvestExtraConfig(
+            _("Remote URL prefix"),
+            "remote_url_prefix",
+            str,
+            _("A prefix used to build the remote URL of the harvested items."),
+        ),
+    )
 
     ISO_SCHEMA = "http://www.isotc211.org/2005/gmd"
 
@@ -294,7 +313,7 @@ class CswIso19139DcatBackend(DcatBackend):
         See https://github.com/SEMICeu/iso-19139-to-dcat-ap for more information on the XSLT.
         """
         # Load XSLT
-        xsl = ET.fromstring(self.get(self.XSL_URL).content)
+        xsl = ET.fromstring(self.get(self.XSL_URL).content, parser=SAFE_PARSER)
         transform = ET.XSLT(xsl)
 
         # Start querying and parsing graph
@@ -336,7 +355,7 @@ class CswIso19139DcatBackend(DcatBackend):
         )
         response.raise_for_status()
 
-        tree_before_transform = ET.fromstring(response.content)
+        tree_before_transform = ET.fromstring(response.content, parser=SAFE_PARSER)
         # Disabling CoupledResourceLookUp to prevent failure on xlink:href
         # https://github.com/SEMICeu/iso-19139-to-dcat-ap/blob/master/documentation/HowTo.md#parameter-coupledresourcelookup
         tree = transform(tree_before_transform, CoupledResourceLookUp="'disabled'")
@@ -371,5 +390,5 @@ class CswIso19139DcatBackend(DcatBackend):
             )
             response.raise_for_status()
 
-            tree_before_transform = ET.fromstring(response.content)
+            tree_before_transform = ET.fromstring(response.content, parser=SAFE_PARSER)
             tree = transform(tree_before_transform, CoupledResourceLookUp="'disabled'")

@@ -43,7 +43,7 @@ def build_catalog(site, datasets, dataservices=[], format=None):
 
     for dataservice in dataservices:
         rdf_dataservice = dataservice_to_rdf(dataservice, graph)
-        catalog.add(DCAT.DataService, rdf_dataservice)
+        catalog.add(DCAT.service, rdf_dataservice)
 
     if isinstance(datasets, Paginable):
         paginate_catalog(catalog, graph, datasets, format, "api.site_rdf_catalog_format")

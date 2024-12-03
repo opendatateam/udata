@@ -6,10 +6,10 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: udata 9.1.2.dev0\n"
+"Project-Id-Version: udata 10.0.1.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2024-07-23 18:05+0200\n"
-"PO-Revision-Date: 2024-07-23 18:05+0200\n"
+"POT-Creation-Date: 2024-11-15 10:00+0100\n"
+"PO-Revision-Date: 2024-11-15 10:00+0100\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -43,7 +43,7 @@ msgstr ""
 msgid "Password reset instructions"
 msgstr ""
 
-#: udata/settings.py:494
+#: udata/settings.py:495
 msgid "This dataset has been archived"
 msgstr ""
 
@@ -51,7 +51,7 @@ msgstr ""
 msgid "Invalid URL \"{url}\": {reason}"
 msgstr ""
 
-#: udata/tests/api/test_datasets_api.py:795 udata/tests/test_model.py:367
+#: udata/tests/api/test_datasets_api.py:810 udata/tests/test_model.py:367
 #: udata/uris.py:55
 msgid "Invalid URL \"{url}\""
 msgstr ""
@@ -205,31 +205,31 @@ msgstr ""
 msgid "Your udata instance is ready!"
 msgstr ""
 
-#: udata/core/owned.py:37 udata/forms/fields.py:735
-#: udata/tests/api/test_dataservices_api.py:271
+#: udata/core/owned.py:53 udata/forms/fields.py:735
+#: udata/tests/api/test_dataservices_api.py:407
 msgid "You can only set yourself as owner"
 msgstr ""
 
-#: udata/core/owned.py:46
+#: udata/core/owned.py:62
 msgid "Unknown organization"
 msgstr ""
 
-#: udata/core/owned.py:50 udata/forms/fields.py:756
-#: udata/tests/api/test_dataservices_api.py:285
+#: udata/core/owned.py:66 udata/forms/fields.py:756
+#: udata/tests/api/test_dataservices_api.py:421
 msgid "Permission denied for this organization"
 msgstr ""
 
-#: udata/core/badges/forms.py:15
+#: udata/core/badges/forms.py:12
 msgid "Kind"
 msgstr ""
 
-#: udata/core/badges/forms.py:18
+#: udata/core/badges/forms.py:15
 msgid "Kind of badge (certified, etc)"
 msgstr ""
 
 #: udata/core/contact_point/forms.py:12 udata/core/jobs/forms.py:27
 #: udata/core/organization/forms.py:46 udata/core/post/forms.py:15
-#: udata/core/topic/forms.py:16 udata/harvest/forms.py:60
+#: udata/core/topic/forms.py:16 udata/harvest/forms.py:78
 #: udata/templates/api/admin.html:10
 msgid "Name"
 msgstr ""
@@ -238,19 +238,31 @@ msgstr ""
 msgid "Email"
 msgstr ""
 
-#: udata/core/contact_point/forms.py:17 udata/core/dataset/forms.py:114
-#: udata/core/dataset/forms.py:177 udata/core/reuse/forms.py:42
-#: udata/core/topic/forms.py:14 udata/harvest/forms.py:69
+#: udata/core/contact_point/forms.py:17
+msgid "Contact form"
+msgstr ""
+
+#: udata/core/contact_point/forms.py:17
+msgid "The organization web contact form"
+msgstr ""
+
+#: udata/core/contact_point/forms.py:20 udata/core/dataset/forms.py:112
+#: udata/core/dataset/forms.py:175 udata/core/topic/forms.py:14
+#: udata/harvest/forms.py:87
 msgid "Publish as"
 msgstr ""
 
-#: udata/core/dataservices/models.py:122 udata/core/dataset/models.py:529
-#: udata/mongo/datetime_fields.py:59
+#: udata/core/contact_point/models.py:18 udata/tests/api/test_contact_points.py:50
+msgid "At least an email or a contact form is required for a contact point"
+msgstr ""
+
+#: udata/core/dataservices/models.py:163 udata/core/dataset/models.py:568
+#: udata/mongo/datetime_fields.py:60
 msgid "Creation date"
 msgstr ""
 
-#: udata/core/dataservices/models.py:127 udata/core/dataset/models.py:532
-#: udata/mongo/datetime_fields.py:62
+#: udata/core/dataservices/models.py:168 udata/core/dataset/models.py:571
+#: udata/mongo/datetime_fields.py:66
 msgid "Last modification date"
 msgstr ""
 
@@ -398,194 +410,190 @@ msgstr ""
 msgid "Remote file"
 msgstr ""
 
-#: udata/core/dataset/forms.py:35
+#: udata/core/dataset/forms.py:33
 msgid "Checksum value"
 msgstr ""
 
-#: udata/core/dataset/forms.py:46
+#: udata/core/dataset/forms.py:44
 msgid "URL of the schema"
 msgstr ""
 
-#: udata/core/dataset/forms.py:47
+#: udata/core/dataset/forms.py:45
 msgid "Name of the schema"
 msgstr ""
 
-#: udata/core/dataset/forms.py:48
+#: udata/core/dataset/forms.py:46
 msgid "Version of the schema"
 msgstr ""
 
-#: udata/core/dataset/forms.py:67 udata/core/dataset/forms.py:144
-#: udata/core/discussions/forms.py:13 udata/core/reuse/forms.py:21
-#: udata/core/site/forms.py:12 udata/templates/mail/discussion_closed.html:26
+#: udata/core/dataset/forms.py:65 udata/core/dataset/forms.py:142
+#: udata/core/discussions/forms.py:13 udata/core/site/forms.py:12
+#: udata/templates/mail/discussion_closed.html:26
 #: udata/templates/mail/new_discussion.html:25
 #: udata/templates/mail/new_discussion_comment.html:26
 msgid "Title"
 msgstr ""
 
-#: udata/core/dataset/forms.py:70 udata/core/dataset/forms.py:148
+#: udata/core/dataset/forms.py:68 udata/core/dataset/forms.py:146
 #: udata/core/jobs/forms.py:28 udata/core/organization/forms.py:50
-#: udata/core/reuse/forms.py:24 udata/core/topic/forms.py:17
-#: udata/harvest/forms.py:62
+#: udata/core/topic/forms.py:17 udata/harvest/forms.py:80
 msgid "Description"
 msgstr ""
 
-#: udata/core/dataset/forms.py:73
+#: udata/core/dataset/forms.py:71
 msgid "File type"
 msgstr ""
 
-#: udata/core/dataset/forms.py:77
+#: udata/core/dataset/forms.py:75
 msgid "Whether the resource is an uploaded file, a remote file or an API"
 msgstr ""
 
-#: udata/core/dataset/forms.py:80 udata/core/reuse/forms.py:30
+#: udata/core/dataset/forms.py:78
 msgid "Type"
 msgstr ""
 
-#: udata/core/dataset/forms.py:84
+#: udata/core/dataset/forms.py:82
 msgid "Resource type (documentation, API...)"
 msgstr ""
 
-#: udata/core/dataset/forms.py:86 udata/core/reuse/forms.py:31
-#: udata/harvest/forms.py:64
+#: udata/core/dataset/forms.py:84 udata/harvest/forms.py:82
 msgid "URL"
 msgstr ""
 
-#: udata/core/dataset/forms.py:88
+#: udata/core/dataset/forms.py:86
 msgid "Format"
 msgstr ""
 
-#: udata/core/dataset/forms.py:93
+#: udata/core/dataset/forms.py:91
 msgid "Mime type"
 msgstr ""
 
-#: udata/core/dataset/forms.py:94
+#: udata/core/dataset/forms.py:92
 msgid "The mime type associated to the extension. (ex: text/plain)"
 msgstr ""
 
-#: udata/core/dataset/forms.py:97
+#: udata/core/dataset/forms.py:95
 msgid "Size"
 msgstr ""
 
-#: udata/core/dataset/forms.py:97
+#: udata/core/dataset/forms.py:95
 msgid "The file size in bytes"
 msgstr ""
 
-#: udata/core/dataset/forms.py:112
+#: udata/core/dataset/forms.py:110
 msgid "Related dataset"
 msgstr ""
 
-#: udata/core/dataset/forms.py:136 udata/tests/api/test_datasets_api.py:710
+#: udata/core/dataset/forms.py:134 udata/tests/api/test_datasets_api.py:725
 msgid "Wrong contact point id or contact point ownership mismatch"
 msgstr ""
 
-#: udata/core/dataset/forms.py:146 udata/core/organization/forms.py:48
+#: udata/core/dataset/forms.py:144 udata/core/organization/forms.py:48
 msgid "Acronym"
 msgstr ""
 
-#: udata/core/dataset/forms.py:146
+#: udata/core/dataset/forms.py:144
 msgid "An optional acronym"
 msgstr ""
 
-#: udata/core/dataset/forms.py:150
+#: udata/core/dataset/forms.py:148
 msgid "The details about the dataset (collection process, specifics...)."
 msgstr ""
 
-#: udata/core/dataset/forms.py:152
+#: udata/core/dataset/forms.py:150
 msgid "License"
 msgstr ""
 
-#: udata/core/dataset/forms.py:154
+#: udata/core/dataset/forms.py:152
 msgid "Update frequency"
 msgstr ""
 
-#: udata/core/dataset/forms.py:159
+#: udata/core/dataset/forms.py:157
 msgid "The frequency at which data are updated."
 msgstr ""
 
-#: udata/core/dataset/forms.py:161
+#: udata/core/dataset/forms.py:159
 msgid "Expected frequency date"
 msgstr ""
 
-#: udata/core/dataset/forms.py:165
+#: udata/core/dataset/forms.py:163
 msgid "Temporal coverage"
 msgstr ""
 
-#: udata/core/dataset/forms.py:165
+#: udata/core/dataset/forms.py:163
 msgid "The period covered by the data"
 msgstr ""
 
-#: udata/core/dataset/forms.py:168 udata/core/spatial/forms.py:85
+#: udata/core/dataset/forms.py:166 udata/core/spatial/forms.py:85
 #: udata/core/topic/forms.py:23
 msgid "Spatial coverage"
 msgstr ""
 
-#: udata/core/dataset/forms.py:168 udata/core/topic/forms.py:23
+#: udata/core/dataset/forms.py:166 udata/core/topic/forms.py:23
 msgid "The geographical area covered by the data."
 msgstr ""
 
-#: udata/core/dataset/forms.py:170 udata/core/post/forms.py:26
-#: udata/core/reuse/forms.py:33 udata/core/site/forms.py:13
-#: udata/core/topic/forms.py:26
+#: udata/core/dataset/forms.py:168 udata/core/post/forms.py:26
+#: udata/core/site/forms.py:13 udata/core/topic/forms.py:26
 msgid "Tags"
 msgstr ""
 
-#: udata/core/dataset/forms.py:170 udata/core/reuse/forms.py:33
+#: udata/core/dataset/forms.py:168
 msgid "Some taxonomy keywords"
 msgstr ""
 
-#: udata/core/dataset/forms.py:172 udata/core/reuse/forms.py:36
-#: udata/core/topic/forms.py:27
+#: udata/core/dataset/forms.py:170 udata/core/topic/forms.py:27
 msgid "Private"
 msgstr ""
 
-#: udata/core/dataset/forms.py:173 udata/core/reuse/forms.py:37
+#: udata/core/dataset/forms.py:171
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr ""
 
-#: udata/core/dataset/models.py:129
+#: udata/core/dataset/models.py:59
+msgid "Pivotal data"
+msgstr ""
+
+#: udata/core/dataset/models.py:135
 msgid "A schema must contains a name or an URL when a version is provided."
 msgstr ""
 
-#: udata/core/dataset/models.py:160 udata/tests/api/test_datasets_api.py:803
-#: udata/tests/api/test_datasets_api.py:814
+#: udata/core/dataset/models.py:166 udata/tests/api/test_datasets_api.py:818
+#: udata/tests/api/test_datasets_api.py:829
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:179 udata/tests/api/test_datasets_api.py:825
+#: udata/core/dataset/models.py:185 udata/tests/api/test_datasets_api.py:840
 msgid ""
 "Version \"{version}\" is not an allowed value for the schema \"{name}\". "
 "Allowed versions: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:437 udata/core/dataset/rdf.py:468
-#: udata/tests/dataset/test_dataset_rdf.py:529
-#: udata/tests/dataset/test_dataset_rdf.py:542
+#: udata/core/dataset/models.py:462 udata/core/dataset/rdf.py:503
+#: udata/tests/dataset/test_dataset_rdf.py:556
+#: udata/tests/dataset/test_dataset_rdf.py:569
 msgid "Nameless resource"
 msgstr ""
 
-#: udata/core/dataset/models.py:515
+#: udata/core/dataset/models.py:554
 msgid "Future date of update"
 msgstr ""
 
-#: udata/core/dataset/models.py:541
-msgid "Pivotal data"
-msgstr ""
-
-#: udata/core/dataset/models.py:582
+#: udata/core/dataset/models.py:617
 msgid "dataset"
 msgstr ""
 
-#: udata/core/dataset/rdf.py:466 udata/tests/dataset/test_dataset_rdf.py:516
+#: udata/core/dataset/rdf.py:501 udata/tests/dataset/test_dataset_rdf.py:543
 msgid "{format} resource"
 msgstr ""
 
-#: udata/core/dataset/tasks.py:106
+#: udata/core/dataset/tasks.py:108
 msgid "You need to update some frequency-based datasets"
 msgstr ""
 
 #: udata/core/discussions/forms.py:15 udata/core/discussions/forms.py:23
 #: udata/core/organization/forms.py:83 udata/core/organization/forms.py:87
-#: udata/harvest/forms.py:79
+#: udata/harvest/forms.py:97
 msgid "Comment"
 msgstr ""
 
@@ -655,17 +663,17 @@ msgid "Refused"
 msgstr ""
 
 #: udata/core/organization/forms.py:25
-#: udata/tests/api/test_organizations_api.py:116
+#: udata/tests/api/test_organizations_api.py:131
 msgid "A siret number is made of 14 digits"
 msgstr ""
 
 #: udata/core/organization/forms.py:36
-#: udata/tests/api/test_organizations_api.py:128
+#: udata/tests/api/test_organizations_api.py:143
 msgid "A siret number is only made of digits"
 msgstr ""
 
 #: udata/core/organization/forms.py:39
-#: udata/tests/api/test_organizations_api.py:123
+#: udata/tests/api/test_organizations_api.py:138
 msgid "Invalid Siret number"
 msgstr ""
 
@@ -701,23 +709,23 @@ msgstr ""
 msgid "Role"
 msgstr ""
 
-#: udata/core/organization/models.py:130
+#: udata/core/organization/models.py:34
 msgid "Public Service"
 msgstr ""
 
-#: udata/core/organization/models.py:131
+#: udata/core/organization/models.py:35
 msgid "Certified"
 msgstr ""
 
-#: udata/core/organization/models.py:132
+#: udata/core/organization/models.py:36
 msgid "Association"
 msgstr ""
 
-#: udata/core/organization/models.py:133
+#: udata/core/organization/models.py:37
 msgid "Company"
 msgstr ""
 
-#: udata/core/organization/models.py:134
+#: udata/core/organization/models.py:38
 msgid "Local authority"
 msgstr ""
 
@@ -783,7 +791,7 @@ msgstr ""
 msgid "Associated reuses"
 msgstr ""
 
-#: udata/core/post/forms.py:22 udata/core/reuse/forms.py:32
+#: udata/core/post/forms.py:22
 msgid "Image"
 msgstr ""
 
@@ -871,7 +879,7 @@ msgstr ""
 msgid "Connected device"
 msgstr ""
 
-#: udata/core/reuse/constants.py:15 udata/tests/reuse/test_reuse_model.py:105
+#: udata/core/reuse/constants.py:15 udata/tests/reuse/test_reuse_model.py:106
 msgid "Health"
 msgstr ""
 
@@ -927,23 +935,11 @@ msgstr ""
 msgid "Open data tools"
 msgstr ""
 
-#: udata/core/reuse/forms.py:14
+#: udata/core/reuse/models.py:35
 msgid "This URL is already registered"
 msgstr ""
 
-#: udata/core/reuse/forms.py:26
-msgid "The details about the reuse (build process, specifics, self-critics...)."
-msgstr ""
-
-#: udata/core/reuse/forms.py:34
-msgid "Used datasets"
-msgstr ""
-
-#: udata/core/reuse/forms.py:39
-msgid "Topic"
-msgstr ""
-
-#: udata/core/reuse/models.py:88
+#: udata/core/reuse/models.py:175
 msgid "reuse"
 msgstr ""
 
@@ -987,67 +983,67 @@ msgstr ""
 msgid "The size of the data increment"
 msgstr ""
 
-#: udata/core/spatial/translations.py:5
+#: udata/core/spatial/translations.py:7
 msgid "French region"
 msgstr ""
 
-#: udata/core/spatial/translations.py:6
+#: udata/core/spatial/translations.py:8
 msgid "French intermunicipal (EPCI)"
 msgstr ""
 
-#: udata/core/spatial/translations.py:7
+#: udata/core/spatial/translations.py:9
 msgid "French county"
 msgstr ""
 
-#: udata/core/spatial/translations.py:8
+#: udata/core/spatial/translations.py:10
 msgid "French district"
 msgstr ""
 
-#: udata/core/spatial/translations.py:9
+#: udata/core/spatial/translations.py:11
 msgid "French town"
 msgstr ""
 
-#: udata/core/spatial/translations.py:10
+#: udata/core/spatial/translations.py:12
 msgid "French canton"
 msgstr ""
 
-#: udata/core/spatial/translations.py:11
+#: udata/core/spatial/translations.py:13
 msgid "Iris (Insee districts)"
 msgstr ""
 
-#: udata/core/spatial/translations.py:12
+#: udata/core/spatial/translations.py:14
 msgid "Country"
 msgstr ""
 
-#: udata/core/spatial/translations.py:13
+#: udata/core/spatial/translations.py:15
 msgid "World"
 msgstr ""
 
-#: udata/core/spatial/translations.py:14
+#: udata/core/spatial/translations.py:16
 msgid "Country group"
 msgstr ""
 
-#: udata/core/spatial/translations.py:15
+#: udata/core/spatial/translations.py:17
 msgid "Country subset"
 msgstr ""
 
-#: udata/core/spatial/translations.py:16
+#: udata/core/spatial/translations.py:18
 msgid "European Union"
 msgstr ""
 
-#: udata/core/spatial/translations.py:17
+#: udata/core/spatial/translations.py:19
 msgid "Metropolitan France"
 msgstr ""
 
-#: udata/core/spatial/translations.py:18
+#: udata/core/spatial/translations.py:20
 msgid "Overseas France"
 msgstr ""
 
-#: udata/core/spatial/translations.py:19
+#: udata/core/spatial/translations.py:21
 msgid "French overseas collectivities"
 msgstr ""
 
-#: udata/core/spatial/translations.py:20
+#: udata/core/spatial/translations.py:22
 msgid "French arrondissement"
 msgstr ""
 
@@ -1127,7 +1123,7 @@ msgstr ""
 msgid "Not a valid UUID"
 msgstr ""
 
-#: udata/forms/fields.py:420
+#: udata/forms/fields.py:420 udata/mongo/taglist_field.py:37
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
 msgstr ""
@@ -1175,11 +1171,11 @@ msgstr ""
 msgid "Source"
 msgstr ""
 
-#: udata/harvest/forms.py:62
+#: udata/harvest/forms.py:80
 msgid "Some optional details about this harvester"
 msgstr ""
 
-#: udata/harvest/forms.py:66
+#: udata/harvest/forms.py:84
 msgid "Backend"
 msgstr ""
 
@@ -1221,6 +1217,14 @@ msgstr ""
 
 #: udata/harvest/models.py:44
 msgid "Archived"
+msgstr ""
+
+#: udata/harvest/backends/dcat.py:292
+msgid "Remote URL prefix"
+msgstr ""
+
+#: udata/harvest/backends/dcat.py:295
+msgid "A prefix used to build the remote URL of the harvested items."
 msgstr ""
 
 #: udata/templates/admin.html:7

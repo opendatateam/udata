@@ -4,7 +4,6 @@ import pytest
 
 from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
 from udata.core.organization.factories import OrganizationFactory
-from udata.models import Badge
 
 
 @pytest.mark.usefixtures("clean_db")
@@ -21,9 +20,9 @@ class BadgeCommandTest:
         assert org.badges[0].kind == PUBLIC_SERVICE
 
     def test_toggle_badge_off(self, cli):
-        ps_badge = Badge(kind=PUBLIC_SERVICE)
-        certified_badge = Badge(kind=CERTIFIED)
-        org = OrganizationFactory(badges=[ps_badge, certified_badge])
+        org = OrganizationFactory()
+        org.add_badge(PUBLIC_SERVICE)
+        org.add_badge(CERTIFIED)
 
         cli("badges", "toggle", str(org.id), PUBLIC_SERVICE)
 

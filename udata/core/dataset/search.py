@@ -7,6 +7,7 @@ from udata.models import Dataset, GeoZone, License, Organization, Topic, User
 from udata.search import (
     BoolFilter,
     Filter,
+    ListFilter,
     ModelSearchAdapter,
     ModelTermsFilter,
     TemporalCoverageFilter,
@@ -31,9 +32,10 @@ class DatasetSearch(ModelSearchAdapter):
     }
 
     filters = {
-        "tag": Filter(),
-        "badge": Filter(),
+        "tag": ListFilter(),
+        "badge": Filter(choices=list(Dataset.__badges__)),
         "organization": ModelTermsFilter(model=Organization),
+        "organization_badge": Filter(choices=list(Organization.__badges__)),
         "owner": ModelTermsFilter(model=User),
         "license": ModelTermsFilter(model=License),
         "geozone": ModelTermsFilter(model=GeoZone),
@@ -51,7 +53,7 @@ class DatasetSearch(ModelSearchAdapter):
 
     @classmethod
     def mongo_search(cls, args):
-        datasets = Dataset.objects(archived=None, deleted=None, private=False)
+        datasets = Dataset.objects.visible()
         datasets = DatasetApiParser.parse_filters(datasets, args)
 
         sort = (
@@ -59,8 +61,7 @@ class DatasetSearch(ModelSearchAdapter):
             or ("$text_score" if args["q"] else None)
             or DEFAULT_SORTING
         )
-        offset = (args["page"] - 1) * args["page_size"]
-        return datasets.order_by(sort).skip(offset).limit(args["page_size"]), datasets.count()
+        return datasets.order_by(sort).paginate(args["page"], args["page_size"])
 
     @classmethod
     def serialize(cls, dataset):
@@ -76,6 +77,7 @@ class DatasetSearch(ModelSearchAdapter):
                 "name": org.name,
                 "public_service": 1 if org.public_service else 0,
                 "followers": org.metrics.get("followers", 0),
+                "badges": [badge.kind for badge in org.badges],
             }
         elif dataset.owner:
             owner = User.objects(id=dataset.owner.id).first()

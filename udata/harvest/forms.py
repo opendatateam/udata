@@ -24,6 +24,10 @@ class HarvestConfigField(fields.DictField):
         candidates = (f for f in backend.features if f.key == key)
         return next(candidates, None)
 
+    def get_extra_configs_specs(self, backend, key):
+        candidates = (f for f in backend.extra_configs if f.key == key)
+        return next(candidates, None)
+
     def pre_validate(self, form):
         if self.data:
             backend = self.get_backend(form)
@@ -43,6 +47,20 @@ class HarvestConfigField(fields.DictField):
 
                 if not isinstance(f["value"], specs.type):
                     msg = '"{0}" filter should of type "{1}"'
+                    msg = msg.format(specs.key, specs.type.__name__)
+                    raise validators.ValidationError(msg)
+            # Validate extras configs
+            for f in self.data.get("extra_configs") or []:
+                if not ("key" in f and "value" in f):
+                    msg = "A field should have both key and value properties"
+                    raise validators.ValidationError(msg)
+                specs = self.get_extra_configs_specs(backend, f["key"])
+                if not specs:
+                    msg = 'Unknown extra config key "{0}" for "{1}" backend'
+                    msg = msg.format(f["key"], backend.name)
+                    raise validators.ValidationError(msg)
+                if not isinstance(f["value"], specs.type):
+                    msg = '"{0}" extra config should be of type "{1}"'
                     msg = msg.format(specs.key, specs.type.__name__)
                     raise validators.ValidationError(msg)
             # Validate features

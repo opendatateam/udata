@@ -21,7 +21,7 @@ class ReportsAPI(API):
     def get(self):
         query = Report.objects
 
-        return Report.apply_sort_filters_and_pagination(query)
+        return Report.apply_pagination(Report.apply_sort_filters(query))
 
     @api.doc("create_report", responses={400: "Validation error"})
     @api.expect(Report.__write_fields__)
