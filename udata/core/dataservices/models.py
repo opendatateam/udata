@@ -198,6 +198,11 @@ class Dataservice(WithMetrics, Owned, db.Document):
         readonly=True,
     )
 
+    def url_for(self, *args, **kwargs):
+        return endpoint_for(
+            "dataservices.show", "api.dataservice", dataservice=self, *args, **kwargs
+        )
+
     @function_field(description="Link to the API endpoint for this dataservice")
     def self_api_url(self):
         return endpoint_for("api.dataservice", dataservice=self, _external=True)
