@@ -130,7 +130,7 @@ export default {
         $(this.$els.endHidden).rules('add', {
             dateGreaterThan: this.$els.startHidden.id,
             required: (el) => {
-                return (this.endValue && !this.startValue);
+                return !!(this.endValue && !this.startValue);
             },
             messages: {
                 dateGreaterThan: this._('End date should be after start date'),
