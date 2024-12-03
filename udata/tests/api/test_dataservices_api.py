@@ -44,6 +44,13 @@ class DataserviceAPITest(APITestCase):
         response = self.get(url_for("api.dataservices", organization_badge="bad-badge"))
         assert400(response)
 
+        # filter on tag
+        tag_dataservice = DataserviceFactory(tags=["my-tag", "other"])
+        response = self.get(url_for("api.dataservices", tag="my-tag"))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(tag_dataservice.id)
+
     def test_dataservice_api_create(self):
         user = self.login()
         datasets = DatasetFactory.create_batch(3)
@@ -91,6 +98,11 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(response.json["license"], license.id)
         self.assertEqual(
             response.json["self_api_url"], "http://local.test/api/1/dataservices/updated-title/"
+        )
+        # metadata_modified_at should have been updated during the patch
+        self.assertNotEqual(
+            response.json["metadata_modified_at"].split("+")[0],
+            dataservice.metadata_modified_at.isoformat(),
         )
 
         self.assertEqual(response.json["datasets"]["total"], 2)
@@ -295,30 +307,6 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(response_datasets.json["total"], 1)
         self.assertEqual(response_datasets.json["data"][0]["id"], str(dataset_a.id))
 
-        response = self.get(url_for("api.dataservices", sort="title"))
-        self.assert200(response)
-
-        self.assertEqual(response.json["previous_page"], None)
-        self.assertEqual(response.json["next_page"], None)
-        self.assertEqual(response.json["page"], 1)
-        self.assertEqual(response.json["total"], 3)
-        self.assertEqual(len(response.json["data"]), 3)
-        self.assertEqual(response.json["data"][0]["title"], "A")
-        self.assertEqual(response.json["data"][1]["title"], "B")
-        self.assertEqual(response.json["data"][2]["title"], "C")
-
-        response = self.get(url_for("api.dataservices", sort="-title"))
-        self.assert200(response)
-
-        self.assertEqual(response.json["previous_page"], None)
-        self.assertEqual(response.json["next_page"], None)
-        self.assertEqual(response.json["page"], 1)
-        self.assertEqual(response.json["total"], 3)
-        self.assertEqual(len(response.json["data"]), 3)
-        self.assertEqual(response.json["data"][0]["title"], "C")
-        self.assertEqual(response.json["data"][1]["title"], "B")
-        self.assertEqual(response.json["data"][2]["title"], "A")
-
         response = self.get(url_for("api.dataservices", page_size=1))
         self.assert200(response)
 
@@ -335,6 +323,48 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(response.json["total"], 2)
         self.assertEqual(response.json["data"][0]["title"], "A")
         self.assertEqual(response.json["data"][1]["title"], "C")
+
+    def test_dataservice_api_index_with_sorts(self):
+        DataserviceFactory(title="A", created_at="2024-03-01", metadata_modified_at="2024-03-01")
+        DataserviceFactory(title="B", created_at="2024-02-01", metadata_modified_at="2024-05-01")
+        DataserviceFactory(title="C", created_at="2024-05-01", metadata_modified_at="2024-04-01")
+        DataserviceFactory(title="D", created_at="2024-04-01", metadata_modified_at="2024-02-01")
+
+        response = self.get(url_for("api.dataservices", sort="title"))
+        self.assert200(response)
+        self.assertEqual(
+            [dataservice["title"] for dataservice in response.json["data"]], ["A", "B", "C", "D"]
+        )
+
+        response = self.get(url_for("api.dataservices", sort="-title"))
+        self.assert200(response)
+        self.assertEqual(
+            [dataservice["title"] for dataservice in response.json["data"]], ["D", "C", "B", "A"]
+        )
+
+        response = self.get(url_for("api.dataservices", sort="created"))
+        self.assert200(response)
+        self.assertEqual(
+            [dataservice["title"] for dataservice in response.json["data"]], ["B", "A", "D", "C"]
+        )
+
+        response = self.get(url_for("api.dataservices", sort="-created"))
+        self.assert200(response)
+        self.assertEqual(
+            [dataservice["title"] for dataservice in response.json["data"]], ["C", "D", "A", "B"]
+        )
+
+        response = self.get(url_for("api.dataservices", sort="last_modified"))
+        self.assert200(response)
+        self.assertEqual(
+            [dataservice["title"] for dataservice in response.json["data"]], ["D", "A", "C", "B"]
+        )
+
+        response = self.get(url_for("api.dataservices", sort="-last_modified"))
+        self.assert200(response)
+        self.assertEqual(
+            [dataservice["title"] for dataservice in response.json["data"]], ["B", "C", "A", "D"]
+        )
 
     def test_dataservice_api_index_with_wrong_dataset_id(self):
         response = self.get(url_for("api.dataservices", sort="title", dataset=str("xxx")))

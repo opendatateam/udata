@@ -34,7 +34,7 @@ class DataservicesAPI(API):
             current_user, mongoengine.Q(private__ne=True, archived_at=None, deleted_at=None)
         )
 
-        return Dataservice.apply_sort_filters_and_pagination(query)
+        return Dataservice.apply_pagination(Dataservice.apply_sort_filters(query))
 
     @api.secure
     @api.doc("create_dataservice", responses={400: "Validation error"})
@@ -76,7 +76,7 @@ class DataserviceAPI(API):
         OwnablePermission(dataservice).test()
 
         patch(dataservice, request)
-        dataservice.modified_at = datetime.utcnow()
+        dataservice.metadata_modified_at = datetime.utcnow()
 
         try:
             dataservice.save()
@@ -93,7 +93,7 @@ class DataserviceAPI(API):
 
         OwnablePermission(dataservice).test()
         dataservice.deleted_at = datetime.utcnow()
-        dataservice.modified_at = datetime.utcnow()
+        dataservice.metadata_modified_at = datetime.utcnow()
         dataservice.save()
 
         return "", 204
@@ -141,6 +141,7 @@ class DataserviceDatasetsAPI(API):
 
         if diff:
             dataservice.datasets += [ObjectId(did) for did in diff]
+            dataservice.metadata_modified_at = datetime.utcnow()
             dataservice.save()
 
         return dataservice, 201
@@ -164,6 +165,7 @@ class DataserviceDatasetAPI(API):
         if dataset not in dataservice.datasets:
             api.abort(404, "Dataset not found in dataservice")
         dataservice.datasets = [d for d in dataservice.datasets if d.id != dataset.id]
+        dataservice.metadata_modified_at = datetime.utcnow()
         dataservice.save()
 
         return None, 204

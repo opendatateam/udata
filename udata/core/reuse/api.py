@@ -112,7 +112,7 @@ class ReuseListAPI(API):
         query = Reuse.objects.visible_by_user(
             current_user, mongoengine.Q(private__ne=True, deleted=None)
         )
-        return Reuse.apply_sort_filters_and_pagination(query)
+        return Reuse.apply_pagination(Reuse.apply_sort_filters(query))
 
     @api.secure
     @api.doc("create_reuse")

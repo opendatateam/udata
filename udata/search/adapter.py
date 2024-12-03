@@ -27,19 +27,28 @@ class ModelSearchAdapter:
         return True
 
     @classmethod
-    def as_request_parser(cls, paginate=True):
+    def as_request_parser(cls, paginate=True, store_missing: bool = True):
         parser = RequestParser()
         # q parameter
-        parser.add_argument("q", type=str, location="args", help="The search query")
+        parser.add_argument(
+            "q", type=str, location="args", help="The search query", store_missing=store_missing
+        )
         # Add filters arguments
         for name, type in cls.filters.items():
             kwargs = type.as_request_parser_kwargs()
-            parser.add_argument(name, location="args", **kwargs)
+            parser.add_argument(name, location="args", store_missing=store_missing, **kwargs)
         # Sort arguments
         keys = list(cls.sorts)
         choices = keys + ["-" + k for k in keys]
         help_msg = "The field (and direction) on which sorting apply"
-        parser.add_argument("sort", type=str, location="args", choices=choices, help=help_msg)
+        parser.add_argument(
+            "sort",
+            type=str,
+            location="args",
+            choices=choices,
+            help=help_msg,
+            store_missing=store_missing,
+        )
         if paginate:
             parser.add_argument(
                 "page", type=int, location="args", default=1, help="The page to display"

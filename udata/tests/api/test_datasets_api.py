@@ -154,7 +154,8 @@ class DatasetAPITest(APITestCase):
 
         [DatasetFactory() for i in range(2)]
 
-        tag_dataset = DatasetFactory(tags=["my-tag", "other"])
+        tag_dataset_1 = DatasetFactory(tags=["my-tag-shared", "my-tag-1"])
+        tag_dataset_2 = DatasetFactory(tags=["my-tag-shared", "my-tag-2"])
         license_dataset = DatasetFactory(license=LicenseFactory(id="cc-by"))
         format_dataset = DatasetFactory(resources=[ResourceFactory(format="my-format")])
         featured_dataset = DatasetFactory(featured=True)
@@ -192,10 +193,19 @@ class DatasetAPITest(APITestCase):
         )
 
         # filter on tag
-        response = self.get(url_for("api.datasets", tag="my-tag"))
+        response = self.get(url_for("api.datasets", tag="my-tag-shared"))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), 2)
+        self.assertEqual(
+            set([str(tag_dataset_1.id), str(tag_dataset_2.id)]),
+            set([d["id"] for d in response.json["data"]]),
+        )
+
+        # filter on multiple tags
+        response = self.get(url_for("api.datasets", tag=["my-tag-shared", "my-tag-1"]))
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), 1)
-        self.assertEqual(response.json["data"][0]["id"], str(tag_dataset.id))
+        self.assertEqual(response.json["data"][0]["id"], str(tag_dataset_1.id))
 
         # filter on format
         response = self.get(url_for("api.datasets", format="my-format"))
