@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add dataservice csv adapter [#3208](https://github.com/opendatateam/udata/pull/3208)
+- Add url_for for dataservices and mail notifications [#3213](https://github.com/opendatateam/udata/pull/3213)
 - The API will now return all the datasets a user has access to, including deleted of private ones that they're the owners of [#3214](https://github.com/opendatateam/udata/pull/3214)
 
 ## 10.0.4 (2024-11-29)
