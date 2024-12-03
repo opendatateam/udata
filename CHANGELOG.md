@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add dataservice csv adapter [#3208](https://github.com/opendatateam/udata/pull/3208)
 
 ## 10.0.4 (2024-11-29)
 
