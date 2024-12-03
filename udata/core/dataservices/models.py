@@ -109,6 +109,11 @@ class Dataservice(WithMetrics, Owned, db.Document):
         "auto_create_index_on_save": True,
     }
 
+    verbose_name = _("dataservice")
+
+    def __str__(self):
+        return self.title or ""
+
     title = field(
         db.StringField(required=True),
         example="My awesome API",
