@@ -63,6 +63,15 @@ class OrgApiParser(ModelApiParser):
         "last_modified": "last_modified",
     }
 
+    def __init__(self):
+        super().__init__()
+        self.parser.add_argument(
+            "badge",
+            type=str,
+            choices=list(Organization.__badges__),
+            location="args",
+        )
+
     @staticmethod
     def parse_filters(organizations, args):
         if args.get("q"):
@@ -72,6 +81,8 @@ class OrgApiParser(ModelApiParser):
             # between tokens whereas an OR is used without it.
             phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
             organizations = organizations.search_text(phrase_query)
+        if args.get("badge"):
+            organizations = organizations.with_badge(args["badge"])
         return organizations
 
 
@@ -422,7 +433,7 @@ class OrganizationSuggestAPI(API):
         ]
 
 
-@ns.route("/<org:org>/logo", endpoint="organization_logo")
+@ns.route("/<org:org>/logo/", endpoint="organization_logo")
 @api.doc(**common_doc)
 class AvatarAPI(API):
     @api.secure

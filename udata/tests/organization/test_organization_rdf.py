@@ -72,7 +72,7 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
         self.assertEqual(str(catalog.identifier), uri)
 
         self.assertEqual(len(list(catalog.objects(DCAT.dataset))), len(datasets))
-        self.assertEqual(len(list(catalog.objects(DCAT.dataservice))), len(dataservices))
+        self.assertEqual(len(list(catalog.objects(DCAT.service))), len(dataservices))
 
         org = catalog.value(DCT.publisher)
         self.assertEqual(org.value(RDF.type).identifier, FOAF.Organization)
@@ -138,7 +138,7 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
         self.assertEqual(len(list(catalog.objects(DCAT.dataset))), page_size)
         # All dataservices that are not linked to a dataset are listed in the first page.
         # See DataserviceQuerySet.filter_by_dataset_pagination.
-        self.assertEqual(len(list(catalog.objects(DCAT.dataservice))), total)
+        self.assertEqual(len(list(catalog.objects(DCAT.service))), total)
 
         paginations = list(graph.subjects(RDF.type, HYDRA.PartialCollectionView))
         self.assertEqual(len(paginations), 1)
@@ -166,7 +166,7 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
         # 5 datasets total, 3 on the first page, 2 on the second.
         self.assertEqual(len(list(catalog.objects(DCAT.dataset))), 2)
         # 1 extra_dataservice, listed on the same page as its associated extra_dataset.
-        self.assertEqual(len(list(catalog.objects(DCAT.dataservice))), 1)
+        self.assertEqual(len(list(catalog.objects(DCAT.service))), 1)
 
         paginations = list(graph.subjects(RDF.type, HYDRA.PartialCollectionView))
         self.assertEqual(len(paginations), 1)

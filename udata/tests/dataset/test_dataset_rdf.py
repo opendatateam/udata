@@ -4,10 +4,11 @@ from xml.etree.ElementTree import XML
 import pytest
 import requests
 from flask import url_for
-from rdflib import BNode, Graph, Literal, URIRef
+from rdflib import BNode, Graph, Literal, Namespace, URIRef
 from rdflib.namespace import FOAF, RDF
 from rdflib.resource import Resource as RdfResource
 
+from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceFactory
 from udata.core.dataset.models import (
     Checksum,
@@ -22,6 +23,7 @@ from udata.core.dataset.rdf import (
     dataset_to_rdf,
     frequency_from_rdf,
     frequency_to_rdf,
+    licenses_from_rdf,
     resource_from_rdf,
     resource_to_rdf,
     temporal_from_rdf,
@@ -30,6 +32,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.i18n import gettext as _
 from udata.mongo import db
 from udata.rdf import (
+    ADMS,
     DCAT,
     DCATAP,
     DCT,
@@ -39,6 +42,8 @@ from udata.rdf import (
     SKOS,
     SPDX,
     TAG_TO_EU_HVD_CATEGORIES,
+    VCARD,
+    primary_topic_identifier_from_rdf,
 )
 from udata.tests.helpers import assert200, assert_redirects
 from udata.utils import faker
@@ -79,17 +84,29 @@ class DatasetToRdfTest:
         assert d.value(DCT.title) == Literal(dataset.title)
         assert d.value(DCT.issued) == Literal(dataset.created_at)
         assert d.value(DCT.modified) == Literal(dataset.last_modified)
+        assert d.value(DCAT.landingPage) is None
 
-    def test_all_dataset_fields(self):
+    def test_all_dataset_fields(self, app):
         resources = ResourceFactory.build_batch(3)
         org = OrganizationFactory(name="organization")
+        contact = ContactPointFactory(
+            name="Organization contact",
+            email="hello@its.me",
+            contact_form="https://data.support.com",
+        )
+        remote_url = "https://somewhere.org/dataset"
         dataset = DatasetFactory(
             tags=faker.tags(nb=3),
             resources=resources,
             frequency="daily",
             acronym="acro",
             organization=org,
+            contact_point=contact,
+            harvest=HarvestDatasetMetadata(
+                remote_url=remote_url, dct_identifier="foobar-identifier"
+            ),
         )
+        app.config["SITE_TITLE"] = "Test site title"
         d = dataset_to_rdf(dataset)
         g = d.graph
 
@@ -101,19 +118,29 @@ class DatasetToRdfTest:
         assert isinstance(d.identifier, URIRef)
         uri = url_for("api.dataset", dataset=dataset.id, _external=True)
         assert str(d.identifier) == uri
-        assert d.value(DCT.identifier) == Literal(dataset.id)
+        assert d.value(DCT.identifier) == Literal("foobar-identifier")
+        alternate_identifier = d.value(ADMS.identifier)
+        assert alternate_identifier.value(RDF.type).identifier == ADMS.Identifier
+        assert f"datasets/{dataset.id}" in alternate_identifier.value(SKOS.notation)
+        assert alternate_identifier.value(DCT.creator) == Literal("Test site title")
         assert d.value(DCT.title) == Literal(dataset.title)
         assert d.value(SKOS.altLabel) == Literal(dataset.acronym)
         assert d.value(DCT.description) == Literal(dataset.description)
         assert d.value(DCT.issued) == Literal(dataset.created_at)
         assert d.value(DCT.modified) == Literal(dataset.last_modified)
         assert d.value(DCT.accrualPeriodicity).identifier == FREQ.daily
+        assert d.value(DCAT.landingPage).identifier == URIRef(remote_url)
         expected_tags = set(Literal(t) for t in dataset.tags)
         assert set(d.objects(DCAT.keyword)) == expected_tags
         assert len(list(d.objects(DCAT.distribution))) == len(resources)
         org = d.value(DCT.publisher)
         assert org.value(RDF.type).identifier == FOAF.Organization
         assert org.value(FOAF.name) == Literal("organization")
+        contact_rdf = d.value(DCAT.contactPoint)
+        assert contact_rdf.value(RDF.type).identifier == VCARD.Kind
+        assert contact_rdf.value(VCARD.fn) == Literal("Organization contact")
+        assert contact_rdf.value(VCARD.hasEmail).identifier == URIRef("mailto:hello@its.me")
+        assert contact_rdf.value(VCARD.hasUrl).identifier == URIRef("https://data.support.com")
 
     def test_map_unkownn_frequencies(self):
         assert frequency_to_rdf("hourly") == FREQ.continuous
@@ -169,6 +196,34 @@ class DatasetToRdfTest:
         assert r.graph.value(checksum.identifier, RDF.type) == SPDX.Checksum
         assert r.graph.value(checksum.identifier, SPDX.algorithm) == SPDX.checksumAlgorithm_sha1
         assert checksum.value(SPDX.checksumValue) == Literal(resource.checksum.value)
+
+    def test_ogc_resource_access_service(self):
+        license = LicenseFactory()
+        resource = ResourceFactory(
+            format="ogc:wms",
+            url="https://services.data.shom.fr/INSPIRE/wms/r?service=WMS&request=GetCapabilities&version=1.3.0",
+        )
+        contact = ContactPointFactory()
+        dataset = DatasetFactory(resources=[resource], license=license, contact_point=contact)
+
+        r = resource_to_rdf(resource, dataset)
+
+        service = r.value(DCAT.accessService)
+        assert service.value(RDF.type).identifier == DCAT.DataService
+        assert service.value(DCT.title) == Literal(resource.title)
+        assert service.value(DCAT.endpointDescription).identifier == URIRef(
+            "https://services.data.shom.fr/INSPIRE/wms/r?service=WMS&request=GetCapabilities&version=1.3.0"
+        )
+        assert service.value(DCAT.endpointURL).identifier == URIRef(
+            "https://services.data.shom.fr/INSPIRE/wms/r"
+        )
+        assert service.value(DCT.conformsTo).identifier == URIRef(
+            "http://www.opengeospatial.org/standards/wms"
+        )
+        assert service.value(DCT.license).identifier == URIRef(license.url)
+
+        contact_rdf = service.value(DCAT.contactPoint)
+        assert contact_rdf.value(RDF.type).identifier == VCARD.Kind
 
     def test_temporal_coverage(self):
         start = faker.past_date(start_date="-30d")
@@ -799,6 +854,39 @@ class RdfToDatasetTest:
         assert resource.title == title
         assert resource.description == description
 
+    def test_primary_topic_identifier_from_rdf_outer(self):
+        """Check that a CatalogRecord node that is primaryTopic of a dataset is found and parsed"""
+        node = BNode()
+        g = Graph()
+
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+
+        primary_topic_node = BNode()
+        g.add((primary_topic_node, RDF.type, DCAT.CatalogRecord))
+        g.add((primary_topic_node, DCT.identifier, Literal("primary-topic-identifier")))
+        g.add((primary_topic_node, FOAF.primaryTopic, node))
+
+        pti = primary_topic_identifier_from_rdf(g, g.resource(node))
+        assert pti == Literal("primary-topic-identifier")
+
+    def test_primary_topic_identifier_from_rdf_inner(self):
+        """Check that a nested isPrimaryTopicOf of a dataset is found and parsed"""
+        node = BNode()
+        g = Graph()
+
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+
+        primary_topic_node = BNode()
+        g.add((primary_topic_node, RDF.type, DCAT.CatalogRecord))
+        g.add((primary_topic_node, DCT.identifier, Literal("primary-topic-identifier")))
+
+        g.add((node, FOAF.isPrimaryTopicOf, primary_topic_node))
+
+        pti = primary_topic_identifier_from_rdf(g, g.resource(node))
+        assert pti == Literal("primary-topic-identifier")
+
 
 @pytest.mark.frontend
 class DatasetRdfViewsTest:
@@ -852,3 +940,57 @@ class DatasetRdfViewsTest:
         response = client.get(url, headers={"Accept": mime})
         assert200(response)
         assert response.content_type == mime
+
+
+class DatasetFromRdfUtilsTest:
+    def test_licenses_from_rdf(self):
+        """Test a bunch of cases of licenses detection from RDF"""
+        rdf_xml_data = """<?xml version="1.0" encoding="UTF-8"?>
+            <rdf:RDF
+            xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+            xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+            xmlns:foaf="http://xmlns.com/foaf/0.1/"
+            xmlns:dct="http://purl.org/dc/terms/"
+            xmlns:cc="http://creativecommons.org/ns#"
+            xmlns:ex="http://example.org/">
+
+            <rdf:Description rdf:about="http://example.org/dataset1">
+                <dct:title>Comprehensive License Example Dataset</dct:title>
+                <dct:license rdf:resource="http://example.org/custom-license"/>
+                <dct:license>This is a literal license statement</dct:license>
+                <dct:license>
+                    <rdf:Description>
+                        <rdfs:label>Embedded License Description</rdfs:label>
+                    </rdf:Description>
+                </dct:license>
+                <dct:license
+                    xmlns:dct="http://purl.org/dc/terms/"
+                    rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply"
+                >
+                    No conditions apply to access and use.
+                </dct:license>
+                <dct:license rdf:resource="https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf"/>
+            </rdf:Description>
+
+            <rdf:Description rdf:about="http://example.org/custom-license">
+                <rdfs:label>Custom Organizational License</rdfs:label>
+                <dct:description>A license specific to our organization</dct:description>
+            </rdf:Description>
+
+            </rdf:RDF>
+        """
+        g = Graph()
+        g.parse(data=rdf_xml_data, format="xml")
+        ex = Namespace("http://example.org/")
+        dataset = RdfResource(g, ex.dataset1)
+        licences = licenses_from_rdf(dataset)
+        expected_licences = set(
+            [
+                "Custom Organizational License",
+                "This is a literal license statement",
+                "Embedded License Description",
+                "https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf",
+                "http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply",
+            ]
+        )
+        assert expected_licences == licences

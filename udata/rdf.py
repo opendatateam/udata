@@ -7,7 +7,7 @@ import re
 from html.parser import HTMLParser
 
 from flask import abort, current_app, request, url_for
-from rdflib import Graph, Literal, URIRef
+from rdflib import BNode, Graph, Literal, URIRef
 from rdflib.namespace import (
     DCTERMS,
     FOAF,
@@ -28,6 +28,7 @@ from udata.frontend.markdown import parse_html
 from udata.models import Schema
 from udata.mongo.errors import FieldValidationError
 from udata.tags import slug as slugify_tag
+from udata.uris import endpoint_for
 
 log = logging.getLogger(__name__)
 
@@ -48,6 +49,7 @@ DCT = DCTERMS  # More common usage
 VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
 
 namespace_manager = NamespaceManager(Graph())
+namespace_manager.bind("adms", ADMS)
 namespace_manager.bind("dcat", DCAT)
 namespace_manager.bind("dcatap", DCATAP)
 namespace_manager.bind("dct", DCT)
@@ -198,16 +200,34 @@ CONTEXT = {
 }
 
 
-def serialize_value(value):
+def serialize_value(value, parse_label=False):
+    """
+    If the value is a URIRef or a Literal, return it as a string.
+    If the value is a RdfResource:
+        - Return the label of the RdfResource if any and `parse_label`,
+        - or the identifier of the RdfResource.
+    """
     if isinstance(value, (URIRef, Literal)):
         return value.toPython()
     elif isinstance(value, RdfResource):
+        if parse_label and (rdfs_label := rdf_value(value, RDFS.label)):
+            return rdfs_label
         return value.identifier.toPython()
 
 
-def rdf_value(obj, predicate, default=None):
+def rdf_unique_values(resource, predicate, parse_label=False) -> set[str]:
+    """Returns a set of serialized values for a predicate from a RdfResource"""
+    return {
+        value
+        for info in resource.objects(predicate=predicate)
+        if (value := serialize_value(info, parse_label=parse_label))
+    }
+
+
+def rdf_value(obj, predicate, default=None, parse_label=False):
+    """Serialize the value for a predicate on a RdfResource"""
     value = obj.value(predicate)
-    return serialize_value(value) if value else default
+    return serialize_value(value, parse_label=parse_label) if value else default
 
 
 class HTMLDetector(HTMLParser):
@@ -283,29 +303,81 @@ def contact_point_from_rdf(rdf, dataset):
             or rdf_value(contact_point, VCARD.email)
             or rdf_value(contact_point, DCAT.email)
         )
-        if not email:
+        email = email.replace("mailto:", "").strip() if email else None
+        contact_form = rdf_value(contact_point, VCARD.hasUrl)
+        if not email and not contact_form:
             return
-        email = email.replace("mailto:", "").strip()
         if dataset.organization:
-            contact_point = ContactPoint.objects(
-                name=name, email=email, organization=dataset.organization
-            ).first()
-            return (
-                contact_point
-                or ContactPoint(name=name, email=email, organization=dataset.organization).save()
+            contact, _ = ContactPoint.objects.get_or_create(
+                name=name, email=email, contact_form=contact_form, organization=dataset.organization
             )
         elif dataset.owner:
-            contact_point = ContactPoint.objects(
-                name=name, email=email, owner=dataset.owner
-            ).first()
-            return contact_point or ContactPoint(name=name, email=email, owner=dataset.owner).save()
+            contact, _ = ContactPoint.objects.get_or_create(
+                name=name, email=email, contact_form=contact_form, owner=dataset.owner
+            )
+        else:
+            contact = None
+        return contact
 
 
-def remote_url_from_rdf(rdf):
+def contact_point_to_rdf(contact, graph=None):
     """
-    Return DCAT.landingPage if found and uri validation succeeds.
-    Use RDF identifier as fallback if uri validation succeeds.
+    Map a contact point to a DCAT/RDF graph
     """
+    if not contact:
+        return None
+
+    graph = graph or Graph(namespace_manager=namespace_manager)
+
+    if contact.id:
+        id = URIRef(
+            endpoint_for(
+                "api.contact_point",
+                contact_point=contact.id,
+                _external=True,
+            )
+        )
+    else:
+        id = BNode()
+
+    node = graph.resource(id)
+    node.set(RDF.type, VCARD.Kind)
+    if contact.name:
+        node.set(VCARD.fn, Literal(contact.name))
+    if contact.email:
+        node.set(VCARD.hasEmail, URIRef(f"mailto:{contact.email}"))
+    if contact.contact_form:
+        node.set(VCARD.hasUrl, URIRef(contact.contact_form))
+    return node
+
+
+def primary_topic_identifier_from_rdf(graph: Graph, resource: RdfResource):
+    """
+    Extract the dct:identifier from a primaryTopic of a RdfResource `resource` via an RDF `graph`.
+    The primary topic might be identified by a FOAF:isPrimaryTopicOf from the Resource, or by a FOAF:primaryTopic to the Resource.
+    In DCAT, the primary topic should be a unique CatalogRecord (if any), but nothing here prevents it to be something else.
+    """
+    # look for "inner" primaryTopic linking to Dataset via isPrimaryTopicOf
+    is_primary_topic_of = graph.value(subject=resource.identifier, predicate=FOAF.isPrimaryTopicOf)
+    if is_primary_topic_of:
+        return graph.value(is_primary_topic_of, DCT.identifier)
+    # look for "outer" primaryTopic linking to Dataset via primaryTopic
+    primary_topic = graph.value(predicate=FOAF.primaryTopic, object=resource.identifier)
+    if primary_topic:
+        return graph.value(primary_topic, DCT.identifier)
+
+
+def remote_url_from_rdf(rdf: RdfResource, graph: Graph, remote_url_prefix: str | None = None):
+    """
+    Compute from `remote_url_prefix` if provided and primaryTopic identifier if found.
+    Otherwise, use DCAT.landingPage if found and uri validation succeeds.
+    In this latter case, use RDF identifier as fallback if uri validation succeeds.
+    """
+    if remote_url_prefix and (
+        primary_topic_identifier := primary_topic_identifier_from_rdf(graph, rdf)
+    ):
+        return f"{remote_url_prefix.rstrip('/')}/{primary_topic_identifier}"
+
     landing_page = url_from_rdf(rdf, DCAT.landingPage)
     uri = rdf.identifier.toPython()
     for candidate in [landing_page, uri]:

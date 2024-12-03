@@ -1,3 +1,4 @@
+from flask import current_app
 from rdflib import RDF, BNode, Graph, Literal, URIRef
 
 from udata.core.dataservices.models import Dataservice
@@ -6,8 +7,12 @@ from udata.core.dataset.models import Dataset, License
 from udata.core.dataset.rdf import dataset_to_graph_id, sanitize_html
 from udata.rdf import (
     DCAT,
+    DCATAP,
     DCT,
+    HVD_LEGISLATION,
+    TAG_TO_EU_HVD_CATEGORIES,
     contact_point_from_rdf,
+    contact_point_to_rdf,
     namespace_manager,
     rdf_value,
     remote_url_from_rdf,
@@ -18,7 +23,11 @@ from udata.uris import endpoint_for
 
 
 def dataservice_from_rdf(
-    graph: Graph, dataservice: Dataservice, node, all_datasets: list[Dataset]
+    graph: Graph,
+    dataservice: Dataservice,
+    node,
+    all_datasets: list[Dataset],
+    remote_url_prefix: str | None = None,
 ) -> Dataservice:
     """
     Create or update a dataset from a RDF/DCAT graph
@@ -64,7 +73,9 @@ def dataservice_from_rdf(
         dataservice.harvest = HarvestDataserviceMetadata()
 
     dataservice.harvest.uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
-    dataservice.harvest.remote_url = remote_url_from_rdf(d)
+    dataservice.harvest.remote_url = remote_url_from_rdf(
+        d, graph, remote_url_prefix=remote_url_prefix
+    )
     dataservice.harvest.created_at = rdf_value(d, DCT.issued)
     dataservice.metadata_modified_at = rdf_value(d, DCT.modified)
 
@@ -110,20 +121,65 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     d.set(DCT.issued, Literal(dataservice.created_at))
 
     if dataservice.base_api_url:
-        d.set(DCAT.endpointURL, Literal(dataservice.base_api_url))
+        d.set(DCAT.endpointURL, URIRef(dataservice.base_api_url))
+
+    if dataservice.harvest and dataservice.harvest.remote_url:
+        d.set(DCAT.landingPage, URIRef(dataservice.harvest.remote_url))
+    elif dataservice.id:
+        d.set(
+            DCAT.landingPage,
+            URIRef(
+                endpoint_for(
+                    "dataservices.show_redirect",
+                    "api.dataservice",
+                    dataservice=dataservice.id,
+                    _external=True,
+                )
+            ),
+        )
 
     if dataservice.endpoint_description_url:
-        d.set(DCAT.endpointDescription, Literal(dataservice.endpoint_description_url))
+        d.set(DCAT.endpointDescription, URIRef(dataservice.endpoint_description_url))
 
+    # Add DCAT-AP HVD properties if the dataservice is tagged hvd.
+    # See https://semiceu.github.io/DCAT-AP/releases/2.2.0-hvd/
+    is_hvd = current_app.config["HVD_SUPPORT"] and "hvd" in dataservice.tags
+    if is_hvd:
+        d.add(DCATAP.applicableLegislation, URIRef(HVD_LEGISLATION))
+
+    hvd_category_tags = set()
     for tag in dataservice.tags:
         d.add(DCAT.keyword, Literal(tag))
+        # Add HVD category if this dataservice is tagged HVD
+        if is_hvd and tag in TAG_TO_EU_HVD_CATEGORIES:
+            hvd_category_tags.add(tag)
+
+    if is_hvd:
+        # We also want to automatically add any HVD category tags of the dataservice's datasets.
+        for dataset in dataservice.datasets:
+            if "hvd" not in dataset.tags:  # Only check HVD datasets for their categories.
+                continue
+            for tag in dataset.tags:
+                if tag in TAG_TO_EU_HVD_CATEGORIES:
+                    hvd_category_tags.add(tag)
+    for tag in hvd_category_tags:
+        d.add(DCATAP.hvdCategory, URIRef(TAG_TO_EU_HVD_CATEGORIES[tag]))
 
     # `dataset_to_graph_id(dataset)` URIRef may not exist in the current page
     # but should exists in the catalog somewhere. Maybe we should create a Node
     # with some basic information about this dataset (but this will return a page
     # with more datasets than the page size… and could be problematic when processing the
     # correct Node with all the information in a future page)
-    for dataset in dataservice.datasets:
-        d.add(DCAT.servesDataset, dataset_to_graph_id(dataset))
+    if str(dataservice.id) == current_app.config["TABULAR_API_DATASERVICE_ID"]:
+        # TODO: remove this condition on TABULAR_API_DATASERVICE_ID.
+        # It is made to prevent having the graph explode due to too many datasets being served.
+        pass
+    else:
+        for dataset in dataservice.datasets:
+            d.add(DCAT.servesDataset, dataset_to_graph_id(dataset))
+
+    contact_point = contact_point_to_rdf(dataservice.contact_point, graph)
+    if contact_point:
+        d.set(DCAT.contactPoint, contact_point)
 
     return d

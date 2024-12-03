@@ -52,6 +52,10 @@ class FactoryBackend(backends.BaseBackend):
         backends.HarvestFeature("test", "Test"),
         backends.HarvestFeature("toggled", "Toggled", "A togglable", True),
     )
+    extra_configs = (
+        backends.HarvestExtraConfig("Test Int", "test_int", int, "An integer"),
+        backends.HarvestExtraConfig("Test Str", "test_str", str),
+    )
 
     def inner_harvest(self):
         mock_initialize.send(self)

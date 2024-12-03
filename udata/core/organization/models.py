@@ -5,11 +5,13 @@ from blinker import Signal
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
-from udata.core.badges.models import BadgeMixin
+from udata.api_fields import field
+from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.metrics.models import WithMetrics
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
+from udata.mail import get_mail_campaign_dict
 from udata.mongo import db
 from udata.uris import endpoint_for
 
@@ -28,6 +30,14 @@ from .constants import (
 )
 
 __all__ = ("Organization", "Team", "Member", "MembershipRequest")
+
+BADGES: dict[str, str] = {
+    PUBLIC_SERVICE: _("Public Service"),
+    CERTIFIED: _("Certified"),
+    ASSOCIATION: _("Association"),
+    COMPANY: _("Company"),
+    LOCAL_AUTHORITY: _("Local authority"),
+}
 
 
 class Team(db.EmbeddedDocument):
@@ -82,8 +92,25 @@ class OrganizationQuerySet(db.BaseQuerySet):
     def get_by_id_or_slug(self, id_or_slug):
         return self(slug=id_or_slug).first() or self(id=id_or_slug).first()
 
+    def with_badge(self, kind):
+        return self(badges__kind=kind)
 
-class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
+
+def validate_badge(value):
+    if value not in Organization.__badges__.keys():
+        raise db.ValidationError("Unknown badge type")
+
+
+class OrganizationBadge(Badge):
+    kind = db.StringField(required=True, validation=validate_badge)
+
+
+class OrganizationBadgeMixin(BadgeMixin):
+    badges = field(BadgesList(OrganizationBadge), **BadgeMixin.default_badges_list_params)
+    __badges__ = BADGES
+
+
+class Organization(WithMetrics, OrganizationBadgeMixin, db.Datetimed, db.Document):
     name = db.StringField(required=True)
     acronym = db.StringField(max_length=128)
     slug = db.SlugField(
@@ -126,14 +153,6 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     def __str__(self):
         return self.name or ""
 
-    __badges__ = {
-        PUBLIC_SERVICE: _("Public Service"),
-        CERTIFIED: _("Certified"),
-        ASSOCIATION: _("Association"),
-        COMPANY: _("Company"),
-        LOCAL_AUTHORITY: _("Local authority"),
-    }
-
     __metrics_keys__ = [
         "datasets",
         "members",
@@ -169,6 +188,11 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     @property
     def external_url(self):
         return self.url_for(_external=True)
+
+    @property
+    def external_url_with_campaign(self):
+        extras = get_mail_campaign_dict()
+        return self.url_for(_external=True, **extras)
 
     @property
     def pending_requests(self):

@@ -19,9 +19,9 @@ BIGGEST_LOGO_SIZE = LOGO_SIZES[0]
 
 PUBLIC_SERVICE = "public-service"
 CERTIFIED = "certified"
-ASSOCIATION = "Association"
-COMPANY = "Company"
-LOCAL_AUTHORITY = "Local authority"
+ASSOCIATION = "association"
+COMPANY = "company"
+LOCAL_AUTHORITY = "local-authority"
 
 TITLE_SIZE_LIMIT = 350
 DESCRIPTION_SIZE_LIMIT = 100000

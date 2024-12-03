@@ -37,11 +37,7 @@ class SearchQuery:
         # If SEARCH_SERVICE_API_URL is set, the remote search service will be queried.
         # Otherwise mongo search will be used instead.
         if current_app.config["SEARCH_SERVICE_API_URL"]:
-            url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{self.adapter.search_url}?q={self._query}&page={self.page}&page_size={self.page_size}"
-            if self.sort:
-                url = url + f"&sort={self.sort}"
-            for name, value in self._filters.items():
-                url = url + f"&{name}={value}"
+            url = self.to_search_service_url()
             r = requests.get(url, timeout=current_app.config["SEARCH_SERVICE_REQUEST_TIMEOUT"])
             r.raise_for_status()
             result = r.json()
@@ -54,9 +50,24 @@ class SearchQuery:
                 "sort": self.sort,
             }
             query_args.update(self._filters)
-            result, total = self.adapter.mongo_search(query_args)
-            return SearchResult(query=self, mongo_objects=result, total=total, **query_args)
+            result = self.adapter.mongo_search(query_args)
+            return SearchResult(
+                query=self, mongo_objects=list(result), total=result.total, **query_args
+            )
 
+    def to_search_service_url(self):
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{self.adapter.search_url}?q={self._query}&page={self.page}&page_size={self.page_size}"
+        if self.sort:
+            url = url + f"&sort={self.sort}"
+        for name, value in self._filters.items():
+            if isinstance(value, (list, tuple)):
+                for v in value:
+                    url = url + f"&{name}={v}"
+            else:
+                url = url + f"&{name}={value}"
+        return url
+
+    # FIXME: unused?
     def to_url(self, url=None, replace=False, **kwargs):
         """Serialize the query into an URL"""
         params = copy.deepcopy(self._filters)

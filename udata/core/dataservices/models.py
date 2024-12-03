@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from flask import url_for
 from mongoengine import Q
 
 import udata.core.contact_point.api_fields as contact_api_fields
@@ -94,7 +95,10 @@ class HarvestMetadata(db.EmbeddedDocument):
     archived_at = field(db.DateTimeField())
 
 
-@generate_fields(searchable=True)
+@generate_fields(
+    searchable=True,
+    additional_filters={"organization_badge": "organization.badges"},
+)
 class Dataservice(WithMetrics, Owned, db.Document):
     meta = {
         "indexes": [
@@ -124,6 +128,7 @@ class Dataservice(WithMetrics, Owned, db.Document):
     description = field(db.StringField(default=""), description="In markdown")
     base_api_url = field(db.URLField(), sortable=True)
     endpoint_description_url = field(db.URLField())
+    business_documentation_url = field(db.URLField())
     authorization_request_url = field(db.URLField())
     availability = field(db.FloatField(min=0, max=100), example="99.99")
     rate_limiting = field(db.StringField())
@@ -140,6 +145,9 @@ class Dataservice(WithMetrics, Owned, db.Document):
 
     tags = field(
         db.TagListField(),
+        filterable={
+            "key": "tag",
+        },
     )
 
     private = field(
@@ -158,12 +166,14 @@ class Dataservice(WithMetrics, Owned, db.Document):
     created_at = field(
         db.DateTimeField(verbose_name=_("Creation date"), default=datetime.utcnow, required=True),
         readonly=True,
+        sortable="created",
     )
     metadata_modified_at = field(
         db.DateTimeField(
             verbose_name=_("Last modification date"), default=datetime.utcnow, required=True
         ),
         readonly=True,
+        sortable="last_modified",
     )
     deleted_at = field(db.DateTimeField())
     archived_at = field(db.DateTimeField(), readonly=True)
@@ -171,13 +181,16 @@ class Dataservice(WithMetrics, Owned, db.Document):
     datasets = field(
         db.ListField(
             field(
-                db.ReferenceField(Dataset),
+                db.LazyReferenceField(Dataset, passthrough=True),
                 nested_fields=datasets_api_fields.dataset_ref_fields,
             )
         ),
         filterable={
             "key": "dataset",
         },
+        href=lambda dataservice: url_for(
+            "api.datasets", dataservice=dataservice.id, _external=True
+        ),
     )
 
     harvest = field(

@@ -8,6 +8,7 @@ import pytz
 import requests_mock
 from flask import url_for
 
+import udata.core.organization.constants as org_constants
 from udata.api import fields
 from udata.app import cache
 from udata.core import storages
@@ -148,10 +149,13 @@ class DatasetAPITest(APITestCase):
         """Should filters datasets results based on query filters"""
         owner = UserFactory()
         org = OrganizationFactory()
+        org_public_service = OrganizationFactory()
+        org_public_service.add_badge(org_constants.PUBLIC_SERVICE)
 
         [DatasetFactory() for i in range(2)]
 
-        tag_dataset = DatasetFactory(tags=["my-tag", "other"])
+        tag_dataset_1 = DatasetFactory(tags=["my-tag-shared", "my-tag-1"])
+        tag_dataset_2 = DatasetFactory(tags=["my-tag-shared", "my-tag-2"])
         license_dataset = DatasetFactory(license=LicenseFactory(id="cc-by"))
         format_dataset = DatasetFactory(resources=[ResourceFactory(format="my-format")])
         featured_dataset = DatasetFactory(featured=True)
@@ -167,6 +171,7 @@ class DatasetAPITest(APITestCase):
 
         owner_dataset = DatasetFactory(owner=owner)
         org_dataset = DatasetFactory(organization=org)
+        org_dataset_public_service = DatasetFactory(organization=org_public_service)
 
         schema_dataset = DatasetFactory(
             resources=[
@@ -188,10 +193,19 @@ class DatasetAPITest(APITestCase):
         )
 
         # filter on tag
-        response = self.get(url_for("api.datasets", tag="my-tag"))
+        response = self.get(url_for("api.datasets", tag="my-tag-shared"))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), 2)
+        self.assertEqual(
+            set([str(tag_dataset_1.id), str(tag_dataset_2.id)]),
+            set([d["id"] for d in response.json["data"]]),
+        )
+
+        # filter on multiple tags
+        response = self.get(url_for("api.datasets", tag=["my-tag-shared", "my-tag-1"]))
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), 1)
-        self.assertEqual(response.json["data"][0]["id"], str(tag_dataset.id))
+        self.assertEqual(response.json["data"][0]["id"], str(tag_dataset_1.id))
 
         # filter on format
         response = self.get(url_for("api.datasets", format="my-format"))
@@ -245,6 +259,17 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(response.json["data"][0]["id"], str(org_dataset.id))
 
         response = self.get(url_for("api.datasets", organization="org-id"))
+        self.assert400(response)
+
+        # filter on organization badge
+        response = self.get(
+            url_for("api.datasets", organization_badge=org_constants.PUBLIC_SERVICE)
+        )
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(response.json["data"][0]["id"], str(org_dataset_public_service.id))
+
+        response = self.get(url_for("api.datasets", organization_badge="bad-badge"))
         self.assert400(response)
 
         # filter on schema

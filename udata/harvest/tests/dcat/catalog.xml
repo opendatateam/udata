@@ -75,6 +75,7 @@
     </dcat:dataset>
     <dcat:dataset>
       <dcat:Dataset rdf:about="http://data.test.org/datasets/2">
+        <dct:rights>Licence Ouverte Version 2.0</dct:rights>
         <dcat:keyword>Tag 1</dcat:keyword>
         <dcat:distribution rdf:resource="http://data.test.org/datasets/2/resources/1"/>
         <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T19:01:24.184120</dcterms:modified>
@@ -93,24 +94,41 @@
         <dcterms:identifier>2</dcterms:identifier>
       </dcat:Dataset>
     </dcat:dataset>
+    <dcat:dataset>
+      <dcat:Dataset rdf:about="http://data.test.org/datasets/4">
+        <dct:rights>Licence Ouverte Version 2.0</dct:rights>
+        <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T19:01:24.184120</dcterms:modified>
+        <dcterms:description>Dataset 4 description</dcterms:description>
+        <dcterms:publisher rdf:resource="http://data.test.org/organizations/1"/>
+        <owl:versionInfo>1.0</owl:versionInfo>
+        <dcat:landingPage>http://data.test.org/datasets/2</dcat:landingPage>
+        <dcat:distribution rdf:resource="http://data.test.org/datasets/4/resources/1"/>
+        <dcat:distribution rdf:resource="http://data.test.org/datasets/4/resources/2"/>
+        <dcterms:title>Dataset 4</dcterms:title>
+        <dcterms:identifier>4</dcterms:identifier>
+      </dcat:Dataset>
+    </dcat:dataset>
     <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-15T09:19:51.723691</dcterms:modified>
     <foaf:homepage>http://data.test.org</foaf:homepage>
     <dcterms:language>en</dcterms:language>
   </dcat:Catalog>
-  <dcat:Distribution rdf:about="http://data.test.org/datasets/2/resources/2">
-    <dcterms:description>A JSON resource</dcterms:description>
-    <dcterms:title>Resource 2-2</dcterms:title>
-    <dcterms:format>JSON</dcterms:format>
-    <dcat:accessURL>http://data.test.org/datasets/2/resources/2/file.json</dcat:accessURL>
-  </dcat:Distribution>
   <vcard:Organization rdf:about="http://data.test.org/contacts/1">
     <vcard:fn>Organization contact</vcard:fn>
     <vcard:hasEmail>mailto: hello@its.me</vcard:hasEmail>
+    <vcard:hasUrl>https://data.support.com</vcard:hasUrl>
   </vcard:Organization>
+  <dcterms:PeriodOfTime rdf:about="file:///base/data/home/apps/s%7Erdf-translator/2.408516547054015808/temporal-1">
+    <schema:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-05T00:00:00</schema:startDate>
+  </dcterms:PeriodOfTime>
   <dcterms:PeriodOfTime rdf:about="file:///base/data/home/apps/s%7Erdf-translator/2.408516547054015808/temporal-2">
     <schema:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-01T00:00:00</schema:startDate>
     <schema:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-05T00:00:00</schema:endDate>
   </dcterms:PeriodOfTime>
+  <dcterms:Location rdf:about="http://wuEurope.com/"/>
+  <foaf:Organization rdf:about="http://data.test.org/organizations/1">
+    <foaf:name>An Organization</foaf:name>
+  </foaf:Organization>
+  <!-- resources for dataset 1 -->
   <dcat:Distribution rdf:about="http://data.test.org/datasets/1/resources/1">
     <dcterms:title>Resource 1-1</dcterms:title>
     <dcterms:format>
@@ -122,34 +140,54 @@
     <dcat:byteSize>12323</dcat:byteSize>
     <dcterms:description>A JSON resource</dcterms:description>
     <dcat:accessURL>http://data.test.org/datasets/1/resources/1/file.json</dcat:accessURL>
+    <dct:license>Licence Ouverte Version 1.0</dct:license>
   </dcat:Distribution>
-  <dcterms:PeriodOfTime rdf:about="file:///base/data/home/apps/s%7Erdf-translator/2.408516547054015808/temporal-1">
-    <schema:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-05T00:00:00</schema:startDate>
-  </dcterms:PeriodOfTime>
   <dcat:Distribution rdf:about="http://data.test.org/datasets/1/resources/2">
     <dcterms:description>A JSON resource</dcterms:description>
     <dcterms:format>JSON</dcterms:format>
     <dcterms:title>Resource 1-2</dcterms:title>
     <dcat:accessURL>http://data.test.org/datasets/1/resources/2/file.json</dcat:accessURL>
   </dcat:Distribution>
+  <foaf:Document rdf:about="http://data.test.org/datasets/1/resources/3">
+    <dcterms:title>Resource 1-3</dcterms:title>
+    <dcterms:format>JSON</dcterms:format>
+  </foaf:Document>
+  <!-- resources for dataset 2 -->
   <dcat:Distribution rdf:about="http://data.test.org/datasets/2/resources/1">
     <dcat:accessURL>http://data.test.org/datasets/2/resources/1/file.json</dcat:accessURL>
     <dcterms:title>Resource 2-1</dcterms:title>
     <dcterms:format>JSON</dcterms:format>
     <dcterms:description>A JSON resource</dcterms:description>
   </dcat:Distribution>
+  <dcat:Distribution rdf:about="http://data.test.org/datasets/2/resources/2">
+    <dcterms:description>A JSON resource</dcterms:description>
+    <dcterms:title>Resource 2-2</dcterms:title>
+    <dcterms:format>JSON</dcterms:format>
+    <dcat:accessURL>http://data.test.org/datasets/2/resources/2/file.json</dcat:accessURL>
+    <dct:rights>Rights on nested resource</dct:rights>
+  </dcat:Distribution>
+  <!-- resources for dataset 3 -->
   <dcat:Distribution rdf:about="datasets/3/resources/1">
     <dcterms:format>JSON</dcterms:format>
     <dcterms:title>Resource 3-1</dcterms:title>
     <dcterms:description>A JSON resource</dcterms:description>
     <dcat:accessURL>http://data.test.org/datasets/3/resources/1/file.json</dcat:accessURL>
   </dcat:Distribution>
-  <foaf:Document rdf:about="http://data.test.org/datasets/1/resources/3">
-    <dcterms:title>Resource 1-3</dcterms:title>
+  <!-- resources for dataset 4 -->
+  <dcat:Distribution rdf:about="datasets/4/resources/1">
     <dcterms:format>JSON</dcterms:format>
-  </foaf:Document>
-  <dcterms:Location rdf:about="http://wuEurope.com/"/>
-  <foaf:Organization rdf:about="http://data.test.org/organizations/1">
-    <foaf:name>An Organization</foaf:name>
-  </foaf:Organization>
+    <dcterms:title>Resource 4-1</dcterms:title>
+    <dcterms:description>A JSON resource</dcterms:description>
+    <dcat:accessURL>http://data.test.org/datasets/4/resources/1/file.json</dcat:accessURL>
+    <dcat:accessRights>Access right 4</dcat:accessRights>
+    <dcat:accessRights>Access right 4-1</dcat:accessRights>
+  </dcat:Distribution>
+  <dcat:Distribution rdf:about="datasets/4/resources/2">
+    <dcterms:format>JSON</dcterms:format>
+    <dcterms:title>Resource 4-2</dcterms:title>
+    <dcterms:description>A JSON resource</dcterms:description>
+    <dcat:accessURL>http://data.test.org/datasets/4/resources/2/file.json</dcat:accessURL>
+    <dcat:accessRights>Access right 4</dcat:accessRights>
+    <dcat:accessRights>Access right 4-2</dcat:accessRights>
+  </dcat:Distribution>
 </rdf:RDF>

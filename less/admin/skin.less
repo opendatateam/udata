@@ -33,6 +33,22 @@
           }
         }
       }
+      .navbar-banner{
+
+        @media (max-width: @screen-header-collapse) {
+          display: none;
+        }
+
+        line-height: 50px;
+        > a, > a:hover, > a:focus {
+          color: #fff;
+          text-decoration: underline white;
+
+          > .fa-external-link {
+            padding-left: 5px;
+          }
+        }
+      }
     }
     //Logo
     .logo {
