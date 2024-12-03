@@ -7,6 +7,7 @@ from udata.models import Dataset, GeoZone, License, Organization, Topic, User
 from udata.search import (
     BoolFilter,
     Filter,
+    ListFilter,
     ModelSearchAdapter,
     ModelTermsFilter,
     TemporalCoverageFilter,
@@ -31,7 +32,7 @@ class DatasetSearch(ModelSearchAdapter):
     }
 
     filters = {
-        "tag": Filter(),
+        "tag": ListFilter(),
         "badge": Filter(choices=list(Dataset.__badges__)),
         "organization": ModelTermsFilter(model=Organization),
         "organization_badge": Filter(choices=list(Organization.__badges__)),
