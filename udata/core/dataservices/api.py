@@ -34,7 +34,7 @@ class DataservicesAPI(API):
             current_user, mongoengine.Q(private__ne=True, archived_at=None, deleted_at=None)
         )
 
-        return Dataservice.apply_sort_filters_and_pagination(query)
+        return Dataservice.apply_pagination(Dataservice.apply_sort_filters(query))
 
     @api.secure
     @api.doc("create_dataservice", responses={400: "Validation error"})

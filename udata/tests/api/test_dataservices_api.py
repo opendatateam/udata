@@ -44,6 +44,13 @@ class DataserviceAPITest(APITestCase):
         response = self.get(url_for("api.dataservices", organization_badge="bad-badge"))
         assert400(response)
 
+        # filter on tag
+        tag_dataservice = DataserviceFactory(tags=["my-tag", "other"])
+        response = self.get(url_for("api.dataservices", tag="my-tag"))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(tag_dataservice.id)
+
     def test_dataservice_api_create(self):
         user = self.login()
         datasets = DatasetFactory.create_batch(3)

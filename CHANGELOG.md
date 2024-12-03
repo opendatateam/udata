@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add list transfers endpoint [#3211](https://github.com/opendatateam/udata/pull/3211)
+- Add dataservice csv adapter [#3208](https://github.com/opendatateam/udata/pull/3208)
 
 ## 10.0.4 (2024-11-29)
 
