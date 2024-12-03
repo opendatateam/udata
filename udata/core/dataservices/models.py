@@ -109,6 +109,11 @@ class Dataservice(WithMetrics, Owned, db.Document):
         "auto_create_index_on_save": True,
     }
 
+    verbose_name = _("dataservice")
+
+    def __str__(self):
+        return self.title or ""
+
     title = field(
         db.StringField(required=True),
         example="My awesome API",
@@ -197,6 +202,11 @@ class Dataservice(WithMetrics, Owned, db.Document):
         db.EmbeddedDocumentField(HarvestMetadata),
         readonly=True,
     )
+
+    def url_for(self, *args, **kwargs):
+        return endpoint_for(
+            "dataservices.show", "api.dataservice", dataservice=self, *args, **kwargs
+        )
 
     @function_field(description="Link to the API endpoint for this dataservice")
     def self_api_url(self):
