@@ -251,7 +251,8 @@ def generate_fields(**kwargs) -> Callable:
 
     It will also
     - generate an API parameter parser
-    - sort and filter a list of documents with the provided params using the `apply_sort_filters_and_pagination` helper
+    - sort and filter a list of documents with the provided params using the `apply_sort_filters` helper
+    - apply a pagination with page and page size args with the `apply_pagination` helper
 
     """
 
@@ -414,7 +415,7 @@ def generate_fields(**kwargs) -> Callable:
 
         cls.__index_parser__ = parser
 
-        def apply_sort_filters_and_pagination(base_query) -> DBPaginator:
+        def apply_sort_filters(base_query) -> UDataQuerySet:
             args = cls.__index_parser__.parse_args()
 
             if sortables and args["sort"]:
@@ -457,12 +458,17 @@ def generate_fields(**kwargs) -> Callable:
                             }
                         )
 
-            if paginable:
-                base_query = base_query.paginate(args["page"], args["page_size"])
-
             return base_query
 
-        cls.apply_sort_filters_and_pagination = apply_sort_filters_and_pagination
+        def apply_pagination(base_query) -> DBPaginator:
+            args = cls.__index_parser__.parse_args()
+
+            if paginable:
+                base_query = base_query.paginate(args["page"], args["page_size"])
+            return base_query
+
+        cls.apply_sort_filters = apply_sort_filters
+        cls.apply_pagination = apply_pagination
         cls.__additional_class_info__ = kwargs
         return cls
 

@@ -145,6 +145,9 @@ class Dataservice(WithMetrics, Owned, db.Document):
 
     tags = field(
         db.TagListField(),
+        filterable={
+            "key": "tag",
+        },
     )
 
     private = field(
