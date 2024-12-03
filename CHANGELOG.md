@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add dataservice csv adapter [#3208](https://github.com/opendatateam/udata/pull/3208)
+- Add url_for for dataservices and mail notifications [#3213](https://github.com/opendatateam/udata/pull/3213)
 
 ## 10.0.4 (2024-11-29)
 
