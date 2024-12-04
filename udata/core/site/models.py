@@ -1,6 +1,7 @@
 from flask import current_app, g
 from werkzeug.local import LocalProxy
 
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
@@ -41,6 +42,7 @@ class Site(WithMetrics, db.Document):
         "public-service",
         "resources",
         "reuses",
+        "dataservices",
         "users",
         "harvesters",
     ]
@@ -85,6 +87,10 @@ class Site(WithMetrics, db.Document):
 
     def count_reuses(self):
         self.metrics["reuses"] = Reuse.objects.visible().count()
+        self.save()
+
+    def count_dataservices(self):
+        self.metrics["dataservices"] = Dataservice.objects.visible().count()
         self.save()
 
     def count_followers(self):
