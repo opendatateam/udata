@@ -31,7 +31,6 @@ from udata.rdf import (
     FREQ,
     HVD_LEGISLATION,
     IANAFORMAT,
-    RDFS,
     SCHEMA,
     SCV,
     SKOS,
@@ -684,7 +683,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     return resource
 
 
-def additionnal_extras_from_rdf(d: Graph):
+def add_responsible_parties_from_rdf(d: Graph, dataset: Dataset):
     extras = {}
 
     # Responsible Party Roles
@@ -699,23 +698,14 @@ def additionnal_extras_from_rdf(d: Graph):
 
     publishers = list(generic_contact(d, DCT.publisher))
     if publishers:
-        extras["dct:publishers"] = publishers
+        add_dcat_extra(dataset, "publisher", publishers)
     creators = list(generic_contact(d, DCT.creator))
     if creators:
-        extras["dct:creators"] = creators
+        add_dcat_extra(dataset, "creator", creators)
     contributors = list(generic_contact(d, DCT.contributor))
     if contributors:
-        extras["dct:contributors"] = contributors
+        add_dcat_extra(dataset, "contributor", contributors)
 
-    # Access Rights
-    access_rights = rdf_value(d, DCT.accessRights)
-    if access_rights:
-        extras["dct:accessRights"] = access_rights
-
-    # Provenance
-    provenance = [p.value(RDFS.label) for p in d.objects(DCT.provenance)]
-    if provenance:
-        extras["dct:provenance"] = provenance
     return extras
 
 
@@ -758,7 +748,8 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
         dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
 
     # Adding some metadata to extras - may be moved to property if relevant
-    dataset.extras["harvest"] = additionnal_extras_from_rdf(d)
+    add_responsible_parties_from_rdf(d, dataset)
+
     provenances = provenances_from_rdf(d)
     if provenances:
         add_dcat_extra(dataset, "provenance", provenances)
