@@ -71,7 +71,7 @@ export default {
                     }
                 }, {
                     id: 'private',
-                    label: this._('Private')
+                    label: this._('Draft')
                 }]
         };
     },
