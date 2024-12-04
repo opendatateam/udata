@@ -479,6 +479,7 @@ class Defaults(object):
         "discussion",
         "organization",
         "reuse",
+        "dataservice",
         "tag",
         "harvest",
     )
