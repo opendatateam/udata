@@ -1,6 +1,8 @@
 from datetime import datetime
 
 import udata.core.organization.constants as org_constants
+from udata.core.dataservices.factories import DataserviceFactory
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import DatasetFactory, HiddenDatasetFactory
 from udata.core.followers.signals import on_follow, on_unfollow
 from udata.core.organization.factories import OrganizationFactory
@@ -27,6 +29,8 @@ class OrganizationModelTest(TestCase, DBTestMixin):
         with assert_emit(Reuse.on_create):
             reuse = VisibleReuseFactory(organization=org)
             ReuseFactory(organization=org)
+        with assert_emit(Dataservice.on_create):
+            dataservice = DataserviceFactory(organization=org)
         with assert_emit(Dataset.on_create):
             dataset = DatasetFactory(organization=org)
             HiddenDatasetFactory(organization=org)
@@ -37,11 +41,15 @@ class OrganizationModelTest(TestCase, DBTestMixin):
 
         assert org.get_metrics()["datasets"] == 1
         assert org.get_metrics()["reuses"] == 1
+        assert org.get_metrics()["dataservices"] == 1
         assert org.get_metrics()["followers"] == 1
 
         with assert_emit(Reuse.on_delete):
             reuse.deleted = datetime.utcnow()
             reuse.save()
+        with assert_emit(Dataservice.on_delete):
+            dataservice.deleted_at = datetime.utcnow()
+            dataservice.save()
         with assert_emit(Dataset.on_delete):
             dataset.deleted = datetime.utcnow()
             dataset.save()
@@ -51,6 +59,7 @@ class OrganizationModelTest(TestCase, DBTestMixin):
 
         assert org.get_metrics()["datasets"] == 0
         assert org.get_metrics()["reuses"] == 0
+        assert org.get_metrics()["dataservices"] == 0
         assert org.get_metrics()["followers"] == 0
 
     def test_organization_queryset_with_badge(self):

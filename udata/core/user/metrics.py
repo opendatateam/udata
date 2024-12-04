@@ -1,3 +1,4 @@
+from udata.core.dataservices.models import Dataservice
 from udata.core.followers.signals import on_follow, on_unfollow
 from udata.core.owned import Owned
 from udata.models import Dataset, Reuse, User
@@ -17,6 +18,14 @@ def update_datasets_metrics(document, **kwargs):
 def update_reuses_metrics(document, **kwargs):
     if document.owner:
         document.owner.count_reuses()
+
+
+@Dataservice.on_create.connect
+@Dataservice.on_update.connect
+@Dataservice.on_delete.connect
+def update_dataservices_metrics(document, **kwargs):
+    if document.owner:
+        document.owner.count_dataservices()
 
 
 @on_follow.connect
