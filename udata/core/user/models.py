@@ -99,6 +99,7 @@ class User(WithMetrics, UserMixin, db.Document):
     __metrics_keys__ = [
         "datasets",
         "reuses",
+        "dataservices",
         "following",
         "followers",
     ]
@@ -294,6 +295,12 @@ class User(WithMetrics, UserMixin, db.Document):
         from udata.models import Reuse
 
         self.metrics["reuses"] = Reuse.objects(owner=self).visible().count()
+        self.save()
+
+    def count_dataservices(self):
+        from udata.core.dataservices.models import Dataservice
+
+        self.metrics["dataservices"] = Dataservice.objects(owner=self).visible().count()
         self.save()
 
     def count_followers(self):

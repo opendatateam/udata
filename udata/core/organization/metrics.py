@@ -1,3 +1,4 @@
+from udata.core.dataservices.models import Dataservice
 from udata.core.owned import Owned
 from udata.models import Dataset, Organization, Reuse
 
@@ -16,6 +17,14 @@ def update_datasets_metrics(document, **kwargs):
 def update_reuses_metrics(document, **kwargs):
     if document.organization:
         document.organization.count_reuses()
+
+
+@Dataservice.on_create.connect
+@Dataservice.on_update.connect
+@Dataservice.on_delete.connect
+def update_dataservices_metrics(document, **kwargs):
+    if document.organization:
+        document.organization.count_dataservices()
 
 
 @Owned.on_owner_change.connect
