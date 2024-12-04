@@ -5,6 +5,7 @@
 - Add dataservice csv adapter [#3208](https://github.com/opendatateam/udata/pull/3208)
 - Add url_for for dataservices and mail notifications [#3213](https://github.com/opendatateam/udata/pull/3213)
 - Compute dataservices metrics on org, user and site [#3209](https://github.com/opendatateam/udata/pull/3209)
+- Update default method blocklist for READ ONLY mode [#3212](https://github.com/opendatateam/udata/pull/3212)
 
 ## 10.0.4 (2024-11-29)
 
@@ -12,7 +13,6 @@
 - Fix dataservice metadata_modified_at update in API [#3207](https://github.com/opendatateam/udata/pull/3207)
 - Escape modal title in admin [#3210](https://github.com/opendatateam/udata/pull/3210)
 - feat: handle multiple tags on datasets and topics apis [#3204](https://github.com/opendatateam/udata/pull/3204)
-- Update default method blocklist for READ ONLY mode [#3212](https://github.com/opendatateam/udata/pull/3212)
 
 ## 10.0.3 (2024-11-27)
 
