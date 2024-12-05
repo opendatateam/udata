@@ -15,7 +15,7 @@ const VISIBILITIES = {
         type: 'warning'
     },
     private: {
-        label: _('Private'),
+        label: _('Draft'),
         type: 'info'
     },
     public: {
