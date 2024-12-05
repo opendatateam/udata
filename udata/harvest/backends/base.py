@@ -7,7 +7,6 @@ import requests
 from flask import current_app
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
-import udata.uris as uris
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset.models import HarvestDatasetMetadata
@@ -389,19 +388,15 @@ class BaseBackend(object):
         """Get or create a dataset given its remote ID (and its source)
         We first try to match `source_id` to be source domain independent
         """
-        try:
-            uris.validate(remote_id)
-            dataset = Dataset.objects(harvest__remote_id=remote_id).first()
-        except uris.ValidationError:
-            dataset = Dataset.objects(
-                __raw__={
-                    "harvest.remote_id": remote_id,
-                    "$or": [
-                        {"harvest.domain": self.source.domain},
-                        {"harvest.source_id": str(self.source.id)},
-                    ],
-                }
-            ).first()
+        dataset = Dataset.objects(
+            __raw__={
+                "harvest.remote_id": remote_id,
+                "$or": [
+                    {"harvest.domain": self.source.domain},
+                    {"harvest.source_id": str(self.source.id)},
+                ],
+            }
+        ).first()
 
         if dataset:
             return dataset

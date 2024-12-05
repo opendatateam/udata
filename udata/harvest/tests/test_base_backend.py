@@ -35,11 +35,6 @@ class FakeBackend(BaseBackend):
     )
 
     def inner_harvest(self):
-        for remote_id in self.source.config.get("dataset_remote_ids", []):
-            self.process_dataset(remote_id)
-            if self.is_done():
-                return
-
         for i in range(self.source.config.get("nb_datasets", 3)):
             remote_id = f"fake-{i}"
             self.process_dataset(remote_id)
@@ -50,8 +45,7 @@ class FakeBackend(BaseBackend):
         dataset = self.get_dataset(item.remote_id)
 
         for key, value in DatasetFactory.as_dict(visible=True).items():
-            if getattr(dataset, key) is None:
-                setattr(dataset, key, value)
+            setattr(dataset, key, value)
         if self.source.config.get("last_modified"):
             dataset.last_modified_internal = self.source.config["last_modified"]
         return dataset
@@ -286,78 +280,6 @@ class BaseBackendTest:
         job.reload()
         for item in job.items:
             assert item.dataset is None
-
-    def test_no_datasets_duplication(self, app):
-        limit = app.config["HARVEST_AUTOARCHIVE_GRACE_DAYS"]
-        last_update = datetime.utcnow() - timedelta(days=limit - 1)
-        reuse_remote_id_uri = "http://example.com/reuse-this-uri"
-        nb_datasets = 3
-        source = HarvestSourceFactory(
-            config={
-                "nb_datasets": nb_datasets,
-                "dataset_remote_ids": [reuse_remote_id_uri],
-            }
-        )
-        backend = FakeBackend(source)
-
-        # Create a dataset that should be reused by the harvest, which will update it
-        # instead of creating a new one, as it has the same remote_id, domain and source_id.
-        dataset_reused = DatasetFactory(
-            title="Reused Dataset",
-            harvest={
-                "domain": source.domain,
-                "remote_id": "fake-0",  # the FakeBackend harvest should reuse this dataset
-                "source_id": str(source.id),
-                "last_update": last_update,
-            },
-        )
-
-        # Create a dataset that should be reused even though it's a different `remote_id` and `domain,
-        # because it's an URI.
-        dataset_reused_uri = DatasetFactory(
-            title="Reused Dataset with URI",
-            harvest={
-                "domain": "some-other-domain",
-                # the FakeBackend harvest above should reuse this dataset with the same remote_id URI
-                "remote_id": reuse_remote_id_uri,
-                "source_id": "some-other-source-id",
-                "last_update": last_update,
-            },
-        )
-
-        # Create a dataset that should not be reused even though it's the same `remote_id`,
-        # as it's not an URI, and has a different domain and source id.
-        dataset_not_reused = DatasetFactory(
-            title="Duplicated Dataset",
-            harvest={
-                "domain": "some-other-domain",
-                "remote_id": "fake-0",  # the "source" harvest above should create another dataset with the same remote_id
-                "source_id": "some-other-source-id",
-                "last_update": last_update,
-            },
-        )
-
-        job = backend.harvest()
-
-        # 3 (nb_datasets) + 1 (dataset_remote_ids) created by the HarvestSourceFactory
-        assert len(job.items) == nb_datasets + 1
-        # all datasets : 4 mocks (3 nb_datasets + 1 dataset_remote_ids) + 3 created with DatasetFactory - 2 reused
-        assert Dataset.objects.count() == nb_datasets + 1 + 3 - 2
-        assert (
-            # and not 3, data_reused was not duplicated
-            Dataset.objects(harvest__remote_id="fake-0").count() == 2
-        )
-        # The dataset not reused wasn't overwritten nor updated by the harvest.
-        dataset_not_reused.reload()
-        assert dataset_not_reused.harvest.domain == "some-other-domain"
-        assert dataset_not_reused.harvest.source_id == "some-other-source-id"
-        # The "reused dataset" was overwritten and updated by the harvest.
-        dataset_reused.reload()
-        assert dataset_reused.harvest.last_update != last_update
-        # The "reused dataset with uri" was overwritten and updated by the harvest.
-        dataset_reused_uri.reload()
-        assert dataset_reused_uri.harvest.domain == source.domain
-        assert dataset_reused_uri.harvest.source_id == str(source.id)
 
 
 @pytest.mark.usefixtures("clean_db")
