@@ -4,6 +4,10 @@ from udata.api import API, api, base_reference, fields
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.user.api_fields import user_ref_fields
+from udata.features.transfer.permissions import (
+    TransferPermission,
+    TransferResponsePermission,
+)
 from udata.models import Dataset, Organization, Reuse, User, db
 from udata.utils import id_or_404
 
@@ -53,6 +57,12 @@ transfer_fields = api.model(
     "Transfer",
     {
         "id": fields.String(readonly=True, description="The transfer unique identifier"),
+        "user": fields.Nested(
+            user_ref_fields,
+            description="The user who requested the transfer",
+            readonly=True,
+            allow_null=True,
+        ),
         "owner": fields.Polymorph(
             person_mapping,
             readonly=True,
@@ -81,14 +91,51 @@ transfer_fields = api.model(
 
 ns = api.namespace("transfer")
 
+requests_parser = api.parser()
+requests_parser.add_argument(
+    "subject", type=str, help="ID of dataset, dataservice, reuse…", location="args"
+)
+requests_parser.add_argument(
+    "subject_type", choices=["Dataset", "Reuse", "Dataservice"], type=str, help="", location="args"
+)
+requests_parser.add_argument(
+    "recipient", type=str, help="ID of user or organization", location="args"
+)
+requests_parser.add_argument(
+    "status",
+    type=str,
+    choices=TRANSFER_STATUS.keys(),
+    help="ID of user or organization",
+    location="args",
+)
+
 
 @ns.route("/", endpoint="transfers")
 class TransferRequestsAPI(API):
     @api.doc("list_transfers")
     @api.marshal_list_with(transfer_fields)
     def get(self):
-        """List all transfer requests"""
-        pass
+        args = requests_parser.parse_args()
+
+        transfers = Transfer.objects
+        if args["subject"]:
+            transfers = transfers.generic_in(subject=args["subject"])
+        if args["subject_type"]:
+            transfers = transfers.filter(__raw__={"subject._cls": args["subject_type"]})
+        if args["recipient"]:
+            transfers = transfers.generic_in(recipient=args["recipient"])
+        if args["status"]:
+            transfers = transfers.filter(status=args["status"])
+
+        if not (args["subject"] or args["recipient"]):
+            api.abort(400, "Please provide at least a `subject` or a `recipient`")
+
+        return [
+            transfer
+            for transfer in transfers
+            if TransferPermission(transfer.subject).can()
+            or TransferResponsePermission(transfer).can()
+        ]
 
     @api.doc("request_transfer")
     @api.expect(transfer_request_fields)
