@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Add list transfers endpoint [#3211](https://github.com/opendatateam/udata/pull/3211)
+- Add list transfers endpoint / Save user requesting the transfer [#3211](https://github.com/opendatateam/udata/pull/3211)
 - Add dataservice csv adapter [#3208](https://github.com/opendatateam/udata/pull/3208)
 - Add url_for for dataservices and mail notifications [#3213](https://github.com/opendatateam/udata/pull/3213)
 - Compute dataservices metrics on org, user and site [#3209](https://github.com/opendatateam/udata/pull/3209)
