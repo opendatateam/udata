@@ -89,6 +89,12 @@ optional arguments:
 ## Backends
 
 `udata` comes with 3 harvest backends but you can implement your own backend.
+In order for `udata` to be able to use any of those backends, they first need to be enabled
+in the `udata.cfg` `PLUGINS` section, like so:
+
+```cfg
+PLUGINS = ['dcat']
+```
 
 ### DCAT
 
@@ -249,6 +255,22 @@ cookiecutter gh:opendatateam/cookiecutter-udata-harvester
 This will create a new package with a harvester skeleton on which you can start hacking.
 
 You may take a look at the [existing backends][backends-repository] to see exiting implementations.
+
+
+## Debugging
+
+Debugging the harvesting code may be difficult as it's run in Celery, asynchronously, and using a `breakpoint` (to drop into a pdb)
+is [kind of a pain](https://docs.celeryq.dev/en/stable/userguide/debugging.html).
+
+Another trick could be calling the `udata.harvest.task.harvest` function straight from a `udata shell`.
+To do that:
+
+```python
+# Drop a `breakpoint()` somewhere in your harvesting code, then:
+$ udata shell
+>>> from udata.harvest.tasks import harvest
+>>> harvest("<id of your job here, taken from the (old) admin at http://dev.local:7000/fr/admin/system/>")
+```
 
 
 [DCAT]: https://www.w3.org/TR/vocab-dcat/
