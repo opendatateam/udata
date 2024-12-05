@@ -127,6 +127,9 @@ class TransferRequestsAPI(API):
         if args["status"]:
             transfers = transfers.filter(status=args["status"])
 
+        if not (args["subject"] or args["recipient"]):
+            api.abort(400, "Please provide at least a `subject` or a `recipient`")
+
         return [
             transfer
             for transfer in transfers
