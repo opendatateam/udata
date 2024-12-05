@@ -17,7 +17,7 @@ TRANSFER_STATUS = {
 
 
 class Transfer(db.Document):
-    user = db.ReferenceField("User")
+    user = db.ReferenceField("User", nullable=True)
     owner = db.GenericReferenceField(required=True)
     recipient = db.GenericReferenceField(required=True)
     subject = db.GenericReferenceField(required=True)
