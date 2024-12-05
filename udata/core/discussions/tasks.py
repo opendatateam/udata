@@ -1,10 +1,8 @@
 from udata import mail
-from udata.core.dataset.models import Dataset
-from udata.core.post.models import Post
-from udata.core.reuse.models import Reuse
 from udata.i18n import lazy_gettext as _
 from udata.tasks import connect, get_logger
 
+from .constants import NOTIFY_DISCUSSION_SUBJECTS
 from .models import Discussion
 from .signals import on_discussion_closed, on_new_discussion, on_new_discussion_comment
 
@@ -23,7 +21,7 @@ def owner_recipients(discussion):
 @connect(on_new_discussion, by_id=True)
 def notify_new_discussion(discussion_id):
     discussion = Discussion.objects.get(pk=discussion_id)
-    if isinstance(discussion.subject, (Dataset, Reuse, Post)):
+    if isinstance(discussion.subject, NOTIFY_DISCUSSION_SUBJECTS):
         recipients = owner_recipients(discussion)
         subject = _("Your %(type)s have a new discussion", type=discussion.subject.verbose_name)
         mail.send(
@@ -41,7 +39,7 @@ def notify_new_discussion(discussion_id):
 def notify_new_discussion_comment(discussion_id, message=None):
     discussion = Discussion.objects.get(pk=discussion_id)
     message = discussion.discussion[message]
-    if isinstance(discussion.subject, (Dataset, Reuse, Post)):
+    if isinstance(discussion.subject, NOTIFY_DISCUSSION_SUBJECTS):
         recipients = owner_recipients(discussion) + [m.posted_by for m in discussion.discussion]
         recipients = list({u.id: u for u in recipients if u != message.posted_by}.values())
         subject = _("%(user)s commented your discussion", user=message.posted_by.fullname)
@@ -57,7 +55,7 @@ def notify_new_discussion_comment(discussion_id, message=None):
 def notify_discussion_closed(discussion_id, message=None):
     discussion = Discussion.objects.get(pk=discussion_id)
     message = discussion.discussion[message]
-    if isinstance(discussion.subject, (Dataset, Reuse, Post)):
+    if isinstance(discussion.subject, NOTIFY_DISCUSSION_SUBJECTS):
         recipients = owner_recipients(discussion) + [m.posted_by for m in discussion.discussion]
         recipients = list({u.id: u for u in recipients if u != message.posted_by}.values())
         subject = _("A discussion has been closed")
