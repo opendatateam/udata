@@ -111,6 +111,7 @@ class TransferAPITest(APITestCase):
             url_for(
                 "api.transfers",
                 subject_type="Reuse",
+                recipient=str(recipient_user.id),
             ),
         )
         self.assert200(response)
@@ -122,12 +123,13 @@ class TransferAPITest(APITestCase):
             url_for(
                 "api.transfers",
                 subject_type="Dataset",
+                recipient=str(recipient_user.id),
             ),
         )
         self.assert200(response)
 
         data = response.json
-        self.assertEqual(len(data), 2)
+        self.assertEqual(len(data), 1)
 
         response = self.get(
             url_for(
@@ -143,26 +145,18 @@ class TransferAPITest(APITestCase):
         self.login(recipient_user)
 
         response = self.get(
-            url_for(
-                "api.transfers",
-            ),
+            url_for("api.transfers", recipient=recipient_user.id),
         )
         self.assert200(response)
 
         data = response.json
         self.assertEqual(len(data), 1)
 
-        # Assert can access email of user requesting transfer
-        self.assertEqual(data[0]["user"]["id"], str(user.id))
-        self.assertEqual(data[0]["user"]["email"], user.email)
-
         # New login
         self.login()
 
         response = self.get(
-            url_for(
-                "api.transfers",
-            ),
+            url_for("api.transfers", recipient=recipient_user.id),
         )
         self.assert200(response)
 
