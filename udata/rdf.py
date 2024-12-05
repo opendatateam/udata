@@ -127,6 +127,13 @@ EU_HVD_CATEGORIES = {
 HVD_LEGISLATION = "http://data.europa.eu/eli/reg_impl/2023/138/oj"
 TAG_TO_EU_HVD_CATEGORIES = {slugify_tag(EU_HVD_CATEGORIES[uri]): uri for uri in EU_HVD_CATEGORIES}
 
+AGENT_ROLE_TO_RDF_PREDICATE = {
+    "contact": DCAT.contactPoint,
+    "publisher": DCT.publisher,
+    "creator": DCT.creator,
+    "contributor": DCT.contributor,
+}
+
 
 def guess_format(string):
     """Guess format given an extension or a mime-type"""
@@ -294,61 +301,81 @@ def themes_from_rdf(rdf):
     return list(set(tags))
 
 
-def contact_point_from_rdf(rdf, dataset):
-    contact_point = rdf.value(DCAT.contactPoint)
-    if contact_point:
-        name = rdf_value(contact_point, VCARD.fn) or ""
-        email = (
-            rdf_value(contact_point, VCARD.hasEmail)
-            or rdf_value(contact_point, VCARD.email)
-            or rdf_value(contact_point, DCAT.email)
-        )
-        email = email.replace("mailto:", "").strip() if email else None
-        contact_form = rdf_value(contact_point, VCARD.hasUrl)
-        if not email and not contact_form:
-            return
+def contact_points_from_rdf(rdf, prop, role, dataset):
+    for contact_point in rdf.objects(prop):
+        # Read contact point information
+        if prop == DCAT.contactPoint:  # Could be split on the type of contact_point instead
+            name = rdf_value(contact_point, VCARD.fn) or ""
+            email = (
+                rdf_value(contact_point, VCARD.hasEmail)
+                or rdf_value(contact_point, VCARD.email)
+                or rdf_value(contact_point, DCAT.email)
+            )
+            email = email.replace("mailto:", "").strip() if email else None
+            contact_form = rdf_value(contact_point, VCARD.hasUrl)
+        else:
+            name = (
+                rdf_value(contact_point, FOAF.name)
+                or rdf_value(contact_point, SKOS.prefLabel)
+                or ""
+            )
+            email = rdf_value(contact_point, FOAF.mbox)
+            email = email.replace("mailto:", "").strip() if email else None
+            contact_form = None
+
+        # Tested at validation time, because it depends on the role
+        # if not email and not contact_form:
+        #         continue
+
+        # Create of get contact point object
         if dataset.organization:
             contact, _ = ContactPoint.objects.get_or_create(
-                name=name, email=email, contact_form=contact_form, organization=dataset.organization
+                name=name,
+                email=email,
+                contact_form=contact_form,
+                role=role,
+                organization=dataset.organization,
             )
         elif dataset.owner:
             contact, _ = ContactPoint.objects.get_or_create(
-                name=name, email=email, contact_form=contact_form, owner=dataset.owner
+                name=name,
+                email=email,
+                contact_form=contact_form,
+                role=role,
+                owner=dataset.owner,
             )
         else:
-            contact = None
-        return contact
+            continue
+        yield contact
 
 
-def contact_point_to_rdf(contact, graph=None):
+def contact_points_to_rdf(contacts, graph=None):
     """
     Map a contact point to a DCAT/RDF graph
     """
-    if not contact:
-        return None
-
     graph = graph or Graph(namespace_manager=namespace_manager)
 
-    if contact.id:
-        id = URIRef(
-            endpoint_for(
-                "api.contact_point",
-                contact_point=contact.id,
-                _external=True,
+    for contact in contacts:
+        if contact.id:
+            id = URIRef(
+                endpoint_for(
+                    "api.contact_point",
+                    contact_point=contact.id,
+                    _external=True,
+                )
             )
-        )
-    else:
-        id = BNode()
+        else:
+            id = BNode()
 
-    node = graph.resource(id)
-    node.set(RDF.type, VCARD.Kind)
-    if contact.name:
-        node.set(VCARD.fn, Literal(contact.name))
-    if contact.email:
-        node.set(VCARD.hasEmail, URIRef(f"mailto:{contact.email}"))
-    if contact.contact_form:
-        node.set(VCARD.hasUrl, URIRef(contact.contact_form))
-    return node
+        node = graph.resource(id)
+        node.set(RDF.type, VCARD.Kind)
+        if contact.name:
+            node.set(VCARD.fn, Literal(contact.name))
+        if contact.email:
+            node.set(VCARD.hasEmail, URIRef(f"mailto:{contact.email}"))
+        if contact.contact_form:
+            node.set(VCARD.hasUrl, URIRef(contact.contact_form))
+        yield node, AGENT_ROLE_TO_RDF_PREDICATE.get(contact.role, "contact")
 
 
 def primary_topic_identifier_from_rdf(graph: Graph, resource: RdfResource):

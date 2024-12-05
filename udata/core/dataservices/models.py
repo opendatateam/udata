@@ -162,10 +162,17 @@ class Dataservice(WithMetrics, Owned, db.Document):
 
     extras = field(db.ExtrasField())
 
-    contact_point = field(
-        db.ReferenceField("ContactPoint", reverse_delete_rule=db.NULLIFY),
-        nested_fields=contact_api_fields.contact_point_fields,
-        allow_null=True,
+    contact_points = field(
+        db.ListField(
+            field(
+                db.ReferenceField("ContactPoint", reverse_delete_rule=db.PULL),
+                nested_fields=contact_api_fields.contact_point_fields,
+                allow_null=True,
+            ),
+        ),
+        filterable={
+            "key": "dataset",
+        },
     )
 
     created_at = field(
