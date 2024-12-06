@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2024-12-04 10:03+0100\n"
-"PO-Revision-Date: 2024-12-05 08:18\n"
+"PO-Revision-Date: 2024-12-06 15:58\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -251,7 +251,7 @@ msgstr "Au moins un e-mail ou un formulaire de contact est requis pour un point 
 
 #: udata/core/dataservices/models.py:114
 msgid "dataservice"
-msgstr ""
+msgstr "API"
 
 #: udata/core/dataservices/models.py:174 udata/core/dataset/models.py:569
 #: udata/mongo/datetime_fields.py:60
