@@ -1,6 +1,7 @@
 from flask import request
 
 from udata.api import api, base_reference, fields
+from udata.auth.helpers import current_user_is_admin_or_self
 from udata.core.badges.fields import badge_fields
 from udata.core.organization.permissions import OrganizationPrivatePermission
 
@@ -60,12 +61,23 @@ def check_can_access_user_private_info():
     return OrganizationPrivatePermission(org).can()
 
 
+def member_email_with_visibility_check(email):
+    if current_user_is_admin_or_self():
+        return email
+    if check_can_access_user_private_info():
+        # Obfuscate email partially for other members
+        name, domain = email.split("@")
+        name = name[:2] + "*" * (len(name) - 2)
+        return f"{name}@{domain}"
+    return None
+
+
 member_user_with_email_fields = api.inherit(
     "MemberUserWithEmail",
     user_ref_fields,
     {
         "email": fields.Raw(
-            attribute=lambda o: o.email if check_can_access_user_private_info() else None,
+            attribute=lambda o: member_email_with_visibility_check(o.email),
             description="The user email (only present on show organization endpoint if the current user is member of the organization: admin or editor)",
             readonly=True,
         ),
