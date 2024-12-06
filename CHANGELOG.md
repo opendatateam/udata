@@ -10,6 +10,7 @@
 - The API will now return all the datasets a user has access to, including deleted of private ones that they're the owners of [#3214](https://github.com/opendatateam/udata/pull/3214)
 - Rename administration labels from "Private" to "Draft" [#3217](https://github.com/opendatateam/udata/pull/3217)
 - Add partial obfuscation of email for members [#3220](https://github.com/opendatateam/udata/pull/3220)
+- Reuse url is now a URLField and should be a valid URL [#3222](https://github.com/opendatateam/udata/pull/3222)
 
 ## 10.0.4 (2024-11-29)
 
