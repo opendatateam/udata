@@ -510,14 +510,23 @@ class Defaults(object):
     READ_ONLY_MODE = False
     METHOD_BLOCKLIST = [
         "OrganizationListAPI.post",
+        "MembershipRequestAPI.post",
+        "MemberAPI.post",
         "ReuseListAPI.post",
         "DatasetListAPI.post",
+        "ResourcesAPI.post",
+        "UploadNewDatasetResource.post",
         "CommunityResourcesAPI.post",
         "UploadNewCommunityResources.post",
         "DiscussionAPI.post",
         "DiscussionsAPI.post",
         "SourcesAPI.post",
+        "PreviewSourceConfigAPI.post",
         "FollowAPI.post",
+        "ContactPointsListAPI.post",
+        "DataservicesAPI.post",
+        "TopicsAPI.post",
+        "TransferRequestsAPI.post",
     ]
 
     # New admin URL
