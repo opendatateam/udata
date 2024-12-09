@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import pytest
+
 import udata.core.organization.constants as org_constants
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
@@ -80,6 +82,10 @@ class OrganizationModelTest(TestCase, DBTestMixin):
         associations = list(Organization.objects.with_badge(org_constants.ASSOCIATION))
         assert len(associations) == 1
         assert org_certified_association in associations
+
+    def test_organization__url(self):
+        with pytest.raises(db.ValidationError):
+            OrganizationFactory(url="not-an-url")
 
 
 class OrganizationBadgeTest(DBTestMixin, TestCase):
