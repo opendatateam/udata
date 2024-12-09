@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Ignore inactive sources at harvest time [#3226](https://github.com/opendatateam/udata/pull/3226)
 
 ## 10.0.5 (2024-12-09)
 
