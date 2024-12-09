@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Organization url is now a URLField and should be a valid URL [#3227](https://github.com/opendatateam/udata/pull/3227)
 
 ## 10.0.5 (2024-12-09)
 
