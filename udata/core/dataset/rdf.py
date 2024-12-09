@@ -27,6 +27,7 @@ from udata.rdf import (
     DCT,
     EUFORMAT,
     EUFREQ,
+    FOAF,
     FREQ,
     HVD_LEGISLATION,
     IANAFORMAT,
@@ -35,8 +36,9 @@ from udata.rdf import (
     SKOS,
     SPDX,
     TAG_TO_EU_HVD_CATEGORIES,
-    contact_point_from_rdf,
-    contact_point_to_rdf,
+    VCARD,
+    contact_points_from_rdf,
+    contact_points_to_rdf,
     namespace_manager,
     rdf_unique_values,
     rdf_value,
@@ -148,10 +150,9 @@ def ogc_service_to_rdf(dataset, resource, graph=None, is_hvd=False):
         if dataset.license.url:
             service.add(DCT.license, URIRef(dataset.license.url))
 
-    if dataset and dataset.contact_point:
-        contact_point = contact_point_to_rdf(dataset.contact_point, graph)
-        if contact_point:
-            service.set(DCAT.contactPoint, contact_point)
+    if dataset and dataset.contact_points:
+        for contact_point, predicate in contact_points_to_rdf(dataset.contact_points, graph):
+            service.set(predicate, contact_point)
 
     if is_hvd:
         # DCAT-AP HVD applicable legislation is also expected at the distribution > accessService level
@@ -236,7 +237,7 @@ def dataset_to_graph_id(dataset: Dataset) -> URIRef | BNode:
         return BNode()
 
 
-def dataset_to_rdf(dataset, graph=None):
+def dataset_to_rdf(dataset: Dataset, graph=None):
     """
     Map a dataset domain model to a DCAT/RDF graph
     """
@@ -317,9 +318,8 @@ def dataset_to_rdf(dataset, graph=None):
     if publisher:
         d.set(DCT.publisher, publisher)
 
-    contact_point = contact_point_to_rdf(dataset.contact_point, graph)
-    if contact_point:
-        d.set(DCAT.contactPoint, contact_point)
+    for contact_point, predicate in contact_points_to_rdf(dataset.contact_points, graph):
+        d.set(predicate, contact_point)
 
     return d
 
@@ -681,6 +681,32 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     return resource
 
 
+def add_responsible_parties_from_rdf(d: Graph, dataset: Dataset):
+    extras = {}
+
+    # Responsible Party Roles
+    def generic_contact(d, node):
+        for contact in d.objects(node):
+            if rdf_value(contact, FOAF.name):
+                yield rdf_value(contact, FOAF.name, parse_label=True)
+            elif rdf_value(contact, VCARD.fn):
+                yield rdf_value(contact, VCARD.fn, parse_label=True)
+            else:
+                yield contact.identifier.toPython()
+
+    publishers = list(generic_contact(d, DCT.publisher))
+    if publishers:
+        add_dcat_extra(dataset, "publisher", publishers)
+    creators = list(generic_contact(d, DCT.creator))
+    if creators:
+        add_dcat_extra(dataset, "creator", creators)
+    contributors = list(generic_contact(d, DCT.contributor))
+    if contributors:
+        add_dcat_extra(dataset, "contributor", contributors)
+
+    return extras
+
+
 def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: str | None = None):
     """
     Create or update a dataset from a RDF/DCAT graph
@@ -700,7 +726,12 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
     description = d.value(DCT.description) or d.value(DCT.abstract)
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
-    dataset.contact_point = contact_point_from_rdf(d, dataset) or dataset.contact_point
+    dataset.contact_points = (
+        list(contact_points_from_rdf(d, DCAT.contactPoint, "contact", dataset))
+        + list(contact_points_from_rdf(d, DCT.publisher, "publisher", dataset))
+        + list(contact_points_from_rdf(d, DCT.creator, "creator", dataset))
+        + list(contact_points_from_rdf(d, DCT.contributor, "contributor", dataset))
+    ) or dataset.contact_points
     schema = schema_from_rdf(d)
     if schema:
         dataset.schema = schema
@@ -718,6 +749,9 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
     temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
     if temporal_coverage:
         dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
+
+    # Adding some metadata to extras - may be moved to property if relevant
+    add_responsible_parties_from_rdf(d, dataset)
 
     provenances = provenances_from_rdf(d)
     if provenances:

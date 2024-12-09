@@ -11,8 +11,8 @@ from udata.rdf import (
     DCT,
     HVD_LEGISLATION,
     TAG_TO_EU_HVD_CATEGORIES,
-    contact_point_from_rdf,
-    contact_point_to_rdf,
+    contact_points_from_rdf,
+    contact_points_to_rdf,
     namespace_manager,
     rdf_value,
     remote_url_from_rdf,
@@ -43,7 +43,10 @@ def dataservice_from_rdf(
     dataservice.base_api_url = url_from_rdf(d, DCAT.endpointURL)
     dataservice.endpoint_description_url = url_from_rdf(d, DCAT.endpointDescription)
 
-    dataservice.contact_point = contact_point_from_rdf(d, dataservice) or dataservice.contact_point
+    dataservice.contact_points = (
+        list(contact_points_from_rdf(d, DCAT.contactPoint, "contact", dataservice))
+        or dataservice.contact_points
+    )
 
     datasets = []
     for dataset_node in d.objects(DCAT.servesDataset):
@@ -178,8 +181,7 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
         for dataset in dataservice.datasets:
             d.add(DCAT.servesDataset, dataset_to_graph_id(dataset))
 
-    contact_point = contact_point_to_rdf(dataservice.contact_point, graph)
-    if contact_point:
-        d.set(DCAT.contactPoint, contact_point)
+    for contact_point, predicate in contact_points_to_rdf(dataservice.contact_points, graph):
+        d.set(predicate, contact_point)
 
     return d

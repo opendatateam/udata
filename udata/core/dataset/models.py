@@ -563,7 +563,7 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
 
     featured = db.BooleanField(required=True, default=False)
 
-    contact_point = db.ReferenceField("ContactPoint", reverse_delete_rule=db.NULLIFY)
+    contact_points = db.ListField(db.ReferenceField("ContactPoint", reverse_delete_rule=db.PULL))
 
     created_at_internal = DateTimeField(
         verbose_name=_("Creation date"), default=datetime.utcnow, required=True
@@ -965,6 +965,14 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             "created_at_internal": self.created_at_internal,
             "last_modified_internal": self.last_modified_internal,
         }
+
+    @property
+    def credits(self):
+        return (
+            self.extras.get("harvest", {}).get("dct:publishers", [])
+            + self.extras.get("harvest", {}).get("dct:creators", [])
+            + self.extras.get("harvest", {}).get("dct:contributors", [])
+        )
 
     @property
     def views_count(self):

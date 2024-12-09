@@ -229,8 +229,9 @@ def import_fixtures(source):
                 DiscussionFactory(**discussion, subject=dataset)
             for dataservice in fixture["dataservices"]:
                 dataservice = remove_unwanted_keys(dataservice, "dataservice")
-                dataservice["contact_point"] = get_or_create(
-                    dataservice, "contact_point", ContactPoint, ContactPointFactory
-                )
+                # TODO: update fixtures
+                dataservice["contact_points"] = [
+                    get_or_create(dataservice, "contact_point", ContactPoint, ContactPointFactory)
+                ]
                 dataservice["organization"] = get_or_create_organization(dataservice)
                 DataserviceFactory(**dataservice, datasets=[dataset])
