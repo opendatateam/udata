@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 10.0.5 (2024-12-09)
 
 - Add list transfers endpoint / Save user requesting the transfer [#3211](https://github.com/opendatateam/udata/pull/3211)
