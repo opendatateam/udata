@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 10.0.5 (2024-12-09)
 
 - Add list transfers endpoint / Save user requesting the transfer [#3211](https://github.com/opendatateam/udata/pull/3211)
 - Add dataservice csv adapter [#3208](https://github.com/opendatateam/udata/pull/3208)
