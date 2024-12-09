@@ -145,7 +145,7 @@ FS_ROOT = 'fs'
 SESSION_COOKIE_SECURE = False
 ```
 
-This define `dev.local:7000` as the URL for your local setup. You’ll have to edit your `/etc/hosts` to add this rule.
+This define `dev.local:7000` as the URL for your local setup. You’ll have to edit your `/etc/hosts` (Linux) or `C:\Windows\System32\drivers\etc\hosts` (Windows) to add this rule.
 
 ```bash
 127.0.0.1       dev.local
