@@ -206,8 +206,10 @@ dataset_fields = apiv2.model(
             readonly=True,
             description="Site internal and specific object's data",
         ),
-        "contact_point": fields.Nested(
-            contact_point_fields, allow_null=True, description="The dataset's contact point"
+        "contact_points": fields.List(
+            fields.Nested(contact_point_fields),
+            allow_null=True,
+            description="The dataset contact points",
         ),
     },
     mask=DEFAULT_MASK_APIV2,

@@ -10,7 +10,7 @@ from udata.rdf import (
     FORMAT_MAP,
     RDF,
     VCARD,
-    contact_point_to_rdf,
+    contact_points_to_rdf,
     guess_format,
     negociate_content,
     want_rdf,
@@ -89,7 +89,7 @@ class ContactToRdfTest:
             contact_form="https://data.support.com",
         )
 
-        contact_rdf = contact_point_to_rdf(contact, None)
+        contact_rdf = contact_points_to_rdf(contact, None)
 
         assert contact_rdf.value(RDF.type).identifier == VCARD.Kind
         assert contact_rdf.value(VCARD.fn) == Literal("Organization contact")

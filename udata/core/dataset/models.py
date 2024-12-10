@@ -563,7 +563,7 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
 
     featured = db.BooleanField(required=True, default=False)
 
-    contact_point = db.ReferenceField("ContactPoint", reverse_delete_rule=db.NULLIFY)
+    contact_points = db.ListField(db.ReferenceField("ContactPoint", reverse_delete_rule=db.PULL))
 
     created_at_internal = DateTimeField(
         verbose_name=_("Creation date"), default=datetime.utcnow, required=True
