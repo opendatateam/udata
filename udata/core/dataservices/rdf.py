@@ -43,6 +43,7 @@ def dataservice_from_rdf(
     dataservice.base_api_url = url_from_rdf(d, DCAT.endpointURL)
     dataservice.endpoint_description_url = url_from_rdf(d, DCAT.endpointDescription)
 
+    # TODO: what are the type of contact points supported on dataservices?
     dataservice.contact_points = (
         list(contact_points_from_rdf(d, DCAT.contactPoint, "contact", dataservice))
         or dataservice.contact_points

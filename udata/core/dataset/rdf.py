@@ -27,7 +27,6 @@ from udata.rdf import (
     DCT,
     EUFORMAT,
     EUFREQ,
-    FOAF,
     FREQ,
     HVD_LEGISLATION,
     IANAFORMAT,
@@ -36,7 +35,6 @@ from udata.rdf import (
     SKOS,
     SPDX,
     TAG_TO_EU_HVD_CATEGORIES,
-    VCARD,
     contact_points_from_rdf,
     contact_points_to_rdf,
     namespace_manager,
@@ -681,32 +679,6 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     return resource
 
 
-def add_responsible_parties_from_rdf(d: Graph, dataset: Dataset):
-    extras = {}
-
-    # Responsible Party Roles
-    def generic_contact(d, node):
-        for contact in d.objects(node):
-            if rdf_value(contact, FOAF.name):
-                yield rdf_value(contact, FOAF.name, parse_label=True)
-            elif rdf_value(contact, VCARD.fn):
-                yield rdf_value(contact, VCARD.fn, parse_label=True)
-            else:
-                yield contact.identifier.toPython()
-
-    publishers = list(generic_contact(d, DCT.publisher))
-    if publishers:
-        add_dcat_extra(dataset, "publisher", publishers)
-    creators = list(generic_contact(d, DCT.creator))
-    if creators:
-        add_dcat_extra(dataset, "creator", creators)
-    contributors = list(generic_contact(d, DCT.contributor))
-    if contributors:
-        add_dcat_extra(dataset, "contributor", contributors)
-
-    return extras
-
-
 def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: str | None = None):
     """
     Create or update a dataset from a RDF/DCAT graph
@@ -726,6 +698,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
     description = d.value(DCT.description) or d.value(DCT.abstract)
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
+    # TODO: could it be less verbose?
     dataset.contact_points = (
         list(contact_points_from_rdf(d, DCAT.contactPoint, "contact", dataset))
         + list(contact_points_from_rdf(d, DCT.publisher, "publisher", dataset))
@@ -749,9 +722,6 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
     temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
     if temporal_coverage:
         dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
-
-    # Adding some metadata to extras - may be moved to property if relevant
-    add_responsible_parties_from_rdf(d, dataset)
 
     provenances = provenances_from_rdf(d)
     if provenances:
