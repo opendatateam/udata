@@ -7,6 +7,7 @@ import pytest
 import pytz
 import requests_mock
 from flask import url_for
+from werkzeug.test import TestResponse
 
 import udata.core.organization.constants as org_constants
 from udata.api import fields
@@ -58,6 +59,11 @@ SAMPLE_GEOM = {
         ],
     ],
 }
+
+
+def dataset_in_response(response: TestResponse, dataset: Dataset) -> bool:
+    only_dataset = [r for r in response.json["data"] if r["id"] == str(dataset.id)]
+    return len(only_dataset) > 0
 
 
 class DatasetAPITest(APITestCase):
@@ -298,6 +304,52 @@ class DatasetAPITest(APITestCase):
         # filter on non id for topic
         response = self.get(url_for("api.datasets", topic="xxx"))
         self.assert400(response)
+
+    def test_dataset_api_list_owned(self) -> None:
+        """Should filter out private datasets if not owner"""
+        owner = UserFactory()
+        org = OrganizationFactory()
+        public_dataset = DatasetFactory()
+        private_user_dataset = DatasetFactory(private=True, owner=owner)
+        private_org_dataset = DatasetFactory(private=True, organization=org)
+
+        # Only public datasets for non-authenticated user.
+        response = self.get(url_for("api.datasets"))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert dataset_in_response(response, public_dataset)
+
+        # Only public dataset for a non-owner authenticated user.
+        self.login(UserFactory())
+        response = self.get(url_for("api.datasets"))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert dataset_in_response(response, public_dataset)
+
+        # Authenticated user is the owner
+        self.login(owner)
+
+        # Public and 1 private dataset for the owner
+        response = self.get(url_for("api.datasets"))
+        assert200(response)
+        assert len(response.json["data"]) == 2  # Return everything
+        assert dataset_in_response(response, public_dataset)
+        assert dataset_in_response(response, private_user_dataset)
+
+        # Authenticated user is now also member of the organization
+        member = Member(user=owner, role="editor")
+        org.members = [member]
+        org.save()
+        del owner.organizations  # clear user.organizations cached property
+        owner.reload()
+
+        # Public and 2 private dataset for the owner + organization member
+        response = self.get(url_for("api.datasets"))
+        assert200(response)
+        assert len(response.json["data"]) == 3  # Return everything
+        assert dataset_in_response(response, public_dataset)
+        assert dataset_in_response(response, private_user_dataset)
+        assert dataset_in_response(response, private_org_dataset)
 
     def test_dataset_api_get(self):
         """It should fetch a dataset from the API"""
@@ -765,6 +817,9 @@ class DatasetAPITest(APITestCase):
         self.assertStatus(response, 204)
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertIsNotNone(Dataset.objects[0].deleted)
+
+        # Login with a distinct user, without visibility on the deleted dataset
+        self.login(UserFactory())
 
         response = self.get(url_for("api.datasets"))
         self.assert200(response)

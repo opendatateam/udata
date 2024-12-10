@@ -1,5 +1,6 @@
 import pytest
 
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import (
     DatasetFactory,
     HiddenDatasetFactory,
@@ -28,6 +29,14 @@ class SiteMetricTest:
         site.count_reuses()
 
         assert site.get_metrics()["reuses"] == 4
+
+    def test_dataservice_metric(self, app):
+        site = SiteFactory.create(id=app.config["SITE_ID"])
+        DataserviceFactory.create_batch(4)
+
+        site.count_dataservices()
+
+        assert site.get_metrics()["dataservices"] == 4
 
     def test_dataset_metric(self, app):
         site = SiteFactory.create(id=app.config["SITE_ID"])
