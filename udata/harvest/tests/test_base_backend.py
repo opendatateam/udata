@@ -20,6 +20,11 @@ class Unknown:
     pass
 
 
+def gen_remote_IDs(num: int) -> list[str]:
+    """Generate remote IDs."""
+    return [f"fake-{i}" for i in range(num)]
+
+
 class FakeBackend(BaseBackend):
     filters = (
         HarvestFilter("First filter", "first", str),
@@ -35,8 +40,7 @@ class FakeBackend(BaseBackend):
     )
 
     def inner_harvest(self):
-        for i in range(self.source.config.get("nb_datasets", 3)):
-            remote_id = f"fake-{i}"
+        for remote_id in self.source.config.get("dataset_remote_ids", []):
             self.process_dataset(remote_id)
             if self.is_done():
                 return
@@ -45,7 +49,8 @@ class FakeBackend(BaseBackend):
         dataset = self.get_dataset(item.remote_id)
 
         for key, value in DatasetFactory.as_dict(visible=True).items():
-            setattr(dataset, key, value)
+            if getattr(dataset, key) is None:
+                setattr(dataset, key, value)
         if self.source.config.get("last_modified"):
             dataset.last_modified_internal = self.source.config["last_modified"]
         return dataset
@@ -76,7 +81,7 @@ class BaseBackendTest:
     def test_simple_harvest(self):
         now = datetime.utcnow()
         nb_datasets = 3
-        source = HarvestSourceFactory(config={"nb_datasets": nb_datasets})
+        source = HarvestSourceFactory(config={"dataset_remote_ids": gen_remote_IDs(nb_datasets)})
         backend = FakeBackend(source)
 
         job = backend.harvest()
@@ -155,7 +160,7 @@ class BaseBackendTest:
 
     def test_harvest_source_id(self):
         nb_datasets = 3
-        source = HarvestSourceFactory(config={"nb_datasets": nb_datasets})
+        source = HarvestSourceFactory(config={"dataset_remote_ids": gen_remote_IDs(nb_datasets)})
         backend = FakeBackend(source)
 
         job = backend.harvest()
@@ -176,7 +181,9 @@ class BaseBackendTest:
 
     def test_dont_overwrite_last_modified(self, mocker):
         last_modified = faker.date_time_between(start_date="-30y", end_date="-1y")
-        source = HarvestSourceFactory(config={"nb_datasets": 1, "last_modified": last_modified})
+        source = HarvestSourceFactory(
+            config={"dataset_remote_ids": gen_remote_IDs(1), "last_modified": last_modified}
+        )
         backend = FakeBackend(source)
 
         backend.harvest()
@@ -188,7 +195,9 @@ class BaseBackendTest:
 
     def test_dont_overwrite_last_modified_even_if_set_to_same(self, mocker):
         last_modified = faker.date_time_between(start_date="-30y", end_date="-1y")
-        source = HarvestSourceFactory(config={"nb_datasets": 1, "last_modified": last_modified})
+        source = HarvestSourceFactory(
+            config={"dataset_remote_ids": gen_remote_IDs(1), "last_modified": last_modified}
+        )
         backend = FakeBackend(source)
 
         backend.harvest()
@@ -201,7 +210,7 @@ class BaseBackendTest:
 
     def test_autoarchive(self, app):
         nb_datasets = 3
-        source = HarvestSourceFactory(config={"nb_datasets": nb_datasets})
+        source = HarvestSourceFactory(config={"dataset_remote_ids": gen_remote_IDs(nb_datasets)})
         backend = FakeBackend(source)
 
         # create a dangling dataset to be archived
@@ -263,7 +272,7 @@ class BaseBackendTest:
 
     def test_harvest_datasets_get_deleted(self):
         nb_datasets = 3
-        source = HarvestSourceFactory(config={"nb_datasets": nb_datasets})
+        source = HarvestSourceFactory(config={"dataset_remote_ids": gen_remote_IDs(nb_datasets)})
         backend = FakeBackend(source)
 
         job = backend.harvest()
@@ -280,6 +289,69 @@ class BaseBackendTest:
         job.reload()
         for item in job.items:
             assert item.dataset is None
+
+    def test_no_datasets_duplication(self, app):
+        duplicated_remote_id_uri = "http://example.com/duplicated_remote_id_uri"
+        nb_datasets = 3
+        remote_ids = gen_remote_IDs(nb_datasets)
+        remote_ids.append(duplicated_remote_id_uri)
+        source = HarvestSourceFactory(config={"dataset_remote_ids": remote_ids})
+        backend = FakeBackend(source)
+
+        # Create a dataset that should be reused by the harvest, which will update it
+        # instead of creating a new one, as it has the same remote_id, domain and source_id.
+        dataset_reused = DatasetFactory(
+            title="Reused Dataset",
+            harvest={
+                "domain": source.domain,
+                "remote_id": "fake-0",  # the FakeBackend harvest should reuse this dataset
+                "source_id": str(source.id),
+            },
+        )
+
+        # Create a dataset that should be reused even though it's a different `source_id` and `domain,
+        # because the remote_id is the same and an URI.
+        dataset_reused_uri = DatasetFactory(
+            title="Reused Dataset with URI",
+            harvest={
+                "domain": "some-other-domain",
+                # the FakeBackend harvest above should reuse this dataset with the same remote_id URI
+                "remote_id": duplicated_remote_id_uri,
+                "source_id": "some-other-source-id",
+            },
+        )
+
+        # Create a dataset that should not be reused even though it's the same `remote_id`,
+        # as it's not an URI, and has a different domain and source id.
+        dataset_not_reused = DatasetFactory(
+            title="Duplicated Dataset",
+            harvest={
+                "domain": "some-other-domain",
+                "remote_id": "fake-0",  # the "source" harvest above should create another dataset with the same remote_id
+                "source_id": "some-other-source-id",
+            },
+        )
+
+        job = backend.harvest()
+
+        # 3 (nb_datasets) + 1 (dataset_remote_ids) created by the HarvestSourceFactory
+        assert len(job.items) == nb_datasets + 1
+        # all datasets : 4 mocks (3 nb_datasets + 1 dataset_remote_ids) + 3 created with DatasetFactory - 2 reused
+        assert Dataset.objects.count() == nb_datasets + 1 + 3 - 2
+        assert (
+            # and not 3, data_reused was not duplicated
+            Dataset.objects(harvest__remote_id="fake-0").count() == 2
+        )
+        # The dataset not reused wasn't overwritten nor updated by the harvest.
+        dataset_not_reused.reload()
+        assert dataset_not_reused.harvest.domain == "some-other-domain"
+        assert dataset_not_reused.harvest.source_id == "some-other-source-id"
+        # The "reused dataset" was overwritten and updated by the harvest.
+        dataset_reused.reload()
+        # The "reused dataset with uri" was overwritten and updated by the harvest.
+        dataset_reused_uri.reload()
+        assert dataset_reused_uri.harvest.domain == source.domain
+        assert dataset_reused_uri.harvest.source_id == str(source.id)
 
 
 @pytest.mark.usefixtures("clean_db")
