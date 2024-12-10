@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Fix the `parse-url` command [#3225](https://github.com/opendatateam/udata/pull/3225)
+- Don’t duplicated datasets with a harvest.remote_id URI when harvesting [#3219](https://github.com/opendatateam/udata/pull/3219)
 
 ## 10.0.5 (2024-12-09)
 
