@@ -694,14 +694,20 @@ class DateRangeField(Field):
             value = valuelist[0]
             if isinstance(value, str):
                 start, end = value.split(" - ")
+                if end is not None:
+                    end = parse(end, yearfirst=True).date()
                 self.data = db.DateRange(
                     start=parse(start, yearfirst=True).date(),
-                    end=parse(end, yearfirst=True).date(),
+                    end=end,
                 )
-            elif "start" in value and "end" in value:
+            elif "start" in value:
+                if value.get("end", None):
+                    end = parse(value["end"], yearfirst=True).date()
+                else:
+                    end = None
                 self.data = db.DateRange(
                     start=parse(value["start"], yearfirst=True).date(),
-                    end=parse(value["end"], yearfirst=True).date(),
+                    end=end,
                 )
             else:
                 raise validators.ValidationError(_("Unable to parse date range"))

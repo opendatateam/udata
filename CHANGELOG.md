@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Allow temporal coverage with only a start date [#3192](https://github.com/opendatateam/udata/pull/3192)
 - Fix the `parse-url` command [#3225](https://github.com/opendatateam/udata/pull/3225)
 
 ## 10.0.5 (2024-12-09)

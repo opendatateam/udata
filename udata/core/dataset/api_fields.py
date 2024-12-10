@@ -194,7 +194,7 @@ temporal_coverage_fields = api.model(
     "TemporalCoverage",
     {
         "start": fields.ISODateTime(description="The temporal coverage start date", required=True),
-        "end": fields.ISODateTime(description="The temporal coverage end date", required=True),
+        "end": fields.ISODateTime(description="The temporal coverage end date"),
     },
 )
 
