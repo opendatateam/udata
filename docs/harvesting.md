@@ -88,7 +88,7 @@ optional arguments:
 
 ## Backends
 
-`udata` comes with 3 harvest backends but you can implement your own backend.
+`udata` comes with 3 harvest backends (listed below) but you can implement your own backend.
 In order for `udata` to be able to use any of those backends, they first need to be enabled
 in the `udata.cfg` `PLUGINS` section, like so:
 
@@ -262,15 +262,14 @@ You may take a look at the [existing backends][backends-repository] to see exiti
 Debugging the harvesting code may be difficult as it's run in Celery, asynchronously, and using a `breakpoint` (to drop into a pdb)
 is [kind of a pain](https://docs.celeryq.dev/en/stable/userguide/debugging.html).
 
-Another trick could be calling the `udata.harvest.task.harvest` function straight from a `udata shell`.
-To do that:
+Another trick could be calling the synchronous version of the harvesting command:
 
-```python
+```shell
 # Drop a `breakpoint()` somewhere in your harvesting code, then:
-$ udata shell
->>> from udata.harvest.tasks import harvest
->>> harvest("<id of your job here, taken from the (old) admin at http://dev.local:7000/fr/admin/system/>")
+$ udata harvest run <source_id>
 ```
+
+`source_id` is the id of your job, taken from the (old) admin at http://dev.local:7000/fr/admin/system/.
 
 
 [DCAT]: https://www.w3.org/TR/vocab-dcat/
