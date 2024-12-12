@@ -907,6 +907,7 @@ class OrganizationContactPointsAPITest:
             "email": "mooneywayne@cobb-cochran.com",
             "name": "Martin Schultz",
             "organization": str(org.id),
+            "role": "contact",
         }
         response = api.post(url_for("api.contact_points"), data)
         assert201(response)

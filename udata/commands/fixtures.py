@@ -231,7 +231,7 @@ def import_fixtures(source):
                 dataservice = remove_unwanted_keys(dataservice, "dataservice")
                 # TODO: update fixtures
                 dataservice["contact_points"] = [
-                    get_or_create(dataservice, "contact_point", ContactPoint, ContactPointFactory)
+                    get_or_create(dataservice, "contact_points", ContactPoint, ContactPointFactory)
                 ]
                 dataservice["organization"] = get_or_create_organization(dataservice)
                 DataserviceFactory(**dataservice, datasets=[dataset])

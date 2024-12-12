@@ -678,6 +678,7 @@ class DatasetAPITest(APITestCase):
             "email": "mooneywayne@cobb-cochran.com",
             "name": "Martin Schultz",
             "organization": str(org.id),
+            "role": "contact",
         }
         response = self.post(url_for("api.contact_points"), contact_point_data)
         self.assert201(response)
@@ -690,19 +691,19 @@ class DatasetAPITest(APITestCase):
         dataset = DatasetFactory(organization=org)
         data = DatasetFactory.as_dict()
 
-        data["contact_point"] = contact_point_id
+        data["contact_points"] = [contact_point_id]
         response = self.put(url_for("api.dataset", dataset=dataset), data)
         self.assert200(response)
 
         dataset = Dataset.objects.first()
-        self.assertEqual(dataset.contact_point.name, contact_point_data["name"])
+        self.assertEqual(dataset.contact_points[0].name, contact_point_data["name"])
 
-        data["contact_point"] = None
+        data["contact_points"] = None
         response = self.put(url_for("api.dataset", dataset=dataset), data)
         self.assert200(response)
 
         dataset.reload()
-        self.assertEqual(dataset.contact_point, None)
+        self.assertEqual(dataset.contact_points, [])
 
     def test_dataset_api_update_contact_point_error(self):
         """It should update a dataset from the API"""
@@ -715,6 +716,7 @@ class DatasetAPITest(APITestCase):
             "email": "mooneywayne@cobb-cochran.com",
             "name": "Martin Schultz",
             "organization": str(org.id),
+            "role": "contact",
         }
         response = self.post(url_for("api.contact_points"), contact_point_data)
         self.assert201(response)
@@ -727,11 +729,11 @@ class DatasetAPITest(APITestCase):
         dataset = DatasetFactory(owner=self.user)
         data = DatasetFactory.as_dict()
 
-        data["contact_point"] = contact_point_id
+        data["contact_points"] = [contact_point_id]
         response = self.put(url_for("api.dataset", dataset=dataset), data)
         self.assert400(response)
         self.assertEqual(
-            response.json["errors"]["contact_point"][0],
+            response.json["errors"]["contact_points"][0],
             _("Wrong contact point id or contact point ownership mismatch"),
         )
 

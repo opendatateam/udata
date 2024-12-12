@@ -93,6 +93,7 @@ class DatasetToRdfTest:
             name="Organization contact",
             email="hello@its.me",
             contact_form="https://data.support.com",
+            role="contact",
         )
         remote_url = "https://somewhere.org/dataset"
         dataset = DatasetFactory(
@@ -101,7 +102,7 @@ class DatasetToRdfTest:
             frequency="daily",
             acronym="acro",
             organization=org,
-            contact_point=contact,
+            contact_points=[contact],
             harvest=HarvestDatasetMetadata(
                 remote_url=remote_url, dct_identifier="foobar-identifier"
             ),
@@ -203,8 +204,8 @@ class DatasetToRdfTest:
             format="ogc:wms",
             url="https://services.data.shom.fr/INSPIRE/wms/r?service=WMS&request=GetCapabilities&version=1.3.0",
         )
-        contact = ContactPointFactory()
-        dataset = DatasetFactory(resources=[resource], license=license, contact_point=contact)
+        contact = ContactPointFactory(role="contact")
+        dataset = DatasetFactory(resources=[resource], license=license, contact_points=[contact])
 
         r = resource_to_rdf(resource, dataset)
 

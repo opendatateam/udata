@@ -765,11 +765,8 @@ class PublishAsField(ModelFieldMixin, Field):
         return True
 
 
-class ContactPointField(ModelFieldMixin, Field):
+class ContactPointListField(ModelList, Field):
     model = ContactPoint
-
-    def __init__(self, *args, **kwargs):
-        super(ContactPointField, self).__init__(*args, **kwargs)
 
 
 def field_parse(cls, value, *args, **kwargs):

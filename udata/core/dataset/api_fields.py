@@ -387,8 +387,7 @@ dataset_fields = api.model(
             description="Site internal and specific object's data",
         ),
         "contact_points": fields.List(
-            fields.Nested(contact_point_fields, allow_null=True),
-            description="The dataset contact points",
+            fields.Nested(contact_point_fields, description="The dataset contact points"),
         ),
     },
     mask=DEFAULT_MASK,

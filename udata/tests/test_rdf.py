@@ -82,16 +82,19 @@ class GuessFormatTest(object):
 
 
 class ContactToRdfTest:
-    def test_contact_point_to_rdf(self):
+    def test_contact_points_to_rdf(self):
         contact = ContactPoint(
             name="Organization contact",
             email="hello@its.me",
             contact_form="https://data.support.com",
         )
 
-        contact_rdf = contact_points_to_rdf(contact, None)
+        contact_rdfs = contact_points_to_rdf([contact], None)
 
-        assert contact_rdf.value(RDF.type).identifier == VCARD.Kind
-        assert contact_rdf.value(VCARD.fn) == Literal("Organization contact")
-        assert contact_rdf.value(VCARD.hasEmail).identifier == URIRef("mailto:hello@its.me")
-        assert contact_rdf.value(VCARD.hasUrl).identifier == URIRef("https://data.support.com")
+        for contact_point, predicate in contact_rdfs:
+            assert contact_point.value(RDF.type).identifier == VCARD.Kind
+            assert contact_point.value(VCARD.fn) == Literal("Organization contact")
+            assert contact_point.value(VCARD.hasEmail).identifier == URIRef("mailto:hello@its.me")
+            assert contact_point.value(VCARD.hasUrl).identifier == URIRef(
+                "https://data.support.com"
+            )

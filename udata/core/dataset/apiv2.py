@@ -66,7 +66,7 @@ DEFAULT_MASK_APIV2 = ",".join(
         "quality",
         "harvest",
         "internal",
-        "contact_point",
+        "contact_points",
     )
 )
 
@@ -208,7 +208,7 @@ dataset_fields = apiv2.model(
         ),
         "contact_points": fields.List(
             fields.Nested(contact_point_fields),
-            allow_null=True,
+            required=False,
             description="The dataset contact points",
         ),
     },

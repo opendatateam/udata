@@ -171,7 +171,7 @@ class Dataservice(WithMetrics, Owned, db.Document):
             ),
         ),
         filterable={
-            "key": "dataset",
+            "key": "contact_point",
         },
     )
 
