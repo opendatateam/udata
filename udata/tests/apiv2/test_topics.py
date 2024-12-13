@@ -154,6 +154,24 @@ class TopicDatasetsAPITest(APITestCase):
         assert response.status_code == 400
 
 
+class TopicDatasetsClearAPI(APITestCase):
+    def test_clear_datasets(self):
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        assert len(topic.datasets) > 0
+        response = self.post(url_for("apiv2.topic_datasets_clear", topic=topic))
+        assert response.status_code == 204
+        topic.reload()
+        assert len(topic.datasets) == 0
+
+    def test_clear_datasets_perm(self):
+        user = UserFactory()
+        topic = TopicFactory(owner=user)
+        self.login()
+        response = self.post(url_for("apiv2.topic_datasets_clear", topic=topic))
+        assert response.status_code == 403
+
+
 class TopicDatasetAPITest(APITestCase):
     def test_delete_dataset(self):
         owner = self.login()
