@@ -188,6 +188,22 @@ class TopicDatasetsAPI(API):
         return topic, 201
 
 
+@ns.route("/<topic:topic>/datasets/clear/", endpoint="topic_datasets_clear", doc=common_doc)
+class TopicDatasetsClearAPI(API):
+    @apiv2.secure
+    @apiv2.doc("topic_datasets_clear")
+    @apiv2.response(403, "Forbidden")
+    @apiv2.response(404, "Topic not found")
+    def post(self, topic):
+        """Clear all datasets from a topic"""
+        if not TopicEditPermission(topic).can():
+            apiv2.abort(403, "Forbidden")
+
+        topic.datasets = []
+        topic.save()
+        return "", 204
+
+
 @ns.route(
     "/<topic:topic>/datasets/<dataset:dataset>/",
     endpoint="topic_dataset",
