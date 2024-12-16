@@ -208,12 +208,12 @@ def import_fixtures(source):
             dataset = fixture["dataset"]
             dataset = remove_unwanted_keys(dataset, "dataset")
             contact_points = []
-            for contact_point in dataset.get("contact_points"):
+            for contact_point in dataset.get("contact_points") or []:
                 contact_points.append(
                     get_or_create_obj(contact_point, ContactPoint, ContactPointFactory)
                 )
             dataset["contact_points"] = contact_points
-            if fixture["organization"]:
+            if fixture.get("organization"):
                 organization = fixture["organization"]
                 organization["members"] = [
                     Member(user=get_or_create_user(member), role=member["role"])
@@ -251,7 +251,7 @@ def import_fixtures(source):
             for dataservice in fixture["dataservices"]:
                 dataservice = remove_unwanted_keys(dataservice, "dataservice")
                 contact_points = []
-                for contact_point in dataservice.get("contact_points"):
+                for contact_point in dataservice.get("contact_points") or []:
                     contact_points.append(
                         get_or_create_obj(contact_point, ContactPoint, ContactPointFactory)
                     )
