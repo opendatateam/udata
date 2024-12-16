@@ -39,7 +39,7 @@ COMMUNITY_RES_URL = "/api/1/datasets/community_resources"
 DISCUSSION_URL = "/api/1/discussions"
 
 
-DEFAULT_FIXTURE_FILE_TAG: str = "v4.0.0"
+DEFAULT_FIXTURE_FILE_TAG: str = "v5.0.0"
 DEFAULT_FIXTURE_FILE: str = f"https://raw.githubusercontent.com/opendatateam/udata-fixtures/{DEFAULT_FIXTURE_FILE_TAG}/results.json"  # noqa
 
 DEFAULT_FIXTURES_RESULTS_FILENAME: str = "results.json"
@@ -113,11 +113,17 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
         for slug in bar:
             json_fixture = {}
 
-            json_dataset = requests.get(f"{data_source}{DATASET_URL}/{slug}/").json()
+            url = f"{data_source}{DATASET_URL}/{slug}/"
+            response = requests.get(url)
+            if not response.ok:
+                print(f"Got a status code {response.status_code} while getting {url}, skipping")
+                continue
+            json_dataset = response.json()
             json_resources = json_dataset.pop("resources")
             if json_dataset["organization"] is None:
                 json_owner = json_dataset.pop("owner")
-                json_dataset["owner"] = json_owner["id"]
+                if json_owner:
+                    json_dataset["owner"] = json_owner["id"]
             else:
                 json_org = json_dataset.pop("organization")
                 json_org = requests.get(f"{data_source}{ORG_URL}/{json_org['id']}/").json()
@@ -138,6 +144,7 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
             json_discussion = requests.get(
                 f"{data_source}{DISCUSSION_URL}/?for={json_dataset['id']}"
             ).json()["data"]
+
             json_fixture["discussions"] = json_discussion
 
             json_dataservices = requests.get(
@@ -152,8 +159,16 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
         print(f"Fixtures saved to file {results_filename}")
 
 
-def get_or_create(data, key, model, factory):
+def get_or_create_obj(data, model, factory):
     """Try getting the object. If it doesn't exist yet, create it with the provided factory."""
+    obj = model.objects(id=data["id"]).first()
+    if not obj:
+        obj = factory(**data)
+    return obj
+
+
+def get_or_create(data, key, model, factory):
+    """Try getting the object from data[key]. If it doesn't exist yet, create it with the provided factory."""
     if key not in data or data[key] is None:
         return
     data[key] = remove_unwanted_keys(data[key], key)
@@ -192,6 +207,12 @@ def import_fixtures(source):
             user = UserFactory()
             dataset = fixture["dataset"]
             dataset = remove_unwanted_keys(dataset, "dataset")
+            contact_points = []
+            for contact_point in dataset.get("contact_points"):
+                contact_points.append(
+                    get_or_create_obj(contact_point, ContactPoint, ContactPointFactory)
+                )
+            dataset["contact_points"] = contact_points
             if fixture["organization"]:
                 organization = fixture["organization"]
                 organization["members"] = [
@@ -229,9 +250,11 @@ def import_fixtures(source):
                 DiscussionFactory(**discussion, subject=dataset)
             for dataservice in fixture["dataservices"]:
                 dataservice = remove_unwanted_keys(dataservice, "dataservice")
-                # TODO: update fixtures
-                dataservice["contact_points"] = [
-                    get_or_create(dataservice, "contact_points", ContactPoint, ContactPointFactory)
-                ]
+                contact_points = []
+                for contact_point in dataservice.get("contact_points"):
+                    contact_points.append(
+                        get_or_create_obj(contact_point, ContactPoint, ContactPointFactory)
+                    )
+                dataservice["contact_points"] = contact_points
                 dataservice["organization"] = get_or_create_organization(dataservice)
                 DataserviceFactory(**dataservice, datasets=[dataset])
