@@ -16,11 +16,13 @@ def migrate(db):
     db = get_db()
     count = 0
     for collection in [db.dataset, db.dataservice]:
+        for obj in collection.find({"contact_point": {"$exists": True}}):
+            collection.update_one(
+                {"_id": obj["_id"]}, {"$set": {"contact_point": [obj["contact_point"]]}}
+            )
+        # If we rename after updating the field to be a list, then we can re-run the migration.
         count += collection.update_many(
             {}, {"$rename": {"contact_point": "contact_points"}}
         ).modified_count
-        for obj in collection.find({"contact_points__exists": True}):
-            obj["contact_points"] = [obj["contacts_point"]]
-            collection.save(obj)
 
     log.info(f"Completed {count} objects")
