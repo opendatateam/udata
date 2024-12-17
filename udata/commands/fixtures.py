@@ -134,22 +134,30 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
             json_reuses = requests.get(
                 f"{data_source}{REUSE_URL}/?dataset={json_dataset['id']}"
             ).json()["data"]
+            for reuse in json_reuses:
+                del reuse["datasets"]
             json_fixture["reuses"] = json_reuses
 
             json_community = requests.get(
                 f"{data_source}{COMMUNITY_RES_URL}/?dataset={json_dataset['id']}"
             ).json()["data"]
+            for community_resource in json_community:
+                del community_resource["dataset"]
             json_fixture["community_resources"] = json_community
 
             json_discussion = requests.get(
                 f"{data_source}{DISCUSSION_URL}/?for={json_dataset['id']}"
             ).json()["data"]
-
+            for discussion in json_discussion:
+                del discussion["subject"]
             json_fixture["discussions"] = json_discussion
 
             json_dataservices = requests.get(
                 f"{data_source}{DATASERVICES_URL}/?dataset={json_dataset['id']}"
             ).json()["data"]
+            for dataservice in json_dataservices:
+                if "datasets" in reuse:
+                    del reuse["datasets"]
             json_fixture["dataservices"] = json_dataservices
 
             json_result.append(json_fixture)
@@ -157,14 +165,6 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
     with results_file.open("w") as f:
         json.dump(json_result, f, indent=2)
         print(f"Fixtures saved to file {results_filename}")
-
-
-def get_or_create_obj(data, model, factory):
-    """Try getting the object. If it doesn't exist yet, create it with the provided factory."""
-    obj = model.objects(id=data["id"]).first()
-    if not obj:
-        obj = factory(**data)
-    return obj
 
 
 def get_or_create(data, key, model, factory):
@@ -190,6 +190,17 @@ def get_or_create_user(data):
     return get_or_create(data, "user", User, UserFactory)
 
 
+def get_or_create_contact_point(data):
+    obj = ContactPoint.objects(id=data["id"]).first()
+    if not obj:
+        if not data.get("role"):
+            data["role"] = (
+                "contact" if (data.get("email") or data.get("contact_form")) else "creator"
+            )
+        obj = ContactPointFactory(**data)
+    return obj
+
+
 @cli.command()
 @click.argument("source", default=DEFAULT_FIXTURE_FILE)
 def import_fixtures(source):
@@ -209,9 +220,7 @@ def import_fixtures(source):
             dataset = remove_unwanted_keys(dataset, "dataset")
             contact_points = []
             for contact_point in dataset.get("contact_points") or []:
-                contact_points.append(
-                    get_or_create_obj(contact_point, ContactPoint, ContactPointFactory)
-                )
+                contact_points.append(get_or_create_contact_point(contact_point))
             dataset["contact_points"] = contact_points
             if fixture.get("organization"):
                 organization = fixture["organization"]
@@ -252,9 +261,7 @@ def import_fixtures(source):
                 dataservice = remove_unwanted_keys(dataservice, "dataservice")
                 contact_points = []
                 for contact_point in dataservice.get("contact_points") or []:
-                    contact_points.append(
-                        get_or_create_obj(contact_point, ContactPoint, ContactPointFactory)
-                    )
+                    contact_points.append(get_or_create_contact_point(contact_point))
                 dataservice["contact_points"] = contact_points
                 dataservice["organization"] = get_or_create_organization(dataservice)
                 DataserviceFactory(**dataservice, datasets=[dataset])
