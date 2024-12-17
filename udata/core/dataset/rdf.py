@@ -30,6 +30,7 @@ from udata.rdf import (
     FREQ,
     HVD_LEGISLATION,
     IANAFORMAT,
+    PROV,
     SCHEMA,
     SCV,
     SKOS,
@@ -312,9 +313,17 @@ def dataset_to_rdf(dataset: Dataset, graph=None):
     if frequency:
         d.set(DCT.accrualPeriodicity, frequency)
 
-    publisher = owner_to_rdf(dataset, graph)
-    if publisher:
-        d.set(DCT.publisher, publisher)
+    owner_role = DCT.publisher
+    if [
+        contact_point
+        for contact_point in dataset.contact_points
+        if contact_point.role == "publisher"
+    ]:
+        # There's already a publisher, so the owner should instead be a qualified attribution.
+        owner_role = PROV.qualified_attribution
+    owner = owner_to_rdf(dataset, graph)
+    if owner:
+        d.set(owner_role, owner)
 
     for contact_point, predicate in contact_points_to_rdf(dataset.contact_points, graph):
         d.set(predicate, contact_point)
