@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from udata.api import API, api, fields
-from udata.auth import admin_permission
+from udata.auth import admin_permission, Permission as AdminPermission
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.reuse.models import Reuse
 from udata.core.storages.api import (
@@ -76,7 +76,7 @@ class PostsAPI(API):
 
         posts = Post.objects()
 
-        if not (admin_permission and args["with_drafts"]):
+        if not (AdminPermission().test() and args["with_drafts"]):
             posts = posts.published()
 
         return (
