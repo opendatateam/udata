@@ -60,6 +60,9 @@ parser = api.page_parser()
 parser.add_argument(
     "sort", type=str, default="-created_at", location="args", help="The sorting attribute"
 )
+parser.add_argument(
+    "with_drafts", type=bool, default=False, location="args", help="`True` also returns the unpublished posts (only for super-admins)"
+)
 
 
 @ns.route("/", endpoint="posts")
@@ -70,8 +73,14 @@ class PostsAPI(API):
     def get(self):
         """List all posts"""
         args = parser.parse_args()
+
+        posts = Post.objects()
+
+        if not (admin_permission and args["with_drafts"]):
+            posts = posts.published()
+
         return (
-            Post.objects.published()
+            posts
             .order_by(args["sort"])
             .paginate(args["page"], args["page_size"])
         )
