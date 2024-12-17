@@ -61,7 +61,11 @@ parser.add_argument(
     "sort", type=str, default="-created_at", location="args", help="The sorting attribute"
 )
 parser.add_argument(
-    "with_drafts", type=bool, default=False, location="args", help="`True` also returns the unpublished posts (only for super-admins)"
+    "with_drafts",
+    type=bool,
+    default=False,
+    location="args",
+    help="`True` also returns the unpublished posts (only for super-admins)",
 )
 
 
@@ -79,11 +83,7 @@ class PostsAPI(API):
         if not (AdminPermission().can() and args["with_drafts"]):
             posts = posts.published()
 
-        return (
-            posts
-            .order_by(args["sort"])
-            .paginate(args["page"], args["page_size"])
-        )
+        return posts.order_by(args["sort"]).paginate(args["page"], args["page_size"])
 
     @api.doc("create_post")
     @api.secure(admin_permission)
