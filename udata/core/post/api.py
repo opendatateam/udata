@@ -76,7 +76,7 @@ class PostsAPI(API):
 
         posts = Post.objects()
 
-        if not (AdminPermission().test() and args["with_drafts"]):
+        if not (AdminPermission().can() and args["with_drafts"]):
             posts = posts.published()
 
         return (
