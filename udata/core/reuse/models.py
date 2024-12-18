@@ -80,7 +80,7 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
         filterable={},
     )
     url = field(
-        db.StringField(required=True),
+        db.URLField(required=True),
         description="The remote URL (website)",
         check=check_url_does_not_exists,
     )

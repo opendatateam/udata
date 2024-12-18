@@ -2,9 +2,19 @@
 
 ## Current (in progress)
 
+- Fix the `parse-url` command [#3225](https://github.com/opendatateam/udata/pull/3225)
+
+## 10.0.5 (2024-12-09)
+
+- Add list transfers endpoint / Save user requesting the transfer [#3211](https://github.com/opendatateam/udata/pull/3211)
 - Add dataservice csv adapter [#3208](https://github.com/opendatateam/udata/pull/3208)
 - Add url_for for dataservices and mail notifications [#3213](https://github.com/opendatateam/udata/pull/3213)
 - Compute dataservices metrics on org, user and site [#3209](https://github.com/opendatateam/udata/pull/3209)
+- Update default method blocklist for READ ONLY mode [#3212](https://github.com/opendatateam/udata/pull/3212)
+- The API will now return all the datasets a user has access to, including deleted of private ones that they're the owners of [#3214](https://github.com/opendatateam/udata/pull/3214)
+- Rename administration labels from "Private" to "Draft" [#3217](https://github.com/opendatateam/udata/pull/3217)
+- Add partial obfuscation of email for members [#3220](https://github.com/opendatateam/udata/pull/3220)
+- Reuse url is now a URLField and should be a valid URL [#3222](https://github.com/opendatateam/udata/pull/3222)
 
 ## 10.0.4 (2024-11-29)
 
