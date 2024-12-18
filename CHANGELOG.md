@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Fix the `parse-url` command [#3225](https://github.com/opendatateam/udata/pull/3225)
+- Fix failing dataset save in update reuses metrics [#3230](https://github.com/opendatateam/udata/pull/3230)
 
 ## 10.0.5 (2024-12-09)
 
