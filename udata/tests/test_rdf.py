@@ -7,6 +7,8 @@ from rdflib import (
 from udata.models import ContactPoint
 from udata.rdf import (
     ACCEPTED_MIME_TYPES,
+    DCAT,
+    DCT,
     FORMAT_MAP,
     RDF,
     VCARD,
@@ -98,3 +100,33 @@ class ContactToRdfTest:
             assert contact_point.value(VCARD.hasUrl).identifier == URIRef(
                 "https://data.support.com"
             )
+            # Default predicate is "contact"
+            assert predicate == "contact"
+
+    @pytest.mark.parametrize(
+        "role,predicate",
+        [
+            ("contact", DCAT.contactPoint),
+            ("publisher", DCT.publisher),
+            ("creator", DCT.creator),
+            ("contributor", DCT.contributor),
+        ],
+    )
+    def test_contact_points_from_rdf_roles(self, role, predicate):
+        contact = ContactPoint(
+            name="Organization contact",
+            email="hello@its.me",
+            contact_form="https://data.support.com",
+            role=role,
+        )
+
+        contact_rdfs = contact_points_to_rdf([contact], None)
+
+        for contact_point, contact_point_predicate in contact_rdfs:
+            assert contact_point.value(RDF.type).identifier == VCARD.Kind
+            assert contact_point.value(VCARD.fn) == Literal("Organization contact")
+            assert contact_point.value(VCARD.hasEmail).identifier == URIRef("mailto:hello@its.me")
+            assert contact_point.value(VCARD.hasUrl).identifier == URIRef(
+                "https://data.support.com"
+            )
+            assert contact_point_predicate == predicate
