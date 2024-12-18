@@ -37,7 +37,6 @@ class PostsAPITest:
         assert len(response.json["data"]) == 4
         assert str(draft.id) in [post["id"] for post in response.json["data"]]
 
-
     def test_post_api_get(self, api):
         """It should fetch a post from the API"""
         post = PostFactory()
