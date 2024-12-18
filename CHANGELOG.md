@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Organization url is now a URLField and should be a valid URL [#3227](https://github.com/opendatateam/udata/pull/3227)
 - Fix the `parse-url` command [#3225](https://github.com/opendatateam/udata/pull/3225)
 - Add `with_drafts` argument to posts API [#3229](https://github.com/opendatateam/udata/pull/3229)
 - Fix failing dataset save in update reuses metrics [#3230](https://github.com/opendatateam/udata/pull/3230)
