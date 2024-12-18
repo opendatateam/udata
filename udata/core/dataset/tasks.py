@@ -128,7 +128,11 @@ def send_frequency_reminder(self):
 def update_datasets_reuses_metrics(self):
     all_datasets = Dataset.objects.visible().timeout(False)
     for dataset in all_datasets:
-        dataset.count_reuses()
+        try:
+            dataset.count_reuses()
+        except Exception as e:
+            log.error(f"Error for dataset {dataset} during reuses metrics update: {e}")
+            continue
 
 
 def get_queryset(model_cls):

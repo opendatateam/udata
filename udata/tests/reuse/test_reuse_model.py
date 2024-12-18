@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import pytest
+
 from udata.core.dataset import tasks as dataset_tasks
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory
@@ -125,6 +127,10 @@ class ReuseModelTest(TestCase, DBTestMixin):
         reuse.private = True
         reuse.save()
         self.assertEqual(reuse.private, True)
+
+    def test_reuse_url(self):
+        with pytest.raises(db.ValidationError):
+            ReuseFactory(url="not-an-url")
 
 
 class ReuseBadgeTest(DBTestMixin, TestCase):

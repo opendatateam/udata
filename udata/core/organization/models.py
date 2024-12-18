@@ -117,7 +117,7 @@ class Organization(WithMetrics, OrganizationBadgeMixin, db.Datetimed, db.Documen
         max_length=255, required=True, populate_from="name", update=True, follow=True
     )
     description = db.StringField(required=True)
-    url = db.StringField()
+    url = db.URLField()
     image_url = db.StringField()
     logo = db.ImageField(
         fs=avatars, basename=default_image_basename, max_size=LOGO_MAX_SIZE, thumbnails=LOGO_SIZES
@@ -157,6 +157,7 @@ class Organization(WithMetrics, OrganizationBadgeMixin, db.Datetimed, db.Documen
         "datasets",
         "members",
         "reuses",
+        "dataservices",
         "followers",
         "views",
     ]
@@ -307,6 +308,12 @@ class Organization(WithMetrics, OrganizationBadgeMixin, db.Datetimed, db.Documen
         from udata.models import Reuse
 
         self.metrics["reuses"] = Reuse.objects(organization=self).visible().count()
+        self.save()
+
+    def count_dataservices(self):
+        from udata.models import Dataservice
+
+        self.metrics["dataservices"] = Dataservice.objects(organization=self).visible().count()
         self.save()
 
     def count_followers(self):
