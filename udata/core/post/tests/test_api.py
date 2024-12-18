@@ -15,13 +15,28 @@ class PostsAPITest:
 
     def test_post_api_list(self, api):
         """It should fetch a post list from the API"""
-        posts = PostFactory.create_batch(3)
-        posts.append(PostFactory(published=None))
+        PostFactory.create_batch(3)
+        draft = PostFactory(published=None)
 
         response = api.get(url_for("api.posts"))
         assert200(response)
         # Response should not contain the unpublished post
         assert len(response.json["data"]) == 3
+
+        api.login(AdminFactory())
+
+        response = api.get(url_for("api.posts"))
+        assert200(response)
+
+        assert len(response.json["data"]) == 3
+        assert str(draft.id) not in [post["id"] for post in response.json["data"]]
+
+        response = api.get(url_for("api.posts", with_drafts=True))
+        assert200(response)
+
+        assert len(response.json["data"]) == 4
+        assert str(draft.id) in [post["id"] for post in response.json["data"]]
+
 
     def test_post_api_get(self, api):
         """It should fetch a post from the API"""
