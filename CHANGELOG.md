@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Ignore inactive sources at harvest time [#3226](https://github.com/opendatateam/udata/pull/3226)
+    - If some harvest sources were marked inactive by mistake, they won't get executed anymore
 - Organization url is now a URLField and should be a valid URL [#3227](https://github.com/opendatateam/udata/pull/3227)
 - Fix the `parse-url` command [#3225](https://github.com/opendatateam/udata/pull/3225)
 - Add `with_drafts` argument to posts API [#3229](https://github.com/opendatateam/udata/pull/3229)
