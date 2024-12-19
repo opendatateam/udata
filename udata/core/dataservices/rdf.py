@@ -156,12 +156,10 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
 
     if is_hvd:
         # We also want to automatically add any HVD category tags of the dataservice's datasets.
-        for dataset in dataservice.datasets:
-            if "hvd" not in dataset.tags:  # Only check HVD datasets for their categories.
-                continue
-            for tag in dataset.tags:
-                if tag in TAG_TO_EU_HVD_CATEGORIES:
-                    hvd_category_tags.add(tag)
+        dataset_ids = [dat.id for dat in dataservice.datasets]
+        for tag in TAG_TO_EU_HVD_CATEGORIES:
+            if Dataset.objects(id__in=dataset_ids, tags="hvd").filter(tags=tag).first():
+                hvd_category_tags.add(tag)
     for tag in hvd_category_tags:
         d.add(DCATAP.hvdCategory, URIRef(TAG_TO_EU_HVD_CATEGORIES[tag]))
 
