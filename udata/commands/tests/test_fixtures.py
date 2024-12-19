@@ -6,6 +6,7 @@ from werkzeug.wrappers.response import Response
 
 import udata.commands.fixtures
 from udata import models
+from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import (
     CommunityResourceFactory,
@@ -31,9 +32,12 @@ class FixturesTest:
         org = OrganizationFactory(
             members=[Member(user=user, role="editor"), Member(user=admin, role="admin")]
         )
+        contact_point = ContactPointFactory(role="contact")
         # Set the same slug we're 'exporting' from the FIXTURE_DATASET_SLUG config, see the
         # @pytest.mark.options above.
-        dataset = DatasetFactory(slug="some-test-dataset-slug", organization=org)
+        dataset = DatasetFactory(
+            slug="some-test-dataset-slug", organization=org, contact_points=[contact_point]
+        )
         res = ResourceFactory()
         dataset.add_resource(res)
         ReuseFactory(datasets=[dataset], owner=user)
@@ -48,12 +52,13 @@ class FixturesTest:
             ],
             closed_by=admin,
         )
-        DataserviceFactory(datasets=[dataset], organization=org)
+        DataserviceFactory(datasets=[dataset], organization=org, contact_points=[contact_point])
 
         with NamedTemporaryFile(mode="w+", delete=True) as fixtures_fd:
             # Get the fixtures from the local instance.
             monkeypatch.setattr(requests, "get", lambda url: api.get(url))
             monkeypatch.setattr(Response, "json", Response.get_json)
+            Response.ok = True
             result = cli("generate-fixtures-file", "", fixtures_fd.name)
             fixtures_fd.flush()
             assert "Fixtures saved to file " in result.output
@@ -65,6 +70,7 @@ class FixturesTest:
             models.CommunityResource.drop_collection()
             models.User.drop_collection()
             models.Dataservice.drop_collection()
+            models.ContactPoint.drop_collection()
 
             assert models.Organization.objects(slug=org.slug).count() == 0
             assert models.Dataset.objects.count() == 0
@@ -72,6 +78,7 @@ class FixturesTest:
             assert models.CommunityResource.objects.count() == 0
             assert models.User.objects.count() == 0
             assert models.Dataservice.objects.count() == 0
+            assert models.ContactPoint.objects.count() == 0
 
             # Then load them in the database to make sure they're correct.
             result = cli("import-fixtures", fixtures_fd.name)
@@ -82,6 +89,8 @@ class FixturesTest:
         assert result_org.members[1].user.id == admin.id
         assert result_org.members[1].role == "admin"
         assert models.Dataset.objects.count() > 0
+        result_dataset = models.Dataset.objects.first()
+        assert result_dataset.contact_points == [contact_point]
         assert models.Discussion.objects.count() > 0
         result_discussion = models.Discussion.objects.first()
         assert result_discussion.user.id == user.id
@@ -95,6 +104,7 @@ class FixturesTest:
         # Make sure we also import the dataservice organization
         result_dataservice = models.Dataservice.objects.first()
         assert result_dataservice.organization == org
+        assert result_dataservice.contact_points == [contact_point]
 
     def test_import_fixtures_from_default_file(self, cli):
         """Test importing fixtures from udata.commands.fixture.DEFAULT_FIXTURE_FILE."""
