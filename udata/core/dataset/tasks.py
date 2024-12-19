@@ -48,6 +48,11 @@ def purge_datasets(self):
             datasets = topic.datasets
             datasets.remove(dataset)
             topic.update(datasets=datasets)
+        # Remove dataservices related dataset
+        for dataservice in Dataservice.objects(datasets=dataset):
+            datasets = dataservice.datasets
+            datasets.remove(dataset)
+            dataservice.update(datasets=datasets)
         # Remove HarvestItem references
         HarvestJob.objects(items__dataset=dataset).update(set__items__S__dataset=None)
         # Remove associated Transfers
