@@ -6,6 +6,7 @@
 - Fix the `parse-url` command [#3225](https://github.com/opendatateam/udata/pull/3225)
 - Add `with_drafts` argument to posts API [#3229](https://github.com/opendatateam/udata/pull/3229)
 - Fix failing dataset save in update reuses metrics [#3230](https://github.com/opendatateam/udata/pull/3230)
+- Update purge tasks [#3167](https://github.com/opendatateam/udata/pull/3167)
 
 ## 10.0.5 (2024-12-09)
 
