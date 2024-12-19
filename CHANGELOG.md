@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 10.0.6 (2024-12-19)
 
 - Ignore inactive sources at harvest time [#3226](https://github.com/opendatateam/udata/pull/3226)
