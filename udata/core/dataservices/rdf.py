@@ -156,8 +156,11 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
 
     if is_hvd:
         # We also want to automatically add any HVD category tags of the dataservice's datasets.
-        for dataset in dataservice.datasets:
-            if "hvd" not in dataset.tags:  # Only check HVD datasets for their categories.
+        for dataset_lazyref in dataservice.datasets:
+            # We fetch dataset manually to prevent RAM increase with LazyReference.fetch()
+            dataset = Dataset.objects.get(id=dataset_lazyref.id)
+            # Only check HVD datasets for their categories.
+            if "hvd" not in dataset.tags:
                 continue
             for tag in dataset.tags:
                 if tag in TAG_TO_EU_HVD_CATEGORIES:
