@@ -39,11 +39,11 @@ jobs:
       - save_cache:
           key: py3-cache-v12-{{ arch }}-{{ checksum "python.deps" }}
           paths:
-          - venv
+            - venv
       - save_cache:
           key: py3-cache-v12-{{ arch }}-{{ .Branch }}
           paths:
-          - venv
+            - venv
       - run:
           name: Lint and format code and sort imports
           # ruff check --select I . : check linting and imports sorting without fixing (to fix, use --fix)
@@ -58,27 +58,24 @@ jobs:
             mkdir -p reports/python
             source venv/bin/activate
 
-            echo "Debug: Current working directory"
-            pwd
+            # List of tests that must run serially (one per line for easier maintenance)
+            SERIAL_TESTS="
+            udata/tests/dataset/test_dataset_tasks.py
+            "
 
-            echo "Debug: Listing project root contents"
-            ls -la
+            if [ "$CIRCLE_NODE_INDEX" = "0" ]; then
+              # First executor runs the non-parallel safe tests
+              echo "Running serial tests..."
+              echo "$SERIAL_TESTS" | tr -d '\n' | xargs inv test --report --ci --paths
+            fi
 
-            echo "Debug: Looking for all test files"
-            find . -name "test_*.py"
-
-            echo "Debug: Attempting to find and split tests"
-            TESTFILES=$(find udata/tests -name "test_*.py" | circleci tests split --split-by=timings)
-            echo "Debug: TESTFILES=$TESTFILES"
+            # Then run the rest of the tests split across executors
+            echo "Running parallel tests..."
+            TESTFILES=$(find udata/tests -name "test_*.py" $(echo "$SERIAL_TESTS" | sed 's/^/! -path /') | circleci tests split --split-by=timings)
 
             if [ -n "$TESTFILES" ]; then
               echo "Running tests: $TESTFILES"
               inv test --report --ci --paths "$TESTFILES"
-            else
-              echo "Error: No tests found to run in this split"
-              echo "Debug: Listing all Python files"
-              find . -name "*.py" | grep -i test
-              exit 1
             fi
       - store_test_results:
           path: reports/python
@@ -89,7 +86,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-          - venv
+            - venv
 
   assets:
     docker:
@@ -125,11 +122,11 @@ jobs:
       - save_cache:
           key: js-cache-{{ arch }}-{{ checksum "js.deps" }}
           paths:
-          - node_modules
+            - node_modules
       - save_cache:
           key: js-cache-{{ arch }}-{{ .Branch }}
           paths:
-          - node_modules
+            - node_modules
       - run:
           name: Compile assets
           command: |
