@@ -153,6 +153,7 @@ jobs:
           name: Build a distributable package as a wheel release
           command: |
             source venv/bin/activate
+            RELEASE_VERSION=$(cat version.txt)
             inv pydist -b $RELEASE_VERSION
       - store_artifacts:
           path: dist
