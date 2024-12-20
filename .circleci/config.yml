@@ -1,10 +1,18 @@
 ---
-version: 2
+version: 2.1
+
+parameters:
+  python-version:
+    type: string
+    default: "3.11"
+  publish-branch:
+    type: string
+    default: "master"
 
 jobs:
   python:
     docker:
-      - image: udata/circleci:py3.11
+      - image: udata/circleci:py<< pipeline.parameters.python-version >>
       - image: mongo:6.0.4
       - image: redis:alpine
     environment:
@@ -66,7 +74,7 @@ jobs:
   assets:
     docker:
       # TODO make an image based on 2-alpine w/ nvm and phantom deps
-      - image: udata/circleci:py3.11
+      - image: udata/circleci:py<< pipeline.parameters.python-version >>
     environment:
       BASH_ENV: /root/.bashrc
     steps:
@@ -108,9 +116,9 @@ jobs:
           paths:
             - udata/static
 
-  dist:
+  build:
     docker:
-      - image: udata/circleci:py3.11
+      - image: udata/circleci:py<< pipeline.parameters.python-version >>
     environment:
       BASH_ENV: /root/.bashrc
     steps:
@@ -141,7 +149,7 @@ jobs:
 
   publish:
     docker:
-      - image: udata/circleci:py3.11
+      - image: udata/circleci:py<< pipeline.parameters.python-version >>
     steps:
       - attach_workspace:
           at: .
@@ -152,9 +160,48 @@ jobs:
             pip install twine
             twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
 
+  trigger-gitlab-pipeline:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Configure the SSH simple-scaffold repository private key
+          command: |
+            mkdir -p ~/.ssh
+            # SCAFFOLD_PRIVATE_KEY is the private key related to the "simple-scaffold" GitLab repository, so that it can be cloned
+            # CircleCI doesn't accept multiple lines in a single environment variable, so the multiline private key must be base64 encoded, and then decoded here
+            echo "$SCAFFOLD_PRIVATE_KEY" | base64 -d > ~/.ssh/id_ed25519
+            chmod 600 ~/.ssh/id_ed25519
+            ssh-keyscan -t rsa gitlab.com >> ~/.ssh/known_hosts
+      - run:
+          name: Configure Git
+          command: |
+            git config --global user.email "root@data.gouv.fr"
+            git config --global user.name "datagouv"
+      - run:
+          name: Clone simple-scaffold repository
+          command: |
+            git clone --quiet --depth 1 $SCAFFOLD_REPO_SSH_URL scaffold
+      - run:
+          name: Trigger Gitlab CI/CD pipeline for Hydra to deploy to dev environment
+          environment:
+            # GITLAB_API_TOKEN is the token related to the "infra" GitLab repository, so that the Gitlab CI/CD pipeline can be triggered
+            GITLAB_API_TOKEN: ${GITLAB_API_TOKEN}
+          command: |
+            RELEASE_VERSION=$(cat version.txt)
+            cd scaffold
+            # Run the script that triggers the Gitlab CI/CD pipeline.
+            # The script args are, in order:
+            # - udata: the name of the project to deploy (APP_NAME)
+            # - $RELEASE_VERSION: the version to deploy (RELEASE_VERSION)
+            # - env: the environment to deploy to (ENV)
+            # - "": the deploy variables (VARS)
+            ./scripts/gitlab-ci-pipeline.sh udata $RELEASE_VERSION dev ""
+
 workflows:
-  version: 2
-  build:
+  build-and-publish:
     jobs:
       - python:
           filters:
@@ -164,7 +211,7 @@ workflows:
           filters:
             tags:
               only: /v[0-9]+(\.[0-9]+)*/
-      - dist:
+      - build:
           requires:
             - python
             - assets
@@ -173,12 +220,22 @@ workflows:
               only: /v[0-9]+(\.[0-9]+)*/
       - publish:
           requires:
-            - dist
+            - build
           filters:
             branches:
               only:
-                - master
+                - << pipeline.parameters.publish-branch >>
                 - /[0-9]+(\.[0-9]+)+/
             tags:
               only: /v[0-9]+(\.[0-9]+)*/
           context: org-global
+      - trigger-gitlab-pipeline:
+          requires:
+            - publish
+          filters:
+            branches:
+              only:
+                - << pipeline.parameters.publish-branch >>
+          context:
+            - org-global
+            - gitlab-trigger
