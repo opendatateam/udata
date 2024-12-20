@@ -9,6 +9,7 @@ jobs:
       - image: redis:alpine
     environment:
       BASH_ENV: /root/.bashrc
+    parallelism: 4
     steps:
       - checkout
       - run:
@@ -56,7 +57,36 @@ jobs:
           command: |
             mkdir -p reports/python
             source venv/bin/activate
-            inv test --report --ci
+
+            # List of tests that must run serially (one per line for easier maintenance)
+            SERIAL_TESTS="
+            udata/tests/dataset/test_dataset_tasks.py
+            "
+
+            if [ "$CIRCLE_NODE_INDEX" = "0" ]; then
+              # First executor runs the non-parallel safe tests
+              echo "Running serial tests..."
+              echo "Debug: Current environment:"
+              env | sort
+              echo "Debug: Python path:"
+              python -c "import sys; print('\n'.join(sys.path))"
+              echo "Debug: Running tests:"
+              echo "$SERIAL_TESTS" | tr -d '\n'
+              echo ""
+
+              # Run serial tests with more verbose output
+              echo "$SERIAL_TESTS" | tr -d '\n' | xargs inv test --report --ci --paths -- -vv
+            fi
+
+            # Then run the rest of the tests split across executors
+            echo "Running parallel tests..."
+            TESTFILES=$(find udata/tests -name "test_*.py" $(echo "$SERIAL_TESTS" | sed 's/^/! -path /') | circleci tests split --split-by=timings)
+
+            if [ -n "$TESTFILES" ]; then
+              echo "Debug: Running parallel tests on node $CIRCLE_NODE_INDEX:"
+              echo "$TESTFILES"
+              inv test --report --ci --paths "$TESTFILES"
+            fi
       - store_test_results:
           path: reports/python
       - store_artifacts:
