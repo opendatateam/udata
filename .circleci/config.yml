@@ -150,7 +150,7 @@ jobs:
             echo "Commit hash: ${CIRCLE_SHA1:0:7}"
             echo "Git tag: $CIRCLE_TAG"
       - run:
-          name: Build a distributable package
+          name: Build a distributable package as a wheel release
           command: |
             source venv/bin/activate
             inv pydist -b $RELEASE_VERSION
