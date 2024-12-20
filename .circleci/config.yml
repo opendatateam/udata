@@ -74,8 +74,9 @@ jobs:
               echo "$SERIAL_TESTS" | tr -d '\n'
               echo ""
 
-              # Run serial tests with more verbose output
-              echo "$SERIAL_TESTS" | tr -d '\n' | xargs inv test --report --ci --paths -- -vv
+              # Fix: properly pass the paths argument
+              SERIAL_TEST_FILES=$(echo "$SERIAL_TESTS" | tr -d '\n')
+              inv test --report --ci --paths "${SERIAL_TEST_FILES}"
             fi
 
             # Then run the rest of the tests split across executors
@@ -85,7 +86,7 @@ jobs:
             if [ -n "$TESTFILES" ]; then
               echo "Debug: Running parallel tests on node $CIRCLE_NODE_INDEX:"
               echo "$TESTFILES"
-              inv test --report --ci --paths "$TESTFILES"
+              inv test --report --ci --paths "${TESTFILES}"
             fi
       - store_test_results:
           path: reports/python
