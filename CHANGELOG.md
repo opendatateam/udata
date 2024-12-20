@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- feat: optimize topic's datasets reindex [#3234](https://github.com/opendatateam/udata/pull/3234)
 
 ## 10.0.6 (2024-12-19)
 
