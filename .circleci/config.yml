@@ -201,7 +201,7 @@ jobs:
             ./scripts/gitlab-ci-pipeline.sh udata $RELEASE_VERSION dev ""
 
 workflows:
-  build-and-publish:
+  build-publish-deploy:
     jobs:
       - python:
           filters:
