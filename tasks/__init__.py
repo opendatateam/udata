@@ -134,10 +134,14 @@ def i18nc(ctx):
 
 
 @task(i18nc)
-def test(ctx, fast=False, report=False, verbose=False, ci=False):
+def test(ctx, fast=False, report=False, verbose=False, ci=False, paths=None):
     """Run tests suite"""
     header("Run tests suite")
-    cmd = ["pytest udata"]
+    cmd = ["pytest"]
+    if paths:
+        cmd.extend(paths.split())
+    else:
+        cmd.append("udata")
     if ci:
         cmd.append("-p no:sugar --color=yes")
     if verbose:

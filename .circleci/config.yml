@@ -9,6 +9,7 @@ jobs:
       - image: redis:alpine
     environment:
       BASH_ENV: /root/.bashrc
+    parallelism: 3
     steps:
       - checkout
       - run:
@@ -56,7 +57,32 @@ jobs:
           command: |
             mkdir -p reports/python
             source venv/bin/activate
-            inv test --report --ci
+
+            echo "Debug: Current working directory"
+            pwd
+
+            echo "Debug: Listing project root contents"
+            ls -la
+
+            echo "Debug: Looking for all test files"
+            find . -name "test_*.py"
+
+            echo "Debug: Attempting to find and split tests"
+            TESTFILES=$(find udata/tests -name "test_*.py" | circleci tests split --split-by=timings)
+            echo "Debug: TESTFILES=$TESTFILES"
+
+            echo "Debug: Current node index: $CIRCLE_NODE_INDEX"
+            echo "Debug: Total nodes: $CIRCLE_NODE_TOTAL"
+
+            if [ -n "$TESTFILES" ]; then
+              echo "Running tests: $TESTFILES"
+              inv test --report --ci --paths "$TESTFILES"
+            else
+              echo "Error: No tests found to run in this split"
+              echo "Debug: Listing all Python files"
+              find . -name "*.py" | grep -i test
+              exit 1
+            fi
       - store_test_results:
           path: reports/python
       - store_artifacts:
