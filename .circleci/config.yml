@@ -9,7 +9,6 @@ jobs:
       - image: redis:alpine
     environment:
       BASH_ENV: /root/.bashrc
-    parallelism: 4
     steps:
       - checkout
       - run:
@@ -57,27 +56,7 @@ jobs:
           command: |
             mkdir -p reports/python
             source venv/bin/activate
-
-            # Debug MongoDB
-            echo "Debug: MongoDB status"
-            mongosh --eval "db.serverStatus()"
-
-            # List of tests that must run serially
-            SERIAL_TESTS="
-            udata/tests/dataset/test_dataset_tasks.py
-            "
-
-            if [ "$CIRCLE_NODE_INDEX" = "0" ]; then
-              echo "Running serial tests..."
-              echo "Debug: MongoDB collections before test"
-              mongosh --eval "db.getCollectionNames()"
-
-              SERIAL_TEST_FILES=$(echo "$SERIAL_TESTS" | tr -d '\n')
-              inv test --report --ci --paths "${SERIAL_TEST_FILES}" -- -vv
-
-              echo "Debug: MongoDB collections after test"
-              mongosh --eval "db.getCollectionNames()"
-            fi
+            inv test --report --ci
       - store_test_results:
           path: reports/python
       - store_artifacts:
