@@ -191,6 +191,18 @@ class TopicsAPITest(APITestCase):
         response = self.put(url_for("api.topic", topic=topic), data)
         self.assert403(response)
 
+    def test_topic_api_clear_datasets(self):
+        """It should remove all datasets if set to None"""
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        assert len(topic.datasets) > 0
+        data = topic.to_dict()
+        data["datasets"] = None
+        response = self.put(url_for("api.topic", topic=topic), data)
+        self.assert200(response)
+        topic.reload()
+        self.assertEqual(len(topic.datasets), 0)
+
     def test_topic_api_delete(self):
         """It should delete a topic from the API"""
         owner = self.login()
