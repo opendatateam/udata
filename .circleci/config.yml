@@ -9,7 +9,7 @@ jobs:
       - image: redis:alpine
     environment:
       BASH_ENV: /root/.bashrc
-    parallelism: 3
+    parallelism: 4
     steps:
       - checkout
       - run:
