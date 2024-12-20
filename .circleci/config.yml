@@ -119,8 +119,6 @@ jobs:
   build:
     docker:
       - image: udata/circleci:py<< pipeline.parameters.python-version >>
-    environment:
-      BASH_ENV: /root/.bashrc
     steps:
       - checkout
       - attach_workspace:
