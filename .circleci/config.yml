@@ -71,9 +71,6 @@ jobs:
             TESTFILES=$(find udata/tests -name "test_*.py" | circleci tests split --split-by=timings)
             echo "Debug: TESTFILES=$TESTFILES"
 
-            echo "Debug: Current node index: $CIRCLE_NODE_INDEX"
-            echo "Debug: Total nodes: $CIRCLE_NODE_TOTAL"
-
             if [ -n "$TESTFILES" ]; then
               echo "Running tests: $TESTFILES"
               inv test --report --ci --paths "$TESTFILES"
