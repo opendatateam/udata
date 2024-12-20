@@ -200,7 +200,7 @@ jobs:
           command: |
             git clone --quiet --depth 1 $SCAFFOLD_REPO_SSH_URL scaffold
       - run:
-          name: Trigger Gitlab CI/CD pipeline for Hydra to deploy to dev environment
+          name: Trigger Gitlab CI/CD pipeline for udata to be deployed to dev environment
           environment:
             # GITLAB_API_TOKEN is the token related to the "infra" GitLab repository, so that the Gitlab CI/CD pipeline can be triggered
             GITLAB_API_TOKEN: ${GITLAB_API_TOKEN}
