@@ -27,9 +27,14 @@ jobs:
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
-          - py3-cache-v12-{{ arch }}-{{ checksum "python.deps" }}
-          - py3-cache-v12-{{ arch }}-{{ .Branch }}
-          - py3-cache-v12-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+            # 1. Exact match of dependencies
+            - py3-cache-v12-{{ arch }}-{{ checksum "python.deps" }}
+            # 2. Latest cache from this branch
+            - py3-cache-v12-{{ arch }}-{{ .Branch }}
+            # 3. Latest cache from base branch (e.g., master)
+            - py3-cache-v12-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+            # 4. Any latest cache for this architecture (fallback)
+            - py3-cache-v12-{{ arch }}-
       - run:
           name: Install Python dependencies
           command: |
@@ -87,9 +92,14 @@ jobs:
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
+            # 1. Exact match of dependencies
             - js-cache-{{ arch }}-{{ checksum "js.deps" }}
+            # 2. Latest cache from this branch
             - js-cache-{{ arch }}-{{ .Branch }}
+            # 3. Latest cache from base branch (e.g., master)
             - js-cache-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+            # 4. Any latest cache for this architecture (fallback)
+            - js-cache-{{ arch }}-
       - run:
           name: Install NodeJS and dependencies
           command: |
