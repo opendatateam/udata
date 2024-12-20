@@ -147,8 +147,6 @@ jobs:
   dist:
     docker:
       - image: udata/circleci:py3.11
-    environment:
-      BASH_ENV: /root/.bashrc
     steps:
       - checkout
       - attach_workspace:
