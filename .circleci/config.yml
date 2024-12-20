@@ -66,22 +66,22 @@ jobs:
             if [ "$CIRCLE_NODE_INDEX" = "0" ]; then
               # First executor runs the non-parallel safe tests
               echo "Running serial tests..."
-              echo "Debug: Current environment:"
-              env | sort
-              echo "Debug: Python path:"
-              python -c "import sys; print('\n'.join(sys.path))"
-              echo "Debug: Running tests:"
-              echo "$SERIAL_TESTS" | tr -d '\n'
-              echo ""
-
-              # Fix: properly pass the paths argument
               SERIAL_TEST_FILES=$(echo "$SERIAL_TESTS" | tr -d '\n')
               inv test --report --ci --paths "${SERIAL_TEST_FILES}"
             fi
 
             # Then run the rest of the tests split across executors
             echo "Running parallel tests..."
-            TESTFILES=$(find udata/tests -name "test_*.py" $(echo "$SERIAL_TESTS" | sed 's/^/! -path /') | circleci tests split --split-by=timings)
+            # Fix: properly construct the find command with exclusions
+            EXCLUSIONS=""
+            while read -r test_file; do
+              if [ -n "$test_file" ]; then
+                EXCLUSIONS="$EXCLUSIONS ! -path $test_file"
+              fi
+            done <<< "$SERIAL_TESTS"
+
+            echo "Debug: Find command exclusions: $EXCLUSIONS"
+            TESTFILES=$(find udata/tests -name "test_*.py" $EXCLUSIONS | circleci tests split --split-by=timings)
 
             if [ -n "$TESTFILES" ]; then
               echo "Debug: Running parallel tests on node $CIRCLE_NODE_INDEX:"
