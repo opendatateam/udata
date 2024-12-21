@@ -69,15 +69,6 @@ jobs:
             # List of longer-running tests to execute in parallel (one per line)
             PARALLEL_TESTS=(
               "udata/harvest/tests/test_actions.py"
-              "udata/tests/api/test_activities_api.py"
-              "udata/tests/api/test_datasets_api.py"
-              "udata/tests/api/test_contact_points.py"
-              "udata/tests/api/test_dataservices_api.py"
-              "udata/tests/api/test_organizations_api.py"
-              "udata/tests/api/test_reports_api.py"
-              "udata/tests/apiv2/test_swagger.py"
-              "udata/tests/api/test_transfer_api.py"
-              "udata/tests/forms/test_form_field.py"
             )
 
             if [ "$CIRCLE_NODE_INDEX" = "0" ]; then
