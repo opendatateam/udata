@@ -61,7 +61,7 @@ jobs:
             # List of longer-running tests to execute in parallel (one per line)
             PARALLEL_TESTS=(
               "udata/harvest/tests/test_actions.py"
-              "udata/tests/api/test_activies_api.py"
+              "udata/tests/api/test_activities_api.py"
               "udata/tests/api/test_datasets_api.py"
               "udata/tests/api/test_organizations_api.py"
               "udata/tests/api/test_reports_api.py"
@@ -71,11 +71,13 @@ jobs:
             )
 
             if [ "$CIRCLE_NODE_INDEX" = "0" ]; then
-              echo "Running all tests except parallel ones..."
+              echo "=== EXECUTOR 0: Running all tests except these parallel ones"
               inv test --report --ci
             else
-              echo "Running parallel tests: $PARALLEL_TESTS_LIST"
-              inv test --report --ci --paths "$PARALLEL_TESTS_LIST"
+              echo "=== EXECUTOR 1: Running these parallel tests: ==="
+              printf '%s\n' "${PARALLEL_TESTS[@]}"
+              echo "=================================================="
+              inv test --report --ci --paths "${PARALLEL_TESTS[@]}"
             fi
       - store_test_results:
           path: reports/python
