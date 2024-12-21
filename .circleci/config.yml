@@ -103,7 +103,6 @@ jobs:
       - image: udata/circleci:py3.11
     environment:
       BASH_ENV: /root/.bashrc
-    parallelism: 3
     steps:
       - checkout
       - run:
@@ -139,12 +138,10 @@ jobs:
       - run:
           name: Compile assets
           command: |
-            COMMANDS=("npm run assets:build" "npm run widgets:build" "npm run oembed:build")
-            INDEX=$((CIRCLE_NODE_INDEX))
-            if [ $INDEX -lt ${#COMMANDS[@]} ]; then
-              echo "Running: ${COMMANDS[$INDEX]}"
-              eval "${COMMANDS[$INDEX]}"
-            fi
+            npm run assets:build
+            npm run widgets:build
+            npm run oembed:build
+
       - persist_to_workspace:
           root: .
           paths:
