@@ -58,14 +58,6 @@ jobs:
             mkdir -p reports/python
             source venv/bin/activate
 
-            # Debug current directory and structure
-            echo "=== Current working directory: ==="
-            pwd
-            echo "=== Directory structure: ==="
-            ls -la
-            echo "=== Finding test files: ==="
-            find . -name "test_*.py" | sort
-
             # List of longer-running tests to execute in parallel (one per line)
             PARALLEL_TESTS=(
               "udata/harvest/tests/test_actions.py"
@@ -75,21 +67,17 @@ jobs:
               echo "=== EXECUTOR 0: Running all tests except these parallel ones: ==="
               printf '%s\n' "${PARALLEL_TESTS[@]}"
               echo "=================================================="
-              inv test --report --ci
+              # Create a list of all test files except the parallel ones
+              find . -name "test_*.py" > all_tests.txt
+              for test in "${PARALLEL_TESTS[@]}"; do
+                sed -i "\:${test}:d" all_tests.txt
+              done
+              # Run the filtered tests
+              inv test --report --ci --paths $(cat all_tests.txt)
             else
               echo "=== EXECUTOR 1: Running these parallel tests: ==="
               printf '%s\n' "${PARALLEL_TESTS[@]}"
               echo "=================================================="
-              # Debug: Show exact test file paths
-              echo "=== Verifying test files existence: ==="
-              for test_file in "${PARALLEL_TESTS[@]}"; do
-                if [ -f "$test_file" ]; then
-                  echo "✓ Found: $test_file"
-                else
-                  echo "✗ Missing: $test_file"
-                  ls -la $(dirname "$test_file")
-                fi
-              done
               inv test --report --ci --paths "${PARALLEL_TESTS[@]}"
             fi
       - store_test_results:
