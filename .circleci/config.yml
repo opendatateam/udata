@@ -9,6 +9,7 @@ jobs:
       - image: redis:alpine
     environment:
       BASH_ENV: /root/.bashrc
+    parallelism: 2
     steps:
       - checkout
       - run:
@@ -19,9 +20,14 @@ jobs:
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
-          - py3-cache-v12-{{ arch }}-{{ checksum "python.deps" }}
-          - py3-cache-v12-{{ arch }}-{{ .Branch }}
-          - py3-cache-v12-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+            # 1. Exact match of dependencies
+            - py3-cache-v12-{{ arch }}-{{ checksum "python.deps" }}
+            # 2. Latest cache from this branch
+            - py3-cache-v12-{{ arch }}-{{ .Branch }}
+            # 3. Latest cache from base branch (e.g., master)
+            - py3-cache-v12-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+            # 4. Any latest cache for this architecture (fallback)
+            - py3-cache-v12-{{ arch }}-
       - run:
           name: Install Python dependencies
           command: |
@@ -33,11 +39,11 @@ jobs:
       - save_cache:
           key: py3-cache-v12-{{ arch }}-{{ checksum "python.deps" }}
           paths:
-          - venv
+            - venv
       - save_cache:
           key: py3-cache-v12-{{ arch }}-{{ .Branch }}
           paths:
-          - venv
+            - venv
       - run:
           name: Lint and format code and sort imports
           # ruff check --select I . : check linting and imports sorting without fixing (to fix, use --fix)
@@ -51,7 +57,37 @@ jobs:
           command: |
             mkdir -p reports/python
             source venv/bin/activate
-            inv test --report --ci
+
+            # List of longer-running tests to execute in parallel
+            PARALLEL_TESTS=(
+              "udata/harvest/tests/test_actions.py"
+              "udata/tests/api/test_activities_api.py"
+              "udata/tests/api/test_datasets_api.py"
+              "udata/tests/api/test_organizations_api.py"
+              "udata/tests/api/test_reports_api.py"
+              "udata/tests/apiv2/test_swagger.py"
+              "udata/tests/api/test_transfer_api.py"
+              "udata/tests/forms/test_form_field.py"
+            )
+
+            # Convert array to string with | as separator for grep
+            PARALLEL_PATTERN=$(printf "%s|" "${PARALLEL_TESTS[@]}" | sed 's/|$//')
+
+            if [ "$CIRCLE_NODE_INDEX" = "0" ]; then
+              echo "=== EXECUTOR 0: Running all tests except these parallel ones: ==="
+              printf '%s\n' "${PARALLEL_TESTS[@]}"
+              echo "=================================================="
+              # Run pytest to collect all tests, then filter out parallel ones
+              python -m pytest --collect-only -q | grep "\.py" | grep -vE "$PARALLEL_PATTERN" > serial_tests.txt
+              echo "Tests to run in serial:"
+              cat serial_tests.txt
+              inv test --report --ci
+            else
+              echo "=== EXECUTOR 1: Running parallel tests: ==="
+              printf '%s\n' "${PARALLEL_TESTS[@]}"
+              echo "=================================================="
+              inv test --report --ci --paths "${PARALLEL_TESTS[@]}"
+            fi
       - store_test_results:
           path: reports/python
       - store_artifacts:
@@ -61,7 +97,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-          - venv
+            - venv
 
   assets:
     docker:
@@ -79,9 +115,14 @@ jobs:
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
+            # 1. Exact match of dependencies
             - js-cache-{{ arch }}-{{ checksum "js.deps" }}
+            # 2. Latest cache from this branch
             - js-cache-{{ arch }}-{{ .Branch }}
+            # 3. Latest cache from base branch (e.g., master)
             - js-cache-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+            # 4. Any latest cache for this architecture (fallback)
+            - js-cache-{{ arch }}-
       - run:
           name: Install NodeJS and dependencies
           command: |
@@ -91,11 +132,11 @@ jobs:
       - save_cache:
           key: js-cache-{{ arch }}-{{ checksum "js.deps" }}
           paths:
-          - node_modules
+            - node_modules
       - save_cache:
           key: js-cache-{{ arch }}-{{ .Branch }}
           paths:
-          - node_modules
+            - node_modules
       - run:
           name: Compile assets
           command: |
@@ -111,8 +152,6 @@ jobs:
   dist:
     docker:
       - image: udata/circleci:py3.11
-    environment:
-      BASH_ENV: /root/.bashrc
     steps:
       - checkout
       - attach_workspace:
