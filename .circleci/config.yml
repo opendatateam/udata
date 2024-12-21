@@ -58,9 +58,16 @@ jobs:
             mkdir -p reports/python
             source venv/bin/activate
 
-            # List of tests to run in parallel (one per line)
+            # List of longer-running tests to execute in parallel (one per line)
             PARALLEL_TESTS="
             udata/harvest/tests/test_actions.py
+            udata/tests/api/test_activies_api.py
+            udata/tests/api/test_datasets_api.py
+            udata/tests/api/test_organizations_api.py
+            udata/tests/api/test_reports_api.py
+            udata/tests/apiv2/test_swagger.py
+            udata/tests/api/test_transfer_api.py
+            udata/tests/forms/test_form_field.py
             "
             # Remove leading/trailing whitespace and convert to space-separated list
             PARALLEL_TESTS_LIST=$(echo "$PARALLEL_TESTS" | tr -d '\n' | xargs)
