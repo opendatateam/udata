@@ -560,13 +560,6 @@ If defined, the Sentry support is automatically activated.
 
 `sentry-sdk[flask]` needs to be installed for this to work. This requirement is specified in `requirements/sentry.pip`.
 
-### SENTRY_TAGS
-
-**default**: `{}`
-
-A key-value map of extra tags to pass as Sentry context.
-See: <https://docs.sentry.io/learn/context/>
-
 ### SENTRY_USER_ATTRS
 
 **default**: `['slug', 'email', 'fullname']`

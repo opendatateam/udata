@@ -42,6 +42,7 @@
 - Use a safe XML parser that doesn't resolve entities, update lxml to 5.3.0 [#3205](https://github.com/opendatateam/udata/pull/3205)
 - Add DCAT-AP HVD properties in RDF output if the dataservice or its datasets are tagged hvd [#3187](https://github.com/opendatateam/udata/pull/3187)
 - Only keep the "local authority" org badge if it's also a "public service" [#3200](https://github.com/opendatateam/udata/pull/3200)
+- Create custom exception with contextual Sentry tags and clean Sentry config [#3201](https://github.com/opendatateam/udata/pull/3201)
 
 ## 10.0.2 (2024-11-19)
 
