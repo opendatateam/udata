@@ -2,7 +2,46 @@
 
 ## Current (in progress)
 
+- Add a test to clear datasets on Topics api v1 [#3233](https://github.com/opendatateam/udata/pull/3233)
+- feat: optimize topic's datasets reindex [#3234](https://github.com/opendatateam/udata/pull/3234)
+
+## 10.0.6 (2024-12-19)
+
+- Ignore inactive sources at harvest time [#3226](https://github.com/opendatateam/udata/pull/3226)
+    - If some harvest sources were marked inactive by mistake, they won't get executed anymore
+- Organization url is now a URLField and should be a valid URL [#3227](https://github.com/opendatateam/udata/pull/3227)
+- Fix the `parse-url` command [#3225](https://github.com/opendatateam/udata/pull/3225)
+- Add `with_drafts` argument to posts API [#3229](https://github.com/opendatateam/udata/pull/3229)
+- Fix failing dataset save in update reuses metrics [#3230](https://github.com/opendatateam/udata/pull/3230)
+- Fix catalog RDF by preventing memory increase on getting dataservice hvd tags [#3231](https://github.com/opendatateam/udata/pull/3231)
+- Update purge tasks [#3167](https://github.com/opendatateam/udata/pull/3167)
+
+## 10.0.5 (2024-12-09)
+
+- Add list transfers endpoint / Save user requesting the transfer [#3211](https://github.com/opendatateam/udata/pull/3211)
+- Add dataservice csv adapter [#3208](https://github.com/opendatateam/udata/pull/3208)
+- Add url_for for dataservices and mail notifications [#3213](https://github.com/opendatateam/udata/pull/3213)
+- Compute dataservices metrics on org, user and site [#3209](https://github.com/opendatateam/udata/pull/3209)
+- Update default method blocklist for READ ONLY mode [#3212](https://github.com/opendatateam/udata/pull/3212)
+- The API will now return all the datasets a user has access to, including deleted of private ones that they're the owners of [#3214](https://github.com/opendatateam/udata/pull/3214)
+- Rename administration labels from "Private" to "Draft" [#3217](https://github.com/opendatateam/udata/pull/3217)
+- Add partial obfuscation of email for members [#3220](https://github.com/opendatateam/udata/pull/3220)
+- Reuse url is now a URLField and should be a valid URL [#3222](https://github.com/opendatateam/udata/pull/3222)
+
+## 10.0.4 (2024-11-29)
+
+- Add created and last_modified sorts on dataservice list [#3206](https://github.com/opendatateam/udata/pull/3206)
+- Fix dataservice metadata_modified_at update in API [#3207](https://github.com/opendatateam/udata/pull/3207)
+- Escape modal title in admin [#3210](https://github.com/opendatateam/udata/pull/3210)
+- feat: handle multiple tags on datasets and topics apis [#3204](https://github.com/opendatateam/udata/pull/3204)
+
+## 10.0.3 (2024-11-27)
+
+- Expose OGC services distributions as dataservice [#3203](https://github.com/opendatateam/udata/pull/3203)
 - Add a matomo "campaign" parameter on links in emails if `MAIL_CAMPAIGN` is configured [#3190](https://github.com/opendatateam/udata/pull/3190)
+- Use a safe XML parser that doesn't resolve entities, update lxml to 5.3.0 [#3205](https://github.com/opendatateam/udata/pull/3205)
+- Add DCAT-AP HVD properties in RDF output if the dataservice or its datasets are tagged hvd [#3187](https://github.com/opendatateam/udata/pull/3187)
+- Only keep the "local authority" org badge if it's also a "public service" [#3200](https://github.com/opendatateam/udata/pull/3200)
 - Create custom exception with contextual Sentry tags and clean Sentry config [#3201](https://github.com/opendatateam/udata/pull/3201)
 
 ## 10.0.2 (2024-11-19)

@@ -630,7 +630,7 @@ FS_ROOT = '/srv/http/www.data.dev/fs'
 [celery-doc]: http://docs.celeryproject.org/en/latest/userguide/configuration.html
 [celery-conf-map]: http://docs.celeryproject.org/en/latest/userguide/configuration.html#conf-old-settings-map
 [flask-cache-doc]: https://pythonhosted.org/Flask-Cache/
-[flask-mail-doc]: https://pythonhosted.org/flask-mail/
+[flask-mail-doc]: https://flask-mail.readthedocs.io/
 [flask-mongoengine-doc]: https://flask-mongoengine.readthedocs.org/
 [authlib-doc]: https://docs.authlib.org/en/latest/flask/2/authorization-server.html#server
 [udata-search-service]: https://github.com/opendatateam/udata-search-service

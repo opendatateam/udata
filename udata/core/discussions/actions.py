@@ -16,6 +16,10 @@ def discussions_for(user, only_open=True):
     datasets = Dataset.objects.owned_by(user.id, *user.organizations).only("id", "slug")
     reuses = Reuse.objects.owned_by(user.id, *user.organizations).only("id", "slug")
 
+    # TODO: add dataservices when ready. It would now break notification routing in current admin
+    # since dataservices aren't supported by the current admin.
+    # dataservices = Dataservice.objects.owned_by(user.id, *user.organizations).only("id", "slug")
+
     qs = Discussion.objects(subject__in=list(datasets) + list(reuses))
     if only_open:
         qs = qs(closed__exists=False)

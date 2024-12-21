@@ -3,6 +3,8 @@ import pytest
 from udata.core.dataservices import tasks
 from udata.core.dataservices.models import Dataservice
 from udata.core.user.factories import UserFactory
+from udata.harvest.models import HarvestItem, HarvestJob
+from udata.harvest.tests.factories import HarvestJobFactory
 from udata.models import Discussion, Follow, Message, Transfer
 from udata.utils import faker
 
@@ -34,9 +36,12 @@ def test_purge_dataservices():
 
     follower = Follow.objects.create(follower=user, following=dataservices[0])
 
+    HarvestJobFactory(items=[HarvestItem(dataservice=dataservices[0])])
+
     tasks.purge_dataservices()
 
     assert Dataservice.objects.count() == 1
     assert Transfer.objects.filter(id=transfer.id).count() == 0
     assert Discussion.objects.filter(id=discussion.id).count() == 0
     assert Follow.objects.filter(id=follower.id).count() == 0
+    assert HarvestJob.objects.filter(items__dataservice=dataservices[0].id).count() == 0

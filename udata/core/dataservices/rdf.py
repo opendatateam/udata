@@ -7,7 +7,10 @@ from udata.core.dataset.models import Dataset, License
 from udata.core.dataset.rdf import dataset_to_graph_id, sanitize_html
 from udata.rdf import (
     DCAT,
+    DCATAP,
     DCT,
+    HVD_LEGISLATION,
+    TAG_TO_EU_HVD_CATEGORIES,
     contact_point_from_rdf,
     contact_point_to_rdf,
     namespace_manager,
@@ -138,8 +141,27 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     if dataservice.endpoint_description_url:
         d.set(DCAT.endpointDescription, URIRef(dataservice.endpoint_description_url))
 
+    # Add DCAT-AP HVD properties if the dataservice is tagged hvd.
+    # See https://semiceu.github.io/DCAT-AP/releases/2.2.0-hvd/
+    is_hvd = current_app.config["HVD_SUPPORT"] and "hvd" in dataservice.tags
+    if is_hvd:
+        d.add(DCATAP.applicableLegislation, URIRef(HVD_LEGISLATION))
+
+    hvd_category_tags = set()
     for tag in dataservice.tags:
         d.add(DCAT.keyword, Literal(tag))
+        # Add HVD category if this dataservice is tagged HVD
+        if is_hvd and tag in TAG_TO_EU_HVD_CATEGORIES:
+            hvd_category_tags.add(tag)
+
+    if is_hvd:
+        # We also want to automatically add any HVD category tags of the dataservice's datasets.
+        dataset_ids = [dat.id for dat in dataservice.datasets]
+        for tag in TAG_TO_EU_HVD_CATEGORIES:
+            if Dataset.objects(id__in=dataset_ids, tags="hvd").filter(tags=tag).first():
+                hvd_category_tags.add(tag)
+    for tag in hvd_category_tags:
+        d.add(DCATAP.hvdCategory, URIRef(TAG_TO_EU_HVD_CATEGORIES[tag]))
 
     # `dataset_to_graph_id(dataset)` URIRef may not exist in the current page
     # but should exists in the catalog somewhere. Maybe we should create a Node

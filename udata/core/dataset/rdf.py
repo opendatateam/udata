@@ -49,7 +49,7 @@ from udata.rdf import (
 from udata.uris import endpoint_for
 from udata.utils import get_by, safe_unicode
 
-from .constants import UPDATE_FREQUENCIES
+from .constants import OGC_SERVICE_FORMATS, UPDATE_FREQUENCIES
 from .models import Checksum, Dataset, License, Resource
 
 log = logging.getLogger(__name__)
@@ -126,6 +126,44 @@ def owner_to_rdf(dataset, graph=None):
     return
 
 
+def ogc_service_to_rdf(dataset, resource, graph=None, is_hvd=False):
+    """
+    Build a dataservice on the fly for OGC services distributions
+    Inspired from https://github.com/SEMICeu/iso-19139-to-dcat-ap/blob/f61b2921dd398b90b2dd2db14085e75687f7616b/iso-19139-to-dcat-ap.xsl#L1419
+    """
+    graph = graph or Graph(namespace_manager=namespace_manager)
+    service = graph.resource(BNode())
+    service.set(RDF.type, DCAT.DataService)
+    service.set(DCT.title, Literal(resource.title))
+    service.set(DCAT.endpointURL, URIRef(resource.url.split("?")[0]))
+    if "request=getcapabilities" in resource.url.lower():
+        service.set(DCAT.endpointDescription, URIRef(resource.url))
+    service.set(
+        DCT.conformsTo,
+        URIRef("http://www.opengeospatial.org/standards/" + resource.format.split(":")[-1]),
+    )
+
+    if dataset and dataset.license:
+        service.add(DCT.rights, Literal(dataset.license.title))
+        if dataset.license.url:
+            service.add(DCT.license, URIRef(dataset.license.url))
+
+    if dataset and dataset.contact_point:
+        contact_point = contact_point_to_rdf(dataset.contact_point, graph)
+        if contact_point:
+            service.set(DCAT.contactPoint, contact_point)
+
+    if is_hvd:
+        # DCAT-AP HVD applicable legislation is also expected at the distribution > accessService level
+        service.add(DCATAP.applicableLegislation, URIRef(HVD_LEGISLATION))
+        for tag in dataset.tags:
+            # Add HVD category if this dataset is tagged HVD
+            if tag in TAG_TO_EU_HVD_CATEGORIES:
+                service.add(DCATAP.hvdCategory, URIRef(TAG_TO_EU_HVD_CATEGORIES[tag]))
+
+    return service
+
+
 def resource_to_rdf(resource, dataset=None, graph=None, is_hvd=False):
     """
     Map a Resource domain model to a DCAT/RDF graph
@@ -175,6 +213,11 @@ def resource_to_rdf(resource, dataset=None, graph=None, is_hvd=False):
     if is_hvd:
         # DCAT-AP HVD applicable legislation is also expected at the distribution level
         r.add(DCATAP.applicableLegislation, URIRef(HVD_LEGISLATION))
+
+    # Add access service for known OGC service formats
+    if resource.format in OGC_SERVICE_FORMATS:
+        r.add(DCAT.accessService, ogc_service_to_rdf(dataset, resource, graph, is_hvd))
+
     return r
 
 

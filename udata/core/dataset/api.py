@@ -90,7 +90,7 @@ class DatasetApiParser(ModelApiParser):
 
     def __init__(self):
         super().__init__()
-        self.parser.add_argument("tag", type=str, location="args")
+        self.parser.add_argument("tag", type=str, location="args", action="append")
         self.parser.add_argument("license", type=str, location="args")
         self.parser.add_argument("featured", type=bool, location="args")
         self.parser.add_argument("geozone", type=str, location="args")
@@ -120,7 +120,7 @@ class DatasetApiParser(ModelApiParser):
             phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
             datasets = datasets.search_text(phrase_query)
         if args.get("tag"):
-            datasets = datasets.filter(tags=args["tag"])
+            datasets = datasets.filter(tags__all=args["tag"])
         if args.get("license"):
             datasets = datasets.filter(license__in=License.objects.filter(id=args["license"]))
         if args.get("geozone"):
@@ -214,7 +214,9 @@ class DatasetListAPI(API):
     def get(self):
         """List or search all datasets"""
         args = dataset_parser.parse()
-        datasets = Dataset.objects(archived=None, deleted=None, private=False)
+        datasets = Dataset.objects.visible_by_user(
+            current_user, mongoengine.Q(private__ne=True, archived=None, deleted=None)
+        )
         datasets = dataset_parser.parse_filters(datasets, args)
         sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
         return datasets.order_by(sort).paginate(args["page"], args["page_size"])
