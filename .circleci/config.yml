@@ -7,8 +7,6 @@ jobs:
       - image: udata/circleci:py3.11
       - image: mongo:6.0.4
       - image: redis:alpine
-    environment:
-      BASH_ENV: /root/.bashrc
     parallelism: 2
     steps:
       - checkout
@@ -58,33 +56,38 @@ jobs:
             mkdir -p reports/python
             source venv/bin/activate
 
-            # List of longer-running tests to execute in parallel (one per line)
-            PARALLEL_TESTS="
-            udata/harvest/tests/test_actions.py
-            udata/tests/api/test_activies_api.py
-            udata/tests/api/test_datasets_api.py
-            udata/tests/api/test_organizations_api.py
-            udata/tests/api/test_reports_api.py
-            udata/tests/apiv2/test_swagger.py
-            udata/tests/api/test_transfer_api.py
-            udata/tests/forms/test_form_field.py
-            "
-            # Remove leading/trailing whitespace and convert to space-separated list
-            PARALLEL_TESTS_LIST=$(echo "$PARALLEL_TESTS" | tr -d '\n' | xargs)
+            # List of longer-running tests to execute in parallel (paths relative to udata/)
+            PARALLEL_TESTS=(
+              "harvest/tests/test_actions.py"
+              "tests/api/test_activities_api.py"
+              "tests/api/test_datasets_api.py"
+              "tests/api/test_organizations_api.py"
+              "tests/api/test_reports_api.py"
+              "tests/apiv2/test_swagger.py"
+              "tests/api/test_transfer_api.py"
+              "tests/forms/test_form_field.py"
+            )
+
+            # Convert array to string with | as separator for grep
+            PARALLEL_PATTERN=$(printf "%s|" "${PARALLEL_TESTS[@]}" | sed 's/|$//')
 
             if [ "$CIRCLE_NODE_INDEX" = "0" ]; then
-              echo "Running all tests except parallel ones..."
-              # Create a temporary file with all test files
-              find . -name "test_*.py" > all_tests.txt
-              # Remove parallel tests from the list
-              for test in $PARALLEL_TESTS_LIST; do
-                sed -i "\:$test:d" all_tests.txt
-              done
-              # Run remaining tests - all at once instead of trying to pass them individually
-              inv test --report --ci
+              echo "=== EXECUTOR 0: Running all tests except parallel ones ==="
+              cd ${CIRCLE_WORKING_DIRECTORY:-$(pwd)}/udata
+
+              # Collect all tests except parallel ones
+              python -m pytest --collect-only --quiet --no-header --no-summary | grep -v "$PARALLEL_PATTERN" > serial_tests.txt
+              cd ..
+              inv test --report --ci -- --durations=0
             else
-              echo "Running parallel tests: $PARALLEL_TESTS_LIST"
-              inv test --report --ci --paths "$PARALLEL_TESTS_LIST"
+              echo "=== EXECUTOR 1: Running parallel tests ==="
+              # Prepend udata/ to each test path for correct resolution from project root
+              PARALLEL_PATHS=()
+              for test_path in "${PARALLEL_TESTS[@]}"; do
+                PARALLEL_PATHS+=("udata/$test_path")
+              done
+              PATHS_STRING="${PARALLEL_PATHS[*]}"
+              inv test --report --ci --paths "$PATHS_STRING" -- --durations=0
             fi
       - store_test_results:
           path: reports/python
