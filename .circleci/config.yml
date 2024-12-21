@@ -61,7 +61,6 @@ jobs:
             # List of longer-running tests to execute in parallel (one per line)
             PARALLEL_TESTS=(
               "udata/harvest/tests/test_actions.py"
-              "udata/tests/api/test_activities_api.py"
               "udata/tests/api/test_datasets_api.py"
               "udata/tests/api/test_organizations_api.py"
               "udata/tests/api/test_reports_api.py"
