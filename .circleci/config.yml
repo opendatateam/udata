@@ -8,6 +8,11 @@ parameters:
   publish-branch:
     type: string
     default: "master"
+    description: "Branch to publish to PyPi and trigger the Gitlab CI/CD pipeline when pushed to"
+  deploy-env:
+    type: string
+    default: "dev"
+    description: "Environment to deploy to"
 
 jobs:
   python:
@@ -219,9 +224,9 @@ jobs:
             # The script args are, in order:
             # - udata: the name of the project to deploy (APP_NAME)
             # - $RELEASE_VERSION: the version to deploy (RELEASE_VERSION)
-            # - env: the environment to deploy to (ENV)
+            # - << pipeline.parameters.deploy-env >>: the environment to deploy to (ENV)
             # - "": the deploy variables (VARS)
-            ./scripts/gitlab-ci-pipeline.sh udata $RELEASE_VERSION dev ""
+            ./scripts/gitlab-ci-pipeline.sh udata $RELEASE_VERSION << pipeline.parameters.deploy-env >> ""
 
 workflows:
   build-publish-deploy:
