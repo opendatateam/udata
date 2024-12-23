@@ -64,6 +64,8 @@ jobs:
             PARALLEL_TESTS=(
               "harvest/tests/test_actions.py"
               "harvest/tests/test_api.py"
+              "harvest/tests/test_base_backend.py"
+              "harvest/tests/test_dcat_backend.py"
               "tests/api/test_activities_api.py"
               "tests/api/test_auth_api.py"
               "tests/api/test_datasets_api.py"
@@ -77,9 +79,11 @@ jobs:
               "tests/dataset/test_dataset_rdf.py"
               "tests/forms/test_form_field.py"
               "tests/forms/test_model_field.py"
+              "tests/frontend/test_markdown.py"
               "tests/test_model.py"
               "tests/test_routing.py"
               "tests/test_uris.py"
+              "tests/test_utils.py"
               # This test modifies the global app configuration
               "tests/test_i18n.py"
             )
@@ -96,7 +100,6 @@ jobs:
 
               # Run pytest with the files
               cd ..
-              source venv/bin/activate
               python -m pytest $(sed 's|^|udata/|' udata/serial_tests.txt)
             else
               echo "=== EXECUTOR 1: Running parallel tests ==="
