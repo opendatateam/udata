@@ -56,16 +56,32 @@ jobs:
             mkdir -p reports/python
             source venv/bin/activate
 
-            # List of longer-running tests to execute in parallel (paths relative to udata/)
+            # Place here the tests to execute in parallel (paths relative to udata/)
+            # In order to gain some time when executing the tests in the CI, you should put here the tests files that:
+            # - takes a longer time to run than average
+            # - modify the global app configuration (so that they don't interfere with other tests)
+            # TODO: we could split the tests to be run by more than 2 executors
             PARALLEL_TESTS=(
               "harvest/tests/test_actions.py"
+              "harvest/tests/test_api.py"
               "tests/api/test_activities_api.py"
+              "tests/api/test_auth_api.py"
               "tests/api/test_datasets_api.py"
               "tests/api/test_organizations_api.py"
               "tests/api/test_reports_api.py"
-              "tests/apiv2/test_swagger.py"
+              "tests/api/test_reuses_api.py"
+              "tests/api/test_user_api.py"
               "tests/api/test_transfer_api.py"
+              "tests/apiv2/test_swagger.py"
+              "tests/dataset/test_dataset_model.py"
+              "tests/dataset/test_dataset_rdf.py"
               "tests/forms/test_form_field.py"
+              "tests/forms/test_model_field.py"
+              "tests/test_model.py"
+              "tests/test_routing.py"
+              "tests/test_uris.py"
+              # This test modifies the global app configuration
+              "tests/test_i18n.py"
             )
 
             # Convert array to string with | as separator for grep
