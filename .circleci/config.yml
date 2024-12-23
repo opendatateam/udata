@@ -60,7 +60,6 @@ jobs:
             # In order to gain some time when executing the tests in the CI, you should put here the tests files that:
             # - takes a longer time to run than average
             # - modify the global app configuration (so that they don't interfere with other tests)
-            # TODO: we could split the tests to be run by more than 2 executors
             PARALLEL_TESTS=(
               "harvest/tests/test_actions.py"
               "harvest/tests/test_api.py"
@@ -79,8 +78,10 @@ jobs:
               "tests/dataset/test_dataset_rdf.py"
               "tests/forms/test_form_field.py"
               "tests/forms/test_model_field.py"
+              "tests/forms/test_reference_field.py"
               "tests/frontend/test_markdown.py"
               "tests/test_model.py"
+              "tests/test_rdf.py"
               "tests/test_routing.py"
               "tests/test_uris.py"
               "tests/test_utils.py"
@@ -92,7 +93,7 @@ jobs:
             PARALLEL_PATTERN=$(printf "%s|" "${PARALLEL_TESTS[@]}" | sed 's/|$//')
 
             if [ "$CIRCLE_NODE_INDEX" = "0" ]; then
-              echo "=== EXECUTOR 0: Running all tests except parallel ones ==="
+              echo "=== EXECUTOR 0: Running all tests except isolated ones ==="
               cd ${CIRCLE_WORKING_DIRECTORY:-$(pwd)}/udata
 
               # Collect test files
@@ -102,7 +103,7 @@ jobs:
               cd ..
               python -m pytest $(sed 's|^|udata/|' udata/serial_tests.txt)
             else
-              echo "=== EXECUTOR 1: Running parallel tests ==="
+              echo "=== EXECUTOR 1: Running isolated tests ==="
               PARALLEL_PATHS=()
               for test_path in "${PARALLEL_TESTS[@]}"; do
                 PARALLEL_PATHS+=("udata/$test_path")
