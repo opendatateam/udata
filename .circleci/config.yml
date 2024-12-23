@@ -78,7 +78,8 @@ jobs:
               # Collect all tests except parallel ones
               python -m pytest --collect-only --quiet --no-header --no-summary | grep -v "$PARALLEL_PATTERN" > serial_tests.txt
               cd ..
-              inv test --report --ci --paths "@serial_tests.txt"
+              # Use the collected tests file
+              inv test --report --ci --paths "@serial_tests.txt" -- -v --durations=0
             else
               echo "=== EXECUTOR 1: Running parallel tests ==="
               # Prepend udata/ to each test path for correct resolution from project root
@@ -87,7 +88,7 @@ jobs:
                 PARALLEL_PATHS+=("udata/$test_path")
               done
               PATHS_STRING="${PARALLEL_PATHS[*]}"
-              inv test --report --ci --paths "$PATHS_STRING"0
+              inv test --report --ci --paths "$PATHS_STRING" -- -v --durations=0
             fi
       - store_test_results:
           path: reports/python
