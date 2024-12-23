@@ -7,8 +7,7 @@ jobs:
       - image: udata/circleci:py3.11
       - image: mongo:6.0.4
       - image: redis:alpine
-    environment:
-      BASH_ENV: /root/.bashrc
+    parallelism: 2
     steps:
       - checkout
       - run:
@@ -19,9 +18,14 @@ jobs:
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
-          - py3-cache-v12-{{ arch }}-{{ checksum "python.deps" }}
-          - py3-cache-v12-{{ arch }}-{{ .Branch }}
-          - py3-cache-v12-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+            # 1. Exact match of dependencies
+            - py3-cache-v12-{{ arch }}-{{ checksum "python.deps" }}
+            # 2. Latest cache from this branch
+            - py3-cache-v12-{{ arch }}-{{ .Branch }}
+            # 3. Latest cache from base branch (e.g., master)
+            - py3-cache-v12-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+            # 4. Any latest cache for this architecture (fallback)
+            - py3-cache-v12-{{ arch }}-
       - run:
           name: Install Python dependencies
           command: |
@@ -33,11 +37,11 @@ jobs:
       - save_cache:
           key: py3-cache-v12-{{ arch }}-{{ checksum "python.deps" }}
           paths:
-          - venv
+            - venv
       - save_cache:
           key: py3-cache-v12-{{ arch }}-{{ .Branch }}
           paths:
-          - venv
+            - venv
       - run:
           name: Lint and format code and sort imports
           # ruff check --select I . : check linting and imports sorting without fixing (to fix, use --fix)
@@ -51,7 +55,62 @@ jobs:
           command: |
             mkdir -p reports/python
             source venv/bin/activate
-            inv test --report --ci
+
+            # Place here the tests to execute in parallel (paths relative to udata/)
+            # In order to gain some time when executing the tests in the CI, you should put here the tests files that:
+            # - takes a longer time to run than average
+            # - modify the global app configuration (so that they don't interfere with other tests)
+            PARALLEL_TESTS=(
+              "harvest/tests/test_actions.py"
+              "harvest/tests/test_api.py"
+              "harvest/tests/test_base_backend.py"
+              "harvest/tests/test_dcat_backend.py"
+              "tests/api/test_activities_api.py"
+              "tests/api/test_auth_api.py"
+              "tests/api/test_datasets_api.py"
+              "tests/api/test_organizations_api.py"
+              "tests/api/test_reports_api.py"
+              "tests/api/test_reuses_api.py"
+              "tests/api/test_user_api.py"
+              "tests/api/test_transfer_api.py"
+              "tests/apiv2/test_swagger.py"
+              "tests/dataset/test_dataset_model.py"
+              "tests/dataset/test_dataset_rdf.py"
+              "tests/forms/test_form_field.py"
+              "tests/forms/test_model_field.py"
+              "tests/forms/test_reference_field.py"
+              "tests/frontend/test_markdown.py"
+              "tests/test_model.py"
+              "tests/test_rdf.py"
+              "tests/test_routing.py"
+              "tests/test_uris.py"
+              "tests/test_utils.py"
+              # This test modifies the global app configuration
+              "tests/test_i18n.py"
+            )
+
+            # Convert array to string with | as separator for grep
+            PARALLEL_PATTERN=$(printf "%s|" "${PARALLEL_TESTS[@]}" | sed 's/|$//')
+
+            if [ "$CIRCLE_NODE_INDEX" = "0" ]; then
+              echo "=== EXECUTOR 0: Running all tests except isolated ones ==="
+              cd ${CIRCLE_WORKING_DIRECTORY:-$(pwd)}/udata
+
+              # Collect test files
+              find . -name "test_*.py" | grep -v -E "$PARALLEL_PATTERN" | sed 's|^./||' > serial_tests.txt
+
+              # Run pytest with the files
+              cd ..
+              python -m pytest $(sed 's|^|udata/|' udata/serial_tests.txt)
+            else
+              echo "=== EXECUTOR 1: Running isolated tests ==="
+              PARALLEL_PATHS=()
+              for test_path in "${PARALLEL_TESTS[@]}"; do
+                PARALLEL_PATHS+=("udata/$test_path")
+              done
+              PATHS_STRING="${PARALLEL_PATHS[*]}"
+              inv test --report --ci --paths "$PATHS_STRING"
+            fi
       - store_test_results:
           path: reports/python
       - store_artifacts:
@@ -61,7 +120,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-          - venv
+            - venv
 
   assets:
     docker:
@@ -79,9 +138,14 @@ jobs:
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
+            # 1. Exact match of dependencies
             - js-cache-{{ arch }}-{{ checksum "js.deps" }}
+            # 2. Latest cache from this branch
             - js-cache-{{ arch }}-{{ .Branch }}
+            # 3. Latest cache from base branch (e.g., master)
             - js-cache-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+            # 4. Any latest cache for this architecture (fallback)
+            - js-cache-{{ arch }}-
       - run:
           name: Install NodeJS and dependencies
           command: |
@@ -91,11 +155,11 @@ jobs:
       - save_cache:
           key: js-cache-{{ arch }}-{{ checksum "js.deps" }}
           paths:
-          - node_modules
+            - node_modules
       - save_cache:
           key: js-cache-{{ arch }}-{{ .Branch }}
           paths:
-          - node_modules
+            - node_modules
       - run:
           name: Compile assets
           command: |
@@ -111,8 +175,6 @@ jobs:
   dist:
     docker:
       - image: udata/circleci:py3.11
-    environment:
-      BASH_ENV: /root/.bashrc
     steps:
       - checkout
       - attach_workspace:
