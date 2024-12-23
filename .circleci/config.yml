@@ -75,11 +75,19 @@ jobs:
               echo "=== EXECUTOR 0: Running all tests except parallel ones ==="
               cd ${CIRCLE_WORKING_DIRECTORY:-$(pwd)}/udata
 
-              # Collect all tests except parallel ones
-              python -m pytest --collect-only --quiet --no-header --no-summary | grep -v "$PARALLEL_PATTERN" > serial_tests.txt
+              # Collect tests with error checking
+              python -m pytest --collect-only --quiet --no-header --no-summary > all_tests.txt
+
+              # Filter out parallel tests and save to serial_tests.txt
+              grep -v -E "$PARALLEL_PATTERN" all_tests.txt > serial_tests.txt
+
+              echo "Content of serial_tests.txt:"
+              cat serial_tests.txt
+
+              # Run pytest directly reading from the file
               cd ..
-              # Use the collected tests file
-              inv test --report --ci --paths "@serial_tests.txt" -- -v --durations=0
+              source venv/bin/activate
+              python -m pytest --verbose --durations=0 $(cat udata/serial_tests.txt)
             else
               echo "=== EXECUTOR 1: Running parallel tests ==="
               # Prepend udata/ to each test path for correct resolution from project root
