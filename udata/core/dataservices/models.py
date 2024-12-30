@@ -117,10 +117,7 @@ class Dataservice(WithMetrics, Owned, db.Document):
         return self.title or ""
 
     title = field(
-        db.StringField(required=True),
-        example="My awesome API",
-        sortable=True,
-        show_as_ref=True
+        db.StringField(required=True), example="My awesome API", sortable=True, show_as_ref=True
     )
     acronym = field(
         db.StringField(max_length=128),
