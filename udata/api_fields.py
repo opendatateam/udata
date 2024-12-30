@@ -360,7 +360,7 @@ def generate_fields(**kwargs) -> Callable:
                 attribute=make_lambda(method), **{"readonly": True, **additional_field_info}
             )
             if additional_field_info.get("show_as_ref", False):
-                ref_fields[key] = read_fields[method_name]
+                ref_fields[method_name] = read_fields[method_name]
 
         cls.__read_fields__ = api.model(f"{cls.__name__} (read)", read_fields, **kwargs)
         cls.__write_fields__ = api.model(f"{cls.__name__} (write)", write_fields, **kwargs)
