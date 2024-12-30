@@ -1,6 +1,7 @@
 from flask import request
 
 from udata.api import API, api, base_reference, fields
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.user.api_fields import user_ref_fields
@@ -49,6 +50,7 @@ person_mapping = {
 }
 
 subject_mapping = {
+    Dataservice: Dataservice.__ref_fields__,
     Dataset: dataset_ref_fields,
     Reuse: Reuse.__ref_fields__,
 }
