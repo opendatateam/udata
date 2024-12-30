@@ -4,6 +4,7 @@
 
 - Add a test to clear datasets on Topics api v1 [#3233](https://github.com/opendatateam/udata/pull/3233)
 - feat: optimize topic's datasets reindex [#3234](https://github.com/opendatateam/udata/pull/3234)
+- fix `function_field` wrong name [#3236](https://github.com/opendatateam/udata/pull/3236)
 
 ## 10.0.6 (2024-12-19)
 
