@@ -213,14 +213,13 @@ jobs:
           command: |
             git clone --quiet --depth 1 $SCAFFOLD_REPO_SSH_URL scaffold
       - run:
-          name: Trigger Gitlab CI/CD pipeline for udata to be deployed to dev environment
-          environment:
-            # GITLAB_API_TOKEN is the token related to the "infra" GitLab repository, so that the Gitlab CI/CD pipeline can be triggered
-            GITLAB_API_TOKEN: ${GITLAB_API_TOKEN}
+          name: Trigger GitLab CI/CD pipeline for udata to deploy to << pipeline.parameters.deploy-env >> environment
           command: |
             RELEASE_VERSION=$(cat version.txt)
             cd scaffold
             # Run the script that triggers the Gitlab CI/CD pipeline.
+            # Must have GITLAB_API_TOKEN set in the environment
+            # GITLAB_API_TOKEN is the token related to the "infra" GitLab repository, so that the Gitlab CI/CD pipeline can be triggered
             # The script args are, in order:
             # - udata: the name of the project to deploy (APP_NAME)
             # - $RELEASE_VERSION: the version to deploy (RELEASE_VERSION)
