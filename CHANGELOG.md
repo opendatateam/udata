@@ -6,6 +6,7 @@
 - feat: optimize topic's datasets reindex [#3234](https://github.com/opendatateam/udata/pull/3234)
 - Allow Dataservice transfer [#3237](https://github.com/opendatateam/udata/pull/3237)
 - fix `function_field` wrong name [#3236](https://github.com/opendatateam/udata/pull/3236)
+- Allow dataservice archive [#3238](https://github.com/opendatateam/udata/pull/3238)
 
 ## 10.0.6 (2024-12-19)
 
