@@ -117,9 +117,7 @@ class Dataservice(WithMetrics, Owned, db.Document):
         return self.title or ""
 
     title = field(
-        db.StringField(required=True),
-        example="My awesome API",
-        sortable=True,
+        db.StringField(required=True), example="My awesome API", sortable=True, show_as_ref=True
     )
     acronym = field(
         db.StringField(max_length=128),
@@ -214,7 +212,7 @@ class Dataservice(WithMetrics, Owned, db.Document):
     def self_api_url(self):
         return endpoint_for("api.dataservice", dataservice=self, _external=True)
 
-    @function_field(description="Link to the udata web page for this dataservice")
+    @function_field(description="Link to the udata web page for this dataservice", show_as_ref=True)
     def self_web_url(self):
         return endpoint_for("dataservices.show", dataservice=self, _external=True)
 
