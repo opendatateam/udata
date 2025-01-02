@@ -1112,9 +1112,9 @@ class DatasetResourceAPITest(APITestCase):
         response = self.post(url_for("api.resources", dataset=self.dataset), data)
         self.assert400(response)
 
+        # Cannot modify the ID of an existing resource
         data = response.json
         data["id"] = uuid_b
-
         response = self.put(
             url_for("api.resource", dataset=self.dataset, rid=uuid_a),
             data,
