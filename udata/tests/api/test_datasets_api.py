@@ -1094,21 +1094,29 @@ class DatasetResourceAPITest(APITestCase):
         # should fail because the POST endpoint only supports URL setting for remote resources
         self.assert400(response)
 
-    def test_create_with_custom_uuid(self):
+    def test_creating_and_updating_resource_uuid(self):
+        uuid_a = "c312cfb0-60f7-417c-9cf9-3d985196b22a"
+        uuid_b = "e8262134-5ff0-4bd8-98bc-5db76bb27856"
+
         data = ResourceFactory.as_dict()
         data["filetype"] = "remote"
-        data["id"] = "c312cfb0-60f7-417c-9cf9-3d985196b22a"
+        data["id"] = uuid_a
         response = self.post(url_for("api.resources", dataset=self.dataset), data)
         self.assert201(response)
-        self.assertEqual(response.json["id"], "c312cfb0-60f7-417c-9cf9-3d985196b22a")
+        self.assertEqual(response.json["id"], uuid_a)
+
+        # Cannot create a second resource with the same UUID
+        data = ResourceFactory.as_dict()
+        data["filetype"] = "remote"
+        data["id"] = uuid_a
+        response = self.post(url_for("api.resources", dataset=self.dataset), data)
+        self.assert400(response)
 
         data = response.json
-        data["id"] = "e8262134-5ff0-4bd8-98bc-5db76bb27856"
+        data["id"] = uuid_b
 
         response = self.put(
-            url_for(
-                "api.resource", dataset=self.dataset, rid="c312cfb0-60f7-417c-9cf9-3d985196b22a"
-            ),
+            url_for("api.resource", dataset=self.dataset, rid=uuid_a),
             data,
         )
         self.assert400(response)

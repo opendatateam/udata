@@ -379,6 +379,10 @@ class ResourcesAPI(API):
         ResourceEditPermission(dataset).test()
         form = api.validate(ResourceForm)
         resource = Resource()
+
+        if form._fields.get("id").data in [r.id for r in dataset.resources]:
+            abort(400, "A resource with the same ID already exists.")
+
         if form._fields.get("filetype").data != "remote":
             api.abort(400, "This endpoint only supports remote resources")
         form.populate_obj(resource)
