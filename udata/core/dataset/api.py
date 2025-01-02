@@ -379,6 +379,10 @@ class ResourcesAPI(API):
         ResourceEditPermission(dataset).test()
         form = api.validate(ResourceForm)
         resource = Resource()
+
+        if form._fields.get("id").data in [r.id for r in dataset.resources]:
+            abort(400, "A resource with the same ID already exists.")
+
         if form._fields.get("filetype").data != "remote":
             api.abort(400, "This endpoint only supports remote resources")
         form.populate_obj(resource)
@@ -547,6 +551,10 @@ class ResourceAPI(ResourceMixin, API):
         # ensure API client does not override url on self-hosted resources
         if resource.filetype == "file":
             form._fields.get("url").data = resource.url
+
+        if form._fields.get("id").data != resource.id:
+            abort(400, "Cannot update resource ID after creation")
+
         # populate_obj populates existing resource object with the content of the form.
         # update_resource saves the updated resource dict to the database
         # the additional dataset.save is required as we update the last_modified date.
