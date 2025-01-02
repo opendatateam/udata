@@ -477,6 +477,14 @@ class DatasetAPITest(APITestCase):
         dataset = Dataset.objects.first()
         self.assertEqual(dataset.tags, ["aaa-bbb-u"])
 
+        auto_generated_id = response.json["id"]
+
+        response = self.put(
+            url_for("api.dataset", dataset=auto_generated_id),
+            {"id": "84f31c61-7a58-493d-98c2-5d7345709f17"},
+        )
+        self.assertEqual(response.json["id"], auto_generated_id)
+
     def test_dataset_api_create_with_extras(self):
         """It should create a dataset with extras from the API"""
         data = DatasetFactory.as_dict()
@@ -1080,6 +1088,25 @@ class DatasetResourceAPITest(APITestCase):
         data["filetype"] = "file"  # to be explicit
         response = self.post(url_for("api.resources", dataset=self.dataset), data)
         # should fail because the POST endpoint only supports URL setting for remote resources
+        self.assert400(response)
+
+    def test_create_with_custom_uuid(self):
+        data = ResourceFactory.as_dict()
+        data["filetype"] = "remote"
+        data["id"] = "c312cfb0-60f7-417c-9cf9-3d985196b22a"
+        response = self.post(url_for("api.resources", dataset=self.dataset), data)
+        self.assert201(response)
+        self.assertEqual(response.json["id"], "c312cfb0-60f7-417c-9cf9-3d985196b22a")
+
+        data = response.json
+        data["id"] = "e8262134-5ff0-4bd8-98bc-5db76bb27856"
+
+        response = self.put(
+            url_for(
+                "api.resource", dataset=self.dataset, rid="c312cfb0-60f7-417c-9cf9-3d985196b22a"
+            ),
+            data,
+        )
         self.assert400(response)
 
     def test_create_normalize_format(self):
