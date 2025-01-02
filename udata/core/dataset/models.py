@@ -335,7 +335,7 @@ class Checksum(db.EmbeddedDocument):
 
 
 class ResourceMixin(object):
-    id = db.AutoUUIDField(primary_key=True, readonly=True)
+    id = db.AutoUUIDField(primary_key=True)
     title = db.StringField(verbose_name="Title", required=True)
     description = db.StringField()
     filetype = db.StringField(choices=list(RESOURCE_FILETYPES), default="file", required=True)

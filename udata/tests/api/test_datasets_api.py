@@ -477,14 +477,6 @@ class DatasetAPITest(APITestCase):
         dataset = Dataset.objects.first()
         self.assertEqual(dataset.tags, ["aaa-bbb-u"])
 
-        auto_generated_id = response.json["id"]
-
-        response = self.put(
-            url_for("api.dataset", dataset=auto_generated_id),
-            {"id": "84f31c61-7a58-493d-98c2-5d7345709f17"},
-        )
-        self.assertEqual(response.json["id"], auto_generated_id)
-
     def test_dataset_api_create_with_extras(self):
         """It should create a dataset with extras from the API"""
         data = DatasetFactory.as_dict()
@@ -565,6 +557,18 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description, "new description")
+
+    def test_cannot_modify_dataset_id(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+
+        data = dataset.to_dict()
+        data["id"] = "7776aa373aa050e302b5714d"
+
+        response = self.put(url_for("api.dataset", dataset=dataset.id), data)
+
+        self.assert200(response)
+        self.assertEqual(response.json["id"], str(dataset.id))
 
     def test_dataset_api_update_with_resources(self):
         """It should update a dataset from the API with resources parameters"""
