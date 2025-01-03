@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2024-12-04 10:03+0100\n"
-"PO-Revision-Date: 2025-01-03 13:52\n"
+"PO-Revision-Date: 2025-01-03 15:06\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: sr\n"
 "Language-Team: Serbian (Cyrillic)\n"
@@ -48,16 +48,16 @@ msgstr "Овај скуп података је архивиран"
 
 #: udata/uris.py:53
 msgid "Invalid URL \"{url}\": {reason}"
-msgstr ""
+msgstr "Неисправан УРЛ \"{url}\": {reason}"
 
 #: udata/tests/api/test_datasets_api.py:875 udata/tests/test_model.py:367
 #: udata/uris.py:55
 msgid "Invalid URL \"{url}\""
-msgstr ""
+msgstr "Неисправан УРЛ \"{url}\""
 
 #: udata/uris.py:104
 msgid "Invalid scheme {0}, allowed schemes: {1}"
-msgstr ""
+msgstr "Неисправна шема {0}, дозвољена шема: {1}"
 
 #: udata/uris.py:107
 msgid "Credentials in URL are not allowed"
@@ -65,7 +65,7 @@ msgstr ""
 
 #: udata/uris.py:111
 msgid "Invalid TLD {0}"
-msgstr ""
+msgstr "Неисправан ТЛД {0}"
 
 #: udata/uris.py:120
 msgid "{0} is a multicast IP"
@@ -718,7 +718,7 @@ msgstr ""
 
 #: udata/core/organization/models.py:38
 msgid "Company"
-msgstr ""
+msgstr "Компанија"
 
 #: udata/core/organization/models.py:39
 msgid "Local authority"
@@ -824,7 +824,7 @@ msgstr "Остало"
 
 #: udata/core/reports/constants.py:25
 msgid "Personal data"
-msgstr ""
+msgstr "Лични подаци"
 
 #: udata/core/reports/constants.py:26
 msgid "Security"
@@ -1104,7 +1104,7 @@ msgstr "Пробна порука"
 
 #: udata/forms/fields.py:127
 msgid "Please input a date/time value"
-msgstr ""
+msgstr "Молим вас да унесете вредност за датум/време"
 
 #: udata/forms/fields.py:139
 msgid "Invalid date/time input"
@@ -1602,7 +1602,7 @@ msgstr ""
 
 #: udata/templates/security/email/welcome_existing.html:25
 msgid "Here"
-msgstr ""
+msgstr "Овде"
 
 #: udata/tests/forms/test_model_field.py:165
 msgid "Expect a \"Target\" class but \"Wrong\" was found"
