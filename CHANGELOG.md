@@ -7,6 +7,7 @@
 - Allow Dataservice transfer [#3237](https://github.com/opendatateam/udata/pull/3237)
 - fix `function_field` wrong name [#3236](https://github.com/opendatateam/udata/pull/3236)
 - Allow dataservice archive [#3238](https://github.com/opendatateam/udata/pull/3238)
+- Improve OGC service detection to expose in RDF [#3241](https://github.com/opendatateam/udata/pull/3241)
 
 ## 10.0.6 (2024-12-19)
 
