@@ -131,7 +131,7 @@ def detect_ogc_service(resource):
     Detect if the resource points towards an OGC Service based on either
     * a known OGC Service format
     * a REQUEST=GetCapabilities param in url
-    It returns the OGC service type
+    It returns the OGC service type or None
     """
     if resource.format and resource.format.strip("ogc:") in OGC_SERVICE_FORMATS:
         return resource.format.strip("ogc:")
