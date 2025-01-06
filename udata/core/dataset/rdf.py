@@ -126,7 +126,23 @@ def owner_to_rdf(dataset, graph=None):
     return
 
 
-def ogc_service_to_rdf(dataset, resource, graph=None, is_hvd=False):
+def detect_ogc_service(resource):
+    """
+    Detect if the resource points towards an OGC Service based on either
+    * a known OGC Service format
+    * a REQUEST=GetCapabilities param in url
+    It returns the OGC service type
+    """
+    if resource.format and resource.format.strip("ogc:") in OGC_SERVICE_FORMATS:
+        return resource.format.strip("ogc:")
+    url = resource.url.lower()
+    if "request=getcapabilities" in url and any(
+        f"service={format}" in url for format in OGC_SERVICE_FORMATS
+    ):
+        return next(format for format in OGC_SERVICE_FORMATS if f"service={format}" in url)
+
+
+def ogc_service_to_rdf(dataset, resource, ogc_service_type=None, graph=None, is_hvd=False):
     """
     Build a dataservice on the fly for OGC services distributions
     Inspired from https://github.com/SEMICeu/iso-19139-to-dcat-ap/blob/f61b2921dd398b90b2dd2db14085e75687f7616b/iso-19139-to-dcat-ap.xsl#L1419
@@ -138,10 +154,11 @@ def ogc_service_to_rdf(dataset, resource, graph=None, is_hvd=False):
     service.set(DCAT.endpointURL, URIRef(resource.url.split("?")[0]))
     if "request=getcapabilities" in resource.url.lower():
         service.set(DCAT.endpointDescription, URIRef(resource.url))
-    service.set(
-        DCT.conformsTo,
-        URIRef("http://www.opengeospatial.org/standards/" + resource.format.split(":")[-1]),
-    )
+    if ogc_service_type:
+        service.set(
+            DCT.conformsTo,
+            URIRef("http://www.opengeospatial.org/standards/" + ogc_service_type),
+        )
 
     if dataset and dataset.license:
         service.add(DCT.rights, Literal(dataset.license.title))
@@ -214,9 +231,12 @@ def resource_to_rdf(resource, dataset=None, graph=None, is_hvd=False):
         # DCAT-AP HVD applicable legislation is also expected at the distribution level
         r.add(DCATAP.applicableLegislation, URIRef(HVD_LEGISLATION))
 
-    # Add access service for known OGC service formats
-    if resource.format in OGC_SERVICE_FORMATS:
-        r.add(DCAT.accessService, ogc_service_to_rdf(dataset, resource, graph, is_hvd))
+    # Add access service for known OGC resources
+    if ogc_service_type := detect_ogc_service(resource):
+        r.add(
+            DCAT.accessService,
+            ogc_service_to_rdf(dataset, resource, ogc_service_type, graph, is_hvd),
+        )
 
     return r
 
