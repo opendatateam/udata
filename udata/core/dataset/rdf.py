@@ -6,6 +6,7 @@ import calendar
 import json
 import logging
 from datetime import date
+from typing import Optional
 
 from dateutil.parser import parse as parse_dt
 from flask import current_app
@@ -98,7 +99,9 @@ EU_RDF_REQUENCIES = {
 }
 
 
-def temporal_to_rdf(daterange, graph=None):
+def temporal_to_rdf(
+    daterange: db.DateRange, graph: Optional[Graph] = None
+) -> Optional[RdfResource]:
     if not daterange:
         return
     graph = graph or Graph(namespace_manager=namespace_manager)
@@ -109,13 +112,13 @@ def temporal_to_rdf(daterange, graph=None):
     return pot
 
 
-def frequency_to_rdf(frequency, graph=None):
+def frequency_to_rdf(frequency: str, graph: Optional[Graph] = None) -> Optional[str]:
     if not frequency:
         return
     return RDF_FREQUENCIES.get(frequency, getattr(FREQ, frequency))
 
 
-def owner_to_rdf(dataset, graph=None):
+def owner_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> Optional[RdfResource]:
     from udata.core.organization.rdf import organization_to_rdf
     from udata.core.user.rdf import user_to_rdf
 
@@ -126,7 +129,7 @@ def owner_to_rdf(dataset, graph=None):
     return
 
 
-def detect_ogc_service(resource):
+def detect_ogc_service(resource: Resource) -> Optional[str]:
     """
     Detect if the resource points towards an OGC Service based on either
     * a known OGC Service format
@@ -142,7 +145,13 @@ def detect_ogc_service(resource):
         return next(format for format in OGC_SERVICE_FORMATS if f"service={format}" in url)
 
 
-def ogc_service_to_rdf(dataset, resource, ogc_service_type=None, graph=None, is_hvd=False):
+def ogc_service_to_rdf(
+    dataset: Dataset,
+    resource: Resource,
+    ogc_service_type: Optional[str] = None,
+    graph: Optional[Graph] = None,
+    is_hvd: bool = False,
+) -> RdfResource:
     """
     Build a dataservice on the fly for OGC services distributions
     Inspired from https://github.com/SEMICeu/iso-19139-to-dcat-ap/blob/f61b2921dd398b90b2dd2db14085e75687f7616b/iso-19139-to-dcat-ap.xsl#L1419
@@ -181,7 +190,12 @@ def ogc_service_to_rdf(dataset, resource, ogc_service_type=None, graph=None, is_
     return service
 
 
-def resource_to_rdf(resource, dataset=None, graph=None, is_hvd=False):
+def resource_to_rdf(
+    resource: Resource,
+    dataset: Optional[Dataset] = None,
+    graph: Optional[Graph] = None,
+    is_hvd: bool = False,
+) -> RdfResource:
     """
     Map a Resource domain model to a DCAT/RDF graph
     """
@@ -256,7 +270,7 @@ def dataset_to_graph_id(dataset: Dataset) -> URIRef | BNode:
         return BNode()
 
 
-def dataset_to_rdf(dataset, graph=None):
+def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResource:
     """
     Map a dataset domain model to a DCAT/RDF graph
     """
