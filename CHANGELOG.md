@@ -2,8 +2,24 @@
 
 ## Current (in progress)
 
+- Add a test to clear datasets on Topics api v1 [#3233](https://github.com/opendatateam/udata/pull/3233)
+- feat: optimize topic's datasets reindex [#3234](https://github.com/opendatateam/udata/pull/3234)
+- Allow Dataservice transfer [#3237](https://github.com/opendatateam/udata/pull/3237)
+- fix `function_field` wrong name [#3236](https://github.com/opendatateam/udata/pull/3236)
+- Allow dataservice archive [#3238](https://github.com/opendatateam/udata/pull/3238)
+- Improve OGC service detection to expose in RDF [#3241](https://github.com/opendatateam/udata/pull/3241)
+- Don’t duplicate datasets with a harvest.remote_id URI when harvesting [#3219](https://github.com/opendatateam/udata/pull/3219)
+
+## 10.0.6 (2024-12-19)
+
+- Ignore inactive sources at harvest time [#3226](https://github.com/opendatateam/udata/pull/3226)
+    - If some harvest sources were marked inactive by mistake, they won't get executed anymore
+- Organization url is now a URLField and should be a valid URL [#3227](https://github.com/opendatateam/udata/pull/3227)
 - Fix the `parse-url` command [#3225](https://github.com/opendatateam/udata/pull/3225)
-- Don’t duplicated datasets with a harvest.remote_id URI when harvesting [#3219](https://github.com/opendatateam/udata/pull/3219)
+- Add `with_drafts` argument to posts API [#3229](https://github.com/opendatateam/udata/pull/3229)
+- Fix failing dataset save in update reuses metrics [#3230](https://github.com/opendatateam/udata/pull/3230)
+- Fix catalog RDF by preventing memory increase on getting dataservice hvd tags [#3231](https://github.com/opendatateam/udata/pull/3231)
+- Update purge tasks [#3167](https://github.com/opendatateam/udata/pull/3167)
 
 ## 10.0.5 (2024-12-09)
 
