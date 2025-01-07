@@ -6,6 +6,7 @@ import calendar
 import json
 import logging
 from datetime import date
+from typing import Optional
 
 from dateutil.parser import parse as parse_dt
 from flask import current_app
@@ -99,7 +100,9 @@ EU_RDF_REQUENCIES = {
 }
 
 
-def temporal_to_rdf(daterange, graph=None):
+def temporal_to_rdf(
+    daterange: db.DateRange, graph: Optional[Graph] = None
+) -> Optional[RdfResource]:
     if not daterange:
         return
     graph = graph or Graph(namespace_manager=namespace_manager)
@@ -110,13 +113,13 @@ def temporal_to_rdf(daterange, graph=None):
     return pot
 
 
-def frequency_to_rdf(frequency, graph=None):
+def frequency_to_rdf(frequency: str, graph: Optional[Graph] = None) -> Optional[str]:
     if not frequency:
         return
     return RDF_FREQUENCIES.get(frequency, getattr(FREQ, frequency))
 
 
-def owner_to_rdf(dataset, graph=None):
+def owner_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> Optional[RdfResource]:
     from udata.core.organization.rdf import organization_to_rdf
     from udata.core.user.rdf import user_to_rdf
 
@@ -127,7 +130,29 @@ def owner_to_rdf(dataset, graph=None):
     return
 
 
-def ogc_service_to_rdf(dataset, resource, graph=None, is_hvd=False):
+def detect_ogc_service(resource: Resource) -> Optional[str]:
+    """
+    Detect if the resource points towards an OGC Service based on either
+    * a known OGC Service format
+    * a REQUEST=GetCapabilities param in url
+    It returns the OGC service type or None
+    """
+    if resource.format and resource.format.strip("ogc:") in OGC_SERVICE_FORMATS:
+        return resource.format.strip("ogc:")
+    url = resource.url.lower()
+    if "request=getcapabilities" in url and any(
+        f"service={format}" in url for format in OGC_SERVICE_FORMATS
+    ):
+        return next(format for format in OGC_SERVICE_FORMATS if f"service={format}" in url)
+
+
+def ogc_service_to_rdf(
+    dataset: Dataset,
+    resource: Resource,
+    ogc_service_type: Optional[str] = None,
+    graph: Optional[Graph] = None,
+    is_hvd: bool = False,
+) -> RdfResource:
     """
     Build a dataservice on the fly for OGC services distributions
     Inspired from https://github.com/SEMICeu/iso-19139-to-dcat-ap/blob/f61b2921dd398b90b2dd2db14085e75687f7616b/iso-19139-to-dcat-ap.xsl#L1419
@@ -139,10 +164,11 @@ def ogc_service_to_rdf(dataset, resource, graph=None, is_hvd=False):
     service.set(DCAT.endpointURL, URIRef(resource.url.split("?")[0]))
     if "request=getcapabilities" in resource.url.lower():
         service.set(DCAT.endpointDescription, URIRef(resource.url))
-    service.set(
-        DCT.conformsTo,
-        URIRef("http://www.opengeospatial.org/standards/" + resource.format.split(":")[-1]),
-    )
+    if ogc_service_type:
+        service.set(
+            DCT.conformsTo,
+            URIRef("http://www.opengeospatial.org/standards/" + ogc_service_type),
+        )
 
     if dataset and dataset.license:
         service.add(DCT.rights, Literal(dataset.license.title))
@@ -164,7 +190,12 @@ def ogc_service_to_rdf(dataset, resource, graph=None, is_hvd=False):
     return service
 
 
-def resource_to_rdf(resource, dataset=None, graph=None, is_hvd=False):
+def resource_to_rdf(
+    resource: Resource,
+    dataset: Optional[Dataset] = None,
+    graph: Optional[Graph] = None,
+    is_hvd: bool = False,
+) -> RdfResource:
     """
     Map a Resource domain model to a DCAT/RDF graph
     """
@@ -214,9 +245,12 @@ def resource_to_rdf(resource, dataset=None, graph=None, is_hvd=False):
         # DCAT-AP HVD applicable legislation is also expected at the distribution level
         r.add(DCATAP.applicableLegislation, URIRef(HVD_LEGISLATION))
 
-    # Add access service for known OGC service formats
-    if resource.format in OGC_SERVICE_FORMATS:
-        r.add(DCAT.accessService, ogc_service_to_rdf(dataset, resource, graph, is_hvd))
+    # Add access service for known OGC resources
+    if ogc_service_type := detect_ogc_service(resource):
+        r.add(
+            DCAT.accessService,
+            ogc_service_to_rdf(dataset, resource, ogc_service_type, graph, is_hvd),
+        )
 
     return r
 
@@ -236,7 +270,7 @@ def dataset_to_graph_id(dataset: Dataset) -> URIRef | BNode:
         return BNode()
 
 
-def dataset_to_rdf(dataset: Dataset, graph=None):
+def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResource:
     """
     Map a dataset domain model to a DCAT/RDF graph
     """

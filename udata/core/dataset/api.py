@@ -215,7 +215,9 @@ class DatasetListAPI(API):
     def get(self):
         """List or search all datasets"""
         args = dataset_parser.parse()
-        datasets = Dataset.objects(archived=None, deleted=None, private=False)
+        datasets = Dataset.objects.visible_by_user(
+            current_user, mongoengine.Q(private__ne=True, archived=None, deleted=None)
+        )
         datasets = dataset_parser.parse_filters(datasets, args)
         sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
         return datasets.order_by(sort).paginate(args["page"], args["page_size"])

@@ -17,6 +17,7 @@ def request_transfer(subject, recipient, comment):
     if recipient == (subject.organization or subject.owner):
         raise ValueError("Recipient should be different than the current owner")
     transfer = Transfer.objects.create(
+        user=current_user._get_current_object(),
         owner=subject.organization or subject.owner,
         recipient=recipient,
         subject=subject,

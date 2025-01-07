@@ -264,8 +264,8 @@ class MembershipAPITest:
         assert len(response.json) == 1
         assert response.json[0]["comment"] == "test"
         assert (
-            response.json[0]["user"]["email"] == "thibaud@example.org"
-        )  # Can see email of applicant
+            response.json[0]["user"]["email"] == "th*****@example.org"
+        )  # Can see partially obfuscated email of applicant
 
     def test_only_org_member_can_get_membership_requests(self, api):
         api.login()
@@ -285,7 +285,7 @@ class MembershipAPITest:
 
         organization = OrganizationFactory(members=[admin, editor])
 
-        # Admin can see emails
+        # Organization admin can partially see emails
         api.login(admin.user)
         response = api.get(url_for("api.organization", org=organization))
         assert200(response)
@@ -294,12 +294,12 @@ class MembershipAPITest:
         assert len(members) == 2
         assert members[0]["role"] == "admin"
         assert members[0]["since"] == "2024-04-14T00:00:00+00:00"
-        assert members[0]["user"]["email"] == "admin@example.org"
+        assert members[0]["user"]["email"] == "ad***@example.org"
 
         assert members[1]["role"] == "editor"
-        assert members[1]["user"]["email"] == "editor@example.org"
+        assert members[1]["user"]["email"] == "ed****@example.org"
 
-        # Editor can see emails
+        # Organization editor can partially see emails
         api.login(editor.user)
         response = api.get(url_for("api.organization", org=organization))
         assert200(response)
@@ -308,10 +308,10 @@ class MembershipAPITest:
         assert len(members) == 2
         assert members[0]["role"] == "admin"
         assert members[0]["since"] == "2024-04-14T00:00:00+00:00"
-        assert members[0]["user"]["email"] == "admin@example.org"
+        assert members[0]["user"]["email"] == "ad***@example.org"
 
         assert members[1]["role"] == "editor"
-        assert members[1]["user"]["email"] == "editor@example.org"
+        assert members[1]["user"]["email"] == "ed****@example.org"
 
         # Others cannot see emails
         api.login(other)
@@ -326,6 +326,20 @@ class MembershipAPITest:
 
         assert members[1]["role"] == "editor"
         assert members[1]["user"]["email"] is None
+
+        # Super admin of udata can see emails
+        api.login(AdminFactory())
+        response = api.get(url_for("api.organization", org=organization))
+        assert200(response)
+
+        members = response.json["members"]
+        assert len(members) == 2
+        assert members[0]["role"] == "admin"
+        assert members[0]["since"] == "2024-04-14T00:00:00+00:00"
+        assert members[0]["user"]["email"] == "admin@example.org"
+
+        assert members[1]["role"] == "editor"
+        assert members[1]["user"]["email"] == "editor@example.org"
 
     def test_accept_membership(self, api):
         user = api.login()

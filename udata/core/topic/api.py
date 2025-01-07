@@ -93,6 +93,7 @@ class TopicsAPI(API):
         sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
         return topics.order_by(sort).paginate(args["page"], args["page_size"])
 
+    @api.secure
     @api.doc("create_topic")
     @api.expect(topic_fields)
     @api.marshal_with(topic_fields)

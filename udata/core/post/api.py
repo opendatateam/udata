@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from udata.api import API, api, fields
+from udata.auth import Permission as AdminPermission
 from udata.auth import admin_permission
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.reuse.models import Reuse
@@ -60,6 +61,13 @@ parser = api.page_parser()
 parser.add_argument(
     "sort", type=str, default="-created_at", location="args", help="The sorting attribute"
 )
+parser.add_argument(
+    "with_drafts",
+    type=bool,
+    default=False,
+    location="args",
+    help="`True` also returns the unpublished posts (only for super-admins)",
+)
 
 
 @ns.route("/", endpoint="posts")
@@ -70,11 +78,13 @@ class PostsAPI(API):
     def get(self):
         """List all posts"""
         args = parser.parse_args()
-        return (
-            Post.objects.published()
-            .order_by(args["sort"])
-            .paginate(args["page"], args["page_size"])
-        )
+
+        posts = Post.objects()
+
+        if not (AdminPermission().can() and args["with_drafts"]):
+            posts = posts.published()
+
+        return posts.order_by(args["sort"]).paginate(args["page"], args["page_size"])
 
     @api.doc("create_post")
     @api.secure(admin_permission)

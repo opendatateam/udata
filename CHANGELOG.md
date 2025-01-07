@@ -2,8 +2,35 @@
 
 ## Current (in progress)
 
+- Add a test to clear datasets on Topics api v1 [#3233](https://github.com/opendatateam/udata/pull/3233)
+- feat: optimize topic's datasets reindex [#3234](https://github.com/opendatateam/udata/pull/3234)
+- Allow Dataservice transfer [#3237](https://github.com/opendatateam/udata/pull/3237)
+- fix `function_field` wrong name [#3236](https://github.com/opendatateam/udata/pull/3236)
+- Allow dataservice archive [#3238](https://github.com/opendatateam/udata/pull/3238)
+- Improve OGC service detection to expose in RDF [#3241](https://github.com/opendatateam/udata/pull/3241)
+
+## 10.0.6 (2024-12-19)
+
+- Ignore inactive sources at harvest time [#3226](https://github.com/opendatateam/udata/pull/3226)
+    - If some harvest sources were marked inactive by mistake, they won't get executed anymore
+- Organization url is now a URLField and should be a valid URL [#3227](https://github.com/opendatateam/udata/pull/3227)
+- Fix the `parse-url` command [#3225](https://github.com/opendatateam/udata/pull/3225)
+- Add `with_drafts` argument to posts API [#3229](https://github.com/opendatateam/udata/pull/3229)
+- Fix failing dataset save in update reuses metrics [#3230](https://github.com/opendatateam/udata/pull/3230)
+- Fix catalog RDF by preventing memory increase on getting dataservice hvd tags [#3231](https://github.com/opendatateam/udata/pull/3231)
+- Update purge tasks [#3167](https://github.com/opendatateam/udata/pull/3167)
+
+## 10.0.5 (2024-12-09)
+
+- Add list transfers endpoint / Save user requesting the transfer [#3211](https://github.com/opendatateam/udata/pull/3211)
 - Add dataservice csv adapter [#3208](https://github.com/opendatateam/udata/pull/3208)
 - Add url_for for dataservices and mail notifications [#3213](https://github.com/opendatateam/udata/pull/3213)
+- Compute dataservices metrics on org, user and site [#3209](https://github.com/opendatateam/udata/pull/3209)
+- Update default method blocklist for READ ONLY mode [#3212](https://github.com/opendatateam/udata/pull/3212)
+- The API will now return all the datasets a user has access to, including deleted of private ones that they're the owners of [#3214](https://github.com/opendatateam/udata/pull/3214)
+- Rename administration labels from "Private" to "Draft" [#3217](https://github.com/opendatateam/udata/pull/3217)
+- Add partial obfuscation of email for members [#3220](https://github.com/opendatateam/udata/pull/3220)
+- Reuse url is now a URLField and should be a valid URL [#3222](https://github.com/opendatateam/udata/pull/3222)
 
 ## 10.0.4 (2024-11-29)
 

@@ -1,7 +1,9 @@
 from datetime import datetime
 
+from blinker import Signal
 from flask import url_for
 from mongoengine import Q
+from mongoengine.signals import post_save
 
 import udata.core.contact_point.api_fields as contact_api_fields
 import udata.core.dataset.api_fields as datasets_api_fields
@@ -115,9 +117,7 @@ class Dataservice(WithMetrics, Owned, db.Document):
         return self.title or ""
 
     title = field(
-        db.StringField(required=True),
-        example="My awesome API",
-        sortable=True,
+        db.StringField(required=True), example="My awesome API", sortable=True, show_as_ref=True
     )
     acronym = field(
         db.StringField(max_length=128),
@@ -188,7 +188,7 @@ class Dataservice(WithMetrics, Owned, db.Document):
         sortable="last_modified",
     )
     deleted_at = field(db.DateTimeField())
-    archived_at = field(db.DateTimeField(), readonly=True)
+    archived_at = field(db.DateTimeField())
 
     datasets = field(
         db.ListField(
@@ -219,7 +219,7 @@ class Dataservice(WithMetrics, Owned, db.Document):
     def self_api_url(self):
         return endpoint_for("api.dataservice", dataservice=self, _external=True)
 
-    @function_field(description="Link to the udata web page for this dataservice")
+    @function_field(description="Link to the udata web page for this dataservice", show_as_ref=True)
     def self_web_url(self):
         return endpoint_for("dataservices.show", dataservice=self, _external=True)
 
@@ -240,3 +240,21 @@ class Dataservice(WithMetrics, Owned, db.Document):
     def count_followers(self):
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
         self.save()
+
+    on_create = Signal()
+    on_update = Signal()
+    on_delete = Signal()
+
+    @classmethod
+    def post_save(cls, sender, document, **kwargs):
+        if "post_save" in kwargs.get("ignores", []):
+            return
+        if kwargs.get("created"):
+            cls.on_create.send(document)
+        else:
+            cls.on_update.send(document)
+        if document.deleted_at:
+            cls.on_delete.send(document)
+
+
+post_save.connect(Dataservice.post_save, sender=Dataservice)
