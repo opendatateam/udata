@@ -199,18 +199,29 @@ class DatasetToRdfTest:
 
     def test_ogc_resource_access_service(self):
         license = LicenseFactory()
-        resource = ResourceFactory(
+        # A resource with an explicit OGC service format
+        resource_1 = ResourceFactory(
             format="ogc:wms",
+            url="https://services.data.shom.fr/INSPIRE/wms/",
+        )
+        # A resource with an URL with a REQUEST=GetCapabilities param
+        resource_2 = ResourceFactory(
             url="https://services.data.shom.fr/INSPIRE/wms/r?service=WMS&request=GetCapabilities&version=1.3.0",
         )
         contact = ContactPointFactory()
-        dataset = DatasetFactory(resources=[resource], license=license, contact_point=contact)
+        dataset = DatasetFactory(
+            resources=[resource_1, resource_2], license=license, contact_point=contact
+        )
 
-        r = resource_to_rdf(resource, dataset)
-
+        r = resource_to_rdf(resource_1, dataset)
         service = r.value(DCAT.accessService)
+        assert service is not None
+
+        r = resource_to_rdf(resource_2, dataset)
+        service = r.value(DCAT.accessService)
+        assert service is not None
         assert service.value(RDF.type).identifier == DCAT.DataService
-        assert service.value(DCT.title) == Literal(resource.title)
+        assert service.value(DCT.title) == Literal(resource_2.title)
         assert service.value(DCAT.endpointDescription).identifier == URIRef(
             "https://services.data.shom.fr/INSPIRE/wms/r?service=WMS&request=GetCapabilities&version=1.3.0"
         )
