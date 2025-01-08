@@ -15,7 +15,7 @@ parameters:
     description: "Environment to deploy to"
 
 jobs:
-  python-test:
+  python:
     docker:
       - image: udata/circleci:py<< pipeline.parameters.python-version >>
       - image: mongo:6.0.4
@@ -81,7 +81,7 @@ jobs:
           paths:
           - venv
 
-  build-assets:
+  assets:
     docker:
       # TODO make an image based on 2-alpine w/ nvm and phantom deps
       - image: udata/circleci:py<< pipeline.parameters.python-version >>
@@ -130,7 +130,7 @@ jobs:
           paths:
             - udata/static
 
-  build-package:
+  dist:
     docker:
       - image: udata/circleci:py<< pipeline.parameters.python-version >>
     steps:
@@ -230,24 +230,24 @@ jobs:
 workflows:
   build-publish-deploy:
     jobs:
-      - python-test:
+      - python:
           filters:
             tags:
               only: /v[0-9]+(\.[0-9]+)*/
-      - build-assets:
+      - assets:
           filters:
             tags:
               only: /v[0-9]+(\.[0-9]+)*/
-      - build-package:
+      - dist:
           requires:
-            - python-test
-            - build-assets
+            - python
+            - assets
           filters:
             tags:
               only: /v[0-9]+(\.[0-9]+)*/
       - publish:
           requires:
-            - build-package
+            - dist
           filters:
             branches:
               only:
