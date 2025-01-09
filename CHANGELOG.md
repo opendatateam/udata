@@ -9,6 +9,7 @@
 - Allow dataservice archive [#3238](https://github.com/opendatateam/udata/pull/3238)
 - Improve OGC service detection to expose in RDF [#3241](https://github.com/opendatateam/udata/pull/3241)
 - Don’t duplicate datasets with a harvest.remote_id URI when harvesting [#3219](https://github.com/opendatateam/udata/pull/3219)
+- Fix version number build in CI [#3244](https://github.com/opendatateam/udata/pull/3244)
 
 ## 10.0.6 (2024-12-19)
 
