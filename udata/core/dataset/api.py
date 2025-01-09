@@ -394,7 +394,17 @@ class ResourcesAPI(API):
     def put(self, dataset):
         """Reorder resources"""
         ResourceEditPermission(dataset).test()
-        data = {"resources": request.json}
+        resources = request.json
+        current_resources = [r["id"] for r in Dataset.get(dataset).resources]
+        if len(resources) != len(current_resources):
+            api.abort(
+                400,
+                f"All resources must be reordered, you provided {len(resources)} "
+                f"out of {len(current_resources)}"
+            )
+        if len(set(r["id"] for r in resources)) != len(current_resources):
+            api.abort(400, "Resource ids must be unique in the payload")
+        data = {"resources": resources}
         form = ResourcesListForm.from_json(
             data, obj=dataset, instance=dataset, meta={"csrf": False}
         )
