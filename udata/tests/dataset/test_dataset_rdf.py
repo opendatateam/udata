@@ -237,7 +237,7 @@ class DatasetToRdfTest:
         )
         contact = ContactPointFactory(role="contact")
         dataset = DatasetFactory(
-          resources=[resource_1, resource_2], license=license, contact_points=[contact]
+            resources=[resource_1, resource_2], license=license, contact_points=[contact]
         )
 
         r = resource_to_rdf(resource_1, dataset)
