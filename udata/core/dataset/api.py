@@ -400,7 +400,7 @@ class ResourcesAPI(API):
             api.abort(
                 400,
                 f"All resources must be reordered, you provided {len(resources)} "
-                f"out of {len(current_resources)}"
+                f"out of {len(current_resources)}",
             )
         if len(set(r["id"] for r in resources)) != len(current_resources):
             api.abort(400, "Resource ids must be unique in the payload")
