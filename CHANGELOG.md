@@ -8,6 +8,7 @@
 - fix `function_field` wrong name [#3236](https://github.com/opendatateam/udata/pull/3236)
 - Allow dataservice archive [#3238](https://github.com/opendatateam/udata/pull/3238)
 - Improve OGC service detection to expose in RDF [#3241](https://github.com/opendatateam/udata/pull/3241)
+- Don’t duplicate datasets with a harvest.remote_id URI when harvesting [#3219](https://github.com/opendatateam/udata/pull/3219)
 
 ## 10.0.6 (2024-12-19)
 
@@ -19,6 +20,7 @@
 - Fix failing dataset save in update reuses metrics [#3230](https://github.com/opendatateam/udata/pull/3230)
 - Fix catalog RDF by preventing memory increase on getting dataservice hvd tags [#3231](https://github.com/opendatateam/udata/pull/3231)
 - Update purge tasks [#3167](https://github.com/opendatateam/udata/pull/3167)
+- Trigger GitLab infra deployment through simple-scaffolding script [#3232](https://github.com/opendatateam/udata/pull/3232)
 
 ## 10.0.5 (2024-12-09)
 
