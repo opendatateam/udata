@@ -154,8 +154,8 @@ jobs:
                     # This is a simple development build
                     BUILDNO=$CIRCLE_BUILD_NUM
                 fi
-                # Build the release version string with the build number, like "1.2.1.dev+1234"
-                RELEASE_VERSION="${BASE_VERSION}+${BUILDNO}"
+                # Build the release version string with the build number, like "1.2.1.dev1234"
+                RELEASE_VERSION="${BASE_VERSION}${BUILDNO}"
             fi
             # Save release version to a file that will be persisted
             echo "$RELEASE_VERSION" > version.txt
