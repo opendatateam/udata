@@ -143,7 +143,7 @@ jobs:
             if [[ $CIRCLE_TAG ]]; then
                 # This is a tagged release, version has been handled upstream
                 RELEASE_VERSION=$CIRCLE_TAG
-                echo "RELEASE_VERSION=$RELEASE_VERSION" > version.txt
+                echo "RELEASE_VERSION=$RELEASE_VERSION" > version.sh
             else
                 # Otherwise, relies on a dev version like "1.2.1.dev" by default
                 # Read version from __init__.py
@@ -157,14 +157,14 @@ jobs:
                 fi
                 # Build the release version string with the build number, like "1.2.1.dev1234"
                 RELEASE_VERSION="${BASE_VERSION}${BUILDNO}"
-                echo "BASE_VERSION=$BASE_VERSION" > version.txt
-                echo "BUILDNO=$BUILDNO" >> version.txt
-                echo "RELEASE_VERSION=$RELEASE_VERSION" >> version.txt
+                echo "BASE_VERSION=$BASE_VERSION" > version.sh
+                echo "BUILDNO=$BUILDNO" >> version.sh
+                echo "RELEASE_VERSION=$RELEASE_VERSION" >> version.sh
             fi
       - run:
           name: Display build info for debugging
           command: |
-            source version.txt
+            source version.sh
             echo "Base version from __init__.py: $BASE_VERSION"
             echo "Build number: $BUILDNO"
             echo "Commit hash: ${CIRCLE_SHA1:0:7}"
@@ -174,7 +174,7 @@ jobs:
           name: Build a distributable package as a wheel release
           command: |
             source venv/bin/activate
-            source version.txt
+            source version.sh
             if [[ $CIRCLE_TAG ]]; then
                 inv pydist
             else
@@ -186,7 +186,7 @@ jobs:
           root: .
           paths:
             - dist
-            - version.txt
+            - version.sh
 
   publish:
     docker:
@@ -228,8 +228,7 @@ jobs:
       - run:
           name: Trigger GitLab CI/CD pipeline for udata to deploy to << pipeline.parameters.deploy-env >> environment
           command: |
-            source version.txt
-            echo "RELEASE_VERSION=$RELEASE_VERSION"
+            source version.sh
             cd scaffold
             # Run the script that triggers the Gitlab CI/CD pipeline.
             # Must have GITLAB_API_TOKEN set in the environment
