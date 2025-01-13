@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 10.0.7 (2025-01-13)
 
 - Add a test to clear datasets on Topics api v1 [#3233](https://github.com/opendatateam/udata/pull/3233)
 - feat: optimize topic's datasets reindex [#3234](https://github.com/opendatateam/udata/pull/3234)
