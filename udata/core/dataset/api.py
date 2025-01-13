@@ -20,6 +20,7 @@ These changes might lead to backward compatibility breakage meaning:
 import logging
 import os
 from datetime import datetime
+from uuid import uuid4
 
 import mongoengine
 from bson.objectid import ObjectId
@@ -378,10 +379,7 @@ class ResourcesAPI(API):
         """Create a new resource for a given dataset"""
         ResourceEditPermission(dataset).test()
         form = api.validate(ResourceForm)
-        resource = Resource()
-
-        if form._fields.get("id").data in [r.id for r in dataset.resources]:
-            abort(400, "A resource with the same ID already exists.")
+        resource = Resource(id=str(uuid4()))
 
         if form._fields.get("filetype").data != "remote":
             api.abort(400, "This endpoint only supports remote resources")
