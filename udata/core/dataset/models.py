@@ -335,7 +335,7 @@ class Checksum(db.EmbeddedDocument):
 
 
 class ResourceMixin(object):
-    id = db.AutoUUIDField(primary_key=True)
+    id = db.AutoUUIDField(primary_key=True, unique=True)
     title = db.StringField(verbose_name="Title", required=True)
     description = db.StringField()
     filetype = db.StringField(choices=list(RESOURCE_FILETYPES), default="file", required=True)
@@ -504,15 +504,6 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
         "views",
     ]
 
-    meta = {
-        "indexes": [
-            {
-                "fields": ["id"],
-                "unique": True,
-            }
-        ]
-    }
-
     @property
     def dataset(self):
         try:
@@ -603,7 +594,7 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             "metrics.followers",
             "metrics.views",
             "slug",
-            "resources.id",
+            {"fields": ["resources.id"], "unique": True, "name": "resource_id_unique_index"},
             "resources.urlhash",
         ]
         + Owned.meta["indexes"],
@@ -647,13 +638,13 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         if self.frequency in LEGACY_FREQUENCIES:
             self.frequency = LEGACY_FREQUENCIES[self.frequency]
 
-        resources_ids = set()
-        for resource in self.resources:
-            if resource.id in resources_ids:
-                raise MongoEngineValidationError(
-                    f"Duplicate resource ID {resource.id} in dataset #{self.id}."
-                )
-            resources_ids.add(resource.id)
+        # resources_ids = set()
+        # for resource in self.resources:
+        #     if resource.id in resources_ids:
+        #         raise MongoEngineValidationError(
+        #             f"Duplicate resource ID {resource.id} in dataset #{self.id}."
+        #         )
+        #     resources_ids.add(resource.id)
 
         for key, value in self.extras.items():
             if not key.startswith("custom:"):

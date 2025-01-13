@@ -67,11 +67,22 @@ class DatasetModelTest:
         resource_a = ResourceFactory(id=uuid)
         resource_b = ResourceFactory(id=uuid)
 
-        dataset.add_resource(resource_a)
-        dataset.add_resource(ResourceFactory())
-        dataset.add_resource(resource_b)
-
+        dataset.resources = [resource_a]
         dataset.save()
+
+        dataset.resources = [resource_a, ResourceFactory(), resource_b]
+        dataset.save()
+
+        # dataset.add_resource(resource_a)
+        # dataset.add_resource(ResourceFactory())
+        # dataset.add_resource(resource_b)
+
+        assert len(dataset.resources) == 3
+        print([r.id for r in dataset.resources])
+
+        assert False
+
+        # dataset.save()
 
     def test_add_resource_missing_checksum_type(self):
         user = UserFactory()
