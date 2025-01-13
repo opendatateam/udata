@@ -504,6 +504,15 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
         "views",
     ]
 
+    meta = {
+        "indexes": [
+            {
+                "fields": ["id"],
+                "unique": True,
+            }
+        ]
+    }
+
     @property
     def dataset(self):
         try:
