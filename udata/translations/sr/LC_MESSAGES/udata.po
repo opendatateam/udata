@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2024-12-04 10:03+0100\n"
-"PO-Revision-Date: 2024-12-05 08:19\n"
+"PO-Revision-Date: 2025-01-06 11:28\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: sr\n"
 "Language-Team: Serbian (Cyrillic)\n"
@@ -20,7 +20,7 @@ msgstr ""
 
 #: udata/settings.py:101
 msgid "Welcome"
-msgstr "Добро дошли"
+msgstr "Добродошли"
 
 #: udata/settings.py:102
 msgid "Please confirm your email"
@@ -48,16 +48,16 @@ msgstr "Овај скуп података је архивиран"
 
 #: udata/uris.py:53
 msgid "Invalid URL \"{url}\": {reason}"
-msgstr ""
+msgstr "Неисправан УРЛ \"{url}\": {reason}"
 
 #: udata/tests/api/test_datasets_api.py:875 udata/tests/test_model.py:367
 #: udata/uris.py:55
 msgid "Invalid URL \"{url}\""
-msgstr ""
+msgstr "Неисправан УРЛ \"{url}\""
 
 #: udata/uris.py:104
 msgid "Invalid scheme {0}, allowed schemes: {1}"
-msgstr ""
+msgstr "Неисправна шема {0}, дозвољена шема: {1}"
 
 #: udata/uris.py:107
 msgid "Credentials in URL are not allowed"
@@ -65,7 +65,7 @@ msgstr ""
 
 #: udata/uris.py:111
 msgid "Invalid TLD {0}"
-msgstr ""
+msgstr "Неисправан ТЛД {0}"
 
 #: udata/uris.py:120
 msgid "{0} is a multicast IP"
@@ -205,7 +205,7 @@ msgstr "Само себе можете да означите као власни
 
 #: udata/core/owned.py:62
 msgid "Unknown organization"
-msgstr ""
+msgstr "Непозната организација"
 
 #: udata/core/owned.py:66 udata/forms/fields.py:756
 #: udata/tests/api/test_dataservices_api.py:451
@@ -233,7 +233,7 @@ msgstr "Имејл"
 
 #: udata/core/contact_point/forms.py:17
 msgid "Contact form"
-msgstr ""
+msgstr "Контакт форма"
 
 #: udata/core/contact_point/forms.py:17
 msgid "The organization web contact form"
@@ -413,15 +413,15 @@ msgstr "Чексума"
 
 #: udata/core/dataset/forms.py:44
 msgid "URL of the schema"
-msgstr ""
+msgstr "Урл шеме"
 
 #: udata/core/dataset/forms.py:45
 msgid "Name of the schema"
-msgstr ""
+msgstr "Назив шеме"
 
 #: udata/core/dataset/forms.py:46
 msgid "Version of the schema"
-msgstr ""
+msgstr "Верзија шеме"
 
 #: udata/core/dataset/forms.py:65 udata/core/dataset/forms.py:142
 #: udata/core/discussions/forms.py:13 udata/core/site/forms.py:12
@@ -718,7 +718,7 @@ msgstr ""
 
 #: udata/core/organization/models.py:38
 msgid "Company"
-msgstr ""
+msgstr "Компанија"
 
 #: udata/core/organization/models.py:39
 msgid "Local authority"
@@ -824,15 +824,15 @@ msgstr "Остало"
 
 #: udata/core/reports/constants.py:25
 msgid "Personal data"
-msgstr ""
+msgstr "Лични подаци"
 
 #: udata/core/reports/constants.py:26
 msgid "Security"
-msgstr ""
+msgstr "Безбедност"
 
 #: udata/core/reports/constants.py:27
 msgid "Spam"
-msgstr ""
+msgstr "Нежељена пошта"
 
 #: udata/core/reuse/activities.py:18
 msgid "created a reuse"
@@ -1104,7 +1104,7 @@ msgstr "Пробна порука"
 
 #: udata/forms/fields.py:127
 msgid "Please input a date/time value"
-msgstr ""
+msgstr "Молим вас да унесете вредност за датум/време"
 
 #: udata/forms/fields.py:139
 msgid "Invalid date/time input"
@@ -1602,7 +1602,7 @@ msgstr ""
 
 #: udata/templates/security/email/welcome_existing.html:25
 msgid "Here"
-msgstr ""
+msgstr "Овде"
 
 #: udata/tests/forms/test_model_field.py:165
 msgid "Expect a \"Target\" class but \"Wrong\" was found"
