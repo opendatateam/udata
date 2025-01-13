@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from uuid import uuid4
 
 import pytest
+import requests
 from flask import current_app
 from mongoengine import post_save
 
