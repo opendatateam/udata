@@ -638,6 +638,14 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         if self.frequency in LEGACY_FREQUENCIES:
             self.frequency = LEGACY_FREQUENCIES[self.frequency]
 
+        resources_ids = set()
+        for resource in self.resources:
+            if resource.id in resources_ids:
+                raise MongoEngineValidationError(
+                    f"Duplicate resource ID {resource.id} in dataset #{self.id}."
+                )
+            resources_ids.add(resource.id)
+
         for key, value in self.extras.items():
             if not key.startswith("custom:"):
                 continue
@@ -897,6 +905,9 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
     def add_resource(self, resource):
         """Perform an atomic prepend for a new resource"""
         resource.validate()
+        if resource.id in [r.id for r in self.resources]:
+            raise RuntimeError("Cannot add resource with already existing ID")
+
         self.update(
             __raw__={"$push": {"resources": {"$each": [resource.to_mongo()], "$position": 0}}}
         )
