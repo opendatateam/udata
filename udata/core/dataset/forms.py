@@ -102,6 +102,12 @@ class ResourceForm(BaseResourceForm):
     model_class = Resource
 
 
+class ResourceFormWithIdForReorder(BaseResourceForm):
+    model_class = Resource
+
+    id = fields.UUIDField()
+
+
 class CommunityResourceForm(BaseResourceForm):
     model_class = CommunityResource
 
@@ -179,4 +185,4 @@ class DatasetForm(ModelForm):
 class ResourcesListForm(ModelForm):
     model_class = Dataset
 
-    resources = fields.NestedModelList(ResourceForm)
+    resources = fields.NestedModelList(ResourceFormWithIdForReorder)
