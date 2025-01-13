@@ -1103,23 +1103,27 @@ class DatasetResourceAPITest(APITestCase):
         data["id"] = uuid_a
         response = self.post(url_for("api.resources", dataset=self.dataset), data)
         self.assert201(response)
-        self.assertEqual(response.json["id"], uuid_a)
+        self.assertNotEqual(response.json["id"], uuid_a)
 
-        # Cannot create a second resource with the same UUID
+        first_generated_uuid = response.json["id"]
+
+        # Sending the same UUID twice doesn't change anything…
         data = ResourceFactory.as_dict()
         data["filetype"] = "remote"
-        data["id"] = uuid_a
+        data["id"] = first_generated_uuid
         response = self.post(url_for("api.resources", dataset=self.dataset), data)
-        self.assert400(response)
+        self.assert201(response)
+        self.assertNotEqual(response.json["id"], first_generated_uuid)
 
         # Cannot modify the ID of an existing resource
         data = response.json
         data["id"] = uuid_b
         response = self.put(
-            url_for("api.resource", dataset=self.dataset, rid=uuid_a),
+            url_for("api.resource", dataset=self.dataset, rid=first_generated_uuid),
             data,
         )
-        self.assert400(response)
+        self.assert200(response)
+        self.assertEqual(response.json["id"], first_generated_uuid)
 
     def test_create_normalize_format(self):
         _format = " FORMAT "

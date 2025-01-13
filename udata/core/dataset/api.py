@@ -550,9 +550,6 @@ class ResourceAPI(ResourceMixin, API):
         if resource.filetype == "file":
             form._fields.get("url").data = resource.url
 
-        if form._fields.get("id").data != resource.id:
-            abort(400, "Cannot update resource ID after creation")
-
         # populate_obj populates existing resource object with the content of the form.
         # update_resource saves the updated resource dict to the database
         # the additional dataset.save is required as we update the last_modified date.
