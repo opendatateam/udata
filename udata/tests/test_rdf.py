@@ -101,7 +101,7 @@ class ContactToRdfTest:
                 "https://data.support.com"
             )
             # Default predicate is "contact"
-            assert predicate == "contact"
+            assert predicate == DCAT.contactPoint
 
     @pytest.mark.parametrize(
         "role,predicate",
@@ -112,7 +112,7 @@ class ContactToRdfTest:
             ("contributor", DCT.contributor),
         ],
     )
-    def test_contact_points_from_rdf_roles(self, role, predicate):
+    def test_contact_points_to_rdf_roles(self, role, predicate):
         contact = ContactPoint(
             name="Organization contact",
             email="hello@its.me",

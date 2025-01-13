@@ -6,6 +6,7 @@ import logging
 import re
 from html.parser import HTMLParser
 
+import mongoengine
 from flask import abort, current_app, request, url_for
 from rdflib import BNode, Graph, Literal, URIRef
 from rdflib.namespace import (
@@ -133,6 +134,13 @@ AGENT_ROLE_TO_RDF_PREDICATE = {
     "publisher": DCT.publisher,
     "creator": DCT.creator,
     "contributor": DCT.contributor,
+}
+
+# Map rdf contact point entity to role
+CONTACT_POINT_ENTITY_TO_ROLE = {
+    DCAT.contactPoint: "contact",
+    DCT.publisher: "publisher",
+    DCT.creator: "creator",
 }
 
 
@@ -329,23 +337,19 @@ def contact_points_from_rdf(rdf, prop, role, dataset):
         #         continue
 
         # Create of get contact point object
+        if not dataset.organization and not dataset.owner:
+            continue
+        org_or_owner = {}
         if dataset.organization:
-            contact, _ = ContactPoint.objects.get_or_create(
-                name=name,
-                email=email,
-                contact_form=contact_form,
-                role=role,
-                organization=dataset.organization,
-            )
-        elif dataset.owner:
-            contact, _ = ContactPoint.objects.get_or_create(
-                name=name,
-                email=email,
-                contact_form=contact_form,
-                role=role,
-                owner=dataset.owner,
-            )
+            org_or_owner = {"organization": dataset.organization}
         else:
+            org_or_owner = {"owner": dataset.owner}
+        try:
+            contact, _ = ContactPoint.objects.get_or_create(
+                name=name, email=email, contact_form=contact_form, role=role, **org_or_owner
+            )
+        except mongoengine.errors.ValidationError as validation_error:
+            log.warning(f"Unable to validate contact point: {validation_error}", exc_info=True)
             continue
         yield contact
 
@@ -376,7 +380,7 @@ def contact_points_to_rdf(contacts, graph=None):
             node.set(VCARD.hasEmail, URIRef(f"mailto:{contact.email}"))
         if contact.contact_form:
             node.set(VCARD.hasUrl, URIRef(contact.contact_form))
-        yield node, AGENT_ROLE_TO_RDF_PREDICATE.get(contact.role, "contact")
+        yield node, AGENT_ROLE_TO_RDF_PREDICATE.get(contact.role, DCAT.contactPoint)
 
 
 def primary_topic_identifier_from_rdf(graph: Graph, resource: RdfResource):

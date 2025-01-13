@@ -17,4 +17,3 @@ class ContactPointTest:
     def test_validate_other_role_doesnt_need_an_email_or_contact_form(self):
         ContactPointFactory(role="creator", email=None, contact_form=None)
         ContactPointFactory(role="publisher", email=None, contact_form=None)
-        ContactPointFactory(role="contributor", email=None, contact_form=None)

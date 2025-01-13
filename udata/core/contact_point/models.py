@@ -9,7 +9,6 @@ CONTACT_ROLES = {
     "contact": _("Contact"),
     "creator": _("Creator"),
     "publisher": _("Publisher"),
-    "contributor": _("Contributor"),
 }
 
 

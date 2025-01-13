@@ -119,14 +119,18 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
                 print(f"Got a status code {response.status_code} while getting {url}, skipping")
                 continue
             json_dataset = response.json()
+            json_dataset = remove_unwanted_keys(json_dataset, "dataset")
             json_resources = json_dataset.pop("resources")
+            json_resources = remove_unwanted_keys(json_resources, "resources")
             if json_dataset["organization"] is None:
                 json_owner = json_dataset.pop("owner")
                 if json_owner:
+                    json_owner = remove_unwanted_keys(json_owner, "user")
                     json_dataset["owner"] = json_owner["id"]
             else:
                 json_org = json_dataset.pop("organization")
                 json_org = requests.get(f"{data_source}{ORG_URL}/{json_org['id']}/").json()
+                json_org = remove_unwanted_keys(json_org, "organization")
                 json_fixture["organization"] = json_org
             json_fixture["resources"] = json_resources
             json_fixture["dataset"] = json_dataset
@@ -135,29 +139,28 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
                 f"{data_source}{REUSE_URL}/?dataset={json_dataset['id']}"
             ).json()["data"]
             for reuse in json_reuses:
-                del reuse["datasets"]
+                reuse = remove_unwanted_keys(reuse, "reuse")
             json_fixture["reuses"] = json_reuses
 
             json_community = requests.get(
                 f"{data_source}{COMMUNITY_RES_URL}/?dataset={json_dataset['id']}"
             ).json()["data"]
             for community_resource in json_community:
-                del community_resource["dataset"]
+                community_resource = remove_unwanted_keys(community_resource, "community")
             json_fixture["community_resources"] = json_community
 
             json_discussion = requests.get(
                 f"{data_source}{DISCUSSION_URL}/?for={json_dataset['id']}"
             ).json()["data"]
             for discussion in json_discussion:
-                del discussion["subject"]
+                discussion = remove_unwanted_keys(discussion, "discussion")
             json_fixture["discussions"] = json_discussion
 
             json_dataservices = requests.get(
                 f"{data_source}{DATASERVICES_URL}/?dataset={json_dataset['id']}"
             ).json()["data"]
             for dataservice in json_dataservices:
-                if "datasets" in reuse:
-                    del reuse["datasets"]
+                dataservice = remove_unwanted_keys(dataservice, "dataservice")
             json_fixture["dataservices"] = json_dataservices
 
             json_result.append(json_fixture)

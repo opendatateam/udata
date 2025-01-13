@@ -23,6 +23,7 @@ from udata.harvest.exceptions import HarvestSkipException
 from udata.models import db
 from udata.rdf import (
     ADMS,
+    CONTACT_POINT_ENTITY_TO_ROLE,
     DCAT,
     DCATAP,
     DCT,
@@ -348,11 +349,7 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
         d.set(DCT.accrualPeriodicity, frequency)
 
     owner_role = DCT.publisher
-    if [
-        contact_point
-        for contact_point in dataset.contact_points
-        if contact_point.role == "publisher"
-    ]:
+    if any(contact_point.role == "publisher" for contact_point in dataset.contact_points):
         # There's already a publisher, so the owner should instead be a qualified attribution.
         owner_role = PROV.qualified_attribution
     owner = owner_to_rdf(dataset, graph)
@@ -741,13 +738,13 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
     description = d.value(DCT.description) or d.value(DCT.abstract)
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
-    # TODO: could it be less verbose?
-    dataset.contact_points = (
-        list(contact_points_from_rdf(d, DCAT.contactPoint, "contact", dataset))
-        + list(contact_points_from_rdf(d, DCT.publisher, "publisher", dataset))
-        + list(contact_points_from_rdf(d, DCT.creator, "creator", dataset))
-        + list(contact_points_from_rdf(d, DCT.contributor, "contributor", dataset))
-    ) or dataset.contact_points
+    roles = [  # Imbricated list of contact points for each role
+        list(contact_points_from_rdf(d, rdf_entity, role, dataset))
+        for rdf_entity, role in CONTACT_POINT_ENTITY_TO_ROLE.items()
+    ]
+    dataset.contact_points = [  # Flattened list of contact points
+        contact_point for role in roles for contact_point in role
+    ] or dataset.contact_points
     schema = schema_from_rdf(d)
     if schema:
         dataset.schema = schema

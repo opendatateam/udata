@@ -6,6 +6,7 @@ from udata.core.dataservices.models import HarvestMetadata as HarvestDataservice
 from udata.core.dataset.models import Dataset, License
 from udata.core.dataset.rdf import dataset_to_graph_id, sanitize_html
 from udata.rdf import (
+    CONTACT_POINT_ENTITY_TO_ROLE,
     DCAT,
     DCATAP,
     DCT,
@@ -43,11 +44,13 @@ def dataservice_from_rdf(
     dataservice.base_api_url = url_from_rdf(d, DCAT.endpointURL)
     dataservice.endpoint_description_url = url_from_rdf(d, DCAT.endpointDescription)
 
-    # TODO: what are the type of contact points supported on dataservices?
-    dataservice.contact_points = (
-        list(contact_points_from_rdf(d, DCAT.contactPoint, "contact", dataservice))
-        or dataservice.contact_points
-    )
+    roles = [  # Imbricated list of contact points for each role
+        list(contact_points_from_rdf(d, rdf_entity, role, dataservice))
+        for rdf_entity, role in CONTACT_POINT_ENTITY_TO_ROLE.items()
+    ]
+    dataservice.contact_points = [  # Flattened list of contact points
+        contact_point for role in roles for contact_point in role
+    ] or dataservice.contact_points
 
     datasets = []
     for dataset_node in d.objects(DCAT.servesDataset):

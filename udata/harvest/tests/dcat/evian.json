@@ -20,8 +20,7 @@
 			},
 			"contactPoint": {
 				"@type": "vcard:Contact",
-				"fn": "sigevian",
-				"email": "sig@evian.fr"
+				"fn": "sigevian"
 			},
 			"accessLevel": "public",
 			"spatial": "6.5735,46.3912,6.6069,46.4028",
@@ -90,8 +89,7 @@
 			},
 			"contactPoint": {
 				"@type": "vcard:Contact",
-				"fn": "sigevian",
-				"email": "sig@evian.fr"
+				"fn": "sigevian"
 			},
 			"accessLevel": "public",
 			"spatial": "6.5658,46.3835,6.6141,46.4047",
@@ -160,8 +158,7 @@
 			},
 			"contactPoint": {
 				"@type": "vcard:Contact",
-				"fn": "sigevian",
-				"email": "sig@evian.fr"
+				"fn": "sigevian"
 			},
 			"accessLevel": "public",
 			"spatial": "6.5664,46.3889,6.6088,46.4039",
@@ -230,8 +227,7 @@
 			},
 			"contactPoint": {
 				"@type": "vcard:Contact",
-				"fn": "sigevian",
-				"email": "sig@evian.fr"
+				"fn": "sigevian"
 			},
 			"accessLevel": "public",
 			"spatial": "6.5873,46.4006,6.5889,46.4020",
@@ -300,8 +296,7 @@
 			},
 			"contactPoint": {
 				"@type": "vcard:Contact",
-				"fn": "sigevian",
-				"email": "sig@evian.fr"
+				"fn": "sigevian"
 			},
 			"accessLevel": "public",
 			"spatial": "6.5662,46.3885,6.6130,46.4045",
@@ -370,8 +365,7 @@
 			},
 			"contactPoint": {
 				"@type": "vcard:Contact",
-				"fn": "sigevian",
-				"email": "sig@evian.fr"
+				"fn": "sigevian"
 			},
 			"accessLevel": "public",
 			"spatial": "{{extent:computeSpatialProperty}}",
@@ -413,8 +407,7 @@
 			},
 			"contactPoint": {
 				"@type": "vcard:Contact",
-				"fn": "sigevian",
-				"email": "sig@evian.fr"
+				"fn": "sigevian"
 			},
 			"accessLevel": "public",
 			"spatial": "{{extent:computeSpatialProperty}}",
@@ -449,8 +442,7 @@
 			},
 			"contactPoint": {
 				"@type": "vcard:Contact",
-				"fn": "sigevian",
-				"email": "sig@evian.fr"
+				"fn": "sigevian"
 			},
 			"accessLevel": "public",
 			"spatial": "{{extent:computeSpatialProperty}}",
