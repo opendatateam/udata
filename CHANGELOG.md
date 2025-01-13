@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix creating/updating ID for resources [#3239](https://github.com/opendatateam/udata/pull/3239)
 
 ## 10.0.7 (2025-01-13)
 
