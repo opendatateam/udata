@@ -437,7 +437,7 @@ def check_duplicate_resources_ids(
 
     resources = {id: info for id, info in resources.items() if len(info["resources"]) != 1}
 
-    if duplicate_inside_dataset:
+    if duplicate_outside_dataset:
         count_resources = 0
         count_datasets = 0
         for id, info in resources.items():
@@ -477,7 +477,7 @@ def check_duplicate_resources_ids(
         print(f"Resources with duplicated IDs: {count_resources}")
         print(f"Datasets concerned {count_datasets}")
 
-    if duplicate_outside_dataset:
+    if duplicate_inside_dataset:
         count_resources = 0
         count_datasets = 0
         for id, info in resources.items():

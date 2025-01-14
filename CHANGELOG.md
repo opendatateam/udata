@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add report of duplicates resources ids [#3247](https://github.com/opendatateam/udata/pull/3247)
 
 ## 10.0.7 (2025-01-13)
 
