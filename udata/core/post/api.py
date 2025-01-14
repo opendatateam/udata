@@ -68,6 +68,9 @@ parser.add_argument(
     location="args",
     help="`True` also returns the unpublished posts (only for super-admins)",
 )
+parser.add_argument(
+    "q", type=str, location="args", help="query string to search through resources titles"
+)
 
 
 @ns.route("/", endpoint="posts")
@@ -83,6 +86,10 @@ class PostsAPI(API):
 
         if not (AdminPermission().can() and args["with_drafts"]):
             posts = posts.published()
+
+        if args["q"]:
+            phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
+            posts = posts.search_text(phrase_query)
 
         return posts.order_by(args["sort"]).paginate(args["page"], args["page_size"])
 

@@ -42,6 +42,9 @@ class Post(db.Datetimed, db.Document):
         "indexes": [
             "-created_at",
             "-published",
+            "$name",
+            "$headline",
+            "$content",
         ],
         "queryset_class": PostQuerySet,
     }
