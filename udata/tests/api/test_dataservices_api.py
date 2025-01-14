@@ -405,12 +405,12 @@ class DataserviceAPITest(APITestCase):
             {
                 "title": "My title",
                 "base_api_url": "https://example.org",
-                "contact_point": "66212433e42ab56639ad516e",
+                "contact_points": ["66212433e42ab56639ad516e"],
             },
         )
         self.assert400(response)
         self.assertEqual(
-            response.json["errors"]["contact_point"],
+            response.json["errors"]["contact_points"],
             ["Unknown reference '66212433e42ab56639ad516e'"],
         )
         self.assertEqual(Dataservice.objects.count(), 0)

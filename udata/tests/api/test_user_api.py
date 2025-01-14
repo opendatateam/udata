@@ -390,6 +390,7 @@ class UserAPITest(APITestCase):
             "email": "mooneywayne@cobb-cochran.com",
             "name": "Martin Schultz",
             "owner": str(user.id),
+            "role": "contact",
         }
 
         response = self.post(url_for("api.contact_points"), data)

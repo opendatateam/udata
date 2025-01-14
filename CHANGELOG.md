@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Harvest attribution roles [#3149](https://github.com/opendatateam/udata/pull/3149)
 
 ## 10.0.7 (2025-01-13)
 
