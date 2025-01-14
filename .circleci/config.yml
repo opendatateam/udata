@@ -142,38 +142,51 @@ jobs:
           command: |
             if [[ $CIRCLE_TAG ]]; then
                 # This is a tagged release, version has been handled upstream
-                export RELEASE_VERSION=$CIRCLE_TAG
-            # Otherwise, relies on a dev version like "1.2.1.dev" by default
-            elif [[ "$CIRCLE_BRANCH" == feature/* ]]; then
-                # This is a feature branch
-                export RELEASE_VERSION=$CIRCLE_BUILD_NUM+${CIRCLE_BRANCH#*/}
+                RELEASE_VERSION=$CIRCLE_TAG
+                echo "RELEASE_VERSION=$RELEASE_VERSION" > version.sh
             else
-                # This is a simple development build
-                export RELEASE_VERSION=$CIRCLE_BUILD_NUM
+                # Otherwise, relies on a dev version like "1.2.1.dev" by default
+                # Read version from __init__.py
+                BASE_VERSION=$(python -c "from udata import __version__; print(__version__)")
+                if [[ "$CIRCLE_BRANCH" == feature/* ]]; then
+                    # This is a feature branch
+                    BUILDNO=$CIRCLE_BUILD_NUM${CIRCLE_BRANCH#*/}
+                else
+                    # This is a simple development build
+                    BUILDNO=$CIRCLE_BUILD_NUM
+                fi
+                # Build the release version string with the build number, like "1.2.1.dev1234"
+                RELEASE_VERSION="${BASE_VERSION}${BUILDNO}"
+                echo "BASE_VERSION=$BASE_VERSION" > version.sh
+                echo "BUILDNO=$BUILDNO" >> version.sh
+                echo "RELEASE_VERSION=$RELEASE_VERSION" >> version.sh
             fi
-            # Save version to a file that will be persisted
-            echo "$RELEASE_VERSION" > version.txt
       - run:
           name: Display build info for debugging
           command: |
-            RELEASE_VERSION=$(cat version.txt)
-            echo "Building a wheel release with version $RELEASE_VERSION"
-            echo "Build number: $CIRCLE_BUILD_NUM"
+            source version.sh
+            echo "Base version from __init__.py: $BASE_VERSION"
+            echo "Build number: $BUILDNO"
             echo "Commit hash: ${CIRCLE_SHA1:0:7}"
             echo "Git tag: $CIRCLE_TAG"
+            echo "Building a wheel release with version $RELEASE_VERSION"
       - run:
           name: Build a distributable package as a wheel release
           command: |
             source venv/bin/activate
-            RELEASE_VERSION=$(cat version.txt)
-            inv pydist -b $RELEASE_VERSION
+            source version.sh
+            if [[ $CIRCLE_TAG ]]; then
+                inv pydist
+            else
+                inv pydist -b $BUILDNO
+            fi
       - store_artifacts:
           path: dist
       - persist_to_workspace:
           root: .
           paths:
             - dist
-            - version.txt
+            - version.sh
 
   publish:
     docker:
@@ -215,7 +228,7 @@ jobs:
       - run:
           name: Trigger GitLab CI/CD pipeline for udata to deploy to << pipeline.parameters.deploy-env >> environment
           command: |
-            RELEASE_VERSION=$(cat version.txt)
+            source version.sh
             cd scaffold
             # Run the script that triggers the Gitlab CI/CD pipeline.
             # Must have GITLAB_API_TOKEN set in the environment
