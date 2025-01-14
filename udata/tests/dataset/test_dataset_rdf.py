@@ -37,8 +37,8 @@ from udata.rdf import (
     DCATAP,
     DCT,
     FREQ,
+    GEODCAT,
     HVD_LEGISLATION,
-    PROV,
     SCHEMA,
     SKOS,
     SPDX,
@@ -165,7 +165,7 @@ class DatasetToRdfTest:
         assert contact_rdf.value(RDF.type).identifier == VCARD.Kind
         assert contact_rdf.value(VCARD.fn) == Literal("Publisher Contact")
 
-        org_rdf = d.value(PROV.qualified_attribution)
+        org_rdf = d.value(GEODCAT.distributor)
         assert org_rdf.value(RDF.type).identifier == FOAF.Organization
         assert org_rdf.value(FOAF.name) == Literal("organization")
 

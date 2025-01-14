@@ -48,7 +48,7 @@ EUFORMAT = Namespace("http://publications.europa.eu/resource/authority/file-type
 IANAFORMAT = Namespace("https://www.iana.org/assignments/media-types/")
 DCT = DCTERMS  # More common usage
 VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
-PROV = Namespace("http://www.w3.org/ns/prov#")
+GEODCAT = Namespace("http://data.europa.eu/930/")
 
 namespace_manager = NamespaceManager(Graph())
 namespace_manager.bind("adms", ADMS)
@@ -133,7 +133,6 @@ AGENT_ROLE_TO_RDF_PREDICATE = {
     "contact": DCAT.contactPoint,
     "publisher": DCT.publisher,
     "creator": DCT.creator,
-    "contributor": DCT.contributor,
 }
 
 # Map rdf contact point entity to role

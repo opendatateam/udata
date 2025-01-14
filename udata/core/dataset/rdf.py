@@ -30,9 +30,9 @@ from udata.rdf import (
     EUFORMAT,
     EUFREQ,
     FREQ,
+    GEODCAT,
     HVD_LEGISLATION,
     IANAFORMAT,
-    PROV,
     SCHEMA,
     SCV,
     SKOS,
@@ -350,8 +350,8 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
 
     owner_role = DCT.publisher
     if any(contact_point.role == "publisher" for contact_point in dataset.contact_points):
-        # There's already a publisher, so the owner should instead be a qualified attribution.
-        owner_role = PROV.qualified_attribution
+        # There's already a publisher, so the owner should instead be a distributor.
+        owner_role = GEODCAT.distributor
     owner = owner_to_rdf(dataset, graph)
     if owner:
         d.set(owner_role, owner)
@@ -739,7 +739,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
     roles = [  # Imbricated list of contact points for each role
-        list(contact_points_from_rdf(d, rdf_entity, role, dataset))
+        contact_points_from_rdf(d, rdf_entity, role, dataset)
         for rdf_entity, role in CONTACT_POINT_ENTITY_TO_ROLE.items()
     ]
     dataset.contact_points = [  # Flattened list of contact points

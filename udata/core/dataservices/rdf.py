@@ -45,7 +45,7 @@ def dataservice_from_rdf(
     dataservice.endpoint_description_url = url_from_rdf(d, DCAT.endpointDescription)
 
     roles = [  # Imbricated list of contact points for each role
-        list(contact_points_from_rdf(d, rdf_entity, role, dataservice))
+        contact_points_from_rdf(d, rdf_entity, role, dataservice)
         for rdf_entity, role in CONTACT_POINT_ENTITY_TO_ROLE.items()
     ]
     dataservice.contact_points = [  # Flattened list of contact points

@@ -109,7 +109,6 @@ class ContactToRdfTest:
             ("contact", DCAT.contactPoint),
             ("publisher", DCT.publisher),
             ("creator", DCT.creator),
-            ("contributor", DCT.contributor),
         ],
     )
     def test_contact_points_to_rdf_roles(self, role, predicate):
