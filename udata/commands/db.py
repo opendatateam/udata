@@ -12,7 +12,7 @@ from udata import migrations
 from udata import models as core_models
 from udata.api import oauth2 as oauth2_models
 from udata.commands import cli, cyan, echo, green, magenta, red, white, yellow
-from udata.core.dataset.models import Dataset
+from udata.core.dataset.models import Dataset, Resource
 from udata.harvest import models as harvest_models
 from udata.mongo import db
 
@@ -427,6 +427,15 @@ def check_duplicate_resources_ids(
 ):
     resources = {}
 
+    def get_additional_info(resource: Resource):
+        if resource.checksum:
+            return f" ({resource.checksum.type} {resource.checksum.value} / {resource.url})"
+
+        if "analysis:checksum" in resource.extras:
+            return f" ({resource.extras['analysis:checksum']} / {resource.url})"
+
+        return f" ({resource.url})"
+
     with click.progressbar(Dataset.objects, Dataset.objects().count()) as datasets:
         for dataset in datasets:
             for resource in dataset.resources:
@@ -467,7 +476,7 @@ def check_duplicate_resources_ids(
             print("")
             for resource in info["resources"]:
                 count_resources += 1
-                print(f"\t- Resource {resource.title}")
+                print(f"\t- Resource {resource.title}{get_additional_info(resource)}")
             print()
             print("---")
             print("---")
@@ -507,7 +516,7 @@ def check_duplicate_resources_ids(
             print("")
             for resource in info["resources"]:
                 count_resources += 1
-                print(f"\t- Resource {resource.title}")
+                print(f"\t- Resource {resource.title}{get_additional_info(resource)}")
             print()
             print("---")
             print("---")
