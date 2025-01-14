@@ -12,6 +12,7 @@ from udata import migrations
 from udata import models as core_models
 from udata.api import oauth2 as oauth2_models
 from udata.commands import cli, cyan, echo, green, magenta, red, white, yellow
+from udata.core.dataset.models import Dataset
 from udata.harvest import models as harvest_models
 from udata.mongo import db
 
@@ -394,3 +395,124 @@ def check_references(models_to_check):
 def check_integrity(models):
     """Check the integrity of the database from a business perspective"""
     check_references(models)
+
+
+@grp.command()
+@click.option(
+    "-did",
+    "--duplicate-inside-dataset",
+    is_flag=True,
+    help="Show duplicates inside the same dataset (same resource ID inside one dataset)",
+)
+@click.option(
+    "-dod",
+    "--duplicate-outside-dataset",
+    is_flag=True,
+    help="Show duplicates outside (same resource ID shared between datasets)",
+)
+@click.option(
+    "-emf",
+    "--exclude-meteo-france",
+    is_flag=True,
+    help="Exclude Météo France datasets",
+)
+@click.option(
+    "-omf",
+    "--only-meteo-france",
+    is_flag=True,
+    help="Only Météo France datasets",
+)
+def check_duplicate_resources_ids(
+    duplicate_inside_dataset, duplicate_outside_dataset, exclude_meteo_france, only_meteo_france
+):
+    resources = {}
+
+    with click.progressbar(Dataset.objects, Dataset.objects().count()) as datasets:
+        for dataset in datasets:
+            for resource in dataset.resources:
+                if resource.id not in resources:
+                    resources[resource.id] = {"resources": [], "datasets": set()}
+                resources[resource.id]["resources"].append(resource)
+                resources[resource.id]["datasets"].add(dataset)
+
+    resources = {id: info for id, info in resources.items() if len(info["resources"]) != 1}
+
+    if duplicate_inside_dataset:
+        count_resources = 0
+        count_datasets = 0
+        for id, info in resources.items():
+            if len(info["datasets"]) == 1:
+                continue
+
+            # Filter out meteo france
+            if (
+                exclude_meteo_france
+                and list(info["datasets"])[0].organization
+                and str(list(info["datasets"])[0].organization.id) == "534fff8ba3a7292c64a77ed4"
+            ):
+                continue
+
+            # Filter everything except meteo france
+            if only_meteo_france and (
+                not list(info["datasets"])[0].organization
+                or str(list(info["datasets"])[0].organization.id) != "534fff8ba3a7292c64a77ed4"
+            ):
+                continue
+
+            count = len(info["resources"])
+            print(f"With ID {id}: {count} resources")
+            for dataset in info["datasets"]:
+                count_datasets += 1
+                print(f"\t- Dataset#{dataset.id} {dataset.title}")
+            print("")
+            for resource in info["resources"]:
+                count_resources += 1
+                print(f"\t- Resource {resource.title}")
+            print()
+            print("---")
+            print("---")
+            print("---")
+            print()
+
+        print(f"Resources with duplicated IDs: {count_resources}")
+        print(f"Datasets concerned {count_datasets}")
+
+    if duplicate_outside_dataset:
+        count_resources = 0
+        count_datasets = 0
+        for id, info in resources.items():
+            if len(info["datasets"]) > 1:
+                continue
+
+            # Filter out meteo france
+            if (
+                exclude_meteo_france
+                and list(info["datasets"])[0].organization
+                and str(list(info["datasets"])[0].organization.id) == "534fff8ba3a7292c64a77ed4"
+            ):
+                continue
+
+            # Filter everything except meteo france
+            if only_meteo_france and (
+                not list(info["datasets"])[0].organization
+                or str(list(info["datasets"])[0].organization.id) != "534fff8ba3a7292c64a77ed4"
+            ):
+                continue
+
+            count = len(info["resources"])
+            print(f"With ID {id}: {count} resources")
+            for dataset in info["datasets"]:
+                count_datasets += 1
+                print(f"\t- Dataset#{dataset.id} {dataset.title}")
+            print("")
+            for resource in info["resources"]:
+                count_resources += 1
+                print(f"\t- Resource {resource.title}")
+            print()
+            print("---")
+            print("---")
+            print("---")
+            print()
+
+        print(f"Resources with duplicated IDs: {count_resources}")
+        print(f"Datasets concerned {count_datasets}")
