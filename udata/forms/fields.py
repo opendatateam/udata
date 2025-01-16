@@ -728,6 +728,11 @@ class CurrentUserField(ModelFieldMixin, Field):
         return super(CurrentUserField, self).process(formdata, data, **kwargs)
 
     def pre_validate(self, form):
+        if form.instance:
+            raise validators.ValidationError(
+                _("Cannot change owner after creating. Please use transfer feature.")
+            )
+
         if self.data:
             if current_user.is_anonymous:
                 raise validators.ValidationError(_("You must be authenticated"))
@@ -749,6 +754,11 @@ class PublishAsField(ModelFieldMixin, Field):
         return len(current_user.organizations) <= 0
 
     def pre_validate(self, form):
+        if form.instance:
+            raise validators.ValidationError(
+                _("Cannot change owner after creating. Please use transfer feature.")
+            )
+
         if self.data:
             if not current_user.is_authenticated:
                 raise validators.ValidationError(_("You must be authenticated"))

@@ -61,7 +61,12 @@ from .exceptions import (
     SchemasCacheUnavailableException,
     SchemasCatalogNotFoundException,
 )
-from .forms import CommunityResourceForm, DatasetForm, ResourceForm, ResourcesListForm
+from .forms import (
+    CommunityResourceForm,
+    DatasetForm,
+    ResourceForm,
+    ResourcesListForm,
+)
 from .models import (
     Checksum,
     CommunityResource,
