@@ -536,9 +536,17 @@ def patch(obj, request) -> type:
 
             # `check` field attribute allows to do validation from the request before setting
             # the attribute
-            check = info.get("check", None)
-            if check is not None and value != getattr(obj, key):
-                check(**{key: value})  # TODO add other model attributes in function parameters
+            checks = info.get("checks", [])
+            if value != getattr(obj, key):
+                for check in checks:
+                    check(
+                        value,
+                        **{
+                            "is_creation": obj._created,
+                            "is_update": not obj._created,
+                            "field": key,
+                        },
+                    )  # TODO add other model attributes in function parameters
 
             setattr(obj, key, value)
 

@@ -728,7 +728,7 @@ class CurrentUserField(ModelFieldMixin, Field):
         return super(CurrentUserField, self).process(formdata, data, **kwargs)
 
     def pre_validate(self, form):
-        if form.instance:
+        if form.instance and form.instance.owner and form.instance.owner.id != self.data.id:
             raise validators.ValidationError(
                 _("Cannot change owner after creating. Please use transfer feature.")
             )
@@ -754,7 +754,11 @@ class PublishAsField(ModelFieldMixin, Field):
         return len(current_user.organizations) <= 0
 
     def pre_validate(self, form):
-        if form.instance:
+        if (
+            form.instance
+            and form.instance.organization
+            and form.instance.organization.id != self.data.id
+        ):
             raise validators.ValidationError(
                 _("Cannot change owner after creating. Please use transfer feature.")
             )

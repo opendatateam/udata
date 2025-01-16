@@ -30,7 +30,7 @@ URL_RAISE_ERROR: str = "/raise/validation/error"
 URL_EXISTS_ERROR_MESSAGE: str = "Url exists"
 
 
-def check_url(url: str = "") -> None:
+def check_url(url: str = "", **kwargs) -> None:
     if url == URL_RAISE_ERROR:
         raise ValueError(URL_EXISTS_ERROR_MESSAGE)
     return
@@ -74,7 +74,7 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
     url = field(
         db.StringField(required=True),
         description="The remote URL (website)",
-        check=check_url,
+        checks=[check_url],
     )
     image_url = db.StringField()
     image = field(
