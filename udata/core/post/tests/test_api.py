@@ -37,6 +37,22 @@ class PostsAPITest:
         assert len(response.json["data"]) == 4
         assert str(draft.id) in [post["id"] for post in response.json["data"]]
 
+    def test_search_post(self, api):
+        """It should fetch a post list from the API"""
+        name_match = PostFactory(name="Foobar")
+        content_match = PostFactory(content="Foobar")
+        PostFactory(content="Something else")
+
+        response = api.get(url_for("api.posts", q="Foobar"))
+        assert200(response)
+        assert len(response.json["data"]) == 2
+
+        # Yes it's the wrong order but the search order (weights set in model) in not preserved
+        # because of the `args["sort"]` situation. Maybe we should add a `args["sort"] === 'search'`
+        # to prevent this behaviour.
+        assert response.json["data"][1]["id"] == str(name_match.id)
+        assert response.json["data"][0]["id"] == str(content_match.id)
+
     def test_post_api_get(self, api):
         """It should fetch a post from the API"""
         post = PostFactory()
