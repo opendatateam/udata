@@ -729,7 +729,8 @@ class CurrentUserField(ModelFieldMixin, Field):
 
     def pre_validate(self, form):
         if (
-            "instance" in form
+            isinstance(form, ModelForm)  # Some forms (like HarvestSourceForm) are not model forms
+            and form.instance
             and self.name in form.instance
             and getattr(form.instance, self.name).id != self.data.id
         ):
@@ -759,7 +760,8 @@ class PublishAsField(ModelFieldMixin, Field):
 
     def pre_validate(self, form):
         if (
-            "instance" in form
+            isinstance(form, ModelForm)  # Some forms (like HarvestSourceForm) are not model forms
+            and form.instance
             and self.name in form.instance
             and getattr(form.instance, self.name).id != self.data.id
         ):

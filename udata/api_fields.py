@@ -538,6 +538,7 @@ def patch(obj, request) -> type:
             # the attribute
             checks = info.get("checks", [])
 
+            print(f"Checking {key}")
             if is_value_modified(getattr(obj, key), value):
                 for check in checks:
                     check(
@@ -559,6 +560,8 @@ def is_value_modified(old_value, new_value) -> bool:
     # `wrap_primary_key` can also return the `foreign_document` (see :WrapToForeignDocument)
     # and it is not currently take into account here…
     # Maybe we can do another type of check to check if the reference changes in the future…
+    print(old_value)
+    print(new_value)
     if isinstance(new_value, DBRef):
         return not old_value or new_value.id != old_value.id
 
