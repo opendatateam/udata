@@ -171,12 +171,11 @@ class DatasetForm(ModelForm):
         description=_("Restrict the dataset visibility to you or " "your organization only."),
     )
 
+    owner = fields.CurrentUserField()
+    organization = fields.PublishAsField(_("Publish as"))
     extras = fields.ExtrasField()
     resources = fields.NestedModelList(ResourceForm)
     contact_point = fields.ContactPointField(validators=[validate_contact_point])
-
-    owner = fields.CurrentUserField()
-    organization = fields.PublishAsField(_("Publish as"))
 
 
 class ResourcesListForm(ModelForm):
