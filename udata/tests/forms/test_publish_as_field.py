@@ -205,11 +205,8 @@ class PublishFieldTest(TestCase):
 
         login_user(user)
         form.validate()
-        self.assertEqual(form.errors, {})
-
-        form.populate_obj(ownable)
-        self.assertIsNone(ownable.owner)
-        self.assertEqual(ownable.organization, neworg)
+        self.assertIn("organization", form.errors)
+        self.assertEqual(len(form.errors["organization"]), 1)
 
     def test_with_initial_and_not_member(self):
         Ownable, OwnableForm = self.factory()
