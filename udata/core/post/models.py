@@ -42,9 +42,11 @@ class Post(db.Datetimed, db.Document):
         "indexes": [
             "-created_at",
             "-published",
-            "$name",
-            "$headline",
-            "$content",
+            {
+                "fields": ["$name", "$headline", "$content"],
+                "default_language": "french",
+                "weights": {"name": 10, "headline": 5, "content": 4},
+            },
         ],
         "queryset_class": PostQuerySet,
     }
