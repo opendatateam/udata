@@ -418,7 +418,7 @@ class TagField(Field):
         for tag in self.data:
             if not tags.MIN_TAG_LENGTH <= len(tag) <= tags.MAX_TAG_LENGTH:
                 message = _(
-                    'Tag "%(tag)s" must be between %(min)d ' "and %(max)d characters long.",
+                    'Tag "%(tag)s" must be between %(min)d and %(max)d characters long.',
                     min=tags.MIN_TAG_LENGTH,
                     max=tags.MAX_TAG_LENGTH,
                     tag=tag,
@@ -728,7 +728,11 @@ class CurrentUserField(ModelFieldMixin, Field):
         return super(CurrentUserField, self).process(formdata, data, **kwargs)
 
     def pre_validate(self, form):
-        if form.instance and form.instance.owner and form.instance.owner.id != self.data.id:
+        if (
+            "instance" in form
+            and self.name in form.instance
+            and getattr(form.instance, self.name).id != self.data.id
+        ):
             raise validators.ValidationError(
                 _("Cannot change owner after creating. Please use transfer feature.")
             )
@@ -755,9 +759,9 @@ class PublishAsField(ModelFieldMixin, Field):
 
     def pre_validate(self, form):
         if (
-            form.instance
-            and form.instance.organization
-            and form.instance.organization.id != self.data.id
+            "instance" in form
+            and self.name in form.instance
+            and getattr(form.instance, self.name).id != self.data.id
         ):
             raise validators.ValidationError(
                 _("Cannot change owner after creating. Please use transfer feature.")
