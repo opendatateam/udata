@@ -49,7 +49,6 @@ class Post(db.Datetimed, db.Document):
             },
         ],
         "queryset_class": PostQuerySet,
-        "auto_create_index_on_save": True,
     }
 
     verbose_name = _("post")
