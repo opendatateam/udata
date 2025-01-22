@@ -1,8 +1,10 @@
 import collections
+import copy
 import logging
 import os
 import traceback
 from itertools import groupby
+from uuid import uuid4
 
 import click
 import mongoengine
@@ -292,7 +294,7 @@ def check_references(models_to_check):
 
     print("Those references will be inspected:")
     for reference in references:
-        print(f'- {reference["repr"]}({reference["destination"]}) — {reference["type"]}')
+        print(f"- {reference['repr']}({reference['destination']}) — {reference['type']}")
     print("")
 
     total = 0
@@ -306,7 +308,7 @@ def check_references(models_to_check):
         with click.progressbar(qs, length=count) as models:
             for obj in models:
                 for reference in model_references:
-                    key = f'\t- {reference["repr"]}({reference["destination"]}) — {reference["type"]}…'
+                    key = f"\t- {reference['repr']}({reference['destination']}) — {reference['type']}…"
                     if key not in errors[model]:
                         errors[model][key] = 0
 
@@ -317,7 +319,7 @@ def check_references(models_to_check):
                             except mongoengine.errors.DoesNotExist:
                                 errors[model][key] += 1
                                 print_and_save(
-                                    f'\t{model.__name__}#{obj.id} have a broken reference for `{reference["name"]}`'
+                                    f"\t{model.__name__}#{obj.id} have a broken reference for `{reference['name']}`"
                                 )
                         elif reference["type"] == "list":
                             attr_list = getattr(obj, reference["name"], [])
@@ -327,7 +329,7 @@ def check_references(models_to_check):
                                 if isinstance(sub, DBRef):
                                     errors[model][key] += 1
                                     print_and_save(
-                                        f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}[{i}]'
+                                        f"\t{model.__name__}#{obj.id} have a broken reference for {reference['name']}[{i}]"
                                     )
                         elif reference["type"] == "embed_list":
                             p1, p2 = reference["name"].split("__")
@@ -367,7 +369,7 @@ def check_references(models_to_check):
                                         f"\t{model.__name__}#{obj.id} have a broken reference for {p1}.{p2}[{i}]"
                                     )
                         else:
-                            print_and_save(f'Unknown ref type {reference["type"]}')
+                            print_and_save(f"Unknown ref type {reference['type']}")
                     except mongoengine.errors.FieldDoesNotExist:
                         print_and_save(
                             f"[ERROR for {model.__name__} {obj.id}] {traceback.format_exc()}"
@@ -422,106 +424,145 @@ def check_integrity(models):
     is_flag=True,
     help="Only Météo France datasets",
 )
+@click.option(
+    "-f",
+    "--fix",
+    is_flag=True,
+    help="Auto-fix some problems",
+)
 def check_duplicate_resources_ids(
-    duplicate_inside_dataset, duplicate_outside_dataset, exclude_meteo_france, only_meteo_france
+    duplicate_inside_dataset,
+    duplicate_outside_dataset,
+    exclude_meteo_france,
+    only_meteo_france,
+    fix,
 ):
     resources = {}
 
-    def get_additional_info(resource: Resource):
+    def get_checksum_value(resource: Resource):
         if resource.checksum:
-            return f" ({resource.checksum.type} {resource.checksum.value} / {resource.url})"
+            return resource.checksum.value
 
         if "analysis:checksum" in resource.extras:
-            return f" ({resource.extras['analysis:checksum']} / {resource.url})"
+            return resource.extras["analysis:checksum"]
 
-        return f" ({resource.url})"
+        return None
 
-    with click.progressbar(Dataset.objects, Dataset.objects().count()) as datasets:
+    with click.progressbar(
+        Dataset.objects,
+        Dataset.objects().count(),
+    ) as datasets:
         for dataset in datasets:
             for resource in dataset.resources:
                 if resource.id not in resources:
                     resources[resource.id] = {"resources": [], "datasets": set()}
+
                 resources[resource.id]["resources"].append(resource)
                 resources[resource.id]["datasets"].add(dataset)
 
     resources = {id: info for id, info in resources.items() if len(info["resources"]) != 1}
 
-    if duplicate_outside_dataset:
-        count_resources = 0
-        count_datasets = 0
-        for id, info in resources.items():
-            if len(info["datasets"]) == 1:
-                continue
+    count_resources = 0
+    count_datasets = 0
+    for id, info in resources.items():
+        if len(info["datasets"]) == 1 and not duplicate_inside_dataset:
+            continue
 
-            # Filter out meteo france
+        if len(info["datasets"]) > 1 and not duplicate_outside_dataset:
+            continue
+
+        # Filter out meteo france
+        if (
+            exclude_meteo_france
+            and list(info["datasets"])[0].organization
+            and str(list(info["datasets"])[0].organization.id) == "534fff8ba3a7292c64a77ed4"
+        ):
+            continue
+
+        # Filter everything except meteo france
+        if only_meteo_france and (
+            not list(info["datasets"])[0].organization
+            or str(list(info["datasets"])[0].organization.id) != "534fff8ba3a7292c64a77ed4"
+        ):
+            continue
+
+        count = len(info["resources"])
+        print(f"With ID {id}: {count} resources")
+        for dataset in info["datasets"]:
+            count_datasets += 1
+            print(f"\t- Dataset#{dataset.id} {dataset.title}")
+        print("")
+        for resource in info["resources"]:
+            count_resources += 1
+            print(
+                f"\t- Resource {resource.title} ({get_checksum_value(resource)} / {resource.url})"
+            )
+
+        print()
+
+        if len(info["datasets"]) == 1 and len(info["resources"]) == 2:
+            dataset = next(iter(info["datasets"]))
+
+            resource1 = info["resources"][0]
+            resource2 = info["resources"][1]
+
+            new_resources = []
+            highlight_ids = [id]
             if (
-                exclude_meteo_france
-                and list(info["datasets"])[0].organization
-                and str(list(info["datasets"])[0].organization.id) == "534fff8ba3a7292c64a77ed4"
+                get_checksum_value(resource1) == get_checksum_value(resource2)
+                and resource1.url == resource2.url
             ):
-                continue
+                print(
+                    "Since checksum and URL are the same, fixing by removing the second resource…\n"
+                )
 
-            # Filter everything except meteo france
-            if only_meteo_france and (
-                not list(info["datasets"])[0].organization
-                or str(list(info["datasets"])[0].organization.id) != "534fff8ba3a7292c64a77ed4"
-            ):
-                continue
+                for r in dataset.resources:
+                    # If it's the duplicated resource we're interested in and
+                    # that ID was already added to the new_resources (so we are
+                    # on the second resource), do not add it.
+                    if r.id == id and id in [r.id for r in new_resources]:
+                        continue
 
-            count = len(info["resources"])
-            print(f"With ID {id}: {count} resources")
-            for dataset in info["datasets"]:
-                count_datasets += 1
-                print(f"\t- Dataset#{dataset.id} {dataset.title}")
-            print("")
-            for resource in info["resources"]:
-                count_resources += 1
-                print(f"\t- Resource {resource.title}{get_additional_info(resource)}")
-            print()
-            print("---")
-            print("---")
-            print("---")
-            print()
+                    new_resources.append(r)
+            else:
+                print(
+                    "Since checksum and URL are not the same, fixing by setting a new ID on second resource…\n"
+                )
 
-        print(f"Resources with duplicated IDs: {count_resources}")
-        print(f"Datasets concerned {count_datasets}")
+                for r in dataset.resources:
+                    # If it's the duplicated resource we're interested in and
+                    # that ID was already added to the new_resources (so we are
+                    # on the second resource), generate a new UUID
+                    if r.id == id and id in [r.id for r in new_resources]:
+                        # Just for logging we copy the resource to avoid changing the ID
+                        # on the original resource (and have a clear compare at the end)
+                        new_r = copy.deepcopy(r)
+                        new_r.id = uuid4()
+                        highlight_ids.append(new_r.id)
 
-    if duplicate_inside_dataset:
-        count_resources = 0
-        count_datasets = 0
-        for id, info in resources.items():
-            if len(info["datasets"]) > 1:
-                continue
+                        new_resources.append(new_r)
+                    else:
+                        new_resources.append(r)
 
-            # Filter out meteo france
-            if (
-                exclude_meteo_france
-                and list(info["datasets"])[0].organization
-                and str(list(info["datasets"])[0].organization.id) == "534fff8ba3a7292c64a77ed4"
-            ):
-                continue
+            print(f"Previous resources ({len(dataset.resources)})")
+            for r in dataset.resources:
+                highlight = " <---- CHANGED !" if r.id in highlight_ids else ""
+                print(f"\t{r.id} {r.title} {highlight}")
 
-            # Filter everything except meteo france
-            if only_meteo_france and (
-                not list(info["datasets"])[0].organization
-                or str(list(info["datasets"])[0].organization.id) != "534fff8ba3a7292c64a77ed4"
-            ):
-                continue
+            print(f"New resources ({len(new_resources)})")
+            for r in new_resources:
+                highlight = " <---- CHANGED !" if r.id in highlight_ids else ""
+                print(f"\t{r.id} {r.title} {highlight}")
 
-            count = len(info["resources"])
-            print(f"With ID {id}: {count} resources")
-            for dataset in info["datasets"]:
-                count_datasets += 1
-                print(f"\t- Dataset#{dataset.id} {dataset.title}")
-            print("")
-            for resource in info["resources"]:
-                count_resources += 1
-                print(f"\t- Resource {resource.title}{get_additional_info(resource)}")
-            print()
-            print("---")
-            print("---")
-            print("---")
-            print()
+            if fix:
+                dataset.resources = new_resources
+                dataset.save()
 
-        print(f"Resources with duplicated IDs: {count_resources}")
-        print(f"Datasets concerned {count_datasets}")
+        print()
+        print("---")
+        print("---")
+        print("---")
+        print()
+
+    print(f"Resources with duplicated IDs: {count_resources}")
+    print(f"Datasets concerned {count_datasets}")
