@@ -243,10 +243,8 @@ class Dataservice(WithMetrics, Owned, db.Document):
         if "post_save" in kwargs.get("ignores", []):
             return
         if kwargs.get("created"):
-            document.update(add_to_set__datasets=[])
             cls.on_create.send(document)
         else:
-            document.update(add_to_set__datasets=[])
             cls.on_update.send(document)
         if document.deleted_at:
             cls.on_delete.send(document)
