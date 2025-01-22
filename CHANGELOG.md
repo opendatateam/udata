@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Force the usage of transfers request to change the owner of a model [#3249](https://github.com/opendatateam/udata/pull/3249)
 
 ## 10.0.7 (2025-01-13)
 
