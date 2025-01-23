@@ -6,6 +6,7 @@ import lxml.etree as ET
 from flask import current_app
 from rdflib import Graph
 from rdflib.namespace import RDF
+from saxonche import PySaxonProcessor
 
 from udata.core.dataservices.rdf import dataservice_from_rdf
 from udata.core.dataset.rdf import dataset_from_rdf
@@ -302,7 +303,7 @@ class CswIso19139DcatBackend(DcatBackend):
 
     ISO_SCHEMA = "http://www.isotc211.org/2005/gmd"
 
-    XSL_URL = "https://raw.githubusercontent.com/SEMICeu/iso-19139-to-dcat-ap/master/iso-19139-to-dcat-ap.xsl"
+    XSL_URL = "https://raw.githubusercontent.com/SEMICeu/iso-19139-to-dcat-ap/main/iso-19139-to-dcat-ap.xsl"
 
     def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
         """
@@ -313,8 +314,10 @@ class CswIso19139DcatBackend(DcatBackend):
         See https://github.com/SEMICeu/iso-19139-to-dcat-ap for more information on the XSLT.
         """
         # Load XSLT
-        xsl = ET.fromstring(self.get(self.XSL_URL).content, parser=SAFE_PARSER)
-        transform = ET.XSLT(xsl)
+        stylesheet = self.get(self.XSL_URL).text
+        with PySaxonProcessor(license=False) as proc:
+            xsltproc = proc.new_xslt30_processor()
+            executable = xsltproc.compile_stylesheet(stylesheet_text=stylesheet)
 
         # Start querying and parsing graph
         # Filter on dataset or serie records
@@ -355,12 +358,14 @@ class CswIso19139DcatBackend(DcatBackend):
         )
         response.raise_for_status()
 
+        # TODO: We should get rid of the lxlm tree and use saxoche only
         tree_before_transform = ET.fromstring(response.content, parser=SAFE_PARSER)
-        # Disabling CoupledResourceLookUp to prevent failure on xlink:href
-        # https://github.com/SEMICeu/iso-19139-to-dcat-ap/blob/master/documentation/HowTo.md#parameter-coupledresourcelookup
-        tree = transform(tree_before_transform, CoupledResourceLookUp="'disabled'")
 
-        while tree:
+        # TODO: any safe parser to add?
+        document = proc.parse_xml(xml_text=response.text)
+        transformed_document = executable.transform_to_string(xdm_node=document).encode("utf-8")
+
+        while transformed_document:
             # We query the tree before the transformation because the XSLT remove the search results
             # infos (useful for pagination)
             search_results = tree_before_transform.find("csw:SearchResults", {"csw": CSW_NAMESPACE})
@@ -369,7 +374,7 @@ class CswIso19139DcatBackend(DcatBackend):
                 break
 
             subgraph = Graph(namespace_manager=namespace_manager)
-            subgraph.parse(ET.tostring(tree), format=fmt)
+            subgraph.parse(transformed_document, format=fmt)
 
             if not subgraph.subjects(RDF.type, DCAT.Dataset):
                 raise ValueError("Failed to fetch CSW content")
@@ -391,4 +396,5 @@ class CswIso19139DcatBackend(DcatBackend):
             response.raise_for_status()
 
             tree_before_transform = ET.fromstring(response.content, parser=SAFE_PARSER)
-            tree = transform(tree_before_transform, CoupledResourceLookUp="'disabled'")
+            document = proc.parse_xml(xml_text=response.text)
+            transformed_document = executable.transform_to_string(xdm_node=document).encode("utf-8")
