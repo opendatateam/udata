@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add trailing slash to security routes [#3251](https://github.com/opendatateam/udata/pull/3251)
 
 ## 10.0.7 (2025-01-13)
 

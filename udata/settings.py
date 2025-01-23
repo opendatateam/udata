@@ -91,6 +91,14 @@ class Defaults(object):
     SECURITY_PASSWORD_REQUIREMENTS_UPPERCASE = True
     SECURITY_PASSWORD_REQUIREMENTS_SYMBOLS = False
 
+    SECURITY_LOGIN_URL = "/login/"
+    SECURITY_LOGOUT_URL = "/logout/"
+    SECURITY_REGISTER_URL = "/register/"
+    SECURITY_CONFIRM_URL = "/confirm/"
+    SECURITY_CHANGE_URL = "/change/"
+    SECURITY_RESET_URL = "/reset/"
+    SECURITY_CHANGE_EMAIL_URL = "/change-email/"
+
     SECURITY_PASSWORD_SALT = "Default uData secret password salt"
     SECURITY_CONFIRM_SALT = "Default uData secret confirm salt"
     SECURITY_RESET_SALT = "Default uData secret reset salt"
