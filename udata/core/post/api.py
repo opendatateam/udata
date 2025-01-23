@@ -58,9 +58,7 @@ post_page_fields = api.model("PostPage", fields.pager(post_fields))
 
 parser = api.page_parser()
 
-parser.add_argument(
-    "sort", type=str, default="-created_at", location="args", help="The sorting attribute"
-)
+parser.add_argument("sort", type=str, location="args", help="The sorting attribute")
 parser.add_argument(
     "with_drafts",
     type=bool,
@@ -89,9 +87,13 @@ class PostsAPI(API):
 
         if args["q"]:
             phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
-            posts = posts.search_text(phrase_query)
+            posts = posts.search_text(phrase_query).order_by(args["sort"] or "$text_score")
+        else:
+            posts = posts.order_by(args["sort"] or "-created_at")
 
-        return posts.order_by(args["sort"]).paginate(args["page"], args["page_size"])
+        return posts.order_by(args.get("sort", "$text_score")).paginate(
+            args["page"], args["page_size"]
+        )
 
     @api.doc("create_post")
     @api.secure(admin_permission)

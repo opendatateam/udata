@@ -15,6 +15,7 @@ from flask import (
     url_for,
 )
 from flask_restx import Api, Resource
+from flask_restx.reqparse import RequestParser
 from flask_storage import UnauthorizedFileType
 
 from udata import entrypoints, tracking
@@ -138,7 +139,7 @@ class UDataApi(Api):
         response.headers["WWW-Authenticate"] = challenge
         return response
 
-    def page_parser(self):
+    def page_parser(self) -> RequestParser:
         parser = self.parser()
         parser.add_argument("page", type=int, default=1, location="args", help="The page to fetch")
         parser.add_argument(
@@ -251,9 +252,9 @@ def handle_value_error(error):
 def handle_unauthorized_file_type(error):
     """Error occuring when the user try to upload a non-allowed file type"""
     url = url_for("api.allowed_extensions", _external=True)
-    msg = (
-        "This file type is not allowed." "The allowed file type list is available at {url}"
-    ).format(url=url)
+    msg = ("This file type is not allowed.The allowed file type list is available at {url}").format(
+        url=url
+    )
     return {"message": msg}, 400
 
 

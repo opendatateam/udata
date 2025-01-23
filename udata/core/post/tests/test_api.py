@@ -44,11 +44,8 @@ class PostsAPITest(APITestCase):
         assert200(response)
         assert len(response.json["data"]) == 2
 
-        # Yes it's the wrong order but the search order (weights set in model) is not preserved
-        # because of the `args["sort"]` situation. Maybe we should add a `args["sort"] === 'search'`
-        # to prevent this behaviour.
-        assert response.json["data"][1]["id"] == str(name_match.id)
-        assert response.json["data"][0]["id"] == str(content_match.id)
+        assert response.json["data"][0]["id"] == str(name_match.id)
+        assert response.json["data"][1]["id"] == str(content_match.id)
 
     def test_post_api_get(self):
         """It should fetch a post from the API"""
