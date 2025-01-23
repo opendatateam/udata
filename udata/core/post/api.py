@@ -91,9 +91,7 @@ class PostsAPI(API):
         else:
             posts = posts.order_by(args["sort"] or "-created_at")
 
-        return posts.order_by(args.get("sort", "$text_score")).paginate(
-            args["page"], args["page_size"]
-        )
+        return posts.paginate(args["page"], args["page_size"])
 
     @api.doc("create_post")
     @api.secure(admin_permission)
