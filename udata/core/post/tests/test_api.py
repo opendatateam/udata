@@ -47,6 +47,13 @@ class PostsAPITest(APITestCase):
         assert response.json["data"][0]["id"] == str(name_match.id)
         assert response.json["data"][1]["id"] == str(content_match.id)
 
+        response = self.get(url_for("api.posts", q="Foobar", sort="-created_at"))
+        assert200(response)
+        assert len(response.json["data"]) == 2
+
+        assert response.json["data"][1]["id"] == str(name_match.id)
+        assert response.json["data"][0]["id"] == str(content_match.id)
+
     def test_post_api_get(self):
         """It should fetch a post from the API"""
         post = PostFactory()
