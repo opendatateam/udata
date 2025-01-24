@@ -42,6 +42,7 @@ pytz==2024.1
 redis==4.5.2
 rdflib==6.0.0
 requests==2.32.3
+saxonche==12.5.0
 sentry-sdk[flask]==2.9.0
 speaklater==1.3
 StringDist==1.0.9
