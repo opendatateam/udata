@@ -91,6 +91,14 @@ class Defaults(object):
     SECURITY_PASSWORD_REQUIREMENTS_UPPERCASE = True
     SECURITY_PASSWORD_REQUIREMENTS_SYMBOLS = False
 
+    SECURITY_LOGIN_URL = "/login/"
+    SECURITY_LOGOUT_URL = "/logout/"
+    SECURITY_REGISTER_URL = "/register/"
+    SECURITY_CONFIRM_URL = "/confirm/"
+    SECURITY_CHANGE_URL = "/change/"
+    SECURITY_RESET_URL = "/reset/"
+    SECURITY_CHANGE_EMAIL_URL = "/change-email/"
+
     SECURITY_PASSWORD_SALT = "Default uData secret password salt"
     SECURITY_CONFIRM_SALT = "Default uData secret confirm salt"
     SECURITY_RESET_SALT = "Default uData secret reset salt"
@@ -479,6 +487,7 @@ class Defaults(object):
         "discussion",
         "organization",
         "reuse",
+        "dataservice",
         "tag",
         "harvest",
     )
@@ -509,14 +518,23 @@ class Defaults(object):
     READ_ONLY_MODE = False
     METHOD_BLOCKLIST = [
         "OrganizationListAPI.post",
+        "MembershipRequestAPI.post",
+        "MemberAPI.post",
         "ReuseListAPI.post",
         "DatasetListAPI.post",
+        "ResourcesAPI.post",
+        "UploadNewDatasetResource.post",
         "CommunityResourcesAPI.post",
         "UploadNewCommunityResources.post",
         "DiscussionAPI.post",
         "DiscussionsAPI.post",
         "SourcesAPI.post",
+        "PreviewSourceConfigAPI.post",
         "FollowAPI.post",
+        "ContactPointsListAPI.post",
+        "DataservicesAPI.post",
+        "TopicsAPI.post",
+        "TransferRequestsAPI.post",
     ]
 
     # New admin URL

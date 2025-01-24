@@ -12,7 +12,7 @@ from udata.core.owned import Owned
 from udata.core.storages import default_image_basename, images
 from udata.factories import ModelFactory
 from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics, db
-from udata.mongo.queryset import DBPaginator
+from udata.mongo.queryset import DBPaginator, UDataQuerySet
 from udata.utils import faker
 
 pytestmark = [
@@ -234,7 +234,7 @@ class ApplySortAndFiltersTest:
         fake1: Fake = FakeFactory(filter_field="test filter")
         fake2: Fake = FakeFactory(filter_field="some other filter")
         with app.test_request_context("/foobar", query_string={"filter_field_name": "test filter"}):
-            results: DBPaginator = Fake.apply_sort_filters_and_pagination(Fake.objects)
+            results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
             assert fake1 in results
             assert fake2 not in results
 
@@ -249,7 +249,7 @@ class ApplySortAndFiltersTest:
         with app.test_request_context(
             "/foobar", query_string={"organization_badge": org_constants.PUBLIC_SERVICE}
         ):
-            results: DBPaginator = Fake.apply_sort_filters_and_pagination(Fake.objects)
+            results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
             assert fake1 in results
             assert fake2 not in results
 
@@ -258,7 +258,7 @@ class ApplySortAndFiltersTest:
         fake1: Fake = FakeFactory(title="foobar crux")
         fake2: Fake = FakeFactory(title="barbaz crux")
         with app.test_request_context("/foobar", query_string={"q": "foobar"}):
-            results: DBPaginator = Fake.apply_sort_filters_and_pagination(Fake.objects)
+            results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
             assert fake1 in results
             assert fake2 not in results
 
@@ -267,10 +267,10 @@ class ApplySortAndFiltersTest:
         fake1: Fake = FakeFactory(title="abc")
         fake2: Fake = FakeFactory(title="def")
         with app.test_request_context("/foobar", query_string={"sort": "title"}):
-            results: DBPaginator = Fake.apply_sort_filters_and_pagination(Fake.objects)
+            results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
             assert tuple(results) == (fake1, fake2)
         with app.test_request_context("/foobar", query_string={"sort": "-title"}):
-            results = Fake.apply_sort_filters_and_pagination(Fake.objects)
+            results = Fake.apply_sort_filters(Fake.objects)
             assert tuple(results) == (fake2, fake1)
 
     def test_additional_sorts(self, app) -> None:
@@ -278,8 +278,33 @@ class ApplySortAndFiltersTest:
         fake1: Fake = FakeFactory(metrics={"datasets": 1})
         fake2: Fake = FakeFactory(metrics={"datasets": 2})
         with app.test_request_context("/foobar", query_string={"sort": "datasets"}):
-            results: DBPaginator = Fake.apply_sort_filters_and_pagination(Fake.objects)
+            results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
             assert tuple(results) == (fake1, fake2)
         with app.test_request_context("/foobar", query_string={"sort": "-datasets"}):
-            results = Fake.apply_sort_filters_and_pagination(Fake.objects)
+            results = Fake.apply_sort_filters(Fake.objects)
             assert tuple(results) == (fake2, fake1)
+
+
+class ApplyPaginationTest:
+    def test_default_pagination(self, app) -> None:
+        """Results should be returned with default pagination."""
+        [FakeFactory() for _ in range(100)]
+
+        page_arg: Argument = next(arg for arg in Fake.__index_parser__.args if arg.name == "page")
+        page_size_arg: Argument = next(
+            arg for arg in Fake.__index_parser__.args if arg.name == "page_size"
+        )
+
+        with app.test_request_context("/foobar", query_string={}):
+            results: DBPaginator = Fake.apply_pagination(Fake.apply_sort_filters(Fake.objects))
+            assert results.page_size == page_size_arg.default
+            assert results.page == page_arg.default
+
+    def test_paginate(self, app) -> None:
+        """Results should be returned paginated."""
+        [FakeFactory() for _ in range(100)]
+
+        with app.test_request_context("/foobar", query_string={"page": 3, "page_size": 5}):
+            results: DBPaginator = Fake.apply_pagination(Fake.apply_sort_filters(Fake.objects))
+            assert results.page_size == 5
+            assert results.page == 3

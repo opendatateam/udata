@@ -186,7 +186,7 @@ kombu[redis]==5.3.1
     #   celery
 langdetect==1.0.9
     # via -r requirements/install.in
-lxml==4.9.3
+lxml==5.3.0
     # via -r requirements/install.in
 markupsafe==2.1.2
     # via

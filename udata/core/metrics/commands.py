@@ -46,6 +46,7 @@ def update(
             site.count_datasets()
             site.count_resources()
             site.count_reuses()
+            site.count_dataservices()
             site.count_followers()
             site.count_discussions()
             site.count_harvesters()

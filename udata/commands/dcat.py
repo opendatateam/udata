@@ -2,7 +2,8 @@ import logging
 
 import click
 import mongoengine
-from rdflib import Graph
+from rdflib import Graph, URIRef
+from rdflib.namespace import RDF
 
 from udata.commands import cli, cyan, echo, green, magenta, yellow
 from udata.core.dataset.factories import DatasetFactory
@@ -12,7 +13,8 @@ from udata.harvest.backends.dcat import (
     CswIso19139DcatBackend,
     DcatBackend,
 )
-from udata.rdf import namespace_manager
+from udata.harvest.models import HarvestItem
+from udata.rdf import DCAT, DCT, namespace_manager
 
 log = logging.getLogger(__name__)
 
@@ -61,14 +63,21 @@ def parse_url(url, csw, iso, quiet=False, rid=""):
     backend.job = MockJob()
     format = backend.get_format()
     echo(yellow("Detected format: {}".format(format)))
-    graphs = backend.parse_graph(url, format)
+    graphs = backend.walk_graph(url, format)
 
     # serialize/unserialize graph like in the job mechanism
     graph = Graph(namespace_manager=namespace_manager)
-    for subgraph in graphs:
+    for page_number, subgraph in graphs:
         serialized = subgraph.serialize(format=format, indent=None)
         _subgraph = Graph(namespace_manager=namespace_manager)
         graph += _subgraph.parse(data=serialized, format=format)
+
+        for node in subgraph.subjects(RDF.type, DCAT.Dataset):
+            identifier = subgraph.value(node, DCT.identifier)
+            kwargs = {"nid": str(node), "page": page_number}
+            kwargs["type"] = "uriref" if isinstance(node, URIRef) else "blank"
+            item = HarvestItem(remote_id=str(identifier), kwargs=kwargs)
+            backend.job.items.append(item)
 
     for item in backend.job.items:
         if not rid or rid in item.remote_id:
