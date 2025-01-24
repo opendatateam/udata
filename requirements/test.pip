@@ -307,7 +307,7 @@ netaddr==0.7.19
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-packaging==24.1
+packaging==24.2
     # via
     #   -c requirements/install.pip
     #   bleach
