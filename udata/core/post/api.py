@@ -15,6 +15,8 @@ from udata.core.user.api_fields import user_ref_fields
 from .forms import PostForm
 from .models import Post
 
+DEFAULT_SORTING = "-published"
+
 ns = api.namespace("posts", "Posts related operations")
 
 post_fields = api.model(

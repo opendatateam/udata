@@ -36,8 +36,8 @@ class PostsAPITest(APITestCase):
 
     def test_search_post(self):
         """It should fetch a post list from the API"""
-        name_match = PostFactory(name="Foobar")
-        content_match = PostFactory(content="Foobar")
+        name_match = PostFactory(name="Foobar", published="2025-01-01")
+        content_match = PostFactory(content="Foobar", published="2025-01-02")
         PostFactory(content="Something else")
 
         response = self.get(url_for("api.posts", q="Foobar"))
@@ -47,7 +47,7 @@ class PostsAPITest(APITestCase):
         assert response.json["data"][0]["id"] == str(name_match.id)
         assert response.json["data"][1]["id"] == str(content_match.id)
 
-        response = self.get(url_for("api.posts", q="Foobar", sort="-created_at"))
+        response = self.get(url_for("api.posts", q="Foobar", sort="-published"))
         assert200(response)
         assert len(response.json["data"]) == 2
 
