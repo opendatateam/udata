@@ -1,6 +1,7 @@
 import collections
 import logging
 import os
+import sys
 import traceback
 from itertools import groupby
 
@@ -319,15 +320,29 @@ def check_references(models_to_check):
                                     f'\t{model.__name__}#{obj.id} have a broken reference for `{reference["name"]}`'
                                 )
                         elif reference["type"] == "list":
-                            attr_list = getattr(obj, reference["name"], [])
-                            for i, sub in enumerate(attr_list):
-                                # If it's still an instance of DBRef it means that it failed to
-                                # dereference the ID.
-                                if isinstance(sub, DBRef):
-                                    errors[model][key] += 1
-                                    print_and_save(
-                                        f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}[{i}]'
-                                    )
+                            # import pytest
+
+                            # pytest.set_trace()
+                            field_exists = (
+                                f"{reference['name']}__exists"  # Eg: "contact_points__exists"
+                            )
+                            if model.objects(id=obj.id, **{field_exists: True}).count() == 0:
+                                # See https://github.com/MongoEngine/mongoengine/issues/267#issuecomment-283065318
+                                # Setting it explicitely to an empty list actually removes the field, it shouldn't.
+                                errors[model][key] += 1
+                                print_and_save(
+                                    f'\t{model.__name__}#{obj.id} have a non existing field `{reference["name"]}`, instead of an empty list'
+                                )
+                            else:
+                                attr_list = getattr(obj, reference["name"])
+                                for i, sub in enumerate(attr_list):
+                                    # If it's still an instance of DBRef it means that it failed to
+                                    # dereference the ID.
+                                    if isinstance(sub, DBRef):
+                                        errors[model][key] += 1
+                                        print_and_save(
+                                            f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}[{i}]'
+                                        )
                         elif reference["type"] == "embed_list":
                             p1, p2 = reference["name"].split("__")
                             attr_list = getattr(obj, p1, [])
@@ -387,6 +402,7 @@ def check_references(models_to_check):
                 sentry_sdk.capture_message(f"{total} integrity errors", "fatal")
         except ImportError:
             print("`sentry_sdk` not installed. The errors weren't reported")
+        sys.exit(1)
 
 
 @grp.command()
