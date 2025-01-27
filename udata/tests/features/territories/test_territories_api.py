@@ -84,10 +84,10 @@ class TerritoriesAPITest(APITestCase):
         response = self.get(url_for("api.suggest_territory"), qs={"q": "langue"})
         self.assert200(response)
         self.assertEqual(len(response.json), 2)
-        result = response.json[1]
+        result = response.json[0]
         self.assertEqual(result["title"], occitanie.name)
         self.assertEqual(result["id"], occitanie.id)
-        result = response.json[0]
+        result = response.json[1]
         self.assertEqual(result["title"], lr.name)
         self.assertEqual(result["id"], lr.id)
 
@@ -106,9 +106,9 @@ class TerritoriesAPITest(APITestCase):
         self.assert200(response)
         results = response.json
         self.assertEqual(len(results), 2)
-        # BDR must be first given the population.
-        self.assertEqual(results[0]["id"], self.bdr.id)
-        self.assertEqual(results[1]["id"], bouchet.id)
+
+        self.assertEqual(results[0]["id"], bouchet.id)
+        self.assertEqual(results[1]["id"], self.bdr.id)
 
     def test_suggest_drom_com(self):
         guyane = GeoZoneFactory(
