@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add search to posts [#3248](https://github.com/opendatateam/udata/pull/3248)
+- Resource catalog: fix preview_url and add extras [#3188](https://github.com/opendatateam/udata/pull/3188)
 - Add trailing slash to security routes [#3251](https://github.com/opendatateam/udata/pull/3251)
 
 ## 10.0.7 (2025-01-13)
