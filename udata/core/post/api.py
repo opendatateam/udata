@@ -88,13 +88,9 @@ class PostsAPI(API):
         if args["q"]:
             phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
             posts = posts.search_text(phrase_query)
-            default_sort = "$text_score"
-        else:
-            default_sort = "-created_at"
 
-        return posts.order_by(args["sort"] or default_sort).paginate(
-            args["page"], args["page_size"]
-        )
+        sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
+        return posts.order_by(sort).paginate(args["page"], args["page_size"])
 
     @api.doc("create_post")
     @api.secure(admin_permission)
