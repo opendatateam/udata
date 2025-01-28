@@ -21,8 +21,7 @@ DATE_FORMAT = "%Y-%m-%d %H:%M"
 log = logging.getLogger(__name__)
 
 
-@cli.group("
-           ")
+@cli.group("db")
 def grp():
     """Database related operations"""
     pass
