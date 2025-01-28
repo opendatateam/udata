@@ -1,3 +1,4 @@
+import pytest
 from bson import ObjectId
 from werkzeug.datastructures import MultiDict
 
@@ -192,6 +193,7 @@ class PublishFieldTest(TestCase):
         self.assertIn("organization", form.errors)
         self.assertEqual(len(form.errors["organization"]), 1)
 
+    @pytest.mark.usefixtures("clean_db")
     def test_with_initial_and_both_member(self):
         Ownable, OwnableForm = self.factory()
         user = UserFactory()
@@ -206,7 +208,10 @@ class PublishFieldTest(TestCase):
         login_user(user)
         form.validate()
         self.assertIn("organization", form.errors)
-        self.assertEqual(len(form.errors["organization"]), 1)
+        self.assertEqual(
+            form.errors["organization"],
+            ["Cannot change owner after creation. Please use transfer feature."],
+        )
 
     def test_with_initial_and_not_member(self):
         Ownable, OwnableForm = self.factory()
