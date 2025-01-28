@@ -9,11 +9,8 @@ import mongoengine
 from bson import DBRef
 
 from udata import migrations
-from udata import models as core_models
-from udata.api import oauth2 as oauth2_models
 from udata.commands import cli, cyan, echo, green, magenta, red, white, yellow
-from udata.harvest import models as harvest_models
-from udata.mongo import db
+from udata.mongo.document import get_all_models
 
 # Date format used to for display
 DATE_FORMAT = "%Y-%m-%d %H:%M"
@@ -148,16 +145,8 @@ def check_references(models_to_check):
 
     errors = collections.defaultdict(int)
 
-    _models = []
-    for models in core_models, harvest_models, oauth2_models:
-        _models += [
-            elt
-            for _, elt in models.__dict__.items()
-            if isinstance(elt, type) and issubclass(elt, (db.Document))
-        ]
-
     references = []
-    for model in set(_models):
+    for model in get_all_models():
         if model.__name__ == "Activity":
             print("Skipping Activity model, scheduled for deprecation")
             continue
@@ -291,7 +280,7 @@ def check_references(models_to_check):
 
     print("Those references will be inspected:")
     for reference in references:
-        print(f'- {reference["repr"]}({reference["destination"]}) — {reference["type"]}')
+        print(f"- {reference['repr']}({reference['destination']}) — {reference['type']}")
     print("")
 
     total = 0
@@ -305,7 +294,7 @@ def check_references(models_to_check):
         with click.progressbar(qs, length=count) as models:
             for obj in models:
                 for reference in model_references:
-                    key = f'\t- {reference["repr"]}({reference["destination"]}) — {reference["type"]}…'
+                    key = f"\t- {reference['repr']}({reference['destination']}) — {reference['type']}…"
                     if key not in errors[model]:
                         errors[model][key] = 0
 
@@ -316,7 +305,7 @@ def check_references(models_to_check):
                             except mongoengine.errors.DoesNotExist:
                                 errors[model][key] += 1
                                 print_and_save(
-                                    f'\t{model.__name__}#{obj.id} have a broken reference for `{reference["name"]}`'
+                                    f"\t{model.__name__}#{obj.id} have a broken reference for `{reference['name']}`"
                                 )
                         elif reference["type"] == "list":
                             attr_list = getattr(obj, reference["name"], [])
@@ -326,7 +315,7 @@ def check_references(models_to_check):
                                 if isinstance(sub, DBRef):
                                     errors[model][key] += 1
                                     print_and_save(
-                                        f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}[{i}]'
+                                        f"\t{model.__name__}#{obj.id} have a broken reference for {reference['name']}[{i}]"
                                     )
                         elif reference["type"] == "embed_list":
                             p1, p2 = reference["name"].split("__")
@@ -366,7 +355,7 @@ def check_references(models_to_check):
                                         f"\t{model.__name__}#{obj.id} have a broken reference for {p1}.{p2}[{i}]"
                                     )
                         else:
-                            print_and_save(f'Unknown ref type {reference["type"]}')
+                            print_and_save(f"Unknown ref type {reference['type']}")
                     except mongoengine.errors.FieldDoesNotExist:
                         print_and_save(
                             f"[ERROR for {model.__name__} {obj.id}] {traceback.format_exc()}"
