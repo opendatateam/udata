@@ -30,7 +30,7 @@ class ReuseQuerySet(OwnedQuerySet):
         return self(db.Q(private=True) | db.Q(datasets__0__exists=False) | db.Q(deleted__ne=None))
 
 
-def check_url_does_not_exists(url, **kwargs):
+def check_url_does_not_exists(url, **_kwargs):
     """Ensure a reuse URL is not yet registered"""
     if url and Reuse.url_exists(url):
         raise FieldValidationError(_("This URL is already registered"), field="url")

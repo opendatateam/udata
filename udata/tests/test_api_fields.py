@@ -30,7 +30,7 @@ URL_RAISE_ERROR: str = "/raise/validation/error"
 URL_EXISTS_ERROR_MESSAGE: str = "Url exists"
 
 
-def check_url(url: str = "", **kwargs) -> None:
+def check_url(url: str = "", **_kwargs) -> None:
     if url == URL_RAISE_ERROR:
         raise ValueError(URL_EXISTS_ERROR_MESSAGE)
     return

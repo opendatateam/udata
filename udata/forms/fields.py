@@ -735,7 +735,7 @@ class CurrentUserField(ModelFieldMixin, Field):
             and getattr(form.instance, self.name).id != self.data.id
         ):
             raise validators.ValidationError(
-                _("Cannot change owner after creating. Please use transfer feature.")
+                _("Cannot change owner after creation. Please use transfer feature.")
             )
 
         if self.data:
@@ -766,7 +766,7 @@ class PublishAsField(ModelFieldMixin, Field):
             and getattr(form.instance, self.name).id != self.data.id
         ):
             raise validators.ValidationError(
-                _("Cannot change owner after creating. Please use transfer feature.")
+                _("Cannot change owner after creation. Please use transfer feature.")
             )
 
         if self.data:

@@ -558,10 +558,8 @@ def patch(obj, request) -> type:
 def is_value_modified(old_value, new_value) -> bool:
     # If we want to modify a reference, the new_value may be a DBRef.
     # `wrap_primary_key` can also return the `foreign_document` (see :WrapToForeignDocument)
-    # and it is not currently take into account here…
+    # and it is not currently taken into account here…
     # Maybe we can do another type of check to check if the reference changes in the future…
-    print(old_value)
-    print(new_value)
     if isinstance(new_value, DBRef):
         return not old_value or new_value.id != old_value.id
 
