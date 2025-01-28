@@ -11,12 +11,9 @@ import mongoengine
 from bson import DBRef
 
 from udata import migrations
-from udata import models as core_models
-from udata.api import oauth2 as oauth2_models
 from udata.commands import cli, cyan, echo, green, magenta, red, white, yellow
 from udata.core.dataset.models import Dataset, Resource
-from udata.harvest import models as harvest_models
-from udata.mongo import db
+from udata.mongo.document import get_all_models
 
 # Date format used to for display
 DATE_FORMAT = "%Y-%m-%d %H:%M"
@@ -24,7 +21,8 @@ DATE_FORMAT = "%Y-%m-%d %H:%M"
 log = logging.getLogger(__name__)
 
 
-@cli.group("db")
+@cli.group("
+           ")
 def grp():
     """Database related operations"""
     pass
@@ -151,16 +149,8 @@ def check_references(models_to_check):
 
     errors = collections.defaultdict(int)
 
-    _models = []
-    for models in core_models, harvest_models, oauth2_models:
-        _models += [
-            elt
-            for _, elt in models.__dict__.items()
-            if isinstance(elt, type) and issubclass(elt, (db.Document))
-        ]
-
     references = []
-    for model in set(_models):
+    for model in get_all_models():
         if model.__name__ == "Activity":
             print("Skipping Activity model, scheduled for deprecation")
             continue
