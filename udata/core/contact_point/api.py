@@ -3,8 +3,9 @@ import mongoengine
 from udata.api import API, api
 from udata.api.parsers import ModelApiParser
 
-from .api_fields import contact_point_fields
+from .api_fields import contact_point_fields, contact_point_roles_fields
 from .forms import ContactPointForm
+from .models import CONTACT_ROLES
 
 
 class ContactPointApiParser(ModelApiParser):
@@ -64,3 +65,14 @@ class ContactPointAPI(API):
         """Deletes a contact point given its identifier"""
         contact_point.delete()
         return "", 204
+
+
+@ns.route("/roles/", endpoint="contact_point_roles")
+class ContactPointRolesAPI(API):
+    """Contact point roles endpoint"""
+
+    @api.doc("contact_point_roles")
+    @api.marshal_list_with(contact_point_roles_fields)
+    def get(self):
+        """List all contact point roles"""
+        return [{"id": id, "label": label} for id, label in CONTACT_ROLES.items()]

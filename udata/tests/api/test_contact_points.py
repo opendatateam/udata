@@ -93,3 +93,9 @@ class ContactPointAPITest:
         response = api.delete(url_for("api.contact_point", contact_point=contact_point))
         assert204(response)
         assert ContactPoint.objects.count() == 0
+
+    def test_contact_point_roles_list(self, api):
+        """It should fetch the contact point roles list from the API"""
+        response = api.get(url_for("api.contact_point_roles"))
+        assert200(response)
+        assert len(response.json) == len(CONTACT_ROLES)
