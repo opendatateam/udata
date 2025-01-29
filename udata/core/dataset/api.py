@@ -20,6 +20,7 @@ These changes might lead to backward compatibility breakage meaning:
 import logging
 import os
 from datetime import datetime
+from uuid import uuid4
 
 import mongoengine
 from bson.objectid import ObjectId
@@ -61,7 +62,12 @@ from .exceptions import (
     SchemasCacheUnavailableException,
     SchemasCatalogNotFoundException,
 )
-from .forms import CommunityResourceForm, DatasetForm, ResourceForm, ResourcesListForm
+from .forms import (
+    CommunityResourceForm,
+    DatasetForm,
+    ResourceFormWithoutId,
+    ResourcesListForm,
+)
 from .models import (
     Checksum,
     CommunityResource,
@@ -377,8 +383,9 @@ class ResourcesAPI(API):
     def post(self, dataset):
         """Create a new resource for a given dataset"""
         ResourceEditPermission(dataset).test()
-        form = api.validate(ResourceForm)
-        resource = Resource()
+        form = api.validate(ResourceFormWithoutId)
+        resource = Resource(id=str(uuid4()))
+
         if form._fields.get("filetype").data != "remote":
             api.abort(400, "This endpoint only supports remote resources")
         form.populate_obj(resource)
@@ -543,10 +550,11 @@ class ResourceAPI(ResourceMixin, API):
         """Update a given resource on a given dataset"""
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
-        form = api.validate(ResourceForm, resource)
+        form = api.validate(ResourceFormWithoutId, resource)
         # ensure API client does not override url on self-hosted resources
         if resource.filetype == "file":
             form._fields.get("url").data = resource.url
+
         # populate_obj populates existing resource object with the content of the form.
         # update_resource saves the updated resource dict to the database
         # the additional dataset.save is required as we update the last_modified date.
