@@ -638,13 +638,8 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         if self.frequency in LEGACY_FREQUENCIES:
             self.frequency = LEGACY_FREQUENCIES[self.frequency]
 
-        resources_ids = set()
-        for resource in self.resources:
-            if resource.id in resources_ids:
-                raise MongoEngineValidationError(
-                    f"Duplicate resource ID {resource.id} in dataset #{self.id}."
-                )
-            resources_ids.add(resource.id)
+        if len(set(res.id for res in self.resources)) != len(self.resources):
+            raise MongoEngineValidationError(f"Duplicate resource ID in dataset #{self.id}.")
 
         for key, value in self.extras.items():
             if not key.startswith("custom:"):
