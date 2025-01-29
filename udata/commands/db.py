@@ -4,6 +4,7 @@ import logging
 import os
 import traceback
 from itertools import groupby
+from typing import Optional
 from uuid import uuid4
 
 import click
@@ -390,28 +391,26 @@ def check_integrity(models):
 
 @grp.command()
 @click.option(
-    "-did",
-    "--duplicate-inside-dataset",
+    "-sdid",
+    "--skip-duplicates-inside-dataset",
     is_flag=True,
-    help="Show duplicates inside the same dataset (same resource ID inside one dataset)",
+    help="Do not show duplicates inside the same dataset (same resource ID inside one dataset)",
 )
 @click.option(
-    "-dod",
-    "--duplicate-outside-dataset",
+    "-sdod",
+    "--skip-duplicates-outside-dataset",
     is_flag=True,
-    help="Show duplicates outside (same resource ID shared between datasets)",
+    help="Do not show duplicates between datasets (same resource ID shared between datasets)",
 )
 @click.option(
-    "-emf",
-    "--exclude-meteo-france",
-    is_flag=True,
-    help="Exclude Météo France datasets",
+    "-e",
+    "--exclude-org",
+    help="Exclude some org datasets",
 )
 @click.option(
-    "-omf",
-    "--only-meteo-france",
-    is_flag=True,
-    help="Only Météo France datasets",
+    "-o",
+    "--only-org",
+    help="Only datasets from this org",
 )
 @click.option(
     "-f",
@@ -420,11 +419,11 @@ def check_integrity(models):
     help="Auto-fix some problems",
 )
 def check_duplicate_resources_ids(
-    duplicate_inside_dataset,
-    duplicate_outside_dataset,
-    exclude_meteo_france,
-    only_meteo_france,
-    fix,
+    skip_duplicates_inside_dataset: bool,
+    skip_duplicates_outside_dataset: bool,
+    exclude_org: Optional[str],
+    only_org: Optional[str],
+    fix: bool,
 ):
     resources = {}
 
@@ -452,24 +451,24 @@ def check_duplicate_resources_ids(
     count_resources = 0
     count_datasets = 0
     for id, info in resources.items():
-        if len(info["datasets"]) == 1 and not duplicate_inside_dataset:
+        if len(info["datasets"]) == 1 and skip_duplicates_inside_dataset:
             continue
 
-        if len(info["datasets"]) > 1 and not duplicate_outside_dataset:
+        if len(info["datasets"]) > 1 and skip_duplicates_outside_dataset:
             continue
 
         # Filter out meteo france
         if (
-            exclude_meteo_france
+            exclude_org
             and list(info["datasets"])[0].organization
-            and str(list(info["datasets"])[0].organization.id) == "534fff8ba3a7292c64a77ed4"
+            and str(list(info["datasets"])[0].organization.id) == exclude_org
         ):
             continue
 
         # Filter everything except meteo france
-        if only_meteo_france and (
+        if only_org and (
             not list(info["datasets"])[0].organization
-            or str(list(info["datasets"])[0].organization.id) != "534fff8ba3a7292c64a77ed4"
+            or str(list(info["datasets"])[0].organization.id) != only_org
         ):
             continue
 
