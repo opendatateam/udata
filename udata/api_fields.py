@@ -538,7 +538,6 @@ def patch(obj, request) -> type:
             # the attribute
             checks = info.get("checks", [])
 
-            print(f"Checking {key}")
             if is_value_modified(getattr(obj, key), value):
                 for check in checks:
                     check(
