@@ -432,10 +432,7 @@ def check_duplicate_resources_ids(
         if resource.checksum:
             return resource.checksum.value
 
-        if "analysis:checksum" in resource.extras:
-            return resource.extras["analysis:checksum"]
-
-        return None
+        return resource.extras.get("analysis:checksum")
 
     with click.progressbar(
         Dataset.objects,
@@ -449,6 +446,7 @@ def check_duplicate_resources_ids(
                 resources[resource.id]["resources"].append(resource)
                 resources[resource.id]["datasets"].add(dataset)
 
+    # Keep duplicated resources only
     resources = {id: info for id, info in resources.items() if len(info["resources"]) != 1}
 
     count_resources = 0
