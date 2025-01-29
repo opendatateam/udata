@@ -426,6 +426,7 @@ def check_duplicate_resources_ids(
     fix: bool,
 ):
     resources = {}
+    dry_run = "[ DONE ]" if fix else "[DRYRUN]"
 
     def get_checksum_value(resource: Resource):
         if resource.checksum:
@@ -499,46 +500,35 @@ def check_duplicate_resources_ids(
                 and resource1.url == resource2.url
             ):
                 print(
-                    "Since checksum and URL are the same, fixing by removing the second resource…\n"
+                    f"{dry_run} Since checksum and URL are the same, fixing by removing the second resource…\n"
                 )
 
-                for r in dataset.resources:
-                    # If it's the duplicated resource we're interested in and
-                    # that ID was already added to the new_resources (so we are
-                    # on the second resource), do not add it.
-                    if r.id == id and id in [r.id for r in new_resources]:
-                        continue
-
-                    new_resources.append(r)
+                new_resources = [r for r in dataset.resources if r != resource2]
             else:
                 print(
-                    "Since checksum and URL are not the same, fixing by setting a new ID on second resource…\n"
+                    f"{dry_run} Since checksum and URL are not the same, fixing by setting a new ID on second resource…\n"
                 )
 
-                for r in dataset.resources:
-                    # If it's the duplicated resource we're interested in and
-                    # that ID was already added to the new_resources (so we are
-                    # on the second resource), generate a new UUID
-                    if r.id == id and id in [r.id for r in new_resources]:
-                        # Just for logging we copy the resource to avoid changing the ID
-                        # on the original resource (and have a clear compare at the end)
-                        new_r = copy.deepcopy(r)
-                        new_r.id = uuid4()
-                        highlight_ids.append(new_r.id)
+                # Just for logging we copy the resource to avoid changing the ID
+                # on the original resource (and have a clear compare at the end)
+                new_resource2 = copy.deepcopy(resource2)
+                new_resource2.id = uuid4()
+                highlight_ids.append(new_resource2.id)
 
-                        new_resources.append(new_r)
-                    else:
-                        new_resources.append(r)
+                # Replace `resource2` by `new_resource2` in the `new_resources` array.
+                new_resources = [
+                    (new_resource2 if r == resource2 else r) for r in dataset.resources
+                ]
 
-            print(f"Previous resources ({len(dataset.resources)})")
+            print(f"{dry_run} Previous resources ({len(dataset.resources)})")
             for r in dataset.resources:
                 highlight = " <---- CHANGED !" if r.id in highlight_ids else ""
-                print(f"\t{r.id} {r.title} {highlight}")
+                print(f"{dry_run} \t{r.id} {r.title} {highlight}")
 
-            print(f"New resources ({len(new_resources)})")
+            print(f"{dry_run} New resources ({len(new_resources)})")
             for r in new_resources:
                 highlight = " <---- CHANGED !" if r.id in highlight_ids else ""
-                print(f"\t{r.id} {r.title} {highlight}")
+                print(f"{dry_run} \t{r.id} {r.title} {highlight}")
 
             if fix:
                 dataset.resources = new_resources
