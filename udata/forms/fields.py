@@ -418,7 +418,7 @@ class TagField(Field):
         for tag in self.data:
             if not tags.MIN_TAG_LENGTH <= len(tag) <= tags.MAX_TAG_LENGTH:
                 message = _(
-                    'Tag "%(tag)s" must be between %(min)d ' "and %(max)d characters long.",
+                    'Tag "%(tag)s" must be between %(min)d and %(max)d characters long.',
                     min=tags.MIN_TAG_LENGTH,
                     max=tags.MAX_TAG_LENGTH,
                     tag=tag,
@@ -728,6 +728,16 @@ class CurrentUserField(ModelFieldMixin, Field):
         return super(CurrentUserField, self).process(formdata, data, **kwargs)
 
     def pre_validate(self, form):
+        if (
+            isinstance(form, ModelForm)  # Some forms (like HarvestSourceForm) are not model forms
+            and form.instance
+            and self.name in form.instance
+            and getattr(form.instance, self.name).id != self.data.id
+        ):
+            raise validators.ValidationError(
+                _("Cannot change owner after creation. Please use transfer feature.")
+            )
+
         if self.data:
             if current_user.is_anonymous:
                 raise validators.ValidationError(_("You must be authenticated"))
@@ -749,6 +759,16 @@ class PublishAsField(ModelFieldMixin, Field):
         return len(current_user.organizations) <= 0
 
     def pre_validate(self, form):
+        if (
+            isinstance(form, ModelForm)  # Some forms (like HarvestSourceForm) are not model forms
+            and form.instance
+            and self.name in form.instance
+            and getattr(form.instance, self.name).id != self.data.id
+        ):
+            raise validators.ValidationError(
+                _("Cannot change owner after creation. Please use transfer feature.")
+            )
+
         if self.data:
             if not current_user.is_authenticated:
                 raise validators.ValidationError(_("You must be authenticated"))

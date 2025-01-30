@@ -41,7 +41,12 @@ class OwnedQuerySet(UDataQuerySet):
         return self(visible_query | owned_qs._query_obj)
 
 
-def check_owner_is_current_user(owner):
+def only_creation(_value, is_update, field, **_kwargs):
+    if is_update:
+        raise FieldValidationError(_(f"Cannot modify {field} after creation"), field=field)
+
+
+def check_owner_is_current_user(owner, **_kwargs):
     from udata.auth import admin_permission, current_user
 
     if (
@@ -53,7 +58,7 @@ def check_owner_is_current_user(owner):
         raise FieldValidationError(_("You can only set yourself as owner"), field="owner")
 
 
-def check_organization_is_valid_for_current_user(organization):
+def check_organization_is_valid_for_current_user(organization, **_kwargs):
     from udata.auth import current_user
     from udata.models import Organization
 
@@ -76,7 +81,7 @@ class Owned(object):
         ReferenceField(User, reverse_delete_rule=NULLIFY),
         nested_fields=user_ref_fields,
         description="Only present if organization is not set. Can only be set to the current authenticated user.",
-        check=check_owner_is_current_user,
+        checks=[check_owner_is_current_user, only_creation],
         allow_null=True,
         filterable={},
     )
@@ -84,7 +89,7 @@ class Owned(object):
         ReferenceField(Organization, reverse_delete_rule=NULLIFY),
         nested_fields=org_ref_fields,
         description="Only present if owner is not set. Can only be set to an organization of the current authenticated user.",
-        check=check_organization_is_valid_for_current_user,
+        checks=[check_organization_is_valid_for_current_user, only_creation],
         allow_null=True,
         filterable={},
     )

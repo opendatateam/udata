@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Force the usage of transfers request to change the owner of a model [#3249](https://github.com/opendatateam/udata/pull/3249)
 - Add report of duplicates resources ids [#3247](https://github.com/opendatateam/udata/pull/3247)
 - Add search to posts [#3248](https://github.com/opendatateam/udata/pull/3248)
 - Resource catalog: fix preview_url and add extras [#3188](https://github.com/opendatateam/udata/pull/3188)
