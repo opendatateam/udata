@@ -2,6 +2,7 @@ import mongoengine
 
 from udata.api import API, api
 from udata.api.parsers import ModelApiParser
+from udata.core.dataset.permissions import OwnablePermission
 
 from .api_fields import contact_point_fields
 from .forms import ContactPointForm
@@ -54,6 +55,8 @@ class ContactPointAPI(API):
     @api.response(400, "Validation error")
     def put(self, contact_point):
         """Updates a contact point given its identifier"""
+        OwnablePermission(contact_point).test()
+
         form = api.validate(ContactPointForm, contact_point)
         return form.save()
 
@@ -62,5 +65,7 @@ class ContactPointAPI(API):
     @api.response(204, "Contact point deleted")
     def delete(self, contact_point):
         """Deletes a contact point given its identifier"""
+        OwnablePermission(contact_point).test()
+
         contact_point.delete()
         return "", 204
