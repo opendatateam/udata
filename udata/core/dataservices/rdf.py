@@ -193,17 +193,7 @@ def dataservice_as_distribution_to_rdf(
     distribution = graph.resource(id)
     distribution.set(RDF.type, DCAT.Distribution)
     distribution.add(DCT.title, Literal(dataservice.title))
-    distribution.add(
-        DCAT.accessURL,
-        URIRef(
-            endpoint_for(
-                "dataservices.show_redirect",
-                "api.dataservice",
-                dataservice=dataservice.id,
-                _external=True,
-            )
-        ),
-    )
+    distribution.add(DCAT.accessURL, URIRef(dataservice.base_api_url))
 
     if is_hvd:
         # DCAT-AP HVD applicable legislation is also expected at the distribution level

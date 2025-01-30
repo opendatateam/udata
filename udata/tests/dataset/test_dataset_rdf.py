@@ -302,7 +302,9 @@ class DatasetToRdfTest:
                 _external=True,
             )
         )
-        assert dataservice_as_distribution.value(DCAT.accessURL).identifier == dataservice_uri
+        assert dataservice_as_distribution.value(DCAT.accessURL).identifier == URIRef(
+            dataservice.base_api_url
+        )
         assert dataservice_as_distribution.value(DCT.title) == Literal(dataservice.title)
         assert dataservice_as_distribution.value(DCATAP.applicableLegislation).identifier == URIRef(
             HVD_LEGISLATION
