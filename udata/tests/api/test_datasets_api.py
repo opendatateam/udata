@@ -1264,6 +1264,21 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(updated.url, data["url"])
         self.assertEqual(updated.extras, {"extra:id": "id"})
 
+    def test_cannot_update_resource_filetype(self):
+        user = self.login()
+        resource = ResourceFactory(filetype="file")
+        dataset = DatasetFactory(owner=user, resources=[resource])
+
+        data = {
+            "filetype": "remote",
+            "url": faker.url(),
+        }
+        response = self.put(url_for("api.resource", dataset=dataset, rid=str(resource.id)), data)
+        self.assert400(response)
+
+        dataset.reload()
+        self.assertEqual(dataset.resources[0].filetype, "file")
+
     def test_bulk_update(self):
         resources = ResourceFactory.build_batch(2)
         self.dataset.resources.extend(resources)

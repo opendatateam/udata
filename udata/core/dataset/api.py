@@ -544,9 +544,17 @@ class ResourceAPI(ResourceMixin, API):
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         form = api.validate(ResourceForm, resource)
+
+        if (
+            form._fields.get("filetype").data
+            and form._fields.get("filetype").data != resource.filetype
+        ):
+            abort(400, "Cannot modify filetype after creation")
+
         # ensure API client does not override url on self-hosted resources
         if resource.filetype == "file":
             form._fields.get("url").data = resource.url
+
         # populate_obj populates existing resource object with the content of the form.
         # update_resource saves the updated resource dict to the database
         # the additional dataset.save is required as we update the last_modified date.
