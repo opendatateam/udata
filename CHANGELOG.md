@@ -5,6 +5,7 @@
 - Force the usage of transfers request to change the owner of a model [#3249](https://github.com/opendatateam/udata/pull/3249)
 - Add report of duplicates resources ids [#3247](https://github.com/opendatateam/udata/pull/3247)
 - Add search to posts [#3248](https://github.com/opendatateam/udata/pull/3248)
+- Cannot respond to a transfer after first response [#3255](https://github.com/opendatateam/udata/pull/3255)
 - Resource catalog: fix preview_url and add extras [#3188](https://github.com/opendatateam/udata/pull/3188)
 - Add trailing slash to security routes [#3251](https://github.com/opendatateam/udata/pull/3251)
 - Upgrade packaging dependency to 24.2 [#3252](https://github.com/opendatateam/udata/pull/3252)
