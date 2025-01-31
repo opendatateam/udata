@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 10.0.8 (2025-01-31)
 
 - Force the usage of transfers request to change the owner of a model [#3249](https://github.com/opendatateam/udata/pull/3249)
 - Add report of duplicates resources ids [#3247](https://github.com/opendatateam/udata/pull/3247)
