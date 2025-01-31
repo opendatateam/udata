@@ -51,7 +51,7 @@ msgstr ""
 msgid "Invalid URL \"{url}\": {reason}"
 msgstr ""
 
-#: udata/tests/api/test_datasets_api.py:877 udata/tests/test_model.py:367
+#: udata/tests/api/test_datasets_api.py:892 udata/tests/test_model.py:367
 #: udata/uris.py:55
 msgid "Invalid URL \"{url}\""
 msgstr ""
@@ -205,16 +205,16 @@ msgstr ""
 msgid "Your udata instance is ready!"
 msgstr ""
 
-#: udata/core/owned.py:53 udata/forms/fields.py:735
+#: udata/core/owned.py:58 udata/forms/fields.py:745
 #: udata/tests/api/test_dataservices_api.py:437
 msgid "You can only set yourself as owner"
 msgstr ""
 
-#: udata/core/owned.py:62
+#: udata/core/owned.py:67
 msgid "Unknown organization"
 msgstr ""
 
-#: udata/core/owned.py:66 udata/forms/fields.py:756
+#: udata/core/owned.py:71 udata/forms/fields.py:776
 #: udata/tests/api/test_dataservices_api.py:451
 msgid "Permission denied for this organization"
 msgstr ""
@@ -276,12 +276,12 @@ msgstr ""
 msgid "dataservice"
 msgstr ""
 
-#: udata/core/dataservices/models.py:179 udata/core/dataset/models.py:569
+#: udata/core/dataservices/models.py:172 udata/core/dataset/models.py:569
 #: udata/mongo/datetime_fields.py:60
 msgid "Creation date"
 msgstr ""
 
-#: udata/core/dataservices/models.py:185 udata/core/dataset/models.py:572
+#: udata/core/dataservices/models.py:178 udata/core/dataset/models.py:572
 #: udata/mongo/datetime_fields.py:66
 msgid "Last modification date"
 msgstr ""
@@ -504,7 +504,7 @@ msgstr ""
 msgid "Related dataset"
 msgstr ""
 
-#: udata/core/dataset/forms.py:134 udata/tests/api/test_datasets_api.py:789
+#: udata/core/dataset/forms.py:134 udata/tests/api/test_datasets_api.py:804
 msgid "Wrong contact point id or contact point ownership mismatch"
 msgstr ""
 
@@ -578,20 +578,20 @@ msgstr ""
 msgid "A schema must contains a name or an URL when a version is provided."
 msgstr ""
 
-#: udata/core/dataset/models.py:167 udata/tests/api/test_datasets_api.py:885
-#: udata/tests/api/test_datasets_api.py:896
+#: udata/core/dataset/models.py:167 udata/tests/api/test_datasets_api.py:900
+#: udata/tests/api/test_datasets_api.py:911
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:186 udata/tests/api/test_datasets_api.py:907
+#: udata/core/dataset/models.py:186 udata/tests/api/test_datasets_api.py:922
 msgid ""
 "Version \"{version}\" is not an allowed value for the schema \"{name}\". "
 "Allowed versions: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:463 udata/core/dataset/rdf.py:584
-#: udata/tests/dataset/test_dataset_rdf.py:622
-#: udata/tests/dataset/test_dataset_rdf.py:635
+#: udata/core/dataset/models.py:463 udata/core/dataset/rdf.py:594
+#: udata/tests/dataset/test_dataset_rdf.py:629
+#: udata/tests/dataset/test_dataset_rdf.py:642
 msgid "Nameless resource"
 msgstr ""
 
@@ -603,7 +603,7 @@ msgstr ""
 msgid "dataset"
 msgstr ""
 
-#: udata/core/dataset/rdf.py:582 udata/tests/dataset/test_dataset_rdf.py:609
+#: udata/core/dataset/rdf.py:592 udata/tests/dataset/test_dataset_rdf.py:616
 msgid "{format} resource"
 msgstr ""
 
@@ -827,7 +827,7 @@ msgstr ""
 msgid "Specify your body type (HTML or markdown)"
 msgstr ""
 
-#: udata/core/post/models.py:49
+#: udata/core/post/models.py:54
 msgid "post"
 msgstr ""
 
@@ -1174,7 +1174,11 @@ msgstr ""
 msgid "Unable to parse date range"
 msgstr ""
 
-#: udata/forms/fields.py:733 udata/forms/fields.py:754
+#: udata/forms/fields.py:738 udata/forms/fields.py:769
+msgid "Cannot change owner after creation. Please use transfer feature."
+msgstr ""
+
+#: udata/forms/fields.py:743 udata/forms/fields.py:774
 msgid "You must be authenticated"
 msgstr ""
 

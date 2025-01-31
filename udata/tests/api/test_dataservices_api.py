@@ -478,6 +478,23 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(dataservice.owner, None)
         self.assertEqual(dataservice.organization.id, me_org.id)
 
+    def test_dataservice_api_update_org(self):
+        """It shouldn't update the dataservice org"""
+        user = self.login()
+        original_member = Member(user=user, role="editor")
+        original_org = OrganizationFactory(members=[original_member])
+        dataservice = DataserviceFactory(owner=user, organization=original_org)
+
+        new_member = Member(user=self.user, role="admin")
+        new_org = OrganizationFactory(members=[new_member])
+
+        data = dataservice.to_dict()
+        data["organization"] = {"id": new_org.id}
+        response = self.patch(url_for("api.dataservice", dataservice=dataservice), data)
+        self.assert400(response)
+        self.assertEqual(Dataservice.objects.count(), 1)
+        self.assertNotEqual(Dataservice.objects.first().organization.id, new_org.id)
+
 
 @pytest.mark.frontend
 class DataserviceRdfViewsTest:

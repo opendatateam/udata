@@ -3,10 +3,16 @@
 ## Current (in progress)
 
 - Harvest attribution roles [#3149](https://github.com/opendatateam/udata/pull/3149)
+
+## 10.0.8 (2025-01-31)
+
+- Force the usage of transfers request to change the owner of a model [#3249](https://github.com/opendatateam/udata/pull/3249)
+- Add report of duplicates resources ids [#3247](https://github.com/opendatateam/udata/pull/3247)
 - Add search to posts [#3248](https://github.com/opendatateam/udata/pull/3248)
 - Resource catalog: fix preview_url and add extras [#3188](https://github.com/opendatateam/udata/pull/3188)
 - Add trailing slash to security routes [#3251](https://github.com/opendatateam/udata/pull/3251)
 - Upgrade packaging dependency to 24.2 [#3252](https://github.com/opendatateam/udata/pull/3252)
+- Expose HVD dataservice as inline distribution [#3256](https://github.com/opendatateam/udata/pull/3256)
 
 ## 10.0.7 (2025-01-13)
 
