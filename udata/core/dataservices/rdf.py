@@ -181,3 +181,24 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
         d.set(DCAT.contactPoint, contact_point)
 
     return d
+
+
+def dataservice_as_distribution_to_rdf(
+    dataservice: Dataservice, graph: Graph = None, is_hvd: bool = True
+):
+    """
+    Create a blank distribution pointing towards a dataservice with DCAT.accessService property
+    """
+    id = BNode()
+    distribution = graph.resource(id)
+    distribution.set(RDF.type, DCAT.Distribution)
+    distribution.add(DCT.title, Literal(dataservice.title))
+    distribution.add(DCAT.accessURL, URIRef(dataservice.base_api_url))
+
+    if is_hvd:
+        # DCAT-AP HVD applicable legislation is also expected at the distribution level
+        distribution.add(DCATAP.applicableLegislation, URIRef(HVD_LEGISLATION))
+
+    distribution.add(DCAT.accessService, dataservice_to_rdf(dataservice, graph))
+
+    return distribution
