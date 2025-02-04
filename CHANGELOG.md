@@ -4,6 +4,7 @@
 
 - Allow super-admins to change objects' owners [#3260](https://github.com/opendatateam/udata/pull/3260)
 - Cannot respond to a transfer after first response [#3255](https://github.com/opendatateam/udata/pull/3255)
+- Fix contact point permissions [#3253](https://github.com/opendatateam/udata/pull/3253)
 
 ## 10.0.8 (2025-01-31)
 
