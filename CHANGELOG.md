@@ -3,7 +3,7 @@
 ## Current (in progress)
 
 - Allow super-admins to change objects' owners [#3260](https://github.com/opendatateam/udata/pull/3260)
-- Expose HVD dataservice as inline distribution [#3256](https://github.com/opendatateam/udata/pull/3256)
+- Cannot update resource filetype after creation [#3254](https://github.com/opendatateam/udata/pull/3254)
 
 ## 10.0.8 (2025-01-31)
 
@@ -13,6 +13,7 @@
 - Resource catalog: fix preview_url and add extras [#3188](https://github.com/opendatateam/udata/pull/3188)
 - Add trailing slash to security routes [#3251](https://github.com/opendatateam/udata/pull/3251)
 - Upgrade packaging dependency to 24.2 [#3252](https://github.com/opendatateam/udata/pull/3252)
+- Expose HVD dataservice as inline distribution [#3256](https://github.com/opendatateam/udata/pull/3256)
 
 ## 10.0.7 (2025-01-13)
 
