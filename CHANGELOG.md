@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Allow super-admins to change objects' owners [#3260](https://github.com/opendatateam/udata/pull/3260)
 
 ## 10.0.8 (2025-01-31)
 
