@@ -2,9 +2,11 @@ import pytest
 from flask import url_for
 
 from udata.core.contact_point.factories import ContactPointFactory
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.models import Member
 from udata.i18n import gettext as _
 from udata.models import ContactPoint
-from udata.tests.helpers import assert200, assert201, assert204, assert400
+from udata.tests.helpers import assert200, assert201, assert204, assert400, assert403
 from udata.utils import faker
 
 pytestmark = [
@@ -53,8 +55,10 @@ class ContactPointAPITest:
         assert ContactPoint.objects.count() == 0
 
     def test_contact_point_api_update(self, api):
-        api.login()
-        contact_point = ContactPointFactory()
+        user = api.login()
+        member = Member(user=user, role="editor")
+        org = OrganizationFactory(members=[member])
+        contact_point = ContactPointFactory(organization=org)
         data = contact_point.to_dict()
         data["email"] = "new.email@newdomain.com"
         response = api.put(url_for("api.contact_point", contact_point=contact_point), data)
@@ -62,9 +66,30 @@ class ContactPointAPITest:
         assert ContactPoint.objects.count() == 1
         assert ContactPoint.objects.first().email == "new.email@newdomain.com"
 
-    def test_contact_point_api_delete(self, api):
+    def test_contact_point_api_update_forbidden(self, api):
         api.login()
-        contact_point = ContactPointFactory()
+        org = OrganizationFactory()
+        contact_point = ContactPointFactory(organization=org)
+        data = contact_point.to_dict()
+        data["email"] = "new.email@newdomain.com"
+        response = api.put(url_for("api.contact_point", contact_point=contact_point), data)
+        assert403(response)
+        assert ContactPoint.objects.count() == 1
+        assert ContactPoint.objects.first().email == contact_point.email
+
+    def test_contact_point_api_delete(self, api):
+        user = api.login()
+        member = Member(user=user, role="editor")
+        org = OrganizationFactory(members=[member])
+        contact_point = ContactPointFactory(organization=org)
         response = api.delete(url_for("api.contact_point", contact_point=contact_point))
         assert204(response)
         assert ContactPoint.objects.count() == 0
+
+    def test_contact_point_api_delete_forbidden(self, api):
+        api.login()
+        org = OrganizationFactory()
+        contact_point = ContactPointFactory(organization=org)
+        response = api.delete(url_for("api.contact_point", contact_point=contact_point))
+        assert403(response)
+        assert ContactPoint.objects.count() == 1
