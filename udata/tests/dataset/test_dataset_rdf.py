@@ -9,6 +9,7 @@ from rdflib.namespace import FOAF, RDF
 from rdflib.resource import Resource as RdfResource
 
 from udata.core.contact_point.factories import ContactPointFactory
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceFactory
 from udata.core.dataset.models import (
     Checksum,
@@ -46,6 +47,7 @@ from udata.rdf import (
     primary_topic_identifier_from_rdf,
 )
 from udata.tests.helpers import assert200, assert_redirects
+from udata.uris import endpoint_for
 from udata.utils import faker
 
 pytestmark = pytest.mark.usefixtures("app")
@@ -276,6 +278,38 @@ class DatasetToRdfTest:
         )
         for distrib in d.objects(DCAT.distribution):
             assert distrib.value(DCATAP.applicableLegislation).identifier == URIRef(HVD_LEGISLATION)
+
+    def test_dataset_with_dataservice_as_distribution(self):
+        """
+        Test that a dataset tagged hvd served by an hvd dataservice has an additional distribution
+        with a DCAT.accessService and appropriate DCAT-AP HVD properties
+        """
+        dataset = DatasetFactory(
+            resources=ResourceFactory.build_batch(3), tags=["hvd", "mobilite", "test"]
+        )
+        dataservice = DataserviceFactory(datasets=[dataset], tags=["hvd"])
+        d = dataset_to_rdf(dataset)
+        g = d.graph
+
+        len(list(g.subjects(RDF.type, DCAT.Distribution))) == 4
+        len(list(g.subjects(RDF.type, DCAT.DataService))) == 1
+        dataservice_as_distribution = g.resource(next(g.subjects(DCAT.accessService)))
+        dataservice_uri = URIRef(
+            endpoint_for(
+                "dataservices.show_redirect",
+                "api.dataservice",
+                dataservice=dataservice.id,
+                _external=True,
+            )
+        )
+        assert dataservice_as_distribution.value(DCAT.accessURL).identifier == URIRef(
+            dataservice.base_api_url
+        )
+        assert dataservice_as_distribution.value(DCT.title) == Literal(dataservice.title)
+        assert dataservice_as_distribution.value(DCATAP.applicableLegislation).identifier == URIRef(
+            HVD_LEGISLATION
+        )
+        assert dataservice_as_distribution.value(DCAT.accessService).identifier == dataservice_uri
 
 
 @pytest.mark.usefixtures("clean_db")

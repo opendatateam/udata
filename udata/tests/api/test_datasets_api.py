@@ -558,6 +558,31 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description, "new description")
 
+    def test_dataset_api_update_org(self):
+        """It shouldn't update the dataset org"""
+        user = self.login()
+        original_member = Member(user=user, role="editor")
+        original_org = OrganizationFactory(members=[original_member])
+        dataset = DatasetFactory(owner=user, organization=original_org)
+
+        new_member = Member(user=self.user, role="admin")
+        new_org = OrganizationFactory(members=[new_member])
+
+        data = dataset.to_dict()
+        data["organization"] = {"id": new_org.id}
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert400(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertNotEqual(Dataset.objects.first().organization.id, new_org.id)
+
+        self.login(AdminFactory())
+        data = dataset.to_dict()
+        data["organization"] = {"id": new_org.id}
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertEqual(Dataset.objects.first().organization.id, new_org.id)
+
     def test_dataset_api_update_with_resources(self):
         """It should update a dataset from the API with resources parameters"""
         user = self.login()
