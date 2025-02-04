@@ -340,6 +340,20 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
     for resource in dataset.resources:
         d.add(DCAT.distribution, resource_to_rdf(resource, dataset, graph, is_hvd))
 
+    if is_hvd:
+        from udata.core.dataservices.models import Dataservice
+        from udata.core.dataservices.rdf import dataservice_as_distribution_to_rdf
+
+        # Add a blank distribution pointing to a DataService using the distribution DCAT.accessService.
+        # Useful for HVD reporting since DataService are not currently harvested by
+        # data.europa.eu as first class entities.
+        # Should be removed once supported by data.europa.eu harvesting.
+        for service in Dataservice.objects.filter(datasets=dataset, tags="hvd"):
+            d.add(
+                DCAT.distribution,
+                dataservice_as_distribution_to_rdf(service, graph),
+            )
+
     if dataset.temporal_coverage:
         d.set(DCT.temporal, temporal_to_rdf(dataset.temporal_coverage, graph))
 

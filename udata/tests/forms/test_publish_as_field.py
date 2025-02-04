@@ -6,6 +6,7 @@ from udata.auth import login_user
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.forms import ModelForm, fields
+from udata.i18n import gettext as _
 from udata.models import Member, Organization, User, db
 from udata.tests import TestCase
 
@@ -210,7 +211,7 @@ class PublishFieldTest(TestCase):
         self.assertIn("organization", form.errors)
         self.assertEqual(
             form.errors["organization"],
-            ["Cannot change owner after creation. Please use transfer feature."],
+            [_("Cannot change owner after creation. Please use transfer feature.")],
         )
 
     def test_with_initial_and_not_member(self):
