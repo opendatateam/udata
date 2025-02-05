@@ -1,9 +1,11 @@
 import pytest
 from flask import url_for
 
+
 from udata.core.contact_point.factories import ContactPointFactory
+from udata.core.contact_point.models import CONTACT_ROLES
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.models import CONTACT_ROLES, Member
+from udata.core.organization.models import Member
 from udata.i18n import gettext as _
 from udata.models import ContactPoint
 from udata.tests.helpers import assert200, assert201, assert204, assert400, assert403
