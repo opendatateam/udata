@@ -10,7 +10,7 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
-from udata.core.user.factories import UserFactory
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
 from udata.tests.helpers import assert200, assert400, assert_redirects
 
@@ -494,6 +494,14 @@ class DataserviceAPITest(APITestCase):
         self.assert400(response)
         self.assertEqual(Dataservice.objects.count(), 1)
         self.assertNotEqual(Dataservice.objects.first().organization.id, new_org.id)
+
+        self.login(AdminFactory())
+        data = dataservice.to_dict()
+        data["organization"] = {"id": new_org.id}
+        response = self.patch(url_for("api.dataservice", dataservice=dataservice), data)
+        self.assert200(response)
+        self.assertEqual(Dataservice.objects.count(), 1)
+        self.assertEqual(Dataservice.objects.first().organization.id, new_org.id)
 
 
 @pytest.mark.frontend
