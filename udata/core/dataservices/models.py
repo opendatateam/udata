@@ -132,12 +132,20 @@ class Dataservice(WithMetrics, Owned, db.Document):
     )
     description = field(db.StringField(default=""), description="In markdown")
     base_api_url = field(db.URLField(), sortable=True)
-    endpoint_description_url = field(db.URLField())
+
+    endpoint_description_url = field(db.URLField(), description="Swagger link, OpenAPI format")
+    technical_documentation_url = field(db.URLField())
     business_documentation_url = field(db.URLField())
-    authorization_request_url = field(db.URLField())
-    availability = field(db.FloatField(min=0, max=100), example="99.99")
+
     rate_limiting = field(db.StringField())
+    rate_limiting_url = field(db.URLField())
+
+    availability = field(db.FloatField(min=0, max=100), example="99.99")
+    availability_url = field(db.URLField())
+
     is_restricted = field(db.BooleanField(), filterable={})
+    authorization_request_url = field(db.URLField())
+
     has_token = field(db.BooleanField())
     format = field(db.StringField(choices=DATASERVICE_FORMATS))
 
