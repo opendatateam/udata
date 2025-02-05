@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Harvest attribution roles [#3149](https://github.com/opendatateam/udata/pull/3149)
 - Allow super-admins to change objects' owners [#3260](https://github.com/opendatateam/udata/pull/3260)
 - Fix contact point permissions [#3253](https://github.com/opendatateam/udata/pull/3253)
 
