@@ -132,8 +132,14 @@ class Dataservice(WithMetrics, Owned, db.Document):
     description = field(db.StringField(default=""), description="In markdown")
     base_api_url = field(db.URLField(), sortable=True)
 
-    endpoint_description_url = field(db.URLField(), description="Swagger link, OpenAPI format")
-    technical_documentation_url = field(db.URLField())
+    endpoint_description_url = field(
+        db.URLField()
+    )  # Legacy: to remove / replaced by `machine_documentation_url` or `technical_documentation_url`
+
+    machine_documentation_url = field(
+        db.URLField(), description="Swagger link, OpenAPI format, WMS XML…"
+    )
+    technical_documentation_url = field(db.URLField(), description="HTML version of a Swagger…")
     business_documentation_url = field(db.URLField())
 
     rate_limiting = field(db.StringField())

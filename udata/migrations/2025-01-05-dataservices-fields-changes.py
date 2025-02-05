@@ -3,6 +3,7 @@ This migration keeps only the "Local authority" badge if the organization also h
 """
 
 import logging
+from typing import List
 
 from udata.core.dataservices.constants import (
     DATASERVICE_ACCESS_TYPE_OPEN,
@@ -35,5 +36,19 @@ def migrate(db):
     Dataservice.objects(is_restricted=True, has_token=False).update(
         access_type=DATASERVICE_ACCESS_TYPE_RESTRICTED
     )
+
+    dataservices: List[Dataservice] = Dataservice.objects()
+    for dataservice in dataservices:
+        if not dataservice.endpoint_description_url:
+            continue
+
+        if (
+            dataservice.endpoint_description_url.ends_with(".json")
+            or dataservice.endpoint_description_url.ends_with(".yml")
+            or "getCapabilities" in dataservice.endpoint_description_url
+        ):
+            dataservice.machine_documentation_url = dataservice.endpoint_description_url
+        else:
+            dataservice.technical_documentation_url = dataservice.endpoint_description_url
 
     log.info("Done")

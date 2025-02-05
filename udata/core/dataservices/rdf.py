@@ -41,7 +41,9 @@ def dataservice_from_rdf(
     dataservice.description = sanitize_html(d.value(DCT.description) or d.value(DCT.abstract))
 
     dataservice.base_api_url = url_from_rdf(d, DCAT.endpointURL)
-    dataservice.endpoint_description_url = url_from_rdf(d, DCAT.endpointDescription)
+
+    # TODO detect if it's human-readable or not?
+    dataservice.machine_documentation_url = url_from_rdf(d, DCAT.endpointDescription)
 
     dataservice.contact_point = contact_point_from_rdf(d, dataservice) or dataservice.contact_point
 
@@ -138,8 +140,8 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
             ),
         )
 
-    if dataservice.endpoint_description_url:
-        d.set(DCAT.endpointDescription, URIRef(dataservice.endpoint_description_url))
+    if dataservice.machine_documentation_url:
+        d.set(DCAT.endpointDescription, URIRef(dataservice.machine_documentation_url))
 
     # Add DCAT-AP HVD properties if the dataservice is tagged hvd.
     # See https://semiceu.github.io/DCAT-AP/releases/2.2.0-hvd/
