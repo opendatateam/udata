@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2025-01-31 10:00+0100\n"
-"PO-Revision-Date: 2025-01-31 09:03\n"
+"POT-Creation-Date: 2025-01-28 11:37+0100\n"
+"PO-Revision-Date: 2025-02-05 16:55\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: es\n"
 "Language-Team: Spanish\n"
@@ -245,7 +245,23 @@ msgstr ""
 msgid "Publish as"
 msgstr "Publicar como"
 
-#: udata/core/contact_point/models.py:18 udata/tests/api/test_contact_points.py:50
+#: udata/core/contact_point/forms.py:21 udata/core/organization/forms.py:94
+msgid "Role"
+msgstr "Rol"
+
+#: udata/core/contact_point/models.py:9
+msgid "Contact"
+msgstr ""
+
+#: udata/core/contact_point/models.py:10
+msgid "Creator"
+msgstr ""
+
+#: udata/core/contact_point/models.py:11
+msgid "Publisher"
+msgstr ""
+
+#: udata/core/contact_point/models.py:26 udata/tests/api/test_contact_points.py:56
 msgid "At least an email or a contact form is required for a contact point"
 msgstr ""
 
@@ -699,10 +715,6 @@ msgstr ""
 #: udata/core/organization/forms.py:57
 msgid "Business identification number"
 msgstr ""
-
-#: udata/core/organization/forms.py:94
-msgid "Role"
-msgstr "Rol"
 
 #: udata/core/organization/models.py:35
 msgid "Public Service"
@@ -1603,6 +1615,10 @@ msgstr ""
 
 #: udata/templates/security/email/welcome_existing.html:25
 msgid "Here"
+msgstr ""
+
+#: udata/tests/api/test_contact_points.py:66
+msgid "ValidationError (ContactPoint:None) (Field is required: ['role'])"
 msgstr ""
 
 #: udata/tests/forms/test_model_field.py:165
