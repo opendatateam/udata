@@ -8,6 +8,7 @@ from mongoengine.signals import post_save
 import udata.core.contact_point.api_fields as contact_api_fields
 import udata.core.dataset.api_fields as datasets_api_fields
 from udata.api_fields import field, function_field, generate_fields
+from udata.core.dataservices.constants import DATASERVICE_ACCESS_TYPES, DATASERVICE_FORMATS
 from udata.core.dataset.models import Dataset
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
@@ -23,8 +24,6 @@ from udata.uris import endpoint_for
 # "datasets" # objet : liste de datasets liés à une API
 # "spatial"
 # "temporal_coverage"
-
-DATASERVICE_FORMATS = ["REST", "WMS", "WSL"]
 
 
 class DataserviceQuerySet(OwnedQuerySet):
@@ -143,10 +142,12 @@ class Dataservice(WithMetrics, Owned, db.Document):
     availability = field(db.FloatField(min=0, max=100), example="99.99")
     availability_url = field(db.URLField())
 
-    is_restricted = field(db.BooleanField(), filterable={})
+    access_type = field(db.StringField(choices=DATASERVICE_ACCESS_TYPES))
+
+    is_restricted = db.BooleanField()  # Legacy: to remove / replaced by `access_type`
     authorization_request_url = field(db.URLField())
 
-    has_token = field(db.BooleanField())
+    has_token = db.BooleanField()  # Legacy: to remove / replaced by `access_type`
     format = field(db.StringField(choices=DATASERVICE_FORMATS))
 
     license = field(

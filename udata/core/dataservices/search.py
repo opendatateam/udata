@@ -5,6 +5,11 @@ from flask_restx.inputs import boolean
 
 from udata.api import api
 from udata.api.parsers import ModelApiParser
+from udata.core.dataservices.constants import (
+    DATASERVICE_ACCESS_TYPE_OPEN,
+    DATASERVICE_ACCESS_TYPE_OPEN_WITH_ACCOUNT,
+    DATASERVICE_ACCESS_TYPE_RESTRICTED,
+)
 from udata.models import Dataservice, Organization, User
 from udata.search import (
     BoolFilter,
@@ -47,7 +52,14 @@ class DataserviceApiParser(ModelApiParser):
                 api.abort(400, "Organization arg must be an identifier")
             dataservices = dataservices.filter(organization=args["organization"])
         if "is_restricted" in args:
-            dataservices = dataservices.filter(is_restricted=boolean(args["is_restricted"]))
+            dataservices = dataservices.filter(
+                access_type__in=[
+                    DATASERVICE_ACCESS_TYPE_RESTRICTED,
+                    DATASERVICE_ACCESS_TYPE_OPEN_WITH_ACCOUNT,
+                ]
+                if boolean(args["is_restricted"])
+                else [DATASERVICE_ACCESS_TYPE_OPEN]
+            )
         return dataservices
 
 
