@@ -43,12 +43,19 @@ def migrate(db):
             continue
 
         if (
-            dataservice.endpoint_description_url.ends_with(".json")
-            or dataservice.endpoint_description_url.ends_with(".yml")
-            or "getCapabilities" in dataservice.endpoint_description_url
+            dataservice.endpoint_description_url.endswith(".json")
+            or dataservice.endpoint_description_url.endswith(".yaml")
+            or dataservice.endpoint_description_url.endswith("?format=openapi-json")
+            or "GetCapabilities" in dataservice.endpoint_description_url
+            or "GetResourceDescription" in dataservice.endpoint_description_url
+            or dataservice.endpoint_description_url.startswith(
+                "https://api.insee.fr/catalogue/api-docs/carbon.super"
+            )
         ):
+            # print(f"[MACHINE] {dataservice.endpoint_description_url}")
             dataservice.machine_documentation_url = dataservice.endpoint_description_url
         else:
+            # print(f"[ HUMAN ] {dataservice.endpoint_description_url}")
             dataservice.technical_documentation_url = dataservice.endpoint_description_url
 
     log.info("Done")
