@@ -1,7 +1,6 @@
 import pytest
 from flask import url_for
 
-
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.contact_point.models import CONTACT_ROLES
 from udata.core.organization.factories import OrganizationFactory
