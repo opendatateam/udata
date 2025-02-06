@@ -126,5 +126,6 @@ class DataserviceSearch(ModelSearchAdapter):
             "tags": dataservice.tags,
             "extras": extras,
             "followers": dataservice.metrics.get("followers", 0),
-            "is_restricted": dataservice.is_restricted or False,
+            "is_restricted": dataservice.access_type
+            in [DATASERVICE_ACCESS_TYPE_OPEN_WITH_ACCOUNT, DATASERVICE_ACCESS_TYPE_RESTRICTED],
         }
