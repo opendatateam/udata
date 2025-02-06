@@ -11,6 +11,7 @@ from udata.core.dataservices.constants import (
     DATASERVICE_ACCESS_TYPE_RESTRICTED,
 )
 from udata.core.dataservices.models import Dataservice
+from udata.mongo import db as db2
 
 log = logging.getLogger(__name__)
 
@@ -18,28 +19,35 @@ log = logging.getLogger(__name__)
 def migrate(db):
     log.info("Processing dataservices…")
 
-    Dataservice.objects(db.Q(is_restricted=None) | db.Q(has_token=None)).update(
+    count = Dataservice.objects(db2.Q(is_restricted=None) | db2.Q(has_token=None)).update(
         access_type=DATASERVICE_ACCESS_TYPE_OPEN
     )
+    print(f"{count} dataservices with one of another None")
 
-    Dataservice.objects(is_restricted=True, has_token=True).update(
+    count = Dataservice.objects(is_restricted=True, has_token=True).update(
         access_type=DATASERVICE_ACCESS_TYPE_RESTRICTED
     )
-    Dataservice.objects(is_restricted=False, has_token=True).update(
+    print(f"{count} dataservices with restricted and token")
+
+    count = Dataservice.objects(is_restricted=False, has_token=True).update(
         access_type=DATASERVICE_ACCESS_TYPE_OPEN_WITH_ACCOUNT
     )
-    Dataservice.objects(is_restricted=False, has_token=False).update(
+    print(f"{count} dataservices not restricted but with token")
+
+    count = Dataservice.objects(is_restricted=False, has_token=False).update(
         access_type=DATASERVICE_ACCESS_TYPE_OPEN
     )
+    print(f"{count} open dataservices")
 
     for dataservice in Dataservice.objects(is_restricted=True, has_token=False):
         print(
             f"\t Dataservice #{dataservice.id} {dataservice.title} is restricted but without token. (setting it to access_type={DATASERVICE_ACCESS_TYPE_RESTRICTED})"
         )
 
-    Dataservice.objects(is_restricted=True, has_token=False).update(
+    count = Dataservice.objects(is_restricted=True, has_token=False).update(
         access_type=DATASERVICE_ACCESS_TYPE_RESTRICTED
     )
+    print(f"{count} weird dataservices with restricted but no token")
 
     dataservices: List[Dataservice] = Dataservice.objects()
     for dataservice in dataservices:
