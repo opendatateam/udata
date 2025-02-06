@@ -6,13 +6,14 @@ from udata.core.dataservices.models import HarvestMetadata as HarvestDataservice
 from udata.core.dataset.models import Dataset, License
 from udata.core.dataset.rdf import dataset_to_graph_id, sanitize_html
 from udata.rdf import (
+    CONTACT_POINT_ENTITY_TO_ROLE,
     DCAT,
     DCATAP,
     DCT,
     HVD_LEGISLATION,
     TAG_TO_EU_HVD_CATEGORIES,
-    contact_point_from_rdf,
-    contact_point_to_rdf,
+    contact_points_from_rdf,
+    contact_points_to_rdf,
     namespace_manager,
     rdf_value,
     remote_url_from_rdf,
@@ -45,7 +46,13 @@ def dataservice_from_rdf(
     # TODO detect if it's human-readable or not?
     dataservice.machine_documentation_url = url_from_rdf(d, DCAT.endpointDescription)
 
-    dataservice.contact_point = contact_point_from_rdf(d, dataservice) or dataservice.contact_point
+    roles = [  # Imbricated list of contact points for each role
+        contact_points_from_rdf(d, rdf_entity, role, dataservice)
+        for rdf_entity, role in CONTACT_POINT_ENTITY_TO_ROLE.items()
+    ]
+    dataservice.contact_points = [  # Flattened list of contact points
+        contact_point for role in roles for contact_point in role
+    ] or dataservice.contact_points
 
     datasets = []
     for dataset_node in d.objects(DCAT.servesDataset):
@@ -178,9 +185,8 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
         for dataset in dataservice.datasets:
             d.add(DCAT.servesDataset, dataset_to_graph_id(dataset))
 
-    contact_point = contact_point_to_rdf(dataservice.contact_point, graph)
-    if contact_point:
-        d.set(DCAT.contactPoint, contact_point)
+    for contact_point, predicate in contact_points_to_rdf(dataservice.contact_points, graph):
+        d.set(predicate, contact_point)
 
     return d
 
