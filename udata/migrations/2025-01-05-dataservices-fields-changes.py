@@ -18,6 +18,10 @@ log = logging.getLogger(__name__)
 def migrate(db):
     log.info("Processing dataservices…")
 
+    Dataservice.objects(db.Q(is_restricted=None) | db.Q(has_token=None)).update(
+        access_type=DATASERVICE_ACCESS_TYPE_OPEN
+    )
+
     Dataservice.objects(is_restricted=True, has_token=True).update(
         access_type=DATASERVICE_ACCESS_TYPE_RESTRICTED
     )
@@ -57,5 +61,7 @@ def migrate(db):
         else:
             # print(f"[ HUMAN ] {dataservice.endpoint_description_url}")
             dataservice.technical_documentation_url = dataservice.endpoint_description_url
+
+        dataservice.save()
 
     log.info("Done")
