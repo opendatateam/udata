@@ -23,12 +23,14 @@ from udata.harvest.exceptions import HarvestSkipException
 from udata.models import db
 from udata.rdf import (
     ADMS,
+    CONTACT_POINT_ENTITY_TO_ROLE,
     DCAT,
     DCATAP,
     DCT,
     EUFORMAT,
     EUFREQ,
     FREQ,
+    GEODCAT,
     HVD_LEGISLATION,
     IANAFORMAT,
     SCHEMA,
@@ -36,8 +38,8 @@ from udata.rdf import (
     SKOS,
     SPDX,
     TAG_TO_EU_HVD_CATEGORIES,
-    contact_point_from_rdf,
-    contact_point_to_rdf,
+    contact_points_from_rdf,
+    contact_points_to_rdf,
     namespace_manager,
     rdf_unique_values,
     rdf_value,
@@ -174,10 +176,9 @@ def ogc_service_to_rdf(
         if dataset.license.url:
             service.add(DCT.license, URIRef(dataset.license.url))
 
-    if dataset and dataset.contact_point:
-        contact_point = contact_point_to_rdf(dataset.contact_point, graph)
-        if contact_point:
-            service.set(DCAT.contactPoint, contact_point)
+    if dataset and dataset.contact_points:
+        for contact_point, predicate in contact_points_to_rdf(dataset.contact_points, graph):
+            service.set(predicate, contact_point)
 
     if is_hvd:
         # DCAT-AP HVD applicable legislation is also expected at the distribution > accessService level
@@ -361,13 +362,16 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
     if frequency:
         d.set(DCT.accrualPeriodicity, frequency)
 
-    publisher = owner_to_rdf(dataset, graph)
-    if publisher:
-        d.set(DCT.publisher, publisher)
+    owner_role = DCT.publisher
+    if any(contact_point.role == "publisher" for contact_point in dataset.contact_points):
+        # There's already a publisher, so the owner should instead be a distributor.
+        owner_role = GEODCAT.distributor
+    owner = owner_to_rdf(dataset, graph)
+    if owner:
+        d.set(owner_role, owner)
 
-    contact_point = contact_point_to_rdf(dataset.contact_point, graph)
-    if contact_point:
-        d.set(DCAT.contactPoint, contact_point)
+    for contact_point, predicate in contact_points_to_rdf(dataset.contact_points, graph):
+        d.set(predicate, contact_point)
 
     return d
 
@@ -748,7 +752,13 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
     description = d.value(DCT.description) or d.value(DCT.abstract)
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
-    dataset.contact_point = contact_point_from_rdf(d, dataset) or dataset.contact_point
+    roles = [  # Imbricated list of contact points for each role
+        contact_points_from_rdf(d, rdf_entity, role, dataset)
+        for rdf_entity, role in CONTACT_POINT_ENTITY_TO_ROLE.items()
+    ]
+    dataset.contact_points = [  # Flattened list of contact points
+        contact_point for role in roles for contact_point in role
+    ] or dataset.contact_points
     schema = schema_from_rdf(d)
     if schema:
         dataset.schema = schema
