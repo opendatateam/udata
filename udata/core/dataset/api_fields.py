@@ -125,7 +125,7 @@ resource_fields = api.model(
         "title": fields.String(description="The resource title", required=True),
         "description": fields.Markdown(description="The resource markdown description"),
         "filetype": fields.String(
-            description=("Whether the resource is an uploaded file, " "a remote file or an API"),
+            description=("Whether the resource is an uploaded file, a remote file or an API"),
             required=True,
             enum=list(RESOURCE_FILETYPES),
         ),
@@ -236,6 +236,17 @@ community_resource_fields = api.inherit(
     },
 )
 
+
+upload_community_fields = api.inherit(
+    "UploadedCommunityResource",
+    community_resource_fields,
+    {
+        "success": fields.Boolean(
+            description="Whether the upload succeeded or not.", readonly=True, default=True
+        ),
+    },
+)
+
 community_resource_page_fields = api.model(
     "CommunityResourcePage", fields.pager(community_resource_fields)
 )
@@ -272,7 +283,7 @@ DEFAULT_MASK = ",".join(
         "archived",
         "quality",
         "internal",
-        "contact_point",
+        "contact_points",
     )
 )
 
@@ -332,7 +343,7 @@ dataset_fields = api.model(
         ),
         "frequency_date": fields.ISODateTime(
             description=(
-                "Next expected update date, you will be notified " "once that date is reached."
+                "Next expected update date, you will be notified once that date is reached."
             )
         ),
         "harvest": fields.Nested(
@@ -386,8 +397,8 @@ dataset_fields = api.model(
             readonly=True,
             description="Site internal and specific object's data",
         ),
-        "contact_point": fields.Nested(
-            contact_point_fields, allow_null=True, description="The dataset's contact points"
+        "contact_points": fields.List(
+            fields.Nested(contact_point_fields, description="The dataset contact points"),
         ),
     },
     mask=DEFAULT_MASK,

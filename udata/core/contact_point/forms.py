@@ -18,3 +18,4 @@ class ContactPointForm(ModelForm):
     )
     owner = fields.CurrentUserField()
     organization = fields.PublishAsField(_("Publish as"))
+    role = fields.StringField(_("Role"))

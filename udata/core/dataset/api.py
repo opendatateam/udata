@@ -54,6 +54,7 @@ from .api_fields import (
     license_fields,
     resource_fields,
     resource_type_fields,
+    upload_community_fields,
     upload_fields,
 )
 from .constants import RESOURCE_TYPES, UPDATE_FREQUENCIES
@@ -108,6 +109,7 @@ class DatasetApiParser(ModelApiParser):
         self.parser.add_argument("schema", type=str, location="args")
         self.parser.add_argument("schema_version", type=str, location="args")
         self.parser.add_argument("topic", type=str, location="args")
+        self.parser.add_argument("credit", type=str, location="args")
         self.parser.add_argument("dataservice", type=str, location="args")
 
     @staticmethod
@@ -451,7 +453,7 @@ class UploadNewCommunityResources(UploadMixin, API):
         responses={415: "Incorrect file content type", 400: "Upload error"},
     )
     @api.expect(upload_parser)
-    @api.marshal_with(upload_fields, code=201)
+    @api.marshal_with(upload_community_fields, code=201)
     def post(self, dataset):
         """Upload a new community resource"""
         infos = self.handle_upload(dataset)
@@ -510,7 +512,7 @@ class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
         "upload_community_resource",
         responses={415: "Incorrect file content type", 400: "Upload error"},
     )
-    @api.marshal_with(upload_fields)
+    @api.marshal_with(upload_community_fields)
     def post(self, community):
         """Update the file related to a given community resource"""
         ResourceEditPermission(community).test()

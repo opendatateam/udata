@@ -122,13 +122,13 @@ def validate_contact_point(form, field):
     """Validates contact point with dataset's org or owner"""
     from udata.models import ContactPoint
 
-    if field.data:
+    for contact_point in field.data or []:
         if form.organization.data:
             contact_point = ContactPoint.objects(
-                id=field.data.id, organization=form.organization.data
+                id=contact_point.id, organization=form.organization.data
             ).first()
         elif form.owner.data:
-            contact_point = ContactPoint.objects(id=field.data.id, owner=form.owner.data).first()
+            contact_point = ContactPoint.objects(id=contact_point.id, owner=form.owner.data).first()
         if not contact_point:
             raise validators.ValidationError(
                 _("Wrong contact point id or contact point ownership mismatch")
@@ -175,7 +175,7 @@ class DatasetForm(ModelForm):
     organization = fields.PublishAsField(_("Publish as"))
     extras = fields.ExtrasField()
     resources = fields.NestedModelList(ResourceForm)
-    contact_point = fields.ContactPointField(validators=[validate_contact_point])
+    contact_points = fields.ContactPointListField(validators=[validate_contact_point])
 
 
 class ResourcesListForm(ModelForm):
