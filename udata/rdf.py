@@ -6,6 +6,7 @@ import logging
 import re
 from html.parser import HTMLParser
 
+import mongoengine
 from flask import abort, current_app, request, url_for
 from rdflib import BNode, Graph, Literal, URIRef
 from rdflib.namespace import (
@@ -47,6 +48,7 @@ EUFORMAT = Namespace("http://publications.europa.eu/resource/authority/file-type
 IANAFORMAT = Namespace("https://www.iana.org/assignments/media-types/")
 DCT = DCTERMS  # More common usage
 VCARD = Namespace("http://www.w3.org/2006/vcard/ns#")
+GEODCAT = Namespace("http://data.europa.eu/930/")
 
 namespace_manager = NamespaceManager(Graph())
 namespace_manager.bind("adms", ADMS)
@@ -126,6 +128,19 @@ EU_HVD_CATEGORIES = {
 }
 HVD_LEGISLATION = "http://data.europa.eu/eli/reg_impl/2023/138/oj"
 TAG_TO_EU_HVD_CATEGORIES = {slugify_tag(EU_HVD_CATEGORIES[uri]): uri for uri in EU_HVD_CATEGORIES}
+
+AGENT_ROLE_TO_RDF_PREDICATE = {
+    "contact": DCAT.contactPoint,
+    "publisher": DCT.publisher,
+    "creator": DCT.creator,
+}
+
+# Map rdf contact point entity to role
+CONTACT_POINT_ENTITY_TO_ROLE = {
+    DCAT.contactPoint: "contact",
+    DCT.publisher: "publisher",
+    DCT.creator: "creator",
+}
 
 
 def guess_format(string):
@@ -294,61 +309,77 @@ def themes_from_rdf(rdf):
     return list(set(tags))
 
 
-def contact_point_from_rdf(rdf, dataset):
-    contact_point = rdf.value(DCAT.contactPoint)
-    if contact_point:
-        name = rdf_value(contact_point, VCARD.fn) or ""
-        email = (
-            rdf_value(contact_point, VCARD.hasEmail)
-            or rdf_value(contact_point, VCARD.email)
-            or rdf_value(contact_point, DCAT.email)
-        )
-        email = email.replace("mailto:", "").strip() if email else None
-        contact_form = rdf_value(contact_point, VCARD.hasUrl)
-        if not email and not contact_form:
-            return
-        if dataset.organization:
-            contact, _ = ContactPoint.objects.get_or_create(
-                name=name, email=email, contact_form=contact_form, organization=dataset.organization
+def contact_points_from_rdf(rdf, prop, role, dataset):
+    for contact_point in rdf.objects(prop):
+        # Read contact point information
+        if prop == DCAT.contactPoint:  # Could be split on the type of contact_point instead
+            name = rdf_value(contact_point, VCARD.fn) or ""
+            email = (
+                rdf_value(contact_point, VCARD.hasEmail)
+                or rdf_value(contact_point, VCARD.email)
+                or rdf_value(contact_point, DCAT.email)
             )
-        elif dataset.owner:
-            contact, _ = ContactPoint.objects.get_or_create(
-                name=name, email=email, contact_form=contact_form, owner=dataset.owner
-            )
+            email = email.replace("mailto:", "").strip() if email else None
+            contact_form = rdf_value(contact_point, VCARD.hasUrl)
         else:
-            contact = None
-        return contact
+            name = (
+                rdf_value(contact_point, FOAF.name)
+                or rdf_value(contact_point, SKOS.prefLabel)
+                or ""
+            )
+            email = rdf_value(contact_point, FOAF.mbox)
+            email = email.replace("mailto:", "").strip() if email else None
+            contact_form = None
+
+        # Tested at validation time, because it depends on the role
+        # if not email and not contact_form:
+        #         continue
+
+        # Create of get contact point object
+        if not dataset.organization and not dataset.owner:
+            continue
+        org_or_owner = {}
+        if dataset.organization:
+            org_or_owner = {"organization": dataset.organization}
+        else:
+            org_or_owner = {"owner": dataset.owner}
+        try:
+            contact, _ = ContactPoint.objects.get_or_create(
+                name=name, email=email, contact_form=contact_form, role=role, **org_or_owner
+            )
+        except mongoengine.errors.ValidationError as validation_error:
+            log.warning(f"Unable to validate contact point: {validation_error}", exc_info=True)
+            continue
+        yield contact
 
 
-def contact_point_to_rdf(contact, graph=None):
+def contact_points_to_rdf(contacts, graph=None):
     """
     Map a contact point to a DCAT/RDF graph
     """
-    if not contact:
-        return None
-
     graph = graph or Graph(namespace_manager=namespace_manager)
 
-    if contact.id:
-        id = URIRef(
-            endpoint_for(
-                "api.contact_point",
-                contact_point=contact.id,
-                _external=True,
+    for contact in contacts:
+        if contact.id:
+            id = URIRef(
+                endpoint_for(
+                    "api.contact_point",
+                    contact_point=contact.id,
+                    _external=True,
+                )
             )
-        )
-    else:
-        id = BNode()
+        else:
+            id = BNode()
 
-    node = graph.resource(id)
-    node.set(RDF.type, VCARD.Kind)
-    if contact.name:
-        node.set(VCARD.fn, Literal(contact.name))
-    if contact.email:
-        node.set(VCARD.hasEmail, URIRef(f"mailto:{contact.email}"))
-    if contact.contact_form:
-        node.set(VCARD.hasUrl, URIRef(contact.contact_form))
-    return node
+        node = graph.resource(id)
+        node.set(RDF.type, VCARD.Kind)
+        if contact.name:
+            node.set(VCARD.fn, Literal(contact.name))
+        if contact.email:
+            node.set(VCARD.hasEmail, URIRef(f"mailto:{contact.email}"))
+        if contact.contact_form:
+            node.set(VCARD.hasUrl, URIRef(contact.contact_form))
+        yield node, AGENT_ROLE_TO_RDF_PREDICATE.get(contact.role, DCAT.contactPoint)
 
 
 def primary_topic_identifier_from_rdf(graph: Graph, resource: RdfResource):

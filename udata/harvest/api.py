@@ -36,7 +36,11 @@ error_fields = api.model(
             description="The error creation date", required=True, readonly=True
         ),
         "message": fields.String(description="The error short message", required=True),
-        "details": fields.String(description="Optional details (ie. stacktrace)"),
+        "details": fields.Raw(
+            attribute=lambda o: o.details if admin_permission else None,
+            description="Optional details (only for super-admins)",
+            readonly=True,
+        ),
     },
 )
 

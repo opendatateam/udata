@@ -19,6 +19,7 @@ class OrganizationTasksTest(APITestCase):
             "email": "mooneywayne@cobb-cochran.com",
             "name": "Martin Schultz",
             "organization": str(org.id),
+            "role": "contact",
         }
         response = self.post(url_for("api.contact_points"), data)
         self.assert201(response)

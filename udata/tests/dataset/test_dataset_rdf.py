@@ -38,6 +38,7 @@ from udata.rdf import (
     DCATAP,
     DCT,
     FREQ,
+    GEODCAT,
     HVD_LEGISLATION,
     SCHEMA,
     SKOS,
@@ -95,6 +96,7 @@ class DatasetToRdfTest:
             name="Organization contact",
             email="hello@its.me",
             contact_form="https://data.support.com",
+            role="contact",
         )
         remote_url = "https://somewhere.org/dataset"
         dataset = DatasetFactory(
@@ -103,7 +105,7 @@ class DatasetToRdfTest:
             frequency="daily",
             acronym="acro",
             organization=org,
-            contact_point=contact,
+            contact_points=[contact],
             harvest=HarvestDatasetMetadata(
                 remote_url=remote_url, dct_identifier="foobar-identifier"
             ),
@@ -143,6 +145,31 @@ class DatasetToRdfTest:
         assert contact_rdf.value(VCARD.fn) == Literal("Organization contact")
         assert contact_rdf.value(VCARD.hasEmail).identifier == URIRef("mailto:hello@its.me")
         assert contact_rdf.value(VCARD.hasUrl).identifier == URIRef("https://data.support.com")
+
+    def test_dataset_with_publisher_contact_point(self, app):
+        org = OrganizationFactory(name="organization")
+        contact = ContactPointFactory(
+            name="Publisher Contact",
+            role="publisher",
+        )
+        remote_url = "https://somewhere.org/dataset"
+        dataset = DatasetFactory(
+            organization=org,
+            contact_points=[contact],
+            harvest=HarvestDatasetMetadata(
+                remote_url=remote_url, dct_identifier="foobar-identifier"
+            ),
+        )
+        app.config["SITE_TITLE"] = "Test site title"
+        d = dataset_to_rdf(dataset)
+
+        contact_rdf = d.value(DCT.publisher)
+        assert contact_rdf.value(RDF.type).identifier == VCARD.Kind
+        assert contact_rdf.value(VCARD.fn) == Literal("Publisher Contact")
+
+        org_rdf = d.value(GEODCAT.distributor)
+        assert org_rdf.value(RDF.type).identifier == FOAF.Organization
+        assert org_rdf.value(FOAF.name) == Literal("organization")
 
     def test_map_unkownn_frequencies(self):
         assert frequency_to_rdf("hourly") == FREQ.continuous
@@ -210,9 +237,9 @@ class DatasetToRdfTest:
         resource_2 = ResourceFactory(
             url="https://services.data.shom.fr/INSPIRE/wms/r?service=WMS&request=GetCapabilities&version=1.3.0",
         )
-        contact = ContactPointFactory()
+        contact = ContactPointFactory(role="contact")
         dataset = DatasetFactory(
-            resources=[resource_1, resource_2], license=license, contact_point=contact
+            resources=[resource_1, resource_2], license=license, contact_points=[contact]
         )
 
         r = resource_to_rdf(resource_1, dataset)
