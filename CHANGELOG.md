@@ -8,6 +8,7 @@
 - Fix wrong marshal for community resource uploads [#3261](https://github.com/opendatateam/udata/pull/3261)
 - Return harvesters's errors details only for super-admins [#3264](https://github.com/opendatateam/udata/pull/3264)
 - feat: topics list filtered by visible_by_user [#3265](https://github.com/opendatateam/udata/pull/3265)
+- Add a CI job to create a release on Sentry [#3266](https://github.com/opendatateam/udata/pull/3266)
 
 ## 10.0.8 (2025-01-31)
 
