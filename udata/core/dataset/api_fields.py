@@ -341,6 +341,11 @@ dataset_fields = api.model(
             enum=list(UPDATE_FREQUENCIES),
             default=DEFAULT_FREQUENCY,
         ),
+        "frequency_info": fields.Nested(
+            frequency_fields,
+            description="The update frequency full info with label",
+            attribute="frequency",
+        ),
         "frequency_date": fields.ISODateTime(
             description=(
                 "Next expected update date, you will be notified once that date is reached."

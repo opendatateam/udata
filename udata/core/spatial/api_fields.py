@@ -67,9 +67,13 @@ spatial_coverage_fields = api.model(
             geojson, allow_null=True, description="A multipolygon for the whole coverage"
         ),
         "zones": fields.List(fields.String, description="The covered zones identifiers"),
+        "zones_info": fields.List(
+            zone_fields, attribute="zones", description="The covered zones identifiers"
+        ),
         "granularity": fields.String(
             default="other", description="The spatial/territorial granularity"
         ),
+        "granularity_label": fields.String(description="The spatial/territorial granularity label"),
     },
 )
 
