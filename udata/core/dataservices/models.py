@@ -132,10 +132,6 @@ class Dataservice(WithMetrics, Owned, db.Document):
     description = field(db.StringField(default=""), description="In markdown")
     base_api_url = field(db.URLField(), sortable=True)
 
-    endpoint_description_url = field(
-        db.URLField()
-    )  # Legacy: to remove / replaced by `machine_documentation_url` or `technical_documentation_url`
-
     machine_documentation_url = field(
         db.URLField(), description="Swagger link, OpenAPI format, WMS XML…"
     )
@@ -149,11 +145,8 @@ class Dataservice(WithMetrics, Owned, db.Document):
     availability_url = field(db.URLField())
 
     access_type = field(db.StringField(choices=DATASERVICE_ACCESS_TYPES))
-
-    is_restricted = db.BooleanField()  # Legacy: to remove / replaced by `access_type`
     authorization_request_url = field(db.URLField())
 
-    has_token = db.BooleanField()  # Legacy: to remove / replaced by `access_type`
     format = field(db.StringField(choices=DATASERVICE_FORMATS))
 
     license = field(
