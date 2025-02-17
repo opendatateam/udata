@@ -54,7 +54,7 @@ class SuggestZonesAPI(API):
     def get(self):
         """Geospatial zones suggest endpoint using mongoDB contains"""
         args = suggest_parser.parse_args()
-        geozones = GeoZone.objects(Q(name__icontains=args["q"]) | Q(code__icontains=args["q"]))
+        geozones = GeoZone.objects(Q(name__icontains=args["q"]) | Q(code__icontains=args["q"]) | Q(id__icontains=args["q"]))
 
         # We're manually sorting based on zone level int (cause we don't have the int value directly in mongo document)
         level_id_to_int_level = {level.id: level.admin_level for level in GeoLevel.objects()}
