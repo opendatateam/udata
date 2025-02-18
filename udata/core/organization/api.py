@@ -268,7 +268,9 @@ class MembershipRequestAPI(API):
                     403,
                     "You can only access your own membership requests or the one of your organizations.",
                 )
-            return [r for r in org.requests if r.user.id == args["user"]]
+            if args["status"]:
+                return [r for r in org.requests if (r.status == args["status"] and str(r.user.id) == args["user"])]
+            return [r for r in org.requests if str(r.user.id) == args["user"]]
         OrganizationPrivatePermission(org).test()
         if args["status"]:
             return [r for r in org.requests if r.status == args["status"]]
