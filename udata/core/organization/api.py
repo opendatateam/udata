@@ -248,6 +248,7 @@ requests_parser.add_argument(
     "user", type=str, help="If provided, only return requests for this user", location="args"
 )
 
+
 @ns.route("/<org:org>/membership/", endpoint="request_membership", doc=common_doc)
 class MembershipRequestAPI(API):
     @api.secure
@@ -259,8 +260,14 @@ class MembershipRequestAPI(API):
         """List membership requests for a given organization"""
         args = requests_parser.parse_args()
         if args["user"]:
-            if not current_user.is_authenticated or (str(current_user.id) != args["user"] and not OrganizationPrivatePermission(org).can()):
-                api.abort(403, "You can only access your own membership requests or the one of your organizations.")
+            if not current_user.is_authenticated or (
+                str(current_user.id) != args["user"]
+                and not OrganizationPrivatePermission(org).can()
+            ):
+                api.abort(
+                    403,
+                    "You can only access your own membership requests or the one of your organizations.",
+                )
             return [r for r in org.requests if r.user.id == args["user"]]
         OrganizationPrivatePermission(org).test()
         if args["status"]:
