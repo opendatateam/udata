@@ -547,6 +547,7 @@ class ResourceAPI(ResourceMixin, API):
         resource = self.get_resource_or_404(dataset, rid)
         form = api.validate(ResourceForm, resource)
 
+        # ensure filetype is not modified after creation
         if (
             form._fields.get("filetype").data
             and form._fields.get("filetype").data != resource.filetype
