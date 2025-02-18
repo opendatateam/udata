@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2025-01-28 11:37+0100\n"
-"PO-Revision-Date: 2025-02-18 10:03\n"
+"POT-Creation-Date: 2025-02-18 11:06+0100\n"
+"PO-Revision-Date: 2025-02-18 10:23\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -50,7 +50,7 @@ msgstr "Ce jeu de données a été archivé"
 msgid "Invalid URL \"{url}\": {reason}"
 msgstr "URL invalide \"{url}\" : {reason}"
 
-#: udata/tests/api/test_datasets_api.py:892 udata/tests/test_model.py:367
+#: udata/tests/api/test_datasets_api.py:902 udata/tests/test_model.py:367
 #: udata/uris.py:55
 msgid "Invalid URL \"{url}\""
 msgstr "URL invalide \"{url}\""
@@ -198,16 +198,16 @@ msgstr "Souhaitez-vous générer des données d'exemple ?"
 msgid "Your udata instance is ready!"
 msgstr "Votre instance udata est prête !"
 
-#: udata/core/owned.py:58 udata/forms/fields.py:745
+#: udata/core/owned.py:64 udata/forms/fields.py:746
 #: udata/tests/api/test_dataservices_api.py:437
 msgid "You can only set yourself as owner"
 msgstr "Vous ne pouvez définir que vous-même en tant que propriétaire"
 
-#: udata/core/owned.py:67
+#: udata/core/owned.py:73
 msgid "Unknown organization"
 msgstr "Organisation inconnue"
 
-#: udata/core/owned.py:71 udata/forms/fields.py:776
+#: udata/core/owned.py:77 udata/forms/fields.py:778
 #: udata/tests/api/test_dataservices_api.py:451
 msgid "Permission denied for this organization"
 msgstr "Permission refusée pour cette organisation"
@@ -261,7 +261,7 @@ msgstr "Créateur"
 msgid "Publisher"
 msgstr "Éditeur"
 
-#: udata/core/contact_point/models.py:26 udata/tests/api/test_contact_points.py:56
+#: udata/core/contact_point/models.py:26 udata/tests/api/test_contact_points.py:58
 msgid "At least an email or a contact form is required for a contact point"
 msgstr "Au moins un e-mail ou un formulaire de contact est requis pour un point de contact"
 
@@ -269,12 +269,12 @@ msgstr "Au moins un e-mail ou un formulaire de contact est requis pour un point 
 msgid "dataservice"
 msgstr "API"
 
-#: udata/core/dataservices/models.py:172 udata/core/dataset/models.py:569
+#: udata/core/dataservices/models.py:179 udata/core/dataset/models.py:569
 #: udata/mongo/datetime_fields.py:60
 msgid "Creation date"
 msgstr "Date de création"
 
-#: udata/core/dataservices/models.py:178 udata/core/dataset/models.py:572
+#: udata/core/dataservices/models.py:185 udata/core/dataset/models.py:572
 #: udata/mongo/datetime_fields.py:66
 msgid "Last modification date"
 msgstr "Date de dernière modification"
@@ -497,7 +497,7 @@ msgstr "La taille du fichier en octets"
 msgid "Related dataset"
 msgstr "Jeu de données concerné"
 
-#: udata/core/dataset/forms.py:134 udata/tests/api/test_datasets_api.py:804
+#: udata/core/dataset/forms.py:134 udata/tests/api/test_datasets_api.py:814
 msgid "Wrong contact point id or contact point ownership mismatch"
 msgstr "Mauvais ID de point de contact ou incompatibilité de possession du point de contact"
 
@@ -571,18 +571,18 @@ msgstr "Données pivot"
 msgid "A schema must contains a name or an URL when a version is provided."
 msgstr "Un schéma doit contenir un nom ou une URL lorsqu'une version est fournie."
 
-#: udata/core/dataset/models.py:167 udata/tests/api/test_datasets_api.py:900
-#: udata/tests/api/test_datasets_api.py:911
+#: udata/core/dataset/models.py:167 udata/tests/api/test_datasets_api.py:910
+#: udata/tests/api/test_datasets_api.py:921
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr "Le nom du schéma \"{schema}\" n'est pas une valeur autorisée. Valeurs autorisées : {values}"
 
-#: udata/core/dataset/models.py:186 udata/tests/api/test_datasets_api.py:922
+#: udata/core/dataset/models.py:186 udata/tests/api/test_datasets_api.py:932
 msgid "Version \"{version}\" is not an allowed value for the schema \"{name}\". Allowed versions: {values}"
 msgstr "La version \"{version}\" n'est pas une valeur autorisée pour le schéma \"{name}\". Versions autorisées : {values}"
 
-#: udata/core/dataset/models.py:463 udata/core/dataset/rdf.py:594
-#: udata/tests/dataset/test_dataset_rdf.py:629
-#: udata/tests/dataset/test_dataset_rdf.py:642
+#: udata/core/dataset/models.py:463 udata/core/dataset/rdf.py:598
+#: udata/tests/dataset/test_dataset_rdf.py:656
+#: udata/tests/dataset/test_dataset_rdf.py:669
 msgid "Nameless resource"
 msgstr "Ressource sans nom"
 
@@ -594,7 +594,7 @@ msgstr "Future date de mise à jour"
 msgid "dataset"
 msgstr "jeu de données"
 
-#: udata/core/dataset/rdf.py:592 udata/tests/dataset/test_dataset_rdf.py:616
+#: udata/core/dataset/rdf.py:596 udata/tests/dataset/test_dataset_rdf.py:643
 msgid "{format} resource"
 msgstr "Ressource {format}"
 
@@ -1165,11 +1165,12 @@ msgstr "Identifiants inconnus : {identifiers}"
 msgid "Unable to parse date range"
 msgstr "Incapable de comprendre la date"
 
-#: udata/forms/fields.py:738 udata/forms/fields.py:769
+#: udata/forms/fields.py:739 udata/forms/fields.py:771
+#: udata/tests/forms/test_publish_as_field.py:214
 msgid "Cannot change owner after creation. Please use transfer feature."
 msgstr "Impossible de modifier le propriétaire après la création. Veuillez utiliser la fonctionnalité de transfert."
 
-#: udata/forms/fields.py:743 udata/forms/fields.py:774
+#: udata/forms/fields.py:744 udata/forms/fields.py:776
 msgid "You must be authenticated"
 msgstr "Vous devez être authentifié"
 
@@ -1619,10 +1620,6 @@ msgstr "Si vous avez oublié votre mot de passe, vous pouvez le réinitialiser"
 #: udata/templates/security/email/welcome_existing.html:25
 msgid "Here"
 msgstr "Ici"
-
-#: udata/tests/api/test_contact_points.py:66
-msgid "ValidationError (ContactPoint:None) (Field is required: ['role'])"
-msgstr ""
 
 #: udata/tests/forms/test_model_field.py:165
 msgid "Expect a \"Target\" class but \"Wrong\" was found"
