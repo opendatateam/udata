@@ -295,7 +295,7 @@ class MembershipAPITest:
             "refused",
         ],
     )
-    def test_applicant_can_get_their_membership_requests(self, api, searched_status: str):
+    def test_applicant_can_get_their_membership_requests_with_status(self, api, searched_status: str):
         applicant = api.login()
         membership_request = MembershipRequest(user=applicant, comment="test")
         organization = OrganizationFactory(members=[], requests=[membership_request])
