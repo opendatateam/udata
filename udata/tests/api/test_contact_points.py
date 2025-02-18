@@ -65,8 +65,9 @@ class ContactPointAPITest:
         data = {"name": faker.word(), "email": faker.email()}
         response = api.post(url_for("api.contact_points"), data=data)
         assert400(response)
-        assert response.json["message"] == _(
-            "ValidationError (ContactPoint:None) (Field is required: ['role'])"
+        assert (
+            response.json["message"]
+            == "ValidationError (ContactPoint:None) (Field is required: ['role'])"
         )
         assert ContactPoint.objects.count() == 0
 
