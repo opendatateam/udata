@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2025-01-28 11:37+0100\n"
-"PO-Revision-Date: 2025-02-05 16:55\n"
+"PO-Revision-Date: 2025-02-18 10:03\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -251,15 +251,15 @@ msgstr "Rôle"
 
 #: udata/core/contact_point/models.py:9
 msgid "Contact"
-msgstr ""
+msgstr "Contact"
 
 #: udata/core/contact_point/models.py:10
 msgid "Creator"
-msgstr ""
+msgstr "Créateur"
 
 #: udata/core/contact_point/models.py:11
 msgid "Publisher"
-msgstr ""
+msgstr "Éditeur"
 
 #: udata/core/contact_point/models.py:26 udata/tests/api/test_contact_points.py:56
 msgid "At least an email or a contact form is required for a contact point"
