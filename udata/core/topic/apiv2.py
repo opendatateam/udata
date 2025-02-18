@@ -3,6 +3,7 @@ import logging
 import mongoengine
 from bson import ObjectId
 from flask import request, url_for
+from flask_security import current_user
 
 from udata.api import API, apiv2, fields
 from udata.core.dataset.api import DatasetApiParser
@@ -116,7 +117,7 @@ class TopicsAPI(API):
     def get(self):
         """List all topics"""
         args = topic_parser.parse()
-        topics = Topic.objects()
+        topics = Topic.objects.visible_by_user(current_user, mongoengine.Q(private__ne=True))
         topics = topic_parser.parse_filters(topics, args)
         sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
         return topics.order_by(sort).paginate(args["page"], args["page_size"])

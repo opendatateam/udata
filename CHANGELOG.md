@@ -2,12 +2,13 @@
 
 ## Current (in progress)
 
-- Harvest attribution roles [#3149](https://github.com/opendatateam/udata/pull/3149)
+- Harvest attribution roles [#3149](https://github.com/opendatateam/udata/pull/3149) [#3270](https://github.com/opendatateam/udata/pull/3270)
 - Allow super-admins to change objects' owners [#3260](https://github.com/opendatateam/udata/pull/3260)
 - Cannot update resource filetype after creation [#3254](https://github.com/opendatateam/udata/pull/3254)
 - Fix contact point permissions [#3253](https://github.com/opendatateam/udata/pull/3253)
 - Fix wrong marshal for community resource uploads [#3261](https://github.com/opendatateam/udata/pull/3261)
 - Return harvesters's errors details only for super-admins [#3264](https://github.com/opendatateam/udata/pull/3264)
+- feat: topics list filtered by visible_by_user [#3265](https://github.com/opendatateam/udata/pull/3265)
 
 ## 10.0.8 (2025-01-31)
 
