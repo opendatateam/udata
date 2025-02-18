@@ -281,7 +281,10 @@ class MembershipAPITest:
         membership_request = MembershipRequest(user=applicant, comment="test")
         organization = OrganizationFactory(members=[], requests=[membership_request])
 
-        response = api.get(url_for("api.request_membership", org=organization), query_string={"user": str(applicant.id)})
+        response = api.get(
+            url_for("api.request_membership", org=organization),
+            query_string={"user": str(applicant.id)},
+        )
         assert200(response)
 
     @pytest.mark.parametrize(
@@ -296,13 +299,16 @@ class MembershipAPITest:
         applicant = api.login()
         membership_request = MembershipRequest(user=applicant, comment="test")
         organization = OrganizationFactory(members=[], requests=[membership_request])
-        response = api.get(url_for("api.request_membership", org=organization), query_string={"user": str(applicant.id), "status": searched_status})
+        response = api.get(
+            url_for("api.request_membership", org=organization),
+            query_string={"user": str(applicant.id), "status": searched_status},
+        )
         assert200(response)
         requests = response.json
         if searched_status == "pending":
-            assert(len(requests) == 1)
+            assert len(requests) == 1
         else:
-            assert(len(requests) == 0)
+            assert len(requests) == 0
 
     def test_get_members_with_or_without_email(self, api):
         admin = Member(
