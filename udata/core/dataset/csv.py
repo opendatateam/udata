@@ -93,6 +93,6 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
         ("schema_name", "schema.name"),
         ("schema_version", "schema.version"),
         ("preview_url", lambda o: o.preview_url or None),
-        ("extras", lambda o: json.dumps(o.extras)),
+        ("extras", lambda o: json.dumps(o.extras, default=str)),
     )
     attribute = "resources"
