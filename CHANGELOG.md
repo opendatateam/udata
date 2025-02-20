@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/73e1ea97-9e41-47ee-bb14-e366d1fb65d3)# Changelog
+# Changelog
 
 ## Current (in progress)
 
