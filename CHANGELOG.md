@@ -1,8 +1,8 @@
-# Changelog
+![image](https://github.com/user-attachments/assets/73e1ea97-9e41-47ee-bb14-e366d1fb65d3)# Changelog
 
 ## Current (in progress)
 
-- Nothing yet
+- The `extras` column in the resource catalog is now dumped as json [#3272](https://github.com/opendatateam/udata/pull/3272) 
 
 ## 10.1.0 (2025-02-20)
 
