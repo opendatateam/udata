@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 10.1.0 (2025-02-20)
 
 - **breaking change** Harvest attribution roles [#3149](https://github.com/opendatateam/udata/pull/3149) [#3270](https://github.com/opendatateam/udata/pull/3270)
