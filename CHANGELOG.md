@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- The `extras` column in the resource catalog is now dumped as json [#3272](https://github.com/opendatateam/udata/pull/3272) 
 
 ## 10.1.0 (2025-02-20)
 
