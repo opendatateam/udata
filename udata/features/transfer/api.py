@@ -1,4 +1,4 @@
-from flask import request
+from flask import abort, request
 
 from udata.api import API, api, base_reference, fields
 from udata.core.dataservices.models import Dataservice
@@ -27,7 +27,7 @@ transfer_request_fields = api.model(
         "recipient": fields.Nested(
             base_reference,
             required=True,
-            description=("The transfer recipient, " "either an user or an organization"),
+            description=("The transfer recipient, either an user or an organization"),
         ),
         "comment": fields.String(
             description="An explanation about the transfer request", required=True
@@ -68,12 +68,12 @@ transfer_fields = api.model(
         "owner": fields.Polymorph(
             person_mapping,
             readonly=True,
-            description=("The user or organization currently owning " "the transfered object"),
+            description=("The user or organization currently owning the transfered object"),
         ),
         "recipient": fields.Polymorph(
             person_mapping,
             readonly=True,
-            description=("The user or organization receiving " "the transfered object"),
+            description=("The user or organization receiving the transfered object"),
         ),
         "subject": fields.Polymorph(
             subject_mapping, readonly=True, description="The transfered object"
@@ -185,6 +185,9 @@ class TransferRequestAPI(API):
     def post(self, id):
         """Respond to a transfer request"""
         transfer = Transfer.objects.get_or_404(id=id_or_404(id))
+
+        if transfer.status != "pending":
+            abort(400, "Cannot update transfer after accepting/refusing")
 
         data = request.json
         comment = data.get("comment")

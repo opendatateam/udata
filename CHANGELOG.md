@@ -10,6 +10,7 @@
   - dataset and dataservices now have a list of contact points
   - migration needed
 - Allow super-admins to change objects' owners [#3260](https://github.com/opendatateam/udata/pull/3260)
+- Cannot respond to a transfer after first response [#3255](https://github.com/opendatateam/udata/pull/3255)
 - Fix contact point permissions [#3253](https://github.com/opendatateam/udata/pull/3253)
 - Fix wrong marshal for community resource uploads [#3261](https://github.com/opendatateam/udata/pull/3261)
 - Return harvesters's errors details only for super-admins [#3264](https://github.com/opendatateam/udata/pull/3264)
