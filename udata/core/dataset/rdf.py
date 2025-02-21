@@ -110,7 +110,8 @@ def temporal_to_rdf(
     pot = graph.resource(BNode())
     pot.set(RDF.type, DCT.PeriodOfTime)
     pot.set(DCAT.startDate, Literal(daterange.start))
-    pot.set(DCAT.endDate, Literal(daterange.end))
+    if daterange.end:
+        pot.set(DCAT.endDate, Literal(daterange.end))
     return pot
 
 
@@ -422,18 +423,22 @@ def temporal_from_resource(resource):
         g = Graph().parse(str(resource.identifier))
         resource = g.resource(resource.identifier)
     if resource.value(SCHEMA.startDate):
+        end = resource.value(SCHEMA.endDate)
         return db.DateRange(
             start=resource.value(SCHEMA.startDate).toPython(),
-            end=resource.value(SCHEMA.endDate).toPython(),
+            end=end.toPython() if end else None,
         )
     elif resource.value(DCAT.startDate):
+        end = resource.value(DCAT.endDate)
         return db.DateRange(
             start=resource.value(DCAT.startDate).toPython(),
-            end=resource.value(DCAT.endDate).toPython(),
+            end=end.toPython() if end else None,
         )
     elif resource.value(SCV.min):
+        end = resource.value(SCV.max)
         return db.DateRange(
-            start=resource.value(SCV.min).toPython(), end=resource.value(SCV.max).toPython()
+            start=resource.value(SCV.min).toPython(),
+            end=end.toPython() if end else None,
         )
 
 
@@ -775,7 +780,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
 
     temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
     if temporal_coverage:
-        dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
+        dataset.temporal_coverage = temporal_coverage
 
     provenances = provenances_from_rdf(d)
     if provenances:
