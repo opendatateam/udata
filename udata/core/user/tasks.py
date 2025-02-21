@@ -36,6 +36,11 @@ def send_test_mail(email):
 
 @job("notify-inactive-users")
 def notify_inactive_users(self):
+    if not current_app.config["YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION"]:
+        logging.warning(
+            "YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION setting is not set, no deletion planned"
+        )
+        return
     last_login_notification_date = (
         datetime.utcnow()
         - timedelta(days=current_app.config["YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION"] * 365)
@@ -48,6 +53,11 @@ def notify_inactive_users(self):
 
 @job("delete-inactive-users")
 def delete_inactive_users(self):
+    if not current_app.config["YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION"]:
+        logging.warning(
+            "YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION setting is not set, no deletion planned"
+        )
+        return
     last_login_deletion_date = datetime.utcnow() - timedelta(
         days=current_app.config["YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION"] * 365
     )

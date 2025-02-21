@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+import pytest
 from flask import current_app
 
 from udata.core.discussions.factories import DiscussionFactory
@@ -11,6 +12,7 @@ from udata.tests.helpers import capture_mails
 
 
 class UserTasksTest(APITestCase):
+    @pytest.mark.options(YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION=3)
     def test_notify_inactive_users(self):
         last_login_notification_date = (
             datetime.utcnow()
@@ -30,6 +32,7 @@ class UserTasksTest(APITestCase):
         self.assertEqual(mails[0].send_to, set([inactive_user.email]))
         self.assertEqual(mails[0].subject, _("Account inactivity"))
 
+    @pytest.mark.options(YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION=3)
     def test_delete_inactive_users(self):
         last_login_deletion_date = (
             datetime.utcnow()
