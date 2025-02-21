@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - The `extras` column in the resource catalog is now dumped as json [#3272](https://github.com/opendatateam/udata/pull/3272) and [#3273](https://github.com/opendatateam/udata/pull/3273)
+- Add inactive users notification and deletion jobs [#3274](https://github.com/opendatateam/udata/pull/3274)
 
 ## 10.1.0 (2025-02-20)
 
