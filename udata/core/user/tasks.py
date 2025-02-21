@@ -48,7 +48,12 @@ def notify_inactive_users(self):
     )
 
     for user in User.objects(current_login_at__lte=notification_comparison_date):
-        mail.send(_("Account inactivity"), user, "account_inactivity", user=user)
+        mail.send(
+            _("Inactivity of your {site} account").format(site=current_app.config["SITE_TITLE"]),
+            user,
+            "account_inactivity",
+            user=user,
+        )
         user.inactive_deletion_notified_at = datetime.utcnow()
         user.save()
 
@@ -80,4 +85,10 @@ def delete_inactive_users(self):
     ):
         copied_user = copy(user)
         user.mark_as_deleted(notify=False, delete_comments=False)
-        mail.send(_("Inactive account deletion"), copied_user, "inactive_account_deleted")
+        mail.send(
+            _("Deletion of your inactive {site} account").format(
+                site=current_app.config["SITE_TITLE"]
+            ),
+            copied_user,
+            "inactive_account_deleted",
+        )

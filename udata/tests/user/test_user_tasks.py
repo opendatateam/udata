@@ -31,7 +31,10 @@ class UserTasksTest(APITestCase):
         # Assert (only one) mail has been sent
         self.assertEqual(len(mails), 1)
         self.assertEqual(mails[0].send_to, set([inactive_user.email]))
-        self.assertEqual(mails[0].subject, _("Account inactivity"))
+        self.assertEqual(
+            mails[0].subject,
+            _("Inactivity of your {site} account").format(site=current_app.config["SITE_TITLE"]),
+        )
 
     @pytest.mark.options(YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION=3)
     def test_delete_inactive_users(self):
@@ -61,7 +64,14 @@ class UserTasksTest(APITestCase):
         # Assert (only one) mail has been sent
         self.assertEqual(len(mails), 1)
         self.assertEqual(mails[0].send_to, set([inactive_user_to_delete.email]))
-        self.assertEqual(mails[0].subject, _("Inactive account deletion"))
+        self.assertEqual(
+            mails[0].subject,
+            _(
+                _("Deletion of your inactive {site} account").format(
+                    site=current_app.config["SITE_TITLE"]
+                )
+            ),
+        )
 
         # Assert user has been deleted but not its discussion
         inactive_user_to_delete.reload()
