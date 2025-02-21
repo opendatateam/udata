@@ -117,7 +117,7 @@ class Organization(WithMetrics, OrganizationBadgeMixin, db.Datetimed, db.Documen
         max_length=255, required=True, populate_from="name", update=True, follow=True
     )
     description = db.StringField(required=True)
-    url = db.StringField()
+    url = db.URLField()
     image_url = db.StringField()
     logo = db.ImageField(
         fs=avatars, basename=default_image_basename, max_size=LOGO_MAX_SIZE, thumbnails=LOGO_SIZES

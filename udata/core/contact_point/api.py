@@ -2,9 +2,11 @@ import mongoengine
 
 from udata.api import API, api
 from udata.api.parsers import ModelApiParser
+from udata.core.dataset.permissions import OwnablePermission
 
-from .api_fields import contact_point_fields
+from .api_fields import contact_point_fields, contact_point_roles_fields
 from .forms import ContactPointForm
+from .models import CONTACT_ROLES
 
 
 class ContactPointApiParser(ModelApiParser):
@@ -54,6 +56,8 @@ class ContactPointAPI(API):
     @api.response(400, "Validation error")
     def put(self, contact_point):
         """Updates a contact point given its identifier"""
+        OwnablePermission(contact_point).test()
+
         form = api.validate(ContactPointForm, contact_point)
         return form.save()
 
@@ -62,5 +66,18 @@ class ContactPointAPI(API):
     @api.response(204, "Contact point deleted")
     def delete(self, contact_point):
         """Deletes a contact point given its identifier"""
+        OwnablePermission(contact_point).test()
+
         contact_point.delete()
         return "", 204
+
+
+@ns.route("/roles/", endpoint="contact_point_roles")
+class ContactPointRolesAPI(API):
+    """Contact point roles endpoint"""
+
+    @api.doc("contact_point_roles")
+    @api.marshal_list_with(contact_point_roles_fields)
+    def get(self):
+        """List all contact point roles"""
+        return [{"id": id, "label": label} for id, label in CONTACT_ROLES.items()]

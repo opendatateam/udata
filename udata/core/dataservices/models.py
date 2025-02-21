@@ -117,9 +117,7 @@ class Dataservice(WithMetrics, Owned, db.Document):
         return self.title or ""
 
     title = field(
-        db.StringField(required=True),
-        example="My awesome API",
-        sortable=True,
+        db.StringField(required=True), example="My awesome API", sortable=True, show_as_ref=True
     )
     acronym = field(
         db.StringField(max_length=128),
@@ -164,10 +162,17 @@ class Dataservice(WithMetrics, Owned, db.Document):
 
     extras = field(db.ExtrasField())
 
-    contact_point = field(
-        db.ReferenceField("ContactPoint", reverse_delete_rule=db.NULLIFY),
-        nested_fields=contact_api_fields.contact_point_fields,
-        allow_null=True,
+    contact_points = field(
+        db.ListField(
+            field(
+                db.ReferenceField("ContactPoint", reverse_delete_rule=db.PULL),
+                nested_fields=contact_api_fields.contact_point_fields,
+                allow_null=True,
+            ),
+        ),
+        filterable={
+            "key": "contact_point",
+        },
     )
 
     created_at = field(
@@ -183,7 +188,7 @@ class Dataservice(WithMetrics, Owned, db.Document):
         sortable="last_modified",
     )
     deleted_at = field(db.DateTimeField())
-    archived_at = field(db.DateTimeField(), readonly=True)
+    archived_at = field(db.DateTimeField())
 
     datasets = field(
         db.ListField(
@@ -214,7 +219,7 @@ class Dataservice(WithMetrics, Owned, db.Document):
     def self_api_url(self):
         return endpoint_for("api.dataservice", dataservice=self, _external=True)
 
-    @function_field(description="Link to the udata web page for this dataservice")
+    @function_field(description="Link to the udata web page for this dataservice", show_as_ref=True)
     def self_web_url(self):
         return endpoint_for("dataservices.show", dataservice=self, _external=True)
 

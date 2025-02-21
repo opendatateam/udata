@@ -6,6 +6,7 @@ import calendar
 import json
 import logging
 from datetime import date
+from typing import Optional
 
 from dateutil.parser import parse as parse_dt
 from flask import current_app
@@ -22,12 +23,14 @@ from udata.harvest.exceptions import HarvestSkipException
 from udata.models import db
 from udata.rdf import (
     ADMS,
+    CONTACT_POINT_ENTITY_TO_ROLE,
     DCAT,
     DCATAP,
     DCT,
     EUFORMAT,
     EUFREQ,
     FREQ,
+    GEODCAT,
     HVD_LEGISLATION,
     IANAFORMAT,
     SCHEMA,
@@ -35,8 +38,8 @@ from udata.rdf import (
     SKOS,
     SPDX,
     TAG_TO_EU_HVD_CATEGORIES,
-    contact_point_from_rdf,
-    contact_point_to_rdf,
+    contact_points_from_rdf,
+    contact_points_to_rdf,
     namespace_manager,
     rdf_unique_values,
     rdf_value,
@@ -98,7 +101,9 @@ EU_RDF_REQUENCIES = {
 }
 
 
-def temporal_to_rdf(daterange, graph=None):
+def temporal_to_rdf(
+    daterange: db.DateRange, graph: Optional[Graph] = None
+) -> Optional[RdfResource]:
     if not daterange:
         return
     graph = graph or Graph(namespace_manager=namespace_manager)
@@ -110,13 +115,13 @@ def temporal_to_rdf(daterange, graph=None):
     return pot
 
 
-def frequency_to_rdf(frequency, graph=None):
+def frequency_to_rdf(frequency: str, graph: Optional[Graph] = None) -> Optional[str]:
     if not frequency:
         return
     return RDF_FREQUENCIES.get(frequency, getattr(FREQ, frequency))
 
 
-def owner_to_rdf(dataset, graph=None):
+def owner_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> Optional[RdfResource]:
     from udata.core.organization.rdf import organization_to_rdf
     from udata.core.user.rdf import user_to_rdf
 
@@ -127,7 +132,29 @@ def owner_to_rdf(dataset, graph=None):
     return
 
 
-def ogc_service_to_rdf(dataset, resource, graph=None, is_hvd=False):
+def detect_ogc_service(resource: Resource) -> Optional[str]:
+    """
+    Detect if the resource points towards an OGC Service based on either
+    * a known OGC Service format
+    * a REQUEST=GetCapabilities param in url
+    It returns the OGC service type or None
+    """
+    if resource.format and resource.format.strip("ogc:") in OGC_SERVICE_FORMATS:
+        return resource.format.strip("ogc:")
+    url = resource.url.lower()
+    if "request=getcapabilities" in url and any(
+        f"service={format}" in url for format in OGC_SERVICE_FORMATS
+    ):
+        return next(format for format in OGC_SERVICE_FORMATS if f"service={format}" in url)
+
+
+def ogc_service_to_rdf(
+    dataset: Dataset,
+    resource: Resource,
+    ogc_service_type: Optional[str] = None,
+    graph: Optional[Graph] = None,
+    is_hvd: bool = False,
+) -> RdfResource:
     """
     Build a dataservice on the fly for OGC services distributions
     Inspired from https://github.com/SEMICeu/iso-19139-to-dcat-ap/blob/f61b2921dd398b90b2dd2db14085e75687f7616b/iso-19139-to-dcat-ap.xsl#L1419
@@ -139,20 +166,20 @@ def ogc_service_to_rdf(dataset, resource, graph=None, is_hvd=False):
     service.set(DCAT.endpointURL, URIRef(resource.url.split("?")[0]))
     if "request=getcapabilities" in resource.url.lower():
         service.set(DCAT.endpointDescription, URIRef(resource.url))
-    service.set(
-        DCT.conformsTo,
-        URIRef("http://www.opengeospatial.org/standards/" + resource.format.split(":")[-1]),
-    )
+    if ogc_service_type:
+        service.set(
+            DCT.conformsTo,
+            URIRef("http://www.opengeospatial.org/standards/" + ogc_service_type),
+        )
 
     if dataset and dataset.license:
         service.add(DCT.rights, Literal(dataset.license.title))
         if dataset.license.url:
             service.add(DCT.license, URIRef(dataset.license.url))
 
-    if dataset and dataset.contact_point:
-        contact_point = contact_point_to_rdf(dataset.contact_point, graph)
-        if contact_point:
-            service.set(DCAT.contactPoint, contact_point)
+    if dataset and dataset.contact_points:
+        for contact_point, predicate in contact_points_to_rdf(dataset.contact_points, graph):
+            service.set(predicate, contact_point)
 
     if is_hvd:
         # DCAT-AP HVD applicable legislation is also expected at the distribution > accessService level
@@ -165,7 +192,12 @@ def ogc_service_to_rdf(dataset, resource, graph=None, is_hvd=False):
     return service
 
 
-def resource_to_rdf(resource, dataset=None, graph=None, is_hvd=False):
+def resource_to_rdf(
+    resource: Resource,
+    dataset: Optional[Dataset] = None,
+    graph: Optional[Graph] = None,
+    is_hvd: bool = False,
+) -> RdfResource:
     """
     Map a Resource domain model to a DCAT/RDF graph
     """
@@ -215,9 +247,12 @@ def resource_to_rdf(resource, dataset=None, graph=None, is_hvd=False):
         # DCAT-AP HVD applicable legislation is also expected at the distribution level
         r.add(DCATAP.applicableLegislation, URIRef(HVD_LEGISLATION))
 
-    # Add access service for known OGC service formats
-    if resource.format in OGC_SERVICE_FORMATS:
-        r.add(DCAT.accessService, ogc_service_to_rdf(dataset, resource, graph, is_hvd))
+    # Add access service for known OGC resources
+    if ogc_service_type := detect_ogc_service(resource):
+        r.add(
+            DCAT.accessService,
+            ogc_service_to_rdf(dataset, resource, ogc_service_type, graph, is_hvd),
+        )
 
     return r
 
@@ -237,7 +272,7 @@ def dataset_to_graph_id(dataset: Dataset) -> URIRef | BNode:
         return BNode()
 
 
-def dataset_to_rdf(dataset, graph=None):
+def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResource:
     """
     Map a dataset domain model to a DCAT/RDF graph
     """
@@ -307,6 +342,20 @@ def dataset_to_rdf(dataset, graph=None):
     for resource in dataset.resources:
         d.add(DCAT.distribution, resource_to_rdf(resource, dataset, graph, is_hvd))
 
+    if is_hvd:
+        from udata.core.dataservices.models import Dataservice
+        from udata.core.dataservices.rdf import dataservice_as_distribution_to_rdf
+
+        # Add a blank distribution pointing to a DataService using the distribution DCAT.accessService.
+        # Useful for HVD reporting since DataService are not currently harvested by
+        # data.europa.eu as first class entities.
+        # Should be removed once supported by data.europa.eu harvesting.
+        for service in Dataservice.objects.filter(datasets=dataset, tags="hvd"):
+            d.add(
+                DCAT.distribution,
+                dataservice_as_distribution_to_rdf(service, graph),
+            )
+
     if dataset.temporal_coverage:
         d.set(DCT.temporal, temporal_to_rdf(dataset.temporal_coverage, graph))
 
@@ -314,13 +363,16 @@ def dataset_to_rdf(dataset, graph=None):
     if frequency:
         d.set(DCT.accrualPeriodicity, frequency)
 
-    publisher = owner_to_rdf(dataset, graph)
-    if publisher:
-        d.set(DCT.publisher, publisher)
+    owner_role = DCT.publisher
+    if any(contact_point.role == "publisher" for contact_point in dataset.contact_points):
+        # There's already a publisher, so the owner should instead be a distributor.
+        owner_role = GEODCAT.distributor
+    owner = owner_to_rdf(dataset, graph)
+    if owner:
+        d.set(owner_role, owner)
 
-    contact_point = contact_point_to_rdf(dataset.contact_point, graph)
-    if contact_point:
-        d.set(DCAT.contactPoint, contact_point)
+    for contact_point, predicate in contact_points_to_rdf(dataset.contact_points, graph):
+        d.set(predicate, contact_point)
 
     return d
 
@@ -705,7 +757,13 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
     description = d.value(DCT.description) or d.value(DCT.abstract)
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
-    dataset.contact_point = contact_point_from_rdf(d, dataset) or dataset.contact_point
+    roles = [  # Imbricated list of contact points for each role
+        contact_points_from_rdf(d, rdf_entity, role, dataset)
+        for rdf_entity, role in CONTACT_POINT_ENTITY_TO_ROLE.items()
+    ]
+    dataset.contact_points = [  # Flattened list of contact points
+        contact_point for role in roles for contact_point in role
+    ] or dataset.contact_points
     schema = schema_from_rdf(d)
     if schema:
         dataset.schema = schema

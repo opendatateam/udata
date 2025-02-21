@@ -48,6 +48,11 @@ def purge_datasets(self):
             datasets = topic.datasets
             datasets.remove(dataset)
             topic.update(datasets=datasets)
+        # Remove dataservices related dataset
+        for dataservice in Dataservice.objects(datasets=dataset):
+            datasets = dataservice.datasets
+            datasets.remove(dataset)
+            dataservice.update(datasets=datasets)
         # Remove HarvestItem references
         HarvestJob.objects(items__dataset=dataset).update(set__items__S__dataset=None)
         # Remove associated Transfers
@@ -123,7 +128,11 @@ def send_frequency_reminder(self):
 def update_datasets_reuses_metrics(self):
     all_datasets = Dataset.objects.visible().timeout(False)
     for dataset in all_datasets:
-        dataset.count_reuses()
+        try:
+            dataset.count_reuses()
+        except Exception as e:
+            log.error(f"Error for dataset {dataset} during reuses metrics update: {e}")
+            continue
 
 
 def get_queryset(model_cls):

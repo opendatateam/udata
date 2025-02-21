@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2024-12-04 10:03+0100\n"
-"PO-Revision-Date: 2024-12-05 08:18\n"
+"POT-Creation-Date: 2025-02-18 11:06+0100\n"
+"PO-Revision-Date: 2025-02-18 10:23\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: it\n"
 "Language-Team: Italian\n"
@@ -18,31 +18,31 @@ msgstr ""
 "X-Crowdin-File: /master/udata/translations/udata.pot\n"
 "X-Crowdin-File-ID: 6\n"
 
-#: udata/settings.py:101
+#: udata/settings.py:109
 msgid "Welcome"
 msgstr "Benvenutə"
 
-#: udata/settings.py:102
+#: udata/settings.py:110
 msgid "Please confirm your email"
 msgstr "Per favore conferma la tua email"
 
-#: udata/settings.py:103
+#: udata/settings.py:111
 msgid "Login instructions"
 msgstr "Istruzioni di accesso"
 
-#: udata/settings.py:104
+#: udata/settings.py:112
 msgid "Your password has been reset"
 msgstr "La tua password è stata reimpostata"
 
-#: udata/settings.py:105
+#: udata/settings.py:113
 msgid "Your password has been changed"
 msgstr "La tua password è stata modificata"
 
-#: udata/settings.py:106
+#: udata/settings.py:114
 msgid "Password reset instructions"
 msgstr "Istruzioni per reimpostare la password"
 
-#: udata/settings.py:496
+#: udata/settings.py:504
 msgid "This dataset has been archived"
 msgstr "Questo dataset è stato archiviato"
 
@@ -50,7 +50,7 @@ msgstr "Questo dataset è stato archiviato"
 msgid "Invalid URL \"{url}\": {reason}"
 msgstr ""
 
-#: udata/tests/api/test_datasets_api.py:875 udata/tests/test_model.py:367
+#: udata/tests/api/test_datasets_api.py:902 udata/tests/test_model.py:367
 #: udata/uris.py:55
 msgid "Invalid URL \"{url}\""
 msgstr ""
@@ -198,16 +198,16 @@ msgstr "Vuoi generare alcuni dati di esempio?"
 msgid "Your udata instance is ready!"
 msgstr "La tua istanza udata è pronta!"
 
-#: udata/core/owned.py:53 udata/forms/fields.py:735
+#: udata/core/owned.py:64 udata/forms/fields.py:746
 #: udata/tests/api/test_dataservices_api.py:437
 msgid "You can only set yourself as owner"
 msgstr "Puoi solo impostare te stessə come proprietariə"
 
-#: udata/core/owned.py:62
+#: udata/core/owned.py:73
 msgid "Unknown organization"
 msgstr ""
 
-#: udata/core/owned.py:66 udata/forms/fields.py:756
+#: udata/core/owned.py:77 udata/forms/fields.py:778
 #: udata/tests/api/test_dataservices_api.py:451
 msgid "Permission denied for this organization"
 msgstr "Permesso negato per questa organizzazione"
@@ -245,7 +245,23 @@ msgstr ""
 msgid "Publish as"
 msgstr "Pubblica come"
 
-#: udata/core/contact_point/models.py:18 udata/tests/api/test_contact_points.py:50
+#: udata/core/contact_point/forms.py:21 udata/core/organization/forms.py:94
+msgid "Role"
+msgstr "Ruolo"
+
+#: udata/core/contact_point/models.py:9
+msgid "Contact"
+msgstr ""
+
+#: udata/core/contact_point/models.py:10
+msgid "Creator"
+msgstr ""
+
+#: udata/core/contact_point/models.py:11
+msgid "Publisher"
+msgstr ""
+
+#: udata/core/contact_point/models.py:26 udata/tests/api/test_contact_points.py:58
 msgid "At least an email or a contact form is required for a contact point"
 msgstr ""
 
@@ -253,12 +269,12 @@ msgstr ""
 msgid "dataservice"
 msgstr ""
 
-#: udata/core/dataservices/models.py:174 udata/core/dataset/models.py:569
+#: udata/core/dataservices/models.py:179 udata/core/dataset/models.py:569
 #: udata/mongo/datetime_fields.py:60
 msgid "Creation date"
 msgstr "Data di creazione"
 
-#: udata/core/dataservices/models.py:180 udata/core/dataset/models.py:572
+#: udata/core/dataservices/models.py:185 udata/core/dataset/models.py:572
 #: udata/mongo/datetime_fields.py:66
 msgid "Last modification date"
 msgstr "Data dell'ultima modifica"
@@ -481,7 +497,7 @@ msgstr "Dimensione del file in byte"
 msgid "Related dataset"
 msgstr "Dataset correlato"
 
-#: udata/core/dataset/forms.py:134 udata/tests/api/test_datasets_api.py:787
+#: udata/core/dataset/forms.py:134 udata/tests/api/test_datasets_api.py:814
 msgid "Wrong contact point id or contact point ownership mismatch"
 msgstr ""
 
@@ -555,18 +571,18 @@ msgstr "Dati cardine"
 msgid "A schema must contains a name or an URL when a version is provided."
 msgstr ""
 
-#: udata/core/dataset/models.py:167 udata/tests/api/test_datasets_api.py:883
-#: udata/tests/api/test_datasets_api.py:894
+#: udata/core/dataset/models.py:167 udata/tests/api/test_datasets_api.py:910
+#: udata/tests/api/test_datasets_api.py:921
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr "Il nome dello schema \"{schema}\" non è un valore consentito. Valori consentiti: {values}"
 
-#: udata/core/dataset/models.py:186 udata/tests/api/test_datasets_api.py:905
+#: udata/core/dataset/models.py:186 udata/tests/api/test_datasets_api.py:932
 msgid "Version \"{version}\" is not an allowed value for the schema \"{name}\". Allowed versions: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:463 udata/core/dataset/rdf.py:546
-#: udata/tests/dataset/test_dataset_rdf.py:584
-#: udata/tests/dataset/test_dataset_rdf.py:597
+#: udata/core/dataset/models.py:463 udata/core/dataset/rdf.py:598
+#: udata/tests/dataset/test_dataset_rdf.py:656
+#: udata/tests/dataset/test_dataset_rdf.py:669
 msgid "Nameless resource"
 msgstr "File senza nome"
 
@@ -578,11 +594,11 @@ msgstr "Data di aggiornamento futura"
 msgid "dataset"
 msgstr "dataset"
 
-#: udata/core/dataset/rdf.py:544 udata/tests/dataset/test_dataset_rdf.py:571
+#: udata/core/dataset/rdf.py:596 udata/tests/dataset/test_dataset_rdf.py:643
 msgid "{format} resource"
 msgstr "File {format}"
 
-#: udata/core/dataset/tasks.py:108
+#: udata/core/dataset/tasks.py:113
 msgid "You need to update some frequency-based datasets"
 msgstr "È necessario aggiornare alcuni dataset con una frequenza di aggiornamento"
 
@@ -700,10 +716,6 @@ msgstr ""
 msgid "Business identification number"
 msgstr ""
 
-#: udata/core/organization/forms.py:94
-msgid "Role"
-msgstr "Ruolo"
-
 #: udata/core/organization/models.py:35
 msgid "Public Service"
 msgstr "Servizio Pubblico"
@@ -806,7 +818,7 @@ msgstr "tipo di corpo"
 msgid "Specify your body type (HTML or markdown)"
 msgstr "Specifica il tipo di corpo (HTML o markdown)"
 
-#: udata/core/post/models.py:49
+#: udata/core/post/models.py:54
 msgid "post"
 msgstr "articolo"
 
@@ -874,7 +886,7 @@ msgstr "Visualizzazione"
 msgid "Connected device"
 msgstr "Dispositivo connesso"
 
-#: udata/core/reuse/constants.py:15 udata/tests/reuse/test_reuse_model.py:106
+#: udata/core/reuse/constants.py:15 udata/tests/reuse/test_reuse_model.py:108
 msgid "Health"
 msgstr "Salute"
 
@@ -1153,7 +1165,12 @@ msgstr "Identificatori sconosciuti: {identifiers}"
 msgid "Unable to parse date range"
 msgstr "Impossibile analizzare l'intervallo di date"
 
-#: udata/forms/fields.py:733 udata/forms/fields.py:754
+#: udata/forms/fields.py:739 udata/forms/fields.py:771
+#: udata/tests/forms/test_publish_as_field.py:214
+msgid "Cannot change owner after creation. Please use transfer feature."
+msgstr ""
+
+#: udata/forms/fields.py:744 udata/forms/fields.py:776
 msgid "You must be authenticated"
 msgstr "Devi essere autenticatə"
 
