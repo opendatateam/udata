@@ -115,6 +115,10 @@ class Defaults(object):
 
     SECURITY_RETURN_GENERIC_RESPONSES = False
 
+    # Inactive users settings
+    YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION = 3
+    DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY = 30
+
     # Sentry configuration
     SENTRY_DSN = None
     SENTRY_TAGS = {}
