@@ -1,0 +1,5 @@
+{% extends 'mail/base.html' %}
+
+{% block body %}
+<p style="margin: 0;padding: 0;">{{ _('Your account on %(site)s has been deleted due to inactivity', site=config.SITE_TITLE) }}</p>
+{% endblock %}
