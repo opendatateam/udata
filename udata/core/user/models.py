@@ -241,7 +241,7 @@ class User(WithMetrics, UserMixin, db.Document):
         raise NotImplementedError("""This method should not be using directly.
         Use `mark_as_deleted` (or `_delete` if you know what you're doing)""")
 
-    def mark_as_deleted(self, notify: bool = True, delete_comments: bool = True):
+    def mark_as_deleted(self, notify: bool = True, delete_comments: bool = False):
         if self.avatar.filename is not None:
             storage = storages.avatars
             storage.delete(self.avatar.filename)
