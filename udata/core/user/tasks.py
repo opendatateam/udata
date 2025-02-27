@@ -47,7 +47,13 @@ def notify_inactive_users(self):
         + timedelta(days=current_app.config["DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY"])
     )
 
-    for user in User.objects(current_login_at__lte=notification_comparison_date):
+    for i, user in enumerate(
+        User.objects(
+            deleted=None,
+            inactive_deletion_notified_at=None,
+            current_login_at__lte=notification_comparison_date,
+        )
+    ):
         mail.send(
             _("Inactivity of your {site} account").format(site=current_app.config["SITE_TITLE"]),
             user,
@@ -56,6 +62,9 @@ def notify_inactive_users(self):
         )
         user.inactive_deletion_notified_at = datetime.utcnow()
         user.save()
+        if i > current_app.config["MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS"]:
+            logging.warning("MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS reached, stopping here.")
+            return
 
 
 @job("delete-inactive-users")
@@ -67,7 +76,7 @@ def delete_inactive_users(self):
         return
 
     # Clear inactive_deletion_notified_at field if user has logged in since notification
-    for user in User.objects(inactive_deletion_notified_at__exists=True):
+    for user in User.objects(deleted=None, inactive_deletion_notified_at__exists=True):
         if user.current_login_at > user.inactive_deletion_notified_at:
             user.inactive_deletion_notified_at = None
             user.save()

@@ -36,6 +36,45 @@ class UserTasksTest(APITestCase):
             _("Inactivity of your {site} account").format(site=current_app.config["SITE_TITLE"]),
         )
 
+        # We shouldn't notify users twice
+        with capture_mails() as mails:
+            tasks.notify_inactive_users()
+
+        self.assertEqual(len(mails), 0)
+
+    @pytest.mark.options(YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION=3)
+    @pytest.mark.options(MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS=10)
+    def test_notify_inactive_users_max_notifications(self):
+        notification_comparison_date = (
+            datetime.utcnow()
+            - timedelta(days=current_app.config["YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION"] * 365)
+            + timedelta(days=current_app.config["DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY"])
+            - timedelta(days=1)  # add margin
+        )
+
+        NB_USERS_TO_NOTIFY = 15
+
+        [UserFactory(current_login_at=notification_comparison_date) for _ in range(15)]
+        UserFactory(current_login_at=datetime.utcnow())  # Active user
+
+        with capture_mails() as mails:
+            tasks.notify_inactive_users()
+
+        # Assert MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS mails have been sent
+        self.assertEqual(
+            len(mails), current_app.config["MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS"]
+        )
+
+        # Second batch
+        with capture_mails() as mails:
+            tasks.notify_inactive_users()
+
+        # Assert what's left have been sent
+        self.assertEqual(
+            len(mails),
+            NB_USERS_TO_NOTIFY - current_app.config["MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS"],
+        )
+
     @pytest.mark.options(YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION=3)
     def test_delete_inactive_users(self):
         deletion_comparison_date = (

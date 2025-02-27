@@ -118,6 +118,7 @@ class Defaults(object):
     # Inactive users settings
     YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION = None
     DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY = 30
+    MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS = 200
 
     # Sentry configuration
     SENTRY_DSN = None
