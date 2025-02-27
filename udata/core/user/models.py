@@ -78,6 +78,10 @@ class User(WithMetrics, UserMixin, db.Document):
     current_login_ip = db.StringField()
     login_count = db.IntField()
 
+    # Fields for Two Factor Auth
+    tf_primary_method = db.StringField()
+    tf_totp_secret = db.StringField()
+
     deleted = db.DateTimeField()
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()
