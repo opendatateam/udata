@@ -112,9 +112,6 @@ class SlugFieldTest:
             getattr(receiver, "__func__", None) == db.SlugField.populate_on_pre_save
             for receiver in pre_save.receivers_for(SlugUpdateTester)
         )
-        # Somehow SlugUpdateTester.slug already has an owner, even though it seems to be set
-        # in `SlugField.__get__` that hasn't been called already
-        # assert not hasattr(SlugUpdateTester.slug, "owner")  # FAILS
 
         tester = SlugUpdateTester.objects.create(title="A Title")
 
@@ -134,13 +131,12 @@ class SlugFieldTest:
         tester.title = "Other title"
         tester.save()
 
-        # ⚠️ It is not registered when updating an existing SlugUpdateTester with a SlugField field
-        # but we want it to be registered in order to update the slug.
+        # It is also registered when updating an existing SlugUpdateTester with a SlugField
         assert any(
             getattr(receiver, "__func__", None) == db.SlugField.populate_on_pre_save
             for receiver in pre_save.receivers_for(SlugUpdateTester)
-        )  # FAILS
-        assert tester.slug == "other-title"  # FAILS
+        )
+        assert tester.slug == "other-title"
 
     def test_validate(self):
         """SlugField should validate if not set"""
