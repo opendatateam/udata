@@ -48,8 +48,11 @@ def notify_inactive_users(self):
             "account_inactivity",
             user=user,
         )
+        logging.debug(f"Notified {user.email} of account inactivity")
         user.inactive_deletion_notified_at = datetime.utcnow()
         user.save()
+
+    logging.info(f"Notified {i+1} inactive users")
 
 
 @job("delete-inactive-users")
@@ -73,13 +76,15 @@ def delete_inactive_users(self):
     notified_at = datetime.utcnow() - timedelta(
         days=current_app.config["DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY"]
     )
-    for user in User.objects(
+    users_to_delete = User.objects(
         deleted=None,
         current_login_at__lte=deletion_comparison_date,
         inactive_deletion_notified_at__lte=notified_at,
-    ):
+    )
+    for user in users_to_delete:
         copied_user = copy(user)
         user.mark_as_deleted(notify=False, delete_comments=False)
+        logging.warning(f"Deleted user {copied_user.email} due to account inactivity")
         mail.send(
             _("Deletion of your inactive {site} account").format(
                 site=current_app.config["SITE_TITLE"]
@@ -87,3 +92,4 @@ def delete_inactive_users(self):
             copied_user,
             "inactive_account_deleted",
         )
+    logging.info(f"Deleted {users_to_delete.count()} inactive users")
