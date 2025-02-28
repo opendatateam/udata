@@ -110,35 +110,35 @@ class SlugFieldTest:
         startup_receivers = copy(pre_save.receivers)
         assert not any(
             getattr(receiver, "__func__", None) == db.SlugField.populate_on_pre_save
-            for receiver in pre_save.receivers_for(SlugTester)
+            for receiver in pre_save.receivers_for(SlugUpdateTester)
         )
-        # Somehow SlugTester.slug already has an owner, even though it seems to be set
+        # Somehow SlugUpdateTester.slug already has an owner, even though it seems to be set
         # in `SlugField.__get__` that hasn't been called already
-        # assert not hasattr(SlugTester.slug, "owner")  # FAILS
+        # assert not hasattr(SlugUpdateTester.slug, "owner")  # FAILS
 
-        tester = SlugTester.objects.create(title="A Title")
+        tester = SlugUpdateTester.objects.create(title="A Title")
 
-        # It is registered when initializing a new SlugTester with a SlugField
+        # It is registered when initializing a new SlugUpdateTester with a SlugField
         assert any(
             getattr(receiver, "__func__", None) == db.SlugField.populate_on_pre_save
-            for receiver in pre_save.receivers_for(SlugTester)
+            for receiver in pre_save.receivers_for(SlugUpdateTester)
         )
-        assert hasattr(SlugTester.slug, "owner")
+        assert hasattr(SlugUpdateTester.slug, "owner")
         assert tester.slug == "a-title"
 
         # Clear pre_save receivers
         pre_save.receivers = startup_receivers
-        del SlugTester.slug.owner
+        del SlugUpdateTester.slug.owner
 
-        tester = SlugTester.objects(title="A Title").first()
+        tester = SlugUpdateTester.objects(title="A Title").first()
         tester.title = "Other title"
         tester.save()
 
-        # ⚠️ It is not registered when updating an existing SlugTester with a SlugField field
+        # ⚠️ It is not registered when updating an existing SlugUpdateTester with a SlugField field
         # but we want it to be registered in order to update the slug.
         assert any(
             getattr(receiver, "__func__", None) == db.SlugField.populate_on_pre_save
-            for receiver in pre_save.receivers_for(SlugTester)
+            for receiver in pre_save.receivers_for(SlugUpdateTester)
         )  # FAILS
         assert tester.slug == "other-title"  # FAILS
 
