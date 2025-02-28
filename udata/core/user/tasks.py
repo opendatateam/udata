@@ -19,21 +19,6 @@ def send_test_mail(email):
     mail.send(_("Test mail"), user, "test")
 
 
-# TODO: some questions to answer
-# 1. We went with storing a inactive_deletion_notified_at to make sure we don't delete
-#    accounts that haven't been notified long enough in advance. Are we bulletproof with this logic?
-# 2. How to deactivate/delete account?
-#    Should we set active=false instead of deleting account?
-#    Can we keep comments?
-#    What about other contents (Dataset, Org, etc.)?
-#    Our confidentiality policy states : "Données relatives au Contributeur qui s’inscrit"
-#    We may explicitely states the contents that will be deleted or not in mail
-# 3. Should we add a link to contact us if they can't connect?
-# 4. Can we deal with ooooold inactive users with this system? Or should we do a specific Brevo campaign?
-# 5. How to make the + / - timedelta more readable?
-# 6. There is room for wording improvement here!
-
-
 @job("notify-inactive-users")
 def notify_inactive_users(self):
     if not current_app.config["YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION"]:
@@ -89,6 +74,7 @@ def delete_inactive_users(self):
         days=current_app.config["DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY"]
     )
     for user in User.objects(
+        deleted=None,
         current_login_at__lte=deletion_comparison_date,
         inactive_deletion_notified_at__lte=notified_at,
     ):
