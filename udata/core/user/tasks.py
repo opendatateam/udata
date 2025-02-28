@@ -54,6 +54,9 @@ def notify_inactive_users(self):
             current_login_at__lte=notification_comparison_date,
         )
     ):
+        if i >= current_app.config["MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS"]:
+            logging.warning("MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS reached, stopping here.")
+            return
         mail.send(
             _("Inactivity of your {site} account").format(site=current_app.config["SITE_TITLE"]),
             user,
@@ -62,9 +65,6 @@ def notify_inactive_users(self):
         )
         user.inactive_deletion_notified_at = datetime.utcnow()
         user.save()
-        if i > current_app.config["MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS"]:
-            logging.warning("MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS reached, stopping here.")
-            return
 
 
 @job("delete-inactive-users")
