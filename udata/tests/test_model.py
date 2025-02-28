@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 import pytest
 from mongoengine.errors import ValidationError
 from mongoengine.fields import BaseField
+from mongoengine.signals import pre_save
 
 from udata.errors import ConfigError
 from udata.i18n import _
@@ -102,6 +103,22 @@ class AutoUUIDFieldTest:
 
 
 class SlugFieldTest:
+    def test_populate_on_pre_save_signal_is_registered(self):
+        """populate_on_pre_save signal should be registered"""
+        # It isn't registered on startup
+        assert not any(
+            getattr(receiver, "__func__", None) == db.SlugField.populate_on_pre_save
+            for receiver in pre_save.receivers_for(SlugTester)
+        )
+
+        SlugTester(title="A Title")
+
+        # It is registered once a SlugField has been initialized
+        assert any(
+            getattr(receiver, "__func__", None) == db.SlugField.populate_on_pre_save
+            for receiver in pre_save.receivers_for(SlugTester)
+        )
+
     def test_validate(self):
         """SlugField should validate if not set"""
         obj = SlugTester(title="A Title")
