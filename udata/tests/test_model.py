@@ -1,3 +1,4 @@
+from copy import copy
 from datetime import date, datetime, timedelta
 from uuid import UUID, uuid4
 
@@ -106,18 +107,40 @@ class SlugFieldTest:
     def test_populate_on_pre_save_signal_is_registered(self):
         """populate_on_pre_save signal should be registered"""
         # It isn't registered on startup
+        startup_receivers = copy(pre_save.receivers)
         assert not any(
             getattr(receiver, "__func__", None) == db.SlugField.populate_on_pre_save
             for receiver in pre_save.receivers_for(SlugTester)
         )
+        # Somehow SlugTester.slug already has an owner, even though it seems to be set
+        # in `SlugField.__get__` that hasn't been called already
+        # assert not hasattr(SlugTester.slug, "owner")  # FAILS
 
-        SlugTester(title="A Title")
+        tester = SlugTester.objects.create(title="A Title")
 
-        # It is registered once a SlugField has been initialized
+        # It is registered when initializing a new SlugTester with a SlugField
         assert any(
             getattr(receiver, "__func__", None) == db.SlugField.populate_on_pre_save
             for receiver in pre_save.receivers_for(SlugTester)
         )
+        assert hasattr(SlugTester.slug, "owner")
+        assert tester.slug == "a-title"
+
+        # Clear pre_save receivers
+        pre_save.receivers = startup_receivers
+        del SlugTester.slug.owner
+
+        tester = SlugTester.objects(title="A Title").first()
+        tester.title = "Other title"
+        tester.save()
+
+        # ⚠️ It is not registered when updating an existing SlugTester with a SlugField field
+        # but we want it to be registered in order to update the slug.
+        assert any(
+            getattr(receiver, "__func__", None) == db.SlugField.populate_on_pre_save
+            for receiver in pre_save.receivers_for(SlugTester)
+        )  # FAILS
+        assert tester.slug == "other-title"  # FAILS
 
     def test_validate(self):
         """SlugField should validate if not set"""
