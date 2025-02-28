@@ -52,10 +52,10 @@ class SlugField(StringField):
         self.register_signals(owner)
         return super(SlugField, self).__get__(instance, owner)
 
-    def __set__(self, instance, owner):
+    def __set__(self, instance, value):
         # mongoengine calls this on document update
-        self.register_signals(owner)
-        return super(SlugField, self).__set__(instance, owner)
+        self.register_signals(instance.__class__)
+        return super(SlugField, self).__set__(instance, value)
 
     def __deepcopy__(self, memo):
         # Fixes no_dereference by avoiding deep copying instance attribute
