@@ -18,19 +18,11 @@ class UserModelTest:
         user = UserFactory()
         other_user = UserFactory()
         org = OrganizationFactory(editors=[user])
-        discussion_only_user = DiscussionFactory(
+        discussion = DiscussionFactory(
             user=user,
             subject=org,
             discussion=[
                 MessageDiscussionFactory(posted_by=user),
-                MessageDiscussionFactory(posted_by=user),
-            ],
-        )
-        discussion_with_other = DiscussionFactory(
-            user=other_user,
-            subject=org,
-            discussion=[
-                MessageDiscussionFactory(posted_by=other_user),
                 MessageDiscussionFactory(posted_by=user),
             ],
         )
@@ -42,14 +34,39 @@ class UserModelTest:
         org.reload()
         assert len(org.members) == 0
 
-        assert Discussion.objects(id=discussion_only_user.id).first() is None
-        discussion_with_other.reload()
-        assert discussion_with_other.discussion[1].content == "DELETED"
+        # discussions are kept by default
+        discussion.reload()
+        assert len(discussion.discussion) == 2
+        assert discussion.discussion[1].content != "DELETED"
 
         assert Follow.objects(id=user_follow_org.id).first() is None
         assert Follow.objects(id=user_followed.id).first() is None
 
         assert user.slug == "deleted"
+
+    def test_mark_as_deleted_with_comments_deletion(self):
+        user = UserFactory()
+        other_user = UserFactory()
+        discussion_only_user = DiscussionFactory(
+            user=user,
+            discussion=[
+                MessageDiscussionFactory(posted_by=user),
+                MessageDiscussionFactory(posted_by=user),
+            ],
+        )
+        discussion_with_other = DiscussionFactory(
+            user=other_user,
+            discussion=[
+                MessageDiscussionFactory(posted_by=other_user),
+                MessageDiscussionFactory(posted_by=user),
+            ],
+        )
+
+        user.mark_as_deleted(delete_comments=True)
+
+        assert Discussion.objects(id=discussion_only_user.id).first() is None
+        discussion_with_other.reload()
+        assert discussion_with_other.discussion[1].content == "DELETED"
 
     def test_mark_as_deleted_slug_multiple(self):
         user = UserFactory()
