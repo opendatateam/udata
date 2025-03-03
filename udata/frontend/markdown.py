@@ -69,7 +69,7 @@ class UdataCleaner(bleach.Cleaner):
 
         super().__init__(
             tags=set(current_app.config["MD_ALLOWED_TAGS"]),
-            attributes=set(current_app.config["MD_ALLOWED_ATTRIBUTES"]),
+            attributes=current_app.config["MD_ALLOWED_ATTRIBUTES"],
             css_sanitizer=CSSSanitizer(
                 allowed_css_properties=current_app.config["MD_ALLOWED_STYLES"]
             ),
