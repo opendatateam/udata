@@ -39,15 +39,23 @@ class SlugField(StringField):
         self.instance = None
         super(SlugField, self).__init__(**kwargs)
 
-    def __get__(self, instance, owner):
-        # mongoengine calls this after document initialization
+    def register_signals(self, owner):
         # We register signals handlers here to have a owner reference
         if not hasattr(self, "owner"):
             self.owner = owner
             pre_save.connect(self.populate_on_pre_save, sender=owner)
             if self.follow:
                 post_delete.connect(self.cleanup_on_delete, sender=owner)
+
+    def __get__(self, instance, owner):
+        # mongoengine calls this after document initialization
+        self.register_signals(owner)
         return super(SlugField, self).__get__(instance, owner)
+
+    def __set__(self, instance, value):
+        # mongoengine calls this on document update
+        self.register_signals(instance.__class__)
+        return super(SlugField, self).__set__(instance, value)
 
     def __deepcopy__(self, memo):
         # Fixes no_dereference by avoiding deep copying instance attribute
