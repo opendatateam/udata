@@ -1,8 +1,9 @@
 from flask import url_for
 
 from udata.core import storages
+from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.user.factories import AdminFactory, UserFactory
-from udata.models import Follow
+from udata.models import Discussion, Follow
 from udata.tests.helpers import capture_mails, create_test_image
 from udata.utils import faker
 
@@ -352,35 +353,73 @@ class UserAPITest(APITestCase):
     def test_delete_user(self):
         user = AdminFactory()
         self.login(user)
-        other_user = UserFactory()
+        user_to_delete = UserFactory()
         file = create_test_image()
+        discussion = DiscussionFactory(
+            user=user_to_delete,
+            discussion=[
+                MessageDiscussionFactory(posted_by=user_to_delete),
+                MessageDiscussionFactory(posted_by=user_to_delete),
+            ],
+        )
 
         response = self.post(
-            url_for("api.user_avatar", user=other_user),
+            url_for("api.user_avatar", user=user_to_delete),
             {"file": (file, "test.png")},
             json=False,
         )
         with capture_mails() as mails:
-            response = self.delete(url_for("api.user", user=other_user))
+            response = self.delete(url_for("api.user", user=user_to_delete))
             self.assertEqual(list(storages.avatars.list_files()), [])
             self.assert204(response)
             self.assertEquals(len(mails), 1)
 
-        other_user.reload()
-        response = self.delete(url_for("api.user", user=other_user))
+        user_to_delete.reload()
+        response = self.delete(url_for("api.user", user=user_to_delete))
         self.assert410(response)
         response = self.delete(url_for("api.user", user=user))
         self.assert403(response)
 
+        # discussions are kept by default
+        discussion.reload()
+        assert len(discussion.discussion) == 2
+        assert discussion.discussion[1].content != "DELETED"
+
     def test_delete_user_without_notify(self):
         user = AdminFactory()
         self.login(user)
-        other_user = UserFactory()
+        user_to_delete = UserFactory()
 
         with capture_mails() as mails:
-            response = self.delete(url_for("api.user", user=other_user, no_mail=True))
+            response = self.delete(url_for("api.user", user=user_to_delete, no_mail=True))
             self.assert204(response)
             self.assertEqual(len(mails), 0)
+
+    def test_delete_user_with_comments_deletion(self):
+        user = AdminFactory()
+        self.login(user)
+        user_to_delete = UserFactory()
+        discussion_only_user = DiscussionFactory(
+            user=user_to_delete,
+            discussion=[
+                MessageDiscussionFactory(posted_by=user_to_delete),
+                MessageDiscussionFactory(posted_by=user_to_delete),
+            ],
+        )
+        discussion_with_other = DiscussionFactory(
+            user=user,
+            discussion=[
+                MessageDiscussionFactory(posted_by=user),
+                MessageDiscussionFactory(posted_by=user_to_delete),
+            ],
+        )
+
+        response = self.delete(url_for("api.user", user=user_to_delete, delete_comments=True))
+        self.assert204(response)
+
+        assert Discussion.objects(id=discussion_only_user.id).first() is None
+        discussion_with_other.reload()
+        assert discussion_with_other.discussion[1].content == "DELETED"
 
     def test_contact_points(self):
         user = AdminFactory()
