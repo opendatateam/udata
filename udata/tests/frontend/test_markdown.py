@@ -255,6 +255,28 @@ class MarkdownTest:
         )
         assert_md(text, expected)
 
+    @pytest.mark.options(MD_ALLOWED_ATTRIBUTES={"*": ["style"]})
+    @pytest.mark.options(MD_ALLOWED_STYLES=["font-weight"])
+    def test_styles(self, assert_md):
+        """It should keep only explicitly allowed styles if style attribute is set"""
+        text = "\n".join(
+            (
+                "<p>",
+                '<span style="background-color: red; font-weight: heavy;">TITLE</span>',
+                "BODY CONTENT",
+                "</p>",
+            )
+        )
+        expected = "\n".join(
+            (
+                "<p>",
+                '<span style="font-weight: heavy;">TITLE</span>',
+                "BODY CONTENT",
+                "</p>",
+            )
+        )
+        assert_md(text, expected)
+
 
 @pytest.mark.frontend
 class MdStripTest:
