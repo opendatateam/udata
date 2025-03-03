@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 10.1.1 (2025-03-03)
 
 - Allow temporal coverage with only a start date [#3192](https://github.com/opendatateam/udata/pull/3192)
