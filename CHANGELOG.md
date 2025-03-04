@@ -2,8 +2,9 @@
 
 ## Current (in progress)
 
-- Nothing yet
-
+- Add inactive users notification and deletion jobs [#3274](https://github.com/opendatateam/udata/pull/3274)
+  - these jobs can be scheduled daily for example
+  - `YEARS_OF_INACTIVITY_BEFORE_DELETION` setting must be configured at least to activate it
 ## 10.1.1 (2025-03-03)
 
 - Allow temporal coverage with only a start date [#3192](https://github.com/opendatateam/udata/pull/3192)

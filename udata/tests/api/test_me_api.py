@@ -332,7 +332,7 @@ class MeAPITest(APITestCase):
 
         # The discussions are kept but the messages are anonymized
         self.assertEqual(len(discussion.discussion), 2)
-        self.assertEqual(discussion.discussion[0].content, "DELETED")
+        self.assertEqual(discussion.discussion[0].posted_by.fullname, "DELETED DELETED")
         self.assertEqual(discussion.discussion[1].content, other_disc_msg_content)
 
         # The datasets are unchanged
