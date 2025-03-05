@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- **breaking change** Migrate dataservices fields, migration needed [#3262](https://github.com/opendatateam/udata/pull/3262)
 
 ## 10.1.1 (2025-03-03)
 

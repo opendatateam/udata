@@ -18,31 +18,51 @@ log = logging.getLogger(__name__)
 
 
 def migrate(db):
-    log.info("Processing dataservices…")
+    log.info("Preprocessing dataservices…")
 
     count = get_db().dataservice.update_many(
         filter={
             "$or": [
-                {
-                    "is_restricted": None,
-                    "has_token": None,
-                },
+                {"is_restricted": None},
                 {"is_restricted": {"$exists": False}},
+            ]
+        },
+        update={"$set": {"is_restricted": False}},
+    )
+    log.info(
+        f"\tConverted {count.modified_count} dataservices from `is_restricted=None` to `is_restricted=False`"
+    )
+
+    count = get_db().dataservice.update_many(
+        filter={
+            "$or": [
+                {"has_token": None},
                 {"has_token": {"$exists": False}},
             ]
         },
-        update={"$set": {"access_type": DATASERVICE_ACCESS_TYPE_OPEN}},
+        update={"$set": {"has_token": False}},
     )
-    print(f"{count.modified_count} dataservices with one of another None")
+    log.info(
+        f"\tConverted {count.modified_count} dataservices from `has_token=None` to `has_token=False`"
+    )
+
+    for dataservice in get_db().dataservice.find({"is_restricted": True, "has_token": False}):
+        log.info(
+            f"\tDataservice #{dataservice['_id']} {dataservice['title']} is restricted but without token. (will be set to access_type={DATASERVICE_ACCESS_TYPE_RESTRICTED})"
+        )
+
+    log.info("Processing dataservices…")
 
     count = get_db().dataservice.update_many(
         filter={
             "is_restricted": True,
-            "has_token": True,
+            # `has_token` could be True or False, we don't care
         },
         update={"$set": {"access_type": DATASERVICE_ACCESS_TYPE_RESTRICTED}},
     )
-    print(f"{count.modified_count} dataservices with restricted and token")
+    log.info(
+        f"\t{count.modified_count} restricted dataservices to DATASERVICE_ACCESS_TYPE_RESTRICTED"
+    )
 
     count = get_db().dataservice.update_many(
         filter={
@@ -51,7 +71,9 @@ def migrate(db):
         },
         update={"$set": {"access_type": DATASERVICE_ACCESS_TYPE_OPEN_WITH_ACCOUNT}},
     )
-    print(f"{count.modified_count} dataservices not restricted but with token")
+    log.info(
+        f"\t{count.modified_count} dataservices not restricted but with token to DATASERVICE_ACCESS_TYPE_OPEN_WITH_ACCOUNT"
+    )
 
     count = get_db().dataservice.update_many(
         filter={
@@ -60,21 +82,7 @@ def migrate(db):
         },
         update={"$set": {"access_type": DATASERVICE_ACCESS_TYPE_OPEN}},
     )
-    print(f"{count.modified_count} open dataservices")
-
-    for dataservice in get_db().dataservice.find({"is_restricted": True, "has_token": False}):
-        print(
-            f"\t Dataservice #{dataservice['_id']} {dataservice['title']} is restricted but without token. (setting it to access_type={DATASERVICE_ACCESS_TYPE_RESTRICTED})"
-        )
-
-    count = get_db().dataservice.update_many(
-        filter={
-            "is_restricted": True,
-            "has_token": False,
-        },
-        update={"$set": {"access_type": DATASERVICE_ACCESS_TYPE_RESTRICTED}},
-    )
-    print(f"{count.modified_count} weird dataservices with restricted but no token")
+    log.info(f"\t{count.modified_count} open dataservices to DATASERVICE_ACCESS_TYPE_OPEN")
 
     dataservices: List[Dataservice] = get_db().dataservice.find()
     for dataservice in dataservices:
@@ -88,6 +96,7 @@ def migrate(db):
         if (
             dataservice["endpoint_description_url"].endswith(".json")
             or dataservice["endpoint_description_url"].endswith(".yaml")
+            or dataservice["endpoint_description_url"].endswith(".yml")
             or dataservice["endpoint_description_url"].endswith("?format=openapi-json")
             or "getcapabilities" in dataservice["endpoint_description_url"].lower()
             or "getresourcedescription" in dataservice["endpoint_description_url"].lower()
@@ -95,10 +104,10 @@ def migrate(db):
                 "https://api.insee.fr/catalogue/api-docs/carbon.super"
             )
         ):
-            # print(f"[MACHINE] {dataservice["endpoint_description_url"]}")
+            # log.info(f"[MACHINE] {dataservice["endpoint_description_url"]}")
             to_set["machine_documentation_url"] = dataservice["endpoint_description_url"]
         else:
-            # print(f"[ HUMAN ] {dataservice["endpoint_description_url"]}")
+            # log.info(f"[ HUMAN ] {dataservice["endpoint_description_url"]}")
             to_set["technical_documentation_url"] = dataservice["endpoint_description_url"]
 
         result = get_db().dataservice.update_one(
@@ -110,6 +119,8 @@ def migrate(db):
         assert result.modified_count == 1
         assert result.matched_count == 1
 
+    log.info("Postprocessing dataservices…")
+
     count = get_db().dataservice.update_many(
         {},
         {
@@ -120,6 +131,6 @@ def migrate(db):
             }
         },
     )
-    print(f"Unset legacy fields on {count.modified_count} dataservices")
+    log.info(f"\tUnset legacy fields on {count.modified_count} dataservices")
 
     log.info("Done")
