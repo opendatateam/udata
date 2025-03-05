@@ -935,9 +935,17 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             "url": endpoint_for("datasets.show", "api.dataset", dataset=self, _external=True),
             "name": self.title,
             "keywords": ",".join(self.tags),
-            "distribution": [resource.json_ld for resource in self.resources],
+            "distribution": [
+                resource.json_ld
+                for resource in self.resources[: current_app.config["MAX_RESOURCES_IN_JSON_LD"]]
+            ],
             # Theses values are not standard
-            "contributedDistribution": [resource.json_ld for resource in self.community_resources],
+            "contributedDistribution": [
+                resource.json_ld
+                for resource in self.community_resources[
+                    : current_app.config["MAX_RESOURCES_IN_JSON_LD"]
+                ]
+            ],
             "extras": [get_json_ld_extra(*item) for item in self.extras.items()],
         }
 
