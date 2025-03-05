@@ -2,7 +2,19 @@
 
 ## Current (in progress)
 
-- Harvest attribution roles [#3149](https://github.com/opendatateam/udata/pull/3149) [#3270](https://github.com/opendatateam/udata/pull/3270)
+- Nothing yet
+
+## 10.1.1 (2025-03-03)
+
+- Allow temporal coverage with only a start date [#3192](https://github.com/opendatateam/udata/pull/3192)
+- The `extras` column in the resource catalog is now dumped as json [#3272](https://github.com/opendatateam/udata/pull/3272) and [#3273](https://github.com/opendatateam/udata/pull/3273)
+- Ensure we populate slug properly on user deletion [#3277](https://github.com/opendatateam/udata/pull/3277)
+
+## 10.1.0 (2025-02-20)
+
+- **breaking change** Harvest attribution roles [#3149](https://github.com/opendatateam/udata/pull/3149) [#3270](https://github.com/opendatateam/udata/pull/3270)
+  - dataset and dataservices now have a list of contact points
+  - migration needed
 - Allow super-admins to change objects' owners [#3260](https://github.com/opendatateam/udata/pull/3260)
 - Fix contact point permissions [#3253](https://github.com/opendatateam/udata/pull/3253)
 - Fix wrong marshal for community resource uploads [#3261](https://github.com/opendatateam/udata/pull/3261)
