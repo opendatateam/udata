@@ -288,9 +288,7 @@ class DatasetAPI(API):
         # I cannot add the `resources_len` field to the main query because this is an aggregation.
         # Instead of `$project` we could do a `$addFields` to fetch all the fields of the dataset + the `resources_len`
         # but the aggregate is losing the model (returning a simple dict) so it's not the best to work with it.
-        pipeline = [{"$project": {"_id": 1, "resources_len": {"$size": "$resources"}}}]
-        data = Dataset.objects(id=dataset.id).aggregate(pipeline)
-        dataset.cached_resources_len = next(data)["resources_len"]
+        dataset.get_resources_len_from_mongo()
 
         """Get a dataset given its identifier"""
         if dataset.deleted and not DatasetEditPermission(dataset).can():

@@ -619,6 +619,15 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
 
     cached_resources_len = None
 
+    def get_resources_len_from_mongo(self):
+        if self.cached_resources_len is not None:
+            return self.cached_resources_len
+
+        pipeline = [{"$project": {"_id": 1, "resources_len": {"$size": "$resources"}}}]
+        data = Dataset.objects(id=self.id).aggregate(pipeline)
+        self.cached_resources_len = next(data)["resources_len"]
+        return self.cached_resources_len
+
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
         cls.before_save.send(document)
