@@ -128,7 +128,7 @@ dataset_fields = apiv2.model(
                     _external=True,
                 ),
                 "type": "GET",
-                "total": len(o.resources),
+                "total": o.cached_resources_len or len(o.resources),
             },
             description="Link to the dataset resources",
         ),
@@ -155,7 +155,7 @@ dataset_fields = apiv2.model(
         ),
         "frequency_date": fields.ISODateTime(
             description=(
-                "Next expected update date, you will be notified " "once that date is reached."
+                "Next expected update date, you will be notified once that date is reached."
             )
         ),
         "harvest": fields.Nested(
@@ -276,13 +276,22 @@ class DatasetSearchAPI(API):
             abort(500, "Internal search service error")
 
 
-@ns.route("/<dataset:dataset>/", endpoint="dataset", doc=common_doc)
+@ns.route("/<dataset_without_resources:dataset>/", endpoint="dataset", doc=common_doc)
 @apiv2.response(404, "Dataset not found")
 @apiv2.response(410, "Dataset has been deleted")
 class DatasetAPI(API):
     @apiv2.doc("get_dataset")
     @apiv2.marshal_with(dataset_fields)
     def get(self, dataset):
+        # Compute the resources length with a custom projection
+        # The `dataset_without_resources` exclude the resources array
+        # I cannot add the `resources_len` field to the main query because this is an aggregation.
+        # Instead of `$project` we could do a `$addFields` to fetch all the fields of the dataset + the `resources_len`
+        # but the aggregate is losing the model (returning a simple dict) so it's not the best to work with it.
+        pipeline = [{"$project": {"_id": 1, "resources_len": {"$size": "$resources"}}}]
+        data = Dataset.objects(id=dataset.id).aggregate(pipeline)
+        dataset.cached_resources_len = next(data)["resources_len"]
+
         """Get a dataset given its identifier"""
         if dataset.deleted and not DatasetEditPermission(dataset).can():
             apiv2.abort(410, "Dataset has been deleted")

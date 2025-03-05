@@ -617,6 +617,8 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
 
     verbose_name = _("dataset")
 
+    cached_resources_len = None
+
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
         cls.before_save.send(document)
