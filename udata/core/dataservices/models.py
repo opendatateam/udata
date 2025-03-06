@@ -144,7 +144,7 @@ class Dataservice(WithMetrics, Owned, db.Document):
     availability = field(db.FloatField(min=0, max=100), example="99.99")
     availability_url = field(db.URLField())
 
-    access_type = field(db.StringField(choices=DATASERVICE_ACCESS_TYPES))
+    access_type = field(db.StringField(choices=DATASERVICE_ACCESS_TYPES), filterable={})
     authorization_request_url = field(db.URLField())
 
     format = field(db.StringField(choices=DATASERVICE_FORMATS))
