@@ -129,7 +129,7 @@ dataset_fields = apiv2.model(
                     _external=True,
                 ),
                 "type": "GET",
-                "total": o.cached_resources_len or len(o.resources),
+                "total": o.resources_len,  # :ResourcesLengthProperty may call MongoDB to fetch the length if resources were not fetched
             },
             description="Link to the dataset resources",
         ),
@@ -295,9 +295,7 @@ class DatasetListAPI(API):
         )
         datasets = dataset_parser.parse_filters(datasets, args)
         sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
-        datasets = datasets.order_by(sort).paginate(args["page"], args["page_size"])
-        Dataset.compute_resources_len_from_mongo(datasets)
-        return datasets
+        return datasets.order_by(sort).paginate(args["page"], args["page_size"])
 
 
 @ns.route("/<dataset_without_resources:dataset>/", endpoint="dataset", doc=common_doc)
@@ -307,13 +305,6 @@ class DatasetAPI(API):
     @apiv2.doc("get_dataset")
     @apiv2.marshal_with(dataset_fields)
     def get(self, dataset):
-        # Compute the resources length with a custom projection
-        # The `dataset_without_resources` exclude the resources array
-        # I cannot add the `resources_len` field to the main query because this is an aggregation.
-        # Instead of `$project` we could do a `$addFields` to fetch all the fields of the dataset + the `resources_len`
-        # but the aggregate is losing the model (returning a simple dict) so it's not the best to work with it.
-        Dataset.compute_resources_len_from_mongo([dataset])
-
         """Get a dataset given its identifier"""
         if dataset.deleted and not DatasetEditPermission(dataset).can():
             apiv2.abort(410, "Dataset has been deleted")

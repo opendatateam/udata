@@ -2,7 +2,7 @@ import logging
 import re
 from datetime import datetime, timedelta
 from pydoc import locate
-from typing import List, Self
+from typing import Self
 from urllib.parse import urlparse
 
 import requests
@@ -12,7 +12,7 @@ from flask import current_app
 from mongoengine import DynamicEmbeddedDocument
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import DateTimeField
-from mongoengine.signals import post_save, pre_save
+from mongoengine.signals import post_save, pre_init, pre_save
 from stringdist import rdlevenshtein
 from werkzeug.utils import cached_property
 
@@ -618,17 +618,30 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
 
     verbose_name = _("dataset")
 
-    cached_resources_len = None
+    missing_resources = False
+
+    @cached_property
+    def resources_len(self):
+        # :ResourcesLengthProperty
+        # If we've excluded the resources from the Mongo request we need
+        # to do a new Mongo request to fetch the resources length manually.
+        # If the resources are already present, just return the `len()` of the array.
+        if not self.missing_resources:
+            return len(self.resources)
+
+        pipeline = [{"$project": {"_id": 1, "resources_len": {"$size": "$resources"}}}]
+        data = Dataset.objects(id=self.id).aggregate(pipeline)
+
+        return next(data)["resources_len"]
 
     @classmethod
-    def compute_resources_len_from_mongo(cls, datasets: List[Self]):
-        pipeline = [{"$project": {"_id": 1, "resources_len": {"$size": "$resources"}}}]
-        data = Dataset.objects(id__in=[d.id for d in datasets]).aggregate(pipeline)
-
-        len_by_id = {str(result["_id"]): result["resources_len"] for result in data}
-
-        for dataset in datasets:
-            dataset.cached_resources_len = len_by_id[str(dataset.id)]
+    def pre_init(cls, sender, document: Self, values, **kwargs):
+        # MongoEngine loses the information about raw values during the __init__ function
+        # Here we catch the raw values from the database (or from the creation of the object)
+        # and we check if resources were returned (sometimes we exclude `resources` from the
+        # Mongo request to improve perfs)
+        # This is used in :ResourcesLengthProperty
+        document.missing_resources = "resources" not in values
 
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
@@ -1010,6 +1023,7 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         self.save()
 
 
+pre_init.connect(Dataset.pre_init, sender=Dataset)
 pre_save.connect(Dataset.pre_save, sender=Dataset)
 post_save.connect(Dataset.post_save, sender=Dataset)
 
