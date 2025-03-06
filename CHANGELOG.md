@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add views as Dataservice metrics and sort [#3280](https://github.com/opendatateam/udata/pull/3280)
 
 ## 10.1.1 (2025-03-03)
 

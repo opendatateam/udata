@@ -18,6 +18,7 @@ class DataserviceCSVAdapterTest:
             metadata_modified_at=datetime(2023, 1, 1),
             organization=OrganizationFactory(),
             datasets=[DatasetFactory(), DatasetFactory()],
+            metrics={"views": 42},
         )
         [DataserviceFactory() for _ in range(10)]
         adapter = DataserviceCsvAdapter(Dataservice.objects.all())
@@ -41,3 +42,4 @@ class DataserviceCSVAdapterTest:
         assert dataservice_values["datasets"] == ",".join(
             str(dataset.id) for dataset in dataservice.datasets
         )
+        assert dataservice_values["metric.views"] == dataservice.metrics["views"]

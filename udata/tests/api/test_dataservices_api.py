@@ -326,8 +326,18 @@ class DataserviceAPITest(APITestCase):
 
     def test_dataservice_api_index_with_sorts(self):
         DataserviceFactory(title="A", created_at="2024-03-01", metadata_modified_at="2024-03-01")
-        DataserviceFactory(title="B", created_at="2024-02-01", metadata_modified_at="2024-05-01")
-        DataserviceFactory(title="C", created_at="2024-05-01", metadata_modified_at="2024-04-01")
+        DataserviceFactory(
+            title="B",
+            created_at="2024-02-01",
+            metadata_modified_at="2024-05-01",
+            metrics={"views": 42},
+        )
+        DataserviceFactory(
+            title="C",
+            created_at="2024-05-01",
+            metadata_modified_at="2024-04-01",
+            metrics={"views": 1337},
+        )
         DataserviceFactory(title="D", created_at="2024-04-01", metadata_modified_at="2024-02-01")
 
         response = self.get(url_for("api.dataservices", sort="title"))
@@ -364,6 +374,20 @@ class DataserviceAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(
             [dataservice["title"] for dataservice in response.json["data"]], ["B", "C", "A", "D"]
+        )
+
+        response = self.get(url_for("api.dataservices", sort="views"))
+        self.assert200(response)
+
+        self.assertEqual(
+            [dataservice["title"] for dataservice in response.json["data"]], ["A", "D", "B", "C"]
+        )
+
+        response = self.get(url_for("api.dataservices", sort="-views"))
+        self.assert200(response)
+
+        self.assertEqual(
+            [dataservice["title"] for dataservice in response.json["data"]], ["C", "B", "D", "A"]
         )
 
     def test_dataservice_api_index_with_wrong_dataset_id(self):
