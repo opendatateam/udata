@@ -53,12 +53,9 @@ class DataserviceApiParser(ModelApiParser):
             dataservices = dataservices.filter(organization=args["organization"])
         if "is_restricted" in args:
             dataservices = dataservices.filter(
-                access_type__in=[
-                    DATASERVICE_ACCESS_TYPE_RESTRICTED,
-                    DATASERVICE_ACCESS_TYPE_OPEN_WITH_ACCOUNT,
-                ]
+                access_type__in=[DATASERVICE_ACCESS_TYPE_RESTRICTED]
                 if boolean(args["is_restricted"])
-                else [DATASERVICE_ACCESS_TYPE_OPEN]
+                else [DATASERVICE_ACCESS_TYPE_OPEN, DATASERVICE_ACCESS_TYPE_OPEN_WITH_ACCOUNT]
             )
         return dataservices
 
