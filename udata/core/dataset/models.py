@@ -2,6 +2,7 @@ import logging
 import re
 from datetime import datetime, timedelta
 from pydoc import locate
+from typing import List, Self
 from urllib.parse import urlparse
 
 import requests
@@ -619,14 +620,15 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
 
     cached_resources_len = None
 
-    def get_resources_len_from_mongo(self):
-        if self.cached_resources_len is not None:
-            return self.cached_resources_len
-
+    @classmethod
+    def compute_resources_len_from_mongo(cls, datasets: List[Self]):
         pipeline = [{"$project": {"_id": 1, "resources_len": {"$size": "$resources"}}}]
-        data = Dataset.objects(id=self.id).aggregate(pipeline)
-        self.cached_resources_len = next(data)["resources_len"]
-        return self.cached_resources_len
+        data = Dataset.objects(id__in=[d.id for d in datasets]).aggregate(pipeline)
+
+        len_by_id = {str(result["_id"]): result["resources_len"] for result in data}
+
+        for dataset in datasets:
+            dataset.cached_resources_len = len_by_id[str(dataset.id)]
 
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
