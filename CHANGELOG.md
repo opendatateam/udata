@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix end date not defined in admin [#3281](https://github.com/opendatateam/udata/pull/3281)
 
 ## 10.1.1 (2025-03-03)
 
