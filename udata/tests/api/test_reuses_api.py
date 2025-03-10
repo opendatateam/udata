@@ -321,9 +321,9 @@ class ReuseAPITest:
     def test_reuse_api_update_org_with_full_object(self, api):
         """We can send the full org object (not only the ID) to update to an org"""
         user = api.login()
-        reuse = ReuseFactory(owner=user)
         member = Member(user=user, role="admin")
         org = OrganizationFactory(members=[member])
+        reuse = ReuseFactory(organization=org)
 
         data = reuse.to_dict()
         data["owner"] = None

@@ -1,8 +1,11 @@
 import collections
+import copy
 import logging
 import os
 import traceback
 from itertools import groupby
+from typing import Optional
+from uuid import uuid4
 
 import click
 import mongoengine
@@ -10,6 +13,7 @@ from bson import DBRef
 
 from udata import migrations
 from udata.commands import cli, cyan, echo, green, magenta, red, white, yellow
+from udata.core.dataset.models import Dataset, Resource
 from udata.mongo.document import get_all_models
 
 # Date format used to for display
@@ -383,3 +387,158 @@ def check_references(models_to_check):
 def check_integrity(models):
     """Check the integrity of the database from a business perspective"""
     check_references(models)
+
+
+@grp.command()
+@click.option(
+    "-sdid",
+    "--skip-duplicates-inside-dataset",
+    is_flag=True,
+    help="Do not show duplicates inside the same dataset (same resource ID inside one dataset)",
+)
+@click.option(
+    "-sdod",
+    "--skip-duplicates-outside-dataset",
+    is_flag=True,
+    help="Do not show duplicates between datasets (same resource ID shared between datasets)",
+)
+@click.option(
+    "-e",
+    "--exclude-org",
+    help="Exclude some org datasets",
+)
+@click.option(
+    "-o",
+    "--only-org",
+    help="Only datasets from this org",
+)
+@click.option(
+    "-f",
+    "--fix",
+    is_flag=True,
+    help="Auto-fix some problems",
+)
+def check_duplicate_resources_ids(
+    skip_duplicates_inside_dataset: bool,
+    skip_duplicates_outside_dataset: bool,
+    exclude_org: Optional[str],
+    only_org: Optional[str],
+    fix: bool,
+):
+    resources = {}
+    dry_run = "[ DONE ]" if fix else "[DRYRUN]"
+
+    def get_checksum_value(resource: Resource):
+        if resource.checksum:
+            return resource.checksum.value
+
+        return resource.extras.get("analysis:checksum")
+
+    with click.progressbar(
+        Dataset.objects,
+        Dataset.objects().count(),
+    ) as datasets:
+        for dataset in datasets:
+            for resource in dataset.resources:
+                if resource.id not in resources:
+                    resources[resource.id] = {"resources": [], "datasets": set()}
+
+                resources[resource.id]["resources"].append(resource)
+                resources[resource.id]["datasets"].add(dataset)
+
+    # Keep duplicated resources only
+    resources = {id: info for id, info in resources.items() if len(info["resources"]) != 1}
+
+    count_resources = 0
+    count_datasets = 0
+    for id, info in resources.items():
+        if len(info["datasets"]) == 1 and skip_duplicates_inside_dataset:
+            continue
+
+        if len(info["datasets"]) > 1 and skip_duplicates_outside_dataset:
+            continue
+
+        # Filter out meteo france
+        if (
+            exclude_org
+            and list(info["datasets"])[0].organization
+            and str(list(info["datasets"])[0].organization.id) == exclude_org
+        ):
+            continue
+
+        # Filter everything except meteo france
+        if only_org and (
+            not list(info["datasets"])[0].organization
+            or str(list(info["datasets"])[0].organization.id) != only_org
+        ):
+            continue
+
+        count = len(info["resources"])
+        print(f"With ID {id}: {count} resources")
+        for dataset in info["datasets"]:
+            count_datasets += 1
+            print(f"\t- Dataset#{dataset.id} {dataset.title}")
+        print("")
+        for resource in info["resources"]:
+            count_resources += 1
+            print(
+                f"\t- Resource {resource.title} ({get_checksum_value(resource)} / {resource.url})"
+            )
+
+        print()
+
+        if len(info["datasets"]) == 1 and len(info["resources"]) == 2:
+            dataset = next(iter(info["datasets"]))
+
+            resource1 = info["resources"][0]
+            resource2 = info["resources"][1]
+
+            new_resources = []
+            highlight_ids = [id]
+            if (
+                get_checksum_value(resource1) == get_checksum_value(resource2)
+                and resource1.url == resource2.url
+            ):
+                print(
+                    f"{dry_run} Since checksum and URL are the same, fixing by removing the second resource…\n"
+                )
+
+                new_resources = [r for r in dataset.resources if r != resource2]
+            else:
+                print(
+                    f"{dry_run} Since checksum and URL are not the same, fixing by setting a new ID on second resource…\n"
+                )
+
+                # Just for logging we copy the resource to avoid changing the ID
+                # on the original resource (and have a clear compare at the end)
+                new_resource2 = copy.deepcopy(resource2)
+                new_resource2.id = uuid4()
+                highlight_ids.append(new_resource2.id)
+
+                # Replace `resource2` by `new_resource2` in the `new_resources` array.
+                new_resources = [
+                    (new_resource2 if r == resource2 else r) for r in dataset.resources
+                ]
+
+            print(f"{dry_run} Previous resources ({len(dataset.resources)})")
+            for r in dataset.resources:
+                highlight = " <---- CHANGED !" if r.id in highlight_ids else ""
+                print(f"{dry_run} \t{r.id} {r.title} {highlight}")
+
+            print(f"{dry_run} New resources ({len(new_resources)})")
+            for r in new_resources:
+                highlight = " <---- CHANGED !" if r.id in highlight_ids else ""
+                print(f"{dry_run} \t{r.id} {r.title} {highlight}")
+
+            if fix:
+                dataset.resources = new_resources
+                dataset.save()
+
+        print()
+        print("---")
+        print("---")
+        print("---")
+        print()
+
+    print(f"Resources with duplicated IDs: {count_resources}")
+    print(f"Datasets concerned {count_datasets}")

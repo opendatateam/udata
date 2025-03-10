@@ -569,6 +569,31 @@ class DatasetAPITest(APITestCase):
 
         self.assert200(response)
         self.assertEqual(response.json["id"], str(dataset.id))
+        
+    def test_dataset_api_update_org(self):
+        """It shouldn't update the dataset org"""
+        user = self.login()
+        original_member = Member(user=user, role="editor")
+        original_org = OrganizationFactory(members=[original_member])
+        dataset = DatasetFactory(owner=user, organization=original_org)
+
+        new_member = Member(user=self.user, role="admin")
+        new_org = OrganizationFactory(members=[new_member])
+
+        data = dataset.to_dict()
+        data["organization"] = {"id": new_org.id}
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert400(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertNotEqual(Dataset.objects.first().organization.id, new_org.id)
+
+        self.login(AdminFactory())
+        data = dataset.to_dict()
+        data["organization"] = {"id": new_org.id}
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertEqual(Dataset.objects.first().organization.id, new_org.id)
 
     def test_dataset_api_update_with_resources(self):
         """It should update a dataset from the API with resources parameters"""
@@ -731,6 +756,27 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description, dataset.description)
 
+    def test_update_temporal_coverage(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        data = dataset.to_dict()
+        data["temporal_coverage"] = {
+            "start": "2024-01-01",
+            "end": "2024-01-31",
+        }
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        self.assertEqual("2024-01-01", str(dataset.temporal_coverage.start))
+        self.assertEqual("2024-01-31", str(dataset.temporal_coverage.end))
+        data = dataset.to_dict()
+        data["temporal_coverage"] = {"start": "2024-01-01", "end": None}
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        self.assertEqual("2024-01-01", str(dataset.temporal_coverage.start))
+        self.assertIsNone(dataset.temporal_coverage.end)
+
     def test_dataset_api_update_contact_point(self):
         """It should update a dataset from the API"""
         self.login()
@@ -742,6 +788,7 @@ class DatasetAPITest(APITestCase):
             "email": "mooneywayne@cobb-cochran.com",
             "name": "Martin Schultz",
             "organization": str(org.id),
+            "role": "contact",
         }
         response = self.post(url_for("api.contact_points"), contact_point_data)
         self.assert201(response)
@@ -754,19 +801,19 @@ class DatasetAPITest(APITestCase):
         dataset = DatasetFactory(organization=org)
         data = DatasetFactory.as_dict()
 
-        data["contact_point"] = contact_point_id
+        data["contact_points"] = [contact_point_id]
         response = self.put(url_for("api.dataset", dataset=dataset), data)
         self.assert200(response)
 
         dataset = Dataset.objects.first()
-        self.assertEqual(dataset.contact_point.name, contact_point_data["name"])
+        self.assertEqual(dataset.contact_points[0].name, contact_point_data["name"])
 
-        data["contact_point"] = None
+        data["contact_points"] = None
         response = self.put(url_for("api.dataset", dataset=dataset), data)
         self.assert200(response)
 
         dataset.reload()
-        self.assertEqual(dataset.contact_point, None)
+        self.assertEqual(dataset.contact_points, [])
 
     def test_dataset_api_update_contact_point_error(self):
         """It should update a dataset from the API"""
@@ -779,6 +826,7 @@ class DatasetAPITest(APITestCase):
             "email": "mooneywayne@cobb-cochran.com",
             "name": "Martin Schultz",
             "organization": str(org.id),
+            "role": "contact",
         }
         response = self.post(url_for("api.contact_points"), contact_point_data)
         self.assert201(response)
@@ -791,11 +839,11 @@ class DatasetAPITest(APITestCase):
         dataset = DatasetFactory(owner=self.user)
         data = DatasetFactory.as_dict()
 
-        data["contact_point"] = contact_point_id
+        data["contact_points"] = [contact_point_id]
         response = self.put(url_for("api.dataset", dataset=dataset), data)
         self.assert400(response)
         self.assertEqual(
-            response.json["errors"]["contact_point"][0],
+            response.json["errors"]["contact_points"][0],
             _("Wrong contact point id or contact point ownership mismatch"),
         )
 
@@ -1289,6 +1337,21 @@ class DatasetResourceAPITest(APITestCase):
         # Url should have been updated as it is a remote resource
         self.assertEqual(updated.url, data["url"])
         self.assertEqual(updated.extras, {"extra:id": "id"})
+
+    def test_cannot_update_resource_filetype(self):
+        user = self.login()
+        resource = ResourceFactory(filetype="file")
+        dataset = DatasetFactory(owner=user, resources=[resource])
+
+        data = {
+            "filetype": "remote",
+            "url": faker.url(),
+        }
+        response = self.put(url_for("api.resource", dataset=dataset, rid=str(resource.id)), data)
+        self.assert400(response)
+
+        dataset.reload()
+        self.assertEqual(dataset.resources[0].filetype, "file")
 
     def test_bulk_update(self):
         resources = ResourceFactory.build_batch(2)
