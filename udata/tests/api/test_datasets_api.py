@@ -744,6 +744,27 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description, dataset.description)
 
+    def test_update_temporal_coverage(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        data = dataset.to_dict()
+        data["temporal_coverage"] = {
+            "start": "2024-01-01",
+            "end": "2024-01-31",
+        }
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        self.assertEqual("2024-01-01", str(dataset.temporal_coverage.start))
+        self.assertEqual("2024-01-31", str(dataset.temporal_coverage.end))
+        data = dataset.to_dict()
+        data["temporal_coverage"] = {"start": "2024-01-01", "end": None}
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        self.assertEqual("2024-01-01", str(dataset.temporal_coverage.start))
+        self.assertIsNone(dataset.temporal_coverage.end)
+
     def test_dataset_api_update_contact_point(self):
         """It should update a dataset from the API"""
         self.login()

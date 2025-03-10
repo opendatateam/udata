@@ -2,8 +2,10 @@ from bson import ObjectId
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
+from udata.core.user.models import User
 from udata.utils import faker
 
 from . import APITestCase
@@ -214,3 +216,39 @@ class TransferAPITest(APITestCase):
         data = response.json
 
         self.assertIn("recipient", data["errors"])
+
+    def test_cannot_accept_or_refuse_transfer_after_accepting_or_refusing(self):
+        user = self.login()
+        new_user = UserFactory()
+        dataset = DatasetFactory(owner=user)
+
+        response = self._create_transfer(dataset, new_user)
+        self.assert201(response)
+
+        transfer = response.json
+
+        self.login(new_user)
+        response = self.post(url_for("api.transfer", id=transfer["id"]), {"response": "accept"})
+        self.assert200(response)
+
+        response = self.post(url_for("api.transfer", id=transfer["id"]), {"response": "accept"})
+        self.assert400(response)
+
+        response = self.post(url_for("api.transfer", id=transfer["id"]), {"response": "refuse"})
+        self.assert400(response)
+
+    def _create_transfer(self, source: Dataset, destination: User):
+        return self.post(
+            url_for("api.transfers"),
+            {
+                "subject": {
+                    "class": "Dataset",
+                    "id": str(source.id),
+                },
+                "recipient": {
+                    "class": "User",
+                    "id": str(destination.id),
+                },
+                "comment": "Some comment",
+            },
+        )
