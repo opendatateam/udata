@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Fix creating/updating ID for resources [#3239](https://github.com/opendatateam/udata/pull/3239)
 - Cannot respond to a transfer after first response [#3255](https://github.com/opendatateam/udata/pull/3255)
 - Cannot update resource filetype after creation [#3254](https://github.com/opendatateam/udata/pull/3254)
 

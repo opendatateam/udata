@@ -558,6 +558,18 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description, "new description")
 
+    def test_cannot_modify_dataset_id(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+
+        data = dataset.to_dict()
+        data["id"] = "7776aa373aa050e302b5714d"
+
+        response = self.put(url_for("api.dataset", dataset=dataset.id), data)
+
+        self.assert200(response)
+        self.assertEqual(response.json["id"], str(dataset.id))
+
     def test_dataset_api_update_org(self):
         """It shouldn't update the dataset org"""
         user = self.login()
@@ -1129,6 +1141,37 @@ class DatasetResourceAPITest(APITestCase):
         response = self.post(url_for("api.resources", dataset=self.dataset), data)
         # should fail because the POST endpoint only supports URL setting for remote resources
         self.assert400(response)
+
+    def test_creating_and_updating_resource_uuid(self):
+        uuid_a = "c312cfb0-60f7-417c-9cf9-3d985196b22a"
+        uuid_b = "e8262134-5ff0-4bd8-98bc-5db76bb27856"
+
+        data = ResourceFactory.as_dict()
+        data["filetype"] = "remote"
+        data["id"] = uuid_a
+        response = self.post(url_for("api.resources", dataset=self.dataset), data)
+        self.assert201(response)
+        self.assertNotEqual(response.json["id"], uuid_a)
+
+        first_generated_uuid = response.json["id"]
+
+        # Sending the same UUID twice doesn't change anything…
+        data = ResourceFactory.as_dict()
+        data["filetype"] = "remote"
+        data["id"] = first_generated_uuid
+        response = self.post(url_for("api.resources", dataset=self.dataset), data)
+        self.assert201(response)
+        self.assertNotEqual(response.json["id"], first_generated_uuid)
+
+        # Cannot modify the ID of an existing resource
+        data = response.json
+        data["id"] = uuid_b
+        response = self.put(
+            url_for("api.resource", dataset=self.dataset, rid=first_generated_uuid),
+            data,
+        )
+        self.assert200(response)
+        self.assertEqual(response.json["id"], first_generated_uuid)
 
     def test_create_normalize_format(self):
         _format = " FORMAT "

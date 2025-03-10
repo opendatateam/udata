@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta
+from uuid import uuid4
 
 import pytest
 import requests
 from flask import current_app
+from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine import post_save
 
 from udata.app import cache
@@ -58,6 +60,18 @@ class DatasetModelTest:
             dataset.add_resource(resource)
         assert len(dataset.resources) == 2
         assert dataset.resources[0].id == resource.id
+
+    def test_add_two_resources_with_same_id(self):
+        uuid = uuid4()
+        user = UserFactory()
+        dataset = DatasetFactory(owner=user)
+        resource_a = ResourceFactory(id=uuid)
+        resource_b = ResourceFactory(id=uuid)
+
+        dataset.add_resource(resource_a)
+        dataset.add_resource(ResourceFactory())
+        with pytest.raises(MongoEngineValidationError):
+            dataset.add_resource(resource_b)
 
     def test_add_resource_missing_checksum_type(self):
         user = UserFactory()

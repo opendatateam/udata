@@ -104,6 +104,10 @@ class ResourceForm(BaseResourceForm):
     id = fields.UUIDField()
 
 
+class ResourceFormWithoutId(BaseResourceForm):
+    model_class = Resource
+
+
 class CommunityResourceForm(BaseResourceForm):
     model_class = CommunityResource
 
