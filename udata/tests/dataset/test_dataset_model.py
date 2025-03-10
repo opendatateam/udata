@@ -4,6 +4,7 @@ from uuid import uuid4
 import pytest
 import requests
 from flask import current_app
+from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine import post_save
 
 from udata.app import cache
@@ -69,11 +70,8 @@ class DatasetModelTest:
 
         dataset.add_resource(resource_a)
         dataset.add_resource(ResourceFactory())
-        try:
+        with pytest.raises(MongoEngineValidationError):
             dataset.add_resource(resource_b)
-            assert False
-        except RuntimeError:
-            print("Ok!")
 
     def test_add_resource_missing_checksum_type(self):
         user = UserFactory()

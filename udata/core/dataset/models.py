@@ -901,7 +901,7 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         """Perform an atomic prepend for a new resource"""
         resource.validate()
         if resource.id in [r.id for r in self.resources]:
-            raise RuntimeError("Cannot add resource with already existing ID")
+            raise MongoEngineValidationError("Cannot add resource with already existing ID")
 
         self.update(
             __raw__={"$push": {"resources": {"$each": [resource.to_mongo()], "$position": 0}}}
