@@ -69,8 +69,9 @@ class TopicsAPITest(APITestCase):
 
         response = self.get(url_for("api.topics", include_private="true"))
         self.assert200(response)
-        self.assertEqual(len(response.json["data"]), 8)
-        self.assertIn(str(private_topic.id), [t["id"] for t in response.json["data"]])
+        self.assertEqual(len(response.json["data"]), 7)
+        # we're not logged in, so the private topic does not appear
+        self.assertNotIn(str(private_topic.id), [t["id"] for t in response.json["data"]])
 
         response = self.get(url_for("api.topics", geozone=paca.id))
         self.assert200(response)
@@ -91,6 +92,22 @@ class TopicsAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertIn(str(org_topic.id), [t["id"] for t in response.json["data"]])
+
+    def test_topic_api_list_authenticated(self):
+        owner = self.login()
+
+        private_topic = TopicFactory(private=True)
+        private_topic_owner = TopicFactory(private=True, owner=owner)
+
+        response = self.get(url_for("api.topics"))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), 0)
+
+        response = self.get(url_for("api.topics", include_private="true"))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertNotIn(str(private_topic.id), [t["id"] for t in response.json["data"]])
+        self.assertIn(str(private_topic_owner.id), [t["id"] for t in response.json["data"]])
 
     def test_topic_api_get(self):
         """It should fetch a topic from the API"""

@@ -2,12 +2,31 @@
 
 ## Current (in progress)
 
-- Harvest attribution roles [#3149](https://github.com/opendatateam/udata/pull/3149)
+- Nothing yet
+
+## 10.1.2 (2025-03-10)
+
+- Fix end date not defined in admin [#3281](https://github.com/opendatateam/udata/pull/3281)
+
+## 10.1.1 (2025-03-03)
+
+- Allow temporal coverage with only a start date [#3192](https://github.com/opendatateam/udata/pull/3192)
+- The `extras` column in the resource catalog is now dumped as json [#3272](https://github.com/opendatateam/udata/pull/3272) and [#3273](https://github.com/opendatateam/udata/pull/3273)
+- Ensure we populate slug properly on user deletion [#3277](https://github.com/opendatateam/udata/pull/3277)
+
+## 10.1.0 (2025-02-20)
+
+- **breaking change** Harvest attribution roles [#3149](https://github.com/opendatateam/udata/pull/3149) [#3270](https://github.com/opendatateam/udata/pull/3270)
+  - dataset and dataservices now have a list of contact points
+  - migration needed
 - Allow super-admins to change objects' owners [#3260](https://github.com/opendatateam/udata/pull/3260)
 - Cannot respond to a transfer after first response [#3255](https://github.com/opendatateam/udata/pull/3255)
 - Fix contact point permissions [#3253](https://github.com/opendatateam/udata/pull/3253)
 - Fix wrong marshal for community resource uploads [#3261](https://github.com/opendatateam/udata/pull/3261)
 - Return harvesters's errors details only for super-admins [#3264](https://github.com/opendatateam/udata/pull/3264)
+- feat: topics list filtered by visible_by_user [#3265](https://github.com/opendatateam/udata/pull/3265)
+- Allow geozone suggest to check the id field [#3267](https://github.com/opendatateam/udata/pull/3267)
+- Allow a user to check its own membership requests [#3269](https://github.com/opendatateam/udata/pull/3269)
 
 ## 10.0.8 (2025-01-31)
 

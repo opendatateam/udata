@@ -28,7 +28,6 @@
     <input type="text" class="form-control daterange-picker-end"
         v-el:end-input :placeholder="_('End')"
         @focus="onFocus" @input="onChange | debounce 500"
-        :required="required"
         :value="endValue|dt dateFormat ''"
         :readonly="readonly">
     <span class="input-group-btn">
@@ -131,11 +130,11 @@ export default {
         $(this.$els.endHidden).rules('add', {
             dateGreaterThan: this.$els.startHidden.id,
             required: (el) => {
-                return (this.startValue && !this.endValue) || (this.endValue && !this.startValue);
+                return !!(this.endValue && !this.startValue);
             },
             messages: {
                 dateGreaterThan: this._('End date should be after start date'),
-                required: this._('Both dates are required')
+                required: this._('At least a start date is required')
             }
         });
     },
