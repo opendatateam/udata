@@ -1,3 +1,5 @@
+from flask_login import current_user
+
 from udata.api import api, base_reference, fields
 from udata.auth.helpers import current_user_is_admin_or_self
 
@@ -60,6 +62,11 @@ user_fields = api.model(
         ),
         "since": fields.ISODateTime(
             attribute="created_at", description="The registeration date", required=True
+        ),
+        "last_login_at": fields.Raw(
+            attribute=lambda o: o.last_login_at if current_user.sysadmin else None,
+            description="The user last connection date (only present for global admins)",
+            readonly=True,
         ),
         "page": fields.UrlFor(
             "users.show",
