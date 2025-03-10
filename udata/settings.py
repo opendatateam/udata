@@ -115,6 +115,14 @@ class Defaults(object):
 
     SECURITY_RETURN_GENERIC_RESPONSES = False
 
+    SECURITY_TWO_FACTOR = True
+    SECURITY_TWO_FACTOR_REQUIRED = True
+    SECURITY_TWO_FACTOR_ENABLED_METHODS = ["authenticator"]
+    SECURITY_TWO_FACTOR_RESCUE_MAIL = "no-reply@localhost"
+
+    SECURITY_TOTP_SECRETS = {"1": "Default uData secret totp"}
+    SECURITY_TOTP_ISSUER = "udata"
+
     # Sentry configuration
     SENTRY_DSN = None
     SENTRY_TAGS = {}

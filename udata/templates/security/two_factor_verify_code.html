@@ -1,0 +1,28 @@
+{% set title = title|default(_("Two-Factor Authentication")) %}
+{% import 'macros/forms.html' as forms with context %}
+
+
+{% block content %}
+  <h1>{{ _("Two-Factor Authentication") }}</h1>
+  <h3>{{ _("Please enter your authentication code generated via: %(method)s", method=chosen_method) }}</h3> {# chosen_method is translated string #}
+  <form action="{{ url_for('security.two_factor_token_validation') }}" method="post" name="two_factor_verify_code_form">
+    {{ two_factor_verify_code_form.hidden_tag() }}
+    {{ forms.field(two_factor_verify_code_form.code) }}
+    {{ forms.field(two_factor_verify_code_form.submit) }}
+  </form>
+  {% if two_factor_rescue_form %}
+    <hr class="fs-gap">
+    <form action="{{ url_for('security.two_factor_rescue') }}" method="post" name="two_factor_rescue_form">
+      {# explicitly render csrf_token so we can change the ID so we don't get duplicates #}
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      {{ forms.field(two_factor_rescue_form.help_setup) }}
+      {% if problem=="email" %}
+        <div>{{ _("The code for authentication was sent to your email address") }}</div>
+      {% endif %}
+      {% if problem=="help" %}
+        <div>{{ _("An email was sent to us in order to reset your application account") }}</div>
+      {% endif %}
+      {{ forms.field(two_factor_rescue_form.submit) }}
+    </form>
+  {% endif %}
+{% endblock content %}
