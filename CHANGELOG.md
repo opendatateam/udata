@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Cannot respond to a transfer after first response [#3255](https://github.com/opendatateam/udata/pull/3255)
 
 ## 10.1.2 (2025-03-10)
 
