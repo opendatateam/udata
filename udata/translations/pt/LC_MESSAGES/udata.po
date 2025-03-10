@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2024-11-15 10:00+0100\n"
-"PO-Revision-Date: 2024-11-15 14:16\n"
+"POT-Creation-Date: 2025-02-18 11:06+0100\n"
+"PO-Revision-Date: 2025-02-18 10:23\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -18,31 +18,31 @@ msgstr ""
 "X-Crowdin-File: /master/udata/translations/udata.pot\n"
 "X-Crowdin-File-ID: 6\n"
 
-#: udata/settings.py:101
+#: udata/settings.py:109
 msgid "Welcome"
 msgstr "Bem-vindo"
 
-#: udata/settings.py:102
+#: udata/settings.py:110
 msgid "Please confirm your email"
 msgstr "Por favor confirme o seu e-mail"
 
-#: udata/settings.py:103
+#: udata/settings.py:111
 msgid "Login instructions"
 msgstr "Instruções de login"
 
-#: udata/settings.py:104
+#: udata/settings.py:112
 msgid "Your password has been reset"
 msgstr "A sua palavra-passe foi redefinida"
 
-#: udata/settings.py:105
+#: udata/settings.py:113
 msgid "Your password has been changed"
 msgstr "A sua palavra-passe foi alterada"
 
-#: udata/settings.py:106
+#: udata/settings.py:114
 msgid "Password reset instructions"
 msgstr "Instruções para recuperação da palavra-passe"
 
-#: udata/settings.py:495
+#: udata/settings.py:504
 msgid "This dataset has been archived"
 msgstr "O seu conjunto de dados foi arquivado"
 
@@ -50,7 +50,7 @@ msgstr "O seu conjunto de dados foi arquivado"
 msgid "Invalid URL \"{url}\": {reason}"
 msgstr ""
 
-#: udata/tests/api/test_datasets_api.py:810 udata/tests/test_model.py:367
+#: udata/tests/api/test_datasets_api.py:902 udata/tests/test_model.py:367
 #: udata/uris.py:55
 msgid "Invalid URL \"{url}\""
 msgstr ""
@@ -198,17 +198,17 @@ msgstr "Quer criar alguns dados de exemplo?"
 msgid "Your udata instance is ready!"
 msgstr "O uData foi iniciado com sucesso!"
 
-#: udata/core/owned.py:53 udata/forms/fields.py:735
-#: udata/tests/api/test_dataservices_api.py:407
+#: udata/core/owned.py:64 udata/forms/fields.py:746
+#: udata/tests/api/test_dataservices_api.py:437
 msgid "You can only set yourself as owner"
 msgstr "Apenas pode definir-se como proprietário"
 
-#: udata/core/owned.py:62
+#: udata/core/owned.py:73
 msgid "Unknown organization"
 msgstr ""
 
-#: udata/core/owned.py:66 udata/forms/fields.py:756
-#: udata/tests/api/test_dataservices_api.py:421
+#: udata/core/owned.py:77 udata/forms/fields.py:778
+#: udata/tests/api/test_dataservices_api.py:451
 msgid "Permission denied for this organization"
 msgstr "Permissão recusada para esta organização"
 
@@ -245,16 +245,36 @@ msgstr ""
 msgid "Publish as"
 msgstr "Publicar como"
 
-#: udata/core/contact_point/models.py:18 udata/tests/api/test_contact_points.py:50
+#: udata/core/contact_point/forms.py:21 udata/core/organization/forms.py:94
+msgid "Role"
+msgstr "Perfil"
+
+#: udata/core/contact_point/models.py:9
+msgid "Contact"
+msgstr ""
+
+#: udata/core/contact_point/models.py:10
+msgid "Creator"
+msgstr ""
+
+#: udata/core/contact_point/models.py:11
+msgid "Publisher"
+msgstr ""
+
+#: udata/core/contact_point/models.py:26 udata/tests/api/test_contact_points.py:58
 msgid "At least an email or a contact form is required for a contact point"
 msgstr ""
 
-#: udata/core/dataservices/models.py:163 udata/core/dataset/models.py:568
+#: udata/core/dataservices/models.py:114
+msgid "dataservice"
+msgstr ""
+
+#: udata/core/dataservices/models.py:179 udata/core/dataset/models.py:569
 #: udata/mongo/datetime_fields.py:60
 msgid "Creation date"
 msgstr "Data de criação"
 
-#: udata/core/dataservices/models.py:168 udata/core/dataset/models.py:571
+#: udata/core/dataservices/models.py:185 udata/core/dataset/models.py:572
 #: udata/mongo/datetime_fields.py:66
 msgid "Last modification date"
 msgstr "Data da última modificação"
@@ -477,7 +497,7 @@ msgstr "Tamanho do ficheiro em bytes"
 msgid "Related dataset"
 msgstr "Dataset relacionado"
 
-#: udata/core/dataset/forms.py:134 udata/tests/api/test_datasets_api.py:725
+#: udata/core/dataset/forms.py:134 udata/tests/api/test_datasets_api.py:814
 msgid "Wrong contact point id or contact point ownership mismatch"
 msgstr ""
 
@@ -543,42 +563,42 @@ msgstr "Privado"
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "Restringir a visibilidade do dataset para si ou para a sua organização apenas."
 
-#: udata/core/dataset/models.py:59
+#: udata/core/dataset/models.py:60
 msgid "Pivotal data"
 msgstr "Dados centrais"
 
-#: udata/core/dataset/models.py:135
+#: udata/core/dataset/models.py:136
 msgid "A schema must contains a name or an URL when a version is provided."
 msgstr ""
 
-#: udata/core/dataset/models.py:166 udata/tests/api/test_datasets_api.py:818
-#: udata/tests/api/test_datasets_api.py:829
+#: udata/core/dataset/models.py:167 udata/tests/api/test_datasets_api.py:910
+#: udata/tests/api/test_datasets_api.py:921
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:185 udata/tests/api/test_datasets_api.py:840
+#: udata/core/dataset/models.py:186 udata/tests/api/test_datasets_api.py:932
 msgid "Version \"{version}\" is not an allowed value for the schema \"{name}\". Allowed versions: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:462 udata/core/dataset/rdf.py:503
-#: udata/tests/dataset/test_dataset_rdf.py:556
-#: udata/tests/dataset/test_dataset_rdf.py:569
+#: udata/core/dataset/models.py:463 udata/core/dataset/rdf.py:598
+#: udata/tests/dataset/test_dataset_rdf.py:656
+#: udata/tests/dataset/test_dataset_rdf.py:669
 msgid "Nameless resource"
 msgstr "Recurso sem nome"
 
-#: udata/core/dataset/models.py:554
+#: udata/core/dataset/models.py:555
 msgid "Future date of update"
 msgstr "Data futura de atualização"
 
-#: udata/core/dataset/models.py:617
+#: udata/core/dataset/models.py:618
 msgid "dataset"
 msgstr "conjunto de dados"
 
-#: udata/core/dataset/rdf.py:501 udata/tests/dataset/test_dataset_rdf.py:543
+#: udata/core/dataset/rdf.py:596 udata/tests/dataset/test_dataset_rdf.py:643
 msgid "{format} resource"
 msgstr "{format} recurso"
 
-#: udata/core/dataset/tasks.py:108
+#: udata/core/dataset/tasks.py:113
 msgid "You need to update some frequency-based datasets"
 msgstr "É necessário atualizar alguns datasets baseados em frequência"
 
@@ -592,17 +612,17 @@ msgstr "Comentário"
 msgid "Subject"
 msgstr "Assunto"
 
-#: udata/core/discussions/tasks.py:28
+#: udata/core/discussions/tasks.py:26
 #, python-format
 msgid "Your %(type)s have a new discussion"
 msgstr "O seu %(type)s tem uma nova discussão"
 
-#: udata/core/discussions/tasks.py:47
+#: udata/core/discussions/tasks.py:45
 #, python-format
 msgid "%(user)s commented your discussion"
 msgstr "%(user)s comentou a sua discussão"
 
-#: udata/core/discussions/tasks.py:63
+#: udata/core/discussions/tasks.py:61
 msgid "A discussion has been closed"
 msgstr "Uma discussão foi fechada"
 
@@ -696,27 +716,23 @@ msgstr ""
 msgid "Business identification number"
 msgstr ""
 
-#: udata/core/organization/forms.py:94
-msgid "Role"
-msgstr "Perfil"
-
-#: udata/core/organization/models.py:34
+#: udata/core/organization/models.py:35
 msgid "Public Service"
 msgstr "Serviço público"
 
-#: udata/core/organization/models.py:35
+#: udata/core/organization/models.py:36
 msgid "Certified"
 msgstr "Certificado"
 
-#: udata/core/organization/models.py:36
+#: udata/core/organization/models.py:37
 msgid "Association"
 msgstr ""
 
-#: udata/core/organization/models.py:37
+#: udata/core/organization/models.py:38
 msgid "Company"
 msgstr ""
 
-#: udata/core/organization/models.py:38
+#: udata/core/organization/models.py:39
 msgid "Local authority"
 msgstr ""
 
@@ -802,7 +818,7 @@ msgstr ""
 msgid "Specify your body type (HTML or markdown)"
 msgstr ""
 
-#: udata/core/post/models.py:48
+#: udata/core/post/models.py:54
 msgid "post"
 msgstr "artigo"
 
@@ -870,7 +886,7 @@ msgstr "Visualização"
 msgid "Connected device"
 msgstr "Dispositivo ligado"
 
-#: udata/core/reuse/constants.py:15 udata/tests/reuse/test_reuse_model.py:106
+#: udata/core/reuse/constants.py:15 udata/tests/reuse/test_reuse_model.py:108
 msgid "Health"
 msgstr "Saúde"
 
@@ -926,11 +942,11 @@ msgstr "Lei e justiça"
 msgid "Open data tools"
 msgstr "Abrir ferramentas de dados"
 
-#: udata/core/reuse/models.py:35
+#: udata/core/reuse/models.py:36
 msgid "This URL is already registered"
 msgstr "Este URL já está registado"
 
-#: udata/core/reuse/models.py:175
+#: udata/core/reuse/models.py:176
 msgid "reuse"
 msgstr "reutilização"
 
@@ -1078,7 +1094,7 @@ msgstr "Sobre"
 msgid "Roles"
 msgstr "Perfis"
 
-#: udata/core/user/models.py:279 udata/tests/api/test_me_api.py:297
+#: udata/core/user/models.py:286 udata/tests/api/test_me_api.py:297
 msgid "Account deletion"
 msgstr "Conta eliminada"
 
@@ -1149,7 +1165,12 @@ msgstr "Identificadores desconhecidos: {identifiers}"
 msgid "Unable to parse date range"
 msgstr "Não é possível analisar o intervalo de datas"
 
-#: udata/forms/fields.py:733 udata/forms/fields.py:754
+#: udata/forms/fields.py:739 udata/forms/fields.py:771
+#: udata/tests/forms/test_publish_as_field.py:214
+msgid "Cannot change owner after creation. Please use transfer feature."
+msgstr ""
+
+#: udata/forms/fields.py:744 udata/forms/fields.py:776
 msgid "You must be authenticated"
 msgstr "Você deve estar autenticado"
 
@@ -1210,11 +1231,11 @@ msgstr "Ignorado"
 msgid "Archived"
 msgstr "Arquivado"
 
-#: udata/harvest/backends/dcat.py:292
+#: udata/harvest/backends/dcat.py:296
 msgid "Remote URL prefix"
 msgstr ""
 
-#: udata/harvest/backends/dcat.py:295
+#: udata/harvest/backends/dcat.py:299
 msgid "A prefix used to build the remote URL of the harvested items."
 msgstr ""
 

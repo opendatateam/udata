@@ -2,9 +2,76 @@
 
 ## Current (in progress)
 
+- Cannot respond to a transfer after first response [#3255](https://github.com/opendatateam/udata/pull/3255)
+- Cannot update resource filetype after creation [#3254](https://github.com/opendatateam/udata/pull/3254)
+
+## 10.1.2 (2025-03-10)
+
+- Fix end date not defined in admin [#3281](https://github.com/opendatateam/udata/pull/3281)
+
+## 10.1.1 (2025-03-03)
+
+- Allow temporal coverage with only a start date [#3192](https://github.com/opendatateam/udata/pull/3192)
+- The `extras` column in the resource catalog is now dumped as json [#3272](https://github.com/opendatateam/udata/pull/3272) and [#3273](https://github.com/opendatateam/udata/pull/3273)
+- Ensure we populate slug properly on user deletion [#3277](https://github.com/opendatateam/udata/pull/3277)
+
+## 10.1.0 (2025-02-20)
+
+- **breaking change** Harvest attribution roles [#3149](https://github.com/opendatateam/udata/pull/3149) [#3270](https://github.com/opendatateam/udata/pull/3270)
+  - dataset and dataservices now have a list of contact points
+  - migration needed
+- Allow super-admins to change objects' owners [#3260](https://github.com/opendatateam/udata/pull/3260)
+- Fix contact point permissions [#3253](https://github.com/opendatateam/udata/pull/3253)
+- Fix wrong marshal for community resource uploads [#3261](https://github.com/opendatateam/udata/pull/3261)
+- Return harvesters's errors details only for super-admins [#3264](https://github.com/opendatateam/udata/pull/3264)
+- feat: topics list filtered by visible_by_user [#3265](https://github.com/opendatateam/udata/pull/3265)
+- Allow geozone suggest to check the id field [#3267](https://github.com/opendatateam/udata/pull/3267)
+- Allow a user to check its own membership requests [#3269](https://github.com/opendatateam/udata/pull/3269)
+
+## 10.0.8 (2025-01-31)
+
+- Force the usage of transfers request to change the owner of a model [#3249](https://github.com/opendatateam/udata/pull/3249)
+- Add report of duplicates resources ids [#3247](https://github.com/opendatateam/udata/pull/3247)
+- Add search to posts [#3248](https://github.com/opendatateam/udata/pull/3248)
+- Resource catalog: fix preview_url and add extras [#3188](https://github.com/opendatateam/udata/pull/3188)
+- Add trailing slash to security routes [#3251](https://github.com/opendatateam/udata/pull/3251)
+- Upgrade packaging dependency to 24.2 [#3252](https://github.com/opendatateam/udata/pull/3252)
+- Expose HVD dataservice as inline distribution [#3256](https://github.com/opendatateam/udata/pull/3256)
+
+## 10.0.7 (2025-01-13)
+
+- Add a test to clear datasets on Topics api v1 [#3233](https://github.com/opendatateam/udata/pull/3233)
+- feat: optimize topic's datasets reindex [#3234](https://github.com/opendatateam/udata/pull/3234)
+- Allow Dataservice transfer [#3237](https://github.com/opendatateam/udata/pull/3237)
+- fix `function_field` wrong name [#3236](https://github.com/opendatateam/udata/pull/3236)
+- Allow dataservice archive [#3238](https://github.com/opendatateam/udata/pull/3238)
+- Improve OGC service detection to expose in RDF [#3241](https://github.com/opendatateam/udata/pull/3241)
+- Don’t duplicate datasets with a harvest.remote_id URI when harvesting [#3219](https://github.com/opendatateam/udata/pull/3219)
+- Fix version number build in CI [#3244](https://github.com/opendatateam/udata/pull/3244)
+
+## 10.0.6 (2024-12-19)
+
+- Ignore inactive sources at harvest time [#3226](https://github.com/opendatateam/udata/pull/3226)
+    - If some harvest sources were marked inactive by mistake, they won't get executed anymore
+- Organization url is now a URLField and should be a valid URL [#3227](https://github.com/opendatateam/udata/pull/3227)
+- Fix the `parse-url` command [#3225](https://github.com/opendatateam/udata/pull/3225)
+- Add `with_drafts` argument to posts API [#3229](https://github.com/opendatateam/udata/pull/3229)
+- Fix failing dataset save in update reuses metrics [#3230](https://github.com/opendatateam/udata/pull/3230)
+- Fix catalog RDF by preventing memory increase on getting dataservice hvd tags [#3231](https://github.com/opendatateam/udata/pull/3231)
+- Update purge tasks [#3167](https://github.com/opendatateam/udata/pull/3167)
+- Trigger GitLab infra deployment through simple-scaffolding script [#3232](https://github.com/opendatateam/udata/pull/3232)
+
+## 10.0.5 (2024-12-09)
+
+- Add list transfers endpoint / Save user requesting the transfer [#3211](https://github.com/opendatateam/udata/pull/3211)
 - Add dataservice csv adapter [#3208](https://github.com/opendatateam/udata/pull/3208)
 - Add url_for for dataservices and mail notifications [#3213](https://github.com/opendatateam/udata/pull/3213)
 - Compute dataservices metrics on org, user and site [#3209](https://github.com/opendatateam/udata/pull/3209)
+- Update default method blocklist for READ ONLY mode [#3212](https://github.com/opendatateam/udata/pull/3212)
+- The API will now return all the datasets a user has access to, including deleted of private ones that they're the owners of [#3214](https://github.com/opendatateam/udata/pull/3214)
+- Rename administration labels from "Private" to "Draft" [#3217](https://github.com/opendatateam/udata/pull/3217)
+- Add partial obfuscation of email for members [#3220](https://github.com/opendatateam/udata/pull/3220)
+- Reuse url is now a URLField and should be a valid URL [#3222](https://github.com/opendatateam/udata/pull/3222)
 
 ## 10.0.4 (2024-11-29)
 

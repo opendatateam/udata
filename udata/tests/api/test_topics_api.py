@@ -69,8 +69,9 @@ class TopicsAPITest(APITestCase):
 
         response = self.get(url_for("api.topics", include_private="true"))
         self.assert200(response)
-        self.assertEqual(len(response.json["data"]), 8)
-        self.assertIn(str(private_topic.id), [t["id"] for t in response.json["data"]])
+        self.assertEqual(len(response.json["data"]), 7)
+        # we're not logged in, so the private topic does not appear
+        self.assertNotIn(str(private_topic.id), [t["id"] for t in response.json["data"]])
 
         response = self.get(url_for("api.topics", geozone=paca.id))
         self.assert200(response)
@@ -91,6 +92,22 @@ class TopicsAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertIn(str(org_topic.id), [t["id"] for t in response.json["data"]])
+
+    def test_topic_api_list_authenticated(self):
+        owner = self.login()
+
+        private_topic = TopicFactory(private=True)
+        private_topic_owner = TopicFactory(private=True, owner=owner)
+
+        response = self.get(url_for("api.topics"))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), 0)
+
+        response = self.get(url_for("api.topics", include_private="true"))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertNotIn(str(private_topic.id), [t["id"] for t in response.json["data"]])
+        self.assertIn(str(private_topic_owner.id), [t["id"] for t in response.json["data"]])
 
     def test_topic_api_get(self):
         """It should fetch a topic from the API"""
@@ -190,6 +207,18 @@ class TopicsAPITest(APITestCase):
         data["owner"] = user.to_dict()
         response = self.put(url_for("api.topic", topic=topic), data)
         self.assert403(response)
+
+    def test_topic_api_clear_datasets(self):
+        """It should remove all datasets if set to None"""
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        self.assertGreater(len(topic.datasets), 0)
+        data = topic.to_dict()
+        data["datasets"] = None
+        response = self.put(url_for("api.topic", topic=topic), data)
+        self.assert200(response)
+        topic.reload()
+        self.assertEqual(len(topic.datasets), 0)
 
     def test_topic_api_delete(self):
         """It should delete a topic from the API"""

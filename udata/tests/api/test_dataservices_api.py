@@ -10,7 +10,7 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
-from udata.core.user.factories import UserFactory
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
 from udata.tests.helpers import assert200, assert400, assert_redirects
 
@@ -405,12 +405,12 @@ class DataserviceAPITest(APITestCase):
             {
                 "title": "My title",
                 "base_api_url": "https://example.org",
-                "contact_point": "66212433e42ab56639ad516e",
+                "contact_points": ["66212433e42ab56639ad516e"],
             },
         )
         self.assert400(response)
         self.assertEqual(
-            response.json["errors"]["contact_point"],
+            response.json["errors"]["contact_points"],
             ["Unknown reference '66212433e42ab56639ad516e'"],
         )
         self.assertEqual(Dataservice.objects.count(), 0)
@@ -477,6 +477,31 @@ class DataserviceAPITest(APITestCase):
         dataservice = Dataservice.objects(id=response.json["id"]).first()
         self.assertEqual(dataservice.owner, None)
         self.assertEqual(dataservice.organization.id, me_org.id)
+
+    def test_dataservice_api_update_org(self):
+        """It shouldn't update the dataservice org"""
+        user = self.login()
+        original_member = Member(user=user, role="editor")
+        original_org = OrganizationFactory(members=[original_member])
+        dataservice = DataserviceFactory(owner=user, organization=original_org)
+
+        new_member = Member(user=self.user, role="admin")
+        new_org = OrganizationFactory(members=[new_member])
+
+        data = dataservice.to_dict()
+        data["organization"] = {"id": new_org.id}
+        response = self.patch(url_for("api.dataservice", dataservice=dataservice), data)
+        self.assert400(response)
+        self.assertEqual(Dataservice.objects.count(), 1)
+        self.assertNotEqual(Dataservice.objects.first().organization.id, new_org.id)
+
+        self.login(AdminFactory())
+        data = dataservice.to_dict()
+        data["organization"] = {"id": new_org.id}
+        response = self.patch(url_for("api.dataservice", dataservice=dataservice), data)
+        self.assert200(response)
+        self.assertEqual(Dataservice.objects.count(), 1)
+        self.assertEqual(Dataservice.objects.first().organization.id, new_org.id)
 
 
 @pytest.mark.frontend

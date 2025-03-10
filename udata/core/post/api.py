@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from udata.api import API, api, fields
+from udata.auth import Permission as AdminPermission
 from udata.auth import admin_permission
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.reuse.models import Reuse
@@ -13,6 +14,8 @@ from udata.core.user.api_fields import user_ref_fields
 
 from .forms import PostForm
 from .models import Post
+
+DEFAULT_SORTING = "-published"
 
 ns = api.namespace("posts", "Posts related operations")
 
@@ -57,8 +60,16 @@ post_page_fields = api.model("PostPage", fields.pager(post_fields))
 
 parser = api.page_parser()
 
+parser.add_argument("sort", type=str, location="args", help="The sorting attribute")
 parser.add_argument(
-    "sort", type=str, default="-created_at", location="args", help="The sorting attribute"
+    "with_drafts",
+    type=bool,
+    default=False,
+    location="args",
+    help="`True` also returns the unpublished posts (only for super-admins)",
+)
+parser.add_argument(
+    "q", type=str, location="args", help="query string to search through resources titles"
 )
 
 
@@ -70,11 +81,18 @@ class PostsAPI(API):
     def get(self):
         """List all posts"""
         args = parser.parse_args()
-        return (
-            Post.objects.published()
-            .order_by(args["sort"])
-            .paginate(args["page"], args["page_size"])
-        )
+
+        posts = Post.objects()
+
+        if not (AdminPermission().can() and args["with_drafts"]):
+            posts = posts.published()
+
+        if args["q"]:
+            phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
+            posts = posts.search_text(phrase_query)
+
+        sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
+        return posts.order_by(sort).paginate(args["page"], args["page_size"])
 
     @api.doc("create_post")
     @api.secure(admin_permission)

@@ -19,6 +19,20 @@ def serialize(value):
         return value
 
 
+def get_all_models():
+    from udata import models as core_models
+    from udata.api import oauth2 as oauth2_models
+    from udata.harvest import models as harvest_models
+
+    all_models = set()
+    for models in core_models, harvest_models, oauth2_models:
+        for model in models.__dict__.values():
+            if isinstance(model, type) and issubclass(model, (UDataDocument)):
+                all_models.add(model)
+
+    return all_models
+
+
 class UDataDocument(Document):
     meta = {
         "abstract": True,

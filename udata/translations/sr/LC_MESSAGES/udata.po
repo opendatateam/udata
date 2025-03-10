@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2024-11-15 10:00+0100\n"
-"PO-Revision-Date: 2024-11-15 14:16\n"
+"POT-Creation-Date: 2025-02-18 11:06+0100\n"
+"PO-Revision-Date: 2025-02-18 10:23\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: sr\n"
 "Language-Team: Serbian (Cyrillic)\n"
@@ -18,46 +18,46 @@ msgstr ""
 "X-Crowdin-File: /master/udata/translations/udata.pot\n"
 "X-Crowdin-File-ID: 6\n"
 
-#: udata/settings.py:101
+#: udata/settings.py:109
 msgid "Welcome"
-msgstr "Добро дошли"
+msgstr "Добродошли"
 
-#: udata/settings.py:102
+#: udata/settings.py:110
 msgid "Please confirm your email"
 msgstr "Молимо, потврдите Ваш е-mail "
 
-#: udata/settings.py:103
+#: udata/settings.py:111
 msgid "Login instructions"
 msgstr "Инструкције за приступ"
 
-#: udata/settings.py:104
+#: udata/settings.py:112
 msgid "Your password has been reset"
 msgstr "Ваша лозинка је ресетована"
 
-#: udata/settings.py:105
+#: udata/settings.py:113
 msgid "Your password has been changed"
 msgstr "Ваша лозинка је промењена"
 
-#: udata/settings.py:106
+#: udata/settings.py:114
 msgid "Password reset instructions"
 msgstr "Инструкције за ресетовање лозинке"
 
-#: udata/settings.py:495
+#: udata/settings.py:504
 msgid "This dataset has been archived"
 msgstr "Овај скуп података је архивиран"
 
 #: udata/uris.py:53
 msgid "Invalid URL \"{url}\": {reason}"
-msgstr ""
+msgstr "Неисправан УРЛ \"{url}\": {reason}"
 
-#: udata/tests/api/test_datasets_api.py:810 udata/tests/test_model.py:367
+#: udata/tests/api/test_datasets_api.py:902 udata/tests/test_model.py:367
 #: udata/uris.py:55
 msgid "Invalid URL \"{url}\""
-msgstr ""
+msgstr "Неисправан УРЛ \"{url}\""
 
 #: udata/uris.py:104
 msgid "Invalid scheme {0}, allowed schemes: {1}"
-msgstr ""
+msgstr "Неисправна шема {0}, дозвољена шема: {1}"
 
 #: udata/uris.py:107
 msgid "Credentials in URL are not allowed"
@@ -65,7 +65,7 @@ msgstr ""
 
 #: udata/uris.py:111
 msgid "Invalid TLD {0}"
-msgstr ""
+msgstr "Неисправан ТЛД {0}"
 
 #: udata/uris.py:120
 msgid "{0} is a multicast IP"
@@ -198,17 +198,17 @@ msgstr "Да ли желите да креирате нешто података
 msgid "Your udata instance is ready!"
 msgstr "Ваша платформа ја спремна!"
 
-#: udata/core/owned.py:53 udata/forms/fields.py:735
-#: udata/tests/api/test_dataservices_api.py:407
+#: udata/core/owned.py:64 udata/forms/fields.py:746
+#: udata/tests/api/test_dataservices_api.py:437
 msgid "You can only set yourself as owner"
 msgstr "Само себе можете да означите као власника"
 
-#: udata/core/owned.py:62
+#: udata/core/owned.py:73
 msgid "Unknown organization"
-msgstr ""
+msgstr "Непозната организација"
 
-#: udata/core/owned.py:66 udata/forms/fields.py:756
-#: udata/tests/api/test_dataservices_api.py:421
+#: udata/core/owned.py:77 udata/forms/fields.py:778
+#: udata/tests/api/test_dataservices_api.py:451
 msgid "Permission denied for this organization"
 msgstr "Дозвола ја ову организацију је одбијена"
 
@@ -233,7 +233,7 @@ msgstr "Имејл"
 
 #: udata/core/contact_point/forms.py:17
 msgid "Contact form"
-msgstr ""
+msgstr "Контакт форма"
 
 #: udata/core/contact_point/forms.py:17
 msgid "The organization web contact form"
@@ -245,16 +245,36 @@ msgstr ""
 msgid "Publish as"
 msgstr "Објављено као"
 
-#: udata/core/contact_point/models.py:18 udata/tests/api/test_contact_points.py:50
+#: udata/core/contact_point/forms.py:21 udata/core/organization/forms.py:94
+msgid "Role"
+msgstr "Улога"
+
+#: udata/core/contact_point/models.py:9
+msgid "Contact"
+msgstr ""
+
+#: udata/core/contact_point/models.py:10
+msgid "Creator"
+msgstr ""
+
+#: udata/core/contact_point/models.py:11
+msgid "Publisher"
+msgstr ""
+
+#: udata/core/contact_point/models.py:26 udata/tests/api/test_contact_points.py:58
 msgid "At least an email or a contact form is required for a contact point"
 msgstr ""
 
-#: udata/core/dataservices/models.py:163 udata/core/dataset/models.py:568
+#: udata/core/dataservices/models.py:114
+msgid "dataservice"
+msgstr ""
+
+#: udata/core/dataservices/models.py:179 udata/core/dataset/models.py:569
 #: udata/mongo/datetime_fields.py:60
 msgid "Creation date"
 msgstr "Датум креирања"
 
-#: udata/core/dataservices/models.py:168 udata/core/dataset/models.py:571
+#: udata/core/dataservices/models.py:185 udata/core/dataset/models.py:572
 #: udata/mongo/datetime_fields.py:66
 msgid "Last modification date"
 msgstr "Датум последње измене"
@@ -409,15 +429,15 @@ msgstr "Чексума"
 
 #: udata/core/dataset/forms.py:44
 msgid "URL of the schema"
-msgstr ""
+msgstr "Урл шеме"
 
 #: udata/core/dataset/forms.py:45
 msgid "Name of the schema"
-msgstr ""
+msgstr "Назив шеме"
 
 #: udata/core/dataset/forms.py:46
 msgid "Version of the schema"
-msgstr ""
+msgstr "Верзија шеме"
 
 #: udata/core/dataset/forms.py:65 udata/core/dataset/forms.py:142
 #: udata/core/discussions/forms.py:13 udata/core/site/forms.py:12
@@ -477,7 +497,7 @@ msgstr "Величина датотеке у бајтовима"
 msgid "Related dataset"
 msgstr "Повезани скуп података"
 
-#: udata/core/dataset/forms.py:134 udata/tests/api/test_datasets_api.py:725
+#: udata/core/dataset/forms.py:134 udata/tests/api/test_datasets_api.py:814
 msgid "Wrong contact point id or contact point ownership mismatch"
 msgstr ""
 
@@ -543,42 +563,42 @@ msgstr "Приватно"
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "Ограничите видљивост скупа података само на себе или своју организацију."
 
-#: udata/core/dataset/models.py:59
+#: udata/core/dataset/models.py:60
 msgid "Pivotal data"
 msgstr "Кључни подаци"
 
-#: udata/core/dataset/models.py:135
+#: udata/core/dataset/models.py:136
 msgid "A schema must contains a name or an URL when a version is provided."
 msgstr ""
 
-#: udata/core/dataset/models.py:166 udata/tests/api/test_datasets_api.py:818
-#: udata/tests/api/test_datasets_api.py:829
+#: udata/core/dataset/models.py:167 udata/tests/api/test_datasets_api.py:910
+#: udata/tests/api/test_datasets_api.py:921
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr "Име шеме \"{schema}\" није дозвољена вредност. Дозвољене вредности: {values}"
 
-#: udata/core/dataset/models.py:185 udata/tests/api/test_datasets_api.py:840
+#: udata/core/dataset/models.py:186 udata/tests/api/test_datasets_api.py:932
 msgid "Version \"{version}\" is not an allowed value for the schema \"{name}\". Allowed versions: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:462 udata/core/dataset/rdf.py:503
-#: udata/tests/dataset/test_dataset_rdf.py:556
-#: udata/tests/dataset/test_dataset_rdf.py:569
+#: udata/core/dataset/models.py:463 udata/core/dataset/rdf.py:598
+#: udata/tests/dataset/test_dataset_rdf.py:656
+#: udata/tests/dataset/test_dataset_rdf.py:669
 msgid "Nameless resource"
 msgstr "Ресурс без имена"
 
-#: udata/core/dataset/models.py:554
+#: udata/core/dataset/models.py:555
 msgid "Future date of update"
 msgstr "Будући датум ажурирања"
 
-#: udata/core/dataset/models.py:617
+#: udata/core/dataset/models.py:618
 msgid "dataset"
 msgstr "скуп података"
 
-#: udata/core/dataset/rdf.py:501 udata/tests/dataset/test_dataset_rdf.py:543
+#: udata/core/dataset/rdf.py:596 udata/tests/dataset/test_dataset_rdf.py:643
 msgid "{format} resource"
 msgstr "{format} ресурс"
 
-#: udata/core/dataset/tasks.py:108
+#: udata/core/dataset/tasks.py:113
 msgid "You need to update some frequency-based datasets"
 msgstr "Потребно је да ажурирате неке скупове података засноване на фреквенцији"
 
@@ -592,17 +612,17 @@ msgstr "Коментар"
 msgid "Subject"
 msgstr "Тема"
 
-#: udata/core/discussions/tasks.py:28
+#: udata/core/discussions/tasks.py:26
 #, python-format
 msgid "Your %(type)s have a new discussion"
 msgstr "Ваши %(type)s имају нову дискусију"
 
-#: udata/core/discussions/tasks.py:47
+#: udata/core/discussions/tasks.py:45
 #, python-format
 msgid "%(user)s commented your discussion"
 msgstr "Корисник %(user)s је коментарисао вашу дискусију"
 
-#: udata/core/discussions/tasks.py:63
+#: udata/core/discussions/tasks.py:61
 msgid "A discussion has been closed"
 msgstr "Дискусија је затворена"
 
@@ -696,27 +716,23 @@ msgstr ""
 msgid "Business identification number"
 msgstr ""
 
-#: udata/core/organization/forms.py:94
-msgid "Role"
-msgstr "Улога"
-
-#: udata/core/organization/models.py:34
+#: udata/core/organization/models.py:35
 msgid "Public Service"
 msgstr "Јавни сервис"
 
-#: udata/core/organization/models.py:35
+#: udata/core/organization/models.py:36
 msgid "Certified"
 msgstr "Сертификовано"
 
-#: udata/core/organization/models.py:36
+#: udata/core/organization/models.py:37
 msgid "Association"
 msgstr ""
 
-#: udata/core/organization/models.py:37
-msgid "Company"
-msgstr ""
-
 #: udata/core/organization/models.py:38
+msgid "Company"
+msgstr "Компанија"
+
+#: udata/core/organization/models.py:39
 msgid "Local authority"
 msgstr ""
 
@@ -802,7 +818,7 @@ msgstr ""
 msgid "Specify your body type (HTML or markdown)"
 msgstr ""
 
-#: udata/core/post/models.py:48
+#: udata/core/post/models.py:54
 msgid "post"
 msgstr "Објава"
 
@@ -820,15 +836,15 @@ msgstr "Остало"
 
 #: udata/core/reports/constants.py:25
 msgid "Personal data"
-msgstr ""
+msgstr "Лични подаци"
 
 #: udata/core/reports/constants.py:26
 msgid "Security"
-msgstr ""
+msgstr "Безбедност"
 
 #: udata/core/reports/constants.py:27
 msgid "Spam"
-msgstr ""
+msgstr "Нежељена пошта"
 
 #: udata/core/reuse/activities.py:18
 msgid "created a reuse"
@@ -870,7 +886,7 @@ msgstr "Визуелизација"
 msgid "Connected device"
 msgstr "Повезани уређај"
 
-#: udata/core/reuse/constants.py:15 udata/tests/reuse/test_reuse_model.py:106
+#: udata/core/reuse/constants.py:15 udata/tests/reuse/test_reuse_model.py:108
 msgid "Health"
 msgstr "Здравље"
 
@@ -926,11 +942,11 @@ msgstr "Закон и право"
 msgid "Open data tools"
 msgstr "Алати отворених података"
 
-#: udata/core/reuse/models.py:35
+#: udata/core/reuse/models.py:36
 msgid "This URL is already registered"
 msgstr "Овај URL је већ регистрован"
 
-#: udata/core/reuse/models.py:175
+#: udata/core/reuse/models.py:176
 msgid "reuse"
 msgstr "пример употребе"
 
@@ -1078,7 +1094,7 @@ msgstr "Основни подаци"
 msgid "Roles"
 msgstr "Улоге"
 
-#: udata/core/user/models.py:279 udata/tests/api/test_me_api.py:297
+#: udata/core/user/models.py:286 udata/tests/api/test_me_api.py:297
 msgid "Account deletion"
 msgstr "Брисање налога"
 
@@ -1100,7 +1116,7 @@ msgstr "Пробна порука"
 
 #: udata/forms/fields.py:127
 msgid "Please input a date/time value"
-msgstr ""
+msgstr "Молим вас да унесете вредност за датум/време"
 
 #: udata/forms/fields.py:139
 msgid "Invalid date/time input"
@@ -1149,7 +1165,12 @@ msgstr "Непознати идентификатори: {identifiers}"
 msgid "Unable to parse date range"
 msgstr "Није могуће рашчланити опсег датума"
 
-#: udata/forms/fields.py:733 udata/forms/fields.py:754
+#: udata/forms/fields.py:739 udata/forms/fields.py:771
+#: udata/tests/forms/test_publish_as_field.py:214
+msgid "Cannot change owner after creation. Please use transfer feature."
+msgstr ""
+
+#: udata/forms/fields.py:744 udata/forms/fields.py:776
 msgid "You must be authenticated"
 msgstr "Морате потврдити свој идентитет"
 
@@ -1210,11 +1231,11 @@ msgstr "Прескочено"
 msgid "Archived"
 msgstr "Архивирано"
 
-#: udata/harvest/backends/dcat.py:292
+#: udata/harvest/backends/dcat.py:296
 msgid "Remote URL prefix"
 msgstr ""
 
-#: udata/harvest/backends/dcat.py:295
+#: udata/harvest/backends/dcat.py:299
 msgid "A prefix used to build the remote URL of the harvested items."
 msgstr ""
 
@@ -1598,7 +1619,7 @@ msgstr ""
 
 #: udata/templates/security/email/welcome_existing.html:25
 msgid "Here"
-msgstr ""
+msgstr "Овде"
 
 #: udata/tests/forms/test_model_field.py:165
 msgid "Expect a \"Target\" class but \"Wrong\" was found"

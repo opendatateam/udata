@@ -54,6 +54,7 @@ from .api_fields import (
     license_fields,
     resource_fields,
     resource_type_fields,
+    upload_community_fields,
     upload_fields,
 )
 from .constants import RESOURCE_TYPES, UPDATE_FREQUENCIES
@@ -108,6 +109,7 @@ class DatasetApiParser(ModelApiParser):
         self.parser.add_argument("schema", type=str, location="args")
         self.parser.add_argument("schema_version", type=str, location="args")
         self.parser.add_argument("topic", type=str, location="args")
+        self.parser.add_argument("credit", type=str, location="args")
         self.parser.add_argument("dataservice", type=str, location="args")
 
     @staticmethod
@@ -214,7 +216,9 @@ class DatasetListAPI(API):
     def get(self):
         """List or search all datasets"""
         args = dataset_parser.parse()
-        datasets = Dataset.objects(archived=None, deleted=None, private=False)
+        datasets = Dataset.objects.visible_by_user(
+            current_user, mongoengine.Q(private__ne=True, archived=None, deleted=None)
+        )
         datasets = dataset_parser.parse_filters(datasets, args)
         sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
         return datasets.order_by(sort).paginate(args["page"], args["page_size"])
@@ -449,7 +453,7 @@ class UploadNewCommunityResources(UploadMixin, API):
         responses={415: "Incorrect file content type", 400: "Upload error"},
     )
     @api.expect(upload_parser)
-    @api.marshal_with(upload_fields, code=201)
+    @api.marshal_with(upload_community_fields, code=201)
     def post(self, dataset):
         """Upload a new community resource"""
         infos = self.handle_upload(dataset)
@@ -508,7 +512,7 @@ class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
         "upload_community_resource",
         responses={415: "Incorrect file content type", 400: "Upload error"},
     )
-    @api.marshal_with(upload_fields)
+    @api.marshal_with(upload_community_fields)
     def post(self, community):
         """Update the file related to a given community resource"""
         ResourceEditPermission(community).test()
@@ -542,9 +546,18 @@ class ResourceAPI(ResourceMixin, API):
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         form = api.validate(ResourceForm, resource)
+
+        # ensure filetype is not modified after creation
+        if (
+            form._fields.get("filetype").data
+            and form._fields.get("filetype").data != resource.filetype
+        ):
+            abort(400, "Cannot modify filetype after creation")
+
         # ensure API client does not override url on self-hosted resources
         if resource.filetype == "file":
             form._fields.get("url").data = resource.url
+
         # populate_obj populates existing resource object with the content of the form.
         # update_resource saves the updated resource dict to the database
         # the additional dataset.save is required as we update the last_modified date.
