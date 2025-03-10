@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 from werkzeug.utils import cached_property
 
 from udata.core.dataservices.models import Dataservice
+from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
@@ -203,3 +204,21 @@ def archive_harvested_dataset(dataset, reason, dryrun=False):
         dataset.validate()
     else:
         dataset.save()
+
+
+def archive_harvested_dataservice(dataservice, reason, dryrun=False):
+    """
+    Archive an harvested dataservice, setting extras accordingly.
+    If `dryrun` is True, the dataservice is not saved but validated only.
+    """
+    log.debug("Archiving dataservice %s", dataservice.id)
+    archival_date = datetime.utcnow()
+    dataservice.archived_at = archival_date
+    if not dataservice.harvest:
+        dataservice.harvest = HarvestDataserviceMetadata()
+    dataservice.harvest.archived_reason = reason
+    dataservice.harvest.archived_at = archival_date
+    if dryrun:
+        dataservice.validate()
+    else:
+        dataservice.save()
