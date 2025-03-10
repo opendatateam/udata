@@ -569,7 +569,7 @@ class DatasetAPITest(APITestCase):
 
         self.assert200(response)
         self.assertEqual(response.json["id"], str(dataset.id))
-        
+
     def test_dataset_api_update_org(self):
         """It shouldn't update the dataset org"""
         user = self.login()
