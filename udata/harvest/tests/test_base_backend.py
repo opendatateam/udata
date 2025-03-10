@@ -279,7 +279,6 @@ class BaseBackendTest:
         job = backend.harvest()
 
         # all datasets except arch : 3 mocks + 1 manual (no_arch)
-        print([i.remote_id for i in job.items])
         assert len(job.items) == (nb_datasets + 1) + (nb_dataservices + 1)
         # all datasets : 3 mocks + 2 manuals (arch and no_arch)
         assert Dataset.objects.count() == nb_datasets + 2
