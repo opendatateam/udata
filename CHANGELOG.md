@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 10.1.2 (2025-03-10)
 
 - Fix end date not defined in admin [#3281](https://github.com/opendatateam/udata/pull/3281)
 
