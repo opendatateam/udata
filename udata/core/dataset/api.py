@@ -62,7 +62,12 @@ from .exceptions import (
     SchemasCacheUnavailableException,
     SchemasCatalogNotFoundException,
 )
-from .forms import CommunityResourceForm, DatasetForm, ResourceForm, ResourcesListForm
+from .forms import (
+    CommunityResourceForm,
+    DatasetForm,
+    ResourceFormWithoutId,
+    ResourcesListForm,
+)
 from .models import (
     Checksum,
     CommunityResource,
@@ -379,8 +384,9 @@ class ResourcesAPI(API):
     def post(self, dataset):
         """Create a new resource for a given dataset"""
         ResourceEditPermission(dataset).test()
-        form = api.validate(ResourceForm)
+        form = api.validate(ResourceFormWithoutId)
         resource = Resource()
+
         if form._fields.get("filetype").data != "remote":
             api.abort(400, "This endpoint only supports remote resources")
         form.populate_obj(resource)
@@ -545,7 +551,7 @@ class ResourceAPI(ResourceMixin, API):
         """Update a given resource on a given dataset"""
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
-        form = api.validate(ResourceForm, resource)
+        form = api.validate(ResourceFormWithoutId, resource)
 
         # ensure filetype is not modified after creation
         if (
