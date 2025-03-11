@@ -5,6 +5,11 @@ from flask import url_for
 from werkzeug.test import TestResponse
 
 import udata.core.organization.constants as org_constants
+from udata.core.dataservices.constants import (
+    DATASERVICE_ACCESS_TYPE_OPEN,
+    DATASERVICE_ACCESS_TYPE_OPEN_WITH_ACCOUNT,
+    DATASERVICE_ACCESS_TYPE_RESTRICTED,
+)
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory
@@ -246,6 +251,7 @@ class DataserviceAPITest(APITestCase):
                 "title": "B",
                 "base_api_url": "https://example.org/B",
                 "datasets": [dataset_b.id],
+                "access_type": DATASERVICE_ACCESS_TYPE_OPEN,
             },
         )
         self.post(
@@ -254,6 +260,7 @@ class DataserviceAPITest(APITestCase):
                 "title": "C",
                 "base_api_url": "https://example.org/C",
                 "datasets": [dataset_a.id, dataset_b.id],
+                "access_type": DATASERVICE_ACCESS_TYPE_OPEN_WITH_ACCOUNT,
             },
         )
         self.post(
@@ -262,6 +269,7 @@ class DataserviceAPITest(APITestCase):
                 "title": "A",
                 "base_api_url": "https://example.org/A",
                 "datasets": [dataset_a.id],
+                "access_type": DATASERVICE_ACCESS_TYPE_RESTRICTED,
             },
         )
         self.post(
@@ -323,6 +331,13 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(response.json["total"], 2)
         self.assertEqual(response.json["data"][0]["title"], "A")
         self.assertEqual(response.json["data"][1]["title"], "C")
+
+        response = self.get(url_for("api.dataservices", access_type=DATASERVICE_ACCESS_TYPE_OPEN))
+        self.assert200(response)
+
+        print(response.json)
+        self.assertEqual(response.json["total"], 1)
+        self.assertEqual(response.json["data"][0]["title"], "B")
 
     def test_dataservice_api_index_with_sorts(self):
         DataserviceFactory(title="A", created_at="2024-03-01", metadata_modified_at="2024-03-01")
