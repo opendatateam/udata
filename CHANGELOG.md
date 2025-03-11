@@ -3,6 +3,13 @@
 ## Current (in progress)
 
 - Add views as Dataservice metrics and sort [#3280](https://github.com/opendatateam/udata/pull/3280)
+- Fix creating/updating ID for resources [#3239](https://github.com/opendatateam/udata/pull/3239)
+- Cannot respond to a transfer after first response [#3255](https://github.com/opendatateam/udata/pull/3255)
+- Cannot update resource filetype after creation [#3254](https://github.com/opendatateam/udata/pull/3254)
+
+## 10.1.2 (2025-03-10)
+
+- Fix end date not defined in admin [#3281](https://github.com/opendatateam/udata/pull/3281)
 
 ## 10.1.1 (2025-03-03)
 
