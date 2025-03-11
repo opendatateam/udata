@@ -101,11 +101,17 @@ class HarvestMetadata(db.EmbeddedDocument):
 @generate_fields(
     searchable=True,
     additional_filters={"organization_badge": "organization.badges"},
+    additional_sorts=[
+        {"key": "followers", "value": "metrics.followers"},
+        {"key": "views", "value": "metrics.views"},
+    ],
 )
 class Dataservice(WithMetrics, Owned, db.Document):
     meta = {
         "indexes": [
             "$title",
+            "metrics.followers",
+            "metrics.views",
         ]
         + Owned.meta["indexes"],
         "queryset_class": DataserviceQuerySet,
@@ -224,11 +230,11 @@ class Dataservice(WithMetrics, Owned, db.Document):
     def self_web_url(self):
         return endpoint_for("dataservices.show", dataservice=self, _external=True)
 
-    # TODO
-    # frequency = db.StringField(choices=list(UPDATE_FREQUENCIES.keys()))
-    # temporal_coverage = db.EmbeddedDocumentField(db.DateRange)
-    # spatial = db.EmbeddedDocumentField(SpatialCoverage)
-    # harvest = db.EmbeddedDocumentField(HarvestDatasetMetadata)
+    __metrics_keys__ = [
+        "discussions",
+        "followers",
+        "views",
+    ]
 
     @property
     def is_hidden(self):
