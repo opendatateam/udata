@@ -386,6 +386,8 @@ class BaseBackend(object):
                 )
             )
 
+            self.save_job()
+
         for dataservice in local_dataservices_not_on_remote:
             if not dataservice.harvest.archived_at:
                 archive_harvested_dataservice(
@@ -401,7 +403,7 @@ class BaseBackend(object):
                 )
             )
 
-        self.save_job()
+            self.save_job()
 
     def get_dataset(self, remote_id):
         """Get or create a dataset given its remote ID (and its source)
