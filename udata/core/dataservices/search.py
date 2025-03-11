@@ -65,9 +65,7 @@ class DataserviceSearch(ModelSearchAdapter):
     model = Dataservice
     search_url = "dataservices/"
 
-    sorts = {
-        "created": "created_at",
-    }
+    sorts = {"created": "created_at", "views": "views", "followers": "followers"}
 
     filters = {
         "tag": Filter(),
@@ -123,6 +121,6 @@ class DataserviceSearch(ModelSearchAdapter):
             "tags": dataservice.tags,
             "extras": extras,
             "followers": dataservice.metrics.get("followers", 0),
-            "is_restricted": dataservice.access_type
-            in [DATASERVICE_ACCESS_TYPE_OPEN_WITH_ACCOUNT, DATASERVICE_ACCESS_TYPE_RESTRICTED],
+            "is_restricted": dataservice.access_type == DATASERVICE_ACCESS_TYPE_RESTRICTED,
+            "views": dataservice.metrics.get("views", 0),
         }
