@@ -410,7 +410,8 @@ class BaseBackend(object):
         We first try to match `source_id` to be source domain independent
         """
         try:
-            uris.validate(remote_id)
+            uris.validate(remo
+                          te_id)
             dataset = Dataset.objects(harvest__remote_id=remote_id).first()
         except uris.ValidationError:
             dataset = Dataset.objects(

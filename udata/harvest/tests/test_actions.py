@@ -6,6 +6,8 @@ from tempfile import NamedTemporaryFile
 import pytest
 from mock import patch
 
+from udata.core.dataservices.factories import DataserviceFactory
+from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.core.organization.factories import OrganizationFactory
@@ -396,16 +398,24 @@ class HarvestActionsTest:
         dataset_to_archive = DatasetFactory(
             harvest=HarvestDatasetMetadata(source_id=str(to_delete[0].id))
         )
+        dataservice_to_archive = DataserviceFactory(
+            harvest=HarvestDataserviceMetadata(source_id=str(to_delete[0].id))
+        )
 
         result = actions.purge_sources()
         dataset_to_archive.reload()
+        dataservice_to_archive.reload()
 
         assert result == len(to_delete)
         assert len(HarvestSource.objects) == len(to_keep)
         assert PeriodicTask.objects.filter(id=periodic_task.id).count() == 0
         assert HarvestJob.objects(id=harvest_job.id).count() == 0
+        
         assert dataset_to_archive.harvest.archived == "harvester-deleted"
         assert_equal_dates(dataset_to_archive.archived, now)
+        
+        assert dataservice_to_archive.harvest.archived == "harvester-deleted"
+        assert_equal_dates(dataservice_to_archive.archived, now)
 
     @pytest.mark.options(HARVEST_JOBS_RETENTION_DAYS=2)
     def test_purge_jobs(self):
