@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- **breaking change** Migrate dataservices fields, migration needed [#3262](https://github.com/opendatateam/udata/pull/3262)
 - Add views as Dataservice metrics and sort [#3280](https://github.com/opendatateam/udata/pull/3280)
 - Fix creating/updating ID for resources [#3239](https://github.com/opendatateam/udata/pull/3239)
 - Cannot respond to a transfer after first response [#3255](https://github.com/opendatateam/udata/pull/3255)
