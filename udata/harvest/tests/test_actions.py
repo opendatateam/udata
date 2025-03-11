@@ -412,10 +412,12 @@ class HarvestActionsTest:
         assert HarvestJob.objects(id=harvest_job.id).count() == 0
 
         assert dataset_to_archive.harvest.archived == "harvester-deleted"
+        assert_equal_dates(dataset_to_archive.harvest.archived_at, now)
         assert_equal_dates(dataset_to_archive.archived, now)
 
-        assert dataservice_to_archive.harvest.archived == "harvester-deleted"
-        assert_equal_dates(dataservice_to_archive.archived, now)
+        assert dataservice_to_archive.harvest.archived_reason == "harvester-deleted"
+        assert_equal_dates(dataservice_to_archive.harvest.archived_at, now)
+        assert_equal_dates(dataservice_to_archive.archived_at, now)
 
     @pytest.mark.options(HARVEST_JOBS_RETENTION_DAYS=2)
     def test_purge_jobs(self):
