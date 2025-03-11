@@ -179,7 +179,7 @@ class DcatBackendTest:
         assert dataservices[0].title == "Explore API v2"
         assert dataservices[0].base_api_url == "https://data.paris2024.org/api/explore/v2.1/"
         assert (
-            dataservices[0].endpoint_description_url
+            dataservices[0].machine_documentation_url
             == "https://data.paris2024.org/api/explore/v2.1/swagger.json"
         )
         assert (
