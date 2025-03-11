@@ -94,6 +94,7 @@ class HarvestMetadata(db.EmbeddedDocument):
     )
     last_update = field(db.DateTimeField(), description="Date of the last harvesting")
     archived_at = field(db.DateTimeField())
+    archived_reason = field(db.StringField())
 
 
 @generate_fields(
