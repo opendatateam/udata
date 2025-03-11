@@ -101,7 +101,7 @@ We give you an example for a `udata` user serving a `data.example.com` domain fr
 Install nginx and uWSGI with root privileges:
 
 ```shell
-$ apt-get install nginx-full uwsgi uwsgi-plugin-python
+$ apt-get install nginx-full uwsgi uwsgi-plugin-python3
 ```
 
 Let's start with the uwsgi configuration file:
