@@ -410,10 +410,10 @@ class HarvestActionsTest:
         assert len(HarvestSource.objects) == len(to_keep)
         assert PeriodicTask.objects.filter(id=periodic_task.id).count() == 0
         assert HarvestJob.objects(id=harvest_job.id).count() == 0
-        
+
         assert dataset_to_archive.harvest.archived == "harvester-deleted"
         assert_equal_dates(dataset_to_archive.archived, now)
-        
+
         assert dataservice_to_archive.harvest.archived == "harvester-deleted"
         assert_equal_dates(dataservice_to_archive.archived, now)
 
