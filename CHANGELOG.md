@@ -2,6 +2,9 @@
 
 ## Current (in progress)
 
+- Add inactive users notification and deletion jobs [#3274](https://github.com/opendatateam/udata/pull/3274)
+  - these jobs can be scheduled daily for example
+  - `YEARS_OF_INACTIVITY_BEFORE_DELETION` setting must be configured at least to activate it
 - **breaking change** Migrate dataservices fields, migration needed [#3262](https://github.com/opendatateam/udata/pull/3262)
 - Add views as Dataservice metrics and sort [#3280](https://github.com/opendatateam/udata/pull/3280)
 - Fix creating/updating ID for resources [#3239](https://github.com/opendatateam/udata/pull/3239)
