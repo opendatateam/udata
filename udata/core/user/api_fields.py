@@ -1,5 +1,3 @@
-from flask_login import current_user
-
 from udata.api import api, base_reference, fields
 from udata.auth.helpers import current_user_is_admin_or_self
 
