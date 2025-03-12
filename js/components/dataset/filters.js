@@ -16,7 +16,7 @@ export default {
             const end = range.end ? moment(range.end) : undefined;
             const fmt = details ? 'L' : 'YYYY';
             const start_label = start.format(fmt);
-            const end_label = end.format(fmt);
+            const end_label = end ? end.format(fmt) : undefined;
             if (details) {
                 return end_label
                     ? this._('{start} to {end}', {start: start_label, end: end_label, interpolation: { escapeValue: false }})
