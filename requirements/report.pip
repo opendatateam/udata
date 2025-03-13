@@ -111,7 +111,7 @@ charset-normalizer==3.3.2
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   requests
-click==8.1.2
+click==8.1.8
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -141,7 +141,7 @@ coverage[toml]==7.2.3
     # via
     #   -r requirements/report.in
     #   pytest-cov
-cryptography==2.8
+cryptography==44.0.2
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -530,7 +530,6 @@ six==1.16.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
-    #   cryptography
     #   faker
     #   isodate
     #   langdetect

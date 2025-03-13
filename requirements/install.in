@@ -7,8 +7,8 @@ blinker==1.4
 boto3>=1.26
 celery==5.4.0
 celerybeat-mongo==0.2.0
-click==8.1.2
-cryptography==2.8
+click==8.1.8
+cryptography==44.0.2
 factory-boy==2.12.0
 Faker==3.0.0
 flask-babel==4.0.0
