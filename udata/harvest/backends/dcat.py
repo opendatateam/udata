@@ -4,7 +4,7 @@ from typing import Generator
 
 import lxml.etree as ET
 from flask import current_app
-from rdflib import Graph
+from rdflib import FOAF, Graph
 from rdflib.namespace import RDF
 
 from udata.core.dataservices.rdf import dataservice_from_rdf
@@ -18,6 +18,7 @@ from udata.rdf import (
     SPDX,
     guess_format,
     namespace_manager,
+    rdf_value,
     url_from_rdf,
 )
 from udata.storage.s3 import store_as_json
@@ -157,7 +158,7 @@ class DcatBackend(BaseBackend):
     def process_one_datasets_page(self, page_number: int, page: Graph):
         for node in page.subjects(RDF.type, DCAT.Dataset):
             remote_id = page.value(node, DCT.identifier)
-            if self.is_dataset_inside_dataservice_graph(page, node):
+            if self.is_dataset_external_to_this_page(page, node):
                 continue
 
             self.process_dataset(remote_id, page_number=page_number, page=page, node=node)
@@ -165,26 +166,28 @@ class DcatBackend(BaseBackend):
             if self.is_done():
                 return
 
-    def is_dataset_inside_dataservice_graph(self, page: Graph, dataset_node) -> bool:
+    def is_dataset_external_to_this_page(self, page: Graph, node) -> bool:
         # In dataservice nodes we have `servesDataset` or `hasPart` that can contains nodes
         # with type=dataset. We don't want to process them because these nodes are empty (they
         # only contains a link to the dataset definition).
-        # These datasets are either present in the catalog in past or future pages or datasets
+        # These datasets are either present in the catalog in previous or next pages or
         # external from the catalog we are currently harvesting (so we don't want to harvest them).
         # First we thought of skipping them inside `dataset_from_rdf` (see :ExcludeExternalyDefinedDataset)
         # but it creates a lot of "fake" items in the job and raising problems (reaching the max harvest item for
         # example and not getting to the "real" datasets/dataservices in subsequent pages)
-        # We could check if the node is really empty before discarding it?
-        for node in page.subjects(RDF.type, DCAT.DataService):
-            dataservice = page.resource(node)
-            for dataset in dataservice.objects(DCAT.servesDataset):
-                if dataset_node == dataset.identifier:
-                    return True
-            for dataset in dataservice.objects(DCT.hasPart):
-                if dataset_node == dataset.identifier:
-                    return True
+        # So to prevent creating a lot of useless items in the job we check here to see if there is no title and
+        # if `isPrimaryTopicOf` is present.
+        # `isPrimaryTopicOf` is the tag present in the first harvester raising the problem, it may exists other
+        # values of the same sort we need to check here.
+        # This is not dangerous because we check for missing title in `dataset_from_rdf` later so we would have skipped
+        # this dataset anyway.
 
-        return False
+        resource = page.resource(node)
+
+        title = rdf_value(resource, DCT.title)
+        primary_topic = rdf_value(resource, FOAF.isPrimaryTopicOf)
+
+        return not title and primary_topic
 
     def process_one_dataservices_page(self, page_number: int, page: Graph):
         for node in page.subjects(RDF.type, DCAT.DataService):
