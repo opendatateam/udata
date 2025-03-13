@@ -159,12 +159,12 @@ email-validator==2.2.0
     #   -c requirements/test.pip
     #   flask-security-too
     #   wtforms
-factory-boy==2.12.0
+factory-boy==3.3.3
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-faker==3.0.0
+faker==37.0.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -475,7 +475,6 @@ python-dateutil==2.8.2
     #   -r requirements/install.in
     #   botocore
     #   celery
-    #   faker
 pytz==2024.1
     # via
     #   -c requirements/install.pip
@@ -540,7 +539,6 @@ six==1.16.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
-    #   faker
     #   isodate
     #   langdetect
     #   python-dateutil
@@ -555,11 +553,6 @@ termcolor==2.4.0
     # via
     #   -c requirements/test.pip
     #   pytest-sugar
-text-unidecode==1.3
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   faker
 tinycss2==1.4.0
     # via
     #   -c requirements/install.pip
@@ -575,6 +568,7 @@ tzdata==2024.1
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   celery
+    #   faker
     #   kombu
 unidecode==0.4.21
     # via
