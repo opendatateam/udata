@@ -11,6 +11,7 @@
 - Cannot respond to a transfer after first response [#3255](https://github.com/opendatateam/udata/pull/3255)
 - Cannot update resource filetype after creation [#3254](https://github.com/opendatateam/udata/pull/3254)
 - Add autoarchive to dataservices [#3283](https://github.com/opendatateam/udata/pull/3283)
+- Skip empty datasets nodes referenced in dataservices before creating an harvest job item [#3285](https://github.com/opendatateam/udata/pull/3285)
 
 ## 10.1.2 (2025-03-10)
 
