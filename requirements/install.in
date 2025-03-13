@@ -5,7 +5,7 @@ bcrypt==4.3.0
 bleach[css]==6.2.0
 blinker==1.4
 boto3>=1.26
-celery==5.3.1
+celery==5.4.0
 celerybeat-mongo==0.2.0
 click==8.1.2
 cryptography==2.8
@@ -29,7 +29,7 @@ geojson==2.5.0
 geomet==1.1.0
 html2text==2019.9.26
 Jinja2==3.1.2
-kombu[redis]==5.3.1
+kombu[redis]==5.4.2
 langdetect==1.0.9
 lxml==5.3.0
 mistune==0.8.4
@@ -39,7 +39,7 @@ pydenticon==0.3.1
 pymongo==4.3.3
 python-dateutil==2.8.2
 pytz==2024.1
-redis==4.5.2
+redis==5.2.1
 rdflib==6.0.0
 requests==2.32.3
 sentry-sdk[flask]==2.9.0
