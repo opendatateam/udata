@@ -84,7 +84,7 @@ class DcatBackend(BaseBackend):
         for page_number, page in self.walk_graph(self.source.url, fmt):
             self.process_one_dataservices_page(page_number, page)
 
-        if self.has_reached_max_items():
+        if not self.dryrun and self.has_reached_max_items():
             # We have reached the max_items limit. Warn the user that all the datasets may not be present.
             error = HarvestError(
                 message=f"{self.max_items} max items reached, not all datasets/dataservices were retrieved"
