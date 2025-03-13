@@ -44,12 +44,12 @@ class FakeBackend(BaseBackend):
     def inner_harvest(self):
         for remote_id in self.source.config.get("dataset_remote_ids", []):
             self.process_dataset(remote_id)
-            if self.is_done():
+            if self.has_reached_max_items():
                 return
 
         for remote_id in self.source.config.get("dataservice_remote_ids", []):
             self.process_dataservice(remote_id)
-            if self.is_done():
+            if self.has_reached_max_items():
                 return
 
     def inner_process_dataset(self, item: HarvestItem):

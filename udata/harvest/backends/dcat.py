@@ -9,7 +9,7 @@ from rdflib.namespace import RDF
 
 from udata.core.dataservices.rdf import dataservice_from_rdf
 from udata.core.dataset.rdf import dataset_from_rdf
-from udata.harvest.models import HarvestItem
+from udata.harvest.models import HarvestError, HarvestItem
 from udata.i18n import gettext as _
 from udata.rdf import (
     DCAT,
@@ -84,6 +84,13 @@ class DcatBackend(BaseBackend):
         for page_number, page in self.walk_graph(self.source.url, fmt):
             self.process_one_dataservices_page(page_number, page)
 
+        if self.has_reached_max_items():
+            # We have reached the max_items limit. Warn the user that all the datasets may not be present.
+            error = HarvestError(
+                message=f"{self.max_items} max items reached, not all datasets/dataservices were retrieved"
+            )
+            self.job.errors.append(error)
+
         # The official MongoDB document size in 16MB. The default value here is 15MB to account for other fields in the document (and for difference between * 1024 vs * 1000).
         max_harvest_graph_size_in_mongo = current_app.config.get(
             "HARVEST_MAX_CATALOG_SIZE_IN_MONGO"
@@ -150,7 +157,7 @@ class DcatBackend(BaseBackend):
                     break
 
             yield page_number, subgraph
-            if self.is_done():
+            if self.has_reached_max_items():
                 return
 
             page_number += 1
@@ -163,7 +170,7 @@ class DcatBackend(BaseBackend):
 
             self.process_dataset(remote_id, page_number=page_number, page=page, node=node)
 
-            if self.is_done():
+            if self.has_reached_max_items():
                 return
 
     def is_dataset_external_to_this_page(self, page: Graph, node) -> bool:
@@ -194,7 +201,7 @@ class DcatBackend(BaseBackend):
             remote_id = page.value(node, DCT.identifier)
             self.process_dataservice(remote_id, page_number=page_number, page=page, node=node)
 
-            if self.is_done():
+            if self.has_reached_max_items():
                 return
 
     def inner_process_dataset(self, item: HarvestItem, page_number: int, page: Graph, node):
@@ -296,7 +303,7 @@ class CswDcatBackend(DcatBackend):
                 subgraph.parse(data=ET.tostring(child), format=fmt)
 
                 yield page_number, subgraph
-                if self.is_done():
+                if self.has_reached_max_items():
                     return
 
             next_record = self.next_record_if_should_continue(start, search_results)
@@ -405,7 +412,7 @@ class CswIso19139DcatBackend(DcatBackend):
                 raise ValueError("Failed to fetch CSW content")
 
             yield page_number, subgraph
-            if self.is_done():
+            if self.has_reached_max_items():
                 return
 
             next_record = self.next_record_if_should_continue(start, search_results)
