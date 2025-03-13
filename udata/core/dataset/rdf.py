@@ -29,6 +29,7 @@ from udata.rdf import (
     DCT,
     EUFORMAT,
     EUFREQ,
+    FOAF,
     FREQ,
     GEODCAT,
     HVD_LEGISLATION,
@@ -751,6 +752,14 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
 
     dataset.title = rdf_value(d, DCT.title)
     if not dataset.title:
+        external_rdf = rdf_value(d, FOAF.isPrimaryTopicOf)
+        if external_rdf:
+            # This error shouldn't happen anymore since we check for these common cases above to avoid creating a lot of
+            # unused dataset items in the job :ExcludeExternalyDefinedDataset
+            raise HarvestSkipException(
+                f"dataset is described by the external URL '{external_rdf}', waiting to see this dataset in subsequent pages of the catalog (or not if it's a dataset from another catalog referenced by a dataservice)"
+            )
+
         raise HarvestSkipException("missing title on dataset")
 
     # Support dct:abstract if dct:description is missing (sometimes used instead)
