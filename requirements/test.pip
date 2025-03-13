@@ -21,7 +21,7 @@ attrs==23.2.0
     #   -c requirements/install.pip
     #   jsonschema
     #   referencing
-authlib==1.3.1
+authlib==1.5.1
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -29,12 +29,12 @@ awesome-slugify==1.6.5
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-babel==2.12.1
+babel==2.17.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
     #   flask-babel
-bcrypt==3.1.7
+bcrypt==4.3.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -42,7 +42,7 @@ billiard==4.2.0
     # via
     #   -c requirements/install.pip
     #   celery
-bleach==3.3.1
+bleach[css]==6.2.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -70,7 +70,7 @@ cachelib==0.9.0
     # via
     #   -c requirements/install.pip
     #   flask-caching
-celery==5.3.1
+celery==5.4.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -87,13 +87,12 @@ certifi==2024.7.4
 cffi==1.16.0
     # via
     #   -c requirements/install.pip
-    #   bcrypt
     #   cryptography
 charset-normalizer==3.3.2
     # via
     #   -c requirements/install.pip
     #   requests
-click==8.1.2
+click==8.1.8
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -115,7 +114,7 @@ click-repl==0.3.0
     # via
     #   -c requirements/install.pip
     #   celery
-cryptography==2.8
+cryptography==44.0.2
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -130,11 +129,11 @@ email-validator==2.2.0
     #   -c requirements/install.pip
     #   flask-security-too
     #   wtforms
-factory-boy==2.12.0
+factory-boy==3.3.3
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-faker==3.0.0
+faker==37.0.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -270,12 +269,16 @@ jsonschema-specifications==2023.12.1
     # via
     #   -c requirements/install.pip
     #   jsonschema
-kombu[redis]==5.3.1
+kombu[redis]==5.4.2
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
     #   celery
 langdetect==1.0.9
+    # via
+    #   -c requirements/install.pip
+    #   -r requirements/install.in
+levenshtein==0.27.1
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -309,8 +312,6 @@ netaddr==0.7.19
     #   -r requirements/install.in
 packaging==24.2
     # via
-    #   -c requirements/install.pip
-    #   bleach
     #   pytest
     #   pytest-sugar
 passlib==1.7.4
@@ -371,18 +372,21 @@ python-dateutil==2.8.2
     #   -r requirements/install.in
     #   botocore
     #   celery
-    #   faker
 pytz==2024.1
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
     #   flask-babel
     #   flask-restx
+rapidfuzz==3.12.2
+    # via
+    #   -c requirements/install.pip
+    #   levenshtein
 rdflib==6.0.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-redis==4.5.2
+redis==5.2.1
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -419,10 +423,6 @@ sentry-sdk[flask]==2.9.0
 six==1.16.0
     # via
     #   -c requirements/install.pip
-    #   bcrypt
-    #   bleach
-    #   cryptography
-    #   faker
     #   isodate
     #   langdetect
     #   python-dateutil
@@ -432,16 +432,12 @@ speaklater==1.3
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-stringdist==1.0.9
-    # via
-    #   -c requirements/install.pip
-    #   -r requirements/install.in
 termcolor==2.4.0
     # via pytest-sugar
-text-unidecode==1.3
+tinycss2==1.4.0
     # via
     #   -c requirements/install.pip
-    #   faker
+    #   bleach
 tlds==2024071000
     # via
     #   -c requirements/install.pip
@@ -450,6 +446,8 @@ tzdata==2024.1
     # via
     #   -c requirements/install.pip
     #   celery
+    #   faker
+    #   kombu
 unidecode==0.4.21
     # via
     #   -c requirements/install.pip
@@ -486,6 +484,7 @@ webencodings==0.5.1
     # via
     #   -c requirements/install.pip
     #   bleach
+    #   tinycss2
 werkzeug==2.2.2
     # via
     #   -c requirements/install.pip
