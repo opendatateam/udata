@@ -1287,6 +1287,54 @@ class DatasetResourceAPITest(APITestCase):
         )
         self.assertEqual(self.dataset.last_modified, initial_last_modified)
 
+    def test_invalid_reorder(self):
+        self.dataset.resources = ResourceFactory.build_batch(3)
+        self.dataset.save()
+
+        initial_order = [r.id for r in self.dataset.resources]
+
+        # Not enough resources
+        wrong_order_not_enough_resources = initial_order[:2]
+        response = self.put(
+            url_for("api.resources", dataset=self.dataset), wrong_order_not_enough_resources
+        )
+        self.assertStatus(response, 400)
+        self.assertEqual(
+            response.json["message"], "All resources must be reordered, you provided 2 out of 3"
+        )
+
+        # Too many resources
+        wrong_order_too_many_resources = initial_order + [str(uuid4())]
+        response = self.put(
+            url_for("api.resources", dataset=self.dataset), wrong_order_too_many_resources
+        )
+        self.assertStatus(response, 400)
+        self.assertEqual(
+            response.json["message"], "All resources must be reordered, you provided 4 out of 3"
+        )
+
+        # Duplicated resources
+        wrong_order_duplicated_resources = [initial_order[0]] * 3
+        response = self.put(
+            url_for("api.resources", dataset=self.dataset), wrong_order_duplicated_resources
+        )
+        self.assertStatus(response, 400)
+        self.assertEqual(
+            response.json["message"],
+            f"Resource ids must match existing ones in dataset, ie: {set(str(r.id) for r in self.dataset.resources)}",
+        )
+
+        # Resources that don't belong to this dataset
+        wrong_order_random_resources_id = [str(uuid4()) for _ in range(3)]
+        response = self.put(
+            url_for("api.resources", dataset=self.dataset), wrong_order_random_resources_id
+        )
+        self.assertStatus(response, 400)
+        self.assertEqual(
+            response.json["message"],
+            f"Resource ids must match existing ones in dataset, ie: {set(str(r.id) for r in self.dataset.resources)}",
+        )
+
     def test_update_local(self):
         resource = ResourceFactory()
         self.dataset.resources.append(resource)
