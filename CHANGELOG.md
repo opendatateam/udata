@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 10.1.3 (2025-03-14)
 
 - Add inactive users notification and deletion jobs [#3274](https://github.com/opendatateam/udata/pull/3274)
   - these jobs can be scheduled daily for example
