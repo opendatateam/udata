@@ -403,15 +403,19 @@ class ResourcesAPI(API):
         """Reorder resources"""
         ResourceEditPermission(dataset).test()
         resources = request.json
-        current_resources = [r["id"] for r in Dataset.get(dataset).resources]
-        if len(resources) != len(current_resources):
+        if len(dataset.resources) != len(resources):
             api.abort(
                 400,
                 f"All resources must be reordered, you provided {len(resources)} "
-                f"out of {len(current_resources)}",
+                f"out of {len(dataset.resources)}",
             )
-        if len(set(r["id"] for r in resources)) != len(current_resources):
-            api.abort(400, "Resource ids must be unique in the payload")
+        if set(r["id"] if isinstance(r, dict) else r for r in resources) != set(
+            str(r.id) for r in dataset.resources
+        ):
+            api.abort(
+                400,
+                f"Resource ids must match existing ones in dataset, ie: {set(str(r.id) for r in dataset.resources)}",
+            )
         data = {"resources": resources}
         form = ResourcesListForm.from_json(
             data, obj=dataset, instance=dataset, meta={"csrf": False}
