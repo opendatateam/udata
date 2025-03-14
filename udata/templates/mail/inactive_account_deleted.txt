@@ -1,0 +1,6 @@
+{% extends 'mail/base.txt' %}
+
+{% block body %}
+{{ _('Your account on %(site)s has been deleted due to inactivity', site=config.SITE_TITLE) }}.
+
+{% endblock %}

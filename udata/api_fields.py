@@ -42,7 +42,7 @@ from typing import Any, Callable, Iterable
 import flask_restx.fields as restx_fields
 import mongoengine
 import mongoengine.fields as mongo_fields
-from bson import ObjectId
+from bson import DBRef, ObjectId
 from flask_restx.inputs import boolean
 from flask_restx.reqparse import RequestParser
 from flask_storage.mongo import ImageField as FlaskStorageImageField
@@ -446,7 +446,7 @@ def generate_fields(**kwargs) -> Callable:
                         if constraint == "objectid" and not ObjectId.is_valid(
                             args[filterable["key"]]
                         ):
-                            api.abort(400, f'`{filterable["key"]}` must be an identifier')
+                            api.abort(400, f"`{filterable['key']}` must be an identifier")
 
                     query = filterable.get("query", None)
                     if query:
@@ -534,15 +534,35 @@ def patch(obj, request) -> type:
 
             info = getattr(model_attribute, "__additional_field_info__", {})
 
-            # `check` field attribute allows to do validation from the request before setting
+            # `checks` field attribute allows to do validation from the request before setting
             # the attribute
-            check = info.get("check", None)
-            if check is not None and value != getattr(obj, key):
-                check(**{key: value})  # TODO add other model attributes in function parameters
+            checks = info.get("checks", [])
+
+            if is_value_modified(getattr(obj, key), value):
+                for check in checks:
+                    check(
+                        value,
+                        **{
+                            "is_creation": obj._created,
+                            "is_update": not obj._created,
+                            "field": key,
+                        },
+                    )  # TODO add other model attributes in function parameters
 
             setattr(obj, key, value)
 
     return obj
+
+
+def is_value_modified(old_value, new_value) -> bool:
+    # If we want to modify a reference, the new_value may be a DBRef.
+    # `wrap_primary_key` can also return the `foreign_document` (see :WrapToForeignDocument)
+    # and it is not currently taken into account here…
+    # Maybe we can do another type of check to check if the reference changes in the future…
+    if isinstance(new_value, DBRef):
+        return not old_value or new_value.id != old_value.id
+
+    return new_value != old_value
 
 
 def patch_and_save(obj, request) -> type:
@@ -587,6 +607,7 @@ def wrap_primary_key(
         raise FieldValidationError(field=field_name, message=f"Unknown reference '{value}'")
 
     # GenericReferenceField only accepts document (not dbref / objectid)
+    # :WrapToForeignDocument
     if isinstance(
         foreign_field,
         (

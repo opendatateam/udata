@@ -242,7 +242,10 @@ class OrgContactAPI(API):
 
 requests_parser = api.parser()
 requests_parser.add_argument(
-    "status", type=str, help="If provided, only return requests ith a given status", location="args"
+    "status", type=str, help="If provided, only return requests in a given status", location="args"
+)
+requests_parser.add_argument(
+    "user", type=str, help="If provided, only return requests for this user", location="args"
 )
 
 
@@ -255,8 +258,24 @@ class MembershipRequestAPI(API):
     @api.marshal_list_with(request_fields)
     def get(self, org):
         """List membership requests for a given organization"""
-        OrganizationPrivatePermission(org).test()
         args = requests_parser.parse_args()
+        if args["user"]:
+            if not current_user.is_authenticated or (
+                str(current_user.id) != args["user"]
+                and not OrganizationPrivatePermission(org).can()
+            ):
+                api.abort(
+                    403,
+                    "You can only access your own membership requests or the one of your organizations.",
+                )
+            if args["status"]:
+                return [
+                    r
+                    for r in org.requests
+                    if (r.status == args["status"] and str(r.user.id) == args["user"])
+                ]
+            return [r for r in org.requests if str(r.user.id) == args["user"]]
+        OrganizationPrivatePermission(org).test()
         if args["status"]:
             return [r for r in org.requests if r.status == args["status"]]
         else:

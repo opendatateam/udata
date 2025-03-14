@@ -23,12 +23,14 @@ from udata.harvest.exceptions import HarvestSkipException
 from udata.models import db
 from udata.rdf import (
     ADMS,
+    CONTACT_POINT_ENTITY_TO_ROLE,
     DCAT,
     DCATAP,
     DCT,
     EUFORMAT,
     EUFREQ,
     FREQ,
+    GEODCAT,
     HVD_LEGISLATION,
     IANAFORMAT,
     SCHEMA,
@@ -36,8 +38,8 @@ from udata.rdf import (
     SKOS,
     SPDX,
     TAG_TO_EU_HVD_CATEGORIES,
-    contact_point_from_rdf,
-    contact_point_to_rdf,
+    contact_points_from_rdf,
+    contact_points_to_rdf,
     namespace_manager,
     rdf_unique_values,
     rdf_value,
@@ -108,7 +110,8 @@ def temporal_to_rdf(
     pot = graph.resource(BNode())
     pot.set(RDF.type, DCT.PeriodOfTime)
     pot.set(DCAT.startDate, Literal(daterange.start))
-    pot.set(DCAT.endDate, Literal(daterange.end))
+    if daterange.end:
+        pot.set(DCAT.endDate, Literal(daterange.end))
     return pot
 
 
@@ -174,10 +177,9 @@ def ogc_service_to_rdf(
         if dataset.license.url:
             service.add(DCT.license, URIRef(dataset.license.url))
 
-    if dataset and dataset.contact_point:
-        contact_point = contact_point_to_rdf(dataset.contact_point, graph)
-        if contact_point:
-            service.set(DCAT.contactPoint, contact_point)
+    if dataset and dataset.contact_points:
+        for contact_point, predicate in contact_points_to_rdf(dataset.contact_points, graph):
+            service.set(predicate, contact_point)
 
     if is_hvd:
         # DCAT-AP HVD applicable legislation is also expected at the distribution > accessService level
@@ -340,6 +342,20 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
     for resource in dataset.resources:
         d.add(DCAT.distribution, resource_to_rdf(resource, dataset, graph, is_hvd))
 
+    if is_hvd:
+        from udata.core.dataservices.models import Dataservice
+        from udata.core.dataservices.rdf import dataservice_as_distribution_to_rdf
+
+        # Add a blank distribution pointing to a DataService using the distribution DCAT.accessService.
+        # Useful for HVD reporting since DataService are not currently harvested by
+        # data.europa.eu as first class entities.
+        # Should be removed once supported by data.europa.eu harvesting.
+        for service in Dataservice.objects.filter(datasets=dataset, tags="hvd"):
+            d.add(
+                DCAT.distribution,
+                dataservice_as_distribution_to_rdf(service, graph),
+            )
+
     if dataset.temporal_coverage:
         d.set(DCT.temporal, temporal_to_rdf(dataset.temporal_coverage, graph))
 
@@ -347,13 +363,16 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
     if frequency:
         d.set(DCT.accrualPeriodicity, frequency)
 
-    publisher = owner_to_rdf(dataset, graph)
-    if publisher:
-        d.set(DCT.publisher, publisher)
+    owner_role = DCT.publisher
+    if any(contact_point.role == "publisher" for contact_point in dataset.contact_points):
+        # There's already a publisher, so the owner should instead be a distributor.
+        owner_role = GEODCAT.distributor
+    owner = owner_to_rdf(dataset, graph)
+    if owner:
+        d.set(owner_role, owner)
 
-    contact_point = contact_point_to_rdf(dataset.contact_point, graph)
-    if contact_point:
-        d.set(DCAT.contactPoint, contact_point)
+    for contact_point, predicate in contact_points_to_rdf(dataset.contact_points, graph):
+        d.set(predicate, contact_point)
 
     return d
 
@@ -404,18 +423,22 @@ def temporal_from_resource(resource):
         g = Graph().parse(str(resource.identifier))
         resource = g.resource(resource.identifier)
     if resource.value(SCHEMA.startDate):
+        end = resource.value(SCHEMA.endDate)
         return db.DateRange(
             start=resource.value(SCHEMA.startDate).toPython(),
-            end=resource.value(SCHEMA.endDate).toPython(),
+            end=end.toPython() if end else None,
         )
     elif resource.value(DCAT.startDate):
+        end = resource.value(DCAT.endDate)
         return db.DateRange(
             start=resource.value(DCAT.startDate).toPython(),
-            end=resource.value(DCAT.endDate).toPython(),
+            end=end.toPython() if end else None,
         )
     elif resource.value(SCV.min):
+        end = resource.value(SCV.max)
         return db.DateRange(
-            start=resource.value(SCV.min).toPython(), end=resource.value(SCV.max).toPython()
+            start=resource.value(SCV.min).toPython(),
+            end=end.toPython() if end else None,
         )
 
 
@@ -734,7 +757,13 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
     description = d.value(DCT.description) or d.value(DCT.abstract)
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
-    dataset.contact_point = contact_point_from_rdf(d, dataset) or dataset.contact_point
+    roles = [  # Imbricated list of contact points for each role
+        contact_points_from_rdf(d, rdf_entity, role, dataset)
+        for rdf_entity, role in CONTACT_POINT_ENTITY_TO_ROLE.items()
+    ]
+    dataset.contact_points = [  # Flattened list of contact points
+        contact_point for role in roles for contact_point in role
+    ] or dataset.contact_points
     schema = schema_from_rdf(d)
     if schema:
         dataset.schema = schema
@@ -751,7 +780,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
 
     temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
     if temporal_coverage:
-        dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
+        dataset.temporal_coverage = temporal_coverage
 
     provenances = provenances_from_rdf(d)
     if provenances:

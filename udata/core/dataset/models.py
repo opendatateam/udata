@@ -563,7 +563,7 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
 
     featured = db.BooleanField(required=True, default=False)
 
-    contact_point = db.ReferenceField("ContactPoint", reverse_delete_rule=db.NULLIFY)
+    contact_points = db.ListField(db.ReferenceField("ContactPoint", reverse_delete_rule=db.PULL))
 
     created_at_internal = DateTimeField(
         verbose_name=_("Creation date"), default=datetime.utcnow, required=True
@@ -637,6 +637,9 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         super(Dataset, self).clean()
         if self.frequency in LEGACY_FREQUENCIES:
             self.frequency = LEGACY_FREQUENCIES[self.frequency]
+
+        if len(set(res.id for res in self.resources)) != len(self.resources):
+            raise MongoEngineValidationError(f"Duplicate resource ID in dataset #{self.id}.")
 
         for key, value in self.extras.items():
             if not key.startswith("custom:"):
@@ -897,6 +900,9 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
     def add_resource(self, resource):
         """Perform an atomic prepend for a new resource"""
         resource.validate()
+        if resource.id in [r.id for r in self.resources]:
+            raise MongoEngineValidationError("Cannot add resource with already existing ID")
+
         self.update(
             __raw__={"$push": {"resources": {"$each": [resource.to_mongo()], "$position": 0}}}
         )

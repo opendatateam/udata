@@ -179,7 +179,7 @@ class DcatBackendTest:
         assert dataservices[0].title == "Explore API v2"
         assert dataservices[0].base_api_url == "https://data.paris2024.org/api/explore/v2.1/"
         assert (
-            dataservices[0].endpoint_description_url
+            dataservices[0].machine_documentation_url
             == "https://data.paris2024.org/api/explore/v2.1/swagger.json"
         )
         assert (
@@ -517,9 +517,9 @@ class DcatBackendTest:
         assert dataset.temporal_coverage is not None
         assert dataset.temporal_coverage.start == date(2016, 1, 1)
         assert dataset.temporal_coverage.end == date(2016, 12, 5)
-        assert dataset.contact_point.email == "hello@its.me"
-        assert dataset.contact_point.name == "Organization contact"
-        assert dataset.contact_point.contact_form == "https://data.support.com"
+        assert dataset.contact_points[0].email == "hello@its.me"
+        assert dataset.contact_points[0].name == "Organization contact"
+        assert dataset.contact_points[0].contact_form == "https://data.support.com"
         assert dataset.frequency is None
         # test dct:license nested in distribution
         assert dataset.license.id == "lov1"
@@ -866,10 +866,10 @@ class CswIso19139DcatBackendTest:
             ],
         }
         assert (
-            dataset.contact_point.name
+            dataset.contact_points[0].name
             == "DDTM 80 (Direction Départementale des Territoires et de la Mer de la Somme)"
         )
-        assert dataset.contact_point.email == "ddtm-sap-bsig@somme.gouv.fr"
+        assert dataset.contact_points[0].email == "ddtm-sap-bsig@somme.gouv.fr"
 
         # License is not properly mapped in XSLT conversion
         assert dataset.license is None

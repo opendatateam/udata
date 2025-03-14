@@ -276,6 +276,42 @@ class MembershipAPITest:
         response = api.get(url_for("api.request_membership", org=organization))
         assert403(response)
 
+    def test_applicant_can_get_their_membership_requests(self, api):
+        applicant = api.login()
+        membership_request = MembershipRequest(user=applicant, comment="test")
+        organization = OrganizationFactory(members=[], requests=[membership_request])
+
+        response = api.get(
+            url_for("api.request_membership", org=organization),
+            query_string={"user": str(applicant.id)},
+        )
+        assert200(response)
+
+    @pytest.mark.parametrize(
+        "searched_status",
+        [
+            "pending",
+            "accepted",
+            "refused",
+        ],
+    )
+    def test_applicant_can_get_their_membership_requests_with_status(
+        self, api, searched_status: str
+    ):
+        applicant = api.login()
+        membership_request = MembershipRequest(user=applicant, comment="test")
+        organization = OrganizationFactory(members=[], requests=[membership_request])
+        response = api.get(
+            url_for("api.request_membership", org=organization),
+            query_string={"user": str(applicant.id), "status": searched_status},
+        )
+        assert200(response)
+        requests = response.json
+        if searched_status == "pending":
+            assert len(requests) == 1
+        else:
+            assert len(requests) == 0
+
     def test_get_members_with_or_without_email(self, api):
         admin = Member(
             user=UserFactory(email="admin@example.org"), role="admin", since="2024-04-14"
@@ -921,6 +957,7 @@ class OrganizationContactPointsAPITest:
             "email": "mooneywayne@cobb-cochran.com",
             "name": "Martin Schultz",
             "organization": str(org.id),
+            "role": "contact",
         }
         response = api.post(url_for("api.contact_points"), data)
         assert201(response)

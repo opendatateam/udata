@@ -83,6 +83,8 @@ botocore==1.29.165
     #   s3transfer
 build==1.1.1
     # via pip-tools
+bumpx==0.3.10
+    # via -r requirements/develop.in
 cachelib==0.9.0
     # via
     #   -c requirements/install.pip
@@ -154,6 +156,7 @@ cryptography==2.8
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   authlib
+    #   secretstorage
 decorator==5.1.1
     # via ipython
 distlib==0.3.8
@@ -339,6 +342,10 @@ jaraco-classes==3.3.1
     # via keyring
 jedi==0.19.1
     # via ipython
+jeepney==0.8.0
+    # via
+    #   keyring
+    #   secretstorage
 jinja2==3.1.2
     # via
     #   -c requirements/install.pip
@@ -418,7 +425,7 @@ nh3==0.2.15
     # via readme-renderer
 nodeenv==1.8.0
     # via pre-commit
-packaging==24.1
+packaging==24.2
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -590,6 +597,8 @@ s3transfer==0.6.2
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   boto3
+secretstorage==3.3.3
+    # via keyring
 sentry-sdk[flask]==2.9.0
     # via
     #   -c requirements/install.pip
