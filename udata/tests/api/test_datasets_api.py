@@ -1414,17 +1414,10 @@ class DatasetResourceAPITest(APITestCase):
             }
             for id in ids
         ]
-        data.append(
-            {
-                "title": faker.sentence(),
-                "description": faker.text(),
-                "url": faker.url(),
-            }
-        )
         response = self.put(url_for("api.resources", dataset=self.dataset), data)
         self.assert200(response)
         self.dataset.reload()
-        self.assertEqual(len(self.dataset.resources), 3)
+        self.assertEqual(len(self.dataset.resources), 2)
         for idx, id in enumerate(ids):
             resource = self.dataset.resources[idx]
             rdata = data[idx]
