@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Improve datasets' API perfs (do not fetch resources from Mongo, add /api/2/datasets endpoint…) [#3279](https://github.com/opendatateam/udata/pull/3279)
 
 ## 10.1.3 (2025-03-14)
 
