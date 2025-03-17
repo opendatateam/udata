@@ -9,3 +9,4 @@ pre-commit==2.14.0
 pip-tools==6.13.0
 flask-shell-ipython==0.5.1
 ruff==0.5.1
+bumpx==0.3.10
