@@ -61,6 +61,11 @@ user_fields = api.model(
         "since": fields.ISODateTime(
             attribute="created_at", description="The registeration date", required=True
         ),
+        "last_login_at": fields.Raw(
+            attribute=lambda o: o.current_login_at if current_user_is_admin_or_self() else None,
+            description="The user last connection date (only present for global admins and on /me)",
+            readonly=True,
+        ),
         "page": fields.UrlFor(
             "users.show",
             lambda u: {"user": u},
