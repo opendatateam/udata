@@ -83,7 +83,7 @@ class User(WithMetrics, UserMixin, db.Document):
     extras = db.ExtrasField()
 
     # Used to track notification for automatic inactive users deletion
-    # when YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION is set
+    # when YEARS_OF_INACTIVITY_BEFORE_DELETION is set
     inactive_deletion_notified_at = db.DateTimeField()
 
     before_save = Signal()

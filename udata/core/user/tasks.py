@@ -21,14 +21,14 @@ def send_test_mail(email):
 
 @job("notify-inactive-users")
 def notify_inactive_users(self):
-    if not current_app.config["YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION"]:
+    if not current_app.config["YEARS_OF_INACTIVITY_BEFORE_DELETION"]:
         logging.warning(
-            "YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION setting is not set, no deletion planned"
+            "YEARS_OF_INACTIVITY_BEFORE_DELETION setting is not set, no deletion planned"
         )
         return
     notification_comparison_date = (
         datetime.utcnow()
-        - timedelta(days=current_app.config["YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION"] * 365)
+        - timedelta(days=current_app.config["YEARS_OF_INACTIVITY_BEFORE_DELETION"] * 365)
         + timedelta(days=current_app.config["DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY"])
     )
 
@@ -56,9 +56,9 @@ def notify_inactive_users(self):
 
 @job("delete-inactive-users")
 def delete_inactive_users(self):
-    if not current_app.config["YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION"]:
+    if not current_app.config["YEARS_OF_INACTIVITY_BEFORE_DELETION"]:
         logging.warning(
-            "YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION setting is not set, no deletion planned"
+            "YEARS_OF_INACTIVITY_BEFORE_DELETION setting is not set, no deletion planned"
         )
         return
 
@@ -70,7 +70,7 @@ def delete_inactive_users(self):
 
     # Delete inactive users upon notification delay if user still hasn't logged in
     deletion_comparison_date = datetime.utcnow() - timedelta(
-        days=current_app.config["YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION"] * 365
+        days=current_app.config["YEARS_OF_INACTIVITY_BEFORE_DELETION"] * 365
     )
     notified_at = datetime.utcnow() - timedelta(
         days=current_app.config["DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY"]
