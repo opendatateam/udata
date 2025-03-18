@@ -313,6 +313,7 @@ def contact_points_from_rdf(rdf, prop, role, dataset):
     for contact_point in rdf.objects(prop):
         # Read contact point information
         if isinstance(contact_point, Literal):
+            log.warning(f"Found a `Literal` inside {prop}, `foaf:Agent` or `vcard:Kind` expected.")
             name = contact_point.toPython()
             email = None
             contact_form = None
