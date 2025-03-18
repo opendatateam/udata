@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Improve datasets' API perfs (do not fetch resources from Mongo, add /api/2/datasets endpoint…) [#3279](https://github.com/opendatateam/udata/pull/3279)
+- Use YEARS_OF_INACTIVITY_BEFORE_DELETION all around in code [#3287](https://github.com/opendatateam/udata/pull/3287)
 
 ## 10.1.3 (2025-03-14)
 
