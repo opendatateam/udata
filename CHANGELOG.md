@@ -4,6 +4,7 @@
 
 - Improve datasets' API perfs (do not fetch resources from Mongo, add /api/2/datasets endpoint…) [#3279](https://github.com/opendatateam/udata/pull/3279)
 - Use YEARS_OF_INACTIVITY_BEFORE_DELETION all around in code [#3287](https://github.com/opendatateam/udata/pull/3287)
+- Skip empty datasets nodes referenced in dataservices before creating an harvest job item [#3285](https://github.com/opendatateam/udata/pull/3285)
 
 ## 10.1.3 (2025-03-14)
 
@@ -17,7 +18,6 @@
 - Cannot update resource filetype after creation [#3254](https://github.com/opendatateam/udata/pull/3254)
 - Add `last_login_at` in user endpoints for super-admins [#3284](https://github.com/opendatateam/udata/pull/3284)
 - Add autoarchive to dataservices [#3283](https://github.com/opendatateam/udata/pull/3283)
-- Skip empty datasets nodes referenced in dataservices before creating an harvest job item [#3285](https://github.com/opendatateam/udata/pull/3285)
 
 ## 10.1.2 (2025-03-10)
 
