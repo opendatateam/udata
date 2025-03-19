@@ -207,7 +207,7 @@ class BaseBackendTest:
 
         dataset = Dataset.objects.first()
 
-        assert dataset.last_modified_internal == last_modified
+        assert_equal_dates(dataset.last_modified_internal, last_modified)
         assert_equal_dates(dataset.harvest.last_update, datetime.utcnow())
 
     def test_dont_overwrite_last_modified_even_if_set_to_same(self, mocker):
@@ -222,7 +222,7 @@ class BaseBackendTest:
 
         dataset = Dataset.objects.first()
 
-        assert dataset.last_modified_internal == last_modified
+        assert_equal_dates(dataset.last_modified_internal, last_modified)
         assert_equal_dates(dataset.harvest.last_update, datetime.utcnow())
 
     def test_autoarchive(self, app):
