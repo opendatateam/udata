@@ -570,6 +570,10 @@ class Defaults(object):
     ###########################################################################
     TABULAR_API_DATASERVICE_ID = None
 
+    # JSON-LD settings
+    ###########################################################################
+    MAX_RESOURCES_IN_JSON_LD = 20
+
 
 class Testing(object):
     """Sane values for testing. Should be applied as override"""

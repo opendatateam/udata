@@ -2,6 +2,7 @@ import logging
 import re
 from datetime import datetime, timedelta
 from pydoc import locate
+from typing import Self
 from urllib.parse import urlparse
 
 import Levenshtein
@@ -12,7 +13,7 @@ from flask import current_app
 from mongoengine import DynamicEmbeddedDocument
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import DateTimeField
-from mongoengine.signals import post_save, pre_save
+from mongoengine.signals import post_save, pre_init, pre_save
 from werkzeug.utils import cached_property
 
 from udata.api_fields import field
@@ -620,6 +621,31 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
 
     verbose_name = _("dataset")
 
+    missing_resources = False
+
+    @cached_property
+    def resources_len(self):
+        # :ResourcesLengthProperty
+        # If we've excluded the resources from the Mongo request we need
+        # to do a new Mongo request to fetch the resources length manually.
+        # If the resources are already present, just return the `len()` of the array.
+        if not self.missing_resources:
+            return len(self.resources)
+
+        pipeline = [{"$project": {"_id": 1, "resources_len": {"$size": "$resources"}}}]
+        data = Dataset.objects(id=self.id).aggregate(pipeline)
+
+        return next(data)["resources_len"]
+
+    @classmethod
+    def pre_init(cls, sender, document: Self, values, **kwargs):
+        # MongoEngine loses the information about raw values during the __init__ function
+        # Here we catch the raw values from the database (or from the creation of the object)
+        # and we check if resources were returned (sometimes we exclude `resources` from the
+        # Mongo request to improve perfs)
+        # This is used in :ResourcesLengthProperty
+        document.missing_resources = "resources" not in values
+
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
         cls.before_save.send(document)
@@ -944,9 +970,17 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             "url": endpoint_for("datasets.show", "api.dataset", dataset=self, _external=True),
             "name": self.title,
             "keywords": ",".join(self.tags),
-            "distribution": [resource.json_ld for resource in self.resources],
+            "distribution": [
+                resource.json_ld
+                for resource in self.resources[: current_app.config["MAX_RESOURCES_IN_JSON_LD"]]
+            ],
             # Theses values are not standard
-            "contributedDistribution": [resource.json_ld for resource in self.community_resources],
+            "contributedDistribution": [
+                resource.json_ld
+                for resource in self.community_resources[
+                    : current_app.config["MAX_RESOURCES_IN_JSON_LD"]
+                ]
+            ],
             "extras": [get_json_ld_extra(*item) for item in self.extras.items()],
         }
 
@@ -998,6 +1032,7 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         self.save()
 
 
+pre_init.connect(Dataset.pre_init, sender=Dataset)
 pre_save.connect(Dataset.pre_save, sender=Dataset)
 post_save.connect(Dataset.post_save, sender=Dataset)
 

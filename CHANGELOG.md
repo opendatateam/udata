@@ -2,6 +2,12 @@
 
 ## Current (in progress)
 
+- Improve datasets' API perfs (do not fetch resources from Mongo, add /api/2/datasets endpoint…) [#3279](https://github.com/opendatateam/udata/pull/3279)
+- Fix harvesting literal contact points [#3288](https://github.com/opendatateam/udata/pull/3288)
+- Use YEARS_OF_INACTIVITY_BEFORE_DELETION all around in code [#3287](https://github.com/opendatateam/udata/pull/3287)
+
+## 10.1.3 (2025-03-14)
+
 - Add inactive users notification and deletion jobs [#3274](https://github.com/opendatateam/udata/pull/3274)
   - these jobs can be scheduled daily for example
   - `YEARS_OF_INACTIVITY_BEFORE_DELETION` setting must be configured at least to activate it

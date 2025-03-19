@@ -78,6 +78,8 @@ botocore==1.29.165
     #   s3transfer
 build==1.1.1
     # via pip-tools
+bumpx==0.3.10
+    # via -r requirements/develop.in
 cachelib==0.9.0
     # via
     #   -c requirements/install.pip
