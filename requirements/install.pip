@@ -225,12 +225,12 @@ pymongo==4.11.3
     #   mongoengine
 pyparsing==3.1.2
     # via rdflib
-python-dateutil==2.8.2
+python-dateutil==2.9.0
     # via
     #   -r requirements/install.in
     #   botocore
     #   celery
-pytz==2024.1
+pytz==2025.1
     # via
     #   -r requirements/install.in
     #   flask-babel

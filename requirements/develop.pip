@@ -527,14 +527,14 @@ pytest-sugar==0.9.7
     # via
     #   -c requirements/test.pip
     #   -r requirements/test.in
-python-dateutil==2.8.2
+python-dateutil==2.9.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   botocore
     #   celery
-pytz==2024.1
+pytz==2025.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
