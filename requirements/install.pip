@@ -147,11 +147,11 @@ flask-wtf==1.0.1
     #   -r requirements/install.in
     #   flask-mongoengine
     #   flask-security-too
-geojson==2.5.0
+geojson==3.2.0
     # via -r requirements/install.in
 geomet==1.1.0
     # via -r requirements/install.in
-html2text==2019.9.26
+html2text==2024.2.26
     # via -r requirements/install.in
 idna==2.10
     # via

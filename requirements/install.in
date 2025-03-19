@@ -25,9 +25,9 @@ Flask-Security-Too==5.1.2
 Flask-Sitemap==0.4.0
 Flask-WTF==1.0.1
 Flask==2.1.2
-geojson==2.5.0
+geojson==3.2.0
 geomet==1.1.0
-html2text==2019.9.26
+html2text==2024.2.26
 Jinja2==3.1.2
 kombu[redis]==5.4.2
 langdetect==1.0.9
