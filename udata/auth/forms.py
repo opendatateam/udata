@@ -73,7 +73,7 @@ class ChangeEmailForm(Form):
 
         if self.user.email.strip() == self.new_email.data.strip():
             self.new_email.errors.append(
-                "Your new email must be different than your " "previous email"
+                "Your new email must be different than your previous email"
             )
             return False
         return True
