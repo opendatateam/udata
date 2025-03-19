@@ -14,11 +14,6 @@ aniso8601==9.0.1
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   flask-restx
-appdirs==1.4.4
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   urlextract
 attrs==23.2.0
     # via
     #   -c requirements/install.pip
@@ -170,6 +165,11 @@ faker==37.0.0
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   factory-boy
+filelock==3.18.0
+    # via
+    #   -c requirements/install.pip
+    #   -c requirements/test.pip
+    #   urlextract
 flake8==3.9.2
     # via -r requirements/report.in
 flask==2.1.2
@@ -297,11 +297,6 @@ iniconfig==2.0.0
     # via
     #   -c requirements/test.pip
     #   pytest
-isodate==0.6.1
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   rdflib
 itsdangerous==2.1.2
     # via
     #   -c requirements/install.pip
@@ -401,6 +396,11 @@ pillow==9.2.0
     #   -c requirements/test.pip
     #   flask-storage
     #   pydenticon
+platformdirs==4.3.6
+    # via
+    #   -c requirements/install.pip
+    #   -c requirements/test.pip
+    #   urlextract
 pluggy==1.4.0
     # via
     #   -c requirements/test.pip
@@ -487,7 +487,7 @@ rapidfuzz==3.12.2
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   levenshtein
-rdflib==6.0.0
+rdflib==7.1.3
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -530,7 +530,7 @@ s3transfer==0.6.2
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   boto3
-sentry-sdk[flask]==2.9.0
+sentry-sdk[flask]==2.23.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -539,7 +539,6 @@ six==1.16.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
-    #   isodate
     #   langdetect
     #   python-dateutil
     #   requests-mock
@@ -558,7 +557,7 @@ tinycss2==1.4.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   bleach
-tlds==2024071000
+tlds==2025022800
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -580,7 +579,7 @@ uritools==4.0.3
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   urlextract
-urlextract==0.14.0
+urlextract==1.9.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
