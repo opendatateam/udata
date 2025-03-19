@@ -61,7 +61,7 @@ class FactoryBackend(backends.BaseBackend):
         mock_initialize.send(self)
         for i in range(self.config.get("count", DEFAULT_COUNT)):
             self.process_dataset(str(i))
-            if self.is_done():
+            if self.has_reached_max_items():
                 return
 
     def inner_process_dataset(self, item: HarvestItem):
