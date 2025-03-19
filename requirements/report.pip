@@ -614,7 +614,7 @@ webencodings==0.5.1
     #   -c requirements/test.pip
     #   bleach
     #   tinycss2
-werkzeug==2.2.2
+werkzeug==2.2.3
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -623,7 +623,7 @@ werkzeug==2.2.2
     #   flask-login
     #   flask-restx
     #   pytest-flask
-wtforms[email]==3.0.1
+wtforms[email]==3.2.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
