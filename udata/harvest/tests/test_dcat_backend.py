@@ -512,7 +512,7 @@ class DcatBackendTest:
 
         dataset = Dataset.objects.get(harvest__dct_identifier="1")
         # test html abstract description support
-        assert dataset.description == "# h1 title\n\n## h2 title\n\n **and bold text**"
+        assert dataset.description == "# h1 title\n\n## h2 title\n\n**and bold text**"
         # test DCAT periodoftime
         assert dataset.temporal_coverage is not None
         assert dataset.temporal_coverage.start == date(2016, 1, 1)
