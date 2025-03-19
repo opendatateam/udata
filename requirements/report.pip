@@ -4,17 +4,17 @@
 #
 #    pip-compile --output-file=requirements/report.pip requirements/report.in
 #
-amqp==5.2.0
+amqp==5.3.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   kombu
-aniso8601==9.0.1
+aniso8601==10.0.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   flask-restx
-attrs==23.2.0
+attrs==25.3.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -41,7 +41,7 @@ bcrypt==4.3.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-billiard==4.2.0
+billiard==4.2.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -51,7 +51,7 @@ bleach[css]==6.2.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-blinker==1.4
+blinker==1.5
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -74,7 +74,7 @@ botocore==1.29.165
     #   -c requirements/test.pip
     #   boto3
     #   s3transfer
-cachelib==0.9.0
+cachelib==0.13.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -90,18 +90,18 @@ celerybeat-mongo==0.2.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-certifi==2024.7.4
+certifi==2025.1.31
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   requests
     #   sentry-sdk
-cffi==1.16.0
+cffi==1.17.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   cryptography
-charset-normalizer==3.3.2
+charset-normalizer==3.4.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -132,7 +132,7 @@ click-repl==0.3.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   celery
-coverage[toml]==7.2.3
+coverage[toml]==7.7.0
     # via
     #   -r requirements/report.in
     #   pytest-cov
@@ -142,7 +142,7 @@ cryptography==44.0.2
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   authlib
-dnspython==2.6.1
+dnspython==2.7.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -159,7 +159,7 @@ factory-boy==3.3.3
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-faker==37.0.0
+faker==37.0.2
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -170,7 +170,7 @@ filelock==3.18.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   urlextract
-flake8==3.9.2
+flake8==7.1.2
     # via -r requirements/report.in
 flask==2.1.2
     # via
@@ -198,7 +198,7 @@ flask-babel==4.0.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-flask-caching==2.0.2
+flask-caching==2.3.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -213,13 +213,13 @@ flask-gravatar==0.5.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-flask-login==0.6.2
+flask-login==0.6.3
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   flask-security-too
-flask-mail==0.9.1
+flask-mail==0.10.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -240,7 +240,7 @@ flask-principal==0.4.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   flask-security-too
-flask-restx==1.0.5
+flask-restx==1.3.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -260,7 +260,7 @@ flask-storage==1.3.2
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-flask-wtf==1.0.1
+flask-wtf==1.2.2
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -286,25 +286,30 @@ httpretty==1.1.4
     # via
     #   -c requirements/test.pip
     #   -r requirements/test.in
-idna==2.10
+idna==3.10
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   email-validator
     #   requests
     #   urlextract
+importlib-resources==6.5.2
+    # via
+    #   -c requirements/install.pip
+    #   -c requirements/test.pip
+    #   flask-restx
 iniconfig==2.0.0
     # via
     #   -c requirements/test.pip
     #   pytest
-itsdangerous==2.1.2
+itsdangerous==2.2.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   flask
     #   flask-security-too
     #   flask-wtf
-jinja2==3.1.2
+jinja2==3.1.6
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -322,12 +327,12 @@ jsonschema==4.23.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   flask-restx
-jsonschema-specifications==2023.12.1
+jsonschema-specifications==2024.10.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   jsonschema
-kombu[redis]==5.4.2
+kombu[redis]==5.5.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -343,7 +348,7 @@ levenshtein==0.27.1
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-lxml==5.3.0
+lxml==5.3.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -357,14 +362,14 @@ markupsafe==2.1.2
     #   sentry-sdk
     #   werkzeug
     #   wtforms
-mccabe==0.6.1
+mccabe==0.7.0
     # via flake8
-mistune==3.1.2
+mistune==3.1.3
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-mock==5.0.1
+mock==5.2.0
     # via
     #   -c requirements/test.pip
     #   -r requirements/test.in
@@ -401,23 +406,18 @@ platformdirs==4.3.6
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   urlextract
-pluggy==1.4.0
+pluggy==1.5.0
     # via
     #   -c requirements/test.pip
     #   pytest
-ply==3.11
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   pycparser
-prompt-toolkit==3.0.47
+prompt-toolkit==3.0.50
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   click-repl
-pycodestyle==2.7.0
+pycodestyle==2.12.1
     # via flake8
-pycparser==2.2
+pycparser==2.22
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -427,7 +427,7 @@ pydenticon==0.3.1
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-pyflakes==2.3.1
+pyflakes==3.2.0
     # via flake8
 pymongo==4.11.3
     # via
@@ -436,12 +436,12 @@ pymongo==4.11.3
     #   -r requirements/install.in
     #   celerybeat-mongo
     #   mongoengine
-pyparsing==3.1.2
+pyparsing==3.2.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   rdflib
-pytest==7.3.1
+pytest==8.3.5
     # via
     #   -c requirements/test.pip
     #   -r requirements/test.in
@@ -450,25 +450,25 @@ pytest==7.3.1
     #   pytest-flask
     #   pytest-mock
     #   pytest-sugar
-pytest-cov==4.0.0
+pytest-cov==6.0.0
     # via -r requirements/report.in
-pytest-env==0.8.1
+pytest-env==1.1.5
     # via
     #   -c requirements/test.pip
     #   -r requirements/test.in
-pytest-flask==1.2.0
+pytest-flask==1.3.0
     # via
     #   -c requirements/test.pip
     #   -r requirements/test.in
-pytest-mock==3.10.0
+pytest-mock==3.14.0
     # via
     #   -c requirements/test.pip
     #   -r requirements/test.in
-pytest-sugar==0.9.7
+pytest-sugar==1.0.0
     # via
     #   -c requirements/test.pip
     #   -r requirements/test.in
-python-dateutil==2.9.0
+python-dateutil==2.9.0.post0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -498,13 +498,13 @@ redis==5.2.1
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   kombu
-referencing==0.35.1
+referencing==0.36.2
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   jsonschema
     #   jsonschema-specifications
-regex==2024.5.15
+regex==2024.11.6
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -515,11 +515,11 @@ requests==2.32.3
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   requests-mock
-requests-mock==1.10.0
+requests-mock==1.12.1
     # via
     #   -c requirements/test.pip
     #   -r requirements/test.in
-rpds-py==0.19.0
+rpds-py==0.23.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -535,20 +535,19 @@ sentry-sdk[flask]==2.23.1
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-six==1.16.0
+six==1.17.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   langdetect
     #   python-dateutil
-    #   requests-mock
     #   wtforms-json
 speaklater==1.3
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-termcolor==2.4.0
+termcolor==2.5.0
     # via
     #   -c requirements/test.pip
     #   pytest-sugar
@@ -562,7 +561,12 @@ tlds==2025022800
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-tzdata==2024.1
+typing-extensions==4.12.2
+    # via
+    #   -c requirements/install.pip
+    #   -c requirements/test.pip
+    #   referencing
+tzdata==2025.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -584,7 +588,7 @@ urlextract==1.9.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-urllib3==1.26.19
+urllib3==1.26.20
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip

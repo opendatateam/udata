@@ -3,7 +3,7 @@ awesome-slugify
 Babel
 bcrypt
 bleach[css]
-blinker
+blinker<=1.5
 boto3>=1.26
 celery
 celerybeat-mongo
@@ -48,6 +48,6 @@ speaklater
 tlds
 urlextract
 voluptuous
-werkzeug
+werkzeug==2.2.3
 wtforms-json
 wtforms
