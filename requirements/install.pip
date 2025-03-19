@@ -291,7 +291,7 @@ vine==5.1.0
     #   amqp
     #   celery
     #   kombu
-voluptuous==0.11.7
+voluptuous==0.15.2
     # via -r requirements/install.in
 wcwidth==0.2.13
     # via prompt-toolkit
@@ -299,13 +299,13 @@ webencodings==0.5.1
     # via
     #   bleach
     #   tinycss2
-werkzeug==2.2.2
+werkzeug==2.3.8
     # via
     #   -r requirements/install.in
     #   flask
     #   flask-login
     #   flask-restx
-wtforms[email]==3.0.1
+wtforms[email]==3.2.1
     # via
     #   -r requirements/install.in
     #   flask-mongoengine

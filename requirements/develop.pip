@@ -684,7 +684,7 @@ vine==5.1.0
     #   kombu
 virtualenv==20.25.1
     # via pre-commit
-voluptuous==0.11.7
+voluptuous==0.15.2
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip

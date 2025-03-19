@@ -471,7 +471,7 @@ vine==5.1.0
     #   amqp
     #   celery
     #   kombu
-voluptuous==0.11.7
+voluptuous==0.15.2
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in

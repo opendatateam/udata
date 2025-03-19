@@ -47,7 +47,7 @@ sentry-sdk[flask]==2.23.1
 speaklater==1.3
 tlds
 urlextract==1.9.0
-voluptuous==0.11.7
-werkzeug==2.2.2
+voluptuous==0.15.2
+werkzeug==2.3.8
 wtforms-json==0.3.5
-wtforms==3.0.1
+wtforms==3.2.1
