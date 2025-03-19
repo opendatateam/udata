@@ -4,7 +4,7 @@ from typing import Generator
 
 import lxml.etree as ET
 from flask import current_app
-from rdflib import FOAF, Graph
+from rdflib import Graph
 from rdflib.namespace import RDF
 
 from udata.core.dataservices.rdf import dataservice_from_rdf
@@ -18,7 +18,6 @@ from udata.rdf import (
     SPDX,
     guess_format,
     namespace_manager,
-    rdf_value,
     url_from_rdf,
 )
 from udata.storage.s3 import store_as_json
@@ -182,19 +181,19 @@ class DcatBackend(BaseBackend):
         # First we thought of skipping them inside `dataset_from_rdf` (see :ExcludeExternalyDefinedDataset)
         # but it creates a lot of "fake" items in the job and raising problems (reaching the max harvest item for
         # example and not getting to the "real" datasets/dataservices in subsequent pages)
-        # So to prevent creating a lot of useless items in the job we check here to see if there is no title and
-        # if `isPrimaryTopicOf` is present.
+        # So to prevent creating a lot of useless items in the job we first thought about checking to see if there is no title and
+        # if `isPrimaryTopicOf` is present. But it may be better to check if the only link of the node with the current page is a
+        # `servesDataset` or `hasPart`. If it's the case, the node is only present in a dataservice. (maybe we could also check that
+        # the `_other_node` is a dataservice?)
         # `isPrimaryTopicOf` is the tag present in the first harvester raising the problem, it may exists other
         # values of the same sort we need to check here.
         # This is not dangerous because we check for missing title in `dataset_from_rdf` later so we would have skipped
         # this dataset anyway.
 
-        resource = page.resource(node)
-
-        title = rdf_value(resource, DCT.title)
-        primary_topic = rdf_value(resource, FOAF.isPrimaryTopicOf)
-
-        return not title and primary_topic
+        predicates = [link_type for (_other_node, link_type) in page.subject_predicates(node)]
+        return len(predicates) == 1 and (
+            predicates[0] == DCAT.servesDataset or predicates[0] == DCT.hasPart
+        )
 
     def process_one_dataservices_page(self, page_number: int, page: Graph):
         for node in page.subjects(RDF.type, DCAT.DataService):
