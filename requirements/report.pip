@@ -364,7 +364,7 @@ markupsafe==2.1.2
     #   wtforms
 mccabe==0.6.1
     # via flake8
-mistune==0.8.4
+mistune==3.1.2
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip

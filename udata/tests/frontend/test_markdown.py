@@ -177,14 +177,14 @@ class MarkdownTest:
                 "<table>",
                 "<thead>",
                 "<tr>",
-                "<th>first</th>",
-                "<th>second</th>",
+                "  <th>first</th>",
+                "  <th>second</th>",
                 "</tr>",
                 "</thead>",
                 "<tbody>",
                 "<tr>",
-                "<td>value</td>",
-                "<td>value</td>",
+                "  <td>value</td>",
+                "  <td>value</td>",
                 "</tr>",
                 "</tbody>",
                 "</table>",
@@ -228,7 +228,8 @@ class MarkdownTest:
         )
         expected = "\n".join(
             (
-                "<blockquote><p>This is a blockquote<br>",
+                "<blockquote>",
+                "<p>This is a blockquote<br>",
                 "with &lt;script&gt;evil()&lt;/script&gt; inside</p>",
                 "</blockquote>",
             )

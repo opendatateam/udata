@@ -33,7 +33,7 @@ kombu[redis]==5.4.2
 langdetect==1.0.9
 Levenshtein==0.27.1
 lxml==5.3.0
-mistune==0.8.4
+mistune==3.1.2
 mongoengine==0.27.0
 netaddr==0.7.19
 pydenticon==0.3.1

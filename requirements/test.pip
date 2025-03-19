@@ -294,7 +294,7 @@ markupsafe==2.1.2
     #   sentry-sdk
     #   werkzeug
     #   wtforms
-mistune==0.8.4
+mistune==3.1.2
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in

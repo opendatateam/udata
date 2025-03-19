@@ -56,11 +56,6 @@ def nofollow_callback(attrs, new=False):
         return attrs
 
 
-class Renderer(mistune.Renderer):
-    def table(self, header, body):
-        return ("<table>\n<thead>\n%s</thead>\n" "<tbody>\n%s</tbody>\n</table>\n") % (header, body)
-
-
 class UdataCleaner(bleach.Cleaner):
     def __init__(self, source_tooltip=False) -> None:
         callbacks = [nofollow_callback]
@@ -86,8 +81,9 @@ class UDataMarkdown(object):
 
     def __init__(self, app):
         app.jinja_env.filters.setdefault("markdown", self.__call__)
-        renderer = Renderer(escape=False, hard_wrap=True)
-        self.markdown = mistune.Markdown(renderer=renderer)
+        self.markdown = mistune.create_markdown(
+            escape=False, hard_wrap=True, plugins=["table", "strikethrough"]
+        )
 
     def __call__(self, stream, source_tooltip=False, wrap=True):
         if not stream:

@@ -195,7 +195,7 @@ markupsafe==2.1.2
     #   sentry-sdk
     #   werkzeug
     #   wtforms
-mistune==0.8.4
+mistune==3.1.2
     # via -r requirements/install.in
 mongoengine==0.27.0
     # via
