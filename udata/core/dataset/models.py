@@ -833,9 +833,6 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             * and so on
         """
         result = {}
-        if not self.id:
-            # Quality is only relevant on saved Datasets
-            return result
 
         result["license"] = True if self.license else False
         result["temporal_coverage"] = True if self.temporal_coverage else False
