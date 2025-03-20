@@ -5,6 +5,7 @@
 - Improve datasets' API perfs (do not fetch resources from Mongo, add /api/2/datasets endpoint…) [#3279](https://github.com/opendatateam/udata/pull/3279)
 - Fix harvesting literal contact points [#3288](https://github.com/opendatateam/udata/pull/3288)
 - Use YEARS_OF_INACTIVITY_BEFORE_DELETION all around in code [#3287](https://github.com/opendatateam/udata/pull/3287)
+- Add a udata catalog in dcat backends to test [#3289](https://github.com/opendatateam/udata/pull/3289)
 
 ## 10.1.3 (2025-03-14)
 
