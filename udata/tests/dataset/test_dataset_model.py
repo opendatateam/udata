@@ -189,6 +189,8 @@ class DatasetModelTest:
 
     def test_quality_default(self):
         dataset = DatasetFactory(description="")
+        dataset.save()
+
         assert dataset.quality == {
             "license": False,
             "temporal_coverage": False,
@@ -201,6 +203,8 @@ class DatasetModelTest:
     @pytest.mark.parametrize("freq", UPDATE_FREQUENCIES)
     def test_quality_frequency_update(self, freq):
         dataset = DatasetFactory(description="", frequency=freq)
+        dataset.save()
+
         if freq == "unknown":
             assert dataset.quality["update_frequency"] is False
             assert "update_fulfilled_in_time" not in dataset.quality
@@ -215,6 +219,8 @@ class DatasetModelTest:
             frequency="daily",
             last_modified_internal=datetime.utcnow() - timedelta(days=1, hours=1),
         )
+        dataset.save()
+
         assert dataset.quality["update_frequency"] is True
         assert dataset.quality["update_fulfilled_in_time"] is True
         assert dataset.quality["score"] == Dataset.normalize_score(2)
@@ -225,6 +231,8 @@ class DatasetModelTest:
             frequency="daily",
             last_modified_internal=datetime.utcnow() - timedelta(days=2, hours=1),
         )
+        dataset.save()
+
         assert dataset.quality["update_frequency"] is True
         assert dataset.quality["update_fulfilled_in_time"] is False
         assert dataset.quality["score"] == Dataset.normalize_score(1)
@@ -233,11 +241,14 @@ class DatasetModelTest:
         dataset = DatasetFactory(
             description="a" * (current_app.config.get("QUALITY_DESCRIPTION_LENGTH") - 1)
         )
+        dataset.save()
         assert dataset.quality["dataset_description_quality"] is False
         assert dataset.quality["score"] == 0
+
         dataset = DatasetFactory(
             description="a" * (current_app.config.get("QUALITY_DESCRIPTION_LENGTH") + 1)
         )
+        dataset.save()
         assert dataset.quality["dataset_description_quality"] is True
         assert dataset.quality["score"] == Dataset.normalize_score(1)
 
@@ -264,6 +275,8 @@ class DatasetModelTest:
         )
         dataset.add_resource(ResourceFactory(format=None))
         dataset.add_resource(ResourceFactory(format="xls"))
+        dataset.save()
+
         assert not dataset.quality["has_open_format"]
         assert dataset.quality["score"] == Dataset.normalize_score(2)
 

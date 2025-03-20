@@ -932,8 +932,16 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         if resource.id in [r.id for r in self.resources]:
             raise MongoEngineValidationError("Cannot add resource with already existing ID")
 
+        self.resources.insert(0, resource)
         self.update(
-            __raw__={"$push": {"resources": {"$each": [resource.to_mongo()], "$position": 0}}}
+            __raw__={
+                "$set": {
+                    "quality": self.compute_quality(),
+                },
+                "$push": {
+                    "resources": {"$each": [resource.to_mongo()], "$position": 0},
+                },
+            }
         )
         self.reload()
         self.on_resource_added.send(self.__class__, document=self, resource_id=resource.id)
