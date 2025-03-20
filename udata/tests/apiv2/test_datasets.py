@@ -21,8 +21,12 @@ class DatasetAPIV2Test(APITestCase):
         resources_a = [ResourceFactory() for _ in range(2)]
         dataset_a = DatasetFactory(title="Dataset A", resources=resources_a)
 
-        resources_b = [ResourceFactory() for _ in range(4)]
+        resources_b = [ResourceFactory(format="csv") for _ in range(4)]
         dataset_b = DatasetFactory(title="Dataset B", resources=resources_b)
+
+        # Factories doesn't call clean() method since there are based on pymongo
+        dataset_a.save()
+        dataset_b.save()
 
         response = self.get(url_for("apiv2.datasets"))
         self.assert200(response)
@@ -31,6 +35,11 @@ class DatasetAPIV2Test(APITestCase):
         assert len(data["data"]) == 2
         assert data["data"][1]["title"] == dataset_a.title
         assert data["data"][0]["title"] == dataset_b.title
+
+        assert data["data"][1]["quality"]["has_resources"]
+        assert not data["data"][1]["quality"]["has_open_format"]
+        assert data["data"][0]["quality"]["has_resources"]
+        assert data["data"][0]["quality"]["has_open_format"]
 
         assert data["data"][1]["resources"]["total"] == len(resources_a)
         assert data["data"][0]["resources"]["total"] == len(resources_b)
@@ -41,10 +50,13 @@ class DatasetAPIV2Test(APITestCase):
     def test_get_dataset(self):
         resources = [ResourceFactory() for _ in range(2)]
         dataset = DatasetFactory(resources=resources)
+        dataset.save()  # Factories doesn't call clean() method since there are based on pymongo
 
         response = self.get(url_for("apiv2.dataset", dataset=dataset))
         self.assert200(response)
         data = response.json
+        print(data["quality"])
+        assert data["quality"]["has_resources"]
         assert data["resources"]["rel"] == "subsection"
         assert data["resources"]["href"] == url_for(
             "apiv2.resources",
