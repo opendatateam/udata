@@ -381,7 +381,7 @@ class ResourceMixin(object):
             return to_naive_datetime(self.harvest.modified_at)
         if self.filetype == "remote" and self.extras.get("analysis:last-modified-at"):
             return to_naive_datetime(self.extras.get("analysis:last-modified-at"))
-        return self.last_modified_internal
+        return to_naive_datetime(self.last_modified_internal)
 
     def clean(self):
         super(ResourceMixin, self).clean()
@@ -768,7 +768,7 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             and to_naive_datetime(self.harvest.modified_at) < datetime.utcnow()
         ):
             return to_naive_datetime(self.harvest.modified_at)
-        return self.last_modified_internal
+        return to_naive_datetime(self.last_modified_internal)
 
     @property
     def last_update(self):
