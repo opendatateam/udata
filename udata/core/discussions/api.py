@@ -129,7 +129,7 @@ class DiscussionAPI(API):
     @api.doc("comment_discussion")
     @api.expect(comment_discussion_fields)
     @api.response(
-        403, "Not allowed to close this discussion " "OR can't add comments on a closed discussion"
+        403, "Not allowed to close this discussion OR can't add comments on a closed discussion"
     )
     @api.marshal_with(discussion_fields)
     def post(self, id):

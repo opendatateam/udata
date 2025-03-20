@@ -2,4 +2,4 @@
 -c install.pip
 -c test.pip
 
-mkdocs==1.5.3
+mkdocs

@@ -5,6 +5,7 @@ from pydoc import locate
 from typing import Self
 from urllib.parse import urlparse
 
+import Levenshtein
 import requests
 from blinker import signal
 from dateutil.parser import parse as parse_dt
@@ -13,7 +14,6 @@ from mongoengine import DynamicEmbeddedDocument
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import DateTimeField
 from mongoengine.signals import post_save, pre_init, pre_save
-from stringdist import rdlevenshtein
 from werkzeug.utils import cached_property
 
 from udata.api_fields import field
@@ -281,7 +281,9 @@ class License(db.Document):
 
         if license is None:
             # Try to single match `slug` with a low Damerau-Levenshtein distance
-            computed = ((license_, rdlevenshtein(license_.slug, slug)) for license_ in cls.objects)
+            computed = (
+                (license_, Levenshtein.distance(license_.slug, slug)) for license_ in cls.objects
+            )
             candidates = [license_ for license_, d in computed if d <= MAX_DISTANCE]
             # If there is more that one match, we cannot determinate
             # which one is closer to safely choose between candidates
@@ -291,7 +293,8 @@ class License(db.Document):
         if license is None:
             # Try to match `title` with a low Damerau-Levenshtein distance
             computed = (
-                (license_, rdlevenshtein(license_.title.lower(), text)) for license_ in cls.objects
+                (license_, Levenshtein.distance(license_.title.lower(), text))
+                for license_ in cls.objects
             )
             candidates = [license_ for license_, d in computed if d <= MAX_DISTANCE]
             # If there is more that one match, we cannot determinate
@@ -302,7 +305,7 @@ class License(db.Document):
         if license is None:
             # Try to single match `alternate_titles` with a low Damerau-Levenshtein distance
             computed = (
-                (license_, rdlevenshtein(cls.slug.slugify(title_), slug))
+                (license_, Levenshtein.distance(cls.slug.slugify(title_), slug))
                 for license_ in cls.objects
                 for title_ in license_.alternate_titles
             )
