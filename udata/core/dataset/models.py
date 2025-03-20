@@ -562,6 +562,8 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
     extras = db.ExtrasField()
     harvest = db.EmbeddedDocumentField(HarvestDatasetMetadata)
 
+    quality = db.DictField()
+
     featured = db.BooleanField(required=True, default=False)
 
     contact_points = db.ListField(db.ReferenceField("ContactPoint", reverse_delete_rule=db.PULL))
@@ -666,6 +668,8 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
 
         if len(set(res.id for res in self.resources)) != len(self.resources):
             raise MongoEngineValidationError(f"Duplicate resource ID in dataset #{self.id}.")
+
+        self.quality = self.compute_quality()
 
         for key, value in self.extras.items():
             if not key.startswith("custom:"):
@@ -819,8 +823,7 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         else:
             return self.last_update + delta
 
-    @cached_property
-    def quality(self):
+    def compute_quality(self):
         """Return a dict filled with metrics related to the inner
 
         quality of the dataset:
