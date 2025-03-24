@@ -629,7 +629,9 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         if not self.missing_resources:
             return len(self.resources)
 
-        pipeline = [{"$project": {"_id": 1, "resources_len": {"$size": "$resources"}}}]
+        pipeline = [
+            {"$project": {"_id": 1, "resources_len": {"$size": {"$ifNull": ["$resources", []]}}}}
+        ]
         data = Dataset.objects(id=self.id).aggregate(pipeline)
 
         return next(data)["resources_len"]
