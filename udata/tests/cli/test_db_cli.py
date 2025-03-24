@@ -1,8 +1,9 @@
 from datetime import datetime
 
 import pytest
+from bson import ObjectId
 
-from udata.core.reuse.factories import ReuseFactory
+from udata.models import Reuse
 
 
 @pytest.fixture
@@ -62,15 +63,9 @@ def test_unrecord_with_too_many_parameters(cli, migrations):
 
 
 def test_check_references_report_listfield_missing(cli, clean_db):
-    reuse = ReuseFactory()
-    # TODO: FIX... the following SHOULD wrongly unset the field instead of setting it to an empty list.
-    # This is reproducible in an `udata shell` for example, but for some unknown reason, NOT reproducible
-    # here in the tests...
-    # reuse.datasets = []
-    # reuse.save()
-    # TODO: se we manually unset the field here, just to make sure the cli command `udata db check-integrity`
-    # catches it.
-    reuse.update(unset__datasets=True)
+    # The cli command `udata db check-integrity` should catch reuse object missing datasets field
+    Reuse._get_collection().insert_one({"_id": ObjectId()})
+
     result = cli("db check-integrity --models Reuse", check=False)
     assert "Reuse.datasets(Dataset) — list…: 1" in result.output
     assert result.exit_code != 0
