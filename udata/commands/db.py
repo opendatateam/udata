@@ -313,9 +313,6 @@ def check_references(models_to_check):
                                     f"\t{model.__name__}#{obj.id} have a broken reference for `{reference['name']}`"
                                 )
                         elif reference["type"] == "list":
-                            # import pytest
-
-                            # pytest.set_trace()
                             field_exists = (
                                 f"{reference['name']}__exists"  # Eg: "contact_points__exists"
                             )
