@@ -2,6 +2,7 @@ import logging
 
 import mongoengine
 from flask import abort, request, url_for
+from flask_login import current_user
 from flask_restx import marshal
 
 from udata import search
@@ -11,7 +12,7 @@ from udata.core.organization.api_fields import member_user_with_email_fields
 from udata.core.spatial.api_fields import geojson
 from udata.utils import get_by
 
-from .api import ResourceMixin
+from .api import DEFAULT_SORTING, DatasetApiParser, ResourceMixin
 from .api_fields import (
     badge_fields,
     catalog_schema_fields,
@@ -66,7 +67,7 @@ DEFAULT_MASK_APIV2 = ",".join(
         "quality",
         "harvest",
         "internal",
-        "contact_point",
+        "contact_points",
     )
 )
 
@@ -128,7 +129,7 @@ dataset_fields = apiv2.model(
                     _external=True,
                 ),
                 "type": "GET",
-                "total": len(o.resources),
+                "total": o.resources_len,  # :ResourcesLengthProperty may call MongoDB to fetch the length if resources were not fetched
             },
             description="Link to the dataset resources",
         ),
@@ -155,7 +156,7 @@ dataset_fields = apiv2.model(
         ),
         "frequency_date": fields.ISODateTime(
             description=(
-                "Next expected update date, you will be notified " "once that date is reached."
+                "Next expected update date, you will be notified once that date is reached."
             )
         ),
         "harvest": fields.Nested(
@@ -206,8 +207,10 @@ dataset_fields = apiv2.model(
             readonly=True,
             description="Site internal and specific object's data",
         ),
-        "contact_point": fields.Nested(
-            contact_point_fields, allow_null=True, description="The dataset's contact point"
+        "contact_points": fields.List(
+            fields.Nested(contact_point_fields),
+            required=False,
+            description="The dataset contact points",
         ),
     },
     mask=DEFAULT_MASK_APIV2,
@@ -274,7 +277,28 @@ class DatasetSearchAPI(API):
             abort(500, "Internal search service error")
 
 
-@ns.route("/<dataset:dataset>/", endpoint="dataset", doc=common_doc)
+dataset_parser = DatasetApiParser()
+
+
+@ns.route("/", endpoint="datasets")
+class DatasetListAPI(API):
+    """Datasets collection endpoint"""
+
+    @apiv2.doc("list_datasets")
+    @apiv2.expect(dataset_parser.parser)
+    @apiv2.marshal_with(dataset_page_fields)
+    def get(self):
+        """List or search all datasets"""
+        args = dataset_parser.parse()
+        datasets = Dataset.objects.exclude("resources").visible_by_user(
+            current_user, mongoengine.Q(private__ne=True, archived=None, deleted=None)
+        )
+        datasets = dataset_parser.parse_filters(datasets, args)
+        sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
+        return datasets.order_by(sort).paginate(args["page"], args["page_size"])
+
+
+@ns.route("/<dataset_without_resources:dataset>/", endpoint="dataset", doc=common_doc)
 @apiv2.response(404, "Dataset not found")
 @apiv2.response(410, "Dataset has been deleted")
 class DatasetAPI(API):

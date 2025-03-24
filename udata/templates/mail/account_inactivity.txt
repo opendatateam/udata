@@ -1,0 +1,22 @@
+{% extends 'mail/base.txt' %}
+
+{% block body %}
+{{ _(
+      'Your account  (%(user_email)s) has been inactive for %(inactivity_years)d years or more.',
+      user_email=user.email,
+      inactivity_years=config.YEARS_OF_INACTIVITY_BEFORE_DELETION
+    )
+}}
+
+{{ _(
+      'If you want to keep your account, please log in with your account on %(site)s.',
+      site=config.SITE_TITLE
+    )
+}}
+
+{{ _(
+      'Without logging in, your account will be deleted within %(notify_delay)d days.',
+      notify_delay=config.DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY
+    )
+}}
+{% endblock %}

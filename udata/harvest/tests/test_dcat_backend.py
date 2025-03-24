@@ -179,7 +179,7 @@ class DcatBackendTest:
         assert dataservices[0].title == "Explore API v2"
         assert dataservices[0].base_api_url == "https://data.paris2024.org/api/explore/v2.1/"
         assert (
-            dataservices[0].endpoint_description_url
+            dataservices[0].machine_documentation_url
             == "https://data.paris2024.org/api/explore/v2.1/swagger.json"
         )
         assert (
@@ -517,9 +517,9 @@ class DcatBackendTest:
         assert dataset.temporal_coverage is not None
         assert dataset.temporal_coverage.start == date(2016, 1, 1)
         assert dataset.temporal_coverage.end == date(2016, 12, 5)
-        assert dataset.contact_point.email == "hello@its.me"
-        assert dataset.contact_point.name == "Organization contact"
-        assert dataset.contact_point.contact_form == "https://data.support.com"
+        assert dataset.contact_points[0].email == "hello@its.me"
+        assert dataset.contact_points[0].name == "Organization contact"
+        assert dataset.contact_points[0].contact_form == "https://data.support.com"
         assert dataset.frequency is None
         # test dct:license nested in distribution
         assert dataset.license.id == "lov1"
@@ -623,6 +623,71 @@ class DcatBackendTest:
             == "https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//datasets/0437a976-cff1-4fa6-807a-c23006df2f8f"
         )  # noqa
         assert dataset.harvest.last_update.date() == date.today()
+
+    def test_udata_xml_catalog(self, rmock):
+        LicenseFactory(id="fr-lo", title="Licence ouverte / Open Licence")
+        url = mock_dcat(rmock, "udata.xml")
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
+        actions.run(source.slug)
+
+        source.reload()
+        job = source.get_last_job()
+        assert len(job.items) == 3
+
+        assert Dataset.objects.filter(organization=org).count() == 2
+        dataset = Dataset.objects.filter(organization=org, title="Bureaux de vote - Vanves").first()
+
+        assert dataset is not None
+        assert "bureaux-de-vote" in dataset.tags  # support dcat:keyword
+        assert len(dataset.resources) == 4
+        assert dataset.description == "La liste des 23 bureaux de vote à Vanves"
+        assert dataset.harvest is not None
+        assert (
+            dataset.harvest.dct_identifier
+            == "https://vanves-seineouest.opendatasoft.com/explore/dataset/bureau-de-vote-vanves/"
+        )
+        assert (
+            dataset.harvest.remote_id
+            == "https://vanves-seineouest.opendatasoft.com/explore/dataset/bureau-de-vote-vanves/"
+        )
+        assert dataset.harvest.created_at.isoformat() == "2019-04-19T12:21:56"
+        assert dataset.harvest.modified_at.isoformat() == "2019-04-19T12:21:56"
+        assert (
+            dataset.harvest.uri
+            == "https://vanves-seineouest.opendatasoft.com/explore/dataset/bureau-de-vote-vanves/"
+        )
+        assert (
+            dataset.harvest.remote_url
+            == "https://vanves-seineouest.opendatasoft.com/explore/dataset/bureau-de-vote-vanves/"
+        )
+        assert dataset.harvest.last_update.date() == date.today()
+
+        assert Dataservice.objects(organization=org).count() == 1
+        service = Dataservice.objects(organization=org).first()
+
+        assert service is not None
+        assert len(service.datasets) == 2
+        assert service.title == "Explore API v2 https://vanves-seineouest.opendatasoft.com"
+        assert service.description == ""
+        assert (
+            service.machine_documentation_url
+            == "https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/swagger.json"
+        )
+        assert (
+            service.base_api_url == "https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/"
+        )
+        assert service.harvest is not None
+        assert (
+            service.harvest.remote_id
+            == "https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/"
+        )
+        assert service.harvest.created_at.isoformat() == "2024-07-12T00:03:38.764000"
+        assert (
+            service.harvest.remote_url
+            == "https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/console"
+        )
+        assert service.harvest.last_update.date() == date.today()
 
     def test_user_agent_get(self, rmock):
         url = mock_dcat(rmock, "catalog.xml", path="without/extension")
@@ -866,10 +931,10 @@ class CswIso19139DcatBackendTest:
             ],
         }
         assert (
-            dataset.contact_point.name
+            dataset.contact_points[0].name
             == "DDTM 80 (Direction Départementale des Territoires et de la Mer de la Somme)"
         )
-        assert dataset.contact_point.email == "ddtm-sap-bsig@somme.gouv.fr"
+        assert dataset.contact_points[0].email == "ddtm-sap-bsig@somme.gouv.fr"
 
         # License is not properly mapped in XSLT conversion
         assert dataset.license is None

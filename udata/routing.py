@@ -77,6 +77,9 @@ class ModelConverter(BaseConverter):
     def has_redirected_slug(self):
         return self.has_slug and self.model.slug.follow
 
+    def get_excludes(self):
+        return []
+
     def quote(self, value):
         if self.has_slug:
             return self.model.slug.slugify(value)
@@ -85,13 +88,13 @@ class ModelConverter(BaseConverter):
 
     def to_python(self, value):
         try:
-            return self.model.objects.get_or_404(id=value)
+            return self.model.objects.exclude(*self.get_excludes()).get_or_404(id=value)
         except (NotFound, ValidationError):
             pass
         try:
             quoted = self.quote(value)
             query = db.Q(slug=value) | db.Q(slug=quoted)
-            obj = self.model.objects(query).get()
+            obj = self.model.objects(query).exclude(*self.get_excludes()).get()
         except (InvalidQueryError, self.model.DoesNotExist):
             # If the model doesn't have a slug or matching slug doesn't exist.
             if self.has_redirected_slug:
@@ -119,6 +122,13 @@ class ModelConverter(BaseConverter):
 
 class DatasetConverter(ModelConverter):
     model = models.Dataset
+
+
+class DatasetWithoutResourcesConverter(ModelConverter):
+    model = models.Dataset
+
+    def get_excludes(self):
+        return ["resources"]
 
 
 class DataserviceConverter(ModelConverter):
@@ -226,6 +236,7 @@ def init_app(app):
     app.url_map.converters["pathlist"] = PathListConverter
     app.url_map.converters["uuid"] = UUIDConverter
     app.url_map.converters["dataset"] = DatasetConverter
+    app.url_map.converters["dataset_without_resources"] = DatasetWithoutResourcesConverter
     app.url_map.converters["dataservice"] = DataserviceConverter
     app.url_map.converters["crid"] = CommunityResourceConverter
     app.url_map.converters["org"] = OrganizationConverter
