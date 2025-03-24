@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 10.1.4 (2025-03-24)
 
 - Improve datasets' API perfs (do not fetch resources from Mongo, add /api/2/datasets endpoint…) [#3279](https://github.com/opendatateam/udata/pull/3279) [#3291](https://github.com/opendatateam/udata/pull/3291)
 - Fix harvesting literal contact points [#3288](https://github.com/opendatateam/udata/pull/3288)
