@@ -402,7 +402,21 @@ class ResourcesAPI(API):
     def put(self, dataset):
         """Reorder resources"""
         ResourceEditPermission(dataset).test()
-        data = {"resources": request.json}
+        resources = request.json
+        if len(dataset.resources) != len(resources):
+            api.abort(
+                400,
+                f"All resources must be reordered, you provided {len(resources)} "
+                f"out of {len(dataset.resources)}",
+            )
+        if set(r["id"] if isinstance(r, dict) else r for r in resources) != set(
+            str(r.id) for r in dataset.resources
+        ):
+            api.abort(
+                400,
+                f"Resource ids must match existing ones in dataset, ie: {set(str(r.id) for r in dataset.resources)}",
+            )
+        data = {"resources": resources}
         form = ResourcesListForm.from_json(
             data, obj=dataset, instance=dataset, meta={"csrf": False}
         )
