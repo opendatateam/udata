@@ -17,6 +17,27 @@ from udata.tests.helpers import assert_not_emit
 
 
 class DatasetAPIV2Test(APITestCase):
+    def test_list_datasets(self):
+        resources_a = [ResourceFactory() for _ in range(2)]
+        dataset_a = DatasetFactory(title="Dataset A", resources=resources_a)
+
+        resources_b = [ResourceFactory() for _ in range(4)]
+        dataset_b = DatasetFactory(title="Dataset B", resources=resources_b)
+
+        response = self.get(url_for("apiv2.datasets"))
+        self.assert200(response)
+        data = response.json
+
+        assert len(data["data"]) == 2
+        assert data["data"][1]["title"] == dataset_a.title
+        assert data["data"][0]["title"] == dataset_b.title
+
+        assert data["data"][1]["resources"]["total"] == len(resources_a)
+        assert data["data"][0]["resources"]["total"] == len(resources_b)
+
+        assert data["data"][1]["community_resources"]["total"] == 0
+        assert data["data"][0]["community_resources"]["total"] == 0
+
     def test_get_dataset(self):
         resources = [ResourceFactory() for _ in range(2)]
         dataset = DatasetFactory(resources=resources)

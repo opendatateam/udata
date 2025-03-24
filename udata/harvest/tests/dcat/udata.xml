@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+   xmlns:adms="http://www.w3.org/ns/adms#"
+   xmlns:dcat="http://www.w3.org/ns/dcat#"
+   xmlns:dct="http://purl.org/dc/terms/"
+   xmlns:foaf="http://xmlns.com/foaf/0.1/"
+   xmlns:hydra="http://www.w3.org/ns/hydra/core#"
+   xmlns:ns1="http://data.europa.eu/930/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+   xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+   xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
+>
+  <rdf:Description rdf:about="https://vanves-seineouest.opendatasoft.com/explore/dataset/bureau-de-vote-vanves/">
+    <dct:identifier>https://vanves-seineouest.opendatasoft.com/explore/dataset/bureau-de-vote-vanves/</dct:identifier>
+    <adms:identifier rdf:nodeID="N7cbef9d8b574438f86f859e81e04e4c0"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset"/>
+    <dct:title>Bureaux de vote - Vanves</dct:title>
+    <dct:description>La liste des 23 bureaux de vote à Vanves</dct:description>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2019-04-19T12:21:56</dct:issued>
+    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2019-04-19T12:21:56</dct:modified>
+    <dcat:landingPage rdf:resource="https://vanves-seineouest.opendatasoft.com/explore/dataset/bureau-de-vote-vanves/"/>
+    <dcat:keyword>administration-finances-publiques</dcat:keyword>
+    <dcat:keyword>bureaux-de-vote</dcat:keyword>
+    <dcat:keyword>elections</dcat:keyword>
+    <dcat:distribution rdf:resource="https://www.data.gouv.fr/datasets/61892c9d076a4d62434a1318/#resource-5dd4e0b2-4d96-4f36-b73e-b78ec993703c"/>
+    <dcat:distribution rdf:resource="https://www.data.gouv.fr/datasets/61892c9d076a4d62434a1318/#resource-0f80d285-72f8-49f8-a691-1dad6bd2f6db"/>
+    <dcat:distribution rdf:resource="https://www.data.gouv.fr/datasets/61892c9d076a4d62434a1318/#resource-d78d1245-6e8e-44d8-88cd-87b1dd66034f"/>
+    <dcat:distribution rdf:resource="https://www.data.gouv.fr/datasets/61892c9d076a4d62434a1318/#resource-b18fb2bd-6c8b-47a8-84fb-cdc8e29f4f1a"/>
+    <ns1:distributor rdf:resource="https://www.data.gouv.fr/organizations/54884a24c751df7226a3fc16/"/>
+    <dct:publisher rdf:resource="https://www.data.gouv.fr/api/1/contacts/67b7c3b0e2714e0e9de260a3/"/>
+    <dct:creator rdf:resource="https://www.data.gouv.fr/api/1/contacts/67b7c3b0e2714e0e9de260a4/"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://www.data.gouv.fr/datasets/61892c9d076a4d62434a1318/#resource-5dd4e0b2-4d96-4f36-b73e-b78ec993703c">
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Distribution"/>
+    <dct:identifier>5dd4e0b2-4d96-4f36-b73e-b78ec993703c</dct:identifier>
+    <dct:title>bureau-de-vote-vanves.csv</dct:title>
+    <dct:description>Bureaux de vote - Vanves (csv)</dct:description>
+    <dcat:downloadURL rdf:resource="https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/catalog/datasets/bureau-de-vote-vanves/exports/csv?use_labels=true"/>
+    <dcat:accessURL rdf:resource="https://www.data.gouv.fr/fr/datasets/r/5dd4e0b2-4d96-4f36-b73e-b78ec993703c"/>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2019-04-19T12:21:56</dct:issued>
+    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2019-04-19T12:21:56</dct:modified>
+    <dct:rights>License Not Specified</dct:rights>
+    <dcat:mediaType>text/csv</dcat:mediaType>
+    <dct:format>csv</dct:format>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://www.data.gouv.fr/api/1/organizations/54884a24c751df7226a3fc16/catalog">
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Catalog"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/hydra/core#Collection"/>
+    <dct:publisher rdf:resource="https://www.data.gouv.fr/organizations/54884a24c751df7226a3fc16/"/>
+    <dct:title>Ville de Vanves</dct:title>
+    <dct:description>Ville de Vanves</dct:description>
+    <dcat:dataset rdf:resource="https://vanves-seineouest.opendatasoft.com/explore/dataset/vfe_public_219200755_20240506/"/>
+    <dcat:dataset rdf:resource="https://vanves-seineouest.opendatasoft.com/explore/dataset/bureau-de-vote-vanves/"/>
+    <dcat:service rdf:resource="https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/"/>
+    <hydra:totalItems rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">2</hydra:totalItems>
+    <hydra:view rdf:resource="https://www.data.gouv.fr/api/1/organizations/54884a24c751df7226a3fc16/catalog.rdf?page=1&amp;page_size=100"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://www.data.gouv.fr/datasets/61892c9d076a4d62434a1318/#resource-d78d1245-6e8e-44d8-88cd-87b1dd66034f">
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Distribution"/>
+    <dct:identifier>d78d1245-6e8e-44d8-88cd-87b1dd66034f</dct:identifier>
+    <dct:title>bureau-de-vote-vanves.geojson</dct:title>
+    <dct:description>Bureaux de vote - Vanves (geojson)</dct:description>
+    <dcat:downloadURL rdf:resource="https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/catalog/datasets/bureau-de-vote-vanves/exports/geojson"/>
+    <dcat:accessURL rdf:resource="https://www.data.gouv.fr/fr/datasets/r/d78d1245-6e8e-44d8-88cd-87b1dd66034f"/>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2019-04-19T12:21:56</dct:issued>
+    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2019-04-19T12:21:56</dct:modified>
+    <dct:rights>License Not Specified</dct:rights>
+    <dcat:mediaType>application/json</dcat:mediaType>
+    <dct:format>json</dct:format>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://www.data.gouv.fr/api/1/organizations/54884a24c751df7226a3fc16/catalog.rdf?page=1&amp;page_size=100">
+    <rdf:type rdf:resource="http://www.w3.org/ns/hydra/core#PartialCollectionView"/>
+    <hydra:first rdf:resource="https://www.data.gouv.fr/api/1/organizations/54884a24c751df7226a3fc16/catalog.rdf?page=1&amp;page_size=100"/>
+    <hydra:last rdf:resource="https://www.data.gouv.fr/api/1/organizations/54884a24c751df7226a3fc16/catalog.rdf?page=1&amp;page_size=100"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://www.data.gouv.fr/organizations/54884a24c751df7226a3fc16/">
+    <rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Organization"/>
+    <foaf:name>Ville de Vanves</foaf:name>
+    <rdfs:label>Ville de Vanves</rdfs:label>
+    <foaf:homepage rdf:resource="http://www.vanves.fr"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://www.data.gouv.fr/datasets/66397176ff2a31840e29304c/#resource-482677b8-379c-45a5-83ef-0361fecb4cc3">
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Distribution"/>
+    <dct:identifier>482677b8-379c-45a5-83ef-0361fecb4cc3</dct:identifier>
+    <dct:title>vfe_public_219200755_20240506.json</dct:title>
+    <dct:description>Ville de Vanves - Part des véhicules à faibles émissions dans le renouvellement du parc (json)</dct:description>
+    <dcat:downloadURL rdf:resource="https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/catalog/datasets/vfe_public_219200755_20240506/exports/json"/>
+    <dcat:accessURL rdf:resource="https://www.data.gouv.fr/fr/datasets/r/482677b8-379c-45a5-83ef-0361fecb4cc3"/>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-05-06T15:15:18</dct:issued>
+    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-05-06T15:15:18</dct:modified>
+    <dct:rights>License Not Specified</dct:rights>
+    <dcat:mediaType>application/json</dcat:mediaType>
+    <dct:format>json</dct:format>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://www.data.gouv.fr/datasets/61892c9d076a4d62434a1318/#resource-b18fb2bd-6c8b-47a8-84fb-cdc8e29f4f1a">
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Distribution"/>
+    <dct:identifier>b18fb2bd-6c8b-47a8-84fb-cdc8e29f4f1a</dct:identifier>
+    <dct:title>bureau-de-vote-vanves.zip</dct:title>
+    <dct:description>Bureaux de vote - Vanves (shp)</dct:description>
+    <dcat:downloadURL rdf:resource="https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/catalog/datasets/bureau-de-vote-vanves/exports/shp"/>
+    <dcat:accessURL rdf:resource="https://www.data.gouv.fr/fr/datasets/r/b18fb2bd-6c8b-47a8-84fb-cdc8e29f4f1a"/>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2019-04-19T12:21:56</dct:issued>
+    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2019-04-19T12:21:56</dct:modified>
+    <dct:rights>License Not Specified</dct:rights>
+    <dcat:mediaType>application/zip</dcat:mediaType>
+    <dct:format>zip</dct:format>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://www.data.gouv.fr/datasets/66397176ff2a31840e29304c/#resource-aab4d337-a617-4c18-a045-291d68787a7d">
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Distribution"/>
+    <dct:identifier>aab4d337-a617-4c18-a045-291d68787a7d</dct:identifier>
+    <dct:title>vfe_public_219200755_20240506.csv</dct:title>
+    <dct:description>Ville de Vanves - Part des véhicules à faibles émissions dans le renouvellement du parc (csv)</dct:description>
+    <dcat:downloadURL rdf:resource="https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/catalog/datasets/vfe_public_219200755_20240506/exports/csv?use_labels=true"/>
+    <dcat:accessURL rdf:resource="https://www.data.gouv.fr/fr/datasets/r/aab4d337-a617-4c18-a045-291d68787a7d"/>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-05-06T15:15:18</dct:issued>
+    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-05-06T15:15:18</dct:modified>
+    <dct:rights>License Not Specified</dct:rights>
+    <dcat:mediaType>text/csv</dcat:mediaType>
+    <dct:format>csv</dct:format>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/">
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#DataService"/>
+    <dct:identifier>https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/</dct:identifier>
+    <dct:title>Explore API v2 https://vanves-seineouest.opendatasoft.com</dct:title>
+    <dct:description></dct:description>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-07-12T00:03:38.764000</dct:issued>
+    <dcat:endpointURL rdf:resource="https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/"/>
+    <dcat:landingPage rdf:resource="https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/console"/>
+    <dcat:endpointDescription rdf:resource="https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/swagger.json"/>
+    <dcat:servesDataset rdf:resource="https://vanves-seineouest.opendatasoft.com/explore/dataset/vfe_public_219200755_20240506/"/>
+    <dcat:servesDataset rdf:resource="https://vanves-seineouest.opendatasoft.com/explore/dataset/bureau-de-vote-vanves/"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="N25911b8ad0604e9f8de4d7e1965eb81a">
+    <rdf:type rdf:resource="http://www.w3.org/ns/adms#Identifier"/>
+    <dct:creator>data.gouv.fr</dct:creator>
+    <skos:notation>https://www.data.gouv.fr/datasets/66397176ff2a31840e29304c/</skos:notation>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://vanves-seineouest.opendatasoft.com/explore/dataset/vfe_public_219200755_20240506/">
+    <dct:identifier>https://vanves-seineouest.opendatasoft.com/explore/dataset/vfe_public_219200755_20240506/</dct:identifier>
+    <adms:identifier rdf:nodeID="N25911b8ad0604e9f8de4d7e1965eb81a"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset"/>
+    <dct:title>Ville de Vanves - Part des véhicules à faibles émissions dans le renouvellement du parc</dct:title>
+    <dct:description>Ville de Vanves - Part des véhicules à faibles émissions dans le renouvellement du parc</dct:description>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-05-06T15:15:18</dct:issued>
+    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-05-06T15:15:18</dct:modified>
+    <dcat:landingPage rdf:resource="https://vanves-seineouest.opendatasoft.com/explore/dataset/vfe_public_219200755_20240506/"/>
+    <dcat:distribution rdf:resource="https://www.data.gouv.fr/datasets/66397176ff2a31840e29304c/#resource-aab4d337-a617-4c18-a045-291d68787a7d"/>
+    <dcat:distribution rdf:resource="https://www.data.gouv.fr/datasets/66397176ff2a31840e29304c/#resource-482677b8-379c-45a5-83ef-0361fecb4cc3"/>
+    <ns1:distributor rdf:resource="https://www.data.gouv.fr/organizations/54884a24c751df7226a3fc16/"/>
+    <dct:publisher rdf:resource="https://www.data.gouv.fr/api/1/contacts/67b7c3b0e2714e0e9de260a3/"/>
+    <dct:creator rdf:resource="https://www.data.gouv.fr/api/1/contacts/67b7c3b0e2714e0e9de260a4/"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://www.data.gouv.fr/api/1/contacts/67b7c3b0e2714e0e9de260a4/">
+    <rdf:type rdf:resource="http://www.w3.org/2006/vcard/ns#Kind"/>
+    <vcard:fn>Vanves</vcard:fn>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://www.data.gouv.fr/datasets/61892c9d076a4d62434a1318/#resource-0f80d285-72f8-49f8-a691-1dad6bd2f6db">
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Distribution"/>
+    <dct:identifier>0f80d285-72f8-49f8-a691-1dad6bd2f6db</dct:identifier>
+    <dct:title>bureau-de-vote-vanves.json</dct:title>
+    <dct:description>Bureaux de vote - Vanves (json)</dct:description>
+    <dcat:downloadURL rdf:resource="https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/catalog/datasets/bureau-de-vote-vanves/exports/json"/>
+    <dcat:accessURL rdf:resource="https://www.data.gouv.fr/fr/datasets/r/0f80d285-72f8-49f8-a691-1dad6bd2f6db"/>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2019-04-19T12:21:56</dct:issued>
+    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2019-04-19T12:21:56</dct:modified>
+    <dct:rights>License Not Specified</dct:rights>
+    <dcat:mediaType>application/json</dcat:mediaType>
+    <dct:format>json</dct:format>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://www.data.gouv.fr/api/1/contacts/67b7c3b0e2714e0e9de260a3/">
+    <rdf:type rdf:resource="http://www.w3.org/2006/vcard/ns#Kind"/>
+    <vcard:fn>Vanves</vcard:fn>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="N7cbef9d8b574438f86f859e81e04e4c0">
+    <rdf:type rdf:resource="http://www.w3.org/ns/adms#Identifier"/>
+    <dct:creator>data.gouv.fr</dct:creator>
+    <skos:notation>https://www.data.gouv.fr/datasets/61892c9d076a4d62434a1318/</skos:notation>
+  </rdf:Description>
+</rdf:RDF>

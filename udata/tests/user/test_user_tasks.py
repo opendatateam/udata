@@ -13,11 +13,11 @@ from udata.tests.helpers import capture_mails
 
 
 class UserTasksTest(APITestCase):
-    @pytest.mark.options(YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION=3)
+    @pytest.mark.options(YEARS_OF_INACTIVITY_BEFORE_DELETION=3)
     def test_notify_inactive_users(self):
         notification_comparison_date = (
             datetime.utcnow()
-            - timedelta(days=current_app.config["YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION"] * 365)
+            - timedelta(days=current_app.config["YEARS_OF_INACTIVITY_BEFORE_DELETION"] * 365)
             + timedelta(days=current_app.config["DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY"])
             - timedelta(days=1)  # add margin
         )
@@ -42,12 +42,12 @@ class UserTasksTest(APITestCase):
 
         self.assertEqual(len(mails), 0)
 
-    @pytest.mark.options(YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION=3)
+    @pytest.mark.options(YEARS_OF_INACTIVITY_BEFORE_DELETION=3)
     @pytest.mark.options(MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS=10)
     def test_notify_inactive_users_max_notifications(self):
         notification_comparison_date = (
             datetime.utcnow()
-            - timedelta(days=current_app.config["YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION"] * 365)
+            - timedelta(days=current_app.config["YEARS_OF_INACTIVITY_BEFORE_DELETION"] * 365)
             + timedelta(days=current_app.config["DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY"])
             - timedelta(days=1)  # add margin
         )
@@ -75,11 +75,11 @@ class UserTasksTest(APITestCase):
             NB_USERS_TO_NOTIFY - current_app.config["MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS"],
         )
 
-    @pytest.mark.options(YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION=3)
+    @pytest.mark.options(YEARS_OF_INACTIVITY_BEFORE_DELETION=3)
     def test_delete_inactive_users(self):
         deletion_comparison_date = (
             datetime.utcnow()
-            - timedelta(days=current_app.config["YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION"] * 365)
+            - timedelta(days=current_app.config["YEARS_OF_INACTIVITY_BEFORE_DELETION"] * 365)
             - timedelta(days=1)  # add margin
         )
 
@@ -118,7 +118,7 @@ class UserTasksTest(APITestCase):
         self.assertEqual(inactive_user_to_delete.fullname, "DELETED DELETED")
         self.assertEqual(discussion.title, discussion_title)
 
-    @pytest.mark.options(YEARS_OF_INACTIVITY_BEFORE_DEACTIVATION=3)
+    @pytest.mark.options(YEARS_OF_INACTIVITY_BEFORE_DELETION=3)
     def test_keep_inactive_users_that_logged_in(self):
         notification_comparison_date = (
             datetime.utcnow()
