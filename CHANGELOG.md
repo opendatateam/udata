@@ -6,6 +6,7 @@
 - Fix harvesting literal contact points [#3288](https://github.com/opendatateam/udata/pull/3288)
 - Use YEARS_OF_INACTIVITY_BEFORE_DELETION all around in code [#3287](https://github.com/opendatateam/udata/pull/3287)
 - Add a udata catalog in dcat backends to test [#3289](https://github.com/opendatateam/udata/pull/3289)
+- Fix compute resources_len when resources does not exist in the mongo document [#3291](https://github.com/opendatateam/udata/pull/3291)
 
 ## 10.1.3 (2025-03-14)
 
