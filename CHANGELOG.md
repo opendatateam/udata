@@ -7,6 +7,7 @@
     - upgrade bleach to 6.2.0
     - upgrade html2text to 2024.2.26
     - upgrade mistune to 3.1.3
+    - upgrade netaddr to 1.3.0
     - upgrade wtforms to 3.2.1
     - upgrade voluptuous to 0.15.2
     - replace StringDist by Levenshtein
