@@ -62,7 +62,7 @@ class JobsCommandsTest:
         assert task.name == "Job {0}".format(JOB_NAME)
 
     def test_schedule_job_with_parameters(self, cli):
-        cli('job schedule "0 1 2 3 sunday" fake-job ' "arg0 arg1 key1=value1 key0=value0")
+        cli('job schedule "0 1 2 3 sunday" fake-job arg0 arg1 key1=value1 key0=value0')
 
         tasks = PeriodicTask.objects(task=JOB_NAME)
         assert len(tasks) == 1

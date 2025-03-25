@@ -35,7 +35,7 @@ class TagListField(ListField):
             if not tags.MIN_TAG_LENGTH <= len(tag) <= tags.MAX_TAG_LENGTH:
                 self.error(
                     _(
-                        'Tag "%(tag)s" must be between %(min)d ' "and %(max)d characters long.",
+                        'Tag "%(tag)s" must be between %(min)d and %(max)d characters long.',
                         min=tags.MIN_TAG_LENGTH,
                         max=tags.MAX_TAG_LENGTH,
                         tag=tag,

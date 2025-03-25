@@ -125,7 +125,11 @@ def validate(url, schemes=None, tlds=None, private=None, local=None, credentials
         if ip and ip.is_loopback() or match.group("localhost"):
             error(url, _("is a local URL"))
 
-    if not private and ip and ip.is_private():
+    if (
+        not private
+        and ip
+        and (ip.is_link_local() or ip.is_ipv4_private_use() or ip.is_ipv6_unique_local())
+    ):
         error(url, _("is a private URL"))
 
     return url

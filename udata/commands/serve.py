@@ -18,15 +18,13 @@ log = logging.getLogger(__name__)
     "-r/-nr",
     "--reload/--no-reload",
     default=None,
-    help="Enable or disable the reloader.  By default the reloader "
-    "is active if debug is enabled.",
+    help="Enable or disable the reloader.  By default the reloader is active if debug is enabled.",
 )
 @click.option(
     "-d/-nd",
     "--debugger/--no-debugger",
     default=None,
-    help="Enable or disable the debugger.  By default the debugger "
-    "is active if debug is enabled.",
+    help="Enable or disable the debugger.  By default the debugger is active if debug is enabled.",
 )
 @click.option(
     "--eager-loading/--lazy-loader",

@@ -24,17 +24,17 @@ class ExtendedRegisterForm(RegisterForm):
         ],
     )
 
-    def validate(self):
+    def validate(self, **kwargs):
         # no register allowed when read only mode is on
-        if not super().validate() or current_app.config.get("READ_ONLY_MODE"):
+        if not super().validate(**kwargs) or current_app.config.get("READ_ONLY_MODE"):
             return False
 
         return True
 
 
 class ExtendedLoginForm(LoginForm):
-    def validate(self):
-        if not super().validate():
+    def validate(self, **kwargs):
+        if not super().validate(**kwargs):
             return False
 
         if self.user.password_rotation_demanded:
@@ -45,8 +45,8 @@ class ExtendedLoginForm(LoginForm):
 
 
 class ExtendedResetPasswordForm(ResetPasswordForm):
-    def validate(self):
-        if not super().validate():
+    def validate(self, **kwargs):
+        if not super().validate(**kwargs):
             return False
 
         if self.user.password_rotation_demanded:
@@ -65,15 +65,15 @@ class ChangeEmailForm(Form):
     )
     submit = fields.SubmitField(_("Change email"))
 
-    def validate(self):
-        if not super().validate():
+    def validate(self, **kwargs):
+        if not super().validate(**kwargs):
             return False
 
         self.user = current_user
 
         if self.user.email.strip() == self.new_email.data.strip():
             self.new_email.errors.append(
-                "Your new email must be different than your " "previous email"
+                "Your new email must be different than your previous email"
             )
             return False
         return True
