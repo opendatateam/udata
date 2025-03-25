@@ -381,7 +381,7 @@ class ResourceMixin(object):
             return to_naive_datetime(self.harvest.modified_at)
         if self.filetype == "remote" and self.extras.get("analysis:last-modified-at"):
             return to_naive_datetime(self.extras.get("analysis:last-modified-at"))
-        return self.last_modified_internal
+        return to_naive_datetime(self.last_modified_internal)
 
     def clean(self):
         super(ResourceMixin, self).clean()
@@ -562,6 +562,8 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
     extras = db.ExtrasField()
     harvest = db.EmbeddedDocumentField(HarvestDatasetMetadata)
 
+    quality = db.DictField()
+
     featured = db.BooleanField(required=True, default=False)
 
     contact_points = db.ListField(db.ReferenceField("ContactPoint", reverse_delete_rule=db.PULL))
@@ -669,6 +671,8 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         if len(set(res.id for res in self.resources)) != len(self.resources):
             raise MongoEngineValidationError(f"Duplicate resource ID in dataset #{self.id}.")
 
+        self.quality = self.compute_quality()
+
         for key, value in self.extras.items():
             if not key.startswith("custom:"):
                 continue
@@ -766,7 +770,7 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             and to_naive_datetime(self.harvest.modified_at) < datetime.utcnow()
         ):
             return to_naive_datetime(self.harvest.modified_at)
-        return self.last_modified_internal
+        return to_naive_datetime(self.last_modified_internal)
 
     @property
     def last_update(self):
@@ -821,8 +825,7 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         else:
             return self.last_update + delta
 
-    @cached_property
-    def quality(self):
+    def compute_quality(self):
         """Return a dict filled with metrics related to the inner
 
         quality of the dataset:
@@ -832,9 +835,6 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             * and so on
         """
         result = {}
-        if not self.id:
-            # Quality is only relevant on saved Datasets
-            return result
 
         result["license"] = True if self.license else False
         result["temporal_coverage"] = True if self.temporal_coverage else False
@@ -931,8 +931,16 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         if resource.id in [r.id for r in self.resources]:
             raise MongoEngineValidationError("Cannot add resource with already existing ID")
 
+        self.resources.insert(0, resource)
         self.update(
-            __raw__={"$push": {"resources": {"$each": [resource.to_mongo()], "$position": 0}}}
+            __raw__={
+                "$set": {
+                    "quality": self.compute_quality(),
+                },
+                "$push": {
+                    "resources": {"$each": [resource.to_mongo()], "$position": 0},
+                },
+            }
         )
         self.reload()
         self.on_resource_added.send(self.__class__, document=self, resource_id=resource.id)
