@@ -115,6 +115,11 @@ class Defaults(object):
 
     SECURITY_RETURN_GENERIC_RESPONSES = False
 
+    # Inactive users settings
+    YEARS_OF_INACTIVITY_BEFORE_DELETION = None
+    DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY = 30
+    MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS = 200
+
     # Sentry configuration
     SENTRY_DSN = None
     SENTRY_TAGS = {}
@@ -564,6 +569,10 @@ class Defaults(object):
     # Tabular API Dataservice ID
     ###########################################################################
     TABULAR_API_DATASERVICE_ID = None
+
+    # JSON-LD settings
+    ###########################################################################
+    MAX_RESOURCES_IN_JSON_LD = 20
 
 
 class Testing(object):

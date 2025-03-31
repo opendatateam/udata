@@ -1,9 +1,11 @@
+from copy import copy
 from datetime import date, datetime, timedelta
 from uuid import UUID, uuid4
 
 import pytest
 from mongoengine.errors import ValidationError
 from mongoengine.fields import BaseField
+from mongoengine.signals import pre_save
 
 from udata.errors import ConfigError
 from udata.i18n import _
@@ -102,6 +104,40 @@ class AutoUUIDFieldTest:
 
 
 class SlugFieldTest:
+    def test_populate_on_pre_save_signal_is_registered(self):
+        """populate_on_pre_save signal should be registered"""
+        # It isn't registered on startup
+        startup_receivers = copy(pre_save.receivers)
+        assert not any(
+            getattr(receiver, "__func__", None) == db.SlugField.populate_on_pre_save
+            for receiver in pre_save.receivers_for(SlugUpdateTester)
+        )
+
+        tester = SlugUpdateTester.objects.create(title="A Title")
+
+        # It is registered when initializing a new SlugUpdateTester with a SlugField
+        assert any(
+            getattr(receiver, "__func__", None) == db.SlugField.populate_on_pre_save
+            for receiver in pre_save.receivers_for(SlugUpdateTester)
+        )
+        assert hasattr(SlugUpdateTester.slug, "owner")
+        assert tester.slug == "a-title"
+
+        # Clear pre_save receivers
+        pre_save.receivers = startup_receivers
+        del SlugUpdateTester.slug.owner
+
+        tester = SlugUpdateTester.objects(title="A Title").first()
+        tester.title = "Other title"
+        tester.save()
+
+        # It is also registered when updating an existing SlugUpdateTester with a SlugField
+        assert any(
+            getattr(receiver, "__func__", None) == db.SlugField.populate_on_pre_save
+            for receiver in pre_save.receivers_for(SlugUpdateTester)
+        )
+        assert tester.slug == "other-title"
+
     def test_validate(self):
         """SlugField should validate if not set"""
         obj = SlugTester(title="A Title")

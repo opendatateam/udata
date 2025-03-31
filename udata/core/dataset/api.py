@@ -62,7 +62,12 @@ from .exceptions import (
     SchemasCacheUnavailableException,
     SchemasCatalogNotFoundException,
 )
-from .forms import CommunityResourceForm, DatasetForm, ResourceForm, ResourcesListForm
+from .forms import (
+    CommunityResourceForm,
+    DatasetForm,
+    ResourceFormWithoutId,
+    ResourcesListForm,
+)
 from .models import (
     Checksum,
     CommunityResource,
@@ -379,8 +384,9 @@ class ResourcesAPI(API):
     def post(self, dataset):
         """Create a new resource for a given dataset"""
         ResourceEditPermission(dataset).test()
-        form = api.validate(ResourceForm)
+        form = api.validate(ResourceFormWithoutId)
         resource = Resource()
+
         if form._fields.get("filetype").data != "remote":
             api.abort(400, "This endpoint only supports remote resources")
         form.populate_obj(resource)
@@ -396,7 +402,21 @@ class ResourcesAPI(API):
     def put(self, dataset):
         """Reorder resources"""
         ResourceEditPermission(dataset).test()
-        data = {"resources": request.json}
+        resources = request.json
+        if len(dataset.resources) != len(resources):
+            api.abort(
+                400,
+                f"All resources must be reordered, you provided {len(resources)} "
+                f"out of {len(dataset.resources)}",
+            )
+        if set(r["id"] if isinstance(r, dict) else r for r in resources) != set(
+            str(r.id) for r in dataset.resources
+        ):
+            api.abort(
+                400,
+                f"Resource ids must match existing ones in dataset, ie: {set(str(r.id) for r in dataset.resources)}",
+            )
+        data = {"resources": resources}
         form = ResourcesListForm.from_json(
             data, obj=dataset, instance=dataset, meta={"csrf": False}
         )
@@ -545,10 +565,19 @@ class ResourceAPI(ResourceMixin, API):
         """Update a given resource on a given dataset"""
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
-        form = api.validate(ResourceForm, resource)
+        form = api.validate(ResourceFormWithoutId, resource)
+
+        # ensure filetype is not modified after creation
+        if (
+            form._fields.get("filetype").data
+            and form._fields.get("filetype").data != resource.filetype
+        ):
+            abort(400, "Cannot modify filetype after creation")
+
         # ensure API client does not override url on self-hosted resources
         if resource.filetype == "file":
             form._fields.get("url").data = resource.url
+
         # populate_obj populates existing resource object with the content of the form.
         # update_resource saves the updated resource dict to the database
         # the additional dataset.save is required as we update the last_modified date.

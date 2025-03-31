@@ -558,6 +558,18 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description, "new description")
 
+    def test_cannot_modify_dataset_id(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+
+        data = dataset.to_dict()
+        data["id"] = "7776aa373aa050e302b5714d"
+
+        response = self.put(url_for("api.dataset", dataset=dataset.id), data)
+
+        self.assert200(response)
+        self.assertEqual(response.json["id"], str(dataset.id))
+
     def test_dataset_api_update_org(self):
         """It shouldn't update the dataset org"""
         user = self.login()
@@ -743,6 +755,27 @@ class DatasetAPITest(APITestCase):
         self.assert410(response)
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description, dataset.description)
+
+    def test_update_temporal_coverage(self):
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        data = dataset.to_dict()
+        data["temporal_coverage"] = {
+            "start": "2024-01-01",
+            "end": "2024-01-31",
+        }
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        self.assertEqual("2024-01-01", str(dataset.temporal_coverage.start))
+        self.assertEqual("2024-01-31", str(dataset.temporal_coverage.end))
+        data = dataset.to_dict()
+        data["temporal_coverage"] = {"start": "2024-01-01", "end": None}
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        self.assertEqual("2024-01-01", str(dataset.temporal_coverage.start))
+        self.assertIsNone(dataset.temporal_coverage.end)
 
     def test_dataset_api_update_contact_point(self):
         """It should update a dataset from the API"""
@@ -1109,6 +1142,37 @@ class DatasetResourceAPITest(APITestCase):
         # should fail because the POST endpoint only supports URL setting for remote resources
         self.assert400(response)
 
+    def test_creating_and_updating_resource_uuid(self):
+        uuid_a = "c312cfb0-60f7-417c-9cf9-3d985196b22a"
+        uuid_b = "e8262134-5ff0-4bd8-98bc-5db76bb27856"
+
+        data = ResourceFactory.as_dict()
+        data["filetype"] = "remote"
+        data["id"] = uuid_a
+        response = self.post(url_for("api.resources", dataset=self.dataset), data)
+        self.assert201(response)
+        self.assertNotEqual(response.json["id"], uuid_a)
+
+        first_generated_uuid = response.json["id"]
+
+        # Sending the same UUID twice doesn't change anything…
+        data = ResourceFactory.as_dict()
+        data["filetype"] = "remote"
+        data["id"] = first_generated_uuid
+        response = self.post(url_for("api.resources", dataset=self.dataset), data)
+        self.assert201(response)
+        self.assertNotEqual(response.json["id"], first_generated_uuid)
+
+        # Cannot modify the ID of an existing resource
+        data = response.json
+        data["id"] = uuid_b
+        response = self.put(
+            url_for("api.resource", dataset=self.dataset, rid=first_generated_uuid),
+            data,
+        )
+        self.assert200(response)
+        self.assertEqual(response.json["id"], first_generated_uuid)
+
     def test_create_normalize_format(self):
         _format = " FORMAT "
         data = ResourceFactory.as_dict()
@@ -1223,6 +1287,54 @@ class DatasetResourceAPITest(APITestCase):
         )
         self.assertEqual(self.dataset.last_modified, initial_last_modified)
 
+    def test_invalid_reorder(self):
+        self.dataset.resources = ResourceFactory.build_batch(3)
+        self.dataset.save()
+
+        initial_order = [r.id for r in self.dataset.resources]
+
+        # Not enough resources
+        wrong_order_not_enough_resources = initial_order[:2]
+        response = self.put(
+            url_for("api.resources", dataset=self.dataset), wrong_order_not_enough_resources
+        )
+        self.assertStatus(response, 400)
+        self.assertEqual(
+            response.json["message"], "All resources must be reordered, you provided 2 out of 3"
+        )
+
+        # Too many resources
+        wrong_order_too_many_resources = initial_order + [str(uuid4())]
+        response = self.put(
+            url_for("api.resources", dataset=self.dataset), wrong_order_too_many_resources
+        )
+        self.assertStatus(response, 400)
+        self.assertEqual(
+            response.json["message"], "All resources must be reordered, you provided 4 out of 3"
+        )
+
+        # Duplicated resources
+        wrong_order_duplicated_resources = [initial_order[0]] * 3
+        response = self.put(
+            url_for("api.resources", dataset=self.dataset), wrong_order_duplicated_resources
+        )
+        self.assertStatus(response, 400)
+        self.assertEqual(
+            response.json["message"],
+            f"Resource ids must match existing ones in dataset, ie: {set(str(r.id) for r in self.dataset.resources)}",
+        )
+
+        # Resources that don't belong to this dataset
+        wrong_order_random_resources_id = [str(uuid4()) for _ in range(3)]
+        response = self.put(
+            url_for("api.resources", dataset=self.dataset), wrong_order_random_resources_id
+        )
+        self.assertStatus(response, 400)
+        self.assertEqual(
+            response.json["message"],
+            f"Resource ids must match existing ones in dataset, ie: {set(str(r.id) for r in self.dataset.resources)}",
+        )
+
     def test_update_local(self):
         resource = ResourceFactory()
         self.dataset.resources.append(resource)
@@ -1274,6 +1386,21 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(updated.url, data["url"])
         self.assertEqual(updated.extras, {"extra:id": "id"})
 
+    def test_cannot_update_resource_filetype(self):
+        user = self.login()
+        resource = ResourceFactory(filetype="file")
+        dataset = DatasetFactory(owner=user, resources=[resource])
+
+        data = {
+            "filetype": "remote",
+            "url": faker.url(),
+        }
+        response = self.put(url_for("api.resource", dataset=dataset, rid=str(resource.id)), data)
+        self.assert400(response)
+
+        dataset.reload()
+        self.assertEqual(dataset.resources[0].filetype, "file")
+
     def test_bulk_update(self):
         resources = ResourceFactory.build_batch(2)
         self.dataset.resources.extend(resources)
@@ -1287,17 +1414,10 @@ class DatasetResourceAPITest(APITestCase):
             }
             for id in ids
         ]
-        data.append(
-            {
-                "title": faker.sentence(),
-                "description": faker.text(),
-                "url": faker.url(),
-            }
-        )
         response = self.put(url_for("api.resources", dataset=self.dataset), data)
         self.assert200(response)
         self.dataset.reload()
-        self.assertEqual(len(self.dataset.resources), 3)
+        self.assertEqual(len(self.dataset.resources), 2)
         for idx, id in enumerate(ids):
             resource = self.dataset.resources[idx]
             rdata = data[idx]

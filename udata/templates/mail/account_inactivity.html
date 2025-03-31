@@ -1,0 +1,29 @@
+{% extends 'mail/base.html' %}
+{% from 'mail/button.html' import mail_button %}
+
+{% block body %}
+<p style="margin: 0;padding: 0;">
+    {{ _(
+            'Your account  (%(user_email)s) has been inactive for %(inactivity_years)d years or more.',
+            user_email=user.email,
+            inactivity_years=config.YEARS_OF_INACTIVITY_BEFORE_DELETION
+        )
+    }}
+</p>
+<br/>
+<p style="margin: 0;padding: 0;"><b>
+    {{ _(
+        'If you want to keep your account, please log in with your account on %(site)s.',
+        site=config.SITE_TITLE
+        )
+    }}
+</b></p>
+<br/>
+<p style="margin: 0;padding: 0;">
+    {{ _(
+        'Without logging in, your account will be deleted within %(notify_delay)d days.',
+        notify_delay=config.DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY
+        )
+    }}
+</p>
+{% endblock %}

@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2025-01-31 10:00+0100\n"
-"PO-Revision-Date: 2025-01-31 09:03\n"
+"POT-Creation-Date: 2025-03-13 12:46+0100\n"
+"PO-Revision-Date: 2025-03-13 13:18\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -42,7 +42,7 @@ msgstr "Votre mot de passe a été modifié"
 msgid "Password reset instructions"
 msgstr "Instructions de réinitialisation du mot de passe"
 
-#: udata/settings.py:504
+#: udata/settings.py:509
 msgid "This dataset has been archived"
 msgstr "Ce jeu de données a été archivé"
 
@@ -50,7 +50,7 @@ msgstr "Ce jeu de données a été archivé"
 msgid "Invalid URL \"{url}\": {reason}"
 msgstr "URL invalide \"{url}\" : {reason}"
 
-#: udata/tests/api/test_datasets_api.py:892 udata/tests/test_model.py:367
+#: udata/tests/api/test_datasets_api.py:935 udata/tests/test_model.py:403
 #: udata/uris.py:55
 msgid "Invalid URL \"{url}\""
 msgstr "URL invalide \"{url}\""
@@ -79,7 +79,7 @@ msgstr "{0} est une IP de masque"
 msgid "is a local URL"
 msgstr "est une URL locale"
 
-#: udata/tests/test_model.py:385 udata/uris.py:129
+#: udata/tests/test_model.py:421 udata/uris.py:129
 msgid "is a private URL"
 msgstr "est une URL privée"
 
@@ -198,17 +198,17 @@ msgstr "Souhaitez-vous générer des données d'exemple ?"
 msgid "Your udata instance is ready!"
 msgstr "Votre instance udata est prête !"
 
-#: udata/core/owned.py:58 udata/forms/fields.py:745
-#: udata/tests/api/test_dataservices_api.py:437
+#: udata/core/owned.py:64 udata/forms/fields.py:752
+#: udata/tests/api/test_dataservices_api.py:476
 msgid "You can only set yourself as owner"
 msgstr "Vous ne pouvez définir que vous-même en tant que propriétaire"
 
-#: udata/core/owned.py:67
+#: udata/core/owned.py:73
 msgid "Unknown organization"
 msgstr "Organisation inconnue"
 
-#: udata/core/owned.py:71 udata/forms/fields.py:776
-#: udata/tests/api/test_dataservices_api.py:451
+#: udata/core/owned.py:77 udata/forms/fields.py:784
+#: udata/tests/api/test_dataservices_api.py:490
 msgid "Permission denied for this organization"
 msgstr "Permission refusée pour cette organisation"
 
@@ -239,26 +239,42 @@ msgstr "Formulaire de contact"
 msgid "The organization web contact form"
 msgstr "Formulaire de contact web de l'organisation"
 
-#: udata/core/contact_point/forms.py:20 udata/core/dataset/forms.py:112
-#: udata/core/dataset/forms.py:175 udata/core/topic/forms.py:14
+#: udata/core/contact_point/forms.py:20 udata/core/dataset/forms.py:116
+#: udata/core/dataset/forms.py:179 udata/core/topic/forms.py:14
 #: udata/harvest/forms.py:87
 msgid "Publish as"
 msgstr "Publier en tant que"
 
-#: udata/core/contact_point/models.py:18 udata/tests/api/test_contact_points.py:50
+#: udata/core/contact_point/forms.py:21 udata/core/organization/forms.py:94
+msgid "Role"
+msgstr "Rôle"
+
+#: udata/core/contact_point/models.py:9
+msgid "Contact"
+msgstr "Contact"
+
+#: udata/core/contact_point/models.py:10
+msgid "Creator"
+msgstr "Créateur"
+
+#: udata/core/contact_point/models.py:11
+msgid "Publisher"
+msgstr "Éditeur"
+
+#: udata/core/contact_point/models.py:26 udata/tests/api/test_contact_points.py:58
 msgid "At least an email or a contact form is required for a contact point"
 msgstr "Au moins un e-mail ou un formulaire de contact est requis pour un point de contact"
 
-#: udata/core/dataservices/models.py:114
+#: udata/core/dataservices/models.py:120
 msgid "dataservice"
 msgstr "API"
 
-#: udata/core/dataservices/models.py:172 udata/core/dataset/models.py:569
+#: udata/core/dataservices/models.py:194 udata/core/dataset/models.py:569
 #: udata/mongo/datetime_fields.py:60
 msgid "Creation date"
 msgstr "Date de création"
 
-#: udata/core/dataservices/models.py:178 udata/core/dataset/models.py:572
+#: udata/core/dataservices/models.py:200 udata/core/dataset/models.py:572
 #: udata/mongo/datetime_fields.py:66
 msgid "Last modification date"
 msgstr "Date de dernière modification"
@@ -303,7 +319,7 @@ msgstr "Trois fois par jour"
 msgid "Semidaily"
 msgstr "Deux fois par jour"
 
-#: udata/core/dataset/constants.py:17 udata/harvest/models.py:21
+#: udata/core/dataset/constants.py:17 udata/harvest/models.py:22
 msgid "Daily"
 msgstr "Quotidienne"
 
@@ -319,7 +335,7 @@ msgstr "Trois fois par semaine"
 msgid "Semiweekly"
 msgstr "Deux fois par semaine"
 
-#: udata/core/dataset/constants.py:21 udata/harvest/models.py:20
+#: udata/core/dataset/constants.py:21 udata/harvest/models.py:21
 msgid "Weekly"
 msgstr "Hebdomadaire"
 
@@ -335,7 +351,7 @@ msgstr "Trois fois par mois"
 msgid "Semimonthly"
 msgstr "Deux fois par mois"
 
-#: udata/core/dataset/constants.py:25 udata/harvest/models.py:19
+#: udata/core/dataset/constants.py:25 udata/harvest/models.py:20
 msgid "Monthly"
 msgstr "Mensuelle"
 
@@ -423,7 +439,7 @@ msgstr "Nom du schéma"
 msgid "Version of the schema"
 msgstr "Version du schéma"
 
-#: udata/core/dataset/forms.py:65 udata/core/dataset/forms.py:142
+#: udata/core/dataset/forms.py:65 udata/core/dataset/forms.py:146
 #: udata/core/discussions/forms.py:13 udata/core/site/forms.py:12
 #: udata/templates/mail/discussion_closed.html:26
 #: udata/templates/mail/new_discussion.html:25
@@ -431,7 +447,7 @@ msgstr "Version du schéma"
 msgid "Title"
 msgstr "Titre"
 
-#: udata/core/dataset/forms.py:68 udata/core/dataset/forms.py:146
+#: udata/core/dataset/forms.py:68 udata/core/dataset/forms.py:150
 #: udata/core/jobs/forms.py:28 udata/core/organization/forms.py:50
 #: udata/core/topic/forms.py:17 udata/harvest/forms.py:80
 msgid "Description"
@@ -477,73 +493,73 @@ msgstr "Taille"
 msgid "The file size in bytes"
 msgstr "La taille du fichier en octets"
 
-#: udata/core/dataset/forms.py:110
+#: udata/core/dataset/forms.py:114
 msgid "Related dataset"
 msgstr "Jeu de données concerné"
 
-#: udata/core/dataset/forms.py:134 udata/tests/api/test_datasets_api.py:804
+#: udata/core/dataset/forms.py:138 udata/tests/api/test_datasets_api.py:847
 msgid "Wrong contact point id or contact point ownership mismatch"
 msgstr "Mauvais ID de point de contact ou incompatibilité de possession du point de contact"
 
-#: udata/core/dataset/forms.py:144 udata/core/organization/forms.py:48
+#: udata/core/dataset/forms.py:148 udata/core/organization/forms.py:48
 msgid "Acronym"
 msgstr "Sigle"
 
-#: udata/core/dataset/forms.py:144
+#: udata/core/dataset/forms.py:148
 msgid "An optional acronym"
 msgstr "Un acronyme facultatif"
 
-#: udata/core/dataset/forms.py:148
+#: udata/core/dataset/forms.py:152
 msgid "The details about the dataset (collection process, specifics...)."
 msgstr "Les détails sur le jeu de données (processus de collecte, spécificités...)."
 
-#: udata/core/dataset/forms.py:150
+#: udata/core/dataset/forms.py:154
 msgid "License"
 msgstr "Licence"
 
-#: udata/core/dataset/forms.py:152
+#: udata/core/dataset/forms.py:156
 msgid "Update frequency"
 msgstr "Fréquence de mise à jour"
 
-#: udata/core/dataset/forms.py:157
+#: udata/core/dataset/forms.py:161
 msgid "The frequency at which data are updated."
 msgstr "La fréquence à laquelle les données sont mises à jour."
 
-#: udata/core/dataset/forms.py:159
+#: udata/core/dataset/forms.py:163
 msgid "Expected frequency date"
 msgstr "Date de mise à jour prévue"
 
-#: udata/core/dataset/forms.py:163
+#: udata/core/dataset/forms.py:167
 msgid "Temporal coverage"
 msgstr "Couverture temporelle"
 
-#: udata/core/dataset/forms.py:163
+#: udata/core/dataset/forms.py:167
 msgid "The period covered by the data"
 msgstr "La période couverte par les données"
 
-#: udata/core/dataset/forms.py:166 udata/core/spatial/forms.py:85
+#: udata/core/dataset/forms.py:170 udata/core/spatial/forms.py:85
 #: udata/core/topic/forms.py:23
 msgid "Spatial coverage"
 msgstr "Couverture spatiale"
 
-#: udata/core/dataset/forms.py:166 udata/core/topic/forms.py:23
+#: udata/core/dataset/forms.py:170 udata/core/topic/forms.py:23
 msgid "The geographical area covered by the data."
 msgstr "La zone géographique couverte par les données."
 
-#: udata/core/dataset/forms.py:168 udata/core/post/forms.py:26
+#: udata/core/dataset/forms.py:172 udata/core/post/forms.py:26
 #: udata/core/site/forms.py:13 udata/core/topic/forms.py:26
 msgid "Tags"
 msgstr "Mots-clés"
 
-#: udata/core/dataset/forms.py:168
+#: udata/core/dataset/forms.py:172
 msgid "Some taxonomy keywords"
 msgstr "Quelques mots-clés pour la taxonomie"
 
-#: udata/core/dataset/forms.py:170 udata/core/topic/forms.py:27
+#: udata/core/dataset/forms.py:174 udata/core/topic/forms.py:27
 msgid "Private"
 msgstr "Privé"
 
-#: udata/core/dataset/forms.py:171
+#: udata/core/dataset/forms.py:175
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "Restreint la visibilité du jeu de données à vous ou votre organisation seulement."
 
@@ -555,18 +571,18 @@ msgstr "Données pivot"
 msgid "A schema must contains a name or an URL when a version is provided."
 msgstr "Un schéma doit contenir un nom ou une URL lorsqu'une version est fournie."
 
-#: udata/core/dataset/models.py:167 udata/tests/api/test_datasets_api.py:900
-#: udata/tests/api/test_datasets_api.py:911
+#: udata/core/dataset/models.py:167 udata/tests/api/test_datasets_api.py:943
+#: udata/tests/api/test_datasets_api.py:954
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr "Le nom du schéma \"{schema}\" n'est pas une valeur autorisée. Valeurs autorisées : {values}"
 
-#: udata/core/dataset/models.py:186 udata/tests/api/test_datasets_api.py:922
+#: udata/core/dataset/models.py:186 udata/tests/api/test_datasets_api.py:965
 msgid "Version \"{version}\" is not an allowed value for the schema \"{name}\". Allowed versions: {values}"
 msgstr "La version \"{version}\" n'est pas une valeur autorisée pour le schéma \"{name}\". Versions autorisées : {values}"
 
-#: udata/core/dataset/models.py:463 udata/core/dataset/rdf.py:594
-#: udata/tests/dataset/test_dataset_rdf.py:629
-#: udata/tests/dataset/test_dataset_rdf.py:642
+#: udata/core/dataset/models.py:463 udata/core/dataset/rdf.py:603
+#: udata/tests/dataset/test_dataset_rdf.py:669
+#: udata/tests/dataset/test_dataset_rdf.py:682
 msgid "Nameless resource"
 msgstr "Ressource sans nom"
 
@@ -578,7 +594,7 @@ msgstr "Future date de mise à jour"
 msgid "dataset"
 msgstr "jeu de données"
 
-#: udata/core/dataset/rdf.py:592 udata/tests/dataset/test_dataset_rdf.py:616
+#: udata/core/dataset/rdf.py:601 udata/tests/dataset/test_dataset_rdf.py:656
 msgid "{format} resource"
 msgstr "Ressource {format}"
 
@@ -643,17 +659,17 @@ msgid "Editor"
 msgstr "Éditeur"
 
 #: udata/core/organization/constants.py:11 udata/features/transfer/models.py:13
-#: udata/harvest/models.py:27 udata/harvest/models.py:39 udata/harvest/models.py:87
+#: udata/harvest/models.py:28 udata/harvest/models.py:40 udata/harvest/models.py:88
 msgid "Pending"
 msgstr "En attente"
 
 #: udata/core/organization/constants.py:12 udata/features/transfer/models.py:14
-#: udata/harvest/models.py:88
+#: udata/harvest/models.py:89
 msgid "Accepted"
 msgstr "Acceptée"
 
 #: udata/core/organization/constants.py:13 udata/features/transfer/models.py:15
-#: udata/harvest/models.py:89
+#: udata/harvest/models.py:90
 msgid "Refused"
 msgstr "Refusée"
 
@@ -699,10 +715,6 @@ msgstr "Numéro d'identification d'entreprise"
 #: udata/core/organization/forms.py:57
 msgid "Business identification number"
 msgstr "Numéro d'identification d'entreprise"
-
-#: udata/core/organization/forms.py:94
-msgid "Role"
-msgstr "Rôle"
 
 #: udata/core/organization/models.py:35
 msgid "Public Service"
@@ -1082,7 +1094,7 @@ msgstr "À propos"
 msgid "Roles"
 msgstr "Rôles"
 
-#: udata/core/user/models.py:286 udata/tests/api/test_me_api.py:297
+#: udata/core/user/models.py:291 udata/tests/api/test_me_api.py:297
 msgid "Account deletion"
 msgstr "Suppression de compte"
 
@@ -1098,9 +1110,17 @@ msgstr "Editorialiste"
 msgid "Site moderator"
 msgstr "Moderateur"
 
-#: udata/core/user/tasks.py:15
+#: udata/core/user/tasks.py:19
 msgid "Test mail"
 msgstr "Mail de test"
+
+#: udata/core/user/tasks.py:45 udata/tests/user/test_user_tasks.py:36
+msgid "Inactivity of your {site} account"
+msgstr "Inactivité de votre compte {site}"
+
+#: udata/core/user/tasks.py:88 udata/tests/user/test_user_tasks.py:109
+msgid "Deletion of your inactive {site} account"
+msgstr "Suppression de votre compte {site} inactif"
 
 #: udata/forms/fields.py:127
 msgid "Please input a date/time value"
@@ -1149,15 +1169,16 @@ msgstr "Modèle pour {0} non trouvé"
 msgid "Unknown identifiers: {identifiers}"
 msgstr "Identifiants inconnus : {identifiers}"
 
-#: udata/forms/fields.py:707
+#: udata/forms/fields.py:713
 msgid "Unable to parse date range"
 msgstr "Incapable de comprendre la date"
 
-#: udata/forms/fields.py:738 udata/forms/fields.py:769
+#: udata/forms/fields.py:745 udata/forms/fields.py:777
+#: udata/tests/forms/test_publish_as_field.py:214
 msgid "Cannot change owner after creation. Please use transfer feature."
 msgstr "Impossible de modifier le propriétaire après la création. Veuillez utiliser la fonctionnalité de transfert."
 
-#: udata/forms/fields.py:743 udata/forms/fields.py:774
+#: udata/forms/fields.py:750 udata/forms/fields.py:782
 msgid "You must be authenticated"
 msgstr "Vous devez être authentifié"
 
@@ -1178,43 +1199,43 @@ msgstr "Des détails optionnels sur votre moissonneur"
 msgid "Backend"
 msgstr "Implémentation"
 
-#: udata/harvest/models.py:18
+#: udata/harvest/models.py:19
 msgid "Manual"
 msgstr "Manuel"
 
-#: udata/harvest/models.py:28
+#: udata/harvest/models.py:29
 msgid "Initializing"
 msgstr "En cours de démarrage"
 
-#: udata/harvest/models.py:29
+#: udata/harvest/models.py:30
 msgid "Initialized"
 msgstr "Démarré"
 
-#: udata/harvest/models.py:30
+#: udata/harvest/models.py:31
 msgid "Processing"
 msgstr "En cours de traitement"
 
-#: udata/harvest/models.py:31 udata/harvest/models.py:41
+#: udata/harvest/models.py:32 udata/harvest/models.py:42
 msgid "Done"
 msgstr "Terminé"
 
-#: udata/harvest/models.py:32
+#: udata/harvest/models.py:33
 msgid "Done with errors"
 msgstr "Terminé avec erreurs"
 
-#: udata/harvest/models.py:33 udata/harvest/models.py:42
+#: udata/harvest/models.py:34 udata/harvest/models.py:43
 msgid "Failed"
 msgstr "Échec"
 
-#: udata/harvest/models.py:40
+#: udata/harvest/models.py:41
 msgid "Started"
 msgstr "Démarré"
 
-#: udata/harvest/models.py:43
+#: udata/harvest/models.py:44
 msgid "Skipped"
 msgstr "Ignoré"
 
-#: udata/harvest/models.py:44
+#: udata/harvest/models.py:45
 msgid "Archived"
 msgstr "Archivé"
 
@@ -1313,6 +1334,21 @@ msgstr "Partagez, améliorez et réutilisez les données publiques"
 msgid "Your account has now been deleted"
 msgstr "Votre compte est maintenant supprimé"
 
+#: udata/templates/mail/account_inactivity.html:6
+#, python-format
+msgid "Your account  (%(user_email)s) has been inactive for %(inactivity_years)d years or more."
+msgstr "Votre compte (%(user_email)s) est inactif depuis %(inactivity_years)d ans ou plus."
+
+#: udata/templates/mail/account_inactivity.html:15
+#, python-format
+msgid "If you want to keep your account, please log in with your account on %(site)s."
+msgstr "Si vous souhaitez conserver votre compte, veuillez vous connecter avec votre compte sur %(site)s."
+
+#: udata/templates/mail/account_inactivity.html:23
+#, python-format
+msgid "Without logging in, your account will be deleted within %(notify_delay)d days."
+msgstr "Sans connexion de votre part, votre compte va être supprimé d'ici %(notify_delay)d jours."
+
 #: udata/templates/mail/badge_added_association.html:6
 #, python-format
 msgid "%(user)s has identified your organization \"%(name)s\" as an association"
@@ -1403,6 +1439,11 @@ msgstr "D'après la fréquence choisie (%(dataset_frequency)s) la mise à jour a
 #: udata/templates/mail/frequency_reminder.html:25
 msgid "Update the dataset and associated resources"
 msgstr "Mettez à jour le jeu de données et les ressources associées"
+
+#: udata/templates/mail/inactive_account_deleted.html:4
+#, python-format
+msgid "Your account on %(site)s has been deleted due to inactivity"
+msgstr "Votre compte sur %(site)s a été supprimé pour cause d'inactivité"
 
 #: udata/templates/mail/membership_refused.html:7
 #, python-format

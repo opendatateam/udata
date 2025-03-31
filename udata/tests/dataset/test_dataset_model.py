@@ -1,8 +1,11 @@
 from datetime import datetime, timedelta
+from uuid import uuid4
 
 import pytest
 import requests
+from bson import ObjectId
 from flask import current_app
+from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine import post_save
 
 from udata.app import cache
@@ -58,6 +61,18 @@ class DatasetModelTest:
             dataset.add_resource(resource)
         assert len(dataset.resources) == 2
         assert dataset.resources[0].id == resource.id
+
+    def test_add_two_resources_with_same_id(self):
+        uuid = uuid4()
+        user = UserFactory()
+        dataset = DatasetFactory(owner=user)
+        resource_a = ResourceFactory(id=uuid)
+        resource_b = ResourceFactory(id=uuid)
+
+        dataset.add_resource(resource_a)
+        dataset.add_resource(ResourceFactory())
+        with pytest.raises(MongoEngineValidationError):
+            dataset.add_resource(resource_b)
 
     def test_add_resource_missing_checksum_type(self):
         user = UserFactory()
@@ -310,6 +325,30 @@ class DatasetModelTest:
         dataset.private = True
         dataset.save()
         assert dataset.private is True
+
+    def test_dataset_fetch_exclude_resource(self):
+        # Having a dataset with multiple resources
+        dataset_with_resources = DatasetFactory(nb_resources=5)
+        dataset_with_resources = (
+            Dataset.objects.filter(id=dataset_with_resources.id).exclude("resources").first()
+        )
+        assert dataset_with_resources is not None
+        assert dataset_with_resources.resources == []
+
+        assert dataset_with_resources.resources_len == 5
+
+        # Having dataset with resource field missing
+        dataset_insert_without_resources = Dataset._get_collection().insert_one({"_id": ObjectId()})
+
+        dataset_without_resources = (
+            Dataset.objects.filter(id=dataset_insert_without_resources.inserted_id)
+            .exclude("resources")
+            .first()
+        )
+        assert dataset_without_resources is not None
+        assert dataset_without_resources.resources == []
+
+        assert dataset_without_resources.resources_len == 0
 
 
 class ResourceModelTest:

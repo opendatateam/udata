@@ -27,13 +27,13 @@ The contents of each version (expected or real) is tracked trough [issues][], [p
 
 ## Releasing
 
-udata uses [Bump'R][bumpr] as its release process.
+udata uses [Bump'X][https://github.com/datagouv/bumpx] as its release process.
 
 To create a release, you need to:
 
 - have administrator permission on the udata repository (to allow direct push)
 - have a working development environment up to date with the `master` branch
-- have `bumpr` installed
+- have `bumpx` installed
 
 The step to make a release are:
 
@@ -41,8 +41,8 @@ The step to make a release are:
 2. ensure translations are up to date
 3. ensure the CircleCI build is successful on master branch
 4. ensure your working copy is clean
-5. run `bumpr -d -v` to preview the actions performed and the changes
-6. run `bumpr` to perform the release.  This will:
+5. run `bumpx -d -v` to preview the actions performed and the changes
+6. run `bumpx` to perform the release.  This will:
     - clean up remaining build artifacts
     - execute tests
     - perform a full packaging (to ensure it is working)
@@ -74,7 +74,7 @@ The local identifier will be the feature branch name so the version number will 
 It's up to the developers and system administrators to read the [changelog](changelog.md) before upgrading
 (deprecations and breaking changes are published).
 
-[bumpr]: https://github.com/noirbizarre/bumpr/
+[bumpx]: https://github.com/datagouv/bumpx
 [github]: https://github.com/opendatateam/udata
 [issues]: https://github.com/opendatateam/udata/issues
 [pulls]: https://github.com/opendatateam/udata/pulls
