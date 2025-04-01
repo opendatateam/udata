@@ -18,6 +18,7 @@ from udata.rdf import (
     SPDX,
     guess_format,
     namespace_manager,
+    rdf_value,
     url_from_rdf,
 )
 from udata.storage.s3 import store_as_json
@@ -187,8 +188,13 @@ class DcatBackend(BaseBackend):
         # the `_other_node` is a dataservice?)
         # `isPrimaryTopicOf` is the tag present in the first harvester raising the problem, it may exists other
         # values of the same sort we need to check here.
+
         # This is not dangerous because we check for missing title in `dataset_from_rdf` later so we would have skipped
         # this dataset anyway.
+        resource = page.resource(node)
+        title = rdf_value(resource, DCT.title)
+        if title:
+            return False
 
         predicates = [link_type for (_other_node, link_type) in page.subject_predicates(node)]
         return len(predicates) == 1 and (
