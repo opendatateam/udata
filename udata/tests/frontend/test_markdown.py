@@ -177,14 +177,14 @@ class MarkdownTest:
                 "<table>",
                 "<thead>",
                 "<tr>",
-                "<th>first</th>",
-                "<th>second</th>",
+                "  <th>first</th>",
+                "  <th>second</th>",
                 "</tr>",
                 "</thead>",
                 "<tbody>",
                 "<tr>",
-                "<td>value</td>",
-                "<td>value</td>",
+                "  <td>value</td>",
+                "  <td>value</td>",
                 "</tr>",
                 "</tbody>",
                 "</table>",
@@ -228,7 +228,8 @@ class MarkdownTest:
         )
         expected = "\n".join(
             (
-                "<blockquote><p>This is a blockquote<br>",
+                "<blockquote>",
+                "<p>This is a blockquote<br>",
                 "with &lt;script&gt;evil()&lt;/script&gt; inside</p>",
                 "</blockquote>",
             )
@@ -251,6 +252,28 @@ class MarkdownTest:
                 "<summary>TITLE</summary>",
                 "BODY CONTENT",
                 "</details>",
+            )
+        )
+        assert_md(text, expected)
+
+    @pytest.mark.options(MD_ALLOWED_ATTRIBUTES={"*": ["style"]})
+    @pytest.mark.options(MD_ALLOWED_STYLES=["font-weight"])
+    def test_styles(self, assert_md):
+        """It should keep only explicitly allowed styles if style attribute is set"""
+        text = "\n".join(
+            (
+                "<p>",
+                '<span style="background-color: red; font-weight: heavy;">TITLE</span>',
+                "BODY CONTENT",
+                "</p>",
+            )
+        )
+        expected = "\n".join(
+            (
+                "<p>",
+                '<span style="font-weight: heavy;">TITLE</span>',
+                "BODY CONTENT",
+                "</p>",
             )
         )
         assert_md(text, expected)

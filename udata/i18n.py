@@ -134,7 +134,7 @@ def check_config(cfg):
     default_language = cfg["DEFAULT_LANGUAGE"]
     if default_language not in cfg.get("LANGUAGES", []):
         raise ConfigError(
-            "You are using a DEFAULT_LANGUAGE {0} not defined " "into LANGUAGES".format(
+            "You are using a DEFAULT_LANGUAGE {0} not defined into LANGUAGES".format(
                 default_language
             )
         )
