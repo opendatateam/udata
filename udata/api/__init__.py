@@ -23,7 +23,6 @@ from udata import entrypoints, tracking
 from udata.app import csrf
 from udata.auth import Permission, PermissionDenied, RoleNeed, current_user, login_user
 from udata.i18n import get_locale
-from udata.mongo.errors import FieldValidationError
 from udata.utils import safe_unicode
 
 from . import fields
