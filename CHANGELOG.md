@@ -56,7 +56,6 @@
 - Return harvesters's errors details only for super-admins [#3264](https://github.com/opendatateam/udata/pull/3264)
 - feat: topics list filtered by visible_by_user [#3265](https://github.com/opendatateam/udata/pull/3265)
 - Allow geozone suggest to check the id field [#3267](https://github.com/opendatateam/udata/pull/3267)
-- Fix wrong error message when updating the GeoZone of a dataset with already a Geometry [#3271](https://github.com/opendatateam/udata/pull/3271)
 - Allow a user to check its own membership requests [#3269](https://github.com/opendatateam/udata/pull/3269)
 
 ## 10.0.8 (2025-01-31)
