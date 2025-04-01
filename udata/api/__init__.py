@@ -23,6 +23,7 @@ from udata import entrypoints, tracking
 from udata.app import csrf
 from udata.auth import Permission, PermissionDenied, RoleNeed, current_user, login_user
 from udata.i18n import get_locale
+from udata.mongo.errors import FieldValidationError
 from udata.utils import safe_unicode
 
 from . import fields
@@ -258,13 +259,17 @@ def handle_unauthorized_file_type(error):
     return {"message": msg}, 400
 
 
+field_validation_error_fields = api.model(
+    "FieldValidationError",
+    {"errors": fields.Raw, "message": fields.String},
+)
 validation_error_fields = api.model(
-    "ValidationErrorTata",
+    "ValidationError",
     {"errors": fields.Raw, "message": fields.String},
 )
 
 validation_error_fields_v2 = apiv2.model(
-    "ValidationErrorToto",
+    "ValidationError",
     {"errors": fields.Raw, "message": fields.String},
 )
 
@@ -285,6 +290,21 @@ def convert_object_of_exceptions_to_object_of_strings(exceptions: dict):
             errors[key] = str(exception)
 
     return errors
+
+
+# Because of FieldValidationError extends ValidationError
+# this function should be above the ValidationError handler.
+@api.errorhandler(FieldValidationError)
+@api.marshal_with(field_validation_error_fields, code=400)
+def handle_field_validation_error(error: FieldValidationError):
+    """Error returned when validation failed."""
+    return (
+        {
+            "errors": {error.field: [error.message]},
+            "message": str(error),
+        },
+        400,
+    )
 
 
 @api.errorhandler(mongoengine.errors.ValidationError)
