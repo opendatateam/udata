@@ -292,21 +292,6 @@ def convert_object_of_exceptions_to_object_of_strings(exceptions: dict):
     return errors
 
 
-# Because of FieldValidationError extends ValidationError
-# this function should be above the ValidationError handler.
-@api.errorhandler(FieldValidationError)
-@api.marshal_with(field_validation_error_fields, code=400)
-def handle_field_validation_error(error: FieldValidationError):
-    """Error returned when validation failed."""
-    return (
-        {
-            "errors": {error.field: [error.message]},
-            "message": str(error),
-        },
-        400,
-    )
-
-
 @api.errorhandler(mongoengine.errors.ValidationError)
 @api.marshal_with(validation_error_fields, code=400)
 def handle_validation_error(error: mongoengine.errors.ValidationError):
