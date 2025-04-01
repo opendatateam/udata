@@ -4,6 +4,7 @@ import urllib.parse
 from functools import wraps
 from importlib import import_module
 
+import mongoengine
 from flask import (
     Blueprint,
     current_app,
@@ -263,12 +264,28 @@ validation_error_fields = api.model("ValidationError", {"errors": fields.Raw})
 
 @api.errorhandler(FieldValidationError)
 @api.marshal_with(validation_error_fields, code=400)
-def handle_validation_error(error: FieldValidationError):
+def handle_field_validation_error(error: FieldValidationError):
     """A validation error"""
     errors = {}
     errors[error.field] = [error.message]
 
     return {"errors": errors}, 400
+
+
+@api.errorhandler(mongoengine.errors.ValidationError)
+@api.marshal_with(validation_error_fields, code=400)
+def handle_validation_error(error: mongoengine.errors.ValidationError):
+    """A validation error"""
+    errors = {}
+    errors[error.field] = [error.message]
+
+    return {"errors": errors}, 400
+
+
+@apiv2.errorhandler(mongoengine.errors.ValidationError)
+@apiv2.marshal_with(validation_error_fields, code=400)
+def handle_validation_error_v2(error: mongoengine.errors.ValidationError):
+    return handle_validation_error(error)
 
 
 class API(Resource):  # Avoid name collision as resource is a core model

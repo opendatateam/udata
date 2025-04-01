@@ -1,4 +1,3 @@
-import mongoengine
 from flask import request
 
 from udata import search
@@ -65,10 +64,7 @@ class OrganizationExtrasAPI(API):
 
         # then update the extras with the remaining payload
         org.extras.update(data)
-        try:
-            org.save()
-        except mongoengine.errors.ValidationError as e:
-            apiv2.abort(400, e.message)
+        org.save()
         return org.extras
 
     @apiv2.secure
