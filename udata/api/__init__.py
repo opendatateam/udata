@@ -281,7 +281,7 @@ def convert_object_of_exceptions_to_object_of_strings(exceptions: dict):
         if isinstance(exception, Exception):
             errors[key] = str(exception)
         elif isinstance(exception, dict):
-            errors[key] = convert_object_of_exceptions_to_object_of_strings(exceptions)
+            errors[key] = convert_object_of_exceptions_to_object_of_strings(exception)
         elif isinstance(exception, str):
             errors[key] = exception
         else:
