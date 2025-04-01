@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Skip empty datasets nodes referenced in dataservices before creating an harvest job item [#3285](https://github.com/opendatateam/udata/pull/3285)
+- Fix wrong error message when updating the GeoZone of a dataset with already a Geometry [#3271](https://github.com/opendatateam/udata/pull/3271)
 - Update dependencies [#3278](https://github.com/opendatateam/udata/pull/3278)
   - Some of these upgrades implied code changes in udata, udata-front or udata-ckan:
     - upgrade bleach to 6.2.0
