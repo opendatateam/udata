@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2025-03-13 12:46+0100\n"
-"PO-Revision-Date: 2025-03-13 12:07\n"
+"POT-Creation-Date: 2025-04-01 17:30+0200\n"
+"PO-Revision-Date: 2025-04-01 15:33\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: es\n"
 "Language-Team: Spanish\n"
@@ -11,7 +11,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.12.1\n"
+"Generated-By: Babel 2.17.0\n"
 "X-Crowdin-Project: udata\n"
 "X-Crowdin-Project-ID: 291291\n"
 "X-Crowdin-Language: es-ES\n"
@@ -47,15 +47,18 @@ msgid "This dataset has been archived"
 msgstr ""
 
 #: udata/uris.py:53
+#, python-brace-format
 msgid "Invalid URL \"{url}\": {reason}"
 msgstr ""
 
 #: udata/tests/api/test_datasets_api.py:935 udata/tests/test_model.py:403
 #: udata/uris.py:55
+#, python-brace-format
 msgid "Invalid URL \"{url}\""
 msgstr ""
 
 #: udata/uris.py:104
+#, python-brace-format
 msgid "Invalid scheme {0}, allowed schemes: {1}"
 msgstr ""
 
@@ -64,14 +67,17 @@ msgid "Credentials in URL are not allowed"
 msgstr ""
 
 #: udata/uris.py:111
+#, python-brace-format
 msgid "Invalid TLD {0}"
 msgstr ""
 
 #: udata/uris.py:120
+#, python-brace-format
 msgid "{0} is a multicast IP"
 msgstr ""
 
 #: udata/uris.py:122
+#, python-brace-format
 msgid "{0} is a mask IP"
 msgstr ""
 
@@ -79,11 +85,11 @@ msgstr ""
 msgid "is a local URL"
 msgstr ""
 
-#: udata/tests/test_model.py:421 udata/uris.py:129
+#: udata/tests/test_model.py:421 udata/uris.py:133
 msgid "is a private URL"
 msgstr ""
 
-#: udata/api/errors.py:3
+#: udata/api/errors.py:4
 msgid "Validation error: your data cannot be updated for now, we have been notified of the error and we will fix it as soon as possible."
 msgstr ""
 
@@ -143,6 +149,7 @@ msgid "Change email"
 msgstr ""
 
 #: udata/auth/password_validation.py:26
+#, python-brace-format
 msgid "Password must be at least {pass_length} characters long"
 msgstr ""
 
@@ -166,7 +173,8 @@ msgstr ""
 msgid "Confirm change of email instructions"
 msgstr ""
 
-#: udata/auth/views.py:84
+#: udata/auth/views.py:85
+#, python-brace-format
 msgid "You did not confirm your change of email within {email_within}. New instructions to confirm your change of email have been sent to {new_email}."
 msgstr ""
 
@@ -174,7 +182,8 @@ msgstr ""
 msgid "Thank you. Your change of email has been confirmed."
 msgstr ""
 
-#: udata/auth/views.py:114
+#: udata/auth/views.py:115
+#, python-brace-format
 msgid "Thank you. Confirmation instructions for changing your email have been sent to {new_email}."
 msgstr ""
 
@@ -261,7 +270,7 @@ msgstr ""
 msgid "Publisher"
 msgstr ""
 
-#: udata/core/contact_point/models.py:26 udata/tests/api/test_contact_points.py:58
+#: udata/core/contact_point/models.py:26 udata/tests/api/test_contact_points.py:59
 msgid "At least an email or a contact form is required for a contact point"
 msgstr ""
 
@@ -269,12 +278,12 @@ msgstr ""
 msgid "dataservice"
 msgstr ""
 
-#: udata/core/dataservices/models.py:194 udata/core/dataset/models.py:569
+#: udata/core/dataservices/models.py:194 udata/core/dataset/models.py:573
 #: udata/mongo/datetime_fields.py:60
 msgid "Creation date"
 msgstr "Fecha de creación"
 
-#: udata/core/dataservices/models.py:200 udata/core/dataset/models.py:572
+#: udata/core/dataservices/models.py:200 udata/core/dataset/models.py:576
 #: udata/mongo/datetime_fields.py:66
 msgid "Last modification date"
 msgstr "Ultima fecha de creación "
@@ -563,38 +572,41 @@ msgstr "Privado"
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "Restringa la visibilidad del conjunto de datos solo para usted o su organización."
 
-#: udata/core/dataset/models.py:60
+#: udata/core/dataset/models.py:61
 msgid "Pivotal data"
 msgstr "Datos centrales"
 
-#: udata/core/dataset/models.py:136
+#: udata/core/dataset/models.py:137
 msgid "A schema must contains a name or an URL when a version is provided."
 msgstr ""
 
-#: udata/core/dataset/models.py:167 udata/tests/api/test_datasets_api.py:943
+#: udata/core/dataset/models.py:169 udata/tests/api/test_datasets_api.py:943
 #: udata/tests/api/test_datasets_api.py:954
+#, python-brace-format
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:186 udata/tests/api/test_datasets_api.py:965
+#: udata/core/dataset/models.py:188 udata/tests/api/test_datasets_api.py:966
+#, python-brace-format
 msgid "Version \"{version}\" is not an allowed value for the schema \"{name}\". Allowed versions: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:463 udata/core/dataset/rdf.py:603
+#: udata/core/dataset/models.py:467 udata/core/dataset/rdf.py:603
 #: udata/tests/dataset/test_dataset_rdf.py:669
 #: udata/tests/dataset/test_dataset_rdf.py:682
 msgid "Nameless resource"
 msgstr "Expedientes sin nombre"
 
-#: udata/core/dataset/models.py:555
+#: udata/core/dataset/models.py:559
 msgid "Future date of update"
 msgstr "La futura fecha de actualización"
 
-#: udata/core/dataset/models.py:618
+#: udata/core/dataset/models.py:622
 msgid "dataset"
 msgstr "conjunto de datos"
 
 #: udata/core/dataset/rdf.py:601 udata/tests/dataset/test_dataset_rdf.py:656
+#, python-brace-format
 msgid "{format} resource"
 msgstr ""
 
@@ -635,10 +647,12 @@ msgid "Enabled"
 msgstr "Deshabilitado"
 
 #: udata/core/jobs/models.py:18
+#, python-brace-format
 msgid "every {0.period_singular}"
 msgstr "cada {0.period_singular}"
 
 #: udata/core/jobs/models.py:19
+#, python-brace-format
 msgid "every {0.every} {0.period}"
 msgstr "cada {0.every} {0.period} "
 
@@ -674,12 +688,12 @@ msgid "Refused"
 msgstr "Rechazado"
 
 #: udata/core/organization/forms.py:25
-#: udata/tests/api/test_organizations_api.py:131
+#: udata/tests/api/test_organizations_api.py:132
 msgid "A siret number is made of 14 digits"
 msgstr ""
 
 #: udata/core/organization/forms.py:36
-#: udata/tests/api/test_organizations_api.py:143
+#: udata/tests/api/test_organizations_api.py:144
 msgid "A siret number is only made of digits"
 msgstr ""
 
@@ -769,7 +783,7 @@ msgstr ""
 msgid "Your organization \"%(name)s\" has been identified as an association"
 msgstr ""
 
-#: udata/core/organization/tasks.py:149
+#: udata/core/organization/tasks.py:150
 #, python-format
 msgid "Your organization \"%(name)s\" has been identified as a local authority"
 msgstr ""
@@ -971,6 +985,7 @@ msgid "POI"
 msgstr "PDI"
 
 #: udata/core/spatial/forms.py:48
+#, python-brace-format
 msgid "Unknown geoid(s): {identifiers}"
 msgstr ""
 
@@ -1115,10 +1130,12 @@ msgid "Test mail"
 msgstr "Texto del correo"
 
 #: udata/core/user/tasks.py:45 udata/tests/user/test_user_tasks.py:36
+#, python-brace-format
 msgid "Inactivity of your {site} account"
 msgstr ""
 
 #: udata/core/user/tasks.py:88 udata/tests/user/test_user_tasks.py:109
+#, python-brace-format
 msgid "Deletion of your inactive {site} account"
 msgstr ""
 
@@ -1131,6 +1148,7 @@ msgid "Invalid date/time input"
 msgstr ""
 
 #: udata/forms/fields.py:169
+#, python-brace-format
 msgid "The role {role} does not exist"
 msgstr ""
 
@@ -1138,12 +1156,13 @@ msgstr ""
 msgid "Not a valid UUID"
 msgstr ""
 
-#: udata/forms/fields.py:420 udata/mongo/taglist_field.py:37
+#: udata/forms/fields.py:421 udata/mongo/taglist_field.py:38
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
 msgstr "La etiqueta \"%(tag)s\" debe estar entre %(min)d y %(max)d caracteres"
 
 #: udata/forms/fields.py:461 udata/forms/fields.py:513
+#, python-brace-format
 msgid "{0} does not exists"
 msgstr "{0} no existe"
 
@@ -1153,6 +1172,7 @@ msgid "Missing \"id\" field"
 msgstr ""
 
 #: udata/forms/fields.py:494
+#, python-brace-format
 msgid "Expect a \"{0}\" class but \"{1}\" was found"
 msgstr ""
 
@@ -1162,10 +1182,12 @@ msgid "Expect both class and identifier"
 msgstr ""
 
 #: udata/forms/fields.py:545
+#, python-brace-format
 msgid "Model for {0} not found"
 msgstr "Modelo para {0} no encontrado"
 
 #: udata/forms/fields.py:579
+#, python-brace-format
 msgid "Unknown identifiers: {identifiers}"
 msgstr ""
 
@@ -1187,7 +1209,7 @@ msgstr "Usted debe estar autentificado"
 msgid "This field requires \"%(name)s\" to be set"
 msgstr "Este campo requiere de \"%(name)s\"  que deben ser ajustados"
 
-#: udata/frontend/markdown.py:26
+#: udata/frontend/markdown.py:27
 msgid "Source"
 msgstr ""
 

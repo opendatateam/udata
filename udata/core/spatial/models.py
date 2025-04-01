@@ -170,9 +170,7 @@ class SpatialCoverage(db.EmbeddedDocument):
         return [zone for zone in self.zones if zone.handled_level]
 
     def clean(self):
-        if "geom" in self._get_changed_fields():
-            if self.zones:
-                raise db.ValidationError("The spatial coverage already has a Geozone")
-        if "zones" in self._get_changed_fields():
-            if self.geom:
-                raise db.ValidationError("The spatial coverage already has a Geometry")
+        if self.zones and self.geom:
+            raise db.ValidationError(
+                "The spatial coverage cannot contains a Geozone and a Geometry"
+            )
