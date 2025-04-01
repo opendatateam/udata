@@ -40,7 +40,7 @@
 {% endmacro %}
 
 {% macro radio_inline(field) %}
-{% for value, label, selected in field.iter_choices() %}
+{% for value, label, selected, _ in field.iter_choices() %}
 <label class="radio-inline">
     <input type="radio" name="{{ field.name }}" id="{{ field.id }}-{{ loop.index }}" value="{{ value }}"
         {% if selected %}checked="checked"{% endif %}>
@@ -50,7 +50,7 @@
 {% endmacro %}
 
 {% macro radio_stacked(field) %}
-{% for value, label, selected in field.iter_choices() %}
+{% for value, label, selected, _ in field.iter_choices() %}
 <div class="radio">
     <label>
         <input type="radio" name="{{ field.name }}" id="{{ field.id }}-{{ loop.index }}" value="{{ value }}"

@@ -363,11 +363,11 @@ class SelectField(FieldHelper, fields.SelectField):
 
     def iter_choices(self):
         localized_choices = [
-            (value, self.localize_label(label), selected)
-            for value, label, selected in super(SelectField, self).iter_choices()
+            (value, self.localize_label(label), selected, render_kw)
+            for value, label, selected, render_kw in super(SelectField, self).iter_choices()
         ]
-        for value, label, selected in sorted(localized_choices, key=lambda c: c[1]):
-            yield (value, label, selected)
+        for value, label, selected, render_kw in sorted(localized_choices, key=lambda c: c[1]):
+            yield (value, label, selected, render_kw)
 
     @property
     def choices(self):
@@ -390,11 +390,11 @@ class SelectMultipleField(FieldHelper, fields.SelectMultipleField):
 
     def iter_choices(self):
         localized_choices = [
-            (value, self._(label) if label else "", selected)
-            for value, label, selected in super(SelectMultipleField, self).iter_choices()
+            (value, self._(label) if label else "", selected, render_kw)
+            for value, label, selected, render_kw in super(SelectMultipleField, self).iter_choices()
         ]
-        for value, label, selected in sorted(localized_choices, key=lambda c: c[1]):
-            yield (value, label, selected)
+        for value, label, selected, render_kw in sorted(localized_choices, key=lambda c: c[1]):
+            yield (value, label, selected, render_kw)
 
 
 class TagField(Field):

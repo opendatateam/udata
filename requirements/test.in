@@ -1,11 +1,11 @@
 -r install.in
 -c install.pip
 
-httpretty==1.1.4
-mock==5.0.1
-pytest==7.3.1
-pytest-env==0.8.1
-pytest-flask==1.2.0
-pytest-mock==3.10.0
-pytest-sugar==0.9.7
-requests-mock==1.10.0
+httpretty
+mock
+pytest
+pytest-env
+pytest-flask
+pytest-mock
+pytest-sugar
+requests-mock
