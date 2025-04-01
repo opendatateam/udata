@@ -259,11 +259,14 @@ def handle_unauthorized_file_type(error):
     return {"message": msg}, 400
 
 
-validation_error_fields = api.model("ValidationError", {"errors": fields.Raw})
+field_validation_error_fields = api.model("FieldValidationError", {"errors": fields.Raw})
+validation_error_fields = api.model(
+    "ValidationError", {"errors": fields.Raw, "message": fields.String}
+)
 
 
 @api.errorhandler(FieldValidationError)
-@api.marshal_with(validation_error_fields, code=400)
+@api.marshal_with(field_validation_error_fields, code=400)
 def handle_field_validation_error(error: FieldValidationError):
     """A validation error"""
     errors = {}
@@ -272,14 +275,35 @@ def handle_field_validation_error(error: FieldValidationError):
     return {"errors": errors}, 400
 
 
+def convert_object_of_exceptions_to_object_of_strings(exceptions: dict):
+    errors = {}
+    for key, exception in exceptions.items():
+        if isinstance(exception, Exception):
+            errors[key] = str(exception)
+        elif isinstance(exception, dict):
+            errors[key] = convert_object_of_exceptions_to_object_of_strings(exceptions)
+        elif isinstance(exception, str):
+            errors[key] = exception
+        else:
+            log.warning(
+                f"Unknown type in `convert_object_of_exceptions_to_object_of_strings`: {exception}"
+            )
+            errors[key] = str(exception)
+
+    return errors
+
+
 @api.errorhandler(mongoengine.errors.ValidationError)
 @api.marshal_with(validation_error_fields, code=400)
 def handle_validation_error(error: mongoengine.errors.ValidationError):
     """A validation error"""
-    errors = {}
-    errors[error.field] = [error.message]
-
-    return {"errors": errors}, 400
+    return (
+        {
+            "errors": convert_object_of_exceptions_to_object_of_strings(error.errors),
+            "message": str(error),
+        },
+        400,
+    )
 
 
 @apiv2.errorhandler(mongoengine.errors.ValidationError)
