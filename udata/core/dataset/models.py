@@ -837,16 +837,21 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         quality = self.quality_cached or self.compute_quality()
 
         # :UpdateFulfilledInTime
-        if quality.get("next_update_for_update_fulfilled_in_time"):
+        # `next_update_for_update_fulfilled_in_time` is only useful to compute the
+        # real `update_fulfilled_in_time` check, so we pop it to not polute the `quality`
+        # object for users.
+        next_update = quality.pop("next_update_for_update_fulfilled_in_time", None)
+        if next_update:
             # Allow for being one day late on update.
             # We may have up to one day delay due to harvesting for example
-            quality["update_fulfilled_in_time"] = (
-                quality.get("next_update_for_update_fulfilled_in_time") - datetime.utcnow()
-            ).days >= -1
+            quality["update_fulfilled_in_time"] = (next_update - datetime.utcnow()).days >= -1
         elif self.frequency in ["continuous", "irregular", "punctual"]:
             # For these frequencies, we don't expect regular updates or can't quantify them.
             # Thus we consider the update_fulfilled_in_time quality criterion to be true.
             quality["update_fulfilled_in_time"] = True
+
+        # Since `update_fulfilled_in_time` cannot be precomputed, `score` cannot either.
+        quality["score"] = self.compute_quality_score(quality)
 
         return quality
 
@@ -894,7 +899,6 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
                     resource_desc = True
             result["resources_documentation"] = resource_doc or resource_desc
 
-        result["score"] = self.compute_quality_score(result)
         return result
 
     @property
