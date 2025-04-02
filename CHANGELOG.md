@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 10.2.0 (2025-04-02)
 
 - Fix wrong error message when updating the GeoZone of a dataset with already a Geometry [#3271](https://github.com/opendatateam/udata/pull/3271)
