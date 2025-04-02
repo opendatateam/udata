@@ -13,6 +13,7 @@
     - upgrade voluptuous to 0.15.2
     - replace StringDist by Levenshtein
   - Did not upgrade Flask (and its plugins), blinker and werkzeug yet
+- Compute quality score to show correct resources score in api v2 [#3290](https://github.com/opendatateam/udata/pull/3290/)
 
 ## 10.1.4 (2025-03-24)
 
