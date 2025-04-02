@@ -567,11 +567,7 @@ def is_value_modified(old_value, new_value) -> bool:
 
 def patch_and_save(obj, request) -> type:
     obj = patch(obj, request)
-
-    try:
-        obj.save()
-    except mongoengine.errors.ValidationError as e:
-        api.abort(400, e.message)
+    obj.save()
 
     return obj
 

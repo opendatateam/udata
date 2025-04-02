@@ -1,7 +1,7 @@
 import factory
+import mongoengine
 import pytest
 from flask_restx.reqparse import Argument, RequestParser
-from werkzeug.exceptions import BadRequest
 
 from udata.api_fields import field, function_field, generate_fields, patch, patch_and_save
 from udata.core.dataset.api_fields import dataset_fields
@@ -224,7 +224,7 @@ class PatchTest:
         fake: Fake = FakeFactory.create()
         fake_request = self.FakeRequest()
         fake_request.json["url"] = "ok url"
-        with pytest.raises(BadRequest):
+        with pytest.raises(mongoengine.errors.ValidationError):
             patch_and_save(fake, fake_request)
 
 

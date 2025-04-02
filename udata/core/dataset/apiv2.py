@@ -340,10 +340,7 @@ class DatasetExtrasAPI(API):
             data.pop(key)
         # then update the extras with the remaining payload
         dataset.extras.update(data)
-        try:
-            dataset.save(signal_kwargs={"ignores": ["post_save"]})
-        except mongoengine.errors.ValidationError as e:
-            apiv2.abort(400, e.message)
+        dataset.save(signal_kwargs={"ignores": ["post_save"]})
         return dataset.extras
 
     @apiv2.secure

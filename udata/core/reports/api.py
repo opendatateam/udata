@@ -1,4 +1,3 @@
-import mongoengine
 from flask import request
 from flask_login import current_user
 
@@ -31,11 +30,7 @@ class ReportsAPI(API):
         if current_user.is_authenticated:
             report.by = current_user._get_current_object()
 
-        try:
-            report.save()
-        except mongoengine.errors.ValidationError as e:
-            api.abort(400, e.message)
-
+        report.save()
         return report, 201
 
 
