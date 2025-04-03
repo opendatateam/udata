@@ -524,7 +524,7 @@ class DcatBackendTest:
         # test dct:license nested in distribution
         assert dataset.license.id == "lov1"
 
-        assert len(dataset.resources) == 3
+        assert len(dataset.resources) == 4
 
         resource_1 = next(res for res in dataset.resources if res.title == "Resource 1-1")
         assert resource_1.filetype == "remote"
@@ -548,6 +548,16 @@ class DcatBackendTest:
         assert resource_3.description == ""
         assert resource_3.url == "http://data.test.org/datasets/1/resources/3"
         assert resource_3.type == "other"
+
+        # Make sure a resource with an accessService is of type api
+        resource_4 = next(res for res in dataset.resources if res.title == "Resource 1-4")
+        assert resource_4.format is None
+        assert resource_4.description == "A resource pointing towards a Geo Service"
+        assert (
+            resource_4.url
+            == "http://data.test.org/datasets/1/resources/4/services?SERVICE=WMS&REQUEST=GetCapabilities&VERSION=1.3.0"
+        )
+        assert resource_4.type == "api"
 
         # test dct:rights -> license support from dataset
         dataset = Dataset.objects.get(harvest__dct_identifier="2")
