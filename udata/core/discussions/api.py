@@ -8,6 +8,7 @@ from udata.api import API, api, fields
 from udata.auth import admin_permission
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
+from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
 from udata.core.spam.api import SpamAPIMixin
@@ -33,6 +34,9 @@ message_fields = api.model(
     {
         "content": fields.String(description="The message body"),
         "posted_by": fields.Nested(user_ref_fields, description="The message author"),
+        "posted_by_organization": fields.Nested(
+            org_ref_fields, description="The organization to show to users", allow_null=True
+        ),
         "posted_on": fields.ISODateTime(description="The message posting date"),
         "last_edit_at": fields.ISODateTime(description="The message last edit date"),
         "spam": fields.Nested(spam_fields),
@@ -53,6 +57,9 @@ discussion_fields = api.model(
         "class": fields.ClassName(description="The object class", discriminator=True),
         "title": fields.String(description="The discussion title"),
         "user": fields.Nested(user_ref_fields, description="The discussion author"),
+        "organization": fields.Nested(
+            org_ref_fields, description="The discussion author", allow_null=True
+        ),
         "created": fields.ISODateTime(description="The discussion creation date"),
         "closed": fields.ISODateTime(description="The discussion closing date"),
         "closed_by": fields.Nested(
@@ -73,6 +80,9 @@ start_discussion_fields = api.model(
         "comment": fields.String(description="The content of the initial comment", required=True),
         "subject": fields.Nested(
             api.model_reference, description="The discussion target object", required=True
+        ),
+        "organization": fields.Nested(
+            org_ref_fields, allow_null=True, description="Publish in the name of this organization"
         ),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),
     },
@@ -159,7 +169,11 @@ class DiscussionAPI(API):
         if discussion.closed:
             api.abort(403, "Can't add comments on a closed discussion")
         form = api.validate(DiscussionCommentForm)
-        message = Message(content=form.comment.data, posted_by=current_user.id)
+        message = Message(
+            content=form.comment.data,
+            posted_by=current_user.id,
+            posted_by_organization=form.organization.data,
+        )
         discussion.discussion.append(message)
         message_idx = len(discussion.discussion) - 1
         close = form.close.data
@@ -279,7 +293,11 @@ class DiscussionsAPI(API):
         """Create a new Discussion"""
         form = api.validate(DiscussionCreateForm)
 
-        message = Message(content=form.comment.data, posted_by=current_user.id)
+        message = Message(
+            content=form.comment.data,
+            posted_by=current_user.id,
+            posted_by_organization=form.organization.data,
+        )
         discussion = Discussion(user=current_user.id, discussion=[message])
         form.populate_obj(discussion)
         discussion.save()
