@@ -22,6 +22,12 @@ from .signals import on_discussion_deleted
 
 ns = api.namespace("discussions", "Discussion related operations")
 
+
+message_permissions_fields = api.model(
+    "DiscussionMessagePermissions",
+    {"delete": fields.Boolean()},
+)
+
 message_fields = api.model(
     "DiscussionMessage",
     {
@@ -29,7 +35,13 @@ message_fields = api.model(
         "posted_by": fields.Nested(user_ref_fields, description="The message author"),
         "posted_on": fields.ISODateTime(description="The message posting date"),
         "spam": fields.Nested(spam_fields),
+        "permissions": fields.Nested(message_permissions_fields),
     },
+)
+
+discussion_permissions_fields = api.model(
+    "DiscussionPermissions",
+    {"delete": fields.Boolean(), "close": fields.Boolean()},
 )
 
 discussion_fields = api.model(
@@ -49,6 +61,7 @@ discussion_fields = api.model(
         "url": fields.UrlFor("api.discussion", description="The discussion API URI"),
         "extras": fields.Raw(description="Extra attributes as key-value pairs"),
         "spam": fields.Nested(spam_fields),
+        "permissions": fields.Nested(discussion_permissions_fields),
     },
 )
 

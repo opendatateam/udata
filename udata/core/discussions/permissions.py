@@ -10,7 +10,7 @@ class CloseDiscussionPermission(Permission):
         needs = []
         subject = discussion.subject
 
-        if getattr(subject, "organization"):
+        if getattr(subject, "organization", None):
             needs.append(OrganizationAdminNeed(subject.organization.id))
             needs.append(OrganizationEditorNeed(subject.organization.id))
         elif subject.owner:
