@@ -782,14 +782,16 @@ class PublishAsField(ModelFieldMixin, Field):
                 raise validators.ValidationError(_("You must be authenticated"))
             elif not OrganizationPrivatePermission(self.data).can():
                 raise validators.ValidationError(_("Permission denied for this organization"))
-            # Ensure either owner field or this field value is unset
-            owner_field = form._fields[self.owner_field]
-            if self.raw_data:
-                owner_field.data = None
-            elif getattr(form._obj, self.short_name) and not owner_field.data:
-                pass
-            else:
-                self.data = None
+
+            if self.owner_field:
+                # Ensure either owner field or this field value is unset
+                owner_field = form._fields[self.owner_field]
+                if self.raw_data:
+                    owner_field.data = None
+                elif getattr(form._obj, self.short_name) and not owner_field.data:
+                    pass
+                else:
+                    self.data = None
         return True
 
 

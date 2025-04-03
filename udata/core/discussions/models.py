@@ -16,6 +16,17 @@ class Message(SpamMixin, db.EmbeddedDocument):
     content = db.StringField(required=True)
     posted_on = db.DateTimeField(default=datetime.utcnow, required=True)
     posted_by = db.ReferenceField("User")
+    posted_by_organization = db.ReferenceField("Organization")
+    last_edit_at = db.DateTimeField(default=datetime.utcnow)
+
+    @property
+    def permissions(self):
+        from .permissions import DiscussionMessagePermission
+
+        return {
+            "delete": DiscussionMessagePermission(self).can(),
+            "edit": DiscussionMessagePermission(self).can(),
+        }
 
     def texts_to_check_for_spam(self):
         return [self.content]
@@ -46,6 +57,8 @@ class Message(SpamMixin, db.EmbeddedDocument):
 
 class Discussion(SpamMixin, db.Document):
     user = db.ReferenceField("User")
+    organization = db.ReferenceField("Organization")
+
     subject = db.GenericReferenceField()
     title = db.StringField(required=True)
     discussion = db.ListField(db.EmbeddedDocumentField(Message))
@@ -58,6 +71,13 @@ class Discussion(SpamMixin, db.Document):
         "indexes": ["user", "subject", "-created"],
         "ordering": ["-created"],
     }
+
+    @property
+    def permissions(self):
+        from udata.auth import Permission
+        from udata.core.discussions.permissions import CloseDiscussionPermission
+
+        return {"delete": Permission().can(), "close": CloseDiscussionPermission(self).can()}
 
     def person_involved(self, person):
         """Return True if the given person has been involved in the

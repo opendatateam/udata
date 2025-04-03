@@ -8,6 +8,7 @@ from udata.api import API, api, fields
 from udata.auth import admin_permission
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
+from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
 from udata.core.spam.api import SpamAPIMixin
@@ -15,21 +16,37 @@ from udata.core.spam.fields import spam_fields
 from udata.core.user.api_fields import user_ref_fields
 from udata.utils import id_or_404
 
-from .forms import DiscussionCommentForm, DiscussionCreateForm
+from .forms import DiscussionCommentForm, DiscussionCreateForm, DiscussionEditCommentForm
 from .models import Discussion, Message
-from .permissions import CloseDiscussionPermission
+from .permissions import CloseDiscussionPermission, DiscussionMessagePermission
 from .signals import on_discussion_deleted
 
 ns = api.namespace("discussions", "Discussion related operations")
+
+
+message_permissions_fields = api.model(
+    "DiscussionMessagePermissions",
+    {"delete": fields.Boolean(), "edit": fields.Boolean()},
+)
 
 message_fields = api.model(
     "DiscussionMessage",
     {
         "content": fields.String(description="The message body"),
         "posted_by": fields.Nested(user_ref_fields, description="The message author"),
+        "posted_by_organization": fields.Nested(
+            org_ref_fields, description="The organization to show to users", allow_null=True
+        ),
         "posted_on": fields.ISODateTime(description="The message posting date"),
+        "last_edit_at": fields.ISODateTime(description="The message last edit date"),
         "spam": fields.Nested(spam_fields),
+        "permissions": fields.Nested(message_permissions_fields),
     },
+)
+
+discussion_permissions_fields = api.model(
+    "DiscussionPermissions",
+    {"delete": fields.Boolean(), "close": fields.Boolean()},
 )
 
 discussion_fields = api.model(
@@ -40,6 +57,9 @@ discussion_fields = api.model(
         "class": fields.ClassName(description="The object class", discriminator=True),
         "title": fields.String(description="The discussion title"),
         "user": fields.Nested(user_ref_fields, description="The discussion author"),
+        "organization": fields.Nested(
+            org_ref_fields, description="The discussion author", allow_null=True
+        ),
         "created": fields.ISODateTime(description="The discussion creation date"),
         "closed": fields.ISODateTime(description="The discussion closing date"),
         "closed_by": fields.Nested(
@@ -49,6 +69,7 @@ discussion_fields = api.model(
         "url": fields.UrlFor("api.discussion", description="The discussion API URI"),
         "extras": fields.Raw(description="Extra attributes as key-value pairs"),
         "spam": fields.Nested(spam_fields),
+        "permissions": fields.Nested(discussion_permissions_fields),
     },
 )
 
@@ -59,6 +80,9 @@ start_discussion_fields = api.model(
         "comment": fields.String(description="The content of the initial comment", required=True),
         "subject": fields.Nested(
             api.model_reference, description="The discussion target object", required=True
+        ),
+        "organization": fields.Nested(
+            org_ref_fields, allow_null=True, description="Publish in the name of this organization"
         ),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),
     },
@@ -71,6 +95,13 @@ comment_discussion_fields = api.model(
         "close": fields.Boolean(
             description="Is this a closing response. Only subject owner can close"
         ),
+    },
+)
+
+edit_comment_discussion_fields = api.model(
+    "DiscussionEditComment",
+    {
+        "comment": fields.String(description="The new comment", required=True),
     },
 )
 
@@ -138,7 +169,11 @@ class DiscussionAPI(API):
         if discussion.closed:
             api.abort(403, "Can't add comments on a closed discussion")
         form = api.validate(DiscussionCommentForm)
-        message = Message(content=form.comment.data, posted_by=current_user.id)
+        message = Message(
+            content=form.comment.data,
+            posted_by=current_user.id,
+            posted_by_organization=form.organization.data,
+        )
         discussion.discussion.append(message)
         message_idx = len(discussion.discussion) - 1
         close = form.close.data
@@ -181,6 +216,26 @@ class DiscussionCommentAPI(API):
     """
     Base class for a comment in a discussion thread.
     """
+
+    @api.doc("edit_discussion_comment")
+    @api.response(403, "Not allowed to edit this comment")
+    @api.expect(edit_comment_discussion_fields)
+    @api.marshal_with(discussion_fields)
+    def put(self, id, cidx):
+        """Edit a comment given its index"""
+        discussion = Discussion.objects.get_or_404(id=id_or_404(id))
+        if len(discussion.discussion) <= cidx:
+            api.abort(404, "Comment does not exist")
+
+        message = discussion.discussion[cidx]
+        DiscussionMessagePermission(message).test()
+
+        form = api.validate(DiscussionEditCommentForm)
+
+        discussion.discussion[cidx].content = form.comment.data
+        discussion.discussion[cidx].last_edit_at = datetime.utcnow()
+        discussion.save()
+        return discussion
 
     @api.secure(admin_permission)
     @api.doc("delete_discussion_comment")
@@ -238,7 +293,11 @@ class DiscussionsAPI(API):
         """Create a new Discussion"""
         form = api.validate(DiscussionCreateForm)
 
-        message = Message(content=form.comment.data, posted_by=current_user.id)
+        message = Message(
+            content=form.comment.data,
+            posted_by=current_user.id,
+            posted_by_organization=form.organization.data,
+        )
         discussion = Discussion(user=current_user.id, discussion=[message])
         form.populate_obj(discussion)
         discussion.save()
