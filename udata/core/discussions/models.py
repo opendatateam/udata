@@ -17,12 +17,16 @@ class Message(SpamMixin, db.EmbeddedDocument):
     posted_on = db.DateTimeField(default=datetime.utcnow, required=True)
     posted_by = db.ReferenceField("User")
     posted_by_organization = db.ReferenceField("Organization")
+    last_edit_at = db.DateTimeField(default=datetime.utcnow)
 
     @property
     def permissions(self):
-        from udata.auth import Permission
+        from .permissions import DiscussionMessagePermission
 
-        return {"delete": Permission().can()}
+        return {
+            "delete": DiscussionMessagePermission(self).can(),
+            "edit": DiscussionMessagePermission(self).can(),
+        }
 
     def texts_to_check_for_spam(self):
         return [self.content]

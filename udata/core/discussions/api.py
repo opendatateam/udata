@@ -15,9 +15,9 @@ from udata.core.spam.fields import spam_fields
 from udata.core.user.api_fields import user_ref_fields
 from udata.utils import id_or_404
 
-from .forms import DiscussionCommentForm, DiscussionCreateForm
+from .forms import DiscussionCommentForm, DiscussionCreateForm, DiscussionEditCommentForm
 from .models import Discussion, Message
-from .permissions import CloseDiscussionPermission
+from .permissions import CloseDiscussionPermission, DiscussionMessagePermission
 from .signals import on_discussion_deleted
 
 ns = api.namespace("discussions", "Discussion related operations")
@@ -25,7 +25,7 @@ ns = api.namespace("discussions", "Discussion related operations")
 
 message_permissions_fields = api.model(
     "DiscussionMessagePermissions",
-    {"delete": fields.Boolean()},
+    {"delete": fields.Boolean(), "edit": fields.Boolean()},
 )
 
 message_fields = api.model(
@@ -34,6 +34,7 @@ message_fields = api.model(
         "content": fields.String(description="The message body"),
         "posted_by": fields.Nested(user_ref_fields, description="The message author"),
         "posted_on": fields.ISODateTime(description="The message posting date"),
+        "last_edit_at": fields.ISODateTime(description="The message last edit date"),
         "spam": fields.Nested(spam_fields),
         "permissions": fields.Nested(message_permissions_fields),
     },
@@ -84,6 +85,13 @@ comment_discussion_fields = api.model(
         "close": fields.Boolean(
             description="Is this a closing response. Only subject owner can close"
         ),
+    },
+)
+
+edit_comment_discussion_fields = api.model(
+    "DiscussionEditComment",
+    {
+        "comment": fields.String(description="The new comment", required=True),
     },
 )
 
@@ -194,6 +202,26 @@ class DiscussionCommentAPI(API):
     """
     Base class for a comment in a discussion thread.
     """
+
+    @api.doc("edit_discussion_comment")
+    @api.response(403, "Not allowed to edit this comment")
+    @api.expect(edit_comment_discussion_fields)
+    @api.marshal_with(discussion_fields)
+    def put(self, id, cidx):
+        """Edit a comment given its index"""
+        discussion = Discussion.objects.get_or_404(id=id_or_404(id))
+        if len(discussion.discussion) <= cidx:
+            api.abort(404, "Comment does not exist")
+
+        message = discussion.discussion[cidx]
+        DiscussionMessagePermission(message).test()
+
+        form = api.validate(DiscussionEditCommentForm)
+
+        discussion.discussion[cidx].content = form.comment.data
+        discussion.discussion[cidx].last_edit_at = datetime.utcnow()
+        discussion.save()
+        return discussion
 
     @api.secure(admin_permission)
     @api.doc("delete_discussion_comment")

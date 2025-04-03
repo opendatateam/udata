@@ -4,6 +4,8 @@ from udata.core.organization.permissions import (
     OrganizationEditorNeed,
 )
 
+from .models import Message
+
 
 class CloseDiscussionPermission(Permission):
     def __init__(self, discussion):
@@ -17,3 +19,12 @@ class CloseDiscussionPermission(Permission):
             needs.append(UserNeed(subject.owner.fs_uniquifier))
 
         super(CloseDiscussionPermission, self).__init__(*needs)
+
+
+class DiscussionMessagePermission(Permission):
+    def __init__(self, message: Message):
+        needs = []
+
+        needs.append(UserNeed(message.posted_by.fs_uniquifier))
+
+        super(DiscussionMessagePermission, self).__init__(*needs)

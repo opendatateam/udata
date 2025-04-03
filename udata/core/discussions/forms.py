@@ -23,3 +23,9 @@ class DiscussionCommentForm(Form):
         _("Comment"), [validators.DataRequired(), validators.Length(max=COMMENT_SIZE_LIMIT)]
     )
     close = fields.BooleanField(default=False)
+
+
+class DiscussionEditCommentForm(Form):
+    comment = fields.StringField(
+        _("Comment"), [validators.DataRequired(), validators.Length(max=COMMENT_SIZE_LIMIT)]
+    )
