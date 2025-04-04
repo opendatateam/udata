@@ -476,7 +476,12 @@ class DcatBackendTest:
 
         assert job.status == "done"
         assert job.errors == []
-        assert len(job.items) == 4
+        assert len(job.items) == 5
+        # 4 datasets and one Dataservice mentionned but not described
+        # because it appears in a distribution as DCAT.accessService
+        # but is missing a proper DCT.identifier
+        assert len([item for item in job.items if item.status == "done"]) == 4
+        assert len([item for item in job.items if item.status == "skipped"]) == 1
 
     def test_xml_catalog(self, rmock):
         LicenseFactory(id="lov2", title="Licence Ouverte Version 2.0")
