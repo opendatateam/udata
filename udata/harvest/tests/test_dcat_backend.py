@@ -137,6 +137,7 @@ class DcatBackendTest:
         assert datasets["1"].resources[0].description == "A JSON resource"
         assert datasets["1"].resources[0].format == "json"
         assert datasets["1"].resources[0].mime == "application/json"
+        assert datasets["1"].resources[0].type == "main"
 
     @pytest.mark.options(
         SCHEMA_CATALOG_URL="https://example.com/schemas",
@@ -403,6 +404,7 @@ class DcatBackendTest:
         assert len(dataset.resources) == 1
 
         resource = dataset.resources[0]
+        assert resource.type == "main"
         assert resource.checksum is not None
         assert resource.checksum.type == "sha1"
         assert resource.checksum.value == "fb4106aa286a53be44ec99515f0f0421d4d7ad7d"
@@ -853,6 +855,7 @@ class CswDcatBackendTest:
         assert resource.title == "accidento_hdf_L93"
         assert resource.url == "https://www.geo2france.fr/geoserver/cr_hdf/ows"
         assert resource.format == "ogc:wms"
+        assert resource.type == "main"
 
     def test_user_agent_post(self, rmock):
         url = mock_csw_pagination(rmock, "geonetwork/srv/eng/csw.rdf", "geonetworkv4-page-{}.xml")
@@ -964,6 +967,7 @@ class CswIso19139DcatBackendTest:
             resource.url
             == "http://atom.geo-ide.developpement-durable.gouv.fr/atomArchive/GetResource?id=fr-120066022-ldd-cab63273-b3ae-4e8a-ae1c-6192e45faa94&datasetAggregate=true"
         )
+        assert resource.type == "main"
 
         # Sadly resource format is parsed as a blank node. Format parsing should be improved.
         assert re.match(r"n[0-9a-f]{32}", resource.format)
