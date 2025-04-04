@@ -722,6 +722,10 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
             resource.checksum.type = algorithm
     if is_additionnal:
         resource.type = "other"
+    elif distrib.value(DCAT.accessService):
+        # The distribution has a DCAT.accessService property, we deduce
+        # that the distribution is of type API
+        resource.type = "api"
 
     identifier = rdf_value(distrib, DCT.identifier)
     uri = distrib.identifier.toPython() if isinstance(distrib.identifier, URIRef) else None

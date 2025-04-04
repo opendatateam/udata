@@ -61,16 +61,17 @@
         <dcat:theme>Theme 1</dcat:theme>
         <dcterms:publisher rdf:resource="http://data.test.org/organizations/1"/>
         <owl:versionInfo>1.0</owl:versionInfo>
-        <dcat:distribution rdf:resource="http://data.test.org/datasets/1/resources/2"/>
         <dcat:keyword>Tag 4</dcat:keyword>
         <dcterms:spatial rdf:resource="http://wuEurope.com/"/>
         <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T19:01:24.184120</dcterms:modified>
         <dcat:keyword>Tag 2</dcat:keyword>
         <dcat:keyword>Tag 1</dcat:keyword>
-        <dcat:distribution rdf:resource="http://data.test.org/datasets/1/resources/1"/>
         <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T18:59:02.737480</dcterms:issued>
         <dcterms:identifier>1</dcterms:identifier>
+        <dcat:distribution rdf:resource="http://data.test.org/datasets/1/resources/1"/>
+        <dcat:distribution rdf:resource="http://data.test.org/datasets/1/resources/2"/>
         <dcterms:hasPart rdf:resource="http://data.test.org/datasets/1/resources/3"/>
+        <dcat:distribution rdf:resource="http://data.test.org/datasets/1/resources/4"/>
       </dcat:Dataset>
     </dcat:dataset>
     <dcat:dataset>
@@ -152,6 +153,18 @@
     <dcterms:title>Resource 1-3</dcterms:title>
     <dcterms:format>JSON</dcterms:format>
   </foaf:Document>
+  <dcat:Distribution rdf:about="http://data.test.org/datasets/1/resources/4">
+    <dcterms:description>A resource pointing towards a Geo Service</dcterms:description>
+    <dcterms:title>Resource 1-4</dcterms:title>
+    <dcat:accessURL>http://data.test.org/datasets/1/resources/4/services?SERVICE=WMS&amp;REQUEST=GetCapabilities&amp;VERSION=1.3.0</dcat:accessURL>
+    <dcat:accessService>
+      <dcat:DataService>
+        <dcterms:title xml:lang="fr">Geo Service</dcterms:title>
+        <dcat:endpointURL rdf:resource="http://data.test.org/datasets/1/resources/4/services"/>
+        <dcat:endpointDescription rdf:resource="http://data.test.org/datasets/1/resources/4/services?SERVICE=WMS&amp;REQUEST=GetCapabilities&amp;VERSION=1.3.0"/>
+      </dcat:DataService>
+    </dcat:accessService>
+  </dcat:Distribution>
   <!-- resources for dataset 2 -->
   <dcat:Distribution rdf:about="http://data.test.org/datasets/2/resources/1">
     <dcat:accessURL>http://data.test.org/datasets/2/resources/1/file.json</dcat:accessURL>

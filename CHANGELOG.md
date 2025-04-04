@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Harvest Distribution with a DCAT.accessService property as type `api` [#3294](https://github.com/opendatateam/udata/pull/3294)
 
 ## 10.2.0 (2025-04-02)
 
