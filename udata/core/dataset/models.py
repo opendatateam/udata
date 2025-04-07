@@ -767,11 +767,7 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
 
     @property
     def last_modified(self):
-        if (
-            self.harvest
-            and self.harvest.modified_at
-            and to_naive_datetime(self.harvest.modified_at) < datetime.utcnow()
-        ):
+        if self.harvest and self.harvest.modified_at:
             return to_naive_datetime(self.harvest.modified_at)
         return to_naive_datetime(self.last_modified_internal)
 

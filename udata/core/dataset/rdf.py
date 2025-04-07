@@ -5,7 +5,7 @@ This module centralize dataset helpers for RDF/DCAT serialization and parsing
 import calendar
 import json
 import logging
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 
 from dateutil.parser import parse as parse_dt
@@ -50,7 +50,7 @@ from udata.rdf import (
     url_from_rdf,
 )
 from udata.uris import endpoint_for
-from udata.utils import get_by, safe_unicode
+from udata.utils import get_by, safe_unicode, to_naive_datetime
 
 from .constants import OGC_SERVICE_FORMATS, UPDATE_FREQUENCIES
 from .models import Checksum, Dataset, License, Resource
@@ -731,7 +731,14 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     if not resource.harvest:
         resource.harvest = HarvestResourceMetadata()
     resource.harvest.created_at = created_at
-    resource.harvest.modified_at = modified_at
+
+    # In the past, we've encountered future `modified_at` during harvesting
+    # do not save it.
+    if modified_at and to_naive_datetime(modified_at) > datetime.utcnow():
+        log.warning(f"Future `DCT.modified` date '{modified_at}' in resource")
+    else:
+        resource.harvest.modified_at = modified_at
+
     resource.harvest.dct_identifier = identifier
     resource.harvest.uri = uri
 
@@ -830,7 +837,13 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
     dataset.harvest.uri = uri
     dataset.harvest.remote_url = remote_url
     dataset.harvest.created_at = created_at
-    dataset.harvest.modified_at = modified_at
+
+    # In the past, we've encountered future `modified_at` during harvesting
+    # do not save it.
+    if modified_at and to_naive_datetime(modified_at) > datetime.utcnow():
+        log.warning(f"Future `DCT.modified` date '{modified_at}' in dataset")
+    else:
+        dataset.harvest.modified_at = modified_at
 
     return dataset
 
