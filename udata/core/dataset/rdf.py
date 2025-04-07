@@ -733,7 +733,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     resource.harvest.created_at = created_at
 
     # In the past, we've encountered future `modified_at` during harvesting
-    # do not save it.
+    # do not save it. :FutureHarvestModifiedAt
     if modified_at and to_naive_datetime(modified_at) > datetime.utcnow():
         log.warning(f"Future `DCT.modified` date '{modified_at}' in resource")
     else:
@@ -839,7 +839,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
     dataset.harvest.created_at = created_at
 
     # In the past, we've encountered future `modified_at` during harvesting
-    # do not save it.
+    # do not save it. :FutureHarvestModifiedAt
     if modified_at and to_naive_datetime(modified_at) > datetime.utcnow():
         log.warning(f"Future `DCT.modified` date '{modified_at}' in dataset")
     else:
