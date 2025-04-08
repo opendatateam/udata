@@ -5,7 +5,6 @@ from flask_restx.inputs import boolean
 from flask_security import current_user
 
 from udata.api import API, api, fields
-from udata.auth import admin_permission
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
 from udata.core.organization.api_fields import org_ref_fields
@@ -18,7 +17,6 @@ from udata.utils import id_or_404
 
 from .forms import DiscussionCommentForm, DiscussionCreateForm, DiscussionEditCommentForm
 from .models import Discussion, Message
-from .permissions import CloseDiscussionPermission, DiscussionMessagePermission
 from .signals import on_discussion_deleted
 
 ns = api.namespace("discussions", "Discussion related operations")
@@ -26,7 +24,7 @@ ns = api.namespace("discussions", "Discussion related operations")
 
 message_permissions_fields = api.model(
     "DiscussionMessagePermissions",
-    {"delete": fields.Boolean(), "edit": fields.Boolean()},
+    {"delete": fields.Permission(), "edit": fields.Permission()},
 )
 
 message_fields = api.model(
@@ -46,7 +44,7 @@ message_fields = api.model(
 
 discussion_permissions_fields = api.model(
     "DiscussionPermissions",
-    {"delete": fields.Boolean(), "close": fields.Boolean()},
+    {"delete": fields.Permission(), "close": fields.Permission()},
 )
 
 discussion_fields = api.model(
@@ -178,7 +176,7 @@ class DiscussionAPI(API):
         message_idx = len(discussion.discussion) - 1
         close = form.close.data
         if close:
-            CloseDiscussionPermission(discussion).test()
+            discussion.permissions["close"].test()
             discussion.closed_by = current_user._get_current_object()
             discussion.closed = datetime.utcnow()
         discussion.save()
@@ -188,12 +186,13 @@ class DiscussionAPI(API):
             discussion.signal_comment(message=message_idx)
         return discussion
 
-    @api.secure(admin_permission)
     @api.doc("delete_discussion")
     @api.response(403, "Not allowed to delete this discussion")
     def delete(self, id):
         """Delete a discussion given its ID"""
         discussion = Discussion.objects.get_or_404(id=id_or_404(id))
+        discussion.permissions["delete"].test()
+
         discussion.delete()
         on_discussion_deleted.send(discussion)
         return "", 204
@@ -228,7 +227,7 @@ class DiscussionCommentAPI(API):
             api.abort(404, "Comment does not exist")
 
         message = discussion.discussion[cidx]
-        DiscussionMessagePermission(message).test()
+        message.permissions["edit"].test()
 
         form = api.validate(DiscussionEditCommentForm)
 
@@ -237,7 +236,6 @@ class DiscussionCommentAPI(API):
         discussion.save()
         return discussion
 
-    @api.secure(admin_permission)
     @api.doc("delete_discussion_comment")
     @api.response(403, "Not allowed to delete this comment")
     def delete(self, id, cidx):
@@ -247,6 +245,9 @@ class DiscussionCommentAPI(API):
             api.abort(404, "Comment does not exist")
         elif cidx == 0:
             api.abort(400, "You cannot delete the first comment of a discussion")
+
+        discussion.discussion[cidx].permissions["delete"].test()
+
         discussion.discussion.pop(cidx)
         discussion.save()
         return "", 204

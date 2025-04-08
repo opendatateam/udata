@@ -24,8 +24,8 @@ class Message(SpamMixin, db.EmbeddedDocument):
         from .permissions import DiscussionMessagePermission
 
         return {
-            "delete": DiscussionMessagePermission(self).can(),
-            "edit": DiscussionMessagePermission(self).can(),
+            "delete": DiscussionMessagePermission(self),
+            "edit": DiscussionMessagePermission(self),
         }
 
     def texts_to_check_for_spam(self):
@@ -77,7 +77,7 @@ class Discussion(SpamMixin, db.Document):
         from udata.auth import Permission
         from udata.core.discussions.permissions import CloseDiscussionPermission
 
-        return {"delete": Permission().can(), "close": CloseDiscussionPermission(self).can()}
+        return {"delete": Permission(), "close": CloseDiscussionPermission(self)}
 
     def person_involved(self, person):
         """Return True if the given person has been involved in the
