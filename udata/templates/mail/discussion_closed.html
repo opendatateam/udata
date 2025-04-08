@@ -7,9 +7,9 @@
         type=discussion.subject.verbose_name,
         user=(
             '<a href="'|safe
-            + message.posted_by.external_url_with_campaign
+            + discussion.closed_by.external_url_with_campaign
             + '">'|safe
-            + message.posted_by.fullname
+            + discussion.closed_by.fullname
             + '</a>'|safe
         ),
         subject=(
@@ -27,11 +27,12 @@
     {{ discussion.title }}
 </p>
 
+{% if message %}
 <p style="margin: 0;padding: 0;">
     <b>{{ _('Message') }}:</b>
     {{ message.content | markdown }}
 </p>
-
+{% endif %}
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
     <tr>

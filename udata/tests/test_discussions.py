@@ -657,6 +657,22 @@ class DiscussionsTest(APITestCase):
         )
         self.assert403(response)
 
+    def test_close_discussion_without_message(self):
+        owner = self.login()
+        user = UserFactory()
+        dataset = Dataset.objects.create(title="Test dataset", owner=owner)
+        message = Message(content="bla bla", posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset, user=user, title="test discussion", discussion=[message]
+        )
+
+        with assert_emit(on_discussion_closed):
+            response = self.post(
+                url_for("api.discussion", id=discussion.id),
+                {"close": True},
+            )
+            self.assert200(response)
+
     def test_close_discussion_permissions(self):
         dataset = Dataset.objects.create(title="Test dataset")
         user = UserFactory()

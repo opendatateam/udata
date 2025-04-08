@@ -167,18 +167,29 @@ class DiscussionAPI(API):
         if discussion.closed:
             api.abort(403, "Can't add comments on a closed discussion")
         form = api.validate(DiscussionCommentForm)
-        message = Message(
-            content=form.comment.data,
-            posted_by=current_user.id,
-            posted_by_organization=form.organization.data,
-        )
-        discussion.discussion.append(message)
-        message_idx = len(discussion.discussion) - 1
+
         close = form.close.data
+        if not close and not form.comment.data:
+            api.abort(
+                400, "Can only close without message. Please provide either `close` or a `comment`."
+            )
+
+        if form.comment.data:
+            message = Message(
+                content=form.comment.data,
+                posted_by=current_user.id,
+                posted_by_organization=form.organization.data,
+            )
+            discussion.discussion.append(message)
+            message_idx = len(discussion.discussion) - 1
+        else:
+            message_idx = None
+
         if close:
             discussion.permissions["close"].test()
             discussion.closed_by = current_user._get_current_object()
             discussion.closed = datetime.utcnow()
+
         discussion.save()
         if close:
             discussion.signal_close(message=message_idx)

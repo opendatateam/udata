@@ -178,7 +178,7 @@ class SpamMixin(object):
         signals.post_save.connect(report_after_save, sender=base_model.__class__, weak=False)
 
 
-def spam_protected(get_model_to_check=None):
+def spam_protected(get_model_to_check=None, is_disabled=False):
     """
     This decorator prevent the calling of a class method if the object is a POTENTIAL_SPAM.
     It will save the class method called with its arguments inside the `SpamInfo` object to be
@@ -186,10 +186,17 @@ def spam_protected(get_model_to_check=None):
     The decorator accept an argument, a function to get the model to check when we are doing an operation
     on an embed document. The class method should always take a `self` as a first argument which is the base
     model to allow saving the callbacks back into Mongo (we cannot .save() an embed document).
+
+    If we have nothing to check, we can't pass `None` in `get_model_to_check` because it will check the base model,
+    so you can put `disabled=True` and no check will be done.
     """
 
     def decorator(f):
         def protected_function(*args, **kwargs):
+            if is_disabled(*args, **kwargs):
+                f(*args, **kwargs)
+                return
+
             base_model = args[0]
             if get_model_to_check:
                 model_to_check = get_model_to_check(*args, **kwargs)

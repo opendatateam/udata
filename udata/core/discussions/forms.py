@@ -22,9 +22,7 @@ class DiscussionCreateForm(ModelForm):
 class DiscussionCommentForm(Form):
     organization = fields.PublishAsField(_("Publish as"), owner_field=None)
 
-    comment = fields.StringField(
-        _("Comment"), [validators.DataRequired(), validators.Length(max=COMMENT_SIZE_LIMIT)]
-    )
+    comment = fields.StringField(_("Comment"), [validators.Length(max=COMMENT_SIZE_LIMIT)])
     close = fields.BooleanField(default=False)
 
 
