@@ -2,6 +2,10 @@
 
 ## Current (in progress)
 
+- Harvest Distribution with a DCAT.accessService property as type `api` [#3294](https://github.com/opendatateam/udata/pull/3294)
+
+## 10.2.0 (2025-04-02)
+
 - Fix wrong error message when updating the GeoZone of a dataset with already a Geometry [#3271](https://github.com/opendatateam/udata/pull/3271)
 - Update dependencies [#3278](https://github.com/opendatateam/udata/pull/3278)
   - Some of these upgrades implied code changes in udata, udata-front or udata-ckan:
