@@ -133,10 +133,7 @@ class Discussion(SpamMixin, db.Document):
     def signal_new(self):
         on_new_discussion.send(self)
 
-    @spam_protected(
-        lambda discussion, message: discussion.discussion[message] if message else None,
-        lambda _discussion, message: message is None,
-    )
+    @spam_protected(lambda discussion, message: discussion.discussion[message] if message else None)
     def signal_close(self, message):
         on_discussion_closed.send(self, message=message)
 
