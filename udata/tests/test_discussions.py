@@ -991,6 +991,8 @@ class DiscussionsMailsTest(APITestCase):
             user=poster,
             title=faker.sentence(),
             discussion=[message, second_message, closing_message],
+            closed=datetime.utcnow(),
+            closed_by=owner,
         )
 
         with capture_mails() as mails:
