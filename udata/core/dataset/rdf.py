@@ -762,6 +762,8 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
 
     dataset.title = rdf_value(d, DCT.title)
     if not dataset.title:
+        # If the dataset is externaly defined (so without title and just with a link to the dataset XML)
+        # we should have skipped it way before in :ExcludeExternalyDefinedDataset
         raise HarvestSkipException("missing title on dataset")
 
     # Support dct:abstract if dct:description is missing (sometimes used instead)

@@ -256,7 +256,7 @@ class BaseBackend(object):
             ]
             self.save_job()
 
-    def is_done(self) -> bool:
+    def has_reached_max_items(self) -> bool:
         """Should be called after process_dataset to know if we reach the max items"""
         return self.max_items and len(self.job.items) >= self.max_items
 
