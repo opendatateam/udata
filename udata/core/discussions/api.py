@@ -63,6 +63,11 @@ discussion_fields = api.model(
         "closed_by": fields.Nested(
             user_ref_fields, allow_null=True, description="The user who closed the discussion"
         ),
+        "closed_by_organization": fields.Nested(
+            org_ref_fields,
+            allow_null=True,
+            description="The organization who closed the discussion",
+        ),
         "discussion": fields.Nested(message_fields),
         "url": fields.UrlFor("api.discussion", description="The discussion API URI"),
         "extras": fields.Raw(description="Extra attributes as key-value pairs"),
@@ -188,6 +193,7 @@ class DiscussionAPI(API):
         if close:
             discussion.permissions["close"].test()
             discussion.closed_by = current_user._get_current_object()
+            discussion.closed_by_organization = form.organization.data
             discussion.closed = datetime.utcnow()
 
         discussion.save()

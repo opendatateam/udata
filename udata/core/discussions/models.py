@@ -65,6 +65,7 @@ class Discussion(SpamMixin, db.Document):
     created = db.DateTimeField(default=datetime.utcnow, required=True)
     closed = db.DateTimeField()
     closed_by = db.ReferenceField("User")
+    closed_by_organization = db.ReferenceField("Organization")
     extras = db.ExtrasField()
 
     meta = {
