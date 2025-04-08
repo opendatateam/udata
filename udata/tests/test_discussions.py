@@ -66,6 +66,7 @@ class DiscussionsTest(APITestCase):
 
         discussion = discussions[0]
         self.assertEqual(discussion.user, user)
+        self.assertIsNone(discussion.organization)
         self.assertEqual(len(discussion.discussion), 1)
         self.assertIsNotNone(discussion.created)
         self.assertIsNone(discussion.closed)
@@ -78,6 +79,63 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(message.posted_by, user)
         self.assertIsNotNone(message.posted_on)
         self.assertFalse(message.is_spam())
+
+    def test_new_discussion_on_behalf_of_org(self):
+        user = self.login()
+        org1 = OrganizationFactory(editors=[user])
+        org2 = OrganizationFactory(editors=[user])
+        other_org = OrganizationFactory()
+        dataset = DatasetFactory()
+
+        response = self.post(
+            url_for("api.discussions"),
+            {
+                "organization": other_org.id,
+                "title": "not allowed",
+                "comment": "bla bla",
+                "subject": {
+                    "class": "Dataset",
+                    "id": dataset.id,
+                },
+            },
+        )
+        self.assert400(response)
+
+        response = self.post(
+            url_for("api.discussions"),
+            {
+                "organization": org1.id,
+                "title": "test title",
+                "comment": "bla bla",
+                "subject": {
+                    "class": "Dataset",
+                    "id": dataset.id,
+                },
+            },
+        )
+        self.assert201(response)
+        assert response.json["organization"]["id"] == str(org1.id)
+        assert response.json["user"]["id"] == str(user.id)
+        assert response.json["discussion"][0]["posted_by_organization"]["id"] == str(org1.id)
+        assert response.json["discussion"][0]["posted_by"]["id"] == str(user.id)
+
+        response = self.post(
+            url_for("api.discussion", id=response.json["id"]),
+            {"organization": org2.id, "comment": "A comment"},
+        )
+        self.assert200(response)
+        assert response.json["organization"]["id"] == str(org1.id)
+        assert response.json["user"]["id"] == str(user.id)
+        assert response.json["discussion"][0]["posted_by_organization"]["id"] == str(org1.id)
+        assert response.json["discussion"][0]["posted_by"]["id"] == str(user.id)
+        assert response.json["discussion"][1]["posted_by_organization"]["id"] == str(org2.id)
+        assert response.json["discussion"][1]["posted_by"]["id"] == str(user.id)
+
+        response = self.post(
+            url_for("api.discussion", id=response.json["id"]),
+            {"organization": other_org.id, "comment": "A comment"},
+        )
+        self.assert400(response)
 
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_spam_in_new_discussion_title(self):
