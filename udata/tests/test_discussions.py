@@ -637,6 +637,46 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(dataset.get_metrics()["discussions"], 0)
         self.assertEqual(Discussion.objects(subject=dataset).count(), 0)
 
+    def test_edit_discussion_comment(self):
+        admin = self.login(AdminFactory())
+        user = UserFactory()
+        dataset = Dataset.objects.create(title="Test dataset", owner=admin)
+        message = Message(content="bla bla", posted_by=user)
+        message2 = Message(content="bla bla bla", posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset, user=user, title="test discussion", discussion=[message, message2]
+        )
+        self.assertEqual(len(discussion.discussion), 2)
+
+        response = self.put(
+            url_for("api.discussion_comment", id=discussion.id, cidx=0), {"comment": "new body"}
+        )
+        self.assertStatus(response, 200)
+        discussion.reload()
+        assert discussion.discussion[0].content == "new body"
+
+        self.login(admin)
+        response = self.put(
+            url_for("api.discussion_comment", id=discussion.id, cidx=1),
+            {"comment": "edit by admin"},
+        )
+        self.assertStatus(response, 200)
+        discussion.reload()
+        assert discussion.discussion[1].content == "edit by admin"
+
+        response = self.put(
+            url_for("api.discussion_comment", id=discussion.id, cidx=3),
+            {"comment": "overflow edit"},
+        )
+        self.assertStatus(response, 404)
+
+        self.login(UserFactory())
+        response = self.put(
+            url_for("api.discussion_comment", id=discussion.id, cidx=0),
+            {"comment": "other user"},
+        )
+        self.assertStatus(response, 403)
+
     def test_delete_discussion_comment(self):
         owner = self.login(AdminFactory())
         user = UserFactory()
