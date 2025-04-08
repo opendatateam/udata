@@ -3,7 +3,7 @@
 {% block body %}
 {{ _('%(user)s closed an discussion on your %(type)s %(subject)s',
     type=discussion.subject.verbose_name,
-    user=discussion.closed_by.fullname,
+    user=discussion.closed_by_name,
     subject=discussion.subject|string
 ) }}.
 

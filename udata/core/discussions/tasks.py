@@ -42,7 +42,7 @@ def notify_new_discussion_comment(discussion_id, message=None):
     if isinstance(discussion.subject, NOTIFY_DISCUSSION_SUBJECTS):
         recipients = owner_recipients(discussion) + [m.posted_by for m in discussion.discussion]
         recipients = list({u.id: u for u in recipients if u != message.posted_by}.values())
-        subject = _("%(user)s commented your discussion", user=message.posted_by.fullname)
+        subject = _("%(user)s commented your discussion", user=message.posted_by_name)
 
         mail.send(
             subject, recipients, "new_discussion_comment", discussion=discussion, message=message

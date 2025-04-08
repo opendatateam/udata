@@ -28,13 +28,25 @@ class Message(SpamMixin, db.EmbeddedDocument):
             "edit": DiscussionMessagePermission(self),
         }
 
+    @property
+    def posted_by_name(self):
+        return (
+            self.posted_by_organization.name
+            if self.posted_by_organization
+            else self.posted_by.fullname
+        )
+
+    @property
+    def posted_by_org_or_user(self):
+        return self.posted_by_organization or self.posted_by
+
     def texts_to_check_for_spam(self):
         return [self.content]
 
     def spam_report_message(self, breadcrumb):
         message = "Spam potentiel dans le message"
-        if self.posted_by:
-            message += f" de [{self.posted_by.fullname}]({self.posted_by.external_url})"
+        if self.posted_by_org_or_user:
+            message += f" de [{self.posted_by_name}]({self.posted_by_org_or_user.external_url})"
 
         if len(breadcrumb) != 2:
             log.warning(
@@ -79,6 +91,20 @@ class Discussion(SpamMixin, db.Document):
         from udata.core.discussions.permissions import CloseDiscussionPermission
 
         return {"delete": Permission(), "close": CloseDiscussionPermission(self)}
+
+    @property
+    def closed_by_name(self):
+        if self.closed_by_organization:
+            return self.closed_by_organization.name
+
+        if self.closed_by:
+            return self.closed_by.fullname
+
+        return None
+
+    @property
+    def closed_by_org_or_user(self):
+        return self.closed_by_organization or self.closed_by
 
     def person_involved(self, person):
         """Return True if the given person has been involved in the
