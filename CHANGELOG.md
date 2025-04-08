@@ -4,6 +4,7 @@
 
 - Skip empty datasets nodes referenced in dataservices before creating an harvest job item [#3285](https://github.com/opendatateam/udata/pull/3285)
 - Harvest Distribution with a DCAT.accessService property as type `api` [#3294](https://github.com/opendatateam/udata/pull/3294)
+- Compute quality score to show correct resources score in api v2 [#3290](https://github.com/opendatateam/udata/pull/3290/)
 
 ## 10.2.0 (2025-04-02)
 
@@ -18,7 +19,6 @@
     - upgrade voluptuous to 0.15.2
     - replace StringDist by Levenshtein
   - Did not upgrade Flask (and its plugins), blinker and werkzeug yet
-- Compute quality score to show correct resources score in api v2 [#3290](https://github.com/opendatateam/udata/pull/3290/)
 
 ## 10.1.4 (2025-03-24)
 
