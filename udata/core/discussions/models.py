@@ -90,7 +90,11 @@ class Discussion(SpamMixin, db.Document):
         from udata.auth import Permission
         from udata.core.discussions.permissions import CloseDiscussionPermission
 
-        return {"delete": Permission(), "close": CloseDiscussionPermission(self)}
+        return {
+            "delete": Permission(),
+            "edit": CloseDiscussionPermission(self),
+            "close": CloseDiscussionPermission(self),
+        }
 
     @property
     def closed_by_name(self):

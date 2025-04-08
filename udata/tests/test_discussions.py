@@ -760,6 +760,39 @@ class DiscussionsTest(APITestCase):
         assert response.json["discussion"][1]["permissions"]["edit"]
         assert response.json["discussion"][1]["permissions"]["delete"]
 
+    def test_edit_discussion_title(self):
+        admin = self.login(AdminFactory())
+        user1 = UserFactory()
+        user2 = UserFactory()
+        dataset = Dataset.objects.create(title="Test dataset", owner=user1)
+        message = Message(content="bla bla", posted_by=user1)
+        message2 = Message(content="bla bla bla", posted_by=user2)
+        discussion = Discussion.objects.create(
+            subject=dataset, user=user1, title="test discussion", discussion=[message, message2]
+        )
+        self.assertEqual(len(discussion.discussion), 2)
+
+        response = self.put(url_for("api.discussion", id=discussion.id), {"title": "new title"})
+        self.assertStatus(response, 200)
+        discussion.reload()
+        assert discussion.title == "new title"
+
+        self.login(admin)
+        response = self.put(
+            url_for("api.discussion", id=discussion.id),
+            {"title": "edit by admin"},
+        )
+        self.assertStatus(response, 200)
+        discussion.reload()
+        assert discussion.title == "edit by admin"
+
+        self.login(user2)
+        response = self.put(
+            url_for("api.discussion", id=discussion.id),
+            {"title": "not allowed"},
+        )
+        self.assertStatus(response, 403)
+
     def test_edit_discussion_comment(self):
         admin = self.login(AdminFactory())
         user = UserFactory()

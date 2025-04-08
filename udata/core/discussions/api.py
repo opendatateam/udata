@@ -15,7 +15,12 @@ from udata.core.spam.fields import spam_fields
 from udata.core.user.api_fields import user_ref_fields
 from udata.utils import id_or_404
 
-from .forms import DiscussionCommentForm, DiscussionCreateForm, DiscussionEditCommentForm
+from .forms import (
+    DiscussionCommentForm,
+    DiscussionCreateForm,
+    DiscussionEditCommentForm,
+    DiscussionEditForm,
+)
 from .models import Discussion, Message
 from .signals import on_discussion_deleted
 
@@ -44,7 +49,7 @@ message_fields = api.model(
 
 discussion_permissions_fields = api.model(
     "DiscussionPermissions",
-    {"delete": fields.Permission(), "close": fields.Permission()},
+    {"delete": fields.Permission(), "edit": fields.Permission(), "close": fields.Permission()},
 )
 
 discussion_fields = api.model(
@@ -105,6 +110,13 @@ edit_comment_discussion_fields = api.model(
     "DiscussionEditComment",
     {
         "comment": fields.String(description="The new comment", required=True),
+    },
+)
+
+edit_discussion_fields = api.model(
+    "DiscussionEdit",
+    {
+        "title": fields.String(description="The new title", required=True),
     },
 )
 
@@ -201,6 +213,20 @@ class DiscussionAPI(API):
             discussion.signal_close(message=message_idx)
         else:
             discussion.signal_comment(message=message_idx)
+        return discussion
+
+    @api.doc("update_discussion")
+    @api.response(403, "Not allowed to update this discussion")
+    @api.expect(edit_comment_discussion_fields)
+    @api.marshal_with(discussion_fields)
+    def put(self, id):
+        """Update a discussion given its ID"""
+        discussion = Discussion.objects.get_or_404(id=id_or_404(id))
+        discussion.permissions["edit"].test()
+
+        form = api.validate(DiscussionEditForm, discussion)
+        form.save()
+
         return discussion
 
     @api.doc("delete_discussion")
