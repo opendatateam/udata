@@ -17,7 +17,7 @@ class Message(SpamMixin, db.EmbeddedDocument):
     posted_on = db.DateTimeField(default=datetime.utcnow, required=True)
     posted_by = db.ReferenceField("User")
     posted_by_organization = db.ReferenceField("Organization")
-    last_edit_at = db.DateTimeField(default=datetime.utcnow)
+    last_edit_at = db.DateTimeField()
 
     @property
     def permissions(self):
