@@ -98,21 +98,22 @@ class HarvestAPITest(MockBackendsMixin):
 
     def test_list_sources_paginate(self, api):
         total = 25
+        page_size = 20
         HarvestSourceFactory.create_batch(total)
 
-        url = url_for("api.harvest_sources", page=1, page_size=20)
+        url = url_for("api.harvest_sources", page=1, page_size=page_size)
         response = api.get(url)
         assert200(response)
-        assert len(response.json["data"]) == 20
+        assert len(response.json["data"]) == page_size
         assert response.json["total"] == total
 
-        url = url_for("api.harvest_sources", page=2, page_size=20)
+        url = url_for("api.harvest_sources", page=2, page_size=page_size)
         response = api.get(url)
         assert200(response)
-        assert len(response.json["data"]) == 5
+        assert len(response.json["data"]) == total - page_size
         assert response.json["total"] == total
 
-        url = url_for("api.harvest_sources", page=3, page_size=20)
+        url = url_for("api.harvest_sources", page=3, page_size=page_size)
         response = api.get(url)
         assert404(response)
 
