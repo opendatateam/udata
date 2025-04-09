@@ -263,10 +263,7 @@ validation_error_fields = api.model(
     {"errors": fields.Raw, "message": fields.String},
 )
 
-validation_error_fields_v2 = apiv2.model(
-    "ValidationError",
-    {"errors": fields.Raw, "message": fields.String},
-)
+validation_error_fields_v2 = apiv2.inherit("ValidationError", validation_error_fields)
 
 
 def convert_object_of_exceptions_to_object_of_strings(exceptions: dict):
