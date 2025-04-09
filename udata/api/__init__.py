@@ -258,10 +258,6 @@ def handle_unauthorized_file_type(error):
     return {"message": msg}, 400
 
 
-field_validation_error_fields = api.model(
-    "FieldValidationError",
-    {"errors": fields.Raw, "message": fields.String},
-)
 validation_error_fields = api.model(
     "ValidationError",
     {"errors": fields.Raw, "message": fields.String},
