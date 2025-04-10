@@ -14,7 +14,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.models import Dataset, PeriodicTask
 from udata.tests.helpers import assert_emit, assert_equal_dates
-from udata.utils import Paginable, faker
+from udata.utils import faker
 
 from .. import actions, signals
 from ..backends import BaseBackend
@@ -112,59 +112,6 @@ class HarvestActionsTest:
 
         for source in sources:
             assert source in result
-
-    def test_paginate_sources(self):
-        result = actions.paginate_sources()
-        assert isinstance(result, Paginable)
-        assert result.page == 1
-        assert result.page_size == actions.DEFAULT_PAGE_SIZE
-        assert result.total == 0
-        assert len(result.objects) == 0
-
-        HarvestSourceFactory.create_batch(3)
-
-        result = actions.paginate_sources(page_size=2)
-        assert isinstance(result, Paginable)
-        assert result.page == 1
-        assert result.page_size == 2
-        assert result.total == 3
-        assert len(result.objects) == 2
-
-        result = actions.paginate_sources(page=2, page_size=2)
-        assert isinstance(result, Paginable)
-        assert result.page == 2
-        assert result.page_size == 2
-        assert result.total == 3
-        assert len(result.objects) == 1
-
-    def test_paginate_sources_exclude_deleted(self):
-        HarvestSourceFactory.create_batch(2)
-        HarvestSourceFactory(deleted=datetime.utcnow())
-
-        result = actions.paginate_sources(page_size=2)
-        assert isinstance(result, Paginable)
-        assert result.page == 1
-        assert result.page_size == 2
-        assert result.total == 2
-        assert len(result.objects) == 2
-
-    def test_paginate_sources_include_deleted(self):
-        HarvestSourceFactory.create_batch(2)
-        HarvestSourceFactory(deleted=datetime.utcnow())
-
-        result = actions.paginate_sources(page_size=2, deleted=True)
-        assert isinstance(result, Paginable)
-        assert result.page == 1
-        assert result.page_size == 2
-        assert result.total == 3
-        assert len(result.objects) == 2
-
-        result = actions.paginate_sources(page=2, page_size=2, deleted=True)
-        assert isinstance(result, Paginable)
-        assert result.page == 2
-        assert result.page_size == 2
-        assert result.total == 3
-        assert len(result.objects) == 1
 
     def test_create_source(self):
         source_url = faker.url()

@@ -1,4 +1,3 @@
-from bson import ObjectId
 from flask import current_app, request
 from werkzeug.exceptions import BadRequest
 
@@ -253,6 +252,7 @@ source_parser.add_argument(
 source_parser.add_argument(
     "deleted", type=bool, location="args", default=False, help="Include sources flaggued as deleted"
 )
+source_parser.add_argument("q", type=str, location="args", help="The search query")
 
 
 @ns.route("/sources/", endpoint="harvest_sources")
@@ -264,15 +264,19 @@ class SourcesAPI(API):
         """List all harvest sources"""
         args = source_parser.parse_args()
 
-        if args.get("owner") and not ObjectId.is_valid(args.get("owner")):
-            api.abort(400, "`owner` arg must be an identifier")
+        sources = HarvestSource.objects()
 
-        return actions.paginate_sources(
-            args.get("owner"),
-            page=args["page"],
-            page_size=args["page_size"],
-            deleted=args["deleted"],
-        )
+        if not args["deleted"]:
+            sources = sources.visible()
+
+        if args["owner"]:
+            sources = sources.owned_by(args["owner"])
+
+        if args["q"]:
+            phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
+            sources = sources.search_text(phrase_query)
+
+        return sources.paginate(args["page"], args["page_size"])
 
     @api.secure
     @api.doc("create_harvest_source")
