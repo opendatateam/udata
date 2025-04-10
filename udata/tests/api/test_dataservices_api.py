@@ -431,9 +431,7 @@ class DataserviceAPITest(APITestCase):
             },
         )
         self.assert400(response)
-        self.assertEqual(
-            response.json["errors"]["license"], ["Unknown reference 'unwkown-license'"]
-        )
+        self.assertEqual(response.json["errors"]["license"], "Unknown reference 'unwkown-license'")
         self.assertEqual(Dataservice.objects.count(), 0)
 
     def test_dataservice_api_create_with_unkwown_contact_point(self):
@@ -450,7 +448,7 @@ class DataserviceAPITest(APITestCase):
         self.assert400(response)
         self.assertEqual(
             response.json["errors"]["contact_points"],
-            ["Unknown reference '66212433e42ab56639ad516e'"],
+            "Unknown reference '66212433e42ab56639ad516e'",
         )
         self.assertEqual(Dataservice.objects.count(), 0)
 
@@ -472,9 +470,8 @@ class DataserviceAPITest(APITestCase):
             },
         )
         self.assert400(response)
-        self.assertEqual(
-            response.json["errors"]["owner"], [_("You can only set yourself as owner")]
-        )
+        print(response.json)
+        self.assertEqual(response.json["errors"]["owner"], _("You can only set yourself as owner"))
         self.assertEqual(Dataservice.objects.count(), 0)
 
         response = self.post(
@@ -487,7 +484,7 @@ class DataserviceAPITest(APITestCase):
         )
         self.assert400(response)
         self.assertEqual(
-            response.json["errors"]["organization"], [_("Permission denied for this organization")]
+            response.json["errors"]["organization"], _("Permission denied for this organization")
         )
         self.assertEqual(Dataservice.objects.count(), 0)
 

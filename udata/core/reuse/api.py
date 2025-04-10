@@ -125,10 +125,7 @@ class ReuseListAPI(API):
         if not reuse.owner and not reuse.organization:
             reuse.owner = current_user._get_current_object()
 
-        try:
-            reuse.save()
-        except mongoengine.errors.ValidationError as e:
-            api.abort(400, e.message)
+        reuse.save()
 
         return patch_and_save(reuse, request), 201
 
