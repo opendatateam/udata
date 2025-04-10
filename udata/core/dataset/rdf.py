@@ -5,7 +5,7 @@ This module centralize dataset helpers for RDF/DCAT serialization and parsing
 import calendar
 import json
 import logging
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 
 from dateutil.parser import parse as parse_dt
@@ -50,7 +50,7 @@ from udata.rdf import (
     url_from_rdf,
 )
 from udata.uris import endpoint_for
-from udata.utils import get_by, safe_unicode
+from udata.utils import get_by, safe_unicode, to_naive_datetime
 
 from .constants import OGC_SERVICE_FORMATS, UPDATE_FREQUENCIES
 from .models import Checksum, Dataset, License, Resource
@@ -722,6 +722,10 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
             resource.checksum.type = algorithm
     if is_additionnal:
         resource.type = "other"
+    elif distrib.value(DCAT.accessService):
+        # The distribution has a DCAT.accessService property, we deduce
+        # that the distribution is of type API
+        resource.type = "api"
 
     identifier = rdf_value(distrib, DCT.identifier)
     uri = distrib.identifier.toPython() if isinstance(distrib.identifier, URIRef) else None
@@ -731,7 +735,14 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     if not resource.harvest:
         resource.harvest = HarvestResourceMetadata()
     resource.harvest.created_at = created_at
-    resource.harvest.modified_at = modified_at
+
+    # In the past, we've encountered future `modified_at` during harvesting
+    # do not save it. :FutureHarvestModifiedAt
+    if modified_at and to_naive_datetime(modified_at) > datetime.utcnow():
+        log.warning(f"Future `DCT.modified` date '{modified_at}' in resource")
+    else:
+        resource.harvest.modified_at = modified_at
+
     resource.harvest.dct_identifier = identifier
     resource.harvest.uri = uri
 
@@ -751,6 +762,8 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
 
     dataset.title = rdf_value(d, DCT.title)
     if not dataset.title:
+        # If the dataset is externaly defined (so without title and just with a link to the dataset XML)
+        # we should have skipped it way before in :ExcludeExternalyDefinedDataset
         raise HarvestSkipException("missing title on dataset")
 
     # Support dct:abstract if dct:description is missing (sometimes used instead)
@@ -830,7 +843,13 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
     dataset.harvest.uri = uri
     dataset.harvest.remote_url = remote_url
     dataset.harvest.created_at = created_at
-    dataset.harvest.modified_at = modified_at
+
+    # In the past, we've encountered future `modified_at` during harvesting
+    # do not save it. :FutureHarvestModifiedAt
+    if modified_at and to_naive_datetime(modified_at) > datetime.utcnow():
+        log.warning(f"Future `DCT.modified` date '{modified_at}' in dataset")
+    else:
+        dataset.harvest.modified_at = modified_at
 
     return dataset
 

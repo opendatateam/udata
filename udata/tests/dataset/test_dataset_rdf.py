@@ -483,6 +483,24 @@ class RdfToDatasetTest:
         assert isinstance(dataset, Dataset)
         assert dataset.description == "a description"
 
+    def test_future_modified_at(self):
+        node = BNode()
+        g = Graph()
+
+        modified = faker.future_datetime()
+
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.identifier, Literal(faker.uuid4())))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        g.add((node, DCT.description, Literal("<div>a description</div>")))
+        g.add((node, DCT.modified, Literal(modified)))
+
+        dataset = dataset_from_rdf(g)
+        dataset.validate()
+
+        assert isinstance(dataset, Dataset)
+        assert dataset.harvest.modified_at is None
+
     def test_theme_and_tags(self):
         node = BNode()
         g = Graph()

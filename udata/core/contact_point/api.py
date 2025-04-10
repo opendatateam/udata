@@ -1,5 +1,3 @@
-import mongoengine
-
 from udata.api import API, api
 from udata.api.parsers import ModelApiParser
 from udata.core.dataset.permissions import OwnablePermission
@@ -33,10 +31,8 @@ class ContactPointsListAPI(API):
     def post(self):
         """Creates a contact point"""
         form = api.validate(ContactPointForm)
-        try:
-            contact_point = form.save()
-        except mongoengine.errors.ValidationError as e:
-            api.abort(400, e.message)
+        contact_point = form.save()
+
         return contact_point, 201
 
 

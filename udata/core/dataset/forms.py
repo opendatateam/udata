@@ -54,7 +54,7 @@ class SchemaForm(ModelForm):
             )
         except FieldValidationError as err:
             field = getattr(self, err.field)
-            field.errors.append(err.message)
+            field.errors.append(str(err))
             return False
 
         return validation

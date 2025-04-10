@@ -45,11 +45,7 @@ class DataservicesAPI(API):
         if not dataservice.owner and not dataservice.organization:
             dataservice.owner = current_user._get_current_object()
 
-        try:
-            dataservice.save()
-        except mongoengine.errors.ValidationError as e:
-            api.abort(400, e.message)
-
+        dataservice.save()
         return dataservice, 201
 
 
@@ -78,11 +74,8 @@ class DataserviceAPI(API):
         patch(dataservice, request)
         dataservice.metadata_modified_at = datetime.utcnow()
 
-        try:
-            dataservice.save()
-            return dataservice
-        except mongoengine.errors.ValidationError as e:
-            api.abort(400, e.message)
+        dataservice.save()
+        return dataservice
 
     @api.secure
     @api.doc("delete_dataservice")
