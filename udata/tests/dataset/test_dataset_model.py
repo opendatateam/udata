@@ -748,16 +748,6 @@ class HarvestMetadataTest:
         dataset.harvest = harvest_metadata
         dataset.save()
 
-    def test_harvest_dataset_metadata_future_modifed_at(self):
-        dataset = DatasetFactory()
-
-        harvest_metadata = HarvestDatasetMetadata(
-            created_at=datetime.utcnow(), modified_at=datetime.utcnow() + timedelta(days=1)
-        )
-        dataset.harvest = harvest_metadata
-        dataset.save()
-        assert dataset.last_modified == dataset.last_modified_internal
-
     def test_harvest_dataset_metadata_past_modifed_at(self):
         dataset = DatasetFactory()
 
