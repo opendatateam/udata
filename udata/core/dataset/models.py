@@ -384,7 +384,7 @@ class ResourceMixin(object):
             return to_naive_datetime(self.harvest.modified_at)
         if self.filetype == "remote" and self.extras.get("analysis:last-modified-at"):
             return to_naive_datetime(self.extras.get("analysis:last-modified-at"))
-        return self.last_modified_internal
+        return to_naive_datetime(self.last_modified_internal)
 
     def clean(self):
         super(ResourceMixin, self).clean()
@@ -565,6 +565,8 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
     extras = db.ExtrasField()
     harvest = db.EmbeddedDocumentField(HarvestDatasetMetadata)
 
+    quality_cached = db.DictField()
+
     featured = db.BooleanField(required=True, default=False)
 
     contact_points = db.ListField(db.ReferenceField("ContactPoint", reverse_delete_rule=db.PULL))
@@ -672,6 +674,8 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         if len(set(res.id for res in self.resources)) != len(self.resources):
             raise MongoEngineValidationError(f"Duplicate resource ID in dataset #{self.id}.")
 
+        self.quality_cached = self.compute_quality()
+
         for key, value in self.extras.items():
             if not key.startswith("custom:"):
                 continue
@@ -763,13 +767,9 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
 
     @property
     def last_modified(self):
-        if (
-            self.harvest
-            and self.harvest.modified_at
-            and to_naive_datetime(self.harvest.modified_at) < datetime.utcnow()
-        ):
+        if self.harvest and self.harvest.modified_at:
             return to_naive_datetime(self.harvest.modified_at)
-        return self.last_modified_internal
+        return to_naive_datetime(self.last_modified_internal)
 
     @property
     def last_update(self):
@@ -824,8 +824,34 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         else:
             return self.last_update + delta
 
-    @cached_property
+    @property
     def quality(self):
+        # `quality_cached` should always be set, except during the migration
+        # creating this property. We could remove `or self.compute_quality()`
+        # after the migration but since we need to keep the computed property for
+        # `update_fulfilled_in_time`, maybe we leave it here? Just in case?
+        quality = self.quality_cached or self.compute_quality()
+
+        # :UpdateFulfilledInTime
+        # `next_update_for_update_fulfilled_in_time` is only useful to compute the
+        # real `update_fulfilled_in_time` check, so we pop it to not polute the `quality`
+        # object for users.
+        next_update = quality.pop("next_update_for_update_fulfilled_in_time", None)
+        if next_update:
+            # Allow for being one day late on update.
+            # We may have up to one day delay due to harvesting for example
+            quality["update_fulfilled_in_time"] = (next_update - datetime.utcnow()).days >= -1
+        elif self.frequency in ["continuous", "irregular", "punctual"]:
+            # For these frequencies, we don't expect regular updates or can't quantify them.
+            # Thus we consider the update_fulfilled_in_time quality criterion to be true.
+            quality["update_fulfilled_in_time"] = True
+
+        # Since `update_fulfilled_in_time` cannot be precomputed, `score` cannot either.
+        quality["score"] = self.compute_quality_score(quality)
+
+        return quality
+
+    def compute_quality(self):
         """Return a dict filled with metrics related to the inner
 
         quality of the dataset:
@@ -835,25 +861,18 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             * and so on
         """
         result = {}
-        if not self.id:
-            # Quality is only relevant on saved Datasets
-            return result
 
         result["license"] = True if self.license else False
         result["temporal_coverage"] = True if self.temporal_coverage else False
         result["spatial"] = True if self.spatial else False
 
         result["update_frequency"] = self.frequency and self.frequency != "unknown"
-        if self.next_update:
-            # Allow for being one day late on update.
-            # We may have up to one day delay due to harvesting for example
-            result["update_fulfilled_in_time"] = (
-                True if (self.next_update - datetime.utcnow()).days >= -1 else False
-            )
-        elif self.frequency in ["continuous", "irregular", "punctual"]:
-            # For these frequencies, we don't expect regular updates or can't quantify them.
-            # Thus we consider the update_fulfilled_in_time quality criterion to be true.
-            result["update_fulfilled_in_time"] = True
+
+        # We only save the next_update here because it is based on resources
+        # We cannot save the `update_fulfilled_in_time` because it is time
+        # sensitive (so setting it on save is not really useful…)
+        # See :UpdateFulfilledInTime
+        result["next_update_for_update_fulfilled_in_time"] = self.next_update
 
         result["dataset_description_quality"] = (
             True
@@ -876,7 +895,6 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
                     resource_desc = True
             result["resources_documentation"] = resource_doc or resource_desc
 
-        result["score"] = self.compute_quality_score(result)
         return result
 
     @property
@@ -934,8 +952,16 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         if resource.id in [r.id for r in self.resources]:
             raise MongoEngineValidationError("Cannot add resource with already existing ID")
 
+        self.resources.insert(0, resource)
         self.update(
-            __raw__={"$push": {"resources": {"$each": [resource.to_mongo()], "$position": 0}}}
+            __raw__={
+                "$set": {
+                    "quality_cached": self.compute_quality(),
+                },
+                "$push": {
+                    "resources": {"$each": [resource.to_mongo()], "$position": 0},
+                },
+            }
         )
         self.reload()
         self.on_resource_added.send(self.__class__, document=self, resource_id=resource.id)
