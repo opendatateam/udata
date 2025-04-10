@@ -42,7 +42,7 @@ def notify_new_discussion_comment(discussion_id, message=None):
     if isinstance(discussion.subject, NOTIFY_DISCUSSION_SUBJECTS):
         recipients = owner_recipients(discussion) + [m.posted_by for m in discussion.discussion]
         recipients = list({u.id: u for u in recipients if u != message.posted_by}.values())
-        subject = _("%(user)s commented your discussion", user=message.posted_by.fullname)
+        subject = _("%(user)s commented your discussion", user=message.posted_by_name)
 
         mail.send(
             subject, recipients, "new_discussion_comment", discussion=discussion, message=message
@@ -54,10 +54,10 @@ def notify_new_discussion_comment(discussion_id, message=None):
 @connect(on_discussion_closed, by_id=True)
 def notify_discussion_closed(discussion_id, message=None):
     discussion = Discussion.objects.get(pk=discussion_id)
-    message = discussion.discussion[message]
+    message = discussion.discussion[message] if message else None
     if isinstance(discussion.subject, NOTIFY_DISCUSSION_SUBJECTS):
         recipients = owner_recipients(discussion) + [m.posted_by for m in discussion.discussion]
-        recipients = list({u.id: u for u in recipients if u != message.posted_by}.values())
+        recipients = list({u.id: u for u in recipients if u != discussion.closed_by}.values())
         subject = _("A discussion has been closed")
         mail.send(subject, recipients, "discussion_closed", discussion=discussion, message=message)
     else:

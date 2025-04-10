@@ -7,9 +7,9 @@
         type=discussion.subject.verbose_name,
         user=(
             '<a href="'|safe
-            + message.posted_by.external_url_with_campaign
+            + message.posted_by_org_or_user.external_url_with_campaign
             + '">'|safe
-            + message.posted_by.fullname
+            + message.posted_by_name
             + '</a>'|safe
         ),
         subject=(

@@ -68,6 +68,14 @@ class UrlFor(String):
         )
 
 
+class Permission(Boolean):
+    def __init__(self, mapper=None, **kwargs):
+        super(Permission, self).__init__(**kwargs)
+
+    def format(self, field):
+        return field.can()
+
+
 class NextPageUrl(String):
     def output(self, key, obj, **kwargs):
         if not getattr(obj, "has_next", None):

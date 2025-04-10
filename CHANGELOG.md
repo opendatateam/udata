@@ -7,6 +7,7 @@
 - Add search to harvest sources [#3296](https://github.com/opendatateam/udata/pull/3296)
 - Refactor error management [#3292](https://github.com/opendatateam/udata/pull/3292)
 - Compute quality score to show correct resources score in api v2 [#3290](https://github.com/opendatateam/udata/pull/3290/)
+- Publish on behalf of org, close without message and edit/delete discussions comments [#382](https://github.com/datagouv/cdata/pull/382/)
 
 ## 10.2.0 (2025-04-02)
 

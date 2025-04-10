@@ -193,6 +193,10 @@ def spam_protected(get_model_to_check=None):
             base_model = args[0]
             if get_model_to_check:
                 model_to_check = get_model_to_check(*args, **kwargs)
+
+                if not model_to_check:
+                    f(*args, **kwargs)
+                    return
             else:
                 model_to_check = base_model
 
