@@ -140,7 +140,7 @@ def get_queryset(model_cls):
     if model_cls.__name__ == "Resource":
         model_cls = getattr(udata_models, "Dataset")
     params = {}
-    attrs = ("private", "deleted")
+    attrs = ("private", "deleted", "deleted_at")
     for attr in attrs:
         if getattr(model_cls, attr, None):
             params[attr] = False

@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Exclude deleted dataservices in csv queryset [#3297](https://github.com/opendatateam/udata/pull/3297)
 
 ## 10.3.0 (2025-04-11)
 
