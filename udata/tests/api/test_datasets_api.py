@@ -198,6 +198,13 @@ class DatasetAPITest(APITestCase):
             ]
         )
 
+        total_datasets = Dataset.objects().count()
+
+        # no filter
+        response = self.get(url_for("api.datasets"))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), total_datasets)
+
         # filter on tag
         response = self.get(url_for("api.datasets", tag="my-tag-shared"))
         self.assert200(response)
@@ -220,10 +227,15 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(response.json["data"][0]["id"], str(format_dataset.id))
 
         # filter on featured
-        response = self.get(url_for("api.datasets", featured="true"))
+        response = self.get(url_for("api.datasets", featured=True))
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(response.json["data"][0]["id"], str(featured_dataset.id))
+
+        response = self.get(url_for("api.datasets", featured=False))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), total_datasets - 1)
+        self.assertNotIn(str(featured_dataset.id), (data["id"] for data in response.json["data"]))
 
         # filter on license
         response = self.get(url_for("api.datasets", license="cc-by"))
@@ -304,6 +316,88 @@ class DatasetAPITest(APITestCase):
         # filter on non id for topic
         response = self.get(url_for("api.datasets", topic="xxx"))
         self.assert400(response)
+
+    def test_dataset_api_list_with_restricted_filters(self):
+        owner = UserFactory()
+        org = OrganizationFactory(members=[Member(user=owner)])
+
+        public_datasets = [DatasetFactory() for i in range(2)]
+        private_datasets = [DatasetFactory(organization=org, private=True) for i in range(3)]
+        archived_datasets = [
+            DatasetFactory(organization=org, archived=datetime.utcnow()) for i in range(4)
+        ]
+        deleted_datasets = [
+            DatasetFactory(organization=org, deleted=datetime.utcnow()) for i in range(5)
+        ]
+        total_datasets = (
+            len(public_datasets)
+            + len(private_datasets)
+            + len(archived_datasets)
+            + len(deleted_datasets)
+        )
+
+        # only 3 visible datasets for anonymous user
+        response = self.get(url_for("api.datasets"))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), len(public_datasets))
+
+        # anonmyous user can't filter on restricted params
+        response = self.get(url_for("api.datasets", private=True))
+        self.assert401(response)
+
+        response = self.get(url_for("api.datasets", archived=True))
+        self.assert401(response)
+
+        response = self.get(url_for("api.datasets", deleted=True))
+        self.assert401(response)
+
+        # owner sees all their datasets
+        self.login(owner)
+        response = self.get(url_for("api.datasets"))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), total_datasets)
+
+        # filter on private only datasets
+        response = self.get(url_for("api.datasets", private=True))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), len(private_datasets))
+        self.assertIn(str(private_datasets[0].id), (data["id"] for data in response.json["data"]))
+
+        # filter out private datasets
+        response = self.get(url_for("api.datasets", private=False))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), total_datasets - len(private_datasets))
+        self.assertNotIn(
+            str(private_datasets[0].id), (data["id"] for data in response.json["data"])
+        )
+
+        # filter on archived only datasets
+        response = self.get(url_for("api.datasets", archived=True))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), len(archived_datasets))
+        self.assertIn(str(archived_datasets[0].id), (data["id"] for data in response.json["data"]))
+
+        # filter out archived datasets
+        response = self.get(url_for("api.datasets", archived=False))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), total_datasets - len(archived_datasets))
+        self.assertNotIn(
+            str(archived_datasets[0].id), (data["id"] for data in response.json["data"])
+        )
+
+        # filter on deleted only datasets
+        response = self.get(url_for("api.datasets", deleted=True))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), len(deleted_datasets))
+        self.assertIn(str(deleted_datasets[0].id), (data["id"] for data in response.json["data"]))
+
+        # filter out deleted datasets
+        response = self.get(url_for("api.datasets", deleted=False))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), total_datasets - len(deleted_datasets))
+        self.assertNotIn(
+            str(deleted_datasets[0].id), (data["id"] for data in response.json["data"])
+        )
 
     def test_dataset_api_list_owned(self) -> None:
         """Should filter out private datasets if not owner"""
