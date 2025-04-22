@@ -2,6 +2,10 @@
 
 ## Current (in progress)
 
+- Exclude deleted dataservices in csv queryset [#3297](https://github.com/opendatateam/udata/pull/3297)
+
+## 10.3.0 (2025-04-11)
+
 - Skip empty datasets nodes referenced in dataservices before creating an harvest job item [#3285](https://github.com/opendatateam/udata/pull/3285)
 - Harvest Distribution with a DCAT.accessService property as type `api` [#3294](https://github.com/opendatateam/udata/pull/3294)
 - Add search to harvest sources [#3296](https://github.com/opendatateam/udata/pull/3296)
