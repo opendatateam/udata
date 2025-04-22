@@ -99,7 +99,12 @@ class DatasetApiParser(ModelApiParser):
         super().__init__()
         self.parser.add_argument("tag", type=str, location="args", action="append")
         self.parser.add_argument("license", type=str, location="args")
-        self.parser.add_argument("featured", type=boolean, location="args")
+        self.parser.add_argument(
+            "featured",
+            type=boolean,
+            location="args",
+            help="If set to true, it will filter on featured datasets only. If set to false, it will exclude featured datasets.",
+        )
         self.parser.add_argument("geozone", type=str, location="args")
         self.parser.add_argument("granularity", type=str, location="args")
         self.parser.add_argument("temporal_coverage", type=str, location="args")
