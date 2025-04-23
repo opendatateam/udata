@@ -3,7 +3,7 @@
 ## Current (in progress)
 
 - Exclude deleted dataservices in csv queryset [#3297](https://github.com/opendatateam/udata/pull/3297)
-- Publish on behalf of org, close without message and edit/delete discussions comments [#382](https://github.com/datagouv/cdata/pull/382/)
+- Publish comments on behalf of org, close without message and edit/delete discussions comments [#3295](https://github.com/opendatateam/udata/pull/3295)
 
 ## 10.3.0 (2025-04-11)
 
