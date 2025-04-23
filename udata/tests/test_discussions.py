@@ -747,7 +747,7 @@ class DiscussionsTest(APITestCase):
         response = self.get(url_for("api.discussion", id=discussion.id))
         assert not response.json["permissions"]["edit"]
         assert response.json["permissions"]["close"]
-        assert response.json["permissions"]["delete"]
+        assert not response.json["permissions"]["delete"]
         assert not response.json["discussion"][0]["permissions"]["edit"]
         assert not response.json["discussion"][0]["permissions"]["delete"]
         assert not response.json["discussion"][1]["permissions"]["edit"]
@@ -811,7 +811,7 @@ class DiscussionsTest(APITestCase):
         response = self.get(url_for("api.discussion", id=discussion_by_org.id))
         assert not response.json["permissions"]["edit"]
         assert response.json["permissions"]["close"]
-        assert response.json["permissions"]["delete"]
+        assert not response.json["permissions"]["delete"]
         assert not response.json["discussion"][0]["permissions"]["edit"]
         assert not response.json["discussion"][0]["permissions"]["delete"]
 

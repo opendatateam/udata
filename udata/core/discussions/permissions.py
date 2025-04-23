@@ -8,6 +8,9 @@ from udata.core.organization.permissions import (
 from .models import Discussion, Message
 
 
+# This is a hack to because double inheritance doesn't work really well with permissions.
+# I simulate a class constructor with a function to keep the same API than other permissions
+# but use the `.union()` of two permission under the hood.
 def DiscussionAuthorOrSubjectOwnerPermission(discussion: Discussion):
     return OwnablePermission(discussion.subject).union(DiscussionAuthorPermission(discussion))
 

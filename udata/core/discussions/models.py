@@ -93,7 +93,7 @@ class Discussion(SpamMixin, db.Document):
         )
 
         return {
-            "delete": DiscussionAuthorOrSubjectOwnerPermission(self),
+            "delete": DiscussionAuthorPermission(self),
             # To edit the title of a discussion we need to be the owner of the first message
             "edit": DiscussionAuthorPermission(self),
             "close": DiscussionAuthorOrSubjectOwnerPermission(self),
