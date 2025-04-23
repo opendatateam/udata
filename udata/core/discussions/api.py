@@ -41,7 +41,7 @@ message_fields = api.model(
             org_ref_fields, description="The organization to show to users", allow_null=True
         ),
         "posted_on": fields.ISODateTime(description="The message posting date"),
-        "last_edit_at": fields.ISODateTime(description="The message last edit date"),
+        "last_modified_at": fields.ISODateTime(description="The message last edit date"),
         "spam": fields.Nested(spam_fields),
         "permissions": fields.Nested(message_permissions_fields),
     },
@@ -275,7 +275,7 @@ class DiscussionCommentAPI(API):
         form = api.validate(DiscussionEditCommentForm)
 
         discussion.discussion[cidx].content = form.comment.data
-        discussion.discussion[cidx].last_edit_at = datetime.utcnow()
+        discussion.discussion[cidx].last_modified_at = datetime.utcnow()
         discussion.save()
         return discussion
 
