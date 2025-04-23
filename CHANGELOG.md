@@ -4,6 +4,7 @@
 
 - Add archived, deleted and private filter in dataset list api [#3298](https://github.com/opendatateam/udata/pull/3298)
 - Exclude deleted dataservices in csv queryset [#3297](https://github.com/opendatateam/udata/pull/3297)
+- Migrate MAAF backend from udata-front [#3300](https://github.com/opendatateam/udata/pull/3300)
 
 ## 10.3.0 (2025-04-11)
 
