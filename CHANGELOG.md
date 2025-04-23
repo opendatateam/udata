@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Add archived, deleted and private filter in dataset list api [#3298](https://github.com/opendatateam/udata/pull/3298)
 - Exclude deleted dataservices in csv queryset [#3297](https://github.com/opendatateam/udata/pull/3297)
 - Publish comments on behalf of org, close without message and edit/delete discussions comments [#3295](https://github.com/opendatateam/udata/pull/3295)
 

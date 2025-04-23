@@ -24,6 +24,7 @@ from datetime import datetime
 import mongoengine
 from bson.objectid import ObjectId
 from flask import abort, current_app, make_response, redirect, request, url_for
+from flask_restx.inputs import boolean
 from flask_security import current_user
 from mongoengine.queryset.visitor import Q
 
@@ -98,7 +99,12 @@ class DatasetApiParser(ModelApiParser):
         super().__init__()
         self.parser.add_argument("tag", type=str, location="args", action="append")
         self.parser.add_argument("license", type=str, location="args")
-        self.parser.add_argument("featured", type=bool, location="args")
+        self.parser.add_argument(
+            "featured",
+            type=boolean,
+            location="args",
+            help="If set to true, it will filter on featured datasets only. If set to false, it will exclude featured datasets.",
+        )
         self.parser.add_argument("geozone", type=str, location="args")
         self.parser.add_argument("granularity", type=str, location="args")
         self.parser.add_argument("temporal_coverage", type=str, location="args")
@@ -116,6 +122,24 @@ class DatasetApiParser(ModelApiParser):
         self.parser.add_argument("topic", type=str, location="args")
         self.parser.add_argument("credit", type=str, location="args")
         self.parser.add_argument("dataservice", type=str, location="args")
+        self.parser.add_argument(
+            "archived",
+            type=boolean,
+            location="args",
+            help="If set to true, it will filter on archived datasets only. If set to false, it will exclude archived datasets. User must be authenticated and results are limited to user visibility",
+        )
+        self.parser.add_argument(
+            "deleted",
+            type=boolean,
+            location="args",
+            help="If set to true, it will filter on deleted datasets only. If set to false, it will exclude deleted datasets. User must be authenticated and results are limited to user visibility",
+        )
+        self.parser.add_argument(
+            "private",
+            type=boolean,
+            location="args",
+            help="If set to true, it will filter on private datasets only. If set to false, it will exclude private datasets. User must be authenticated and results are limited to user visibility",
+        )
 
     @staticmethod
     def parse_filters(datasets, args):
@@ -139,7 +163,7 @@ class DatasetApiParser(ModelApiParser):
                 temporal_coverage__start__gte=args["temporal_coverage"][:9],
                 temporal_coverage__start__lte=args["temporal_coverage"][11:],
             )
-        if args.get("featured"):
+        if args.get("featured") is not None:
             datasets = datasets.filter(featured=args["featured"])
         if args.get("organization"):
             if not ObjectId.is_valid(args["organization"]):
@@ -176,6 +200,24 @@ class DatasetApiParser(ModelApiParser):
                 pass
             else:
                 datasets = datasets.filter(id__in=[d.id for d in dataservice.datasets])
+        if args.get("archived") is not None:
+            if current_user.is_anonymous:
+                abort(401)
+            if args["archived"] is True:
+                datasets = datasets.filter(archived__exists=True)
+            else:
+                datasets = datasets.filter(archived=None)
+        if args.get("deleted") is not None:
+            if current_user.is_anonymous:
+                abort(401)
+            if args["deleted"] is True:
+                datasets = datasets.filter(deleted__exists=True)
+            else:
+                datasets = datasets.filter(deleted=None)
+        if args.get("private") is not None:
+            if current_user.is_anonymous:
+                abort(401)
+            datasets = datasets.filter(private=args["private"])
         return datasets
 
 
