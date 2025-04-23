@@ -87,13 +87,16 @@ class Discussion(SpamMixin, db.Document):
 
     @property
     def permissions(self):
-        from udata.auth import Permission
-        from udata.core.discussions.permissions import CloseDiscussionPermission
+        from udata.core.discussions.permissions import (
+            DiscussionAuthorOrSubjectOwnerPermission,
+            DiscussionAuthorPermission,
+        )
 
         return {
-            "delete": Permission(),
-            "edit": CloseDiscussionPermission(self),
-            "close": CloseDiscussionPermission(self),
+            "delete": DiscussionAuthorOrSubjectOwnerPermission(self),
+            # To edit the title of a discussion we need to be the owner of the first message
+            "edit": DiscussionAuthorPermission(self),
+            "close": DiscussionAuthorOrSubjectOwnerPermission(self),
         }
 
     @property

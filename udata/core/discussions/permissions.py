@@ -1,30 +1,38 @@
 from udata.auth import Permission, UserNeed
+from udata.core.dataset.permissions import OwnablePermission
 from udata.core.organization.permissions import (
     OrganizationAdminNeed,
     OrganizationEditorNeed,
 )
 
-from .models import Message
+from .models import Discussion, Message
 
 
-class CloseDiscussionPermission(Permission):
-    def __init__(self, discussion):
+def DiscussionAuthorOrSubjectOwnerPermission(discussion: Discussion):
+    return OwnablePermission(discussion.subject).union(DiscussionAuthorPermission(discussion))
+
+
+class DiscussionAuthorPermission(Permission):
+    def __init__(self, discussion: Discussion):
         needs = []
-        subject = discussion.subject
 
-        if getattr(subject, "organization", None):
-            needs.append(OrganizationAdminNeed(subject.organization.id))
-            needs.append(OrganizationEditorNeed(subject.organization.id))
-        elif subject.owner:
-            needs.append(UserNeed(subject.owner.fs_uniquifier))
+        if discussion.organization:
+            needs.append(OrganizationAdminNeed(discussion.organization.id))
+            needs.append(OrganizationEditorNeed(discussion.organization.id))
+        else:
+            needs.append(UserNeed(discussion.user.fs_uniquifier))
 
-        super(CloseDiscussionPermission, self).__init__(*needs)
+        super(DiscussionAuthorPermission, self).__init__(*needs)
 
 
 class DiscussionMessagePermission(Permission):
     def __init__(self, message: Message):
         needs = []
 
-        needs.append(UserNeed(message.posted_by.fs_uniquifier))
+        if message.posted_by_organization:
+            needs.append(OrganizationAdminNeed(message.posted_by_organization.id))
+            needs.append(OrganizationEditorNeed(message.posted_by_organization.id))
+        else:
+            needs.append(UserNeed(message.posted_by.fs_uniquifier))
 
         super(DiscussionMessagePermission, self).__init__(*needs)

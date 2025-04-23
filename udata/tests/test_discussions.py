@@ -632,7 +632,7 @@ class DiscussionsTest(APITestCase):
                 url_for("api.discussion", id=discussion.id),
                 {"comment": "close bla bla", "close": True},
             )
-        self.assert200(response)
+            self.assert200(response)
 
         dataset.reload()
         self.assertEqual(dataset.get_metrics()["discussions"], 0)
@@ -713,52 +713,131 @@ class DiscussionsTest(APITestCase):
 
     def test_discussion_permissions(self):
         admin = AdminFactory()
-        owner = UserFactory()
+        subject_owner = UserFactory()
         user1 = UserFactory()
         user2 = UserFactory()
-        dataset = Dataset.objects.create(title="Test dataset", owner=owner)
+        user3 = UserFactory()
+        org = OrganizationFactory(
+            members=[Member(user=user1, role="editor"), Member(user=user2, role="editor")]
+        )
+        dataset = Dataset.objects.create(title="Test dataset", owner=subject_owner)
         message = Message(content="bla bla", posted_by=user1)
         message2 = Message(content="bla bla bla", posted_by=user2)
+        message3 = Message(content="bla bla bla", posted_by=user2, posted_by_organization=org)
         discussion = Discussion.objects.create(
-            subject=dataset, user=user1, title="test discussion", discussion=[message, message2]
+            subject=dataset,
+            user=user1,
+            title="test discussion",
+            discussion=[message, message2, message3],
         )
-        self.assertEqual(len(discussion.discussion), 2)
 
         self.login(admin)
         response = self.get(url_for("api.discussion", id=discussion.id))
+        assert response.json["permissions"]["edit"]
         assert response.json["permissions"]["close"]
         assert response.json["permissions"]["delete"]
         assert response.json["discussion"][0]["permissions"]["edit"]
         assert response.json["discussion"][0]["permissions"]["delete"]
         assert response.json["discussion"][1]["permissions"]["edit"]
         assert response.json["discussion"][1]["permissions"]["delete"]
+        assert response.json["discussion"][2]["permissions"]["edit"]
+        assert response.json["discussion"][2]["permissions"]["delete"]
 
-        self.login(owner)
+        self.login(subject_owner)
         response = self.get(url_for("api.discussion", id=discussion.id))
+        assert not response.json["permissions"]["edit"]
         assert response.json["permissions"]["close"]
-        assert not response.json["permissions"]["delete"]
+        assert response.json["permissions"]["delete"]
         assert not response.json["discussion"][0]["permissions"]["edit"]
         assert not response.json["discussion"][0]["permissions"]["delete"]
         assert not response.json["discussion"][1]["permissions"]["edit"]
         assert not response.json["discussion"][1]["permissions"]["delete"]
+        assert not response.json["discussion"][2]["permissions"]["edit"]
+        assert not response.json["discussion"][2]["permissions"]["delete"]
 
         self.login(user1)
         response = self.get(url_for("api.discussion", id=discussion.id))
-        assert not response.json["permissions"]["close"]
-        assert not response.json["permissions"]["delete"]
+        assert response.json["permissions"]["edit"]
+        assert response.json["permissions"]["close"]
+        assert response.json["permissions"]["delete"]
         assert response.json["discussion"][0]["permissions"]["edit"]
         assert response.json["discussion"][0]["permissions"]["delete"]
         assert not response.json["discussion"][1]["permissions"]["edit"]
         assert not response.json["discussion"][1]["permissions"]["delete"]
+        assert response.json["discussion"][2]["permissions"]["edit"]
+        assert response.json["discussion"][2]["permissions"]["delete"]
 
         self.login(user2)
         response = self.get(url_for("api.discussion", id=discussion.id))
+        assert not response.json["permissions"]["edit"]
         assert not response.json["permissions"]["close"]
         assert not response.json["permissions"]["delete"]
         assert not response.json["discussion"][0]["permissions"]["edit"]
         assert not response.json["discussion"][0]["permissions"]["delete"]
         assert response.json["discussion"][1]["permissions"]["edit"]
         assert response.json["discussion"][1]["permissions"]["delete"]
+        assert response.json["discussion"][2]["permissions"]["edit"]
+        assert response.json["discussion"][2]["permissions"]["delete"]
+
+        self.login(user3)
+        response = self.get(url_for("api.discussion", id=discussion.id))
+        assert not response.json["permissions"]["edit"]
+        assert not response.json["permissions"]["close"]
+        assert not response.json["permissions"]["delete"]
+        assert not response.json["discussion"][0]["permissions"]["edit"]
+        assert not response.json["discussion"][0]["permissions"]["delete"]
+        assert not response.json["discussion"][1]["permissions"]["edit"]
+        assert not response.json["discussion"][1]["permissions"]["delete"]
+        assert not response.json["discussion"][2]["permissions"]["edit"]
+        assert not response.json["discussion"][2]["permissions"]["delete"]
+
+        discussion_by_org = Discussion.objects.create(
+            subject=dataset,
+            user=user2,
+            organization=org,
+            title="test discussion",
+            discussion=[message3],
+        )
+
+        self.login(admin)
+        response = self.get(url_for("api.discussion", id=discussion_by_org.id))
+        assert response.json["permissions"]["edit"]
+        assert response.json["permissions"]["close"]
+        assert response.json["permissions"]["delete"]
+        assert response.json["discussion"][0]["permissions"]["edit"]
+        assert response.json["discussion"][0]["permissions"]["delete"]
+
+        self.login(subject_owner)
+        response = self.get(url_for("api.discussion", id=discussion_by_org.id))
+        assert not response.json["permissions"]["edit"]
+        assert response.json["permissions"]["close"]
+        assert response.json["permissions"]["delete"]
+        assert not response.json["discussion"][0]["permissions"]["edit"]
+        assert not response.json["discussion"][0]["permissions"]["delete"]
+
+        self.login(user1)
+        response = self.get(url_for("api.discussion", id=discussion_by_org.id))
+        assert response.json["permissions"]["edit"]
+        assert response.json["permissions"]["close"]
+        assert response.json["permissions"]["delete"]
+        assert response.json["discussion"][0]["permissions"]["edit"]
+        assert response.json["discussion"][0]["permissions"]["delete"]
+
+        self.login(user2)
+        response = self.get(url_for("api.discussion", id=discussion_by_org.id))
+        assert response.json["permissions"]["edit"]
+        assert response.json["permissions"]["close"]
+        assert response.json["permissions"]["delete"]
+        assert response.json["discussion"][0]["permissions"]["edit"]
+        assert response.json["discussion"][0]["permissions"]["delete"]
+
+        self.login(user3)
+        response = self.get(url_for("api.discussion", id=discussion_by_org.id))
+        assert not response.json["permissions"]["edit"]
+        assert not response.json["permissions"]["close"]
+        assert not response.json["permissions"]["delete"]
+        assert not response.json["discussion"][0]["permissions"]["edit"]
+        assert not response.json["discussion"][0]["permissions"]["delete"]
 
     def test_edit_discussion_title(self):
         admin = self.login(AdminFactory())
