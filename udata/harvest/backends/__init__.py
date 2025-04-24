@@ -15,4 +15,3 @@ def get_all(app):
 
 
 from .base import BaseBackend, HarvestFeature, HarvestFilter, HarvestExtraConfig  # noqa
-from .maaf import MaafBackend  # noqa
