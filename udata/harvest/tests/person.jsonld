@@ -1,0 +1,72 @@
+{
+  "@context": {
+    "Person": "https://web.archive.org/web/20250402192935/http://xmlns.com/foaf/0.1/Person",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "name": "https://web.archive.org/web/20250402192935/http://xmlns.com/foaf/0.1/name",
+    "nickname": "https://web.archive.org/web/20250402192935/http://xmlns.com/foaf/0.1/nick",
+    "affiliation": "https://web.archive.org/web/20250402192935/http://schema.org/affiliation",
+    "depiction": {
+      "@id": "https://web.archive.org/web/20250402192935/http://xmlns.com/foaf/0.1/depiction",
+      "@type": "@id"
+    },
+    "image": {
+      "@id": "https://web.archive.org/web/20250402192935/http://xmlns.com/foaf/0.1/img",
+      "@type": "@id"
+    },
+    "born": {
+      "@id": "https://web.archive.org/web/20250402192935/http://schema.org/birthDate",
+      "@type": "xsd:date"
+    },
+    "child": {
+      "@id": "https://web.archive.org/web/20250402192935/http://schema.org/children",
+      "@type": "@id"
+    },
+    "colleague": {
+      "@id": "https://web.archive.org/web/20250402192935/http://schema.org/colleagues",
+      "@type": "@id"
+    },
+    "knows": {
+      "@id": "https://web.archive.org/web/20250402192935/http://xmlns.com/foaf/0.1/knows",
+      "@type": "@id"
+    },
+    "died": {
+      "@id": "https://web.archive.org/web/20250402192935/http://schema.org/deathDate",
+      "@type": "xsd:date"
+    },
+    "email": {
+      "@id": "https://web.archive.org/web/20250402192935/http://xmlns.com/foaf/0.1/mbox",
+      "@type": "@id"
+    },
+    "familyName": "https://web.archive.org/web/20250402192935/http://xmlns.com/foaf/0.1/familyName",
+    "givenName": "https://web.archive.org/web/20250402192935/http://xmlns.com/foaf/0.1/givenName",
+    "gender": "https://web.archive.org/web/20250402192935/http://schema.org/gender",
+    "homepage": {
+      "@id": "https://web.archive.org/web/20250402192935/http://xmlns.com/foaf/0.1/homepage",
+      "@type": "@id"
+    },
+    "honorificPrefix": "https://web.archive.org/web/20250402192935/http://schema.org/honorificPrefix",
+    "honorificSuffix": "https://web.archive.org/web/20250402192935/http://schema.org/honorificSuffix",
+    "jobTitle": "https://web.archive.org/web/20250402192935/http://xmlns.com/foaf/0.1/title",
+    "nationality": "https://web.archive.org/web/20250402192935/http://schema.org/nationality",
+    "parent": {
+      "@id": "https://web.archive.org/web/20250402192935/http://schema.org/parent",
+      "@type": "@id"
+    },
+    "sibling": {
+      "@id": "https://web.archive.org/web/20250402192935/http://schema.org/sibling",
+      "@type": "@id"
+    },
+    "spouse": {
+      "@id": "https://web.archive.org/web/20250402192935/http://schema.org/spouse",
+      "@type": "@id"
+    },
+    "telephone": "https://web.archive.org/web/20250402192935/http://schema.org/telephone",
+    "Address": "http://www.w3.org/2006/vcard/ns#Address",
+    "address": "http://www.w3.org/2006/vcard/ns#address",
+    "street": "http://www.w3.org/2006/vcard/ns#street-address",
+    "locality": "http://www.w3.org/2006/vcard/ns#locality",
+    "region": "http://www.w3.org/2006/vcard/ns#region",
+    "country": "http://www.w3.org/2006/vcard/ns#country",
+    "postalCode": "http://www.w3.org/2006/vcard/ns#postal-code"
+  }
+}
