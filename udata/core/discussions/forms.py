@@ -10,6 +10,7 @@ __all__ = ("DiscussionCreateForm", "DiscussionCommentForm")
 class DiscussionCreateForm(ModelForm):
     model_class = Discussion
 
+    organization = fields.PublishAsField(_("Publish as"), owner_field=None)
     title = fields.StringField(_("Title"), [validators.DataRequired()])
     comment = fields.StringField(
         _("Comment"), [validators.DataRequired(), validators.Length(max=COMMENT_SIZE_LIMIT)]
@@ -18,8 +19,20 @@ class DiscussionCreateForm(ModelForm):
     extras = fields.ExtrasField()
 
 
+class DiscussionEditForm(ModelForm):
+    model_class = Discussion
+
+    title = fields.StringField(_("Title"), [validators.DataRequired()])
+
+
 class DiscussionCommentForm(Form):
+    organization = fields.PublishAsField(_("Publish as"), owner_field=None)
+
+    comment = fields.StringField(_("Comment"), [validators.Length(max=COMMENT_SIZE_LIMIT)])
+    close = fields.BooleanField(default=False)
+
+
+class DiscussionEditCommentForm(Form):
     comment = fields.StringField(
         _("Comment"), [validators.DataRequired(), validators.Length(max=COMMENT_SIZE_LIMIT)]
     )
-    close = fields.BooleanField(default=False)

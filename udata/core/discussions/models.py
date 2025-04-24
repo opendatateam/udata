@@ -16,14 +16,37 @@ class Message(SpamMixin, db.EmbeddedDocument):
     content = db.StringField(required=True)
     posted_on = db.DateTimeField(default=datetime.utcnow, required=True)
     posted_by = db.ReferenceField("User")
+    posted_by_organization = db.ReferenceField("Organization")
+    last_modified_at = db.DateTimeField()
+
+    @property
+    def permissions(self):
+        from .permissions import DiscussionMessagePermission
+
+        return {
+            "delete": DiscussionMessagePermission(self),
+            "edit": DiscussionMessagePermission(self),
+        }
+
+    @property
+    def posted_by_name(self):
+        return (
+            self.posted_by_organization.name
+            if self.posted_by_organization
+            else self.posted_by.fullname
+        )
+
+    @property
+    def posted_by_org_or_user(self):
+        return self.posted_by_organization or self.posted_by
 
     def texts_to_check_for_spam(self):
         return [self.content]
 
     def spam_report_message(self, breadcrumb):
         message = "Spam potentiel dans le message"
-        if self.posted_by:
-            message += f" de [{self.posted_by.fullname}]({self.posted_by.external_url})"
+        if self.posted_by_org_or_user:
+            message += f" de [{self.posted_by_name}]({self.posted_by_org_or_user.external_url})"
 
         if len(breadcrumb) != 2:
             log.warning(
@@ -46,18 +69,49 @@ class Message(SpamMixin, db.EmbeddedDocument):
 
 class Discussion(SpamMixin, db.Document):
     user = db.ReferenceField("User")
+    organization = db.ReferenceField("Organization")
+
     subject = db.GenericReferenceField()
     title = db.StringField(required=True)
     discussion = db.ListField(db.EmbeddedDocumentField(Message))
     created = db.DateTimeField(default=datetime.utcnow, required=True)
     closed = db.DateTimeField()
     closed_by = db.ReferenceField("User")
+    closed_by_organization = db.ReferenceField("Organization")
     extras = db.ExtrasField()
 
     meta = {
         "indexes": ["user", "subject", "-created"],
         "ordering": ["-created"],
     }
+
+    @property
+    def permissions(self):
+        from udata.core.discussions.permissions import (
+            DiscussionAuthorOrSubjectOwnerPermission,
+            DiscussionAuthorPermission,
+        )
+
+        return {
+            "delete": DiscussionAuthorPermission(self),
+            # To edit the title of a discussion we need to be the owner of the first message
+            "edit": DiscussionAuthorPermission(self),
+            "close": DiscussionAuthorOrSubjectOwnerPermission(self),
+        }
+
+    @property
+    def closed_by_name(self):
+        if self.closed_by_organization:
+            return self.closed_by_organization.name
+
+        if self.closed_by:
+            return self.closed_by.fullname
+
+        return None
+
+    @property
+    def closed_by_org_or_user(self):
+        return self.closed_by_organization or self.closed_by
 
     def person_involved(self, person):
         """Return True if the given person has been involved in the
@@ -113,7 +167,7 @@ class Discussion(SpamMixin, db.Document):
     def signal_new(self):
         on_new_discussion.send(self)
 
-    @spam_protected(lambda discussion, message: discussion.discussion[message])
+    @spam_protected(lambda discussion, message: discussion.discussion[message] if message else None)
     def signal_close(self, message):
         on_discussion_closed.send(self, message=message)
 
