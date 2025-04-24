@@ -20,6 +20,7 @@ class TopicApiParser(ModelApiParser):
         self.parser.add_argument("granularity", type=str, location="args")
         self.parser.add_argument("organization", type=str, location="args")
         self.parser.add_argument("owner", type=str, location="args")
+        self.parser.add_argument("featured", type=bool, location="args")
 
     @staticmethod
     def parse_filters(topics, args):
@@ -38,6 +39,8 @@ class TopicApiParser(ModelApiParser):
             topics = topics.filter(spatial__zones=args["geozone"])
         if args.get("granularity"):
             topics = topics.filter(spatial__granularity=args["granularity"])
+        if args.get("featured"):
+            topics = topics.filter(featured=args["featured"])
         if args.get("organization"):
             if not ObjectId.is_valid(args["organization"]):
                 api.abort(400, "Organization arg must be an identifier")
