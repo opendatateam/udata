@@ -77,6 +77,11 @@ class TopicsAPITest(APITestCase):
         assert len(response.json["data"]) == 1
         assert str(featured_topic.id) in [t["id"] for t in response.json["data"]]
 
+        response = self.get(url_for("api.topics", featured="false"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 7
+        assert str(featured_topic.id) not in [t["id"] for t in response.json["data"]]
+
         response = self.get(url_for("api.topics", owner=owner.id))
         assert response.status_code == 200
         assert len(response.json["data"]) == 1

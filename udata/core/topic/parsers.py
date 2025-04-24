@@ -1,4 +1,5 @@
 from bson.objectid import ObjectId
+from flask_restx.inputs import boolean
 
 from udata.api import api
 from udata.api.parsers import ModelApiParser
@@ -20,7 +21,7 @@ class TopicApiParser(ModelApiParser):
         self.parser.add_argument("granularity", type=str, location="args")
         self.parser.add_argument("organization", type=str, location="args")
         self.parser.add_argument("owner", type=str, location="args")
-        self.parser.add_argument("featured", type=bool, location="args")
+        self.parser.add_argument("featured", type=boolean, location="args")
 
     @staticmethod
     def parse_filters(topics, args):
@@ -39,7 +40,7 @@ class TopicApiParser(ModelApiParser):
             topics = topics.filter(spatial__zones=args["geozone"])
         if args.get("granularity"):
             topics = topics.filter(spatial__granularity=args["granularity"])
-        if args.get("featured"):
+        if args.get("featured") is not None:
             topics = topics.filter(featured=args["featured"])
         if args.get("organization"):
             if not ObjectId.is_valid(args["organization"]):

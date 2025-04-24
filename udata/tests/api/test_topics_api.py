@@ -89,6 +89,11 @@ class TopicsAPITest(APITestCase):
         self.assertEqual(len(response.json["data"]), 1)
         self.assertIn(str(featured_topic.id), [t["id"] for t in response.json["data"]])
 
+        response = self.get(url_for("api.topics", featured="false"))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), 7)
+        self.assertNotIn(str(featured_topic.id), [t["id"] for t in response.json["data"]])
+
         response = self.get(url_for("api.topics", owner=owner.id))
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), 1)
