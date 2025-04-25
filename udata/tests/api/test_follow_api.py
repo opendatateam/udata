@@ -28,7 +28,7 @@ class FollowAPITest(APITestCase):
     def handler(self, sender):
         self.assertIsInstance(sender, Follow)
         self.signal_emitted = True
-    
+
     def test_follow_list(self):
         """It should list on GET"""
         user = self.login()
@@ -43,7 +43,7 @@ class FollowAPITest(APITestCase):
 
         self.assertEqual(response.json["total"], nb_followers)
         self.assertEqual(nb_followers, 1)
-    
+
     def test_follow_list_user(self):
         """It should list with user arg on GET"""
         user = self.login()

@@ -29,7 +29,12 @@ parser.add_argument("page", type=int, default=1, location="args", help="The page
 parser.add_argument(
     "page_size", type=int, default=20, location="args", help="The page size to fetch"
 )
-parser.add_argument("user", type=str, location="args", help="Filter follower by user, it allows to check if a user is following the object")
+parser.add_argument(
+    "user",
+    type=str,
+    location="args",
+    help="Filter follower by user, it allows to check if a user is following the object",
+)
 
 NOTE = "Returns the number of followers left after the operation"
 
