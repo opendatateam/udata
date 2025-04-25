@@ -6,6 +6,7 @@ from flask_security import current_user
 from udata import tracking
 from udata.api import API, api, fields
 from udata.core.user.api_fields import user_ref_fields
+from udata.core.user.models import User
 from udata.models import Follow
 from udata.utils import id_or_404
 
@@ -29,6 +30,7 @@ parser.add_argument("page", type=int, default=1, location="args", help="The page
 parser.add_argument(
     "page_size", type=int, default=20, location="args", help="The page size to fetch"
 )
+parser.add_argument("user", type=str, location="args", help="Filter follower by user, it allows to check if a user is following the object")
 
 NOTE = "Returns the number of followers left after the operation"
 
@@ -47,6 +49,8 @@ class FollowAPI(API):
         args = parser.parse_args()
         model = self.model.objects.only("id").get_or_404(id=id_or_404(id))
         qs = Follow.objects(following=model, until=None)
+        if args["user"]:
+            qs = qs.filter(follower=id_or_404(args["user"]))
         return qs.paginate(args["page"], args["page_size"])
 
     @api.secure
