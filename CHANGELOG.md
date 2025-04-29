@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 10.3.1 (2025-04-29)
 
 - Add archived, deleted and private filter in dataset list api [#3298](https://github.com/opendatateam/udata/pull/3298)
