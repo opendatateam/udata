@@ -2,11 +2,16 @@
 
 ## Current (in progress)
 
+- feat(topics): add featured filter in API [#3301](https://github.com/opendatateam/udata/pull/3301)
+
+## 10.3.1 (2025-04-29)
+
 - Add archived, deleted and private filter in dataset list api [#3298](https://github.com/opendatateam/udata/pull/3298)
 - Exclude deleted dataservices in csv queryset [#3297](https://github.com/opendatateam/udata/pull/3297)
 - Publish comments on behalf of org, close without message and edit/delete discussions comments [#3295](https://github.com/opendatateam/udata/pull/3295)
 - Migrate MAAF backend from udata-front [#3300](https://github.com/opendatateam/udata/pull/3300)
-- feat(topics): add featured filter in API [#3301](https://github.com/opendatateam/udata/pull/3301)
+- Follow: add user parser argument [#3302](https://github.com/opendatateam/udata/pull/3302)
+- Allow trailing slash to activity route [#3303](https://github.com/opendatateam/udata/pull/3303)
 
 ## 10.3.0 (2025-04-11)
 

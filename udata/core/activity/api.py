@@ -70,7 +70,7 @@ activity_parser.add_argument(
 )
 
 
-@api.route("/activity", endpoint="activity")
+@api.route("/activity/", endpoint="activity")
 class SiteActivityAPI(API):
     @api.doc("activity")
     @api.expect(activity_parser)
