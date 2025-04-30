@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2025-04-30 14:18+0200\n"
-"PO-Revision-Date: 2025-04-30 12:35\n"
+"PO-Revision-Date: 2025-04-30 12:47\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -1360,12 +1360,12 @@ msgstr "Votre compte est maintenant supprimé"
 #: udata/templates/mail/account_inactivity.html:6
 #, python-format
 msgid "We have noticed that your account associated to (%(user_email)s) has been inactive for %(inactivity_years)d years or more on %(site)s, the open platform for public data."
-msgstr ""
+msgstr "Nous avons constaté que votre compte associé à l'adresse (%(user_email)s) est inactif depuis plus de %(inactivity_years)d ans sur %(site)s, la plateforme des données publiques."
 
 #: udata/templates/mail/account_inactivity.html:17
 #, python-format
 msgid "If you want to keep your account, please log in with your account on %(home)s."
-msgstr ""
+msgstr "Si vous souhaitez conserver votre compte, veuillez vous connecter avec votre compte sur %(home)s."
 
 #: udata/templates/mail/account_inactivity.html:25
 #, python-format
@@ -1375,7 +1375,7 @@ msgstr "Sans connexion de votre part, votre compte va être supprimé d'ici %(no
 #: udata/templates/mail/account_inactivity.html:33
 #, python-format
 msgid "This account is not tied to your other administration accounts and you can always re-create an account on the %(site)s platform if necessary."
-msgstr ""
+msgstr "Ce compte n'est pas relié à vos autres comptes de l'administration et vous aurez toujours la possibilité de recréer un compte sur la plateforme %(site)s."
 
 #: udata/templates/mail/badge_added_association.html:6
 #, python-format
