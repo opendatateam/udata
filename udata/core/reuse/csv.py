@@ -1,4 +1,4 @@
-from udata.frontend import csv
+from udata.core import csv
 
 from .models import Reuse
 

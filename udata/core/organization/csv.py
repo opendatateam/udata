@@ -1,5 +1,5 @@
+from udata.core import csv
 from udata.core.dataset.models import Dataset
-from udata.frontend import csv
 
 from .models import Organization
 

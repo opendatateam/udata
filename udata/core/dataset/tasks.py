@@ -9,9 +9,8 @@ from mongoengine import ValidationError
 
 from udata import mail
 from udata import models as udata_models
-from udata.core import storages
+from udata.core import csv, storages
 from udata.core.dataservices.models import Dataservice
-from udata.frontend import csv
 from udata.harvest.models import HarvestJob
 from udata.i18n import lazy_gettext as _
 from udata.models import Activity, Discussion, Follow, Organization, Topic, Transfer, db
