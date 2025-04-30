@@ -21,7 +21,7 @@ class Topic(db.Document, Owned, db.Datetimed):
     datasets = db.ListField(db.LazyReferenceField("Dataset", reverse_delete_rule=db.PULL))
     reuses = db.ListField(db.LazyReferenceField("Reuse", reverse_delete_rule=db.PULL))
 
-    featured = db.BooleanField()
+    featured = db.BooleanField(default=False)
     private = db.BooleanField()
     extras = db.ExtrasField()
 

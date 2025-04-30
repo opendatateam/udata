@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- feat(topics): add featured filter in API [#3301](https://github.com/opendatateam/udata/pull/3301)
 
 ## 10.3.1 (2025-04-29)
 
