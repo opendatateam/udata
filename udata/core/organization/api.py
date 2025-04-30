@@ -1,3 +1,4 @@
+import itertools
 from datetime import datetime
 
 from flask import make_response, redirect, request, url_for
@@ -6,6 +7,7 @@ from mongoengine.queryset.visitor import Q
 from udata.api import API, api, errors
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission, current_user
+from udata.core import csv
 from udata.core.badges import api as badges_api
 from udata.core.badges.fields import badge_fields
 from udata.core.contact_point.api import ContactPointApiParser
@@ -13,8 +15,10 @@ from udata.core.contact_point.api_fields import contact_point_page_fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api import DatasetApiParser
 from udata.core.dataset.api_fields import dataset_page_fields
+from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter
 from udata.core.dataset.models import Dataset
 from udata.core.discussions.api import discussion_fields
+from udata.core.discussions.csv import DiscussionCsvAdapter
 from udata.core.discussions.models import Discussion
 from udata.core.followers.api import FollowAPI
 from udata.core.reuse.models import Reuse
@@ -162,6 +166,42 @@ class OrganizationAPI(API):
         org.deleted = datetime.utcnow()
         org.save()
         return "", 204
+
+
+@ns.route("/<org:org>/datasets.csv", endpoint="organization_datasets_csv", doc=common_doc)
+@api.response(404, "Organization not found")
+@api.response(410, "Organization has been deleted")
+class DatasetsCsvAPI(API):
+    def get(self, org):
+        datasets = Dataset.objects(organization=str(org.id)).visible()
+        adapter = DatasetCsvAdapter(datasets)
+        return csv.stream(adapter, "{0}-datasets".format(org.slug))
+
+
+@ns.route("/<org:org>/discussions.csv", endpoint="organization_discussions_csv", doc=common_doc)
+@api.response(404, "Organization not found")
+@api.response(410, "Organization has been deleted")
+class DiscussionsCsvAPI(API):
+    def get(self, org):
+        datasets = Dataset.objects.filter(organization=str(org.id))
+        discussions = [Discussion.objects.filter(subject=dataset) for dataset in datasets]
+        # Turns a list of lists into a flat list.
+        adapter = DiscussionCsvAdapter(itertools.chain(*discussions))
+        return csv.stream(adapter, "{0}-discussions".format(org.slug))
+
+
+@ns.route(
+    "/<org:org>/datasets-resources.csv",
+    endpoint="organization_datasets_resources_csv",
+    doc=common_doc,
+)
+@api.response(404, "Organization not found")
+@api.response(410, "Organization has been deleted")
+class DatasetsresourcesCsvAPI(API):
+    def get(self, org):
+        datasets = Dataset.objects(organization=str(org.id)).visible()
+        adapter = ResourcesCsvAdapter(datasets)
+        return csv.stream(adapter, "{0}-datasets-resources".format(org.slug))
 
 
 @ns.route("/<org:org>/catalog", endpoint="organization_rdf", doc=common_doc)

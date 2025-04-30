@@ -1,8 +1,8 @@
 # for backwards compatibility (see https://github.com/opendatateam/udata/pull/3152)
 import json
 
+from udata.core import csv
 from udata.core.discussions.csv import DiscussionCsvAdapter  # noqa: F401
-from udata.frontend import csv
 
 from .models import Dataset, Resource
 
