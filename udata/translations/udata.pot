@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 10.3.2.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2025-04-30 10:24+0200\n"
-"PO-Revision-Date: 2025-04-30 10:24+0200\n"
+"POT-Creation-Date: 2025-04-30 14:18+0200\n"
+"PO-Revision-Date: 2025-04-30 14:18+0200\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -1377,7 +1377,7 @@ msgstr ""
 
 #: udata/templates/mail/account_inactivity.html:17
 #, python-format
-msgid "If you want to keep your account, please log in with your account on %(site)s."
+msgid "If you want to keep your account, please log in with your account on %(home)s."
 msgstr ""
 
 #: udata/templates/mail/account_inactivity.html:25
