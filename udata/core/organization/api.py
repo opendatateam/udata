@@ -197,7 +197,7 @@ class DiscussionsCsvAPI(API):
 )
 @api.response(404, "Organization not found")
 @api.response(410, "Organization has been deleted")
-class DatasetsresourcesCsvAPI(API):
+class DatasetsResourcesCsvAPI(API):
     def get(self, org):
         datasets = Dataset.objects(organization=str(org.id)).visible()
         adapter = ResourcesCsvAdapter(datasets)
