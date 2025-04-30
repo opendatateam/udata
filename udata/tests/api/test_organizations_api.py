@@ -1,12 +1,14 @@
 from datetime import datetime
+from io import StringIO
 
 import pytest
 from flask import url_for
 
 import udata.core.organization.constants as org_constants
+from udata.core import csv
 from udata.core.badges.factories import badge_factory
 from udata.core.badges.signals import on_badge_added, on_badge_removed
-from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
@@ -967,3 +969,73 @@ class OrganizationContactPointsAPITest:
 
         assert response.json["data"][0]["name"] == data["name"]
         assert response.json["data"][0]["email"] == data["email"]
+
+
+class OrganizationCsvExportsTest:
+    modules = []
+
+    def test_datasets_csv(self, api):
+        org = OrganizationFactory()
+        [DatasetFactory(organization=org, resources=[ResourceFactory()]) for _ in range(3)]
+
+        response = api.get(url_for("api.organization_datasets_csv", org=org))
+
+        assert200(response)
+        assert response.mimetype == "text/csv"
+        assert response.charset == "utf-8"
+
+        csvfile = StringIO(response.data.decode("utf-8"))
+        reader = csv.get_reader(csvfile)
+        header = next(reader)
+
+        assert header[0] == "id"
+        assert "title" in header
+        assert "url" in header
+        assert "description" in header
+        assert "created_at" in header
+        assert "last_modified" in header
+        assert "tags" in header
+        assert "metric.reuses" in header
+
+    def test_resources_csv(self, api):
+        org = OrganizationFactory()
+        datasets = [
+            DatasetFactory(organization=org, resources=[ResourceFactory(), ResourceFactory()])
+            for _ in range(3)
+        ]
+        not_org_dataset = DatasetFactory(resources=[ResourceFactory()])
+        hidden_dataset = DatasetFactory(private=True)
+
+        response = api.get(url_for("api.organization_datasets_resources_csv", org=org))
+
+        assert200(response)
+        assert response.mimetype == "text/csv"
+        assert response.charset == "utf-8"
+
+        csvfile = StringIO(response.data.decode("utf-8"))
+        reader = csv.get_reader(csvfile)
+        header = next(reader)
+
+        assert header[0] == "dataset.id"
+        assert "dataset.title" in header
+        assert "dataset.url" in header
+        assert "title" in header
+        assert "filetype" in header
+        assert "url" in header
+        assert "created_at" in header
+        assert "modified" in header
+        assert "downloads" in header
+
+        resource_id_index = header.index("id")
+
+        rows = list(reader)
+        ids = [(row[0], row[resource_id_index]) for row in rows]
+
+        assert len(rows) == sum(len(d.resources) for d in datasets)
+        for dataset in datasets:
+            for resource in dataset.resources:
+                assert (str(dataset.id), str(resource.id)) in ids
+
+        dataset_ids = set(row[0] for row in rows)
+        assert str(hidden_dataset.id) not in dataset_ids
+        assert str(not_org_dataset.id) not in dataset_ids
