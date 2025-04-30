@@ -16,7 +16,7 @@
 <p style="margin: 0;padding: 0;"><b>
     {{ _(
         'If you want to keep your account, please log in with your account on %(home)s.',
-        home=url_for("site.home", _external=True)
+        home=endpoint_for("site.home_redirect", "api.site", _external=True)
         )
     }}
 </b></p>
