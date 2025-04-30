@@ -15,8 +15,8 @@
 <br/>
 <p style="margin: 0;padding: 0;"><b>
     {{ _(
-        'If you want to keep your account, please log in with your account on %(site)s.',
-        site=config.SITE_TITLE
+        'If you want to keep your account, please log in with your account on %(home)s.',
+        home=url_for("site.home", _external=True)
         )
     }}
 </b></p>
