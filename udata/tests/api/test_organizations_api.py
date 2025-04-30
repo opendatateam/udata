@@ -9,6 +9,7 @@ from udata.core import csv
 from udata.core.badges.factories import badge_factory
 from udata.core.badges.signals import on_badge_added, on_badge_removed
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.discussions.factories import DiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
@@ -24,6 +25,7 @@ from udata.tests.helpers import (
     assert410,
     assert_emit,
     assert_not_emit,
+    assert_starts_with,
     assert_status,
 )
 from udata.utils import faker
@@ -1039,3 +1041,26 @@ class OrganizationCsvExportsTest:
         dataset_ids = set(row[0] for row in rows)
         assert str(hidden_dataset.id) not in dataset_ids
         assert str(not_org_dataset.id) not in dataset_ids
+
+    def test_discussions_csv_content_empty(self, api):
+        organization = OrganizationFactory()
+        response = api.get(url_for("api.organization_discussions_csv", org=organization))
+        assert200(response)
+
+        assert response.data.decode("utf8") == (
+            '"id";"user";"subject";"subject_class";"subject_id";"title";"size";"participants";'
+            '"messages";"created";"closed";"closed_by";"closed_by_id";"closed_by_organization";'
+            '"closed_by_organization_id"\r\n'
+        )
+
+    def test_discussions_csv_content_filled(self, api):
+        organization = OrganizationFactory()
+        dataset = DatasetFactory(organization=organization)
+        user = UserFactory(first_name="John", last_name="Snow")
+        discussion = DiscussionFactory(subject=dataset, user=user)
+        response = api.get(url_for("api.organization_discussions_csv", org=organization))
+        assert200(response)
+
+        headers, data = response.data.decode("utf-8").strip().split("\r\n")
+        expected = '"{discussion.id}";"{discussion.user}"'
+        assert_starts_with(data, expected.format(discussion=discussion))
