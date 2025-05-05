@@ -4,6 +4,7 @@
 
 - feat(topics): add featured filter in API [#3301](https://github.com/opendatateam/udata/pull/3301)
 - Improve wording on account inactivity emails [#3304](https://github.com/opendatateam/udata/pull/3304)
+- Add reuse filter on datasets API [#3307](https://github.com/opendatateam/udata/pull/3307)
 
 ## 10.3.1 (2025-04-29)
 
