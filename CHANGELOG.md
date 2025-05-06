@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 10.3.2 (2025-05-06)
 
 - feat(topics): add featured filter in API [#3301](https://github.com/opendatateam/udata/pull/3301)
