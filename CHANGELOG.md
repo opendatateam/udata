@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 10.3.2 (2025-05-06)
 
 - feat(topics): add featured filter in API [#3301](https://github.com/opendatateam/udata/pull/3301)
 - Improve wording on account inactivity emails [#3304](https://github.com/opendatateam/udata/pull/3304)
