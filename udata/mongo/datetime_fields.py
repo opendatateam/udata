@@ -73,5 +73,6 @@ class Datetimed(object):
 @pre_save.connect
 def set_modified_datetime(sender, document, **kwargs):
     changed = document._get_changed_fields()
-    if isinstance(document, Datetimed) and "last_modified" not in changed:
+    print(changed)
+    if isinstance(document, Datetimed) and len(changed) and "last_modified" not in changed:
         document.last_modified = datetime.utcnow()
