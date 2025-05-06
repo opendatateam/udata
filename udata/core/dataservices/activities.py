@@ -42,7 +42,6 @@ def on_user_created_dataservice(dataservice):
 
 @Dataservice.on_update.connect
 def on_user_updated_dataservice(dataservice):
-    print('on updated')
     if not dataservice.private and current_user and current_user.is_authenticated:
         UserUpdatedDataservice.emit(dataservice, dataservice.organization)
 

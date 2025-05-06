@@ -267,7 +267,6 @@ class Dataservice(WithMetrics, Owned, db.Document):
         if kwargs.get("created"):
             cls.on_create.send(document)
         else:
-            print("post save")
             cls.on_update.send(document)
         if document.deleted_at:
             cls.on_delete.send(document)

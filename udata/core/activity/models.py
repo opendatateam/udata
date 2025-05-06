@@ -36,6 +36,7 @@ class Activity(db.Document, metaclass=EmitNewActivityMetaClass):
     organization = db.ReferenceField("Organization")
     related_to = db.ReferenceField(db.DomainModel, required=True)
     created_at = db.DateTimeField(default=datetime.utcnow, required=True)
+    changes = db.ListField(db.StringField())
 
     extras = db.ExtrasField()
 
@@ -71,5 +72,6 @@ class Activity(db.Document, metaclass=EmitNewActivityMetaClass):
             related_to=related_to,
             actor=current_user._get_current_object(),
             organization=organization,
+            changes=related_to._get_changed_fields(),
             extras=extras,
         )
