@@ -42,7 +42,9 @@ def on_user_created_dataservice(dataservice):
 
 @Dataservice.on_update.connect
 def on_user_updated_dataservice(dataservice):
-    if not dataservice.private and current_user and current_user.is_authenticated:
+    changes = dataservice._get_changed_fields()
+    filtered_changes = [change for change in changes if "metrics" not in str(change) and str(change) != "metadata_modified_at"]
+    if not dataservice.private and len(filtered_changes) and current_user and current_user.is_authenticated:
         UserUpdatedDataservice.emit(dataservice, dataservice.organization)
 
 
