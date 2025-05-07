@@ -46,6 +46,7 @@ activity_fields = api.model(
         "label": fields.String(description="The label of the activity", required=True),
         "key": fields.String(description="The key of the activity", required=True),
         "icon": fields.String(description="The icon of the activity", required=True),
+        "changes": fields.List(fields.String, description="Changed attributes as list"),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),
     },
 )

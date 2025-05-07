@@ -175,6 +175,8 @@ class Organization(WithMetrics, OrganizationBadgeMixin, db.Datetimed, db.Documen
 
     @classmethod
     def post_save(cls, sender, document, **kwargs):
+        if "post_save" in kwargs.get("ignores", []):
+            return
         cls.after_save.send(document)
         if kwargs.get("created"):
             cls.on_create.send(document)
@@ -296,31 +298,31 @@ class Organization(WithMetrics, OrganizationBadgeMixin, db.Datetimed, db.Documen
 
     def count_members(self):
         self.metrics["members"] = len(self.members)
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_datasets(self):
         from udata.models import Dataset
 
         self.metrics["datasets"] = Dataset.objects(organization=self).visible().count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_reuses(self):
         from udata.models import Reuse
 
         self.metrics["reuses"] = Reuse.objects(organization=self).visible().count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_dataservices(self):
         from udata.models import Dataservice
 
         self.metrics["dataservices"] = Dataservice.objects(organization=self).visible().count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):
         from udata.models import Follow
 
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
 
 pre_save.connect(Organization.pre_save, sender=Organization)

@@ -209,6 +209,8 @@ class User(WithMetrics, UserMixin, db.Document):
 
     @classmethod
     def post_save(cls, sender, document, **kwargs):
+        if "post_save" in kwargs.get("ignores", []):
+            return
         cls.after_save.send(document)
         if kwargs.get("created"):
             cls.on_create.send(document)
@@ -294,31 +296,31 @@ class User(WithMetrics, UserMixin, db.Document):
         from udata.models import Dataset
 
         self.metrics["datasets"] = Dataset.objects(owner=self).visible().count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_reuses(self):
         from udata.models import Reuse
 
         self.metrics["reuses"] = Reuse.objects(owner=self).visible().count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_dataservices(self):
         from udata.core.dataservices.models import Dataservice
 
         self.metrics["dataservices"] = Dataservice.objects(owner=self).visible().count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):
         from udata.models import Follow
 
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_following(self):
         from udata.models import Follow
 
         self.metrics["following"] = Follow.objects.following(self).count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
 
 datastore = MongoEngineUserDatastore(db, User, Role)
