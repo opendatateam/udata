@@ -1,5 +1,7 @@
 import logging
 
+from collections.abc import Iterable
+
 from udata.models import Organization, User, db
 from udata.tasks import task
 
@@ -32,7 +34,7 @@ def emit_activity(
         related_to_cls,
         related_to_id,
         organization_id,
-        ', '.join(changes),
+        ', '.join(changes) if changes and isinstance(changes, Iterable) else '',
         extras,
     )
     cls = db.resolve_model(classname)
