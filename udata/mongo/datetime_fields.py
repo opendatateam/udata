@@ -67,12 +67,12 @@ class Datetimed(object):
         ),
         sortable=True,
         readonly=True,
+        auditable=False,
     )
 
 
 @pre_save.connect
 def set_modified_datetime(sender, document, **kwargs):
-    changes = document._get_changed_fields()
-    filtered_changes = [change for change in changes if "metrics" not in str(change) and str(change) != "last_modified"]
-    if isinstance(document, Datetimed) and len(filtered_changes):
+    changed = document._get_changed_fields()
+    if isinstance(document, Datetimed) and "last_modified" not in changed:
         document.last_modified = datetime.utcnow()

@@ -38,9 +38,10 @@ def on_user_created_reuse(reuse):
 
 
 @Reuse.on_update.connect
-def on_user_updated_reuse(reuse):
+def on_user_updated_reuse(reuse, **kwargs):
+    changed_fields = kwargs.get("changed_fields", [])
     if not reuse.private and current_user and current_user.is_authenticated:
-        UserUpdatedReuse.emit(reuse, reuse.organization)
+        UserUpdatedReuse.emit(reuse, reuse.organization, changed_fields)
 
 
 @Reuse.on_delete.connect

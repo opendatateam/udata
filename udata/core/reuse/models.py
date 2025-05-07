@@ -3,6 +3,7 @@ from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
 from udata.api_fields import field, function_field, generate_fields
+from udata.core.activity.models import Auditable
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE
@@ -59,7 +60,7 @@ class ReuseBadgeMixin(BadgeMixin):
     ],
     additional_filters={"organization_badge": "organization.badges"},
 )
-class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
+class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
     title = field(
         db.StringField(required=True),
         sortable=True,
@@ -70,6 +71,7 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
             max_length=255, required=True, populate_from="title", update=True, follow=True
         ),
         readonly=True,
+        auditable=False,
     )
     description = field(
         db.StringField(required=True),
@@ -125,7 +127,7 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
     private = field(db.BooleanField(default=False), filterable={})
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
-    extras = field(db.ExtrasField())
+    extras = field(db.ExtrasField(), auditable=False)
 
     featured = field(
         db.BooleanField(),
@@ -166,7 +168,6 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
     }
 
     before_save = Signal()
-    after_save = Signal()
     on_create = Signal()
     on_update = Signal()
     before_delete = Signal()
@@ -179,18 +180,6 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
     def pre_save(cls, sender, document, **kwargs):
         # Emit before_save
         cls.before_save.send(document)
-
-    @classmethod
-    def post_save(cls, sender, document, **kwargs):
-        if "post_save" in kwargs.get("ignores", []):
-            return
-        cls.after_save.send(document)
-        if kwargs.get("created"):
-            cls.on_create.send(document)
-        else:
-            cls.on_update.send(document)
-        if document.deleted:
-            cls.on_delete.send(document)
 
     def url_for(self, *args, **kwargs):
         return endpoint_for("reuses.show", "api.reuse", reuse=self, *args, **kwargs)
@@ -288,13 +277,13 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
         from udata.models import Discussion
 
         self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):
         from udata.models import Follow
 
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
 
 pre_save.connect(Reuse.pre_save, sender=Reuse)
