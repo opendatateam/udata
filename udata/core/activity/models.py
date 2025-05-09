@@ -86,7 +86,10 @@ class Auditable(object):
 
     @classmethod
     def post_save(cls, sender, document, **kwargs):
-        auditable_fields = [key for key, field, info in get_fields(cls) if info.get("auditable", True)]
+        try:
+            auditable_fields = [key for key, field, info in get_fields(cls) if info.get("auditable", True)]
+        except:
+            auditable_fields = document._get_changed_fields() # all field are treated as auditable for classes not using field() function
         changed_fields = [field for field in document._get_changed_fields() if field in auditable_fields]
         if "post_save" in kwargs.get("ignores", []):
             return
