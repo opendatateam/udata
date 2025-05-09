@@ -111,28 +111,33 @@ class OrganizationBadgeMixin(BadgeMixin):
 
 
 class Organization(WithMetrics, OrganizationBadgeMixin, db.Datetimed, db.Document):
-    name = db.StringField(required=True)
-    acronym = db.StringField(max_length=128)
-    slug = db.SlugField(
-        max_length=255, required=True, populate_from="name", update=True, follow=True
+    name = field(db.StringField(required=True))
+    acronym = field(db.StringField(max_length=128))
+    slug = field(
+        db.SlugField(
+            max_length=255, required=True, populate_from="name", update=True, follow=True
+        ),
+        auditable=False,
     )
-    description = db.StringField(required=True)
-    url = db.URLField()
-    image_url = db.StringField()
-    logo = db.ImageField(
-        fs=avatars, basename=default_image_basename, max_size=LOGO_MAX_SIZE, thumbnails=LOGO_SIZES
+    description = field(db.StringField(required=True))
+    url = field(db.URLField())
+    image_url = field(db.StringField())
+    logo = field(
+        db.ImageField(
+            fs=avatars, basename=default_image_basename, max_size=LOGO_MAX_SIZE, thumbnails=LOGO_SIZES
+        )
     )
-    business_number_id = db.StringField(max_length=ORG_BID_SIZE_LIMIT)
+    business_number_id = field(db.StringField(max_length=ORG_BID_SIZE_LIMIT))
 
-    members = db.ListField(db.EmbeddedDocumentField(Member))
-    teams = db.ListField(db.EmbeddedDocumentField(Team))
-    requests = db.ListField(db.EmbeddedDocumentField(MembershipRequest))
+    members = field(db.ListField(db.EmbeddedDocumentField(Member)))
+    teams = field(db.ListField(db.EmbeddedDocumentField(Team)))
+    requests = field(db.ListField(db.EmbeddedDocumentField(MembershipRequest)))
 
-    ext = db.MapField(db.GenericEmbeddedDocumentField())
-    zone = db.StringField()
-    extras = db.OrganizationExtrasField()
+    ext = field(db.MapField(db.GenericEmbeddedDocumentField()))
+    zone = field(db.StringField())
+    extras = field(db.OrganizationExtrasField(), auditable=False)
 
-    deleted = db.DateTimeField()
+    deleted = field(db.DateTimeField())
 
     meta = {
         "indexes": [
