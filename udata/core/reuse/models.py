@@ -168,6 +168,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Owned, db.Doc
     }
 
     before_save = Signal()
+    after_save = Signal()
     on_create = Signal()
     on_update = Signal()
     before_delete = Signal()
