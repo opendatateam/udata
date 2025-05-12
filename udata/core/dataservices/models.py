@@ -181,7 +181,10 @@ class Dataservice(Auditable, WithMetrics, Owned, db.Document):
         description="Is the dataservice private to the owner or the organization",
     )
 
-    extras = field(db.ExtrasField(), auditable=False,)
+    extras = field(
+        db.ExtrasField(),
+        auditable=False,
+    )
 
     contact_points = field(
         db.ListField(
@@ -263,5 +266,6 @@ class Dataservice(Auditable, WithMetrics, Owned, db.Document):
     def count_followers(self):
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
         self.save(signal_kwargs={"ignores": ["post_save"]})
+
 
 post_save.connect(Dataservice.post_save, sender=Dataservice)

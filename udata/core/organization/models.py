@@ -115,9 +115,7 @@ class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, db.Datetimed,
     name = field(db.StringField(required=True))
     acronym = field(db.StringField(max_length=128))
     slug = field(
-        db.SlugField(
-            max_length=255, required=True, populate_from="name", update=True, follow=True
-        ),
+        db.SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
         auditable=False,
     )
     description = field(db.StringField(required=True))
@@ -125,7 +123,10 @@ class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, db.Datetimed,
     image_url = field(db.StringField())
     logo = field(
         db.ImageField(
-            fs=avatars, basename=default_image_basename, max_size=LOGO_MAX_SIZE, thumbnails=LOGO_SIZES
+            fs=avatars,
+            basename=default_image_basename,
+            max_size=LOGO_MAX_SIZE,
+            thumbnails=LOGO_SIZES,
         )
     )
     business_number_id = field(db.StringField(max_length=ORG_BID_SIZE_LIMIT))
@@ -177,7 +178,7 @@ class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, db.Datetimed,
 
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
-        cls.before_save.send(document)    
+        cls.before_save.send(document)
 
     def url_for(self, *args, **kwargs):
         return endpoint_for("organizations.show", "api.organization", org=self, *args, **kwargs)

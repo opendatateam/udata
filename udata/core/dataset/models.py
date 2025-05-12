@@ -573,14 +573,20 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
 
     featured = field(db.BooleanField(required=True, default=False))
 
-    contact_points = field(db.ListField(db.ReferenceField("ContactPoint", reverse_delete_rule=db.PULL)))
+    contact_points = field(
+        db.ListField(db.ReferenceField("ContactPoint", reverse_delete_rule=db.PULL))
+    )
 
-    created_at_internal = field(DateTimeField(
-        verbose_name=_("Creation date"), default=datetime.utcnow, required=True
-    ), auditable=False)
-    last_modified_internal = field(DateTimeField(
-        verbose_name=_("Last modification date"), default=datetime.utcnow, required=True
-    ), auditable=False)
+    created_at_internal = field(
+        DateTimeField(verbose_name=_("Creation date"), default=datetime.utcnow, required=True),
+        auditable=False,
+    )
+    last_modified_internal = field(
+        DateTimeField(
+            verbose_name=_("Last modification date"), default=datetime.utcnow, required=True
+        ),
+        auditable=False,
+    )
     deleted = field(db.DateTimeField())
     archived = field(db.DateTimeField())
 
@@ -657,7 +663,6 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
         cls.before_save.send(document)
-        
 
     def clean(self):
         super(Dataset, self).clean()

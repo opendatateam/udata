@@ -43,7 +43,9 @@ class UserSettings(db.EmbeddedDocument):
 
 
 class User(WithMetrics, UserMixin, db.Document):
-    slug = field(db.SlugField(max_length=255, required=True, populate_from="fullname"), auditable=False)
+    slug = field(
+        db.SlugField(max_length=255, required=True, populate_from="fullname"), auditable=False
+    )
     email = field(db.StringField(max_length=255, required=True, unique=True))
     password = field(db.StringField())
     active = field(db.BooleanField())
@@ -54,7 +56,9 @@ class User(WithMetrics, UserMixin, db.Document):
     last_name = field(db.StringField(max_length=255, required=True))
 
     avatar_url = field(db.URLField())
-    avatar = field(db.ImageField(fs=avatars, basename=default_image_basename, thumbnails=AVATAR_SIZES))
+    avatar = field(
+        db.ImageField(fs=avatars, basename=default_image_basename, thumbnails=AVATAR_SIZES)
+    )
     website = field(db.URLField())
     about = field(db.StringField())
 

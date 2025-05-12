@@ -79,7 +79,7 @@ def on_user_created_dataset(dataset):
 
 
 @Dataset.on_update.connect
-def on_user_updated_dataset(dataset,  **kwargs):
+def on_user_updated_dataset(dataset, **kwargs):
     changed_fields = kwargs.get("changed_fields", [])
     if not dataset.private and current_user and current_user.is_authenticated:
         UserUpdatedDataset.emit(dataset, dataset.organization, changed_fields)
