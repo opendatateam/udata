@@ -175,6 +175,7 @@ class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, db.Datetimed,
     on_update = Signal()
     before_delete = Signal()
     after_delete = Signal()
+    on_delete = Signal()
 
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
