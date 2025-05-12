@@ -6,6 +6,7 @@ from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
 from udata.api_fields import field
+from udata.core.activity.models import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.metrics.models import WithMetrics
 from udata.core.storages import avatars, default_image_basename
@@ -110,7 +111,7 @@ class OrganizationBadgeMixin(BadgeMixin):
     __badges__ = BADGES
 
 
-class Organization(WithMetrics, OrganizationBadgeMixin, db.Datetimed, db.Document):
+class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, db.Datetimed, db.Document):
     name = field(db.StringField(required=True))
     acronym = field(db.StringField(max_length=128))
     slug = field(
@@ -176,17 +177,7 @@ class Organization(WithMetrics, OrganizationBadgeMixin, db.Datetimed, db.Documen
 
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
-        cls.before_save.send(document)
-
-    @classmethod
-    def post_save(cls, sender, document, **kwargs):
-        if "post_save" in kwargs.get("ignores", []):
-            return
-        cls.after_save.send(document)
-        if kwargs.get("created"):
-            cls.on_create.send(document)
-        else:
-            cls.on_update.send(document)
+        cls.before_save.send(document)    
 
     def url_for(self, *args, **kwargs):
         return endpoint_for("organizations.show", "api.organization", org=self, *args, **kwargs)
