@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2025-04-01 17:30+0200\n"
-"PO-Revision-Date: 2025-04-01 15:33\n"
+"POT-Creation-Date: 2025-04-30 14:18+0200\n"
+"PO-Revision-Date: 2025-04-30 12:35\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: ar\n"
 "Language-Team: Arabic\n"
@@ -51,7 +51,7 @@ msgstr ""
 msgid "Invalid URL \"{url}\": {reason}"
 msgstr ""
 
-#: udata/tests/api/test_datasets_api.py:935 udata/tests/test_model.py:403
+#: udata/tests/api/test_datasets_api.py:1029 udata/tests/test_model.py:403
 #: udata/uris.py:55
 #, python-brace-format
 msgid "Invalid URL \"{url}\""
@@ -208,7 +208,7 @@ msgid "Your udata instance is ready!"
 msgstr ""
 
 #: udata/core/owned.py:64 udata/forms/fields.py:752
-#: udata/tests/api/test_dataservices_api.py:476
+#: udata/tests/api/test_dataservices_api.py:474
 msgid "You can only set yourself as owner"
 msgstr "يمكنك تعيين نفسك فقط كمالك"
 
@@ -217,7 +217,7 @@ msgid "Unknown organization"
 msgstr ""
 
 #: udata/core/owned.py:77 udata/forms/fields.py:784
-#: udata/tests/api/test_dataservices_api.py:490
+#: udata/tests/api/test_dataservices_api.py:487
 msgid "Permission denied for this organization"
 msgstr "تم رفض الإذن لهذه المؤسسة"
 
@@ -249,7 +249,8 @@ msgid "The organization web contact form"
 msgstr ""
 
 #: udata/core/contact_point/forms.py:20 udata/core/dataset/forms.py:116
-#: udata/core/dataset/forms.py:179 udata/core/topic/forms.py:14
+#: udata/core/dataset/forms.py:179 udata/core/discussions/forms.py:13
+#: udata/core/discussions/forms.py:29 udata/core/topic/forms.py:14
 #: udata/harvest/forms.py:87
 msgid "Publish as"
 msgstr "نشر بإسم"
@@ -278,12 +279,12 @@ msgstr ""
 msgid "dataservice"
 msgstr ""
 
-#: udata/core/dataservices/models.py:194 udata/core/dataset/models.py:573
+#: udata/core/dataservices/models.py:194 udata/core/dataset/models.py:575
 #: udata/mongo/datetime_fields.py:60
 msgid "Creation date"
 msgstr "تاريخ الإنشاء"
 
-#: udata/core/dataservices/models.py:200 udata/core/dataset/models.py:576
+#: udata/core/dataservices/models.py:200 udata/core/dataset/models.py:578
 #: udata/mongo/datetime_fields.py:66
 msgid "Last modification date"
 msgstr "تاريخ التعديل الأخير"
@@ -449,8 +450,8 @@ msgid "Version of the schema"
 msgstr ""
 
 #: udata/core/dataset/forms.py:65 udata/core/dataset/forms.py:146
-#: udata/core/discussions/forms.py:13 udata/core/site/forms.py:12
-#: udata/templates/mail/discussion_closed.html:26
+#: udata/core/discussions/forms.py:14 udata/core/discussions/forms.py:25
+#: udata/core/site/forms.py:12 udata/templates/mail/discussion_closed.html:26
 #: udata/templates/mail/new_discussion.html:25
 #: udata/templates/mail/new_discussion_comment.html:26
 msgid "Title"
@@ -506,7 +507,7 @@ msgstr "حجم الملف بالبايت"
 msgid "Related dataset"
 msgstr "مجموعة البيانات متعلقة"
 
-#: udata/core/dataset/forms.py:138 udata/tests/api/test_datasets_api.py:847
+#: udata/core/dataset/forms.py:138 udata/tests/api/test_datasets_api.py:941
 msgid "Wrong contact point id or contact point ownership mismatch"
 msgstr ""
 
@@ -580,20 +581,20 @@ msgstr "بيانات محورية"
 msgid "A schema must contains a name or an URL when a version is provided."
 msgstr ""
 
-#: udata/core/dataset/models.py:169 udata/tests/api/test_datasets_api.py:943
-#: udata/tests/api/test_datasets_api.py:954
+#: udata/core/dataset/models.py:169 udata/tests/api/test_datasets_api.py:1037
+#: udata/tests/api/test_datasets_api.py:1048
 #, python-brace-format
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:188 udata/tests/api/test_datasets_api.py:966
+#: udata/core/dataset/models.py:188 udata/tests/api/test_datasets_api.py:1060
 #, python-brace-format
 msgid "Version \"{version}\" is not an allowed value for the schema \"{name}\". Allowed versions: {values}"
 msgstr ""
 
 #: udata/core/dataset/models.py:467 udata/core/dataset/rdf.py:603
-#: udata/tests/dataset/test_dataset_rdf.py:669
-#: udata/tests/dataset/test_dataset_rdf.py:682
+#: udata/tests/dataset/test_dataset_rdf.py:687
+#: udata/tests/dataset/test_dataset_rdf.py:700
 msgid "Nameless resource"
 msgstr "مورد مجهول"
 
@@ -601,11 +602,11 @@ msgstr "مورد مجهول"
 msgid "Future date of update"
 msgstr "تاريخ التحديث في المستقبل"
 
-#: udata/core/dataset/models.py:622
+#: udata/core/dataset/models.py:624
 msgid "dataset"
 msgstr "مجموعة البيانات"
 
-#: udata/core/dataset/rdf.py:601 udata/tests/dataset/test_dataset_rdf.py:656
+#: udata/core/dataset/rdf.py:601 udata/tests/dataset/test_dataset_rdf.py:674
 #, python-brace-format
 msgid "{format} resource"
 msgstr ""
@@ -614,13 +615,13 @@ msgstr ""
 msgid "You need to update some frequency-based datasets"
 msgstr "يجب تحديث بعض مجموعات البيانات المستندة إلى الترددات"
 
-#: udata/core/discussions/forms.py:15 udata/core/discussions/forms.py:23
-#: udata/core/organization/forms.py:83 udata/core/organization/forms.py:87
-#: udata/harvest/forms.py:97
+#: udata/core/discussions/forms.py:16 udata/core/discussions/forms.py:31
+#: udata/core/discussions/forms.py:37 udata/core/organization/forms.py:83
+#: udata/core/organization/forms.py:87 udata/harvest/forms.py:97
 msgid "Comment"
 msgstr "تعليق"
 
-#: udata/core/discussions/forms.py:17
+#: udata/core/discussions/forms.py:18
 msgid "Subject"
 msgstr "موضوع"
 
@@ -956,11 +957,11 @@ msgstr ""
 msgid "Open data tools"
 msgstr ""
 
-#: udata/core/reuse/models.py:36
+#: udata/core/reuse/models.py:37
 msgid "This URL is already registered"
 msgstr "هذا العنوان الإلكتروني مسجل من قبل"
 
-#: udata/core/reuse/models.py:176
+#: udata/core/reuse/models.py:178
 msgid "reuse"
 msgstr "استخدام"
 
@@ -1261,11 +1262,11 @@ msgstr "تم تخطيه"
 msgid "Archived"
 msgstr ""
 
-#: udata/harvest/backends/dcat.py:296
+#: udata/harvest/backends/dcat.py:338
 msgid "Remote URL prefix"
 msgstr ""
 
-#: udata/harvest/backends/dcat.py:299
+#: udata/harvest/backends/dcat.py:341
 msgid "A prefix used to build the remote URL of the harvested items."
 msgstr ""
 
@@ -1355,17 +1356,22 @@ msgstr ""
 
 #: udata/templates/mail/account_inactivity.html:6
 #, python-format
-msgid "Your account  (%(user_email)s) has been inactive for %(inactivity_years)d years or more."
+msgid "We have noticed that your account associated to (%(user_email)s) has been inactive for %(inactivity_years)d years or more on %(site)s, the open platform for public data."
 msgstr ""
 
-#: udata/templates/mail/account_inactivity.html:15
+#: udata/templates/mail/account_inactivity.html:17
 #, python-format
-msgid "If you want to keep your account, please log in with your account on %(site)s."
+msgid "If you want to keep your account, please log in with your account on %(home)s."
 msgstr ""
 
-#: udata/templates/mail/account_inactivity.html:23
+#: udata/templates/mail/account_inactivity.html:25
 #, python-format
 msgid "Without logging in, your account will be deleted within %(notify_delay)d days."
+msgstr ""
+
+#: udata/templates/mail/account_inactivity.html:33
+#, python-format
+msgid "This account is not tied to your other administration accounts and you can always re-create an account on the %(site)s platform if necessary."
 msgstr ""
 
 #: udata/templates/mail/badge_added_association.html:6
@@ -1429,13 +1435,13 @@ msgstr ""
 msgid "%(user)s closed an discussion on your %(type)s %(subject)s"
 msgstr ""
 
-#: udata/templates/mail/discussion_closed.html:31
+#: udata/templates/mail/discussion_closed.html:32
 #: udata/templates/mail/new_discussion.html:30
 #: udata/templates/mail/new_discussion_comment.html:31
 msgid "Message"
 msgstr ""
 
-#: udata/templates/mail/discussion_closed.html:40
+#: udata/templates/mail/discussion_closed.html:41
 #: udata/templates/mail/new_discussion.html:38
 #: udata/templates/mail/new_discussion_comment.html:39
 msgid "See the discussion"

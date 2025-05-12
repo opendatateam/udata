@@ -12,6 +12,7 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.spatial.models import GeoZone
 from udata.i18n import ISO_639_1_CODES
 from udata.mongo import db
+from udata.uris import endpoint_for
 
 
 class LazyRedirect(object):
@@ -247,3 +248,5 @@ def init_app(app):
     app.url_map.converters["territory"] = TerritoryConverter
     app.url_map.converters["contact_point"] = ContactPointConverter
     app.url_map.converters["report"] = ReportConverter
+
+    app.jinja_env.globals["endpoint_for"] = endpoint_for

@@ -11,6 +11,7 @@ from udata.core.dataset.factories import (
 )
 from udata.core.dataset.models import ResourceMixin
 from udata.core.organization.factories import Member, OrganizationFactory
+from udata.core.reuse.factories import ReuseFactory
 from udata.models import Dataset, db
 from udata.tests.api import APITestCase
 from udata.tests.helpers import assert_not_emit
@@ -42,6 +43,21 @@ class DatasetAPIV2Test(APITestCase):
 
         assert data["data"][1]["community_resources"]["total"] == 0
         assert data["data"][0]["community_resources"]["total"] == 0
+
+    def test_filter_by_reuse(self):
+        DatasetFactory(title="Dataset without reuse")
+
+        dataset_with_reuse = DatasetFactory(title="Dataset with reuse")
+        archived_dataset_with_reuse = DatasetFactory(
+            title="Dataset with reuse", archived=datetime(2022, 2, 22)
+        )
+        reuse = ReuseFactory(datasets=[dataset_with_reuse.id, archived_dataset_with_reuse.id])
+
+        response = self.get(url_for("apiv2.datasets", reuse=reuse.id))
+        self.assert200(response)
+        data = response.json
+        assert len(data["data"]) == 1
+        assert data["data"][0]["title"] == dataset_with_reuse.title
 
     def test_get_dataset(self):
         resources = [ResourceFactory() for _ in range(2)]

@@ -38,6 +38,7 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.followers.api import FollowAPI
 from udata.core.organization.models import Organization
+from udata.core.reuse.models import Reuse
 from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.topic.models import Topic
 from udata.linkchecker.checker import check_resource
@@ -122,6 +123,7 @@ class DatasetApiParser(ModelApiParser):
         self.parser.add_argument("topic", type=str, location="args")
         self.parser.add_argument("credit", type=str, location="args")
         self.parser.add_argument("dataservice", type=str, location="args")
+        self.parser.add_argument("reuse", type=str, location="args")
         self.parser.add_argument(
             "archived",
             type=boolean,
@@ -200,6 +202,15 @@ class DatasetApiParser(ModelApiParser):
                 pass
             else:
                 datasets = datasets.filter(id__in=[d.id for d in dataservice.datasets])
+        if args.get("reuse"):
+            if not ObjectId.is_valid(args["reuse"]):
+                api.abort(400, "Reuse arg must be an identifier")
+            try:
+                reuse = Reuse.objects.get(id=args["reuse"])
+            except Reuse.DoesNotExist:
+                pass
+            else:
+                datasets = datasets.filter(id__in=[d.id for d in reuse.datasets])
         if args.get("archived") is not None:
             if current_user.is_anonymous:
                 abort(401)

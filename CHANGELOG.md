@@ -2,7 +2,14 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 10.3.2 (2025-05-06)
+
 - feat(topics): add featured filter in API [#3301](https://github.com/opendatateam/udata/pull/3301)
+- Improve wording on account inactivity emails [#3304](https://github.com/opendatateam/udata/pull/3304)
+- Migrate CSV exports from udata-front to udata (requires adding redirection to Nginx) [#3306](https://github.com/opendatateam/udata/pull/3306)
+- Add reuse filter on datasets API [#3307](https://github.com/opendatateam/udata/pull/3307)
 
 ## 10.3.1 (2025-04-29)
 
