@@ -136,6 +136,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Owned, db.Doc
     )
     deleted = field(
         db.DateTimeField(),
+        auditable=False,
     )
     archived = field(
         db.DateTimeField(),

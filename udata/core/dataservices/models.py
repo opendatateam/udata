@@ -212,7 +212,7 @@ class Dataservice(Auditable, WithMetrics, Owned, db.Document):
         sortable="last_modified",
         auditable=False,
     )
-    deleted_at = field(db.DateTimeField())
+    deleted_at = field(db.DateTimeField(), auditable=False)
     archived_at = field(db.DateTimeField())
 
     datasets = field(

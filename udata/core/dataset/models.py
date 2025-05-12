@@ -587,7 +587,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         ),
         auditable=False,
     )
-    deleted = field(db.DateTimeField())
+    deleted = field(db.DateTimeField(), auditable=False)
     archived = field(db.DateTimeField())
 
     def __str__(self):
