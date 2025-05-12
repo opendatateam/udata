@@ -556,7 +556,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
     license = field(db.ReferenceField("License"))
 
     tags = field(db.TagListField())
-    resources = field(db.ListField(db.EmbeddedDocumentField(Resource)))
+    resources = field(db.ListField(db.EmbeddedDocumentField(Resource)), auditable=False)
 
     private = field(db.BooleanField(default=False))
     frequency = field(db.StringField(choices=list(UPDATE_FREQUENCIES.keys())))
@@ -614,8 +614,12 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
     }
 
     before_save = signal("Dataset.before_save")
+    after_save = signal("Dataset.after_save")
+    on_create = signal("Dataset.on_create")
+    on_update = signal("Dataset.on_update")
     before_delete = signal("Dataset.before_delete")
     after_delete = signal("Dataset.after_delete")
+    on_delete = signal("Dataset.on_delete")
     on_archive = signal("Dataset.on_archive")
     on_resource_added = signal("Dataset.on_resource_added")
     on_resource_updated = signal("Dataset.on_resource_updated")
