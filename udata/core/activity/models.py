@@ -3,8 +3,8 @@ from datetime import datetime
 from blinker import Signal
 from mongoengine.signals import post_save
 
-from udata.auth import current_user
 from udata.api_fields import get_fields
+from udata.auth import current_user
 from udata.mongo import db
 
 from .signals import new_activity
@@ -85,7 +85,7 @@ class Auditable(object):
             auditable_fields = [
                 key for key, field, info in get_fields(cls) if info.get("auditable", True)
             ]
-        except:
+        except Exception:
             # for backward compatibility, all fields are treated as auditable for classes not using field() function
             auditable_fields = document._get_changed_fields()
         changed_fields = [

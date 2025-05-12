@@ -1,5 +1,4 @@
 import logging
-
 from collections.abc import Iterable
 
 from udata.models import Organization, User, db
