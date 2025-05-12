@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from blinker import Signal
 from flask import url_for
 from mongoengine import Q
 from mongoengine.signals import post_save
@@ -116,6 +117,11 @@ class Dataservice(Auditable, WithMetrics, Owned, db.Document):
         "queryset_class": DataserviceQuerySet,
         "auto_create_index_on_save": True,
     }
+
+    after_save = Signal()
+    on_create = Signal()
+    on_update = Signal()
+    on_delete = Signal()
 
     verbose_name = _("dataservice")
 
