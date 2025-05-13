@@ -31,23 +31,23 @@ def dataservice_in_response(response: TestResponse, dataservice: Dataservice) ->
 class DataserviceAPITest(APITestCase):
     modules = []
 
-    def test_dataservice_api_get(self, api):
+    def test_dataservice_api_get(self):
         """It should fetch a dataservice from the API"""
         dataservice = DataserviceFactory()
-        response = api.get(url_for("api.dataservice", dataservice=dataservice))
+        response = self.get(url_for("api.dataservice", dataservice=dataservice))
         assert200(response)
 
-    def test_dataservice_api_get_deleted(self, api):
+    def test_dataservice_api_get_deleted(self):
         """It should not fetch a deleted dataservice from the API and raise 410"""
         dataservice = DataserviceFactory(deleted_at=datetime.utcnow())
-        response = api.get(url_for("api.dataservice", dataservice=dataservice))
+        response = self.get(url_for("api.dataservice", dataservice=dataservice))
         assert410(response)
 
-    def test_dataservice_api_get_deleted_but_authorized(self, api):
+    def test_dataservice_api_get_deleted_but_authorized(self):
         """It should fetch a deleted dataservice from the API if authorized"""
-        user = api.login()
+        user = self.login()
         dataservice = DataserviceFactory(deleted_at=datetime.utcnow(), owner=user)
-        response = api.get(url_for("api.dataservice", dataservice=dataservice))
+        response = self.get(url_for("api.dataservice", dataservice=dataservice))
         assert200(response)
 
     def test_dataservice_api_get_private(self):
