@@ -59,6 +59,7 @@ class ReuseBadgeMixin(BadgeMixin):
         {"key": "views", "value": "metrics.views"},
     ],
     additional_filters={"organization_badge": "organization.badges"},
+    mask="*,datasets{title,uri,page}",
 )
 class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
     title = field(
