@@ -140,6 +140,8 @@ class ReuseAPI(API):
         """Fetch a given reuse"""
         if reuse.deleted and not ReuseEditPermission(reuse).can():
             api.abort(410, "This reuse has been deleted")
+        if reuse.private and not ReuseEditPermission(reuse).can():
+            api.abort(404)
         return reuse
 
     @api.secure

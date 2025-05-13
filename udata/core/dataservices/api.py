@@ -56,6 +56,8 @@ class DataserviceAPI(API):
     def get(self, dataservice):
         if dataservice.deleted_at and not OwnablePermission(dataservice).can():
             api.abort(410, "Dataservice has been deleted")
+        if dataservice.private and not OwnablePermission(dataservice).can():
+            api.abort(404)
         return dataservice
 
     @api.secure

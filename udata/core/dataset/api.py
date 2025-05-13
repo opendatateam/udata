@@ -302,6 +302,8 @@ class DatasetAPI(API):
         """Get a dataset given its identifier"""
         if dataset.deleted and not DatasetEditPermission(dataset).can():
             api.abort(410, "Dataset has been deleted")
+        if dataset.private and not DatasetEditPermission(dataset).can():
+            api.abort(404)
         return dataset
 
     @api.secure
