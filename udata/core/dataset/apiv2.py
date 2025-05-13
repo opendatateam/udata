@@ -148,11 +148,17 @@ dataset_fields = apiv2.model(
             },
             description="Link to the dataset community resources",
         ),
-        "frequency": fields.String(
-            description="The update frequency",
-            required=True,
+        "frequency": fields.Raw(
+            attribute=lambda d: {
+                "id": d.frequency or DEFAULT_FREQUENCY,
+                "label": UPDATE_FREQUENCIES.get(d.frequency or DEFAULT_FREQUENCY),
+            }
+            if request.headers.get("X-Get-Datasets-Full-Objects", False, bool)
+            else d.frequency,
             enum=list(UPDATE_FREQUENCIES),
             default=DEFAULT_FREQUENCY,
+            required=True,
+            description="The update frequency (full Frequency object if `X-Get-Datasets-Full-Objects` is set, ID of the frequency otherwise)",
         ),
         "frequency_date": fields.ISODateTime(
             description=(
@@ -182,8 +188,12 @@ dataset_fields = apiv2.model(
         "spatial": fields.Nested(
             spatial_coverage_fields, allow_null=True, description="The spatial coverage"
         ),
-        "license": fields.String(
-            attribute="license.id", default=DEFAULT_LICENSE["id"], description="The dataset license"
+        "license": fields.Raw(
+            attribute=lambda d: d.license
+            if request.headers.get("X-Get-Datasets-Full-Objects", False, bool)
+            else (d.license.id if d.license is not None else None),
+            default=DEFAULT_LICENSE["id"],
+            description="The dataset license (full License object if `X-Get-Datasets-Full-Objects` is set, ID of the license otherwise)",
         ),
         "uri": fields.UrlFor(
             "api.dataset",
