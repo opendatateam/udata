@@ -484,9 +484,24 @@ class DatasetAPITest(APITestCase):
         self.assert410(response)
 
     def test_dataset_api_get_deleted_but_authorized(self):
-        """It should a deleted dataset from the API if user is authorized"""
+        """It should fetch a deleted dataset from the API if user is authorized"""
         self.login()
         dataset = DatasetFactory(owner=self.user, deleted=datetime.utcnow())
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        self.assert200(response)
+
+    def test_dataset_api_get_private(self):
+        """It should not fetch a private dataset from the API and raise 404"""
+        dataset = DatasetFactory(private=True)
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        self.assert404(response)
+
+    def test_dataset_api_get_private_but_authorized(self):
+        """It should fetch a private dataset from the API if user is authorized"""
+        self.login()
+        dataset = DatasetFactory(owner=self.user, private=True)
 
         response = self.get(url_for("api.dataset", dataset=dataset))
         self.assert200(response)
