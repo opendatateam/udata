@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Improve reuse api perfs by adding a mask on datasets [#3309](https://github.com/opendatateam/udata/pull/3309)
+- Allow returning full sub-objects (license, frequency, zones and granularity) for datasets APIv2 [#3310](https://github.com/opendatateam/udata/pull/3310)
 
 ## 10.3.2 (2025-05-06)
 
