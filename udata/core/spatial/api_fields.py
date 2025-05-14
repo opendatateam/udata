@@ -1,4 +1,8 @@
+from flask import request
+from flask_restx import marshal
+
 from udata.api import api, fields
+from udata.core.dataset.constants import FULL_OBJECTS_HEADER
 
 GEOM_TYPES = ("Point", "LineString", "Polygon", "MultiPoint", "MultiLineString", "MultiPolygon")
 
@@ -66,9 +70,18 @@ spatial_coverage_fields = api.model(
         "geom": fields.Nested(
             geojson, allow_null=True, description="A multipolygon for the whole coverage"
         ),
-        "zones": fields.List(fields.String, description="The covered zones identifiers"),
-        "granularity": fields.String(
-            default="other", description="The spatial/territorial granularity"
+        "zones": fields.Raw(
+            attribute=lambda s: marshal(s.zones, zone_fields)
+            if request.headers.get(FULL_OBJECTS_HEADER, False, bool)
+            else [str(z) for z in s.zones],
+            description="The covered zones identifiers (full GeoZone objects if `X-Get-Datasets-Full-Objects` is set, IDs of the zones otherwise)",
+        ),
+        "granularity": fields.Raw(
+            attribute=lambda s: {"id": s.granularity or "other", "name": s.granularity_label}
+            if request.headers.get(FULL_OBJECTS_HEADER, False, bool)
+            else s.granularity,
+            default="other",
+            description="The spatial/territorial granularity (full Granularity object if `X-Get-Datasets-Full-Objects` is set, ID of the granularity otherwise)",
         ),
     },
 )
