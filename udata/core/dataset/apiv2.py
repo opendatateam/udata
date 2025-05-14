@@ -8,6 +8,7 @@ from flask_restx import marshal
 from udata import search
 from udata.api import API, apiv2, fields
 from udata.core.contact_point.api_fields import contact_point_fields
+from udata.core.dataset.api_fields import license_fields
 from udata.core.organization.api_fields import member_user_with_email_fields
 from udata.core.spatial.api_fields import geojson
 from udata.utils import get_by
@@ -190,7 +191,7 @@ dataset_fields = apiv2.model(
             spatial_coverage_fields, allow_null=True, description="The spatial coverage"
         ),
         "license": fields.Raw(
-            attribute=lambda d: d.license
+            attribute=lambda d: marshal(d.license, license_fields)
             if request.headers.get(FULL_OBJECTS_HEADER, False, bool)
             else (d.license.id if d.license is not None else None),
             default=DEFAULT_LICENSE["id"],
