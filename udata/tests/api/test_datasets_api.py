@@ -1135,6 +1135,37 @@ class DatasetAPITest(APITestCase):
         assert dataset.resources[0].schema["url"] is None
         assert dataset.resources[0].schema["version"] is None
 
+    def test_get_schemas(self):
+        resources = []
+        resources.append(ResourceFactory(schema={"name": "etalab/schema-irve-statique"}))
+        resources.append(
+            ResourceFactory(
+                schema={"name": "etalab/schema-irve-statique", "url": "http://example.org"}
+            )
+        )
+        resources.append(ResourceFactory(schema={"name": "etalab/schema-irve-dynamique"}))
+        resources.append(ResourceFactory(schema={"name": "etalab/schema-irve-dynamique"}))
+        resources.append(ResourceFactory(schema=None))
+        dataset = DatasetFactory(resources=resources)
+
+        response = self.get(url_for("apiv2.dataset_schemas", dataset=dataset))
+        assert len(response.json) == 3
+        assert response.json[0] == {
+            "name": "etalab/schema-irve-statique",
+            "url": None,
+            "version": None,
+        }
+        assert response.json[1] == {
+            "name": "etalab/schema-irve-statique",
+            "url": "http://example.org",
+            "version": None,
+        }
+        assert response.json[2] == {
+            "name": "etalab/schema-irve-dynamique",
+            "url": None,
+            "version": None,
+        }
+
 
 class DatasetBadgeAPITest(APITestCase):
     @classmethod
