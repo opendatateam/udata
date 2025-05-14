@@ -412,8 +412,11 @@ class DatasetSchemasAPI(API):
     @apiv2.marshal_with(schema_fields)
     def get(self, dataset):
         """Get a dataset schemas given its identifier"""
-        if dataset.deleted and not DatasetEditPermission(dataset).can():
-            apiv2.abort(410, "Dataset has been deleted")
+        if not DatasetEditPermission(dataset).can():
+            if dataset.private:
+                apiv2.abort(404)
+            elif dataset.deleted:
+                apiv2.abort(410, "Dataset has been deleted")
 
         pipeline = [
             {
