@@ -4,6 +4,7 @@
 
 - Improve reuse api perfs by adding a mask on datasets [#3309](https://github.com/opendatateam/udata/pull/3309)
 - Add `featured` to dataset default mask [#3313](https://github.com/opendatateam/udata/pull/3313)
+- Add endpoint to get all schemas for a dataset without fetching resources [#3314](https://github.com/opendatateam/udata/pull/3314)
 
 ## 10.3.2 (2025-05-06)
 
