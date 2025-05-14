@@ -404,6 +404,58 @@ class ResourcesAPI(API):
         }
 
 
+@ns.route("/<dataset:dataset>/schemas/", endpoint="dataset_schemas", doc=common_doc)
+@apiv2.response(404, "Dataset not found")
+@apiv2.response(410, "Dataset has been deleted")
+class DatasetSchemasAPI(API):
+    @apiv2.doc("get_dataset_schemas")
+    @apiv2.marshal_with(schema_fields)
+    def get(self, dataset):
+        """Get a dataset schemas given its identifier"""
+        if dataset.deleted and not DatasetEditPermission(dataset).can():
+            apiv2.abort(410, "Dataset has been deleted")
+
+        pipeline = [
+            {
+                "$match": {"_id": dataset.id}  # Sélection du document
+            },
+            {
+                "$project": {
+                    "resources": {
+                        "$filter": {
+                            "input": "$resources",
+                            "as": "res",
+                            "cond": {"$ne": ["$$res.schema", None]},
+                        }
+                    }
+                }
+            },
+        ]
+
+        results = Dataset.objects.aggregate(*pipeline)
+
+        for doc in results:
+            seen_schemas = set()
+            unique_schemas = []
+
+            for res in doc.get("resources", []):
+                schema = res.get("schema")
+                if not schema:
+                    continue
+
+                key = (
+                    schema.get("url"),
+                    schema.get("name"),
+                    schema.get("version"),
+                )
+
+                if key not in seen_schemas:
+                    seen_schemas.add(key)
+                    unique_schemas.append(schema)
+
+        return unique_schemas
+
+
 @ns.route("/resources/<uuid:rid>/", endpoint="resource")
 class ResourceAPI(API):
     @apiv2.doc("get_resource")
