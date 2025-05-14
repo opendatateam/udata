@@ -54,8 +54,11 @@ class DataserviceAPI(API):
     @api.doc("get_dataservice")
     @api.marshal_with(Dataservice.__read_fields__)
     def get(self, dataservice):
-        if dataservice.deleted_at and not OwnablePermission(dataservice).can():
-            api.abort(410, "Dataservice has been deleted")
+        if not OwnablePermission(dataservice).can():
+            if dataservice.private:
+                api.abort(404)
+            elif dataservice.deleted_at:
+                api.abort(410, "Dataservice has been deleted")
         return dataservice
 
     @api.secure
