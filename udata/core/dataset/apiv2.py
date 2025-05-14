@@ -28,7 +28,7 @@ from .api_fields import (
     temporal_coverage_fields,
     user_ref_fields,
 )
-from .constants import DEFAULT_FREQUENCY, DEFAULT_LICENSE, UPDATE_FREQUENCIES
+from .constants import DEFAULT_FREQUENCY, DEFAULT_LICENSE, FULL_OBJECTS_HEADER, UPDATE_FREQUENCIES
 from .models import CommunityResource, Dataset
 from .permissions import DatasetEditPermission, ResourceEditPermission
 from .search import DatasetSearch
@@ -154,7 +154,7 @@ dataset_fields = apiv2.model(
                 "id": d.frequency or DEFAULT_FREQUENCY,
                 "label": UPDATE_FREQUENCIES.get(d.frequency or DEFAULT_FREQUENCY),
             }
-            if request.headers.get("X-Get-Datasets-Full-Objects", False, bool)
+            if request.headers.get(FULL_OBJECTS_HEADER, False, bool)
             else d.frequency,
             enum=list(UPDATE_FREQUENCIES),
             default=DEFAULT_FREQUENCY,
@@ -191,7 +191,7 @@ dataset_fields = apiv2.model(
         ),
         "license": fields.Raw(
             attribute=lambda d: d.license
-            if request.headers.get("X-Get-Datasets-Full-Objects", False, bool)
+            if request.headers.get(FULL_OBJECTS_HEADER, False, bool)
             else (d.license.id if d.license is not None else None),
             default=DEFAULT_LICENSE["id"],
             description="The dataset license (full License object if `X-Get-Datasets-Full-Objects` is set, ID of the license otherwise)",
