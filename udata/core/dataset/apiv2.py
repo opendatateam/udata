@@ -435,28 +435,18 @@ class DatasetSchemasAPI(API):
             },
         ]
 
-        results = Dataset.objects.aggregate(*pipeline)
-
-        for doc in results:
-            seen_schemas = set()
-            unique_schemas = []
-
-            for res in doc.get("resources", []):
-                schema = res.get("schema")
-                if not schema:
-                    continue
-
-                key = (
-                    schema.get("url"),
-                    schema.get("name"),
-                    schema.get("version"),
-                )
-
-                if key not in seen_schemas:
-                    seen_schemas.add(key)
-                    unique_schemas.append(schema)
-
-        return unique_schemas
+        dataset = next(Dataset.objects.aggregate(*pipeline))
+        return list(
+            {
+                (
+                    r.get("schema").get("url"),
+                    r.get("schema").get("name"),
+                    r.get("schema").get("version"),
+                ): r.get("schema")
+                for r in dataset.get("resources", [])
+                if r.get("schema")
+            }.values()
+        )
 
 
 @ns.route("/resources/<uuid:rid>/", endpoint="resource")
