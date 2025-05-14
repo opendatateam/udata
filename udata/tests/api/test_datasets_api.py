@@ -19,6 +19,7 @@ from udata.core.dataset.api_fields import (
     resource_harvest_fields,
 )
 from udata.core.dataset.constants import (
+    FULL_OBJECTS_HEADER,
     LEGACY_FREQUENCIES,
     RESOURCE_TYPES,
     UPDATE_FREQUENCIES,
@@ -37,7 +38,7 @@ from udata.core.dataset.models import (
     ResourceMixin,
 )
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.spatial.factories import SpatialCoverageFactory
+from udata.core.spatial.factories import GeoLevelFactory, SpatialCoverageFactory
 from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
@@ -505,6 +506,41 @@ class DatasetAPITest(APITestCase):
 
         response = self.get(url_for("api.dataset", dataset=dataset))
         self.assert200(response)
+
+    def test_dataset_api_get_with_full_objects(self):
+        """It should fetch a private dataset from the API if user is authorized"""
+        license = LicenseFactory(id="lov2", title="Licence Ouverte Version 2.0")
+        paca, bdr, arles = create_geozones_fixtures()
+        country = GeoLevelFactory(id="country", name="Pays", admin_level=10)
+
+        dataset = DatasetFactory(
+            frequency="monthly",
+            license=license,
+            spatial=SpatialCoverageFactory(zones=[paca.id], granularity=country.id),
+        )
+
+        response = self.get(url_for("apiv2.dataset", dataset=dataset))
+        self.assert200(response)
+        assert response.json["frequency"] == "monthly"
+        assert response.json["license"] == "lov2"
+        assert response.json["spatial"]["zones"][0] == paca.id
+        assert response.json["spatial"]["granularity"] == "country"
+
+        response = self.get(
+            url_for("apiv2.dataset", dataset=dataset),
+            headers={
+                FULL_OBJECTS_HEADER: "True",
+            },
+        )
+        self.assert200(response)
+        assert response.json["frequency"]["id"] == "monthly"
+        assert response.json["frequency"]["label"] == "Mensuelle"
+        assert response.json["license"]["id"] == "lov2"
+        assert response.json["license"]["title"] == license.title
+        assert response.json["spatial"]["zones"][0]["id"] == paca.id
+        assert response.json["spatial"]["zones"][0]["name"] == paca.name
+        assert response.json["spatial"]["granularity"]["id"] == "country"
+        assert response.json["spatial"]["granularity"]["name"] == country.name
 
     def test_dataset_api_create(self):
         """It should create a dataset from the API"""
