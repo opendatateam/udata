@@ -138,8 +138,11 @@ class ReuseAPI(API):
     @api.marshal_with(Reuse.__read_fields__)
     def get(self, reuse):
         """Fetch a given reuse"""
-        if reuse.deleted and not ReuseEditPermission(reuse).can():
-            api.abort(410, "This reuse has been deleted")
+        if not ReuseEditPermission(reuse).can():
+            if reuse.private:
+                api.abort(404)
+            elif reuse.deleted:
+                api.abort(410, "This reuse has been deleted")
         return reuse
 
     @api.secure

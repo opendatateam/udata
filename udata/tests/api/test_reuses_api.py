@@ -257,6 +257,21 @@ class ReuseAPITest:
         response = api.get(url_for("api.reuse", reuse=reuse))
         assert200(response)
 
+    def test_reuse_api_get_private(self, api):
+        """It should not fetch a private reuse from the API and raise 404"""
+        reuse = ReuseFactory(private=True)
+
+        response = api.get(url_for("api.reuse", reuse=reuse))
+        assert404(response)
+
+    def test_reuse_api_get_private_but_authorized(self, api):
+        """It should fetch a private reuse from the API if user is authorized"""
+        user = api.login()
+        reuse = ReuseFactory(owner=user, private=True)
+
+        response = api.get(url_for("api.reuse", reuse=reuse))
+        assert200(response)
+
     def test_reuse_api_create(self, api):
         """It should create a reuse from the API"""
         data = ReuseFactory.as_dict()
