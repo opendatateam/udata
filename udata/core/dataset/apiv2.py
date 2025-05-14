@@ -8,6 +8,7 @@ from flask_restx import marshal
 from udata import search
 from udata.api import API, apiv2, fields
 from udata.core.contact_point.api_fields import contact_point_fields
+from udata.core.dataset.api_fields import license_fields
 from udata.core.organization.api_fields import member_user_with_email_fields
 from udata.core.spatial.api_fields import geojson
 from udata.utils import get_by
@@ -28,7 +29,7 @@ from .api_fields import (
     temporal_coverage_fields,
     user_ref_fields,
 )
-from .constants import DEFAULT_FREQUENCY, DEFAULT_LICENSE, UPDATE_FREQUENCIES
+from .constants import DEFAULT_FREQUENCY, DEFAULT_LICENSE, FULL_OBJECTS_HEADER, UPDATE_FREQUENCIES
 from .models import CommunityResource, Dataset
 from .permissions import DatasetEditPermission, ResourceEditPermission
 from .search import DatasetSearch
@@ -149,11 +150,17 @@ dataset_fields = apiv2.model(
             },
             description="Link to the dataset community resources",
         ),
-        "frequency": fields.String(
-            description="The update frequency",
-            required=True,
+        "frequency": fields.Raw(
+            attribute=lambda d: {
+                "id": d.frequency or DEFAULT_FREQUENCY,
+                "label": UPDATE_FREQUENCIES.get(d.frequency or DEFAULT_FREQUENCY),
+            }
+            if request.headers.get(FULL_OBJECTS_HEADER, False, bool)
+            else d.frequency,
             enum=list(UPDATE_FREQUENCIES),
             default=DEFAULT_FREQUENCY,
+            required=True,
+            description="The update frequency (full Frequency object if `X-Get-Datasets-Full-Objects` is set, ID of the frequency otherwise)",
         ),
         "frequency_date": fields.ISODateTime(
             description=(
@@ -183,8 +190,12 @@ dataset_fields = apiv2.model(
         "spatial": fields.Nested(
             spatial_coverage_fields, allow_null=True, description="The spatial coverage"
         ),
-        "license": fields.String(
-            attribute="license.id", default=DEFAULT_LICENSE["id"], description="The dataset license"
+        "license": fields.Raw(
+            attribute=lambda d: marshal(d.license, license_fields)
+            if request.headers.get(FULL_OBJECTS_HEADER, False, bool)
+            else (d.license.id if d.license is not None else None),
+            default=DEFAULT_LICENSE["id"],
+            description="The dataset license (full License object if `X-Get-Datasets-Full-Objects` is set, ID of the license otherwise)",
         ),
         "uri": fields.UrlFor(
             "api.dataset",
