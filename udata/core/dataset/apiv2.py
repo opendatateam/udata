@@ -68,6 +68,7 @@ DEFAULT_MASK_APIV2 = ",".join(
         "harvest",
         "internal",
         "contact_points",
+        "featured",
     )
 )
 
