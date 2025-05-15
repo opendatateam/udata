@@ -318,8 +318,11 @@ class DatasetAPI(API):
     @apiv2.marshal_with(dataset_fields)
     def get(self, dataset):
         """Get a dataset given its identifier"""
-        if dataset.deleted and not DatasetEditPermission(dataset).can():
-            apiv2.abort(410, "Dataset has been deleted")
+        if not DatasetEditPermission(dataset).can():
+            if dataset.private:
+                apiv2.abort(404)
+            elif dataset.deleted:
+                apiv2.abort(410, "Dataset has been deleted")
         return dataset
 
 
@@ -332,8 +335,11 @@ class DatasetExtrasAPI(API):
     @apiv2.doc("get_dataset_extras")
     def get(self, dataset):
         """Get a dataset extras given its identifier"""
-        if dataset.deleted and not DatasetEditPermission(dataset).can():
-            apiv2.abort(410, "Dataset has been deleted")
+        if not DatasetEditPermission(dataset).can():
+            if dataset.private:
+                apiv2.abort(404)
+            elif dataset.deleted:
+                apiv2.abort(410, "Dataset has been deleted")
         return dataset.extras
 
     @apiv2.secure
@@ -381,6 +387,11 @@ class ResourcesAPI(API):
     @apiv2.marshal_with(resource_page_fields)
     def get(self, dataset):
         """Get the given dataset resources, paginated."""
+        if not DatasetEditPermission(dataset).can():
+            if dataset.private:
+                apiv2.abort(404)
+            elif dataset.deleted:
+                apiv2.abort(410, "Dataset has been deleted")
         args = resources_parser.parse_args()
         page = args["page"]
         page_size = args["page_size"]
@@ -466,6 +477,11 @@ class ResourceAPI(API):
     def get(self, rid):
         dataset = Dataset.objects(resources__id=rid).first()
         if dataset:
+            if not DatasetEditPermission(dataset).can():
+                if dataset.private:
+                    apiv2.abort(404)
+                elif dataset.deleted:
+                    apiv2.abort(410, "Dataset has been deleted")
             resource = get_by(dataset.resources, "id", rid)
         else:
             resource = CommunityResource.objects(id=rid).first()
@@ -492,8 +508,11 @@ class ResourceExtrasAPI(ResourceMixin, API):
     @apiv2.doc("get_resource_extras")
     def get(self, dataset, rid):
         """Get a resource extras given its identifier"""
-        if dataset.deleted and not DatasetEditPermission(dataset).can():
-            apiv2.abort(410, "Dataset has been deleted")
+        if not DatasetEditPermission(dataset).can():
+            if dataset.private:
+                apiv2.abort(404)
+            elif dataset.deleted:
+                apiv2.abort(410, "Dataset has been deleted")
         resource = self.get_resource_or_404(dataset, rid)
         return resource.extras
 
