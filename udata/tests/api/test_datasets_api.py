@@ -19,6 +19,8 @@ from udata.core.dataset.api_fields import (
     resource_harvest_fields,
 )
 from udata.core.dataset.constants import (
+    DEFAULT_FREQUENCY,
+    DEFAULT_LICENSE,
     FULL_OBJECTS_HEADER,
     LEGACY_FREQUENCIES,
     RESOURCE_TYPES,
@@ -512,6 +514,7 @@ class DatasetAPITest(APITestCase):
         license = LicenseFactory(id="lov2", title="Licence Ouverte Version 2.0")
         paca, bdr, arles = create_geozones_fixtures()
         country = GeoLevelFactory(id="country", name="Pays", admin_level=10)
+        other = GeoLevelFactory(id="other", name="Autre")
 
         dataset = DatasetFactory(
             frequency="monthly",
@@ -541,6 +544,27 @@ class DatasetAPITest(APITestCase):
         assert response.json["spatial"]["zones"][0]["name"] == paca.name
         assert response.json["spatial"]["granularity"]["id"] == "country"
         assert response.json["spatial"]["granularity"]["name"] == country.name
+
+        dataset_without_anything = DatasetFactory(
+            frequency=None,
+            license=None,
+            spatial=SpatialCoverageFactory(zones=[], granularity=None),
+        )
+
+        response = self.get(
+            url_for("apiv2.dataset", dataset=dataset_without_anything),
+            headers={
+                FULL_OBJECTS_HEADER: "True",
+            },
+        )
+        self.assert200(response)
+        assert response.json["frequency"]["id"] == DEFAULT_FREQUENCY
+        assert response.json["frequency"]["label"] == UPDATE_FREQUENCIES.get(DEFAULT_FREQUENCY)
+        assert response.json["license"]["id"] == DEFAULT_LICENSE["id"]
+        assert response.json["license"]["title"] == DEFAULT_LICENSE["title"]
+        assert len(response.json["spatial"]["zones"]) == 0
+        assert response.json["spatial"]["granularity"]["id"] == "other"
+        assert response.json["spatial"]["granularity"]["name"] == other.name
 
     def test_dataset_api_create(self):
         """It should create a dataset from the API"""
