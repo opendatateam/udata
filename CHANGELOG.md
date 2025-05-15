@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 10.4.0 (2025-05-15)
 
 - Improve reuse api perfs by adding a mask on datasets [#3309](https://github.com/opendatateam/udata/pull/3309)
