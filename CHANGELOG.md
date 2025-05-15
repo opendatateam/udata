@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 10.4.0 (2025-05-15)
 
 - Improve reuse api perfs by adding a mask on datasets [#3309](https://github.com/opendatateam/udata/pull/3309)
 - Private objects should return 404 by api [#3311](https://github.com/opendatateam/udata/pull/3311) [#3316](https://github.com/opendatateam/udata/pull/3316)
