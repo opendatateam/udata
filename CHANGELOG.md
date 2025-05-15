@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add missing default for license full object [#3317](https://github.com/opendatateam/udata/pull/3317/)
 
 ## 10.4.0 (2025-05-15)
 
