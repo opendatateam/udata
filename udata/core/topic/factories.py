@@ -2,10 +2,21 @@ import factory
 
 from udata import utils
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.reuse.factories import VisibleReuseFactory
 from udata.factories import ModelFactory
 
-from .models import Topic
+from .models import Topic, TopicElement
+
+
+class TopicElementFactory(ModelFactory):
+    class Meta:
+        model = TopicElement
+
+    title = factory.Faker("sentence")
+    description = factory.Faker("text")
+
+
+class TopicElementDatasetFactory(TopicElementFactory):
+    element = factory.SubFactory(DatasetFactory)
 
 
 class TopicFactory(ModelFactory):
@@ -18,9 +29,6 @@ class TopicFactory(ModelFactory):
     private = False
 
     @factory.lazy_attribute
-    def datasets(self):
-        return DatasetFactory.create_batch(3)
-
-    @factory.lazy_attribute
-    def reuses(self):
-        return VisibleReuseFactory.create_batch(3)
+    def elements(self):
+        # TODO: create more types
+        return TopicElementDatasetFactory.create_batch(3)
