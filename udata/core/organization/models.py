@@ -6,6 +6,7 @@ from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
 from udata.api_fields import field
+from udata.core.activity.models import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
 from udata.core.metrics.models import WithMetrics
 from udata.core.storages import avatars, default_image_basename
@@ -110,29 +111,35 @@ class OrganizationBadgeMixin(BadgeMixin):
     __badges__ = BADGES
 
 
-class Organization(WithMetrics, OrganizationBadgeMixin, db.Datetimed, db.Document):
-    name = db.StringField(required=True)
-    acronym = db.StringField(max_length=128)
-    slug = db.SlugField(
-        max_length=255, required=True, populate_from="name", update=True, follow=True
+class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, db.Datetimed, db.Document):
+    name = field(db.StringField(required=True))
+    acronym = field(db.StringField(max_length=128))
+    slug = field(
+        db.SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
+        auditable=False,
     )
-    description = db.StringField(required=True)
-    url = db.URLField()
-    image_url = db.StringField()
-    logo = db.ImageField(
-        fs=avatars, basename=default_image_basename, max_size=LOGO_MAX_SIZE, thumbnails=LOGO_SIZES
+    description = field(db.StringField(required=True))
+    url = field(db.URLField())
+    image_url = field(db.StringField())
+    logo = field(
+        db.ImageField(
+            fs=avatars,
+            basename=default_image_basename,
+            max_size=LOGO_MAX_SIZE,
+            thumbnails=LOGO_SIZES,
+        )
     )
-    business_number_id = db.StringField(max_length=ORG_BID_SIZE_LIMIT)
+    business_number_id = field(db.StringField(max_length=ORG_BID_SIZE_LIMIT))
 
-    members = db.ListField(db.EmbeddedDocumentField(Member))
-    teams = db.ListField(db.EmbeddedDocumentField(Team))
-    requests = db.ListField(db.EmbeddedDocumentField(MembershipRequest))
+    members = field(db.ListField(db.EmbeddedDocumentField(Member)))
+    teams = field(db.ListField(db.EmbeddedDocumentField(Team)))
+    requests = field(db.ListField(db.EmbeddedDocumentField(MembershipRequest)))
 
-    ext = db.MapField(db.GenericEmbeddedDocumentField())
-    zone = db.StringField()
-    extras = db.OrganizationExtrasField()
+    ext = field(db.MapField(db.GenericEmbeddedDocumentField()))
+    zone = field(db.StringField())
+    extras = field(db.OrganizationExtrasField(), auditable=False)
 
-    deleted = db.DateTimeField()
+    deleted = field(db.DateTimeField())
 
     meta = {
         "indexes": [
@@ -168,18 +175,11 @@ class Organization(WithMetrics, OrganizationBadgeMixin, db.Datetimed, db.Documen
     on_update = Signal()
     before_delete = Signal()
     after_delete = Signal()
+    on_delete = Signal()
 
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
         cls.before_save.send(document)
-
-    @classmethod
-    def post_save(cls, sender, document, **kwargs):
-        cls.after_save.send(document)
-        if kwargs.get("created"):
-            cls.on_create.send(document)
-        else:
-            cls.on_update.send(document)
 
     def url_for(self, *args, **kwargs):
         return endpoint_for("organizations.show", "api.organization", org=self, *args, **kwargs)
@@ -296,31 +296,31 @@ class Organization(WithMetrics, OrganizationBadgeMixin, db.Datetimed, db.Documen
 
     def count_members(self):
         self.metrics["members"] = len(self.members)
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_datasets(self):
         from udata.models import Dataset
 
         self.metrics["datasets"] = Dataset.objects(organization=self).visible().count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_reuses(self):
         from udata.models import Reuse
 
         self.metrics["reuses"] = Reuse.objects(organization=self).visible().count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_dataservices(self):
         from udata.models import Dataservice
 
         self.metrics["dataservices"] = Dataservice.objects(organization=self).visible().count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):
         from udata.models import Follow
 
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
 
 pre_save.connect(Organization.pre_save, sender=Organization)

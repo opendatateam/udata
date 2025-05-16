@@ -3,6 +3,7 @@ from datetime import datetime
 from blinker import Signal
 from mongoengine.signals import post_save
 
+from udata.api_fields import get_fields
 from udata.auth import current_user
 from udata.mongo import db
 
@@ -36,6 +37,7 @@ class Activity(db.Document, metaclass=EmitNewActivityMetaClass):
     organization = db.ReferenceField("Organization")
     related_to = db.ReferenceField(db.DomainModel, required=True)
     created_at = db.DateTimeField(default=datetime.utcnow, required=True)
+    changes = db.ListField(db.StringField())
 
     extras = db.ExtrasField()
 
@@ -65,11 +67,36 @@ class Activity(db.Document, metaclass=EmitNewActivityMetaClass):
         return cls.on_new.connect(func, sender=cls)
 
     @classmethod
-    def emit(cls, related_to, organization=None, extras=None):
+    def emit(cls, related_to, organization=None, changed_fields=None, extras=None):
         new_activity.send(
             cls,
             related_to=related_to,
             actor=current_user._get_current_object(),
             organization=organization,
+            changes=changed_fields,
             extras=extras,
         )
+
+
+class Auditable(object):
+    @classmethod
+    def post_save(cls, sender, document, **kwargs):
+        try:
+            auditable_fields = [
+                key for key, field, info in get_fields(cls) if info.get("auditable", True)
+            ]
+        except Exception:
+            # for backward compatibility, all fields are treated as auditable for classes not using field() function
+            auditable_fields = document._get_changed_fields()
+        changed_fields = [
+            field for field in document._get_changed_fields() if field in auditable_fields
+        ]
+        if "post_save" in kwargs.get("ignores", []):
+            return
+        cls.after_save.send(document)
+        if kwargs.get("created"):
+            cls.on_create.send(document)
+        elif len(changed_fields):
+            cls.on_update.send(document, changed_fields=changed_fields)
+        if getattr(document, "deleted_at", None) or getattr(document, "deleted", None):
+            cls.on_delete.send(document)

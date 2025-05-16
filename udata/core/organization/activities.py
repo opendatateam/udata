@@ -32,6 +32,7 @@ def on_user_created_organization(organization):
 
 
 @Organization.on_update.connect
-def on_user_updated_organization(organization):
+def on_user_updated_organization(organization, **kwargs):
+    changed_fields = kwargs.get("changed_fields", [])
     if current_user and current_user.is_authenticated:
-        UserUpdatedOrganization.emit(organization, organization)
+        UserUpdatedOrganization.emit(organization, organization, changed_fields)
