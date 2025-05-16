@@ -897,10 +897,6 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
 
         return result
 
-    @property
-    def downloads(self):
-        return sum(resource.metrics.get("views", 0) for resource in self.resources)
-
     @staticmethod
     def normalize_score(score):
         """
