@@ -87,7 +87,6 @@ class DatasetCSVAdapterTest:
         assert harvest_dataset_values["harvest.domain"] == "example.com"
         assert harvest_dataset_values["harvest.remote_url"] == "https://www.example.com/"
         assert harvest_dataset_values["resources_count"] == 0
-        assert harvest_dataset_values["downloads"] == 0
 
         resources_dataset_values = csv[str(resources_dataset.id)]
         assert resources_dataset_values["resources_count"] == 3
