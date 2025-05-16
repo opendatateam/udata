@@ -7,11 +7,9 @@ from flask_security import current_user
 
 from udata.api import API, apiv2, fields
 from udata.core.dataset.api import DatasetApiParser
-from udata.core.dataset.apiv2 import dataset_page_fields
 from udata.core.dataset.models import Dataset
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api import ReuseApiParser
-from udata.core.reuse.models import Reuse
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.topic.models import Topic
 from udata.core.topic.parsers import TopicApiParser
@@ -33,6 +31,7 @@ reuse_parser = ReuseApiParser()
 common_doc = {"params": {"topic": "The topic ID"}}
 
 
+# FIXME: move to fields submodule
 topic_fields = apiv2.model(
     "Topic",
     {
@@ -45,35 +44,20 @@ topic_fields = apiv2.model(
         "tags": fields.List(
             fields.String, description="Some keywords to help in search", required=True
         ),
-        "datasets": fields.Raw(
+        "elements": fields.Raw(
             attribute=lambda o: {
                 "rel": "subsection",
                 "href": url_for(
-                    "apiv2.topic_datasets",
+                    "apiv2.topic_elements",
                     topic=o.id,
                     page=1,
                     page_size=DEFAULT_PAGE_SIZE,
                     _external=True,
                 ),
                 "type": "GET",
-                "total": len(o.datasets),
+                "total": len(o.elements),
             },
-            description="Link to the topic datasets",
-        ),
-        "reuses": fields.Raw(
-            attribute=lambda o: {
-                "rel": "subsection",
-                "href": url_for(
-                    "apiv2.topic_reuses",
-                    topic=o.id,
-                    page=1,
-                    page_size=DEFAULT_PAGE_SIZE,
-                    _external=True,
-                ),
-                "type": "GET",
-                "total": len(o.reuses),
-            },
-            description="Link to the topic reuses",
+            description="Link to the topic elements",
         ),
         "featured": fields.Boolean(description="Is the topic featured"),
         "private": fields.Boolean(description="Is the topic private"),
@@ -109,6 +93,49 @@ topic_fields = apiv2.model(
 
 topic_page_fields = apiv2.model("TopicPage", fields.pager(topic_fields))
 
+nested_element_fields = apiv2.model(
+    "NestedTopicElement",
+    {
+        "class": fields.ClassName(description="The model class", required=True),
+        "id": fields.String(description="The object identifier", required=True),
+    },
+)
+
+element_fields = apiv2.model(
+    "TopicElement",
+    {
+        "id": fields.String(description="The element id"),
+        "title": fields.String(description="The element title"),
+        "description": fields.String(description="The element description"),
+        "element": fields.Nested(nested_element_fields, description="The element target object"),
+    },
+)
+
+element_page_fields = apiv2.model(
+    "TopicElementPage",
+    {
+        "data": fields.List(fields.Nested(element_fields, description="The topic elements")),
+        "next_page": fields.String(),
+        "previous_page": fields.String(),
+        "page": fields.Integer(),
+        "page_size": fields.Integer(),
+        "total": fields.Integer(),
+    },
+)
+
+# FIXME: move to parsers submodule
+elements_parser = apiv2.parser()
+elements_parser.add_argument("page", type=int, default=1, location="args", help="The page to fetch")
+elements_parser.add_argument(
+    "page_size", type=int, default=DEFAULT_PAGE_SIZE, location="args", help="The page size to fetch"
+)
+elements_parser.add_argument(
+    "type", type=str, location="args", help="The type of resources to fetch"
+)
+elements_parser.add_argument(
+    "q", type=str, location="args", help="query string to search through elements"
+)
+
 
 @ns.route("/", endpoint="topics_list")
 class TopicsAPI(API):
@@ -142,22 +169,56 @@ topic_add_items_fields = apiv2.model(
 )
 
 
-@ns.route("/<topic:topic>/datasets/", endpoint="topic_datasets", doc=common_doc)
-class TopicDatasetsAPI(API):
-    @apiv2.doc("topic_datasets")
-    @apiv2.expect(dataset_parser.parser)
-    @apiv2.marshal_with(dataset_page_fields)
+@ns.route("/<topic:topic>/elements/", endpoint="topic_elements", doc=common_doc)
+class TopicElementsAPI(API):
+    @apiv2.doc("topic_elements")
+    @apiv2.expect(elements_parser)
+    @apiv2.marshal_with(element_page_fields)
     def get(self, topic):
-        """Get a given topic datasets, with filters"""
-        args = dataset_parser.parse()
-        args["topic"] = topic.id
-        datasets = Dataset.objects(archived=None, deleted=None, private=False)
-        datasets = dataset_parser.parse_filters(datasets, args)
-        sort = args["sort"] or ("$text_score" if args["q"] else None) or "-created_at_internal"
-        return datasets.order_by(sort).paginate(args["page"], args["page_size"])
+        """Get a given topic elements, with filters"""
+        args = elements_parser.parse_args()
+        page = args["page"]
+        page_size = args["page_size"]
+        list_elements_url = url_for("apiv2.topic_elements", topic=topic.id, _external=True)
+        next_page = f"{list_elements_url}?page={page + 1}&page_size={page_size}"
+        previous_page = f"{list_elements_url}?page={page - 1}&page_size={page_size}"
+
+        # FIXME: this will probably fail with a lot of elements
+        # is there an efficient way to handle embedded documents pagination? or shall we use an Element document?
+        # -> aggregation pipeline is probably the way to go
+        res = topic.elements
+
+        # FIXME: implement class/type filter
+        if args["type"]:
+            res = [elem for elem in res if elem["type"] == args["type"]]
+            next_page += f"&type={args['type']}"
+            previous_page += f"&type={args['type']}"
+
+        # FIXME: implement on description too, and be smarter
+        if args["q"]:
+            res = [elem for elem in res if args["q"].lower() in elem["title"].lower()]
+            next_page += f"&q={args['q']}"
+            previous_page += f"&q={args['q']}"
+
+        if page > 1:
+            offset = page_size * (page - 1)
+        else:
+            offset = 0
+        paginated_result = res[offset : (page_size + offset if page_size is not None else None)]
+
+        print("elements", [e.id for e in topic.elements])
+
+        return {
+            "data": paginated_result,
+            "next_page": next_page if page_size + offset < len(res) else None,
+            "page": page,
+            "page_size": page_size,
+            "previous_page": previous_page if page > 1 else None,
+            "total": len(res),
+        }
 
     @apiv2.secure
-    @apiv2.doc("topic_datasets_create")
+    @apiv2.doc("topic_elements_create")
     @apiv2.expect([topic_add_items_fields])
     @apiv2.marshal_with(topic_fields)
     @apiv2.response(400, "Malformed object id(s) in request")
@@ -190,96 +251,23 @@ class TopicDatasetsAPI(API):
 
 
 @ns.route(
-    "/<topic:topic>/datasets/<dataset:dataset>/",
-    endpoint="topic_dataset",
-    doc={"params": {"topic": "The topic ID", "dataset": "The dataset ID"}},
+    "/<topic:topic>/elements/<uuid:element_id>/",
+    endpoint="topic_element",
+    doc={"params": {"topic": "The topic ID", "element": "The element ID"}},
 )
-class TopicDatasetAPI(API):
+class TopicElementAPI(API):
     @apiv2.secure
     @apiv2.response(404, "Topic not found")
-    @apiv2.response(404, "Dataset not found in topic")
+    @apiv2.response(404, "Element not found in topic")
     @apiv2.response(204, "Success")
-    def delete(self, topic, dataset):
+    def delete(self, topic, element_id):
         """Delete a given dataset from the given topic"""
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
 
-        if dataset.id not in (d.id for d in topic.datasets):
-            apiv2.abort(404, "Dataset not found in topic")
-        topic.datasets = [d for d in topic.datasets if d.id != dataset.id]
-        topic.save()
-
-        return None, 204
-
-
-@ns.route("/<topic:topic>/reuses/", endpoint="topic_reuses", doc=common_doc)
-class TopicReusesAPI(API):
-    @apiv2.doc("topic_reuses")
-    @apiv2.expect(reuse_parser.parser)
-    @apiv2.marshal_with(Reuse.__page_fields__)
-    def get(self, topic):
-        """Get a given topic reuses, with filters"""
-        args = reuse_parser.parse()
-        reuses = Reuse.objects(deleted=None, private__ne=True).filter(
-            id__in=[d.id for d in topic.reuses]
-        )
-        # warning: topic in reuse_parser is different from Topic
-        reuses = reuse_parser.parse_filters(reuses, args)
-        sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
-        return reuses.order_by(sort).paginate(args["page"], args["page_size"])
-
-    @apiv2.secure
-    @apiv2.doc("topic_reuses_create")
-    @apiv2.expect([topic_add_items_fields])
-    @apiv2.marshal_with(topic_fields)
-    @apiv2.response(400, "Malformed object id(s) in request")
-    @apiv2.response(400, "Expecting a list")
-    @apiv2.response(400, "Expecting a list of dicts with id attribute")
-    @apiv2.response(404, "Topic not found")
-    @apiv2.response(403, "Forbidden")
-    def post(self, topic):
-        """Add reuses to a given topic from a list of reuses ids"""
-        if not TopicEditPermission(topic).can():
-            apiv2.abort(403, "Forbidden")
-
-        data = request.json
-
-        if not isinstance(data, list):
-            apiv2.abort(400, "Expecting a list")
-        if not all(isinstance(d, dict) and d.get("id") for d in data):
-            apiv2.abort(400, "Expecting a list of dicts with id attribute")
-
-        try:
-            reuses = Reuse.objects.filter(id__in=[r["id"] for r in data]).only("id")
-            diff = set(d.id for d in reuses) - set(d.id for d in topic.reuses)
-        except mongoengine.errors.ValidationError:
-            apiv2.abort(400, "Malformed object id(s) in request")
-
-        if diff:
-            topic.reuses += [ObjectId(rid) for rid in diff]
-            topic.save()
-
-        return topic, 201
-
-
-@ns.route(
-    "/<topic:topic>/reuses/<reuse:reuse>/",
-    endpoint="topic_reuse",
-    doc={"params": {"topic": "The topic ID", "reuse": "The reuse ID"}},
-)
-class TopicReuseAPI(API):
-    @apiv2.secure
-    @apiv2.response(404, "Topic not found")
-    @apiv2.response(404, "Reuse not found in topic")
-    @apiv2.response(204, "Success")
-    def delete(self, topic, reuse):
-        """Delete a given reuse from the given topic"""
-        if not TopicEditPermission(topic).can():
-            apiv2.abort(403, "Forbidden")
-
-        if reuse.id not in (d.id for d in topic.reuses):
-            apiv2.abort(404, "Reuse not found in topic")
-        topic.reuses = [d for d in topic.reuses if d.id != reuse.id]
+        if element_id not in (elt.id for elt in topic.elements):
+            apiv2.abort(404, "Element not found in topic")
+        topic.elements = [elt for elt in topic.elements if elt.id != element_id]
         topic.save()
 
         return None, 204

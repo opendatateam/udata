@@ -3,9 +3,18 @@ from mongoengine.signals import pre_save
 
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.models import SpatialCoverage, db
-from udata.search import reindex
 
 __all__ = ("Topic",)
+
+
+class TopicElement(db.EmbeddedDocument):
+    id = db.AutoUUIDField(primary_key=True)
+    title = db.StringField(required=False)
+    description = db.StringField(required=False)
+    tags = db.ListField(db.StringField())
+    extras = db.ExtrasField()
+    # FIXME: no reverse_delete_rule allowed here, is cleanup a problem?
+    element = db.GenericReferenceField()
 
 
 class Topic(db.Document, Owned, db.Datetimed):
@@ -18,8 +27,7 @@ class Topic(db.Document, Owned, db.Datetimed):
     color = db.IntField()
 
     tags = db.ListField(db.StringField())
-    datasets = db.ListField(db.LazyReferenceField("Dataset", reverse_delete_rule=db.PULL))
-    reuses = db.ListField(db.LazyReferenceField("Reuse", reverse_delete_rule=db.PULL))
+    elements = db.EmbeddedDocumentListField(TopicElement)
 
     featured = db.BooleanField(default=False)
     private = db.BooleanField()
@@ -39,16 +47,20 @@ class Topic(db.Document, Owned, db.Datetimed):
 
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
+        # FIXME: reindex elements based on diff and class
+        # NB: reuse was not reindexed
+        pass
+
         # Try catch is to prevent the mechanism to crash at the
         # creation of the Topic, where an original state does not exist.
-        try:
-            original_doc = sender.objects.get(id=document.id)
-            # Get the diff between the original and current datasets
-            datasets_list_dif = set(original_doc.datasets) ^ set(document.datasets)
-        except cls.DoesNotExist:
-            datasets_list_dif = document.datasets
-        for dataset in datasets_list_dif:
-            reindex.delay("Dataset", str(dataset.pk))
+        # try:
+        #     original_doc = sender.objects.get(id=document.id)
+        #     # Get the diff between the original and current datasets
+        #     datasets_list_dif = set(original_doc.datasets) ^ set(document.datasets)
+        # except cls.DoesNotExist:
+        #     datasets_list_dif = document.datasets
+        # for dataset in datasets_list_dif:
+        #     reindex.delay("Dataset", str(dataset.pk))
 
     @property
     def display_url(self):
