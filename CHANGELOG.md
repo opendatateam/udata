@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Remove duplicate `downloads` in dataset csv adapter [#3319](https://github.com/opendatateam/udata/pull/3319)
 
 ## 10.4.0 (2025-05-15)
 
