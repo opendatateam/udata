@@ -284,6 +284,7 @@ DEFAULT_MASK = ",".join(
         "quality",
         "internal",
         "contact_points",
+        "featured",
     )
 )
 

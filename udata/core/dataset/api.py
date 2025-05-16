@@ -300,8 +300,11 @@ class DatasetAPI(API):
     @api.marshal_with(dataset_fields)
     def get(self, dataset):
         """Get a dataset given its identifier"""
-        if dataset.deleted and not DatasetEditPermission(dataset).can():
-            api.abort(410, "Dataset has been deleted")
+        if not DatasetEditPermission(dataset).can():
+            if dataset.private:
+                api.abort(404)
+            elif dataset.deleted:
+                api.abort(410, "Dataset has been deleted")
         return dataset
 
     @api.secure
@@ -601,8 +604,11 @@ class ResourceAPI(ResourceMixin, API):
     @api.marshal_with(resource_fields)
     def get(self, dataset, rid):
         """Get a resource given its identifier"""
-        if dataset.deleted and not DatasetEditPermission(dataset).can():
-            api.abort(410, "Dataset has been deleted")
+        if not DatasetEditPermission(dataset).can():
+            if dataset.private:
+                api.abort(404)
+            elif dataset.deleted:
+                api.abort(410, "Dataset has been deleted")
         resource = self.get_resource_or_404(dataset, rid)
         return resource
 
