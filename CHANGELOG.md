@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Add missing default for license full object [#3317](https://github.com/opendatateam/udata/pull/3317/)
 - Check for slugs in followers API [#3320](https://github.com/opendatateam/udata/pull/3320)
 - Fix missing ID in dataset reuses mask [#3321](https://github.com/opendatateam/udata/pull/3321)
 
