@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Check for slugs in followers API [#3320](https://github.com/opendatateam/udata/pull/3320)
 
 ## 10.4.0 (2025-05-15)
 
