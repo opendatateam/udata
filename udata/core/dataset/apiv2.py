@@ -191,7 +191,7 @@ dataset_fields = apiv2.model(
             spatial_coverage_fields, allow_null=True, description="The spatial coverage"
         ),
         "license": fields.Raw(
-            attribute=lambda d: marshal(d.license, license_fields)
+            attribute=lambda d: marshal(d.license or DEFAULT_LICENSE, license_fields)
             if request.headers.get(FULL_OBJECTS_HEADER, False, bool)
             else (d.license.id if d.license is not None else None),
             default=DEFAULT_LICENSE["id"],
