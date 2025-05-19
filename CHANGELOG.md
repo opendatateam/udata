@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix missing ID in dataset reuses mask [#3321](https://github.com/opendatateam/udata/pull/3321)
 
 ## 10.4.0 (2025-05-15)
 
