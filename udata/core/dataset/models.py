@@ -976,8 +976,9 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             try:
                 storages.resources.delete(resource.fs_filename)
             except FileNotFoundError as e:
-                log.error(f"File not found while deleting resource #{resource.id} in dataset {self.id}: {e}")
-
+                log.error(
+                    f"File not found while deleting resource #{resource.id} in dataset {self.id}: {e}"
+                )
 
         self.resources.remove(resource)
         self.on_resource_removed.send(self.__class__, document=self, resource_id=resource.id)
