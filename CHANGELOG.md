@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+-  Do not crash if file doesn't exists during resource deletion [#3323](https://github.com/opendatateam/udata/pull/3323) 
 
 ## 10.4.1 (2025-05-20)
 
