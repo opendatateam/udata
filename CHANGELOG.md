@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 10.4.1 (2025-05-20)
 
 - Remove duplicate `downloads` in dataset csv adapter [#3319](https://github.com/opendatateam/udata/pull/3319)
 - Add missing default for license full object [#3317](https://github.com/opendatateam/udata/pull/3317/)
