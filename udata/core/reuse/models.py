@@ -134,6 +134,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Owned, db.Doc
         db.BooleanField(),
         filterable={},
         readonly=True,
+        auditable=False,
     )
     deleted = field(
         db.DateTimeField(),

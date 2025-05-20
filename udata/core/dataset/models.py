@@ -571,7 +571,10 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
 
     quality_cached = field(db.DictField(), auditable=False)
 
-    featured = field(db.BooleanField(required=True, default=False))
+    featured = field(
+        db.BooleanField(required=True, default=False),
+        auditable=False,
+    )
 
     contact_points = field(
         db.ListField(db.ReferenceField("ContactPoint", reverse_delete_rule=db.PULL))
