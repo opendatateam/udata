@@ -10,6 +10,7 @@ from udata.core.dataset.api_fields import community_resource_fields, dataset_fie
 from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields
 from udata.core.followers.api import FollowAPI
+from udata.core.organization.api_fields import member_email_with_visibility_check
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
@@ -409,6 +410,7 @@ class SuggestUsersAPI(API):
                 "first_name": user.first_name,
                 "last_name": user.last_name,
                 "avatar_url": user.avatar,
+                "email": user.email,
                 "slug": user.slug,
             }
             for user in users.order_by(DEFAULT_SORTING).limit(args["size"])

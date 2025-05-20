@@ -30,7 +30,7 @@ user_ref_fields = api.inherit(
     },
 )
 
-from udata.core.organization.api_fields import org_ref_fields  # noqa
+from udata.core.organization.api_fields import member_email_with_visibility_check, org_ref_fields  # noqa
 
 user_fields = api.model(
     "User",
@@ -125,6 +125,11 @@ user_suggestion_fields = api.model(
         "last_name": fields.String(description="The user last name", readonly=True),
         "avatar_url": fields.ImageField(
             size=BIGGEST_AVATAR_SIZE, description="The user avatar URL", readonly=True
+        ),
+        "email": fields.Raw(
+            attribute=lambda o: member_email_with_visibility_check(o['email']),
+            description="The user email (only the domain for non-admin user)",
+            readonly=True,
         ),
         "slug": fields.String(description="The user permalink string", readonly=True),
     },
