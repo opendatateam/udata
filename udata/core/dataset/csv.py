@@ -40,7 +40,6 @@ class DatasetCsvAdapter(csv.Adapter):
         ("resources_count", lambda o: len(o.resources)),
         ("main_resources_count", lambda o: len([r for r in o.resources if r.type == "main"])),
         ("resources_formats", lambda o: ",".join(set(r.format for r in o.resources if r.format))),
-        "downloads",
         ("harvest.backend", lambda r: r.harvest and r.harvest.backend),
         ("harvest.domain", lambda r: r.harvest and r.harvest.domain),
         ("harvest.created_at", lambda r: r.harvest and r.harvest.created_at),
