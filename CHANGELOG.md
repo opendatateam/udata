@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+-  Add test for removing last contact point [#3322](https://github.com/opendatateam/udata/pull/3322) 
 
 ## 10.4.1 (2025-05-20)
 

@@ -977,6 +977,14 @@ class DatasetAPITest(APITestCase):
         dataset = Dataset.objects.first()
         self.assertEqual(dataset.contact_points[0].name, contact_point_data["name"])
 
+        data["contact_points"] = []
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+
+        dataset = Dataset.objects.first()
+        # This is weird, we should have no contact point if sending an empty array… :RemoveAllContactPoints (in cdata)
+        self.assertEqual(dataset.contact_points[0].name, contact_point_data["name"])
+
         data["contact_points"] = None
         response = self.put(url_for("api.dataset", dataset=dataset), data)
         self.assert200(response)
