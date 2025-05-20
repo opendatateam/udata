@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add integrity checks on non existent list field instead of empty [#3242](https://github.com/opendatateam/udata/pull/3242)
 
 ## 10.4.1 (2025-05-20)
 
