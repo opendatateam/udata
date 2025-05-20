@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add activities to dataservices and resources, add Auditable class to refactor improve code [#3308](https://github.com/opendatateam/udata/pull/3308)
 
 ## 10.4.1 (2025-05-20)
 
