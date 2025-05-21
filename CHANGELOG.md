@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Show user domain in suggest [#3324](https://github.com/opendatateam/udata/pull/3324)
 
 ## 10.4.1 (2025-05-20)
 
