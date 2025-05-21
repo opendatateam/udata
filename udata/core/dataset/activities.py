@@ -56,20 +56,29 @@ class UserRemovedResourceFromDataset(DatasetRelatedActivity, Activity):
 @Dataset.on_resource_added.connect
 def on_user_added_resource_to_dataset(sender, document, **kwargs):
     if not document.private and current_user and current_user.is_authenticated:
-        UserAddedResourceToDataset.emit(document, document.organization, None, { 'resource_id': str(kwargs['resource_id']) })
+        UserAddedResourceToDataset.emit(
+            document, document.organization, None, {"resource_id": str(kwargs["resource_id"])}
+        )
 
 
 @Dataset.on_resource_updated.connect
 def on_user_updated_resource(sender, document, **kwargs):
     changed_fields = kwargs.get("changed_fields", [])
     if not document.private and current_user and current_user.is_authenticated:
-        UserUpdatedResource.emit(document, document.organization, changed_fields, { 'resource_id': str(kwargs['resource_id']) })
+        UserUpdatedResource.emit(
+            document,
+            document.organization,
+            changed_fields,
+            {"resource_id": str(kwargs["resource_id"])},
+        )
 
 
 @Dataset.on_resource_removed.connect
 def on_user_removed_resource_from_dataset(sender, document, **kwargs):
     if not document.private and current_user and current_user.is_authenticated:
-        UserRemovedResourceFromDataset.emit(document, document.organization, None, { 'resource_id': str(kwargs['resource_id']) })
+        UserRemovedResourceFromDataset.emit(
+            document, document.organization, None, {"resource_id": str(kwargs["resource_id"])}
+        )
 
 
 @Dataset.on_create.connect
