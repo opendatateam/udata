@@ -10,7 +10,6 @@ from udata.core.dataset.api_fields import community_resource_fields, dataset_fie
 from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields
 from udata.core.followers.api import FollowAPI
-from udata.core.organization.api_fields import member_email_with_visibility_check
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,

@@ -127,7 +127,7 @@ user_suggestion_fields = api.model(
             size=BIGGEST_AVATAR_SIZE, description="The user avatar URL", readonly=True
         ),
         "email": fields.Raw(
-            attribute=lambda o: member_email_with_visibility_check(o['email']),
+            attribute=lambda o: member_email_with_visibility_check(o["email"]),
             description="The user email (only the domain for non-admin user)",
             readonly=True,
         ),
