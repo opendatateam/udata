@@ -6,23 +6,18 @@ from flask_security import current_user
 
 from udata.api import API, apiv2, fields
 from udata.core.dataset.api import DatasetApiParser
-from udata.core.dataset.models import Dataset
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api import ReuseApiParser
-from udata.core.reuse.models import Reuse
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.topic.forms import TopicElementForm
 from udata.core.topic.models import Topic, TopicElement
 from udata.core.topic.parsers import TopicApiParser
 from udata.core.topic.permissions import TopicEditPermission
 from udata.core.user.api_fields import user_ref_fields
+from udata.utils import get_by
 
 DEFAULT_SORTING = "-created_at"
 DEFAULT_PAGE_SIZE = 20
-ALLOWED_ELEMENTS_CLASSES = {
-    "Dataset": Dataset,
-    "Reuse": Reuse,
-}
 
 log = logging.getLogger(__name__)
 
@@ -271,13 +266,15 @@ class TopicElementAPI(API):
     @apiv2.response(404, "Element not found in topic")
     @apiv2.response(204, "Success")
     def delete(self, topic, element_id):
-        """Delete a given dataset from the given topic"""
+        """Delete a given element from the given topic"""
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
 
-        if element_id not in (elt.id for elt in topic.elements):
+        element = get_by(topic.elements, "id", element_id)
+        if not element:
             apiv2.abort(404, "Element not found in topic")
-        topic.elements = [elt for elt in topic.elements if elt.id != element_id]
+
+        topic.elements.remove(element)
         topic.save()
 
         return None, 204

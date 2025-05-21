@@ -2,6 +2,7 @@ from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.reuse.factories import ReuseFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import UserFactory
@@ -116,7 +117,6 @@ class TopicsAPITest(APITestCase):
         assert topic_response.json["created_at"] is not None
         assert topic_response.json["last_modified"] is not None
 
-        # FIXME: do it when elements API is tested
         response = self.get(topic_response.json["elements"]["href"])
         data = response.json
         assert all(str(elt.id) in (_elt["id"] for _elt in data["data"]) for elt in topic.elements)
@@ -131,22 +131,56 @@ class TopicElementsAPITest(APITestCase):
         assert len(data) == 3
         assert all(str(elt.id) in (_elt["id"] for _elt in data) for elt in topic.elements)
 
-    def test_add_datasets(self):
+    def test_add_elements(self):
         owner = self.login()
         topic = TopicFactory(owner=owner)
-        d1, d2 = DatasetFactory.create_batch(2)
+        dataset = DatasetFactory()
+        reuse = ReuseFactory()
         response = self.post(
             url_for("apiv2.topic_elements", topic=topic),
             [
-                # FIXME: test with more attributes
-                {"element": {"class": "Dataset", "id": d1.id}},
-                {"element": {"class": "Dataset", "id": d2.id}},
+                {
+                    "title": "A dataset",
+                    "description": "A dataset description",
+                    "tags": ["tag1", "tag2"],
+                    "extras": {"extra": "value"},
+                    "element": {"class": "Dataset", "id": dataset.id},
+                },
+                {
+                    "title": "A reuse",
+                    "description": "A reuse description",
+                    "tags": ["tag1", "tag2"],
+                    "extras": {"extra": "value"},
+                    "element": {"class": "Reuse", "id": reuse.id},
+                },
             ],
         )
         assert response.status_code == 201
         topic.reload()
         assert len(topic.elements) == 5
-        assert all(d.id in (_d.element.id for _d in topic.elements) for d in (d1, d2))
+
+        dataset_elt = next(elt for elt in topic.elements if elt.element.id == dataset.id)
+        assert dataset_elt.title == "A dataset"
+        assert dataset_elt.description == "A dataset description"
+        assert dataset_elt.tags == ["tag1", "tag2"]
+        assert dataset_elt.extras == {"extra": "value"}
+
+        reuse_elt = next(elt for elt in topic.elements if elt.element.id == reuse.id)
+        assert reuse_elt.title == "A reuse"
+        assert reuse_elt.description == "A reuse description"
+        assert reuse_elt.tags == ["tag1", "tag2"]
+        assert reuse_elt.extras == {"extra": "value"}
+
+    def test_add_element_wrong_class(self):
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        dataset = DatasetFactory()
+        response = self.post(
+            url_for("apiv2.topic_elements", topic=topic),
+            [{"element": {"class": "Reuse", "id": dataset.id}}],
+        )
+        assert response.status_code == 400
+        assert "n'existe pas" in response.json["errors"][0]["element"][0]
 
     def test_add_empty_element(self):
         owner = self.login()
@@ -157,21 +191,6 @@ class TopicElementsAPITest(APITestCase):
             response.json["errors"][0]["element"][0]
             == "A topic element must have a title or an element."
         )
-
-    def test_add_datasets_double(self):
-        owner = self.login()
-        topic = TopicFactory(owner=owner)
-        dataset = DatasetFactory()
-        response = self.post(
-            url_for("apiv2.topic_elements", topic=topic), [{"id": dataset.id}, {"id": dataset.id}]
-        )
-        assert response.status_code == 201
-        topic.reload()
-        assert len(topic.datasets) == 4
-        response = self.post(url_for("apiv2.topic_elements", topic=topic), [{"id": dataset.id}])
-        assert response.status_code == 201
-        topic.reload()
-        assert len(topic.datasets) == 4
 
     def test_add_datasets_perm(self):
         user = UserFactory()
@@ -193,19 +212,19 @@ class TopicElementsAPITest(APITestCase):
 
 
 class TopicElementAPITest(APITestCase):
-    def test_delete_dataset(self):
+    def test_delete_element(self):
         owner = self.login()
         topic = TopicFactory(owner=owner)
-        dataset = topic.datasets[0]
-        response = self.delete(url_for("apiv2.topic_dataset", topic=topic, dataset=dataset))
+        element = topic.elements[0]
+        response = self.delete(url_for("apiv2.topic_element", topic=topic, element_id=element.id))
         assert response.status_code == 204
         topic.reload()
-        assert len(topic.datasets) == 2
-        assert dataset.id not in (d.id for d in topic.datasets)
+        assert len(topic.elements) == 2
+        assert element.id not in (elt.id for elt in topic.elements)
 
-    def test_delete_dataset_perm(self):
+    def test_delete_element_perm(self):
         topic = TopicFactory(owner=UserFactory())
-        dataset = topic.datasets[0]
+        element = topic.elements[0]
         self.login()
-        response = self.delete(url_for("apiv2.topic_dataset", topic=topic, dataset=dataset))
+        response = self.delete(url_for("apiv2.topic_element", topic=topic, element_id=element.id))
         assert response.status_code == 403
