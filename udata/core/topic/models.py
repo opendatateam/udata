@@ -3,6 +3,7 @@ from mongoengine.signals import pre_save
 
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.models import SpatialCoverage, db
+from udata.search import reindex
 
 __all__ = ("Topic",)
 
@@ -45,22 +46,31 @@ class Topic(db.Document, Owned, db.Datetimed):
     def __str__(self):
         return self.name
 
+    # TODO: also reindex Reuses
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
-        # FIXME: reindex elements based on diff and class
-        # NB: reuse was not reindexed
-        pass
-
         # Try catch is to prevent the mechanism to crash at the
         # creation of the Topic, where an original state does not exist.
-        # try:
-        #     original_doc = sender.objects.get(id=document.id)
-        #     # Get the diff between the original and current datasets
-        #     datasets_list_dif = set(original_doc.datasets) ^ set(document.datasets)
-        # except cls.DoesNotExist:
-        #     datasets_list_dif = document.datasets
-        # for dataset in datasets_list_dif:
-        #     reindex.delay("Dataset", str(dataset.pk))
+        try:
+            original_doc = sender.objects.get(id=document.id)
+            # Get the diff between the original and current datasets
+            datasets_list_dif = set(
+                elt.element
+                for elt in original_doc.elements
+                if elt.element.__class__.__name__ == "Dataset"
+            ) ^ set(
+                elt.element
+                for elt in document.elements
+                if elt.element.__class__.__name__ == "Dataset"
+            )
+        except cls.DoesNotExist:
+            datasets_list_dif = set(
+                elt.element
+                for elt in document.elements
+                if elt.element.__class__.__name__ == "Dataset"
+            )
+        for dataset in datasets_list_dif:
+            reindex.delay("Dataset", str(dataset.pk))
 
     @property
     def display_url(self):

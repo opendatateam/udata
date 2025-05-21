@@ -68,7 +68,7 @@ class DatasetSearch(ModelSearchAdapter):
         organization = None
         owner = None
 
-        topics = Topic.objects(datasets=dataset).only("id")
+        topics = Topic.objects(elements__element=dataset).only("id")
 
         if dataset.organization:
             org = Organization.objects(id=dataset.organization.id).first()
