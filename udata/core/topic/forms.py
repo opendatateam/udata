@@ -2,9 +2,26 @@ from udata.core.spatial.forms import SpatialCoverageField
 from udata.forms import ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 
-from .models import Topic
+from .models import Topic, TopicElement
 
-__all__ = ("TopicForm",)
+__all__ = ("TopicForm", "TopicElementForm")
+
+
+class TopicElementForm(ModelForm):
+    model_class = TopicElement
+
+    title = fields.StringField(_("Title"))
+    description = fields.StringField(_("Description"))
+    tags = fields.TagField(_("Tags"))
+    extras = fields.ExtrasField()
+    element = fields.ModelField(_("Element"))
+
+    def validate(self, extra_validators=None):
+        validation = super().validate(extra_validators)
+        if not self.element.data and not self.title.data:
+            self.element.errors.append(_("A topic element must have a title or an element."))
+            return False
+        return validation
 
 
 class TopicForm(ModelForm):

@@ -1,7 +1,6 @@
 import logging
 
 import mongoengine
-from bson import ObjectId
 from flask import request, url_for
 from flask_security import current_user
 
@@ -10,14 +9,20 @@ from udata.core.dataset.api import DatasetApiParser
 from udata.core.dataset.models import Dataset
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api import ReuseApiParser
+from udata.core.reuse.models import Reuse
 from udata.core.spatial.api_fields import spatial_coverage_fields
-from udata.core.topic.models import Topic
+from udata.core.topic.forms import TopicElementForm
+from udata.core.topic.models import Topic, TopicElement
 from udata.core.topic.parsers import TopicApiParser
 from udata.core.topic.permissions import TopicEditPermission
 from udata.core.user.api_fields import user_ref_fields
 
 DEFAULT_SORTING = "-created_at"
 DEFAULT_PAGE_SIZE = 20
+ALLOWED_ELEMENTS_CLASSES = {
+    "Dataset": Dataset,
+    "Reuse": Reuse,
+}
 
 log = logging.getLogger(__name__)
 
@@ -221,9 +226,7 @@ class TopicElementsAPI(API):
     @apiv2.doc("topic_elements_create")
     @apiv2.expect([topic_add_items_fields])
     @apiv2.marshal_with(topic_fields)
-    @apiv2.response(400, "Malformed object id(s) in request")
     @apiv2.response(400, "Expecting a list")
-    @apiv2.response(400, "Expecting a list of dicts with id attribute")
     @apiv2.response(404, "Topic not found")
     @apiv2.response(403, "Forbidden")
     def post(self, topic):
@@ -234,18 +237,25 @@ class TopicElementsAPI(API):
 
         if not isinstance(data, list):
             apiv2.abort(400, "Expecting a list")
-        if not all(isinstance(d, dict) and d.get("id") for d in data):
-            apiv2.abort(400, "Expecting a list of dicts with id attribute")
 
-        try:
-            datasets = Dataset.objects.filter(id__in=[d["id"] for d in data]).only("id")
-            diff = set(d.id for d in datasets) - set(d.id for d in topic.datasets)
-        except mongoengine.errors.ValidationError:
-            apiv2.abort(400, "Malformed object id(s) in request")
+        errors = []
+        elements = []
+        for element_data in data:
+            form = TopicElementForm.from_json(element_data)
+            if not form.validate():
+                errors.append(form.errors)
+            else:
+                element = TopicElement()
+                form.populate_obj(element)
+                elements.append(element)
 
-        if diff:
-            topic.datasets += [ObjectId(did) for did in diff]
-            topic.save()
+        if errors:
+            apiv2.abort(400, errors=errors)
+
+        for element in elements:
+            topic.elements.insert(0, element)
+
+        topic.save()
 
         return topic, 201
 

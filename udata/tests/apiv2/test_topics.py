@@ -127,7 +127,6 @@ class TopicElementsAPITest(APITestCase):
         topic = TopicFactory()
         response = self.get(url_for("apiv2.topic_elements", topic=topic))
         assert response.status_code == 200
-        print(response.json)
         data = response.json["data"]
         assert len(data) == 3
         assert all(str(elt.id) in (_elt["id"] for _elt in data) for elt in topic.elements)
@@ -137,24 +136,39 @@ class TopicElementsAPITest(APITestCase):
         topic = TopicFactory(owner=owner)
         d1, d2 = DatasetFactory.create_batch(2)
         response = self.post(
-            url_for("apiv2.topic_datasets", topic=topic), [{"id": d1.id}, {"id": d2.id}]
+            url_for("apiv2.topic_elements", topic=topic),
+            [
+                # FIXME: test with more attributes
+                {"element": {"class": "Dataset", "id": d1.id}},
+                {"element": {"class": "Dataset", "id": d2.id}},
+            ],
         )
         assert response.status_code == 201
         topic.reload()
-        assert len(topic.datasets) == 5
-        assert all(d.id in (_d.id for _d in topic.datasets) for d in (d1, d2))
+        assert len(topic.elements) == 5
+        assert all(d.id in (_d.element.id for _d in topic.elements) for d in (d1, d2))
+
+    def test_add_empty_element(self):
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        response = self.post(url_for("apiv2.topic_elements", topic=topic), [{}])
+        assert response.status_code == 400
+        assert (
+            response.json["errors"][0]["element"][0]
+            == "A topic element must have a title or an element."
+        )
 
     def test_add_datasets_double(self):
         owner = self.login()
         topic = TopicFactory(owner=owner)
         dataset = DatasetFactory()
         response = self.post(
-            url_for("apiv2.topic_datasets", topic=topic), [{"id": dataset.id}, {"id": dataset.id}]
+            url_for("apiv2.topic_elements", topic=topic), [{"id": dataset.id}, {"id": dataset.id}]
         )
         assert response.status_code == 201
         topic.reload()
         assert len(topic.datasets) == 4
-        response = self.post(url_for("apiv2.topic_datasets", topic=topic), [{"id": dataset.id}])
+        response = self.post(url_for("apiv2.topic_elements", topic=topic), [{"id": dataset.id}])
         assert response.status_code == 201
         topic.reload()
         assert len(topic.datasets) == 4
@@ -164,17 +178,17 @@ class TopicElementsAPITest(APITestCase):
         topic = TopicFactory(owner=user)
         dataset = DatasetFactory()
         self.login()
-        response = self.post(url_for("apiv2.topic_datasets", topic=topic), [{"id": dataset.id}])
+        response = self.post(url_for("apiv2.topic_elements", topic=topic), [{"id": dataset.id}])
         assert response.status_code == 403
 
     def test_add_datasets_wrong_payload(self):
         owner = self.login()
         topic = TopicFactory(owner=owner)
-        response = self.post(url_for("apiv2.topic_datasets", topic=topic), [{"id": "xxx"}])
+        response = self.post(url_for("apiv2.topic_elements", topic=topic), [{"id": "xxx"}])
         assert response.status_code == 400
-        response = self.post(url_for("apiv2.topic_datasets", topic=topic), [{"nain": "portekoi"}])
+        response = self.post(url_for("apiv2.topic_elements", topic=topic), [{"nain": "portekoi"}])
         assert response.status_code == 400
-        response = self.post(url_for("apiv2.topic_datasets", topic=topic), {"non": "mais"})
+        response = self.post(url_for("apiv2.topic_elements", topic=topic), {"non": "mais"})
         assert response.status_code == 400
 
 
