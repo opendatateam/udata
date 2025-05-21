@@ -362,10 +362,10 @@ class MembershipAPITest:
         assert len(members) == 2
         assert members[0]["role"] == "admin"
         assert members[0]["since"] == "2024-04-14T00:00:00+00:00"
-        assert members[0]["user"]["email"] is None
+        assert members[0]["user"]["email"] == "***@example.org"
 
         assert members[1]["role"] == "editor"
-        assert members[1]["user"]["email"] is None
+        assert members[1]["user"]["email"] == "***@example.org"
 
         # Super admin of udata can see emails
         api.login(AdminFactory())
