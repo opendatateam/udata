@@ -3,6 +3,7 @@ from flask import url_for
 from udata.core import storages
 from udata.core.reuse import tasks
 from udata.core.reuse.factories import ReuseFactory
+from udata.core.topic.models import Topic, TopicElement
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.models import Reuse, Transfer
 from udata.tests.api import APITestCase
@@ -22,6 +23,8 @@ class ReuseTasksTest(APITestCase):
         )
         self.assert200(response)
 
+        topic = Topic.objects.create(name="test topic", elements=[TopicElement(element=reuse)])
+
         # Delete reuse
         response = self.delete(url_for("api.reuse", reuse=reuse))
         self.assert204(response)
@@ -37,6 +40,9 @@ class ReuseTasksTest(APITestCase):
         tasks.purge_reuses()
 
         assert Transfer.objects.filter(id=transfer.id).count() == 0
+
+        topic = Topic.objects(name="test topic").first()
+        assert topic.elements[0].element is None
 
         # Check reuse's image is deleted
         self.assertEqual(list(storages.images.list_files()), [])

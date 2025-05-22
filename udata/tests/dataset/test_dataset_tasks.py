@@ -10,6 +10,7 @@ from udata.core.discussions.factories import DiscussionFactory
 from udata.core.organization.csv import OrganizationCsvAdapter  # noqa
 from udata.core.reuse.csv import ReuseCsvAdapter  # noqa
 from udata.core.tags.csv import TagCsvAdapter  # noqa
+from udata.core.topic.models import TopicElement
 from udata.core.user.factories import UserFactory
 from udata.harvest.csv import HarvestSourceCsvAdapter  # noqa
 from udata.harvest.models import HarvestItem, HarvestJob
@@ -25,7 +26,9 @@ def test_purge_datasets():
         Dataset.objects.create(title="keep me"),
     ]
 
-    topic = Topic.objects.create(name="test topic", datasets=datasets)
+    topic = Topic.objects.create(
+        name="test topic", elements=[TopicElement(element=d) for d in datasets]
+    )
 
     user = UserFactory()
     transfer = Transfer.objects.create(
@@ -48,7 +51,7 @@ def test_purge_datasets():
     assert Transfer.objects.filter(id=transfer.id).count() == 0
 
     topic = Topic.objects(name="test topic").first()
-    assert topic.datasets[0] == datasets[1]
+    assert topic.elements[0].element is None
 
     assert Discussion.objects.filter(id=discussion.id).count() == 0
     assert Follow.objects.filter(id=follower.id).count() == 0
