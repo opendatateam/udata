@@ -20,9 +20,11 @@ These changes might lead to backward compatibility breakage meaning:
 import logging
 import os
 from datetime import datetime
+from typing import List
 
 import mongoengine
 from bson.objectid import ObjectId
+from feedgenerator.django.utils.feedgenerator import Atom1Feed
 from flask import abort, current_app, make_response, redirect, request, url_for
 from flask_restx.inputs import boolean
 from flask_security import current_user
@@ -39,8 +41,10 @@ from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.followers.api import FollowAPI
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
+from udata.core.site.models import current_site
 from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.topic.models import Topic
+from udata.i18n import gettext as _
 from udata.linkchecker.checker import check_resource
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
 from udata.utils import get_by
@@ -290,6 +294,45 @@ class DatasetListAPI(API):
         form = api.validate(DatasetForm)
         dataset = form.save()
         return dataset, 201
+
+
+@ns.route("/recent.atom", endpoint="recent_datasets_atom_feed")
+class DatasetsAtomFeedAPI(API):
+    @api.doc("recent_datasets_atom_feed")
+    def get(self):
+        feed = Atom1Feed(
+            _("Derniers jeux de données"),
+            description=None,
+            feed_url=request.url,
+            link=request.url_root,
+        )
+
+        datasets: List[Dataset] = (
+            Dataset.objects.visible().order_by("-created_at_internal").limit(current_site.feed_size)
+        )
+        for dataset in datasets:
+            author_name = None
+            author_uri = None
+            if dataset.organization:
+                author_name = dataset.organization.name
+                author_uri = dataset.organization.external_url
+            elif dataset.owner:
+                author_name = dataset.owner.fullname
+                author_uri = dataset.owner.external_url
+            feed.add_item(
+                dataset.title,
+                unique_id=dataset.id,
+                description=dataset.description,
+                # content=dataset.description, TODO transform to HTML? :FeedContentHtml
+                author_name=author_name,
+                author_link=author_uri,
+                link=dataset.url_for(external=True),
+                updateddate=dataset.last_modified,
+                pubdate=dataset.created_at,
+            )
+        response = make_response(feed.writeString("utf-8"))
+        response.headers["Content-Type"] = "application/atom+xml"
+        return response
 
 
 @ns.route("/<dataset:dataset>/", endpoint="dataset", doc=common_doc)

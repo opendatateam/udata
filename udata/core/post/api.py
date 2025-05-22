@@ -1,4 +1,8 @@
 from datetime import datetime
+from typing import List
+
+from feedgenerator.django.utils.feedgenerator import Atom1Feed
+from flask import make_response, request
 
 from udata.api import API, api, fields
 from udata.auth import Permission as AdminPermission
@@ -11,6 +15,7 @@ from udata.core.storages.api import (
     uploaded_image_fields,
 )
 from udata.core.user.api_fields import user_ref_fields
+from udata.i18n import gettext as _
 
 from .forms import PostForm
 from .models import Post
@@ -103,6 +108,34 @@ class PostsAPI(API):
         """Create a post"""
         form = api.validate(PostForm)
         return form.save(), 201
+
+
+@ns.route("/recent.atom", endpoint="recent_reuses_atom_feed")
+class ReusesAtomFeedAPI(API):
+    @api.doc("recent_reuses_atom_feed")
+    def get(self):
+        feed = Atom1Feed(
+            _("Derniers articles"),
+            description=None,
+            feed_url=request.url,
+            link=request.url_root,
+        )
+
+        posts: List[Post] = Post.objects().published().order_by("-published").limit(15)
+        for post in posts:
+            feed.add_item(
+                post.name,
+                unique_id=post.id,
+                description=post.headline,
+                content=post.content,  # TODO transform to HTML? :FeedContentHtml
+                author_name="data.gouv.fr",
+                link=post.url_for(external=True),
+                updateddate=post.last_modified,
+                pubdate=post.published,
+            )
+        response = make_response(feed.writeString("utf-8"))
+        response.headers["Content-Type"] = "application/atom+xml"
+        return response
 
 
 @ns.route("/<post:post>/", endpoint="post")
