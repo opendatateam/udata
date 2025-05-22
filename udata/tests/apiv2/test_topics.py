@@ -5,6 +5,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.core.topic.factories import TopicFactory
+from udata.core.topic.models import Topic
 from udata.core.user.factories import UserFactory
 from udata.tests.api import APITestCase
 from udata.tests.features.territories import create_geozones_fixtures
@@ -120,6 +121,27 @@ class TopicsAPITest(APITestCase):
         response = self.get(topic_response.json["elements"]["href"])
         data = response.json
         assert all(str(elt.id) in (_elt["id"] for _elt in data["data"]) for elt in topic.elements)
+
+    def test_topic_api_create(self):
+        """It should create a topic from the API"""
+        data = TopicFactory.as_dict()
+        data["elements"] = [
+            {
+                "element": {"id": str(elt.element.id), "class": elt.element.__class__.__name__},
+                "title": elt.title,
+                "description": elt.description,
+                "tags": elt.tags,
+                "extras": elt.extras,
+            }
+            for elt in data["elements"]
+        ]
+        self.login()
+        response = self.post(url_for("apiv2.topics_list"), data)
+        self.assert201(response)
+        self.assertEqual(Topic.objects.count(), 1)
+        topic = Topic.objects.first()
+        for element in data["elements"]:
+            assert element["element"]["id"] in (str(elt.element.id) for elt in topic.elements)
 
 
 class TopicElementsAPITest(APITestCase):

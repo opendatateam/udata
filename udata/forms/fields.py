@@ -480,7 +480,15 @@ class ModelField(Field):
         if not valuelist or len(valuelist) != 1 or not valuelist[0]:
             return
         specs = valuelist[0]
-        model_field = getattr(self._form.model_class, self.name)
+
+        # FIXME: always rely on short name?
+        try:
+            model_field = getattr(self._form.model_class, self.name)
+        # Try to get the model field, but handle the case where it doesn't exist directly
+        # This can happen in nested forms like NestedModelList
+        except AttributeError:
+            model_field = getattr(self._form.model_class, self.short_name)
+
         if isinstance(specs, str):
             specs = {"id": specs}
         elif not specs.get("id", None):

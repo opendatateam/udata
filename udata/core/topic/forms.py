@@ -10,6 +10,9 @@ __all__ = ("TopicForm", "TopicElementForm")
 class TopicElementForm(ModelForm):
     model_class = TopicElement
 
+    # FIXME: add this?
+    # id = fields.UUIDField()
+
     title = fields.StringField(_("Title"))
     description = fields.StringField(_("Description"))
     tags = fields.TagField(_("Tags"))
@@ -33,8 +36,7 @@ class TopicForm(ModelForm):
     name = fields.StringField(_("Name"), [validators.DataRequired()])
     description = fields.MarkdownField(_("Description"), [validators.DataRequired()])
 
-    datasets = fields.DatasetListField(_("Associated datasets"))
-    reuses = fields.ReuseListField(_("Associated reuses"))
+    elements = fields.NestedModelList(TopicElementForm)
 
     spatial = SpatialCoverageField(
         _("Spatial coverage"), description=_("The geographical area covered by the data.")

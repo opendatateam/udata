@@ -9,7 +9,7 @@ from udata.core.dataset.api import DatasetApiParser
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api import ReuseApiParser
 from udata.core.spatial.api_fields import spatial_coverage_fields
-from udata.core.topic.forms import TopicElementForm
+from udata.core.topic.forms import TopicElementForm, TopicForm
 from udata.core.topic.models import Topic, TopicElement
 from udata.core.topic.parsers import TopicApiParser
 from udata.core.topic.permissions import TopicEditPermission
@@ -44,6 +44,10 @@ topic_fields = apiv2.model(
         "tags": fields.List(
             fields.String, description="Some keywords to help in search", required=True
         ),
+        # FIXME: that won't work for input serialiazation, we need smtg like for resources:
+        # "resources": fields.List(
+        #     fields.Nested(resource_fields, description="The dataset resources")
+        # ),
         "elements": fields.Raw(
             attribute=lambda o: {
                 "rel": "subsection",
@@ -148,6 +152,16 @@ class TopicsAPI(API):
         topics = topic_parser.parse_filters(topics, args)
         sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
         return topics.order_by(sort).paginate(args["page"], args["page_size"])
+
+    @apiv2.secure
+    @apiv2.doc("create_topic")
+    @apiv2.expect(topic_fields)
+    @apiv2.marshal_with(topic_fields)
+    @apiv2.response(400, "Validation error")
+    def post(self):
+        """Create a topic"""
+        form = apiv2.validate(TopicForm)
+        return form.save(), 201
 
 
 @ns.route("/<topic:topic>/", endpoint="topic", doc=common_doc)
