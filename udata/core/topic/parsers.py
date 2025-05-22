@@ -1,8 +1,21 @@
 from bson.objectid import ObjectId
 from flask_restx.inputs import boolean
 
-from udata.api import api
+from udata.api import api, apiv2
 from udata.api.parsers import ModelApiParser
+from udata.core.topic import DEFAULT_PAGE_SIZE
+
+elements_parser = apiv2.parser()
+elements_parser.add_argument("page", type=int, default=1, location="args", help="The page to fetch")
+elements_parser.add_argument(
+    "page_size", type=int, default=DEFAULT_PAGE_SIZE, location="args", help="The page size to fetch"
+)
+elements_parser.add_argument(
+    "type", type=str, location="args", help="The type of resources to fetch"
+)
+elements_parser.add_argument(
+    "q", type=str, location="args", help="query string to search through elements"
+)
 
 
 class TopicApiParser(ModelApiParser):
