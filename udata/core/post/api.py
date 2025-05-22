@@ -110,9 +110,9 @@ class PostsAPI(API):
         return form.save(), 201
 
 
-@ns.route("/recent.atom", endpoint="recent_reuses_atom_feed")
-class ReusesAtomFeedAPI(API):
-    @api.doc("recent_reuses_atom_feed")
+@ns.route("/recent.atom", endpoint="recent_posts_atom_feed")
+class PostsAtomFeedAPI(API):
+    @api.doc("recent_posts_atom_feed")
     def get(self):
         feed = Atom1Feed(
             _("Derniers articles"),
