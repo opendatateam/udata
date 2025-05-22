@@ -33,6 +33,9 @@ site_fields = api.model(
         "metrics": fields.Raw(
             attribute=lambda o: o.get_metrics(), description="The associated metrics", default={}
         ),
+        "details_metrics": fields.Raw(
+            attribute=lambda o: o.get_details_metrics(), description="The details metrics", default={}
+        ),
     },
 )
 

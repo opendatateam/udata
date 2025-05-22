@@ -172,6 +172,31 @@ class Site(WithMetrics, db.Document):
         self.metrics["max_org_datasets"] = org.metrics["datasets"] if org else 0
         self.save()
 
+    def get_details_metrics(self):
+        from udata.models import User, Discussion
+        from udata.core.metrics.helpers import get_metrics_for_model, get_stock_metrics
+        from udata.harvest.models import HarvestSource
+
+        visit_dataset, download_resource = get_metrics_for_model(
+            'site', None, ['visit_dataset', 'download_resource'])
+        user_metrics = get_stock_metrics(User.objects())
+        dataset_metrics = get_stock_metrics(Dataset.objects().visible(),
+                                            date_label='created_at_internal')
+        harvest_metrics = get_stock_metrics(HarvestSource.objects())
+        reuse_metrics = get_stock_metrics(Reuse.objects().visible())
+        organization_metrics = get_stock_metrics(Organization.objects().visible())
+        discussion_metrics = get_stock_metrics(Discussion.objects(), date_label='created')
+        return {
+            'visit_dataset': visit_dataset,
+            'download_resource': download_resource,
+            'user_metrics': user_metrics,
+            'dataset_metrics': dataset_metrics,
+            'harvest_metrics': harvest_metrics,
+            'reuse_metrics': reuse_metrics,
+            'organization_metrics': organization_metrics,
+            'discussion_metrics': discussion_metrics,
+        }
+
 
 def get_current_site():
     if getattr(g, "site", None) is None:
