@@ -33,9 +33,6 @@ site_fields = api.model(
         "metrics": fields.Raw(
             attribute=lambda o: o.get_metrics(), description="The associated metrics", default={}
         ),
-        "details_metrics": fields.Raw(
-            attribute=lambda o: o.get_details_metrics(), description="The details metrics", default={}
-        ),
     },
 )
 
@@ -46,6 +43,7 @@ class SiteAPI(API):
     @api.marshal_with(site_fields)
     def get(self):
         """Site-wide variables"""
+        print(current_site.metrics)
         return current_site
 
 
