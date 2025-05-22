@@ -2,6 +2,12 @@
 
 ## Current (in progress)
 
+-  Do not crash if file doesn't exists during resource deletion [#3323](https://github.com/opendatateam/udata/pull/3323) 
+- Show user domain in suggest [#3324](https://github.com/opendatateam/udata/pull/3324)
+
+## 10.4.1 (2025-05-20)
+
+- Remove duplicate `downloads` in dataset csv adapter [#3319](https://github.com/opendatateam/udata/pull/3319)
 - Add missing default for license full object [#3317](https://github.com/opendatateam/udata/pull/3317/)
 - Check for slugs in followers API [#3320](https://github.com/opendatateam/udata/pull/3320)
 - Fix missing ID in dataset reuses mask [#3321](https://github.com/opendatateam/udata/pull/3321)

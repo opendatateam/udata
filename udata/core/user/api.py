@@ -409,6 +409,7 @@ class SuggestUsersAPI(API):
                 "first_name": user.first_name,
                 "last_name": user.last_name,
                 "avatar_url": user.avatar,
+                "email": user.email,
                 "slug": user.slug,
             }
             for user in users.order_by(DEFAULT_SORTING).limit(args["size"])
