@@ -974,7 +974,12 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
     def remove_resource(self, resource):
         # Deletes resource's file from file storage
         if resource.fs_filename is not None:
-            storages.resources.delete(resource.fs_filename)
+            try:
+                storages.resources.delete(resource.fs_filename)
+            except FileNotFoundError as e:
+                log.error(
+                    f"File not found while deleting resource #{resource.id} in dataset {self.id}: {e}"
+                )
 
         self.resources.remove(resource)
         self.on_resource_removed.send(self.__class__, document=self, resource_id=resource.id)
