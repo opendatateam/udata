@@ -43,6 +43,7 @@ def purge_datasets(self):
         # Remove activity
         Activity.objects(related_to=dataset).delete()
         # Remove topics' related dataset
+        # FIXME: what happens right now when a dataset is deleted? if ref is set to None, it could be allright.
         for topic in Topic.objects(datasets=dataset):
             datasets = topic.datasets
             datasets.remove(dataset)

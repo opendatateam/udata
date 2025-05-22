@@ -192,7 +192,13 @@ class DatasetApiParser(ModelApiParser):
             except Topic.DoesNotExist:
                 pass
             else:
-                datasets = datasets.filter(id__in=[d.id for d in topic.datasets])
+                datasets = datasets.filter(
+                    id__in=[
+                        d.element.id
+                        for d in topic.elements
+                        if d.element.__class__.__name__ == "Dataset"
+                    ]
+                )
         if args.get("dataservice"):
             if not ObjectId.is_valid(args["dataservice"]):
                 api.abort(400, "Dataservice arg must be an identifier")
