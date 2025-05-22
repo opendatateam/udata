@@ -43,7 +43,6 @@ class SiteAPI(API):
     @api.marshal_with(site_fields)
     def get(self):
         """Site-wide variables"""
-        print(current_site.metrics)
         return current_site
 
 

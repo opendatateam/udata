@@ -44,8 +44,6 @@ def update(
             site = Site.objects(id=current_app.config["SITE_ID"]).first()
             if drop:
                 site.metrics.clear()
-            print(site.id)
-            print(site.metrics)
             site.count_users()
             site.count_org()
             site.count_datasets()
@@ -64,7 +62,6 @@ def update(
             site.count_max_org_datasets()
             site.count_stock_metrics()
             site.save()
-            print(site.metrics)
         except Exception as e:
             log.info(f"Error during update: {e}")
 
