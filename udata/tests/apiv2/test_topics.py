@@ -1,17 +1,22 @@
+import pytest
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.discussions.models import Discussion
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.models import Member
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
-from udata.core.topic.factories import TopicFactory
+from udata.core.spatial.models import spatial_granularities
+from udata.core.topic.factories import TopicElementDatasetFactory, TopicElementFactory, TopicFactory
 from udata.core.topic.models import Topic
 from udata.core.user.factories import UserFactory
 from udata.tests.api import APITestCase
+from udata.tests.api.test_datasets_api import SAMPLE_GEOM
 from udata.tests.features.territories import create_geozones_fixtures
 
 
-class TopicsAPITest(APITestCase):
+class TopicsListAPITest(APITestCase):
     modules = []
 
     def test_topic_api_list(self):
@@ -124,17 +129,7 @@ class TopicsAPITest(APITestCase):
 
     def test_topic_api_create(self):
         """It should create a topic from the API"""
-        data = TopicFactory.as_dict()
-        data["elements"] = [
-            {
-                "element": {"id": str(elt.element.id), "class": elt.element.__class__.__name__},
-                "title": elt.title,
-                "description": elt.description,
-                "tags": elt.tags,
-                "extras": elt.extras,
-            }
-            for elt in data["elements"]
-        ]
+        data = TopicFactory.as_payload()
         self.login()
         response = self.post(url_for("apiv2.topics_list"), data)
         self.assert201(response)
@@ -142,6 +137,142 @@ class TopicsAPITest(APITestCase):
         topic = Topic.objects.first()
         for element in data["elements"]:
             assert element["element"]["id"] in (str(elt.element.id) for elt in topic.elements)
+
+    def test_topic_api_create_as_org(self):
+        """It should create a topic as organization from the API"""
+        data = TopicFactory.as_payload()
+        user = self.login()
+        member = Member(user=user, role="editor")
+        org = OrganizationFactory(members=[member])
+        data["organization"] = str(org.id)
+        response = self.post(url_for("apiv2.topics_list"), data)
+        self.assert201(response)
+        self.assertEqual(Topic.objects.count(), 1)
+
+        topic = Topic.objects.first()
+        assert topic.owner is None
+        assert topic.organization == org
+
+    def test_topic_api_create_spatial_zone(self):
+        paca, _, _ = create_geozones_fixtures()
+        granularity = spatial_granularities[0][0]
+        data = TopicFactory.as_payload()
+        data["spatial"] = {
+            "zones": [paca.id],
+            "granularity": granularity,
+        }
+        self.login()
+        response = self.post(url_for("apiv2.topics_list"), data)
+        self.assert201(response)
+        self.assertEqual(Topic.objects.count(), 1)
+        topic = Topic.objects.first()
+        self.assertEqual([str(z) for z in topic.spatial.zones], [paca.id])
+        self.assertEqual(topic.spatial.granularity, granularity)
+
+    def test_topic_api_create_spatial_geom(self):
+        granularity = spatial_granularities[0][0]
+        data = TopicFactory.as_payload()
+        data["spatial"] = {
+            "geom": SAMPLE_GEOM,
+            "granularity": granularity,
+        }
+        self.login()
+        response = self.post(url_for("apiv2.topics_list"), data)
+        self.assert201(response)
+        self.assertEqual(Topic.objects.count(), 1)
+        topic = Topic.objects.first()
+        self.assertEqual(topic.spatial.geom, SAMPLE_GEOM)
+        self.assertEqual(topic.spatial.granularity, granularity)
+
+
+class TopicAPITest(APITestCase):
+    def test_topic_api_update(self):
+        """It should update a topic from the API"""
+        owner = self.login()
+        topic = TopicFactory(owner=owner, elements=[])
+        data = topic.to_dict()
+        data["description"] = "new description"
+        response = self.put(url_for("apiv2.topic", topic=topic), data)
+        self.assert200(response)
+        self.assertEqual(Topic.objects.count(), 1)
+        topic = Topic.objects.first()
+        self.assertEqual(topic.description, "new description")
+        self.assertGreater(topic.last_modified, topic.created_at)
+
+    def test_topic_api_update_perm(self):
+        """It should not update a topic from the API"""
+        owner = UserFactory()
+        topic = TopicFactory(owner=owner, elements=[])
+        user = self.login()
+        data = topic.to_dict()
+        data["owner"] = user.to_dict()
+        response = self.put(url_for("apiv2.topic", topic=topic), data)
+        self.assert403(response)
+
+    @pytest.mark.skip(reason="Not implemented anymore")
+    def test_topic_api_clear_elements(self):
+        """It should remove all elements if set to None"""
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        self.assertGreater(len(topic.elements), 0)
+        data = topic.to_dict()
+        data["elements"] = None
+        response = self.put(url_for("apiv2.topic", topic=topic), data)
+        self.assert200(response)
+        topic.reload()
+        self.assertEqual(len(topic.elements), 0)
+
+    def test_topic_api_update_with_elements(self):
+        """It should update a topic from the API with elements parameters"""
+        user = self.login()
+        topic = TopicFactory(owner=user)
+        initial_length = len(topic.elements)
+        data = topic.to_dict()
+        data["elements"] = [TopicElementFactory.element_as_payload(elt) for elt in topic.elements]
+        data["elements"].append(
+            TopicElementFactory.element_as_payload(TopicElementDatasetFactory())
+        )
+        response = self.put(url_for("apiv2.topic", topic=topic), data)
+        self.assert200(response)
+        topic.reload()
+        self.assertEqual(len(topic.elements), initial_length + 1)
+
+    def test_topic_api_delete(self):
+        """It should delete a topic from the API"""
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+
+        with self.api_user():
+            response = self.post(
+                url_for("api.discussions"),
+                {
+                    "title": "test title",
+                    "comment": "bla bla",
+                    "subject": {
+                        "class": "Topic",
+                        "id": topic.id,
+                    },
+                },
+            )
+        self.assert201(response)
+
+        discussions = Discussion.objects(subject=topic)
+        self.assertEqual(len(discussions), 1)
+
+        with self.api_user():
+            response = self.delete(url_for("apiv2.topic", topic=topic))
+        self.assertStatus(response, 204)
+
+        self.assertEqual(Topic.objects.count(), 0)
+        self.assertEqual(Discussion.objects.count(), 0)
+
+    def test_topic_api_delete_perm(self):
+        """It should not delete a topic from the API"""
+        owner = UserFactory()
+        topic = TopicFactory(owner=owner)
+        with self.api_user():
+            response = self.delete(url_for("apiv2.topic", topic=topic))
+        self.assertStatus(response, 403)
 
 
 class TopicElementsAPITest(APITestCase):

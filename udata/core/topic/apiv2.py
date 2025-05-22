@@ -6,6 +6,7 @@ from flask_security import current_user
 
 from udata.api import API, apiv2, fields
 from udata.core.dataset.api import DatasetApiParser
+from udata.core.discussions.models import Discussion
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.reuse.api import ReuseApiParser
 from udata.core.spatial.api_fields import spatial_coverage_fields
@@ -172,6 +173,32 @@ class TopicAPI(API):
     def get(self, topic):
         """Get a given topic"""
         return topic
+
+    @apiv2.secure
+    @apiv2.doc("update_topic")
+    @apiv2.expect(topic_fields)
+    @apiv2.marshal_with(topic_fields)
+    @apiv2.response(400, "Validation error")
+    @apiv2.response(403, "Forbidden")
+    def put(self, topic):
+        """Update a given topic"""
+        if not TopicEditPermission(topic).can():
+            apiv2.abort(403, "Forbidden")
+        form = apiv2.validate(TopicForm, topic)
+        return form.save()
+
+    @apiv2.secure
+    @apiv2.doc("delete_topic")
+    @apiv2.response(204, "Object deleted")
+    @apiv2.response(403, "Forbidden")
+    def delete(self, topic):
+        """Delete a given topic"""
+        if not TopicEditPermission(topic).can():
+            apiv2.abort(403, "Forbidden")
+        # Remove discussions linked to the topic
+        Discussion.objects(subject=topic).delete()
+        topic.delete()
+        return "", 204
 
 
 topic_add_items_fields = apiv2.model(

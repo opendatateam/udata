@@ -484,8 +484,8 @@ class ModelField(Field):
         # FIXME: always rely on short name?
         try:
             model_field = getattr(self._form.model_class, self.name)
-        # Try to get the model field, but handle the case where it doesn't exist directly
-        # This can happen in nested forms like NestedModelList
+        # Handle the case where the field it is not fetchable in the model via self.name
+        # This can happen in nested forms like NestedModelList, where self.name is {parent}-{index}-{short_name}
         except AttributeError:
             model_field = getattr(self._form.model_class, self.short_name)
 

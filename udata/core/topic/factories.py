@@ -15,6 +15,19 @@ class TopicElementFactory(ModelFactory):
     title = factory.Faker("sentence")
     description = factory.Faker("text")
 
+    @classmethod
+    def element_as_payload(cls, elt) -> dict:
+        return {
+            "element": {"id": str(elt["element"].id), "class": elt["element"].__class__.__name__},
+            "title": elt["title"],
+            "description": elt["description"],
+        }
+
+    @classmethod
+    def as_payload(cls) -> dict:
+        elt = cls.as_dict()
+        return cls.element_as_payload(elt)
+
 
 class TopicElementDatasetFactory(TopicElementFactory):
     element = factory.SubFactory(DatasetFactory)
@@ -36,3 +49,22 @@ class TopicFactory(ModelFactory):
     @factory.lazy_attribute
     def elements(self):
         return [*TopicElementDatasetFactory.create_batch(2), TopicElementReuseFactory()]
+
+    @classmethod
+    def elements_as_payload(cls, elements: list) -> dict:
+        return [
+            {
+                "element": {"id": str(elt.element.id), "class": elt.element.__class__.__name__},
+                "title": elt.title,
+                "description": elt.description,
+                "tags": elt.tags,
+                "extras": elt.extras,
+            }
+            for elt in elements
+        ]
+
+    @classmethod
+    def as_payload(cls) -> dict:
+        payload = cls.as_dict()
+        payload["elements"] = cls.elements_as_payload(payload["elements"])
+        return payload
