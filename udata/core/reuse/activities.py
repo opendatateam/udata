@@ -33,18 +33,18 @@ class UserDeletedReuse(ReuseRelatedActivity, Activity):
 
 @Reuse.on_create.connect
 def on_user_created_reuse(reuse):
-    if not reuse.private and current_user and current_user.is_authenticated:
+    if current_user and current_user.is_authenticated:
         UserCreatedReuse.emit(reuse, reuse.organization)
 
 
 @Reuse.on_update.connect
 def on_user_updated_reuse(reuse, **kwargs):
     changed_fields = kwargs.get("changed_fields", [])
-    if not reuse.private and current_user and current_user.is_authenticated:
+    if current_user and current_user.is_authenticated:
         UserUpdatedReuse.emit(reuse, reuse.organization, changed_fields)
 
 
 @Reuse.on_delete.connect
 def on_user_deleted_reuse(reuse):
-    if not reuse.private and current_user and current_user.is_authenticated:
+    if current_user and current_user.is_authenticated:
         UserDeletedReuse.emit(reuse, reuse.organization)
