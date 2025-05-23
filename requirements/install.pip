@@ -92,6 +92,8 @@ faker==37.0.2
     # via
     #   -r requirements/install.in
     #   factory-boy
+feedgenerator==2.1.0
+    # via -r requirements/install.in
 filelock==3.18.0
     # via urlextract
 flask==2.1.2
@@ -233,6 +235,7 @@ python-dateutil==2.9.0.post0
 pytz==2025.1
     # via
     #   -r requirements/install.in
+    #   feedgenerator
     #   flask-babel
     #   flask-restx
 rapidfuzz==3.12.2
