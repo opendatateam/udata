@@ -5,6 +5,7 @@
 - Add activities to dataservices and resources, add Auditable class to refactor improve code [#3308](https://github.com/opendatateam/udata/pull/3308)
 - Do not crash if file doesn't exists during resource deletion [#3323](https://github.com/opendatateam/udata/pull/3323)
 - Show user domain in suggest [#3324](https://github.com/opendatateam/udata/pull/3324)
+- Add new global site metrics [#3325](https://github.com/opendatateam/udata/pull/3325)
 
 ## 10.4.1 (2025-05-20)
 

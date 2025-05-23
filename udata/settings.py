@@ -574,6 +574,10 @@ class Defaults(object):
     ###########################################################################
     MAX_RESOURCES_IN_JSON_LD = 20
 
+    # Metrics settings
+    ###########################################################################
+    METRICS_API = None
+
 
 class Testing(object):
     """Sane values for testing. Should be applied as override"""
