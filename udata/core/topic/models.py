@@ -8,6 +8,16 @@ from udata.search import reindex
 __all__ = ("Topic",)
 
 
+class TopicElement(db.EmbeddedDocument):
+    id = db.AutoUUIDField(primary_key=True)
+    title = db.StringField(required=False)
+    description = db.StringField(required=False)
+    tags = db.ListField(db.StringField())
+    extras = db.ExtrasField()
+    # FIXME: no reverse_delete_rule allowed here, is cleanup a problem?
+    element = db.GenericReferenceField()
+
+
 class Topic(db.Document, Owned, db.Datetimed):
     name = db.StringField(required=True)
     slug = db.SlugField(
@@ -18,8 +28,7 @@ class Topic(db.Document, Owned, db.Datetimed):
     color = db.IntField()
 
     tags = db.ListField(db.StringField())
-    datasets = db.ListField(db.LazyReferenceField("Dataset", reverse_delete_rule=db.PULL))
-    reuses = db.ListField(db.LazyReferenceField("Reuse", reverse_delete_rule=db.PULL))
+    elements = db.EmbeddedDocumentListField(TopicElement)
 
     featured = db.BooleanField(default=False)
     private = db.BooleanField()
@@ -37,6 +46,7 @@ class Topic(db.Document, Owned, db.Datetimed):
     def __str__(self):
         return self.name
 
+    # TODO: also reindex Reuses
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
         # Try catch is to prevent the mechanism to crash at the
@@ -44,9 +54,21 @@ class Topic(db.Document, Owned, db.Datetimed):
         try:
             original_doc = sender.objects.get(id=document.id)
             # Get the diff between the original and current datasets
-            datasets_list_dif = set(original_doc.datasets) ^ set(document.datasets)
+            datasets_list_dif = set(
+                elt.element
+                for elt in original_doc.elements
+                if elt.element.__class__.__name__ == "Dataset"
+            ) ^ set(
+                elt.element
+                for elt in document.elements
+                if elt.element.__class__.__name__ == "Dataset"
+            )
         except cls.DoesNotExist:
-            datasets_list_dif = document.datasets
+            datasets_list_dif = set(
+                elt.element
+                for elt in document.elements
+                if elt.element.__class__.__name__ == "Dataset"
+            )
         for dataset in datasets_list_dif:
             reindex.delay("Dataset", str(dataset.pk))
 

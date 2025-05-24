@@ -1,0 +1,102 @@
+from flask import url_for
+
+from udata.api import apiv2, fields
+from udata.core.organization.api_fields import org_ref_fields
+from udata.core.spatial.api_fields import spatial_coverage_fields
+from udata.core.topic import DEFAULT_PAGE_SIZE
+from udata.core.user.api_fields import user_ref_fields
+
+topic_fields = apiv2.model(
+    "Topic",
+    {
+        "id": fields.String(description="The topic identifier"),
+        "name": fields.String(description="The topic name", required=True),
+        "slug": fields.String(description="The topic permalink string", readonly=True),
+        "description": fields.Markdown(
+            description="The topic description in Markdown", required=True
+        ),
+        "tags": fields.List(
+            fields.String, description="Some keywords to help in search", required=True
+        ),
+        # FIXME: that won't work for input serialiazation, we need smtg like for resources:
+        # "resources": fields.List(
+        #     fields.Nested(resource_fields, description="The dataset resources")
+        # ),
+        "elements": fields.Raw(
+            attribute=lambda o: {
+                "rel": "subsection",
+                "href": url_for(
+                    "apiv2.topic_elements",
+                    topic=o.id,
+                    page=1,
+                    page_size=DEFAULT_PAGE_SIZE,
+                    _external=True,
+                ),
+                "type": "GET",
+                "total": len(o.elements),
+            },
+            description="Link to the topic elements",
+        ),
+        "featured": fields.Boolean(description="Is the topic featured"),
+        "private": fields.Boolean(description="Is the topic private"),
+        "created_at": fields.ISODateTime(description="The topic creation date", readonly=True),
+        "spatial": fields.Nested(
+            spatial_coverage_fields, allow_null=True, description="The spatial coverage"
+        ),
+        "last_modified": fields.ISODateTime(
+            description="The topic last modification date", readonly=True
+        ),
+        "organization": fields.Nested(
+            org_ref_fields,
+            allow_null=True,
+            description="The publishing organization",
+            readonly=True,
+        ),
+        "owner": fields.Nested(
+            user_ref_fields, description="The owner user", readonly=True, allow_null=True
+        ),
+        "uri": fields.UrlFor(
+            "apiv2.topic", lambda o: {"topic": o}, description="The topic API URI", readonly=True
+        ),
+        "page": fields.UrlFor(
+            "topics.display",
+            lambda o: {"topic": o},
+            description="The topic page URL",
+            readonly=True,
+            fallback_endpoint="apiv2.topic",
+        ),
+        "extras": fields.Raw(description="Extras attributes as key-value pairs"),
+    },
+)
+
+topic_page_fields = apiv2.model("TopicPage", fields.pager(topic_fields))
+
+nested_element_fields = apiv2.model(
+    "NestedTopicElement",
+    {
+        "class": fields.ClassName(description="The model class", required=True),
+        "id": fields.String(description="The object identifier", required=True),
+    },
+)
+
+element_fields = apiv2.model(
+    "TopicElement",
+    {
+        "id": fields.String(description="The element id"),
+        "title": fields.String(description="The element title"),
+        "description": fields.String(description="The element description"),
+        "element": fields.Nested(nested_element_fields, description="The element target object"),
+    },
+)
+
+element_page_fields = apiv2.model(
+    "TopicElementPage",
+    {
+        "data": fields.List(fields.Nested(element_fields, description="The topic elements")),
+        "next_page": fields.String(),
+        "previous_page": fields.String(),
+        "page": fields.Integer(),
+        "page_size": fields.Integer(),
+        "total": fields.Integer(),
+    },
+)
