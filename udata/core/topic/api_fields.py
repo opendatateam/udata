@@ -18,10 +18,6 @@ topic_fields = apiv2.model(
         "tags": fields.List(
             fields.String, description="Some keywords to help in search", required=True
         ),
-        # FIXME: that won't work for input serialiazation, we need smtg like for resources:
-        # "resources": fields.List(
-        #     fields.Nested(resource_fields, description="The dataset resources")
-        # ),
         "elements": fields.Raw(
             attribute=lambda o: {
                 "rel": "subsection",
@@ -99,4 +95,17 @@ element_page_fields = apiv2.model(
         "page_size": fields.Integer(),
         "total": fields.Integer(),
     },
+)
+
+topic_input_fields = topic_fields.clone("TopicInput")
+topic_input_fields.elements = fields.List(
+    fields.Nested(element_fields, description="The topic elements")
+)
+
+topic_add_elements_fields = apiv2.model(
+    "TopicElementsAdd",
+    {
+        "id": fields.String(description="Id of the item to add", required=True),
+    },
+    location="json",
 )
