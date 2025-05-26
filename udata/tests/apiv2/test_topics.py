@@ -296,6 +296,19 @@ class TopicElementsAPITest(APITestCase):
         assert response.json["next_page"] is None
         assert response.json["data"][0]["id"] not in first_page_ids
 
+    def test_elements_list_search(self):
+        matches = [TopicElementFactory(title="Match"), TopicElementFactory(description="IsAmatcH")]
+        topic = TopicFactory(
+            elements=[
+                *matches,
+                TopicElementFactory(title="shouldnotappear"),
+            ]
+        )
+        response = self.get(url_for("apiv2.topic_elements", topic=topic, q="match"))
+        assert response.status_code == 200
+        assert response.json["total"] == 2
+        assert all(elt["id"] in [str(m.id) for m in matches] for elt in response.json["data"])
+
     def test_add_elements(self):
         owner = self.login()
         topic = TopicFactory(owner=owner)

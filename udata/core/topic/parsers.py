@@ -11,7 +11,7 @@ elements_parser.add_argument(
     "page_size", type=int, default=DEFAULT_PAGE_SIZE, location="args", help="The page size to fetch"
 )
 elements_parser.add_argument(
-    "type", type=str, location="args", help="The type of resources to fetch"
+    "type", type=str, location="args", help="The type of elements to fetch"
 )
 elements_parser.add_argument(
     "q", type=str, location="args", help="query string to search through elements"

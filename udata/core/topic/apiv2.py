@@ -107,6 +107,7 @@ class TopicElementsAPI(API):
         args = elements_parser.parse_args()
         page = args["page"]
         page_size = args["page_size"]
+        query = args["q"]
         list_elements_url = url_for("apiv2.topic_elements", topic=topic.id, _external=True)
         next_page = f"{list_elements_url}?page={page + 1}&page_size={page_size}"
         previous_page = f"{list_elements_url}?page={page - 1}&page_size={page_size}"
@@ -116,6 +117,26 @@ class TopicElementsAPI(API):
             {"$match": {"_id": topic.id}},
             {"$unwind": "$elements"},
             {"$replaceRoot": {"newRoot": "$elements"}},
+        ]
+
+        if query:
+            pipeline.append(
+                {
+                    "$match": {
+                        "$or": [
+                            # TODO: use text index instead
+                            {"title": {"$regex": query, "$options": "i"}},
+                            {"description": {"$regex": query, "$options": "i"}},
+                        ]
+                    }
+                }
+            )
+            next_page += f"&q={args['q']}"
+            previous_page += f"&q={args['q']}"
+
+        count_pipeline = pipeline.copy()
+
+        pipeline.append(
             {
                 "$project": {
                     "id": "$_id",
@@ -123,15 +144,10 @@ class TopicElementsAPI(API):
                     "description": 1,
                     "element": {"class": "$element._cls", "id": "$element._ref.$id"},
                 }
-            },
-        ]
+            }
+        )
 
-        # Get total count
-        count_pipeline = [
-            {"$match": {"_id": topic.id}},
-            {"$project": {"count": {"$size": "$elements"}}},
-            {"$project": {"total": "$count"}},
-        ]
+        count_pipeline.extend([{"$count": "total"}])
 
         # Add pagination
         if page > 1:
