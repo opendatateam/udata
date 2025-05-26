@@ -156,6 +156,8 @@ class TopicElementsAPI(API):
                     "id": "$_id",
                     "title": 1,
                     "description": 1,
+                    "tags": 1,
+                    "extras": 1,
                     "element": {"class": "$element._cls", "id": "$element._ref.$id"},
                 }
             }

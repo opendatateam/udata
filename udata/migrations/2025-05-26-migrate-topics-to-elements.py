@@ -23,6 +23,8 @@ def migrate(db):
             elements.append(
                 {
                     "_id": str(uuid.uuid4()),
+                    "tags": [],
+                    "extras": {},
                     "element": {"_cls": "Dataset", "_ref": DBRef("dataset", dataset_id)},
                 }
             )
@@ -32,6 +34,8 @@ def migrate(db):
             elements.append(
                 {
                     "_id": str(uuid.uuid4()),
+                    "tags": [],
+                    "extras": {},
                     "element": {"_cls": "Reuse", "_ref": DBRef("reuse", reuse_id)},
                 }
             )

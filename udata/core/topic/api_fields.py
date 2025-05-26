@@ -81,6 +81,8 @@ element_fields = apiv2.model(
         "id": fields.String(description="The element id"),
         "title": fields.String(description="The element title"),
         "description": fields.String(description="The element description"),
+        "tags": fields.List(fields.String, description="The element tags"),
+        "extras": fields.Raw(description="Extras attributes as key-value pairs"),
         "element": fields.Nested(nested_element_fields, description="The element target object"),
     },
 )
