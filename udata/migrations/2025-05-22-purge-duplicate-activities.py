@@ -5,6 +5,8 @@ This migration updates Topic.featured to False when it is None.
 import logging
 from datetime import datetime, timedelta
 
+from mongoengine.connection import get_db
+
 from udata.core.dataset.activities import UserCreatedDataset, UserDeletedDataset, UserUpdatedDataset
 from udata.core.organization.activities import UserUpdatedOrganization
 from udata.core.reuse.activities import UserCreatedReuse, UserDeletedReuse, UserUpdatedReuse
@@ -20,6 +22,15 @@ log = logging.getLogger(__name__)
 
 
 def migrate(db):
+    # Remove legacy fields (`as_organization`, `kwargs`) from old activities
+    result = get_db().activity.update_many({}, {"$unset": {"as_organization": ""}})
+    log.info(
+        f"Legacy field `as_organization` removed from {result.modified_count} activity objects"
+    )
+
+    result = get_db().activity.update_many({}, {"$unset": {"kwargs": ""}})
+    log.info(f"Legacy field `kwargs` removed from {result.modified_count} activity objects")
+
     # Clean duplicate activities in case of discussion or following
     # - remove the "updated" activity on the discussed/followed object
     # - remove the activity on the organization
@@ -35,7 +46,6 @@ def migrate(db):
         object_activity_count = 0
         activities = (
             action_related_activity.objects()
-            .order_by("-created_at")
             .no_dereference()  # We use no_dereference in query to prevent DBref DoesNotExist errors
             .no_cache()
         )
@@ -71,7 +81,6 @@ def migrate(db):
         count = 0
         activities = (
             object_related_activity.objects()
-            .order_by("-created_at")
             .no_dereference()  # We use no_dereference in query to prevent DBref DoesNotExist errors
             .no_cache()
         )
