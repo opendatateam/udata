@@ -51,10 +51,14 @@ class FollowAPI(API):
     def get(self, id):
         """List all followers for a given object"""
         args = parser.parse_args()
-        model = self.model.objects.only("id").get_or_404(id=id_or_404(id))
+        model = None
+        if hasattr(self.model, "slug"):
+            model = self.model.objects(slug=id).first()
+        model = model or self.model.objects.only("id").get_or_404(id=id_or_404(id))
         qs = Follow.objects(following=model, until=None)
         if args["user"]:
             qs = qs.filter(follower=id_or_404(args["user"]))
+
         return qs.paginate(args["page"], args["page_size"])
 
     @api.secure

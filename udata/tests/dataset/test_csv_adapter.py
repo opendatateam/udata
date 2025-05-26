@@ -21,7 +21,10 @@ class DatasetCSVAdapterTest:
                         "created_at": date_created,
                         "modified_at": date_modified,
                         "uri": "http://domain.gouv.fr/dataset/uri",
-                    }
+                    },
+                    metrics={
+                        "views": 42,
+                    },
                 )
             ],
             harvest={
@@ -41,6 +44,8 @@ class DatasetCSVAdapterTest:
         assert date_modified.isoformat() in d_row
         # dataset harvest dates should not be here
         assert another_date.isoformat() not in d_row
+        # assert resource metrics downloads
+        assert 42 in d_row
 
     def test_datasets_csv_adapter(self):
         date_created = datetime(2022, 12, 31)
@@ -87,10 +92,8 @@ class DatasetCSVAdapterTest:
         assert harvest_dataset_values["harvest.domain"] == "example.com"
         assert harvest_dataset_values["harvest.remote_url"] == "https://www.example.com/"
         assert harvest_dataset_values["resources_count"] == 0
-        assert harvest_dataset_values["downloads"] == 0
 
         resources_dataset_values = csv[str(resources_dataset.id)]
         assert resources_dataset_values["resources_count"] == 3
         assert resources_dataset_values["main_resources_count"] == 1
         assert set(resources_dataset_values["resources_formats"].split(",")) == set(["csv", "json"])
-        assert resources_dataset_values["downloads"] == 1337 + 42

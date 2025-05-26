@@ -80,7 +80,7 @@ def check_organization_is_valid_for_current_user(organization, **_kwargs):
 
 class Owned(object):
     """
-    A mixin to factorize owning behvaior between users and organizations.
+    A mixin to factorize owning behavior between users and organizations.
     """
 
     owner = field(
