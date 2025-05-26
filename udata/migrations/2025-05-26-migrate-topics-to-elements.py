@@ -1,6 +1,7 @@
 """Migrate topic.datasets and topics.reuses to topic.elements"""
 
 import logging
+import uuid
 
 from bson import DBRef
 from mongoengine.connection import get_db
@@ -19,11 +20,21 @@ def migrate(db):
 
         # Convert datasets to elements with DBRef
         for dataset_id in topic.get("datasets", []):
-            elements.append({"element": {"_cls": "Dataset", "_ref": DBRef("dataset", dataset_id)}})
+            elements.append(
+                {
+                    "id": str(uuid.uuid4()),
+                    "element": {"_cls": "Dataset", "_ref": DBRef("dataset", dataset_id)},
+                }
+            )
 
         # Convert reuses to elements with DBRef
         for reuse_id in topic.get("reuses", []):
-            elements.append({"element": {"_cls": "Reuse", "_ref": DBRef("reuse", reuse_id)}})
+            elements.append(
+                {
+                    "id": str(uuid.uuid4()),
+                    "element": {"_cls": "Reuse", "_ref": DBRef("reuse", reuse_id)},
+                }
+            )
 
         log.info(f"Topic: {topic.get('name', 'Unnamed')} (ID: {topic['_id']})")
         log.info(f"  - Converting {len(topic.get('datasets', []))} datasets")
