@@ -97,9 +97,12 @@ element_page_fields = apiv2.model(
     },
 )
 
-topic_input_fields = topic_fields.clone("TopicInput")
-topic_input_fields.elements = fields.List(
-    fields.Nested(element_fields, description="The topic elements")
+topic_input_fields = apiv2.clone(
+    "TopicInput",
+    topic_fields,
+    {
+        "elements": fields.List(fields.Nested(element_fields, description="The topic elements")),
+    },
 )
 
 topic_add_elements_fields = apiv2.model(
