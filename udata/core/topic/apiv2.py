@@ -108,6 +108,7 @@ class TopicElementsAPI(API):
         page = args["page"]
         page_size = args["page_size"]
         query = args["q"]
+        element_class = args["class"]
         list_elements_url = url_for("apiv2.topic_elements", topic=topic.id, _external=True)
         next_page = f"{list_elements_url}?page={page + 1}&page_size={page_size}"
         previous_page = f"{list_elements_url}?page={page - 1}&page_size={page_size}"
@@ -133,6 +134,11 @@ class TopicElementsAPI(API):
             )
             next_page += f"&q={args['q']}"
             previous_page += f"&q={args['q']}"
+
+        if element_class:
+            pipeline.append({"$match": {"element._cls": element_class}})
+            next_page += f"&class={element_class}"
+            previous_page += f"&class={element_class}"
 
         count_pipeline = pipeline.copy()
 

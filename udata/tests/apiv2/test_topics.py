@@ -9,7 +9,12 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.core.spatial.models import spatial_granularities
 from udata.core.topic import DEFAULT_PAGE_SIZE
-from udata.core.topic.factories import TopicElementDatasetFactory, TopicElementFactory, TopicFactory
+from udata.core.topic.factories import (
+    TopicElementDatasetFactory,
+    TopicElementFactory,
+    TopicElementReuseFactory,
+    TopicFactory,
+)
 from udata.core.topic.models import Topic
 from udata.core.user.factories import UserFactory
 from udata.tests.api import APITestCase
@@ -308,6 +313,23 @@ class TopicElementsAPITest(APITestCase):
         assert response.status_code == 200
         assert response.json["total"] == 2
         assert all(elt["id"] in [str(m.id) for m in matches] for elt in response.json["data"])
+
+    def test_elements_list_class_filter(self):
+        dataset_elt = TopicElementDatasetFactory()
+        reuse_elt = TopicElementReuseFactory()
+        no_elt = TopicElementFactory()
+        topic = TopicFactory(elements=[dataset_elt, reuse_elt, no_elt])
+        response = self.get(url_for("apiv2.topic_elements", topic=topic, **{"class": "Dataset"}))
+        assert response.status_code == 200
+        assert response.json["total"] == 1
+        assert str(dataset_elt.id) == response.json["data"][0]["id"]
+        response = self.get(url_for("apiv2.topic_elements", topic=topic, **{"class": "Reuse"}))
+        assert response.status_code == 200
+        assert response.json["total"] == 1
+        assert str(reuse_elt.id) == response.json["data"][0]["id"]
+        response = self.get(url_for("apiv2.topic_elements", topic=topic, **{"class": "NotAModel"}))
+        assert response.status_code == 200
+        assert response.json["total"] == 0
 
     def test_add_elements(self):
         owner = self.login()
