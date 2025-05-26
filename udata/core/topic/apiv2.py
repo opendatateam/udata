@@ -148,6 +148,7 @@ class TopicElementsAPI(API):
                 previous_page += f"&tag={tag}"
 
         count_pipeline = pipeline.copy()
+        count_pipeline.append({"$count": "total"})
 
         pipeline.append(
             {
@@ -160,14 +161,13 @@ class TopicElementsAPI(API):
             }
         )
 
-        count_pipeline.extend([{"$count": "total"}])
-
         # Add pagination
         if page > 1:
             pipeline.append({"$skip": page_size * (page - 1)})
         if page_size:
             pipeline.append({"$limit": page_size})
 
+        # $facet executes total and data queries in one shot
         result = (
             topic._get_collection()
             .aggregate([{"$facet": {"data": pipeline, "total": count_pipeline}}])
