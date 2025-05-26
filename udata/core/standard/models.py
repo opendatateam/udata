@@ -1,5 +1,5 @@
-from udata.api_fields import field, function_field, generate_fields
 import udata.core.contact_point.api_fields as contact_api_fields
+from udata.api_fields import field, function_field, generate_fields
 from udata.core.owned import Owned
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
@@ -24,9 +24,7 @@ class Standard(Owned, db.Document):
         show_as_ref=True,
     )
     slug = field(
-        db.SlugField(
-            max_length=255, required=True, populate_from="name", update=True, follow=True
-        ),
+        db.SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
         readonly=True,
         auditable=False,
     )
