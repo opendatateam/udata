@@ -9,7 +9,7 @@ from udata.core.dataset.api import DatasetApiParser
 from udata.core.discussions.models import Discussion
 from udata.core.reuse.api import ReuseApiParser
 from udata.core.topic.api_fields import (
-    element_page_fields,
+    element_page_fields_for_pipeline,
     topic_add_elements_fields,
     topic_fields,
     topic_input_fields,
@@ -98,9 +98,12 @@ class TopicAPI(API):
 class TopicElementsAPI(API):
     @apiv2.doc("topic_elements")
     @apiv2.expect(elements_parser)
-    @apiv2.marshal_with(element_page_fields)
+    @apiv2.marshal_with(element_page_fields_for_pipeline)
     def get(self, topic):
-        """Get a given topic elements, with filters"""
+        """
+        Get a given topic elements with pagination.
+        We're using an aggregation pipeline instead of high level MongoEngine API for performance reasons.
+        """
         args = elements_parser.parse_args()
         page = args["page"]
         page_size = args["page_size"]
@@ -108,38 +111,49 @@ class TopicElementsAPI(API):
         next_page = f"{list_elements_url}?page={page + 1}&page_size={page_size}"
         previous_page = f"{list_elements_url}?page={page - 1}&page_size={page_size}"
 
-        # FIXME: this will probably fail with a lot of elements
-        # is there an efficient way to handle embedded documents pagination? or shall we use an Element document?
-        # -> aggregation pipeline is probably the way to go
-        res = topic.elements
+        # Get raw elements from pipeline
+        pipeline = [
+            {"$match": {"_id": topic.id}},
+            {"$unwind": "$elements"},
+            {"$replaceRoot": {"newRoot": "$elements"}},
+            {
+                "$project": {
+                    "id": "$_id",
+                    "title": 1,
+                    "description": 1,
+                    "element": {"class": "$element._cls", "id": "$element._ref.$id"},
+                }
+            },
+        ]
 
-        # FIXME: implement class/type filter
-        if args["type"]:
-            res = [elem for elem in res if elem["type"] == args["type"]]
-            next_page += f"&type={args['type']}"
-            previous_page += f"&type={args['type']}"
+        # Get total count
+        count_pipeline = [
+            {"$match": {"_id": topic.id}},
+            {"$project": {"count": {"$size": "$elements"}}},
+            {"$project": {"total": "$count"}},
+        ]
 
-        # FIXME: implement on description too, and be smarter
-        if args["q"]:
-            res = [elem for elem in res if args["q"].lower() in elem["title"].lower()]
-            next_page += f"&q={args['q']}"
-            previous_page += f"&q={args['q']}"
-
+        # Add pagination
         if page > 1:
-            offset = page_size * (page - 1)
-        else:
-            offset = 0
-        paginated_result = res[offset : (page_size + offset if page_size is not None else None)]
+            pipeline.append({"$skip": page_size * (page - 1)})
+        if page_size:
+            pipeline.append({"$limit": page_size})
 
-        print("elements", [e.id for e in topic.elements])
+        result = (
+            topic._get_collection()
+            .aggregate([{"$facet": {"data": pipeline, "total": count_pipeline}}])
+            .next()
+        )
+
+        total = result["total"][0]["total"] if result["total"] else 0
 
         return {
-            "data": paginated_result,
-            "next_page": next_page if page_size + offset < len(res) else None,
+            "data": result["data"],
+            "next_page": next_page if (page * page_size) < total else None,
             "page": page,
             "page_size": page_size,
             "previous_page": previous_page if page > 1 else None,
-            "total": len(res),
+            "total": total,
         }
 
     @apiv2.secure

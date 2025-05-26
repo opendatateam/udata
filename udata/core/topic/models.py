@@ -45,7 +45,7 @@ class Topic(db.Document, Owned, db.Datetimed):
     def __str__(self):
         return self.name
 
-    # TODO: also reindex Reuses
+    # TODO: also reindex Reuses (never been done)
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
         # Try catch is to prevent the mechanism to crash at the

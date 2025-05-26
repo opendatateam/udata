@@ -8,6 +8,7 @@ from udata.core.organization.models import Member
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.core.spatial.models import spatial_granularities
+from udata.core.topic import DEFAULT_PAGE_SIZE
 from udata.core.topic.factories import TopicElementDatasetFactory, TopicElementFactory, TopicFactory
 from udata.core.topic.models import Topic
 from udata.core.user.factories import UserFactory
@@ -283,6 +284,17 @@ class TopicElementsAPITest(APITestCase):
         data = response.json["data"]
         assert len(data) == 3
         assert all(str(elt.id) in (_elt["id"] for _elt in data) for elt in topic.elements)
+
+    def test_elements_list_pagination(self):
+        topic = TopicFactory(elements=[TopicElementFactory() for _ in range(DEFAULT_PAGE_SIZE + 1)])
+        response = self.get(url_for("apiv2.topic_elements", topic=topic))
+        assert response.status_code == 200
+        assert response.json["next_page"] is not None
+        first_page_ids = [elt["id"] for elt in response.json["data"]]
+        response = self.get(response.json["next_page"])
+        assert response.status_code == 200
+        assert response.json["next_page"] is None
+        assert response.json["data"][0]["id"] not in first_page_ids
 
     def test_add_elements(self):
         owner = self.login()
