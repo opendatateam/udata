@@ -331,6 +331,20 @@ class TopicElementsAPITest(APITestCase):
         assert response.status_code == 200
         assert response.json["total"] == 0
 
+    def test_elements_list_tags_filter(self):
+        match_tag = TopicElementFactory(tags=["is-a-match-1", "is-a-match-2"])
+        match_tag_2 = TopicElementFactory(tags=["is-a-match-2"])
+        no_match_tag = TopicElementFactory(tags=["is-not-a-match"])
+        topic = TopicFactory(elements=[match_tag, match_tag_2, no_match_tag])
+        response = self.get(
+            url_for("apiv2.topic_elements", topic=topic, tag=["is-a-match-1", "is-a-match-2"])
+        )
+        assert response.status_code == 200
+        assert response.json["total"] == 1
+        assert str(match_tag.id) in [elt["id"] for elt in response.json["data"]]
+        assert str(no_match_tag.id) not in [elt["id"] for elt in response.json["data"]]
+        assert str(match_tag_2.id) not in [elt["id"] for elt in response.json["data"]]
+
     def test_add_elements(self):
         owner = self.login()
         topic = TopicFactory(owner=owner)

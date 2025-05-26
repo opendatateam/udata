@@ -16,6 +16,7 @@ elements_parser.add_argument(
 elements_parser.add_argument(
     "q", type=str, location="args", help="query string to search through elements"
 )
+elements_parser.add_argument("tag", type=str, location="args", action="append")
 
 
 class TopicApiParser(ModelApiParser):
