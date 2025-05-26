@@ -22,7 +22,7 @@ def migrate(db):
         for dataset_id in topic.get("datasets", []):
             elements.append(
                 {
-                    "id": str(uuid.uuid4()),
+                    "_id": str(uuid.uuid4()),
                     "element": {"_cls": "Dataset", "_ref": DBRef("dataset", dataset_id)},
                 }
             )
@@ -31,7 +31,7 @@ def migrate(db):
         for reuse_id in topic.get("reuses", []):
             elements.append(
                 {
-                    "id": str(uuid.uuid4()),
+                    "_id": str(uuid.uuid4()),
                     "element": {"_cls": "Reuse", "_ref": DBRef("reuse", reuse_id)},
                 }
             )
