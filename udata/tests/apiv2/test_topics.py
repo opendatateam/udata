@@ -283,12 +283,26 @@ class TopicAPITest(APITestCase):
 
 class TopicElementsAPITest(APITestCase):
     def test_elements_list(self):
-        topic = TopicFactory()
+        reuse_elt = TopicElementReuseFactory(tags=["foo", "bar"], extras={"foo": "bar"})
+        dataset_elt = TopicElementDatasetFactory(tags=["foo", "bar"], extras={"foo": "bar"})
+        topic = TopicFactory(
+            elements=[
+                dataset_elt,
+                reuse_elt,
+            ]
+        )
         response = self.get(url_for("apiv2.topic_elements", topic=topic))
         assert response.status_code == 200
         data = response.json["data"]
-        assert len(data) == 3
-        assert all(str(elt.id) in (_elt["id"] for _elt in data) for elt in topic.elements)
+        assert len(data) == 2
+        assert all(_elt["tags"] == ["foo", "bar"] for _elt in data)
+        assert all(_elt["extras"] == {"foo": "bar"} for _elt in data)
+        assert {"class": "Reuse", "id": str(reuse_elt.element.id)} in [
+            _elt["element"] for _elt in data
+        ]
+        assert {"class": "Dataset", "id": str(dataset_elt.element.id)} in [
+            _elt["element"] for _elt in data
+        ]
 
     def test_elements_list_pagination(self):
         topic = TopicFactory(elements=[TopicElementFactory() for _ in range(DEFAULT_PAGE_SIZE + 1)])
