@@ -44,7 +44,6 @@ def purge_datasets(self):
         Activity.objects(related_to=dataset).delete()
         # Remove topics' related dataset
         # FIXME: is is acceptable to have a broken reference inbetween? seems similar to other objects.
-        # FIXME: we should also implement purge_topics and delete elements that have neither element nor title (similar to form business rule)
         Topic.objects(elements__element=dataset).update(set__elements__S__element=None)
         # Remove dataservices related dataset
         for dataservice in Dataservice.objects(datasets=dataset):

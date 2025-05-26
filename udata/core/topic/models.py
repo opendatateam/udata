@@ -14,7 +14,6 @@ class TopicElement(db.EmbeddedDocument):
     description = db.StringField(required=False)
     tags = db.ListField(db.StringField())
     extras = db.ExtrasField()
-    # FIXME: no reverse_delete_rule allowed here, is cleanup a problem?
     element = db.GenericReferenceField()
 
 
