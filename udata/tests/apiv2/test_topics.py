@@ -456,3 +456,28 @@ class TopicElementAPITest(APITestCase):
         self.login()
         response = self.delete(url_for("apiv2.topic_element", topic=topic, element_id=element.id))
         assert response.status_code == 403
+
+    def test_update_element(self):
+        owner = self.login()
+        topic = TopicFactory(elements=[TopicElementFactory(title="foo")], owner=owner)
+        dataset = DatasetFactory()
+        element = topic.elements[0]
+        response = self.put(
+            url_for("apiv2.topic_element", topic=topic, element_id=element.id),
+            {
+                "title": "bar",
+                "description": "baz",
+                "tags": ["baz"],
+                "extras": {"foo": "bar"},
+                "element": {"class": "Dataset", "id": str(dataset.id)},
+            },
+        )
+        assert response.status_code == 200
+        assert response.json["title"] == "bar"
+        topic.reload()
+        assert len(topic.elements) == 1
+        assert topic.elements[0].title == "bar"
+        assert topic.elements[0].description == "baz"
+        assert topic.elements[0].tags == ["baz"]
+        assert topic.elements[0].extras == {"foo": "bar"}
+        assert topic.elements[0].element.id == dataset.id

@@ -9,6 +9,7 @@ from udata.core.dataset.api import DatasetApiParser
 from udata.core.discussions.models import Discussion
 from udata.core.reuse.api import ReuseApiParser
 from udata.core.topic.api_fields import (
+    element_fields,
     element_page_fields_for_pipeline,
     topic_add_elements_fields,
     topic_fields,
@@ -248,3 +249,27 @@ class TopicElementAPI(API):
         topic.save()
 
         return None, 204
+
+    @apiv2.secure
+    @apiv2.doc("topic_element_update")
+    @apiv2.expect(element_fields)
+    @apiv2.marshal_with(element_fields)
+    @apiv2.response(404, "Topic not found")
+    @apiv2.response(404, "Element not found in topic")
+    @apiv2.response(204, "Success")
+    def put(self, topic, element_id):
+        """Update a given element from the given topic"""
+        if not TopicEditPermission(topic).can():
+            apiv2.abort(403, "Forbidden")
+
+        element = get_by(topic.elements, "id", element_id)
+        if not element:
+            apiv2.abort(404, "Element not found in topic")
+
+        form = apiv2.validate(TopicElementForm, element)
+        form.populate_obj(element)
+
+        data = {f"elements__{topic.elements.index(element)}": element}
+        topic.update(**data)
+
+        return element
