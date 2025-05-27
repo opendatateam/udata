@@ -123,17 +123,32 @@ class TopicElementsAPI(API):
         ]
 
         if query:
-            pipeline.append(
-                {
-                    "$match": {
+            search_terms = query.lower().split()
+            regex_conditions = []
+
+            for term in search_terms:
+                # Create regex that ignores diacritics (basic approach)
+                diacritic_term = (
+                    term.replace("e", "[eéèêë]")
+                    .replace("a", "[aàâä]")
+                    .replace("i", "[iîï]")
+                    .replace("o", "[oôö]")
+                    .replace("u", "[uùûü]")
+                    .replace("c", "[cç]")
+                )
+
+                regex_conditions.append(
+                    {
                         "$or": [
-                            # TODO: use text index instead
-                            {"title": {"$regex": query, "$options": "i"}},
-                            {"description": {"$regex": query, "$options": "i"}},
+                            {"title": {"$regex": diacritic_term, "$options": "i"}},
+                            {"description": {"$regex": diacritic_term, "$options": "i"}},
                         ]
                     }
-                }
-            )
+                )
+
+            # All search terms must match (AND logic)
+            pipeline.append({"$match": {"$and": regex_conditions}})
+
             next_page += f"&q={args['q']}"
             previous_page += f"&q={args['q']}"
 

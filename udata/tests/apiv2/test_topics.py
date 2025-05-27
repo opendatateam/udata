@@ -316,17 +316,43 @@ class TopicElementsAPITest(APITestCase):
         assert response.json["data"][0]["id"] not in first_page_ids
 
     def test_elements_list_search(self):
-        matches = [TopicElementFactory(title="Match"), TopicElementFactory(description="IsAmatcH")]
-        topic = TopicFactory(
-            elements=[
-                *matches,
-                TopicElementFactory(title="shouldnotappear"),
-            ]
+        matches_1 = [
+            TopicElementFactory(title="Apprentissage automatique et algorithmes"),
+            TopicElementFactory(
+                description="Ceci concerne l'apprentissage automatique et les algorithmes d'intelligence artificielle"
+            ),
+            TopicElementFactory(title="algorithmes d'apprentissage"),
+            # TopicElementFactory(description="Les techniques d'apprentissage sont importantes"),  # TODO: Stemming test
+        ]
+        matches_2 = [
+            TopicElementFactory(title="Système de données"),  # Diacritics test
+            TopicElementFactory(description="Création d'un modèle"),  # More diacritics
+        ]
+        no_matches = [
+            TopicElementFactory(title="ne devrait pas apparaître"),
+            TopicElementFactory(description="contenu non pertinent"),
+            TopicElementFactory(title="appr algo"),  # Partial words that regex might catch
+        ]
+
+        topic = TopicFactory(elements=[*matches_1, *matches_2, *no_matches])
+
+        # Test with French phrase
+        response = self.get(
+            url_for("apiv2.topic_elements", topic=topic, q="apprentissage algorithmes")
         )
-        response = self.get(url_for("apiv2.topic_elements", topic=topic, q="match"))
         assert response.status_code == 200
-        assert response.json["total"] == 2
-        assert all(elt["id"] in [str(m.id) for m in matches] for elt in response.json["data"])
+        assert response.json["total"] == 3
+        assert all(elt["id"] in [str(m.id) for m in matches_1] for elt in response.json["data"])
+
+        # Test diacritics - search without accents should match content with accents
+        response = self.get(url_for("apiv2.topic_elements", topic=topic, q="systeme donnees"))
+        assert response.status_code == 200
+        assert response.json["total"] >= 1
+
+        # Test reverse diacritics - search with accents should work
+        response = self.get(url_for("apiv2.topic_elements", topic=topic, q="création modèle"))
+        assert response.status_code == 200
+        assert response.json["total"] >= 1
 
     def test_elements_list_class_filter(self):
         dataset_elt = TopicElementDatasetFactory()
