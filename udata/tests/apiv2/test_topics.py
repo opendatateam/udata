@@ -33,7 +33,6 @@ class TopicsListAPITest(APITestCase):
 
         tag_topic_1 = TopicFactory(tags=["my-tag-shared", "my-tag-1"])
         tag_topic_2 = TopicFactory(tags=["my-tag-shared", "my-tag-2"])
-        name_topic = TopicFactory(name="topic-for-query")
         private_topic = TopicFactory(private=True)
         geozone_topic = TopicFactory(spatial=SpatialCoverageFactory(zones=[paca.id]))
         granularity_topic = TopicFactory(spatial=SpatialCoverageFactory(granularity="country"))
@@ -48,11 +47,6 @@ class TopicsListAPITest(APITestCase):
 
         hateoas_fields = ["rel", "href", "type", "total"]
         assert all(k in data[0]["elements"] for k in hateoas_fields)
-
-        response = self.get(url_for("apiv2.topics_list", q="topic-for"))
-        assert response.status_code == 200
-        assert len(response.json["data"]) == 1
-        assert response.json["data"][0]["id"] == str(name_topic.id)
 
         response = self.get(url_for("apiv2.topics_list", tag=["my-tag-shared", "my-tag-1"]))
         assert response.status_code == 200
@@ -102,6 +96,47 @@ class TopicsListAPITest(APITestCase):
         assert response.status_code == 200
         assert len(response.json["data"]) == 1
         assert str(org_topic.id) in [t["id"] for t in response.json["data"]]
+
+    def test_topic_api_list_search(self):
+        topic = TopicFactory(name="topic-for-test")
+        response = self.get(url_for("apiv2.topics_list", q="topic-for"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(topic.id)
+
+        topic = TopicFactory(name="aménagement")
+        response = self.get(url_for("apiv2.topics_list", q="amenagement"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(topic.id)
+
+        # this is because we have an "AND" clause in TopicApiParser for q
+        topic = TopicFactory(name="aménagement sols")
+        response = self.get(url_for("apiv2.topics_list", q="amenagement urbain"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 0
+
+    def test_topic_api_list_search_description(self):
+        topic = TopicFactory(name="xxx", description="aménagement")
+        response = self.get(url_for("apiv2.topics_list", q="amenagement"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(topic.id)
+
+    # TODO: this would work with the following index on Topic,
+    # but we need to find a way to inject the language from config:
+    #   meta = {
+    #     "indexes": [
+    #       {"fields": ["$name", "$description"], 'default_language': 'fr'}
+    #     ]
+    #   }
+    @pytest.mark.skip()
+    def test_topic_api_list_search_advanced(self):
+        topic = TopicFactory(name="plans d'eau")
+        response = self.get(url_for("apiv2.topics_list", q="eau"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(topic.id)
 
     def test_topic_api_list_authenticated(self):
         owner = self.login()
@@ -215,6 +250,7 @@ class TopicAPITest(APITestCase):
         response = self.put(url_for("apiv2.topic", topic=topic), data)
         self.assert403(response)
 
+    # FIXME: ok to remove the feature?
     @pytest.mark.skip(reason="Not implemented anymore")
     def test_topic_api_clear_elements(self):
         """It should remove all elements if set to None"""

@@ -36,7 +36,14 @@ class Topic(db.Document, Owned, db.Datetimed):
     spatial = db.EmbeddedDocumentField(SpatialCoverage)
 
     meta = {
-        "indexes": ["$name", "created_at", "slug"] + Owned.meta["indexes"],
+        "indexes": [
+            {
+                "fields": ["$name", "$description"],
+            },
+            "created_at",
+            "slug",
+        ]
+        + Owned.meta["indexes"],
         "ordering": ["-created_at"],
         "auto_create_index_on_save": True,
         "queryset_class": OwnedQuerySet,
