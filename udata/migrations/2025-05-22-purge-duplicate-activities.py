@@ -48,6 +48,7 @@ def migrate(db):
             action_related_activity.objects()
             .no_dereference()  # We use no_dereference in query to prevent DBref DoesNotExist errors
             .no_cache()
+            .timeout(False)
         )
         log.info(
             f"{datetime.utcnow()}: Processing {activities.count()} {action_related_activity} activities..."
@@ -58,12 +59,14 @@ def migrate(db):
                 related_to=act.related_to.id,
                 created_at__gte=act.created_at - timedelta(seconds=1),
                 created_at__lte=act.created_at + timedelta(seconds=1),
-            ).count()
-            org_activity_count += UserUpdatedOrganization.objects(
-                actor=act.actor.id,
-                created_at__gte=act.created_at - timedelta(seconds=1),
-                created_at__lte=act.created_at + timedelta(seconds=1),
-            ).count()
+            ).delete()
+            if act.organization:
+                org_activity_count += UserUpdatedOrganization.objects(
+                    actor=act.actor.id,
+                    related_to=act.organization,
+                    created_at__gte=act.created_at - timedelta(seconds=1),
+                    created_at__lte=act.created_at + timedelta(seconds=1),
+                ).delete()
         log.info(
             f"{datetime.utcnow()}: Deleted {object_activity_count} {object_updated_activity} and {org_activity_count} UserUpdatedOrganization activities"
         )
@@ -80,9 +83,10 @@ def migrate(db):
     ]:
         count = 0
         activities = (
-            object_related_activity.objects()
+            object_related_activity.objects(organization__exists=True)
             .no_dereference()  # We use no_dereference in query to prevent DBref DoesNotExist errors
             .no_cache()
+            .timeout(False)
         )
         log.info(
             f"{datetime.utcnow()}: Processing {activities.count()} {object_related_activity} activities..."
@@ -90,7 +94,8 @@ def migrate(db):
         for act in activities:
             count += UserUpdatedOrganization.objects(
                 actor=act.actor.id,
+                related_to=act.organization,
                 created_at__gte=act.created_at - timedelta(seconds=1),
                 created_at__lte=act.created_at + timedelta(seconds=1),
-            ).count()
+            ).delete()
         log.info(f"{datetime.utcnow()}: Deleted {count} UserUpdatedOrganization activities")
