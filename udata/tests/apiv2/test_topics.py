@@ -43,7 +43,7 @@ class TopicsListAPITest(APITestCase):
         response = self.get(url_for("apiv2.topics_list"))
         assert response.status_code == 200
         data = response.json["data"]
-        assert len(data) == 8
+        assert len(data) == 7
 
         hateoas_fields = ["rel", "href", "type", "total"]
         assert all(k in data[0]["elements"] for k in hateoas_fields)
@@ -63,7 +63,7 @@ class TopicsListAPITest(APITestCase):
 
         response = self.get(url_for("apiv2.topics_list", include_private="true"))
         assert response.status_code == 200
-        assert len(response.json["data"]) == 8
+        assert len(response.json["data"]) == 7
         # we're not logged in, so the private topic does not appear
         assert str(private_topic.id) not in [t["id"] for t in response.json["data"]]
 
@@ -84,7 +84,7 @@ class TopicsListAPITest(APITestCase):
 
         response = self.get(url_for("apiv2.topics_list", featured="false"))
         assert response.status_code == 200
-        assert len(response.json["data"]) == 7
+        assert len(response.json["data"]) == 6
         assert str(featured_topic.id) not in [t["id"] for t in response.json["data"]]
 
         response = self.get(url_for("apiv2.topics_list", owner=owner.id))
