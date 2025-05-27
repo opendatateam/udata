@@ -168,6 +168,10 @@ class ReportConverter(ModelConverter):
     model = models.Report
 
 
+class StandardConverter(ModelConverter):
+    model = models.Standard
+
+
 class TerritoryConverter(PathConverter):
     DEFAULT_PREFIX = "fr"  # TODO: make it a setting parameter
 
@@ -248,5 +252,6 @@ def init_app(app):
     app.url_map.converters["territory"] = TerritoryConverter
     app.url_map.converters["contact_point"] = ContactPointConverter
     app.url_map.converters["report"] = ReportConverter
+    app.url_map.converters["standard"] = StandardConverter
 
     app.jinja_env.globals["endpoint_for"] = endpoint_for

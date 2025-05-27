@@ -10,20 +10,18 @@ from udata.api_fields import patch, patch_and_save
 from .models import Standard
 from .permissions import StandardEditPermission
 
-ns = api.namespace("standard", "Standards related operations")
+ns = api.namespace("standards", "Standards related operations")
 
 common_doc = {"params": {"standard": "The standard ID or slug"}}
 
 
-@ns.route("/", endpoint="standard")
+@ns.route("/", endpoint="standards")
 class StandardListAPI(API):
     @api.doc("list_standards")
     @api.expect(Standard.__index_parser__)
     @api.marshal_with(Standard.__page_fields__)
     def get(self):
-        query = Standard.objects.visible_by_user(
-            current_user, mongoengine.Q(private__ne=True, deleted=None)
-        )
+        query = Standard.objects(deleted=None)
         return Standard.apply_pagination(Standard.apply_sort_filters(query))
 
     @api.secure

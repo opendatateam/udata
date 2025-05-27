@@ -17,7 +17,7 @@ def check_url_does_not_exists(url, **_kwargs):
 
 
 @generate_fields()
-class Standard(Owned, db.Document):
+class Standard(db.Datetimed, Owned, db.Document):
     name = field(
         db.StringField(required=True),
         sortable=True,
@@ -56,6 +56,7 @@ class Standard(Owned, db.Document):
         db.DateTimeField(),
         auditable=False,
     )
+    urlhash = db.StringField(required=True, unique=True)
     archived = field(
         db.DateTimeField(),
     )
@@ -73,6 +74,15 @@ class Standard(Owned, db.Document):
     )
 
     verbose_name = _("standard")
+
+    meta = {
+        "indexes": [
+            "$name",
+            "created_at",
+            "last_modified",
+            "urlhash",
+        ]
+    }
 
     def __str__(self):
         return self.name or ""
@@ -94,3 +104,9 @@ class Standard(Owned, db.Document):
     @property
     def type_label(self):
         return STANDARD_TYPES[self.type]
+
+    def clean(self):
+        super(Standard, self).clean()
+        """Auto populate urlhash from url"""
+        if not self.urlhash or "url" in self._get_changed_fields():
+            self.urlhash = hash_url(self.url)
