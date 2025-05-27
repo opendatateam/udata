@@ -55,7 +55,7 @@ class UserRemovedResourceFromDataset(DatasetRelatedActivity, Activity):
 
 @Dataset.on_resource_added.connect
 def on_user_added_resource_to_dataset(sender, document, **kwargs):
-    if not document.private and current_user and current_user.is_authenticated:
+    if current_user and current_user.is_authenticated:
         UserAddedResourceToDataset.emit(
             document, document.organization, None, {"resource_id": str(kwargs["resource_id"])}
         )
@@ -64,7 +64,7 @@ def on_user_added_resource_to_dataset(sender, document, **kwargs):
 @Dataset.on_resource_updated.connect
 def on_user_updated_resource(sender, document, **kwargs):
     changed_fields = kwargs.get("changed_fields", [])
-    if not document.private and current_user and current_user.is_authenticated:
+    if current_user and current_user.is_authenticated:
         UserUpdatedResource.emit(
             document,
             document.organization,
@@ -75,7 +75,7 @@ def on_user_updated_resource(sender, document, **kwargs):
 
 @Dataset.on_resource_removed.connect
 def on_user_removed_resource_from_dataset(sender, document, **kwargs):
-    if not document.private and current_user and current_user.is_authenticated:
+    if current_user and current_user.is_authenticated:
         UserRemovedResourceFromDataset.emit(
             document, document.organization, None, {"resource_id": str(kwargs["resource_id"])}
         )
@@ -83,18 +83,18 @@ def on_user_removed_resource_from_dataset(sender, document, **kwargs):
 
 @Dataset.on_create.connect
 def on_user_created_dataset(dataset):
-    if not dataset.private and current_user and current_user.is_authenticated:
+    if current_user and current_user.is_authenticated:
         UserCreatedDataset.emit(dataset, dataset.organization)
 
 
 @Dataset.on_update.connect
 def on_user_updated_dataset(dataset, **kwargs):
     changed_fields = kwargs.get("changed_fields", [])
-    if not dataset.private and current_user and current_user.is_authenticated:
+    if current_user and current_user.is_authenticated:
         UserUpdatedDataset.emit(dataset, dataset.organization, changed_fields)
 
 
 @Dataset.on_delete.connect
 def on_user_deleted_dataset(dataset):
-    if not dataset.private and current_user and current_user.is_authenticated:
+    if current_user and current_user.is_authenticated:
         UserDeletedDataset.emit(dataset, dataset.organization)
