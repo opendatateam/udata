@@ -10,9 +10,6 @@ __all__ = ("TopicForm", "TopicElementForm")
 class TopicElementForm(ModelForm):
     model_class = TopicElement
 
-    # FIXME: add this?
-    # id = fields.UUIDField()
-
     title = fields.StringField(_("Title"))
     description = fields.StringField(_("Description"))
     tags = fields.TagField(_("Tags"))
