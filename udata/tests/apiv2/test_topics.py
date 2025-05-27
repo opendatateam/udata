@@ -322,11 +322,11 @@ class TopicElementsAPITest(APITestCase):
                 description="Ceci concerne l'apprentissage automatique et les algorithmes d'intelligence artificielle"
             ),
             TopicElementFactory(title="algorithmes d'apprentissage"),
-            # TopicElementFactory(description="Les techniques d'apprentissage sont importantes"),  # TODO: Stemming test
         ]
+        # Diacritics test
         matches_2 = [
-            TopicElementFactory(title="Système de données"),  # Diacritics test
-            TopicElementFactory(description="Création d'un modèle"),  # More diacritics
+            TopicElementFactory(title="Système de données"),
+            TopicElementFactory(description="Création d'un modèle"),
         ]
         no_matches = [
             TopicElementFactory(title="ne devrait pas apparaître"),
