@@ -30,11 +30,6 @@ class DiscussActivity(object):
     badge_type = "warning"
 
 
-class UserStarredOrganization(FollowActivity, OrgRelatedActivity, Activity):
-    key = "organization:followed"
-    label = _("followed an organization")
-
-
 class UserFollowedUser(FollowActivity, Activity):
     key = "user:followed"
     label = _("followed a user")
