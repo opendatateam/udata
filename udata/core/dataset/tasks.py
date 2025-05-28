@@ -43,10 +43,8 @@ def purge_datasets(self):
         # Remove activity
         Activity.objects(related_to=dataset).delete()
         # Remove topics' related dataset
-        for topic in Topic.objects(datasets=dataset):
-            datasets = topic.datasets
-            datasets.remove(dataset)
-            topic.update(datasets=datasets)
+        # FIXME: is is acceptable to have a broken reference inbetween? seems similar to other objects.
+        Topic.objects(elements__element=dataset).update(set__elements__S__element=None)
         # Remove dataservices related dataset
         for dataservice in Dataservice.objects(datasets=dataset):
             datasets = dataservice.datasets
