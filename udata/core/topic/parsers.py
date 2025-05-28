@@ -1,22 +1,34 @@
 from bson.objectid import ObjectId
 from flask_restx.inputs import boolean
 
-from udata.api import api, apiv2
+from udata.api import api
 from udata.api.parsers import ModelApiParser
 from udata.core.topic import DEFAULT_PAGE_SIZE
 
-elements_parser = apiv2.parser()
-elements_parser.add_argument("page", type=int, default=1, location="args", help="The page to fetch")
-elements_parser.add_argument(
-    "page_size", type=int, default=DEFAULT_PAGE_SIZE, location="args", help="The page size to fetch"
-)
-elements_parser.add_argument(
-    "class", type=str, location="args", help="The class of elements to fetch (eg. Dataset or Reuse)"
-)
-elements_parser.add_argument(
-    "q", type=str, location="args", help="query string to search through elements"
-)
-elements_parser.add_argument("tag", type=str, location="args", action="append")
+
+class TopicElementsParser(ModelApiParser):
+    def __init__(self):
+        super().__init__()
+        self.parser.add_argument(
+            "page", type=int, default=1, location="args", help="The page to fetch"
+        )
+        self.parser.add_argument(
+            "page_size",
+            type=int,
+            default=DEFAULT_PAGE_SIZE,
+            location="args",
+            help="The page size to fetch",
+        )
+        self.parser.add_argument(
+            "class",
+            type=str,
+            location="args",
+            help="The class of elements to fetch (eg. Dataset or Reuse)",
+        )
+        self.parser.add_argument(
+            "q", type=str, location="args", help="query string to search through elements"
+        )
+        self.parser.add_argument("tag", type=str, location="args", action="append")
 
 
 class TopicApiParser(ModelApiParser):

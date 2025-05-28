@@ -5,9 +5,7 @@ from flask import request, url_for
 from flask_security import current_user
 
 from udata.api import API, apiv2
-from udata.core.dataset.api import DatasetApiParser
 from udata.core.discussions.models import Discussion
-from udata.core.reuse.api import ReuseApiParser
 from udata.core.topic.api_fields import (
     element_fields,
     element_page_fields_for_pipeline,
@@ -18,7 +16,7 @@ from udata.core.topic.api_fields import (
 )
 from udata.core.topic.forms import TopicElementForm, TopicForm
 from udata.core.topic.models import Topic, TopicElement
-from udata.core.topic.parsers import TopicApiParser, elements_parser
+from udata.core.topic.parsers import TopicApiParser, TopicElementsParser
 from udata.core.topic.permissions import TopicEditPermission
 from udata.utils import get_by
 
@@ -29,9 +27,7 @@ log = logging.getLogger(__name__)
 ns = apiv2.namespace("topics", "Topics related operations")
 
 topic_parser = TopicApiParser()
-generic_parser = apiv2.page_parser()
-dataset_parser = DatasetApiParser()
-reuse_parser = ReuseApiParser()
+elements_parser = TopicElementsParser()
 
 common_doc = {"params": {"topic": "The topic ID"}}
 
@@ -98,14 +94,14 @@ class TopicAPI(API):
 @ns.route("/<topic:topic>/elements/", endpoint="topic_elements", doc=common_doc)
 class TopicElementsAPI(API):
     @apiv2.doc("topic_elements")
-    @apiv2.expect(elements_parser)
+    @apiv2.expect(elements_parser.parser)
     @apiv2.marshal_with(element_page_fields_for_pipeline)
     def get(self, topic):
         """
         Get a given topic elements with pagination.
         We're using an aggregation pipeline instead of high level MongoEngine API for performance reasons.
         """
-        args = elements_parser.parse_args()
+        args = elements_parser.parse()
         page = args["page"]
         page_size = args["page_size"]
         query = args["q"]
