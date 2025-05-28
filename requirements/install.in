@@ -11,6 +11,7 @@ click
 cryptography
 factory-boy
 Faker
+feedgenerator
 flask-babel
 Flask-Caching
 Flask-CDN
