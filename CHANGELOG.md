@@ -2,9 +2,12 @@
 
 ## Current (in progress)
 
--  Do not crash if file doesn't exists during resource deletion [#3323](https://github.com/opendatateam/udata/pull/3323) 
+- Add activities to dataservices and resources, add Auditable class to refactor improve code [#3308](https://github.com/opendatateam/udata/pull/3308)
+- Store activities for private objects [#3328](https://github.com/opendatateam/udata/pull/3328)
+- Do not crash if file doesn't exists during resource deletion [#3323](https://github.com/opendatateam/udata/pull/3323)
 - Show user domain in suggest [#3324](https://github.com/opendatateam/udata/pull/3324)
 - Add new global site metrics [#3325](https://github.com/opendatateam/udata/pull/3325)
+- Keep the existing frequency if not found during harvesting [#3330](https://github.com/opendatateam/udata/pull/3330)
 
 ## 10.4.1 (2025-05-20)
 

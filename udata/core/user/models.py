@@ -12,6 +12,7 @@ from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
 from udata import mail
+from udata.api_fields import field
 from udata.core import storages
 from udata.core.discussions.models import Discussion
 from udata.core.storages import avatars, default_image_basename
@@ -42,49 +43,53 @@ class UserSettings(db.EmbeddedDocument):
 
 
 class User(WithMetrics, UserMixin, db.Document):
-    slug = db.SlugField(max_length=255, required=True, populate_from="fullname")
-    email = db.StringField(max_length=255, required=True, unique=True)
-    password = db.StringField()
-    active = db.BooleanField()
-    fs_uniquifier = db.StringField(max_length=64, unique=True, sparse=True)
-    roles = db.ListField(db.ReferenceField(Role), default=[])
+    slug = field(
+        db.SlugField(max_length=255, required=True, populate_from="fullname"), auditable=False
+    )
+    email = field(db.StringField(max_length=255, required=True, unique=True))
+    password = field(db.StringField())
+    active = field(db.BooleanField())
+    fs_uniquifier = field(db.StringField(max_length=64, unique=True, sparse=True))
+    roles = field(db.ListField(db.ReferenceField(Role), default=[]))
 
-    first_name = db.StringField(max_length=255, required=True)
-    last_name = db.StringField(max_length=255, required=True)
+    first_name = field(db.StringField(max_length=255, required=True))
+    last_name = field(db.StringField(max_length=255, required=True))
 
-    avatar_url = db.URLField()
-    avatar = db.ImageField(fs=avatars, basename=default_image_basename, thumbnails=AVATAR_SIZES)
-    website = db.URLField()
-    about = db.StringField()
+    avatar_url = field(db.URLField())
+    avatar = field(
+        db.ImageField(fs=avatars, basename=default_image_basename, thumbnails=AVATAR_SIZES)
+    )
+    website = field(db.URLField())
+    about = field(db.StringField())
 
-    prefered_language = db.StringField()
+    prefered_language = field(db.StringField())
 
-    apikey = db.StringField()
+    apikey = field(db.StringField())
 
-    created_at = db.DateTimeField(default=datetime.utcnow, required=True)
+    created_at = field(db.DateTimeField(default=datetime.utcnow, required=True), auditable=False)
 
     # The field below is required for Flask-security
     # when SECURITY_CONFIRMABLE is True
-    confirmed_at = db.DateTimeField()
+    confirmed_at = field(db.DateTimeField(), auditable=False)
 
-    password_rotation_demanded = db.DateTimeField()
-    password_rotation_performed = db.DateTimeField()
+    password_rotation_demanded = field(db.DateTimeField(), auditable=False)
+    password_rotation_performed = field(db.DateTimeField(), auditable=False)
 
     # The 5 fields below are required for Flask-security
     # when SECURITY_TRACKABLE is True
-    last_login_at = db.DateTimeField()
-    current_login_at = db.DateTimeField()
-    last_login_ip = db.StringField()
-    current_login_ip = db.StringField()
-    login_count = db.IntField()
+    last_login_at = field(db.DateTimeField(), auditable=False)
+    current_login_at = field(db.DateTimeField(), auditable=False)
+    last_login_ip = field(db.StringField(), auditable=False)
+    current_login_ip = field(db.StringField(), auditable=False)
+    login_count = field(db.IntField(), auditable=False)
 
-    deleted = db.DateTimeField()
-    ext = db.MapField(db.GenericEmbeddedDocumentField())
-    extras = db.ExtrasField()
+    deleted = field(db.DateTimeField())
+    ext = field(db.MapField(db.GenericEmbeddedDocumentField()))
+    extras = field(db.ExtrasField(), auditable=False)
 
     # Used to track notification for automatic inactive users deletion
     # when YEARS_OF_INACTIVITY_BEFORE_DELETION is set
-    inactive_deletion_notified_at = db.DateTimeField()
+    inactive_deletion_notified_at = field(db.DateTimeField(), auditable=False)
 
     before_save = Signal()
     after_save = Signal()
@@ -209,6 +214,8 @@ class User(WithMetrics, UserMixin, db.Document):
 
     @classmethod
     def post_save(cls, sender, document, **kwargs):
+        if "post_save" in kwargs.get("ignores", []):
+            return
         cls.after_save.send(document)
         if kwargs.get("created"):
             cls.on_create.send(document)
@@ -294,31 +301,31 @@ class User(WithMetrics, UserMixin, db.Document):
         from udata.models import Dataset
 
         self.metrics["datasets"] = Dataset.objects(owner=self).visible().count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_reuses(self):
         from udata.models import Reuse
 
         self.metrics["reuses"] = Reuse.objects(owner=self).visible().count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_dataservices(self):
         from udata.core.dataservices.models import Dataservice
 
         self.metrics["dataservices"] = Dataservice.objects(owner=self).visible().count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):
         from udata.models import Follow
 
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_following(self):
         from udata.models import Follow
 
         self.metrics["following"] = Follow.objects.following(self).count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
 
 datastore = MongoEngineUserDatastore(db, User, Role)

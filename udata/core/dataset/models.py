@@ -19,6 +19,7 @@ from werkzeug.utils import cached_property
 from udata.api_fields import field
 from udata.app import cache
 from udata.core import storages
+from udata.core.activity.models import Auditable
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -540,45 +541,57 @@ class DatasetBadgeMixin(BadgeMixin):
     __badges__ = BADGES
 
 
-class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
-    title = db.StringField(required=True)
-    acronym = db.StringField(max_length=128)
+class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
+    title = field(db.StringField(required=True))
+    acronym = field(db.StringField(max_length=128))
     # /!\ do not set directly the slug when creating or updating a dataset
     # this will break the search indexation
-    slug = db.SlugField(
-        max_length=255, required=True, populate_from="title", update=True, follow=True
+    slug = field(
+        db.SlugField(
+            max_length=255, required=True, populate_from="title", update=True, follow=True
+        ),
+        auditable=False,
     )
-    description = db.StringField(required=True, default="")
-    license = db.ReferenceField("License")
+    description = field(db.StringField(required=True, default=""))
+    license = field(db.ReferenceField("License"))
 
-    tags = db.TagListField()
-    resources = db.ListField(db.EmbeddedDocumentField(Resource))
+    tags = field(db.TagListField())
+    resources = field(db.ListField(db.EmbeddedDocumentField(Resource)), auditable=False)
 
-    private = db.BooleanField(default=False)
-    frequency = db.StringField(choices=list(UPDATE_FREQUENCIES.keys()))
-    frequency_date = db.DateTimeField(verbose_name=_("Future date of update"))
-    temporal_coverage = db.EmbeddedDocumentField(db.DateRange)
-    spatial = db.EmbeddedDocumentField(SpatialCoverage)
-    schema = db.EmbeddedDocumentField(Schema)
+    private = field(db.BooleanField(default=False))
+    frequency = field(db.StringField(choices=list(UPDATE_FREQUENCIES.keys())))
+    frequency_date = field(db.DateTimeField(verbose_name=_("Future date of update")))
+    temporal_coverage = field(db.EmbeddedDocumentField(db.DateRange))
+    spatial = field(db.EmbeddedDocumentField(SpatialCoverage))
+    schema = field(db.EmbeddedDocumentField(Schema))
 
-    ext = db.MapField(db.GenericEmbeddedDocumentField())
-    extras = db.ExtrasField()
-    harvest = db.EmbeddedDocumentField(HarvestDatasetMetadata)
+    ext = field(db.MapField(db.GenericEmbeddedDocumentField()), auditable=False)
+    extras = field(db.ExtrasField(), auditable=False)
+    harvest = field(db.EmbeddedDocumentField(HarvestDatasetMetadata), auditable=False)
 
-    quality_cached = db.DictField()
+    quality_cached = field(db.DictField(), auditable=False)
 
-    featured = db.BooleanField(required=True, default=False)
-
-    contact_points = db.ListField(db.ReferenceField("ContactPoint", reverse_delete_rule=db.PULL))
-
-    created_at_internal = DateTimeField(
-        verbose_name=_("Creation date"), default=datetime.utcnow, required=True
+    featured = field(
+        db.BooleanField(required=True, default=False),
+        auditable=False,
     )
-    last_modified_internal = DateTimeField(
-        verbose_name=_("Last modification date"), default=datetime.utcnow, required=True
+
+    contact_points = field(
+        db.ListField(db.ReferenceField("ContactPoint", reverse_delete_rule=db.PULL))
     )
-    deleted = db.DateTimeField()
-    archived = db.DateTimeField()
+
+    created_at_internal = field(
+        DateTimeField(verbose_name=_("Creation date"), default=datetime.utcnow, required=True),
+        auditable=False,
+    )
+    last_modified_internal = field(
+        DateTimeField(
+            verbose_name=_("Last modification date"), default=datetime.utcnow, required=True
+        ),
+        auditable=False,
+    )
+    deleted = field(db.DateTimeField(), auditable=False)
+    archived = field(db.DateTimeField())
 
     def __str__(self):
         return self.title or ""
@@ -653,18 +666,6 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
         cls.before_save.send(document)
-
-    @classmethod
-    def post_save(cls, sender, document, **kwargs):
-        if "post_save" in kwargs.get("ignores", []):
-            return
-        cls.after_save.send(document)
-        if kwargs.get("created"):
-            cls.on_create.send(document)
-        else:
-            cls.on_update.send(document)
-        if document.deleted:
-            cls.on_delete.send(document)
 
     def clean(self):
         super(Dataset, self).clean()
@@ -1046,19 +1047,19 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         from udata.models import Discussion
 
         self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_reuses(self):
         from udata.models import Reuse
 
         self.metrics["reuses"] = Reuse.objects(datasets=self).visible().count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):
         from udata.models import Follow
 
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
 
 pre_init.connect(Dataset.pre_init, sender=Dataset)
