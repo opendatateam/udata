@@ -1,5 +1,7 @@
 from flask_security import current_user
 
+from udata.core.dataservices.activities import DataserviceRelatedActivity
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.activities import DatasetRelatedActivity
 from udata.core.discussions.signals import on_new_discussion, on_new_discussion_comment
 from udata.core.followers.signals import on_follow
@@ -40,6 +42,11 @@ class UserFollowedUser(FollowActivity, Activity):
     template = "activity/user.html"
 
 
+class UserDiscussedDataservice(DiscussActivity, DataserviceRelatedActivity, Activity):
+    key = "dataservice:discussed"
+    label = _("discussed a dataservice")
+
+
 class UserDiscussedDataset(DiscussActivity, DatasetRelatedActivity, Activity):
     key = "dataset:discussed"
     label = _("discussed a dataset")
@@ -48,6 +55,11 @@ class UserDiscussedDataset(DiscussActivity, DatasetRelatedActivity, Activity):
 class UserDiscussedReuse(DiscussActivity, ReuseRelatedActivity, Activity):
     key = "reuse:discussed"
     label = _("discussed a reuse")
+
+
+class UserFollowedDataservice(FollowActivity, DataserviceRelatedActivity, Activity):
+    key = "dataservice:followed"
+    label = _("followed a dataservice")
 
 
 class UserFollowedDataset(FollowActivity, DatasetRelatedActivity, Activity):
@@ -68,7 +80,9 @@ class UserFollowedOrganization(FollowActivity, OrgRelatedActivity, Activity):
 @on_follow.connect
 def write_activity_on_follow(follow, **kwargs):
     if current_user.is_authenticated:
-        if isinstance(follow.following, Dataset):
+        if isinstance(follow.following, Dataservice):
+            UserFollowedDataservice.emit(follow.following)
+        elif isinstance(follow.following, Dataset):
             UserFollowedDataset.emit(follow.following)
         elif isinstance(follow.following, Reuse):
             UserFollowedReuse.emit(follow.following)
@@ -82,6 +96,8 @@ def write_activity_on_follow(follow, **kwargs):
 @on_new_discussion_comment.connect
 def write_activity_on_discuss(discussion, **kwargs):
     if current_user.is_authenticated:
+        if isinstance(discussion.subject, Dataservice):
+            UserDiscussedDataservice.emit(discussion.subject)
         if isinstance(discussion.subject, Dataset):
             UserDiscussedDataset.emit(discussion.subject)
         elif isinstance(discussion.subject, Reuse):

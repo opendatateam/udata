@@ -8,6 +8,7 @@ from mongoengine.signals import post_save
 import udata.core.contact_point.api_fields as contact_api_fields
 import udata.core.dataset.api_fields as datasets_api_fields
 from udata.api_fields import field, function_field, generate_fields
+from udata.core.activity.models import Auditable
 from udata.core.dataservices.constants import DATASERVICE_ACCESS_TYPES, DATASERVICE_FORMATS
 from udata.core.dataset.models import Dataset
 from udata.core.metrics.models import WithMetrics
@@ -105,7 +106,7 @@ class HarvestMetadata(db.EmbeddedDocument):
         {"key": "views", "value": "metrics.views"},
     ],
 )
-class Dataservice(WithMetrics, Owned, db.Document):
+class Dataservice(Auditable, WithMetrics, Owned, db.Document):
     meta = {
         "indexes": [
             "$title",
@@ -116,6 +117,11 @@ class Dataservice(WithMetrics, Owned, db.Document):
         "queryset_class": DataserviceQuerySet,
         "auto_create_index_on_save": True,
     }
+
+    after_save = Signal()
+    on_create = Signal()
+    on_update = Signal()
+    on_delete = Signal()
 
     verbose_name = _("dataservice")
 
@@ -175,7 +181,10 @@ class Dataservice(WithMetrics, Owned, db.Document):
         description="Is the dataservice private to the owner or the organization",
     )
 
-    extras = field(db.ExtrasField())
+    extras = field(
+        db.ExtrasField(),
+        auditable=False,
+    )
 
     contact_points = field(
         db.ListField(
@@ -201,8 +210,9 @@ class Dataservice(WithMetrics, Owned, db.Document):
         ),
         readonly=True,
         sortable="last_modified",
+        auditable=False,
     )
-    deleted_at = field(db.DateTimeField())
+    deleted_at = field(db.DateTimeField(), auditable=False)
     archived_at = field(db.DateTimeField())
 
     datasets = field(
@@ -223,6 +233,7 @@ class Dataservice(WithMetrics, Owned, db.Document):
     harvest = field(
         db.EmbeddedDocumentField(HarvestMetadata),
         readonly=True,
+        auditable=False,
     )
 
     def url_for(self, *args, **kwargs):
@@ -250,26 +261,11 @@ class Dataservice(WithMetrics, Owned, db.Document):
 
     def count_discussions(self):
         self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
-        self.save()
-
-    on_create = Signal()
-    on_update = Signal()
-    on_delete = Signal()
-
-    @classmethod
-    def post_save(cls, sender, document, **kwargs):
-        if "post_save" in kwargs.get("ignores", []):
-            return
-        if kwargs.get("created"):
-            cls.on_create.send(document)
-        else:
-            cls.on_update.send(document)
-        if document.deleted_at:
-            cls.on_delete.send(document)
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
 
 post_save.connect(Dataservice.post_save, sender=Dataservice)
