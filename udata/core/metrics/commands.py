@@ -61,7 +61,6 @@ def update(
             site.count_max_org_reuses()
             site.count_max_org_datasets()
             site.count_stock_metrics()
-            site.save()
         except Exception as e:
             log.info(f"Error during update: {e}")
 
