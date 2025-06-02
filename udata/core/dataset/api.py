@@ -44,6 +44,7 @@ from udata.core.reuse.models import Reuse
 from udata.core.site.models import current_site
 from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.topic.models import Topic
+from udata.frontend.markdown import md
 from udata.i18n import gettext as _
 from udata.linkchecker.checker import check_resource
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
@@ -301,7 +302,7 @@ class DatasetsAtomFeedAPI(API):
     @api.doc("recent_datasets_atom_feed")
     def get(self):
         feed = Atom1Feed(
-            _("Derniers jeux de données"),
+            _("Latest datasets"),
             description=None,
             feed_url=request.url,
             link=request.url_root,
@@ -323,10 +324,10 @@ class DatasetsAtomFeedAPI(API):
                 dataset.title,
                 unique_id=dataset.id,
                 description=dataset.description,
-                # content=dataset.description, TODO transform to HTML? :FeedContentHtml
+                content=md(dataset.description),
                 author_name=author_name,
                 author_link=author_uri,
-                link=dataset.url_for(external=True),
+                link=dataset.external_url,
                 updateddate=dataset.last_modified,
                 pubdate=dataset.created_at,
             )

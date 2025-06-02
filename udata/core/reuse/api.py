@@ -22,6 +22,7 @@ from udata.core.storages.api import (
     parse_uploaded_image,
     uploaded_image_fields,
 )
+from udata.frontend.markdown import md
 from udata.i18n import gettext as _
 from udata.models import Dataset
 from udata.utils import id_or_404
@@ -138,7 +139,7 @@ class ReusesAtomFeedAPI(API):
     @api.doc("recent_reuses_atom_feed")
     def get(self):
         feed = Atom1Feed(
-            _("Dernières réutilisations"),
+            _("Latests reuses"),
             description=None,
             feed_url=request.url,
             link=request.url_root,
@@ -158,10 +159,10 @@ class ReusesAtomFeedAPI(API):
                 reuse.title,
                 unique_id=reuse.id,
                 description=reuse.description,
-                # content=dataset.description, TODO transform to HTML? :FeedContentHtml
+                content=md(reuse.description),
                 author_name=author_name,
                 author_link=author_uri,
-                link=reuse.url_for(external=True),
+                link=reuse.external_url,
                 updateddate=reuse.last_modified,
                 pubdate=reuse.created_at,
             )

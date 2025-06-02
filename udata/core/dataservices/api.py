@@ -13,6 +13,7 @@ from udata.core.dataservices.permissions import OwnablePermission
 from udata.core.dataset.models import Dataset
 from udata.core.followers.api import FollowAPI
 from udata.core.site.models import current_site
+from udata.frontend.markdown import md
 from udata.i18n import gettext as _
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
 
@@ -58,7 +59,7 @@ class DataservicesAtomFeedAPI(API):
     @api.doc("recent_dataservices_atom_feed")
     def get(self):
         feed = Atom1Feed(
-            _("Dernières APIs"), description=None, feed_url=request.url, link=request.url_root
+            _("Latest APIs"), description=None, feed_url=request.url, link=request.url_root
         )
 
         dataservices: List[Dataservice] = (
@@ -79,10 +80,10 @@ class DataservicesAtomFeedAPI(API):
                 dataservice.title,
                 unique_id=dataservice.id,
                 description=dataservice.description,
-                # content=dataservice.description, TODO transform to HTML? :FeedContentHtml
+                content=md(dataservice.description),
                 author_name=author_name,
                 author_link=author_uri,
-                link=dataservice.self_web_url(),
+                link=dataservice.url_for(external=True),
                 updateddate=dataservice.metadata_modified_at,
                 pubdate=dataservice.created_at,
             )

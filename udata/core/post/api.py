@@ -15,6 +15,7 @@ from udata.core.storages.api import (
     uploaded_image_fields,
 )
 from udata.core.user.api_fields import user_ref_fields
+from udata.frontend.markdown import md
 from udata.i18n import gettext as _
 
 from .forms import PostForm
@@ -115,7 +116,7 @@ class PostsAtomFeedAPI(API):
     @api.doc("recent_posts_atom_feed")
     def get(self):
         feed = Atom1Feed(
-            _("Derniers articles"),
+            _("Latests posts"),
             description=None,
             feed_url=request.url,
             link=request.url_root,
@@ -127,9 +128,9 @@ class PostsAtomFeedAPI(API):
                 post.name,
                 unique_id=post.id,
                 description=post.headline,
-                content=post.content,  # TODO transform to HTML? :FeedContentHtml
+                content=md(post.content),
                 author_name="data.gouv.fr",
-                link=post.url_for(external=True),
+                link=post.external_url,
                 updateddate=post.last_modified,
                 pubdate=post.published,
             )
