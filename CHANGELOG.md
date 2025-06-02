@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+-  Add test for removing last contact point [#3322](https://github.com/opendatateam/udata/pull/3322) 
 - Add activities to dataservices and resources, add Auditable class to refactor improve code [#3308](https://github.com/opendatateam/udata/pull/3308)
 - Store activities for private objects [#3328](https://github.com/opendatateam/udata/pull/3328)
 - Do not crash if file doesn't exists during resource deletion [#3323](https://github.com/opendatateam/udata/pull/3323)
