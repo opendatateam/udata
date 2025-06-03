@@ -2,10 +2,13 @@
 
 ## Current (in progress)
 
+-  Add test for removing last contact point [#3322](https://github.com/opendatateam/udata/pull/3322) 
 - Add activities to dataservices and resources, add Auditable class to refactor improve code [#3308](https://github.com/opendatateam/udata/pull/3308)
 - Store activities for private objects [#3328](https://github.com/opendatateam/udata/pull/3328)
+- :warning: Add migration to clean duplicate activities [#3327](https://github.com/opendatateam/udata/pull/3327)
 - Do not crash if file doesn't exists during resource deletion [#3323](https://github.com/opendatateam/udata/pull/3323)
 - Show user domain in suggest [#3324](https://github.com/opendatateam/udata/pull/3324)
+- Add new global site metrics [#3325](https://github.com/opendatateam/udata/pull/3325)
 - Keep the existing frequency if not found during harvesting [#3330](https://github.com/opendatateam/udata/pull/3330)
 - Migrate atom feeds from udata-front to udata [#3326](https://github.com/opendatateam/udata/pull/3326)
 
