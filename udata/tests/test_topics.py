@@ -1,7 +1,6 @@
 import pytest
 
-from udata.core.dataset.factories import DatasetFactory
-from udata.core.topic.factories import TopicFactory
+from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.search import reindex
 
 
@@ -24,24 +23,23 @@ class TopicModelTest:
     modules = ["admin"]
 
     def test_pre_save(self, job_reindex):
-        topic = TopicFactory(datasets=[])
-        dataset = DatasetFactory()
+        topic = TopicFactory(elements=[])
 
         topic.name = "new_name"
         topic.save()
         job_reindex.assert_not_called()
 
-        topic.datasets = [dataset]
+        topic.elements = [TopicElementDatasetFactory()]
         topic.save()
         job_reindex.assert_called()
 
-        topic.datasets = []
+        topic.elements = []
         topic.save()
         job_reindex.assert_called()
 
     @pytest.mark.options(SEARCH_SERVICE_API_URL="smtg")
     def test_pre_save_reindex(self, job_reindex_undelayed):
         """This will call the real reindex method and thus bubble up errors"""
-        # creates a topic with datasets, thus calls reindex
+        # creates a topic with elements, thus calls reindex
         TopicFactory()
         job_reindex_undelayed.assert_called()
