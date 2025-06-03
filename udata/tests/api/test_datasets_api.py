@@ -3,6 +3,7 @@ from datetime import datetime
 from io import BytesIO
 from uuid import uuid4
 
+import feedparser
 import pytest
 import pytz
 import requests_mock
@@ -1248,6 +1249,58 @@ class DatasetAPITest(APITestCase):
             "url": None,
             "version": None,
         }
+
+
+class DatasetsFeedAPItest(APITestCase):
+    def test_recent_feed(self):
+        datasets = [DatasetFactory(resources=[ResourceFactory()]) for i in range(3)]
+
+        response = self.get(url_for("api.recent_datasets_atom_feed"))
+
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+
+        self.assertEqual(len(feed.entries), len(datasets))
+        for i in range(1, len(feed.entries)):
+            published_date = feed.entries[i].published_parsed
+            prev_published_date = feed.entries[i - 1].published_parsed
+            self.assertGreaterEqual(prev_published_date, published_date)
+
+    def test_recent_feed_owner(self):
+        owner = UserFactory()
+        DatasetFactory(owner=owner, resources=[ResourceFactory()])
+
+        response = self.get(url_for("api.recent_datasets_atom_feed"))
+
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+
+        self.assertEqual(len(feed.entries), 1)
+        entry = feed.entries[0]
+        self.assertEqual(len(entry.authors), 1)
+        author = entry.authors[0]
+        self.assertEqual(author.name, owner.fullname)
+        self.assertEqual(author.href, owner.external_url)
+
+    def test_recent_feed_org(self):
+        owner = UserFactory()
+        org = OrganizationFactory()
+        DatasetFactory(owner=owner, organization=org, resources=[ResourceFactory()])
+
+        response = self.get(url_for("api.recent_datasets_atom_feed"))
+
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+
+        self.assertEqual(len(feed.entries), 1)
+        entry = feed.entries[0]
+        self.assertEqual(len(entry.authors), 1)
+        author = entry.authors[0]
+        self.assertEqual(author.name, org.name)
+        self.assertEqual(author.href, org.external_url)
 
 
 class DatasetBadgeAPITest(APITestCase):

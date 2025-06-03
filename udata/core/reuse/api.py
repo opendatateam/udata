@@ -1,8 +1,10 @@
 from datetime import datetime
+from typing import List
 
 import mongoengine
 from bson.objectid import ObjectId
-from flask import request
+from feedgenerator.django.utils.feedgenerator import Atom1Feed
+from flask import make_response, request
 from flask_login import current_user
 
 from udata.api import API, api, errors
@@ -20,6 +22,8 @@ from udata.core.storages.api import (
     parse_uploaded_image,
     uploaded_image_fields,
 )
+from udata.frontend.markdown import md
+from udata.i18n import gettext as _
 from udata.models import Dataset
 from udata.utils import id_or_404
 
@@ -128,6 +132,43 @@ class ReuseListAPI(API):
         reuse.save()
 
         return patch_and_save(reuse, request), 201
+
+
+@ns.route("/recent.atom", endpoint="recent_reuses_atom_feed")
+class ReusesAtomFeedAPI(API):
+    @api.doc("recent_reuses_atom_feed")
+    def get(self):
+        feed = Atom1Feed(
+            _("Latests reuses"),
+            description=None,
+            feed_url=request.url,
+            link=request.url_root,
+        )
+
+        reuses: List[Reuse] = Reuse.objects.visible().order_by("-created_at").limit(15)
+        for reuse in reuses:
+            author_name = None
+            author_uri = None
+            if reuse.organization:
+                author_name = reuse.organization.name
+                author_uri = reuse.organization.external_url
+            elif reuse.owner:
+                author_name = reuse.owner.fullname
+                author_uri = reuse.owner.external_url
+            feed.add_item(
+                reuse.title,
+                unique_id=reuse.id,
+                description=reuse.description,
+                content=md(reuse.description),
+                author_name=author_name,
+                author_link=author_uri,
+                link=reuse.external_url,
+                updateddate=reuse.last_modified,
+                pubdate=reuse.created_at,
+            )
+        response = make_response(feed.writeString("utf-8"))
+        response.headers["Content-Type"] = "application/atom+xml"
+        return response
 
 
 @ns.route("/<reuse:reuse>/", endpoint="reuse", doc=common_doc)

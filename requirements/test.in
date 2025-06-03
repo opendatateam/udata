@@ -1,6 +1,7 @@
 -r install.in
 -c install.pip
 
+feedparser
 httpretty
 mock
 pytest
