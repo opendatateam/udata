@@ -12,6 +12,7 @@ from udata.core.badges import api as badges_api
 from udata.core.badges.fields import badge_fields
 from udata.core.contact_point.api import ContactPointApiParser
 from udata.core.contact_point.api_fields import contact_point_page_fields
+from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api import DatasetApiParser
 from udata.core.dataset.api_fields import dataset_page_fields
@@ -176,6 +177,16 @@ class DatasetsCsvAPI(API):
         datasets = Dataset.objects(organization=str(org.id)).visible()
         adapter = DatasetCsvAdapter(datasets)
         return csv.stream(adapter, "{0}-datasets".format(org.slug))
+
+
+@ns.route("/<org:org>/dataservices.csv", endpoint="organization_dataservices_csv")
+@api.response(404, "Organization not found")
+@api.response(410, "Organization has been deleted")
+class DataservicesCsv(API):
+    def get(self, org):
+        dataservices = Dataservice.objects(organization=str(org.id)).visible()
+        adapter = DataserviceCsvAdapter(dataservices)
+        return csv.stream(adapter, "{0}-dataservices".format(org.slug))
 
 
 @ns.route("/<org:org>/discussions.csv", endpoint="organization_discussions_csv", doc=common_doc)

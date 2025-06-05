@@ -11,6 +11,7 @@
 - Add new global site metrics [#3325](https://github.com/opendatateam/udata/pull/3325)
 - Keep the existing frequency if not found during harvesting [#3330](https://github.com/opendatateam/udata/pull/3330)
 - Migrate atom feeds from udata-front to udata [#3326](https://github.com/opendatateam/udata/pull/3326)
+- Add organization dataservices catalog route [#3332](https://github.com/opendatateam/udata/pull/3332)
 
 ## 10.4.1 (2025-05-20)
 
