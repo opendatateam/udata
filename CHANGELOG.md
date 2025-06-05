@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 10.4.2 (2025-06-05)
 
 - :warning: Add migration to clean duplicate activities [#3327](https://github.com/opendatateam/udata/pull/3327)
 - Add test for removing last contact point [#3322](https://github.com/opendatateam/udata/pull/3322)
