@@ -10,3 +10,4 @@ def init_app(app):
     import udata.core.dataset.activities  # noqa
     import udata.core.reuse.activities  # noqa
     import udata.core.organization.activities  # noqa
+    import udata.core.topic.activities  # noqa
