@@ -505,7 +505,6 @@ def patch(obj, request) -> type:
         field = obj.__write_fields__.get(key)
         if field is not None and not field.readonly:
             model_attribute = getattr(obj.__class__, key)
-
             if hasattr(model_attribute, "from_input"):
                 value = model_attribute.from_input(value)
             elif isinstance(model_attribute, mongoengine.fields.ListField) and isinstance(
@@ -531,6 +530,14 @@ def patch(obj, request) -> type:
                     value["id"],
                     document_type=db.resolve_model(value["class"]),
                 )
+            elif isinstance(
+                model_attribute,
+                mongoengine.fields.EmbeddedDocumentField,
+            ):
+                embedded_field = model_attribute.document_type()
+                for embedded_key, embedded_value in value.items():
+                    embedded_field[embedded_key] = embedded_value
+                value = embedded_field
 
             info = getattr(model_attribute, "__additional_field_info__", {})
 

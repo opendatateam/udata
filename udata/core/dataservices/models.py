@@ -9,7 +9,7 @@ import udata.core.contact_point.api_fields as contact_api_fields
 import udata.core.dataset.api_fields as datasets_api_fields
 from udata.api_fields import field, function_field, generate_fields
 from udata.core.activity.models import Auditable
-from udata.core.dataservices.constants import DATASERVICE_ACCESS_TYPES, DATASERVICE_FORMATS
+from udata.core.dataservices.constants import DATASERVICE_ACCESS_AUDIENCE_CONDITIONS, DATASERVICE_ACCESS_TYPES, DATASERVICE_FORMATS
 from udata.core.dataset.models import Dataset
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
@@ -98,6 +98,13 @@ class HarvestMetadata(db.EmbeddedDocument):
     archived_reason = field(db.StringField())
 
 
+@generate_fields()
+class AccessAudience(db.EmbeddedDocument):
+    local_authority_and_administration = field(db.StringField(choices=DATASERVICE_ACCESS_AUDIENCE_CONDITIONS), filterable={})
+    company_and_association = field(db.StringField(choices=DATASERVICE_ACCESS_AUDIENCE_CONDITIONS), filterable={})
+    private = field(db.StringField(choices=DATASERVICE_ACCESS_AUDIENCE_CONDITIONS), filterable={})
+
+
 @generate_fields(
     searchable=True,
     additional_filters={"organization_badge": "organization.badges"},
@@ -158,6 +165,8 @@ class Dataservice(Auditable, WithMetrics, Owned, db.Document):
     availability_url = field(db.URLField())
 
     access_type = field(db.StringField(choices=DATASERVICE_ACCESS_TYPES), filterable={})
+    access_audience = field(db.EmbeddedDocumentField(AccessAudience))
+
     authorization_request_url = field(db.URLField())
 
     format = field(db.StringField(choices=DATASERVICE_FORMATS))
