@@ -245,7 +245,11 @@ class PatchTest:
 
 class PatchEmbeddedTest:
     class FakeRequest:
-        json = {"url": URL_RAISE_ERROR, "description": "desc", "embedded": { "title": "embedded title", "description": "d2"}}
+        json = {
+            "url": URL_RAISE_ERROR,
+            "description": "desc",
+            "embedded": {"title": "embedded title", "description": "d2"},
+        }
 
     def test_patch_check(self) -> None:
         fake: Fake = FakeFactory.create()

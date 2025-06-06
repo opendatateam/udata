@@ -9,7 +9,11 @@ import udata.core.contact_point.api_fields as contact_api_fields
 import udata.core.dataset.api_fields as datasets_api_fields
 from udata.api_fields import field, function_field, generate_fields
 from udata.core.activity.models import Auditable
-from udata.core.dataservices.constants import DATASERVICE_ACCESS_AUDIENCE_CONDITIONS, DATASERVICE_ACCESS_TYPES, DATASERVICE_FORMATS
+from udata.core.dataservices.constants import (
+    DATASERVICE_ACCESS_AUDIENCE_CONDITIONS,
+    DATASERVICE_ACCESS_TYPES,
+    DATASERVICE_FORMATS,
+)
 from udata.core.dataset.models import Dataset
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
@@ -100,8 +104,12 @@ class HarvestMetadata(db.EmbeddedDocument):
 
 @generate_fields()
 class AccessAudience(db.EmbeddedDocument):
-    local_authority_and_administration = field(db.StringField(choices=DATASERVICE_ACCESS_AUDIENCE_CONDITIONS), filterable={})
-    company_and_association = field(db.StringField(choices=DATASERVICE_ACCESS_AUDIENCE_CONDITIONS), filterable={})
+    local_authority_and_administration = field(
+        db.StringField(choices=DATASERVICE_ACCESS_AUDIENCE_CONDITIONS), filterable={}
+    )
+    company_and_association = field(
+        db.StringField(choices=DATASERVICE_ACCESS_AUDIENCE_CONDITIONS), filterable={}
+    )
     private = field(db.StringField(choices=DATASERVICE_ACCESS_AUDIENCE_CONDITIONS), filterable={})
 
 
