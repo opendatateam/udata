@@ -530,7 +530,7 @@ def patch(obj, request) -> type:
                     value["id"],
                     document_type=db.resolve_model(value["class"]),
                 )
-            elif isinstance(
+            elif value and isinstance(
                 model_attribute,
                 mongoengine.fields.EmbeddedDocumentField,
             ):
