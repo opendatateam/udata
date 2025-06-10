@@ -170,7 +170,14 @@ class TopicElementsAPI(API):
                     "description": 1,
                     "tags": 1,
                     "extras": 1,
-                    "element": {"class": "$element._cls", "id": "$element._ref.$id"},
+                    # output the element as a dict with class and id, or None if no element
+                    "element": {
+                        "$cond": {
+                            "if": {"$ifNull": ["$element._ref", False]},
+                            "then": {"class": "$element._cls", "id": "$element._ref.$id"},
+                            "else": None,
+                        }
+                    },
                 }
             }
         )
@@ -268,6 +275,7 @@ class TopicElementAPI(API):
     @apiv2.response(404, "Topic not found")
     @apiv2.response(404, "Element not found in topic")
     @apiv2.response(204, "Success")
+    # FIXME: test the marshalling of element in this case
     def put(self, topic, element_id):
         """Update a given element from the given topic"""
         if not TopicEditPermission(topic).can():

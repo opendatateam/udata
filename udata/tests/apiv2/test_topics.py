@@ -321,16 +321,18 @@ class TopicElementsAPITest(APITestCase):
     def test_elements_list(self):
         reuse_elt = TopicElementReuseFactory(tags=["foo", "bar"], extras={"foo": "bar"})
         dataset_elt = TopicElementDatasetFactory(tags=["foo", "bar"], extras={"foo": "bar"})
+        no_elt_elt = TopicElementFactory(tags=["foo", "bar"], extras={"foo": "bar"})
         topic = TopicFactory(
             elements=[
                 dataset_elt,
                 reuse_elt,
+                no_elt_elt,
             ]
         )
         response = self.get(url_for("apiv2.topic_elements", topic=topic))
         assert response.status_code == 200
         data = response.json["data"]
-        assert len(data) == 2
+        assert len(data) == 3
         assert all(_elt["tags"] == ["foo", "bar"] for _elt in data)
         assert all(_elt["extras"] == {"foo": "bar"} for _elt in data)
         assert {"class": "Reuse", "id": str(reuse_elt.element.id)} in [
@@ -339,6 +341,8 @@ class TopicElementsAPITest(APITestCase):
         assert {"class": "Dataset", "id": str(dataset_elt.element.id)} in [
             _elt["element"] for _elt in data
         ]
+        no_elt = next(_elt for _elt in data if not _elt["element"])
+        assert no_elt["element"] is None
 
     def test_elements_list_pagination(self):
         topic = TopicFactory(elements=[TopicElementFactory() for _ in range(DEFAULT_PAGE_SIZE + 1)])
@@ -562,3 +566,28 @@ class TopicElementAPITest(APITestCase):
         assert topic.elements[0].tags == ["baz"]
         assert topic.elements[0].extras == {"foo": "bar"}
         assert topic.elements[0].element.id == dataset.id
+
+    def test_update_element_no_element(self):
+        owner = self.login()
+        topic = TopicFactory(elements=[TopicElementFactory(title="foo")], owner=owner)
+        element = topic.elements[0]
+        response = self.put(
+            url_for("apiv2.topic_element", topic=topic, element_id=element.id),
+            {
+                "title": "bar",
+                "description": "baz",
+                "tags": ["baz"],
+                "extras": {"foo": "bar"},
+                "element": None,
+            },
+        )
+        assert response.status_code == 200
+        assert response.json["title"] == "bar"
+        assert response.json["element"] is None
+        topic.reload()
+        assert len(topic.elements) == 1
+        assert topic.elements[0].title == "bar"
+        assert topic.elements[0].description == "baz"
+        assert topic.elements[0].tags == ["baz"]
+        assert topic.elements[0].extras == {"foo": "bar"}
+        assert topic.elements[0].element is None
