@@ -12,12 +12,12 @@ __all__ = ("Topic", "TopicElement")
 
 
 class TopicElement(db.EmbeddedDocument):
-    id = db.AutoUUIDField(primary_key=True)
-    title = db.StringField(required=False)
-    description = db.StringField(required=False)
-    tags = db.ListField(db.StringField())
-    extras = db.ExtrasField()
-    element = db.GenericReferenceField()
+    id = field(db.AutoUUIDField(primary_key=True))
+    title = field(db.StringField(required=False))
+    description = field(db.StringField(required=False))
+    tags = field(db.ListField(db.StringField()))
+    extras = field(db.ExtrasField())
+    element = field(db.GenericReferenceField())
 
 
 class Topic(db.Datetimed, Auditable, db.Document, Owned):
@@ -30,8 +30,7 @@ class Topic(db.Datetimed, Auditable, db.Document, Owned):
     tags = field(db.ListField(db.StringField()))
     color = field(db.IntField())
 
-    # FIXME: migrate to field()
-    elements = db.EmbeddedDocumentListField(TopicElement)
+    elements = field(db.EmbeddedDocumentListField(TopicElement))
 
     featured = field(db.BooleanField(default=False), auditable=False)
     private = field(db.BooleanField())
