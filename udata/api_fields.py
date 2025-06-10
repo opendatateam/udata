@@ -536,7 +536,7 @@ def patch(obj, request) -> type:
             ):
                 embedded_field = model_attribute.document_type()
                 for embedded_key, embedded_value in value.items():
-                    embedded_field[embedded_key] = embedded_value
+                    setattr(embedded_field, embedded_key, embedded_value)
                 value = embedded_field
 
             info = getattr(model_attribute, "__additional_field_info__", {})
