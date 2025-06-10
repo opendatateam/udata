@@ -4,7 +4,9 @@ from mongoengine.signals import post_save, pre_save
 
 from udata.api_fields import field
 from udata.core.activity.models import Auditable
+from udata.core.dataset.models import Dataset
 from udata.core.owned import Owned, OwnedQuerySet
+from udata.core.reuse.models import Reuse
 from udata.models import SpatialCoverage, db
 from udata.search import reindex
 
@@ -17,7 +19,7 @@ class TopicElement(db.EmbeddedDocument):
     description = field(db.StringField(required=False))
     tags = field(db.ListField(db.StringField()))
     extras = field(db.ExtrasField())
-    element = field(db.GenericReferenceField())
+    element = field(db.GenericReferenceField(choices=[Dataset, Reuse]))
 
 
 class Topic(db.Datetimed, Auditable, db.Document, Owned):
