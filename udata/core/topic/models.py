@@ -1,11 +1,14 @@
+from blinker import Signal
 from flask import url_for
-from mongoengine.signals import pre_save
+from mongoengine.signals import post_save, pre_save
 
+from udata.api_fields import field
+from udata.core.activity.models import Auditable
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.models import SpatialCoverage, db
 from udata.search import reindex
 
-__all__ = ("Topic",)
+__all__ = ("Topic", "TopicElement")
 
 
 class TopicElement(db.EmbeddedDocument):
@@ -17,23 +20,24 @@ class TopicElement(db.EmbeddedDocument):
     element = db.GenericReferenceField()
 
 
-class Topic(db.Document, Owned, db.Datetimed):
-    name = db.StringField(required=True)
-    slug = db.SlugField(
-        max_length=255, required=True, populate_from="name", update=True, follow=True
+class Topic(db.Datetimed, Auditable, db.Document, Owned):
+    name = field(db.StringField(required=True))
+    slug = field(
+        db.SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
+        auditable=False,
     )
-    description = db.StringField()
-    tags = db.ListField(db.StringField())
-    color = db.IntField()
+    description = field(db.StringField())
+    tags = field(db.ListField(db.StringField()))
+    color = field(db.IntField())
 
-    tags = db.ListField(db.StringField())
+    # FIXME: migrate to field()
     elements = db.EmbeddedDocumentListField(TopicElement)
 
-    featured = db.BooleanField(default=False)
-    private = db.BooleanField()
-    extras = db.ExtrasField()
+    featured = field(db.BooleanField(default=False), auditable=False)
+    private = field(db.BooleanField())
+    extras = field(db.ExtrasField(), auditable=False)
 
-    spatial = db.EmbeddedDocumentField(SpatialCoverage)
+    spatial = field(db.EmbeddedDocumentField(SpatialCoverage))
 
     meta = {
         "indexes": [
@@ -48,6 +52,10 @@ class Topic(db.Document, Owned, db.Datetimed):
         "auto_create_index_on_save": True,
         "queryset_class": OwnedQuerySet,
     }
+
+    after_save = Signal()
+    on_create = Signal()
+    on_update = Signal()
 
     def __str__(self):
         return self.name
@@ -88,3 +96,4 @@ class Topic(db.Document, Owned, db.Datetimed):
 
 
 pre_save.connect(Topic.pre_save, sender=Topic)
+post_save.connect(Topic.post_save, sender=Topic)

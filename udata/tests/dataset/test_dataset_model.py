@@ -9,6 +9,14 @@ from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine import post_save
 
 from udata.app import cache
+from udata.core.dataset.activities import (
+    UserAddedResourceToDataset,
+    UserCreatedDataset,
+    UserDeletedDataset,
+    UserRemovedResourceFromDataset,
+    UserUpdatedDataset,
+    UserUpdatedResource,
+)
 from udata.core.dataset.constants import LEGACY_FREQUENCIES, UPDATE_FREQUENCIES
 from udata.core.dataset.exceptions import (
     SchemasCacheUnavailableException,
@@ -349,6 +357,47 @@ class DatasetModelTest:
         assert dataset_without_resources.resources == []
 
         assert dataset_without_resources.resources_len == 0
+
+    def test_dataset_activities(self, api, mocker):
+        # A user must be authenticated for activities to be emitted
+        user = api.login()
+
+        mock_created = mocker.patch.object(UserCreatedDataset, "emit")
+        mock_updated = mocker.patch.object(UserUpdatedDataset, "emit")
+        mock_deleted = mocker.patch.object(UserDeletedDataset, "emit")
+        mock_resource_added = mocker.patch.object(UserAddedResourceToDataset, "emit")
+        mock_resouce_updated = mocker.patch.object(UserUpdatedResource, "emit")
+        mock_resouce_removed = mocker.patch.object(UserRemovedResourceFromDataset, "emit")
+
+        with assert_emit(Dataset.on_create):
+            dataset = DatasetFactory(owner=user)
+            mock_created.assert_called()
+
+        with assert_emit(Dataset.on_update):
+            dataset.title = "new title"
+            dataset.save()
+            mock_updated.assert_called()
+
+        with assert_emit(Dataset.on_resource_added):
+            dataset.add_resource(ResourceFactory())
+            mock_resource_added.assert_called()
+
+        dataset.reload()
+
+        with assert_emit(Dataset.on_resource_updated):
+            resource = dataset.resources[0]
+            resource.description = "New description"
+            dataset.update_resource(resource)
+            mock_resouce_updated.assert_called()
+
+        with assert_emit(Dataset.on_resource_removed):
+            dataset.remove_resource(dataset.resources[-1])
+            mock_resouce_removed.assert_called()
+
+        with assert_emit(Dataset.on_delete):
+            dataset.deleted = datetime.utcnow()
+            dataset.save()
+            mock_deleted.assert_called()
 
 
 class ResourceModelTest:

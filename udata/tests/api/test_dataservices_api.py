@@ -1,6 +1,7 @@
 from datetime import datetime
 from xml.etree.ElementTree import XML
 
+import feedparser
 import pytest
 from flask import url_for
 from werkzeug.test import TestResponse
@@ -627,3 +628,55 @@ class DataserviceRdfViewsTest:
         response = client.get(url, headers={"Accept": mime})
         assert200(response)
         assert response.content_type == mime
+
+
+class DataservicesFeedAPItest(APITestCase):
+    def test_recent_feed(self):
+        dataservices = [DataserviceFactory() for i in range(3)]
+
+        response = self.get(url_for("api.recent_dataservices_atom_feed"))
+
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+
+        self.assertEqual(len(feed.entries), len(dataservices))
+        for i in range(1, len(feed.entries)):
+            published_date = feed.entries[i].published_parsed
+            prev_published_date = feed.entries[i - 1].published_parsed
+            self.assertGreaterEqual(prev_published_date, published_date)
+
+    def test_recent_feed_owner(self):
+        owner = UserFactory()
+        DataserviceFactory(owner=owner)
+
+        response = self.get(url_for("api.recent_dataservices_atom_feed"))
+
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+
+        self.assertEqual(len(feed.entries), 1)
+        entry = feed.entries[0]
+        self.assertEqual(len(entry.authors), 1)
+        author = entry.authors[0]
+        self.assertEqual(author.name, owner.fullname)
+        self.assertEqual(author.href, owner.external_url)
+
+    def test_recent_feed_org(self):
+        owner = UserFactory()
+        org = OrganizationFactory()
+        DataserviceFactory(owner=owner, organization=org)
+
+        response = self.get(url_for("api.recent_dataservices_atom_feed"))
+
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+
+        self.assertEqual(len(feed.entries), 1)
+        entry = feed.entries[0]
+        self.assertEqual(len(entry.authors), 1)
+        author = entry.authors[0]
+        self.assertEqual(author.name, org.name)
+        self.assertEqual(author.href, org.external_url)

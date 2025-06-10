@@ -1,7 +1,9 @@
 from datetime import datetime
+from typing import List
 
 import mongoengine
 from bson import ObjectId
+from feedgenerator.django.utils.feedgenerator import Atom1Feed
 from flask import make_response, redirect, request, url_for
 from flask_login import current_user
 
@@ -10,6 +12,9 @@ from udata.api_fields import patch
 from udata.core.dataservices.permissions import OwnablePermission
 from udata.core.dataset.models import Dataset
 from udata.core.followers.api import FollowAPI
+from udata.core.site.models import current_site
+from udata.frontend.markdown import md
+from udata.i18n import gettext as _
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
 
 from .models import Dataservice
@@ -47,6 +52,44 @@ class DataservicesAPI(API):
 
         dataservice.save()
         return dataservice, 201
+
+
+@ns.route("/recent.atom", endpoint="recent_dataservices_atom_feed")
+class DataservicesAtomFeedAPI(API):
+    @api.doc("recent_dataservices_atom_feed")
+    def get(self):
+        feed = Atom1Feed(
+            _("Latest APIs"), description=None, feed_url=request.url, link=request.url_root
+        )
+
+        dataservices: List[Dataservice] = (
+            Dataservice.objects.visible()
+            .order_by("-created_at_internal")
+            .limit(current_site.feed_size)
+        )
+        for dataservice in dataservices:
+            author_name = None
+            author_uri = None
+            if dataservice.organization:
+                author_name = dataservice.organization.name
+                author_uri = dataservice.organization.external_url
+            elif dataservice.owner:
+                author_name = dataservice.owner.fullname
+                author_uri = dataservice.owner.external_url
+            feed.add_item(
+                dataservice.title,
+                unique_id=dataservice.id,
+                description=dataservice.description,
+                content=md(dataservice.description),
+                author_name=author_name,
+                author_link=author_uri,
+                link=dataservice.url_for(external=True),
+                updateddate=dataservice.metadata_modified_at,
+                pubdate=dataservice.created_at,
+            )
+        response = make_response(feed.writeString("utf-8"))
+        response.headers["Content-Type"] = "application/atom+xml"
+        return response
 
 
 @ns.route("/<dataservice:dataservice>/", endpoint="dataservice")

@@ -1,7 +1,10 @@
 import pytest
 
+from udata.core.topic.activities import UserCreatedTopic, UserUpdatedTopic
 from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
+from udata.core.topic.models import Topic
 from udata.search import reindex
+from udata.tests.helpers import assert_emit
 
 
 @pytest.fixture
@@ -43,3 +46,19 @@ class TopicModelTest:
         # creates a topic with elements, thus calls reindex
         TopicFactory()
         job_reindex_undelayed.assert_called()
+
+    def test_topic_activities(self, api, mocker):
+        # A user must be authenticated for activities to be emitted
+        user = api.login()
+
+        mock_created = mocker.patch.object(UserCreatedTopic, "emit")
+        mock_updated = mocker.patch.object(UserUpdatedTopic, "emit")
+
+        with assert_emit(Topic.on_create):
+            topic = TopicFactory(owner=user)
+            mock_created.assert_called()
+
+        with assert_emit(Topic.on_update):
+            topic.name = "new name"
+            topic.save()
+            mock_updated.assert_called()
