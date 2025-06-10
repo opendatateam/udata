@@ -443,23 +443,42 @@ class TopicElementsAPITest(APITestCase):
                     "extras": {"extra": "value"},
                     "element": {"class": "Reuse", "id": reuse.id},
                 },
+                {
+                    "title": "An element without element",
+                    "description": "An element description",
+                    "tags": ["tag1", "tag2"],
+                    "extras": {"extra": "value"},
+                    "element": None,
+                },
             ],
         )
         assert response.status_code == 201
         topic.reload()
-        assert len(topic.elements) == 5
+        assert len(topic.elements) == 6
 
-        dataset_elt = next(elt for elt in topic.elements if elt.element.id == dataset.id)
+        dataset_elt = next(
+            elt for elt in topic.elements if elt.element and elt.element.id == dataset.id
+        )
         assert dataset_elt.title == "A dataset"
         assert dataset_elt.description == "A dataset description"
         assert dataset_elt.tags == ["tag1", "tag2"]
         assert dataset_elt.extras == {"extra": "value"}
 
-        reuse_elt = next(elt for elt in topic.elements if elt.element.id == reuse.id)
+        reuse_elt = next(
+            elt for elt in topic.elements if elt.element and elt.element.id == reuse.id
+        )
         assert reuse_elt.title == "A reuse"
         assert reuse_elt.description == "A reuse description"
         assert reuse_elt.tags == ["tag1", "tag2"]
         assert reuse_elt.extras == {"extra": "value"}
+
+        no_elt_elt = next(
+            elt for elt in topic.elements if elt.title == "An element without element"
+        )
+        assert no_elt_elt.description == "An element description"
+        assert no_elt_elt.tags == ["tag1", "tag2"]
+        assert no_elt_elt.extras == {"extra": "value"}
+        assert no_elt_elt.element is None
 
     def test_add_element_wrong_class(self):
         owner = self.login()
