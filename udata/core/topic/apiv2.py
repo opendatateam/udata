@@ -251,7 +251,7 @@ class TopicElementsAPI(API):
         """Delete all elements from a Topic
 
         This a workaround for https://github.com/kvesteri/wtforms-json/issues/43
-        -> we can't use POST /api/2/topics/ with an empty list of elements
+        -> we can't use PUT /api/2/topics/ with an empty list of elements
         """
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
