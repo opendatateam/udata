@@ -250,20 +250,6 @@ class TopicAPITest(APITestCase):
         response = self.put(url_for("apiv2.topic", topic=topic), data)
         self.assert403(response)
 
-    # FIXME: ok to remove the feature?
-    @pytest.mark.skip(reason="Not implemented anymore")
-    def test_topic_api_clear_elements(self):
-        """It should remove all elements if set to None"""
-        owner = self.login()
-        topic = TopicFactory(owner=owner)
-        self.assertGreater(len(topic.elements), 0)
-        data = topic.to_dict()
-        data["elements"] = None
-        response = self.put(url_for("apiv2.topic", topic=topic), data)
-        self.assert200(response)
-        topic.reload()
-        self.assertEqual(len(topic.elements), 0)
-
     def test_topic_api_update_with_elements(self):
         """It should update a topic from the API with elements parameters"""
         user = self.login()
@@ -522,6 +508,16 @@ class TopicElementsAPITest(APITestCase):
         assert response.status_code == 400
         response = self.post(url_for("apiv2.topic_elements", topic=topic), {"non": "mais"})
         assert response.status_code == 400
+
+    def test_clear_elements(self):
+        """It should remove all elements from a Topic"""
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        self.assertGreater(len(topic.elements), 0)
+        response = self.delete(url_for("apiv2.topic_elements", topic=topic))
+        self.assert204(response)
+        topic.reload()
+        self.assertEqual(len(topic.elements), 0)
 
 
 class TopicElementAPITest(APITestCase):
