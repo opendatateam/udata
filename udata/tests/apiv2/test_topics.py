@@ -385,14 +385,22 @@ class TopicElementsAPITest(APITestCase):
         reuse_elt = TopicElementReuseFactory()
         no_elt = TopicElementFactory()
         topic = TopicFactory(elements=[dataset_elt, reuse_elt, no_elt])
+
         response = self.get(url_for("apiv2.topic_elements", topic=topic, **{"class": "Dataset"}))
         assert response.status_code == 200
         assert response.json["total"] == 1
         assert str(dataset_elt.id) == response.json["data"][0]["id"]
+
         response = self.get(url_for("apiv2.topic_elements", topic=topic, **{"class": "Reuse"}))
         assert response.status_code == 200
         assert response.json["total"] == 1
         assert str(reuse_elt.id) == response.json["data"][0]["id"]
+
+        response = self.get(url_for("apiv2.topic_elements", topic=topic, **{"class": "None"}))
+        assert response.status_code == 200
+        assert response.json["total"] == 1
+        assert str(no_elt.id) == response.json["data"][0]["id"]
+
         response = self.get(url_for("apiv2.topic_elements", topic=topic, **{"class": "NotAModel"}))
         assert response.status_code == 200
         assert response.json["total"] == 0

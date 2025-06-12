@@ -149,7 +149,10 @@ class TopicElementsAPI(API):
             previous_page += f"&q={args['q']}"
 
         if element_class:
-            pipeline.append({"$match": {"element._cls": element_class}})
+            if element_class != "None":
+                pipeline.append({"$match": {"element._cls": element_class}})
+            else:
+                pipeline.append({"$match": {"element": None}})
             next_page += f"&class={element_class}"
             previous_page += f"&class={element_class}"
 
