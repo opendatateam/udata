@@ -348,7 +348,6 @@ def init_app(app):
     import udata.core.reports.api  # noqa
     import udata.core.site.api  # noqa
     import udata.core.tags.api  # noqa
-    import udata.core.topic.api  # noqa
     import udata.core.topic.apiv2  # noqa
     import udata.core.post.api  # noqa
     import udata.core.contact_point.api  # noqa
