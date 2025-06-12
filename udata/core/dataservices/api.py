@@ -122,7 +122,7 @@ class DataserviceAPI(API):
         if len(roles) != len(access_audiences):
             api.abort(
                 400,
-                f"You can't define multiple conditions for the same role",
+                "You can't define multiple conditions for the same role",
             )
         patch(dataservice, request)
         dataservice.metadata_modified_at = datetime.utcnow()
