@@ -117,6 +117,13 @@ class DataserviceAPI(API):
 
         OwnablePermission(dataservice).test()
 
+        access_audiences = request.json.get("access_audiences", [])
+        roles = set(e["role"] for e in access_audiences)
+        if len(roles) != len(access_audiences):
+            api.abort(
+                400,
+                f"You can't define multiple conditions for the same role",
+            )
         patch(dataservice, request)
         dataservice.metadata_modified_at = datetime.utcnow()
 
