@@ -105,9 +105,7 @@ class HarvestMetadata(db.EmbeddedDocument):
 
 @generate_fields()
 class AccessAudience(db.EmbeddedDocument):
-    role = field(
-        db.StringField(choices=DATASERVICE_ACCESS_AUDIENCE_TYPES), filterable={}
-    )
+    role = field(db.StringField(choices=DATASERVICE_ACCESS_AUDIENCE_TYPES), filterable={})
     condition = field(db.StringField(choices=DATASERVICE_ACCESS_AUDIENCE_CONDITIONS), filterable={})
 
 
