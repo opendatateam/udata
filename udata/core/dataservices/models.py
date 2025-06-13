@@ -20,6 +20,7 @@ from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
 from udata.models import Discussion, Follow, db
+from udata.mongo.errors import FieldValidationError
 from udata.uris import endpoint_for
 
 # "frequency"
@@ -109,6 +110,12 @@ class AccessAudience(db.EmbeddedDocument):
     condition = field(db.StringField(choices=DATASERVICE_ACCESS_AUDIENCE_CONDITIONS), filterable={})
 
 
+def check_only_one_condition_per_role(access_audiences, **_kwargs):
+    roles = set(e["role"] for e in access_audiences)
+    if len(roles) != len(access_audiences):
+        raise FieldValidationError(_("You can only set one condition for a given access audience role"), field="access_audiences")
+
+
 @generate_fields(
     searchable=True,
     additional_filters={"organization_badge": "organization.badges"},
@@ -169,7 +176,10 @@ class Dataservice(Auditable, WithMetrics, Owned, db.Document):
     availability_url = field(db.URLField())
 
     access_type = field(db.StringField(choices=DATASERVICE_ACCESS_TYPES), filterable={})
-    access_audiences = field(db.EmbeddedDocumentListField(AccessAudience))
+    access_audiences = field(
+        db.EmbeddedDocumentListField(AccessAudience),
+        checks=[check_only_one_condition_per_role],
+    )
 
     authorization_request_url = field(db.URLField())
 
