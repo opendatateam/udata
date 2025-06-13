@@ -599,6 +599,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
     __metrics_keys__ = [
         "discussions",
         "reuses",
+        "dataservices",
         "followers",
         "views",
         "resources_downloads",
@@ -610,6 +611,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             "created_at_internal",
             "last_modified_internal",
             "metrics.reuses",
+            "metrics.dataservices",
             "metrics.followers",
             "metrics.views",
             "slug",
@@ -1053,6 +1055,12 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         from udata.models import Reuse
 
         self.metrics["reuses"] = Reuse.objects(datasets=self).visible().count()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
+
+    def count_dataservices(self):
+        from udata.core.dataservices.models import Dataservice
+
+        self.metrics["dataservices"] = Dataservice.objects(datasets=self).visible().count()
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):
