@@ -810,19 +810,19 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         delta = None
         if self.frequency == "hourly":
             delta = timedelta(hours=1)
-        elif self.frequency in ["fourTimesADay", "threeTimesADay", "semidaily", "daily"]:
+        elif self.frequency in ["cont", "daily_2", "daily"]:
             delta = timedelta(days=1)
-        elif self.frequency in ["fourTimesAWeek", "threeTimesAWeek", "semiweekly", "weekly"]:
+        elif self.frequency in ["weekly_5", "weekly_3", "weekly_2", "weekly"]:
             delta = timedelta(weeks=1)
         elif self.frequency == "biweekly":
             delta = timedelta(weeks=2)
-        elif self.frequency in ["threeTimesAMonth", "semimonthly", "monthly"]:
+        elif self.frequency in ["monthly_3", "monthly_2", "monthly"]:
             delta = timedelta(days=31)
         elif self.frequency == "bimonthly":
             delta = timedelta(days=31 * 2)
         elif self.frequency == "quarterly":
             delta = timedelta(days=365 / 4)
-        elif self.frequency in ["threeTimesAYear", "semiannual", "annual"]:
+        elif self.frequency in ["annual_3", "annual_2", "annual"]:
             delta = timedelta(days=365)
         elif self.frequency == "biennial":
             delta = timedelta(days=365 * 2)
@@ -830,6 +830,8 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             delta = timedelta(days=365 * 3)
         elif self.frequency == "quinquennial":
             delta = timedelta(days=365 * 5)
+        elif self.frequency == "decennial":
+            delta = timedelta(days=365 * 10)
         if delta is None:
             return
         else:
@@ -852,7 +854,14 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             # Allow for being one day late on update.
             # We may have up to one day delay due to harvesting for example
             quality["update_fulfilled_in_time"] = (next_update - datetime.utcnow()).days >= -1
-        elif self.frequency in ["continuous", "irregular", "punctual"]:
+        elif self.frequency in [
+            "other",
+            "never",
+            "not_planned",
+            "as_needed",
+            "irreg",
+            "update_cont",
+        ]:
             # For these frequencies, we don't expect regular updates or can't quantify them.
             # Thus we consider the update_fulfilled_in_time quality criterion to be true.
             quality["update_fulfilled_in_time"] = True

@@ -29,7 +29,6 @@ from udata.rdf import (
     DCT,
     EUFORMAT,
     EUFREQ,
-    FREQ,
     GEODCAT,
     HVD_LEGISLATION,
     IANAFORMAT,
@@ -57,47 +56,21 @@ from .models import Checksum, Dataset, License, Resource
 
 log = logging.getLogger(__name__)
 
-# Map extra frequencies (ie. not defined in Dublin Core) to closest equivalent
+# Map extra frequencies (ie. not defined in EU vocabulary) to closest equivalent
+# FIXME: Redundant with LEGACY_FREQUENCIES?
 RDF_FREQUENCIES = {
-    "punctual": None,
-    "hourly": FREQ.continuous,
-    "fourTimesADay": FREQ.daily,
-    "threeTimesADay": FREQ.daily,
-    "semidaily": FREQ.daily,
-    "fourTimesAWeek": FREQ.threeTimesAWeek,
-    "quinquennial": None,
-    "unknown": None,
-}
-
-# Map european frequencies to their closest equivalent
-# See:
-#  - http://publications.europa.eu/mdr/resource/authority/frequency/html/frequencies-eng.html # noqa: E501
-#  - https://publications.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/frequency # noqa: E501
-EU_RDF_REQUENCIES = {
-    # Match Dublin Core name
-    EUFREQ.ANNUAL: "annual",
-    EUFREQ.BIENNIAL: "biennial",
-    EUFREQ.TRIENNIAL: "triennial",
-    EUFREQ.QUARTERLY: "quarterly",
-    EUFREQ.MONTHLY: "monthly",
-    EUFREQ.BIMONTHLY: "bimonthly",
-    EUFREQ.WEEKLY: "weekly",
-    EUFREQ.BIWEEKLY: "biweekly",
-    EUFREQ.DAILY: "daily",
-    # Name differs from Dublin Core
-    EUFREQ.ANNUAL_2: "semiannual",
-    EUFREQ.ANNUAL_3: "threeTimesAYear",
-    EUFREQ.MONTHLY_2: "semimonthly",
-    EUFREQ.MONTHLY_3: "threeTimesAMonth",
-    EUFREQ.WEEKLY_2: "semiweekly",
-    EUFREQ.WEEKLY_3: "threeTimesAWeek",
-    EUFREQ.DAILY_2: "semidaily",
-    EUFREQ.CONT: "continuous",
-    EUFREQ.UPDATE_CONT: "continuous",
-    EUFREQ.IRREG: "irregular",
-    EUFREQ.UNKNOWN: "unknown",
-    EUFREQ.OTHER: "unknown",
-    EUFREQ.NEVER: "punctual",
+    "punctual": EUFREQ.as_needed,
+    "irregular": EUFREQ.irreg,
+    "continuous": EUFREQ.update_cont,
+    "fourTimesADay": EUFREQ.cont,
+    "threeTimesADay": EUFREQ.cont,
+    "semidaily": EUFREQ.daily_2,
+    "threeTimesAWeek": EUFREQ.weekly_3,
+    "semiweekly": EUFREQ.weekly_2,
+    "threeTimesAMonth": EUFREQ.monthly_3,
+    "semimonthly": EUFREQ.montly_2,
+    "threeTimesAYear": EUFREQ.annual_3,
+    "semiannual": EUFREQ.annual_2,
 }
 
 
@@ -118,7 +91,10 @@ def temporal_to_rdf(
 def frequency_to_rdf(frequency: str, graph: Optional[Graph] = None) -> Optional[str]:
     if not frequency:
         return
-    return RDF_FREQUENCIES.get(frequency, getattr(FREQ, frequency))
+    # FIXME: Do we want to map to FREQ (if possible) then EUFREQ?
+    # FIXME: Uppercase unless done in UPDATE_FREQUENCIES (see FIXME there)
+    # FIXME: Fallback on FREQ/EUFREQ.$frequency creates invalid URI, ok?
+    return RDF_FREQUENCIES.get(frequency, getattr(EUFREQ, frequency))
 
 
 def owner_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> Optional[RdfResource]:
@@ -552,11 +528,12 @@ def frequency_from_rdf(term):
     if isinstance(term, RdfResource):
         term = term.identifier
     if isinstance(term, URIRef):
-        if EUFREQ in term:
-            return EU_RDF_REQUENCIES.get(term)
-        _, _, freq = namespace_manager.compute_qname(term)
-        if freq.lower() in UPDATE_FREQUENCIES:
-            return freq.lower()
+        freq = namespace_manager.compute_qname(term)[2].lower()
+        if freq in UPDATE_FREQUENCIES:
+            return freq
+        # FIXME: Do we want to restrict to `FREQ in term`?
+        if equiv := RDF_FREQUENCIES.get(freq):
+            return namespace_manager.compute_qname(equiv)[2]
 
 
 def mime_from_rdf(resource):
