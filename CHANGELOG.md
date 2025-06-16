@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add access audience to dataservices [#3334](https://github.com/opendatateam/udata/pull/3334)
+- Fix old references errors in HarvestItem [#3339](https://github.com/opendatateam/udata/pull/3339)
 
 ## 10.4.2 (2025-06-05)
 
