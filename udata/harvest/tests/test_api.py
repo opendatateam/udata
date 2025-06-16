@@ -5,6 +5,7 @@ import pytest
 from flask import url_for
 from pytest_mock import MockerFixture
 
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.models import Member, PeriodicTask
@@ -17,10 +18,11 @@ from ..models import (
     VALIDATION_ACCEPTED,
     VALIDATION_PENDING,
     VALIDATION_REFUSED,
+    HarvestItem,
     HarvestSource,
     HarvestSourceValidation,
 )
-from .factories import HarvestSourceFactory, MockBackendsMixin
+from .factories import HarvestJobFactory, HarvestSourceFactory, MockBackendsMixin
 
 log = logging.getLogger(__name__)
 
@@ -645,3 +647,41 @@ class HarvestAPITest(MockBackendsMixin):
 
         source.reload()
         assert source.periodic_task is not None
+
+    def test_get_jobs(self, api):
+        api.login()
+        dataset = DatasetFactory()
+
+        source = HarvestSourceFactory()
+        job = HarvestJobFactory(source=source, items=[HarvestItem(dataset=dataset)])
+
+        response = api.get(url_for("api.harvest_jobs", ident=str(source.id)))
+        assert200(response)
+        print(response.json)
+        assert len(response.json["data"]) == 1
+
+        fetched_job = response.json["data"][0]
+        assert fetched_job["id"] == str(job.id)
+
+        assert len(fetched_job["items"]) == 1
+        assert fetched_job["items"][0]["dataset"]["id"] == str(dataset.id)
+
+    def test_get_jobs_with_deleted_dataset(self, api):
+        api.login()
+        dataset = DatasetFactory()
+
+        source = HarvestSourceFactory()
+        job = HarvestJobFactory(source=source, items=[HarvestItem(dataset=dataset)])
+
+        dataset.delete()
+
+        response = api.get(url_for("api.harvest_jobs", ident=str(source.id)))
+        assert200(response)
+        print(response.json)
+        assert len(response.json["data"]) == 1
+
+        fetched_job = response.json["data"][0]
+        assert fetched_job["id"] == str(job.id)
+
+        assert len(fetched_job["items"]) == 1
+        assert fetched_job["items"][0]["dataset"] is None
