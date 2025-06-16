@@ -16,6 +16,7 @@ from udata.core.dataservices.constants import (
     DATASERVICE_FORMATS,
 )
 from udata.core.dataset.models import Dataset
+from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
@@ -278,6 +279,7 @@ class Dataservice(Auditable, WithMetrics, Owned, db.Document):
     __metrics_keys__ = [
         "discussions",
         "followers",
+        "followers_by_months",
         "views",
     ]
 
@@ -291,6 +293,7 @@ class Dataservice(Auditable, WithMetrics, Owned, db.Document):
 
     def count_followers(self):
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
+        self.metrics["followers_by_months"] = get_stock_metrics(Follow.objects(following=self), date_label='since')
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
 

@@ -20,6 +20,7 @@ from udata.api_fields import field
 from udata.app import cache
 from udata.core import storages
 from udata.core.activity.models import Auditable
+from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -599,7 +600,9 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
     __metrics_keys__ = [
         "discussions",
         "reuses",
+        "reuses_by_months",
         "followers",
+        "followers_by_months",
         "views",
         "resources_downloads",
     ]
@@ -1053,12 +1056,14 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         from udata.models import Reuse
 
         self.metrics["reuses"] = Reuse.objects(datasets=self).visible().count()
+        self.metrics["reuses_by_months"] = get_stock_metrics(Reuse.objects(datasets=self).visible())
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):
         from udata.models import Follow
 
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
+        self.metrics["followers_by_months"] = get_stock_metrics(Follow.objects(following=self), date_label='since')
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
 
