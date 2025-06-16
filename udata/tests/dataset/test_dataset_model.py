@@ -83,6 +83,8 @@ class DatasetModelTest:
             dataset.add_resource(resource_b)
 
     def test_add_two_resources_with_different_id_in_parallel(self):
+        # Test that we correctly retry if we have a modification (another `add_resource`
+        # with different ID) during `add_resource`
         user = UserFactory()
         dataset = DatasetFactory(owner=user)
         resource_a = ResourceFactory(title="resource_a", id=uuid4())
