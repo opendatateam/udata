@@ -58,7 +58,14 @@ UNWANTED_KEYS: dict[str, list[str]] = {
     ],
     "resource": ["latest", "preview_url", "last_modified"],
     "organization": ["class", "page", "uri", "logo_thumbnail"],
-    "reuse": ["datasets", "image_thumbnail", "page", "uri", "owner"],
+    "reuse": [
+        "datasets",
+        "image_thumbnail",
+        "page",
+        "uri",
+        "owner",
+        "permissions",
+    ],
     "community": [
         "dataset",
         "owner",

@@ -16,6 +16,7 @@ from udata.mongo.errors import FieldValidationError
 from udata.uris import endpoint_for
 from udata.utils import hash_url
 
+from .api_fields import reuse_permissions_fields
 from .constants import IMAGE_MAX_SIZE, IMAGE_SIZES, REUSE_TOPICS, REUSE_TYPES
 
 __all__ = ("Reuse",)
@@ -199,6 +200,18 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Owned, db.Doc
         return endpoint_for(
             "reuses.show", reuse=self, _external=True, fallback_endpoint="api.reuse"
         )
+
+    @property
+    @function_field(
+        nested_fields=reuse_permissions_fields,
+    )
+    def permissions(self):
+        from .permissions import ReuseEditPermission
+
+        return {
+            "delete": ReuseEditPermission(self),
+            "edit": ReuseEditPermission(self),
+        }
 
     @property
     def is_visible(self):
