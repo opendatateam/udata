@@ -20,6 +20,7 @@ from .api_fields import (
     checksum_fields,
     dataset_harvest_fields,
     dataset_internal_fields,
+    dataset_permissions_fields,
     org_ref_fields,
     resource_fields,
     resource_harvest_fields,
@@ -69,6 +70,7 @@ DEFAULT_MASK_APIV2 = ",".join(
         "internal",
         "contact_points",
         "featured",
+        "permissions",
     )
 )
 
@@ -223,6 +225,7 @@ dataset_fields = apiv2.model(
             required=False,
             description="The dataset contact points",
         ),
+        "permissions": fields.Nested(dataset_permissions_fields),
     },
     mask=DEFAULT_MASK_APIV2,
 )

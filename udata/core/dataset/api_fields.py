@@ -295,6 +295,7 @@ DEFAULT_MASK = ",".join(
         "internal",
         "contact_points",
         "featured",
+        "permissions",
     )
 )
 
