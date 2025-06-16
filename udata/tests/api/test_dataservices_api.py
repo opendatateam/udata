@@ -132,13 +132,16 @@ class DataserviceAPITest(APITestCase):
                     "foo": "bar",
                 },
                 "access_type": DATASERVICE_ACCESS_TYPE_RESTRICTED,
-                "access_audiences": [ {
-                    "role": DATASERVICE_ACCESS_AUDIENCE_ADMINISTRATION,
-                    "condition": DATASERVICE_ACCESS_AUDIENCE_YES,
-                }, {
-                    "role": DATASERVICE_ACCESS_AUDIENCE_COMPANY,
-                    "condition": DATASERVICE_ACCESS_AUDIENCE_UNDER_CONDITIONS,
-                } ]
+                "access_audiences": [
+                    {
+                        "role": DATASERVICE_ACCESS_AUDIENCE_ADMINISTRATION,
+                        "condition": DATASERVICE_ACCESS_AUDIENCE_YES,
+                    },
+                    {
+                        "role": DATASERVICE_ACCESS_AUDIENCE_COMPANY,
+                        "condition": DATASERVICE_ACCESS_AUDIENCE_UNDER_CONDITIONS,
+                    },
+                ],
             },
         )
         self.assert200(response)
@@ -154,10 +157,19 @@ class DataserviceAPITest(APITestCase):
         )
         self.assertEqual(response.json["access_type"], DATASERVICE_ACCESS_TYPE_RESTRICTED)
         self.assertEqual(len(response.json["access_audiences"]), 2)
-        self.assertEqual(response.json["access_audiences"][0]["role"], DATASERVICE_ACCESS_AUDIENCE_ADMINISTRATION)
-        self.assertEqual(response.json["access_audiences"][0]["condition"], DATASERVICE_ACCESS_AUDIENCE_YES)
-        self.assertEqual(response.json["access_audiences"][1]["role"], DATASERVICE_ACCESS_AUDIENCE_COMPANY)
-        self.assertEqual(response.json["access_audiences"][1]["condition"], DATASERVICE_ACCESS_AUDIENCE_UNDER_CONDITIONS)
+        self.assertEqual(
+            response.json["access_audiences"][0]["role"], DATASERVICE_ACCESS_AUDIENCE_ADMINISTRATION
+        )
+        self.assertEqual(
+            response.json["access_audiences"][0]["condition"], DATASERVICE_ACCESS_AUDIENCE_YES
+        )
+        self.assertEqual(
+            response.json["access_audiences"][1]["role"], DATASERVICE_ACCESS_AUDIENCE_COMPANY
+        )
+        self.assertEqual(
+            response.json["access_audiences"][1]["condition"],
+            DATASERVICE_ACCESS_AUDIENCE_UNDER_CONDITIONS,
+        )
         # metadata_modified_at should have been updated during the patch
         self.assertNotEqual(
             response.json["metadata_modified_at"].split("+")[0],
@@ -578,18 +590,21 @@ class DataserviceAPITest(APITestCase):
                 "title": "My title",
                 "base_api_url": "https://example.org",
                 "access_type": DATASERVICE_ACCESS_TYPE_RESTRICTED,
-                "access_audiences": [ {
-                    "role": DATASERVICE_ACCESS_AUDIENCE_ADMINISTRATION,
-                    "condition": DATASERVICE_ACCESS_AUDIENCE_YES,
-                }, {
-                    "role": DATASERVICE_ACCESS_AUDIENCE_ADMINISTRATION,
-                    "condition": DATASERVICE_ACCESS_AUDIENCE_UNDER_CONDITIONS,
-                } ]
+                "access_audiences": [
+                    {
+                        "role": DATASERVICE_ACCESS_AUDIENCE_ADMINISTRATION,
+                        "condition": DATASERVICE_ACCESS_AUDIENCE_YES,
+                    },
+                    {
+                        "role": DATASERVICE_ACCESS_AUDIENCE_ADMINISTRATION,
+                        "condition": DATASERVICE_ACCESS_AUDIENCE_UNDER_CONDITIONS,
+                    },
+                ],
             },
         )
         self.assert400(response)
         self.assertEqual(Dataservice.objects.count(), 0)
-    
+
     def test_dataservice_api_multiple_conditions_for_a_role(self):
         """It shouldn't update the dataservice with multiple conditions for the same role"""
         user = self.login()
@@ -599,18 +614,20 @@ class DataserviceAPITest(APITestCase):
 
         data = dataservice.to_dict()
         data["access_type"] = DATASERVICE_ACCESS_TYPE_RESTRICTED
-        data["access_audiences"] = [ {
-            "role": DATASERVICE_ACCESS_AUDIENCE_ADMINISTRATION,
-            "condition": DATASERVICE_ACCESS_AUDIENCE_YES,
-        }, {
-            "role": DATASERVICE_ACCESS_AUDIENCE_ADMINISTRATION,
-            "condition": DATASERVICE_ACCESS_AUDIENCE_UNDER_CONDITIONS,
-        } ]
+        data["access_audiences"] = [
+            {
+                "role": DATASERVICE_ACCESS_AUDIENCE_ADMINISTRATION,
+                "condition": DATASERVICE_ACCESS_AUDIENCE_YES,
+            },
+            {
+                "role": DATASERVICE_ACCESS_AUDIENCE_ADMINISTRATION,
+                "condition": DATASERVICE_ACCESS_AUDIENCE_UNDER_CONDITIONS,
+            },
+        ]
         response = self.patch(url_for("api.dataservice", dataservice=dataservice), data)
         self.assert400(response)
         self.assertEqual(Dataservice.objects.count(), 1)
 
-    
     def test_dataservice_api_update_org(self):
         """It shouldn't update the dataservice org"""
         user = self.login()

@@ -113,7 +113,10 @@ class AccessAudience(db.EmbeddedDocument):
 def check_only_one_condition_per_role(access_audiences, **_kwargs):
     roles = set(e["role"] for e in access_audiences)
     if len(roles) != len(access_audiences):
-        raise FieldValidationError(_("You can only set one condition for a given access audience role"), field="access_audiences")
+        raise FieldValidationError(
+            _("You can only set one condition for a given access audience role"),
+            field="access_audiences",
+        )
 
 
 @generate_fields(
