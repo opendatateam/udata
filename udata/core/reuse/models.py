@@ -6,7 +6,7 @@ from udata.api_fields import field, function_field, generate_fields
 from udata.core.activity.models import Auditable
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.owned import Owned, OwnedQuerySet
-from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE
+from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE, reuse_permissions_fields
 from udata.core.storages import default_image_basename, images
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -16,7 +16,6 @@ from udata.mongo.errors import FieldValidationError
 from udata.uris import endpoint_for
 from udata.utils import hash_url
 
-from .api_fields import reuse_permissions_fields
 from .constants import IMAGE_MAX_SIZE, IMAGE_SIZES, REUSE_TOPICS, REUSE_TYPES
 
 __all__ = ("Reuse",)

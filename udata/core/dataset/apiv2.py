@@ -271,6 +271,7 @@ apiv2.inherit("ResourceInternals", resource_internal_fields)
 apiv2.inherit("ContactPoint", contact_point_fields)
 apiv2.inherit("Schema", schema_fields)
 apiv2.inherit("CatalogSchema", catalog_schema_fields)
+apiv2.inherit("DatasetPermissions", dataset_permissions_fields)
 
 
 @ns.route("/search/", endpoint="dataset_search")
