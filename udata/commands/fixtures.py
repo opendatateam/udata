@@ -77,6 +77,7 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "owner",
         "self_api_url",
         "self_web_url",
+        "permissions",
     ],
 }
 
