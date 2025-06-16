@@ -950,8 +950,11 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
 
         self.reload()
         resource.validate()
-        if resource.id in [r.id for r in self.resources]:
-            raise MongoEngineValidationError("Cannot add resource with already existing ID")
+        existing_resource = next((r for r in self.resources if r.id == resource.id), None)
+        if existing_resource:
+            raise MongoEngineValidationError(
+                f"Cannot add resource '{resource.title}'. A resource '{existing_resource.title}' already exists with ID '{existing_resource.id}'"
+            )
 
         last_known_modified = self.last_modified_internal
 

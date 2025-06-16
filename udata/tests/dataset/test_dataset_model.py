@@ -82,12 +82,11 @@ class DatasetModelTest:
         with pytest.raises(MongoEngineValidationError):
             dataset.add_resource(resource_b)
 
-    def test_add_two_resources_with_same_id_in_parallel(self):
-        uuid = uuid4()
+    def test_add_two_resources_with_different_id_in_parallel(self):
         user = UserFactory()
         dataset = DatasetFactory(owner=user)
-        resource_a = ResourceFactory(id=uuid)
-        resource_b = ResourceFactory(id=uuid)
+        resource_a = ResourceFactory(title="resource_a", id=uuid4())
+        resource_b = ResourceFactory(title="resource_b", id=uuid4())
 
         real_reload = dataset.reload
         done = False
@@ -102,7 +101,36 @@ class DatasetModelTest:
 
         dataset.reload = fake_reload
 
-        with pytest.raises(MongoEngineValidationError):
+        dataset.add_resource(resource_a)
+
+        assert len(dataset.resources) == 2
+        assert dataset.resources[0].id == resource_a.id
+        assert dataset.resources[1].id == resource_b.id
+
+    def test_add_two_resources_with_same_id_in_parallel(self):
+        uuid = uuid4()
+        user = UserFactory()
+        dataset = DatasetFactory(owner=user)
+        resource_a = ResourceFactory(title="resource_a", id=uuid)
+        resource_b = ResourceFactory(title="resource_b", id=uuid)
+
+        real_reload = dataset.reload
+        done = False
+
+        def fake_reload():
+            nonlocal done
+            real_reload()
+
+            if not done:
+                done = True
+                dataset.add_resource(resource_b)
+
+        dataset.reload = fake_reload
+
+        with pytest.raises(
+            MongoEngineValidationError,
+            match="A resource 'resource_b' already exists",
+        ):
             dataset.add_resource(resource_a)
 
     def test_add_resource_missing_checksum_type(self):
