@@ -82,6 +82,29 @@ class DatasetModelTest:
         with pytest.raises(MongoEngineValidationError):
             dataset.add_resource(resource_b)
 
+    def test_add_two_resources_with_same_id_in_parallel(self):
+        uuid = uuid4()
+        user = UserFactory()
+        dataset = DatasetFactory(owner=user)
+        resource_a = ResourceFactory(id=uuid)
+        resource_b = ResourceFactory(id=uuid)
+
+        real_reload = dataset.reload
+        done = False
+
+        def fake_reload():
+            nonlocal done
+            real_reload()
+
+            if not done:
+                done = True
+                dataset.add_resource(resource_b)
+
+        dataset.reload = fake_reload
+
+        with pytest.raises(MongoEngineValidationError):
+            dataset.add_resource(resource_a)
+
     def test_add_resource_missing_checksum_type(self):
         user = UserFactory()
         dataset = DatasetFactory(owner=user)

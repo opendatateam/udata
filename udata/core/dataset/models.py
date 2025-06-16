@@ -943,36 +943,88 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         obj = cls.objects(slug=id_or_slug).first()
         return obj or cls.objects.get_or_404(id=id_or_slug)
 
-    def add_resource(self, resource):
+    def add_resource(self, resource, retry=5):
         """Perform an atomic prepend for a new resource"""
+        if retry == 0:
+            raise MongoEngineValidationError("Tried 5 time to add_resource without success")
+
+        self.reload()
         resource.validate()
         if resource.id in [r.id for r in self.resources]:
             raise MongoEngineValidationError("Cannot add resource with already existing ID")
 
+        last_known_modified = self.last_modified_internal
+
+        # only useful for compute_quality(), we will reload to have a clean object
         self.resources.insert(0, resource)
-        self.update(
-            __raw__={
-                "$set": {
-                    "quality_cached": self.compute_quality(),
-                },
-                "$push": {
-                    "resources": {"$each": [resource.to_mongo()], "$position": 0},
-                },
-            }
+
+        update_result = self.__class__.objects(
+            id=self.id, last_modified_internal=last_known_modified
+        ).update_one(
+            set__quality_cached=self.compute_quality(),
+            push__resources={"$each": [resource.to_mongo()], "$position": 0},
+            set__last_modified_internal=datetime.utcnow(),
         )
+
+        if update_result == 0:
+            self.add_resource(resource, retry - 1)
+            return
+
         self.reload()
         self.on_resource_added.send(self.__class__, document=self, resource_id=resource.id)
 
-    def update_resource(self, resource):
+    def update_resource(self, resource, retry=3):
         """Perform an atomic update for an existing resource"""
-        index = self.resources.index(resource)
-        data = {"resources__{index}".format(index=index): resource}
-        self.update(**data)
+        if retry == 0:
+            raise MongoEngineValidationError("Tried 5 time to update_resource without success")
+
+        self.reload()
+        last_known_modified = self.last_modified_internal
+        index = next(i for i, r in enumerate(self.resources) if r.id == resource.id)
+
+        # only useful for compute_quality(), we will reload to have a clean object
+        self.resources[index] = resource
+
+        update_result = self.__class__.objects(
+            id=self.id, last_modified_internal=last_known_modified
+        ).update_one(
+            **{
+                "set__quality_cached": self.compute_quality(),
+                f"resources__{index}": resource,
+                "set__last_modified_internal": datetime.utcnow(),
+            }
+        )
+
+        if update_result == 0:
+            self.update_resource(resource, retry - 1)
+            return
+
         self.reload()
         self.on_resource_updated.send(self.__class__, document=self, resource_id=resource.id)
 
-    def remove_resource(self, resource):
+    def remove_resource(self, resource, retry=3):
         # Deletes resource's file from file storage
+        if retry == 0:
+            raise MongoEngineValidationError("Tried 5 time to remove_resource without success")
+
+        self.reload()
+        last_known_modified = self.last_modified_internal
+
+        # only useful for compute_quality(), we will reload to have a clean object
+        self.resources = [r for r in self.resources if r.id != resource.id]
+
+        update_result = self.__class__.objects(
+            id=self.id, last_modified_internal=last_known_modified
+        ).update_one(
+            set__quality_cached=self.compute_quality(),
+            pull__resources__id=resource.id,
+            set__last_modified_internal=datetime.utcnow(),
+        )
+
+        if update_result == 0:
+            self.update_resource(resource, retry - 1)
+            return
+
         if resource.fs_filename is not None:
             try:
                 storages.resources.delete(resource.fs_filename)
@@ -981,7 +1033,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
                     f"File not found while deleting resource #{resource.id} in dataset {self.id}: {e}"
                 )
 
-        self.resources.remove(resource)
+        self.reload()
         self.on_resource_removed.send(self.__class__, document=self, resource_id=resource.id)
 
     @property
