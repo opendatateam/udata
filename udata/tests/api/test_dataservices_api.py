@@ -152,6 +152,12 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(
             response.json["self_api_url"], "http://local.test/api/1/dataservices/updated-title/"
         )
+        self.assertEqual(response.json["access_type"], DATASERVICE_ACCESS_TYPE_RESTRICTED)
+        self.assertEqual(len(response.json["access_audiences"]), 2)
+        self.assertEqual(response.json["access_audiences"][0]["role"], DATASERVICE_ACCESS_AUDIENCE_ADMINISTRATION)
+        self.assertEqual(response.json["access_audiences"][0]["condition"], DATASERVICE_ACCESS_AUDIENCE_YES)
+        self.assertEqual(response.json["access_audiences"][1]["role"], DATASERVICE_ACCESS_AUDIENCE_COMPANY)
+        self.assertEqual(response.json["access_audiences"][1]["condition"], DATASERVICE_ACCESS_AUDIENCE_UNDER_CONDITIONS)
         # metadata_modified_at should have been updated during the patch
         self.assertNotEqual(
             response.json["metadata_modified_at"].split("+")[0],
