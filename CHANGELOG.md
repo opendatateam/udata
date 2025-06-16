@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add access audience to dataservices [#3334](https://github.com/opendatateam/udata/pull/3334)
 
 ## 10.4.2 (2025-06-05)
 
