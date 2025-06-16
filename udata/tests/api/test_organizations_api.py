@@ -8,6 +8,7 @@ import udata.core.organization.constants as org_constants
 from udata.core import csv
 from udata.core.badges.factories import badge_factory
 from udata.core.badges.signals import on_badge_added, on_badge_removed
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
@@ -1041,6 +1042,30 @@ class OrganizationCsvExportsTest:
         dataset_ids = set(row[0] for row in rows)
         assert str(hidden_dataset.id) not in dataset_ids
         assert str(not_org_dataset.id) not in dataset_ids
+
+    def test_dataservices_csv(self, api):
+        org = OrganizationFactory()
+        [DataserviceFactory(organization=org) for _ in range(3)]
+
+        response = api.get(url_for("api.organization_dataservices_csv", org=org))
+
+        assert200(response)
+        assert response.mimetype == "text/csv"
+        assert response.charset == "utf-8"
+
+        csvfile = StringIO(response.data.decode("utf-8"))
+        reader = csv.get_reader(csvfile)
+        header = next(reader)
+
+        assert header[0] == "id"
+        assert "title" in header
+        assert "url" in header
+        assert "description" in header
+        assert "created_at" in header
+        assert "metadata_modified_at" in header
+        assert "tags" in header
+        assert "metric.views" in header
+        assert "datasets" in header
 
     def test_discussions_csv_content_empty(self, api):
         organization = OrganizationFactory()
