@@ -657,7 +657,6 @@ class HarvestAPITest(MockBackendsMixin):
 
         response = api.get(url_for("api.harvest_jobs", ident=str(source.id)))
         assert200(response)
-        print(response.json)
         assert len(response.json["data"]) == 1
 
         fetched_job = response.json["data"][0]
@@ -677,7 +676,6 @@ class HarvestAPITest(MockBackendsMixin):
 
         response = api.get(url_for("api.harvest_jobs", ident=str(source.id)))
         assert200(response)
-        print(response.json)
         assert len(response.json["data"]) == 1
 
         fetched_job = response.json["data"][0]
