@@ -1012,7 +1012,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         self.reload()
         self.on_resource_added.send(self.__class__, document=self, resource_id=resource.id)
 
-    def update_resource(self, resource, retry=3):
+    def update_resource(self, resource, retry=5):
         """Perform an atomic update for an existing resource"""
         if retry == 0:
             raise MongoEngineValidationError("Tried 5 time to update_resource without success")
@@ -1041,7 +1041,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         self.reload()
         self.on_resource_updated.send(self.__class__, document=self, resource_id=resource.id)
 
-    def remove_resource(self, resource, retry=3):
+    def remove_resource(self, resource, retry=5):
         # Deletes resource's file from file storage
         if retry == 0:
             raise MongoEngineValidationError("Tried 5 time to remove_resource without success")
