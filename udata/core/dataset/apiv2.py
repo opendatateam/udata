@@ -390,7 +390,7 @@ class ResourcesAPI(API):
     @apiv2.marshal_with(resource_page_fields)
     def get(self, dataset):
         """Get the given dataset resources, paginated."""
-        if dataset.permissions["edit"].can():
+        if not dataset.permissions["edit"].can():
             if dataset.private:
                 apiv2.abort(404)
             elif dataset.deleted:
@@ -437,7 +437,7 @@ class DatasetSchemasAPI(API):
     @apiv2.marshal_with(schema_fields)
     def get(self, dataset):
         """Get a dataset schemas given its identifier"""
-        if dataset.permissions["edit"].can():
+        if not dataset.permissions["edit"].can():
             if dataset.private:
                 apiv2.abort(404)
             elif dataset.deleted:
@@ -480,7 +480,7 @@ class ResourceAPI(API):
     def get(self, rid):
         dataset = Dataset.objects(resources__id=rid).first()
         if dataset:
-            if dataset.permissions["edit"].can():
+            if not dataset.permissions["edit"].can():
                 if dataset.private:
                     apiv2.abort(404)
                 elif dataset.deleted:
@@ -511,7 +511,7 @@ class ResourceExtrasAPI(ResourceMixin, API):
     @apiv2.doc("get_resource_extras")
     def get(self, dataset, rid):
         """Get a resource extras given its identifier"""
-        if dataset.permissions["edit"].can():
+        if not dataset.permissions["edit"].can():
             if dataset.private:
                 apiv2.abort(404)
             elif dataset.deleted:
