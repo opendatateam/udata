@@ -123,7 +123,12 @@ class DatasetApiParser(ModelApiParser):
             location="args",
         )
         self.parser.add_argument("owner", type=str, location="args")
-        self.parser.add_argument("followed_by", type=str, location="args")
+        self.parser.add_argument(
+            "followed_by",
+            type=str,
+            location="args",
+            help="(beta, subject to change/be removed)",
+        )
         self.parser.add_argument("format", type=str, location="args")
         self.parser.add_argument("schema", type=str, location="args")
         self.parser.add_argument("schema_version", type=str, location="args")
