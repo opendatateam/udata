@@ -39,6 +39,7 @@ from udata.core.badges.fields import badge_fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.followers.api import FollowAPI
+from udata.core.followers.models import Follow
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
 from udata.core.site.models import current_site
@@ -122,6 +123,12 @@ class DatasetApiParser(ModelApiParser):
             location="args",
         )
         self.parser.add_argument("owner", type=str, location="args")
+        self.parser.add_argument(
+            "followed_by",
+            type=str,
+            location="args",
+            help="(beta, subject to change/be removed)",
+        )
         self.parser.add_argument("format", type=str, location="args")
         self.parser.add_argument("schema", type=str, location="args")
         self.parser.add_argument("schema_version", type=str, location="args")
@@ -183,6 +190,16 @@ class DatasetApiParser(ModelApiParser):
             if not ObjectId.is_valid(args["owner"]):
                 api.abort(400, "Owner arg must be an identifier")
             datasets = datasets.filter(owner=args["owner"])
+        if args.get("followed_by"):
+            if not ObjectId.is_valid(args["followed_by"]):
+                api.abort(400, "`followed_by` arg must be an identifier")
+            ids = [
+                f.following.id
+                for f in Follow.objects(follower=args["followed_by"]).filter(
+                    __raw__={"following._cls": Dataset._class_name}
+                )
+            ]
+            datasets = datasets.filter(id__in=ids)
         if args.get("format"):
             datasets = datasets.filter(resources__format=args["format"])
         if args.get("schema"):
