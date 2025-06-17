@@ -5,6 +5,7 @@
 - Add access audience to dataservices [#3334](https://github.com/opendatateam/udata/pull/3334)
 - Expose permissions to cdata [#3336](https://github.com/opendatateam/udata/pull/3336)
 - Add endpoint to get datasets followed by user [#3337](https://github.com/opendatateam/udata/pull/3337)
+- Allow global admins to manually run harvesters in production [#3340](https://github.com/opendatateam/udata/pull/3340)
 
 ## 10.4.2 (2025-06-05)
 
