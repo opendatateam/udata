@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime, timedelta
 from uuid import uuid4
 
@@ -115,6 +116,7 @@ class DatasetModelTest:
         user = UserFactory()
         dataset = DatasetFactory(owner=user)
         resource_a = ResourceFactory(id=uuid4())
+        resource_a_bis = copy.deepcopy(resource_a)
 
         real_reload = dataset.reload
         done = False
@@ -125,7 +127,7 @@ class DatasetModelTest:
 
             if not done:
                 done = True
-                dataset.add_resource(resource_a)
+                dataset.add_resource(resource_a_bis)
 
         dataset.reload = fake_reload
 
