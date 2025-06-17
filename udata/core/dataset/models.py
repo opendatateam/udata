@@ -706,6 +706,16 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
                     "Dataset's organization did not define the requested custom metadata."
                 )
 
+    @property
+    def permissions(self):
+        from .permissions import DatasetEditPermission, ResourceEditPermission
+
+        return {
+            "delete": DatasetEditPermission(self),
+            "edit": DatasetEditPermission(self),
+            "edit_resources": ResourceEditPermission(self),
+        }
+
     def url_for(self, *args, **kwargs):
         return endpoint_for("datasets.show", "api.dataset", dataset=self, *args, **kwargs)
 
@@ -1087,6 +1097,15 @@ class CommunityResource(ResourceMixin, WithMetrics, Owned, db.Document):
     @property
     def from_community(self):
         return True
+
+    @property
+    def permissions(self):
+        from .permissions import ResourceEditPermission
+
+        return {
+            "delete": ResourceEditPermission(self),
+            "edit": ResourceEditPermission(self),
+        }
 
 
 class ResourceSchema(object):

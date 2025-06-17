@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add access audience to dataservices [#3334](https://github.com/opendatateam/udata/pull/3334)
+- Expose permissions to cdata [#3336](https://github.com/opendatateam/udata/pull/3336)
 - Add endpoint to get datasets followed by user [#3337](https://github.com/opendatateam/udata/pull/3337)
 
 ## 10.4.2 (2025-06-05)

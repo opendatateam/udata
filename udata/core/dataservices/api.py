@@ -10,7 +10,6 @@ from flask_login import current_user
 from udata.api import API, api, fields
 from udata.api_fields import patch
 from udata.core.dataservices.constants import DATASERVICE_ACCESS_TYPE_RESTRICTED
-from udata.core.dataservices.permissions import OwnablePermission
 from udata.core.dataset.models import Dataset
 from udata.core.followers.api import FollowAPI
 from udata.core.site.models import current_site
@@ -19,7 +18,6 @@ from udata.i18n import gettext as _
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
 
 from .models import Dataservice
-from .permissions import DataserviceEditPermission
 from .rdf import dataservice_to_rdf
 
 ns = api.namespace("dataservices", "Dataservices related operations (beta)")
@@ -99,7 +97,7 @@ class DataserviceAPI(API):
     @api.doc("get_dataservice")
     @api.marshal_with(Dataservice.__read_fields__)
     def get(self, dataservice):
-        if not OwnablePermission(dataservice).can():
+        if not dataservice.permissions["edit"].can():
             if dataservice.private:
                 api.abort(404)
             elif dataservice.deleted_at:
@@ -117,7 +115,7 @@ class DataserviceAPI(API):
         ):
             api.abort(410, "dataservice has been deleted")
 
-        OwnablePermission(dataservice).test()
+        dataservice.permissions["edit"].test()
 
         patch(dataservice, request)
         dataservice.metadata_modified_at = datetime.utcnow()
@@ -134,7 +132,7 @@ class DataserviceAPI(API):
         if dataservice.deleted_at:
             api.abort(410, "dataservice has been deleted")
 
-        OwnablePermission(dataservice).test()
+        dataservice.permissions["delete"].test()
         dataservice.deleted_at = datetime.utcnow()
         dataservice.metadata_modified_at = datetime.utcnow()
         dataservice.save()
@@ -167,7 +165,7 @@ class DataserviceDatasetsAPI(API):
         if dataservice.deleted_at:
             api.abort(410, "Dataservice has been deleted")
 
-        OwnablePermission(dataservice).test()
+        dataservice.permissions["edit"].test()
 
         data = request.json
 
@@ -203,7 +201,7 @@ class DataserviceDatasetAPI(API):
         if dataservice.deleted_at:
             api.abort(410, "Dataservice has been deleted")
 
-        OwnablePermission(dataservice).test()
+        dataservice.permissions["edit"].test()
 
         if dataset not in dataservice.datasets:
             api.abort(404, "Dataset not found in dataservice")
@@ -232,8 +230,8 @@ class DataserviceRdfAPI(API):
 @api.response(410, "Dataservice has been deleted")
 class DataserviceRdfFormatAPI(API):
     @api.doc("rdf_dataservice_format")
-    def get(self, dataservice, format):
-        if not DataserviceEditPermission(dataservice).can():
+    def get(self, dataservice: Dataservice, format):
+        if not dataservice.permissions["edit"].can():
             if dataservice.private:
                 api.abort(404)
             elif dataservice.deleted_at:
