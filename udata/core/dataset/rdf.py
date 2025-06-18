@@ -536,7 +536,7 @@ def spatial_from_rdf(graph):
         spatial_coverage.clean()
         return spatial_coverage
     except ValidationError as e:
-        log.warning(f"Cannot save the spatial coverage {coordinates} (error was {e})")
+        log.warning(f"Cannot save the spatial coverage {polygons} (error was {e})")
         return None
 
 

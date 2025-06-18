@@ -35,6 +35,11 @@
             <schema:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-05T00:00:00</schema:endDate>
           </dcterms:PeriodOfTime>
         </dct:temporal>
+        <dct:spatial>
+            <ogc:Polygon>
+                <locn:geometry rdf:datatype="https://www.iana.org/assignments/media-types/application/vnd.geo+json"><![CDATA[{"type":"Polygon","coordinates":[[[4, 45], [4, NaN], [4, 46], [4, 45], [4, 45]]]}]]></locn:geometry>
+            </ogc:Polygon>
+        </dct:spatial>
       </dcat:Dataset>
     </dcat:dataset>
     <dcterms:title>Sample DCAT Catalog</dcterms:title>
