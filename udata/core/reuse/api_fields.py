@@ -4,6 +4,14 @@ from .constants import IMAGE_SIZES
 
 BIGGEST_IMAGE_SIZE = IMAGE_SIZES[0]
 
+reuse_permissions_fields = api.model(
+    "ReusePermissions",
+    {
+        "delete": fields.Permission(),
+        "edit": fields.Permission(),
+    },
+)
+
 reuse_type_fields = api.model(
     "ReuseType",
     {

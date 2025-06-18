@@ -341,6 +341,9 @@ def generate_fields(**kwargs) -> Callable:
                 continue  # Do not override if the attribute is also callable like for Extras
 
             method = getattr(cls, method_name)
+            if isinstance(method, property):
+                method = method.fget
+
             if not callable(method):
                 continue
 
@@ -356,7 +359,16 @@ def generate_fields(**kwargs) -> Callable:
                 """
                 return lambda o: method(o)
 
-            read_fields[method_name] = restx_fields.String(
+            nested_fields: dict | None = additional_field_info.get("nested_fields")
+            if nested_fields is None:
+                # If there is no `nested_fields` convert the object to the string representation.
+                field_constructor = restx_fields.String
+            else:
+
+                def field_constructor(**kwargs):
+                    return restx_fields.Nested(nested_fields, **kwargs)
+
+            read_fields[method_name] = field_constructor(
                 attribute=make_lambda(method), **{"readonly": True, **additional_field_info}
             )
             if additional_field_info.get("show_as_ref", False):
