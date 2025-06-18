@@ -7,7 +7,7 @@ from udata.core.activity.models import Auditable
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.owned import Owned, OwnedQuerySet
-from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE
+from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE, reuse_permissions_fields
 from udata.core.storages import default_image_basename, images
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -201,6 +201,18 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Owned, db.Doc
         return endpoint_for(
             "reuses.show", reuse=self, _external=True, fallback_endpoint="api.reuse"
         )
+
+    @property
+    @function_field(
+        nested_fields=reuse_permissions_fields,
+    )
+    def permissions(self):
+        from .permissions import ReuseEditPermission
+
+        return {
+            "delete": ReuseEditPermission(self),
+            "edit": ReuseEditPermission(self),
+        }
 
     @property
     def is_visible(self):

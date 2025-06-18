@@ -7,6 +7,7 @@ from mongoengine.signals import post_save
 
 import udata.core.contact_point.api_fields as contact_api_fields
 import udata.core.dataset.api_fields as datasets_api_fields
+from udata.api import api, fields
 from udata.api_fields import field, function_field, generate_fields
 from udata.core.activity.models import Auditable
 from udata.core.dataservices.constants import (
@@ -32,6 +33,15 @@ from udata.uris import endpoint_for
 # "datasets" # objet : liste de datasets liés à une API
 # "spatial"
 # "temporal_coverage"
+
+
+dataservice_permissions_fields = api.model(
+    "DataservicePermissions",
+    {
+        "delete": fields.Permission(),
+        "edit": fields.Permission(),
+    },
+)
 
 
 class DataserviceQuerySet(OwnedQuerySet):
@@ -286,6 +296,18 @@ class Dataservice(Auditable, WithMetrics, Owned, db.Document):
     @property
     def is_hidden(self):
         return self.private or self.deleted_at or self.archived_at
+
+    @property
+    @function_field(
+        nested_fields=dataservice_permissions_fields,
+    )
+    def permissions(self):
+        from .permissions import DataserviceEditPermission
+
+        return {
+            "delete": DataserviceEditPermission(self),
+            "edit": DataserviceEditPermission(self),
+        }
 
     def count_discussions(self):
         self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()
