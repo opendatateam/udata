@@ -977,30 +977,11 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         self.reload()
         resource.validate()
 
-        existing_resources = list(r for r in self.resources if r.id == resource.id)
-
-        # We loop below but if there is a duplicate, it should be alone otherwise it's a past problem…
-        if len(existing_resources) > 1:
-            log.warning(
-                f"{len(existing_resources)} resources already exists with ID '{resource.id}' in dataset '{self.id}'"
-            )
-
-        same_already_exists = False
-        for existing_resource in existing_resources:
-            # We don't want to crash if the user send twice the same resource in parallel.
-            if resource.is_equal_to(existing_resource):
-                same_already_exists = True
-                continue
-
+        existing_resource = next(r for r in self.resources if r.id == resource.id)
+        if existing_resource:
             raise MongoEngineValidationError(
                 f"Cannot add resource '{resource.title}'. A resource '{existing_resource.title}' already exists with ID '{existing_resource.id}'"
             )
-
-        if same_already_exists:
-            log.warning(
-                f"Skipping adding resource '{resource.title}'. The same resource already exists with ID '{existing_resource.id}' in dataset '{self.id}'"
-            )
-            return
 
         last_known_modified = self.last_modified_internal
 
