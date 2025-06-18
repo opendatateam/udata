@@ -8,7 +8,6 @@ import logging
 from datetime import date, datetime
 from typing import Optional
 
-import geojson as geojson_lib
 from dateutil.parser import parse as parse_dt
 from flask import current_app
 from geomet import wkt
@@ -526,24 +525,18 @@ def spatial_from_rdf(graph):
         log.warning("No supported types found in the GeoJSON data.")
         return None
 
-    geom = {
-        "type": "MultiPolygon",
-        "coordinates": polygons,
-    }
-
-    try:
-        geojson_lib.loads(geojson_lib.dumps(geom))
-    except (ValueError, TypeError) as err:
-        log.warning(f"Invalid GeoJSON data: {err}.")
-        return None
-
-    spatial_coverage = SpatialCoverage(geom=geom)
+    spatial_coverage = SpatialCoverage(
+        geom={
+            "type": "MultiPolygon",
+            "coordinates": polygons,
+        }
+    )
 
     try:
         spatial_coverage.clean()
         return spatial_coverage
     except ValidationError as e:
-        log.warning(f"Cannot save the spatial coverage {coordinates} (error was {e})")
+        log.warning(f"Cannot save the spatial coverage {polygons} (error was {e})")
         return None
 
 
