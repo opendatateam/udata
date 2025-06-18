@@ -39,6 +39,7 @@ from udata.core.badges.fields import badge_fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.followers.api import FollowAPI
+from udata.core.followers.models import Follow
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
 from udata.core.site.models import current_site
@@ -84,7 +85,6 @@ from .models import (
     ResourceSchema,
     get_resource,
 )
-from .permissions import DatasetEditPermission, ResourceEditPermission
 from .rdf import dataset_to_rdf
 
 DEFAULT_SORTING = "-created_at_internal"
@@ -122,6 +122,12 @@ class DatasetApiParser(ModelApiParser):
             location="args",
         )
         self.parser.add_argument("owner", type=str, location="args")
+        self.parser.add_argument(
+            "followed_by",
+            type=str,
+            location="args",
+            help="(beta, subject to change/be removed)",
+        )
         self.parser.add_argument("format", type=str, location="args")
         self.parser.add_argument("schema", type=str, location="args")
         self.parser.add_argument("schema_version", type=str, location="args")
@@ -183,6 +189,16 @@ class DatasetApiParser(ModelApiParser):
             if not ObjectId.is_valid(args["owner"]):
                 api.abort(400, "Owner arg must be an identifier")
             datasets = datasets.filter(owner=args["owner"])
+        if args.get("followed_by"):
+            if not ObjectId.is_valid(args["followed_by"]):
+                api.abort(400, "`followed_by` arg must be an identifier")
+            ids = [
+                f.following.id
+                for f in Follow.objects(follower=args["followed_by"]).filter(
+                    __raw__={"following._cls": Dataset._class_name}
+                )
+            ]
+            datasets = datasets.filter(id__in=ids)
         if args.get("format"):
             datasets = datasets.filter(resources__format=args["format"])
         if args.get("schema"):
@@ -348,9 +364,9 @@ class DatasetsAtomFeedAPI(API):
 class DatasetAPI(API):
     @api.doc("get_dataset")
     @api.marshal_with(dataset_fields)
-    def get(self, dataset):
+    def get(self, dataset: Dataset):
         """Get a dataset given its identifier"""
-        if not DatasetEditPermission(dataset).can():
+        if not dataset.permissions["edit"].can():
             if dataset.private:
                 api.abort(404)
             elif dataset.deleted:
@@ -362,12 +378,12 @@ class DatasetAPI(API):
     @api.expect(dataset_fields)
     @api.marshal_with(dataset_fields)
     @api.response(400, errors.VALIDATION_ERROR)
-    def put(self, dataset):
+    def put(self, dataset: Dataset):
         """Update a dataset given its identifier"""
         request_deleted = request.json.get("deleted", True)
         if dataset.deleted and request_deleted is not None:
             api.abort(410, "Dataset has been deleted")
-        DatasetEditPermission(dataset).test()
+        dataset.permissions["edit"].test()
         dataset.last_modified_internal = datetime.utcnow()
         form = api.validate(DatasetForm, dataset)
 
@@ -380,7 +396,7 @@ class DatasetAPI(API):
         """Delete a dataset given its identifier"""
         if dataset.deleted:
             api.abort(410, "Dataset has been deleted")
-        DatasetEditPermission(dataset).test()
+        dataset.permissions["delete"].test()
         dataset.deleted = datetime.utcnow()
         dataset.last_modified_internal = datetime.utcnow()
         dataset.save()
@@ -426,7 +442,7 @@ class DatasetRdfAPI(API):
 class DatasetRdfFormatAPI(API):
     @api.doc("rdf_dataset_format")
     def get(self, dataset, format):
-        if not DatasetEditPermission(dataset).can():
+        if not dataset.permissions["edit"].can():
             if dataset.private:
                 api.abort(404)
             elif dataset.deleted:
@@ -485,7 +501,7 @@ class ResourcesAPI(API):
     @api.marshal_with(resource_fields, code=201)
     def post(self, dataset):
         """Create a new resource for a given dataset"""
-        ResourceEditPermission(dataset).test()
+        dataset.permissions["edit_resources"].test()
         form = api.validate(ResourceFormWithoutId)
         resource = Resource()
 
@@ -503,7 +519,7 @@ class ResourcesAPI(API):
     @api.marshal_list_with(resource_fields)
     def put(self, dataset):
         """Reorder resources"""
-        ResourceEditPermission(dataset).test()
+        dataset.permissions["edit_resources"].test()
         resources = request.json
         if len(dataset.resources) != len(resources):
             api.abort(
@@ -557,7 +573,7 @@ class UploadNewDatasetResource(UploadMixin, API):
     @api.marshal_with(upload_fields, code=201)
     def post(self, dataset):
         """Upload a file for a new dataset resource"""
-        ResourceEditPermission(dataset).test()
+        dataset.permissions["edit_resources"].test()
         infos = self.handle_upload(dataset)
         resource = Resource(**infos)
         dataset.add_resource(resource)
@@ -608,7 +624,7 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
     @api.marshal_with(upload_fields)
     def post(self, dataset, rid):
         """Upload a file related to a given resource on a given dataset"""
-        ResourceEditPermission(dataset).test()
+        dataset.permissions["edit_resources"].test()
         resource = self.get_resource_or_404(dataset, rid)
         fs_filename_to_remove = resource.fs_filename
         infos = self.handle_upload(dataset)
@@ -637,7 +653,7 @@ class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
     @api.marshal_with(upload_community_fields)
     def post(self, community):
         """Update the file related to a given community resource"""
-        ResourceEditPermission(community).test()
+        community.permissions["edit"].test()
         fs_filename_to_remove = community.fs_filename
         infos = self.handle_upload(community.dataset)
         community.update(**infos)
@@ -654,7 +670,7 @@ class ResourceAPI(ResourceMixin, API):
     @api.marshal_with(resource_fields)
     def get(self, dataset, rid):
         """Get a resource given its identifier"""
-        if not DatasetEditPermission(dataset).can():
+        if not dataset.permissions["edit"].can():
             if dataset.private:
                 api.abort(404)
             elif dataset.deleted:
@@ -668,7 +684,7 @@ class ResourceAPI(ResourceMixin, API):
     @api.marshal_with(resource_fields)
     def put(self, dataset, rid):
         """Update a given resource on a given dataset"""
-        ResourceEditPermission(dataset).test()
+        dataset.permissions["edit_resources"].test()
         resource = self.get_resource_or_404(dataset, rid)
         form = api.validate(ResourceFormWithoutId, resource)
 
@@ -697,7 +713,7 @@ class ResourceAPI(ResourceMixin, API):
     @api.doc("delete_resource")
     def delete(self, dataset, rid):
         """Delete a given resource on a given dataset"""
-        ResourceEditPermission(dataset).test()
+        dataset.permissions["edit_resources"].test()
         resource = self.get_resource_or_404(dataset, rid)
         dataset.remove_resource(resource)
         dataset.last_modified_internal = datetime.utcnow()
@@ -757,7 +773,7 @@ class CommunityResourceAPI(API):
     @api.marshal_with(community_resource_fields)
     def put(self, community):
         """Update a given community resource"""
-        ResourceEditPermission(community).test()
+        community.permissions["edit"].test()
         form = api.validate(CommunityResourceForm, community)
         if community.filetype == "file":
             form._fields.get("url").data = community.url
@@ -772,7 +788,7 @@ class CommunityResourceAPI(API):
     @api.doc("delete_community_resource")
     def delete(self, community):
         """Delete a given community resource"""
-        ResourceEditPermission(community).test()
+        community.permissions["delete"].test()
         # Deletes community resource's file from file storage
         if community.fs_filename is not None:
             storages.resources.delete(community.fs_filename)

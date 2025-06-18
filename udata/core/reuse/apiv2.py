@@ -5,8 +5,10 @@ from udata.api import API, apiv2
 from udata.core.reuse.models import Reuse
 from udata.utils import multi_to_dict
 
+from .api_fields import reuse_permissions_fields
 from .search import ReuseSearch
 
+apiv2.inherit("ReusePermissions", reuse_permissions_fields)
 apiv2.inherit("ReusePage", Reuse.__page_fields__)
 apiv2.inherit("Reuse (read)", Reuse.__read_fields__)
 

@@ -220,6 +220,15 @@ dataset_ref_fields = api.inherit(
     },
 )
 
+
+community_resource_permissions_fields = api.model(
+    "DatasetPermissions",
+    {
+        "delete": fields.Permission(),
+        "edit": fields.Permission(),
+    },
+)
+
 community_resource_fields = api.inherit(
     "CommunityResource",
     resource_fields,
@@ -233,6 +242,7 @@ community_resource_fields = api.inherit(
         "owner": fields.Nested(
             user_ref_fields, allow_null=True, description="The user information"
         ),
+        "permissions": fields.Nested(community_resource_permissions_fields),
     },
 )
 
@@ -285,6 +295,7 @@ DEFAULT_MASK = ",".join(
         "internal",
         "contact_points",
         "featured",
+        "permissions",
     )
 )
 
@@ -297,6 +308,15 @@ dataset_internal_fields = api.model(
         "last_modified_internal": fields.ISODateTime(
             description="The dataset's internal last modification date", required=True
         ),
+    },
+)
+
+dataset_permissions_fields = api.model(
+    "DatasetPermissions",
+    {
+        "delete": fields.Permission(),
+        "edit": fields.Permission(),
+        "edit_resources": fields.Permission(),
     },
 )
 
@@ -401,6 +421,7 @@ dataset_fields = api.model(
         "contact_points": fields.List(
             fields.Nested(contact_point_fields, description="The dataset contact points"),
         ),
+        "permissions": fields.Nested(dataset_permissions_fields),
     },
     mask=DEFAULT_MASK,
 )

@@ -341,6 +341,9 @@ def generate_fields(**kwargs) -> Callable:
                 continue  # Do not override if the attribute is also callable like for Extras
 
             method = getattr(cls, method_name)
+            if isinstance(method, property):
+                method = method.fget
+
             if not callable(method):
                 continue
 
@@ -356,7 +359,16 @@ def generate_fields(**kwargs) -> Callable:
                 """
                 return lambda o: method(o)
 
-            read_fields[method_name] = restx_fields.String(
+            nested_fields: dict | None = additional_field_info.get("nested_fields")
+            if nested_fields is None:
+                # If there is no `nested_fields` convert the object to the string representation.
+                field_constructor = restx_fields.String
+            else:
+
+                def field_constructor(**kwargs):
+                    return restx_fields.Nested(nested_fields, **kwargs)
+
+            read_fields[method_name] = field_constructor(
                 attribute=make_lambda(method), **{"readonly": True, **additional_field_info}
             )
             if additional_field_info.get("show_as_ref", False):
@@ -505,7 +517,6 @@ def patch(obj, request) -> type:
         field = obj.__write_fields__.get(key)
         if field is not None and not field.readonly:
             model_attribute = getattr(obj.__class__, key)
-
             if hasattr(model_attribute, "from_input"):
                 value = model_attribute.from_input(value)
             elif isinstance(model_attribute, mongoengine.fields.ListField) and isinstance(
@@ -531,6 +542,20 @@ def patch(obj, request) -> type:
                     value["id"],
                     document_type=db.resolve_model(value["class"]),
                 )
+            elif value and isinstance(
+                model_attribute,
+                mongoengine.fields.EmbeddedDocumentField,
+            ):
+                embedded_field = model_attribute.document_type()
+                value = embedded_field._from_son(value)
+            elif value and isinstance(
+                model_attribute,
+                mongoengine.fields.EmbeddedDocumentListField,
+            ):
+                embedded_field = model_attribute.field.document_type()
+                # MongoEngine BaseDocument has a `from_json` method for string and a private `_from_son`
+                # but there is no public `from_son` to use
+                value = [embedded_field._from_son(embedded_value) for embedded_value in value]
 
             info = getattr(model_attribute, "__additional_field_info__", {})
 

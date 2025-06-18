@@ -7,14 +7,21 @@ from mongoengine.signals import post_save
 
 import udata.core.contact_point.api_fields as contact_api_fields
 import udata.core.dataset.api_fields as datasets_api_fields
+from udata.api import api, fields
 from udata.api_fields import field, function_field, generate_fields
 from udata.core.activity.models import Auditable
-from udata.core.dataservices.constants import DATASERVICE_ACCESS_TYPES, DATASERVICE_FORMATS
+from udata.core.dataservices.constants import (
+    DATASERVICE_ACCESS_AUDIENCE_CONDITIONS,
+    DATASERVICE_ACCESS_AUDIENCE_TYPES,
+    DATASERVICE_ACCESS_TYPES,
+    DATASERVICE_FORMATS,
+)
 from udata.core.dataset.models import Dataset
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
 from udata.models import Discussion, Follow, db
+from udata.mongo.errors import FieldValidationError
 from udata.uris import endpoint_for
 
 # "frequency"
@@ -25,6 +32,15 @@ from udata.uris import endpoint_for
 # "datasets" # objet : liste de datasets liés à une API
 # "spatial"
 # "temporal_coverage"
+
+
+dataservice_permissions_fields = api.model(
+    "DataservicePermissions",
+    {
+        "delete": fields.Permission(),
+        "edit": fields.Permission(),
+    },
+)
 
 
 class DataserviceQuerySet(OwnedQuerySet):
@@ -98,6 +114,21 @@ class HarvestMetadata(db.EmbeddedDocument):
     archived_reason = field(db.StringField())
 
 
+@generate_fields()
+class AccessAudience(db.EmbeddedDocument):
+    role = field(db.StringField(choices=DATASERVICE_ACCESS_AUDIENCE_TYPES), filterable={})
+    condition = field(db.StringField(choices=DATASERVICE_ACCESS_AUDIENCE_CONDITIONS), filterable={})
+
+
+def check_only_one_condition_per_role(access_audiences, **_kwargs):
+    roles = set(e["role"] for e in access_audiences)
+    if len(roles) != len(access_audiences):
+        raise FieldValidationError(
+            _("You can only set one condition for a given access audience role"),
+            field="access_audiences",
+        )
+
+
 @generate_fields(
     searchable=True,
     additional_filters={"organization_badge": "organization.badges"},
@@ -158,6 +189,11 @@ class Dataservice(Auditable, WithMetrics, Owned, db.Document):
     availability_url = field(db.URLField())
 
     access_type = field(db.StringField(choices=DATASERVICE_ACCESS_TYPES), filterable={})
+    access_audiences = field(
+        db.EmbeddedDocumentListField(AccessAudience),
+        checks=[check_only_one_condition_per_role],
+    )
+
     authorization_request_url = field(db.URLField())
 
     format = field(db.StringField(choices=DATASERVICE_FORMATS))
@@ -258,6 +294,18 @@ class Dataservice(Auditable, WithMetrics, Owned, db.Document):
     @property
     def is_hidden(self):
         return self.private or self.deleted_at or self.archived_at
+
+    @property
+    @function_field(
+        nested_fields=dataservice_permissions_fields,
+    )
+    def permissions(self):
+        from .permissions import DataserviceEditPermission
+
+        return {
+            "delete": DataserviceEditPermission(self),
+            "edit": DataserviceEditPermission(self),
+        }
 
     def count_discussions(self):
         self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()
