@@ -311,24 +311,27 @@ class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, db.Datetimed,
 
         self.metrics["datasets"] = Dataset.objects(organization=self).visible().count()
         self.metrics["datasets_by_months"] = get_stock_metrics(
-            Dataset.objects(organization=self).visible(),
-            date_label='created_at_internal')
+            Dataset.objects(organization=self).visible(), date_label="created_at_internal"
+        )
         self.metrics["datasets_followers_by_months"] = get_stock_metrics(
-            Follow.objects(following__in=Dataset.objects(organization=self)),
-            date_label='since')
+            Follow.objects(following__in=Dataset.objects(organization=self)), date_label="since"
+        )
         self.metrics["datasets_reuses_by_months"] = get_stock_metrics(
-            Reuse.objects(datasets__in=Dataset.objects(organization=self)).visible())
-    
+            Reuse.objects(datasets__in=Dataset.objects(organization=self)).visible()
+        )
+
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_reuses(self):
         from udata.models import Follow, Reuse
 
         self.metrics["reuses"] = Reuse.objects(organization=self).visible().count()
-        self.metrics["reuses_by_months"] = get_stock_metrics(Reuse.objects(organization=self).visible())
+        self.metrics["reuses_by_months"] = get_stock_metrics(
+            Reuse.objects(organization=self).visible()
+        )
         self.metrics["reuses_followers_by_months"] = get_stock_metrics(
-            Follow.objects(following__in=Reuse.objects(organization=self)),
-            date_label='since')
+            Follow.objects(following__in=Reuse.objects(organization=self)), date_label="since"
+        )
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_dataservices(self):
@@ -336,8 +339,8 @@ class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, db.Datetimed,
 
         self.metrics["dataservices"] = Dataservice.objects(organization=self).visible().count()
         self.metrics["dataservices_by_months"] = get_stock_metrics(
-            Dataservice.objects(organization=self).visible(),
-            date_label='created_at')
+            Dataservice.objects(organization=self).visible(), date_label="created_at"
+        )
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):

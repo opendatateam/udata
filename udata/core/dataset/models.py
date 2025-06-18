@@ -1073,7 +1073,9 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         from udata.models import Follow
 
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
-        self.metrics["followers_by_months"] = get_stock_metrics(Follow.objects(following=self), date_label='since')
+        self.metrics["followers_by_months"] = get_stock_metrics(
+            Follow.objects(following=self), date_label="since"
+        )
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
 
