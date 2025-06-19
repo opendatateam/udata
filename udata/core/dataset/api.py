@@ -910,6 +910,22 @@ class CheckDatasetResource(API, ResourceMixin):
         return check_resource(resource)
 
 
+@ns.route(
+    "/r/<uuid:rid>",
+    endpoint="resource_permalink",
+    doc=common_doc,
+)
+@api.param("rid", "The resource unique identifier")
+class ResourcePermalink(API, ResourceMixin):
+    @api.doc("resource_permalink")
+    def get(self, rid):
+        """
+        Redirect to the latest version of a resource given its identifier.
+        """
+        resource = get_resource(rid)
+        return redirect(resource.url.strip()) if resource else abort(404)
+
+
 @ns.route("/resource_types/", endpoint="resource_types")
 class ResourceTypesAPI(API):
     @api.doc("resource_types")
