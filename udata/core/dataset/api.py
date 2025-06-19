@@ -911,7 +911,7 @@ class CheckDatasetResource(API, ResourceMixin):
 
 
 @ns.route(
-    "/r/<uuid:rid>",
+    "/r/<uuid:rid>/",
     endpoint="resource_permalink",
     doc=common_doc,
 )
