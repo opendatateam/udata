@@ -79,7 +79,7 @@ def cdata_url(uri: str, **kwargs) -> Optional[str]:
 
     url_parts = list(urlparse(base_url))
     url_parts[4] = urlencode(
-        {k: v for k, v in kwargs.entries() if not k.startswith("_")}
+        {k: v for k, v in kwargs.items() if not k.startswith("_")}
     )  # index 4 is the query params
     return urlunparse(url_parts)
 

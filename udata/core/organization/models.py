@@ -197,7 +197,7 @@ class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, db.Datetimed,
         return cdata_url(f"/organizations/{self.slug}/", **kwargs)
 
     def self_api_url(self, *args, **kwargs):
-        return url_for("api.organization", organization=self, *args, **kwargs)
+        return url_for("api.organization", org=self, *args, **kwargs)
 
     display_url = property(url_for)
 
