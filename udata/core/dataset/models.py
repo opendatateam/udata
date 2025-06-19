@@ -526,22 +526,6 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
             raise RuntimeError("Impossible to save an orphan resource")
         self.dataset.save(*args, **kwargs)
 
-    def is_equal_to(self, other: Self) -> bool:
-        return (
-            self.id == other.id
-            and self.title == other.title
-            and self.description == other.description
-            and self.filetype == other.filetype
-            and self.type == other.type
-            and self.format == other.format
-            and self.url == other.url
-            and self.checksum == other.checksum
-            and self.filesize == other.filesize
-            and self.mime == other.mime
-            and self.extras == other.extras
-            and self.schema == other.schema
-        )
-
 
 def validate_badge(value):
     if value not in Dataset.__badges__.keys():
@@ -977,7 +961,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         self.reload()
         resource.validate()
 
-        existing_resource = next(r for r in self.resources if r.id == resource.id)
+        existing_resource = next((r for r in self.resources if r.id == resource.id), None)
         if existing_resource:
             raise MongoEngineValidationError(
                 f"Cannot add resource '{resource.title}'. A resource '{existing_resource.title}' already exists with ID '{existing_resource.id}'"
