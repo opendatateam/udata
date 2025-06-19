@@ -32,7 +32,7 @@ class UserToRdfTest(DBTestMixin, TestCase):
 
     def test_all_fields(self):
         user = UserFactory(website=faker.uri())
-        user_url = url_for("api.user", user=user.id, _external=True)
+        user_url = url_for("api.user", user=user, _external=True)
         u = user_to_rdf(user)
         g = u.graph
 
