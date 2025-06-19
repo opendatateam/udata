@@ -273,16 +273,16 @@ class Dataservice(Auditable, WithMetrics, Owned, db.Document):
         auditable=False,
     )
 
-    def url_for(self):
-        return self.self_web_url() or self.self_api_url()
+    def url_for(self, **kwargs):
+        return self.self_web_url(**kwargs) or self.self_api_url(**kwargs)
 
     @function_field(description="Link to the API endpoint for this dataservice")
-    def self_api_url(self):
-        return url_for("api.dataservice", dataservice=self, _external=True)
+    def self_api_url(self, **kwargs):
+        return url_for("api.dataservice", dataservice=self, _external=True, **kwargs)
 
     @function_field(description="Link to the udata web page for this dataservice", show_as_ref=True)
-    def self_web_url(self):
-        return cdata_url(f"/dataservices/{self.slug}/")
+    def self_web_url(self, **kwargs):
+        return cdata_url(f"/dataservices/{self.slug}/", **kwargs)
 
     __metrics_keys__ = [
         "discussions",
