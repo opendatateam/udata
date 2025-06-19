@@ -84,7 +84,8 @@ def send_frequency_reminder(self):
     frequencies = [
         f
         for f in UPDATE_FREQUENCIES.keys()
-        if f not in ("unknown", "realtime", "punctual", "irregular", "continuous")
+        if f
+        not in ("unknown", "other", "never", "not_planned", "as_needed", "irreg", "update_cont")
     ]
     now = datetime.utcnow()
     reminded_orgs = {}
