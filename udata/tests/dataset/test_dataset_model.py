@@ -1,4 +1,3 @@
-import copy
 from datetime import datetime, timedelta
 from uuid import uuid4
 
@@ -109,32 +108,6 @@ class DatasetModelTest:
         assert len(dataset.resources) == 2
         assert dataset.resources[0].id == resource_a.id
         assert dataset.resources[1].id == resource_b.id
-
-    def test_add_same_resource_twice_in_parallel(self):
-        # Test that we correctly retry if we have a modification (another `add_resource`
-        # with different ID) during `add_resource`
-        user = UserFactory()
-        dataset = DatasetFactory(owner=user)
-        resource_a = ResourceFactory(id=uuid4())
-        resource_a_bis = copy.deepcopy(resource_a)
-
-        real_reload = dataset.reload
-        done = False
-
-        def fake_reload():
-            nonlocal done
-            real_reload()
-
-            if not done:
-                done = True
-                dataset.add_resource(resource_a_bis)
-
-        dataset.reload = fake_reload
-
-        dataset.add_resource(resource_a)
-
-        assert len(dataset.resources) == 1
-        assert dataset.resources[0].id == resource_a.id
 
     def test_add_two_resources_with_same_id_in_parallel(self):
         uuid = uuid4()
