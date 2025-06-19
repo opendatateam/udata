@@ -96,13 +96,6 @@ topic_fields = apiv2.model(
         "uri": fields.UrlFor(
             "api.topic", lambda o: {"topic": o}, description="The topic API URI", readonly=True
         ),
-        "page": fields.UrlFor(
-            "topics.display",
-            lambda o: {"topic": o},
-            description="The topic page URL",
-            readonly=True,
-            fallback_endpoint="api.topic",
-        ),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),
     },
 )
