@@ -1,4 +1,5 @@
 from flask import current_app, request
+from flask_login import current_user
 from werkzeug.exceptions import BadRequest
 
 from udata.api import API, api, fields
@@ -345,7 +346,7 @@ class RunSourceAPI(API):
     @api.marshal_with(source_fields)
     def post(self, ident):
         enabled = current_app.config.get("HARVEST_ENABLE_MANUAL_RUN")
-        if not enabled:
+        if not enabled and not current_user.sysadmin:
             api.abort(
                 400,
                 "Cannot run source manually. Please contact the platform if you need to reschedule the harvester.",
