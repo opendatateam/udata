@@ -987,57 +987,34 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         self.reload()
         self.on_resource_added.send(self.__class__, document=self, resource_id=resource.id)
 
-    def update_resource(self, resource, retry=5):
+    def update_resource(self, resource):
         """Perform an atomic update for an existing resource"""
-        if retry == 0:
-            raise MongoEngineValidationError("Tried 5 time to update_resource without success")
-
         self.reload()
-        last_known_modified = self.last_modified_internal
-        index = next(i for i, r in enumerate(self.resources) if r.id == resource.id)
 
         # only useful for compute_quality(), we will reload to have a clean object
+        index = next(i for i, r in enumerate(self.resources) if r.id == resource.id)
         self.resources[index] = resource
 
-        update_result = self.__class__.objects(
-            id=self.id, last_modified_internal=last_known_modified
-        ).update_one(
-            **{
-                "set__quality_cached": self.compute_quality(),
-                f"resources__{index}": resource,
-                "set__last_modified_internal": datetime.utcnow(),
-            }
+        Dataset.objects(id=self.id, resources__id=resource.id).update_one(
+            set__quality_cached=self.compute_quality(),
+            set__resources__S=resource,
+            set__last_modified_internal=datetime.utcnow(),
         )
-
-        if update_result == 0:
-            self.update_resource(resource, retry - 1)
-            return
 
         self.reload()
         self.on_resource_updated.send(self.__class__, document=self, resource_id=resource.id)
 
-    def remove_resource(self, resource, retry=5):
+    def remove_resource(self, resource):
         # Deletes resource's file from file storage
-        if retry == 0:
-            raise MongoEngineValidationError("Tried 5 time to remove_resource without success")
-
-        self.reload()
-        last_known_modified = self.last_modified_internal
 
         # only useful for compute_quality(), we will reload to have a clean object
         self.resources = [r for r in self.resources if r.id != resource.id]
 
-        update_result = self.__class__.objects(
-            id=self.id, last_modified_internal=last_known_modified
-        ).update_one(
+        self.update(
             set__quality_cached=self.compute_quality(),
             pull__resources__id=resource.id,
             set__last_modified_internal=datetime.utcnow(),
         )
-
-        if update_result == 0:
-            self.update_resource(resource, retry - 1)
-            return
 
         if resource.fs_filename is not None:
             try:
