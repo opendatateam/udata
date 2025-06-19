@@ -191,9 +191,13 @@ class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, db.Datetimed,
         cls.before_save.send(document)
 
     def url_for(self, *args, **kwargs):
-        return cdata_url(f"/organizations/{self.slug}/", **kwargs) or url_for(
-            "api.organization", org=self, *args, **kwargs
-        )
+        return self.self_web_url(**kwargs) or self.self_api_url(*args, **kwargs)
+
+    def self_web_url(self, **kwargs):
+        return cdata_url(f"/organizations/{self.slug}/", **kwargs)
+
+    def self_api_url(self, *args, **kwargs):
+        return url_for("api.organization", organization=self, *args, **kwargs)
 
     display_url = property(url_for)
 

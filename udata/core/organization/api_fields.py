@@ -13,21 +13,18 @@ org_ref_fields = api.inherit(
     {
         "name": fields.String(description="The organization name", readonly=True),
         "acronym": fields.String(description="The organization acronym"),
-        "uri": fields.UrlFor(
-            "api.organization",
-            lambda o: {"org": o},
-            description="The organization API URI",
-            readonly=True,
-        ),
         "slug": fields.String(
             description="The organization string used as permalink", required=True
         ),
-        "page": fields.UrlFor(
-            "organizations.show",
-            lambda o: {"org": o},
+        "uri": fields.String(
+            attribute=lambda o: o.self_api_url(_external=True),
+            description="The API URI for this organization",
+            readonly=True,
+        ),
+        "page": fields.String(
+            attribute=lambda o: o.self_web_url(),
             description="The organization web page URL",
             readonly=True,
-            fallback_endpoint="api.organization",
         ),
         "logo": fields.ImageField(original=True, description="The organization logo URL"),
         "logo_thumbnail": fields.ImageField(
@@ -151,18 +148,15 @@ org_fields = api.model(
             description="The organization metrics",
             readonly=True,
         ),
-        "uri": fields.UrlFor(
-            "api.organization",
-            lambda o: {"org": o},
-            description="The organization API URI",
+        "uri": fields.String(
+            attribute=lambda o: o.self_api_url(_external=True),
+            description="The API URI for this organization",
             readonly=True,
         ),
-        "page": fields.UrlFor(
-            "organizations.show",
-            lambda o: {"org": o},
-            description="The organization page URL",
+        "page": fields.String(
+            attribute=lambda o: o.self_web_url(),
+            description="The organization web page URL",
             readonly=True,
-            fallback_endpoint="api.organization",
         ),
         "logo": fields.ImageField(original=True, description="The organization logo URL"),
         "logo_thumbnail": fields.ImageField(
@@ -211,12 +205,10 @@ org_suggestion_fields = api.model(
         "image_url": fields.ImageField(
             size=BIGGEST_LOGO_SIZE, description="The organization logo URL", readonly=True
         ),
-        "page": fields.UrlFor(
-            "organizations.show_redirect",
-            lambda o: {"org": o["slug"]},
+        "page": fields.String(
+            attribute=lambda o: o.self_web_url(),
             description="The organization web page URL",
             readonly=True,
-            fallback_endpoint="api.organization",
         ),
     },
 )

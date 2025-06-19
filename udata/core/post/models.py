@@ -4,6 +4,7 @@ from udata.core.storages import default_image_basename, images
 from udata.i18n import lazy_gettext as _
 from udata.mail import get_mail_campaign_dict
 from udata.mongo import db
+from udata.uris import cdata_url
 
 from .constants import BODY_TYPES, IMAGE_SIZES
 
@@ -57,7 +58,13 @@ class Post(db.Datetimed, db.Document):
         return self.name or ""
 
     def url_for(self, *args, **kwargs):
-        return url_for("posts.show", post=self, *args, **kwargs)
+        return self.self_web_url(**kwargs) or self.self_api_url(*args, **kwargs)
+
+    def self_web_url(self, **kwargs):
+        return cdata_url(f"/posts/{self.slug}/", **kwargs)
+
+    def self_api_url(self, *args, **kwargs):
+        return url_for("api.post", post=self, *args, **kwargs)
 
     @property
     def display_url(self):

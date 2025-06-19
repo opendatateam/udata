@@ -131,9 +131,13 @@ class User(WithMetrics, UserMixin, db.Document):
         return self.has_role("admin")
 
     def url_for(self, *args, **kwargs):
-        return cdata_url(f"/users/{self.slug}/", **kwargs) or url_for(
-            "api.user", user=self, *args, **kwargs
-        )
+        return self.self_web_url(**kwargs) or self.self_api_url(*args, **kwargs)
+
+    def self_web_url(self, **kwargs):
+        return cdata_url(f"/users/{self.slug}/", **kwargs)
+
+    def self_api_url(self, *args, **kwargs):
+        return url_for("api.user", user=self, *args, **kwargs)
 
     display_url = property(url_for)
 
