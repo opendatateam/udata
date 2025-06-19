@@ -956,12 +956,8 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         obj = cls.objects(slug=id_or_slug).first()
         return obj or cls.objects.get_or_404(id=id_or_slug)
 
-    def add_resource(self, resource: Resource, retry=5):
+    def add_resource(self, resource: Resource):
         """Perform an atomic prepend for a new resource"""
-        if retry == 0:
-            raise MongoEngineValidationError("Tried 5 time to add_resource without success")
-
-        self.reload()
         resource.validate()
 
         existing_resource = next((r for r in self.resources if r.id == resource.id), None)
@@ -970,29 +966,20 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
                 f"Cannot add resource '{resource.title}'. A resource '{existing_resource.title}' already exists with ID '{existing_resource.id}'"
             )
 
-        last_known_modified = self.last_modified_internal
-
         # only useful for compute_quality(), we will reload to have a clean object
         self.resources.insert(0, resource)
 
-        update_result = self.__class__.objects(
-            id=self.id, last_modified_internal=last_known_modified
-        ).update_one(
+        self.update(
             set__quality_cached=self.compute_quality(),
             push__resources={"$each": [resource.to_mongo()], "$position": 0},
             set__last_modified_internal=datetime.utcnow(),
         )
-
-        if update_result == 0:
-            self.add_resource(resource, retry - 1)
-            return
 
         self.reload()
         self.on_resource_added.send(self.__class__, document=self, resource_id=resource.id)
 
     def update_resource(self, resource):
         """Perform an atomic update for an existing resource"""
-        self.reload()
 
         # only useful for compute_quality(), we will reload to have a clean object
         index = next(i for i, r in enumerate(self.resources) if r.id == resource.id)
@@ -1008,8 +995,6 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         self.on_resource_updated.send(self.__class__, document=self, resource_id=resource.id)
 
     def remove_resource(self, resource):
-        # Deletes resource's file from file storage
-
         # only useful for compute_quality(), we will reload to have a clean object
         self.resources = [r for r in self.resources if r.id != resource.id]
 
@@ -1019,6 +1004,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             set__last_modified_internal=datetime.utcnow(),
         )
 
+        # Deletes resource's file from file storage
         if resource.fs_filename is not None:
             try:
                 storages.resources.delete(resource.fs_filename)
