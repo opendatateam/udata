@@ -101,7 +101,7 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     if dataservice.harvest and dataservice.harvest.uri:
         id = URIRef(dataservice.harvest.uri)
     elif dataservice.id:
-        id = URIRef(dataservice.url_for())
+        id = URIRef(dataservice.url_for(_external=True))
     else:
         # Should not happen in production. Some test only
         # `build()` a dataset without saving it to the DB.
@@ -129,7 +129,7 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     elif dataservice.id:
         d.set(
             DCAT.landingPage,
-            URIRef(dataservice.url_for()),
+            URIRef(dataservice.url_for(_external=True)),
         )
 
     if dataservice.machine_documentation_url:

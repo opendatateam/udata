@@ -509,10 +509,7 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
     ]
 
     def url_for(self, *args, **kwargs):
-        return self.self_web_url() or self.self_api_url(*args, **kwargs)
-
-    def self_api_url(self, *args, **kwargs):
-        return url_for("api.resource_redirect", id=self.id, *args, **kwargs)
+        return self.self_web_url() or self.latest
 
     def self_web_url(self):
         return cdata_url(f"/datasets/{self.dataset.slug}/", resource_id=self.id)
