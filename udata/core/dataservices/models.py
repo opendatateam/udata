@@ -23,7 +23,7 @@ from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
 from udata.models import Discussion, Follow, db
 from udata.mongo.errors import FieldValidationError
-from udata.uris import endpoint_for
+from udata.uris import cdata_url
 
 # "frequency"
 # "harvest"
@@ -273,18 +273,21 @@ class Dataservice(Auditable, WithMetrics, Owned, db.Document):
         auditable=False,
     )
 
-    def url_for(self, *args, **kwargs):
-        return endpoint_for(
-            "dataservices.show", "api.dataservice", dataservice=self, *args, **kwargs
-        )
+    def url_for(self, **kwargs):
+        return self.self_web_url(**kwargs) or self.self_api_url(**kwargs)
 
     @function_field(description="Link to the API endpoint for this dataservice")
-    def self_api_url(self):
-        return endpoint_for("api.dataservice", dataservice=self, _external=True)
+    def self_api_url(self, **kwargs):
+        return url_for(
+            "api.dataservice",
+            dataservice=self.id,
+            _external=kwargs.pop("_external", True),
+            **kwargs,
+        )
 
     @function_field(description="Link to the udata web page for this dataservice", show_as_ref=True)
-    def self_web_url(self):
-        return endpoint_for("dataservices.show", dataservice=self, _external=True)
+    def self_web_url(self, **kwargs):
+        return cdata_url(f"/dataservices/{self.slug}/", **kwargs)
 
     __metrics_keys__ = [
         "discussions",

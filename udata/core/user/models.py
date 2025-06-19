@@ -6,7 +6,7 @@ from time import time
 
 from authlib.jose import JsonWebSignature
 from blinker import Signal
-from flask import current_app
+from flask import current_app, url_for
 from flask_security import MongoEngineUserDatastore, RoleMixin, UserMixin
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
@@ -20,7 +20,7 @@ from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.mail import get_mail_campaign_dict
 from udata.models import Follow, WithMetrics, db
-from udata.uris import endpoint_for
+from udata.uris import cdata_url
 
 from .constants import AVATAR_SIZES
 
@@ -131,7 +131,13 @@ class User(WithMetrics, UserMixin, db.Document):
         return self.has_role("admin")
 
     def url_for(self, *args, **kwargs):
-        return endpoint_for("users.show", "api.user", user=self, *args, **kwargs)
+        return self.self_web_url(**kwargs) or self.self_api_url(*args, **kwargs)
+
+    def self_web_url(self, **kwargs):
+        return cdata_url(f"/users/{self.slug}/", **kwargs)
+
+    def self_api_url(self, *args, **kwargs):
+        return url_for("api.user", user=self.id, *args, **kwargs)
 
     display_url = property(url_for)
 

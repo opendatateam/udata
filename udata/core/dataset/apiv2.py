@@ -198,18 +198,15 @@ dataset_fields = apiv2.model(
             default=DEFAULT_LICENSE["id"],
             description="The dataset license (full License object if `X-Get-Datasets-Full-Objects` is set, ID of the license otherwise)",
         ),
-        "uri": fields.UrlFor(
-            "api.dataset",
-            lambda o: {"dataset": o},
-            description="The dataset API URI",
-            required=True,
+        "uri": fields.String(
+            attribute=lambda d: d.self_api_url(_external=True),
+            description="The API URI for this dataset",
+            readonly=True,
         ),
-        "page": fields.UrlFor(
-            "datasets.show",
-            lambda o: {"dataset": o},
-            description="The dataset page URL",
-            required=True,
-            fallback_endpoint="api.dataset",
+        "page": fields.String(
+            attribute=lambda d: d.self_web_url(),
+            description="The dataset web page URL",
+            readonly=True,
         ),
         "quality": fields.Raw(description="The dataset quality", readonly=True),
         "last_update": fields.ISODateTime(

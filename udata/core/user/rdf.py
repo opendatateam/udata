@@ -6,7 +6,6 @@ from rdflib import BNode, Graph, Literal, URIRef
 from rdflib.namespace import FOAF, RDF, RDFS
 
 from udata.rdf import namespace_manager
-from udata.uris import endpoint_for
 
 
 def user_to_rdf(user, graph=None):
@@ -15,8 +14,7 @@ def user_to_rdf(user, graph=None):
     """
     graph = graph or Graph(namespace_manager=namespace_manager)
     if user.id:
-        user_url = endpoint_for("users.show_redirect", "api.user", user=user.id, _external=True)
-        id = URIRef(user_url)
+        id = URIRef(user.url_for(_external=True))
     else:
         id = BNode()
     o = graph.resource(id)

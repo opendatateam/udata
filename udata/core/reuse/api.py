@@ -320,6 +320,7 @@ class ReusesSuggestAPI(API):
                 "title": reuse.title,
                 "slug": reuse.slug,
                 "image_url": reuse.image,
+                "page": reuse.self_web_url(),
             }
             for reuse in reuses.order_by(SUGGEST_SORTING).limit(args["size"])
         ]
