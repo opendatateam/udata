@@ -205,10 +205,6 @@ org_suggestion_fields = api.model(
         "image_url": fields.ImageField(
             size=BIGGEST_LOGO_SIZE, description="The organization logo URL", readonly=True
         ),
-        "page": fields.String(
-            attribute=lambda o: o.self_web_url(),
-            description="The organization web page URL",
-            readonly=True,
-        ),
+        "page": fields.String(description="The organization web page URL", readonly=True),
     },
 )

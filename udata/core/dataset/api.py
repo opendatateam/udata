@@ -834,6 +834,7 @@ class DatasetSuggestAPI(API):
                     if dataset.owner
                     else None
                 ),
+                "page": dataset.self_web_url(),
             }
             for dataset in datasets.order_by(SUGGEST_SORTING).limit(args["size"])
         ]

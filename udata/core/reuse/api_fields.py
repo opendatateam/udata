@@ -30,11 +30,7 @@ reuse_suggestion_fields = api.model(
         "image_url": fields.ImageField(
             size=BIGGEST_IMAGE_SIZE, description="The reuse thumbnail URL", readonly=True
         ),
-        "page": fields.String(
-            attribute=lambda r: r.page(),
-            description="The reuse web page URL",
-            readonly=True,
-        ),
+        "page": fields.String(description="The reuse web page URL", readonly=True),
     },
 )
 

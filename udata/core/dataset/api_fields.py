@@ -435,11 +435,7 @@ dataset_suggestion_fields = api.model(
         "image_url": fields.ImageField(
             size=BIGGEST_LOGO_SIZE, description="The dataset (organization) logo URL", readonly=True
         ),
-        "page": fields.String(
-            attribute=lambda d: d.self_web_url(),
-            description="The dataset web page URL",
-            readonly=True,
-        ),
+        "page": fields.String(description="The dataset web page URL", readonly=True),
     },
 )
 

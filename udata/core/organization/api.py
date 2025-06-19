@@ -498,6 +498,7 @@ class OrganizationSuggestAPI(API):
                 "acronym": org.acronym,
                 "slug": org.slug,
                 "image_url": org.logo,
+                "page": org.self_web_url(),
             }
             for org in orgs.order_by(SUGGEST_SORTING).limit(args["size"])
         ]
