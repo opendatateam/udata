@@ -11,6 +11,7 @@ from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
 from udata.models import Dataset, db
+from udata.mongo.reference_field import SafeReferenceField
 
 log = logging.getLogger(__name__)
 
@@ -66,8 +67,8 @@ class HarvestLog(db.EmbeddedDocument):
 
 class HarvestItem(db.EmbeddedDocument):
     remote_id = db.StringField()
-    dataset = db.ReferenceField(Dataset)
-    dataservice = db.ReferenceField(Dataservice)
+    dataset = SafeReferenceField(Dataset)
+    dataservice = SafeReferenceField(Dataservice)
     status = db.StringField(
         choices=list(HARVEST_ITEM_STATUS), default=DEFAULT_HARVEST_ITEM_STATUS, required=True
     )

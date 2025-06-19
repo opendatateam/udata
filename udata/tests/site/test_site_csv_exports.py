@@ -330,7 +330,6 @@ class SiteCsvExportsTest(APITestCase):
         hidden_dataservice = DataserviceFactory(private=True)
 
         response = self.get(url_for("api.site_dataservices_csv"))
-        print(response.json)
 
         self.assert200(response)
         self.assertEqual(response.mimetype, "text/csv")
