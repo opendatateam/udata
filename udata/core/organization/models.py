@@ -2,6 +2,7 @@ from datetime import datetime
 from itertools import chain
 
 from blinker import Signal
+from flask import url_for
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
@@ -15,7 +16,7 @@ from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.mail import get_mail_campaign_dict
 from udata.mongo import db
-from udata.uris import endpoint_for
+from udata.uris import cdata_url
 
 from .constants import (
     ASSOCIATION,
@@ -190,7 +191,9 @@ class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, db.Datetimed,
         cls.before_save.send(document)
 
     def url_for(self, *args, **kwargs):
-        return endpoint_for("organizations.show", "api.organization", org=self, *args, **kwargs)
+        return cdata_url(f"/organizations/{self.slug}/", **kwargs) or url_for(
+            "api.organization", org=self, *args, **kwargs
+        )
 
     display_url = property(url_for)
 
@@ -283,7 +286,7 @@ class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, db.Datetimed,
             "@type": type_,
             "@id": str(self.id),
             "alternateName": self.slug,
-            "url": endpoint_for("organizations.show", "api.organization", org=self, _external=True),
+            "url": self.url_for(_external=True),
             "name": self.name,
             "dateCreated": self.created_at.isoformat(),
             "dateModified": self.last_modified.isoformat(),

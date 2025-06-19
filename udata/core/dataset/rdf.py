@@ -49,7 +49,6 @@ from udata.rdf import (
     themes_from_rdf,
     url_from_rdf,
 )
-from udata.uris import endpoint_for
 from udata.utils import get_by, safe_unicode, to_naive_datetime
 
 from .constants import OGC_SERVICE_FORMATS, UPDATE_FREQUENCIES
@@ -203,27 +202,16 @@ def resource_to_rdf(
     """
     graph = graph or Graph(namespace_manager=namespace_manager)
     if dataset and dataset.id:
-        id = URIRef(
-            endpoint_for(
-                "datasets.show_redirect",
-                "api.dataset",
-                dataset=dataset.id,
-                _external=True,
-                _anchor="resource-{0}".format(resource.id),
-            )
-        )
+        id = URIRef(resource.url_for(_external=True))
     else:
         id = BNode(resource.id)
-    permalink = endpoint_for(
-        "datasets.resource", "api.resource_redirect", id=resource.id, _external=True
-    )
     r = graph.resource(id)
     r.set(RDF.type, DCAT.Distribution)
     r.set(DCT.identifier, Literal(resource.id))
     r.add(DCT.title, Literal(resource.title))
     r.add(DCT.description, Literal(resource.description))
     r.add(DCAT.downloadURL, URIRef(resource.url))
-    r.add(DCAT.accessURL, URIRef(permalink))
+    r.add(DCAT.accessURL, URIRef(resource.latest))
     r.add(DCT.issued, Literal(resource.created_at))
     r.add(DCT.modified, Literal(resource.last_modified))
     if dataset and dataset.license:
@@ -261,11 +249,7 @@ def dataset_to_graph_id(dataset: Dataset) -> URIRef | BNode:
     if dataset.harvest and dataset.harvest.uri:
         return URIRef(dataset.harvest.uri)
     elif dataset.id:
-        return URIRef(
-            endpoint_for(
-                "datasets.show_redirect", "api.dataset", dataset=dataset.id, _external=True
-            )
-        )
+        return URIRef(dataset.url_for(_external=True))
     else:
         # Should not happen in production. Some test only
         # `build()` a dataset without saving it to the DB.
@@ -288,14 +272,7 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
         d.set(DCT.identifier, Literal(dataset.harvest.dct_identifier))
 
         alt = graph.resource(BNode())
-        alternate_identifier = Literal(
-            endpoint_for(
-                "datasets.show_redirect",
-                "api.dataset",
-                dataset=dataset.id,
-                _external=True,
-            )
-        )
+        alternate_identifier = Literal(dataset.url_for(_external=True))
         alt.set(RDF.type, ADMS.Identifier)
         alt.set(DCT.creator, Literal(current_app.config["SITE_TITLE"]))
         alt.set(SKOS.notation, alternate_identifier)
@@ -312,17 +289,7 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
     if dataset.harvest and dataset.harvest.remote_url:
         d.set(DCAT.landingPage, URIRef(dataset.harvest.remote_url))
     elif dataset.id:
-        d.set(
-            DCAT.landingPage,
-            URIRef(
-                endpoint_for(
-                    "datasets.show_redirect",
-                    "api.dataset",
-                    dataset=dataset.id,
-                    _external=True,
-                )
-            ),
-        )
+        d.set(DCAT.landingPage, URIRef(dataset.url_for(_external=True)))
 
     if dataset.acronym:
         d.set(SKOS.altLabel, Literal(dataset.acronym))

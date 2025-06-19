@@ -9,7 +9,7 @@ import Levenshtein
 import requests
 from blinker import signal
 from dateutil.parser import parse as parse_dt
-from flask import current_app
+from flask import current_app, url_for
 from mongoengine import DynamicEmbeddedDocument
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import DateTimeField
@@ -27,7 +27,7 @@ from udata.i18n import lazy_gettext as _
 from udata.mail import get_mail_campaign_dict
 from udata.models import Badge, BadgeMixin, BadgesList, SpatialCoverage, WithMetrics, db
 from udata.mongo.errors import FieldValidationError
-from udata.uris import ValidationError, endpoint_for
+from udata.uris import ValidationError, cdata_url
 from udata.uris import validate as validate_url
 from udata.utils import get_by, hash_url, to_naive_datetime
 
@@ -456,9 +456,7 @@ class ResourceMixin(object):
 
         If this resource is updated and `url` changes, this property won't.
         """
-        return endpoint_for(
-            "datasets.resource", "api.resource_redirect", id=self.id, _external=True
-        )
+        return url_for("api.resource_redirect", id=self.id, _external=True)
 
     @cached_property
     def json_ld(self):
@@ -509,6 +507,15 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
     __metrics_keys__ = [
         "views",
     ]
+
+    def url_for(self, *args, **kwargs):
+        return self.self_web_url() or self.self_api_url(*args, **kwargs)
+
+    def self_api_url(self, *args, **kwargs):
+        return url_for("api.resource_redirect", id=self.id, *args, **kwargs)
+
+    def self_web_url(self):
+        return cdata_url(f"/datasets/{self.dataset.slug}/", resource_id=self.id)
 
     @property
     def dataset(self):
@@ -720,7 +727,9 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         }
 
     def url_for(self, *args, **kwargs):
-        return endpoint_for("datasets.show", "api.dataset", dataset=self, *args, **kwargs)
+        return cdata_url(f"/datasets/{self.slug}/", **kwargs) or url_for(
+            "api.dataset", dataset=self, *args, **kwargs
+        )
 
     display_url = property(url_for)
 
@@ -1010,7 +1019,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             "alternateName": self.slug,
             "dateCreated": self.created_at.isoformat(),
             "dateModified": self.last_modified.isoformat(),
-            "url": endpoint_for("datasets.show", "api.dataset", dataset=self, _external=True),
+            "url": self.url_for(_external=True),
             "name": self.title,
             "keywords": ",".join(self.tags),
             "distribution": [

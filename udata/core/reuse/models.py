@@ -1,4 +1,5 @@
 from blinker import Signal
+from flask import url_for
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
@@ -14,7 +15,7 @@ from udata.i18n import lazy_gettext as _
 from udata.mail import get_mail_campaign_dict
 from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics, db
 from udata.mongo.errors import FieldValidationError
-from udata.uris import endpoint_for
+from udata.uris import cdata_url
 from udata.utils import hash_url
 
 from .constants import IMAGE_MAX_SIZE, IMAGE_SIZES, REUSE_TOPICS, REUSE_TYPES
@@ -188,19 +189,17 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Owned, db.Doc
         cls.before_save.send(document)
 
     def url_for(self, *args, **kwargs):
-        return endpoint_for("reuses.show", "api.reuse", reuse=self, *args, **kwargs)
+        return self.page(**kwargs) or url_for("api.reuse", reuse=self, *args, **kwargs)
 
     display_url = property(url_for)
 
     @function_field(description="Link to the API endpoint for this reuse", show_as_ref=True)
     def uri(self):
-        return endpoint_for("api.reuse", reuse=self, _external=True)
+        return url_for("api.reuse", reuse=self, _external=True)
 
     @function_field(description="Link to the udata web page for this reuse", show_as_ref=True)
-    def page(self):
-        return endpoint_for(
-            "reuses.show", reuse=self, _external=True, fallback_endpoint="api.reuse"
-        )
+    def page(self, **kwargs):
+        return cdata_url(f"/reuses/{self.slug}/", **kwargs)
 
     @property
     @function_field(
@@ -263,7 +262,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Owned, db.Doc
             "alternateName": self.slug,
             "dateCreated": self.created_at.isoformat(),
             "dateModified": self.last_modified.isoformat(),
-            "url": endpoint_for("reuses.show", "api.reuse", reuse=self, _external=True),
+            "url": self.url_for(_external=True),
             "name": self.title,
             "isBasedOnUrl": self.url,
         }

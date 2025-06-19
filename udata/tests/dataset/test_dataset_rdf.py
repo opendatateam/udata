@@ -48,7 +48,6 @@ from udata.rdf import (
     primary_topic_identifier_from_rdf,
 )
 from udata.tests.helpers import assert200, assert_redirects
-from udata.uris import endpoint_for
 from udata.utils import faker
 
 pytestmark = pytest.mark.usefixtures("app")
@@ -334,14 +333,7 @@ class DatasetToRdfTest:
         len(list(g.subjects(RDF.type, DCAT.Distribution))) == 4
         len(list(g.subjects(RDF.type, DCAT.DataService))) == 1
         dataservice_as_distribution = g.resource(next(g.subjects(DCAT.accessService)))
-        dataservice_uri = URIRef(
-            endpoint_for(
-                "dataservices.show_redirect",
-                "api.dataservice",
-                dataservice=dataservice.id,
-                _external=True,
-            )
-        )
+        dataservice_uri = URIRef(dataservice.url_for(_external=True))
         assert dataservice_as_distribution.value(DCAT.accessURL).identifier == URIRef(
             dataservice.base_api_url
         )

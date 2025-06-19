@@ -20,7 +20,6 @@ from udata.rdf import (
     themes_from_rdf,
     url_from_rdf,
 )
-from udata.uris import endpoint_for
 
 
 def dataservice_from_rdf(
@@ -102,14 +101,7 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     if dataservice.harvest and dataservice.harvest.uri:
         id = URIRef(dataservice.harvest.uri)
     elif dataservice.id:
-        id = URIRef(
-            endpoint_for(
-                "dataservices.show_redirect",
-                "api.dataservice",
-                dataservice=dataservice.id,
-                _external=True,
-            )
-        )
+        id = URIRef(dataservice.url_for())
     else:
         # Should not happen in production. Some test only
         # `build()` a dataset without saving it to the DB.
@@ -137,14 +129,7 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     elif dataservice.id:
         d.set(
             DCAT.landingPage,
-            URIRef(
-                endpoint_for(
-                    "dataservices.show_redirect",
-                    "api.dataservice",
-                    dataservice=dataservice.id,
-                    _external=True,
-                )
-            ),
+            URIRef(dataservice.url_for()),
         )
 
     if dataservice.machine_documentation_url:

@@ -26,7 +26,7 @@ from flask_security.views import (
 from werkzeug.local import LocalProxy
 
 from udata.i18n import lazy_gettext as _
-from udata.uris import endpoint_for
+from udata.uris import homepage_url
 
 from .forms import ChangeEmailForm
 
@@ -87,7 +87,7 @@ def confirm_change_email(token):
             "error",
         )
     if invalid or expired:
-        return redirect(endpoint_for("site.home", "admin.index"))
+        return redirect(homepage_url())
 
     if user != current_user:
         logout_user()
@@ -98,7 +98,7 @@ def confirm_change_email(token):
     msg = (_("Thank you. Your change of email has been confirmed."), "success")
 
     do_flash(*msg)
-    return redirect(endpoint_for("site.home", "admin.index"))
+    return redirect(homepage_url())
 
 
 @login_required
@@ -116,7 +116,7 @@ def change_email():
             ).format(new_email=new_email),
             "success",
         )
-        return redirect(endpoint_for("site.home", "admin.index"))
+        return redirect(homepage_url())
 
     return _security.render_template("security/change_email.html", change_email_form=form)
 
