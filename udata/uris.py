@@ -1,6 +1,6 @@
 import re
 from typing import Optional
-from urllib.parse import urlencode, urlparse, urlunparse
+from urllib.parse import urlencode, urljoin, urlparse, urlunparse
 
 from flask import current_app, url_for
 from netaddr import AddrFormatError, IPAddress
@@ -77,7 +77,8 @@ def cdata_url(uri: str, **kwargs) -> Optional[str]:
     if not base_url:
         return None
 
-    url_parts = list(urlparse(base_url))
+    url = urljoin(base_url, uri)
+    url_parts = list(urlparse(url))
     url_parts[4] = urlencode(
         {k: v for k, v in kwargs.items() if not k.startswith("_")}
     )  # index 4 is the query params
