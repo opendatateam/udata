@@ -730,7 +730,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         return cdata_url(f"/datasets/{self.slug}/", **kwargs)
 
     def self_api_url(self, *args, **kwargs):
-        return url_for("api.dataset", dataset=self, *args, **kwargs)
+        return url_for("api.dataset", dataset=self.id, *args, **kwargs)
 
     display_url = property(url_for)
 

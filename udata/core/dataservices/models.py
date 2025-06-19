@@ -279,7 +279,10 @@ class Dataservice(Auditable, WithMetrics, Owned, db.Document):
     @function_field(description="Link to the API endpoint for this dataservice")
     def self_api_url(self, **kwargs):
         return url_for(
-            "api.dataservice", dataservice=self, _external=kwargs.pop("_external", True), **kwargs
+            "api.dataservice",
+            dataservice=self.id,
+            _external=kwargs.pop("_external", True),
+            **kwargs,
         )
 
     @function_field(description="Link to the udata web page for this dataservice", show_as_ref=True)

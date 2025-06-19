@@ -195,7 +195,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Owned, db.Doc
 
     @function_field(description="Link to the API endpoint for this reuse", show_as_ref=True)
     def uri(self):
-        return url_for("api.reuse", reuse=self, _external=True)
+        return url_for("api.reuse", reuse=self.id, _external=True)
 
     @function_field(description="Link to the udata web page for this reuse", show_as_ref=True)
     def page(self, **kwargs):

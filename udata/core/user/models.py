@@ -137,7 +137,7 @@ class User(WithMetrics, UserMixin, db.Document):
         return cdata_url(f"/users/{self.slug}/", **kwargs)
 
     def self_api_url(self, *args, **kwargs):
-        return url_for("api.user", user=self, *args, **kwargs)
+        return url_for("api.user", user=self.id, *args, **kwargs)
 
     display_url = property(url_for)
 
