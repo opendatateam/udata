@@ -168,7 +168,7 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
         pass
     else:
         for dataset in dataservice.datasets:
-            d.add(DCAT.servesDataset, dataset_to_graph_id(dataset))
+            d.add(DCAT.servesDataset, dataset_to_graph_id(dataset.fetch()))
 
     for contact_point, predicate in contact_points_to_rdf(dataservice.contact_points, graph):
         d.set(predicate, contact_point)
