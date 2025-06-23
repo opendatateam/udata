@@ -512,9 +512,7 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
         return self.self_web_url(**kwargs) or self.latest
 
     def self_web_url(self, **kwargs):
-        return cdata_url(
-            f"/datasets/{self.dataset._link_id(**kwargs)}/", resource_id=self.id, **kwargs
-        )
+        return self.dataset.self_web_url(resource_id=self.id, **kwargs)
 
     @property
     def dataset(self):
