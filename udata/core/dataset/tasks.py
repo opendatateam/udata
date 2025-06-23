@@ -210,8 +210,9 @@ def export_csv_for_model(model, dataset):
         # add it to the dataset
         if created:
             dataset.add_resource(resource)
-        dataset.last_modified_internal = datetime.utcnow()
-        dataset.save()
+        else:
+            dataset.last_modified_internal = datetime.utcnow()
+            dataset.save()
     finally:
         csvfile.close()
         os.unlink(csvfile.name)
