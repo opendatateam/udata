@@ -38,6 +38,7 @@
         <td align="center">
             {{ mail_button(
                 _('See the request'),
+                cdata_url(f"/admin/organizations/{org.slug}/members")
                 url_for('admin.index', path='organization/{id}/'.format(id=org.id), _anchor='membership-requests', _external=True, **extras)
             ) }}
         </td>
