@@ -191,15 +191,21 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Owned, db.Doc
     def url_for(self, *args, **kwargs):
         return self.page(**kwargs) or url_for("api.reuse", reuse=self, *args, **kwargs)
 
+    def self_web_url(self, **kwargs):
+        return cdata_url(f"/reuses/{self.slug}/", **kwargs)
+
+    def self_api_url(self, **kwargs):
+        return url_for("api.reuse", reuse=self.id, _external=True)
+
     display_url = property(url_for)
 
     @function_field(description="Link to the API endpoint for this reuse", show_as_ref=True)
-    def uri(self):
-        return url_for("api.reuse", reuse=self.id, _external=True)
+    def uri(self, *args, **kwargs):
+        return self.self_api_url(*args, **kwargs)
 
     @function_field(description="Link to the udata web page for this reuse", show_as_ref=True)
-    def page(self, **kwargs):
-        return cdata_url(f"/reuses/{self.slug}/", **kwargs)
+    def page(self, *args, **kwargs):
+        return self.self_web_url(*args, **kwargs)
 
     @property
     @function_field(
