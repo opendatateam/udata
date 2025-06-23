@@ -731,8 +731,6 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
     def self_api_url(self, **kwargs):
         return url_for("api.dataset", dataset=self._link_id(**kwargs), **kwargs)
 
-    display_url = property(url_for)
-
     @property
     def is_visible(self):
         return not self.is_hidden

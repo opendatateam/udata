@@ -198,8 +198,6 @@ class Organization(
     def self_api_url(self, **kwargs):
         return url_for("api.organization", org=self._link_id(**kwargs), **kwargs)
 
-    display_url = property(url_for)
-
     @property
     def pending_requests(self):
         return [r for r in self.requests if r.status == "pending"]
