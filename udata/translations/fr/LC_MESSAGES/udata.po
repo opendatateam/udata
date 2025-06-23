@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2025-06-23 10:12+0200\n"
-"PO-Revision-Date: 2025-06-23 09:34\n"
+"PO-Revision-Date: 2025-06-23 12:56\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -277,23 +277,23 @@ msgstr "Au moins un e-mail ou un formulaire de contact est requis pour un point 
 
 #: udata/core/dataservices/activities.py:21
 msgid "created a dataservice"
-msgstr ""
+msgstr "a créé une API"
 
 #: udata/core/dataservices/activities.py:27
 msgid "updated a dataservice"
-msgstr ""
+msgstr "a mis à jour une API"
 
 #: udata/core/dataservices/activities.py:34
 msgid "deleted a dataservice"
-msgstr ""
+msgstr "a supprimé une API"
 
 #: udata/core/dataservices/api.py:62
 msgid "Latest APIs"
-msgstr ""
+msgstr "Dernières APIs"
 
 #: udata/core/dataservices/models.py:128
 msgid "You can only set one condition for a given access audience role"
-msgstr ""
+msgstr "Vous ne pouvez définir qu'une seule condition pour une audience donnée"
 
 #: udata/core/dataservices/models.py:158
 msgid "dataservice"
@@ -323,19 +323,19 @@ msgstr "a supprimé un jeu de données"
 
 #: udata/core/dataset/activities.py:41
 msgid "added a resource to a dataset"
-msgstr ""
+msgstr "a ajouté une ressource à un jeu de données"
 
 #: udata/core/dataset/activities.py:47
 msgid "updated a resource"
-msgstr ""
+msgstr "a mis à jour une ressource"
 
 #: udata/core/dataset/activities.py:53
 msgid "removed a resource from a dataset"
-msgstr ""
+msgstr "a supprimé une ressource d'un jeu de données"
 
 #: udata/core/dataset/api.py:321
 msgid "Latest datasets"
-msgstr ""
+msgstr "Derniers jeux de données"
 
 #: udata/core/dataset/constants.py:10
 msgid "Unknown"
@@ -827,7 +827,7 @@ msgstr "Votre organisation \"%(name)s\" a été identifiée comme étant une col
 
 #: udata/core/post/api.py:119
 msgid "Latests posts"
-msgstr ""
+msgstr "Derniers articles"
 
 #: udata/core/post/constants.py:9
 msgid "Markdown"
@@ -915,7 +915,7 @@ msgstr "a supprimé une réutilisation"
 
 #: udata/core/reuse/api.py:141
 msgid "Latests reuses"
-msgstr ""
+msgstr "Dernières réutilisations"
 
 #: udata/core/reuse/constants.py:5
 msgid "Application"
@@ -1116,11 +1116,11 @@ msgstr "Arrondissement français"
 
 #: udata/core/topic/activities.py:17
 msgid "created a topic"
-msgstr ""
+msgstr "a créé une thématique"
 
 #: udata/core/topic/activities.py:23
 msgid "updated a topic"
-msgstr ""
+msgstr "a mis à jour une thématique"
 
 #: udata/core/topic/forms.py:28
 msgid "Featured"
@@ -1132,7 +1132,7 @@ msgstr "a suivi un utilisateur"
 
 #: udata/core/user/activities.py:42
 msgid "discussed a dataservice"
-msgstr ""
+msgstr "a commenté une API"
 
 #: udata/core/user/activities.py:47
 msgid "discussed a dataset"
@@ -1144,7 +1144,7 @@ msgstr "a commenté une réutilisation"
 
 #: udata/core/user/activities.py:57
 msgid "followed a dataservice"
-msgstr ""
+msgstr "a suivi une API"
 
 #: udata/core/user/activities.py:62
 msgid "followed a dataset"
