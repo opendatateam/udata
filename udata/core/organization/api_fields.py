@@ -17,7 +17,7 @@ org_ref_fields = api.inherit(
             description="The organization string used as permalink", required=True
         ),
         "uri": fields.String(
-            attribute=lambda o: o.self_api_url(_external=True),
+            attribute=lambda o: o.self_api_url(),
             description="The API URI for this organization",
             readonly=True,
         ),
@@ -149,7 +149,7 @@ org_fields = api.model(
             readonly=True,
         ),
         "uri": fields.String(
-            attribute=lambda o: o.self_api_url(_external=True),
+            attribute=lambda o: o.self_api_url(),
             description="The API URI for this organization",
             readonly=True,
         ),

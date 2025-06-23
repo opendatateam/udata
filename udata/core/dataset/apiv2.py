@@ -199,7 +199,7 @@ dataset_fields = apiv2.model(
             description="The dataset license (full License object if `X-Get-Datasets-Full-Objects` is set, ID of the license otherwise)",
         ),
         "uri": fields.String(
-            attribute=lambda d: d.self_api_url(_external=True),
+            attribute=lambda d: d.self_api_url(),
             description="The API URI for this dataset",
             readonly=True,
         ),

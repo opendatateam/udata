@@ -11,7 +11,7 @@ user_ref_fields = api.inherit(
         "last_name": fields.String(description="The user larst name", readonly=True),
         "slug": fields.String(description="The user permalink string", required=True),
         "uri": fields.String(
-            attribute=lambda u: u.self_api_url(_external=True),
+            attribute=lambda u: u.self_api_url(),
             description="The API URI for this user",
             readonly=True,
         ),
@@ -67,7 +67,7 @@ user_fields = api.model(
             readonly=True,
         ),
         "uri": fields.String(
-            attribute=lambda u: u.self_api_url(_external=True),
+            attribute=lambda u: u.self_api_url(),
             description="The API URI for this user",
             readonly=True,
         ),

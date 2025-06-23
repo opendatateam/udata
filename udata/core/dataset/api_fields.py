@@ -205,7 +205,7 @@ dataset_ref_fields = api.inherit(
         "title": fields.String(description="The dataset title", readonly=True),
         "acronym": fields.String(description="An optional dataset acronym", readonly=True),
         "uri": fields.String(
-            attribute=lambda d: d.self_api_url(_external=True),
+            attribute=lambda d: d.self_api_url(),
             description="The API URI for this dataset",
             readonly=True,
         ),
@@ -391,7 +391,7 @@ dataset_fields = api.model(
             attribute="license.id", default=DEFAULT_LICENSE["id"], description="The dataset license"
         ),
         "uri": fields.String(
-            attribute=lambda d: d.self_api_url(_external=True),
+            attribute=lambda d: d.self_api_url(),
             description="The API URI for this dataset",
             readonly=True,
         ),
