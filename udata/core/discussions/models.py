@@ -46,7 +46,7 @@ class Message(SpamMixin, db.EmbeddedDocument):
     def spam_report_message(self, breadcrumb):
         message = "Spam potentiel dans le message"
         if self.posted_by_org_or_user:
-            message += f" de [{self.posted_by_name}]({self.posted_by_org_or_user.external_url})"
+            message += f" de [{self.posted_by_name}]({self.posted_by_org_or_user.url_for()})"
 
         if len(breadcrumb) != 2:
             log.warning(
@@ -159,7 +159,7 @@ class Discussion(SpamMixin, db.Document):
     def spam_report_message(self, breadcrumb):
         message = f"Spam potentiel sur la discussion « [{self.title}]({self.external_url}) »"
         if self.user:
-            message += f" de [{self.user.fullname}]({self.user.external_url})"
+            message += f" de [{self.user.fullname}]({self.user.url_for()})"
 
         return message
 

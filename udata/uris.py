@@ -7,6 +7,7 @@ from netaddr import AddrFormatError, IPAddress
 from werkzeug.routing import BuildError
 
 from udata.i18n import _
+from udata.mail import get_mail_campaign_dict
 from udata.settings import Defaults
 
 URL_REGEX = re.compile(
@@ -76,6 +77,9 @@ def cdata_url(uri: str, **kwargs) -> Optional[str]:
     base_url = current_app.config["CDATA_BASE_URL"]
     if not base_url:
         return None
+
+    if kwargs.pop("_mailCampaign", False):
+        kwargs.update(get_mail_campaign_dict())
 
     url = urljoin(base_url, uri)
     url_parts = list(urlparse(url))

@@ -602,7 +602,7 @@ class ReusesFeedAPItest(APITestCase):
         self.assertEqual(len(entry.authors), 1)
         author = entry.authors[0]
         self.assertEqual(author.name, owner.fullname)
-        self.assertEqual(author.href, owner.external_url)
+        self.assertEqual(author.href, owner.url_for())
 
     def test_recent_feed_org(self):
         owner = UserFactory()
@@ -620,7 +620,7 @@ class ReusesFeedAPItest(APITestCase):
         self.assertEqual(len(entry.authors), 1)
         author = entry.authors[0]
         self.assertEqual(author.name, org.name)
-        self.assertEqual(author.href, org.external_url)
+        self.assertEqual(author.href, org.url_for())
 
 
 class ReuseBadgeAPITest:

@@ -130,7 +130,7 @@ class PostsAtomFeedAPI(API):
                 description=post.headline,
                 content=md(post.content),
                 author_name="data.gouv.fr",
-                link=post.external_url,
+                link=post.url_for(),
                 updateddate=post.last_modified,
                 pubdate=post.published,
             )
