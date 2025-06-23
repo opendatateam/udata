@@ -81,7 +81,15 @@ def cdata_url(uri: str, **kwargs) -> Optional[str]:
     if kwargs.pop("_mailCampaign", False):
         kwargs.update(get_mail_campaign_dict())
 
+    uri = uri.rstrip("/")
+    append = kwargs.pop("append", None)
+    if append:
+        uri += f"/{append.lstrip('/')}"
+
     url = urljoin(base_url, uri)
+    if not url.endswith("/"):
+        url += "/"
+
     url_parts = list(urlparse(url))
     url_parts[4] = urlencode(
         {k: v for k, v in kwargs.items() if not k.startswith("_")}

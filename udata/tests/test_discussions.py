@@ -137,7 +137,7 @@ class DiscussionsTest(APITestCase):
         )
         self.assert400(response)
 
-    @pytest.mark.options(SPAM_WORDS=["spam"])
+    @pytest.mark.options(SPAM_WORDS=["spam"], CDATA_BASE_URL="https://data.gouv.fr")
     def test_spam_in_new_discussion_title(self):
         self.login()
         dataset = Dataset.objects.create(title="Test dataset")
@@ -148,7 +148,7 @@ class DiscussionsTest(APITestCase):
             def check_signal(args):
                 self.assertIsNotNone(discussion_id)
                 self.assertIn(
-                    f"http://local.test/api/1/datasets/{dataset.slug}/#discussion-{discussion_id}",
+                    f"https://data.gouv.fr/datasets/{dataset.slug}/discussions/?discussion_id={discussion_id}",
                     args[1]["message"],
                 )
 
