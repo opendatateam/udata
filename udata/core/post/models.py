@@ -63,10 +63,6 @@ class Post(db.Datetimed, Linkable, db.Document):
     def self_api_url(self, **kwargs):
         return url_for("api.post", post=self._link_id(**kwargs), **kwargs)
 
-    @property
-    def display_url(self):
-        return self.url_for()
-
     def count_discussions(self):
         # There are no metrics on Post to store discussions count
         pass

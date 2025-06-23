@@ -37,7 +37,7 @@ activity_fields = api.model(
             required=True,
         ),
         "related_to_url": fields.String(
-            attribute="related_to.display_url",
+            attribute=lambda o: o.related_to.url_for(),
             description="The activity target model",
             required=True,
         ),

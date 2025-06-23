@@ -136,8 +136,6 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
     def self_api_url(self, **kwargs):
         return url_for("api.user", user=self._link_id(**kwargs), **kwargs)
 
-    display_url = property(url_for)
-
     @property
     def visible(self):
         count = self.metrics.get("datasets", 0) + self.metrics.get("reuses", 0)
