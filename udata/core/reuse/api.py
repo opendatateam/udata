@@ -33,7 +33,6 @@ from .api_fields import (
     reuse_type_fields,
 )
 from .models import Reuse
-from .permissions import ReuseEditPermission
 
 DEFAULT_SORTING = "-created_at"
 SUGGEST_SORTING = "-metrics.followers"
@@ -179,7 +178,7 @@ class ReuseAPI(API):
     @api.marshal_with(Reuse.__read_fields__)
     def get(self, reuse):
         """Fetch a given reuse"""
-        if not ReuseEditPermission(reuse).can():
+        if not reuse.permissions["edit"].can():
             if reuse.private:
                 api.abort(404)
             elif reuse.deleted:
@@ -196,7 +195,7 @@ class ReuseAPI(API):
         request_deleted = request.json.get("deleted", True)
         if reuse.deleted and request_deleted is not None:
             api.abort(410, "This reuse has been deleted")
-        ReuseEditPermission(reuse).test()
+        reuse.permissions["edit"].test()
 
         # This is a patch but old API acted like PATCH on PUT requests.
         return patch_and_save(reuse, request)
@@ -208,7 +207,7 @@ class ReuseAPI(API):
         """Delete a given reuse"""
         if reuse.deleted:
             api.abort(410, "This reuse has been deleted")
-        ReuseEditPermission(reuse).test()
+        reuse.permissions["delete"].test()
         reuse.deleted = datetime.utcnow()
         reuse.save()
         return "", 204
@@ -335,7 +334,7 @@ class ReuseImageAPI(API):
     @api.marshal_with(uploaded_image_fields)
     def post(self, reuse):
         """Upload a new reuse image"""
-        ReuseEditPermission(reuse).test()
+        reuse.permissions["edit"].test()
         parse_uploaded_image(reuse.image)
         reuse.save()
 

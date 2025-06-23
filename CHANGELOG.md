@@ -2,7 +2,14 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add access audience to dataservices [#3334](https://github.com/opendatateam/udata/pull/3334)
+- Lock the updates of the resources list [#3338](https://github.com/opendatateam/udata/pull/3338)
+- Expose permissions to cdata [#3336](https://github.com/opendatateam/udata/pull/3336)
+- Add endpoint to get datasets followed by user [#3337](https://github.com/opendatateam/udata/pull/3337)
+- Do not harvest spatial with invalid values [#3341](https://github.com/opendatateam/udata/pull/3341)
+- Allow global admins to manually run harvesters in production [#3340](https://github.com/opendatateam/udata/pull/3340)
+- Add monthly metrics to datasets, dataservices, reuses and organizations [#3342](https://github.com/opendatateam/udata/pull/3342)
+- Fix user avatar deletion [#3346](https://github.com/opendatateam/udata/pull/3346)
 
 ## 10.4.2 (2025-06-05)
 

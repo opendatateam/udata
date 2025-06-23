@@ -45,6 +45,19 @@ class FakeBadgeMixin(BadgeMixin):
     __badges__ = BADGES
 
 
+@generate_fields()
+class FakeEmbedded(db.EmbeddedDocument):
+    title = field(
+        db.StringField(required=True),
+        sortable=True,
+        show_as_ref=True,
+    )
+    description = field(
+        db.StringField(required=True),
+        markdown=True,
+    )
+
+
 @generate_fields(
     searchable=True,
     additional_sorts=[
@@ -112,6 +125,8 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
     archived = field(
         db.DateTimeField(),
     )
+
+    embedded = field(db.EmbeddedDocumentField(FakeEmbedded))
 
     def __str__(self) -> str:
         return self.title or ""
@@ -226,6 +241,26 @@ class PatchTest:
         fake_request.json["url"] = "ok url"
         with pytest.raises(mongoengine.errors.ValidationError):
             patch_and_save(fake, fake_request)
+
+
+class PatchEmbeddedTest:
+    class FakeRequest:
+        json = {
+            "url": URL_RAISE_ERROR,
+            "description": "desc",
+            "embedded": {"title": "embedded title", "description": "d2"},
+        }
+
+    def test_patch_check(self) -> None:
+        fake: Fake = FakeFactory.create()
+        with pytest.raises(ValueError, match=URL_EXISTS_ERROR_MESSAGE):
+            patch(fake, self.FakeRequest())
+
+    def test_patch_and_save(self) -> None:
+        fake: Fake = FakeFactory.create()
+        fake_request = self.FakeRequest()
+        fake_request.json["url"] = "ok url"
+        patch_and_save(fake, fake_request)
 
 
 class ApplySortAndFiltersTest:
