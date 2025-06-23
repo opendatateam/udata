@@ -79,6 +79,18 @@ class Activity(db.Document, metaclass=EmitNewActivityMetaClass):
 
 
 class Auditable(object):
+    def clean(self, **kwargs):
+        super().clean()
+        """
+        Fetch original document changed fields values before the new one erase it.
+        """
+        changed_fields = self._get_changed_fields()
+        if changed_fields:
+            old_document = self.__class__.objects.only(*changed_fields).get(pk=self.pk)
+            self._previous_changed_fields = {}
+            for field in changed_fields:
+                self._previous_changed_fields[field] = getattr(old_document, field, None)
+
     @classmethod
     def post_save(cls, sender, document, **kwargs):
         try:
@@ -97,6 +109,7 @@ class Auditable(object):
         if kwargs.get("created"):
             cls.on_create.send(document)
         elif len(changed_fields):
-            cls.on_update.send(document, changed_fields=changed_fields)
+            previous = getattr(document, "_previous_changed_fields", None)
+            cls.on_update.send(document, changed_fields=changed_fields, previous=previous)
         if getattr(document, "deleted_at", None) or getattr(document, "deleted", None):
             cls.on_delete.send(document)
