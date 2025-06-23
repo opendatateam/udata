@@ -1,4 +1,5 @@
 import json
+import logging
 from copy import copy
 from datetime import datetime
 from itertools import chain
@@ -25,6 +26,8 @@ from udata.uris import endpoint_for
 from .constants import AVATAR_SIZES
 
 __all__ = ("User", "Role", "datastore")
+
+log = logging.getLogger(__name__)
 
 
 # TODO: use simple text for role
@@ -250,11 +253,14 @@ class User(WithMetrics, UserMixin, db.Document):
 
     def mark_as_deleted(self, notify: bool = True, delete_comments: bool = False):
         if self.avatar.filename is not None:
-            storage = storages.avatars
-            storage.delete(self.avatar.filename)
-            storage.delete(self.avatar.original)
-            for key, value in self.avatar.thumbnails.items():
-                storage.delete(value)
+            try:
+                storage = storages.avatars
+                storage.delete(self.avatar.filename)
+                storage.delete(self.avatar.original)
+                for key, value in self.avatar.thumbnails.items():
+                    storage.delete(value)
+            except FileNotFoundError as e:
+                log.error(f"File not found while deleting user #{self.id} avatar: {e}")
 
         copied_user = copy(self)
         self.email = "{}@deleted".format(self.id)
