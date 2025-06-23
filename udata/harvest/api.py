@@ -213,7 +213,7 @@ preview_dataset_fields = api.clone(
     dataset_fields,
     {
         "uri": fields.String(
-            lambda d: url_for("api.dataset", dataset="not-available"),
+            lambda: url_for("api.dataset", dataset="not-available"),
             description="The dataset API URI (fake)",
         ),
         "page": fields.Raw(lambda: None, description="The dataset page URL (fake)"),

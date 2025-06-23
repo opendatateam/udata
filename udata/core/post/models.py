@@ -61,7 +61,9 @@ class Post(db.Datetimed, Linkable, db.Document):
         return cdata_url(f"/posts/{self._link_id(**kwargs)}/", **kwargs)
 
     def self_api_url(self, **kwargs):
-        return url_for("api.post", post=self._link_id(**kwargs), **kwargs)
+        return url_for(
+            "api.post", post=self._link_id(**kwargs), **self._self_api_url_kwargs(**kwargs)
+        )
 
     def count_discussions(self):
         # There are no metrics on Post to store discussions count

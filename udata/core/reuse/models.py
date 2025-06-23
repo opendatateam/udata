@@ -192,7 +192,9 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
         return cdata_url(f"/reuses/{self._link_id(**kwargs)}/", **kwargs)
 
     def self_api_url(self, **kwargs):
-        return url_for("api.reuse", reuse=self._link_id(**kwargs), **kwargs)
+        return url_for(
+            "api.reuse", reuse=self._link_id(**kwargs), **self._self_api_url_kwargs(**kwargs)
+        )
 
     @function_field(description="Link to the API endpoint for this reuse", show_as_ref=True)
     def uri(self, *args, **kwargs):

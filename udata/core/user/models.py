@@ -137,7 +137,9 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
         return cdata_url(f"/users/{self._link_id(**kwargs)}/", **kwargs)
 
     def self_api_url(self, **kwargs):
-        return url_for("api.user", user=self._link_id(**kwargs), **kwargs)
+        return url_for(
+            "api.user", user=self._link_id(**kwargs), **self._self_api_url_kwargs(**kwargs)
+        )
 
     @property
     def visible(self):

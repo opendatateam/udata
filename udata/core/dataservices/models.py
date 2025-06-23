@@ -279,6 +279,7 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
         return url_for(
             "api.dataservice",
             dataservice=self._link_id(**kwargs),
+            **self._self_api_url_kwargs(**kwargs),
             _external=kwargs.pop("_external", True),
             **kwargs,
         )

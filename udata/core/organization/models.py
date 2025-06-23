@@ -196,7 +196,9 @@ class Organization(
         return cdata_url(f"/organizations/{self._link_id(**kwargs)}/", **kwargs)
 
     def self_api_url(self, **kwargs):
-        return url_for("api.organization", org=self._link_id(**kwargs), **kwargs)
+        return url_for(
+            "api.organization", org=self._link_id(**kwargs), **self._self_api_url_kwargs(**kwargs)
+        )
 
     @property
     def pending_requests(self):

@@ -150,7 +150,7 @@ class Discussion(SpamMixin, Linkable, db.Document):
         return self.subject.self_web_url(append="/discussions", discussion_id=self.id, **kwargs)
 
     def self_api_url(self, **kwargs):
-        return url_for("api.discussion", id=self.id, **kwargs)
+        return url_for("api.discussion", id=self.id, **self._self_api_url_kwargs(**kwargs))
 
     def spam_report_message(self, breadcrumb):
         message = f"Spam potentiel sur la discussion « [{self.title}]({self.url_for()}) »"
