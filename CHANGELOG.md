@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 10.4.3 (2025-06-23)
 
 - Add access audience to dataservices [#3334](https://github.com/opendatateam/udata/pull/3334)
 - Lock the updates of the resources list [#3338](https://github.com/opendatateam/udata/pull/3338)
