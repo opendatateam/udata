@@ -4,11 +4,22 @@ from mongoengine.signals import post_save, pre_save
 
 from udata.api_fields import field
 from udata.core.activity.models import Auditable
+from udata.core.dataset.models import Dataset
 from udata.core.owned import Owned, OwnedQuerySet
+from udata.core.reuse.models import Reuse
 from udata.models import SpatialCoverage, db
 from udata.search import reindex
 
-__all__ = ("Topic",)
+__all__ = ("Topic", "TopicElement")
+
+
+class TopicElement(db.EmbeddedDocument):
+    id = field(db.AutoUUIDField(primary_key=True))
+    title = field(db.StringField(required=False))
+    description = field(db.StringField(required=False))
+    tags = field(db.ListField(db.StringField()))
+    extras = field(db.ExtrasField())
+    element = field(db.GenericReferenceField(choices=[Dataset, Reuse]))
 
 
 class Topic(db.Datetimed, Auditable, db.Document, Owned):
@@ -21,8 +32,7 @@ class Topic(db.Datetimed, Auditable, db.Document, Owned):
     tags = field(db.ListField(db.StringField()))
     color = field(db.IntField())
 
-    datasets = field(db.ListField(db.LazyReferenceField("Dataset", reverse_delete_rule=db.PULL)))
-    reuses = field(db.ListField(db.LazyReferenceField("Reuse", reverse_delete_rule=db.PULL)))
+    elements = field(db.EmbeddedDocumentListField(TopicElement))
 
     featured = field(db.BooleanField(default=False), auditable=False)
     private = field(db.BooleanField())
@@ -31,7 +41,14 @@ class Topic(db.Datetimed, Auditable, db.Document, Owned):
     spatial = field(db.EmbeddedDocumentField(SpatialCoverage))
 
     meta = {
-        "indexes": ["$name", "created_at", "slug"] + Owned.meta["indexes"],
+        "indexes": [
+            {
+                "fields": ["$name", "$description"],
+            },
+            "created_at",
+            "slug",
+        ]
+        + Owned.meta["indexes"],
         "ordering": ["-created_at"],
         "auto_create_index_on_save": True,
         "queryset_class": OwnedQuerySet,
@@ -44,6 +61,7 @@ class Topic(db.Datetimed, Auditable, db.Document, Owned):
     def __str__(self):
         return self.name
 
+    # TODO: also reindex Reuses (never been done) but Reuse.topic is a different field
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
         # Try catch is to prevent the mechanism to crash at the
@@ -51,9 +69,21 @@ class Topic(db.Datetimed, Auditable, db.Document, Owned):
         try:
             original_doc = sender.objects.get(id=document.id)
             # Get the diff between the original and current datasets
-            datasets_list_dif = set(original_doc.datasets) ^ set(document.datasets)
+            datasets_list_dif = set(
+                elt.element
+                for elt in original_doc.elements
+                if elt.element.__class__.__name__ == "Dataset"
+            ) ^ set(
+                elt.element
+                for elt in document.elements
+                if elt.element.__class__.__name__ == "Dataset"
+            )
         except cls.DoesNotExist:
-            datasets_list_dif = document.datasets
+            datasets_list_dif = set(
+                elt.element
+                for elt in document.elements
+                if elt.element.__class__.__name__ == "Dataset"
+            )
         for dataset in datasets_list_dif:
             reindex.delay("Dataset", str(dataset.pk))
 
