@@ -1,9 +1,7 @@
-from flask import current_app, flash, redirect, url_for
+from flask import current_app, redirect, url_for
 from flask_login import current_user, login_required
 from flask_security.utils import (
     check_and_get_token_status,
-    do_flash,
-    get_message,
     get_within_delta,
     hash_data,
     login_user,
@@ -75,19 +73,20 @@ def confirm_change_email_token_status(token):
 def confirm_change_email(token):
     expired, invalid, user, new_email = confirm_change_email_token_status(token)
 
-    if not user or invalid:
-        invalid = True
-        do_flash(*get_message("INVALID_CONFIRMATION_TOKEN"))
+    flash = None
+    flash_data = None
     if expired:
         send_change_email_confirmation_instructions(user, new_email)
-        do_flash(
-            _(
-                "You did not confirm your change of email within {email_within}. New instructions to confirm your change of email have been sent to {new_email}."
-            ).format(email_within=_security.confirm_email_within, new_email=new_email),
-            "error",
-        )
-    if invalid or expired:
-        return redirect(homepage_url())
+        flash = "change_email_expired"
+        flash_data = {
+            "email_within": _security.confirm_email_within,
+            "new_email": new_email,
+        }
+    elif not user or invalid:
+        flash = "change_email_invalid"
+
+    if flash:
+        return redirect(homepage_url(flash=flash, flash_data=flash_data))
 
     if user != current_user:
         logout_user()
@@ -95,10 +94,8 @@ def confirm_change_email(token):
 
     user.email = new_email
     _datastore.put(user)
-    msg = (_("Thank you. Your change of email has been confirmed."), "success")
 
-    do_flash(*msg)
-    return redirect(homepage_url())
+    return redirect(homepage_url(flash="change_email_confirmed"))
 
 
 @login_required
@@ -110,13 +107,14 @@ def change_email():
     if form.validate_on_submit():
         new_email = form.new_email.data
         send_change_email_confirmation_instructions(current_user, new_email)
-        flash(
-            _(
-                "Thank you. Confirmation instructions for changing your email have been sent to {new_email}."
-            ).format(new_email=new_email),
-            "success",
+        return redirect(
+            homepage_url(
+                flash="change_email",
+                flash_data={
+                    "email": new_email,
+                },
+            )
         )
-        return redirect(homepage_url())
 
     return _security.render_template("security/change_email.html", change_email_form=form)
 
