@@ -51,19 +51,6 @@ class Markdown(String):
     __schema_format__ = "markdown"
 
 
-class UrlFor(String):
-    def __init__(self, endpoint, mapper=None, **kwargs):
-        super(UrlFor, self).__init__(**kwargs)
-        self.endpoint = endpoint
-        self.mapper = mapper or self.default_mapper
-
-    def default_mapper(self, obj):
-        return {"id": str(obj.id)}
-
-    def output(self, key, obj, **kwargs):
-        return url_for(self.endpoint, _external=True, **self.mapper(obj))
-
-
 class Permission(Boolean):
     def __init__(self, mapper=None, **kwargs):
         super(Permission, self).__init__(**kwargs)

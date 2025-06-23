@@ -1,4 +1,4 @@
-from flask import current_app, request
+from flask import current_app, request, url_for
 from flask_login import current_user
 from werkzeug.exceptions import BadRequest
 
@@ -212,9 +212,8 @@ preview_dataset_fields = api.clone(
     "DatasetPreview",
     dataset_fields,
     {
-        "uri": fields.UrlFor(
-            "api.dataset",
-            lambda o: {"dataset": "not-available"},
+        "uri": fields.String(
+            lambda d: url_for("api.dataset", dataset="not-available"),
             description="The dataset API URI (fake)",
         ),
         "page": fields.Raw(lambda: None, description="The dataset page URL (fake)"),
