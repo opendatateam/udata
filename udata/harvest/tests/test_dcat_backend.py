@@ -334,6 +334,7 @@ class DcatBackendTest:
                 [[[159, -25.0], [159, -11], [212, -11], [212, -25.0], [159, -25.0]]],
             ],
         }
+        # dataset-3 has a spatial with NaN values…
         assert datasets["3"].spatial is None
 
     @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/schemas")
