@@ -6,6 +6,7 @@ from werkzeug.utils import cached_property
 from udata.api_fields import field, function_field, generate_fields
 from udata.core.activity.models import Auditable
 from udata.core.dataset.api_fields import dataset_fields
+from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE, reuse_permissions_fields
@@ -63,7 +64,7 @@ class ReuseBadgeMixin(BadgeMixin):
     additional_filters={"organization_badge": "organization.badges"},
     mask="*,datasets{id,title,uri,page}",
 )
-class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
+class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Owned, db.Document):
     title = field(
         db.StringField(required=True),
         sortable=True,
@@ -188,14 +189,11 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Owned, db.Doc
         # Emit before_save
         cls.before_save.send(document)
 
-    def url_for(self, *args, **kwargs):
-        return self.page(**kwargs) or url_for("api.reuse", reuse=self, *args, **kwargs)
-
     def self_web_url(self, **kwargs):
-        return cdata_url(f"/reuses/{self.slug}/", **kwargs)
+        return cdata_url(f"/reuses/{self._link_id(**kwargs)}/", **kwargs)
 
     def self_api_url(self, **kwargs):
-        return url_for("api.reuse", reuse=self.id, _external=True)
+        return url_for("api.reuse", reuse=self._link_id(**kwargs), **kwargs)
 
     display_url = property(url_for)
 
@@ -268,7 +266,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Owned, db.Doc
             "alternateName": self.slug,
             "dateCreated": self.created_at.isoformat(),
             "dateModified": self.last_modified.isoformat(),
-            "url": self.url_for(_external=True),
+            "url": self.url_for(),
             "name": self.title,
             "isBasedOnUrl": self.url,
         }

@@ -19,7 +19,7 @@ def organization_to_rdf(org, graph=None):
     """
     graph = graph or Graph(namespace_manager=namespace_manager)
     if org.id:
-        id = URIRef(org.url_for(_external=True))
+        id = URIRef(org.url_for(_useId=True))
     else:
         id = BNode()
     o = graph.resource(id)

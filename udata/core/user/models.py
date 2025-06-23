@@ -15,6 +15,7 @@ from udata import mail
 from udata.api_fields import field
 from udata.core import storages
 from udata.core.discussions.models import Discussion
+from udata.core.linkable import Linkable
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -42,7 +43,7 @@ class UserSettings(db.EmbeddedDocument):
     prefered_language = db.StringField()
 
 
-class User(WithMetrics, UserMixin, db.Document):
+class User(WithMetrics, UserMixin, Linkable, db.Document):
     slug = field(
         db.SlugField(max_length=255, required=True, populate_from="fullname"), auditable=False
     )
@@ -130,14 +131,11 @@ class User(WithMetrics, UserMixin, db.Document):
     def sysadmin(self):
         return self.has_role("admin")
 
-    def url_for(self, *args, **kwargs):
-        return self.self_web_url(**kwargs) or self.self_api_url(*args, **kwargs)
-
     def self_web_url(self, **kwargs):
-        return cdata_url(f"/users/{self.slug}/", **kwargs)
+        return cdata_url(f"/users/{self._link_id(**kwargs)}/", **kwargs)
 
-    def self_api_url(self, *args, **kwargs):
-        return url_for("api.user", user=self.id, *args, **kwargs)
+    def self_api_url(self, **kwargs):
+        return url_for("api.user", user=self._link_id(**kwargs), **kwargs)
 
     display_url = property(url_for)
 

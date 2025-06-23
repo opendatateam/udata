@@ -9,6 +9,7 @@ from werkzeug.utils import cached_property
 from udata.api_fields import field
 from udata.core.activity.models import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
+from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.storages import avatars, default_image_basename
@@ -113,7 +114,9 @@ class OrganizationBadgeMixin(BadgeMixin):
     __badges__ = BADGES
 
 
-class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, db.Datetimed, db.Document):
+class Organization(
+    Auditable, WithMetrics, OrganizationBadgeMixin, Linkable, db.Datetimed, db.Document
+):
     name = field(db.StringField(required=True))
     acronym = field(db.StringField(max_length=128))
     slug = field(
@@ -190,14 +193,11 @@ class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, db.Datetimed,
     def pre_save(cls, sender, document, **kwargs):
         cls.before_save.send(document)
 
-    def url_for(self, *args, **kwargs):
-        return self.self_web_url(**kwargs) or self.self_api_url(*args, **kwargs)
-
     def self_web_url(self, **kwargs):
-        return cdata_url(f"/organizations/{self.slug}/", **kwargs)
+        return cdata_url(f"/organizations/{self._link_id(**kwargs)}/", **kwargs)
 
-    def self_api_url(self, *args, **kwargs):
-        return url_for("api.organization", org=self.id, *args, **kwargs)
+    def self_api_url(self, **kwargs):
+        return url_for("api.organization", org=self._link_id(**kwargs), **kwargs)
 
     display_url = property(url_for)
 
@@ -290,7 +290,7 @@ class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, db.Datetimed,
             "@type": type_,
             "@id": str(self.id),
             "alternateName": self.slug,
-            "url": self.url_for(_external=True),
+            "url": self.url_for(),
             "name": self.name,
             "dateCreated": self.created_at.isoformat(),
             "dateModified": self.last_modified.isoformat(),

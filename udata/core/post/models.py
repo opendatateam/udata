@@ -1,5 +1,6 @@
 from flask import url_for
 
+from udata.core.linkable import Linkable
 from udata.core.storages import default_image_basename, images
 from udata.i18n import lazy_gettext as _
 from udata.mail import get_mail_campaign_dict
@@ -16,7 +17,7 @@ class PostQuerySet(db.BaseQuerySet):
         return self(published__ne=None).order_by("-published")
 
 
-class Post(db.Datetimed, db.Document):
+class Post(db.Datetimed, Linkable, db.Document):
     name = db.StringField(max_length=255, required=True)
     slug = db.SlugField(
         max_length=255, required=True, populate_from="name", update=True, follow=True
@@ -57,14 +58,11 @@ class Post(db.Datetimed, db.Document):
     def __str__(self):
         return self.name or ""
 
-    def url_for(self, *args, **kwargs):
-        return self.self_web_url(**kwargs) or self.self_api_url(*args, **kwargs)
-
     def self_web_url(self, **kwargs):
-        return cdata_url(f"/posts/{self.slug}/", **kwargs)
+        return cdata_url(f"/posts/{self._link_id(**kwargs)}/", **kwargs)
 
-    def self_api_url(self, *args, **kwargs):
-        return url_for("api.post", post=self, *args, **kwargs)
+    def self_api_url(self, **kwargs):
+        return url_for("api.post", post=self._link_id(**kwargs), **kwargs)
 
     @property
     def display_url(self):

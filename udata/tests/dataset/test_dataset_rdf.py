@@ -333,7 +333,7 @@ class DatasetToRdfTest:
         len(list(g.subjects(RDF.type, DCAT.Distribution))) == 4
         len(list(g.subjects(RDF.type, DCAT.DataService))) == 1
         dataservice_as_distribution = g.resource(next(g.subjects(DCAT.accessService)))
-        dataservice_uri = URIRef(dataservice.url_for(_external=True))
+        dataservice_uri = URIRef(dataservice.url_for(_useId=True))
         assert dataservice_as_distribution.value(DCAT.accessURL).identifier == URIRef(
             dataservice.base_api_url
         )

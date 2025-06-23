@@ -14,7 +14,7 @@ def user_to_rdf(user, graph=None):
     """
     graph = graph or Graph(namespace_manager=namespace_manager)
     if user.id:
-        id = URIRef(user.url_for(_external=True))
+        id = URIRef(user.url_for(_useId=True))
     else:
         id = BNode()
     o = graph.resource(id)

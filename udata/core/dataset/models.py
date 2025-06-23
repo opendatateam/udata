@@ -20,6 +20,7 @@ from udata.api_fields import field
 from udata.app import cache
 from udata.core import storages
 from udata.core.activity.models import Auditable
+from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.frontend.markdown import mdstrip
@@ -508,11 +509,13 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
         "views",
     ]
 
-    def url_for(self, *args, **kwargs):
-        return self.self_web_url() or self.latest
+    def url_for(self, **kwargs):
+        return self.self_web_url(**kwargs) or self.latest
 
-    def self_web_url(self):
-        return cdata_url(f"/datasets/{self.dataset.slug}/", resource_id=self.id)
+    def self_web_url(self, **kwargs):
+        return cdata_url(
+            f"/datasets/{self.dataset._link_id(**kwargs)}/", resource_id=self.id, **kwargs
+        )
 
     @property
     def dataset(self):
@@ -546,7 +549,7 @@ class DatasetBadgeMixin(BadgeMixin):
     __badges__ = BADGES
 
 
-class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
+class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Document):
     title = field(db.StringField(required=True))
     acronym = field(db.StringField(max_length=128))
     # /!\ do not set directly the slug when creating or updating a dataset
@@ -723,14 +726,11 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             "edit_resources": ResourceEditPermission(self),
         }
 
-    def url_for(self, *args, **kwargs):
-        return self.self_web_url(**kwargs) or self.self_api_url(*args, **kwargs)
-
     def self_web_url(self, **kwargs):
-        return cdata_url(f"/datasets/{self.slug}/", **kwargs)
+        return cdata_url(f"/datasets/{self._link_id(**kwargs)}/", **kwargs)
 
-    def self_api_url(self, *args, **kwargs):
-        return url_for("api.dataset", dataset=self.id, *args, **kwargs)
+    def self_api_url(self, **kwargs):
+        return url_for("api.dataset", dataset=self._link_id(**kwargs), **kwargs)
 
     display_url = property(url_for)
 
@@ -1020,7 +1020,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             "alternateName": self.slug,
             "dateCreated": self.created_at.isoformat(),
             "dateModified": self.last_modified.isoformat(),
-            "url": self.url_for(_external=True),
+            "url": self.url_for(),
             "name": self.title,
             "keywords": ",".join(self.tags),
             "distribution": [

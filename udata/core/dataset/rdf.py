@@ -202,7 +202,7 @@ def resource_to_rdf(
     """
     graph = graph or Graph(namespace_manager=namespace_manager)
     if dataset and dataset.id:
-        id = URIRef(resource.url_for(_external=True))
+        id = URIRef(resource.url_for(_useId=True))
     else:
         id = BNode(resource.id)
     r = graph.resource(id)
@@ -249,7 +249,7 @@ def dataset_to_graph_id(dataset: Dataset) -> URIRef | BNode:
     if dataset.harvest and dataset.harvest.uri:
         return URIRef(dataset.harvest.uri)
     elif dataset.id:
-        return URIRef(dataset.url_for(_external=True))
+        return URIRef(dataset.url_for(_useId=True))
     else:
         # Should not happen in production. Some test only
         # `build()` a dataset without saving it to the DB.
@@ -272,7 +272,7 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
         d.set(DCT.identifier, Literal(dataset.harvest.dct_identifier))
 
         alt = graph.resource(BNode())
-        alternate_identifier = Literal(dataset.url_for(_external=True))
+        alternate_identifier = Literal(dataset.url_for(_useId=True))
         alt.set(RDF.type, ADMS.Identifier)
         alt.set(DCT.creator, Literal(current_app.config["SITE_TITLE"]))
         alt.set(SKOS.notation, alternate_identifier)
@@ -289,7 +289,7 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
     if dataset.harvest and dataset.harvest.remote_url:
         d.set(DCAT.landingPage, URIRef(dataset.harvest.remote_url))
     elif dataset.id:
-        d.set(DCAT.landingPage, URIRef(dataset.url_for(_external=True)))
+        d.set(DCAT.landingPage, URIRef(dataset.url_for()))
 
     if dataset.acronym:
         d.set(SKOS.altLabel, Literal(dataset.acronym))
