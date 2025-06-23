@@ -1,3 +1,4 @@
+import geojson
 from flask import current_app
 from werkzeug.local import LocalProxy
 from werkzeug.utils import cached_property
@@ -168,3 +169,11 @@ class SpatialCoverage(db.EmbeddedDocument):
             raise db.ValidationError(
                 "The spatial coverage cannot contains a Geozone and a Geometry"
             )
+
+        if self.geom:
+            try:
+                geojson.loads(geojson.dumps(self.geom))
+            except (ValueError, TypeError) as err:
+                raise db.ValidationError(
+                    f"Invalid GeoJSON data `{self.geom}`: {err}.", field_name="geom"
+                )
