@@ -4,42 +4,62 @@ from udata.i18n import lazy_gettext as _
 
 #: Udata frequencies with their labels
 #:
-#: See: http://dublincore.org/groups/collections/frequency/
+#: See: https://publications.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/frequency
 UPDATE_FREQUENCIES = OrderedDict(
-    [  # Dublin core equivalent
-        ("unknown", _("Unknown")),  # N/A
-        ("punctual", _("Punctual")),  # N/A
-        ("continuous", _("Real time")),  # freq:continuous
-        ("hourly", _("Hourly")),  # N/A
-        ("fourTimesADay", _("Four times a day")),  # N/A
-        ("threeTimesADay", _("Three times a day")),  # N/A
-        ("semidaily", _("Semidaily")),  # N/A
-        ("daily", _("Daily")),  # freq:daily
-        ("fourTimesAWeek", _("Four times a week")),  # N/A
-        ("threeTimesAWeek", _("Three times a week")),  # freq:threeTimesAWeek
-        ("semiweekly", _("Semiweekly")),  # freq:semiweekly
-        ("weekly", _("Weekly")),  # freq:weekly
-        ("biweekly", _("Biweekly")),  # freq:bimonthly
-        ("threeTimesAMonth", _("Three times a month")),  # freq:threeTimesAMonth
-        ("semimonthly", _("Semimonthly")),  # freq:semimonthly
-        ("monthly", _("Monthly")),  # freq:monthly
-        ("bimonthly", _("Bimonthly")),  # freq:bimonthly
-        ("quarterly", _("Quarterly")),  # freq:quarterly
-        ("threeTimesAYear", _("Three times a year")),  # freq:threeTimesAYear
-        ("semiannual", _("Biannual")),  # freq:semiannual
-        ("annual", _("Annual")),  # freq:annual
-        ("biennial", _("Biennial")),  # freq:biennial
-        ("triennial", _("Triennial")),  # freq:triennial
-        ("quinquennial", _("Quinquennial")),  # N/A
-        ("irregular", _("Irregular")),  # freq:irregular
+    [
+        # FIXME: Add ALL EU terms (from 30yrs to 1mn)?
+        # FIXME: Uppercase to match EU vocab?
+        # FIXME: Drop end-of-line annotations
+        ("unknown", _("Unknown")),  # =
+        ("other", _("Other")),  # N/A
+        ("never", _("Never")),  # N/A
+        ("not_planned", _("Not planned")),  # N/A
+        ("as_needed", _("As needed")),  # punctual
+        ("irreg", _("Irregular")),  # irregular
+        ("update_cont", _("Real time")),  # continuous
+        ("hourly", _("Hourly")),  # =
+        ("cont", _("Several times a day")),  # N/A
+        ("daily_2", _("Semidaily")),  # semidaily
+        ("daily", _("Daily")),  # =
+        ("weekly_5", _("Five times a week")),  # N/A
+        ("weekly_3", _("Three times a week")),  # threeTimesAWeek
+        ("weekly_2", _("Semiweekly")),  # semiweekly
+        ("weekly", _("Weekly")),  # =
+        ("biweekly", _("Biweekly")),  # =
+        ("monthly_3", _("Three times a month")),  # threeTimesAMonth
+        ("monthly_2", _("Semimonthly")),  # semimonthly
+        ("monthly", _("Monthly")),  # =
+        ("bimonthly", _("Bimonthly")),  # =
+        ("quarterly", _("Quarterly")),  # =
+        ("annual_3", _("Three times a year")),  # threeTimesAYear
+        ("annual_2", _("Biannual")),  # semiannual
+        ("annual", _("Annual")),  # =
+        ("biennial", _("Biennial")),  # =
+        ("triennial", _("Triennial")),  # =
+        ("quinquennial", _("Quinquennial")),  # =
+        ("decennial", _("Decennial")),  # N/A
     ]
 )
 
-#: Map legacy frequencies to currents
+#: Map legacy (including DC) frequencies to currents
 LEGACY_FREQUENCIES = {
+    # FIXME: Preserve older mappings?
+    "irregular": "irreg",
+    "punctual": "as_needed",
+    "realtime": "update_cont",
+    "continuous": "update_cont",
+    "fourTimesADay": "cont",  # FIXME: or OTHER?
+    "threeTimesADay": "cont",  # FIXME: or OTHER?
+    "semidaily": "daily_2",
+    "fourTimesAWeek": "other",  # FIXME: or WEEKLY_3?
+    "threeTimesAWeek": "weekly_3",
+    "semiweekly": "weekly_2",
+    "threeTimesAMonth": "monthly_3",
+    "semimonthly": "monthly_2",
     "fortnighly": "biweekly",
-    "biannual": "semiannual",
-    "realtime": "continuous",
+    "threeTimesAYear": "annual_3",
+    "semiannual": "annual_2",
+    "biannual": "annual_2",
 }
 
 DEFAULT_FREQUENCY = "unknown"
