@@ -3,7 +3,6 @@ from flask import url_for
 from udata.core.linkable import Linkable
 from udata.core.storages import default_image_basename, images
 from udata.i18n import lazy_gettext as _
-from udata.mail import get_mail_campaign_dict
 from udata.mongo import db
 from udata.uris import cdata_url
 
@@ -67,15 +66,6 @@ class Post(db.Datetimed, Linkable, db.Document):
     @property
     def display_url(self):
         return self.url_for()
-
-    @property
-    def external_url(self):
-        return self.url_for(_external=True)
-
-    @property
-    def external_url_with_campaign(self):
-        extras = get_mail_campaign_dict()
-        return self.url_for(_external=True, **extras)
 
     def count_discussions(self):
         # There are no metrics on Post to store discussions count

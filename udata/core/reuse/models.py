@@ -13,7 +13,6 @@ from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE, reuse_permissions_fi
 from udata.core.storages import default_image_basename, images
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.mail import get_mail_campaign_dict
 from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics, db
 from udata.mongo.errors import FieldValidationError
 from udata.uris import cdata_url
@@ -224,15 +223,6 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
     @property
     def is_hidden(self):
         return len(self.datasets) == 0 or self.private or self.deleted
-
-    @property
-    def external_url(self):
-        return self.url_for(_external=True)
-
-    @property
-    def external_url_with_campaign(self):
-        extras = get_mail_campaign_dict()
-        return self.url_for(_external=True, **extras)
 
     @property
     def type_label(self):

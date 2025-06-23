@@ -25,7 +25,6 @@ from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.mail import get_mail_campaign_dict
 from udata.models import Badge, BadgeMixin, BadgesList, SpatialCoverage, WithMetrics, db
 from udata.mongo.errors import FieldValidationError
 from udata.uris import ValidationError, cdata_url
@@ -747,15 +746,6 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
         if not self.acronym:
             return self.title
         return "{title} ({acronym})".format(**self._data)
-
-    @property
-    def external_url(self):
-        return self.url_for(_external=True)
-
-    @property
-    def external_url_with_campaign(self):
-        extras = get_mail_campaign_dict()
-        return self.url_for(_external=True, **extras)
 
     @property
     def image_url(self):

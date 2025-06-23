@@ -15,7 +15,6 @@ from udata.core.metrics.models import WithMetrics
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.mail import get_mail_campaign_dict
 from udata.mongo import db
 from udata.uris import cdata_url
 
@@ -200,15 +199,6 @@ class Organization(
         return url_for("api.organization", org=self._link_id(**kwargs), **kwargs)
 
     display_url = property(url_for)
-
-    @property
-    def external_url(self):
-        return self.url_for(_external=True)
-
-    @property
-    def external_url_with_campaign(self):
-        extras = get_mail_campaign_dict()
-        return self.url_for(_external=True, **extras)
 
     @property
     def pending_requests(self):

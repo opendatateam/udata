@@ -7,7 +7,7 @@
     _('A new reuse of your dataset %(dataset)s has been published',
         dataset=(
             '<a href="'|safe
-            + dataset.external_url_with_campaign
+            + dataset.url_for(_mailCampaign=True)
             + '" style="text-decoration: none;">'|safe
             + dataset.title
             + '</a>'|safe

@@ -5,7 +5,6 @@ from werkzeug.utils import cached_property
 from udata.app import cache
 from udata.core.metrics.models import WithMetrics
 from udata.i18n import _, get_locale, language
-from udata.mail import get_mail_campaign_dict
 from udata.mongo import db
 from udata.uris import endpoint_for
 
@@ -97,11 +96,6 @@ class GeoZone(WithMetrics, db.Document):
     @property
     def external_url(self):
         return endpoint_for("territories.territory", territory=self, _external=True)
-
-    @property
-    def external_url_with_campaign(self):
-        extras = get_mail_campaign_dict()
-        return endpoint_for("territories.territory", territory=self, _external=True, **extras)
 
     def count_datasets(self):
         from udata.models import Dataset

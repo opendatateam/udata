@@ -579,7 +579,7 @@ class DiscussionsTest(APITestCase):
         with assert_not_emit(on_new_discussion_comment):
 
             def check_signal(args):
-                self.assertIn(discussion.external_url, args[1]["message"])
+                self.assertIn(discussion.url_for(), args[1]["message"])
 
             with assert_emit(on_new_potential_spam, assertions_callback=check_signal):
                 response = self.post(

@@ -19,7 +19,6 @@ from udata.core.linkable import Linkable
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.mail import get_mail_campaign_dict
 from udata.models import Follow, WithMetrics, db
 from udata.uris import cdata_url
 
@@ -138,15 +137,6 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
         return url_for("api.user", user=self._link_id(**kwargs), **kwargs)
 
     display_url = property(url_for)
-
-    @property
-    def external_url(self):
-        return self.url_for(_external=True)
-
-    @property
-    def external_url_with_campaign(self):
-        extras = get_mail_campaign_dict()
-        return self.url_for(_external=True, **extras)
 
     @property
     def visible(self):
