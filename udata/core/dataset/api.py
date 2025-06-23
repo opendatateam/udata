@@ -509,8 +509,6 @@ class ResourcesAPI(API):
             api.abort(400, "This endpoint only supports remote resources")
         form.populate_obj(resource)
         dataset.add_resource(resource)
-        dataset.last_modified_internal = datetime.utcnow()
-        dataset.save()
         return resource, 201
 
     @api.secure
@@ -577,8 +575,6 @@ class UploadNewDatasetResource(UploadMixin, API):
         infos = self.handle_upload(dataset)
         resource = Resource(**infos)
         dataset.add_resource(resource)
-        dataset.last_modified_internal = datetime.utcnow()
-        dataset.save()
         return resource, 201
 
 
@@ -631,8 +627,6 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
         for k, v in infos.items():
             resource[k] = v
         dataset.update_resource(resource)
-        dataset.last_modified_internal = datetime.utcnow()
-        dataset.save()
         if fs_filename_to_remove is not None:
             storages.resources.delete(fs_filename_to_remove)
         return resource
@@ -705,8 +699,6 @@ class ResourceAPI(ResourceMixin, API):
         form.populate_obj(resource)
         resource.last_modified_internal = datetime.utcnow()
         dataset.update_resource(resource)
-        dataset.last_modified_internal = datetime.utcnow()
-        dataset.save()
         return resource
 
     @api.secure
@@ -716,8 +708,6 @@ class ResourceAPI(ResourceMixin, API):
         dataset.permissions["edit_resources"].test()
         resource = self.get_resource_or_404(dataset, rid)
         dataset.remove_resource(resource)
-        dataset.last_modified_internal = datetime.utcnow()
-        dataset.save()
         return "", 204
 
 

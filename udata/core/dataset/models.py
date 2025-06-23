@@ -20,6 +20,7 @@ from udata.api_fields import field
 from udata.app import cache
 from udata.core import storages
 from udata.core.activity.models import Auditable
+from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -599,7 +600,9 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
     __metrics_keys__ = [
         "discussions",
         "reuses",
+        "reuses_by_months",
         "followers",
+        "followers_by_months",
         "views",
         "resources_downloads",
     ]
@@ -953,35 +956,54 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         obj = cls.objects(slug=id_or_slug).first()
         return obj or cls.objects.get_or_404(id=id_or_slug)
 
-    def add_resource(self, resource):
+    def add_resource(self, resource: Resource):
         """Perform an atomic prepend for a new resource"""
         resource.validate()
-        if resource.id in [r.id for r in self.resources]:
-            raise MongoEngineValidationError("Cannot add resource with already existing ID")
 
+        existing_resource = next((r for r in self.resources if r.id == resource.id), None)
+        if existing_resource:
+            raise MongoEngineValidationError(
+                f"Cannot add resource '{resource.title}'. A resource '{existing_resource.title}' already exists with ID '{existing_resource.id}'"
+            )
+
+        # only useful for compute_quality(), we will reload to have a clean object
         self.resources.insert(0, resource)
+
         self.update(
-            __raw__={
-                "$set": {
-                    "quality_cached": self.compute_quality(),
-                },
-                "$push": {
-                    "resources": {"$each": [resource.to_mongo()], "$position": 0},
-                },
-            }
+            set__quality_cached=self.compute_quality(),
+            push__resources={"$each": [resource.to_mongo()], "$position": 0},
+            set__last_modified_internal=datetime.utcnow(),
         )
+
         self.reload()
         self.on_resource_added.send(self.__class__, document=self, resource_id=resource.id)
 
     def update_resource(self, resource):
         """Perform an atomic update for an existing resource"""
-        index = self.resources.index(resource)
-        data = {"resources__{index}".format(index=index): resource}
-        self.update(**data)
+
+        # only useful for compute_quality(), we will reload to have a clean object
+        index = next(i for i, r in enumerate(self.resources) if r.id == resource.id)
+        self.resources[index] = resource
+
+        Dataset.objects(id=self.id, resources__id=resource.id).update_one(
+            set__quality_cached=self.compute_quality(),
+            set__resources__S=resource,
+            set__last_modified_internal=datetime.utcnow(),
+        )
+
         self.reload()
         self.on_resource_updated.send(self.__class__, document=self, resource_id=resource.id)
 
     def remove_resource(self, resource):
+        # only useful for compute_quality(), we will reload to have a clean object
+        self.resources = [r for r in self.resources if r.id != resource.id]
+
+        self.update(
+            set__quality_cached=self.compute_quality(),
+            pull__resources__id=resource.id,
+            set__last_modified_internal=datetime.utcnow(),
+        )
+
         # Deletes resource's file from file storage
         if resource.fs_filename is not None:
             try:
@@ -991,7 +1013,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
                     f"File not found while deleting resource #{resource.id} in dataset {self.id}: {e}"
                 )
 
-        self.resources.remove(resource)
+        self.reload()
         self.on_resource_removed.send(self.__class__, document=self, resource_id=resource.id)
 
     @property
@@ -1063,12 +1085,16 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         from udata.models import Reuse
 
         self.metrics["reuses"] = Reuse.objects(datasets=self).visible().count()
+        self.metrics["reuses_by_months"] = get_stock_metrics(Reuse.objects(datasets=self).visible())
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):
         from udata.models import Follow
 
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
+        self.metrics["followers_by_months"] = get_stock_metrics(
+            Follow.objects(following=self), date_label="since"
+        )
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
 
