@@ -280,8 +280,6 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
             "api.dataservice",
             dataservice=self._link_id(**kwargs),
             **self._self_api_url_kwargs(**kwargs),
-            _external=kwargs.pop("_external", True),
-            **kwargs,
         )
 
     @function_field(description="Link to the udata web page for this dataservice", show_as_ref=True)
