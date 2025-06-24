@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from blinker import Signal
+from mongoengine.errors import DoesNotExist
 from mongoengine.signals import post_save
 
 from udata.api_fields import get_fields
@@ -86,10 +87,13 @@ class Auditable(object):
         """
         changed_fields = self._get_changed_fields()
         if changed_fields:
-            old_document = self.__class__.objects.only(*changed_fields).get(pk=self.pk)
-            self._previous_changed_fields = {}
-            for field in changed_fields:
-                self._previous_changed_fields[field] = getattr(old_document, field, None)
+            try:
+                old_document = self.__class__.objects.only(*changed_fields).get(pk=self.pk)
+                self._previous_changed_fields = {}
+                for field in changed_fields:
+                    self._previous_changed_fields[field] = getattr(old_document, field, None)
+            except DoesNotExist:
+                pass
 
     @classmethod
     def post_save(cls, sender, document, **kwargs):
