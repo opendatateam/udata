@@ -67,7 +67,7 @@ class ExtendedLoginForm(LoginForm):
         return True
 
 
-class ExtendedResetPasswordForm(WithCaptcha, ResetPasswordForm):
+class ExtendedResetPasswordForm(ResetPasswordForm):
     def validate(self, **kwargs):
         if not super().validate(**kwargs):
             return False
@@ -76,9 +76,6 @@ class ExtendedResetPasswordForm(WithCaptcha, ResetPasswordForm):
             self.user.password_rotation_demanded = None
             self.user.password_rotation_performed = datetime.datetime.utcnow()
             self.user.save()
-
-        if not self.validate_captcha():
-            return False
 
         return True
 
