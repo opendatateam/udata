@@ -4,7 +4,6 @@ from urllib.parse import urlencode, urljoin, urlparse, urlunparse
 
 from flask import current_app, url_for
 from netaddr import AddrFormatError, IPAddress
-from werkzeug.routing import BuildError
 
 from udata.i18n import _
 from udata.mail import get_mail_campaign_dict
@@ -95,15 +94,6 @@ def cdata_url(uri: str, **kwargs) -> Optional[str]:
         {k: v for k, v in kwargs.items() if not k.startswith("_")}
     )  # index 4 is the query params
     return urlunparse(url_parts)
-
-
-def endpoint_for(endpoint, fallback_endpoint=None, **values):
-    try:
-        return url_for(endpoint, **values)
-    except BuildError:
-        if fallback_endpoint:
-            return url_for(fallback_endpoint, **values)
-        return None
 
 
 def idna(string):

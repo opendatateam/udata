@@ -1,5 +1,5 @@
 import geojson
-from flask import current_app
+from flask import current_app, url_for
 from werkzeug.local import LocalProxy
 from werkzeug.utils import cached_property
 
@@ -7,7 +7,6 @@ from udata.app import cache
 from udata.core.metrics.models import WithMetrics
 from udata.i18n import _, get_locale, language
 from udata.mongo import db
-from udata.uris import endpoint_for
 
 from . import geoids
 from .constants import ADMIN_LEVEL_MAX, ADMIN_LEVEL_MIN, BASE_GRANULARITIES
@@ -92,11 +91,11 @@ class GeoZone(WithMetrics, db.Document):
 
     @property
     def url(self):
-        return endpoint_for("territories.territory", territory=self)
+        return url_for("territories.territory", territory=self)
 
     @property
     def external_url(self):
-        return endpoint_for("territories.territory", territory=self, _external=True)
+        return url_for("territories.territory", territory=self, _external=True)
 
     def count_datasets(self):
         from udata.models import Dataset

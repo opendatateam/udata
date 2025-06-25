@@ -40,7 +40,6 @@ from udata.core.storages import default_image_basename, images
 from udata.i18n import I18nBlueprint
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
-from udata.uris import homepage_url
 
 blueprint = I18nBlueprint("oauth", __name__, url_prefix="/oauth")
 oauth = AuthorizationServer()
@@ -329,12 +328,7 @@ def authorize(*args, **kwargs):
 
 @blueprint.route("/error")
 def oauth_error():
-    return render_template(
-        "api/oauth_error.html",
-        {
-            "homepage_url": homepage_url(),
-        },
-    )
+    return render_template("api/oauth_error.html")
 
 
 def query_client(client_id):
