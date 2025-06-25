@@ -39,6 +39,7 @@ def init_app(app):
     from udata.models import datastore
 
     from .forms import (
+        ExtendedForgotPasswordForm,
         ExtendedLoginForm,
         ExtendedRegisterForm,
         ExtendedResetPasswordForm,
@@ -56,6 +57,7 @@ def init_app(app):
         confirm_register_form=ExtendedRegisterForm,
         register_form=ExtendedRegisterForm,
         reset_password_form=ExtendedResetPasswordForm,
+        forgot_password_form=ExtendedForgotPasswordForm,
         mail_util_cls=UdataMailUtil,
         password_util_cls=UdataPasswordUtil,
     )

@@ -134,7 +134,7 @@ def create_security_blueprint(app, state, import_name):
         template_folder="templates",
     )
 
-    bp.route(app.config["SECURITY_LOGOUT_URL"], endpoint="logout")(logout)
+    bp.route(app.config["SECURITY_LOGOUT_URL"], methods=["GET", "POST"], endpoint="logout")(logout)
 
     if state.passwordless:
         bp.route(app.config["SECURITY_LOGIN_URL"], methods=["GET", "POST"], endpoint="login")(
