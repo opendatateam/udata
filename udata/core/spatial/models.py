@@ -1,5 +1,5 @@
 import geojson
-from flask import current_app, url_for
+from flask import current_app
 from werkzeug.local import LocalProxy
 from werkzeug.utils import cached_property
 
@@ -91,11 +91,11 @@ class GeoZone(WithMetrics, db.Document):
 
     @property
     def url(self):
-        return url_for("territories.territory", territory=self)
+        return None
 
     @property
     def external_url(self):
-        return url_for("territories.territory", territory=self, _external=True)
+        return None
 
     def count_datasets(self):
         from udata.models import Dataset

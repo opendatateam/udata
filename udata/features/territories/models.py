@@ -1,5 +1,3 @@
-from flask import url_for
-
 from udata.models import License, Organization
 
 __all__ = ("TerritoryDataset", "ResourceBasedTerritoryDataset", "TERRITORY_DATASETS")
@@ -44,15 +42,7 @@ class ResourceBasedTerritoryDataset(TerritoryDataset):
     csv_column = ""
 
     def url_for(self, external=False):
-        return url_for(
-            "territories.territory_dataset_resource",
-            territory=self.territory,
-            dataset=self.dataset_id,
-            resource_id=self.resource_id,
-            territory_attr=self.territory_attr,
-            csv_column=self.csv_column,
-            _external=external,
-        )
+        return None
 
     url = property(url_for)
 
