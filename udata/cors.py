@@ -43,6 +43,7 @@ def is_allowed_cors_route():
         or path.startswith("/login")
         or path.startswith("/logout")
         or path.startswith("/reset")
+        or path.startswith("/register")
         or path.startswith("/datasets/r/")
     )
 

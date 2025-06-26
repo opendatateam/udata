@@ -12,6 +12,8 @@ from flask_security import login_required as login_required
 from flask_security import login_user as login_user
 from werkzeug.utils import import_string
 
+from udata.uris import cdata_url
+
 log = logging.getLogger(__name__)
 
 
@@ -47,6 +49,9 @@ def init_app(app):
     from .mails import UdataMailUtil
     from .password_validation import UdataPasswordUtil
     from .views import create_security_blueprint
+
+    if app.config["CDATA_BASE_URL"]:
+        app.config.setdefault("SECURITY_CONFIRM_ERROR_VIEW", app.config["CDATA_BASE_URL"])
 
     security.init_app(
         app,
