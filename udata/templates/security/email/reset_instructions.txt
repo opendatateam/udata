@@ -4,6 +4,6 @@
 
 {{ _('To reset your password, please confirm your request through the link below:') }}
 
-{{ reset_link }}
+{{ cdata_url("/reset/" ~ reset_token) or reset_link }}
 
 {% endblock %}
