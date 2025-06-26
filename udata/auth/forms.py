@@ -118,8 +118,6 @@ def check_captchetat(id: str, code: str) -> bool:
     if not captchetat_url:
         return True
 
-    print(id)
-    print(code)
     if not id or not code:
         return False
 
@@ -133,9 +131,7 @@ def check_captchetat(id: str, code: str) -> bool:
                 "code": code,
             },
         )
-        print(resp)
         return resp.text == "true"
-    except requests.exceptions.RequestException as err:
-        print(err)
+    except requests.exceptions.RequestException:
         # Should not happen, log?
         return False
