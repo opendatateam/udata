@@ -57,6 +57,10 @@ class MailSendTest(TestCase, DBTestMixin):
 @pytest.mark.frontend
 class MailCampaignTest:
     def test_send_mail_campaign_link_new_member(self, app):
+        # MTM campaign are only added on web URL (not API ones generated when
+        # no front-end is configured)
+        app.config["CDATA_BASE_URL"] = "https://www.data.gouv.fr"
+
         org = OrganizationFactory()
         recipient = UserFactory(email="recipient@udata")
 
@@ -88,6 +92,10 @@ class MailCampaignTest:
         assert "mtm_campaign=data-gouv-fr" in message.html
 
     def test_send_mail_campaign_link_badge_added_company(self, app):
+        # MTM campaign are only added on web URL (not API ones generated when
+        # no front-end is configured)
+        app.config["CDATA_BASE_URL"] = "https://www.data.gouv.fr"
+
         app.config["SEND_MAIL"] = True
         org = OrganizationFactory()
         org.add_badge("company")

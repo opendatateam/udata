@@ -23,7 +23,7 @@
             <td align="center">
                 {{ mail_button(
                     _('Update the dataset and associated resources'),
-                    url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), _external=True, **extras)
+                    cdata_url(f"/admin/datasets/{dataset.slug}/")
                 ) }}
             </td>
         </tr>

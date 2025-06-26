@@ -7,5 +7,5 @@
 
 
 {{ _('You can go on your organization page') }}:
-{{ org.external_url_with_campaign }}
+{{ org.url_for(_mailCampaign=True) }}
 {% endblock %}

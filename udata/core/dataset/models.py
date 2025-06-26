@@ -9,7 +9,7 @@ import Levenshtein
 import requests
 from blinker import signal
 from dateutil.parser import parse as parse_dt
-from flask import current_app
+from flask import current_app, url_for
 from mongoengine import DynamicEmbeddedDocument
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import DateTimeField
@@ -20,14 +20,14 @@ from udata.api_fields import field
 from udata.app import cache
 from udata.core import storages
 from udata.core.activity.models import Auditable
+from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.mail import get_mail_campaign_dict
 from udata.models import Badge, BadgeMixin, BadgesList, SpatialCoverage, WithMetrics, db
 from udata.mongo.errors import FieldValidationError
-from udata.uris import ValidationError, endpoint_for
+from udata.uris import ValidationError, cdata_url
 from udata.uris import validate as validate_url
 from udata.utils import get_by, hash_url, to_naive_datetime
 
@@ -456,9 +456,7 @@ class ResourceMixin(object):
 
         If this resource is updated and `url` changes, this property won't.
         """
-        return endpoint_for(
-            "datasets.resource", "api.resource_redirect", id=self.id, _external=True
-        )
+        return url_for("api.resource_redirect", id=self.id, _external=True)
 
     @cached_property
     def json_ld(self):
@@ -510,6 +508,12 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
         "views",
     ]
 
+    def url_for(self, **kwargs):
+        return self.self_web_url(**kwargs) or self.latest
+
+    def self_web_url(self, **kwargs):
+        return self.dataset.self_web_url(resource_id=self.id, **kwargs)
+
     @property
     def dataset(self):
         try:
@@ -542,7 +546,7 @@ class DatasetBadgeMixin(BadgeMixin):
     __badges__ = BADGES
 
 
-class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
+class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Document):
     title = field(db.StringField(required=True))
     acronym = field(db.StringField(max_length=128))
     # /!\ do not set directly the slug when creating or updating a dataset
@@ -719,10 +723,13 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             "edit_resources": ResourceEditPermission(self),
         }
 
-    def url_for(self, *args, **kwargs):
-        return endpoint_for("datasets.show", "api.dataset", dataset=self, *args, **kwargs)
+    def self_web_url(self, **kwargs):
+        return cdata_url(f"/datasets/{self._link_id(**kwargs)}/", **kwargs)
 
-    display_url = property(url_for)
+    def self_api_url(self, **kwargs):
+        return url_for(
+            "api.dataset", dataset=self._link_id(**kwargs), **self._self_api_url_kwargs(**kwargs)
+        )
 
     @property
     def is_visible(self):
@@ -737,15 +744,6 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         if not self.acronym:
             return self.title
         return "{title} ({acronym})".format(**self._data)
-
-    @property
-    def external_url(self):
-        return self.url_for(_external=True)
-
-    @property
-    def external_url_with_campaign(self):
-        extras = get_mail_campaign_dict()
-        return self.url_for(_external=True, **extras)
 
     @property
     def image_url(self):
@@ -1029,7 +1027,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             "alternateName": self.slug,
             "dateCreated": self.created_at.isoformat(),
             "dateModified": self.last_modified.isoformat(),
-            "url": endpoint_for("datasets.show", "api.dataset", dataset=self, _external=True),
+            "url": self.url_for(),
             "name": self.title,
             "keywords": ",".join(self.tags),
             "distribution": [
