@@ -42,7 +42,7 @@ class DatasetCsvAdapter(csv.Adapter):
         ("resources_formats", lambda o: ",".join(set(r.format for r in o.resources if r.format))),
         ("harvest.backend", lambda r: r.harvest and r.harvest.backend),
         ("harvest.domain", lambda r: r.harvest and r.harvest.domain),
-        ("harvest.issued_at", lambda r: r.harvest and r.harvest.issued_at),
+        ("harvest.created_at", lambda r: r.harvest and r.harvest.created_at),
         ("harvest.modified_at", lambda r: r.harvest and r.harvest.modified_at),
         ("harvest.remote_url", lambda r: r.harvest and r.harvest.remote_url),
         ("quality_score", lambda o: format(o.quality["score"], ".2f")),

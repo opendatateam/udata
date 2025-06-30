@@ -2399,7 +2399,7 @@ class HarvestMetadataAPITest:
         date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
 
         harvest_metadata = HarvestResourceMetadata(
-            created_at=date,
+            issued_at=date,
             modified_at=date,
             uri="http://domain.gouv.fr/dataset/uri",
         )
@@ -2408,7 +2408,7 @@ class HarvestMetadataAPITest:
         response = api.get(url_for("api.dataset", dataset=dataset))
         assert200(response)
         assert response.json["resources"][0]["harvest"] == {
-            "created_at": date.isoformat(),
+            "issued_at": date.isoformat(),
             "modified_at": date.isoformat(),
             "uri": "http://domain.gouv.fr/dataset/uri",
         }
