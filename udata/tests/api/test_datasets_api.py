@@ -1255,13 +1255,21 @@ class DatasetAPITest(APITestCase):
         resource = ResourceFactory(schema={"name": "etalab/schema-irve-statique"})
         dataset = DatasetFactory(resources=[resource])
 
-        data = {"title": "updated", "schema": None}
+        # not sending the schema should keep the current one
+        data = {"title": "updated 1"}
+        response = self.put(url_for("api.resource", dataset=dataset, rid=str(resource.id)), data)
+        self.assert200(response)
+        dataset.reload()
+        assert dataset.resources[0].title == "updated 1"
+        assert dataset.resources[0].schema is not None
+
+        # sending a None schema should remove it
+        data = {"title": "updated 2", "schema": None}
         response = self.put(url_for("api.resource", dataset=dataset, rid=str(resource.id)), data)
         self.assert200(response)
 
         dataset.reload()
-        print(dataset.resources[0])
-        assert dataset.resources[0].title == "updated"
+        assert dataset.resources[0].title == "updated 2"
         assert dataset.resources[0].schema is None
 
 
