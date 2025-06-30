@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix removing schema by sending null [#3350](https://github.com/opendatateam/udata/pull/3350)
 
 ## 10.4.3 (2025-06-23)
 
