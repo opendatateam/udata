@@ -544,6 +544,8 @@ class DcatBackendTest:
         assert resource_1.description == "A JSON resource"
         assert resource_1.url == "http://data.test.org/datasets/1/resources/1/file.json"
         assert resource_1.type == "main"
+        assert resource_1.harvest.issued_at.date() == date(2018, 3, 12)
+        assert resource_1.harvest.modified_at.date() == date(2018, 3, 14)
 
         resource_2 = next(res for res in dataset.resources if res.title == "Resource 1-2")
         assert resource_2.format == "json"

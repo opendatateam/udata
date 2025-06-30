@@ -224,8 +224,16 @@ def resource_to_rdf(
     r.add(DCT.description, Literal(resource.description))
     r.add(DCAT.downloadURL, URIRef(resource.url))
     r.add(DCAT.accessURL, URIRef(permalink))
-    r.add(DCT.issued, Literal(resource.created_at))
-    r.add(DCT.modified, Literal(resource.last_modified))
+    # issued
+    if resource.harvest and resource.harvest.issued_at:
+        r.add(DCT.issued, Literal(resource.harvest.issued_at))
+    else:
+        r.add(DCT.issued, Literal(resource.created_at))
+    # modified
+    if resource.harvest and resource.harvest.modified_at:
+        r.add(DCT.modified, Literal(resource.harvest.modified_at))
+    else:
+        r.add(DCT.modified, Literal(resource.last_modified))
     if dataset and dataset.license:
         r.add(DCT.rights, Literal(dataset.license.title))
         if dataset.license.url:
@@ -743,12 +751,12 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
 
     identifier = rdf_value(distrib, DCT.identifier)
     uri = distrib.identifier.toPython() if isinstance(distrib.identifier, URIRef) else None
-    created_at = rdf_value(distrib, DCT.issued)
+    issued_at = rdf_value(distrib, DCT.issued)
     modified_at = rdf_value(distrib, DCT.modified)
 
     if not resource.harvest:
         resource.harvest = HarvestResourceMetadata()
-    resource.harvest.created_at = created_at
+    resource.harvest.issued_at = issued_at
 
     # In the past, we've encountered future `modified_at` during harvesting
     # do not save it. :FutureHarvestModifiedAt

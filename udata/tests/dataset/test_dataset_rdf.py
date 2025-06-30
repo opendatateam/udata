@@ -15,6 +15,7 @@ from udata.core.dataset.models import (
     Checksum,
     Dataset,
     HarvestDatasetMetadata,
+    HarvestResourceMetadata,
     License,
     Resource,
 )
@@ -209,7 +210,13 @@ class DatasetToRdfTest:
 
     def test_all_resource_fields(self):
         license = LicenseFactory()
-        resource = ResourceFactory(format="csv")
+        resource = ResourceFactory(
+            format="csv",
+            harvest=HarvestResourceMetadata(
+                modified_at=faker.date_time_between(start_date="-30y", end_date="-1y"),
+                issued_at=faker.date_time_between(start_date="-30y", end_date="-1y"),
+            ),
+        )
         dataset = DatasetFactory(resources=[resource], license=license)
         permalink = url_for("api.resource_redirect", id=resource.id, _external=True)
 
@@ -217,8 +224,8 @@ class DatasetToRdfTest:
 
         assert r.value(DCT.title) == Literal(resource.title)
         assert r.value(DCT.description) == Literal(resource.description)
-        assert r.value(DCT.issued) == Literal(resource.created_at)
-        assert r.value(DCT.modified) == Literal(resource.last_modified)
+        assert r.value(DCT.issued) == Literal(resource.harvest.issued_at)
+        assert r.value(DCT.modified) == Literal(resource.harvest.modified_at)
         assert r.value(DCT.license).identifier == URIRef(license.url)
         assert r.value(DCT.rights) == Literal(license.title)
         assert r.value(DCAT.downloadURL).identifier == URIRef(resource.url)
@@ -612,7 +619,7 @@ class RdfToDatasetTest:
         assert isinstance(resource.checksum, Checksum)
         assert resource.checksum.type == "sha1"
         assert resource.checksum.value == sha1
-        assert resource.harvest.created_at.date() == issued.date()
+        assert resource.harvest.issued_at.date() == issued.date()
         assert resource.harvest.modified_at.date() == modified.date()
         assert resource.format == "csv"
 

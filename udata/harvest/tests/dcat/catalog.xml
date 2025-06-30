@@ -143,6 +143,8 @@
     <dcterms:description>A JSON resource</dcterms:description>
     <dcat:accessURL>http://data.test.org/datasets/1/resources/1/file.json</dcat:accessURL>
     <dct:license>Licence Ouverte Version 1.0</dct:license>
+    <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2018-03-14T18:59:02.737480</dcterms:modified>
+    <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2018-03-12T18:59:02.737480</dcterms:issued>
   </dcat:Distribution>
   <dcat:Distribution rdf:about="http://data.test.org/datasets/1/resources/2">
     <dcterms:description>A JSON resource</dcterms:description>
