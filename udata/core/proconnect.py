@@ -30,7 +30,7 @@ def init_app(app):
 
 @ns.route("/login/", endpoint="proconnect_login")
 class ProconnectLoginAPI(API):
-    def post(self):
+    def get(self):
         redirect_uri = url_for("api.proconnect_auth", _external=True)
         return oauth.proconnect.authorize_redirect(redirect_uri, acr_values="eidas1")
 
