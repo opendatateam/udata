@@ -700,7 +700,8 @@ class DcatBackendTest:
             service.harvest.remote_id
             == "https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/"
         )
-        assert service.harvest.created_at.isoformat() == "2024-07-12T00:03:38.764000"
+        assert service.harvest.issued_at.isoformat() == "2024-07-12T00:03:38.764000"
+        assert service.harvest.created_at is None
         assert (
             service.harvest.remote_url
             == "https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/console"

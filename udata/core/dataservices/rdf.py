@@ -85,7 +85,8 @@ def dataservice_from_rdf(
     dataservice.harvest.remote_url = remote_url_from_rdf(
         d, graph, remote_url_prefix=remote_url_prefix
     )
-    dataservice.harvest.created_at = rdf_value(d, DCT.issued)
+    dataservice.harvest.created_at = rdf_value(d, DCT.created)
+    dataservice.harvest.issued_at = rdf_value(d, DCT.issued)
     dataservice.metadata_modified_at = rdf_value(d, DCT.modified)
 
     dataservice.tags = themes_from_rdf(d)
@@ -127,7 +128,16 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     d.set(DCT.identifier, Literal(identifier))
     d.set(DCT.title, Literal(dataservice.title))
     d.set(DCT.description, Literal(dataservice.description))
-    d.set(DCT.issued, Literal(dataservice.created_at))
+
+    if dataservice.harvest and dataservice.harvest.created_at:
+        d.set(DCT.created, Literal(dataservice.harvest.created_at))
+    else:
+        d.set(DCT.created, Literal(dataservice.created_at))
+    if dataservice.harvest and dataservice.harvest.issued_at:
+        d.set(DCT.issued, Literal(dataservice.harvest.issued_at))
+    else:
+        d.set(DCT.issued, Literal(dataservice.created_at))
+    d.set(DCT.modified, Literal(dataservice.metadata_modified_at))
 
     if dataservice.base_api_url:
         d.set(DCAT.endpointURL, URIRef(dataservice.base_api_url))
