@@ -78,7 +78,7 @@ resource_harvest_fields = api.model(
             description="The resource harvested creation date", allow_null=True, readonly=True
         ),
         "issued_at": fields.ISODateTime(
-            description="The dataset harvested issuance (publication) date",
+            description="The resource harvested issuance (publication) date",
             allow_null=True,
             readonly=True,
         ),
