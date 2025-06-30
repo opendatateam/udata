@@ -86,6 +86,7 @@ class DatasetToRdfTest:
         assert d.value(DCT.identifier) == Literal(dataset.id)
         assert d.value(DCT.title) == Literal(dataset.title)
         assert d.value(DCT.issued) == Literal(dataset.created_at)
+        assert d.value(DCT.created) == Literal(dataset.created_at)
         assert d.value(DCT.modified) == Literal(dataset.last_modified)
         assert d.value(DCAT.landingPage) is None
 
@@ -107,7 +108,11 @@ class DatasetToRdfTest:
             organization=org,
             contact_points=[contact],
             harvest=HarvestDatasetMetadata(
-                remote_url=remote_url, dct_identifier="foobar-identifier"
+                remote_url=remote_url,
+                dct_identifier="foobar-identifier",
+                created_at=faker.date_time_between(start_date="-30y", end_date="-1y"),
+                modified_at=faker.date_time_between(start_date="-30y", end_date="-1y"),
+                issued_at=faker.date_time_between(start_date="-30y", end_date="-1y"),
             ),
         )
         app.config["SITE_TITLE"] = "Test site title"
@@ -130,8 +135,9 @@ class DatasetToRdfTest:
         assert d.value(DCT.title) == Literal(dataset.title)
         assert d.value(SKOS.altLabel) == Literal(dataset.acronym)
         assert d.value(DCT.description) == Literal(dataset.description)
-        assert d.value(DCT.issued) == Literal(dataset.created_at)
-        assert d.value(DCT.modified) == Literal(dataset.last_modified)
+        assert d.value(DCT.issued) == Literal(dataset.harvest.issued_at)
+        assert d.value(DCT.created) == Literal(dataset.harvest.created_at)
+        assert d.value(DCT.modified) == Literal(dataset.harvest.modified_at)
         assert d.value(DCT.accrualPeriodicity).identifier == FREQ.daily
         assert d.value(DCAT.landingPage).identifier == URIRef(remote_url)
         expected_tags = set(Literal(t) for t in dataset.tags)

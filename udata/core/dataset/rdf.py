@@ -306,8 +306,22 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
     d.set(RDF.type, DCAT.Dataset)
     d.set(DCT.title, Literal(dataset.title))
     d.set(DCT.description, Literal(dataset.description))
-    d.set(DCT.issued, Literal(dataset.created_at))
-    d.set(DCT.modified, Literal(dataset.last_modified))
+
+    # created
+    if dataset.harvest and dataset.harvest.created_at:
+        d.set(DCT.created, Literal(dataset.harvest.created_at))
+    else:
+        d.set(DCT.created, Literal(dataset.created_at))
+    # issued
+    if dataset.harvest and dataset.harvest.issued_at:
+        d.set(DCT.issued, Literal(dataset.harvest.issued_at))
+    else:
+        d.set(DCT.issued, Literal(dataset.created_at))
+    # modified
+    if dataset.harvest and dataset.harvest.modified_at:
+        d.set(DCT.modified, Literal(dataset.harvest.modified_at))
+    else:
+        d.set(DCT.modified, Literal(dataset.last_modified))
 
     if dataset.harvest and dataset.harvest.remote_url:
         d.set(DCAT.landingPage, URIRef(dataset.harvest.remote_url))
@@ -834,7 +848,8 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
 
     remote_url = remote_url_from_rdf(d, graph, remote_url_prefix=remote_url_prefix)
 
-    created_at = rdf_value(d, DCT.issued)
+    created_at = rdf_value(d, DCT.created)
+    issued_at = rdf_value(d, DCT.issued)
     modified_at = rdf_value(d, DCT.modified)
 
     if not dataset.harvest:
@@ -843,6 +858,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
     dataset.harvest.uri = uri
     dataset.harvest.remote_url = remote_url
     dataset.harvest.created_at = created_at
+    dataset.harvest.issued_at = issued_at
 
     # In the past, we've encountered future `modified_at` during harvesting
     # do not save it. :FutureHarvestModifiedAt

@@ -129,14 +129,17 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     d.set(DCT.title, Literal(dataservice.title))
     d.set(DCT.description, Literal(dataservice.description))
 
+    # created
     if dataservice.harvest and dataservice.harvest.created_at:
         d.set(DCT.created, Literal(dataservice.harvest.created_at))
     else:
         d.set(DCT.created, Literal(dataservice.created_at))
+    # issued
     if dataservice.harvest and dataservice.harvest.issued_at:
         d.set(DCT.issued, Literal(dataservice.harvest.issued_at))
     else:
         d.set(DCT.issued, Literal(dataservice.created_at))
+    # modified
     d.set(DCT.modified, Literal(dataservice.metadata_modified_at))
 
     if dataservice.base_api_url:

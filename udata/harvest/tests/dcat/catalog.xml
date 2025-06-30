@@ -21,6 +21,7 @@
         <dcat:keyword>Tag 2</dcat:keyword>
         <dcterms:publisher rdf:resource="http://data.test.org/organizations/1"/>
         <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T18:59:02.737480</dcterms:issued>
+        <dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-12T18:59:02.737480</dcterms:created>
         <dcterms:description>Dataset 3 description</dcterms:description>
         <dcat:keyword>Tag 1</dcat:keyword>
         <dcat:theme rdf:resource="http://data.europa.eu/bna/c_dd313021"/>
