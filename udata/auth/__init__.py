@@ -12,8 +12,6 @@ from flask_security import login_required as login_required
 from flask_security import login_user as login_user
 from werkzeug.utils import import_string
 
-from udata.uris import cdata_url
-
 log = logging.getLogger(__name__)
 
 
