@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Fix removing schema by sending null [#3350](https://github.com/opendatateam/udata/pull/3350)
+- Use datagouv patched ISO-DCAT XSLT URL [#3351](https://github.com/opendatateam/udata/pull/3351)
 
 ## 10.4.3 (2025-06-23)
 
