@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Use datagouv patched ISO-DCAT XSLT URL [#3351](https://github.com/opendatateam/udata/pull/3351)
 
 ## 10.4.3 (2025-06-23)
 
