@@ -7,6 +7,7 @@ from werkzeug.security import gen_salt
 
 from udata.api import API, api
 from udata.auth import login_user
+from udata.uris import homepage_url
 
 ns = api.namespace("proconnect", "Proconnect related operations")
 oauth = OAuth()
@@ -70,7 +71,7 @@ class ProconnectAuthAPI(API):
         if not login_user(user):
             return {"message": "ProConnect Authentication failed"}, 401
 
-        return redirect("/")
+        return redirect(homepage_url(flash="connected"))
 
 
 @ns.route("/logout_oauth", endpoint="proconnect_logout_oauth")

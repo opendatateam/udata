@@ -45,6 +45,7 @@ def is_allowed_cors_route():
         or path.startswith("/reset")
         or path.startswith("/register")
         or path.startswith("/confirm")
+        or path.startswith("/oauth")
         or path.startswith("/datasets/r/")
     )
 
