@@ -1,4 +1,4 @@
-from flask import current_app, redirect, url_for
+from flask import current_app, jsonify, redirect, url_for
 from flask_login import current_user, login_required
 from flask_security.utils import (
     check_and_get_token_status,
@@ -21,10 +21,12 @@ from flask_security.views import (
     send_login,
     token_login,
 )
+from flask_wtf.csrf import generate_csrf
 from werkzeug.local import LocalProxy
 
 from udata.i18n import lazy_gettext as _
 from udata.uris import homepage_url
+from udata.utils import wants_json
 
 from .forms import ChangeEmailForm
 
@@ -107,6 +109,10 @@ def change_email():
     if form.validate_on_submit():
         new_email = form.new_email.data
         send_change_email_confirmation_instructions(current_user, new_email)
+
+        if wants_json():
+            return jsonify({})
+
         return redirect(
             homepage_url(
                 flash="change_email",
@@ -115,6 +121,9 @@ def change_email():
                 },
             )
         )
+
+    if wants_json():
+        return jsonify({"response": {"csrf_token": generate_csrf()}})
 
     return _security.render_template("security/change_email.html", change_email_form=form)
 
