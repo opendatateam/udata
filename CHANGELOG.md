@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 10.5.0 (2025-07-02)
 
 - Allow temporal intervals with no start date [#3353](https://github.com/opendatateam/udata/pull/3353)
 - Fix removing schema by sending null [#3350](https://github.com/opendatateam/udata/pull/3350)
