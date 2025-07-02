@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Fix invalid resource format from harvested RDF records
+- Fix invalid resource format from harvested RDF records [#3354](https://github.com/opendatateam/udata/pull/3354)
 
 ## 10.5.0 (2025-07-02)
 
