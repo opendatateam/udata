@@ -558,7 +558,7 @@ def frequency_from_rdf(term):
 
 def mime_from_rdf(resource):
     # DCAT.mediaType *should* only be used when defined as IANA
-    mime = rdf_value(resource, DCAT.mediaType)
+    mime = rdf_value(resource, DCAT.mediaType, parse_label=True)
     if not mime:
         return
     if IANAFORMAT in mime:
@@ -568,7 +568,7 @@ def mime_from_rdf(resource):
 
 
 def format_from_rdf(resource):
-    format = rdf_value(resource, DCT.format)
+    format = rdf_value(resource, DCT.format, parse_label=True)
     if not format:
         return
     if EUFORMAT in format or IANAFORMAT in format:
@@ -591,7 +591,7 @@ def title_from_rdf(rdf, url):
         last_part = url.split("/")[-1]
         if "." in last_part and "?" not in last_part:
             return last_part
-    fmt = rdf_value(rdf, DCT.format)
+    fmt = format_from_rdf(rdf)
     lang = current_app.config["DEFAULT_LANGUAGE"]
     with i18n.language(lang):
         if fmt:

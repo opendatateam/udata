@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix invalid resource format from harvested RDF records
 
 ## 10.5.0 (2025-07-02)
 
