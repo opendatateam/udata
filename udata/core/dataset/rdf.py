@@ -109,7 +109,8 @@ def temporal_to_rdf(
     graph = graph or Graph(namespace_manager=namespace_manager)
     pot = graph.resource(BNode())
     pot.set(RDF.type, DCT.PeriodOfTime)
-    pot.set(DCAT.startDate, Literal(daterange.start))
+    if daterange.start:
+        pot.set(DCAT.startDate, Literal(daterange.start))
     if daterange.end:
         pot.set(DCAT.endDate, Literal(daterange.end))
     return pot
@@ -409,6 +410,14 @@ def temporal_from_literal(text):
             )
 
 
+def maybe_date_range(start, end):
+    if start or end:
+        return db.DateRange(
+            start=start.toPython() if start else None,
+            end=end.toPython() if end else None,
+        )
+
+
 def temporal_from_resource(resource):
     """
     Parse a temporal coverage from a RDF class/resource ie. either:
@@ -422,24 +431,12 @@ def temporal_from_resource(resource):
         # Fetch remote ontology if necessary
         g = Graph().parse(str(resource.identifier))
         resource = g.resource(resource.identifier)
-    if resource.value(SCHEMA.startDate):
-        end = resource.value(SCHEMA.endDate)
-        return db.DateRange(
-            start=resource.value(SCHEMA.startDate).toPython(),
-            end=end.toPython() if end else None,
-        )
-    elif resource.value(DCAT.startDate):
-        end = resource.value(DCAT.endDate)
-        return db.DateRange(
-            start=resource.value(DCAT.startDate).toPython(),
-            end=end.toPython() if end else None,
-        )
-    elif resource.value(SCV.min):
-        end = resource.value(SCV.max)
-        return db.DateRange(
-            start=resource.value(SCV.min).toPython(),
-            end=end.toPython() if end else None,
-        )
+    if range := maybe_date_range(resource.value(SCHEMA.startDate), resource.value(SCHEMA.endDate)):
+        return range
+    elif range := maybe_date_range(resource.value(DCAT.startDate), resource.value(DCAT.endDate)):
+        return range
+    elif range := maybe_date_range(resource.value(SCV.min), resource.value(SCV.max)):
+        return range
 
 
 def temporal_from_rdf(period_of_time):

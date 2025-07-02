@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Allow temporal intervals with no start date [#3353](https://github.com/opendatateam/udata/pull/3353)
 - Fix removing schema by sending null [#3350](https://github.com/opendatateam/udata/pull/3350)
 - Use datagouv patched ISO-DCAT XSLT URL [#3351](https://github.com/opendatateam/udata/pull/3351)
 
