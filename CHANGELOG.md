@@ -4,6 +4,7 @@
 
 - Fix invalid resource format from harvested RDF records [#3354](https://github.com/opendatateam/udata/pull/3354)
 - Expose `dataset_id` for CommunityResource in /dataset/resource/id [#3258](https://github.com/opendatateam/udata/pull/3258)
+- Parallelize test execution using 2 CircleCI executors, making CI workflow ~30% faster. Modified `inv tests` task to accept specific tests for parallelization [#3235](https://github.com/opendatateam/udata/pull/3235)
 
 ## 10.5.0 (2025-07-02)
 
