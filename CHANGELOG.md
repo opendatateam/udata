@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Fix failing to return dataservice in harvest preview because of no ID for URL [#3357](https://github.com/opendatateam/udata/pull/3357/)
 - Fix invalid resource format from harvested RDF records [#3354](https://github.com/opendatateam/udata/pull/3354)
 
 ## 10.5.0 (2025-07-02)
