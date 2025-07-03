@@ -1,6 +1,5 @@
 import logging
 import os
-import re
 import xml.etree.ElementTree as ET
 from datetime import date
 
@@ -969,9 +968,7 @@ class CswIso19139DcatBackendTest:
             == "http://atom.geo-ide.developpement-durable.gouv.fr/atomArchive/GetResource?id=fr-120066022-ldd-cab63273-b3ae-4e8a-ae1c-6192e45faa94&datasetAggregate=true"
         )
         assert resource.type == "main"
-
-        # Sadly resource format is parsed as a blank node. Format parsing should be improved.
-        assert re.match(r"n[0-9a-f]{32}", resource.format)
+        assert resource.format == "mapinfo tab"
 
         # Computed from source config `remote_url_prefix` + `dct:identifier` from `isPrimaryTopicOf`
         if remote_url_prefix:

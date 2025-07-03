@@ -689,9 +689,15 @@ class ResourceAPI(ResourceMixin, API):
 
         # populate_obj populates existing resource object with the content of the form.
         # update_resource saves the updated resource dict to the database
-        # the additional dataset.save is required as we update the last_modified date.
         form.populate_obj(resource)
         resource.last_modified_internal = datetime.utcnow()
+
+        # populate_obj is bugged when sending a None value we want to remove the existing
+        # value. We don't want to remove the existing value if no "schema" is sent.
+        # Will be fixed when we switch to the new API Fields.
+        if "schema" in request.get_json() and form._fields.get("schema").data is None:
+            resource.schema = None
+
         dataset.update_resource(resource)
         return resource
 

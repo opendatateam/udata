@@ -108,7 +108,8 @@ def temporal_to_rdf(
     graph = graph or Graph(namespace_manager=namespace_manager)
     pot = graph.resource(BNode())
     pot.set(RDF.type, DCT.PeriodOfTime)
-    pot.set(DCAT.startDate, Literal(daterange.start))
+    if daterange.start:
+        pot.set(DCAT.startDate, Literal(daterange.start))
     if daterange.end:
         pot.set(DCAT.endDate, Literal(daterange.end))
     return pot
@@ -376,6 +377,14 @@ def temporal_from_literal(text):
             )
 
 
+def maybe_date_range(start, end):
+    if start or end:
+        return db.DateRange(
+            start=start.toPython() if start else None,
+            end=end.toPython() if end else None,
+        )
+
+
 def temporal_from_resource(resource):
     """
     Parse a temporal coverage from a RDF class/resource ie. either:
@@ -389,24 +398,12 @@ def temporal_from_resource(resource):
         # Fetch remote ontology if necessary
         g = Graph().parse(str(resource.identifier))
         resource = g.resource(resource.identifier)
-    if resource.value(SCHEMA.startDate):
-        end = resource.value(SCHEMA.endDate)
-        return db.DateRange(
-            start=resource.value(SCHEMA.startDate).toPython(),
-            end=end.toPython() if end else None,
-        )
-    elif resource.value(DCAT.startDate):
-        end = resource.value(DCAT.endDate)
-        return db.DateRange(
-            start=resource.value(DCAT.startDate).toPython(),
-            end=end.toPython() if end else None,
-        )
-    elif resource.value(SCV.min):
-        end = resource.value(SCV.max)
-        return db.DateRange(
-            start=resource.value(SCV.min).toPython(),
-            end=end.toPython() if end else None,
-        )
+    if range := maybe_date_range(resource.value(SCHEMA.startDate), resource.value(SCHEMA.endDate)):
+        return range
+    elif range := maybe_date_range(resource.value(DCAT.startDate), resource.value(DCAT.endDate)):
+        return range
+    elif range := maybe_date_range(resource.value(SCV.min), resource.value(SCV.max)):
+        return range
 
 
 def temporal_from_rdf(period_of_time):
@@ -528,7 +525,7 @@ def frequency_from_rdf(term):
 
 def mime_from_rdf(resource):
     # DCAT.mediaType *should* only be used when defined as IANA
-    mime = rdf_value(resource, DCAT.mediaType)
+    mime = rdf_value(resource, DCAT.mediaType, parse_label=True)
     if not mime:
         return
     if IANAFORMAT in mime:
@@ -538,7 +535,7 @@ def mime_from_rdf(resource):
 
 
 def format_from_rdf(resource):
-    format = rdf_value(resource, DCT.format)
+    format = rdf_value(resource, DCT.format, parse_label=True)
     if not format:
         return
     if EUFORMAT in format or IANAFORMAT in format:
@@ -561,7 +558,7 @@ def title_from_rdf(rdf, url):
         last_part = url.split("/")[-1]
         if "." in last_part and "?" not in last_part:
             return last_part
-    fmt = rdf_value(rdf, DCT.format)
+    fmt = format_from_rdf(rdf)
     lang = current_app.config["DEFAULT_LANGUAGE"]
     with i18n.language(lang):
         if fmt:

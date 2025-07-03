@@ -2,7 +2,13 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix invalid resource format from harvested RDF records [#3354](https://github.com/opendatateam/udata/pull/3354)
+
+## 10.5.0 (2025-07-02)
+
+- Allow temporal intervals with no start date [#3353](https://github.com/opendatateam/udata/pull/3353)
+- Fix removing schema by sending null [#3350](https://github.com/opendatateam/udata/pull/3350)
+- Use datagouv patched ISO-DCAT XSLT URL [#3351](https://github.com/opendatateam/udata/pull/3351)
 
 ## 10.4.3 (2025-06-23)
 
