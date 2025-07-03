@@ -5,7 +5,7 @@ import pytest
 import requests
 from flask import url_for
 from rdflib import BNode, Graph, Literal, Namespace, URIRef
-from rdflib.namespace import FOAF, RDF
+from rdflib.namespace import FOAF, RDF, RDFS
 from rdflib.resource import Resource as RdfResource
 
 from udata.core.contact_point.factories import ContactPointFactory
@@ -672,7 +672,7 @@ class RdfToDatasetTest:
 
         assert resource.title == "somefile.csv"
 
-    def test_resource_title_from_format(self):
+    def test_resource_title_from_format_value(self):
         node = BNode()
         g = Graph()
         url = "https://www.somewhere.com/no-extension/"
@@ -680,6 +680,23 @@ class RdfToDatasetTest:
         g.set((node, RDF.type, DCAT.Distribution))
         g.set((node, DCAT.downloadURL, URIRef(url)))
         g.set((node, DCT.format, Literal("CSV")))
+
+        resource = resource_from_rdf(g)
+        resource.validate()
+
+        assert resource.title == _("{format} resource").format(format="csv")
+
+    def test_resource_title_from_format_label(self):
+        node = BNode()
+        g = Graph()
+        url = "https://www.somewhere.com/no-extension/"
+
+        g.set((node, RDF.type, DCAT.Distribution))
+        g.set((node, DCAT.downloadURL, URIRef(url)))
+        format = BNode()
+        g.add((node, DCT.format, format))
+        g.add((format, RDF.type, DCT.MediaType))
+        g.add((format, RDFS.label, Literal("CSV")))
 
         resource = resource_from_rdf(g)
         resource.validate()
@@ -800,6 +817,56 @@ class RdfToDatasetTest:
 
         assert isinstance(dataset, Dataset)
         assert len(dataset.resources) == 1
+
+    def test_resource_format_from_mediatype_uriref(self):
+        node = BNode()
+        g = Graph()
+        url = "https://www.somewhere.com/no-extension/"
+
+        g.set((node, RDF.type, DCAT.Distribution))
+        g.set((node, DCAT.downloadURL, URIRef(url)))
+        format = URIRef("http://publications.europa.eu/resource/authority/file-type/CSV")
+        g.add((format, RDF.type, DCT.MediaType))
+        g.add((node, DCT.format, format))
+
+        resource = resource_from_rdf(g)
+        resource.validate()
+
+        assert resource.format == "csv"
+
+    def test_resource_format_from_mediatype_label(self):
+        node = BNode()
+        g = Graph()
+        url = "https://www.somewhere.com/no-extension/"
+
+        g.set((node, RDF.type, DCAT.Distribution))
+        g.set((node, DCAT.downloadURL, URIRef(url)))
+        format = BNode()
+        g.add((node, DCT.format, format))
+        g.add((format, RDF.type, DCT.MediaType))
+        g.add((format, RDFS.label, Literal("CSV")))
+
+        resource = resource_from_rdf(g)
+        resource.validate()
+
+        assert resource.format == "csv"
+
+    def test_resource_format_from_mediatype_uriref_and_label(self):
+        node = BNode()
+        g = Graph()
+        url = "https://www.somewhere.com/no-extension/"
+
+        g.set((node, RDF.type, DCAT.Distribution))
+        g.set((node, DCAT.downloadURL, URIRef(url)))
+        format = URIRef("http://publications.europa.eu/resource/authority/file-type/SHP")
+        g.add((format, RDF.type, DCT.MediaType))
+        g.add((format, RDFS.label, Literal("ESRI Shapefile")))
+        g.add((node, DCT.format, format))
+
+        resource = resource_from_rdf(g)
+        resource.validate()
+
+        assert resource.format == "esri shapefile"
 
     def test_match_license_from_license_uri(self):
         license = LicenseFactory()
