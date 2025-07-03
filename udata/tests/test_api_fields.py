@@ -1,7 +1,7 @@
 import factory
+import mongoengine
 import pytest
 from flask_restx.reqparse import Argument, RequestParser
-from werkzeug.exceptions import BadRequest
 
 from udata.api_fields import field, function_field, generate_fields, patch, patch_and_save
 from udata.core.dataset.api_fields import dataset_fields
@@ -30,7 +30,7 @@ URL_RAISE_ERROR: str = "/raise/validation/error"
 URL_EXISTS_ERROR_MESSAGE: str = "Url exists"
 
 
-def check_url(url: str = "") -> None:
+def check_url(url: str = "", **_kwargs) -> None:
     if url == URL_RAISE_ERROR:
         raise ValueError(URL_EXISTS_ERROR_MESSAGE)
     return
@@ -43,6 +43,19 @@ class FakeBadge(Badge):
 class FakeBadgeMixin(BadgeMixin):
     badges = field(BadgesList(FakeBadge), **BadgeMixin.default_badges_list_params)
     __badges__ = BADGES
+
+
+@generate_fields()
+class FakeEmbedded(db.EmbeddedDocument):
+    title = field(
+        db.StringField(required=True),
+        sortable=True,
+        show_as_ref=True,
+    )
+    description = field(
+        db.StringField(required=True),
+        markdown=True,
+    )
 
 
 @generate_fields(
@@ -74,7 +87,7 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
     url = field(
         db.StringField(required=True),
         description="The remote URL (website)",
-        check=check_url,
+        checks=[check_url],
     )
     image_url = db.StringField()
     image = field(
@@ -112,6 +125,8 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
     archived = field(
         db.DateTimeField(),
     )
+
+    embedded = field(db.EmbeddedDocumentField(FakeEmbedded))
 
     def __str__(self) -> str:
         return self.title or ""
@@ -224,8 +239,28 @@ class PatchTest:
         fake: Fake = FakeFactory.create()
         fake_request = self.FakeRequest()
         fake_request.json["url"] = "ok url"
-        with pytest.raises(BadRequest):
+        with pytest.raises(mongoengine.errors.ValidationError):
             patch_and_save(fake, fake_request)
+
+
+class PatchEmbeddedTest:
+    class FakeRequest:
+        json = {
+            "url": URL_RAISE_ERROR,
+            "description": "desc",
+            "embedded": {"title": "embedded title", "description": "d2"},
+        }
+
+    def test_patch_check(self) -> None:
+        fake: Fake = FakeFactory.create()
+        with pytest.raises(ValueError, match=URL_EXISTS_ERROR_MESSAGE):
+            patch(fake, self.FakeRequest())
+
+    def test_patch_and_save(self) -> None:
+        fake: Fake = FakeFactory.create()
+        fake_request = self.FakeRequest()
+        fake_request.json["url"] = "ok url"
+        patch_and_save(fake, fake_request)
 
 
 class ApplySortAndFiltersTest:

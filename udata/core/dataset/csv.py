@@ -1,6 +1,8 @@
 # for backwards compatibility (see https://github.com/opendatateam/udata/pull/3152)
+import json
+
+from udata.core import csv
 from udata.core.discussions.csv import DiscussionCsvAdapter  # noqa: F401
-from udata.frontend import csv
 
 from .models import Dataset, Resource
 
@@ -38,7 +40,6 @@ class DatasetCsvAdapter(csv.Adapter):
         ("resources_count", lambda o: len(o.resources)),
         ("main_resources_count", lambda o: len([r for r in o.resources if r.type == "main"])),
         ("resources_formats", lambda o: ",".join(set(r.format for r in o.resources if r.format))),
-        "downloads",
         ("harvest.backend", lambda r: r.harvest and r.harvest.backend),
         ("harvest.domain", lambda r: r.harvest and r.harvest.domain),
         ("harvest.created_at", lambda r: r.harvest and r.harvest.created_at),
@@ -90,6 +91,7 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
         ("harvest.modified_at", lambda o: o.harvest and o.harvest.modified_at),
         ("schema_name", "schema.name"),
         ("schema_version", "schema.version"),
-        ("preview_url", lambda o: o.preview_url or False),
+        ("preview_url", lambda o: o.preview_url or None),
+        ("extras", lambda o: json.dumps(o.extras, default=str)),
     )
     attribute = "resources"

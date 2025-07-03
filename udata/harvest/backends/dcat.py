@@ -9,7 +9,7 @@ from rdflib.namespace import RDF
 
 from udata.core.dataservices.rdf import dataservice_from_rdf
 from udata.core.dataset.rdf import dataset_from_rdf
-from udata.harvest.models import HarvestItem
+from udata.harvest.models import HarvestError, HarvestItem
 from udata.i18n import gettext as _
 from udata.rdf import (
     DCAT,
@@ -18,6 +18,7 @@ from udata.rdf import (
     SPDX,
     guess_format,
     namespace_manager,
+    rdf_value,
     url_from_rdf,
 )
 from udata.storage.s3 import store_as_json
@@ -77,8 +78,18 @@ class DcatBackend(BaseBackend):
             self.process_one_datasets_page(page_number, page)
             serialized_graphs.append(page.serialize(format=fmt, indent=None))
 
+        # We do a second pass to have all datasets in memory and attach datasets
+        # to dataservices. It could be better to be one pass of graph walking and
+        # then one pass of attaching datasets to dataservices.
         for page_number, page in self.walk_graph(self.source.url, fmt):
             self.process_one_dataservices_page(page_number, page)
+
+        if not self.dryrun and self.has_reached_max_items():
+            # We have reached the max_items limit. Warn the user that all the datasets may not be present.
+            error = HarvestError(
+                message=f"{self.max_items} max items reached, not all datasets/dataservices were retrieved"
+            )
+            self.job.errors.append(error)
 
         # The official MongoDB document size in 16MB. The default value here is 15MB to account for other fields in the document (and for difference between * 1024 vs * 1000).
         max_harvest_graph_size_in_mongo = current_app.config.get(
@@ -146,7 +157,7 @@ class DcatBackend(BaseBackend):
                     break
 
             yield page_number, subgraph
-            if self.is_done():
+            if self.has_reached_max_items():
                 return
 
             page_number += 1
@@ -154,17 +165,48 @@ class DcatBackend(BaseBackend):
     def process_one_datasets_page(self, page_number: int, page: Graph):
         for node in page.subjects(RDF.type, DCAT.Dataset):
             remote_id = page.value(node, DCT.identifier)
+            if self.is_dataset_external_to_this_page(page, node):
+                continue
+
             self.process_dataset(remote_id, page_number=page_number, page=page, node=node)
 
-            if self.is_done():
+            if self.has_reached_max_items():
                 return
+
+    def is_dataset_external_to_this_page(self, page: Graph, node) -> bool:
+        # In dataservice nodes we have `servesDataset` or `hasPart` that can contains nodes
+        # with type=dataset. We don't want to process them because these nodes are empty (they
+        # only contains a link to the dataset definition).
+        # These datasets are either present in the catalog in previous or next pages or
+        # external from the catalog we are currently harvesting (so we don't want to harvest them).
+        # First we thought of skipping them inside `dataset_from_rdf` (see :ExcludeExternalyDefinedDataset)
+        # but it creates a lot of "fake" items in the job and raising problems (reaching the max harvest item for
+        # example and not getting to the "real" datasets/dataservices in subsequent pages)
+        # So to prevent creating a lot of useless items in the job we first thought about checking to see if there is no title and
+        # if `isPrimaryTopicOf` is present. But it may be better to check if the only link of the node with the current page is a
+        # `servesDataset` or `hasPart`. If it's the case, the node is only present in a dataservice. (maybe we could also check that
+        # the `_other_node` is a dataservice?)
+        # `isPrimaryTopicOf` is the tag present in the first harvester raising the problem, it may exists other
+        # values of the same sort we need to check here.
+
+        # This is not dangerous because we check for missing title in `dataset_from_rdf` later so we would have skipped
+        # this dataset anyway.
+        resource = page.resource(node)
+        title = rdf_value(resource, DCT.title)
+        if title:
+            return False
+
+        predicates = [link_type for (_other_node, link_type) in page.subject_predicates(node)]
+        return len(predicates) == 1 and (
+            predicates[0] == DCAT.servesDataset or predicates[0] == DCT.hasPart
+        )
 
     def process_one_dataservices_page(self, page_number: int, page: Graph):
         for node in page.subjects(RDF.type, DCAT.DataService):
             remote_id = page.value(node, DCT.identifier)
             self.process_dataservice(remote_id, page_number=page_number, page=page, node=node)
 
-            if self.is_done():
+            if self.has_reached_max_items():
                 return
 
     def inner_process_dataset(self, item: HarvestItem, page_number: int, page: Graph, node):
@@ -266,7 +308,7 @@ class CswDcatBackend(DcatBackend):
                 subgraph.parse(data=ET.tostring(child), format=fmt)
 
                 yield page_number, subgraph
-                if self.is_done():
+                if self.has_reached_max_items():
                     return
 
             next_record = self.next_record_if_should_continue(start, search_results)
@@ -302,7 +344,7 @@ class CswIso19139DcatBackend(DcatBackend):
 
     ISO_SCHEMA = "http://www.isotc211.org/2005/gmd"
 
-    XSL_URL = "https://raw.githubusercontent.com/SEMICeu/iso-19139-to-dcat-ap/master/iso-19139-to-dcat-ap.xsl"
+    XSL_URL = "https://raw.githubusercontent.com/datagouv/iso-19139-to-dcat-ap/patch-datagouv/iso-19139-to-dcat-ap.xsl"
 
     def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
         """
@@ -375,7 +417,7 @@ class CswIso19139DcatBackend(DcatBackend):
                 raise ValueError("Failed to fetch CSW content")
 
             yield page_number, subgraph
-            if self.is_done():
+            if self.has_reached_max_items():
                 return
 
             next_record = self.next_record_if_should_continue(start, search_results)

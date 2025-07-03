@@ -1,4 +1,8 @@
 from datetime import datetime
+from typing import List
+
+from feedgenerator.django.utils.feedgenerator import Atom1Feed
+from flask import make_response, request
 
 from udata.api import API, api, fields
 from udata.auth import Permission as AdminPermission
@@ -11,9 +15,13 @@ from udata.core.storages.api import (
     uploaded_image_fields,
 )
 from udata.core.user.api_fields import user_ref_fields
+from udata.frontend.markdown import md
+from udata.i18n import gettext as _
 
 from .forms import PostForm
 from .models import Post
+
+DEFAULT_SORTING = "-published"
 
 ns = api.namespace("posts", "Posts related operations")
 
@@ -58,15 +66,16 @@ post_page_fields = api.model("PostPage", fields.pager(post_fields))
 
 parser = api.page_parser()
 
-parser.add_argument(
-    "sort", type=str, default="-created_at", location="args", help="The sorting attribute"
-)
+parser.add_argument("sort", type=str, location="args", help="The sorting attribute")
 parser.add_argument(
     "with_drafts",
     type=bool,
     default=False,
     location="args",
     help="`True` also returns the unpublished posts (only for super-admins)",
+)
+parser.add_argument(
+    "q", type=str, location="args", help="query string to search through resources titles"
 )
 
 
@@ -84,7 +93,12 @@ class PostsAPI(API):
         if not (AdminPermission().can() and args["with_drafts"]):
             posts = posts.published()
 
-        return posts.order_by(args["sort"]).paginate(args["page"], args["page_size"])
+        if args["q"]:
+            phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
+            posts = posts.search_text(phrase_query)
+
+        sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
+        return posts.order_by(sort).paginate(args["page"], args["page_size"])
 
     @api.doc("create_post")
     @api.secure(admin_permission)
@@ -95,6 +109,34 @@ class PostsAPI(API):
         """Create a post"""
         form = api.validate(PostForm)
         return form.save(), 201
+
+
+@ns.route("/recent.atom", endpoint="recent_posts_atom_feed")
+class PostsAtomFeedAPI(API):
+    @api.doc("recent_posts_atom_feed")
+    def get(self):
+        feed = Atom1Feed(
+            _("Latests posts"),
+            description=None,
+            feed_url=request.url,
+            link=request.url_root,
+        )
+
+        posts: List[Post] = Post.objects().published().order_by("-published").limit(15)
+        for post in posts:
+            feed.add_item(
+                post.name,
+                unique_id=post.id,
+                description=post.headline,
+                content=md(post.content),
+                author_name="data.gouv.fr",
+                link=post.external_url,
+                updateddate=post.last_modified,
+                pubdate=post.published,
+            )
+        response = make_response(feed.writeString("utf-8"))
+        response.headers["Content-Type"] = "application/atom+xml"
+        return response
 
 
 @ns.route("/<post:post>/", endpoint="post")

@@ -42,7 +42,7 @@ from typing import Any, Callable, Iterable
 import flask_restx.fields as restx_fields
 import mongoengine
 import mongoengine.fields as mongo_fields
-from bson import ObjectId
+from bson import DBRef, ObjectId
 from flask_restx.inputs import boolean
 from flask_restx.reqparse import RequestParser
 from flask_storage.mongo import ImageField as FlaskStorageImageField
@@ -341,6 +341,9 @@ def generate_fields(**kwargs) -> Callable:
                 continue  # Do not override if the attribute is also callable like for Extras
 
             method = getattr(cls, method_name)
+            if isinstance(method, property):
+                method = method.fget
+
             if not callable(method):
                 continue
 
@@ -356,11 +359,20 @@ def generate_fields(**kwargs) -> Callable:
                 """
                 return lambda o: method(o)
 
-            read_fields[method_name] = restx_fields.String(
+            nested_fields: dict | None = additional_field_info.get("nested_fields")
+            if nested_fields is None:
+                # If there is no `nested_fields` convert the object to the string representation.
+                field_constructor = restx_fields.String
+            else:
+
+                def field_constructor(**kwargs):
+                    return restx_fields.Nested(nested_fields, **kwargs)
+
+            read_fields[method_name] = field_constructor(
                 attribute=make_lambda(method), **{"readonly": True, **additional_field_info}
             )
             if additional_field_info.get("show_as_ref", False):
-                ref_fields[key] = read_fields[method_name]
+                ref_fields[method_name] = read_fields[method_name]
 
         cls.__read_fields__ = api.model(f"{cls.__name__} (read)", read_fields, **kwargs)
         cls.__write_fields__ = api.model(f"{cls.__name__} (write)", write_fields, **kwargs)
@@ -446,7 +458,7 @@ def generate_fields(**kwargs) -> Callable:
                         if constraint == "objectid" and not ObjectId.is_valid(
                             args[filterable["key"]]
                         ):
-                            api.abort(400, f'`{filterable["key"]}` must be an identifier')
+                            api.abort(400, f"`{filterable['key']}` must be an identifier")
 
                     query = filterable.get("query", None)
                     if query:
@@ -505,7 +517,6 @@ def patch(obj, request) -> type:
         field = obj.__write_fields__.get(key)
         if field is not None and not field.readonly:
             model_attribute = getattr(obj.__class__, key)
-
             if hasattr(model_attribute, "from_input"):
                 value = model_attribute.from_input(value)
             elif isinstance(model_attribute, mongoengine.fields.ListField) and isinstance(
@@ -531,27 +542,57 @@ def patch(obj, request) -> type:
                     value["id"],
                     document_type=db.resolve_model(value["class"]),
                 )
+            elif value and isinstance(
+                model_attribute,
+                mongoengine.fields.EmbeddedDocumentField,
+            ):
+                embedded_field = model_attribute.document_type()
+                value = embedded_field._from_son(value)
+            elif value and isinstance(
+                model_attribute,
+                mongoengine.fields.EmbeddedDocumentListField,
+            ):
+                embedded_field = model_attribute.field.document_type()
+                # MongoEngine BaseDocument has a `from_json` method for string and a private `_from_son`
+                # but there is no public `from_son` to use
+                value = [embedded_field._from_son(embedded_value) for embedded_value in value]
 
             info = getattr(model_attribute, "__additional_field_info__", {})
 
-            # `check` field attribute allows to do validation from the request before setting
+            # `checks` field attribute allows to do validation from the request before setting
             # the attribute
-            check = info.get("check", None)
-            if check is not None and value != getattr(obj, key):
-                check(**{key: value})  # TODO add other model attributes in function parameters
+            checks = info.get("checks", [])
+
+            if is_value_modified(getattr(obj, key), value):
+                for check in checks:
+                    check(
+                        value,
+                        **{
+                            "is_creation": obj._created,
+                            "is_update": not obj._created,
+                            "field": key,
+                        },
+                    )  # TODO add other model attributes in function parameters
 
             setattr(obj, key, value)
 
     return obj
 
 
+def is_value_modified(old_value, new_value) -> bool:
+    # If we want to modify a reference, the new_value may be a DBRef.
+    # `wrap_primary_key` can also return the `foreign_document` (see :WrapToForeignDocument)
+    # and it is not currently taken into account here…
+    # Maybe we can do another type of check to check if the reference changes in the future…
+    if isinstance(new_value, DBRef):
+        return not old_value or new_value.id != old_value.id
+
+    return new_value != old_value
+
+
 def patch_and_save(obj, request) -> type:
     obj = patch(obj, request)
-
-    try:
-        obj.save()
-    except mongoengine.errors.ValidationError as e:
-        api.abort(400, e.message)
+    obj.save()
 
     return obj
 
@@ -587,6 +628,7 @@ def wrap_primary_key(
         raise FieldValidationError(field=field_name, message=f"Unknown reference '{value}'")
 
     # GenericReferenceField only accepts document (not dbref / objectid)
+    # :WrapToForeignDocument
     if isinstance(
         foreign_field,
         (

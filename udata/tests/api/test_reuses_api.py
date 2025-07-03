@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import feedparser
 import pytest
 from flask import url_for
 from werkzeug.test import TestResponse
@@ -12,6 +13,7 @@ from udata.core.reuse.constants import REUSE_TOPICS, REUSE_TYPES
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.models import Follow, Member, Reuse
+from udata.tests.api import APITestCase
 from udata.tests.helpers import (
     assert200,
     assert201,
@@ -257,6 +259,21 @@ class ReuseAPITest:
         response = api.get(url_for("api.reuse", reuse=reuse))
         assert200(response)
 
+    def test_reuse_api_get_private(self, api):
+        """It should not fetch a private reuse from the API and raise 404"""
+        reuse = ReuseFactory(private=True)
+
+        response = api.get(url_for("api.reuse", reuse=reuse))
+        assert404(response)
+
+    def test_reuse_api_get_private_but_authorized(self, api):
+        """It should fetch a private reuse from the API if user is authorized"""
+        user = api.login()
+        reuse = ReuseFactory(owner=user, private=True)
+
+        response = api.get(url_for("api.reuse", reuse=reuse))
+        assert200(response)
+
     def test_reuse_api_create(self, api):
         """It should create a reuse from the API"""
         data = ReuseFactory.as_dict()
@@ -321,9 +338,9 @@ class ReuseAPITest:
     def test_reuse_api_update_org_with_full_object(self, api):
         """We can send the full org object (not only the ID) to update to an org"""
         user = api.login()
-        reuse = ReuseFactory(owner=user)
         member = Member(user=user, role="admin")
         org = OrganizationFactory(members=[member])
+        reuse = ReuseFactory(organization=org)
 
         data = reuse.to_dict()
         data["owner"] = None
@@ -552,6 +569,58 @@ class ReuseAPITest:
         response = api.get(url_for("api.suggest_reuses"), qs={"q": "xxxxxx", "size": "5"})
         assert200(response)
         assert len(response.json) == 0
+
+
+class ReusesFeedAPItest(APITestCase):
+    def test_recent_feed(self):
+        datasets = [ReuseFactory(datasets=[DatasetFactory()]) for i in range(3)]
+
+        response = self.get(url_for("api.recent_reuses_atom_feed"))
+
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+
+        self.assertEqual(len(feed.entries), len(datasets))
+        for i in range(1, len(feed.entries)):
+            published_date = feed.entries[i].published_parsed
+            prev_published_date = feed.entries[i - 1].published_parsed
+            self.assertGreaterEqual(prev_published_date, published_date)
+
+    def test_recent_feed_owner(self):
+        owner = UserFactory()
+        ReuseFactory(owner=owner, datasets=[DatasetFactory()])
+
+        response = self.get(url_for("api.recent_reuses_atom_feed"))
+
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+
+        self.assertEqual(len(feed.entries), 1)
+        entry = feed.entries[0]
+        self.assertEqual(len(entry.authors), 1)
+        author = entry.authors[0]
+        self.assertEqual(author.name, owner.fullname)
+        self.assertEqual(author.href, owner.external_url)
+
+    def test_recent_feed_org(self):
+        owner = UserFactory()
+        org = OrganizationFactory()
+        ReuseFactory(owner=owner, organization=org, datasets=[DatasetFactory()])
+
+        response = self.get(url_for("api.recent_reuses_atom_feed"))
+
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+
+        self.assertEqual(len(feed.entries), 1)
+        entry = feed.entries[0]
+        self.assertEqual(len(entry.authors), 1)
+        author = entry.authors[0]
+        self.assertEqual(author.name, org.name)
+        self.assertEqual(author.href, org.external_url)
 
 
 class ReuseBadgeAPITest:

@@ -72,7 +72,7 @@ RESOURCE_FILETYPES = OrderedDict(
     ]
 )
 
-OGC_SERVICE_FORMATS = ["ogc:wms", "ogc:wfs", "wms", "wfs"]
+OGC_SERVICE_FORMATS = ["wms", "wfs"]
 
 CHECKSUM_TYPES = ("sha1", "sha2", "sha256", "md5", "crc")
 DEFAULT_CHECKSUM_TYPE = "sha1"
@@ -89,3 +89,5 @@ SCHEMA_CACHE_DURATION = 60 * 5  # In seconds
 
 TITLE_SIZE_LIMIT = 350
 DESCRIPTION_SIZE_LIMIT = 100000
+
+FULL_OBJECTS_HEADER = "X-Get-Datasets-Full-Objects"

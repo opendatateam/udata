@@ -1,3 +1,6 @@
+import mongoengine
+from flask_security import current_user
+
 from udata.api import API, api, fields
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.discussions.models import Discussion
@@ -88,7 +91,7 @@ class TopicsAPI(API):
     def get(self):
         """List all topics"""
         args = topic_parser.parse()
-        topics = Topic.objects()
+        topics = Topic.objects.visible_by_user(current_user, mongoengine.Q(private__ne=True))
         topics = topic_parser.parse_filters(topics, args)
         sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
         return topics.order_by(sort).paginate(args["page"], args["page_size"])

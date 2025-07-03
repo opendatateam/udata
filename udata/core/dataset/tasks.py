@@ -9,9 +9,8 @@ from mongoengine import ValidationError
 
 from udata import mail
 from udata import models as udata_models
-from udata.core import storages
+from udata.core import csv, storages
 from udata.core.dataservices.models import Dataservice
-from udata.frontend import csv
 from udata.harvest.models import HarvestJob
 from udata.i18n import lazy_gettext as _
 from udata.models import Activity, Discussion, Follow, Organization, Topic, Transfer, db
@@ -140,7 +139,7 @@ def get_queryset(model_cls):
     if model_cls.__name__ == "Resource":
         model_cls = getattr(udata_models, "Dataset")
     params = {}
-    attrs = ("private", "deleted")
+    attrs = ("private", "deleted", "deleted_at")
     for attr in attrs:
         if getattr(model_cls, attr, None):
             params[attr] = False
@@ -211,8 +210,9 @@ def export_csv_for_model(model, dataset):
         # add it to the dataset
         if created:
             dataset.add_resource(resource)
-        dataset.last_modified_internal = datetime.utcnow()
-        dataset.save()
+        else:
+            dataset.last_modified_internal = datetime.utcnow()
+            dataset.save()
     finally:
         csvfile.close()
         os.unlink(csvfile.name)

@@ -125,7 +125,7 @@ resource_fields = api.model(
         "title": fields.String(description="The resource title", required=True),
         "description": fields.Markdown(description="The resource markdown description"),
         "filetype": fields.String(
-            description=("Whether the resource is an uploaded file, " "a remote file or an API"),
+            description=("Whether the resource is an uploaded file, a remote file or an API"),
             required=True,
             enum=list(RESOURCE_FILETYPES),
         ),
@@ -194,7 +194,7 @@ temporal_coverage_fields = api.model(
     "TemporalCoverage",
     {
         "start": fields.ISODateTime(description="The temporal coverage start date", required=True),
-        "end": fields.ISODateTime(description="The temporal coverage end date", required=True),
+        "end": fields.ISODateTime(description="The temporal coverage end date"),
     },
 )
 
@@ -220,6 +220,15 @@ dataset_ref_fields = api.inherit(
     },
 )
 
+
+community_resource_permissions_fields = api.model(
+    "DatasetPermissions",
+    {
+        "delete": fields.Permission(),
+        "edit": fields.Permission(),
+    },
+)
+
 community_resource_fields = api.inherit(
     "CommunityResource",
     resource_fields,
@@ -232,6 +241,18 @@ community_resource_fields = api.inherit(
         ),
         "owner": fields.Nested(
             user_ref_fields, allow_null=True, description="The user information"
+        ),
+        "permissions": fields.Nested(community_resource_permissions_fields),
+    },
+)
+
+
+upload_community_fields = api.inherit(
+    "UploadedCommunityResource",
+    community_resource_fields,
+    {
+        "success": fields.Boolean(
+            description="Whether the upload succeeded or not.", readonly=True, default=True
         ),
     },
 )
@@ -272,7 +293,9 @@ DEFAULT_MASK = ",".join(
         "archived",
         "quality",
         "internal",
-        "contact_point",
+        "contact_points",
+        "featured",
+        "permissions",
     )
 )
 
@@ -285,6 +308,15 @@ dataset_internal_fields = api.model(
         "last_modified_internal": fields.ISODateTime(
             description="The dataset's internal last modification date", required=True
         ),
+    },
+)
+
+dataset_permissions_fields = api.model(
+    "DatasetPermissions",
+    {
+        "delete": fields.Permission(),
+        "edit": fields.Permission(),
+        "edit_resources": fields.Permission(),
     },
 )
 
@@ -332,7 +364,7 @@ dataset_fields = api.model(
         ),
         "frequency_date": fields.ISODateTime(
             description=(
-                "Next expected update date, you will be notified " "once that date is reached."
+                "Next expected update date, you will be notified once that date is reached."
             )
         ),
         "harvest": fields.Nested(
@@ -386,9 +418,10 @@ dataset_fields = api.model(
             readonly=True,
             description="Site internal and specific object's data",
         ),
-        "contact_point": fields.Nested(
-            contact_point_fields, allow_null=True, description="The dataset's contact points"
+        "contact_points": fields.List(
+            fields.Nested(contact_point_fields, description="The dataset contact points"),
         ),
+        "permissions": fields.Nested(dataset_permissions_fields),
     },
     mask=DEFAULT_MASK,
 )

@@ -1,10 +1,23 @@
 ---
-version: 2
+version: 2.1
+
+parameters:
+  python-version:
+    type: string
+    default: "3.11"
+  publish-branch:
+    type: string
+    default: "master"
+    description: "Branch to publish to PyPi and trigger the Gitlab CI/CD pipeline when pushed to"
+  deploy-env:
+    type: string
+    default: "dev"
+    description: "Environment to deploy to"
 
 jobs:
   python:
     docker:
-      - image: udata/circleci:py3.11
+      - image: udata/circleci:py<< pipeline.parameters.python-version >>
       - image: mongo:6.0.4
       - image: redis:alpine
     parallelism: 2
@@ -125,7 +138,7 @@ jobs:
   assets:
     docker:
       # TODO make an image based on 2-alpine w/ nvm and phantom deps
-      - image: udata/circleci:py3.11
+      - image: udata/circleci:py<< pipeline.parameters.python-version >>
     environment:
       BASH_ENV: /root/.bashrc
     steps:
@@ -166,7 +179,6 @@ jobs:
             npm run assets:build
             npm run widgets:build
             npm run oembed:build
-
       - persist_to_workspace:
           root: .
           paths:
@@ -174,25 +186,53 @@ jobs:
 
   dist:
     docker:
-      - image: udata/circleci:py3.11
+      - image: udata/circleci:py<< pipeline.parameters.python-version >>
     steps:
       - checkout
       - attach_workspace:
           at: .
       - run:
-          name: Build a distributable package
+          name: Set version
+          command: |
+            if [[ $CIRCLE_TAG ]]; then
+                # This is a tagged release, version has been handled upstream
+                RELEASE_VERSION=$CIRCLE_TAG
+                echo "RELEASE_VERSION=$RELEASE_VERSION" > version.sh
+            else
+                # Otherwise, relies on a dev version like "1.2.1.dev" by default
+                # Read version from __init__.py
+                BASE_VERSION=$(python -c "from udata import __version__; print(__version__)")
+                if [[ "$CIRCLE_BRANCH" == feature/* ]]; then
+                    # This is a feature branch
+                    BUILDNO=$CIRCLE_BUILD_NUM${CIRCLE_BRANCH#*/}
+                else
+                    # This is a simple development build
+                    BUILDNO=$CIRCLE_BUILD_NUM
+                fi
+                # Build the release version string with the build number, like "1.2.1.dev1234"
+                RELEASE_VERSION="${BASE_VERSION}${BUILDNO}"
+                echo "BASE_VERSION=$BASE_VERSION" > version.sh
+                echo "BUILDNO=$BUILDNO" >> version.sh
+                echo "RELEASE_VERSION=$RELEASE_VERSION" >> version.sh
+            fi
+      - run:
+          name: Display build info for debugging
+          command: |
+            source version.sh
+            echo "Base version from __init__.py: $BASE_VERSION"
+            echo "Build number: $BUILDNO"
+            echo "Commit hash: ${CIRCLE_SHA1:0:7}"
+            echo "Git tag: $CIRCLE_TAG"
+            echo "Building a wheel release with version $RELEASE_VERSION"
+      - run:
+          name: Build a distributable package as a wheel release
           command: |
             source venv/bin/activate
-            # Build a wheel release
+            source version.sh
             if [[ $CIRCLE_TAG ]]; then
-                # This is a tagged release
                 inv pydist
-            elif [[ "$CIRCLE_BRANCH" == feature/* ]]; then
-                # This is a feature branch
-                inv pydist -b $CIRCLE_BUILD_NUM+${CIRCLE_BRANCH#*/}
             else
-                # This is a simple development build
-                inv pydist -b $CIRCLE_BUILD_NUM
+                inv pydist -b $BUILDNO
             fi
       - store_artifacts:
           path: dist
@@ -200,10 +240,11 @@ jobs:
           root: .
           paths:
             - dist
+            - version.sh
 
   publish:
     docker:
-      - image: udata/circleci:py3.11
+      - image: udata/circleci:py<< pipeline.parameters.python-version >>
     steps:
       - attach_workspace:
           at: .
@@ -214,9 +255,47 @@ jobs:
             pip install twine
             twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
 
+  trigger-gitlab-pipeline:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Configure the SSH simple-scaffold repository private key
+          command: |
+            mkdir -p ~/.ssh
+            # SCAFFOLD_PRIVATE_KEY is the private key related to the "simple-scaffold" GitLab repository, so that it can be cloned
+            # CircleCI doesn't accept multiple lines in a single environment variable, so the multiline private key must be base64 encoded, and then decoded here
+            echo "$SCAFFOLD_PRIVATE_KEY" | base64 -d > ~/.ssh/id_ed25519
+            chmod 600 ~/.ssh/id_ed25519
+            ssh-keyscan -t rsa gitlab.com >> ~/.ssh/known_hosts
+      - run:
+          name: Configure Git
+          command: |
+            git config --global user.email "root@data.gouv.fr"
+            git config --global user.name "datagouv"
+      - run:
+          name: Clone simple-scaffold repository
+          command: |
+            git clone --quiet --depth 1 $SCAFFOLD_REPO_SSH_URL scaffold
+      - run:
+          name: Trigger GitLab CI/CD pipeline for udata to deploy to << pipeline.parameters.deploy-env >> environment
+          command: |
+            source version.sh
+            cd scaffold
+            # Run the script that triggers the Gitlab CI/CD pipeline.
+            # Must have GITLAB_API_TOKEN set in the environment
+            # GITLAB_API_TOKEN is the token related to the "infra" GitLab repository, so that the Gitlab CI/CD pipeline can be triggered
+            # The script args are, in order:
+            # - udata: the name of the project to deploy (APP_NAME)
+            # - $RELEASE_VERSION: the version to deploy (RELEASE_VERSION)
+            # - << pipeline.parameters.deploy-env >>: the environment to deploy to (ENV)
+            # - "": the deploy variables (VARS)
+            ./scripts/gitlab-ci-pipeline.sh udata $RELEASE_VERSION << pipeline.parameters.deploy-env >> ""
+
 workflows:
-  version: 2
-  build:
+  build-publish-deploy:
     jobs:
       - python:
           filters:
@@ -239,8 +318,18 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - << pipeline.parameters.publish-branch >>
                 - /[0-9]+(\.[0-9]+)+/
             tags:
               only: /v[0-9]+(\.[0-9]+)*/
           context: org-global
+      - trigger-gitlab-pipeline:
+          requires:
+            - publish
+          filters:
+            branches:
+              only:
+                - << pipeline.parameters.publish-branch >>
+          context:
+            - org-global
+            - gitlab-trigger

@@ -3,9 +3,11 @@ from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
 from udata.api_fields import field, function_field, generate_fields
+from udata.core.activity.models import Auditable
 from udata.core.dataset.api_fields import dataset_fields
+from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.owned import Owned, OwnedQuerySet
-from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE
+from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE, reuse_permissions_fields
 from udata.core.storages import default_image_basename, images
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -30,7 +32,7 @@ class ReuseQuerySet(OwnedQuerySet):
         return self(db.Q(private=True) | db.Q(datasets__0__exists=False) | db.Q(deleted__ne=None))
 
 
-def check_url_does_not_exists(url):
+def check_url_does_not_exists(url, **_kwargs):
     """Ensure a reuse URL is not yet registered"""
     if url and Reuse.url_exists(url):
         raise FieldValidationError(_("This URL is already registered"), field="url")
@@ -58,8 +60,9 @@ class ReuseBadgeMixin(BadgeMixin):
         {"key": "views", "value": "metrics.views"},
     ],
     additional_filters={"organization_badge": "organization.badges"},
+    mask="*,datasets{id,title,uri,page}",
 )
-class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
+class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
     title = field(
         db.StringField(required=True),
         sortable=True,
@@ -70,6 +73,7 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
             max_length=255, required=True, populate_from="title", update=True, follow=True
         ),
         readonly=True,
+        auditable=False,
     )
     description = field(
         db.StringField(required=True),
@@ -82,7 +86,7 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
     url = field(
         db.URLField(required=True),
         description="The remote URL (website)",
-        check=check_url_does_not_exists,
+        checks=[check_url_does_not_exists],
     )
     urlhash = db.StringField(required=True, unique=True)
     image_url = db.StringField()
@@ -125,15 +129,17 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
     private = field(db.BooleanField(default=False), filterable={})
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
-    extras = field(db.ExtrasField())
+    extras = field(db.ExtrasField(), auditable=False)
 
     featured = field(
         db.BooleanField(),
         filterable={},
         readonly=True,
+        auditable=False,
     )
     deleted = field(
         db.DateTimeField(),
+        auditable=False,
     )
     archived = field(
         db.DateTimeField(),
@@ -146,6 +152,7 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
         "discussions",
         "datasets",
         "followers",
+        "followers_by_months",
         "views",
     ]
 
@@ -180,18 +187,6 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
         # Emit before_save
         cls.before_save.send(document)
 
-    @classmethod
-    def post_save(cls, sender, document, **kwargs):
-        if "post_save" in kwargs.get("ignores", []):
-            return
-        cls.after_save.send(document)
-        if kwargs.get("created"):
-            cls.on_create.send(document)
-        else:
-            cls.on_update.send(document)
-        if document.deleted:
-            cls.on_delete.send(document)
-
     def url_for(self, *args, **kwargs):
         return endpoint_for("reuses.show", "api.reuse", reuse=self, *args, **kwargs)
 
@@ -206,6 +201,18 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
         return endpoint_for(
             "reuses.show", reuse=self, _external=True, fallback_endpoint="api.reuse"
         )
+
+    @property
+    @function_field(
+        nested_fields=reuse_permissions_fields,
+    )
+    def permissions(self):
+        from .permissions import ReuseEditPermission
+
+        return {
+            "delete": ReuseEditPermission(self),
+            "edit": ReuseEditPermission(self),
+        }
 
     @property
     def is_visible(self):
@@ -288,13 +295,16 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
         from udata.models import Discussion
 
         self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):
         from udata.models import Follow
 
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
-        self.save()
+        self.metrics["followers_by_months"] = get_stock_metrics(
+            Follow.objects(following=self), date_label="since"
+        )
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
 
 pre_save.connect(Reuse.pre_save, sender=Reuse)

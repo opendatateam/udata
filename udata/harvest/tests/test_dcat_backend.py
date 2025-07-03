@@ -1,6 +1,5 @@
 import logging
 import os
-import re
 import xml.etree.ElementTree as ET
 from datetime import date
 
@@ -137,6 +136,7 @@ class DcatBackendTest:
         assert datasets["1"].resources[0].description == "A JSON resource"
         assert datasets["1"].resources[0].format == "json"
         assert datasets["1"].resources[0].mime == "application/json"
+        assert datasets["1"].resources[0].type == "main"
 
     @pytest.mark.options(
         SCHEMA_CATALOG_URL="https://example.com/schemas",
@@ -179,7 +179,7 @@ class DcatBackendTest:
         assert dataservices[0].title == "Explore API v2"
         assert dataservices[0].base_api_url == "https://data.paris2024.org/api/explore/v2.1/"
         assert (
-            dataservices[0].endpoint_description_url
+            dataservices[0].machine_documentation_url
             == "https://data.paris2024.org/api/explore/v2.1/swagger.json"
         )
         assert (
@@ -333,6 +333,7 @@ class DcatBackendTest:
                 [[[159, -25.0], [159, -11], [212, -11], [212, -25.0], [159, -25.0]]],
             ],
         }
+        # dataset-3 has a spatial with NaN values…
         assert datasets["3"].spatial is None
 
     @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/schemas")
@@ -403,6 +404,7 @@ class DcatBackendTest:
         assert len(dataset.resources) == 1
 
         resource = dataset.resources[0]
+        assert resource.type == "main"
         assert resource.checksum is not None
         assert resource.checksum.type == "sha1"
         assert resource.checksum.value == "fb4106aa286a53be44ec99515f0f0421d4d7ad7d"
@@ -476,7 +478,12 @@ class DcatBackendTest:
 
         assert job.status == "done"
         assert job.errors == []
-        assert len(job.items) == 4
+        assert len(job.items) == 5
+        # 4 datasets and one Dataservice mentionned but not described
+        # because it appears in a distribution as DCAT.accessService
+        # but is missing a proper DCT.identifier
+        assert len([item for item in job.items if item.status == "done"]) == 4
+        assert len([item for item in job.items if item.status == "skipped"]) == 1
 
     def test_xml_catalog(self, rmock):
         LicenseFactory(id="lov2", title="Licence Ouverte Version 2.0")
@@ -512,19 +519,19 @@ class DcatBackendTest:
 
         dataset = Dataset.objects.get(harvest__dct_identifier="1")
         # test html abstract description support
-        assert dataset.description == "# h1 title\n\n## h2 title\n\n **and bold text**"
+        assert dataset.description == "# h1 title\n\n## h2 title\n\n**and bold text**"
         # test DCAT periodoftime
         assert dataset.temporal_coverage is not None
         assert dataset.temporal_coverage.start == date(2016, 1, 1)
         assert dataset.temporal_coverage.end == date(2016, 12, 5)
-        assert dataset.contact_point.email == "hello@its.me"
-        assert dataset.contact_point.name == "Organization contact"
-        assert dataset.contact_point.contact_form == "https://data.support.com"
+        assert dataset.contact_points[0].email == "hello@its.me"
+        assert dataset.contact_points[0].name == "Organization contact"
+        assert dataset.contact_points[0].contact_form == "https://data.support.com"
         assert dataset.frequency is None
         # test dct:license nested in distribution
         assert dataset.license.id == "lov1"
 
-        assert len(dataset.resources) == 3
+        assert len(dataset.resources) == 4
 
         resource_1 = next(res for res in dataset.resources if res.title == "Resource 1-1")
         assert resource_1.filetype == "remote"
@@ -548,6 +555,16 @@ class DcatBackendTest:
         assert resource_3.description == ""
         assert resource_3.url == "http://data.test.org/datasets/1/resources/3"
         assert resource_3.type == "other"
+
+        # Make sure a resource with an accessService is of type api
+        resource_4 = next(res for res in dataset.resources if res.title == "Resource 1-4")
+        assert resource_4.format is None
+        assert resource_4.description == "A resource pointing towards a Geo Service"
+        assert (
+            resource_4.url
+            == "http://data.test.org/datasets/1/resources/4/services?SERVICE=WMS&REQUEST=GetCapabilities&VERSION=1.3.0"
+        )
+        assert resource_4.type == "api"
 
         # test dct:rights -> license support from dataset
         dataset = Dataset.objects.get(harvest__dct_identifier="2")
@@ -623,6 +640,71 @@ class DcatBackendTest:
             == "https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//datasets/0437a976-cff1-4fa6-807a-c23006df2f8f"
         )  # noqa
         assert dataset.harvest.last_update.date() == date.today()
+
+    def test_udata_xml_catalog(self, rmock):
+        LicenseFactory(id="fr-lo", title="Licence ouverte / Open Licence")
+        url = mock_dcat(rmock, "udata.xml")
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
+        actions.run(source.slug)
+
+        source.reload()
+        job = source.get_last_job()
+        assert len(job.items) == 3
+
+        assert Dataset.objects.filter(organization=org).count() == 2
+        dataset = Dataset.objects.filter(organization=org, title="Bureaux de vote - Vanves").first()
+
+        assert dataset is not None
+        assert "bureaux-de-vote" in dataset.tags  # support dcat:keyword
+        assert len(dataset.resources) == 4
+        assert dataset.description == "La liste des 23 bureaux de vote à Vanves"
+        assert dataset.harvest is not None
+        assert (
+            dataset.harvest.dct_identifier
+            == "https://vanves-seineouest.opendatasoft.com/explore/dataset/bureau-de-vote-vanves/"
+        )
+        assert (
+            dataset.harvest.remote_id
+            == "https://vanves-seineouest.opendatasoft.com/explore/dataset/bureau-de-vote-vanves/"
+        )
+        assert dataset.harvest.created_at.isoformat() == "2019-04-19T12:21:56"
+        assert dataset.harvest.modified_at.isoformat() == "2019-04-19T12:21:56"
+        assert (
+            dataset.harvest.uri
+            == "https://vanves-seineouest.opendatasoft.com/explore/dataset/bureau-de-vote-vanves/"
+        )
+        assert (
+            dataset.harvest.remote_url
+            == "https://vanves-seineouest.opendatasoft.com/explore/dataset/bureau-de-vote-vanves/"
+        )
+        assert dataset.harvest.last_update.date() == date.today()
+
+        assert Dataservice.objects(organization=org).count() == 1
+        service = Dataservice.objects(organization=org).first()
+
+        assert service is not None
+        assert len(service.datasets) == 2
+        assert service.title == "Explore API v2 https://vanves-seineouest.opendatasoft.com"
+        assert service.description == ""
+        assert (
+            service.machine_documentation_url
+            == "https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/swagger.json"
+        )
+        assert (
+            service.base_api_url == "https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/"
+        )
+        assert service.harvest is not None
+        assert (
+            service.harvest.remote_id
+            == "https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/"
+        )
+        assert service.harvest.created_at.isoformat() == "2024-07-12T00:03:38.764000"
+        assert (
+            service.harvest.remote_url
+            == "https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/console"
+        )
+        assert service.harvest.last_update.date() == date.today()
 
     def test_user_agent_get(self, rmock):
         url = mock_dcat(rmock, "catalog.xml", path="without/extension")
@@ -773,6 +855,7 @@ class CswDcatBackendTest:
         assert resource.title == "accidento_hdf_L93"
         assert resource.url == "https://www.geo2france.fr/geoserver/cr_hdf/ows"
         assert resource.format == "ogc:wms"
+        assert resource.type == "main"
 
     def test_user_agent_post(self, rmock):
         url = mock_csw_pagination(rmock, "geonetwork/srv/eng/csw.rdf", "geonetworkv4-page-{}.xml")
@@ -866,10 +949,10 @@ class CswIso19139DcatBackendTest:
             ],
         }
         assert (
-            dataset.contact_point.name
+            dataset.contact_points[0].name
             == "DDTM 80 (Direction Départementale des Territoires et de la Mer de la Somme)"
         )
-        assert dataset.contact_point.email == "ddtm-sap-bsig@somme.gouv.fr"
+        assert dataset.contact_points[0].email == "ddtm-sap-bsig@somme.gouv.fr"
 
         # License is not properly mapped in XSLT conversion
         assert dataset.license is None
@@ -884,9 +967,8 @@ class CswIso19139DcatBackendTest:
             resource.url
             == "http://atom.geo-ide.developpement-durable.gouv.fr/atomArchive/GetResource?id=fr-120066022-ldd-cab63273-b3ae-4e8a-ae1c-6192e45faa94&datasetAggregate=true"
         )
-
-        # Sadly resource format is parsed as a blank node. Format parsing should be improved.
-        assert re.match(r"n[0-9a-f]{32}", resource.format)
+        assert resource.type == "main"
+        assert resource.format == "mapinfo tab"
 
         # Computed from source config `remote_url_prefix` + `dct:identifier` from `isPrimaryTopicOf`
         if remote_url_prefix:

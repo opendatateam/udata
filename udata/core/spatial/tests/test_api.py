@@ -1,14 +1,17 @@
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import (
     GeoLevelFactory,
     GeoZoneFactory,
     SpatialCoverageFactory,
 )
+from udata.core.spatial.models import spatial_granularities
 from udata.core.spatial.tasks import compute_geozones_metrics
 from udata.tests.api import APITestCase
+from udata.tests.api.test_datasets_api import SAMPLE_GEOM
 from udata.tests.features.territories import (
     TerritoriesSettings,
     create_geozones_fixtures,
@@ -74,6 +77,17 @@ class SpatialApiTest(APITestCase):
             self.assertIn("uri", suggestion)
             self.assertIn("level", suggestion)
             self.assertIn("name-test", suggestion["name"])
+
+    def test_suggest_zones_on_id(self):
+        """It should suggest zones based on its id"""
+        zone = GeoZoneFactory()
+        for _ in range(2):
+            GeoZoneFactory()
+
+        response = self.get(url_for("api.suggest_zones"), qs={"q": zone.id})
+        self.assert200(response)
+
+        self.assertEqual(response.json[0]["id"], zone["id"])
 
     def test_suggest_zones_sorted(self):
         """It should suggest zones based on its name"""
@@ -275,3 +289,56 @@ class SpatialTerritoriesApiTest(APITestCase):
         self.assert200(response)
         # No dynamic datasets given that they are added by udata-front extension.
         self.assertEqual(len(response.json), 2)
+
+
+class DatasetsSpatialAPITest(APITestCase):
+    modules = []
+
+    def test_create_spatial_zones(self):
+        paca, _, _ = create_geozones_fixtures()
+        granularity = spatial_granularities[0][0]
+        data = DatasetFactory.as_dict()
+        data["spatial"] = {
+            "zones": [paca.id],
+            "granularity": granularity,
+        }
+        self.login()
+        response = self.post(url_for("api.datasets"), data)
+        self.assert201(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+        dataset = Dataset.objects.first()
+        self.assertEqual([str(z) for z in dataset.spatial.zones], [paca.id])
+        self.assertEqual(dataset.spatial.geom, None)
+        self.assertEqual(dataset.spatial.granularity, granularity)
+
+    def test_create_spatial_geom(self):
+        granularity = spatial_granularities[0][0]
+        data = DatasetFactory.as_dict()
+        data["spatial"] = {
+            "geom": SAMPLE_GEOM,
+            "granularity": granularity,
+        }
+        self.login()
+        response = self.post(url_for("api.datasets"), data)
+        self.assert201(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+        dataset = Dataset.objects.first()
+        self.assertEqual(dataset.spatial.zones, [])
+        self.assertEqual(dataset.spatial.geom, SAMPLE_GEOM)
+        self.assertEqual(dataset.spatial.granularity, granularity)
+
+    def test_cannot_create_both_geom_and_zones(self):
+        paca, _, _ = create_geozones_fixtures()
+
+        granularity = spatial_granularities[0][0]
+        data = DatasetFactory.as_dict()
+        data["spatial"] = {
+            "zones": [paca.id],
+            "geom": SAMPLE_GEOM,
+            "granularity": granularity,
+        }
+        self.login()
+
+        response = self.post(url_for("api.datasets"), data)
+        self.assert400(response)
+        self.assertEqual(Dataset.objects.count(), 0)
