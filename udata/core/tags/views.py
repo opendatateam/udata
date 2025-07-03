@@ -1,6 +1,6 @@
 import logging
 
-from udata.frontend import csv
+from udata.core import csv
 from udata.i18n import I18nBlueprint
 
 from .csv import TagCsvAdapter

@@ -363,11 +363,11 @@ class SelectField(FieldHelper, fields.SelectField):
 
     def iter_choices(self):
         localized_choices = [
-            (value, self.localize_label(label), selected)
-            for value, label, selected in super(SelectField, self).iter_choices()
+            (value, self.localize_label(label), selected, render_kw)
+            for value, label, selected, render_kw in super(SelectField, self).iter_choices()
         ]
-        for value, label, selected in sorted(localized_choices, key=lambda c: c[1]):
-            yield (value, label, selected)
+        for value, label, selected, render_kw in sorted(localized_choices, key=lambda c: c[1]):
+            yield (value, label, selected, render_kw)
 
     @property
     def choices(self):
@@ -390,11 +390,11 @@ class SelectMultipleField(FieldHelper, fields.SelectMultipleField):
 
     def iter_choices(self):
         localized_choices = [
-            (value, self._(label) if label else "", selected)
-            for value, label, selected in super(SelectMultipleField, self).iter_choices()
+            (value, self._(label) if label else "", selected, render_kw)
+            for value, label, selected, render_kw in super(SelectMultipleField, self).iter_choices()
         ]
-        for value, label, selected in sorted(localized_choices, key=lambda c: c[1]):
-            yield (value, label, selected)
+        for value, label, selected, render_kw in sorted(localized_choices, key=lambda c: c[1]):
+            yield (value, label, selected, render_kw)
 
 
 class TagField(Field):
@@ -694,14 +694,20 @@ class DateRangeField(Field):
             value = valuelist[0]
             if isinstance(value, str):
                 start, end = value.split(" - ")
+                if end is not None:
+                    end = parse(end, yearfirst=True).date()
                 self.data = db.DateRange(
                     start=parse(start, yearfirst=True).date(),
-                    end=parse(end, yearfirst=True).date(),
+                    end=end,
                 )
-            elif "start" in value and "end" in value:
+            elif "start" in value:
+                if value.get("end", None):
+                    end = parse(value["end"], yearfirst=True).date()
+                else:
+                    end = None
                 self.data = db.DateRange(
                     start=parse(value["start"], yearfirst=True).date(),
-                    end=parse(value["end"], yearfirst=True).date(),
+                    end=end,
                 )
             else:
                 raise validators.ValidationError(_("Unable to parse date range"))
@@ -733,6 +739,7 @@ class CurrentUserField(ModelFieldMixin, Field):
             and form.instance
             and self.name in form.instance
             and getattr(form.instance, self.name).id != self.data.id
+            and not admin_permission
         ):
             raise validators.ValidationError(
                 _("Cannot change owner after creation. Please use transfer feature.")
@@ -764,6 +771,7 @@ class PublishAsField(ModelFieldMixin, Field):
             and form.instance
             and self.name in form.instance
             and getattr(form.instance, self.name).id != self.data.id
+            and not admin_permission
         ):
             raise validators.ValidationError(
                 _("Cannot change owner after creation. Please use transfer feature.")
@@ -774,22 +782,21 @@ class PublishAsField(ModelFieldMixin, Field):
                 raise validators.ValidationError(_("You must be authenticated"))
             elif not OrganizationPrivatePermission(self.data).can():
                 raise validators.ValidationError(_("Permission denied for this organization"))
-            # Ensure either owner field or this field value is unset
-            owner_field = form._fields[self.owner_field]
-            if self.raw_data:
-                owner_field.data = None
-            elif getattr(form._obj, self.short_name) and not owner_field.data:
-                pass
-            else:
-                self.data = None
+
+            if self.owner_field:
+                # Ensure either owner field or this field value is unset
+                owner_field = form._fields[self.owner_field]
+                if self.raw_data:
+                    owner_field.data = None
+                elif getattr(form._obj, self.short_name) and not owner_field.data:
+                    pass
+                else:
+                    self.data = None
         return True
 
 
-class ContactPointField(ModelFieldMixin, Field):
+class ContactPointListField(ModelList, Field):
     model = ContactPoint
-
-    def __init__(self, *args, **kwargs):
-        super(ContactPointField, self).__init__(*args, **kwargs)
 
 
 def field_parse(cls, value, *args, **kwargs):

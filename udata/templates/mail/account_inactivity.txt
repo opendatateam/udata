@@ -1,0 +1,31 @@
+{% extends 'mail/base.txt' %}
+
+{% block body %}
+{{ _(
+      'We have noticed that your account associated to (%(user_email)s) has been inactive for %(inactivity_years)d years or more'
+      ' on %(site)s, the open platform for public data.',
+      user_email=user.email,
+      inactivity_years=config.YEARS_OF_INACTIVITY_BEFORE_DELETION,
+      site=config.SITE_TITLE
+    )
+}}
+
+{{ _(
+      'If you want to keep your account, please log in with your account on %(home)s.',
+      home=endpoint_for("site.home_redirect", "api.site", _external=True)
+    )
+}}
+
+{{ _(
+      'Without logging in, your account will be deleted within %(notify_delay)d days.',
+      notify_delay=config.DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY
+    )
+}}
+{{
+  _(
+      'This account is not tied to your other administration accounts and '
+      'you can always re-create an account on the %(site)s platform if necessary',
+      site=config.SITE_TITLE
+  )
+}}
+{% endblock %}

@@ -5,7 +5,7 @@ This module centralize dataset helpers for RDF/DCAT serialization and parsing
 import calendar
 import json
 import logging
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 
 from dateutil.parser import parse as parse_dt
@@ -23,12 +23,14 @@ from udata.harvest.exceptions import HarvestSkipException
 from udata.models import db
 from udata.rdf import (
     ADMS,
+    CONTACT_POINT_ENTITY_TO_ROLE,
     DCAT,
     DCATAP,
     DCT,
     EUFORMAT,
     EUFREQ,
     FREQ,
+    GEODCAT,
     HVD_LEGISLATION,
     IANAFORMAT,
     SCHEMA,
@@ -36,8 +38,8 @@ from udata.rdf import (
     SKOS,
     SPDX,
     TAG_TO_EU_HVD_CATEGORIES,
-    contact_point_from_rdf,
-    contact_point_to_rdf,
+    contact_points_from_rdf,
+    contact_points_to_rdf,
     namespace_manager,
     rdf_unique_values,
     rdf_value,
@@ -48,7 +50,7 @@ from udata.rdf import (
     url_from_rdf,
 )
 from udata.uris import endpoint_for
-from udata.utils import get_by, safe_unicode
+from udata.utils import get_by, safe_unicode, to_naive_datetime
 
 from .constants import OGC_SERVICE_FORMATS, UPDATE_FREQUENCIES
 from .models import Checksum, Dataset, License, Resource
@@ -107,8 +109,10 @@ def temporal_to_rdf(
     graph = graph or Graph(namespace_manager=namespace_manager)
     pot = graph.resource(BNode())
     pot.set(RDF.type, DCT.PeriodOfTime)
-    pot.set(DCAT.startDate, Literal(daterange.start))
-    pot.set(DCAT.endDate, Literal(daterange.end))
+    if daterange.start:
+        pot.set(DCAT.startDate, Literal(daterange.start))
+    if daterange.end:
+        pot.set(DCAT.endDate, Literal(daterange.end))
     return pot
 
 
@@ -174,10 +178,9 @@ def ogc_service_to_rdf(
         if dataset.license.url:
             service.add(DCT.license, URIRef(dataset.license.url))
 
-    if dataset and dataset.contact_point:
-        contact_point = contact_point_to_rdf(dataset.contact_point, graph)
-        if contact_point:
-            service.set(DCAT.contactPoint, contact_point)
+    if dataset and dataset.contact_points:
+        for contact_point, predicate in contact_points_to_rdf(dataset.contact_points, graph):
+            service.set(predicate, contact_point)
 
     if is_hvd:
         # DCAT-AP HVD applicable legislation is also expected at the distribution > accessService level
@@ -361,13 +364,16 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
     if frequency:
         d.set(DCT.accrualPeriodicity, frequency)
 
-    publisher = owner_to_rdf(dataset, graph)
-    if publisher:
-        d.set(DCT.publisher, publisher)
+    owner_role = DCT.publisher
+    if any(contact_point.role == "publisher" for contact_point in dataset.contact_points):
+        # There's already a publisher, so the owner should instead be a distributor.
+        owner_role = GEODCAT.distributor
+    owner = owner_to_rdf(dataset, graph)
+    if owner:
+        d.set(owner_role, owner)
 
-    contact_point = contact_point_to_rdf(dataset.contact_point, graph)
-    if contact_point:
-        d.set(DCAT.contactPoint, contact_point)
+    for contact_point, predicate in contact_points_to_rdf(dataset.contact_points, graph):
+        d.set(predicate, contact_point)
 
     return d
 
@@ -404,6 +410,14 @@ def temporal_from_literal(text):
             )
 
 
+def maybe_date_range(start, end):
+    if start or end:
+        return db.DateRange(
+            start=start.toPython() if start else None,
+            end=end.toPython() if end else None,
+        )
+
+
 def temporal_from_resource(resource):
     """
     Parse a temporal coverage from a RDF class/resource ie. either:
@@ -417,20 +431,12 @@ def temporal_from_resource(resource):
         # Fetch remote ontology if necessary
         g = Graph().parse(str(resource.identifier))
         resource = g.resource(resource.identifier)
-    if resource.value(SCHEMA.startDate):
-        return db.DateRange(
-            start=resource.value(SCHEMA.startDate).toPython(),
-            end=resource.value(SCHEMA.endDate).toPython(),
-        )
-    elif resource.value(DCAT.startDate):
-        return db.DateRange(
-            start=resource.value(DCAT.startDate).toPython(),
-            end=resource.value(DCAT.endDate).toPython(),
-        )
-    elif resource.value(SCV.min):
-        return db.DateRange(
-            start=resource.value(SCV.min).toPython(), end=resource.value(SCV.max).toPython()
-        )
+    if range := maybe_date_range(resource.value(SCHEMA.startDate), resource.value(SCHEMA.endDate)):
+        return range
+    elif range := maybe_date_range(resource.value(DCAT.startDate), resource.value(DCAT.endDate)):
+        return range
+    elif range := maybe_date_range(resource.value(SCV.min), resource.value(SCV.max)):
+        return range
 
 
 def temporal_from_rdf(period_of_time):
@@ -527,7 +533,7 @@ def spatial_from_rdf(graph):
         spatial_coverage.clean()
         return spatial_coverage
     except ValidationError as e:
-        log.warning(f"Cannot save the spatial coverage {coordinates} (error was {e})")
+        log.warning(f"Cannot save the spatial coverage {polygons} (error was {e})")
         return None
 
 
@@ -552,7 +558,7 @@ def frequency_from_rdf(term):
 
 def mime_from_rdf(resource):
     # DCAT.mediaType *should* only be used when defined as IANA
-    mime = rdf_value(resource, DCAT.mediaType)
+    mime = rdf_value(resource, DCAT.mediaType, parse_label=True)
     if not mime:
         return
     if IANAFORMAT in mime:
@@ -562,7 +568,7 @@ def mime_from_rdf(resource):
 
 
 def format_from_rdf(resource):
-    format = rdf_value(resource, DCT.format)
+    format = rdf_value(resource, DCT.format, parse_label=True)
     if not format:
         return
     if EUFORMAT in format or IANAFORMAT in format:
@@ -585,7 +591,7 @@ def title_from_rdf(rdf, url):
         last_part = url.split("/")[-1]
         if "." in last_part and "?" not in last_part:
             return last_part
-    fmt = rdf_value(rdf, DCT.format)
+    fmt = format_from_rdf(rdf)
     lang = current_app.config["DEFAULT_LANGUAGE"]
     with i18n.language(lang):
         if fmt:
@@ -713,6 +719,10 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
             resource.checksum.type = algorithm
     if is_additionnal:
         resource.type = "other"
+    elif distrib.value(DCAT.accessService):
+        # The distribution has a DCAT.accessService property, we deduce
+        # that the distribution is of type API
+        resource.type = "api"
 
     identifier = rdf_value(distrib, DCT.identifier)
     uri = distrib.identifier.toPython() if isinstance(distrib.identifier, URIRef) else None
@@ -722,7 +732,14 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     if not resource.harvest:
         resource.harvest = HarvestResourceMetadata()
     resource.harvest.created_at = created_at
-    resource.harvest.modified_at = modified_at
+
+    # In the past, we've encountered future `modified_at` during harvesting
+    # do not save it. :FutureHarvestModifiedAt
+    if modified_at and to_naive_datetime(modified_at) > datetime.utcnow():
+        log.warning(f"Future `DCT.modified` date '{modified_at}' in resource")
+    else:
+        resource.harvest.modified_at = modified_at
+
     resource.harvest.dct_identifier = identifier
     resource.harvest.uri = uri
 
@@ -742,13 +759,21 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
 
     dataset.title = rdf_value(d, DCT.title)
     if not dataset.title:
+        # If the dataset is externaly defined (so without title and just with a link to the dataset XML)
+        # we should have skipped it way before in :ExcludeExternalyDefinedDataset
         raise HarvestSkipException("missing title on dataset")
 
     # Support dct:abstract if dct:description is missing (sometimes used instead)
     description = d.value(DCT.description) or d.value(DCT.abstract)
     dataset.description = sanitize_html(description)
-    dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
-    dataset.contact_point = contact_point_from_rdf(d, dataset) or dataset.contact_point
+    dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity)) or dataset.frequency
+    roles = [  # Imbricated list of contact points for each role
+        contact_points_from_rdf(d, rdf_entity, role, dataset)
+        for rdf_entity, role in CONTACT_POINT_ENTITY_TO_ROLE.items()
+    ]
+    dataset.contact_points = [  # Flattened list of contact points
+        contact_point for role in roles for contact_point in role
+    ] or dataset.contact_points
     schema = schema_from_rdf(d)
     if schema:
         dataset.schema = schema
@@ -765,7 +790,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
 
     temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
     if temporal_coverage:
-        dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
+        dataset.temporal_coverage = temporal_coverage
 
     provenances = provenances_from_rdf(d)
     if provenances:
@@ -815,7 +840,13 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
     dataset.harvest.uri = uri
     dataset.harvest.remote_url = remote_url
     dataset.harvest.created_at = created_at
-    dataset.harvest.modified_at = modified_at
+
+    # In the past, we've encountered future `modified_at` during harvesting
+    # do not save it. :FutureHarvestModifiedAt
+    if modified_at and to_naive_datetime(modified_at) > datetime.utcnow():
+        log.warning(f"Future `DCT.modified` date '{modified_at}' in dataset")
+    else:
+        dataset.harvest.modified_at = modified_at
 
     return dataset
 

@@ -1,5 +1,5 @@
-from bson import ObjectId
 from flask import current_app, request
+from flask_login import current_user
 from werkzeug.exceptions import BadRequest
 
 from udata.api import API, api, fields
@@ -36,7 +36,11 @@ error_fields = api.model(
             description="The error creation date", required=True, readonly=True
         ),
         "message": fields.String(description="The error short message", required=True),
-        "details": fields.String(description="Optional details (ie. stacktrace)"),
+        "details": fields.Raw(
+            attribute=lambda o: o.details if admin_permission else None,
+            description="Optional details (only for super-admins)",
+            readonly=True,
+        ),
     },
 )
 
@@ -249,6 +253,7 @@ source_parser.add_argument(
 source_parser.add_argument(
     "deleted", type=bool, location="args", default=False, help="Include sources flaggued as deleted"
 )
+source_parser.add_argument("q", type=str, location="args", help="The search query")
 
 
 @ns.route("/sources/", endpoint="harvest_sources")
@@ -260,15 +265,19 @@ class SourcesAPI(API):
         """List all harvest sources"""
         args = source_parser.parse_args()
 
-        if args.get("owner") and not ObjectId.is_valid(args.get("owner")):
-            api.abort(400, "`owner` arg must be an identifier")
+        sources = HarvestSource.objects()
 
-        return actions.paginate_sources(
-            args.get("owner"),
-            page=args["page"],
-            page_size=args["page_size"],
-            deleted=args["deleted"],
-        )
+        if not args["deleted"]:
+            sources = sources.visible()
+
+        if args["owner"]:
+            sources = sources.owned_by(args["owner"])
+
+        if args["q"]:
+            phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
+            sources = sources.search_text(phrase_query)
+
+        return sources.paginate(args["page"], args["page_size"])
 
     @api.secure
     @api.doc("create_harvest_source")
@@ -337,7 +346,7 @@ class RunSourceAPI(API):
     @api.marshal_with(source_fields)
     def post(self, ident):
         enabled = current_app.config.get("HARVEST_ENABLE_MANUAL_RUN")
-        if not enabled:
+        if not enabled and not current_user.sysadmin:
             api.abort(
                 400,
                 "Cannot run source manually. Please contact the platform if you need to reschedule the harvester.",

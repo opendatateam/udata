@@ -1,11 +1,12 @@
 -r test.in
 -c test.pip
 
-invoke==2.2.0
+invoke
 wheel
 # Pinned Twine's version. The newest one pulls a version of the cryptography pkg that's make the CircleCi build fail.
-twine==3.3.0
-pre-commit==2.14.0
-pip-tools==6.13.0
-flask-shell-ipython==0.5.1
-ruff==0.5.1
+twine
+pre-commit
+pip-tools
+flask-shell-ipython
+ruff
+bumpx

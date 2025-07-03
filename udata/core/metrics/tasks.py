@@ -24,5 +24,6 @@ def compute_site_metrics(self):
     site.count_max_org_followers()
     site.count_max_org_reuses()
     site.count_max_org_datasets()
+    site.count_stock_metrics()
     # Sending signal
     on_site_metrics_computed.send(site)

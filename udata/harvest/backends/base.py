@@ -20,6 +20,7 @@ from ..models import (
     HarvestItem,
     HarvestJob,
     HarvestLog,
+    archive_harvested_dataservice,
     archive_harvested_dataset,
 )
 from ..signals import after_harvest_job, before_harvest_job
@@ -255,7 +256,7 @@ class BaseBackend(object):
             ]
             self.save_job()
 
-    def is_done(self) -> bool:
+    def has_reached_max_items(self) -> bool:
         """Should be called after process_dataset to know if we reach the max items"""
         return self.max_items and len(self.job.items) >= self.max_items
 
@@ -342,6 +343,7 @@ class BaseBackend(object):
         harvest.last_update = datetime.utcnow()
 
         harvest.archived_at = None
+        harvest.archived_reason = None
 
         return harvest
 
@@ -370,9 +372,10 @@ class BaseBackend(object):
             "harvest__remote_id__nin": remote_ids,
             "harvest__last_update__lt": limit_date,
         }
-        local_items_not_on_remote = Dataset.objects.filter(**q)
+        local_datasets_not_on_remote = Dataset.objects.filter(**q)
+        local_dataservices_not_on_remote = Dataservice.objects.filter(**q)
 
-        for dataset in local_items_not_on_remote:
+        for dataset in local_datasets_not_on_remote:
             if not dataset.harvest.archived_at:
                 archive_harvested_dataset(dataset, reason="not-on-remote", dryrun=self.dryrun)
             # add a HarvestItem to the job list (useful for report)
@@ -380,6 +383,23 @@ class BaseBackend(object):
             self.job.items.append(
                 HarvestItem(
                     remote_id=str(dataset.harvest.remote_id), dataset=dataset, status="archived"
+                )
+            )
+
+            self.save_job()
+
+        for dataservice in local_dataservices_not_on_remote:
+            if not dataservice.harvest.archived_at:
+                archive_harvested_dataservice(
+                    dataservice, reason="not-on-remote", dryrun=self.dryrun
+                )
+            # add a HarvestItem to the job list (useful for report)
+            # even when archiving has already been done (useful for debug)
+            self.job.items.append(
+                HarvestItem(
+                    remote_id=str(dataservice.harvest.remote_id),
+                    dataservice=dataservice,
+                    status="archived",
                 )
             )
 

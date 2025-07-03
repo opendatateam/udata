@@ -4,6 +4,7 @@ from bson import ObjectId
 from mongoengine.errors import DoesNotExist
 
 from udata.api import API, api, fields
+from udata.auth import current_user
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.user.api_fields import user_ref_fields
 from udata.models import Activity, db
@@ -46,6 +47,7 @@ activity_fields = api.model(
         "label": fields.String(description="The label of the activity", required=True),
         "key": fields.String(description="The key of the activity", required=True),
         "icon": fields.String(description="The icon of the activity", required=True),
+        "changes": fields.List(fields.String, description="Changed attributes as list"),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),
     },
 )
@@ -70,13 +72,13 @@ activity_parser.add_argument(
 )
 
 
-@api.route("/activity", endpoint="activity")
+@api.route("/activity/", endpoint="activity")
 class SiteActivityAPI(API):
     @api.doc("activity")
     @api.expect(activity_parser)
     @api.marshal_with(activity_page_fields)
     def get(self):
-        """Fetch site activity, optionally filtered by user of org."""
+        """Fetch site activity, optionally filtered by user or org."""
         args = activity_parser.parse_args()
         qs = Activity.objects
 
@@ -95,10 +97,11 @@ class SiteActivityAPI(API):
         qs = qs.order_by("-created_at")
         qs = qs.paginate(args["page"], args["page_size"])
 
-        # Filter out DBRefs
+        # - Filter out DBRefs
         # Always return a result even not complete
         # But log the error (ie. visible in sentry, silent for user)
         # Can happen when someone manually delete an object in DB (ie. without proper purge)
+        # - Filter out private items (except for sysadmin users)
         safe_items = []
         for item in qs.queryset.items:
             try:
@@ -106,6 +109,11 @@ class SiteActivityAPI(API):
             except DoesNotExist as e:
                 log.error(e, exc_info=True)
             else:
+                if hasattr(item.related_to, "private") and (
+                    current_user.is_anonymous or not current_user.sysadmin
+                ):
+                    if item.related_to.private:
+                        continue
                 safe_items.append(item)
         qs.queryset.items = safe_items
 

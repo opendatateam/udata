@@ -1,18 +1,29 @@
+from datetime import datetime
 from xml.etree.ElementTree import XML
 
+import feedparser
 import pytest
 from flask import url_for
 from werkzeug.test import TestResponse
 
 import udata.core.organization.constants as org_constants
+from udata.core.dataservices.constants import (
+    DATASERVICE_ACCESS_AUDIENCE_ADMINISTRATION,
+    DATASERVICE_ACCESS_AUDIENCE_COMPANY,
+    DATASERVICE_ACCESS_AUDIENCE_UNDER_CONDITIONS,
+    DATASERVICE_ACCESS_AUDIENCE_YES,
+    DATASERVICE_ACCESS_TYPE_OPEN,
+    DATASERVICE_ACCESS_TYPE_OPEN_WITH_ACCOUNT,
+    DATASERVICE_ACCESS_TYPE_RESTRICTED,
+)
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
-from udata.core.user.factories import UserFactory
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
-from udata.tests.helpers import assert200, assert400, assert_redirects
+from udata.tests.helpers import assert200, assert400, assert410, assert_redirects
 
 from . import APITestCase
 
@@ -24,6 +35,40 @@ def dataservice_in_response(response: TestResponse, dataservice: Dataservice) ->
 
 class DataserviceAPITest(APITestCase):
     modules = []
+
+    def test_dataservice_api_get(self):
+        """It should fetch a dataservice from the API"""
+        dataservice = DataserviceFactory()
+        response = self.get(url_for("api.dataservice", dataservice=dataservice))
+        assert200(response)
+
+    def test_dataservice_api_get_deleted(self):
+        """It should not fetch a deleted dataservice from the API and raise 410"""
+        dataservice = DataserviceFactory(deleted_at=datetime.utcnow())
+        response = self.get(url_for("api.dataservice", dataservice=dataservice))
+        assert410(response)
+
+    def test_dataservice_api_get_deleted_but_authorized(self):
+        """It should fetch a deleted dataservice from the API if authorized"""
+        user = self.login()
+        dataservice = DataserviceFactory(deleted_at=datetime.utcnow(), owner=user)
+        response = self.get(url_for("api.dataservice", dataservice=dataservice))
+        assert200(response)
+
+    def test_dataservice_api_get_private(self):
+        """It should not fetch a private dataservice from the API and raise 404"""
+        dataservice = DataserviceFactory(private=True)
+
+        response = self.get(url_for("api.dataservice", dataservice=dataservice))
+        self.assert404(response)
+
+    def test_dataservice_api_get_private_but_authorized(self):
+        """It should fetch a private dataservice from the API if user is authorized"""
+        self.login()
+        dataservice = DataserviceFactory(owner=self.user, private=True)
+
+        response = self.get(url_for("api.dataservice", dataservice=dataservice))
+        self.assert200(response)
 
     def test_dataservices_api_list_with_filters(self):
         """Should filters dataservices results based on query filters"""
@@ -86,6 +131,17 @@ class DataserviceAPITest(APITestCase):
                 "extras": {
                     "foo": "bar",
                 },
+                "access_type": DATASERVICE_ACCESS_TYPE_RESTRICTED,
+                "access_audiences": [
+                    {
+                        "role": DATASERVICE_ACCESS_AUDIENCE_ADMINISTRATION,
+                        "condition": DATASERVICE_ACCESS_AUDIENCE_YES,
+                    },
+                    {
+                        "role": DATASERVICE_ACCESS_AUDIENCE_COMPANY,
+                        "condition": DATASERVICE_ACCESS_AUDIENCE_UNDER_CONDITIONS,
+                    },
+                ],
             },
         )
         self.assert200(response)
@@ -98,6 +154,21 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(response.json["license"], license.id)
         self.assertEqual(
             response.json["self_api_url"], "http://local.test/api/1/dataservices/updated-title/"
+        )
+        self.assertEqual(response.json["access_type"], DATASERVICE_ACCESS_TYPE_RESTRICTED)
+        self.assertEqual(len(response.json["access_audiences"]), 2)
+        self.assertEqual(
+            response.json["access_audiences"][0]["role"], DATASERVICE_ACCESS_AUDIENCE_ADMINISTRATION
+        )
+        self.assertEqual(
+            response.json["access_audiences"][0]["condition"], DATASERVICE_ACCESS_AUDIENCE_YES
+        )
+        self.assertEqual(
+            response.json["access_audiences"][1]["role"], DATASERVICE_ACCESS_AUDIENCE_COMPANY
+        )
+        self.assertEqual(
+            response.json["access_audiences"][1]["condition"],
+            DATASERVICE_ACCESS_AUDIENCE_UNDER_CONDITIONS,
         )
         # metadata_modified_at should have been updated during the patch
         self.assertNotEqual(
@@ -169,10 +240,10 @@ class DataserviceAPITest(APITestCase):
         response = self.get(url_for("api.dataservice", dataservice=dataservice))
         self.assert200(response)
 
-        # We cannot access deleted element as random user
+        # We cannot access private element as random user
         self.login()
         response = self.get(url_for("api.dataservice", dataservice=dataservice))
-        self.assert410(response)
+        self.assert404(response)
 
         # We can undelete with a patch
         self.login(user)
@@ -246,6 +317,7 @@ class DataserviceAPITest(APITestCase):
                 "title": "B",
                 "base_api_url": "https://example.org/B",
                 "datasets": [dataset_b.id],
+                "access_type": DATASERVICE_ACCESS_TYPE_OPEN,
             },
         )
         self.post(
@@ -254,6 +326,7 @@ class DataserviceAPITest(APITestCase):
                 "title": "C",
                 "base_api_url": "https://example.org/C",
                 "datasets": [dataset_a.id, dataset_b.id],
+                "access_type": DATASERVICE_ACCESS_TYPE_OPEN_WITH_ACCOUNT,
             },
         )
         self.post(
@@ -262,6 +335,7 @@ class DataserviceAPITest(APITestCase):
                 "title": "A",
                 "base_api_url": "https://example.org/A",
                 "datasets": [dataset_a.id],
+                "access_type": DATASERVICE_ACCESS_TYPE_RESTRICTED,
             },
         )
         self.post(
@@ -324,10 +398,27 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(response.json["data"][0]["title"], "A")
         self.assertEqual(response.json["data"][1]["title"], "C")
 
+        response = self.get(url_for("api.dataservices", access_type=DATASERVICE_ACCESS_TYPE_OPEN))
+        self.assert200(response)
+
+        print(response.json)
+        self.assertEqual(response.json["total"], 1)
+        self.assertEqual(response.json["data"][0]["title"], "B")
+
     def test_dataservice_api_index_with_sorts(self):
         DataserviceFactory(title="A", created_at="2024-03-01", metadata_modified_at="2024-03-01")
-        DataserviceFactory(title="B", created_at="2024-02-01", metadata_modified_at="2024-05-01")
-        DataserviceFactory(title="C", created_at="2024-05-01", metadata_modified_at="2024-04-01")
+        DataserviceFactory(
+            title="B",
+            created_at="2024-02-01",
+            metadata_modified_at="2024-05-01",
+            metrics={"views": 42},
+        )
+        DataserviceFactory(
+            title="C",
+            created_at="2024-05-01",
+            metadata_modified_at="2024-04-01",
+            metrics={"views": 1337},
+        )
         DataserviceFactory(title="D", created_at="2024-04-01", metadata_modified_at="2024-02-01")
 
         response = self.get(url_for("api.dataservices", sort="title"))
@@ -366,6 +457,20 @@ class DataserviceAPITest(APITestCase):
             [dataservice["title"] for dataservice in response.json["data"]], ["B", "C", "A", "D"]
         )
 
+        response = self.get(url_for("api.dataservices", sort="views"))
+        self.assert200(response)
+
+        self.assertEqual(
+            [dataservice["title"] for dataservice in response.json["data"]], ["A", "D", "B", "C"]
+        )
+
+        response = self.get(url_for("api.dataservices", sort="-views"))
+        self.assert200(response)
+
+        self.assertEqual(
+            [dataservice["title"] for dataservice in response.json["data"]], ["C", "B", "D", "A"]
+        )
+
     def test_dataservice_api_index_with_wrong_dataset_id(self):
         response = self.get(url_for("api.dataservices", sort="title", dataset=str("xxx")))
         self.assert400(response)
@@ -392,9 +497,7 @@ class DataserviceAPITest(APITestCase):
             },
         )
         self.assert400(response)
-        self.assertEqual(
-            response.json["errors"]["license"], ["Unknown reference 'unwkown-license'"]
-        )
+        self.assertEqual(response.json["errors"]["license"], "Unknown reference 'unwkown-license'")
         self.assertEqual(Dataservice.objects.count(), 0)
 
     def test_dataservice_api_create_with_unkwown_contact_point(self):
@@ -405,13 +508,13 @@ class DataserviceAPITest(APITestCase):
             {
                 "title": "My title",
                 "base_api_url": "https://example.org",
-                "contact_point": "66212433e42ab56639ad516e",
+                "contact_points": ["66212433e42ab56639ad516e"],
             },
         )
         self.assert400(response)
         self.assertEqual(
-            response.json["errors"]["contact_point"],
-            ["Unknown reference '66212433e42ab56639ad516e'"],
+            response.json["errors"]["contact_points"],
+            "Unknown reference '66212433e42ab56639ad516e'",
         )
         self.assertEqual(Dataservice.objects.count(), 0)
 
@@ -433,9 +536,8 @@ class DataserviceAPITest(APITestCase):
             },
         )
         self.assert400(response)
-        self.assertEqual(
-            response.json["errors"]["owner"], [_("You can only set yourself as owner")]
-        )
+        print(response.json)
+        self.assertEqual(response.json["errors"]["owner"], _("You can only set yourself as owner"))
         self.assertEqual(Dataservice.objects.count(), 0)
 
         response = self.post(
@@ -448,7 +550,7 @@ class DataserviceAPITest(APITestCase):
         )
         self.assert400(response)
         self.assertEqual(
-            response.json["errors"]["organization"], [_("Permission denied for this organization")]
+            response.json["errors"]["organization"], _("Permission denied for this organization")
         )
         self.assertEqual(Dataservice.objects.count(), 0)
 
@@ -478,6 +580,54 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(dataservice.owner, None)
         self.assertEqual(dataservice.organization.id, me_org.id)
 
+    def test_dataservice_api_create_with_multiple_conditions_for_a_role(self):
+        """It shouldn't create a dataservice with multiple conditions for the same role"""
+        self.login()
+
+        response = self.post(
+            url_for("api.dataservices"),
+            {
+                "title": "My title",
+                "base_api_url": "https://example.org",
+                "access_type": DATASERVICE_ACCESS_TYPE_RESTRICTED,
+                "access_audiences": [
+                    {
+                        "role": DATASERVICE_ACCESS_AUDIENCE_ADMINISTRATION,
+                        "condition": DATASERVICE_ACCESS_AUDIENCE_YES,
+                    },
+                    {
+                        "role": DATASERVICE_ACCESS_AUDIENCE_ADMINISTRATION,
+                        "condition": DATASERVICE_ACCESS_AUDIENCE_UNDER_CONDITIONS,
+                    },
+                ],
+            },
+        )
+        self.assert400(response)
+        self.assertEqual(Dataservice.objects.count(), 0)
+
+    def test_dataservice_api_multiple_conditions_for_a_role(self):
+        """It shouldn't update the dataservice with multiple conditions for the same role"""
+        user = self.login()
+        original_member = Member(user=user, role="editor")
+        original_org = OrganizationFactory(members=[original_member])
+        dataservice = DataserviceFactory(owner=user, organization=original_org)
+
+        data = dataservice.to_dict()
+        data["access_type"] = DATASERVICE_ACCESS_TYPE_RESTRICTED
+        data["access_audiences"] = [
+            {
+                "role": DATASERVICE_ACCESS_AUDIENCE_ADMINISTRATION,
+                "condition": DATASERVICE_ACCESS_AUDIENCE_YES,
+            },
+            {
+                "role": DATASERVICE_ACCESS_AUDIENCE_ADMINISTRATION,
+                "condition": DATASERVICE_ACCESS_AUDIENCE_UNDER_CONDITIONS,
+            },
+        ]
+        response = self.patch(url_for("api.dataservice", dataservice=dataservice), data)
+        self.assert400(response)
+        self.assertEqual(Dataservice.objects.count(), 1)
+
     def test_dataservice_api_update_org(self):
         """It shouldn't update the dataservice org"""
         user = self.login()
@@ -494,6 +644,14 @@ class DataserviceAPITest(APITestCase):
         self.assert400(response)
         self.assertEqual(Dataservice.objects.count(), 1)
         self.assertNotEqual(Dataservice.objects.first().organization.id, new_org.id)
+
+        self.login(AdminFactory())
+        data = dataservice.to_dict()
+        data["organization"] = {"id": new_org.id}
+        response = self.patch(url_for("api.dataservice", dataservice=dataservice), data)
+        self.assert200(response)
+        self.assertEqual(Dataservice.objects.count(), 1)
+        self.assertEqual(Dataservice.objects.first().organization.id, new_org.id)
 
 
 @pytest.mark.frontend
@@ -548,3 +706,55 @@ class DataserviceRdfViewsTest:
         response = client.get(url, headers={"Accept": mime})
         assert200(response)
         assert response.content_type == mime
+
+
+class DataservicesFeedAPItest(APITestCase):
+    def test_recent_feed(self):
+        dataservices = [DataserviceFactory() for i in range(3)]
+
+        response = self.get(url_for("api.recent_dataservices_atom_feed"))
+
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+
+        self.assertEqual(len(feed.entries), len(dataservices))
+        for i in range(1, len(feed.entries)):
+            published_date = feed.entries[i].published_parsed
+            prev_published_date = feed.entries[i - 1].published_parsed
+            self.assertGreaterEqual(prev_published_date, published_date)
+
+    def test_recent_feed_owner(self):
+        owner = UserFactory()
+        DataserviceFactory(owner=owner)
+
+        response = self.get(url_for("api.recent_dataservices_atom_feed"))
+
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+
+        self.assertEqual(len(feed.entries), 1)
+        entry = feed.entries[0]
+        self.assertEqual(len(entry.authors), 1)
+        author = entry.authors[0]
+        self.assertEqual(author.name, owner.fullname)
+        self.assertEqual(author.href, owner.external_url)
+
+    def test_recent_feed_org(self):
+        owner = UserFactory()
+        org = OrganizationFactory()
+        DataserviceFactory(owner=owner, organization=org)
+
+        response = self.get(url_for("api.recent_dataservices_atom_feed"))
+
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+
+        self.assertEqual(len(feed.entries), 1)
+        entry = feed.entries[0]
+        self.assertEqual(len(entry.authors), 1)
+        author = entry.authors[0]
+        self.assertEqual(author.name, org.name)
+        self.assertEqual(author.href, org.external_url)

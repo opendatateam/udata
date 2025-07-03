@@ -6,7 +6,7 @@ import factory
 from factory.mongoengine import MongoEngineFactory
 from flask import Blueprint, url_for
 
-from udata.frontend import csv
+from udata.core import csv
 from udata.mongo import db
 from udata.utils import faker
 
