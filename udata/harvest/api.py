@@ -62,7 +62,7 @@ item_fields = api.model(
             dataset_ref_fields, description="The processed dataset", allow_null=True
         ),
         "dataservice": fields.Nested(
-            Dataservice.__read_fields__, description="The processed dataservice", allow_null=True
+            Dataservice.__ref_fields__, description="The processed dataservice", allow_null=True
         ),
         "status": fields.String(
             description="The item status", required=True, enum=list(HARVEST_ITEM_STATUS)
@@ -208,6 +208,19 @@ backend_fields = api.model(
     },
 )
 
+preview_dataservice_fields = api.clone(
+    "DataservicePreview",
+    Dataservice.__ref_fields__,
+    {
+        "self_web_url": fields.Raw(
+            attribute=lambda _d: None, description="The dataservice webpage URL (fake)"
+        ),
+        "self_api_url": fields.Raw(
+            attribute=lambda _d: None, description="The dataservice API URL (fake)"
+        ),
+    },
+)
+
 preview_dataset_fields = api.clone(
     "DatasetPreview",
     dataset_fields,
@@ -216,7 +229,7 @@ preview_dataset_fields = api.clone(
             lambda: url_for("api.dataset", dataset="not-available"),
             description="The dataset API URI (fake)",
         ),
-        "page": fields.Raw(lambda: None, description="The dataset page URL (fake)"),
+        "page": fields.Raw(attribute=lambda _d: None, description="The dataset page URL (fake)"),
     },
 )
 
@@ -226,6 +239,9 @@ preview_item_fields = api.clone(
     {
         "dataset": fields.Nested(
             preview_dataset_fields, description="The processed dataset", allow_null=True
+        ),
+        "dataservice": fields.Nested(
+            preview_dataservice_fields, description="The processed dataset", allow_null=True
         ),
     },
 )
