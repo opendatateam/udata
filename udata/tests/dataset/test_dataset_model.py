@@ -1,11 +1,22 @@
 from datetime import datetime, timedelta
+from uuid import uuid4
 
 import pytest
 import requests
+from bson import ObjectId
 from flask import current_app
+from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine import post_save
 
 from udata.app import cache
+from udata.core.dataset.activities import (
+    UserAddedResourceToDataset,
+    UserCreatedDataset,
+    UserDeletedDataset,
+    UserRemovedResourceFromDataset,
+    UserUpdatedDataset,
+    UserUpdatedResource,
+)
 from udata.core.dataset.constants import LEGACY_FREQUENCIES, UPDATE_FREQUENCIES
 from udata.core.dataset.exceptions import (
     SchemasCacheUnavailableException,
@@ -58,6 +69,18 @@ class DatasetModelTest:
             dataset.add_resource(resource)
         assert len(dataset.resources) == 2
         assert dataset.resources[0].id == resource.id
+
+    def test_add_two_resources_with_same_id(self):
+        uuid = uuid4()
+        user = UserFactory()
+        dataset = DatasetFactory(owner=user)
+        resource_a = ResourceFactory(id=uuid)
+        resource_b = ResourceFactory(id=uuid)
+
+        dataset.add_resource(resource_a)
+        dataset.add_resource(ResourceFactory())
+        with pytest.raises(MongoEngineValidationError):
+            dataset.add_resource(resource_b)
 
     def test_add_resource_missing_checksum_type(self):
         user = UserFactory()
@@ -310,6 +333,71 @@ class DatasetModelTest:
         dataset.private = True
         dataset.save()
         assert dataset.private is True
+
+    def test_dataset_fetch_exclude_resource(self):
+        # Having a dataset with multiple resources
+        dataset_with_resources = DatasetFactory(nb_resources=5)
+        dataset_with_resources = (
+            Dataset.objects.filter(id=dataset_with_resources.id).exclude("resources").first()
+        )
+        assert dataset_with_resources is not None
+        assert dataset_with_resources.resources == []
+
+        assert dataset_with_resources.resources_len == 5
+
+        # Having dataset with resource field missing
+        dataset_insert_without_resources = Dataset._get_collection().insert_one({"_id": ObjectId()})
+
+        dataset_without_resources = (
+            Dataset.objects.filter(id=dataset_insert_without_resources.inserted_id)
+            .exclude("resources")
+            .first()
+        )
+        assert dataset_without_resources is not None
+        assert dataset_without_resources.resources == []
+
+        assert dataset_without_resources.resources_len == 0
+
+    def test_dataset_activities(self, api, mocker):
+        # A user must be authenticated for activities to be emitted
+        user = api.login()
+
+        mock_created = mocker.patch.object(UserCreatedDataset, "emit")
+        mock_updated = mocker.patch.object(UserUpdatedDataset, "emit")
+        mock_deleted = mocker.patch.object(UserDeletedDataset, "emit")
+        mock_resource_added = mocker.patch.object(UserAddedResourceToDataset, "emit")
+        mock_resouce_updated = mocker.patch.object(UserUpdatedResource, "emit")
+        mock_resouce_removed = mocker.patch.object(UserRemovedResourceFromDataset, "emit")
+
+        with assert_emit(Dataset.on_create):
+            dataset = DatasetFactory(owner=user)
+            mock_created.assert_called()
+
+        with assert_emit(Dataset.on_update):
+            dataset.title = "new title"
+            dataset.save()
+            mock_updated.assert_called()
+
+        with assert_emit(Dataset.on_resource_added):
+            dataset.add_resource(ResourceFactory())
+            mock_resource_added.assert_called()
+
+        dataset.reload()
+
+        with assert_emit(Dataset.on_resource_updated):
+            resource = dataset.resources[0]
+            resource.description = "New description"
+            dataset.update_resource(resource)
+            mock_resouce_updated.assert_called()
+
+        with assert_emit(Dataset.on_resource_removed):
+            dataset.remove_resource(dataset.resources[-1])
+            mock_resouce_removed.assert_called()
+
+        with assert_emit(Dataset.on_delete):
+            dataset.deleted = datetime.utcnow()
+            dataset.save()
+            mock_deleted.assert_called()
 
 
 class ResourceModelTest:
@@ -708,16 +796,6 @@ class HarvestMetadataTest:
         dataset = DatasetFactory()
         dataset.harvest = harvest_metadata
         dataset.save()
-
-    def test_harvest_dataset_metadata_future_modifed_at(self):
-        dataset = DatasetFactory()
-
-        harvest_metadata = HarvestDatasetMetadata(
-            created_at=datetime.utcnow(), modified_at=datetime.utcnow() + timedelta(days=1)
-        )
-        dataset.harvest = harvest_metadata
-        dataset.save()
-        assert dataset.last_modified == dataset.last_modified_internal
 
     def test_harvest_dataset_metadata_past_modifed_at(self):
         dataset = DatasetFactory()

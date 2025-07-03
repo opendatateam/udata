@@ -28,12 +28,13 @@ class TopicsAPITest(APITestCase):
         private_topic = TopicFactory(private=True)
         geozone_topic = TopicFactory(spatial=SpatialCoverageFactory(zones=[paca.id]))
         granularity_topic = TopicFactory(spatial=SpatialCoverageFactory(granularity="country"))
+        featured_topic = TopicFactory(featured=True)
         owner_topic = TopicFactory(owner=owner)
         org_topic = TopicFactory(organization=org)
 
         response = self.get(url_for("api.topics"))
         self.assert200(response)
-        self.assertEqual(len(response.json["data"]), 7)
+        self.assertEqual(len(response.json["data"]), 8)
 
         response = self.get(url_for("api.topics", q="topic-for"))
         self.assert200(response)
@@ -69,7 +70,7 @@ class TopicsAPITest(APITestCase):
 
         response = self.get(url_for("api.topics", include_private="true"))
         self.assert200(response)
-        self.assertEqual(len(response.json["data"]), 7)
+        self.assertEqual(len(response.json["data"]), 8)
         # we're not logged in, so the private topic does not appear
         self.assertNotIn(str(private_topic.id), [t["id"] for t in response.json["data"]])
 
@@ -82,6 +83,16 @@ class TopicsAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertIn(str(granularity_topic.id), [t["id"] for t in response.json["data"]])
+
+        response = self.get(url_for("api.topics", featured="true"))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertIn(str(featured_topic.id), [t["id"] for t in response.json["data"]])
+
+        response = self.get(url_for("api.topics", featured="false"))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), 7)
+        self.assertNotIn(str(featured_topic.id), [t["id"] for t in response.json["data"]])
 
         response = self.get(url_for("api.topics", owner=owner.id))
         self.assert200(response)
@@ -165,7 +176,7 @@ class TopicsAPITest(APITestCase):
         assert topic.owner is None
         assert topic.organization == org
 
-    def test_topic_api_create_spatial(self):
+    def test_topic_api_create_spatial_zone(self):
         paca, _, _ = create_geozones_fixtures()
         granularity = spatial_granularities[0][0]
         data = TopicFactory.as_dict()
@@ -173,7 +184,6 @@ class TopicsAPITest(APITestCase):
         data["reuses"] = [str(r.id) for r in data["reuses"]]
         data["spatial"] = {
             "zones": [paca.id],
-            "geom": SAMPLE_GEOM,
             "granularity": granularity,
         }
         self.login()
@@ -182,6 +192,22 @@ class TopicsAPITest(APITestCase):
         self.assertEqual(Topic.objects.count(), 1)
         topic = Topic.objects.first()
         self.assertEqual([str(z) for z in topic.spatial.zones], [paca.id])
+        self.assertEqual(topic.spatial.granularity, granularity)
+
+    def test_topic_api_create_spatial_geom(self):
+        granularity = spatial_granularities[0][0]
+        data = TopicFactory.as_dict()
+        data["datasets"] = [str(d.id) for d in data["datasets"]]
+        data["reuses"] = [str(r.id) for r in data["reuses"]]
+        data["spatial"] = {
+            "geom": SAMPLE_GEOM,
+            "granularity": granularity,
+        }
+        self.login()
+        response = self.post(url_for("api.topics"), data)
+        self.assert201(response)
+        self.assertEqual(Topic.objects.count(), 1)
+        topic = Topic.objects.first()
         self.assertEqual(topic.spatial.geom, SAMPLE_GEOM)
         self.assertEqual(topic.spatial.granularity, granularity)
 

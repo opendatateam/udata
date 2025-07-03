@@ -41,21 +41,18 @@ def clean(ctx, node=False, translations=False, all=False):
 
 
 @task
-def update(ctx, migrate=False):
+def update(ctx):
     """Perform a development update"""
     msg = "Update all dependencies"
-    if migrate:
-        msg += " and migrate data"
     header(msg)
     info("Updating Python dependencies")
     with ctx.cd(ROOT):
-        ctx.run("pi3 install -e .")
         ctx.run("pip install -r requirements/develop.pip")
-        info("Updating JavaScript dependencies")
-        ctx.run("npm install")
-        if migrate:
-            info("Migrating database")
-            ctx.run("udata db migrate")
+        for requirement_file in ["install", "test", "develop", "doc", "report"]:
+            ctx.run(
+                f"pip-compile requirements/{requirement_file}.in --output-file=requirements/{requirement_file}.pip --upgrade"
+            )
+    # TODO: Add javascript dependencies update
 
 
 @task

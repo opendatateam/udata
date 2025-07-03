@@ -39,7 +39,7 @@ COMMUNITY_RES_URL = "/api/1/datasets/community_resources"
 DISCUSSION_URL = "/api/1/discussions"
 
 
-DEFAULT_FIXTURE_FILE_TAG: str = "v5.0.0"
+DEFAULT_FIXTURE_FILE_TAG: str = "v6.0.0"
 DEFAULT_FIXTURE_FILE: str = f"https://raw.githubusercontent.com/opendatateam/udata-fixtures/{DEFAULT_FIXTURE_FILE_TAG}/results.json"  # noqa
 
 DEFAULT_FIXTURES_RESULTS_FILENAME: str = "results.json"
@@ -54,18 +54,28 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "badges",
         "spatial",
         "quality",
+        "permissions",
     ],
     "resource": ["latest", "preview_url", "last_modified"],
     "organization": ["class", "page", "uri", "logo_thumbnail"],
-    "reuse": ["datasets", "image_thumbnail", "page", "uri", "owner"],
+    "reuse": [
+        "datasets",
+        "image_thumbnail",
+        "page",
+        "uri",
+        "owner",
+        "permissions",
+    ],
     "community": [
         "dataset",
         "owner",
         "latest",
         "last_modified",
         "preview_url",
+        "permissions",
     ],
-    "discussion": ["subject", "url", "class"],
+    "discussion": ["subject", "url", "class", "permissions"],
+    "discussion_message": ["permissions"],
     "user": ["uri", "page", "class", "avatar_thumbnail", "email"],
     "posted_by": ["uri", "page", "class", "avatar_thumbnail", "email"],
     "dataservice": [
@@ -74,6 +84,7 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "owner",
         "self_api_url",
         "self_web_url",
+        "permissions",
     ],
 }
 
@@ -154,6 +165,11 @@ def generate_fixtures_file(data_source: str, results_filename: str) -> None:
             ).json()["data"]
             for discussion in json_discussion:
                 discussion = remove_unwanted_keys(discussion, "discussion")
+                for index, message in enumerate(discussion["discussion"]):
+                    discussion["discussion"][index] = remove_unwanted_keys(
+                        message, "discussion_message"
+                    )
+
             json_fixture["discussions"] = json_discussion
 
             json_dataservices = requests.get(

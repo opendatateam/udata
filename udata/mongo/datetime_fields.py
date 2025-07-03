@@ -67,6 +67,7 @@ class Datetimed(object):
         ),
         sortable=True,
         readonly=True,
+        auditable=False,
     )
 
 

@@ -42,9 +42,6 @@ org_ref_fields = api.inherit(
     },
 )
 
-# This import is not at the top of the file to avoid circular imports
-from udata.core.user.api_fields import user_ref_fields  # noqa
-
 
 def check_can_access_user_private_info():
     # This endpoint is secure, only organization member has access.
@@ -64,13 +61,17 @@ def check_can_access_user_private_info():
 def member_email_with_visibility_check(email):
     if current_user_is_admin_or_self():
         return email
+    name, domain = email.split("@")
     if check_can_access_user_private_info():
         # Obfuscate email partially for other members
-        name, domain = email.split("@")
         name = name[:2] + "*" * (len(name) - 2)
         return f"{name}@{domain}"
-    return None
+    # Return only domain for other users
+    return f"***@{domain}"
 
+
+# This import is not at the top of the file to avoid circular imports
+from udata.core.user.api_fields import user_ref_fields  # noqa
 
 member_user_with_email_fields = api.inherit(
     "MemberUserWithEmail",
@@ -82,7 +83,9 @@ member_user_with_email_fields = api.inherit(
             readonly=True,
         ),
         "last_login_at": fields.Raw(
-            attribute=lambda o: o.last_login_at if check_can_access_user_private_info() else None,
+            attribute=lambda o: o.current_login_at
+            if check_can_access_user_private_info()
+            else None,
             description="The user last connection date (only present on show organization endpoint if the current user is member of the organization: admin or editor)",
             readonly=True,
         ),

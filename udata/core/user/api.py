@@ -275,6 +275,13 @@ delete_parser.add_argument(
     location="args",
     default=False,
 )
+delete_parser.add_argument(
+    "delete_comments",
+    type=bool,
+    help="Delete comments posted by the user upon user deletion",
+    location="args",
+    default=False,
+)
 
 
 @ns.route("/<user:user>/", endpoint="user")
@@ -317,7 +324,7 @@ class UserAPI(API):
                 403, "You cannot delete yourself with this API. " + 'Use the "me" API instead.'
             )
 
-        user.mark_as_deleted(notify=not args["no_mail"])
+        user.mark_as_deleted(notify=not args["no_mail"], delete_comments=args["delete_comments"])
         return "", 204
 
 
@@ -402,6 +409,7 @@ class SuggestUsersAPI(API):
                 "first_name": user.first_name,
                 "last_name": user.last_name,
                 "avatar_url": user.avatar,
+                "email": user.email,
                 "slug": user.slug,
             }
             for user in users.order_by(DEFAULT_SORTING).limit(args["size"])

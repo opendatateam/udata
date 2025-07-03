@@ -1,3 +1,4 @@
+import itertools
 from datetime import datetime
 
 from flask import make_response, redirect, request, url_for
@@ -6,15 +7,19 @@ from mongoengine.queryset.visitor import Q
 from udata.api import API, api, errors
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission, current_user
+from udata.core import csv
 from udata.core.badges import api as badges_api
 from udata.core.badges.fields import badge_fields
 from udata.core.contact_point.api import ContactPointApiParser
 from udata.core.contact_point.api_fields import contact_point_page_fields
+from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api import DatasetApiParser
 from udata.core.dataset.api_fields import dataset_page_fields
+from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter
 from udata.core.dataset.models import Dataset
 from udata.core.discussions.api import discussion_fields
+from udata.core.discussions.csv import DiscussionCsvAdapter
 from udata.core.discussions.models import Discussion
 from udata.core.followers.api import FollowAPI
 from udata.core.reuse.models import Reuse
@@ -164,6 +169,52 @@ class OrganizationAPI(API):
         return "", 204
 
 
+@ns.route("/<org:org>/datasets.csv", endpoint="organization_datasets_csv", doc=common_doc)
+@api.response(404, "Organization not found")
+@api.response(410, "Organization has been deleted")
+class DatasetsCsvAPI(API):
+    def get(self, org):
+        datasets = Dataset.objects(organization=str(org.id)).visible()
+        adapter = DatasetCsvAdapter(datasets)
+        return csv.stream(adapter, "{0}-datasets".format(org.slug))
+
+
+@ns.route("/<org:org>/dataservices.csv", endpoint="organization_dataservices_csv")
+@api.response(404, "Organization not found")
+@api.response(410, "Organization has been deleted")
+class DataservicesCsv(API):
+    def get(self, org):
+        dataservices = Dataservice.objects(organization=str(org.id)).visible()
+        adapter = DataserviceCsvAdapter(dataservices)
+        return csv.stream(adapter, "{0}-dataservices".format(org.slug))
+
+
+@ns.route("/<org:org>/discussions.csv", endpoint="organization_discussions_csv", doc=common_doc)
+@api.response(404, "Organization not found")
+@api.response(410, "Organization has been deleted")
+class DiscussionsCsvAPI(API):
+    def get(self, org):
+        datasets = Dataset.objects.filter(organization=str(org.id))
+        discussions = [Discussion.objects.filter(subject=dataset) for dataset in datasets]
+        # Turns a list of lists into a flat list.
+        adapter = DiscussionCsvAdapter(itertools.chain(*discussions))
+        return csv.stream(adapter, "{0}-discussions".format(org.slug))
+
+
+@ns.route(
+    "/<org:org>/datasets-resources.csv",
+    endpoint="organization_datasets_resources_csv",
+    doc=common_doc,
+)
+@api.response(404, "Organization not found")
+@api.response(410, "Organization has been deleted")
+class DatasetsResourcesCsvAPI(API):
+    def get(self, org):
+        datasets = Dataset.objects(organization=str(org.id)).visible()
+        adapter = ResourcesCsvAdapter(datasets)
+        return csv.stream(adapter, "{0}-datasets-resources".format(org.slug))
+
+
 @ns.route("/<org:org>/catalog", endpoint="organization_rdf", doc=common_doc)
 @api.response(404, "Organization not found")
 @api.response(410, "Organization has been deleted")
@@ -242,7 +293,10 @@ class OrgContactAPI(API):
 
 requests_parser = api.parser()
 requests_parser.add_argument(
-    "status", type=str, help="If provided, only return requests ith a given status", location="args"
+    "status", type=str, help="If provided, only return requests in a given status", location="args"
+)
+requests_parser.add_argument(
+    "user", type=str, help="If provided, only return requests for this user", location="args"
 )
 
 
@@ -255,8 +309,24 @@ class MembershipRequestAPI(API):
     @api.marshal_list_with(request_fields)
     def get(self, org):
         """List membership requests for a given organization"""
-        OrganizationPrivatePermission(org).test()
         args = requests_parser.parse_args()
+        if args["user"]:
+            if not current_user.is_authenticated or (
+                str(current_user.id) != args["user"]
+                and not OrganizationPrivatePermission(org).can()
+            ):
+                api.abort(
+                    403,
+                    "You can only access your own membership requests or the one of your organizations.",
+                )
+            if args["status"]:
+                return [
+                    r
+                    for r in org.requests
+                    if (r.status == args["status"] and str(r.user.id) == args["user"])
+                ]
+            return [r for r in org.requests if str(r.user.id) == args["user"]]
+        OrganizationPrivatePermission(org).test()
         if args["status"]:
             return [r for r in org.requests if r.status == args["status"]]
         else:

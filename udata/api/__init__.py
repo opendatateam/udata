@@ -4,6 +4,7 @@ import urllib.parse
 from functools import wraps
 from importlib import import_module
 
+import mongoengine
 from flask import (
     Blueprint,
     current_app,
@@ -22,7 +23,6 @@ from udata import entrypoints, tracking
 from udata.app import csrf
 from udata.auth import Permission, PermissionDenied, RoleNeed, current_user, login_user
 from udata.i18n import get_locale
-from udata.mongo.errors import FieldValidationError
 from udata.utils import safe_unicode
 
 from . import fields
@@ -258,17 +258,50 @@ def handle_unauthorized_file_type(error):
     return {"message": msg}, 400
 
 
-validation_error_fields = api.model("ValidationError", {"errors": fields.Raw})
+validation_error_fields = api.model(
+    "ValidationError",
+    {"errors": fields.Raw, "message": fields.String},
+)
+
+validation_error_fields_v2 = apiv2.inherit("ValidationError", validation_error_fields)
 
 
-@api.errorhandler(FieldValidationError)
-@api.marshal_with(validation_error_fields, code=400)
-def handle_validation_error(error: FieldValidationError):
-    """A validation error"""
+def convert_object_of_exceptions_to_object_of_strings(exceptions: dict):
     errors = {}
-    errors[error.field] = [error.message]
+    for key, exception in exceptions.items():
+        if isinstance(exception, Exception):
+            errors[key] = str(exception)
+        elif isinstance(exception, dict):
+            errors[key] = convert_object_of_exceptions_to_object_of_strings(exception)
+        elif isinstance(exception, str):
+            errors[key] = exception
+        else:
+            log.warning(
+                f"Unknown type in `convert_object_of_exceptions_to_object_of_strings`: {exception}"
+            )
+            errors[key] = str(exception)
 
-    return {"errors": errors}, 400
+    return errors
+
+
+@api.errorhandler(mongoengine.errors.ValidationError)
+@api.marshal_with(validation_error_fields, code=400)
+def handle_validation_error(error: mongoengine.errors.ValidationError):
+    """Error returned when validation failed."""
+    return (
+        {
+            "errors": convert_object_of_exceptions_to_object_of_strings(error.errors),
+            "message": str(error),
+        },
+        400,
+    )
+
+
+@apiv2.errorhandler(mongoengine.errors.ValidationError)
+@apiv2.marshal_with(validation_error_fields_v2, code=400)
+def handle_validation_error_v2(error: mongoengine.errors.ValidationError):
+    """Error returned when validation failed."""
+    return handle_validation_error(error)
 
 
 class API(Resource):  # Avoid name collision as resource is a core model

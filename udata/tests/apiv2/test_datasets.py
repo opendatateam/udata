@@ -11,12 +11,54 @@ from udata.core.dataset.factories import (
 )
 from udata.core.dataset.models import ResourceMixin
 from udata.core.organization.factories import Member, OrganizationFactory
+from udata.core.reuse.factories import ReuseFactory
 from udata.models import Dataset, db
 from udata.tests.api import APITestCase
 from udata.tests.helpers import assert_not_emit
 
 
 class DatasetAPIV2Test(APITestCase):
+    def test_list_datasets(self):
+        resources_a = [ResourceFactory() for _ in range(2)]
+        dataset_a = DatasetFactory(title="Dataset A", resources=resources_a)
+
+        resources_b = [ResourceFactory(format="csv") for _ in range(4)]
+        dataset_b = DatasetFactory(title="Dataset B", resources=resources_b)
+
+        response = self.get(url_for("apiv2.datasets"))
+        self.assert200(response)
+        data = response.json
+
+        assert len(data["data"]) == 2
+        assert data["data"][1]["title"] == dataset_a.title
+        assert data["data"][0]["title"] == dataset_b.title
+
+        assert data["data"][1]["quality"]["has_resources"]
+        assert not data["data"][1]["quality"]["has_open_format"]
+        assert data["data"][0]["quality"]["has_resources"]
+        assert data["data"][0]["quality"]["has_open_format"]
+
+        assert data["data"][1]["resources"]["total"] == len(resources_a)
+        assert data["data"][0]["resources"]["total"] == len(resources_b)
+
+        assert data["data"][1]["community_resources"]["total"] == 0
+        assert data["data"][0]["community_resources"]["total"] == 0
+
+    def test_filter_by_reuse(self):
+        DatasetFactory(title="Dataset without reuse")
+
+        dataset_with_reuse = DatasetFactory(title="Dataset with reuse")
+        archived_dataset_with_reuse = DatasetFactory(
+            title="Dataset with reuse", archived=datetime(2022, 2, 22)
+        )
+        reuse = ReuseFactory(datasets=[dataset_with_reuse.id, archived_dataset_with_reuse.id])
+
+        response = self.get(url_for("apiv2.datasets", reuse=reuse.id))
+        self.assert200(response)
+        data = response.json
+        assert len(data["data"]) == 1
+        assert data["data"][0]["title"] == dataset_with_reuse.title
+
     def test_get_dataset(self):
         resources = [ResourceFactory() for _ in range(2)]
         dataset = DatasetFactory(resources=resources)
@@ -24,6 +66,7 @@ class DatasetAPIV2Test(APITestCase):
         response = self.get(url_for("apiv2.dataset", dataset=dataset))
         self.assert200(response)
         data = response.json
+        assert data["quality"]["has_resources"]
         assert data["resources"]["rel"] == "subsection"
         assert data["resources"]["href"] == url_for(
             "apiv2.resources",

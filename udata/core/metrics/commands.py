@@ -4,6 +4,7 @@ import click
 from flask import current_app
 
 from udata.commands import cli, success
+from udata.core.dataservices.models import Dataservice
 from udata.models import Dataset, GeoZone, Organization, Reuse, Site, User
 
 log = logging.getLogger(__name__)
@@ -19,6 +20,7 @@ def grp():
 @click.option("-s", "--site", is_flag=True, help="Update site metrics")
 @click.option("-o", "--organizations", is_flag=True, help="Compute organizations metrics")
 @click.option("-d", "--datasets", is_flag=True, help="Compute datasets metrics")
+@click.option("--dataservices", is_flag=True, help="Compute dataservices metrics")
 @click.option("-r", "--reuses", is_flag=True, help="Compute reuses metrics")
 @click.option("-u", "--users", is_flag=True, help="Compute users metrics")
 @click.option("-g", "--geozones", is_flag=True, help="Compute geo levels metrics")
@@ -28,12 +30,13 @@ def update(
     organizations=False,
     users=False,
     datasets=False,
+    dataservices=False,
     reuses=False,
     geozones=False,
     drop=False,
 ):
     """Update all metrics for the current date"""
-    do_all = not any((site, organizations, users, datasets, reuses, geozones))
+    do_all = not any((site, organizations, users, datasets, dataservices, reuses, geozones))
 
     if do_all or site:
         log.info("Update site metrics")
@@ -57,6 +60,7 @@ def update(
             site.count_max_org_followers()
             site.count_max_org_reuses()
             site.count_max_org_datasets()
+            site.count_stock_metrics()
         except Exception as e:
             log.info(f"Error during update: {e}")
 
@@ -71,6 +75,22 @@ def update(
                     dataset.count_discussions()
                     dataset.count_reuses()
                     dataset.count_followers()
+                except Exception as e:
+                    log.info(f"Error during update: {e}")
+                    continue
+
+    if do_all or dataservices:
+        log.info("Update dataservices metrics")
+        all_dataservices = Dataservice.objects.visible().timeout(False)
+        with click.progressbar(
+            all_dataservices, length=Dataservice.objects.count()
+        ) as dataservice_bar:
+            for dataservice in dataservice_bar:
+                try:
+                    if drop:
+                        dataservice.metrics.clear()
+                    dataservice.count_discussions()
+                    dataservice.count_followers()
                 except Exception as e:
                     log.info(f"Error during update: {e}")
                     continue

@@ -25,13 +25,14 @@ class TopicsAPITest(APITestCase):
         private_topic = TopicFactory(private=True)
         geozone_topic = TopicFactory(spatial=SpatialCoverageFactory(zones=[paca.id]))
         granularity_topic = TopicFactory(spatial=SpatialCoverageFactory(granularity="country"))
+        featured_topic = TopicFactory(featured=True)
         owner_topic = TopicFactory(owner=owner)
         org_topic = TopicFactory(organization=org)
 
         response = self.get(url_for("apiv2.topics_list"))
         assert response.status_code == 200
         data = response.json["data"]
-        assert len(data) == 7
+        assert len(data) == 8
 
         hateoas_fields = ["rel", "href", "type", "total"]
         assert all(k in data[0]["datasets"] for k in hateoas_fields)
@@ -57,7 +58,7 @@ class TopicsAPITest(APITestCase):
 
         response = self.get(url_for("api.topics", include_private="true"))
         assert response.status_code == 200
-        assert len(response.json["data"]) == 7
+        assert len(response.json["data"]) == 8
         # we're not logged in, so the private topic does not appear
         assert str(private_topic.id) not in [t["id"] for t in response.json["data"]]
 
@@ -70,6 +71,16 @@ class TopicsAPITest(APITestCase):
         assert response.status_code == 200
         assert len(response.json["data"]) == 1
         assert str(granularity_topic.id) in [t["id"] for t in response.json["data"]]
+
+        response = self.get(url_for("api.topics", featured="true"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 1
+        assert str(featured_topic.id) in [t["id"] for t in response.json["data"]]
+
+        response = self.get(url_for("api.topics", featured="false"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 7
+        assert str(featured_topic.id) not in [t["id"] for t in response.json["data"]]
 
         response = self.get(url_for("api.topics", owner=owner.id))
         assert response.status_code == 200

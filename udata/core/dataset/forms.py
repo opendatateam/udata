@@ -54,7 +54,7 @@ class SchemaForm(ModelForm):
             )
         except FieldValidationError as err:
             field = getattr(self, err.field)
-            field.errors.append(err.message)
+            field.errors.append(str(err))
             return False
 
         return validation
@@ -72,7 +72,7 @@ class BaseResourceForm(ModelForm):
         [validators.DataRequired()],
         choices=list(RESOURCE_FILETYPES.items()),
         default="file",
-        description=_("Whether the resource is an uploaded file, " "a remote file or an API"),
+        description=_("Whether the resource is an uploaded file, a remote file or an API"),
     )
     type = fields.RadioField(
         _("Type"),
@@ -89,7 +89,7 @@ class BaseResourceForm(ModelForm):
     checksum = fields.FormField(ChecksumForm)
     mime = fields.StringField(
         _("Mime type"),
-        description=_("The mime type associated to the extension. " "(ex: text/plain)"),
+        description=_("The mime type associated to the extension. (ex: text/plain)"),
     )
     filesize = fields.IntegerField(
         _("Size"), [validators.optional()], description=_("The file size in bytes")
@@ -102,6 +102,10 @@ class ResourceForm(BaseResourceForm):
     model_class = Resource
 
     id = fields.UUIDField()
+
+
+class ResourceFormWithoutId(BaseResourceForm):
+    model_class = Resource
 
 
 class CommunityResourceForm(BaseResourceForm):
@@ -145,7 +149,7 @@ class DatasetForm(ModelForm):
     description = fields.MarkdownField(
         _("Description"),
         [validators.DataRequired(), validators.Length(max=DESCRIPTION_SIZE_LIMIT)],
-        description=_("The details about the dataset " "(collection process, specifics...)."),
+        description=_("The details about the dataset (collection process, specifics...)."),
     )
     license = fields.ModelSelectField(_("License"), model=License, allow_blank=True)
     frequency = fields.SelectField(
@@ -168,7 +172,7 @@ class DatasetForm(ModelForm):
     tags = fields.TagField(_("Tags"), description=_("Some taxonomy keywords"))
     private = fields.BooleanField(
         _("Private"),
-        description=_("Restrict the dataset visibility to you or " "your organization only."),
+        description=_("Restrict the dataset visibility to you or your organization only."),
     )
 
     owner = fields.CurrentUserField()

@@ -2,8 +2,10 @@ import logging
 import re
 from datetime import datetime, timedelta
 from pydoc import locate
+from typing import Self
 from urllib.parse import urlparse
 
+import Levenshtein
 import requests
 from blinker import signal
 from dateutil.parser import parse as parse_dt
@@ -11,13 +13,14 @@ from flask import current_app
 from mongoengine import DynamicEmbeddedDocument
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import DateTimeField
-from mongoengine.signals import post_save, pre_save
-from stringdist import rdlevenshtein
+from mongoengine.signals import post_save, pre_init, pre_save
 from werkzeug.utils import cached_property
 
 from udata.api_fields import field
 from udata.app import cache
 from udata.core import storages
+from udata.core.activity.models import Auditable
+from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
@@ -280,7 +283,9 @@ class License(db.Document):
 
         if license is None:
             # Try to single match `slug` with a low Damerau-Levenshtein distance
-            computed = ((license_, rdlevenshtein(license_.slug, slug)) for license_ in cls.objects)
+            computed = (
+                (license_, Levenshtein.distance(license_.slug, slug)) for license_ in cls.objects
+            )
             candidates = [license_ for license_, d in computed if d <= MAX_DISTANCE]
             # If there is more that one match, we cannot determinate
             # which one is closer to safely choose between candidates
@@ -290,7 +295,8 @@ class License(db.Document):
         if license is None:
             # Try to match `title` with a low Damerau-Levenshtein distance
             computed = (
-                (license_, rdlevenshtein(license_.title.lower(), text)) for license_ in cls.objects
+                (license_, Levenshtein.distance(license_.title.lower(), text))
+                for license_ in cls.objects
             )
             candidates = [license_ for license_, d in computed if d <= MAX_DISTANCE]
             # If there is more that one match, we cannot determinate
@@ -301,7 +307,7 @@ class License(db.Document):
         if license is None:
             # Try to single match `alternate_titles` with a low Damerau-Levenshtein distance
             computed = (
-                (license_, rdlevenshtein(cls.slug.slugify(title_), slug))
+                (license_, Levenshtein.distance(cls.slug.slugify(title_), slug))
                 for license_ in cls.objects
                 for title_ in license_.alternate_titles
             )
@@ -380,7 +386,7 @@ class ResourceMixin(object):
             return to_naive_datetime(self.harvest.modified_at)
         if self.filetype == "remote" and self.extras.get("analysis:last-modified-at"):
             return to_naive_datetime(self.extras.get("analysis:last-modified-at"))
-        return self.last_modified_internal
+        return to_naive_datetime(self.last_modified_internal)
 
     def clean(self):
         super(ResourceMixin, self).clean()
@@ -536,43 +542,57 @@ class DatasetBadgeMixin(BadgeMixin):
     __badges__ = BADGES
 
 
-class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
-    title = db.StringField(required=True)
-    acronym = db.StringField(max_length=128)
+class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
+    title = field(db.StringField(required=True))
+    acronym = field(db.StringField(max_length=128))
     # /!\ do not set directly the slug when creating or updating a dataset
     # this will break the search indexation
-    slug = db.SlugField(
-        max_length=255, required=True, populate_from="title", update=True, follow=True
+    slug = field(
+        db.SlugField(
+            max_length=255, required=True, populate_from="title", update=True, follow=True
+        ),
+        auditable=False,
     )
-    description = db.StringField(required=True, default="")
-    license = db.ReferenceField("License")
+    description = field(db.StringField(required=True, default=""))
+    license = field(db.ReferenceField("License"))
 
-    tags = db.TagListField()
-    resources = db.ListField(db.EmbeddedDocumentField(Resource))
+    tags = field(db.TagListField())
+    resources = field(db.ListField(db.EmbeddedDocumentField(Resource)), auditable=False)
 
-    private = db.BooleanField(default=False)
-    frequency = db.StringField(choices=list(UPDATE_FREQUENCIES.keys()))
-    frequency_date = db.DateTimeField(verbose_name=_("Future date of update"))
-    temporal_coverage = db.EmbeddedDocumentField(db.DateRange)
-    spatial = db.EmbeddedDocumentField(SpatialCoverage)
-    schema = db.EmbeddedDocumentField(Schema)
+    private = field(db.BooleanField(default=False))
+    frequency = field(db.StringField(choices=list(UPDATE_FREQUENCIES.keys())))
+    frequency_date = field(db.DateTimeField(verbose_name=_("Future date of update")))
+    temporal_coverage = field(db.EmbeddedDocumentField(db.DateRange))
+    spatial = field(db.EmbeddedDocumentField(SpatialCoverage))
+    schema = field(db.EmbeddedDocumentField(Schema))
 
-    ext = db.MapField(db.GenericEmbeddedDocumentField())
-    extras = db.ExtrasField()
-    harvest = db.EmbeddedDocumentField(HarvestDatasetMetadata)
+    ext = field(db.MapField(db.GenericEmbeddedDocumentField()), auditable=False)
+    extras = field(db.ExtrasField(), auditable=False)
+    harvest = field(db.EmbeddedDocumentField(HarvestDatasetMetadata), auditable=False)
 
-    featured = db.BooleanField(required=True, default=False)
+    quality_cached = field(db.DictField(), auditable=False)
 
-    contact_points = db.ListField(db.ReferenceField("ContactPoint", reverse_delete_rule=db.PULL))
-
-    created_at_internal = DateTimeField(
-        verbose_name=_("Creation date"), default=datetime.utcnow, required=True
+    featured = field(
+        db.BooleanField(required=True, default=False),
+        auditable=False,
     )
-    last_modified_internal = DateTimeField(
-        verbose_name=_("Last modification date"), default=datetime.utcnow, required=True
+
+    contact_points = field(
+        db.ListField(db.ReferenceField("ContactPoint", reverse_delete_rule=db.PULL))
     )
-    deleted = db.DateTimeField()
-    archived = db.DateTimeField()
+
+    created_at_internal = field(
+        DateTimeField(verbose_name=_("Creation date"), default=datetime.utcnow, required=True),
+        auditable=False,
+    )
+    last_modified_internal = field(
+        DateTimeField(
+            verbose_name=_("Last modification date"), default=datetime.utcnow, required=True
+        ),
+        auditable=False,
+    )
+    deleted = field(db.DateTimeField(), auditable=False)
+    archived = field(db.DateTimeField())
 
     def __str__(self):
         return self.title or ""
@@ -580,7 +600,9 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
     __metrics_keys__ = [
         "discussions",
         "reuses",
+        "reuses_by_months",
         "followers",
+        "followers_by_months",
         "views",
         "resources_downloads",
     ]
@@ -617,26 +639,46 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
 
     verbose_name = _("dataset")
 
+    missing_resources = False
+
+    @cached_property
+    def resources_len(self):
+        # :ResourcesLengthProperty
+        # If we've excluded the resources from the Mongo request we need
+        # to do a new Mongo request to fetch the resources length manually.
+        # If the resources are already present, just return the `len()` of the array.
+        if not self.missing_resources:
+            return len(self.resources)
+
+        pipeline = [
+            {"$project": {"_id": 1, "resources_len": {"$size": {"$ifNull": ["$resources", []]}}}}
+        ]
+        data = Dataset.objects(id=self.id).aggregate(pipeline)
+
+        return next(data)["resources_len"]
+
+    @classmethod
+    def pre_init(cls, sender, document: Self, values, **kwargs):
+        # MongoEngine loses the information about raw values during the __init__ function
+        # Here we catch the raw values from the database (or from the creation of the object)
+        # and we check if resources were returned (sometimes we exclude `resources` from the
+        # Mongo request to improve perfs)
+        # This is used in :ResourcesLengthProperty
+        document.missing_resources = "resources" not in values
+
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
         cls.before_save.send(document)
-
-    @classmethod
-    def post_save(cls, sender, document, **kwargs):
-        if "post_save" in kwargs.get("ignores", []):
-            return
-        cls.after_save.send(document)
-        if kwargs.get("created"):
-            cls.on_create.send(document)
-        else:
-            cls.on_update.send(document)
-        if document.deleted:
-            cls.on_delete.send(document)
 
     def clean(self):
         super(Dataset, self).clean()
         if self.frequency in LEGACY_FREQUENCIES:
             self.frequency = LEGACY_FREQUENCIES[self.frequency]
+
+        if len(set(res.id for res in self.resources)) != len(self.resources):
+            raise MongoEngineValidationError(f"Duplicate resource ID in dataset #{self.id}.")
+
+        self.quality_cached = self.compute_quality()
 
         for key, value in self.extras.items():
             if not key.startswith("custom:"):
@@ -666,6 +708,16 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
                 raise MongoEngineValidationError(
                     "Dataset's organization did not define the requested custom metadata."
                 )
+
+    @property
+    def permissions(self):
+        from .permissions import DatasetEditPermission, ResourceEditPermission
+
+        return {
+            "delete": DatasetEditPermission(self),
+            "edit": DatasetEditPermission(self),
+            "edit_resources": ResourceEditPermission(self),
+        }
 
     def url_for(self, *args, **kwargs):
         return endpoint_for("datasets.show", "api.dataset", dataset=self, *args, **kwargs)
@@ -729,13 +781,9 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
 
     @property
     def last_modified(self):
-        if (
-            self.harvest
-            and self.harvest.modified_at
-            and to_naive_datetime(self.harvest.modified_at) < datetime.utcnow()
-        ):
+        if self.harvest and self.harvest.modified_at:
             return to_naive_datetime(self.harvest.modified_at)
-        return self.last_modified_internal
+        return to_naive_datetime(self.last_modified_internal)
 
     @property
     def last_update(self):
@@ -790,8 +838,34 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         else:
             return self.last_update + delta
 
-    @cached_property
+    @property
     def quality(self):
+        # `quality_cached` should always be set, except during the migration
+        # creating this property. We could remove `or self.compute_quality()`
+        # after the migration but since we need to keep the computed property for
+        # `update_fulfilled_in_time`, maybe we leave it here? Just in case?
+        quality = self.quality_cached or self.compute_quality()
+
+        # :UpdateFulfilledInTime
+        # `next_update_for_update_fulfilled_in_time` is only useful to compute the
+        # real `update_fulfilled_in_time` check, so we pop it to not polute the `quality`
+        # object for users.
+        next_update = quality.pop("next_update_for_update_fulfilled_in_time", None)
+        if next_update:
+            # Allow for being one day late on update.
+            # We may have up to one day delay due to harvesting for example
+            quality["update_fulfilled_in_time"] = (next_update - datetime.utcnow()).days >= -1
+        elif self.frequency in ["continuous", "irregular", "punctual"]:
+            # For these frequencies, we don't expect regular updates or can't quantify them.
+            # Thus we consider the update_fulfilled_in_time quality criterion to be true.
+            quality["update_fulfilled_in_time"] = True
+
+        # Since `update_fulfilled_in_time` cannot be precomputed, `score` cannot either.
+        quality["score"] = self.compute_quality_score(quality)
+
+        return quality
+
+    def compute_quality(self):
         """Return a dict filled with metrics related to the inner
 
         quality of the dataset:
@@ -801,25 +875,18 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             * and so on
         """
         result = {}
-        if not self.id:
-            # Quality is only relevant on saved Datasets
-            return result
 
         result["license"] = True if self.license else False
         result["temporal_coverage"] = True if self.temporal_coverage else False
         result["spatial"] = True if self.spatial else False
 
         result["update_frequency"] = self.frequency and self.frequency != "unknown"
-        if self.next_update:
-            # Allow for being one day late on update.
-            # We may have up to one day delay due to harvesting for example
-            result["update_fulfilled_in_time"] = (
-                True if (self.next_update - datetime.utcnow()).days >= -1 else False
-            )
-        elif self.frequency in ["continuous", "irregular", "punctual"]:
-            # For these frequencies, we don't expect regular updates or can't quantify them.
-            # Thus we consider the update_fulfilled_in_time quality criterion to be true.
-            result["update_fulfilled_in_time"] = True
+
+        # We only save the next_update here because it is based on resources
+        # We cannot save the `update_fulfilled_in_time` because it is time
+        # sensitive (so setting it on save is not really useful…)
+        # See :UpdateFulfilledInTime
+        result["next_update_for_update_fulfilled_in_time"] = self.next_update
 
         result["dataset_description_quality"] = (
             True
@@ -842,12 +909,7 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
                     resource_desc = True
             result["resources_documentation"] = resource_doc or resource_desc
 
-        result["score"] = self.compute_quality_score(result)
         return result
-
-    @property
-    def downloads(self):
-        return sum(resource.metrics.get("views", 0) for resource in self.resources)
 
     @staticmethod
     def normalize_score(score):
@@ -894,29 +956,64 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         obj = cls.objects(slug=id_or_slug).first()
         return obj or cls.objects.get_or_404(id=id_or_slug)
 
-    def add_resource(self, resource):
+    def add_resource(self, resource: Resource):
         """Perform an atomic prepend for a new resource"""
         resource.validate()
+
+        existing_resource = next((r for r in self.resources if r.id == resource.id), None)
+        if existing_resource:
+            raise MongoEngineValidationError(
+                f"Cannot add resource '{resource.title}'. A resource '{existing_resource.title}' already exists with ID '{existing_resource.id}'"
+            )
+
+        # only useful for compute_quality(), we will reload to have a clean object
+        self.resources.insert(0, resource)
+
         self.update(
-            __raw__={"$push": {"resources": {"$each": [resource.to_mongo()], "$position": 0}}}
+            set__quality_cached=self.compute_quality(),
+            push__resources={"$each": [resource.to_mongo()], "$position": 0},
+            set__last_modified_internal=datetime.utcnow(),
         )
+
         self.reload()
         self.on_resource_added.send(self.__class__, document=self, resource_id=resource.id)
 
     def update_resource(self, resource):
         """Perform an atomic update for an existing resource"""
-        index = self.resources.index(resource)
-        data = {"resources__{index}".format(index=index): resource}
-        self.update(**data)
+
+        # only useful for compute_quality(), we will reload to have a clean object
+        index = next(i for i, r in enumerate(self.resources) if r.id == resource.id)
+        self.resources[index] = resource
+
+        Dataset.objects(id=self.id, resources__id=resource.id).update_one(
+            set__quality_cached=self.compute_quality(),
+            set__resources__S=resource,
+            set__last_modified_internal=datetime.utcnow(),
+        )
+
         self.reload()
         self.on_resource_updated.send(self.__class__, document=self, resource_id=resource.id)
 
     def remove_resource(self, resource):
+        # only useful for compute_quality(), we will reload to have a clean object
+        self.resources = [r for r in self.resources if r.id != resource.id]
+
+        self.update(
+            set__quality_cached=self.compute_quality(),
+            pull__resources__id=resource.id,
+            set__last_modified_internal=datetime.utcnow(),
+        )
+
         # Deletes resource's file from file storage
         if resource.fs_filename is not None:
-            storages.resources.delete(resource.fs_filename)
+            try:
+                storages.resources.delete(resource.fs_filename)
+            except FileNotFoundError as e:
+                log.error(
+                    f"File not found while deleting resource #{resource.id} in dataset {self.id}: {e}"
+                )
 
-        self.resources.remove(resource)
+        self.reload()
         self.on_resource_removed.send(self.__class__, document=self, resource_id=resource.id)
 
     @property
@@ -935,9 +1032,17 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             "url": endpoint_for("datasets.show", "api.dataset", dataset=self, _external=True),
             "name": self.title,
             "keywords": ",".join(self.tags),
-            "distribution": [resource.json_ld for resource in self.resources],
+            "distribution": [
+                resource.json_ld
+                for resource in self.resources[: current_app.config["MAX_RESOURCES_IN_JSON_LD"]]
+            ],
             # Theses values are not standard
-            "contributedDistribution": [resource.json_ld for resource in self.community_resources],
+            "contributedDistribution": [
+                resource.json_ld
+                for resource in self.community_resources[
+                    : current_app.config["MAX_RESOURCES_IN_JSON_LD"]
+                ]
+            ],
             "extras": [get_json_ld_extra(*item) for item in self.extras.items()],
         }
 
@@ -974,21 +1079,26 @@ class Dataset(WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         from udata.models import Discussion
 
         self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()
-        self.save()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_reuses(self):
         from udata.models import Reuse
 
         self.metrics["reuses"] = Reuse.objects(datasets=self).visible().count()
-        self.save()
+        self.metrics["reuses_by_months"] = get_stock_metrics(Reuse.objects(datasets=self).visible())
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):
         from udata.models import Follow
 
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
-        self.save()
+        self.metrics["followers_by_months"] = get_stock_metrics(
+            Follow.objects(following=self), date_label="since"
+        )
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
 
+pre_init.connect(Dataset.pre_init, sender=Dataset)
 pre_save.connect(Dataset.pre_save, sender=Dataset)
 post_save.connect(Dataset.post_save, sender=Dataset)
 
@@ -1013,6 +1123,15 @@ class CommunityResource(ResourceMixin, WithMetrics, Owned, db.Document):
     @property
     def from_community(self):
         return True
+
+    @property
+    def permissions(self):
+        from .permissions import ResourceEditPermission
+
+        return {
+            "delete": ResourceEditPermission(self),
+            "edit": ResourceEditPermission(self),
+        }
 
 
 class ResourceSchema(object):

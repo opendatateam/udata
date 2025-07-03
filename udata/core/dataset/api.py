@@ -20,10 +20,13 @@ These changes might lead to backward compatibility breakage meaning:
 import logging
 import os
 from datetime import datetime
+from typing import List
 
 import mongoengine
 from bson.objectid import ObjectId
+from feedgenerator.django.utils.feedgenerator import Atom1Feed
 from flask import abort, current_app, make_response, redirect, request, url_for
+from flask_restx.inputs import boolean
 from flask_security import current_user
 from mongoengine.queryset.visitor import Q
 
@@ -36,9 +39,14 @@ from udata.core.badges.fields import badge_fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.followers.api import FollowAPI
+from udata.core.followers.models import Follow
 from udata.core.organization.models import Organization
+from udata.core.reuse.models import Reuse
+from udata.core.site.models import current_site
 from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.topic.models import Topic
+from udata.frontend.markdown import md
+from udata.i18n import gettext as _
 from udata.linkchecker.checker import check_resource
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
 from udata.utils import get_by
@@ -62,7 +70,12 @@ from .exceptions import (
     SchemasCacheUnavailableException,
     SchemasCatalogNotFoundException,
 )
-from .forms import CommunityResourceForm, DatasetForm, ResourceForm, ResourcesListForm
+from .forms import (
+    CommunityResourceForm,
+    DatasetForm,
+    ResourceFormWithoutId,
+    ResourcesListForm,
+)
 from .models import (
     Checksum,
     CommunityResource,
@@ -72,7 +85,6 @@ from .models import (
     ResourceSchema,
     get_resource,
 )
-from .permissions import DatasetEditPermission, ResourceEditPermission
 from .rdf import dataset_to_rdf
 
 DEFAULT_SORTING = "-created_at_internal"
@@ -93,7 +105,12 @@ class DatasetApiParser(ModelApiParser):
         super().__init__()
         self.parser.add_argument("tag", type=str, location="args", action="append")
         self.parser.add_argument("license", type=str, location="args")
-        self.parser.add_argument("featured", type=bool, location="args")
+        self.parser.add_argument(
+            "featured",
+            type=boolean,
+            location="args",
+            help="If set to true, it will filter on featured datasets only. If set to false, it will exclude featured datasets.",
+        )
         self.parser.add_argument("geozone", type=str, location="args")
         self.parser.add_argument("granularity", type=str, location="args")
         self.parser.add_argument("temporal_coverage", type=str, location="args")
@@ -105,12 +122,37 @@ class DatasetApiParser(ModelApiParser):
             location="args",
         )
         self.parser.add_argument("owner", type=str, location="args")
+        self.parser.add_argument(
+            "followed_by",
+            type=str,
+            location="args",
+            help="(beta, subject to change/be removed)",
+        )
         self.parser.add_argument("format", type=str, location="args")
         self.parser.add_argument("schema", type=str, location="args")
         self.parser.add_argument("schema_version", type=str, location="args")
         self.parser.add_argument("topic", type=str, location="args")
         self.parser.add_argument("credit", type=str, location="args")
         self.parser.add_argument("dataservice", type=str, location="args")
+        self.parser.add_argument("reuse", type=str, location="args")
+        self.parser.add_argument(
+            "archived",
+            type=boolean,
+            location="args",
+            help="If set to true, it will filter on archived datasets only. If set to false, it will exclude archived datasets. User must be authenticated and results are limited to user visibility",
+        )
+        self.parser.add_argument(
+            "deleted",
+            type=boolean,
+            location="args",
+            help="If set to true, it will filter on deleted datasets only. If set to false, it will exclude deleted datasets. User must be authenticated and results are limited to user visibility",
+        )
+        self.parser.add_argument(
+            "private",
+            type=boolean,
+            location="args",
+            help="If set to true, it will filter on private datasets only. If set to false, it will exclude private datasets. User must be authenticated and results are limited to user visibility",
+        )
 
     @staticmethod
     def parse_filters(datasets, args):
@@ -134,7 +176,7 @@ class DatasetApiParser(ModelApiParser):
                 temporal_coverage__start__gte=args["temporal_coverage"][:9],
                 temporal_coverage__start__lte=args["temporal_coverage"][11:],
             )
-        if args.get("featured"):
+        if args.get("featured") is not None:
             datasets = datasets.filter(featured=args["featured"])
         if args.get("organization"):
             if not ObjectId.is_valid(args["organization"]):
@@ -147,6 +189,16 @@ class DatasetApiParser(ModelApiParser):
             if not ObjectId.is_valid(args["owner"]):
                 api.abort(400, "Owner arg must be an identifier")
             datasets = datasets.filter(owner=args["owner"])
+        if args.get("followed_by"):
+            if not ObjectId.is_valid(args["followed_by"]):
+                api.abort(400, "`followed_by` arg must be an identifier")
+            ids = [
+                f.following.id
+                for f in Follow.objects(follower=args["followed_by"]).filter(
+                    __raw__={"following._cls": Dataset._class_name}
+                )
+            ]
+            datasets = datasets.filter(id__in=ids)
         if args.get("format"):
             datasets = datasets.filter(resources__format=args["format"])
         if args.get("schema"):
@@ -171,6 +223,33 @@ class DatasetApiParser(ModelApiParser):
                 pass
             else:
                 datasets = datasets.filter(id__in=[d.id for d in dataservice.datasets])
+        if args.get("reuse"):
+            if not ObjectId.is_valid(args["reuse"]):
+                api.abort(400, "Reuse arg must be an identifier")
+            try:
+                reuse = Reuse.objects.get(id=args["reuse"])
+            except Reuse.DoesNotExist:
+                pass
+            else:
+                datasets = datasets.filter(id__in=[d.id for d in reuse.datasets])
+        if args.get("archived") is not None:
+            if current_user.is_anonymous:
+                abort(401)
+            if args["archived"] is True:
+                datasets = datasets.filter(archived__exists=True)
+            else:
+                datasets = datasets.filter(archived=None)
+        if args.get("deleted") is not None:
+            if current_user.is_anonymous:
+                abort(401)
+            if args["deleted"] is True:
+                datasets = datasets.filter(deleted__exists=True)
+            else:
+                datasets = datasets.filter(deleted=None)
+        if args.get("private") is not None:
+            if current_user.is_anonymous:
+                abort(401)
+            datasets = datasets.filter(private=args["private"])
         return datasets
 
 
@@ -234,16 +313,58 @@ class DatasetListAPI(API):
         return dataset, 201
 
 
+@ns.route("/recent.atom", endpoint="recent_datasets_atom_feed")
+class DatasetsAtomFeedAPI(API):
+    @api.doc("recent_datasets_atom_feed")
+    def get(self):
+        feed = Atom1Feed(
+            _("Latest datasets"),
+            description=None,
+            feed_url=request.url,
+            link=request.url_root,
+        )
+
+        datasets: List[Dataset] = (
+            Dataset.objects.visible().order_by("-created_at_internal").limit(current_site.feed_size)
+        )
+        for dataset in datasets:
+            author_name = None
+            author_uri = None
+            if dataset.organization:
+                author_name = dataset.organization.name
+                author_uri = dataset.organization.external_url
+            elif dataset.owner:
+                author_name = dataset.owner.fullname
+                author_uri = dataset.owner.external_url
+            feed.add_item(
+                dataset.title,
+                unique_id=dataset.id,
+                description=dataset.description,
+                content=md(dataset.description),
+                author_name=author_name,
+                author_link=author_uri,
+                link=dataset.external_url,
+                updateddate=dataset.last_modified,
+                pubdate=dataset.created_at,
+            )
+        response = make_response(feed.writeString("utf-8"))
+        response.headers["Content-Type"] = "application/atom+xml"
+        return response
+
+
 @ns.route("/<dataset:dataset>/", endpoint="dataset", doc=common_doc)
 @api.response(404, "Dataset not found")
 @api.response(410, "Dataset has been deleted")
 class DatasetAPI(API):
     @api.doc("get_dataset")
     @api.marshal_with(dataset_fields)
-    def get(self, dataset):
+    def get(self, dataset: Dataset):
         """Get a dataset given its identifier"""
-        if dataset.deleted and not DatasetEditPermission(dataset).can():
-            api.abort(410, "Dataset has been deleted")
+        if not dataset.permissions["edit"].can():
+            if dataset.private:
+                api.abort(404)
+            elif dataset.deleted:
+                api.abort(410, "Dataset has been deleted")
         return dataset
 
     @api.secure
@@ -251,20 +372,16 @@ class DatasetAPI(API):
     @api.expect(dataset_fields)
     @api.marshal_with(dataset_fields)
     @api.response(400, errors.VALIDATION_ERROR)
-    def put(self, dataset):
+    def put(self, dataset: Dataset):
         """Update a dataset given its identifier"""
         request_deleted = request.json.get("deleted", True)
         if dataset.deleted and request_deleted is not None:
             api.abort(410, "Dataset has been deleted")
-        DatasetEditPermission(dataset).test()
+        dataset.permissions["edit"].test()
         dataset.last_modified_internal = datetime.utcnow()
         form = api.validate(DatasetForm, dataset)
-        # As validation for some fields (ie. extras) is at model
-        # level instead form level, we use mongoengine errors here.
-        try:
-            return form.save()
-        except mongoengine.errors.ValidationError as e:
-            api.abort(400, e.message)
+
+        return form.save()
 
     @api.secure
     @api.doc("delete_dataset")
@@ -273,7 +390,7 @@ class DatasetAPI(API):
         """Delete a dataset given its identifier"""
         if dataset.deleted:
             api.abort(410, "Dataset has been deleted")
-        DatasetEditPermission(dataset).test()
+        dataset.permissions["delete"].test()
         dataset.deleted = datetime.utcnow()
         dataset.last_modified_internal = datetime.utcnow()
         dataset.save()
@@ -319,7 +436,7 @@ class DatasetRdfAPI(API):
 class DatasetRdfFormatAPI(API):
     @api.doc("rdf_dataset_format")
     def get(self, dataset, format):
-        if not DatasetEditPermission(dataset).can():
+        if not dataset.permissions["edit"].can():
             if dataset.private:
                 api.abort(404)
             elif dataset.deleted:
@@ -378,15 +495,14 @@ class ResourcesAPI(API):
     @api.marshal_with(resource_fields, code=201)
     def post(self, dataset):
         """Create a new resource for a given dataset"""
-        ResourceEditPermission(dataset).test()
-        form = api.validate(ResourceForm)
+        dataset.permissions["edit_resources"].test()
+        form = api.validate(ResourceFormWithoutId)
         resource = Resource()
+
         if form._fields.get("filetype").data != "remote":
             api.abort(400, "This endpoint only supports remote resources")
         form.populate_obj(resource)
         dataset.add_resource(resource)
-        dataset.last_modified_internal = datetime.utcnow()
-        dataset.save()
         return resource, 201
 
     @api.secure
@@ -395,8 +511,22 @@ class ResourcesAPI(API):
     @api.marshal_list_with(resource_fields)
     def put(self, dataset):
         """Reorder resources"""
-        ResourceEditPermission(dataset).test()
-        data = {"resources": request.json}
+        dataset.permissions["edit_resources"].test()
+        resources = request.json
+        if len(dataset.resources) != len(resources):
+            api.abort(
+                400,
+                f"All resources must be reordered, you provided {len(resources)} "
+                f"out of {len(dataset.resources)}",
+            )
+        if set(r["id"] if isinstance(r, dict) else r for r in resources) != set(
+            str(r.id) for r in dataset.resources
+        ):
+            api.abort(
+                400,
+                f"Resource ids must match existing ones in dataset, ie: {set(str(r.id) for r in dataset.resources)}",
+            )
+        data = {"resources": resources}
         form = ResourcesListForm.from_json(
             data, obj=dataset, instance=dataset, meta={"csrf": False}
         )
@@ -435,12 +565,10 @@ class UploadNewDatasetResource(UploadMixin, API):
     @api.marshal_with(upload_fields, code=201)
     def post(self, dataset):
         """Upload a file for a new dataset resource"""
-        ResourceEditPermission(dataset).test()
+        dataset.permissions["edit_resources"].test()
         infos = self.handle_upload(dataset)
         resource = Resource(**infos)
         dataset.add_resource(resource)
-        dataset.last_modified_internal = datetime.utcnow()
-        dataset.save()
         return resource, 201
 
 
@@ -486,15 +614,13 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
     @api.marshal_with(upload_fields)
     def post(self, dataset, rid):
         """Upload a file related to a given resource on a given dataset"""
-        ResourceEditPermission(dataset).test()
+        dataset.permissions["edit_resources"].test()
         resource = self.get_resource_or_404(dataset, rid)
         fs_filename_to_remove = resource.fs_filename
         infos = self.handle_upload(dataset)
         for k, v in infos.items():
             resource[k] = v
         dataset.update_resource(resource)
-        dataset.last_modified_internal = datetime.utcnow()
-        dataset.save()
         if fs_filename_to_remove is not None:
             storages.resources.delete(fs_filename_to_remove)
         return resource
@@ -515,7 +641,7 @@ class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
     @api.marshal_with(upload_community_fields)
     def post(self, community):
         """Update the file related to a given community resource"""
-        ResourceEditPermission(community).test()
+        community.permissions["edit"].test()
         fs_filename_to_remove = community.fs_filename
         infos = self.handle_upload(community.dataset)
         community.update(**infos)
@@ -532,8 +658,11 @@ class ResourceAPI(ResourceMixin, API):
     @api.marshal_with(resource_fields)
     def get(self, dataset, rid):
         """Get a resource given its identifier"""
-        if dataset.deleted and not DatasetEditPermission(dataset).can():
-            api.abort(410, "Dataset has been deleted")
+        if not dataset.permissions["edit"].can():
+            if dataset.private:
+                api.abort(404)
+            elif dataset.deleted:
+                api.abort(410, "Dataset has been deleted")
         resource = self.get_resource_or_404(dataset, rid)
         return resource
 
@@ -543,31 +672,42 @@ class ResourceAPI(ResourceMixin, API):
     @api.marshal_with(resource_fields)
     def put(self, dataset, rid):
         """Update a given resource on a given dataset"""
-        ResourceEditPermission(dataset).test()
+        dataset.permissions["edit_resources"].test()
         resource = self.get_resource_or_404(dataset, rid)
-        form = api.validate(ResourceForm, resource)
+        form = api.validate(ResourceFormWithoutId, resource)
+
+        # ensure filetype is not modified after creation
+        if (
+            form._fields.get("filetype").data
+            and form._fields.get("filetype").data != resource.filetype
+        ):
+            abort(400, "Cannot modify filetype after creation")
+
         # ensure API client does not override url on self-hosted resources
         if resource.filetype == "file":
             form._fields.get("url").data = resource.url
+
         # populate_obj populates existing resource object with the content of the form.
         # update_resource saves the updated resource dict to the database
-        # the additional dataset.save is required as we update the last_modified date.
         form.populate_obj(resource)
         resource.last_modified_internal = datetime.utcnow()
+
+        # populate_obj is bugged when sending a None value we want to remove the existing
+        # value. We don't want to remove the existing value if no "schema" is sent.
+        # Will be fixed when we switch to the new API Fields.
+        if "schema" in request.get_json() and form._fields.get("schema").data is None:
+            resource.schema = None
+
         dataset.update_resource(resource)
-        dataset.last_modified_internal = datetime.utcnow()
-        dataset.save()
         return resource
 
     @api.secure
     @api.doc("delete_resource")
     def delete(self, dataset, rid):
         """Delete a given resource on a given dataset"""
-        ResourceEditPermission(dataset).test()
+        dataset.permissions["edit_resources"].test()
         resource = self.get_resource_or_404(dataset, rid)
         dataset.remove_resource(resource)
-        dataset.last_modified_internal = datetime.utcnow()
-        dataset.save()
         return "", 204
 
 
@@ -623,7 +763,7 @@ class CommunityResourceAPI(API):
     @api.marshal_with(community_resource_fields)
     def put(self, community):
         """Update a given community resource"""
-        ResourceEditPermission(community).test()
+        community.permissions["edit"].test()
         form = api.validate(CommunityResourceForm, community)
         if community.filetype == "file":
             form._fields.get("url").data = community.url
@@ -638,7 +778,7 @@ class CommunityResourceAPI(API):
     @api.doc("delete_community_resource")
     def delete(self, community):
         """Delete a given community resource"""
-        ResourceEditPermission(community).test()
+        community.permissions["delete"].test()
         # Deletes community resource's file from file storage
         if community.fs_filename is not None:
             storages.resources.delete(community.fs_filename)

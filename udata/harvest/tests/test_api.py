@@ -8,7 +8,7 @@ from pytest_mock import MockerFixture
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.models import Member, PeriodicTask
-from udata.tests.helpers import assert200, assert201, assert204, assert400, assert403
+from udata.tests.helpers import assert200, assert201, assert204, assert400, assert403, assert404
 from udata.tests.plugin import ApiClient
 from udata.utils import faker
 
@@ -84,6 +84,38 @@ class HarvestAPITest(MockBackendsMixin):
         assert200(response)
 
         assert len(response.json["data"]) == len(sources)
+
+    def test_list_sources_search(self, api):
+        HarvestSourceFactory.create_batch(3)
+        source = HarvestSourceFactory(name="Moissonneur GeoNetwork de la ville de Rennes")
+
+        url = url_for("api.harvest_sources", q="geonetwork rennes")
+        response = api.get(url)
+        assert200(response)
+
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(source.id)
+
+    def test_list_sources_paginate(self, api):
+        total = 25
+        page_size = 20
+        HarvestSourceFactory.create_batch(total)
+
+        url = url_for("api.harvest_sources", page=1, page_size=page_size)
+        response = api.get(url)
+        assert200(response)
+        assert len(response.json["data"]) == page_size
+        assert response.json["total"] == total
+
+        url = url_for("api.harvest_sources", page=2, page_size=page_size)
+        response = api.get(url)
+        assert200(response)
+        assert len(response.json["data"]) == total - page_size
+        assert response.json["total"] == total
+
+        url = url_for("api.harvest_sources", page=3, page_size=page_size)
+        response = api.get(url)
+        assert404(response)
 
     def test_create_source_with_owner(self, api):
         """It should create and attach a new source to an owner"""

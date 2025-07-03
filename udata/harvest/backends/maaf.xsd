@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+    elementFormDefault="qualified"
+    version="0.1"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <!--
+   méta-données ETALAB
+   contient les informations nécessaires à ETALAB pour référencer nos jeux de données sur data.gouv.fr
+   date de MAJ : 07/04/2014
+   créé par : Célia Carceller Kemiche
+   contact : celia.carceller-kemiche@agriculture.gouv.fr
+   -->
+    <xs:element name="ETALAB">
+        <xs:complexType>
+            <xs:sequence>
+                <!--
+            méta-données des jeux de données référencés sur data.gouv.fr
+            -->
+                <xs:element name="metadata">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <!--
+                     Nom du bureau, département ou service producteur du jeu de données
+                     
+                     Ce champ complète le champ organization, qui lui décrit l'organisme (Ministère, collectivité
+                            territoriale, entreprise, association, etc) auquel appartient le bureau,
+                            département ou service.
+                     
+                     obligatoire - valeur fixe
+                     
+                     Exemple : "Service de publication des données ouvertes"
+                     -->
+                            <xs:element name="author" type="xs:string" />
+                            <!--
+                     Courriel de contact
+                     
+                     facultatif - valeur fixe 
+                     
+                     Exemple : "support@open-data.miniver.gouv.fr"
+                     -->
+                            <xs:element name="author_email" type="xs:string" />
+                            <!--
+                     Prévoir ici 3 champs personnalisés : 
+					 Key = Quartier et Value = le nom du quartier de SI Source
+					 Key = Source et Value = le nom de la source de données
+					 Key = ETL et Value = 0 ==> cas d'usage d'un flux ETL
+					 
+					 Obligatoire - valeur fixe
+					 
+					 Exemple : 
+					 	<extras>
+							<key>Quartier</key>
+							<value>SIAL</value>
+						</extras>
+						<extras>
+							<key>Source</key>
+							<value>EPHY</value>
+						</extras>
+						<extras>
+							<key>ETL</key>
+							<value>0</value>
+						</extras>						
+                     -->
+                            <xs:element name="extras">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="key" type="xs:string" />
+                                        <xs:element name="value" type="xs:string" />
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                            <!--
+                     Fréquence de mise à jour des données
+                     
+                     Valeurs possibles :
+                         annuelle
+                         au fil de l'eau
+                         bimensuelle
+                         bimestrielle
+                         hebdomadaire
+                         mensuelle
+                         quotidienne
+                         semestrielle
+                         temps réel
+                         trimestrielle 
+                     
+                     obligatoire - valeur fixe 
+                     -->
+                            <xs:element name="frequency" type="xs:string" />
+                            <!--
+                     Liste des groupes auxquels appartient ce jeu de données
+                                        
+                     facultatif - valeur fixe 
+                     -->
+                            <xs:element name="groups" type="xs:string" />
+                            <!--
+                     Identifiant unique du jeu de données
+                     
+                     obligatoire
+                     
+                     La règle d'unicité est la suivante :
+                     - MINAGRI pour Ministère de l'agriculture
+                     - QUARTIER : nom du quartier de SI source (référentiel Cellule sécurité pour les nommages des sites
+                            internet)
+                     - NOM_SIO ou NOM_SID : nom de la source de données SIO ou SID
+                     - PERIMETRE : libellé qui caractérise le jeu de données => identique au libellé de la balise
+                            <Tittle>
+                     
+                     Exemple : MINAGRI-SIAL-EPHY-Les_produits_phytopharmaceutiques_vues_par_leur_substances 
+                     -->
+                            <xs:element name="id" type="xs:ID" />
+                            <!--
+                     Identifiant unique de la licence jeu de données
+                     La Licence ouverte / Open License, qui est la licence Etalab, dont le license_id vaut fr-lo.
+                     
+                     obligatoire - valeur fixe 
+                     -->
+                            <xs:element name="license_id" fixed="fr-lo" type="xs:string" />
+                            <!--
+                     Nom de la personne responsable du jeu de données
+                                          
+                     facultatif, masqué dans l'interface utilisateur - valeur fixe  
+                     -->
+                            <xs:element name="maintainer" type="xs:string" />
+                            <!--
+                     Courriel de la personne responsable du jeu de données
+                                          
+                     facultatif, masqué dans l'interface utilisateur - valeur fixe 
+                     -->
+                            <xs:element name="maintainer_email" type="xs:string" />
+                            <!--
+                     Description litterale du jeu de données
+					 
+					 A noter : il est possible qu'une exception de sécurité apparaissent au téléchargement du fichiers
+                            de données. Dans la description du jeu de données, vous devez insérer le
+                            commentaire : 
+					« Le site exposant les données est protégé par un certificat délivré par l'IGC/A (IGC officielle de
+                            l'État). Une exception de sécurité peut apparaître si votre navigateur
+                            ne reconnait pas cette autorité : vous trouverez  la procédure à suivre
+                            pour éviter une telle alerte à l'adresse :
+                            http://www.ssi.gouv.fr/fr/anssi/services-securises/igc-a/modalites-de-verification-du-certificat-de-l-igc-a-rsa-4096.html »
+                                        
+                     obligatoire - valeur fixe 
+                     -->
+                            <xs:element name="notes" type="xs:string" />
+                            <!--
+                     Organisme producteur du jeu de données
+                                          
+                     obligatoire - valeur fixe 
+                     -->
+                            <xs:element name="organization"
+                                fixed="Ministère de l’Agriculture, de l’Agroalimentaire et de la Forêt"
+                                type="xs:string" />
+                            <!--
+                     Booléen indiquant si le jeu de données est public ou privé
+					 Pendant les phases de tests (unitaire, intégration et qualif), les jeux de données doivent être
+                            publiés obligatoirement en mode privé ("1"). 
+					 ETALAB ne met pas à disposition d'environnement de tests.
+                     
+                     obligatoire - valeur fixe 
+                     -->
+                            <xs:element name="private" default="0" type="xs:boolean" />
+                            <!--
+                     Liste des fichiers constituant le jeu de données
+                     
+                     A noter : chaque fichiers de données est accompagné de son fichier de signature (*.clé) calculé via
+                            la fonction de hachage SHA-256
+                     
+                     obligatoire  - valeur variable
+                     -->
+                            <xs:element name="resources">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <!--
+                              Exemple : Produits phytopharmaceutiques vus par leurs substances
+							  
+							  Obligatoire
+                              -->
+                                        <xs:element name="description" type="xs:string" />
+                                        <!--
+                              Exemple : CSV
+                              
+                              Liste possible : 
+                              - HTML
+                              - CSV
+                              - PDF
+                              - XML
+                              - JSON
+                              - ODT
+                              - ODS
+                              -->
+                                        <xs:element name="format" type="xs:string" />
+                                        <!--
+                              Exemple : Données brutes produites le 26-11-2011
+                              -->
+                                        <xs:element name="name" type="xs:string" />
+                                        <!--
+                              obligatoire
+                     
+								La règle d'unicité des noms des fichiers de données brutes est la suivante :
+								- PERIMETRE : ID du jeux de données
+								- DATE : date de dernière mise à jour
+								- EXTENSION : CSV pour les données brutes, CLE pour le fichier clé
+                     
+								Exemple nom de fichier :
+                                        MINAGRI-SIAL-EPHY-Les_produits_phytopharmaceutiques_vues_par_leur_substances_2011-10-26.csv
+								
+								L'URL correspondante sera donc composé de : 
+								- Nom du site web : https://fichiers-publics.agriculture.gouv.fr/etalab/
+								- Répertoire racine : ETALAB
+								- QUARTIER : ALIM
+								- Source : EPHY
+								- Nom du fichiers : Id du jeux de données + Date de MAJ + Extension
+								
+								Exemple valueur <URL> :
+                                        https://fichiers-publics.agriculture.gouv.fr/etalab/ETALAB/ALIM/EPHY/MINAGRI-ALIM-EPHY-Les_produits_phyto-pharmaceutiques_vus_par_leurs_substances_2013-11-26.csv	
+						
+                              -->
+                                        <xs:element name="url" type="xs:string" />
+                                        <!--
+								Date de dernière mise à jour du fichier ressource
+                     
+								Ce champ est une date au format ISO 8601
+                     
+								facultatif - valeur variable 
+							  -->
+                                        <xs:element name="last_modified" type="xs:dateTime" />
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                            <!--
+                     État du jeu de données
+                                          
+                     facultatif - valeur fixe 
+                     -->
+                            <xs:element name="state" type="xs:string" />
+                            <!--
+                     Organisme assurant la fourniture technique du jeu de données
+                     
+                     Le fournisseur est soit le prestataire déposant automatiquement les jeux de données du producteur
+                            dans le CKAN d'Etalab, soit l'organisme gérant le dépôt de données d'où
+                            provient le jeu de données.
+                     
+                     Ce champ a une structure identique à celle du champ organization.
+                     
+                     facultatif - valeur fixe 
+                     -->
+                            <xs:element name="supplier"
+                                fixed="Ministère de l’Agriculture, de l’Agroalimentaire et de la Forêt"
+                                type="xs:string" />
+                            <!--
+                     Mots-clés associés au jeu de données. L'ensemble des mots clés est présent dans la balise séparé
+                            par une ","
+                     
+                     obligatoire : au moins 1 mot clé  - valeur fixe
+                     -->
+                            <xs:element name="tags" type="xs:string" />
+                            <!--
+                     Date de début de la période temporelle couverte par ce jeu de données
+                     
+                     Ce champ est une date au format ISO 8601.
+                     
+                     facultatif  - valeur variable
+                     
+                     Définition Wikipedia du format : http://fr.wikipedia.org/wiki/ISO_8601
+                     Exemple : 
+                         2013-12-31
+                         2013-12
+                         2013
+                     
+                     -->
+                            <xs:element name="temporal_coverage_from" type="xs:dateTime" />
+                            <!--
+                     Date de fin de la période temporelle couverte par ce jeu de données
+                     
+                     Ce champ est une date au format ISO 8601.
+                     
+                     facultatif  - valeur variable
+                     
+                     Exemple : 
+                         2013-12-31
+                         2013-12
+                         2013
+                     -->
+                            <xs:element name="temporal_coverage_to" type="xs:dateTime" />
+                            <xs:element name="territorial_coverage">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <!--
+                              Territoire couvert par ce jeu de données
+                              
+                              Ce champ est une chaîne de caractères contenant une liste de territoires séparés par une virgule.
+                              
+                              Chaque territoire est au format type/code.
+                              
+                              Le type peut valoir :
+                                  ArrondissemntOfCommuneOfFrance : Arrondissement municipal (pour Lyon, Marseille, Paris)
+                                  CantonOfFrance : Canton
+                                  CommuneOfFrance : Commune
+                                  Country : Pays
+                                  DepartmentOfFrance : Département
+                                  OverseasCollectivityOfFrance : Collectivité d'outremer
+                                  RegionOfFrance : Région 
+                              
+                              Le code est le code Insee correspondant au type de territoire
+                              
+                              facultatif  - valeur fixe
+                              
+                              Exemple :
+                                  "CommuneOfFrance/44109" : Nantes
+                                  "DepartmentOfFrance/44,DepartmentOfFrance/973" : Départements de Loire-Atlantique et de Guyane
+                                  "RegionOfFrance/52,OverseasCollectivityOfFrance/986" : Région Pays de la Loire et collectivé
+                                        d'outremer de Wallis et Futuna 
+                              -->
+                                        <xs:element name="territorial_coverage_code"
+                                            type="xs:string" />
+                                        <!--
+                              Granularité territoriale des informations contenu dans le jeu de données
+                              
+                              Ce champ est une chaîne de caractères pouvant valoir :
+                                  poi (Point d'intérêt, ie point fourni avec des coordonnées géographiques)
+                                  iris (îlots infra-communaux regroupés en quartiers par l'Insee)
+                                  canton
+                                  commune
+                                  department (département ou collectivité d'outremer)
+                                  epci : Intercommunalité (EPCI)
+                                  france
+                                  region 
+                              
+                              Quand la granularité du jeu de données est infra-communale (point d'intérêt, IRIS, etc), utiliser
+                                        la valeur commune.
+                              
+                              facultatif  - valeur fixe
+                              -->
+                                        <xs:element name="territorial_coverage_granularity"
+                                            type="xs:string" />
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                            <!--
+                     Titre du jeu de données
+                     
+                     Ce champ est celui défini en standard par CKAN.
+                     
+                     obligatoire  - valeur fixe
+                     -->
+                            <xs:element name="title" type="xs:string" />
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <!--
+            Signature SHA-256 des méta-données 
+            Cette clé de signature est calculée via la fonction de hachage SHA-256 appliquée sur la balise
+                <metadata>
+            
+            Facultatif  - valeur variable
+            -->
+                <xs:element name="digest" type="xs:string" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

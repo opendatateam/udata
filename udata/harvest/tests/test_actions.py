@@ -6,13 +6,15 @@ from tempfile import NamedTemporaryFile
 import pytest
 from mock import patch
 
+from udata.core.dataservices.factories import DataserviceFactory
+from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.models import Dataset, PeriodicTask
 from udata.tests.helpers import assert_emit, assert_equal_dates
-from udata.utils import Paginable, faker
+from udata.utils import faker
 
 from .. import actions, signals
 from ..backends import BaseBackend
@@ -110,59 +112,6 @@ class HarvestActionsTest:
 
         for source in sources:
             assert source in result
-
-    def test_paginate_sources(self):
-        result = actions.paginate_sources()
-        assert isinstance(result, Paginable)
-        assert result.page == 1
-        assert result.page_size == actions.DEFAULT_PAGE_SIZE
-        assert result.total == 0
-        assert len(result.objects) == 0
-
-        HarvestSourceFactory.create_batch(3)
-
-        result = actions.paginate_sources(page_size=2)
-        assert isinstance(result, Paginable)
-        assert result.page == 1
-        assert result.page_size == 2
-        assert result.total == 3
-        assert len(result.objects) == 2
-
-        result = actions.paginate_sources(page=2, page_size=2)
-        assert isinstance(result, Paginable)
-        assert result.page == 2
-        assert result.page_size == 2
-        assert result.total == 3
-        assert len(result.objects) == 1
-
-    def test_paginate_sources_exclude_deleted(self):
-        HarvestSourceFactory.create_batch(2)
-        HarvestSourceFactory(deleted=datetime.utcnow())
-
-        result = actions.paginate_sources(page_size=2)
-        assert isinstance(result, Paginable)
-        assert result.page == 1
-        assert result.page_size == 2
-        assert result.total == 2
-        assert len(result.objects) == 2
-
-    def test_paginate_sources_include_deleted(self):
-        HarvestSourceFactory.create_batch(2)
-        HarvestSourceFactory(deleted=datetime.utcnow())
-
-        result = actions.paginate_sources(page_size=2, deleted=True)
-        assert isinstance(result, Paginable)
-        assert result.page == 1
-        assert result.page_size == 2
-        assert result.total == 3
-        assert len(result.objects) == 2
-
-        result = actions.paginate_sources(page=2, page_size=2, deleted=True)
-        assert isinstance(result, Paginable)
-        assert result.page == 2
-        assert result.page_size == 2
-        assert result.total == 3
-        assert len(result.objects) == 1
 
     def test_create_source(self):
         source_url = faker.url()
@@ -396,16 +345,26 @@ class HarvestActionsTest:
         dataset_to_archive = DatasetFactory(
             harvest=HarvestDatasetMetadata(source_id=str(to_delete[0].id))
         )
+        dataservice_to_archive = DataserviceFactory(
+            harvest=HarvestDataserviceMetadata(source_id=str(to_delete[0].id))
+        )
 
         result = actions.purge_sources()
         dataset_to_archive.reload()
+        dataservice_to_archive.reload()
 
         assert result == len(to_delete)
         assert len(HarvestSource.objects) == len(to_keep)
         assert PeriodicTask.objects.filter(id=periodic_task.id).count() == 0
         assert HarvestJob.objects(id=harvest_job.id).count() == 0
+
         assert dataset_to_archive.harvest.archived == "harvester-deleted"
+        assert_equal_dates(dataset_to_archive.harvest.archived_at, now)
         assert_equal_dates(dataset_to_archive.archived, now)
+
+        assert dataservice_to_archive.harvest.archived_reason == "harvester-deleted"
+        assert_equal_dates(dataservice_to_archive.harvest.archived_at, now)
+        assert_equal_dates(dataservice_to_archive.archived_at, now)
 
     @pytest.mark.options(HARVEST_JOBS_RETENTION_DAYS=2)
     def test_purge_jobs(self):

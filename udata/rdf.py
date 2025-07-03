@@ -312,7 +312,12 @@ def themes_from_rdf(rdf):
 def contact_points_from_rdf(rdf, prop, role, dataset):
     for contact_point in rdf.objects(prop):
         # Read contact point information
-        if prop == DCAT.contactPoint:  # Could be split on the type of contact_point instead
+        if isinstance(contact_point, Literal):
+            log.warning(f"Found a `Literal` inside {prop}, `foaf:Agent` or `vcard:Kind` expected.")
+            name = contact_point.toPython()
+            email = None
+            contact_form = None
+        elif prop == DCAT.contactPoint:  # Could be split on the type of contact_point instead
             name = rdf_value(contact_point, VCARD.fn) or ""
             email = (
                 rdf_value(contact_point, VCARD.hasEmail)
