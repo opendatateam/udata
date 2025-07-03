@@ -16,7 +16,7 @@
         <td align="center">
             {{ mail_button(
                 _('Reset my password'),
-                reset_link
+                cdata_url("/reset/" ~ reset_token) or reset_link
             ) }}
         </td>
     </tr>
