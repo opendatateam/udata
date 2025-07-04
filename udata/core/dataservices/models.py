@@ -17,13 +17,14 @@ from udata.core.dataservices.constants import (
     DATASERVICE_FORMATS,
 )
 from udata.core.dataset.models import Dataset
+from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
 from udata.models import Discussion, Follow, db
 from udata.mongo.errors import FieldValidationError
-from udata.uris import endpoint_for
+from udata.uris import cdata_url
 
 # "frequency"
 # "harvest"
@@ -138,7 +139,7 @@ def check_only_one_condition_per_role(access_audiences, **_kwargs):
         {"key": "views", "value": "metrics.views"},
     ],
 )
-class Dataservice(Auditable, WithMetrics, Owned, db.Document):
+class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
     meta = {
         "indexes": [
             "$title",
@@ -273,18 +274,17 @@ class Dataservice(Auditable, WithMetrics, Owned, db.Document):
         auditable=False,
     )
 
-    def url_for(self, *args, **kwargs):
-        return endpoint_for(
-            "dataservices.show", "api.dataservice", dataservice=self, *args, **kwargs
+    @function_field(description="Link to the API endpoint for this dataservice")
+    def self_api_url(self, **kwargs):
+        return url_for(
+            "api.dataservice",
+            dataservice=self._link_id(**kwargs),
+            **self._self_api_url_kwargs(**kwargs),
         )
 
-    @function_field(description="Link to the API endpoint for this dataservice")
-    def self_api_url(self):
-        return endpoint_for("api.dataservice", dataservice=self, _external=True)
-
     @function_field(description="Link to the udata web page for this dataservice", show_as_ref=True)
-    def self_web_url(self):
-        return endpoint_for("dataservices.show", dataservice=self, _external=True)
+    def self_web_url(self, **kwargs):
+        return cdata_url(f"/dataservices/{self._link_id(**kwargs)}/", **kwargs)
 
     __metrics_keys__ = [
         "discussions",

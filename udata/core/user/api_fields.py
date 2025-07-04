@@ -10,15 +10,15 @@ user_ref_fields = api.inherit(
         "first_name": fields.String(description="The user first name", readonly=True),
         "last_name": fields.String(description="The user larst name", readonly=True),
         "slug": fields.String(description="The user permalink string", required=True),
-        "page": fields.UrlFor(
-            "users.show",
-            lambda u: {"user": u},
-            description="The user profile page URL",
+        "uri": fields.String(
+            attribute=lambda u: u.self_api_url(),
+            description="The API URI for this user",
             readonly=True,
-            fallback_endpoint="api.user",
         ),
-        "uri": fields.UrlFor(
-            "api.user", lambda o: {"user": o}, description="The user API URI", required=True
+        "page": fields.String(
+            attribute=lambda u: u.self_web_url(),
+            description="The user web page URL",
+            readonly=True,
         ),
         "avatar": fields.ImageField(original=True, description="The user avatar URL"),
         "avatar_thumbnail": fields.ImageField(
@@ -66,15 +66,15 @@ user_fields = api.model(
             description="The user last connection date (only present for global admins and on /me)",
             readonly=True,
         ),
-        "page": fields.UrlFor(
-            "users.show",
-            lambda u: {"user": u},
-            description="The user profile page URL",
+        "uri": fields.String(
+            attribute=lambda u: u.self_api_url(),
+            description="The API URI for this user",
             readonly=True,
-            fallback_endpoint="api.user",
         ),
-        "uri": fields.UrlFor(
-            "api.user", lambda o: {"user": o}, description="The user API URI", required=True
+        "page": fields.String(
+            attribute=lambda u: u.self_web_url(),
+            description="The user web page URL",
+            readonly=True,
         ),
         "metrics": fields.Raw(
             attribute=lambda o: o.get_metrics(), description="The user metrics", readonly=True

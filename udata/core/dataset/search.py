@@ -87,7 +87,7 @@ class DatasetSearch(ModelSearchAdapter):
             "title": dataset.title,
             "description": dataset.description,
             "acronym": dataset.acronym or None,
-            "url": dataset.display_url,
+            "url": dataset.url_for(),
             "tags": dataset.tags,
             "license": getattr(dataset.license, "id", None),
             "badges": [badge.kind for badge in dataset.badges],

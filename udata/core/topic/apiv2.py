@@ -93,15 +93,10 @@ topic_fields = apiv2.model(
         "owner": fields.Nested(
             user_ref_fields, description="The owner user", readonly=True, allow_null=True
         ),
-        "uri": fields.UrlFor(
-            "api.topic", lambda o: {"topic": o}, description="The topic API URI", readonly=True
-        ),
-        "page": fields.UrlFor(
-            "topics.display",
-            lambda o: {"topic": o},
-            description="The topic page URL",
+        "uri": fields.String(
+            attribute=lambda t: url_for("api.topic", topic=t),
+            description="The topic API URI",
             readonly=True,
-            fallback_endpoint="api.topic",
         ),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),
     },

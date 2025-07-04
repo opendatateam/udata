@@ -10,7 +10,6 @@ from rdflib.namespace import FOAF, RDF, RDFS
 from udata.core.dataservices.rdf import dataservice_to_rdf
 from udata.core.dataset.rdf import dataset_to_rdf
 from udata.rdf import DCAT, DCT, namespace_manager, paginate_catalog
-from udata.uris import endpoint_for
 from udata.utils import Paginable
 
 
@@ -20,10 +19,7 @@ def organization_to_rdf(org, graph=None):
     """
     graph = graph or Graph(namespace_manager=namespace_manager)
     if org.id:
-        org_url = endpoint_for(
-            "organizations.show_redirect", "api.organization", org=org.id, _external=True
-        )
-        id = URIRef(org_url)
+        id = URIRef(org.url_for(_useId=True))
     else:
         id = BNode()
     o = graph.resource(id)

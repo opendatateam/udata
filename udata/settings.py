@@ -24,6 +24,8 @@ class Defaults(object):
     CONTACT_EMAIL = "contact@example.org"
     TERRITORIES_EMAIL = "territories@example.org"
 
+    CDATA_BASE_URL = None
+
     MONGODB_HOST = "mongodb://localhost:27017/udata"
     MONGODB_CONNECT = False  # Lazy connexion for Fork-safe usage
 
