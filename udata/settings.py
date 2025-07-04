@@ -508,6 +508,10 @@ class Defaults(object):
     ARCHIVE_COMMENT_USER_ID = None
     ARCHIVE_COMMENT_TITLE = _("This dataset has been archived")
 
+    # Transport extras
+    ##################
+    TRANSPORT_DATASETS_URL = None
+
     # Schemas parameters
     ####################
     SCHEMA_CATALOG_URL = None
