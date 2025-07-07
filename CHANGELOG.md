@@ -6,6 +6,7 @@
 - Expose `dataset_id` for CommunityResource in /dataset/resource/id [#3258](https://github.com/opendatateam/udata/pull/3258)
 - Add a CI job to create a release on Sentry [#3266](https://github.com/opendatateam/udata/pull/3266)
 - Sort extensions in `/api/1/datasets/extensions/` response alphabetically [#3358](https://github.com/opendatateam/udata/pull/3358)
+- Migrate recommendations tasks, [udata-recommendations](https://github.com/opendatateam/udata-recommendations/) is no longer required [#3355](https://github.com/opendatateam/udata/pull/3355)
 
 ## 10.5.0 (2025-07-02)
 
