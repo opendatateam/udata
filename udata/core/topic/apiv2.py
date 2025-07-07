@@ -199,14 +199,13 @@ class TopicElementAPI(API):
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
 
-        element = get_by(topic.elements, "id", element_id)
-        if not element:
+        element_ref = get_by(topic.elements, "id", element_id)
+        if not element_ref:
             apiv2.abort(404, "Element not found in topic")
 
+        element = element_ref.fetch()
         form = apiv2.validate(TopicElementForm, element)
         form.populate_obj(element)
-
-        data = {f"elements__{topic.elements.index(element)}": element}
-        topic.update(**data)
+        element.save()
 
         return element
