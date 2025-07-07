@@ -23,7 +23,9 @@ class ReuseTasksTest(APITestCase):
         )
         self.assert200(response)
 
-        topic = Topic.objects.create(name="test topic", elements=[TopicElement(element=reuse)])
+        topic_element = TopicElement(element=reuse)
+        topic_element.save()
+        topic = Topic.objects.create(name="test topic", elements=[topic_element])
 
         # Delete reuse
         response = self.delete(url_for("api.reuse", reuse=reuse))
@@ -42,7 +44,8 @@ class ReuseTasksTest(APITestCase):
         assert Transfer.objects.filter(id=transfer.id).count() == 0
 
         topic = Topic.objects(name="test topic").first()
-        assert topic.elements[0].element is None
+        element = topic.elements[0].fetch()
+        assert element.element is None
 
         # Check reuse's image is deleted
         self.assertEqual(list(storages.images.list_files()), [])
