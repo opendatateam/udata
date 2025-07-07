@@ -100,7 +100,9 @@ class TopicElementsAPI(API):
         """Get a given topic's elements with pagination."""
         args = elements_parser.parse()
         elements = elements_parser.parse_filters(
-            TopicElement.objects(id__in=[e.id for e in topic.elements]), args
+            # FIXME: is this efficient on a huge Topic?
+            TopicElement.objects(id__in=[e.id for e in topic.elements]),
+            args,
         )
         return elements.paginate(args["page"], args["page_size"])
 
@@ -129,6 +131,7 @@ class TopicElementsAPI(API):
             else:
                 element = TopicElement()
                 form.populate_obj(element)
+                element.save()
                 elements.append(element)
 
         if errors:

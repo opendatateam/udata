@@ -458,8 +458,11 @@ class TopicElementsAPITest(APITestCase):
         topic.reload()
         assert len(topic.elements) == 6
 
+        # Fetch all elements to resolve lazy references
+        fetched_elements = [elt.fetch() for elt in topic.elements]
+
         dataset_elt = next(
-            elt for elt in topic.elements if elt.element and elt.element.id == dataset.id
+            elt for elt in fetched_elements if elt.element and elt.element.id == dataset.id
         )
         assert dataset_elt.title == "A dataset"
         assert dataset_elt.description == "A dataset description"
@@ -467,7 +470,7 @@ class TopicElementsAPITest(APITestCase):
         assert dataset_elt.extras == {"extra": "value"}
 
         reuse_elt = next(
-            elt for elt in topic.elements if elt.element and elt.element.id == reuse.id
+            elt for elt in fetched_elements if elt.element and elt.element.id == reuse.id
         )
         assert reuse_elt.title == "A reuse"
         assert reuse_elt.description == "A reuse description"
@@ -475,7 +478,7 @@ class TopicElementsAPITest(APITestCase):
         assert reuse_elt.extras == {"extra": "value"}
 
         no_elt_elt = next(
-            elt for elt in topic.elements if elt.title == "An element without element"
+            elt for elt in fetched_elements if elt.title == "An element without element"
         )
         assert no_elt_elt.description == "An element description"
         assert no_elt_elt.tags == ["tag1", "tag2"]
@@ -569,11 +572,12 @@ class TopicElementAPITest(APITestCase):
         assert response.json["title"] == "bar"
         topic.reload()
         assert len(topic.elements) == 1
-        assert topic.elements[0].title == "bar"
-        assert topic.elements[0].description == "baz"
-        assert topic.elements[0].tags == ["baz"]
-        assert topic.elements[0].extras == {"foo": "bar"}
-        assert topic.elements[0].element.id == dataset.id
+        element = topic.elements[0].fetch()
+        assert element.title == "bar"
+        assert element.description == "baz"
+        assert element.tags == ["baz"]
+        assert element.extras == {"foo": "bar"}
+        assert element.element.id == dataset.id
 
     def test_update_element_no_element(self):
         owner = self.login()
@@ -594,8 +598,9 @@ class TopicElementAPITest(APITestCase):
         assert response.json["element"] is None
         topic.reload()
         assert len(topic.elements) == 1
-        assert topic.elements[0].title == "bar"
-        assert topic.elements[0].description == "baz"
-        assert topic.elements[0].tags == ["baz"]
-        assert topic.elements[0].extras == {"foo": "bar"}
-        assert topic.elements[0].element is None
+        element = topic.elements[0].fetch()
+        assert element.title == "bar"
+        assert element.description == "baz"
+        assert element.tags == ["baz"]
+        assert element.extras == {"foo": "bar"}
+        assert element.element is None

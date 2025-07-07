@@ -75,9 +75,6 @@ class Topic(db.Datetimed, Auditable, db.Document, Owned):
     # TODO: also reindex Reuses (never been done) but Reuse.topic is a different field
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
-        # Try catch is to prevent the mechanism to crash at the
-        # creation of the Topic, where an original state does not exist.
-
         def get_datasets_ids(elements: list[TopicElement]) -> set[str]:
             """Optimized query to get dataset ids from elements."""
             return set(
@@ -89,6 +86,8 @@ class Topic(db.Datetimed, Auditable, db.Document, Owned):
                 .as_pymongo()
             )
 
+        # Try catch is to prevent the mechanism to crash at the
+        # creation of the Topic, where an original state does not exist.
         try:
             original_doc = sender.objects.get(id=document.id)
             original_dataset_ids = get_datasets_ids(original_doc.elements)
