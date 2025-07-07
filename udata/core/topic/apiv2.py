@@ -1,14 +1,14 @@
 import logging
 
 import mongoengine
-from flask import request, url_for
+from flask import request
 from flask_security import current_user
 
 from udata.api import API, apiv2
 from udata.core.discussions.models import Discussion
 from udata.core.topic.api_fields import (
     element_fields,
-    element_page_fields_for_pipeline,
+    element_page_fields,
     topic_add_elements_fields,
     topic_fields,
     topic_input_fields,
@@ -95,119 +95,14 @@ class TopicAPI(API):
 class TopicElementsAPI(API):
     @apiv2.doc("topic_elements")
     @apiv2.expect(elements_parser.parser)
-    @apiv2.marshal_with(element_page_fields_for_pipeline)
+    @apiv2.marshal_with(element_page_fields)
     def get(self, topic):
-        """
-        Get a given topic elements with pagination.
-        We're using an aggregation pipeline instead of high level MongoEngine API for performance reasons.
-        """
+        """Get a given topic's elements with pagination."""
         args = elements_parser.parse()
-        page = args["page"]
-        page_size = args["page_size"]
-        query = args["q"]
-        element_class = args["class"]
-        tags = args["tag"]
-        list_elements_url = url_for("apiv2.topic_elements", topic=topic.id, _external=True)
-        next_page = f"{list_elements_url}?page={page + 1}&page_size={page_size}"
-        previous_page = f"{list_elements_url}?page={page - 1}&page_size={page_size}"
-
-        # Get raw elements from pipeline
-        pipeline = [
-            {"$match": {"_id": topic.id}},
-            {"$unwind": "$elements"},
-            {"$replaceRoot": {"newRoot": "$elements"}},
-        ]
-
-        if query:
-            search_terms = query.lower().split()
-            regex_conditions = []
-
-            for term in search_terms:
-                # Create regex that ignores diacritics (basic approach)
-                diacritic_term = (
-                    term.replace("e", "[eéèêë]")
-                    .replace("a", "[aàâä]")
-                    .replace("i", "[iîï]")
-                    .replace("o", "[oôö]")
-                    .replace("u", "[uùûü]")
-                    .replace("c", "[cç]")
-                )
-
-                regex_conditions.append(
-                    {
-                        "$or": [
-                            {"title": {"$regex": diacritic_term, "$options": "i"}},
-                            {"description": {"$regex": diacritic_term, "$options": "i"}},
-                        ]
-                    }
-                )
-
-            # All search terms must match (AND logic)
-            pipeline.append({"$match": {"$and": regex_conditions}})
-
-            next_page += f"&q={args['q']}"
-            previous_page += f"&q={args['q']}"
-
-        if element_class:
-            if element_class != "None":
-                pipeline.append({"$match": {"element._cls": element_class}})
-            else:
-                pipeline.append({"$match": {"element": None}})
-            next_page += f"&class={element_class}"
-            previous_page += f"&class={element_class}"
-
-        if tags:
-            pipeline.append({"$match": {"tags": {"$all": tags}}})
-            for tag in tags:
-                next_page += f"&tag={tag}"
-                previous_page += f"&tag={tag}"
-
-        count_pipeline = pipeline.copy()
-        count_pipeline.append({"$count": "total"})
-
-        pipeline.append(
-            {
-                "$project": {
-                    "id": "$_id",
-                    "title": 1,
-                    "description": 1,
-                    "tags": 1,
-                    "extras": 1,
-                    # output the element as a dict with class and id, or None if no element
-                    "element": {
-                        "$cond": {
-                            "if": {"$ifNull": ["$element._ref", False]},
-                            "then": {"class": "$element._cls", "id": "$element._ref.$id"},
-                            "else": None,
-                        }
-                    },
-                }
-            }
+        elements = elements_parser.parse_filters(
+            TopicElement.objects(id__in=[e.id for e in topic.elements]), args
         )
-
-        # Add pagination
-        if page > 1:
-            pipeline.append({"$skip": page_size * (page - 1)})
-        if page_size:
-            pipeline.append({"$limit": page_size})
-
-        # $facet executes total and data queries in one shot
-        result = (
-            topic._get_collection()
-            .aggregate([{"$facet": {"data": pipeline, "total": count_pipeline}}])
-            .next()
-        )
-
-        total = result["total"][0]["total"] if result["total"] else 0
-
-        return {
-            "data": result["data"],
-            "next_page": next_page if (page * page_size) < total else None,
-            "page": page,
-            "page_size": page_size,
-            "previous_page": previous_page if page > 1 else None,
-            "total": total,
-        }
+        return elements.paginate(args["page"], args["page_size"])
 
     @apiv2.secure
     @apiv2.doc("topic_elements_create")

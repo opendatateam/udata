@@ -89,36 +89,7 @@ element_fields = apiv2.model(
     },
 )
 
-# used when the query results come from a Mongo pipeline: we're not working on MongoEngine objects anymore, use raw result
-element_fields_for_pipeline = apiv2.clone(
-    "TopicElementForPipeline",
-    element_fields,
-    {
-        "element": fields.Raw(description="The element target object"),
-    },
-)
-
-element_page_fields = apiv2.model(
-    "TopicElementPage",
-    {
-        "data": fields.List(fields.Nested(element_fields, description="The topic elements")),
-        "next_page": fields.String(),
-        "previous_page": fields.String(),
-        "page": fields.Integer(),
-        "page_size": fields.Integer(),
-        "total": fields.Integer(),
-    },
-)
-
-element_page_fields_for_pipeline = apiv2.clone(
-    "TopicElementPageForPipeline",
-    element_page_fields,
-    {
-        "data": fields.List(
-            fields.Nested(element_fields_for_pipeline, description="The topic elements")
-        )
-    },
-)
+element_page_fields = apiv2.model("TopicElementPage", fields.pager(element_fields))
 
 topic_input_fields = apiv2.clone(
     "TopicInput",

@@ -30,6 +30,20 @@ class TopicElementsParser(ModelApiParser):
         )
         self.parser.add_argument("tag", type=str, location="args", action="append")
 
+    @staticmethod
+    def parse_filters(elements, args):
+        if args.get("q"):
+            phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
+            elements = elements.search_text(phrase_query)
+        if args.get("tag"):
+            elements = elements.filter(tags__all=args["tag"])
+        if element_class := args.get("class"):
+            if element_class == "None":
+                elements = elements.filter(element=None)
+            else:
+                elements = elements.filter(__raw__={"element._cls": element_class})
+        return elements
+
 
 class TopicApiParser(ModelApiParser):
     sorts = {

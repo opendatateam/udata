@@ -21,6 +21,15 @@ class TopicElement(db.Document):
     extras = field(db.ExtrasField())
     element = field(db.GenericReferenceField(choices=[Dataset, Reuse]))
 
+    meta = {
+        "indexes": [
+            {
+                "fields": ["$title", "$description"],
+            }
+        ],
+        "auto_create_index_on_save": True,
+    }
+
 
 class Topic(db.Datetimed, Auditable, db.Document, Owned):
     name = field(db.StringField(required=True))
@@ -86,8 +95,6 @@ class Topic(db.Datetimed, Auditable, db.Document, Owned):
             current_dataset_ids = get_datasets_ids(document.elements)
             datasets_list_diff = original_dataset_ids ^ current_dataset_ids
         except cls.DoesNotExist:
-            # FIXME: document.elements does not pass on form.create somehow
-            # probably because we're getting a list of dicts where we would like a list of objects
             datasets_list_diff = get_datasets_ids(document.elements)
 
         for dataset_id in datasets_list_diff:
