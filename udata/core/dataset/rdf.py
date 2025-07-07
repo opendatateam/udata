@@ -225,8 +225,16 @@ def resource_to_rdf(
     r.add(DCT.description, Literal(resource.description))
     r.add(DCAT.downloadURL, URIRef(resource.url))
     r.add(DCAT.accessURL, URIRef(permalink))
-    r.add(DCT.issued, Literal(resource.created_at))
-    r.add(DCT.modified, Literal(resource.last_modified))
+    # issued
+    if resource.harvest and resource.harvest.issued_at:
+        r.add(DCT.issued, Literal(resource.harvest.issued_at))
+    else:
+        r.add(DCT.issued, Literal(resource.created_at))
+    # modified
+    if resource.harvest and resource.harvest.modified_at:
+        r.add(DCT.modified, Literal(resource.harvest.modified_at))
+    else:
+        r.add(DCT.modified, Literal(resource.last_modified))
     if dataset and dataset.license:
         r.add(DCT.rights, Literal(dataset.license.title))
         if dataset.license.url:
@@ -307,8 +315,22 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
     d.set(RDF.type, DCAT.Dataset)
     d.set(DCT.title, Literal(dataset.title))
     d.set(DCT.description, Literal(dataset.description))
-    d.set(DCT.issued, Literal(dataset.created_at))
-    d.set(DCT.modified, Literal(dataset.last_modified))
+
+    # created
+    if dataset.harvest and dataset.harvest.created_at:
+        d.set(DCT.created, Literal(dataset.harvest.created_at))
+    else:
+        d.set(DCT.created, Literal(dataset.created_at))
+    # issued
+    if dataset.harvest and dataset.harvest.issued_at:
+        d.set(DCT.issued, Literal(dataset.harvest.issued_at))
+    else:
+        d.set(DCT.issued, Literal(dataset.created_at))
+    # modified
+    if dataset.harvest and dataset.harvest.modified_at:
+        d.set(DCT.modified, Literal(dataset.harvest.modified_at))
+    else:
+        d.set(DCT.modified, Literal(dataset.last_modified))
 
     if dataset.harvest and dataset.harvest.remote_url:
         d.set(DCAT.landingPage, URIRef(dataset.harvest.remote_url))
@@ -726,12 +748,12 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
 
     identifier = rdf_value(distrib, DCT.identifier)
     uri = distrib.identifier.toPython() if isinstance(distrib.identifier, URIRef) else None
-    created_at = rdf_value(distrib, DCT.issued)
+    issued_at = rdf_value(distrib, DCT.issued)
     modified_at = rdf_value(distrib, DCT.modified)
 
     if not resource.harvest:
         resource.harvest = HarvestResourceMetadata()
-    resource.harvest.created_at = created_at
+    resource.harvest.issued_at = issued_at
 
     # In the past, we've encountered future `modified_at` during harvesting
     # do not save it. :FutureHarvestModifiedAt
@@ -831,7 +853,8 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
 
     remote_url = remote_url_from_rdf(d, graph, remote_url_prefix=remote_url_prefix)
 
-    created_at = rdf_value(d, DCT.issued)
+    created_at = rdf_value(d, DCT.created)
+    issued_at = rdf_value(d, DCT.issued)
     modified_at = rdf_value(d, DCT.modified)
 
     if not dataset.harvest:
@@ -840,6 +863,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
     dataset.harvest.uri = uri
     dataset.harvest.remote_url = remote_url
     dataset.harvest.created_at = created_at
+    dataset.harvest.issued_at = issued_at
 
     # In the past, we've encountered future `modified_at` during harvesting
     # do not save it. :FutureHarvestModifiedAt
