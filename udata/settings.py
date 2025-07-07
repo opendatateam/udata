@@ -520,6 +520,10 @@ class Defaults(object):
         "https://guides.data.gouv.fr/publier-des-donnees/guide-data.gouv.fr/api/reference"
     )
 
+    # Dataset recommendations
+    #########################
+    RECOMMENDATIONS_SOURCES = {}
+
     # Read Only Mode
     ####################
     # This mode can be used to mitigate a spam attack for example.
