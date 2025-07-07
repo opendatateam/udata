@@ -344,8 +344,6 @@ class CswIso19139DcatBackend(DcatBackend):
 
     ISO_SCHEMA = "http://www.isotc211.org/2005/gmd"
 
-    DEFAULT_XSL_URL = "https://raw.githubusercontent.com/datagouv/iso-19139-to-dcat-ap/patch-datagouv/iso-19139-to-dcat-ap.xsl"
-
     def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
         """
         Yield all RDF pages as `Graph` from the source
@@ -355,7 +353,7 @@ class CswIso19139DcatBackend(DcatBackend):
         See https://github.com/SEMICeu/iso-19139-to-dcat-ap for more information on the XSLT.
         """
         # Load XSLT
-        xsl_url = current_app.config.get("HARVEST_ISO19139_XSL_URL", self.DEFAULT_XSL_URL)
+        xsl_url = current_app.config.get("HARVEST_ISO19139_XSL_URL")
         xsl = ET.fromstring(self.get(xsl_url).content, parser=SAFE_PARSER)
         transform = ET.XSLT(xsl)
 
