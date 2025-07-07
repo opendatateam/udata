@@ -35,6 +35,29 @@ class TopicForm(ModelForm):
 
     elements = fields.NestedModelList(TopicElementForm)
 
+    def save(self, commit=True, **kwargs):
+        """Custom save to handle TopicElement creation properly"""
+        # Handle elements manually before saving the topic
+        saved_elements = []
+        if self.elements.data:
+            for element_data in self.elements.data:
+                # Create and populate TopicElement instance
+                element_form = TopicElementForm(data=element_data)
+                if element_form.validate():
+                    element = element_form.save()  # This will save the TopicElement
+                    saved_elements.append(element)
+
+        # Save the topic with the default behavior but without committing
+        topic = super().save(commit=False, **kwargs)
+
+        # Replace elements with our saved ones
+        topic.elements = saved_elements
+
+        if commit:
+            topic.save()
+
+        return topic
+
     spatial = SpatialCoverageField(
         _("Spatial coverage"), description=_("The geographical area covered by the data.")
     )

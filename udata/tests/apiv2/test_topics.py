@@ -177,7 +177,9 @@ class TopicsListAPITest(APITestCase):
         self.assertEqual(Topic.objects.count(), 1)
         topic = Topic.objects.first()
         for element in data["elements"]:
-            assert element["element"]["id"] in (str(elt.element.id) for elt in topic.elements)
+            assert element["element"]["id"] in (
+                str(elt.fetch().element.id) for elt in topic.elements
+            )
 
     def test_topic_api_create_as_org(self):
         """It should create a topic as organization from the API"""
@@ -256,7 +258,9 @@ class TopicAPITest(APITestCase):
         topic = TopicFactory(owner=user)
         initial_length = len(topic.elements)
         data = topic.to_dict()
-        data["elements"] = [TopicElementFactory.element_as_payload(elt) for elt in topic.elements]
+        data["elements"] = [
+            TopicElementFactory.element_as_payload(elt.fetch()) for elt in topic.elements
+        ]
         data["elements"].append(
             TopicElementFactory.element_as_payload(TopicElementDatasetFactory())
         )
