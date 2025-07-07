@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Migrate udata-transport tasks, [udata-transport](https://github.com/opendatateam/udata-transport/) is no longer required [#3355](https://github.com/opendatateam/udata/pull/3355)
 
 ## 10.5.0 (2025-07-02)
 
