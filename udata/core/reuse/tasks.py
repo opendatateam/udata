@@ -1,6 +1,6 @@
 from udata import mail
 from udata.core import storages
-from udata.core.topic.models import Topic
+from udata.core.topic.models import TopicElement
 from udata.i18n import lazy_gettext as _
 from udata.models import Activity, Discussion, Follow, Transfer
 from udata.tasks import get_logger, job, task
@@ -23,7 +23,7 @@ def purge_reuses(self) -> None:
         # Remove transfers
         Transfer.objects(subject=reuse).delete()
         # Remove reuses references in Topics
-        Topic.objects(elements__element=reuse).update(set__elements__S__element=None)
+        TopicElement.objects(element=reuse).update(element=None)
         # Remove reuse's logo in all sizes
         if reuse.image.filename is not None:
             storage = storages.images

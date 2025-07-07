@@ -11,13 +11,18 @@ pytestmark = pytest.mark.usefixtures("clean_db")
 def test_purge_topics_elements():
     topic = TopicFactory()
     assert len(topic.elements) > 0
-    for element in topic.elements:
+    for _element in topic.elements:
+        element = _element.fetch()
         element.title = None
+        element.save()
         element.element.deleted = "2023-01-01"
         element.element.save()
     topic.save()
+    # remove the dataset elements marked as deleted
     purge_datasets()
+    # remove the reuse elements marked as deleted
     purge_reuses()
+    # remove the topic elements that have neither title nor element
     purge_topics_elements()
     topic.reload()
     assert len(topic.elements) == 0

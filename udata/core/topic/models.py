@@ -13,7 +13,7 @@ from udata.search import reindex
 __all__ = ("Topic", "TopicElement")
 
 
-class TopicElement(db.EmbeddedDocument):
+class TopicElement(db.Document):
     id = field(db.AutoUUIDField(primary_key=True))
     title = field(db.StringField(required=False))
     description = field(db.StringField(required=False))
@@ -32,7 +32,9 @@ class Topic(db.Datetimed, Auditable, db.Document, Owned):
     tags = field(db.ListField(db.StringField()))
     color = field(db.IntField())
 
-    elements = field(db.EmbeddedDocumentListField(TopicElement))
+    elements = field(
+        db.ListField(db.LazyReferenceField("TopicElement", reverse_delete_rule=db.PULL))
+    )
 
     featured = field(db.BooleanField(default=False), auditable=False)
     private = field(db.BooleanField())
@@ -66,26 +68,30 @@ class Topic(db.Datetimed, Auditable, db.Document, Owned):
     def pre_save(cls, sender, document, **kwargs):
         # Try catch is to prevent the mechanism to crash at the
         # creation of the Topic, where an original state does not exist.
+
+        def get_datasets_ids(elements: list[TopicElement]) -> set[str]:
+            """Optimized query to get dataset ids from elements."""
+            return set(
+                str(elem["element"]["_ref"].id)
+                for elem in TopicElement.objects.filter(
+                    id__in=[ref.pk for ref in elements], __raw__={"element._cls": "Dataset"}
+                )
+                .fields(element=1)
+                .as_pymongo()
+            )
+
         try:
             original_doc = sender.objects.get(id=document.id)
-            # Get the diff between the original and current datasets
-            datasets_list_dif = set(
-                elt.element
-                for elt in original_doc.elements
-                if elt.element.__class__.__name__ == "Dataset"
-            ) ^ set(
-                elt.element
-                for elt in document.elements
-                if elt.element.__class__.__name__ == "Dataset"
-            )
+            original_dataset_ids = get_datasets_ids(original_doc.elements)
+            current_dataset_ids = get_datasets_ids(document.elements)
+            datasets_list_diff = original_dataset_ids ^ current_dataset_ids
         except cls.DoesNotExist:
-            datasets_list_dif = set(
-                elt.element
-                for elt in document.elements
-                if elt.element.__class__.__name__ == "Dataset"
-            )
-        for dataset in datasets_list_dif:
-            reindex.delay("Dataset", str(dataset.pk))
+            # FIXME: document.elements does not pass on form.create somehow
+            # probably because we're getting a list of dicts where we would like a list of objects
+            datasets_list_diff = get_datasets_ids(document.elements)
+
+        for dataset_id in datasets_list_diff:
+            reindex.delay("Dataset", dataset_id)
 
     @property
     def display_url(self):

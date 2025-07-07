@@ -13,7 +13,7 @@ from udata.core import csv, storages
 from udata.core.dataservices.models import Dataservice
 from udata.harvest.models import HarvestJob
 from udata.i18n import lazy_gettext as _
-from udata.models import Activity, Discussion, Follow, Organization, Topic, Transfer, db
+from udata.models import Activity, Discussion, Follow, Organization, TopicElement, Transfer, db
 from udata.tasks import job
 
 from .constants import UPDATE_FREQUENCIES
@@ -44,7 +44,7 @@ def purge_datasets(self):
         Activity.objects(related_to=dataset).delete()
         # Remove topics' related dataset
         # FIXME: is is acceptable to have a broken reference inbetween? seems similar to other objects.
-        Topic.objects(elements__element=dataset).update(set__elements__S__element=None)
+        TopicElement.objects(element=dataset).update(element=None)
         # Remove dataservices related dataset
         for dataservice in Dataservice.objects(datasets=dataset):
             datasets = dataservice.datasets
