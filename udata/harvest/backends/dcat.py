@@ -344,7 +344,7 @@ class CswIso19139DcatBackend(DcatBackend):
 
     ISO_SCHEMA = "http://www.isotc211.org/2005/gmd"
 
-    XSL_URL = "https://raw.githubusercontent.com/SEMICeu/iso-19139-to-dcat-ap/master/iso-19139-to-dcat-ap.xsl"
+    XSL_URL = "https://raw.githubusercontent.com/datagouv/iso-19139-to-dcat-ap/patch-datagouv/iso-19139-to-dcat-ap.xsl"
 
     def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
         """

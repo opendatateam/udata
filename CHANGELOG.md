@@ -2,6 +2,19 @@
 
 ## Current (in progress)
 
+- Fix invalid resource format from harvested RDF records [#3354](https://github.com/opendatateam/udata/pull/3354)
+- Expose `dataset_id` for CommunityResource in /dataset/resource/id [#3258](https://github.com/opendatateam/udata/pull/3258)
+- Add a CI job to create a release on Sentry [#3266](https://github.com/opendatateam/udata/pull/3266)
+- Sort extensions in `/api/1/datasets/extensions/` response alphabetically [#3358](https://github.com/opendatateam/udata/pull/3358)
+
+## 10.5.0 (2025-07-02)
+
+- Allow temporal intervals with no start date [#3353](https://github.com/opendatateam/udata/pull/3353)
+- Fix removing schema by sending null [#3350](https://github.com/opendatateam/udata/pull/3350)
+- Use datagouv patched ISO-DCAT XSLT URL [#3351](https://github.com/opendatateam/udata/pull/3351)
+
+## 10.4.3 (2025-06-23)
+
 - Add access audience to dataservices [#3334](https://github.com/opendatateam/udata/pull/3334)
 - Lock the updates of the resources list [#3338](https://github.com/opendatateam/udata/pull/3338)
 - Expose permissions to cdata [#3336](https://github.com/opendatateam/udata/pull/3336)
