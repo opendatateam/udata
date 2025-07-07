@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Add config entry for ISO-DCAT XSLT URL [PR TODO]
 - Fix failing to return dataservice in harvest preview because of no ID for URL [#3357](https://github.com/opendatateam/udata/pull/3357/)
 - Fix invalid resource format from harvested RDF records [#3354](https://github.com/opendatateam/udata/pull/3354)
 - Expose `dataset_id` for CommunityResource in /dataset/resource/id [#3258](https://github.com/opendatateam/udata/pull/3258)
