@@ -213,6 +213,7 @@ def register_extensions(app):
         sitemap,
         tasks,
     )
+    from udata.core import proconnect
 
     cors.init_app(app)
     tasks.init_app(app)
@@ -227,6 +228,8 @@ def register_extensions(app):
     search.init_app(app)
     sitemap.init_app(app)
     sentry.init_app(app)
+    proconnect.init_app(app)
+
     return app
 
 

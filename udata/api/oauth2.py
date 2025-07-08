@@ -29,7 +29,7 @@ from authlib.oauth2.rfc6750 import BearerTokenValidator
 from authlib.oauth2.rfc7009 import RevocationEndpoint
 from authlib.oauth2.rfc7636 import CodeChallenge
 from bson import ObjectId
-from flask import current_app, render_template, request
+from flask import current_app, jsonify, render_template, request
 from flask_security.utils import verify_password
 from werkzeug.exceptions import Unauthorized
 
@@ -40,6 +40,7 @@ from udata.core.storages import default_image_basename, images
 from udata.i18n import I18nBlueprint
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
+from udata.utils import wants_json
 
 blueprint = I18nBlueprint("oauth", __name__, url_prefix="/oauth")
 oauth = AuthorizationServer()
@@ -313,8 +314,13 @@ def authorize(*args, **kwargs):
         except OAuth2Error as error:
             return error.error
         # Bypass authorization screen for internal clients
+        # It's not used right now…
         if grant.client.internal:
             return oauth.create_authorization_response(grant_user=current_user)
+
+        if wants_json():
+            return jsonify({"client": {"name": grant.client.name}, "scopes": ["default"]})
+
         return render_template("api/oauth_authorize.html", grant=grant)
     elif request.method == "POST":
         accept = "accept" in request.form
