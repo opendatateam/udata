@@ -485,6 +485,8 @@ class ResourceAPI(API):
             resource = get_by(dataset.resources, "id", rid)
         else:
             resource = CommunityResource.objects(id=rid).first()
+            if resource:
+                dataset = resource.dataset
         if not resource:
             apiv2.abort(404, "Resource does not exist")
 

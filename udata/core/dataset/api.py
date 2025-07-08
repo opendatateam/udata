@@ -890,7 +890,7 @@ class AllowedExtensionsAPI(API):
     @api.response(200, "Success", [str])
     def get(self):
         """List all allowed resources extensions"""
-        return current_app.config["ALLOWED_RESOURCES_EXTENSIONS"]
+        return sorted(current_app.config["ALLOWED_RESOURCES_EXTENSIONS"])
 
 
 @ns.route(
