@@ -353,7 +353,7 @@ class CswIso19139DcatBackend(DcatBackend):
         See https://github.com/SEMICeu/iso-19139-to-dcat-ap for more information on the XSLT.
         """
         # Load XSLT
-        xsl_url = current_app.config.get("HARVEST_ISO19139_XSL_URL")
+        xsl_url = current_app.config["HARVEST_ISO19139_XSL_URL"]
         xsl = ET.fromstring(self.get(xsl_url).content, parser=SAFE_PARSER)
         transform = ET.XSLT(xsl)
 
