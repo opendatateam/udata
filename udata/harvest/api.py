@@ -1,4 +1,4 @@
-from flask import current_app, request, url_for
+from flask import current_app, request
 from flask_login import current_user
 from werkzeug.exceptions import BadRequest
 
