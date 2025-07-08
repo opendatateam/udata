@@ -332,10 +332,10 @@ class DatasetsAtomFeedAPI(API):
             author_uri = None
             if dataset.organization:
                 author_name = dataset.organization.name
-                author_uri = dataset.organization.external_url
+                author_uri = dataset.organization.url_for()
             elif dataset.owner:
                 author_name = dataset.owner.fullname
-                author_uri = dataset.owner.external_url
+                author_uri = dataset.owner.url_for()
             feed.add_item(
                 dataset.title,
                 unique_id=dataset.id,
@@ -343,7 +343,7 @@ class DatasetsAtomFeedAPI(API):
                 content=md(dataset.description),
                 author_name=author_name,
                 author_link=author_uri,
-                link=dataset.external_url,
+                link=dataset.url_for(),
                 updateddate=dataset.last_modified,
                 pubdate=dataset.created_at,
             )
@@ -830,6 +830,7 @@ class DatasetSuggestAPI(API):
                     if dataset.owner
                     else None
                 ),
+                "page": dataset.self_web_url(),
             }
             for dataset in datasets.order_by(SUGGEST_SORTING).limit(args["size"])
         ]

@@ -1,10 +1,11 @@
 import logging
 from datetime import datetime
 
+from flask import url_for
 from flask_login import current_user
 
+from udata.core.linkable import Linkable
 from udata.core.spam.models import SpamMixin, spam_protected
-from udata.mail import get_mail_campaign_dict
 from udata.mongo import db
 
 from .signals import on_discussion_closed, on_new_discussion, on_new_discussion_comment
@@ -46,7 +47,7 @@ class Message(SpamMixin, db.EmbeddedDocument):
     def spam_report_message(self, breadcrumb):
         message = "Spam potentiel dans le message"
         if self.posted_by_org_or_user:
-            message += f" de [{self.posted_by_name}]({self.posted_by_org_or_user.external_url})"
+            message += f" de [{self.posted_by_name}]({self.posted_by_org_or_user.url_for()})"
 
         if len(breadcrumb) != 2:
             log.warning(
@@ -63,11 +64,11 @@ class Message(SpamMixin, db.EmbeddedDocument):
             )
             return message
 
-        message += f" sur la discussion « [{discussion.title}]({discussion.external_url}) »"
+        message += f" sur la discussion « [{discussion.title}]({discussion.url_for()}) »"
         return message
 
 
-class Discussion(SpamMixin, db.Document):
+class Discussion(SpamMixin, Linkable, db.Document):
     user = db.ReferenceField("User")
     organization = db.ReferenceField("Organization")
 
@@ -145,21 +146,16 @@ class Discussion(SpamMixin, db.Document):
 
         return OwnablePermission(self.subject).can()
 
-    @property
-    def external_url(self):
-        return self.subject.url_for(_anchor="discussion-{id}".format(id=self.id), _external=True)
+    def self_web_url(self, **kwargs):
+        return self.subject.self_web_url(append="/discussions", discussion_id=self.id, **kwargs)
 
-    @property
-    def external_url_with_campaign(self):
-        extras = get_mail_campaign_dict()
-        return self.subject.url_for(
-            _anchor="discussion-{id}".format(id=self.id), _external=True, **extras
-        )
+    def self_api_url(self, **kwargs):
+        return url_for("api.discussion", id=self.id, **self._self_api_url_kwargs(**kwargs))
 
     def spam_report_message(self, breadcrumb):
-        message = f"Spam potentiel sur la discussion « [{self.title}]({self.external_url}) »"
+        message = f"Spam potentiel sur la discussion « [{self.title}]({self.url_for()}) »"
         if self.user:
-            message += f" de [{self.user.fullname}]({self.user.external_url})"
+            message += f" de [{self.user.fullname}]({self.user.url_for()})"
 
         return message
 

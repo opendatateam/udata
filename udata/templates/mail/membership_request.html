@@ -8,14 +8,14 @@
 {{ _('As an administrator of "%(org)s" you are being informed than a new membership request from %(user)s is pending for validation',
     user=(
         '<a href="'|safe
-        + request.user.external_url_with_campaign
+        + request.user.url_for(_mailCampaign=True)
         + '">'|safe
         + request.user.fullname
         + '</a>'|safe
     ),
     org=(
         '<a href="'|safe
-        + org.external_url_with_campaign
+        + org.url_for(_mailCampaign=True)
         + '">'|safe
         + org.name
         + '</a>'|safe
@@ -38,7 +38,7 @@
         <td align="center">
             {{ mail_button(
                 _('See the request'),
-                url_for('admin.index', path='organization/{id}/'.format(id=org.id), _anchor='membership-requests', _external=True, **extras)
+                cdata_url(f"/admin/organizations/{org.slug}/members")
             ) }}
         </td>
     </tr>
