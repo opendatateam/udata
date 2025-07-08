@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 10.6.0 (2025-07-08)
 
 - Add config entry for ISO-DCAT XSLT URL [#3360](https://github.com/opendatateam/udata/pull/3360)
 - Fix failing to return dataservice in harvest preview because of no ID for URL [#3357](https://github.com/opendatateam/udata/pull/3357/)
