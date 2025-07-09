@@ -82,7 +82,7 @@ class OrgApiParser(ModelApiParser):
             location="args",
         )
         self.parser.add_argument(
-            "siret",
+            "business_number_id",
             type=str,
             location="args",
         )
