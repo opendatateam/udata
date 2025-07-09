@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Refactor how to get URLs to the cdata front-end, need to set the `CDATA_BASE_URL` env variable (removal of `endpoint_for()`, `fields.UrlFor()`, `display_url`, `external_url` and `external_url_with_campaign`) [#3345](https://github.com/opendatateam/udata/pull/3345)
 
 ## 10.6.0 (2025-07-08)
 
