@@ -20,6 +20,7 @@ from udata.api_fields import field
 from udata.app import cache
 from udata.core import storages
 from udata.core.activity.models import Auditable
+from udata.core.dataset.preview import TabularAPIPreview
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.owned import Owned, OwnedQuerySet
@@ -47,7 +48,6 @@ from .exceptions import (
     SchemasCacheUnavailableException,
     SchemasCatalogNotFoundException,
 )
-from .preview import get_preview_url
 
 __all__ = (
     "License",
@@ -393,9 +393,9 @@ class ResourceMixin(object):
         if not self.urlhash or "url" in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
 
-    @cached_property  # Accessed at least 2 times in front rendering
+    @property
     def preview_url(self):
-        return get_preview_url(self)
+        return TabularAPIPreview().preview_url(self)
 
     @property
     def closed_or_no_format(self):
