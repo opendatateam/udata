@@ -4,6 +4,7 @@
 
 - Add name and siret filters for orgs [#3362](https://github.com/opendatateam/udata/pull/3362)
 - Refactor how to get URLs to the cdata front-end, need to set the `CDATA_BASE_URL` env variable (removal of `endpoint_for()`, `fields.UrlFor()`, `display_url`, `external_url` and `external_url_with_campaign`) [#3345](https://github.com/opendatateam/udata/pull/3345)
+- Add back preview_url from tabular API (remove the PreviewPlugin system) [#3364](https://github.com/opendatateam/udata/pull/3364)
 - Do not crash on invalid schemas API JSON [#3363](https://github.com/opendatateam/udata/pull/3363/)
 
 ## 10.6.0 (2025-07-08)

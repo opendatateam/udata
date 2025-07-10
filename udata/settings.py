@@ -582,6 +582,9 @@ class Defaults(object):
     ###########################################################################
     TABULAR_API_DATASERVICE_ID = None
 
+    TABULAR_EXPLORE_URL = None
+    TABULAR_ALLOW_REMOTE = True
+
     # JSON-LD settings
     ###########################################################################
     MAX_RESOURCES_IN_JSON_LD = 20
