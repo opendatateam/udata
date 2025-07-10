@@ -76,6 +76,16 @@ class OrgApiParser(ModelApiParser):
             choices=list(Organization.__badges__),
             location="args",
         )
+        self.parser.add_argument(
+            "name",
+            type=str,
+            location="args",
+        )
+        self.parser.add_argument(
+            "business_number_id",
+            type=str,
+            location="args",
+        )
 
     @staticmethod
     def parse_filters(organizations, args):
@@ -88,6 +98,10 @@ class OrgApiParser(ModelApiParser):
             organizations = organizations.search_text(phrase_query)
         if args.get("badge"):
             organizations = organizations.with_badge(args["badge"])
+        if args.get("name"):
+            organizations = organizations.filter(name=args["name"])
+        if args.get("business_number_id"):
+            organizations = organizations.filter(business_number_id=args["business_number_id"])
         return organizations
 
 
