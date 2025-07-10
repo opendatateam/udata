@@ -46,29 +46,23 @@ class UDataQuerySet(BaseQuerySet):
         data = self.in_bulk(ids)
         return [data[id] for id in ids]
 
-    def get_or_create(self, write_concern=None, auto_save=True, *q_objs, **query):
-        """Retrieve unique object or create, if it doesn't exist.
+    def get_or_create(self, **query):
+        """
+        Atomically retrieve or create a document using findAndModify (modify in MongoEngine).
 
-        Returns a tuple of ``(object, created)``, where ``object`` is
-        the retrieved or created object and ``created`` is a boolean
-        specifying whether a new object was created.
-
-        Taken back from:
-
-        https://github.com/MongoEngine/mongoengine/
-        pull/1029/files#diff-05c70acbd0634d6d05e4a6e3a9b7d66b
+        Returns:
+            tuple: (document, created)
         """
         defaults = query.pop("defaults", {})
-        try:
-            doc = self.get(*q_objs, **query)
-            return doc, False
-        except self._document.DoesNotExist:
-            query.update(defaults)
-            doc = self._document(**query)
 
-            if auto_save:
-                doc.save(write_concern=write_concern)
-            return doc, True
+        update_fields = {f"set__{k}": v for k, v in defaults.items()}
+        existing_doc_before_upsert = self.modify(
+            upsert=True,
+            **query,
+            **update_fields,
+        )
+
+        return self.get(**query), existing_doc_before_upsert is None
 
     def generic_in(self, **kwargs):
         """Bypass buggy GenericReferenceField querying issue"""
