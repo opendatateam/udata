@@ -53,9 +53,9 @@ class UDataQuerySet(BaseQuerySet):
         Returns:
             tuple: (document, created)
         """
-        defaults = query.pop("defaults", {})
+        updates = query.pop("updates", {})
 
-        update_fields = {f"set__{k}": v for k, v in defaults.items()}
+        update_fields = {f"set__{k}": v for k, v in updates.items()}
         existing_doc_before_upsert = self.modify(
             upsert=True,
             **query,
