@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from xml.etree.ElementTree import XML
 
 import feedparser
@@ -710,19 +710,19 @@ class DataserviceRdfViewsTest:
 
 class DataservicesFeedAPItest(APITestCase):
     def test_recent_feed(self):
-        dataservices = [DataserviceFactory() for i in range(3)]
+        DataserviceFactory(title="A", created_at=datetime.utcnow())
+        DataserviceFactory(title="B", created_at=datetime.utcnow() - timedelta(days=2))
+        DataserviceFactory(title="C", created_at=datetime.utcnow() - timedelta(days=1))
 
         response = self.get(url_for("api.recent_dataservices_atom_feed"))
-
         self.assert200(response)
 
         feed = feedparser.parse(response.data)
 
-        self.assertEqual(len(feed.entries), len(dataservices))
-        for i in range(1, len(feed.entries)):
-            published_date = feed.entries[i].published_parsed
-            prev_published_date = feed.entries[i - 1].published_parsed
-            self.assertGreaterEqual(prev_published_date, published_date)
+        self.assertEqual(len(feed.entries), 3)
+        self.assertEqual(feed.entries[0].title, "A")
+        self.assertEqual(feed.entries[1].title, "C")
+        self.assertEqual(feed.entries[2].title, "B")
 
     def test_recent_feed_owner(self):
         owner = UserFactory()
