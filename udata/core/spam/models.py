@@ -66,8 +66,8 @@ class SpamMixin(object):
         if not self.spam:
             self.spam = SpamInfo(status=NOT_CHECKED, callbacks={})
 
-        if self.spam_is_whitelisted():
-            return
+        # if self.spam_is_whitelisted():
+        #     return
 
         # The breadcrumb is useful during reporting to know where we came from
         # in case of a potential spam inside an embed.
