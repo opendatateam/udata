@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Add name and siret filters for orgs [#3362](https://github.com/opendatateam/udata/pull/3362)
 - Refactor how to get URLs to the cdata front-end, need to set the `CDATA_BASE_URL` env variable (removal of `endpoint_for()`, `fields.UrlFor()`, `display_url`, `external_url` and `external_url_with_campaign`) [#3345](https://github.com/opendatateam/udata/pull/3345)
 - Do not crash on invalid schemas API JSON [#3363](https://github.com/opendatateam/udata/pull/3363/)
 
