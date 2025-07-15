@@ -2,6 +2,7 @@ import logging
 
 from bson import DBRef, ObjectId
 from flask_mongoengine import BaseQuerySet
+from mongoengine.signals import post_save
 
 from udata.utils import Paginable
 
@@ -56,14 +57,18 @@ class UDataQuerySet(BaseQuerySet):
         updates = query.pop("updates", {})
         update_fields = {f"set__{k}": v for k, v in updates.items()}
 
-        print(update_fields)
         existing_doc_before_upsert = self.filter(**query).modify(
             upsert=True,
             **query,
             **update_fields,
         )
 
-        return self.get(**query), existing_doc_before_upsert is None
+        document = self.get(**query)
+        created = existing_doc_before_upsert is None
+        if created:
+            post_save.send(document.__class__, document=document)
+
+        return document, created
 
     def generic_in(self, **kwargs):
         """Bypass buggy GenericReferenceField querying issue"""
