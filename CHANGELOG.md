@@ -2,10 +2,23 @@
 
 ## Current (in progress)
 
+- Add name and siret filters for orgs [#3362](https://github.com/opendatateam/udata/pull/3362)
+- Refactor how to get URLs to the cdata front-end, need to set the `CDATA_BASE_URL` env variable (removal of `endpoint_for()`, `fields.UrlFor()`, `display_url`, `external_url` and `external_url_with_campaign`) [#3345](https://github.com/opendatateam/udata/pull/3345)
+- Add back preview_url from tabular API (remove the PreviewPlugin system) [#3364](https://github.com/opendatateam/udata/pull/3364)
+- Do not crash on invalid schemas API JSON [#3363](https://github.com/opendatateam/udata/pull/3363/)
+- Fix flaky test on timed recent Atom feeds [#3365](https://github.com/opendatateam/udata/pull/3365)
+- Allow to remove checksum from resource [#3369](https://github.com/opendatateam/udata/pull/3369)
+
+## 10.6.0 (2025-07-08)
+
+- Add config entry for ISO-DCAT XSLT URL [#3360](https://github.com/opendatateam/udata/pull/3360)
+- Fix failing to return dataservice in harvest preview because of no ID for URL [#3357](https://github.com/opendatateam/udata/pull/3357/)
 - Fix invalid resource format from harvested RDF records [#3354](https://github.com/opendatateam/udata/pull/3354)
 - Expose `dataset_id` for CommunityResource in /dataset/resource/id [#3258](https://github.com/opendatateam/udata/pull/3258)
 - Add a CI job to create a release on Sentry [#3266](https://github.com/opendatateam/udata/pull/3266)
 - Sort extensions in `/api/1/datasets/extensions/` response alphabetically [#3358](https://github.com/opendatateam/udata/pull/3358)
+- Migrate recommendations tasks, [udata-recommendations](https://github.com/opendatateam/udata-recommendations/) is no longer required [#3355](https://github.com/opendatateam/udata/pull/3355)
+- Migrate udata-transport tasks, [udata-transport](https://github.com/opendatateam/udata-transport/) is no longer required [#3355](https://github.com/opendatateam/udata/pull/3355)
 
 ## 10.5.0 (2025-07-02)
 

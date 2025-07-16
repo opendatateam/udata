@@ -49,10 +49,11 @@ class OrganizationAPITest:
 
     def test_organization_api_list_with_filters(self, api):
         """It should filter the organization list"""
-        _org = OrganizationFactory()
+        org = OrganizationFactory(business_number_id="13002526500013")
         org_public_service = OrganizationFactory()
         org_public_service.add_badge(org_constants.PUBLIC_SERVICE)
 
+        #### Badges ####
         response = api.get(url_for("api.organizations", badge=org_constants.PUBLIC_SERVICE))
         assert200(response)
         assert len(response.json["data"]) == 1
@@ -60,6 +61,27 @@ class OrganizationAPITest:
 
         response = api.get(url_for("api.organizations", badge="bad-badge"))
         assert400(response)
+
+        #### Name ####
+        response = api.get(url_for("api.organizations", name=org.name))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(org.id)
+
+        response = api.get(url_for("api.organizations", name="Some other name"))
+        assert200(response)
+        assert len(response.json["data"]) == 0
+
+        #### SIRET ####
+        response = api.get(url_for("api.organizations", business_number_id=org.business_number_id))
+        assert200(response)
+        print(response.json["data"])
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(org.id)
+
+        response = api.get(url_for("api.organizations", business_number_id="xxx"))
+        assert200(response)
+        assert len(response.json["data"]) == 0
 
     def test_organization_role_api_get(self, api):
         """It should fetch an organization's roles list from the API"""

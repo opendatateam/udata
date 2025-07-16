@@ -11,5 +11,5 @@
 {{ _('Title') }}: {{ discussion.title }}
 
 {{ _('You can see the discussion on this page:') }}
-{{ discussion.subject.external_url_with_campaign }}
+{{ discussion.subject.url_for(_mailCampaign=True) }}
 {% endblock %}

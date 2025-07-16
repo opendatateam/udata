@@ -48,15 +48,15 @@ post_fields = api.model(
         ),
         "published": fields.ISODateTime(description="The post publication date", readonly=True),
         "body_type": fields.String(description="HTML or markdown body type", default="markdown"),
-        "uri": fields.UrlFor(
-            "api.post", lambda o: {"post": o}, description="The post API URI", readonly=True
-        ),
-        "page": fields.UrlFor(
-            "posts.show",
-            lambda o: {"post": o},
-            description="The post page URL",
+        "uri": fields.String(
+            attribute=lambda p: p.self_api_url(),
+            description="The API URI for this post",
             readonly=True,
-            fallback_endpoint="api.post",
+        ),
+        "page": fields.String(
+            attribute=lambda p: p.self_web_url(),
+            description="The post web page URL",
+            readonly=True,
         ),
     },
     mask="*,datasets{id,title,acronym,uri,page},reuses{id,title,image,image_thumbnail,uri,page}",
@@ -130,7 +130,7 @@ class PostsAtomFeedAPI(API):
                 description=post.headline,
                 content=md(post.content),
                 author_name="data.gouv.fr",
-                link=post.external_url,
+                link=post.url_for(),
                 updateddate=post.last_modified,
                 pubdate=post.published,
             )

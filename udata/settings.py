@@ -24,6 +24,8 @@ class Defaults(object):
     CONTACT_EMAIL = "contact@example.org"
     TERRITORIES_EMAIL = "territories@example.org"
 
+    CDATA_BASE_URL = None
+
     MONGODB_HOST = "mongodb://localhost:27017/udata"
     MONGODB_CONNECT = False  # Lazy connexion for Fork-safe usage
 
@@ -281,6 +283,8 @@ class Defaults(object):
     HARVEST_GRAPHS_S3_BUCKET = None  # If the catalog is bigger than `HARVEST_MAX_CATALOG_SIZE_IN_MONGO` store the graph inside S3 instead of MongoDB
     HARVEST_GRAPHS_S3_FILENAME_PREFIX = ""  # Useful to store the graphs inside a subfolder of the bucket. For example by setting `HARVEST_GRAPHS_S3_FILENAME_PREFIX = 'graphs/'`
 
+    HARVEST_ISO19139_XSL_URL = "https://raw.githubusercontent.com/SEMICeu/iso-19139-to-dcat-ap/refs/heads/geodcat-ap-2.0.0/iso-19139-to-dcat-ap.xsl"
+
     # S3 connection details
     S3_URL = None
     S3_ACCESS_KEY_ID = None
@@ -508,6 +512,10 @@ class Defaults(object):
     ARCHIVE_COMMENT_USER_ID = None
     ARCHIVE_COMMENT_TITLE = _("This dataset has been archived")
 
+    # Transport extras
+    ##################
+    TRANSPORT_DATASETS_URL = None
+
     # Schemas parameters
     ####################
     SCHEMA_CATALOG_URL = None
@@ -515,6 +523,10 @@ class Defaults(object):
     API_DOC_EXTERNAL_LINK = (
         "https://guides.data.gouv.fr/publier-des-donnees/guide-data.gouv.fr/api/reference"
     )
+
+    # Dataset recommendations
+    #########################
+    RECOMMENDATIONS_SOURCES = {}
 
     # Read Only Mode
     ####################
@@ -569,6 +581,9 @@ class Defaults(object):
     # Tabular API Dataservice ID
     ###########################################################################
     TABULAR_API_DATASERVICE_ID = None
+
+    TABULAR_EXPLORE_URL = None
+    TABULAR_ALLOW_REMOTE = True
 
     # JSON-LD settings
     ###########################################################################

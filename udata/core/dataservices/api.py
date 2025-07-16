@@ -63,19 +63,17 @@ class DataservicesAtomFeedAPI(API):
         )
 
         dataservices: List[Dataservice] = (
-            Dataservice.objects.visible()
-            .order_by("-created_at_internal")
-            .limit(current_site.feed_size)
+            Dataservice.objects.visible().order_by("-created_at").limit(current_site.feed_size)
         )
         for dataservice in dataservices:
             author_name = None
             author_uri = None
             if dataservice.organization:
                 author_name = dataservice.organization.name
-                author_uri = dataservice.organization.external_url
+                author_uri = dataservice.organization.url_for()
             elif dataservice.owner:
                 author_name = dataservice.owner.fullname
-                author_uri = dataservice.owner.external_url
+                author_uri = dataservice.owner.url_for()
             feed.add_item(
                 dataservice.title,
                 unique_id=dataservice.id,
@@ -83,7 +81,7 @@ class DataservicesAtomFeedAPI(API):
                 content=md(dataservice.description),
                 author_name=author_name,
                 author_link=author_uri,
-                link=dataservice.url_for(external=True),
+                link=dataservice.url_for(),
                 updateddate=dataservice.metadata_modified_at,
                 pubdate=dataservice.created_at,
             )

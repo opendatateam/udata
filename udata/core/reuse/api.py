@@ -150,10 +150,10 @@ class ReusesAtomFeedAPI(API):
             author_uri = None
             if reuse.organization:
                 author_name = reuse.organization.name
-                author_uri = reuse.organization.external_url
+                author_uri = reuse.organization.url_for()
             elif reuse.owner:
                 author_name = reuse.owner.fullname
-                author_uri = reuse.owner.external_url
+                author_uri = reuse.owner.url_for()
             feed.add_item(
                 reuse.title,
                 unique_id=reuse.id,
@@ -161,7 +161,7 @@ class ReusesAtomFeedAPI(API):
                 content=md(reuse.description),
                 author_name=author_name,
                 author_link=author_uri,
-                link=reuse.external_url,
+                link=reuse.url_for(),
                 updateddate=reuse.last_modified,
                 pubdate=reuse.created_at,
             )
@@ -320,6 +320,7 @@ class ReusesSuggestAPI(API):
                 "title": reuse.title,
                 "slug": reuse.slug,
                 "image_url": reuse.image,
+                "page": reuse.self_web_url(),
             }
             for reuse in reuses.order_by(SUGGEST_SORTING).limit(args["size"])
         ]

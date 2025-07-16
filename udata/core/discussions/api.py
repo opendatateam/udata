@@ -74,7 +74,9 @@ discussion_fields = api.model(
             description="The organization who closed the discussion",
         ),
         "discussion": fields.Nested(message_fields),
-        "url": fields.UrlFor("api.discussion", description="The discussion API URI"),
+        "url": fields.String(
+            attribute=lambda d: d.self_api_url(), description="The discussion API URI"
+        ),
         "extras": fields.Raw(description="Extra attributes as key-value pairs"),
         "spam": fields.Nested(spam_fields),
         "permissions": fields.Nested(discussion_permissions_fields),

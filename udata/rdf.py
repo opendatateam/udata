@@ -29,7 +29,6 @@ from udata.frontend.markdown import parse_html
 from udata.models import Schema
 from udata.mongo.errors import FieldValidationError
 from udata.tags import slug as slugify_tag
-from udata.uris import endpoint_for
 
 log = logging.getLogger(__name__)
 
@@ -367,7 +366,7 @@ def contact_points_to_rdf(contacts, graph=None):
     for contact in contacts:
         if contact.id:
             id = URIRef(
-                endpoint_for(
+                url_for(
                     "api.contact_point",
                     contact_point=contact.id,
                     _external=True,

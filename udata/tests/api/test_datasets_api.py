@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 from uuid import uuid4
 
@@ -1276,19 +1276,29 @@ class DatasetAPITest(APITestCase):
 
 class DatasetsFeedAPItest(APITestCase):
     def test_recent_feed(self):
-        datasets = [DatasetFactory(resources=[ResourceFactory()]) for i in range(3)]
+        DatasetFactory(
+            title="A", resources=[ResourceFactory()], created_at_internal=datetime.utcnow()
+        )
+        DatasetFactory(
+            title="B",
+            resources=[ResourceFactory()],
+            created_at_internal=datetime.utcnow() - timedelta(days=2),
+        )
+        DatasetFactory(
+            title="C",
+            resources=[ResourceFactory()],
+            created_at_internal=datetime.utcnow() - timedelta(days=1),
+        )
 
         response = self.get(url_for("api.recent_datasets_atom_feed"))
-
         self.assert200(response)
 
         feed = feedparser.parse(response.data)
 
-        self.assertEqual(len(feed.entries), len(datasets))
-        for i in range(1, len(feed.entries)):
-            published_date = feed.entries[i].published_parsed
-            prev_published_date = feed.entries[i - 1].published_parsed
-            self.assertGreaterEqual(prev_published_date, published_date)
+        self.assertEqual(len(feed.entries), 3)
+        self.assertEqual(feed.entries[0].title, "A")
+        self.assertEqual(feed.entries[1].title, "C")
+        self.assertEqual(feed.entries[2].title, "B")
 
     def test_recent_feed_owner(self):
         owner = UserFactory()
@@ -1305,7 +1315,7 @@ class DatasetsFeedAPItest(APITestCase):
         self.assertEqual(len(entry.authors), 1)
         author = entry.authors[0]
         self.assertEqual(author.name, owner.fullname)
-        self.assertEqual(author.href, owner.external_url)
+        self.assertEqual(author.href, owner.url_for())
 
     def test_recent_feed_org(self):
         owner = UserFactory()
@@ -1323,7 +1333,7 @@ class DatasetsFeedAPItest(APITestCase):
         self.assertEqual(len(entry.authors), 1)
         author = entry.authors[0]
         self.assertEqual(author.name, org.name)
-        self.assertEqual(author.href, org.external_url)
+        self.assertEqual(author.href, org.url_for())
 
 
 class DatasetBadgeAPITest(APITestCase):

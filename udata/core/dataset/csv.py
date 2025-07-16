@@ -19,7 +19,7 @@ class DatasetCsvAdapter(csv.Adapter):
         "title",
         "slug",
         "acronym",
-        ("url", "external_url"),
+        ("url", lambda d: d.url_for()),
         ("organization", "organization.name"),
         ("organization_id", "organization.id"),
         ("owner", "owner.slug"),  # in case it's owned by a user, or introduce 'owner_type'?
@@ -63,7 +63,7 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
         dataset_field("id"),
         dataset_field("title"),
         dataset_field("slug"),
-        dataset_field("url", "external_url"),
+        dataset_field("url", lambda r: r.url_for()),
         dataset_field("organization", lambda r: r.organization.name if r.organization else None),
         dataset_field(
             "organization_id", lambda r: str(r.organization.id) if r.organization else None
