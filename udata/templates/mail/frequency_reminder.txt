@@ -11,7 +11,7 @@
     dataset_frequency=dataset.frequency_str,
     due_update_days=dataset.outdated.days) }}
   {{ _('You can update the dataset and associated resources at:') }}
-  {{ cdata_url(f"/admin/datasets/{dataset.slug}/") }}
+  {{ cdata_url('/admin/datasets/' ~ dataset.slug ~ '/') }}
 
 {% endfor %}
 

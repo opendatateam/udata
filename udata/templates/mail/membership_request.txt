@@ -8,5 +8,5 @@
 
 
 {{ _('You can go on your organization backoffice to accept or refuse the request') }}:
-{{ cdata_url(f"/admin/organizations/{org.slug}/members") }}
+{{ cdata_url('/admin/organizations/' ~ org.slug ~ '/members/') }}
 {% endblock %}
