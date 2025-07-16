@@ -603,6 +603,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
 
     __metrics_keys__ = [
         "discussions",
+        "discussions_open",
         "reuses",
         "reuses_by_months",
         "followers",

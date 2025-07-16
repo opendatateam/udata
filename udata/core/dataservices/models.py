@@ -288,6 +288,7 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
 
     __metrics_keys__ = [
         "discussions",
+        "discussions_open",
         "followers",
         "followers_by_months",
         "views",

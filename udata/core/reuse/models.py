@@ -151,6 +151,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
 
     __metrics_keys__ = [
         "discussions",
+        "discussions_open",
         "datasets",
         "followers",
         "followers_by_months",
