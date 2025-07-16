@@ -8,6 +8,7 @@
 - Do not crash on invalid schemas API JSON [#3363](https://github.com/opendatateam/udata/pull/3363/)
 - Fix flaky test on timed recent Atom feeds [#3365](https://github.com/opendatateam/udata/pull/3365)
 - Allow to remove checksum from resource [#3369](https://github.com/opendatateam/udata/pull/3369)
+- Separate metrics for opened discussions [#3370](https://github.com/opendatateam/udata/pull/3370)
 
 ## 10.6.0 (2025-07-08)
 
