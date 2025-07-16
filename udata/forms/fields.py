@@ -481,7 +481,6 @@ class ModelField(Field):
             return
         specs = valuelist[0]
 
-        # FIXME: always rely on short name?
         try:
             model_field = getattr(self._form.model_class, self.name)
         # Handle the case where the field it is not fetchable in the model via self.name
