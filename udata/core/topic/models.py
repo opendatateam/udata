@@ -13,7 +13,6 @@ __all__ = ("Topic", "TopicElement")
 
 
 class TopicElement(db.Document):
-    id = field(db.AutoUUIDField(primary_key=True))
     title = field(db.StringField(required=False))
     description = field(db.StringField(required=False))
     tags = field(db.ListField(db.StringField()))
@@ -41,7 +40,9 @@ class Topic(db.Datetimed, Auditable, db.Document, Owned):
     color = field(db.IntField())
 
     elements = field(
-        db.ListField(db.LazyReferenceField("TopicElement", reverse_delete_rule=db.PULL))
+        db.ListField(
+            db.LazyReferenceField("TopicElement", reverse_delete_rule=db.PULL, passthrough=True)
+        )
     )
 
     featured = field(db.BooleanField(default=False), auditable=False)
