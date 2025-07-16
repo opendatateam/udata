@@ -17,6 +17,10 @@ class TopicElementForm(ModelForm):
     element = fields.ModelField(_("Element"))
 
     def validate(self, extra_validators=None):
+        """
+        Make sure that either title or element is set.
+        (Empty nested element is a valid use case for "placeholder" elements)
+        """
         validation = super().validate(extra_validators)
         if not self.element.data and not self.title.data:
             self.element.errors.append(_("A topic element must have a title or an element."))
