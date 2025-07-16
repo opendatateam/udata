@@ -331,6 +331,7 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
     if frequency:
         d.set(DCT.accrualPeriodicity, frequency)
 
+    # FIXME: owner should map to rightsHolder instead of publisher?
     owner_role = DCT.publisher
     if any(contact_point.role == "publisher" for contact_point in dataset.contact_points):
         # There's already a publisher, so the owner should instead be a distributor.

@@ -130,15 +130,31 @@ TAG_TO_EU_HVD_CATEGORIES = {slugify_tag(EU_HVD_CATEGORIES[uri]): uri for uri in 
 
 AGENT_ROLE_TO_RDF_PREDICATE = {
     "contact": DCAT.contactPoint,
-    "publisher": DCT.publisher,
     "creator": DCT.creator,
+    "publisher": DCT.publisher,
+    "rightsHolder": DCT.rightsHolder,
+    "custodian": GEODCAT.custodian,
+    "distributor": GEODCAT.distributor,
+    "originator": GEODCAT.originator,
+    "principalInvestigator": GEODCAT.principalInvestigator,
+    "processor": GEODCAT.processor,
+    "resourceProvider": GEODCAT.resourceProvider,
+    "user": GEODCAT.user,
 }
 
 # Map rdf contact point entity to role
 CONTACT_POINT_ENTITY_TO_ROLE = {
     DCAT.contactPoint: "contact",
-    DCT.publisher: "publisher",
     DCT.creator: "creator",
+    DCT.publisher: "publisher",
+    DCT.rightsHolder: "rightsHolder",
+    GEODCAT.custodian: "custodian",
+    GEODCAT.distributor: "distributor",
+    GEODCAT.originator: "originator",
+    GEODCAT.principalInvestigator: "principalInvestigator",
+    GEODCAT.processor: "processor",
+    GEODCAT.resourceProvider: "resourceProvider",
+    GEODCAT.user: "user",
 }
 
 
@@ -309,6 +325,8 @@ def themes_from_rdf(rdf):
 
 
 def contact_points_from_rdf(rdf, prop, role, dataset):
+    if not dataset.organization and not dataset.owner:
+        return
     for contact_point in rdf.objects(prop):
         # Read contact point information
         if isinstance(contact_point, Literal):
@@ -340,8 +358,6 @@ def contact_points_from_rdf(rdf, prop, role, dataset):
         #         continue
 
         # Create of get contact point object
-        if not dataset.organization and not dataset.owner:
-            continue
         org_or_owner = {}
         if dataset.organization:
             org_or_owner = {"organization": dataset.organization}
@@ -376,14 +392,24 @@ def contact_points_to_rdf(contacts, graph=None):
             id = BNode()
 
         node = graph.resource(id)
-        node.set(RDF.type, VCARD.Kind)
-        if contact.name:
-            node.set(VCARD.fn, Literal(contact.name))
-        if contact.email:
-            node.set(VCARD.hasEmail, URIRef(f"mailto:{contact.email}"))
-        if contact.contact_form:
-            node.set(VCARD.hasUrl, URIRef(contact.contact_form))
-        yield node, AGENT_ROLE_TO_RDF_PREDICATE.get(contact.role, DCAT.contactPoint)
+        role = AGENT_ROLE_TO_RDF_PREDICATE.get(contact.role, DCAT.contactPoint)
+        # TODO: we could use user_to_rdf/organization_to_rdf if ContactPoint was typed
+        if role == DCAT.contactPoint:
+            node.set(RDF.type, VCARD.Kind)
+            if contact.name:
+                node.set(VCARD.fn, Literal(contact.name))
+            if contact.email:
+                node.set(VCARD.hasEmail, URIRef(f"mailto:{contact.email}"))
+            if contact.contact_form:
+                node.set(VCARD.hasUrl, URIRef(contact.contact_form))
+        else:
+            node.set(RDF.type, FOAF.Agent)
+            node.set(FOAF.name, Literal(contact.name))
+            if contact.email:
+                node.set(FOAF.mbox, URIRef(f"mailto:{contact.email}"))
+            # FIXME: contact_form mapping?
+
+        yield node, role
 
 
 def primary_topic_identifier_from_rdf(graph: Graph, resource: RdfResource):
