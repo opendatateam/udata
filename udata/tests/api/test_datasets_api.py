@@ -1250,6 +1250,11 @@ class DatasetAPITest(APITestCase):
             "version": None,
         }
 
+        # Empty dataset (no resources)
+        empty_dataset = Dataset.objects.create(title="test", resources=None)
+        response = self.get(url_for("apiv2.dataset_schemas", dataset=empty_dataset))
+        assert len(response.json) == 0
+
     def test_remove_schema(self):
         self.login(AdminFactory())
         resource = ResourceFactory(schema={"name": "etalab/schema-irve-statique"})
