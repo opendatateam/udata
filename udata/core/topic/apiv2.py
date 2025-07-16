@@ -1,6 +1,7 @@
 import logging
 
 import mongoengine
+from bson import ObjectId
 from flask import request
 from flask_security import current_user
 
@@ -163,7 +164,7 @@ class TopicElementsAPI(API):
 
 
 @ns.route(
-    "/<topic:topic>/elements/<uuid:element_id>/",
+    "/<topic:topic>/elements/<element_id>/",
     endpoint="topic_element",
     doc={"params": {"topic": "The topic ID", "element": "The element ID"}},
 )
@@ -177,7 +178,7 @@ class TopicElementAPI(API):
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
 
-        element = get_by(topic.elements, "id", element_id)
+        element = get_by(topic.elements, "pk", ObjectId(element_id))
         if not element:
             apiv2.abort(404, "Element not found in topic")
 
@@ -198,7 +199,7 @@ class TopicElementAPI(API):
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
 
-        element_ref = get_by(topic.elements, "id", element_id)
+        element_ref = get_by(topic.elements, "pk", ObjectId(element_id))
         if not element_ref:
             apiv2.abort(404, "Element not found in topic")
 
