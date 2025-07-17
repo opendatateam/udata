@@ -305,6 +305,17 @@ def revoke_token():
     return oauth.create_endpoint_response(RevokeToken.ENDPOINT_NAME)
 
 
+@blueprint.route("/client_info", methods=["GET"])
+@login_required
+def client_info(*args, **kwargs):
+    try:
+        grant = oauth.get_consent_grant(end_user=current_user)
+    except OAuth2Error as error:
+        return error.error
+
+    return jsonify({"client": {"name": grant.client.name}, "scopes": ["default"]})
+
+
 @blueprint.route("/authorize", methods=["GET", "POST"])
 @login_required
 def authorize(*args, **kwargs):
