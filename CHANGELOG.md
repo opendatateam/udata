@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Change CSW harvesters XML processor from lxml to saxonche [#3380](https://github.com/opendatateam/udata/pull/3380)
+- Convert security views to cdata [#3348](https://github.com/opendatateam/udata/pull/3348/)
 
 ## 10.9.0 (2025-08-28)
 
