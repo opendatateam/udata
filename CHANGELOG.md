@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Remove placeholder Jinja filter [#3372](https://github.com/opendatateam/udata/pull/3372/)
 
 ## 10.7.0 (2025-07-17)
 
