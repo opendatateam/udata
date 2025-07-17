@@ -29,7 +29,7 @@ from authlib.oauth2.rfc6750 import BearerTokenValidator
 from authlib.oauth2.rfc7009 import RevocationEndpoint
 from authlib.oauth2.rfc7636 import CodeChallenge
 from bson import ObjectId
-from flask import current_app, jsonify, render_template, request
+from flask import abort, current_app, jsonify, render_template, request
 from flask_security.utils import verify_password
 from werkzeug.exceptions import Unauthorized
 
@@ -306,8 +306,10 @@ def revoke_token():
 
 
 @blueprint.route("/client_info", methods=["GET"])
-@login_required
 def client_info(*args, **kwargs):
+    if not current_user or not current_user.is_authenticated:
+        abort(401)
+
     try:
         grant = oauth.get_consent_grant(end_user=current_user)
     except OAuth2Error as error:
