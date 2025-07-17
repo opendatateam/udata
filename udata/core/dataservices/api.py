@@ -63,9 +63,7 @@ class DataservicesAtomFeedAPI(API):
         )
 
         dataservices: List[Dataservice] = (
-            Dataservice.objects.visible()
-            .order_by("-created_at_internal")
-            .limit(current_site.feed_size)
+            Dataservice.objects.visible().order_by("-created_at").limit(current_site.feed_size)
         )
         for dataservice in dataservices:
             author_name = None

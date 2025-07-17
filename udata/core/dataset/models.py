@@ -20,6 +20,7 @@ from udata.api_fields import field
 from udata.app import cache
 from udata.core import storages
 from udata.core.activity.models import Auditable
+from udata.core.dataset.preview import TabularAPIPreview
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.owned import Owned, OwnedQuerySet
@@ -47,7 +48,6 @@ from .exceptions import (
     SchemasCacheUnavailableException,
     SchemasCatalogNotFoundException,
 )
-from .preview import get_preview_url
 
 __all__ = (
     "License",
@@ -393,9 +393,9 @@ class ResourceMixin(object):
         if not self.urlhash or "url" in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
 
-    @cached_property  # Accessed at least 2 times in front rendering
+    @property
     def preview_url(self):
-        return get_preview_url(self)
+        return TabularAPIPreview().preview_url(self)
 
     @property
     def closed_or_no_format(self):
@@ -1156,12 +1156,17 @@ class ResourceSchema(object):
                     f"Schemas catalog does not exist at {endpoint}"
                 )
             response.raise_for_status()
-        except requests.exceptions.RequestException:
-            log.exception(f"Error while getting schema catalog from {endpoint}")
+            data = response.json()
+        except requests.exceptions.RequestException as err:
+            log.exception(f"Error while getting schema catalog from {endpoint}: {err}")
+            schemas = cache.get(cache_key)
+        except requests.exceptions.JSONDecodeError as err:
+            log.exception(f"Error while getting schema catalog from {endpoint}: {err}")
             schemas = cache.get(cache_key)
         else:
-            schemas = response.json().get("schemas", [])
+            schemas = data.get("schemas", [])
             cache.set(cache_key, schemas)
+
         # no cached version or no content
         if not schemas:
             log.error("No content found inc. from cache for schema catalog")
