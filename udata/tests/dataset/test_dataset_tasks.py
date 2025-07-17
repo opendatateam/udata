@@ -26,13 +26,10 @@ def test_purge_datasets():
         Dataset.objects.create(title="keep me"),
     ]
 
-    topic_elements = []
+    topic = Topic.objects.create(name="test topic")
     for d in datasets:
-        topic_element = TopicElement(element=d)
+        topic_element = TopicElement(element=d, topic=topic)
         topic_element.save()
-        topic_elements.append(topic_element)
-
-    topic = Topic.objects.create(name="test topic", elements=topic_elements)
 
     user = UserFactory()
     transfer = Transfer.objects.create(
@@ -55,7 +52,7 @@ def test_purge_datasets():
     assert Transfer.objects.filter(id=transfer.id).count() == 0
 
     topic = Topic.objects(name="test topic").first()
-    topic_element = topic.elements[0].fetch()
+    topic_element = topic.elements.first()
     assert topic_element.element is None
 
     assert Discussion.objects.filter(id=discussion.id).count() == 0

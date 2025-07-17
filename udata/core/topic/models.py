@@ -1,5 +1,5 @@
 from blinker import Signal
-from mongoengine.signals import post_save, pre_save
+from mongoengine.signals import post_delete, post_save
 
 from udata.api_fields import field
 from udata.core.activity.models import Auditable
@@ -18,6 +18,8 @@ class TopicElement(db.Document):
     tags = field(db.ListField(db.StringField()))
     extras = field(db.ExtrasField())
     element = field(db.GenericReferenceField(choices=[Dataset, Reuse]))
+    # Made optional to allow proper form handling with commit=False
+    topic = field(db.ReferenceField("Topic", required=False))
 
     meta = {
         "indexes": [
@@ -27,6 +29,20 @@ class TopicElement(db.Document):
         ],
         "auto_create_index_on_save": True,
     }
+
+    @classmethod
+    def post_save(cls, sender, document, **kwargs):
+        """Trigger Dataset reindex when element is saved"""
+        if document.topic and document.element and hasattr(document.element, "id"):
+            if document.element.__class__.__name__ == "Dataset":
+                reindex.delay("Dataset", str(document.element.id))
+
+    @classmethod
+    def post_delete(cls, sender, document, **kwargs):
+        """Trigger Dataset reindex when element is deleted"""
+        if document.topic and document.element and hasattr(document.element, "id"):
+            if document.element.__class__.__name__ == "Dataset":
+                reindex.delay("Dataset", str(document.element.id))
 
 
 class Topic(db.Datetimed, Auditable, db.Document, Owned):
@@ -38,12 +54,6 @@ class Topic(db.Datetimed, Auditable, db.Document, Owned):
     description = field(db.StringField())
     tags = field(db.ListField(db.StringField()))
     color = field(db.IntField())
-
-    elements = field(
-        db.ListField(
-            db.LazyReferenceField("TopicElement", reverse_delete_rule=db.PULL, passthrough=True)
-        )
-    )
 
     featured = field(db.BooleanField(default=False), auditable=False)
     private = field(db.BooleanField())
@@ -72,37 +82,29 @@ class Topic(db.Datetimed, Auditable, db.Document, Owned):
     def __str__(self):
         return self.name
 
-    # TODO: also reindex Reuses (never been done) but Reuse.topic is a different field
-    @classmethod
-    def pre_save(cls, sender, document, **kwargs):
-        # Try catch is to prevent the mechanism to crash at the
-        # creation of the Topic, where an original state does not exist.
-        try:
-            original_doc = sender.objects.get(id=document.id)
-            original_dataset_ids = original_doc.get_nested_elements_ids("Dataset")
-            current_dataset_ids = document.get_nested_elements_ids("Dataset")
-            datasets_list_diff = original_dataset_ids ^ current_dataset_ids
-        except cls.DoesNotExist:
-            datasets_list_diff = document.get_nested_elements_ids("Dataset")
-
-        for dataset_id in datasets_list_diff:
-            reindex.delay("Dataset", dataset_id)
-
     def count_discussions(self):
         # There are no metrics on Topic to store discussions count
         pass
 
+    @property
+    def elements(self):
+        """Get elements associated with this topic"""
+        return TopicElement.objects(topic=self)
+
     def get_nested_elements_ids(self, cls: str) -> set[str]:
-        """Optimized query to get objects ids from nested elements, filtered by class."""
+        """Optimized query to get objects ids from related elements, filtered by class."""
+        # Return empty set if topic doesn't have an ID yet
+        if not self.id:
+            return set()
+
         return set(
             str(elem["element"]["_ref"].id)
-            for elem in TopicElement.objects.filter(
-                id__in=[ref.pk for ref in self.elements], __raw__={"element._cls": cls}
-            )
+            for elem in TopicElement.objects.filter(topic=self, __raw__={"element._cls": cls})
             .fields(element=1)
             .as_pymongo()
         )
 
 
-pre_save.connect(Topic.pre_save, sender=Topic)
 post_save.connect(Topic.post_save, sender=Topic)
+post_save.connect(TopicElement.post_save, sender=TopicElement)
+post_delete.connect(TopicElement.post_delete, sender=TopicElement)
