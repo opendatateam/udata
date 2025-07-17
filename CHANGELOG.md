@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 10.7.0 (2025-07-17)
 
 - Add name and siret filters for orgs [#3362](https://github.com/opendatateam/udata/pull/3362)
