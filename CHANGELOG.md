@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Fix dataset schemas endpoint when no resource [#3373](https://github.com/opendatateam/udata/pull/3373)
 - Add contact points suggest [#3376](https://github.com/opendatateam/udata/pull/3376)
 
 ## 10.7.0 (2025-07-17)
