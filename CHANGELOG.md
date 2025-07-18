@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix dataset schemas endpoint when no resource [#3373](https://github.com/opendatateam/udata/pull/3373)
 
 ## 10.7.0 (2025-07-17)
 
@@ -12,7 +12,6 @@
 - Do not crash on invalid schemas API JSON [#3363](https://github.com/opendatateam/udata/pull/3363/)
 - Fix flaky test on timed recent Atom feeds [#3365](https://github.com/opendatateam/udata/pull/3365)
 - Allow to remove checksum from resource [#3369](https://github.com/opendatateam/udata/pull/3369)
-- Fix dataset schemas endpoint when no resource [#3373](https://github.com/opendatateam/udata/pull/3373)
 
 ## 10.6.0 (2025-07-08)
 
