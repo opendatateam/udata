@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add `self_web_url` for discussion [#3375](https://github.com/opendatateam/udata/pull/3375)
 
 ## 10.7.0 (2025-07-17)
 
