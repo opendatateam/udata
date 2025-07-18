@@ -635,6 +635,7 @@ class DiscussionsTest(APITestCase):
             self.assert200(response)
 
         dataset.reload()
+        self.assertEqual(dataset.get_metrics()["discussions"], 1)
         self.assertEqual(dataset.get_metrics()["discussions_open"], 0)
 
         data = response.json
