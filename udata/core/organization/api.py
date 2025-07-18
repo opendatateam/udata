@@ -323,7 +323,7 @@ class OrganizationSuggestAPI(API):
         """Contact points suggest endpoint using mongoDB contains"""
         args = suggest_parser.parse_args()
         contact_points = ContactPoint.objects(
-            Q(name__icontains=args["q"]) | Q(email__icontains=args["q"])
+            Q(name__icontains=args["q"]) | Q(email__icontains=args["q"]) | Q(contact_form__icontains=args["q"])
         ).owned_by(org)
         return [
             contact_point
