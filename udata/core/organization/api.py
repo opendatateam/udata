@@ -11,7 +11,7 @@ from udata.core import csv
 from udata.core.badges import api as badges_api
 from udata.core.badges.fields import badge_fields
 from udata.core.contact_point.api import ContactPointApiParser
-from udata.core.contact_point.api_fields import contact_point_page_fields, contact_point_fields
+from udata.core.contact_point.api_fields import contact_point_fields, contact_point_page_fields
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api import DatasetApiParser
