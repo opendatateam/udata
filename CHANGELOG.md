@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add contact points suggest [#3376](https://github.com/opendatateam/udata/pull/3376)
 
 ## 10.7.0 (2025-07-17)
 
