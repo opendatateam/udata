@@ -690,9 +690,9 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
         if len(set(res.id for res in self.resources)) != len(self.resources):
             raise MongoEngineValidationError(f"Duplicate resource ID in dataset #{self.id}.")
 
-        self.quality_cached = self.compute_quality()
-
         self.last_update = self.compute_last_update()
+
+        self.quality_cached = self.compute_quality()
 
         for key, value in self.extras.items():
             if not key.startswith("custom:"):
