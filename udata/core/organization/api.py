@@ -315,7 +315,7 @@ suggest_parser.add_argument(
 
 
 @ns.route("/<org:org>/contacts/suggest/", endpoint="suggest_org_contact_points")
-class OrganizationSuggestAPI(API):
+class ContactPointSuggestAPI(API):
     @api.doc("suggest_org_contact_points")
     @api.expect(suggest_parser)
     @api.marshal_list_with(contact_point_fields)
@@ -323,12 +323,12 @@ class OrganizationSuggestAPI(API):
         """Contact points suggest endpoint using mongoDB contains"""
         args = suggest_parser.parse_args()
         contact_points = ContactPoint.objects(
-            Q(name__icontains=args["q"]) | Q(email__icontains=args["q"]) | Q(contact_form__icontains=args["q"])
+            Q(name__icontains=args["q"])
+            | Q(email__icontains=args["q"])
+            | Q(contact_form__icontains=args["q"])
         ).owned_by(org)
-        return [
-            contact_point
-            for contact_point in contact_points.limit(args["size"])
-        ]
+        return [contact_point for contact_point in contact_points.limit(args["size"])]
+
 
 requests_parser = api.parser()
 requests_parser.add_argument(
