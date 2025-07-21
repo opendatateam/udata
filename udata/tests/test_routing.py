@@ -211,7 +211,7 @@ class SlugAsSLugFieldWithFollowTest(AsSlugMixin):
         dataset_a_old_url = url_for("model_tester", model=dataset_a)
         dataset_a.slug = "new_a"
         dataset_a.save()
-        dataset_a_new_url = url_for("model_tester", model=dataset_a)
+        _dataset_a_new_url = url_for("model_tester", model=dataset_a)
 
         dataset_b = self.model.objects.create(slug="old")
         dataset_b_old_url = url_for("model_tester", model=dataset_b)
