@@ -3,8 +3,10 @@
 ## Current (in progress)
 
 - Remove placeholder Jinja filter [#3372](https://github.com/opendatateam/udata/pull/3372/)
+- Add `self_web_url` for discussion [#3375](https://github.com/opendatateam/udata/pull/3375)
 - Fix dataset schemas endpoint when no resource [#3373](https://github.com/opendatateam/udata/pull/3373)
 - Add last_update as a dataset model property [#3377](https://github.com/opendatateam/udata/pull/3377)
+- Fix crashing on datasets with no slugs [#3368](https://github.com/opendatateam/udata/pull/3368/)
 
 ## 10.7.0 (2025-07-17)
 

@@ -452,14 +452,20 @@ class DiscussionsTest(APITestCase):
 
     def test_list_discussions_sort(self) -> None:
         user: User = UserFactory()
+        dataset = DatasetFactory()
+
         sorting_keys_dict: dict = {
             "title": ["aaa", "bbb"],
             "created": ["2023-12-12", "2024-01-01"],
             "closed": ["2023-12-12", "2024-01-01"],
         }
         for sorting_key, values in sorting_keys_dict.items():
-            discussion1: Discussion = DiscussionFactory(user=user, **{sorting_key: values[0]})
-            discussion2: Discussion = DiscussionFactory(user=user, **{sorting_key: values[1]})
+            discussion1: Discussion = DiscussionFactory(
+                subject=dataset, user=user, **{sorting_key: values[0]}
+            )
+            discussion2: Discussion = DiscussionFactory(
+                subject=dataset, user=user, **{sorting_key: values[1]}
+            )
 
             response: TestResponse = self.get(url_for("api.discussions", sort=sorting_key))
             self.assert200(response)
