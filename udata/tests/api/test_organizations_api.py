@@ -1014,7 +1014,9 @@ class OrganizationContactPointsAPITest:
         assert response.json[0]["name"] == data["name"]
         assert response.json[0]["email"] == data["email"]
 
-        response = api.get(url_for("api.suggest_org_contact_points", org=org, q="mooneeejnknywayne"))
+        response = api.get(
+            url_for("api.suggest_org_contact_points", org=org, q="mooneeejnknywayne")
+        )
         assert200(response)
 
         assert len(response.json) == 0
