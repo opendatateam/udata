@@ -77,6 +77,9 @@ discussion_fields = api.model(
         "url": fields.String(
             attribute=lambda d: d.self_api_url(), description="The discussion API URI"
         ),
+        "self_web_url": fields.String(
+            attribute=lambda d: d.self_web_url(), description="The discussion web URL"
+        ),
         "extras": fields.Raw(description="Extra attributes as key-value pairs"),
         "spam": fields.Nested(spam_fields),
         "permissions": fields.Nested(discussion_permissions_fields),

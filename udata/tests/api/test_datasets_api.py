@@ -136,16 +136,6 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(response.json["data"][0]["id"], str(second.id))
 
-        second.title = "second updated dataset"
-        second.save()
-        response = self.get(url_for("api.datasets", sort="-last_update"))
-        self.assert200(response)
-        self.assertEqual(response.json["data"][0]["id"], str(second.id))
-
-        response = self.get(url_for("api.datasets", sort="last_update"))
-        self.assert200(response)
-        self.assertEqual(response.json["data"][0]["id"], str(first.id))
-
     def test_dataset_api_default_sorting(self):
         # Default sort should be -created
         self.login()
@@ -154,6 +144,32 @@ class DatasetAPITest(APITestCase):
         response = self.get(url_for("api.datasets"))
         self.assert200(response)
         self.assertEqual(response.json["data"][0]["id"], str(last.id))
+
+    def test_dataset_api_sorting_last_update(self):
+        # Sort on last_update that takes resources update into account
+        self.login()
+        [
+            DatasetFactory(
+                title="some created dataset",
+                resources=[ResourceFactory(last_modified_internal=f"2025-01-0{i}")],
+            )
+            for i in range(1, 10)
+        ]
+        oldest_updated_dataset_ = DatasetFactory(
+            title="last created dataset",
+            resources=[ResourceFactory(last_modified_internal="2014-01-01")],
+        )
+        most_recent_updated_dataset = DatasetFactory(
+            title="last created dataset",
+            resources=[ResourceFactory(last_modified_internal="2025-07-01")],
+        )
+        response = self.get(url_for("api.datasets", sort="-last_update"))
+        self.assert200(response)
+        self.assertEqual(response.json["data"][0]["id"], str(most_recent_updated_dataset.id))
+
+        response = self.get(url_for("api.datasets", sort="last_update"))
+        self.assert200(response)
+        self.assertEqual(response.json["data"][0]["id"], str(oldest_updated_dataset_.id))
 
     def test_dataset_api_list_with_filters(self):
         """Should filters datasets results based on query filters"""
@@ -1250,6 +1266,11 @@ class DatasetAPITest(APITestCase):
             "url": None,
             "version": None,
         }
+
+        # Empty dataset (no resources)
+        empty_dataset = Dataset.objects.create(title="test", resources=None)
+        response = self.get(url_for("apiv2.dataset_schemas", dataset=empty_dataset))
+        assert len(response.json) == 0
 
     def test_remove_schema(self):
         self.login(AdminFactory())
