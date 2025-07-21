@@ -2,6 +2,7 @@ import logging
 
 from bson import DBRef, ObjectId
 from flask_mongoengine import BaseQuerySet
+from mongoengine.signals import post_save
 
 from udata.utils import Paginable
 
@@ -46,29 +47,41 @@ class UDataQuerySet(BaseQuerySet):
         data = self.in_bulk(ids)
         return [data[id] for id in ids]
 
-    def get_or_create(self, write_concern=None, auto_save=True, *q_objs, **query):
-        """Retrieve unique object or create, if it doesn't exist.
-
-        Returns a tuple of ``(object, created)``, where ``object`` is
-        the retrieved or created object and ``created`` is a boolean
-        specifying whether a new object was created.
-
-        Taken back from:
-
-        https://github.com/MongoEngine/mongoengine/
-        pull/1029/files#diff-05c70acbd0634d6d05e4a6e3a9b7d66b
+    def get_or_create(self, **query):
         """
-        defaults = query.pop("defaults", {})
-        try:
-            doc = self.get(*q_objs, **query)
-            return doc, False
-        except self._document.DoesNotExist:
-            query.update(defaults)
-            doc = self._document(**query)
+        Atomically retrieve or create a document using findAndModify (modify in MongoEngine).
+        We allow to update the model with the `updates`. The raw kwargs are for the filtering and
+        the `updates` are only using to set values for the first creation or update the existing one.
 
-            if auto_save:
-                doc.save(write_concern=write_concern)
-            return doc, True
+        Returns:
+            tuple: (document, created)
+        """
+        updates = query.pop("updates", {})
+
+        # If we pass `new=True` we cannot know if the model
+        # was recently created or existed before.
+        # When passing `new=False` (the default), we get the previous
+        # value: `None` if it wasn't existing, the object if it was already
+        # existing.
+        # This way of doing force us to do a new request to fetch the document
+        # after the modify.
+        existing_doc_before_upsert = self.filter(
+            **query
+        ).modify(
+            upsert=True,
+            **query,  # Require because `updates` can be empty and `modify` crash when no values are provided.
+            **updates,
+        )
+
+        # We may avoid this query if `existing_doc_before_upsert` is not `None`
+        # by updating the local document with the new values (but the database may
+        # have updates too? default values?).
+        document = self.get(**query)
+        created = existing_doc_before_upsert is None
+        if created:
+            post_save.send(document.__class__, document=document)
+
+        return document, created
 
     def generic_in(self, **kwargs):
         """Bypass buggy GenericReferenceField querying issue"""

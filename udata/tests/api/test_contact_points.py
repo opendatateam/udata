@@ -18,6 +18,39 @@ pytestmark = [
 class ContactPointAPITest:
     modules = []
 
+    def test_get_or_create(self):
+        org = OrganizationFactory()
+        contact_point, created = ContactPoint.objects().get_or_create(
+            name="An Organization",
+            email=None,
+            contact_form=None,
+            role="publisher",
+            organization=org.id,
+        )
+
+        assert created
+        assert contact_point.name == "An Organization"
+
+        contact_point, created = ContactPoint.objects().get_or_create(
+            name="An Organization",
+            email=None,
+            contact_form=None,
+            role="publisher",
+            organization=org.id,
+        )
+        assert not created
+        assert contact_point.name == "An Organization"
+
+        contact_point, created = ContactPoint.objects().get_or_create(
+            name="Another",
+            email=None,
+            contact_form=None,
+            role="publisher",
+            organization=org.id,
+        )
+        assert created
+        assert contact_point.name == "Another"
+
     def test_contact_point_api_create(self, api):
         user = api.login()
         data = {

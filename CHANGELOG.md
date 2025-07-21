@@ -8,6 +8,7 @@
 - Add last_update as a dataset model property [#3377](https://github.com/opendatateam/udata/pull/3377)
 - Fix crashing on datasets with no slugs [#3368](https://github.com/opendatateam/udata/pull/3368/)
 - Fix duplicate contact point creation [#3379](https://github.com/opendatateam/udata/pull/3379)
+- Atomic `get_or_create` [#3366](https://github.com/opendatateam/udata/pull/3366)
 
 ## 10.7.0 (2025-07-17)
 
