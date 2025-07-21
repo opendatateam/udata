@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Consolidate CSW harvesting logic [#3378](https://github.com/opendatateam/udata/pull/3378)
 - Remove placeholder Jinja filter [#3372](https://github.com/opendatateam/udata/pull/3372/)
 - Add `self_web_url` for discussion [#3375](https://github.com/opendatateam/udata/pull/3375)
 - Fix dataset schemas endpoint when no resource [#3373](https://github.com/opendatateam/udata/pull/3373)
