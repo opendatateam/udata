@@ -58,12 +58,24 @@ class UDataQuerySet(BaseQuerySet):
         """
         updates = query.pop("updates", {})
 
-        existing_doc_before_upsert = self.filter(**query).modify(
+        # If we pass `new=True` we cannot know if the model
+        # was recently created or existed before.
+        # When passing `new=False` (the default), we get the previous
+        # value: `None` if it wasn't existing, the object if it was already
+        # existing.
+        # This way of doing force us to do a new request to fetch the document
+        # after the modify.
+        existing_doc_before_upsert = self.filter(
+            **query
+        ).modify(
             upsert=True,
-            **query,
+            **query,  # Require because `updates` can be empty and `modify` crash when no values are provided.
             **updates,
         )
 
+        # We may avoid this query if `existing_doc_before_upsert` is not `None`
+        # by updating the local document with the new values (but the database may
+        # have updates too? default values?).
         document = self.get(**query)
         created = existing_doc_before_upsert is None
         if created:

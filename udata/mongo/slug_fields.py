@@ -202,7 +202,9 @@ def populate_slug(instance, field):
             SlugFollow.objects.get_or_create(
                 namespace=ns,
                 old_slug=old_slug,
-                new_slug=slug,
+                updates={
+                    "new_slug": slug,
+                },
             )
 
             # Maintain previous redirects

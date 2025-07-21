@@ -215,9 +215,12 @@ class SlugAsSLugFieldWithFollowTest(AsSlugMixin):
 
         dataset_b = self.model.objects.create(slug="old")
         dataset_b_old_url = url_for("model_tester", model=dataset_b)
+        assert200(client.get(dataset_b_old_url))
         dataset_b.slug = "new_b"
         dataset_b.save()
         dataset_b_new_url = url_for("model_tester", model=dataset_b)
+
+        assert SlugFollow.objects.count() == 1
 
         assert_redirects(client.get(dataset_a_old_url), dataset_b_new_url)
         assert_redirects(client.get(dataset_b_old_url), dataset_b_new_url)
