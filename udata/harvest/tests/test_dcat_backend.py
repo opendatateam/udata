@@ -868,6 +868,29 @@ class CswDcatBackendTest:
         assert "User-Agent" in get_mock.last_request.headers
         assert get_mock.last_request.headers["User-Agent"] == "uData/0.1 csw-dcat"
 
+    def test_csw_error(self, rmock):
+        exception_report = """<?xml version="1.0" encoding="UTF-8"?>
+        <ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1"
+                             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                             xsi:schemaLocation="http://www.opengis.net/ows/1.1 http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd">
+          <ows:Exception exceptionCode="MissingParameterValue" locator="request">
+            <ows:ExceptionText>Mandatory parameter &lt;request&gt; was not specified</ows:ExceptionText>
+          </ows:Exception>
+        </ows:ExceptionReport>
+        """
+        rmock.head(rmock.ANY, headers={"Content-Type": "application/xml"})
+        rmock.post(rmock.ANY, text=exception_report)
+        source = HarvestSourceFactory(backend="csw-dcat")
+
+        actions.run(source.slug)
+
+        source.reload()
+        job = source.get_last_job()
+
+        assert len(job.errors) == 1
+        assert "Failed to query CSW" in job.errors[0].message
+        assert job.status == "failed"
+
 
 @pytest.mark.usefixtures("clean_db")
 @pytest.mark.options(PLUGINS=["csw"])
