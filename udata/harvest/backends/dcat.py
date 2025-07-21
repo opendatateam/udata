@@ -1,6 +1,6 @@
 import logging
 from datetime import date
-from typing import Generator
+from typing import ClassVar, Generator
 
 import lxml.etree as ET
 from flask import current_app
@@ -237,7 +237,7 @@ class DcatBackend(BaseBackend):
 class CswDcatBackend(DcatBackend):
     display_name = "CSW-DCAT"
 
-    CSW_REQUEST = """
+    CSW_REQUEST: ClassVar[str] = """
     <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
                     xmlns:ogc="http://www.opengis.net/ogc"
                     service="CSW" version="2.0.2" resultType="results"
@@ -342,7 +342,7 @@ class CswIso19139DcatBackend(CswDcatBackend):
         ),
     )
 
-    CSW_REQUEST = """
+    CSW_REQUEST: ClassVar[str] = """
     <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
                     xmlns:ogc="http://www.opengis.net/ogc"
                     service="CSW" version="2.0.2" resultType="results"
