@@ -50,6 +50,8 @@ class UDataQuerySet(BaseQuerySet):
     def get_or_create(self, **query):
         """
         Atomically retrieve or create a document using findAndModify (modify in MongoEngine).
+        We allow to update the model with the `updates`. The raw kwargs are for the filtering and
+        the `updates` are only using to set values for the first creation or update the existing one.
 
         Returns:
             tuple: (document, created)
