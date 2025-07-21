@@ -199,13 +199,13 @@ def populate_slug(instance, field):
 
         if old_slug:
             # Create a redirect for previous slug
-            slug_follower, created = SlugFollow.objects.get_or_create(
+            SlugFollow.objects.get_or_create(
                 namespace=ns,
                 old_slug=old_slug,
-                auto_save=False,
+                updates={
+                    "new_slug": slug,
+                },
             )
-            slug_follower.new_slug = slug
-            slug_follower.save()
 
             # Maintain previous redirects
             SlugFollow.objects(namespace=ns, new_slug=old_slug).update(new_slug=slug)
