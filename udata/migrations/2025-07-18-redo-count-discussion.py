@@ -8,37 +8,20 @@ import click
 
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
+from udata.core.discussions.models import Discussion
+from udata.mongo import db as udata_db
 
 log = logging.getLogger(__name__)
 
 
 def migrate(db):
-    dataservices = Dataservice.objects(metrics__discussions__gt=0)
-    dataservices_count = dataservices.count()
-
-    with click.progressbar(dataservices, length=dataservices_count) as dataservices:
-        for dataservice in dataservices:
+    objects_with_discussions = Discussion.objects.aggregate([{
+        '$group': { '_id': '$subject._ref', '_cls': { '$first': '$subject._cls' }}
+    }])
+    with click.progressbar(objects_with_discussions) as objects_with_discussions:
+        for object in objects_with_discussions:
+            related_to = udata_db.resolve_model(object['_cls']).objects.get(pk=object['_id'].id)
             try:
-                dataservice.count_discussions()
+                related_to.count_discussions()
             except Exception as err:
-                log.error(f"Cannot count discussions for dataservice {dataservice.id} {err}")
-
-    reuses = Dataservice.objects(metrics__discussions__gt=0)
-    reuses_count = reuses.count()
-
-    with click.progressbar(reuses, length=reuses_count) as reuses:
-        for reuse in reuses:
-            try:
-                reuse.count_discussions()
-            except Exception as err:
-                log.error(f"Cannot count discussions for reuse {reuse.id} {err}")
-    
-    datasets = Dataset.objects(metrics__discussions__gt=0)
-    datasets_count = datasets.count()
-
-    with click.progressbar(datasets, length=datasets_count) as datasets:
-        for dataset in datasets:
-            try:
-                dataset.count_discussions()
-            except Exception as err:
-                log.error(f"Cannot count discussions for dataset {dataset.id} {err}")
+                log.error(f"Cannot count discussions for {object['_cls']} {object['_id'].id} {err}")
