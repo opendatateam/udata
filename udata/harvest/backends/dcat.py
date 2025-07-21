@@ -2,10 +2,10 @@ import logging
 from datetime import date
 from typing import ClassVar, Generator
 
-import lxml.etree as ET
 from flask import current_app
 from rdflib import Graph
 from rdflib.namespace import RDF
+from saxonche import PySaxonProcessor, PyXdmNode
 from typing_extensions import override
 
 from udata.core.dataservices.rdf import dataservice_from_rdf
@@ -47,7 +47,6 @@ KNOWN_PAGINATION = (
 )
 
 CSW_NAMESPACE = "http://www.opengis.net/cat/csw/2.0.2"
-OWS_NAMESPACE = "http://www.opengis.net/ows"
 
 # Useful to patch essential failing URIs
 URIS_TO_REPLACE = {
@@ -310,7 +309,12 @@ class CswDcatBackend(DcatBackend):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.xml_parser = ET.XMLParser(resolve_entities=False)
+        self.saxon_proc = PySaxonProcessor(license=False)
+        self.saxon_proc.set_configuration_property(
+            "http://saxon.sf.net/feature/strip-whitespace", "all"
+        )
+        self.xpath_proc = self.saxon_proc.new_xpath_processor()
+        self.xpath_proc.declare_namespace("csw", CSW_NAMESPACE)
 
     def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
         """
@@ -324,19 +328,23 @@ class CswDcatBackend(DcatBackend):
             response = self.post(url, data=data, headers={"Content-Type": "application/xml"})
             response.raise_for_status()
 
-            content = response.content
-            tree = ET.fromstring(content, parser=self.xml_parser)
-            if tree.tag == "{" + OWS_NAMESPACE + "}ExceptionReport":
-                raise ValueError(f"Failed to query CSW:\n{content}")
+            text = response.text
+            tree = self.saxon_proc.parse_xml(xml_text=text)
+            self.xpath_proc.set_context(xdm_item=tree)
 
-            search_results = tree.find("csw:SearchResults", {"csw": CSW_NAMESPACE})
-            if not search_results:
+            # Using * namespace so we don't have to enumerate ows versions
+            if self.xpath_proc.evaluate("/*:ExceptionReport"):
+                raise ValueError(f"Failed to query CSW:\n{text}")
+
+            if r := self.xpath_proc.evaluate("/csw:GetRecordsResponse/csw:SearchResults"):
+                search_results = r.head
+            else:
                 log.error(f"No search results found for {url} on page {page_number}")
                 return
 
-            for result in search_results:
+            for result in search_results.children:
                 subgraph = Graph(namespace_manager=namespace_manager)
-                doc = ET.tostring(self.as_dcat(result))
+                doc = self.as_dcat(result).to_string("utf-8")
                 subgraph.parse(data=doc, format=fmt)
 
                 if not subgraph.subjects(
@@ -354,7 +362,7 @@ class CswDcatBackend(DcatBackend):
             if not start:
                 return
 
-    def as_dcat(self, tree: ET._Element) -> ET._Element:
+    def as_dcat(self, tree: PyXdmNode) -> PyXdmNode:
         """
         Return the input tree as a DCAT tree.
         For CswDcatBackend, this method return the incoming tree as-is, since it's already DCAT.
@@ -362,10 +370,10 @@ class CswDcatBackend(DcatBackend):
         """
         return tree
 
-    def next_position(self, start: int, search_results: ET._Element) -> int | None:
-        next_record = int(search_results.attrib["nextRecord"])
-        matched_count = int(search_results.attrib["numberOfRecordsMatched"])
-        returned_count = int(search_results.attrib["numberOfRecordsReturned"])
+    def next_position(self, start: int, search_results: PyXdmNode) -> int | None:
+        next_record = int(search_results.get_attribute_value("nextRecord"))
+        matched_count = int(search_results.get_attribute_value("numberOfRecordsMatched"))
+        returned_count = int(search_results.get_attribute_value("numberOfRecordsReturned"))
 
         # Break conditions copied gratefully from
         # noqa https://github.com/geonetwork/core-geonetwork/blob/main/harvesters/src/main/java/org/fao/geonet/kernel/harvest/harvester/csw/Harvester.java#L338-L369
@@ -406,9 +414,13 @@ class CswIso19139DcatBackend(CswDcatBackend):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         xslt_url = current_app.config["HARVEST_ISO19139_XSLT_URL"]
-        xslt = ET.fromstring(self.get(xslt_url).content, parser=self.xml_parser)
-        self.transform = ET.XSLT(xslt)
+        xslt_text = self.get(xslt_url).text
+        xslt_proc = self.saxon_proc.new_xslt30_processor()
+        self.xslt_exec = xslt_proc.compile_stylesheet(stylesheet_text=xslt_text)
+        self.xslt_exec.set_parameter(
+            "CoupledResourceLookUp", self.saxon_proc.make_string_value("disabled")
+        )
 
     @override
-    def as_dcat(self, tree: ET._Element) -> ET._Element:
-        return self.transform(tree, CoupledResourceLookUp="'disabled'")
+    def as_dcat(self, tree: PyXdmNode) -> PyXdmNode:
+        return self.xslt_exec.transform_to_value(xdm_node=tree).head
