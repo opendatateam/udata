@@ -327,7 +327,7 @@ class ContactPointSuggestAPI(API):
             | Q(email__icontains=args["q"])
             | Q(contact_form__icontains=args["q"])
         ).owned_by(org)
-        return [contact_point for contact_point in contact_points.limit(args["size"])]
+        return list(contact_points.limit(args["size"]))
 
 
 requests_parser = api.parser()
