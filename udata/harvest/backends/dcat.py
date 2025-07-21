@@ -375,7 +375,7 @@ class CswIso19139DcatBackend(CswDcatBackend):
     @override
     def inner_init(self) -> None:
         super().inner_init()
-        xslt_url = current_app.config["HARVEST_ISO19139_XSL_URL"]
+        xslt_url = current_app.config["HARVEST_ISO19139_XSLT_URL"]
         xslt = ET.fromstring(self.get(xslt_url).content, parser=self.xml_parser)
         self.transform = ET.XSLT(xslt)
 

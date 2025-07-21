@@ -886,7 +886,7 @@ class CswIso19139DcatBackendTest:
         with open(os.path.join(CSW_DCAT_FILES_DIR, "XSLT.xml"), "r") as f:
             xslt = f.read()
         url = mock_csw_pagination(rmock, "geonetwork/srv/eng/csw.rdf", "geonetwork-iso-page-{}.xml")
-        rmock.get(current_app.config.get("HARVEST_ISO19139_XSL_URL"), text=xslt)
+        rmock.get(current_app.config.get("HARVEST_ISO19139_XSLT_URL"), text=xslt)
         org = OrganizationFactory()
         source = HarvestSourceFactory(
             backend="csw-iso-19139",
