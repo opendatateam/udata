@@ -12,6 +12,7 @@
 - Fix not returning 404 for harvest sources [#3382](https://github.com/opendatateam/udata/pull/3382/)
 - Add missing trailing slashes on some endpoints [#3392](https://github.com/opendatateam/udata/pull/3392/)
 - Make organization name filter case insensitive [#3392](https://github.com/opendatateam/udata/pull/3395)
+- Change CSW harvesters XML processor from lxml to saxonche [#3380](https://github.com/opendatateam/udata/pull/3380)
 
 ## 10.8.1 (2025-07-25)
 
