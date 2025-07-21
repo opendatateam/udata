@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Fix dataset schemas endpoint when no resource [#3373](https://github.com/opendatateam/udata/pull/3373)
+- Add last_update as a dataset model property [#3377](https://github.com/opendatateam/udata/pull/3377)
 
 ## 10.7.0 (2025-07-17)
 
