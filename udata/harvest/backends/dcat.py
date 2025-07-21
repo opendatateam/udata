@@ -304,7 +304,7 @@ class CswDcatBackend(DcatBackend):
         """
         return tree
 
-    def next_position(self, start, search_results) -> int | None:
+    def next_position(self, start: int, search_results: ET._Element) -> int | None:
         next_record = int(search_results.attrib["nextRecord"])
         matched_count = int(search_results.attrib["numberOfRecordsMatched"])
         returned_count = int(search_results.attrib["numberOfRecordsReturned"])
