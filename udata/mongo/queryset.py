@@ -57,12 +57,11 @@ class UDataQuerySet(BaseQuerySet):
             tuple: (document, created)
         """
         updates = query.pop("updates", {})
-        update_fields = {f"set__{k}": v for k, v in updates.items()}
 
         existing_doc_before_upsert = self.filter(**query).modify(
             upsert=True,
             **query,
-            **update_fields,
+            **updates,
         )
 
         document = self.get(**query)
