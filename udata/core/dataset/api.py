@@ -95,7 +95,7 @@ class DatasetApiParser(ModelApiParser):
     sorts = {
         "title": "title",
         "created": "created_at_internal",
-        "last_update": "last_modified_internal",
+        "last_update": "last_update",
         "reuses": "metrics.reuses",
         "followers": "metrics.followers",
         "views": "metrics.views",
@@ -697,6 +697,8 @@ class ResourceAPI(ResourceMixin, API):
         # Will be fixed when we switch to the new API Fields.
         if "schema" in request.get_json() and form._fields.get("schema").data is None:
             resource.schema = None
+        if "checksum" in request.get_json() and form._fields.get("checksum").data is None:
+            resource.checksum = None
 
         dataset.update_resource(resource)
         return resource
