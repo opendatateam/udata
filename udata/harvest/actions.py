@@ -113,9 +113,9 @@ def validate_source(ident_or_source, comment=None):
     return source
 
 
-def reject_source(ident, comment):
+def reject_source(ident_or_source, comment):
     """Reject a source for automatic harvesting"""
-    source = get_source(ident)
+    source = get_source(ident_or_source)
     source.validation.on = datetime.utcnow()
     source.validation.comment = comment
     source.validation.state = VALIDATION_REFUSED
@@ -125,18 +125,18 @@ def reject_source(ident, comment):
     return source
 
 
-def delete_source(ident):
+def delete_source(ident_or_source):
     """Delete an harvest source"""
-    source = get_source(ident)
+    source = get_source(ident_or_source)
     source.deleted = datetime.utcnow()
     source.save()
     signals.harvest_source_deleted.send(source)
     return source
 
 
-def clean_source(ident):
+def clean_source(ident_or_source):
     """Deletes all datasets linked to a harvest source"""
-    source = get_source(ident)
+    source = get_source(ident_or_source)
     datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
     for dataset in datasets:
         dataset.deleted = datetime.utcnow()

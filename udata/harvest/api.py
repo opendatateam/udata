@@ -316,7 +316,7 @@ class SourceAPI(API):
         """Update a harvest source"""
         OwnablePermission(source).test()
         form = api.validate(HarvestSourceForm, source)
-        source = actions.update_source(source.id, form.data)
+        source = actions.update_source(source, form.data)
         return source
 
     @api.secure
@@ -324,7 +324,7 @@ class SourceAPI(API):
     @api.marshal_with(source_fields)
     def delete(self, source: HarvestSource):
         OwnablePermission(source).test()
-        return actions.delete_source(source.id), 204
+        return actions.delete_source(source), 204
 
 
 @ns.route("/source/<harvest_source:source>/validate", endpoint="validate_harvest_source")
