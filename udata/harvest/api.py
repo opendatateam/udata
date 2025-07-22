@@ -336,19 +336,10 @@ class ValidateSourceAPI(API):
     def post(self, source: HarvestSource):
         """Validate or reject an harvest source"""
         form = api.validate(HarvestSourceValidationForm)
-        print("here")
-        print("here")
-        print("here")
-        print("here")
-        print("here")
         if form.state.data == VALIDATION_ACCEPTED:
-            print("there")
-            source = actions.validate_source(source, form.comment.data)
+            return actions.validate_source(source, form.comment.data)
         else:
-            source = actions.reject_source(source, form.comment.data)
-
-        print("oups")
-        return source
+            return actions.reject_source(source, form.comment.data)
 
 
 @ns.route("/source/<harvest_source:source>/run", endpoint="run_harvest_source")
