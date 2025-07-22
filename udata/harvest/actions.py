@@ -44,9 +44,11 @@ def list_sources(owner=None, deleted=False):
     return list(sources)
 
 
-def get_source(ident):
+def get_source(ident_or_source: HarvestSource | str) -> HarvestSource:
     """Get an harvest source given its ID or its slug"""
-    return HarvestSource.get(ident)
+    if isinstance(ident_or_source, HarvestSource):
+        return ident_or_source
+    return HarvestSource.get(ident_or_source)
 
 
 def get_job(ident):
@@ -89,25 +91,25 @@ def create_source(
     return source
 
 
-def update_source(ident, data):
+def update_source(ident_or_source, data):
     """Update an harvest source"""
-    source = get_source(ident)
+    source = get_source(ident_or_source)
     source.modify(**data)
     signals.harvest_source_updated.send(source)
     return source
 
 
-def validate_source(ident, comment=None):
+def validate_source(ident_or_source, comment=None):
     """Validate a source for automatic harvesting"""
-    source = get_source(ident)
+    source = get_source(ident_or_source)
     source.validation.on = datetime.utcnow()
     source.validation.comment = comment
     source.validation.state = VALIDATION_ACCEPTED
     if current_user.is_authenticated:
         source.validation.by = current_user._get_current_object()
     source.save()
-    schedule(ident, cron=current_app.config["HARVEST_DEFAULT_SCHEDULE"])
-    launch(ident)
+    schedule(source, cron=current_app.config["HARVEST_DEFAULT_SCHEDULE"])
+    launch(source)
     return source
 
 
@@ -240,10 +242,16 @@ def preview_from_config(
 
 
 def schedule(
-    ident, cron=None, minute="*", hour="*", day_of_week="*", day_of_month="*", month_of_year="*"
+    ident_or_source,
+    cron=None,
+    minute="*",
+    hour="*",
+    day_of_week="*",
+    day_of_month="*",
+    month_of_year="*",
 ):
     """Schedule an harvesting on a source given a crontab"""
-    source = get_source(ident)
+    source = get_source(ident_or_source)
 
     if cron:
         minute, hour, day_of_month, month_of_year, day_of_week = cron.split()
@@ -273,9 +281,9 @@ def schedule(
     return source
 
 
-def unschedule(ident):
+def unschedule(ident_or_source):
     """Unschedule an harvesting on a source"""
-    source = get_source(ident)
+    source = get_source(ident_or_source)
     if not source.periodic_task:
         msg = "Harvesting on source {0} is ot scheduled".format(source.name)
         raise ValueError(msg)
