@@ -35,6 +35,7 @@ def migrate(db):
         )
     )
 
+    removed_count = 0
     for group in duplicates:
         ids = group["ids"]
         keep = ids[0]
@@ -48,6 +49,6 @@ def migrate(db):
             pull_all__contact_points=remove_ids
         )
 
-        ContactPoint.objects(id__in=remove_ids).delete()
+        removed_count += ContactPoint.objects(id__in=remove_ids).delete()
 
-    log.info("Done")
+    log.info(f"Done. {removed_count} contact points removed")
