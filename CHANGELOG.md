@@ -7,6 +7,7 @@
 - Fix dataset schemas endpoint when no resource [#3373](https://github.com/opendatateam/udata/pull/3373)
 - Add last_update as a dataset model property [#3377](https://github.com/opendatateam/udata/pull/3377)
 - Fix crashing on datasets with no slugs [#3368](https://github.com/opendatateam/udata/pull/3368/)
+- Add search to discussions [#3384](https://github.com/opendatateam/udata/pull/3384)
 - Fix duplicate contact point creation [#3379](https://github.com/opendatateam/udata/pull/3379)
 - Atomic `get_or_create` [#3366](https://github.com/opendatateam/udata/pull/3366)
 - Add contact points suggest [#3376](https://github.com/opendatateam/udata/pull/3376)
