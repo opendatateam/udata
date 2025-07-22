@@ -360,7 +360,7 @@ class RunSourceAPI(API):
         if source.validation.state != VALIDATION_ACCEPTED:
             api.abort(400, "Source is not validated. Please validate the source before running.")
 
-        actions.launch(source.id)
+        actions.launch(source)
 
         return source
 
@@ -378,14 +378,14 @@ class ScheduleSourceAPI(API):
             data = request.json
         except BadRequest:
             data = request.data.decode("utf-8")
-        return actions.schedule(source.id, data)
+        return actions.schedule(source, data)
 
     @api.doc("unschedule_harvest_source")
     @api.secure(admin_permission)
     @api.marshal_with(source_fields)
     def delete(self, source: HarvestSource):
         """Unschedule an harvest source"""
-        return actions.unschedule(source.id), 204
+        return actions.unschedule(source), 204
 
 
 @ns.route("/source/preview", endpoint="preview_harvest_source_config")
@@ -409,7 +409,7 @@ class PreviewSourceAPI(API):
     @api.marshal_with(preview_job_fields)
     def get(self, source: HarvestSource):
         """Preview a single harvest source given an ID or a slug"""
-        return actions.preview(source.id)
+        return actions.preview(source)
 
 
 parser = api.parser()
