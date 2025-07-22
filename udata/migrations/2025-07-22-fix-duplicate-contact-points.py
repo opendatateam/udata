@@ -42,17 +42,14 @@ def migrate(db):
         keep = ids[0]
         remove_ids = ids[1:]
 
-        # Update Dataset
         Dataset.objects(contact_points__in=remove_ids).update(add_to_set__contact_points=keep)
-        Dataservice.objects(contact_points__in=remove_ids).update(add_to_set__contact_points=keep)
-
-        # Étape 2 : retirer les doublons
         Dataset.objects(contact_points__in=remove_ids).update(pull_all__contact_points=remove_ids)
+
+        Dataservice.objects(contact_points__in=remove_ids).update(add_to_set__contact_points=keep)
         Dataservice.objects(contact_points__in=remove_ids).update(
             pull_all__contact_points=remove_ids
         )
 
-        # Supprimer les doublons
         ContactPoint.objects(id__in=remove_ids).delete()
 
     log.info("Done")
