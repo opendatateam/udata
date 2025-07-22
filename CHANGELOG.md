@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 10.8.0 (2025-07-22)
 
 - Remove placeholder Jinja filter [#3372](https://github.com/opendatateam/udata/pull/3372/)
 - Add `self_web_url` for discussion [#3375](https://github.com/opendatateam/udata/pull/3375)
