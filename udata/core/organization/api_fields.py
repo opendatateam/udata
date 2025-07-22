@@ -112,7 +112,7 @@ member_fields = api.model(
             enum=list(ORG_ROLES),
             default=DEFAULT_ROLE,
         ),
-        "label": fields.String(),
+        "label": fields.String(readonly=True),
         "since": fields.ISODateTime(
             description="The date the user joined the organization", readonly=True
         ),
