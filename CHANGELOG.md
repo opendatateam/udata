@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 10.8.0 (2025-07-22)
 
 - Remove placeholder Jinja filter [#3372](https://github.com/opendatateam/udata/pull/3372/)
