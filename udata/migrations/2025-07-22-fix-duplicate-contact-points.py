@@ -15,7 +15,6 @@ log = logging.getLogger(__name__)
 def migrate(db):
     log.info("Fixing contact points")
 
-    # Étape 1 : identifier les doublons
     duplicates = list(
         ContactPoint.objects.aggregate(
             {
@@ -36,7 +35,6 @@ def migrate(db):
         )
     )
 
-    # Étape 2 : mise à jour des références
     for group in duplicates:
         ids = group["ids"]
         keep = ids[0]
