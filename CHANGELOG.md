@@ -2,8 +2,18 @@
 
 ## Current (in progress)
 
+- Remove placeholder Jinja filter [#3372](https://github.com/opendatateam/udata/pull/3372/)
+- Add `self_web_url` for discussion [#3375](https://github.com/opendatateam/udata/pull/3375)
+- Fix dataset schemas endpoint when no resource [#3373](https://github.com/opendatateam/udata/pull/3373)
+- Add last_update as a dataset model property [#3377](https://github.com/opendatateam/udata/pull/3377)
+- Fix crashing on datasets with no slugs [#3368](https://github.com/opendatateam/udata/pull/3368/)
+- Atomic `get_or_create` [#3366](https://github.com/opendatateam/udata/pull/3366)
+- Add contact points suggest [#3376](https://github.com/opendatateam/udata/pull/3376)
+
+## 10.7.0 (2025-07-17)
+
 - Add name and siret filters for orgs [#3362](https://github.com/opendatateam/udata/pull/3362)
-- Refactor how to get URLs to the cdata front-end, need to set the `CDATA_BASE_URL` env variable (removal of `endpoint_for()`, `fields.UrlFor()`, `display_url`, `external_url` and `external_url_with_campaign`) [#3345](https://github.com/opendatateam/udata/pull/3345)
+- Refactor how to get URLs to the cdata front-end, need to set the `CDATA_BASE_URL` env variable (removal of `endpoint_for()`, `fields.UrlFor()`, `display_url`, `external_url` and `external_url_with_campaign`) [#3345](https://github.com/opendatateam/udata/pull/3345) [#3371](https://github.com/opendatateam/udata/pull/3371)
 - Add back preview_url from tabular API (remove the PreviewPlugin system) [#3364](https://github.com/opendatateam/udata/pull/3364)
 - Do not crash on invalid schemas API JSON [#3363](https://github.com/opendatateam/udata/pull/3363/)
 - Fix flaky test on timed recent Atom feeds [#3365](https://github.com/opendatateam/udata/pull/3365)

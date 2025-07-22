@@ -213,15 +213,11 @@ def get_current_site():
         site_keywords = current_app.config.get("SITE_KEYWORDS", [])
         g.site, _ = Site.objects.get_or_create(
             id=site_id,
-            defaults={
+            updates={
                 "title": site_title,
                 "keywords": site_keywords,
             },
         )
-        if g.site.title != site_title:
-            Site.objects(id=site_id).modify(set__title=site_title)
-        if g.site.keywords != site_keywords:
-            Site.objects(id=site_id).modify(set__keywords=site_keywords)
 
     return g.site
 
