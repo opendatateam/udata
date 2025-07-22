@@ -6,6 +6,7 @@
 - Add `self_web_url` for discussion [#3375](https://github.com/opendatateam/udata/pull/3375)
 - Fix dataset schemas endpoint when no resource [#3373](https://github.com/opendatateam/udata/pull/3373)
 - Add last_update as a dataset model property [#3377](https://github.com/opendatateam/udata/pull/3377)
+- Add `label` (translation of role) to API response for org members [#3383](https://github.com/opendatateam/udata/pull/3383)
 - Fix crashing on datasets with no slugs [#3368](https://github.com/opendatateam/udata/pull/3368/)
 - Fix duplicate contact point creation [#3379](https://github.com/opendatateam/udata/pull/3379) [#3381](https://github.com/opendatateam/udata/pull/3381)
 - Atomic `get_or_create` [#3366](https://github.com/opendatateam/udata/pull/3366)
