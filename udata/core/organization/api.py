@@ -11,7 +11,7 @@ from udata.core import csv
 from udata.core.badges import api as badges_api
 from udata.core.badges.fields import badge_fields
 from udata.core.contact_point.api import ContactPointApiParser
-from udata.core.contact_point.api_fields import contact_point_page_fields
+from udata.core.contact_point.api_fields import contact_point_fields, contact_point_page_fields
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api import DatasetApiParser
@@ -305,6 +305,31 @@ class OrgContactAPI(API):
         return contact_points.paginate(args["page"], args["page_size"])
 
 
+suggest_parser = api.parser()
+suggest_parser.add_argument(
+    "q", help="The string to autocomplete/suggest", location="args", required=True
+)
+suggest_parser.add_argument(
+    "size", type=int, help="The amount of suggestion to fetch", location="args", default=10
+)
+
+
+@ns.route("/<org:org>/contacts/suggest/", endpoint="suggest_org_contact_points")
+class ContactPointSuggestAPI(API):
+    @api.doc("suggest_org_contact_points")
+    @api.expect(suggest_parser)
+    @api.marshal_list_with(contact_point_fields)
+    def get(self, org):
+        """Contact points suggest endpoint using mongoDB contains"""
+        args = suggest_parser.parse_args()
+        contact_points = ContactPoint.objects(
+            Q(name__icontains=args["q"])
+            | Q(email__icontains=args["q"])
+            | Q(contact_form__icontains=args["q"])
+        ).owned_by(org)
+        return list(contact_points.limit(args["size"]))
+
+
 requests_parser = api.parser()
 requests_parser.add_argument(
     "status", type=str, help="If provided, only return requests in a given status", location="args"
@@ -483,15 +508,6 @@ class MemberAPI(API):
 )
 class FollowOrgAPI(FollowAPI):
     model = Organization
-
-
-suggest_parser = api.parser()
-suggest_parser.add_argument(
-    "q", help="The string to autocomplete/suggest", location="args", required=True
-)
-suggest_parser.add_argument(
-    "size", type=int, help="The amount of suggestion to fetch", location="args", default=10
-)
 
 
 @ns.route("/suggest/", endpoint="suggest_organizations")
