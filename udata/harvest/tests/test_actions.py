@@ -162,14 +162,14 @@ class HarvestActionsTest:
     def test_validate_source(self, mock):
         source = HarvestSourceFactory()
 
-        actions.validate_source(source)
+        actions.validate_source(source.id)
 
         source.reload()
         assert source.validation.state == VALIDATION_ACCEPTED
         assert source.validation.on is not None
         assert source.validation.by is None
         assert source.validation.comment is None
-        mock.assert_called_once_with(source.id)
+        mock.assert_called_once_with(source)
 
         assert source.periodic_task is not None
 
@@ -177,7 +177,7 @@ class HarvestActionsTest:
     def test_validate_source_with_comment(self, mock):
         source = HarvestSourceFactory()
 
-        actions.validate_source(source, "comment")
+        actions.validate_source(source.id, "comment")
 
         source.reload()
 
@@ -185,7 +185,7 @@ class HarvestActionsTest:
         assert source.validation.on is not None
         assert source.validation.by is None
         assert source.validation.comment == "comment"
-        mock.assert_called_once_with(source.id)
+        mock.assert_called_once_with(source)
 
     def test_reject_source(self):
         source = HarvestSourceFactory()
