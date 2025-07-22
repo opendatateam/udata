@@ -1,11 +1,12 @@
 import logging
 from datetime import date
-from typing import Generator
+from typing import ClassVar, Generator
 
-import lxml.etree as ET
 from flask import current_app
 from rdflib import Graph
 from rdflib.namespace import RDF
+from saxonche import PySaxonProcessor, PyXdmNode
+from typing_extensions import override
 
 from udata.core.dataservices.rdf import dataservice_from_rdf
 from udata.core.dataset.rdf import dataset_from_rdf
@@ -46,16 +47,12 @@ KNOWN_PAGINATION = (
 )
 
 CSW_NAMESPACE = "http://www.opengis.net/cat/csw/2.0.2"
-OWS_NAMESPACE = "http://www.opengis.net/ows"
 
 # Useful to patch essential failing URIs
 URIS_TO_REPLACE = {
     # See https://github.com/etalab/data.gouv.fr/issues/1151
     "https://project-open-data.cio.gov/v1.1/schema/catalog.jsonld": "https://gist.githubusercontent.com/maudetes/f019586185d6f59dcfb07f97148a1973/raw/585c3c7bf602b5a4e635b137257d0619792e2c1f/gistfile1.txt"  # noqa
 }
-
-
-SAFE_PARSER = ET.XMLParser(resolve_entities=False)
 
 
 def extract_graph(source, target, node, specs):
@@ -235,98 +232,109 @@ class DcatBackend(BaseBackend):
                 return node
         raise ValueError(f"Unable to find dataset with DCT.identifier:{item.remote_id}")
 
-    def next_record_if_should_continue(self, start, search_results):
-        next_record = int(search_results.attrib["nextRecord"])
-        matched_count = int(search_results.attrib["numberOfRecordsMatched"])
-        returned_count = int(search_results.attrib["numberOfRecordsReturned"])
-
-        # Break conditions copied gratefully from
-        # noqa https://github.com/geonetwork/core-geonetwork/blob/main/harvesters/src/main/java/org/fao/geonet/kernel/harvest/harvester/csw/Harvester.java#L338-L369
-        break_conditions = (
-            # standard CSW: A value of 0 means all records have been returned.
-            next_record == 0,
-            # Misbehaving CSW server returning a next record > matched count
-            next_record > matched_count,
-            # No results returned already
-            returned_count == 0,
-            # Current next record is lower than previous one
-            next_record < start,
-            # Enough items have been harvested already
-            self.max_items and len(self.job.items) >= self.max_items,
-        )
-
-        if any(break_conditions):
-            return None
-        else:
-            return next_record
-
 
 class CswDcatBackend(DcatBackend):
     display_name = "CSW-DCAT"
 
-    DCAT_SCHEMA = "http://www.w3.org/ns/dcat#"
+    CSW_REQUEST: ClassVar[str] = """
+    <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
+                    xmlns:ogc="http://www.opengis.net/ogc"
+                    service="CSW" version="2.0.2" resultType="results"
+                    outputSchema="http://www.w3.org/ns/dcat#"
+                    startPosition="{start}" maxRecords="25">
+      <csw:Query typeNames="csw:Record">
+        <csw:ElementSetName>full</csw:ElementSetName>
+        <ogc:SortBy>
+          <ogc:SortProperty>
+            <ogc:PropertyName>identifier</ogc:PropertyName>
+            <ogc:SortOrder>ASC</ogc:SortOrder>
+          </ogc:SortProperty>
+        </ogc:SortBy>
+      </csw:Query>
+    </csw:GetRecords>
+    """
+
+    @override
+    def inner_init(self) -> None:
+        self.saxon_proc = PySaxonProcessor(license=False)
+        self.saxon_proc.set_configuration_property(
+            "http://saxon.sf.net/feature/strip-whitespace", "all"
+        )
+        self.xpath_proc = self.saxon_proc.new_xpath_processor()
+        self.xpath_proc.declare_namespace("csw", CSW_NAMESPACE)
 
     def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
         """
         Yield all RDF pages as `Graph` from the source
         """
-        body = """<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
-                                  xmlns:gmd="http://www.isotc211.org/2005/gmd"
-                                  service="CSW" version="2.0.2" resultType="results"
-                                  startPosition="{start}" maxPosition="200"
-                                  outputSchema="{schema}">
-                    <csw:Query typeNames="gmd:MD_Metadata">
-                        <csw:ElementSetName>full</csw:ElementSetName>
-                        <ogc:SortBy xmlns:ogc="http://www.opengis.net/ogc">
-                            <ogc:SortProperty>
-                                <ogc:PropertyName>identifier</ogc:PropertyName>
-                            <ogc:SortOrder>ASC</ogc:SortOrder>
-                            </ogc:SortProperty>
-                        </ogc:SortBy>
-                    </csw:Query>
-                </csw:GetRecords>"""
-        headers = {"Content-Type": "application/xml"}
-
         page_number = 0
         start = 1
 
-        response = self.post(
-            url, data=body.format(start=start, schema=self.DCAT_SCHEMA), headers=headers
-        )
-        response.raise_for_status()
-        content = response.content
-        tree = ET.fromstring(content, parser=SAFE_PARSER)
-        if tree.tag == "{" + OWS_NAMESPACE + "}ExceptionReport":
-            raise ValueError(f"Failed to query CSW:\n{content}")
-        while tree is not None:
-            search_results = tree.find("csw:SearchResults", {"csw": CSW_NAMESPACE})
-            if search_results is None:
+        while True:
+            data = self.CSW_REQUEST.format(start=start)
+            response = self.post(url, data=data, headers={"Content-Type": "application/xml"})
+            response.raise_for_status()
+
+            text = response.text
+            tree = self.saxon_proc.parse_xml(xml_text=text)
+            self.xpath_proc.set_context(xdm_item=tree)
+
+            # Using * namespace so we don't have to enumerate ows versions
+            if self.xpath_proc.evaluate("/*:ExceptionReport"):
+                raise ValueError(f"Failed to query CSW:\n{text}")
+
+            if r := self.xpath_proc.evaluate("/csw:GetRecordsResponse/csw:SearchResults"):
+                search_results = r.head
+            else:
                 log.error(f"No search results found for {url} on page {page_number}")
-                break
-            for child in search_results:
+                return
+
+            for result in search_results.children:
                 subgraph = Graph(namespace_manager=namespace_manager)
-                subgraph.parse(data=ET.tostring(child), format=fmt)
+                doc = self.as_dcat(result).to_string("utf-8")
+                subgraph.parse(data=doc, format=fmt)
 
                 yield page_number, subgraph
+
                 if self.has_reached_max_items():
                     return
 
-            next_record = self.next_record_if_should_continue(start, search_results)
-            if not next_record:
-                break
-
-            start = next_record
             page_number += 1
+            start = self.next_position(start, search_results)
+            if not start:
+                return
 
-            tree = ET.fromstring(
-                self.post(
-                    url, data=body.format(start=start, schema=self.DCAT_SCHEMA), headers=headers
-                ).content,
-                parser=SAFE_PARSER,
-            )
+    def as_dcat(self, tree: PyXdmNode) -> PyXdmNode:
+        """
+        Return the input tree as a DCAT tree.
+        For CswDcatBackend this method is a noop.
+        For subclasses of CswDcatBackend, this method should convert the incoming tree to DCAT.
+        """
+        return tree
+
+    def next_position(self, start: int, search_results: PyXdmNode) -> int | None:
+        next_record = int(search_results.get_attribute_value("nextRecord"))
+        matched_count = int(search_results.get_attribute_value("numberOfRecordsMatched"))
+        returned_count = int(search_results.get_attribute_value("numberOfRecordsReturned"))
+
+        # Break conditions copied gratefully from
+        # noqa https://github.com/geonetwork/core-geonetwork/blob/main/harvesters/src/main/java/org/fao/geonet/kernel/harvest/harvester/csw/Harvester.java#L338-L369
+        should_break = (
+            # A value of 0 means all records have been returned (standard CSW)
+            (next_record == 0)
+            # Misbehaving CSW server returning a next record > matched count
+            or (next_record > matched_count)
+            # No results returned already
+            or (returned_count == 0)
+            # Current next record is lower than previous one
+            or (next_record < start)
+            # Enough items have been harvested already
+            or self.has_reached_max_items()
+        )
+        return None if should_break else next_record
 
 
-class CswIso19139DcatBackend(DcatBackend):
+class CswIso19139DcatBackend(CswDcatBackend):
     """
     An harvester that takes CSW ISO 19139 as input and transforms it to DCAT using SEMIC GeoDCAT-AP XSLT.
     The parsing of items is then the same as for the DcatBackend.
@@ -342,94 +350,47 @@ class CswIso19139DcatBackend(DcatBackend):
         ),
     )
 
-    ISO_SCHEMA = "http://www.isotc211.org/2005/gmd"
+    CSW_REQUEST: ClassVar[str] = """
+    <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
+                    xmlns:ogc="http://www.opengis.net/ogc"
+                    service="CSW" version="2.0.2" resultType="results"
+                    outputSchema="http://www.isotc211.org/2005/gmd"
+                    startPosition="{start}" maxRecords="10">
+      <csw:Query typeNames="csw:Record">
+        <csw:ElementSetName>full</csw:ElementSetName>
+        <csw:Constraint version="1.1.0">
+          <ogc:Filter>
+            <ogc:Or>
+              <ogc:PropertyIsEqualTo>
+                <ogc:PropertyName>dc:type</ogc:PropertyName>
+                <ogc:Literal>dataset</ogc:Literal>
+              </ogc:PropertyIsEqualTo>
+              <ogc:PropertyIsEqualTo>
+                <ogc:PropertyName>dc:type</ogc:PropertyName>
+                <ogc:Literal>service</ogc:Literal>
+              </ogc:PropertyIsEqualTo>
+              <ogc:PropertyIsEqualTo>
+                <ogc:PropertyName>dc:type</ogc:PropertyName>
+                <ogc:Literal>series</ogc:Literal>
+              </ogc:PropertyIsEqualTo>
+            </ogc:Or>
+          </ogc:Filter>
+        </csw:Constraint>
+      </csw:Query>
+    </csw:GetRecords>
+    """
 
-    def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
-        """
-        Yield all RDF pages as `Graph` from the source
-
-        Parse CSW graph querying ISO schema.
-        Use SEMIC GeoDCAT-AP XSLT to map it to a correct version.
-        See https://github.com/SEMICeu/iso-19139-to-dcat-ap for more information on the XSLT.
-        """
-        # Load XSLT
-        xsl_url = current_app.config["HARVEST_ISO19139_XSL_URL"]
-        xsl = ET.fromstring(self.get(xsl_url).content, parser=SAFE_PARSER)
-        transform = ET.XSLT(xsl)
-
-        # Start querying and parsing graph
-        # Filter on dataset or serie records
-        body = """<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
-                                  xmlns:gmd="http://www.isotc211.org/2005/gmd"
-                                  service="CSW" version="2.0.2" resultType="results"
-                                  startPosition="{start}" maxPosition="10"
-                                  outputSchema="{schema}">
-                      <csw:Query typeNames="csw:Record">
-                        <csw:ElementSetName>full</csw:ElementSetName>
-                        <csw:Constraint version="1.1.0">
-                            <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">
-                                <ogc:Or xmlns:ogc="http://www.opengis.net/ogc">
-                                    <ogc:PropertyIsEqualTo>
-                                        <ogc:PropertyName>dc:type</ogc:PropertyName>
-                                        <ogc:Literal>dataset</ogc:Literal>
-                                    </ogc:PropertyIsEqualTo>
-                                    <ogc:PropertyIsEqualTo>
-                                        <ogc:PropertyName>dc:type</ogc:PropertyName>
-                                        <ogc:Literal>service</ogc:Literal>
-                                    </ogc:PropertyIsEqualTo>
-                                    <ogc:PropertyIsEqualTo>
-                                        <ogc:PropertyName>dc:type</ogc:PropertyName>
-                                        <ogc:Literal>series</ogc:Literal>
-                                    </ogc:PropertyIsEqualTo>
-                                </ogc:Or>
-                            </ogc:Filter>
-                        </csw:Constraint>
-                    </csw:Query>
-                </csw:GetRecords>"""
-        headers = {"Content-Type": "application/xml"}
-
-        page_number = 0
-        start = 1
-
-        response = self.post(
-            url, data=body.format(start=start, schema=self.ISO_SCHEMA), headers=headers
+    @override
+    def inner_init(self) -> None:
+        super().inner_init()
+        xslt_url = current_app.config["HARVEST_ISO19139_XSLT_URL"]
+        xslt_text = self.get(xslt_url).text
+        xslt_proc = self.saxon_proc.new_xslt30_processor()
+        self.xslt_exec = xslt_proc.compile_stylesheet(stylesheet_text=xslt_text)
+        self.xslt_exec.set_parameter(
+            "CoupledResourceLookUp", self.saxon_proc.make_string_value("disabled")
         )
-        response.raise_for_status()
 
-        tree_before_transform = ET.fromstring(response.content, parser=SAFE_PARSER)
-        # Disabling CoupledResourceLookUp to prevent failure on xlink:href
-        # https://github.com/SEMICeu/iso-19139-to-dcat-ap/blob/master/documentation/HowTo.md#parameter-coupledresourcelookup
-        tree = transform(tree_before_transform, CoupledResourceLookUp="'disabled'")
-
-        while tree:
-            # We query the tree before the transformation because the XSLT remove the search results
-            # infos (useful for pagination)
-            search_results = tree_before_transform.find("csw:SearchResults", {"csw": CSW_NAMESPACE})
-            if search_results is None:
-                log.error(f"No search results found for {url} on page {page_number}")
-                break
-
-            subgraph = Graph(namespace_manager=namespace_manager)
-            subgraph.parse(ET.tostring(tree), format=fmt)
-
-            if not subgraph.subjects(RDF.type, DCAT.Dataset):
-                raise ValueError("Failed to fetch CSW content")
-
-            yield page_number, subgraph
-            if self.has_reached_max_items():
-                return
-
-            next_record = self.next_record_if_should_continue(start, search_results)
-            if not next_record:
-                break
-
-            start = next_record
-            page_number += 1
-
-            response = self.post(
-                url, data=body.format(start=start, schema=self.ISO_SCHEMA), headers=headers
-            )
-            response.raise_for_status()
-
-            tree_before_transform = ET.fromstring(response.content, parser=SAFE_PARSER)
-            tree = transform(tree_before_transform, CoupledResourceLookUp="'disabled'")
+    @override
+    def as_dcat(self, tree: PyXdmNode) -> PyXdmNode:
+        return self.xslt_exec.transform_to_value(xdm_node=tree).head

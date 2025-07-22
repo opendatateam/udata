@@ -110,6 +110,7 @@ class BaseBackend(object):
             self.job = None
         self.dryrun = dryrun
         self.max_items = max_items or current_app.config["HARVEST_MAX_ITEMS"]
+        self.inner_init()
 
     @property
     def config(self):
@@ -152,6 +153,9 @@ class BaseBackend(object):
         )
         if extra_config:
             return extra_config["value"]
+
+    def inner_init(self) -> None:
+        pass
 
     def inner_harvest(self):
         raise NotImplementedError
