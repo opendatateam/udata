@@ -1,6 +1,5 @@
 import json
 import logging
-from pprint import pprint
 from urllib.parse import urljoin
 from uuid import UUID
 
@@ -55,7 +54,6 @@ class CkanBackend(BaseBackend):
 
     def get_action(self, endpoint, fix=False, **kwargs):
         url = self.action_url(endpoint)
-        print(url)
         if fix:
             response = self.post(url, "{}", params=kwargs)
         else:
@@ -139,8 +137,6 @@ class CkanBackend(BaseBackend):
         if result.get("id"):
             item.remote_id = result["id"]
 
-        print("show some result")
-        pprint(result)
         data = self.validate(result, self.schema)
 
         # Skip if no resource
