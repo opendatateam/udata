@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix user deletion performances issues [#3388](https://github.com/opendatateam/udata/pull/3388)
 
 ## 10.8.0 (2025-07-22)
 
