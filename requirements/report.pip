@@ -165,6 +165,15 @@ faker==37.0.2
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   factory-boy
+feedgenerator==2.1.0
+    # via
+    #   -c requirements/install.pip
+    #   -c requirements/test.pip
+    #   -r requirements/install.in
+feedparser==6.0.11
+    # via
+    #   -c requirements/test.pip
+    #   -r requirements/test.in
 filelock==3.18.0
     # via
     #   -c requirements/install.pip
@@ -286,6 +295,11 @@ httpretty==1.1.4
     # via
     #   -c requirements/test.pip
     #   -r requirements/test.in
+humanfriendly==10.0
+    # via
+    #   -c requirements/install.pip
+    #   -c requirements/test.pip
+    #   -r requirements/install.in
 idna==3.10
     # via
     #   -c requirements/install.pip
@@ -480,6 +494,7 @@ pytz==2025.1
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
+    #   feedgenerator
     #   flask-babel
     #   flask-restx
 rapidfuzz==3.12.2
@@ -535,6 +550,10 @@ sentry-sdk[flask]==2.23.1
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
+sgmllib3k==1.0.0
+    # via
+    #   -c requirements/test.pip
+    #   feedparser
 six==1.17.0
     # via
     #   -c requirements/install.pip
