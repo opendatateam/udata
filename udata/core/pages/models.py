@@ -17,6 +17,9 @@ class Bloc(db.EmbeddedDocument):
 
 @generate_fields()
 class DatasetsListBloc(Bloc):
+    title = field(db.StringField(required=True))
+    subtitle = field(db.StringField())
+
     datasets = field(
         db.ListField(
             field(
