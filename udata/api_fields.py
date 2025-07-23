@@ -43,6 +43,8 @@ import flask_restx.fields as restx_fields
 import mongoengine
 import mongoengine.fields as mongo_fields
 from bson import DBRef, ObjectId
+from flask import Request
+from flask_restx import marshal
 from flask_restx.inputs import boolean
 from flask_restx.reqparse import RequestParser
 from flask_storage.mongo import ImageField as FlaskStorageImageField
@@ -59,6 +61,16 @@ lazy_reference = api.model(
         "id": restx_fields.Raw(attribute=lambda ref: ref.pk),
     },
 )
+
+
+class GenericField(restx_fields.Raw):
+    def __init__(self, fields_by_type, generic_key):
+        super().__init__(self)
+        self.fields_by_type = fields_by_type
+        self.generic_key = generic_key
+
+    def format(self, value):
+        return marshal(value, self.fields_by_type[getattr(value, self.generic_key)])
 
 
 def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | None]:
@@ -125,6 +137,7 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         # For lists, we can expose them only by showing a link to the API
         # with the results of the list to avoid listing a lot of sub-ressources
         # (for example for a dataservices with thousands of datasets).
+
         href = info.get("href", None)
         if href:
 
@@ -147,9 +160,30 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         #     2. `__additional_field_info__` of the inner field
         #     3. `__additional_field_info__` of the parent
         inner_info: dict = getattr(field.field, "__additional_field_info__", {})
-        field_read, field_write = convert_db_to_field(
-            f"{key}.inner", field.field, {**info, **inner_info, **info.get("inner_field_info", {})}
-        )
+        generic = info.get("generic", {})
+        generic_key = info.get("generic_key", "type")
+        if generic:
+            generic_fields = {
+                k: convert_db_to_field(
+                    f"{key}.{k}",
+                    field.field.__class__(v),
+                    {**info, **inner_info, **info.get("inner_field_info", {})},
+                )
+                for k, v in generic.items()
+            }
+
+            field_read = GenericField(
+                {k: v[0].model for k, v in generic_fields.items()}, generic_key
+            )
+            field_write = GenericField(
+                {k: v[1].model for k, v in generic_fields.items()}, generic_key
+            )
+        else:
+            field_read, field_write = convert_db_to_field(
+                f"{key}.inner",
+                field.field,
+                {**info, **inner_info, **info.get("inner_field_info", {})},
+            )
 
         if constructor_read is None:
             # We don't want to set the `constructor_read` if it's already set
@@ -513,10 +547,13 @@ def patch(obj, request) -> type:
     """
     from udata.mongo.engine import db
 
-    for key, value in request.json.items():
+    data = request.json if isinstance(request, Request) else request
+    for key, value in data.items():
         field = obj.__write_fields__.get(key)
         if field is not None and not field.readonly:
             model_attribute = getattr(obj.__class__, key)
+            info = getattr(model_attribute, "__additional_field_info__", {})
+
             if hasattr(model_attribute, "from_input"):
                 value = model_attribute.from_input(value)
             elif isinstance(model_attribute, mongoengine.fields.ListField) and isinstance(
@@ -547,17 +584,26 @@ def patch(obj, request) -> type:
                 mongoengine.fields.EmbeddedDocumentField,
             ):
                 embedded_field = model_attribute.document_type()
-                value = embedded_field._from_son(value)
+                value = patch(embedded_field(), value)
             elif value and isinstance(
                 model_attribute,
                 mongoengine.fields.EmbeddedDocumentListField,
             ):
-                embedded_field = model_attribute.field.document_type()
-                # MongoEngine BaseDocument has a `from_json` method for string and a private `_from_son`
-                # but there is no public `from_son` to use
-                value = [embedded_field._from_son(embedded_value) for embedded_value in value]
+                base_embedded_field = model_attribute.field.document_type()
+                generic = info.get("generic", {})
+                generic_key = info.get("generic_key", "type")
 
-            info = getattr(model_attribute, "__additional_field_info__", {})
+                objects = []
+                for embedded_value in value:
+                    # MongoEngine BaseDocument has a `from_json` method for string and a private `_from_son`
+                    # but there is no public `from_son` to use
+                    # TODO add validation on generic_key presence and value
+                    embedded_field = (
+                        generic[embedded_value[generic_key]] if generic else base_embedded_field
+                    )
+                    objects.append(patch(embedded_field(), embedded_value))
+
+                value = objects
 
             # `checks` field attribute allows to do validation from the request before setting
             # the attribute
