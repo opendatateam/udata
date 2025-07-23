@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Migrate udata-ckan [#3385](https://github.com/opendatateam/udata/pull/3385)
 
 ## 10.8.0 (2025-07-22)
 
