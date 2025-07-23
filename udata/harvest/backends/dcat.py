@@ -286,6 +286,11 @@ class CswDcatBackend(DcatBackend):
                 doc = ET.tostring(self.as_dcat(result))
                 subgraph.parse(data=doc, format=fmt)
 
+                if not subgraph.subjects(
+                    RDF.type, [DCAT.Dataset, DCAT.DatasetSeries, DCAT.DataService]
+                ):
+                    raise ValueError("Failed to fetch CSW content")
+
                 yield page_number, subgraph
 
                 if self.has_reached_max_items():
@@ -299,7 +304,7 @@ class CswDcatBackend(DcatBackend):
     def as_dcat(self, tree: ET._Element) -> ET._Element:
         """
         Return the input tree as a DCAT tree.
-        For CswDcatBackend this method is a noop.
+        For CswDcatBackend, this method return the incoming tree as-is, since it's already DCAT.
         For subclasses of CswDcatBackend, this method should convert the incoming tree to DCAT.
         """
         return tree
@@ -347,9 +352,15 @@ class CswIso19139DcatBackend(CswDcatBackend):
                     xmlns:ogc="http://www.opengis.net/ogc"
                     service="CSW" version="2.0.2" resultType="results"
                     outputSchema="http://www.isotc211.org/2005/gmd"
-                    startPosition="{start}" maxRecords="10">
+                    startPosition="{start}" maxRecords="25">
       <csw:Query typeNames="csw:Record">
         <csw:ElementSetName>full</csw:ElementSetName>
+        <ogc:SortBy>
+          <ogc:SortProperty>
+            <ogc:PropertyName>identifier</ogc:PropertyName>
+            <ogc:SortOrder>ASC</ogc:SortOrder>
+          </ogc:SortProperty>
+        </ogc:SortBy>
         <csw:Constraint version="1.1.0">
           <ogc:Filter>
             <ogc:Or>
