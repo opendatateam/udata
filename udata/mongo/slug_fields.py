@@ -172,21 +172,30 @@ def populate_slug(instance, field):
     # Ensure uniqueness
     if field.unique:
         base_slug = slug
-        index = 1
         qs = instance.__class__.objects
         if previous:
             qs = qs(id__ne=previous.id)
 
-        def exists(s):
-            return qs(**{field.db_field: s}).clear_cls_query().limit(1).count(True) > 0
+        def exists(slug):
+            return qs(**{field.db_field: slug}).clear_cls_query().limit(1).count(True) > 0
 
-        while exists(slug):
-            # keep space for index suffix, trim slug if needed
-            slug_overflow = len("{0}-{1}".format(base_slug, index)) - field.max_length
-            if slug_overflow >= 1:
-                base_slug = base_slug[:-slug_overflow]
+        def get_existing_slug_suffixes(slug):
+            qs_suffix = qs(slug__regex=f"^{slug}-\d*$").clear_cls_query().only(field.db_field)
+            return (getattr(obj, field.db_field) for obj in qs_suffix)
+
+        if exists(base_slug):
+            # Find all existing slugs with suffixes
+            existing_slugs = set(sorted(get_existing_slug_suffixes(slug)))
+
+            index = 1
             slug = "{0}-{1}".format(base_slug, index)
-            index += 1
+            while slug in existing_slugs:
+                # keep space for index suffix, trim slug if needed
+                slug_overflow = len("{0}-{1}".format(base_slug, index)) - field.max_length
+                if slug_overflow >= 1:
+                    base_slug = base_slug[:-slug_overflow]
+                slug = "{0}-{1}".format(base_slug, index)
+                index += 1
 
         if is_uuid(slug):
             slug = "{0}-uuid".format(slug)
