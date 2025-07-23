@@ -1,5 +1,6 @@
 """
-This migration updates Topic.featured to False when it is None.
+This migration does a `count_discussions` on all objets with discussions.
+It follows the change of `metrics.discussions` to track all discussions and not onyl the opened ones.
 """
 
 import logging
