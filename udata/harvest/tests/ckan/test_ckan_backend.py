@@ -3,13 +3,13 @@ import random
 from datetime import date
 
 import pytest
-from udata_ckan.harvesters import ALLOWED_RESOURCE_TYPES
-from udata_ckan.schemas.ckan import RESOURCE_TYPES
 
 from udata.app import create_app
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import GeoZoneFactory
 from udata.harvest import actions
+from udata.harvest.backends.ckan.harvesters import ALLOWED_RESOURCE_TYPES
+from udata.harvest.backends.ckan.schemas.ckan import RESOURCE_TYPES
 from udata.harvest.tests.factories import HarvestSourceFactory
 from udata.models import Dataset
 from udata.settings import Defaults, Testing
