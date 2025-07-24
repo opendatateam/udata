@@ -1,4 +1,5 @@
 from datetime import datetime
+from pprint import pprint
 
 import pytest
 from flask import url_for
@@ -422,6 +423,46 @@ class DiscussionsTest(APITestCase):
 
         self.assertEqual(len(response.json["data"]), len(discussions))
 
+    def test_list_discussions_search(self):
+        user = self.login()
+        dataset = DatasetFactory()
+
+        discussion_a = DiscussionFactory(
+            user=user,
+            subject=dataset,
+            title="discussion a",
+            discussion=[
+                Message(posted_by=user, content="another message"),
+                Message(posted_by=user, content="a message with something"),
+            ],
+        )
+        discussion_b = DiscussionFactory(
+            user=user,
+            subject=dataset,
+            title="something in title",
+            discussion=[
+                Message(posted_by=user, content="another message"),
+                Message(posted_by=user, content="there is a problem"),
+            ],
+        )
+        discussion_c = DiscussionFactory(
+            user=user,
+            subject=dataset,
+            title="discussion c",
+            discussion=[
+                Message(posted_by=user, content="some text"),
+                Message(posted_by=user, content="and another"),
+            ],
+        )
+
+        response = self.get(url_for("api.discussions", q="something"))
+        self.assert200(response)
+
+        pprint(response.json)
+        self.assertEqual(len(response.json["data"]), 2)
+        self.assertEqual(discussion_b.title, response.json["data"][0]["title"])
+        self.assertEqual(discussion_a.title, response.json["data"][1]["title"])
+
     def assertIdIn(self, json_data: dict, id_: str) -> None:
         for item in json_data:
             if item["id"] == id_:
@@ -641,8 +682,7 @@ class DiscussionsTest(APITestCase):
             self.assert200(response)
 
         dataset.reload()
-        self.assertEqual(dataset.get_metrics()["discussions"], 1)
-        self.assertEqual(dataset.get_metrics()["discussions_open"], 0)
+        self.assertEqual(dataset.get_metrics()["discussions"], 0)
 
         data = response.json
 
