@@ -172,21 +172,38 @@ def populate_slug(instance, field):
     # Ensure uniqueness
     if field.unique:
         base_slug = slug
-        index = 1
         qs = instance.__class__.objects
         if previous:
             qs = qs(id__ne=previous.id)
 
-        def exists(s):
-            return qs(**{field.db_field: s}).clear_cls_query().limit(1).count(True) > 0
+        def exists(slug):
+            return qs(**{field.db_field: slug}).clear_cls_query().limit(1).count(True) > 0
 
-        while exists(slug):
-            # keep space for index suffix, trim slug if needed
+        def get_existing_slug_suffixes(slug):
+            qs_suffix = qs(slug__regex=f"^{slug}-\d*$").clear_cls_query().only(field.db_field)
+            return [getattr(obj, field.db_field) for obj in qs_suffix]
+
+        def trim_base_slug(base_slug, index):
             slug_overflow = len("{0}-{1}".format(base_slug, index)) - field.max_length
             if slug_overflow >= 1:
                 base_slug = base_slug[:-slug_overflow]
-            slug = "{0}-{1}".format(base_slug, index)
-            index += 1
+            return base_slug
+
+        if exists(base_slug):
+            # We'll iterate to get the first free slug suffix
+            index = 1
+            existing_slugs = None
+            while True:
+                # Keep space for index suffix, trim slug if needed
+                trimmed_slug = trim_base_slug(base_slug, index)
+                # Find all existing slugs with suffixes
+                if existing_slugs is None or trimmed_slug != base_slug:
+                    base_slug = trimmed_slug
+                    existing_slugs = set(sorted(get_existing_slug_suffixes(base_slug)))
+                slug = "{0}-{1}".format(base_slug, index)
+                if slug not in existing_slugs:
+                    break
+                index += 1
 
         if is_uuid(slug):
             slug = "{0}-uuid".format(slug)

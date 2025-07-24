@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Fix user deletion performances issues [#3388](https://github.com/opendatateam/udata/pull/3388)
 - Add search to discussions [#3384](https://github.com/opendatateam/udata/pull/3384)
 - Separate metrics for opened discussions [#3370](https://github.com/opendatateam/udata/pull/3370)
 
