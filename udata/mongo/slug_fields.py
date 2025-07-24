@@ -181,20 +181,28 @@ def populate_slug(instance, field):
 
         def get_existing_slug_suffixes(slug):
             qs_suffix = qs(slug__regex=f"^{slug}-\d*$").clear_cls_query().only(field.db_field)
-            return (getattr(obj, field.db_field) for obj in qs_suffix)
+            return [getattr(obj, field.db_field) for obj in qs_suffix]
+
+        def trim_base_slug(base_slug, index):
+            slug_overflow = len("{0}-{1}".format(base_slug, index)) - field.max_length
+            if slug_overflow >= 1:
+                base_slug = base_slug[:-slug_overflow]
+            return base_slug
 
         if exists(base_slug):
-            # Find all existing slugs with suffixes
-            existing_slugs = set(sorted(get_existing_slug_suffixes(slug)))
-
+            # We'll iterate to get the first free slug suffix
             index = 1
-            slug = "{0}-{1}".format(base_slug, index)
-            while slug in existing_slugs:
-                # keep space for index suffix, trim slug if needed
-                slug_overflow = len("{0}-{1}".format(base_slug, index)) - field.max_length
-                if slug_overflow >= 1:
-                    base_slug = base_slug[:-slug_overflow]
+            existing_slugs = None
+            while True:
+                # Keep space for index suffix, trim slug if needed
+                trimmed_slug = trim_base_slug(base_slug, index)
+                # Find all existing slugs with suffixes
+                if existing_slugs is None or trimmed_slug != base_slug:
+                    base_slug = trimmed_slug
+                    existing_slugs = set(sorted(get_existing_slug_suffixes(base_slug)))
                 slug = "{0}-{1}".format(base_slug, index)
+                if slug not in existing_slugs:
+                    break
                 index += 1
 
         if is_uuid(slug):
