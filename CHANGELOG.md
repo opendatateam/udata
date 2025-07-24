@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Separate metrics for opened discussions [#3370](https://github.com/opendatateam/udata/pull/3370)
+- Fix not returning 404 for harvest sources [#3382](https://github.com/opendatateam/udata/pull/3382/)
 
 ## 10.8.0 (2025-07-22)
 
@@ -15,7 +16,6 @@
 - Fix duplicate contact point creation [#3379](https://github.com/opendatateam/udata/pull/3379) [#3381](https://github.com/opendatateam/udata/pull/3381)
 - Atomic `get_or_create` [#3366](https://github.com/opendatateam/udata/pull/3366)
 - Add contact points suggest [#3376](https://github.com/opendatateam/udata/pull/3376)
-- Fix not returning 404 for harvest sources [#3382](https://github.com/opendatateam/udata/pull/3382/)
 
 ## 10.7.0 (2025-07-17)
 
