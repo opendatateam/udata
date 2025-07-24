@@ -39,26 +39,37 @@ class TopicForm(ModelForm):
 
     elements = fields.NestedModelList(TopicElementForm)
 
+    @property
+    def data(self):
+        """Override to exclude non-model fields from data"""
+        # Get the base data from WTForms
+        base_data = super().data
+        # Filter out non-model fields
+        return {name: value for name, value in base_data.items() if name != "elements"}
+
+    def populate_obj(self, obj):
+        """Override populate_obj to exclude non-model fields"""
+        # Only populate model fields, skip elements
+        for name, field in self._fields.items():
+            if name != "elements":
+                field.populate_obj(obj, name)
+
     def save(self, commit=True, **kwargs):
         """Custom save to handle TopicElement creation properly"""
-        # Handle elements manually before saving the topic
-        saved_elements = []
-        if self.elements.data:
-            for element_data in self.elements.data:
-                # Create and populate TopicElement instance
-                element_form = TopicElementForm(data=element_data)
-                if element_form.validate():
-                    element = element_form.save()  # This will save the TopicElement
-                    saved_elements.append(element)
+        # Store elements data before parent save
+        elements_data = self.elements.data
 
-        # Save the topic with the default behavior but without committing
-        topic = super().save(commit=False, **kwargs)
+        # Use parent save method (elements field is excluded via populate_obj)
+        topic = super().save(commit=commit, **kwargs)
 
-        # Replace elements with our saved ones
-        topic.elements = saved_elements
-
-        if commit:
-            topic.save()
+        # Create elements and associate them with the topic
+        for element_data in elements_data or []:
+            element_form = TopicElementForm(data=element_data)
+            if element_form.validate():
+                element = element_form.save(commit=False)
+                element.topic = topic
+                if commit:
+                    element.save()
 
         return topic
 

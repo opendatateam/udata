@@ -14,8 +14,9 @@ from udata.core.topic.factories import (
     TopicElementFactory,
     TopicElementReuseFactory,
     TopicFactory,
+    TopicWithElementsFactory,
 )
-from udata.core.topic.models import Topic
+from udata.core.topic.models import Topic, TopicElement
 from udata.core.user.factories import UserFactory
 from udata.tests.api import APITestCase
 from udata.tests.api.test_datasets_api import SAMPLE_GEOM
@@ -156,7 +157,7 @@ class TopicsListAPITest(APITestCase):
 
     def test_topic_api_get(self):
         """It should fetch a topic from the API"""
-        topic = TopicFactory()
+        topic = TopicWithElementsFactory()
         topic_response = self.get(url_for("apiv2.topic", topic=topic))
         assert topic_response.status_code == 200
         assert "spatial" in topic_response.json
@@ -166,11 +167,14 @@ class TopicsListAPITest(APITestCase):
 
         response = self.get(topic_response.json["elements"]["href"])
         data = response.json
-        assert all(str(elt.id) in (_elt["id"] for _elt in data["data"]) for elt in topic.elements)
+        assert all(
+            str(elt.id) in (_elt["id"] for _elt in data["data"])
+            for elt in TopicElement.objects(topic=topic)
+        )
 
     def test_topic_api_create(self):
         """It should create a topic from the API"""
-        data = TopicFactory.as_payload()
+        data = TopicWithElementsFactory.as_payload()
         self.login()
         response = self.post(url_for("apiv2.topics_list"), data)
         self.assert201(response)
@@ -178,12 +182,12 @@ class TopicsListAPITest(APITestCase):
         topic = Topic.objects.first()
         for element in data["elements"]:
             assert element["element"]["id"] in (
-                str(elt.fetch().element.id) for elt in topic.elements
+                str(elt.element.id) for elt in TopicElement.objects(topic=topic)
             )
 
     def test_topic_api_create_as_org(self):
         """It should create a topic as organization from the API"""
-        data = TopicFactory.as_payload()
+        data = TopicWithElementsFactory.as_payload()
         user = self.login()
         member = Member(user=user, role="editor")
         org = OrganizationFactory(members=[member])
@@ -199,7 +203,7 @@ class TopicsListAPITest(APITestCase):
     def test_topic_api_create_spatial_zone(self):
         paca, _, _ = create_geozones_fixtures()
         granularity = spatial_granularities[0][0]
-        data = TopicFactory.as_payload()
+        data = TopicWithElementsFactory.as_payload()
         data["spatial"] = {
             "zones": [paca.id],
             "granularity": granularity,
@@ -214,7 +218,7 @@ class TopicsListAPITest(APITestCase):
 
     def test_topic_api_create_spatial_geom(self):
         granularity = spatial_granularities[0][0]
-        data = TopicFactory.as_payload()
+        data = TopicWithElementsFactory.as_payload()
         data["spatial"] = {
             "geom": SAMPLE_GEOM,
             "granularity": granularity,
@@ -232,7 +236,7 @@ class TopicAPITest(APITestCase):
     def test_topic_api_update(self):
         """It should update a topic from the API"""
         owner = self.login()
-        topic = TopicFactory(owner=owner, elements=[])
+        topic = TopicFactory(owner=owner)
         data = topic.to_dict()
         data["description"] = "new description"
         response = self.put(url_for("apiv2.topic", topic=topic), data)
@@ -245,7 +249,7 @@ class TopicAPITest(APITestCase):
     def test_topic_api_update_perm(self):
         """It should not update a topic from the API"""
         owner = UserFactory()
-        topic = TopicFactory(owner=owner, elements=[])
+        topic = TopicFactory(owner=owner)
         user = self.login()
         data = topic.to_dict()
         data["owner"] = user.to_dict()
@@ -309,16 +313,14 @@ class TopicAPITest(APITestCase):
 
 class TopicElementsAPITest(APITestCase):
     def test_elements_list(self):
-        reuse_elt = TopicElementReuseFactory(tags=["foo", "bar"], extras={"foo": "bar"})
-        dataset_elt = TopicElementDatasetFactory(tags=["foo", "bar"], extras={"foo": "bar"})
-        no_elt_elt = TopicElementFactory(tags=["foo", "bar"], extras={"foo": "bar"})
-        topic = TopicFactory(
-            elements=[
-                dataset_elt,
-                reuse_elt,
-                no_elt_elt,
-            ]
+        topic = TopicFactory()
+        reuse_elt = TopicElementReuseFactory(
+            topic=topic, tags=["foo", "bar"], extras={"foo": "bar"}
         )
+        dataset_elt = TopicElementDatasetFactory(
+            topic=topic, tags=["foo", "bar"], extras={"foo": "bar"}
+        )
+        TopicElementFactory(topic=topic, tags=["foo", "bar"], extras={"foo": "bar"})
         response = self.get(url_for("apiv2.topic_elements", topic=topic))
         assert response.status_code == 200
         data = response.json["data"]
@@ -335,7 +337,9 @@ class TopicElementsAPITest(APITestCase):
         assert no_elt["element"] is None
 
     def test_elements_list_pagination(self):
-        topic = TopicFactory(elements=[TopicElementFactory() for _ in range(DEFAULT_PAGE_SIZE + 1)])
+        topic = TopicFactory()
+        for _ in range(DEFAULT_PAGE_SIZE + 1):
+            TopicElementFactory(topic=topic)
         response = self.get(url_for("apiv2.topic_elements", topic=topic))
         assert response.status_code == 200
         assert response.json["next_page"] is not None
@@ -346,25 +350,23 @@ class TopicElementsAPITest(APITestCase):
         assert response.json["data"][0]["id"] not in first_page_ids
 
     def test_elements_list_search(self):
+        topic = TopicFactory()
         matches_1 = [
-            TopicElementFactory(title="Apprentissage automatique et algorithmes"),
+            TopicElementFactory(topic=topic, title="Apprentissage automatique et algorithmes"),
             TopicElementFactory(
-                description="Ceci concerne l'apprentissage automatique et les algorithmes d'intelligence artificielle"
+                topic=topic,
+                description="Ceci concerne l'apprentissage automatique et les algorithmes d'intelligence artificielle",
             ),
-            TopicElementFactory(title="algorithmes d'apprentissage"),
+            TopicElementFactory(topic=topic, title="algorithmes d'apprentissage"),
         ]
         # Diacritics test
-        matches_2 = [
-            TopicElementFactory(title="Système de données"),
-            TopicElementFactory(description="Création d'un modèle"),
-        ]
-        no_matches = [
-            TopicElementFactory(title="ne devrait pas apparaître"),
-            TopicElementFactory(description="contenu non pertinent"),
-            TopicElementFactory(title="appr algo"),  # Partial words that regex might catch
-        ]
+        TopicElementFactory(topic=topic, title="Système de données")
+        TopicElementFactory(topic=topic, description="Création d'un modèle")
 
-        topic = TopicFactory(elements=[*matches_1, *matches_2, *no_matches])
+        # Create non-matching elements
+        TopicElementFactory(topic=topic, title="ne devrait pas apparaître")
+        TopicElementFactory(topic=topic, description="contenu non pertinent")
+        TopicElementFactory(topic=topic, title="appr algo")  # Partial words that regex might catch
 
         # Test with French phrase
         response = self.get(
@@ -385,10 +387,10 @@ class TopicElementsAPITest(APITestCase):
         assert response.json["total"] >= 1
 
     def test_elements_list_class_filter(self):
-        dataset_elt = TopicElementDatasetFactory()
-        reuse_elt = TopicElementReuseFactory()
-        no_elt = TopicElementFactory()
-        topic = TopicFactory(elements=[dataset_elt, reuse_elt, no_elt])
+        topic = TopicFactory()
+        dataset_elt = TopicElementDatasetFactory(topic=topic)
+        reuse_elt = TopicElementReuseFactory(topic=topic)
+        no_elt = TopicElementFactory(topic=topic)
 
         response = self.get(url_for("apiv2.topic_elements", topic=topic, **{"class": "Dataset"}))
         assert response.status_code == 200
@@ -410,10 +412,10 @@ class TopicElementsAPITest(APITestCase):
         assert response.json["total"] == 0
 
     def test_elements_list_tags_filter(self):
-        match_tag = TopicElementFactory(tags=["is-a-match-1", "is-a-match-2"])
-        match_tag_2 = TopicElementFactory(tags=["is-a-match-2"])
-        no_match_tag = TopicElementFactory(tags=["is-not-a-match"])
-        topic = TopicFactory(elements=[match_tag, match_tag_2, no_match_tag])
+        topic = TopicFactory()
+        match_tag = TopicElementFactory(topic=topic, tags=["is-a-match-1", "is-a-match-2"])
+        match_tag_2 = TopicElementFactory(topic=topic, tags=["is-a-match-2"])
+        no_match_tag = TopicElementFactory(topic=topic, tags=["is-not-a-match"])
         response = self.get(
             url_for("apiv2.topic_elements", topic=topic, tag=["is-a-match-1", "is-a-match-2"])
         )
@@ -425,7 +427,7 @@ class TopicElementsAPITest(APITestCase):
 
     def test_add_elements(self):
         owner = self.login()
-        topic = TopicFactory(owner=owner)
+        topic = TopicWithElementsFactory(owner=owner)
         dataset = DatasetFactory()
         reuse = ReuseFactory()
         response = self.post(
@@ -458,11 +460,8 @@ class TopicElementsAPITest(APITestCase):
         topic.reload()
         assert len(topic.elements) == 6
 
-        # Fetch all elements to resolve lazy references
-        fetched_elements = [elt.fetch() for elt in topic.elements]
-
         dataset_elt = next(
-            elt for elt in fetched_elements if elt.element and elt.element.id == dataset.id
+            elt for elt in topic.elements if elt.element and elt.element.id == dataset.id
         )
         assert dataset_elt.title == "A dataset"
         assert dataset_elt.description == "A dataset description"
@@ -470,7 +469,7 @@ class TopicElementsAPITest(APITestCase):
         assert dataset_elt.extras == {"extra": "value"}
 
         reuse_elt = next(
-            elt for elt in fetched_elements if elt.element and elt.element.id == reuse.id
+            elt for elt in topic.elements if elt.element and elt.element.id == reuse.id
         )
         assert reuse_elt.title == "A reuse"
         assert reuse_elt.description == "A reuse description"
@@ -478,7 +477,7 @@ class TopicElementsAPITest(APITestCase):
         assert reuse_elt.extras == {"extra": "value"}
 
         no_elt_elt = next(
-            elt for elt in fetched_elements if elt.title == "An element without element"
+            elt for elt in topic.elements if elt.title == "An element without element"
         )
         assert no_elt_elt.description == "An element description"
         assert no_elt_elt.tags == ["tag1", "tag2"]
@@ -527,7 +526,7 @@ class TopicElementsAPITest(APITestCase):
     def test_clear_elements(self):
         """It should remove all elements from a Topic"""
         owner = self.login()
-        topic = TopicFactory(owner=owner)
+        topic = TopicWithElementsFactory(owner=owner)
         self.assertGreater(len(topic.elements), 0)
         response = self.delete(url_for("apiv2.topic_elements", topic=topic))
         self.assert204(response)
@@ -538,7 +537,7 @@ class TopicElementsAPITest(APITestCase):
 class TopicElementAPITest(APITestCase):
     def test_delete_element(self):
         owner = self.login()
-        topic = TopicFactory(owner=owner)
+        topic = TopicWithElementsFactory(owner=owner)
         element = topic.elements[0]
         response = self.delete(url_for("apiv2.topic_element", topic=topic, element_id=element.id))
         assert response.status_code == 204
@@ -547,7 +546,7 @@ class TopicElementAPITest(APITestCase):
         assert element.id not in (elt.id for elt in topic.elements)
 
     def test_delete_element_perm(self):
-        topic = TopicFactory(owner=UserFactory())
+        topic = TopicWithElementsFactory(owner=UserFactory())
         element = topic.elements[0]
         self.login()
         response = self.delete(url_for("apiv2.topic_element", topic=topic, element_id=element.id))
@@ -555,9 +554,9 @@ class TopicElementAPITest(APITestCase):
 
     def test_update_element(self):
         owner = self.login()
-        topic = TopicFactory(elements=[TopicElementFactory(title="foo")], owner=owner)
+        topic = TopicFactory(owner=owner)
         dataset = DatasetFactory()
-        element = topic.elements[0]
+        element = TopicElementFactory(topic=topic, title="foo")
         response = self.put(
             url_for("apiv2.topic_element", topic=topic, element_id=element.id),
             {
@@ -572,7 +571,7 @@ class TopicElementAPITest(APITestCase):
         assert response.json["title"] == "bar"
         topic.reload()
         assert len(topic.elements) == 1
-        element = topic.elements[0].fetch()
+        element = topic.elements.first()
         assert element.title == "bar"
         assert element.description == "baz"
         assert element.tags == ["baz"]
@@ -581,8 +580,8 @@ class TopicElementAPITest(APITestCase):
 
     def test_update_element_no_element(self):
         owner = self.login()
-        topic = TopicFactory(elements=[TopicElementFactory(title="foo")], owner=owner)
-        element = topic.elements[0]
+        topic = TopicFactory(owner=owner)
+        element = TopicElementFactory(topic=topic, title="foo")
         response = self.put(
             url_for("apiv2.topic_element", topic=topic, element_id=element.id),
             {
@@ -598,7 +597,7 @@ class TopicElementAPITest(APITestCase):
         assert response.json["element"] is None
         topic.reload()
         assert len(topic.elements) == 1
-        element = topic.elements[0].fetch()
+        element = topic.elements.first()
         assert element.title == "bar"
         assert element.description == "baz"
         assert element.tags == ["baz"]

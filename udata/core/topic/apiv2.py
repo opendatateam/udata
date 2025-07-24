@@ -1,7 +1,6 @@
 import logging
 
 import mongoengine
-from bson import ObjectId
 from flask import request
 from flask_security import current_user
 
@@ -19,7 +18,6 @@ from udata.core.topic.forms import TopicElementForm, TopicForm
 from udata.core.topic.models import Topic, TopicElement
 from udata.core.topic.parsers import TopicApiParser, TopicElementsParser
 from udata.core.topic.permissions import TopicEditPermission
-from udata.utils import get_by
 
 DEFAULT_SORTING = "-created_at"
 
@@ -101,7 +99,7 @@ class TopicElementsAPI(API):
         """Get a given topic's elements with pagination."""
         args = elements_parser.parse()
         elements = elements_parser.parse_filters(
-            TopicElement.objects(id__in=[e.pk for e in topic.elements]),
+            topic.elements,
             args,
         )
         return elements.paginate(args["page"], args["page_size"])
@@ -138,7 +136,8 @@ class TopicElementsAPI(API):
             apiv2.abort(400, errors=errors)
 
         for element in elements:
-            topic.elements.insert(0, element)
+            element.topic = topic
+            element.save()
 
         topic.save()
 
@@ -157,8 +156,7 @@ class TopicElementsAPI(API):
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
 
-        topic.elements = []
-        topic.save()
+        topic.elements.delete()
 
         return None, 204
 
@@ -178,12 +176,8 @@ class TopicElementAPI(API):
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
 
-        element = get_by(topic.elements, "pk", ObjectId(element_id))
-        if not element:
-            apiv2.abort(404, "Element not found in topic")
-
-        topic.elements.remove(element)
-        topic.save()
+        element = TopicElement.objects.get_or_404(pk=element_id)
+        element.delete()
 
         return None, 204
 
@@ -199,11 +193,7 @@ class TopicElementAPI(API):
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
 
-        element_ref = get_by(topic.elements, "pk", ObjectId(element_id))
-        if not element_ref:
-            apiv2.abort(404, "Element not found in topic")
-
-        element = element_ref.fetch()
+        element = TopicElement.objects.get_or_404(pk=element_id)
         form = apiv2.validate(TopicElementForm, element)
         form.populate_obj(element)
         element.save()

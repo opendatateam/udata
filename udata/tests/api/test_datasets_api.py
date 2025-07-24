@@ -186,8 +186,8 @@ class DatasetAPITest(APITestCase):
         format_dataset = DatasetFactory(resources=[ResourceFactory(format="my-format")])
         featured_dataset = DatasetFactory(featured=True)
         topic_dataset = DatasetFactory()
-        topic_element = TopicElementDatasetFactory(element=topic_dataset)
-        topic = TopicFactory(elements=[topic_element])
+        topic = TopicFactory()
+        TopicElementDatasetFactory(element=topic_dataset, topic=topic)
 
         paca, _, _ = create_geozones_fixtures()
         geozone_dataset = DatasetFactory(spatial=SpatialCoverageFactory(zones=[paca.id]))

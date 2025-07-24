@@ -3,7 +3,12 @@ from mongoengine.errors import ValidationError
 
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.topic.activities import UserCreatedTopic, UserUpdatedTopic
-from udata.core.topic.factories import TopicElementDatasetFactory, TopicElementFactory, TopicFactory
+from udata.core.topic.factories import (
+    TopicElementDatasetFactory,
+    TopicElementFactory,
+    TopicFactory,
+    TopicWithElementsFactory,
+)
 from udata.core.topic.models import Topic
 from udata.search import reindex
 from udata.tests.helpers import assert_emit
@@ -28,17 +33,17 @@ class TopicModelTest:
     modules = ["admin"]
 
     def test_pre_save(self, job_reindex):
-        topic = TopicFactory(elements=[])
+        topic = TopicFactory()
 
         topic.name = "new_name"
         topic.save()
         job_reindex.assert_not_called()
 
-        topic.elements = [TopicElementDatasetFactory()]
+        TopicElementDatasetFactory(topic=topic)
         topic.save()
         job_reindex.assert_called()
 
-        topic.elements = []
+        topic.elements.delete()
         topic.save()
         job_reindex.assert_called()
 
@@ -46,7 +51,7 @@ class TopicModelTest:
     def test_pre_save_reindex(self, job_reindex_undelayed):
         """This will call the real reindex method and thus bubble up errors"""
         # creates a topic with elements, thus calls reindex
-        TopicFactory()
+        TopicWithElementsFactory()
         job_reindex_undelayed.assert_called()
 
     def test_topic_activities(self, api, mocker):
@@ -68,4 +73,5 @@ class TopicModelTest:
     def test_topic_element_wrong_class(self):
         # use a model instance that is not supported
         with pytest.raises(ValidationError):
-            TopicFactory(elements=[TopicElementFactory(element=DiscussionFactory())])
+            topic = TopicFactory()
+            TopicElementFactory(topic=topic, element=DiscussionFactory())
