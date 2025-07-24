@@ -9,7 +9,7 @@ from udata.core.discussions.models import Discussion
 from udata.core.topic.api_fields import (
     element_fields,
     element_page_fields,
-    topic_add_elements_fields,
+    nested_element_fields,
     topic_fields,
     topic_input_fields,
     topic_page_fields,
@@ -106,7 +106,7 @@ class TopicElementsAPI(API):
 
     @apiv2.secure
     @apiv2.doc("topic_elements_create")
-    @apiv2.expect([topic_add_elements_fields])
+    @apiv2.expect([nested_element_fields])
     @apiv2.marshal_with(topic_fields)
     @apiv2.response(400, "Expecting a list")
     @apiv2.response(404, "Topic not found")

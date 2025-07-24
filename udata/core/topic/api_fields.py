@@ -93,11 +93,3 @@ topic_input_fields = apiv2.clone(
         "elements": fields.List(fields.Nested(element_fields, description="The topic elements")),
     },
 )
-
-topic_add_elements_fields = apiv2.model(
-    "TopicElementsAdd",
-    {
-        "id": fields.String(description="Id of the item to add", required=True),
-    },
-    location="json",
-)
