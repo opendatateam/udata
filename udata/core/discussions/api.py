@@ -130,6 +130,7 @@ discussion_page_fields = api.model("DiscussionPage", fields.pager(discussion_fie
 parser = api.parser()
 sorting_keys: list[str] = ["created", "title", "closed", "discussion.posted_on"]
 sorting_choices: list[str] = sorting_keys + ["-" + k for k in sorting_keys]
+parser.add_argument("q", type=str, location="args", help="The search query")
 parser.add_argument(
     "sort",
     type=str,
@@ -331,6 +332,11 @@ class DiscussionsAPI(API):
             discussions = discussions(closed=None)
         elif args["closed"] is True:
             discussions = discussions(closed__ne=None)
+
+        if args["q"]:
+            phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
+            discussions = discussions.search_text(phrase_query).order_by("$text_score")
+
         discussions = discussions.order_by(args["sort"])
         return discussions.paginate(args["page"], args["page_size"])
 
