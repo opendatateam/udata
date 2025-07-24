@@ -444,7 +444,7 @@ class DiscussionsTest(APITestCase):
                 Message(posted_by=user, content="there is a problem"),
             ],
         )
-        discussion_c = DiscussionFactory(
+        DiscussionFactory(
             user=user,
             subject=dataset,
             title="discussion c",
