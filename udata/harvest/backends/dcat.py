@@ -235,6 +235,11 @@ class DcatBackend(BaseBackend):
 
 
 class CswDcatBackend(DcatBackend):
+    """
+    CSW harvester fetching records as DCAT.
+    The parsing of items is then the same as for the DcatBackend.
+    """
+
     display_name = "CSW-DCAT"
 
     CSW_REQUEST: ClassVar[str] = """
@@ -351,11 +356,12 @@ class CswDcatBackend(DcatBackend):
 
 class CswIso19139DcatBackend(CswDcatBackend):
     """
-    An harvester that takes CSW ISO 19139 as input and transforms it to DCAT using SEMIC GeoDCAT-AP XSLT.
+    CSW harvester fetching records as ISO-19139 and using XSLT to convert them to DCAT.
     The parsing of items is then the same as for the DcatBackend.
     """
 
     display_name = "CSW-ISO-19139"
+
     extra_configs = (
         HarvestExtraConfig(
             _("Remote URL prefix"),
