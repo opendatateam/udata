@@ -108,6 +108,9 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         params["enum"] = field.choices
         if field.validation:
             params["validation"] = validation_to_type(field.validation)
+    elif isinstance(field, mongo_fields.UUIDField):
+        # TODO add validation?
+        constructor = restx_fields.String
     elif isinstance(field, mongo_fields.ObjectIdField):
         constructor = restx_fields.String
     elif isinstance(field, mongo_fields.FloatField):

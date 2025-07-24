@@ -10,6 +10,7 @@ from udata.models import db
 
 @generate_fields()
 class Bloc(db.EmbeddedDocument):
+    id = field(db.AutoUUIDField(primary_key=True))
     type = field(db.StringField(required=True))
 
     meta = {"allow_inheritance": True}
