@@ -100,6 +100,7 @@ class Topic(db.Datetimed, Auditable, db.Document, Owned):
             str(elem["element"]["_ref"].id)
             for elem in TopicElement.objects.filter(topic=self, __raw__={"element._cls": cls})
             .fields(element=1)
+            .no_dereference()
             .as_pymongo()
         )
 
