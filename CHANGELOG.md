@@ -3,6 +3,8 @@
 ## Current (in progress)
 
 - Migrate udata-ckan [#3385](https://github.com/opendatateam/udata/pull/3385)
+- Add search to discussions [#3384](https://github.com/opendatateam/udata/pull/3384)
+- Separate metrics for opened discussions [#3370](https://github.com/opendatateam/udata/pull/3370)
 
 ## 10.8.0 (2025-07-22)
 

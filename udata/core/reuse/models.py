@@ -151,6 +151,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
 
     __metrics_keys__ = [
         "discussions",
+        "discussions_open",
         "datasets",
         "followers",
         "followers_by_months",
@@ -287,7 +288,8 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
     def count_discussions(self):
         from udata.models import Discussion
 
-        self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()
+        self.metrics["discussions"] = Discussion.objects(subject=self).count()
+        self.metrics["discussions_open"] = Discussion.objects(subject=self, closed=None).count()
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):
