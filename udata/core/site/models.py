@@ -28,6 +28,8 @@ class Site(WithMetrics, db.Document):
     themes = db.DictField()
     settings = db.EmbeddedDocumentField(SiteSettings, default=SiteSettings)
     datasets_page = db.ReferenceField("Page")
+    reuses_page = db.ReferenceField("Page")
+    dataservices_page = db.ReferenceField("Page")
 
     __metrics_keys__ = [
         "max_dataset_followers",
