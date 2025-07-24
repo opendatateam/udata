@@ -1,0 +1,35 @@
+# Translations template for udata-ckan.
+# Copyright (C) 2018 ORGANIZATION
+# This file is distributed under the same license as the udata-ckan project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: udata-ckan 1.1.2.dev0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2018-08-01 18:30+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.0\n"
+
+#: udata_ckan/harvesters.py:111
+msgid "Organization"
+msgstr ""
+
+#: udata_ckan/harvesters.py:112
+msgid "A CKAN Organization name"
+msgstr ""
+
+#: udata_ckan/harvesters.py:113
+msgid "Tag"
+msgstr ""
+
+#: udata_ckan/harvesters.py:113
+msgid "A CKAN tag name"
+msgstr ""
+

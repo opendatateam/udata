@@ -155,6 +155,8 @@ geomet==1.1.0
     # via -r requirements/install.in
 html2text==2024.2.26
     # via -r requirements/install.in
+humanfriendly==10.0
+    # via -r requirements/install.in
 idna==3.10
     # via
     #   email-validator
