@@ -1,5 +1,4 @@
 from datetime import datetime
-from pprint import pprint
 
 import pytest
 from flask import url_for
@@ -458,7 +457,6 @@ class DiscussionsTest(APITestCase):
         response = self.get(url_for("api.discussions", q="something"))
         self.assert200(response)
 
-        pprint(response.json)
         self.assertEqual(len(response.json["data"]), 2)
         self.assertEqual(discussion_b.title, response.json["data"][0]["title"])
         self.assertEqual(discussion_a.title, response.json["data"][1]["title"])
