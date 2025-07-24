@@ -245,6 +245,24 @@ class CswDcatBackend(DcatBackend):
                     startPosition="{start}" maxRecords="25">
       <csw:Query typeNames="csw:Record">
         <csw:ElementSetName>full</csw:ElementSetName>
+        <csw:Constraint version="1.1.0">
+          <ogc:Filter>
+            <ogc:Or>
+              <ogc:PropertyIsEqualTo>
+                <ogc:PropertyName>dc:type</ogc:PropertyName>
+                <ogc:Literal>dataset</ogc:Literal>
+              </ogc:PropertyIsEqualTo>
+              <ogc:PropertyIsEqualTo>
+                <ogc:PropertyName>dc:type</ogc:PropertyName>
+                <ogc:Literal>service</ogc:Literal>
+              </ogc:PropertyIsEqualTo>
+              <ogc:PropertyIsEqualTo>
+                <ogc:PropertyName>dc:type</ogc:PropertyName>
+                <ogc:Literal>series</ogc:Literal>
+              </ogc:PropertyIsEqualTo>
+            </ogc:Or>
+          </ogc:Filter>
+        </csw:Constraint>
         <ogc:SortBy>
           <ogc:SortProperty>
             <ogc:PropertyName>identifier</ogc:PropertyName>
@@ -347,6 +365,7 @@ class CswIso19139DcatBackend(CswDcatBackend):
         ),
     )
 
+    # Same as CswDcatBackend.CSW_REQUEST except for `outputSchema`
     CSW_REQUEST: ClassVar[str] = """
     <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
                     xmlns:ogc="http://www.opengis.net/ogc"
@@ -355,12 +374,6 @@ class CswIso19139DcatBackend(CswDcatBackend):
                     startPosition="{start}" maxRecords="25">
       <csw:Query typeNames="csw:Record">
         <csw:ElementSetName>full</csw:ElementSetName>
-        <ogc:SortBy>
-          <ogc:SortProperty>
-            <ogc:PropertyName>identifier</ogc:PropertyName>
-            <ogc:SortOrder>ASC</ogc:SortOrder>
-          </ogc:SortProperty>
-        </ogc:SortBy>
         <csw:Constraint version="1.1.0">
           <ogc:Filter>
             <ogc:Or>
@@ -379,6 +392,12 @@ class CswIso19139DcatBackend(CswDcatBackend):
             </ogc:Or>
           </ogc:Filter>
         </csw:Constraint>
+        <ogc:SortBy>
+          <ogc:SortProperty>
+            <ogc:PropertyName>identifier</ogc:PropertyName>
+            <ogc:SortOrder>ASC</ogc:SortOrder>
+          </ogc:SortProperty>
+        </ogc:SortBy>
       </csw:Query>
     </csw:GetRecords>
     """
