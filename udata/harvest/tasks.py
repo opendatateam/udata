@@ -10,10 +10,10 @@ log = get_logger(__name__)
 
 
 @job("harvest", route="low.harvest")
-def harvest(self, ident_or_source):
-    log.info('Launching harvest job for source "%s"', ident_or_source)
+def harvest(self, ident):
+    log.info('Launching harvest job for source "%s"', ident)
 
-    source = actions.get_source(ident_or_source)
+    source = actions.get_source(ident)
     if source.deleted or not source.active:
         log.info('Ignoring inactive or deleted source "%s"', source.id)
         return  # Ignore deleted and inactive sources
