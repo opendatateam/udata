@@ -2,13 +2,16 @@
 
 ## Current (in progress)
 
+- Add search to discussions [#3384](https://github.com/opendatateam/udata/pull/3384)
+
+## 10.8.0 (2025-07-22)
+
 - Remove placeholder Jinja filter [#3372](https://github.com/opendatateam/udata/pull/3372/)
 - Add `self_web_url` for discussion [#3375](https://github.com/opendatateam/udata/pull/3375)
 - Fix dataset schemas endpoint when no resource [#3373](https://github.com/opendatateam/udata/pull/3373)
 - Add last_update as a dataset model property [#3377](https://github.com/opendatateam/udata/pull/3377)
 - Add `label` (translation of role) to API response for org members [#3383](https://github.com/opendatateam/udata/pull/3383)
 - Fix crashing on datasets with no slugs [#3368](https://github.com/opendatateam/udata/pull/3368/)
-- Add search to discussions [#3384](https://github.com/opendatateam/udata/pull/3384)
 - Fix duplicate contact point creation [#3379](https://github.com/opendatateam/udata/pull/3379)
 - Atomic `get_or_create` [#3366](https://github.com/opendatateam/udata/pull/3366)
 - Add contact points suggest [#3376](https://github.com/opendatateam/udata/pull/3376)
@@ -21,6 +24,7 @@
 - Do not crash on invalid schemas API JSON [#3363](https://github.com/opendatateam/udata/pull/3363/)
 - Fix flaky test on timed recent Atom feeds [#3365](https://github.com/opendatateam/udata/pull/3365)
 - Allow to remove checksum from resource [#3369](https://github.com/opendatateam/udata/pull/3369)
+- Separate metrics for opened discussions [#3370](https://github.com/opendatateam/udata/pull/3370)
 
 ## 10.6.0 (2025-07-08)
 
