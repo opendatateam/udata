@@ -8,6 +8,7 @@ from udata.core.owned import Owned, OwnedQuerySet
 from udata.core.reuse.models import Reuse
 from udata.models import SpatialCoverage, db
 from udata.search import reindex
+from udata.tasks import as_task_param
 
 __all__ = ("Topic", "TopicElement")
 
@@ -32,17 +33,15 @@ class TopicElement(db.Document):
 
     @classmethod
     def post_save(cls, sender, document, **kwargs):
-        """Trigger Dataset reindex when element is saved"""
+        """Trigger reindex when element is saved"""
         if document.topic and document.element and hasattr(document.element, "id"):
-            if document.element.__class__.__name__ == "Dataset":
-                reindex.delay("Dataset", str(document.element.id))
+            reindex.delay(*as_task_param(document.element))
 
     @classmethod
     def post_delete(cls, sender, document, **kwargs):
-        """Trigger Dataset reindex when element is deleted"""
+        """Trigger reindex when element is deleted"""
         if document.topic and document.element and hasattr(document.element, "id"):
-            if document.element.__class__.__name__ == "Dataset":
-                reindex.delay("Dataset", str(document.element.id))
+            reindex.delay(*as_task_param(document.element))
 
 
 class Topic(db.Datetimed, Auditable, db.Document, Owned):
