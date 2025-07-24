@@ -1,9 +1,10 @@
 from flask import current_app
 
+from udata.harvest import actions
 from udata.tasks import get_logger, job, task
 
 from . import backends
-from .models import HarvestJob, HarvestSource
+from .models import HarvestJob
 
 log = get_logger(__name__)
 
@@ -12,9 +13,9 @@ log = get_logger(__name__)
 def harvest(self, ident):
     log.info('Launching harvest job for source "%s"', ident)
 
-    source = HarvestSource.get(ident)
+    source = actions.get_source(ident)
     if source.deleted or not source.active:
-        log.info('Ignoring inactive or deleted source "%s"', ident)
+        log.info('Ignoring inactive or deleted source "%s"', source.id)
         return  # Ignore deleted and inactive sources
     Backend = backends.get(current_app, source.backend)
     backend = Backend(source)

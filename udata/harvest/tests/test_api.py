@@ -395,7 +395,7 @@ class HarvestAPITest(MockBackendsMixin):
             "url": new_url,
             "backend": "factory",
         }
-        api_url = url_for("api.harvest_source", ident=str(source.id))
+        api_url = url_for("api.harvest_source", source=source)
         response = api.put(api_url, data)
         assert200(response)
         assert response.json["url"] == new_url
@@ -403,7 +403,7 @@ class HarvestAPITest(MockBackendsMixin):
         # Source is now owned by orga, with user as member
         source.organization = OrganizationFactory(members=[Member(user=user)])
         source.save()
-        api_url = url_for("api.harvest_source", ident=str(source.id))
+        api_url = url_for("api.harvest_source", source=source)
         response = api.put(api_url, data)
         assert200(response)
 
@@ -418,7 +418,7 @@ class HarvestAPITest(MockBackendsMixin):
             "url": new_url,
             "backend": "factory",
         }
-        api_url: str = url_for("api.harvest_source", ident=str(source.id))
+        api_url: str = url_for("api.harvest_source", source=source)
         response = api.put(api_url, data)
 
         assert403(response)
@@ -429,7 +429,7 @@ class HarvestAPITest(MockBackendsMixin):
         source = HarvestSourceFactory()
 
         data = {"state": VALIDATION_ACCEPTED}
-        url = url_for("api.validate_harvest_source", ident=str(source.id))
+        url = url_for("api.validate_harvest_source", source=source)
         response = api.post(url, data)
         assert200(response)
 
@@ -443,7 +443,7 @@ class HarvestAPITest(MockBackendsMixin):
         source = HarvestSourceFactory()
 
         data = {"state": VALIDATION_REFUSED, "comment": "Not valid"}
-        url = url_for("api.validate_harvest_source", ident=str(source.id))
+        url = url_for("api.validate_harvest_source", source=source)
         response = api.post(url, data)
         assert200(response)
 
@@ -458,22 +458,27 @@ class HarvestAPITest(MockBackendsMixin):
         source = HarvestSourceFactory()
 
         data = {"validate": True}
-        url = url_for("api.validate_harvest_source", ident=str(source.id))
+        url = url_for("api.validate_harvest_source", source=source)
         response = api.post(url, data)
         assert403(response)
 
     def test_get_source(self, api):
         source = HarvestSourceFactory()
 
-        url = url_for("api.harvest_source", ident=str(source.id))
+        url = url_for("api.harvest_source", source=source)
         response = api.get(url)
         assert200(response)
+
+    def test_get_missing_source(self, api):
+        url = url_for("api.harvest_source", source="685bb38b9cb9284b93fd9e72")
+        response = api.get(url)
+        assert404(response)
 
     def test_source_preview(self, api):
         api.login()
         source = HarvestSourceFactory(backend="factory")
 
-        url = url_for("api.preview_harvest_source", ident=str(source.id))
+        url = url_for("api.preview_harvest_source", source=source)
         response = api.get(url)
         assert200(response)
 
@@ -488,7 +493,7 @@ class HarvestAPITest(MockBackendsMixin):
             validation=HarvestSourceValidation(state=VALIDATION_ACCEPTED),
         )
 
-        url = url_for("api.run_harvest_source", ident=str(source.id))
+        url = url_for("api.run_harvest_source", source=source)
         response = api.post(url)
         assert200(response)
 
@@ -505,7 +510,7 @@ class HarvestAPITest(MockBackendsMixin):
             validation=HarvestSourceValidation(state=VALIDATION_ACCEPTED),
         )
 
-        url = url_for("api.run_harvest_source", ident=str(source.id))
+        url = url_for("api.run_harvest_source", source=source)
         response = api.post(url)
         assert400(response)
 
@@ -523,7 +528,7 @@ class HarvestAPITest(MockBackendsMixin):
             validation=HarvestSourceValidation(state=VALIDATION_ACCEPTED),
         )
 
-        url = url_for("api.run_harvest_source", ident=str(source.id))
+        url = url_for("api.run_harvest_source", source=source)
         response = api.post(url)
         assert403(response)
 
@@ -540,7 +545,7 @@ class HarvestAPITest(MockBackendsMixin):
             validation=HarvestSourceValidation(state=VALIDATION_PENDING),
         )
 
-        url = url_for("api.run_harvest_source", ident=str(source.id))
+        url = url_for("api.run_harvest_source", source=source)
         response = api.post(url)
         assert400(response)
 
@@ -556,7 +561,7 @@ class HarvestAPITest(MockBackendsMixin):
         user = api.login()
         source = HarvestSourceFactory(owner=user)
 
-        url = url_for("api.harvest_source", ident=str(source.id))
+        url = url_for("api.harvest_source", source=source)
         response = api.delete(url)
         assert204(response)
 
@@ -568,7 +573,7 @@ class HarvestAPITest(MockBackendsMixin):
         api.login()
         source = HarvestSourceFactory()
 
-        url = url_for("api.harvest_source", ident=str(source.id))
+        url = url_for("api.harvest_source", source=source)
         response = api.delete(url)
 
         assert403(response)
@@ -579,7 +584,7 @@ class HarvestAPITest(MockBackendsMixin):
         source = HarvestSourceFactory()
 
         data = "0 0 * * *"
-        url = url_for("api.schedule_harvest_source", ident=str(source.id))
+        url = url_for("api.schedule_harvest_source", source=source)
         response = api.post(url, data)
         assert200(response)
 
@@ -601,7 +606,7 @@ class HarvestAPITest(MockBackendsMixin):
         source = HarvestSourceFactory()
 
         data = "0 0 * * *"
-        url = url_for("api.schedule_harvest_source", ident=str(source.id))
+        url = url_for("api.schedule_harvest_source", source=source)
         response = api.post(url, data)
         assert403(response)
 
@@ -620,7 +625,7 @@ class HarvestAPITest(MockBackendsMixin):
         )
         source = HarvestSourceFactory(periodic_task=periodic_task)
 
-        url = url_for("api.schedule_harvest_source", ident=str(source.id))
+        url = url_for("api.schedule_harvest_source", source=source)
         response = api.delete(url)
         assert204(response)
 
@@ -639,7 +644,7 @@ class HarvestAPITest(MockBackendsMixin):
         )
         source = HarvestSourceFactory(periodic_task=periodic_task)
 
-        url = url_for("api.schedule_harvest_source", ident=str(source.id))
+        url = url_for("api.schedule_harvest_source", source=source)
         response = api.delete(url)
         assert403(response)
 

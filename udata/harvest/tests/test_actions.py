@@ -152,7 +152,7 @@ class HarvestActionsTest:
         data["url"] = new_url
 
         with assert_emit(signals.harvest_source_updated):
-            source = actions.update_source(source.id, data)
+            source = actions.update_source(source, data)
 
         assert source.url == new_url
         source.reload()
@@ -169,7 +169,7 @@ class HarvestActionsTest:
         assert source.validation.on is not None
         assert source.validation.by is None
         assert source.validation.comment is None
-        mock.assert_called_once_with(source.id)
+        mock.assert_called_once_with(source)
 
         assert source.periodic_task is not None
 
@@ -185,12 +185,12 @@ class HarvestActionsTest:
         assert source.validation.on is not None
         assert source.validation.by is None
         assert source.validation.comment == "comment"
-        mock.assert_called_once_with(source.id)
+        mock.assert_called_once_with(source)
 
     def test_reject_source(self):
         source = HarvestSourceFactory()
 
-        actions.reject_source(source.id, "comment")
+        actions.reject_source(source, "comment")
 
         source.reload()
         assert source.validation.state == VALIDATION_REFUSED
@@ -208,7 +208,7 @@ class HarvestActionsTest:
 
     def test_get_source_by_objectid(self):
         source = HarvestSourceFactory()
-        assert actions.get_source(source.id) == source
+        assert actions.get_source(source) == source
 
     def test_delete_source_by_slug(self):
         source = HarvestSourceFactory()
@@ -233,7 +233,7 @@ class HarvestActionsTest:
     def test_delete_source_by_objectid(self):
         source = HarvestSourceFactory()
         with assert_emit(signals.harvest_source_deleted):
-            deleted_source = actions.delete_source(source.id)
+            deleted_source = actions.delete_source(source)
 
         assert deleted_source.deleted is not None
         assert deleted_source.id == source.id
