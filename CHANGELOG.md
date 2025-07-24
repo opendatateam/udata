@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Add search to discussions [#3384](https://github.com/opendatateam/udata/pull/3384)
 - Separate metrics for opened discussions [#3370](https://github.com/opendatateam/udata/pull/3370)
 - Fix not returning 404 for harvest sources [#3382](https://github.com/opendatateam/udata/pull/3382/)
 
