@@ -45,7 +45,7 @@ class TopicsAPI(API):
 
     @apiv2.secure
     @apiv2.doc("create_topic")
-    @apiv2.expect(topic_fields)
+    @apiv2.expect(topic_input_fields)
     @apiv2.marshal_with(topic_fields)
     @apiv2.response(400, "Validation error")
     def post(self):
