@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Migrate udata-metrics [#3386](https://github.com/opendatateam/udata/pull/3386/)
 - Add search to discussions [#3384](https://github.com/opendatateam/udata/pull/3384)
 - Separate metrics for opened discussions [#3370](https://github.com/opendatateam/udata/pull/3370)
 
