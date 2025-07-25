@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Convert security views to cdata [#3348](https://github.com/opendatateam/udata/pull/3348/)
 
 ## 10.8.1 (2025-07-25)
 

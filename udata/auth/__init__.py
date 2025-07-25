@@ -39,6 +39,7 @@ def init_app(app):
     from udata.models import datastore
 
     from .forms import (
+        ExtendedForgotPasswordForm,
         ExtendedLoginForm,
         ExtendedRegisterForm,
         ExtendedResetPasswordForm,
@@ -46,6 +47,9 @@ def init_app(app):
     from .mails import UdataMailUtil
     from .password_validation import UdataPasswordUtil
     from .views import create_security_blueprint
+
+    if app.config["CDATA_BASE_URL"]:
+        app.config.setdefault("SECURITY_CONFIRM_ERROR_VIEW", app.config["CDATA_BASE_URL"])
 
     security.init_app(
         app,
@@ -56,6 +60,7 @@ def init_app(app):
         confirm_register_form=ExtendedRegisterForm,
         register_form=ExtendedRegisterForm,
         reset_password_form=ExtendedResetPasswordForm,
+        forgot_password_form=ExtendedForgotPasswordForm,
         mail_util_cls=UdataMailUtil,
         password_util_cls=UdataPasswordUtil,
     )
