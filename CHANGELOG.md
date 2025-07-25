@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 10.8.1 (2025-07-25)
 
 - Fix user deletion performances issues [#3388](https://github.com/opendatateam/udata/pull/3388)
