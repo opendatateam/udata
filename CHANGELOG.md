@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Deactivate sitemap extension [#3389](https://github.com/opendatateam/udata/pull/3389)
 
 ## 10.8.1 (2025-07-25)
 
