@@ -125,6 +125,10 @@ class DatasetConverter(ModelConverter):
     model = models.Dataset
 
 
+class PageConverter(ModelConverter):
+    model = models.Page
+
+
 class DatasetWithoutResourcesConverter(ModelConverter):
     model = models.Dataset
 
@@ -244,6 +248,7 @@ def init_app(app):
     app.url_map.converters["reuse"] = ReuseConverter
     app.url_map.converters["user"] = UserConverter
     app.url_map.converters["topic"] = TopicConverter
+    app.url_map.converters["page"] = PageConverter
     app.url_map.converters["post"] = PostConverter
     app.url_map.converters["territory"] = TerritoryConverter
     app.url_map.converters["contact_point"] = ContactPointConverter

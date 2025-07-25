@@ -33,6 +33,15 @@ site_fields = api.model(
         "metrics": fields.Raw(
             attribute=lambda o: o.get_metrics(), description="The associated metrics", default={}
         ),
+        "datasets_page_id": fields.String(
+            attribute=lambda s: s.datasets_page.id if s.datasets_page else None
+        ),
+        "reuses_page_id": fields.String(
+            attribute=lambda s: s.reuses_page.id if s.reuses_page else None
+        ),
+        "dataservices_page_id": fields.String(
+            attribute=lambda s: s.dataservices_page.id if s.dataservices_page else None
+        ),
     },
 )
 
@@ -43,6 +52,22 @@ class SiteAPI(API):
     @api.marshal_with(site_fields)
     def get(self):
         """Site-wide variables"""
+        return current_site
+
+    @api.doc(id="get_site")
+    @api.marshal_with(site_fields)
+    def patch(self):
+        if "datasets_page_id" in request.json:
+            current_site.datasets_page = ObjectId(request.json["datasets_page_id"])
+
+        if "reuses_page_id" in request.json:
+            current_site.reuses_page = ObjectId(request.json["reuses_page_id"])
+
+        if "dataservices_page_id" in request.json:
+            current_site.dataservices_page = ObjectId(request.json["dataservices_page_id"])
+
+        current_site.save()
+        current_site.reload()
         return current_site
 
 
