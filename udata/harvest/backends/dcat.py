@@ -242,35 +242,59 @@ class CswDcatBackend(DcatBackend):
 
     display_name = "CSW-DCAT"
 
+    # CSW_REQUEST is based on:
+    # - Request syntax from spec [1] and example requests [1] [2].
+    # - Sort settings to ensure stable paging [3].
+    # - Filter settings to only retrieve record types currently mapped in udata.
+    #
+    # If you modify the request, make sure:
+    # - `typeNames` and `outputSchema` are consistent. You'll likely want to keep "gmd:MD_Metadata",
+    #   since "csw:Record" contains less information.
+    # - `typeNames` and namespaces in `csw:Query` (`Filter`, `SortBy`, ...) are consistent, although
+    #   they are ignored on some servers [4] [5].
+    # - It works on real catalogs! Not many servers implement the whole spec.
+    #
+    # References:
+    # [1] OpenGIS Catalogue Services Specification 2.0.2 – ISO Metadata Application Profile: Corrigendum
+    #     https://portal.ogc.org/files/80534
+    # [2] GeoNetwork - CSW test requests
+    #     https://github.com/geonetwork/core-geonetwork/tree/3.10.4/web/src/main/webapp/xml/csw/test
+    # [3] Udata - Support csw dcat harvest
+    #     https://github.com/opendatateam/udata/pull/2800#discussion_r1129053500
+    # [4] GeoNetwork - GetRecords ignores namespaces for Filter/SortBy fields
+    #     https://github.com/geonetwork/core-geonetwork/blob/3.10.4/csw-server/src/main/java/org/fao/geonet/kernel/csw/services/getrecords/FieldMapper.java#L92
+    # [5] GeoNetwork - GetRecords ignores `typeNames`
+    #     https://github.com/geonetwork/core-geonetwork/blob/3.10.4/csw-server/src/main/java/org/fao/geonet/kernel/csw/services/getrecords/CatalogSearcher.java#L194
     CSW_REQUEST: ClassVar[str] = """
-    <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
+    <csw:GetRecords xmlns:apiso="http://www.opengis.net/cat/csw/apiso/1.0"
+                    xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
                     xmlns:ogc="http://www.opengis.net/ogc"
-                    service="CSW" version="2.0.2" resultType="results"
-                    outputSchema="http://www.w3.org/ns/dcat#"
-                    startPosition="{start}" maxRecords="25">
-      <csw:Query typeNames="csw:Record">
+                    service="CSW" version="2.0.2" outputFormat="application/xml"
+                    resultType="results" startPosition="{start}" maxRecords="25"
+                    outputSchema="http://www.w3.org/ns/dcat#">
+      <csw:Query typeNames="gmd:MD_Metadata">
         <csw:ElementSetName>full</csw:ElementSetName>
         <csw:Constraint version="1.1.0">
           <ogc:Filter>
             <ogc:Or>
               <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>dc:type</ogc:PropertyName>
+                <ogc:PropertyName>apiso:type</ogc:PropertyName>
                 <ogc:Literal>dataset</ogc:Literal>
               </ogc:PropertyIsEqualTo>
               <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>dc:type</ogc:PropertyName>
-                <ogc:Literal>service</ogc:Literal>
+                <ogc:PropertyName>apiso:type</ogc:PropertyName>
+                <ogc:Literal>series</ogc:Literal>
               </ogc:PropertyIsEqualTo>
               <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>dc:type</ogc:PropertyName>
-                <ogc:Literal>series</ogc:Literal>
+                <ogc:PropertyName>apiso:type</ogc:PropertyName>
+                <ogc:Literal>service</ogc:Literal>
               </ogc:PropertyIsEqualTo>
             </ogc:Or>
           </ogc:Filter>
         </csw:Constraint>
         <ogc:SortBy>
           <ogc:SortProperty>
-            <ogc:PropertyName>identifier</ogc:PropertyName>
+            <ogc:PropertyName>apiso:identifier</ogc:PropertyName>
             <ogc:SortOrder>ASC</ogc:SortOrder>
           </ogc:SortProperty>
         </ogc:SortBy>
@@ -373,34 +397,35 @@ class CswIso19139DcatBackend(CswDcatBackend):
 
     # Same as CswDcatBackend.CSW_REQUEST except for `outputSchema`
     CSW_REQUEST: ClassVar[str] = """
-    <csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
+    <csw:GetRecords xmlns:apiso="http://www.opengis.net/cat/csw/apiso/1.0"
+                    xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
                     xmlns:ogc="http://www.opengis.net/ogc"
-                    service="CSW" version="2.0.2" resultType="results"
-                    outputSchema="http://www.isotc211.org/2005/gmd"
-                    startPosition="{start}" maxRecords="25">
-      <csw:Query typeNames="csw:Record">
+                    service="CSW" version="2.0.2" outputFormat="application/xml"
+                    resultType="results" startPosition="{start}" maxRecords="25"
+                    outputSchema="http://www.isotc211.org/2005/gmd">
+      <csw:Query typeNames="gmd:MD_Metadata">
         <csw:ElementSetName>full</csw:ElementSetName>
         <csw:Constraint version="1.1.0">
           <ogc:Filter>
             <ogc:Or>
               <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>dc:type</ogc:PropertyName>
+                <ogc:PropertyName>apiso:type</ogc:PropertyName>
                 <ogc:Literal>dataset</ogc:Literal>
               </ogc:PropertyIsEqualTo>
               <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>dc:type</ogc:PropertyName>
-                <ogc:Literal>service</ogc:Literal>
+                <ogc:PropertyName>apiso:type</ogc:PropertyName>
+                <ogc:Literal>series</ogc:Literal>
               </ogc:PropertyIsEqualTo>
               <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>dc:type</ogc:PropertyName>
-                <ogc:Literal>series</ogc:Literal>
+                <ogc:PropertyName>apiso:type</ogc:PropertyName>
+                <ogc:Literal>service</ogc:Literal>
               </ogc:PropertyIsEqualTo>
             </ogc:Or>
           </ogc:Filter>
         </csw:Constraint>
         <ogc:SortBy>
           <ogc:SortProperty>
-            <ogc:PropertyName>identifier</ogc:PropertyName>
+            <ogc:PropertyName>apiso:identifier</ogc:PropertyName>
             <ogc:SortOrder>ASC</ogc:SortOrder>
           </ogc:SortProperty>
         </ogc:SortBy>
