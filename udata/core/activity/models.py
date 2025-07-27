@@ -93,10 +93,10 @@ class Auditable(object):
         ]
         if "post_save" in kwargs.get("ignores", []):
             return
-        cls.after_save.send(document)
+        cls.after_save.send(document, **kwargs)
         if kwargs.get("created"):
-            cls.on_create.send(document)
+            cls.on_create.send(document, **kwargs)
         elif len(changed_fields):
-            cls.on_update.send(document, changed_fields=changed_fields)
+            cls.on_update.send(document, changed_fields=changed_fields, **kwargs)
         if getattr(document, "deleted_at", None) or getattr(document, "deleted", None):
-            cls.on_delete.send(document)
+            cls.on_delete.send(document, **kwargs)

@@ -228,7 +228,7 @@ class BaseBackend(object):
             if self.dryrun:
                 dataset.validate()
             else:
-                dataset.save()
+                dataset.save(signal_kwargs={"compute_aggregates": False})
             item.dataset = dataset
             item.status = "done"
         except HarvestSkipException as e:

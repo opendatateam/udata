@@ -7,8 +7,9 @@ from udata.models import Dataset, Organization, Reuse
 @Dataset.on_update.connect
 @Dataset.on_delete.connect
 def update_datasets_metrics(document, **kwargs):
+    compute_aggregates = kwargs.get("compute_aggregates", True)
     if document.organization:
-        document.organization.count_datasets()
+        document.organization.count_datasets(compute_aggregates=compute_aggregates)
 
 
 @Reuse.on_create.connect
