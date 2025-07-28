@@ -3,6 +3,7 @@ import logging
 import urllib.parse
 from functools import wraps
 from importlib import import_module
+from pprint import pprint
 
 import mongoengine
 from flask import (
@@ -181,6 +182,7 @@ api.model_reference = api.model(
 @api.representation("application/json")
 def output_json(data, code, headers=None):
     """Use Flask JSON to serialize"""
+    pprint(data)
     resp = make_response(json.dumps(data), code)
     resp.headers.extend(headers or {})
     return resp

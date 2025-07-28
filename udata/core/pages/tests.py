@@ -17,7 +17,7 @@ class PageAPITest(APITestCase):
             {
                 "blocs": [
                     {
-                        "type": "DatasetsListBloc",
+                        "class": "DatasetsListBloc",
                         "title": "My awesome title",
                         "datasets": [str(d.id) for d in datasets],
                     }
@@ -56,7 +56,7 @@ class PageAPITest(APITestCase):
             {
                 "blocs": [
                     {
-                        "type": "DatasetsListBloc",
+                        "class": "DatasetsListBloc",
                         "title": "My awesome title",
                         "subtitle": "more information",
                         "datasets": [{"id": str(datasets[2].id)}],

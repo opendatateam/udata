@@ -37,7 +37,6 @@ The following fields are added on the document class once decorated:
 """
 
 import functools
-from pprint import pprint
 from typing import Any, Callable, Iterable
 
 import flask_restx.fields as restx_fields
@@ -63,18 +62,21 @@ lazy_reference = api.model(
     },
 )
 
+DEFAULT_GENERIC_KEY = "class"
+
 classes_by_names = {}
 classes_by_parents = {}
 
 
 class GenericField(restx_fields.Raw):
-    def __init__(self, fields_by_type, generic_key):
+    def __init__(self, fields_by_type):
         super().__init__(self)
-        self.fields_by_type = fields_by_type
-        self.generic_key = generic_key
+        self.default = None
+        self._fields_by_type = fields_by_type
 
     def format(self, value):
-        return marshal(value, self.fields_by_type[getattr(value, self.generic_key)])
+        # Value is one of the generic object
+        return marshal(value, self._fields_by_type[value.__class__.__name__])
 
 
 def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | None]:
@@ -168,7 +170,6 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         #     3. `__additional_field_info__` of the parent
         inner_info: dict = getattr(field.field, "__additional_field_info__", {})
         generic = info.get("generic", False)
-        generic_key = info.get("generic_key", "type")
 
         allowed_classes = (
             classes_by_parents[field.field.document_type_obj]
@@ -186,12 +187,8 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
                 for cls in allowed_classes
             }
 
-            field_read = GenericField(
-                {k: v[0].model for k, v in generic_fields.items()}, generic_key
-            )
-            field_write = GenericField(
-                {k: v[1].model for k, v in generic_fields.items()}, generic_key
-            )
+            field_read = GenericField({k: v[0].model for k, v in generic_fields.items()})
+            field_write = GenericField({k: v[1].model for k, v in generic_fields.items()})
         else:
             field_read, field_write = convert_db_to_field(
                 f"{key}.inner",
@@ -334,8 +331,6 @@ def generate_fields(**kwargs) -> Callable:
 
         classes_by_names[cls.__name__] = cls
         save_class_by_parents(cls)
-        pprint(classes_by_names)
-        pprint(classes_by_parents)
 
         for key, field, info in get_fields(cls):
             sortable_key: bool = info.get("sortable", False)
@@ -623,12 +618,10 @@ def patch(obj, request) -> type:
             ):
                 base_embedded_field = model_attribute.field.document_type().__class__
                 generic = info.get("generic", False)
-                generic_key = info.get("generic_key", "type")
+                generic_key = info.get("generic_key", DEFAULT_GENERIC_KEY)
 
                 objects = []
                 for embedded_value in value:
-                    # MongoEngine BaseDocument has a `from_json` method for string and a private `_from_son`
-                    # but there is no public `from_son` to use
                     # TODO add validation on generic_key presence and value
                     embedded_field = (
                         classes_by_names[embedded_value[generic_key]]
