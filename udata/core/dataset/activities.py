@@ -82,7 +82,7 @@ def on_user_removed_resource_from_dataset(sender, document, **kwargs):
 
 
 @Dataset.on_create.connect
-def on_user_created_dataset(dataset):
+def on_user_created_dataset(dataset, **kwargs):
     if current_user and current_user.is_authenticated:
         UserCreatedDataset.emit(dataset, dataset.organization)
 
@@ -95,6 +95,6 @@ def on_user_updated_dataset(dataset, **kwargs):
 
 
 @Dataset.on_delete.connect
-def on_user_deleted_dataset(dataset):
+def on_user_deleted_dataset(dataset, **kwargs):
     if current_user and current_user.is_authenticated:
         UserDeletedDataset.emit(dataset, dataset.organization)
