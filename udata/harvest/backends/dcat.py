@@ -271,7 +271,7 @@ class CswDcatBackend(DcatBackend):
                     xmlns:ogc="http://www.opengis.net/ogc"
                     service="CSW" version="2.0.2" outputFormat="application/xml"
                     resultType="results" startPosition="{start}" maxRecords="25"
-                    outputSchema="http://www.w3.org/ns/dcat#">
+                    outputSchema="{output_schema}">
       <csw:Query typeNames="gmd:MD_Metadata">
         <csw:ElementSetName>full</csw:ElementSetName>
         <csw:Constraint version="1.1.0">
@@ -306,6 +306,8 @@ class CswDcatBackend(DcatBackend):
     </csw:GetRecords>
     """
 
+    CSW_OUTPUT_SCHEMA = "http://www.w3.org/ns/dcat#"
+
     @override
     def inner_init(self) -> None:
         self.xml_parser = ET.XMLParser(resolve_entities=False)
@@ -318,7 +320,7 @@ class CswDcatBackend(DcatBackend):
         start = 1
 
         while True:
-            data = self.CSW_REQUEST.format(start=start)
+            data = self.CSW_REQUEST.format(output_schema=self.CSW_OUTPUT_SCHEMA, start=start)
             response = self.post(url, data=data, headers={"Content-Type": "application/xml"})
             response.raise_for_status()
 
@@ -399,43 +401,7 @@ class CswIso19139DcatBackend(CswDcatBackend):
         ),
     )
 
-    # Same as CswDcatBackend.CSW_REQUEST except for `outputSchema`
-    CSW_REQUEST: ClassVar[str] = """
-    <csw:GetRecords xmlns:apiso="http://www.opengis.net/cat/csw/apiso/1.0"
-                    xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
-                    xmlns:ogc="http://www.opengis.net/ogc"
-                    service="CSW" version="2.0.2" outputFormat="application/xml"
-                    resultType="results" startPosition="{start}" maxRecords="25"
-                    outputSchema="http://www.isotc211.org/2005/gmd">
-      <csw:Query typeNames="gmd:MD_Metadata">
-        <csw:ElementSetName>full</csw:ElementSetName>
-        <csw:Constraint version="1.1.0">
-          <ogc:Filter>
-            <ogc:Or>
-              <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>apiso:type</ogc:PropertyName>
-                <ogc:Literal>dataset</ogc:Literal>
-              </ogc:PropertyIsEqualTo>
-              <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>apiso:type</ogc:PropertyName>
-                <ogc:Literal>series</ogc:Literal>
-              </ogc:PropertyIsEqualTo>
-              <ogc:PropertyIsEqualTo>
-                <ogc:PropertyName>apiso:type</ogc:PropertyName>
-                <ogc:Literal>service</ogc:Literal>
-              </ogc:PropertyIsEqualTo>
-            </ogc:Or>
-          </ogc:Filter>
-        </csw:Constraint>
-        <ogc:SortBy>
-          <ogc:SortProperty>
-            <ogc:PropertyName>apiso:identifier</ogc:PropertyName>
-            <ogc:SortOrder>ASC</ogc:SortOrder>
-          </ogc:SortProperty>
-        </ogc:SortBy>
-      </csw:Query>
-    </csw:GetRecords>
-    """
+    CSW_OUTPUT_SCHEMA = "http://www.isotc211.org/2005/gmd"
 
     @override
     def inner_init(self) -> None:
