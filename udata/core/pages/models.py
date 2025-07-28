@@ -79,12 +79,7 @@ class LinksListBloc(BlocWithTitleMixin, Bloc):
 class Page(Auditable, Owned, db.Document):
     blocs = field(
         db.EmbeddedDocumentListField(Bloc),
-        generic={
-            "datasets_list": DatasetsListBloc,
-            "reuses_list": ReusesListBloc,
-            "dataservices_list": DataservicesListBloc,
-            "links_list": LinksListBloc,
-        },
+        generic=True,
     )
 
     created_at = field(

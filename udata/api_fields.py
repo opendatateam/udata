@@ -37,6 +37,7 @@ The following fields are added on the document class once decorated:
 """
 
 import functools
+from pprint import pprint
 from typing import Any, Callable, Iterable
 
 import flask_restx.fields as restx_fields
@@ -61,6 +62,9 @@ lazy_reference = api.model(
         "id": restx_fields.Raw(attribute=lambda ref: ref.pk),
     },
 )
+
+classes_by_names = {}
+classes_by_parents = {}
 
 
 class GenericField(restx_fields.Raw):
@@ -163,16 +167,23 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         #     2. `__additional_field_info__` of the inner field
         #     3. `__additional_field_info__` of the parent
         inner_info: dict = getattr(field.field, "__additional_field_info__", {})
-        generic = info.get("generic", {})
+        generic = info.get("generic", False)
         generic_key = info.get("generic_key", "type")
-        if generic:
+
+        allowed_classes = (
+            classes_by_parents[field.field.document_type_obj]
+            if isinstance(field.field, mongoengine.fields.EmbeddedDocumentField)
+            and field.field.document_type_obj in classes_by_parents
+            else set()
+        )
+        if generic and allowed_classes:
             generic_fields = {
-                k: convert_db_to_field(
-                    f"{key}.{k}",
-                    field.field.__class__(v),
+                cls.__name__: convert_db_to_field(
+                    f"{key}.{cls.__name__}",
+                    field.field.__class__(cls),
                     {**info, **inner_info, **info.get("inner_field_info", {})},
                 )
-                for k, v in generic.items()
+                for cls in allowed_classes
             }
 
             field_read = GenericField(
@@ -280,6 +291,19 @@ def get_fields(cls) -> Iterable[tuple[str, Callable, dict]]:
             )
 
 
+def save_class_by_parents(cls):
+    from udata.mongo.engine import db
+
+    for parent in cls.__bases__:
+        if parent == db.Document:
+            return
+
+        classes_by_parents[parent] = (
+            classes_by_parents[parent] if parent in classes_by_parents else set()
+        )
+        classes_by_parents[parent].add(cls)
+
+
 def generate_fields(**kwargs) -> Callable:
     """Mongoengine document decorator.
 
@@ -307,6 +331,11 @@ def generate_fields(**kwargs) -> Callable:
         )
 
         read_fields["id"] = restx_fields.String(required=True, readonly=True)
+
+        classes_by_names[cls.__name__] = cls
+        save_class_by_parents(cls)
+        pprint(classes_by_names)
+        pprint(classes_by_parents)
 
         for key, field, info in get_fields(cls):
             sortable_key: bool = info.get("sortable", False)
@@ -593,7 +622,7 @@ def patch(obj, request) -> type:
                 mongoengine.fields.EmbeddedDocumentListField,
             ):
                 base_embedded_field = model_attribute.field.document_type().__class__
-                generic = info.get("generic", {})
+                generic = info.get("generic", False)
                 generic_key = info.get("generic_key", "type")
 
                 objects = []
@@ -602,7 +631,9 @@ def patch(obj, request) -> type:
                     # but there is no public `from_son` to use
                     # TODO add validation on generic_key presence and value
                     embedded_field = (
-                        generic[embedded_value[generic_key]] if generic else base_embedded_field
+                        classes_by_names[embedded_value[generic_key]]
+                        if generic
+                        else base_embedded_field
                     )
                     objects.append(patch(embedded_field(), embedded_value))
 
