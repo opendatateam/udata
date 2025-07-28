@@ -1,13 +1,11 @@
-from datetime import datetime
-
 import udata.core.dataset.api_fields as datasets_api_fields
 from udata.api_fields import field, generate_fields
 from udata.core.activity.models import Auditable
 from udata.core.dataservices.models import Dataservice
 from udata.core.owned import Owned
 from udata.core.reuse.models import Reuse
-from udata.i18n import lazy_gettext as _
 from udata.models import db
+from udata.mongo.datetime_fields import Datetimed
 
 
 @generate_fields()
@@ -76,22 +74,8 @@ class LinksListBloc(BlocWithTitleMixin, Bloc):
 
 
 @generate_fields()
-class Page(Auditable, Owned, db.Document):
+class Page(Auditable, Owned, Datetimed, db.Document):
     blocs = field(
         db.EmbeddedDocumentListField(Bloc),
         generic=True,
-    )
-
-    created_at = field(
-        db.DateTimeField(verbose_name=_("Creation date"), default=datetime.utcnow, required=True),
-        readonly=True,
-        sortable="created",
-        auditable=False,
-    )
-    updated_at = field(
-        db.DateTimeField(
-            verbose_name=_("Last modification date"), default=datetime.utcnow, required=True
-        ),
-        readonly=True,
-        auditable=False,
     )
