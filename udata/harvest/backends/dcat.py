@@ -283,6 +283,10 @@ class CswDcatBackend(DcatBackend):
               </ogc:PropertyIsEqualTo>
               <ogc:PropertyIsEqualTo>
                 <ogc:PropertyName>apiso:type</ogc:PropertyName>
+                <ogc:Literal>nonGeographicDataset</ogc:Literal>
+              </ogc:PropertyIsEqualTo>
+              <ogc:PropertyIsEqualTo>
+                <ogc:PropertyName>apiso:type</ogc:PropertyName>
                 <ogc:Literal>series</ogc:Literal>
               </ogc:PropertyIsEqualTo>
               <ogc:PropertyIsEqualTo>
