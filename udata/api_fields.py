@@ -72,11 +72,11 @@ class GenericField(restx_fields.Raw):
     def __init__(self, fields_by_type):
         super().__init__(self)
         self.default = None
-        self._fields_by_type = fields_by_type
+        self.fields_by_type = fields_by_type
 
     def format(self, value):
         # Value is one of the generic object
-        return marshal(value, self._fields_by_type[value.__class__.__name__])
+        return marshal(value, self.fields_by_type[value.__class__.__name__])
 
 
 def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | None]:
@@ -181,7 +181,9 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
             generic_fields = {
                 cls.__name__: convert_db_to_field(
                     f"{key}.{cls.__name__}",
-                    field.field.__class__(cls),
+                    # Instead of having EmbeddedDocumentField(Bloc) we'll create fields for each
+                    # of the subclasses with EmbededdDocumentField(DatasetsListBloc), EmbeddedDocumentFied(DataservicesListBloc)…
+                    mongoengine.fields.EmbeddedDocumentField(cls),
                     {**info, **inner_info, **info.get("inner_field_info", {})},
                 )
                 for cls in allowed_classes

@@ -182,7 +182,6 @@ api.model_reference = api.model(
 @api.representation("application/json")
 def output_json(data, code, headers=None):
     """Use Flask JSON to serialize"""
-    pprint(data)
     resp = make_response(json.dumps(data), code)
     resp.headers.extend(headers or {})
     return resp
