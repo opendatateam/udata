@@ -210,7 +210,7 @@ class DataserviceDatasetAPI(API):
         return None, 204
 
 
-@ns.route("/<dataservice:dataservice>/rdf", endpoint="dataservice_rdf", doc=common_doc)
+@ns.route("/<dataservice:dataservice>/rdf/", endpoint="dataservice_rdf", doc=common_doc)
 @api.response(404, "Dataservice not found")
 @api.response(410, "Dataservice has been deleted")
 class DataserviceRdfAPI(API):
