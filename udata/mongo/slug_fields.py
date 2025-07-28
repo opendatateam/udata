@@ -172,7 +172,7 @@ def populate_slug(instance, field):
     # Ensure uniqueness
     if field.unique:
         base_slug = slug
-        qs = instance.__class__.objects
+        qs = instance.__class__.objects.no_cache()
         if previous:
             qs = qs(id__ne=previous.id)
 
