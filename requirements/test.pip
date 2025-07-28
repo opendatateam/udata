@@ -238,6 +238,10 @@ html2text==2024.2.26
     #   -r requirements/install.in
 httpretty==1.1.4
     # via -r requirements/test.in
+humanfriendly==10.0
+    # via
+    #   -c requirements/install.pip
+    #   -r requirements/install.in
 idna==3.10
     # via
     #   -c requirements/install.pip
