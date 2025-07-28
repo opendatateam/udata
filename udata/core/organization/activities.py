@@ -26,7 +26,7 @@ class UserUpdatedOrganization(OrgRelatedActivity, Activity):
 
 
 @Organization.on_create.connect
-def on_user_created_organization(organization):
+def on_user_created_organization(organization, **kwargs):
     if current_user and current_user.is_authenticated:
         UserCreatedOrganization.emit(organization, organization)
 

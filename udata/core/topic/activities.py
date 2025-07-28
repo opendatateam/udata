@@ -24,7 +24,7 @@ class UserUpdatedTopic(TopicRelatedActivity, Activity):
 
 
 @Topic.on_create.connect
-def on_user_created_topic(topic):
+def on_user_created_topic(topic, **kwargs):
     if current_user and current_user.is_authenticated:
         UserCreatedTopic.emit(topic, topic.organization)
 

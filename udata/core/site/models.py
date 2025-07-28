@@ -226,14 +226,14 @@ current_site = LocalProxy(get_current_site)
 
 
 @Dataset.on_delete.connect
-def remove_from_home_datasets(dataset):
+def remove_from_home_datasets(dataset, **kwargs):
     if dataset in current_site.settings.home_datasets:
         current_site.settings.home_datasets.remove(dataset)
         current_site.save()
 
 
 @Reuse.on_delete.connect
-def remove_from_home_reuses(reuse):
+def remove_from_home_reuses(reuse, **kwargs):
     if reuse in current_site.settings.home_reuses:
         current_site.settings.home_reuses.remove(reuse)
         current_site.save()

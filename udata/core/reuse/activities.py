@@ -32,7 +32,7 @@ class UserDeletedReuse(ReuseRelatedActivity, Activity):
 
 
 @Reuse.on_create.connect
-def on_user_created_reuse(reuse):
+def on_user_created_reuse(reuse, **kwargs):
     if current_user and current_user.is_authenticated:
         UserCreatedReuse.emit(reuse, reuse.organization)
 
@@ -45,6 +45,6 @@ def on_user_updated_reuse(reuse, **kwargs):
 
 
 @Reuse.on_delete.connect
-def on_user_deleted_reuse(reuse):
+def on_user_deleted_reuse(reuse, **kwargs):
     if current_user and current_user.is_authenticated:
         UserDeletedReuse.emit(reuse, reuse.organization)
