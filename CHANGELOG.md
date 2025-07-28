@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Deactivate cache to check for existing slugs [#3390](https://github.com/opendatateam/udata/pull/3390)
 
 ## 10.8.1 (2025-07-25)
 
