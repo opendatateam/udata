@@ -229,7 +229,7 @@ class DatasetsResourcesCsvAPI(API):
         return csv.stream(adapter, "{0}-datasets-resources".format(org.slug))
 
 
-@ns.route("/<org:org>/catalog", endpoint="organization_rdf", doc=common_doc)
+@ns.route("/<org:org>/catalog/", endpoint="organization_rdf", doc=common_doc)
 @api.response(404, "Organization not found")
 @api.response(410, "Organization has been deleted")
 class OrganizationRdfAPI(API):
@@ -449,7 +449,7 @@ class MembershipRefuseAPI(MembershipAPI):
         return {}, 200
 
 
-@ns.route("/<org:org>/member/<user:user>", endpoint="member", doc=common_doc)
+@ns.route("/<org:org>/member/<user:user>/", endpoint="member", doc=common_doc)
 class MemberAPI(API):
     @api.secure
     @api.expect(member_fields)
