@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2025-07-28 16:59+0200\n"
-"PO-Revision-Date: 2025-07-28 15:31\n"
+"PO-Revision-Date: 2025-07-28 15:36\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -217,7 +217,7 @@ msgstr "Type de badge (certifié, etc)"
 
 #: udata/core/contact_point/api.py:62
 msgid "An existing contact point already exists with these informations."
-msgstr ""
+msgstr "Un point de contact existe déjà avec ces informations."
 
 #: udata/core/contact_point/forms.py:12 udata/core/jobs/forms.py:27
 #: udata/core/organization/forms.py:46 udata/core/post/forms.py:15
@@ -630,7 +630,7 @@ msgstr "Future date de mise à jour"
 
 #: udata/core/dataset/models.py:600
 msgid "Last update of the dataset resources"
-msgstr ""
+msgstr "Dernière mise à jour des ressources de ce jeu de données"
 
 #: udata/core/dataset/models.py:653
 msgid "dataset"
@@ -1327,19 +1327,19 @@ msgstr "Un préfixe utilisé pour construire l'URL distante des éléments réco
 
 #: udata/harvest/backends/ckan/harvesters.py:35
 msgid "Organization"
-msgstr ""
+msgstr "Organisation"
 
 #: udata/harvest/backends/ckan/harvesters.py:35
 msgid "A CKAN Organization name"
-msgstr ""
+msgstr "Un nom d'organisation CKAN"
 
 #: udata/harvest/backends/ckan/harvesters.py:36
 msgid "Tag"
-msgstr ""
+msgstr "Mot-clé"
 
 #: udata/harvest/backends/ckan/harvesters.py:36
 msgid "A CKAN tag name"
-msgstr ""
+msgstr "Un nom de mot-clé CKAN"
 
 #: udata/templates/admin.html:7
 msgid "Admin"
