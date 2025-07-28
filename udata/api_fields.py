@@ -76,7 +76,9 @@ class GenericField(restx_fields.Raw):
 
     def format(self, value):
         # Value is one of the generic object
-        return marshal(value, self.fields_by_type[value.__class__.__name__])
+        data = marshal(value, self.fields_by_type[value.__class__.__name__])
+        # data[DEFAULT_GENERIC_KEY] = value.__class__.__name__
+        return data
 
 
 def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | None]:
@@ -169,6 +171,8 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         #     2. `__additional_field_info__` of the inner field
         #     3. `__additional_field_info__` of the parent
         inner_info: dict = getattr(field.field, "__additional_field_info__", {})
+        nested_info = {**info, **inner_info, **info.get("inner_field_info", {})}
+
         generic = info.get("generic", False)
 
         allowed_classes = (
@@ -184,7 +188,7 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
                     # Instead of having EmbeddedDocumentField(Bloc) we'll create fields for each
                     # of the subclasses with EmbededdDocumentField(DatasetsListBloc), EmbeddedDocumentFied(DataservicesListBloc)…
                     mongoengine.fields.EmbeddedDocumentField(cls),
-                    {**info, **inner_info, **info.get("inner_field_info", {})},
+                    nested_info,
                 )
                 for cls in allowed_classes
             }
@@ -195,7 +199,7 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
             field_read, field_write = convert_db_to_field(
                 f"{key}.inner",
                 field.field,
-                {**info, **inner_info, **info.get("inner_field_info", {})},
+                nested_info,
             )
 
         if constructor_read is None:
