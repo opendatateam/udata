@@ -3,6 +3,12 @@
 ## Current (in progress)
 
 - Migrate udata-ckan [#3385](https://github.com/opendatateam/udata/pull/3385)
+- Deactivate sitemap extension [#3389](https://github.com/opendatateam/udata/pull/3389)
+- Deactivate cache to check for existing slugs [#3390](https://github.com/opendatateam/udata/pull/3390)
+
+## 10.8.1 (2025-07-25)
+
+- Fix user deletion performances issues [#3388](https://github.com/opendatateam/udata/pull/3388)
 - Add search to discussions [#3384](https://github.com/opendatateam/udata/pull/3384)
 - Separate metrics for opened discussions [#3370](https://github.com/opendatateam/udata/pull/3370)
 
