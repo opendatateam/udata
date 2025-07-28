@@ -3,7 +3,6 @@ import logging
 import urllib.parse
 from functools import wraps
 from importlib import import_module
-from pprint import pprint
 
 import mongoengine
 from flask import (
