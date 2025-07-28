@@ -100,6 +100,7 @@ class Defaults(object):
     SECURITY_CHANGE_URL = "/change/"
     SECURITY_RESET_URL = "/reset/"
     SECURITY_CHANGE_EMAIL_URL = "/change-email/"
+    SECURITY_REDIRECT_BEHAVIOR = "spa"
 
     SECURITY_PASSWORD_SALT = "Default uData secret password salt"
     SECURITY_CONFIRM_SALT = "Default uData secret confirm salt"
@@ -117,10 +118,26 @@ class Defaults(object):
 
     SECURITY_RETURN_GENERIC_RESPONSES = False
 
+    # SECURITY_CSRF_PROTECT_MECHANISMS = ["session", "basic"]
+    SECURITY_CSRF_IGNORE_UNAUTH_ENDPOINTS = True
+
+    # SECURITY_CSRF_COOKIE_NAME = "XSRF-TOKEN"
+    WTF_CSRF_CHECK_DEFAULT = False
+    WTF_CSRF_TIME_LIMIT = None
+
     # Inactive users settings
     YEARS_OF_INACTIVITY_BEFORE_DELETION = None
     DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY = 30
     MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS = 200
+
+    # You can activate CaptchEtat, a captcha.com integration by providing
+    # CAPTCHETAT_BASE_URL, CAPTCHETAT_OAUTH_BASE_URL, CAPTCHETAT_CLIENT_ID and CAPTCHETAT_CLIENT_SECRET
+    CAPTCHETAT_BASE_URL = None
+    CAPTCHETAT_OAUTH_BASE_URL = None
+    CAPTCHETAT_CLIENT_ID = None
+    CAPTCHETAT_CLIENT_SECRET = None
+    CAPTCHETAT_TOKEN_CACHE_KEY = "captchetat-bearer-token"
+    CAPTCHETAT_STYLE_NAME = "captchaFR"
 
     # Sentry configuration
     SENTRY_DSN = None
