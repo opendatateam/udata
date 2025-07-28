@@ -46,6 +46,7 @@ class PageAPITest(APITestCase):
         self.assert200(response)
 
         self.assertEqual(len(response.json["blocs"][0]["datasets"]), 3)
+        self.assertEqual("DatasetsListBloc", response.json["blocs"][0]["class"])
         self.assertEqual("My awesome title", response.json["blocs"][0]["title"])
         self.assertIsNone(response.json["blocs"][0]["subtitle"])
         self.assertEqual(str(datasets[0].id), response.json["blocs"][0]["datasets"][0]["id"])
@@ -67,6 +68,7 @@ class PageAPITest(APITestCase):
         )
         self.assert200(response)
 
+        self.assertEqual("DatasetsListBloc", response.json["blocs"][0]["class"])
         self.assertEqual("My awesome title", response.json["blocs"][0]["title"])
         self.assertEqual("more information", response.json["blocs"][0]["subtitle"])
         self.assertEqual(len(response.json["blocs"][0]["datasets"]), 1)

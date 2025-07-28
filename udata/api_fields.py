@@ -77,7 +77,7 @@ class GenericField(restx_fields.Raw):
     def format(self, value):
         # Value is one of the generic object
         data = marshal(value, self.fields_by_type[value.__class__.__name__])
-        # data[DEFAULT_GENERIC_KEY] = value.__class__.__name__
+        data[DEFAULT_GENERIC_KEY] = value.__class__.__name__
         return data
 
 
