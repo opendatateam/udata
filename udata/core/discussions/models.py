@@ -82,8 +82,18 @@ class Discussion(SpamMixin, Linkable, db.Document):
     extras = db.ExtrasField()
 
     meta = {
-        "indexes": ["user", "subject", "-created"],
+        "indexes": [
+            {
+                "fields": ["$title", "$discussion.content"],
+                "default_language": "french",
+                "weights": {"title": 10, "discussion.content": 5},
+            },
+            "user",
+            "subject",
+            "-created",
+        ],
         "ordering": ["-created"],
+        "auto_create_index_on_save": True,
     }
 
     @property

@@ -18,8 +18,41 @@ pytestmark = [
 class ContactPointAPITest:
     modules = []
 
+    def test_get_or_create(self):
+        org = OrganizationFactory()
+        contact_point, created = ContactPoint.objects().get_or_create(
+            name="An Organization",
+            email=None,
+            contact_form=None,
+            role="publisher",
+            organization=org.id,
+        )
+
+        assert created
+        assert contact_point.name == "An Organization"
+
+        contact_point, created = ContactPoint.objects().get_or_create(
+            name="An Organization",
+            email=None,
+            contact_form=None,
+            role="publisher",
+            organization=org.id,
+        )
+        assert not created
+        assert contact_point.name == "An Organization"
+
+        contact_point, created = ContactPoint.objects().get_or_create(
+            name="Another",
+            email=None,
+            contact_form=None,
+            role="publisher",
+            organization=org.id,
+        )
+        assert created
+        assert contact_point.name == "Another"
+
     def test_contact_point_api_create(self, api):
-        api.login()
+        user = api.login()
         data = {
             "name": faker.word(),
             "email": faker.email(),
@@ -30,6 +63,9 @@ class ContactPointAPITest:
         assert201(response)
         assert ContactPoint.objects.count() == 1
 
+        contact_point = ContactPoint.objects.first()
+        assert contact_point.owner.id == user.id
+
     def test_contact_point_api_create_email_or_contact_form(self, api):
         api.login()
         data = {"name": faker.word(), "contact_form": faker.url(), "role": "contact"}
@@ -38,6 +74,53 @@ class ContactPointAPITest:
         assert ContactPoint.objects.count() == 1
 
         data = {"name": faker.word(), "email": faker.email(), "role": "contact"}
+        response = api.post(url_for("api.contact_points"), data=data)
+        assert201(response)
+        assert ContactPoint.objects.count() == 2
+
+    def test_contact_point_duplicate_creation(self, api):
+        api.login()
+        data = {"name": faker.word(), "contact_form": faker.url(), "role": "contact"}
+        response = api.post(url_for("api.contact_points"), data=data)
+        assert201(response)
+        assert ContactPoint.objects.count() == 1
+
+        response = api.post(url_for("api.contact_points"), data=data)
+        assert200(response)
+        assert ContactPoint.objects.count() == 1
+
+    def test_contact_point_for_different_org(self, api):
+        user = api.login()
+        member = Member(user=user, role="editor")
+        org_a = OrganizationFactory(members=[member])
+
+        data = {
+            "name": faker.word(),
+            "contact_form": faker.url(),
+            "role": "contact",
+            "organization": str(org_a.id),
+        }
+        response = api.post(url_for("api.contact_points"), data=data)
+        assert201(response)
+        assert ContactPoint.objects.count() == 1
+
+        response = api.post(url_for("api.contact_points"), data=data)
+        assert200(response)
+        assert ContactPoint.objects.count() == 1
+
+        contact_point = ContactPoint.objects.first()
+        assert contact_point.owner is None
+        assert contact_point.organization.id == org_a.id
+
+        org_b = OrganizationFactory(members=[])
+        data["organization"] = str(org_b.id)
+        response = api.post(url_for("api.contact_points"), data=data)
+        assert400(response)
+        assert ContactPoint.objects.count() == 1
+
+        org_b.members = [Member(user=user, role="editor")]
+        org_b.save()
+
         response = api.post(url_for("api.contact_points"), data=data)
         assert201(response)
         assert ContactPoint.objects.count() == 2
@@ -91,6 +174,19 @@ class ContactPointAPITest:
         assert200(response)
         assert ContactPoint.objects.count() == 1
         assert ContactPoint.objects.first().email == "new.email@newdomain.com"
+
+    def test_contact_point_api_update_to_existing_contact_point(self, api):
+        user = api.login()
+        contact_point_a = ContactPointFactory(email="a@example.org", owner=user)
+        contact_point_b = ContactPointFactory(email="b@example.org", owner=user)
+
+        data_b = contact_point_b.to_dict()
+        response = api.put(url_for("api.contact_point", contact_point=contact_point_a), data_b)
+        assert400(response)
+        assert ContactPoint.objects.count() == 2
+
+        contact_point_a.reload()
+        assert contact_point_a.email == "a@example.org"
 
     def test_contact_point_api_update_forbidden(self, api):
         api.login()

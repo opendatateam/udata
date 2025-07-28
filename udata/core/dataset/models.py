@@ -595,6 +595,14 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
         ),
         auditable=False,
     )
+    last_update = field(
+        DateTimeField(
+            verbose_name=_("Last update of the dataset resources"),
+            default=datetime.utcnow,
+            required=True,
+        ),
+        auditable=False,
+    )
     deleted = field(db.DateTimeField(), auditable=False)
     archived = field(db.DateTimeField())
 
@@ -603,6 +611,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
 
     __metrics_keys__ = [
         "discussions",
+        "discussions_open",
         "reuses",
         "reuses_by_months",
         "followers",
@@ -681,6 +690,8 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
 
         if len(set(res.id for res in self.resources)) != len(self.resources):
             raise MongoEngineValidationError(f"Duplicate resource ID in dataset #{self.id}.")
+
+        self.last_update = self.compute_last_update()
 
         self.quality_cached = self.compute_quality()
 
@@ -783,11 +794,11 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
             return to_naive_datetime(self.harvest.modified_at)
         return to_naive_datetime(self.last_modified_internal)
 
-    @property
-    def last_update(self):
+    def compute_last_update(self):
         """
         Use the more recent date we would have on resources (harvest, modified).
         Default to dataset last_modified if no resource.
+        Resources should be fetched when calling this method.
         """
         if self.resources:
             return max([res.last_modified for res in self.resources])
@@ -1076,7 +1087,8 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
     def count_discussions(self):
         from udata.models import Discussion
 
-        self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()
+        self.metrics["discussions"] = Discussion.objects(subject=self).count()
+        self.metrics["discussions_open"] = Discussion.objects(subject=self, closed=None).count()
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_reuses(self):

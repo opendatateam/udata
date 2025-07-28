@@ -465,7 +465,7 @@ class DatasetSchemasAPI(API):
                     r.get("schema").get("name"),
                     r.get("schema").get("version"),
                 ): r.get("schema")
-                for r in dataset.get("resources", [])
+                for r in dataset.get("resources", []) or []
                 if r.get("schema")
             }.values()
         )

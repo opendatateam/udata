@@ -1,6 +1,10 @@
 class Linkable:
     def _link_id(self, **kwargs):
-        return self.id if kwargs.get("_useId", False) else self.slug
+        if kwargs.get("_useId", False):
+            return self.id
+
+        # Some old/special datasets don't have slug?
+        return self.slug or self.id
 
     def _self_api_url_kwargs(self, **kwargs):
         # Default to external
