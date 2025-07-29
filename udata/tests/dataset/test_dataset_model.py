@@ -422,10 +422,7 @@ class DatasetModelTest:
             )
 
         dataset.reload()
-        # Reuse metrics are updated with a job following https://github.com/opendatateam/udata/pull/2531
-        # Thus, metrics are not updated real time here
-        # TODO: could we revert to using signals for reuse metrics?
-        # assert dataset.get_metrics()["reuses"] == 1
+        assert dataset.get_metrics()["reuses"] == 1
         assert dataset.get_metrics()["dataservices"] == 1
         assert dataset.get_metrics()["followers"] == 1
 
@@ -441,7 +438,7 @@ class DatasetModelTest:
             follow.save()
 
         dataset.reload()
-        # assert dataset.get_metrics()["reuses"] == 0
+        assert dataset.get_metrics()["reuses"] == 0
         assert dataset.get_metrics()["dataservices"] == 0
         assert dataset.get_metrics()["followers"] == 0
 
@@ -450,7 +447,7 @@ class DatasetModelTest:
         dataservice = DataserviceFactory(datasets=[dataset])
 
         dataset.reload()
-        # assert dataset.get_metrics()["reuses"] == 1
+        assert dataset.get_metrics()["reuses"] == 1
         assert dataset.get_metrics()["dataservices"] == 1
 
         with assert_emit(Reuse.on_update):
@@ -461,11 +458,8 @@ class DatasetModelTest:
             dataservice.save()
 
         dataset.reload()
-        # assert dataset.get_metrics()["reuses"] == 0
+        assert dataset.get_metrics()["reuses"] == 0
         assert dataset.get_metrics()["dataservices"] == 0
-        # TODO: the assertion above doesn't work since we don't compute
-        # count_dataservices on datasets that are no longer in the dataservices
-        # since we iterate on dataservice.datasets
 
 
 class ResourceModelTest:
