@@ -321,7 +321,7 @@ def check_references(models_to_check):
                                 # Setting it explicitely to an empty list actually removes the field, it shouldn't.
                                 errors[model][key] += 1
                                 print_and_save(
-                                    f'\t{model.__name__}#{obj.id} have a non existing field `{reference["name"]}`, instead of an empty list'
+                                    f"\t{model.__name__}#{obj.id} have a non existing field `{reference['name']}`, instead of an empty list"
                                 )
                             else:
                                 attr_list = getattr(obj, reference["name"])
@@ -331,7 +331,7 @@ def check_references(models_to_check):
                                     if isinstance(sub, DBRef):
                                         errors[model][key] += 1
                                         print_and_save(
-                                            f'\t{model.__name__}#{obj.id} have a broken reference for {reference["name"]}[{i}]'
+                                            f"\t{model.__name__}#{obj.id} have a broken reference for {reference['name']}[{i}]"
                                         )
                         elif reference["type"] == "embed_list":
                             p1, p2 = reference["name"].split("__")
