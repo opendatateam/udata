@@ -10,3 +10,4 @@ pytest-flask
 pytest-mock
 pytest-sugar
 requests-mock
+deepdiff

@@ -1,0 +1,330 @@
+{
+  "requests_history": [
+    {
+      "request": {
+        "method": "HEAD",
+        "url": "https://data.capatlantique.fr/api/explore/v2.1/catalog/exports/dcat/?where=publisher%3D%22CCAS+Gu%C3%A9rande%22&include_exports=json%2Ccsv%2Cshp%2Cgeojson&lang=fr",
+        "headers": {
+          "User-Agent": "uData/0.1 dcat",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive"
+        },
+        "body": "None"
+      },
+      "response": {
+        "status_code": 200,
+        "headers": {
+          "Server": "openresty",
+          "Date": "Tue, 29 Jul 2025 14:58:32 GMT",
+          "Content-Type": "application/rdf+xml; charset=utf-8",
+          "Connection": "keep-alive",
+          "Content-Disposition": "attachment; filename=\"datasets.rdf\"",
+          "Cache-Control": "no-cache, no-store, max-age=0, must-revalidate",
+          "X-RateLimit-Remaining": "4878",
+          "X-RateLimit-Limit": "5000",
+          "X-RateLimit-Reset": "2025-07-30 00:00:00+00:00",
+          "Content-Security-Policy": "upgrade-insecure-requests; default-src 'self' https://*.screeb.app; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://*.googletagmanager.com/ disqus.com *.disqus.com *.disquscdn.com https://js.hs-scripts.com platform.twitter.com syndication.twitter.com cdn.syndication.twimg.com https://gist.github.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://js.hsforms.net https://forms.hsforms.com/ https://js.hs-analytics.net https://app.getbeamer.com/js/ https://realtime.getbeamer.com/ https://apis.google.com https://*.screeb.app nominatim.openstreetmap.org http://cdn.matomo.cloud/opendatasoft.matomo.cloud/matomo.js http://cdn.mxpnl.com/ ; style-src 'self' 'unsafe-inline' https://platform.twitter.com https://ton.twimg.com https://github.githubassets.com/ *.disquscdn.com https://fonts.googleapis.com https://app.getbeamer.com/styles/ ; img-src * data: blob:; font-src * data:; media-src 'self' https://eu.ftp.opendatasoft.com/odsacademy/ ; connect-src 'self' *.opendatasoft.com *.disqus.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com *.algolia.net api.jawg.io tile.jawg.io https://graph.microsoft.com/ https://backend.getbeamer.com/ wss://realtime.getbeamer.com https://static.getbeamer.com/favico.js https://stats.g.doubleclick.net https://t.hs-growth-metrics.com https://*.screeb.app wss://*.screeb.app https://opendatasoft.matomo.cloud/matomo.php https://api-js.mixpanel.com/ ; frame-src 'self' https://platform.twitter.com https://syndication.twitter.com https://www.google.com/recaptcha/ https://accounts.google.com https://docs.google.com https://*.screeb.app *.opendatasoft.com disqus.com https://app.hubspot.com https://forms.hsforms.com https://app.getbeamer.com https://opendatasoft-trial.com data.opendatasoft.com/ www.youtube.com/embed/ www.youtube-nocookie.com/embed/ www.dailymotion.com/embed/video/ player.vimeo.com/video/ www.veed.io/embed/ app.powerbi.com/ app.powerbigov.us/ app.high.powerbigov.us/ app.mil.powerbigov.us/ public.tableau.com/views/ arcgis.com/apps/View/ docs.google.com/forms/ forms.office.com/ www.google.com/maps/d/embed www.google.com/maps/embed www.arcgis.com/home/webscene/viewer.html www.arcgis.com/home/webmap/viewer.html www.arcgis.com/apps/dashboards/ app.streamfizz.live/embed/ player.streamfizz.live/embed/ www.facebook.com/plugins/page.php experience.arcgis.com/experience/;frame-ancestors 'none'",
+          "X-Frame-Options": "DENY",
+          "Vary": "Accept-Language, Cookie, Host",
+          "Content-Language": "fr-fr",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+          "Access-Control-Max-Age": "1000",
+          "Access-Control-Allow-Headers": "Authorization, X-Requested-With, Origin, ODS-API-Analytics-App, ODS-API-Analytics-Embed-Type, ODS-API-Analytics-Embed-Referrer, ODS-Widgets-Version, Accept",
+          "Access-Control-Expose-Headers": "ODS-Explore-API-Deprecation, Link, X-RateLimit-Remaining, X-RateLimit-Limit, X-RateLimit-Reset, X-RateLimit-dataset-Remaining, X-RateLimit-dataset-Limit, X-RateLimit-dataset-Reset",
+          "x-datadog-trace-id": "14461863232168556570",
+          "Strict-Transport-Security": "max-age=31536000;includeSubdomains",
+          "X-XSS-Protection": "1; mode=block",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "Permissions-Policy": "midi=(),microphone=(),camera=(),magnetometer=(),gyroscope=(),fullscreen=(self),payment=()",
+          "X-UA-Compatible": "IE=edge"
+        },
+        "body": ""
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://data.capatlantique.fr/api/explore/v2.1/catalog/exports/dcat/?where=publisher%3D%22CCAS+Gu%C3%A9rande%22&include_exports=json%2Ccsv%2Cshp%2Cgeojson&lang=fr",
+        "headers": {
+          "User-Agent": "uData/0.1 dcat",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive"
+        },
+        "body": "None"
+      },
+      "response": {
+        "status_code": 200,
+        "headers": {
+          "Server": "openresty",
+          "Date": "Tue, 29 Jul 2025 14:58:32 GMT",
+          "Content-Type": "application/rdf+xml; charset=utf-8",
+          "Transfer-Encoding": "chunked",
+          "Connection": "keep-alive",
+          "Content-Disposition": "attachment; filename=\"datasets.rdf\"",
+          "Cache-Control": "no-cache, no-store, max-age=0, must-revalidate",
+          "X-RateLimit-Remaining": "4877",
+          "X-RateLimit-Limit": "5000",
+          "X-RateLimit-Reset": "2025-07-30 00:00:00+00:00",
+          "Content-Security-Policy": "upgrade-insecure-requests; default-src 'self' https://*.screeb.app; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://*.googletagmanager.com/ disqus.com *.disqus.com *.disquscdn.com https://js.hs-scripts.com platform.twitter.com syndication.twitter.com cdn.syndication.twimg.com https://gist.github.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://js.hsforms.net https://forms.hsforms.com/ https://js.hs-analytics.net https://app.getbeamer.com/js/ https://realtime.getbeamer.com/ https://apis.google.com https://*.screeb.app nominatim.openstreetmap.org http://cdn.matomo.cloud/opendatasoft.matomo.cloud/matomo.js http://cdn.mxpnl.com/ ; style-src 'self' 'unsafe-inline' https://platform.twitter.com https://ton.twimg.com https://github.githubassets.com/ *.disquscdn.com https://fonts.googleapis.com https://app.getbeamer.com/styles/ ; img-src * data: blob:; font-src * data:; media-src 'self' https://eu.ftp.opendatasoft.com/odsacademy/ ; connect-src 'self' *.opendatasoft.com *.disqus.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com *.algolia.net api.jawg.io tile.jawg.io https://graph.microsoft.com/ https://backend.getbeamer.com/ wss://realtime.getbeamer.com https://static.getbeamer.com/favico.js https://stats.g.doubleclick.net https://t.hs-growth-metrics.com https://*.screeb.app wss://*.screeb.app https://opendatasoft.matomo.cloud/matomo.php https://api-js.mixpanel.com/ ; frame-src 'self' https://platform.twitter.com https://syndication.twitter.com https://www.google.com/recaptcha/ https://accounts.google.com https://docs.google.com https://*.screeb.app *.opendatasoft.com disqus.com https://app.hubspot.com https://forms.hsforms.com https://app.getbeamer.com https://opendatasoft-trial.com data.opendatasoft.com/ www.youtube.com/embed/ www.youtube-nocookie.com/embed/ www.dailymotion.com/embed/video/ player.vimeo.com/video/ www.veed.io/embed/ app.powerbi.com/ app.powerbigov.us/ app.high.powerbigov.us/ app.mil.powerbigov.us/ public.tableau.com/views/ arcgis.com/apps/View/ docs.google.com/forms/ forms.office.com/ www.google.com/maps/d/embed www.google.com/maps/embed www.arcgis.com/home/webscene/viewer.html www.arcgis.com/home/webmap/viewer.html www.arcgis.com/apps/dashboards/ app.streamfizz.live/embed/ player.streamfizz.live/embed/ www.facebook.com/plugins/page.php experience.arcgis.com/experience/;frame-ancestors 'none'",
+          "X-Frame-Options": "DENY",
+          "Vary": "Accept-Language, Cookie, Host",
+          "Content-Language": "fr-fr",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+          "Access-Control-Max-Age": "1000",
+          "Access-Control-Allow-Headers": "Authorization, X-Requested-With, Origin, ODS-API-Analytics-App, ODS-API-Analytics-Embed-Type, ODS-API-Analytics-Embed-Referrer, ODS-Widgets-Version, Accept",
+          "Access-Control-Expose-Headers": "ODS-Explore-API-Deprecation, Link, X-RateLimit-Remaining, X-RateLimit-Limit, X-RateLimit-Reset, X-RateLimit-dataset-Remaining, X-RateLimit-dataset-Limit, X-RateLimit-dataset-Reset",
+          "x-datadog-trace-id": "1806248671732771469",
+          "Strict-Transport-Security": "max-age=31536000;includeSubdomains",
+          "X-XSS-Protection": "1; mode=block",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "Permissions-Policy": "midi=(),microphone=(),camera=(),magnetometer=(),gyroscope=(),fullscreen=(self),payment=()",
+          "X-UA-Compatible": "IE=edge"
+        },
+        "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><rdf:RDF xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:dcterms=\"http://purl.org/dc/terms/\" xmlns:dctype=\"http://purl.org/dc/dcmitype/\" xmlns:dcat=\"http://www.w3.org/ns/dcat#\" xmlns:dcatap=\"http://data.europa.eu/r5r/\" xmlns:foaf=\"http://xmlns.com/foaf/0.1/\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\" xmlns:vcard=\"http://www.w3.org/2006/vcard/ns#\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\" xmlns:skos=\"http://www.w3.org/2004/02/skos/core#\"><rdf:Description rdf:about=\"https://data.capatlantique.fr/explore/\"><rdf:type rdf:resource=\"http://www.w3.org/ns/dcat#Catalog\" />\n<dcterms:title><![CDATA[Cap Atlantique - Open Data]]></dcterms:title>\n<dcterms:description><![CDATA[Cap Atlantique - Open Data catalog]]></dcterms:description>\n<dcterms:language rdf:resource=\"http://id.loc.gov/vocabulary/iso639-1/fr\" />\n<foaf:homepage><foaf:Document rdf:about=\"https://data.capatlantique.fr\"><rdf:type rdf:resource=\"http://xmlns.com/foaf/0.1/Document\" />\n</foaf:Document></foaf:homepage><dcat:dataset><dcat:Dataset rdf:about=\"https://data.capatlantique.fr/explore/dataset/264400516_arretes_ccas_guerande/\"><dcterms:description xml:lang=\"fr\"><![CDATA[Actes r\u00e9glementaires pris par le CCAS de la Commune de Gu\u00e9rande.\u00a0 Publication des arr\u00eat\u00e9s du Pr\u00e9sident \u00e0 caract\u00e8re non individuel.]]></dcterms:description>\n<dcterms:identifier>https://data.capatlantique.fr/explore/dataset/264400516_arretes_ccas_guerande/</dcterms:identifier>\n<rdf:type rdf:resource=\"dctype:Dataset\" />\n<rdf:type rdf:resource=\"http://www.w3.org/ns/dcat#Dataset\" />\n<dcterms:issued rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dcterms:issued>\n<dcterms:date rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dcterms:date>\n<dcterms:modified rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dcterms:modified>\n<dcterms:publisher><foaf:Agent rdf:about=\"https://data.capatlantique.fr/explore/?refine.publisher=CCAS+Gu%C3%A9rande\"><foaf:name>CCAS Gu\u00e9rande</foaf:name>\n</foaf:Agent></dcterms:publisher><dcterms:contributor rdf:resource=\"https://data.capatlantique.fr/explore/?refine.publisher=CCAS+Gu%C3%A9rande\" />\n<dcterms:creator rdf:resource=\"https://data.capatlantique.fr/explore/?refine.publisher=CCAS+Gu%C3%A9rande\" />\n<dcterms:license><dcterms:LicenseDocument rdf:about=\"https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf\"><rdf:type rdf:resource=\"http://purl.org/dc/terms/LicenseDocument\" />\n</dcterms:LicenseDocument></dcterms:license><dcterms:rights rdf:resource=\"https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf\" />\n<dcat:landingPage><foaf:Document rdf:about=\"https://data.capatlantique.fr/explore/dataset/264400516_arretes_ccas_guerande/\"><rdf:type rdf:resource=\"http://xmlns.com/foaf/0.1/Document\" />\n</foaf:Document></dcat:landingPage><dcterms:title xml:lang=\"fr\">Arr\u00eat\u00e9s du CCAS de Gu\u00e9rande</dcterms:title>\n<dcterms:language><dcterms:LinguisticSystem rdf:about=\"http://id.loc.gov/vocabulary/iso639-1/fr\"><rdf:type rdf:resource=\"http://purl.org/dc/terms/LinguisticSystem\" />\n</dcterms:LinguisticSystem></dcterms:language><dcat:theme><skos:Concept rdf:about=\"https://data.capatlantique.fr/explore/?refine.theme=Citoyennet%C3%A9+%2F+Institution\"><rdf:type rdf:resource=\"http://www.w3.org/2004/02/skos/core#Concept\" />\n<skos:prefLabel>Citoyennet\u00e9 / Institution</skos:prefLabel>\n</skos:Concept></dcat:theme><dcterms:subject rdf:resource=\"https://data.capatlantique.fr/explore/?refine.theme=Citoyennet%C3%A9+%2F+Institution\" />\n<dcat:distribution><dcat:Distribution rdf:about=\"https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/csv?use_labels=true\"><rdf:type rdf:resource=\"http://www.w3.org/ns/dcat#Distribution\" />\n<dcterms:title xml:lang=\"fr\">264400516_arretes_ccas_guerande.csv</dcterms:title>\n<dcterms:description xml:lang=\"fr\">Arr\u00eat\u00e9s du CCAS de Gu\u00e9rande (csv)</dcterms:description>\n<dcat:accessURL rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/csv?use_labels=true\" />\n<dcat:downloadURL rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/csv?use_labels=true\" />\n<dcterms:format><dcterms:MediaTypeOrExtent rdf:about=\"https://www.iana.org/assignments/media-types/text/csv\"><rdf:type rdf:resource=\"http://purl.org/dc/terms/MediaTypeOrExtent\" />\n</dcterms:MediaTypeOrExtent></dcterms:format><dcat:mediaType rdf:resource=\"https://www.iana.org/assignments/media-types/text/csv\" />\n<dcterms:license><dcterms:LicenseDocument rdf:about=\"https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf\"><rdf:type rdf:resource=\"http://purl.org/dc/terms/LicenseDocument\" />\n</dcterms:LicenseDocument></dcterms:license><dcterms:rights rdf:resource=\"https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf\" />\n<dcterms:language><dcterms:LinguisticSystem rdf:about=\"http://id.loc.gov/vocabulary/iso639-1/fr\"><rdf:type rdf:resource=\"http://purl.org/dc/terms/LinguisticSystem\" />\n</dcterms:LinguisticSystem></dcterms:language><dcterms:issued rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dcterms:issued>\n<dcterms:date rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dcterms:date>\n<dcterms:modified rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dcterms:modified>\n</dcat:Distribution></dcat:distribution>\n<dcat:distribution><dcat:Distribution rdf:about=\"https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/json\"><rdf:type rdf:resource=\"http://www.w3.org/ns/dcat#Distribution\" />\n<dcterms:title xml:lang=\"fr\">264400516_arretes_ccas_guerande.json</dcterms:title>\n<dcterms:description xml:lang=\"fr\">Arr\u00eat\u00e9s du CCAS de Gu\u00e9rande (json)</dcterms:description>\n<dcat:accessURL rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/json\" />\n<dcat:downloadURL rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/json\" />\n<dcterms:format><dcterms:MediaTypeOrExtent rdf:about=\"https://www.iana.org/assignments/media-types/application/json\"><rdf:type rdf:resource=\"http://purl.org/dc/terms/MediaTypeOrExtent\" />\n</dcterms:MediaTypeOrExtent></dcterms:format><dcat:mediaType rdf:resource=\"https://www.iana.org/assignments/media-types/application/json\" />\n<dcterms:license><dcterms:LicenseDocument rdf:about=\"https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf\"><rdf:type rdf:resource=\"http://purl.org/dc/terms/LicenseDocument\" />\n</dcterms:LicenseDocument></dcterms:license><dcterms:rights rdf:resource=\"https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf\" />\n<dcterms:language><dcterms:LinguisticSystem rdf:about=\"http://id.loc.gov/vocabulary/iso639-1/fr\"><rdf:type rdf:resource=\"http://purl.org/dc/terms/LinguisticSystem\" />\n</dcterms:LinguisticSystem></dcterms:language><dcterms:issued rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dcterms:issued>\n<dcterms:date rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dcterms:date>\n<dcterms:modified rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dcterms:modified>\n</dcat:Distribution></dcat:distribution>\n</dcat:Dataset>\n</dcat:dataset><dcat:service><dcat:DataService rdf:about=\"https://data.capatlantique.fr/api/explore/v2.1/\"><dcterms:title xml:lang=\"en\"><![CDATA[Explore API v2 https://data.capatlantique.fr]]></dcterms:title>\n<dcterms:identifier>https://data.capatlantique.fr/api/explore/v2.1/</dcterms:identifier>\n<dcat:endpointURL rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/\" />\n<dcat:endpointDescription rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/swagger.json\" />\n<dcat:landingPage rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/console\" />\n<dcat:servesDataset rdf:resource=\"https://data.capatlantique.fr/explore/dataset/264400516_arretes_ccas_guerande/\" />\n</dcat:DataService></dcat:service>\n</rdf:Description></rdf:RDF>\n"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://data.capatlantique.fr/api/explore/v2.1/catalog/exports/dcat/?where=publisher%3D%22CCAS+Gu%C3%A9rande%22&include_exports=json%2Ccsv%2Cshp%2Cgeojson&lang=fr",
+        "headers": {
+          "User-Agent": "uData/0.1 dcat",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive"
+        },
+        "body": "None"
+      },
+      "response": {
+        "status_code": 200,
+        "headers": {
+          "Server": "openresty",
+          "Date": "Tue, 29 Jul 2025 14:58:33 GMT",
+          "Content-Type": "application/rdf+xml; charset=utf-8",
+          "Transfer-Encoding": "chunked",
+          "Connection": "keep-alive",
+          "Content-Disposition": "attachment; filename=\"datasets.rdf\"",
+          "Cache-Control": "no-cache, no-store, max-age=0, must-revalidate",
+          "X-RateLimit-Remaining": "4876",
+          "X-RateLimit-Limit": "5000",
+          "X-RateLimit-Reset": "2025-07-30 00:00:00+00:00",
+          "Content-Security-Policy": "upgrade-insecure-requests; default-src 'self' https://*.screeb.app; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://*.googletagmanager.com/ disqus.com *.disqus.com *.disquscdn.com https://js.hs-scripts.com platform.twitter.com syndication.twitter.com cdn.syndication.twimg.com https://gist.github.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://js.hsforms.net https://forms.hsforms.com/ https://js.hs-analytics.net https://app.getbeamer.com/js/ https://realtime.getbeamer.com/ https://apis.google.com https://*.screeb.app nominatim.openstreetmap.org http://cdn.matomo.cloud/opendatasoft.matomo.cloud/matomo.js http://cdn.mxpnl.com/ ; style-src 'self' 'unsafe-inline' https://platform.twitter.com https://ton.twimg.com https://github.githubassets.com/ *.disquscdn.com https://fonts.googleapis.com https://app.getbeamer.com/styles/ ; img-src * data: blob:; font-src * data:; media-src 'self' https://eu.ftp.opendatasoft.com/odsacademy/ ; connect-src 'self' *.opendatasoft.com *.disqus.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com *.algolia.net api.jawg.io tile.jawg.io https://graph.microsoft.com/ https://backend.getbeamer.com/ wss://realtime.getbeamer.com https://static.getbeamer.com/favico.js https://stats.g.doubleclick.net https://t.hs-growth-metrics.com https://*.screeb.app wss://*.screeb.app https://opendatasoft.matomo.cloud/matomo.php https://api-js.mixpanel.com/ ; frame-src 'self' https://platform.twitter.com https://syndication.twitter.com https://www.google.com/recaptcha/ https://accounts.google.com https://docs.google.com https://*.screeb.app *.opendatasoft.com disqus.com https://app.hubspot.com https://forms.hsforms.com https://app.getbeamer.com https://opendatasoft-trial.com data.opendatasoft.com/ www.youtube.com/embed/ www.youtube-nocookie.com/embed/ www.dailymotion.com/embed/video/ player.vimeo.com/video/ www.veed.io/embed/ app.powerbi.com/ app.powerbigov.us/ app.high.powerbigov.us/ app.mil.powerbigov.us/ public.tableau.com/views/ arcgis.com/apps/View/ docs.google.com/forms/ forms.office.com/ www.google.com/maps/d/embed www.google.com/maps/embed www.arcgis.com/home/webscene/viewer.html www.arcgis.com/home/webmap/viewer.html www.arcgis.com/apps/dashboards/ app.streamfizz.live/embed/ player.streamfizz.live/embed/ www.facebook.com/plugins/page.php experience.arcgis.com/experience/;frame-ancestors 'none'",
+          "X-Frame-Options": "DENY",
+          "Vary": "Accept-Language, Cookie, Host",
+          "Content-Language": "fr-fr",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+          "Access-Control-Max-Age": "1000",
+          "Access-Control-Allow-Headers": "Authorization, X-Requested-With, Origin, ODS-API-Analytics-App, ODS-API-Analytics-Embed-Type, ODS-API-Analytics-Embed-Referrer, ODS-Widgets-Version, Accept",
+          "Access-Control-Expose-Headers": "ODS-Explore-API-Deprecation, Link, X-RateLimit-Remaining, X-RateLimit-Limit, X-RateLimit-Reset, X-RateLimit-dataset-Remaining, X-RateLimit-dataset-Limit, X-RateLimit-dataset-Reset",
+          "x-datadog-trace-id": "1687029031557383653",
+          "Strict-Transport-Security": "max-age=31536000;includeSubdomains",
+          "X-XSS-Protection": "1; mode=block",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "Permissions-Policy": "midi=(),microphone=(),camera=(),magnetometer=(),gyroscope=(),fullscreen=(self),payment=()",
+          "X-UA-Compatible": "IE=edge"
+        },
+        "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><rdf:RDF xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:dcterms=\"http://purl.org/dc/terms/\" xmlns:dctype=\"http://purl.org/dc/dcmitype/\" xmlns:dcat=\"http://www.w3.org/ns/dcat#\" xmlns:dcatap=\"http://data.europa.eu/r5r/\" xmlns:foaf=\"http://xmlns.com/foaf/0.1/\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\" xmlns:vcard=\"http://www.w3.org/2006/vcard/ns#\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\" xmlns:skos=\"http://www.w3.org/2004/02/skos/core#\"><rdf:Description rdf:about=\"https://data.capatlantique.fr/explore/\"><rdf:type rdf:resource=\"http://www.w3.org/ns/dcat#Catalog\" />\n<dcterms:title><![CDATA[Cap Atlantique - Open Data]]></dcterms:title>\n<dcterms:description><![CDATA[Cap Atlantique - Open Data catalog]]></dcterms:description>\n<dcterms:language rdf:resource=\"http://id.loc.gov/vocabulary/iso639-1/fr\" />\n<foaf:homepage><foaf:Document rdf:about=\"https://data.capatlantique.fr\"><rdf:type rdf:resource=\"http://xmlns.com/foaf/0.1/Document\" />\n</foaf:Document></foaf:homepage><dcat:dataset><dcat:Dataset rdf:about=\"https://data.capatlantique.fr/explore/dataset/264400516_arretes_ccas_guerande/\"><dcterms:description xml:lang=\"fr\"><![CDATA[Actes r\u00e9glementaires pris par le CCAS de la Commune de Gu\u00e9rande.\u00a0 Publication des arr\u00eat\u00e9s du Pr\u00e9sident \u00e0 caract\u00e8re non individuel.]]></dcterms:description>\n<dcterms:identifier>https://data.capatlantique.fr/explore/dataset/264400516_arretes_ccas_guerande/</dcterms:identifier>\n<rdf:type rdf:resource=\"dctype:Dataset\" />\n<rdf:type rdf:resource=\"http://www.w3.org/ns/dcat#Dataset\" />\n<dcterms:issued rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dcterms:issued>\n<dcterms:date rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dcterms:date>\n<dcterms:modified rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dcterms:modified>\n<dcterms:publisher><foaf:Agent rdf:about=\"https://data.capatlantique.fr/explore/?refine.publisher=CCAS+Gu%C3%A9rande\"><foaf:name>CCAS Gu\u00e9rande</foaf:name>\n</foaf:Agent></dcterms:publisher><dcterms:contributor rdf:resource=\"https://data.capatlantique.fr/explore/?refine.publisher=CCAS+Gu%C3%A9rande\" />\n<dcterms:creator rdf:resource=\"https://data.capatlantique.fr/explore/?refine.publisher=CCAS+Gu%C3%A9rande\" />\n<dcterms:license><dcterms:LicenseDocument rdf:about=\"https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf\"><rdf:type rdf:resource=\"http://purl.org/dc/terms/LicenseDocument\" />\n</dcterms:LicenseDocument></dcterms:license><dcterms:rights rdf:resource=\"https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf\" />\n<dcat:landingPage><foaf:Document rdf:about=\"https://data.capatlantique.fr/explore/dataset/264400516_arretes_ccas_guerande/\"><rdf:type rdf:resource=\"http://xmlns.com/foaf/0.1/Document\" />\n</foaf:Document></dcat:landingPage><dcterms:title xml:lang=\"fr\">Arr\u00eat\u00e9s du CCAS de Gu\u00e9rande</dcterms:title>\n<dcterms:language><dcterms:LinguisticSystem rdf:about=\"http://id.loc.gov/vocabulary/iso639-1/fr\"><rdf:type rdf:resource=\"http://purl.org/dc/terms/LinguisticSystem\" />\n</dcterms:LinguisticSystem></dcterms:language><dcat:theme><skos:Concept rdf:about=\"https://data.capatlantique.fr/explore/?refine.theme=Citoyennet%C3%A9+%2F+Institution\"><rdf:type rdf:resource=\"http://www.w3.org/2004/02/skos/core#Concept\" />\n<skos:prefLabel>Citoyennet\u00e9 / Institution</skos:prefLabel>\n</skos:Concept></dcat:theme><dcterms:subject rdf:resource=\"https://data.capatlantique.fr/explore/?refine.theme=Citoyennet%C3%A9+%2F+Institution\" />\n<dcat:distribution><dcat:Distribution rdf:about=\"https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/csv?use_labels=true\"><rdf:type rdf:resource=\"http://www.w3.org/ns/dcat#Distribution\" />\n<dcterms:title xml:lang=\"fr\">264400516_arretes_ccas_guerande.csv</dcterms:title>\n<dcterms:description xml:lang=\"fr\">Arr\u00eat\u00e9s du CCAS de Gu\u00e9rande (csv)</dcterms:description>\n<dcat:accessURL rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/csv?use_labels=true\" />\n<dcat:downloadURL rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/csv?use_labels=true\" />\n<dcterms:format><dcterms:MediaTypeOrExtent rdf:about=\"https://www.iana.org/assignments/media-types/text/csv\"><rdf:type rdf:resource=\"http://purl.org/dc/terms/MediaTypeOrExtent\" />\n</dcterms:MediaTypeOrExtent></dcterms:format><dcat:mediaType rdf:resource=\"https://www.iana.org/assignments/media-types/text/csv\" />\n<dcterms:license><dcterms:LicenseDocument rdf:about=\"https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf\"><rdf:type rdf:resource=\"http://purl.org/dc/terms/LicenseDocument\" />\n</dcterms:LicenseDocument></dcterms:license><dcterms:rights rdf:resource=\"https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf\" />\n<dcterms:language><dcterms:LinguisticSystem rdf:about=\"http://id.loc.gov/vocabulary/iso639-1/fr\"><rdf:type rdf:resource=\"http://purl.org/dc/terms/LinguisticSystem\" />\n</dcterms:LinguisticSystem></dcterms:language><dcterms:issued rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dcterms:issued>\n<dcterms:date rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dcterms:date>\n<dcterms:modified rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dcterms:modified>\n</dcat:Distribution></dcat:distribution>\n<dcat:distribution><dcat:Distribution rdf:about=\"https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/json\"><rdf:type rdf:resource=\"http://www.w3.org/ns/dcat#Distribution\" />\n<dcterms:title xml:lang=\"fr\">264400516_arretes_ccas_guerande.json</dcterms:title>\n<dcterms:description xml:lang=\"fr\">Arr\u00eat\u00e9s du CCAS de Gu\u00e9rande (json)</dcterms:description>\n<dcat:accessURL rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/json\" />\n<dcat:downloadURL rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/json\" />\n<dcterms:format><dcterms:MediaTypeOrExtent rdf:about=\"https://www.iana.org/assignments/media-types/application/json\"><rdf:type rdf:resource=\"http://purl.org/dc/terms/MediaTypeOrExtent\" />\n</dcterms:MediaTypeOrExtent></dcterms:format><dcat:mediaType rdf:resource=\"https://www.iana.org/assignments/media-types/application/json\" />\n<dcterms:license><dcterms:LicenseDocument rdf:about=\"https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf\"><rdf:type rdf:resource=\"http://purl.org/dc/terms/LicenseDocument\" />\n</dcterms:LicenseDocument></dcterms:license><dcterms:rights rdf:resource=\"https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf\" />\n<dcterms:language><dcterms:LinguisticSystem rdf:about=\"http://id.loc.gov/vocabulary/iso639-1/fr\"><rdf:type rdf:resource=\"http://purl.org/dc/terms/LinguisticSystem\" />\n</dcterms:LinguisticSystem></dcterms:language><dcterms:issued rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dcterms:issued>\n<dcterms:date rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dcterms:date>\n<dcterms:modified rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dcterms:modified>\n</dcat:Distribution></dcat:distribution>\n</dcat:Dataset>\n</dcat:dataset><dcat:service><dcat:DataService rdf:about=\"https://data.capatlantique.fr/api/explore/v2.1/\"><dcterms:title xml:lang=\"en\"><![CDATA[Explore API v2 https://data.capatlantique.fr]]></dcterms:title>\n<dcterms:identifier>https://data.capatlantique.fr/api/explore/v2.1/</dcterms:identifier>\n<dcat:endpointURL rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/\" />\n<dcat:endpointDescription rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/swagger.json\" />\n<dcat:landingPage rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/console\" />\n<dcat:servesDataset rdf:resource=\"https://data.capatlantique.fr/explore/dataset/264400516_arretes_ccas_guerande/\" />\n</dcat:DataService></dcat:service>\n</rdf:Description></rdf:RDF>\n"
+      }
+    }
+  ],
+  "job": {
+    "created": "2025-07-29 14:59:04.347000",
+    "started": "2025-07-29 14:59:04.347000",
+    "ended": "2025-07-29 14:59:05.439000",
+    "status": "done",
+    "errors": [],
+    "items": [
+      {
+        "remote_id": "https://data.capatlantique.fr/explore/dataset/264400516_arretes_ccas_guerande/",
+        "dataset": "6888e1b978d5a47e54b91109",
+        "status": "done",
+        "created": "2025-07-29 14:59:04.692000",
+        "started": "2025-07-29 14:59:04.692000",
+        "ended": "2025-07-29 14:59:05.047000",
+        "errors": [],
+        "logs": [],
+        "args": [],
+        "kwargs": {
+          "page_number": 0
+        }
+      },
+      {
+        "remote_id": "https://data.capatlantique.fr/api/explore/v2.1/",
+        "dataservice": "6888e1b978d5a47e54b9110a",
+        "status": "done",
+        "created": "2025-07-29 14:59:05.279000",
+        "started": "2025-07-29 14:59:05.279000",
+        "ended": "2025-07-29 14:59:05.438000",
+        "errors": [],
+        "logs": [],
+        "args": [],
+        "kwargs": {
+          "page_number": 0
+        }
+      }
+    ],
+    "source": "6888e1b778d5a47e54b91107",
+    "data": {
+      "format": "xml",
+      "graphs": [
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<rdf:RDF\n   xmlns:dcat=\"http://www.w3.org/ns/dcat#\"\n   xmlns:dct=\"http://purl.org/dc/terms/\"\n   xmlns:foaf=\"http://xmlns.com/foaf/0.1/\"\n   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n   xmlns:skos=\"http://www.w3.org/2004/02/skos/core#\"\n>\n  <rdf:Description rdf:about=\"https://data.capatlantique.fr/explore/\">\n    <rdf:type rdf:resource=\"http://www.w3.org/ns/dcat#Catalog\"/>\n    <dct:title>Cap Atlantique - Open Data</dct:title>\n    <dct:description>Cap Atlantique - Open Data catalog</dct:description>\n    <dct:language rdf:resource=\"http://id.loc.gov/vocabulary/iso639-1/fr\"/>\n    <foaf:homepage rdf:resource=\"https://data.capatlantique.fr\"/>\n    <dcat:dataset rdf:resource=\"https://data.capatlantique.fr/explore/dataset/264400516_arretes_ccas_guerande/\"/>\n    <dcat:service rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/\"/>\n  </rdf:Description>\n  <rdf:Description rdf:about=\"https://data.capatlantique.fr/explore/dataset/264400516_arretes_ccas_guerande/\">\n    <rdf:type rdf:resource=\"http://www.w3.org/ns/dcat#Dataset\"/>\n    <rdf:type rdf:resource=\"dctype:Dataset\"/>\n    <rdf:type rdf:resource=\"http://xmlns.com/foaf/0.1/Document\"/>\n    <dct:description xml:lang=\"fr\">Actes r\u00e9glementaires pris par le CCAS de la Commune de Gu\u00e9rande.\u00a0 Publication des arr\u00eat\u00e9s du Pr\u00e9sident \u00e0 caract\u00e8re non individuel.</dct:description>\n    <dct:identifier>https://data.capatlantique.fr/explore/dataset/264400516_arretes_ccas_guerande/</dct:identifier>\n    <dct:issued rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dct:issued>\n    <dct:date rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dct:date>\n    <dct:modified rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dct:modified>\n    <dct:publisher rdf:resource=\"https://data.capatlantique.fr/explore/?refine.publisher=CCAS+Gu%C3%A9rande\"/>\n    <dct:contributor rdf:resource=\"https://data.capatlantique.fr/explore/?refine.publisher=CCAS+Gu%C3%A9rande\"/>\n    <dct:creator rdf:resource=\"https://data.capatlantique.fr/explore/?refine.publisher=CCAS+Gu%C3%A9rande\"/>\n    <dct:license rdf:resource=\"https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf\"/>\n    <dct:rights rdf:resource=\"https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf\"/>\n    <dcat:landingPage rdf:resource=\"https://data.capatlantique.fr/explore/dataset/264400516_arretes_ccas_guerande/\"/>\n    <dct:title xml:lang=\"fr\">Arr\u00eat\u00e9s du CCAS de Gu\u00e9rande</dct:title>\n    <dct:language rdf:resource=\"http://id.loc.gov/vocabulary/iso639-1/fr\"/>\n    <dcat:theme rdf:resource=\"https://data.capatlantique.fr/explore/?refine.theme=Citoyennet%C3%A9+%2F+Institution\"/>\n    <dct:subject rdf:resource=\"https://data.capatlantique.fr/explore/?refine.theme=Citoyennet%C3%A9+%2F+Institution\"/>\n    <dcat:distribution rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/csv?use_labels=true\"/>\n    <dcat:distribution rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/json\"/>\n  </rdf:Description>\n  <rdf:Description rdf:about=\"https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/csv?use_labels=true\">\n    <rdf:type rdf:resource=\"http://www.w3.org/ns/dcat#Distribution\"/>\n    <dct:title xml:lang=\"fr\">264400516_arretes_ccas_guerande.csv</dct:title>\n    <dct:description xml:lang=\"fr\">Arr\u00eat\u00e9s du CCAS de Gu\u00e9rande (csv)</dct:description>\n    <dcat:accessURL rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/csv?use_labels=true\"/>\n    <dcat:downloadURL rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/csv?use_labels=true\"/>\n    <dct:format rdf:resource=\"https://www.iana.org/assignments/media-types/text/csv\"/>\n    <dcat:mediaType rdf:resource=\"https://www.iana.org/assignments/media-types/text/csv\"/>\n    <dct:license rdf:resource=\"https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf\"/>\n    <dct:rights rdf:resource=\"https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf\"/>\n    <dct:language rdf:resource=\"http://id.loc.gov/vocabulary/iso639-1/fr\"/>\n    <dct:issued rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dct:issued>\n    <dct:date rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dct:date>\n    <dct:modified rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dct:modified>\n  </rdf:Description>\n  <rdf:Description rdf:about=\"https://www.iana.org/assignments/media-types/application/json\">\n    <rdf:type rdf:resource=\"http://purl.org/dc/terms/MediaTypeOrExtent\"/>\n  </rdf:Description>\n  <rdf:Description rdf:about=\"https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/json\">\n    <rdf:type rdf:resource=\"http://www.w3.org/ns/dcat#Distribution\"/>\n    <dct:title xml:lang=\"fr\">264400516_arretes_ccas_guerande.json</dct:title>\n    <dct:description xml:lang=\"fr\">Arr\u00eat\u00e9s du CCAS de Gu\u00e9rande (json)</dct:description>\n    <dcat:accessURL rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/json\"/>\n    <dcat:downloadURL rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/json\"/>\n    <dct:format rdf:resource=\"https://www.iana.org/assignments/media-types/application/json\"/>\n    <dcat:mediaType rdf:resource=\"https://www.iana.org/assignments/media-types/application/json\"/>\n    <dct:license rdf:resource=\"https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf\"/>\n    <dct:rights rdf:resource=\"https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf\"/>\n    <dct:language rdf:resource=\"http://id.loc.gov/vocabulary/iso639-1/fr\"/>\n    <dct:issued rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dct:issued>\n    <dct:date rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dct:date>\n    <dct:modified rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\">2025-07-29T14:00:34.112000+00:00</dct:modified>\n  </rdf:Description>\n  <rdf:Description rdf:about=\"https://data.capatlantique.fr/explore/?refine.publisher=CCAS+Gu%C3%A9rande\">\n    <rdf:type rdf:resource=\"http://xmlns.com/foaf/0.1/Agent\"/>\n    <foaf:name>CCAS Gu\u00e9rande</foaf:name>\n  </rdf:Description>\n  <rdf:Description rdf:about=\"https://data.capatlantique.fr/api/explore/v2.1/\">\n    <rdf:type rdf:resource=\"http://www.w3.org/ns/dcat#DataService\"/>\n    <dct:title xml:lang=\"en\">Explore API v2 https://data.capatlantique.fr</dct:title>\n    <dct:identifier>https://data.capatlantique.fr/api/explore/v2.1/</dct:identifier>\n    <dcat:endpointURL rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/\"/>\n    <dcat:endpointDescription rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/swagger.json\"/>\n    <dcat:landingPage rdf:resource=\"https://data.capatlantique.fr/api/explore/v2.1/console\"/>\n    <dcat:servesDataset rdf:resource=\"https://data.capatlantique.fr/explore/dataset/264400516_arretes_ccas_guerande/\"/>\n  </rdf:Description>\n  <rdf:Description rdf:about=\"https://data.capatlantique.fr/explore/?refine.theme=Citoyennet%C3%A9+%2F+Institution\">\n    <rdf:type rdf:resource=\"http://www.w3.org/2004/02/skos/core#Concept\"/>\n    <skos:prefLabel>Citoyennet\u00e9 / Institution</skos:prefLabel>\n  </rdf:Description>\n  <rdf:Description rdf:about=\"https://www.iana.org/assignments/media-types/text/csv\">\n    <rdf:type rdf:resource=\"http://purl.org/dc/terms/MediaTypeOrExtent\"/>\n  </rdf:Description>\n  <rdf:Description rdf:about=\"http://id.loc.gov/vocabulary/iso639-1/fr\">\n    <rdf:type rdf:resource=\"http://purl.org/dc/terms/LinguisticSystem\"/>\n  </rdf:Description>\n  <rdf:Description rdf:about=\"https://data.capatlantique.fr\">\n    <rdf:type rdf:resource=\"http://xmlns.com/foaf/0.1/Document\"/>\n  </rdf:Description>\n  <rdf:Description rdf:about=\"https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf\">\n    <rdf:type rdf:resource=\"http://purl.org/dc/terms/LicenseDocument\"/>\n  </rdf:Description>\n</rdf:RDF>\n"
+      ]
+    },
+    "id": "6888e1b878d5a47e54b91108"
+  },
+  "datasets": [
+    {
+      "metrics": {},
+      "badges": [],
+      "title": "Arr\u00eat\u00e9s du CCAS de Gu\u00e9rande",
+      "slug": "arretes-du-ccas-de-guerande",
+      "description": "Actes r\u00e9glementaires pris par le CCAS de la Commune de Gu\u00e9rande.\u00a0 Publication des arr\u00eat\u00e9s du Pr\u00e9sident \u00e0 caract\u00e8re non individuel.",
+      "tags": [
+        "citoyennete-institution"
+      ],
+      "resources": [
+        {
+          "_id": "c7280b49-5dd4-4a0d-9d47-5144d21aa259",
+          "metrics": {},
+          "title": "264400516_arretes_ccas_guerande.csv",
+          "description": "Arr\u00eat\u00e9s du CCAS de Gu\u00e9rande (csv)",
+          "filetype": "remote",
+          "type": "main",
+          "url": "https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/csv?use_labels=true",
+          "urlhash": "c0485d383d1c169eeab142903c24b22131a29241",
+          "format": "csv",
+          "mime": "text/csv",
+          "extras": {
+            "dcat": {
+              "license": [
+                "https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf"
+              ],
+              "rights": [
+                "https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf"
+              ]
+            }
+          },
+          "harvest": {
+            "created_at": "2025-07-29 14:00:34.112000",
+            "modified_at": "2025-07-29 14:00:34.112000",
+            "uri": "https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/csv?use_labels=true",
+            "dct_identifier": null
+          },
+          "created_at_internal": "2025-07-29 14:59:04.936000",
+          "last_modified_internal": "2025-07-29 14:59:04.936000"
+        },
+        {
+          "_id": "c7cb12c4-5b30-432d-9c49-d4c2b6b0722c",
+          "metrics": {},
+          "title": "264400516_arretes_ccas_guerande.json",
+          "description": "Arr\u00eat\u00e9s du CCAS de Gu\u00e9rande (json)",
+          "filetype": "remote",
+          "type": "main",
+          "url": "https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/json",
+          "urlhash": "a857fc1263cd8f55e1fa8d4185bb370b17ef95ab",
+          "format": "json",
+          "mime": "application/json",
+          "extras": {
+            "dcat": {
+              "license": [
+                "https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf"
+              ],
+              "rights": [
+                "https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf"
+              ]
+            }
+          },
+          "harvest": {
+            "created_at": "2025-07-29 14:00:34.112000",
+            "modified_at": "2025-07-29 14:00:34.112000",
+            "uri": "https://data.capatlantique.fr/api/explore/v2.1/catalog/datasets/264400516_arretes_ccas_guerande/exports/json",
+            "dct_identifier": null
+          },
+          "created_at_internal": "2025-07-29 14:59:04.936000",
+          "last_modified_internal": "2025-07-29 14:59:04.936000"
+        }
+      ],
+      "private": false,
+      "ext": {},
+      "extras": {
+        "dcat": {
+          "license": [
+            "https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf"
+          ],
+          "rights": [
+            "https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf"
+          ]
+        }
+      },
+      "harvest": {
+        "backend": "DCAT",
+        "created_at": "2025-07-29 14:00:34.112000",
+        "modified_at": "2025-07-29 14:00:34.112000",
+        "source_id": "6888e1b778d5a47e54b91107",
+        "remote_id": "https://data.capatlantique.fr/explore/dataset/264400516_arretes_ccas_guerande/",
+        "domain": "data.capatlantique.fr",
+        "last_update": "2025-07-29 14:59:04.989000",
+        "remote_url": "https://data.capatlantique.fr/explore/dataset/264400516_arretes_ccas_guerande/",
+        "uri": "https://data.capatlantique.fr/explore/dataset/264400516_arretes_ccas_guerande/",
+        "dct_identifier": "https://data.capatlantique.fr/explore/dataset/264400516_arretes_ccas_guerande/"
+      },
+      "quality_cached": {
+        "license": false,
+        "temporal_coverage": false,
+        "spatial": false,
+        "update_frequency": null,
+        "next_update_for_update_fulfilled_in_time": null,
+        "dataset_description_quality": true,
+        "has_resources": true,
+        "has_open_format": true,
+        "all_resources_available": true,
+        "resources_documentation": true
+      },
+      "featured": false,
+      "contact_points": [],
+      "created_at_internal": "2025-07-29 14:59:04.935000",
+      "last_modified_internal": "2025-07-29 14:59:04.935000",
+      "last_update": "2025-07-29 14:00:34.112000",
+      "id": "6888e1b978d5a47e54b91109"
+    }
+  ],
+  "dataservices": [
+    {
+      "metrics": {},
+      "title": "Explore API v2 https://data.capatlantique.fr",
+      "slug": "explore-api-v2-https-data-capatlantique-fr",
+      "description": "",
+      "base_api_url": "https://data.capatlantique.fr/api/explore/v2.1/",
+      "machine_documentation_url": "https://data.capatlantique.fr/api/explore/v2.1/swagger.json",
+      "access_audiences": [],
+      "tags": [],
+      "private": false,
+      "extras": {},
+      "contact_points": [],
+      "created_at": "2025-07-29 14:59:05.435000",
+      "metadata_modified_at": "2025-07-29 14:59:05.435000",
+      "datasets": [
+        "6888e1b978d5a47e54b91109"
+      ],
+      "harvest": {
+        "backend": "DCAT",
+        "domain": "data.capatlantique.fr",
+        "source_id": "6888e1b778d5a47e54b91107",
+        "source_url": "https://data.capatlantique.fr/api/explore/v2.1/catalog/exports/dcat/?where=publisher%3D%22CCAS+Gu%C3%A9rande%22&include_exports=json%2Ccsv%2Cshp%2Cgeojson&lang=fr",
+        "remote_id": "https://data.capatlantique.fr/api/explore/v2.1/",
+        "remote_url": "https://data.capatlantique.fr/api/explore/v2.1/console",
+        "uri": "https://data.capatlantique.fr/api/explore/v2.1/",
+        "last_update": "2025-07-29 14:59:05.435000"
+      },
+      "id": "6888e1b978d5a47e54b9110a"
+    }
+  ]
+}
