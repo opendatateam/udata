@@ -68,18 +68,21 @@ def extract_graph(source, target, node, specs):
 class DcatBackend(BaseBackend):
     display_name = "DCAT"
 
+    def __init__(self, *args, **kwargs):
+        super(DcatBackend, self).__init__(*args, **kwargs)
+        self.organizations_to_update = set()
+
     def inner_harvest(self):
         fmt = self.get_format()
         self.job.data = {"format": fmt}
 
         serialized_graphs = []
-        orgs_to_update = set()
 
         for page_number, page in self.walk_graph(self.source.url, fmt):
-            self.process_one_datasets_page(page_number, page, orgs_to_update)
+            self.process_one_datasets_page(page_number, page)
             serialized_graphs.append(page.serialize(format=fmt, indent=None))
 
-        for org in orgs_to_update:
+        for org in self.organizations_to_update:
             org.count_datasets()
 
         # We do a second pass to have all datasets in memory and attach datasets
@@ -166,19 +169,13 @@ class DcatBackend(BaseBackend):
 
             page_number += 1
 
-    def process_one_datasets_page(self, page_number: int, page: Graph, orgs_to_update: set):
+    def process_one_datasets_page(self, page_number: int, page: Graph):
         for node in page.subjects(RDF.type, DCAT.Dataset):
             remote_id = page.value(node, DCT.identifier)
             if self.is_dataset_external_to_this_page(page, node):
                 continue
 
-            self.process_dataset(
-                remote_id,
-                page_number=page_number,
-                page=page,
-                node=node,
-                orgs_to_update=orgs_to_update,
-            )
+            self.process_dataset(remote_id, page_number=page_number, page=page, node=node)
 
             if self.has_reached_max_items():
                 return
@@ -219,16 +216,14 @@ class DcatBackend(BaseBackend):
             if self.has_reached_max_items():
                 return
 
-    def inner_process_dataset(
-        self, item: HarvestItem, page_number: int, page: Graph, node, orgs_to_update: set | None
-    ):
+    def inner_process_dataset(self, item: HarvestItem, page_number: int, page: Graph, node):
         item.kwargs["page_number"] = page_number
 
         dataset = self.get_dataset(item.remote_id)
         remote_url_prefix = self.get_extra_config_value("remote_url_prefix")
         dataset = dataset_from_rdf(page, dataset, node=node, remote_url_prefix=remote_url_prefix)
-        if orgs_to_update is not None and dataset.organization:
-            orgs_to_update.add(dataset.organization)
+        if dataset.organization:
+            self.organizations_to_update.add(dataset.organization)
         return dataset
 
     def inner_process_dataservice(self, item: HarvestItem, page_number: int, page: Graph, node):
