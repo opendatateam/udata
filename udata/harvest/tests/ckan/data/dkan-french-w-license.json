@@ -1,0 +1,226 @@
+{
+    "help": "Return the metadata of a dataset (package) and its resources. :param id: the id or name of the dataset :type id: string",
+    "success": true,
+    "result": [
+      {
+        "id": "04be6288-696d-4331-850d-a144871a7e3a",
+        "name": "antennes-regionales-de-la-region-hauts-de-france-au-01102019-0",
+        "title": "Antennes régionales de la Région Hauts-de-France (au 01/10/2019)",
+        "author_email": "sig@hautsdefrance.fr",
+        "maintainer": "Opendata de la Région Hauts-de-France",
+        "maintainer_email": "opendata@hautsdefrance.fr",
+        "license_title": "http://www.etalab.gouv.fr/pages/Licence_ouverte_Open_licence-5899923.html",
+        "notes": "<p>Liste et coordonnées des antennes de proximité du conseil régional Hauts-de-France.</p>\n",
+        "url": "https://opendata.hautsdefrance.fr/?q=dataset/antennes-regionales-de-la-region-hauts-de-france-au-01102019-0",
+        "state": "Active",
+        "private": true,
+        "revision_timestamp": "jeu, 19/12/2019 - 03:00",
+        "metadata_created": "mar, 10/12/2019 - 09:23",
+        "metadata_modified": "2019-09-30 22:00:00",
+        "creator_user_id": "235f2695-89bd-4a0d-8bcf-b6e26b7b3981",
+        "type": "Dataset",
+        "resources": [
+          {
+            "id": "33f30271-cd5c-49ae-b44b-595caae16126",
+            "revision_id": "",
+            "url": "https://geocatalogue.hautsdefrance.fr/geonetwork/srv/api/records/4b5f8e1b-de37-47cd-9203-37a59f318b09/attachments/coordonnees_antennes.xlsx",
+            "description": "<p>Tableau des données</p>\n",
+            "format": "xlsx",
+            "state": "Active",
+            "revision_timestamp": "jeu, 19/12/2019 - 03:00",
+            "name": "coordonnees_antennes.xlsx",
+            "mimetype": "xlsx",
+            "size": "42 octets",
+            "created": "jeu, 19/12/2019 - 03:00",
+            "resource_group_id": "b72cd25d-1cec-49f6-8c71-297bd373fa01",
+            "last_modified": "Date changed  jeu, 19/12/2019 - 03:00"
+          },
+          {
+            "id": "ab5948b1-95be-4806-ad8d-efaa9ffe43dc",
+            "revision_id": "",
+            "url": "https://sig.hautsdefrance.fr/ext/mv/?config=antenne_regionale.xml#",
+            "description": "<p>Visionneuse cartographique avec une représentation simplifiée des données</p>\n",
+            "format": "",
+            "state": "Active",
+            "revision_timestamp": "jeu, 19/12/2019 - 03:00",
+            "name": "Visionneuse mviewer",
+            "mimetype": "",
+            "size": "",
+            "created": "jeu, 19/12/2019 - 03:00",
+            "resource_group_id": "b72cd25d-1cec-49f6-8c71-297bd373fa01",
+            "last_modified": "Date changed  jeu, 19/12/2019 - 03:00"
+          }
+        ],
+        "tags": [
+          {
+            "id": "0800bf74-0728-48ef-b6bb-6e458feff785",
+            "vocabulary_id": "2",
+            "name": "ADMINISTRATION"
+          },
+          {
+            "id": "3e213764-c884-402b-88f5-097a5de38876",
+            "vocabulary_id": "2",
+            "name": "ADRESSE"
+          },
+          {
+            "id": "8da693f4-e4d3-432e-8192-fa4d12ee21e8",
+            "vocabulary_id": "2",
+            "name": "AISNE"
+          },
+          {
+            "id": "40577117-4987-4588-b08c-e1636fa0865b",
+            "vocabulary_id": "2",
+            "name": "ANTENNE REGIONALE"
+          },
+          {
+            "id": "46af567e-d862-4d65-8912-0f7eff3f94a8",
+            "vocabulary_id": "2",
+            "name": "DONNEES OUVERTES"
+          },
+          {
+            "id": "713c6627-5caa-4434-9583-159b8f9fbfea",
+            "vocabulary_id": "2",
+            "name": "HAUTS-DE-FRANCE"
+          },
+          {
+            "id": "1e14a78d-127f-4401-ac4a-09159f5d22b2",
+            "vocabulary_id": "2",
+            "name": "NORD"
+          },
+          {
+            "id": "08f08873-ce41-465b-a055-826f6cee0ca4",
+            "vocabulary_id": "2",
+            "name": "OISE"
+          },
+          {
+            "id": "de6a5ac7-c9cb-42c8-b6a9-506740c54be3",
+            "vocabulary_id": "2",
+            "name": "PAS-DE-CALAIS"
+          },
+          {
+            "id": "b428bef2-9a4c-4545-9a70-1549ae2384a7",
+            "vocabulary_id": "2",
+            "name": "POLITIQUE REGIONALE"
+          },
+          {
+            "id": "f8676e82-0864-4b8f-afd2-2ca3368ccb53",
+            "vocabulary_id": "2",
+            "name": "PROXIMITE"
+          },
+          {
+            "id": "c18de608-ae9b-4043-81e1-27e367461a0d",
+            "vocabulary_id": "2",
+            "name": "SOMME"
+          },
+          {
+            "id": "33efc6a3-86b4-4ca3-b9b1-301d8ce7a379",
+            "vocabulary_id": "2",
+            "name": "Services d utilité publique et services publics"
+          }
+        ],
+        "groups": [
+          {
+            "description": "<p>Conseil régional des Hauts-de-France</p>\n",
+            "id": "b72cd25d-1cec-49f6-8c71-297bd373fa01",
+            "image_display_url": "https://opendata.hautsdefrance.fr/sites/default/files/Logo%20R%C3%A9gion%20HDF-pourleweb.jpg",
+            "title": "Région Hauts-de-France",
+            "name": "group/region-hauts-de-france"
+          }
+        ],
+        "extras": [
+          {
+            "key": "access_constraints",
+            "value": "[]"
+          },
+          {
+            "key": "bbox-east-long",
+            "value": "4.65820313"
+          },
+          {
+            "key": "bbox-north-lat",
+            "value": "51.16423318"
+          },
+          {
+            "key": "bbox-south-lat",
+            "value": "48.80546301"
+          },
+          {
+            "key": "bbox-west-long",
+            "value": "1.18652344"
+          },
+          {
+            "key": "contact-email",
+            "value": "sig@hautsdefrance.fr"
+          },
+          {
+            "key": "coupled-resource",
+            "value": "[]"
+          },
+          {
+            "key": "dataset-reference-date",
+            "value": "[{&quot;type&quot;: &quot;revision&quot;, &quot;value&quot;: &quot;2019-10-01&quot;}]"
+          },
+          {
+            "key": "frequency-of-update",
+            "value": "asNeeded"
+          },
+          {
+            "key": "graphic-preview-description",
+            "value": "logohdf.png"
+          },
+          {
+            "key": "graphic-preview-file",
+            "value": "https://geocatalogue.hautsdefrance.fr/geonetwork/srv/api/records/4b5f8e1b-de37-47cd-9203-37a59f318b09/attachments/logohdf.png"
+          },
+          {
+            "key": "guid",
+            "value": "4b5f8e1b-de37-47cd-9203-37a59f318b09"
+          },
+          {
+            "key": "licence",
+            "value": "[]"
+          },
+          {
+            "key": "metadata-date",
+            "value": "2019-11-13T11:24:54"
+          },
+          {
+            "key": "metadata-language",
+            "value": "fre"
+          },
+          {
+            "key": "metadata_created",
+            "value": "2019-11-13T11:24:54"
+          },
+          {
+            "key": "metadata_modified",
+            "value": "2019-11-13T11:24:54"
+          },
+          {
+            "key": "resource-type",
+            "value": "dataset"
+          },
+          {
+            "key": "responsible-party",
+            "value": "[{&quot;name&quot;: &quot;R\\u00e9gion Hauts-de-France&quot;, &quot;roles&quot;: [&quot;pointOfContact&quot;]}]"
+          },
+          {
+            "key": "spatial_harvester",
+            "value": "true"
+          },
+          {
+            "key": "harvest_object_id",
+            "value": "281dfceb-ed90-46da-aef6-4ad5e1348150"
+          },
+          {
+            "key": "harvest_source_id",
+            "value": "c6a6feb7-fc9a-4a26-ab6a-cd13024c4fdd"
+          },
+          {
+            "key": "harvest_source_title",
+            "value": "Données ouvertes publiées par la région Hauts-de-France"
+          }
+        ]
+      }
+    ]
+  }

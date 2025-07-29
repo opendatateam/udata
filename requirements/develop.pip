@@ -314,6 +314,11 @@ httpretty==1.1.4
     # via
     #   -c requirements/test.pip
     #   -r requirements/test.in
+humanfriendly==10.0
+    # via
+    #   -c requirements/install.pip
+    #   -c requirements/test.pip
+    #   -r requirements/install.in
 id==1.5.0
     # via twine
 identify==2.6.9
