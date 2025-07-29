@@ -100,7 +100,7 @@ class SiteDataPortal(API):
         return redirect(url)
 
 
-@api.route("/site/catalog/", endpoint="site_rdf_catalog")
+@api.route("/site/catalog", endpoint="site_rdf_catalog")
 class SiteRdfCatalog(API):
     def get(self):
         """Root RDF endpoint with content negociation handling"""

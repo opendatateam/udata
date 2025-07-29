@@ -419,7 +419,7 @@ class DatasetFeaturedAPI(API):
         return dataset
 
 
-@ns.route("/<dataset:dataset>/rdf/", endpoint="dataset_rdf", doc=common_doc)
+@ns.route("/<dataset:dataset>/rdf", endpoint="dataset_rdf", doc=common_doc)
 @api.response(404, "Dataset not found")
 @api.response(410, "Dataset has been deleted")
 class DatasetRdfAPI(API):
@@ -476,7 +476,7 @@ class DatasetBadgeAPI(API):
         return badges_api.remove(dataset, badge_kind)
 
 
-@ns.route("/r/<uuid:id>/", endpoint="resource_redirect")
+@ns.route("/r/<uuid:id>", endpoint="resource_redirect")
 class ResourceRedirectAPI(API):
     @api.doc("redirect_resource", **common_doc)
     def get(self, id):

@@ -229,7 +229,7 @@ class DatasetsResourcesCsvAPI(API):
         return csv.stream(adapter, "{0}-datasets-resources".format(org.slug))
 
 
-@ns.route("/<org:org>/catalog/", endpoint="organization_rdf", doc=common_doc)
+@ns.route("/<org:org>/catalog", endpoint="organization_rdf", doc=common_doc)
 @api.response(404, "Organization not found")
 @api.response(410, "Organization has been deleted")
 class OrganizationRdfAPI(API):
