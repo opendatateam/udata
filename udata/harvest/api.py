@@ -1,5 +1,5 @@
-from bson import ObjectId
 from flask import current_app, request
+from flask_login import current_user
 from werkzeug.exceptions import BadRequest
 
 from udata.api import API, api, fields
@@ -62,7 +62,7 @@ item_fields = api.model(
             dataset_ref_fields, description="The processed dataset", allow_null=True
         ),
         "dataservice": fields.Nested(
-            Dataservice.__read_fields__, description="The processed dataservice", allow_null=True
+            Dataservice.__ref_fields__, description="The processed dataservice", allow_null=True
         ),
         "status": fields.String(
             description="The item status", required=True, enum=list(HARVEST_ITEM_STATUS)
@@ -208,21 +208,26 @@ backend_fields = api.model(
     },
 )
 
+preview_dataservice_fields = api.clone(
+    "DataservicePreview",
+    Dataservice.__ref_fields__,
+    {
+        "self_web_url": fields.Raw(
+            attribute=lambda _d: None, description="The dataservice webpage URL (fake)"
+        ),
+        "self_api_url": fields.Raw(
+            attribute=lambda _d: None, description="The dataservice API URL (fake)"
+        ),
+    },
+)
+
+
 preview_dataset_fields = api.clone(
     "DatasetPreview",
     dataset_fields,
     {
-        "uri": fields.UrlFor(
-            "api.dataset",
-            lambda o: {"dataset": "not-available"},
-            description="The dataset API URI (fake)",
-        ),
-        "page": fields.UrlFor(
-            "datasets.show",
-            lambda o: {"dataset": "not-available"},
-            description="The dataset page URL (fake)",
-            fallback_endpoint="api.dataset",
-        ),
+        "uri": fields.Raw(attribute=lambda _d: None, description="The dataset API URL (fake)"),
+        "page": fields.Raw(attribute=lambda _d: None, description="The dataset page URL (fake)"),
     },
 )
 
@@ -232,6 +237,9 @@ preview_item_fields = api.clone(
     {
         "dataset": fields.Nested(
             preview_dataset_fields, description="The processed dataset", allow_null=True
+        ),
+        "dataservice": fields.Nested(
+            preview_dataservice_fields, description="The processed dataset", allow_null=True
         ),
     },
 )
@@ -253,6 +261,7 @@ source_parser.add_argument(
 source_parser.add_argument(
     "deleted", type=bool, location="args", default=False, help="Include sources flaggued as deleted"
 )
+source_parser.add_argument("q", type=str, location="args", help="The search query")
 
 
 @ns.route("/sources/", endpoint="harvest_sources")
@@ -264,15 +273,19 @@ class SourcesAPI(API):
         """List all harvest sources"""
         args = source_parser.parse_args()
 
-        if args.get("owner") and not ObjectId.is_valid(args.get("owner")):
-            api.abort(400, "`owner` arg must be an identifier")
+        sources = HarvestSource.objects()
 
-        return actions.paginate_sources(
-            args.get("owner"),
-            page=args["page"],
-            page_size=args["page_size"],
-            deleted=args["deleted"],
-        )
+        if not args["deleted"]:
+            sources = sources.visible()
+
+        if args["owner"]:
+            sources = sources.owned_by(args["owner"])
+
+        if args["q"]:
+            phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
+            sources = sources.search_text(phrase_query)
+
+        return sources.paginate(args["page"], args["page_size"])
 
     @api.secure
     @api.doc("create_harvest_source")
@@ -287,7 +300,7 @@ class SourcesAPI(API):
         return source, 201
 
 
-@ns.route("/source/<string:ident>", endpoint="harvest_source")
+@ns.route("/source/<string:ident>/", endpoint="harvest_source")
 @api.param("ident", "A source ID or slug")
 class SourceAPI(API):
     @api.doc("get_harvest_source")
@@ -317,7 +330,7 @@ class SourceAPI(API):
         return actions.delete_source(ident), 204
 
 
-@ns.route("/source/<string:ident>/validate", endpoint="validate_harvest_source")
+@ns.route("/source/<string:ident>/validate/", endpoint="validate_harvest_source")
 @api.param("ident", "A source ID or slug")
 class ValidateSourceAPI(API):
     @api.doc("validate_harvest_source")
@@ -333,7 +346,7 @@ class ValidateSourceAPI(API):
             return actions.reject_source(ident, form.comment.data)
 
 
-@ns.route("/source/<string:ident>/run", endpoint="run_harvest_source")
+@ns.route("/source/<string:ident>/run/", endpoint="run_harvest_source")
 @api.param("ident", "A source ID or slug")
 class RunSourceAPI(API):
     @api.doc("run_harvest_source")
@@ -341,7 +354,7 @@ class RunSourceAPI(API):
     @api.marshal_with(source_fields)
     def post(self, ident):
         enabled = current_app.config.get("HARVEST_ENABLE_MANUAL_RUN")
-        if not enabled:
+        if not enabled and not current_user.sysadmin:
             api.abort(
                 400,
                 "Cannot run source manually. Please contact the platform if you need to reschedule the harvester.",
@@ -358,7 +371,7 @@ class RunSourceAPI(API):
         return source
 
 
-@ns.route("/source/<string:ident>/schedule", endpoint="schedule_harvest_source")
+@ns.route("/source/<string:ident>/schedule/", endpoint="schedule_harvest_source")
 @api.param("ident", "A source ID or slug")
 class ScheduleSourceAPI(API):
     @api.doc("schedule_harvest_source")
@@ -382,7 +395,7 @@ class ScheduleSourceAPI(API):
         return actions.unschedule(ident), 204
 
 
-@ns.route("/source/preview", endpoint="preview_harvest_source_config")
+@ns.route("/source/preview/", endpoint="preview_harvest_source_config")
 class PreviewSourceConfigAPI(API):
     @api.secure
     @api.expect(source_fields)
@@ -396,7 +409,7 @@ class PreviewSourceConfigAPI(API):
         return actions.preview_from_config(**form.data)
 
 
-@ns.route("/source/<string:ident>/preview", endpoint="preview_harvest_source")
+@ns.route("/source/<string:ident>/preview/", endpoint="preview_harvest_source")
 @api.param("ident", "A source ID or slug")
 class PreviewSourceAPI(API):
     @api.secure
@@ -437,7 +450,7 @@ class JobAPI(API):
         return actions.get_job(ident)
 
 
-@ns.route("/backends", endpoint="harvest_backends")
+@ns.route("/backends/", endpoint="harvest_backends")
 class ListBackendsAPI(API):
     @api.doc("harvest_backends")
     @api.marshal_with(backend_fields)
@@ -458,7 +471,7 @@ class ListBackendsAPI(API):
         )
 
 
-@ns.route("/job_status", endpoint="havest_job_status")
+@ns.route("/job_status/", endpoint="havest_job_status")
 class ListHarvesterAPI(API):
     @api.doc(model=[str])
     def get(self):

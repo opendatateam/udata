@@ -1,8 +1,8 @@
 # for backwards compatibility (see https://github.com/opendatateam/udata/pull/3152)
 import json
 
+from udata.core import csv
 from udata.core.discussions.csv import DiscussionCsvAdapter  # noqa: F401
-from udata.frontend import csv
 
 from .models import Dataset, Resource
 
@@ -19,7 +19,7 @@ class DatasetCsvAdapter(csv.Adapter):
         "title",
         "slug",
         "acronym",
-        ("url", "external_url"),
+        ("url", lambda d: d.url_for()),
         ("organization", "organization.name"),
         ("organization_id", "organization.id"),
         ("owner", "owner.slug"),  # in case it's owned by a user, or introduce 'owner_type'?
@@ -40,7 +40,6 @@ class DatasetCsvAdapter(csv.Adapter):
         ("resources_count", lambda o: len(o.resources)),
         ("main_resources_count", lambda o: len([r for r in o.resources if r.type == "main"])),
         ("resources_formats", lambda o: ",".join(set(r.format for r in o.resources if r.format))),
-        "downloads",
         ("harvest.backend", lambda r: r.harvest and r.harvest.backend),
         ("harvest.domain", lambda r: r.harvest and r.harvest.domain),
         ("harvest.created_at", lambda r: r.harvest and r.harvest.created_at),
@@ -64,7 +63,7 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
         dataset_field("id"),
         dataset_field("title"),
         dataset_field("slug"),
-        dataset_field("url", "external_url"),
+        dataset_field("url", lambda r: r.url_for()),
         dataset_field("organization", lambda r: r.organization.name if r.organization else None),
         dataset_field(
             "organization_id", lambda r: str(r.organization.id) if r.organization else None

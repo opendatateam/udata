@@ -4,6 +4,14 @@ from .constants import IMAGE_SIZES
 
 BIGGEST_IMAGE_SIZE = IMAGE_SIZES[0]
 
+reuse_permissions_fields = api.model(
+    "ReusePermissions",
+    {
+        "delete": fields.Permission(),
+        "edit": fields.Permission(),
+    },
+)
+
 reuse_type_fields = api.model(
     "ReuseType",
     {
@@ -22,13 +30,7 @@ reuse_suggestion_fields = api.model(
         "image_url": fields.ImageField(
             size=BIGGEST_IMAGE_SIZE, description="The reuse thumbnail URL", readonly=True
         ),
-        "page": fields.UrlFor(
-            "reuses.show_redirect",
-            lambda o: {"reuse": o["slug"]},
-            description="The reuse page URL",
-            readonly=True,
-            fallback_endpoint="api.reuse",
-        ),
+        "page": fields.String(description="The reuse web page URL", readonly=True),
     },
 )
 

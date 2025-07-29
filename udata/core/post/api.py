@@ -1,4 +1,8 @@
 from datetime import datetime
+from typing import List
+
+from feedgenerator.django.utils.feedgenerator import Atom1Feed
+from flask import make_response, request
 
 from udata.api import API, api, fields
 from udata.auth import Permission as AdminPermission
@@ -11,6 +15,8 @@ from udata.core.storages.api import (
     uploaded_image_fields,
 )
 from udata.core.user.api_fields import user_ref_fields
+from udata.frontend.markdown import md
+from udata.i18n import gettext as _
 
 from .forms import PostForm
 from .models import Post
@@ -42,15 +48,15 @@ post_fields = api.model(
         ),
         "published": fields.ISODateTime(description="The post publication date", readonly=True),
         "body_type": fields.String(description="HTML or markdown body type", default="markdown"),
-        "uri": fields.UrlFor(
-            "api.post", lambda o: {"post": o}, description="The post API URI", readonly=True
-        ),
-        "page": fields.UrlFor(
-            "posts.show",
-            lambda o: {"post": o},
-            description="The post page URL",
+        "uri": fields.String(
+            attribute=lambda p: p.self_api_url(),
+            description="The API URI for this post",
             readonly=True,
-            fallback_endpoint="api.post",
+        ),
+        "page": fields.String(
+            attribute=lambda p: p.self_web_url(),
+            description="The post web page URL",
+            readonly=True,
         ),
     },
     mask="*,datasets{id,title,acronym,uri,page},reuses{id,title,image,image_thumbnail,uri,page}",
@@ -105,6 +111,34 @@ class PostsAPI(API):
         return form.save(), 201
 
 
+@ns.route("/recent.atom", endpoint="recent_posts_atom_feed")
+class PostsAtomFeedAPI(API):
+    @api.doc("recent_posts_atom_feed")
+    def get(self):
+        feed = Atom1Feed(
+            _("Latests posts"),
+            description=None,
+            feed_url=request.url,
+            link=request.url_root,
+        )
+
+        posts: List[Post] = Post.objects().published().order_by("-published").limit(15)
+        for post in posts:
+            feed.add_item(
+                post.name,
+                unique_id=post.id,
+                description=post.headline,
+                content=md(post.content),
+                author_name="data.gouv.fr",
+                link=post.url_for(),
+                updateddate=post.last_modified,
+                pubdate=post.published,
+            )
+        response = make_response(feed.writeString("utf-8"))
+        response.headers["Content-Type"] = "application/atom+xml"
+        return response
+
+
 @ns.route("/<post:post>/", endpoint="post")
 @api.response(404, "Object not found")
 @api.param("post", "The post ID or slug")
@@ -134,7 +168,7 @@ class PostAPI(API):
         return "", 204
 
 
-@ns.route("/<post:post>/publish", endpoint="publish_post")
+@ns.route("/<post:post>/publish/", endpoint="publish_post")
 class PublishPostAPI(API):
     @api.secure(admin_permission)
     @api.doc("publish_post")

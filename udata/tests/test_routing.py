@@ -206,6 +206,25 @@ class SlugAsSLugFieldWithFollowTest(AsSlugMixin):
         assert200(client.get(new_url))
         assert_redirects(client.get(old_url), new_url)
 
+    def test_old_slug_being_reused(self, client):
+        dataset_a = self.model.objects.create(slug="old")
+        dataset_a_old_url = url_for("model_tester", model=dataset_a)
+        dataset_a.slug = "new_a"
+        dataset_a.save()
+        _dataset_a_new_url = url_for("model_tester", model=dataset_a)
+
+        dataset_b = self.model.objects.create(slug="old")
+        dataset_b_old_url = url_for("model_tester", model=dataset_b)
+        assert200(client.get(dataset_b_old_url))
+        dataset_b.slug = "new_b"
+        dataset_b.save()
+        dataset_b_new_url = url_for("model_tester", model=dataset_b)
+
+        assert SlugFollow.objects.count() == 1
+
+        assert_redirects(client.get(dataset_a_old_url), dataset_b_new_url)
+        assert_redirects(client.get(dataset_b_old_url), dataset_b_new_url)
+
     def test_multiple_renaming_redirect(self, client):
         tester = self.model.objects.create(slug="first")
         first_url = url_for("model_tester", model=tester)

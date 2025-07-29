@@ -1,10 +1,12 @@
 import re
+from typing import Optional
+from urllib.parse import urlencode, urljoin, urlparse, urlunparse
 
 from flask import current_app, url_for
 from netaddr import AddrFormatError, IPAddress
-from werkzeug.routing import BuildError
 
 from udata.i18n import _
+from udata.mail import get_mail_campaign_dict
 from udata.settings import Defaults
 
 URL_REGEX = re.compile(
@@ -66,13 +68,32 @@ def config_for(value, key):
         return getattr(Defaults, key)
 
 
-def endpoint_for(endpoint, fallback_endpoint=None, **values):
-    try:
-        return url_for(endpoint, **values)
-    except BuildError:
-        if fallback_endpoint:
-            return url_for(fallback_endpoint, **values)
+def homepage_url(**kwargs) -> str:
+    return cdata_url("/", **kwargs) or url_for("api.site", **kwargs)
+
+
+def cdata_url(uri: str, **kwargs) -> Optional[str]:
+    base_url = current_app.config["CDATA_BASE_URL"]
+    if not base_url:
         return None
+
+    if kwargs.pop("_mailCampaign", False):
+        kwargs.update(get_mail_campaign_dict())
+
+    uri = uri.rstrip("/")
+    append = kwargs.pop("append", None)
+    if append:
+        uri += f"/{append.lstrip('/')}"
+
+    url = urljoin(base_url, uri)
+    if not url.endswith("/"):
+        url += "/"
+
+    url_parts = list(urlparse(url))
+    url_parts[4] = urlencode(
+        {k: v for k, v in kwargs.items() if not k.startswith("_")}
+    )  # index 4 is the query params
+    return urlunparse(url_parts)
 
 
 def idna(string):
@@ -125,7 +146,11 @@ def validate(url, schemes=None, tlds=None, private=None, local=None, credentials
         if ip and ip.is_loopback() or match.group("localhost"):
             error(url, _("is a local URL"))
 
-    if not private and ip and ip.is_private():
+    if (
+        not private
+        and ip
+        and (ip.is_link_local() or ip.is_ipv4_private_use() or ip.is_ipv6_unique_local())
+    ):
         error(url, _("is a private URL"))
 
     return url

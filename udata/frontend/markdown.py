@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 import bleach
 import html2text
 import mistune
+from bleach.css_sanitizer import CSSSanitizer
 from bleach.linkifier import LinkifyFilter
 from flask import Markup, current_app, request
 from jinja2.filters import do_striptags, do_truncate
@@ -55,11 +56,6 @@ def nofollow_callback(attrs, new=False):
         return attrs
 
 
-class Renderer(mistune.Renderer):
-    def table(self, header, body):
-        return ("<table>\n<thead>\n%s</thead>\n" "<tbody>\n%s</tbody>\n</table>\n") % (header, body)
-
-
 class UdataCleaner(bleach.Cleaner):
     def __init__(self, source_tooltip=False) -> None:
         callbacks = [nofollow_callback]
@@ -67,9 +63,11 @@ class UdataCleaner(bleach.Cleaner):
             callbacks.append(source_tooltip_callback)
 
         super().__init__(
-            tags=current_app.config["MD_ALLOWED_TAGS"],
+            tags=set(current_app.config["MD_ALLOWED_TAGS"]),
             attributes=current_app.config["MD_ALLOWED_ATTRIBUTES"],
-            styles=current_app.config["MD_ALLOWED_STYLES"],
+            css_sanitizer=CSSSanitizer(
+                allowed_css_properties=current_app.config["MD_ALLOWED_STYLES"]
+            ),
             protocols=current_app.config["MD_ALLOWED_PROTOCOLS"],
             strip_comments=False,
             filters=[
@@ -83,8 +81,9 @@ class UDataMarkdown(object):
 
     def __init__(self, app):
         app.jinja_env.filters.setdefault("markdown", self.__call__)
-        renderer = Renderer(escape=False, hard_wrap=True)
-        self.markdown = mistune.Markdown(renderer=renderer)
+        self.markdown = mistune.create_markdown(
+            escape=False, hard_wrap=True, plugins=["table", "strikethrough"]
+        )
 
     def __call__(self, stream, source_tooltip=False, wrap=True):
         if not stream:

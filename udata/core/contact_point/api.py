@@ -1,12 +1,12 @@
-import mongoengine
-
 from udata.api import API, api
 from udata.api.parsers import ModelApiParser
 from udata.core.dataset.permissions import OwnablePermission
+from udata.forms import validators
+from udata.i18n import lazy_gettext as _
 
 from .api_fields import contact_point_fields, contact_point_roles_fields
 from .forms import ContactPointForm
-from .models import CONTACT_ROLES
+from .models import CONTACT_ROLES, ContactPoint
 
 
 class ContactPointApiParser(ModelApiParser):
@@ -33,11 +33,9 @@ class ContactPointsListAPI(API):
     def post(self):
         """Creates a contact point"""
         form = api.validate(ContactPointForm)
-        try:
-            contact_point = form.save()
-        except mongoengine.errors.ValidationError as e:
-            api.abort(400, e.message)
-        return contact_point, 201
+        contact_point, created = ContactPoint.objects.get_or_create(**form.data)
+
+        return contact_point, 201 if created else 200
 
 
 @ns.route("/<contact_point:contact_point>/", endpoint="contact_point")
@@ -59,6 +57,11 @@ class ContactPointAPI(API):
         OwnablePermission(contact_point).test()
 
         form = api.validate(ContactPointForm, contact_point)
+        if ContactPoint.objects().filter(**form.data).count():
+            raise validators.ValidationError(
+                _("An existing contact point already exists with these informations.")
+            )
+
         return form.save()
 
     @api.secure

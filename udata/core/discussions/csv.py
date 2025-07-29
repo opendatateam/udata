@@ -1,4 +1,4 @@
-from udata.frontend import csv
+from udata.core import csv
 
 from .models import Discussion
 
@@ -19,4 +19,6 @@ class DiscussionCsvAdapter(csv.Adapter):
         "closed",
         "closed_by",
         ("closed_by_id", "closed_by.id"),
+        "closed_by_organization",
+        ("closed_by_organization_id", "closed_by_organization.id"),
     )

@@ -3,6 +3,132 @@
 ## Current (in progress)
 
 - Add integrity checks on non existent list field instead of empty [#3242](https://github.com/opendatateam/udata/pull/3242)
+- Migrate udata-metrics [#3386](https://github.com/opendatateam/udata/pull/3386/)
+- Migrate udata-ckan [#3385](https://github.com/opendatateam/udata/pull/3385)
+- Deactivate sitemap extension [#3389](https://github.com/opendatateam/udata/pull/3389)
+- Deactivate cache to check for existing slugs [#3390](https://github.com/opendatateam/udata/pull/3390)
+- Add missing trailing slashes on some endpoints [#3392](https://github.com/opendatateam/udata/pull/3392/)
+
+## 10.8.1 (2025-07-25)
+
+- Fix user deletion performances issues [#3388](https://github.com/opendatateam/udata/pull/3388)
+- Add search to discussions [#3384](https://github.com/opendatateam/udata/pull/3384)
+- Separate metrics for opened discussions [#3370](https://github.com/opendatateam/udata/pull/3370)
+
+## 10.8.0 (2025-07-22)
+
+- Remove placeholder Jinja filter [#3372](https://github.com/opendatateam/udata/pull/3372/)
+- Add `self_web_url` for discussion [#3375](https://github.com/opendatateam/udata/pull/3375)
+- Fix dataset schemas endpoint when no resource [#3373](https://github.com/opendatateam/udata/pull/3373)
+- Add last_update as a dataset model property [#3377](https://github.com/opendatateam/udata/pull/3377)
+- Add `label` (translation of role) to API response for org members [#3383](https://github.com/opendatateam/udata/pull/3383)
+- Fix crashing on datasets with no slugs [#3368](https://github.com/opendatateam/udata/pull/3368/)
+- Fix duplicate contact point creation [#3379](https://github.com/opendatateam/udata/pull/3379) [#3381](https://github.com/opendatateam/udata/pull/3381)
+- Atomic `get_or_create` [#3366](https://github.com/opendatateam/udata/pull/3366)
+- Add contact points suggest [#3376](https://github.com/opendatateam/udata/pull/3376)
+
+## 10.7.0 (2025-07-17)
+
+- Add name and siret filters for orgs [#3362](https://github.com/opendatateam/udata/pull/3362)
+- Refactor how to get URLs to the cdata front-end, need to set the `CDATA_BASE_URL` env variable (removal of `endpoint_for()`, `fields.UrlFor()`, `display_url`, `external_url` and `external_url_with_campaign`) [#3345](https://github.com/opendatateam/udata/pull/3345) [#3371](https://github.com/opendatateam/udata/pull/3371)
+- Add back preview_url from tabular API (remove the PreviewPlugin system) [#3364](https://github.com/opendatateam/udata/pull/3364)
+- Do not crash on invalid schemas API JSON [#3363](https://github.com/opendatateam/udata/pull/3363/)
+- Fix flaky test on timed recent Atom feeds [#3365](https://github.com/opendatateam/udata/pull/3365)
+- Allow to remove checksum from resource [#3369](https://github.com/opendatateam/udata/pull/3369)
+
+## 10.6.0 (2025-07-08)
+
+- Add config entry for ISO-DCAT XSLT URL [#3360](https://github.com/opendatateam/udata/pull/3360)
+- Fix failing to return dataservice in harvest preview because of no ID for URL [#3357](https://github.com/opendatateam/udata/pull/3357/)
+- Fix invalid resource format from harvested RDF records [#3354](https://github.com/opendatateam/udata/pull/3354)
+- Expose `dataset_id` for CommunityResource in /dataset/resource/id [#3258](https://github.com/opendatateam/udata/pull/3258)
+- Add a CI job to create a release on Sentry [#3266](https://github.com/opendatateam/udata/pull/3266)
+- Sort extensions in `/api/1/datasets/extensions/` response alphabetically [#3358](https://github.com/opendatateam/udata/pull/3358)
+- Migrate recommendations tasks, [udata-recommendations](https://github.com/opendatateam/udata-recommendations/) is no longer required [#3355](https://github.com/opendatateam/udata/pull/3355)
+- Migrate udata-transport tasks, [udata-transport](https://github.com/opendatateam/udata-transport/) is no longer required [#3355](https://github.com/opendatateam/udata/pull/3355)
+
+## 10.5.0 (2025-07-02)
+
+- Allow temporal intervals with no start date [#3353](https://github.com/opendatateam/udata/pull/3353)
+- Fix removing schema by sending null [#3350](https://github.com/opendatateam/udata/pull/3350)
+- Use datagouv patched ISO-DCAT XSLT URL [#3351](https://github.com/opendatateam/udata/pull/3351)
+
+## 10.4.3 (2025-06-23)
+
+- Add access audience to dataservices [#3334](https://github.com/opendatateam/udata/pull/3334)
+- Lock the updates of the resources list [#3338](https://github.com/opendatateam/udata/pull/3338)
+- Expose permissions to cdata [#3336](https://github.com/opendatateam/udata/pull/3336)
+- Add endpoint to get datasets followed by user [#3337](https://github.com/opendatateam/udata/pull/3337)
+- Do not harvest spatial with invalid values [#3341](https://github.com/opendatateam/udata/pull/3341)
+- Allow global admins to manually run harvesters in production [#3340](https://github.com/opendatateam/udata/pull/3340)
+- Add monthly metrics to datasets, dataservices, reuses and organizations [#3342](https://github.com/opendatateam/udata/pull/3342)
+- Fix user avatar deletion [#3346](https://github.com/opendatateam/udata/pull/3346)
+
+## 10.4.2 (2025-06-05)
+
+- :warning: Add migration to clean duplicate activities [#3327](https://github.com/opendatateam/udata/pull/3327)
+- Add test for removing last contact point [#3322](https://github.com/opendatateam/udata/pull/3322)
+- Add activities to dataservices, topics and resources, add Auditable class to refactor improve code [#3308](https://github.com/opendatateam/udata/pull/3308) [#3333](https://github.com/opendatateam/udata/pull/3333)
+- Store activities for private objects [#3328](https://github.com/opendatateam/udata/pull/3328)
+- Do not crash if file doesn't exists during resource deletion [#3323](https://github.com/opendatateam/udata/pull/3323)
+- Show user domain in suggest [#3324](https://github.com/opendatateam/udata/pull/3324)
+- Add new global site metrics [#3325](https://github.com/opendatateam/udata/pull/3325)
+- Keep the existing frequency if not found during harvesting [#3330](https://github.com/opendatateam/udata/pull/3330)
+- Migrate atom feeds from udata-front to udata [#3326](https://github.com/opendatateam/udata/pull/3326)
+- Add organization dataservices catalog route [#3332](https://github.com/opendatateam/udata/pull/3332)
+
+## 10.4.1 (2025-05-20)
+
+- Remove duplicate `downloads` in dataset csv adapter [#3319](https://github.com/opendatateam/udata/pull/3319)
+- Add missing default for license full object [#3317](https://github.com/opendatateam/udata/pull/3317/)
+- Check for slugs in followers API [#3320](https://github.com/opendatateam/udata/pull/3320)
+- Fix missing ID in dataset reuses mask [#3321](https://github.com/opendatateam/udata/pull/3321)
+
+## 10.4.0 (2025-05-15)
+
+- Improve reuse api perfs by adding a mask on datasets [#3309](https://github.com/opendatateam/udata/pull/3309)
+- Private objects should return 404 by api [#3311](https://github.com/opendatateam/udata/pull/3311) [#3316](https://github.com/opendatateam/udata/pull/3316)
+- Allow returning full sub-objects (license, frequency, zones and granularity) for datasets APIv2 [#3310](https://github.com/opendatateam/udata/pull/3310)
+- Add `featured` to dataset default mask [#3313](https://github.com/opendatateam/udata/pull/3313)
+- Add endpoint to get all schemas for a dataset without fetching resources [#3314](https://github.com/opendatateam/udata/pull/3314)
+
+## 10.3.2 (2025-05-06)
+
+- feat(topics): add featured filter in API [#3301](https://github.com/opendatateam/udata/pull/3301)
+- Improve wording on account inactivity emails [#3304](https://github.com/opendatateam/udata/pull/3304)
+- Migrate CSV exports from udata-front to udata (requires adding redirection to Nginx) [#3306](https://github.com/opendatateam/udata/pull/3306)
+- Add reuse filter on datasets API [#3307](https://github.com/opendatateam/udata/pull/3307)
+
+## 10.3.1 (2025-04-29)
+
+- Add archived, deleted and private filter in dataset list api [#3298](https://github.com/opendatateam/udata/pull/3298)
+- Exclude deleted dataservices in csv queryset [#3297](https://github.com/opendatateam/udata/pull/3297)
+- Publish comments on behalf of org, close without message and edit/delete discussions comments [#3295](https://github.com/opendatateam/udata/pull/3295)
+- Migrate MAAF backend from udata-front [#3300](https://github.com/opendatateam/udata/pull/3300)
+- Follow: add user parser argument [#3302](https://github.com/opendatateam/udata/pull/3302)
+- Allow trailing slash to activity route [#3303](https://github.com/opendatateam/udata/pull/3303)
+
+## 10.3.0 (2025-04-11)
+
+- Skip empty datasets nodes referenced in dataservices before creating an harvest job item [#3285](https://github.com/opendatateam/udata/pull/3285)
+- Harvest Distribution with a DCAT.accessService property as type `api` [#3294](https://github.com/opendatateam/udata/pull/3294)
+- Add search to harvest sources [#3296](https://github.com/opendatateam/udata/pull/3296)
+- Refactor error management [#3292](https://github.com/opendatateam/udata/pull/3292)
+- Compute quality score to show correct resources score in api v2 [#3290](https://github.com/opendatateam/udata/pull/3290/)
+
+## 10.2.0 (2025-04-02)
+
+- Fix wrong error message when updating the GeoZone of a dataset with already a Geometry [#3271](https://github.com/opendatateam/udata/pull/3271)
+- Update dependencies [#3278](https://github.com/opendatateam/udata/pull/3278)
+  - Some of these upgrades implied code changes in udata, udata-front or udata-ckan:
+    - upgrade bleach to 6.2.0
+    - upgrade html2text to 2024.2.26
+    - upgrade mistune to 3.1.3
+    - upgrade netaddr to 1.3.0
+    - upgrade wtforms to 3.2.1
+    - upgrade voluptuous to 0.15.2
+    - replace StringDist by Levenshtein
+  - Did not upgrade Flask (and its plugins), blinker and werkzeug yet
 
 ## 10.1.4 (2025-03-24)
 

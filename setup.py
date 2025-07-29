@@ -42,6 +42,9 @@ setup(
             "dcat = udata.harvest.backends.dcat:DcatBackend",
             "csw-dcat = udata.harvest.backends.dcat:CswDcatBackend",
             "csw-iso-19139 = udata.harvest.backends.dcat:CswIso19139DcatBackend",
+            "maaf = udata.harvest.backends.maaf:MaafBackend",
+            "ckan = udata.harvest.backends.ckan.harvesters:CkanBackend",
+            "dkan = udata.harvest.backends.ckan.harvesters:DkanBackend",
         ],
         "udata.avatars": [
             "internal = udata.features.identicon.backends:internal",
@@ -65,6 +68,6 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Topic :: Software Development :: Libraries :: Python Modules",
-        ("License :: OSI Approved :: GNU Affero General Public License v3" " or later (AGPLv3+)"),
+        ("License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)"),
     ],
 )

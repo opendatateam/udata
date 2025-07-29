@@ -7,14 +7,24 @@ from mongoengine.signals import post_save
 
 import udata.core.contact_point.api_fields as contact_api_fields
 import udata.core.dataset.api_fields as datasets_api_fields
+from udata.api import api, fields
 from udata.api_fields import field, function_field, generate_fields
-from udata.core.dataservices.constants import DATASERVICE_ACCESS_TYPES, DATASERVICE_FORMATS
+from udata.core.activity.models import Auditable
+from udata.core.dataservices.constants import (
+    DATASERVICE_ACCESS_AUDIENCE_CONDITIONS,
+    DATASERVICE_ACCESS_AUDIENCE_TYPES,
+    DATASERVICE_ACCESS_TYPES,
+    DATASERVICE_FORMATS,
+)
 from udata.core.dataset.models import Dataset
+from udata.core.linkable import Linkable
+from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
 from udata.models import Discussion, Follow, db
-from udata.uris import endpoint_for
+from udata.mongo.errors import FieldValidationError
+from udata.uris import cdata_url
 
 # "frequency"
 # "harvest"
@@ -24,6 +34,15 @@ from udata.uris import endpoint_for
 # "datasets" # objet : liste de datasets liés à une API
 # "spatial"
 # "temporal_coverage"
+
+
+dataservice_permissions_fields = api.model(
+    "DataservicePermissions",
+    {
+        "delete": fields.Permission(),
+        "edit": fields.Permission(),
+    },
+)
 
 
 class DataserviceQuerySet(OwnedQuerySet):
@@ -97,6 +116,21 @@ class HarvestMetadata(db.EmbeddedDocument):
     archived_reason = field(db.StringField())
 
 
+@generate_fields()
+class AccessAudience(db.EmbeddedDocument):
+    role = field(db.StringField(choices=DATASERVICE_ACCESS_AUDIENCE_TYPES), filterable={})
+    condition = field(db.StringField(choices=DATASERVICE_ACCESS_AUDIENCE_CONDITIONS), filterable={})
+
+
+def check_only_one_condition_per_role(access_audiences, **_kwargs):
+    roles = set(e["role"] for e in access_audiences)
+    if len(roles) != len(access_audiences):
+        raise FieldValidationError(
+            _("You can only set one condition for a given access audience role"),
+            field="access_audiences",
+        )
+
+
 @generate_fields(
     searchable=True,
     additional_filters={"organization_badge": "organization.badges"},
@@ -105,7 +139,7 @@ class HarvestMetadata(db.EmbeddedDocument):
         {"key": "views", "value": "metrics.views"},
     ],
 )
-class Dataservice(WithMetrics, Owned, db.Document):
+class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
     meta = {
         "indexes": [
             "$title",
@@ -116,6 +150,11 @@ class Dataservice(WithMetrics, Owned, db.Document):
         "queryset_class": DataserviceQuerySet,
         "auto_create_index_on_save": True,
     }
+
+    after_save = Signal()
+    on_create = Signal()
+    on_update = Signal()
+    on_delete = Signal()
 
     verbose_name = _("dataservice")
 
@@ -152,6 +191,11 @@ class Dataservice(WithMetrics, Owned, db.Document):
     availability_url = field(db.URLField())
 
     access_type = field(db.StringField(choices=DATASERVICE_ACCESS_TYPES), filterable={})
+    access_audiences = field(
+        db.EmbeddedDocumentListField(AccessAudience),
+        checks=[check_only_one_condition_per_role],
+    )
+
     authorization_request_url = field(db.URLField())
 
     format = field(db.StringField(choices=DATASERVICE_FORMATS))
@@ -175,7 +219,10 @@ class Dataservice(WithMetrics, Owned, db.Document):
         description="Is the dataservice private to the owner or the organization",
     )
 
-    extras = field(db.ExtrasField())
+    extras = field(
+        db.ExtrasField(),
+        auditable=False,
+    )
 
     contact_points = field(
         db.ListField(
@@ -201,8 +248,9 @@ class Dataservice(WithMetrics, Owned, db.Document):
         ),
         readonly=True,
         sortable="last_modified",
+        auditable=False,
     )
-    deleted_at = field(db.DateTimeField())
+    deleted_at = field(db.DateTimeField(), auditable=False)
     archived_at = field(db.DateTimeField())
 
     datasets = field(
@@ -223,24 +271,26 @@ class Dataservice(WithMetrics, Owned, db.Document):
     harvest = field(
         db.EmbeddedDocumentField(HarvestMetadata),
         readonly=True,
+        auditable=False,
     )
 
-    def url_for(self, *args, **kwargs):
-        return endpoint_for(
-            "dataservices.show", "api.dataservice", dataservice=self, *args, **kwargs
+    @function_field(description="Link to the API endpoint for this dataservice")
+    def self_api_url(self, **kwargs):
+        return url_for(
+            "api.dataservice",
+            dataservice=self._link_id(**kwargs),
+            **self._self_api_url_kwargs(**kwargs),
         )
 
-    @function_field(description="Link to the API endpoint for this dataservice")
-    def self_api_url(self):
-        return endpoint_for("api.dataservice", dataservice=self, _external=True)
-
     @function_field(description="Link to the udata web page for this dataservice", show_as_ref=True)
-    def self_web_url(self):
-        return endpoint_for("dataservices.show", dataservice=self, _external=True)
+    def self_web_url(self, **kwargs):
+        return cdata_url(f"/dataservices/{self._link_id(**kwargs)}/", **kwargs)
 
     __metrics_keys__ = [
         "discussions",
+        "discussions_open",
         "followers",
+        "followers_by_months",
         "views",
     ]
 
@@ -248,28 +298,29 @@ class Dataservice(WithMetrics, Owned, db.Document):
     def is_hidden(self):
         return self.private or self.deleted_at or self.archived_at
 
+    @property
+    @function_field(
+        nested_fields=dataservice_permissions_fields,
+    )
+    def permissions(self):
+        from .permissions import DataserviceEditPermission
+
+        return {
+            "delete": DataserviceEditPermission(self),
+            "edit": DataserviceEditPermission(self),
+        }
+
     def count_discussions(self):
-        self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()
-        self.save()
+        self.metrics["discussions"] = Discussion.objects(subject=self).count()
+        self.metrics["discussions_open"] = Discussion.objects(subject=self, closed=None).count()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
-        self.save()
-
-    on_create = Signal()
-    on_update = Signal()
-    on_delete = Signal()
-
-    @classmethod
-    def post_save(cls, sender, document, **kwargs):
-        if "post_save" in kwargs.get("ignores", []):
-            return
-        if kwargs.get("created"):
-            cls.on_create.send(document)
-        else:
-            cls.on_update.send(document)
-        if document.deleted_at:
-            cls.on_delete.send(document)
+        self.metrics["followers_by_months"] = get_stock_metrics(
+            Follow.objects(following=self), date_label="since"
+        )
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
 
 post_save.connect(Dataservice.post_save, sender=Dataservice)

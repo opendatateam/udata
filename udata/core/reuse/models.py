@@ -1,18 +1,21 @@
 from blinker import Signal
+from flask import url_for
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
 from udata.api_fields import field, function_field, generate_fields
+from udata.core.activity.models import Auditable
 from udata.core.dataset.api_fields import dataset_fields
+from udata.core.linkable import Linkable
+from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.owned import Owned, OwnedQuerySet
-from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE
+from udata.core.reuse.api_fields import BIGGEST_IMAGE_SIZE, reuse_permissions_fields
 from udata.core.storages import default_image_basename, images
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.mail import get_mail_campaign_dict
 from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics, db
 from udata.mongo.errors import FieldValidationError
-from udata.uris import endpoint_for
+from udata.uris import cdata_url
 from udata.utils import hash_url
 
 from .constants import IMAGE_MAX_SIZE, IMAGE_SIZES, REUSE_TOPICS, REUSE_TYPES
@@ -58,8 +61,9 @@ class ReuseBadgeMixin(BadgeMixin):
         {"key": "views", "value": "metrics.views"},
     ],
     additional_filters={"organization_badge": "organization.badges"},
+    mask="*,datasets{id,title,uri,page}",
 )
-class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
+class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Owned, db.Document):
     title = field(
         db.StringField(required=True),
         sortable=True,
@@ -70,6 +74,7 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
             max_length=255, required=True, populate_from="title", update=True, follow=True
         ),
         readonly=True,
+        auditable=False,
     )
     description = field(
         db.StringField(required=True),
@@ -125,15 +130,17 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
     private = field(db.BooleanField(default=False), filterable={})
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
-    extras = field(db.ExtrasField())
+    extras = field(db.ExtrasField(), auditable=False)
 
     featured = field(
         db.BooleanField(),
         filterable={},
         readonly=True,
+        auditable=False,
     )
     deleted = field(
         db.DateTimeField(),
+        auditable=False,
     )
     archived = field(
         db.DateTimeField(),
@@ -144,8 +151,10 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
 
     __metrics_keys__ = [
         "discussions",
+        "discussions_open",
         "datasets",
         "followers",
+        "followers_by_months",
         "views",
     ]
 
@@ -180,32 +189,33 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
         # Emit before_save
         cls.before_save.send(document)
 
-    @classmethod
-    def post_save(cls, sender, document, **kwargs):
-        if "post_save" in kwargs.get("ignores", []):
-            return
-        cls.after_save.send(document)
-        if kwargs.get("created"):
-            cls.on_create.send(document)
-        else:
-            cls.on_update.send(document)
-        if document.deleted:
-            cls.on_delete.send(document)
+    def self_web_url(self, **kwargs):
+        return cdata_url(f"/reuses/{self._link_id(**kwargs)}/", **kwargs)
 
-    def url_for(self, *args, **kwargs):
-        return endpoint_for("reuses.show", "api.reuse", reuse=self, *args, **kwargs)
-
-    display_url = property(url_for)
+    def self_api_url(self, **kwargs):
+        return url_for(
+            "api.reuse", reuse=self._link_id(**kwargs), **self._self_api_url_kwargs(**kwargs)
+        )
 
     @function_field(description="Link to the API endpoint for this reuse", show_as_ref=True)
-    def uri(self):
-        return endpoint_for("api.reuse", reuse=self, _external=True)
+    def uri(self, *args, **kwargs):
+        return self.self_api_url(*args, **kwargs)
 
     @function_field(description="Link to the udata web page for this reuse", show_as_ref=True)
-    def page(self):
-        return endpoint_for(
-            "reuses.show", reuse=self, _external=True, fallback_endpoint="api.reuse"
-        )
+    def page(self, *args, **kwargs):
+        return self.self_web_url(*args, **kwargs)
+
+    @property
+    @function_field(
+        nested_fields=reuse_permissions_fields,
+    )
+    def permissions(self):
+        from .permissions import ReuseEditPermission
+
+        return {
+            "delete": ReuseEditPermission(self),
+            "edit": ReuseEditPermission(self),
+        }
 
     @property
     def is_visible(self):
@@ -214,15 +224,6 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
     @property
     def is_hidden(self):
         return len(self.datasets) == 0 or self.private or self.deleted
-
-    @property
-    def external_url(self):
-        return self.url_for(_external=True)
-
-    @property
-    def external_url_with_campaign(self):
-        extras = get_mail_campaign_dict()
-        return self.url_for(_external=True, **extras)
 
     @property
     def type_label(self):
@@ -256,7 +257,7 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
             "alternateName": self.slug,
             "dateCreated": self.created_at.isoformat(),
             "dateModified": self.last_modified.isoformat(),
-            "url": endpoint_for("reuses.show", "api.reuse", reuse=self, _external=True),
+            "url": self.url_for(),
             "name": self.title,
             "isBasedOnUrl": self.url,
         }
@@ -287,14 +288,18 @@ class Reuse(db.Datetimed, WithMetrics, ReuseBadgeMixin, Owned, db.Document):
     def count_discussions(self):
         from udata.models import Discussion
 
-        self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()
-        self.save()
+        self.metrics["discussions"] = Discussion.objects(subject=self).count()
+        self.metrics["discussions_open"] = Discussion.objects(subject=self, closed=None).count()
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):
         from udata.models import Follow
 
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
-        self.save()
+        self.metrics["followers_by_months"] = get_stock_metrics(
+            Follow.objects(following=self), date_label="since"
+        )
+        self.save(signal_kwargs={"ignores": ["post_save"]})
 
 
 pre_save.connect(Reuse.pre_save, sender=Reuse)

@@ -4,31 +4,29 @@
 #
 #    pip-compile --output-file=requirements/install.pip requirements/install.in
 #
-amqp==5.2.0
+amqp==5.3.1
     # via kombu
-aniso8601==9.0.1
+aniso8601==10.0.0
     # via flask-restx
-appdirs==1.4.4
-    # via urlextract
-attrs==23.2.0
+attrs==25.3.0
     # via
     #   jsonschema
     #   referencing
-authlib==1.3.1
+authlib==1.5.1
     # via -r requirements/install.in
 awesome-slugify==1.6.5
     # via -r requirements/install.in
-babel==2.12.1
+babel==2.17.0
     # via
     #   -r requirements/install.in
     #   flask-babel
-bcrypt==3.1.7
+bcrypt==4.3.0
     # via -r requirements/install.in
-billiard==4.2.0
+billiard==4.2.1
     # via celery
-bleach==3.3.1
+bleach[css]==6.2.0
     # via -r requirements/install.in
-blinker==1.4
+blinker==1.5
     # via
     #   -r requirements/install.in
     #   flask-mail
@@ -45,25 +43,23 @@ botocore==1.29.165
     # via
     #   boto3
     #   s3transfer
-cachelib==0.9.0
+cachelib==0.13.0
     # via flask-caching
-celery==5.3.1
+celery==5.4.0
     # via
     #   -r requirements/install.in
     #   celerybeat-mongo
 celerybeat-mongo==0.2.0
     # via -r requirements/install.in
-certifi==2024.7.4
+certifi==2025.1.31
     # via
     #   requests
     #   sentry-sdk
-cffi==1.16.0
-    # via
-    #   bcrypt
-    #   cryptography
-charset-normalizer==3.3.2
+cffi==1.17.1
+    # via cryptography
+charset-normalizer==3.4.1
     # via requests
-click==8.1.2
+click==8.1.8
     # via
     #   -r requirements/install.in
     #   celery
@@ -78,11 +74,11 @@ click-plugins==1.1.1
     # via celery
 click-repl==0.3.0
     # via celery
-cryptography==2.8
+cryptography==44.0.2
     # via
     #   -r requirements/install.in
     #   authlib
-dnspython==2.6.1
+dnspython==2.7.0
     # via
     #   email-validator
     #   pymongo
@@ -90,12 +86,16 @@ email-validator==2.2.0
     # via
     #   flask-security-too
     #   wtforms
-factory-boy==2.12.0
+factory-boy==3.3.3
     # via -r requirements/install.in
-faker==3.0.0
+faker==37.0.2
     # via
     #   -r requirements/install.in
     #   factory-boy
+feedgenerator==2.1.0
+    # via -r requirements/install.in
+filelock==3.18.0
+    # via urlextract
 flask==2.1.2
     # via
     #   -r requirements/install.in
@@ -116,17 +116,17 @@ flask==2.1.2
     #   sentry-sdk
 flask-babel==4.0.0
     # via -r requirements/install.in
-flask-caching==2.0.2
+flask-caching==2.3.1
     # via -r requirements/install.in
 flask-cdn==1.5.3
     # via -r requirements/install.in
 flask-gravatar==0.5.0
     # via -r requirements/install.in
-flask-login==0.6.2
+flask-login==0.6.3
     # via
     #   -r requirements/install.in
     #   flask-security-too
-flask-mail==0.9.1
+flask-mail==0.10.0
     # via -r requirements/install.in
 flask-mongoengine==1.0.0
     # via
@@ -136,7 +136,7 @@ flask-navigation-temp-python-311==0.2.1
     # via -r requirements/install.in
 flask-principal==0.4.0
     # via flask-security-too
-flask-restx==1.0.5
+flask-restx==1.3.0
     # via -r requirements/install.in
 flask-security-too==5.1.2
     # via -r requirements/install.in
@@ -144,30 +144,32 @@ flask-sitemap==0.4.0
     # via -r requirements/install.in
 flask-storage==1.3.2
     # via -r requirements/install.in
-flask-wtf==1.0.1
+flask-wtf==1.2.2
     # via
     #   -r requirements/install.in
     #   flask-mongoengine
     #   flask-security-too
-geojson==2.5.0
+geojson==3.2.0
     # via -r requirements/install.in
 geomet==1.1.0
     # via -r requirements/install.in
-html2text==2019.9.26
+html2text==2024.2.26
     # via -r requirements/install.in
-idna==2.10
+humanfriendly==10.0
+    # via -r requirements/install.in
+idna==3.10
     # via
     #   email-validator
     #   requests
     #   urlextract
-isodate==0.6.1
-    # via rdflib
-itsdangerous==2.1.2
+importlib-resources==6.5.2
+    # via flask-restx
+itsdangerous==2.2.0
     # via
     #   flask
     #   flask-security-too
     #   flask-wtf
-jinja2==3.1.2
+jinja2==3.1.6
     # via
     #   -r requirements/install.in
     #   flask
@@ -178,15 +180,17 @@ jmespath==1.0.1
     #   botocore
 jsonschema==4.23.0
     # via flask-restx
-jsonschema-specifications==2023.12.1
+jsonschema-specifications==2024.10.1
     # via jsonschema
-kombu[redis]==5.3.1
+kombu[redis]==5.5.0
     # via
     #   -r requirements/install.in
     #   celery
 langdetect==1.0.9
     # via -r requirements/install.in
-lxml==5.3.0
+levenshtein==0.27.1
+    # via -r requirements/install.in
+lxml==5.3.1
     # via -r requirements/install.in
 markupsafe==2.1.2
     # via
@@ -195,98 +199,96 @@ markupsafe==2.1.2
     #   sentry-sdk
     #   werkzeug
     #   wtforms
-mistune==0.8.4
+mistune==3.1.3
     # via -r requirements/install.in
-mongoengine==0.27.0
+mongoengine==0.29.1
     # via
     #   -r requirements/install.in
     #   celerybeat-mongo
     #   flask-mongoengine
-netaddr==0.7.19
+netaddr==1.3.0
     # via -r requirements/install.in
-packaging==24.2
-    # via bleach
 passlib==1.7.4
     # via flask-security-too
 pillow==9.2.0
     # via
     #   flask-storage
     #   pydenticon
-ply==3.11
-    # via pycparser
-prompt-toolkit==3.0.47
+platformdirs==4.3.6
+    # via urlextract
+prompt-toolkit==3.0.50
     # via click-repl
-pycparser==2.2
+pycparser==2.22
     # via cffi
 pydenticon==0.3.1
     # via -r requirements/install.in
-pymongo==4.3.3
+pymongo==4.11.3
     # via
     #   -r requirements/install.in
     #   celerybeat-mongo
     #   mongoengine
-pyparsing==3.1.2
+pyparsing==3.2.1
     # via rdflib
-python-dateutil==2.8.2
+python-dateutil==2.9.0.post0
     # via
     #   -r requirements/install.in
     #   botocore
     #   celery
-    #   faker
-pytz==2024.1
+pytz==2025.1
     # via
     #   -r requirements/install.in
+    #   feedgenerator
     #   flask-babel
     #   flask-restx
-rdflib==6.0.0
+rapidfuzz==3.12.2
+    # via levenshtein
+rdflib==7.1.3
     # via -r requirements/install.in
-redis==4.5.2
+redis==5.2.1
     # via
     #   -r requirements/install.in
     #   kombu
-referencing==0.35.1
+referencing==0.36.2
     # via
     #   jsonschema
     #   jsonschema-specifications
-regex==2024.5.15
+regex==2024.11.6
     # via awesome-slugify
 requests==2.32.3
     # via -r requirements/install.in
-rpds-py==0.19.0
+rpds-py==0.23.1
     # via
     #   jsonschema
     #   referencing
 s3transfer==0.6.2
     # via boto3
-sentry-sdk[flask]==2.9.0
+sentry-sdk[flask]==2.23.1
     # via -r requirements/install.in
-six==1.16.0
+six==1.17.0
     # via
-    #   bcrypt
-    #   bleach
-    #   cryptography
-    #   faker
-    #   isodate
     #   langdetect
     #   python-dateutil
     #   wtforms-json
 speaklater==1.3
     # via -r requirements/install.in
-stringdist==1.0.9
+tinycss2==1.4.0
+    # via bleach
+tlds==2025022800
     # via -r requirements/install.in
-text-unidecode==1.3
-    # via faker
-tlds==2024071000
-    # via -r requirements/install.in
-tzdata==2024.1
-    # via celery
+typing-extensions==4.12.2
+    # via referencing
+tzdata==2025.1
+    # via
+    #   celery
+    #   faker
+    #   kombu
 unidecode==0.4.21
     # via awesome-slugify
 uritools==4.0.3
     # via urlextract
-urlextract==0.14.0
+urlextract==1.9.0
     # via -r requirements/install.in
-urllib3==1.26.19
+urllib3==1.26.20
     # via
     #   botocore
     #   requests
@@ -296,19 +298,21 @@ vine==5.1.0
     #   amqp
     #   celery
     #   kombu
-voluptuous==0.11.7
+voluptuous==0.15.2
     # via -r requirements/install.in
 wcwidth==0.2.13
     # via prompt-toolkit
 webencodings==0.5.1
-    # via bleach
-werkzeug==2.2.2
+    # via
+    #   bleach
+    #   tinycss2
+werkzeug==2.2.3
     # via
     #   -r requirements/install.in
     #   flask
     #   flask-login
     #   flask-restx
-wtforms[email]==3.0.1
+wtforms[email]==3.2.1
     # via
     #   -r requirements/install.in
     #   flask-mongoengine

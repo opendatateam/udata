@@ -204,19 +204,25 @@ dataset_ref_fields = api.inherit(
     {
         "title": fields.String(description="The dataset title", readonly=True),
         "acronym": fields.String(description="An optional dataset acronym", readonly=True),
-        "uri": fields.UrlFor(
-            "api.dataset",
-            lambda d: {"dataset": d},
+        "uri": fields.String(
+            attribute=lambda d: d.self_api_url(),
             description="The API URI for this dataset",
             readonly=True,
         ),
-        "page": fields.UrlFor(
-            "datasets.show",
-            lambda d: {"dataset": d},
-            description="The web page URL for this dataset",
+        "page": fields.String(
+            attribute=lambda d: d.self_web_url(),
+            description="The dataset web page URL",
             readonly=True,
-            fallback_endpoint="api.dataset",
         ),
+    },
+)
+
+
+community_resource_permissions_fields = api.model(
+    "DatasetPermissions",
+    {
+        "delete": fields.Permission(),
+        "edit": fields.Permission(),
     },
 )
 
@@ -233,6 +239,7 @@ community_resource_fields = api.inherit(
         "owner": fields.Nested(
             user_ref_fields, allow_null=True, description="The user information"
         ),
+        "permissions": fields.Nested(community_resource_permissions_fields),
     },
 )
 
@@ -284,6 +291,8 @@ DEFAULT_MASK = ",".join(
         "quality",
         "internal",
         "contact_points",
+        "featured",
+        "permissions",
     )
 )
 
@@ -296,6 +305,15 @@ dataset_internal_fields = api.model(
         "last_modified_internal": fields.ISODateTime(
             description="The dataset's internal last modification date", required=True
         ),
+    },
+)
+
+dataset_permissions_fields = api.model(
+    "DatasetPermissions",
+    {
+        "delete": fields.Permission(),
+        "edit": fields.Permission(),
+        "edit_resources": fields.Permission(),
     },
 )
 
@@ -372,18 +390,15 @@ dataset_fields = api.model(
         "license": fields.String(
             attribute="license.id", default=DEFAULT_LICENSE["id"], description="The dataset license"
         ),
-        "uri": fields.UrlFor(
-            "api.dataset",
-            lambda o: {"dataset": o},
-            description="The dataset API URI",
-            required=True,
+        "uri": fields.String(
+            attribute=lambda d: d.self_api_url(),
+            description="The API URI for this dataset",
+            readonly=True,
         ),
-        "page": fields.UrlFor(
-            "datasets.show",
-            lambda o: {"dataset": o},
-            description="The dataset page URL",
-            required=True,
-            fallback_endpoint="api.dataset",
+        "page": fields.String(
+            attribute=lambda d: d.self_web_url(),
+            description="The dataset web page URL",
+            readonly=True,
         ),
         "quality": fields.Raw(description="The dataset quality", readonly=True),
         "last_update": fields.ISODateTime(
@@ -400,6 +415,7 @@ dataset_fields = api.model(
         "contact_points": fields.List(
             fields.Nested(contact_point_fields, description="The dataset contact points"),
         ),
+        "permissions": fields.Nested(dataset_permissions_fields),
     },
     mask=DEFAULT_MASK,
 )
@@ -419,12 +435,7 @@ dataset_suggestion_fields = api.model(
         "image_url": fields.ImageField(
             size=BIGGEST_LOGO_SIZE, description="The dataset (organization) logo URL", readonly=True
         ),
-        "page": fields.UrlFor(
-            "datasets.show_redirect",
-            lambda d: {"dataset": d["slug"]},
-            description="The web page URL for this dataset",
-            fallback_endpoint="api.dataset",
-        ),
+        "page": fields.String(description="The dataset web page URL", readonly=True),
     },
 )
 

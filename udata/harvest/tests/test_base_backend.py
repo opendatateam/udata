@@ -44,12 +44,12 @@ class FakeBackend(BaseBackend):
     def inner_harvest(self):
         for remote_id in self.source.config.get("dataset_remote_ids", []):
             self.process_dataset(remote_id)
-            if self.is_done():
+            if self.has_reached_max_items():
                 return
 
         for remote_id in self.source.config.get("dataservice_remote_ids", []):
             self.process_dataservice(remote_id)
-            if self.is_done():
+            if self.has_reached_max_items():
                 return
 
     def inner_process_dataset(self, item: HarvestItem):
@@ -207,7 +207,7 @@ class BaseBackendTest:
 
         dataset = Dataset.objects.first()
 
-        assert dataset.last_modified_internal == last_modified
+        assert_equal_dates(dataset.last_modified_internal, last_modified)
         assert_equal_dates(dataset.harvest.last_update, datetime.utcnow())
 
     def test_dont_overwrite_last_modified_even_if_set_to_same(self, mocker):
@@ -222,7 +222,7 @@ class BaseBackendTest:
 
         dataset = Dataset.objects.first()
 
-        assert dataset.last_modified_internal == last_modified
+        assert_equal_dates(dataset.last_modified_internal, last_modified)
         assert_equal_dates(dataset.harvest.last_update, datetime.utcnow())
 
     def test_autoarchive(self, app):

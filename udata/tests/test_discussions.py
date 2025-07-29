@@ -66,6 +66,7 @@ class DiscussionsTest(APITestCase):
 
         discussion = discussions[0]
         self.assertEqual(discussion.user, user)
+        self.assertIsNone(discussion.organization)
         self.assertEqual(len(discussion.discussion), 1)
         self.assertIsNotNone(discussion.created)
         self.assertIsNone(discussion.closed)
@@ -79,7 +80,64 @@ class DiscussionsTest(APITestCase):
         self.assertIsNotNone(message.posted_on)
         self.assertFalse(message.is_spam())
 
-    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_new_discussion_on_behalf_of_org(self):
+        user = self.login()
+        org1 = OrganizationFactory(editors=[user])
+        org2 = OrganizationFactory(editors=[user])
+        other_org = OrganizationFactory()
+        dataset = DatasetFactory()
+
+        response = self.post(
+            url_for("api.discussions"),
+            {
+                "organization": other_org.id,
+                "title": "not allowed",
+                "comment": "bla bla",
+                "subject": {
+                    "class": "Dataset",
+                    "id": dataset.id,
+                },
+            },
+        )
+        self.assert400(response)
+
+        response = self.post(
+            url_for("api.discussions"),
+            {
+                "organization": org1.id,
+                "title": "test title",
+                "comment": "bla bla",
+                "subject": {
+                    "class": "Dataset",
+                    "id": dataset.id,
+                },
+            },
+        )
+        self.assert201(response)
+        assert response.json["organization"]["id"] == str(org1.id)
+        assert response.json["user"]["id"] == str(user.id)
+        assert response.json["discussion"][0]["posted_by_organization"]["id"] == str(org1.id)
+        assert response.json["discussion"][0]["posted_by"]["id"] == str(user.id)
+
+        response = self.post(
+            url_for("api.discussion", id=response.json["id"]),
+            {"organization": org2.id, "comment": "A comment"},
+        )
+        self.assert200(response)
+        assert response.json["organization"]["id"] == str(org1.id)
+        assert response.json["user"]["id"] == str(user.id)
+        assert response.json["discussion"][0]["posted_by_organization"]["id"] == str(org1.id)
+        assert response.json["discussion"][0]["posted_by"]["id"] == str(user.id)
+        assert response.json["discussion"][1]["posted_by_organization"]["id"] == str(org2.id)
+        assert response.json["discussion"][1]["posted_by"]["id"] == str(user.id)
+
+        response = self.post(
+            url_for("api.discussion", id=response.json["id"]),
+            {"organization": other_org.id, "comment": "A comment"},
+        )
+        self.assert400(response)
+
+    @pytest.mark.options(SPAM_WORDS=["spam"], CDATA_BASE_URL="https://data.gouv.fr")
     def test_spam_in_new_discussion_title(self):
         self.login()
         dataset = Dataset.objects.create(title="Test dataset")
@@ -90,7 +148,7 @@ class DiscussionsTest(APITestCase):
             def check_signal(args):
                 self.assertIsNotNone(discussion_id)
                 self.assertIn(
-                    f"http://local.test/api/1/datasets/{dataset.slug}/#discussion-{discussion_id}",
+                    f"https://data.gouv.fr/datasets/{dataset.slug}/discussions/?discussion_id={discussion_id}",
                     args[1]["message"],
                 )
 
@@ -364,6 +422,45 @@ class DiscussionsTest(APITestCase):
 
         self.assertEqual(len(response.json["data"]), len(discussions))
 
+    def test_list_discussions_search(self):
+        user = self.login()
+        dataset = DatasetFactory()
+
+        discussion_a = DiscussionFactory(
+            user=user,
+            subject=dataset,
+            title="discussion a",
+            discussion=[
+                Message(posted_by=user, content="another message"),
+                Message(posted_by=user, content="a message with something"),
+            ],
+        )
+        discussion_b = DiscussionFactory(
+            user=user,
+            subject=dataset,
+            title="something in title",
+            discussion=[
+                Message(posted_by=user, content="another message"),
+                Message(posted_by=user, content="there is a problem"),
+            ],
+        )
+        DiscussionFactory(
+            user=user,
+            subject=dataset,
+            title="discussion c",
+            discussion=[
+                Message(posted_by=user, content="some text"),
+                Message(posted_by=user, content="and another"),
+            ],
+        )
+
+        response = self.get(url_for("api.discussions", q="something"))
+        self.assert200(response)
+
+        self.assertEqual(len(response.json["data"]), 2)
+        self.assertEqual(discussion_b.title, response.json["data"][0]["title"])
+        self.assertEqual(discussion_a.title, response.json["data"][1]["title"])
+
     def assertIdIn(self, json_data: dict, id_: str) -> None:
         for item in json_data:
             if item["id"] == id_:
@@ -394,14 +491,20 @@ class DiscussionsTest(APITestCase):
 
     def test_list_discussions_sort(self) -> None:
         user: User = UserFactory()
+        dataset = DatasetFactory()
+
         sorting_keys_dict: dict = {
             "title": ["aaa", "bbb"],
             "created": ["2023-12-12", "2024-01-01"],
             "closed": ["2023-12-12", "2024-01-01"],
         }
         for sorting_key, values in sorting_keys_dict.items():
-            discussion1: Discussion = DiscussionFactory(user=user, **{sorting_key: values[0]})
-            discussion2: Discussion = DiscussionFactory(user=user, **{sorting_key: values[1]})
+            discussion1: Discussion = DiscussionFactory(
+                subject=dataset, user=user, **{sorting_key: values[0]}
+            )
+            discussion2: Discussion = DiscussionFactory(
+                subject=dataset, user=user, **{sorting_key: values[1]}
+            )
 
             response: TestResponse = self.get(url_for("api.discussions", sort=sorting_key))
             self.assert200(response)
@@ -521,7 +624,7 @@ class DiscussionsTest(APITestCase):
         with assert_not_emit(on_new_discussion_comment):
 
             def check_signal(args):
-                self.assertIn(discussion.external_url, args[1]["message"])
+                self.assertIn(discussion.url_for(), args[1]["message"])
 
             with assert_emit(on_new_potential_spam, assertions_callback=check_signal):
                 response = self.post(
@@ -574,10 +677,11 @@ class DiscussionsTest(APITestCase):
                 url_for("api.discussion", id=discussion.id),
                 {"comment": "close bla bla", "close": True},
             )
-        self.assert200(response)
+            self.assert200(response)
 
         dataset.reload()
-        self.assertEqual(dataset.get_metrics()["discussions"], 0)
+        self.assertEqual(dataset.get_metrics()["discussions"], 1)
+        self.assertEqual(dataset.get_metrics()["discussions_open"], 0)
 
         data = response.json
 
@@ -598,6 +702,22 @@ class DiscussionsTest(APITestCase):
             url_for("api.discussion", id=discussion.id), {"comment": "can't comment"}
         )
         self.assert403(response)
+
+    def test_close_discussion_without_message(self):
+        owner = self.login()
+        user = UserFactory()
+        dataset = Dataset.objects.create(title="Test dataset", owner=owner)
+        message = Message(content="bla bla", posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset, user=user, title="test discussion", discussion=[message]
+        )
+
+        with assert_emit(on_discussion_closed):
+            response = self.post(
+                url_for("api.discussion", id=discussion.id),
+                {"close": True},
+            )
+            self.assert200(response)
 
     def test_close_discussion_permissions(self):
         dataset = Dataset.objects.create(title="Test dataset")
@@ -636,6 +756,207 @@ class DiscussionsTest(APITestCase):
         dataset.reload()
         self.assertEqual(dataset.get_metrics()["discussions"], 0)
         self.assertEqual(Discussion.objects(subject=dataset).count(), 0)
+
+    def test_discussion_permissions(self):
+        admin = AdminFactory()
+        subject_owner = UserFactory()
+        user1 = UserFactory()
+        user2 = UserFactory()
+        user3 = UserFactory()
+        org = OrganizationFactory(
+            members=[Member(user=user1, role="editor"), Member(user=user2, role="editor")]
+        )
+        dataset = Dataset.objects.create(title="Test dataset", owner=subject_owner)
+        message = Message(content="bla bla", posted_by=user1)
+        message2 = Message(content="bla bla bla", posted_by=user2)
+        message3 = Message(content="bla bla bla", posted_by=user2, posted_by_organization=org)
+        discussion = Discussion.objects.create(
+            subject=dataset,
+            user=user1,
+            title="test discussion",
+            discussion=[message, message2, message3],
+        )
+
+        self.login(admin)
+        response = self.get(url_for("api.discussion", id=discussion.id))
+        assert response.json["permissions"]["edit"]
+        assert response.json["permissions"]["close"]
+        assert response.json["permissions"]["delete"]
+        assert response.json["discussion"][0]["permissions"]["edit"]
+        assert response.json["discussion"][0]["permissions"]["delete"]
+        assert response.json["discussion"][1]["permissions"]["edit"]
+        assert response.json["discussion"][1]["permissions"]["delete"]
+        assert response.json["discussion"][2]["permissions"]["edit"]
+        assert response.json["discussion"][2]["permissions"]["delete"]
+
+        self.login(subject_owner)
+        response = self.get(url_for("api.discussion", id=discussion.id))
+        assert not response.json["permissions"]["edit"]
+        assert response.json["permissions"]["close"]
+        assert not response.json["permissions"]["delete"]
+        assert not response.json["discussion"][0]["permissions"]["edit"]
+        assert not response.json["discussion"][0]["permissions"]["delete"]
+        assert not response.json["discussion"][1]["permissions"]["edit"]
+        assert not response.json["discussion"][1]["permissions"]["delete"]
+        assert not response.json["discussion"][2]["permissions"]["edit"]
+        assert not response.json["discussion"][2]["permissions"]["delete"]
+
+        self.login(user1)
+        response = self.get(url_for("api.discussion", id=discussion.id))
+        assert response.json["permissions"]["edit"]
+        assert response.json["permissions"]["close"]
+        assert response.json["permissions"]["delete"]
+        assert response.json["discussion"][0]["permissions"]["edit"]
+        assert response.json["discussion"][0]["permissions"]["delete"]
+        assert not response.json["discussion"][1]["permissions"]["edit"]
+        assert not response.json["discussion"][1]["permissions"]["delete"]
+        assert response.json["discussion"][2]["permissions"]["edit"]
+        assert response.json["discussion"][2]["permissions"]["delete"]
+
+        self.login(user2)
+        response = self.get(url_for("api.discussion", id=discussion.id))
+        assert not response.json["permissions"]["edit"]
+        assert not response.json["permissions"]["close"]
+        assert not response.json["permissions"]["delete"]
+        assert not response.json["discussion"][0]["permissions"]["edit"]
+        assert not response.json["discussion"][0]["permissions"]["delete"]
+        assert response.json["discussion"][1]["permissions"]["edit"]
+        assert response.json["discussion"][1]["permissions"]["delete"]
+        assert response.json["discussion"][2]["permissions"]["edit"]
+        assert response.json["discussion"][2]["permissions"]["delete"]
+
+        self.login(user3)
+        response = self.get(url_for("api.discussion", id=discussion.id))
+        assert not response.json["permissions"]["edit"]
+        assert not response.json["permissions"]["close"]
+        assert not response.json["permissions"]["delete"]
+        assert not response.json["discussion"][0]["permissions"]["edit"]
+        assert not response.json["discussion"][0]["permissions"]["delete"]
+        assert not response.json["discussion"][1]["permissions"]["edit"]
+        assert not response.json["discussion"][1]["permissions"]["delete"]
+        assert not response.json["discussion"][2]["permissions"]["edit"]
+        assert not response.json["discussion"][2]["permissions"]["delete"]
+
+        discussion_by_org = Discussion.objects.create(
+            subject=dataset,
+            user=user2,
+            organization=org,
+            title="test discussion",
+            discussion=[message3],
+        )
+
+        self.login(admin)
+        response = self.get(url_for("api.discussion", id=discussion_by_org.id))
+        assert response.json["permissions"]["edit"]
+        assert response.json["permissions"]["close"]
+        assert response.json["permissions"]["delete"]
+        assert response.json["discussion"][0]["permissions"]["edit"]
+        assert response.json["discussion"][0]["permissions"]["delete"]
+
+        self.login(subject_owner)
+        response = self.get(url_for("api.discussion", id=discussion_by_org.id))
+        assert not response.json["permissions"]["edit"]
+        assert response.json["permissions"]["close"]
+        assert not response.json["permissions"]["delete"]
+        assert not response.json["discussion"][0]["permissions"]["edit"]
+        assert not response.json["discussion"][0]["permissions"]["delete"]
+
+        self.login(user1)
+        response = self.get(url_for("api.discussion", id=discussion_by_org.id))
+        assert response.json["permissions"]["edit"]
+        assert response.json["permissions"]["close"]
+        assert response.json["permissions"]["delete"]
+        assert response.json["discussion"][0]["permissions"]["edit"]
+        assert response.json["discussion"][0]["permissions"]["delete"]
+
+        self.login(user2)
+        response = self.get(url_for("api.discussion", id=discussion_by_org.id))
+        assert response.json["permissions"]["edit"]
+        assert response.json["permissions"]["close"]
+        assert response.json["permissions"]["delete"]
+        assert response.json["discussion"][0]["permissions"]["edit"]
+        assert response.json["discussion"][0]["permissions"]["delete"]
+
+        self.login(user3)
+        response = self.get(url_for("api.discussion", id=discussion_by_org.id))
+        assert not response.json["permissions"]["edit"]
+        assert not response.json["permissions"]["close"]
+        assert not response.json["permissions"]["delete"]
+        assert not response.json["discussion"][0]["permissions"]["edit"]
+        assert not response.json["discussion"][0]["permissions"]["delete"]
+
+    def test_edit_discussion_title(self):
+        admin = self.login(AdminFactory())
+        user1 = UserFactory()
+        user2 = UserFactory()
+        dataset = Dataset.objects.create(title="Test dataset", owner=user1)
+        message = Message(content="bla bla", posted_by=user1)
+        message2 = Message(content="bla bla bla", posted_by=user2)
+        discussion = Discussion.objects.create(
+            subject=dataset, user=user1, title="test discussion", discussion=[message, message2]
+        )
+        self.assertEqual(len(discussion.discussion), 2)
+
+        response = self.put(url_for("api.discussion", id=discussion.id), {"title": "new title"})
+        self.assertStatus(response, 200)
+        discussion.reload()
+        assert discussion.title == "new title"
+
+        self.login(admin)
+        response = self.put(
+            url_for("api.discussion", id=discussion.id),
+            {"title": "edit by admin"},
+        )
+        self.assertStatus(response, 200)
+        discussion.reload()
+        assert discussion.title == "edit by admin"
+
+        self.login(user2)
+        response = self.put(
+            url_for("api.discussion", id=discussion.id),
+            {"title": "not allowed"},
+        )
+        self.assertStatus(response, 403)
+
+    def test_edit_discussion_comment(self):
+        admin = self.login(AdminFactory())
+        user = UserFactory()
+        dataset = Dataset.objects.create(title="Test dataset", owner=admin)
+        message = Message(content="bla bla", posted_by=user)
+        message2 = Message(content="bla bla bla", posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset, user=user, title="test discussion", discussion=[message, message2]
+        )
+        self.assertEqual(len(discussion.discussion), 2)
+
+        response = self.put(
+            url_for("api.discussion_comment", id=discussion.id, cidx=0), {"comment": "new body"}
+        )
+        self.assertStatus(response, 200)
+        discussion.reload()
+        assert discussion.discussion[0].content == "new body"
+
+        self.login(admin)
+        response = self.put(
+            url_for("api.discussion_comment", id=discussion.id, cidx=1),
+            {"comment": "edit by admin"},
+        )
+        self.assertStatus(response, 200)
+        discussion.reload()
+        assert discussion.discussion[1].content == "edit by admin"
+
+        response = self.put(
+            url_for("api.discussion_comment", id=discussion.id, cidx=3),
+            {"comment": "overflow edit"},
+        )
+        self.assertStatus(response, 404)
+
+        self.login(UserFactory())
+        response = self.put(
+            url_for("api.discussion_comment", id=discussion.id, cidx=0),
+            {"comment": "other user"},
+        )
+        self.assertStatus(response, 403)
 
     def test_delete_discussion_comment(self):
         owner = self.login(AdminFactory())
@@ -688,11 +1009,12 @@ class DiscussionsTest(APITestCase):
         dataset = Dataset.objects.create(title="Test dataset")
         user = UserFactory()
         message = Message(content="bla bla", posted_by=user)
+        message2 = Message(content="bla bla bla", posted_by=user)
         discussion = Discussion.objects.create(
-            subject=dataset, user=user, title="test discussion", discussion=[message]
+            subject=dataset, user=user, title="test discussion", discussion=[message, message2]
         )
         self.login()
-        response = self.delete(url_for("api.discussion_comment", id=discussion.id, cidx=0))
+        response = self.delete(url_for("api.discussion_comment", id=discussion.id, cidx=1))
         self.assert403(response)
 
 
@@ -827,6 +1149,8 @@ class DiscussionsMailsTest(APITestCase):
             user=poster,
             title=faker.sentence(),
             discussion=[message, second_message, closing_message],
+            closed=datetime.utcnow(),
+            closed_by=owner,
         )
 
         with capture_mails() as mails:

@@ -155,6 +155,11 @@ class HarvestSource(Owned, db.Document):
 
     meta = {
         "indexes": [
+            {
+                "fields": ["$name", "$url"],
+                "default_language": "french",
+                "weights": {"name": 10, "url": 5},
+            },
             "-created_at",
             "slug",
             ("deleted", "-created_at"),

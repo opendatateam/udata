@@ -1,12 +1,16 @@
 from datetime import datetime
+from io import StringIO
 
 import pytest
 from flask import url_for
 
 import udata.core.organization.constants as org_constants
+from udata.core import csv
 from udata.core.badges.factories import badge_factory
 from udata.core.badges.signals import on_badge_added, on_badge_removed
-from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataservices.factories import DataserviceFactory
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.discussions.factories import DiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
@@ -22,6 +26,7 @@ from udata.tests.helpers import (
     assert410,
     assert_emit,
     assert_not_emit,
+    assert_starts_with,
     assert_status,
 )
 from udata.utils import faker
@@ -44,10 +49,11 @@ class OrganizationAPITest:
 
     def test_organization_api_list_with_filters(self, api):
         """It should filter the organization list"""
-        _org = OrganizationFactory()
+        org = OrganizationFactory(business_number_id="13002526500013")
         org_public_service = OrganizationFactory()
         org_public_service.add_badge(org_constants.PUBLIC_SERVICE)
 
+        #### Badges ####
         response = api.get(url_for("api.organizations", badge=org_constants.PUBLIC_SERVICE))
         assert200(response)
         assert len(response.json["data"]) == 1
@@ -55,6 +61,27 @@ class OrganizationAPITest:
 
         response = api.get(url_for("api.organizations", badge="bad-badge"))
         assert400(response)
+
+        #### Name ####
+        response = api.get(url_for("api.organizations", name=org.name))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(org.id)
+
+        response = api.get(url_for("api.organizations", name="Some other name"))
+        assert200(response)
+        assert len(response.json["data"]) == 0
+
+        #### SIRET ####
+        response = api.get(url_for("api.organizations", business_number_id=org.business_number_id))
+        assert200(response)
+        print(response.json["data"])
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(org.id)
+
+        response = api.get(url_for("api.organizations", business_number_id="xxx"))
+        assert200(response)
+        assert len(response.json["data"]) == 0
 
     def test_organization_role_api_get(self, api):
         """It should fetch an organization's roles list from the API"""
@@ -358,10 +385,10 @@ class MembershipAPITest:
         assert len(members) == 2
         assert members[0]["role"] == "admin"
         assert members[0]["since"] == "2024-04-14T00:00:00+00:00"
-        assert members[0]["user"]["email"] is None
+        assert members[0]["user"]["email"] == "***@example.org"
 
         assert members[1]["role"] == "editor"
-        assert members[1]["user"]["email"] is None
+        assert members[1]["user"]["email"] == "***@example.org"
 
         # Super admin of udata can see emails
         api.login(AdminFactory())
@@ -967,3 +994,146 @@ class OrganizationContactPointsAPITest:
 
         assert response.json["data"][0]["name"] == data["name"]
         assert response.json["data"][0]["email"] == data["email"]
+
+    def test_org_contact_points_suggest(self, api):
+        user = api.login()
+        member = Member(user=user, role="admin")
+        org = OrganizationFactory(members=[member])
+        data = {
+            "email": "mooneywayne@cobb-cochran.com",
+            "name": "Martin Schultz",
+            "organization": str(org.id),
+            "role": "contact",
+        }
+        response = api.post(url_for("api.contact_points"), data)
+        assert201(response)
+
+        response = api.get(url_for("api.suggest_org_contact_points", org=org, q="mooneywayne"))
+        assert200(response)
+
+        assert response.json[0]["name"] == data["name"]
+        assert response.json[0]["email"] == data["email"]
+
+        response = api.get(
+            url_for("api.suggest_org_contact_points", org=org, q="mooneeejnknywayne")
+        )
+        assert200(response)
+
+        assert len(response.json) == 0
+
+
+class OrganizationCsvExportsTest:
+    modules = []
+
+    def test_datasets_csv(self, api):
+        org = OrganizationFactory()
+        [DatasetFactory(organization=org, resources=[ResourceFactory()]) for _ in range(3)]
+
+        response = api.get(url_for("api.organization_datasets_csv", org=org))
+
+        assert200(response)
+        assert response.mimetype == "text/csv"
+        assert response.charset == "utf-8"
+
+        csvfile = StringIO(response.data.decode("utf-8"))
+        reader = csv.get_reader(csvfile)
+        header = next(reader)
+
+        assert header[0] == "id"
+        assert "title" in header
+        assert "url" in header
+        assert "description" in header
+        assert "created_at" in header
+        assert "last_modified" in header
+        assert "tags" in header
+        assert "metric.reuses" in header
+
+    def test_resources_csv(self, api):
+        org = OrganizationFactory()
+        datasets = [
+            DatasetFactory(organization=org, resources=[ResourceFactory(), ResourceFactory()])
+            for _ in range(3)
+        ]
+        not_org_dataset = DatasetFactory(resources=[ResourceFactory()])
+        hidden_dataset = DatasetFactory(private=True)
+
+        response = api.get(url_for("api.organization_datasets_resources_csv", org=org))
+
+        assert200(response)
+        assert response.mimetype == "text/csv"
+        assert response.charset == "utf-8"
+
+        csvfile = StringIO(response.data.decode("utf-8"))
+        reader = csv.get_reader(csvfile)
+        header = next(reader)
+
+        assert header[0] == "dataset.id"
+        assert "dataset.title" in header
+        assert "dataset.url" in header
+        assert "title" in header
+        assert "filetype" in header
+        assert "url" in header
+        assert "created_at" in header
+        assert "modified" in header
+        assert "downloads" in header
+
+        resource_id_index = header.index("id")
+
+        rows = list(reader)
+        ids = [(row[0], row[resource_id_index]) for row in rows]
+
+        assert len(rows) == sum(len(d.resources) for d in datasets)
+        for dataset in datasets:
+            for resource in dataset.resources:
+                assert (str(dataset.id), str(resource.id)) in ids
+
+        dataset_ids = set(row[0] for row in rows)
+        assert str(hidden_dataset.id) not in dataset_ids
+        assert str(not_org_dataset.id) not in dataset_ids
+
+    def test_dataservices_csv(self, api):
+        org = OrganizationFactory()
+        [DataserviceFactory(organization=org) for _ in range(3)]
+
+        response = api.get(url_for("api.organization_dataservices_csv", org=org))
+
+        assert200(response)
+        assert response.mimetype == "text/csv"
+        assert response.charset == "utf-8"
+
+        csvfile = StringIO(response.data.decode("utf-8"))
+        reader = csv.get_reader(csvfile)
+        header = next(reader)
+
+        assert header[0] == "id"
+        assert "title" in header
+        assert "url" in header
+        assert "description" in header
+        assert "created_at" in header
+        assert "metadata_modified_at" in header
+        assert "tags" in header
+        assert "metric.views" in header
+        assert "datasets" in header
+
+    def test_discussions_csv_content_empty(self, api):
+        organization = OrganizationFactory()
+        response = api.get(url_for("api.organization_discussions_csv", org=organization))
+        assert200(response)
+
+        assert response.data.decode("utf8") == (
+            '"id";"user";"subject";"subject_class";"subject_id";"title";"size";"participants";'
+            '"messages";"created";"closed";"closed_by";"closed_by_id";"closed_by_organization";'
+            '"closed_by_organization_id"\r\n'
+        )
+
+    def test_discussions_csv_content_filled(self, api):
+        organization = OrganizationFactory()
+        dataset = DatasetFactory(organization=organization)
+        user = UserFactory(first_name="John", last_name="Snow")
+        discussion = DiscussionFactory(subject=dataset, user=user)
+        response = api.get(url_for("api.organization_discussions_csv", org=organization))
+        assert200(response)
+
+        headers, data = response.data.decode("utf-8").strip().split("\r\n")
+        expected = '"{discussion.id}";"{discussion.user}"'
+        assert_starts_with(data, expected.format(discussion=discussion))

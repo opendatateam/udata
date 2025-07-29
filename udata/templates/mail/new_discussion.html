@@ -7,14 +7,14 @@
     type=discussion.subject.verbose_name,
     user=(
         '<a href="'|safe
-        + discussion.user.external_url_with_campaign
+        + discussion.user.url_for(_mailCampaign=True)
         + '">'|safe
         + discussion.user.fullname
         + '</a>'|safe
     ),
     subject=(
         '<a href="'|safe
-        + discussion.external_url_with_campaign
+        + discussion.url_for(_mailCampaign=True)
         + '">'|safe
         + discussion.subject|string
         + '</a>'|safe
@@ -36,7 +36,7 @@
         <td align="center">
             {{ mail_button(
                 _('See the discussion'),
-                discussion.external_url_with_campaign
+                discussion.url_for(_mailCampaign=True)
             ) }}
         </td>
     </tr>

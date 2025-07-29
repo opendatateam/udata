@@ -1,4 +1,4 @@
-from udata.frontend import csv
+from udata.core import csv
 
 from .models import Reuse
 
@@ -9,7 +9,7 @@ class ReuseCsvAdapter(csv.Adapter):
         "id",
         "title",
         "slug",
-        ("url", "external_url"),
+        ("url", lambda r: r.url_for()),
         "type",
         "description",
         ("remote_url", "url"),

@@ -27,7 +27,6 @@ from flask_restx.fields import StringMixin as StringMixin
 from flask_restx.fields import Url as Url
 from flask_restx.fields import Wildcard as Wildcard
 
-from udata.uris import endpoint_for
 from udata.utils import multi_to_dict
 
 log = logging.getLogger(__name__)
@@ -52,20 +51,12 @@ class Markdown(String):
     __schema_format__ = "markdown"
 
 
-class UrlFor(String):
-    def __init__(self, endpoint, mapper=None, **kwargs):
-        super(UrlFor, self).__init__(**kwargs)
-        self.endpoint = endpoint
-        self.fallback_endpoint = kwargs.pop("fallback_endpoint", None)
-        self.mapper = mapper or self.default_mapper
+class Permission(Boolean):
+    def __init__(self, mapper=None, **kwargs):
+        super(Permission, self).__init__(**kwargs)
 
-    def default_mapper(self, obj):
-        return {"id": str(obj.id)}
-
-    def output(self, key, obj, **kwargs):
-        return endpoint_for(
-            self.endpoint, self.fallback_endpoint, _external=True, **self.mapper(obj)
-        )
+    def format(self, field):
+        return field.can()
 
 
 class NextPageUrl(String):

@@ -194,7 +194,7 @@ class MyOrgDiscussionsAPI(API):
         return list(discussions)
 
 
-@me.route("/apikey", endpoint="my_apikey")
+@me.route("/apikey/", endpoint="my_apikey")
 class ApiKeyAPI(API):
     @api.secure
     @api.doc("generate_apikey")
@@ -409,6 +409,7 @@ class SuggestUsersAPI(API):
                 "first_name": user.first_name,
                 "last_name": user.last_name,
                 "avatar_url": user.avatar,
+                "email": user.email,
                 "slug": user.slug,
             }
             for user in users.order_by(DEFAULT_SORTING).limit(args["size"])

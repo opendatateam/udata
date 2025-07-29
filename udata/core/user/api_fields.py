@@ -10,15 +10,15 @@ user_ref_fields = api.inherit(
         "first_name": fields.String(description="The user first name", readonly=True),
         "last_name": fields.String(description="The user larst name", readonly=True),
         "slug": fields.String(description="The user permalink string", required=True),
-        "page": fields.UrlFor(
-            "users.show",
-            lambda u: {"user": u},
-            description="The user profile page URL",
+        "uri": fields.String(
+            attribute=lambda u: u.self_api_url(),
+            description="The API URI for this user",
             readonly=True,
-            fallback_endpoint="api.user",
         ),
-        "uri": fields.UrlFor(
-            "api.user", lambda o: {"user": o}, description="The user API URI", required=True
+        "page": fields.String(
+            attribute=lambda u: u.self_web_url(),
+            description="The user web page URL",
+            readonly=True,
         ),
         "avatar": fields.ImageField(original=True, description="The user avatar URL"),
         "avatar_thumbnail": fields.ImageField(
@@ -30,7 +30,7 @@ user_ref_fields = api.inherit(
     },
 )
 
-from udata.core.organization.api_fields import org_ref_fields  # noqa
+from udata.core.organization.api_fields import member_email_with_visibility_check, org_ref_fields  # noqa
 
 user_fields = api.model(
     "User",
@@ -66,15 +66,15 @@ user_fields = api.model(
             description="The user last connection date (only present for global admins and on /me)",
             readonly=True,
         ),
-        "page": fields.UrlFor(
-            "users.show",
-            lambda u: {"user": u},
-            description="The user profile page URL",
+        "uri": fields.String(
+            attribute=lambda u: u.self_api_url(),
+            description="The API URI for this user",
             readonly=True,
-            fallback_endpoint="api.user",
         ),
-        "uri": fields.UrlFor(
-            "api.user", lambda o: {"user": o}, description="The user API URI", required=True
+        "page": fields.String(
+            attribute=lambda u: u.self_web_url(),
+            description="The user web page URL",
+            readonly=True,
         ),
         "metrics": fields.Raw(
             attribute=lambda o: o.get_metrics(), description="The user metrics", readonly=True
@@ -125,6 +125,11 @@ user_suggestion_fields = api.model(
         "last_name": fields.String(description="The user last name", readonly=True),
         "avatar_url": fields.ImageField(
             size=BIGGEST_AVATAR_SIZE, description="The user avatar URL", readonly=True
+        ),
+        "email": fields.Raw(
+            attribute=lambda o: member_email_with_visibility_check(o["email"]),
+            description="The user email (only the domain for non-admin user)",
+            readonly=True,
         ),
         "slug": fields.String(description="The user permalink string", readonly=True),
     },

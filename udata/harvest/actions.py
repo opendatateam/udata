@@ -34,25 +34,14 @@ def list_backends():
     return backends.get_all(current_app).values()
 
 
-def _sources_queryset(owner=None, deleted=False):
+def list_sources(owner=None, deleted=False):
+    """List all harvest sources"""
     sources = HarvestSource.objects
     if not deleted:
         sources = sources.visible()
     if owner:
         sources = sources.owned_by(owner)
-    return sources
-
-
-def list_sources(owner=None, deleted=False):
-    """List all harvest sources"""
-    return list(_sources_queryset(owner=owner, deleted=deleted))
-
-
-def paginate_sources(owner=None, page=1, page_size=DEFAULT_PAGE_SIZE, deleted=False):
-    """Paginate harvest sources"""
-    sources = _sources_queryset(owner=owner, deleted=deleted)
-    page = max(page or 1, 1)
-    return sources.paginate(page, page_size)
+    return list(sources)
 
 
 def get_source(ident):

@@ -5,7 +5,7 @@ import pytest
 import requests
 from flask import url_for
 from rdflib import BNode, Graph, Literal, Namespace, URIRef
-from rdflib.namespace import FOAF, RDF
+from rdflib.namespace import FOAF, RDF, RDFS
 from rdflib.resource import Resource as RdfResource
 
 from udata.core.contact_point.factories import ContactPointFactory
@@ -48,7 +48,6 @@ from udata.rdf import (
     primary_topic_identifier_from_rdf,
 )
 from udata.tests.helpers import assert200, assert_redirects
-from udata.uris import endpoint_for
 from udata.utils import faker
 
 pytestmark = pytest.mark.usefixtures("app")
@@ -292,6 +291,19 @@ class DatasetToRdfTest:
         assert pot.value(DCAT.startDate).toPython() == start
         assert pot.value(DCAT.endDate) is None
 
+    def test_temporal_coverage_only_end(self):
+        end = faker.future_date(end_date="+30d")
+        temporal_coverage = db.DateRange(end=end)
+        dataset = DatasetFactory(temporal_coverage=temporal_coverage)
+
+        d = dataset_to_rdf(dataset)
+
+        pot = d.value(DCT.temporal)
+
+        assert pot.value(RDF.type).identifier == DCT.PeriodOfTime
+        assert pot.value(DCAT.startDate) is None
+        assert pot.value(DCAT.endDate).toPython() == end
+
     def test_from_external_repository(self):
         dataset = DatasetFactory(
             harvest=HarvestDatasetMetadata(
@@ -334,14 +346,7 @@ class DatasetToRdfTest:
         len(list(g.subjects(RDF.type, DCAT.Distribution))) == 4
         len(list(g.subjects(RDF.type, DCAT.DataService))) == 1
         dataservice_as_distribution = g.resource(next(g.subjects(DCAT.accessService)))
-        dataservice_uri = URIRef(
-            endpoint_for(
-                "dataservices.show_redirect",
-                "api.dataservice",
-                dataservice=dataservice.id,
-                _external=True,
-            )
-        )
+        dataservice_uri = URIRef(dataservice.url_for(_useId=True))
         assert dataservice_as_distribution.value(DCAT.accessURL).identifier == URIRef(
             dataservice.base_api_url
         )
@@ -482,6 +487,24 @@ class RdfToDatasetTest:
 
         assert isinstance(dataset, Dataset)
         assert dataset.description == "a description"
+
+    def test_future_modified_at(self):
+        node = BNode()
+        g = Graph()
+
+        modified = faker.future_datetime()
+
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.identifier, Literal(faker.uuid4())))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        g.add((node, DCT.description, Literal("<div>a description</div>")))
+        g.add((node, DCT.modified, Literal(modified)))
+
+        dataset = dataset_from_rdf(g)
+        dataset.validate()
+
+        assert isinstance(dataset, Dataset)
+        assert dataset.harvest.modified_at is None
 
     def test_theme_and_tags(self):
         node = BNode()
@@ -641,7 +664,7 @@ class RdfToDatasetTest:
 
         assert resource.title == "somefile.csv"
 
-    def test_resource_title_from_format(self):
+    def test_resource_title_from_format_value(self):
         node = BNode()
         g = Graph()
         url = "https://www.somewhere.com/no-extension/"
@@ -649,6 +672,23 @@ class RdfToDatasetTest:
         g.set((node, RDF.type, DCAT.Distribution))
         g.set((node, DCAT.downloadURL, URIRef(url)))
         g.set((node, DCT.format, Literal("CSV")))
+
+        resource = resource_from_rdf(g)
+        resource.validate()
+
+        assert resource.title == _("{format} resource").format(format="csv")
+
+    def test_resource_title_from_format_label(self):
+        node = BNode()
+        g = Graph()
+        url = "https://www.somewhere.com/no-extension/"
+
+        g.set((node, RDF.type, DCAT.Distribution))
+        g.set((node, DCAT.downloadURL, URIRef(url)))
+        format = BNode()
+        g.add((node, DCT.format, format))
+        g.add((format, RDF.type, DCT.MediaType))
+        g.add((format, RDFS.label, Literal("CSV")))
 
         resource = resource_from_rdf(g)
         resource.validate()
@@ -770,6 +810,56 @@ class RdfToDatasetTest:
         assert isinstance(dataset, Dataset)
         assert len(dataset.resources) == 1
 
+    def test_resource_format_from_mediatype_uriref(self):
+        node = BNode()
+        g = Graph()
+        url = "https://www.somewhere.com/no-extension/"
+
+        g.set((node, RDF.type, DCAT.Distribution))
+        g.set((node, DCAT.downloadURL, URIRef(url)))
+        format = URIRef("http://publications.europa.eu/resource/authority/file-type/CSV")
+        g.add((format, RDF.type, DCT.MediaType))
+        g.add((node, DCT.format, format))
+
+        resource = resource_from_rdf(g)
+        resource.validate()
+
+        assert resource.format == "csv"
+
+    def test_resource_format_from_mediatype_label(self):
+        node = BNode()
+        g = Graph()
+        url = "https://www.somewhere.com/no-extension/"
+
+        g.set((node, RDF.type, DCAT.Distribution))
+        g.set((node, DCAT.downloadURL, URIRef(url)))
+        format = BNode()
+        g.add((node, DCT.format, format))
+        g.add((format, RDF.type, DCT.MediaType))
+        g.add((format, RDFS.label, Literal("CSV")))
+
+        resource = resource_from_rdf(g)
+        resource.validate()
+
+        assert resource.format == "csv"
+
+    def test_resource_format_from_mediatype_uriref_and_label(self):
+        node = BNode()
+        g = Graph()
+        url = "https://www.somewhere.com/no-extension/"
+
+        g.set((node, RDF.type, DCAT.Distribution))
+        g.set((node, DCAT.downloadURL, URIRef(url)))
+        format = URIRef("http://publications.europa.eu/resource/authority/file-type/SHP")
+        g.add((format, RDF.type, DCT.MediaType))
+        g.add((format, RDFS.label, Literal("ESRI Shapefile")))
+        g.add((node, DCT.format, format))
+
+        resource = resource_from_rdf(g)
+        resource.validate()
+
+        assert resource.format == "esri shapefile"
+
     def test_match_license_from_license_uri(self):
         license = LicenseFactory()
         node = BNode()
@@ -874,6 +964,20 @@ class RdfToDatasetTest:
         assert isinstance(daterange, db.DateRange)
         assert daterange.start == start
         assert daterange.end is None
+
+    def test_parse_temporal_as_schema_format_only_end_date(self):
+        node = BNode()
+        g = Graph()
+        end = faker.future_date(end_date="+30d")
+
+        g.set((node, RDF.type, DCT.PeriodOfTime))
+        g.set((node, SCHEMA.endDate, Literal(end)))
+
+        daterange = temporal_from_rdf(g.resource(node))
+
+        assert isinstance(daterange, db.DateRange)
+        assert daterange.start is None
+        assert daterange.end == end
 
     def test_parse_temporal_as_iso_interval(self):
         start = faker.past_date(start_date="-30d")

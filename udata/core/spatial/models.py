@@ -1,3 +1,4 @@
+import geojson
 from flask import current_app
 from werkzeug.local import LocalProxy
 from werkzeug.utils import cached_property
@@ -5,9 +6,7 @@ from werkzeug.utils import cached_property
 from udata.app import cache
 from udata.core.metrics.models import WithMetrics
 from udata.i18n import _, get_locale, language
-from udata.mail import get_mail_campaign_dict
 from udata.mongo import db
-from udata.uris import endpoint_for
 
 from . import geoids
 from .constants import ADMIN_LEVEL_MAX, ADMIN_LEVEL_MIN, BASE_GRANULARITIES
@@ -92,16 +91,11 @@ class GeoZone(WithMetrics, db.Document):
 
     @property
     def url(self):
-        return endpoint_for("territories.territory", territory=self)
+        return None
 
     @property
     def external_url(self):
-        return endpoint_for("territories.territory", territory=self, _external=True)
-
-    @property
-    def external_url_with_campaign(self):
-        extras = get_mail_campaign_dict()
-        return endpoint_for("territories.territory", territory=self, _external=True, **extras)
+        return None
 
     def count_datasets(self):
         from udata.models import Dataset
@@ -170,9 +164,15 @@ class SpatialCoverage(db.EmbeddedDocument):
         return [zone for zone in self.zones if zone.handled_level]
 
     def clean(self):
-        if "geom" in self._get_changed_fields():
-            if self.zones:
-                raise db.ValidationError("The spatial coverage already has a Geozone")
-        if "zones" in self._get_changed_fields():
-            if self.geom:
-                raise db.ValidationError("The spatial coverage already has a Geometry")
+        if self.zones and self.geom:
+            raise db.ValidationError(
+                "The spatial coverage cannot contains a Geozone and a Geometry"
+            )
+
+        if self.geom:
+            try:
+                geojson.loads(geojson.dumps(self.geom))
+            except (ValueError, TypeError) as err:
+                raise db.ValidationError(
+                    f"Invalid GeoJSON data `{self.geom}`: {err}.", field_name="geom"
+                )

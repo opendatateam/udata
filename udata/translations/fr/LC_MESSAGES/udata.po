@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2025-03-13 12:46+0100\n"
-"PO-Revision-Date: 2025-03-13 13:18\n"
+"POT-Creation-Date: 2025-07-28 16:59+0200\n"
+"PO-Revision-Date: 2025-07-28 15:36\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -11,79 +11,85 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.12.1\n"
+"Generated-By: Babel 2.17.0\n"
 "X-Crowdin-Project: udata\n"
 "X-Crowdin-Project-ID: 291291\n"
 "X-Crowdin-Language: fr\n"
 "X-Crowdin-File: /master/udata/translations/udata.pot\n"
 "X-Crowdin-File-ID: 6\n"
 
-#: udata/settings.py:109
+#: udata/settings.py:111
 msgid "Welcome"
 msgstr "Bienvenue"
 
-#: udata/settings.py:110
+#: udata/settings.py:112
 msgid "Please confirm your email"
 msgstr "Veuillez confirmer votre adresse e-mail"
 
-#: udata/settings.py:111
+#: udata/settings.py:113
 msgid "Login instructions"
 msgstr "Instructions de connexion"
 
-#: udata/settings.py:112
+#: udata/settings.py:114
 msgid "Your password has been reset"
 msgstr "Votre mot de passe a été réinitialisé"
 
-#: udata/settings.py:113
+#: udata/settings.py:115
 msgid "Your password has been changed"
 msgstr "Votre mot de passe a été modifié"
 
-#: udata/settings.py:114
+#: udata/settings.py:116
 msgid "Password reset instructions"
 msgstr "Instructions de réinitialisation du mot de passe"
 
-#: udata/settings.py:509
+#: udata/settings.py:513
 msgid "This dataset has been archived"
 msgstr "Ce jeu de données a été archivé"
 
-#: udata/uris.py:53
+#: udata/uris.py:55
+#, python-brace-format
 msgid "Invalid URL \"{url}\": {reason}"
 msgstr "URL invalide \"{url}\" : {reason}"
 
-#: udata/tests/api/test_datasets_api.py:935 udata/tests/test_model.py:403
-#: udata/uris.py:55
+#: udata/tests/api/test_datasets_api.py:1129 udata/tests/test_model.py:403
+#: udata/uris.py:57
+#, python-brace-format
 msgid "Invalid URL \"{url}\""
 msgstr "URL invalide \"{url}\""
 
-#: udata/uris.py:104
+#: udata/uris.py:125
+#, python-brace-format
 msgid "Invalid scheme {0}, allowed schemes: {1}"
 msgstr "Schéma invalide {0}, schémas autorisés : {1}"
 
-#: udata/uris.py:107
+#: udata/uris.py:128
 msgid "Credentials in URL are not allowed"
 msgstr "Les identifiants dans l'URL ne sont pas autorisés"
 
-#: udata/uris.py:111
+#: udata/uris.py:132
+#, python-brace-format
 msgid "Invalid TLD {0}"
 msgstr "Domaine invalide {0}"
 
-#: udata/uris.py:120
+#: udata/uris.py:141
+#, python-brace-format
 msgid "{0} is a multicast IP"
 msgstr "{0} est une IP multicast"
 
-#: udata/uris.py:122
+#: udata/uris.py:143
+#, python-brace-format
 msgid "{0} is a mask IP"
 msgstr "{0} est une IP de masque"
 
-#: udata/uris.py:126
+#: udata/uris.py:147
 msgid "is a local URL"
 msgstr "est une URL locale"
 
-#: udata/tests/test_model.py:421 udata/uris.py:129
+#: udata/tests/test_model.py:421 udata/uris.py:154
 msgid "is a private URL"
 msgstr "est une URL privée"
 
-#: udata/api/errors.py:3
+#: udata/api/errors.py:4
 msgid "Validation error: your data cannot be updated for now, we have been notified of the error and we will fix it as soon as possible."
 msgstr "Erreur de validation : vos données ne peuvent être sauvegardées pour l'instant, nous avons été avertis de cette erreur et la corrigeons dans les plus brefs délais."
 
@@ -143,6 +149,7 @@ msgid "Change email"
 msgstr "Modifier l'adresse email"
 
 #: udata/auth/password_validation.py:26
+#, python-brace-format
 msgid "Password must be at least {pass_length} characters long"
 msgstr "Le mot de passe doit contenir au moins {pass_length} caractères"
 
@@ -162,21 +169,9 @@ msgstr "Le mot de passe doit contenir des majuscules"
 msgid "Password must contain symbols"
 msgstr "Le mot de passe doit contenir des caractères spéciaux"
 
-#: udata/auth/views.py:51
+#: udata/auth/views.py:49
 msgid "Confirm change of email instructions"
 msgstr "Instructions pour confirmer le changement d'email"
-
-#: udata/auth/views.py:84
-msgid "You did not confirm your change of email within {email_within}. New instructions to confirm your change of email have been sent to {new_email}."
-msgstr "Vous n'avez pas confirmé le changement d'adresse email en moins de {email_within}. De nouvelles instructions pour confirmer votre changement d'email ont été envoyées à  {new_email}."
-
-#: udata/auth/views.py:98
-msgid "Thank you. Your change of email has been confirmed."
-msgstr "Merci. Votre changement d'email a été confirmé."
-
-#: udata/auth/views.py:114
-msgid "Thank you. Confirmation instructions for changing your email have been sent to {new_email}."
-msgstr "Merci. Les instructions de confirmation pour changer votre adresse email ont été envoyées à {new_email}."
 
 #: udata/commands/init.py:32
 msgid "Do you want to create a superadmin user?"
@@ -199,7 +194,7 @@ msgid "Your udata instance is ready!"
 msgstr "Votre instance udata est prête !"
 
 #: udata/core/owned.py:64 udata/forms/fields.py:752
-#: udata/tests/api/test_dataservices_api.py:476
+#: udata/tests/api/test_dataservices_api.py:540
 msgid "You can only set yourself as owner"
 msgstr "Vous ne pouvez définir que vous-même en tant que propriétaire"
 
@@ -208,7 +203,7 @@ msgid "Unknown organization"
 msgstr "Organisation inconnue"
 
 #: udata/core/owned.py:77 udata/forms/fields.py:784
-#: udata/tests/api/test_dataservices_api.py:490
+#: udata/tests/api/test_dataservices_api.py:553
 msgid "Permission denied for this organization"
 msgstr "Permission refusée pour cette organisation"
 
@@ -219,6 +214,10 @@ msgstr "Type"
 #: udata/core/badges/forms.py:15
 msgid "Kind of badge (certified, etc)"
 msgstr "Type de badge (certifié, etc)"
+
+#: udata/core/contact_point/api.py:62
+msgid "An existing contact point already exists with these informations."
+msgstr "Un point de contact existe déjà avec ces informations."
 
 #: udata/core/contact_point/forms.py:12 udata/core/jobs/forms.py:27
 #: udata/core/organization/forms.py:46 udata/core/post/forms.py:15
@@ -240,7 +239,8 @@ msgid "The organization web contact form"
 msgstr "Formulaire de contact web de l'organisation"
 
 #: udata/core/contact_point/forms.py:20 udata/core/dataset/forms.py:116
-#: udata/core/dataset/forms.py:179 udata/core/topic/forms.py:14
+#: udata/core/dataset/forms.py:179 udata/core/discussions/forms.py:13
+#: udata/core/discussions/forms.py:29 udata/core/topic/forms.py:14
 #: udata/harvest/forms.py:87
 msgid "Publish as"
 msgstr "Publier en tant que"
@@ -261,20 +261,40 @@ msgstr "Créateur"
 msgid "Publisher"
 msgstr "Éditeur"
 
-#: udata/core/contact_point/models.py:26 udata/tests/api/test_contact_points.py:58
+#: udata/core/contact_point/models.py:26 udata/tests/api/test_contact_points.py:142
 msgid "At least an email or a contact form is required for a contact point"
 msgstr "Au moins un e-mail ou un formulaire de contact est requis pour un point de contact"
 
-#: udata/core/dataservices/models.py:120
+#: udata/core/dataservices/activities.py:21
+msgid "created a dataservice"
+msgstr "a créé une API"
+
+#: udata/core/dataservices/activities.py:27
+msgid "updated a dataservice"
+msgstr "a mis à jour une API"
+
+#: udata/core/dataservices/activities.py:34
+msgid "deleted a dataservice"
+msgstr "a supprimé une API"
+
+#: udata/core/dataservices/api.py:62
+msgid "Latest APIs"
+msgstr "Dernières APIs"
+
+#: udata/core/dataservices/models.py:129
+msgid "You can only set one condition for a given access audience role"
+msgstr "Vous ne pouvez définir qu'une seule condition pour une audience donnée"
+
+#: udata/core/dataservices/models.py:159
 msgid "dataservice"
 msgstr "API"
 
-#: udata/core/dataservices/models.py:194 udata/core/dataset/models.py:569
+#: udata/core/dataservices/models.py:241 udata/core/dataset/models.py:589
 #: udata/mongo/datetime_fields.py:60
 msgid "Creation date"
 msgstr "Date de création"
 
-#: udata/core/dataservices/models.py:200 udata/core/dataset/models.py:572
+#: udata/core/dataservices/models.py:247 udata/core/dataset/models.py:594
 #: udata/mongo/datetime_fields.py:66
 msgid "Last modification date"
 msgstr "Date de dernière modification"
@@ -290,6 +310,22 @@ msgstr "a mis à jour un jeu de données"
 #: udata/core/dataset/activities.py:35
 msgid "deleted a dataset"
 msgstr "a supprimé un jeu de données"
+
+#: udata/core/dataset/activities.py:41
+msgid "added a resource to a dataset"
+msgstr "a ajouté une ressource à un jeu de données"
+
+#: udata/core/dataset/activities.py:47
+msgid "updated a resource"
+msgstr "a mis à jour une ressource"
+
+#: udata/core/dataset/activities.py:53
+msgid "removed a resource from a dataset"
+msgstr "a supprimé une ressource d'un jeu de données"
+
+#: udata/core/dataset/api.py:321
+msgid "Latest datasets"
+msgstr "Derniers jeux de données"
 
 #: udata/core/dataset/constants.py:10
 msgid "Unknown"
@@ -440,8 +476,8 @@ msgid "Version of the schema"
 msgstr "Version du schéma"
 
 #: udata/core/dataset/forms.py:65 udata/core/dataset/forms.py:146
-#: udata/core/discussions/forms.py:13 udata/core/site/forms.py:12
-#: udata/templates/mail/discussion_closed.html:26
+#: udata/core/discussions/forms.py:14 udata/core/discussions/forms.py:25
+#: udata/core/site/forms.py:12 udata/templates/mail/discussion_closed.html:26
 #: udata/templates/mail/new_discussion.html:25
 #: udata/templates/mail/new_discussion_comment.html:26
 msgid "Title"
@@ -497,7 +533,7 @@ msgstr "La taille du fichier en octets"
 msgid "Related dataset"
 msgstr "Jeu de données concerné"
 
-#: udata/core/dataset/forms.py:138 udata/tests/api/test_datasets_api.py:847
+#: udata/core/dataset/forms.py:138 udata/tests/api/test_datasets_api.py:1041
 msgid "Wrong contact point id or contact point ownership mismatch"
 msgstr "Mauvais ID de point de contact ou incompatibilité de possession du point de contact"
 
@@ -563,52 +599,60 @@ msgstr "Privé"
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "Restreint la visibilité du jeu de données à vous ou votre organisation seulement."
 
-#: udata/core/dataset/models.py:60
+#: udata/core/dataset/models.py:63
 msgid "Pivotal data"
 msgstr "Données pivot"
 
-#: udata/core/dataset/models.py:136
+#: udata/core/dataset/models.py:139
 msgid "A schema must contains a name or an URL when a version is provided."
 msgstr "Un schéma doit contenir un nom ou une URL lorsqu'une version est fournie."
 
-#: udata/core/dataset/models.py:167 udata/tests/api/test_datasets_api.py:943
-#: udata/tests/api/test_datasets_api.py:954
+#: udata/core/dataset/models.py:171 udata/tests/api/test_datasets_api.py:1137
+#: udata/tests/api/test_datasets_api.py:1148
+#, python-brace-format
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr "Le nom du schéma \"{schema}\" n'est pas une valeur autorisée. Valeurs autorisées : {values}"
 
-#: udata/core/dataset/models.py:186 udata/tests/api/test_datasets_api.py:965
+#: udata/core/dataset/models.py:190 udata/tests/api/test_datasets_api.py:1160
+#, python-brace-format
 msgid "Version \"{version}\" is not an allowed value for the schema \"{name}\". Allowed versions: {values}"
 msgstr "La version \"{version}\" n'est pas une valeur autorisée pour le schéma \"{name}\". Versions autorisées : {values}"
 
-#: udata/core/dataset/models.py:463 udata/core/dataset/rdf.py:603
-#: udata/tests/dataset/test_dataset_rdf.py:669
-#: udata/tests/dataset/test_dataset_rdf.py:682
+#: udata/core/dataset/models.py:467 udata/core/dataset/rdf.py:567
+#: udata/tests/dataset/test_dataset_rdf.py:709
+#: udata/tests/dataset/test_dataset_rdf.py:722
 msgid "Nameless resource"
 msgstr "Ressource sans nom"
 
-#: udata/core/dataset/models.py:555
+#: udata/core/dataset/models.py:568
 msgid "Future date of update"
 msgstr "Future date de mise à jour"
 
-#: udata/core/dataset/models.py:618
+#: udata/core/dataset/models.py:600
+msgid "Last update of the dataset resources"
+msgstr "Dernière mise à jour des ressources de ce jeu de données"
+
+#: udata/core/dataset/models.py:653
 msgid "dataset"
 msgstr "jeu de données"
 
-#: udata/core/dataset/rdf.py:601 udata/tests/dataset/test_dataset_rdf.py:656
+#: udata/core/dataset/rdf.py:565 udata/tests/dataset/test_dataset_rdf.py:679
+#: udata/tests/dataset/test_dataset_rdf.py:696
+#, python-brace-format
 msgid "{format} resource"
 msgstr "Ressource {format}"
 
-#: udata/core/dataset/tasks.py:113
+#: udata/core/dataset/tasks.py:112
 msgid "You need to update some frequency-based datasets"
 msgstr "Vous devez publier certains jeux de données avec une fréquence de mise à jour"
 
-#: udata/core/discussions/forms.py:15 udata/core/discussions/forms.py:23
-#: udata/core/organization/forms.py:83 udata/core/organization/forms.py:87
-#: udata/harvest/forms.py:97
+#: udata/core/discussions/forms.py:16 udata/core/discussions/forms.py:31
+#: udata/core/discussions/forms.py:37 udata/core/organization/forms.py:83
+#: udata/core/organization/forms.py:87 udata/harvest/forms.py:97
 msgid "Comment"
 msgstr "Commentaire"
 
-#: udata/core/discussions/forms.py:17
+#: udata/core/discussions/forms.py:18
 msgid "Subject"
 msgstr "Sujet"
 
@@ -635,10 +679,12 @@ msgid "Enabled"
 msgstr "Activé"
 
 #: udata/core/jobs/models.py:18
+#, python-brace-format
 msgid "every {0.period_singular}"
 msgstr "chaque {0.period_singular}"
 
 #: udata/core/jobs/models.py:19
+#, python-brace-format
 msgid "every {0.every} {0.period}"
 msgstr "chaque {0.every} {0.period}"
 
@@ -674,17 +720,17 @@ msgid "Refused"
 msgstr "Refusée"
 
 #: udata/core/organization/forms.py:25
-#: udata/tests/api/test_organizations_api.py:131
+#: udata/tests/api/test_organizations_api.py:159
 msgid "A siret number is made of 14 digits"
 msgstr "Un numéro siret est composé de 14 chiffres"
 
 #: udata/core/organization/forms.py:36
-#: udata/tests/api/test_organizations_api.py:143
+#: udata/tests/api/test_organizations_api.py:171
 msgid "A siret number is only made of digits"
 msgstr "Un numéro siret est composé uniquement de chiffres"
 
 #: udata/core/organization/forms.py:39
-#: udata/tests/api/test_organizations_api.py:138
+#: udata/tests/api/test_organizations_api.py:165
 msgid "Invalid Siret number"
 msgstr "Numéro siret invalide"
 
@@ -716,23 +762,23 @@ msgstr "Numéro d'identification d'entreprise"
 msgid "Business identification number"
 msgstr "Numéro d'identification d'entreprise"
 
-#: udata/core/organization/models.py:35
+#: udata/core/organization/models.py:38
 msgid "Public Service"
 msgstr "Service Public"
 
-#: udata/core/organization/models.py:36
+#: udata/core/organization/models.py:39
 msgid "Certified"
 msgstr "Certifié"
 
-#: udata/core/organization/models.py:37
+#: udata/core/organization/models.py:40
 msgid "Association"
 msgstr "Association"
 
-#: udata/core/organization/models.py:38
+#: udata/core/organization/models.py:41
 msgid "Company"
 msgstr "Entreprise"
 
-#: udata/core/organization/models.py:39
+#: udata/core/organization/models.py:42
 msgid "Local authority"
 msgstr "Collectivité territoriale"
 
@@ -769,10 +815,14 @@ msgstr "Votre organisation \"%(name)s\" a été identifiée comme étant une ent
 msgid "Your organization \"%(name)s\" has been identified as an association"
 msgstr "Votre organisation \"%(name)s\" a été identifiée comme étant une association"
 
-#: udata/core/organization/tasks.py:149
+#: udata/core/organization/tasks.py:150
 #, python-format
 msgid "Your organization \"%(name)s\" has been identified as a local authority"
 msgstr "Votre organisation \"%(name)s\" a été identifiée comme étant une collectivité territoriale"
+
+#: udata/core/post/api.py:119
+msgid "Latests posts"
+msgstr "Derniers articles"
 
 #: udata/core/post/constants.py:9
 msgid "Markdown"
@@ -818,7 +868,7 @@ msgstr "type du contenu"
 msgid "Specify your body type (HTML or markdown)"
 msgstr "Spécifiez votre type de contenu (HTML ou markdown)"
 
-#: udata/core/post/models.py:54
+#: udata/core/post/models.py:55
 msgid "post"
 msgstr "article"
 
@@ -857,6 +907,10 @@ msgstr "a mis à jour une réutilisation"
 #: udata/core/reuse/activities.py:31
 msgid "deleted a reuse"
 msgstr "a supprimé une réutilisation"
+
+#: udata/core/reuse/api.py:141
+msgid "Latests reuses"
+msgstr "Dernières réutilisations"
 
 #: udata/core/reuse/constants.py:5
 msgid "Application"
@@ -942,11 +996,11 @@ msgstr "Droit et justice"
 msgid "Open data tools"
 msgstr "Outils open data"
 
-#: udata/core/reuse/models.py:36
+#: udata/core/reuse/models.py:39
 msgid "This URL is already registered"
 msgstr "Cette URL est déjà enregistrée"
 
-#: udata/core/reuse/models.py:176
+#: udata/core/reuse/models.py:185
 msgid "reuse"
 msgstr "réutilisation"
 
@@ -971,6 +1025,7 @@ msgid "POI"
 msgstr "Point d'Intérêt"
 
 #: udata/core/spatial/forms.py:48
+#, python-brace-format
 msgid "Unknown geoid(s): {identifiers}"
 msgstr "GeoID(s) inconnu(s): {identifiers}"
 
@@ -1054,33 +1109,49 @@ msgstr "Collectivités d'outre-mer françaises"
 msgid "French arrondissement"
 msgstr "Arrondissement français"
 
+#: udata/core/topic/activities.py:17
+msgid "created a topic"
+msgstr "a créé une thématique"
+
+#: udata/core/topic/activities.py:23
+msgid "updated a topic"
+msgstr "a mis à jour une thématique"
+
 #: udata/core/topic/forms.py:28
 msgid "Featured"
 msgstr "Mis en avant"
 
-#: udata/core/user/activities.py:33 udata/core/user/activities.py:65
-msgid "followed an organization"
-msgstr "a suivi une organisation"
-
-#: udata/core/user/activities.py:38
+#: udata/core/user/activities.py:35
 msgid "followed a user"
 msgstr "a suivi un utilisateur"
 
-#: udata/core/user/activities.py:45
+#: udata/core/user/activities.py:42
+msgid "discussed a dataservice"
+msgstr "a commenté une API"
+
+#: udata/core/user/activities.py:47
 msgid "discussed a dataset"
 msgstr "a commenté un jeu de données"
 
-#: udata/core/user/activities.py:50
+#: udata/core/user/activities.py:52
 msgid "discussed a reuse"
 msgstr "a commenté une réutilisation"
 
-#: udata/core/user/activities.py:55
+#: udata/core/user/activities.py:57
+msgid "followed a dataservice"
+msgstr "a suivi une API"
+
+#: udata/core/user/activities.py:62
 msgid "followed a dataset"
 msgstr "a suivi un jeu de données"
 
-#: udata/core/user/activities.py:60
+#: udata/core/user/activities.py:67
 msgid "followed a reuse"
 msgstr "a suivi une réutilisation"
+
+#: udata/core/user/activities.py:72
+msgid "followed an organization"
+msgstr "a suivi une organisation"
 
 #: udata/core/user/forms.py:22
 msgid "Avatar"
@@ -1094,7 +1165,7 @@ msgstr "À propos"
 msgid "Roles"
 msgstr "Rôles"
 
-#: udata/core/user/models.py:291 udata/tests/api/test_me_api.py:297
+#: udata/core/user/models.py:298 udata/tests/api/test_me_api.py:297
 msgid "Account deletion"
 msgstr "Suppression de compte"
 
@@ -1115,10 +1186,12 @@ msgid "Test mail"
 msgstr "Mail de test"
 
 #: udata/core/user/tasks.py:45 udata/tests/user/test_user_tasks.py:36
+#, python-brace-format
 msgid "Inactivity of your {site} account"
 msgstr "Inactivité de votre compte {site}"
 
 #: udata/core/user/tasks.py:88 udata/tests/user/test_user_tasks.py:109
+#, python-brace-format
 msgid "Deletion of your inactive {site} account"
 msgstr "Suppression de votre compte {site} inactif"
 
@@ -1131,6 +1204,7 @@ msgid "Invalid date/time input"
 msgstr "Date/heure non valide"
 
 #: udata/forms/fields.py:169
+#, python-brace-format
 msgid "The role {role} does not exist"
 msgstr "Le rôle {role} n'existe pas"
 
@@ -1138,12 +1212,13 @@ msgstr "Le rôle {role} n'existe pas"
 msgid "Not a valid UUID"
 msgstr "N'est pas un UUID"
 
-#: udata/forms/fields.py:420 udata/mongo/taglist_field.py:37
+#: udata/forms/fields.py:421 udata/mongo/taglist_field.py:38
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
 msgstr "Le mot-clé \"%(tag)s\" doit avoir entre %(min)d et %(max)d caractères."
 
 #: udata/forms/fields.py:461 udata/forms/fields.py:513
+#, python-brace-format
 msgid "{0} does not exists"
 msgstr "{0} n'existe pas"
 
@@ -1153,6 +1228,7 @@ msgid "Missing \"id\" field"
 msgstr "Champ \"id\" manquant"
 
 #: udata/forms/fields.py:494
+#, python-brace-format
 msgid "Expect a \"{0}\" class but \"{1}\" was found"
 msgstr "Attend une classe \"{0}\" mais \"{1}\" a été trouvée"
 
@@ -1162,10 +1238,12 @@ msgid "Expect both class and identifier"
 msgstr "Attends à la fois une classe et un identifiant"
 
 #: udata/forms/fields.py:545
+#, python-brace-format
 msgid "Model for {0} not found"
 msgstr "Modèle pour {0} non trouvé"
 
 #: udata/forms/fields.py:579
+#, python-brace-format
 msgid "Unknown identifiers: {identifiers}"
 msgstr "Identifiants inconnus : {identifiers}"
 
@@ -1187,7 +1265,7 @@ msgstr "Vous devez être authentifié"
 msgid "This field requires \"%(name)s\" to be set"
 msgstr "Ce champ requiert la définition de \"%(name)s\""
 
-#: udata/frontend/markdown.py:26
+#: udata/frontend/markdown.py:27
 msgid "Source"
 msgstr "Source"
 
@@ -1239,13 +1317,29 @@ msgstr "Ignoré"
 msgid "Archived"
 msgstr "Archivé"
 
-#: udata/harvest/backends/dcat.py:296
+#: udata/harvest/backends/dcat.py:338
 msgid "Remote URL prefix"
 msgstr "Préfixe d'URL distante"
 
-#: udata/harvest/backends/dcat.py:299
+#: udata/harvest/backends/dcat.py:341
 msgid "A prefix used to build the remote URL of the harvested items."
 msgstr "Un préfixe utilisé pour construire l'URL distante des éléments récoltés."
+
+#: udata/harvest/backends/ckan/harvesters.py:35
+msgid "Organization"
+msgstr "Organisation"
+
+#: udata/harvest/backends/ckan/harvesters.py:35
+msgid "A CKAN Organization name"
+msgstr "Un nom d'organisation CKAN"
+
+#: udata/harvest/backends/ckan/harvesters.py:36
+msgid "Tag"
+msgstr "Mot-clé"
+
+#: udata/harvest/backends/ckan/harvesters.py:36
+msgid "A CKAN tag name"
+msgstr "Un nom de mot-clé CKAN"
 
 #: udata/templates/admin.html:7
 msgid "Admin"
@@ -1336,18 +1430,23 @@ msgstr "Votre compte est maintenant supprimé"
 
 #: udata/templates/mail/account_inactivity.html:6
 #, python-format
-msgid "Your account  (%(user_email)s) has been inactive for %(inactivity_years)d years or more."
-msgstr "Votre compte (%(user_email)s) est inactif depuis %(inactivity_years)d ans ou plus."
+msgid "We have noticed that your account associated to (%(user_email)s) has been inactive for %(inactivity_years)d years or more on %(site)s, the open platform for public data."
+msgstr "Nous avons constaté que votre compte associé à l'adresse (%(user_email)s) est inactif depuis plus de %(inactivity_years)d ans sur %(site)s, la plateforme des données publiques."
 
-#: udata/templates/mail/account_inactivity.html:15
+#: udata/templates/mail/account_inactivity.html:17
 #, python-format
-msgid "If you want to keep your account, please log in with your account on %(site)s."
-msgstr "Si vous souhaitez conserver votre compte, veuillez vous connecter avec votre compte sur %(site)s."
+msgid "If you want to keep your account, please log in with your account on %(home)s."
+msgstr "Si vous souhaitez conserver votre compte, veuillez vous connecter avec votre compte sur %(home)s."
 
-#: udata/templates/mail/account_inactivity.html:23
+#: udata/templates/mail/account_inactivity.html:25
 #, python-format
 msgid "Without logging in, your account will be deleted within %(notify_delay)d days."
 msgstr "Sans connexion de votre part, votre compte va être supprimé d'ici %(notify_delay)d jours."
+
+#: udata/templates/mail/account_inactivity.html:33
+#, python-format
+msgid "This account is not tied to your other administration accounts and you can always re-create an account on the %(site)s platform if necessary."
+msgstr "Ce compte n'est pas relié à vos autres comptes de l'administration et vous aurez toujours la possibilité de recréer un compte sur la plateforme %(site)s."
 
 #: udata/templates/mail/badge_added_association.html:6
 #, python-format
@@ -1410,13 +1509,13 @@ msgstr "L'équipe de %(site)s"
 msgid "%(user)s closed an discussion on your %(type)s %(subject)s"
 msgstr "%(user)s a fermé une discussion sur %(type)s %(subject)s"
 
-#: udata/templates/mail/discussion_closed.html:31
+#: udata/templates/mail/discussion_closed.html:32
 #: udata/templates/mail/new_discussion.html:30
 #: udata/templates/mail/new_discussion_comment.html:31
 msgid "Message"
 msgstr "Message"
 
-#: udata/templates/mail/discussion_closed.html:40
+#: udata/templates/mail/discussion_closed.html:41
 #: udata/templates/mail/new_discussion.html:38
 #: udata/templates/mail/new_discussion_comment.html:39
 msgid "See the discussion"
@@ -1490,10 +1589,6 @@ msgstr "Une nouvelle réutilisation de votre jeu de données %(dataset)s a été
 #: udata/templates/mail/new_reuse.html:31
 msgid "See the reuse"
 msgstr "Voir la réutilisation"
-
-#: udata/templates/mail/new_reuse.html:37
-msgid "See on the dataset page"
-msgstr "Voir sur la page du jeu de données"
 
 #: udata/templates/mail/test.html:4
 msgid "This is a test mail"

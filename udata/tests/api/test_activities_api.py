@@ -7,7 +7,7 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.reuse.models import Reuse
-from udata.core.user.factories import UserFactory
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.mongo import db
 from udata.tests.helpers import assert200, assert400
 
@@ -67,3 +67,31 @@ class ActivityAPITest:
         assert200(response)
         len(response.json["data"]) == 1
         assert response.json["data"][0]["related_to"] == reuse.title
+
+    def test_activity_api_list_with_private(self, api) -> None:
+        """It should fetch an activity list from the API"""
+        activities: list[Activity] = [
+            FakeDatasetActivity.objects.create(
+                actor=UserFactory(), related_to=DatasetFactory(private=True)
+            ),
+            FakeReuseActivity.objects.create(
+                actor=UserFactory(), related_to=ReuseFactory(private=True)
+            ),
+        ]
+
+        # Anonymised user won't see activities about private documents
+        response: TestResponse = api.get(url_for("api.activity"))
+        assert200(response)
+        assert len(response.json["data"]) == 0
+
+        # Lambda user won't see activities about private documents
+        api.login()
+        response: TestResponse = api.get(url_for("api.activity"))
+        assert200(response)
+        assert len(response.json["data"]) == 0
+
+        # Sysadmin user will see activities about private documents
+        api.login(AdminFactory())
+        response: TestResponse = api.get(url_for("api.activity"))
+        assert200(response)
+        assert len(response.json["data"]) == len(activities)

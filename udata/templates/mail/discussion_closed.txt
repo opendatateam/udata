@@ -3,7 +3,7 @@
 {% block body %}
 {{ _('%(user)s closed an discussion on your %(type)s %(subject)s',
     type=discussion.subject.verbose_name,
-    user=message.posted_by.fullname,
+    user=discussion.closed_by_name,
     subject=discussion.subject|string
 ) }}.
 
@@ -12,5 +12,5 @@
 
 
 {{ _('You can see the discussion on this page:') }}
-{{ discussion.external_url_with_campaign }}
+{{ discussion.url_for(_mailCampaign=True) }}
 {% endblock %}

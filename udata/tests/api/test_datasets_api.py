@@ -1,8 +1,9 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 from uuid import uuid4
 
+import feedparser
 import pytest
 import pytz
 import requests_mock
@@ -19,6 +20,9 @@ from udata.core.dataset.api_fields import (
     resource_harvest_fields,
 )
 from udata.core.dataset.constants import (
+    DEFAULT_FREQUENCY,
+    DEFAULT_LICENSE,
+    FULL_OBJECTS_HEADER,
     LEGACY_FREQUENCIES,
     RESOURCE_TYPES,
     UPDATE_FREQUENCIES,
@@ -37,7 +41,7 @@ from udata.core.dataset.models import (
     ResourceMixin,
 )
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.spatial.factories import SpatialCoverageFactory
+from udata.core.spatial.factories import GeoLevelFactory, SpatialCoverageFactory
 from udata.core.topic.factories import TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
@@ -132,16 +136,6 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(response.json["data"][0]["id"], str(second.id))
 
-        second.title = "second updated dataset"
-        second.save()
-        response = self.get(url_for("api.datasets", sort="-last_update"))
-        self.assert200(response)
-        self.assertEqual(response.json["data"][0]["id"], str(second.id))
-
-        response = self.get(url_for("api.datasets", sort="last_update"))
-        self.assert200(response)
-        self.assertEqual(response.json["data"][0]["id"], str(first.id))
-
     def test_dataset_api_default_sorting(self):
         # Default sort should be -created
         self.login()
@@ -150,6 +144,32 @@ class DatasetAPITest(APITestCase):
         response = self.get(url_for("api.datasets"))
         self.assert200(response)
         self.assertEqual(response.json["data"][0]["id"], str(last.id))
+
+    def test_dataset_api_sorting_last_update(self):
+        # Sort on last_update that takes resources update into account
+        self.login()
+        [
+            DatasetFactory(
+                title="some created dataset",
+                resources=[ResourceFactory(last_modified_internal=f"2025-01-0{i}")],
+            )
+            for i in range(1, 10)
+        ]
+        oldest_updated_dataset_ = DatasetFactory(
+            title="last created dataset",
+            resources=[ResourceFactory(last_modified_internal="2014-01-01")],
+        )
+        most_recent_updated_dataset = DatasetFactory(
+            title="last created dataset",
+            resources=[ResourceFactory(last_modified_internal="2025-07-01")],
+        )
+        response = self.get(url_for("api.datasets", sort="-last_update"))
+        self.assert200(response)
+        self.assertEqual(response.json["data"][0]["id"], str(most_recent_updated_dataset.id))
+
+        response = self.get(url_for("api.datasets", sort="last_update"))
+        self.assert200(response)
+        self.assertEqual(response.json["data"][0]["id"], str(oldest_updated_dataset_.id))
 
     def test_dataset_api_list_with_filters(self):
         """Should filters datasets results based on query filters"""
@@ -198,6 +218,13 @@ class DatasetAPITest(APITestCase):
             ]
         )
 
+        total_datasets = Dataset.objects().count()
+
+        # no filter
+        response = self.get(url_for("api.datasets"))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), total_datasets)
+
         # filter on tag
         response = self.get(url_for("api.datasets", tag="my-tag-shared"))
         self.assert200(response)
@@ -220,10 +247,15 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(response.json["data"][0]["id"], str(format_dataset.id))
 
         # filter on featured
-        response = self.get(url_for("api.datasets", featured="true"))
+        response = self.get(url_for("api.datasets", featured=True))
         self.assert200(response)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(response.json["data"][0]["id"], str(featured_dataset.id))
+
+        response = self.get(url_for("api.datasets", featured=False))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), total_datasets - 1)
+        self.assertNotIn(str(featured_dataset.id), (data["id"] for data in response.json["data"]))
 
         # filter on license
         response = self.get(url_for("api.datasets", license="cc-by"))
@@ -304,6 +336,88 @@ class DatasetAPITest(APITestCase):
         # filter on non id for topic
         response = self.get(url_for("api.datasets", topic="xxx"))
         self.assert400(response)
+
+    def test_dataset_api_list_with_restricted_filters(self):
+        owner = UserFactory()
+        org = OrganizationFactory(members=[Member(user=owner)])
+
+        public_datasets = [DatasetFactory() for i in range(2)]
+        private_datasets = [DatasetFactory(organization=org, private=True) for i in range(3)]
+        archived_datasets = [
+            DatasetFactory(organization=org, archived=datetime.utcnow()) for i in range(4)
+        ]
+        deleted_datasets = [
+            DatasetFactory(organization=org, deleted=datetime.utcnow()) for i in range(5)
+        ]
+        total_datasets = (
+            len(public_datasets)
+            + len(private_datasets)
+            + len(archived_datasets)
+            + len(deleted_datasets)
+        )
+
+        # only 3 visible datasets for anonymous user
+        response = self.get(url_for("api.datasets"))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), len(public_datasets))
+
+        # anonmyous user can't filter on restricted params
+        response = self.get(url_for("api.datasets", private=True))
+        self.assert401(response)
+
+        response = self.get(url_for("api.datasets", archived=True))
+        self.assert401(response)
+
+        response = self.get(url_for("api.datasets", deleted=True))
+        self.assert401(response)
+
+        # owner sees all their datasets
+        self.login(owner)
+        response = self.get(url_for("api.datasets"))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), total_datasets)
+
+        # filter on private only datasets
+        response = self.get(url_for("api.datasets", private=True))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), len(private_datasets))
+        self.assertIn(str(private_datasets[0].id), (data["id"] for data in response.json["data"]))
+
+        # filter out private datasets
+        response = self.get(url_for("api.datasets", private=False))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), total_datasets - len(private_datasets))
+        self.assertNotIn(
+            str(private_datasets[0].id), (data["id"] for data in response.json["data"])
+        )
+
+        # filter on archived only datasets
+        response = self.get(url_for("api.datasets", archived=True))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), len(archived_datasets))
+        self.assertIn(str(archived_datasets[0].id), (data["id"] for data in response.json["data"]))
+
+        # filter out archived datasets
+        response = self.get(url_for("api.datasets", archived=False))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), total_datasets - len(archived_datasets))
+        self.assertNotIn(
+            str(archived_datasets[0].id), (data["id"] for data in response.json["data"])
+        )
+
+        # filter on deleted only datasets
+        response = self.get(url_for("api.datasets", deleted=True))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), len(deleted_datasets))
+        self.assertIn(str(deleted_datasets[0].id), (data["id"] for data in response.json["data"]))
+
+        # filter out deleted datasets
+        response = self.get(url_for("api.datasets", deleted=False))
+        self.assert200(response)
+        self.assertEqual(len(response.json["data"]), total_datasets - len(deleted_datasets))
+        self.assertNotIn(
+            str(deleted_datasets[0].id), (data["id"] for data in response.json["data"])
+        )
 
     def test_dataset_api_list_owned(self) -> None:
         """Should filter out private datasets if not owner"""
@@ -390,12 +504,84 @@ class DatasetAPITest(APITestCase):
         self.assert410(response)
 
     def test_dataset_api_get_deleted_but_authorized(self):
-        """It should a deleted dataset from the API if user is authorized"""
+        """It should fetch a deleted dataset from the API if user is authorized"""
         self.login()
         dataset = DatasetFactory(owner=self.user, deleted=datetime.utcnow())
 
         response = self.get(url_for("api.dataset", dataset=dataset))
         self.assert200(response)
+
+    def test_dataset_api_get_private(self):
+        """It should not fetch a private dataset from the API and raise 404"""
+        dataset = DatasetFactory(private=True)
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        self.assert404(response)
+
+    def test_dataset_api_get_private_but_authorized(self):
+        """It should fetch a private dataset from the API if user is authorized"""
+        self.login()
+        dataset = DatasetFactory(owner=self.user, private=True)
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+        self.assert200(response)
+
+    def test_dataset_api_get_with_full_objects(self):
+        """It should fetch a private dataset from the API if user is authorized"""
+        license = LicenseFactory(id="lov2", title="Licence Ouverte Version 2.0")
+        paca, bdr, arles = create_geozones_fixtures()
+        country = GeoLevelFactory(id="country", name="Pays", admin_level=10)
+        other = GeoLevelFactory(id="other", name="Autre")
+
+        dataset = DatasetFactory(
+            frequency="monthly",
+            license=license,
+            spatial=SpatialCoverageFactory(zones=[paca.id], granularity=country.id),
+        )
+
+        response = self.get(url_for("apiv2.dataset", dataset=dataset))
+        self.assert200(response)
+        assert response.json["frequency"] == "monthly"
+        assert response.json["license"] == "lov2"
+        assert response.json["spatial"]["zones"][0] == paca.id
+        assert response.json["spatial"]["granularity"] == "country"
+
+        response = self.get(
+            url_for("apiv2.dataset", dataset=dataset),
+            headers={
+                FULL_OBJECTS_HEADER: "True",
+            },
+        )
+        self.assert200(response)
+        assert response.json["frequency"]["id"] == "monthly"
+        assert response.json["frequency"]["label"] == "Mensuelle"
+        assert response.json["license"]["id"] == "lov2"
+        assert response.json["license"]["title"] == license.title
+        assert response.json["spatial"]["zones"][0]["id"] == paca.id
+        assert response.json["spatial"]["zones"][0]["name"] == paca.name
+        assert response.json["spatial"]["granularity"]["id"] == "country"
+        assert response.json["spatial"]["granularity"]["name"] == country.name
+
+        dataset_without_anything = DatasetFactory(
+            frequency=None,
+            license=None,
+            spatial=SpatialCoverageFactory(zones=[], granularity=None),
+        )
+
+        response = self.get(
+            url_for("apiv2.dataset", dataset=dataset_without_anything),
+            headers={
+                FULL_OBJECTS_HEADER: "True",
+            },
+        )
+        self.assert200(response)
+        assert response.json["frequency"]["id"] == DEFAULT_FREQUENCY
+        assert response.json["frequency"]["label"] == UPDATE_FREQUENCIES.get(DEFAULT_FREQUENCY)
+        assert response.json["license"]["id"] == DEFAULT_LICENSE["id"]
+        assert response.json["license"]["title"] == DEFAULT_LICENSE["title"]
+        assert len(response.json["spatial"]["zones"]) == 0
+        assert response.json["spatial"]["granularity"]["id"] == "other"
+        assert response.json["spatial"]["granularity"]["name"] == other.name
 
     def test_dataset_api_create(self):
         """It should create a dataset from the API"""
@@ -808,6 +994,14 @@ class DatasetAPITest(APITestCase):
         dataset = Dataset.objects.first()
         self.assertEqual(dataset.contact_points[0].name, contact_point_data["name"])
 
+        data["contact_points"] = []
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+
+        dataset = Dataset.objects.first()
+        # This is weird, we should have no contact point if sending an empty array… :RemoveAllContactPoints (in cdata)
+        self.assertEqual(dataset.contact_points[0].name, contact_point_data["name"])
+
         data["contact_points"] = None
         response = self.put(url_for("api.dataset", dataset=dataset), data)
         self.assert200(response)
@@ -1040,6 +1234,126 @@ class DatasetAPITest(APITestCase):
         assert dataset.resources[0].schema["name"] is None
         assert dataset.resources[0].schema["url"] is None
         assert dataset.resources[0].schema["version"] is None
+
+    def test_get_schemas(self):
+        resources = []
+        resources.append(ResourceFactory(schema={"name": "etalab/schema-irve-statique"}))
+        resources.append(
+            ResourceFactory(
+                schema={"name": "etalab/schema-irve-statique", "url": "http://example.org"}
+            )
+        )
+        resources.append(ResourceFactory(schema={"name": "etalab/schema-irve-dynamique"}))
+        resources.append(ResourceFactory(schema={"name": "etalab/schema-irve-dynamique"}))
+        resources.append(ResourceFactory(schema=None))
+        dataset = DatasetFactory(resources=resources)
+
+        response = self.get(url_for("apiv2.dataset_schemas", dataset=dataset))
+        assert len(response.json) == 3
+        assert response.json[0] == {
+            "name": "etalab/schema-irve-statique",
+            "url": None,
+            "version": None,
+        }
+        assert response.json[1] == {
+            "name": "etalab/schema-irve-statique",
+            "url": "http://example.org",
+            "version": None,
+        }
+        assert response.json[2] == {
+            "name": "etalab/schema-irve-dynamique",
+            "url": None,
+            "version": None,
+        }
+
+        # Empty dataset (no resources)
+        empty_dataset = Dataset.objects.create(title="test", resources=None)
+        response = self.get(url_for("apiv2.dataset_schemas", dataset=empty_dataset))
+        assert len(response.json) == 0
+
+    def test_remove_schema(self):
+        self.login(AdminFactory())
+        resource = ResourceFactory(schema={"name": "etalab/schema-irve-statique"})
+        dataset = DatasetFactory(resources=[resource])
+
+        # not sending the schema should keep the current one
+        data = {"title": "updated 1"}
+        response = self.put(url_for("api.resource", dataset=dataset, rid=str(resource.id)), data)
+        self.assert200(response)
+        dataset.reload()
+        assert dataset.resources[0].title == "updated 1"
+        assert dataset.resources[0].schema is not None
+
+        # sending a None schema should remove it
+        data = {"title": "updated 2", "schema": None}
+        response = self.put(url_for("api.resource", dataset=dataset, rid=str(resource.id)), data)
+        self.assert200(response)
+
+        dataset.reload()
+        assert dataset.resources[0].title == "updated 2"
+        assert dataset.resources[0].schema is None
+
+
+class DatasetsFeedAPItest(APITestCase):
+    def test_recent_feed(self):
+        DatasetFactory(
+            title="A", resources=[ResourceFactory()], created_at_internal=datetime.utcnow()
+        )
+        DatasetFactory(
+            title="B",
+            resources=[ResourceFactory()],
+            created_at_internal=datetime.utcnow() - timedelta(days=2),
+        )
+        DatasetFactory(
+            title="C",
+            resources=[ResourceFactory()],
+            created_at_internal=datetime.utcnow() - timedelta(days=1),
+        )
+
+        response = self.get(url_for("api.recent_datasets_atom_feed"))
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+
+        self.assertEqual(len(feed.entries), 3)
+        self.assertEqual(feed.entries[0].title, "A")
+        self.assertEqual(feed.entries[1].title, "C")
+        self.assertEqual(feed.entries[2].title, "B")
+
+    def test_recent_feed_owner(self):
+        owner = UserFactory()
+        DatasetFactory(owner=owner, resources=[ResourceFactory()])
+
+        response = self.get(url_for("api.recent_datasets_atom_feed"))
+
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+
+        self.assertEqual(len(feed.entries), 1)
+        entry = feed.entries[0]
+        self.assertEqual(len(entry.authors), 1)
+        author = entry.authors[0]
+        self.assertEqual(author.name, owner.fullname)
+        self.assertEqual(author.href, owner.url_for())
+
+    def test_recent_feed_org(self):
+        owner = UserFactory()
+        org = OrganizationFactory()
+        DatasetFactory(owner=owner, organization=org, resources=[ResourceFactory()])
+
+        response = self.get(url_for("api.recent_datasets_atom_feed"))
+
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+
+        self.assertEqual(len(feed.entries), 1)
+        entry = feed.entries[0]
+        self.assertEqual(len(entry.authors), 1)
+        author = entry.authors[0]
+        self.assertEqual(author.name, org.name)
+        self.assertEqual(author.href, org.url_for())
 
 
 class DatasetBadgeAPITest(APITestCase):

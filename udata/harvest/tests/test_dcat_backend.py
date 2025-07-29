@@ -1,6 +1,5 @@
 import logging
 import os
-import re
 import xml.etree.ElementTree as ET
 from datetime import date
 
@@ -19,7 +18,7 @@ from udata.rdf import DCAT, RDF, namespace_manager
 from udata.storage.s3 import get_from_json
 
 from .. import actions
-from ..backends.dcat import URIS_TO_REPLACE, CswIso19139DcatBackend
+from ..backends.dcat import URIS_TO_REPLACE
 from .factories import HarvestSourceFactory
 
 log = logging.getLogger(__name__)
@@ -137,6 +136,7 @@ class DcatBackendTest:
         assert datasets["1"].resources[0].description == "A JSON resource"
         assert datasets["1"].resources[0].format == "json"
         assert datasets["1"].resources[0].mime == "application/json"
+        assert datasets["1"].resources[0].type == "main"
 
     @pytest.mark.options(
         SCHEMA_CATALOG_URL="https://example.com/schemas",
@@ -333,6 +333,7 @@ class DcatBackendTest:
                 [[[159, -25.0], [159, -11], [212, -11], [212, -25.0], [159, -25.0]]],
             ],
         }
+        # dataset-3 has a spatial with NaN values…
         assert datasets["3"].spatial is None
 
     @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/schemas")
@@ -403,6 +404,7 @@ class DcatBackendTest:
         assert len(dataset.resources) == 1
 
         resource = dataset.resources[0]
+        assert resource.type == "main"
         assert resource.checksum is not None
         assert resource.checksum.type == "sha1"
         assert resource.checksum.value == "fb4106aa286a53be44ec99515f0f0421d4d7ad7d"
@@ -476,7 +478,12 @@ class DcatBackendTest:
 
         assert job.status == "done"
         assert job.errors == []
-        assert len(job.items) == 4
+        assert len(job.items) == 5
+        # 4 datasets and one Dataservice mentionned but not described
+        # because it appears in a distribution as DCAT.accessService
+        # but is missing a proper DCT.identifier
+        assert len([item for item in job.items if item.status == "done"]) == 4
+        assert len([item for item in job.items if item.status == "skipped"]) == 1
 
     def test_xml_catalog(self, rmock):
         LicenseFactory(id="lov2", title="Licence Ouverte Version 2.0")
@@ -512,7 +519,7 @@ class DcatBackendTest:
 
         dataset = Dataset.objects.get(harvest__dct_identifier="1")
         # test html abstract description support
-        assert dataset.description == "# h1 title\n\n## h2 title\n\n **and bold text**"
+        assert dataset.description == "# h1 title\n\n## h2 title\n\n**and bold text**"
         # test DCAT periodoftime
         assert dataset.temporal_coverage is not None
         assert dataset.temporal_coverage.start == date(2016, 1, 1)
@@ -524,7 +531,7 @@ class DcatBackendTest:
         # test dct:license nested in distribution
         assert dataset.license.id == "lov1"
 
-        assert len(dataset.resources) == 3
+        assert len(dataset.resources) == 4
 
         resource_1 = next(res for res in dataset.resources if res.title == "Resource 1-1")
         assert resource_1.filetype == "remote"
@@ -548,6 +555,16 @@ class DcatBackendTest:
         assert resource_3.description == ""
         assert resource_3.url == "http://data.test.org/datasets/1/resources/3"
         assert resource_3.type == "other"
+
+        # Make sure a resource with an accessService is of type api
+        resource_4 = next(res for res in dataset.resources if res.title == "Resource 1-4")
+        assert resource_4.format is None
+        assert resource_4.description == "A resource pointing towards a Geo Service"
+        assert (
+            resource_4.url
+            == "http://data.test.org/datasets/1/resources/4/services?SERVICE=WMS&REQUEST=GetCapabilities&VERSION=1.3.0"
+        )
+        assert resource_4.type == "api"
 
         # test dct:rights -> license support from dataset
         dataset = Dataset.objects.get(harvest__dct_identifier="2")
@@ -838,6 +855,7 @@ class CswDcatBackendTest:
         assert resource.title == "accidento_hdf_L93"
         assert resource.url == "https://www.geo2france.fr/geoserver/cr_hdf/ows"
         assert resource.format == "ogc:wms"
+        assert resource.type == "main"
 
     def test_user_agent_post(self, rmock):
         url = mock_csw_pagination(rmock, "geonetwork/srv/eng/csw.rdf", "geonetworkv4-page-{}.xml")
@@ -868,7 +886,7 @@ class CswIso19139DcatBackendTest:
         with open(os.path.join(CSW_DCAT_FILES_DIR, "XSLT.xml"), "r") as f:
             xslt = f.read()
         url = mock_csw_pagination(rmock, "geonetwork/srv/eng/csw.rdf", "geonetwork-iso-page-{}.xml")
-        rmock.get(CswIso19139DcatBackend.XSL_URL, text=xslt)
+        rmock.get(current_app.config.get("HARVEST_ISO19139_XSL_URL"), text=xslt)
         org = OrganizationFactory()
         source = HarvestSourceFactory(
             backend="csw-iso-19139",
@@ -949,9 +967,8 @@ class CswIso19139DcatBackendTest:
             resource.url
             == "http://atom.geo-ide.developpement-durable.gouv.fr/atomArchive/GetResource?id=fr-120066022-ldd-cab63273-b3ae-4e8a-ae1c-6192e45faa94&datasetAggregate=true"
         )
-
-        # Sadly resource format is parsed as a blank node. Format parsing should be improved.
-        assert re.match(r"n[0-9a-f]{32}", resource.format)
+        assert resource.type == "main"
+        assert resource.format == "mapinfo tab"
 
         # Computed from source config `remote_url_prefix` + `dct:identifier` from `isPrimaryTopicOf`
         if remote_url_prefix:

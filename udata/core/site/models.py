@@ -3,6 +3,7 @@ from werkzeug.local import LocalProxy
 
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
+from udata.core.metrics.helpers import get_metrics_for_model, get_stock_metrics
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
 from udata.models import WithMetrics, db
@@ -36,15 +37,23 @@ class Site(WithMetrics, db.Document):
         "max_org_reuses",
         "max_org_datasets",
         "datasets",
+        "datasets_visits_by_months",
         "discussions",
         "followers",
         "organizations",
         "public-service",
         "resources",
+        "resources_downloads_by_months",
         "reuses",
         "dataservices",
         "users",
         "harvesters",
+        "users_by_months",
+        "datasets_by_months",
+        "harvesters_by_months",
+        "reuses_by_months",
+        "organizations_by_months",
+        "discussions_by_months",
     ]
 
     def __str__(self):
@@ -72,6 +81,9 @@ class Site(WithMetrics, db.Document):
         from udata.models import Dataset
 
         self.metrics["datasets"] = Dataset.objects.visible().count()
+        self.metrics["datasets_visits_by_months"] = get_metrics_for_model(
+            "site", None, ["visit_dataset"]
+        )[0]
         self.save()
 
     def count_resources(self):
@@ -83,6 +95,9 @@ class Site(WithMetrics, db.Document):
             ),
             {},
         ).get("count", 0)
+        self.metrics["resources_downloads_by_months"] = get_metrics_for_model(
+            "site", None, ["download_resource"]
+        )[0]
         self.save()
 
     def count_reuses(self):
@@ -172,6 +187,24 @@ class Site(WithMetrics, db.Document):
         self.metrics["max_org_datasets"] = org.metrics["datasets"] if org else 0
         self.save()
 
+    def count_stock_metrics(self):
+        from udata.harvest.models import HarvestSource
+        from udata.models import Discussion, User
+
+        self.metrics["users_by_months"] = get_stock_metrics(User.objects())
+        self.metrics["datasets_by_months"] = get_stock_metrics(
+            Dataset.objects().visible(), date_label="created_at_internal"
+        )
+        self.metrics["harvesters_by_months"] = get_stock_metrics(HarvestSource.objects())
+        self.metrics["reuses_by_months"] = get_stock_metrics(Reuse.objects().visible())
+        self.metrics["organizations_by_months"] = get_stock_metrics(
+            Organization.objects().visible()
+        )
+        self.metrics["discussions_by_months"] = get_stock_metrics(
+            Discussion.objects(), date_label="created"
+        )
+        self.save()
+
 
 def get_current_site():
     if getattr(g, "site", None) is None:
@@ -180,15 +213,11 @@ def get_current_site():
         site_keywords = current_app.config.get("SITE_KEYWORDS", [])
         g.site, _ = Site.objects.get_or_create(
             id=site_id,
-            defaults={
+            updates={
                 "title": site_title,
                 "keywords": site_keywords,
             },
         )
-        if g.site.title != site_title:
-            Site.objects(id=site_id).modify(set__title=site_title)
-        if g.site.keywords != site_keywords:
-            Site.objects(id=site_id).modify(set__keywords=site_keywords)
 
     return g.site
 

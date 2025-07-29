@@ -1,5 +1,5 @@
+from udata.core import csv
 from udata.core.dataset.models import Dataset
-from udata.frontend import csv
 
 from .models import Organization
 
@@ -13,7 +13,7 @@ class OrganizationCsvAdapter(csv.Adapter):
         "name",
         "acronym",
         "slug",
-        ("url", "external_url"),
+        ("url", lambda o: o.url_for()),
         "description",
         ("logo", lambda o: o.logo(external=True)),
         ("badges", lambda o: ",".join([badge.kind for badge in o.badges])),
