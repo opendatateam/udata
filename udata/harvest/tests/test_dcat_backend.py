@@ -1,6 +1,5 @@
 import logging
 import os
-import re
 import xml.etree.ElementTree as ET
 from datetime import date
 
@@ -19,7 +18,7 @@ from udata.rdf import DCAT, RDF, namespace_manager
 from udata.storage.s3 import get_from_json
 
 from .. import actions
-from ..backends.dcat import URIS_TO_REPLACE, CswIso19139DcatBackend
+from ..backends.dcat import URIS_TO_REPLACE
 from .factories import HarvestSourceFactory
 
 log = logging.getLogger(__name__)
@@ -887,7 +886,7 @@ class CswIso19139DcatBackendTest:
         with open(os.path.join(CSW_DCAT_FILES_DIR, "XSLT.xml"), "r") as f:
             xslt = f.read()
         url = mock_csw_pagination(rmock, "geonetwork/srv/eng/csw.rdf", "geonetwork-iso-page-{}.xml")
-        rmock.get(CswIso19139DcatBackend.XSL_URL, text=xslt)
+        rmock.get(current_app.config.get("HARVEST_ISO19139_XSL_URL"), text=xslt)
         org = OrganizationFactory()
         source = HarvestSourceFactory(
             backend="csw-iso-19139",
@@ -969,9 +968,7 @@ class CswIso19139DcatBackendTest:
             == "http://atom.geo-ide.developpement-durable.gouv.fr/atomArchive/GetResource?id=fr-120066022-ldd-cab63273-b3ae-4e8a-ae1c-6192e45faa94&datasetAggregate=true"
         )
         assert resource.type == "main"
-
-        # Sadly resource format is parsed as a blank node. Format parsing should be improved.
-        assert re.match(r"n[0-9a-f]{32}", resource.format)
+        assert resource.format == "mapinfo tab"
 
         # Computed from source config `remote_url_prefix` + `dct:identifier` from `isPrimaryTopicOf`
         if remote_url_prefix:

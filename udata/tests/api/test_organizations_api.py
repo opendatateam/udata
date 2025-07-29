@@ -49,10 +49,11 @@ class OrganizationAPITest:
 
     def test_organization_api_list_with_filters(self, api):
         """It should filter the organization list"""
-        _org = OrganizationFactory()
+        org = OrganizationFactory(business_number_id="13002526500013")
         org_public_service = OrganizationFactory()
         org_public_service.add_badge(org_constants.PUBLIC_SERVICE)
 
+        #### Badges ####
         response = api.get(url_for("api.organizations", badge=org_constants.PUBLIC_SERVICE))
         assert200(response)
         assert len(response.json["data"]) == 1
@@ -60,6 +61,27 @@ class OrganizationAPITest:
 
         response = api.get(url_for("api.organizations", badge="bad-badge"))
         assert400(response)
+
+        #### Name ####
+        response = api.get(url_for("api.organizations", name=org.name))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(org.id)
+
+        response = api.get(url_for("api.organizations", name="Some other name"))
+        assert200(response)
+        assert len(response.json["data"]) == 0
+
+        #### SIRET ####
+        response = api.get(url_for("api.organizations", business_number_id=org.business_number_id))
+        assert200(response)
+        print(response.json["data"])
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(org.id)
+
+        response = api.get(url_for("api.organizations", business_number_id="xxx"))
+        assert200(response)
+        assert len(response.json["data"]) == 0
 
     def test_organization_role_api_get(self, api):
         """It should fetch an organization's roles list from the API"""
@@ -972,6 +994,32 @@ class OrganizationContactPointsAPITest:
 
         assert response.json["data"][0]["name"] == data["name"]
         assert response.json["data"][0]["email"] == data["email"]
+
+    def test_org_contact_points_suggest(self, api):
+        user = api.login()
+        member = Member(user=user, role="admin")
+        org = OrganizationFactory(members=[member])
+        data = {
+            "email": "mooneywayne@cobb-cochran.com",
+            "name": "Martin Schultz",
+            "organization": str(org.id),
+            "role": "contact",
+        }
+        response = api.post(url_for("api.contact_points"), data)
+        assert201(response)
+
+        response = api.get(url_for("api.suggest_org_contact_points", org=org, q="mooneywayne"))
+        assert200(response)
+
+        assert response.json[0]["name"] == data["name"]
+        assert response.json[0]["email"] == data["email"]
+
+        response = api.get(
+            url_for("api.suggest_org_contact_points", org=org, q="mooneeejnknywayne")
+        )
+        assert200(response)
+
+        assert len(response.json) == 0
 
 
 class OrganizationCsvExportsTest:

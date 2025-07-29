@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 from uuid import uuid4
 
@@ -136,16 +136,6 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(response.json["data"][0]["id"], str(second.id))
 
-        second.title = "second updated dataset"
-        second.save()
-        response = self.get(url_for("api.datasets", sort="-last_update"))
-        self.assert200(response)
-        self.assertEqual(response.json["data"][0]["id"], str(second.id))
-
-        response = self.get(url_for("api.datasets", sort="last_update"))
-        self.assert200(response)
-        self.assertEqual(response.json["data"][0]["id"], str(first.id))
-
     def test_dataset_api_default_sorting(self):
         # Default sort should be -created
         self.login()
@@ -154,6 +144,32 @@ class DatasetAPITest(APITestCase):
         response = self.get(url_for("api.datasets"))
         self.assert200(response)
         self.assertEqual(response.json["data"][0]["id"], str(last.id))
+
+    def test_dataset_api_sorting_last_update(self):
+        # Sort on last_update that takes resources update into account
+        self.login()
+        [
+            DatasetFactory(
+                title="some created dataset",
+                resources=[ResourceFactory(last_modified_internal=f"2025-01-0{i}")],
+            )
+            for i in range(1, 10)
+        ]
+        oldest_updated_dataset_ = DatasetFactory(
+            title="last created dataset",
+            resources=[ResourceFactory(last_modified_internal="2014-01-01")],
+        )
+        most_recent_updated_dataset = DatasetFactory(
+            title="last created dataset",
+            resources=[ResourceFactory(last_modified_internal="2025-07-01")],
+        )
+        response = self.get(url_for("api.datasets", sort="-last_update"))
+        self.assert200(response)
+        self.assertEqual(response.json["data"][0]["id"], str(most_recent_updated_dataset.id))
+
+        response = self.get(url_for("api.datasets", sort="last_update"))
+        self.assert200(response)
+        self.assertEqual(response.json["data"][0]["id"], str(oldest_updated_dataset_.id))
 
     def test_dataset_api_list_with_filters(self):
         """Should filters datasets results based on query filters"""
@@ -1250,22 +1266,59 @@ class DatasetAPITest(APITestCase):
             "version": None,
         }
 
+        # Empty dataset (no resources)
+        empty_dataset = Dataset.objects.create(title="test", resources=None)
+        response = self.get(url_for("apiv2.dataset_schemas", dataset=empty_dataset))
+        assert len(response.json) == 0
+
+    def test_remove_schema(self):
+        self.login(AdminFactory())
+        resource = ResourceFactory(schema={"name": "etalab/schema-irve-statique"})
+        dataset = DatasetFactory(resources=[resource])
+
+        # not sending the schema should keep the current one
+        data = {"title": "updated 1"}
+        response = self.put(url_for("api.resource", dataset=dataset, rid=str(resource.id)), data)
+        self.assert200(response)
+        dataset.reload()
+        assert dataset.resources[0].title == "updated 1"
+        assert dataset.resources[0].schema is not None
+
+        # sending a None schema should remove it
+        data = {"title": "updated 2", "schema": None}
+        response = self.put(url_for("api.resource", dataset=dataset, rid=str(resource.id)), data)
+        self.assert200(response)
+
+        dataset.reload()
+        assert dataset.resources[0].title == "updated 2"
+        assert dataset.resources[0].schema is None
+
 
 class DatasetsFeedAPItest(APITestCase):
     def test_recent_feed(self):
-        datasets = [DatasetFactory(resources=[ResourceFactory()]) for i in range(3)]
+        DatasetFactory(
+            title="A", resources=[ResourceFactory()], created_at_internal=datetime.utcnow()
+        )
+        DatasetFactory(
+            title="B",
+            resources=[ResourceFactory()],
+            created_at_internal=datetime.utcnow() - timedelta(days=2),
+        )
+        DatasetFactory(
+            title="C",
+            resources=[ResourceFactory()],
+            created_at_internal=datetime.utcnow() - timedelta(days=1),
+        )
 
         response = self.get(url_for("api.recent_datasets_atom_feed"))
-
         self.assert200(response)
 
         feed = feedparser.parse(response.data)
 
-        self.assertEqual(len(feed.entries), len(datasets))
-        for i in range(1, len(feed.entries)):
-            published_date = feed.entries[i].published_parsed
-            prev_published_date = feed.entries[i - 1].published_parsed
-            self.assertGreaterEqual(prev_published_date, published_date)
+        self.assertEqual(len(feed.entries), 3)
+        self.assertEqual(feed.entries[0].title, "A")
+        self.assertEqual(feed.entries[1].title, "C")
+        self.assertEqual(feed.entries[2].title, "B")
 
     def test_recent_feed_owner(self):
         owner = UserFactory()
@@ -1282,7 +1335,7 @@ class DatasetsFeedAPItest(APITestCase):
         self.assertEqual(len(entry.authors), 1)
         author = entry.authors[0]
         self.assertEqual(author.name, owner.fullname)
-        self.assertEqual(author.href, owner.external_url)
+        self.assertEqual(author.href, owner.url_for())
 
     def test_recent_feed_org(self):
         owner = UserFactory()
@@ -1300,7 +1353,7 @@ class DatasetsFeedAPItest(APITestCase):
         self.assertEqual(len(entry.authors), 1)
         author = entry.authors[0]
         self.assertEqual(author.name, org.name)
-        self.assertEqual(author.href, org.external_url)
+        self.assertEqual(author.href, org.url_for())
 
 
 class DatasetBadgeAPITest(APITestCase):

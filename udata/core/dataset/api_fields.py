@@ -204,18 +204,15 @@ dataset_ref_fields = api.inherit(
     {
         "title": fields.String(description="The dataset title", readonly=True),
         "acronym": fields.String(description="An optional dataset acronym", readonly=True),
-        "uri": fields.UrlFor(
-            "api.dataset",
-            lambda d: {"dataset": d},
+        "uri": fields.String(
+            attribute=lambda d: d.self_api_url(),
             description="The API URI for this dataset",
             readonly=True,
         ),
-        "page": fields.UrlFor(
-            "datasets.show",
-            lambda d: {"dataset": d},
-            description="The web page URL for this dataset",
+        "page": fields.String(
+            attribute=lambda d: d.self_web_url(),
+            description="The dataset web page URL",
             readonly=True,
-            fallback_endpoint="api.dataset",
         ),
     },
 )
@@ -393,18 +390,15 @@ dataset_fields = api.model(
         "license": fields.String(
             attribute="license.id", default=DEFAULT_LICENSE["id"], description="The dataset license"
         ),
-        "uri": fields.UrlFor(
-            "api.dataset",
-            lambda o: {"dataset": o},
-            description="The dataset API URI",
-            required=True,
+        "uri": fields.String(
+            attribute=lambda d: d.self_api_url(),
+            description="The API URI for this dataset",
+            readonly=True,
         ),
-        "page": fields.UrlFor(
-            "datasets.show",
-            lambda o: {"dataset": o},
-            description="The dataset page URL",
-            required=True,
-            fallback_endpoint="api.dataset",
+        "page": fields.String(
+            attribute=lambda d: d.self_web_url(),
+            description="The dataset web page URL",
+            readonly=True,
         ),
         "quality": fields.Raw(description="The dataset quality", readonly=True),
         "last_update": fields.ISODateTime(
@@ -441,12 +435,7 @@ dataset_suggestion_fields = api.model(
         "image_url": fields.ImageField(
             size=BIGGEST_LOGO_SIZE, description="The dataset (organization) logo URL", readonly=True
         ),
-        "page": fields.UrlFor(
-            "datasets.show_redirect",
-            lambda d: {"dataset": d["slug"]},
-            description="The web page URL for this dataset",
-            fallback_endpoint="api.dataset",
-        ),
+        "page": fields.String(description="The dataset web page URL", readonly=True),
     },
 )
 

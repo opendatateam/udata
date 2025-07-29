@@ -2,6 +2,58 @@
 
 ## Current (in progress)
 
+- Migrate udata-metrics [#3386](https://github.com/opendatateam/udata/pull/3386/)
+- Migrate udata-ckan [#3385](https://github.com/opendatateam/udata/pull/3385)
+- Deactivate sitemap extension [#3389](https://github.com/opendatateam/udata/pull/3389)
+- Deactivate cache to check for existing slugs [#3390](https://github.com/opendatateam/udata/pull/3390)
+- Add missing trailing slashes on some endpoints [#3392](https://github.com/opendatateam/udata/pull/3392/)
+
+## 10.8.1 (2025-07-25)
+
+- Fix user deletion performances issues [#3388](https://github.com/opendatateam/udata/pull/3388)
+- Add search to discussions [#3384](https://github.com/opendatateam/udata/pull/3384)
+- Separate metrics for opened discussions [#3370](https://github.com/opendatateam/udata/pull/3370)
+
+## 10.8.0 (2025-07-22)
+
+- Remove placeholder Jinja filter [#3372](https://github.com/opendatateam/udata/pull/3372/)
+- Add `self_web_url` for discussion [#3375](https://github.com/opendatateam/udata/pull/3375)
+- Fix dataset schemas endpoint when no resource [#3373](https://github.com/opendatateam/udata/pull/3373)
+- Add last_update as a dataset model property [#3377](https://github.com/opendatateam/udata/pull/3377)
+- Add `label` (translation of role) to API response for org members [#3383](https://github.com/opendatateam/udata/pull/3383)
+- Fix crashing on datasets with no slugs [#3368](https://github.com/opendatateam/udata/pull/3368/)
+- Fix duplicate contact point creation [#3379](https://github.com/opendatateam/udata/pull/3379) [#3381](https://github.com/opendatateam/udata/pull/3381)
+- Atomic `get_or_create` [#3366](https://github.com/opendatateam/udata/pull/3366)
+- Add contact points suggest [#3376](https://github.com/opendatateam/udata/pull/3376)
+
+## 10.7.0 (2025-07-17)
+
+- Add name and siret filters for orgs [#3362](https://github.com/opendatateam/udata/pull/3362)
+- Refactor how to get URLs to the cdata front-end, need to set the `CDATA_BASE_URL` env variable (removal of `endpoint_for()`, `fields.UrlFor()`, `display_url`, `external_url` and `external_url_with_campaign`) [#3345](https://github.com/opendatateam/udata/pull/3345) [#3371](https://github.com/opendatateam/udata/pull/3371)
+- Add back preview_url from tabular API (remove the PreviewPlugin system) [#3364](https://github.com/opendatateam/udata/pull/3364)
+- Do not crash on invalid schemas API JSON [#3363](https://github.com/opendatateam/udata/pull/3363/)
+- Fix flaky test on timed recent Atom feeds [#3365](https://github.com/opendatateam/udata/pull/3365)
+- Allow to remove checksum from resource [#3369](https://github.com/opendatateam/udata/pull/3369)
+
+## 10.6.0 (2025-07-08)
+
+- Add config entry for ISO-DCAT XSLT URL [#3360](https://github.com/opendatateam/udata/pull/3360)
+- Fix failing to return dataservice in harvest preview because of no ID for URL [#3357](https://github.com/opendatateam/udata/pull/3357/)
+- Fix invalid resource format from harvested RDF records [#3354](https://github.com/opendatateam/udata/pull/3354)
+- Expose `dataset_id` for CommunityResource in /dataset/resource/id [#3258](https://github.com/opendatateam/udata/pull/3258)
+- Add a CI job to create a release on Sentry [#3266](https://github.com/opendatateam/udata/pull/3266)
+- Sort extensions in `/api/1/datasets/extensions/` response alphabetically [#3358](https://github.com/opendatateam/udata/pull/3358)
+- Migrate recommendations tasks, [udata-recommendations](https://github.com/opendatateam/udata-recommendations/) is no longer required [#3355](https://github.com/opendatateam/udata/pull/3355)
+- Migrate udata-transport tasks, [udata-transport](https://github.com/opendatateam/udata-transport/) is no longer required [#3355](https://github.com/opendatateam/udata/pull/3355)
+
+## 10.5.0 (2025-07-02)
+
+- Allow temporal intervals with no start date [#3353](https://github.com/opendatateam/udata/pull/3353)
+- Fix removing schema by sending null [#3350](https://github.com/opendatateam/udata/pull/3350)
+- Use datagouv patched ISO-DCAT XSLT URL [#3351](https://github.com/opendatateam/udata/pull/3351)
+
+## 10.4.3 (2025-06-23)
+
 - Add access audience to dataservices [#3334](https://github.com/opendatateam/udata/pull/3334)
 - Lock the updates of the resources list [#3338](https://github.com/opendatateam/udata/pull/3338)
 - Expose permissions to cdata [#3336](https://github.com/opendatateam/udata/pull/3336)

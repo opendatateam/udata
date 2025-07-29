@@ -74,7 +74,12 @@ discussion_fields = api.model(
             description="The organization who closed the discussion",
         ),
         "discussion": fields.Nested(message_fields),
-        "url": fields.UrlFor("api.discussion", description="The discussion API URI"),
+        "url": fields.String(
+            attribute=lambda d: d.self_api_url(), description="The discussion API URI"
+        ),
+        "self_web_url": fields.String(
+            attribute=lambda d: d.self_web_url(), description="The discussion web URL"
+        ),
         "extras": fields.Raw(description="Extra attributes as key-value pairs"),
         "spam": fields.Nested(spam_fields),
         "permissions": fields.Nested(discussion_permissions_fields),
@@ -125,6 +130,7 @@ discussion_page_fields = api.model("DiscussionPage", fields.pager(discussion_fie
 parser = api.parser()
 sorting_keys: list[str] = ["created", "title", "closed", "discussion.posted_on"]
 sorting_choices: list[str] = sorting_keys + ["-" + k for k in sorting_keys]
+parser.add_argument("q", type=str, location="args", help="The search query")
 parser.add_argument(
     "sort",
     type=str,
@@ -241,7 +247,7 @@ class DiscussionAPI(API):
         return "", 204
 
 
-@ns.route("/<id>/comments/<int:cidx>/spam", endpoint="discussion_comment_spam")
+@ns.route("/<id>/comments/<int:cidx>/spam/", endpoint="discussion_comment_spam")
 @ns.doc(delete={"id": "unspam"})
 class DiscussionCommentSpamAPI(SpamAPIMixin):
     def get_model(self, id, cidx):
@@ -253,7 +259,7 @@ class DiscussionCommentSpamAPI(SpamAPIMixin):
         return discussion, discussion.discussion[cidx]
 
 
-@ns.route("/<id>/comments/<int:cidx>", endpoint="discussion_comment")
+@ns.route("/<id>/comments/<int:cidx>/", endpoint="discussion_comment")
 class DiscussionCommentAPI(API):
     """
     Base class for a comment in a discussion thread.
@@ -326,6 +332,11 @@ class DiscussionsAPI(API):
             discussions = discussions(closed=None)
         elif args["closed"] is True:
             discussions = discussions(closed__ne=None)
+
+        if args["q"]:
+            phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
+            discussions = discussions.search_text(phrase_query).order_by("$text_score")
+
         discussions = discussions.order_by(args["sort"])
         return discussions.paginate(args["page"], args["page_size"])
 
