@@ -7,6 +7,8 @@
 - Deactivate sitemap extension [#3389](https://github.com/opendatateam/udata/pull/3389)
 - Deactivate cache to check for existing slugs [#3390](https://github.com/opendatateam/udata/pull/3390)
 - Add missing trailing slashes on some endpoints [#3392](https://github.com/opendatateam/udata/pull/3392/)
+- Count dataservices and reuses for datasets based on signal [#3335](https://github.com/opendatateam/udata/pull/3335)
+  :warning: the job `update-datasets-reuses-metrics` disappears, you should unschedule it
 
 ## 10.8.1 (2025-07-25)
 
