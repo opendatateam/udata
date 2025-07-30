@@ -308,8 +308,8 @@ class CswDcatBackend(DcatBackend):
 
     CSW_OUTPUT_SCHEMA = "http://www.w3.org/ns/dcat#"
 
-    @override
-    def inner_init(self) -> None:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.xml_parser = ET.XMLParser(resolve_entities=False)
 
     def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
@@ -403,9 +403,8 @@ class CswIso19139DcatBackend(CswDcatBackend):
 
     CSW_OUTPUT_SCHEMA = "http://www.isotc211.org/2005/gmd"
 
-    @override
-    def inner_init(self) -> None:
-        super().inner_init()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         xslt_url = current_app.config["HARVEST_ISO19139_XSLT_URL"]
         xslt = ET.fromstring(self.get(xslt_url).content, parser=self.xml_parser)
         self.transform = ET.XSLT(xslt)
