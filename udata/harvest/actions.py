@@ -29,6 +29,11 @@ log = logging.getLogger(__name__)
 DEFAULT_PAGE_SIZE = 10
 
 
+def get_source(ident):
+    """Get an harvest source given its ID or its slug"""
+    return HarvestSource.get(ident)
+
+
 def list_backends():
     """List all available backends"""
     return backends.get_all(current_app).values()
