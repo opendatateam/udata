@@ -11,3 +11,4 @@ pytest-mock
 pytest-sugar
 requests-mock
 deepdiff
+xmldiff

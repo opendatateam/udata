@@ -416,6 +416,7 @@ lxml==5.3.1
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
+    #   xmldiff
 markdown-it-py==3.0.0
     # via rich
 markupsafe==2.1.2
@@ -777,6 +778,10 @@ wtforms-json==0.3.5
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
+xmldiff==2.7.0
+    # via
+    #   -c requirements/test.pip
+    #   -r requirements/test.in
 zipp==3.21.0
     # via importlib-metadata
 

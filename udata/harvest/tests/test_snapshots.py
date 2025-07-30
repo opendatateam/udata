@@ -93,7 +93,23 @@ class SnapshotsTest:
                     r"root\['job'\]\['source'\]",
                 ],
             )
+
+            from xmldiff import formatting, main
+
+            for index, graph in enumerate(data["job"]["data"]["graphs"]):
+                diff = main.diff_texts(
+                    graph.encode("utf-8"),
+                    new_data["job"]["data"]["graphs"][index].encode("utf-8"),
+                    formatter=formatting.DiffFormatter(),
+                )
+                print(f"\n\n{graph}\n\n")
+                print(f"\n\n{new_data['job']['data']['graphs'][index]}\n\n")
+
+                print(diff)
+                assert not diff
+
             print(diff.pretty())
+            print(diff)
             assert not diff
 
 
