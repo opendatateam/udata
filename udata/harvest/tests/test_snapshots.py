@@ -78,7 +78,7 @@ class SnapshotsTest:
                         additional_matcher=make_matcher(history),
                     )
 
-            actions.run(harvester.slug)
+            actions.run(harvester)
 
         assert HarvestJob.objects.count() == 1
 
