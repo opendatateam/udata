@@ -91,60 +91,59 @@ class SnapshotsTest:
 
         if refresh:
             json.dump(new_data, open(data_path, "w"), indent=2, default=str)
-        else:
-            if "graphs" in data["job"]["data"]:
-                for index, graph in enumerate(data["job"]["data"]["graphs"]):
-                    diff = main.diff_texts(
-                        graph.encode("utf-8"),
-                        new_data["job"]["data"]["graphs"][index].encode("utf-8"),
-                        formatter=formatting.DiffFormatter(),
-                    )
+            return
 
-                    rdf_check = compare_rdf_graphs_canonically(
-                        graph, new_data["job"]["data"]["graphs"][index]
-                    )
+        if "graphs" in data["job"]["data"]:
+            for index, graph in enumerate(data["job"]["data"]["graphs"]):
+                diff = main.diff_texts(
+                    graph.encode("utf-8"),
+                    new_data["job"]["data"]["graphs"][index].encode("utf-8"),
+                    formatter=formatting.DiffFormatter(),
+                )
 
-                    if not rdf_check:
-                        print(graph, file=open("/tmp/1.xml", "w"))
-                        print(
-                            new_data["job"]["data"]["graphs"][index], file=open("/tmp/2.xml", "w")
-                        )
-                        print(f"\n\n{graph}\n\n")
-                        print(f"\n\n{new_data['job']['data']['graphs'][index]}\n\n")
+                rdf_check = compare_rdf_graphs_canonically(
+                    graph, new_data["job"]["data"]["graphs"][index]
+                )
 
-                    assert rdf_check, "RDF graphs are differents"
+                if not rdf_check:
+                    print(graph, file=open("/tmp/1.xml", "w"))
+                    print(new_data["job"]["data"]["graphs"][index], file=open("/tmp/2.xml", "w"))
+                    print(f"\n\n{graph}\n\n")
+                    print(f"\n\n{new_data['job']['data']['graphs'][index]}\n\n")
 
-            diff = DeepDiff(
-                data,
-                # Compare datetime as strings by serialize/deserialize
-                json.loads(json.dumps(new_data, indent=2, default=str)),
-                verbose_level=2,
-                ignore_order=True,
-                exclude_regex_paths=[
-                    r"root\['requests_history'\]",
-                    r"_id",
-                    r"id",
-                    r"created_at_internal",
-                    r"last_modified_internal",
-                    r"last_update",
-                    r"root\['datasets'\]\[\d+]\['harvest'\]\['last_update'\]",
-                    r"root\['dataservices'\]\[\d+]\['harvest'\]\['last_update'\]",
-                    r"root\['dataservices'\]\[\d+]\['created_at'\]",
-                    r"root\['dataservices'\]\[\d+]\['metadata_modified_at'\]",
-                    r"root\['dataservices'\]\[\d+]\['datasets'\]",
-                    r"\['created'\]",
-                    r"\['started'\]",
-                    r"\['ended'\]",
-                    r"root\['job'\]\['data'\]\['graphs'\]",
-                    r"root\['job'\]\['items'\]\[\d+\]\['dataset'\]",
-                    r"root\['job'\]\['items'\]\[\d+\]\['dataservice'\]",
-                    r"root\['job'\]\['source'\]",
-                    r"root\['job'\]\['items'\]\[\d+\]\['errors'\]\[\d+\]\['created_at'\]",
-                ],
-            )
+                assert rdf_check, "RDF graphs are differents"
 
-            print(diff.pretty())
-            assert not diff, "Global diffs are different"
+        diff = DeepDiff(
+            data,
+            # Compare datetime as strings by serialize/deserialize
+            json.loads(json.dumps(new_data, indent=2, default=str)),
+            verbose_level=2,
+            ignore_order=True,
+            exclude_regex_paths=[
+                r"root\['requests_history'\]",
+                r"_id",
+                r"id",
+                r"created_at_internal",
+                r"last_modified_internal",
+                r"last_update",
+                r"root\['datasets'\]\[\d+]\['harvest'\]\['last_update'\]",
+                r"root\['dataservices'\]\[\d+]\['harvest'\]\['last_update'\]",
+                r"root\['dataservices'\]\[\d+]\['created_at'\]",
+                r"root\['dataservices'\]\[\d+]\['metadata_modified_at'\]",
+                r"root\['dataservices'\]\[\d+]\['datasets'\]",
+                r"\['created'\]",
+                r"\['started'\]",
+                r"\['ended'\]",
+                r"root\['job'\]\['data'\]\['graphs'\]",
+                r"root\['job'\]\['items'\]\[\d+\]\['dataset'\]",
+                r"root\['job'\]\['items'\]\[\d+\]\['dataservice'\]",
+                r"root\['job'\]\['source'\]",
+                r"root\['job'\]\['items'\]\[\d+\]\['errors'\]\[\d+\]\['created_at'\]",
+            ],
+        )
+
+        print(diff.pretty())
+        assert not diff, "Global diffs are different"
 
 
 def rdf_to_canonical_jsonld(xml_string: str) -> str:
