@@ -87,6 +87,10 @@ cachelib==0.13.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   flask-caching
+cachetools==6.1.0
+    # via
+    #   -c requirements/test.pip
+    #   pyld
 celery==5.4.0
     # via
     #   -c requirements/install.pip
@@ -299,6 +303,10 @@ flask-wtf==1.2.2
     #   -r requirements/install.in
     #   flask-mongoengine
     #   flask-security-too
+frozendict==2.4.6
+    # via
+    #   -c requirements/test.pip
+    #   pyld
 geojson==3.2.0
     # via
     #   -c requirements/install.pip
@@ -416,6 +424,7 @@ lxml==5.3.1
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
+    #   pyld
     #   xmldiff
 markdown-it-py==3.0.0
     # via rich
@@ -527,6 +536,10 @@ pygments==2.19.1
     #   ipython-pygments-lexers
     #   readme-renderer
     #   rich
+pyld==2.0.4
+    # via
+    #   -c requirements/test.pip
+    #   -r requirements/test.in
 pymongo==4.11.3
     # via
     #   -c requirements/install.pip
