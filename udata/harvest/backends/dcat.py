@@ -69,7 +69,7 @@ class DcatBackend(BaseBackend):
     display_name = "DCAT"
 
     def __init__(self, *args, **kwargs):
-        super(DcatBackend, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.organizations_to_update = set()
 
     def inner_harvest(self):
