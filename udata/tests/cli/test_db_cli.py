@@ -1,6 +1,9 @@
 from datetime import datetime
 
 import pytest
+from bson import ObjectId
+
+from udata.models import Reuse
 
 
 @pytest.fixture
@@ -57,3 +60,12 @@ def test_unrecord_with_too_many_parameters(cli, migrations):
     result = cli("db unrecord udata test.py too many", check=False)
     assert result.exit_code != 0
     assert migrations.count_documents({}) == 1
+
+
+def test_check_references_report_listfield_missing(cli, clean_db):
+    # The cli command `udata db check-integrity` should catch reuse object missing datasets field
+    Reuse._get_collection().insert_one({"_id": ObjectId()})
+
+    result = cli("db check-integrity --models Reuse", check=False)
+    assert "Reuse.datasets(Dataset) — list…: 1" in result.output
+    assert result.exit_code != 0
