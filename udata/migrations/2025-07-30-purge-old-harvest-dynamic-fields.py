@@ -1,5 +1,5 @@
 """
-This migration updates Topic.featured to False when it is None.
+This migration removes legacy harvest dynamic fields
 """
 
 import logging
