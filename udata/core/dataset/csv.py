@@ -26,6 +26,7 @@ class DatasetCsvAdapter(csv.Adapter):
         ("owner_id", "owner.id"),
         # 'contact_point', #  ?
         "description",
+        "description_short",
         "frequency",
         "license",
         "temporal_coverage.start",
@@ -77,6 +78,7 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
         "url",
         "title",
         "description",
+        "description_short",
         "filetype",
         "type",
         "format",

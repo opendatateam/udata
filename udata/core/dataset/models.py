@@ -344,6 +344,7 @@ class ResourceMixin(object):
     id = db.AutoUUIDField(primary_key=True)
     title = db.StringField(verbose_name="Title", required=True)
     description = db.StringField()
+    description_short = db.StringField(max_length=200)
     filetype = db.StringField(choices=list(RESOURCE_FILETYPES), default="file", required=True)
     type = db.StringField(choices=list(RESOURCE_TYPES), default="main", required=True)
     url = db.URLField(required=True)

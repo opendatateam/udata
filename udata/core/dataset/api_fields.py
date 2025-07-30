@@ -124,6 +124,7 @@ resource_fields = api.model(
         "id": fields.String(description="The resource unique ID", readonly=True),
         "title": fields.String(description="The resource title", required=True),
         "description": fields.Markdown(description="The resource markdown description"),
+        "description_short": fields.String(description="The resource short description"),
         "filetype": fields.String(
             description=("Whether the resource is an uploaded file, a remote file or an API"),
             required=True,
