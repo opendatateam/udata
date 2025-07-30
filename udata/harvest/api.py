@@ -365,7 +365,6 @@ class RunSourceAPI(API):
         return source
 
 
-
 @ns.route("/source/<harvest_source:source>/schedule/", endpoint="schedule_harvest_source")
 class ScheduleSourceAPI(API):
     @api.doc("schedule_harvest_source")
