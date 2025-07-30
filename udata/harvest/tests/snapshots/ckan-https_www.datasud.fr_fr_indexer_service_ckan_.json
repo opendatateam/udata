@@ -1,0 +1,937 @@
+{
+  "requests_history": [
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.datasud.fr/fr/indexer/service/ckan/api/3/action/package_search?q=organization%3A%22communaute-dagglomeration-de-gap-tallard-durance%22&rows=1000",
+        "headers": {
+          "User-Agent": "uData/0.1 ckan",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive",
+          "content-type": "application/json"
+        },
+        "body": null
+      },
+      "response": {
+        "status_code": 200,
+        "headers": {
+          "Server": "nginx/1.22.1",
+          "Date": "Wed, 30 Jul 2025 11:19:40 GMT",
+          "Content-Type": "application/json",
+          "Transfer-Encoding": "chunked",
+          "Connection": "keep-alive",
+          "Vary": "Accept-Encoding, Accept, Cookie",
+          "Allow": "GET, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Language": "fr",
+          "X-Content-Type-Options": "nosniff, nosniff, nosniff",
+          "Referrer-Policy": "same-origin, no-referrer-when-downgrade, no-referrer-when-downgrade",
+          "X-XSS-Protection": "1; mode=block, 1; mode=block",
+          "Permissions-Policy": "accelerometer=(), camera=(), geolocation=(self), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()",
+          "Strict-Transport-Security": "max-age=31536000; includeSubDomains, max-age=31536000; includeSubDomains",
+          "Set-Cookie": "consent=true;Domain=www.datasud.fr;Path=/;Max-Age=7776000;SameSite=strict;HTTPOnly;Secure, consent=true;Domain=www.datasud.fr;Path=/;Max-Age=7776000;SameSite=strict;HTTPOnly;Secure",
+          "X-Cache-status": "MISS",
+          "Access-Control-Allow-Methods": "POST, GET, OPTIONS, DELETE, PUT",
+          "Access-Control-Allow-Headers": "*",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Encoding": "gzip"
+        },
+        "body": "{\"help\":\"https://demo.ckan.org/api/3/action/help_show?name=package_search\",\"success\":true,\"result\":{\"count\":7,\"sort\":\"score desc, metadata_modified desc\",\"search_facets\":{\"count_by_scope\":{\"title\":\"count_by_scope\",\"items\":[{\"name\":\"dataset\",\"display_name\":\"dataset\",\"count\":7}]}},\"facets\":{\"count_by_scope\":{\"dataset\":7}},\"results\":[{\"version\":\"1.0\",\"id\":\"cfa98601-185f-4194-bc0f-119fc23a194b\",\"revision_id\":\"\",\"state\":\"active\",\"metadata_created\":\"2025-07-16T08:11:44.531453+00:00\",\"metadata_modified\":\"2025-07-16\",\"private\":false,\"isopen\":false,\"type\":\"dataset\",\"datatype\":[\"Donn\u00e9es g\u00e9ographiques\"],\"name\":\"canispaces----ville-de-gap\",\"title\":\"Canispaces - Ville de Gap\",\"notes\":\"Lieux r\u00e9serv\u00e9s aux d\u00e9jections canines de la Ville de Gap\\n\\nPlus d'information sur la [propret\u00e9 canine \u00e0 Gap ](https://www.ville-gap.fr/la-proprete-canine/)\",\"thumbnail\":\"\",\"author\":\"Ville de Gap\",\"author_email\":\"voirie@ville-gap.fr\",\"creator_user_id\":null,\"license_id\":\"lov2\",\"license_title\":\"Licence Ouverte 2.0\",\"maintainer\":null,\"maintainer_email\":null,\"url\":\"https://www.datasud.fr/explorer/fr/jeux-de-donnees/canispaces----ville-de-gap\",\"owner_org\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"organization\":{\"id\":\"532\",\"revision_id\":\"\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"title\":\"Communaut\u00e9 d'Agglom\u00e9ration de Gap-Tallard-Durance\",\"description\":\"\",\"image_url\":\"https://www.datasud.fr/fr/usergroup/user-groups/532/thumbnail/\",\"created\":\"2024-01-24T07:38:57.302863+00:00\",\"type\":\"organization\",\"is_organization\":true,\"approval_status\":\"approved\",\"state\":\"active\"},\"kinds\":[{\"id\":\"3\",\"name\":\"geospatial-data\",\"title\":\"Donn\u00e9es g\u00e9ographiques\",\"description\":\"\",\"image_display_url\":null}],\"category\":[{\"id\":\"4\",\"name\":\"proteger-mon-environnement\",\"title\":\"Prot\u00e9ger mon environnement\",\"description\":\"\",\"image_display_url\":null}],\"groups\":[{\"id\":\"21\",\"name\":\"environnement-et-climat\",\"title\":\"Environnement et climat\",\"description\":\"\",\"image_display_url\":null},{\"id\":\"22\",\"name\":\"equipements-batiments-et-logement\",\"title\":\"\u00c9quipements, b\u00e2timents et logement\",\"description\":\"\",\"image_display_url\":null}],\"num_tags\":2,\"tags\":[{\"vocabulary_id\":null,\"id\":\"1110\",\"name\":\"chien\",\"display_name\":\"chien\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"2441\",\"name\":\"canispace\",\"display_name\":\"canispace\",\"state\":\"active\"}],\"num_resources\":1,\"resources\":[{\"position\":1,\"state\":\"active\",\"package_id\":\"cfa98601-185f-4194-bc0f-119fc23a194b\",\"id\":\"a1994436-fbad-4617-bf97-98939511533b\",\"hash\":null,\"resource_type\":\"file.upload\",\"data_type\":null,\"name\":\"canispace_05061\",\"description\":\"canispace_05061\",\"format\":\"Shapefile (zip)\",\"created\":\"2025-07-16T14:34:50.656523+00:00\",\"last_modified\":\"2025-07-16\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":\"application/zip\",\"mimetype_inner\":null,\"size\":1955,\"url\":\"https://www.datasud.fr/fr/dataset/datasets/4539/resource/6176/download/\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":0,\"state\":\"active\",\"package_id\":\"cfa98601-185f-4194-bc0f-119fc23a194b\",\"id\":\"1112\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WMS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:canispace_05061\",\"description\":\"\",\"format\":\"OGC:WMS\",\"created\":\"2025-07-16T14:34:57.197567+00:00\",\"last_modified\":\"2025-07-16T14:34:57.197662+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":1,\"state\":\"active\",\"package_id\":\"cfa98601-185f-4194-bc0f-119fc23a194b\",\"id\":\"1112\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WFS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:canispace_05061\",\"description\":\"\",\"format\":\"OGC:WFS\",\"created\":\"2025-07-16T14:34:57.197567+00:00\",\"last_modified\":\"2025-07-16T14:34:57.197662+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=communaute-dagglomeration-de-gap-tallard-durance:canispace_05061&maxFeatures=50&outputFormat=application/json\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false}],\"relationships_as_subject\":[],\"relationships_as_object\":[],\"extras\":[]},{\"version\":\"1.0\",\"id\":\"04c1c235-969a-4442-8c8a-43dca754f2ca\",\"revision_id\":\"\",\"state\":\"active\",\"metadata_created\":\"2024-02-07T16:37:44.654097+00:00\",\"metadata_modified\":\"2025-07-10\",\"private\":false,\"isopen\":false,\"type\":\"dataset\",\"datatype\":[\"Donn\u00e9es g\u00e9ographiques\"],\"name\":\"point-d-apport-volontaire-pav-ca-gap-tallard-durance\",\"title\":\"Point d'apport volontaire (PAV) de la CA Gap-Tallard-Durance\",\"notes\":\"Localisation des Points d'Apport Volontaire sur la Communaut\u00e9 d'Agglom\u00e9ration Gap-Tallard-Durance\",\"thumbnail\":\"\",\"author\":\"Ville de Gap\",\"author_email\":\"voirie@ville-gap.fr\",\"creator_user_id\":null,\"license_id\":\"lov2\",\"license_title\":\"Licence Ouverte 2.0\",\"maintainer\":null,\"maintainer_email\":null,\"url\":\"https://www.datasud.fr/explorer/fr/jeux-de-donnees/point-d-apport-volontaire-pav-ca-gap-tallard-durance\",\"owner_org\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"organization\":{\"id\":\"532\",\"revision_id\":\"\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"title\":\"Communaut\u00e9 d'Agglom\u00e9ration de Gap-Tallard-Durance\",\"description\":\"\",\"image_url\":\"https://www.datasud.fr/fr/usergroup/user-groups/532/thumbnail/\",\"created\":\"2024-01-24T07:38:57.302863+00:00\",\"type\":\"organization\",\"is_organization\":true,\"approval_status\":\"approved\",\"state\":\"active\"},\"kinds\":[{\"id\":\"3\",\"name\":\"geospatial-data\",\"title\":\"Donn\u00e9es g\u00e9ographiques\",\"description\":\"\",\"image_display_url\":null}],\"category\":[{\"id\":\"4\",\"name\":\"proteger-mon-environnement\",\"title\":\"Prot\u00e9ger mon environnement\",\"description\":\"\",\"image_display_url\":null}],\"groups\":[{\"id\":\"21\",\"name\":\"environnement-et-climat\",\"title\":\"Environnement et climat\",\"description\":\"\",\"image_display_url\":null}],\"num_tags\":3,\"tags\":[{\"vocabulary_id\":null,\"id\":\"601\",\"name\":\"recyclage\",\"display_name\":\"recyclage\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"897\",\"name\":\"d\u00e9chet\",\"display_name\":\"d\u00e9chet\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"1222\",\"name\":\"pav\",\"display_name\":\"PAV\",\"state\":\"active\"}],\"num_resources\":1,\"resources\":[{\"position\":1,\"state\":\"active\",\"package_id\":\"04c1c235-969a-4442-8c8a-43dca754f2ca\",\"id\":\"e76700f4-3edf-4fb5-8918-eb35ca7b4314\",\"hash\":null,\"resource_type\":\"file.upload\",\"data_type\":null,\"name\":\"Points d'Apport Volontaire (PAV) de la CA Gap Tallard Durance\",\"description\":\"\",\"format\":\"CSV LonLat/XY\",\"created\":\"2025-07-10T10:46:45.899830+00:00\",\"last_modified\":\"2025-07-10\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":\"text/csv\",\"mimetype_inner\":null,\"size\":145962,\"url\":\"https://www.datasud.fr/fr/dataset/datasets/2222/resource/6149/download/\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":0,\"state\":\"active\",\"package_id\":\"04c1c235-969a-4442-8c8a-43dca754f2ca\",\"id\":\"1099\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WMS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:pav-cagtd\",\"description\":\"\",\"format\":\"OGC:WMS\",\"created\":\"2025-07-10T10:46:51.657208+00:00\",\"last_modified\":\"2025-07-10T11:06:25.046758+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":1,\"state\":\"active\",\"package_id\":\"04c1c235-969a-4442-8c8a-43dca754f2ca\",\"id\":\"1099\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WFS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:pav-cagtd\",\"description\":\"\",\"format\":\"OGC:WFS\",\"created\":\"2025-07-10T10:46:51.657208+00:00\",\"last_modified\":\"2025-07-10T11:06:25.046758+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=communaute-dagglomeration-de-gap-tallard-durance:pav-cagtd&maxFeatures=50&outputFormat=application/json\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false}],\"relationships_as_subject\":[],\"relationships_as_object\":[],\"extras\":[]},{\"version\":\"1.0\",\"id\":\"b8f35d04-c2ad-400e-86b3-c06b8ce7708a\",\"revision_id\":\"\",\"state\":\"active\",\"metadata_created\":\"2025-07-16T08:33:58.929285+00:00\",\"metadata_modified\":\"2025-07-16\",\"private\":false,\"isopen\":false,\"type\":\"dataset\",\"datatype\":[\"Donn\u00e9es g\u00e9ographiques\"],\"name\":\"sacs-a-chien----ville-de-gap\",\"title\":\"Canisacs -  Ville de Gap\",\"notes\":\"Distributeurs de sacs pour d\u00e9jections canines situ\u00e9es sur la ville de Gap\\nPlus d'information sur la [propret\u00e9 canine \u00e0 Gap ](https://www.ville-gap.fr/la-proprete-canine/)\",\"thumbnail\":\"\",\"author\":\"Ville de Gap\",\"author_email\":\"voirie@ville-gap.fr\",\"creator_user_id\":null,\"license_id\":\"lov2\",\"license_title\":\"Licence Ouverte 2.0\",\"maintainer\":null,\"maintainer_email\":null,\"url\":\"https://www.datasud.fr/explorer/fr/jeux-de-donnees/sacs-a-chien----ville-de-gap\",\"owner_org\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"organization\":{\"id\":\"532\",\"revision_id\":\"\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"title\":\"Communaut\u00e9 d'Agglom\u00e9ration de Gap-Tallard-Durance\",\"description\":\"\",\"image_url\":\"https://www.datasud.fr/fr/usergroup/user-groups/532/thumbnail/\",\"created\":\"2024-01-24T07:38:57.302863+00:00\",\"type\":\"organization\",\"is_organization\":true,\"approval_status\":\"approved\",\"state\":\"active\"},\"kinds\":[{\"id\":\"3\",\"name\":\"geospatial-data\",\"title\":\"Donn\u00e9es g\u00e9ographiques\",\"description\":\"\",\"image_display_url\":null}],\"category\":[{\"id\":\"4\",\"name\":\"proteger-mon-environnement\",\"title\":\"Prot\u00e9ger mon environnement\",\"description\":\"\",\"image_display_url\":null}],\"groups\":[{\"id\":\"21\",\"name\":\"environnement-et-climat\",\"title\":\"Environnement et climat\",\"description\":\"\",\"image_display_url\":null},{\"id\":\"22\",\"name\":\"equipements-batiments-et-logement\",\"title\":\"\u00c9quipements, b\u00e2timents et logement\",\"description\":\"\",\"image_display_url\":null}],\"num_tags\":4,\"tags\":[{\"vocabulary_id\":null,\"id\":\"1571\",\"name\":\"distributeur\",\"display_name\":\"distributeur\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"2445\",\"name\":\"sac-\u00e0-chien\",\"display_name\":\"sac \u00e0 chien\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"2446\",\"name\":\"d\u00e9jection-canine\",\"display_name\":\"d\u00e9jection canine\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"2447\",\"name\":\"canisac\",\"display_name\":\"canisac\",\"state\":\"active\"}],\"num_resources\":1,\"resources\":[{\"position\":1,\"state\":\"active\",\"package_id\":\"b8f35d04-c2ad-400e-86b3-c06b8ce7708a\",\"id\":\"0e55aad6-a0e6-4663-82c6-da3c1ad85173\",\"hash\":null,\"resource_type\":\"file.upload\",\"data_type\":null,\"name\":\"sac_chien_05061\",\"description\":\"\",\"format\":\"Shapefile (zip)\",\"created\":\"2025-07-16T08:34:13.547167+00:00\",\"last_modified\":\"2025-07-16\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":\"application/zip\",\"mimetype_inner\":null,\"size\":4798,\"url\":\"https://www.datasud.fr/fr/dataset/datasets/4542/resource/6175/download/\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":0,\"state\":\"active\",\"package_id\":\"b8f35d04-c2ad-400e-86b3-c06b8ce7708a\",\"id\":\"1111\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WMS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:sac_chien_05061\",\"description\":\"\",\"format\":\"OGC:WMS\",\"created\":\"2025-07-16T08:34:19.783911+00:00\",\"last_modified\":\"2025-07-16T08:34:19.783967+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":1,\"state\":\"active\",\"package_id\":\"b8f35d04-c2ad-400e-86b3-c06b8ce7708a\",\"id\":\"1111\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WFS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:sac_chien_05061\",\"description\":\"\",\"format\":\"OGC:WFS\",\"created\":\"2025-07-16T08:34:19.783911+00:00\",\"last_modified\":\"2025-07-16T08:34:19.783967+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=communaute-dagglomeration-de-gap-tallard-durance:sac_chien_05061&maxFeatures=50&outputFormat=application/json\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false}],\"relationships_as_subject\":[],\"relationships_as_object\":[],\"extras\":[]},{\"version\":\"1.0\",\"id\":\"af382e3c-4160-428f-9b8e-885bc1739f20\",\"revision_id\":\"\",\"state\":\"active\",\"metadata_created\":\"2025-07-16T08:29:30.737470+00:00\",\"metadata_modified\":\"2025-07-16\",\"private\":false,\"isopen\":false,\"type\":\"dataset\",\"datatype\":[\"Donn\u00e9es g\u00e9ographiques\"],\"name\":\"cendriers----ville-de-gap\",\"title\":\"Cendriers -  Ville de Gap\",\"notes\":\"Localisation des cendriers situ\u00e9s sur la ville de Gap.\",\"thumbnail\":\"\",\"author\":\"Ville de Gap\",\"author_email\":\"voirie@ville-gap.fr\",\"creator_user_id\":null,\"license_id\":\"lov2\",\"license_title\":\"Licence Ouverte 2.0\",\"maintainer\":null,\"maintainer_email\":null,\"url\":\"https://www.datasud.fr/explorer/fr/jeux-de-donnees/cendriers----ville-de-gap\",\"owner_org\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"organization\":{\"id\":\"532\",\"revision_id\":\"\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"title\":\"Communaut\u00e9 d'Agglom\u00e9ration de Gap-Tallard-Durance\",\"description\":\"\",\"image_url\":\"https://www.datasud.fr/fr/usergroup/user-groups/532/thumbnail/\",\"created\":\"2024-01-24T07:38:57.302863+00:00\",\"type\":\"organization\",\"is_organization\":true,\"approval_status\":\"approved\",\"state\":\"active\"},\"kinds\":[{\"id\":\"3\",\"name\":\"geospatial-data\",\"title\":\"Donn\u00e9es g\u00e9ographiques\",\"description\":\"\",\"image_display_url\":null}],\"category\":[{\"id\":\"4\",\"name\":\"proteger-mon-environnement\",\"title\":\"Prot\u00e9ger mon environnement\",\"description\":\"\",\"image_display_url\":null}],\"groups\":[{\"id\":\"21\",\"name\":\"environnement-et-climat\",\"title\":\"Environnement et climat\",\"description\":\"\",\"image_display_url\":null},{\"id\":\"22\",\"name\":\"equipements-batiments-et-logement\",\"title\":\"\u00c9quipements, b\u00e2timents et logement\",\"description\":\"\",\"image_display_url\":null}],\"num_tags\":1,\"tags\":[{\"vocabulary_id\":null,\"id\":\"1007\",\"name\":\"cendrier\",\"display_name\":\"cendrier\",\"state\":\"active\"}],\"num_resources\":1,\"resources\":[{\"position\":1,\"state\":\"active\",\"package_id\":\"af382e3c-4160-428f-9b8e-885bc1739f20\",\"id\":\"925b26ad-03ce-4358-ac9c-cfea2b927f4b\",\"hash\":null,\"resource_type\":\"file.upload\",\"data_type\":null,\"name\":\"cendrier_05061\",\"description\":\"\",\"format\":\"Shapefile (zip)\",\"created\":\"2025-07-16T08:29:46.677521+00:00\",\"last_modified\":\"2025-07-16\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":\"application/zip\",\"mimetype_inner\":null,\"size\":3081,\"url\":\"https://www.datasud.fr/fr/dataset/datasets/4540/resource/6173/download/\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":0,\"state\":\"active\",\"package_id\":\"af382e3c-4160-428f-9b8e-885bc1739f20\",\"id\":\"1109\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WMS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:cendrier_05061\",\"description\":\"\",\"format\":\"OGC:WMS\",\"created\":\"2025-07-16T08:29:53.061129+00:00\",\"last_modified\":\"2025-07-16T08:29:53.061201+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":1,\"state\":\"active\",\"package_id\":\"af382e3c-4160-428f-9b8e-885bc1739f20\",\"id\":\"1109\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WFS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:cendrier_05061\",\"description\":\"\",\"format\":\"OGC:WFS\",\"created\":\"2025-07-16T08:29:53.061129+00:00\",\"last_modified\":\"2025-07-16T08:29:53.061201+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=communaute-dagglomeration-de-gap-tallard-durance:cendrier_05061&maxFeatures=50&outputFormat=application/json\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false}],\"relationships_as_subject\":[],\"relationships_as_object\":[],\"extras\":[]},{\"version\":\"1.0\",\"id\":\"73d7b463-9230-4910-92ce-414e16376521\",\"revision_id\":\"\",\"state\":\"active\",\"metadata_created\":\"2025-07-16T08:31:26.555922+00:00\",\"metadata_modified\":\"2025-07-16\",\"private\":false,\"isopen\":false,\"type\":\"dataset\",\"datatype\":[\"Donn\u00e9es g\u00e9ographiques\"],\"name\":\"corbeilles---ville-de-gap\",\"title\":\"Corbeilles -  Ville de Gap\",\"notes\":\"Corbeilles situ\u00e9es sur la ville de Gap\",\"thumbnail\":\"\",\"author\":\"Ville de Gap\",\"author_email\":\"voirie@ville-gap.fr\",\"creator_user_id\":null,\"license_id\":\"lov2\",\"license_title\":\"Licence Ouverte 2.0\",\"maintainer\":null,\"maintainer_email\":null,\"url\":\"https://www.datasud.fr/explorer/fr/jeux-de-donnees/corbeilles---ville-de-gap\",\"owner_org\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"organization\":{\"id\":\"532\",\"revision_id\":\"\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"title\":\"Communaut\u00e9 d'Agglom\u00e9ration de Gap-Tallard-Durance\",\"description\":\"\",\"image_url\":\"https://www.datasud.fr/fr/usergroup/user-groups/532/thumbnail/\",\"created\":\"2024-01-24T07:38:57.302863+00:00\",\"type\":\"organization\",\"is_organization\":true,\"approval_status\":\"approved\",\"state\":\"active\"},\"kinds\":[{\"id\":\"3\",\"name\":\"geospatial-data\",\"title\":\"Donn\u00e9es g\u00e9ographiques\",\"description\":\"\",\"image_display_url\":null}],\"category\":[{\"id\":\"4\",\"name\":\"proteger-mon-environnement\",\"title\":\"Prot\u00e9ger mon environnement\",\"description\":\"\",\"image_display_url\":null}],\"groups\":[{\"id\":\"21\",\"name\":\"environnement-et-climat\",\"title\":\"Environnement et climat\",\"description\":\"\",\"image_display_url\":null},{\"id\":\"22\",\"name\":\"equipements-batiments-et-logement\",\"title\":\"\u00c9quipements, b\u00e2timents et logement\",\"description\":\"\",\"image_display_url\":null}],\"num_tags\":2,\"tags\":[{\"vocabulary_id\":null,\"id\":\"1443\",\"name\":\"poubelle\",\"display_name\":\"poubelle\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"2444\",\"name\":\"corbeille\",\"display_name\":\"corbeille\",\"state\":\"active\"}],\"num_resources\":1,\"resources\":[{\"position\":1,\"state\":\"active\",\"package_id\":\"73d7b463-9230-4910-92ce-414e16376521\",\"id\":\"92ec00b7-53d2-42a6-94e1-c10861213478\",\"hash\":null,\"resource_type\":\"file.upload\",\"data_type\":null,\"name\":\"corbeille_05061\",\"description\":\"\",\"format\":\"Shapefile (zip)\",\"created\":\"2025-07-16T08:31:44.432179+00:00\",\"last_modified\":\"2025-07-16\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":\"application/zip\",\"mimetype_inner\":null,\"size\":10569,\"url\":\"https://www.datasud.fr/fr/dataset/datasets/4541/resource/6174/download/\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":0,\"state\":\"active\",\"package_id\":\"73d7b463-9230-4910-92ce-414e16376521\",\"id\":\"1110\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WMS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:corbeille_05061\",\"description\":\"\",\"format\":\"OGC:WMS\",\"created\":\"2025-07-16T08:31:51.188944+00:00\",\"last_modified\":\"2025-07-16T08:31:51.189026+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":1,\"state\":\"active\",\"package_id\":\"73d7b463-9230-4910-92ce-414e16376521\",\"id\":\"1110\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WFS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:corbeille_05061\",\"description\":\"\",\"format\":\"OGC:WFS\",\"created\":\"2025-07-16T08:31:51.188944+00:00\",\"last_modified\":\"2025-07-16T08:31:51.189026+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=communaute-dagglomeration-de-gap-tallard-durance:corbeille_05061&maxFeatures=50&outputFormat=application/json\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false}],\"relationships_as_subject\":[],\"relationships_as_object\":[],\"extras\":[]},{\"version\":\"1.0\",\"id\":\"fe7cdceb-f65e-4e79-9ff2-d7895dc3b155\",\"revision_id\":\"\",\"state\":\"active\",\"metadata_created\":\"2025-07-16T15:05:30.868851+00:00\",\"metadata_modified\":\"2025-07-16\",\"private\":false,\"isopen\":false,\"type\":\"dataset\",\"datatype\":[\"Donn\u00e9es g\u00e9ographiques\"],\"name\":\"parkings-ville-de-gap\",\"title\":\"Parcs de stationnement de la Ville de Gap\",\"notes\":\"Localisation des parcs de stationnement situ\u00e9s sur la ville de Gap : parking s\u00e9curis\u00e9, parking gratuits non ferm\u00e9s, parkings-relais.\\n[Plus d'information sur le stationnement sur le territoire](https://www.ville-gap.fr/stationnement/)\",\"thumbnail\":\"\",\"author\":\"Ville de Gap\",\"author_email\":\"voirie@ville-gap.fr\",\"creator_user_id\":null,\"license_id\":\"lov2\",\"license_title\":\"Licence Ouverte 2.0\",\"maintainer\":null,\"maintainer_email\":null,\"url\":\"https://www.datasud.fr/explorer/fr/jeux-de-donnees/parkings-ville-de-gap\",\"owner_org\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"organization\":{\"id\":\"532\",\"revision_id\":\"\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"title\":\"Communaut\u00e9 d'Agglom\u00e9ration de Gap-Tallard-Durance\",\"description\":\"\",\"image_url\":\"https://www.datasud.fr/fr/usergroup/user-groups/532/thumbnail/\",\"created\":\"2024-01-24T07:38:57.302863+00:00\",\"type\":\"organization\",\"is_organization\":true,\"approval_status\":\"approved\",\"state\":\"active\"},\"kinds\":[{\"id\":\"3\",\"name\":\"geospatial-data\",\"title\":\"Donn\u00e9es g\u00e9ographiques\",\"description\":\"\",\"image_display_url\":null}],\"category\":[{\"id\":\"5\",\"name\":\"se-deplacer\",\"title\":\"Se d\u00e9placer\",\"description\":\"\",\"image_display_url\":null}],\"groups\":[{\"id\":\"27\",\"name\":\"mobilite-et-transports\",\"title\":\"Mobilit\u00e9 et transports\",\"description\":\"\",\"image_display_url\":null}],\"num_tags\":3,\"tags\":[{\"vocabulary_id\":null,\"id\":\"763\",\"name\":\"parking\",\"display_name\":\"parking\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"2337\",\"name\":\"aire-de-stationnement\",\"display_name\":\"aire de stationnement\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"2448\",\"name\":\"stationner\",\"display_name\":\"stationner\",\"state\":\"active\"}],\"num_resources\":1,\"resources\":[{\"position\":1,\"state\":\"active\",\"package_id\":\"fe7cdceb-f65e-4e79-9ff2-d7895dc3b155\",\"id\":\"759b8f35-ef8a-4e23-bbcc-4bd8dc29ce27\",\"hash\":null,\"resource_type\":\"file.upload\",\"data_type\":null,\"name\":\"parking_05061\",\"description\":\"parking_05061\",\"format\":\"Shapefile (zip)\",\"created\":\"2025-07-16T15:05:45.227793+00:00\",\"last_modified\":\"2025-07-16T15:05:50.090430+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":\"application/zip\",\"mimetype_inner\":null,\"size\":2606,\"url\":\"https://www.datasud.fr/fr/dataset/datasets/4543/resource/6177/download/\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":0,\"state\":\"active\",\"package_id\":\"fe7cdceb-f65e-4e79-9ff2-d7895dc3b155\",\"id\":\"1113\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WMS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:parking_05061\",\"description\":\"\",\"format\":\"OGC:WMS\",\"created\":\"2025-07-16T15:05:51.288711+00:00\",\"last_modified\":\"2025-07-16T15:05:51.288785+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":1,\"state\":\"active\",\"package_id\":\"fe7cdceb-f65e-4e79-9ff2-d7895dc3b155\",\"id\":\"1113\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WFS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:parking_05061\",\"description\":\"\",\"format\":\"OGC:WFS\",\"created\":\"2025-07-16T15:05:51.288711+00:00\",\"last_modified\":\"2025-07-16T15:05:51.288785+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=communaute-dagglomeration-de-gap-tallard-durance:parking_05061&maxFeatures=50&outputFormat=application/json\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false}],\"relationships_as_subject\":[],\"relationships_as_object\":[],\"extras\":[]},{\"version\":\"1.0\",\"id\":\"b63fa801-a20a-4cbd-b202-398d3afbd328\",\"revision_id\":\"\",\"state\":\"active\",\"metadata_created\":\"2025-07-16T06:59:56.199433+00:00\",\"metadata_modified\":\"2025-07-10\",\"private\":false,\"isopen\":false,\"type\":\"dataset\",\"datatype\":[\"Donn\u00e9es g\u00e9ographiques\"],\"name\":\"dechetteries-de-la-cagtd\",\"title\":\"D\u00e9chetteries  Communaut\u00e9 d'Agglom\u00e9ration Gap - Tallard - Durance\",\"notes\":\"Localisation des d\u00e9chetteries situ\u00e9es sur le territoire de la Communaut\u00e9 d'Agglom\u00e9ration Gap - Tallard - Durance\",\"thumbnail\":\"\",\"author\":\"Ville de Gap\",\"author_email\":\"voirie@ville-gap.fr\",\"creator_user_id\":null,\"license_id\":\"lov2\",\"license_title\":\"Licence Ouverte 2.0\",\"maintainer\":null,\"maintainer_email\":null,\"url\":\"https://www.datasud.fr/explorer/fr/jeux-de-donnees/dechetteries-de-la-cagtd\",\"owner_org\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"organization\":{\"id\":\"532\",\"revision_id\":\"\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"title\":\"Communaut\u00e9 d'Agglom\u00e9ration de Gap-Tallard-Durance\",\"description\":\"\",\"image_url\":\"https://www.datasud.fr/fr/usergroup/user-groups/532/thumbnail/\",\"created\":\"2024-01-24T07:38:57.302863+00:00\",\"type\":\"organization\",\"is_organization\":true,\"approval_status\":\"approved\",\"state\":\"active\"},\"kinds\":[{\"id\":\"3\",\"name\":\"geospatial-data\",\"title\":\"Donn\u00e9es g\u00e9ographiques\",\"description\":\"\",\"image_display_url\":null}],\"category\":[{\"id\":\"4\",\"name\":\"proteger-mon-environnement\",\"title\":\"Prot\u00e9ger mon environnement\",\"description\":\"\",\"image_display_url\":null}],\"groups\":[{\"id\":\"21\",\"name\":\"environnement-et-climat\",\"title\":\"Environnement et climat\",\"description\":\"\",\"image_display_url\":null}],\"num_tags\":3,\"tags\":[{\"vocabulary_id\":null,\"id\":\"897\",\"name\":\"d\u00e9chet\",\"display_name\":\"d\u00e9chet\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"2439\",\"name\":\"d\u00e9chetterie\",\"display_name\":\"d\u00e9chetterie\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"2440\",\"name\":\"dechetterie\",\"display_name\":\"dechetterie\",\"state\":\"active\"}],\"num_resources\":1,\"resources\":[{\"position\":1,\"state\":\"active\",\"package_id\":\"b63fa801-a20a-4cbd-b202-398d3afbd328\",\"id\":\"7deef705-611c-4214-8b02-1397e6784a2c\",\"hash\":null,\"resource_type\":\"file.upload\",\"data_type\":null,\"name\":\"dechetterie_CAGTD\",\"description\":\"\",\"format\":\"Shapefile (zip)\",\"created\":\"2025-07-16T07:00:10.865436+00:00\",\"last_modified\":\"2025-07-16T07:00:15.197204+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":\"application/zip\",\"mimetype_inner\":null,\"size\":1551,\"url\":\"https://www.datasud.fr/fr/dataset/datasets/4537/resource/6169/download/\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":0,\"state\":\"active\",\"package_id\":\"b63fa801-a20a-4cbd-b202-398d3afbd328\",\"id\":\"1105\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WMS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:dechetterie_cagtd\",\"description\":\"\",\"format\":\"OGC:WMS\",\"created\":\"2025-07-16T07:00:16.268080+00:00\",\"last_modified\":\"2025-07-16T07:00:16.268125+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":1,\"state\":\"active\",\"package_id\":\"b63fa801-a20a-4cbd-b202-398d3afbd328\",\"id\":\"1105\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WFS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:dechetterie_cagtd\",\"description\":\"\",\"format\":\"OGC:WFS\",\"created\":\"2025-07-16T07:00:16.268080+00:00\",\"last_modified\":\"2025-07-16T07:00:16.268125+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=communaute-dagglomeration-de-gap-tallard-durance:dechetterie_cagtd&maxFeatures=50&outputFormat=application/json\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false}],\"relationships_as_subject\":[],\"relationships_as_object\":[],\"extras\":[]}]}}"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.datasud.fr/fr/indexer/service/ckan/api/3/action/package_show?id=canispaces----ville-de-gap",
+        "headers": {
+          "User-Agent": "uData/0.1 ckan",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive",
+          "content-type": "application/json"
+        },
+        "body": null
+      },
+      "response": {
+        "status_code": 200,
+        "headers": {
+          "Server": "nginx/1.22.1",
+          "Date": "Wed, 30 Jul 2025 11:19:40 GMT",
+          "Content-Type": "application/json",
+          "Transfer-Encoding": "chunked",
+          "Connection": "keep-alive",
+          "Vary": "Accept-Encoding, Accept, Cookie",
+          "Allow": "GET, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Language": "fr",
+          "X-Content-Type-Options": "nosniff, nosniff, nosniff",
+          "Referrer-Policy": "same-origin, no-referrer-when-downgrade, no-referrer-when-downgrade",
+          "X-XSS-Protection": "1; mode=block, 1; mode=block",
+          "Permissions-Policy": "accelerometer=(), camera=(), geolocation=(self), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()",
+          "Strict-Transport-Security": "max-age=31536000; includeSubDomains, max-age=31536000; includeSubDomains",
+          "Set-Cookie": "consent=true;Domain=www.datasud.fr;Path=/;Max-Age=7776000;SameSite=strict;HTTPOnly;Secure, consent=true;Domain=www.datasud.fr;Path=/;Max-Age=7776000;SameSite=strict;HTTPOnly;Secure",
+          "X-Cache-status": "MISS",
+          "Access-Control-Allow-Methods": "POST, GET, OPTIONS, DELETE, PUT",
+          "Access-Control-Allow-Headers": "*",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Encoding": "gzip"
+        },
+        "body": "{\"help\":\"https://demo.ckan.org/api/3/action/help_show?name=package_show\",\"success\":true,\"result\":{\"version\":\"1.0\",\"id\":\"cfa98601-185f-4194-bc0f-119fc23a194b\",\"revision_id\":\"\",\"state\":\"active\",\"metadata_created\":\"2025-07-16T08:11:44.531453+00:00\",\"metadata_modified\":\"2025-07-16\",\"private\":false,\"isopen\":false,\"type\":\"dataset\",\"datatype\":[\"Donn\u00e9es g\u00e9ographiques\"],\"name\":\"canispaces----ville-de-gap\",\"title\":\"Canispaces - Ville de Gap\",\"notes\":\"Lieux r\u00e9serv\u00e9s aux d\u00e9jections canines de la Ville de Gap\\n\\nPlus d'information sur la [propret\u00e9 canine \u00e0 Gap ](https://www.ville-gap.fr/la-proprete-canine/)\",\"thumbnail\":\"\",\"author\":\"Ville de Gap\",\"author_email\":\"voirie@ville-gap.fr\",\"creator_user_id\":null,\"license_id\":\"lov2\",\"license_title\":\"Licence Ouverte 2.0\",\"maintainer\":null,\"maintainer_email\":null,\"url\":\"https://www.datasud.fr/explorer/fr/jeux-de-donnees/canispaces----ville-de-gap\",\"owner_org\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"organization\":{\"id\":\"532\",\"revision_id\":\"\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"title\":\"Communaut\u00e9 d'Agglom\u00e9ration de Gap-Tallard-Durance\",\"description\":\"\",\"image_url\":\"https://www.datasud.fr/fr/usergroup/user-groups/532/thumbnail/\",\"created\":\"2024-01-24T07:38:57.302863+00:00\",\"type\":\"organization\",\"is_organization\":true,\"approval_status\":\"approved\",\"state\":\"active\"},\"kinds\":[{\"id\":\"3\",\"name\":\"geospatial-data\",\"title\":\"Donn\u00e9es g\u00e9ographiques\",\"description\":\"\",\"image_display_url\":null}],\"category\":[{\"id\":\"4\",\"name\":\"proteger-mon-environnement\",\"title\":\"Prot\u00e9ger mon environnement\",\"description\":\"\",\"image_display_url\":null}],\"groups\":[{\"id\":\"21\",\"name\":\"environnement-et-climat\",\"title\":\"Environnement et climat\",\"description\":\"\",\"image_display_url\":null},{\"id\":\"22\",\"name\":\"equipements-batiments-et-logement\",\"title\":\"\u00c9quipements, b\u00e2timents et logement\",\"description\":\"\",\"image_display_url\":null}],\"num_tags\":2,\"tags\":[{\"vocabulary_id\":null,\"id\":\"1110\",\"name\":\"chien\",\"display_name\":\"chien\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"2441\",\"name\":\"canispace\",\"display_name\":\"canispace\",\"state\":\"active\"}],\"num_resources\":1,\"resources\":[{\"position\":1,\"state\":\"active\",\"package_id\":\"cfa98601-185f-4194-bc0f-119fc23a194b\",\"id\":\"a1994436-fbad-4617-bf97-98939511533b\",\"hash\":null,\"resource_type\":\"file.upload\",\"data_type\":null,\"name\":\"canispace_05061\",\"description\":\"canispace_05061\",\"format\":\"Shapefile (zip)\",\"created\":\"2025-07-16T14:34:50.656523+00:00\",\"last_modified\":\"2025-07-16\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":\"application/zip\",\"mimetype_inner\":null,\"size\":1955,\"url\":\"https://www.datasud.fr/fr/dataset/datasets/4539/resource/6176/download/\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":0,\"state\":\"active\",\"package_id\":\"cfa98601-185f-4194-bc0f-119fc23a194b\",\"id\":\"1112\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WMS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:canispace_05061\",\"description\":\"\",\"format\":\"OGC:WMS\",\"created\":\"2025-07-16T14:34:57.197567+00:00\",\"last_modified\":\"2025-07-16T14:34:57.197662+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":1,\"state\":\"active\",\"package_id\":\"cfa98601-185f-4194-bc0f-119fc23a194b\",\"id\":\"1112\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WFS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:canispace_05061\",\"description\":\"\",\"format\":\"OGC:WFS\",\"created\":\"2025-07-16T14:34:57.197567+00:00\",\"last_modified\":\"2025-07-16T14:34:57.197662+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=communaute-dagglomeration-de-gap-tallard-durance:canispace_05061&maxFeatures=50&outputFormat=application/json\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false}],\"relationships_as_subject\":[],\"relationships_as_object\":[],\"extras\":[]}}"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.datasud.fr/fr/indexer/service/ckan/api/3/action/package_show?id=point-d-apport-volontaire-pav-ca-gap-tallard-durance",
+        "headers": {
+          "User-Agent": "uData/0.1 ckan",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive",
+          "content-type": "application/json"
+        },
+        "body": null
+      },
+      "response": {
+        "status_code": 200,
+        "headers": {
+          "Server": "nginx/1.22.1",
+          "Date": "Wed, 30 Jul 2025 11:19:41 GMT",
+          "Content-Type": "application/json",
+          "Transfer-Encoding": "chunked",
+          "Connection": "keep-alive",
+          "Vary": "Accept-Encoding, Accept, Cookie",
+          "Allow": "GET, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Language": "fr",
+          "X-Content-Type-Options": "nosniff, nosniff, nosniff",
+          "Referrer-Policy": "same-origin, no-referrer-when-downgrade, no-referrer-when-downgrade",
+          "X-XSS-Protection": "1; mode=block, 1; mode=block",
+          "Permissions-Policy": "accelerometer=(), camera=(), geolocation=(self), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()",
+          "Strict-Transport-Security": "max-age=31536000; includeSubDomains, max-age=31536000; includeSubDomains",
+          "Set-Cookie": "consent=true;Domain=www.datasud.fr;Path=/;Max-Age=7776000;SameSite=strict;HTTPOnly;Secure, consent=true;Domain=www.datasud.fr;Path=/;Max-Age=7776000;SameSite=strict;HTTPOnly;Secure",
+          "X-Cache-status": "MISS",
+          "Access-Control-Allow-Methods": "POST, GET, OPTIONS, DELETE, PUT",
+          "Access-Control-Allow-Headers": "*",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Encoding": "gzip"
+        },
+        "body": "{\"help\":\"https://demo.ckan.org/api/3/action/help_show?name=package_show\",\"success\":true,\"result\":{\"version\":\"1.0\",\"id\":\"04c1c235-969a-4442-8c8a-43dca754f2ca\",\"revision_id\":\"\",\"state\":\"active\",\"metadata_created\":\"2024-02-07T16:37:44.654097+00:00\",\"metadata_modified\":\"2025-07-10\",\"private\":false,\"isopen\":false,\"type\":\"dataset\",\"datatype\":[\"Donn\u00e9es g\u00e9ographiques\"],\"name\":\"point-d-apport-volontaire-pav-ca-gap-tallard-durance\",\"title\":\"Point d'apport volontaire (PAV) de la CA Gap-Tallard-Durance\",\"notes\":\"Localisation des Points d'Apport Volontaire sur la Communaut\u00e9 d'Agglom\u00e9ration Gap-Tallard-Durance\",\"thumbnail\":\"\",\"author\":\"Ville de Gap\",\"author_email\":\"voirie@ville-gap.fr\",\"creator_user_id\":null,\"license_id\":\"lov2\",\"license_title\":\"Licence Ouverte 2.0\",\"maintainer\":null,\"maintainer_email\":null,\"url\":\"https://www.datasud.fr/explorer/fr/jeux-de-donnees/point-d-apport-volontaire-pav-ca-gap-tallard-durance\",\"owner_org\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"organization\":{\"id\":\"532\",\"revision_id\":\"\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"title\":\"Communaut\u00e9 d'Agglom\u00e9ration de Gap-Tallard-Durance\",\"description\":\"\",\"image_url\":\"https://www.datasud.fr/fr/usergroup/user-groups/532/thumbnail/\",\"created\":\"2024-01-24T07:38:57.302863+00:00\",\"type\":\"organization\",\"is_organization\":true,\"approval_status\":\"approved\",\"state\":\"active\"},\"kinds\":[{\"id\":\"3\",\"name\":\"geospatial-data\",\"title\":\"Donn\u00e9es g\u00e9ographiques\",\"description\":\"\",\"image_display_url\":null}],\"category\":[{\"id\":\"4\",\"name\":\"proteger-mon-environnement\",\"title\":\"Prot\u00e9ger mon environnement\",\"description\":\"\",\"image_display_url\":null}],\"groups\":[{\"id\":\"21\",\"name\":\"environnement-et-climat\",\"title\":\"Environnement et climat\",\"description\":\"\",\"image_display_url\":null}],\"num_tags\":3,\"tags\":[{\"vocabulary_id\":null,\"id\":\"601\",\"name\":\"recyclage\",\"display_name\":\"recyclage\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"897\",\"name\":\"d\u00e9chet\",\"display_name\":\"d\u00e9chet\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"1222\",\"name\":\"pav\",\"display_name\":\"PAV\",\"state\":\"active\"}],\"num_resources\":1,\"resources\":[{\"position\":1,\"state\":\"active\",\"package_id\":\"04c1c235-969a-4442-8c8a-43dca754f2ca\",\"id\":\"e76700f4-3edf-4fb5-8918-eb35ca7b4314\",\"hash\":null,\"resource_type\":\"file.upload\",\"data_type\":null,\"name\":\"Points d'Apport Volontaire (PAV) de la CA Gap Tallard Durance\",\"description\":\"\",\"format\":\"CSV LonLat/XY\",\"created\":\"2025-07-10T10:46:45.899830+00:00\",\"last_modified\":\"2025-07-10\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":\"text/csv\",\"mimetype_inner\":null,\"size\":145962,\"url\":\"https://www.datasud.fr/fr/dataset/datasets/2222/resource/6149/download/\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":0,\"state\":\"active\",\"package_id\":\"04c1c235-969a-4442-8c8a-43dca754f2ca\",\"id\":\"1099\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WMS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:pav-cagtd\",\"description\":\"\",\"format\":\"OGC:WMS\",\"created\":\"2025-07-10T10:46:51.657208+00:00\",\"last_modified\":\"2025-07-10T11:06:25.046758+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":1,\"state\":\"active\",\"package_id\":\"04c1c235-969a-4442-8c8a-43dca754f2ca\",\"id\":\"1099\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WFS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:pav-cagtd\",\"description\":\"\",\"format\":\"OGC:WFS\",\"created\":\"2025-07-10T10:46:51.657208+00:00\",\"last_modified\":\"2025-07-10T11:06:25.046758+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=communaute-dagglomeration-de-gap-tallard-durance:pav-cagtd&maxFeatures=50&outputFormat=application/json\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false}],\"relationships_as_subject\":[],\"relationships_as_object\":[],\"extras\":[]}}"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.datasud.fr/fr/indexer/service/ckan/api/3/action/package_show?id=sacs-a-chien----ville-de-gap",
+        "headers": {
+          "User-Agent": "uData/0.1 ckan",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive",
+          "content-type": "application/json"
+        },
+        "body": null
+      },
+      "response": {
+        "status_code": 200,
+        "headers": {
+          "Server": "nginx/1.22.1",
+          "Date": "Wed, 30 Jul 2025 11:19:41 GMT",
+          "Content-Type": "application/json",
+          "Transfer-Encoding": "chunked",
+          "Connection": "keep-alive",
+          "Vary": "Accept-Encoding, Accept, Cookie",
+          "Allow": "GET, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Language": "fr",
+          "X-Content-Type-Options": "nosniff, nosniff, nosniff",
+          "Referrer-Policy": "same-origin, no-referrer-when-downgrade, no-referrer-when-downgrade",
+          "X-XSS-Protection": "1; mode=block, 1; mode=block",
+          "Permissions-Policy": "accelerometer=(), camera=(), geolocation=(self), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()",
+          "Strict-Transport-Security": "max-age=31536000; includeSubDomains, max-age=31536000; includeSubDomains",
+          "Set-Cookie": "consent=true;Domain=www.datasud.fr;Path=/;Max-Age=7776000;SameSite=strict;HTTPOnly;Secure, consent=true;Domain=www.datasud.fr;Path=/;Max-Age=7776000;SameSite=strict;HTTPOnly;Secure",
+          "X-Cache-status": "MISS",
+          "Access-Control-Allow-Methods": "POST, GET, OPTIONS, DELETE, PUT",
+          "Access-Control-Allow-Headers": "*",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Encoding": "gzip"
+        },
+        "body": "{\"help\":\"https://demo.ckan.org/api/3/action/help_show?name=package_show\",\"success\":true,\"result\":{\"version\":\"1.0\",\"id\":\"b8f35d04-c2ad-400e-86b3-c06b8ce7708a\",\"revision_id\":\"\",\"state\":\"active\",\"metadata_created\":\"2025-07-16T08:33:58.929285+00:00\",\"metadata_modified\":\"2025-07-16\",\"private\":false,\"isopen\":false,\"type\":\"dataset\",\"datatype\":[\"Donn\u00e9es g\u00e9ographiques\"],\"name\":\"sacs-a-chien----ville-de-gap\",\"title\":\"Canisacs -  Ville de Gap\",\"notes\":\"Distributeurs de sacs pour d\u00e9jections canines situ\u00e9es sur la ville de Gap\\nPlus d'information sur la [propret\u00e9 canine \u00e0 Gap ](https://www.ville-gap.fr/la-proprete-canine/)\",\"thumbnail\":\"\",\"author\":\"Ville de Gap\",\"author_email\":\"voirie@ville-gap.fr\",\"creator_user_id\":null,\"license_id\":\"lov2\",\"license_title\":\"Licence Ouverte 2.0\",\"maintainer\":null,\"maintainer_email\":null,\"url\":\"https://www.datasud.fr/explorer/fr/jeux-de-donnees/sacs-a-chien----ville-de-gap\",\"owner_org\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"organization\":{\"id\":\"532\",\"revision_id\":\"\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"title\":\"Communaut\u00e9 d'Agglom\u00e9ration de Gap-Tallard-Durance\",\"description\":\"\",\"image_url\":\"https://www.datasud.fr/fr/usergroup/user-groups/532/thumbnail/\",\"created\":\"2024-01-24T07:38:57.302863+00:00\",\"type\":\"organization\",\"is_organization\":true,\"approval_status\":\"approved\",\"state\":\"active\"},\"kinds\":[{\"id\":\"3\",\"name\":\"geospatial-data\",\"title\":\"Donn\u00e9es g\u00e9ographiques\",\"description\":\"\",\"image_display_url\":null}],\"category\":[{\"id\":\"4\",\"name\":\"proteger-mon-environnement\",\"title\":\"Prot\u00e9ger mon environnement\",\"description\":\"\",\"image_display_url\":null}],\"groups\":[{\"id\":\"21\",\"name\":\"environnement-et-climat\",\"title\":\"Environnement et climat\",\"description\":\"\",\"image_display_url\":null},{\"id\":\"22\",\"name\":\"equipements-batiments-et-logement\",\"title\":\"\u00c9quipements, b\u00e2timents et logement\",\"description\":\"\",\"image_display_url\":null}],\"num_tags\":4,\"tags\":[{\"vocabulary_id\":null,\"id\":\"1571\",\"name\":\"distributeur\",\"display_name\":\"distributeur\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"2445\",\"name\":\"sac-\u00e0-chien\",\"display_name\":\"sac \u00e0 chien\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"2446\",\"name\":\"d\u00e9jection-canine\",\"display_name\":\"d\u00e9jection canine\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"2447\",\"name\":\"canisac\",\"display_name\":\"canisac\",\"state\":\"active\"}],\"num_resources\":1,\"resources\":[{\"position\":1,\"state\":\"active\",\"package_id\":\"b8f35d04-c2ad-400e-86b3-c06b8ce7708a\",\"id\":\"0e55aad6-a0e6-4663-82c6-da3c1ad85173\",\"hash\":null,\"resource_type\":\"file.upload\",\"data_type\":null,\"name\":\"sac_chien_05061\",\"description\":\"\",\"format\":\"Shapefile (zip)\",\"created\":\"2025-07-16T08:34:13.547167+00:00\",\"last_modified\":\"2025-07-16\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":\"application/zip\",\"mimetype_inner\":null,\"size\":4798,\"url\":\"https://www.datasud.fr/fr/dataset/datasets/4542/resource/6175/download/\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":0,\"state\":\"active\",\"package_id\":\"b8f35d04-c2ad-400e-86b3-c06b8ce7708a\",\"id\":\"1111\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WMS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:sac_chien_05061\",\"description\":\"\",\"format\":\"OGC:WMS\",\"created\":\"2025-07-16T08:34:19.783911+00:00\",\"last_modified\":\"2025-07-16T08:34:19.783967+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":1,\"state\":\"active\",\"package_id\":\"b8f35d04-c2ad-400e-86b3-c06b8ce7708a\",\"id\":\"1111\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WFS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:sac_chien_05061\",\"description\":\"\",\"format\":\"OGC:WFS\",\"created\":\"2025-07-16T08:34:19.783911+00:00\",\"last_modified\":\"2025-07-16T08:34:19.783967+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=communaute-dagglomeration-de-gap-tallard-durance:sac_chien_05061&maxFeatures=50&outputFormat=application/json\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false}],\"relationships_as_subject\":[],\"relationships_as_object\":[],\"extras\":[]}}"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.datasud.fr/fr/indexer/service/ckan/api/3/action/package_show?id=cendriers----ville-de-gap",
+        "headers": {
+          "User-Agent": "uData/0.1 ckan",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive",
+          "content-type": "application/json"
+        },
+        "body": null
+      },
+      "response": {
+        "status_code": 200,
+        "headers": {
+          "Server": "nginx/1.22.1",
+          "Date": "Wed, 30 Jul 2025 11:19:42 GMT",
+          "Content-Type": "application/json",
+          "Transfer-Encoding": "chunked",
+          "Connection": "keep-alive",
+          "Vary": "Accept-Encoding, Accept, Cookie",
+          "Allow": "GET, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Language": "fr",
+          "X-Content-Type-Options": "nosniff, nosniff, nosniff",
+          "Referrer-Policy": "same-origin, no-referrer-when-downgrade, no-referrer-when-downgrade",
+          "X-XSS-Protection": "1; mode=block, 1; mode=block",
+          "Permissions-Policy": "accelerometer=(), camera=(), geolocation=(self), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()",
+          "Strict-Transport-Security": "max-age=31536000; includeSubDomains, max-age=31536000; includeSubDomains",
+          "Set-Cookie": "consent=true;Domain=www.datasud.fr;Path=/;Max-Age=7776000;SameSite=strict;HTTPOnly;Secure, consent=true;Domain=www.datasud.fr;Path=/;Max-Age=7776000;SameSite=strict;HTTPOnly;Secure",
+          "X-Cache-status": "MISS",
+          "Access-Control-Allow-Methods": "POST, GET, OPTIONS, DELETE, PUT",
+          "Access-Control-Allow-Headers": "*",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Encoding": "gzip"
+        },
+        "body": "{\"help\":\"https://demo.ckan.org/api/3/action/help_show?name=package_show\",\"success\":true,\"result\":{\"version\":\"1.0\",\"id\":\"af382e3c-4160-428f-9b8e-885bc1739f20\",\"revision_id\":\"\",\"state\":\"active\",\"metadata_created\":\"2025-07-16T08:29:30.737470+00:00\",\"metadata_modified\":\"2025-07-16\",\"private\":false,\"isopen\":false,\"type\":\"dataset\",\"datatype\":[\"Donn\u00e9es g\u00e9ographiques\"],\"name\":\"cendriers----ville-de-gap\",\"title\":\"Cendriers -  Ville de Gap\",\"notes\":\"Localisation des cendriers situ\u00e9s sur la ville de Gap.\",\"thumbnail\":\"\",\"author\":\"Ville de Gap\",\"author_email\":\"voirie@ville-gap.fr\",\"creator_user_id\":null,\"license_id\":\"lov2\",\"license_title\":\"Licence Ouverte 2.0\",\"maintainer\":null,\"maintainer_email\":null,\"url\":\"https://www.datasud.fr/explorer/fr/jeux-de-donnees/cendriers----ville-de-gap\",\"owner_org\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"organization\":{\"id\":\"532\",\"revision_id\":\"\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"title\":\"Communaut\u00e9 d'Agglom\u00e9ration de Gap-Tallard-Durance\",\"description\":\"\",\"image_url\":\"https://www.datasud.fr/fr/usergroup/user-groups/532/thumbnail/\",\"created\":\"2024-01-24T07:38:57.302863+00:00\",\"type\":\"organization\",\"is_organization\":true,\"approval_status\":\"approved\",\"state\":\"active\"},\"kinds\":[{\"id\":\"3\",\"name\":\"geospatial-data\",\"title\":\"Donn\u00e9es g\u00e9ographiques\",\"description\":\"\",\"image_display_url\":null}],\"category\":[{\"id\":\"4\",\"name\":\"proteger-mon-environnement\",\"title\":\"Prot\u00e9ger mon environnement\",\"description\":\"\",\"image_display_url\":null}],\"groups\":[{\"id\":\"21\",\"name\":\"environnement-et-climat\",\"title\":\"Environnement et climat\",\"description\":\"\",\"image_display_url\":null},{\"id\":\"22\",\"name\":\"equipements-batiments-et-logement\",\"title\":\"\u00c9quipements, b\u00e2timents et logement\",\"description\":\"\",\"image_display_url\":null}],\"num_tags\":1,\"tags\":[{\"vocabulary_id\":null,\"id\":\"1007\",\"name\":\"cendrier\",\"display_name\":\"cendrier\",\"state\":\"active\"}],\"num_resources\":1,\"resources\":[{\"position\":1,\"state\":\"active\",\"package_id\":\"af382e3c-4160-428f-9b8e-885bc1739f20\",\"id\":\"925b26ad-03ce-4358-ac9c-cfea2b927f4b\",\"hash\":null,\"resource_type\":\"file.upload\",\"data_type\":null,\"name\":\"cendrier_05061\",\"description\":\"\",\"format\":\"Shapefile (zip)\",\"created\":\"2025-07-16T08:29:46.677521+00:00\",\"last_modified\":\"2025-07-16\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":\"application/zip\",\"mimetype_inner\":null,\"size\":3081,\"url\":\"https://www.datasud.fr/fr/dataset/datasets/4540/resource/6173/download/\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":0,\"state\":\"active\",\"package_id\":\"af382e3c-4160-428f-9b8e-885bc1739f20\",\"id\":\"1109\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WMS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:cendrier_05061\",\"description\":\"\",\"format\":\"OGC:WMS\",\"created\":\"2025-07-16T08:29:53.061129+00:00\",\"last_modified\":\"2025-07-16T08:29:53.061201+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":1,\"state\":\"active\",\"package_id\":\"af382e3c-4160-428f-9b8e-885bc1739f20\",\"id\":\"1109\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WFS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:cendrier_05061\",\"description\":\"\",\"format\":\"OGC:WFS\",\"created\":\"2025-07-16T08:29:53.061129+00:00\",\"last_modified\":\"2025-07-16T08:29:53.061201+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=communaute-dagglomeration-de-gap-tallard-durance:cendrier_05061&maxFeatures=50&outputFormat=application/json\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false}],\"relationships_as_subject\":[],\"relationships_as_object\":[],\"extras\":[]}}"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.datasud.fr/fr/indexer/service/ckan/api/3/action/package_show?id=corbeilles---ville-de-gap",
+        "headers": {
+          "User-Agent": "uData/0.1 ckan",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive",
+          "content-type": "application/json"
+        },
+        "body": null
+      },
+      "response": {
+        "status_code": 200,
+        "headers": {
+          "Server": "nginx/1.22.1",
+          "Date": "Wed, 30 Jul 2025 11:19:42 GMT",
+          "Content-Type": "application/json",
+          "Transfer-Encoding": "chunked",
+          "Connection": "keep-alive",
+          "Vary": "Accept-Encoding, Accept, Cookie",
+          "Allow": "GET, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Language": "fr",
+          "X-Content-Type-Options": "nosniff, nosniff, nosniff",
+          "Referrer-Policy": "same-origin, no-referrer-when-downgrade, no-referrer-when-downgrade",
+          "X-XSS-Protection": "1; mode=block, 1; mode=block",
+          "Permissions-Policy": "accelerometer=(), camera=(), geolocation=(self), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()",
+          "Strict-Transport-Security": "max-age=31536000; includeSubDomains, max-age=31536000; includeSubDomains",
+          "Set-Cookie": "consent=true;Domain=www.datasud.fr;Path=/;Max-Age=7776000;SameSite=strict;HTTPOnly;Secure, consent=true;Domain=www.datasud.fr;Path=/;Max-Age=7776000;SameSite=strict;HTTPOnly;Secure",
+          "X-Cache-status": "MISS",
+          "Access-Control-Allow-Methods": "POST, GET, OPTIONS, DELETE, PUT",
+          "Access-Control-Allow-Headers": "*",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Encoding": "gzip"
+        },
+        "body": "{\"help\":\"https://demo.ckan.org/api/3/action/help_show?name=package_show\",\"success\":true,\"result\":{\"version\":\"1.0\",\"id\":\"73d7b463-9230-4910-92ce-414e16376521\",\"revision_id\":\"\",\"state\":\"active\",\"metadata_created\":\"2025-07-16T08:31:26.555922+00:00\",\"metadata_modified\":\"2025-07-16\",\"private\":false,\"isopen\":false,\"type\":\"dataset\",\"datatype\":[\"Donn\u00e9es g\u00e9ographiques\"],\"name\":\"corbeilles---ville-de-gap\",\"title\":\"Corbeilles -  Ville de Gap\",\"notes\":\"Corbeilles situ\u00e9es sur la ville de Gap\",\"thumbnail\":\"\",\"author\":\"Ville de Gap\",\"author_email\":\"voirie@ville-gap.fr\",\"creator_user_id\":null,\"license_id\":\"lov2\",\"license_title\":\"Licence Ouverte 2.0\",\"maintainer\":null,\"maintainer_email\":null,\"url\":\"https://www.datasud.fr/explorer/fr/jeux-de-donnees/corbeilles---ville-de-gap\",\"owner_org\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"organization\":{\"id\":\"532\",\"revision_id\":\"\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"title\":\"Communaut\u00e9 d'Agglom\u00e9ration de Gap-Tallard-Durance\",\"description\":\"\",\"image_url\":\"https://www.datasud.fr/fr/usergroup/user-groups/532/thumbnail/\",\"created\":\"2024-01-24T07:38:57.302863+00:00\",\"type\":\"organization\",\"is_organization\":true,\"approval_status\":\"approved\",\"state\":\"active\"},\"kinds\":[{\"id\":\"3\",\"name\":\"geospatial-data\",\"title\":\"Donn\u00e9es g\u00e9ographiques\",\"description\":\"\",\"image_display_url\":null}],\"category\":[{\"id\":\"4\",\"name\":\"proteger-mon-environnement\",\"title\":\"Prot\u00e9ger mon environnement\",\"description\":\"\",\"image_display_url\":null}],\"groups\":[{\"id\":\"21\",\"name\":\"environnement-et-climat\",\"title\":\"Environnement et climat\",\"description\":\"\",\"image_display_url\":null},{\"id\":\"22\",\"name\":\"equipements-batiments-et-logement\",\"title\":\"\u00c9quipements, b\u00e2timents et logement\",\"description\":\"\",\"image_display_url\":null}],\"num_tags\":2,\"tags\":[{\"vocabulary_id\":null,\"id\":\"1443\",\"name\":\"poubelle\",\"display_name\":\"poubelle\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"2444\",\"name\":\"corbeille\",\"display_name\":\"corbeille\",\"state\":\"active\"}],\"num_resources\":1,\"resources\":[{\"position\":1,\"state\":\"active\",\"package_id\":\"73d7b463-9230-4910-92ce-414e16376521\",\"id\":\"92ec00b7-53d2-42a6-94e1-c10861213478\",\"hash\":null,\"resource_type\":\"file.upload\",\"data_type\":null,\"name\":\"corbeille_05061\",\"description\":\"\",\"format\":\"Shapefile (zip)\",\"created\":\"2025-07-16T08:31:44.432179+00:00\",\"last_modified\":\"2025-07-16\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":\"application/zip\",\"mimetype_inner\":null,\"size\":10569,\"url\":\"https://www.datasud.fr/fr/dataset/datasets/4541/resource/6174/download/\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":0,\"state\":\"active\",\"package_id\":\"73d7b463-9230-4910-92ce-414e16376521\",\"id\":\"1110\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WMS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:corbeille_05061\",\"description\":\"\",\"format\":\"OGC:WMS\",\"created\":\"2025-07-16T08:31:51.188944+00:00\",\"last_modified\":\"2025-07-16T08:31:51.189026+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":1,\"state\":\"active\",\"package_id\":\"73d7b463-9230-4910-92ce-414e16376521\",\"id\":\"1110\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WFS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:corbeille_05061\",\"description\":\"\",\"format\":\"OGC:WFS\",\"created\":\"2025-07-16T08:31:51.188944+00:00\",\"last_modified\":\"2025-07-16T08:31:51.189026+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=communaute-dagglomeration-de-gap-tallard-durance:corbeille_05061&maxFeatures=50&outputFormat=application/json\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false}],\"relationships_as_subject\":[],\"relationships_as_object\":[],\"extras\":[]}}"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.datasud.fr/fr/indexer/service/ckan/api/3/action/package_show?id=parkings-ville-de-gap",
+        "headers": {
+          "User-Agent": "uData/0.1 ckan",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive",
+          "content-type": "application/json"
+        },
+        "body": null
+      },
+      "response": {
+        "status_code": 200,
+        "headers": {
+          "Server": "nginx/1.22.1",
+          "Date": "Wed, 30 Jul 2025 11:19:43 GMT",
+          "Content-Type": "application/json",
+          "Transfer-Encoding": "chunked",
+          "Connection": "keep-alive",
+          "Vary": "Accept-Encoding, Accept, Cookie",
+          "Allow": "GET, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Language": "fr",
+          "X-Content-Type-Options": "nosniff, nosniff, nosniff",
+          "Referrer-Policy": "same-origin, no-referrer-when-downgrade, no-referrer-when-downgrade",
+          "X-XSS-Protection": "1; mode=block, 1; mode=block",
+          "Permissions-Policy": "accelerometer=(), camera=(), geolocation=(self), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()",
+          "Strict-Transport-Security": "max-age=31536000; includeSubDomains, max-age=31536000; includeSubDomains",
+          "Set-Cookie": "consent=true;Domain=www.datasud.fr;Path=/;Max-Age=7776000;SameSite=strict;HTTPOnly;Secure, consent=true;Domain=www.datasud.fr;Path=/;Max-Age=7776000;SameSite=strict;HTTPOnly;Secure",
+          "X-Cache-status": "MISS",
+          "Access-Control-Allow-Methods": "POST, GET, OPTIONS, DELETE, PUT",
+          "Access-Control-Allow-Headers": "*",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Encoding": "gzip"
+        },
+        "body": "{\"help\":\"https://demo.ckan.org/api/3/action/help_show?name=package_show\",\"success\":true,\"result\":{\"version\":\"1.0\",\"id\":\"fe7cdceb-f65e-4e79-9ff2-d7895dc3b155\",\"revision_id\":\"\",\"state\":\"active\",\"metadata_created\":\"2025-07-16T15:05:30.868851+00:00\",\"metadata_modified\":\"2025-07-16\",\"private\":false,\"isopen\":false,\"type\":\"dataset\",\"datatype\":[\"Donn\u00e9es g\u00e9ographiques\"],\"name\":\"parkings-ville-de-gap\",\"title\":\"Parcs de stationnement de la Ville de Gap\",\"notes\":\"Localisation des parcs de stationnement situ\u00e9s sur la ville de Gap : parking s\u00e9curis\u00e9, parking gratuits non ferm\u00e9s, parkings-relais.\\n[Plus d'information sur le stationnement sur le territoire](https://www.ville-gap.fr/stationnement/)\",\"thumbnail\":\"\",\"author\":\"Ville de Gap\",\"author_email\":\"voirie@ville-gap.fr\",\"creator_user_id\":null,\"license_id\":\"lov2\",\"license_title\":\"Licence Ouverte 2.0\",\"maintainer\":null,\"maintainer_email\":null,\"url\":\"https://www.datasud.fr/explorer/fr/jeux-de-donnees/parkings-ville-de-gap\",\"owner_org\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"organization\":{\"id\":\"532\",\"revision_id\":\"\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"title\":\"Communaut\u00e9 d'Agglom\u00e9ration de Gap-Tallard-Durance\",\"description\":\"\",\"image_url\":\"https://www.datasud.fr/fr/usergroup/user-groups/532/thumbnail/\",\"created\":\"2024-01-24T07:38:57.302863+00:00\",\"type\":\"organization\",\"is_organization\":true,\"approval_status\":\"approved\",\"state\":\"active\"},\"kinds\":[{\"id\":\"3\",\"name\":\"geospatial-data\",\"title\":\"Donn\u00e9es g\u00e9ographiques\",\"description\":\"\",\"image_display_url\":null}],\"category\":[{\"id\":\"5\",\"name\":\"se-deplacer\",\"title\":\"Se d\u00e9placer\",\"description\":\"\",\"image_display_url\":null}],\"groups\":[{\"id\":\"27\",\"name\":\"mobilite-et-transports\",\"title\":\"Mobilit\u00e9 et transports\",\"description\":\"\",\"image_display_url\":null}],\"num_tags\":3,\"tags\":[{\"vocabulary_id\":null,\"id\":\"763\",\"name\":\"parking\",\"display_name\":\"parking\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"2337\",\"name\":\"aire-de-stationnement\",\"display_name\":\"aire de stationnement\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"2448\",\"name\":\"stationner\",\"display_name\":\"stationner\",\"state\":\"active\"}],\"num_resources\":1,\"resources\":[{\"position\":1,\"state\":\"active\",\"package_id\":\"fe7cdceb-f65e-4e79-9ff2-d7895dc3b155\",\"id\":\"759b8f35-ef8a-4e23-bbcc-4bd8dc29ce27\",\"hash\":null,\"resource_type\":\"file.upload\",\"data_type\":null,\"name\":\"parking_05061\",\"description\":\"parking_05061\",\"format\":\"Shapefile (zip)\",\"created\":\"2025-07-16T15:05:45.227793+00:00\",\"last_modified\":\"2025-07-16T15:05:50.090430+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":\"application/zip\",\"mimetype_inner\":null,\"size\":2606,\"url\":\"https://www.datasud.fr/fr/dataset/datasets/4543/resource/6177/download/\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":0,\"state\":\"active\",\"package_id\":\"fe7cdceb-f65e-4e79-9ff2-d7895dc3b155\",\"id\":\"1113\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WMS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:parking_05061\",\"description\":\"\",\"format\":\"OGC:WMS\",\"created\":\"2025-07-16T15:05:51.288711+00:00\",\"last_modified\":\"2025-07-16T15:05:51.288785+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":1,\"state\":\"active\",\"package_id\":\"fe7cdceb-f65e-4e79-9ff2-d7895dc3b155\",\"id\":\"1113\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WFS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:parking_05061\",\"description\":\"\",\"format\":\"OGC:WFS\",\"created\":\"2025-07-16T15:05:51.288711+00:00\",\"last_modified\":\"2025-07-16T15:05:51.288785+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=communaute-dagglomeration-de-gap-tallard-durance:parking_05061&maxFeatures=50&outputFormat=application/json\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false}],\"relationships_as_subject\":[],\"relationships_as_object\":[],\"extras\":[]}}"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.datasud.fr/fr/indexer/service/ckan/api/3/action/package_show?id=dechetteries-de-la-cagtd",
+        "headers": {
+          "User-Agent": "uData/0.1 ckan",
+          "Accept-Encoding": "gzip, deflate",
+          "Accept": "*/*",
+          "Connection": "keep-alive",
+          "content-type": "application/json"
+        },
+        "body": null
+      },
+      "response": {
+        "status_code": 200,
+        "headers": {
+          "Server": "nginx/1.22.1",
+          "Date": "Wed, 30 Jul 2025 11:19:44 GMT",
+          "Content-Type": "application/json",
+          "Transfer-Encoding": "chunked",
+          "Connection": "keep-alive",
+          "Vary": "Accept-Encoding, Accept, Cookie",
+          "Allow": "GET, HEAD, OPTIONS",
+          "X-Frame-Options": "DENY",
+          "Content-Language": "fr",
+          "X-Content-Type-Options": "nosniff, nosniff, nosniff",
+          "Referrer-Policy": "same-origin, no-referrer-when-downgrade, no-referrer-when-downgrade",
+          "X-XSS-Protection": "1; mode=block, 1; mode=block",
+          "Permissions-Policy": "accelerometer=(), camera=(), geolocation=(self), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()",
+          "Strict-Transport-Security": "max-age=31536000; includeSubDomains, max-age=31536000; includeSubDomains",
+          "Set-Cookie": "consent=true;Domain=www.datasud.fr;Path=/;Max-Age=7776000;SameSite=strict;HTTPOnly;Secure, consent=true;Domain=www.datasud.fr;Path=/;Max-Age=7776000;SameSite=strict;HTTPOnly;Secure",
+          "X-Cache-status": "MISS",
+          "Access-Control-Allow-Methods": "POST, GET, OPTIONS, DELETE, PUT",
+          "Access-Control-Allow-Headers": "*",
+          "Access-Control-Allow-Origin": "*",
+          "Content-Encoding": "gzip"
+        },
+        "body": "{\"help\":\"https://demo.ckan.org/api/3/action/help_show?name=package_show\",\"success\":true,\"result\":{\"version\":\"1.0\",\"id\":\"b63fa801-a20a-4cbd-b202-398d3afbd328\",\"revision_id\":\"\",\"state\":\"active\",\"metadata_created\":\"2025-07-16T06:59:56.199433+00:00\",\"metadata_modified\":\"2025-07-10\",\"private\":false,\"isopen\":false,\"type\":\"dataset\",\"datatype\":[\"Donn\u00e9es g\u00e9ographiques\"],\"name\":\"dechetteries-de-la-cagtd\",\"title\":\"D\u00e9chetteries  Communaut\u00e9 d'Agglom\u00e9ration Gap - Tallard - Durance\",\"notes\":\"Localisation des d\u00e9chetteries situ\u00e9es sur le territoire de la Communaut\u00e9 d'Agglom\u00e9ration Gap - Tallard - Durance\",\"thumbnail\":\"\",\"author\":\"Ville de Gap\",\"author_email\":\"voirie@ville-gap.fr\",\"creator_user_id\":null,\"license_id\":\"lov2\",\"license_title\":\"Licence Ouverte 2.0\",\"maintainer\":null,\"maintainer_email\":null,\"url\":\"https://www.datasud.fr/explorer/fr/jeux-de-donnees/dechetteries-de-la-cagtd\",\"owner_org\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"organization\":{\"id\":\"532\",\"revision_id\":\"\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance\",\"title\":\"Communaut\u00e9 d'Agglom\u00e9ration de Gap-Tallard-Durance\",\"description\":\"\",\"image_url\":\"https://www.datasud.fr/fr/usergroup/user-groups/532/thumbnail/\",\"created\":\"2024-01-24T07:38:57.302863+00:00\",\"type\":\"organization\",\"is_organization\":true,\"approval_status\":\"approved\",\"state\":\"active\"},\"kinds\":[{\"id\":\"3\",\"name\":\"geospatial-data\",\"title\":\"Donn\u00e9es g\u00e9ographiques\",\"description\":\"\",\"image_display_url\":null}],\"category\":[{\"id\":\"4\",\"name\":\"proteger-mon-environnement\",\"title\":\"Prot\u00e9ger mon environnement\",\"description\":\"\",\"image_display_url\":null}],\"groups\":[{\"id\":\"21\",\"name\":\"environnement-et-climat\",\"title\":\"Environnement et climat\",\"description\":\"\",\"image_display_url\":null}],\"num_tags\":3,\"tags\":[{\"vocabulary_id\":null,\"id\":\"897\",\"name\":\"d\u00e9chet\",\"display_name\":\"d\u00e9chet\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"2439\",\"name\":\"d\u00e9chetterie\",\"display_name\":\"d\u00e9chetterie\",\"state\":\"active\"},{\"vocabulary_id\":null,\"id\":\"2440\",\"name\":\"dechetterie\",\"display_name\":\"dechetterie\",\"state\":\"active\"}],\"num_resources\":1,\"resources\":[{\"position\":1,\"state\":\"active\",\"package_id\":\"b63fa801-a20a-4cbd-b202-398d3afbd328\",\"id\":\"7deef705-611c-4214-8b02-1397e6784a2c\",\"hash\":null,\"resource_type\":\"file.upload\",\"data_type\":null,\"name\":\"dechetterie_CAGTD\",\"description\":\"\",\"format\":\"Shapefile (zip)\",\"created\":\"2025-07-16T07:00:10.865436+00:00\",\"last_modified\":\"2025-07-16T07:00:15.197204+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":\"application/zip\",\"mimetype_inner\":null,\"size\":1551,\"url\":\"https://www.datasud.fr/fr/dataset/datasets/4537/resource/6169/download/\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":0,\"state\":\"active\",\"package_id\":\"b63fa801-a20a-4cbd-b202-398d3afbd328\",\"id\":\"1105\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WMS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:dechetterie_cagtd\",\"description\":\"\",\"format\":\"OGC:WMS\",\"created\":\"2025-07-16T07:00:16.268080+00:00\",\"last_modified\":\"2025-07-16T07:00:16.268125+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false},{\"position\":1,\"state\":\"active\",\"package_id\":\"b63fa801-a20a-4cbd-b202-398d3afbd328\",\"id\":\"1105\",\"hash\":null,\"resource_type\":null,\"data_type\":\"WFS\",\"name\":\"communaute-dagglomeration-de-gap-tallard-durance:dechetterie_cagtd\",\"description\":\"\",\"format\":\"OGC:WFS\",\"created\":\"2025-07-16T07:00:16.268080+00:00\",\"last_modified\":\"2025-07-16T07:00:16.268125+00:00\",\"cache_url\":null,\"cache_last_updated\":null,\"mimetype\":null,\"mimetype_inner\":null,\"size\":null,\"url\":\"https://www.datasud.fr/geoserver/communaute-dagglomeration-de-gap-tallard-durance/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=communaute-dagglomeration-de-gap-tallard-durance:dechetterie_cagtd&maxFeatures=50&outputFormat=application/json\",\"url_type\":null,\"datastore_active\":false,\"datastore_contains_all_records_of_source_file\":false}],\"relationships_as_subject\":[],\"relationships_as_object\":[],\"extras\":[]}}"
+      }
+    }
+  ],
+  "job": {
+    "created": "2025-07-30 11:20:12.490000",
+    "started": "2025-07-30 11:20:12.489000",
+    "ended": "2025-07-30 11:20:16.963000",
+    "status": "done",
+    "errors": [],
+    "items": [
+      {
+        "remote_id": "cfa98601-185f-4194-bc0f-119fc23a194b",
+        "dataset": "6889ffed4b3bbc104668b260",
+        "status": "done",
+        "created": "2025-07-30 11:20:12.801000",
+        "started": "2025-07-30 11:20:12.801000",
+        "ended": "2025-07-30 11:20:13.663000",
+        "errors": [],
+        "logs": [
+          {
+            "level": "ERROR",
+            "message": "Unable to parse resource ID 1112"
+          },
+          {
+            "level": "ERROR",
+            "message": "Unable to parse resource ID 1112"
+          }
+        ],
+        "args": [],
+        "kwargs": {}
+      },
+      {
+        "remote_id": "04c1c235-969a-4442-8c8a-43dca754f2ca",
+        "dataset": "6889ffee4b3bbc104668b261",
+        "status": "done",
+        "created": "2025-07-30 11:20:13.663000",
+        "started": "2025-07-30 11:20:13.663000",
+        "ended": "2025-07-30 11:20:14.248000",
+        "errors": [],
+        "logs": [
+          {
+            "level": "ERROR",
+            "message": "Unable to parse resource ID 1099"
+          },
+          {
+            "level": "ERROR",
+            "message": "Unable to parse resource ID 1099"
+          }
+        ],
+        "args": [],
+        "kwargs": {}
+      },
+      {
+        "remote_id": "b8f35d04-c2ad-400e-86b3-c06b8ce7708a",
+        "dataset": "6889ffee4b3bbc104668b262",
+        "status": "done",
+        "created": "2025-07-30 11:20:14.249000",
+        "started": "2025-07-30 11:20:14.249000",
+        "ended": "2025-07-30 11:20:14.744000",
+        "errors": [],
+        "logs": [
+          {
+            "level": "ERROR",
+            "message": "Unable to parse resource ID 1111"
+          },
+          {
+            "level": "ERROR",
+            "message": "Unable to parse resource ID 1111"
+          }
+        ],
+        "args": [],
+        "kwargs": {}
+      },
+      {
+        "remote_id": "af382e3c-4160-428f-9b8e-885bc1739f20",
+        "dataset": "6889ffef4b3bbc104668b263",
+        "status": "done",
+        "created": "2025-07-30 11:20:14.745000",
+        "started": "2025-07-30 11:20:14.745000",
+        "ended": "2025-07-30 11:20:15.247000",
+        "errors": [],
+        "logs": [
+          {
+            "level": "ERROR",
+            "message": "Unable to parse resource ID 1109"
+          },
+          {
+            "level": "ERROR",
+            "message": "Unable to parse resource ID 1109"
+          }
+        ],
+        "args": [],
+        "kwargs": {}
+      },
+      {
+        "remote_id": "73d7b463-9230-4910-92ce-414e16376521",
+        "dataset": "6889ffef4b3bbc104668b264",
+        "status": "done",
+        "created": "2025-07-30 11:20:15.248000",
+        "started": "2025-07-30 11:20:15.248000",
+        "ended": "2025-07-30 11:20:15.759000",
+        "errors": [],
+        "logs": [
+          {
+            "level": "ERROR",
+            "message": "Unable to parse resource ID 1110"
+          },
+          {
+            "level": "ERROR",
+            "message": "Unable to parse resource ID 1110"
+          }
+        ],
+        "args": [],
+        "kwargs": {}
+      },
+      {
+        "remote_id": "fe7cdceb-f65e-4e79-9ff2-d7895dc3b155",
+        "dataset": "6889fff04b3bbc104668b265",
+        "status": "done",
+        "created": "2025-07-30 11:20:15.760000",
+        "started": "2025-07-30 11:20:15.760000",
+        "ended": "2025-07-30 11:20:16.344000",
+        "errors": [],
+        "logs": [
+          {
+            "level": "ERROR",
+            "message": "Unable to parse resource ID 1113"
+          },
+          {
+            "level": "ERROR",
+            "message": "Unable to parse resource ID 1113"
+          }
+        ],
+        "args": [],
+        "kwargs": {}
+      },
+      {
+        "remote_id": "b63fa801-a20a-4cbd-b202-398d3afbd328",
+        "dataset": "6889fff04b3bbc104668b266",
+        "status": "done",
+        "created": "2025-07-30 11:20:16.345000",
+        "started": "2025-07-30 11:20:16.345000",
+        "ended": "2025-07-30 11:20:16.816000",
+        "errors": [],
+        "logs": [
+          {
+            "level": "ERROR",
+            "message": "Unable to parse resource ID 1105"
+          },
+          {
+            "level": "ERROR",
+            "message": "Unable to parse resource ID 1105"
+          }
+        ],
+        "args": [],
+        "kwargs": {}
+      }
+    ],
+    "source": "6889ffec4b3bbc104668b25e",
+    "data": {},
+    "id": "6889ffec4b3bbc104668b25f"
+  },
+  "datasets": [
+    {
+      "metrics": {},
+      "badges": [],
+      "title": "D\u00e9chetteries  Communaut\u00e9 d'Agglom\u00e9ration Gap - Tallard - Durance",
+      "slug": "dechetteries-de-la-cagtd",
+      "description": "Localisation des d\u00e9chetteries situ\u00e9es sur le territoire de la Communaut\u00e9 d'Agglom\u00e9ration Gap - Tallard - Durance",
+      "tags": [
+        "dechet",
+        "dechetterie"
+      ],
+      "resources": [
+        {
+          "_id": "7deef705-611c-4214-8b02-1397e6784a2c",
+          "metrics": {},
+          "title": "dechetterie_CAGTD",
+          "description": "",
+          "filetype": "remote",
+          "type": "main",
+          "url": "https://www.datasud.fr/fr/dataset/datasets/4537/resource/6169/download/",
+          "urlhash": "7781a08fe9147e8e1ffb98b142d55ddca8913da1",
+          "format": "shapefile (zip)",
+          "mime": "application/zip",
+          "extras": {},
+          "harvest": {
+            "created_at": "2025-07-16 00:00:00",
+            "modified_at": "2025-07-16 00:00:00"
+          },
+          "created_at_internal": "2025-07-30 11:20:16.812000",
+          "last_modified_internal": "2025-07-30 11:20:16.812000"
+        }
+      ],
+      "private": false,
+      "ext": {},
+      "extras": {},
+      "harvest": {
+        "backend": "CKAN",
+        "created_at": "2025-07-16 00:00:00",
+        "modified_at": "2025-07-10 00:00:00",
+        "source_id": "6889ffec4b3bbc104668b25e",
+        "remote_id": "b63fa801-a20a-4cbd-b202-398d3afbd328",
+        "domain": "www.datasud.fr",
+        "last_update": "2025-07-30 11:20:16.812000",
+        "remote_url": "https://www.datasud.fr/explorer/fr/jeux-de-donnees/dechetteries-de-la-cagtd",
+        "ckan_name": "dechetteries-de-la-cagtd"
+      },
+      "quality_cached": {
+        "license": false,
+        "temporal_coverage": false,
+        "spatial": false,
+        "update_frequency": null,
+        "next_update_for_update_fulfilled_in_time": null,
+        "dataset_description_quality": true,
+        "has_resources": true,
+        "has_open_format": true,
+        "all_resources_available": true,
+        "resources_documentation": false
+      },
+      "featured": false,
+      "contact_points": [],
+      "created_at_internal": "2025-07-30 11:20:16.810000",
+      "last_modified_internal": "2025-07-30 11:20:16.810000",
+      "last_update": "2025-07-16 00:00:00",
+      "id": "6889fff04b3bbc104668b266"
+    },
+    {
+      "metrics": {},
+      "badges": [],
+      "title": "Parcs de stationnement de la Ville de Gap",
+      "slug": "parkings-ville-de-gap",
+      "description": "Localisation des parcs de stationnement situ\u00e9s sur la ville de Gap : parking s\u00e9curis\u00e9, parking gratuits non ferm\u00e9s, parkings-relais. [Plus d'information sur le stationnement sur le territoire](https://www.ville-gap.fr/stationnement/)",
+      "tags": [
+        "aire-de-stationnement",
+        "parking",
+        "stationner"
+      ],
+      "resources": [
+        {
+          "_id": "759b8f35-ef8a-4e23-bbcc-4bd8dc29ce27",
+          "metrics": {},
+          "title": "parking_05061",
+          "description": "parking_05061",
+          "filetype": "remote",
+          "type": "main",
+          "url": "https://www.datasud.fr/fr/dataset/datasets/4543/resource/6177/download/",
+          "urlhash": "907047324e415e7239bb542f77ecca50d75b31fd",
+          "format": "shapefile (zip)",
+          "mime": "application/zip",
+          "extras": {},
+          "harvest": {
+            "created_at": "2025-07-16 00:00:00",
+            "modified_at": "2025-07-16 00:00:00"
+          },
+          "created_at_internal": "2025-07-30 11:20:16.340000",
+          "last_modified_internal": "2025-07-30 11:20:16.340000"
+        }
+      ],
+      "private": false,
+      "ext": {},
+      "extras": {},
+      "harvest": {
+        "backend": "CKAN",
+        "created_at": "2025-07-16 00:00:00",
+        "modified_at": "2025-07-16 00:00:00",
+        "source_id": "6889ffec4b3bbc104668b25e",
+        "remote_id": "fe7cdceb-f65e-4e79-9ff2-d7895dc3b155",
+        "domain": "www.datasud.fr",
+        "last_update": "2025-07-30 11:20:16.340000",
+        "remote_url": "https://www.datasud.fr/explorer/fr/jeux-de-donnees/parkings-ville-de-gap",
+        "ckan_name": "parkings-ville-de-gap"
+      },
+      "quality_cached": {
+        "license": false,
+        "temporal_coverage": false,
+        "spatial": false,
+        "update_frequency": null,
+        "next_update_for_update_fulfilled_in_time": null,
+        "dataset_description_quality": true,
+        "has_resources": true,
+        "has_open_format": true,
+        "all_resources_available": true,
+        "resources_documentation": true
+      },
+      "featured": false,
+      "contact_points": [],
+      "created_at_internal": "2025-07-30 11:20:16.338000",
+      "last_modified_internal": "2025-07-30 11:20:16.338000",
+      "last_update": "2025-07-16 00:00:00",
+      "id": "6889fff04b3bbc104668b265"
+    },
+    {
+      "metrics": {},
+      "badges": [],
+      "title": "Corbeilles -  Ville de Gap",
+      "slug": "corbeilles-ville-de-gap",
+      "description": "Corbeilles situ\u00e9es sur la ville de Gap",
+      "tags": [
+        "corbeille",
+        "poubelle"
+      ],
+      "resources": [
+        {
+          "_id": "92ec00b7-53d2-42a6-94e1-c10861213478",
+          "metrics": {},
+          "title": "corbeille_05061",
+          "description": "",
+          "filetype": "remote",
+          "type": "main",
+          "url": "https://www.datasud.fr/fr/dataset/datasets/4541/resource/6174/download/",
+          "urlhash": "67dd33eeb930c98c3a0597423d0649ae06c25d20",
+          "format": "shapefile (zip)",
+          "mime": "application/zip",
+          "extras": {},
+          "harvest": {
+            "created_at": "2025-07-16 00:00:00",
+            "modified_at": "2025-07-16 00:00:00"
+          },
+          "created_at_internal": "2025-07-30 11:20:15.755000",
+          "last_modified_internal": "2025-07-30 11:20:15.755000"
+        }
+      ],
+      "private": false,
+      "ext": {},
+      "extras": {},
+      "harvest": {
+        "backend": "CKAN",
+        "created_at": "2025-07-16 00:00:00",
+        "modified_at": "2025-07-16 00:00:00",
+        "source_id": "6889ffec4b3bbc104668b25e",
+        "remote_id": "73d7b463-9230-4910-92ce-414e16376521",
+        "domain": "www.datasud.fr",
+        "last_update": "2025-07-30 11:20:15.756000",
+        "remote_url": "https://www.datasud.fr/explorer/fr/jeux-de-donnees/corbeilles---ville-de-gap",
+        "ckan_name": "corbeilles---ville-de-gap"
+      },
+      "quality_cached": {
+        "license": false,
+        "temporal_coverage": false,
+        "spatial": false,
+        "update_frequency": null,
+        "next_update_for_update_fulfilled_in_time": null,
+        "dataset_description_quality": false,
+        "has_resources": true,
+        "has_open_format": true,
+        "all_resources_available": true,
+        "resources_documentation": false
+      },
+      "featured": false,
+      "contact_points": [],
+      "created_at_internal": "2025-07-30 11:20:15.753000",
+      "last_modified_internal": "2025-07-30 11:20:15.753000",
+      "last_update": "2025-07-16 00:00:00",
+      "id": "6889ffef4b3bbc104668b264"
+    },
+    {
+      "metrics": {},
+      "badges": [],
+      "title": "Cendriers -  Ville de Gap",
+      "slug": "cendriers-ville-de-gap",
+      "description": "Localisation des cendriers situ\u00e9s sur la ville de Gap.",
+      "tags": [
+        "cendrier"
+      ],
+      "resources": [
+        {
+          "_id": "925b26ad-03ce-4358-ac9c-cfea2b927f4b",
+          "metrics": {},
+          "title": "cendrier_05061",
+          "description": "",
+          "filetype": "remote",
+          "type": "main",
+          "url": "https://www.datasud.fr/fr/dataset/datasets/4540/resource/6173/download/",
+          "urlhash": "73f353157dee2214064f25fb263509941efcc64b",
+          "format": "shapefile (zip)",
+          "mime": "application/zip",
+          "extras": {},
+          "harvest": {
+            "created_at": "2025-07-16 00:00:00",
+            "modified_at": "2025-07-16 00:00:00"
+          },
+          "created_at_internal": "2025-07-30 11:20:15.243000",
+          "last_modified_internal": "2025-07-30 11:20:15.243000"
+        }
+      ],
+      "private": false,
+      "ext": {},
+      "extras": {},
+      "harvest": {
+        "backend": "CKAN",
+        "created_at": "2025-07-16 00:00:00",
+        "modified_at": "2025-07-16 00:00:00",
+        "source_id": "6889ffec4b3bbc104668b25e",
+        "remote_id": "af382e3c-4160-428f-9b8e-885bc1739f20",
+        "domain": "www.datasud.fr",
+        "last_update": "2025-07-30 11:20:15.244000",
+        "remote_url": "https://www.datasud.fr/explorer/fr/jeux-de-donnees/cendriers----ville-de-gap",
+        "ckan_name": "cendriers----ville-de-gap"
+      },
+      "quality_cached": {
+        "license": false,
+        "temporal_coverage": false,
+        "spatial": false,
+        "update_frequency": null,
+        "next_update_for_update_fulfilled_in_time": null,
+        "dataset_description_quality": false,
+        "has_resources": true,
+        "has_open_format": true,
+        "all_resources_available": true,
+        "resources_documentation": false
+      },
+      "featured": false,
+      "contact_points": [],
+      "created_at_internal": "2025-07-30 11:20:15.241000",
+      "last_modified_internal": "2025-07-30 11:20:15.241000",
+      "last_update": "2025-07-16 00:00:00",
+      "id": "6889ffef4b3bbc104668b263"
+    },
+    {
+      "metrics": {},
+      "badges": [],
+      "title": "Canisacs -  Ville de Gap",
+      "slug": "sacs-a-chien-ville-de-gap",
+      "description": "Distributeurs de sacs pour d\u00e9jections canines situ\u00e9es sur la ville de Gap Plus d'information sur la [propret\u00e9 canine \u00e0 Gap ](https://www.ville-gap.fr/la-proprete-canine/)",
+      "tags": [
+        "canisac",
+        "dejection-canine",
+        "distributeur",
+        "sac-a-chien"
+      ],
+      "resources": [
+        {
+          "_id": "0e55aad6-a0e6-4663-82c6-da3c1ad85173",
+          "metrics": {},
+          "title": "sac_chien_05061",
+          "description": "",
+          "filetype": "remote",
+          "type": "main",
+          "url": "https://www.datasud.fr/fr/dataset/datasets/4542/resource/6175/download/",
+          "urlhash": "9c95a63f691e40eb145f56298c7a3a8b3db76df7",
+          "format": "shapefile (zip)",
+          "mime": "application/zip",
+          "extras": {},
+          "harvest": {
+            "created_at": "2025-07-16 00:00:00",
+            "modified_at": "2025-07-16 00:00:00"
+          },
+          "created_at_internal": "2025-07-30 11:20:14.741000",
+          "last_modified_internal": "2025-07-30 11:20:14.741000"
+        }
+      ],
+      "private": false,
+      "ext": {},
+      "extras": {},
+      "harvest": {
+        "backend": "CKAN",
+        "created_at": "2025-07-16 00:00:00",
+        "modified_at": "2025-07-16 00:00:00",
+        "source_id": "6889ffec4b3bbc104668b25e",
+        "remote_id": "b8f35d04-c2ad-400e-86b3-c06b8ce7708a",
+        "domain": "www.datasud.fr",
+        "last_update": "2025-07-30 11:20:14.741000",
+        "remote_url": "https://www.datasud.fr/explorer/fr/jeux-de-donnees/sacs-a-chien----ville-de-gap",
+        "ckan_name": "sacs-a-chien----ville-de-gap"
+      },
+      "quality_cached": {
+        "license": false,
+        "temporal_coverage": false,
+        "spatial": false,
+        "update_frequency": null,
+        "next_update_for_update_fulfilled_in_time": null,
+        "dataset_description_quality": true,
+        "has_resources": true,
+        "has_open_format": true,
+        "all_resources_available": true,
+        "resources_documentation": false
+      },
+      "featured": false,
+      "contact_points": [],
+      "created_at_internal": "2025-07-30 11:20:14.738000",
+      "last_modified_internal": "2025-07-30 11:20:14.738000",
+      "last_update": "2025-07-16 00:00:00",
+      "id": "6889ffee4b3bbc104668b262"
+    },
+    {
+      "metrics": {},
+      "badges": [],
+      "title": "Point d'apport volontaire (PAV) de la CA Gap-Tallard-Durance",
+      "slug": "point-d-apport-volontaire-pav-ca-gap-tallard-durance",
+      "description": "Localisation des Points d'Apport Volontaire sur la Communaut\u00e9 d'Agglom\u00e9ration Gap-Tallard-Durance",
+      "tags": [
+        "dechet",
+        "pav",
+        "recyclage"
+      ],
+      "resources": [
+        {
+          "_id": "e76700f4-3edf-4fb5-8918-eb35ca7b4314",
+          "metrics": {},
+          "title": "Points d'Apport Volontaire (PAV) de la CA Gap Tallard Durance",
+          "description": "",
+          "filetype": "remote",
+          "type": "main",
+          "url": "https://www.datasud.fr/fr/dataset/datasets/2222/resource/6149/download/",
+          "urlhash": "c99fe17d39db7222c9188b3ca91f4157079e6137",
+          "format": "csv lonlat/xy",
+          "mime": "text/csv",
+          "extras": {},
+          "harvest": {
+            "created_at": "2025-07-10 00:00:00",
+            "modified_at": "2025-07-10 00:00:00"
+          },
+          "created_at_internal": "2025-07-30 11:20:14.245000",
+          "last_modified_internal": "2025-07-30 11:20:14.245000"
+        }
+      ],
+      "private": false,
+      "ext": {},
+      "extras": {},
+      "harvest": {
+        "backend": "CKAN",
+        "created_at": "2024-02-07 00:00:00",
+        "modified_at": "2025-07-10 00:00:00",
+        "source_id": "6889ffec4b3bbc104668b25e",
+        "remote_id": "04c1c235-969a-4442-8c8a-43dca754f2ca",
+        "domain": "www.datasud.fr",
+        "last_update": "2025-07-30 11:20:14.245000",
+        "remote_url": "https://www.datasud.fr/explorer/fr/jeux-de-donnees/point-d-apport-volontaire-pav-ca-gap-tallard-durance",
+        "ckan_name": "point-d-apport-volontaire-pav-ca-gap-tallard-durance"
+      },
+      "quality_cached": {
+        "license": false,
+        "temporal_coverage": false,
+        "spatial": false,
+        "update_frequency": null,
+        "next_update_for_update_fulfilled_in_time": null,
+        "dataset_description_quality": false,
+        "has_resources": true,
+        "has_open_format": true,
+        "all_resources_available": true,
+        "resources_documentation": false
+      },
+      "featured": false,
+      "contact_points": [],
+      "created_at_internal": "2025-07-30 11:20:14.242000",
+      "last_modified_internal": "2025-07-30 11:20:14.242000",
+      "last_update": "2025-07-10 00:00:00",
+      "id": "6889ffee4b3bbc104668b261"
+    },
+    {
+      "metrics": {},
+      "badges": [],
+      "title": "Canispaces - Ville de Gap",
+      "slug": "canispaces-ville-de-gap",
+      "description": "Lieux r\u00e9serv\u00e9s aux d\u00e9jections canines de la Ville de Gap Plus d'information sur la [propret\u00e9 canine \u00e0 Gap ](https://www.ville-gap.fr/la-proprete-canine/)",
+      "tags": [
+        "canispace",
+        "chien"
+      ],
+      "resources": [
+        {
+          "_id": "a1994436-fbad-4617-bf97-98939511533b",
+          "metrics": {},
+          "title": "canispace_05061",
+          "description": "canispace_05061",
+          "filetype": "remote",
+          "type": "main",
+          "url": "https://www.datasud.fr/fr/dataset/datasets/4539/resource/6176/download/",
+          "urlhash": "e4ae1f626deb642075b3f4a43e12d3f83e49e400",
+          "format": "shapefile (zip)",
+          "mime": "application/zip",
+          "extras": {},
+          "harvest": {
+            "created_at": "2025-07-16 00:00:00",
+            "modified_at": "2025-07-16 00:00:00"
+          },
+          "created_at_internal": "2025-07-30 11:20:13.604000",
+          "last_modified_internal": "2025-07-30 11:20:13.604000"
+        }
+      ],
+      "private": false,
+      "ext": {},
+      "extras": {},
+      "harvest": {
+        "backend": "CKAN",
+        "created_at": "2025-07-16 00:00:00",
+        "modified_at": "2025-07-16 00:00:00",
+        "source_id": "6889ffec4b3bbc104668b25e",
+        "remote_id": "cfa98601-185f-4194-bc0f-119fc23a194b",
+        "domain": "www.datasud.fr",
+        "last_update": "2025-07-30 11:20:13.604000",
+        "remote_url": "https://www.datasud.fr/explorer/fr/jeux-de-donnees/canispaces----ville-de-gap",
+        "ckan_name": "canispaces----ville-de-gap"
+      },
+      "quality_cached": {
+        "license": false,
+        "temporal_coverage": false,
+        "spatial": false,
+        "update_frequency": null,
+        "next_update_for_update_fulfilled_in_time": null,
+        "dataset_description_quality": true,
+        "has_resources": true,
+        "has_open_format": true,
+        "all_resources_available": true,
+        "resources_documentation": true
+      },
+      "featured": false,
+      "contact_points": [],
+      "created_at_internal": "2025-07-30 11:20:13.551000",
+      "last_modified_internal": "2025-07-30 11:20:13.551000",
+      "last_update": "2025-07-16 00:00:00",
+      "id": "6889ffed4b3bbc104668b260"
+    }
+  ],
+  "dataservices": []
+}

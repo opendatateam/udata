@@ -6,6 +6,8 @@ from os.path import dirname, isfile, join
 import pytest
 import requests_mock
 from deepdiff import DeepDiff
+from pyld import jsonld
+from rdflib import Graph
 
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
@@ -25,22 +27,32 @@ harvester_configs = [
         "backend": "csw-iso-19139",
         "url": "https://ogc.geo-ide.developpement-durable.gouv.fr/csw/csw-ddt24",
     },
-    # {
-    #     "backend": "ckan",
-    #     "url": "https://www.datasud.fr/fr/indexer/service/ckan/",
-    # },
+    {
+        "backend": "ckan",
+        "url": "https://www.datasud.fr/fr/indexer/service/ckan/",
+        "config": {
+            "filters": [
+                {
+                    "key": "organization",
+                    "value": '"communaute-dagglomeration-de-gap-tallard-durance"',
+                },
+            ],
+        },
+    },
 ]
 
 
 @pytest.mark.usefixtures("clean_db")
-@pytest.mark.options(PLUGINS=["dcat", "csw-iso-19139"])
+@pytest.mark.options(PLUGINS=["dcat", "csw-iso-19139", "ckan"])
 class SnapshotsTest:
     @pytest.mark.parametrize("harvester_conf", harvester_configs)
     def test_all(self, harvester_conf):
         os.makedirs(SNAPSHOTS_DIR, exist_ok=True)
 
         harvester = HarvestSourceFactory(
-            backend=harvester_conf["backend"], url=harvester_conf["url"]
+            backend=harvester_conf["backend"],
+            url=harvester_conf["url"],
+            config=harvester_conf.get("config", {}),
         )
 
         data = {}
@@ -88,20 +100,21 @@ class SnapshotsTest:
         else:
             from xmldiff import formatting, main
 
-            for index, graph in enumerate(data["job"]["data"]["graphs"]):
-                diff = main.diff_texts(
-                    graph.encode("utf-8"),
-                    new_data["job"]["data"]["graphs"][index].encode("utf-8"),
-                    formatter=formatting.DiffFormatter(),
-                )
-                print(graph, file=open("/tmp/1.xml", "w"))
-                print(new_data["job"]["data"]["graphs"][index], file=open("/tmp/2.xml", "w"))
-                print(f"\n\n{graph}\n\n")
-                print(f"\n\n{new_data['job']['data']['graphs'][index]}\n\n")
+            if "graphs" in data["job"]["data"]:
+                for index, graph in enumerate(data["job"]["data"]["graphs"]):
+                    diff = main.diff_texts(
+                        graph.encode("utf-8"),
+                        new_data["job"]["data"]["graphs"][index].encode("utf-8"),
+                        formatter=formatting.DiffFormatter(),
+                    )
+                    print(graph, file=open("/tmp/1.xml", "w"))
+                    print(new_data["job"]["data"]["graphs"][index], file=open("/tmp/2.xml", "w"))
+                    print(f"\n\n{graph}\n\n")
+                    print(f"\n\n{new_data['job']['data']['graphs'][index]}\n\n")
 
-                assert compare_rdf_graphs_canonically(
-                    graph, new_data["job"]["data"]["graphs"][index]
-                ), "RDF graphs are differents"
+                    assert compare_rdf_graphs_canonically(
+                        graph, new_data["job"]["data"]["graphs"][index]
+                    ), "RDF graphs are differents"
 
             diff = DeepDiff(
                 data,
@@ -135,10 +148,6 @@ class SnapshotsTest:
             print(diff.pretty())
             print(diff)
             assert not diff, "Global diffs are different"
-
-
-from pyld import jsonld
-from rdflib import Graph
 
 
 def rdf_to_canonical_jsonld(xml_string: str) -> str:
