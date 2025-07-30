@@ -449,7 +449,7 @@ class MembershipRefuseAPI(MembershipAPI):
         return {}, 200
 
 
-@ns.route("/<org:org>/member/<user:user>", endpoint="member", doc=common_doc)
+@ns.route("/<org:org>/member/<user:user>/", endpoint="member", doc=common_doc)
 class MemberAPI(API):
     @api.secure
     @api.expect(member_fields)

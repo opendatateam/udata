@@ -2,9 +2,12 @@
 
 ## Current (in progress)
 
--  Compute organization aggregate metrics only once at the end of harvest [#3391](https://github.com/opendatateam/udata/pull/3391)
+- Compute organization aggregate metrics only once at the end of harvest [#3391](https://github.com/opendatateam/udata/pull/3391)
+- Migrate udata-metrics [#3386](https://github.com/opendatateam/udata/pull/3386/)
+- Migrate udata-ckan [#3385](https://github.com/opendatateam/udata/pull/3385)
 - Deactivate sitemap extension [#3389](https://github.com/opendatateam/udata/pull/3389)
 - Deactivate cache to check for existing slugs [#3390](https://github.com/opendatateam/udata/pull/3390)
+- Add missing trailing slashes on some endpoints [#3392](https://github.com/opendatateam/udata/pull/3392/)
 
 ## 10.8.1 (2025-07-25)
 

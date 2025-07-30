@@ -300,7 +300,7 @@ class SourcesAPI(API):
         return source, 201
 
 
-@ns.route("/source/<string:ident>", endpoint="harvest_source")
+@ns.route("/source/<string:ident>/", endpoint="harvest_source")
 @api.param("ident", "A source ID or slug")
 class SourceAPI(API):
     @api.doc("get_harvest_source")
@@ -330,7 +330,7 @@ class SourceAPI(API):
         return actions.delete_source(ident), 204
 
 
-@ns.route("/source/<string:ident>/validate", endpoint="validate_harvest_source")
+@ns.route("/source/<string:ident>/validate/", endpoint="validate_harvest_source")
 @api.param("ident", "A source ID or slug")
 class ValidateSourceAPI(API):
     @api.doc("validate_harvest_source")
@@ -346,7 +346,7 @@ class ValidateSourceAPI(API):
             return actions.reject_source(ident, form.comment.data)
 
 
-@ns.route("/source/<string:ident>/run", endpoint="run_harvest_source")
+@ns.route("/source/<string:ident>/run/", endpoint="run_harvest_source")
 @api.param("ident", "A source ID or slug")
 class RunSourceAPI(API):
     @api.doc("run_harvest_source")
@@ -371,7 +371,7 @@ class RunSourceAPI(API):
         return source
 
 
-@ns.route("/source/<string:ident>/schedule", endpoint="schedule_harvest_source")
+@ns.route("/source/<string:ident>/schedule/", endpoint="schedule_harvest_source")
 @api.param("ident", "A source ID or slug")
 class ScheduleSourceAPI(API):
     @api.doc("schedule_harvest_source")
@@ -395,7 +395,7 @@ class ScheduleSourceAPI(API):
         return actions.unschedule(ident), 204
 
 
-@ns.route("/source/preview", endpoint="preview_harvest_source_config")
+@ns.route("/source/preview/", endpoint="preview_harvest_source_config")
 class PreviewSourceConfigAPI(API):
     @api.secure
     @api.expect(source_fields)
@@ -409,7 +409,7 @@ class PreviewSourceConfigAPI(API):
         return actions.preview_from_config(**form.data)
 
 
-@ns.route("/source/<string:ident>/preview", endpoint="preview_harvest_source")
+@ns.route("/source/<string:ident>/preview/", endpoint="preview_harvest_source")
 @api.param("ident", "A source ID or slug")
 class PreviewSourceAPI(API):
     @api.secure
@@ -450,7 +450,7 @@ class JobAPI(API):
         return actions.get_job(ident)
 
 
-@ns.route("/backends", endpoint="harvest_backends")
+@ns.route("/backends/", endpoint="harvest_backends")
 class ListBackendsAPI(API):
     @api.doc("harvest_backends")
     @api.marshal_with(backend_fields)
@@ -471,7 +471,7 @@ class ListBackendsAPI(API):
         )
 
 
-@ns.route("/job_status", endpoint="havest_job_status")
+@ns.route("/job_status/", endpoint="havest_job_status")
 class ListHarvesterAPI(API):
     @api.doc(model=[str])
     def get(self):
