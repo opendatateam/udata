@@ -68,6 +68,11 @@ class OrganizationAPITest:
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(org.id)
 
+        response = api.get(url_for("api.organizations", name=org.name.upper()))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(org.id)
+
         response = api.get(url_for("api.organizations", name="Some other name"))
         assert200(response)
         assert len(response.json["data"]) == 0
