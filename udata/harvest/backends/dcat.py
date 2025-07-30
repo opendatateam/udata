@@ -309,6 +309,7 @@ class CswDcatBackend(DcatBackend):
 
     SAXON_SECURITY_FEATURES = {
         "http://saxon.sf.net/feature/allow-external-functions": "false",
+        "http://saxon.sf.net/feature/parserFeature?uri=http://apache.org/xml/features/nonvalidating/load-external-dtd": "false",
         "http://saxon.sf.net/feature/parserFeature?uri=http://xml.org/sax/features/external-general-entities": "false",
         "http://saxon.sf.net/feature/parserFeature?uri=http://xml.org/sax/features/external-parameter-entities": "false",
     }
