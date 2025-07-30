@@ -3,6 +3,7 @@ import logging
 import click
 
 from udata.commands import cli
+from udata.harvest.models import HarvestSource
 
 from . import actions
 
@@ -44,7 +45,7 @@ def create(name, url, backend, frequency=None, owner=None, org=None):
 @click.argument("identifier")
 def validate(identifier):
     """Validate a source given its identifier"""
-    source = actions.validate_source(identifier)
+    source = actions.validate_source(HarvestSource.get(identifier))
     log.info("Source %s (%s) has been validated", source.slug, str(source.id))
 
 
@@ -52,7 +53,7 @@ def validate(identifier):
 def delete(identifier):
     """Delete a harvest source"""
     log.info('Deleting source "%s"', identifier)
-    actions.delete_source(identifier)
+    actions.delete_source(HarvestSource.get(identifier))
     log.info('Deleted source "%s"', identifier)
 
 
@@ -61,7 +62,7 @@ def delete(identifier):
 def clean(identifier):
     """Delete all datasets linked to a harvest source"""
     log.info(f'Cleaning source "{identifier}"')
-    num_of_datasets = actions.clean_source(identifier)
+    num_of_datasets = actions.clean_source(HarvestSource.get(identifier))
     log.info(f'Cleaned source "{identifier}" - deleted {num_of_datasets} dataset(s)')
 
 
@@ -99,7 +100,7 @@ def backends():
 def launch(identifier):
     """Launch a source harvesting on the workers"""
     log.info('Launching harvest job for source "%s"', identifier)
-    actions.launch(identifier)
+    actions.launch(HarvestSource.get(identifier))
 
 
 @grp.command()
@@ -107,7 +108,7 @@ def launch(identifier):
 def run(identifier):
     """Run a harvester synchronously"""
     log.info('Harvesting source "%s"', identifier)
-    actions.run(identifier)
+    actions.run(HarvestSource.get(identifier))
 
 
 @grp.command()
@@ -121,7 +122,7 @@ def run(identifier):
 @click.option("-M", "--month-of-year", default="*", help="The crontab expression for month of year")
 def schedule(identifier, **kwargs):
     """Schedule a harvest job to run periodically"""
-    source = actions.schedule(identifier, **kwargs)
+    source = actions.schedule(HarvestSource.get(identifier), **kwargs)
     msg = "Scheduled {source.name} with the following crontab: {cron}"
     log.info(msg.format(source=source, cron=source.periodic_task.crontab))
 
@@ -130,7 +131,7 @@ def schedule(identifier, **kwargs):
 @click.argument("identifier")
 def unschedule(identifier):
     """Unschedule a periodical harvest job"""
-    source = actions.unschedule(identifier)
+    source = actions.unschedule(HarvestSource.get(identifier))
     log.info('Unscheduled harvest source "%s"', source.name)
 
 

@@ -162,7 +162,7 @@ class HarvestActionsTest:
     def test_validate_source(self, mock):
         source = HarvestSourceFactory()
 
-        actions.validate_source(source.id)
+        actions.validate_source(source)
 
         source.reload()
         assert source.validation.state == VALIDATION_ACCEPTED
@@ -177,7 +177,7 @@ class HarvestActionsTest:
     def test_validate_source_with_comment(self, mock):
         source = HarvestSourceFactory()
 
-        actions.validate_source(source.id, "comment")
+        actions.validate_source(source, "comment")
 
         source.reload()
 
@@ -200,20 +200,16 @@ class HarvestActionsTest:
 
     def test_get_source_by_slug(self):
         source = HarvestSourceFactory()
-        assert actions.get_source(source.slug) == source
+        assert HarvestSource.get(source.slug) == source
 
     def test_get_source_by_id(self):
         source = HarvestSourceFactory()
-        assert actions.get_source(str(source.id)) == source
-
-    def test_get_source_by_objectid(self):
-        source = HarvestSourceFactory()
-        assert actions.get_source(source) == source
+        assert HarvestSource.get(str(source.id)) == source
 
     def test_delete_source_by_slug(self):
         source = HarvestSourceFactory()
         with assert_emit(signals.harvest_source_deleted):
-            deleted_source = actions.delete_source(source.slug)
+            deleted_source = actions.delete_source(source)
 
         assert deleted_source.deleted is not None
         assert deleted_source.id == source.id
@@ -223,7 +219,7 @@ class HarvestActionsTest:
     def test_delete_source_by_id(self):
         source = HarvestSourceFactory()
         with assert_emit(signals.harvest_source_deleted):
-            deleted_source = actions.delete_source(str(source.id))
+            deleted_source = actions.delete_source(source)
 
         assert deleted_source.deleted is not None
         assert deleted_source.id == source.id
@@ -240,12 +236,11 @@ class HarvestActionsTest:
         deleted_sources = HarvestSource.objects(deleted__exists=True)
         assert len(deleted_sources) == 1
 
-    @pytest.mark.parametrize("by_attr", ["source.id", "str(source.id)", "source.slug"])
-    def test_clean_source(self, by_attr):
+    def test_clean_source(self):
         source = HarvestSourceFactory()
         for _ in range(5):
             DatasetFactory(harvest=HarvestDatasetMetadata(source_id=str(source.id)))
-        actions.clean_source(eval(by_attr))
+        actions.clean_source(source)
         datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
         assert len(datasets) == 5
         for dataset in datasets:
@@ -262,7 +257,7 @@ class HarvestActionsTest:
     def test_schedule(self):
         source = HarvestSourceFactory()
         with assert_emit(signals.harvest_source_scheduled):
-            source = actions.schedule(str(source.id), hour=0)
+            source = actions.schedule(source, hour=0)
 
         assert len(PeriodicTask.objects) == 1
         periodic_task = source.periodic_task
@@ -279,7 +274,7 @@ class HarvestActionsTest:
     def test_schedule_from_cron(self):
         source = HarvestSourceFactory()
         with assert_emit(signals.harvest_source_scheduled):
-            source = actions.schedule(str(source.id), "0 1 2 3 sunday")
+            source = actions.schedule(source, "0 1 2 3 sunday")
 
         assert len(PeriodicTask.objects) == 1
         periodic_task = source.periodic_task
@@ -296,10 +291,10 @@ class HarvestActionsTest:
     def test_reschedule(self):
         source = HarvestSourceFactory()
         with assert_emit(signals.harvest_source_scheduled):
-            source = actions.schedule(str(source.id), hour=0)
+            source = actions.schedule(source, hour=0)
 
         with assert_emit(signals.harvest_source_scheduled):
-            source = actions.schedule(str(source.id), minute=0)
+            source = actions.schedule(source, minute=0)
 
         assert len(PeriodicTask.objects) == 1
         periodic_task = source.periodic_task
@@ -323,7 +318,7 @@ class HarvestActionsTest:
         )
         source = HarvestSourceFactory(periodic_task=periodic_task)
         with assert_emit(signals.harvest_source_unscheduled):
-            actions.unschedule(str(source.id))
+            actions.unschedule(source)
 
         source.reload()
         assert len(PeriodicTask.objects) == 0
@@ -460,7 +455,7 @@ class ExecutionTestMixin(MockBackendsMixin):
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="factory", organization=org)
         with assert_emit(signals.before_harvest_job, signals.after_harvest_job):
-            self.action(source.slug)
+            self.action(source)
 
         source.reload()
         assert len(HarvestJob.objects(source=source)) == 1
@@ -496,7 +491,7 @@ class ExecutionTestMixin(MockBackendsMixin):
 
         source = HarvestSourceFactory(backend="factory")
         with assert_emit(signals.before_harvest_job), mock_initialize.connected_to(init):
-            self.action(source.slug)
+            self.action(source)
 
         source.reload()
         assert len(HarvestJob.objects(source=source)) == 1
@@ -523,7 +518,7 @@ class ExecutionTestMixin(MockBackendsMixin):
             assert_emit(signals.before_harvest_job, signals.after_harvest_job),
             mock_process.connected_to(process),
         ):
-            self.action(source.slug)
+            self.action(source)
 
         source.reload()
         assert len(HarvestJob.objects(source=source)) == 1
@@ -559,7 +554,7 @@ class ExecutionTestMixin(MockBackendsMixin):
     def test_empty(self):
         source = HarvestSourceFactory(backend="factory", config={"count": 0})
         with assert_emit(signals.before_harvest_job, signals.after_harvest_job):
-            self.action(source.slug)
+            self.action(source)
 
         source.reload()
         assert len(HarvestJob.objects(source=source)) == 1
@@ -580,7 +575,7 @@ class ExecutionTestMixin(MockBackendsMixin):
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="factory", organization=org, config={"count": 10})
 
-        self.action(source.slug)
+        self.action(source)
         assert len(Dataset.objects) == 5
 
 
@@ -599,7 +594,7 @@ class HarvestPreviewTest(MockBackendsMixin):
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="factory", organization=org)
 
-        job = actions.preview(source.slug)
+        job = actions.preview(source)
 
         assert job.status == "done"
         assert job.errors == []
@@ -628,7 +623,7 @@ class HarvestPreviewTest(MockBackendsMixin):
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="factory", organization=org, config={"count": 10})
 
-        job = actions.preview(source.slug)
+        job = actions.preview(source)
 
         assert len(job.items) == 5
 
@@ -639,7 +634,7 @@ class HarvestPreviewTest(MockBackendsMixin):
         source = HarvestSourceFactory(backend="factory")
 
         with mock_initialize.connected_to(init):
-            job = actions.preview(source.slug)
+            job = actions.preview(source)
 
         assert job.status == "failed"
         assert len(job.errors) == 1
@@ -660,7 +655,7 @@ class HarvestPreviewTest(MockBackendsMixin):
         source = HarvestSourceFactory(backend="factory")
 
         with mock_process.connected_to(process):
-            job = actions.preview(source.slug)
+            job = actions.preview(source)
 
         assert job.status == "done-errors"
         assert job.started is not None
