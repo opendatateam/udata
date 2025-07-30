@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Add integrity checks on non existent list field instead of empty [#3242](https://github.com/opendatateam/udata/pull/3242)
 - Migrate udata-metrics [#3386](https://github.com/opendatateam/udata/pull/3386/)
 - Migrate udata-ckan [#3385](https://github.com/opendatateam/udata/pull/3385)
 - Deactivate sitemap extension [#3389](https://github.com/opendatateam/udata/pull/3389)
@@ -9,6 +10,7 @@
 - Fix not returning 404 for harvest sources [#3382](https://github.com/opendatateam/udata/pull/3382/)
 - Add missing trailing slashes on some endpoints [#3392](https://github.com/opendatateam/udata/pull/3392/)
 - Add snapshot tests for harvesting [#3394](https://github.com/opendatateam/udata/pull/3394)
+- Make organization name filter case insensitive [#3392](https://github.com/opendatateam/udata/pull/3395)
 
 ## 10.8.1 (2025-07-25)
 

@@ -99,7 +99,7 @@ class OrgApiParser(ModelApiParser):
         if args.get("badge"):
             organizations = organizations.with_badge(args["badge"])
         if args.get("name"):
-            organizations = organizations.filter(name=args["name"])
+            organizations = organizations.filter(name__iexact=args["name"])
         if args.get("business_number_id"):
             organizations = organizations.filter(business_number_id=args["business_number_id"])
         return organizations
