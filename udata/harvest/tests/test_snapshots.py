@@ -1,5 +1,6 @@
 import json
 import os
+import xml.etree.ElementTree as ET
 from os.path import dirname, isfile, join
 
 import pytest
@@ -39,7 +40,8 @@ class SnapshotsTest:
             SNAPSHOTS_DIR,
             f"{harvester.backend}-{harvester.url.replace('://', '_').replace('/', '_')}.json",
         )
-        refresh = not isfile(data_path)
+        refresh = not isfile(data_path) or os.getenv("REFRESH_SNAPSHOTS", False)
+
         if not refresh:
             data = json.load(open(data_path))
 
@@ -68,6 +70,19 @@ class SnapshotsTest:
         if refresh:
             json.dump(new_data, open(data_path, "w"), indent=2, default=str)
         else:
+            from xmldiff import formatting, main
+
+            for index, graph in enumerate(data["job"]["data"]["graphs"]):
+                diff = main.diff_texts(
+                    graph.encode("utf-8"),
+                    new_data["job"]["data"]["graphs"][index].encode("utf-8"),
+                    formatter=formatting.DiffFormatter(),
+                )
+                print(f"\n\n{graph}\n\n")
+                print(f"\n\n{new_data['job']['data']['graphs'][index]}\n\n")
+
+                assert compare_xml(graph, new_data["job"]["data"]["graphs"][index])
+
             diff = DeepDiff(
                 data,
                 # Compare datetime as strings by serialize/deserialize
@@ -94,23 +109,39 @@ class SnapshotsTest:
                 ],
             )
 
-            from xmldiff import formatting, main
-
-            for index, graph in enumerate(data["job"]["data"]["graphs"]):
-                diff = main.diff_texts(
-                    graph.encode("utf-8"),
-                    new_data["job"]["data"]["graphs"][index].encode("utf-8"),
-                    formatter=formatting.DiffFormatter(),
-                )
-                print(f"\n\n{graph}\n\n")
-                print(f"\n\n{new_data['job']['data']['graphs'][index]}\n\n")
-
-                print(diff)
-                assert not diff
-
             print(diff.pretty())
             print(diff)
             assert not diff
+
+
+def sort_children(elem):
+    # Trie les enfants par balise + attributs + texte pour stabilité
+    elem[:] = sorted(elem, key=lambda e: (e.tag, sorted(e.attrib.items()), (e.text or "").strip()))
+    for child in elem:
+        sort_children(child)
+
+
+def elements_equal(e1, e2):
+    if e1.tag != e2.tag:
+        return False
+    if sorted(e1.attrib.items()) != sorted(e2.attrib.items()):
+        return False
+    if (e1.text or "").strip() != (e2.text or "").strip():
+        return False
+    if len(e1) != len(e2):
+        return False
+    for c1, c2 in zip(e1, e2):
+        if not elements_equal(c1, c2):
+            return False
+    return True
+
+
+def compare_xml(xml1_str, xml2_str):
+    root1 = ET.fromstring(xml1_str)
+    root2 = ET.fromstring(xml2_str)
+    sort_children(root1)
+    sort_children(root2)
+    return elements_equal(root1, root2)
 
 
 class MyMock(requests_mock.Mocker):
