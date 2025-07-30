@@ -8,6 +8,7 @@
 - Deactivate cache to check for existing slugs [#3390](https://github.com/opendatateam/udata/pull/3390)
 - Fix not returning 404 for harvest sources [#3382](https://github.com/opendatateam/udata/pull/3382/)
 - Add missing trailing slashes on some endpoints [#3392](https://github.com/opendatateam/udata/pull/3392/)
+- Make organization name filter case insensitive [#3392](https://github.com/opendatateam/udata/pull/3395)
 
 ## 10.8.1 (2025-07-25)
 
