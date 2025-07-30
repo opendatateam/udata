@@ -10,7 +10,6 @@ import requests
 from blinker import signal
 from dateutil.parser import parse as parse_dt
 from flask import current_app, url_for
-from mongoengine import DynamicEmbeddedDocument
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import DateTimeField
 from mongoengine.signals import post_save, pre_init, pre_save
@@ -78,7 +77,7 @@ def get_json_ld_extra(key, value):
     }
 
 
-class HarvestDatasetMetadata(DynamicEmbeddedDocument):
+class HarvestDatasetMetadata(db.EmbeddedDocument):
     backend = db.StringField()
     created_at = db.DateTimeField()
     modified_at = db.DateTimeField()
@@ -91,9 +90,11 @@ class HarvestDatasetMetadata(DynamicEmbeddedDocument):
     dct_identifier = db.StringField()
     archived_at = db.DateTimeField()
     archived = db.StringField()
+    ckan_name = db.StringField()
+    ckan_source = db.StringField()
 
 
-class HarvestResourceMetadata(DynamicEmbeddedDocument):
+class HarvestResourceMetadata(db.EmbeddedDocument):
     created_at = db.DateTimeField()
     modified_at = db.DateTimeField()
     uri = db.StringField()
