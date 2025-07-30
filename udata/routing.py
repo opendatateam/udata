@@ -10,6 +10,7 @@ from werkzeug.urls import url_quote
 from udata import models
 from udata.core.dataservices.models import Dataservice
 from udata.core.spatial.models import GeoZone
+from udata.harvest.models import HarvestSource
 from udata.i18n import ISO_639_1_CODES
 from udata.mongo import db
 from udata.uris import cdata_url, homepage_url
@@ -136,6 +137,10 @@ class DataserviceConverter(ModelConverter):
     model = Dataservice
 
 
+class HarvestSourceConverter(ModelConverter):
+    model = HarvestSource
+
+
 class CommunityResourceConverter(ModelConverter):
     model = models.CommunityResource
 
@@ -239,6 +244,7 @@ def init_app(app):
     app.url_map.converters["dataset"] = DatasetConverter
     app.url_map.converters["dataset_without_resources"] = DatasetWithoutResourcesConverter
     app.url_map.converters["dataservice"] = DataserviceConverter
+    app.url_map.converters["harvest_source"] = HarvestSourceConverter
     app.url_map.converters["crid"] = CommunityResourceConverter
     app.url_map.converters["org"] = OrganizationConverter
     app.url_map.converters["reuse"] = ReuseConverter

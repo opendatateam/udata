@@ -25,7 +25,7 @@ def test_html_error(rmock, code):
 
     rmock.get(API_URL, text=html, status_code=code, headers={"Content-Type": "text/html"})
 
-    actions.run(source.slug)
+    actions.run(source)
 
     source.reload()
 
@@ -45,7 +45,7 @@ def test_plain_text_error(rmock, code):
         API_URL, text='"Some error"', status_code=code, headers={"Content-Type": "text/plain"}
     )
 
-    actions.run(source.slug)
+    actions.run(source)
 
     source.reload()
 
@@ -66,7 +66,7 @@ def test_200_plain_text_error(rmock):
 
     rmock.get(API_URL, text='"Some error"', status_code=200, headers={"Content-Type": "text/plain"})
 
-    actions.run(source.slug)
+    actions.run(source)
 
     source.reload()
 
@@ -84,7 +84,7 @@ def test_standard_api_json_error(rmock):
 
     rmock.get(API_URL, json=json, status_code=200, headers={"Content-Type": "application/json"})
 
-    actions.run(source.slug)
+    actions.run(source)
 
     source.reload()
 
@@ -106,7 +106,7 @@ def test_standard_api_json_error_with_details(rmock):
 
     rmock.get(API_URL, json=json, status_code=200, headers={"Content-Type": "application/json"})
 
-    actions.run(source.slug)
+    actions.run(source)
 
     source.reload()
 
@@ -129,7 +129,7 @@ def test_standard_api_json_error_with_details_and_type(rmock):
 
     rmock.get(API_URL, json=json, status_code=200, headers={"Content-Type": "application/json"})
 
-    actions.run(source.slug)
+    actions.run(source)
 
     source.reload()
 
