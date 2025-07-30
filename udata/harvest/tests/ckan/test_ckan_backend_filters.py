@@ -26,7 +26,7 @@ def test_include_org_filter(ckan, rmock):
         headers={"Content-Type": "application/json"},
     )
 
-    actions.run(source.slug)
+    actions.run(source)
     source.reload()
 
     assert rmock.call_count == 1
@@ -50,7 +50,7 @@ def test_exclude_org_filter(ckan, rmock):
         headers={"Content-Type": "application/json"},
     )
 
-    actions.run(source.slug)
+    actions.run(source)
     source.reload()
 
     assert rmock.call_count == 1
@@ -72,7 +72,7 @@ def test_tag_filter(ckan, rmock):
         headers={"Content-Type": "application/json"},
     )
 
-    actions.run(source.slug)
+    actions.run(source)
     source.reload()
 
     assert rmock.call_count == 1
@@ -95,7 +95,7 @@ def test_exclude_tag_filter(ckan, rmock):
         headers={"Content-Type": "application/json"},
     )
 
-    actions.run(source.slug)
+    actions.run(source)
     source.reload()
 
     assert rmock.call_count == 1
@@ -122,7 +122,7 @@ def test_can_have_multiple_filters(ckan, rmock):
         headers={"Content-Type": "application/json"},
     )
 
-    actions.run(source.slug)
+    actions.run(source)
     source.reload()
 
     assert rmock.call_count == 1
