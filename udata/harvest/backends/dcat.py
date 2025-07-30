@@ -307,9 +307,17 @@ class CswDcatBackend(DcatBackend):
 
     CSW_OUTPUT_SCHEMA = "http://www.w3.org/ns/dcat#"
 
+    SAXON_SECURITY_FEATURES = {
+        "http://saxon.sf.net/feature/allow-external-functions": "false",
+        "http://saxon.sf.net/feature/parserFeature?uri=http://xml.org/sax/features/external-general-entities": "false",
+        "http://saxon.sf.net/feature/parserFeature?uri=http://xml.org/sax/features/external-parameter-entities": "false",
+    }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.saxon_proc = PySaxonProcessor(license=False)
+        for feature, value in self.SAXON_SECURITY_FEATURES.items():
+            self.saxon_proc.set_configuration_property(feature, value)
         self.saxon_proc.set_configuration_property(
             "http://saxon.sf.net/feature/strip-whitespace", "all"
         )
