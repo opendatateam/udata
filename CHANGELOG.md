@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Add integrity checks on non existent list field instead of empty [#3242](https://github.com/opendatateam/udata/pull/3242)
 - Migrate udata-metrics [#3386](https://github.com/opendatateam/udata/pull/3386/)
 - Migrate udata-ckan [#3385](https://github.com/opendatateam/udata/pull/3385)
 - Deactivate sitemap extension [#3389](https://github.com/opendatateam/udata/pull/3389)
