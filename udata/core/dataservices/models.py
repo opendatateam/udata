@@ -288,6 +288,7 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
 
     __metrics_keys__ = [
         "discussions",
+        "discussions_open",
         "followers",
         "followers_by_months",
         "views",
@@ -310,7 +311,8 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
         }
 
     def count_discussions(self):
-        self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()
+        self.metrics["discussions"] = Discussion.objects(subject=self).count()
+        self.metrics["discussions_open"] = Discussion.objects(subject=self, closed=None).count()
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):

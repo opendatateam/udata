@@ -58,6 +58,9 @@ class UDataQuerySet(BaseQuerySet):
         """
         updates = query.pop("updates", {})
 
+        # Since `modify` doesn't trigger validation, we need to manually call it here.
+        self._document(**query, **updates).validate()
+
         # If we pass `new=True` we cannot know if the model
         # was recently created or existed before.
         # When passing `new=False` (the default), we get the previous

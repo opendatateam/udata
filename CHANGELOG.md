@@ -2,14 +2,32 @@
 
 ## Current (in progress)
 
-- Consolidate CSW harvesting logic. [#3378](https://github.com/opendatateam/udata/pull/3378)
+- Consolidate CSW harvesting logic [#3378](https://github.com/opendatateam/udata/pull/3378)
   - :warning: Config setting `HARVEST_ISO19139_XSL_URL` is renamed to `HARVEST_ISO19139_XSLT_URL`.
+- Migrate udata-metrics [#3386](https://github.com/opendatateam/udata/pull/3386/)
+- Migrate udata-ckan [#3385](https://github.com/opendatateam/udata/pull/3385)
+- Deactivate sitemap extension [#3389](https://github.com/opendatateam/udata/pull/3389)
+- Deactivate cache to check for existing slugs [#3390](https://github.com/opendatateam/udata/pull/3390)
+- Fix not returning 404 for harvest sources [#3382](https://github.com/opendatateam/udata/pull/3382/)
+- Add missing trailing slashes on some endpoints [#3392](https://github.com/opendatateam/udata/pull/3392/)
+
+## 10.8.1 (2025-07-25)
+
+- Fix user deletion performances issues [#3388](https://github.com/opendatateam/udata/pull/3388)
+- Add search to discussions [#3384](https://github.com/opendatateam/udata/pull/3384)
+- Separate metrics for opened discussions [#3370](https://github.com/opendatateam/udata/pull/3370)
+
+## 10.8.0 (2025-07-22)
+
 - Remove placeholder Jinja filter [#3372](https://github.com/opendatateam/udata/pull/3372/)
 - Add `self_web_url` for discussion [#3375](https://github.com/opendatateam/udata/pull/3375)
 - Fix dataset schemas endpoint when no resource [#3373](https://github.com/opendatateam/udata/pull/3373)
 - Add last_update as a dataset model property [#3377](https://github.com/opendatateam/udata/pull/3377)
+- Add `label` (translation of role) to API response for org members [#3383](https://github.com/opendatateam/udata/pull/3383)
 - Fix crashing on datasets with no slugs [#3368](https://github.com/opendatateam/udata/pull/3368/)
+- Fix duplicate contact point creation [#3379](https://github.com/opendatateam/udata/pull/3379) [#3381](https://github.com/opendatateam/udata/pull/3381)
 - Atomic `get_or_create` [#3366](https://github.com/opendatateam/udata/pull/3366)
+- Add contact points suggest [#3376](https://github.com/opendatateam/udata/pull/3376)
 
 ## 10.7.0 (2025-07-17)
 

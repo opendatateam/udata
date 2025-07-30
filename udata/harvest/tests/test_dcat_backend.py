@@ -74,7 +74,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -123,7 +123,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
 
@@ -154,7 +154,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
 
@@ -171,7 +171,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         dataservices = Dataservice.objects
 
@@ -192,7 +192,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
         assert len(datasets) == 8
@@ -244,7 +244,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
 
@@ -306,7 +306,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         assert Dataset.objects.count() == 2
         assert HarvestJob.objects.first().status == "done"
@@ -320,7 +320,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
 
@@ -345,7 +345,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
 
@@ -388,7 +388,7 @@ class DcatBackendTest:
         url = mock_dcat(rmock, filename)
         source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
 
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -416,8 +416,8 @@ class DcatBackendTest:
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
         # Run the same havester twice
-        actions.run(source.slug)
-        actions.run(source.slug)
+        actions.run(source)
+        actions.run(source)
 
         datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
 
@@ -431,7 +431,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -443,7 +443,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -456,7 +456,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -470,7 +470,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -493,7 +493,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         # test dct:license support
         dataset = Dataset.objects.get(harvest__dct_identifier="3")
@@ -587,7 +587,7 @@ class DcatBackendTest:
         url = mock_dcat(rmock, "geonetwork.xml", path="catalog.xml")
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
-        actions.run(source.slug)
+        actions.run(source)
         dataset = Dataset.objects.filter(organization=org).first()
         assert dataset is not None
         assert dataset.harvest is not None
@@ -616,7 +616,7 @@ class DcatBackendTest:
         url = mock_dcat(rmock, "sig.oreme.rdf")
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
-        actions.run(source.slug)
+        actions.run(source)
         dataset = Dataset.objects.filter(organization=org).first()
 
         assert dataset is not None
@@ -646,7 +646,7 @@ class DcatBackendTest:
         url = mock_dcat(rmock, "udata.xml")
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
         job = source.get_last_job()
@@ -712,7 +712,7 @@ class DcatBackendTest:
         get_mock = rmock.get(url)
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
-        actions.run(source.slug)
+        actions.run(source)
 
         assert "User-Agent" in get_mock.last_request.headers
         assert get_mock.last_request.headers["User-Agent"] == "uData/0.1 dcat"
@@ -723,7 +723,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -741,7 +741,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -773,7 +773,7 @@ class DcatBackendTest:
         rmock.head(url, headers={"Content-Type": "application/json"})
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -787,7 +787,7 @@ class DcatBackendTest:
         rmock.get(url, status_code=404)
 
         source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
-        actions.run(source.slug)
+        actions.run(source)
         source.reload()
 
         job = source.get_last_job()
@@ -800,7 +800,7 @@ class DcatBackendTest:
         rmock.head(url, status_code=404)
 
         source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
-        actions.run(source.slug)
+        actions.run(source)
         source.reload()
 
         job = source.get_last_job()
@@ -817,7 +817,7 @@ class CswDcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="csw-dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -863,7 +863,7 @@ class CswDcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="csw-dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         assert "User-Agent" in get_mock.last_request.headers
         assert get_mock.last_request.headers["User-Agent"] == "uData/0.1 csw-dcat"
@@ -902,7 +902,7 @@ class CswIso19139DcatBackendTest:
             },
         )
 
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
