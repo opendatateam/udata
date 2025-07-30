@@ -98,6 +98,7 @@ class HarvestResourceMetadata(db.EmbeddedDocument):
     created_at = db.DateTimeField()
     modified_at = db.DateTimeField()
     uri = db.StringField()
+    dct_identifier = db.StringField()
 
 
 class Schema(db.EmbeddedDocument):
