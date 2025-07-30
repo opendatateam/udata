@@ -7,6 +7,7 @@ from mongoengine.signals import post_save
 from udata.api_fields import get_fields
 from udata.auth import current_user
 from udata.mongo import db
+from udata.utils import get_field_value_from_path
 
 from .signals import new_activity
 
@@ -88,10 +89,14 @@ class Auditable(object):
         changed_fields = self._get_changed_fields()
         if changed_fields:
             try:
-                old_document = self.__class__.objects.only(*changed_fields).get(pk=self.pk)
+                # `only` does not support having nested list as expressed in changed fields, ex resources.0.title
+                # thus we only strip to direct attributes for simplicity
+                direct_attributes = set(field.split(".")[0] for field in changed_fields)
+                old_document = self.__class__.objects.only(*direct_attributes).get(pk=self.pk)
                 self._previous_changed_fields = {}
-                for field in changed_fields:
-                    self._previous_changed_fields[field] = getattr(old_document, field, None)
+                for field_path in changed_fields:
+                    field_value = get_field_value_from_path(old_document, field_path)
+                    self._previous_changed_fields[field_path] = field_value
             except DoesNotExist:
                 pass
 
