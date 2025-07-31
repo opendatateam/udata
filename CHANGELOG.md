@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 10.8.2 (2025-07-31)
 
 - Add integrity checks on non existent list field instead of empty [#3242](https://github.com/opendatateam/udata/pull/3242)
 - Migrate udata-metrics [#3386](https://github.com/opendatateam/udata/pull/3386/)
