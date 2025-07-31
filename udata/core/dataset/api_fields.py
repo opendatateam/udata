@@ -266,6 +266,7 @@ DEFAULT_MASK = ",".join(
         "acronym",
         "slug",
         "description",
+        "description_short",
         "created_at",
         "last_modified",
         "deleted",
