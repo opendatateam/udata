@@ -96,7 +96,7 @@ def harvest_ckan(request, source, ckan, app, rmock):
     )
 
     with app.app_context():
-        actions.run(source.slug)
+        actions.run(source)
         source.reload()
         job = source.get_last_job()
         assert len(job.items) == 1
@@ -565,7 +565,7 @@ def test_minimal_ckan_response(app, rmock):
         status_code=200,
         headers={"Content-Type": "application/json"},
     )
-    actions.run(source.slug)
+    actions.run(source)
     source.reload()
     assert source.get_last_job().status == "done"
 
@@ -600,7 +600,7 @@ def test_flawed_ckan_response(app, rmock):
         status_code=200,
         headers={"Content-Type": "application/json"},
     )
-    actions.run(source.slug)
+    actions.run(source)
     source.reload()
     assert source.get_last_job().status == "done-errors"
     assert source.get_last_job().items[0].remote_id == _id
@@ -617,7 +617,7 @@ def test_flawed_ckan_response(app, rmock):
         status_code=200,
         headers={"Content-Type": "application/json"},
     )
-    actions.run(source.slug)
+    actions.run(source)
     source.reload()
     assert source.get_last_job().status == "done-errors"
     assert source.get_last_job().items[0].remote_id == name
@@ -662,7 +662,7 @@ def test_max_items(app, rmock):
         status_code=200,
         headers={"Content-Type": "application/json"},
     )
-    actions.run(source.slug)
+    actions.run(source)
     source.reload()
     assert source.get_last_job().status == "done"
     assert len(source.get_last_job().items) == 1
