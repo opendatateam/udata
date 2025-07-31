@@ -124,7 +124,6 @@ resource_fields = api.model(
         "id": fields.String(description="The resource unique ID", readonly=True),
         "title": fields.String(description="The resource title", required=True),
         "description": fields.Markdown(description="The resource markdown description"),
-        "description_short": fields.String(description="The resource short description"),
         "filetype": fields.String(
             description=("Whether the resource is an uploaded file, a remote file or an API"),
             required=True,
@@ -328,6 +327,7 @@ dataset_fields = api.model(
         "description": fields.Markdown(
             description="The dataset description in markdown", required=True
         ),
+        "description_short": fields.String(description="The dataset short description"),
         "created_at": fields.ISODateTime(
             description="This date is computed between harvested creation date if any and site's internal creation date",
             required=True,
