@@ -10,7 +10,7 @@
 - Fix not returning 404 for harvest sources [#3382](https://github.com/opendatateam/udata/pull/3382/)
 - Add missing trailing slashes on some endpoints [#3392](https://github.com/opendatateam/udata/pull/3392/)
 - Make organization name filter case insensitive [#3395](https://github.com/opendatateam/udata/pull/3395)
-- Add dataset field `desciption_short` [#3397](https://github.com/opendatateam/udata/pull/3397)
+- Add dataset field `description_short` [#3397](https://github.com/opendatateam/udata/pull/3397)
 
 ## 10.8.1 (2025-07-25)
 
