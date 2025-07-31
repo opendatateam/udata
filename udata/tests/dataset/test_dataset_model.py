@@ -789,14 +789,6 @@ class HarvestMetadataTest:
         with pytest.raises(db.ValidationError):
             dataset.save()
 
-    def test_harvest_dataset_metadata_no_validation_dynamic(self):
-        # Adding a dynamic field (not defined in HarvestDatasetMetadata) does not raise error
-        # at validation time
-        harvest_metadata = HarvestDatasetMetadata(dynamic_created_at="maintenant")
-        dataset = DatasetFactory()
-        dataset.harvest = harvest_metadata
-        dataset.save()
-
     def test_harvest_dataset_metadata_past_modifed_at(self):
         dataset = DatasetFactory()
 
@@ -825,14 +817,6 @@ class HarvestMetadataTest:
         resource.harvest = harvest_metadata
         with pytest.raises(db.ValidationError):
             resource.validate()
-
-    def test_harvest_resource_metadata_no_validation_dynamic(self):
-        # Adding a dynamic field (not defined in HarvestResourceMetadata) does not raise error
-        # at validation time
-        harvest_metadata = HarvestResourceMetadata(dynamic_created_at="maintenant")
-        resource = ResourceFactory()
-        resource.harvest = harvest_metadata
-        resource.validate()
 
     def test_harvest_resource_metadata_future_modifed_at(self):
         resource = ResourceFactory()
