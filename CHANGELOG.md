@@ -10,7 +10,6 @@
 - Fix not returning 404 for harvest sources [#3382](https://github.com/opendatateam/udata/pull/3382/)
 - Add missing trailing slashes on some endpoints [#3392](https://github.com/opendatateam/udata/pull/3392/)
 - Make organization name filter case insensitive [#3395](https://github.com/opendatateam/udata/pull/3395)
-- Make organization name filter case insensitive [#3392](https://github.com/opendatateam/udata/pull/3395)
 - Harvest metadata documents are no longer dynamic [#3396](https://github.com/opendatateam/udata/pull/3396)
 - Add dataset field `description_short` [#3397](https://github.com/opendatateam/udata/pull/3397)
 
