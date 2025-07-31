@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Cache dcat harvest pages to avoid two rounds of requests [#3398](https://github.com/opendatateam/udata/pull/3398)
 
 ## 10.8.2 (2025-07-31)
 
