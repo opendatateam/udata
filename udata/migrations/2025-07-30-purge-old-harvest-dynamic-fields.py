@@ -21,7 +21,8 @@ def migrate(db):
     resource_legacy_fields = ["ods_type"]
     for field in resource_legacy_fields:
         result = get_db().dataset.update_many(
-            {"resources": {"$exists": True}}, {"$unset": {f"resources.$[].harvest.{field}": 1}}
+            {"resources": {"$exists": True, "$type": "array"}},
+            {"$unset": {f"resources.$[].harvest.{field}": 1}},
         )
         log.info(
             f"Harvest Resource dynamic legacy fields ({field}) removed from {result.modified_count} objects"
