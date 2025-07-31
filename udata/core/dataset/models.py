@@ -36,6 +36,7 @@ from .constants import (
     CHECKSUM_TYPES,
     CLOSED_FORMATS,
     DEFAULT_LICENSE,
+    DESCRIPTION_SHORT_SIZE_LIMIT,
     LEGACY_FREQUENCIES,
     MAX_DISTANCE,
     PIVOTAL_DATA,
@@ -558,7 +559,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
         auditable=False,
     )
     description = field(db.StringField(required=True, default=""))
-    description_short = field(db.StringField(max_length=200))
+    description_short = field(db.StringField(max_length=DESCRIPTION_SHORT_SIZE_LIMIT))
     license = field(db.ReferenceField("License"))
 
     tags = field(db.TagListField())
