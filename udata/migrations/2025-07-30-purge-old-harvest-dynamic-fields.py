@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 
 def migrate(db):
-    # Remove legacy fields (`as_organization`, `kwargs`) from old activities
+    # Remove legacy fields (`ods_has_records`, `ods_url`, ...) from old harvested datasets and resources
     dataset_legacy_fields = ["ods_has_records", "ods_url", "ods_geo"]
     for field in dataset_legacy_fields:
         result = get_db().dataset.update_many({}, {"$unset": {f"harvest.{field}": 1}})
