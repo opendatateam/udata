@@ -2,8 +2,9 @@
 
 ## Current (in progress)
 
-- Nothing yet
-
+- Count dataservices and reuses for datasets based on signal [#3335](https://github.com/opendatateam/udata/pull/3335)
+  :warning: the job `update-datasets-reuses-metrics` disappears, you should unschedule it before installing this version
+ 
 ## 10.8.2 (2025-07-31)
 
 - Add integrity checks on non existent list field instead of empty [#3242](https://github.com/opendatateam/udata/pull/3242)
