@@ -187,6 +187,23 @@ class DcatBackendTest:
             == "https://data.paris2024.org/api/explore/v2.1/console"
         )
 
+    def test_harvest_dataservices_ignore_accessservices(self, rmock):
+        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
+
+        url = mock_dcat(rmock, "catalog.xml")
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
+
+        actions.run(source)
+
+        source.reload()
+
+        job = source.get_last_job()
+        assert len(job.items) == 4
+
+        dataservices = Dataservice.objects
+        assert len(dataservices) == 0
+
     def test_harvest_literal_spatial(self, rmock):
         url = mock_dcat(rmock, "evian.json")
         org = OrganizationFactory()
@@ -478,12 +495,8 @@ class DcatBackendTest:
 
         assert job.status == "done"
         assert job.errors == []
-        assert len(job.items) == 5
-        # 4 datasets and one Dataservice mentionned but not described
-        # because it appears in a distribution as DCAT.accessService
-        # but is missing a proper DCT.identifier
+        assert len(job.items) == 4
         assert len([item for item in job.items if item.status == "done"]) == 4
-        assert len([item for item in job.items if item.status == "skipped"]) == 1
 
     def test_xml_catalog(self, rmock):
         LicenseFactory(id="lov2", title="Licence Ouverte Version 2.0")

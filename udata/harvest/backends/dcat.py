@@ -200,7 +200,10 @@ class DcatBackend(BaseBackend):
         )
 
     def process_one_dataservices_page(self, page_number: int, page: Graph):
+        access_services = {o for _, _, o in page.triples((None, DCAT.accessService, None))}
         for node in page.subjects(RDF.type, DCAT.DataService):
+            if node in access_services:
+                continue
             remote_id = page.value(node, DCT.identifier)
             self.process_dataservice(remote_id, page_number=page_number, page=page, node=node)
 
