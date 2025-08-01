@@ -72,16 +72,16 @@ class DcatBackend(BaseBackend):
         fmt = self.get_format()
         self.job.data = {"format": fmt}
 
-        serialized_graphs = []
+        pages = []
 
         for page_number, page in self.walk_graph(self.source.url, fmt):
             self.process_one_datasets_page(page_number, page)
-            serialized_graphs.append(page.serialize(format=fmt, indent=None))
+            pages.append((page_number, page))
 
         # We do a second pass to have all datasets in memory and attach datasets
         # to dataservices. It could be better to be one pass of graph walking and
         # then one pass of attaching datasets to dataservices.
-        for page_number, page in self.walk_graph(self.source.url, fmt):
+        for page_number, page in pages:
             self.process_one_dataservices_page(page_number, page)
 
         if not self.dryrun and self.has_reached_max_items():
@@ -99,6 +99,8 @@ class DcatBackend(BaseBackend):
             max_harvest_graph_size_in_mongo = 15 * 1000 * 1000
 
         bucket = current_app.config.get("HARVEST_GRAPHS_S3_BUCKET")
+
+        serialized_graphs = [p.serialize(format=fmt, indent=None) for _, p in pages]
 
         if (
             bucket is not None
