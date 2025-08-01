@@ -81,6 +81,7 @@ class DcatBackend(BaseBackend):
             pages.append((page_number, page))
 
         for org in self.organizations_to_update:
+            org.compute_aggregate_metrics = True
             org.count_datasets()
 
         # We do a second pass to have all datasets in memory and attach datasets
