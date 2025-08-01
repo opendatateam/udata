@@ -14,8 +14,6 @@
 ## 10.8.2 (2025-07-31)
 
 - Add integrity checks on non existent list field instead of empty [#3242](https://github.com/opendatateam/udata/pull/3242)
-- Consolidate CSW harvesting logic [#3378](https://github.com/opendatateam/udata/pull/3378)
-  - :warning: Config setting `HARVEST_ISO19139_XSL_URL` is renamed to `HARVEST_ISO19139_XSLT_URL`.
 - Migrate udata-metrics [#3386](https://github.com/opendatateam/udata/pull/3386/)
 - Migrate udata-ckan [#3385](https://github.com/opendatateam/udata/pull/3385)
 - Deactivate sitemap extension [#3389](https://github.com/opendatateam/udata/pull/3389)
