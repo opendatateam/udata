@@ -2,6 +2,17 @@
 
 ## Current (in progress)
 
+- Count dataservices and reuses for datasets based on signal [#3335](https://github.com/opendatateam/udata/pull/3335)
+  :warning: the job `update-datasets-reuses-metrics` disappears, you should unschedule it before installing this version
+- Consolidate CSW harvesting logic [#3378](https://github.com/opendatateam/udata/pull/3378)
+  :warning: Config setting `HARVEST_ISO19139_XSL_URL` is renamed to `HARVEST_ISO19139_XSLT_URL`.
+- Change CSW harvesters XML processor from lxml to saxonche [#3380](https://github.com/opendatateam/udata/pull/3380)
+- Cache dcat harvest pages to avoid two rounds of requests [#3398](https://github.com/opendatateam/udata/pull/3398)
+- Ignore Dataset.accessService when processing DataService [#3399](https://github.com/opendatateam/udata/pull/3399)
+- Add dataset field `description_short` [#3397](https://github.com/opendatateam/udata/pull/3397)
+
+## 10.8.2 (2025-07-31)
+
 - Add integrity checks on non existent list field instead of empty [#3242](https://github.com/opendatateam/udata/pull/3242)
 - Consolidate CSW harvesting logic [#3378](https://github.com/opendatateam/udata/pull/3378)
   - :warning: Config setting `HARVEST_ISO19139_XSL_URL` is renamed to `HARVEST_ISO19139_XSLT_URL`.
@@ -11,8 +22,8 @@
 - Deactivate cache to check for existing slugs [#3390](https://github.com/opendatateam/udata/pull/3390)
 - Fix not returning 404 for harvest sources [#3382](https://github.com/opendatateam/udata/pull/3382/)
 - Add missing trailing slashes on some endpoints [#3392](https://github.com/opendatateam/udata/pull/3392/)
-- Make organization name filter case insensitive [#3392](https://github.com/opendatateam/udata/pull/3395)
-- Change CSW harvesters XML processor from lxml to saxonche [#3380](https://github.com/opendatateam/udata/pull/3380)
+- Make organization name filter case insensitive [#3395](https://github.com/opendatateam/udata/pull/3395)
+- Harvest metadata documents are no longer dynamic [#3396](https://github.com/opendatateam/udata/pull/3396)
 
 ## 10.8.1 (2025-07-25)
 

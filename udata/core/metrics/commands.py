@@ -74,6 +74,7 @@ def update(
                         dataset.metrics.clear()
                     dataset.count_discussions()
                     dataset.count_reuses()
+                    dataset.count_dataservices()
                     dataset.count_followers()
                 except Exception as e:
                     log.info(f"Error during update: {e}")
@@ -119,6 +120,7 @@ def update(
                         organization.metrics.clear()
                     organization.count_datasets()
                     organization.count_reuses()
+                    organization.count_dataservices()
                     organization.count_followers()
                     organization.count_members()
                 except Exception as e:
@@ -135,6 +137,7 @@ def update(
                         user.metrics.clear()
                     user.count_datasets()
                     user.count_reuses()
+                    user.count_dataservices()
                     user.count_followers()
                     user.count_following()
                 except Exception as e:
