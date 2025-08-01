@@ -357,6 +357,7 @@ def init_app(app):
     import udata.features.identicon.api  # noqa
     import udata.features.territories.api  # noqa
     import udata.harvest.api  # noqa
+    import udata.core.standard.api  # noqa
 
     for module in entrypoints.get_enabled("udata.apis", app).values():
         module if inspect.ismodule(module) else import_module(module)
