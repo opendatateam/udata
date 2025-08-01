@@ -618,6 +618,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
         "discussions_open",
         "reuses",
         "reuses_by_months",
+        "dataservices",
         "followers",
         "followers_by_months",
         "views",
@@ -630,6 +631,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
             "created_at_internal",
             "last_modified_internal",
             "metrics.reuses",
+            "metrics.dataservices",
             "metrics.followers",
             "metrics.views",
             "slug",
@@ -1100,6 +1102,12 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
 
         self.metrics["reuses"] = Reuse.objects(datasets=self).visible().count()
         self.metrics["reuses_by_months"] = get_stock_metrics(Reuse.objects(datasets=self).visible())
+        self.save(signal_kwargs={"ignores": ["post_save"]})
+
+    def count_dataservices(self):
+        from udata.core.dataservices.models import Dataservice
+
+        self.metrics["dataservices"] = Dataservice.objects(datasets=self).visible().count()
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):
