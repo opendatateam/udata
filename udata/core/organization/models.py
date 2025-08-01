@@ -188,6 +188,10 @@ class Organization(
     after_delete = Signal()
     on_delete = Signal()
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.compute_aggregate_metrics = True
+
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
         cls.before_save.send(document)
@@ -303,11 +307,11 @@ class Organization(
         self.metrics["members"] = len(self.members)
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
-    def count_datasets(self, compute_aggregates: bool = True):
+    def count_datasets(self):
         from udata.models import Dataset, Follow, Reuse
 
         self.metrics["datasets"] = Dataset.objects(organization=self).visible().count()
-        if compute_aggregates:
+        if self.compute_aggregate_metrics:
             self.metrics["datasets_by_months"] = get_stock_metrics(
                 Dataset.objects(organization=self).visible(), date_label="created_at_internal"
             )

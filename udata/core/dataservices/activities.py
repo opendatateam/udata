@@ -35,7 +35,7 @@ class UserDeletedDataservice(DataserviceRelatedActivity, Activity):
 
 
 @Dataservice.on_create.connect
-def on_user_created_dataservice(dataservice, **kwargs):
+def on_user_created_dataservice(dataservice):
     if current_user and current_user.is_authenticated:
         UserCreatedDataservice.emit(dataservice, dataservice.organization)
 
@@ -48,6 +48,6 @@ def on_user_updated_dataservice(dataservice, **kwargs):
 
 
 @Dataservice.on_delete.connect
-def on_user_deleted_dataservice(dataservice, **kwargs):
+def on_user_deleted_dataservice(dataservice):
     if current_user and current_user.is_authenticated:
         UserDeletedDataservice.emit(dataservice, dataservice.organization)

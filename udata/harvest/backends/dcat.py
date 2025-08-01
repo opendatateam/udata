@@ -228,6 +228,7 @@ class DcatBackend(BaseBackend):
         remote_url_prefix = self.get_extra_config_value("remote_url_prefix")
         dataset = dataset_from_rdf(page, dataset, node=node, remote_url_prefix=remote_url_prefix)
         if dataset.organization:
+            dataset.organization.compute_aggregate_metrics = False
             self.organizations_to_update.add(dataset.organization)
         return dataset
 
