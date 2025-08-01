@@ -460,7 +460,7 @@ def test_skip_no_resources(source, result):
 def test_ckan_url_is_url(data, result):
     dataset = dataset_for(result)
     assert dataset.harvest.remote_url == data["url"]
-    assert not hasattr(dataset.harvest, "ckan_source")
+    assert dataset.harvest.ckan_source is None
 
 
 @pytest.mark.ckan_data("ckan_url_is_a_string")
