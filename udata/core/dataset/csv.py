@@ -26,6 +26,7 @@ class DatasetCsvAdapter(csv.Adapter):
         ("owner_id", "owner.id"),
         # 'contact_point', #  ?
         "description",
+        "description_short",
         "frequency",
         "license",
         "temporal_coverage.start",

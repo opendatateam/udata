@@ -300,59 +300,54 @@ class SourcesAPI(API):
         return source, 201
 
 
-@ns.route("/source/<string:ident>", endpoint="harvest_source")
-@api.param("ident", "A source ID or slug")
+@ns.route("/source/<harvest_source:source>/", endpoint="harvest_source")
 class SourceAPI(API):
     @api.doc("get_harvest_source")
     @api.marshal_with(source_fields)
-    def get(self, ident):
+    def get(self, source: HarvestSource):
         """Get a single source given an ID or a slug"""
-        return actions.get_source(ident)
+        return source
 
     @api.secure
     @api.doc("update_harvest_source")
     @api.expect(source_fields)
     @api.marshal_with(source_fields)
-    def put(self, ident):
+    def put(self, source: HarvestSource):
         """Update a harvest source"""
-        source = actions.get_source(ident)
         OwnablePermission(source).test()
         form = api.validate(HarvestSourceForm, source)
-        source = actions.update_source(ident, form.data)
+        source = actions.update_source(source, form.data)
         return source
 
     @api.secure
     @api.doc("delete_harvest_source")
     @api.marshal_with(source_fields)
-    def delete(self, ident):
-        source: HarvestSource = actions.get_source(ident)
+    def delete(self, source: HarvestSource):
         OwnablePermission(source).test()
-        return actions.delete_source(ident), 204
+        return actions.delete_source(source), 204
 
 
-@ns.route("/source/<string:ident>/validate", endpoint="validate_harvest_source")
-@api.param("ident", "A source ID or slug")
+@ns.route("/source/<harvest_source:source>/validate/", endpoint="validate_harvest_source")
 class ValidateSourceAPI(API):
     @api.doc("validate_harvest_source")
     @api.secure(admin_permission)
     @api.expect(validation_fields)
     @api.marshal_with(source_fields)
-    def post(self, ident):
+    def post(self, source: HarvestSource):
         """Validate or reject an harvest source"""
         form = api.validate(HarvestSourceValidationForm)
         if form.state.data == VALIDATION_ACCEPTED:
-            return actions.validate_source(ident, form.comment.data)
+            return actions.validate_source(source, form.comment.data)
         else:
-            return actions.reject_source(ident, form.comment.data)
+            return actions.reject_source(source, form.comment.data)
 
 
-@ns.route("/source/<string:ident>/run", endpoint="run_harvest_source")
-@api.param("ident", "A source ID or slug")
+@ns.route("/source/<harvest_source:source>/run/", endpoint="run_harvest_source")
 class RunSourceAPI(API):
     @api.doc("run_harvest_source")
     @api.secure
     @api.marshal_with(source_fields)
-    def post(self, ident):
+    def post(self, source: HarvestSource):
         enabled = current_app.config.get("HARVEST_ENABLE_MANUAL_RUN")
         if not enabled and not current_user.sysadmin:
             api.abort(
@@ -360,42 +355,40 @@ class RunSourceAPI(API):
                 "Cannot run source manually. Please contact the platform if you need to reschedule the harvester.",
             )
 
-        source: HarvestSource = actions.get_source(ident)
         OwnablePermission(source).test()
 
         if source.validation.state != VALIDATION_ACCEPTED:
             api.abort(400, "Source is not validated. Please validate the source before running.")
 
-        actions.launch(ident)
+        actions.launch(source)
 
         return source
 
 
-@ns.route("/source/<string:ident>/schedule", endpoint="schedule_harvest_source")
-@api.param("ident", "A source ID or slug")
+@ns.route("/source/<harvest_source:source>/schedule/", endpoint="schedule_harvest_source")
 class ScheduleSourceAPI(API):
     @api.doc("schedule_harvest_source")
     @api.secure(admin_permission)
     @api.expect((str, "A cron expression"))
     @api.marshal_with(source_fields)
-    def post(self, ident):
+    def post(self, source: HarvestSource):
         """Schedule an harvest source"""
         # Handle both syntax: quoted and unquoted
         try:
             data = request.json
         except BadRequest:
             data = request.data.decode("utf-8")
-        return actions.schedule(ident, data)
+        return actions.schedule(source, data)
 
     @api.doc("unschedule_harvest_source")
     @api.secure(admin_permission)
     @api.marshal_with(source_fields)
-    def delete(self, ident):
+    def delete(self, source: HarvestSource):
         """Unschedule an harvest source"""
-        return actions.unschedule(ident), 204
+        return actions.unschedule(source), 204
 
 
-@ns.route("/source/preview", endpoint="preview_harvest_source_config")
+@ns.route("/source/preview/", endpoint="preview_harvest_source_config")
 class PreviewSourceConfigAPI(API):
     @api.secure
     @api.expect(source_fields)
@@ -409,15 +402,14 @@ class PreviewSourceConfigAPI(API):
         return actions.preview_from_config(**form.data)
 
 
-@ns.route("/source/<string:ident>/preview", endpoint="preview_harvest_source")
-@api.param("ident", "A source ID or slug")
+@ns.route("/source/<harvest_source:source>/preview/", endpoint="preview_harvest_source")
 class PreviewSourceAPI(API):
     @api.secure
     @api.doc("preview_harvest_source")
     @api.marshal_with(preview_job_fields)
-    def get(self, ident):
+    def get(self, source: HarvestSource):
         """Preview a single harvest source given an ID or a slug"""
-        return actions.preview(ident)
+        return actions.preview(source)
 
 
 parser = api.parser()
@@ -427,15 +419,15 @@ parser.add_argument(
 )
 
 
-@ns.route("/source/<string:ident>/jobs/", endpoint="harvest_jobs")
+@ns.route("/source/<harvest_source:source>/jobs/", endpoint="harvest_jobs")
 class JobsAPI(API):
     @api.doc("list_harvest_jobs")
     @api.expect(parser)
     @api.marshal_with(job_page_fields)
-    def get(self, ident):
+    def get(self, source: HarvestSource):
         """List all jobs for a given source"""
         args = parser.parse_args()
-        qs = HarvestJob.objects(source=ident)
+        qs = HarvestJob.objects(source=source)
         qs = qs.order_by("-created")
         return qs.paginate(args["page"], args["page_size"])
 
@@ -450,7 +442,7 @@ class JobAPI(API):
         return actions.get_job(ident)
 
 
-@ns.route("/backends", endpoint="harvest_backends")
+@ns.route("/backends/", endpoint="harvest_backends")
 class ListBackendsAPI(API):
     @api.doc("harvest_backends")
     @api.marshal_with(backend_fields)
@@ -471,7 +463,7 @@ class ListBackendsAPI(API):
         )
 
 
-@ns.route("/job_status", endpoint="havest_job_status")
+@ns.route("/job_status/", endpoint="havest_job_status")
 class ListHarvesterAPI(API):
     @api.doc(model=[str])
     def get(self):

@@ -54,7 +54,7 @@ def test_dkan_french_w_license(app, rmock):
     rmock.get(
         PACKAGE_SHOW_URL, json=data, status_code=200, headers={"Content-Type": "application/json"}
     )
-    actions.run(source.slug)
+    actions.run(source)
     source.reload()
     assert source.get_last_job().status == "done"
 

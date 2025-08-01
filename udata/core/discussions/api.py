@@ -247,7 +247,7 @@ class DiscussionAPI(API):
         return "", 204
 
 
-@ns.route("/<id>/comments/<int:cidx>/spam", endpoint="discussion_comment_spam")
+@ns.route("/<id>/comments/<int:cidx>/spam/", endpoint="discussion_comment_spam")
 @ns.doc(delete={"id": "unspam"})
 class DiscussionCommentSpamAPI(SpamAPIMixin):
     def get_model(self, id, cidx):
@@ -259,7 +259,7 @@ class DiscussionCommentSpamAPI(SpamAPIMixin):
         return discussion, discussion.discussion[cidx]
 
 
-@ns.route("/<id>/comments/<int:cidx>", endpoint="discussion_comment")
+@ns.route("/<id>/comments/<int:cidx>/", endpoint="discussion_comment")
 class DiscussionCommentAPI(API):
     """
     Base class for a comment in a discussion thread.
