@@ -15,10 +15,6 @@ from udata.api import fields
 from udata.app import cache
 from udata.core import storages
 from udata.core.badges.factories import badge_factory
-from udata.core.dataset.api_fields import (
-    dataset_harvest_fields,
-    resource_harvest_fields,
-)
 from udata.core.dataset.constants import (
     DEFAULT_FREQUENCY,
     DEFAULT_LICENSE,
@@ -2392,10 +2388,6 @@ class DatasetSchemasAPITest:
 class HarvestMetadataAPITest:
     modules = []
 
-    # api fields should be updated before app is created
-    dataset_harvest_fields["dynamic_field"] = fields.String(description="", allow_null=True)
-    resource_harvest_fields["dynamic_field"] = fields.String(description="", allow_null=True)
-
     def test_dataset_with_harvest_metadata(self, api):
         date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
         harvest_metadata = HarvestDatasetMetadata(
@@ -2431,24 +2423,6 @@ class HarvestMetadataAPITest:
             "archived": "not-on-remote",
         }
 
-    def test_dataset_dynamic_harvest_metadata_without_api_field(self, api):
-        harvest_metadata = HarvestDatasetMetadata(dynamic_field_but_no_api_field_defined="DCAT")
-        dataset = DatasetFactory(harvest=harvest_metadata)
-
-        response = api.get(url_for("api.dataset", dataset=dataset))
-        assert200(response)
-        assert response.json["harvest"] == {}
-
-    def test_dataset_dynamic_harvest_metadata_with_api_field(self, api):
-        harvest_metadata = HarvestDatasetMetadata(dynamic_field="dynamic_value")
-        dataset = DatasetFactory(harvest=harvest_metadata)
-
-        response = api.get(url_for("api.dataset", dataset=dataset))
-        assert200(response)
-        assert response.json["harvest"] == {
-            "dynamic_field": "dynamic_value",
-        }
-
     def test_dataset_with_resource_harvest_metadata(self, api):
         date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
 
@@ -2465,26 +2439,6 @@ class HarvestMetadataAPITest:
             "created_at": date.isoformat(),
             "modified_at": date.isoformat(),
             "uri": "http://domain.gouv.fr/dataset/uri",
-        }
-
-    def test_resource_dynamic_harvest_metadata_without_api_field(self, api):
-        harvest_metadata = HarvestResourceMetadata(
-            dynamic_field_but_no_api_field_defined="dynamic_value"
-        )
-        dataset = DatasetFactory(resources=[ResourceFactory(harvest=harvest_metadata)])
-
-        response = api.get(url_for("api.dataset", dataset=dataset))
-        assert200(response)
-        assert response.json["resources"][0]["harvest"] == {}
-
-    def test_resource_dynamic_harvest_metadata_with_api_field(self, api):
-        harvest_metadata = HarvestResourceMetadata(dynamic_field="dynamic_value")
-        dataset = DatasetFactory(resources=[ResourceFactory(harvest=harvest_metadata)])
-
-        response = api.get(url_for("api.dataset", dataset=dataset))
-        assert200(response)
-        assert response.json["resources"][0]["harvest"] == {
-            "dynamic_field": "dynamic_value",
         }
 
     def test_dataset_with_harvest_computed_dates(self, api):

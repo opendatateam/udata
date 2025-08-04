@@ -120,17 +120,6 @@ def send_frequency_reminder(self):
     print("Done")
 
 
-@job("update-datasets-reuses-metrics")
-def update_datasets_reuses_metrics(self):
-    all_datasets = Dataset.objects.visible().timeout(False)
-    for dataset in all_datasets:
-        try:
-            dataset.count_reuses()
-        except Exception as e:
-            log.error(f"Error for dataset {dataset} during reuses metrics update: {e}")
-            continue
-
-
 def get_queryset(model_cls):
     # special case for resources
     if model_cls.__name__ == "Resource":

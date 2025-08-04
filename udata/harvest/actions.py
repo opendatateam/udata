@@ -29,6 +29,11 @@ log = logging.getLogger(__name__)
 DEFAULT_PAGE_SIZE = 10
 
 
+def get_source(ident):
+    """Get an harvest source given its ID or its slug"""
+    return HarvestSource.get(ident)
+
+
 def list_backends():
     """List all available backends"""
     return backends.get_all(current_app).values()
@@ -42,11 +47,6 @@ def list_sources(owner=None, deleted=False):
     if owner:
         sources = sources.owned_by(owner)
     return list(sources)
-
-
-def get_source(ident):
-    """Get an harvest source given its ID or its slug"""
-    return HarvestSource.get(ident)
 
 
 def get_job(ident):
@@ -89,31 +89,28 @@ def create_source(
     return source
 
 
-def update_source(ident, data):
+def update_source(source: HarvestSource, data):
     """Update an harvest source"""
-    source = get_source(ident)
     source.modify(**data)
     signals.harvest_source_updated.send(source)
     return source
 
 
-def validate_source(ident, comment=None):
+def validate_source(source: HarvestSource, comment=None):
     """Validate a source for automatic harvesting"""
-    source = get_source(ident)
     source.validation.on = datetime.utcnow()
     source.validation.comment = comment
     source.validation.state = VALIDATION_ACCEPTED
     if current_user.is_authenticated:
         source.validation.by = current_user._get_current_object()
     source.save()
-    schedule(ident, cron=current_app.config["HARVEST_DEFAULT_SCHEDULE"])
-    launch(ident)
+    schedule(source, cron=current_app.config["HARVEST_DEFAULT_SCHEDULE"])
+    launch(source)
     return source
 
 
-def reject_source(ident, comment):
+def reject_source(source: HarvestSource, comment):
     """Reject a source for automatic harvesting"""
-    source = get_source(ident)
     source.validation.on = datetime.utcnow()
     source.validation.comment = comment
     source.validation.state = VALIDATION_REFUSED
@@ -123,18 +120,16 @@ def reject_source(ident, comment):
     return source
 
 
-def delete_source(ident):
+def delete_source(source: HarvestSource):
     """Delete an harvest source"""
-    source = get_source(ident)
     source.deleted = datetime.utcnow()
     source.save()
     signals.harvest_source_deleted.send(source)
     return source
 
 
-def clean_source(ident):
+def clean_source(source: HarvestSource):
     """Deletes all datasets linked to a harvest source"""
-    source = get_source(ident)
     datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
     for dataset in datasets:
         dataset.deleted = datetime.utcnow()
@@ -180,22 +175,20 @@ def purge_jobs():
     return HarvestJob.objects(created__lt=expiration).delete()
 
 
-def run(ident):
+def run(source: HarvestSource):
     """Launch or resume an harvesting for a given source if none is running"""
-    source = get_source(ident)
     cls = backends.get(current_app, source.backend)
     backend = cls(source)
     backend.harvest()
 
 
-def launch(ident):
+def launch(source: HarvestSource):
     """Launch or resume an harvesting for a given source if none is running"""
-    return harvest.delay(ident)
+    return harvest.delay(source.id)
 
 
-def preview(ident):
+def preview(source: HarvestSource):
     """Preview an harvesting for a given source"""
-    source = get_source(ident)
     cls = backends.get(current_app, source.backend)
     max_items = current_app.config["HARVEST_PREVIEW_MAX_ITEMS"]
     backend = cls(source, dryrun=True, max_items=max_items)
@@ -240,11 +233,15 @@ def preview_from_config(
 
 
 def schedule(
-    ident, cron=None, minute="*", hour="*", day_of_week="*", day_of_month="*", month_of_year="*"
+    source: HarvestSource,
+    cron=None,
+    minute="*",
+    hour="*",
+    day_of_week="*",
+    day_of_month="*",
+    month_of_year="*",
 ):
     """Schedule an harvesting on a source given a crontab"""
-    source = get_source(ident)
-
     if cron:
         minute, hour, day_of_month, month_of_year, day_of_week = cron.split()
 
@@ -273,9 +270,8 @@ def schedule(
     return source
 
 
-def unschedule(ident):
+def unschedule(source: HarvestSource):
     """Unschedule an harvesting on a source"""
-    source = get_source(ident)
     if not source.periodic_task:
         msg = "Harvesting on source {0} is ot scheduled".format(source.name)
         raise ValueError(msg)

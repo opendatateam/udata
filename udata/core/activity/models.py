@@ -1,11 +1,13 @@
 from datetime import datetime
 
 from blinker import Signal
+from mongoengine.errors import DoesNotExist
 from mongoengine.signals import post_save
 
 from udata.api_fields import get_fields
 from udata.auth import current_user
 from udata.mongo import db
+from udata.utils import get_field_value_from_path
 
 from .signals import new_activity
 
@@ -79,6 +81,25 @@ class Activity(db.Document, metaclass=EmitNewActivityMetaClass):
 
 
 class Auditable(object):
+    def clean(self, **kwargs):
+        super().clean()
+        """
+        Fetch original document changed fields values before the new one erase it.
+        """
+        changed_fields = self._get_changed_fields()
+        if changed_fields:
+            try:
+                # `only` does not support having nested list as expressed in changed fields, ex resources.0.title
+                # thus we only strip to direct attributes for simplicity
+                direct_attributes = set(field.split(".")[0] for field in changed_fields)
+                old_document = self.__class__.objects.only(*direct_attributes).get(pk=self.pk)
+                self._previous_changed_fields = {}
+                for field_path in changed_fields:
+                    field_value = get_field_value_from_path(old_document, field_path)
+                    self._previous_changed_fields[field_path] = field_value
+            except DoesNotExist:
+                pass
+
     @classmethod
     def post_save(cls, sender, document, **kwargs):
         try:
@@ -97,6 +118,7 @@ class Auditable(object):
         if kwargs.get("created"):
             cls.on_create.send(document)
         elif len(changed_fields):
-            cls.on_update.send(document, changed_fields=changed_fields)
+            previous = getattr(document, "_previous_changed_fields", None)
+            cls.on_update.send(document, changed_fields=changed_fields, previous=previous)
         if getattr(document, "deleted_at", None) or getattr(document, "deleted", None):
             cls.on_delete.send(document)
