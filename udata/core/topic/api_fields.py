@@ -1,6 +1,6 @@
 from flask import url_for
 
-from udata.api import apiv2, fields
+from udata.api import api, apiv2, fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.topic import DEFAULT_PAGE_SIZE
@@ -62,14 +62,6 @@ topic_fields = apiv2.model(
 
 topic_page_fields = apiv2.model("TopicPage", fields.pager(topic_fields))
 
-nested_element_fields = apiv2.model(
-    "ElementModelReference",
-    {
-        "class": fields.ClassName(description="The model class", required=True),
-        "id": fields.String(description="The object identifier", required=True),
-    },
-)
-
 element_fields = apiv2.model(
     "TopicElement",
     {
@@ -79,7 +71,7 @@ element_fields = apiv2.model(
         "tags": fields.List(fields.String, description="The element tags"),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),
         "element": fields.Nested(
-            nested_element_fields, description="The element target object", allow_null=True
+            api.model_reference, description="The element target object", allow_null=True
         ),
     },
 )

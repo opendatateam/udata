@@ -4,12 +4,11 @@ import mongoengine
 from flask import request
 from flask_security import current_user
 
-from udata.api import API, apiv2
+from udata.api import API, api, apiv2
 from udata.core.discussions.models import Discussion
 from udata.core.topic.api_fields import (
     element_fields,
     element_page_fields,
-    nested_element_fields,
     topic_fields,
     topic_input_fields,
     topic_page_fields,
@@ -18,6 +17,8 @@ from udata.core.topic.forms import TopicElementForm, TopicForm
 from udata.core.topic.models import Topic, TopicElement
 from udata.core.topic.parsers import TopicApiParser, TopicElementsParser
 from udata.core.topic.permissions import TopicEditPermission
+
+apiv2.inherit("ModelReference", api.model_reference)
 
 DEFAULT_SORTING = "-created_at"
 
@@ -106,7 +107,7 @@ class TopicElementsAPI(API):
 
     @apiv2.secure
     @apiv2.doc("topic_elements_create")
-    @apiv2.expect([nested_element_fields])
+    @apiv2.expect([api.model_reference])
     @apiv2.marshal_with(topic_fields)
     @apiv2.response(400, "Expecting a list")
     @apiv2.response(404, "Topic not found")
