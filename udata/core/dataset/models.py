@@ -374,11 +374,9 @@ class ResourceMixin(object):
 
     @property
     def created_at(self):
-        return (
-            self.harvest.created_at
-            if self.harvest and self.harvest.created_at
-            else self.created_at_internal
-        )
+        if self.harvest:
+            return self.harvest.issued_at or self.created_at_internal
+        return self.created_at_internal
 
     @property
     def last_modified(self):
@@ -789,11 +787,9 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
 
     @property
     def created_at(self):
-        return (
-            self.harvest.created_at
-            if self.harvest and self.harvest.created_at
-            else self.created_at_internal
-        )
+        if self.harvest:
+            return self.harvest.issued_at or self.harvest.created_at or self.created_at_internal
+        return self.created_at_internal
 
     @property
     def last_modified(self):

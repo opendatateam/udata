@@ -46,6 +46,7 @@ from udata.rdf import (
     remote_url_from_rdf,
     sanitize_html,
     schema_from_rdf,
+    set_harvested_date,
     themes_from_rdf,
     url_from_rdf,
 )
@@ -214,15 +215,9 @@ def resource_to_rdf(
     r.add(DCAT.downloadURL, URIRef(resource.url))
     r.add(DCAT.accessURL, URIRef(resource.latest))
     # issued
-    if resource.harvest and resource.harvest.issued_at:
-        r.add(DCT.issued, Literal(resource.harvest.issued_at))
-    else:
-        r.add(DCT.issued, Literal(resource.created_at))
+    set_harvested_date(resource, r, DCT.issued, "issued_at", fallback=resource.created_at)
     # modified
-    if resource.harvest and resource.harvest.modified_at:
-        r.add(DCT.modified, Literal(resource.harvest.modified_at))
-    else:
-        r.add(DCT.modified, Literal(resource.last_modified))
+    set_harvested_date(resource, r, DCT.modified, "modified_at", fallback=resource.last_modified)
     if dataset and dataset.license:
         r.add(DCT.rights, Literal(dataset.license.title))
         if dataset.license.url:
@@ -294,20 +289,11 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
     d.set(DCT.description, Literal(dataset.description))
 
     # created
-    if dataset.harvest and dataset.harvest.created_at:
-        d.set(DCT.created, Literal(dataset.harvest.created_at))
-    else:
-        d.set(DCT.created, Literal(dataset.created_at))
+    set_harvested_date(dataset, d, DCT.created, "created_at", fallback=dataset.created_at)
     # issued
-    if dataset.harvest and dataset.harvest.issued_at:
-        d.set(DCT.issued, Literal(dataset.harvest.issued_at))
-    else:
-        d.set(DCT.issued, Literal(dataset.created_at))
+    set_harvested_date(dataset, d, DCT.issued, "issued_at", fallback=dataset.created_at)
     # modified
-    if dataset.harvest and dataset.harvest.modified_at:
-        d.set(DCT.modified, Literal(dataset.harvest.modified_at))
-    else:
-        d.set(DCT.modified, Literal(dataset.last_modified))
+    set_harvested_date(dataset, d, DCT.modified, "modified_at", fallback=dataset.last_modified)
 
     if dataset.harvest and dataset.harvest.remote_url:
         d.set(DCAT.landingPage, URIRef(dataset.harvest.remote_url))

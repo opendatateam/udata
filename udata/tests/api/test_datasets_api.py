@@ -2441,26 +2441,40 @@ class HarvestMetadataAPITest:
         }
 
     def test_dataset_with_harvest_computed_dates(self, api):
-        creation_date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
+        # issued_date takes precedence over internal creation date and harvest created_at on dataset
+        issued_date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
+        creation_date = datetime(2022, 2, 23, tzinfo=pytz.UTC)
+        modification_date = datetime(2022, 3, 19, tzinfo=pytz.UTC)
+        harvest_metadata = HarvestDatasetMetadata(
+            created_at=creation_date,
+            issued_at=issued_date,
+            modified_at=modification_date,
+        )
+        dataset = DatasetFactory(harvest=harvest_metadata)
+        response = api.get(url_for("api.dataset", dataset=dataset))
+        assert200(response)
+        assert response.json["created_at"] == issued_date.isoformat()
+        assert response.json["last_modified"] == modification_date.isoformat()
+
+        # without issuance date, creation_date takes precedence over internal creation date on dataset
         modification_date = datetime(2022, 3, 19, tzinfo=pytz.UTC)
         harvest_metadata = HarvestDatasetMetadata(
             created_at=creation_date,
             modified_at=modification_date,
         )
         dataset = DatasetFactory(harvest=harvest_metadata)
-
         response = api.get(url_for("api.dataset", dataset=dataset))
         assert200(response)
         assert response.json["created_at"] == creation_date.isoformat()
         assert response.json["last_modified"] == modification_date.isoformat()
 
+        # issued_date takes precedence over internal creation date on resource
         resource_harvest_metadata = HarvestResourceMetadata(
-            created_at=creation_date,
+            issued_at=issued_date,
             modified_at=modification_date,
         )
         dataset = DatasetFactory(resources=[ResourceFactory(harvest=resource_harvest_metadata)])
-
         response = api.get(url_for("api.dataset", dataset=dataset))
         assert200(response)
-        assert response.json["resources"][0]["created_at"] == creation_date.isoformat()
+        assert response.json["resources"][0]["created_at"] == issued_date.isoformat()
         assert response.json["resources"][0]["last_modified"] == modification_date.isoformat()

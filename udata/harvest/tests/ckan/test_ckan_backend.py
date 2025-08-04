@@ -425,7 +425,7 @@ def test_all_metadata(data, result):
     # Use result because format is normalized by CKAN
     assert resource.format == resource_result["format"].lower()
     assert resource.mime == resource_data["mimetype"].lower()
-    assert resource.harvest.created_at.date() == date(2022, 9, 29)
+    assert resource.harvest.issued_at.date() == date(2022, 9, 29)
     assert resource.harvest.modified_at.date() == date(2022, 9, 30)
 
 

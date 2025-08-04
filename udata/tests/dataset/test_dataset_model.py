@@ -866,7 +866,7 @@ class HarvestMetadataTest:
         resource = ResourceFactory()
 
         harvest_metadata = HarvestResourceMetadata(
-            created_at=datetime.utcnow(),
+            issued_at=datetime.utcnow(),
             modified_at=datetime.utcnow(),
             uri="http://domain.gouv.fr/dataset/uri",
         )

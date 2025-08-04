@@ -17,6 +17,7 @@ from udata.rdf import (
     namespace_manager,
     rdf_value,
     remote_url_from_rdf,
+    set_harvested_date,
     themes_from_rdf,
     url_from_rdf,
 )
@@ -122,15 +123,9 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     d.set(DCT.description, Literal(dataservice.description))
 
     # created
-    if dataservice.harvest and dataservice.harvest.created_at:
-        d.set(DCT.created, Literal(dataservice.harvest.created_at))
-    else:
-        d.set(DCT.created, Literal(dataservice.created_at))
+    set_harvested_date(dataservice, d, DCT.created, "created_at", fallback=dataservice.created_at)
     # issued
-    if dataservice.harvest and dataservice.harvest.issued_at:
-        d.set(DCT.issued, Literal(dataservice.harvest.issued_at))
-    else:
-        d.set(DCT.issued, Literal(dataservice.created_at))
+    set_harvested_date(dataservice, d, DCT.issued, "issued_at", fallback=dataservice.created_at)
     # modified
     d.set(DCT.modified, Literal(dataservice.metadata_modified_at))
 
