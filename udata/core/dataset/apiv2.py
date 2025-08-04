@@ -44,6 +44,7 @@ DEFAULT_MASK_APIV2 = ",".join(
         "acronym",
         "slug",
         "description",
+        "description_short",
         "created_at",
         "last_modified",
         "deleted",
@@ -104,6 +105,9 @@ dataset_fields = apiv2.model(
         "slug": fields.String(description="The dataset permalink string", required=True),
         "description": fields.Markdown(
             description="The dataset description in markdown", required=True
+        ),
+        "description_short": fields.String(
+            description="The dataset short description", required=False
         ),
         "created_at": fields.ISODateTime(
             description="The dataset creation date", required=True, readonly=True
@@ -198,18 +202,15 @@ dataset_fields = apiv2.model(
             default=DEFAULT_LICENSE["id"],
             description="The dataset license (full License object if `X-Get-Datasets-Full-Objects` is set, ID of the license otherwise)",
         ),
-        "uri": fields.UrlFor(
-            "api.dataset",
-            lambda o: {"dataset": o},
-            description="The dataset API URI",
-            required=True,
+        "uri": fields.String(
+            attribute=lambda d: d.self_api_url(),
+            description="The API URI for this dataset",
+            readonly=True,
         ),
-        "page": fields.UrlFor(
-            "datasets.show",
-            lambda o: {"dataset": o},
-            description="The dataset page URL",
-            required=True,
-            fallback_endpoint="api.dataset",
+        "page": fields.String(
+            attribute=lambda d: d.self_web_url(),
+            description="The dataset web page URL",
+            readonly=True,
         ),
         "quality": fields.Raw(description="The dataset quality", readonly=True),
         "last_update": fields.ISODateTime(
@@ -468,7 +469,7 @@ class DatasetSchemasAPI(API):
                     r.get("schema").get("name"),
                     r.get("schema").get("version"),
                 ): r.get("schema")
-                for r in dataset.get("resources", [])
+                for r in dataset.get("resources", []) or []
                 if r.get("schema")
             }.values()
         )
@@ -488,6 +489,8 @@ class ResourceAPI(API):
             resource = get_by(dataset.resources, "id", rid)
         else:
             resource = CommunityResource.objects(id=rid).first()
+            if resource:
+                dataset = resource.dataset
         if not resource:
             apiv2.abort(404, "Resource does not exist")
 

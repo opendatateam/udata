@@ -162,6 +162,7 @@
     <dcat:accessURL>http://data.test.org/datasets/1/resources/4/services?SERVICE=WMS&amp;REQUEST=GetCapabilities&amp;VERSION=1.3.0</dcat:accessURL>
     <dcat:accessService>
       <dcat:DataService>
+        <rdf:type rdf:resource="http://www.w3.org/ns/dcat#DataService"/>
         <dcterms:title xml:lang="fr">Geo Service</dcterms:title>
         <dcat:endpointURL rdf:resource="http://data.test.org/datasets/1/resources/4/services"/>
         <dcat:endpointDescription rdf:resource="http://data.test.org/datasets/1/resources/4/services?SERVICE=WMS&amp;REQUEST=GetCapabilities&amp;VERSION=1.3.0"/>

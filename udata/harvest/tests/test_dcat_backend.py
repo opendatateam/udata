@@ -1,6 +1,5 @@
 import logging
 import os
-import re
 import xml.etree.ElementTree as ET
 from datetime import date
 
@@ -19,7 +18,7 @@ from udata.rdf import DCAT, RDF, namespace_manager
 from udata.storage.s3 import get_from_json
 
 from .. import actions
-from ..backends.dcat import URIS_TO_REPLACE, CswIso19139DcatBackend
+from ..backends.dcat import URIS_TO_REPLACE
 from .factories import HarvestSourceFactory
 
 log = logging.getLogger(__name__)
@@ -75,7 +74,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -124,7 +123,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
 
@@ -155,7 +154,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
 
@@ -172,7 +171,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         dataservices = Dataservice.objects
 
@@ -188,12 +187,29 @@ class DcatBackendTest:
             == "https://data.paris2024.org/api/explore/v2.1/console"
         )
 
+    def test_harvest_dataservices_ignore_accessservices(self, rmock):
+        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
+
+        url = mock_dcat(rmock, "catalog.xml")
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
+
+        actions.run(source)
+
+        source.reload()
+
+        job = source.get_last_job()
+        assert len(job.items) == 4
+
+        dataservices = Dataservice.objects
+        assert len(dataservices) == 0
+
     def test_harvest_literal_spatial(self, rmock):
         url = mock_dcat(rmock, "evian.json")
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
         assert len(datasets) == 8
@@ -245,7 +261,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
 
@@ -307,7 +323,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         assert Dataset.objects.count() == 2
         assert HarvestJob.objects.first().status == "done"
@@ -321,7 +337,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
 
@@ -346,7 +362,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
 
@@ -389,7 +405,7 @@ class DcatBackendTest:
         url = mock_dcat(rmock, filename)
         source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
 
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -417,8 +433,8 @@ class DcatBackendTest:
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
         # Run the same havester twice
-        actions.run(source.slug)
-        actions.run(source.slug)
+        actions.run(source)
+        actions.run(source)
 
         datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
 
@@ -432,7 +448,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -444,7 +460,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -457,7 +473,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -471,7 +487,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -479,12 +495,8 @@ class DcatBackendTest:
 
         assert job.status == "done"
         assert job.errors == []
-        assert len(job.items) == 5
-        # 4 datasets and one Dataservice mentionned but not described
-        # because it appears in a distribution as DCAT.accessService
-        # but is missing a proper DCT.identifier
+        assert len(job.items) == 4
         assert len([item for item in job.items if item.status == "done"]) == 4
-        assert len([item for item in job.items if item.status == "skipped"]) == 1
 
     def test_xml_catalog(self, rmock):
         LicenseFactory(id="lov2", title="Licence Ouverte Version 2.0")
@@ -494,7 +506,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         # test dct:license support
         dataset = Dataset.objects.get(harvest__dct_identifier="3")
@@ -591,7 +603,7 @@ class DcatBackendTest:
         url = mock_dcat(rmock, "geonetwork.xml", path="catalog.xml")
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
-        actions.run(source.slug)
+        actions.run(source)
         dataset = Dataset.objects.filter(organization=org).first()
         assert dataset is not None
         assert dataset.harvest is not None
@@ -621,7 +633,7 @@ class DcatBackendTest:
         url = mock_dcat(rmock, "sig.oreme.rdf")
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
-        actions.run(source.slug)
+        actions.run(source)
         dataset = Dataset.objects.filter(organization=org).first()
 
         assert dataset is not None
@@ -651,7 +663,7 @@ class DcatBackendTest:
         url = mock_dcat(rmock, "udata.xml")
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
         job = source.get_last_job()
@@ -719,7 +731,7 @@ class DcatBackendTest:
         get_mock = rmock.get(url)
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
-        actions.run(source.slug)
+        actions.run(source)
 
         assert "User-Agent" in get_mock.last_request.headers
         assert get_mock.last_request.headers["User-Agent"] == "uData/0.1 dcat"
@@ -730,7 +742,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -748,7 +760,7 @@ class DcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -780,7 +792,7 @@ class DcatBackendTest:
         rmock.head(url, headers={"Content-Type": "application/json"})
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -794,7 +806,7 @@ class DcatBackendTest:
         rmock.get(url, status_code=404)
 
         source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
-        actions.run(source.slug)
+        actions.run(source)
         source.reload()
 
         job = source.get_last_job()
@@ -807,7 +819,7 @@ class DcatBackendTest:
         rmock.head(url, status_code=404)
 
         source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
-        actions.run(source.slug)
+        actions.run(source)
         source.reload()
 
         job = source.get_last_job()
@@ -824,7 +836,7 @@ class CswDcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="csw-dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -871,7 +883,7 @@ class CswDcatBackendTest:
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="csw-dcat", url=url, organization=org)
 
-        actions.run(source.slug)
+        actions.run(source)
 
         assert "User-Agent" in get_mock.last_request.headers
         assert get_mock.last_request.headers["User-Agent"] == "uData/0.1 csw-dcat"
@@ -894,7 +906,7 @@ class CswIso19139DcatBackendTest:
         with open(os.path.join(CSW_DCAT_FILES_DIR, "XSLT.xml"), "r") as f:
             xslt = f.read()
         url = mock_csw_pagination(rmock, "geonetwork/srv/eng/csw.rdf", "geonetwork-iso-page-{}.xml")
-        rmock.get(CswIso19139DcatBackend.XSL_URL, text=xslt)
+        rmock.get(current_app.config.get("HARVEST_ISO19139_XSLT_URL"), text=xslt)
         org = OrganizationFactory()
         source = HarvestSourceFactory(
             backend="csw-iso-19139",
@@ -910,7 +922,7 @@ class CswIso19139DcatBackendTest:
             },
         )
 
-        actions.run(source.slug)
+        actions.run(source)
 
         source.reload()
 
@@ -977,9 +989,7 @@ class CswIso19139DcatBackendTest:
             == "http://atom.geo-ide.developpement-durable.gouv.fr/atomArchive/GetResource?id=fr-120066022-ldd-cab63273-b3ae-4e8a-ae1c-6192e45faa94&datasetAggregate=true"
         )
         assert resource.type == "main"
-
-        # Sadly resource format is parsed as a blank node. Format parsing should be improved.
-        assert re.match(r"n[0-9a-f]{32}", resource.format)
+        assert resource.format == "mapinfo tab"
 
         # Computed from source config `remote_url_prefix` + `dct:identifier` from `isPrimaryTopicOf`
         if remote_url_prefix:

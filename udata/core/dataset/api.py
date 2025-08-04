@@ -95,7 +95,7 @@ class DatasetApiParser(ModelApiParser):
     sorts = {
         "title": "title",
         "created": "created_at_internal",
-        "last_update": "last_modified_internal",
+        "last_update": "last_update",
         "reuses": "metrics.reuses",
         "followers": "metrics.followers",
         "views": "metrics.views",
@@ -332,10 +332,10 @@ class DatasetsAtomFeedAPI(API):
             author_uri = None
             if dataset.organization:
                 author_name = dataset.organization.name
-                author_uri = dataset.organization.external_url
+                author_uri = dataset.organization.url_for()
             elif dataset.owner:
                 author_name = dataset.owner.fullname
-                author_uri = dataset.owner.external_url
+                author_uri = dataset.owner.url_for()
             feed.add_item(
                 dataset.title,
                 unique_id=dataset.id,
@@ -343,7 +343,7 @@ class DatasetsAtomFeedAPI(API):
                 content=md(dataset.description),
                 author_name=author_name,
                 author_link=author_uri,
-                link=dataset.external_url,
+                link=dataset.url_for(),
                 updateddate=dataset.last_modified,
                 pubdate=dataset.created_at,
             )
@@ -689,9 +689,17 @@ class ResourceAPI(ResourceMixin, API):
 
         # populate_obj populates existing resource object with the content of the form.
         # update_resource saves the updated resource dict to the database
-        # the additional dataset.save is required as we update the last_modified date.
         form.populate_obj(resource)
         resource.last_modified_internal = datetime.utcnow()
+
+        # populate_obj is bugged when sending a None value we want to remove the existing
+        # value. We don't want to remove the existing value if no "schema" is sent.
+        # Will be fixed when we switch to the new API Fields.
+        if "schema" in request.get_json() and form._fields.get("schema").data is None:
+            resource.schema = None
+        if "checksum" in request.get_json() and form._fields.get("checksum").data is None:
+            resource.checksum = None
+
         dataset.update_resource(resource)
         return resource
 
@@ -824,6 +832,7 @@ class DatasetSuggestAPI(API):
                     if dataset.owner
                     else None
                 ),
+                "page": dataset.self_web_url(),
             }
             for dataset in datasets.order_by(SUGGEST_SORTING).limit(args["size"])
         ]
@@ -883,7 +892,7 @@ class AllowedExtensionsAPI(API):
     @api.response(200, "Success", [str])
     def get(self):
         """List all allowed resources extensions"""
-        return current_app.config["ALLOWED_RESOURCES_EXTENSIONS"]
+        return sorted(current_app.config["ALLOWED_RESOURCES_EXTENSIONS"])
 
 
 @ns.route(

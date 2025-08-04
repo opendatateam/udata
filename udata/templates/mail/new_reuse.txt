@@ -5,7 +5,5 @@
     reuse=reuse.title, dataset=dataset.name
 ) }}.
 {{ _('You can see this new reuse on its own page:') }}
-{{ url_for('reuses.show', reuse=reuse.id, _external=True, **extras) }}
-{{ _('Or in the reuse list on you dataset page:')}}
-{{ url_for('datasets.show', dataset=dataset.id, _external=True, **extras) }}#reuse-{{reuse.id}}
+{{ reuse.url_for() }}
 {% endblock %}

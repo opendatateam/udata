@@ -50,13 +50,13 @@ class TopicsAPITest(APITestCase):
         for dataset, expected in zip(datasets, [d.fetch() for d in tag_topic_1.datasets]):
             self.assertEqual(dataset["id"], str(expected.id))
             self.assertEqual(dataset["title"], str(expected.title))
-            self.assertIsNotNone(dataset["page"])
+            self.assertIsNone(dataset["page"])  # we don't have cdata in tests
             self.assertIsNotNone(dataset["uri"])
         reuses = response.json["data"][0]["reuses"]
         for reuse, expected in zip(reuses, [r.fetch() for r in tag_topic_1.reuses]):
             self.assertEqual(reuse["id"], str(expected.id))
             self.assertEqual(reuse["title"], str(expected.title))
-            self.assertIsNotNone(reuse["page"])
+            self.assertIsNone(reuse["page"])  # we don't have cdata in tests
             self.assertIsNotNone(reuse["uri"])
         self.assertEqual(len(reuses), 3)
 
@@ -132,13 +132,13 @@ class TopicsAPITest(APITestCase):
         for dataset, expected in zip(data["datasets"], [d.fetch() for d in topic.datasets]):
             self.assertEqual(dataset["id"], str(expected.id))
             self.assertEqual(dataset["title"], str(expected.title))
-            self.assertIsNotNone(dataset["page"])
+            self.assertIsNone(dataset["page"])  # we don't have cdata by default
             self.assertIsNotNone(dataset["uri"])
 
         for reuse, expected in zip(data["reuses"], [r.fetch() for r in topic.reuses]):
             self.assertEqual(reuse["id"], str(expected.id))
             self.assertEqual(reuse["title"], str(expected.title))
-            self.assertIsNotNone(reuse["page"])
+            self.assertIsNone(reuse["page"])  # we don't have cdata by default
             self.assertIsNotNone(reuse["uri"])
 
         self.assertIsNotNone(data.get("created_at"))

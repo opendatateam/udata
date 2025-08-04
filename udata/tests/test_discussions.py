@@ -137,7 +137,7 @@ class DiscussionsTest(APITestCase):
         )
         self.assert400(response)
 
-    @pytest.mark.options(SPAM_WORDS=["spam"])
+    @pytest.mark.options(SPAM_WORDS=["spam"], CDATA_BASE_URL="https://data.gouv.fr")
     def test_spam_in_new_discussion_title(self):
         self.login()
         dataset = Dataset.objects.create(title="Test dataset")
@@ -148,7 +148,7 @@ class DiscussionsTest(APITestCase):
             def check_signal(args):
                 self.assertIsNotNone(discussion_id)
                 self.assertIn(
-                    f"http://local.test/api/1/datasets/{dataset.slug}/#discussion-{discussion_id}",
+                    f"https://data.gouv.fr/datasets/{dataset.slug}/discussions/?discussion_id={discussion_id}",
                     args[1]["message"],
                 )
 
@@ -422,6 +422,45 @@ class DiscussionsTest(APITestCase):
 
         self.assertEqual(len(response.json["data"]), len(discussions))
 
+    def test_list_discussions_search(self):
+        user = self.login()
+        dataset = DatasetFactory()
+
+        discussion_a = DiscussionFactory(
+            user=user,
+            subject=dataset,
+            title="discussion a",
+            discussion=[
+                Message(posted_by=user, content="another message"),
+                Message(posted_by=user, content="a message with something"),
+            ],
+        )
+        discussion_b = DiscussionFactory(
+            user=user,
+            subject=dataset,
+            title="something in title",
+            discussion=[
+                Message(posted_by=user, content="another message"),
+                Message(posted_by=user, content="there is a problem"),
+            ],
+        )
+        DiscussionFactory(
+            user=user,
+            subject=dataset,
+            title="discussion c",
+            discussion=[
+                Message(posted_by=user, content="some text"),
+                Message(posted_by=user, content="and another"),
+            ],
+        )
+
+        response = self.get(url_for("api.discussions", q="something"))
+        self.assert200(response)
+
+        self.assertEqual(len(response.json["data"]), 2)
+        self.assertEqual(discussion_b.title, response.json["data"][0]["title"])
+        self.assertEqual(discussion_a.title, response.json["data"][1]["title"])
+
     def assertIdIn(self, json_data: dict, id_: str) -> None:
         for item in json_data:
             if item["id"] == id_:
@@ -452,14 +491,20 @@ class DiscussionsTest(APITestCase):
 
     def test_list_discussions_sort(self) -> None:
         user: User = UserFactory()
+        dataset = DatasetFactory()
+
         sorting_keys_dict: dict = {
             "title": ["aaa", "bbb"],
             "created": ["2023-12-12", "2024-01-01"],
             "closed": ["2023-12-12", "2024-01-01"],
         }
         for sorting_key, values in sorting_keys_dict.items():
-            discussion1: Discussion = DiscussionFactory(user=user, **{sorting_key: values[0]})
-            discussion2: Discussion = DiscussionFactory(user=user, **{sorting_key: values[1]})
+            discussion1: Discussion = DiscussionFactory(
+                subject=dataset, user=user, **{sorting_key: values[0]}
+            )
+            discussion2: Discussion = DiscussionFactory(
+                subject=dataset, user=user, **{sorting_key: values[1]}
+            )
 
             response: TestResponse = self.get(url_for("api.discussions", sort=sorting_key))
             self.assert200(response)
@@ -579,7 +624,7 @@ class DiscussionsTest(APITestCase):
         with assert_not_emit(on_new_discussion_comment):
 
             def check_signal(args):
-                self.assertIn(discussion.external_url, args[1]["message"])
+                self.assertIn(discussion.url_for(), args[1]["message"])
 
             with assert_emit(on_new_potential_spam, assertions_callback=check_signal):
                 response = self.post(
@@ -635,7 +680,8 @@ class DiscussionsTest(APITestCase):
             self.assert200(response)
 
         dataset.reload()
-        self.assertEqual(dataset.get_metrics()["discussions"], 0)
+        self.assertEqual(dataset.get_metrics()["discussions"], 1)
+        self.assertEqual(dataset.get_metrics()["discussions_open"], 0)
 
         data = response.json
 
