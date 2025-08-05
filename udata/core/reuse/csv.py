@@ -12,6 +12,7 @@ class ReuseCsvAdapter(csv.Adapter):
         ("url", lambda r: r.url_for()),
         "type",
         "description",
+        "description_short",
         ("remote_url", "url"),
         ("organization", "organization.name"),
         ("organization_id", "organization.id"),
