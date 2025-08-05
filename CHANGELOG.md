@@ -10,6 +10,7 @@
 - Cache dcat harvest pages to avoid two rounds of requests [#3398](https://github.com/opendatateam/udata/pull/3398)
 - Ignore Dataset.accessService when processing DataService [#3399](https://github.com/opendatateam/udata/pull/3399)
 - Add dataset field `description_short` [#3397](https://github.com/opendatateam/udata/pull/3397)
+- Add reuse and api field `description_short` [#4000](https://github.com/opendatateam/udata/pull/3400)
 
 ## 10.8.2 (2025-07-31)
 
