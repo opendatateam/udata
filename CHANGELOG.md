@@ -7,6 +7,7 @@
 - Consolidate CSW harvesting logic [#3378](https://github.com/opendatateam/udata/pull/3378)
   :warning: Config setting `HARVEST_ISO19139_XSL_URL` is renamed to `HARVEST_ISO19139_XSLT_URL`.
 - Change CSW harvesters XML processor from lxml to saxonche [#3380](https://github.com/opendatateam/udata/pull/3380)
+- Compute organization aggregate metrics only once at the end of harvest [#3391](https://github.com/opendatateam/udata/pull/3391)
 - Cache dcat harvest pages to avoid two rounds of requests [#3398](https://github.com/opendatateam/udata/pull/3398)
 - Ignore Dataset.accessService when processing DataService [#3399](https://github.com/opendatateam/udata/pull/3399)
 - Add dataset field `description_short` [#3397](https://github.com/opendatateam/udata/pull/3397)
