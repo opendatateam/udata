@@ -48,7 +48,6 @@ from udata.rdf import (
     themes_from_rdf,
     url_from_rdf,
 )
-from udata.uris import endpoint_for
 from udata.utils import get_by, safe_unicode, to_naive_datetime
 
 from .constants import OGC_SERVICE_FORMATS, UPDATE_FREQUENCIES
@@ -82,7 +81,8 @@ def temporal_to_rdf(
     graph = graph or Graph(namespace_manager=namespace_manager)
     pot = graph.resource(BNode())
     pot.set(RDF.type, DCT.PeriodOfTime)
-    pot.set(DCAT.startDate, Literal(daterange.start))
+    if daterange.start:
+        pot.set(DCAT.startDate, Literal(daterange.start))
     if daterange.end:
         pot.set(DCAT.endDate, Literal(daterange.end))
     return pot
@@ -179,27 +179,16 @@ def resource_to_rdf(
     """
     graph = graph or Graph(namespace_manager=namespace_manager)
     if dataset and dataset.id:
-        id = URIRef(
-            endpoint_for(
-                "datasets.show_redirect",
-                "api.dataset",
-                dataset=dataset.id,
-                _external=True,
-                _anchor="resource-{0}".format(resource.id),
-            )
-        )
+        id = URIRef(resource.url_for(_useId=True))
     else:
         id = BNode(resource.id)
-    permalink = endpoint_for(
-        "datasets.resource", "api.resource_redirect", id=resource.id, _external=True
-    )
     r = graph.resource(id)
     r.set(RDF.type, DCAT.Distribution)
     r.set(DCT.identifier, Literal(resource.id))
     r.add(DCT.title, Literal(resource.title))
     r.add(DCT.description, Literal(resource.description))
     r.add(DCAT.downloadURL, URIRef(resource.url))
-    r.add(DCAT.accessURL, URIRef(permalink))
+    r.add(DCAT.accessURL, URIRef(resource.latest))
     r.add(DCT.issued, Literal(resource.created_at))
     r.add(DCT.modified, Literal(resource.last_modified))
     if dataset and dataset.license:
@@ -237,11 +226,7 @@ def dataset_to_graph_id(dataset: Dataset) -> URIRef | BNode:
     if dataset.harvest and dataset.harvest.uri:
         return URIRef(dataset.harvest.uri)
     elif dataset.id:
-        return URIRef(
-            endpoint_for(
-                "datasets.show_redirect", "api.dataset", dataset=dataset.id, _external=True
-            )
-        )
+        return URIRef(dataset.url_for(_useId=True))
     else:
         # Should not happen in production. Some test only
         # `build()` a dataset without saving it to the DB.
@@ -264,14 +249,7 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
         d.set(DCT.identifier, Literal(dataset.harvest.dct_identifier))
 
         alt = graph.resource(BNode())
-        alternate_identifier = Literal(
-            endpoint_for(
-                "datasets.show_redirect",
-                "api.dataset",
-                dataset=dataset.id,
-                _external=True,
-            )
-        )
+        alternate_identifier = Literal(dataset.url_for(_useId=True))
         alt.set(RDF.type, ADMS.Identifier)
         alt.set(DCT.creator, Literal(current_app.config["SITE_TITLE"]))
         alt.set(SKOS.notation, alternate_identifier)
@@ -288,17 +266,7 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
     if dataset.harvest and dataset.harvest.remote_url:
         d.set(DCAT.landingPage, URIRef(dataset.harvest.remote_url))
     elif dataset.id:
-        d.set(
-            DCAT.landingPage,
-            URIRef(
-                endpoint_for(
-                    "datasets.show_redirect",
-                    "api.dataset",
-                    dataset=dataset.id,
-                    _external=True,
-                )
-            ),
-        )
+        d.set(DCAT.landingPage, URIRef(dataset.url_for()))
 
     if dataset.acronym:
         d.set(SKOS.altLabel, Literal(dataset.acronym))
@@ -385,6 +353,14 @@ def temporal_from_literal(text):
             )
 
 
+def maybe_date_range(start, end):
+    if start or end:
+        return db.DateRange(
+            start=start.toPython() if start else None,
+            end=end.toPython() if end else None,
+        )
+
+
 def temporal_from_resource(resource):
     """
     Parse a temporal coverage from a RDF class/resource ie. either:
@@ -398,24 +374,12 @@ def temporal_from_resource(resource):
         # Fetch remote ontology if necessary
         g = Graph().parse(str(resource.identifier))
         resource = g.resource(resource.identifier)
-    if resource.value(SCHEMA.startDate):
-        end = resource.value(SCHEMA.endDate)
-        return db.DateRange(
-            start=resource.value(SCHEMA.startDate).toPython(),
-            end=end.toPython() if end else None,
-        )
-    elif resource.value(DCAT.startDate):
-        end = resource.value(DCAT.endDate)
-        return db.DateRange(
-            start=resource.value(DCAT.startDate).toPython(),
-            end=end.toPython() if end else None,
-        )
-    elif resource.value(SCV.min):
-        end = resource.value(SCV.max)
-        return db.DateRange(
-            start=resource.value(SCV.min).toPython(),
-            end=end.toPython() if end else None,
-        )
+    if range := maybe_date_range(resource.value(SCHEMA.startDate), resource.value(SCHEMA.endDate)):
+        return range
+    elif range := maybe_date_range(resource.value(DCAT.startDate), resource.value(DCAT.endDate)):
+        return range
+    elif range := maybe_date_range(resource.value(SCV.min), resource.value(SCV.max)):
+        return range
 
 
 def temporal_from_rdf(period_of_time):
@@ -512,7 +476,7 @@ def spatial_from_rdf(graph):
         spatial_coverage.clean()
         return spatial_coverage
     except ValidationError as e:
-        log.warning(f"Cannot save the spatial coverage {coordinates} (error was {e})")
+        log.warning(f"Cannot save the spatial coverage {polygons} (error was {e})")
         return None
 
 
@@ -538,7 +502,7 @@ def frequency_from_rdf(term):
 
 def mime_from_rdf(resource):
     # DCAT.mediaType *should* only be used when defined as IANA
-    mime = rdf_value(resource, DCAT.mediaType)
+    mime = rdf_value(resource, DCAT.mediaType, parse_label=True)
     if not mime:
         return
     if IANAFORMAT in mime:
@@ -548,7 +512,7 @@ def mime_from_rdf(resource):
 
 
 def format_from_rdf(resource):
-    format = rdf_value(resource, DCT.format)
+    format = rdf_value(resource, DCT.format, parse_label=True)
     if not format:
         return
     if EUFORMAT in format or IANAFORMAT in format:
@@ -571,7 +535,7 @@ def title_from_rdf(rdf, url):
         last_part = url.split("/")[-1]
         if "." in last_part and "?" not in last_part:
             return last_part
-    fmt = rdf_value(rdf, DCT.format)
+    fmt = format_from_rdf(rdf)
     lang = current_app.config["DEFAULT_LANGUAGE"]
     with i18n.language(lang):
         if fmt:

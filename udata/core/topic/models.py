@@ -1,5 +1,4 @@
 from blinker import Signal
-from flask import url_for
 from mongoengine.signals import post_save, pre_save
 
 from udata.api_fields import field
@@ -57,13 +56,13 @@ class Topic(db.Datetimed, Auditable, db.Document, Owned):
         for dataset in datasets_list_dif:
             reindex.delay("Dataset", str(dataset.pk))
 
-    @property
-    def display_url(self):
-        return url_for("topics.display", topic=self)
-
     def count_discussions(self):
         # There are no metrics on Topic to store discussions count
         pass
+
+    def self_web_url(self, **kwargs):
+        # Useful for Discussions to call self_web_url on their `subject`
+        return None
 
 
 pre_save.connect(Topic.pre_save, sender=Topic)

@@ -2,19 +2,21 @@ from datetime import datetime
 from itertools import chain
 
 from blinker import Signal
+from flask import url_for
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
 from udata.api_fields import field
 from udata.core.activity.models import Auditable
 from udata.core.badges.models import Badge, BadgeMixin, BadgesList
+from udata.core.linkable import Linkable
+from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.mail import get_mail_campaign_dict
 from udata.mongo import db
-from udata.uris import endpoint_for
+from udata.uris import cdata_url
 
 from .constants import (
     ASSOCIATION,
@@ -111,7 +113,9 @@ class OrganizationBadgeMixin(BadgeMixin):
     __badges__ = BADGES
 
 
-class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, db.Datetimed, db.Document):
+class Organization(
+    Auditable, WithMetrics, OrganizationBadgeMixin, Linkable, db.Datetimed, db.Document
+):
     name = field(db.StringField(required=True))
     acronym = field(db.StringField(max_length=128))
     slug = field(
@@ -161,9 +165,16 @@ class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, db.Datetimed,
         return self.name or ""
 
     __metrics_keys__ = [
+        "dataservices",
+        "dataservices_by_months",
         "datasets",
+        "datasets_by_months",
+        "datasets_followers_by_months",
+        "datasets_reuses_by_months",
         "members",
         "reuses",
+        "reuses_by_months",
+        "reuses_followers_by_months",
         "dataservices",
         "followers",
         "views",
@@ -177,23 +188,21 @@ class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, db.Datetimed,
     after_delete = Signal()
     on_delete = Signal()
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.compute_aggregate_metrics = True
+
     @classmethod
     def pre_save(cls, sender, document, **kwargs):
         cls.before_save.send(document)
 
-    def url_for(self, *args, **kwargs):
-        return endpoint_for("organizations.show", "api.organization", org=self, *args, **kwargs)
+    def self_web_url(self, **kwargs):
+        return cdata_url(f"/organizations/{self._link_id(**kwargs)}/", **kwargs)
 
-    display_url = property(url_for)
-
-    @property
-    def external_url(self):
-        return self.url_for(_external=True)
-
-    @property
-    def external_url_with_campaign(self):
-        extras = get_mail_campaign_dict()
-        return self.url_for(_external=True, **extras)
+    def self_api_url(self, **kwargs):
+        return url_for(
+            "api.organization", org=self._link_id(**kwargs), **self._self_api_url_kwargs(**kwargs)
+        )
 
     @property
     def pending_requests(self):
@@ -275,7 +284,7 @@ class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, db.Datetimed,
             "@type": type_,
             "@id": str(self.id),
             "alternateName": self.slug,
-            "url": endpoint_for("organizations.show", "api.organization", org=self, _external=True),
+            "url": self.url_for(),
             "name": self.name,
             "dateCreated": self.created_at.isoformat(),
             "dateModified": self.last_modified.isoformat(),
@@ -299,21 +308,41 @@ class Organization(Auditable, WithMetrics, OrganizationBadgeMixin, db.Datetimed,
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_datasets(self):
-        from udata.models import Dataset
+        from udata.models import Dataset, Follow, Reuse
 
         self.metrics["datasets"] = Dataset.objects(organization=self).visible().count()
+        if self.compute_aggregate_metrics:
+            self.metrics["datasets_by_months"] = get_stock_metrics(
+                Dataset.objects(organization=self).visible(), date_label="created_at_internal"
+            )
+            self.metrics["datasets_followers_by_months"] = get_stock_metrics(
+                Follow.objects(following__in=Dataset.objects(organization=self)), date_label="since"
+            )
+            self.metrics["datasets_reuses_by_months"] = get_stock_metrics(
+                Reuse.objects(datasets__in=Dataset.objects(organization=self)).visible()
+            )
+
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_reuses(self):
-        from udata.models import Reuse
+        from udata.models import Follow, Reuse
 
         self.metrics["reuses"] = Reuse.objects(organization=self).visible().count()
+        self.metrics["reuses_by_months"] = get_stock_metrics(
+            Reuse.objects(organization=self).visible()
+        )
+        self.metrics["reuses_followers_by_months"] = get_stock_metrics(
+            Follow.objects(following__in=Reuse.objects(organization=self)), date_label="since"
+        )
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_dataservices(self):
         from udata.models import Dataservice
 
         self.metrics["dataservices"] = Dataservice.objects(organization=self).visible().count()
+        self.metrics["dataservices_by_months"] = get_stock_metrics(
+            Dataservice.objects(organization=self).visible(), date_label="created_at"
+        )
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):

@@ -1,4 +1,5 @@
 import json
+import logging
 from copy import copy
 from datetime import datetime
 from itertools import chain
@@ -6,7 +7,7 @@ from time import time
 
 from authlib.jose import JsonWebSignature
 from blinker import Signal
-from flask import current_app
+from flask import current_app, url_for
 from flask_security import MongoEngineUserDatastore, RoleMixin, UserMixin
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
@@ -15,16 +16,18 @@ from udata import mail
 from udata.api_fields import field
 from udata.core import storages
 from udata.core.discussions.models import Discussion
+from udata.core.linkable import Linkable
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.mail import get_mail_campaign_dict
 from udata.models import Follow, WithMetrics, db
-from udata.uris import endpoint_for
+from udata.uris import cdata_url
 
 from .constants import AVATAR_SIZES
 
 __all__ = ("User", "Role", "datastore")
+
+log = logging.getLogger(__name__)
 
 
 # TODO: use simple text for role
@@ -42,7 +45,7 @@ class UserSettings(db.EmbeddedDocument):
     prefered_language = db.StringField()
 
 
-class User(WithMetrics, UserMixin, db.Document):
+class User(WithMetrics, UserMixin, Linkable, db.Document):
     slug = field(
         db.SlugField(max_length=255, required=True, populate_from="fullname"), auditable=False
     )
@@ -130,19 +133,13 @@ class User(WithMetrics, UserMixin, db.Document):
     def sysadmin(self):
         return self.has_role("admin")
 
-    def url_for(self, *args, **kwargs):
-        return endpoint_for("users.show", "api.user", user=self, *args, **kwargs)
+    def self_web_url(self, **kwargs):
+        return cdata_url(f"/users/{self._link_id(**kwargs)}/", **kwargs)
 
-    display_url = property(url_for)
-
-    @property
-    def external_url(self):
-        return self.url_for(_external=True)
-
-    @property
-    def external_url_with_campaign(self):
-        extras = get_mail_campaign_dict()
-        return self.url_for(_external=True, **extras)
+    def self_api_url(self, **kwargs):
+        return url_for(
+            "api.user", user=self._link_id(**kwargs), **self._self_api_url_kwargs(**kwargs)
+        )
 
     @property
     def visible(self):
@@ -250,11 +247,14 @@ class User(WithMetrics, UserMixin, db.Document):
 
     def mark_as_deleted(self, notify: bool = True, delete_comments: bool = False):
         if self.avatar.filename is not None:
-            storage = storages.avatars
-            storage.delete(self.avatar.filename)
-            storage.delete(self.avatar.original)
-            for key, value in self.avatar.thumbnails.items():
-                storage.delete(value)
+            try:
+                storage = storages.avatars
+                storage.delete(self.avatar.filename)
+                storage.delete(self.avatar.original)
+                for key, value in self.avatar.thumbnails.items():
+                    storage.delete(value)
+            except FileNotFoundError as e:
+                log.error(f"File not found while deleting user #{self.id} avatar: {e}")
 
         copied_user = copy(self)
         self.email = "{}@deleted".format(self.id)

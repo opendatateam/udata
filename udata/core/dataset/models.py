@@ -9,8 +9,7 @@ import Levenshtein
 import requests
 from blinker import signal
 from dateutil.parser import parse as parse_dt
-from flask import current_app
-from mongoengine import DynamicEmbeddedDocument
+from flask import current_app, url_for
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import DateTimeField
 from mongoengine.signals import post_save, pre_init, pre_save
@@ -20,13 +19,15 @@ from udata.api_fields import field
 from udata.app import cache
 from udata.core import storages
 from udata.core.activity.models import Auditable
+from udata.core.dataset.preview import TabularAPIPreview
+from udata.core.linkable import Linkable
+from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
-from udata.mail import get_mail_campaign_dict
 from udata.models import Badge, BadgeMixin, BadgesList, SpatialCoverage, WithMetrics, db
 from udata.mongo.errors import FieldValidationError
-from udata.uris import ValidationError, endpoint_for
+from udata.uris import ValidationError, cdata_url
 from udata.uris import validate as validate_url
 from udata.utils import get_by, hash_url, to_naive_datetime
 
@@ -34,6 +35,7 @@ from .constants import (
     CHECKSUM_TYPES,
     CLOSED_FORMATS,
     DEFAULT_LICENSE,
+    DESCRIPTION_SHORT_SIZE_LIMIT,
     LEGACY_FREQUENCIES,
     MAX_DISTANCE,
     PIVOTAL_DATA,
@@ -46,7 +48,6 @@ from .exceptions import (
     SchemasCacheUnavailableException,
     SchemasCatalogNotFoundException,
 )
-from .preview import get_preview_url
 
 __all__ = (
     "License",
@@ -77,7 +78,7 @@ def get_json_ld_extra(key, value):
     }
 
 
-class HarvestDatasetMetadata(DynamicEmbeddedDocument):
+class HarvestDatasetMetadata(db.EmbeddedDocument):
     backend = db.StringField()
     created_at = db.DateTimeField()
     modified_at = db.DateTimeField()
@@ -90,12 +91,15 @@ class HarvestDatasetMetadata(DynamicEmbeddedDocument):
     dct_identifier = db.StringField()
     archived_at = db.DateTimeField()
     archived = db.StringField()
+    ckan_name = db.StringField()
+    ckan_source = db.StringField()
 
 
-class HarvestResourceMetadata(DynamicEmbeddedDocument):
+class HarvestResourceMetadata(db.EmbeddedDocument):
     created_at = db.DateTimeField()
     modified_at = db.DateTimeField()
     uri = db.StringField()
+    dct_identifier = db.StringField()
 
 
 class Schema(db.EmbeddedDocument):
@@ -392,9 +396,9 @@ class ResourceMixin(object):
         if not self.urlhash or "url" in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
 
-    @cached_property  # Accessed at least 2 times in front rendering
+    @property
     def preview_url(self):
-        return get_preview_url(self)
+        return TabularAPIPreview().preview_url(self)
 
     @property
     def closed_or_no_format(self):
@@ -455,9 +459,7 @@ class ResourceMixin(object):
 
         If this resource is updated and `url` changes, this property won't.
         """
-        return endpoint_for(
-            "datasets.resource", "api.resource_redirect", id=self.id, _external=True
-        )
+        return url_for("api.resource_redirect", id=self.id, _external=True)
 
     @cached_property
     def json_ld(self):
@@ -509,6 +511,12 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
         "views",
     ]
 
+    def url_for(self, **kwargs):
+        return self.self_web_url(**kwargs) or self.latest
+
+    def self_web_url(self, **kwargs):
+        return self.dataset.self_web_url(resource_id=self.id, **kwargs)
+
     @property
     def dataset(self):
         try:
@@ -541,7 +549,7 @@ class DatasetBadgeMixin(BadgeMixin):
     __badges__ = BADGES
 
 
-class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
+class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Document):
     title = field(db.StringField(required=True))
     acronym = field(db.StringField(max_length=128))
     # /!\ do not set directly the slug when creating or updating a dataset
@@ -553,6 +561,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         auditable=False,
     )
     description = field(db.StringField(required=True, default=""))
+    description_short = field(db.StringField(max_length=DESCRIPTION_SHORT_SIZE_LIMIT))
     license = field(db.ReferenceField("License"))
 
     tags = field(db.TagListField())
@@ -590,6 +599,14 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         ),
         auditable=False,
     )
+    last_update = field(
+        DateTimeField(
+            verbose_name=_("Last update of the dataset resources"),
+            default=datetime.utcnow,
+            required=True,
+        ),
+        auditable=False,
+    )
     deleted = field(db.DateTimeField(), auditable=False)
     archived = field(db.DateTimeField())
 
@@ -598,8 +615,12 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
 
     __metrics_keys__ = [
         "discussions",
+        "discussions_open",
         "reuses",
+        "reuses_by_months",
+        "dataservices",
         "followers",
+        "followers_by_months",
         "views",
         "resources_downloads",
     ]
@@ -610,6 +631,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             "created_at_internal",
             "last_modified_internal",
             "metrics.reuses",
+            "metrics.dataservices",
             "metrics.followers",
             "metrics.views",
             "slug",
@@ -675,6 +697,8 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         if len(set(res.id for res in self.resources)) != len(self.resources):
             raise MongoEngineValidationError(f"Duplicate resource ID in dataset #{self.id}.")
 
+        self.last_update = self.compute_last_update()
+
         self.quality_cached = self.compute_quality()
 
         for key, value in self.extras.items():
@@ -716,10 +740,13 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             "edit_resources": ResourceEditPermission(self),
         }
 
-    def url_for(self, *args, **kwargs):
-        return endpoint_for("datasets.show", "api.dataset", dataset=self, *args, **kwargs)
+    def self_web_url(self, **kwargs):
+        return cdata_url(f"/datasets/{self._link_id(**kwargs)}/", **kwargs)
 
-    display_url = property(url_for)
+    def self_api_url(self, **kwargs):
+        return url_for(
+            "api.dataset", dataset=self._link_id(**kwargs), **self._self_api_url_kwargs(**kwargs)
+        )
 
     @property
     def is_visible(self):
@@ -734,15 +761,6 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         if not self.acronym:
             return self.title
         return "{title} ({acronym})".format(**self._data)
-
-    @property
-    def external_url(self):
-        return self.url_for(_external=True)
-
-    @property
-    def external_url_with_campaign(self):
-        extras = get_mail_campaign_dict()
-        return self.url_for(_external=True, **extras)
 
     @property
     def image_url(self):
@@ -782,11 +800,11 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             return to_naive_datetime(self.harvest.modified_at)
         return to_naive_datetime(self.last_modified_internal)
 
-    @property
-    def last_update(self):
+    def compute_last_update(self):
         """
         Use the more recent date we would have on resources (harvest, modified).
         Default to dataset last_modified if no resource.
+        Resources should be fetched when calling this method.
         """
         if self.resources:
             return max([res.last_modified for res in self.resources])
@@ -962,35 +980,54 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
         obj = cls.objects(slug=id_or_slug).first()
         return obj or cls.objects.get_or_404(id=id_or_slug)
 
-    def add_resource(self, resource):
+    def add_resource(self, resource: Resource):
         """Perform an atomic prepend for a new resource"""
         resource.validate()
-        if resource.id in [r.id for r in self.resources]:
-            raise MongoEngineValidationError("Cannot add resource with already existing ID")
 
+        existing_resource = next((r for r in self.resources if r.id == resource.id), None)
+        if existing_resource:
+            raise MongoEngineValidationError(
+                f"Cannot add resource '{resource.title}'. A resource '{existing_resource.title}' already exists with ID '{existing_resource.id}'"
+            )
+
+        # only useful for compute_quality(), we will reload to have a clean object
         self.resources.insert(0, resource)
+
         self.update(
-            __raw__={
-                "$set": {
-                    "quality_cached": self.compute_quality(),
-                },
-                "$push": {
-                    "resources": {"$each": [resource.to_mongo()], "$position": 0},
-                },
-            }
+            set__quality_cached=self.compute_quality(),
+            push__resources={"$each": [resource.to_mongo()], "$position": 0},
+            set__last_modified_internal=datetime.utcnow(),
         )
+
         self.reload()
         self.on_resource_added.send(self.__class__, document=self, resource_id=resource.id)
 
     def update_resource(self, resource):
         """Perform an atomic update for an existing resource"""
-        index = self.resources.index(resource)
-        data = {"resources__{index}".format(index=index): resource}
-        self.update(**data)
+
+        # only useful for compute_quality(), we will reload to have a clean object
+        index = next(i for i, r in enumerate(self.resources) if r.id == resource.id)
+        self.resources[index] = resource
+
+        Dataset.objects(id=self.id, resources__id=resource.id).update_one(
+            set__quality_cached=self.compute_quality(),
+            set__resources__S=resource,
+            set__last_modified_internal=datetime.utcnow(),
+        )
+
         self.reload()
         self.on_resource_updated.send(self.__class__, document=self, resource_id=resource.id)
 
     def remove_resource(self, resource):
+        # only useful for compute_quality(), we will reload to have a clean object
+        self.resources = [r for r in self.resources if r.id != resource.id]
+
+        self.update(
+            set__quality_cached=self.compute_quality(),
+            pull__resources__id=resource.id,
+            set__last_modified_internal=datetime.utcnow(),
+        )
+
         # Deletes resource's file from file storage
         if resource.fs_filename is not None:
             try:
@@ -1000,7 +1037,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
                     f"File not found while deleting resource #{resource.id} in dataset {self.id}: {e}"
                 )
 
-        self.resources.remove(resource)
+        self.reload()
         self.on_resource_removed.send(self.__class__, document=self, resource_id=resource.id)
 
     @property
@@ -1016,7 +1053,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
             "alternateName": self.slug,
             "dateCreated": self.created_at.isoformat(),
             "dateModified": self.last_modified.isoformat(),
-            "url": endpoint_for("datasets.show", "api.dataset", dataset=self, _external=True),
+            "url": self.url_for(),
             "name": self.title,
             "keywords": ",".join(self.tags),
             "distribution": [
@@ -1065,19 +1102,30 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, db.Document):
     def count_discussions(self):
         from udata.models import Discussion
 
-        self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()
+        self.metrics["discussions"] = Discussion.objects(subject=self).count()
+        self.metrics["discussions_open"] = Discussion.objects(subject=self, closed=None).count()
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_reuses(self):
         from udata.models import Reuse
 
         self.metrics["reuses"] = Reuse.objects(datasets=self).visible().count()
+        self.metrics["reuses_by_months"] = get_stock_metrics(Reuse.objects(datasets=self).visible())
+        self.save(signal_kwargs={"ignores": ["post_save"]})
+
+    def count_dataservices(self):
+        from udata.core.dataservices.models import Dataservice
+
+        self.metrics["dataservices"] = Dataservice.objects(datasets=self).visible().count()
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):
         from udata.models import Follow
 
         self.metrics["followers"] = Follow.objects(until=None).followers(self).count()
+        self.metrics["followers_by_months"] = get_stock_metrics(
+            Follow.objects(following=self), date_label="since"
+        )
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
 
@@ -1141,12 +1189,17 @@ class ResourceSchema(object):
                     f"Schemas catalog does not exist at {endpoint}"
                 )
             response.raise_for_status()
-        except requests.exceptions.RequestException:
-            log.exception(f"Error while getting schema catalog from {endpoint}")
+            data = response.json()
+        except requests.exceptions.RequestException as err:
+            log.exception(f"Error while getting schema catalog from {endpoint}: {err}")
+            schemas = cache.get(cache_key)
+        except requests.exceptions.JSONDecodeError as err:
+            log.exception(f"Error while getting schema catalog from {endpoint}: {err}")
             schemas = cache.get(cache_key)
         else:
-            schemas = response.json().get("schemas", [])
+            schemas = data.get("schemas", [])
             cache.set(cache_key, schemas)
+
         # no cached version or no content
         if not schemas:
             log.error("No content found inc. from cache for schema catalog")

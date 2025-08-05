@@ -43,6 +43,8 @@ setup(
             "csw-dcat = udata.harvest.backends.dcat:CswDcatBackend",
             "csw-iso-19139 = udata.harvest.backends.dcat:CswIso19139DcatBackend",
             "maaf = udata.harvest.backends.maaf:MaafBackend",
+            "ckan = udata.harvest.backends.ckan.harvesters:CkanBackend",
+            "dkan = udata.harvest.backends.ckan.harvesters:DkanBackend",
         ],
         "udata.avatars": [
             "internal = udata.features.identicon.backends:internal",
