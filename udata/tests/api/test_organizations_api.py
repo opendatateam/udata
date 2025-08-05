@@ -68,6 +68,11 @@ class OrganizationAPITest:
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(org.id)
 
+        response = api.get(url_for("api.organizations", name=org.name.upper()))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(org.id)
+
         response = api.get(url_for("api.organizations", name="Some other name"))
         assert200(response)
         assert len(response.json["data"]) == 0
@@ -994,6 +999,32 @@ class OrganizationContactPointsAPITest:
 
         assert response.json["data"][0]["name"] == data["name"]
         assert response.json["data"][0]["email"] == data["email"]
+
+    def test_org_contact_points_suggest(self, api):
+        user = api.login()
+        member = Member(user=user, role="admin")
+        org = OrganizationFactory(members=[member])
+        data = {
+            "email": "mooneywayne@cobb-cochran.com",
+            "name": "Martin Schultz",
+            "organization": str(org.id),
+            "role": "contact",
+        }
+        response = api.post(url_for("api.contact_points"), data)
+        assert201(response)
+
+        response = api.get(url_for("api.suggest_org_contact_points", org=org, q="mooneywayne"))
+        assert200(response)
+
+        assert response.json[0]["name"] == data["name"]
+        assert response.json[0]["email"] == data["email"]
+
+        response = api.get(
+            url_for("api.suggest_org_contact_points", org=org, q="mooneeejnknywayne")
+        )
+        assert200(response)
+
+        assert len(response.json) == 0
 
 
 class OrganizationCsvExportsTest:

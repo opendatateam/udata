@@ -15,10 +15,6 @@ from udata.api import fields
 from udata.app import cache
 from udata.core import storages
 from udata.core.badges.factories import badge_factory
-from udata.core.dataset.api_fields import (
-    dataset_harvest_fields,
-    resource_harvest_fields,
-)
 from udata.core.dataset.constants import (
     DEFAULT_FREQUENCY,
     DEFAULT_LICENSE,
@@ -136,16 +132,6 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(response.json["data"][0]["id"], str(second.id))
 
-        second.title = "second updated dataset"
-        second.save()
-        response = self.get(url_for("api.datasets", sort="-last_update"))
-        self.assert200(response)
-        self.assertEqual(response.json["data"][0]["id"], str(second.id))
-
-        response = self.get(url_for("api.datasets", sort="last_update"))
-        self.assert200(response)
-        self.assertEqual(response.json["data"][0]["id"], str(first.id))
-
     def test_dataset_api_default_sorting(self):
         # Default sort should be -created
         self.login()
@@ -154,6 +140,32 @@ class DatasetAPITest(APITestCase):
         response = self.get(url_for("api.datasets"))
         self.assert200(response)
         self.assertEqual(response.json["data"][0]["id"], str(last.id))
+
+    def test_dataset_api_sorting_last_update(self):
+        # Sort on last_update that takes resources update into account
+        self.login()
+        [
+            DatasetFactory(
+                title="some created dataset",
+                resources=[ResourceFactory(last_modified_internal=f"2025-01-0{i}")],
+            )
+            for i in range(1, 10)
+        ]
+        oldest_updated_dataset_ = DatasetFactory(
+            title="last created dataset",
+            resources=[ResourceFactory(last_modified_internal="2014-01-01")],
+        )
+        most_recent_updated_dataset = DatasetFactory(
+            title="last created dataset",
+            resources=[ResourceFactory(last_modified_internal="2025-07-01")],
+        )
+        response = self.get(url_for("api.datasets", sort="-last_update"))
+        self.assert200(response)
+        self.assertEqual(response.json["data"][0]["id"], str(most_recent_updated_dataset.id))
+
+        response = self.get(url_for("api.datasets", sort="last_update"))
+        self.assert200(response)
+        self.assertEqual(response.json["data"][0]["id"], str(oldest_updated_dataset_.id))
 
     def test_dataset_api_list_with_filters(self):
         """Should filters datasets results based on query filters"""
@@ -1249,6 +1261,11 @@ class DatasetAPITest(APITestCase):
             "url": None,
             "version": None,
         }
+
+        # Empty dataset (no resources)
+        empty_dataset = Dataset.objects.create(title="test", resources=None)
+        response = self.get(url_for("apiv2.dataset_schemas", dataset=empty_dataset))
+        assert len(response.json) == 0
 
     def test_remove_schema(self):
         self.login(AdminFactory())
@@ -2370,10 +2387,6 @@ class DatasetSchemasAPITest:
 class HarvestMetadataAPITest:
     modules = []
 
-    # api fields should be updated before app is created
-    dataset_harvest_fields["dynamic_field"] = fields.String(description="", allow_null=True)
-    resource_harvest_fields["dynamic_field"] = fields.String(description="", allow_null=True)
-
     def test_dataset_with_harvest_metadata(self, api):
         date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
         harvest_metadata = HarvestDatasetMetadata(
@@ -2409,24 +2422,6 @@ class HarvestMetadataAPITest:
             "archived": "not-on-remote",
         }
 
-    def test_dataset_dynamic_harvest_metadata_without_api_field(self, api):
-        harvest_metadata = HarvestDatasetMetadata(dynamic_field_but_no_api_field_defined="DCAT")
-        dataset = DatasetFactory(harvest=harvest_metadata)
-
-        response = api.get(url_for("api.dataset", dataset=dataset))
-        assert200(response)
-        assert response.json["harvest"] == {}
-
-    def test_dataset_dynamic_harvest_metadata_with_api_field(self, api):
-        harvest_metadata = HarvestDatasetMetadata(dynamic_field="dynamic_value")
-        dataset = DatasetFactory(harvest=harvest_metadata)
-
-        response = api.get(url_for("api.dataset", dataset=dataset))
-        assert200(response)
-        assert response.json["harvest"] == {
-            "dynamic_field": "dynamic_value",
-        }
-
     def test_dataset_with_resource_harvest_metadata(self, api):
         date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
 
@@ -2443,26 +2438,6 @@ class HarvestMetadataAPITest:
             "created_at": date.isoformat(),
             "modified_at": date.isoformat(),
             "uri": "http://domain.gouv.fr/dataset/uri",
-        }
-
-    def test_resource_dynamic_harvest_metadata_without_api_field(self, api):
-        harvest_metadata = HarvestResourceMetadata(
-            dynamic_field_but_no_api_field_defined="dynamic_value"
-        )
-        dataset = DatasetFactory(resources=[ResourceFactory(harvest=harvest_metadata)])
-
-        response = api.get(url_for("api.dataset", dataset=dataset))
-        assert200(response)
-        assert response.json["resources"][0]["harvest"] == {}
-
-    def test_resource_dynamic_harvest_metadata_with_api_field(self, api):
-        harvest_metadata = HarvestResourceMetadata(dynamic_field="dynamic_value")
-        dataset = DatasetFactory(resources=[ResourceFactory(harvest=harvest_metadata)])
-
-        response = api.get(url_for("api.dataset", dataset=dataset))
-        assert200(response)
-        assert response.json["resources"][0]["harvest"] == {
-            "dynamic_field": "dynamic_value",
         }
 
     def test_dataset_with_harvest_computed_dates(self, api):

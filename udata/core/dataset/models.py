@@ -10,7 +10,6 @@ import requests
 from blinker import signal
 from dateutil.parser import parse as parse_dt
 from flask import current_app, url_for
-from mongoengine import DynamicEmbeddedDocument
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import DateTimeField
 from mongoengine.signals import post_save, pre_init, pre_save
@@ -36,6 +35,7 @@ from .constants import (
     CHECKSUM_TYPES,
     CLOSED_FORMATS,
     DEFAULT_LICENSE,
+    DESCRIPTION_SHORT_SIZE_LIMIT,
     LEGACY_FREQUENCIES,
     MAX_DISTANCE,
     PIVOTAL_DATA,
@@ -78,7 +78,7 @@ def get_json_ld_extra(key, value):
     }
 
 
-class HarvestDatasetMetadata(DynamicEmbeddedDocument):
+class HarvestDatasetMetadata(db.EmbeddedDocument):
     backend = db.StringField()
     created_at = db.DateTimeField()
     modified_at = db.DateTimeField()
@@ -91,12 +91,15 @@ class HarvestDatasetMetadata(DynamicEmbeddedDocument):
     dct_identifier = db.StringField()
     archived_at = db.DateTimeField()
     archived = db.StringField()
+    ckan_name = db.StringField()
+    ckan_source = db.StringField()
 
 
-class HarvestResourceMetadata(DynamicEmbeddedDocument):
+class HarvestResourceMetadata(db.EmbeddedDocument):
     created_at = db.DateTimeField()
     modified_at = db.DateTimeField()
     uri = db.StringField()
+    dct_identifier = db.StringField()
 
 
 class Schema(db.EmbeddedDocument):
@@ -558,6 +561,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
         auditable=False,
     )
     description = field(db.StringField(required=True, default=""))
+    description_short = field(db.StringField(max_length=DESCRIPTION_SHORT_SIZE_LIMIT))
     license = field(db.ReferenceField("License"))
 
     tags = field(db.TagListField())
@@ -595,6 +599,14 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
         ),
         auditable=False,
     )
+    last_update = field(
+        DateTimeField(
+            verbose_name=_("Last update of the dataset resources"),
+            default=datetime.utcnow,
+            required=True,
+        ),
+        auditable=False,
+    )
     deleted = field(db.DateTimeField(), auditable=False)
     archived = field(db.DateTimeField())
 
@@ -603,8 +615,10 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
 
     __metrics_keys__ = [
         "discussions",
+        "discussions_open",
         "reuses",
         "reuses_by_months",
+        "dataservices",
         "followers",
         "followers_by_months",
         "views",
@@ -617,6 +631,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
             "created_at_internal",
             "last_modified_internal",
             "metrics.reuses",
+            "metrics.dataservices",
             "metrics.followers",
             "metrics.views",
             "slug",
@@ -681,6 +696,8 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
 
         if len(set(res.id for res in self.resources)) != len(self.resources):
             raise MongoEngineValidationError(f"Duplicate resource ID in dataset #{self.id}.")
+
+        self.last_update = self.compute_last_update()
 
         self.quality_cached = self.compute_quality()
 
@@ -783,11 +800,11 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
             return to_naive_datetime(self.harvest.modified_at)
         return to_naive_datetime(self.last_modified_internal)
 
-    @property
-    def last_update(self):
+    def compute_last_update(self):
         """
         Use the more recent date we would have on resources (harvest, modified).
         Default to dataset last_modified if no resource.
+        Resources should be fetched when calling this method.
         """
         if self.resources:
             return max([res.last_modified for res in self.resources])
@@ -1076,7 +1093,8 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
     def count_discussions(self):
         from udata.models import Discussion
 
-        self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()
+        self.metrics["discussions"] = Discussion.objects(subject=self).count()
+        self.metrics["discussions_open"] = Discussion.objects(subject=self, closed=None).count()
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_reuses(self):
@@ -1084,6 +1102,12 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
 
         self.metrics["reuses"] = Reuse.objects(datasets=self).visible().count()
         self.metrics["reuses_by_months"] = get_stock_metrics(Reuse.objects(datasets=self).visible())
+        self.save(signal_kwargs={"ignores": ["post_save"]})
+
+    def count_dataservices(self):
+        from udata.core.dataservices.models import Dataservice
+
+        self.metrics["dataservices"] = Dataservice.objects(datasets=self).visible().count()
         self.save(signal_kwargs={"ignores": ["post_save"]})
 
     def count_followers(self):

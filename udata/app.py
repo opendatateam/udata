@@ -210,7 +210,6 @@ def register_extensions(app):
         routing,
         search,
         sentry,
-        sitemap,
         tasks,
     )
 
@@ -225,7 +224,6 @@ def register_extensions(app):
     csrf.init_app(app)
     mail.init_app(app)
     search.init_app(app)
-    sitemap.init_app(app)
     sentry.init_app(app)
     return app
 

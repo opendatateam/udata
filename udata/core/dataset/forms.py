@@ -7,6 +7,7 @@ from udata.mongo.errors import FieldValidationError
 from .constants import (
     CHECKSUM_TYPES,
     DEFAULT_FREQUENCY,
+    DESCRIPTION_SHORT_SIZE_LIMIT,
     DESCRIPTION_SIZE_LIMIT,
     LEGACY_FREQUENCIES,
     RESOURCE_FILETYPES,
@@ -150,6 +151,11 @@ class DatasetForm(ModelForm):
         _("Description"),
         [validators.DataRequired(), validators.Length(max=DESCRIPTION_SIZE_LIMIT)],
         description=_("The details about the dataset (collection process, specifics...)."),
+    )
+    description_short = fields.StringField(
+        _("Short description"),
+        [validators.Length(max=DESCRIPTION_SHORT_SIZE_LIMIT)],
+        description=_("A short description of the dataset."),
     )
     license = fields.ModelSelectField(_("License"), model=License, allow_blank=True)
     frequency = fields.SelectField(

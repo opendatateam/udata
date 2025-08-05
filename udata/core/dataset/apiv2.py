@@ -44,6 +44,7 @@ DEFAULT_MASK_APIV2 = ",".join(
         "acronym",
         "slug",
         "description",
+        "description_short",
         "created_at",
         "last_modified",
         "deleted",
@@ -104,6 +105,9 @@ dataset_fields = apiv2.model(
         "slug": fields.String(description="The dataset permalink string", required=True),
         "description": fields.Markdown(
             description="The dataset description in markdown", required=True
+        ),
+        "description_short": fields.String(
+            description="The dataset short description", required=False
         ),
         "created_at": fields.ISODateTime(
             description="The dataset creation date", required=True, readonly=True
@@ -465,7 +469,7 @@ class DatasetSchemasAPI(API):
                     r.get("schema").get("name"),
                     r.get("schema").get("version"),
                 ): r.get("schema")
-                for r in dataset.get("resources", [])
+                for r in dataset.get("resources", []) or []
                 if r.get("schema")
             }.values()
         )

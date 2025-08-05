@@ -74,7 +74,7 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "preview_url",
         "permissions",
     ],
-    "discussion": ["subject", "url", "class", "permissions"],
+    "discussion": ["subject", "url", "self_web_url", "class", "permissions"],
     "discussion_message": ["permissions"],
     "user": ["uri", "page", "class", "avatar_thumbnail", "email"],
     "posted_by": ["uri", "page", "class", "avatar_thumbnail", "email"],
