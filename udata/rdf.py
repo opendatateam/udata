@@ -144,17 +144,7 @@ AGENT_ROLE_TO_RDF_PREDICATE = {
 
 # Map rdf contact point entity to role
 CONTACT_POINT_ENTITY_TO_ROLE = {
-    DCAT.contactPoint: "contact",
-    DCT.creator: "creator",
-    DCT.publisher: "publisher",
-    DCT.rightsHolder: "rightsHolder",
-    GEODCAT.custodian: "custodian",
-    GEODCAT.distributor: "distributor",
-    GEODCAT.originator: "originator",
-    GEODCAT.principalInvestigator: "principalInvestigator",
-    GEODCAT.processor: "processor",
-    GEODCAT.resourceProvider: "resourceProvider",
-    GEODCAT.user: "user",
+    predicate: role for role, predicate in AGENT_ROLE_TO_RDF_PREDICATE.items()
 }
 
 
@@ -393,7 +383,7 @@ def contact_points_to_rdf(contacts, graph=None):
 
         node = graph.resource(id)
         role = AGENT_ROLE_TO_RDF_PREDICATE.get(contact.role, DCAT.contactPoint)
-        # TODO: we could use user_to_rdf/organization_to_rdf if ContactPoint was typed
+        # GeoDCAT-AP spec: Only contactPoint is a Kind. Other roles are Agent.
         if role == DCAT.contactPoint:
             node.set(RDF.type, VCARD.Kind)
             if contact.name:
@@ -407,7 +397,8 @@ def contact_points_to_rdf(contacts, graph=None):
             node.set(FOAF.name, Literal(contact.name))
             if contact.email:
                 node.set(FOAF.mbox, URIRef(f"mailto:{contact.email}"))
-            # FIXME: contact_form mapping?
+            if contact.contact_form:
+                node.set(FOAF.page, URIRef(contact.contact_form))
 
         yield node, role
 

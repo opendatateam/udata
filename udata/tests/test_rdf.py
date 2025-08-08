@@ -130,4 +130,6 @@ class ContactToRdfTest:
                 assert contact_point.value(RDF.type).identifier == FOAF.Agent
                 assert contact_point.value(FOAF.name) == Literal("Organization contact")
                 assert contact_point.value(FOAF.mbox).identifier == URIRef("mailto:hello@its.me")
-                # FIXME: URL
+                assert contact_point.value(FOAF.page).identifier == URIRef(
+                    "https://data.support.com"
+                )
