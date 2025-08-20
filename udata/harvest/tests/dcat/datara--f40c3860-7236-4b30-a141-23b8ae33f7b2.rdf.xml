@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF xmlns:adms="http://www.w3.org/ns/adms#"
+         xmlns:cnt="http://www.w3.org/2011/content#"
+         xmlns:dc="http://purl.org/dc/elements/1.1/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dctype="http://purl.org/dc/dcmitype/"
+         xmlns:dqv="http://www.w3.org/ns/dqv#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/"
+         xmlns:geodcatap="http://data.europa.eu/930/"
+         xmlns:gsp="http://www.opengis.net/ont/geosparql#"
+         xmlns:locn="http://www.w3.org/ns/locn#"
+         xmlns:org="http://www.w3.org/ns/org#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+         xmlns:prov="http://www.w3.org/ns/prov#"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:schema="http://schema.org/"
+         xmlns:sdmx-attribute="http://purl.org/linked-data/sdmx/2009/attribute#"
+         xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+         xmlns:vcard="http://www.w3.org/2006/vcard/ns#">
+   <rdf:Description rdf:about="https://catalogue.open-datara.fr/geonetwork/srv/f40c3860-7236-4b30-a141-23b8ae33f7b2">
+      <foaf:isPrimaryTopicOf>
+         <rdf:Description>
+            <rdf:type rdf:resource="http://www.w3.org/ns/dcat#CatalogRecord"/>
+            <foaf:primaryTopic rdf:resource="https://catalogue.open-datara.fr/geonetwork/srv/f40c3860-7236-4b30-a141-23b8ae33f7b2"/>
+            <dct:conformsTo>
+               <dct:Standard rdf:about="http://data.europa.eu/930/"/>
+            </dct:conformsTo>
+            <dct:language>
+               <dct:LinguisticSystem rdf:about="http://publications.europa.eu/resource/authority/language/FRE"/>
+            </dct:language>
+            <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-06-23T06:57:04.90887Z</dct:modified>
+            <dcat:contactPoint>
+               <rdf:Description>
+                  <rdf:type rdf:resource="http://www.w3.org/2006/vcard/ns#Individual"/>
+                  <vcard:fn xml:lang="fr">Administrateur de Données</vcard:fn>
+                  <vcard:organization-name xml:lang="fr">Direction Régionale de l’Environnement de l’Aménagement et du Logement d'Auvergne-Rhône-Alpes (DREAL Auvergne-Rhône-Alpes)</vcard:organization-name>
+                  <vcard:hasEmail rdf:resource="mailto:sig.dreal-ara@developpement-durable.gouv.fr"/>
+               </rdf:Description>
+            </dcat:contactPoint>
+            <prov:qualifiedAttribution>
+               <prov:Attribution>
+                  <prov:agent>
+                     <rdf:Description>
+                        <rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
+                        <rdf:type rdf:resource="http://www.w3.org/ns/prov#Agent"/>
+                        <foaf:name xml:lang="fr">Administrateur de Données</foaf:name>
+                        <org:memberOf>
+                           <foaf:Organization>
+                              <foaf:name xml:lang="fr">Direction Régionale de l’Environnement de l’Aménagement et du Logement d'Auvergne-Rhône-Alpes (DREAL Auvergne-Rhône-Alpes)</foaf:name>
+                           </foaf:Organization>
+                        </org:memberOf>
+                        <foaf:mbox rdf:resource="mailto:sig.dreal-ara@developpement-durable.gouv.fr"/>
+                     </rdf:Description>
+                  </prov:agent>
+                  <dct:type rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/pointOfContact"/>
+                  <dcat:hadRole>
+                     <dcat:Role rdf:about="http://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/pointOfContact"/>
+                  </dcat:hadRole>
+               </prov:Attribution>
+            </prov:qualifiedAttribution>
+            <dct:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">f40c3860-7236-4b30-a141-23b8ae33f7b2</dct:identifier>
+            <dct:source rdf:parseType="Resource">
+               <rdf:type rdf:resource="http://www.w3.org/ns/dcat#CatalogRecord"/>
+               <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2025-06-23T06:57:04.90887Z</dct:modified>
+               <cnt:characterEncoding rdf:datatype="http://www.w3.org/2001/XMLSchema#string">UTF-8</cnt:characterEncoding>
+               <dct:conformsTo rdf:parseType="Resource">
+                  <rdf:type rdf:resource="http://purl.org/dc/terms/Standard"/>
+                  <dct:title xml:lang="fr">ISO 19115:2003/19139</dct:title>
+                  <owl:versionInfo xml:lang="fr">1.0</owl:versionInfo>
+               </dct:conformsTo>
+            </dct:source>
+         </rdf:Description>
+      </foaf:isPrimaryTopicOf>
+      <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset"/>
+      <dct:type rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ResourceType/dataset"/>
+      <dct:title xml:lang="fr">Couche relevés de végétations patrimoniales. PRFB. 2020</dct:title>
+      <dct:description xml:lang="fr">Cette couche présente pour les départements ex Rhône-Alpes; les données ponctuelles d’occurrences de végétations rattachées au prodrome des végétations ou au référentiel syntaxonomique du CBNA. A ces informations d’occurences, ont été ajoutées par jointure spatiale les informations des couches départementales "formation_vegetale_bdf".</dct:description>
+      <dct:subject rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/TopicCategory/biota"/>
+      <dcat:keyword xml:lang="fr">Flore</dcat:keyword>
+      <dcat:theme rdf:parseType="Resource">
+         <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+         <skos:prefLabel xml:lang="fr">AUVERGNE-RHONE-ALPES</skos:prefLabel>
+         <skos:inScheme>
+            <skos:ConceptScheme>
+               <dct:title xml:lang="fr">NouvellesRegionAdminExpress</dct:title>
+               <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2006-09-22</dct:issued>
+            </skos:ConceptScheme>
+         </skos:inScheme>
+      </dcat:theme>
+      <dcat:theme rdf:parseType="Resource">
+         <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+         <skos:prefLabel xml:lang="fr">Habitats et biotopes</skos:prefLabel>
+         <skos:inScheme>
+            <skos:ConceptScheme>
+               <dct:title xml:lang="fr">GEMET - INSPIRE themes, version 1.0</dct:title>
+               <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2008-06-01</dct:issued>
+            </skos:ConceptScheme>
+         </skos:inScheme>
+      </dcat:theme>
+      <dct:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://catalogue.open-datara.fr/geonetwork/srv/f40c3860-7236-4b30-a141-23b8ae33f7b2</dct:identifier>
+      <dct:language>
+         <dct:LinguisticSystem rdf:about="http://publications.europa.eu/resource/authority/language/FRE"/>
+      </dct:language>
+      <dct:spatial rdf:parseType="Resource">
+         <rdf:type rdf:resource="http://purl.org/dc/terms/Location"/>
+         <locn:geometry rdf:datatype="http://www.opengis.net/ont/geosparql#wktLiteral"><![CDATA[POLYGON((2.0629141330719 46.8040313720703,7.18588781356812 46.8040313720703,7.18588781356812 44.1153793334961,2.0629141330719 44.1153793334961,2.0629141330719 46.8040313720703))]]></locn:geometry>
+         <locn:geometry rdf:datatype="http://www.opengis.net/ont/geosparql#gmlLiteral"><![CDATA[<gml:Envelope srsName="http://www.opengis.net/def/crs/OGC/1.3/CRS84"><gml:lowerCorner>2.0629141330719 44.1153793334961</gml:lowerCorner><gml:upperCorner>7.18588781356812 46.8040313720703</gml:upperCorner></gml:Envelope>]]></locn:geometry>
+         <locn:geometry rdf:datatype="https://www.iana.org/assignments/media-types/application/vnd.geo+json"><![CDATA[{"type":"Polygon","coordinates":[[[2.0629141330719,46.8040313720703],[7.18588781356812,46.8040313720703],[7.18588781356812,44.1153793334961],[2.0629141330719,44.1153793334961],[2.0629141330719,46.8040313720703]]]}]]></locn:geometry>
+         <locn:geometry rdf:datatype="http://www.opengis.net/ont/geosparql#geoJSONLiteral"><![CDATA[{"type":"Polygon","coordinates":[[[2.0629141330719,46.8040313720703],[7.18588781356812,46.8040313720703],[7.18588781356812,44.1153793334961],[2.0629141330719,44.1153793334961],[2.0629141330719,46.8040313720703]]]}]]></locn:geometry>
+         <dcat:bbox rdf:datatype="http://www.opengis.net/ont/geosparql#wktLiteral"><![CDATA[POLYGON((2.0629141330719 46.8040313720703,7.18588781356812 46.8040313720703,7.18588781356812 44.1153793334961,2.0629141330719 44.1153793334961,2.0629141330719 46.8040313720703))]]></dcat:bbox>
+         <dcat:bbox rdf:datatype="http://www.opengis.net/ont/geosparql#gmlLiteral"><![CDATA[<gml:Envelope srsName="http://www.opengis.net/def/crs/OGC/1.3/CRS84"><gml:lowerCorner>2.0629141330719 44.1153793334961</gml:lowerCorner><gml:upperCorner>7.18588781356812 46.8040313720703</gml:upperCorner></gml:Envelope>]]></dcat:bbox>
+         <dcat:bbox rdf:datatype="https://www.iana.org/assignments/media-types/application/vnd.geo+json"><![CDATA[{"type":"Polygon","coordinates":[[[2.0629141330719,46.8040313720703],[7.18588781356812,46.8040313720703],[7.18588781356812,44.1153793334961],[2.0629141330719,44.1153793334961],[2.0629141330719,46.8040313720703]]]}]]></dcat:bbox>
+         <dcat:bbox rdf:datatype="http://www.opengis.net/ont/geosparql#geoJSONLiteral"><![CDATA[{"type":"Polygon","coordinates":[[[2.0629141330719,46.8040313720703],[7.18588781356812,46.8040313720703],[7.18588781356812,44.1153793334961],[2.0629141330719,44.1153793334961],[2.0629141330719,46.8040313720703]]]}]]></dcat:bbox>
+      </dct:spatial>
+      <dct:spatial rdf:parseType="Resource">
+         <rdf:type rdf:resource="http://purl.org/dc/terms/Location"/>
+         <locn:geometry rdf:datatype="http://www.opengis.net/ont/geosparql#wktLiteral"><![CDATA[POLYGON((2.0629141330719 46.8040313720703,7.18588781356812 46.8040313720703,7.18588781356812 44.1153793334961,2.0629141330719 44.1153793334961,2.0629141330719 46.8040313720703))]]></locn:geometry>
+         <locn:geometry rdf:datatype="http://www.opengis.net/ont/geosparql#gmlLiteral"><![CDATA[<gml:Envelope srsName="http://www.opengis.net/def/crs/OGC/1.3/CRS84"><gml:lowerCorner>2.0629141330719 44.1153793334961</gml:lowerCorner><gml:upperCorner>7.18588781356812 46.8040313720703</gml:upperCorner></gml:Envelope>]]></locn:geometry>
+         <locn:geometry rdf:datatype="https://www.iana.org/assignments/media-types/application/vnd.geo+json"><![CDATA[{"type":"Polygon","coordinates":[[[2.0629141330719,46.8040313720703],[7.18588781356812,46.8040313720703],[7.18588781356812,44.1153793334961],[2.0629141330719,44.1153793334961],[2.0629141330719,46.8040313720703]]]}]]></locn:geometry>
+         <locn:geometry rdf:datatype="http://www.opengis.net/ont/geosparql#geoJSONLiteral"><![CDATA[{"type":"Polygon","coordinates":[[[2.0629141330719,46.8040313720703],[7.18588781356812,46.8040313720703],[7.18588781356812,44.1153793334961],[2.0629141330719,44.1153793334961],[2.0629141330719,46.8040313720703]]]}]]></locn:geometry>
+         <dcat:bbox rdf:datatype="http://www.opengis.net/ont/geosparql#wktLiteral"><![CDATA[POLYGON((2.0629141330719 46.8040313720703,7.18588781356812 46.8040313720703,7.18588781356812 44.1153793334961,2.0629141330719 44.1153793334961,2.0629141330719 46.8040313720703))]]></dcat:bbox>
+         <dcat:bbox rdf:datatype="http://www.opengis.net/ont/geosparql#gmlLiteral"><![CDATA[<gml:Envelope srsName="http://www.opengis.net/def/crs/OGC/1.3/CRS84"><gml:lowerCorner>2.0629141330719 44.1153793334961</gml:lowerCorner><gml:upperCorner>7.18588781356812 46.8040313720703</gml:upperCorner></gml:Envelope>]]></dcat:bbox>
+         <dcat:bbox rdf:datatype="https://www.iana.org/assignments/media-types/application/vnd.geo+json"><![CDATA[{"type":"Polygon","coordinates":[[[2.0629141330719,46.8040313720703],[7.18588781356812,46.8040313720703],[7.18588781356812,44.1153793334961],[2.0629141330719,44.1153793334961],[2.0629141330719,46.8040313720703]]]}]]></dcat:bbox>
+         <dcat:bbox rdf:datatype="http://www.opengis.net/ont/geosparql#geoJSONLiteral"><![CDATA[{"type":"Polygon","coordinates":[[[2.0629141330719,46.8040313720703],[7.18588781356812,46.8040313720703],[7.18588781356812,44.1153793334961],[2.0629141330719,44.1153793334961],[2.0629141330719,46.8040313720703]]]}]]></dcat:bbox>
+      </dct:spatial>
+      <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#date"/>
+      <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2021-01-27</dct:modified>
+      <dct:created rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2020-09-08</dct:created>
+      <dct:provenance>
+         <dct:ProvenanceStatement>
+            <rdfs:label xml:lang="fr">agrégation des 3 couches transmises par les CBN Alpin et Massif Central pour le PRFB. pour le CBNA : donnees_flore_prodrome_point.shp / donnees_flore_syntaxon obtenues par extraction de la base flore CBNA et jointure spatiale avec les couches départementales "formation_vegetale_bdf". Pour le CBNMC : releves_vegetations_patrimoniales_Massif_central.shp</rdfs:label>
+         </dct:ProvenanceStatement>
+      </dct:provenance>
+      <dct:conformsTo rdf:parseType="Resource">
+         <rdf:type rdf:resource="http://purl.org/dc/terms/Standard"/>
+         <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+         <dct:type rdf:resource="http://inspire.ec.europa.eu/glossary/SpatialReferenceSystem"/>
+         <dct:title xml:lang="fr">RGF93 / Lambert-93 (EPSG:2154)</dct:title>
+         <skos:prefLabel xml:lang="fr">RGF93 / Lambert-93 (EPSG:2154)</skos:prefLabel>
+         <skos:inScheme>
+            <skos:ConceptScheme>
+               <dct:title xml:lang="fr">EPSG</dct:title>
+            </skos:ConceptScheme>
+         </skos:inScheme>
+         <owl:versionInfo xml:lang="fr">7.4</owl:versionInfo>
+      </dct:conformsTo>
+      <dqv:hasQualityMeasurement>
+         <dqv:QualityMeasurement>
+            <dqv:isMeasurementOf>
+               <dqv:Metric rdf:about="http://data.europa.eu/930/spatialResolutionAsScale"/>
+            </dqv:isMeasurementOf>
+            <dqv:value rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">0.0002</dqv:value>
+         </dqv:QualityMeasurement>
+      </dqv:hasQualityMeasurement>
+      <dct:conformsTo rdf:parseType="Resource">
+         <rdf:type rdf:resource="http://purl.org/dc/terms/Standard"/>
+         <dct:title xml:lang="fr">COMMISSION REGULATION (EU) No 1089/2010 of 23 November 2010 implementing Directive 2007/2/EC of the European Parliament and of the Council as regards interoperability of spatial data sets and services</dct:title>
+         <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#date"/>
+      </dct:conformsTo>
+      <prov:wasUsedBy>
+         <prov:Activity>
+            <prov:used>
+               <prov:Entity rdf:about="https://catalogue.open-datara.fr/geonetwork/srv/f40c3860-7236-4b30-a141-23b8ae33f7b2"/>
+            </prov:used>
+            <prov:qualifiedAssociation rdf:parseType="Resource">
+               <rdf:type rdf:resource="http://www.w3.org/ns/prov#Association"/>
+               <prov:hadPlan rdf:parseType="Resource">
+                  <rdf:type rdf:resource="http://www.w3.org/ns/prov#Plan"/>
+                  <prov:wasDerivedFrom rdf:parseType="Resource">
+                     <rdf:type rdf:resource="http://www.w3.org/ns/prov#Entity"/>
+                     <dct:title xml:lang="fr">COMMISSION REGULATION (EU) No 1089/2010 of 23 November 2010 implementing Directive 2007/2/EC of the European Parliament and of the Council as regards interoperability of spatial data sets and services</dct:title>
+                     <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#date"/>
+                  </prov:wasDerivedFrom>
+               </prov:hadPlan>
+            </prov:qualifiedAssociation>
+            <prov:generated rdf:parseType="Resource">
+               <rdf:type rdf:resource="http://www.w3.org/ns/prov#Entity"/>
+               <dct:type rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/DegreeOfConformity/conformant"/>
+               <dct:description xml:lang="fr">etc</dct:description>
+            </prov:generated>
+         </prov:Activity>
+      </prov:wasUsedBy>
+      <dct:rightsHolder>
+         <rdf:Description>
+            <rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
+            <rdf:type rdf:resource="http://www.w3.org/ns/prov#Agent"/>
+            <foaf:name xml:lang="fr">Jean-Michel GENIS</foaf:name>
+            <org:memberOf>
+               <foaf:Organization>
+                  <foaf:name xml:lang="fr">Conservatoire Botanique National Alpin</foaf:name>
+               </foaf:Organization>
+            </org:memberOf>
+            <foaf:mbox rdf:resource="mailto:jm.genis@cbn-alpin.fr"/>
+         </rdf:Description>
+      </dct:rightsHolder>
+      <prov:qualifiedAttribution>
+         <prov:Attribution>
+            <prov:agent>
+               <rdf:Description>
+                  <rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
+                  <rdf:type rdf:resource="http://www.w3.org/ns/prov#Agent"/>
+                  <foaf:name xml:lang="fr">Jean-Michel GENIS</foaf:name>
+                  <org:memberOf>
+                     <foaf:Organization>
+                        <foaf:name xml:lang="fr">Conservatoire Botanique National Alpin</foaf:name>
+                     </foaf:Organization>
+                  </org:memberOf>
+                  <foaf:mbox rdf:resource="mailto:jm.genis@cbn-alpin.fr"/>
+               </rdf:Description>
+            </prov:agent>
+            <dct:type rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/owner"/>
+            <dcat:hadRole>
+               <dcat:Role rdf:about="http://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/owner"/>
+            </dcat:hadRole>
+         </prov:Attribution>
+      </prov:qualifiedAttribution>
+      <dct:rightsHolder>
+         <rdf:Description>
+            <rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Organization"/>
+            <rdf:type rdf:resource="http://www.w3.org/ns/prov#Agent"/>
+            <foaf:name xml:lang="fr">Conservatoire Botanique National Massif Central</foaf:name>
+            <foaf:mbox rdf:resource="mailto:Benoit.Renaux@cbnmc.fr"/>
+         </rdf:Description>
+      </dct:rightsHolder>
+      <prov:qualifiedAttribution>
+         <prov:Attribution>
+            <prov:agent>
+               <rdf:Description>
+                  <rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Organization"/>
+                  <rdf:type rdf:resource="http://www.w3.org/ns/prov#Agent"/>
+                  <foaf:name xml:lang="fr">Conservatoire Botanique National Massif Central</foaf:name>
+                  <foaf:mbox rdf:resource="mailto:Benoit.Renaux@cbnmc.fr"/>
+               </rdf:Description>
+            </prov:agent>
+            <dct:type rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/owner"/>
+            <dcat:hadRole>
+               <dcat:Role rdf:about="http://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/owner"/>
+            </dcat:hadRole>
+         </prov:Attribution>
+      </prov:qualifiedAttribution>
+      <dcat:contactPoint>
+         <rdf:Description>
+            <rdf:type rdf:resource="http://www.w3.org/2006/vcard/ns#Individual"/>
+            <vcard:fn xml:lang="fr">Administrateur de Données</vcard:fn>
+            <vcard:organization-name xml:lang="fr">Direction Régionale de l’Environnement de l’Aménagement et du Logement d'Auvergne-Rhône-Alpes (DREAL Auvergne-Rhône-Alpes)</vcard:organization-name>
+            <vcard:hasEmail rdf:resource="mailto:sig.dreal-ara@developpement-durable.gouv.fr"/>
+            <vcard:hasAddress>
+               <vcard:Address>
+                  <vcard:street-address>5 place Jules Ferry</vcard:street-address>
+                  <vcard:locality>LYON</vcard:locality>
+                  <vcard:postal-code>69006</vcard:postal-code>
+                  <vcard:country-name>France</vcard:country-name>
+               </vcard:Address>
+            </vcard:hasAddress>
+         </rdf:Description>
+      </dcat:contactPoint>
+      <prov:qualifiedAttribution>
+         <prov:Attribution>
+            <prov:agent>
+               <rdf:Description>
+                  <rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
+                  <rdf:type rdf:resource="http://www.w3.org/ns/prov#Agent"/>
+                  <foaf:name xml:lang="fr">Administrateur de Données</foaf:name>
+                  <org:memberOf>
+                     <foaf:Organization>
+                        <foaf:name xml:lang="fr">Direction Régionale de l’Environnement de l’Aménagement et du Logement d'Auvergne-Rhône-Alpes (DREAL Auvergne-Rhône-Alpes)</foaf:name>
+                     </foaf:Organization>
+                  </org:memberOf>
+                  <foaf:mbox rdf:resource="mailto:sig.dreal-ara@developpement-durable.gouv.fr"/>
+                  <locn:address>
+                     <locn:Address>
+                        <locn:thoroughfare>5 place Jules Ferry</locn:thoroughfare>
+                        <locn:postName>LYON</locn:postName>
+                        <locn:postCode>69006</locn:postCode>
+                        <locn:adminUnitL1>France</locn:adminUnitL1>
+                     </locn:Address>
+                  </locn:address>
+               </rdf:Description>
+            </prov:agent>
+            <dct:type rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/pointOfContact"/>
+            <dcat:hadRole>
+               <dcat:Role rdf:about="http://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/pointOfContact"/>
+            </dcat:hadRole>
+         </prov:Attribution>
+      </prov:qualifiedAttribution>
+   </rdf:Description>
+</rdf:RDF>

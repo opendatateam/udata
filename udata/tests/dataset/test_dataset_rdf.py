@@ -19,6 +19,7 @@ from udata.core.dataset.models import (
     Resource,
 )
 from udata.core.dataset.rdf import (
+    CONTACT_POINT_ENTITY_TO_ROLE,
     EU_RDF_REQUENCIES,
     dataset_from_rdf,
     dataset_to_rdf,
@@ -163,8 +164,8 @@ class DatasetToRdfTest:
         d = dataset_to_rdf(dataset)
 
         contact_rdf = d.value(DCT.publisher)
-        assert contact_rdf.value(RDF.type).identifier == VCARD.Kind
-        assert contact_rdf.value(VCARD.fn) == Literal("Publisher Contact")
+        assert contact_rdf.value(RDF.type).identifier == FOAF.Agent
+        assert contact_rdf.value(FOAF.name) == Literal("Publisher Contact")
 
         org_rdf = d.value(GEODCAT.distributor)
         assert org_rdf.value(RDF.type).identifier == FOAF.Organization
@@ -505,6 +506,43 @@ class RdfToDatasetTest:
 
         assert isinstance(dataset, Dataset)
         assert dataset.harvest.modified_at is None
+
+    @pytest.mark.parametrize("rdf_role,role", CONTACT_POINT_ENTITY_TO_ROLE.items())
+    def test_contact_points(self, rdf_role, role):
+        uri = "https://test.org/dataset"
+        node = URIRef(uri)
+        g = Graph()
+
+        id = faker.uuid4()
+        title = faker.sentence()
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.identifier, Literal(id)))
+        g.set((node, DCT.title, Literal(title)))
+
+        contact = BNode()
+        contact_name = Literal(f"{role} contact")
+        contact_email = Literal(f"{role}@example.com")
+        if rdf_role == DCAT.contactPoint:
+            g.add((contact, RDF.type, VCARD.Individual))
+            g.add((contact, VCARD.fn, contact_name))
+            g.add((contact, VCARD.email, contact_email))
+        else:
+            g.add((contact, RDF.type, FOAF.Person))
+            g.add((contact, FOAF.name, contact_name))
+            g.add((contact, FOAF.mbox, contact_email))
+        g.add((node, rdf_role, contact))
+
+        # Dataset needs an owner/organization for contact_points_from_rdf() to work
+        d = DatasetFactory.build()
+        d.organization = OrganizationFactory(name="organization")
+
+        dataset = dataset_from_rdf(g, d)
+        dataset.validate()
+
+        assert len(dataset.contact_points) == 1
+        assert dataset.contact_points[0].role == role
+        assert dataset.contact_points[0].name == f"{role} contact"
+        assert dataset.contact_points[0].email == f"{role}@example.com"
 
     def test_theme_and_tags(self):
         node = BNode()
