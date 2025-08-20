@@ -2,6 +2,10 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 10.8.3 (2025-08-20)
+
 - Count dataservices and reuses for datasets based on signal [#3335](https://github.com/opendatateam/udata/pull/3335)
   :warning: the job `update-datasets-reuses-metrics` disappears, you should unschedule it before installing this version
 - Consolidate CSW harvesting logic [#3378](https://github.com/opendatateam/udata/pull/3378)
@@ -10,6 +14,7 @@
 - Cache dcat harvest pages to avoid two rounds of requests [#3398](https://github.com/opendatateam/udata/pull/3398)
 - Ignore Dataset.accessService when processing DataService [#3399](https://github.com/opendatateam/udata/pull/3399)
 - Add dataset field `description_short` [#3397](https://github.com/opendatateam/udata/pull/3397)
+- Optimize csv organization export [#3401](https://github.com/opendatateam/udata/pull/3401)
 
 ## 10.8.2 (2025-07-31)
 
