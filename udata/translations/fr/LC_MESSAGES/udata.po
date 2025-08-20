@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2025-08-20 12:14+0200\n"
-"PO-Revision-Date: 2025-08-20 10:16\n"
+"PO-Revision-Date: 2025-08-20 10:17\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -551,11 +551,11 @@ msgstr "Les détails sur le jeu de données (processus de collecte, spécificit�
 
 #: udata/core/dataset/forms.py:156
 msgid "Short description"
-msgstr ""
+msgstr "Description courte"
 
 #: udata/core/dataset/forms.py:158
 msgid "A short description of the dataset."
-msgstr ""
+msgstr "Une courte description du jeu de données."
 
 #: udata/core/dataset/forms.py:160
 msgid "License"
