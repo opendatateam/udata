@@ -1,11 +1,20 @@
 import udata.core.dataset.api_fields as datasets_api_fields
-from udata.api_fields import field, generate_fields
+from udata.api import api, fields
+from udata.api_fields import field, function_field, generate_fields
 from udata.core.activity.models import Auditable
 from udata.core.dataservices.models import Dataservice
 from udata.core.owned import Owned
 from udata.core.reuse.models import Reuse
 from udata.models import db
 from udata.mongo.datetime_fields import Datetimed
+
+page_permissions_fields = api.model(
+    "PagePermissions",
+    {
+        "delete": fields.Permission(),
+        "edit": fields.Permission(),
+    },
+)
 
 
 @generate_fields()
@@ -78,3 +87,15 @@ class Page(Auditable, Owned, Datetimed, db.Document):
         db.EmbeddedDocumentListField(Bloc),
         generic=True,
     )
+
+    @property
+    @function_field(
+        nested_fields=page_permissions_fields,
+    )
+    def permissions(self):
+        from .permissions import PageEditPermission
+
+        return {
+            "delete": PageEditPermission(self),
+            "edit": PageEditPermission(self),
+        }

@@ -47,9 +47,8 @@ class PageAPI(API):
     @api.expect(Page.__write_fields__)
     @api.marshal_with(Page.__read_fields__)
     def put(self, page: Page):
+        page.permissions["edit"].test()
         patch(page, request)
-        if not page.owner and not page.organization:
-            page.owner = current_user._get_current_object()
 
         page.save()
         return page
