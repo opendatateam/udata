@@ -3,6 +3,7 @@ from flask_login import current_user
 
 from udata.api import API, api
 from udata.api_fields import patch
+from udata.auth import admin_permission
 
 from .models import Page
 
@@ -13,6 +14,14 @@ common_doc = {"params": {"page": "The page ID or slug"}}
 
 @ns.route("/", endpoint="pages")
 class PagesAPI(API):
+    @api.secure(admin_permission)
+    @api.doc("list_pages")
+    @api.expect(Page.__index_parser__)
+    @api.marshal_with(Page.__page_fields__)
+    def get(self):
+        """List or search all pages"""
+        return Page.apply_pagination(Page.objects)
+
     @api.secure
     @api.doc("create_page", responses={400: "Validation error"})
     @api.expect(Page.__write_fields__)
