@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Prevent numerous user deleted slug duplicates [#3403](https://github.com/opendatateam/udata/pull/3403)
 
 ## 10.8.3 (2025-08-20)
 
