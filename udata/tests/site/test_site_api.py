@@ -1,6 +1,7 @@
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.pages.factories import PageFactory
 from udata.core.reuse.factories import VisibleReuseFactory
 from udata.core.site.factories import SiteFactory
 from udata.core.site.models import Site, current_site
@@ -15,52 +16,29 @@ class SiteAPITest(APITestCase):
         response = self.get(url_for("api.site"))
         self.assert200(response)
 
-    def test_get_home_datasets(self):
-        site = SiteFactory.create(
-            id=self.app.config["SITE_ID"], settings__home_datasets=DatasetFactory.create_batch(3)
-        )
-        current_site.reload()
+        site = Site.objects.get(id=self.app.config["SITE_ID"])
 
-        self.login(AdminFactory())
-        response = self.get(url_for("api.home_datasets"))
+        self.assertEqual(site.title, response.json['title'])
+
+    def test_set_site(self):
+        response = self.get(url_for("api.site"))
         self.assert200(response)
 
-        self.assertEqual(len(response.json), len(site.settings.home_datasets))
-
-    def test_get_home_reuses(self):
-        site = SiteFactory.create(
-            id=self.app.config["SITE_ID"], settings__home_reuses=VisibleReuseFactory.create_batch(3)
-        )
-        current_site.reload()
-
+        site = Site.objects.get(id=self.app.config["SITE_ID"])
+        ids = [p.id for p in PageFactory.create_batch(3)]
         self.login(AdminFactory())
-        response = self.get(url_for("api.home_reuses"))
-        self.assert200(response)
-
-        self.assertEqual(len(response.json), len(site.settings.home_reuses))
-
-    def test_set_home_datasets(self):
-        ids = [d.id for d in DatasetFactory.create_batch(3)]
-
-        self.login(AdminFactory())
-        response = self.put(url_for("api.home_datasets"), ids)
+        
+        response = self.patch(url_for("api.site"), {
+            "datasets_page": ids[0],
+            "reuses_page": ids[1],
+            "dataservices_page": ids[2],
+        })
 
         self.assert200(response)
-        self.assertEqual(len(response.json), len(ids))
+        self.assertEqual(response.json['title'], site.title)
 
         site = Site.objects.get(id=self.app.config["SITE_ID"])
 
-        self.assertEqual([d.id for d in site.settings.home_datasets], ids)
-
-    def test_set_home_reuses(self):
-        ids = [r.id for r in VisibleReuseFactory.create_batch(3)]
-
-        self.login(AdminFactory())
-        response = self.put(url_for("api.home_reuses"), ids)
-
-        self.assert200(response)
-        self.assertEqual(len(response.json), len(ids))
-
-        site = Site.objects.get(id=self.app.config["SITE_ID"])
-
-        self.assertEqual([r.id for r in site.settings.home_reuses], ids)
+        self.assertEqual(site.datasets_page.id, ids[0])
+        self.assertEqual(site.reuses_page.id, ids[1])
+        self.assertEqual(site.dataservices_page.id, ids[2])

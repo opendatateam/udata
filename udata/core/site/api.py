@@ -34,7 +34,7 @@ class SiteAPI(API):
         return current_site
 
     @api.secure(admin_permission)
-    @api.doc(id="get_site")
+    @api.doc(id="set_site")
     @api.expect(Site.__write_fields__)
     @api.marshal_with(Site.__read_fields__)
     def patch(self):
