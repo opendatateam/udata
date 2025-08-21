@@ -1,6 +1,7 @@
 from flask import current_app, g
 from werkzeug.local import LocalProxy
 
+from udata.api_fields import field, generate_fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
 from udata.core.metrics.helpers import get_metrics_for_model, get_stock_metrics
@@ -19,17 +20,18 @@ class SiteSettings(db.EmbeddedDocument):
     home_reuses = db.ListField(db.ReferenceField(Reuse))
 
 
+@generate_fields()
 class Site(WithMetrics, db.Document):
-    id = db.StringField(primary_key=True)
-    title = db.StringField(required=True)
-    keywords = db.ListField(db.StringField())
-    feed_size = db.IntField(required=True, default=DEFAULT_FEED_SIZE)
+    id = field(db.StringField(primary_key=True), readonly=True)
+    title = field(db.StringField(required=True), description="The site display title")
+    keywords = field(db.ListField(db.StringField()))
+    feed_size = field(db.IntField(required=True, default=DEFAULT_FEED_SIZE))
     configs = db.DictField()
     themes = db.DictField()
     settings = db.EmbeddedDocumentField(SiteSettings, default=SiteSettings)
-    datasets_page = db.ReferenceField("Page")
-    reuses_page = db.ReferenceField("Page")
-    dataservices_page = db.ReferenceField("Page")
+    datasets_page = field(db.ReferenceField("Page"), attribute="datasets_page.id")
+    reuses_page = field(db.ReferenceField("Page"), attribute="reuses_page.id")
+    dataservices_page = field(db.ReferenceField("Page"), attribute="dataservices_page.id")
 
     __metrics_keys__ = [
         "max_dataset_followers",
