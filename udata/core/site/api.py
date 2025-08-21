@@ -1,14 +1,12 @@
-from bson import ObjectId
 from flask import current_app, json, make_response, redirect, request, url_for
 
-from udata.api import API, api, fields
+from udata.api import API, api
 from udata.api_fields import patch
 from udata.auth import admin_permission
 from udata.core import csv
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api import DatasetApiParser
-from udata.core.dataset.api_fields import dataset_fields
 from udata.core.dataset.csv import ResourcesCsvAdapter
 from udata.core.dataset.search import DatasetSearch
 from udata.core.dataset.tasks import get_queryset as get_csv_queryset
