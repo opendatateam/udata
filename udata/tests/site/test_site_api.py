@@ -15,7 +15,7 @@ class SiteAPITest(APITestCase):
 
         site = Site.objects.get(id=self.app.config["SITE_ID"])
 
-        self.assertEqual(site.title, response.json['title'])
+        self.assertEqual(site.title, response.json["title"])
 
     def test_set_site(self):
         response = self.get(url_for("api.site"))
@@ -24,15 +24,18 @@ class SiteAPITest(APITestCase):
         site = Site.objects.get(id=self.app.config["SITE_ID"])
         ids = [p.id for p in PageFactory.create_batch(3)]
         self.login(AdminFactory())
-        
-        response = self.patch(url_for("api.site"), {
-            "datasets_page": ids[0],
-            "reuses_page": ids[1],
-            "dataservices_page": ids[2],
-        })
+
+        response = self.patch(
+            url_for("api.site"),
+            {
+                "datasets_page": ids[0],
+                "reuses_page": ids[1],
+                "dataservices_page": ids[2],
+            },
+        )
 
         self.assert200(response)
-        self.assertEqual(response.json['title'], site.title)
+        self.assertEqual(response.json["title"], site.title)
 
         site = Site.objects.get(id=self.app.config["SITE_ID"])
 

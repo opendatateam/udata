@@ -1,4 +1,3 @@
-
 from udata.factories import ModelFactory
 
 from .models import Page
