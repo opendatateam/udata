@@ -9,6 +9,7 @@ from flask_login import current_user
 
 from udata.api import API, api, fields
 from udata.api_fields import patch
+from udata.auth import admin_permission
 from udata.core.dataservices.constants import DATASERVICE_ACCESS_TYPE_RESTRICTED
 from udata.core.dataset.models import Dataset
 from udata.core.followers.api import FollowAPI
@@ -136,6 +137,28 @@ class DataserviceAPI(API):
         dataservice.save()
 
         return "", 204
+
+
+@ns.route("/<dataservice:dataservice>/featured/", endpoint="dataservice_featured")
+@api.doc(**common_doc)
+class ReuseFeaturedAPI(API):
+    @api.doc("feature_dataservice")
+    @api.secure(admin_permission)
+    @api.marshal_with(Dataservice.__read_fields__)
+    def post(self, dataservice):
+        """Mark a dataservice as featured"""
+        dataservice.featured = True
+        dataservice.save()
+        return dataservice
+
+    @api.doc("unfeature_dataservice")
+    @api.secure(admin_permission)
+    @api.marshal_with(Dataservice.__read_fields__)
+    def delete(self, dataservice):
+        """Unmark a dataservice as featured"""
+        dataservice.featured = False
+        dataservice.save()
+        return dataservice
 
 
 dataservice_add_datasets_fields = api.model(
