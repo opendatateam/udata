@@ -6,7 +6,6 @@ from mongoengine import Q
 from mongoengine.signals import post_save
 
 import udata.core.contact_point.api_fields as contact_api_fields
-from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.api import api, fields
 from udata.api_fields import field, function_field, generate_fields
 from udata.core.activity.models import Auditable
@@ -16,6 +15,7 @@ from udata.core.dataservices.constants import (
     DATASERVICE_ACCESS_TYPES,
     DATASERVICE_FORMATS,
 )
+from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.dataset.models import Dataset
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics

@@ -1,4 +1,3 @@
-import factory
 
 from udata.factories import ModelFactory
 
