@@ -29,7 +29,7 @@ class BlocWithTitleMixin:
     subtitle = field(db.StringField())
 
 
-@generate_fields(mask="*,datasets{id,title,uri,page}")
+@generate_fields(mask="*,datasets{id,title,uri,page,private,archived,organization,owner,last_update,quality,metrics,description}")
 class DatasetsListBloc(BlocWithTitleMixin, Bloc):
     datasets = field(
         db.ListField(
