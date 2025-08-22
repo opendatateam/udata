@@ -1,8 +1,8 @@
-import udata.core.dataset.api_fields as datasets_api_fields
 from udata.api import api, fields
 from udata.api_fields import field, function_field, generate_fields
 from udata.core.activity.models import Auditable
 from udata.core.dataservices.models import Dataservice
+from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.owned import Owned
 from udata.core.reuse.models import Reuse
 from udata.models import db
@@ -35,7 +35,7 @@ class DatasetsListBloc(BlocWithTitleMixin, Bloc):
         db.ListField(
             field(
                 db.ReferenceField("Dataset"),
-                nested_fields=datasets_api_fields.dataset_fields,
+                nested_fields=dataset_ref_fields,
             )
         )
     )
@@ -47,7 +47,7 @@ class ReusesListBloc(BlocWithTitleMixin, Bloc):
         db.ListField(
             field(
                 db.ReferenceField("Reuse"),
-                nested_fields=Reuse.__read_fields__,
+                nested_fields=Reuse.__ref_fields__,
             )
         )
     )
@@ -59,7 +59,7 @@ class DataservicesListBloc(BlocWithTitleMixin, Bloc):
         db.ListField(
             field(
                 db.ReferenceField("Dataservice"),
-                nested_fields=Dataservice.__read_fields__,
+                nested_fields=Dataservice.__ref_fields__,
             )
         )
     )

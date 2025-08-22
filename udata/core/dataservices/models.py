@@ -6,7 +6,7 @@ from mongoengine import Q
 from mongoengine.signals import post_save
 
 import udata.core.contact_point.api_fields as contact_api_fields
-import udata.core.dataset.api_fields as datasets_api_fields
+from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.api import api, fields
 from udata.api_fields import field, function_field, generate_fields
 from udata.core.activity.models import Auditable
@@ -257,7 +257,7 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
         db.ListField(
             field(
                 db.LazyReferenceField(Dataset, passthrough=True),
-                nested_fields=datasets_api_fields.dataset_ref_fields,
+                nested_fields=dataset_ref_fields,
             )
         ),
         filterable={
