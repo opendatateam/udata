@@ -100,7 +100,18 @@ class Defaults(object):
     SECURITY_CHANGE_URL = "/change/"
     SECURITY_RESET_URL = "/reset/"
     SECURITY_CHANGE_EMAIL_URL = "/change-email/"
+
+    # See https://flask-security.readthedocs.io/en/stable/configuration.html#SECURITY_REDIRECT_BEHAVIOR
+    # We do not define all the URLs requested in the documentation because we have the same routes in `cdata`.
+    # The
     SECURITY_REDIRECT_BEHAVIOR = "spa"
+    SECURITY_LOGIN_ERROR_VIEW = ""
+    SECURITY_CONFIRM_ERROR_VIEW = ""
+    SECURITY_POST_CHANGE_EMAIL_VIEW = ""
+    SECURITY_CHANGE_EMAIL_ERROR_VIEW = ""
+    SECURITY_POST_CONFIRM_VIEW = ""
+    SECURITY_RESET_ERROR_VIEW = ""
+    SECURITY_RESET_VIEW = ""
 
     SECURITY_SPA_ON_SAME_DOMAIN = False
 
@@ -120,12 +131,10 @@ class Defaults(object):
 
     SECURITY_RETURN_GENERIC_RESPONSES = False
 
-    # SECURITY_CSRF_PROTECT_MECHANISMS = ["session", "basic"]
+    # Allow to avoid having to get CSRF tokens to POST on /login and /register.
+    # We could fetch a CSRF token via a GET request before POSTing like we do
+    # for /change (change email). It may be cleaner?
     SECURITY_CSRF_IGNORE_UNAUTH_ENDPOINTS = True
-
-    # SECURITY_CSRF_COOKIE_NAME = "XSRF-TOKEN"
-    WTF_CSRF_CHECK_DEFAULT = False
-    WTF_CSRF_TIME_LIMIT = None
 
     # Inactive users settings
     YEARS_OF_INACTIVITY_BEFORE_DELETION = None

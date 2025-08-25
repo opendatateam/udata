@@ -212,7 +212,7 @@ def register_extensions(app):
         sentry,
         tasks,
     )
-    from udata.core import proconnect
+    from udata.auth import proconnect
 
     cors.init_app(app)
     tasks.init_app(app)
