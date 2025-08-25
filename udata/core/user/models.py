@@ -258,7 +258,7 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
 
         copied_user = copy(self)
         self.email = "{}@deleted".format(self.id)
-        self.slug = "deleted"
+        self.slug = "deleted-{}".format(self.id)
         self.password = None
         self.active = False
         self.first_name = "DELETED"

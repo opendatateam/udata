@@ -162,6 +162,11 @@ faker==37.0.2
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   factory-boy
+feedgenerator==2.1.0
+    # via
+    #   -c requirements/install.pip
+    #   -c requirements/test.pip
+    #   -r requirements/install.in
 filelock==3.18.0
     # via
     #   -c requirements/install.pip
@@ -274,6 +279,11 @@ geomet==1.1.0
 ghp-import==2.1.0
     # via mkdocs
 html2text==2024.2.26
+    # via
+    #   -c requirements/install.pip
+    #   -c requirements/test.pip
+    #   -r requirements/install.in
+humanfriendly==10.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -442,6 +452,7 @@ pytz==2025.1
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
+    #   feedgenerator
     #   flask-babel
     #   flask-restx
 pyyaml==6.0.2

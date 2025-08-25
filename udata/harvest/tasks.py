@@ -14,7 +14,7 @@ def harvest(self, ident):
 
     source = HarvestSource.get(ident)
     if source.deleted or not source.active:
-        log.info('Ignoring inactive or deleted source "%s"', ident)
+        log.info('Ignoring inactive or deleted source "%s"', source.id)
         return  # Ignore deleted and inactive sources
     Backend = backends.get(current_app, source.backend)
     backend = Backend(source)

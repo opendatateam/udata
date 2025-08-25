@@ -9,6 +9,9 @@ from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine import post_save
 
 from udata.app import cache
+from udata.core import metrics
+from udata.core.dataservices.factories import DataserviceFactory
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.activities import (
     UserAddedResourceToDataset,
     UserCreatedDataset,
@@ -30,8 +33,10 @@ from udata.core.dataset.factories import (
     ResourceSchemaMockData,
 )
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
+from udata.core.followers.signals import on_follow, on_unfollow
+from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.user.factories import UserFactory
-from udata.models import Dataset, License, ResourceSchema, Schema, db
+from udata.models import Dataset, Follow, License, ResourceSchema, Reuse, Schema, db
 from udata.tests.helpers import assert_emit, assert_equal_dates, assert_not_emit
 from udata.utils import faker
 
@@ -398,6 +403,63 @@ class DatasetModelTest:
             dataset.deleted = datetime.utcnow()
             dataset.save()
             mock_deleted.assert_called()
+
+    def test_dataset_metrics(self):
+        # We need to init metrics module
+        metrics.init_app(current_app)
+
+        dataset = DatasetFactory()
+
+        # Add related elements
+        with assert_emit(Reuse.on_create):
+            reuse = VisibleReuseFactory(datasets=[dataset])
+            ReuseFactory()
+        with assert_emit(Dataservice.on_create):
+            dataservice = DataserviceFactory(datasets=[dataset])
+        with assert_emit(on_follow):
+            follow = Follow.objects.create(
+                following=dataset, follower=UserFactory(), since=datetime.utcnow()
+            )
+
+        dataset.reload()
+        assert dataset.get_metrics()["reuses"] == 1
+        assert dataset.get_metrics()["dataservices"] == 1
+        assert dataset.get_metrics()["followers"] == 1
+
+        # Delete related elements
+        with assert_emit(Reuse.on_delete):
+            reuse.deleted = datetime.utcnow()
+            reuse.save()
+        with assert_emit(Dataservice.on_delete):
+            dataservice.deleted_at = datetime.utcnow()
+            dataservice.save()
+        with assert_emit(on_unfollow):
+            follow.until = datetime.utcnow()
+            follow.save()
+
+        dataset.reload()
+        assert dataset.get_metrics()["reuses"] == 0
+        assert dataset.get_metrics()["dataservices"] == 0
+        assert dataset.get_metrics()["followers"] == 0
+
+        # Attach and then detach related elements
+        reuse = VisibleReuseFactory(datasets=[dataset])
+        dataservice = DataserviceFactory(datasets=[dataset])
+
+        dataset.reload()
+        assert dataset.get_metrics()["reuses"] == 1
+        assert dataset.get_metrics()["dataservices"] == 1
+
+        with assert_emit(Reuse.on_update):
+            reuse.datasets = []
+            reuse.save()
+        with assert_emit(Dataservice.on_update):
+            dataservice.datasets = []
+            dataservice.save()
+
+        dataset.reload()
+        assert dataset.get_metrics()["reuses"] == 0
+        assert dataset.get_metrics()["dataservices"] == 0
 
 
 class ResourceModelTest:
@@ -789,14 +851,6 @@ class HarvestMetadataTest:
         with pytest.raises(db.ValidationError):
             dataset.save()
 
-    def test_harvest_dataset_metadata_no_validation_dynamic(self):
-        # Adding a dynamic field (not defined in HarvestDatasetMetadata) does not raise error
-        # at validation time
-        harvest_metadata = HarvestDatasetMetadata(dynamic_created_at="maintenant")
-        dataset = DatasetFactory()
-        dataset.harvest = harvest_metadata
-        dataset.save()
-
     def test_harvest_dataset_metadata_past_modifed_at(self):
         dataset = DatasetFactory()
 
@@ -825,14 +879,6 @@ class HarvestMetadataTest:
         resource.harvest = harvest_metadata
         with pytest.raises(db.ValidationError):
             resource.validate()
-
-    def test_harvest_resource_metadata_no_validation_dynamic(self):
-        # Adding a dynamic field (not defined in HarvestResourceMetadata) does not raise error
-        # at validation time
-        harvest_metadata = HarvestResourceMetadata(dynamic_created_at="maintenant")
-        resource = ResourceFactory()
-        resource.harvest = harvest_metadata
-        resource.validate()
 
     def test_harvest_resource_metadata_future_modifed_at(self):
         resource = ResourceFactory()

@@ -1,8 +1,9 @@
 from datetime import datetime
 
 import pytest
+from flask import current_app
 
-from udata.core.dataset import tasks as dataset_tasks
+from udata.core import metrics
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
@@ -69,6 +70,9 @@ class ReuseModelTest(TestCase, DBTestMixin):
             reuse.save()
 
     def test_reuse_metrics(self):
+        # We need to init metrics module
+        metrics.init_app(current_app)
+
         dataset = DatasetFactory()
         reuse = VisibleReuseFactory()
         DiscussionFactory(subject=reuse)
@@ -83,17 +87,15 @@ class ReuseModelTest(TestCase, DBTestMixin):
             reuse.datasets.append(dataset)
             reuse.save()
 
-        reuse.count_datasets()
         assert reuse.get_metrics()["datasets"] == 2
 
-        dataset.count_reuses()
+        dataset.reload()
         assert dataset.get_metrics()["reuses"] == 1
 
         with assert_emit(Reuse.on_update):
             reuse.datasets.remove(dataset)
             reuse.save()
 
-        dataset_tasks.update_datasets_reuses_metrics()
         dataset.reload()
         assert dataset.get_metrics()["reuses"] == 0
 

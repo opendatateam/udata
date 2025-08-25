@@ -29,6 +29,7 @@ Flask
 geojson
 geomet
 html2text
+humanfriendly
 Jinja2
 kombu[redis]
 langdetect

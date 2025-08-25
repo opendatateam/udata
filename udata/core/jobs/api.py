@@ -101,7 +101,7 @@ class JobsAPI(API):
         return form.save(), 201
 
 
-@ns.route("/jobs/<string:id>", endpoint="job")
+@ns.route("/jobs/<string:id>/", endpoint="job")
 @api.param("id", "A job ID")
 class JobAPI(API):
     def get_or_404(self, id):
@@ -139,7 +139,7 @@ class JobAPI(API):
         return "", 204
 
 
-@ns.route("/tasks/<string:id>", endpoint="task")
+@ns.route("/tasks/<string:id>/", endpoint="task")
 class TaskAPI(API):
     @api.marshal_with(task_fields)
     def get(self, id):
@@ -159,7 +159,7 @@ class TaskAPI(API):
         return data
 
 
-@ns.route("/jobs/schedulables", endpoint="schedulable_jobs")
+@ns.route("/jobs/schedulables/", endpoint="schedulable_jobs")
 class JobsReferenceAPI(API):
     @api.doc(model=[str])
     def get(self):

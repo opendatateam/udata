@@ -37,6 +37,22 @@ def multi_to_dict(multi):
     )
 
 
+def get_field_value_from_path(document, field_path: str):
+    # The field_path is a pattern of dot-separated nested field as returned
+    # by mongoengine.base.document._get_changed_fields
+    # Inspired from mongoengine.base.document._clear_changed_fields iteration
+    doc_field = document
+    for part in field_path.split("."):
+        if isinstance(doc_field, list) and part.isdigit():
+            doc_field = doc_field[int(part)]
+        elif isinstance(doc_field, dict):
+            doc_field = doc_field.get(part, None)
+        else:
+            field_name = doc_field._reverse_db_field_map.get(part, part)
+            doc_field = getattr(doc_field, field_name, None)
+    return doc_field
+
+
 FIRST_CAP_RE = re.compile("(.)([A-Z][a-z]+)")
 ALL_CAP_RE = re.compile("([a-z0-9])([A-Z])")
 UUID_LENGTH = 36

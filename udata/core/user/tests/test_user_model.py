@@ -42,7 +42,7 @@ class UserModelTest:
         assert Follow.objects(id=user_follow_org.id).first() is None
         assert Follow.objects(id=user_followed.id).first() is None
 
-        assert user.slug == "deleted"
+        assert user.slug == f"deleted-{user.id}"
 
     def test_mark_as_deleted_with_comments_deletion(self):
         user = UserFactory()
@@ -75,8 +75,8 @@ class UserModelTest:
         user.mark_as_deleted()
         other_user.mark_as_deleted()
 
-        assert user.slug == "deleted"
-        assert other_user.slug == "deleted-1"
+        assert user.slug == f"deleted-{user.id}"
+        assert other_user.slug == f"deleted-{other_user.id}"
 
     def test_delete_safeguard(self):
         user = UserFactory()

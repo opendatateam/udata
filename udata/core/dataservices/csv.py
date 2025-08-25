@@ -25,6 +25,7 @@ class DataserviceCsvAdapter(csv.Adapter):
         ("organization_id", "organization.id"),
         ("owner", "owner.slug"),  # in case it's owned by a user
         ("owner_id", "owner.id"),
+        ("featured", lambda d: d.featured or False),
         "created_at",
         "metadata_modified_at",
         ("archived", lambda d: d.archived_at or False),

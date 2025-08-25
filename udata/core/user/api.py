@@ -194,7 +194,7 @@ class MyOrgDiscussionsAPI(API):
         return list(discussions)
 
 
-@me.route("/apikey", endpoint="my_apikey")
+@me.route("/apikey/", endpoint="my_apikey")
 class ApiKeyAPI(API):
     @api.secure
     @api.doc("generate_apikey")

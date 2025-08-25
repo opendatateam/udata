@@ -266,6 +266,7 @@ DEFAULT_MASK = ",".join(
         "acronym",
         "slug",
         "description",
+        "description_short",
         "created_at",
         "last_modified",
         "deleted",
@@ -327,6 +328,7 @@ dataset_fields = api.model(
         "description": fields.Markdown(
             description="The dataset description in markdown", required=True
         ),
+        "description_short": fields.String(description="The dataset short description"),
         "created_at": fields.ISODateTime(
             description="This date is computed between harvested creation date if any and site's internal creation date",
             required=True,

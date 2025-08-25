@@ -168,7 +168,7 @@ class PostAPI(API):
         return "", 204
 
 
-@ns.route("/<post:post>/publish", endpoint="publish_post")
+@ns.route("/<post:post>/publish/", endpoint="publish_post")
 class PublishPostAPI(API):
     @api.secure(admin_permission)
     @api.doc("publish_post")

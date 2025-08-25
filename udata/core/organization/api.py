@@ -99,7 +99,7 @@ class OrgApiParser(ModelApiParser):
         if args.get("badge"):
             organizations = organizations.with_badge(args["badge"])
         if args.get("name"):
-            organizations = organizations.filter(name=args["name"])
+            organizations = organizations.filter(name__iexact=args["name"])
         if args.get("business_number_id"):
             organizations = organizations.filter(business_number_id=args["business_number_id"])
         return organizations
@@ -449,7 +449,7 @@ class MembershipRefuseAPI(MembershipAPI):
         return {}, 200
 
 
-@ns.route("/<org:org>/member/<user:user>", endpoint="member", doc=common_doc)
+@ns.route("/<org:org>/member/<user:user>/", endpoint="member", doc=common_doc)
 class MemberAPI(API):
     @api.secure
     @api.expect(member_fields)

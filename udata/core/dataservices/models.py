@@ -224,6 +224,13 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
         auditable=False,
     )
 
+    featured = field(
+        db.BooleanField(),
+        filterable={},
+        readonly=True,
+        auditable=False,
+    )
+
     contact_points = field(
         db.ListField(
             field(
