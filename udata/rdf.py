@@ -241,7 +241,7 @@ def rdf_unique_values(resource, predicate, parse_label=False) -> set[str]:
 def rdf_value(obj, predicate, default=None, parse_label=False):
     """
     Serialize the value for a predicate on a RdfResource,
-    expecting one value only or one per language for Literals.
+    expecting one value only or (at most) one per language for Literals.
     """
     value = default_lang_value(obj, predicate)
     return serialize_value(value, parse_label=parse_label) if value else default
