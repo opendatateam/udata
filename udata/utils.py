@@ -16,7 +16,7 @@ from faker import Faker
 from faker.config import PROVIDERS
 from faker.providers import BaseProvider
 from faker.providers.lorem.la import Provider as LoremProvider
-from flask import abort
+from flask import abort, request
 
 from udata import tags
 
@@ -349,3 +349,10 @@ def id_or_404(object_id):
         return object_id
     except InvalidId:
         abort(404)
+
+
+def wants_json() -> bool:
+    if request.is_json:
+        return True
+
+    return request.accept_mimetypes.best == "application/json"

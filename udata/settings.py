@@ -101,6 +101,20 @@ class Defaults(object):
     SECURITY_RESET_URL = "/reset/"
     SECURITY_CHANGE_EMAIL_URL = "/change-email/"
 
+    # See https://flask-security.readthedocs.io/en/stable/configuration.html#SECURITY_REDIRECT_BEHAVIOR
+    # We do not define all the URLs requested in the documentation because we have the same routes in `cdata`.
+    # The
+    SECURITY_REDIRECT_BEHAVIOR = "spa"
+    SECURITY_LOGIN_ERROR_VIEW = ""
+    SECURITY_CONFIRM_ERROR_VIEW = ""
+    SECURITY_POST_CHANGE_EMAIL_VIEW = ""
+    SECURITY_CHANGE_EMAIL_ERROR_VIEW = ""
+    SECURITY_POST_CONFIRM_VIEW = ""
+    SECURITY_RESET_ERROR_VIEW = ""
+    SECURITY_RESET_VIEW = ""
+
+    SECURITY_SPA_ON_SAME_DOMAIN = False
+
     SECURITY_PASSWORD_SALT = "Default uData secret password salt"
     SECURITY_CONFIRM_SALT = "Default uData secret confirm salt"
     SECURITY_RESET_SALT = "Default uData secret reset salt"
@@ -117,10 +131,24 @@ class Defaults(object):
 
     SECURITY_RETURN_GENERIC_RESPONSES = False
 
+    # Allow to avoid having to get CSRF tokens to POST on /login and /register.
+    # We could fetch a CSRF token via a GET request before POSTing like we do
+    # for /change (change email). It may be cleaner?
+    SECURITY_CSRF_IGNORE_UNAUTH_ENDPOINTS = True
+
     # Inactive users settings
     YEARS_OF_INACTIVITY_BEFORE_DELETION = None
     DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY = 30
     MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS = 200
+
+    # You can activate CaptchEtat, a captcha.com integration by providing
+    # CAPTCHETAT_BASE_URL, CAPTCHETAT_OAUTH_BASE_URL, CAPTCHETAT_CLIENT_ID and CAPTCHETAT_CLIENT_SECRET
+    CAPTCHETAT_BASE_URL = None
+    CAPTCHETAT_OAUTH_BASE_URL = None
+    CAPTCHETAT_CLIENT_ID = None
+    CAPTCHETAT_CLIENT_SECRET = None
+    CAPTCHETAT_TOKEN_CACHE_KEY = "captchetat-bearer-token"
+    CAPTCHETAT_STYLE_NAME = "captchaFR"
 
     # Sentry configuration
     SENTRY_DSN = None
