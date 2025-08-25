@@ -43,6 +43,8 @@ import flask_restx.fields as restx_fields
 import mongoengine
 import mongoengine.fields as mongo_fields
 from bson import DBRef, ObjectId
+from flask import Request
+from flask_restx import marshal
 from flask_restx.inputs import boolean
 from flask_restx.reqparse import RequestParser
 from flask_storage.mongo import ImageField as FlaskStorageImageField
@@ -59,6 +61,24 @@ lazy_reference = api.model(
         "id": restx_fields.Raw(attribute=lambda ref: ref.pk),
     },
 )
+
+DEFAULT_GENERIC_KEY = "class"
+
+classes_by_names = {}
+classes_by_parents = {}
+
+
+class GenericField(restx_fields.Raw):
+    def __init__(self, fields_by_type):
+        super().__init__(self)
+        self.default = None
+        self.fields_by_type = fields_by_type
+
+    def format(self, value):
+        # Value is one of the generic object
+        data = marshal(value, self.fields_by_type[value.__class__.__name__])
+        data[DEFAULT_GENERIC_KEY] = value.__class__.__name__
+        return data
 
 
 def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | None]:
@@ -96,12 +116,19 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         params["enum"] = field.choices
         if field.validation:
             params["validation"] = validation_to_type(field.validation)
+    elif isinstance(field, mongo_fields.UUIDField):
+        # TODO add validation?
+        constructor = restx_fields.String
     elif isinstance(field, mongo_fields.ObjectIdField):
         constructor = restx_fields.String
     elif isinstance(field, mongo_fields.FloatField):
         constructor = restx_fields.Float
         params["min"] = field.min  # TODO min_value?
         params["max"] = field.max
+    elif isinstance(field, mongo_fields.IntField):
+        constructor = restx_fields.Integer
+        params["min"] = field.min_value
+        params["max"] = field.max_value
     elif isinstance(field, mongo_fields.BooleanField):
         constructor = restx_fields.Boolean
     elif isinstance(field, mongo_fields.DateTimeField):
@@ -125,6 +152,7 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         # For lists, we can expose them only by showing a link to the API
         # with the results of the list to avoid listing a lot of sub-ressources
         # (for example for a dataservices with thousands of datasets).
+
         href = info.get("href", None)
         if href:
 
@@ -147,9 +175,36 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         #     2. `__additional_field_info__` of the inner field
         #     3. `__additional_field_info__` of the parent
         inner_info: dict = getattr(field.field, "__additional_field_info__", {})
-        field_read, field_write = convert_db_to_field(
-            f"{key}.inner", field.field, {**info, **inner_info, **info.get("inner_field_info", {})}
+        nested_info = {**info, **inner_info, **info.get("inner_field_info", {})}
+
+        generic = info.get("generic", False)
+
+        allowed_classes = (
+            classes_by_parents[field.field.document_type_obj]
+            if isinstance(field.field, mongoengine.fields.EmbeddedDocumentField)
+            and field.field.document_type_obj in classes_by_parents
+            else set()
         )
+        if generic and allowed_classes:
+            generic_fields = {
+                cls.__name__: convert_db_to_field(
+                    f"{key}.{cls.__name__}",
+                    # Instead of having EmbeddedDocumentField(Bloc) we'll create fields for each
+                    # of the subclasses with EmbededdDocumentField(DatasetsListBloc), EmbeddedDocumentFied(DataservicesListBloc)…
+                    mongoengine.fields.EmbeddedDocumentField(cls),
+                    nested_info,
+                )
+                for cls in allowed_classes
+            }
+
+            field_read = GenericField({k: v[0].model for k, v in generic_fields.items()})
+            field_write = GenericField({k: v[1].model for k, v in generic_fields.items()})
+        else:
+            field_read, field_write = convert_db_to_field(
+                f"{key}.inner",
+                field.field,
+                nested_info,
+            )
 
         if constructor_read is None:
             # We don't want to set the `constructor_read` if it's already set
@@ -243,6 +298,19 @@ def get_fields(cls) -> Iterable[tuple[str, Callable, dict]]:
             )
 
 
+def save_class_by_parents(cls):
+    from udata.mongo.engine import db
+
+    for parent in cls.__bases__:
+        if parent == db.Document:
+            return
+
+        classes_by_parents[parent] = (
+            classes_by_parents[parent] if parent in classes_by_parents else set()
+        )
+        classes_by_parents[parent].add(cls)
+
+
 def generate_fields(**kwargs) -> Callable:
     """Mongoengine document decorator.
 
@@ -270,6 +338,9 @@ def generate_fields(**kwargs) -> Callable:
         )
 
         read_fields["id"] = restx_fields.String(required=True, readonly=True)
+
+        classes_by_names[cls.__name__] = cls
+        save_class_by_parents(cls)
 
         for key, field, info in get_fields(cls):
             sortable_key: bool = info.get("sortable", False)
@@ -513,10 +584,13 @@ def patch(obj, request) -> type:
     """
     from udata.mongo.engine import db
 
-    for key, value in request.json.items():
+    data = request.json if isinstance(request, Request) else request
+    for key, value in data.items():
         field = obj.__write_fields__.get(key)
         if field is not None and not field.readonly:
             model_attribute = getattr(obj.__class__, key)
+            info = getattr(model_attribute, "__additional_field_info__", {})
+
             if hasattr(model_attribute, "from_input"):
                 value = model_attribute.from_input(value)
             elif isinstance(model_attribute, mongoengine.fields.ListField) and isinstance(
@@ -546,18 +620,27 @@ def patch(obj, request) -> type:
                 model_attribute,
                 mongoengine.fields.EmbeddedDocumentField,
             ):
-                embedded_field = model_attribute.document_type()
-                value = embedded_field._from_son(value)
+                embedded_field = model_attribute.document_type().__class__
+                value = patch(embedded_field(), value)
             elif value and isinstance(
                 model_attribute,
                 mongoengine.fields.EmbeddedDocumentListField,
             ):
-                embedded_field = model_attribute.field.document_type()
-                # MongoEngine BaseDocument has a `from_json` method for string and a private `_from_son`
-                # but there is no public `from_son` to use
-                value = [embedded_field._from_son(embedded_value) for embedded_value in value]
+                base_embedded_field = model_attribute.field.document_type().__class__
+                generic = info.get("generic", False)
+                generic_key = info.get("generic_key", DEFAULT_GENERIC_KEY)
 
-            info = getattr(model_attribute, "__additional_field_info__", {})
+                objects = []
+                for embedded_value in value:
+                    # TODO add validation on generic_key presence and value
+                    embedded_field = (
+                        classes_by_names[embedded_value[generic_key]]
+                        if generic
+                        else base_embedded_field
+                    )
+                    objects.append(patch(embedded_field(), embedded_value))
+
+                value = objects
 
             # `checks` field attribute allows to do validation from the request before setting
             # the attribute
