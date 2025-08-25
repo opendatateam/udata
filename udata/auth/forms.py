@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 import requests
 from flask import current_app
@@ -14,6 +15,8 @@ from flask_security.forms import (
 from udata.core.captchetat import bearer_token
 from udata.forms import fields, validators
 from udata.i18n import lazy_gettext as _
+
+log = logging.getLogger(__name__)
 
 
 class WithCaptcha:
@@ -132,6 +135,6 @@ def check_captchetat(id: str, code: str) -> bool:
             },
         )
         return resp.text == "true"
-    except requests.exceptions.RequestException:
-        # Should not happen, log?
-        return False
+    except requests.exceptions.RequestException as err:
+        log.error(f"Failed to query CaptchEtat: {err}")
+        return True
