@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Convert security views to cdata [#3348](https://github.com/opendatateam/udata/pull/3348/)
+  - Add `SECURITY_SPA_ON_SAME_DOMAIN` to `True` if your frontend is on the same domain as the backend.
 - Prevent numerous user deleted slug duplicates [#3403](https://github.com/opendatateam/udata/pull/3403)
 - Dataservice feature [#3405](https://github.com/opendatateam/udata/pull/3405)
 

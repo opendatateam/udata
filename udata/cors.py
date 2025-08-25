@@ -1,6 +1,6 @@
 import logging
 
-from flask import g, request
+from flask import current_app, g, request
 from werkzeug.datastructures import Headers
 
 log = logging.getLogger(__name__)
@@ -36,11 +36,11 @@ def is_allowed_cors_route():
         path: str = request.path.removeprefix(f"/{g.lang_code}")
     else:
         path: str = request.path
-    return (
-        path.endswith((".js", ".css", ".woff", ".woff2", ".png", ".jpg", ".jpeg", ".svg"))
-        or path.startswith("/api")
-        or path.startswith("/oauth")
-        or path.startswith("/login")
+
+    # Allow to keep clean CORS when `udata` and the frontend are on the same domain
+    # (as it's the case in data.gouv with cdata/udata).
+    if not current_app.config["SECURITY_SPA_ON_SAME_DOMAIN"] and (
+        path.startswith("/login")
         or path.startswith("/logout")
         or path.startswith("/reset")
         or path.startswith("/register")
@@ -48,6 +48,12 @@ def is_allowed_cors_route():
         or path.startswith("/change")
         or path.startswith("/change-email")
         or path.startswith("/oauth")
+    ):
+        return True
+
+    return (
+        path.endswith((".js", ".css", ".woff", ".woff2", ".png", ".jpg", ".jpeg", ".svg"))
+        or path.startswith("/api")
         or path.startswith("/datasets/r/")
     )
 

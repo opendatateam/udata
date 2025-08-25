@@ -102,6 +102,8 @@ class Defaults(object):
     SECURITY_CHANGE_EMAIL_URL = "/change-email/"
     SECURITY_REDIRECT_BEHAVIOR = "spa"
 
+    SECURITY_SPA_ON_SAME_DOMAIN = False
+
     SECURITY_PASSWORD_SALT = "Default uData secret password salt"
     SECURITY_CONFIRM_SALT = "Default uData secret confirm salt"
     SECURITY_RESET_SALT = "Default uData secret reset salt"
