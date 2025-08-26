@@ -5,6 +5,7 @@
 - Prevent numerous user deleted slug duplicates [#3403](https://github.com/opendatateam/udata/pull/3403)
 - Dataservice feature [#3405](https://github.com/opendatateam/udata/pull/3405)
 - Prefer default lang for literal values with different languages [#3406](https://github.com/opendatateam/udata/pull/3406)
+- Serialize resources ids and titles for indexation [#3408](https://github.com/opendatateam/udata/pull/3408)
 
 ## 10.8.3 (2025-08-20)
 
