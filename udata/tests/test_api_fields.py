@@ -227,39 +227,37 @@ class IndexParserTest:
 
 
 class PatchTest:
-    class FakeRequest:
-        json = {"url": URL_RAISE_ERROR, "description": None}
+    fake_json = {"url": URL_RAISE_ERROR, "description": None}
 
     def test_patch_check(self) -> None:
         fake: Fake = FakeFactory.create()
         with pytest.raises(ValueError, match=URL_EXISTS_ERROR_MESSAGE):
-            patch(fake, self.FakeRequest())
+            patch(fake, self.fake_json)
 
     def test_patch_and_save(self) -> None:
         fake: Fake = FakeFactory.create()
-        fake_request = self.FakeRequest()
-        fake_request.json["url"] = "ok url"
+        fake_request = self.fake_json
+        fake_request["url"] = "ok url"
         with pytest.raises(mongoengine.errors.ValidationError):
             patch_and_save(fake, fake_request)
 
 
 class PatchEmbeddedTest:
-    class FakeRequest:
-        json = {
-            "url": URL_RAISE_ERROR,
-            "description": "desc",
-            "embedded": {"title": "embedded title", "description": "d2"},
-        }
+    fake_json = {
+        "url": URL_RAISE_ERROR,
+        "description": "desc",
+        "embedded": {"title": "embedded title", "description": "d2"},
+    }
 
     def test_patch_check(self) -> None:
         fake: Fake = FakeFactory.create()
         with pytest.raises(ValueError, match=URL_EXISTS_ERROR_MESSAGE):
-            patch(fake, self.FakeRequest())
+            patch(fake, self.fake_json)
 
     def test_patch_and_save(self) -> None:
         fake: Fake = FakeFactory.create()
-        fake_request = self.FakeRequest()
-        fake_request.json["url"] = "ok url"
+        fake_request = self.fake_json
+        fake_request["url"] = "ok url"
         patch_and_save(fake, fake_request)
 
 
