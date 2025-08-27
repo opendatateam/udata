@@ -2,7 +2,10 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Prevent numerous user deleted slug duplicates [#3403](https://github.com/opendatateam/udata/pull/3403)
+- Dataservice feature [#3405](https://github.com/opendatateam/udata/pull/3405)
+- Prefer default lang for literal values with different languages [#3406](https://github.com/opendatateam/udata/pull/3406)
+- Better organization discussion csv export perfs [#3407](https://github.com/opendatateam/udata/pull/3407)
 
 ## 10.8.3 (2025-08-20)
 
