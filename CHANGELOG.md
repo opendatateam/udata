@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Add editos pages [#3387](https://github.com/opendatateam/udata/pull/3387)
 - Prevent numerous user deleted slug duplicates [#3403](https://github.com/opendatateam/udata/pull/3403)
 - Dataservice feature [#3405](https://github.com/opendatateam/udata/pull/3405)
 - Prefer default lang for literal values with different languages [#3406](https://github.com/opendatateam/udata/pull/3406)
