@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 10.9.0 (2025-08-28)
 
 - Add editos pages [#3387](https://github.com/opendatateam/udata/pull/3387)
 - Prevent numerous user deleted slug duplicates [#3403](https://github.com/opendatateam/udata/pull/3403)
