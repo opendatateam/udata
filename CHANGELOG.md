@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 10.9.0 (2025-08-28)
 
 - Add editos pages [#3387](https://github.com/opendatateam/udata/pull/3387)
