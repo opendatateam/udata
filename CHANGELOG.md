@@ -2,6 +2,31 @@
 
 ## Current (in progress)
 
+- Add snapshot tests for harvesting [#3394](https://github.com/opendatateam/udata/pull/3394)
+
+## 10.9.0 (2025-08-28)
+
+- Add editos pages [#3387](https://github.com/opendatateam/udata/pull/3387)
+- Prevent numerous user deleted slug duplicates [#3403](https://github.com/opendatateam/udata/pull/3403)
+- Dataservice feature [#3405](https://github.com/opendatateam/udata/pull/3405)
+- Prefer default lang for literal values with different languages [#3406](https://github.com/opendatateam/udata/pull/3406)
+- Better organization discussion csv export perfs [#3407](https://github.com/opendatateam/udata/pull/3407)
+- Serialize resources ids and titles for indexation [#3408](https://github.com/opendatateam/udata/pull/3408)
+
+## 10.8.3 (2025-08-20)
+
+- Count dataservices and reuses for datasets based on signal [#3335](https://github.com/opendatateam/udata/pull/3335)
+  :warning: the job `update-datasets-reuses-metrics` disappears, you should unschedule it before installing this version
+- Consolidate CSW harvesting logic [#3378](https://github.com/opendatateam/udata/pull/3378)
+  :warning: Config setting `HARVEST_ISO19139_XSL_URL` is renamed to `HARVEST_ISO19139_XSLT_URL`.
+- Compute organization aggregate metrics only once at the end of harvest [#3391](https://github.com/opendatateam/udata/pull/3391)
+- Cache dcat harvest pages to avoid two rounds of requests [#3398](https://github.com/opendatateam/udata/pull/3398)
+- Ignore Dataset.accessService when processing DataService [#3399](https://github.com/opendatateam/udata/pull/3399)
+- Add dataset field `description_short` [#3397](https://github.com/opendatateam/udata/pull/3397)
+- Optimize csv organization export [#3401](https://github.com/opendatateam/udata/pull/3401)
+
+## 10.8.2 (2025-07-31)
+
 - Add integrity checks on non existent list field instead of empty [#3242](https://github.com/opendatateam/udata/pull/3242)
 - Migrate udata-metrics [#3386](https://github.com/opendatateam/udata/pull/3386/)
 - Migrate udata-ckan [#3385](https://github.com/opendatateam/udata/pull/3385)
@@ -9,8 +34,8 @@
 - Deactivate cache to check for existing slugs [#3390](https://github.com/opendatateam/udata/pull/3390)
 - Fix not returning 404 for harvest sources [#3382](https://github.com/opendatateam/udata/pull/3382/)
 - Add missing trailing slashes on some endpoints [#3392](https://github.com/opendatateam/udata/pull/3392/)
-- Add snapshot tests for harvesting [#3394](https://github.com/opendatateam/udata/pull/3394)
-- Make organization name filter case insensitive [#3392](https://github.com/opendatateam/udata/pull/3395)
+- Make organization name filter case insensitive [#3395](https://github.com/opendatateam/udata/pull/3395)
+- Harvest metadata documents are no longer dynamic [#3396](https://github.com/opendatateam/udata/pull/3396)
 
 ## 10.8.1 (2025-07-25)
 
