@@ -124,7 +124,7 @@ class TopicElementsAPI(API):
         errors = []
         elements = []
         for element_data in data:
-            form = TopicElementForm.from_json(element_data)
+            form = TopicElementForm.from_json(element_data, meta={"csrf": False})
             if not form.validate():
                 errors.append(form.errors)
             else:
