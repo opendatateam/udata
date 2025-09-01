@@ -19,6 +19,11 @@ from udata.utils import to_iso_datetime
 __all__ = ("DatasetSearch",)
 
 
+# This const is kept to prevent creating huge documents and paylods for datasets
+# with a large number of resources
+MAX_NUMBER_OF_RESOURCES_TO_INDEX = 500
+
+
 @register
 class DatasetSearch(ModelSearchAdapter):
     model = Dataset
@@ -102,6 +107,10 @@ class DatasetSearch(ModelSearchAdapter):
             "reuses": dataset.metrics.get("reuses", 0),
             "featured": 1 if dataset.featured else 0,
             "resources_count": len(dataset.resources),
+            "resources": [
+                {"id": str(res.id), "title": res.title}
+                for res in dataset.resources[:MAX_NUMBER_OF_RESOURCES_TO_INDEX]
+            ],
             "organization": organization,
             "owner": str(owner.id) if owner else None,
             "format": [r.format.lower() for r in dataset.resources if r.format],
