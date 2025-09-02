@@ -135,11 +135,6 @@ class Defaults(object):
 
     SECURITY_RETURN_GENERIC_RESPONSES = False
 
-    # Allow to avoid having to get CSRF tokens to POST on /login and /register.
-    # We could fetch a CSRF token via a GET request before POSTing like we do
-    # for /change (change email). It may be cleaner?
-    SECURITY_CSRF_IGNORE_UNAUTH_ENDPOINTS = True
-
     # Inactive users settings
     YEARS_OF_INACTIVITY_BEFORE_DELETION = None
     DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY = 30
