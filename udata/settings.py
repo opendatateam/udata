@@ -102,16 +102,20 @@ class Defaults(object):
     SECURITY_CHANGE_EMAIL_URL = "/change-email/"
 
     # See https://flask-security.readthedocs.io/en/stable/configuration.html#SECURITY_REDIRECT_BEHAVIOR
-    # We do not define all the URLs requested in the documentation because we have the same routes in `cdata`.
-    # The
+    # We do not define all the URLs requested in the documentation because most of the time we do JSON requests in cdata
+    # and catch errors instead of followings the redirects.
+    # The only place where we don't have control over the redirect is when the user is clicking a link directly to udata
+    # (instead of a link to `cdata`) as in /confirm. When the user is clicking on the confirmation link, he's redirected
+    # to `confirm_change_email` endpoint, and then udata redirect him to the homepage of `cdata` with a custom flash message.
     SECURITY_REDIRECT_BEHAVIOR = "spa"
-    SECURITY_LOGIN_ERROR_VIEW = ""
-    SECURITY_CONFIRM_ERROR_VIEW = ""
-    SECURITY_POST_CHANGE_EMAIL_VIEW = ""
-    SECURITY_CHANGE_EMAIL_ERROR_VIEW = ""
-    SECURITY_POST_CONFIRM_VIEW = ""
-    SECURITY_RESET_ERROR_VIEW = ""
-    SECURITY_RESET_VIEW = ""
+    # SECURITY_POST_OAUTH_LOGIN_VIEW = ""    # SECURITY_OAUTH_ENABLE is disabled
+    # SECURITY_LOGIN_ERROR_VIEW = ""         # We don't follow the redirects since we do JSON POST requests during login
+    # SECURITY_CONFIRM_ERROR_VIEW = ""       # Manually changed in `confirm_change_email`
+    # SECURITY_POST_CHANGE_EMAIL_VIEW = ""   # We don't follow the redirects since we do JSON POST requests during change email
+    # SECURITY_CHANGE_EMAIL_ERROR_VIEW = ""  # We don't follow the redirects since we do JSON POST requests during change email
+    # SECURITY_POST_CONFIRM_VIEW = ""        # Manually changed in `confirm_change_email`
+    # SECURITY_RESET_ERROR_VIEW = ""         # We don't follow the redirects since we do JSON POST requests during request reset
+    # SECURITY_RESET_VIEW = ""               # We don't follow the redirects since we do JSON POST requests during request reset
 
     SECURITY_SPA_ON_SAME_DOMAIN = False
 

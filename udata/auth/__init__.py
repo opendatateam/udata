@@ -48,9 +48,6 @@ def init_app(app):
     from .password_validation import UdataPasswordUtil
     from .views import create_security_blueprint
 
-    if app.config["CDATA_BASE_URL"]:
-        app.config.setdefault("SECURITY_CONFIRM_ERROR_VIEW", app.config["CDATA_BASE_URL"])
-
     security.init_app(
         app,
         datastore,
