@@ -88,7 +88,7 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
         "created_at",
         ("modified", lambda o: o.last_modified),
         ("downloads", lambda o: int(o.metrics.get("views", 0))),
-        ("harvest.created_at", lambda o: o.harvest and o.harvest.created_at),
+        ("harvest.issued_at", lambda o: o.harvest and o.harvest.issued_at),
         ("harvest.modified_at", lambda o: o.harvest and o.harvest.modified_at),
         ("schema_name", "schema.name"),
         ("schema_version", "schema.version"),
