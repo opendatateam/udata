@@ -100,6 +100,16 @@ def confirm_change_email(token):
     return redirect(homepage_url(flash="change_email_confirmed"))
 
 
+def get_csrf():
+    # We need to have a public endpoint for getting a CSRF token.
+    # In Flask, we can query the form with an Accept:application/json,
+    # for example: GET `/login` to get a JSON with the CSRF token.
+    # It's not working in our implementation because GET `/login` is routed to
+    # cdata and not udata. So we need to have an endpoint existing only on udata
+    # so we can fetch a valid CSRF token.
+    return jsonify({"response": {"csrf_token": generate_csrf()}})
+
+
 @login_required
 def change_email():
     """Change email page."""
@@ -196,5 +206,6 @@ def create_security_blueprint(app, state, import_name):
     )(confirm_change_email)
 
     bp.route("/change-email", methods=["GET", "POST"], endpoint="change_email")(change_email)
+    bp.route("/get-csrf", methods=["GET"], endpoint="get_csrf")(get_csrf)
 
     return bp
