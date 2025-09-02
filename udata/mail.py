@@ -49,7 +49,7 @@ def send(subject, recipients, template_base, **kwargs):
 
     debug = current_app.config.get("DEBUG", False)
     send_mail = current_app.config.get("SEND_MAIL", not debug)
-    connection = send_mail and mail.connect or dummyconnection
+    connection = mail.connect if send_mail else dummyconnection
     extras = get_mail_campaign_dict()
 
     with connection() as conn:
