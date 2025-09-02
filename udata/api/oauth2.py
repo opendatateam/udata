@@ -293,13 +293,13 @@ class BearerToken(BearerTokenValidator):
         return token.revoked
 
 
-@blueprint.route("/token", methods=["POST"], localize=False, endpoint="token")
+@blueprint.route("/token", methods=["POST"], endpoint="token")
 @csrf.exempt
 def access_token():
     return oauth.create_token_response()
 
 
-@blueprint.route("/revoke", methods=["POST"], localize=False)
+@blueprint.route("/revoke", methods=["POST"])
 @csrf.exempt
 def revoke_token():
     return oauth.create_endpoint_response(RevokeToken.ENDPOINT_NAME)
