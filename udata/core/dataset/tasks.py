@@ -13,7 +13,7 @@ from udata.core import csv, storages
 from udata.core.dataservices.models import Dataservice
 from udata.harvest.models import HarvestJob
 from udata.i18n import lazy_gettext as _
-from udata.models import Activity, Discussion, Follow, Organization, Topic, Transfer, db
+from udata.models import Activity, Discussion, Follow, Organization, TopicElement, Transfer, db
 from udata.tasks import job
 
 from .constants import UPDATE_FREQUENCIES
@@ -43,10 +43,7 @@ def purge_datasets(self):
         # Remove activity
         Activity.objects(related_to=dataset).delete()
         # Remove topics' related dataset
-        for topic in Topic.objects(datasets=dataset):
-            datasets = topic.datasets
-            datasets.remove(dataset)
-            topic.update(datasets=datasets)
+        TopicElement.objects(element=dataset).update(element=None)
         # Remove dataservices related dataset
         for dataservice in Dataservice.objects(datasets=dataset):
             datasets = dataservice.datasets
