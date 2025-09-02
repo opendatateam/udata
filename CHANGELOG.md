@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Simplify getting mail connection (dummy or real) condition [#3410](https://github.com/opendatateam/udata/pull/3410)
 
 ## 10.9.0 (2025-08-28)
 
