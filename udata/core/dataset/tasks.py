@@ -85,7 +85,15 @@ def send_frequency_reminder(self):
         f
         for f in UPDATE_FREQUENCIES.keys()
         if f
-        not in ("unknown", "other", "never", "not_planned", "as_needed", "irreg", "update_cont")
+        not in (
+            "unknown",
+            "continuous",
+            "punctual",
+            "irregular",
+            "never",
+            "not_planned",
+            "other",
+        )  # FIXME: do we want to ignore very short delays like 1min?
     ]
     now = datetime.utcnow()
     reminded_orgs = {}

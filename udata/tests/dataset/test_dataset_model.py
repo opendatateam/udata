@@ -157,55 +157,51 @@ class DatasetModelTest:
         dataset = DatasetFactory()
         assert dataset.next_update is None
 
-    def test_next_update_hourly(self):
-        dataset = DatasetFactory(frequency="hourly")
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(hours=1))
-
-    @pytest.mark.parametrize("freq", ["daily_2", "daily"])
-    def test_next_update_daily(self, freq):
+    @pytest.mark.parametrize(
+        "freq,delta",
+        [
+            ("1min", timedelta(minutes=1)),
+            ("5min", timedelta(minutes=5)),
+            ("10min", timedelta(minutes=10)),
+            ("15min", timedelta(minutes=15)),
+            ("30min", timedelta(minutes=30)),
+            ("hourly", timedelta(hours=1)),
+            ("bihourly", timedelta(hours=2)),
+            ("trihourly", timedelta(hours=3)),
+            ("12hrs", timedelta(hours=12)),
+            ("cont", timedelta(days=1)),
+            ("daily_3", timedelta(days=1)),
+            ("daily_2", timedelta(days=1)),
+            ("daily", timedelta(days=1)),
+            ("weekly_5", timedelta(weeks=1)),
+            ("weekly_3", timedelta(weeks=1)),
+            ("weekly_2", timedelta(weeks=1)),
+            ("weekly", timedelta(weeks=1)),
+            ("biweekly", timedelta(weeks=2)),
+            ("monthly_3", timedelta(days=31)),
+            ("monthly_2", timedelta(days=31)),
+            ("monthly", timedelta(days=31)),
+            ("bimonthly", timedelta(days=31 * 2)),
+            ("quarterly", timedelta(days=365 / 4)),
+            ("annual_3", timedelta(days=365)),
+            ("annual_2", timedelta(days=365)),
+            ("annual", timedelta(days=365)),
+            ("biennial", timedelta(days=365 * 2)),
+            ("triennial", timedelta(days=365 * 3)),
+            ("quadrennial", timedelta(days=365 * 4)),
+            ("quinquennial", timedelta(days=365 * 5)),
+            ("decennial", timedelta(days=365 * 10)),
+            ("bidecennial", timedelta(days=365 * 20)),
+            ("tridecennial", timedelta(days=365 * 30)),
+        ],
+    )
+    def test_next_update_delta(self, freq, delta):
         dataset = DatasetFactory(frequency=freq)
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=1))
+        assert_equal_dates(dataset.next_update, datetime.utcnow() + delta)
 
-    @pytest.mark.parametrize("freq", ["weekly_5", "weekly_3", "weekly_2", "weekly"])
-    def test_next_update_weekly(self, freq):
-        dataset = DatasetFactory(frequency=freq)
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=7))
-
-    def test_next_update_biweekly(self):
-        dataset = DatasetFactory(frequency="biweekly")
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(weeks=2))
-
-    @pytest.mark.parametrize("freq", ["monthly_3", "monthly_2", "monthly"])
-    def test_next_update_monthly(self, freq):
-        dataset = DatasetFactory(frequency=freq)
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=31))
-
-    def test_next_update_quarterly(self):
-        dataset = DatasetFactory(frequency="quarterly")
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=365 / 4))
-
-    @pytest.mark.parametrize("freq", ["annual_3", "annual_2", "annual"])
-    def test_next_update_annual(self, freq):
-        dataset = DatasetFactory(frequency=freq)
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=365))
-
-    def test_next_update_biennial(self):
-        dataset = DatasetFactory(frequency="biennial")
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=365 * 2))
-
-    def test_next_update_triennial(self):
-        dataset = DatasetFactory(frequency="triennial")
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=365 * 3))
-
-    def test_next_update_quinquennial(self):
-        dataset = DatasetFactory(frequency="quinquennial")
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=365 * 5))
-
-    def test_next_update_decennial(self):
-        dataset = DatasetFactory(frequency="decennial")
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=365 * 10))
-
-    @pytest.mark.parametrize("freq", ["continuous", "punctual", "irregular", "unknown"])
+    @pytest.mark.parametrize(
+        "freq", ["unknown", "continuous", "punctual", "irregular", "never", "not_planned", "other"]
+    )
     def test_next_update_undefined(self, freq):
         dataset = DatasetFactory(frequency=freq)
         assert dataset.next_update is None

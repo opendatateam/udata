@@ -633,7 +633,7 @@ class DcatBackendTest:
         dataset = Dataset.objects.filter(organization=org).first()
 
         assert dataset is not None
-        assert dataset.frequency == "irreg"
+        assert dataset.frequency == "irregular"
         assert "gravi" in dataset.tags  # support dcat:keyword
         assert "geodesy" in dataset.tags  # support dcat:theme
         assert dataset.license.id == "fr-lo"

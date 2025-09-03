@@ -29,6 +29,7 @@ from udata.rdf import (
     DCT,
     EUFORMAT,
     EUFREQ,
+    FREQ,
     GEODCAT,
     HVD_LEGISLATION,
     IANAFORMAT,
@@ -50,27 +51,81 @@ from udata.rdf import (
 )
 from udata.utils import get_by, safe_unicode, to_naive_datetime
 
-from .constants import OGC_SERVICE_FORMATS, UPDATE_FREQUENCIES
+from .constants import OGC_SERVICE_FORMATS
 from .models import Checksum, Dataset, License, Resource
 
 log = logging.getLogger(__name__)
 
-# Map extra frequencies (ie. not defined in EU vocabulary) to closest equivalent
-# FIXME: Redundant with LEGACY_FREQUENCIES?
-RDF_FREQUENCIES = {
-    "punctual": EUFREQ.as_needed,
-    "irregular": EUFREQ.irreg,
-    "continuous": EUFREQ.update_cont,
-    "fourTimesADay": EUFREQ.cont,
-    "threeTimesADay": EUFREQ.cont,
-    "semidaily": EUFREQ.daily_2,
-    "threeTimesAWeek": EUFREQ.weekly_3,
-    "semiweekly": EUFREQ.weekly_2,
-    "threeTimesAMonth": EUFREQ.monthly_3,
-    "semimonthly": EUFREQ.montly_2,
-    "threeTimesAYear": EUFREQ.annual_3,
-    "semiannual": EUFREQ.annual_2,
+FREQ_TERM_TO_UDATA = {
+    FREQ.continuous: "continuous",
+    FREQ.daily: "daily",
+    FREQ.threeTimesAWeek: "weekly_3",
+    FREQ.semiweekly: "weekly_2",
+    FREQ.weekly: "weekly",
+    FREQ.biweekly: "biweekly",
+    FREQ.threeTimesAMonth: "monthly_3",
+    FREQ.semimonthly: "monthly_2",
+    FREQ.monthly: "monthly",
+    FREQ.bimonthly: "bimonthly",
+    FREQ.quarterly: "quarterly",
+    FREQ.threeTimesAYear: "annual_3",
+    FREQ.semiannual: "annual_2",
+    FREQ.annual: "annual",
+    FREQ.biennial: "biennial",
+    FREQ.triennial: "triennial",
+    FREQ.irregular: "irregular",
 }
+FREQ_ID_TO_UDATA = {
+    namespace_manager.compute_qname(k)[2].lower(): v for k, v in FREQ_TERM_TO_UDATA.items()
+}
+FREQ_UDATA_TO_TERM = {v: k for k, v in FREQ_TERM_TO_UDATA.items()}
+
+EUFREQ_TERM_TO_UDATA = {
+    EUFREQ.UNKNOWN: "unknown",
+    EUFREQ.UPDATE_CONT: "continuous",
+    getattr(EUFREQ, "1MIN"): "1min",
+    getattr(EUFREQ, "5MIN"): "5min",
+    getattr(EUFREQ, "10MIN"): "10min",
+    getattr(EUFREQ, "15MIN"): "15min",
+    getattr(EUFREQ, "30MIN"): "30min",
+    EUFREQ.HOURLY: "hourly",
+    EUFREQ.BIHOURLY: "bihourly",
+    EUFREQ.TRIHOURLY: "trihourly",
+    getattr(EUFREQ, "12HRS"): "12hrs",
+    EUFREQ.CONT: "cont",
+    EUFREQ.DAILY_3: "daily_3",
+    EUFREQ.DAILY_2: "daily_2",
+    EUFREQ.DAILY: "daily",
+    EUFREQ.WEEKLY_5: "weekly_5",
+    EUFREQ.WEEKLY_3: "weekly_3",
+    EUFREQ.WEEKLY_2: "weekly_2",
+    EUFREQ.WEEKLY: "weekly",
+    EUFREQ.BIWEEKLY: "biweekly",
+    EUFREQ.MONTHLY_3: "monthly_3",
+    EUFREQ.MONTHLY_2: "monthly_2",
+    EUFREQ.MONTHLY: "monthly",
+    EUFREQ.BIMONTHLY: "bimonthly",
+    EUFREQ.QUARTERLY: "quarterly",
+    EUFREQ.ANNUAL_3: "annual_3",
+    EUFREQ.ANNUAL_2: "annual_2",
+    EUFREQ.ANNUAL: "annual",
+    EUFREQ.BIENNIAL: "biennial",
+    EUFREQ.TRIENNIAL: "triennial",
+    EUFREQ.QUADRENNIAL: "quadrennial",
+    EUFREQ.QUINQUENNIAL: "quinquennial",
+    EUFREQ.DECENNIAL: "decennial",
+    EUFREQ.BIDECENNIAL: "bidecennial",
+    EUFREQ.TRIDECENNIAL: "tridecennial",
+    EUFREQ.AS_NEEDED: "punctual",
+    EUFREQ.IRREG: "irregular",
+    EUFREQ.NEVER: "never",
+    EUFREQ.NOT_PLANNED: "not_planned",
+    EUFREQ.OTHER: "other",
+}
+EUFREQ_ID_TO_UDATA = {
+    namespace_manager.compute_qname(k)[2].lower(): v for k, v in EUFREQ_TERM_TO_UDATA.items()
+}
+EUFREQ_UDATA_TO_TERM = {v: k for k, v in EUFREQ_TERM_TO_UDATA.items()}
 
 
 def temporal_to_rdf(
@@ -91,10 +146,11 @@ def temporal_to_rdf(
 def frequency_to_rdf(frequency: str, graph: Optional[Graph] = None) -> Optional[str]:
     if not frequency:
         return
-    # FIXME: Do we want to map to FREQ (if possible) then EUFREQ?
-    # FIXME: Uppercase unless done in UPDATE_FREQUENCIES (see FIXME there)
-    # FIXME: Fallback on FREQ/EUFREQ.$frequency creates invalid URI, ok?
-    return RDF_FREQUENCIES.get(frequency, getattr(EUFREQ, frequency))
+    return (
+        FREQ_UDATA_TO_TERM.get(frequency)
+        or EUFREQ_UDATA_TO_TERM.get(frequency)
+        or frequency  # FIXME: do we want that?
+    )
 
 
 def owner_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> Optional[RdfResource]:
@@ -485,19 +541,15 @@ def frequency_from_rdf(term):
         try:
             term = URIRef(uris.validate(term))
         except uris.ValidationError:
+            # FIXME: do we want to try to resolve it as a Literal?
             pass
     if isinstance(term, Literal):
-        if term.toPython().lower() in UPDATE_FREQUENCIES:
-            return term.toPython().lower()
+        t = term.toPython().lower()
+        return FREQ_ID_TO_UDATA.get(t) or EUFREQ_ID_TO_UDATA.get(t)
     if isinstance(term, RdfResource):
         term = term.identifier
     if isinstance(term, URIRef):
-        freq = namespace_manager.compute_qname(term)[2].lower()
-        if freq in UPDATE_FREQUENCIES:
-            return freq
-        # FIXME: Do we want to restrict to `FREQ in term`?
-        if equiv := RDF_FREQUENCIES.get(freq):
-            return namespace_manager.compute_qname(equiv)[2]
+        return FREQ_TERM_TO_UDATA.get(term) or EUFREQ_TERM_TO_UDATA.get(term)
 
 
 def mime_from_rdf(resource):

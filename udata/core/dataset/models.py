@@ -34,6 +34,7 @@ from udata.utils import get_by, hash_url, to_naive_datetime
 from .constants import (
     CHECKSUM_TYPES,
     CLOSED_FORMATS,
+    DEFAULT_FREQUENCY,
     DEFAULT_LICENSE,
     DESCRIPTION_SHORT_SIZE_LIMIT,
     LEGACY_FREQUENCIES,
@@ -771,7 +772,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
 
     @property
     def frequency_label(self):
-        return UPDATE_FREQUENCIES.get(self.frequency or "unknown", UPDATE_FREQUENCIES["unknown"])
+        return UPDATE_FREQUENCIES.get(self.frequency) or UPDATE_FREQUENCIES[DEFAULT_FREQUENCY]
 
     def check_availability(self):
         """Check if resources from that dataset are available.
@@ -825,10 +826,21 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
         Ex: the next update for a threeTimesAday freq is not
         every 8 hours, but is maximum 24 hours later.
         """
+        if self.frequency is None:
+            return
         delta = None
-        if self.frequency == "hourly":
+        if self.frequency.endswith("min"):
+            # FIXME: do we want a minimum time span?
+            delta = timedelta(minutes=int(self.frequency[:-3]))
+        elif self.frequency == "hourly":
             delta = timedelta(hours=1)
-        elif self.frequency in ["cont", "daily_2", "daily"]:
+        elif self.frequency == "bihourly":
+            delta = timedelta(hours=2)
+        elif self.frequency == "trihourly":
+            delta = timedelta(hours=3)
+        elif self.frequency == "12hrs":
+            delta = timedelta(hours=12)
+        elif self.frequency in ["cont", "daily_3", "daily_2", "daily"]:
             delta = timedelta(days=1)
         elif self.frequency in ["weekly_5", "weekly_3", "weekly_2", "weekly"]:
             delta = timedelta(weeks=1)
@@ -846,10 +858,16 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
             delta = timedelta(days=365 * 2)
         elif self.frequency == "triennial":
             delta = timedelta(days=365 * 3)
+        elif self.frequency == "quadrennial":
+            delta = timedelta(days=365 * 4)
         elif self.frequency == "quinquennial":
             delta = timedelta(days=365 * 5)
         elif self.frequency == "decennial":
             delta = timedelta(days=365 * 10)
+        elif self.frequency == "bidecennial":
+            delta = timedelta(days=365 * 20)
+        elif self.frequency == "tridecennial":
+            delta = timedelta(days=365 * 30)
         if delta is None:
             return
         else:
@@ -873,12 +891,13 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
             # We may have up to one day delay due to harvesting for example
             quality["update_fulfilled_in_time"] = (next_update - datetime.utcnow()).days >= -1
         elif self.frequency in [
-            "other",
+            # FIXME: "unknown"?
+            "continuous",
+            "punctual",
+            "irregular",
             "never",
             "not_planned",
-            "as_needed",
-            "irreg",
-            "update_cont",
+            "other",
         ]:
             # For these frequencies, we don't expect regular updates or can't quantify them.
             # Thus we consider the update_fulfilled_in_time quality criterion to be true.

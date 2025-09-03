@@ -10,7 +10,6 @@ from rdflib.resource import Resource as RdfResource
 
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataservices.factories import DataserviceFactory
-from udata.core.dataset.constants import UPDATE_FREQUENCIES
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceFactory
 from udata.core.dataset.models import (
     Checksum,
@@ -20,6 +19,10 @@ from udata.core.dataset.models import (
     Resource,
 )
 from udata.core.dataset.rdf import (
+    EUFREQ_TERM_TO_UDATA,
+    EUFREQ_UDATA_TO_TERM,
+    FREQ_TERM_TO_UDATA,
+    FREQ_UDATA_TO_TERM,
     dataset_from_rdf,
     dataset_to_rdf,
     frequency_from_rdf,
@@ -38,6 +41,7 @@ from udata.rdf import (
     DCATAP,
     DCT,
     EUFREQ,
+    FREQ,
     GEODCAT,
     HVD_LEGISLATION,
     SCHEMA,
@@ -51,14 +55,6 @@ from udata.tests.helpers import assert200, assert_redirects
 from udata.utils import faker
 
 pytestmark = pytest.mark.usefixtures("app")
-
-
-FREQ_SAMPLE = [
-    (EUFREQ.annual, "annual"),
-    (EUFREQ.monthly, "monthly"),
-    (EUFREQ.daily, "daily"),
-    (EUFREQ.update_cont, "update_cont"),
-]
 
 GOV_UK_REF = "http://reference.data.gov.uk/id/year/2017"
 
@@ -132,7 +128,7 @@ class DatasetToRdfTest:
         assert d.value(DCT.description) == Literal(dataset.description)
         assert d.value(DCT.issued) == Literal(dataset.created_at)
         assert d.value(DCT.modified) == Literal(dataset.last_modified)
-        assert d.value(DCT.accrualPeriodicity).identifier == EUFREQ.daily
+        assert d.value(DCT.accrualPeriodicity).identifier == FREQ.daily
         assert d.value(DCAT.landingPage).identifier == URIRef(remote_url)
         expected_tags = set(Literal(t) for t in dataset.tags)
         assert set(d.objects(DCAT.keyword)) == expected_tags
@@ -171,19 +167,20 @@ class DatasetToRdfTest:
         assert org_rdf.value(RDF.type).identifier == FOAF.Organization
         assert org_rdf.value(FOAF.name) == Literal("organization")
 
-    def test_map_unkownn_frequencies(self):
-        assert frequency_to_rdf("punctual") == EUFREQ.as_needed
-        assert frequency_to_rdf("irregular") == EUFREQ.irreg
-        assert frequency_to_rdf("continuous") == EUFREQ.update_cont
-        assert frequency_to_rdf("fourTimesADay") == EUFREQ.cont
-        assert frequency_to_rdf("threeTimesADay") == EUFREQ.cont
-        assert frequency_to_rdf("semidaily") == EUFREQ.daily_2
-        assert frequency_to_rdf("threeTimesAWeek") == EUFREQ.weekly_3
-        assert frequency_to_rdf("semiweekly") == EUFREQ.weekly_2
-        assert frequency_to_rdf("threeTimesAMonth") == EUFREQ.monthly_3
-        assert frequency_to_rdf("semimonthly") == EUFREQ.montly_2
-        assert frequency_to_rdf("threeTimesAYear") == EUFREQ.annual_3
-        assert frequency_to_rdf("semiannual") == EUFREQ.annual_2
+    @pytest.mark.parametrize("freq,expected", FREQ_UDATA_TO_TERM.items())
+    def test_map_dublin_core_frequencies(self, freq, expected):
+        assert frequency_to_rdf(freq) == expected
+
+    @pytest.mark.parametrize("freq,expected", EUFREQ_UDATA_TO_TERM.items())
+    def test_map_european_frequencies(self, freq, expected):
+        assert (
+            frequency_to_rdf(freq) == expected
+            if freq not in FREQ_UDATA_TO_TERM
+            else FREQ_UDATA_TO_TERM[freq]
+        )
+
+    def test_map_undefined_frequency(self):
+        assert frequency_to_rdf("undefined_freq") == "undefined_freq"
 
     def test_minimal_resource_fields(self):
         resource = ResourceFactory()
@@ -449,7 +446,7 @@ class RdfToDatasetTest:
         g.set((node, DCT.title, Literal(title)))
         g.set((node, SKOS.altLabel, Literal(acronym)))
         g.set((node, DCT.description, Literal(description)))
-        g.set((node, DCT.accrualPeriodicity, EUFREQ.daily))
+        g.set((node, DCT.accrualPeriodicity, EUFREQ.DAILY))
         pot = BNode()
         g.add((node, DCT.temporal, pot))
         g.set((pot, RDF.type, DCT.PeriodOfTime))
@@ -526,35 +523,33 @@ class RdfToDatasetTest:
         assert isinstance(dataset, Dataset)
         assert set(dataset.tags) == set(tags + themes)
 
-    @pytest.mark.parametrize("freq,expected", FREQ_SAMPLE)
+    @pytest.mark.parametrize("freq,expected", FREQ_TERM_TO_UDATA.items())
     def test_parse_dublin_core_frequencies(self, freq, expected):
         assert frequency_from_rdf(freq) == expected
 
-    @pytest.mark.parametrize("freq,expected", FREQ_SAMPLE)
+    @pytest.mark.parametrize("freq,expected", FREQ_TERM_TO_UDATA.items())
     def test_parse_dublin_core_frequencies_as_resource(self, freq, expected):
         g = Graph()
         resource = RdfResource(g, freq)
         assert frequency_from_rdf(resource) == expected
 
-    @pytest.mark.parametrize("freq,expected", FREQ_SAMPLE)
+    @pytest.mark.parametrize("freq,expected", FREQ_TERM_TO_UDATA.items())
     def test_parse_dublin_core_frequencies_as_url(self, freq, expected):
         assert frequency_from_rdf(str(freq)) == expected
 
-    @pytest.mark.parametrize("freq", UPDATE_FREQUENCIES.keys())
-    def test_parse_european_frequencies(self, freq):
-        term = EUFREQ.term(freq)
-        assert frequency_from_rdf(term) == freq
+    @pytest.mark.parametrize("freq,expected", EUFREQ_TERM_TO_UDATA.items())
+    def test_parse_european_frequencies(self, freq, expected):
+        assert frequency_from_rdf(freq) == expected
 
-    @pytest.mark.parametrize("freq", UPDATE_FREQUENCIES.keys())
-    def test_parse_european_frequencies_as_resource(self, freq):
+    @pytest.mark.parametrize("freq,expected", EUFREQ_TERM_TO_UDATA.items())
+    def test_parse_european_frequencies_as_resource(self, freq, expected):
         g = Graph()
-        resource = RdfResource(g, EUFREQ.term(freq))
-        assert frequency_from_rdf(resource) == freq
+        resource = RdfResource(g, freq)
+        assert frequency_from_rdf(resource) == expected
 
-    @pytest.mark.parametrize("freq", UPDATE_FREQUENCIES.keys())
-    def test_parse_european_frequencies_as_url(self, freq):
-        url = str(EUFREQ.term(freq))
-        assert frequency_from_rdf(url) == freq
+    @pytest.mark.parametrize("freq,expected", EUFREQ_TERM_TO_UDATA.items())
+    def test_parse_european_frequencies_as_url(self, freq, expected):
+        assert frequency_from_rdf(str(freq)) == expected
 
     def test_minimal_resource_fields(self):
         node = BNode()
