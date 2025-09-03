@@ -1,17 +1,22 @@
+import logging
 from datetime import datetime
 
 from blinker import Signal
+from flask import g
 from mongoengine.errors import DoesNotExist
 from mongoengine.signals import post_save
 
 from udata.api_fields import get_fields
 from udata.auth import current_user
+from udata.models import User
 from udata.mongo import db
 from udata.utils import get_field_value_from_path
 
 from .signals import new_activity
 
 __all__ = ("Activity",)
+
+log = logging.getLogger(__name__)
 
 
 _registered_activities = {}
@@ -70,10 +75,15 @@ class Activity(db.Document, metaclass=EmitNewActivityMetaClass):
 
     @classmethod
     def emit(cls, related_to, organization=None, changed_fields=None, extras=None):
+        if getattr(g, "harvest_activity_user_id", None):
+            # We're in the context of a harvest action with a harvest activity user to use as actor
+            actor = User.get(g.harvest_activity_user_id)
+        else:
+            actor = current_user._get_current_object()
         new_activity.send(
             cls,
             related_to=related_to,
-            actor=current_user._get_current_object(),
+            actor=actor,
             organization=organization,
             changes=changed_fields,
             extras=extras,

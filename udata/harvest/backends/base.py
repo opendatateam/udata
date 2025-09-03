@@ -4,7 +4,7 @@ from datetime import date, datetime, timedelta
 from uuid import UUID
 
 import requests
-from flask import current_app
+from flask import current_app, g
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
 import udata.uris as uris
@@ -168,6 +168,8 @@ class BaseBackend(object):
         self.job = factory(status="initialized", started=datetime.utcnow(), source=self.source)
 
         before_harvest_job.send(self)
+        # Set harvest_activity_user_id on global context during the run
+        g.harvest_activity_user_id = current_app.config["HARVEST_ACTIVITY_USER_ID"]
 
         try:
             self.inner_harvest()
@@ -199,6 +201,8 @@ class BaseBackend(object):
             self.job.errors.append(error)
         finally:
             self.end_job()
+            # Clean harvest_activity_user_id on global context
+            delattr(g, "harvest_activity_user_id")
 
         return self.job
 
