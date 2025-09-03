@@ -146,11 +146,7 @@ def temporal_to_rdf(
 def frequency_to_rdf(frequency: str, graph: Optional[Graph] = None) -> Optional[str]:
     if not frequency:
         return
-    return (
-        FREQ_UDATA_TO_TERM.get(frequency)
-        or EUFREQ_UDATA_TO_TERM.get(frequency)
-        or frequency  # FIXME: do we want that?
-    )
+    return FREQ_UDATA_TO_TERM.get(frequency) or EUFREQ_UDATA_TO_TERM.get(frequency) or frequency
 
 
 def owner_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> Optional[RdfResource]:
@@ -541,15 +537,16 @@ def frequency_from_rdf(term):
         try:
             term = URIRef(uris.validate(term))
         except uris.ValidationError:
-            # FIXME: do we want to try to resolve it as a Literal?
             pass
     if isinstance(term, Literal):
-        t = term.toPython().lower()
-        return FREQ_ID_TO_UDATA.get(t) or EUFREQ_ID_TO_UDATA.get(t)
+        term = term.toPython().lower()
+        if freq := FREQ_ID_TO_UDATA.get(term) or EUFREQ_ID_TO_UDATA.get(term):
+            return freq
     if isinstance(term, RdfResource):
         term = term.identifier
     if isinstance(term, URIRef):
-        return FREQ_TERM_TO_UDATA.get(term) or EUFREQ_TERM_TO_UDATA.get(term)
+        if freq := FREQ_TERM_TO_UDATA.get(term) or EUFREQ_TERM_TO_UDATA.get(term):
+            return freq
 
 
 def mime_from_rdf(resource):

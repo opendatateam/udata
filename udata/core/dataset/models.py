@@ -43,6 +43,7 @@ from .constants import (
     RESOURCE_FILETYPES,
     RESOURCE_TYPES,
     SCHEMA_CACHE_DURATION,
+    UNBOUNDED_FREQUENCIES,
     UPDATE_FREQUENCIES,
 )
 from .exceptions import (
@@ -830,7 +831,6 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
             return
         delta = None
         if self.frequency.endswith("min"):
-            # FIXME: do we want a minimum time span?
             delta = timedelta(minutes=int(self.frequency[:-3]))
         elif self.frequency == "hourly":
             delta = timedelta(hours=1)
@@ -890,17 +890,9 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
             # Allow for being one day late on update.
             # We may have up to one day delay due to harvesting for example
             quality["update_fulfilled_in_time"] = (next_update - datetime.utcnow()).days >= -1
-        elif self.frequency in [
-            # FIXME: "unknown"?
-            "continuous",
-            "punctual",
-            "irregular",
-            "never",
-            "not_planned",
-            "other",
-        ]:
-            # For these frequencies, we don't expect regular updates or can't quantify them.
-            # Thus we consider the update_fulfilled_in_time quality criterion to be true.
+        elif self.frequency in UNBOUNDED_FREQUENCIES:
+            # Next update for unbounded frequencies can't be estimated, so we consider
+            # the update_fulfilled_in_time quality criterion to be true.
             quality["update_fulfilled_in_time"] = True
 
         # Since `update_fulfilled_in_time` cannot be precomputed, `score` cannot either.
