@@ -1,0 +1,12 @@
+{
+  "include": [
+    "tasks",
+    "udata"
+  ],
+
+  "exclude": [
+    "**/__pycache__"
+  ],
+
+  "typeCheckingMode": "standard"
+}
