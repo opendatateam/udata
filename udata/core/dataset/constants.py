@@ -2,44 +2,77 @@ from collections import OrderedDict
 
 from udata.i18n import lazy_gettext as _
 
-#: Udata frequencies with their labels
-#:
-#: See: http://dublincore.org/groups/collections/frequency/
+# Udata frequencies with their labels
+#
+# Based on the following vocabularies:
+# - DC: http://dublincore.org/groups/collections/frequency/
+# - EU: https://publications.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/frequency
 UPDATE_FREQUENCIES = OrderedDict(
-    [  # Dublin core equivalent
-        ("unknown", _("Unknown")),  # N/A
-        ("punctual", _("Punctual")),  # N/A
-        ("continuous", _("Real time")),  # freq:continuous
-        ("hourly", _("Hourly")),  # N/A
-        ("fourTimesADay", _("Four times a day")),  # N/A
-        ("threeTimesADay", _("Three times a day")),  # N/A
-        ("semidaily", _("Semidaily")),  # N/A
-        ("daily", _("Daily")),  # freq:daily
-        ("fourTimesAWeek", _("Four times a week")),  # N/A
-        ("threeTimesAWeek", _("Three times a week")),  # freq:threeTimesAWeek
-        ("semiweekly", _("Semiweekly")),  # freq:semiweekly
-        ("weekly", _("Weekly")),  # freq:weekly
-        ("biweekly", _("Biweekly")),  # freq:bimonthly
-        ("threeTimesAMonth", _("Three times a month")),  # freq:threeTimesAMonth
-        ("semimonthly", _("Semimonthly")),  # freq:semimonthly
-        ("monthly", _("Monthly")),  # freq:monthly
-        ("bimonthly", _("Bimonthly")),  # freq:bimonthly
-        ("quarterly", _("Quarterly")),  # freq:quarterly
-        ("threeTimesAYear", _("Three times a year")),  # freq:threeTimesAYear
-        ("semiannual", _("Biannual")),  # freq:semiannual
-        ("annual", _("Annual")),  # freq:annual
-        ("biennial", _("Biennial")),  # freq:biennial
-        ("triennial", _("Triennial")),  # freq:triennial
-        ("quinquennial", _("Quinquennial")),  # N/A
-        ("irregular", _("Irregular")),  # freq:irregular
+    [
+        ("unknown", _("Unknown")),  #                      EU
+        ("continuous", _("Real time")),  #                 DC, EU:UPDATE_CONT
+        ("1min", _("Every minute")),  #                    EU
+        ("5min", _("Every five minutes")),  #              EU
+        ("10min", _("Every ten minutes")),  #              EU
+        ("15min", _("Every fifteen minutes")),  #          EU
+        ("30min", _("Every thirty minutes")),  #           EU
+        ("hourly", _("Hourly")),  #                        EU
+        ("bihourly", _("Every two hours")),  #             EU
+        ("trihourly", _("Every three hours")),  #          EU
+        ("12hours", _("Every twelve hours")),  #           EU:12HRS
+        ("severalTimesADay", _("Several times a day")),  # EU:CONT
+        ("threeTimesADay", _("Three times a day")),  #     EU:DAILY_3
+        ("semidaily", _("Twice a day")),  #                EU:DAILY_2
+        ("daily", _("Daily")),  #                          DC, EU
+        ("fiveTimesAWeek", _("Five times a week")),  #     EU:WEEKLY_5
+        ("threeTimesAWeek", _("Three times a week")),  #   DC, EU:WEEKLY_3
+        ("semiweekly", _("Twice a week")),  #              DC, EU:WEEKLY_2
+        ("weekly", _("Weekly")),  #                        DC, EU
+        ("biweekly", _("Every two weeks")),  #             DC, EU
+        ("threeTimesAMonth", _("Three times a month")),  # DC, EU:MONTHLY_3
+        ("semimonthly", _("Twice a month")),  #            DC, EU:MONTHLY_2
+        ("monthly", _("Monthly")),  #                      DC, EU
+        ("bimonthly", _("Every two months")),  #           DC, EU
+        ("quarterly", _("Quarterly")),  #                  DC, EU
+        ("threeTimesAYear", _("Three times a year")),  #   DC, EU:ANNUAL_3
+        ("semiannual", _("Twice a year")),  #              DC, EU:ANNUAL_2
+        ("annual", _("Annually")),  #                      DC, EU
+        ("biennial", _("Every two years")),  #             DC, EU
+        ("triennial", _("Every three years")),  #          DC, EU
+        ("quadrennial", _("Every four years")),  #         EU
+        ("quinquennial", _("Every five years")),  #        EU
+        ("decennial", _("Every ten years")),  #            EU
+        ("bidecennial", _("Every twenty years")),  #       EU
+        ("tridecennial", _("Every thirty years")),  #      EU
+        ("punctual", _("Punctual")),  #                    EU:AS_NEEDED
+        ("irregular", _("Irregular")),  #                  DC, EU:IRREG
+        ("never", _("Never")),  #                          EU
+        ("notPlanned", _("Not planned")),  #               EU:NOT_PLANNED
+        ("other", _("Other")),  #                          EU
     ]
 )
 
-#: Map legacy frequencies to currents
+# Defined (not "unknown") but irregular or unquantifiable frequencies
+UNBOUNDED_FREQUENCIES = [
+    "continuous",
+    "punctual",
+    "irregular",
+    "never",
+    "notPlanned",
+    "other",
+]
+
+BOUNDED_FREQUENCIES = [
+    f for f in UPDATE_FREQUENCIES.keys() if f != "unknown" and f not in UNBOUNDED_FREQUENCIES
+]
+
+# Map legacy frequencies to current ones
 LEGACY_FREQUENCIES = {
+    "realtime": "continuous",
+    "fourTimesADay": "severalTimesADay",
+    "fourTimesAWeek": "other",
     "fortnighly": "biweekly",
     "biannual": "semiannual",
-    "realtime": "continuous",
 }
 
 DEFAULT_FREQUENCY = "unknown"
