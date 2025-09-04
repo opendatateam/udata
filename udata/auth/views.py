@@ -1,4 +1,4 @@
-from flask import current_app, jsonify, redirect, url_for
+from flask import current_app, jsonify, redirect, request, url_for
 from flask_login import current_user, login_required
 from flask_security.utils import (
     check_and_get_token_status,
@@ -24,6 +24,7 @@ from flask_security.views import (
 from flask_wtf.csrf import generate_csrf
 from werkzeug.local import LocalProxy
 
+from udata.auth.proconnect import get_logout_url
 from udata.i18n import lazy_gettext as _
 from udata.uris import homepage_url
 from udata.utils import wants_json
@@ -153,7 +154,9 @@ def create_security_blueprint(app, state, import_name):
         template_folder="templates",
     )
 
-    bp.route(app.config["SECURITY_LOGOUT_URL"], methods=["GET", "POST"], endpoint="logout")(logout)
+    bp.route(app.config["SECURITY_LOGOUT_URL"], methods=["GET", "POST"], endpoint="logout")(
+        logout_with_proconnect_url
+    )
 
     if state.passwordless:
         bp.route(app.config["SECURITY_LOGIN_URL"], methods=["GET", "POST"], endpoint="login")(
@@ -209,3 +212,20 @@ def create_security_blueprint(app, state, import_name):
     bp.route("/get-csrf", methods=["GET"], endpoint="get_csrf")(get_csrf)
 
     return bp
+
+
+def logout_with_proconnect_url():
+    """
+    Extends the flask-security `logout` by returning the ProConnect logout URL (if any)
+    so `cdata` can redirect to it if the user was connected via ProConnect.
+    """
+    response = logout()
+
+    if request.method == "POST" and wants_json():
+        return jsonify(
+            {
+                "proconnect_logout_url": get_logout_url(),
+            }
+        )
+
+    return response

@@ -29,6 +29,29 @@ def init_app(app):
         )
 
 
+def get_logout_url():
+    id_token = session.get(ID_TOKEN_KEY)
+    if id_token is None:
+        # No id_token, so no way to logout from ProConnect.
+        return None
+
+    metadata = oauth.proconnect.load_server_metadata()
+    end_session_endpoint = metadata["end_session_endpoint"]
+    # Generate a random state that we send to ProConnect, they'll return it so we can check it.
+    state = gen_salt(50)
+    session[STATE_KEY] = state
+    redirect_uri = url_for("proconnect.logout", _external=True)
+
+    return add_params_to_uri(
+        end_session_endpoint,
+        (
+            ("id_token_hint", id_token),
+            ("state", state),
+            ("post_logout_redirect_uri", redirect_uri),
+        ),
+    )
+
+
 @ns.route("/login/", endpoint="proconnect_login")
 class ProconnectLoginAPI(API):
     def get(self):
@@ -81,26 +104,9 @@ class ProconnectLogoutOAuthAPI(API):
         # https://github.com/lepture/authlib/issues/292
         # So we implement it ourselves. This code may be simplified (or even removed?) in the future
         # if we update to a version that supports it.
-        metadata = oauth.proconnect.load_server_metadata()
-        end_session_endpoint = metadata["end_session_endpoint"]
-        # Generate a random state that we send to ProConnect, they'll return it so we can check it.
-        state = gen_salt(50)
-        session[STATE_KEY] = state
-        redirect_uri = url_for("proconnect.logout", _external=True)
-
-        id_token = session.get(ID_TOKEN_KEY)
-        if id_token is None:
-            # No id_token, so no way to logout from ProConnect.
+        end_session_url = get_logout_url()
+        if end_session_url is None:
             return redirect(url_for("security.logout"))
-
-        end_session_url = add_params_to_uri(
-            end_session_endpoint,
-            (
-                ("id_token_hint", id_token),
-                ("state", state),
-                ("post_logout_redirect_uri", redirect_uri),
-            ),
-        )
 
         return redirect(end_session_url)
 

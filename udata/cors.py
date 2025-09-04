@@ -48,6 +48,7 @@ def is_allowed_cors_route():
         or path.startswith("/change")
         or path.startswith("/change-email")
         or path.startswith("/oauth")
+        or path.startswith("/get-csrf")
     ):
         return True
 
