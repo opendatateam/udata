@@ -20,7 +20,11 @@ from udata.core.dataset.activities import (
     UserUpdatedDataset,
     UserUpdatedResource,
 )
-from udata.core.dataset.constants import LEGACY_FREQUENCIES, UPDATE_FREQUENCIES
+from udata.core.dataset.constants import (
+    LEGACY_FREQUENCIES,
+    UNBOUNDED_FREQUENCIES,
+    UPDATE_FREQUENCIES,
+)
 from udata.core.dataset.exceptions import (
     SchemasCacheUnavailableException,
     SchemasCatalogNotFoundException,
@@ -159,7 +163,7 @@ class DatasetModelTest:
 
     @pytest.mark.parametrize(
         "freq,delta",
-        [
+        [  # should cover all core.dataset.constants.BOUNDED_FREQUENCIES
             ("1min", timedelta(minutes=1)),
             ("5min", timedelta(minutes=5)),
             ("10min", timedelta(minutes=10)),
@@ -199,9 +203,7 @@ class DatasetModelTest:
         dataset = DatasetFactory(frequency=freq)
         assert_equal_dates(dataset.next_update, datetime.utcnow() + delta)
 
-    @pytest.mark.parametrize(
-        "freq", ["unknown", "continuous", "punctual", "irregular", "never", "not_planned", "other"]
-    )
+    @pytest.mark.parametrize("freq", UNBOUNDED_FREQUENCIES + ["unknown"])
     def test_next_update_undefined(self, freq):
         dataset = DatasetFactory(frequency=freq)
         assert dataset.next_update is None
