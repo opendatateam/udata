@@ -20,11 +20,7 @@ from udata.core.dataset.activities import (
     UserUpdatedDataset,
     UserUpdatedResource,
 )
-from udata.core.dataset.constants import (
-    LEGACY_FREQUENCIES,
-    UNBOUNDED_FREQUENCIES,
-    UPDATE_FREQUENCIES,
-)
+from udata.core.dataset.constants import UpdateFrequency
 from udata.core.dataset.exceptions import (
     SchemasCacheUnavailableException,
     SchemasCatalogNotFoundException,
@@ -161,52 +157,13 @@ class DatasetModelTest:
         dataset = DatasetFactory()
         assert dataset.next_update is None
 
-    @pytest.mark.parametrize(
-        "freq,delta",
-        [  # should cover all core.dataset.constants.BOUNDED_FREQUENCIES
-            ("1min", timedelta(minutes=1)),
-            ("5min", timedelta(minutes=5)),
-            ("10min", timedelta(minutes=10)),
-            ("15min", timedelta(minutes=15)),
-            ("30min", timedelta(minutes=30)),
-            ("hourly", timedelta(hours=1)),
-            ("bihourly", timedelta(hours=2)),
-            ("trihourly", timedelta(hours=3)),
-            ("12hours", timedelta(hours=12)),
-            ("severalTimesADay", timedelta(days=1)),
-            ("threeTimesADay", timedelta(days=1)),
-            ("semidaily", timedelta(days=1)),
-            ("daily", timedelta(days=1)),
-            ("fiveTimesAWeek", timedelta(weeks=1)),
-            ("threeTimesAWeek", timedelta(weeks=1)),
-            ("semiweekly", timedelta(weeks=1)),
-            ("weekly", timedelta(weeks=1)),
-            ("biweekly", timedelta(weeks=2)),
-            ("threeTimesAMonth", timedelta(days=31)),
-            ("semimonthly", timedelta(days=31)),
-            ("monthly", timedelta(days=31)),
-            ("bimonthly", timedelta(days=31 * 2)),
-            ("quarterly", timedelta(days=365 / 4)),
-            ("threeTimesAYear", timedelta(days=365)),
-            ("semiannual", timedelta(days=365)),
-            ("annual", timedelta(days=365)),
-            ("biennial", timedelta(days=365 * 2)),
-            ("triennial", timedelta(days=365 * 3)),
-            ("quadrennial", timedelta(days=365 * 4)),
-            ("quinquennial", timedelta(days=365 * 5)),
-            ("decennial", timedelta(days=365 * 10)),
-            ("bidecennial", timedelta(days=365 * 20)),
-            ("tridecennial", timedelta(days=365 * 30)),
-        ],
-    )
-    def test_next_update_delta(self, freq, delta):
+    @pytest.mark.parametrize("freq", list(UpdateFrequency))
+    def test_next_update(self, freq: UpdateFrequency):
         dataset = DatasetFactory(frequency=freq)
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + delta)
-
-    @pytest.mark.parametrize("freq", UNBOUNDED_FREQUENCIES + ["unknown"])
-    def test_next_update_undefined(self, freq):
-        dataset = DatasetFactory(frequency=freq)
-        assert dataset.next_update is None
+        if freq.delta is None:
+            assert dataset.next_update is None
+        else:
+            assert_equal_dates(dataset.next_update, freq.next_update(datetime.utcnow()))
 
     def test_quality_default(self):
         dataset = DatasetFactory(description="")
@@ -219,21 +176,21 @@ class DatasetModelTest:
             "score": 0,
         }
 
-    @pytest.mark.parametrize("freq", UPDATE_FREQUENCIES)
-    def test_quality_frequency_update(self, freq):
+    @pytest.mark.parametrize("freq", list(UpdateFrequency))
+    def test_quality_frequency_update(self, freq: UpdateFrequency):
         dataset = DatasetFactory(description="", frequency=freq)
-        if freq == "unknown":
+        if freq is UpdateFrequency.UNKNOWN:
             assert dataset.quality["update_frequency"] is False
             assert "update_fulfilled_in_time" not in dataset.quality
-            return
-        assert dataset.quality["update_frequency"] is True
-        assert dataset.quality["update_fulfilled_in_time"] is True
-        assert dataset.quality["score"] == Dataset.normalize_score(2)
+        else:
+            assert dataset.quality["update_frequency"] is True
+            assert dataset.quality["update_fulfilled_in_time"] is True
+            assert dataset.quality["score"] == Dataset.normalize_score(2)
 
     def test_quality_frequency_update_one_day_late(self):
         dataset = DatasetFactory(
             description="",
-            frequency="daily",
+            frequency=UpdateFrequency.DAILY,
             last_modified_internal=datetime.utcnow() - timedelta(days=1, hours=1),
         )
         assert dataset.quality["update_frequency"] is True
@@ -243,7 +200,7 @@ class DatasetModelTest:
     def test_quality_frequency_update_two_days_late(self):
         dataset = DatasetFactory(
             description="",
-            frequency="daily",
+            frequency=UpdateFrequency.DAILY,
             last_modified_internal=datetime.utcnow() - timedelta(days=2, hours=1),
         )
         assert dataset.quality["update_frequency"] is True
@@ -316,7 +273,7 @@ class DatasetModelTest:
         assert dataset.tags[1] == "this-is-a-tag"
 
     def test_legacy_frequencies(self):
-        for oldFreq, newFreq in LEGACY_FREQUENCIES.items():
+        for oldFreq, newFreq in UpdateFrequency._legacy_frequencies.items():
             dataset = DatasetFactory(frequency=oldFreq)
             assert dataset.frequency == newFreq
 

@@ -1,81 +1,137 @@
 from collections import OrderedDict
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any
 
 from udata.i18n import lazy_gettext as _
 
-# Udata frequencies with their labels
+
+# Udata frequencies
 #
 # Based on the following vocabularies:
 # - DC: http://dublincore.org/groups/collections/frequency/
 # - EU: https://publications.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/frequency
-UPDATE_FREQUENCIES = OrderedDict(
-    [
-        ("unknown", _("Unknown")),  #                      EU
-        ("continuous", _("Real time")),  #                 DC, EU:UPDATE_CONT
-        ("1min", _("Every minute")),  #                    EU
-        ("5min", _("Every five minutes")),  #              EU
-        ("10min", _("Every ten minutes")),  #              EU
-        ("15min", _("Every fifteen minutes")),  #          EU
-        ("30min", _("Every thirty minutes")),  #           EU
-        ("hourly", _("Hourly")),  #                        EU
-        ("bihourly", _("Every two hours")),  #             EU
-        ("trihourly", _("Every three hours")),  #          EU
-        ("12hours", _("Every twelve hours")),  #           EU:12HRS
-        ("severalTimesADay", _("Several times a day")),  # EU:CONT
-        ("threeTimesADay", _("Three times a day")),  #     EU:DAILY_3
-        ("semidaily", _("Twice a day")),  #                EU:DAILY_2
-        ("daily", _("Daily")),  #                          DC, EU
-        ("fiveTimesAWeek", _("Five times a week")),  #     EU:WEEKLY_5
-        ("threeTimesAWeek", _("Three times a week")),  #   DC, EU:WEEKLY_3
-        ("semiweekly", _("Twice a week")),  #              DC, EU:WEEKLY_2
-        ("weekly", _("Weekly")),  #                        DC, EU
-        ("biweekly", _("Every two weeks")),  #             DC, EU
-        ("threeTimesAMonth", _("Three times a month")),  # DC, EU:MONTHLY_3
-        ("semimonthly", _("Twice a month")),  #            DC, EU:MONTHLY_2
-        ("monthly", _("Monthly")),  #                      DC, EU
-        ("bimonthly", _("Every two months")),  #           DC, EU
-        ("quarterly", _("Quarterly")),  #                  DC, EU
-        ("threeTimesAYear", _("Three times a year")),  #   DC, EU:ANNUAL_3
-        ("semiannual", _("Twice a year")),  #              DC, EU:ANNUAL_2
-        ("annual", _("Annually")),  #                      DC, EU
-        ("biennial", _("Every two years")),  #             DC, EU
-        ("triennial", _("Every three years")),  #          DC, EU
-        ("quadrennial", _("Every four years")),  #         EU
-        ("quinquennial", _("Every five years")),  #        EU
-        ("decennial", _("Every ten years")),  #            EU
-        ("bidecennial", _("Every twenty years")),  #       EU
-        ("tridecennial", _("Every thirty years")),  #      EU
-        ("punctual", _("Punctual")),  #                    EU:AS_NEEDED
-        ("irregular", _("Irregular")),  #                  DC, EU:IRREG
-        ("never", _("Never")),  #                          EU
-        ("notPlanned", _("Not planned")),  #               EU:NOT_PLANNED
-        ("other", _("Other")),  #                          EU
-    ]
-)
+class UpdateFrequency(str, Enum):
+    UNKNOWN = ("unknown", _("Unknown"), None)  # EU
+    CONTINUOUS = ("continuous", _("Real time"), None)  # DC, EU:UPDATE_CONT
+    ONE_MINUTE = ("oneMinute", _("Every minute"), timedelta(minutes=1))  # EU:1MIN
+    FIVE_MINUTES = ("fiveMinutes", _("Every five minutes"), timedelta(minutes=5))  # EU:5MIN
+    TEN_MINUTES = ("tenMinutes", _("Every ten minutes"), timedelta(minutes=10))  # EU:10MIN
+    FIFTEEN_MINUTES = (
+        "fifteenMinutes",
+        _("Every fifteen minutes"),
+        timedelta(minutes=15),
+    )  # EU:15MIN
+    THIRTY_MINUTES = ("thirtyMinutes", _("Every thirty minute"), timedelta(minutes=30))  # EU:30MIN
+    HOURLY = ("hourly", _("Every hour"), timedelta(hours=1))  # EU
+    BIHOURLY = ("bihourly", _("Every two hours"), timedelta(hours=2))  # EU
+    TRIHOURLY = ("trihourly", _("Every three hours"), timedelta(hours=3))  # EU
+    TWELVE_HOURS = ("twelveHours", _("Every twelve hours"), timedelta(hours=12))  # EU:12HRS
+    SEVERAL_TIMES_A_DAY = (
+        "severalTimesADay",
+        _("Several times a day"),
+        timedelta(days=1),
+    )  # EU:CONT
+    THREE_TIMES_A_DAY = ("threeTimesADay", _("Three times a day"), timedelta(days=1))  # EU:DAILY_3
+    SEMIDAILY = ("semidaily", _("Twice a day"), timedelta(days=1))  # EU:DAILY_2
+    DAILY = ("daily", _("Daily"), timedelta(days=1))  # DC, EU
+    FIVE_TIMES_A_WEEK = (
+        "fiveTimesAWeek",
+        _("Five times a week"),
+        timedelta(weeks=1),
+    )  # EU:WEEKLY_5
+    THREE_TIMES_A_WEEK = (
+        "threeTimesAWeek",
+        _("Three times a week"),
+        timedelta(weeks=1),
+    )  # DC, EU:WEEKLY_3
+    SEMIWEEKLY = ("semiweekly", _("Twice a week"), timedelta(weeks=1))  # DC, EU:WEEKLY_2
+    WEEKLY = ("weekly", _("Weekly"), timedelta(weeks=1))  # DC, EU
+    BIWEEKLY = ("biweekly", _("Every two weeks"), timedelta(weeks=2))  # DC, EU
+    THREE_TIMES_A_MONTH = (
+        "threeTimesAMonth",
+        _("Three times a month"),
+        timedelta(days=31),
+    )  # DC, EU:MONTHLY_3
+    SEMIMONTHLY = ("semimonthly", _("Twice a month"), timedelta(days=31))  # DC, EU:MONTHLY_2
+    MONTHLY = ("monthly", _("Monthly"), timedelta(days=31))  # DC, EU
+    BIMONTHLY = ("bimonthly", _("Every two months"), timedelta(days=31 * 2))  # DC, EU
+    QUARTERLY = ("quarterly", _("Quarterly"), timedelta(days=31 * 3))  # DC, EU
+    THREE_TIMES_A_YEAR = (
+        "threeTimesAYear",
+        _("Three times a year"),
+        timedelta(days=365),
+    )  # DC, EU:ANNUAL_3
+    SEMIANNUAL = ("semiannual", _("Twice a year"), timedelta(days=365))  # DC, EU:ANNUAL_2
+    ANNUAL = ("annual", _("Annually"), timedelta(days=365))  # DC, EU
+    BIENNIAL = ("biennial", _("Every two years"), timedelta(days=365 * 2))  # DC, EU
+    TRIENNIAL = ("triennial", _("Every three years"), timedelta(days=365 * 3))  # DC, EU
+    QUADRENNIAL = ("quadrennial", _("Every four years"), timedelta(days=365 * 4))  # EU
+    QUINQUENNIAL = ("quinquennial", _("Every five years"), timedelta(days=365 * 5))  # EU
+    DECENNIAL = ("decennial", _("Every ten years"), timedelta(days=365 * 10))  # EU
+    BIDECENNIAL = ("bidecennial", _("Every twenty years"), timedelta(days=365 * 20))  # EU
+    TRIDECENNIAL = ("tridecennial", _("Every thirty years"), timedelta(days=365 * 30))  # EU
+    PUNCTUAL = ("punctual", _("Punctual"), None)  # EU:AS_NEEDED
+    IRREGULAR = ("irregular", _("Irregular"), None)  # DC, EU:IRREG
+    NEVER = ("never", _("Never"), None)  # EU
+    NOT_PLANNED = ("notPlanned", _("Not planned"), None)  # EU:NOT_PLANNED
+    OTHER = ("other", _("Other"), None)  # EU
 
-# Defined (not "unknown") but irregular or unquantifiable frequencies
-UNBOUNDED_FREQUENCIES = [
-    "continuous",
-    "punctual",
-    "irregular",
-    "never",
-    "notPlanned",
-    "other",
-]
+    def __new__(cls, id: str, label: Any, delta: timedelta | None):
+        # Make value lookup depend only on `id` by explicitly setting _value_
+        # See https://docs.python.org/3/howto/enum.html#when-to-use-new-vs-init
+        obj = str.__new__(cls, id)
+        obj._value_ = id
+        obj._label = label  # type: ignore[misc]
+        obj._delta = delta  # type: ignore[misc]
+        return obj
 
-BOUNDED_FREQUENCIES = [
-    f for f in UPDATE_FREQUENCIES.keys() if f != "unknown" and f not in UNBOUNDED_FREQUENCIES
-]
+    @classmethod
+    def _missing_(cls, value) -> "UpdateFrequency | None":
+        return (
+            cls._legacy_frequencies.get(value)
+            if value and isinstance(value, str)
+            else UpdateFrequency.UNKNOWN
+        )
 
-# Map legacy frequencies to current ones
-LEGACY_FREQUENCIES = {
-    "realtime": "continuous",
-    "fourTimesADay": "severalTimesADay",
-    "fourTimesAWeek": "other",
-    "fortnighly": "biweekly",
-    "biannual": "semiannual",
+    @classmethod
+    def vocabulary(cls) -> list[str]:
+        return [m.id for m in cls]
+
+    @property
+    def id(self) -> str:
+        return self._value_  # type: ignore[misc]
+
+    @property
+    def label(self) -> Any:
+        return self._label  # type: ignore[misc]
+
+    @property
+    def delta(self) -> timedelta | None:
+        return self._delta  # type: ignore[misc]
+
+    def next_update(self, last_update: datetime) -> datetime | None:
+        return last_update + self.delta if self.delta else None  # type: ignore[misc]
+
+    # FIXME(python 3.11+): drop when switching to StrEnum
+    # Needed so we can do `UpdateFrequency.FOO or UpdateFrequency.BAR` (see frequency_from_rdf)
+    def __bool__(self):
+        return bool(self._value_)
+
+    # FIXME(python 3.11+): drop when switching to StrEnum
+    def __str__(self):
+        return self._value_
+
+
+# FIXME: basedpyright complains
+UpdateFrequency._legacy_frequencies = {
+    "realtime": UpdateFrequency.CONTINUOUS,
+    "fourTimesADay": UpdateFrequency.SEVERAL_TIMES_A_DAY,
+    "fourTimesAWeek": UpdateFrequency.OTHER,
+    "fortnighly": UpdateFrequency.BIWEEKLY,
+    "biannual": UpdateFrequency.SEMIANNUAL,
 }
 
-DEFAULT_FREQUENCY = "unknown"
 
 DEFAULT_LICENSE = {
     "id": "notspecified",

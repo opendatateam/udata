@@ -4,7 +4,7 @@ Convert legacy frequencies to latest vocabulary
 
 import logging
 
-from udata.core.dataset.constants import LEGACY_FREQUENCIES
+from udata.core.dataset.constants import UpdateFrequency
 from udata.models import Dataset
 
 log = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ def migrate(db):
 
     datasets = Dataset.objects().no_cache().timeout(False)
     for dataset in datasets:
-        if freq := LEGACY_FREQUENCIES.get(dataset.frequency):
+        if freq := UpdateFrequency._legacy_frequencies.get(dataset.frequency):
             dataset.frequency = freq
             dataset.save()
 

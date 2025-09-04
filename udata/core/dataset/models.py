@@ -34,17 +34,14 @@ from udata.utils import get_by, hash_url, to_naive_datetime
 from .constants import (
     CHECKSUM_TYPES,
     CLOSED_FORMATS,
-    DEFAULT_FREQUENCY,
     DEFAULT_LICENSE,
     DESCRIPTION_SHORT_SIZE_LIMIT,
-    LEGACY_FREQUENCIES,
     MAX_DISTANCE,
     PIVOTAL_DATA,
     RESOURCE_FILETYPES,
     RESOURCE_TYPES,
     SCHEMA_CACHE_DURATION,
-    UNBOUNDED_FREQUENCIES,
-    UPDATE_FREQUENCIES,
+    UpdateFrequency,
 )
 from .exceptions import (
     SchemasCacheUnavailableException,
@@ -570,7 +567,8 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
     resources = field(db.ListField(db.EmbeddedDocumentField(Resource)), auditable=False)
 
     private = field(db.BooleanField(default=False))
-    frequency = field(db.StringField(choices=list(UPDATE_FREQUENCIES.keys())))
+
+    frequency = field(db.StringEnumField(enum_class=UpdateFrequency))
     frequency_date = field(db.DateTimeField(verbose_name=_("Future date of update")))
     temporal_coverage = field(db.EmbeddedDocumentField(db.DateRange))
     spatial = field(db.EmbeddedDocumentField(SpatialCoverage))
@@ -693,8 +691,6 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
 
     def clean(self):
         super(Dataset, self).clean()
-        if self.frequency in LEGACY_FREQUENCIES:
-            self.frequency = LEGACY_FREQUENCIES[self.frequency]
 
         if len(set(res.id for res in self.resources)) != len(self.resources):
             raise MongoEngineValidationError(f"Duplicate resource ID in dataset #{self.id}.")
@@ -772,8 +768,8 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
             return self.owner.avatar.url
 
     @property
-    def frequency_label(self):
-        return UPDATE_FREQUENCIES.get(self.frequency) or UPDATE_FREQUENCIES[DEFAULT_FREQUENCY]
+    def has_frequency(self):
+        return self.frequency not in [None, UpdateFrequency.UNKNOWN]
 
     def check_availability(self):
         """Check if resources from that dataset are available.
@@ -827,51 +823,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
         Ex: the next update for a threeTimesAday freq is not
         every 8 hours, but is maximum 24 hours later.
         """
-        if self.frequency is None:
-            return
-        delta = None
-        if self.frequency.endswith("min"):
-            delta = timedelta(minutes=int(self.frequency[:-3]))
-        elif self.frequency == "hourly":
-            delta = timedelta(hours=1)
-        elif self.frequency == "bihourly":
-            delta = timedelta(hours=2)
-        elif self.frequency == "trihourly":
-            delta = timedelta(hours=3)
-        elif self.frequency == "12hours":
-            delta = timedelta(hours=12)
-        elif self.frequency in ["severalTimesADay", "threeTimesADay", "semidaily", "daily"]:
-            delta = timedelta(days=1)
-        elif self.frequency in ["fiveTimesAWeek", "threeTimesAWeek", "semiweekly", "weekly"]:
-            delta = timedelta(weeks=1)
-        elif self.frequency == "biweekly":
-            delta = timedelta(weeks=2)
-        elif self.frequency in ["threeTimesAMonth", "semimonthly", "monthly"]:
-            delta = timedelta(days=31)
-        elif self.frequency == "bimonthly":
-            delta = timedelta(days=31 * 2)
-        elif self.frequency == "quarterly":
-            delta = timedelta(days=365 / 4)
-        elif self.frequency in ["threeTimesAYear", "semiannual", "annual"]:
-            delta = timedelta(days=365)
-        elif self.frequency == "biennial":
-            delta = timedelta(days=365 * 2)
-        elif self.frequency == "triennial":
-            delta = timedelta(days=365 * 3)
-        elif self.frequency == "quadrennial":
-            delta = timedelta(days=365 * 4)
-        elif self.frequency == "quinquennial":
-            delta = timedelta(days=365 * 5)
-        elif self.frequency == "decennial":
-            delta = timedelta(days=365 * 10)
-        elif self.frequency == "bidecennial":
-            delta = timedelta(days=365 * 20)
-        elif self.frequency == "tridecennial":
-            delta = timedelta(days=365 * 30)
-        if delta is None:
-            return
-        else:
-            return self.last_update + delta
+        return self.frequency.next_update(self.last_update) if self.has_frequency else None
 
     @property
     def quality(self):
@@ -890,9 +842,9 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
             # Allow for being one day late on update.
             # We may have up to one day delay due to harvesting for example
             quality["update_fulfilled_in_time"] = (next_update - datetime.utcnow()).days >= -1
-        elif self.frequency in UNBOUNDED_FREQUENCIES:
-            # Next update for unbounded frequencies can't be estimated, so we consider
-            # the update_fulfilled_in_time quality criterion to be true.
+        elif self.has_frequency and self.frequency.delta is None:
+            # Unbonded frequencies can't be estimated, so we always consider the
+            # update_fulfilled_in_time quality criterion to be true.
             quality["update_fulfilled_in_time"] = True
 
         # Since `update_fulfilled_in_time` cannot be precomputed, `score` cannot either.
@@ -915,7 +867,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
         result["temporal_coverage"] = True if self.temporal_coverage else False
         result["spatial"] = True if self.spatial else False
 
-        result["update_frequency"] = self.frequency and self.frequency != "unknown"
+        result["update_frequency"] = self.has_frequency
 
         # We only save the next_update here because it is based on resources
         # We cannot save the `update_fulfilled_in_time` because it is time

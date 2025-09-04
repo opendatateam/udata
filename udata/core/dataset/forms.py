@@ -6,14 +6,12 @@ from udata.mongo.errors import FieldValidationError
 
 from .constants import (
     CHECKSUM_TYPES,
-    DEFAULT_FREQUENCY,
     DESCRIPTION_SHORT_SIZE_LIMIT,
     DESCRIPTION_SIZE_LIMIT,
-    LEGACY_FREQUENCIES,
     RESOURCE_FILETYPES,
     RESOURCE_TYPES,
     TITLE_SIZE_LIMIT,
-    UPDATE_FREQUENCIES,
+    UpdateFrequency,
 )
 from .models import (
     Checksum,
@@ -119,8 +117,8 @@ class CommunityResourceForm(BaseResourceForm):
 
 def map_legacy_frequencies(form, field):
     """Map legacy frequencies to new ones"""
-    if field.data in LEGACY_FREQUENCIES:
-        field.data = LEGACY_FREQUENCIES[field.data]
+    if freq := UpdateFrequency._legacy_frequencies.get(field.data):
+        field.data = freq.id
 
 
 def validate_contact_point(form, field):
@@ -160,8 +158,8 @@ class DatasetForm(ModelForm):
     license = fields.ModelSelectField(_("License"), model=License, allow_blank=True)
     frequency = fields.SelectField(
         _("Update frequency"),
-        choices=list(UPDATE_FREQUENCIES.items()),
-        default=DEFAULT_FREQUENCY,
+        choices=UpdateFrequency.vocabulary(),
+        default=UpdateFrequency.UNKNOWN.id,
         validators=[validators.optional()],
         preprocessors=[map_legacy_frequencies],
         description=_("The frequency at which data are updated."),

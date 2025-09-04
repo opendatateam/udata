@@ -17,6 +17,7 @@ from rdflib.namespace import RDF
 from rdflib.resource import Resource as RdfResource
 
 from udata import i18n, uris
+from udata.core.dataset.constants import UpdateFrequency
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.spatial.models import SpatialCoverage
 from udata.harvest.exceptions import HarvestSkipException
@@ -58,75 +59,76 @@ from .models import Checksum, Dataset, License, Resource
 log = logging.getLogger(__name__)
 
 FREQ_TERM_TO_UDATA = {
-    FREQ.continuous: "continuous",
-    FREQ.daily: "daily",
-    FREQ.threeTimesAWeek: "threeTimesAWeek",
-    FREQ.semiweekly: "semiweekly",
-    FREQ.weekly: "weekly",
-    FREQ.biweekly: "biweekly",
-    FREQ.threeTimesAMonth: "threeTimesAMonth",
-    FREQ.semimonthly: "semimonthly",
-    FREQ.monthly: "monthly",
-    FREQ.bimonthly: "bimonthly",
-    FREQ.quarterly: "quarterly",
-    FREQ.threeTimesAYear: "threeTimesAYear",
-    FREQ.semiannual: "semiannual",
-    FREQ.annual: "annual",
-    FREQ.biennial: "biennial",
-    FREQ.triennial: "triennial",
-    FREQ.irregular: "irregular",
+    FREQ.continuous: UpdateFrequency.CONTINUOUS,
+    FREQ.daily: UpdateFrequency.DAILY,
+    FREQ.threeTimesAWeek: UpdateFrequency.THREE_TIMES_A_WEEK,
+    FREQ.semiweekly: UpdateFrequency.SEMIWEEKLY,
+    FREQ.weekly: UpdateFrequency.WEEKLY,
+    FREQ.biweekly: UpdateFrequency.BIWEEKLY,
+    FREQ.threeTimesAMonth: UpdateFrequency.THREE_TIMES_A_MONTH,
+    FREQ.semimonthly: UpdateFrequency.SEMIMONTHLY,
+    FREQ.monthly: UpdateFrequency.MONTHLY,
+    FREQ.bimonthly: UpdateFrequency.BIMONTHLY,
+    FREQ.quarterly: UpdateFrequency.QUARTERLY,
+    FREQ.threeTimesAYear: UpdateFrequency.THREE_TIMES_A_YEAR,
+    FREQ.semiannual: UpdateFrequency.SEMIANNUAL,
+    FREQ.annual: UpdateFrequency.ANNUAL,
+    FREQ.biennial: UpdateFrequency.BIENNIAL,
+    FREQ.triennial: UpdateFrequency.TRIENNIAL,
+    FREQ.irregular: UpdateFrequency.IRREGULAR,
 }
 FREQ_ID_TO_UDATA = {
     namespace_manager.compute_qname(k)[2].lower(): v for k, v in FREQ_TERM_TO_UDATA.items()
 }
-FREQ_UDATA_TO_TERM = {v: k for k, v in FREQ_TERM_TO_UDATA.items()}
 
 EUFREQ_TERM_TO_UDATA = {
-    EUFREQ.UNKNOWN: "unknown",
-    EUFREQ.UPDATE_CONT: "continuous",
-    getattr(EUFREQ, "1MIN"): "1min",
-    getattr(EUFREQ, "5MIN"): "5min",
-    getattr(EUFREQ, "10MIN"): "10min",
-    getattr(EUFREQ, "15MIN"): "15min",
-    getattr(EUFREQ, "30MIN"): "30min",
-    EUFREQ.HOURLY: "hourly",
-    EUFREQ.BIHOURLY: "bihourly",
-    EUFREQ.TRIHOURLY: "trihourly",
-    getattr(EUFREQ, "12HRS"): "12hrs",
-    EUFREQ.CONT: "cont",
-    EUFREQ.DAILY_3: "threeTimesADay",
-    EUFREQ.DAILY_2: "semidaily",
-    EUFREQ.DAILY: "daily",
-    EUFREQ.WEEKLY_5: "fiveTimesAWeek",
-    EUFREQ.WEEKLY_3: "threeTimesAWeek",
-    EUFREQ.WEEKLY_2: "semiweekly",
-    EUFREQ.WEEKLY: "weekly",
-    EUFREQ.BIWEEKLY: "biweekly",
-    EUFREQ.MONTHLY_3: "threeTimesAMonth",
-    EUFREQ.MONTHLY_2: "semimonthly",
-    EUFREQ.MONTHLY: "monthly",
-    EUFREQ.BIMONTHLY: "bimonthly",
-    EUFREQ.QUARTERLY: "quarterly",
-    EUFREQ.ANNUAL_3: "threeTimesAYear",
-    EUFREQ.ANNUAL_2: "semiannual",
-    EUFREQ.ANNUAL: "annual",
-    EUFREQ.BIENNIAL: "biennial",
-    EUFREQ.TRIENNIAL: "triennial",
-    EUFREQ.QUADRENNIAL: "quadrennial",
-    EUFREQ.QUINQUENNIAL: "quinquennial",
-    EUFREQ.DECENNIAL: "decennial",
-    EUFREQ.BIDECENNIAL: "bidecennial",
-    EUFREQ.TRIDECENNIAL: "tridecennial",
-    EUFREQ.AS_NEEDED: "punctual",
-    EUFREQ.IRREG: "irregular",
-    EUFREQ.NEVER: "never",
-    EUFREQ.NOT_PLANNED: "notPlanned",
-    EUFREQ.OTHER: "other",
+    EUFREQ.UNKNOWN: UpdateFrequency.UNKNOWN,
+    EUFREQ.UPDATE_CONT: UpdateFrequency.CONTINUOUS,
+    getattr(EUFREQ, "1MIN"): UpdateFrequency.ONE_MINUTE,
+    getattr(EUFREQ, "5MIN"): UpdateFrequency.FIVE_MINUTES,
+    getattr(EUFREQ, "10MIN"): UpdateFrequency.TEN_MINUTES,
+    getattr(EUFREQ, "15MIN"): UpdateFrequency.FIFTEEN_MINUTES,
+    getattr(EUFREQ, "30MIN"): UpdateFrequency.THIRTY_MINUTES,
+    EUFREQ.HOURLY: UpdateFrequency.HOURLY,
+    EUFREQ.BIHOURLY: UpdateFrequency.BIHOURLY,
+    EUFREQ.TRIHOURLY: UpdateFrequency.TRIHOURLY,
+    getattr(EUFREQ, "12HRS"): UpdateFrequency.TWELVE_HOURS,
+    EUFREQ.CONT: UpdateFrequency.SEVERAL_TIMES_A_DAY,
+    EUFREQ.DAILY_3: UpdateFrequency.THREE_TIMES_A_DAY,
+    EUFREQ.DAILY_2: UpdateFrequency.SEMIDAILY,
+    EUFREQ.DAILY: UpdateFrequency.DAILY,
+    EUFREQ.WEEKLY_5: UpdateFrequency.FIVE_TIMES_A_WEEK,
+    EUFREQ.WEEKLY_3: UpdateFrequency.THREE_TIMES_A_WEEK,
+    EUFREQ.WEEKLY_2: UpdateFrequency.SEMIWEEKLY,
+    EUFREQ.WEEKLY: UpdateFrequency.WEEKLY,
+    EUFREQ.BIWEEKLY: UpdateFrequency.BIWEEKLY,
+    EUFREQ.MONTHLY_3: UpdateFrequency.THREE_TIMES_A_MONTH,
+    EUFREQ.MONTHLY_2: UpdateFrequency.SEMIMONTHLY,
+    EUFREQ.MONTHLY: UpdateFrequency.MONTHLY,
+    EUFREQ.BIMONTHLY: UpdateFrequency.BIMONTHLY,
+    EUFREQ.QUARTERLY: UpdateFrequency.QUARTERLY,
+    EUFREQ.ANNUAL_3: UpdateFrequency.THREE_TIMES_A_YEAR,
+    EUFREQ.ANNUAL_2: UpdateFrequency.SEMIANNUAL,
+    EUFREQ.ANNUAL: UpdateFrequency.ANNUAL,
+    EUFREQ.BIENNIAL: UpdateFrequency.BIENNIAL,
+    EUFREQ.TRIENNIAL: UpdateFrequency.TRIENNIAL,
+    EUFREQ.QUADRENNIAL: UpdateFrequency.QUADRENNIAL,
+    EUFREQ.QUINQUENNIAL: UpdateFrequency.QUINQUENNIAL,
+    EUFREQ.DECENNIAL: UpdateFrequency.DECENNIAL,
+    EUFREQ.BIDECENNIAL: UpdateFrequency.BIDECENNIAL,
+    EUFREQ.TRIDECENNIAL: UpdateFrequency.TRIDECENNIAL,
+    EUFREQ.AS_NEEDED: UpdateFrequency.PUNCTUAL,
+    EUFREQ.IRREG: UpdateFrequency.IRREGULAR,
+    EUFREQ.NEVER: UpdateFrequency.NEVER,
+    EUFREQ.NOT_PLANNED: UpdateFrequency.NOT_PLANNED,
+    EUFREQ.OTHER: UpdateFrequency.OTHER,
 }
 EUFREQ_ID_TO_UDATA = {
     namespace_manager.compute_qname(k)[2].lower(): v for k, v in EUFREQ_TERM_TO_UDATA.items()
 }
-EUFREQ_UDATA_TO_TERM = {v: k for k, v in EUFREQ_TERM_TO_UDATA.items()}
+
+# Order matters, we want FREQ to win over EUFREQ
+UDATA_ID_TO_TERM = {v: k for k, v in {**EUFREQ_TERM_TO_UDATA, **FREQ_TERM_TO_UDATA}.items()}
 
 
 def temporal_to_rdf(
@@ -144,10 +146,8 @@ def temporal_to_rdf(
     return pot
 
 
-def frequency_to_rdf(frequency: str, graph: Optional[Graph] = None) -> Optional[str]:
-    if not frequency:
-        return
-    return FREQ_UDATA_TO_TERM.get(frequency) or EUFREQ_UDATA_TO_TERM.get(frequency) or frequency
+def frequency_to_rdf(frequency: UpdateFrequency | None, graph: Graph | None = None) -> str | None:
+    return UDATA_ID_TO_TERM.get(frequency) if frequency else None
 
 
 def owner_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> Optional[RdfResource]:
@@ -356,8 +356,7 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
     if dataset.temporal_coverage:
         d.set(DCT.temporal, temporal_to_rdf(dataset.temporal_coverage, graph))
 
-    frequency = frequency_to_rdf(dataset.frequency)
-    if frequency:
+    if frequency := frequency_to_rdf(dataset.frequency):
         d.set(DCT.accrualPeriodicity, frequency)
 
     owner_role = DCT.publisher
@@ -533,7 +532,7 @@ def spatial_from_rdf(graph):
         return None
 
 
-def frequency_from_rdf(term):
+def frequency_from_rdf(term) -> UpdateFrequency | None:
     if isinstance(term, str):
         try:
             term = URIRef(uris.validate(term))
@@ -541,13 +540,11 @@ def frequency_from_rdf(term):
             pass
     if isinstance(term, Literal):
         term = term.toPython().lower()
-        if freq := FREQ_ID_TO_UDATA.get(term) or EUFREQ_ID_TO_UDATA.get(term):
-            return freq
+        return FREQ_ID_TO_UDATA.get(term) or EUFREQ_ID_TO_UDATA.get(term)
     if isinstance(term, RdfResource):
         term = term.identifier
     if isinstance(term, URIRef):
-        if freq := FREQ_TERM_TO_UDATA.get(term) or EUFREQ_TERM_TO_UDATA.get(term):
-            return freq
+        return FREQ_TERM_TO_UDATA.get(term) or EUFREQ_TERM_TO_UDATA.get(term)
 
 
 def mime_from_rdf(resource):

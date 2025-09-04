@@ -10,6 +10,7 @@ from rdflib.resource import Resource as RdfResource
 
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataservices.factories import DataserviceFactory
+from udata.core.dataset.constants import UpdateFrequency
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceFactory
 from udata.core.dataset.models import (
     Checksum,
@@ -20,9 +21,7 @@ from udata.core.dataset.models import (
 )
 from udata.core.dataset.rdf import (
     EUFREQ_TERM_TO_UDATA,
-    EUFREQ_UDATA_TO_TERM,
     FREQ_TERM_TO_UDATA,
-    FREQ_UDATA_TO_TERM,
     dataset_from_rdf,
     dataset_to_rdf,
     frequency_from_rdf,
@@ -99,7 +98,7 @@ class DatasetToRdfTest:
         dataset = DatasetFactory(
             tags=faker.tags(nb=3),
             resources=resources,
-            frequency="daily",
+            frequency=UpdateFrequency.DAILY,
             acronym="acro",
             organization=org,
             contact_points=[contact],
@@ -168,20 +167,16 @@ class DatasetToRdfTest:
         assert org_rdf.value(RDF.type).identifier == FOAF.Organization
         assert org_rdf.value(FOAF.name) == Literal("organization")
 
-    @pytest.mark.parametrize("freq,expected", FREQ_UDATA_TO_TERM.items())
-    def test_map_dublin_core_frequencies(self, freq, expected):
-        assert frequency_to_rdf(freq) == expected
+    @pytest.mark.parametrize("term,freq", FREQ_TERM_TO_UDATA.items())
+    def test_map_dublin_core_frequencies(self, term, freq):
+        assert frequency_to_rdf(freq) == term
 
-    @pytest.mark.parametrize("freq,expected", EUFREQ_UDATA_TO_TERM.items())
-    def test_map_european_frequencies(self, freq, expected):
-        assert (
-            frequency_to_rdf(freq) == expected
-            if freq not in FREQ_UDATA_TO_TERM
-            else FREQ_UDATA_TO_TERM[freq]
-        )
-
-    def test_map_undefined_frequency(self):
-        assert frequency_to_rdf("undefined_freq") == "undefined_freq"
+    @pytest.mark.parametrize(
+        "term,freq",
+        [(k, v) for k, v in EUFREQ_TERM_TO_UDATA.items() if v not in FREQ_TERM_TO_UDATA.values()],
+    )
+    def test_map_european_frequencies(self, term, freq):
+        assert frequency_to_rdf(freq) == term
 
     def test_minimal_resource_fields(self):
         resource = ResourceFactory()
@@ -463,7 +458,7 @@ class RdfToDatasetTest:
         assert dataset.title == title
         assert dataset.acronym == acronym
         assert dataset.description == description
-        assert dataset.frequency == "daily"
+        assert dataset.frequency == UpdateFrequency.DAILY
         assert set(dataset.tags) == set(tags)
         assert isinstance(dataset.temporal_coverage, db.DateRange)
         assert dataset.temporal_coverage.start == start

@@ -16,12 +16,10 @@ from udata.app import cache
 from udata.core import storages
 from udata.core.badges.factories import badge_factory
 from udata.core.dataset.constants import (
-    DEFAULT_FREQUENCY,
     DEFAULT_LICENSE,
     FULL_OBJECTS_HEADER,
-    LEGACY_FREQUENCIES,
     RESOURCE_TYPES,
-    UPDATE_FREQUENCIES,
+    UpdateFrequency,
 )
 from udata.core.dataset.factories import (
     CommunityResourceFactory,
@@ -530,14 +528,14 @@ class DatasetAPITest(APITestCase):
         other = GeoLevelFactory(id="other", name="Autre")
 
         dataset = DatasetFactory(
-            frequency="monthly",
+            frequency=UpdateFrequency.MONTHLY,
             license=license,
             spatial=SpatialCoverageFactory(zones=[paca.id], granularity=country.id),
         )
 
         response = self.get(url_for("apiv2.dataset", dataset=dataset))
         self.assert200(response)
-        assert response.json["frequency"] == "monthly"
+        assert response.json["frequency"] == UpdateFrequency.MONTHLY.id
         assert response.json["license"] == "lov2"
         assert response.json["spatial"]["zones"][0] == paca.id
         assert response.json["spatial"]["granularity"] == "country"
@@ -549,8 +547,8 @@ class DatasetAPITest(APITestCase):
             },
         )
         self.assert200(response)
-        assert response.json["frequency"]["id"] == "monthly"
-        assert response.json["frequency"]["label"] == "Mensuelle"
+        assert response.json["frequency"]["id"] == UpdateFrequency.MONTHLY.id
+        assert response.json["frequency"]["label"] == UpdateFrequency.MONTHLY.label
         assert response.json["license"]["id"] == "lov2"
         assert response.json["license"]["title"] == license.title
         assert response.json["spatial"]["zones"][0]["id"] == paca.id
@@ -571,8 +569,8 @@ class DatasetAPITest(APITestCase):
             },
         )
         self.assert200(response)
-        assert response.json["frequency"]["id"] == DEFAULT_FREQUENCY
-        assert response.json["frequency"]["label"] == UPDATE_FREQUENCIES.get(DEFAULT_FREQUENCY)
+        assert response.json["frequency"]["id"] == UpdateFrequency.UNKNOWN.id
+        assert response.json["frequency"]["label"] == UpdateFrequency.UNKNOWN.label
         assert response.json["license"]["id"] == DEFAULT_LICENSE["id"]
         assert response.json["license"]["title"] == DEFAULT_LICENSE["title"]
         assert len(response.json["spatial"]["zones"]) == 0
@@ -722,12 +720,12 @@ class DatasetAPITest(APITestCase):
         """It should create a dataset from the API with a legacy frequency"""
         self.login()
 
-        for oldFreq, newFreq in LEGACY_FREQUENCIES.items():
+        for oldFreq, newFreq in UpdateFrequency._legacy_frequencies.items():
             data = DatasetFactory.as_dict()
             data["frequency"] = oldFreq
             response = self.post(url_for("api.datasets"), data)
             self.assert201(response)
-            self.assertEqual(response.json["frequency"], newFreq)
+            self.assertEqual(response.json["frequency"], newFreq.id)
 
     def test_dataset_api_update(self):
         """It should update a dataset from the API"""
@@ -2032,7 +2030,7 @@ class DatasetReferencesAPITest(APITestCase):
         """It should fetch the dataset frequencies list from the API"""
         response = self.get(url_for("api.dataset_frequencies"))
         self.assert200(response)
-        self.assertEqual(len(response.json), len(UPDATE_FREQUENCIES))
+        self.assertEqual(len(response.json), len(UpdateFrequency))
 
     def test_dataset_allowed_resources_extensions(self):
         """It should fetch the resources allowed extensions list from the API"""

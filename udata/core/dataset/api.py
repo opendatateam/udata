@@ -65,7 +65,7 @@ from .api_fields import (
     upload_community_fields,
     upload_fields,
 )
-from .constants import RESOURCE_TYPES, UPDATE_FREQUENCIES
+from .constants import RESOURCE_TYPES, UpdateFrequency
 from .exceptions import (
     SchemasCacheUnavailableException,
     SchemasCatalogNotFoundException,
@@ -883,7 +883,7 @@ class FrequenciesAPI(API):
     @api.marshal_list_with(frequency_fields)
     def get(self):
         """List all available frequencies"""
-        return [{"id": id, "label": label} for id, label in UPDATE_FREQUENCIES.items()]
+        return [{"id": f.id, "label": f.label} for f in UpdateFrequency]
 
 
 @ns.route("/extensions/", endpoint="allowed_extensions")
