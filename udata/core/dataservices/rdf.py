@@ -14,6 +14,7 @@ from udata.rdf import (
     TAG_TO_EU_HVD_CATEGORIES,
     contact_points_from_rdf,
     contact_points_to_rdf,
+    default_lang_value,
     namespace_manager,
     rdf_value,
     remote_url_from_rdf,
@@ -38,7 +39,9 @@ def dataservice_from_rdf(
     d = graph.resource(node)
 
     dataservice.title = rdf_value(d, DCT.title)
-    dataservice.description = sanitize_html(d.value(DCT.description) or d.value(DCT.abstract))
+    dataservice.description = sanitize_html(
+        default_lang_value(d, DCT.description) or default_lang_value(d, DCT.abstract)
+    )
 
     dataservice.base_api_url = url_from_rdf(d, DCAT.endpointURL)
 

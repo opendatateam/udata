@@ -40,6 +40,7 @@ from udata.rdf import (
     TAG_TO_EU_HVD_CATEGORIES,
     contact_points_from_rdf,
     contact_points_to_rdf,
+    default_lang_value,
     namespace_manager,
     rdf_unique_values,
     rdf_value,
@@ -682,7 +683,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     resource.filetype = "remote"
     resource.title = title_from_rdf(distrib, url)
     resource.url = url
-    resource.description = sanitize_html(distrib.value(DCT.description))
+    resource.description = sanitize_html(default_lang_value(distrib, DCT.description))
     resource.filesize = rdf_value(distrib, DCAT.byteSize)
     resource.mime = mime_from_rdf(distrib)
     resource.format = format_from_rdf(distrib)
@@ -757,7 +758,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
         raise HarvestSkipException("missing title on dataset")
 
     # Support dct:abstract if dct:description is missing (sometimes used instead)
-    description = d.value(DCT.description) or d.value(DCT.abstract)
+    description = default_lang_value(d, DCT.description) or default_lang_value(d, DCT.abstract)
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity)) or dataset.frequency
     roles = [  # Imbricated list of contact points for each role

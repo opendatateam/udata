@@ -45,6 +45,7 @@ pytz
 redis
 rdflib
 requests
+saxonche==12.8.0
 sentry-sdk[flask]
 speaklater
 tlds
