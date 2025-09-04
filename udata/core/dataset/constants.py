@@ -9,46 +9,46 @@ from udata.i18n import lazy_gettext as _
 # - EU: https://publications.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/frequency
 UPDATE_FREQUENCIES = OrderedDict(
     [
-        ("unknown", _("Unknown")),  #                  EU
-        ("continuous", _("Real time")),  #             DC, EU:UPDATE_CONT
-        ("1min", _("Every minute")),  #                EU
-        ("5min", _("Every five minutes")),  #          EU
-        ("10min", _("Every ten minutes")),  #          EU
-        ("15min", _("Every fifteen minutes")),  #      EU
-        ("30min", _("Every thirty minutes")),  #       EU
-        ("hourly", _("Hourly")),  #                    DC, EU
-        ("bihourly", _("Every two hours")),  #         EU
-        ("trihourly", _("Every three hours")),  #      EU
-        ("12hrs", _("Every twelve hours")),  #         EU
-        ("cont", _("Several times a day")),  #         EU
-        ("daily_3", _("Three times a day")),  #        DC:threeTimesADay, EU
-        ("daily_2", _("Twice a day")),  #              DC:semidaily, EU
-        ("daily", _("Daily")),  #                      DC, EU
-        ("weekly_5", _("Five times a week")),  #       EU
-        ("weekly_3", _("Three times a week")),  #      DC:threeTimesAWeek, EU
-        ("weekly_2", _("Twice a week")),  #            DC:semiweekly, EU
-        ("weekly", _("Weekly")),  #                    DC, EU
-        ("biweekly", _("Every two weeks")),  #         DC, EU
-        ("monthly_3", _("Three times a month")),  #    DC:threeTimesAMonth, EU
-        ("monthly_2", _("Twice a month")),  #          DC:semimonthly, EU
-        ("monthly", _("Monthly")),  #                  DC, EU
-        ("bimonthly", _("Every two months")),  #       DC, EU
-        ("quarterly", _("Quarterly")),  #              DC, EU
-        ("annual_3", _("Three times a year")),  #      DC:threeTimesAYear, EU
-        ("annual_2", _("Twice a year")),  #            DC:semiannual, EU
-        ("annual", _("Annually")),  #                  DC, EU
-        ("biennial", _("Every two years")),  #         DC, EU
-        ("triennial", _("Every three years")),  #      DC, EU
-        ("quadrennial", _("Every four years")),  #     EU
-        ("quinquennial", _("Every five years")),  #    EU
-        ("decennial", _("Every ten years")),  #        EU
-        ("bidecennial", _("Every twenty years")),  #   EU
-        ("tridecennial", _("Every thirty years")),  #  EU
-        ("punctual", _("Punctual")),  #                DC, EU:AS_NEEDED
-        ("irregular", _("Irregular")),  #              DC, EU:IRREG
-        ("never", _("Never")),  #                      EU
-        ("not_planned", _("Not planned")),  #          EU
-        ("other", _("Other")),  #                      EU
+        ("unknown", _("Unknown")),  #                      EU
+        ("continuous", _("Real time")),  #                 DC, EU:UPDATE_CONT
+        ("1min", _("Every minute")),  #                    EU
+        ("5min", _("Every five minutes")),  #              EU
+        ("10min", _("Every ten minutes")),  #              EU
+        ("15min", _("Every fifteen minutes")),  #          EU
+        ("30min", _("Every thirty minutes")),  #           EU
+        ("hourly", _("Hourly")),  #                        EU
+        ("bihourly", _("Every two hours")),  #             EU
+        ("trihourly", _("Every three hours")),  #          EU
+        ("12hours", _("Every twelve hours")),  #           EU:12HRS
+        ("severalTimesADay", _("Several times a day")),  # EU:CONT
+        ("threeTimesADay", _("Three times a day")),  #     EU:DAILY_3
+        ("semidaily", _("Twice a day")),  #                EU:DAILY_2
+        ("daily", _("Daily")),  #                          DC, EU
+        ("fiveTimesAWeek", _("Five times a week")),  #     EU:WEEKLY_5
+        ("threeTimesAWeek", _("Three times a week")),  #   DC, EU:WEEKLY_3
+        ("semiweekly", _("Twice a week")),  #              DC, EU:WEEKLY_2
+        ("weekly", _("Weekly")),  #                        DC, EU
+        ("biweekly", _("Every two weeks")),  #             DC, EU
+        ("threeTimesAMonth", _("Three times a month")),  # DC, EU:MONTHLY_3
+        ("semimonthly", _("Twice a month")),  #            DC, EU:MONTHLY_2
+        ("monthly", _("Monthly")),  #                      DC, EU
+        ("bimonthly", _("Every two months")),  #           DC, EU
+        ("quarterly", _("Quarterly")),  #                  DC, EU
+        ("threeTimesAYear", _("Three times a year")),  #   DC, EU:ANNUAL_3
+        ("semiannual", _("Twice a year")),  #              DC, EU:ANNUAL_2
+        ("annual", _("Annually")),  #                      DC, EU
+        ("biennial", _("Every two years")),  #             DC, EU
+        ("triennial", _("Every three years")),  #          DC, EU
+        ("quadrennial", _("Every four years")),  #         EU
+        ("quinquennial", _("Every five years")),  #        EU
+        ("decennial", _("Every ten years")),  #            EU
+        ("bidecennial", _("Every twenty years")),  #       EU
+        ("tridecennial", _("Every thirty years")),  #      EU
+        ("punctual", _("Punctual")),  #                    EU:AS_NEEDED
+        ("irregular", _("Irregular")),  #                  DC, EU:IRREG
+        ("never", _("Never")),  #                          EU
+        ("notPlanned", _("Not planned")),  #               EU:NOT_PLANNED
+        ("other", _("Other")),  #                          EU
     ]
 )
 
@@ -58,7 +58,7 @@ UNBOUNDED_FREQUENCIES = [
     "punctual",
     "irregular",
     "never",
-    "not_planned",
+    "notPlanned",
     "other",
 ]
 
@@ -69,18 +69,10 @@ BOUNDED_FREQUENCIES = [
 # Map legacy frequencies to current ones
 LEGACY_FREQUENCIES = {
     "realtime": "continuous",
-    "fourTimesADay": "cont",
-    "threeTimesADay": "daily_3",
-    "semidaily": "daily_2",
+    "fourTimesADay": "severalTimesADay",
     "fourTimesAWeek": "other",
-    "threeTimesAWeek": "weekly_3",
-    "semiweekly": "weekly_2",
     "fortnighly": "biweekly",
-    "threeTimesAMonth": "monthly_3",
-    "semimonthly": "monthly_2",
-    "threeTimesAYear": "annual_3",
-    "semiannual": "annual_2",
-    "biannual": "annual_2",
+    "biannual": "semiannual",
 }
 
 DEFAULT_FREQUENCY = "unknown"

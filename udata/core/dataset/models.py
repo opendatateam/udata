@@ -838,21 +838,21 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
             delta = timedelta(hours=2)
         elif self.frequency == "trihourly":
             delta = timedelta(hours=3)
-        elif self.frequency == "12hrs":
+        elif self.frequency == "12hours":
             delta = timedelta(hours=12)
-        elif self.frequency in ["cont", "daily_3", "daily_2", "daily"]:
+        elif self.frequency in ["severalTimesADay", "threeTimesADay", "semidaily", "daily"]:
             delta = timedelta(days=1)
-        elif self.frequency in ["weekly_5", "weekly_3", "weekly_2", "weekly"]:
+        elif self.frequency in ["fiveTimesAWeek", "threeTimesAWeek", "semiweekly", "weekly"]:
             delta = timedelta(weeks=1)
         elif self.frequency == "biweekly":
             delta = timedelta(weeks=2)
-        elif self.frequency in ["monthly_3", "monthly_2", "monthly"]:
+        elif self.frequency in ["threeTimesAMonth", "semimonthly", "monthly"]:
             delta = timedelta(days=31)
         elif self.frequency == "bimonthly":
             delta = timedelta(days=31 * 2)
         elif self.frequency == "quarterly":
             delta = timedelta(days=365 / 4)
-        elif self.frequency in ["annual_3", "annual_2", "annual"]:
+        elif self.frequency in ["threeTimesAYear", "semiannual", "annual"]:
             delta = timedelta(days=365)
         elif self.frequency == "biennial":
             delta = timedelta(days=365 * 2)
