@@ -1,5 +1,5 @@
 """
-Convert DublinCore-based Dataset frequencies to EU vocabulary
+Convert legacy frequencies to latest vocabulary
 """
 
 import logging
