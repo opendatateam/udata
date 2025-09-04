@@ -1,4 +1,0 @@
-line-length = 100
-
-[lint]
-extend-select = ["I"] # also sort imports with an isort rule

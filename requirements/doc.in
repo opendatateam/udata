@@ -1,5 +1,0 @@
--r install.in
--c install.pip
--c test.pip
-
-mkdocs

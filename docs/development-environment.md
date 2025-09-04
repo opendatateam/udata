@@ -8,7 +8,7 @@ See [getting-started](getting-started.md) for installation instructions.
 
 ### Dependency management
 
-We're using [pip-tools](https://github.com/jazzband/pip-tools/#pip-tools--pip-compile--pip-sync) with [a pre-commit hook](https://github.com/jazzband/pip-tools/#version-control-integration) to help us manage our requirements.
+We're using `pyproject.toml` to manage our dependencies with optional dependency groups for different use cases.
 
 **This is not mandatory unless you're actively contributing to the project.**
 
@@ -16,23 +16,27 @@ We're using [pip-tools](https://github.com/jazzband/pip-tools/#pip-tools--pip-co
 $ pre-commit install
 ```
 
-`pip-tools` uses the `.in` files in `requirements/` as input to generate the `.pip` files we rely on to install `udata`.
+Dependencies are defined in `pyproject.toml` with the following optional groups:
+- `dev`: Development tools (ruff, pre-commit, invoke, etc.)
+- `test`: Testing dependencies (pytest, mock, etc.)
+- `doc`: Documentation dependencies (mkdocs, etc.)
+- `report`: Reporting dependencies (coverage, flake8, etc.)
 
-If you need to add or modify a dependency, do it in the `.in` files _and commit them_. The pre-commit hook will compile the `.pip` files and warn you.
-
-You can also generate the `.pip` files manually from the `.in` files without commiting them beforehand. For example, if you modified `install.in`:
+To install the project with all development dependencies:
 
 ```shell
-pip-compile requirements/install.in --output-file requirements/install.pip
+pip install -e ".[dev]"
 ```
 
-> WARNING: whenever the dependencies change, the `udata.pip` needs to be manually recompiled on plugins that use the same virtualenv and pip-compile against udata, like
-  [the udata-front project](https://github.com/datagouv/udata-front), eg:
+To install with specific optional dependencies:
 
-  ```shell
-  cd udata-front
-  pip-compile requirements/udata.in --output-file=requirements/udata.pip
-  ```
+```shell
+pip install -e ".[test]"     # For testing
+pip install -e ".[doc]"      # For documentation
+pip install -e ".[report]"   # For reporting
+```
+
+If you need to add or modify a dependency, edit the `pyproject.toml` file directly in the appropriate section.
 
 
 ### Optmizing performances with Cython
@@ -43,8 +47,7 @@ To enable it, you need to install Cython before all other dependencies:
 
 ```shell
 $ pip install Cython
-$ pip install -r requirements/develop.pip
-$ pip install -e .
+$ pip install -e ".[dev]"
 ```
 
 ### Mac OS caveats
@@ -57,14 +60,14 @@ If installing `cryptography` fails:
 brew install openssl@1.1
 export LDFLAGS="-L$(brew --prefix openssl@1.1)/lib"
 export CPPFLAGS="-I$(brew --prefix openssl@1.1)/include"
-pip install -r requirements/develop.pip
+pip install -e ".[dev]"
 ```
 
 If installing `Pillow` fails:
 
 ```
 brew install libjpeg
-pip install -r requirements/develop.pip
+pip install -e ".[dev]"
 ```
 
 #### Local web server is slow

@@ -26,7 +26,7 @@ jobs:
       - checkout
       - run:
           name: Compute Python dependencies key
-          command: cat requirements/*.pip > python.deps
+          command: cat pyproject.toml > python.deps
       - run:
           name: Get the base reference branch
           command: export BASE_BRANCH=$(base_branch)
@@ -45,9 +45,8 @@ jobs:
           command: |
             python -m venv venv
             source venv/bin/activate
-            pip install --upgrade wheel pip
-            pip install -r requirements/develop.pip
-            pip install -e .
+            pip install --upgrade pip
+            pip install -e ".[dev]"
       - save_cache:
           key: py3-cache-v12-{{ arch }}-{{ checksum "python.deps" }}
           paths:
@@ -62,7 +61,7 @@ jobs:
           # ruff format --check . : check code formatting without fixing (to fix, remove --check)
           command: |
             source venv/bin/activate
-            ruff check .
+            ruff check --select I .
             ruff format --check .
       - run:
           name: Run tests

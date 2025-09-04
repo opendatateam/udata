@@ -3,10 +3,10 @@
     "config:base"
   ],
   "baseBranches": ["master"],
-  "pip_requirements": {
-    "fileMatch": ["requirements/install.in", "requirements/test.in"]
+  "enabledManagers": ["pep621"],
+  "pep621": {
+    "fileMatch": ["pyproject.toml"]
   },
-  "enabledManagers": ["pip_requirements"],
   "automerge": true,
   "prHourlyLimit": 5,
   "masterIssueApproval": true
