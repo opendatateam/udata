@@ -219,15 +219,17 @@ def logout_with_proconnect_url():
     Extends the flask-security `logout` by returning the ProConnect logout URL (if any)
     so `cdata` can redirect to it if the user was connected via ProConnect.
     """
-
     # after the redirection to ProConnect logout, the user will be redirected
     # to our logout again with ProconnectLogoutAPI.
     if request.method == "POST" and wants_json():
-        return jsonify(
-            {
-                "proconnect_logout_url": get_logout_url(),
-            }
-        )
+        proconnect_logout_url = get_logout_url()
+
+        if proconnect_logout_url:
+            return jsonify(
+                {
+                    "proconnect_logout_url": get_logout_url(),
+                }
+            )
 
     # Calling the flask-security logout endpoint
     logout()
