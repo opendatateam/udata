@@ -40,7 +40,7 @@ def get_logout_url():
     # Generate a random state that we send to ProConnect, they'll return it so we can check it.
     state = gen_salt(50)
     session[STATE_KEY] = state
-    redirect_uri = url_for("proconnect.logout", _external=True)
+    redirect_uri = url_for("api.proconnect_logout", _external=True)
 
     return add_params_to_uri(
         end_session_endpoint,
