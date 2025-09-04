@@ -7,7 +7,6 @@ import pytest
 from flask import current_app
 from mock import patch
 
-from udata.core import activity
 from udata.core.activity.models import new_activity
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
@@ -584,8 +583,8 @@ class ExecutionTestMixin(MockBackendsMixin):
 
     @pytest.mark.options(HARVEST_ACTIVITY_USER_ID="68b860182728e27218dd7c72")
     def test_harvest_emit_activity(self):
-        # We need to init activity module
-        activity.init_app(current_app)
+        # We need to init dataset activities module
+        import udata.core.dataset.activities  # noqa
 
         user = UserFactory(id=current_app.config["HARVEST_ACTIVITY_USER_ID"])
         source = HarvestSourceFactory(backend="factory")
