@@ -1,12 +1,35 @@
+from datetime import date, datetime
+
+from blinker import Signal
+from mongoengine.signals import post_save
+
+from udata.api_fields import field
 from udata.auth import login_user
+from udata.core.activity.models import Activity, Auditable
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
-from udata.models import Activity, db
+from udata.models import db
 from udata.tests import DBTestMixin, TestCase, WebTestMixin
+from udata.tests.helpers import assert_emit, assert_not_emit
 
 
 class FakeSubject(db.Document):
     name = db.StringField()
+
+
+class FakeAuditableSubject(Auditable, db.Document):
+    name = field(db.StringField())
+    tags = field(db.TagListField())
+    some_date = field(db.DateField())
+    not_auditable = field(db.StringField(), auditable=False)
+
+    after_save = Signal()
+    on_create = Signal()
+    on_update = Signal()
+    on_delete = Signal()
+
+
+post_save.connect(FakeAuditableSubject.post_save, sender=FakeAuditableSubject)
 
 
 class FakeActivity(Activity):
@@ -87,3 +110,72 @@ class ActivityTest(WebTestMixin, DBTestMixin, TestCase):
 
         self.assertEqual(Activity.objects(related_to=self.fake).count(), 1)
         self.assertEqual(Activity.objects(actor=self.user).count(), 1)
+
+
+class AuditableTest(WebTestMixin, DBTestMixin, TestCase):
+    def test_auditable_signals_emission(self):
+        """It should emit appropriate signals on subject fields creation, update and deletion"""
+        with assert_emit(post_save, FakeAuditableSubject.on_create):
+            fake = FakeAuditableSubject.objects.create(
+                name="fake",
+                tags=["my", "tags"],
+                some_date=date(2020, 1, 1),
+                not_auditable="original",
+            )
+
+        # All these fields should trigger an update signal
+        fake.name = "different"
+        with assert_emit(post_save, FakeAuditableSubject.on_update):
+            fake.save()
+
+        fake.tags = ["other", "tags"]
+        with assert_emit(post_save, FakeAuditableSubject.on_update):
+            fake.save()
+
+        fake.some_date = date(2027, 7, 7)
+        with assert_emit(post_save, FakeAuditableSubject.on_update):
+            fake.save()
+
+        # Not auditable field that should NOT trigger an update signal
+        fake.not_auditable = "changed"
+        with assert_not_emit(FakeAuditableSubject.on_update):
+            fake.save()
+
+        # Field modifications that should NOT trigger an update signal
+        # since they are actually cleaned and stored similarly to the current value
+        # 1. Same as current ones but in capital case, that will be slugified
+        fake.tags = ["OTHER", "TAGS"]
+        with assert_not_emit(FakeAuditableSubject.on_update):  # FAIL at the moment
+            fake.save()
+            fake.reload()
+            self.assertEqual(fake.tags, ["other", "tags"])
+
+        # 2. Using a datetime, that will be stored as date in mongo, exactly like the current value
+        fake.some_date = datetime(2027, 7, 7, 0, 0, 0)
+        with assert_not_emit(FakeAuditableSubject.on_update):  # FAIL at the moment
+            fake.save()
+            fake.reload()
+            self.assertEqual(fake.some_date, date(2027, 7, 7))
+
+        # The deletion should trigger a delete signal
+        with assert_not_emit(FakeAuditableSubject.on_update):
+            fake.delete()
+
+    def test_changed_fields(self):
+        """It should emit an update signals on subject fields creation, update and deletion"""
+        fake = FakeAuditableSubject.objects.create(
+            name="fake", tags=["my", "tags"], some_date=date(2020, 1, 1), not_auditable="original"
+        )
+
+        def check_signal_update(args):
+            self.assertEqual(args[1]["changed_fields"], ["name", "tags", "some_date"])
+            self.assertEqual(args[1]["previous"]["name"], "fake")
+            self.assertEqual(args[1]["previous"]["tags"], ["my", "tags"])
+            self.assertEqual(args[1]["previous"]["some_date"], date(2020, 1, 1))
+
+        with assert_emit(FakeAuditableSubject.on_update, assertions_callback=check_signal_update):
+            fake.name = "different"
+            fake.tags = ["other", "tags"]
+            fake.some_date = date(2027, 7, 7)
+            fake.not_auditable = "changed"
+            fake.save()
