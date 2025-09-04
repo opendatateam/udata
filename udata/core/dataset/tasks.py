@@ -16,7 +16,7 @@ from udata.i18n import lazy_gettext as _
 from udata.models import Activity, Discussion, Follow, Organization, Topic, Transfer, db
 from udata.tasks import job
 
-from .constants import UNBOUNDED_FREQUENCIES, UPDATE_FREQUENCIES
+from .constants import BOUNDED_FREQUENCIES, UPDATE_FREQUENCIES
 from .models import Checksum, CommunityResource, Dataset, Resource
 
 log = get_task_logger(__name__)
@@ -81,7 +81,6 @@ def purge_datasets(self):
 @job("send-frequency-reminder")
 def send_frequency_reminder(self):
     # We exclude irrelevant frequencies.
-    frequencies = [f for f in UPDATE_FREQUENCIES.keys() if f not in UNBOUNDED_FREQUENCIES]
     now = datetime.utcnow()
     reminded_orgs = {}
     reminded_people = []
@@ -89,7 +88,7 @@ def send_frequency_reminder(self):
     for org in Organization.objects.visible():
         outdated_datasets = []
         for dataset in Dataset.objects.filter(
-            frequency__in=frequencies, organization=org
+            frequency__in=BOUNDED_FREQUENCIES, organization=org
         ).visible():
             if dataset.next_update + timedelta(days=allowed_delay) < now:
                 dataset.outdated = now - dataset.next_update

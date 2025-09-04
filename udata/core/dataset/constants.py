@@ -52,18 +52,19 @@ UPDATE_FREQUENCIES = OrderedDict(
     ]
 )
 
-# Irregular or unquantifiable frequencies
-UNBOUNDED_FREQUENCIES = set(
-    [
-        "unknown",
-        "continuous",
-        "punctual",
-        "irregular",
-        "never",
-        "not_planned",
-        "other",
-    ]
-)
+# Defined (not "unknown") but irregular or unquantifiable frequencies
+UNBOUNDED_FREQUENCIES = [
+    "continuous",
+    "punctual",
+    "irregular",
+    "never",
+    "not_planned",
+    "other",
+]
+
+BOUNDED_FREQUENCIES = [
+    f for f in UPDATE_FREQUENCIES.keys() if f != "unknown" and f not in UNBOUNDED_FREQUENCIES
+]
 
 # Map legacy frequencies to current ones
 LEGACY_FREQUENCIES = {
