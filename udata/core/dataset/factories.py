@@ -8,6 +8,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.factories import ModelFactory
 
+from .constants import UpdateFrequency
 from .models import Checksum, CommunityResource, Dataset, License, Resource
 
 
@@ -17,7 +18,7 @@ class DatasetFactory(ModelFactory):
 
     title = factory.Faker("sentence")
     description = factory.Faker("text")
-    frequency = "unknown"
+    frequency = UpdateFrequency.UNKNOWN
     resources = factory.LazyAttribute(lambda o: ResourceFactory.build_batch(o.nb_resources))
 
     class Params:

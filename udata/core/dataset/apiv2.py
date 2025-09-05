@@ -30,7 +30,7 @@ from .api_fields import (
     temporal_coverage_fields,
     user_ref_fields,
 )
-from .constants import DEFAULT_FREQUENCY, DEFAULT_LICENSE, FULL_OBJECTS_HEADER, UPDATE_FREQUENCIES
+from .constants import DEFAULT_LICENSE, FULL_OBJECTS_HEADER, UpdateFrequency
 from .models import CommunityResource, Dataset
 from .search import DatasetSearch
 
@@ -157,13 +157,13 @@ dataset_fields = apiv2.model(
         ),
         "frequency": fields.Raw(
             attribute=lambda d: {
-                "id": d.frequency or DEFAULT_FREQUENCY,
-                "label": UPDATE_FREQUENCIES.get(d.frequency or DEFAULT_FREQUENCY),
+                "id": UpdateFrequency(d.frequency).id,
+                "label": UpdateFrequency(d.frequency).label,
             }
             if request.headers.get(FULL_OBJECTS_HEADER, False, bool)
-            else d.frequency,
-            enum=list(UPDATE_FREQUENCIES),
-            default=DEFAULT_FREQUENCY,
+            else UpdateFrequency(d.frequency).id,
+            enum=UpdateFrequency.vocabulary(),
+            default=UpdateFrequency.UNKNOWN.id,
             required=True,
             description="The update frequency (full Frequency object if `X-Get-Datasets-Full-Objects` is set, ID of the frequency otherwise)",
         ),
