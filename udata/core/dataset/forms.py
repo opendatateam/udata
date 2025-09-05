@@ -117,8 +117,10 @@ class CommunityResourceForm(BaseResourceForm):
 
 def map_legacy_frequencies(form, field):
     """Map legacy frequencies to new ones"""
-    if freq := UpdateFrequency._legacy_frequencies.get(field.data):
-        field.data = freq.id
+    try:
+        field.data = UpdateFrequency(field.data).id
+    except ValueError:
+        pass
 
 
 def validate_contact_point(form, field):

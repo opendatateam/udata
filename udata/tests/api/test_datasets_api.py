@@ -720,7 +720,7 @@ class DatasetAPITest(APITestCase):
         """It should create a dataset from the API with a legacy frequency"""
         self.login()
 
-        for oldFreq, newFreq in UpdateFrequency._legacy_frequencies.items():
+        for oldFreq, newFreq in UpdateFrequency._LEGACY_FREQUENCIES.items():  # type: ignore[misc]
             data = DatasetFactory.as_dict()
             data["frequency"] = oldFreq
             response = self.post(url_for("api.datasets"), data)

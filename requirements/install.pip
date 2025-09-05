@@ -20,6 +20,8 @@ babel==2.17.0
     # via
     #   -r requirements/install.in
     #   flask-babel
+backports.strenum==1.3.1 ; python_version < '3.11'
+    # via -r requirements/install.in
 bcrypt==4.3.0
     # via -r requirements/install.in
 billiard==4.2.1

@@ -8,7 +8,7 @@ from mongoengine.signals import post_save, pre_save
 from .badges_field import BadgesField
 from .datetime_fields import DateField, DateRange, Datetimed
 from .document import DomainModel, UDataDocument
-from .enum_fields import StringEnumField
+from .enum_fields import StrEnumField
 from .extras_fields import ExtrasField, OrganizationExtrasField
 from .queryset import UDataQuerySet
 from .slug_fields import SlugField
@@ -41,7 +41,7 @@ class UDataMongoEngine(MongoEngine):
         self.ValidationError = ValidationError
         self.ObjectId = ObjectId
         self.DBRef = DBRef
-        self.StringEnumField = StringEnumField
+        self.StringEnumField = StrEnumField
         self.post_save = post_save
         self.pre_save = pre_save
 

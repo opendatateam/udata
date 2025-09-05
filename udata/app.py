@@ -3,7 +3,6 @@ import importlib
 import logging
 import os
 import types
-from enum import Enum
 from os.path import abspath, dirname, exists, isfile, join
 
 import bson
@@ -117,8 +116,6 @@ class UDataJsonEncoder(json.JSONEncoder):
             return str(obj)
         elif isinstance(obj, datetime.datetime):
             return obj.isoformat()
-        elif isinstance(obj, Enum):
-            return str(obj.value)
         elif hasattr(obj, "to_dict"):
             return obj.to_dict()
         elif hasattr(obj, "serialize"):

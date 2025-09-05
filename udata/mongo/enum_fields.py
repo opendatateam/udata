@@ -1,22 +1,24 @@
 import logging
-from enum import Enum
+import sys
+
+if sys.version_info >= (3, 11):
+    from enum import StrEnum
+else:
+    from backports.strenum import StrEnum
 
 from mongoengine.fields import BaseField
 
 log = logging.getLogger(__name__)
 
 
-class StringEnumField(BaseField):
+class StrEnumField(BaseField):
     """
-    Store StrEnum-like enums as plain strings
+    Store StrEnum as plain strings
     """
 
-    def __init__(self, enum_class: type[Enum], **kwargs):
+    def __init__(self, enum_class: type[StrEnum], **kwargs):
         self.enum_class = enum_class
         super().__init__(choices=list(enum_class), **kwargs)
 
-    def to_python(self, value) -> Enum | None:
-        return value if isinstance(value, Enum) else self.enum_class(value)
-
-    def to_mongo(self, value) -> str | None:
-        return str(value) if value else None
+    def to_python(self, value) -> StrEnum:
+        return self.enum_class(value)

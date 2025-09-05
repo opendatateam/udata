@@ -273,7 +273,7 @@ class DatasetModelTest:
         assert dataset.tags[1] == "this-is-a-tag"
 
     def test_legacy_frequencies(self):
-        for oldFreq, newFreq in UpdateFrequency._legacy_frequencies.items():
+        for oldFreq, newFreq in UpdateFrequency._LEGACY_FREQUENCIES.items():  # type: ignore[misc]
             dataset = DatasetFactory(frequency=oldFreq)
             assert dataset.frequency == newFreq
 

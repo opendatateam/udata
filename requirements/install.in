@@ -2,6 +2,7 @@ authlib
 awesome-slugify
 Babel
 bcrypt
+backports.strenum ; python_version < '3.11'
 bleach[css]
 blinker<=1.5
 boto3>=1.26

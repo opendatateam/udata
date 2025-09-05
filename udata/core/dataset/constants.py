@@ -1,17 +1,32 @@
+import sys
 from collections import OrderedDict
 from datetime import datetime, timedelta
-from enum import Enum
-from typing import Any
+
+if sys.version_info >= (3, 11):
+    from enum import StrEnum
+else:
+    from backports.strenum import StrEnum
+
+from flask_babel import LazyString
 
 from udata.i18n import lazy_gettext as _
 
 
-# Udata frequencies
-#
-# Based on the following vocabularies:
-# - DC: http://dublincore.org/groups/collections/frequency/
-# - EU: https://publications.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/frequency
-class UpdateFrequency(str, Enum):
+class UpdateFrequency(StrEnum):
+    """
+    Udata frequency vocabulary
+
+    Based on the following vocabularies:
+    - DC: http://dublincore.org/groups/collections/frequency/
+    - EU: https://publications.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/frequency
+    """
+
+    # FIXME(python 3.11.1+): Drop tupple syntax and use auto() where possible:
+    #
+    #     UNKNOWN = auto(), _("Unknown"), None
+    #     CONTINUOUS = auto(), _("Real time"), None
+    #     ONE_MINUTE = "oneMinute", _("Every minute"), timedelta(minutes=1)
+    #     ...
     UNKNOWN = ("unknown", _("Unknown"), None)  # EU
     CONTINUOUS = ("continuous", _("Real time"), None)  # DC, EU:UPDATE_CONT
     ONE_MINUTE = ("oneMinute", _("Every minute"), timedelta(minutes=1))  # EU:1MIN
@@ -77,8 +92,8 @@ class UpdateFrequency(str, Enum):
     NOT_PLANNED = ("notPlanned", _("Not planned"), None)  # EU:NOT_PLANNED
     OTHER = ("other", _("Other"), None)  # EU
 
-    def __new__(cls, id: str, label: Any, delta: timedelta | None):
-        # Make value lookup depend only on `id` by explicitly setting _value_
+    def __new__(cls, id: str, label: LazyString, delta: timedelta | None):
+        # Set _value_ so the enum value-based lookup depends only on the id field.
         # See https://docs.python.org/3/howto/enum.html#when-to-use-new-vs-init
         obj = str.__new__(cls, id)
         obj._value_ = id
@@ -88,11 +103,10 @@ class UpdateFrequency(str, Enum):
 
     @classmethod
     def _missing_(cls, value) -> "UpdateFrequency | None":
-        return (
-            cls._legacy_frequencies.get(value)
-            if value and isinstance(value, str)
-            else UpdateFrequency.UNKNOWN
-        )
+        if value is None:
+            return UpdateFrequency.UNKNOWN
+        if isinstance(value, str):
+            return UpdateFrequency._LEGACY_FREQUENCIES.get(value)  # type: ignore[misc]
 
     @classmethod
     def vocabulary(cls) -> list[str]:
@@ -100,10 +114,10 @@ class UpdateFrequency(str, Enum):
 
     @property
     def id(self) -> str:
-        return self._value_  # type: ignore[misc]
+        return self.value
 
     @property
-    def label(self) -> Any:
+    def label(self) -> LazyString:
         return self._label  # type: ignore[misc]
 
     @property
@@ -111,20 +125,28 @@ class UpdateFrequency(str, Enum):
         return self._delta  # type: ignore[misc]
 
     def next_update(self, last_update: datetime) -> datetime | None:
-        return last_update + self.delta if self.delta else None  # type: ignore[misc]
-
-    # FIXME(python 3.11+): drop when switching to StrEnum
-    # Needed so we can do `UpdateFrequency.FOO or UpdateFrequency.BAR` (see frequency_from_rdf)
-    def __bool__(self):
-        return bool(self._value_)
-
-    # FIXME(python 3.11+): drop when switching to StrEnum
-    def __str__(self):
-        return self._value_
+        return last_update + self.delta if self.delta else None
 
 
-# FIXME: basedpyright complains
-UpdateFrequency._legacy_frequencies = {
+# We must declare UpdateFrequency class variables after the Enum magic
+# happens, so outside of class declaration.
+#
+# The alternative method based on _ignore_ breaks accessing the class
+# variables from outside the class, because accesses to will go
+# through __getattr__ as if it were an Enum entry.
+#
+# FIXME(python 3.13+): Use Enum._add_value_alias_ instead:
+#
+#     UNKNOWN = auto(), _("Unknown"), None, []
+#     CONTINUOUS = auto(), _("Real time"), None, ["realtime"]
+#     SEVERAL_TIMES_A_DAY = "severalTimesADay", ..., ["fourTimesADay"]
+#
+#     def __new__(cls, id: str, ..., aliases: list[str]):
+#         ...
+#         for alias in aliases:
+#             obj._add_value_alias_(alias)
+#
+UpdateFrequency._LEGACY_FREQUENCIES = {  # type: ignore[misc]
     "realtime": UpdateFrequency.CONTINUOUS,
     "fourTimesADay": UpdateFrequency.SEVERAL_TIMES_A_DAY,
     "fourTimesAWeek": UpdateFrequency.OTHER,
