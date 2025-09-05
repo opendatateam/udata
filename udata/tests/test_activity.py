@@ -125,7 +125,7 @@ class AuditableTest(WebTestMixin, DBTestMixin, TestCase):
         with assert_emit(post_save, FakeAuditableSubject.on_create):
             fake = FakeAuditableSubject.objects.create(
                 name="fake",
-                tags=["my", "tags"],
+                tags=["some", "tags"],
                 some_date=date(2020, 1, 1),
                 daterange_embedded={"start": date(2020, 1, 1), "end": date(2020, 12, 31)},
                 embedded_list=[FakeEmbedded(name=f"fake_embedded_{i}") for i in range(3)],
@@ -189,7 +189,7 @@ class AuditableTest(WebTestMixin, DBTestMixin, TestCase):
         """It should emit an update signals on subject fields creation, update and deletion"""
         fake = FakeAuditableSubject.objects.create(
             name="fake",
-            tags=["my", "tags"],
+            tags=["some", "tags"],
             some_date=date(2020, 1, 1),
             daterange_embedded={"start": date(2020, 1, 1), "end": date(2020, 12, 31)},
             embedded_list=[FakeEmbedded(name=f"fake_embedded_{i}") for i in range(3)],
@@ -210,7 +210,7 @@ class AuditableTest(WebTestMixin, DBTestMixin, TestCase):
                 ],
             )
             self.assertEqual(args[1]["previous"]["name"], "fake")
-            self.assertEqual(args[1]["previous"]["tags"], ["my", "tags"])
+            self.assertEqual(args[1]["previous"]["tags"], ["some", "tags"])
             self.assertEqual(args[1]["previous"]["some_date"], date(2020, 1, 1))
             self.assertEqual(args[1]["previous"]["daterange_embedded.start"], date(2020, 1, 1))
             self.assertEqual(args[1]["previous"]["daterange_embedded.end"], date(2020, 12, 31))
