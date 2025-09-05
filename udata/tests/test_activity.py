@@ -17,10 +17,17 @@ class FakeSubject(db.Document):
     name = db.StringField()
 
 
+class FakeEmbedded(db.EmbeddedDocument):
+    name = db.StringField()
+
+
 class FakeAuditableSubject(Auditable, db.Document):
     name = field(db.StringField())
     tags = field(db.TagListField())
     some_date = field(db.DateField())
+    daterange_embedded = field(db.EmbeddedDocumentField(db.DateRange))
+    embedded_list = field(db.ListField(db.EmbeddedDocumentField("FakeEmbedded")))
+    ref_list = field(db.ListField(db.ReferenceField("FakeSubject")))
     not_auditable = field(db.StringField(), auditable=False)
 
     after_save = Signal()
@@ -120,6 +127,9 @@ class AuditableTest(WebTestMixin, DBTestMixin, TestCase):
                 name="fake",
                 tags=["my", "tags"],
                 some_date=date(2020, 1, 1),
+                daterange_embedded={"start": date(2020, 1, 1), "end": date(2020, 12, 31)},
+                embedded_list=[FakeEmbedded(name=f"fake_embedded_{i}") for i in range(3)],
+                ref_list=[FakeSubject.objects.create(name=f"fake_ref_{i}") for i in range(3)],
                 not_auditable="original",
             )
 
@@ -135,6 +145,20 @@ class AuditableTest(WebTestMixin, DBTestMixin, TestCase):
         fake.some_date = date(2027, 7, 7)
         with assert_emit(post_save, FakeAuditableSubject.on_update):
             fake.save()
+
+        fake.daterange_embedded.start = date(2017, 7, 7)
+        with assert_emit(post_save, FakeAuditableSubject.on_update):
+            fake.save()
+
+        fake.embedded_list[1].name = "other"
+        with assert_emit(post_save, FakeAuditableSubject.on_update):
+            fake.save()
+
+        # Reference document field that should NOT trigger an update signal
+        # on the current document
+        fake.ref_list[1].name = "other"
+        with assert_not_emit(FakeAuditableSubject.on_update):
+            fake.ref_list[1].save()
 
         # Not auditable field that should NOT trigger an update signal
         fake.not_auditable = "changed"
@@ -164,18 +188,43 @@ class AuditableTest(WebTestMixin, DBTestMixin, TestCase):
     def test_changed_fields(self):
         """It should emit an update signals on subject fields creation, update and deletion"""
         fake = FakeAuditableSubject.objects.create(
-            name="fake", tags=["my", "tags"], some_date=date(2020, 1, 1), not_auditable="original"
+            name="fake",
+            tags=["my", "tags"],
+            some_date=date(2020, 1, 1),
+            daterange_embedded={"start": date(2020, 1, 1), "end": date(2020, 12, 31)},
+            embedded_list=[FakeEmbedded(name=f"fake_embedded_{i}") for i in range(3)],
+            ref_list=[FakeSubject.objects.create(name=f"fake_ref_{i}") for i in range(3)],
+            not_auditable="original",
         )
 
         def check_signal_update(args):
-            self.assertEqual(args[1]["changed_fields"], ["name", "tags", "some_date"])
+            self.assertEqual(
+                args[1]["changed_fields"],
+                [
+                    "name",
+                    "tags",
+                    "some_date",
+                    "daterange_embedded.start",
+                    "daterange_embedded.end",
+                    "embedded_list.1.name",
+                ],
+            )
             self.assertEqual(args[1]["previous"]["name"], "fake")
             self.assertEqual(args[1]["previous"]["tags"], ["my", "tags"])
             self.assertEqual(args[1]["previous"]["some_date"], date(2020, 1, 1))
+            self.assertEqual(args[1]["previous"]["daterange_embedded.start"], date(2020, 1, 1))
+            self.assertEqual(args[1]["previous"]["daterange_embedded.end"], date(2020, 12, 31))
+            self.assertEqual(args[1]["previous"]["embedded_list.1.name"], "fake_embedded_1")
 
         with assert_emit(FakeAuditableSubject.on_update, assertions_callback=check_signal_update):
             fake.name = "different"
             fake.tags = ["other", "tags"]
             fake.some_date = date(2027, 7, 7)
+            fake.daterange_embedded.start = date(2017, 7, 7)
+            fake.daterange_embedded.end = date(2027, 7, 7)
+            fake.embedded_list[1].name = "other"
+            # Modification of a reference document should not be taken into account in changed_fields
+            fake.ref_list[1].name = "other"
+            fake.ref_list[1].save()
             fake.not_auditable = "changed"
             fake.save()
