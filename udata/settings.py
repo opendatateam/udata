@@ -261,6 +261,8 @@ class Defaults(object):
 
     DELAY_BEFORE_REMINDER_NOTIFICATION = 30  # Days
 
+    # Harvest settings
+    ###########################################################################
     HARVEST_ENABLE_MANUAL_RUN = False
 
     HARVEST_PREVIEW_MAX_ITEMS = 20
@@ -285,7 +287,12 @@ class Defaults(object):
 
     HARVEST_ISO19139_XSLT_URL = "https://raw.githubusercontent.com/SEMICeu/iso-19139-to-dcat-ap/refs/heads/geodcat-ap-2.0.0/iso-19139-to-dcat-ap.xsl"
 
+    # If set, harvest emit activities associated with this user as actor
+    # It should be a dedicated service account
+    HARVEST_ACTIVITY_USER_ID = None
+
     # S3 connection details
+    ###########################################################################
     S3_URL = None
     S3_ACCESS_KEY_ID = None
     S3_SECRET_ACCESS_KEY = None
@@ -626,6 +633,7 @@ class Testing(object):
         "check_deliverability": False
     }  # Disables deliverability for email domain name
     PUBLISH_ON_RESOURCE_EVENTS = False
+    HARVEST_ACTIVITY_USER_ID = None
 
 
 class Debug(Defaults):
