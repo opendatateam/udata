@@ -120,7 +120,9 @@ class Auditable(object):
             # for backward compatibility, all fields are treated as auditable for classes not using field() function
             auditable_fields = document._get_changed_fields()
         changed_fields = [
-            field for field in document._get_changed_fields() if field in auditable_fields
+            field
+            for field in document._get_changed_fields()
+            if field.split(".")[0] in auditable_fields
         ]
         if "post_save" in kwargs.get("ignores", []):
             return
