@@ -169,14 +169,14 @@ class AuditableTest(WebTestMixin, DBTestMixin, TestCase):
         # since they are actually cleaned and stored similarly to the current value
         # 1. Same as current ones but in capital case, that will be slugified
         fake.tags = ["OTHER", "TAGS"]
-        with assert_not_emit(FakeAuditableSubject.on_update):  # FAIL at the moment
+        with assert_not_emit(FakeAuditableSubject.on_update):
             fake.save()
             fake.reload()
             self.assertEqual(fake.tags, ["other", "tags"])
 
         # 2. Using a datetime, that will be stored as date in mongo, exactly like the current value
         fake.some_date = datetime(2027, 7, 7, 0, 0, 0)
-        with assert_not_emit(FakeAuditableSubject.on_update):  # FAIL at the moment
+        with assert_not_emit(FakeAuditableSubject.on_update):
             fake.save()
             fake.reload()
             self.assertEqual(fake.some_date, date(2027, 7, 7))

@@ -131,6 +131,17 @@ class Auditable(object):
             cls.on_create.send(document)
         elif len(changed_fields):
             previous = getattr(document, "_previous_changed_fields", None)
-            cls.on_update.send(document, changed_fields=changed_fields, previous=previous)
+            # make sure that changed fields have actually changed when comparing the document
+            # once it has been reloaded. It may have been cleaned or normalized when saved to mongo.
+            # We compare them one by one with the previous value stored in _previous_changed_fields.
+            # See https://github.com/opendatateam/udata/pull/3412 for more context.
+            document.reload()
+            changed_fields = [
+                field
+                for field in changed_fields
+                if previous[field] != get_field_value_from_path(document, field)
+            ]
+            if changed_fields:
+                cls.on_update.send(document, changed_fields=changed_fields, previous=previous)
         if getattr(document, "deleted_at", None) or getattr(document, "deleted", None):
             cls.on_delete.send(document)
