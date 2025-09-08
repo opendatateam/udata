@@ -48,6 +48,13 @@ def init_app(app):
     from .password_validation import UdataPasswordUtil
     from .views import create_security_blueprint
 
+    # We want to alias SECURITY_POST_CONFIRM_VIEW to the CDATA_BASE_URL (the homepage)
+    # but can't do it in `settings.py` because it's not defined yet (`CDATA_BASE_URL` is set
+    # in the env)
+    # :SecurityPostConfirmViewAtRuntime
+    if app.config["CDATA_BASE_URL"]:
+        app.config.setdefault("SECURITY_POST_CONFIRM_VIEW", app.config["CDATA_BASE_URL"])
+
     security.init_app(
         app,
         datastore,

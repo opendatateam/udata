@@ -113,7 +113,7 @@ class Defaults(object):
     # SECURITY_CONFIRM_ERROR_VIEW = ""       # Manually changed in `confirm_change_email`
     # SECURITY_POST_CHANGE_EMAIL_VIEW = ""   # We don't follow the redirects since we do JSON POST requests during change email
     # SECURITY_CHANGE_EMAIL_ERROR_VIEW = ""  # We don't follow the redirects since we do JSON POST requests during change email
-    # SECURITY_POST_CONFIRM_VIEW = ""        # Manually changed in `confirm_change_email`
+    # SECURITY_POST_CONFIRM_VIEW = ""        # Set at runtime. See :SecurityPostConfirmViewAtRuntime
     # SECURITY_RESET_ERROR_VIEW = ""         # We don't follow the redirects since we do JSON POST requests during request reset
     # SECURITY_RESET_VIEW = ""               # We don't follow the redirects since we do JSON POST requests during request reset
 
