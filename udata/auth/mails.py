@@ -16,7 +16,7 @@ def sendmail(msg):
         mail = current_app.extensions.get("mail")
         mail.send(msg)
     else:
-        log.info(msg)
+        log.warning(msg)
 
 
 class UdataMailUtil:
