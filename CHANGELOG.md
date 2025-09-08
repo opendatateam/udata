@@ -97,6 +97,7 @@
 - Allow global admins to manually run harvesters in production [#3340](https://github.com/opendatateam/udata/pull/3340)
 - Add monthly metrics to datasets, dataservices, reuses and organizations [#3342](https://github.com/opendatateam/udata/pull/3342)
 - Fix user avatar deletion [#3346](https://github.com/opendatateam/udata/pull/3346)
+- **breaking change** feat: topic elements [#3318](https://github.com/opendatateam/udata/pull/3318)
 
 ## 10.4.2 (2025-06-05)
 
