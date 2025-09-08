@@ -46,6 +46,12 @@ class ExtendedRegisterForm(WithCaptcha, RegisterForm):
             validators.NoURLs(_("URLs not allowed in this field")),
         ],
     )
+    accept_conditions = fields.BooleanField(
+        _("J'accepte les conditions générales d'utilisation"),
+        validators=[
+            validators.DataRequired(message=_("Vous devez accepter les CGU pour continuer."))
+        ],
+    )
 
     def validate(self, **kwargs):
         # no register allowed when read only mode is on
