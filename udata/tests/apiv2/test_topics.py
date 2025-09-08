@@ -259,12 +259,10 @@ class TopicAPITest(APITestCase):
     def test_topic_api_update_with_elements(self):
         """It should update a topic from the API with elements parameters"""
         user = self.login()
-        topic = TopicFactory(owner=user)
+        topic = TopicWithElementsFactory(owner=user)
         initial_length = len(topic.elements)
         data = topic.to_dict()
-        data["elements"] = [
-            TopicElementFactory.element_as_payload(elt.fetch()) for elt in topic.elements
-        ]
+        data["elements"] = [TopicElementFactory.element_as_payload(elt) for elt in topic.elements]
         data["elements"].append(
             TopicElementFactory.element_as_payload(TopicElementDatasetFactory())
         )
