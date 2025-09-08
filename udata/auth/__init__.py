@@ -53,7 +53,9 @@ def init_app(app):
     # in the env)
     # :SecurityPostConfirmViewAtRuntime
     if app.config["CDATA_BASE_URL"]:
-        app.config.setdefault("SECURITY_POST_CONFIRM_VIEW", app.config["CDATA_BASE_URL"])
+        app.config.setdefault(
+            "SECURITY_POST_CONFIRM_VIEW", app.config["CDATA_BASE_URL"] + "?flash=post_confirm"
+        )
 
     security.init_app(
         app,
