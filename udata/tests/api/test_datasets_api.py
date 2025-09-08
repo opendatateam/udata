@@ -38,7 +38,7 @@ from udata.core.dataset.models import (
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import GeoLevelFactory, SpatialCoverageFactory
-from udata.core.topic.factories import TopicFactory
+from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
 from udata.models import CommunityResource, Dataset, Follow, Member, db
@@ -182,7 +182,8 @@ class DatasetAPITest(APITestCase):
         format_dataset = DatasetFactory(resources=[ResourceFactory(format="my-format")])
         featured_dataset = DatasetFactory(featured=True)
         topic_dataset = DatasetFactory()
-        topic = TopicFactory(datasets=[topic_dataset])
+        topic = TopicFactory()
+        TopicElementDatasetFactory(element=topic_dataset, topic=topic)
 
         paca, _, _ = create_geozones_fixtures()
         geozone_dataset = DatasetFactory(spatial=SpatialCoverageFactory(zones=[paca.id]))
