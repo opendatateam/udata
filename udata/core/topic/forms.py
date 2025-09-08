@@ -62,6 +62,10 @@ class TopicForm(ModelForm):
         # Use parent save method (elements field is excluded via populate_obj)
         topic = super().save(commit=commit, **kwargs)
 
+        # Clear existing elements before adding new ones
+        if commit:
+            TopicElement.objects(topic=topic).delete()
+
         # Create elements and associate them with the topic
         for element_data in elements_data or []:
             element_form = TopicElementForm(data=element_data)
