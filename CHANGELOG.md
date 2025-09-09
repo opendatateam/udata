@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Change CSW harvesters XML processor from lxml to saxonche [#3380](https://github.com/opendatateam/udata/pull/3380)
+- **breaking change** feat: topic elements [#3318](https://github.com/opendatateam/udata/pull/3318) [#3416](https://github.com/opendatateam/udata/pull/3416) [#3417](https://github.com/opendatateam/udata/pull/3417)
 
 ## 10.9.0 (2025-08-28)
 
