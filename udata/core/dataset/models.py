@@ -342,7 +342,7 @@ class DatasetQuerySet(OwnedQuerySet):
 
     def hidden(self):
         return self(db.Q(private=True) | db.Q(deleted__ne=None) | db.Q(archived__ne=None))
-    
+
     def with_badge(self, kind):
         return self(badges__kind=kind)
 
