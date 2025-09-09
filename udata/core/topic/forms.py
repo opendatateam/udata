@@ -69,7 +69,7 @@ class TopicForm(ModelForm):
         # Create elements and associate them with the topic
         for element_data in elements_data or []:
             # Create element form with only its own data, not inheriting from parent
-            element_form = TopicElementForm()
+            element_form = TopicElementForm(meta={"csrf": False})
             element_form.process(data=element_data)
             if element_form.validate():
                 element = element_form.save(commit=False)
