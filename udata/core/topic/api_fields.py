@@ -29,7 +29,7 @@ topic_fields = apiv2.model(
                     _external=True,
                 ),
                 "type": "GET",
-                "total": len(o.elements),
+                "total": o.elements.count(),
             },
             description="Link to the topic elements",
         ),
