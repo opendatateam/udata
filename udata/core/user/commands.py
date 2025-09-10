@@ -20,14 +20,18 @@ def grp():
 
 
 @grp.command()
-def create():
+@click.option("--first-name")
+@click.option("--last-name")
+@click.option("--email")
+@click.option("--password")
+def create(first_name, last_name, email, password):
     """Create a new user"""
     data = {
-        "first_name": click.prompt("First name"),
-        "last_name": click.prompt("Last name"),
-        "email": click.prompt("Email"),
-        "password": click.prompt("Password", hide_input=True),
-        "password_confirm": click.prompt("Confirm Password", hide_input=True),
+        "first_name": first_name or click.prompt("First name"),
+        "last_name": last_name or click.prompt("Last name"),
+        "email": email or click.prompt("Email"),
+        "password": password or click.prompt("Password", hide_input=True),
+        "password_confirm": password or click.prompt("Confirm Password", hide_input=True),
     }
     # Until https://github.com/mattupstate/flask-security/issues/672 is fixed
     with current_app.test_request_context():
