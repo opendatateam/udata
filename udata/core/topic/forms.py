@@ -16,12 +16,12 @@ class TopicElementForm(ModelForm):
     extras = fields.ExtrasField()
     element = fields.ModelField(_("Element"))
 
-    def validate(self, extra_validators=None):
+    def validate(self, **kwargs):
         """
         Make sure that either title or element is set.
         (Empty nested element is a valid use case for "placeholder" elements)
         """
-        validation = super().validate(extra_validators)
+        validation = super().validate(**kwargs)
         if not self.element.data and not self.title.data:
             self.element.errors.append(_("A topic element must have a title or an element."))
             return False
@@ -62,9 +62,15 @@ class TopicForm(ModelForm):
         # Use parent save method (elements field is excluded via populate_obj)
         topic = super().save(commit=commit, **kwargs)
 
+        # Clear existing elements before adding new ones
+        if commit:
+            TopicElement.objects(topic=topic).delete()
+
         # Create elements and associate them with the topic
         for element_data in elements_data or []:
-            element_form = TopicElementForm(data=element_data)
+            # Create element form with only its own data, not inheriting from parent
+            element_form = TopicElementForm(meta={"csrf": False})
+            element_form.process(data=element_data)
             if element_form.validate():
                 element = element_form.save(commit=False)
                 element.topic = topic
