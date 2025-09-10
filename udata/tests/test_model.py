@@ -11,6 +11,7 @@ from udata.errors import ConfigError
 from udata.i18n import _
 from udata.models import Dataset
 from udata.mongo import build_test_config, db, validate_config
+from udata.mongo.datetime_fields import DateField, DateRange
 from udata.settings import Defaults
 from udata.tests.helpers import assert_equal_dates, assert_json_equal
 
@@ -39,19 +40,19 @@ class SlugUpdateTester(db.Document):
 
 
 class DateTester(db.Document):
-    a_date = db.DateField()
+    a_date = DateField()
 
 
 class DateRangeTester(db.Document):
-    temporal = db.EmbeddedDocumentField(db.DateRange)
+    temporal = db.EmbeddedDocumentField(DateRange)
 
 
 class RequiredDateRangeTester(db.Document):
-    temporal = db.EmbeddedDocumentField(db.DateRange, required=True)
+    temporal = db.EmbeddedDocumentField(DateRange, required=True)
 
 
 class DateTesterWithDefault(db.Document):
-    a_date = db.DateField(default=date.today)
+    a_date = DateField(default=date.today)
 
 
 class InheritedSlugTester(SlugTester):
@@ -517,7 +518,7 @@ class ExtrasFieldTest:
             (db.FloatField, 0.42),
             (db.BooleanField, True),
             (db.DateTimeField, datetime.utcnow()),
-            (db.DateField, date.today()),
+            (DateField, date.today()),
         ],
     )
     def test_validate_registered_db_type(self, dbtype, value):
@@ -535,7 +536,7 @@ class ExtrasFieldTest:
             (db.FloatField, datetime.utcnow()),
             (db.BooleanField, 42),
             (db.DateTimeField, 42),
-            (db.DateField, 42),
+            (DateField, 42),
         ],
     )
     def test_fail_to_validate_wrong_type(self, dbtype, value):

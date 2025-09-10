@@ -13,6 +13,7 @@ from udata.core.storages import default_image_basename, images
 from udata.factories import ModelFactory
 from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics, db
 from udata.mongo.queryset import DBPaginator, UDataQuerySet
+from udata.mongo.taglist_field import TagListField
 from udata.utils import faker
 
 pytestmark = [
@@ -113,7 +114,7 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
         },
     )
     tags = field(
-        db.TagListField(),
+        TagListField(),
         filterable={
             "key": "tag",
         },

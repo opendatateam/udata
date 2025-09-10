@@ -42,6 +42,7 @@ from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
 from udata.models import CommunityResource, Dataset, Follow, Member, db
+from udata.mongo.datetime_fields import DateRange
 from udata.tags import MAX_TAG_LENGTH, MIN_TAG_LENGTH
 from udata.tests.features.territories import create_geozones_fixtures
 from udata.tests.helpers import assert200, assert404
@@ -189,7 +190,7 @@ class DatasetAPITest(APITestCase):
         geozone_dataset = DatasetFactory(spatial=SpatialCoverageFactory(zones=[paca.id]))
         granularity_dataset = DatasetFactory(spatial=SpatialCoverageFactory(granularity="country"))
 
-        temporal_coverage = db.DateRange(start="2022-05-03", end="2022-05-04")
+        temporal_coverage = DateRange(start="2022-05-03", end="2022-05-04")
         temporal_coverage_dataset = DatasetFactory(temporal_coverage=temporal_coverage)
 
         owner_dataset = DatasetFactory(owner=owner)
