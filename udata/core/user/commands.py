@@ -24,7 +24,8 @@ def grp():
 @click.option("--last-name")
 @click.option("--email")
 @click.option("--password")
-def create(first_name, last_name, email, password):
+@click.option("--admin", is_flag=True)
+def create(first_name, last_name, email, password, admin):
     """Create a new user"""
     data = {
         "first_name": first_name or click.prompt("First name"),
@@ -41,6 +42,9 @@ def create(first_name, last_name, email, password):
         del data["password_confirm"]
         data["confirmed_at"] = datetime.utcnow()
         user = datastore.create_user(**data)
+        if admin:
+            role = datastore.find_or_create_role("admin")
+            datastore.add_role_to_user(user, role)
         success("User(id={u.id} email={u.email}) created".format(u=user))
         return user
     errors = "\n".join("\n".join([str(m) for m in e]) for e in form.errors.values())
