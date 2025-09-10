@@ -19,6 +19,7 @@ from udata.core.storages import tmp
 from udata.forms import ModelForm
 from udata.i18n import lazy_gettext as _
 from udata.models import ContactPoint, Dataset, Organization, Reuse, User, datastore, db
+from udata.mongo.datetime_fields import DateRange
 from udata.utils import get_by, to_iso_date
 
 from . import widgets
@@ -703,7 +704,7 @@ class DateRangeField(Field):
                 start, end = value.split(" - ")
                 if end is not None:
                     end = parse(end, yearfirst=True).date()
-                self.data = db.DateRange(
+                self.data = DateRange(
                     start=parse(start, yearfirst=True).date(),
                     end=end,
                 )
@@ -712,7 +713,7 @@ class DateRangeField(Field):
                     end = parse(value["end"], yearfirst=True).date()
                 else:
                     end = None
-                self.data = db.DateRange(
+                self.data = DateRange(
                     start=parse(value["start"], yearfirst=True).date(),
                     end=end,
                 )

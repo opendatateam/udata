@@ -26,6 +26,7 @@ from udata.core.owned import Owned, OwnedQuerySet
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.models import Badge, BadgeMixin, BadgesList, SpatialCoverage, WithMetrics, db
+from udata.mongo.datetime_fields import DateRange
 from udata.mongo.errors import FieldValidationError
 from udata.mongo.taglist_field import TagListField
 from udata.uris import ValidationError, cdata_url
@@ -571,7 +572,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
     private = field(db.BooleanField(default=False))
     frequency = field(db.StringField(choices=list(UPDATE_FREQUENCIES.keys())))
     frequency_date = field(db.DateTimeField(verbose_name=_("Future date of update")))
-    temporal_coverage = field(db.EmbeddedDocumentField(db.DateRange))
+    temporal_coverage = field(db.EmbeddedDocumentField(DateRange))
     spatial = field(db.EmbeddedDocumentField(SpatialCoverage))
     schema = field(db.EmbeddedDocumentField(Schema))
 

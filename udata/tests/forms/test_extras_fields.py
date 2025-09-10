@@ -6,6 +6,7 @@ from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
 from udata.mongo import db
+from udata.mongo.datetime_fields import DateField
 
 pytestmark = [pytest.mark.usefixtures("app")]
 
@@ -133,7 +134,7 @@ class ExtrasFieldTest:
                     datetime,
                     datetime(2018, 5, 29, 13, 15, 4, 397603),
                 ),
-                (db.DateField, "2018-05-29", date, date(2018, 5, 29)),
+                (DateField, "2018-05-29", date, date(2018, 5, 29)),
                 (db.BooleanField, "true", bool, True),
                 (db.IntField, 42, int, 42),
                 (db.StringField, "42", str, "42"),
@@ -170,7 +171,7 @@ class ExtrasFieldTest:
             pytest.param(*p, id=p[0].__name__)
             for p in [
                 (db.DateTimeField, "xxxx"),
-                (db.DateField, "xxxx"),
+                (DateField, "xxxx"),
                 (db.IntField, "xxxx"),
                 (db.StringField, 42),
                 (db.FloatField, "xxxx"),

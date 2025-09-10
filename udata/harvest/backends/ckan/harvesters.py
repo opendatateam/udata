@@ -6,6 +6,7 @@ from uuid import UUID
 from udata import uris
 from udata.harvest.models import HarvestItem
 from udata.i18n import lazy_gettext as _
+from udata.mongo.datetime_fields import DateRange
 
 try:
     from udata.core.dataset.constants import UPDATE_FREQUENCIES
@@ -226,7 +227,7 @@ class CkanBackend(BaseBackend):
             dataset.spatial.geom = {"type": "MultiPolygon", "coordinates": coordinates}
 
         if temporal_start and temporal_end:
-            dataset.temporal_coverage = db.DateRange(
+            dataset.temporal_coverage = DateRange(
                 start=temporal_start,
                 end=temporal_end,
             )

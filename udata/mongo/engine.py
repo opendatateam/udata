@@ -6,7 +6,7 @@ from mongoengine.errors import ValidationError
 from mongoengine.signals import post_save, pre_save
 
 from .badges_field import BadgesField
-from .datetime_fields import DateField, DateRange, Datetimed
+from .datetime_fields import Datetimed
 from .document import DomainModel, UDataDocument
 from .extras_fields import ExtrasField, OrganizationExtrasField
 from .queryset import UDataQuerySet
@@ -21,7 +21,6 @@ class UDataMongoEngine(MongoEngine):
     def __init__(self, app=None):
         super(UDataMongoEngine, self).__init__(app)
         self.BadgesField = BadgesField
-        self.DateField = DateField
         self.Datetimed = Datetimed
         self.ExtrasField = ExtrasField
         self.OrganizationExtrasField = OrganizationExtrasField
@@ -29,7 +28,6 @@ class UDataMongoEngine(MongoEngine):
         self.AutoUUIDField = AutoUUIDField
         self.Document = UDataDocument
         self.DomainModel = DomainModel
-        self.DateRange = DateRange
         self.BaseQuerySet = UDataQuerySet
         self.BaseDocumentMetaclass = TopLevelDocumentMetaclass
         self.FileField = FileField
