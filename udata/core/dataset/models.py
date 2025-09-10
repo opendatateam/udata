@@ -27,6 +27,7 @@ from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.models import Badge, BadgeMixin, BadgesList, SpatialCoverage, WithMetrics, db
 from udata.mongo.errors import FieldValidationError
+from udata.mongo.taglist_field import TagListField
 from udata.uris import ValidationError, cdata_url
 from udata.uris import validate as validate_url
 from udata.utils import get_by, hash_url, to_naive_datetime
@@ -564,7 +565,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
     description_short = field(db.StringField(max_length=DESCRIPTION_SHORT_SIZE_LIMIT))
     license = field(db.ReferenceField("License"))
 
-    tags = field(db.TagListField())
+    tags = field(TagListField())
     resources = field(db.ListField(db.EmbeddedDocumentField(Resource)), auditable=False)
 
     private = field(db.BooleanField(default=False))

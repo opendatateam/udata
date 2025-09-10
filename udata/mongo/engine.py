@@ -11,7 +11,6 @@ from .document import DomainModel, UDataDocument
 from .extras_fields import ExtrasField, OrganizationExtrasField
 from .queryset import UDataQuerySet
 from .slug_fields import SlugField
-from .taglist_field import TagListField
 from .url_field import URLField
 from .uuid_fields import AutoUUIDField
 
@@ -22,7 +21,6 @@ class UDataMongoEngine(MongoEngine):
     def __init__(self, app=None):
         super(UDataMongoEngine, self).__init__(app)
         self.BadgesField = BadgesField
-        self.TagListField = TagListField
         self.DateField = DateField
         self.Datetimed = Datetimed
         self.ExtrasField = ExtrasField

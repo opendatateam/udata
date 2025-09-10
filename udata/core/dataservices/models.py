@@ -24,6 +24,7 @@ from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
 from udata.models import Discussion, Follow, db
 from udata.mongo.errors import FieldValidationError
+from udata.mongo.taglist_field import TagListField
 from udata.uris import cdata_url
 
 # "frequency"
@@ -208,7 +209,7 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
     )
 
     tags = field(
-        db.TagListField(),
+        TagListField(),
         filterable={
             "key": "tag",
         },

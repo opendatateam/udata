@@ -15,6 +15,7 @@ from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics, db
 from udata.mongo.errors import FieldValidationError
+from udata.mongo.taglist_field import TagListField
 from udata.uris import cdata_url
 from udata.utils import hash_url
 
@@ -116,7 +117,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
         },
     )
     tags = field(
-        db.TagListField(),
+        TagListField(),
         filterable={
             "key": "tag",
         },
