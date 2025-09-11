@@ -185,6 +185,30 @@ class TopicsListAPITest(APITestCase):
                 str(elt.element.id) for elt in TopicElement.objects(topic=topic)
             )
 
+    def test_topic_api_create_element_no_inherit_parent_fields(self):
+        """It should create topic elements without inheriting parent topic's description/tags"""
+        dataset = DatasetFactory()
+        data = {
+            "name": "Test Topic with Element",
+            "description": "Topic description that should NOT be inherited",
+            "tags": ["topic-tag-1", "topic-tag-2"],
+            "elements": [{"element": {"class": "Dataset", "id": str(dataset.id)}}],
+        }
+        self.login()
+        response = self.post(url_for("apiv2.topics_list"), data)
+        self.assert201(response)
+
+        topic = Topic.objects.first()
+        element = TopicElement.objects(topic=topic).first()
+
+        # Element should NOT inherit parent topic's fields when not provided
+        assert element.description is None
+        assert element.tags == []
+
+        # But parent topic should have its fields
+        assert topic.description == "Topic description that should NOT be inherited"
+        assert topic.tags == ["topic-tag-1", "topic-tag-2"]
+
     def test_topic_api_create_as_org(self):
         """It should create a topic as organization from the API"""
         data = TopicWithElementsFactory.as_payload()
@@ -259,12 +283,10 @@ class TopicAPITest(APITestCase):
     def test_topic_api_update_with_elements(self):
         """It should update a topic from the API with elements parameters"""
         user = self.login()
-        topic = TopicFactory(owner=user)
+        topic = TopicWithElementsFactory(owner=user)
         initial_length = len(topic.elements)
         data = topic.to_dict()
-        data["elements"] = [
-            TopicElementFactory.element_as_payload(elt.fetch()) for elt in topic.elements
-        ]
+        data["elements"] = [TopicElementFactory.element_as_payload(elt) for elt in topic.elements]
         data["elements"].append(
             TopicElementFactory.element_as_payload(TopicElementDatasetFactory())
         )
