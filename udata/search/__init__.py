@@ -63,6 +63,20 @@ def unindex(classname, id):
         log.exception('Unable to unindex %s "%s"', model.__name__, id)
 
 
+@task(route="high.search")
+def batch_reindex(document_refs: tuple[str, str]):
+    """Batch reindex documents"""
+    if not current_app.config["SEARCH_SERVICE_API_URL"]:
+        return
+
+    log.info("Batch reindexing %d documents", len(document_refs))
+    for classname, document_id in document_refs:
+        try:
+            reindex(classname, document_id)
+        except Exception:
+            log.exception('Unable to reindex %s "%s"', classname, document_id)
+
+
 def reindex_model_on_save(sender, document, **kwargs):
     """(Re/Un)Index Mongo document on post_save"""
     if current_app.config.get("AUTO_INDEX") and current_app.config["SEARCH_SERVICE_API_URL"]:
