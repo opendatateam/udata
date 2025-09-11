@@ -570,9 +570,11 @@ class TopicElementsAPITest(APITestCase):
         self.assertEqual(len(topic.elements), 7)
 
         # Patch batch size to 3 for testing
-        with patch("udata.core.topic.apiv2.DELETE_REINDEX_BATCH_SIZE", 3), patch(
-            "udata.core.topic.apiv2.batch_reindex_elements"
-        ) as mock_batch_reindex, patch("udata.search.reindex") as mock_reindex:
+        with (
+            patch("udata.core.topic.apiv2.DELETE_REINDEX_BATCH_SIZE", 3),
+            patch("udata.core.topic.apiv2.batch_reindex_elements") as mock_batch_reindex,
+            patch("udata.search.reindex") as mock_reindex,
+        ):
             response = self.delete(url_for("apiv2.topic_elements", topic=topic))
             self.assert204(response)
 
