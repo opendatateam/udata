@@ -1,0 +1,6 @@
+{% trans %}This dataset has been archived by our administration team.
+
+An archived dataset is considered out of date by a combination of factors.
+It does not appear in the search results and has a special layout warning the site's users.
+
+If you think this is a mistake, you can contact the site administrator.{% endtrans %}
