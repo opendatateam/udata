@@ -572,7 +572,7 @@ class TopicElementsAPITest(APITestCase):
         # Patch batch size to 3 for testing
         with (
             patch("udata.core.topic.apiv2.DELETE_REINDEX_BATCH_SIZE", 3),
-            patch("udata.core.topic.apiv2.batch_reindex_elements") as mock_batch_reindex,
+            patch("udata.core.topic.apiv2.batch_reindex") as mock_batch_reindex,
             patch("udata.search.reindex") as mock_reindex,
         ):
             response = self.delete(url_for("apiv2.topic_elements", topic=topic))
@@ -585,7 +585,7 @@ class TopicElementsAPITest(APITestCase):
             # Verify signal disconnection worked - individual reindex.delay should NOT be called
             self.assertEqual(mock_reindex.delay.call_count, 0)
 
-            # Verify batch_reindex_elements.delay was called 3 times: 3 + 3 + 1 elements
+            # Verify batch_reindex.delay was called 3 times: 3 + 3 + 1 elements
             self.assertEqual(mock_batch_reindex.delay.call_count, 3)
 
             # Verify batch sizes
