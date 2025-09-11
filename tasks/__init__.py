@@ -44,7 +44,6 @@ def update(ctx):
             ctx.run(
                 f"pip-compile requirements/{requirement_file}.in --output-file=requirements/{requirement_file}.pip --upgrade"
             )
-    # TODO: Add javascript dependencies update
 
 
 @task
