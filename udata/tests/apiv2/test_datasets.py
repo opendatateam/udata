@@ -119,6 +119,15 @@ class DatasetAPIV2Test(APITestCase):
         assert len(data) == 1
         assert data[0]["id"] == str(tag_dataset_1.id)
 
+    def test_search_datasetbadges(self):
+        DatasetFactory(badges=[{"kind": "spd"}, {"kind": "hvd"}])
+        DatasetFactory(badges=[{"kind": "spd"}, {"kind": "inspire"}])
+
+        response = self.get(url_for("apiv2.dataset_search", badges={"kind": "spd"}))
+        self.assert200(response)
+        data = response.json["data"]
+        assert len(data) == 2
+
 
 class DatasetResourceAPIV2Test(APITestCase):
     def test_get_specific(self):
