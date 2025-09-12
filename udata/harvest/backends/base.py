@@ -3,7 +3,6 @@ import traceback
 from datetime import date, datetime, timedelta
 from uuid import UUID
 
-import mongoengine
 import requests
 from flask import current_app, g
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
