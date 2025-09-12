@@ -39,7 +39,10 @@ class TopicElement(db.Document):
 
     @classmethod
     def post_delete(cls, sender, document, **kwargs):
-        """Trigger reindex when element is deleted"""
+        """
+        Trigger reindex when element is deleted
+        ⚠️ This logic is also implemented in batch in `topic_elements_delete`.
+        """
         if document.topic and document.element and hasattr(document.element, "id"):
             reindex.delay(*as_task_param(document.element))
 
