@@ -1,6 +1,6 @@
 # Here to force translations by gettext
 def _(s):
-    return s  # noqa: force translations
+    return s  # noqa: F401
 
 
 TRANSLATIONS = (
