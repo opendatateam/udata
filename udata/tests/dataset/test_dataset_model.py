@@ -20,7 +20,11 @@ from udata.core.dataset.activities import (
     UserUpdatedDataset,
     UserUpdatedResource,
 )
-from udata.core.dataset.constants import LEGACY_FREQUENCIES, UPDATE_FREQUENCIES
+from udata.core.dataset.constants import (
+    LEGACY_FREQUENCIES,
+    UNBOUNDED_FREQUENCIES,
+    UPDATE_FREQUENCIES,
+)
 from udata.core.dataset.exceptions import (
     SchemasCacheUnavailableException,
     SchemasCatalogNotFoundException,
@@ -157,46 +161,49 @@ class DatasetModelTest:
         dataset = DatasetFactory()
         assert dataset.next_update is None
 
-    def test_next_update_hourly(self):
-        dataset = DatasetFactory(frequency="hourly")
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(hours=1))
-
-    @pytest.mark.parametrize("freq", ["fourTimesADay", "threeTimesADay", "semidaily", "daily"])
-    def test_next_update_daily(self, freq):
+    @pytest.mark.parametrize(
+        "freq,delta",
+        [  # should cover all core.dataset.constants.BOUNDED_FREQUENCIES
+            ("1min", timedelta(minutes=1)),
+            ("5min", timedelta(minutes=5)),
+            ("10min", timedelta(minutes=10)),
+            ("15min", timedelta(minutes=15)),
+            ("30min", timedelta(minutes=30)),
+            ("hourly", timedelta(hours=1)),
+            ("bihourly", timedelta(hours=2)),
+            ("trihourly", timedelta(hours=3)),
+            ("12hours", timedelta(hours=12)),
+            ("severalTimesADay", timedelta(days=1)),
+            ("threeTimesADay", timedelta(days=1)),
+            ("semidaily", timedelta(days=1)),
+            ("daily", timedelta(days=1)),
+            ("fiveTimesAWeek", timedelta(weeks=1)),
+            ("threeTimesAWeek", timedelta(weeks=1)),
+            ("semiweekly", timedelta(weeks=1)),
+            ("weekly", timedelta(weeks=1)),
+            ("biweekly", timedelta(weeks=2)),
+            ("threeTimesAMonth", timedelta(days=31)),
+            ("semimonthly", timedelta(days=31)),
+            ("monthly", timedelta(days=31)),
+            ("bimonthly", timedelta(days=31 * 2)),
+            ("quarterly", timedelta(days=365 / 4)),
+            ("threeTimesAYear", timedelta(days=365)),
+            ("semiannual", timedelta(days=365)),
+            ("annual", timedelta(days=365)),
+            ("biennial", timedelta(days=365 * 2)),
+            ("triennial", timedelta(days=365 * 3)),
+            ("quadrennial", timedelta(days=365 * 4)),
+            ("quinquennial", timedelta(days=365 * 5)),
+            ("decennial", timedelta(days=365 * 10)),
+            ("bidecennial", timedelta(days=365 * 20)),
+            ("tridecennial", timedelta(days=365 * 30)),
+        ],
+    )
+    def test_next_update_delta(self, freq, delta):
         dataset = DatasetFactory(frequency=freq)
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=1))
+        assert_equal_dates(dataset.next_update, datetime.utcnow() + delta)
 
-    @pytest.mark.parametrize("freq", ["fourTimesAWeek", "threeTimesAWeek", "semiweekly", "weekly"])
-    def test_next_update_weekly(self, freq):
-        dataset = DatasetFactory(frequency=freq)
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=7))
-
-    def test_next_update_biweekly(self):
-        dataset = DatasetFactory(frequency="biweekly")
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(weeks=2))
-
-    def test_next_update_quarterly(self):
-        dataset = DatasetFactory(frequency="quarterly")
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=365 / 4))
-
-    @pytest.mark.parametrize("freq", ["threeTimesAYear", "semiannual", "annual"])
-    def test_next_update_annual(self, freq):
-        dataset = DatasetFactory(frequency=freq)
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=365))
-
-    def test_next_update_biennial(self):
-        dataset = DatasetFactory(frequency="biennial")
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=365 * 2))
-
-    def test_next_update_triennial(self):
-        dataset = DatasetFactory(frequency="triennial")
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=365 * 3))
-
-    def test_next_update_quinquennial(self):
-        dataset = DatasetFactory(frequency="quinquennial")
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=365 * 5))
-
-    @pytest.mark.parametrize("freq", ["continuous", "punctual", "irregular", "unknown"])
+    @pytest.mark.parametrize("freq", UNBOUNDED_FREQUENCIES + ["unknown"])
     def test_next_update_undefined(self, freq):
         dataset = DatasetFactory(frequency=freq)
         assert dataset.next_update is None

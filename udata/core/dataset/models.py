@@ -34,6 +34,7 @@ from udata.utils import get_by, hash_url, to_naive_datetime
 from .constants import (
     CHECKSUM_TYPES,
     CLOSED_FORMATS,
+    DEFAULT_FREQUENCY,
     DEFAULT_LICENSE,
     DESCRIPTION_SHORT_SIZE_LIMIT,
     LEGACY_FREQUENCIES,
@@ -42,6 +43,7 @@ from .constants import (
     RESOURCE_FILETYPES,
     RESOURCE_TYPES,
     SCHEMA_CACHE_DURATION,
+    UNBOUNDED_FREQUENCIES,
     UPDATE_FREQUENCIES,
 )
 from .exceptions import (
@@ -771,7 +773,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
 
     @property
     def frequency_label(self):
-        return UPDATE_FREQUENCIES.get(self.frequency or "unknown", UPDATE_FREQUENCIES["unknown"])
+        return UPDATE_FREQUENCIES.get(self.frequency) or UPDATE_FREQUENCIES[DEFAULT_FREQUENCY]
 
     def check_availability(self):
         """Check if resources from that dataset are available.
@@ -825,12 +827,22 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
         Ex: the next update for a threeTimesAday freq is not
         every 8 hours, but is maximum 24 hours later.
         """
+        if self.frequency is None:
+            return
         delta = None
-        if self.frequency == "hourly":
+        if self.frequency.endswith("min"):
+            delta = timedelta(minutes=int(self.frequency[:-3]))
+        elif self.frequency == "hourly":
             delta = timedelta(hours=1)
-        elif self.frequency in ["fourTimesADay", "threeTimesADay", "semidaily", "daily"]:
+        elif self.frequency == "bihourly":
+            delta = timedelta(hours=2)
+        elif self.frequency == "trihourly":
+            delta = timedelta(hours=3)
+        elif self.frequency == "12hours":
+            delta = timedelta(hours=12)
+        elif self.frequency in ["severalTimesADay", "threeTimesADay", "semidaily", "daily"]:
             delta = timedelta(days=1)
-        elif self.frequency in ["fourTimesAWeek", "threeTimesAWeek", "semiweekly", "weekly"]:
+        elif self.frequency in ["fiveTimesAWeek", "threeTimesAWeek", "semiweekly", "weekly"]:
             delta = timedelta(weeks=1)
         elif self.frequency == "biweekly":
             delta = timedelta(weeks=2)
@@ -846,8 +858,16 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
             delta = timedelta(days=365 * 2)
         elif self.frequency == "triennial":
             delta = timedelta(days=365 * 3)
+        elif self.frequency == "quadrennial":
+            delta = timedelta(days=365 * 4)
         elif self.frequency == "quinquennial":
             delta = timedelta(days=365 * 5)
+        elif self.frequency == "decennial":
+            delta = timedelta(days=365 * 10)
+        elif self.frequency == "bidecennial":
+            delta = timedelta(days=365 * 20)
+        elif self.frequency == "tridecennial":
+            delta = timedelta(days=365 * 30)
         if delta is None:
             return
         else:
@@ -870,9 +890,9 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
             # Allow for being one day late on update.
             # We may have up to one day delay due to harvesting for example
             quality["update_fulfilled_in_time"] = (next_update - datetime.utcnow()).days >= -1
-        elif self.frequency in ["continuous", "irregular", "punctual"]:
-            # For these frequencies, we don't expect regular updates or can't quantify them.
-            # Thus we consider the update_fulfilled_in_time quality criterion to be true.
+        elif self.frequency in UNBOUNDED_FREQUENCIES:
+            # Next update for unbounded frequencies can't be estimated, so we consider
+            # the update_fulfilled_in_time quality criterion to be true.
             quality["update_fulfilled_in_time"] = True
 
         # Since `update_fulfilled_in_time` cannot be precomputed, `score` cannot either.
