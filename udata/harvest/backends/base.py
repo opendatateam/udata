@@ -177,7 +177,7 @@ class BaseBackend(object):
                 g.harvest_activity_user_id = current_app.config["HARVEST_ACTIVITY_USER_ID"]
             except User.DoesNotExist:
                 log.exception(
-                    f"HARVEST_ACTIVITY_USER_ID does not seem to match an existing user id."
+                    "HARVEST_ACTIVITY_USER_ID does not seem to match an existing user id."
                 )
 
         try:
