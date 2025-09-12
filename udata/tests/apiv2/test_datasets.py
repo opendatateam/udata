@@ -134,6 +134,7 @@ class DatasetAPIV2Test(APITestCase):
         assert len(data) == 1
         assert data[0]["id"] == str(test_dataset.id)
 
+
 class DatasetResourceAPIV2Test(APITestCase):
     def test_get_specific(self):
         """Should fetch serialized resource from the API based on rid"""
