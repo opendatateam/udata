@@ -87,6 +87,10 @@ cachelib==0.13.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   flask-caching
+cachetools==6.1.0
+    # via
+    #   -c requirements/test.pip
+    #   pyld
 celery==5.4.0
     # via
     #   -c requirements/install.pip
@@ -153,6 +157,10 @@ cryptography==44.0.2
     #   secretstorage
 decorator==5.2.1
     # via ipython
+deepdiff==8.5.0
+    # via
+    #   -c requirements/test.pip
+    #   -r requirements/test.in
 distlib==0.3.9
     # via virtualenv
 dnspython==2.7.0
@@ -295,6 +303,10 @@ flask-wtf==1.2.2
     #   -r requirements/install.in
     #   flask-mongoengine
     #   flask-security-too
+frozendict==2.4.6
+    # via
+    #   -c requirements/test.pip
+    #   pyld
 geojson==3.2.0
     # via
     #   -c requirements/install.pip
@@ -412,6 +424,8 @@ lxml==5.3.1
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
+    #   pyld
+    #   xmldiff
 markdown-it-py==3.0.0
     # via rich
 markupsafe==2.1.2
@@ -456,6 +470,10 @@ nh3==0.2.21
     # via readme-renderer
 nodeenv==1.9.1
     # via pre-commit
+orderly-set==5.5.0
+    # via
+    #   -c requirements/test.pip
+    #   deepdiff
 packaging==24.2
     # via
     #   -c requirements/test.pip
@@ -518,6 +536,10 @@ pygments==2.19.1
     #   ipython-pygments-lexers
     #   readme-renderer
     #   rich
+pyld==2.0.4
+    # via
+    #   -c requirements/test.pip
+    #   -r requirements/test.in
 pymongo==4.11.3
     # via
     #   -c requirements/install.pip
@@ -774,6 +796,10 @@ wtforms-json==0.3.5
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
+xmldiff==2.7.0
+    # via
+    #   -c requirements/test.pip
+    #   -r requirements/test.in
 zipp==3.21.0
     # via importlib-metadata
 

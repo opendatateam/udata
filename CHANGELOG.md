@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add snapshot tests for harvesting [#3394](https://github.com/opendatateam/udata/pull/3394)
 
 ## 11.0.0 (2025-09-12)
 
