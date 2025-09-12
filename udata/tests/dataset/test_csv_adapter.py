@@ -18,7 +18,7 @@ class DatasetCSVAdapterTest:
             resources=[
                 ResourceFactory(
                     harvest={
-                        "created_at": date_created,
+                        "issued_at": date_created,
                         "modified_at": date_modified,
                         "uri": "http://domain.gouv.fr/dataset/uri",
                     },

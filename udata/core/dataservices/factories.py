@@ -20,6 +20,9 @@ class HarvestMetadataFactory(ModelFactory):
 
     uri = factory.Faker("url")
 
+    created_at = factory.Faker("date_time")
+    issued_at = factory.Faker("date_time")
+
 
 class DataserviceFactory(ModelFactory):
     class Meta:
