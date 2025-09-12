@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Emit harvest activities. Set `HARVEST_ACTIVITY_USER_ID` to an existing user account to activate it [#3412](https://github.com/opendatateam/udata/pull/3412)
 
 ## 11.0.0 (2025-09-12)
 
