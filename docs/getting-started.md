@@ -70,8 +70,7 @@ activate it and install the requirements with the following commands.
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements/develop.pip
-pip install -e .
+pip install -e ".[dev]"
 ```
 
 You can find [common errors and workarounds for Macos on udata documentation](https://udata.readthedocs.io/en/latest/development-environment/#macos-big-sur-caveat).
@@ -242,7 +241,7 @@ Then, you can install pip requirements.
 
 ```bash
 cd udata-front
-pip install -e . -r requirements/test.pip -r requirements/develop.pip
+pip install -e ".[test,dev]"
 ```
 
 The last thing to do is to install udata-front NPM packages.
