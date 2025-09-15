@@ -25,15 +25,12 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Compute Python dependencies key
-          command: cat pyproject.toml > python.deps
-      - run:
           name: Get the base reference branch
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
             # 1. Exact match of dependencies
-            - py3-cache-v12-{{ arch }}-{{ checksum "python.deps" }}
+            - py3-cache-v12-{{ arch }}-{{ checksum "pyproject.toml" }}
             # 2. Latest cache from this branch
             - py3-cache-v12-{{ arch }}-{{ .Branch }}
             # 3. Latest cache from base branch (e.g., master)
@@ -48,7 +45,7 @@ jobs:
             pip install --upgrade pip
             pip install -e ".[dev]"
       - save_cache:
-          key: py3-cache-v12-{{ arch }}-{{ checksum "python.deps" }}
+          key: py3-cache-v12-{{ arch }}-{{ checksum "pyproject.toml" }}
           paths:
           - venv
       - save_cache:
