@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- fix(harvest): refactor dates handling [#3352](https://github.com/opendatateam/udata/pull/3352)
+
 
 ## 11.0.1 (2025-09-15)
 
