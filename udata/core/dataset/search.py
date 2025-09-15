@@ -3,6 +3,7 @@ import datetime
 from udata.core.dataset.api import DEFAULT_SORTING, DatasetApiParser
 from udata.core.spatial.constants import ADMIN_LEVEL_MAX
 from udata.core.spatial.models import admin_levels
+from udata.core.topic.models import TopicElement
 from udata.models import Dataset, GeoZone, License, Organization, Topic, User
 from udata.search import (
     BoolFilter,
@@ -73,7 +74,9 @@ class DatasetSearch(ModelSearchAdapter):
         organization = None
         owner = None
 
-        topics = Topic.objects(datasets=dataset).only("id")
+        topic_ids = list(
+            set(te.topic.id for te in TopicElement.objects(element=dataset) if te.topic)
+        )
 
         if dataset.organization:
             org = Organization.objects(id=dataset.organization.id).first()
@@ -112,7 +115,7 @@ class DatasetSearch(ModelSearchAdapter):
             "owner": str(owner.id) if owner else None,
             "format": [r.format.lower() for r in dataset.resources if r.format],
             "schema": [r.schema.name for r in dataset.resources if r.schema],
-            "topics": [str(t.id) for t in topics if topics],
+            "topics": [str(tid) for tid in topic_ids],
         }
         extras = {}
         for key, value in dataset.extras.items():
