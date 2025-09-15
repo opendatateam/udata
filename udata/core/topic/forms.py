@@ -58,24 +58,27 @@ class TopicForm(ModelForm):
         """Custom save to handle TopicElement creation properly"""
         # Store elements data before parent save
         elements_data = self.elements.data
+        # Check if elements field was explicitly provided
+        elements_provided = self.elements.has_data
 
         # Use parent save method (elements field is excluded via populate_obj)
         topic = super().save(commit=commit, **kwargs)
 
-        # Clear existing elements before adding new ones
-        if commit:
-            TopicElement.objects(topic=topic).delete()
+        # Only clear and recreate elements if they were explicitly provided in the payload
+        if elements_provided:
+            if commit:
+                TopicElement.objects(topic=topic).delete()
 
-        # Create elements and associate them with the topic
-        for element_data in elements_data or []:
-            # Create element form with only its own data, not inheriting from parent
-            element_form = TopicElementForm(meta={"csrf": False})
-            element_form.process(data=element_data)
-            if element_form.validate():
-                element = element_form.save(commit=False)
-                element.topic = topic
-                if commit:
-                    element.save()
+            # Create elements and associate them with the topic
+            for element_data in elements_data or []:
+                # Create element form with only its own data, not inheriting from parent
+                element_form = TopicElementForm(meta={"csrf": False})
+                element_form.process(data=element_data)
+                if element_form.validate():
+                    element = element_form.save(commit=False)
+                    element.topic = topic
+                    if commit:
+                        element.save()
 
         return topic
 
