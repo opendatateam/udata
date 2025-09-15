@@ -8,7 +8,6 @@ from mongoengine.signals import post_save
 
 from udata.api_fields import get_fields
 from udata.auth import current_user
-from udata.models import User
 from udata.mongo import db
 from udata.utils import get_field_value_from_path
 

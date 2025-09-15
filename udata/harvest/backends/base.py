@@ -172,7 +172,9 @@ class BaseBackend(object):
         if current_app.config["HARVEST_ACTIVITY_USER_ID"]:
             try:
                 # Try to fetch the existing harvest activity user
-                g.harvest_activity_user = User.objects.get(id=current_app.config["HARVEST_ACTIVITY_USER_ID"])
+                g.harvest_activity_user = User.objects.get(
+                    id=current_app.config["HARVEST_ACTIVITY_USER_ID"]
+                )
             except User.DoesNotExist:
                 log.exception(
                     "HARVEST_ACTIVITY_USER_ID does not seem to match an existing user id."
