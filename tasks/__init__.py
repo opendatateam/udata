@@ -43,7 +43,6 @@ def update(ctx):
     info("Note: Dependencies are now managed in pyproject.toml")
 
 
-
 @task
 def i18n(ctx, update=False):
     """Extract translatable strings"""
