@@ -1,4 +1,9 @@
-from udata.core.access_type.constants import ACCESS_AUDIENCE_CONDITIONS, ACCESS_AUDIENCE_TYPES, ACCESS_TYPE_OPEN, ACCESS_TYPES
+from udata.core.access_type.constants import (
+    ACCESS_AUDIENCE_CONDITIONS,
+    ACCESS_AUDIENCE_TYPES,
+    ACCESS_TYPE_OPEN,
+    ACCESS_TYPES,
+)
 from udata.core.access_type.models import AccessAudience
 from udata.core.spatial.forms import SpatialCoverageField
 from udata.core.storages import resources

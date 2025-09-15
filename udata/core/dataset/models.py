@@ -13,13 +13,13 @@ from flask import current_app, url_for
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import DateTimeField
 from mongoengine.signals import post_save, pre_init, pre_save
-from udata.core.access_type.constants import ACCESS_TYPE_OPEN
-from udata.core.access_type.models import WithAccessType, check_only_one_condition_per_role
 from werkzeug.utils import cached_property
 
 from udata.api_fields import field
 from udata.app import cache
 from udata.core import storages
+from udata.core.access_type.constants import ACCESS_TYPE_OPEN
+from udata.core.access_type.models import WithAccessType, check_only_one_condition_per_role
 from udata.core.activity.models import Auditable
 from udata.core.dataset.preview import TabularAPIPreview
 from udata.core.linkable import Linkable

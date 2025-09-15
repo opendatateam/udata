@@ -8,13 +8,22 @@ import pytest
 import pytz
 import requests_mock
 from flask import url_for
-from udata.core.access_type.constants import ACCESS_AUDIENCE_ADMINISTRATION, ACCESS_AUDIENCE_COMPANY, ACCESS_AUDIENCE_NO, ACCESS_AUDIENCE_PRIVATE, ACCESS_AUDIENCE_UNDER_CONDITIONS, ACCESS_AUDIENCE_YES, ACCESS_TYPE_OPEN, ACCESS_TYPE_RESTRICTED
 from werkzeug.test import TestResponse
 
 import udata.core.organization.constants as org_constants
 from udata.api import fields
 from udata.app import cache
 from udata.core import storages
+from udata.core.access_type.constants import (
+    ACCESS_AUDIENCE_ADMINISTRATION,
+    ACCESS_AUDIENCE_COMPANY,
+    ACCESS_AUDIENCE_NO,
+    ACCESS_AUDIENCE_PRIVATE,
+    ACCESS_AUDIENCE_UNDER_CONDITIONS,
+    ACCESS_AUDIENCE_YES,
+    ACCESS_TYPE_OPEN,
+    ACCESS_TYPE_RESTRICTED,
+)
 from udata.core.badges.factories import badge_factory
 from udata.core.dataset.constants import (
     DEFAULT_FREQUENCY,
