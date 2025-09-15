@@ -13,7 +13,8 @@ from flask import current_app, url_for
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import DateTimeField
 from mongoengine.signals import post_save, pre_init, pre_save
-from udata.core.access_type.models import WithAccessType
+from udata.core.access_type.constants import ACCESS_TYPE_OPEN
+from udata.core.access_type.models import WithAccessType, check_only_one_condition_per_role
 from werkzeug.utils import cached_property
 
 from udata.api_fields import field
@@ -700,6 +701,10 @@ class Dataset(Auditable, WithMetrics, WithAccessType, DatasetBadgeMixin, Owned, 
         self.last_update = self.compute_last_update()
 
         self.quality_cached = self.compute_quality()
+
+        check_only_one_condition_per_role(self.access_audiences)
+        if self.access_type and self.access_type != ACCESS_TYPE_OPEN:
+            self.license = None
 
         for key, value in self.extras.items():
             if not key.startswith("custom:"):

@@ -601,9 +601,6 @@ class NestedModelList(fields.FieldList):
         self.prefix = "{0}-".format(self.name)
 
     def process(self, formdata, data=unset_value, **kwargs):
-        print("process")
-        print(data)
-        print(formdata)
         self._formdata = formdata
         self.initial_data = data
         self.is_list_data = formdata and self.name in formdata
@@ -625,9 +622,7 @@ class NestedModelList(fields.FieldList):
         return super(NestedModelList, self).validate(form, extra_validators)
 
     def populate_obj(self, obj, name):
-        print("populate_obj")
         if not self.has_data:
-            print("no data")
             return
 
         initial_values = getattr(obj, name, [])
@@ -639,7 +634,6 @@ class NestedModelList(fields.FieldList):
         holder = Holder()
 
         for idx, field in enumerate(self):
-            print(field)
             initial = None
             if hasattr(self.nested_model, "id") and "id" in field.data:
                 id = self.nested_model.id.to_python(field.data["id"])

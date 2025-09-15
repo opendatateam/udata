@@ -1310,7 +1310,6 @@ class DatasetAPITest(APITestCase):
             ],
             "authorization_request_url": "https://example.org",
             "access_type_reason": "Les données contiennent des information sensibles ou liées au secret défense",
-            "resources": [{}],
         })
 
         self.assert200(response)
@@ -1326,6 +1325,34 @@ class DatasetAPITest(APITestCase):
         assert dataset.access_audiences[2].condition == ACCESS_AUDIENCE_UNDER_CONDITIONS
         assert dataset.authorization_request_url == "https://example.org"
         assert dataset.access_type_reason == "Les données contiennent des information sensibles ou liées au secret défense"
+
+
+    def test_cannot_duplicate_access_audiences(self):
+        self.login(AdminFactory())
+        dataset = DatasetFactory()
+
+        response = self.put(url_for("api.dataset", dataset=dataset), {
+            "access_type": ACCESS_TYPE_RESTRICTED,
+            "access_audiences": [
+                { "role": ACCESS_AUDIENCE_ADMINISTRATION, "condition": ACCESS_AUDIENCE_YES },
+                { "role": ACCESS_AUDIENCE_ADMINISTRATION, "condition": ACCESS_AUDIENCE_YES },
+            ],
+        })
+
+        self.assert400(response)
+
+    def test_reset_license_on_restricted(self):
+        self.login(AdminFactory())
+        dataset = DatasetFactory(license=LicenseFactory(id="cc-by"))
+
+        response = self.put(url_for("api.dataset", dataset=dataset), {
+            "access_type": ACCESS_TYPE_RESTRICTED,
+        })
+
+        self.assert200(response)
+
+        dataset.reload()
+        assert dataset.license is None
 
 
 class DatasetsFeedAPItest(APITestCase):
