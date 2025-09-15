@@ -75,9 +75,9 @@ class Activity(db.Document, metaclass=EmitNewActivityMetaClass):
 
     @classmethod
     def emit(cls, related_to, organization=None, changed_fields=None, extras=None):
-        if hasattr(g, "harvest_activity_user_id"):
+        if hasattr(g, "harvest_activity_user"):
             # We're in the context of a harvest action with a harvest activity user to use as actor
-            actor = User.get(g.harvest_activity_user_id)
+            actor = g.harvest_activity_user
         else:
             actor = current_user._get_current_object()
         new_activity.send(
