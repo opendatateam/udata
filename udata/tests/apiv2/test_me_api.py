@@ -28,10 +28,10 @@ class MeAPIv2Test(APITestCase):
         assert all(
             str(topic.id) in [remote_topic["id"] for remote_topic in data] for topic in topics
         )
-        assert "rel" in data[0]["datasets"]
+        assert "rel" in data[0]["elements"]
 
         # topic parser is already tested in topics test
-        # we're just making sure one of theme is working
+        # we're just making sure one of them is working
         response = self.get(url_for("apiv2.my_org_topics", tag="energy"))
         assert response.status_code == 200
         data = response.json["data"]

@@ -166,6 +166,7 @@ def init_app(app):
     import udata.core.dataset.transport  # noqa
     import udata.core.dataset.recommendations  # noqa
     import udata.core.spatial.tasks  # noqa
+    import udata.core.topic.tasks  # noqa
     import udata.core.reuse.tasks  # noqa
     import udata.core.user.tasks  # noqa
     import udata.core.organization.tasks  # noqa
