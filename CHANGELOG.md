@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Harvest model records in csw-dcat [#3433](https://github.com/opendatateam/udata/pull/3433)
 
 ## 11.0.1 (2025-09-15)
 
