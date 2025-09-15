@@ -172,7 +172,9 @@ class DatasetForm(ModelForm):
         description=_("A short description of the dataset."),
     )
     license = fields.ModelSelectField(_("License"), model=License, allow_blank=True)
-    access_type = fields.SelectField(choices=ACCESS_TYPES, default=ACCESS_TYPE_OPEN, validators=[validators.optional()])
+    access_type = fields.SelectField(
+        choices=ACCESS_TYPES, default=ACCESS_TYPE_OPEN, validators=[validators.optional()]
+    )
     access_audiences = fields.NestedModelList(AccessAudienceForm)
     authorization_request_url = fields.StringField(_("Authorization request URL"))
     access_type_reason = fields.StringField(_("Access type reason"))

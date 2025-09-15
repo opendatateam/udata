@@ -26,7 +26,9 @@ def check_only_one_condition_per_role(access_audiences, **_kwargs):
 
 
 class WithAccessType:
-    access_type = field(db.StringField(choices=ACCESS_TYPES, default=ACCESS_TYPE_OPEN), filterable={})
+    access_type = field(
+        db.StringField(choices=ACCESS_TYPES, default=ACCESS_TYPE_OPEN), filterable={}
+    )
     access_audiences = field(
         db.EmbeddedDocumentListField(AccessAudience),
         checks=[check_only_one_condition_per_role],

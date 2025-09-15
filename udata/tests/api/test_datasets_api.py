@@ -1310,16 +1310,22 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         assert response.json["access_type"] == ACCESS_TYPE_OPEN
 
-        response = self.put(url_for("api.dataset", dataset=dataset), {
-            "access_type": ACCESS_TYPE_RESTRICTED,
-            "access_audiences": [
-                { "role": ACCESS_AUDIENCE_ADMINISTRATION, "condition": ACCESS_AUDIENCE_YES },
-                { "role": ACCESS_AUDIENCE_COMPANY, "condition": ACCESS_AUDIENCE_NO },
-                { "role": ACCESS_AUDIENCE_PRIVATE, "condition": ACCESS_AUDIENCE_UNDER_CONDITIONS },
-            ],
-            "authorization_request_url": "https://example.org",
-            "access_type_reason": "Les données contiennent des information sensibles ou liées au secret défense",
-        })
+        response = self.put(
+            url_for("api.dataset", dataset=dataset),
+            {
+                "access_type": ACCESS_TYPE_RESTRICTED,
+                "access_audiences": [
+                    {"role": ACCESS_AUDIENCE_ADMINISTRATION, "condition": ACCESS_AUDIENCE_YES},
+                    {"role": ACCESS_AUDIENCE_COMPANY, "condition": ACCESS_AUDIENCE_NO},
+                    {
+                        "role": ACCESS_AUDIENCE_PRIVATE,
+                        "condition": ACCESS_AUDIENCE_UNDER_CONDITIONS,
+                    },
+                ],
+                "authorization_request_url": "https://example.org",
+                "access_type_reason": "Les données contiennent des information sensibles ou liées au secret défense",
+            },
+        )
 
         self.assert200(response)
         assert response.json["access_type"] == ACCESS_TYPE_RESTRICTED
@@ -1333,20 +1339,25 @@ class DatasetAPITest(APITestCase):
         assert dataset.access_audiences[2].role == ACCESS_AUDIENCE_PRIVATE
         assert dataset.access_audiences[2].condition == ACCESS_AUDIENCE_UNDER_CONDITIONS
         assert dataset.authorization_request_url == "https://example.org"
-        assert dataset.access_type_reason == "Les données contiennent des information sensibles ou liées au secret défense"
-
+        assert (
+            dataset.access_type_reason
+            == "Les données contiennent des information sensibles ou liées au secret défense"
+        )
 
     def test_cannot_duplicate_access_audiences(self):
         self.login(AdminFactory())
         dataset = DatasetFactory()
 
-        response = self.put(url_for("api.dataset", dataset=dataset), {
-            "access_type": ACCESS_TYPE_RESTRICTED,
-            "access_audiences": [
-                { "role": ACCESS_AUDIENCE_ADMINISTRATION, "condition": ACCESS_AUDIENCE_YES },
-                { "role": ACCESS_AUDIENCE_ADMINISTRATION, "condition": ACCESS_AUDIENCE_YES },
-            ],
-        })
+        response = self.put(
+            url_for("api.dataset", dataset=dataset),
+            {
+                "access_type": ACCESS_TYPE_RESTRICTED,
+                "access_audiences": [
+                    {"role": ACCESS_AUDIENCE_ADMINISTRATION, "condition": ACCESS_AUDIENCE_YES},
+                    {"role": ACCESS_AUDIENCE_ADMINISTRATION, "condition": ACCESS_AUDIENCE_YES},
+                ],
+            },
+        )
 
         self.assert400(response)
 
@@ -1354,9 +1365,12 @@ class DatasetAPITest(APITestCase):
         self.login(AdminFactory())
         dataset = DatasetFactory(license=LicenseFactory(id="cc-by"))
 
-        response = self.put(url_for("api.dataset", dataset=dataset), {
-            "access_type": ACCESS_TYPE_RESTRICTED,
-        })
+        response = self.put(
+            url_for("api.dataset", dataset=dataset),
+            {
+                "access_type": ACCESS_TYPE_RESTRICTED,
+            },
+        )
 
         self.assert200(response)
 
