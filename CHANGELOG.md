@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Remove unused BadgesField [#3420](https://github.com/opendatateam/udata/pull/3420)
 
 ## 11.0.1 (2025-09-15)
 
