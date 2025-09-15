@@ -295,6 +295,33 @@ class TopicAPITest(APITestCase):
         topic.reload()
         self.assertEqual(len(topic.elements), initial_length + 1)
 
+    def test_topic_api_update_without_elements(self):
+        """It should update a topic without affecting existing elements when elements field is not provided"""
+        user = self.login()
+        topic = TopicWithElementsFactory(owner=user)
+        initial_elements_count = len(topic.elements)
+        initial_element_ids = [str(elt.id) for elt in topic.elements]
+
+        # Update topic without including elements field
+        data = {
+            "name": "Updated topic name",
+            "description": "Updated description",
+            "tags": ["updated-tag"],
+        }
+        response = self.put(url_for("apiv2.topic", topic=topic), data)
+        self.assert200(response)
+
+        # Reload and verify elements are preserved
+        topic.reload()
+        self.assertEqual(len(topic.elements), initial_elements_count)
+        current_element_ids = [str(elt.id) for elt in topic.elements]
+        self.assertEqual(set(current_element_ids), set(initial_element_ids))
+
+        # Verify other fields were updated
+        self.assertEqual(topic.name, "Updated topic name")
+        self.assertEqual(topic.description, "Updated description")
+        self.assertEqual(topic.tags, ["updated-tag"])
+
     def test_topic_api_delete(self):
         """It should delete a topic from the API"""
         owner = self.login()
