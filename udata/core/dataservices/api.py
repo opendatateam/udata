@@ -10,7 +10,7 @@ from flask_login import current_user
 from udata.api import API, api, fields
 from udata.api_fields import patch
 from udata.auth import admin_permission
-from udata.core.dataservices.constants import DATASERVICE_ACCESS_TYPE_RESTRICTED
+from udata.core.access_type.constants import ACCESS_TYPE_RESTRICTED
 from udata.core.dataset.models import Dataset
 from udata.core.followers.api import FollowAPI
 from udata.core.site.models import current_site
@@ -49,7 +49,7 @@ class DataservicesAPI(API):
         dataservice = patch(Dataservice(), request)
         if not dataservice.owner and not dataservice.organization:
             dataservice.owner = current_user._get_current_object()
-        if dataservice.access_type != DATASERVICE_ACCESS_TYPE_RESTRICTED:
+        if dataservice.access_type != ACCESS_TYPE_RESTRICTED:
             dataservice.access_audiences = []
         dataservice.save()
         return dataservice, 201
@@ -118,7 +118,7 @@ class DataserviceAPI(API):
 
         patch(dataservice, request)
         dataservice.metadata_modified_at = datetime.utcnow()
-        if dataservice.access_type != DATASERVICE_ACCESS_TYPE_RESTRICTED:
+        if dataservice.access_type != ACCESS_TYPE_RESTRICTED:
             dataservice.access_audiences = []
 
         dataservice.save()

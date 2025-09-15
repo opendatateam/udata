@@ -9,11 +9,11 @@ import udata.core.contact_point.api_fields as contact_api_fields
 from udata.api import api, fields
 from udata.api_fields import field, function_field, generate_fields
 from udata.core.activity.models import Auditable
-from udata.core.dataservices.constants import (
-    DATASERVICE_ACCESS_AUDIENCE_CONDITIONS,
-    DATASERVICE_ACCESS_AUDIENCE_TYPES,
-    DATASERVICE_ACCESS_TYPES,
-    DATASERVICE_FORMATS,
+from udata.core.dataservices.constants import DATASERVICE_FORMATS
+from udata.core.access_type.constants import (
+    ACCESS_AUDIENCE_CONDITIONS,
+    ACCESS_AUDIENCE_TYPES,
+    ACCESS_TYPES,
 )
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.dataset.models import Dataset
@@ -118,8 +118,8 @@ class HarvestMetadata(db.EmbeddedDocument):
 
 @generate_fields()
 class AccessAudience(db.EmbeddedDocument):
-    role = field(db.StringField(choices=DATASERVICE_ACCESS_AUDIENCE_TYPES), filterable={})
-    condition = field(db.StringField(choices=DATASERVICE_ACCESS_AUDIENCE_CONDITIONS), filterable={})
+    role = field(db.StringField(choices=ACCESS_AUDIENCE_TYPES), filterable={})
+    condition = field(db.StringField(choices=ACCESS_AUDIENCE_CONDITIONS), filterable={})
 
 
 def check_only_one_condition_per_role(access_audiences, **_kwargs):
@@ -190,7 +190,7 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
     availability = field(db.FloatField(min=0, max=100), example="99.99")
     availability_url = field(db.URLField())
 
-    access_type = field(db.StringField(choices=DATASERVICE_ACCESS_TYPES), filterable={})
+    access_type = field(db.StringField(choices=ACCESS_TYPES), filterable={})
     access_audiences = field(
         db.EmbeddedDocumentListField(AccessAudience),
         checks=[check_only_one_condition_per_role],

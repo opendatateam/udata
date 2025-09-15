@@ -7,10 +7,10 @@ from typing import List
 
 from mongoengine.connection import get_db
 
-from udata.core.dataservices.constants import (
-    DATASERVICE_ACCESS_TYPE_OPEN,
-    DATASERVICE_ACCESS_TYPE_OPEN_WITH_ACCOUNT,
-    DATASERVICE_ACCESS_TYPE_RESTRICTED,
+from udata.core.access_type.constants import (
+    ACCESS_TYPE_OPEN,
+    ACCESS_TYPE_OPEN_WITH_ACCOUNT,
+    ACCESS_TYPE_RESTRICTED,
 )
 from udata.core.dataservices.models import Dataservice
 
@@ -48,7 +48,7 @@ def migrate(db):
 
     for dataservice in get_db().dataservice.find({"is_restricted": True, "has_token": False}):
         log.info(
-            f"\tDataservice #{dataservice['_id']} {dataservice['title']} is restricted but without token. (will be set to access_type={DATASERVICE_ACCESS_TYPE_RESTRICTED})"
+            f"\tDataservice #{dataservice['_id']} {dataservice['title']} is restricted but without token. (will be set to access_type={ACCESS_TYPE_RESTRICTED})"
         )
 
     log.info("Processing dataservices…")
@@ -58,10 +58,10 @@ def migrate(db):
             "is_restricted": True,
             # `has_token` could be True or False, we don't care
         },
-        update={"$set": {"access_type": DATASERVICE_ACCESS_TYPE_RESTRICTED}},
+        update={"$set": {"access_type": ACCESS_TYPE_RESTRICTED}},
     )
     log.info(
-        f"\t{count.modified_count} restricted dataservices to DATASERVICE_ACCESS_TYPE_RESTRICTED"
+        f"\t{count.modified_count} restricted dataservices to ACCESS_TYPE_RESTRICTED"
     )
 
     count = get_db().dataservice.update_many(
@@ -69,10 +69,10 @@ def migrate(db):
             "is_restricted": False,
             "has_token": True,
         },
-        update={"$set": {"access_type": DATASERVICE_ACCESS_TYPE_OPEN_WITH_ACCOUNT}},
+        update={"$set": {"access_type": ACCESS_TYPE_OPEN_WITH_ACCOUNT}},
     )
     log.info(
-        f"\t{count.modified_count} dataservices not restricted but with token to DATASERVICE_ACCESS_TYPE_OPEN_WITH_ACCOUNT"
+        f"\t{count.modified_count} dataservices not restricted but with token to ACCESS_TYPE_OPEN_WITH_ACCOUNT"
     )
 
     count = get_db().dataservice.update_many(
@@ -80,9 +80,9 @@ def migrate(db):
             "is_restricted": False,
             "has_token": False,
         },
-        update={"$set": {"access_type": DATASERVICE_ACCESS_TYPE_OPEN}},
+        update={"$set": {"access_type": ACCESS_TYPE_OPEN}},
     )
-    log.info(f"\t{count.modified_count} open dataservices to DATASERVICE_ACCESS_TYPE_OPEN")
+    log.info(f"\t{count.modified_count} open dataservices to ACCESS_TYPE_OPEN")
 
     dataservices: List[Dataservice] = get_db().dataservice.find()
     for dataservice in dataservices:

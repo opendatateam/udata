@@ -5,10 +5,10 @@ from flask_restx.inputs import boolean
 
 from udata.api import api
 from udata.api.parsers import ModelApiParser
-from udata.core.dataservices.constants import (
-    DATASERVICE_ACCESS_TYPE_OPEN,
-    DATASERVICE_ACCESS_TYPE_OPEN_WITH_ACCOUNT,
-    DATASERVICE_ACCESS_TYPE_RESTRICTED,
+from udata.core.access_type.constants import (
+    ACCESS_TYPE_OPEN,
+    ACCESS_TYPE_OPEN_WITH_ACCOUNT,
+    ACCESS_TYPE_RESTRICTED,
 )
 from udata.models import Dataservice, Organization, User
 from udata.search import (
@@ -54,9 +54,9 @@ class DataserviceApiParser(ModelApiParser):
             dataservices = dataservices.filter(organization=args["organization"])
         if "is_restricted" in args:
             dataservices = dataservices.filter(
-                access_type__in=[DATASERVICE_ACCESS_TYPE_RESTRICTED]
+                access_type__in=[ACCESS_TYPE_RESTRICTED]
                 if boolean(args["is_restricted"])
-                else [DATASERVICE_ACCESS_TYPE_OPEN, DATASERVICE_ACCESS_TYPE_OPEN_WITH_ACCOUNT]
+                else [ACCESS_TYPE_OPEN, ACCESS_TYPE_OPEN_WITH_ACCOUNT]
             )
         if args.get("featured"):
             dataservices = dataservices.filter(featured=args["featured"])
@@ -126,6 +126,6 @@ class DataserviceSearch(ModelSearchAdapter):
             "tags": dataservice.tags,
             "extras": extras,
             "followers": dataservice.metrics.get("followers", 0),
-            "is_restricted": dataservice.access_type == DATASERVICE_ACCESS_TYPE_RESTRICTED,
+            "is_restricted": dataservice.access_type == ACCESS_TYPE_RESTRICTED,
             "views": dataservice.metrics.get("views", 0),
         }
