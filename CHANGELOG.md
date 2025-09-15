@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Simplify getting mail connection (dummy or real) condition [#3410](https://github.com/opendatateam/udata/pull/3410)
 - fix(harvest): refactor dates handling [#3352](https://github.com/opendatateam/udata/pull/3352)
 - migrate to pyproject.toml [#3413](https://github.com/opendatateam/udata/pull/3413)
 
