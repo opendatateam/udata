@@ -14,6 +14,7 @@ from udata.core.dataset.factories import (
 )
 from udata.core.dataset.models import Schema
 from udata.core.dataset.search import DatasetSearch
+from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.i18n import gettext as _
 from udata.search import as_task_param, reindex
 from udata.search.commands import index_model
@@ -173,3 +174,45 @@ class IndexingLifecycleTest(APITestCase):
         expected_value = {"document": DatasetSearch.serialize(fake_data), "index": "dataset"}
         url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/datasets/index"
         mock_req.assert_called_with(url, json=expected_value)
+
+
+class DatasetSearchAdapterTest(APITestCase):
+    def test_serialize_includes_topic_ids(self):
+        """Test that DatasetSearch.serialize includes topic_ids in the serialized document"""
+        dataset = DatasetFactory()
+        topic1 = TopicFactory()
+        topic2 = TopicFactory()
+
+        TopicElementDatasetFactory(element=dataset, topic=topic1)
+        TopicElementDatasetFactory(element=dataset, topic=topic2)
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "topics" in serialized
+        assert len(serialized["topics"]) == 2
+        assert str(topic1.id) in serialized["topics"]
+        assert str(topic2.id) in serialized["topics"]
+
+    def test_serialize_empty_topics_for_dataset_without_topics(self):
+        """Test that DatasetSearch.serialize returns empty topics list for dataset without topics"""
+        dataset = DatasetFactory()
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "topics" in serialized
+        assert serialized["topics"] == []
+
+    def test_serialize_deduplicates_topic_ids(self):
+        """Test that DatasetSearch.serialize deduplicates topic IDs when same topic appears multiple times"""
+        dataset = DatasetFactory()
+        topic = TopicFactory()
+
+        # Create multiple topic elements for the same topic
+        TopicElementDatasetFactory(element=dataset, topic=topic)
+        TopicElementDatasetFactory(element=dataset, topic=topic)
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "topics" in serialized
+        assert len(serialized["topics"]) == 1
+        assert str(topic.id) in serialized["topics"]
