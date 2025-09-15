@@ -60,9 +60,7 @@ def migrate(db):
         },
         update={"$set": {"access_type": ACCESS_TYPE_RESTRICTED}},
     )
-    log.info(
-        f"\t{count.modified_count} restricted dataservices to ACCESS_TYPE_RESTRICTED"
-    )
+    log.info(f"\t{count.modified_count} restricted dataservices to ACCESS_TYPE_RESTRICTED")
 
     count = get_db().dataservice.update_many(
         filter={

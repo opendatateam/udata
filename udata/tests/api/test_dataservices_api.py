@@ -160,12 +160,8 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(
             response.json["access_audiences"][0]["role"], ACCESS_AUDIENCE_ADMINISTRATION
         )
-        self.assertEqual(
-            response.json["access_audiences"][0]["condition"], ACCESS_AUDIENCE_YES
-        )
-        self.assertEqual(
-            response.json["access_audiences"][1]["role"], ACCESS_AUDIENCE_COMPANY
-        )
+        self.assertEqual(response.json["access_audiences"][0]["condition"], ACCESS_AUDIENCE_YES)
+        self.assertEqual(response.json["access_audiences"][1]["role"], ACCESS_AUDIENCE_COMPANY)
         self.assertEqual(
             response.json["access_audiences"][1]["condition"],
             ACCESS_AUDIENCE_UNDER_CONDITIONS,

@@ -5,16 +5,12 @@ from flask import url_for
 from mongoengine import Q
 from mongoengine.signals import post_save
 
+from udata.core.access_type.models import WithAccessType
 import udata.core.contact_point.api_fields as contact_api_fields
 from udata.api import api, fields
 from udata.api_fields import field, function_field, generate_fields
 from udata.core.activity.models import Auditable
 from udata.core.dataservices.constants import DATASERVICE_FORMATS
-from udata.core.access_type.constants import (
-    ACCESS_AUDIENCE_CONDITIONS,
-    ACCESS_AUDIENCE_TYPES,
-    ACCESS_TYPES,
-)
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.dataset.models import Dataset
 from udata.core.linkable import Linkable
@@ -23,7 +19,6 @@ from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
 from udata.models import Discussion, Follow, db
-from udata.mongo.errors import FieldValidationError
 from udata.uris import cdata_url
 
 # "frequency"
@@ -116,21 +111,6 @@ class HarvestMetadata(db.EmbeddedDocument):
     archived_reason = field(db.StringField())
 
 
-@generate_fields()
-class AccessAudience(db.EmbeddedDocument):
-    role = field(db.StringField(choices=ACCESS_AUDIENCE_TYPES), filterable={})
-    condition = field(db.StringField(choices=ACCESS_AUDIENCE_CONDITIONS), filterable={})
-
-
-def check_only_one_condition_per_role(access_audiences, **_kwargs):
-    roles = set(e["role"] for e in access_audiences)
-    if len(roles) != len(access_audiences):
-        raise FieldValidationError(
-            _("You can only set one condition for a given access audience role"),
-            field="access_audiences",
-        )
-
-
 @generate_fields(
     searchable=True,
     additional_filters={"organization_badge": "organization.badges"},
@@ -139,7 +119,7 @@ def check_only_one_condition_per_role(access_audiences, **_kwargs):
         {"key": "views", "value": "metrics.views"},
     ],
 )
-class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
+class Dataservice(Auditable, WithMetrics, WithAccessType, Linkable, Owned, db.Document):
     meta = {
         "indexes": [
             "$title",
@@ -189,14 +169,6 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
 
     availability = field(db.FloatField(min=0, max=100), example="99.99")
     availability_url = field(db.URLField())
-
-    access_type = field(db.StringField(choices=ACCESS_TYPES), filterable={})
-    access_audiences = field(
-        db.EmbeddedDocumentListField(AccessAudience),
-        checks=[check_only_one_condition_per_role],
-    )
-
-    authorization_request_url = field(db.URLField())
 
     format = field(db.StringField(choices=DATASERVICE_FORMATS))
 
