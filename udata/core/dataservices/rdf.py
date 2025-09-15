@@ -18,6 +18,7 @@ from udata.rdf import (
     namespace_manager,
     rdf_value,
     remote_url_from_rdf,
+    set_harvested_date,
     themes_from_rdf,
     url_from_rdf,
 )
@@ -87,7 +88,8 @@ def dataservice_from_rdf(
     dataservice.harvest.remote_url = remote_url_from_rdf(
         d, graph, remote_url_prefix=remote_url_prefix
     )
-    dataservice.harvest.created_at = rdf_value(d, DCT.issued)
+    dataservice.harvest.created_at = rdf_value(d, DCT.created)
+    dataservice.harvest.issued_at = rdf_value(d, DCT.issued)
     dataservice.metadata_modified_at = rdf_value(d, DCT.modified)
 
     dataservice.tags = themes_from_rdf(d)
@@ -122,7 +124,14 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     d.set(DCT.identifier, Literal(identifier))
     d.set(DCT.title, Literal(dataservice.title))
     d.set(DCT.description, Literal(dataservice.description))
-    d.set(DCT.issued, Literal(dataservice.created_at))
+
+    # created
+    set_harvested_date(dataservice, d, DCT.created, "created_at", fallback=dataservice.created_at)
+    # issued
+    set_harvested_date(dataservice, d, DCT.issued, "issued_at", fallback=dataservice.created_at)
+    # modified
+    # uses internal attr instead of harvested one, mapping of metadata_modified_at from harvested is clean enough
+    d.set(DCT.modified, Literal(dataservice.metadata_modified_at))
 
     if dataservice.base_api_url:
         d.set(DCAT.endpointURL, URIRef(dataservice.base_api_url))
