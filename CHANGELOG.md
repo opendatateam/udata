@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 11.0.1 (2025-09-15)
 
 - fix: PUT topic without elements [#3424](https://github.com/opendatateam/udata/pull/3424)
