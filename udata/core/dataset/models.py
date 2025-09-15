@@ -13,6 +13,7 @@ from flask import current_app, url_for
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import DateTimeField
 from mongoengine.signals import post_save, pre_init, pre_save
+from udata.core.access_type.models import WithAccessType
 from werkzeug.utils import cached_property
 
 from udata.api_fields import field
@@ -549,7 +550,7 @@ class DatasetBadgeMixin(BadgeMixin):
     __badges__ = BADGES
 
 
-class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Document):
+class Dataset(Auditable, WithMetrics, WithAccessType, DatasetBadgeMixin, Owned, Linkable, db.Document):
     title = field(db.StringField(required=True))
     acronym = field(db.StringField(max_length=128))
     # /!\ do not set directly the slug when creating or updating a dataset

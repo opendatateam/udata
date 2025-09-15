@@ -1,3 +1,5 @@
+from udata.core.access_type.constants import ACCESS_AUDIENCE_CONDITIONS, ACCESS_AUDIENCE_TYPES, ACCESS_TYPE_OPEN, ACCESS_TYPES
+from udata.core.access_type.models import AccessAudience
 from udata.core.spatial.forms import SpatialCoverageField
 from udata.core.storages import resources
 from udata.forms import ModelForm, fields, validators
@@ -140,6 +142,13 @@ def validate_contact_point(form, field):
             )
 
 
+class AccessAudienceForm(ModelForm):
+    model_class = AccessAudience
+
+    role = fields.SelectField(choices=ACCESS_AUDIENCE_TYPES)
+    condition = fields.SelectField(choices=ACCESS_AUDIENCE_CONDITIONS)
+
+
 class DatasetForm(ModelForm):
     model_class = Dataset
 
@@ -158,6 +167,10 @@ class DatasetForm(ModelForm):
         description=_("A short description of the dataset."),
     )
     license = fields.ModelSelectField(_("License"), model=License, allow_blank=True)
+    access_type = fields.SelectField(choices=ACCESS_TYPES, default=ACCESS_TYPE_OPEN, validators=[validators.optional()])
+    access_audiences = fields.NestedModelList(AccessAudienceForm)
+    authorization_request_url = fields.StringField(_("Authorization request URL"))
+    access_type_reason = fields.StringField(_("Access type reason"))
     frequency = fields.SelectField(
         _("Update frequency"),
         choices=list(UPDATE_FREQUENCIES.items()),

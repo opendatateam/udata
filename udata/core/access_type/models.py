@@ -2,6 +2,7 @@ from udata.api_fields import field, generate_fields
 from udata.core.access_type.constants import (
     ACCESS_AUDIENCE_CONDITIONS,
     ACCESS_AUDIENCE_TYPES,
+    ACCESS_TYPE_OPEN,
     ACCESS_TYPES,
 )
 from udata.i18n import lazy_gettext as _
@@ -25,10 +26,11 @@ def check_only_one_condition_per_role(access_audiences, **_kwargs):
 
 
 class WithAccessType:
-    access_type = field(db.StringField(choices=ACCESS_TYPES), filterable={})
+    access_type = field(db.StringField(choices=ACCESS_TYPES, default=ACCESS_TYPE_OPEN), filterable={})
     access_audiences = field(
         db.EmbeddedDocumentListField(AccessAudience),
         checks=[check_only_one_condition_per_role],
     )
 
     authorization_request_url = field(db.URLField())
+    access_type_reason = field(db.StringField())
