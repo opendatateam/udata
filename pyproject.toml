@@ -200,6 +200,10 @@ extract_messages = { keywords = "_ N_:1,2 P_:1c,2 L_ gettext ngettext:1,2 pgette
 init_catalog = { domain = "udata", input_file = "udata/translations/udata.pot", output_dir = "udata/translations" }
 update_catalog = { domain = "udata", input_file = "udata/translations/udata.pot", output_dir = "udata/translations", previous = true }
 
+[tool.pyright]
+include = ["tasks", "udata"]
+typeCheckingMode = "standard"
+
 [tool.pytest.ini_options]
 norecursedirs = [".git", "build", ".tox", "specs", ".cache", "udata/static", "udata/templates", "udata/translations"]
 python_files = ["test_*.py"]
