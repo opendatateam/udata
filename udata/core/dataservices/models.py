@@ -5,10 +5,10 @@ from flask import url_for
 from mongoengine import Q
 from mongoengine.signals import post_save
 
-from udata.core.access_type.models import WithAccessType
 import udata.core.contact_point.api_fields as contact_api_fields
 from udata.api import api, fields
 from udata.api_fields import field, function_field, generate_fields
+from udata.core.access_type.models import WithAccessType
 from udata.core.activity.models import Auditable
 from udata.core.dataservices.constants import DATASERVICE_FORMATS
 from udata.core.dataset.api_fields import dataset_ref_fields
