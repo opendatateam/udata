@@ -130,6 +130,7 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     # issued
     set_harvested_date(dataservice, d, DCT.issued, "issued_at", fallback=dataservice.created_at)
     # modified
+    # uses internal attr instead of harvested one, mapping of metadata_modified_at from harvested is clean enough
     d.set(DCT.modified, Literal(dataservice.metadata_modified_at))
 
     if dataservice.base_api_url:
