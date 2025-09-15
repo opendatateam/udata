@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- fix: PUT topic without elements [#3424](https://github.com/opendatateam/udata/pull/3424)
 
 ## 11.0.0 (2025-09-12)
 

@@ -299,7 +299,6 @@ class TopicAPITest(APITestCase):
         """It should update a topic without affecting existing elements when elements field is not provided"""
         user = self.login()
         topic = TopicWithElementsFactory(owner=user)
-        initial_elements_count = len(topic.elements)
         initial_element_ids = [str(elt.id) for elt in topic.elements]
 
         # Update topic without including elements field
@@ -313,7 +312,7 @@ class TopicAPITest(APITestCase):
 
         # Reload and verify elements are preserved
         topic.reload()
-        self.assertEqual(len(topic.elements), initial_elements_count)
+        self.assertEqual(len(topic.elements), len(initial_element_ids))
         current_element_ids = [str(elt.id) for elt in topic.elements]
         self.assertEqual(set(current_element_ids), set(initial_element_ids))
 
