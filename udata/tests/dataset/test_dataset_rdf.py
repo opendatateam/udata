@@ -46,6 +46,7 @@ from udata.rdf import (
     SPDX,
     TAG_TO_EU_HVD_CATEGORIES,
     VCARD,
+    default_lang_value,
     primary_topic_identifier_from_rdf,
 )
 from udata.tests.helpers import assert200, assert_redirects
@@ -1102,6 +1103,24 @@ class RdfToDatasetTest:
 
         pti = primary_topic_identifier_from_rdf(g, g.resource(node))
         assert pti == Literal("primary-topic-identifier")
+
+    def test_rdf_value_with_preferred_language(self, app):
+        """Check that rdf_value gets the Literal with preferred language if multiple exists"""
+
+        app.config["DEFAULT_LANGUAGE"] = "es"
+
+        node = BNode()
+        g = Graph()
+
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal("Deutscher Titel", lang="de")))
+        g.add((node, DCT.title, Literal("Titolo italiano ", lang="it")))
+        g.add((node, DCT.title, Literal("Title in English", lang="en")))
+        g.add((node, DCT.title, Literal("Título en español", lang="es")))
+        g.add((node, DCT.title, Literal("中文标题", lang="zh")))
+
+        value = default_lang_value(g.resource(node), DCT.title)
+        assert value.language == "es"
 
 
 @pytest.mark.frontend

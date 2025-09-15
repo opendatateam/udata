@@ -480,7 +480,14 @@ class ModelField(Field):
         if not valuelist or len(valuelist) != 1 or not valuelist[0]:
             return
         specs = valuelist[0]
-        model_field = getattr(self._form.model_class, self.name)
+
+        try:
+            model_field = getattr(self._form.model_class, self.name)
+        # Handle the case where the field it is not fetchable in the model via self.name
+        # This can happen in nested forms like NestedModelList, where self.name is {parent}-{index}-{short_name}
+        except AttributeError:
+            model_field = getattr(self._form.model_class, self.short_name)
+
         if isinstance(specs, str):
             specs = {"id": specs}
         elif not specs.get("id", None):

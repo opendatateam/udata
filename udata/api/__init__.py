@@ -268,6 +268,7 @@ validation_error_fields_v2 = apiv2.inherit("ValidationError", validation_error_f
 
 def convert_object_of_exceptions_to_object_of_strings(exceptions: dict):
     errors = {}
+
     for key, exception in exceptions.items():
         if isinstance(exception, Exception):
             errors[key] = str(exception)
@@ -290,7 +291,9 @@ def handle_validation_error(error: mongoengine.errors.ValidationError):
     """Error returned when validation failed."""
     return (
         {
-            "errors": convert_object_of_exceptions_to_object_of_strings(error.errors),
+            "errors": convert_object_of_exceptions_to_object_of_strings(error.errors)
+            if error.errors
+            else {},
             "message": str(error),
         },
         400,
@@ -343,12 +346,12 @@ def init_app(app):
     import udata.core.reuse.apiv2  # noqa
     import udata.core.organization.api  # noqa
     import udata.core.organization.apiv2  # noqa
+    import udata.core.pages.api  # noqa
     import udata.core.followers.api  # noqa
     import udata.core.jobs.api  # noqa
     import udata.core.reports.api  # noqa
     import udata.core.site.api  # noqa
     import udata.core.tags.api  # noqa
-    import udata.core.topic.api  # noqa
     import udata.core.topic.apiv2  # noqa
     import udata.core.post.api  # noqa
     import udata.core.contact_point.api  # noqa

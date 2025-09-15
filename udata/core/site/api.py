@@ -1,13 +1,12 @@
-from bson import ObjectId
 from flask import current_app, json, make_response, redirect, request, url_for
 
-from udata.api import API, api, fields
+from udata.api import API, api
+from udata.api_fields import patch
 from udata.auth import admin_permission
 from udata.core import csv
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api import DatasetApiParser
-from udata.core.dataset.api_fields import dataset_fields
 from udata.core.dataset.csv import ResourcesCsvAdapter
 from udata.core.dataset.search import DatasetSearch
 from udata.core.dataset.tasks import get_queryset as get_csv_queryset
@@ -22,74 +21,28 @@ from udata.models import Dataset, Reuse
 from udata.rdf import CONTEXT, RDF_EXTENSIONS, graph_response, negociate_content
 from udata.utils import multi_to_dict
 
-from .models import current_site
+from .models import Site, current_site
 from .rdf import build_catalog
-
-site_fields = api.model(
-    "Site",
-    {
-        "id": fields.String(description="The Site unique identifier", required=True),
-        "title": fields.String(description="The site display title", required=True),
-        "metrics": fields.Raw(
-            attribute=lambda o: o.get_metrics(), description="The associated metrics", default={}
-        ),
-    },
-)
 
 
 @api.route("/site/", endpoint="site")
 class SiteAPI(API):
     @api.doc(id="get_site")
-    @api.marshal_with(site_fields)
+    @api.marshal_with(Site.__read_fields__)
     def get(self):
         """Site-wide variables"""
         return current_site
 
-
-@api.route("/site/home/datasets/", endpoint="home_datasets")
-class SiteHomeDatasetsAPI(API):
-    @api.doc("get_home_datasets")
-    # @api.secure(admin_permission)
-    @api.marshal_list_with(dataset_fields)
-    def get(self):
-        """List homepage datasets"""
-        return current_site.settings.home_datasets
-
     @api.secure(admin_permission)
-    @api.doc("set_home_datasets")
-    @api.expect(([str], "Dataset IDs to put in homepage"))
-    @api.marshal_list_with(dataset_fields)
-    def put(self):
-        """Set the homepage datasets editorial selection"""
-        if not isinstance(request.json, list):
-            api.abort(400, "Expect a list of dataset IDs")
-        ids = [ObjectId(id) for id in request.json]
-        current_site.settings.home_datasets = Dataset.objects.bulk_list(ids)
+    @api.doc(id="set_site")
+    @api.expect(Site.__write_fields__)
+    @api.marshal_with(Site.__read_fields__)
+    def patch(self):
+        patch(current_site, request)
+
         current_site.save()
-        return current_site.settings.home_datasets
-
-
-@api.route("/site/home/reuses/", endpoint="home_reuses")
-class SiteHomeReusesAPI(API):
-    @api.doc("get_home_reuses")
-    @api.secure(admin_permission)
-    @api.marshal_list_with(Reuse.__read_fields__)
-    def get(self):
-        """List homepage featured reuses"""
-        return current_site.settings.home_reuses
-
-    @api.secure(admin_permission)
-    @api.doc("set_home_reuses")
-    @api.expect(([str], "Reuse IDs to put in homepage"))
-    @api.marshal_list_with(Reuse.__read_fields__)
-    def put(self):
-        """Set the homepage reuses editorial selection"""
-        if not isinstance(request.json, list):
-            api.abort(400, "Expect a list of reuse IDs")
-        ids = [ObjectId(id) for id in request.json]
-        current_site.settings.home_reuses = Reuse.objects.bulk_list(ids)
-        current_site.save()
-        return current_site.settings.home_reuses
+        current_site.reload()
+        return current_site
 
 
 @api.route("/site/data.<format>", endpoint="site_dataportal")
