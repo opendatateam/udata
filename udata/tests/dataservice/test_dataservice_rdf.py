@@ -3,7 +3,7 @@ from rdflib import BNode, Literal, URIRef
 from rdflib.namespace import RDF
 from rdflib.resource import Resource as RdfResource
 
-from udata.core.dataservices.factories import DataserviceFactory
+from udata.core.dataservices.factories import DataserviceFactory, HarvestMetadataFactory
 from udata.core.dataservices.rdf import dataservice_to_rdf
 from udata.core.dataset.factories import DatasetFactory
 from udata.rdf import (
@@ -31,7 +31,18 @@ class DataserviceToRdfTest:
         assert isinstance(d.identifier, BNode)
         assert d.value(DCT.identifier) == Literal(dataservice.id)
         assert d.value(DCT.title) == Literal(dataservice.title)
+
+        # no harvest extras, fallback to internal values for dates
+        assert d.value(DCT.created) == Literal(dataservice.created_at)
         assert d.value(DCT.issued) == Literal(dataservice.created_at)
+        assert d.value(DCT.modified) == Literal(dataservice.metadata_modified_at)
+
+    def test_harvested_dates(self):
+        dataservice = DataserviceFactory(harvest=HarvestMetadataFactory())
+        d = dataservice_to_rdf(dataservice)
+        assert d.value(DCT.created) == Literal(dataservice.harvest.created_at)
+        assert d.value(DCT.issued) == Literal(dataservice.harvest.issued_at)
+        assert d.value(DCT.modified) == Literal(dataservice.metadata_modified_at)
 
     def test_hvd_dataservice(self):
         """Test that a dataservice tagged hvd has appropriate DCAT-AP HVD properties"""

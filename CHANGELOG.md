@@ -3,6 +3,8 @@
 ## Current (in progress)
 
 - Harvest model records in csw-dcat [#3433](https://github.com/opendatateam/udata/pull/3433)
+- fix(harvest): refactor dates handling [#3352](https://github.com/opendatateam/udata/pull/3352)
+- migrate to pyproject.toml [#3413](https://github.com/opendatateam/udata/pull/3413)
 
 ## 11.0.1 (2025-09-15)
 
