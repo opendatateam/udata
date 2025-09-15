@@ -4,6 +4,10 @@
 
 - Emit harvest activities. Set `HARVEST_ACTIVITY_USER_ID` to an existing user account to activate it [#3412](https://github.com/opendatateam/udata/pull/3412)
 
+## 11.0.1 (2025-09-15)
+
+- fix: PUT topic without elements [#3424](https://github.com/opendatateam/udata/pull/3424)
+
 ## 11.0.0 (2025-09-12)
 
 - Change CSW harvesters XML processor from lxml to saxonche [#3380](https://github.com/opendatateam/udata/pull/3380)
