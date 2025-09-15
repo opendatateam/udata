@@ -1,0 +1,8 @@
+{
+  "include": [
+    "tasks",
+    "udata"
+  ],
+
+  "typeCheckingMode": "standard"
+}
