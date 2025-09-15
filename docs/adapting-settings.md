@@ -582,7 +582,7 @@ The default page size for post listing
 The Sentry DSN associated to this udata instance.
 If defined, the Sentry support is automatically activated.
 
-`sentry-sdk[flask]` needs to be installed for this to work. This requirement is specified in `requirements/sentry.pip`.
+`sentry-sdk[flask]` needs to be installed for this to work. This requirement is specified in `pyproject.toml`.
 
 ### SENTRY_TAGS
 

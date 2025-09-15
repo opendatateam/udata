@@ -25,15 +25,12 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Compute Python dependencies key
-          command: cat requirements/*.pip > python.deps
-      - run:
           name: Get the base reference branch
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
             # 1. Exact match of dependencies
-            - py3-cache-v12-{{ arch }}-{{ checksum "python.deps" }}
+            - py3-cache-v12-{{ arch }}-{{ checksum "pyproject.toml" }}
             # 2. Latest cache from this branch
             - py3-cache-v12-{{ arch }}-{{ .Branch }}
             # 3. Latest cache from base branch (e.g., master)
@@ -45,11 +42,10 @@ jobs:
           command: |
             python -m venv venv
             source venv/bin/activate
-            pip install --upgrade wheel pip
-            pip install -r requirements/develop.pip
-            pip install -e .
+            pip install --upgrade pip
+            pip install -e ".[dev]"
       - save_cache:
-          key: py3-cache-v12-{{ arch }}-{{ checksum "python.deps" }}
+          key: py3-cache-v12-{{ arch }}-{{ checksum "pyproject.toml" }}
           paths:
           - venv
       - save_cache:
@@ -58,11 +54,11 @@ jobs:
           - venv
       - run:
           name: Lint and format code and sort imports
-          # ruff check --select I . : check linting and imports sorting without fixing (to fix, use --fix)
+          # ruff check --extend-select I . : check linting and imports sorting without fixing (to fix, use --fix)
           # ruff format --check . : check code formatting without fixing (to fix, remove --check)
           command: |
             source venv/bin/activate
-            ruff check .
+            ruff check --extend-select I .
             ruff format --check .
       - run:
           name: Run tests

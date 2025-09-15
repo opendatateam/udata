@@ -65,23 +65,23 @@ coverage.xml
 .noseids
 Procfile
 
+# IDEs
+.cursor
+.idea
+.vscode
+
+# Python package managers
+.python-version
+*.lock
+
+# Ruff
+.ruff_cache
+
+# Project specific
+fs/resources/
+
 # Local configuration file of udata
 udata.cfg
 
 # Local data directory
 data
-
-# PyCharm
-.idea
-
-# Pyenv
-.python-version
-
-# Ruff
-.ruff_cache
-
-# VSCode
-.vscode
-
-# Project specific
-fs/resources/

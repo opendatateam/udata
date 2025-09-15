@@ -41,7 +41,7 @@ $ pytest udata/tests/api/test_me_api.py -k test_get_profile
 To launch tests with coverage report:
 
 ```shell
-$ pip install requirements/report.pip
+$ pip install -e ".[report]"
 $ inv cover
 ```
 
