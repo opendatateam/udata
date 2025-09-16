@@ -134,7 +134,7 @@ jobs:
       - run:
           name: Install build tools
           command: |
-            python -m pip install --upgrade pip build twine
+            python -m pip install --upgrade pip build twine setuptools-scm
       - run:
           name: Save and show RELEASE_VERSION
           command: |
