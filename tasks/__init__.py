@@ -47,11 +47,8 @@ def update(ctx):
     header(msg)
     info("Updating Python dependencies")
     with ctx.cd(ROOT):
-        ctx.run("pip install -r requirements/develop.pip")
-        for requirement_file in ["install", "test", "develop", "doc", "report"]:
-            ctx.run(
-                f"pip-compile requirements/{requirement_file}.in --output-file=requirements/{requirement_file}.pip --upgrade"
-            )
+        ctx.run('pip install -e ".[dev]"')
+    info("Note: Dependencies are now managed in pyproject.toml")
     # TODO: Add javascript dependencies update
 
 
@@ -62,7 +59,9 @@ def i18n(ctx, update=False):
 
     info("Extract Python strings")
     with ctx.cd(ROOT):
-        ctx.run("python setup.py extract_messages")
+        ctx.run(
+            "pybabel extract -F babel.cfg -k _ -k N_:1,2 -k P_:1c,2 -k L_ -k gettext -k ngettext:1,2 -k pgettext:1c,2 -k npgettext:1c,2,3 -k lazy_gettext -k lazy_pgettext:1c,2 --add-comments=TRANSLATORS: --width=80 -o udata/translations/udata.pot udata"
+        )
 
     # Fix crowdin requiring Language with `2-digit` iso code in potfile
     # to produce 2-digit iso code pofile
@@ -80,7 +79,7 @@ def i18n(ctx, update=False):
 
     if update:
         with ctx.cd(ROOT):
-            ctx.run("python setup.py update_catalog")
+            ctx.run("pybabel update -D udata -d udata/translations -i udata/translations/udata.pot")
 
     info("Extract JavaScript strings")
     keys = set()
@@ -127,7 +126,7 @@ def i18nc(ctx):
     """Compile translations"""
     header("Compiling translations")
     with ctx.cd(ROOT):
-        ctx.run("python setup.py compile_catalog")
+        ctx.run("pybabel compile -D udata -d udata/translations")
 
 
 @task(i18nc)
@@ -255,24 +254,19 @@ def oembed_watch(ctx):
 
 
 @task(clean, i18nc, assets_build, widgets_build, oembed_build, default=True)
-def dist(ctx, buildno=None):
+def dist(ctx):
     """Package for distribution"""
-    perform_dist(ctx, buildno)
+    perform_dist(ctx)
 
 
 @task(i18nc)
-def pydist(ctx, buildno=None):
+def pydist(ctx):
     """Perform python packaging (without compiling assets)"""
-    perform_dist(ctx, buildno)
+    perform_dist(ctx)
 
 
-def perform_dist(ctx, buildno=None):
+def perform_dist(ctx):
     header("Building a distribuable package")
-    cmd = ["python setup.py"]
-    if buildno:
-        cmd.append("egg_info -b {0}".format(buildno))
-    cmd.append("bdist_wheel")
-    with ctx.cd(ROOT):
-        ctx.run(" ".join(cmd), pty=True)
-        ctx.run("twine check dist/*")
+    ctx.run("python -m build")
+    ctx.run("twine check dist/*")
     success("Distribution is available in dist directory")
