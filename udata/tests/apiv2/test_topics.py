@@ -358,6 +358,16 @@ class TopicAPITest(APITestCase):
             response = self.delete(url_for("apiv2.topic", topic=topic))
         self.assertStatus(response, 403)
 
+    def test_topic_api_uri_is_absolute(self):
+        """It should return an absolute URI for topic API"""
+        topic = TopicFactory()
+        response = self.get(url_for("apiv2.topic", topic=topic))
+        self.assert200(response)
+        data = response.json
+
+        self.assertIn("uri", data)
+        self.assertTrue(data["uri"].startswith("http"))
+
 
 class TopicElementsAPITest(APITestCase):
     def test_elements_list(self):
