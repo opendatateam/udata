@@ -104,7 +104,7 @@ dependencies = [
     "redis==5.2.1",
     "referencing==0.36.2",
     "regex==2024.11.6",
-    "requests==2.32.3",
+    "requests==2.32.4",
     "rpds-py==0.23.1",
     "s3transfer==0.6.2",
     "saxonche==12.8.0",
