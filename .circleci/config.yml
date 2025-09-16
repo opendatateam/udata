@@ -131,6 +131,8 @@ jobs:
       - image: udata/circleci:py<< pipeline.parameters.python-version >>
     steps:
       - checkout
+      - attach_workspace:
+          at: .
       - run:
           name: Install build tools
           command: |
