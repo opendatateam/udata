@@ -146,6 +146,7 @@ jobs:
       - run:
           name: Build a distributable package as a wheel release
           command: |
+            source venv/bin/activate
             inv pydist
       - store_artifacts:
           path: dist
