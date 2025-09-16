@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from flask import url_for
+from regex import P
 
 import udata.core.organization.constants as org_constants
 from udata.core.dataset.apiv2 import DEFAULT_PAGE_SIZE
@@ -123,12 +124,12 @@ class DatasetAPIV2Test(APITestCase):
         test_dataset = DatasetFactory(badges=[{"kind": "spd"}, {"kind": "hvd"}])
         DatasetFactory(badges=[{"kind": "spd"}, {"kind": "inspire"}])
 
-        response = self.get(url_for("apiv2.dataset_search", badges={"kind": "spd"}))
+        response = self.get(url_for("apiv2.dataset_search", badge={"kind": "spd"}))
         self.assert200(response)
         data = response.json["data"]
         assert len(data) == 2
 
-        response = self.get(url_for("apiv2.dataset_search", badges={"kind": "hvd"}))
+        response = self.get(url_for("apiv2.dataset_search", badge={"kind": "hvd"}))
         self.assert200(response)
         data = response.json["data"]
         assert len(data) == 1
