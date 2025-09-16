@@ -309,6 +309,10 @@ class CswDcatBackend(DcatBackend):
                 <ogc:PropertyName>apiso:type</ogc:PropertyName>
                 <ogc:Literal>service</ogc:Literal>
               </ogc:PropertyIsEqualTo>
+              <ogc:PropertyIsEqualTo>
+                <ogc:PropertyName>apiso:type</ogc:PropertyName>
+                <ogc:Literal>model</ogc:Literal>
+              </ogc:PropertyIsEqualTo>
             </ogc:Or>
           </ogc:Filter>
         </csw:Constraint>
