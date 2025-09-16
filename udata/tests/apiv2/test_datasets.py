@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from flask import url_for
-from regex import P
 
 import udata.core.organization.constants as org_constants
 from udata.core.dataset.apiv2 import DEFAULT_PAGE_SIZE
