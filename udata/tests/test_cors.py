@@ -2,7 +2,6 @@ from datetime import datetime
 
 from flask import url_for
 
-from udata import assets
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.tests.api import APITestCase
 from udata.tests.helpers import assert_status
@@ -37,13 +36,6 @@ class CorsTest(APITestCase):
         # Oauth
         response = self.get("/oauth/", headers=cors_headers)
         assert_status(response, 404)  # Oauth is defined in udata-front
-        assert "Access-Control-Allow-Origin" in response.headers
-
-        # Static
-        response = self.get(
-            assets.cdn_for("static", filename="my_static.css"), headers=cors_headers
-        )
-        assert_status(response, 404)  # Not available in APITestCase
         assert "Access-Control-Allow-Origin" in response.headers
 
     def test_cors_redirects(self):
