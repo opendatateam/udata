@@ -20,13 +20,11 @@ jobs:
       - image: udata/circleci:py<< pipeline.parameters.python-version >>
       - image: mongo:6.0.4
       - image: redis:alpine
-    environment:
-      BASH_ENV: /root/.bashrc
     steps:
       - checkout
       - run:
           name: Get the base reference branch
-          command: export BASE_BRANCH=$(base_branch)
+          command: echo "export BASE_BRANCH=$(base_branch)" >> $BASH_ENV
       - restore_cache:
           keys:
             # 1. Exact match of dependencies
@@ -90,7 +88,7 @@ jobs:
           command: cat .nvmrc package.json > js.deps
       - run:
           name: Get the base reference branch
-          command: export BASE_BRANCH=$(base_branch)
+          command: echo "export BASE_BRANCH=$(base_branch)" >> $BASH_ENV
       - restore_cache:
           keys:
             # 1. Exact match of dependencies
@@ -136,10 +134,17 @@ jobs:
           command: |
             python -m pip install --upgrade pip build twine
       - run:
-          name: Build a wheel + sdist
+          name: Save and show RELEASE_VERSION
           command: |
-            python -m build
-            twine check dist/*
+            # derive from setuptools_scm or base version + build number
+            RELEASE_VERSION=$(python -c "from setuptools_scm import get_version; print(get_version())")
+
+            echo "export RELEASE_VERSION=$RELEASE_VERSION" >> $BASH_ENV
+            echo "RELEASE_VERSION is $RELEASE_VERSION"
+      - run:
+          name: Build a distributable package as a wheel release
+          command: |
+            inv pydist
       - store_artifacts:
           path: dist
       - persist_to_workspace:
@@ -187,7 +192,6 @@ jobs:
       - run:
           name: Trigger GitLab CI/CD pipeline for udata to deploy to << pipeline.parameters.deploy-env >> environment
           command: |
-            source version.sh
             cd scaffold
             # Run the script that triggers the Gitlab CI/CD pipeline.
             # Must have GITLAB_API_TOKEN set in the environment
@@ -208,7 +212,6 @@ jobs:
       - run:
           name: Create Sentry release
           command: |
-            source version.sh
             # Create release
             curl https://errors.data.gouv.fr/api/0/organizations/sentry/releases/ \
               -H "Authorization: Bearer ${SENTRY_AUTH_TOKEN}" \
