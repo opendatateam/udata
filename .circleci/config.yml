@@ -143,7 +143,7 @@ jobs:
             # derive from setuptools_scm or base version + build number
             RELEASE_VERSION=$(python -c "from setuptools_scm import get_version; print(get_version())")
 
-            echo "export RELEASE_VERSION=$RELEASE_VERSION" >> $BASH_ENV
+            echo "export RELEASE_VERSION=$RELEASE_VERSION" > release.env
             echo "RELEASE_VERSION is $RELEASE_VERSION"
       - run:
           name: Build a distributable package as a wheel release
@@ -156,6 +156,19 @@ jobs:
           root: .
           paths:
             - dist
+            - release.env
+
+  debug:
+    docker:
+      - image: udata/circleci:py<< pipeline.parameters.python-version >>
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Debug release_version
+          command: |
+            source release.env
+            echo $RELEASE_VERSION
 
   publish:
     docker:
@@ -197,6 +210,7 @@ jobs:
       - run:
           name: Trigger GitLab CI/CD pipeline for udata to deploy to << pipeline.parameters.deploy-env >> environment
           command: |
+            source release.env
             cd scaffold
             # Run the script that triggers the Gitlab CI/CD pipeline.
             # Must have GITLAB_API_TOKEN set in the environment
@@ -217,6 +231,8 @@ jobs:
       - run:
           name: Create Sentry release
           command: |
+            source release.env
+
             # Create release
             curl https://errors.data.gouv.fr/api/0/organizations/sentry/releases/ \
               -H "Authorization: Bearer ${SENTRY_AUTH_TOKEN}" \
@@ -247,6 +263,9 @@ workflows:
           filters:
             tags:
               only: /v[0-9]+(\.[0-9]+)*/
+      - debug: 
+          requires: 
+            - dist
       - publish:
           requires:
             - dist
