@@ -6,6 +6,7 @@
 - fix(harvest): refactor dates handling [#3352](https://github.com/opendatateam/udata/pull/3352)
 - migrate to pyproject.toml, replace `CIRCLE_TAG` by `setuptools_scm` to compute the correct version automatically [#3413](https://github.com/opendatateam/udata/pull/3413) [#3434](https://github.com/opendatateam/udata/pull/3434)
 - fix(topic): absolute Topic.uri [#3436](https://github.com/opendatateam/udata/pull/3436)
+- Remove unused BadgesField [#3420](https://github.com/opendatateam/udata/pull/3420)
 
 ## 11.0.1 (2025-09-15)
 
