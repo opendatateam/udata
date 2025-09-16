@@ -131,58 +131,21 @@ jobs:
       - image: udata/circleci:py<< pipeline.parameters.python-version >>
     steps:
       - checkout
-      - attach_workspace:
-          at: .
       - run:
-          name: Set version
+          name: Install build tools
           command: |
-            if [[ $CIRCLE_TAG ]]; then
-                # This is a tagged release, version has been handled upstream
-                RELEASE_VERSION=$CIRCLE_TAG
-                echo "RELEASE_VERSION=$RELEASE_VERSION" > version.sh
-            else
-                # Otherwise, relies on a dev version like "1.2.1.dev" by default
-                # Read version from __init__.py
-                BASE_VERSION=$(python -c "from udata import __version__; print(__version__)")
-                if [[ "$CIRCLE_BRANCH" == feature/* ]]; then
-                    # This is a feature branch
-                    BUILDNO=$CIRCLE_BUILD_NUM${CIRCLE_BRANCH#*/}
-                else
-                    # This is a simple development build
-                    BUILDNO=$CIRCLE_BUILD_NUM
-                fi
-                # Build the release version string with the build number, like "1.2.1.dev1234"
-                RELEASE_VERSION="${BASE_VERSION}${BUILDNO}"
-                echo "BASE_VERSION=$BASE_VERSION" > version.sh
-                echo "BUILDNO=$BUILDNO" >> version.sh
-                echo "RELEASE_VERSION=$RELEASE_VERSION" >> version.sh
-            fi
+            python -m pip install --upgrade pip build twine
       - run:
-          name: Display build info for debugging
+          name: Build a wheel + sdist
           command: |
-            source version.sh
-            echo "Base version from __init__.py: $BASE_VERSION"
-            echo "Build number: $BUILDNO"
-            echo "Commit hash: ${CIRCLE_SHA1:0:7}"
-            echo "Git tag: $CIRCLE_TAG"
-            echo "Building a wheel release with version $RELEASE_VERSION"
-      - run:
-          name: Build a distributable package as a wheel release
-          command: |
-            source venv/bin/activate
-            source version.sh
-            if [[ $CIRCLE_TAG ]]; then
-                inv pydist
-            else
-                inv pydist -b $BUILDNO
-            fi
+            python -m build
+            twine check dist/*
       - store_artifacts:
           path: dist
       - persist_to_workspace:
           root: .
           paths:
             - dist
-            - version.sh
 
   publish:
     docker:
