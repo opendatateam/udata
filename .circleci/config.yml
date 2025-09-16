@@ -158,6 +158,18 @@ jobs:
             - dist
             - release.env
 
+  debug:
+    docker:
+      - image: udata/circleci:py<< pipeline.parameters.python-version >>
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Debug release version
+          command: |
+            source release.env
+            echo $RELEASE_VERSION
+
   publish:
     docker:
       - image: udata/circleci:py<< pipeline.parameters.python-version >>
@@ -251,6 +263,9 @@ workflows:
           filters:
             tags:
               only: /v[0-9]+(\.[0-9]+)*/
+      - debug:
+          requires:
+            - dist
       - publish:
           requires:
             - dist
