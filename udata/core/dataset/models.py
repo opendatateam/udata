@@ -36,12 +36,17 @@ from .constants import (
     CLOSED_FORMATS,
     DEFAULT_LICENSE,
     DESCRIPTION_SHORT_SIZE_LIMIT,
+    HVD,
+    INSPIRE,
     LEGACY_FREQUENCIES,
     MAX_DISTANCE,
     PIVOTAL_DATA,
     RESOURCE_FILETYPES,
     RESOURCE_TYPES,
     SCHEMA_CACHE_DURATION,
+    SL,
+    SPD,
+    SR,
     UPDATE_FREQUENCIES,
 )
 from .exceptions import (
@@ -61,6 +66,11 @@ __all__ = (
 
 BADGES: dict[str, str] = {
     PIVOTAL_DATA: _("Pivotal data"),
+    SPD: _("Reference data public service"),
+    INSPIRE: _("Inspire"),
+    HVD: _("High value datasets"),
+    SL: _("Certified statistic series"),
+    SR: _("Statistical series of general interest"),
 }
 
 NON_ASSIGNABLE_SCHEMA_TYPES = ["datapackage"]
@@ -333,6 +343,9 @@ class DatasetQuerySet(OwnedQuerySet):
 
     def hidden(self):
         return self(db.Q(private=True) | db.Q(deleted__ne=None) | db.Q(archived__ne=None))
+
+    def with_badge(self, kind):
+        return self(badges__kind=kind)
 
 
 class Checksum(db.EmbeddedDocument):
