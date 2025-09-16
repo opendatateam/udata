@@ -2,6 +2,16 @@
 
 ## Current (in progress)
 
+- Emit harvest activities. Set `HARVEST_ACTIVITY_USER_ID` to an existing user account to activate it [#3412](https://github.com/opendatateam/udata/pull/3412)
+- fix(harvest): refactor dates handling [#3352](https://github.com/opendatateam/udata/pull/3352)
+- migrate to pyproject.toml, replace `CIRCLE_TAG` by `setuptools_scm` to compute the correct version automatically [#3413](https://github.com/opendatateam/udata/pull/3413) [#3434](https://github.com/opendatateam/udata/pull/3434)
+
+## 11.0.1 (2025-09-15)
+
+- fix: PUT topic without elements [#3424](https://github.com/opendatateam/udata/pull/3424)
+
+## 11.0.0 (2025-09-12)
+
 - Change CSW harvesters XML processor from lxml to saxonche [#3380](https://github.com/opendatateam/udata/pull/3380)
 - Convert security views to cdata [#3348](https://github.com/opendatateam/udata/pull/3348/)
   - Add `SECURITY_SPA_ON_SAME_DOMAIN` to `True` if your frontend is on the same domain as the backend.
