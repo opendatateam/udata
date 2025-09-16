@@ -1,6 +1,8 @@
+import logging
 from datetime import datetime
 
 from blinker import Signal
+from flask import g
 from mongoengine.errors import DoesNotExist
 from mongoengine.signals import post_save
 
@@ -12,6 +14,8 @@ from udata.utils import get_field_value_from_path
 from .signals import new_activity
 
 __all__ = ("Activity",)
+
+log = logging.getLogger(__name__)
 
 
 _registered_activities = {}
@@ -70,10 +74,15 @@ class Activity(db.Document, metaclass=EmitNewActivityMetaClass):
 
     @classmethod
     def emit(cls, related_to, organization=None, changed_fields=None, extras=None):
+        if hasattr(g, "harvest_activity_user"):
+            # We're in the context of a harvest action with a harvest activity user to use as actor
+            actor = g.harvest_activity_user
+        else:
+            actor = current_user._get_current_object()
         new_activity.send(
             cls,
             related_to=related_to,
-            actor=current_user._get_current_object(),
+            actor=actor,
             organization=organization,
             changes=changed_fields,
             extras=extras,
@@ -110,7 +119,9 @@ class Auditable(object):
             # for backward compatibility, all fields are treated as auditable for classes not using field() function
             auditable_fields = document._get_changed_fields()
         changed_fields = [
-            field for field in document._get_changed_fields() if field in auditable_fields
+            field
+            for field in document._get_changed_fields()
+            if field.split(".")[0] in auditable_fields
         ]
         if "post_save" in kwargs.get("ignores", []):
             return
@@ -119,6 +130,17 @@ class Auditable(object):
             cls.on_create.send(document)
         elif len(changed_fields):
             previous = getattr(document, "_previous_changed_fields", None)
-            cls.on_update.send(document, changed_fields=changed_fields, previous=previous)
+            # make sure that changed fields have actually changed when comparing the document
+            # once it has been reloaded. It may have been cleaned or normalized when saved to mongo.
+            # We compare them one by one with the previous value stored in _previous_changed_fields.
+            # See https://github.com/opendatateam/udata/pull/3412 for more context.
+            document.reload()
+            changed_fields = [
+                field
+                for field in changed_fields
+                if previous[field] != get_field_value_from_path(document, field)
+            ]
+            if changed_fields:
+                cls.on_update.send(document, changed_fields=changed_fields, previous=previous)
         if getattr(document, "deleted_at", None) or getattr(document, "deleted", None):
             cls.on_delete.send(document)
