@@ -79,8 +79,6 @@ jobs:
     docker:
       # TODO make an image based on 2-alpine w/ nvm and phantom deps
       - image: udata/circleci:py<< pipeline.parameters.python-version >>
-    environment:
-      BASH_ENV: /root/.bashrc
     steps:
       - checkout
       - run:
