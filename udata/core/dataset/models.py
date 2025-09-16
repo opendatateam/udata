@@ -91,6 +91,7 @@ def get_json_ld_extra(key, value):
 class HarvestDatasetMetadata(db.EmbeddedDocument):
     backend = db.StringField()
     created_at = db.DateTimeField()
+    issued_at = db.DateTimeField()
     modified_at = db.DateTimeField()
     source_id = db.StringField()
     remote_id = db.StringField()
@@ -106,7 +107,7 @@ class HarvestDatasetMetadata(db.EmbeddedDocument):
 
 
 class HarvestResourceMetadata(db.EmbeddedDocument):
-    created_at = db.DateTimeField()
+    issued_at = db.DateTimeField()
     modified_at = db.DateTimeField()
     uri = db.StringField()
     dct_identifier = db.StringField()
@@ -386,11 +387,9 @@ class ResourceMixin(object):
 
     @property
     def created_at(self):
-        return (
-            self.harvest.created_at
-            if self.harvest and self.harvest.created_at
-            else self.created_at_internal
-        )
+        if self.harvest:
+            return self.harvest.issued_at or self.created_at_internal
+        return self.created_at_internal
 
     @property
     def last_modified(self):
@@ -801,11 +800,9 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
 
     @property
     def created_at(self):
-        return (
-            self.harvest.created_at
-            if self.harvest and self.harvest.created_at
-            else self.created_at_internal
-        )
+        if self.harvest:
+            return self.harvest.issued_at or self.harvest.created_at or self.created_at_internal
+        return self.created_at_internal
 
     @property
     def last_modified(self):

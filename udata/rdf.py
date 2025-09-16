@@ -537,3 +537,14 @@ def graph_response(graph, format):
     if isinstance(graph, RdfResource):
         graph = graph.graph
     return escape_xml_illegal_chars(graph.serialize(format=fmt, **kwargs)), 200, headers
+
+
+def set_harvested_date(obj, rdf_resource, rdf_term, harvest_attr, fallback=None) -> None:
+    """
+    Add a date to the RDF resource from the harvest metadata if available.
+    Use the fallback value for non harvested objects.
+    """
+    if obj.harvest and (harvest_attr_value := getattr(obj.harvest, harvest_attr)):
+        rdf_resource.set(rdf_term, Literal(harvest_attr_value))
+    elif not obj.harvest and fallback:
+        rdf_resource.set(rdf_term, Literal(fallback))
