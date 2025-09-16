@@ -20,11 +20,13 @@ jobs:
       - image: udata/circleci:py<< pipeline.parameters.python-version >>
       - image: mongo:6.0.4
       - image: redis:alpine
+    environment:
+      BASH_ENV: /root/.bashrc
     steps:
       - checkout
       - run:
           name: Get the base reference branch
-          command: echo "export BASE_BRANCH=$(base_branch)" >> $BASH_ENV
+          command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
             # 1. Exact match of dependencies
@@ -79,6 +81,8 @@ jobs:
     docker:
       # TODO make an image based on 2-alpine w/ nvm and phantom deps
       - image: udata/circleci:py<< pipeline.parameters.python-version >>
+    environment:
+      BASH_ENV: /root/.bashrc
     steps:
       - checkout
       - run:
@@ -86,7 +90,7 @@ jobs:
           command: cat .nvmrc package.json > js.deps
       - run:
           name: Get the base reference branch
-          command: echo "export BASE_BRANCH=$(base_branch)" >> $BASH_ENV
+          command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
             # 1. Exact match of dependencies
