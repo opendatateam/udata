@@ -141,7 +141,7 @@ jobs:
           name: Save and show RELEASE_VERSION
           command: |
             # derive from setuptools_scm or base version + build number
-            RELEASE_VERSION=$(python -c "from setuptools_scm import get_version; print(get_version())")
+            RELEASE_VERSION=$(python -m setuptools_scm)
 
             echo "export RELEASE_VERSION=$RELEASE_VERSION" > release.env
             echo "RELEASE_VERSION is $RELEASE_VERSION"
