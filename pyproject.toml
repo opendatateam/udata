@@ -1,0 +1,268 @@
+[build-system]
+requires = ["setuptools>=61", "wheel", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "udata"
+dynamic = ["version"]
+description = "Open data portal"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Opendata Team", email = "opendatateam@data.gouv.fr" }]
+maintainers = [{ name = "Opendata Team", email = "opendatateam@data.gouv.fr" }]
+keywords = ["udata", "open data", "portal", "data"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Programming Language :: Python",
+    "Environment :: Web Environment",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Topic :: System :: Software Distribution",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+]
+requires-python = ">=3.9,<3.14"
+dependencies = [
+    "amqp==5.3.1",
+    "aniso8601==10.0.0",
+    "attrs==25.3.0",
+    "authlib==1.5.1",
+    "awesome-slugify==1.6.5",
+    "babel==2.17.0",
+    "bcrypt==4.3.0",
+    "billiard==4.2.1",
+    "bleach[css]==6.2.0",
+    "blinker==1.5",
+    "boto3==1.26.102",
+    "botocore==1.29.165",
+    "cachelib==0.13.0",
+    "celery==5.4.0",
+    "celerybeat-mongo==0.2.0",
+    "certifi==2025.1.31",
+    "cffi==1.17.1",
+    "charset-normalizer==3.4.1",
+    "click==8.1.8",
+    "click-didyoumean==0.3.1",
+    "click-plugins==1.1.1",
+    "click-repl==0.3.0",
+    "cryptography==44.0.2",
+    "dnspython==2.7.0",
+    "email-validator==2.2.0",
+    "feedgenerator==2.1.0",
+    "filelock==3.18.0",
+    "flask==2.1.2",
+    "flask-babel==4.0.0",
+    "flask-caching==2.3.1",
+    "flask-cdn==1.5.3",
+    "flask-gravatar==0.5.0",
+    "flask-login==0.6.3",
+    "flask-mail==0.10.0",
+    "flask-mongoengine==1.0.0",
+    "flask-navigation-temp-python-311==0.2.1",
+    "flask-principal==0.4.0",
+    "flask-restx==1.3.0",
+    "flask-security-too==5.1.2",
+    "flask-sitemap==0.4.0",
+    "flask-storage==1.3.2",
+    "flask-wtf==1.2.2",
+    "geojson==3.2.0",
+    "geomet==1.1.0",
+    "html2text==2024.2.26",
+    "humanfriendly==10.0",
+    "idna==3.10",
+    "importlib-resources==6.5.2",
+    "itsdangerous==2.2.0",
+    "jinja2==3.1.6",
+    "jmespath==1.0.1",
+    "jsonschema==4.23.0",
+    "jsonschema-specifications==2024.10.1",
+    "kombu[redis]==5.5.0",
+    "langdetect==1.0.9",
+    "levenshtein==0.27.1",
+    "lxml==5.3.1",
+    "markupsafe==2.1.2",
+    "mistune==3.1.3",
+    "mongoengine==0.29.1",
+    "netaddr==1.3.0",
+    "passlib==1.7.4",
+    "pillow==9.2.0",
+    "platformdirs==4.3.6",
+    "prompt-toolkit==3.0.50",
+    "pycparser==2.22",
+    "pydenticon==0.3.1",
+    "pymongo==4.11.3",
+    "pyparsing==3.2.1",
+    "python-dateutil==2.9.0.post0",
+    "pytz==2025.1",
+    "rapidfuzz==3.12.2",
+    "rdflib==7.1.3",
+    "redis==5.2.1",
+    "referencing==0.36.2",
+    "regex==2024.11.6",
+    "requests==2.32.4",
+    "rpds-py==0.23.1",
+    "s3transfer==0.6.2",
+    "saxonche==12.8.0",
+    "sentry-sdk[flask]==2.23.1",
+    "six==1.17.0",
+    "speaklater==1.3",
+    "tinycss2==1.4.0",
+    "tlds==2025022800",
+    "typing-extensions==4.12.2",
+    "tzdata==2025.1",
+    "unidecode==0.4.21",
+    "uritools==4.0.3",
+    "urlextract==1.9.0",
+    "urllib3==1.26.20",
+    "vine==5.1.0",
+    "voluptuous==0.15.2",
+    "wcwidth==0.2.13",
+    "webencodings==0.5.1",
+    "werkzeug==2.2.3",
+    "wtforms[email]==3.2.1",
+    "wtforms-json==0.3.5",
+]
+
+[project.urls]
+Homepage = "https://github.com/opendatateam/udata"
+Repository = "https://github.com/opendatateam/udata"
+Documentation = "https://udata.readthedocs.io/"
+"Bug Tracker" = "https://github.com/opendatateam/udata/issues"
+
+[project.scripts]
+udata = "udata.commands:cli"
+
+[project.entry-points."udata.harvesters"]
+dcat = "udata.harvest.backends.dcat:DcatBackend"
+csw-dcat = "udata.harvest.backends.dcat:CswDcatBackend"
+csw-iso-19139 = "udata.harvest.backends.dcat:CswIso19139DcatBackend"
+maaf = "udata.harvest.backends.maaf:MaafBackend"
+ckan = "udata.harvest.backends.ckan.harvesters:CkanBackend"
+dkan = "udata.harvest.backends.ckan.harvesters:DkanBackend"
+
+[project.entry-points."udata.avatars"]
+internal = "udata.features.identicon.backends:internal"
+adorable = "udata.features.identicon.backends:adorable"
+robohash = "udata.features.identicon.backends:robohash"
+
+[project.entry-points."pytest11"]
+udata = "udata.tests.plugin"
+
+[project.optional-dependencies]
+dev = [
+    "bumpx==0.3.10",
+    "flask-shell-ipython==0.5.3",
+    "invoke==2.2.0",
+    "pip-tools==7.4.1",
+    "pre-commit==4.2.0",
+    "ruff==0.11.0",
+    "twine==6.1.0",
+    "wheel==0.45.1",
+]
+test = [
+    "factory-boy==3.3.3",
+    "faker==37.0.2",
+    "feedparser==6.0.11",
+    "httpretty==1.1.4",
+    "mock==5.2.0",
+    "pytest==8.3.5",
+    "pytest-env==1.1.5",
+    "pytest-flask==1.3.0",
+    "pytest-mock==3.14.0",
+    "pytest-sugar==1.0.0",
+    "requests-mock==1.12.1",
+]
+doc = [
+    "ghp-import==2.1.0",
+    "markdown==3.7",
+    "mergedeep==1.3.4",
+    "mkdocs==1.6.1",
+    "mkdocs-get-deps==0.2.0",
+    "pathspec==0.12.1",
+    "pyyaml==6.0.2",
+    "pyyaml-env-tag==0.1",
+    "watchdog==6.0.0",
+]
+report = [
+    "coverage[toml]==7.7.0",
+    "flake8==7.1.2",
+    "pytest-cov==6.0.0",
+]
+
+[tool.setuptools_scm]
+version_scheme = "guess-next-dev"
+local_scheme = "node-and-date"
+
+[tool.babel]
+compile_catalog = { domain = "udata", directory = "udata/translations", statistics = true }
+extract_messages = { keywords = "_ N_:1,2 P_:1c,2 L_ gettext ngettext:1,2 pgettext:1c,2 npgettext:1c,2,3 lazy_gettext lazy_pgettext:1c,2", mapping_file = "babel.cfg", add_comments = "TRANSLATORS:", output_file = "udata/translations/udata.pot", width = 80 }
+init_catalog = { domain = "udata", input_file = "udata/translations/udata.pot", output_dir = "udata/translations" }
+update_catalog = { domain = "udata", input_file = "udata/translations/udata.pot", output_dir = "udata/translations", previous = true }
+
+[tool.pyright]
+include = ["tasks", "udata"]
+typeCheckingMode = "standard"
+
+[tool.pytest.ini_options]
+norecursedirs = [".git", "build", ".tox", "specs", ".cache", "udata/static", "udata/templates", "udata/translations"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+python_classes = ["*Test"]
+env = [
+    "AUTHLIB_INSECURE_TRANSPORT=true",
+    "mock_use_standalone_module=true"
+]
+filterwarnings = [
+    "ignore::DeprecationWarning:mongoengine"
+]
+markers = [
+    "frontend: load the frontend stack",
+    "preview: mock a preview backend",
+    "oauth: inject an OAuth client"
+]
+
+[tool.ruff]
+lint = { extend-select = ["I"] } # ["I"] is to also sort imports with an isort rule
+line-length = 100
+
+[tool.setuptools]
+packages = ["udata"]
+
+[tool.setuptools.package-data]
+udata = ["templates/*", "static/*", "translations/*"]
+
+[tool.tox]
+requires = ["tox>=4.19"]
+env_list = ["py39", "py310", "py311", "py312", "doc"]
+
+[tool.tox.env_run_base]
+description = "Run tests under {base_python}"
+deps = [
+    "feedparser==6.0.11",
+    "httpretty==1.1.4",
+    "mock==5.2.0",
+    "pytest==8.3.5",
+    "pytest-env==1.1.5",
+    "pytest-flask==1.3.0",
+    "pytest-mock==3.14.0",
+    "pytest-sugar==1.0.0",
+    "requests-mock==1.12.1"
+]
+commands = [
+    ["pytest", "udata"]
+]
+[tool.tox.env.doc]
+description = "Build documentation with sphinx"
+deps = ["sphinx"]
+commands = [
+    ["sphinx-build", "-b", "html", "-d", "{envtmpdir}/doctrees", ".", "{envtmpdir}/html"]
+]
+change_dir = "doc"
+
+[tool.wheel]
+universal = true

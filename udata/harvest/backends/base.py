@@ -4,14 +4,14 @@ from datetime import date, datetime, timedelta
 from uuid import UUID
 
 import requests
-from flask import current_app
+from flask import current_app, g
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
 import udata.uris as uris
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset.models import HarvestDatasetMetadata
-from udata.models import Dataset
+from udata.models import Dataset, User
 from udata.utils import safe_unicode
 
 from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
@@ -168,6 +168,17 @@ class BaseBackend(object):
         self.job = factory(status="initialized", started=datetime.utcnow(), source=self.source)
 
         before_harvest_job.send(self)
+        # Set harvest_activity_user on global context during the run
+        if current_app.config["HARVEST_ACTIVITY_USER_ID"]:
+            try:
+                # Try to fetch the existing harvest activity user
+                g.harvest_activity_user = User.objects.get(
+                    id=current_app.config["HARVEST_ACTIVITY_USER_ID"]
+                )
+            except User.DoesNotExist:
+                log.exception(
+                    "HARVEST_ACTIVITY_USER_ID does not seem to match an existing user id."
+                )
 
         try:
             self.inner_harvest()
@@ -199,6 +210,9 @@ class BaseBackend(object):
             self.job.errors.append(error)
         finally:
             self.end_job()
+            # Clean harvest_activity_user on global context
+            if hasattr(g, "harvest_activity_user"):
+                delattr(g, "harvest_activity_user")
 
         return self.job
 

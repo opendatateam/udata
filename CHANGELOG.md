@@ -2,8 +2,9 @@
 
 ## Current (in progress)
 
+- Emit harvest activities. Set `HARVEST_ACTIVITY_USER_ID` to an existing user account to activate it [#3412](https://github.com/opendatateam/udata/pull/3412)
 - fix(harvest): refactor dates handling [#3352](https://github.com/opendatateam/udata/pull/3352)
-
+- migrate to pyproject.toml, replace `CIRCLE_TAG` by `setuptools_scm` to compute the correct version automatically [#3413](https://github.com/opendatateam/udata/pull/3413) [#3434](https://github.com/opendatateam/udata/pull/3434)
 
 ## 11.0.1 (2025-09-15)
 
