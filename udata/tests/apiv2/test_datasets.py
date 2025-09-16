@@ -123,12 +123,12 @@ class DatasetAPIV2Test(APITestCase):
         test_dataset = DatasetFactory(badges=[{"kind": "spd"}, {"kind": "hvd"}])
         DatasetFactory(badges=[{"kind": "spd"}, {"kind": "inspire"}])
 
-        response = self.get(url_for("apiv2.dataset_search", badge={"kind": "spd"}))
+        response = self.get(url_for("apiv2.dataset_search", badge="spd"))
         self.assert200(response)
         data = response.json["data"]
         assert len(data) == 2
 
-        response = self.get(url_for("apiv2.dataset_search", badge={"kind": "hvd"}))
+        response = self.get(url_for("apiv2.dataset_search", badge="hvd"))
         self.assert200(response)
         data = response.json["data"]
         assert len(data) == 1
