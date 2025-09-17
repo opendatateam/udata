@@ -104,6 +104,7 @@ class TopicModelTest:
 
         # Test TopicElement update
         element.title = "Updated title"
+        element.extras = {"key": "value"}
         element.save()
         mock_element_updated.assert_called_once()
         mock_topic_created.assert_not_called()
@@ -114,6 +115,7 @@ class TopicModelTest:
         call_args = mock_element_updated.call_args
         assert call_args[0][0] == topic  # related_to
         assert call_args[0][1] == topic.organization  # organization
+        assert call_args[0][2] == ["title", "extras"]  # changed_fields
         assert call_args[1]["extras"]["element_id"] == str(element.id)
 
         mock_element_updated.reset_mock()

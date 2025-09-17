@@ -1,5 +1,4 @@
 from blinker import Signal
-from flask_security import current_user
 from mongoengine.signals import post_delete, post_save
 
 from udata.api_fields import field
@@ -14,7 +13,7 @@ from udata.tasks import as_task_param
 __all__ = ("Topic", "TopicElement")
 
 
-class TopicElement(db.Document):
+class TopicElement(Auditable, db.Document):
     title = field(db.StringField(required=False))
     description = field(db.StringField(required=False))
     tags = field(db.ListField(db.StringField()))
@@ -32,38 +31,25 @@ class TopicElement(db.Document):
         "auto_create_index_on_save": True,
     }
 
+    after_save = Signal()
+    on_create = Signal()
+    on_update = Signal()
+    on_delete = Signal()
+
     @classmethod
     def post_save(cls, sender, document, **kwargs):
         """Trigger reindex when element is saved"""
+        # Call parent post_save for Auditable functionality
+        super().post_save(sender, document, **kwargs)
         if document.topic and document.element and hasattr(document.element, "id"):
             reindex.delay(*as_task_param(document.element))
-
-        # Emit activity for topic element changes
-        if document.topic and current_user and current_user.is_authenticated:
-            from udata.core.topic.activities import UserCreatedTopicElement, UserUpdatedTopicElement
-
-            extras = {"element_id": str(document.id)}
-            if kwargs.get("created"):
-                UserCreatedTopicElement.emit(
-                    document.topic, document.topic.organization, extras=extras
-                )
-            else:
-                UserUpdatedTopicElement.emit(
-                    document.topic, document.topic.organization, extras=extras
-                )
 
     @classmethod
     def post_delete(cls, sender, document, **kwargs):
         """Trigger reindex when element is deleted"""
         if document.topic and document.element and hasattr(document.element, "id"):
             reindex.delay(*as_task_param(document.element))
-
-        # Emit activity for topic element deletion
-        if document.topic and current_user and current_user.is_authenticated:
-            from udata.core.topic.activities import UserDeletedTopicElement
-
-            extras = {"element_id": str(document.id)}
-            UserDeletedTopicElement.emit(document.topic, document.topic.organization, extras=extras)
+        cls.on_delete.send(document)
 
 
 class Topic(db.Datetimed, Auditable, db.Document, Owned):
