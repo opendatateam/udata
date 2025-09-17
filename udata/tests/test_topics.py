@@ -2,7 +2,13 @@ import pytest
 from mongoengine.errors import ValidationError
 
 from udata.core.discussions.factories import DiscussionFactory
-from udata.core.topic.activities import UserCreatedTopic, UserUpdatedTopic
+from udata.core.topic.activities import (
+    UserCreatedTopic,
+    UserCreatedTopicElement,
+    UserDeletedTopicElement,
+    UserUpdatedTopic,
+    UserUpdatedTopicElement,
+)
 from udata.core.topic.factories import (
     TopicElementDatasetFactory,
     TopicElementFactory,
@@ -69,6 +75,65 @@ class TopicModelTest:
             topic.name = "new name"
             topic.save()
             mock_updated.assert_called()
+
+    def test_topic_element_activities(self, api, mocker):
+        # A user must be authenticated for activities to be emitted
+        user = api.login()
+        topic = TopicFactory(owner=user)
+
+        mock_topic_created = mocker.patch.object(UserCreatedTopic, "emit")
+        mock_topic_updated = mocker.patch.object(UserUpdatedTopic, "emit")
+        mock_element_created = mocker.patch.object(UserCreatedTopicElement, "emit")
+        mock_element_updated = mocker.patch.object(UserUpdatedTopicElement, "emit")
+        mock_element_deleted = mocker.patch.object(UserDeletedTopicElement, "emit")
+
+        # Test TopicElement creation
+        element = TopicElementDatasetFactory(topic=topic)
+        mock_element_created.assert_called_once()
+        mock_topic_created.assert_not_called()
+        mock_topic_updated.assert_not_called()
+        mock_element_updated.assert_not_called()
+        mock_element_deleted.assert_not_called()
+
+        call_args = mock_element_created.call_args
+        assert call_args[0][0] == topic  # related_to
+        assert call_args[0][1] == topic.organization  # organization
+        assert call_args[1]["extras"]["element_id"] == str(element.id)
+
+        mock_element_created.reset_mock()
+
+        # Test TopicElement update
+        element.title = "Updated title"
+        element.save()
+        mock_element_updated.assert_called_once()
+        mock_topic_created.assert_not_called()
+        mock_topic_updated.assert_not_called()
+        mock_element_created.assert_not_called()
+        mock_element_deleted.assert_not_called()
+
+        call_args = mock_element_updated.call_args
+        assert call_args[0][0] == topic  # related_to
+        assert call_args[0][1] == topic.organization  # organization
+        assert call_args[1]["extras"]["element_id"] == str(element.id)
+
+        mock_element_updated.reset_mock()
+
+        # Test TopicElement deletion
+        element_id = element.id
+        element.delete()
+
+        # Deletion should only trigger delete activity
+        mock_element_deleted.assert_called_once()
+        mock_element_updated.assert_not_called()
+        mock_topic_created.assert_not_called()
+        mock_topic_updated.assert_not_called()
+        mock_element_created.assert_not_called()
+
+        # Verify delete activity arguments
+        delete_call_args = mock_element_deleted.call_args
+        assert delete_call_args[0][0] == topic  # related_to
+        assert delete_call_args[0][1] == topic.organization  # organization
+        assert delete_call_args[1]["extras"]["element_id"] == str(element_id)
 
     def test_topic_element_wrong_class(self):
         # use a model instance that is not supported

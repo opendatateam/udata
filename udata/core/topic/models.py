@@ -1,4 +1,5 @@
 from blinker import Signal
+from flask_security import current_user
 from mongoengine.signals import post_delete, post_save
 
 from udata.api_fields import field
@@ -37,11 +38,32 @@ class TopicElement(db.Document):
         if document.topic and document.element and hasattr(document.element, "id"):
             reindex.delay(*as_task_param(document.element))
 
+        # Emit activity for topic element changes
+        if document.topic and current_user and current_user.is_authenticated:
+            from udata.core.topic.activities import UserCreatedTopicElement, UserUpdatedTopicElement
+
+            extras = {"element_id": str(document.id)}
+            if kwargs.get("created"):
+                UserCreatedTopicElement.emit(
+                    document.topic, document.topic.organization, extras=extras
+                )
+            else:
+                UserUpdatedTopicElement.emit(
+                    document.topic, document.topic.organization, extras=extras
+                )
+
     @classmethod
     def post_delete(cls, sender, document, **kwargs):
         """Trigger reindex when element is deleted"""
         if document.topic and document.element and hasattr(document.element, "id"):
             reindex.delay(*as_task_param(document.element))
+
+        # Emit activity for topic element deletion
+        if document.topic and current_user and current_user.is_authenticated:
+            from udata.core.topic.activities import UserDeletedTopicElement
+
+            extras = {"element_id": str(document.id)}
+            UserDeletedTopicElement.emit(document.topic, document.topic.organization, extras=extras)
 
 
 class Topic(db.Datetimed, Auditable, db.Document, Owned):
