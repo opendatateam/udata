@@ -157,6 +157,7 @@ class TopicElementsAPI(API):
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
 
+        # TODO: should we ignore activity creation here?
         topic.elements.delete()
 
         return None, 204
