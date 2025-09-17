@@ -1,9 +1,11 @@
 from blinker import Signal
+from flask import url_for
 from mongoengine.signals import post_delete, post_save
 
 from udata.api_fields import field
 from udata.core.activity.models import Auditable
 from udata.core.dataset.models import Dataset
+from udata.core.linkable import Linkable
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.core.reuse.models import Reuse
 from udata.models import SpatialCoverage, db
@@ -52,7 +54,7 @@ class TopicElement(Auditable, db.Document):
         cls.on_delete.send(document)
 
 
-class Topic(db.Datetimed, Auditable, db.Document, Owned):
+class Topic(db.Datetimed, Auditable, Linkable, db.Document, Owned):
     name = field(db.StringField(required=True))
     slug = field(
         db.SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
@@ -115,6 +117,13 @@ class Topic(db.Datetimed, Auditable, db.Document, Owned):
     def self_web_url(self, **kwargs):
         # Useful for Discussions to call self_web_url on their `subject`
         return None
+
+    def self_api_url(self, **kwargs):
+        return url_for(
+            "apiv2.topic",
+            topic=self._link_id(**kwargs),
+            **self._self_api_url_kwargs(**kwargs),
+        )
 
 
 post_save.connect(Topic.post_save, sender=Topic)
