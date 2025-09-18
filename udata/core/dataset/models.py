@@ -845,7 +845,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
             # We may have up to one day delay due to harvesting for example
             quality["update_fulfilled_in_time"] = (next_update - datetime.utcnow()).days >= -1
         elif self.has_frequency and self.frequency.delta is None:
-            # Unbonded frequencies can't be estimated, so we always consider the
+            # Unbounded frequencies can't be estimated, so we always consider the
             # update_fulfilled_in_time quality criterion to be true.
             quality["update_fulfilled_in_time"] = True
 
