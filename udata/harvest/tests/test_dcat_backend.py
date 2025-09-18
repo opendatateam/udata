@@ -97,7 +97,7 @@ class DcatBackendTest:
             assert d.harvest.dct_identifier == i
             assert d.harvest.remote_url == f"http://data.test.org/datasets/{i}"
             assert d.harvest.uri == f"http://data.test.org/datasets/{i}"
-            assert d.harvest.created_at.date() == date(2016, 12, 14)
+            assert d.harvest.issued_at.date() == date(2016, 12, 14)
             assert d.harvest.modified_at.date() == date(2016, 12, 14)
             assert d.harvest.last_update.date() == date.today()
             assert d.harvest.archived_at is None
@@ -514,7 +514,8 @@ class DcatBackendTest:
         assert dataset.license.id == "lov2"
         assert dataset.harvest.remote_url == "http://data.test.org/datasets/3"
         assert dataset.harvest.remote_id == "3"
-        assert dataset.harvest.created_at.date() == date(2016, 12, 14)
+        assert dataset.harvest.issued_at.date() == date(2016, 12, 14)
+        assert dataset.harvest.created_at.date() == date(2016, 12, 12)
         assert dataset.harvest.modified_at.date() == date(2016, 12, 14)
         assert dataset.frequency == UpdateFrequency.DAILY
         assert dataset.description == "Dataset 3 description"
@@ -556,6 +557,8 @@ class DcatBackendTest:
         assert resource_1.description == "A JSON resource"
         assert resource_1.url == "http://data.test.org/datasets/1/resources/1/file.json"
         assert resource_1.type == "main"
+        assert resource_1.harvest.issued_at.date() == date(2018, 3, 12)
+        assert resource_1.harvest.modified_at.date() == date(2018, 3, 14)
 
         resource_2 = next(res for res in dataset.resources if res.title == "Resource 1-2")
         assert resource_2.format == "json"
@@ -613,7 +616,8 @@ class DcatBackendTest:
             dataset.harvest.dct_identifier
             == "0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2"
         )  # noqa
-        assert dataset.harvest.created_at.date() == date(2004, 11, 3)
+        assert dataset.harvest.issued_at.date() == date(2004, 11, 3)
+        assert dataset.harvest.created_at is None
         assert dataset.harvest.modified_at is None
         assert (
             dataset.harvest.uri
@@ -682,7 +686,8 @@ class DcatBackendTest:
             dataset.harvest.remote_id
             == "https://vanves-seineouest.opendatasoft.com/explore/dataset/bureau-de-vote-vanves/"
         )
-        assert dataset.harvest.created_at.isoformat() == "2019-04-19T12:21:56"
+        assert dataset.harvest.issued_at.isoformat() == "2019-04-19T12:21:56"
+        assert dataset.harvest.created_at is None
         assert dataset.harvest.modified_at.isoformat() == "2019-04-19T12:21:56"
         assert (
             dataset.harvest.uri
@@ -713,7 +718,8 @@ class DcatBackendTest:
             service.harvest.remote_id
             == "https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/"
         )
-        assert service.harvest.created_at.isoformat() == "2024-07-12T00:03:38.764000"
+        assert service.harvest.issued_at.isoformat() == "2024-07-12T00:03:38.764000"
+        assert service.harvest.created_at is None
         assert (
             service.harvest.remote_url
             == "https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/console"
@@ -863,7 +869,8 @@ class CswDcatBackendTest:
                 "aisne",
             ]
         )
-        assert dataset.harvest.created_at.date() == date(2017, 1, 1)
+        assert dataset.harvest.issued_at.date() == date(2017, 1, 1)
+        assert dataset.harvest.created_at is None
         assert len(dataset.resources) == 1
         resource = dataset.resources[0]
         assert resource.title == "accidento_hdf_L93"
@@ -1036,7 +1043,8 @@ class CswIso19139DcatBackendTest:
                 "usage-des-sols",
             ]
         )
-        assert dataset.harvest.created_at.date() == date(2017, 10, 7)
+        assert dataset.harvest.issued_at.date() == date(2017, 10, 7)
+        assert dataset.harvest.created_at.date() == date(2013, 3, 8)
         assert dataset.spatial.geom == {
             "type": "MultiPolygon",
             "coordinates": [

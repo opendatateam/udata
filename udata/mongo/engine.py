@@ -5,7 +5,6 @@ from mongoengine.base import TopLevelDocumentMetaclass, get_document
 from mongoengine.errors import ValidationError
 from mongoengine.signals import post_save, pre_save
 
-from .badges_field import BadgesField
 from .datetime_fields import DateField, DateRange, Datetimed
 from .document import DomainModel, UDataDocument
 from .enum_fields import StrEnumField
@@ -22,7 +21,6 @@ class UDataMongoEngine(MongoEngine):
 
     def __init__(self, app=None):
         super(UDataMongoEngine, self).__init__(app)
-        self.BadgesField = BadgesField
         self.TagListField = TagListField
         self.DateField = DateField
         self.Datetimed = Datetimed

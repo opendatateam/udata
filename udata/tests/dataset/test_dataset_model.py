@@ -830,7 +830,7 @@ class HarvestMetadataTest:
         resource = ResourceFactory()
 
         harvest_metadata = HarvestResourceMetadata(
-            created_at=datetime.utcnow(),
+            issued_at=datetime.utcnow(),
             modified_at=datetime.utcnow(),
             uri="http://domain.gouv.fr/dataset/uri",
         )
@@ -838,7 +838,7 @@ class HarvestMetadataTest:
         resource.validate()
 
     def test_harvest_resource_metadata_validation_error(self):
-        harvest_metadata = HarvestResourceMetadata(created_at="maintenant")
+        harvest_metadata = HarvestResourceMetadata(issued_at="maintenant")
         resource = ResourceFactory()
         resource.harvest = harvest_metadata
         with pytest.raises(db.ValidationError):

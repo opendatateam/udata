@@ -260,7 +260,7 @@ class CkanBackend(BaseBackend):
             resource.format = res.get("format")
             resource.mime = res.get("mimetype")
             resource.hash = res.get("hash")
-            resource.harvest.created_at = res["created"]
+            resource.harvest.issued_at = res["created"]
             resource.harvest.modified_at = res["last_modified"]
 
         return dataset

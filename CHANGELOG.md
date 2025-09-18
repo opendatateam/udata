@@ -2,7 +2,21 @@
 
 ## Current (in progress)
 
+- Emit harvest activities. Set `HARVEST_ACTIVITY_USER_ID` to an existing user account to activate it [#3412](https://github.com/opendatateam/udata/pull/3412)
+- fix(harvest): refactor dates handling [#3352](https://github.com/opendatateam/udata/pull/3352)
+- Remove unused BadgesField [#3420](https://github.com/opendatateam/udata/pull/3420)
+- migrate to pyproject.toml, replace `CIRCLE_TAG` by `setuptools_scm` to compute the correct version automatically [#3413](https://github.com/opendatateam/udata/pull/3413) [#3434](https://github.com/opendatateam/udata/pull/3434) [#3435](https://github.com/opendatateam/udata/pull/3435) [#3437](https://github.com/opendatateam/udata/pull/3437) [#3438](https://github.com/opendatateam/udata/pull/3438/)
+- fix(topic): absolute Topic.uri [#3436](https://github.com/opendatateam/udata/pull/3436)
+
+## 11.0.1 (2025-09-15)
+
+- fix: PUT topic without elements [#3424](https://github.com/opendatateam/udata/pull/3424)
+
+## 11.0.0 (2025-09-12)
+
 - Change CSW harvesters XML processor from lxml to saxonche [#3380](https://github.com/opendatateam/udata/pull/3380)
+- **breaking change** feat: topic elements [#3318](https://github.com/opendatateam/udata/pull/3318) [#3416](https://github.com/opendatateam/udata/pull/3416) [#3417](https://github.com/opendatateam/udata/pull/3417) [#3418](https://github.com/opendatateam/udata/pull/3418)
+- Allow to send arguments to the `udata user create` command for CI [#3419](https://github.com/opendatateam/udata/pull/3419)
 
 ## 10.9.0 (2025-08-28)
 
