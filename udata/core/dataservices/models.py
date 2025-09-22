@@ -7,7 +7,7 @@ from mongoengine.signals import post_save
 
 import udata.core.contact_point.api_fields as contact_api_fields
 from udata.api import api, fields
-from udata.api_fields import field, function_field, generate_fields
+from udata.api_fields import field, generate_fields
 from udata.core.activity.models import Auditable
 from udata.core.dataservices.constants import (
     DATASERVICE_ACCESS_AUDIENCE_CONDITIONS,

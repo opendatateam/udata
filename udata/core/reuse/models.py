@@ -3,7 +3,7 @@ from flask import url_for
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
-from udata.api_fields import field, function_field, generate_fields
+from udata.api_fields import field, generate_fields
 from udata.core.activity.models import Auditable
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.linkable import Linkable

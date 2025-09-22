@@ -569,19 +569,19 @@ def field(
     **kwargs: Any,  # Accept any additional parameters
 ):
     """Universal field decorator/wrapper for API field metadata.
-    
+
     Can be used in two ways:
-    
+
     1. As a wrapper for MongoEngine fields:
-        title = field(db.StringField(required=True), 
-                     sortable=True, 
+        title = field(db.StringField(required=True),
+                     sortable=True,
                      description="The title of the item")
-    
+
     2. As a decorator for computed fields:
         @field(description="Link to the API endpoint", show_as_ref=True)
         def uri(self):
             return f"/api/items/{self.id}"
-    
+
     Args:
         inner: The MongoEngine field to wrap (or None when used as decorator)
         sortable: If True, field can be sorted. If str, use as custom sort key
@@ -605,22 +605,25 @@ def field(
         convert_to: Custom converter for RestX
         allow_null: If True, field can be null
         **kwargs: Any additional parameters not explicitly defined
-    
+
     Returns:
         When used as wrapper: The field with __additional_field_info__ attached.
         When used as decorator: A decorator function.
     """
     # Build field_info from non-None parameters, excluding 'inner' and 'kwargs'
-    field_info = {k: v for k, v in locals().items() if v is not None and k not in ('inner', 'kwargs')}
-    
+    field_info = {
+        k: v for k, v in locals().items() if v is not None and k not in ("inner", "kwargs")
+    }
+
     # Add any extra kwargs passed
     field_info.update(kwargs)
-    
+
     if inner is None:
         # Used as a decorator for methods
         def decorator(func):
             func.__additional_field_info__ = field_info
             return func
+
         return decorator
     else:
         # Used as a field wrapper

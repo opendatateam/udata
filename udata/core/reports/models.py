@@ -4,7 +4,7 @@ from bson import DBRef
 from flask import url_for
 from mongoengine import DO_NOTHING, NULLIFY, signals
 
-from udata.api_fields import field, function_field, generate_fields
+from udata.api_fields import field, generate_fields
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.mongo import db

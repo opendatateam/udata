@@ -3,7 +3,7 @@ import mongoengine
 import pytest
 from flask_restx.reqparse import Argument, RequestParser
 
-from udata.api_fields import field, function_field, generate_fields, patch, patch_and_save
+from udata.api_fields import field, generate_fields, patch, patch_and_save
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.organization import constants as org_constants
 from udata.core.organization.factories import OrganizationFactory
