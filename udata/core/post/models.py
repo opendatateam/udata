@@ -1,5 +1,7 @@
 from flask import url_for
 
+from udata.api_fields import field, function_field, generate_fields
+from udata.auth import current_user
 from udata.core.linkable import Linkable
 from udata.core.storages import default_image_basename, images
 from udata.i18n import lazy_gettext as _
@@ -16,27 +18,78 @@ class PostQuerySet(db.BaseQuerySet):
         return self(published__ne=None).order_by("-published")
 
 
+@generate_fields(
+    searchable=True,
+    mask="*,datasets{id,title,acronym,uri,page},reuses{id,title,image,image_thumbnail,uri,page}"
+)
 class Post(db.Datetimed, Linkable, db.Document):
-    name = db.StringField(max_length=255, required=True)
-    slug = db.SlugField(
-        max_length=255, required=True, populate_from="name", update=True, follow=True
+    name = field(
+        db.StringField(max_length=255, required=True),
+        sortable=True,
+        show_as_ref=True,
     )
-    headline = db.StringField()
-    content = db.StringField(required=True)
-    image_url = db.StringField()
-    image = db.ImageField(fs=images, basename=default_image_basename, thumbnails=IMAGE_SIZES)
+    slug = field(
+        db.SlugField(
+            max_length=255, required=True, populate_from="name", update=True, follow=True
+        ),
+        readonly=True,
+    )
+    headline = field(
+        db.StringField(),
+        sortable=True,
+    )
+    content = field(
+        db.StringField(required=True),
+        markdown=True,
+    )
+    image_url = field(
+        db.StringField(),
+    )
+    image = field(
+        db.ImageField(fs=images, basename=default_image_basename, thumbnails=IMAGE_SIZES),
+        readonly=True,
+        thumbnail_info={"size": 100},
+    )
 
-    credit_to = db.StringField()
-    credit_url = db.URLField()
+    credit_to = field(
+        db.StringField(),
+        description="An optional credit line (associated to the image)",
+    )
+    credit_url = field(
+        db.URLField(),
+        description="An optional link associated to the credits",
+    )
 
-    tags = db.ListField(db.StringField())
-    datasets = db.ListField(db.ReferenceField("Dataset", reverse_delete_rule=db.PULL))
-    reuses = db.ListField(db.ReferenceField("Reuse", reverse_delete_rule=db.PULL))
+    tags = field(
+        db.ListField(db.StringField()),
+        description="Some keywords to help in search",
+    )
+    datasets = field(
+        db.ListField(db.ReferenceField("Dataset", reverse_delete_rule=db.PULL)),
+        description="The post datasets",
+    )
+    reuses = field(
+        db.ListField(db.ReferenceField("Reuse", reverse_delete_rule=db.PULL)),
+        description="The post reuses",
+    )
 
-    owner = db.ReferenceField("User")
-    published = db.DateTimeField()
+    owner = field(
+        db.ReferenceField("User"),
+        readonly=True,
+        allow_null=True,
+        description="The owner user",
+    )
+    published = field(
+        db.DateTimeField(),
+        readonly=True,
+        sortable=True,
+        description="The post publication date",
+    )
 
-    body_type = db.StringField(choices=list(BODY_TYPES), default="markdown", required=False)
+    body_type = field(
+        db.StringField(choices=list(BODY_TYPES), default="markdown", required=False),
+        description="HTML or markdown body type",
+    )
 
     meta = {
         "ordering": ["-created_at"],
@@ -64,7 +117,20 @@ class Post(db.Datetimed, Linkable, db.Document):
         return url_for(
             "api.post", post=self._link_id(**kwargs), **self._self_api_url_kwargs(**kwargs)
         )
+    
+    @function_field(description="The API URI for this post")
+    def uri(self):
+        return self.self_api_url()
+    
+    @function_field(description="The post web page URL")
+    def page(self):
+        return self.self_web_url()
 
     def count_discussions(self):
         # There are no metrics on Post to store discussions count
         pass
+    
+    def before_save(self):
+        # Set the owner to the current user on creation if not specified
+        if not self.owner and current_user.is_authenticated:
+            self.owner = current_user._get_current_object()

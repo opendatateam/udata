@@ -4,65 +4,25 @@ from typing import List
 from feedgenerator.django.utils.feedgenerator import Atom1Feed
 from flask import make_response, request
 
-from udata.api import API, api, fields
+from udata.api import API, api
+from udata.api_fields import patch_and_save
 from udata.auth import Permission as AdminPermission
 from udata.auth import admin_permission
-from udata.core.dataset.api_fields import dataset_fields
-from udata.core.reuse.models import Reuse
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
     uploaded_image_fields,
 )
-from udata.core.user.api_fields import user_ref_fields
 from udata.frontend.markdown import md
 from udata.i18n import gettext as _
 
-from .forms import PostForm
 from .models import Post
 
 DEFAULT_SORTING = "-published"
 
 ns = api.namespace("posts", "Posts related operations")
 
-post_fields = api.model(
-    "Post",
-    {
-        "id": fields.String(description="The post identifier"),
-        "name": fields.String(description="The post name", required=True),
-        "slug": fields.String(description="The post permalink string", readonly=True),
-        "headline": fields.String(description="The post headline", required=True),
-        "content": fields.Markdown(description="The post content in Markdown", required=True),
-        "image": fields.ImageField(description="The post image", readonly=True),
-        "credit_to": fields.String(description="An optional credit line (associated to the image)"),
-        "credit_url": fields.String(description="An optional link associated to the credits"),
-        "tags": fields.List(fields.String, description="Some keywords to help in search"),
-        "datasets": fields.List(fields.Nested(dataset_fields), description="The post datasets"),
-        "reuses": fields.List(fields.Nested(Reuse.__read_fields__), description="The post reuses"),
-        "owner": fields.Nested(
-            user_ref_fields, description="The owner user", readonly=True, allow_null=True
-        ),
-        "created_at": fields.ISODateTime(description="The post creation date", readonly=True),
-        "last_modified": fields.ISODateTime(
-            description="The post last modification date", readonly=True
-        ),
-        "published": fields.ISODateTime(description="The post publication date", readonly=True),
-        "body_type": fields.String(description="HTML or markdown body type", default="markdown"),
-        "uri": fields.String(
-            attribute=lambda p: p.self_api_url(),
-            description="The API URI for this post",
-            readonly=True,
-        ),
-        "page": fields.String(
-            attribute=lambda p: p.self_web_url(),
-            description="The post web page URL",
-            readonly=True,
-        ),
-    },
-    mask="*,datasets{id,title,acronym,uri,page},reuses{id,title,image,image_thumbnail,uri,page}",
-)
-
-post_page_fields = api.model("PostPage", fields.pager(post_fields))
+post_page_fields = api.model("PostPage", api.fields.pager(Post.__read_fields__))
 
 parser = api.page_parser()
 
@@ -102,13 +62,14 @@ class PostsAPI(API):
 
     @api.doc("create_post")
     @api.secure(admin_permission)
-    @api.expect(post_fields)
-    @api.marshal_with(post_fields)
+    @api.expect(Post.__write_fields__)
+    @api.marshal_with(Post.__read_fields__)
     @api.response(400, "Validation error")
     def post(self):
         """Create a post"""
-        form = api.validate(PostForm)
-        return form.save(), 201
+        post = Post()
+        post = patch_and_save(post, request)
+        return post, 201
 
 
 @ns.route("/recent.atom", endpoint="recent_posts_atom_feed")
@@ -144,20 +105,20 @@ class PostsAtomFeedAPI(API):
 @api.param("post", "The post ID or slug")
 class PostAPI(API):
     @api.doc("get_post")
-    @api.marshal_with(post_fields)
+    @api.marshal_with(Post.__read_fields__)
     def get(self, post):
         """Get a given post"""
         return post
 
     @api.doc("update_post")
     @api.secure(admin_permission)
-    @api.expect(post_fields)
-    @api.marshal_with(post_fields)
+    @api.expect(Post.__write_fields__)
+    @api.marshal_with(Post.__read_fields__)
     @api.response(400, "Validation error")
     def put(self, post):
         """Update a given post"""
-        form = api.validate(PostForm, post)
-        return form.save()
+        post = patch_and_save(post, request)
+        return post
 
     @api.secure(admin_permission)
     @api.doc("delete_post")
@@ -172,7 +133,7 @@ class PostAPI(API):
 class PublishPostAPI(API):
     @api.secure(admin_permission)
     @api.doc("publish_post")
-    @api.marshal_with(post_fields)
+    @api.marshal_with(Post.__read_fields__)
     def post(self, post):
         """Publish an existing post"""
         post.modify(published=datetime.utcnow())
@@ -180,9 +141,9 @@ class PublishPostAPI(API):
 
     @api.secure(admin_permission)
     @api.doc("unpublish_post")
-    @api.marshal_with(post_fields)
+    @api.marshal_with(Post.__read_fields__)
     def delete(self, post):
-        """Publish an existing post"""
+        """Unpublish an existing post"""
         post.modify(published=None)
         return post
 
