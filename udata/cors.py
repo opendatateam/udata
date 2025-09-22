@@ -55,6 +55,7 @@ def is_allowed_cors_route():
     return (
         path.endswith((".js", ".css", ".woff", ".woff2", ".png", ".jpg", ".jpeg", ".svg"))
         or path.startswith("/api")
+        or path.startswith("/oauth/token")
         or path.startswith("/datasets/r/")
     )
 
