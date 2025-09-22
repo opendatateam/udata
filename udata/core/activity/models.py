@@ -129,16 +129,20 @@ class Auditable(object):
         if kwargs.get("created"):
             cls.on_create.send(document)
         elif len(changed_fields):
-            previous = getattr(document, "_previous_changed_fields", None)
+            previous = getattr(document, "_previous_changed_fields", {})
             # make sure that changed fields have actually changed when comparing the document
             # once it has been reloaded. It may have been cleaned or normalized when saved to mongo.
             # We compare them one by one with the previous value stored in _previous_changed_fields.
             # See https://github.com/opendatateam/udata/pull/3412 for more context.
+            # Sometimes, we nullify a field in the clean method (for exemple the `license` when we change
+            # the `access_type` of a dataset). This field is then not present in `previous`. Returning `None`
+            # is a little bit wrong because we should return the previous value of the `license`. Right now
+            # we don't notice license change because `None (not present) == None (removed)` is equal.
             document.reload()
             changed_fields = [
                 field
                 for field in changed_fields
-                if previous[field] != get_field_value_from_path(document, field)
+                if previous.get(field, None) != get_field_value_from_path(document, field)
             ]
             if changed_fields:
                 cls.on_update.send(document, changed_fields=changed_fields, previous=previous)
