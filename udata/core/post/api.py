@@ -3,9 +3,10 @@ from typing import List
 
 from feedgenerator.django.utils.feedgenerator import Atom1Feed
 from flask import make_response, request
+from flask_login import current_user
 
 from udata.api import API, api
-from udata.api_fields import patch_and_save
+from udata.api_fields import patch, patch_and_save
 from udata.auth import Permission as AdminPermission
 from udata.auth import admin_permission
 from udata.core.storages.api import (
@@ -22,11 +23,7 @@ DEFAULT_SORTING = "-published"
 
 ns = api.namespace("posts", "Posts related operations")
 
-post_page_fields = api.model("PostPage", api.fields.pager(Post.__read_fields__))
-
-parser = api.page_parser()
-
-parser.add_argument("sort", type=str, location="args", help="The sorting attribute")
+parser = Post.__index_parser__
 parser.add_argument(
     "with_drafts",
     type=bool,
@@ -34,16 +31,13 @@ parser.add_argument(
     location="args",
     help="`True` also returns the unpublished posts (only for super-admins)",
 )
-parser.add_argument(
-    "q", type=str, location="args", help="query string to search through resources titles"
-)
 
 
 @ns.route("/", endpoint="posts")
 class PostsAPI(API):
     @api.doc("list_posts")
     @api.expect(parser)
-    @api.marshal_with(post_page_fields)
+    @api.marshal_with(Post.__page_fields__)
     def get(self):
         """List all posts"""
         args = parser.parse_args()
@@ -53,12 +47,8 @@ class PostsAPI(API):
         if not (AdminPermission().can() and args["with_drafts"]):
             posts = posts.published()
 
-        if args["q"]:
-            phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
-            posts = posts.search_text(phrase_query)
-
-        sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
-        return posts.order_by(sort).paginate(args["page"], args["page_size"])
+        # The search is already handled by apply_sort_filters if searchable=True
+        return Post.apply_pagination(Post.apply_sort_filters(posts))
 
     @api.doc("create_post")
     @api.secure(admin_permission)
@@ -67,8 +57,12 @@ class PostsAPI(API):
     @api.response(400, "Validation error")
     def post(self):
         """Create a post"""
-        post = Post()
-        post = patch_and_save(post, request)
+        post = patch(Post(), request)
+
+        if not post.owner:
+            post.owner = current_user._get_current_object()
+
+        post.save()
         return post, 201
 
 

@@ -1,7 +1,7 @@
 from flask import url_for
 
 from udata.api_fields import field, function_field, generate_fields
-from udata.auth import current_user
+from udata.core.dataset.api_fields import dataset_fields
 from udata.core.linkable import Linkable
 from udata.core.storages import default_image_basename, images
 from udata.i18n import lazy_gettext as _
@@ -20,7 +20,10 @@ class PostQuerySet(db.BaseQuerySet):
 
 @generate_fields(
     searchable=True,
-    mask="*,datasets{id,title,acronym,uri,page},reuses{id,title,image,image_thumbnail,uri,page}"
+    additional_sorts=[
+        {"key": "created", "value": "created_at"},
+        {"key": "modified", "value": "last_modified"},
+    ],
 )
 class Post(db.Datetimed, Linkable, db.Document):
     name = field(
@@ -65,11 +68,18 @@ class Post(db.Datetimed, Linkable, db.Document):
         description="Some keywords to help in search",
     )
     datasets = field(
-        db.ListField(db.ReferenceField("Dataset", reverse_delete_rule=db.PULL)),
+        db.ListField(
+            field(
+                db.ReferenceField("Dataset", reverse_delete_rule=db.PULL),
+                nested_fields=dataset_fields,
+            )
+        ),
         description="The post datasets",
     )
     reuses = field(
-        db.ListField(db.ReferenceField("Reuse", reverse_delete_rule=db.PULL)),
+        db.ListField(
+            db.ReferenceField("Reuse", reverse_delete_rule=db.PULL)
+        ),
         description="The post reuses",
     )
 
@@ -129,8 +139,3 @@ class Post(db.Datetimed, Linkable, db.Document):
     def count_discussions(self):
         # There are no metrics on Post to store discussions count
         pass
-    
-    def before_save(self):
-        # Set the owner to the current user on creation if not specified
-        if not self.owner and current_user.is_authenticated:
-            self.owner = current_user._get_current_object()
