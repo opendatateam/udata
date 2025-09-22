@@ -197,16 +197,16 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
             "api.reuse", reuse=self._link_id(**kwargs), **self._self_api_url_kwargs(**kwargs)
         )
 
-    @function_field(description="Link to the API endpoint for this reuse", show_as_ref=True)
+    @field(description="Link to the API endpoint for this reuse", show_as_ref=True)
     def uri(self, *args, **kwargs):
         return self.self_api_url(*args, **kwargs)
 
-    @function_field(description="Link to the udata web page for this reuse", show_as_ref=True)
+    @field(description="Link to the udata web page for this reuse", show_as_ref=True)
     def page(self, *args, **kwargs):
         return self.self_web_url(*args, **kwargs)
 
     @property
-    @function_field(
+    @field(
         nested_fields=reuse_permissions_fields,
     )
     def permissions(self):

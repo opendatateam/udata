@@ -131,7 +131,7 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
     def __str__(self) -> str:
         return self.title or ""
 
-    @function_field(description="Link to the API endpoint for this fake", show_as_ref=True)
+    @field(description="Link to the API endpoint for this fake", show_as_ref=True)
     def uri(self) -> str:
         return "fake/foobar/endpoint/"
 

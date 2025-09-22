@@ -284,7 +284,7 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
         auditable=False,
     )
 
-    @function_field(description="Link to the API endpoint for this dataservice")
+    @field(description="Link to the API endpoint for this dataservice")
     def self_api_url(self, **kwargs):
         return url_for(
             "api.dataservice",
@@ -292,7 +292,7 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
             **self._self_api_url_kwargs(**kwargs),
         )
 
-    @function_field(description="Link to the udata web page for this dataservice", show_as_ref=True)
+    @field(description="Link to the udata web page for this dataservice", show_as_ref=True)
     def self_web_url(self, **kwargs):
         return cdata_url(f"/dataservices/{self._link_id(**kwargs)}/", **kwargs)
 
@@ -309,7 +309,7 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
         return self.private or self.deleted_at or self.archived_at
 
     @property
-    @function_field(
+    @field(
         nested_fields=dataservice_permissions_fields,
     )
     def permissions(self):

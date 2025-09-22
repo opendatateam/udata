@@ -46,7 +46,7 @@ class Report(db.Document):
         readonly=True,
     )
 
-    @function_field(description="Link to the API endpoint for this report")
+    @field(description="Link to the API endpoint for this report")
     def self_api_url(self):
         return url_for("api.report", report=self, _external=True)
 

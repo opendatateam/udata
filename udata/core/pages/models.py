@@ -91,7 +91,7 @@ class Page(Auditable, Owned, Datetimed, db.Document):
     )
 
     @property
-    @function_field(
+    @field(
         nested_fields=page_permissions_fields,
     )
     def permissions(self):
