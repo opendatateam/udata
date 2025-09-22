@@ -32,9 +32,7 @@ class Post(db.Datetimed, Linkable, db.Document):
         show_as_ref=True,
     )
     slug = field(
-        db.SlugField(
-            max_length=255, required=True, populate_from="name", update=True, follow=True
-        ),
+        db.SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
         readonly=True,
     )
     headline = field(
@@ -77,9 +75,7 @@ class Post(db.Datetimed, Linkable, db.Document):
         description="The post datasets",
     )
     reuses = field(
-        db.ListField(
-            db.ReferenceField("Reuse", reverse_delete_rule=db.PULL)
-        ),
+        db.ListField(db.ReferenceField("Reuse", reverse_delete_rule=db.PULL)),
         description="The post reuses",
     )
 
@@ -127,11 +123,11 @@ class Post(db.Datetimed, Linkable, db.Document):
         return url_for(
             "api.post", post=self._link_id(**kwargs), **self._self_api_url_kwargs(**kwargs)
         )
-    
+
     @function_field(description="The API URI for this post")
     def uri(self):
         return self.self_api_url()
-    
+
     @function_field(description="The post web page URL")
     def page(self):
         return self.self_web_url()
