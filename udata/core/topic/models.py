@@ -3,9 +3,7 @@ from mongoengine.signals import post_delete, post_save
 
 from udata.api_fields import field
 from udata.core.activity.models import Auditable
-from udata.core.dataset.models import Dataset
 from udata.core.owned import Owned, OwnedQuerySet
-from udata.core.reuse.models import Reuse
 from udata.models import SpatialCoverage, db
 from udata.search import reindex
 from udata.tasks import as_task_param
@@ -18,7 +16,7 @@ class TopicElement(db.Document):
     description = field(db.StringField(required=False))
     tags = field(db.ListField(db.StringField()))
     extras = field(db.ExtrasField())
-    element = field(db.GenericReferenceField(choices=[Dataset, Reuse]))
+    element = field(db.GenericReferenceField(choices=["Dataset", "Reuse", "Dataservice"]))
     # Made optional to allow proper form handling with commit=False
     topic = field(db.ReferenceField("Topic", required=False))
 

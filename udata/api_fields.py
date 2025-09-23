@@ -10,7 +10,8 @@ Now they're defined in models.py, and adding the `generate_fields` decorator mak
 - default_filterable_field: which field in this document should be the default filter, eg when filtering by Badge, you're actually filtering on `Badge.kind`
 - searchable: boolean, if True, the document can be full-text searched using MongoEngine text search
 - additional_sorts: add more sorts than the already available ones based on fields (see below). Eg, sort by metrics.
-- additional_filters: filter on a field of a field (aka "join"), eg filter on `Reuse__organization__badge=PUBLIC_SERVICE`.
+- nested_filters: filter on a field of a field (aka "join"), eg filter on `Reuse__organization__badge=PUBLIC_SERVICE`.
+- standalone_filters: filter on something else than a field. Should be a list of dicts with filterable attributes, as returned by `compute_filter`.
 
 
 On top of those functionalities added to the document by the `@generate_fields` decorator parameters,
@@ -332,9 +333,9 @@ def generate_fields(**kwargs) -> Callable:
         ref_fields: dict = {}
         sortables: list = kwargs.get("additional_sorts", [])
 
-        filterables: list[dict] = []
-        additional_filters: dict[str, dict] = get_fields_with_additional_filters(
-            kwargs.get("additional_filters", {})
+        filterables: list[dict] = kwargs.get("standalone_filters", [])
+        nested_filters: dict[str, dict] = get_fields_with_nested_filters(
+            kwargs.get("nested_filters", {})
         )
 
         read_fields["id"] = restx_fields.String(required=True, readonly=True)
@@ -356,16 +357,16 @@ def generate_fields(**kwargs) -> Callable:
             if filterable is not None:
                 filterables.append(compute_filter(key, field, info, filterable))
 
-            additional_filter: dict | None = additional_filters.get(key, None)
-            if additional_filter:
+            nested_filter: dict | None = nested_filters.get(key, None)
+            if nested_filter:
                 if not isinstance(
                     field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField
                 ):
-                    raise Exception("Cannot use additional_filters on a field that is not a ref.")
+                    raise Exception("Cannot use nested_filters on a field that is not a ref.")
 
                 ref_model: db.Document = field.document_type
 
-                for child in additional_filter.get("children", []):
+                for child in nested_filter.get("children", []):
                     inner_field: str = getattr(ref_model, child["key"])
 
                     column: str = f"{key}__{child['key']}"
@@ -489,7 +490,7 @@ def generate_fields(**kwargs) -> Callable:
 
         for filterable in filterables:
             parser.add_argument(
-                # Use the custom label from `additional_filters` if there's one.
+                # Use the custom label from `nested_filters` if there's one.
                 filterable.get("label", filterable["key"]),
                 type=filterable["type"],
                 location="args",
@@ -520,7 +521,7 @@ def generate_fields(**kwargs) -> Callable:
                 base_query = base_query.search_text(phrase_query)
 
             for filterable in filterables:
-                # If it's from an `additional_filter`, use the custom label instead of the key,
+                # If it's from an `nested_filter`, use the custom label instead of the key,
                 # eg use `organization_badge` instead of `organization.badges` which is
                 # computed to `organization_badges`.
                 filter = args.get(filterable.get("label", filterable["key"]))
@@ -738,21 +739,18 @@ def wrap_primary_key(
         )
 
 
-def get_fields_with_additional_filters(additional_filters: dict[str, str]) -> dict[str, Any]:
+def get_fields_with_nested_filters(nested_filters: dict[str, str]) -> dict[str, Any]:
     """Filter on additional related fields.
 
-    Right now we only support additional filters with a depth of two, eg "organization.badges".
-
-    The goal of this function is to key by the additional filters by the first part (`organization`) to
     be able to compute them when we loop over all the fields (`title`, `organization`…)
 
 
-    The `additional_filters` property is a dict: {"label": "key"}, for example {"organization_badge": "organization.badges"}.
+    The `nested_filters` property is a dict: {"label": "key"}, for example {"organization_badge": "organization.badges"}.
     The `label` will be the name of the parser arg, like `?organization_badge=public-service`, which makes more
     sense than `?organization_badges=public-service`.
     """
     results: dict = {}
-    for label, key in additional_filters.items():
+    for label, key in nested_filters.items():
         parts = key.split(".")
         if len(parts) == 2:
             parent = parts[0]
@@ -770,7 +768,7 @@ def get_fields_with_additional_filters(additional_filters: dict[str, str]) -> di
                 }
             )
         else:
-            raise Exception(f"Do not support `additional_filters` without two parts: {key}.")
+            raise Exception(f"Do not support `nested_filters` without two parts: {key}.")
 
     return results
 

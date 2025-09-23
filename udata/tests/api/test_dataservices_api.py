@@ -21,6 +21,7 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
+from udata.core.topic.factories import TopicElementFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
 from udata.tests.helpers import assert200, assert400, assert410, assert_redirects
@@ -95,6 +96,14 @@ class DataserviceAPITest(APITestCase):
         assert200(response)
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(tag_dataservice.id)
+
+        # filter on topic
+        topic_dataservice = DataserviceFactory()
+        topic = TopicFactory(elements=[TopicElementFactory(element=topic_dataservice)])
+        response = self.get(url_for("api.dataservices", topic=topic.id))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(topic_dataservice.id)
 
     def test_dataservice_api_create(self):
         user = self.login()

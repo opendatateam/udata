@@ -1,6 +1,7 @@
 import pytest
 from flask import url_for
 
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.models import Discussion
 from udata.core.organization.factories import OrganizationFactory
@@ -123,6 +124,91 @@ class TopicsListAPITest(APITestCase):
         assert response.status_code == 200
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(topic.id)
+
+    def test_topic_api_list_search_by_element_content(self):
+        """It should find topics by searching their elements' content"""
+        topic_with_matching_element = TopicFactory(
+            name="unrelated topic", description="unrelated description"
+        )
+        TopicElementFactory(
+            topic=topic_with_matching_element,
+            title="climate change data",
+            description="environmental datasets about climate",
+        )
+
+        topic_without_matching_element = TopicFactory(
+            name="other topic", description="other description"
+        )
+        TopicElementFactory(
+            topic=topic_without_matching_element,
+            title="unrelated element",
+            description="unrelated element description",
+        )
+
+        response = self.get(url_for("apiv2.topics_list", q="climate"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(topic_with_matching_element.id)
+
+        response = self.get(url_for("apiv2.topics_list", q="environmental"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(topic_with_matching_element.id)
+
+        response = self.get(url_for("apiv2.topics_list", q="nonexistent"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 0
+
+    def test_topic_api_list_search_combined_topic_and_element(self):
+        """It should find topics that match either in topic content OR element content"""
+        topic_matches_itself = TopicFactory(
+            name="climate policy", description="environmental policy"
+        )
+
+        topic_matches_through_element = TopicFactory(
+            name="data collection", description="research data"
+        )
+        TopicElementFactory(
+            topic=topic_matches_through_element,
+            title="climate research",
+            description="climate change studies",
+        )
+
+        response = self.get(url_for("apiv2.topics_list", q="climate"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 2
+
+        topic_ids = {t["id"] for t in response.json["data"]}
+        assert str(topic_matches_itself.id) in topic_ids
+        assert str(topic_matches_through_element.id) in topic_ids
+
+    def test_topic_api_list_search_by_element_content_diacritics(self):
+        """It should find topics by searching their elements' content with diacritics support"""
+        topic_with_accents = TopicFactory(name="data topic", description="data collection")
+        TopicElementFactory(
+            topic=topic_with_accents, title="Système de données", description="Création d'un modèle"
+        )
+
+        topic_without_accents = TopicFactory(name="other topic", description="other description")
+        TopicElementFactory(
+            topic=topic_without_accents,
+            title="systeme de donnees",
+            description="creation d'un modele",
+        )
+
+        response = self.get(url_for("apiv2.topics_list", q="systeme donnees"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 2
+        topic_ids = {t["id"] for t in response.json["data"]}
+        assert str(topic_with_accents.id) in topic_ids
+        assert str(topic_without_accents.id) in topic_ids
+
+        response = self.get(url_for("apiv2.topics_list", q="création modèle"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 2
+        topic_ids = {t["id"] for t in response.json["data"]}
+        assert str(topic_with_accents.id) in topic_ids
+        assert str(topic_without_accents.id) in topic_ids
 
     # TODO: this would work with the following index on Topic,
     # but we need to find a way to inject the language from config:
@@ -488,6 +574,7 @@ class TopicElementsAPITest(APITestCase):
         topic = TopicWithElementsFactory(owner=owner)
         dataset = DatasetFactory()
         reuse = ReuseFactory()
+        dataservice = DataserviceFactory()
         response = self.post(
             url_for("apiv2.topic_elements", topic=topic),
             [
@@ -506,6 +593,13 @@ class TopicElementsAPITest(APITestCase):
                     "element": {"class": "Reuse", "id": reuse.id},
                 },
                 {
+                    "title": "A dataservice",
+                    "description": "A dataservice description",
+                    "tags": ["tag1", "tag2"],
+                    "extras": {"extra": "value"},
+                    "element": {"class": "Dataservice", "id": dataservice.id},
+                },
+                {
                     "title": "An element without element",
                     "description": "An element description",
                     "tags": ["tag1", "tag2"],
@@ -516,7 +610,7 @@ class TopicElementsAPITest(APITestCase):
         )
         assert response.status_code == 201
         topic.reload()
-        assert len(topic.elements) == 6
+        assert len(topic.elements) == 7
 
         dataset_elt = next(
             elt for elt in topic.elements if elt.element and elt.element.id == dataset.id
@@ -533,6 +627,14 @@ class TopicElementsAPITest(APITestCase):
         assert reuse_elt.description == "A reuse description"
         assert reuse_elt.tags == ["tag1", "tag2"]
         assert reuse_elt.extras == {"extra": "value"}
+
+        dataservice_elt = next(
+            elt for elt in topic.elements if elt.element and elt.element.id == dataservice.id
+        )
+        assert dataservice_elt.title == "A dataservice"
+        assert dataservice_elt.description == "A dataservice description"
+        assert dataservice_elt.tags == ["tag1", "tag2"]
+        assert dataservice_elt.extras == {"extra": "value"}
 
         no_elt_elt = next(
             elt for elt in topic.elements if elt.title == "An element without element"
