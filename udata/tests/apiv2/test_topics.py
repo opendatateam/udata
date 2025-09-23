@@ -525,7 +525,7 @@ class TopicElementsAPITest(APITestCase):
         )
         assert response.status_code == 201
         topic.reload()
-        assert len(topic.elements) == 7
+        assert len(topic.elements) == 8
 
         dataset_elt = next(
             elt for elt in topic.elements if elt.element and elt.element.id == dataset.id
@@ -617,7 +617,7 @@ class TopicElementAPITest(APITestCase):
         response = self.delete(url_for("apiv2.topic_element", topic=topic, element_id=element.id))
         assert response.status_code == 204
         topic.reload()
-        assert len(topic.elements) == 2
+        assert len(topic.elements) == 3
         assert element.id not in (elt.id for elt in topic.elements)
 
     def test_delete_element_perm(self):

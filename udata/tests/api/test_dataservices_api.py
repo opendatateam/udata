@@ -99,7 +99,8 @@ class DataserviceAPITest(APITestCase):
 
         # filter on topic
         topic_dataservice = DataserviceFactory()
-        topic = TopicFactory(elements=[TopicElementFactory(element=topic_dataservice)])
+        topic = TopicFactory()
+        TopicElementFactory(topic=topic, element=topic_dataservice)
         response = self.get(url_for("api.dataservices", topic=topic.id))
         assert200(response)
         assert len(response.json["data"]) == 1
