@@ -10,6 +10,7 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.core.spatial.models import spatial_granularities
 from udata.core.topic import DEFAULT_PAGE_SIZE
+from udata.core.topic.activities import UserCreatedTopicElement, UserUpdatedTopicElement
 from udata.core.topic.factories import (
     TopicElementDatasetFactory,
     TopicElementFactory,
@@ -607,6 +608,80 @@ class TopicElementsAPITest(APITestCase):
         self.assert204(response)
         topic.reload()
         self.assertEqual(len(topic.elements), 0)
+
+    def test_add_elements_creates_correct_activity(self):
+        """It should create 'created' activities when adding elements via POST"""
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        dataset = DatasetFactory()
+
+        response = self.post(
+            url_for("apiv2.topic_elements", topic=topic),
+            [
+                {
+                    "title": "A dataset",
+                    "description": "A dataset description",
+                    "element": {"class": "Dataset", "id": dataset.id},
+                }
+            ],
+        )
+        assert response.status_code == 201
+
+        created_activities = UserCreatedTopicElement.objects(related_to=topic)
+        updated_activities = UserUpdatedTopicElement.objects(related_to=topic)
+
+        assert len(created_activities) == 1
+        assert len(updated_activities) == 0
+
+        created_activity = created_activities.first()
+        assert created_activity.actor == owner
+        assert created_activity.related_to == topic
+        assert "element_id" in created_activity.extras
+
+    def test_topic_api_create_with_elements_creates_correct_activities(self):
+        """It should create 'created' activities when creating a topic with elements"""
+        owner = self.login()
+        dataset = DatasetFactory()
+        reuse = ReuseFactory()
+
+        data = {
+            "name": "Test Topic",
+            "description": "A test topic",
+            "tags": ["test-tag"],
+            "elements": [
+                {
+                    "title": "A dataset element",
+                    "description": "A dataset description",
+                    "element": {"class": "Dataset", "id": str(dataset.id)},
+                },
+                {
+                    "title": "A reuse element",
+                    "description": "A reuse description",
+                    "element": {"class": "Reuse", "id": str(reuse.id)},
+                },
+                {
+                    "title": "An element without reference",
+                    "description": "No element reference",
+                    "element": None,
+                },
+            ],
+        }
+
+        response = self.post(url_for("apiv2.topics_list"), data)
+        self.assert201(response)
+
+        topic = Topic.objects.first()
+
+        created_activities = UserCreatedTopicElement.objects(related_to=topic)
+        updated_activities = UserUpdatedTopicElement.objects(related_to=topic)
+
+        assert len(created_activities) == 3
+        assert len(updated_activities) == 0
+
+        for activity in created_activities:
+            assert activity.actor == owner
+            assert activity.related_to == topic
+            assert "element_id" in activity.extras
 
 
 class TopicElementAPITest(APITestCase):

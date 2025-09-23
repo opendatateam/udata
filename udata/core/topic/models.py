@@ -1,8 +1,10 @@
 from blinker import Signal
+from flask import url_for
 from mongoengine.signals import post_delete, post_save
 
 from udata.api_fields import field
 from udata.core.activity.models import Auditable
+from udata.core.linkable import Linkable
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.models import SpatialCoverage, db
 from udata.search import reindex
@@ -11,7 +13,7 @@ from udata.tasks import as_task_param
 __all__ = ("Topic", "TopicElement")
 
 
-class TopicElement(db.Document):
+class TopicElement(Auditable, db.Document):
     title = field(db.StringField(required=False))
     description = field(db.StringField(required=False))
     tags = field(db.ListField(db.StringField()))
@@ -29,9 +31,16 @@ class TopicElement(db.Document):
         "auto_create_index_on_save": True,
     }
 
+    after_save = Signal()
+    on_create = Signal()
+    on_update = Signal()
+    on_delete = Signal()
+
     @classmethod
     def post_save(cls, sender, document, **kwargs):
         """Trigger reindex when element is saved"""
+        # Call parent post_save for Auditable functionality
+        super().post_save(sender, document, **kwargs)
         if document.topic and document.element and hasattr(document.element, "id"):
             reindex.delay(*as_task_param(document.element))
 
@@ -40,9 +49,10 @@ class TopicElement(db.Document):
         """Trigger reindex when element is deleted"""
         if document.topic and document.element and hasattr(document.element, "id"):
             reindex.delay(*as_task_param(document.element))
+        cls.on_delete.send(document)
 
 
-class Topic(db.Datetimed, Auditable, db.Document, Owned):
+class Topic(db.Datetimed, Auditable, Linkable, db.Document, Owned):
     name = field(db.StringField(required=True))
     slug = field(
         db.SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
@@ -105,6 +115,13 @@ class Topic(db.Datetimed, Auditable, db.Document, Owned):
     def self_web_url(self, **kwargs):
         # Useful for Discussions to call self_web_url on their `subject`
         return None
+
+    def self_api_url(self, **kwargs):
+        return url_for(
+            "apiv2.topic",
+            topic=self._link_id(**kwargs),
+            **self._self_api_url_kwargs(**kwargs),
+        )
 
 
 post_save.connect(Topic.post_save, sender=Topic)
