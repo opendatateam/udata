@@ -3,6 +3,7 @@ import logging
 import mongoengine
 from flask import request
 from flask_security import current_user
+from mongoengine.signals import post_delete
 
 from udata.api import API, api, apiv2
 from udata.core.discussions.models import Discussion
@@ -17,10 +18,13 @@ from udata.core.topic.forms import TopicElementForm, TopicForm
 from udata.core.topic.models import Topic, TopicElement
 from udata.core.topic.parsers import TopicApiParser, TopicElementsParser
 from udata.core.topic.permissions import TopicEditPermission
+from udata.search import batch_reindex
+from udata.tasks import as_task_param
 
 apiv2.inherit("ModelReference", api.model_reference)
 
 DEFAULT_SORTING = "-created_at"
+DELETE_REINDEX_BATCH_SIZE = 500
 
 log = logging.getLogger(__name__)
 
@@ -157,7 +161,24 @@ class TopicElementsAPI(API):
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
 
-        topic.elements.delete()
+        # Collect element references for batch reindexing before deletion
+        elements_to_reindex = [
+            as_task_param(element.element)
+            for element in TopicElement.objects(topic=topic).only("element")
+            if element.element and hasattr(element.element, "id")
+        ]
+
+        # Temporarily disconnect post_delete signal to avoid individual reindex tasks
+        post_delete.disconnect(TopicElement.post_delete, sender=TopicElement)
+        try:
+            TopicElement.objects(topic=topic).delete()
+            # Process reindexing in batches
+            for i in range(0, len(elements_to_reindex), DELETE_REINDEX_BATCH_SIZE):
+                batch = elements_to_reindex[i : i + DELETE_REINDEX_BATCH_SIZE]
+                batch_reindex.delay(batch)
+        finally:
+            # Always reconnect the signal
+            post_delete.connect(TopicElement.post_delete, sender=TopicElement)
 
         return None, 204
 

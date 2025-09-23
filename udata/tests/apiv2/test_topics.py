@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from flask import url_for
 
@@ -590,6 +592,43 @@ class TopicElementsAPITest(APITestCase):
         self.assert204(response)
         topic.reload()
         self.assertEqual(len(topic.elements), 0)
+
+    def test_clear_elements_batch_reindex(self):
+        """It should batch reindex elements when clearing a topic to prevent Redis exhaustion"""
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+
+        # Create 7 elements with dataset references
+        datasets = [DatasetFactory() for _ in range(7)]
+        for dataset in datasets:
+            TopicElementDatasetFactory(topic=topic, element=dataset)
+
+        self.assertEqual(len(topic.elements), 7)
+
+        # Patch batch size to 3 for testing
+        with (
+            patch("udata.core.topic.apiv2.DELETE_REINDEX_BATCH_SIZE", 3),
+            patch("udata.core.topic.apiv2.batch_reindex") as mock_batch_reindex,
+            patch("udata.core.topic.models.reindex") as mock_reindex,
+        ):
+            response = self.delete(url_for("apiv2.topic_elements", topic=topic))
+            self.assert204(response)
+
+            # Verify elements were deleted
+            topic.reload()
+            self.assertEqual(len(topic.elements), 0)
+
+            # Verify signal disconnection worked - individual reindex.delay should NOT be called
+            self.assertEqual(mock_reindex.delay.call_count, 0)
+
+            # Verify batch_reindex.delay was called 3 times: 3 + 3 + 1 elements
+            self.assertEqual(mock_batch_reindex.delay.call_count, 3)
+
+            # Verify batch sizes
+            call_args = [call[0][0] for call in mock_batch_reindex.delay.call_args_list]
+            self.assertEqual(len(call_args[0]), 3)  # First batch
+            self.assertEqual(len(call_args[1]), 3)  # Second batch
+            self.assertEqual(len(call_args[2]), 1)  # Third batch
 
 
 class TopicElementAPITest(APITestCase):
