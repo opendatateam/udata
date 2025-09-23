@@ -116,6 +116,12 @@ class DatasetApiParser(ModelApiParser):
         self.parser.add_argument("temporal_coverage", type=str, location="args")
         self.parser.add_argument("organization", type=str, location="args")
         self.parser.add_argument(
+            "badge",
+            type=str,
+            choices=list(Dataset.__badges__),
+            location="args",
+        )
+        self.parser.add_argument(
             "organization_badge",
             type=str,
             choices=list(Organization.__badges__),
@@ -178,6 +184,8 @@ class DatasetApiParser(ModelApiParser):
             )
         if args.get("featured") is not None:
             datasets = datasets.filter(featured=args["featured"])
+        if args.get("badge"):
+            datasets = datasets.with_badge(args["badge"])
         if args.get("organization"):
             if not ObjectId.is_valid(args["organization"]):
                 api.abort(400, "Organization arg must be an identifier")
