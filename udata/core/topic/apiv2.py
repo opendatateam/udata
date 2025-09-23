@@ -154,7 +154,7 @@ class TopicElementsAPI(API):
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
 
-        # TODO: should we ignore activity creation here?
+        # TODO: this triggers performance issues on a huge topic (too many tasks, too many activities)
         topic.elements.delete()
 
         return None, 204
