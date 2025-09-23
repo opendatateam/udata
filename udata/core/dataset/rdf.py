@@ -17,7 +17,6 @@ from rdflib.namespace import RDF
 from rdflib.resource import Resource as RdfResource
 
 from udata import i18n, uris
-from udata.core.dataset.constants import UpdateFrequency
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.spatial.models import SpatialCoverage
 from udata.harvest.exceptions import HarvestSkipException
@@ -54,7 +53,7 @@ from udata.rdf import (
 )
 from udata.utils import get_by, safe_unicode, to_naive_datetime
 
-from .constants import OGC_SERVICE_FORMATS
+from .constants import OGC_SERVICE_FORMATS, UpdateFrequency
 from .models import Checksum, Dataset, License, Resource
 
 log = logging.getLogger(__name__)
@@ -128,7 +127,7 @@ EUFREQ_ID_TO_UDATA = {
     namespace_manager.compute_qname(k)[2].lower(): v for k, v in EUFREQ_TERM_TO_UDATA.items()
 }
 
-# Order matters, we want FREQ to win over EUFREQ
+# Merge order matters: we want FREQ to win over EUFREQ
 UDATA_ID_TO_TERM = {v: k for k, v in {**EUFREQ_TERM_TO_UDATA, **FREQ_TERM_TO_UDATA}.items()}
 
 

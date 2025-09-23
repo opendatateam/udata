@@ -39,7 +39,7 @@ class UDataMongoEngine(MongoEngine):
         self.ValidationError = ValidationError
         self.ObjectId = ObjectId
         self.DBRef = DBRef
-        self.StringEnumField = StrEnumField
+        self.StrEnumField = StrEnumField
         self.post_save = post_save
         self.pre_save = pre_save
 

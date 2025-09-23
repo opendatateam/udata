@@ -582,7 +582,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
 
     # FIXME: Do we want required=True to avoid None?
     # This would simplify has_frequency, eliminate UpdateFrequency._missing_ None override, etc.
-    frequency = field(db.StringEnumField(enum_class=UpdateFrequency))
+    frequency = field(db.StrEnumField(enum_class=UpdateFrequency))
     frequency_date = field(db.DateTimeField(verbose_name=_("Future date of update")))
     temporal_coverage = field(db.EmbeddedDocumentField(db.DateRange))
     spatial = field(db.EmbeddedDocumentField(SpatialCoverage))
@@ -855,8 +855,8 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
             # We may have up to one day delay due to harvesting for example
             quality["update_fulfilled_in_time"] = (next_update - datetime.utcnow()).days >= -1
         elif self.has_frequency and self.frequency.delta is None:
-            # Unbonded frequencies can't be estimated, so we always consider the
-            # update_fulfilled_in_time quality criterion to be true.
+            # For these frequencies, we don't expect regular updates or can't quantify them.
+            # Thus we consider the update_fulfilled_in_time quality criterion to be true.
             quality["update_fulfilled_in_time"] = True
 
         # Since `update_fulfilled_in_time` cannot be precomputed, `score` cannot either.
