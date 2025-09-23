@@ -8,6 +8,7 @@
 - migrate to pyproject.toml, replace `CIRCLE_TAG` by `setuptools_scm` to compute the correct version automatically [#3413](https://github.com/opendatateam/udata/pull/3413) [#3434](https://github.com/opendatateam/udata/pull/3434) [#3435](https://github.com/opendatateam/udata/pull/3435) [#3437](https://github.com/opendatateam/udata/pull/3437) [#3438](https://github.com/opendatateam/udata/pull/3438/)
 - fix(topic): absolute Topic.uri [#3436](https://github.com/opendatateam/udata/pull/3436)
 - Add new badges [#3415](https://github.com/opendatateam/udata/pull/3415)
+- feat(topic): add elements activities [#3439](https://github.com/opendatateam/udata/pull/3439)
 
 ## 11.0.1 (2025-09-15)
 
