@@ -130,15 +130,12 @@ class TopicElementsAPI(API):
             else:
                 element = TopicElement()
                 form.populate_obj(element)
+                element.topic = topic
                 element.save()
                 elements.append(element)
 
         if errors:
             apiv2.abort(400, errors=errors)
-
-        for element in elements:
-            element.topic = topic
-            element.save()
 
         topic.save()
 
@@ -157,6 +154,7 @@ class TopicElementsAPI(API):
         if not TopicEditPermission(topic).can():
             apiv2.abort(403, "Forbidden")
 
+        # TODO: this triggers performance issues on a huge topic (too many tasks, too many activities)
         topic.elements.delete()
 
         return None, 204
