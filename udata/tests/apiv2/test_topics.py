@@ -125,6 +125,91 @@ class TopicsListAPITest(APITestCase):
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(topic.id)
 
+    def test_topic_api_list_search_by_element_content(self):
+        """It should find topics by searching their elements' content"""
+        topic_with_matching_element = TopicFactory(
+            name="unrelated topic", description="unrelated description"
+        )
+        TopicElementFactory(
+            topic=topic_with_matching_element,
+            title="climate change data",
+            description="environmental datasets about climate",
+        )
+
+        topic_without_matching_element = TopicFactory(
+            name="other topic", description="other description"
+        )
+        TopicElementFactory(
+            topic=topic_without_matching_element,
+            title="unrelated element",
+            description="unrelated element description",
+        )
+
+        response = self.get(url_for("apiv2.topics_list", q="climate"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(topic_with_matching_element.id)
+
+        response = self.get(url_for("apiv2.topics_list", q="environmental"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(topic_with_matching_element.id)
+
+        response = self.get(url_for("apiv2.topics_list", q="nonexistent"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 0
+
+    def test_topic_api_list_search_combined_topic_and_element(self):
+        """It should find topics that match either in topic content OR element content"""
+        topic_matches_itself = TopicFactory(
+            name="climate policy", description="environmental policy"
+        )
+
+        topic_matches_through_element = TopicFactory(
+            name="data collection", description="research data"
+        )
+        TopicElementFactory(
+            topic=topic_matches_through_element,
+            title="climate research",
+            description="climate change studies",
+        )
+
+        response = self.get(url_for("apiv2.topics_list", q="climate"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 2
+
+        topic_ids = {t["id"] for t in response.json["data"]}
+        assert str(topic_matches_itself.id) in topic_ids
+        assert str(topic_matches_through_element.id) in topic_ids
+
+    def test_topic_api_list_search_by_element_content_diacritics(self):
+        """It should find topics by searching their elements' content with diacritics support"""
+        topic_with_accents = TopicFactory(name="data topic", description="data collection")
+        TopicElementFactory(
+            topic=topic_with_accents, title="Système de données", description="Création d'un modèle"
+        )
+
+        topic_without_accents = TopicFactory(name="other topic", description="other description")
+        TopicElementFactory(
+            topic=topic_without_accents,
+            title="systeme de donnees",
+            description="creation d'un modele",
+        )
+
+        response = self.get(url_for("apiv2.topics_list", q="systeme donnees"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 2
+        topic_ids = {t["id"] for t in response.json["data"]}
+        assert str(topic_with_accents.id) in topic_ids
+        assert str(topic_without_accents.id) in topic_ids
+
+        response = self.get(url_for("apiv2.topics_list", q="création modèle"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 2
+        topic_ids = {t["id"] for t in response.json["data"]}
+        assert str(topic_with_accents.id) in topic_ids
+        assert str(topic_without_accents.id) in topic_ids
+
     # TODO: this would work with the following index on Topic,
     # but we need to find a way to inject the language from config:
     #   meta = {
