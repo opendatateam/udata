@@ -516,6 +516,49 @@ class TopicElementsAPITest(APITestCase):
             ],
         )
         assert response.status_code == 201
+
+        # Verify response payload contains the created elements
+        response_data = response.json
+        assert isinstance(response_data, list)
+        assert len(response_data) == 3
+
+        # Verify the dataset element in response
+        dataset_response = next(
+            elem
+            for elem in response_data
+            if elem["element"] and elem["element"]["id"] == str(dataset.id)
+        )
+        assert dataset_response["id"] is not None
+        assert dataset_response["title"] == "A dataset"
+        assert dataset_response["description"] == "A dataset description"
+        assert dataset_response["tags"] == ["tag1", "tag2"]
+        assert dataset_response["extras"] == {"extra": "value"}
+        assert dataset_response["element"]["class"] == "Dataset"
+
+        # Verify the reuse element in response
+        reuse_response = next(
+            elem
+            for elem in response_data
+            if elem["element"] and elem["element"]["id"] == str(reuse.id)
+        )
+        assert reuse_response["id"] is not None
+        assert reuse_response["title"] == "A reuse"
+        assert reuse_response["description"] == "A reuse description"
+        assert reuse_response["tags"] == ["tag1", "tag2"]
+        assert reuse_response["extras"] == {"extra": "value"}
+        assert reuse_response["element"]["class"] == "Reuse"
+
+        # Verify the element without reference in response
+        no_element_response = next(
+            elem
+            for elem in response_data
+            if elem["element"] is None and elem["title"] == "An element without element"
+        )
+        assert no_element_response["id"] is not None
+        assert no_element_response["description"] == "An element description"
+        assert no_element_response["tags"] == ["tag1", "tag2"]
+        assert no_element_response["extras"] == {"extra": "value"}
+
         topic.reload()
         assert len(topic.elements) == 6
 
