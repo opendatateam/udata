@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=45", "wheel"]
+requires = ["setuptools>=61", "wheel", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "udata"
-version = "10.9.1.dev"
+dynamic = ["version"]
 description = "Open data portal"
 readme = "README.md"
 license = { text = "MIT" }
@@ -104,7 +104,7 @@ dependencies = [
     "redis==5.2.1",
     "referencing==0.36.2",
     "regex==2024.11.6",
-    "requests==2.32.3",
+    "requests==2.32.4",
     "rpds-py==0.23.1",
     "s3transfer==0.6.2",
     "saxonche==12.8.0",
@@ -193,6 +193,10 @@ report = [
     "flake8==7.1.2",
     "pytest-cov==6.0.0",
 ]
+
+[tool.setuptools_scm]
+version_scheme = "guess-next-dev"
+local_scheme = "no-local-version"
 
 [tool.babel]
 compile_catalog = { domain = "udata", directory = "udata/translations", statistics = true }

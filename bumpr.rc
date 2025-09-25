@@ -1,5 +1,4 @@
 [bumpr]
-file = udata/__init__.py
 vcs = git
 commit = true
 tag = true
@@ -10,13 +9,7 @@ tests = inv test
 publish = inv dist
 files =
     README.md
-
-[bump]
-unsuffix = true
-
-[prepare]
-part = patch
-suffix = dev
+    CHANGELOG.md
 
 [changelog]
 file = CHANGELOG.md

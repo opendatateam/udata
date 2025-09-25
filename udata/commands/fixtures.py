@@ -51,7 +51,6 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "last_update",
         "last_modified",
         "license",
-        "badges",
         "spatial",
         "quality",
         "permissions",

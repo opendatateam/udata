@@ -9,6 +9,7 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.core.spatial.models import spatial_granularities
 from udata.core.topic import DEFAULT_PAGE_SIZE
+from udata.core.topic.activities import UserCreatedTopicElement, UserUpdatedTopicElement
 from udata.core.topic.factories import (
     TopicElementDatasetFactory,
     TopicElementFactory,
@@ -123,6 +124,91 @@ class TopicsListAPITest(APITestCase):
         assert response.status_code == 200
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(topic.id)
+
+    def test_topic_api_list_search_by_element_content(self):
+        """It should find topics by searching their elements' content"""
+        topic_with_matching_element = TopicFactory(
+            name="unrelated topic", description="unrelated description"
+        )
+        TopicElementFactory(
+            topic=topic_with_matching_element,
+            title="climate change data",
+            description="environmental datasets about climate",
+        )
+
+        topic_without_matching_element = TopicFactory(
+            name="other topic", description="other description"
+        )
+        TopicElementFactory(
+            topic=topic_without_matching_element,
+            title="unrelated element",
+            description="unrelated element description",
+        )
+
+        response = self.get(url_for("apiv2.topics_list", q="climate"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(topic_with_matching_element.id)
+
+        response = self.get(url_for("apiv2.topics_list", q="environmental"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(topic_with_matching_element.id)
+
+        response = self.get(url_for("apiv2.topics_list", q="nonexistent"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 0
+
+    def test_topic_api_list_search_combined_topic_and_element(self):
+        """It should find topics that match either in topic content OR element content"""
+        topic_matches_itself = TopicFactory(
+            name="climate policy", description="environmental policy"
+        )
+
+        topic_matches_through_element = TopicFactory(
+            name="data collection", description="research data"
+        )
+        TopicElementFactory(
+            topic=topic_matches_through_element,
+            title="climate research",
+            description="climate change studies",
+        )
+
+        response = self.get(url_for("apiv2.topics_list", q="climate"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 2
+
+        topic_ids = {t["id"] for t in response.json["data"]}
+        assert str(topic_matches_itself.id) in topic_ids
+        assert str(topic_matches_through_element.id) in topic_ids
+
+    def test_topic_api_list_search_by_element_content_diacritics(self):
+        """It should find topics by searching their elements' content with diacritics support"""
+        topic_with_accents = TopicFactory(name="data topic", description="data collection")
+        TopicElementFactory(
+            topic=topic_with_accents, title="Système de données", description="Création d'un modèle"
+        )
+
+        topic_without_accents = TopicFactory(name="other topic", description="other description")
+        TopicElementFactory(
+            topic=topic_without_accents,
+            title="systeme de donnees",
+            description="creation d'un modele",
+        )
+
+        response = self.get(url_for("apiv2.topics_list", q="systeme donnees"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 2
+        topic_ids = {t["id"] for t in response.json["data"]}
+        assert str(topic_with_accents.id) in topic_ids
+        assert str(topic_without_accents.id) in topic_ids
+
+        response = self.get(url_for("apiv2.topics_list", q="création modèle"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 2
+        topic_ids = {t["id"] for t in response.json["data"]}
+        assert str(topic_with_accents.id) in topic_ids
+        assert str(topic_without_accents.id) in topic_ids
 
     # TODO: this would work with the following index on Topic,
     # but we need to find a way to inject the language from config:
@@ -358,6 +444,16 @@ class TopicAPITest(APITestCase):
             response = self.delete(url_for("apiv2.topic", topic=topic))
         self.assertStatus(response, 403)
 
+    def test_topic_api_uri_is_absolute(self):
+        """It should return an absolute URI for topic API"""
+        topic = TopicFactory()
+        response = self.get(url_for("apiv2.topic", topic=topic))
+        self.assert200(response)
+        data = response.json
+
+        self.assertIn("uri", data)
+        self.assertTrue(data["uri"].startswith("http"))
+
 
 class TopicElementsAPITest(APITestCase):
     def test_elements_list(self):
@@ -505,6 +601,49 @@ class TopicElementsAPITest(APITestCase):
             ],
         )
         assert response.status_code == 201
+
+        # Verify response payload contains the created elements
+        response_data = response.json
+        assert isinstance(response_data, list)
+        assert len(response_data) == 3
+
+        # Verify the dataset element in response
+        dataset_response = next(
+            elem
+            for elem in response_data
+            if elem["element"] and elem["element"]["id"] == str(dataset.id)
+        )
+        assert dataset_response["id"] is not None
+        assert dataset_response["title"] == "A dataset"
+        assert dataset_response["description"] == "A dataset description"
+        assert dataset_response["tags"] == ["tag1", "tag2"]
+        assert dataset_response["extras"] == {"extra": "value"}
+        assert dataset_response["element"]["class"] == "Dataset"
+
+        # Verify the reuse element in response
+        reuse_response = next(
+            elem
+            for elem in response_data
+            if elem["element"] and elem["element"]["id"] == str(reuse.id)
+        )
+        assert reuse_response["id"] is not None
+        assert reuse_response["title"] == "A reuse"
+        assert reuse_response["description"] == "A reuse description"
+        assert reuse_response["tags"] == ["tag1", "tag2"]
+        assert reuse_response["extras"] == {"extra": "value"}
+        assert reuse_response["element"]["class"] == "Reuse"
+
+        # Verify the element without reference in response
+        no_element_response = next(
+            elem
+            for elem in response_data
+            if elem["element"] is None and elem["title"] == "An element without element"
+        )
+        assert no_element_response["id"] is not None
+        assert no_element_response["description"] == "An element description"
+        assert no_element_response["tags"] == ["tag1", "tag2"]
+        assert no_element_response["extras"] == {"extra": "value"}
+
         topic.reload()
         assert len(topic.elements) == 6
 
@@ -580,6 +719,80 @@ class TopicElementsAPITest(APITestCase):
         self.assert204(response)
         topic.reload()
         self.assertEqual(len(topic.elements), 0)
+
+    def test_add_elements_creates_correct_activity(self):
+        """It should create 'created' activities when adding elements via POST"""
+        owner = self.login()
+        topic = TopicFactory(owner=owner)
+        dataset = DatasetFactory()
+
+        response = self.post(
+            url_for("apiv2.topic_elements", topic=topic),
+            [
+                {
+                    "title": "A dataset",
+                    "description": "A dataset description",
+                    "element": {"class": "Dataset", "id": dataset.id},
+                }
+            ],
+        )
+        assert response.status_code == 201
+
+        created_activities = UserCreatedTopicElement.objects(related_to=topic)
+        updated_activities = UserUpdatedTopicElement.objects(related_to=topic)
+
+        assert len(created_activities) == 1
+        assert len(updated_activities) == 0
+
+        created_activity = created_activities.first()
+        assert created_activity.actor == owner
+        assert created_activity.related_to == topic
+        assert "element_id" in created_activity.extras
+
+    def test_topic_api_create_with_elements_creates_correct_activities(self):
+        """It should create 'created' activities when creating a topic with elements"""
+        owner = self.login()
+        dataset = DatasetFactory()
+        reuse = ReuseFactory()
+
+        data = {
+            "name": "Test Topic",
+            "description": "A test topic",
+            "tags": ["test-tag"],
+            "elements": [
+                {
+                    "title": "A dataset element",
+                    "description": "A dataset description",
+                    "element": {"class": "Dataset", "id": str(dataset.id)},
+                },
+                {
+                    "title": "A reuse element",
+                    "description": "A reuse description",
+                    "element": {"class": "Reuse", "id": str(reuse.id)},
+                },
+                {
+                    "title": "An element without reference",
+                    "description": "No element reference",
+                    "element": None,
+                },
+            ],
+        }
+
+        response = self.post(url_for("apiv2.topics_list"), data)
+        self.assert201(response)
+
+        topic = Topic.objects.first()
+
+        created_activities = UserCreatedTopicElement.objects(related_to=topic)
+        updated_activities = UserUpdatedTopicElement.objects(related_to=topic)
+
+        assert len(created_activities) == 3
+        assert len(updated_activities) == 0
+
+        for activity in created_activities:
+            assert activity.actor == owner
+            assert activity.related_to == topic
+            assert "element_id" in activity.extras
 
 
 class TopicElementAPITest(APITestCase):
