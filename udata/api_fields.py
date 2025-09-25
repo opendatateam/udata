@@ -565,7 +565,7 @@ def field(
     generic_key: str | None = None,
     convert_to: Callable | None = None,
     allow_null: bool | None = None,
-    **kwargs: Any,  # Accept any additional parameters
+    **kwargs: Any,  # Accept any additional parameters, forward to flask rest x constructor.
 ):
     """Universal field decorator/wrapper for API field metadata.
 
