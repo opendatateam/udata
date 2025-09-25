@@ -545,7 +545,6 @@ def generate_fields(**kwargs) -> Callable:
 
 def field(
     inner=None,
-    *,  # Force named arguments after this
     sortable: bool | str | None = None,
     filterable: dict[str, Any] | None = None,
     readonly: bool | None = None,
