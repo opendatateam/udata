@@ -108,7 +108,7 @@ class TopicElementsAPI(API):
     @apiv2.secure
     @apiv2.doc("topic_elements_create")
     @apiv2.expect([api.model_reference])
-    @apiv2.marshal_with(topic_fields)
+    @apiv2.marshal_list_with(element_fields)
     @apiv2.response(400, "Expecting a list")
     @apiv2.response(404, "Topic not found")
     @apiv2.response(403, "Forbidden")
@@ -139,7 +139,7 @@ class TopicElementsAPI(API):
 
         topic.save()
 
-        return topic, 201
+        return elements, 201
 
     @apiv2.secure
     @apiv2.doc("topic_elements_delete")
