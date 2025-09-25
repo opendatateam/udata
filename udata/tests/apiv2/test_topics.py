@@ -614,7 +614,7 @@ class TopicElementsAPITest(APITestCase):
         # Verify response payload contains the created elements
         response_data = response.json
         assert isinstance(response_data, list)
-        assert len(response_data) == 3
+        assert len(response_data) == 4
 
         # Verify the dataset element in response
         dataset_response = next(
