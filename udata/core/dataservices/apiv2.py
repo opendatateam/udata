@@ -2,7 +2,8 @@ from flask import request
 
 from udata import search
 from udata.api import API, apiv2
-from udata.core.dataservices.models import AccessAudience, Dataservice, HarvestMetadata
+from udata.core.access_type.models import AccessAudience
+from udata.core.dataservices.models import Dataservice, HarvestMetadata
 from udata.utils import multi_to_dict
 
 from .models import dataservice_permissions_fields
