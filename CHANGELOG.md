@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Simplify getting mail connection (dummy or real) condition [#3410](https://github.com/opendatateam/udata/pull/3410)
 - Emit harvest activities. Set `HARVEST_ACTIVITY_USER_ID` to an existing user account to activate it [#3412](https://github.com/opendatateam/udata/pull/3412)
 - fix(harvest): refactor dates handling [#3352](https://github.com/opendatateam/udata/pull/3352)
 - Remove unused BadgesField [#3420](https://github.com/opendatateam/udata/pull/3420)
