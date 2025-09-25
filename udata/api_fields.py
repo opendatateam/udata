@@ -9,7 +9,7 @@ Main components:
 
 The `@generate_fields` decorator parameters:
 - default_filterable_field: Default field for filtering (e.g., Badge.kind)
-- searchable: Enables full-text search via MongoEngine
+- searchable: Enables full-text search with param `q` via MongoEngine on indexed text fields
 - additional_sorts: Custom sort options beyond field-based sorts
 - additional_filters: Cross-document filtering (e.g., Reuse__organization__badge)
 
