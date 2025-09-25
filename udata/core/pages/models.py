@@ -1,5 +1,5 @@
 from udata.api import api, fields
-from udata.api_fields import field, function_field, generate_fields
+from udata.api_fields import field, generate_fields
 from udata.core.activity.models import Auditable
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields
@@ -91,7 +91,7 @@ class Page(Auditable, Owned, Datetimed, db.Document):
     )
 
     @property
-    @function_field(
+    @field(
         nested_fields=page_permissions_fields,
     )
     def permissions(self):
