@@ -126,6 +126,91 @@ class TopicsListAPITest(APITestCase):
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(topic.id)
 
+    def test_topic_api_list_search_by_element_content(self):
+        """It should find topics by searching their elements' content"""
+        topic_with_matching_element = TopicFactory(
+            name="unrelated topic", description="unrelated description"
+        )
+        TopicElementFactory(
+            topic=topic_with_matching_element,
+            title="climate change data",
+            description="environmental datasets about climate",
+        )
+
+        topic_without_matching_element = TopicFactory(
+            name="other topic", description="other description"
+        )
+        TopicElementFactory(
+            topic=topic_without_matching_element,
+            title="unrelated element",
+            description="unrelated element description",
+        )
+
+        response = self.get(url_for("apiv2.topics_list", q="climate"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(topic_with_matching_element.id)
+
+        response = self.get(url_for("apiv2.topics_list", q="environmental"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(topic_with_matching_element.id)
+
+        response = self.get(url_for("apiv2.topics_list", q="nonexistent"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 0
+
+    def test_topic_api_list_search_combined_topic_and_element(self):
+        """It should find topics that match either in topic content OR element content"""
+        topic_matches_itself = TopicFactory(
+            name="climate policy", description="environmental policy"
+        )
+
+        topic_matches_through_element = TopicFactory(
+            name="data collection", description="research data"
+        )
+        TopicElementFactory(
+            topic=topic_matches_through_element,
+            title="climate research",
+            description="climate change studies",
+        )
+
+        response = self.get(url_for("apiv2.topics_list", q="climate"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 2
+
+        topic_ids = {t["id"] for t in response.json["data"]}
+        assert str(topic_matches_itself.id) in topic_ids
+        assert str(topic_matches_through_element.id) in topic_ids
+
+    def test_topic_api_list_search_by_element_content_diacritics(self):
+        """It should find topics by searching their elements' content with diacritics support"""
+        topic_with_accents = TopicFactory(name="data topic", description="data collection")
+        TopicElementFactory(
+            topic=topic_with_accents, title="Système de données", description="Création d'un modèle"
+        )
+
+        topic_without_accents = TopicFactory(name="other topic", description="other description")
+        TopicElementFactory(
+            topic=topic_without_accents,
+            title="systeme de donnees",
+            description="creation d'un modele",
+        )
+
+        response = self.get(url_for("apiv2.topics_list", q="systeme donnees"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 2
+        topic_ids = {t["id"] for t in response.json["data"]}
+        assert str(topic_with_accents.id) in topic_ids
+        assert str(topic_without_accents.id) in topic_ids
+
+        response = self.get(url_for("apiv2.topics_list", q="création modèle"))
+        assert response.status_code == 200
+        assert len(response.json["data"]) == 2
+        topic_ids = {t["id"] for t in response.json["data"]}
+        assert str(topic_with_accents.id) in topic_ids
+        assert str(topic_without_accents.id) in topic_ids
+
     # TODO: this would work with the following index on Topic,
     # but we need to find a way to inject the language from config:
     #   meta = {
@@ -525,6 +610,49 @@ class TopicElementsAPITest(APITestCase):
             ],
         )
         assert response.status_code == 201
+
+        # Verify response payload contains the created elements
+        response_data = response.json
+        assert isinstance(response_data, list)
+        assert len(response_data) == 3
+
+        # Verify the dataset element in response
+        dataset_response = next(
+            elem
+            for elem in response_data
+            if elem["element"] and elem["element"]["id"] == str(dataset.id)
+        )
+        assert dataset_response["id"] is not None
+        assert dataset_response["title"] == "A dataset"
+        assert dataset_response["description"] == "A dataset description"
+        assert dataset_response["tags"] == ["tag1", "tag2"]
+        assert dataset_response["extras"] == {"extra": "value"}
+        assert dataset_response["element"]["class"] == "Dataset"
+
+        # Verify the reuse element in response
+        reuse_response = next(
+            elem
+            for elem in response_data
+            if elem["element"] and elem["element"]["id"] == str(reuse.id)
+        )
+        assert reuse_response["id"] is not None
+        assert reuse_response["title"] == "A reuse"
+        assert reuse_response["description"] == "A reuse description"
+        assert reuse_response["tags"] == ["tag1", "tag2"]
+        assert reuse_response["extras"] == {"extra": "value"}
+        assert reuse_response["element"]["class"] == "Reuse"
+
+        # Verify the element without reference in response
+        no_element_response = next(
+            elem
+            for elem in response_data
+            if elem["element"] is None and elem["title"] == "An element without element"
+        )
+        assert no_element_response["id"] is not None
+        assert no_element_response["description"] == "An element description"
+        assert no_element_response["tags"] == ["tag1", "tag2"]
+        assert no_element_response["extras"] == {"extra": "value"}
+
         topic.reload()
         assert len(topic.elements) == 8
 
