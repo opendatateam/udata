@@ -14,6 +14,7 @@
 - Add new badges [#3415](https://github.com/opendatateam/udata/pull/3415)
 - Refactor `@function_field` and `@field` to provide better doc and type support [#3441](https://github.com/opendatateam/udata/pull/3441/)
 - feat(topic): add Dataservice to supported elements [#3444](https://github.com/opendatateam/udata/pull/3444)
+- Ignore list reordering in changed fields detection [#3448](https://github.com/opendatateam/udata/pull/3448)
 
 ## 11.0.1 (2025-09-15)
 
