@@ -7,7 +7,7 @@ from mongoengine.signals import post_save
 
 import udata.core.contact_point.api_fields as contact_api_fields
 from udata.api import api, fields
-from udata.api_fields import field, function_field, generate_fields
+from udata.api_fields import field, generate_fields
 from udata.core.activity.models import Auditable
 from udata.core.dataservices.constants import (
     DATASERVICE_ACCESS_AUDIENCE_CONDITIONS,
@@ -134,9 +134,29 @@ def check_only_one_condition_per_role(access_audiences, **_kwargs):
         )
 
 
+def filter_by_topic(base_query, filter_value):
+    from udata.core.topic.models import Topic
+
+    try:
+        topic = Topic.objects.get(id=filter_value)
+    except Topic.DoesNotExist:
+        pass
+    else:
+        return base_query.filter(
+            id__in=[
+                elt.element.id
+                for elt in topic.elements
+                if elt.element.__class__.__name__ == "Dataservice"
+            ]
+        )
+
+
 @generate_fields(
     searchable=True,
-    additional_filters={"organization_badge": "organization.badges"},
+    nested_filters={"organization_badge": "organization.badges"},
+    standalone_filters=[
+        {"key": "topic", "constraints": "objectid", "query": filter_by_topic, "type": str}
+    ],
     additional_sorts=[
         {"key": "followers", "value": "metrics.followers"},
         {"key": "views", "value": "metrics.views"},
@@ -284,7 +304,7 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
         auditable=False,
     )
 
-    @function_field(description="Link to the API endpoint for this dataservice")
+    @field(description="Link to the API endpoint for this dataservice")
     def self_api_url(self, **kwargs):
         return url_for(
             "api.dataservice",
@@ -292,7 +312,7 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
             **self._self_api_url_kwargs(**kwargs),
         )
 
-    @function_field(description="Link to the udata web page for this dataservice", show_as_ref=True)
+    @field(description="Link to the udata web page for this dataservice", show_as_ref=True)
     def self_web_url(self, **kwargs):
         return cdata_url(f"/dataservices/{self._link_id(**kwargs)}/", **kwargs)
 
@@ -309,7 +329,7 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
         return self.private or self.deleted_at or self.archived_at
 
     @property
-    @function_field(
+    @field(
         nested_fields=dataservice_permissions_fields,
     )
     def permissions(self):

@@ -1,6 +1,7 @@
 from celery.utils.log import get_task_logger
 
 from udata.core.dataservices.models import Dataservice
+from udata.core.topic.models import TopicElement
 from udata.harvest.models import HarvestJob
 from udata.models import Discussion, Follow, Transfer
 from udata.tasks import job
@@ -20,5 +21,7 @@ def purge_dataservices(self):
         HarvestJob.objects(items__dataservice=dataservice).update(set__items__S__dataservice=None)
         # Remove associated Transfers
         Transfer.objects(subject=dataservice).delete()
+        # Remove dataservices references in Topics
+        TopicElement.objects(element=dataservice).update(element=None)
         # Remove dataservice
         dataservice.delete()

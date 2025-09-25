@@ -2,11 +2,18 @@
 
 ## Current (in progress)
 
+- Simplify getting mail connection (dummy or real) condition [#3410](https://github.com/opendatateam/udata/pull/3410)
 - Emit harvest activities. Set `HARVEST_ACTIVITY_USER_ID` to an existing user account to activate it [#3412](https://github.com/opendatateam/udata/pull/3412)
 - fix(harvest): refactor dates handling [#3352](https://github.com/opendatateam/udata/pull/3352)
 - Remove unused BadgesField [#3420](https://github.com/opendatateam/udata/pull/3420)
 - migrate to pyproject.toml, replace `CIRCLE_TAG` by `setuptools_scm` to compute the correct version automatically [#3413](https://github.com/opendatateam/udata/pull/3413) [#3434](https://github.com/opendatateam/udata/pull/3434) [#3435](https://github.com/opendatateam/udata/pull/3435) [#3437](https://github.com/opendatateam/udata/pull/3437) [#3438](https://github.com/opendatateam/udata/pull/3438/)
 - fix(topic): absolute Topic.uri [#3436](https://github.com/opendatateam/udata/pull/3436)
+- feat(topics): search by elements content [#3443](https://github.com/opendatateam/udata/pull/3443)
+- feat(topic): add elements activities [#3439](https://github.com/opendatateam/udata/pull/3439)
+- feat(topics): serialize elements in topic_elements_create response [#3446](https://github.com/opendatateam/udata/pull/3446)
+- Add new badges [#3415](https://github.com/opendatateam/udata/pull/3415)
+- Refactor `@function_field` and `@field` to provide better doc and type support [#3441](https://github.com/opendatateam/udata/pull/3441/)
+- feat(topic): add Dataservice to supported elements [#3444](https://github.com/opendatateam/udata/pull/3444)
 
 ## 11.0.1 (2025-09-15)
 
