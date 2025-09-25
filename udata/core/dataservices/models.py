@@ -134,9 +134,29 @@ def check_only_one_condition_per_role(access_audiences, **_kwargs):
         )
 
 
+def filter_by_topic(base_query, filter_value):
+    from udata.core.topic.models import Topic
+
+    try:
+        topic = Topic.objects.get(id=filter_value)
+    except Topic.DoesNotExist:
+        pass
+    else:
+        return base_query.filter(
+            id__in=[
+                elt.element.id
+                for elt in topic.elements
+                if elt.element.__class__.__name__ == "Dataservice"
+            ]
+        )
+
+
 @generate_fields(
     searchable=True,
-    additional_filters={"organization_badge": "organization.badges"},
+    nested_filters={"organization_badge": "organization.badges"},
+    standalone_filters=[
+        {"key": "topic", "constraints": "objectid", "query": filter_by_topic, "type": str}
+    ],
     additional_sorts=[
         {"key": "followers", "value": "metrics.followers"},
         {"key": "views", "value": "metrics.views"},
