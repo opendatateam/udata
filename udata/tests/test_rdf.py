@@ -7,8 +7,9 @@ from rdflib import (
 from udata.models import ContactPoint
 from udata.rdf import (
     ACCEPTED_MIME_TYPES,
+    AGENT_ROLE_TO_RDF_PREDICATE,
     DCAT,
-    DCT,
+    FOAF,
     FORMAT_MAP,
     RDF,
     VCARD,
@@ -103,14 +104,7 @@ class ContactToRdfTest:
             # Default predicate is "contact"
             assert predicate == DCAT.contactPoint
 
-    @pytest.mark.parametrize(
-        "role,predicate",
-        [
-            ("contact", DCAT.contactPoint),
-            ("publisher", DCT.publisher),
-            ("creator", DCT.creator),
-        ],
-    )
+    @pytest.mark.parametrize("role,predicate", AGENT_ROLE_TO_RDF_PREDICATE.items())
     def test_contact_points_to_rdf_roles(self, role, predicate):
         contact = ContactPoint(
             name="Organization contact",
@@ -122,10 +116,20 @@ class ContactToRdfTest:
         contact_rdfs = contact_points_to_rdf([contact], None)
 
         for contact_point, contact_point_predicate in contact_rdfs:
-            assert contact_point.value(RDF.type).identifier == VCARD.Kind
-            assert contact_point.value(VCARD.fn) == Literal("Organization contact")
-            assert contact_point.value(VCARD.hasEmail).identifier == URIRef("mailto:hello@its.me")
-            assert contact_point.value(VCARD.hasUrl).identifier == URIRef(
-                "https://data.support.com"
-            )
             assert contact_point_predicate == predicate
+            if predicate == DCAT.contactPoint:
+                assert contact_point.value(RDF.type).identifier == VCARD.Kind
+                assert contact_point.value(VCARD.fn) == Literal("Organization contact")
+                assert contact_point.value(VCARD.hasEmail).identifier == URIRef(
+                    "mailto:hello@its.me"
+                )
+                assert contact_point.value(VCARD.hasUrl).identifier == URIRef(
+                    "https://data.support.com"
+                )
+            else:
+                assert contact_point.value(RDF.type).identifier == FOAF.Agent
+                assert contact_point.value(FOAF.name) == Literal("Organization contact")
+                assert contact_point.value(FOAF.mbox).identifier == URIRef("mailto:hello@its.me")
+                assert contact_point.value(FOAF.page).identifier == URIRef(
+                    "https://data.support.com"
+                )
