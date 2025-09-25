@@ -53,6 +53,30 @@ def get_field_value_from_path(document, field_path: str):
     return doc_field
 
 
+def filter_changed_fields(document, previous, changed_fields: list[str]):
+    # Make sure that changed fields have actually changed.
+    # We compare the document values once it has been reloaded.
+    # It may have been cleaned or normalized when saved to mongo.
+    # We compare the field values one by one with the previous value stored in _previous_changed_fields.
+    # We also ignore reordering in the case of list, ex tags or contact points.
+    # See https://github.com/opendatateam/udata/pull/3412 for more context.
+    document.reload()
+    filtered_changed_fields = []
+    for field in changed_fields:
+        previous_value = previous[field]
+        current_value = get_field_value_from_path(document, field)
+        # Filter out special case of list reordering
+        if isinstance(previous_value, list) and isinstance(current_value, list):
+            if set(previous_value) != set(current_value) or len(previous_value) != len(
+                current_value
+            ):
+                filtered_changed_fields.append(field)
+        # Direct comparison for the rest of the fields
+        elif previous_value != current_value:
+            filtered_changed_fields.append(field)
+    return filtered_changed_fields
+
+
 FIRST_CAP_RE = re.compile("(.)([A-Z][a-z]+)")
 ALL_CAP_RE = re.compile("([a-z0-9])([A-Z])")
 UUID_LENGTH = 36
