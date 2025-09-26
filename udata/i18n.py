@@ -206,38 +206,13 @@ class I18nBlueprintSetupState(BlueprintSetupState):
         if "defaults" in options:
             defaults = dict(defaults, **options.pop("defaults"))
 
-        if options.pop("localize", True):
-            self.app.add_url_rule(
-                "/<lang:lang_code>" + rule,
-                "%s.%s" % (self.blueprint.name, endpoint),
-                view_func,
-                defaults=defaults,
-                **options,
-            )
-
-            self.app.add_url_rule(
-                rule,
-                "%s.%s_redirect" % (self.blueprint.name, endpoint),
-                redirect_to_lang,
-                defaults=defaults,
-                **options,
-            )
-        else:
-            self.app.add_url_rule(
-                rule,
-                "%s.%s" % (self.blueprint.name, endpoint),
-                view_func,
-                defaults=defaults,
-                **options,
-            )
-
-            self.app.add_url_rule(
-                "/<lang:lang_code>" + rule,
-                "%s.%s_redirect" % (self.blueprint.name, endpoint),
-                redirect_to_unlocalized,
-                defaults=defaults,
-                **options,
-            )
+        self.app.add_url_rule(
+            rule,
+            "%s.%s" % (self.blueprint.name, endpoint),
+            view_func,
+            defaults=defaults,
+            **options,
+        )
 
 
 class I18nBlueprint(Blueprint):
