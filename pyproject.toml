@@ -54,6 +54,7 @@ dependencies = [
     "cryptography==44.0.2",
     "dnspython==2.7.0",
     "email-validator==2.2.0",
+    "factory-boy==3.3.3",
     "feedgenerator==2.1.0",
     "filelock==3.18.0",
     "flask==2.1.2",
@@ -166,7 +167,6 @@ dev = [
     "wheel==0.45.1",
 ]
 test = [
-    "factory-boy==3.3.3",
     "faker==37.0.2",
     "feedparser==6.0.11",
     "httpretty==1.1.4",
