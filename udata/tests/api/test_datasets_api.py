@@ -739,6 +739,37 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description, "new description")
 
+    def test_dataset_api_update_valid_frequency(self):
+        """It should update a dataset from the API"""
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        data = dataset.to_dict()
+        data["frequency"] = "monthly"
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertEqual(Dataset.objects.first().frequency, UpdateFrequency.MONTHLY)
+
+    def test_dataset_api_update_invalid_frequency(self):
+        """It should return an error saying the frequency is invalid"""
+        user = self.login()
+        dataset = DatasetFactory(owner=user, frequency=UpdateFrequency.ANNUAL)
+        data = dataset.to_dict()
+
+        data["frequency"] = 1  # invalid type
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert400(response)
+        self.assertEqual(response.json.get("message"), "'1' is not a valid UpdateFrequency")
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertEqual(Dataset.objects.first().frequency, UpdateFrequency.ANNUAL)
+
+        data["frequency"] = "foo"  # valid type but invalid term
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert400(response)
+        self.assertEqual(response.json.get("message"), "'foo' is not a valid UpdateFrequency")
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertEqual(Dataset.objects.first().frequency, UpdateFrequency.ANNUAL)
+
     def test_cannot_modify_dataset_id(self):
         user = self.login()
         dataset = DatasetFactory(owner=user)

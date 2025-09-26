@@ -108,10 +108,6 @@ class UpdateFrequency(StrEnum):
         if isinstance(value, str):
             return UpdateFrequency._LEGACY_FREQUENCIES.get(value)  # type: ignore[misc]
 
-    @classmethod
-    def vocabulary(cls) -> list[str]:
-        return [m.id for m in cls]
-
     @property
     def id(self) -> str:
         return self.value

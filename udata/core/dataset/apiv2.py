@@ -161,9 +161,9 @@ dataset_fields = apiv2.model(
                 "label": UpdateFrequency(d.frequency).label,
             }
             if request.headers.get(FULL_OBJECTS_HEADER, False, bool)
-            else UpdateFrequency(d.frequency).id,
-            enum=UpdateFrequency.vocabulary(),
-            default=UpdateFrequency.UNKNOWN.id,
+            else UpdateFrequency(d.frequency),
+            enum=list(UpdateFrequency),
+            default=UpdateFrequency.UNKNOWN,
             required=True,
             description="The update frequency (full Frequency object if `X-Get-Datasets-Full-Objects` is set, ID of the frequency otherwise)",
         ),

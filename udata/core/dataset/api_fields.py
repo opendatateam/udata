@@ -360,8 +360,8 @@ dataset_fields = api.model(
         "frequency": fields.String(
             description="The update frequency",
             required=True,
-            enum=UpdateFrequency.vocabulary(),
-            default=UpdateFrequency.UNKNOWN.id,
+            enum=list(UpdateFrequency),
+            default=UpdateFrequency.UNKNOWN,
         ),
         "frequency_date": fields.ISODateTime(
             description=(
