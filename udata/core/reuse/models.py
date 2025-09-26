@@ -60,7 +60,7 @@ class ReuseBadgeMixin(BadgeMixin):
         {"key": "followers", "value": "metrics.followers"},
         {"key": "views", "value": "metrics.views"},
     ],
-    additional_filters={"organization_badge": "organization.badges"},
+    nested_filters={"organization_badge": "organization.badges"},
     mask="*,datasets{id,title,uri,page}",
 )
 class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Owned, db.Document):

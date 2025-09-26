@@ -1,6 +1,7 @@
 import pytest
 from flask import url_for
 
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.models import Discussion
 from udata.core.organization.factories import OrganizationFactory
@@ -574,6 +575,7 @@ class TopicElementsAPITest(APITestCase):
         topic = TopicWithElementsFactory(owner=owner)
         dataset = DatasetFactory()
         reuse = ReuseFactory()
+        dataservice = DataserviceFactory()
         response = self.post(
             url_for("apiv2.topic_elements", topic=topic),
             [
@@ -592,6 +594,13 @@ class TopicElementsAPITest(APITestCase):
                     "element": {"class": "Reuse", "id": reuse.id},
                 },
                 {
+                    "title": "A dataservice",
+                    "description": "A dataservice description",
+                    "tags": ["tag1", "tag2"],
+                    "extras": {"extra": "value"},
+                    "element": {"class": "Dataservice", "id": dataservice.id},
+                },
+                {
                     "title": "An element without element",
                     "description": "An element description",
                     "tags": ["tag1", "tag2"],
@@ -605,7 +614,7 @@ class TopicElementsAPITest(APITestCase):
         # Verify response payload contains the created elements
         response_data = response.json
         assert isinstance(response_data, list)
-        assert len(response_data) == 3
+        assert len(response_data) == 4
 
         # Verify the dataset element in response
         dataset_response = next(
@@ -645,7 +654,7 @@ class TopicElementsAPITest(APITestCase):
         assert no_element_response["extras"] == {"extra": "value"}
 
         topic.reload()
-        assert len(topic.elements) == 6
+        assert len(topic.elements) == 8
 
         dataset_elt = next(
             elt for elt in topic.elements if elt.element and elt.element.id == dataset.id
@@ -662,6 +671,14 @@ class TopicElementsAPITest(APITestCase):
         assert reuse_elt.description == "A reuse description"
         assert reuse_elt.tags == ["tag1", "tag2"]
         assert reuse_elt.extras == {"extra": "value"}
+
+        dataservice_elt = next(
+            elt for elt in topic.elements if elt.element and elt.element.id == dataservice.id
+        )
+        assert dataservice_elt.title == "A dataservice"
+        assert dataservice_elt.description == "A dataservice description"
+        assert dataservice_elt.tags == ["tag1", "tag2"]
+        assert dataservice_elt.extras == {"extra": "value"}
 
         no_elt_elt = next(
             elt for elt in topic.elements if elt.title == "An element without element"
@@ -803,7 +820,7 @@ class TopicElementAPITest(APITestCase):
         response = self.delete(url_for("apiv2.topic_element", topic=topic, element_id=element.id))
         assert response.status_code == 204
         topic.reload()
-        assert len(topic.elements) == 2
+        assert len(topic.elements) == 3
         assert element.id not in (elt.id for elt in topic.elements)
 
     def test_delete_element_perm(self):

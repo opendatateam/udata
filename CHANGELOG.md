@@ -13,6 +13,7 @@
 - feat(topics): serialize elements in topic_elements_create response [#3446](https://github.com/opendatateam/udata/pull/3446)
 - Add new badges [#3415](https://github.com/opendatateam/udata/pull/3415)
 - Refactor `@function_field` and `@field` to provide better doc and type support [#3441](https://github.com/opendatateam/udata/pull/3441/)
+- feat(topic): add Dataservice to supported elements [#3444](https://github.com/opendatateam/udata/pull/3444)
 
 ## 11.0.1 (2025-09-15)
 
