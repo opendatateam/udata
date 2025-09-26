@@ -15,6 +15,7 @@
 - Refactor `@function_field` and `@field` to provide better doc and type support [#3441](https://github.com/opendatateam/udata/pull/3441/)
 - feat(topic): add Dataservice to supported elements [#3444](https://github.com/opendatateam/udata/pull/3444)
 - Ignore list reordering in changed fields detection [#3448](https://github.com/opendatateam/udata/pull/3448)
+- Move factory-boy to the main dependencies [3447](https://github.com/opendatateam/udata/pull/3447)
 
 ## 11.0.1 (2025-09-15)
 
