@@ -1,9 +1,11 @@
 import hashlib
+import itertools
 import math
 import re
+from collections import Counter
 from datetime import date, datetime
 from math import ceil
-from typing import Any
+from typing import Any, Hashable
 from uuid import UUID, uuid4
 from xml.sax.saxutils import escape
 
@@ -65,11 +67,16 @@ def filter_changed_fields(document, previous, changed_fields: list[str]):
     for field in changed_fields:
         previous_value = previous[field]
         current_value = get_field_value_from_path(document, field)
-        # Filter out special case of list reordering
-        if isinstance(previous_value, list) and isinstance(current_value, list):
-            if set(previous_value) != set(current_value) or len(previous_value) != len(
-                current_value
-            ):
+        # Filter out special case of list reordering, does not support unhashable types
+        if (
+            isinstance(previous_value, list)
+            and isinstance(current_value, list)
+            and all(
+                isinstance(value, Hashable)
+                for value in itertools.chain(previous_value, current_value)
+            )
+        ):
+            if Counter(previous_value) != Counter(current_value):
                 filtered_changed_fields.append(field)
         # Direct comparison for the rest of the fields
         elif previous_value != current_value:
