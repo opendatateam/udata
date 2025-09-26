@@ -32,7 +32,7 @@ def dataservice_from_rdf(
     remote_url_prefix: str | None = None,
 ) -> Dataservice:
     """
-    Create or update a dataset from a RDF/DCAT graph
+    Create or update a dataservice from a RDF/DCAT graph
     """
     if node is None:  # Assume first match is the only match
         node = graph.value(predicate=RDF.type, object=DCAT.DataService)
@@ -57,7 +57,6 @@ def dataservice_from_rdf(
         contact_point for role in roles for contact_point in role
     ] or dataservice.contact_points
 
-    datasets = []
     for dataset_node in d.objects(DCAT.servesDataset):
         id = dataset_node.value(DCT.identifier)
         dataset = next(
@@ -71,11 +70,9 @@ def dataservice_from_rdf(
                 None,
             )
 
-        if dataset is not None:
-            datasets.append(dataset.id)
-
-    if datasets:
-        dataservice.datasets = datasets
+        # We append the dataset to the list of the current attached ones if not already attached
+        if dataset is not None and dataset not in dataservice.datasets:
+            dataservice.datasets.append(dataset)
 
     license = rdf_value(d, DCT.license)
     if license is not None:
