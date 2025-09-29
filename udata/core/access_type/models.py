@@ -4,6 +4,7 @@ from udata.core.access_type.constants import (
     ACCESS_AUDIENCE_TYPES,
     ACCESS_TYPE_OPEN,
     ACCESS_TYPES,
+    INSPIRE_LIMITATION_CATEGORIES,
 )
 from udata.i18n import lazy_gettext as _
 from udata.models import db
@@ -35,4 +36,7 @@ class WithAccessType:
     )
 
     authorization_request_url = field(db.URLField())
+    access_type_reason_category = field(
+        db.StringField(choices=INSPIRE_LIMITATION_CATEGORIES), allow_null=True
+    )
     access_type_reason = field(db.StringField())
