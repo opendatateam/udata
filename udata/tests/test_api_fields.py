@@ -3,7 +3,7 @@ import mongoengine
 import pytest
 from flask_restx.reqparse import Argument, RequestParser
 
-from udata.api_fields import field, function_field, generate_fields, patch, patch_and_save
+from udata.api_fields import field, generate_fields, patch, patch_and_save
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.organization import constants as org_constants
 from udata.core.organization.factories import OrganizationFactory
@@ -65,7 +65,14 @@ class FakeEmbedded(db.EmbeddedDocument):
         {"key": "followers", "value": "metrics.followers"},
         {"key": "views", "value": "metrics.views"},
     ],
-    additional_filters={"organization_badge": "organization.badges"},
+    nested_filters={"organization_badge": "organization.badges"},
+    standalone_filters=[
+        {
+            "key": "standalone",
+            "type": str,
+            "query": lambda base_query, value: base_query.filter(title__contains=value),
+        },
+    ],
 )
 class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
     filter_field = field(db.StringField(), filterable={"key": "filter_field_name"})
@@ -131,7 +138,7 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
     def __str__(self) -> str:
         return self.title or ""
 
-    @function_field(description="Link to the API endpoint for this fake", show_as_ref=True)
+    @field(description="Link to the API endpoint for this fake", show_as_ref=True)
     def uri(self) -> str:
         return "fake/foobar/endpoint/"
 
@@ -191,8 +198,8 @@ class IndexParserTest:
         """Filterable fields from mixins should have a parser arg."""
         assert set(["owner", "organization"]).issubset(self.index_parser_args_names)
 
-    def test_additional_filters_in_parser(self) -> None:
-        """Filterable fields from the `additional_filters` decorater parameter should have a parser arg."""
+    def test_nested_filters_in_parser(self) -> None:
+        """Filterable fields from the `nested_filters` decorater parameter should have a parser arg."""
         assert "organization_badge" in self.index_parser_args_names
 
     def test_pagination_fields_in_parser(self) -> None:
@@ -271,8 +278,8 @@ class ApplySortAndFiltersTest:
             assert fake1 in results
             assert fake2 not in results
 
-    def test_additional_filters(self, app) -> None:
-        """Filtering on an additional filter filters the results."""
+    def test_nested_filters(self, app) -> None:
+        """Filtering on an nested filter filters the results."""
         org_public_service: Organization = OrganizationFactory()
         org_public_service.add_badge(org_constants.PUBLIC_SERVICE)
         org_company: Organization = OrganizationFactory()
@@ -316,6 +323,15 @@ class ApplySortAndFiltersTest:
         with app.test_request_context("/foobar", query_string={"sort": "-datasets"}):
             results = Fake.apply_sort_filters(Fake.objects)
             assert tuple(results) == (fake2, fake1)
+
+    def test_standalone_filters(self, app) -> None:
+        """Standalone filters should be applied."""
+        fake1: Fake = FakeFactory(title="foo bar")
+        fake2: Fake = FakeFactory(title="bar bar")
+        with app.test_request_context("/foobar", query_string={"standalone": "foo"}):
+            results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
+            assert fake1 in results
+            assert fake2 not in results
 
 
 class ApplyPaginationTest:

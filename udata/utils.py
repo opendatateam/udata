@@ -1,9 +1,11 @@
 import hashlib
+import itertools
 import math
 import re
+from collections import Counter
 from datetime import date, datetime
 from math import ceil
-from typing import Any
+from typing import Any, Hashable
 from uuid import UUID, uuid4
 from xml.sax.saxutils import escape
 
@@ -51,6 +53,39 @@ def get_field_value_from_path(document, field_path: str):
             field_name = doc_field._reverse_db_field_map.get(part, part)
             doc_field = getattr(doc_field, field_name, None)
     return doc_field
+
+
+def filter_changed_fields(document, previous, changed_fields: list[str]):
+    # Make sure that changed fields have actually changed.
+    # We compare the document values once it has been reloaded.
+    # It may have been cleaned or normalized when saved to mongo.
+    # We compare the field values one by one with the previous value stored in _previous_changed_fields.
+    # We also ignore reordering in the case of list, ex tags or contact points.
+    # See https://github.com/opendatateam/udata/pull/3412 for more context.
+    document.reload()
+    filtered_changed_fields = []
+    for field in changed_fields:
+        # Sometimes, we nullify a field in the clean method (for exemple the `license` when we change
+        # the `access_type` of a dataset). This field is then not present in `previous`. Returning `None`
+        # is a little bit wrong because we should return the previous value of the `license`. Right now
+        # we don't notice license change because `None (not present) == None (removed)` is equal.
+        previous_value = previous.get(field, None)
+        current_value = get_field_value_from_path(document, field)
+        # Filter out special case of list reordering, does not support unhashable types
+        if (
+            isinstance(previous_value, list)
+            and isinstance(current_value, list)
+            and all(
+                isinstance(value, Hashable)
+                for value in itertools.chain(previous_value, current_value)
+            )
+        ):
+            if Counter(previous_value) != Counter(current_value):
+                filtered_changed_fields.append(field)
+        # Direct comparison for the rest of the fields
+        elif previous_value != current_value:
+            filtered_changed_fields.append(field)
+    return filtered_changed_fields
 
 
 FIRST_CAP_RE = re.compile("(.)([A-Z][a-z]+)")
