@@ -292,6 +292,7 @@ DEFAULT_MASK = ",".join(
         "access_type",
         "access_audiences",
         "authorization_request_url",
+        "access_type_reason_category",
         "access_type_reason",
         "uri",
         "page",
@@ -403,6 +404,7 @@ dataset_fields = api.model(
         "access_type": fields.String(allow_null=True),
         "access_audiences": fields.Nested(AccessAudience.__read_fields__),
         "authorization_request_url": fields.String(allow_null=True),
+        "access_type_reason_category": fields.String(allow_null=True),
         "access_type_reason": fields.String(allow_null=True),
         "uri": fields.String(
             attribute=lambda d: d.self_api_url(),

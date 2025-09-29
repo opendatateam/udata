@@ -65,6 +65,7 @@ DEFAULT_MASK_APIV2 = ",".join(
         "license",
         "access_type",
         "access_audiences",
+        "access_type_reason_category",
         "access_type_reason",
         "authorization_request_url",
         "uri",
@@ -210,6 +211,7 @@ dataset_fields = apiv2.model(
         "access_type": fields.String(allow_null=True),
         "access_audiences": fields.Nested(AccessAudience.__read_fields__),
         "authorization_request_url": fields.String(allow_null=True),
+        "access_type_reason_category": fields.String(allow_null=True),
         "access_type_reason": fields.String(allow_null=True),
         "uri": fields.String(
             attribute=lambda d: d.self_api_url(),

@@ -3,6 +3,7 @@ from udata.core.access_type.constants import (
     ACCESS_AUDIENCE_TYPES,
     ACCESS_TYPE_OPEN,
     ACCESS_TYPES,
+    INSPIRE_LIMITATION_CATEGORIES,
 )
 from udata.core.access_type.models import AccessAudience
 from udata.core.spatial.forms import SpatialCoverageField
@@ -177,6 +178,9 @@ class DatasetForm(ModelForm):
     )
     access_audiences = fields.NestedModelList(AccessAudienceForm)
     authorization_request_url = fields.StringField(_("Authorization request URL"))
+    access_type_reason_category = fields.SelectField(
+        _("Access type reason category"), choices=INSPIRE_LIMITATION_CATEGORIES
+    )
     access_type_reason = fields.StringField(_("Access type reason"))
     frequency = fields.SelectField(
         _("Update frequency"),

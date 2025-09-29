@@ -23,7 +23,7 @@ from udata.core.access_type.constants import (
     ACCESS_AUDIENCE_YES,
     ACCESS_TYPE_OPEN,
     ACCESS_TYPE_RESTRICTED,
-    INSPIRE_13_D_NATIONAL_SECURITY,
+    INSPIRE_13_B_INTERNATIONAL_RELATIONS,
 )
 from udata.core.badges.factories import badge_factory
 from udata.core.dataset.constants import (
@@ -1324,13 +1324,18 @@ class DatasetAPITest(APITestCase):
                     },
                 ],
                 "authorization_request_url": "https://example.org",
-                "access_type_reason_category": INSPIRE_13_D_NATIONAL_SECURITY,
+                "access_type_reason_category": INSPIRE_13_B_INTERNATIONAL_RELATIONS,
                 "access_type_reason": "Les données contiennent des information sensibles ou liées au secret défense",
             },
         )
 
         self.assert200(response)
         assert response.json["access_type"] == ACCESS_TYPE_RESTRICTED
+        assert response.json["access_type_reason_category"] == INSPIRE_13_B_INTERNATIONAL_RELATIONS
+        assert (
+            response.json["access_type_reason"]
+            == "Les données contiennent des information sensibles ou liées au secret défense"
+        )
 
         dataset.reload()
         assert dataset.access_type == ACCESS_TYPE_RESTRICTED
@@ -1341,7 +1346,7 @@ class DatasetAPITest(APITestCase):
         assert dataset.access_audiences[2].role == ACCESS_AUDIENCE_PRIVATE
         assert dataset.access_audiences[2].condition == ACCESS_AUDIENCE_UNDER_CONDITIONS
         assert dataset.authorization_request_url == "https://example.org"
-        assert dataset.access_type_reason_category == INSPIRE_13_D_NATIONAL_SECURITY
+        assert dataset.access_type_reason_category == INSPIRE_13_B_INTERNATIONAL_RELATIONS
         assert (
             dataset.access_type_reason
             == "Les données contiennent des information sensibles ou liées au secret défense"
