@@ -198,8 +198,20 @@ class DcatBackendTest:
         source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
 
         previously_attached_dataset = DatasetFactory()
+        previously_harvested_dataset = DatasetFactory(
+            harvest={
+                "remote_id": "2",
+                "domain": source.domain,
+                "source_id": str(source.id),
+            }
+        )
         existing_dataservice = DataserviceFactory(
-            datasets=[previously_attached_dataset],
+            # Two datasets are already attached, the first one NOT connected via harvesting
+            # when the second one is connected with dcat:servesDataset in harvest graph
+            datasets=[
+                previously_attached_dataset,
+                previously_harvested_dataset,
+            ],
             harvest={
                 "remote_id": "https://data.paris2024.org/api/explore/v2.1/",
                 "domain": source.domain,
@@ -215,8 +227,9 @@ class DcatBackendTest:
         assert existing_dataservice.title == "Explore API v2"
         assert (
             len(existing_dataservice.datasets) == 2 + 1
-        )  # The two harvested datasets and the previously attached one
+        )  # The previsouly harvested dataset, the previously attached one and a new harvested dataset
         assert previously_attached_dataset in existing_dataservice.datasets
+        assert previously_harvested_dataset in existing_dataservice.datasets
 
     def test_harvest_dataservices_ignore_accessservices(self, rmock):
         rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
