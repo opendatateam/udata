@@ -179,7 +179,9 @@ class DatasetForm(ModelForm):
     access_audiences = fields.NestedModelList(AccessAudienceForm)
     authorization_request_url = fields.StringField(_("Authorization request URL"))
     access_type_reason_category = fields.SelectField(
-        _("Access type reason category"), choices=INSPIRE_LIMITATION_CATEGORIES
+        _("Access type reason category"),
+        choices=INSPIRE_LIMITATION_CATEGORIES,
+        validators=[validators.optional()],
     )
     access_type_reason = fields.StringField(_("Access type reason"))
     frequency = fields.SelectField(
