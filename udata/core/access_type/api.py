@@ -12,5 +12,7 @@ class ReasonCategoriesAPI(API):
     @api.doc("reason_categories")
     def get(self):
         """List all INSPIRE limitation reason categories"""
-        labels = get_inspire_limitation_labels()
-        return [{"id": id, "label": label} for id, label in labels.items()]
+        return [
+            {"value": value, "label": label}
+            for value, label in get_inspire_limitation_labels().items()
+        ]
