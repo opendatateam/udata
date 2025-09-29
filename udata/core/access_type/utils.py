@@ -17,7 +17,9 @@ def get_inspire_limitation_labels():
     """
     return {
         INSPIRE_13_A_PUBLIC_AUTHORITIES: _("Confidentiality of public authorities proceedings"),
-        INSPIRE_13_B_INTERNATIONAL_RELATIONS: _("International relations, public security or national defence"),
+        INSPIRE_13_B_INTERNATIONAL_RELATIONS: _(
+            "International relations, public security or national defence"
+        ),
         INSPIRE_13_C_COURSE_OF_JUSTICE: _("Course of justice"),
         INSPIRE_13_D_COMMERCIAL_CONFIDENTIALITY: _("Commercial or industrial confidentiality"),
         INSPIRE_13_E_INTELLECTUAL_PROPERTY: _("Intellectual property rights"),
@@ -45,9 +47,7 @@ def get_inspire_limitation_definition(category):
         INSPIRE_13_D_COMMERCIAL_CONFIDENTIALITY: _(
             "The confidentiality of commercial or industrial information, where such confidentiality is provided for by national or Community law to protect a legitimate economic interest."
         ),
-        INSPIRE_13_E_INTELLECTUAL_PROPERTY: _(
-            "Intellectual property rights."
-        ),
+        INSPIRE_13_E_INTELLECTUAL_PROPERTY: _("Intellectual property rights."),
         INSPIRE_13_F_PERSONAL_DATA: _(
             "The confidentiality of personal data and/or files relating to a natural person where that person has not consented to the disclosure."
         ),
