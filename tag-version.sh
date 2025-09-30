@@ -41,6 +41,16 @@ if git rev-parse "v$VERSION" >/dev/null 2>&1; then
     exit 1
 fi
 
+# Get repository URL for PR links
+GIT_REMOTE=$(git remote get-url origin 2>/dev/null || echo "")
+if [[ "$GIT_REMOTE" =~ github.com[:/]([^/]+)/([^/.]+) ]]; then
+    REPO_OWNER="${BASH_REMATCH[1]}"
+    REPO_NAME="${BASH_REMATCH[2]}"
+    REPO_URL="https://github.com/$REPO_OWNER/$REPO_NAME"
+else
+    REPO_URL=""
+fi
+
 # Get the last tag
 LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
 
@@ -58,11 +68,48 @@ if [ -z "$COMMITS" ]; then
     exit 1
 fi
 
+# Process commits: separate breaking changes and sort
+BREAKING_CHANGES=""
+REGULAR_COMMITS=""
+
+while IFS= read -r commit; do
+    # Convert PR numbers to links if we have a repo URL
+    if [ -n "$REPO_URL" ]; then
+        commit=$(echo "$commit" | sed -E "s/#([0-9]+)/[#\1]($REPO_URL\/pull\/\1)/g")
+    fi
+
+    # Check if it's a breaking change (contains ! before :)
+    if [[ "$commit" =~ ^-\ [a-z]+(\([^)]+\))?!: ]]; then
+        # Make it bold in markdown
+        bold_commit=$(echo "$commit" | sed 's/^- \(.*\)$/- **\1**/')
+        BREAKING_CHANGES="${BREAKING_CHANGES}${bold_commit}\n"
+    else
+        REGULAR_COMMITS="${REGULAR_COMMITS}${commit}\n"
+    fi
+done <<< "$COMMITS"
+
+# Sort breaking changes and regular commits alphabetically
+if [ -n "$BREAKING_CHANGES" ]; then
+    BREAKING_CHANGES=$(echo -e "$BREAKING_CHANGES" | sort)
+fi
+
+if [ -n "$REGULAR_COMMITS" ]; then
+    REGULAR_COMMITS=$(echo -e "$REGULAR_COMMITS" | sort)
+fi
+
+# Combine: breaking changes first, then regular commits
+SORTED_COMMITS=""
+if [ -n "$BREAKING_CHANGES" ]; then
+    SORTED_COMMITS="$BREAKING_CHANGES"
+fi
+if [ -n "$REGULAR_COMMITS" ]; then
+    SORTED_COMMITS="${SORTED_COMMITS}${REGULAR_COMMITS}"
+fi
+
 # Prepare the new changelog entry
 NEW_ENTRY="## $VERSION ($DATE)
 
-$COMMITS
-
+$SORTED_COMMITS
 "
 
 # Update CHANGELOG.md
