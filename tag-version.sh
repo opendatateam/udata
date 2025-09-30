@@ -121,8 +121,11 @@ if [ "$DRY_RUN" = true ]; then
     echo "Would run: git push origin HEAD v$VERSION"
 else
     if [ -f "CHANGELOG.md" ]; then
-        # Insert after the first line (assuming it's a header)
-        echo "$NEW_ENTRY" | cat - CHANGELOG.md > CHANGELOG.md.tmp && mv CHANGELOG.md.tmp CHANGELOG.md
+        # Keep existing entries (skip the first line "# Changelog")
+        EXISTING_ENTRIES=$(tail -n +2 CHANGELOG.md)
+        echo "# Changelog
+
+$NEW_ENTRY$EXISTING_ENTRIES" > CHANGELOG.md
     else
         # Create new CHANGELOG.md
         echo "# Changelog
