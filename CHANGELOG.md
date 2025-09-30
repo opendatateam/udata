@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+Nothing yet
+
 ## 11.1.0 (2025-09-30)
 
 - chore: migrate to pyproject.toml, replace `CIRCLE_TAG` by `setuptools_scm` to compute the correct version automatically [#3413](https://github.com/opendatateam/udata/pull/3413) [#3434](https://github.com/opendatateam/udata/pull/3434) [#3435](https://github.com/opendatateam/udata/pull/3435) [#3437](https://github.com/opendatateam/udata/pull/3437) [#3438](https://github.com/opendatateam/udata/pull/3438/) [3447](https://github.com/opendatateam/udata/pull/3447)
