@@ -35,6 +35,42 @@ if [ "$DRY_RUN" = true ]; then
     echo ""
 fi
 
+# Detect main branch (master or main)
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if git rev-parse --verify master >/dev/null 2>&1; then
+    MAIN_BRANCH="master"
+elif git rev-parse --verify main >/dev/null 2>&1; then
+    MAIN_BRANCH="main"
+else
+    echo "Error: Could not detect main branch (neither master nor main exists)"
+    exit 1
+fi
+
+# Check if we're on the main branch
+if [ "$CURRENT_BRANCH" != "$MAIN_BRANCH" ]; then
+    echo "Error: You must be on the $MAIN_BRANCH branch to create a release"
+    echo "Current branch: $CURRENT_BRANCH"
+    exit 1
+fi
+
+# Check if working copy is clean
+if ! git diff-index --quiet HEAD --; then
+    echo "Error: Working copy is not clean. Please commit or stash your changes."
+    git status --short
+    exit 1
+fi
+
+# Check if we're up to date with remote
+git fetch origin "$MAIN_BRANCH" --quiet
+LOCAL=$(git rev-parse @)
+REMOTE=$(git rev-parse @{u})
+
+if [ "$LOCAL" != "$REMOTE" ]; then
+    echo "Error: Your local $MAIN_BRANCH branch is not up to date with origin/$MAIN_BRANCH"
+    echo "Please run: git pull origin $MAIN_BRANCH"
+    exit 1
+fi
+
 # Check if tag already exists
 if git rev-parse "v$VERSION" >/dev/null 2>&1; then
     echo "Error: Tag v$VERSION already exists"

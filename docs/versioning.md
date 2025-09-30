@@ -27,37 +27,28 @@ The contents of each version (expected or real) is tracked trough [issues][], [p
 
 ## Releasing
 
-udata uses [Bump'X][https://github.com/datagouv/bumpx] as its release process.
+udata uses a custom release script (`tag-version.sh`) to automate its release process.
 
-To create a release, you need to:
+To create a release, you need to have administrator permission on the udata repository (to allow direct push).
 
-- have administrator permission on the udata repository (to allow direct push)
-- have a working development environment up to date with the `master` branch
-- have `bumpx` installed
+The steps to make a release are:
 
-The step to make a release are:
-
-1. fetch latest changes from upstream repository
-2. ensure translations are up to date
-3. ensure the CircleCI build is successful on master branch
-4. ensure your working copy is clean
-5. run `bumpx -d -v` to preview the actions performed and the changes
-6. run `bumpx` to perform the release.  This will:
-    - clean up remaining build artifacts
-    - execute tests
-    - perform a full packaging (to ensure it is working)
-    - perform replacements (bumped version, URLs)
-    - set the changelog version and date
-    - commit
-    - set a git tag with the version (`vX.Y.Z`)
-    - perform next iteration replacements (increased dev version, URLs)
-    - prepare the changelog for the next iteration
-    - commit
-    - push (commits and tags)
-7. check on [github][] that everything has been pushed
-8. wait for [CircleCI][] tagged build to succeed
-9. check on [PyPI](https://pypi.org/project/udata/#history) that the new release is present
-10. celebrate!
+1. ensure translations are up to date
+2. ensure the CircleCI build is successful on the main branch
+3. run `./tag-version.sh X.Y.Z --dry-run` to preview the changelog and actions that will be performed
+4. run `./tag-version.sh X.Y.Z` to perform the release. The script will automatically check that you are on the main branch, that your working copy is clean, and that you are up to date with the remote. It will then:
+    - retrieve all commits since the last tag
+    - sort commits alphabetically
+    - detect breaking changes (commits with `!` before `:`) and put them first in bold
+    - convert PR references (`#XXXX`) to markdown links
+    - update CHANGELOG.md with the new version and date
+    - commit the changelog update
+    - create a git tag with the version (`vX.Y.Z`)
+    - push both the commit and the tag to origin
+5. check on [github][] that everything has been pushed
+6. wait for [CircleCI][] tagged build to succeed
+7. check on [PyPI](https://pypi.org/project/udata/#history) that the new release is present
+8. celebrate!
 
 ## Feature branches
 
@@ -74,7 +65,6 @@ The local identifier will be the feature branch name so the version number will 
 It's up to the developers and system administrators to read the [changelog](changelog.md) before upgrading
 (deprecations and breaking changes are published).
 
-[bumpx]: https://github.com/datagouv/bumpx
 [github]: https://github.com/opendatateam/udata
 [issues]: https://github.com/opendatateam/udata/issues
 [pulls]: https://github.com/opendatateam/udata/pulls
