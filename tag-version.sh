@@ -75,11 +75,11 @@ REGULAR_COMMITS=""
 while IFS= read -r commit; do
     # Convert PR numbers to links if we have a repo URL
     if [ -n "$REPO_URL" ]; then
-        commit=$(echo "$commit" | sed -E "s/#([0-9]+)/[#\1]($REPO_URL\/pull\/\1)/g")
+        commit=$(echo "$commit" | sed -E "s|#([0-9]+)|[#\1]($REPO_URL/pull/\1)|g")
     fi
 
     # Check if it's a breaking change (contains ! before :)
-    if [[ "$commit" =~ ^-\ [a-z]+(\([^)]+\))?!: ]]; then
+    if [[ "$commit" =~ ^-\ [a-z]+(\([^\)]+\))?\!: ]]; then
         # Make it bold in markdown
         bold_commit=$(echo "$commit" | sed 's/^- \(.*\)$/- **\1**/')
         BREAKING_CHANGES="${BREAKING_CHANGES}${bold_commit}\n"
