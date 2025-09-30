@@ -2,7 +2,11 @@
 
 ## Current (in progress)
 
-Nothing yet
+- Convert security views to cdata [#3348](https://github.com/opendatateam/udata/pull/3348/)
+  - Add `SECURITY_SPA_ON_SAME_DOMAIN` to `True` if your frontend is on the same domain as the backend.
+  - Change the redirects URLs in ProConnect:
+    - From https://www.data.gouv.fr/proconnect/auth to https://www.data.gouv.fr/api/1/proconnect/auth
+    - From https://www.data.gouv.fr/proconnect/logout to https://www.data.gouv.fr/api/1/proconnect/logout
 
 ## 11.1.0 (2025-09-30)
 
@@ -28,11 +32,6 @@ Nothing yet
 ## 11.0.0 (2025-09-12)
 
 - Change CSW harvesters XML processor from lxml to saxonche [#3380](https://github.com/opendatateam/udata/pull/3380)
-- Convert security views to cdata [#3348](https://github.com/opendatateam/udata/pull/3348/)
-  - Add `SECURITY_SPA_ON_SAME_DOMAIN` to `True` if your frontend is on the same domain as the backend.
-  - Change the redirects URLs in ProConnect:
-    - From https://www.data.gouv.fr/proconnect/auth to https://www.data.gouv.fr/api/1/proconnect/auth
-    - From https://www.data.gouv.fr/proconnect/logout to https://www.data.gouv.fr/api/1/proconnect/logout
 - **breaking change** feat: topic elements [#3318](https://github.com/opendatateam/udata/pull/3318) [#3416](https://github.com/opendatateam/udata/pull/3416) [#3417](https://github.com/opendatateam/udata/pull/3417) [#3418](https://github.com/opendatateam/udata/pull/3418)
 - Allow to send arguments to the `udata user create` command for CI [#3419](https://github.com/opendatateam/udata/pull/3419)
 
