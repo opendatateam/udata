@@ -108,7 +108,6 @@ fi
 
 # Prepare the new changelog entry
 NEW_ENTRY="## $VERSION ($DATE)
-
 $SORTED_COMMITS
 "
 
