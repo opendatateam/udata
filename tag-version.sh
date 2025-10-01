@@ -92,14 +92,21 @@ LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
 
 if [ -z "$LAST_TAG" ]; then
     echo "No previous tag found, getting all commits"
-    COMMITS=$(git log --pretty=format:"- %s" --no-merges)
+    COMMIT_RANGE=""
 else
     echo "Getting commits since $LAST_TAG"
-    COMMITS=$(git log "$LAST_TAG"..HEAD --pretty=format:"- %s" --no-merges)
+    COMMIT_RANGE="$LAST_TAG..HEAD"
+fi
+
+# Get commit hashes
+if [ -z "$COMMIT_RANGE" ]; then
+    COMMIT_HASHES=$(git log --pretty=format:"%H" --no-merges)
+else
+    COMMIT_HASHES=$(git log "$COMMIT_RANGE" --pretty=format:"%H" --no-merges)
 fi
 
 # Check if there are commits
-if [ -z "$COMMITS" ]; then
+if [ -z "$COMMIT_HASHES" ]; then
     echo "No new commits since last tag"
     exit 1
 fi
@@ -108,21 +115,34 @@ fi
 BREAKING_CHANGES=""
 REGULAR_COMMITS=""
 
-while IFS= read -r commit; do
+while IFS= read -r hash; do
+    # Get subject and body
+    subject=$(git log -1 --pretty=format:"%s" "$hash")
+    body=$(git log -1 --pretty=format:"%b" "$hash")
+
     # Convert PR numbers to links if we have a repo URL
     if [ -n "$REPO_URL" ]; then
-        commit=$(echo "$commit" | sed -E "s|#([0-9]+)|[#\1]($REPO_URL/pull/\1)|g")
+        subject=$(echo "$subject" | sed -E "s|#([0-9]+)|[#\1]($REPO_URL/pull/\1)|g")
+        body=$(echo "$body" | sed -E "s|#([0-9]+)|[#\1]($REPO_URL/pull/\1)|g")
     fi
 
     # Check if it's a breaking change (contains ! before :)
-    if [[ "$commit" =~ ^-\ [a-z]+(\([^\)]+\))?\!: ]]; then
-        # Make it bold in markdown
-        bold_commit=$(echo "$commit" | sed 's/^- \(.*\)$/- **\1**/')
-        BREAKING_CHANGES="${BREAKING_CHANGES}${bold_commit}\n"
+    if [[ "$subject" =~ ^[a-z]+(\([^\)]+\))?\!: ]]; then
+        # Make subject bold in markdown
+        bold_subject=$(echo "- **$subject**")
+
+        # Add body if it exists, indented with two spaces for markdown
+        if [ -n "$body" ]; then
+            # Indent body lines with two spaces
+            indented_body=$(echo "$body" | sed 's/^/  /')
+            BREAKING_CHANGES="${BREAKING_CHANGES}${bold_subject}\n${indented_body}\n"
+        else
+            BREAKING_CHANGES="${BREAKING_CHANGES}${bold_subject}\n"
+        fi
     else
-        REGULAR_COMMITS="${REGULAR_COMMITS}${commit}\n"
+        REGULAR_COMMITS="${REGULAR_COMMITS}- ${subject}\n"
     fi
-done <<< "$COMMITS"
+done <<< "$COMMIT_HASHES"
 
 # Sort breaking changes and regular commits alphabetically
 if [ -n "$BREAKING_CHANGES" ]; then
