@@ -152,38 +152,39 @@ if [ "$DRY_RUN" = true ]; then
     echo "Would update CHANGELOG.md with:"
     echo "$NEW_ENTRY"
     echo "Would run: git add CHANGELOG.md"
-    echo "Would run: git commit -m \"Update CHANGELOG for version $VERSION\""
+    echo "Would run: git commit -m \"Bump version $VERSION\""
     echo "Would run: git tag -a \"v$VERSION\" -m \"Version $VERSION\""
     echo "Would run: git push origin HEAD v$VERSION"
-else
-    if [ -f "CHANGELOG.md" ]; then
-        # Keep existing entries (skip the first line "# Changelog")
-        EXISTING_ENTRIES=$(tail -n +2 CHANGELOG.md)
-        echo "# Changelog
+    exit 0
+fi
+
+if [ -f "CHANGELOG.md" ]; then
+    # Keep existing entries (skip the first line "# Changelog")
+    EXISTING_ENTRIES=$(tail -n +2 CHANGELOG.md)
+    echo "# Changelog
 
 $NEW_ENTRY$EXISTING_ENTRIES" > CHANGELOG.md
-    else
-        # Create new CHANGELOG.md
-        echo "# Changelog
+else
+    # Create new CHANGELOG.md
+    echo "# Changelog
 
 $NEW_ENTRY" > CHANGELOG.md
-    fi
-
-    echo "CHANGELOG.md updated with commits from $LAST_TAG to HEAD"
-
-    # Commit the CHANGELOG update
-    git add CHANGELOG.md
-    git commit -m "Update CHANGELOG for version $VERSION"
-
-    echo "✓ Committed CHANGELOG.md"
-
-    # Create the git tag
-    git tag -a "v$VERSION" -m "Version $VERSION"
-
-    echo "✓ Created tag v$VERSION"
-
-    # Push the commit and tag
-    git push origin HEAD "v$VERSION"
-
-    echo "✓ Pushed commit and tag v$VERSION to origin"
 fi
+
+echo "CHANGELOG.md updated with commits from $LAST_TAG to HEAD"
+
+# Commit the CHANGELOG update
+git add CHANGELOG.md
+git commit -m "Bump version $VERSION"
+
+echo "✓ Committed CHANGELOG.md"
+
+# Create the git tag
+git tag -a "v$VERSION" -m "Version $VERSION"
+
+echo "✓ Created tag v$VERSION"
+
+# Push the commit and tag
+git push origin HEAD "v$VERSION"
+
+echo "✓ Pushed commit and tag v$VERSION to origin"
