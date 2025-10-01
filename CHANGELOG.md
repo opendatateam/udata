@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-Nothing yet
+- fix: delete TopicElements when Topic is deleted [#3452](https://github.com/opendatateam/udata/pull/3452)
 
 ## 11.1.0 (2025-09-30)
 
