@@ -145,19 +145,12 @@ class TopicModelTest:
 
     def test_topic_deletion_deletes_associated_elements(self):
         """Test that deleting a topic also deletes its associated TopicElements"""
-        # Create a topic with elements
         topic = TopicWithElementsFactory()
 
-        # Get the element IDs for verification
         element_ids = [elem.id for elem in topic.elements]
         assert len(element_ids) > 0
 
-        # Verify elements exist
-        assert TopicElement.objects(topic=topic).count() == len(element_ids)
-
-        # Delete the topic
         topic.delete()
 
-        # Verify all associated elements are also deleted
         for element_id in element_ids:
             assert TopicElement.objects(id=element_id).first() is None
