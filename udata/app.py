@@ -7,7 +7,7 @@ from os.path import abspath, dirname, exists, isfile, join
 
 import bson
 from flask import Blueprint as BaseBlueprint
-from flask import Flask, abort, g, json, make_response, send_from_directory
+from flask import Flask, abort, g, json, make_response, render_template, send_from_directory
 from flask_caching import Cache
 from flask_wtf.csrf import CSRFProtect
 from speaklater import is_lazy_string
@@ -225,7 +225,18 @@ def register_extensions(app):
     mail.init_app(app)
     search.init_app(app)
     sentry.init_app(app)
+    register_error_handlers(app)
     return app
+
+
+def register_error_handlers(app):
+    """Register error handlers for the application"""
+
+    @app.errorhandler(404)
+    def page_not_found(e):
+        from udata.uris import homepage_url
+
+        return render_template("404.html", homepage_url=homepage_url()), 404
 
 
 def register_features(app):
