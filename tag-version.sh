@@ -125,8 +125,10 @@ if [ -z "$COMMIT_HASHES" ]; then
 fi
 
 # Process commits: separate breaking changes and sort
-BREAKING_CHANGES=""
-REGULAR_COMMITS=""
+# Use a delimiter to separate commits (a string that won't appear in commit messages)
+COMMIT_DELIMITER="<<<COMMIT_SEPARATOR>>>"
+BREAKING_CHANGES_RAW=""
+REGULAR_COMMITS_RAW=""
 
 while IFS= read -r hash; do
     # Get subject and body
@@ -142,28 +144,46 @@ while IFS= read -r hash; do
     # Check if it's a breaking change (contains ! before :)
     if [[ "$subject" =~ ^[a-z]+(\([^\)]+\))?\!: ]]; then
         # Make subject bold in markdown
-        bold_subject=$(echo "- **$subject**")
+        commit_entry="- **$subject**"
 
         # Add body if it exists, indented with two spaces for markdown
         if [ -n "$body" ]; then
-            # Indent body lines with two spaces
+            # Indent body lines with two spaces and preserve newlines
             indented_body=$(echo "$body" | sed 's/^/  /')
-            BREAKING_CHANGES="${BREAKING_CHANGES}${bold_subject}\n${indented_body}\n"
-        else
-            BREAKING_CHANGES="${BREAKING_CHANGES}${bold_subject}\n"
+            commit_entry="${commit_entry}"$'\n'"${indented_body}"
         fi
+
+        BREAKING_CHANGES_RAW="${BREAKING_CHANGES_RAW}${commit_entry}${COMMIT_DELIMITER}"$'\n'
     else
-        REGULAR_COMMITS="${REGULAR_COMMITS}- ${subject}\n"
+        REGULAR_COMMITS_RAW="${REGULAR_COMMITS_RAW}- ${subject}${COMMIT_DELIMITER}"$'\n'
     fi
 done <<< "$COMMIT_HASHES"
 
-# Sort breaking changes and regular commits alphabetically
-if [ -n "$BREAKING_CHANGES" ]; then
-    BREAKING_CHANGES=$(echo -e "$BREAKING_CHANGES" | sort)
+# Sort breaking changes (sort by first line only, keep blocks together)
+BREAKING_CHANGES=""
+if [ -n "$BREAKING_CHANGES_RAW" ]; then
+    BREAKING_CHANGES=$(echo "$BREAKING_CHANGES_RAW" | awk -v delim="$COMMIT_DELIMITER" '
+        BEGIN { RS=delim"\n"; ORS="" }
+        NF { commits[NR] = $0; keys[NR] = $0; sub(/\n.*/, "", keys[NR]) }
+        END {
+            n = asort(keys, sorted_keys)
+            for (i = 1; i <= n; i++) {
+                for (j in keys) {
+                    if (keys[j] == sorted_keys[i]) {
+                        print commits[j] "\n"
+                        delete keys[j]
+                        break
+                    }
+                }
+            }
+        }
+    ')
 fi
 
-if [ -n "$REGULAR_COMMITS" ]; then
-    REGULAR_COMMITS=$(echo -e "$REGULAR_COMMITS" | sort)
+# Sort regular commits
+REGULAR_COMMITS=""
+if [ -n "$REGULAR_COMMITS_RAW" ]; then
+    REGULAR_COMMITS=$(echo "$REGULAR_COMMITS_RAW" | sed "s/${COMMIT_DELIMITER}//g" | sort)$'\n'
 fi
 
 # Combine: breaking changes first, then regular commits
