@@ -20,7 +20,8 @@ def migrate(db):
     for element in topic_elements:
         try:
             # Try to access the topic - will raise DoesNotExist if topic was deleted
-            element.topic.id
+            if element.topic:
+                _ = element.topic.id
         except mongoengine.errors.DoesNotExist:
             # Topic doesn't exist, delete the orphaned element
             element.delete()
