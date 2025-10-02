@@ -2,8 +2,6 @@ from uuid import uuid4
 
 from flask import url_for
 
-from udata.core.dataset.factories import DatasetFactory, ResourceFactory
-
 from . import FrontTestCase
 
 
@@ -31,8 +29,7 @@ class ErrorHandlersTest(FrontTestCase):
 
         # Request the resource redirect endpoint with HTML accept header
         response = self.get(
-            url_for("api.resource_redirect", id=non_existent_uuid),
-            headers={"Accept": "text/html"}
+            url_for("api.resource_redirect", id=non_existent_uuid), headers={"Accept": "text/html"}
         )
 
         # Check that we get a 404 status code
@@ -49,10 +46,7 @@ class ErrorHandlersTest(FrontTestCase):
     def test_404_page_json(self):
         """Test that a 404 error returns JSON when requested"""
         # Request a non-existent page with JSON accept header
-        response = self.get(
-            "/this-page-does-not-exist",
-            headers={"Accept": "application/json"}
-        )
+        response = self.get("/this-page-does-not-exist", headers={"Accept": "application/json"})
 
         # Check that we get a 404 status code
         assert response.status_code == 404
@@ -62,7 +56,10 @@ class ErrorHandlersTest(FrontTestCase):
 
         # Check the JSON response content
         data = response.json
-        assert data["error"] == "Not found"
+        assert (
+            data["error"]
+            == "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."
+        )
         assert data["status"] == 404
 
     def test_api_resource_redirect_404_json(self):
@@ -75,3 +72,6 @@ class ErrorHandlersTest(FrontTestCase):
 
         # Check that the response is JSON (Flask-RESTX returns JSON by default for API routes)
         assert response.content_type == "application/json"
+
+        # Custom message
+        assert response.json["message"] == "Resource not found"

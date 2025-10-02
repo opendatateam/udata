@@ -259,25 +259,6 @@ def handle_unauthorized_file_type(error):
     return {"message": msg}, 400
 
 
-@api.errorhandler(werkzeug.exceptions.NotFound)
-def handle_not_found(error):
-    """Handle 404 errors - return HTML or JSON based on Accept header"""
-    from flask import render_template
-
-    from udata.uris import homepage_url
-
-    # Check if the request wants JSON
-    if request.accept_mimetypes.best_match(["application/json", "text/html"]) == "application/json":
-        return {"message": "Not found"}, 404
-
-    print("toto")
-    print("toto")
-    print("toto")
-    print("toto")
-    # Return HTML 404 page
-    return render_template("404.html", homepage_url=homepage_url()), 404
-
-
 validation_error_fields = api.model(
     "ValidationError",
     {"errors": fields.Raw, "message": fields.String},
