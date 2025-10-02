@@ -69,7 +69,10 @@ def config_for(value, key):
 
 
 def homepage_url(**kwargs) -> str:
-    return cdata_url("/", **kwargs) or url_for("api.site", **kwargs)
+    try:
+        return cdata_url("/", **kwargs) or url_for("api.site", **kwargs)
+    except Exception:
+        return "/"
 
 
 def cdata_url(uri: str, **kwargs) -> Optional[str]:
