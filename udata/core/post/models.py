@@ -1,6 +1,6 @@
 from flask import url_for
 
-from udata.api_fields import field, function_field, generate_fields
+from udata.api_fields import field, generate_fields
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.linkable import Linkable
 from udata.core.storages import default_image_basename, images
@@ -24,6 +24,7 @@ class PostQuerySet(db.BaseQuerySet):
         {"key": "created", "value": "created_at"},
         {"key": "modified", "value": "last_modified"},
     ],
+    default_sort="-published",
 )
 class Post(db.Datetimed, Linkable, db.Document):
     name = field(
@@ -124,11 +125,11 @@ class Post(db.Datetimed, Linkable, db.Document):
             "api.post", post=self._link_id(**kwargs), **self._self_api_url_kwargs(**kwargs)
         )
 
-    @function_field(description="The API URI for this post")
+    @field(description="The API URI for this post")
     def uri(self):
         return self.self_api_url()
 
-    @function_field(description="The post web page URL")
+    @field(description="The post web page URL")
     def page(self):
         return self.self_web_url()
 

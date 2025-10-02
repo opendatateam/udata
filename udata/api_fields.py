@@ -317,6 +317,7 @@ def generate_fields(**kwargs) -> Callable:
         write_fields: dict = {}
         ref_fields: dict = {}
         sortables: list = kwargs.get("additional_sorts", [])
+        default_sort: list = kwargs.get("default_sort", None)
 
         filterables: list[dict] = kwargs.get("standalone_filters", [])
         nested_filters: dict[str, dict] = get_fields_with_nested_filters(
@@ -466,6 +467,7 @@ def generate_fields(**kwargs) -> Callable:
                 type=str,
                 location="args",
                 choices=choices,
+                default=default_sort,
                 help="The field (and direction) on which sorting apply",
             )
 
