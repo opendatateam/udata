@@ -26,6 +26,7 @@ class FakeAuditableSubject(Auditable, db.Document):
     tags = field(db.TagListField())
     some_date = field(db.DateField())
     daterange_embedded = field(db.EmbeddedDocumentField(db.DateRange))
+    some_list = field(db.ListField(db.StringField()))
     embedded_list = field(db.ListField(db.EmbeddedDocumentField("FakeEmbedded")))
     ref_list = field(db.ListField(db.ReferenceField("FakeSubject")))
     not_auditable = field(db.StringField(), auditable=False)
@@ -128,6 +129,7 @@ class AuditableTest(WebTestMixin, DBTestMixin, TestCase):
                 tags=["some", "tags"],
                 some_date=date(2020, 1, 1),
                 daterange_embedded={"start": date(2020, 1, 1), "end": date(2020, 12, 31)},
+                some_list=["some", "list"],
                 embedded_list=[FakeEmbedded(name=f"fake_embedded_{i}") for i in range(3)],
                 ref_list=[FakeSubject.objects.create(name=f"fake_ref_{i}") for i in range(3)],
                 not_auditable="original",
@@ -147,6 +149,10 @@ class AuditableTest(WebTestMixin, DBTestMixin, TestCase):
             fake.save()
 
         fake.daterange_embedded.start = date(2017, 7, 7)
+        with assert_emit(post_save, FakeAuditableSubject.on_update):
+            fake.save()
+
+        fake.some_list = ["other", "list"]
         with assert_emit(post_save, FakeAuditableSubject.on_update):
             fake.save()
 
@@ -181,6 +187,13 @@ class AuditableTest(WebTestMixin, DBTestMixin, TestCase):
             fake.reload()
             self.assertEqual(fake.some_date, date(2027, 7, 7))
 
+        # 3. Reordering of some elements in a list
+        fake.some_list = ["list", "other"]
+        with assert_not_emit(FakeAuditableSubject.on_update):
+            fake.save()
+            fake.reload()
+            self.assertEqual(fake.some_list, ["list", "other"])
+
         # The deletion should trigger a delete signal
         with assert_not_emit(FakeAuditableSubject.on_update):
             fake.delete()
@@ -192,6 +205,7 @@ class AuditableTest(WebTestMixin, DBTestMixin, TestCase):
             tags=["some", "tags"],
             some_date=date(2020, 1, 1),
             daterange_embedded={"start": date(2020, 1, 1), "end": date(2020, 12, 31)},
+            some_list=["some", "list"],
             embedded_list=[FakeEmbedded(name=f"fake_embedded_{i}") for i in range(3)],
             ref_list=[FakeSubject.objects.create(name=f"fake_ref_{i}") for i in range(3)],
             not_auditable="original",
@@ -204,6 +218,7 @@ class AuditableTest(WebTestMixin, DBTestMixin, TestCase):
                     "name",
                     "tags",
                     "some_date",
+                    "some_list",
                     "daterange_embedded.start",
                     "daterange_embedded.end",
                     "embedded_list.1.name",
@@ -214,6 +229,7 @@ class AuditableTest(WebTestMixin, DBTestMixin, TestCase):
             self.assertEqual(args[1]["previous"]["some_date"], date(2020, 1, 1))
             self.assertEqual(args[1]["previous"]["daterange_embedded.start"], date(2020, 1, 1))
             self.assertEqual(args[1]["previous"]["daterange_embedded.end"], date(2020, 12, 31))
+            self.assertEqual(args[1]["previous"]["some_list"], ["some", "list"])
             self.assertEqual(args[1]["previous"]["embedded_list.1.name"], "fake_embedded_1")
 
         with assert_emit(FakeAuditableSubject.on_update, assertions_callback=check_signal_update):
@@ -222,6 +238,7 @@ class AuditableTest(WebTestMixin, DBTestMixin, TestCase):
             fake.some_date = date(2027, 7, 7)
             fake.daterange_embedded.start = date(2017, 7, 7)
             fake.daterange_embedded.end = date(2027, 7, 7)
+            fake.some_list = ["other", "list"]
             fake.embedded_list[1].name = "other"
             # Modification of a reference document should not be taken into account in changed_fields
             fake.ref_list[1].name = "other"

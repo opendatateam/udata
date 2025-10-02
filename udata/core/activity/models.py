@@ -9,7 +9,7 @@ from mongoengine.signals import post_save
 from udata.api_fields import get_fields
 from udata.auth import current_user
 from udata.mongo import db
-from udata.utils import get_field_value_from_path
+from udata.utils import filter_changed_fields, get_field_value_from_path
 
 from .signals import new_activity
 
@@ -130,16 +130,8 @@ class Auditable(object):
             cls.on_create.send(document)
         elif len(changed_fields):
             previous = getattr(document, "_previous_changed_fields", None)
-            # make sure that changed fields have actually changed when comparing the document
-            # once it has been reloaded. It may have been cleaned or normalized when saved to mongo.
-            # We compare them one by one with the previous value stored in _previous_changed_fields.
-            # See https://github.com/opendatateam/udata/pull/3412 for more context.
-            document.reload()
-            changed_fields = [
-                field
-                for field in changed_fields
-                if previous[field] != get_field_value_from_path(document, field)
-            ]
+            # Filter changed_fields since mongoengine raises some false positive occurences
+            changed_fields = filter_changed_fields(document, previous, changed_fields)
             if changed_fields:
                 cls.on_update.send(document, changed_fields=changed_fields, previous=previous)
         if getattr(document, "deleted_at", None) or getattr(document, "deleted", None):
