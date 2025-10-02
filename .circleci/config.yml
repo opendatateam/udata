@@ -32,16 +32,16 @@ jobs:
             # 1. Exact match of dependencies
             - py3-cache-v13-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
             # 2. Latest cache from this branch
-            - py3-cache-v12-{{ arch }}-{{ .Branch }}
+            - py3-cache-v13-{{ arch }}-{{ .Branch }}
             # 3. Latest cache from base branch (e.g., master)
-            - py3-cache-v12-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+            - py3-cache-v13-{{ arch }}-{{ .Environment.BASE_BRANCH }}
             # 4. Any latest cache for this architecture (fallback)
-            - py3-cache-v12-{{ arch }}-
+            - py3-cache-v13-{{ arch }}-
       - run:
           name: Install Python dependencies
           command: |
             pip install uv
-            uv sync --extra dev
+            uv sync --extra dev --extra test
       - save_cache:
           key: py3-cache-v13-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
           paths:
