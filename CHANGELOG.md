@@ -1,14 +1,5 @@
 # Changelog
 
-## Current (in progress)
-
-- Convert security views to cdata [#3348](https://github.com/opendatateam/udata/pull/3348/)
-  - Add `SECURITY_SPA_ON_SAME_DOMAIN` to `True` if your frontend is on the same domain as the backend.
-  - Change the redirects URLs in ProConnect:
-    - From https://www.data.gouv.fr/proconnect/auth to https://www.data.gouv.fr/api/1/proconnect/auth
-    - From https://www.data.gouv.fr/proconnect/logout to https://www.data.gouv.fr/api/1/proconnect/logout
-- fix: delete TopicElements when Topic is deleted [#3452](https://github.com/opendatateam/udata/pull/3452)
-
 ## 11.1.0 (2025-09-30)
 
 - chore: migrate to pyproject.toml, replace `CIRCLE_TAG` by `setuptools_scm` to compute the correct version automatically [#3413](https://github.com/opendatateam/udata/pull/3413) [#3434](https://github.com/opendatateam/udata/pull/3434) [#3435](https://github.com/opendatateam/udata/pull/3435) [#3437](https://github.com/opendatateam/udata/pull/3437) [#3438](https://github.com/opendatateam/udata/pull/3438/) [3447](https://github.com/opendatateam/udata/pull/3447)

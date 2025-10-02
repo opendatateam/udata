@@ -156,7 +156,6 @@ udata = "udata.tests.plugin"
 
 [project.optional-dependencies]
 dev = [
-    "bumpx==0.3.10",
     "flask-shell-ipython==0.5.3",
     "invoke==2.2.0",
     "pip-tools==7.4.1",
