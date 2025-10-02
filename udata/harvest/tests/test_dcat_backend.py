@@ -8,8 +8,9 @@ from flask import current_app
 from lxml import etree
 from rdflib import Graph
 
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataset.factories import LicenseFactory, ResourceSchemaMockData
+from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceSchemaMockData
 from udata.core.dataset.rdf import dataset_from_rdf
 from udata.core.organization.factories import OrganizationFactory
 from udata.harvest.models import HarvestJob
@@ -186,6 +187,49 @@ class DcatBackendTest:
             dataservices[0].harvest.remote_url
             == "https://data.paris2024.org/api/explore/v2.1/console"
         )
+
+    def test_harvest_dataservices_keep_attached_associated_datasets(self, rmock):
+        """It should update the existing list of dataservice.datasets and not overwrite existing ones"""
+        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
+
+        filename = "bnodes.xml"
+        url = mock_dcat(rmock, filename)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
+
+        previously_attached_dataset = DatasetFactory()
+        previously_harvested_dataset = DatasetFactory(
+            harvest={
+                "remote_id": "2",
+                "domain": source.domain,
+                "source_id": str(source.id),
+            }
+        )
+        existing_dataservice = DataserviceFactory(
+            # Two datasets are already attached, the first one NOT connected via harvesting
+            # when the second one is connected with dcat:servesDataset in harvest graph
+            datasets=[
+                previously_attached_dataset,
+                previously_harvested_dataset,
+            ],
+            harvest={
+                "remote_id": "https://data.paris2024.org/api/explore/v2.1/",
+                "domain": source.domain,
+                "source_id": str(source.id),
+            },
+        )
+
+        actions.run(source)
+
+        existing_dataservice.reload()
+
+        assert len(Dataservice.objects) == 1
+        assert existing_dataservice.title == "Explore API v2"
+        assert (
+            len(existing_dataservice.datasets) == 2 + 1
+        )  # The previsouly harvested dataset, the previously attached one and a new harvested dataset
+        assert previously_attached_dataset in existing_dataservice.datasets
+        assert previously_harvested_dataset in existing_dataservice.datasets
 
     def test_harvest_dataservices_ignore_accessservices(self, rmock):
         rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())

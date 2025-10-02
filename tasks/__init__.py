@@ -149,25 +149,19 @@ def beat(ctx, loglevel="info"):
 
 
 @task(clean, i18nc, default=True)
-def dist(ctx, buildno=None):
+def dist(ctx):
     """Package for distribution"""
-    perform_dist(ctx, buildno)
+    perform_dist(ctx)
 
 
 @task(i18nc)
-def pydist(ctx, buildno=None):
+def pydist(ctx):
     """Perform python packaging (without compiling assets)"""
-    perform_dist(ctx, buildno)
+    perform_dist(ctx)
 
 
-def perform_dist(ctx, buildno=None):
+def perform_dist(ctx):
     header("Building a distribuable package")
-    cmd = ["python -m build"]
-    if buildno:
-        # For development builds, we can set the version in pyproject.toml
-        # or use environment variables
-        info(f"Build number: {buildno}")
-    with ctx.cd(ROOT):
-        ctx.run(" ".join(cmd), pty=True)
-        ctx.run("twine check dist/*")
+    ctx.run("python -m build")
+    ctx.run("twine check dist/*")
     success("Distribution is available in dist directory")

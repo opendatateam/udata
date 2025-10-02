@@ -4,6 +4,8 @@ from flask_restx.inputs import boolean
 from udata.api import api
 from udata.api.parsers import ModelApiParser
 from udata.core.topic import DEFAULT_PAGE_SIZE
+from udata.core.topic.models import TopicElement
+from udata.mongo.engine import db
 
 
 class TopicElementsParser(ModelApiParser):
@@ -71,7 +73,20 @@ class TopicApiParser(ModelApiParser):
             # This allows the search_text method to tokenise with an AND
             # between tokens whereas an OR is used without it.
             phrase_query = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
-            topics = topics.search_text(phrase_query)
+
+            # Search topics by their own content
+            topic_text_filter = db.Q(__raw__={"$text": {"$search": phrase_query}})
+
+            # Find topics that have elements matching the search
+            matching_elements = TopicElement.objects.search_text(phrase_query)
+            element_topic_ids = set(elem.topic.id for elem in matching_elements if elem.topic)
+
+            # Combine with OR
+            if element_topic_ids:
+                element_filter = db.Q(id__in=element_topic_ids)
+                topics = topics.filter(topic_text_filter | element_filter)
+            else:
+                topics = topics.filter(topic_text_filter)
         if args.get("tag"):
             topics = topics.filter(tags__all=args["tag"])
         if not args.get("include_private"):

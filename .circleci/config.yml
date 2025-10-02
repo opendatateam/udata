@@ -86,55 +86,29 @@ jobs:
       - attach_workspace:
           at: .
       - run:
-          name: Set version
+          name: Install build tools
           command: |
-            if [[ $CIRCLE_TAG ]]; then
-                # This is a tagged release, version has been handled upstream
-                RELEASE_VERSION=$CIRCLE_TAG
-                echo "RELEASE_VERSION=$RELEASE_VERSION" > version.sh
-            else
-                # Otherwise, relies on a dev version like "1.2.1.dev" by default
-                # Read version from __init__.py
-                BASE_VERSION=$(python -c "from udata import __version__; print(__version__)")
-                if [[ "$CIRCLE_BRANCH" == feature/* ]]; then
-                    # This is a feature branch
-                    BUILDNO=$CIRCLE_BUILD_NUM${CIRCLE_BRANCH#*/}
-                else
-                    # This is a simple development build
-                    BUILDNO=$CIRCLE_BUILD_NUM
-                fi
-                # Build the release version string with the build number, like "1.2.1.dev1234"
-                RELEASE_VERSION="${BASE_VERSION}${BUILDNO}"
-                echo "BASE_VERSION=$BASE_VERSION" > version.sh
-                echo "BUILDNO=$BUILDNO" >> version.sh
-                echo "RELEASE_VERSION=$RELEASE_VERSION" >> version.sh
-            fi
+            python -m pip install --upgrade pip build twine setuptools-scm
       - run:
-          name: Display build info for debugging
+          name: Save and show RELEASE_VERSION
           command: |
-            source version.sh
-            echo "Base version from __init__.py: $BASE_VERSION"
-            echo "Build number: $BUILDNO"
-            echo "Commit hash: ${CIRCLE_SHA1:0:7}"
-            echo "Git tag: $CIRCLE_TAG"
-            echo "Building a wheel release with version $RELEASE_VERSION"
+            # derive from setuptools_scm or base version + build number
+            RELEASE_VERSION=$(python -m setuptools_scm)
+
+            echo "export RELEASE_VERSION=$RELEASE_VERSION" > release.env
+            echo "RELEASE_VERSION is $RELEASE_VERSION"
       - run:
           name: Build a distributable package as a wheel release
           command: |
             source venv/bin/activate
-            source version.sh
-            if [[ $CIRCLE_TAG ]]; then
-                inv pydist
-            else
-                inv pydist -b $BUILDNO
-            fi
+            inv pydist
       - store_artifacts:
           path: dist
       - persist_to_workspace:
           root: .
           paths:
             - dist
-            - version.sh
+            - release.env
 
   publish:
     docker:
@@ -176,7 +150,7 @@ jobs:
       - run:
           name: Trigger GitLab CI/CD pipeline for udata to deploy to << pipeline.parameters.deploy-env >> environment
           command: |
-            source version.sh
+            source release.env
             cd scaffold
             # Run the script that triggers the Gitlab CI/CD pipeline.
             # Must have GITLAB_API_TOKEN set in the environment
@@ -197,7 +171,8 @@ jobs:
       - run:
           name: Create Sentry release
           command: |
-            source version.sh
+            source release.env
+
             # Create release
             curl https://errors.data.gouv.fr/api/0/organizations/sentry/releases/ \
               -H "Authorization: Bearer ${SENTRY_AUTH_TOKEN}" \

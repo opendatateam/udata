@@ -7,6 +7,8 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.reuse.models import Reuse
+from udata.core.topic.factories import TopicFactory
+from udata.core.topic.models import Topic
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.mongo import db
 from udata.tests.helpers import assert200, assert400
@@ -24,6 +26,11 @@ class FakeDatasetActivity(Activity):
 class FakeReuseActivity(Activity):
     key = "fakeReuse"
     related_to = db.ReferenceField(Reuse, required=True)
+
+
+class FakeTopicActivity(Activity):
+    key = "fakeTopic"
+    related_to = db.ReferenceField(Topic, required=True)
 
 
 class ActivityAPITest:
@@ -95,3 +102,18 @@ class ActivityAPITest:
         response: TestResponse = api.get(url_for("api.activity"))
         assert200(response)
         assert len(response.json["data"]) == len(activities)
+
+    def test_activity_api_with_topic(self, api) -> None:
+        """It should fetch topic activities from the API"""
+        topic: Topic = TopicFactory()
+        FakeTopicActivity.objects.create(actor=UserFactory(), related_to=topic)
+
+        response: TestResponse = api.get(url_for("api.activity"))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+
+        activity_data = response.json["data"][0]
+        assert activity_data["related_to"] == topic.name
+        assert activity_data["related_to_id"] == str(topic.id)
+        assert activity_data["related_to_kind"] == "Topic"
+        assert activity_data["related_to_url"] == topic.self_api_url()

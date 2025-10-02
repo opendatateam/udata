@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=45", "wheel"]
+requires = ["setuptools>=61", "wheel", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "udata"
-version = "10.9.1.dev"
+dynamic = ["version"]
 description = "Open data portal"
 readme = "README.md"
 license = { text = "MIT" }
@@ -53,6 +53,7 @@ dependencies = [
     "cryptography==44.0.2",
     "dnspython==2.7.0",
     "email-validator==2.2.0",
+    "factory-boy==3.3.3",
     "feedgenerator==2.1.0",
     "filelock==3.18.0",
     "flask==2.1.2",
@@ -104,7 +105,7 @@ dependencies = [
     "redis==5.2.1",
     "referencing==0.36.2",
     "regex==2024.11.6",
-    "requests==2.32.3",
+    "requests==2.32.4",
     "rpds-py==0.23.1",
     "s3transfer==0.6.2",
     "saxonche==12.8.0",
@@ -155,7 +156,6 @@ udata = "udata.tests.plugin"
 
 [project.optional-dependencies]
 dev = [
-    "bumpx==0.3.10",
     "flask-shell-ipython==0.5.3",
     "invoke==2.2.0",
     "pip-tools==7.4.1",
@@ -165,7 +165,6 @@ dev = [
     "wheel==0.45.1",
 ]
 test = [
-    "factory-boy==3.3.3",
     "faker==37.0.2",
     "feedparser==6.0.11",
     "httpretty==1.1.4",
@@ -193,6 +192,10 @@ report = [
     "flake8==7.1.2",
     "pytest-cov==6.0.0",
 ]
+
+[tool.setuptools_scm]
+version_scheme = "guess-next-dev"
+local_scheme = "no-local-version"
 
 [tool.babel]
 compile_catalog = { domain = "udata", directory = "udata/translations", statistics = true }
