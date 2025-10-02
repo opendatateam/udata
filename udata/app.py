@@ -271,10 +271,10 @@ def page_not_found(e: NotFound):
     """
     from udata.uris import homepage_url
 
-    if request.accept_mimetypes.best_match(["application/json", "text/html"]) == "application/json":
-        return jsonify({"error": e.description, "status": 404}), 404
+    if request.accept_mimetypes.best_match(["application/json", "text/html"]) == "text/html":
+        return render_template("404.html", homepage_url=homepage_url()), 404
 
-    return render_template("404.html", homepage_url=homepage_url()), 404
+    return jsonify({"error": e.description, "status": 404}), 404
 
 
 def register_features(app):
