@@ -5,7 +5,6 @@ from functools import wraps
 from importlib import import_module
 
 import mongoengine
-import werkzeug.exceptions
 from flask import (
     Blueprint,
     current_app,
