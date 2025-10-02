@@ -7,6 +7,7 @@
   - Change the redirects URLs in ProConnect:
     - From https://www.data.gouv.fr/proconnect/auth to https://www.data.gouv.fr/api/1/proconnect/auth
     - From https://www.data.gouv.fr/proconnect/logout to https://www.data.gouv.fr/api/1/proconnect/logout
+- fix: delete TopicElements when Topic is deleted [#3452](https://github.com/opendatateam/udata/pull/3452)
 
 ## 11.1.0 (2025-09-30)
 
