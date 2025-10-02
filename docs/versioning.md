@@ -29,7 +29,9 @@ The contents of each version (expected or real) is tracked trough [issues][], [p
 
 udata uses a custom release script (`tag-version.sh`) to automate its release process.
 
-To create a release, you need to have administrator permission on the udata repository (to allow direct push).
+To create a release, you need to:
+- have administrator permission on the udata repository (to allow direct push)
+- have the [GitHub CLI (`gh`)](https://cli.github.com/) installed and authenticated (`gh auth login`)
 
 The steps to make a release are:
 
@@ -45,7 +47,8 @@ The steps to make a release are:
     - commit the changelog update
     - create a git tag with the version (`vX.Y.Z`)
     - push both the commit and the tag to origin
-5. check on [github][] that everything has been pushed
+    - create a GitHub release with the same changelog content
+5. check on [github][] that the release has been created
 6. wait for [CircleCI][] tagged build to succeed
 7. check on [PyPI](https://pypi.org/project/udata/#history) that the new release is present
 8. celebrate!
