@@ -91,7 +91,7 @@ dependencies = [
     "mongoengine==0.29.1",
     "netaddr==1.3.0",
     "passlib==1.7.4",
-    "pillow==9.2.0",
+    "pillow==10.3.0",
     "platformdirs==4.3.6",
     "prompt-toolkit==3.0.50",
     "pycparser==2.22",
