@@ -67,11 +67,10 @@ jobs:
       - store_artifacts:
           path: reports/
           destination: reports
-
       - persist_to_workspace:
           root: .
           paths:
-            - venv
+            - .venv
 
   assets:
     docker:
