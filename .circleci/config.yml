@@ -137,7 +137,7 @@ jobs:
           name: Save and show RELEASE_VERSION
           command: |
             # derive from setuptools_scm or base version + build number
-            RELEASE_VERSION=$(python -m setuptools_scm)
+            RELEASE_VERSION=$(uv run python -m setuptools_scm)
 
             echo "export RELEASE_VERSION=$RELEASE_VERSION" > release.env
             echo "RELEASE_VERSION is $RELEASE_VERSION"
@@ -162,6 +162,7 @@ jobs:
       - run:
           name: Publish on PyPI
           command: |
+            pip install uv
             uv publish --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
 
   trigger-gitlab-pipeline:
