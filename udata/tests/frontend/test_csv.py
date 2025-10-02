@@ -108,8 +108,6 @@ def with_basename():
 
 
 class CsvTest(FrontTestCase):
-    modules = ["admin"]
-
     def create_app(self):
         app = super(CsvTest, self).create_app()
         app.register_blueprint(blueprint)

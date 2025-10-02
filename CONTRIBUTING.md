@@ -95,10 +95,6 @@ ruff format .
 > WARNING: running `ruff` on the codebase will lint and format all of it, whereas using `pre-commit` will
   only be done on the staged files.
 
-### JavaScript style guide
-
-We follow the [JavaScript styleguide][js-styleguide] from airbnb.
-
 ### HTML and CSS code guide
 
 We follow @mdo's [code guide][code-guide].
@@ -114,7 +110,6 @@ We try to stay as close as possible to [CommonMark][] but use default [extension
 [PEP-0257]: https://www.python.org/dev/peps/pep-0257/
 [PEP-0020]: https://www.python.org/dev/peps/pep-0020/
 [py-style-guide]: https://google.github.io/styleguide/pyguide.html
-[js-styleguide]: https://github.com/airbnb/javascript
 [code-guide]: http://codeguide.co/
 [commonmark]: http://commonmark.org/
 [extensions-mkdocs]: http://www.mkdocs.org/user-guide/writing-your-docs/

@@ -78,38 +78,6 @@ You can find [common errors and workarounds for Macos on udata documentation](ht
 !!! info
     You need to make sure that your virtualenv is activated for the entire development process.
 
-## Install nvm and dependencies
-
-udata and udata-front use NVM to manage node versions (based on `.nvmrc` file). You can install it based on [their instructions](https://github.com/nvm-sh/nvm).
-
-Then, you can install and activate the required node version.
-
-```bash
-nvm install
-nvm use
-```
-
-You can install JavaScript dependencies with NPM.
-
-```bash
-npm install
-```
-
-Once it's done, you should be able to run the build commands for JS and CSS.
-
-```bash
-inv assets-build
-inv widgets-build
-```
-
-### Alternative to nvm
-
-If you don't want to use nvm and are not actively contributing to the frontend part of udata, you shoud be able to install the dependencies with this command on a modern node version (tested on v20):
-
-```bash
-npm install --legacy-peer-deps
-```
-
 ## Configure udata
 
 udata uses a config file called `udata.cfg` and a custom directory as base for its filesystem, we’ll call it `fs`. You can put them as shown below.

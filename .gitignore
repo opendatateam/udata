@@ -29,17 +29,11 @@ bower
 *.log
 *.pid
 .webassets-cache
-js-built
 .DS_Store
-*.min.css
-*.min.js
 /instance/
 /static/
 /doc/_build/
 /site/
-/node_modules/
-/udata/static/
-/jsdoc/
 *.rdb
 venv
 .venv
