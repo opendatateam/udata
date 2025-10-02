@@ -21,7 +21,6 @@ class PostQuerySet(db.BaseQuerySet):
 @generate_fields(
     searchable=True,
     additional_sorts=[
-        {"key": "created", "value": "created_at"},
         {"key": "modified", "value": "last_modified"},
     ],
     default_sort="-published",
