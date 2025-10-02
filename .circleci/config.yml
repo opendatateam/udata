@@ -30,7 +30,7 @@ jobs:
       - restore_cache:
           keys:
             # 1. Exact match of dependencies
-            - py3-cache-v12-{{ arch }}-{{ checksum "pyproject.toml" }}
+            - py3-cache-v13-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
             # 2. Latest cache from this branch
             - py3-cache-v12-{{ arch }}-{{ .Branch }}
             # 3. Latest cache from base branch (e.g., master)
@@ -40,32 +40,28 @@ jobs:
       - run:
           name: Install Python dependencies
           command: |
-            python -m venv venv
-            source venv/bin/activate
-            pip install --upgrade pip
-            pip install -e ".[dev]"
+            pip install uv
+            uv sync --extra dev
       - save_cache:
-          key: py3-cache-v12-{{ arch }}-{{ checksum "pyproject.toml" }}
+          key: py3-cache-v13-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
           paths:
-            - venv
+            - .venv
       - save_cache:
-          key: py3-cache-v12-{{ arch }}-{{ .Branch }}
+          key: py3-cache-v13-{{ arch }}-{{ .Branch }}
           paths:
-            - venv
+            - .venv
       - run:
           name: Lint and format code and sort imports
           # ruff check --extend-select I . : check linting and imports sorting without fixing (to fix, use --fix)
           # ruff format --check . : check code formatting without fixing (to fix, remove --check)
           command: |
-            source venv/bin/activate
-            ruff check --extend-select I .
-            ruff format --check .
+            uv run ruff check --extend-select I .
+            uv run ruff format --check .
       - run:
           name: Run tests
           command: |
             mkdir -p reports/python
-            source venv/bin/activate
-            inv test --report --ci
+            uv run inv test --report --ci
       - store_test_results:
           path: reports/python
       - store_artifacts:
@@ -136,7 +132,8 @@ jobs:
       - run:
           name: Install build tools
           command: |
-            python -m pip install --upgrade pip build twine setuptools-scm
+            pip install uv
+            uv pip install build twine setuptools-scm
       - run:
           name: Save and show RELEASE_VERSION
           command: |
@@ -148,8 +145,7 @@ jobs:
       - run:
           name: Build a distributable package as a wheel release
           command: |
-            source venv/bin/activate
-            inv pydist
+            uv run inv pydist
       - store_artifacts:
           path: dist
       - persist_to_workspace:
@@ -167,9 +163,8 @@ jobs:
       - run:
           name: Publish on PyPI
           command: |
-            source venv/bin/activate
-            pip install twine
-            twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
+            uv pip install twine
+            uv run twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
 
   trigger-gitlab-pipeline:
     docker:
