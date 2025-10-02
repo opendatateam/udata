@@ -1,5 +1,6 @@
 from blinker import Signal
 from flask import url_for
+from mongoengine.errors import DoesNotExist
 from mongoengine.signals import post_delete, post_save
 
 from udata.api_fields import field
@@ -47,8 +48,12 @@ class TopicElement(Auditable, db.Document):
     @classmethod
     def post_delete(cls, sender, document, **kwargs):
         """Trigger reindex when element is deleted"""
-        if document.topic and document.element and hasattr(document.element, "id"):
-            reindex.delay(*as_task_param(document.element))
+        try:
+            if document.topic and document.element and hasattr(document.element, "id"):
+                reindex.delay(*as_task_param(document.element))
+        except DoesNotExist:
+            # Topic might have been deleted, causing dereferencing to fail
+            pass
         cls.on_delete.send(document)
 
 
@@ -85,6 +90,11 @@ class Topic(db.Datetimed, Auditable, Linkable, db.Document, Owned):
     after_save = Signal()
     on_create = Signal()
     on_update = Signal()
+
+    @classmethod
+    def post_delete(cls, sender, document, **kwargs):
+        """Delete associated TopicElements when a Topic is deleted"""
+        TopicElement.objects(topic=document).delete()
 
     def __str__(self):
         return self.name
@@ -126,4 +136,5 @@ class Topic(db.Datetimed, Auditable, Linkable, db.Document, Owned):
 
 post_save.connect(Topic.post_save, sender=Topic)
 post_save.connect(TopicElement.post_save, sender=TopicElement)
+post_delete.connect(Topic.post_delete, sender=Topic)
 post_delete.connect(TopicElement.post_delete, sender=TopicElement)
