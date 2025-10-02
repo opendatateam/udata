@@ -236,56 +236,45 @@ def register_extensions(app):
     mail.init_app(app)
     search.init_app(app)
     sentry.init_app(app)
-    register_response_middleware(app)
-    register_error_handlers(app)
+    app.after_request(return_404_html_if_requested)
+    app.register_error_handler(NotFound, page_not_found)
     return app
 
 
-def register_response_middleware(app):
-    """Register middleware to intercept and modify responses"""
+def return_404_html_if_requested(response):
+    # It's impossible to return an HTML page from an error handler of
+    # the API with Fask-RestX because the error handler is expected to
+    # return a JSON `dict` and not an HTML string.
+    # The only way to return the correct HTML response from a client
+    # that require HTML (for exemple by requesting /api/1/datasets/r/some-uuid with
+    # a non-existant resource) is to hook an `after_request` middleware.
 
-    @app.after_request
-    def return_404_html_if_requested(response):
-        # It's impossible to return an HTML page from an error handler of
-        # the API with Fask-RestX because the error handler is expected to
-        # return a JSON `dict` and not an HTML string.
-        # The only way to return the correct HTML response from a client
-        # that require HTML (for exemple by requesting /api/1/datasets/r/some-uuid with
-        # a non-existant resource) is to hook an `after_request` middleware.
-
-        if response.status_code != 404:
-            return response
-
-        # Return an HTML response if the user prefers HTML over JSON
-        if request.accept_mimetypes.best_match(["application/json", "text/html"]) == "text/html":
-            from udata.uris import homepage_url
-
-            html_content = render_template("404.html", homepage_url=homepage_url())
-            response = make_response(html_content, 404)
-            response.headers["Content-Type"] = "text/html; charset=utf-8"
-
+    if response.status_code != 404:
         return response
 
-
-def register_error_handlers(app):
-    """Register error handlers for the application"""
-
-    @app.errorhandler(NotFound)
-    def page_not_found(e: NotFound):
-        """
-        This handler is only called for non existing pages,
-        for example "/api/1/oups", see `return_404_html_if_requested`
-        for calling `abort(404)` inside the API.
-        """
+    # Return an HTML response if the user prefers HTML over JSON
+    if request.accept_mimetypes.best_match(["application/json", "text/html"]) == "text/html":
         from udata.uris import homepage_url
 
-        if (
-            request.accept_mimetypes.best_match(["application/json", "text/html"])
-            == "application/json"
-        ):
-            return jsonify({"error": e.description, "status": 404}), 404
+        html_content = render_template("404.html", homepage_url=homepage_url())
+        response = make_response(html_content, 404)
+        response.headers["Content-Type"] = "text/html; charset=utf-8"
 
-        return render_template("404.html", homepage_url=homepage_url()), 404
+    return response
+
+
+def page_not_found(e: NotFound):
+    """
+    This handler is only called for non existing pages,
+    for example "/api/1/oups", see `return_404_html_if_requested`
+    for calling `abort(404)` inside the API.
+    """
+    from udata.uris import homepage_url
+
+    if request.accept_mimetypes.best_match(["application/json", "text/html"]) == "application/json":
+        return jsonify({"error": e.description, "status": 404}), 404
+
+    return render_template("404.html", homepage_url=homepage_url()), 404
 
 
 def register_features(app):
