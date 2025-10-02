@@ -7,7 +7,17 @@ from os.path import abspath, dirname, exists, isfile, join
 
 import bson
 from flask import Blueprint as BaseBlueprint
-from flask import Flask, abort, g, json, make_response, render_template, send_from_directory
+from flask import (
+    Flask,
+    abort,
+    g,
+    json,
+    jsonify,
+    make_response,
+    render_template,
+    request,
+    send_from_directory,
+)
 from flask_caching import Cache
 from flask_wtf.csrf import CSRFProtect
 from speaklater import is_lazy_string
@@ -235,6 +245,19 @@ def register_error_handlers(app):
     @app.errorhandler(404)
     def page_not_found(e):
         from udata.uris import homepage_url
+
+        print("here")
+        print("here")
+        print("here")
+        print("here")
+        print(request.accept_mimetypes)
+
+        # Check if the request wants JSON
+        if (
+            request.accept_mimetypes.best_match(["application/json", "text/html"])
+            == "application/json"
+        ):
+            return jsonify({"error": "Not found", "status": 404}), 404
 
         return render_template("404.html", homepage_url=homepage_url()), 404
 
