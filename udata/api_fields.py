@@ -29,7 +29,7 @@ import flask_restx.fields as restx_fields
 import mongoengine
 import mongoengine.fields as mongo_fields
 from bson import DBRef, ObjectId
-from flask import Request
+from flask import Request, request
 from flask_restx import marshal
 from flask_restx.inputs import boolean
 from flask_restx.reqparse import RequestParser
@@ -506,6 +506,9 @@ def generate_fields(**kwargs) -> Callable:
             if searchable and args.get("q"):
                 phrase_query: str = " ".join([f'"{elem}"' for elem in args["q"].split(" ")])
                 base_query = base_query.search_text(phrase_query)
+
+                if "sort" not in request.args:
+                    base_query = base_query.order_by("$text_score")
 
             for filterable in filterables:
                 # If it's from an `nested_filter`, use the custom label instead of the key,
