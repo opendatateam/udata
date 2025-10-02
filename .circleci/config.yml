@@ -133,7 +133,7 @@ jobs:
           name: Install build tools
           command: |
             pip install uv
-            uv pip install build twine setuptools-scm
+            uv pip install build setuptools-scm
       - run:
           name: Save and show RELEASE_VERSION
           command: |
@@ -163,8 +163,7 @@ jobs:
       - run:
           name: Publish on PyPI
           command: |
-            uv pip install twine
-            uv run twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
+            uv publish --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
 
   trigger-gitlab-pipeline:
     docker:
