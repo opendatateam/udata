@@ -64,6 +64,15 @@ class Site(WithMetrics, db.Document):
     def __str__(self):
         return self.title or ""
 
+    @field(description="The current version of udata")
+    def version(self):
+        try:
+            from importlib.metadata import version
+
+            return version("udata")
+        except Exception:
+            return None
+
     def count_users(self):
         from udata.models import User
 
