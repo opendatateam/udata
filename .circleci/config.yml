@@ -236,6 +236,8 @@ jobs:
 workflows:
   build-publish-deploy:
     jobs:
+      - python
+      - assets
       - dist:
           requires:
             - python
