@@ -6,10 +6,10 @@ from . import FrontTestCase
 
 
 class ErrorHandlersTest(FrontTestCase):
-    def test_404_page_html(self):
+    def test_404_in_flask_routing_requesting_html(self):
         """Test that a 404 error displays the custom 404 HTML page"""
         # Request a non-existent page
-        response = self.get("/this-page-does-not-exist")
+        response = self.get("/this-page-does-not-exist", headers={"Accept": "text/html"})
 
         # Check that we get a 404 status code
         assert response.status_code == 404
@@ -22,7 +22,7 @@ class ErrorHandlersTest(FrontTestCase):
         # Check that there's a link back to the homepage
         assert "Back to home" in html or "home" in html.lower()
 
-    def test_resource_redirect_404_html(self):
+    def test_404_with_abort_function_requesting_html(self):
         """Test that resource redirect returns HTML 404 when HTML is requested"""
         # Use a UUID that doesn't exist
         non_existent_uuid = uuid4()
@@ -43,10 +43,10 @@ class ErrorHandlersTest(FrontTestCase):
         assert "404" in html
         assert "Page not found" in html or "page you are looking for does not exist" in html.lower()
 
-    def test_404_page_json(self):
+    def test_404_in_flask_routing(self):
         """Test that a 404 error returns JSON when requested"""
         # Request a non-existent page with JSON accept header
-        response = self.get("/this-page-does-not-exist", headers={"Accept": "application/json"})
+        response = self.get("/this-page-does-not-exist")
 
         # Check that we get a 404 status code
         assert response.status_code == 404
@@ -62,7 +62,7 @@ class ErrorHandlersTest(FrontTestCase):
         )
         assert data["status"] == 404
 
-    def test_api_resource_redirect_404_json(self):
+    def test_404_with_abort_function_and_custom_message(self):
         """Test that API resource redirect returns 404 JSON when resource doesn't exist"""
         # Use a UUID that doesn't exist
         non_existent_uuid = uuid4()
