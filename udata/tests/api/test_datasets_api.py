@@ -1825,9 +1825,11 @@ class DatasetResourceAPITest(APITestCase):
     def test_resource_redirect_success(self):
         """It should redirect to the resource URL"""
         resource = ResourceFactory(url="https://example.com/data.csv")
-        dataset = DatasetFactory(resources=[resource])
+        DatasetFactory(resources=[resource])
 
-        response = self.get(url_for("api.resource_redirect", id=resource.id), follow_redirects=False)
+        response = self.get(
+            url_for("api.resource_redirect", id=resource.id), follow_redirects=False
+        )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.location, "https://example.com/data.csv")
 
