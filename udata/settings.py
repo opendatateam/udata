@@ -261,6 +261,8 @@ class Defaults(object):
 
     DELAY_BEFORE_REMINDER_NOTIFICATION = 30  # Days
 
+    DELAY_BEFORE_APPEARING_IN_RSS_FEED = 10  # Hours
+
     # Harvest settings
     ###########################################################################
     HARVEST_ENABLE_MANUAL_RUN = False

@@ -1,10 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 
 import mongoengine
 from bson import ObjectId
 from feedgenerator.django.utils.feedgenerator import Atom1Feed
-from flask import make_response, redirect, request, url_for
+from flask import current_app, make_response, redirect, request, url_for
 from flask_login import current_user
 
 from udata.api import API, api, fields
@@ -63,8 +63,16 @@ class DataservicesAtomFeedAPI(API):
             _("Latest APIs"), description=None, feed_url=request.url, link=request.url_root
         )
 
+        # We add a delay before a new dataservice appears in feed in order to allow for post-publication moderation
+        created_delay = datetime.utcnow() - timedelta(
+            hours=current_app.config["DELAY_BEFORE_APPEARING_IN_RSS_FEED"]
+        )
+
         dataservices: List[Dataservice] = (
-            Dataservice.objects.visible().order_by("-created_at").limit(current_site.feed_size)
+            Dataservice.objects.filter(created_at__lte=created_delay)
+            .visible()
+            .order_by("-created_at")
+            .limit(current_site.feed_size)
         )
         for dataservice in dataservices:
             author_name = None

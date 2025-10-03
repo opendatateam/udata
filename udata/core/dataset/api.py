@@ -19,7 +19,7 @@ These changes might lead to backward compatibility breakage meaning:
 
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 
 import mongoengine
@@ -332,8 +332,16 @@ class DatasetsAtomFeedAPI(API):
             link=request.url_root,
         )
 
+        # We add a delay before a new dataset appears in feed in order to allow for post-publication moderation
+        created_delay = datetime.utcnow() - timedelta(
+            hours=current_app.config["DELAY_BEFORE_APPEARING_IN_RSS_FEED"]
+        )
+
         datasets: List[Dataset] = (
-            Dataset.objects.visible().order_by("-created_at_internal").limit(current_site.feed_size)
+            Dataset.objects.filter(created_at_internal__lte=created_delay)
+            .visible()
+            .order_by("-created_at_internal")
+            .limit(current_site.feed_size)
         )
         for dataset in datasets:
             author_name = None

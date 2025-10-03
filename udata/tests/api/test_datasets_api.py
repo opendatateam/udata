@@ -1292,7 +1292,9 @@ class DatasetAPITest(APITestCase):
 
 
 class DatasetsFeedAPItest(APITestCase):
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=10)
     def test_recent_feed(self):
+        # We have a 10 hours delay for a new object to appear in feed. A newly created one shouldn't appear.
         DatasetFactory(
             title="A", resources=[ResourceFactory()], created_at_internal=datetime.utcnow()
         )
@@ -1312,11 +1314,11 @@ class DatasetsFeedAPItest(APITestCase):
 
         feed = feedparser.parse(response.data)
 
-        self.assertEqual(len(feed.entries), 3)
-        self.assertEqual(feed.entries[0].title, "A")
-        self.assertEqual(feed.entries[1].title, "C")
-        self.assertEqual(feed.entries[2].title, "B")
+        self.assertEqual(len(feed.entries), 2)
+        self.assertEqual(feed.entries[0].title, "C")
+        self.assertEqual(feed.entries[1].title, "B")
 
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
     def test_recent_feed_owner(self):
         owner = UserFactory()
         DatasetFactory(owner=owner, resources=[ResourceFactory()])
@@ -1334,6 +1336,7 @@ class DatasetsFeedAPItest(APITestCase):
         self.assertEqual(author.name, owner.fullname)
         self.assertEqual(author.href, owner.url_for())
 
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
     def test_recent_feed_org(self):
         owner = UserFactory()
         org = OrganizationFactory()
