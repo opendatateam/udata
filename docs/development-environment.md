@@ -23,13 +23,21 @@ Dependencies are defined in `pyproject.toml` with the following optional groups:
 - `report`: Reporting dependencies (coverage, flake8, etc.)
 
 To install the project with all development dependencies:
-
+```shell
+uv sync --extra dev
+```
+...or, with pip:
 ```shell
 pip install -e ".[dev]"
 ```
 
 To install with specific optional dependencies:
-
+```shell
+uv sync --extra test         # For testing
+uv sync --extra doc          # For documentation
+uv sync --extra report       # For reporting
+```
+...or, with pip:
 ```shell
 pip install -e ".[test]"     # For testing
 pip install -e ".[doc]"      # For documentation
