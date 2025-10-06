@@ -333,16 +333,38 @@ class DatasetsAtomFeedAPI(API):
         )
 
         # We add a delay before a new dataset appears in feed in order to allow for post-publication moderation
+        # The delay is not taken into account if the dataset is published by a certified organization
+        # We need to merge the two lists manually, compensating for the delay, else datasets with delay may not show
+        # if new datasets have been published by certified organization in the meantime
         created_delay = datetime.utcnow() - timedelta(
             hours=current_app.config["DELAY_BEFORE_APPEARING_IN_RSS_FEED"]
         )
-
-        datasets: List[Dataset] = (
-            Dataset.objects.filter(created_at_internal__lte=created_delay)
+        datasets_with_delay: List[Dataset] = (
+            Dataset.objects.filter(
+                created_at_internal__lte=created_delay,
+                organization__nin=Organization.objects(badges__kind="certified"),
+            )
             .visible()
             .order_by("-created_at_internal")
             .limit(current_site.feed_size)
         )
+        datasets_without_delay: List[Dataset] = (
+            Dataset.objects.filter(organization__in=Organization.objects(badges__kind="certified"))
+            .visible()
+            .order_by("-created_at_internal")
+            .limit(current_site.feed_size)
+        )
+        datasets = sorted(
+            [*datasets_with_delay, *datasets_without_delay],
+            reverse=True,
+            key=lambda dat: (
+                dat.created_at_internal
+                + timedelta(hours=current_app.config["DELAY_BEFORE_APPEARING_IN_RSS_FEED"])
+            )
+            if dat in datasets_with_delay
+            else dat.created_at_internal,
+        )[: current_site.feed_size]
+
         for dataset in datasets:
             author_name = None
             author_uri = None

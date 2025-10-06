@@ -37,6 +37,7 @@ from udata.core.dataset.models import (
     ResourceMixin,
 )
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.models import OrganizationBadge
 from udata.core.spatial.factories import GeoLevelFactory, SpatialCoverageFactory
 from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
@@ -1294,19 +1295,31 @@ class DatasetAPITest(APITestCase):
 class DatasetsFeedAPItest(APITestCase):
     @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=10)
     def test_recent_feed(self):
+        certified_org = OrganizationFactory(badges=[OrganizationBadge(kind="certified")])
         # We have a 10 hours delay for a new object to appear in feed. A newly created one shouldn't appear.
         DatasetFactory(
             title="A", resources=[ResourceFactory()], created_at_internal=datetime.utcnow()
         )
+        # Except in the case of a new dataset published by a certified organization
         DatasetFactory(
             title="B",
-            resources=[ResourceFactory()],
-            created_at_internal=datetime.utcnow() - timedelta(days=2),
+            created_at_internal=datetime.utcnow(),
+            organization=certified_org,
         )
         DatasetFactory(
             title="C",
-            resources=[ResourceFactory()],
+            created_at_internal=datetime.utcnow() - timedelta(days=2),
+        )
+        DatasetFactory(
+            title="D",
             created_at_internal=datetime.utcnow() - timedelta(days=1),
+        )
+        # Even if dataset E is created more recently than D, it should appear after in the feed, since it doesn't have a delay
+        # before appearing in the field because it is published by a certified organization
+        DatasetFactory(
+            title="E",
+            created_at_internal=datetime.utcnow() - timedelta(hours=23),
+            organization=certified_org,
         )
 
         response = self.get(url_for("api.recent_datasets_atom_feed"))
@@ -1314,9 +1327,11 @@ class DatasetsFeedAPItest(APITestCase):
 
         feed = feedparser.parse(response.data)
 
-        self.assertEqual(len(feed.entries), 2)
-        self.assertEqual(feed.entries[0].title, "C")
-        self.assertEqual(feed.entries[1].title, "B")
+        self.assertEqual(len(feed.entries), 4)
+        self.assertEqual(feed.entries[0].title, "B")
+        self.assertEqual(feed.entries[1].title, "D")
+        self.assertEqual(feed.entries[2].title, "E")
+        self.assertEqual(feed.entries[3].title, "C")
 
     @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
     def test_recent_feed_owner(self):
