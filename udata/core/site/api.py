@@ -15,6 +15,8 @@ from udata.core.organization.csv import OrganizationCsvAdapter
 from udata.core.organization.models import Organization
 from udata.core.reuse.api import ReuseApiParser
 from udata.core.reuse.csv import ReuseCsvAdapter
+from udata.core.tags.csv import TagCsvAdapter
+from udata.core.tags.models import Tag
 from udata.harvest.csv import HarvestSourceCsvAdapter
 from udata.harvest.models import HarvestSource
 from udata.models import Dataset, Reuse
@@ -157,6 +159,13 @@ class SiteHarvestsCsv(API):
             return redirect(get_export_url("harvest"))
         adapter = HarvestSourceCsvAdapter(get_csv_queryset(HarvestSource).order_by("created_at"))
         return csv.stream(adapter, "harvest")
+
+
+@api.route("/site/tags.csv", endpoint="site_tags_csv")
+class SiteTagsCsv(API):
+    def get(self):
+        adapter = TagCsvAdapter(Tag.objects.order_by("-total"))
+        return csv.stream(adapter, "tags")
 
 
 @api.route("/site/context.jsonld", endpoint="site_jsonld_context")

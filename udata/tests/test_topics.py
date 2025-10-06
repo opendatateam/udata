@@ -15,7 +15,7 @@ from udata.core.topic.factories import (
     TopicFactory,
     TopicWithElementsFactory,
 )
-from udata.core.topic.models import Topic
+from udata.core.topic.models import Topic, TopicElement
 from udata.search import reindex
 from udata.tests.helpers import assert_emit
 
@@ -142,3 +142,15 @@ class TopicModelTest:
         with pytest.raises(ValidationError):
             topic = TopicFactory()
             TopicElementFactory(topic=topic, element=DiscussionFactory())
+
+    def test_topic_deletion_deletes_associated_elements(self):
+        """Test that deleting a topic also deletes its associated TopicElements"""
+        topic = TopicWithElementsFactory()
+
+        element_ids = [elem.id for elem in topic.elements]
+        assert len(element_ids) > 0
+
+        topic.delete()
+
+        for element_id in element_ids:
+            assert TopicElement.objects(id=element_id).first() is None

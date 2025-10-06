@@ -1,21 +1,28 @@
 # Changelog
 
-## Current (in progress)
+## 11.1.1 (2025-10-02)
 
-- Simplify getting mail connection (dummy or real) condition [#3410](https://github.com/opendatateam/udata/pull/3410)
-- Emit harvest activities. Set `HARVEST_ACTIVITY_USER_ID` to an existing user account to activate it [#3412](https://github.com/opendatateam/udata/pull/3412)
+- feat(git): new tag_version.sh script to replace Bumpr ([#3451](https://github.com/opendatateam/udata/pull/3451))
+- fix(topics): delete TopicElements when Topic is deleted ([#3452](https://github.com/opendatateam/udata/pull/3452))
+- Update to version 11.1.1.dev for next development cycle
+
+
+## 11.1.0 (2025-09-30)
+
+- chore: migrate to pyproject.toml, replace `CIRCLE_TAG` by `setuptools_scm` to compute the correct version automatically [#3413](https://github.com/opendatateam/udata/pull/3413) [#3434](https://github.com/opendatateam/udata/pull/3434) [#3435](https://github.com/opendatateam/udata/pull/3435) [#3437](https://github.com/opendatateam/udata/pull/3437) [#3438](https://github.com/opendatateam/udata/pull/3438/) [3447](https://github.com/opendatateam/udata/pull/3447)
 - fix(harvest): refactor dates handling [#3352](https://github.com/opendatateam/udata/pull/3352)
-- Remove unused BadgesField [#3420](https://github.com/opendatateam/udata/pull/3420)
-- migrate to pyproject.toml, replace `CIRCLE_TAG` by `setuptools_scm` to compute the correct version automatically [#3413](https://github.com/opendatateam/udata/pull/3413) [#3434](https://github.com/opendatateam/udata/pull/3434) [#3435](https://github.com/opendatateam/udata/pull/3435) [#3437](https://github.com/opendatateam/udata/pull/3437) [#3438](https://github.com/opendatateam/udata/pull/3438/)
+- feat(harvest): emit harvest activities. Set `HARVEST_ACTIVITY_USER_ID` to an existing user account to activate it [#3412](https://github.com/opendatateam/udata/pull/3412)
+- feat(activity): ignore list reordering in changed fields detection [#3448](https://github.com/opendatateam/udata/pull/3448)
+- feat(dataservice): Keep existing attached datasets to a dataservice at harvest time [#3449](https://github.com/opendatateam/udata/pull/3449)
+- feat(badges): add new badges [#3415](https://github.com/opendatateam/udata/pull/3415)
+- fix(badges): remove unused BadgesField [#3420](https://github.com/opendatateam/udata/pull/3420)
+- chore(mail): simplify getting mail connection (dummy or real) condition [#3410](https://github.com/opendatateam/udata/pull/3410)
 - fix(topic): absolute Topic.uri [#3436](https://github.com/opendatateam/udata/pull/3436)
 - feat(topics): search by elements content [#3443](https://github.com/opendatateam/udata/pull/3443)
 - feat(topic): add elements activities [#3439](https://github.com/opendatateam/udata/pull/3439)
 - feat(topics): serialize elements in topic_elements_create response [#3446](https://github.com/opendatateam/udata/pull/3446)
-- Add new badges [#3415](https://github.com/opendatateam/udata/pull/3415)
-- Refactor `@function_field` and `@field` to provide better doc and type support [#3441](https://github.com/opendatateam/udata/pull/3441/)
 - feat(topic): add Dataservice to supported elements [#3444](https://github.com/opendatateam/udata/pull/3444)
-- Ignore list reordering in changed fields detection [#3448](https://github.com/opendatateam/udata/pull/3448)
-- Move factory-boy to the main dependencies [3447](https://github.com/opendatateam/udata/pull/3447)
+- feat(api): refactor `@function_field` and `@field` to provide better doc and type support [#3441](https://github.com/opendatateam/udata/pull/3441/)
 
 ## 11.0.1 (2025-09-15)
 
@@ -818,6 +825,7 @@ Search refactor [#2680](https://github.com/opendatateam/udata/pull/2680)
 
 - Fix fields empty value in admin form to allow for unsetting fields [#2691](https://github.com/opendatateam/udata/pull/2691)
 - :warning: Add a new required topic string field on reuses. The associated migration set default topic to `others` [#2689](https://github.com/opendatateam/udata/pull/2689)
+- Use [uv](https://docs.astral.sh/uv/) as package manager and lockfile [#3459](https://github.com/opendatateam/udata/pull/3459)
 
 ## 3.3.0 (2021-12-10)
 
