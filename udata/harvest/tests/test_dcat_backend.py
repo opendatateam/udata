@@ -1021,6 +1021,68 @@ class CswDcatBackendTest:
         assert job.status == "done"
         assert len(job.items) == 1
 
+    @pytest.mark.parametrize(
+        "remote_url_prefix",
+        [
+            None,
+            "http://catalog.example.com",  # no trailing slash
+            "http://catalog.example.com/",  # trailing slash
+        ],
+    )
+    def test_url_prefix(self, rmock, remote_url_prefix: str):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+        <csw:GetRecordsResponse xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
+          <csw:SearchStatus timestamp="2023-03-03T16:09:50.697645Z" />
+          <csw:SearchResults numberOfRecordsMatched="1" numberOfRecordsReturned="1" elementSet="full" nextRecord="0">
+            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+                     xmlns:dct="http://purl.org/dc/terms/"
+                     xmlns:dcat="http://www.w3.org/ns/dcat#"
+                     xmlns:foaf="http://xmlns.com/foaf/0.1/">
+              <dcat:CatalogRecord rdf:about="record-1">
+                <foaf:primaryTopic rdf:resource="dataset-1"/>
+                <dct:identifier>id-1</dct:identifier>
+              </dcat:CatalogRecord>
+              <dcat:Dataset rdf:about="dataset-1">
+                <dct:identifier>dataset-1</dct:identifier>
+                <dct:title>Dataset 1</dct:title>
+                <dcat:landingPage rdf:resource="http://data.example.com/datasets/dataset-1"/>
+              </dcat:Dataset>
+            </rdf:RDF>
+          </csw:SearchResults>
+        </csw:GetRecordsResponse>
+        """
+        rmock.get("http://data.example.com/datasets/dataset-1", status_code=200)
+        rmock.head(rmock.ANY, headers={"Content-Type": "application/xml"})
+        rmock.post(rmock.ANY, text=xml)
+
+        source = HarvestSourceFactory(
+            backend="csw-dcat",
+            config={
+                "extra_configs": [
+                    {
+                        "key": "remote_url_prefix",
+                        "value": remote_url_prefix,
+                    }
+                ]
+            },
+        )
+
+        actions.run(source)
+        source.reload()
+        job = source.get_last_job()
+        assert len(job.items) == 1
+
+        dataset = Dataset.objects[0]
+        if remote_url_prefix:
+            # Computed from source config `remote_url_prefix` + metadata `dct:identifier`.
+            assert dataset.harvest.remote_url == "http://catalog.example.com/id-1"
+        else:
+            # First `dct:landingPage` found in the resource.
+            # If it breaks, it's not necessarily a bug — this acts as a demonstration of current behavior.
+            assert dataset.harvest.remote_url == "http://data.example.com/datasets/dataset-1"
+
 
 @pytest.mark.usefixtures("clean_db")
 @pytest.mark.options(PLUGINS=["csw"])

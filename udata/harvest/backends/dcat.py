@@ -258,6 +258,15 @@ class CswDcatBackend(DcatBackend):
 
     display_name = "CSW-DCAT"
 
+    extra_configs = (
+        HarvestExtraConfig(
+            _("Remote URL prefix"),
+            "remote_url_prefix",
+            str,
+            _("A prefix used to build the remote URL of the harvested items."),
+        ),
+    )
+
     # CSW_REQUEST is based on:
     # - Request syntax from spec [1] and example requests [1] [2].
     # - Sort settings to ensure stable paging [3].
@@ -425,15 +434,6 @@ class CswIso19139DcatBackend(CswDcatBackend):
     """
 
     display_name = "CSW-ISO-19139"
-
-    extra_configs = (
-        HarvestExtraConfig(
-            _("Remote URL prefix"),
-            "remote_url_prefix",
-            str,
-            _("A prefix used to build the remote URL of the harvested items."),
-        ),
-    )
 
     CSW_OUTPUT_SCHEMA = "http://www.isotc211.org/2005/gmd"
 
