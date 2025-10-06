@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - {{ _('Page not found') }}</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 600px;
+        }
+        h1 {
+            font-size: 3rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+        }
+        p {
+            color: #666;
+            line-height: 1.5;
+            margin: 0 0 1.5rem 0;
+        }
+        a {
+            color: #000;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>404</h1>
+        <p>{{ _('The page you are looking for does not exist.') }}</p>
+        <a href="{{ homepage_url }}">{{ _('Back to home') }}</a>
+    </div>
+</body>
+</html>
