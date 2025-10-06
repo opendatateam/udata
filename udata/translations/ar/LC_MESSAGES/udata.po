@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2025-08-20 12:14+0200\n"
-"PO-Revision-Date: 2025-08-20 10:16\n"
+"POT-Creation-Date: 2025-10-06 17:05+0200\n"
+"PO-Revision-Date: 2025-10-06 15:41\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: ar\n"
 "Language-Team: Arabic\n"
@@ -42,7 +42,7 @@ msgstr "تم تغيير كلمة المرور الخاصه بك"
 msgid "Password reset instructions"
 msgstr "إرشادات إعادة تعيين كلمة المرور"
 
-#: udata/settings.py:513
+#: udata/settings.py:520
 msgid "This dataset has been archived"
 msgstr ""
 
@@ -51,41 +51,41 @@ msgstr ""
 msgid "Invalid URL \"{url}\": {reason}"
 msgstr ""
 
-#: udata/tests/api/test_datasets_api.py:1125 udata/tests/test_model.py:403
+#: udata/tests/api/test_datasets_api.py:1126 udata/tests/test_model.py:403
 #: udata/uris.py:57
 #, python-brace-format
 msgid "Invalid URL \"{url}\""
 msgstr ""
 
-#: udata/uris.py:125
+#: udata/uris.py:131
 #, python-brace-format
 msgid "Invalid scheme {0}, allowed schemes: {1}"
 msgstr ""
 
-#: udata/uris.py:128
+#: udata/uris.py:134
 msgid "Credentials in URL are not allowed"
 msgstr ""
 
-#: udata/uris.py:132
+#: udata/uris.py:138
 #, python-brace-format
 msgid "Invalid TLD {0}"
 msgstr ""
 
-#: udata/uris.py:141
+#: udata/uris.py:147
 #, python-brace-format
 msgid "{0} is a multicast IP"
 msgstr ""
 
-#: udata/uris.py:143
+#: udata/uris.py:149
 #, python-brace-format
 msgid "{0} is a mask IP"
 msgstr ""
 
-#: udata/uris.py:147
+#: udata/uris.py:153
 msgid "is a local URL"
 msgstr ""
 
-#: udata/tests/test_model.py:421 udata/uris.py:154
+#: udata/tests/test_model.py:421 udata/uris.py:160
 msgid "is a private URL"
 msgstr ""
 
@@ -193,8 +193,8 @@ msgstr "هل تريد إنشاء بعض نماذج البيانات؟"
 msgid "Your udata instance is ready!"
 msgstr ""
 
-#: udata/core/owned.py:64 udata/forms/fields.py:752
-#: udata/tests/api/test_dataservices_api.py:540
+#: udata/core/owned.py:64 udata/forms/fields.py:759
+#: udata/tests/api/test_dataservices_api.py:550
 msgid "You can only set yourself as owner"
 msgstr "يمكنك تعيين نفسك فقط كمالك"
 
@@ -202,8 +202,8 @@ msgstr "يمكنك تعيين نفسك فقط كمالك"
 msgid "Unknown organization"
 msgstr ""
 
-#: udata/core/owned.py:77 udata/forms/fields.py:784
-#: udata/tests/api/test_dataservices_api.py:553
+#: udata/core/owned.py:77 udata/forms/fields.py:791
+#: udata/tests/api/test_dataservices_api.py:563
 msgid "Permission denied for this organization"
 msgstr "تم رفض الإذن لهذه المؤسسة"
 
@@ -221,7 +221,7 @@ msgstr ""
 
 #: udata/core/contact_point/forms.py:12 udata/core/jobs/forms.py:27
 #: udata/core/organization/forms.py:46 udata/core/post/forms.py:15
-#: udata/core/topic/forms.py:16 udata/harvest/forms.py:78
+#: udata/core/topic/forms.py:37 udata/harvest/forms.py:78
 #: udata/templates/api/admin.html:10
 msgid "Name"
 msgstr "اسم"
@@ -240,7 +240,7 @@ msgstr ""
 
 #: udata/core/contact_point/forms.py:20 udata/core/dataset/forms.py:117
 #: udata/core/dataset/forms.py:185 udata/core/discussions/forms.py:13
-#: udata/core/discussions/forms.py:29 udata/core/topic/forms.py:14
+#: udata/core/discussions/forms.py:29 udata/core/topic/forms.py:35
 #: udata/harvest/forms.py:87
 msgid "Publish as"
 msgstr "نشر بإسم"
@@ -265,65 +265,65 @@ msgstr ""
 msgid "At least an email or a contact form is required for a contact point"
 msgstr ""
 
-#: udata/core/dataservices/activities.py:21
+#: udata/core/dataservices/activities.py:23
 msgid "created a dataservice"
 msgstr ""
 
-#: udata/core/dataservices/activities.py:27
+#: udata/core/dataservices/activities.py:29
 msgid "updated a dataservice"
 msgstr ""
 
-#: udata/core/dataservices/activities.py:34
+#: udata/core/dataservices/activities.py:36
 msgid "deleted a dataservice"
 msgstr ""
 
-#: udata/core/dataservices/api.py:62
+#: udata/core/dataservices/api.py:63
 msgid "Latest APIs"
 msgstr ""
 
-#: udata/core/dataservices/models.py:129
+#: udata/core/dataservices/models.py:132
 msgid "You can only set one condition for a given access audience role"
 msgstr ""
 
-#: udata/core/dataservices/models.py:159
+#: udata/core/dataservices/models.py:182
 msgid "dataservice"
 msgstr ""
 
-#: udata/core/dataservices/models.py:241 udata/core/dataset/models.py:593
+#: udata/core/dataservices/models.py:271 udata/core/dataset/models.py:605
 #: udata/mongo/datetime_fields.py:60
 msgid "Creation date"
 msgstr "تاريخ الإنشاء"
 
-#: udata/core/dataservices/models.py:247 udata/core/dataset/models.py:598
+#: udata/core/dataservices/models.py:277 udata/core/dataset/models.py:610
 #: udata/mongo/datetime_fields.py:66
 msgid "Last modification date"
 msgstr "تاريخ التعديل الأخير"
 
-#: udata/core/dataset/activities.py:22
+#: udata/core/dataset/activities.py:24
 msgid "created a dataset"
 msgstr "قام بإنشاء مجموعة بيانات"
 
-#: udata/core/dataset/activities.py:28
+#: udata/core/dataset/activities.py:30
 msgid "updated a dataset"
 msgstr "قام بتحديث مجموعة بيانات"
 
-#: udata/core/dataset/activities.py:35
+#: udata/core/dataset/activities.py:37
 msgid "deleted a dataset"
 msgstr "قام بحذف مجموعة بيانات"
 
-#: udata/core/dataset/activities.py:41
+#: udata/core/dataset/activities.py:43
 msgid "added a resource to a dataset"
 msgstr ""
 
-#: udata/core/dataset/activities.py:47
+#: udata/core/dataset/activities.py:49
 msgid "updated a resource"
 msgstr ""
 
-#: udata/core/dataset/activities.py:53
+#: udata/core/dataset/activities.py:55
 msgid "removed a resource from a dataset"
 msgstr ""
 
-#: udata/core/dataset/api.py:321
+#: udata/core/dataset/api.py:329
 msgid "Latest datasets"
 msgstr ""
 
@@ -477,7 +477,8 @@ msgstr ""
 
 #: udata/core/dataset/forms.py:66 udata/core/dataset/forms.py:147
 #: udata/core/discussions/forms.py:14 udata/core/discussions/forms.py:25
-#: udata/core/site/forms.py:12 udata/templates/mail/discussion_closed.html:26
+#: udata/core/site/forms.py:12 udata/core/topic/forms.py:13
+#: udata/templates/mail/discussion_closed.html:26
 #: udata/templates/mail/new_discussion.html:25
 #: udata/templates/mail/new_discussion_comment.html:26
 msgid "Title"
@@ -485,7 +486,8 @@ msgstr "عنوان"
 
 #: udata/core/dataset/forms.py:69 udata/core/dataset/forms.py:151
 #: udata/core/jobs/forms.py:28 udata/core/organization/forms.py:50
-#: udata/core/topic/forms.py:17 udata/harvest/forms.py:80
+#: udata/core/topic/forms.py:14 udata/core/topic/forms.py:38
+#: udata/harvest/forms.py:80
 msgid "Description"
 msgstr "وصف"
 
@@ -533,7 +535,7 @@ msgstr "حجم الملف بالبايت"
 msgid "Related dataset"
 msgstr "مجموعة البيانات متعلقة"
 
-#: udata/core/dataset/forms.py:139 udata/tests/api/test_datasets_api.py:1037
+#: udata/core/dataset/forms.py:139 udata/tests/api/test_datasets_api.py:1038
 msgid "Wrong contact point id or contact point ownership mismatch"
 msgstr ""
 
@@ -582,16 +584,17 @@ msgid "The period covered by the data"
 msgstr "الفترة التي تغطيها البيانات."
 
 #: udata/core/dataset/forms.py:176 udata/core/spatial/forms.py:85
-#: udata/core/topic/forms.py:23
+#: udata/core/topic/forms.py:86
 msgid "Spatial coverage"
 msgstr "التغطية المكانية"
 
-#: udata/core/dataset/forms.py:176 udata/core/topic/forms.py:23
+#: udata/core/dataset/forms.py:176 udata/core/topic/forms.py:86
 msgid "The geographical area covered by the data."
 msgstr "المنطقة الجغرافية التي تغطيها البيانات."
 
 #: udata/core/dataset/forms.py:178 udata/core/post/forms.py:26
-#: udata/core/site/forms.py:13 udata/core/topic/forms.py:26
+#: udata/core/site/forms.py:13 udata/core/topic/forms.py:15
+#: udata/core/topic/forms.py:89
 msgid "Tags"
 msgstr "علامات"
 
@@ -599,7 +602,7 @@ msgstr "علامات"
 msgid "Some taxonomy keywords"
 msgstr "بعض الكلمات الرئيسية للتصنيف"
 
-#: udata/core/dataset/forms.py:180 udata/core/topic/forms.py:27
+#: udata/core/dataset/forms.py:180 udata/core/topic/forms.py:90
 msgid "Private"
 msgstr "خاص"
 
@@ -607,50 +610,70 @@ msgstr "خاص"
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "قم بتقييد رؤية البيانات لك أو لمؤسستك فقط."
 
-#: udata/core/dataset/models.py:63
+#: udata/core/dataset/models.py:68
 msgid "Pivotal data"
 msgstr "بيانات محورية"
 
-#: udata/core/dataset/models.py:142
+#: udata/core/dataset/models.py:69
+msgid "Reference data public service"
+msgstr ""
+
+#: udata/core/dataset/models.py:70
+msgid "Inspire"
+msgstr ""
+
+#: udata/core/dataset/models.py:71
+msgid "High value datasets"
+msgstr ""
+
+#: udata/core/dataset/models.py:72
+msgid "Certified statistic series"
+msgstr ""
+
+#: udata/core/dataset/models.py:73
+msgid "Statistical series of general interest"
+msgstr ""
+
+#: udata/core/dataset/models.py:153
 msgid "A schema must contains a name or an URL when a version is provided."
 msgstr ""
 
-#: udata/core/dataset/models.py:174 udata/tests/api/test_datasets_api.py:1133
-#: udata/tests/api/test_datasets_api.py:1144
+#: udata/core/dataset/models.py:185 udata/tests/api/test_datasets_api.py:1134
+#: udata/tests/api/test_datasets_api.py:1145
 #, python-brace-format
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:193 udata/tests/api/test_datasets_api.py:1156
+#: udata/core/dataset/models.py:204 udata/tests/api/test_datasets_api.py:1157
 #, python-brace-format
 msgid "Version \"{version}\" is not an allowed value for the schema \"{name}\". Allowed versions: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:470 udata/core/dataset/rdf.py:567
-#: udata/tests/dataset/test_dataset_rdf.py:709
-#: udata/tests/dataset/test_dataset_rdf.py:722
+#: udata/core/dataset/models.py:482 udata/core/dataset/rdf.py:576
+#: udata/tests/dataset/test_dataset_rdf.py:723
+#: udata/tests/dataset/test_dataset_rdf.py:736
 msgid "Nameless resource"
 msgstr "مورد مجهول"
 
-#: udata/core/dataset/models.py:572
+#: udata/core/dataset/models.py:584
 msgid "Future date of update"
 msgstr "تاريخ التحديث في المستقبل"
 
-#: udata/core/dataset/models.py:604
+#: udata/core/dataset/models.py:616
 msgid "Last update of the dataset resources"
 msgstr ""
 
-#: udata/core/dataset/models.py:659
+#: udata/core/dataset/models.py:671
 msgid "dataset"
 msgstr "مجموعة البيانات"
 
-#: udata/core/dataset/rdf.py:565 udata/tests/dataset/test_dataset_rdf.py:679
-#: udata/tests/dataset/test_dataset_rdf.py:696
+#: udata/core/dataset/rdf.py:574 udata/tests/dataset/test_dataset_rdf.py:693
+#: udata/tests/dataset/test_dataset_rdf.py:710
 #, python-brace-format
 msgid "{format} resource"
 msgstr ""
 
-#: udata/core/dataset/tasks.py:112
+#: udata/core/dataset/tasks.py:109
 msgid "You need to update some frequency-based datasets"
 msgstr "يجب تحديث بعض مجموعات البيانات المستندة إلى الترددات"
 
@@ -848,11 +871,11 @@ msgstr "عنوان"
 msgid "Content"
 msgstr "محتوى"
 
-#: udata/core/post/forms.py:19 udata/core/topic/forms.py:19
+#: udata/core/post/forms.py:19
 msgid "Associated datasets"
 msgstr "مجموعة بيانات مرتبطة"
 
-#: udata/core/post/forms.py:20 udata/core/topic/forms.py:20
+#: udata/core/post/forms.py:20
 msgid "Associated reuses"
 msgstr "استخدامات مرتبطة"
 
@@ -1012,7 +1035,7 @@ msgstr "هذا العنوان الإلكتروني مسجل من قبل"
 msgid "reuse"
 msgstr "استخدام"
 
-#: udata/core/reuse/tasks.py:45
+#: udata/core/reuse/tasks.py:48
 msgid "New reuse"
 msgstr "استخدام جديد"
 
@@ -1117,15 +1140,35 @@ msgstr ""
 msgid "French arrondissement"
 msgstr ""
 
-#: udata/core/topic/activities.py:17
+#: udata/core/topic/activities.py:25
 msgid "created a topic"
 msgstr ""
 
-#: udata/core/topic/activities.py:23
+#: udata/core/topic/activities.py:31
 msgid "updated a topic"
 msgstr ""
 
-#: udata/core/topic/forms.py:28
+#: udata/core/topic/activities.py:38
+msgid "added an element to a topic"
+msgstr ""
+
+#: udata/core/topic/activities.py:44
+msgid "updated an element in a topic"
+msgstr ""
+
+#: udata/core/topic/activities.py:51
+msgid "removed an element from a topic"
+msgstr ""
+
+#: udata/core/topic/forms.py:17
+msgid "Element"
+msgstr ""
+
+#: udata/core/topic/forms.py:26
+msgid "A topic element must have a title or an element."
+msgstr ""
+
+#: udata/core/topic/forms.py:91
 msgid "Featured"
 msgstr "مميز"
 
@@ -1225,46 +1268,46 @@ msgstr ""
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
 msgstr ""
 
-#: udata/forms/fields.py:461 udata/forms/fields.py:513
+#: udata/forms/fields.py:461 udata/forms/fields.py:520
 #, python-brace-format
 msgid "{0} does not exists"
 msgstr ""
 
-#: udata/forms/fields.py:487 udata/tests/forms/test_model_field.py:333
+#: udata/forms/fields.py:494 udata/tests/forms/test_model_field.py:333
 #: udata/tests/forms/test_model_field.py:349
 msgid "Missing \"id\" field"
 msgstr ""
 
-#: udata/forms/fields.py:494
+#: udata/forms/fields.py:501
 #, python-brace-format
 msgid "Expect a \"{0}\" class but \"{1}\" was found"
 msgstr ""
 
-#: udata/forms/fields.py:500 udata/tests/forms/test_model_field.py:41
+#: udata/forms/fields.py:507 udata/tests/forms/test_model_field.py:41
 #: udata/tests/forms/test_model_field.py:56
 msgid "Expect both class and identifier"
 msgstr ""
 
-#: udata/forms/fields.py:545
+#: udata/forms/fields.py:552
 #, python-brace-format
 msgid "Model for {0} not found"
 msgstr ""
 
-#: udata/forms/fields.py:579
+#: udata/forms/fields.py:586
 #, python-brace-format
 msgid "Unknown identifiers: {identifiers}"
 msgstr ""
 
-#: udata/forms/fields.py:713
+#: udata/forms/fields.py:720
 msgid "Unable to parse date range"
 msgstr ""
 
-#: udata/forms/fields.py:745 udata/forms/fields.py:777
+#: udata/forms/fields.py:752 udata/forms/fields.py:784
 #: udata/tests/forms/test_publish_as_field.py:214
 msgid "Cannot change owner after creation. Please use transfer feature."
 msgstr ""
 
-#: udata/forms/fields.py:750 udata/forms/fields.py:782
+#: udata/forms/fields.py:757 udata/forms/fields.py:789
 msgid "You must be authenticated"
 msgstr "يجب ان تكون موثق"
 
@@ -1325,11 +1368,11 @@ msgstr "تم تخطيه"
 msgid "Archived"
 msgstr ""
 
-#: udata/harvest/backends/dcat.py:414
+#: udata/harvest/backends/dcat.py:431
 msgid "Remote URL prefix"
 msgstr ""
 
-#: udata/harvest/backends/dcat.py:417
+#: udata/harvest/backends/dcat.py:434
 msgid "A prefix used to build the remote URL of the harvested items."
 msgstr ""
 
@@ -1347,6 +1390,18 @@ msgstr ""
 
 #: udata/harvest/backends/ckan/harvesters.py:36
 msgid "A CKAN tag name"
+msgstr ""
+
+#: udata/templates/404.html:6
+msgid "Page not found"
+msgstr ""
+
+#: udata/templates/404.html:39
+msgid "The page you are looking for does not exist."
+msgstr ""
+
+#: udata/templates/404.html:40
+msgid "Back to home"
 msgstr ""
 
 #: udata/templates/admin.html:7
@@ -1753,19 +1808,19 @@ msgstr ""
 msgid "Expect a \"Target\" class but \"Wrong\" was found"
 msgstr ""
 
-#: udata/tests/search/test_adapter.py:30
+#: udata/tests/search/test_adapter.py:31
 msgid "Never reused"
 msgstr "لم تستخدم قط"
 
-#: udata/tests/search/test_adapter.py:31
+#: udata/tests/search/test_adapter.py:32
 msgid "Little reused"
 msgstr "مستخدم قليلا"
 
-#: udata/tests/search/test_adapter.py:32
+#: udata/tests/search/test_adapter.py:33
 msgid "Quite reused"
 msgstr "مستخدم"
 
-#: udata/tests/search/test_adapter.py:33
+#: udata/tests/search/test_adapter.py:34
 msgid "Heavily reused"
 msgstr "مستخدم بشكل كبير"
 
