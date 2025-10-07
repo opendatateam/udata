@@ -1,5 +1,12 @@
 # Changelog
 
+## 11.1.1 (2025-10-02)
+
+- feat(git): new tag_version.sh script to replace Bumpr ([#3451](https://github.com/opendatateam/udata/pull/3451))
+- fix(topics): delete TopicElements when Topic is deleted ([#3452](https://github.com/opendatateam/udata/pull/3452))
+- Update to version 11.1.1.dev for next development cycle
+
+
 ## 11.1.0 (2025-09-30)
 
 - chore: migrate to pyproject.toml, replace `CIRCLE_TAG` by `setuptools_scm` to compute the correct version automatically [#3413](https://github.com/opendatateam/udata/pull/3413) [#3434](https://github.com/opendatateam/udata/pull/3434) [#3435](https://github.com/opendatateam/udata/pull/3435) [#3437](https://github.com/opendatateam/udata/pull/3437) [#3438](https://github.com/opendatateam/udata/pull/3438/) [3447](https://github.com/opendatateam/udata/pull/3447)
@@ -818,6 +825,7 @@ Search refactor [#2680](https://github.com/opendatateam/udata/pull/2680)
 
 - Fix fields empty value in admin form to allow for unsetting fields [#2691](https://github.com/opendatateam/udata/pull/2691)
 - :warning: Add a new required topic string field on reuses. The associated migration set default topic to `others` [#2689](https://github.com/opendatateam/udata/pull/2689)
+- Use [uv](https://docs.astral.sh/uv/) as package manager and lockfile [#3459](https://github.com/opendatateam/udata/pull/3459)
 
 ## 3.3.0 (2021-12-10)
 

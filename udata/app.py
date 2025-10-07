@@ -7,10 +7,21 @@ from os.path import abspath, dirname, exists, isfile, join
 
 import bson
 from flask import Blueprint as BaseBlueprint
-from flask import Flask, abort, g, json, make_response, send_from_directory
+from flask import (
+    Flask,
+    abort,
+    g,
+    json,
+    jsonify,
+    make_response,
+    render_template,
+    request,
+    send_from_directory,
+)
 from flask_caching import Cache
 from flask_wtf.csrf import CSRFProtect
 from speaklater import is_lazy_string
+from werkzeug.exceptions import NotFound
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from udata import cors, entrypoints
@@ -228,7 +239,45 @@ def register_extensions(app):
     sentry.init_app(app)
     proconnect.init_app(app)
 
+    app.after_request(return_404_html_if_requested)
+    app.register_error_handler(NotFound, page_not_found)
     return app
+
+
+def return_404_html_if_requested(response):
+    # It's impossible to return an HTML page from an error handler of
+    # the API with Fask-RestX because the error handler is expected to
+    # return a JSON `dict` and not an HTML string.
+    # The only way to return the correct HTML response from a client
+    # that require HTML (for exemple by requesting /api/1/datasets/r/some-uuid with
+    # a non-existant resource) is to hook an `after_request` middleware.
+
+    if response.status_code != 404:
+        return response
+
+    # Return an HTML response if the user prefers HTML over JSON
+    if request.accept_mimetypes.best_match(["application/json", "text/html"]) == "text/html":
+        from udata.uris import homepage_url
+
+        html_content = render_template("404.html", homepage_url=homepage_url())
+        response = make_response(html_content, 404)
+        response.headers["Content-Type"] = "text/html; charset=utf-8"
+
+    return response
+
+
+def page_not_found(e: NotFound):
+    """
+    This handler is only called for non existing pages,
+    for example "/api/1/oups", see `return_404_html_if_requested`
+    for calling `abort(404)` inside the API.
+    """
+    from udata.uris import homepage_url
+
+    if request.accept_mimetypes.best_match(["application/json", "text/html"]) == "text/html":
+        return render_template("404.html", homepage_url=homepage_url()), 404
+
+    return jsonify({"error": e.description, "status": 404}), 404
 
 
 def register_features(app):
