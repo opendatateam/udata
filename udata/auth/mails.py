@@ -1,7 +1,11 @@
+import logging
+
 import email_validator
 from flask import current_app
 
 from udata.tasks import task
+
+log = logging.getLogger(__name__)
 
 
 @task
@@ -11,6 +15,8 @@ def sendmail(msg):
     if send_mail:
         mail = current_app.extensions.get("mail")
         mail.send(msg)
+    else:
+        log.warning(msg)
 
 
 class UdataMailUtil:
