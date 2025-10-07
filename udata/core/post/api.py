@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 
 from feedgenerator.django.utils.feedgenerator import Atom1Feed
 from flask import make_response, request
@@ -122,7 +121,7 @@ class PostsAtomFeedAPI(API):
             link=request.url_root,
         )
 
-        posts: List[Post] = Post.objects().published().order_by("-published").limit(15)
+        posts: list[Post] = Post.objects().published().order_by("-published").limit(15)
         for post in posts:
             feed.add_item(
                 post.name,

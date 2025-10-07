@@ -1,7 +1,6 @@
 import logging
 import time
 from functools import wraps
-from typing import Dict, List
 
 import requests
 from flask import current_app
@@ -17,9 +16,7 @@ log = logging.getLogger(__name__)
 def log_timing(func):
     @wraps(func)
     def timeit_wrapper(*args, **kwargs):
-        # Better log if we're using Python 3.9
-        name = func.__name__
-        model = name.removeprefix("update_") if hasattr(name, "removeprefix") else name
+        model = func.__name__.removeprefix("update_")
 
         log.info(f"Processing {model}…")
         start_time = time.perf_counter()
@@ -31,7 +28,7 @@ def log_timing(func):
     return timeit_wrapper
 
 
-def save_model(model: db.Document, model_id: str, metrics: Dict[str, int]) -> None:
+def save_model(model: db.Document, model_id: str, metrics: dict[str, int]) -> None:
     try:
         result = model.objects(id=model_id).update(
             **{f"set__metrics__{key}": value for key, value in metrics.items()}
@@ -43,7 +40,7 @@ def save_model(model: db.Document, model_id: str, metrics: Dict[str, int]) -> No
         log.exception(e)
 
 
-def iterate_on_metrics(target: str, value_keys: List[str], page_size: int = 50) -> dict:
+def iterate_on_metrics(target: str, value_keys: list[str], page_size: int = 50) -> dict:
     """
     Yield all elements with not zero values for the keys inside `value_keys`.
     If you pass ['visit', 'download_resource'], it will do a `OR` and get
