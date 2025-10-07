@@ -135,7 +135,7 @@ def check_only_one_condition_per_role(access_audiences, **_kwargs):
 
 
 def filter_by_topic(base_query, filter_value):
-    from udata.core.topic.models import Topic, TopicElement
+    from udata.core.topic.models import Topic
 
     try:
         topic = Topic.objects.get(id=filter_value)
@@ -145,9 +145,7 @@ def filter_by_topic(base_query, filter_value):
         return base_query.filter(
             id__in=[
                 element.element.id
-                for element in TopicElement.objects(
-                    topic=topic, __raw__={"element._cls": "Dataservice"}
-                )
+                for element in topic.elements.filter(__raw__={"element._cls": "Dataservice"})
             ]
         )
 
