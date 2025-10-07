@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from datetime import datetime, timedelta
-from enum import StrEnum
+from enum import StrEnum, auto
 
 from flask_babel import LazyString
 
@@ -16,76 +16,62 @@ class UpdateFrequency(StrEnum):
     - EU: https://publications.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/frequency
     """
 
-    # FIXME(python 3.11.1+): Drop tupple syntax and use auto() where possible:
-    #
-    #     UNKNOWN = auto(), _("Unknown"), None
-    #     CONTINUOUS = auto(), _("Real time"), None
-    #     ONE_MINUTE = "oneMinute", _("Every minute"), timedelta(minutes=1)
-    #     ...
-    UNKNOWN = ("unknown", _("Unknown"), None)  # EU
-    CONTINUOUS = ("continuous", _("Real time"), None)  # DC, EU:UPDATE_CONT
-    ONE_MINUTE = ("oneMinute", _("Every minute"), timedelta(minutes=1))  # EU:1MIN
-    FIVE_MINUTES = ("fiveMinutes", _("Every five minutes"), timedelta(minutes=5))  # EU:5MIN
-    TEN_MINUTES = ("tenMinutes", _("Every ten minutes"), timedelta(minutes=10))  # EU:10MIN
+    UNKNOWN = auto(), _("Unknown"), None  # EU
+    CONTINUOUS = auto(), _("Real time"), None  # DC, EU:UPDATE_CONT
+    ONE_MINUTE = "oneMinute", _("Every minute"), timedelta(minutes=1)  # EU:1MIN
+    FIVE_MINUTES = "fiveMinutes", _("Every five minutes"), timedelta(minutes=5)  # EU:5MIN
+    TEN_MINUTES = "tenMinutes", _("Every ten minutes"), timedelta(minutes=10)  # EU:10MIN
     FIFTEEN_MINUTES = (
         "fifteenMinutes",
         _("Every fifteen minutes"),
         timedelta(minutes=15),
     )  # EU:15MIN
-    THIRTY_MINUTES = ("thirtyMinutes", _("Every thirty minute"), timedelta(minutes=30))  # EU:30MIN
-    HOURLY = ("hourly", _("Every hour"), timedelta(hours=1))  # EU
-    BIHOURLY = ("bihourly", _("Every two hours"), timedelta(hours=2))  # EU
-    TRIHOURLY = ("trihourly", _("Every three hours"), timedelta(hours=3))  # EU
-    TWELVE_HOURS = ("twelveHours", _("Every twelve hours"), timedelta(hours=12))  # EU:12HRS
-    SEVERAL_TIMES_A_DAY = (
-        "severalTimesADay",
-        _("Several times a day"),
-        timedelta(days=1),
-    )  # EU:CONT
-    THREE_TIMES_A_DAY = ("threeTimesADay", _("Three times a day"), timedelta(days=1))  # EU:DAILY_3
-    SEMIDAILY = ("semidaily", _("Twice a day"), timedelta(days=1))  # EU:DAILY_2
-    DAILY = ("daily", _("Daily"), timedelta(days=1))  # DC, EU
-    FIVE_TIMES_A_WEEK = (
-        "fiveTimesAWeek",
-        _("Five times a week"),
-        timedelta(weeks=1),
-    )  # EU:WEEKLY_5
+    THIRTY_MINUTES = "thirtyMinutes", _("Every thirty minute"), timedelta(minutes=30)  # EU:30MIN
+    HOURLY = auto(), _("Every hour"), timedelta(hours=1)  # EU
+    BIHOURLY = auto(), _("Every two hours"), timedelta(hours=2)  # EU
+    TRIHOURLY = auto(), _("Every three hours"), timedelta(hours=3)  # EU
+    TWELVE_HOURS = "twelveHours", _("Every twelve hours"), timedelta(hours=12)  # EU:12HRS
+    SEVERAL_TIMES_A_DAY = "severalTimesADay", _("Several times a day"), timedelta(days=1)  # EU:CONT
+    THREE_TIMES_A_DAY = "threeTimesADay", _("Three times a day"), timedelta(days=1)  # EU:DAILY_3
+    SEMIDAILY = auto(), _("Twice a day"), timedelta(days=1)  # EU:DAILY_2
+    DAILY = auto(), _("Daily"), timedelta(days=1)  # DC, EU
+    FIVE_TIMES_A_WEEK = "fiveTimesAWeek", _("Five times a week"), timedelta(weeks=1)  # EU:WEEKLY_5
     THREE_TIMES_A_WEEK = (
         "threeTimesAWeek",
         _("Three times a week"),
         timedelta(weeks=1),
     )  # DC, EU:WEEKLY_3
-    SEMIWEEKLY = ("semiweekly", _("Twice a week"), timedelta(weeks=1))  # DC, EU:WEEKLY_2
-    WEEKLY = ("weekly", _("Weekly"), timedelta(weeks=1))  # DC, EU
-    BIWEEKLY = ("biweekly", _("Every two weeks"), timedelta(weeks=2))  # DC, EU
+    SEMIWEEKLY = auto(), _("Twice a week"), timedelta(weeks=1)  # DC, EU:WEEKLY_2
+    WEEKLY = auto(), _("Weekly"), timedelta(weeks=1)  # DC, EU
+    BIWEEKLY = auto(), _("Every two weeks"), timedelta(weeks=2)  # DC, EU
     THREE_TIMES_A_MONTH = (
         "threeTimesAMonth",
         _("Three times a month"),
         timedelta(days=31),
     )  # DC, EU:MONTHLY_3
-    SEMIMONTHLY = ("semimonthly", _("Twice a month"), timedelta(days=31))  # DC, EU:MONTHLY_2
-    MONTHLY = ("monthly", _("Monthly"), timedelta(days=31))  # DC, EU
-    BIMONTHLY = ("bimonthly", _("Every two months"), timedelta(days=31 * 2))  # DC, EU
-    QUARTERLY = ("quarterly", _("Quarterly"), timedelta(days=31 * 3))  # DC, EU
+    SEMIMONTHLY = auto(), _("Twice a month"), timedelta(days=31)  # DC, EU:MONTHLY_2
+    MONTHLY = auto(), _("Monthly"), timedelta(days=31)  # DC, EU
+    BIMONTHLY = auto(), _("Every two months"), timedelta(days=31 * 2)  # DC, EU
+    QUARTERLY = auto(), _("Quarterly"), timedelta(days=31 * 3)  # DC, EU
     THREE_TIMES_A_YEAR = (
         "threeTimesAYear",
         _("Three times a year"),
         timedelta(days=365),
     )  # DC, EU:ANNUAL_3
-    SEMIANNUAL = ("semiannual", _("Twice a year"), timedelta(days=365))  # DC, EU:ANNUAL_2
-    ANNUAL = ("annual", _("Annually"), timedelta(days=365))  # DC, EU
-    BIENNIAL = ("biennial", _("Every two years"), timedelta(days=365 * 2))  # DC, EU
-    TRIENNIAL = ("triennial", _("Every three years"), timedelta(days=365 * 3))  # DC, EU
-    QUADRENNIAL = ("quadrennial", _("Every four years"), timedelta(days=365 * 4))  # EU
-    QUINQUENNIAL = ("quinquennial", _("Every five years"), timedelta(days=365 * 5))  # EU
-    DECENNIAL = ("decennial", _("Every ten years"), timedelta(days=365 * 10))  # EU
-    BIDECENNIAL = ("bidecennial", _("Every twenty years"), timedelta(days=365 * 20))  # EU
-    TRIDECENNIAL = ("tridecennial", _("Every thirty years"), timedelta(days=365 * 30))  # EU
-    PUNCTUAL = ("punctual", _("Punctual"), None)  # EU:AS_NEEDED
-    IRREGULAR = ("irregular", _("Irregular"), None)  # DC, EU:IRREG
-    NEVER = ("never", _("Never"), None)  # EU
-    NOT_PLANNED = ("notPlanned", _("Not planned"), None)  # EU:NOT_PLANNED
-    OTHER = ("other", _("Other"), None)  # EU
+    SEMIANNUAL = auto(), _("Twice a year"), timedelta(days=365)  # DC, EU:ANNUAL_2
+    ANNUAL = auto(), _("Annually"), timedelta(days=365)  # DC, EU
+    BIENNIAL = auto(), _("Every two years"), timedelta(days=365 * 2)  # DC, EU
+    TRIENNIAL = auto(), _("Every three years"), timedelta(days=365 * 3)  # DC, EU
+    QUADRENNIAL = auto(), _("Every four years"), timedelta(days=365 * 4)  # EU
+    QUINQUENNIAL = auto(), _("Every five years"), timedelta(days=365 * 5)  # EU
+    DECENNIAL = auto(), _("Every ten years"), timedelta(days=365 * 10)  # EU
+    BIDECENNIAL = auto(), _("Every twenty years"), timedelta(days=365 * 20)  # EU
+    TRIDECENNIAL = auto(), _("Every thirty years"), timedelta(days=365 * 30)  # EU
+    PUNCTUAL = auto(), _("Punctual"), None  # EU:AS_NEEDED
+    IRREGULAR = auto(), _("Irregular"), None  # DC, EU:IRREG
+    NEVER = auto(), _("Never"), None  # EU
+    NOT_PLANNED = "notPlanned", _("Not planned"), None  # EU:NOT_PLANNED
+    OTHER = auto(), _("Other"), None  # EU
 
     def __new__(cls, id: str, label: LazyString, delta: timedelta | None):
         # Set _value_ so the enum value-based lookup depends only on the id field.
