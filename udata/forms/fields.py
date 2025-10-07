@@ -2,7 +2,6 @@ import uuid
 
 from dateutil.parser import parse
 from flask import url_for
-from flask_mongoengine.wtf import fields as mefields
 from flask_storage.mongo import ImageReference
 from speaklater import is_lazy_string
 from wtforms import Field as WTField
@@ -16,6 +15,7 @@ from udata import tags, uris
 from udata.auth import admin_permission, current_user
 from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.core.storages import tmp
+from udata.flask_mongoengine.fields import ModelSelectField as BaseModelSelectField
 from udata.forms import ModelForm
 from udata.i18n import lazy_gettext as _
 from udata.models import ContactPoint, Dataset, Organization, Reuse, User, datastore, db
@@ -381,7 +381,7 @@ class SelectField(FieldHelper, fields.SelectField):
         self._choices = value
 
 
-class ModelSelectField(FieldHelper, mefields.ModelSelectField):
+class ModelSelectField(FieldHelper, BaseModelSelectField):
     pass
 
 

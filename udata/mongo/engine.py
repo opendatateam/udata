@@ -1,9 +1,10 @@
 from bson import DBRef, ObjectId
-from flask_mongoengine import MongoEngine, MongoEngineSessionInterface
 from flask_storage.mongo import FileField, ImageField
 from mongoengine.base import TopLevelDocumentMetaclass, get_document
 from mongoengine.errors import ValidationError
 from mongoengine.signals import post_save, pre_save
+
+from udata.flask_mongoengine.engine import MongoEngine
 
 from .datetime_fields import DateField, DateRange, Datetimed
 from .document import DomainModel, UDataDocument
@@ -64,4 +65,3 @@ class UDataMongoEngine(MongoEngine):
 
 
 db = UDataMongoEngine()
-session_interface = MongoEngineSessionInterface(db)

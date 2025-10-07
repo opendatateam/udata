@@ -1,9 +1,9 @@
 import logging
 
 from bson import DBRef, ObjectId
-from flask_mongoengine import BaseQuerySet
 from mongoengine.signals import post_save
 
+from udata.flask_mongoengine.document import BaseQuerySet
 from udata.utils import Paginable
 
 log = logging.getLogger(__name__)
