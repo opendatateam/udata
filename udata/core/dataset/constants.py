@@ -84,8 +84,6 @@ class UpdateFrequency(StrEnum):
 
     @classmethod
     def _missing_(cls, value) -> "UpdateFrequency | None":
-        if value is None:
-            return UpdateFrequency.UNKNOWN
         if isinstance(value, str):
             return UpdateFrequency._LEGACY_FREQUENCIES.get(value)  # type: ignore[misc]
 

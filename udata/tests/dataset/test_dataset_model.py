@@ -157,10 +157,10 @@ class DatasetModelTest:
         dataset = DatasetFactory()
         assert dataset.next_update is None
 
-    @pytest.mark.parametrize("freq", list(UpdateFrequency))
-    def test_next_update(self, freq: UpdateFrequency):
+    @pytest.mark.parametrize("freq", list(UpdateFrequency) + [None])
+    def test_next_update(self, freq: UpdateFrequency | None):
         dataset = DatasetFactory(frequency=freq)
-        if freq.delta is None:
+        if freq is None or freq.delta is None:
             assert dataset.next_update is None
         else:
             assert_equal_dates(dataset.next_update, freq.next_update(datetime.utcnow()))
@@ -176,10 +176,10 @@ class DatasetModelTest:
             "score": 0,
         }
 
-    @pytest.mark.parametrize("freq", list(UpdateFrequency))
-    def test_quality_frequency_update(self, freq: UpdateFrequency):
+    @pytest.mark.parametrize("freq", list(UpdateFrequency) + [None])
+    def test_quality_frequency_update(self, freq: UpdateFrequency | None):
         dataset = DatasetFactory(description="", frequency=freq)
-        if freq is UpdateFrequency.UNKNOWN:
+        if freq in [None, UpdateFrequency.UNKNOWN]:
             assert dataset.quality["update_frequency"] is False
             assert "update_fulfilled_in_time" not in dataset.quality
         else:

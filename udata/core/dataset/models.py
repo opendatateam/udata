@@ -580,8 +580,6 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
 
     private = field(db.BooleanField(default=False))
 
-    # FIXME: Do we want required=True to avoid None?
-    # This would simplify has_frequency, eliminate UpdateFrequency._missing_ None override, etc.
     frequency = field(db.EnumField(UpdateFrequency))
     frequency_date = field(db.DateTimeField(verbose_name=_("Future date of update")))
     temporal_coverage = field(db.EmbeddedDocumentField(db.DateRange))

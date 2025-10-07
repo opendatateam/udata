@@ -157,11 +157,11 @@ dataset_fields = apiv2.model(
         ),
         "frequency": fields.Raw(
             attribute=lambda d: {
-                "id": UpdateFrequency(d.frequency).id,
-                "label": UpdateFrequency(d.frequency).label,
+                "id": (d.frequency or UpdateFrequency.UNKNOWN).id,
+                "label": (d.frequency or UpdateFrequency.UNKNOWN).label,
             }
             if request.headers.get(FULL_OBJECTS_HEADER, False, bool)
-            else UpdateFrequency(d.frequency),
+            else (d.frequency or UpdateFrequency.UNKNOWN),
             enum=list(UpdateFrequency),
             default=UpdateFrequency.UNKNOWN,
             required=True,

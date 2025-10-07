@@ -174,6 +174,9 @@ class DatasetToRdfTest:
         assert org_rdf.value(RDF.type).identifier == FOAF.Organization
         assert org_rdf.value(FOAF.name) == Literal("organization")
 
+    def test_map_null_frequency(self):
+        assert frequency_to_rdf(None) is None
+
     @pytest.mark.parametrize("term,freq", FREQ_TERM_TO_UDATA.items())
     def test_map_dublin_core_frequencies(self, term, freq):
         assert frequency_to_rdf(freq) == term
@@ -531,6 +534,9 @@ class RdfToDatasetTest:
 
         assert isinstance(dataset, Dataset)
         assert set(dataset.tags) == set(tags + themes)
+
+    def test_parse_null_frequency(self):
+        assert frequency_from_rdf(None) is None
 
     @pytest.mark.parametrize("freq,expected", FREQ_TERM_TO_UDATA.items())
     def test_parse_dublin_core_frequencies(self, freq, expected):
