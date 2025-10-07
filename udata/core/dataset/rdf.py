@@ -761,10 +761,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
     # Support dct:abstract if dct:description is missing (sometimes used instead)
     description = default_lang_value(d, DCT.description) or default_lang_value(d, DCT.abstract)
     dataset.description = sanitize_html(description)
-
-    if frequency := frequency_from_rdf(d.value(DCT.accrualPeriodicity)):
-        dataset.frequency = frequency
-
+    dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity)) or dataset.frequency
     roles = [  # Imbricated list of contact points for each role
         contact_points_from_rdf(d, rdf_entity, role, dataset)
         for rdf_entity, role in CONTACT_POINT_ENTITY_TO_ROLE.items()
