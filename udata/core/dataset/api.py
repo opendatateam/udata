@@ -20,7 +20,6 @@ These changes might lead to backward compatibility breakage meaning:
 import logging
 import os
 from datetime import datetime
-from typing import List
 
 import mongoengine
 from bson.objectid import ObjectId
@@ -332,7 +331,7 @@ class DatasetsAtomFeedAPI(API):
             link=request.url_root,
         )
 
-        datasets: List[Dataset] = (
+        datasets: list[Dataset] = (
             Dataset.objects.visible().order_by("-created_at_internal").limit(current_site.feed_size)
         )
         for dataset in datasets:
@@ -492,7 +491,7 @@ class ResourceRedirectAPI(API):
         Redirect to the latest version of a resource given its identifier.
         """
         resource = get_resource(id)
-        return redirect(resource.url.strip()) if resource else abort(404)
+        return redirect(resource.url.strip()) if resource else abort(404, "Resource not found")
 
 
 @ns.route("/<dataset:dataset>/resources/", endpoint="resources")

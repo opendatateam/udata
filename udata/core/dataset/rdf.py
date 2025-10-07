@@ -6,7 +6,6 @@ import calendar
 import json
 import logging
 from datetime import date, datetime
-from typing import Optional
 
 from dateutil.parser import parse as parse_dt
 from flask import current_app
@@ -131,9 +130,7 @@ EUFREQ_ID_TO_UDATA = {
 UDATA_ID_TO_TERM = {v: k for k, v in {**EUFREQ_TERM_TO_UDATA, **FREQ_TERM_TO_UDATA}.items()}
 
 
-def temporal_to_rdf(
-    daterange: db.DateRange, graph: Optional[Graph] = None
-) -> Optional[RdfResource]:
+def temporal_to_rdf(daterange: db.DateRange, graph: Graph | None = None) -> RdfResource | None:
     if not daterange:
         return
     graph = graph or Graph(namespace_manager=namespace_manager)
@@ -150,7 +147,7 @@ def frequency_to_rdf(frequency: UpdateFrequency | None, graph: Graph | None = No
     return UDATA_ID_TO_TERM.get(frequency) if frequency else None
 
 
-def owner_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> Optional[RdfResource]:
+def owner_to_rdf(dataset: Dataset, graph: Graph | None = None) -> RdfResource | None:
     from udata.core.organization.rdf import organization_to_rdf
     from udata.core.user.rdf import user_to_rdf
 
@@ -161,7 +158,7 @@ def owner_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> Optional[Rd
     return
 
 
-def detect_ogc_service(resource: Resource) -> Optional[str]:
+def detect_ogc_service(resource: Resource) -> str | None:
     """
     Detect if the resource points towards an OGC Service based on either
     * a known OGC Service format
@@ -180,8 +177,8 @@ def detect_ogc_service(resource: Resource) -> Optional[str]:
 def ogc_service_to_rdf(
     dataset: Dataset,
     resource: Resource,
-    ogc_service_type: Optional[str] = None,
-    graph: Optional[Graph] = None,
+    ogc_service_type: str | None = None,
+    graph: Graph | None = None,
     is_hvd: bool = False,
 ) -> RdfResource:
     """
@@ -223,8 +220,8 @@ def ogc_service_to_rdf(
 
 def resource_to_rdf(
     resource: Resource,
-    dataset: Optional[Dataset] = None,
-    graph: Optional[Graph] = None,
+    dataset: Dataset | None = None,
+    graph: Graph | None = None,
     is_hvd: bool = False,
 ) -> RdfResource:
     """
@@ -288,7 +285,7 @@ def dataset_to_graph_id(dataset: Dataset) -> URIRef | BNode:
         return BNode()
 
 
-def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResource:
+def dataset_to_rdf(dataset: Dataset, graph: Graph | None = None) -> RdfResource:
     """
     Map a dataset domain model to a DCAT/RDF graph
     """

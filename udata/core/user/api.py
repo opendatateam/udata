@@ -1,5 +1,3 @@
-from typing import Optional
-
 from flask_security import current_user, logout_user
 from slugify import slugify
 
@@ -370,7 +368,7 @@ suggest_parser.add_argument(
 )
 
 
-def suggest_size(value: str) -> Optional[int]:
+def suggest_size(value: str) -> int | None:
     """Parse an integer that must be between 1 and 20."""
     help_message = "The size must be an integer between 1 and 20."
     try:
