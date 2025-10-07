@@ -75,15 +75,15 @@
                     "description": "The update frequency",
                     "enum": [
                         "continuous",
-                        "1min",
-                        "5min",
-                        "10min",
-                        "15min",
-                        "30min",
+                        "oneMinute",
+                        "fiveMinutes",
+                        "tenMinutes",
+                        "fifteenMinutes",
+                        "thirtyMinutes",
                         "hourly",
                         "bihourly",
                         "trihourly",
-                        "12hours",
+                        "twelveHours",
                         "severalTimesADay",
                         "threeTimesADay",
                         "semidaily",
@@ -112,7 +112,8 @@
                         "irregular",
                         "never",
                         "notPlanned",
-                        "other"
+                        "other",
+                        "unknown"
                     ],
                     "type": "string"
                 },
