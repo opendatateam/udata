@@ -127,7 +127,7 @@ EUFREQ_ID_TO_UDATA = {
 }
 
 # Merge order matters: we want FREQ to win over EUFREQ
-UDATA_ID_TO_TERM = {v: k for k, v in {**EUFREQ_TERM_TO_UDATA, **FREQ_TERM_TO_UDATA}.items()}
+UDATA_FREQ_ID_TO_TERM = {v: k for k, v in {**EUFREQ_TERM_TO_UDATA, **FREQ_TERM_TO_UDATA}.items()}
 
 
 def temporal_to_rdf(daterange: db.DateRange, graph: Graph | None = None) -> RdfResource | None:
@@ -144,7 +144,7 @@ def temporal_to_rdf(daterange: db.DateRange, graph: Graph | None = None) -> RdfR
 
 
 def frequency_to_rdf(frequency: UpdateFrequency | None, graph: Graph | None = None) -> str | None:
-    return UDATA_ID_TO_TERM.get(frequency) if frequency else None
+    return UDATA_FREQ_ID_TO_TERM.get(frequency)
 
 
 def owner_to_rdf(dataset: Dataset, graph: Graph | None = None) -> RdfResource | None:
