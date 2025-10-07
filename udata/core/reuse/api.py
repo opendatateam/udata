@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 
 import mongoengine
 from bson.objectid import ObjectId
@@ -144,7 +143,7 @@ class ReusesAtomFeedAPI(API):
             link=request.url_root,
         )
 
-        reuses: List[Reuse] = Reuse.objects.visible().order_by("-created_at").limit(15)
+        reuses: list[Reuse] = Reuse.objects.visible().order_by("-created_at").limit(15)
         for reuse in reuses:
             author_name = None
             author_uri = None
