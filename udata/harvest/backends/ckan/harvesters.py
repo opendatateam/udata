@@ -188,8 +188,7 @@ class CkanBackend(BaseBackend):
                 log.debug("spatial-uri value not handled: %s", value)
             elif key == "frequency":
                 # Update frequency
-                freq = frequency_from_rdf(value)
-                if freq:
+                if freq := frequency_from_rdf(value):
                     dataset.frequency = freq
                 else:
                     # FIXME(python 3.12+): prefer `if value in UpdateFrequency`
