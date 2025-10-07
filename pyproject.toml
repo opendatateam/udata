@@ -235,33 +235,5 @@ packages = ["udata"]
 [tool.setuptools.package-data]
 udata = ["templates/*", "static/*", "translations/*"]
 
-[tool.tox]
-requires = ["tox>=4.19"]
-env_list = ["py39", "py310", "py311", "py312", "doc"]
-
-[tool.tox.env_run_base]
-description = "Run tests under {base_python}"
-deps = [
-    "feedparser==6.0.11",
-    "httpretty==1.1.4",
-    "mock==5.2.0",
-    "pytest==8.3.5",
-    "pytest-env==1.1.5",
-    "pytest-flask==1.3.0",
-    "pytest-mock==3.14.0",
-    "pytest-sugar==1.0.0",
-    "requests-mock==1.12.1"
-]
-commands = [
-    ["pytest", "udata"]
-]
-[tool.tox.env.doc]
-description = "Build documentation with sphinx"
-deps = ["sphinx"]
-commands = [
-    ["sphinx-build", "-b", "html", "-d", "{envtmpdir}/doctrees", ".", "{envtmpdir}/html"]
-]
-change_dir = "doc"
-
 [tool.wheel]
 universal = true

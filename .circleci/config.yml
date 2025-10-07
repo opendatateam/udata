@@ -16,8 +16,11 @@ parameters:
 
 jobs:
   python:
+    parameters:
+      python-version:
+        type: string
     docker:
-      - image: udata/circleci:py<< pipeline.parameters.python-version >>
+      - image: udata/circleci:py<< parameters.python-version >>
       - image: mongo:6.0.4
       - image: redis:alpine
     environment:
@@ -30,24 +33,24 @@ jobs:
       - restore_cache:
           keys:
             # 1. Exact match of dependencies
-            - py3-cache-v13-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
+            - py3-cache-v13-{{ arch }}-<< parameters.python-version >>-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
             # 2. Latest cache from this branch
-            - py3-cache-v13-{{ arch }}-{{ .Branch }}
+            - py3-cache-v13-{{ arch }}-<< parameters.python-version >>-{{ .Branch }}
             # 3. Latest cache from base branch (e.g., master)
-            - py3-cache-v13-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+            - py3-cache-v13-{{ arch }}-<< parameters.python-version >>-{{ .Environment.BASE_BRANCH }}
             # 4. Any latest cache for this architecture (fallback)
-            - py3-cache-v13-{{ arch }}-
+            - py3-cache-v13-{{ arch }}-<< parameters.python-version >>-
       - run:
           name: Install Python dependencies
           command: |
             pip install uv
             uv sync --frozen --extra dev --extra test
       - save_cache:
-          key: py3-cache-v13-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
+          key: py3-cache-v13-{{ arch }}-<< parameters.python-version >>-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
           paths:
             - .venv
       - save_cache:
-          key: py3-cache-v13-{{ arch }}-{{ .Branch }}
+          key: py3-cache-v13-{{ arch }}-<< parameters.python-version >>-{{ .Branch }}
           paths:
             - .venv
       - run:
@@ -230,11 +233,14 @@ jobs:
 workflows:
   build-publish-deploy:
     jobs:
-      - python
+      - python:
+          matrix:
+            parameters:
+              python-version: ["3.11", "3.12", "3.13"]
       - assets
       - dist:
           requires:
-            - python
+            - python-3.11
             - assets
       - publish:
           requires:
