@@ -2,9 +2,6 @@
 version: 2.1
 
 parameters:
-  python-version:
-    type: string
-    default: "3.11"
   publish-branch:
     type: string
     default: "master"
@@ -20,37 +17,32 @@ jobs:
       python-version:
         type: string
     docker:
-      - image: udata/circleci:py<< parameters.python-version >>
+      - image: cimg/python:<< parameters.python-version >>
       - image: mongo:6.0.4
       - image: redis:alpine
-    environment:
-      BASH_ENV: /root/.bashrc
     steps:
       - checkout
-      - run:
-          name: Get the base reference branch
-          command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
             # 1. Exact match of dependencies
-            - py3-cache-v13-{{ arch }}-<< parameters.python-version >>-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
+            - py3-cache-v14-{{ arch }}-<< parameters.python-version >>-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
             # 2. Latest cache from this branch
-            - py3-cache-v13-{{ arch }}-<< parameters.python-version >>-{{ .Branch }}
-            # 3. Latest cache from base branch (e.g., master)
-            - py3-cache-v13-{{ arch }}-<< parameters.python-version >>-{{ .Environment.BASE_BRANCH }}
+            - py3-cache-v14-{{ arch }}-<< parameters.python-version >>-{{ .Branch }}
+            # 3. Latest cache from base branch (master)
+            - py3-cache-v14-{{ arch }}-<< parameters.python-version >>-<< pipeline.parameters.publish-branch >>
             # 4. Any latest cache for this architecture (fallback)
-            - py3-cache-v13-{{ arch }}-<< parameters.python-version >>-
+            - py3-cache-v14-{{ arch }}-<< parameters.python-version >>-
       - run:
           name: Install Python dependencies
           command: |
             pip install uv
             uv sync --frozen --extra dev --extra test
       - save_cache:
-          key: py3-cache-v13-{{ arch }}-<< parameters.python-version >>-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
+          key: py3-cache-v14-{{ arch }}-<< parameters.python-version >>-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
           paths:
             - .venv
       - save_cache:
-          key: py3-cache-v13-{{ arch }}-<< parameters.python-version >>-{{ .Branch }}
+          key: py3-cache-v14-{{ arch }}-<< parameters.python-version >>-{{ .Branch }}
           paths:
             - .venv
       - run:
@@ -70,67 +62,12 @@ jobs:
       - store_artifacts:
           path: reports/
           destination: reports
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .venv
-
-  assets:
-    docker:
-      # TODO make an image based on 2-alpine w/ nvm and phantom deps
-      - image: udata/circleci:py<< pipeline.parameters.python-version >>
-    environment:
-      BASH_ENV: /root/.bashrc
-    steps:
-      - checkout
-      - run:
-          name: Compute JS dependencies key
-          command: cat .nvmrc package.json > js.deps
-      - run:
-          name: Get the base reference branch
-          command: export BASE_BRANCH=$(base_branch)
-      - restore_cache:
-          keys:
-            # 1. Exact match of dependencies
-            - js-cache-{{ arch }}-{{ checksum "js.deps" }}
-            # 2. Latest cache from this branch
-            - js-cache-{{ arch }}-{{ .Branch }}
-            # 3. Latest cache from base branch (e.g., master)
-            - js-cache-{{ arch }}-{{ .Environment.BASE_BRANCH }}
-            # 4. Any latest cache for this architecture (fallback)
-            - js-cache-{{ arch }}-
-      - run:
-          name: Install NodeJS and dependencies
-          command: |
-            nvm install
-            npm install
-            npm list || true
-      - save_cache:
-          key: js-cache-{{ arch }}-{{ checksum "js.deps" }}
-          paths:
-            - node_modules
-      - save_cache:
-          key: js-cache-{{ arch }}-{{ .Branch }}
-          paths:
-            - node_modules
-      - run:
-          name: Compile assets
-          command: |
-            npm run assets:build
-            npm run widgets:build
-            npm run oembed:build
-      - persist_to_workspace:
-          root: .
-          paths:
-            - udata/static
 
   dist:
     docker:
-      - image: udata/circleci:py<< pipeline.parameters.python-version >>
+      - image: cimg/python:3.11
     steps:
       - checkout
-      - attach_workspace:
-          at: .
       - run:
           name: Install build tools
           command: |
@@ -158,7 +95,7 @@ jobs:
 
   publish:
     docker:
-      - image: udata/circleci:py<< pipeline.parameters.python-version >>
+      - image: cimg/python:3.11
     steps:
       - attach_workspace:
           at: .
@@ -237,11 +174,9 @@ workflows:
           matrix:
             parameters:
               python-version: ["3.11", "3.12", "3.13"]
-      - assets
       - dist:
           requires:
             - python-3.11
-            - assets
       - publish:
           requires:
             - dist
