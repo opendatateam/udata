@@ -1,10 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 
 import mongoengine
 from bson.objectid import ObjectId
 from feedgenerator.django.utils.feedgenerator import Atom1Feed
-from flask import make_response, request
+from flask import current_app, make_response, request
 from flask_login import current_user
 
 from udata.api import API, api, errors
@@ -144,7 +144,17 @@ class ReusesAtomFeedAPI(API):
             link=request.url_root,
         )
 
-        reuses: List[Reuse] = Reuse.objects.visible().order_by("-created_at").limit(15)
+        # We add a delay before a new reuse appears in feed in order to allow for post-publication moderation
+        created_delay = datetime.utcnow() - timedelta(
+            hours=current_app.config["DELAY_BEFORE_APPEARING_IN_RSS_FEED"]
+        )
+
+        reuses: List[Reuse] = (
+            Reuse.objects.filter(created_at__lte=created_delay)
+            .visible()
+            .order_by("-created_at")
+            .limit(15)
+        )
         for reuse in reuses:
             author_name = None
             author_uri = None
