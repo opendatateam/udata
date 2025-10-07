@@ -437,6 +437,19 @@ class TopicAPITest(APITestCase):
         self.assertEqual(Topic.objects.count(), 0)
         self.assertEqual(Discussion.objects.count(), 0)
 
+    def test_topic_api_delete_with_elements(self):
+        """It should delete a topic with elements without raising DoesNotExist error"""
+        owner = self.login()
+        topic = TopicWithElementsFactory(owner=owner)
+
+        with self.api_user():
+            response = self.delete(url_for("apiv2.topic", topic=topic))
+        self.assertStatus(response, 204)
+
+        # Verify both topic and elements are deleted
+        self.assertEqual(Topic.objects.count(), 0)
+        self.assertEqual(TopicElement.objects.count(), 0)
+
     def test_topic_api_delete_perm(self):
         """It should not delete a topic from the API"""
         owner = UserFactory()
