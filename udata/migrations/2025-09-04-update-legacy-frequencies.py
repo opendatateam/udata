@@ -11,9 +11,10 @@ log = logging.getLogger(__name__)
 
 
 def migrate(db):
-    log.info("Processing datasets.")
+    log.info("Updating datasets legacy frequencies:")
 
     for legacy_value, frequency in UpdateFrequency._LEGACY_FREQUENCIES.items():
+        count = 0
         for dataset in Dataset.objects(frequency=legacy_value).no_cache().timeout(False):
             # Explicitly call update() to force writing the new frequency string to mongo.
             # We can't rely on save() here because:
@@ -29,5 +30,7 @@ def migrate(db):
             # Still call save() afterwards so computed fields like quality_cached are updated if
             # necessary, e.g. if moving from a predictable timedelta to an unpredictable one.
             dataset.save()
+            count += 1
+        log.info(f"- {legacy_value} -> {frequency.value}: {count} updated")
 
     log.info("Completed.")
