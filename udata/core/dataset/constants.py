@@ -1,11 +1,6 @@
-import sys
 from collections import OrderedDict
 from datetime import datetime, timedelta
-
-if sys.version_info >= (3, 11):
-    from enum import StrEnum
-else:
-    from backports.strenum import StrEnum
+from enum import StrEnum
 
 from flask_babel import LazyString
 
