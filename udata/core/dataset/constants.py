@@ -16,7 +16,6 @@ class UpdateFrequency(StrEnum):
     - EU: https://publications.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/frequency
     """
 
-    UNKNOWN = auto(), _("Unknown"), None  # EU
     CONTINUOUS = auto(), _("Real time"), None  # DC, EU:UPDATE_CONT
     ONE_MINUTE = "oneMinute", _("Every minute"), timedelta(minutes=1)  # EU:1MIN
     FIVE_MINUTES = "fiveMinutes", _("Every five minutes"), timedelta(minutes=5)  # EU:5MIN
@@ -72,6 +71,7 @@ class UpdateFrequency(StrEnum):
     NEVER = auto(), _("Never"), None  # EU
     NOT_PLANNED = "notPlanned", _("Not planned"), None  # EU:NOT_PLANNED
     OTHER = auto(), _("Other"), None  # EU
+    UNKNOWN = auto(), _("Unknown"), None  # EU
 
     def __new__(cls, id: str, label: LazyString, delta: timedelta | None):
         # Set _value_ so the enum value-based lookup depends only on the id field.
