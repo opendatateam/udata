@@ -333,6 +333,7 @@ def marshal_page_with(func):
 
 def init_app(app):
     # Load all core APIs
+    import udata.core.access_type.api  # noqa
     import udata.core.activity.api  # noqa
     import udata.core.spatial.api  # noqa
     import udata.core.user.api  # noqa
