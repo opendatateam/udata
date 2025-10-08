@@ -1,4 +1,5 @@
 from enum import StrEnum
+from typing import assert_never
 
 from udata.i18n import lazy_gettext as _
 
@@ -36,48 +37,60 @@ class InspireLimitationCategory(StrEnum):
     @property
     def label(self):
         """Returns the label for this limitation category."""
-        labels = {
-            self.PUBLIC_AUTHORITIES: _("Confidentiality of public authorities proceedings"),
-            self.INTERNATIONAL_RELATIONS: _(
-                "International relations, public security or national defence"
-            ),
-            self.COURSE_OF_JUSTICE: _("Course of justice"),
-            self.COMMERCIAL_CONFIDENTIALITY: _("Commercial or industrial confidentiality"),
-            self.INTELLECTUAL_PROPERTY: _("Intellectual property rights"),
-            self.PERSONAL_DATA: _("Personal data confidentiality"),
-            self.VOLUNTARY_SUPPLIER: _("Protection of voluntary information suppliers"),
-            self.ENVIRONMENTAL_PROTECTION: _("Environmental protection"),
-        }
-        return labels.get(self, _("Unknown limitation category"))
+        match self:
+            case InspireLimitationCategory.PUBLIC_AUTHORITIES:
+                return _("Confidentiality of public authorities proceedings")
+            case InspireLimitationCategory.INTERNATIONAL_RELATIONS:
+                return _("International relations, public security or national defence")
+            case InspireLimitationCategory.COURSE_OF_JUSTICE:
+                return _("Course of justice")
+            case InspireLimitationCategory.COMMERCIAL_CONFIDENTIALITY:
+                return _("Commercial or industrial confidentiality")
+            case InspireLimitationCategory.INTELLECTUAL_PROPERTY:
+                return _("Intellectual property rights")
+            case InspireLimitationCategory.PERSONAL_DATA:
+                return _("Personal data confidentiality")
+            case InspireLimitationCategory.VOLUNTARY_SUPPLIER:
+                return _("Protection of voluntary information suppliers")
+            case InspireLimitationCategory.ENVIRONMENTAL_PROTECTION:
+                return _("Environmental protection")
+            case _:
+                assert_never(self)
 
     @property
     def definition(self):
         """Returns the definition for this limitation category."""
-        definitions = {
-            self.PUBLIC_AUTHORITIES: _(
-                "The confidentiality of the proceedings of public authorities, where such confidentiality is provided for by law."
-            ),
-            self.INTERNATIONAL_RELATIONS: _(
-                "International relations, public security or national defence."
-            ),
-            self.COURSE_OF_JUSTICE: _(
-                "The course of justice, the ability of any person to receive a fair trial or the ability of a public authority to conduct an enquiry of a criminal or disciplinary nature."
-            ),
-            self.COMMERCIAL_CONFIDENTIALITY: _(
-                "The confidentiality of commercial or industrial information, where such confidentiality is provided for by national or Community law to protect a legitimate economic interest."
-            ),
-            self.INTELLECTUAL_PROPERTY: _("Intellectual property rights."),
-            self.PERSONAL_DATA: _(
-                "The confidentiality of personal data and/or files relating to a natural person where that person has not consented to the disclosure."
-            ),
-            self.VOLUNTARY_SUPPLIER: _(
-                "The interests or protection of any person who supplied the information requested on a voluntary basis without being under a legal obligation."
-            ),
-            self.ENVIRONMENTAL_PROTECTION: _(
-                "The protection of the environment to which such information relates, such as the location of rare species."
-            ),
-        }
-        return definitions.get(self, _("Unknown limitation category"))
+        match self:
+            case InspireLimitationCategory.PUBLIC_AUTHORITIES:
+                return _(
+                    "The confidentiality of the proceedings of public authorities, where such confidentiality is provided for by law."
+                )
+            case InspireLimitationCategory.INTERNATIONAL_RELATIONS:
+                return _("International relations, public security or national defence.")
+            case InspireLimitationCategory.COURSE_OF_JUSTICE:
+                return _(
+                    "The course of justice, the ability of any person to receive a fair trial or the ability of a public authority to conduct an enquiry of a criminal or disciplinary nature."
+                )
+            case InspireLimitationCategory.COMMERCIAL_CONFIDENTIALITY:
+                return _(
+                    "The confidentiality of commercial or industrial information, where such confidentiality is provided for by national or Community law to protect a legitimate economic interest."
+                )
+            case InspireLimitationCategory.INTELLECTUAL_PROPERTY:
+                return _("Intellectual property rights.")
+            case InspireLimitationCategory.PERSONAL_DATA:
+                return _(
+                    "The confidentiality of personal data and/or files relating to a natural person where that person has not consented to the disclosure."
+                )
+            case InspireLimitationCategory.VOLUNTARY_SUPPLIER:
+                return _(
+                    "The interests or protection of any person who supplied the information requested on a voluntary basis without being under a legal obligation."
+                )
+            case InspireLimitationCategory.ENVIRONMENTAL_PROTECTION:
+                return _(
+                    "The protection of the environment to which such information relates, such as the location of rare species."
+                )
+            case _:
+                assert_never(self)
 
     @classmethod
     def get_labels(cls):
