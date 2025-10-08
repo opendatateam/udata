@@ -890,6 +890,14 @@ class FrequenciesAPI(API):
     @api.marshal_list_with(frequency_fields)
     def get(self):
         """List all available frequencies"""
+        from flask import current_app, g
+
+        from udata.i18n import get_locale
+
+        print(current_app.config["DEFAULT_LANGUAGE"])
+        print(get_locale())
+        print(g.lang_code)
+        print(_("Unknown"))
         return [{"id": id, "label": label} for id, label in UPDATE_FREQUENCIES.items()]
 
 
