@@ -27,14 +27,14 @@ ACCESS_AUDIENCE_CONDITIONS = [
 ]
 
 # INSPIRE Directive Article 13(1) limitation reason categories
-INSPIRE_13_A_PUBLIC_AUTHORITIES = "confidentialityOfProceedingsOfPublicAuthorities"
-INSPIRE_13_B_INTERNATIONAL_RELATIONS = "internationalRelationsPublicSecurityOrNationalDefence"
-INSPIRE_13_C_COURSE_OF_JUSTICE = "courseOfJusticeOrFairTrial"
-INSPIRE_13_D_COMMERCIAL_CONFIDENTIALITY = "confidentialityOfCommercialOrIndustrialInformation"
-INSPIRE_13_E_INTELLECTUAL_PROPERTY = "intellectualPropertyRights"
-INSPIRE_13_F_PERSONAL_DATA = "confidentialityOfPersonalData"
-INSPIRE_13_G_VOLUNTARY_SUPPLIER = "protectionOfVoluntaryInformationSuppliers"
-INSPIRE_13_H_ENVIRONMENTAL_PROTECTION = "protectionOfEnvironment"
+INSPIRE_13_A_PUBLIC_AUTHORITIES = "confidentiality_of_proceedings_of_public_authorities"
+INSPIRE_13_B_INTERNATIONAL_RELATIONS = "international_relations_public_security_or_national_defence"
+INSPIRE_13_C_COURSE_OF_JUSTICE = "course_of_justice_or_fair_trial"
+INSPIRE_13_D_COMMERCIAL_CONFIDENTIALITY = "confidentiality_of_commercial_or_industrial_information"
+INSPIRE_13_E_INTELLECTUAL_PROPERTY = "intellectual_property_rights"
+INSPIRE_13_F_PERSONAL_DATA = "confidentiality_of_personal_data"
+INSPIRE_13_G_VOLUNTARY_SUPPLIER = "protection_of_voluntary_information_suppliers"
+INSPIRE_13_H_ENVIRONMENTAL_PROTECTION = "protection_of_environment"
 
 INSPIRE_LIMITATION_CATEGORIES = [
     INSPIRE_13_A_PUBLIC_AUTHORITIES,
