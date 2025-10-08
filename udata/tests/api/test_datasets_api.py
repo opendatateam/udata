@@ -1311,7 +1311,10 @@ class DatasetAPITest(APITestCase):
             {
                 "access_type": AccessType.RESTRICTED,
                 "access_audiences": [
-                    {"role": AccessAudienceType.ADMINISTRATION, "condition": AccessAudienceCondition.YES},
+                    {
+                        "role": AccessAudienceType.ADMINISTRATION,
+                        "condition": AccessAudienceCondition.YES,
+                    },
                     {"role": AccessAudienceType.COMPANY, "condition": AccessAudienceCondition.NO},
                     {
                         "role": AccessAudienceType.PRIVATE,
@@ -1326,7 +1329,10 @@ class DatasetAPITest(APITestCase):
 
         self.assert200(response)
         assert response.json["access_type"] == AccessType.RESTRICTED
-        assert response.json["access_type_reason_category"] == InspireLimitationCategory.INTERNATIONAL_RELATIONS
+        assert (
+            response.json["access_type_reason_category"]
+            == InspireLimitationCategory.INTERNATIONAL_RELATIONS
+        )
         assert (
             response.json["access_type_reason"]
             == "Les données contiennent des information sensibles ou liées au secret défense"
@@ -1341,7 +1347,9 @@ class DatasetAPITest(APITestCase):
         assert dataset.access_audiences[2].role == AccessAudienceType.PRIVATE
         assert dataset.access_audiences[2].condition == AccessAudienceCondition.UNDER_CONDITIONS
         assert dataset.authorization_request_url == "https://example.org"
-        assert dataset.access_type_reason_category == InspireLimitationCategory.INTERNATIONAL_RELATIONS
+        assert (
+            dataset.access_type_reason_category == InspireLimitationCategory.INTERNATIONAL_RELATIONS
+        )
         assert (
             dataset.access_type_reason
             == "Les données contiennent des information sensibles ou liées au secret défense"
@@ -1356,8 +1364,14 @@ class DatasetAPITest(APITestCase):
             {
                 "access_type": AccessType.RESTRICTED,
                 "access_audiences": [
-                    {"role": AccessAudienceType.ADMINISTRATION, "condition": AccessAudienceCondition.YES},
-                    {"role": AccessAudienceType.ADMINISTRATION, "condition": AccessAudienceCondition.YES},
+                    {
+                        "role": AccessAudienceType.ADMINISTRATION,
+                        "condition": AccessAudienceCondition.YES,
+                    },
+                    {
+                        "role": AccessAudienceType.ADMINISTRATION,
+                        "condition": AccessAudienceCondition.YES,
+                    },
                 ],
             },
         )

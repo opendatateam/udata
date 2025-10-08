@@ -151,9 +151,7 @@ class AccessAudienceForm(ModelForm):
     model_class = AccessAudience
 
     role = fields.SelectField(choices=[(e.value, e.value) for e in AccessAudienceType])
-    condition = fields.SelectField(
-        choices=[(e.value, e.value) for e in AccessAudienceCondition]
-    )
+    condition = fields.SelectField(choices=[(e.value, e.value) for e in AccessAudienceCondition])
 
 
 class DatasetForm(ModelForm):
