@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2025-10-08 15:31+0200\n"
-"PO-Revision-Date: 2025-10-08 14:00\n"
+"PO-Revision-Date: 2025-10-08 15:13\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -107,15 +107,15 @@ msgstr "Droits de l'administrateur système"
 
 #: udata/auth/forms.py:23
 msgid "Captcha code"
-msgstr ""
+msgstr "Code captcha"
 
 #: udata/auth/forms.py:24
 msgid "Captcha ID"
-msgstr ""
+msgstr "ID Captcha"
 
 #: udata/auth/forms.py:30
 msgid "Invalid Captcha"
-msgstr ""
+msgstr "Captcha invalide"
 
 #: udata/auth/forms.py:36 udata/core/user/forms.py:14
 msgid "First name"
@@ -141,11 +141,11 @@ msgstr "Nom de famille requis"
 
 #: udata/auth/forms.py:50
 msgid "J'accepte les conditions générales d'utilisation"
-msgstr ""
+msgstr "J'accepte les conditions générales d'utilisation"
 
 #: udata/auth/forms.py:52
 msgid "Vous devez accepter les CGU pour continuer."
-msgstr ""
+msgstr "Vous devez accepter les CGU pour continuer."
 
 #: udata/auth/forms.py:73 udata/tests/forms/test_current_user_field.py:192
 msgid "Password must be changed for security reasons"
@@ -353,43 +353,43 @@ msgstr "Temps réel"
 
 #: udata/core/dataset/constants.py:20
 msgid "Every minute"
-msgstr ""
+msgstr "Toutes les minutes"
 
 #: udata/core/dataset/constants.py:21
 msgid "Every five minutes"
-msgstr ""
+msgstr "Toutes les cinq minutes"
 
 #: udata/core/dataset/constants.py:22
 msgid "Every ten minutes"
-msgstr ""
+msgstr "Toutes les dix minutes"
 
 #: udata/core/dataset/constants.py:25
 msgid "Every fifteen minutes"
-msgstr ""
+msgstr "Toutes les quinze minutes"
 
 #: udata/core/dataset/constants.py:28
 msgid "Every thirty minute"
-msgstr ""
+msgstr "Toutes les trente minutes"
 
 #: udata/core/dataset/constants.py:29
 msgid "Every hour"
-msgstr ""
+msgstr "Toutes les heures"
 
 #: udata/core/dataset/constants.py:30
 msgid "Every two hours"
-msgstr ""
+msgstr "Toutes les deux heures"
 
 #: udata/core/dataset/constants.py:31
 msgid "Every three hours"
-msgstr ""
+msgstr "Toutes les trois heures"
 
 #: udata/core/dataset/constants.py:32
 msgid "Every twelve hours"
-msgstr ""
+msgstr "Toutes les douze heures"
 
 #: udata/core/dataset/constants.py:33
 msgid "Several times a day"
-msgstr ""
+msgstr "Plusieurs fois par jour"
 
 #: udata/core/dataset/constants.py:34
 msgid "Three times a day"
@@ -397,7 +397,7 @@ msgstr "Trois fois par jour"
 
 #: udata/core/dataset/constants.py:35
 msgid "Twice a day"
-msgstr ""
+msgstr "Deux fois par jour"
 
 #: udata/core/dataset/constants.py:36 udata/harvest/models.py:22
 msgid "Daily"
@@ -405,7 +405,7 @@ msgstr "Quotidienne"
 
 #: udata/core/dataset/constants.py:37
 msgid "Five times a week"
-msgstr ""
+msgstr "Cinq fois par semaine"
 
 #: udata/core/dataset/constants.py:40
 msgid "Three times a week"
@@ -413,7 +413,7 @@ msgstr "Trois fois par semaine"
 
 #: udata/core/dataset/constants.py:43
 msgid "Twice a week"
-msgstr ""
+msgstr "Deux fois par semaine"
 
 #: udata/core/dataset/constants.py:44 udata/harvest/models.py:21
 msgid "Weekly"
@@ -421,7 +421,7 @@ msgstr "Hebdomadaire"
 
 #: udata/core/dataset/constants.py:45
 msgid "Every two weeks"
-msgstr ""
+msgstr "Toutes les deux semaines"
 
 #: udata/core/dataset/constants.py:48
 msgid "Three times a month"
@@ -429,7 +429,7 @@ msgstr "Trois fois par mois"
 
 #: udata/core/dataset/constants.py:51
 msgid "Twice a month"
-msgstr ""
+msgstr "Deux fois par mois"
 
 #: udata/core/dataset/constants.py:52 udata/harvest/models.py:20
 msgid "Monthly"
@@ -437,7 +437,7 @@ msgstr "Mensuelle"
 
 #: udata/core/dataset/constants.py:53
 msgid "Every two months"
-msgstr ""
+msgstr "Tous les deux mois"
 
 #: udata/core/dataset/constants.py:54
 msgid "Quarterly"
@@ -449,39 +449,39 @@ msgstr "Trois fois par an"
 
 #: udata/core/dataset/constants.py:60
 msgid "Twice a year"
-msgstr ""
+msgstr "Deux fois par an"
 
 #: udata/core/dataset/constants.py:61
 msgid "Annually"
-msgstr ""
+msgstr "Annuel"
 
 #: udata/core/dataset/constants.py:62
 msgid "Every two years"
-msgstr ""
+msgstr "Tous les deux ans"
 
 #: udata/core/dataset/constants.py:63
 msgid "Every three years"
-msgstr ""
+msgstr "Tous les trois ans"
 
 #: udata/core/dataset/constants.py:64
 msgid "Every four years"
-msgstr ""
+msgstr "Tous les quatre ans"
 
 #: udata/core/dataset/constants.py:65
 msgid "Every five years"
-msgstr ""
+msgstr "Tous les cinq ans"
 
 #: udata/core/dataset/constants.py:66
 msgid "Every ten years"
-msgstr ""
+msgstr "Tous les dix ans"
 
 #: udata/core/dataset/constants.py:67
 msgid "Every twenty years"
-msgstr ""
+msgstr "Tous les vingt ans"
 
 #: udata/core/dataset/constants.py:68
 msgid "Every thirty years"
-msgstr ""
+msgstr "Tous les trente ans"
 
 #: udata/core/dataset/constants.py:69
 msgid "Punctual"
@@ -493,11 +493,11 @@ msgstr "Sans régularité"
 
 #: udata/core/dataset/constants.py:71
 msgid "Never"
-msgstr ""
+msgstr "Jamais"
 
 #: udata/core/dataset/constants.py:72
 msgid "Not planned"
-msgstr ""
+msgstr "Non planifié"
 
 #: udata/core/dataset/constants.py:73 udata/core/dataset/constants.py:149
 #: udata/core/spatial/constants.py:5
@@ -697,11 +697,11 @@ msgstr ""
 
 #: udata/core/dataset/models.py:69
 msgid "Inspire"
-msgstr ""
+msgstr "Inspire"
 
 #: udata/core/dataset/models.py:70
 msgid "High value datasets"
-msgstr ""
+msgstr "Données de forte valeur"
 
 #: udata/core/dataset/models.py:71
 msgid "Certified statistic series"
@@ -1227,7 +1227,7 @@ msgstr "a mis à jour une thématique"
 
 #: udata/core/topic/activities.py:38
 msgid "added an element to a topic"
-msgstr ""
+msgstr "a ajouté un élément à une thématique"
 
 #: udata/core/topic/activities.py:44
 msgid "updated an element in a topic"
