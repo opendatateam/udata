@@ -124,9 +124,8 @@ def filter_by_topic(base_query, filter_value):
     else:
         return base_query.filter(
             id__in=[
-                elt.element.id
-                for elt in topic.elements
-                if elt.element.__class__.__name__ == "Dataservice"
+                element.element.id
+                for element in topic.elements.filter(__raw__={"element._cls": "Dataservice"})
             ]
         )
 

@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 
 import mongoengine
 from bson import ObjectId
@@ -63,7 +62,7 @@ class DataservicesAtomFeedAPI(API):
             _("Latest APIs"), description=None, feed_url=request.url, link=request.url_root
         )
 
-        dataservices: List[Dataservice] = (
+        dataservices: list[Dataservice] = (
             Dataservice.objects.visible().order_by("-created_at").limit(current_site.feed_size)
         )
         for dataservice in dataservices:

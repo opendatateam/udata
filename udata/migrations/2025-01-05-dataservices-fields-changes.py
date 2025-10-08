@@ -3,7 +3,6 @@ This migration keeps only the "Local authority" badge if the organization also h
 """
 
 import logging
-from typing import List
 
 from mongoengine.connection import get_db
 
@@ -82,7 +81,7 @@ def migrate(db):
     )
     log.info(f"\t{count.modified_count} open dataservices to ACCESS_TYPE_OPEN")
 
-    dataservices: List[Dataservice] = get_db().dataservice.find()
+    dataservices: list[Dataservice] = get_db().dataservice.find()
     for dataservice in dataservices:
         if (
             "endpoint_description_url" not in dataservice
