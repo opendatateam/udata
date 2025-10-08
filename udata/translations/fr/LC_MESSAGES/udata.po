@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2025-10-08 15:31+0200\n"
-"PO-Revision-Date: 2025-10-08 15:13\n"
+"PO-Revision-Date: 2025-10-08 16:23\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -693,7 +693,7 @@ msgstr "Données pivot"
 
 #: udata/core/dataset/models.py:68
 msgid "Reference data public service"
-msgstr ""
+msgstr "Service public de la donnée de référence"
 
 #: udata/core/dataset/models.py:69
 msgid "Inspire"
@@ -705,11 +705,11 @@ msgstr "Données de forte valeur"
 
 #: udata/core/dataset/models.py:71
 msgid "Certified statistic series"
-msgstr ""
+msgstr "Séries statistiques labellisées"
 
 #: udata/core/dataset/models.py:72
 msgid "Statistical series of general interest"
-msgstr ""
+msgstr "Séries statistiques reconnues d’intérêt général"
 
 #: udata/core/dataset/models.py:152
 msgid "A schema must contains a name or an URL when a version is provided."
@@ -1231,19 +1231,19 @@ msgstr "a ajouté un élément à une thématique"
 
 #: udata/core/topic/activities.py:44
 msgid "updated an element in a topic"
-msgstr ""
+msgstr "a mis à jour un élément dans une thématique"
 
 #: udata/core/topic/activities.py:51
 msgid "removed an element from a topic"
-msgstr ""
+msgstr "a supprimé un élément d'une thématique"
 
 #: udata/core/topic/forms.py:17
 msgid "Element"
-msgstr ""
+msgstr "Élément"
 
 #: udata/core/topic/forms.py:26
 msgid "A topic element must have a title or an element."
-msgstr ""
+msgstr "Un élément de thématique doit avoir un titre ou un élément."
 
 #: udata/core/topic/forms.py:91
 msgid "Featured"
@@ -1471,15 +1471,15 @@ msgstr "Un nom de mot-clé CKAN"
 
 #: udata/templates/404.html:6
 msgid "Page not found"
-msgstr ""
+msgstr "Page non trouvée"
 
 #: udata/templates/404.html:39
 msgid "The page you are looking for does not exist."
-msgstr ""
+msgstr "La page que vous cherchez ne peut être trouvée."
 
 #: udata/templates/404.html:40
 msgid "Back to home"
-msgstr ""
+msgstr "Retour à la page d'accueil"
 
 #: udata/templates/admin.html:7
 msgid "Admin"
