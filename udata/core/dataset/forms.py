@@ -1,9 +1,8 @@
 from udata.core.access_type.constants import (
-    ACCESS_AUDIENCE_CONDITIONS,
-    ACCESS_AUDIENCE_TYPES,
-    ACCESS_TYPE_OPEN,
-    ACCESS_TYPES,
-    INSPIRE_LIMITATION_CATEGORIES,
+    AccessAudienceCondition,
+    AccessAudienceType,
+    AccessType,
+    InspireLimitationCategory,
 )
 from udata.core.access_type.models import AccessAudience
 from udata.core.spatial.forms import SpatialCoverageField
@@ -151,8 +150,10 @@ def validate_contact_point(form, field):
 class AccessAudienceForm(ModelForm):
     model_class = AccessAudience
 
-    role = fields.SelectField(choices=ACCESS_AUDIENCE_TYPES)
-    condition = fields.SelectField(choices=ACCESS_AUDIENCE_CONDITIONS)
+    role = fields.SelectField(choices=[(e.value, e.value) for e in AccessAudienceType])
+    condition = fields.SelectField(
+        choices=[(e.value, e.value) for e in AccessAudienceCondition]
+    )
 
 
 class DatasetForm(ModelForm):
@@ -174,13 +175,15 @@ class DatasetForm(ModelForm):
     )
     license = fields.ModelSelectField(_("License"), model=License, allow_blank=True)
     access_type = fields.SelectField(
-        choices=ACCESS_TYPES, default=ACCESS_TYPE_OPEN, validators=[validators.optional()]
+        choices=[(e.value, e.value) for e in AccessType],
+        default=AccessType.OPEN.value,
+        validators=[validators.optional()],
     )
     access_audiences = fields.NestedModelList(AccessAudienceForm)
     authorization_request_url = fields.StringField(_("Authorization request URL"))
     access_type_reason_category = fields.SelectField(
         _("Access type reason category"),
-        choices=INSPIRE_LIMITATION_CATEGORIES,
+        choices=[(e.value, e.value) for e in InspireLimitationCategory],
         validators=[validators.optional()],
     )
     access_type_reason = fields.StringField(_("Access type reason"))

@@ -18,7 +18,7 @@ from werkzeug.utils import cached_property
 from udata.api_fields import field
 from udata.app import cache
 from udata.core import storages
-from udata.core.access_type.constants import ACCESS_TYPE_OPEN
+from udata.core.access_type.constants import AccessType
 from udata.core.access_type.models import WithAccessType, check_only_one_condition_per_role
 from udata.core.activity.models import Auditable
 from udata.core.dataset.preview import TabularAPIPreview
@@ -718,7 +718,7 @@ class Dataset(
         self.quality_cached = self.compute_quality()
 
         check_only_one_condition_per_role(self.access_audiences)
-        if self.access_type and self.access_type != ACCESS_TYPE_OPEN:
+        if self.access_type and self.access_type != AccessType.OPEN:
             self.license = None
 
         for key, value in self.extras.items():

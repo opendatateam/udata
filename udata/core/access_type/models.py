@@ -1,10 +1,9 @@
 from udata.api_fields import field, generate_fields
 from udata.core.access_type.constants import (
-    ACCESS_AUDIENCE_CONDITIONS,
-    ACCESS_AUDIENCE_TYPES,
-    ACCESS_TYPE_OPEN,
-    ACCESS_TYPES,
-    INSPIRE_LIMITATION_CATEGORIES,
+    AccessAudienceCondition,
+    AccessAudienceType,
+    AccessType,
+    InspireLimitationCategory,
 )
 from udata.i18n import lazy_gettext as _
 from udata.models import db
@@ -13,8 +12,10 @@ from udata.mongo.errors import FieldValidationError
 
 @generate_fields()
 class AccessAudience(db.EmbeddedDocument):
-    role = field(db.StringField(choices=ACCESS_AUDIENCE_TYPES), filterable={})
-    condition = field(db.StringField(choices=ACCESS_AUDIENCE_CONDITIONS), filterable={})
+    role = field(db.StringField(choices=[e.value for e in AccessAudienceType]), filterable={})
+    condition = field(
+        db.StringField(choices=[e.value for e in AccessAudienceCondition]), filterable={}
+    )
 
 
 def check_only_one_condition_per_role(access_audiences, **_kwargs):
@@ -28,7 +29,8 @@ def check_only_one_condition_per_role(access_audiences, **_kwargs):
 
 class WithAccessType:
     access_type = field(
-        db.StringField(choices=ACCESS_TYPES, default=ACCESS_TYPE_OPEN), filterable={}
+        db.StringField(choices=[e.value for e in AccessType], default=AccessType.OPEN.value),
+        filterable={},
     )
     access_audiences = field(
         db.EmbeddedDocumentListField(AccessAudience),
@@ -37,6 +39,6 @@ class WithAccessType:
 
     authorization_request_url = field(db.URLField())
     access_type_reason_category = field(
-        db.StringField(choices=INSPIRE_LIMITATION_CATEGORIES), allow_null=True
+        db.StringField(choices=[e.value for e in InspireLimitationCategory]), allow_null=True
     )
     access_type_reason = field(db.StringField())

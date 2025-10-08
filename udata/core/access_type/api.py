@@ -1,7 +1,7 @@
 from flask import Blueprint
 
 from udata.api import API, api
-from udata.core.access_type.utils import get_inspire_limitation_labels
+from udata.core.access_type.constants import InspireLimitationCategory
 
 blueprint = Blueprint("access_type", __name__, url_prefix="/api/1/access_type")
 ns = api.namespace("access_type", "Access type related operations")
@@ -13,6 +13,6 @@ class ReasonCategoriesAPI(API):
     def get(self):
         """List all limitation reason categories"""
         return [
-            {"value": value, "label": label}
-            for value, label in get_inspire_limitation_labels().items()
+            {"value": category.value, "label": category.label}
+            for category in InspireLimitationCategory
         ]

@@ -15,15 +15,10 @@ from udata.api import fields
 from udata.app import cache
 from udata.core import storages
 from udata.core.access_type.constants import (
-    ACCESS_AUDIENCE_ADMINISTRATION,
-    ACCESS_AUDIENCE_COMPANY,
-    ACCESS_AUDIENCE_NO,
-    ACCESS_AUDIENCE_PRIVATE,
-    ACCESS_AUDIENCE_UNDER_CONDITIONS,
-    ACCESS_AUDIENCE_YES,
-    ACCESS_TYPE_OPEN,
-    ACCESS_TYPE_RESTRICTED,
-    INSPIRE_13_B_INTERNATIONAL_RELATIONS,
+    AccessAudienceCondition,
+    AccessAudienceType,
+    AccessType,
+    InspireLimitationCategory,
 )
 from udata.core.badges.factories import badge_factory
 from udata.core.dataset.constants import (
@@ -1304,49 +1299,49 @@ class DatasetAPITest(APITestCase):
     def test_add_access_type(self):
         self.login(AdminFactory())
         dataset = DatasetFactory()
-        assert dataset.access_type == ACCESS_TYPE_OPEN
+        assert dataset.access_type == AccessType.OPEN
 
         response = self.get(url_for("api.dataset", dataset=dataset))
 
         self.assert200(response)
-        assert response.json["access_type"] == ACCESS_TYPE_OPEN
+        assert response.json["access_type"] == AccessType.OPEN
 
         response = self.put(
             url_for("api.dataset", dataset=dataset),
             {
-                "access_type": ACCESS_TYPE_RESTRICTED,
+                "access_type": AccessType.RESTRICTED,
                 "access_audiences": [
-                    {"role": ACCESS_AUDIENCE_ADMINISTRATION, "condition": ACCESS_AUDIENCE_YES},
-                    {"role": ACCESS_AUDIENCE_COMPANY, "condition": ACCESS_AUDIENCE_NO},
+                    {"role": AccessAudienceType.ADMINISTRATION, "condition": AccessAudienceCondition.YES},
+                    {"role": AccessAudienceType.COMPANY, "condition": AccessAudienceCondition.NO},
                     {
-                        "role": ACCESS_AUDIENCE_PRIVATE,
-                        "condition": ACCESS_AUDIENCE_UNDER_CONDITIONS,
+                        "role": AccessAudienceType.PRIVATE,
+                        "condition": AccessAudienceCondition.UNDER_CONDITIONS,
                     },
                 ],
                 "authorization_request_url": "https://example.org",
-                "access_type_reason_category": INSPIRE_13_B_INTERNATIONAL_RELATIONS,
+                "access_type_reason_category": InspireLimitationCategory.INTERNATIONAL_RELATIONS,
                 "access_type_reason": "Les données contiennent des information sensibles ou liées au secret défense",
             },
         )
 
         self.assert200(response)
-        assert response.json["access_type"] == ACCESS_TYPE_RESTRICTED
-        assert response.json["access_type_reason_category"] == INSPIRE_13_B_INTERNATIONAL_RELATIONS
+        assert response.json["access_type"] == AccessType.RESTRICTED
+        assert response.json["access_type_reason_category"] == InspireLimitationCategory.INTERNATIONAL_RELATIONS
         assert (
             response.json["access_type_reason"]
             == "Les données contiennent des information sensibles ou liées au secret défense"
         )
 
         dataset.reload()
-        assert dataset.access_type == ACCESS_TYPE_RESTRICTED
-        assert dataset.access_audiences[0].role == ACCESS_AUDIENCE_ADMINISTRATION
-        assert dataset.access_audiences[0].condition == ACCESS_AUDIENCE_YES
-        assert dataset.access_audiences[1].role == ACCESS_AUDIENCE_COMPANY
-        assert dataset.access_audiences[1].condition == ACCESS_AUDIENCE_NO
-        assert dataset.access_audiences[2].role == ACCESS_AUDIENCE_PRIVATE
-        assert dataset.access_audiences[2].condition == ACCESS_AUDIENCE_UNDER_CONDITIONS
+        assert dataset.access_type == AccessType.RESTRICTED
+        assert dataset.access_audiences[0].role == AccessAudienceType.ADMINISTRATION
+        assert dataset.access_audiences[0].condition == AccessAudienceCondition.YES
+        assert dataset.access_audiences[1].role == AccessAudienceType.COMPANY
+        assert dataset.access_audiences[1].condition == AccessAudienceCondition.NO
+        assert dataset.access_audiences[2].role == AccessAudienceType.PRIVATE
+        assert dataset.access_audiences[2].condition == AccessAudienceCondition.UNDER_CONDITIONS
         assert dataset.authorization_request_url == "https://example.org"
-        assert dataset.access_type_reason_category == INSPIRE_13_B_INTERNATIONAL_RELATIONS
+        assert dataset.access_type_reason_category == InspireLimitationCategory.INTERNATIONAL_RELATIONS
         assert (
             dataset.access_type_reason
             == "Les données contiennent des information sensibles ou liées au secret défense"
@@ -1359,10 +1354,10 @@ class DatasetAPITest(APITestCase):
         response = self.put(
             url_for("api.dataset", dataset=dataset),
             {
-                "access_type": ACCESS_TYPE_RESTRICTED,
+                "access_type": AccessType.RESTRICTED,
                 "access_audiences": [
-                    {"role": ACCESS_AUDIENCE_ADMINISTRATION, "condition": ACCESS_AUDIENCE_YES},
-                    {"role": ACCESS_AUDIENCE_ADMINISTRATION, "condition": ACCESS_AUDIENCE_YES},
+                    {"role": AccessAudienceType.ADMINISTRATION, "condition": AccessAudienceCondition.YES},
+                    {"role": AccessAudienceType.ADMINISTRATION, "condition": AccessAudienceCondition.YES},
                 ],
             },
         )
@@ -1376,7 +1371,7 @@ class DatasetAPITest(APITestCase):
         response = self.put(
             url_for("api.dataset", dataset=dataset),
             {
-                "access_type": ACCESS_TYPE_RESTRICTED,
+                "access_type": AccessType.RESTRICTED,
             },
         )
 
