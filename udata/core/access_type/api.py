@@ -11,7 +11,7 @@ ns = api.namespace("access_type", "Access type related operations")
 class ReasonCategoriesAPI(API):
     @api.doc("reason_categories")
     def get(self):
-        """List all INSPIRE limitation reason categories"""
+        """List all limitation reason categories"""
         return [
             {"value": value, "label": label}
             for value, label in get_inspire_limitation_labels().items()
