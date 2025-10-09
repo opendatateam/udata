@@ -1,9 +1,10 @@
 import logging
 from contextlib import contextmanager
-from smtplib import SMTPException
+from dataclasses import dataclass
 
 from blinker import signal
-from flask import current_app, render_template
+from flask import current_app
+from flask_babel import LazyString
 from flask_mail import Mail, Message
 
 from udata import i18n
@@ -15,69 +16,107 @@ mail = Mail()
 mail_sent = signal("mail-sent")
 
 
-class FakeMailer(object):
-    """Display sent mail in logging output"""
-
-    def send(self, msg):
-        log.debug(msg.body)
-        log.debug(msg.html)
-        mail_sent.send(msg)
+@dataclass
+class MailCTA:
+    label: str
+    link: str
 
 
-@contextmanager
-def dummyconnection(*args, **kw):
-    """Allow to test email templates rendering without actually send emails."""
-    yield FakeMailer()
+@dataclass
+class MailMessage:
+    subject: LazyString
+    paragraph: LazyString | None = None
+    paragraphs: list[LazyString] = []
+    cta: MailCTA | None = None
+
+    def text(self) -> str:
+        return ""
+
+    def html(self) -> str:
+        return ""
 
 
 def init_app(app):
     mail.init_app(app)
 
 
-def send(subject, recipients, template_base, **kwargs):
-    """
-    Send a given email to multiple recipients.
+@contextmanager
+def send_mail_for(user):
+    def _send_mail(message: MailMessage):
+        send_mail(user, message)
 
-    User prefered language is taken in account.
-    To translate the subject in the right language, you should ugettext_lazy
-    """
-    sender = kwargs.pop("sender", None)
-    if not isinstance(recipients, (list, tuple)):
-        recipients = [recipients]
+    lang = i18n._default_lang(user)
+    with i18n.language(lang):
+        yield _send_mail
 
-    tpl_path = f"mail/{template_base}"
 
+def send_mail(user, message: MailMessage):
     debug = current_app.config.get("DEBUG", False)
     send_mail = current_app.config.get("SEND_MAIL", not debug)
-    connection = mail.connect if send_mail else dummyconnection
-    extras = get_mail_campaign_dict()
 
-    with connection() as conn:
-        for recipient in recipients:
-            lang = i18n._default_lang(recipient)
-            with i18n.language(lang):
-                log.debug('Sending mail "%s" to recipient "%s"', subject, recipient)
-                msg = Message(subject, sender=sender, recipients=[recipient.email])
-                msg.body = render_template(
-                    f"{tpl_path}.txt",
-                    subject=subject,
-                    sender=sender,
-                    recipient=recipient,
-                    extras=extras,
-                    **kwargs,
-                )
-                msg.html = render_template(
-                    f"{tpl_path}.html",
-                    subject=subject,
-                    sender=sender,
-                    recipient=recipient,
-                    extras=extras,
-                    **kwargs,
-                )
-                try:
-                    conn.send(msg)
-                except SMTPException as e:
-                    log.error(f"Error sending mail {e}")
+    lang = i18n._default_lang(user)
+    with i18n.language(lang):
+        msg = Message(
+            subject=message.subject,
+            body=message.text(),
+            html=message.html(),
+            recipients=[user.email],
+        )
+
+    if send_mail:
+        with mail.connect() as conn:
+            conn.send(msg)
+    else:
+        log.debug(f"Sending mail {message.subject} to {user.email}")
+        log.debug(msg.body)
+        log.debug(msg.html)
+        mail_sent.send(msg)
+
+
+# def send(subject, recipients, template_base, **kwargs):
+#     """
+#     Send a given email to multiple recipients.
+
+#     User prefered language is taken in account.
+#     To translate the subject in the right language, you should ugettext_lazy
+#     """
+#     sender = kwargs.pop("sender", None)
+#     if not isinstance(recipients, (list, tuple)):
+#         recipients = [recipients]
+
+#     tpl_path = f"mail/{template_base}"
+
+#     debug = current_app.config.get("DEBUG", False)
+#     send_mail = current_app.config.get("SEND_MAIL", not debug)
+#     connection = mail.connect if send_mail else dummyconnection
+#     extras = get_mail_campaign_dict()
+
+#     with connection() as conn:
+#         for recipient in recipients:
+#             lang = i18n._default_lang(recipient)
+#             with i18n.language(lang):
+#                 log.debug('Sending mail "%s" to recipient "%s"', subject, recipient)
+#                 msg = Message(subject, sender=sender, recipients=[recipient.email])
+#                 msg.body = render_template(
+#                     f"{tpl_path}.txt",
+#                     subject=subject,
+#                     sender=sender,
+#                     recipient=recipient,
+#                     extras=extras,
+#                     **kwargs,
+#                 )
+#                 msg.html = render_template(
+#                     f"{tpl_path}.html",
+#                     subject=subject,
+#                     sender=sender,
+#                     recipient=recipient,
+#                     extras=extras,
+#                     **kwargs,
+#                 )
+#                 try:
+#                     conn.send(msg)
+#                 except SMTPException as e:
+#                     log.error(f"Error sending mail {e}")
 
 
 def get_mail_campaign_dict() -> dict:
