@@ -1,7 +1,7 @@
 import logging
 import typing as t
 
-from flask import current_app
+from flask import current_app, url_for
 from flask_security import signals
 from flask_security.mail_util import MailUtil
 from flask_security.utils import url_for_security
@@ -12,7 +12,7 @@ from udata.mail import MailCTA, MailMessage
 log = logging.getLogger(__name__)
 
 
-def user_registered(confirmation_token: str, **kwargs) -> MailMessage:
+def welcome(confirmation_token: str, **kwargs) -> MailMessage:
     return MailMessage(
         subject=_("Confirmez votre adresse email"),
         paragraphs=[
@@ -26,7 +26,7 @@ def user_registered(confirmation_token: str, **kwargs) -> MailMessage:
     )
 
 
-def user_not_registered(**kwargs) -> MailMessage:
+def welcome_existing(**kwargs) -> MailMessage:
     return MailMessage(
         subject=_("Votre adresse email est déjà associée à un compte"),
         paragraphs=[
@@ -43,20 +43,20 @@ def user_not_registered(**kwargs) -> MailMessage:
     )
 
 
-def confirm_instructions_sent(confirmation_token: str, **kwargs) -> MailMessage:
+def confirmation_instructions(confirmation_token: str, **kwargs) -> MailMessage:
     return MailMessage(
         subject=_("Confirmez votre adresse email"),
         paragraphs=[
             _("Veuillez confirmer votre adresse email."),
             MailCTA(
                 _("Confirmer votre adresse email"),
-                url_for_security("confirm_email", token=confirmation_token, _external=True),
+                url_for("security.confirm_change_email", token=confirmation_token, _external=True),
             ),
         ],
     )
 
 
-def reset_password_instructions_sent(reset_token: str, **kwargs) -> MailMessage:
+def reset_instructions(reset_token: str, **kwargs) -> MailMessage:
     return MailMessage(
         subject=_("Réinitialisez votre mot de passe"),
         paragraphs=[
@@ -73,7 +73,7 @@ def reset_password_instructions_sent(reset_token: str, **kwargs) -> MailMessage:
     )
 
 
-def password_reset(**kwargs) -> MailMessage:
+def reset_notice(**kwargs) -> MailMessage:
     return MailMessage(
         subject=_("Votre mot de passe a bien été réinitialisé"),
         paragraphs=[
@@ -82,7 +82,7 @@ def password_reset(**kwargs) -> MailMessage:
     )
 
 
-def password_changed(reset_token: str, **kwargs) -> MailMessage:
+def change_notice(reset_token: str, **kwargs) -> MailMessage:
     return MailMessage(
         subject=_("Votre mot de passe a été modifié"),
         paragraphs=[
@@ -101,15 +101,15 @@ def password_changed(reset_token: str, **kwargs) -> MailMessage:
 
 mails_to_signals = {
     # Mails we want to manage
-    "welcome": (signals.user_registered, user_registered),
-    "welcome_existing": (signals.user_not_registered, user_not_registered),
-    "confirmation_instructions": (signals.confirm_instructions_sent, confirm_instructions_sent),
+    "welcome": (signals.user_registered, welcome),
+    "welcome_existing": (signals.user_not_registered, welcome_existing),
+    "confirmation_instructions": (signals.confirm_instructions_sent, confirmation_instructions),
     "reset_instructions": (
         signals.reset_password_instructions_sent,
-        reset_password_instructions_sent,
+        reset_instructions,
     ),
-    "reset_notice": (signals.password_reset, password_reset),
-    "change_notice": (signals.password_changed, password_changed),
+    "reset_notice": (signals.password_reset, reset_notice),
+    "change_notice": (signals.password_changed, change_notice),
     # Other mails
     "login_instructions": None,
     "two_factor_instructions": None,

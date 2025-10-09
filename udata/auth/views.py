@@ -1,4 +1,4 @@
-from flask import current_app, jsonify, redirect, request, url_for
+from flask import current_app, jsonify, redirect, request
 from flask_login import current_user, login_required
 from flask_security.utils import (
     check_and_get_token_status,
@@ -6,7 +6,6 @@ from flask_security.utils import (
     hash_data,
     login_user,
     logout_user,
-    send_mail,
     verify_hash,
 )
 from flask_security.views import (
@@ -25,10 +24,10 @@ from flask_wtf.csrf import generate_csrf
 from werkzeug.local import LocalProxy
 
 from udata.auth.proconnect import get_logout_url
-from udata.i18n import lazy_gettext as _
 from udata.uris import homepage_url
 from udata.utils import wants_json
 
+from . import mails
 from .forms import ChangeEmailForm
 
 _security = LocalProxy(lambda: current_app.extensions["security"])
@@ -47,16 +46,8 @@ def slash_url_suffix(url, suffix):
 def send_change_email_confirmation_instructions(user, new_email):
     data = [str(current_user.fs_uniquifier), hash_data(current_user.email), new_email]
     token = _security.confirm_serializer.dumps(data)
-    confirmation_link = url_for("security.confirm_change_email", token=token, _external=True)
 
-    subject = _("Confirm change of email instructions")
-    send_mail(
-        subject=subject,
-        recipient=new_email,
-        template="confirmation_instructions",
-        user=current_user,
-        confirmation_link=confirmation_link,
-    )
+    mails.confirmation_instructions(confirmation_token=token).send(current_user)
 
 
 def confirm_change_email_token_status(token):
