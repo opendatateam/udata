@@ -324,8 +324,13 @@ class Defaults(object):
     S3_ACCESS_KEY_ID = None
     S3_SECRET_ACCESS_KEY = None
 
-    # Specific support for hvd (map HVD categories URIs to keywords)
+    # Specific support for hvd:
+    # - map HVD categories URIs to keywords
     HVD_SUPPORT = True
+
+    # Specific support for inspire:
+    # - add inspire keyword during harvest if GEMETE INSPIRE thesaurus is used in DCAT.theme
+    INSPIRE_SUPPORT = True
 
     ACTIVATE_TERRITORIES = False
     # The order is important to compute parents/children, smaller first.

@@ -303,16 +303,26 @@ def theme_labels_from_rdf(rdf):
     """
     Get theme labels to use as keywords.
     Map HVD keywords from known URIs resources if HVD support is activated.
+    Map INSPIRE keyword from known themes if INSPIRE support is activated.
     """
     for theme in rdf.objects(DCAT.theme):
         if isinstance(theme, RdfResource):
+            label = rdf_value(theme, SKOS.prefLabel)
             uri = theme.identifier.toPython()
             if current_app.config["HVD_SUPPORT"] and uri in EU_HVD_CATEGORIES:
+                # Map label from EU HVD categories
                 label = EU_HVD_CATEGORIES[uri]
                 # Additionnally yield hvd keyword
                 yield "hvd"
-            else:
-                label = rdf_value(theme, SKOS.prefLabel)
+            elif current_app.config["INSPIRE_SUPPORT"]:
+                if uri.startswith("http://inspire.ec.europa.eu/theme/"):
+                    yield "inspire"
+                else:
+                    if (scheme := theme.value(SKOS.inScheme)) and (
+                        scheme_title := rdf_value(scheme, DCT.title)
+                    ):
+                        if scheme_title.lower() == "gemet - inspire themes, version 1.0":
+                            yield "inspire"
         else:
             label = theme.toPython()
         if label:
