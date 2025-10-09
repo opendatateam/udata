@@ -19,7 +19,14 @@ mail_sent = signal("mail-sent")
 @dataclass
 class MailCTA:
     label: LazyString
-    link: str
+    link: str | None
+
+
+@dataclass
+class LabelledContent:
+    label: LazyString
+    content: str | None
+    inlined: bool = False
 
 
 @dataclass
@@ -35,7 +42,9 @@ class ParagraphWithLinks:
 
         for key, value in new_paragraph._kwargs.items():
             if hasattr(value, "url_for"):
-                new_paragraph._kwargs[key] = f'<a href="{value.url_for()}">{str(value)}</a>'
+                new_paragraph._kwargs[key] = (
+                    f'<a href="{value.url_for(_mailCampaign=True)}">{str(value)}</a>'
+                )
 
         return str(new_paragraph)
 
@@ -43,7 +52,7 @@ class ParagraphWithLinks:
 @dataclass
 class MailMessage:
     subject: LazyString
-    paragraphs: list[LazyString | MailCTA | ParagraphWithLinks]
+    paragraphs: list[LazyString | MailCTA | ParagraphWithLinks | LabelledContent]
 
     def text(self, recipient) -> str:
         return render_template(
@@ -64,27 +73,31 @@ def init_app(app):
     mail.init_app(app)
 
 
-def send_mail(user, message: MailMessage):
+def send_mail(recipients: object | list, message: MailMessage):
     debug = current_app.config.get("DEBUG", False)
     send_mail = current_app.config.get("SEND_MAIL", not debug)
 
-    lang = i18n._default_lang(user)
-    with i18n.language(lang):
-        msg = Message(
-            subject=str(message.subject),
-            body=message.text(user),
-            html=message.html(user),
-            recipients=[user.email],
-        )
+    if not isinstance(recipients, list):
+        recipients = [recipients]
 
-    if send_mail:
-        with mail.connect() as conn:
-            conn.send(msg)
-    else:
-        log.debug(f"Sending mail {message.subject} to {user.email}")
-        log.debug(msg.body)
-        log.debug(msg.html)
-        mail_sent.send(msg)
+    for recipient in recipients:
+        lang = i18n._default_lang(recipient)
+        with i18n.language(lang):
+            msg = Message(
+                subject=str(message.subject),
+                body=message.text(recipient),
+                html=message.html(recipient),
+                recipients=[recipient.email],
+            )
+
+        if send_mail:
+            with mail.connect() as conn:
+                conn.send(msg)
+        else:
+            log.debug(f"Sending mail {message.subject} to {recipient.email}")
+            log.debug(msg.body)
+            log.debug(msg.html)
+            mail_sent.send(msg)
 
 
 # def send(subject, recipients, template_base, **kwargs):

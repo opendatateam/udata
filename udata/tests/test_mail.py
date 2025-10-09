@@ -18,9 +18,30 @@ class MailGenerationTest(TestCase, DBTestMixin):
             )
 
         assert len(mails) == 1
+        assert len(mails[0].recipients) == 1
+        assert mails[0].recipients[0] == "jane@example.org"
         assert mails[0].subject == "Unknown"
         assert "Some text" in mails[0].body
         assert "Some text" in mails[0].html
+
+    @pytest.mark.options(DEFAULT_LANGUAGE="en")
+    def test_multiple_recipients(self):
+        with capture_mails() as mails:
+            send_mail(
+                [
+                    UserFactory(email="jane@example.org"),
+                    UserFactory(email="john@example.org", prefered_language="fr"),
+                ],
+                MailMessage(_("Unknown"), paragraphs=[_("Some text")]),
+            )
+
+        assert len(mails) == 2
+        assert len(mails[0].recipients) == 1
+        assert mails[0].recipients[0] == "jane@example.org"
+        assert mails[0].subject == "Unknown"
+        assert len(mails[1].recipients) == 1
+        assert mails[1].recipients[0] == "john@example.org"
+        assert mails[1].subject == "Inconnu"
 
     @pytest.mark.options(DEFAULT_LANGUAGE="en")
     def test_use_user_language(self):
