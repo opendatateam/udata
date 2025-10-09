@@ -13,7 +13,7 @@ def account_deletion() -> MailMessage:
     )
 
 
-def inactive_user(user: User):
+def inactive_user(user: User) -> MailMessage:
     config = current_app.config
 
     return MailMessage(
