@@ -1,10 +1,9 @@
-from udata import mail
 from udata.core import storages
 from udata.core.topic.models import TopicElement
-from udata.i18n import lazy_gettext as _
 from udata.models import Activity, Discussion, Follow, Transfer
 from udata.tasks import get_logger, job, task
 
+from . import mails
 from .models import Reuse
 
 log = get_logger(__name__)
@@ -45,4 +44,4 @@ def notify_new_reuse(reuse_id: int) -> None:
         else:
             recipients = None
         if recipients:
-            mail.send(_("New reuse"), recipients, "new_reuse", reuse=reuse, dataset=dataset)
+            mails.new_reuse(reuse, dataset).send(recipients)
