@@ -6,58 +6,58 @@ from udata.mail import LabelledContent, MailCTA, MailMessage, ParagraphWithLinks
 def new_discussion(discussion: Discussion) -> MailMessage:
     return MailMessage(
         subject=_(
-            "Une nouvelle discussion a été ouverte sur votre %(type)s",
+            "A new discussion has been opened on your %(type)s",
             type=discussion.subject.verbose_name,
         ),
         paragraphs=[
             ParagraphWithLinks(
                 _(
-                    "Vous avez un nouvelle discussion de %(user_or_org)s sur votre %(type)s %(object)s",
+                    "You have a new discussion from %(user_or_org)s on your %(type)s %(object)s",
                     user_or_org=discussion.organization or discussion.user,
                     type=discussion.subject.verbose_name,
                     object=discussion.subject,
                 )
             ),
-            LabelledContent(_("Titre de la discussion :"), discussion.title, inline=True),
-            LabelledContent(_("Commentaire :"), discussion.discussion[0].content),
-            MailCTA(_("Répondre"), discussion.url_for()),
+            LabelledContent(_("Discussion title:"), discussion.title, inline=True),
+            LabelledContent(_("Comment:"), discussion.discussion[0].content),
+            MailCTA(_("Reply"), discussion.url_for()),
         ],
     )
 
 
 def new_discussion_comment(discussion: Discussion, comment: Message) -> MailMessage:
     return MailMessage(
-        subject=_("Un nouveau commentaire a été ajouté dans une discussion"),
+        subject=_("A new comment has been added to a discussion"),
         paragraphs=[
             ParagraphWithLinks(
                 _(
-                    "Vous avez un nouveau commentaire de %(user_or_org)s sur votre %(type)s %(object)s",
+                    "You have a new comment from %(user_or_org)s on your %(type)s %(object)s",
                     user_or_org=comment.posted_by_org_or_user,
                     type=discussion.subject.verbose_name,
                     object=discussion.subject,
                 )
             ),
-            LabelledContent(_("Titre de la discussion :"), discussion.title, inline=True),
-            LabelledContent(_("Commentaire :"), comment.content),
-            MailCTA(_("Répondre"), discussion.url_for()),
+            LabelledContent(_("Discussion title:"), discussion.title, inline=True),
+            LabelledContent(_("Comment:"), comment.content),
+            MailCTA(_("Reply"), discussion.url_for()),
         ],
     )
 
 
 def discussion_closed(discussion: Discussion, comment: Message | None) -> MailMessage:
     return MailMessage(
-        subject=_("Une discussion a été clôturée"),
+        subject=_("A discussion has been closed"),
         paragraphs=[
             ParagraphWithLinks(
                 _(
-                    "La discussion à laquelle vous avez participé sur le %(type)s %(object)s a été clôturée par %(user_or_org)s.",
+                    "The discussion you participated in on the %(type)s %(object)s has been closed by %(user_or_org)s.",
                     user_or_org=discussion.closed_by_org_or_user,
                     type=discussion.subject.verbose_name,
                     object=discussion.subject,
                 )
             ),
-            LabelledContent(_("Titre de la discussion :"), discussion.title, inline=True),
-            LabelledContent(_("Commentaire :"), comment.content) if comment else None,
-            MailCTA(_("Voir la discussion"), discussion.url_for()),
+            LabelledContent(_("Discussion title:"), discussion.title, inline=True),
+            LabelledContent(_("Comment:"), comment.content) if comment else None,
+            MailCTA(_("View the discussion"), discussion.url_for()),
         ],
     )

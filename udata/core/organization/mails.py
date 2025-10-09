@@ -10,12 +10,12 @@ def new_membership_request(org: Organization, request: MembershipRequest) -> Mai
         paragraphs=[
             ParagraphWithLinks(
                 _(
-                    "Vous avez reçu une demande d'adhésion de %(user)s sur votre organisation %(org)s",
+                    "You received a membership request from %(user)s for your organization %(org)s",
                     user=request.user,
                     org=org,
                 )
             ),
-            LabelledContent(_("Motif de la demande:"), request.comment),
+            LabelledContent(_("Reason for the request:"), request.comment),
             MailCTA(_("See the request"), cdata_url(f"/admin/organizations/{org.id}/members/")),
         ],
     )
@@ -37,104 +37,104 @@ def membership_refused(org: Organization) -> MailMessage:
 
 def membership_accepted(org: Organization) -> MailMessage:
     return MailMessage(
-        subject=_("Votre invitation à rejoindre une organisation a été acceptée"),
+        subject=_("Your invitation to join an organization has been accepted"),
         paragraphs=[
             ParagraphWithLinks(
                 _(
-                    "Bonne nouvelle ! Votre demande pour rejoindre l’organisation %(org)s a été approuvée.",
+                    "Good news! Your request to join the organization %(org)s has been approved.",
                     org=org,
                 )
             ),
-            MailCTA(_("Voir l'organisation"), cdata_url(f"/admin/organizations/{org.id}/")),
+            MailCTA(_("View the organization"), cdata_url(f"/admin/organizations/{org.id}/")),
         ],
     )
 
 
 def new_member(org: Organization) -> MailMessage:
     return MailMessage(
-        subject=_("Vous avez été ajouté comme membre d'une organisation"),
+        subject=_("You have been added as a member of an organization"),
         paragraphs=[
             ParagraphWithLinks(
                 _(
-                    "Bonne nouvelle ! Vous êtes maintenant membre de %(org)s.",
+                    "Good news! You are now a member of %(org)s.",
                     org=org,
                 )
             ),
-            MailCTA(_("Voir l'organisation"), cdata_url(f"/admin/organizations/{org.id}/")),
+            MailCTA(_("View the organization"), cdata_url(f"/admin/organizations/{org.id}/")),
         ],
     )
 
 
 def badge_added_certified(org: Organization) -> MailMessage:
     return MailMessage(
-        subject=_("Votre organisation a été certifiée"),
+        subject=_("Your organization has been certified"),
         paragraphs=[
             ParagraphWithLinks(
                 _(
-                    "Bonne nouvelle ! Votre organisation %(org)s a été certifiée par notre équipe. Un badge est désormais associé à votre organisation.",
+                    "Good news! Your organization %(org)s has been certified by our team. A badge is now associated with your organization.",
                     org=org,
                 )
             ),
-            MailCTA(_("Voir l'organisation"), cdata_url(f"/admin/organizations/{org.id}/")),
+            MailCTA(_("View the organization"), cdata_url(f"/admin/organizations/{org.id}/")),
         ],
     )
 
 
 def badge_added_public_service(org: Organization) -> MailMessage:
     return MailMessage(
-        subject=_("Votre organisation a été identifiée comme un service public"),
+        subject=_("Your organization has been identified as a public service"),
         paragraphs=[
             ParagraphWithLinks(
                 _(
-                    "Bonne nouvelle ! Votre organisation %(org)s a été identifiée par notre équipe comme un service public. Un badge est désormais associé à votre organisation.",
+                    "Good news! Your organization %(org)s has been identified by our team as a public service. A badge is now associated with your organization.",
                     org=org,
                 )
             ),
-            MailCTA(_("Voir l'organisation"), cdata_url(f"/admin/organizations/{org.id}/")),
+            MailCTA(_("View the organization"), cdata_url(f"/admin/organizations/{org.id}/")),
         ],
     )
 
 
 def badge_added_local_authority(org: Organization) -> MailMessage:
     return MailMessage(
-        subject=_("Votre organisation a été identifiée comme une collectivité territoriale"),
+        subject=_("Your organization has been identified as a local authority"),
         paragraphs=[
             ParagraphWithLinks(
                 _(
-                    "Bonne nouvelle ! Votre organisation %(org)s a été identifiée par notre équipe comme une collectivité territoriale. Un badge est désormais associé à votre organisation.",
+                    "Good news! Your organization %(org)s has been identified by our team as a local authority. A badge is now associated with your organization.",
                     org=org,
                 )
             ),
-            MailCTA(_("Voir l'organisation"), cdata_url(f"/admin/organizations/{org.id}/")),
+            MailCTA(_("View the organization"), cdata_url(f"/admin/organizations/{org.id}/")),
         ],
     )
 
 
 def badge_added_company(org: Organization) -> MailMessage:
     return MailMessage(
-        subject=_("Votre organisation a été identifiée comme une entreprise"),
+        subject=_("Your organization has been identified as a company"),
         paragraphs=[
             ParagraphWithLinks(
                 _(
-                    "Votre organisation %(org)s a été identifiée par notre équipe comme une entreprise. Un badge est désormais associé à votre organisation.",
+                    "Your organization %(org)s has been identified by our team as a company. A badge is now associated with your organization.",
                     org=org,
                 )
             ),
-            MailCTA(_("Voir l'organisation"), cdata_url(f"/admin/organizations/{org.id}/")),
+            MailCTA(_("View the organization"), cdata_url(f"/admin/organizations/{org.id}/")),
         ],
     )
 
 
 def badge_added_association(org: Organization) -> MailMessage:
     return MailMessage(
-        subject=_("Votre organisation a été identifiée comme une association"),
+        subject=_("Your organization has been identified as an association"),
         paragraphs=[
             ParagraphWithLinks(
                 _(
-                    "Votre organisation %(org)s a été identifiée par notre équipe comme une association. Un badge est désormais associé à votre organisation.",
+                    "Your organization %(org)s has been identified by our team as an association. A badge is now associated with your organization.",
                     org=org,
                 )
             ),
-            MailCTA(_("Voir l'organisation"), cdata_url(f"/admin/organizations/{org.id}/")),
+            MailCTA(_("View the organization"), cdata_url(f"/admin/organizations/{org.id}/")),
         ],
     )

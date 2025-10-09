@@ -14,12 +14,12 @@ log = logging.getLogger(__name__)
 
 def welcome(confirmation_token: str, **kwargs) -> MailMessage:
     return MailMessage(
-        subject=_("Confirmez votre adresse email"),
+        subject=_("Confirm your email address"),
         paragraphs=[
-            _("Bienvenue sur %(site)s !", site=current_app.config["SITE_TITLE"]),
-            _("Veuillez confirmer votre adresse email."),
+            _("Welcome to %(site)s!", site=current_app.config["SITE_TITLE"]),
+            _("Please confirm your email address."),
             MailCTA(
-                _("Confirmer votre adresse email"),
+                _("Confirm your email address"),
                 url_for_security("confirm_email", token=confirmation_token, _external=True),
             ),
         ],
@@ -28,15 +28,15 @@ def welcome(confirmation_token: str, **kwargs) -> MailMessage:
 
 def welcome_existing(**kwargs) -> MailMessage:
     return MailMessage(
-        subject=_("Votre adresse email est déjà associée à un compte"),
+        subject=_("Your email address is already associated with an account"),
         paragraphs=[
             _(
-                "Quelqu’un (vous ?) a essayé de créer un compte sur %(site)s avec votre email.",
+                "Someone (you?) tried to create an account on %(site)s with your email.",
                 site=current_app.config["SITE_TITLE"],
             ),
-            _("Si vous avez oublié votre mot de passe, vous pouvez le réinitialiser."),
+            _("If you forgot your password, you can reset it."),
             MailCTA(
-                _("Réinitialiser votre mot de passe"),
+                _("Reset your password"),
                 url_for_security("forgot_password", _external=True),
             ),
         ],
@@ -45,11 +45,11 @@ def welcome_existing(**kwargs) -> MailMessage:
 
 def confirmation_instructions(confirmation_token: str, **kwargs) -> MailMessage:
     return MailMessage(
-        subject=_("Confirmez votre adresse email"),
+        subject=_("Confirm your email address"),
         paragraphs=[
-            _("Veuillez confirmer votre adresse email."),
+            _("Please confirm your email address."),
             MailCTA(
-                _("Confirmer votre adresse email"),
+                _("Confirm your email address"),
                 url_for("security.confirm_change_email", token=confirmation_token, _external=True),
             ),
         ],
@@ -58,15 +58,15 @@ def confirmation_instructions(confirmation_token: str, **kwargs) -> MailMessage:
 
 def reset_instructions(reset_token: str, **kwargs) -> MailMessage:
     return MailMessage(
-        subject=_("Réinitialisez votre mot de passe"),
+        subject=_("Reset your password"),
         paragraphs=[
             _(
-                "Quelqu’un a demandé une réinitialisation du mot de passe de votre compte %(site)s.",
+                "Someone requested a password reset for your %(site)s account.",
                 site=current_app.config["SITE_TITLE"],
             ),
-            _("Si ce n’est pas vous, veuillez ignorer cet email."),
+            _("If this wasn't you, please ignore this email."),
             MailCTA(
-                _("Réinitialisez votre mot de passe"),
+                _("Reset your password"),
                 url_for_security("reset_password", token=reset_token, _external=True),
             ),
         ],
@@ -75,24 +75,24 @@ def reset_instructions(reset_token: str, **kwargs) -> MailMessage:
 
 def reset_notice(**kwargs) -> MailMessage:
     return MailMessage(
-        subject=_("Votre mot de passe a bien été réinitialisé"),
+        subject=_("Your password has been reset"),
         paragraphs=[
-            _("Votre mot de passe data.gouv.fr a été réinitialisé."),
+            _("Your data.gouv.fr password has been reset."),
         ],
     )
 
 
 def change_notice(reset_token: str, **kwargs) -> MailMessage:
     return MailMessage(
-        subject=_("Votre mot de passe a été modifié"),
+        subject=_("Your password has been changed"),
         paragraphs=[
             _(
-                "Le mot de passe de votre compte %(site)s a été modifié.",
+                "Your %(site)s account password has been changed.",
                 site=current_app.config["SITE_TITLE"],
             ),
-            _("Si vous n’avez pas modifié votre mot de passe veuillez le réinitialiser."),
+            _("If you did not change your password, please reset it."),
             MailCTA(
-                _("Réinitialisez votre mot de passe"),
+                _("Reset your password"),
                 url_for_security("reset_password", _external=True),
             ),
         ],

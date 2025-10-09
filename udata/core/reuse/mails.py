@@ -6,16 +6,16 @@ from udata.mail import LabelledContent, MailCTA, MailMessage, ParagraphWithLinks
 
 def new_reuse(reuse: Reuse, dataset: Dataset) -> MailMessage:
     return MailMessage(
-        subject=_("New membership request"),
+        subject=_("New reuse on your dataset"),
         paragraphs=[
             ParagraphWithLinks(
                 _(
-                    "Une nouvelle réutilisation a été publiée par %(user_or_org)s sur votre jeu de données %(dataset)s",
+                    "A new reuse has been published by %(user_or_org)s on your dataset %(dataset)s",
                     user_or_org=reuse.organization or reuse.owner,
                     dataset=dataset,
                 )
             ),
-            LabelledContent(_("Titre de la réutilisation :"), str(reuse.title)),
-            MailCTA(_("Voir la réutilisation"), reuse.url_for()),
+            LabelledContent(_("Reuse title:"), str(reuse.title)),
+            MailCTA(_("View the reuse"), reuse.url_for()),
         ],
     )
