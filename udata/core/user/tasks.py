@@ -4,20 +4,12 @@ from datetime import datetime, timedelta
 
 from flask import current_app
 
-from udata import mail
-from udata.i18n import lazy_gettext as _
-from udata.tasks import job, task
+from udata.tasks import job
 
 from . import mails
-from .models import User, datastore
+from .models import User
 
 log = logging.getLogger(__name__)
-
-
-@task(route="high.mail")
-def send_test_mail(email):
-    user = datastore.find_user(email=email)
-    mail.send(_("Test mail"), user, "test")
 
 
 @job("notify-inactive-users")
