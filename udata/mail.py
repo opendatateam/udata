@@ -26,8 +26,17 @@ class MailCTA:
 @dataclass
 class LabelledContent:
     label: LazyString
-    content: str | None
+    content: str
     inline: bool = False
+    truncated_at: int = 50
+
+    @property
+    def truncated_content(self) -> str:
+        return (
+            self.content[: self.truncated_at] + "…"
+            if len(self.content) > self.truncated_at
+            else self.content
+        )
 
 
 @dataclass

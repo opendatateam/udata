@@ -47,10 +47,10 @@
             </p>
         {% elif item.__class__.__name__ == 'LabelledContent' %}
             {% if item.inline %}
-                <p style="margin-bottom: 15px;"><strong>{{ item.label }}</strong> {{ item.content }}</p>
+                <p style="margin-bottom: 15px;"><strong>{{ item.label }}</strong> {{ item.truncated_content }}</p>
             {% else %}
                 <p style="margin-bottom: 5px; font-weight: bold;">{{ item.label }}</p>
-                <p style="margin-bottom: 15px; margin-top: 0;">{{ item.content }}</p>
+                <p style="margin-bottom: 15px; margin-top: 0;">{{ item.truncated_content }}</p>
             {% endif %}
         {% elif item.__class__.__name__ == 'ParagraphWithLinks' %}
             <p style="margin-bottom: 15px;">{{ item.html|safe }}</p>
