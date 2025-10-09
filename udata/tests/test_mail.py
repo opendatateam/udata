@@ -4,11 +4,11 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.i18n import lazy_gettext as _
 from udata.mail import MailMessage, ParagraphWithLinks, send_mail
-from udata.tests import DBTestMixin, TestCase
+from udata.tests.api import APITestCase
 from udata.tests.helpers import capture_mails
 
 
-class MailGenerationTest(TestCase, DBTestMixin):
+class MailGenerationTest(APITestCase):
     @pytest.mark.options(DEFAULT_LANGUAGE="en")
     def test_simple_mail(self):
         with capture_mails() as mails:
