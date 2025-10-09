@@ -25,6 +25,16 @@ class MailGenerationTest(TestCase, DBTestMixin):
         assert "Some text" in mails[0].html
 
     @pytest.mark.options(DEFAULT_LANGUAGE="en")
+    def test_allow_none_in_paragraphs(self):
+        with capture_mails() as mails:
+            send_mail(
+                UserFactory(email="jane@example.org"),
+                MailMessage(_("Unknown"), paragraphs=[_("Some text"), None]),
+            )
+
+        assert len(mails) == 1
+
+    @pytest.mark.options(DEFAULT_LANGUAGE="en")
     def test_multiple_recipients(self):
         with capture_mails() as mails:
             send_mail(

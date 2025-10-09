@@ -26,7 +26,7 @@ class MailCTA:
 class LabelledContent:
     label: LazyString
     content: str | None
-    inlined: bool = False
+    inline: bool = False
 
 
 @dataclass
@@ -52,7 +52,10 @@ class ParagraphWithLinks:
 @dataclass
 class MailMessage:
     subject: LazyString
-    paragraphs: list[LazyString | MailCTA | ParagraphWithLinks | LabelledContent]
+    paragraphs: list[LazyString | MailCTA | ParagraphWithLinks | LabelledContent | None]
+
+    def __post_init__(self):
+        self.paragraphs = [p for p in self.paragraphs if p is not None]
 
     def text(self, recipient) -> str:
         return render_template(

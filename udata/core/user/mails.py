@@ -1,6 +1,5 @@
 from flask import current_app
 
-from udata.core.user.models import User
 from udata.i18n import lazy_gettext as _
 from udata.mail import MailCTA, MailMessage
 from udata.uris import homepage_url
@@ -13,7 +12,7 @@ def account_deletion() -> MailMessage:
     )
 
 
-def inactive_user(user: User) -> MailMessage:
+def inactive_user(user) -> MailMessage:
     config = current_app.config
 
     return MailMessage(
