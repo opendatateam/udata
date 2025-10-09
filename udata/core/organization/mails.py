@@ -108,3 +108,33 @@ def badge_added_local_authority(org: Organization) -> MailMessage:
             MailCTA(_("Voir l'organisation"), cdata_url(f"/admin/organizations/{org.id}/")),
         ],
     )
+
+
+def badge_added_company(org: Organization) -> MailMessage:
+    return MailMessage(
+        subject=_("Votre organisation a été identifiée comme une entreprise"),
+        paragraphs=[
+            ParagraphWithLinks(
+                _(
+                    "Votre organisation %(org)s a été identifiée par notre équipe comme une entreprise. Un badge est désormais associé à votre organisation.",
+                    org=org,
+                )
+            ),
+            MailCTA(_("Voir l'organisation"), cdata_url(f"/admin/organizations/{org.id}/")),
+        ],
+    )
+
+
+def badge_added_association(org: Organization) -> MailMessage:
+    return MailMessage(
+        subject=_("Votre organisation a été identifiée comme une association"),
+        paragraphs=[
+            ParagraphWithLinks(
+                _(
+                    "Votre organisation %(org)s a été identifiée par notre équipe comme une association. Un badge est désormais associé à votre organisation.",
+                    org=org,
+                )
+            ),
+            MailCTA(_("Voir l'organisation"), cdata_url(f"/admin/organizations/{org.id}/")),
+        ],
+    )

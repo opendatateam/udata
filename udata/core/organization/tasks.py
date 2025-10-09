@@ -1,7 +1,5 @@
-from udata import mail
 from udata.core import storages
 from udata.core.badges.tasks import notify_new_badge
-from udata.i18n import lazy_gettext as _
 from udata.models import Activity, ContactPoint, Dataset, Follow, Transfer
 from udata.search import reindex
 from udata.tasks import get_logger, job, task
@@ -109,10 +107,7 @@ def notify_badge_company(org_id):
     """
     org = Organization.objects.get(pk=org_id)
     recipients = [member.user for member in org.members]
-    subject = _('Your organization "%(name)s" has been identified as a company', name=org.name)
-    mail.send(
-        subject, recipients, "badge_added_company", organization=org, badge=org.get_badge(COMPANY)
-    )
+    mails.badge_added_company(org).send(recipients)
 
 
 @notify_new_badge(Organization, ASSOCIATION)
@@ -122,14 +117,7 @@ def notify_badge_association(org_id):
     """
     org = Organization.objects.get(pk=org_id)
     recipients = [member.user for member in org.members]
-    subject = _('Your organization "%(name)s" has been identified as an association', name=org.name)
-    mail.send(
-        subject,
-        recipients,
-        "badge_added_association",
-        organization=org,
-        badge=org.get_badge(ASSOCIATION),
-    )
+    mails.badge_added_association(org).send(recipients)
 
 
 @notify_new_badge(Organization, LOCAL_AUTHORITY)
