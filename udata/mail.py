@@ -1,8 +1,9 @@
+import copy
 import logging
 from dataclasses import dataclass
 
 from blinker import signal
-from flask import current_app
+from flask import current_app, render_template
 from flask_babel import LazyString
 from flask_mail import Mail, Message
 
@@ -22,15 +23,41 @@ class MailCTA:
 
 
 @dataclass
+class ParagraphWithLinks:
+    paragraph: LazyString
+
+    def __str__(self):
+        return str(self.paragraph)
+
+    @property
+    def html(self):
+        new_paragraph = copy.deepcopy(self.paragraph)
+
+        for key, value in new_paragraph._kwargs.items():
+            if hasattr(value, "url_for"):
+                new_paragraph._kwargs[key] = f'<a href="{value.url_for()}">{str(value)}</a>'
+
+        return str(new_paragraph)
+
+
+@dataclass
 class MailMessage:
     subject: LazyString
-    paragraphs: list[LazyString | MailCTA] = []
+    paragraphs: list[LazyString | MailCTA | ParagraphWithLinks]
 
-    def text(self) -> str:
-        return ""
+    def text(self, recipient) -> str:
+        return render_template(
+            "mail/message.txt",
+            message=self,
+            recipient=recipient,
+        )
 
-    def html(self) -> str:
-        return ""
+    def html(self, recipient) -> str:
+        return render_template(
+            "mail/message.html",
+            message=self,
+            recipient=recipient,
+        )
 
 
 def init_app(app):
@@ -45,8 +72,8 @@ def send_mail(user, message: MailMessage):
     with i18n.language(lang):
         msg = Message(
             subject=str(message.subject),
-            body=message.text(),
-            html=message.html(),
+            body=message.text(user),
+            html=message.html(user),
             recipients=[user.email],
         )
 

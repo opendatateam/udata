@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ message.subject }}</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="margin-bottom: 30px;">
+        <h1 style="color: #4a5568; font-size: 24px; font-weight: normal; margin: 0;">
+            <span style="color: #2c5282;">data</span><span style="color: #667eea;">gouv</span>
+        </h1>
+    </div>
+
+    <p style="margin-bottom: 20px;">{{ _('Hi %(user)s', user=recipient.first_name) }},</p>
+
+    {% for item in message.paragraphs %}
+        {% if item.__class__.__name__ == 'MailCTA' %}
+            <p style="margin: 25px 0;">
+                <a href="{{ item.link }}" style="color: #2c5282; text-decoration: underline; font-weight: normal;">{{ item.label }}</a>
+            </p>
+        {% elif item.__class__.__name__ == 'ParagraphWithLinks' %}
+            <p style="margin-bottom: 15px;">{{ item.html }}</p>
+        {% else %}
+            <p style="margin-bottom: 15px;">{{ item }}</p>
+        {% endif %}
+    {% endfor %}
+
+    <p style="margin-top: 30px; margin-bottom: 5px;">{{ _('Have a great day') }},</p>
+    <p style="margin: 0;">{{ _('The %(site)s team', site=config.SITE_TITLE) }}</p>
+</body>
+</html>

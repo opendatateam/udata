@@ -1,0 +1,13 @@
+{{ _('Hi %(user)s', user=recipient.first_name) }},
+
+{% for item in message.paragraphs %}
+{% if item.__class__.__name__ == 'MailCTA' %}
+{{ item.label }}: {{ item.link }}
+{% else %}
+{{ item }}
+{% endif %}
+
+{% endfor %}
+
+{{ _('Have a great day') }},
+{{ _('The %(site)s team', site=config.SITE_TITLE) }}
