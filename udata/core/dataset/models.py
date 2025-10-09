@@ -560,7 +560,7 @@ class DatasetBadgeMixin(BadgeMixin):
     __badges__ = BADGES
 
 
-class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Document):
+class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.DynamicDocument):
     title = field(db.StringField(required=True))
     acronym = field(db.StringField(max_length=128))
     # /!\ do not set directly the slug when creating or updating a dataset
