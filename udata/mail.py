@@ -1,5 +1,4 @@
 import logging
-from contextlib import contextmanager
 from dataclasses import dataclass
 
 from blinker import signal
@@ -18,16 +17,14 @@ mail_sent = signal("mail-sent")
 
 @dataclass
 class MailCTA:
-    label: str
+    label: LazyString
     link: str
 
 
 @dataclass
 class MailMessage:
     subject: LazyString
-    paragraph: LazyString | None = None
-    paragraphs: list[LazyString] = []
-    cta: MailCTA | None = None
+    paragraphs: list[LazyString | MailCTA] = []
 
     def text(self) -> str:
         return ""
@@ -40,16 +37,6 @@ def init_app(app):
     mail.init_app(app)
 
 
-@contextmanager
-def send_mail_for(user):
-    def _send_mail(message: MailMessage):
-        send_mail(user, message)
-
-    lang = i18n._default_lang(user)
-    with i18n.language(lang):
-        yield _send_mail
-
-
 def send_mail(user, message: MailMessage):
     debug = current_app.config.get("DEBUG", False)
     send_mail = current_app.config.get("SEND_MAIL", not debug)
@@ -57,7 +44,7 @@ def send_mail(user, message: MailMessage):
     lang = i18n._default_lang(user)
     with i18n.language(lang):
         msg = Message(
-            subject=message.subject,
+            subject=str(message.subject),
             body=message.text(),
             html=message.html(),
             recipients=[user.email],

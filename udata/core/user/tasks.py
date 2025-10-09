@@ -7,6 +7,7 @@ from flask import current_app
 from udata import mail
 from udata.i18n import lazy_gettext as _
 from udata.tasks import job, task
+from udata.uris import homepage_url
 
 from .models import User, datastore
 
@@ -17,6 +18,34 @@ log = logging.getLogger(__name__)
 def send_test_mail(email):
     user = datastore.find_user(email=email)
     mail.send(_("Test mail"), user, "test")
+
+
+def inactive_user_mail(user):
+    return mail.MailMessage(
+        subject=_("Inactivity of your {site} account").format(
+            site=current_app.config["SITE_TITLE"]
+        ),
+        paragraphs=[
+            _(
+                "We have noticed that your account associated to (%(user_email)s) has been inactive for %(inactivity_years)d years or more on %(site)s, the open platform for public data.",
+                user_email=user.email,
+                inactivity_years=current_app.config["YEARS_OF_INACTIVITY_BEFORE_DELETION"],
+                site=current_app.config["SITE_TITLE"],
+            ),
+            mail.MailCTA(
+                label=_("If you want to keep your account, please log in with your account."),
+                link=homepage_url(),
+            ),
+            _(
+                "Without logging in, your account will be deleted within %(notify_delay)d days.",
+                notify_delay=current_app.config["DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY"],
+            ),
+            _(
+                "This account is not tied to your other administration accounts and you can always re-create an account on the %(site)s platform if necessary.",
+                site=current_app.config["SITE_TITLE"],
+            ),
+        ],
+    )
 
 
 @job("notify-inactive-users")
@@ -41,12 +70,9 @@ def notify_inactive_users(self):
         if i >= current_app.config["MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS"]:
             logging.warning("MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS reached, stopping here.")
             return
-        mail.send(
-            _("Inactivity of your {site} account").format(site=current_app.config["SITE_TITLE"]),
-            user,
-            "account_inactivity",
-            user=user,
-        )
+
+        mail.send_mail(user, inactive_user_mail(user))
+
         logging.debug(f"Notified {user.email} of account inactivity")
         user.inactive_deletion_notified_at = datetime.utcnow()
         user.save()

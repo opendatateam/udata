@@ -295,7 +295,13 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
         ContactPoint.objects(owner=self).delete()
 
         if notify:
-            mail.send(_("Account deletion"), copied_user, "account_deleted")
+            mail.send_mail(
+                copied_user,
+                mail.MailMessage(
+                    subject=_("Account deletion"),
+                    paragraphs=[_("Your account has now been deleted")],
+                ),
+            )
 
     def count_datasets(self):
         from udata.models import Dataset
