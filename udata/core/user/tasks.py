@@ -82,11 +82,6 @@ def delete_inactive_users(self):
         copied_user = copy(user)
         user.mark_as_deleted(notify=False, delete_comments=False)
         logging.warning(f"Deleted user {copied_user.email} due to account inactivity")
-        mail.send(
-            _("Deletion of your inactive {site} account").format(
-                site=current_app.config["SITE_TITLE"]
-            ),
-            copied_user,
-            "inactive_account_deleted",
-        )
+        mails.inactive_account_deleted().send(copied_user)
+
     logging.info(f"Deleted {users_to_delete.count()} inactive users")

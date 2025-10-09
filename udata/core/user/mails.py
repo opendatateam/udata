@@ -12,6 +12,20 @@ def account_deletion() -> MailMessage:
     )
 
 
+def inactive_account_deleted() -> MailMessage:
+    return MailMessage(
+        subject=_(
+            "Deletion of your inactive %(site)s account", site=current_app.config["SITE_TITLE"]
+        ),
+        paragraphs=[
+            _(
+                "Your account on %(site)s has been deleted due to inactivity",
+                site=current_app.config["SITE_TITLE"],
+            )
+        ],
+    )
+
+
 def inactive_user(user) -> MailMessage:
     config = current_app.config
 
