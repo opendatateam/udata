@@ -68,6 +68,9 @@ class MailMessage:
             recipient=recipient,
         )
 
+    def send(self, recipients):
+        send_mail(recipients, self)
+
 
 def init_app(app):
     mail.init_app(app)

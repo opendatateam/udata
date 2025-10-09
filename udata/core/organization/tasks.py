@@ -5,8 +5,8 @@ from udata.i18n import lazy_gettext as _
 from udata.models import Activity, ContactPoint, Dataset, Follow, Transfer
 from udata.search import reindex
 from udata.tasks import get_logger, job, task
-from udata.uris import cdata_url
 
+from . import mails
 from .constants import ASSOCIATION, CERTIFIED, COMPANY, LOCAL_AUTHORITY, PUBLIC_SERVICE
 from .models import Organization
 
@@ -52,25 +52,7 @@ def notify_membership_request(org_id, request_id):
         return
 
     recipients = [m.user for m in org.by_role("admin")]
-    mail.send_mail(
-        recipients,
-        mail.MailMessage(
-            subject=_("New membership request"),
-            paragraphs=[
-                mail.ParagraphWithLinks(
-                    _(
-                        "Vous avez reçu une demande d'adhésion de %(user)s sur votre organisation %(org)s",
-                        user=request.user,
-                        org=org,
-                    )
-                ),
-                mail.LabelledContent(_("Motif de la demande:"), request.comment),
-                mail.MailCTA(
-                    _("See the request"), cdata_url(f"/admin/organizations/{org.id}/members/")
-                ),
-            ],
-        ),
-    )
+    mails.new_membership_request(org, request).send(recipients)
 
 
 @task(route="high.mail")
