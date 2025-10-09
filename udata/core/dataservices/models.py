@@ -313,9 +313,6 @@ class Dataservice(Auditable, WithMetrics, DataserviceBadgeMixin, Linkable, Owned
         auditable=False,
     )
 
-    access_type_reason_category = db.StringField()
-    access_type_reason = db.StringField()
-
     @field(description="Link to the API endpoint for this dataservice")
     def self_api_url(self, **kwargs):
         return url_for(
