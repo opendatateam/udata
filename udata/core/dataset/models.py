@@ -10,6 +10,7 @@ import requests
 from blinker import signal
 from dateutil.parser import parse as parse_dt
 from flask import current_app, url_for
+from flask_babel import LazyString
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import DateTimeField
 from mongoengine.signals import post_save, pre_init, pre_save
@@ -63,7 +64,7 @@ __all__ = (
     "ResourceSchema",
 )
 
-BADGES: dict[str, str] = {
+BADGES: dict[str, LazyString] = {
     PIVOTAL_DATA: _("Pivotal data"),
     SPD: _("Reference data public service"),
     INSPIRE: _("Inspire"),

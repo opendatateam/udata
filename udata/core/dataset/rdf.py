@@ -52,7 +52,7 @@ from udata.rdf import (
 )
 from udata.utils import get_by, safe_unicode, to_naive_datetime
 
-from .constants import OGC_SERVICE_FORMATS, UpdateFrequency
+from .constants import HVD, OGC_SERVICE_FORMATS, UpdateFrequency
 from .models import Checksum, Dataset, License, Resource
 
 log = logging.getLogger(__name__)
@@ -330,7 +330,7 @@ def dataset_to_rdf(dataset: Dataset, graph: Graph | None = None) -> RdfResource:
 
     # Add DCAT-AP HVD properties if the dataset is tagged hvd.
     # See https://semiceu.github.io/DCAT-AP/releases/2.2.0-hvd/
-    is_hvd = current_app.config["HVD_SUPPORT"] and "hvd" in dataset.tags
+    is_hvd = current_app.config["HVD_SUPPORT"] and any(b.kind == HVD for b in dataset.badges)
     if is_hvd:
         d.add(DCATAP.applicableLegislation, URIRef(HVD_LEGISLATION))
 
