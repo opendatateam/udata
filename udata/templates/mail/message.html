@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ message.subject }}</title>
 </head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+<body style="font-family: Marianne, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; background-color: #ffffff; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="margin-bottom: 30px;">
         <svg width="186" height="59" viewBox="0 0 186 59" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M143.469 29.5086H145.86L152.728 46.4699L159.558 29.5086H161.986L154.208 48.6328H151.248L143.469 29.5086Z" fill="#3558A2"/>
@@ -43,7 +43,7 @@
     {% for item in message.paragraphs %}
         {% if item.__class__.__name__ == 'MailCTA' %}
             <p style="margin: 25px 0;">
-                <a href="{{ item.link }}" style="color: #2c5282; text-decoration: underline; font-weight: normal;">{{ item.label }}</a>
+                <a href="{{ item.link }}" style="color: #3558A2; text-decoration: underline; font-weight: 700;">{{ item.label }}</a>
             </p>
         {% elif item.__class__.__name__ == 'LabelledContent' %}
             {% if item.inline %}

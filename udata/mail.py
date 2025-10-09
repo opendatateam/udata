@@ -53,7 +53,7 @@ class ParagraphWithLinks:
         for key, value in new_paragraph._kwargs.items():
             if hasattr(value, "url_for"):
                 new_paragraph._kwargs[key] = (
-                    f'<a href="{value.url_for(_mailCampaign=True)}">{escape(str(value))}</a>'
+                    f'<a href="{value.url_for(_mailCampaign=True)}" style="color: #000000; text-decoration: underline;">{escape(str(value))}</a>'
                 )
 
         return str(new_paragraph)
