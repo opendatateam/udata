@@ -60,12 +60,13 @@ def notify_membership_response(org_id, request_id):
     org = Organization.objects.get(pk=org_id)
     request = next((r for r in org.requests if str(r.id) == request_id), None)
 
+    if request is None:
+        return
+
     if request.status == "accepted":
-        subject = _('You are now a member of the organization "%(org)s"', org=org)
-        template = "new_member"
+        mails.membership_accepted(org).send(request.user)
     else:
-        subject, template = _("Membership refused"), "membership_refused"
-    mail.send(subject, request.user, template, org=org, request=request)
+        mails.membership_refused(org).send(request.user)
 
 
 @task
@@ -73,8 +74,10 @@ def notify_new_member(org_id, email):
     org = Organization.objects.get(pk=org_id)
     member = next((m for m in org.members if m.user.email == email), None)
 
-    subject = _('You are now a member of the organization "%(org)s"', org=org)
-    mail.send(subject, member.user, "new_member", org=org)
+    if member is None:
+        return
+
+    mails.new_member(org).send(member.user)
 
 
 @notify_new_badge(Organization, CERTIFIED)
@@ -84,14 +87,8 @@ def notify_badge_certified(org_id):
     """
     org = Organization.objects.get(pk=org_id)
     recipients = [member.user for member in org.members]
-    subject = _('Your organization "%(name)s" has been certified', name=org.name)
-    mail.send(
-        subject,
-        recipients,
-        "badge_added_certified",
-        organization=org,
-        badge=org.get_badge(CERTIFIED),
-    )
+
+    mails.badge_added_certified(org).send(recipients)
 
 
 @notify_new_badge(Organization, PUBLIC_SERVICE)
@@ -101,14 +98,8 @@ def notify_badge_public_service(org_id):
     """
     org = Organization.objects.get(pk=org_id)
     recipients = [member.user for member in org.members]
-    subject = _('Your organization "%(name)s" has been identified as public service', name=org.name)
-    mail.send(
-        subject,
-        recipients,
-        "badge_added_public_service",
-        organization=org,
-        badge=org.get_badge(PUBLIC_SERVICE),
-    )
+
+    mails.badge_added_public_service(org).send(recipients)
 
 
 @notify_new_badge(Organization, COMPANY)
@@ -148,13 +139,4 @@ def notify_badge_local_authority(org_id):
     """
     org = Organization.objects.get(pk=org_id)
     recipients = [member.user for member in org.members]
-    subject = _(
-        'Your organization "%(name)s" has been identified as a local authority', name=org.name
-    )
-    mail.send(
-        subject,
-        recipients,
-        "badge_added_local_authority",
-        organization=org,
-        badge=org.get_badge(LOCAL_AUTHORITY),
-    )
+    mails.badge_added_local_authority(org).send(recipients)

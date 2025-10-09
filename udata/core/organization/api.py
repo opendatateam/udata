@@ -50,7 +50,7 @@ from .forms import (
 from .models import Member, MembershipRequest, Organization
 from .permissions import EditOrganizationPermission, OrganizationPrivatePermission
 from .rdf import build_org_catalog
-from .tasks import notify_membership_request, notify_membership_response
+from .tasks import notify_membership_request, notify_membership_response, notify_new_member
 
 DEFAULT_SORTING = "-created_at"
 SUGGEST_SORTING = "-metrics.followers"
@@ -467,6 +467,8 @@ class MemberAPI(API):
         org.members.append(member)
         org.count_members()
         org.save()
+
+        notify_new_member.delay(str(org.id), str(member.user.email))
 
         return member, 201
 
