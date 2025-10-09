@@ -1,6 +1,7 @@
 import copy
 import logging
 from dataclasses import dataclass
+from html import escape
 
 from blinker import signal
 from flask import current_app, render_template
@@ -43,7 +44,7 @@ class ParagraphWithLinks:
         for key, value in new_paragraph._kwargs.items():
             if hasattr(value, "url_for"):
                 new_paragraph._kwargs[key] = (
-                    f'<a href="{value.url_for(_mailCampaign=True)}">{str(value)}</a>'
+                    f'<a href="{value.url_for(_mailCampaign=True)}">{escape(str(value))}</a>'
                 )
 
         return str(new_paragraph)

@@ -3,6 +3,9 @@
 {% for item in message.paragraphs %}
 {% if item.__class__.__name__ == 'MailCTA' %}
 {{ item.label }}: {{ item.link }}
+{% elif item.__class__.__name__ == 'LabelledContent' %}
+{% if item.inline %}{{ item.label }} {{ item.content }}{% else %}{{ item.label }}
+{{ item.content }}{% endif %}
 {% else %}
 {{ item }}
 {% endif %}

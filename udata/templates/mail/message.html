@@ -45,8 +45,15 @@
             <p style="margin: 25px 0;">
                 <a href="{{ item.link }}" style="color: #2c5282; text-decoration: underline; font-weight: normal;">{{ item.label }}</a>
             </p>
+        {% elif item.__class__.__name__ == 'LabelledContent' %}
+            {% if item.inline %}
+                <p style="margin-bottom: 15px;"><strong>{{ item.label }}</strong> {{ item.content }}</p>
+            {% else %}
+                <p style="margin-bottom: 5px; font-weight: bold;">{{ item.label }}</p>
+                <p style="margin-bottom: 15px; margin-top: 0;">{{ item.content }}</p>
+            {% endif %}
         {% elif item.__class__.__name__ == 'ParagraphWithLinks' %}
-            <p style="margin-bottom: 15px;">{{ item.html }}</p>
+            <p style="margin-bottom: 15px;">{{ item.html|safe }}</p>
         {% else %}
             <p style="margin-bottom: 15px;">{{ item }}</p>
         {% endif %}

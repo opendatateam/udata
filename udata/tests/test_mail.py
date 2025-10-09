@@ -3,7 +3,7 @@ import pytest
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.i18n import lazy_gettext as _
-from udata.mail import MailMessage, ParagraphWithLinks, send_mail
+from udata.mail import LabelledContent, MailMessage, ParagraphWithLinks, send_mail
 from udata.tests.api import APITestCase
 from udata.tests.helpers import capture_mails
 
@@ -81,7 +81,57 @@ class MailGenerationTest(APITestCase):
         assert "My Org" in mails[0].body
         assert org.url_for() not in mails[0].body
         assert "My Org" in mails[0].html
+        assert "<a" in mails[0].html
         assert org.url_for() in mails[0].html
+
+    @pytest.mark.options(DEFAULT_LANGUAGE="en")
+    def test_labelled_bloc(self):
+        with capture_mails() as mails:
+            send_mail(
+                UserFactory(email="jane@example.org", prefered_language="fr"),
+                MailMessage(
+                    _("Unknown"),
+                    paragraphs=[LabelledContent(_("Some text:"), "Some content", inline=True)],
+                ),
+            )
+
+        assert len(mails) == 1
+        assert "<strong>Some text:</strong> Some content" in mails[0].html
+        assert "Some text: Some content" in mails[0].body
+
+    @pytest.mark.options(DEFAULT_LANGUAGE="en")
+    def test_escape_user_content_in_content(self):
+        with capture_mails() as mails:
+            send_mail(
+                UserFactory(email="jane@example.org", prefered_language="fr"),
+                MailMessage(
+                    _("Unknown"),
+                    paragraphs=[
+                        LabelledContent(
+                            _("Some text:"), "<script>Some content</script>", inline=True
+                        )
+                    ],
+                ),
+            )
+
+        assert len(mails) == 1
+        assert "<script>" not in mails[0].html
+
+    @pytest.mark.options(DEFAULT_LANGUAGE="en")
+    def test_escape_user_content_in_object_label(self):
+        org = OrganizationFactory(name="<script>My Org</script>")
+
+        with capture_mails() as mails:
+            send_mail(
+                UserFactory(email="jane@example.org", prefered_language="fr"),
+                MailMessage(
+                    _("Unknown"),
+                    paragraphs=[ParagraphWithLinks(_("Some text %(org)s", org=org))],
+                ),
+            )
+
+        assert len(mails) == 1
+        assert "<script>" not in mails[0].html
 
 
 # SMTPRecipientsRefusedList = ["not-found@udata", "not-found-either@udata"]
