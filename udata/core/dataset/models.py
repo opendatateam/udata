@@ -20,6 +20,7 @@ from udata.api_fields import field
 from udata.app import cache
 from udata.core import storages
 from udata.core.activity.models import Auditable
+from udata.core.constants import HVD
 from udata.core.dataset.preview import TabularAPIPreview
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
@@ -37,7 +38,6 @@ from .constants import (
     CLOSED_FORMATS,
     DEFAULT_LICENSE,
     DESCRIPTION_SHORT_SIZE_LIMIT,
-    HVD,
     INSPIRE,
     MAX_DISTANCE,
     PIVOTAL_DATA,

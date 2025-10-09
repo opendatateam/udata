@@ -16,6 +16,7 @@ from rdflib.namespace import RDF
 from rdflib.resource import Resource as RdfResource
 
 from udata import i18n, uris
+from udata.core.constants import HVD
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.spatial.models import SpatialCoverage
 from udata.harvest.exceptions import HarvestSkipException
@@ -52,7 +53,7 @@ from udata.rdf import (
 )
 from udata.utils import get_by, safe_unicode, to_naive_datetime
 
-from .constants import HVD, OGC_SERVICE_FORMATS, UpdateFrequency
+from .constants import OGC_SERVICE_FORMATS, UpdateFrequency
 from .models import Checksum, Dataset, License, Resource
 
 log = logging.getLogger(__name__)

@@ -11,6 +11,7 @@ from udata import mail
 from udata import models as udata_models
 from udata.core import csv, storages
 from udata.core.badges import tasks as badge_tasks
+from udata.core.constants import HVD
 from udata.core.dataservices.models import Dataservice
 from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
 from udata.harvest.models import HarvestJob
@@ -18,7 +19,7 @@ from udata.i18n import lazy_gettext as _
 from udata.models import Activity, Discussion, Follow, Organization, TopicElement, Transfer, db
 from udata.tasks import job
 
-from .constants import HVD, UpdateFrequency
+from .constants import UpdateFrequency
 from .models import Checksum, CommunityResource, Dataset, Resource
 
 log = get_task_logger(__name__)
