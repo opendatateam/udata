@@ -10,7 +10,6 @@ from udata.core.dataset.constants import DEFAULT_LICENSE
 from udata.models import Dataset, License
 
 from . import actions
-from .tasks import send_frequency_reminder
 
 log = logging.getLogger(__name__)
 
@@ -64,15 +63,6 @@ def licenses(source=DEFAULT_LICENSE_FILE):
         License.objects.create(**DEFAULT_LICENSE)
         log.info('Added license "%s"', DEFAULT_LICENSE["title"])
     success("Done")
-
-
-@cli.command()
-def frequency_reminder():
-    """Send a unique email per organization to members
-
-    to remind them they have outdated datasets on the website.
-    """
-    send_frequency_reminder()
 
 
 @cli.group("dataset")
