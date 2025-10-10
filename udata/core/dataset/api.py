@@ -19,8 +19,7 @@ These changes might lead to backward compatibility breakage meaning:
 
 import logging
 import os
-from datetime import datetime, timedelta
-from typing import List
+from datetime import datetime
 
 import mongoengine
 from bson.objectid import ObjectId
@@ -42,14 +41,13 @@ from udata.core.followers.api import FollowAPI
 from udata.core.followers.models import Follow
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
-from udata.core.site.models import current_site
 from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.topic.models import Topic
 from udata.frontend.markdown import md
 from udata.i18n import gettext as _
 from udata.linkchecker.checker import check_resource
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
-from udata.utils import get_by
+from udata.utils import get_by, get_rss_feed_list
 
 from .api_fields import (
     catalog_schema_fields,
@@ -332,38 +330,9 @@ class DatasetsAtomFeedAPI(API):
             link=request.url_root,
         )
 
-        # We add a delay before a new dataset appears in feed in order to allow for post-publication moderation
-        # The delay is not taken into account if the dataset is published by a certified organization
-        # We need to merge the two lists manually, compensating for the delay, else datasets with delay may not show
-        # if new datasets have been published by certified organization in the meantime
-        created_delay = datetime.utcnow() - timedelta(
-            hours=current_app.config["DELAY_BEFORE_APPEARING_IN_RSS_FEED"]
+        datasets: list[Dataset] = get_rss_feed_list(
+            Dataset.objects.visible(), "created_at_internal"
         )
-        datasets_with_delay: List[Dataset] = (
-            Dataset.objects.filter(
-                created_at_internal__lte=created_delay,
-                organization__nin=Organization.objects(badges__kind="certified"),
-            )
-            .visible()
-            .order_by("-created_at_internal")
-            .limit(current_site.feed_size)
-        )
-        datasets_without_delay: List[Dataset] = (
-            Dataset.objects.filter(organization__in=Organization.objects(badges__kind="certified"))
-            .visible()
-            .order_by("-created_at_internal")
-            .limit(current_site.feed_size)
-        )
-        datasets = sorted(
-            [*datasets_with_delay, *datasets_without_delay],
-            reverse=True,
-            key=lambda dat: (
-                dat.created_at_internal
-                + timedelta(hours=current_app.config["DELAY_BEFORE_APPEARING_IN_RSS_FEED"])
-            )
-            if dat in datasets_with_delay
-            else dat.created_at_internal,
-        )[: current_site.feed_size]
 
         for dataset in datasets:
             author_name = None
