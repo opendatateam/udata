@@ -125,7 +125,7 @@ class PostsAtomFeedAPI(API):
         for post in posts:
             feed.add_item(
                 post.name,
-                unique_id=post.id,
+                unique_id=post.url_for(_useId=True),
                 description=post.headline,
                 content=str(md(post.content)),
                 author_name="data.gouv.fr",

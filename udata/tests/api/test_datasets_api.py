@@ -11,6 +11,7 @@ from flask import url_for
 from werkzeug.test import TestResponse
 
 import udata.core.organization.constants as org_constants
+from udata import uris
 from udata.api import fields
 from udata.app import cache
 from udata.core import storages
@@ -1391,6 +1392,19 @@ class DatasetsFeedAPItest(APITestCase):
 
         assert "&lt;h1&gt;" in response.text
         assert "&lt;ul&gt;" in response.text
+
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
+    def test_feed_id_uri_is_valid(self):
+        DatasetFactory()
+
+        response = self.get(url_for("api.recent_datasets_atom_feed"))
+
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+
+        entry = feed.entries[0]
+        assert uris.validate(entry["id"])
 
 
 class DatasetBadgeAPITest(APITestCase):

@@ -155,7 +155,7 @@ class ReusesAtomFeedAPI(API):
                 author_uri = reuse.owner.url_for()
             feed.add_item(
                 reuse.title,
-                unique_id=reuse.id,
+                unique_id=reuse.url_for(_useId=True),
                 description=reuse.description,
                 content=str(md(reuse.description)),
                 author_name=author_name,
