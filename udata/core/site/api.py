@@ -6,7 +6,7 @@ from udata.auth import admin_permission
 from udata.core import csv
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataset.api import DatasetApiParser
+from udata.core.dataset.api import DatasetApiParser, dataset_parser
 from udata.core.dataset.csv import ResourcesCsvAdapter
 from udata.core.dataset.search import DatasetSearch
 from udata.core.dataset.tasks import get_queryset as get_csv_queryset
@@ -57,22 +57,30 @@ class SiteDataPortal(API):
 
 @api.route("/site/catalog", endpoint="site_rdf_catalog")
 class SiteRdfCatalog(API):
+    @api.expect(dataset_parser.parser)
     def get(self):
         """Root RDF endpoint with content negociation handling"""
         format = RDF_EXTENSIONS[negociate_content()]
-        url = url_for("api.site_rdf_catalog_format", format=format)
+        # We parse args in order to sanitize the params used as kwargs in url_for
+        search_parser = DatasetSearch.as_request_parser(store_missing=False)
+        params = search_parser.parse_args()
+        url = url_for("api.site_rdf_catalog_format", format=format, **params)
         return redirect(url)
 
 
 @api.route("/site/catalog.<format>", endpoint="site_rdf_catalog_format")
 class SiteRdfCatalogFormat(API):
+    @api.expect(dataset_parser.parser)
     def get(self, format):
-        params = multi_to_dict(request.args)
+        """
+        Return the RDF catalog in the requested format.
+        Filtering, sorting and paginating abilities apply to the datasets elements.
+        """
+        search_parser = DatasetSearch.as_request_parser(store_missing=False)
+        params = search_parser.parse_args()
         page = int(params.get("page", 1))
         page_size = int(params.get("page_size", 100))
-        datasets = Dataset.objects.visible()
-        if "tag" in params:
-            datasets = datasets.filter(tags=params.get("tag", ""))
+        datasets = DatasetApiParser.parse_filters(Dataset.objects.visible(), params)
         datasets = datasets.paginate(page, page_size)
         dataservices = Dataservice.objects.visible().filter_by_dataset_pagination(datasets, page)
 
