@@ -157,7 +157,7 @@ class ReusesAtomFeedAPI(API):
                 reuse.title,
                 unique_id=reuse.id,
                 description=reuse.description,
-                content=md(reuse.description),
+                content=str(md(reuse.description)),
                 author_name=author_name,
                 author_link=author_uri,
                 link=reuse.url_for(),

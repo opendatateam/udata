@@ -127,7 +127,7 @@ class PostsAtomFeedAPI(API):
                 post.name,
                 unique_id=post.id,
                 description=post.headline,
-                content=md(post.content),
+                content=str(md(post.content)),
                 author_name="data.gouv.fr",
                 link=post.url_for(),
                 updateddate=post.last_modified,

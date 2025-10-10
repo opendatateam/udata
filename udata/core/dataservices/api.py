@@ -78,7 +78,7 @@ class DataservicesAtomFeedAPI(API):
                 dataservice.title,
                 unique_id=dataservice.id,
                 description=dataservice.description,
-                content=md(dataservice.description),
+                content=str(md(dataservice.description)),
                 author_name=author_name,
                 author_link=author_uri,
                 link=dataservice.url_for(),

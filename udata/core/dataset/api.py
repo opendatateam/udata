@@ -347,7 +347,7 @@ class DatasetsAtomFeedAPI(API):
                 dataset.title,
                 unique_id=dataset.id,
                 description=dataset.description,
-                content=md(dataset.description),
+                content=str(md(dataset.description)),
                 author_name=author_name,
                 author_link=author_uri,
                 link=dataset.url_for(),

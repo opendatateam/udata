@@ -1381,6 +1381,17 @@ class DatasetsFeedAPItest(APITestCase):
         self.assertEqual(author.name, org.name)
         self.assertEqual(author.href, org.url_for())
 
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
+    def test_feed_html_content(self):
+        DatasetFactory(description="# My title\n\n* a list\n* of items")
+
+        response = self.get(url_for("api.recent_datasets_atom_feed"))
+
+        self.assert200(response)
+
+        assert "&lt;h1&gt;" in response.text
+        assert "&lt;ul&gt;" in response.text
+
 
 class DatasetBadgeAPITest(APITestCase):
     @classmethod
