@@ -26,6 +26,12 @@ from udata.utils import multi_to_dict
 from .models import Site, current_site
 from .rdf import build_catalog
 
+# Build catalog_parser from DatasetApiParser parser with a default page_size of 100
+catalog_parser = DatasetApiParser().parser
+catalog_parser.replace_argument(
+    "page_size", type=int, location="args", default=100, help="The page size"
+)
+
 
 @api.route("/site/", endpoint="site")
 class SiteAPI(API):
@@ -73,19 +79,18 @@ class SiteRdfCatalog(API):
 
 @api.route("/site/catalog.<format>", endpoint="site_rdf_catalog_format")
 class SiteRdfCatalogFormat(API):
-    @api.expect(dataset_parser.parser)
+    @api.expect(catalog_parser)
     def get(self, format):
         """
         Return the RDF catalog in the requested format.
         Filtering, sorting and paginating abilities apply to the datasets elements.
         """
-        search_parser = DatasetSearch.as_request_parser(store_missing=False)
-        params = search_parser.parse_args()
-        page = int(params.get("page", 1))
-        page_size = int(params.get("page_size", 100))
+        params = catalog_parser.parse_args()
         datasets = DatasetApiParser.parse_filters(Dataset.objects.visible(), params)
-        datasets = datasets.paginate(page, page_size)
-        dataservices = Dataservice.objects.visible().filter_by_dataset_pagination(datasets, page)
+        datasets = datasets.paginate(params["page"], params["page_size"])
+        dataservices = Dataservice.objects.visible().filter_by_dataset_pagination(
+            datasets, params["page"]
+        )
 
         catalog = build_catalog(current_site, datasets, dataservices=dataservices, format=format)
         # bypass flask-restplus make_response, since graph_response
