@@ -76,9 +76,9 @@ class DataservicesAtomFeedAPI(API):
                 author_uri = dataservice.owner.url_for()
             feed.add_item(
                 dataservice.title,
-                unique_id=dataservice.id,
+                unique_id=dataservice.url_for(_useId=True),
                 description=dataservice.description,
-                content=md(dataservice.description),
+                content=str(md(dataservice.description)),
                 author_name=author_name,
                 author_link=author_uri,
                 link=dataservice.url_for(),

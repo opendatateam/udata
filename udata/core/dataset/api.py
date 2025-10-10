@@ -345,9 +345,9 @@ class DatasetsAtomFeedAPI(API):
                 author_uri = dataset.owner.url_for()
             feed.add_item(
                 dataset.title,
-                unique_id=dataset.id,
+                unique_id=dataset.url_for(_useId=True),
                 description=dataset.description,
-                content=md(dataset.description),
+                content=str(md(dataset.description)),
                 author_name=author_name,
                 author_link=author_uri,
                 link=dataset.url_for(),
