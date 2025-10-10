@@ -16,6 +16,7 @@ from rdflib.namespace import RDF
 from rdflib.resource import Resource as RdfResource
 
 from udata import i18n, uris
+from udata.core.constants import HVD
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.spatial.models import SpatialCoverage
 from udata.harvest.exceptions import HarvestSkipException
@@ -330,7 +331,7 @@ def dataset_to_rdf(dataset: Dataset, graph: Graph | None = None) -> RdfResource:
 
     # Add DCAT-AP HVD properties if the dataset is tagged hvd.
     # See https://semiceu.github.io/DCAT-AP/releases/2.2.0-hvd/
-    is_hvd = current_app.config["HVD_SUPPORT"] and "hvd" in dataset.tags
+    is_hvd = current_app.config["HVD_SUPPORT"] and any(b.kind == HVD for b in dataset.badges)
     if is_hvd:
         d.add(DCATAP.applicableLegislation, URIRef(HVD_LEGISLATION))
 

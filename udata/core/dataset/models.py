@@ -10,6 +10,7 @@ import requests
 from blinker import signal
 from dateutil.parser import parse as parse_dt
 from flask import current_app, url_for
+from flask_babel import LazyString
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import DateTimeField
 from mongoengine.signals import post_save, pre_init, pre_save
@@ -19,6 +20,7 @@ from udata.api_fields import field
 from udata.app import cache
 from udata.core import storages
 from udata.core.activity.models import Auditable
+from udata.core.constants import HVD
 from udata.core.dataset.preview import TabularAPIPreview
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
@@ -36,7 +38,6 @@ from .constants import (
     CLOSED_FORMATS,
     DEFAULT_LICENSE,
     DESCRIPTION_SHORT_SIZE_LIMIT,
-    HVD,
     INSPIRE,
     MAX_DISTANCE,
     PIVOTAL_DATA,
@@ -63,7 +64,7 @@ __all__ = (
     "ResourceSchema",
 )
 
-BADGES: dict[str, str] = {
+BADGES: dict[str, LazyString] = {
     PIVOTAL_DATA: _("Pivotal data"),
     SPD: _("Reference data public service"),
     INSPIRE: _("Inspire"),

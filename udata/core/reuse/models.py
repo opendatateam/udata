@@ -1,5 +1,6 @@
 from blinker import Signal
 from flask import url_for
+from flask_babel import LazyString
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
@@ -22,7 +23,7 @@ from .constants import IMAGE_MAX_SIZE, IMAGE_SIZES, REUSE_TOPICS, REUSE_TYPES
 
 __all__ = ("Reuse",)
 
-BADGES: dict[str, str] = {}
+BADGES: dict[str, LazyString] = {}
 
 
 class ReuseQuerySet(OwnedQuerySet):
