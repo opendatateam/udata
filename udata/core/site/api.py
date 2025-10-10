@@ -6,7 +6,7 @@ from udata.auth import admin_permission
 from udata.core import csv
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataset.api import DatasetApiParser, dataset_parser
+from udata.core.dataset.api import DatasetApiParser, catalog_parser, dataset_parser
 from udata.core.dataset.csv import ResourcesCsvAdapter
 from udata.core.dataset.search import DatasetSearch
 from udata.core.dataset.tasks import get_queryset as get_csv_queryset
@@ -25,12 +25,6 @@ from udata.utils import multi_to_dict
 
 from .models import Site, current_site
 from .rdf import build_catalog
-
-# Build catalog_parser from DatasetApiParser parser with a default page_size of 100
-catalog_parser = DatasetApiParser().parser
-catalog_parser.replace_argument(
-    "page_size", type=int, location="args", default=100, help="The page size"
-)
 
 
 @api.route("/site/", endpoint="site")
@@ -63,7 +57,7 @@ class SiteDataPortal(API):
 
 @api.route("/site/catalog", endpoint="site_rdf_catalog")
 class SiteRdfCatalog(API):
-    @api.expect(dataset_parser.parser)
+    @api.expect(catalog_parser)
     def get(self):
         """Root RDF endpoint with content negociation handling"""
         format = RDF_EXTENSIONS[negociate_content()]

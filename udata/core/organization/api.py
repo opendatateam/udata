@@ -13,7 +13,7 @@ from udata.core.contact_point.api import ContactPointApiParser
 from udata.core.contact_point.api_fields import contact_point_fields, contact_point_page_fields
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataset.api import DatasetApiParser
+from udata.core.dataset.api import DatasetApiParser, catalog_parser
 from udata.core.dataset.api_fields import dataset_page_fields
 from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter
 from udata.core.dataset.models import Dataset
@@ -29,7 +29,6 @@ from udata.core.storages.api import (
 )
 from udata.models import ContactPoint
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
-from udata.utils import multi_to_dict
 
 from .api_fields import (
     member_fields,
@@ -235,7 +234,12 @@ class OrganizationRdfAPI(API):
     @api.doc("rdf_organization")
     def get(self, org):
         format = RDF_EXTENSIONS[negociate_content()]
-        url = url_for("api.organization_rdf_format", org=org.id, format=format)
+        params = {
+            arg: value
+            for arg, value in request.args.lists()
+            if any(arg == parser_arg.name for parser_arg in dataset_parser.parser.args)
+        }
+        url = url_for("api.organization_rdf_format", org=org.id, format=format, **params)
         return redirect(url)
 
 
@@ -244,17 +248,20 @@ class OrganizationRdfAPI(API):
 @api.response(410, "Organization has been deleted")
 class OrganizationRdfFormatAPI(API):
     @api.doc("rdf_organization_format")
+    @api.expect(catalog_parser)
     def get(self, org, format):
         if org.deleted:
             api.abort(410)
-        params = multi_to_dict(request.args)
-        page = int(params.get("page", 1))
-        page_size = int(params.get("page_size", 100))
-        datasets = Dataset.objects(organization=org).visible().paginate(page, page_size)
+        params = catalog_parser.parse_args()
+        datasets = DatasetApiParser.parse_filters(
+            Dataset.objects(organization=org).visible(), params
+        )
+        datasets = datasets.paginate(params["page"], params["page_size"])
+
         dataservices = (
             Dataservice.objects(organization=org)
             .visible()
-            .filter_by_dataset_pagination(datasets, page)
+            .filter_by_dataset_pagination(datasets, params["page"])
         )
         catalog = build_org_catalog(org, datasets, dataservices, format=format)
         # bypass flask-restplus make_response, since graph_response

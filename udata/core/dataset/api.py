@@ -291,6 +291,12 @@ community_parser.add_argument(
 
 common_doc = {"params": {"dataset": "The dataset ID or slug"}}
 
+# Build catalog_parser from DatasetApiParser parser with a default page_size of 100
+catalog_parser = DatasetApiParser().parser
+catalog_parser.replace_argument(
+    "page_size", type=int, location="args", default=100, help="The page size"
+)
+
 
 @ns.route("/", endpoint="datasets")
 class DatasetListAPI(API):
