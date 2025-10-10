@@ -5,8 +5,8 @@ from rdflib.namespace import FOAF, RDF
 from rdflib.resource import Resource
 from werkzeug.datastructures import ImmutableMultiDict
 
-from udata.core.constants import HVD
 from udata.core.dataservices.factories import DataserviceFactory, HarvestMetadataFactory
+from udata.core.dataset.constants import HVD
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
