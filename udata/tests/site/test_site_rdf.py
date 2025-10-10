@@ -3,6 +3,7 @@ from flask import url_for
 from rdflib import Graph, Literal, URIRef
 from rdflib.namespace import FOAF, RDF
 from rdflib.resource import Resource
+from werkzeug.datastructures import ImmutableMultiDict
 
 from udata.core.constants import HVD
 from udata.core.dataservices.factories import DataserviceFactory, HarvestMetadataFactory
@@ -155,6 +156,31 @@ class SiteRdfViewsTest:
     def test_catalog_default_to_jsonld(self, client):
         expected = url_for("api.site_rdf_catalog_format", format="json")
         response = client.get(url_for("api.site_rdf_catalog"))
+        assert_redirects(response, expected)
+
+    def test_catalog_redirect_with_filters_sanitazing(self, client):
+        """
+        It should filter out unknown params (including url_for keywords).
+        Repeated keywords should be kept as expected.
+        """
+        expected_params = ImmutableMultiDict([("page", 3), ("tag", "hvd"), ("tag", "other")])
+        expected = url_for(
+            "api.site_rdf_catalog_format", format="xml", **expected_params.to_dict(flat=False)
+        )
+        params = [
+            ("page", 3),
+            ("tag", "hvd"),
+            ("tag", "other"),
+            ("unknown_param", 5),
+            ("_external", True),
+        ]
+        url = (
+            url_for("api.site_rdf_catalog")
+            + "?"
+            + "&".join(f"{arg}={value}" for arg, value in params)
+        )
+        headers = {"accept": "application/xml"}
+        response = client.get(url, headers=headers)
         assert_redirects(response, expected)
 
     def test_rdf_perform_content_negociation(self, client):

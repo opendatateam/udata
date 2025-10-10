@@ -61,9 +61,12 @@ class SiteRdfCatalog(API):
     def get(self):
         """Root RDF endpoint with content negociation handling"""
         format = RDF_EXTENSIONS[negociate_content()]
-        # We parse args in order to sanitize the params used as kwargs in url_for
-        search_parser = DatasetSearch.as_request_parser(store_missing=False)
-        params = search_parser.parse_args()
+        # We sanitize the args used as kwargs in url_for
+        params = {
+            arg: value
+            for arg, value in request.args.lists()
+            if any(arg == parser_arg.name for parser_arg in dataset_parser.parser.args)
+        }
         url = url_for("api.site_rdf_catalog_format", format=format, **params)
         return redirect(url)
 
