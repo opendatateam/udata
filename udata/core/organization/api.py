@@ -234,6 +234,7 @@ class OrganizationRdfAPI(API):
     @api.doc("rdf_organization")
     def get(self, org):
         format = RDF_EXTENSIONS[negociate_content()]
+        # We sanitize the args used as kwargs in url_for
         params = {
             arg: value
             for arg, value in request.args.lists()
