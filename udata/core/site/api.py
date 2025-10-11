@@ -6,7 +6,7 @@ from udata.auth import admin_permission
 from udata.core import csv
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataset.api import DatasetApiParser
+from udata.core.dataset.api import DatasetApiParser, catalog_parser, dataset_parser
 from udata.core.dataset.csv import ResourcesCsvAdapter
 from udata.core.dataset.search import DatasetSearch
 from udata.core.dataset.tasks import get_queryset as get_csv_queryset
@@ -57,24 +57,34 @@ class SiteDataPortal(API):
 
 @api.route("/site/catalog", endpoint="site_rdf_catalog")
 class SiteRdfCatalog(API):
+    @api.expect(catalog_parser)
     def get(self):
         """Root RDF endpoint with content negociation handling"""
         format = RDF_EXTENSIONS[negociate_content()]
-        url = url_for("api.site_rdf_catalog_format", format=format)
+        # We sanitize the args used as kwargs in url_for
+        params = {
+            arg: value
+            for arg, value in request.args.lists()
+            if any(arg == parser_arg.name for parser_arg in dataset_parser.parser.args)
+        }
+        url = url_for("api.site_rdf_catalog_format", format=format, **params)
         return redirect(url)
 
 
 @api.route("/site/catalog.<format>", endpoint="site_rdf_catalog_format")
 class SiteRdfCatalogFormat(API):
+    @api.expect(catalog_parser)
     def get(self, format):
-        params = multi_to_dict(request.args)
-        page = int(params.get("page", 1))
-        page_size = int(params.get("page_size", 100))
-        datasets = Dataset.objects.visible()
-        if "tag" in params:
-            datasets = datasets.filter(tags=params.get("tag", ""))
-        datasets = datasets.paginate(page, page_size)
-        dataservices = Dataservice.objects.visible().filter_by_dataset_pagination(datasets, page)
+        """
+        Return the RDF catalog in the requested format.
+        Filtering, sorting and paginating abilities apply to the datasets elements.
+        """
+        params = catalog_parser.parse_args()
+        datasets = DatasetApiParser.parse_filters(Dataset.objects.visible(), params)
+        datasets = datasets.paginate(params["page"], params["page_size"])
+        dataservices = Dataservice.objects.visible().filter_by_dataset_pagination(
+            datasets, params["page"]
+        )
 
         catalog = build_catalog(current_site, datasets, dataservices=dataservices, format=format)
         # bypass flask-restplus make_response, since graph_response

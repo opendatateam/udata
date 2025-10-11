@@ -3,8 +3,10 @@ from flask import url_for
 from rdflib import Graph, Literal, URIRef
 from rdflib.namespace import FOAF, RDF
 from rdflib.resource import Resource
+from werkzeug.datastructures import ImmutableMultiDict
 
 from udata.core.dataservices.factories import DataserviceFactory, HarvestMetadataFactory
+from udata.core.dataset.constants import HVD
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
@@ -156,6 +158,31 @@ class SiteRdfViewsTest:
         response = client.get(url_for("api.site_rdf_catalog"))
         assert_redirects(response, expected)
 
+    def test_catalog_redirect_with_filters_sanitazing(self, client):
+        """
+        It should filter out unknown params (including url_for keywords).
+        Repeated keywords should be kept as expected.
+        """
+        expected_params = ImmutableMultiDict([("page", 3), ("tag", "hvd"), ("tag", "other")])
+        expected = url_for(
+            "api.site_rdf_catalog_format", format="xml", **expected_params.to_dict(flat=False)
+        )
+        params = [
+            ("page", 3),
+            ("tag", "hvd"),
+            ("tag", "other"),
+            ("unknown_param", 5),
+            ("_external", True),
+        ]
+        url = (
+            url_for("api.site_rdf_catalog")
+            + "?"
+            + "&".join(f"{arg}={value}" for arg, value in params)
+        )
+        headers = {"accept": "application/xml"}
+        response = client.get(url, headers=headers)
+        assert_redirects(response, expected)
+
     def test_rdf_perform_content_negociation(self, client):
         expected = url_for("api.site_rdf_catalog_format", format="xml")
         url = url_for("api.site_rdf_catalog")
@@ -233,9 +260,15 @@ class SiteRdfViewsTest:
         response = client.get(url)
         assert404(response)
 
-    def test_catalog_rdf_filter_tag(self, client):
+    def test_catalog_rdf_filter(self, client):
+        """
+        Test catalog RDF filter on tags and badges
+        """
         DatasetFactory.create_batch(4, tags=["my-tag"])
+        [dat.add_badge(HVD) for dat in DatasetFactory.create_batch(5)]
         DatasetFactory.create_batch(3)
+
+        # Filter on tags
         url = url_for("api.site_rdf_catalog_format", format="xml", tag="my-tag")
 
         response = client.get(url, headers={"Accept": "application/xml"})
@@ -248,6 +281,17 @@ class SiteRdfViewsTest:
 
         for dat in datasets:
             assert graph.value(dat, DCAT.keyword) == Literal("my-tag")
+
+        # Filter on badge
+        url = url_for("api.site_rdf_catalog_format", format="xml", badge=HVD)
+
+        response = client.get(url, headers={"Accept": "application/xml"})
+        assert200(response)
+
+        graph = Graph().parse(data=response.data, format="xml")
+
+        datasets = list(graph.subjects(RDF.type, DCAT.Dataset))
+        assert len(datasets) == 5
 
     def test_catalog_rdf_dataservices(self, client):
         dataset_a = DatasetFactory.create()
