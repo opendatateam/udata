@@ -1,4 +1,4 @@
-from flask import current_app, jsonify, redirect, request
+from flask import current_app, jsonify, redirect, request, url_for
 from flask_login import current_user, login_required
 from flask_security.utils import (
     check_and_get_token_status,
@@ -47,7 +47,9 @@ def send_change_email_confirmation_instructions(user, new_email):
     data = [str(current_user.fs_uniquifier), hash_data(current_user.email), new_email]
     token = _security.confirm_serializer.dumps(data)
 
-    mails.confirmation_instructions(confirmation_token=token).send(current_user)
+    mails.confirmation_instructions(
+        confirmation_link=url_for("security.confirm_change_email", token=token, _external=True)
+    ).send(current_user)
 
 
 def confirm_change_email_token_status(token):
