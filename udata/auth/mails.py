@@ -1,6 +1,6 @@
 """
 We have our own system to build mails without Jinja templates with `MailMessage`.
-To connect our system with the system from flask_security we need to overidde the Jinja
+To connect our system with the system from flask_security we need to override the Jinja
 `render_template` function, create our MailMessage, and generate the HTML or text version.
 `flask_security` then call the standard mail method from flask to send these strings.
 
