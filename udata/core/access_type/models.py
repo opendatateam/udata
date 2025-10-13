@@ -29,7 +29,7 @@ def check_only_one_condition_per_role(access_audiences, **_kwargs):
 
 class WithAccessType:
     access_type = field(
-        db.StringField(choices=[e.value for e in AccessType], default=AccessType.OPEN.value),
+        db.EnumField(AccessType, default=AccessType.OPEN),
         filterable={},
     )
     access_audiences = field(
