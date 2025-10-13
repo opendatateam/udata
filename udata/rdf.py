@@ -304,6 +304,9 @@ def theme_labels_from_rdf(rdf):
     Get theme labels to use as keywords.
     Map HVD keywords from known URIs resources if HVD support is activated.
     Map INSPIRE keyword from known themes if INSPIRE support is activated.
+    - An INSPIRE dataset is a dataset with a theme INSPIRE encoded with gmd:descriptiveKeywords/gmd:MD_Keywords.
+      In DCAT, it is shown as a DCAT.theme with a SKOS.inScheme pointing to to the INSPIRE thesaurus.
+      We filter on this thesaurus based on its name with DCT.title == "GEMET - INSPIRE themes, version 1.0".
     """
     for theme in rdf.objects(DCAT.theme):
         if isinstance(theme, RdfResource):
