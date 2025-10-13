@@ -174,7 +174,7 @@ class DatasetForm(ModelForm):
     license = fields.ModelSelectField(_("License"), model=License, allow_blank=True)
     access_type = fields.SelectField(
         choices=[(e.value, e.value) for e in AccessType],
-        default=AccessType.OPEN.value,
+        default=AccessType.OPEN,
         validators=[validators.optional()],
     )
     access_audiences = fields.NestedModelList(AccessAudienceForm)
