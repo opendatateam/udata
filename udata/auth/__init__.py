@@ -1,6 +1,6 @@
 import logging
 
-from flask import current_app, render_template
+from flask import render_template
 from flask_principal import Permission as BasePermission
 from flask_principal import PermissionDenied as PermissionDenied
 from flask_principal import RoleNeed as RoleNeed
