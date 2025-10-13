@@ -56,6 +56,10 @@ def init_app(app):
         app.config.setdefault(
             "SECURITY_POST_CONFIRM_VIEW", app.config["CDATA_BASE_URL"] + "?flash=post_confirm"
         )
+        app.config.setdefault(
+            "SECURITY_CONFIRM_ERROR_VIEW",
+            app.config["CDATA_BASE_URL"] + "?flash=confirm_error",
+        )
 
     security.init_app(
         app,
