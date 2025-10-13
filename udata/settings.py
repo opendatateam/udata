@@ -110,7 +110,7 @@ class Defaults(object):
     SECURITY_REDIRECT_BEHAVIOR = "spa"
     # SECURITY_POST_OAUTH_LOGIN_VIEW = ""    # SECURITY_OAUTH_ENABLE is disabled
     # SECURITY_LOGIN_ERROR_VIEW = ""         # We don't follow the redirects since we do JSON POST requests during login
-    # SECURITY_CONFIRM_ERROR_VIEW = ""       # Manually changed in `confirm_change_email`
+    # SECURITY_CONFIRM_ERROR_VIEW = ""       # Manually changed in `confirm_change_email` and set at runtime. See :SecurityPostConfirmViewAtRuntime
     # SECURITY_POST_CHANGE_EMAIL_VIEW = ""   # We don't follow the redirects since we do JSON POST requests during change email
     # SECURITY_CHANGE_EMAIL_ERROR_VIEW = ""  # We don't follow the redirects since we do JSON POST requests during change email
     # SECURITY_POST_CONFIRM_VIEW = ""        # Set at runtime. See :SecurityPostConfirmViewAtRuntime
