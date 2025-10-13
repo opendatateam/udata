@@ -5,9 +5,9 @@ from udata.i18n import lazy_gettext as _
 
 
 class AccessType(StrEnum):
-    OPEN = "open"
-    OPEN_WITH_ACCOUNT = "open_with_account"
-    RESTRICTED = "restricted"
+    OPEN = auto()
+    OPEN_WITH_ACCOUNT = auto()
+    RESTRICTED = auto()
 
 
 class AccessAudienceType(StrEnum):
