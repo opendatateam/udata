@@ -10,17 +10,18 @@ from flask_security import Security as Security
 from flask_security import current_user as current_user
 from flask_security import login_required as login_required
 from flask_security import login_user as login_user
-from werkzeug.utils import import_string
+
+from . import mails
 
 log = logging.getLogger(__name__)
 
 
-def render_security_template(*args, **kwargs):
-    try:
-        render = import_string(current_app.config.get("SECURITY_RENDER"))
-    except Exception:
-        render = render_template
-    return render(*args, **kwargs)
+def render_security_template(template_name_or_list, **kwargs):
+    result = mails.render_mail_template(template_name_or_list, **kwargs)
+    if result is not None:
+        return result
+
+    return render_template(template_name_or_list, **kwargs)
 
 
 security = Security()
@@ -44,7 +45,6 @@ def init_app(app):
         ExtendedRegisterForm,
         ExtendedResetPasswordForm,
     )
-    from .mails import UdataMailUtil
     from .password_validation import UdataPasswordUtil
     from .views import create_security_blueprint
 
@@ -67,7 +67,6 @@ def init_app(app):
         register_form=ExtendedRegisterForm,
         reset_password_form=ExtendedResetPasswordForm,
         forgot_password_form=ExtendedForgotPasswordForm,
-        mail_util_cls=UdataMailUtil,
         password_util_cls=UdataPasswordUtil,
     )
 
