@@ -1,3 +1,18 @@
+"""
+We have our own system to build mails without Jinja templates with `MailMessage`.
+To connect our system with the system from flask_security we need to overidde the Jinja
+`render_template` function, create our MailMessage, and generate the HTML or text version.
+`flask_security` then call the standard mail method from flask to send these strings.
+
+In `render_mail_template` we support a few mails but not all. We could fallback to the regular
+Jinja render function, but since we don't have any mails' templates defined in our application
+the render function will crash, so we crash early in the `render_mail_template` function.
+
+Note that `flask_security` have default templates for all mails but we create our own blueprint
+specifying our `template` folder for templates and the system is not intelligent enough to try
+our folder before fallbacking to the templates inside the `flask_security` package.
+"""
+
 import logging
 
 from flask import current_app
@@ -35,17 +50,14 @@ def render_mail_template(template_name_or_list: str | list[str], **kwargs):
         case "change_notice":
             mail_message = change_notice(**kwargs)
         case _:
-            log.error(f"Unknown mail message template: {name}")
-            return None
+            raise Exception(f"Unknown mail message template: {name}")
 
     if format == "txt":
         return mail_message.text(kwargs.get("user"))
     elif format == "html":
         return mail_message.html(kwargs.get("user"))
     else:
-        log.error(f"Mail message with unknown format: {name} (txt or html supported)")
-
-    return None
+        raise Exception(f"Mail message with unknown format: {name} (txt or html supported)")
 
 
 def welcome(confirmation_link: str, **kwargs) -> MailMessage:
