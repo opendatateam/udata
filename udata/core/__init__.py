@@ -1,5 +1,7 @@
 from importlib import import_module
 
+import udata.core.captchetat  # noqa
+
 MODULES = (
     "metrics",
     "storages",
