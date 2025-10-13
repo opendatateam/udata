@@ -1,4 +1,4 @@
-from enum import StrEnum
+from enum import StrEnum, auto
 from typing import assert_never
 
 from udata.i18n import lazy_gettext as _
