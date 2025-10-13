@@ -10,11 +10,10 @@ from udata.core.user.api_fields import user_ref_fields
 from .constants import (
     CHECKSUM_TYPES,
     DEFAULT_CHECKSUM_TYPE,
-    DEFAULT_FREQUENCY,
     DEFAULT_LICENSE,
     RESOURCE_FILETYPES,
     RESOURCE_TYPES,
-    UPDATE_FREQUENCIES,
+    UpdateFrequency,
 )
 
 checksum_fields = api.model(
@@ -367,8 +366,8 @@ dataset_fields = api.model(
         "frequency": fields.String(
             description="The update frequency",
             required=True,
-            enum=list(UPDATE_FREQUENCIES),
-            default=DEFAULT_FREQUENCY,
+            enum=list(UpdateFrequency),
+            default=UpdateFrequency.UNKNOWN,
         ),
         "frequency_date": fields.ISODateTime(
             description=(
