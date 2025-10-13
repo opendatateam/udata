@@ -181,25 +181,10 @@ jobs:
 workflows:
   build-publish-deploy:
     jobs:
-<<<<<<< HEAD
-      - python:
-          filters:
-            tags:
-              only: /v[0-9]+(\.[0-9]+)*/
-      - dist:
-          requires:
-            - python
-          filters:
-            tags:
-              only: /v[0-9]+(\.[0-9]+)*/
-=======
       - python
-      - assets
       - dist:
           requires:
             - python
-            - assets
->>>>>>> master
       - publish:
           requires:
             - dist
