@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2025-10-08 15:31+0200\n"
-"PO-Revision-Date: 2025-10-08 16:23\n"
+"PO-Revision-Date: 2025-10-13 11:43\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -697,7 +697,7 @@ msgstr "Service public de la donnée de référence"
 
 #: udata/core/dataset/models.py:69
 msgid "Inspire"
-msgstr "Inspire"
+msgstr "INSPIRE"
 
 #: udata/core/dataset/models.py:70
 msgid "High value datasets"
