@@ -1,5 +1,10 @@
 # Changelog
 
+## 12.0.1 (2025-10-13)
+
+- fix(security): confirm email error crashing instead of redirecting ([#3478](https://github.com/opendatateam/udata/pull/3478))
+
+
 ## 12.0.0 (2025-10-13)
 - **feat!: bump minimum Python version to 3.11 ([#3463](https://github.com/opendatateam/udata/pull/3463))**
   Python 3.9 is reaching end of life at the end of october
