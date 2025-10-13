@@ -20,7 +20,6 @@ These changes might lead to backward compatibility breakage meaning:
 import logging
 import os
 from datetime import datetime
-from typing import List
 
 import mongoengine
 from bson.objectid import ObjectId
@@ -65,7 +64,7 @@ from .api_fields import (
     upload_community_fields,
     upload_fields,
 )
-from .constants import RESOURCE_TYPES, UPDATE_FREQUENCIES
+from .constants import RESOURCE_TYPES, UpdateFrequency
 from .exceptions import (
     SchemasCacheUnavailableException,
     SchemasCatalogNotFoundException,
@@ -332,7 +331,7 @@ class DatasetsAtomFeedAPI(API):
             link=request.url_root,
         )
 
-        datasets: List[Dataset] = (
+        datasets: list[Dataset] = (
             Dataset.objects.visible().order_by("-created_at_internal").limit(current_site.feed_size)
         )
         for dataset in datasets:
@@ -346,9 +345,9 @@ class DatasetsAtomFeedAPI(API):
                 author_uri = dataset.owner.url_for()
             feed.add_item(
                 dataset.title,
-                unique_id=dataset.id,
+                unique_id=dataset.url_for(_useId=True),
                 description=dataset.description,
-                content=md(dataset.description),
+                content=str(md(dataset.description)),
                 author_name=author_name,
                 author_link=author_uri,
                 link=dataset.url_for(),
@@ -492,7 +491,7 @@ class ResourceRedirectAPI(API):
         Redirect to the latest version of a resource given its identifier.
         """
         resource = get_resource(id)
-        return redirect(resource.url.strip()) if resource else abort(404)
+        return redirect(resource.url.strip()) if resource else abort(404, "Resource not found")
 
 
 @ns.route("/<dataset:dataset>/resources/", endpoint="resources")
@@ -891,7 +890,7 @@ class FrequenciesAPI(API):
     @api.marshal_list_with(frequency_fields)
     def get(self):
         """List all available frequencies"""
-        return [{"id": id, "label": label} for id, label in UPDATE_FREQUENCIES.items()]
+        return [{"id": f.id, "label": f.label} for f in UpdateFrequency]
 
 
 @ns.route("/extensions/", endpoint="allowed_extensions")

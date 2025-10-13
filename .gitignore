@@ -72,7 +72,6 @@ Procfile
 
 # Python package managers
 .python-version
-*.lock
 
 # Ruff
 .ruff_cache

@@ -10,7 +10,7 @@ We’ll use the following repositories:
 # Check the system requirements
 
 !!! info
-    Be aware that udata now requires Python **>3.9,<=3.11** to work.
+    Be aware that udata now requires Python **>3.11,<=3.13** to work.
 
 udata requires several libraries to be installed to work. You can see them on the udata documentation link below.
 
@@ -63,14 +63,18 @@ docker compose up
 
 ## Install virtual env and dependencies
 
-udata uses pip to install its dependencies. You can create a
-[virtualenv](https://realpython.com/blog/python/python-virtual-environments-a-primer/),
-activate it and install the requirements with the following commands.
+With [uv](https://docs.astral.sh/uv/) (recommended):
 
+```bash
+uv sync --extra dev --extra test
+```
+
+...or with pip:
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip install -e ".[dev]"
+pip install -e ".[dev,test]"
+```
 ```
 
 You can find [common errors and workarounds for Macos on udata documentation](https://udata.readthedocs.io/en/latest/development-environment/#macos-big-sur-caveat).
@@ -205,8 +209,13 @@ udata-front uses the same virtualenv as udata. You can activate it from your uda
 source $UDATA_WORKSPACE/udata/venv/bin/activate
 ```
 
-Then, you can install pip requirements.
+Then, you can install the requirements with:
+```bash
+cd udata-front
+uv sync --extra dev --extra test
+```
 
+...or, with pip:
 ```bash
 cd udata-front
 pip install -e ".[test,dev]"

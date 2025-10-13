@@ -1,5 +1,45 @@
 # Changelog
 
+## 12.0.1 (2025-10-13)
+
+- fix(security): confirm email error crashing instead of redirecting ([#3478](https://github.com/opendatateam/udata/pull/3478))
+
+
+## 12.0.0 (2025-10-13)
+- **feat!: bump minimum Python version to 3.11 ([#3463](https://github.com/opendatateam/udata/pull/3463))**
+  Python 3.9 is reaching end of life at the end of october
+  https://devguide.python.org/versions/#versions
+- **feat(security)!: enable SPA type security views (login, register) for cdata  ([#3348](https://github.com/opendatateam/udata/pull/3348))**
+  - Add `SECURITY_SPA_ON_SAME_DOMAIN` to `True` if your frontend is on the
+  same domain as the backend.
+  - Change the redirects URLs in ProConnect:
+  - From https://www.data.gouv.fr/proconnect/auth to
+  https://www.data.gouv.fr/api/1/proconnect/auth
+  - From https://www.data.gouv.fr/proconnect/logout to
+  https://www.data.gouv.fr/api/1/proconnect/logout
+  - Part of https://github.com/datagouv/data.gouv.fr/issues/1717
+  
+  ---------
+  
+  Co-authored-by: maudetes <maudet.estelle@gmail.com>
+- build: use uv ([#3459](https://github.com/opendatateam/udata/pull/3459))
+- ci: do not publish on tags ([#3455](https://github.com/opendatateam/udata/pull/3455))
+- feat: add standalone 404 page ([#3457](https://github.com/opendatateam/udata/pull/3457))
+- feat(harvest): add missing EU update frequencies ([#3343](https://github.com/opendatateam/udata/pull/3343))
+- feat(site): add version to response ([#3458](https://github.com/opendatateam/udata/pull/3458))
+- feat(topic): improve perf in dataservice topic filter ([#3465](https://github.com/opendatateam/udata/pull/3465))
+- fix(topic): protect element activity on Topic deletion ([#3461](https://github.com/opendatateam/udata/pull/3461))
+- refactor(datasets): remove frequency reminder task and mail (never used) ([#3472](https://github.com/opendatateam/udata/pull/3472))
+- refactor(tags): move tags.csv to /api/1/site/tags.csv ([#3456](https://github.com/opendatateam/udata/pull/3456))
+
+
+## 11.1.1 (2025-10-02)
+
+- feat(git): new tag_version.sh script to replace Bumpr ([#3451](https://github.com/opendatateam/udata/pull/3451))
+- fix(topics): delete TopicElements when Topic is deleted ([#3452](https://github.com/opendatateam/udata/pull/3452))
+- Update to version 11.1.1.dev for next development cycle
+
+
 ## 11.1.0 (2025-09-30)
 
 - chore: migrate to pyproject.toml, replace `CIRCLE_TAG` by `setuptools_scm` to compute the correct version automatically [#3413](https://github.com/opendatateam/udata/pull/3413) [#3434](https://github.com/opendatateam/udata/pull/3434) [#3435](https://github.com/opendatateam/udata/pull/3435) [#3437](https://github.com/opendatateam/udata/pull/3437) [#3438](https://github.com/opendatateam/udata/pull/3438/) [3447](https://github.com/opendatateam/udata/pull/3447)
@@ -818,6 +858,7 @@ Search refactor [#2680](https://github.com/opendatateam/udata/pull/2680)
 
 - Fix fields empty value in admin form to allow for unsetting fields [#2691](https://github.com/opendatateam/udata/pull/2691)
 - :warning: Add a new required topic string field on reuses. The associated migration set default topic to `others` [#2689](https://github.com/opendatateam/udata/pull/2689)
+- Use [uv](https://docs.astral.sh/uv/) as package manager and lockfile [#3459](https://github.com/opendatateam/udata/pull/3459)
 
 ## 3.3.0 (2021-12-10)
 

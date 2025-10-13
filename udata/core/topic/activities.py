@@ -85,8 +85,11 @@ def on_user_updated_topic_element(topic_element, **kwargs):
 
 @TopicElement.on_delete.connect
 def on_user_deleted_topic_element(topic_element):
-    if current_user and current_user.is_authenticated and topic_element.topic:
+    try:
+        topic = topic_element.topic
+    except db.DoesNotExist:
+        # Topic was already deleted, skip activity creation
+        return
+    if current_user and current_user.is_authenticated and topic:
         extras = {"element_id": str(topic_element.id)}
-        UserDeletedTopicElement.emit(
-            topic_element.topic, topic_element.topic.organization, extras=extras
-        )
+        UserDeletedTopicElement.emit(topic, topic.organization, extras=extras)
