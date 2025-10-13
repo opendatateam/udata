@@ -3,7 +3,6 @@ import logging
 from flask import current_app
 from flask_security.utils import url_for_security
 
-from udata.i18n import lazy_gettext as _
 from udata.mail import MailCTA, MailMessage
 
 log = logging.getLogger(__name__)
@@ -24,17 +23,17 @@ def render_mail_template(template_name_or_list: str | list[str], **kwargs):
     mail_message = None
     match name:
         case "welcome":
-            mail_message = welcome(kwargs.get("confirmation_token"))
+            mail_message = welcome(**kwargs)
         case "welcome_existing":
-            mail_message = welcome_existing()
+            mail_message = welcome_existing(**kwargs)
         case "confirmation_instructions":
-            mail_message = confirmation_instructions(kwargs.get("confirmation_link"))
+            mail_message = confirmation_instructions(**kwargs)
         case "reset_instructions":
-            mail_message = reset_instructions(kwargs.get("reset_token"))
+            mail_message = reset_instructions(**kwargs)
         case "reset_notice":
-            mail_message = reset_notice()
+            mail_message = reset_notice(**kwargs)
         case "change_notice":
-            mail_message = change_notice()
+            mail_message = change_notice(**kwargs)
         case _:
             log.error(f"Unknown mail message template: {name}")
             return None
@@ -49,21 +48,22 @@ def render_mail_template(template_name_or_list: str | list[str], **kwargs):
     return None
 
 
-def welcome(confirmation_token: str, **kwargs) -> MailMessage:
+def welcome(confirmation_link: str, **kwargs) -> MailMessage:
+    from udata.i18n import lazy_gettext as _
+
     return MailMessage(
         subject=_("Confirm your email address"),
         paragraphs=[
             _("Welcome to %(site)s!", site=current_app.config["SITE_TITLE"]),
             _("Please confirm your email address."),
-            MailCTA(
-                _("Confirm your email address"),
-                url_for_security("confirm_email", token=confirmation_token, _external=True),
-            ),
+            MailCTA(_("Confirm your email address"), confirmation_link),
         ],
     )
 
 
-def welcome_existing(**kwargs) -> MailMessage:
+def welcome_existing(recovery_link: str, **kwargs) -> MailMessage:
+    from udata.i18n import lazy_gettext as _
+
     return MailMessage(
         subject=_("Your email address is already associated with an account"),
         paragraphs=[
@@ -72,15 +72,14 @@ def welcome_existing(**kwargs) -> MailMessage:
                 site=current_app.config["SITE_TITLE"],
             ),
             _("If you forgot your password, you can reset it."),
-            MailCTA(
-                _("Reset your password"),
-                url_for_security("forgot_password", _external=True),
-            ),
+            MailCTA(_("Reset your password"), recovery_link),
         ],
     )
 
 
 def confirmation_instructions(confirmation_link: str, **kwargs) -> MailMessage:
+    from udata.i18n import lazy_gettext as _
+
     return MailMessage(
         subject=_("Confirm your email address"),
         paragraphs=[
@@ -90,7 +89,9 @@ def confirmation_instructions(confirmation_link: str, **kwargs) -> MailMessage:
     )
 
 
-def reset_instructions(reset_token: str, **kwargs) -> MailMessage:
+def reset_instructions(reset_link: str, **kwargs) -> MailMessage:
+    from udata.i18n import lazy_gettext as _
+
     return MailMessage(
         subject=_("Reset your password"),
         paragraphs=[
@@ -99,15 +100,14 @@ def reset_instructions(reset_token: str, **kwargs) -> MailMessage:
                 site=current_app.config["SITE_TITLE"],
             ),
             _("If this wasn't you, please ignore this email."),
-            MailCTA(
-                _("Reset your password"),
-                url_for_security("reset_password", token=reset_token, _external=True),
-            ),
+            MailCTA(_("Reset your password"), reset_link),
         ],
     )
 
 
 def reset_notice(**kwargs) -> MailMessage:
+    from udata.i18n import lazy_gettext as _
+
     return MailMessage(
         subject=_("Your password has been reset"),
         paragraphs=[
@@ -117,6 +117,8 @@ def reset_notice(**kwargs) -> MailMessage:
 
 
 def change_notice(**kwargs) -> MailMessage:
+    from udata.i18n import lazy_gettext as _
+
     return MailMessage(
         subject=_("Your password has been changed"),
         paragraphs=[
