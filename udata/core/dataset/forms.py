@@ -181,7 +181,7 @@ class DatasetForm(ModelForm):
     authorization_request_url = fields.StringField(_("Authorization request URL"))
     access_type_reason_category = fields.SelectField(
         _("Access type reason category"),
-        choices=[(e.value, e.value) for e in InspireLimitationCategory],
+        choices=[(e.value, e.label) for e in InspireLimitationCategory],
         validators=[validators.optional()],
     )
     access_type_reason = fields.StringField(_("Access type reason"))
