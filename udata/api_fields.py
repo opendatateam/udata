@@ -93,12 +93,14 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         # TODO: this is currently never used. We may remove it if the auto-conversion
         # is always good enough.
         return info.get("convert_to"), info.get("convert_to")
-    elif isinstance(field, mongo_fields.StringField):
+    elif isinstance(field, mongo_fields.StringField) or isinstance(field, mongo_fields.EnumField):
         constructor = (
             custom_restx_fields.Markdown if info.get("markdown", False) else restx_fields.String
         )
-        params["min_length"] = field.min_length
-        params["max_length"] = field.max_length
+        if isinstance(field, mongo_fields.StringField):
+            params["min_length"] = field.min_length
+            params["max_length"] = field.max_length
+        # EnumField define choices too from the enum values.
         params["enum"] = field.choices
         if field.validation:
             params["validation"] = validation_to_type(field.validation)
