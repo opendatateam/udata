@@ -1,6 +1,6 @@
 import logging
 
-from flask import current_app, url_for
+from flask import current_app
 from flask_security.utils import url_for_security
 
 from udata.i18n import lazy_gettext as _
@@ -28,7 +28,7 @@ def render_mail_template(template_name_or_list: str | list[str], **kwargs):
         case "welcome_existing":
             mail_message = welcome_existing()
         case "confirmation_instructions":
-            mail_message = confirmation_instructions(kwargs.get("confirmation_token"))
+            mail_message = confirmation_instructions(kwargs.get("confirmation_link"))
         case "reset_instructions":
             mail_message = reset_instructions(kwargs.get("reset_token"))
         case "reset_notice":
@@ -80,15 +80,12 @@ def welcome_existing(**kwargs) -> MailMessage:
     )
 
 
-def confirmation_instructions(confirmation_token: str, **kwargs) -> MailMessage:
+def confirmation_instructions(confirmation_link: str, **kwargs) -> MailMessage:
     return MailMessage(
         subject=_("Confirm your email address"),
         paragraphs=[
             _("Please confirm your email address."),
-            MailCTA(
-                _("Confirm your email address"),
-                url_for("security.confirm_change_email", token=confirmation_token, _external=True),
-            ),
+            MailCTA(_("Confirm your email address"), confirmation_link),
         ],
     )
 
