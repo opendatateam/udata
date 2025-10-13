@@ -38,7 +38,6 @@ from .constants import (
     DESCRIPTION_SHORT_SIZE_LIMIT,
     HVD,
     INSPIRE,
-    LEGACY_FREQUENCIES,
     MAX_DISTANCE,
     PIVOTAL_DATA,
     RESOURCE_FILETYPES,
@@ -47,7 +46,7 @@ from .constants import (
     SL,
     SPD,
     SR,
-    UPDATE_FREQUENCIES,
+    UpdateFrequency,
 )
 from .exceptions import (
     SchemasCacheUnavailableException,
@@ -580,7 +579,8 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
     resources = field(db.ListField(db.EmbeddedDocumentField(Resource)), auditable=False)
 
     private = field(db.BooleanField(default=False))
-    frequency = field(db.StringField(choices=list(UPDATE_FREQUENCIES.keys())))
+
+    frequency = field(db.EnumField(UpdateFrequency))
     frequency_date = field(db.DateTimeField(verbose_name=_("Future date of update")))
     temporal_coverage = field(db.EmbeddedDocumentField(db.DateRange))
     spatial = field(db.EmbeddedDocumentField(SpatialCoverage))
@@ -703,8 +703,6 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
 
     def clean(self):
         super(Dataset, self).clean()
-        if self.frequency in LEGACY_FREQUENCIES:
-            self.frequency = LEGACY_FREQUENCIES[self.frequency]
 
         if len(set(res.id for res in self.resources)) != len(self.resources):
             raise MongoEngineValidationError(f"Duplicate resource ID in dataset #{self.id}.")
@@ -782,8 +780,8 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
             return self.owner.avatar.url
 
     @property
-    def frequency_label(self):
-        return UPDATE_FREQUENCIES.get(self.frequency or "unknown", UPDATE_FREQUENCIES["unknown"])
+    def has_frequency(self):
+        return self.frequency not in [None, UpdateFrequency.UNKNOWN]
 
     def check_availability(self):
         """Check if resources from that dataset are available.
@@ -835,33 +833,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
         Ex: the next update for a threeTimesAday freq is not
         every 8 hours, but is maximum 24 hours later.
         """
-        delta = None
-        if self.frequency == "hourly":
-            delta = timedelta(hours=1)
-        elif self.frequency in ["fourTimesADay", "threeTimesADay", "semidaily", "daily"]:
-            delta = timedelta(days=1)
-        elif self.frequency in ["fourTimesAWeek", "threeTimesAWeek", "semiweekly", "weekly"]:
-            delta = timedelta(weeks=1)
-        elif self.frequency == "biweekly":
-            delta = timedelta(weeks=2)
-        elif self.frequency in ["threeTimesAMonth", "semimonthly", "monthly"]:
-            delta = timedelta(days=31)
-        elif self.frequency == "bimonthly":
-            delta = timedelta(days=31 * 2)
-        elif self.frequency == "quarterly":
-            delta = timedelta(days=365 / 4)
-        elif self.frequency in ["threeTimesAYear", "semiannual", "annual"]:
-            delta = timedelta(days=365)
-        elif self.frequency == "biennial":
-            delta = timedelta(days=365 * 2)
-        elif self.frequency == "triennial":
-            delta = timedelta(days=365 * 3)
-        elif self.frequency == "quinquennial":
-            delta = timedelta(days=365 * 5)
-        if delta is None:
-            return
-        else:
-            return self.last_update + delta
+        return self.frequency.next_update(self.last_update) if self.has_frequency else None
 
     @property
     def quality(self):
@@ -880,7 +852,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
             # Allow for being one day late on update.
             # We may have up to one day delay due to harvesting for example
             quality["update_fulfilled_in_time"] = (next_update - datetime.utcnow()).days >= -1
-        elif self.frequency in ["continuous", "irregular", "punctual"]:
+        elif self.has_frequency and self.frequency.delta is None:
             # For these frequencies, we don't expect regular updates or can't quantify them.
             # Thus we consider the update_fulfilled_in_time quality criterion to be true.
             quality["update_fulfilled_in_time"] = True
@@ -905,7 +877,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
         result["temporal_coverage"] = True if self.temporal_coverage else False
         result["spatial"] = True if self.spatial else False
 
-        result["update_frequency"] = self.frequency and self.frequency != "unknown"
+        result["update_frequency"] = self.has_frequency
 
         # We only save the next_update here because it is based on resources
         # We cannot save the `update_fulfilled_in_time` because it is time

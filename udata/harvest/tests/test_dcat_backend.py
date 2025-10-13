@@ -10,6 +10,7 @@ from rdflib import Graph
 
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
+from udata.core.dataset.constants import UpdateFrequency
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceSchemaMockData
 from udata.core.dataset.rdf import dataset_from_rdf
 from udata.core.organization.factories import OrganizationFactory
@@ -560,7 +561,7 @@ class DcatBackendTest:
         assert dataset.harvest.issued_at.date() == date(2016, 12, 14)
         assert dataset.harvest.created_at.date() == date(2016, 12, 12)
         assert dataset.harvest.modified_at.date() == date(2016, 12, 14)
-        assert dataset.frequency == "daily"
+        assert dataset.frequency == UpdateFrequency.DAILY
         assert dataset.description == "Dataset 3 description"
 
         assert dataset.temporal_coverage is not None
@@ -681,7 +682,7 @@ class DcatBackendTest:
         dataset = Dataset.objects.filter(organization=org).first()
 
         assert dataset is not None
-        assert dataset.frequency == "irregular"
+        assert dataset.frequency == UpdateFrequency.IRREGULAR
         assert "gravi" in dataset.tags  # support dcat:keyword
         assert "geodesy" in dataset.tags  # support dcat:theme
         assert dataset.license.id == "fr-lo"
