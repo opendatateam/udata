@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2025-10-08 15:31+0200\n"
-"PO-Revision-Date: 2025-10-13 11:43\n"
+"PO-Revision-Date: 2025-10-14 08:42\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -453,7 +453,7 @@ msgstr "Deux fois par an"
 
 #: udata/core/dataset/constants.py:61
 msgid "Annually"
-msgstr "Annuel"
+msgstr "Annuelle"
 
 #: udata/core/dataset/constants.py:62
 msgid "Every two years"
