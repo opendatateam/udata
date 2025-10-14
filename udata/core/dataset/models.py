@@ -371,7 +371,6 @@ class ResourceMixin(object):
     extras = db.ExtrasField(
         {
             "check:available": db.BooleanField,
-            "check:count-availability": db.IntField,
             "check:status": db.IntField,
             "check:url": db.StringField,
             "check:date": db.DateTimeField,
