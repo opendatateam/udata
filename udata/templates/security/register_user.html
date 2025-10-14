@@ -1,0 +1,19 @@
+{% import 'macros/forms.html' as forms with context %}
+
+{% block main_content %}
+
+<div class="container auth-container">
+    <form class="form-horizontal validate col-md-offset-2 col-md-8"
+        method="post" action="{{ url_for('security.register') }}">
+        <fieldset>
+            <legend>{{ _('Sign Up') }}</legend>
+            {{ forms.render(register_user_form, exclude=[register_user_form.submit]) }}
+            <div class="form-group">
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-primary btn-block">{{ _('Sign up') }}</button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
+{% endblock %}
