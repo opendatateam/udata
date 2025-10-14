@@ -3,8 +3,10 @@ from flask import url_for
 from rdflib import Graph, Literal, URIRef
 from rdflib.namespace import FOAF, RDF
 from rdflib.resource import Resource
+from werkzeug.datastructures import ImmutableMultiDict
 
 from udata.core.dataservices.factories import DataserviceFactory, HarvestMetadataFactory
+from udata.core.dataset.constants import HVD
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
@@ -77,14 +79,14 @@ class CatalogTest:
         uri = url_for("api.site_rdf_catalog", _external=True)
         uri_first = url_for(
             "api.site_rdf_catalog_format",
-            format="json",
+            _format="json",
             page=1,
             page_size=page_size,
             _external=True,
         )
         uri_last = url_for(
             "api.site_rdf_catalog_format",
-            format="json",
+            _format="json",
             page=2,
             page_size=page_size,
             _external=True,
@@ -93,7 +95,7 @@ class CatalogTest:
 
         # First page
         datasets = Dataset.objects.paginate(1, page_size)
-        catalog = build_catalog(site, datasets, format="json")
+        catalog = build_catalog(site, datasets, _format="json")
         graph = catalog.graph
 
         assert isinstance(catalog, Resource)
@@ -117,7 +119,7 @@ class CatalogTest:
 
         # Second page
         datasets = Dataset.objects.paginate(2, page_size)
-        catalog = build_catalog(site, datasets, format="json")
+        catalog = build_catalog(site, datasets, _format="json")
         graph = catalog.graph
 
         assert isinstance(catalog, Resource)
@@ -152,12 +154,39 @@ class SiteRdfViewsTest:
         assert response.json == CONTEXT
 
     def test_catalog_default_to_jsonld(self, client):
-        expected = url_for("api.site_rdf_catalog_format", format="json")
+        expected = url_for("api.site_rdf_catalog_format", _format="json", page=1, page_size=100)
         response = client.get(url_for("api.site_rdf_catalog"))
         assert_redirects(response, expected)
 
+    def test_catalog_redirect_with_filters_sanitizing(self, client):
+        """
+        It should filter out unknown params (including url_for keywords).
+        Repeated keywords should be kept as expected.
+        """
+        expected_params = ImmutableMultiDict(
+            [("page", 3), ("tag", "hvd"), ("tag", "other"), ("page_size", 100)]
+        )
+        expected = url_for(
+            "api.site_rdf_catalog_format", _format="xml", **expected_params.to_dict(flat=False)
+        )
+        params = [
+            ("page", 3),
+            ("tag", "hvd"),
+            ("tag", "other"),
+            ("unknown_param", 5),
+            ("_external", True),
+        ]
+        url = (
+            url_for("api.site_rdf_catalog")
+            + "?"
+            + "&".join(f"{arg}={value}" for arg, value in params)
+        )
+        headers = {"accept": "application/xml"}
+        response = client.get(url, headers=headers)
+        assert_redirects(response, expected)
+
     def test_rdf_perform_content_negociation(self, client):
-        expected = url_for("api.site_rdf_catalog_format", format="xml")
+        expected = url_for("api.site_rdf_catalog_format", _format="xml", page=1, page_size=100)
         url = url_for("api.site_rdf_catalog")
         headers = {"accept": "application/xml"}
         response = client.get(url, headers=headers)
@@ -165,57 +194,65 @@ class SiteRdfViewsTest:
 
     @pytest.mark.parametrize("fmt", ("json", "jsonld"))
     def test_catalog_rdf_json_ld(self, fmt, client):
-        url = url_for("api.site_rdf_catalog_format", format=fmt)
+        url = url_for("api.site_rdf_catalog_format", _format=fmt)
         response = client.get(url, headers={"Accept": "application/ld+json"})
         assert200(response)
         assert response.content_type == "application/ld+json"
         assert response.json["@context"]["@vocab"] == "http://www.w3.org/ns/dcat#"
 
     def test_catalog_rdf_n3(self, client):
-        url = url_for("api.site_rdf_catalog_format", format="n3")
+        url = url_for("api.site_rdf_catalog_format", _format="n3")
         response = client.get(url, headers={"Accept": "text/n3"})
         assert200(response)
         assert response.content_type == "text/n3"
 
     def test_catalog_rdf_turtle(self, client):
-        url = url_for("api.site_rdf_catalog_format", format="ttl")
+        url = url_for("api.site_rdf_catalog_format", _format="ttl")
         response = client.get(url, headers={"Accept": "application/x-turtle"})
         assert200(response)
         assert response.content_type == "application/x-turtle"
 
     @pytest.mark.parametrize("fmt", ("xml", "rdf", "owl"))
     def test_catalog_rdf_rdfxml(self, fmt, client):
-        url = url_for("api.site_rdf_catalog_format", format=fmt)
+        url = url_for("api.site_rdf_catalog_format", _format=fmt)
         response = client.get(url, headers={"Accept": "application/rdf+xml"})
         assert200(response)
         assert response.content_type == "application/rdf+xml"
 
     def test_catalog_rdf_n_triples(self, client):
-        url = url_for("api.site_rdf_catalog_format", format="nt")
+        url = url_for("api.site_rdf_catalog_format", _format="nt")
         response = client.get(url, headers={"Accept": "application/n-triples"})
         assert200(response)
         assert response.content_type == "application/n-triples"
 
     def test_catalog_rdf_trig(self, client):
-        url = url_for("api.site_rdf_catalog_format", format="trig")
+        url = url_for("api.site_rdf_catalog_format", _format="trig")
         response = client.get(url, headers={"Accept": "application/trig"})
         assert200(response)
         assert response.content_type == "application/trig"
 
     @pytest.mark.parametrize("fmt", ("json", "xml", "ttl"))
     def test_dataportal_compliance(self, fmt, client):
-        url = url_for("api.site_dataportal", format=fmt)
+        url = url_for("api.site_dataportal", _format=fmt)
         assert url == "/api/1/site/data.{0}".format(fmt)
-        expected_url = url_for("api.site_rdf_catalog_format", format=fmt)
+        expected_url = url_for("api.site_rdf_catalog_format", _format=fmt)
 
         response = client.get(url)
         assert_redirects(response, expected_url)
 
     def test_catalog_rdf_paginate(self, client):
-        DatasetFactory.create_batch(4)
-        url = url_for("api.site_rdf_catalog_format", format="n3", page_size=3)
+        DatasetFactory.create_batch(4, tags=["my-tag"])
+        DatasetFactory.create_batch(
+            3, tags=["other-tag"]
+        )  # Shouldn't be returned because of the filter on tag="my-tag"
+        url = url_for("api.site_rdf_catalog_format", _format="n3", page_size=3, tag="my-tag")
         next_url = url_for(
-            "api.site_rdf_catalog_format", format="n3", page=2, page_size=3, _external=True
+            "api.site_rdf_catalog_format",
+            _format="n3",
+            page=2,
+            page_size=3,
+            _external=True,
+            tag="my-tag",
         )
 
         response = client.get(url, headers={"Accept": "text/n3"})
@@ -227,16 +264,27 @@ class SiteRdfViewsTest:
         pagination = graph.resource(pagination)
         assert not pagination.value(HYDRA.previous)
         assert pagination.value(HYDRA.next).identifier == URIRef(next_url)
+        assert pagination.value(HYDRA.last).identifier == URIRef(next_url)
+        catalog = graph.value(predicate=RDF.type, object=HYDRA.Collection)
+        assert catalog is not None
+        catalog = graph.resource(catalog)
+        assert catalog.value(HYDRA.totalItems) == Literal(4)
 
     def test_catalog_format_unknown(self, client):
-        url = url_for("api.site_rdf_catalog_format", format="unknown")
+        url = url_for("api.site_rdf_catalog_format", _format="unknown")
         response = client.get(url)
         assert404(response)
 
-    def test_catalog_rdf_filter_tag(self, client):
+    def test_catalog_rdf_filter(self, client):
+        """
+        Test catalog RDF filter on tags and badges
+        """
         DatasetFactory.create_batch(4, tags=["my-tag"])
+        [dat.add_badge(HVD) for dat in DatasetFactory.create_batch(5)]
         DatasetFactory.create_batch(3)
-        url = url_for("api.site_rdf_catalog_format", format="xml", tag="my-tag")
+
+        # Filter on tags
+        url = url_for("api.site_rdf_catalog_format", _format="xml", tag="my-tag")
 
         response = client.get(url, headers={"Accept": "application/xml"})
         assert200(response)
@@ -249,6 +297,17 @@ class SiteRdfViewsTest:
         for dat in datasets:
             assert graph.value(dat, DCAT.keyword) == Literal("my-tag")
 
+        # Filter on badge
+        url = url_for("api.site_rdf_catalog_format", _format="xml", badge=HVD)
+
+        response = client.get(url, headers={"Accept": "application/xml"})
+        assert200(response)
+
+        graph = Graph().parse(data=response.data, format="xml")
+
+        datasets = list(graph.subjects(RDF.type, DCAT.Dataset))
+        assert len(datasets) == 5
+
     def test_catalog_rdf_dataservices(self, client):
         dataset_a = DatasetFactory.create()
         dataset_b = DatasetFactory.create()
@@ -260,7 +319,7 @@ class SiteRdfViewsTest:
         dataservice_y = DataserviceFactory.create(datasets=[])
 
         response = client.get(
-            url_for("api.site_rdf_catalog_format", format="xml"),
+            url_for("api.site_rdf_catalog_format", _format="xml"),
             headers={"Accept": "application/xml"},
         )
         assert200(response)
@@ -280,7 +339,7 @@ class SiteRdfViewsTest:
 
         # Test first page contains the dataservice without dataset
         response = client.get(
-            url_for("api.site_rdf_catalog_format", format="xml", page_size=1),
+            url_for("api.site_rdf_catalog_format", _format="xml", page_size=1),
             headers={"Accept": "application/xml"},
         )
         assert200(response)
@@ -299,7 +358,7 @@ class SiteRdfViewsTest:
 
         # Test second page doesn't contains the dataservice without dataset
         response = client.get(
-            url_for("api.site_rdf_catalog_format", format="xml", page_size=1, page=2),
+            url_for("api.site_rdf_catalog_format", _format="xml", page_size=1, page=2),
             headers={"Accept": "application/xml"},
         )
         assert200(response)
