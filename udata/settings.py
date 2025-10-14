@@ -471,19 +471,22 @@ class Defaults(object):
     # if set to anything else than `None`
     ###########################################################################
     # avatar provider used to render user avatars
-    AVATAR_PROVIDER = None
     # Number of blocks used by the internal provider
-    AVATAR_INTERNAL_SIZE = None
+    AVATAR_INTERNAL_SIZE = 7
     # List of foreground colors used by the internal provider
-    AVATAR_INTERNAL_FOREGROUND = None
+    AVATAR_INTERNAL_FOREGROUND = [
+        "rgb(45,79,255)",
+        "rgb(254,180,44)",
+        "rgb(226,121,234)",
+        "rgb(30,179,253)",
+        "rgb(232,77,65)",
+        "rgb(49,203,115)",
+        "rgb(141,69,170)",
+    ]
     # Background color used by the internal provider
-    AVATAR_INTERNAL_BACKGROUND = None
+    AVATAR_INTERNAL_BACKGROUND = "rgb(224,224,224)"
     # Padding (in percent) used by the internal provider
-    AVATAR_INTERNAL_PADDING = None
-    # Skin (set) used by the robohash provider
-    AVATAR_ROBOHASH_SKIN = None
-    # The background used by the robohash provider.
-    AVATAR_ROBOHASH_BACKGROUND = None
+    AVATAR_INTERNAL_PADDING = 10
 
     # Post settings
     ###########################################################################
