@@ -27,34 +27,21 @@ classifiers = [
 ]
 requires-python = ">=3.11,<3.14"
 dependencies = [
-    "amqp==5.3.1",
-    "aniso8601==10.0.0",
-    "attrs==25.3.0",
     "authlib==1.5.1",
     "awesome-slugify==1.6.5",
     "babel==2.17.0",
     "bcrypt==4.3.0",
-    "billiard==4.2.1",
     "bleach[css]==6.2.0",
     "blinker==1.5",
     "boto3==1.26.102",
     "botocore==1.29.165",
-    "cachelib==0.13.0",
     "celery==5.4.0",
     "celerybeat-mongo==0.2.0",
-    "certifi==2025.1.31",
-    "cffi==1.17.1",
-    "charset-normalizer==3.4.1",
     "click==8.1.8",
-    "click-didyoumean==0.3.1",
-    "click-plugins==1.1.1",
-    "click-repl==0.3.0",
     "cryptography==44.0.2",
-    "dnspython==2.7.0",
     "email-validator==2.2.0",
     "factory-boy==3.3.3",
     "feedgenerator==2.1.0",
-    "filelock==3.18.0",
     "flask==2.1.2",
     "flask-babel==4.0.0",
     "flask-caching==2.3.1",
@@ -62,25 +49,21 @@ dependencies = [
     "flask-gravatar==0.5.0",
     "flask-login==0.6.3",
     "flask-mail==0.10.0",
-    "flask-mongoengine==1.0.0",
     "flask-navigation-temp-python-311==0.2.1",
     "flask-principal==0.4.0",
     "flask-restx==1.3.0",
     "flask-security-too==5.1.2",
     "flask-sitemap==0.4.0",
-    "flask-storage==1.3.2",
+    "flask-storage ~= 1.4.0",
     "flask-wtf==1.2.2",
     "geojson==3.2.0",
     "geomet==1.1.0",
     "html2text==2024.2.26",
     "humanfriendly==10.0",
-    "idna==3.10",
     "importlib-resources==6.5.2",
     "itsdangerous==2.2.0",
     "jinja2==3.1.6",
-    "jmespath==1.0.1",
     "jsonschema==4.23.0",
-    "jsonschema-specifications==2024.10.1",
     "kombu[redis]==5.5.0",
     "langdetect==1.0.9",
     "levenshtein==0.27.1",
@@ -89,40 +72,23 @@ dependencies = [
     "mistune==3.1.3",
     "mongoengine==0.29.1",
     "netaddr==1.3.0",
-    "passlib==1.7.4",
     "pillow==9.2.0",
-    "platformdirs==4.3.6",
-    "prompt-toolkit==3.0.50",
-    "pycparser==2.22",
     "pydenticon==0.3.1",
     "pymongo==4.11.3",
-    "pyparsing==3.2.1",
     "python-dateutil==2.9.0.post0",
     "pytz==2025.1",
-    "rapidfuzz==3.12.2",
     "rdflib==7.1.3",
     "redis==5.2.1",
-    "referencing==0.36.2",
-    "regex==2024.11.6",
     "requests==2.32.4",
-    "rpds-py==0.23.1",
-    "s3transfer==0.6.2",
     "saxonche==12.8.0",
     "sentry-sdk[flask]==2.23.1",
-    "six==1.17.0",
     "speaklater==1.3",
-    "tinycss2==1.4.0",
     "tlds==2025022800",
     "typing-extensions==4.12.2",
     "tzdata==2025.1",
-    "unidecode==0.4.21",
-    "uritools==4.0.3",
     "urlextract==1.9.0",
     "urllib3==1.26.20",
-    "vine==5.1.0",
     "voluptuous==0.15.2",
-    "wcwidth==0.2.13",
-    "webencodings==0.5.1",
     "werkzeug==2.2.3",
     "wtforms[email]==3.2.1",
     "wtforms-json==0.3.5",
@@ -186,11 +152,7 @@ doc = [
     "pyyaml-env-tag==0.1",
     "watchdog==6.0.0",
 ]
-report = [
-    "coverage[toml]==7.7.0",
-    "flake8==7.1.2",
-    "pytest-cov==6.0.0",
-]
+report = ["coverage[toml]==7.7.0", "flake8==7.1.2", "pytest-cov==6.0.0"]
 
 [tool.setuptools_scm]
 version_scheme = "guess-next-dev"
@@ -207,32 +169,37 @@ include = ["tasks", "udata"]
 typeCheckingMode = "standard"
 
 [tool.pytest.ini_options]
-norecursedirs = [".git", "build", ".tox", "specs", ".cache", "udata/static", "udata/templates", "udata/translations"]
+norecursedirs = [
+    ".git",
+    "build",
+    ".tox",
+    "specs",
+    ".cache",
+    "udata/templates",
+    "udata/translations",
+]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 python_classes = ["*Test"]
-env = [
-    "AUTHLIB_INSECURE_TRANSPORT=true",
-    "mock_use_standalone_module=true"
-]
-filterwarnings = [
-    "ignore::DeprecationWarning:mongoengine"
-]
+env = ["AUTHLIB_INSECURE_TRANSPORT=true", "mock_use_standalone_module=true"]
+filterwarnings = ["ignore::DeprecationWarning:mongoengine"]
 markers = [
     "frontend: load the frontend stack",
     "preview: mock a preview backend",
-    "oauth: inject an OAuth client"
+    "oauth: inject an OAuth client",
 ]
 
 [tool.ruff]
-lint = { extend-select = ["I"] } # ["I"] is to also sort imports with an isort rule
+lint = { extend-select = [
+    "I",
+] } # ["I"] is to also sort imports with an isort rule
 line-length = 100
 
 [tool.setuptools]
 packages = ["udata"]
 
 [tool.setuptools.package-data]
-udata = ["templates/*", "static/*", "translations/*"]
+udata = ["templates/*", "translations/*"]
 
 [tool.tox]
 requires = ["tox>=4.19"]
@@ -249,16 +216,22 @@ deps = [
     "pytest-flask==1.3.0",
     "pytest-mock==3.14.0",
     "pytest-sugar==1.0.0",
-    "requests-mock==1.12.1"
+    "requests-mock==1.12.1",
 ]
-commands = [
-    ["pytest", "udata"]
-]
+commands = [["pytest", "udata"]]
 [tool.tox.env.doc]
 description = "Build documentation with sphinx"
 deps = ["sphinx"]
 commands = [
-    ["sphinx-build", "-b", "html", "-d", "{envtmpdir}/doctrees", ".", "{envtmpdir}/html"]
+    [
+        "sphinx-build",
+        "-b",
+        "html",
+        "-d",
+        "{envtmpdir}/doctrees",
+        ".",
+        "{envtmpdir}/html",
+    ],
 ]
 change_dir = "doc"
 

@@ -193,21 +193,6 @@ class APIAuthTest:
         assert200(response)
         assert response.json == {"success": True}
 
-    def test_authorization_display(self, client, oauth):
-        """Should display the OAuth authorization page"""
-        client.login()
-
-        response = client.get(
-            url_for(
-                "oauth.authorize",
-                response_type="code",
-                client_id=oauth.client_id,
-                redirect_uri=oauth.default_redirect_uri,
-            )
-        )
-
-        assert200(response)
-
     def test_authorization_decline(self, client, oauth):
         """Should redirect to the redirect_uri on authorization denied"""
         client.login()
