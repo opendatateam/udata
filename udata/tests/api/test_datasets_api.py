@@ -1925,35 +1925,25 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(Follow.objects.following(user).count(), 0)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
+    @pytest.mark.options(ALLOWED_RESOURCES_EXTENSIONS=["txt", "html", "kml", "kml-1", "qml", "xml"])
     def test_suggest_formats_api(self):
-        """It should suggest formats"""
-        DatasetFactory(
-            resources=[
-                ResourceFactory(format=f) for f in (faker.word(), faker.word(), "kml", "kml-1")
-            ]
-        )
-
         response = self.get(url_for("api.suggest_formats"), qs={"q": "km", "size": "5"})
         self.assert200(response)
 
-        self.assertLessEqual(len(response.json), 5)
-        self.assertGreater(len(response.json), 1)
+        self.assertEqual(len(response.json), 2)
+        self.assertEqual(response.json[0]["text"], "kml")
+        self.assertEqual(response.json[1]["text"], "kml-1")
 
-        for suggestion in response.json:
-            self.assertIn("text", suggestion)
-            self.assertIn("km", suggestion["text"])
-
+    @pytest.mark.options(ALLOWED_RESOURCES_EXTENSIONS=["txt", "html", "kml", "kml-1", "qml", "xml"])
     def test_suggest_format_api_no_match(self):
-        """It should not provide format suggestion if no match"""
-        DatasetFactory(resources=[ResourceFactory(format=faker.word()) for _ in range(3)])
-
         response = self.get(url_for("api.suggest_formats"), qs={"q": "test", "size": "5"})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
+    @pytest.mark.options(ALLOWED_RESOURCES_EXTENSIONS=[])
     def test_suggest_format_api_empty(self):
         """It should not provide format suggestion if no data"""
-        response = self.get(url_for("api.suggest_formats"), qs={"q": "test", "size": "5"})
+        response = self.get(url_for("api.suggest_formats"), qs={"q": "txt", "size": "5"})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
