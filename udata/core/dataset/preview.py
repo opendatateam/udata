@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from flask import current_app
 
@@ -12,12 +12,12 @@ if TYPE_CHECKING:
 # Define an abstract class
 class Preview(ABC):
     @abstractmethod
-    def preview_url(self, resource: Resource) -> Optional[str]:
+    def preview_url(self, resource: Resource) -> str | None:
         return None
 
 
 class TabularAPIPreview(Preview):
-    def preview_url(self, resource: Resource) -> Optional[str]:
+    def preview_url(self, resource: Resource) -> str | None:
         preview_base_url = current_app.config["TABULAR_EXPLORE_URL"]
         if not preview_base_url:
             return None

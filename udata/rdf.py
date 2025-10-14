@@ -239,9 +239,26 @@ def rdf_unique_values(resource, predicate, parse_label=False) -> set[str]:
 
 
 def rdf_value(obj, predicate, default=None, parse_label=False):
-    """Serialize the value for a predicate on a RdfResource"""
-    value = obj.value(predicate)
+    """
+    Serialize the value for a predicate on a RdfResource,
+    expecting one value only or (at most) one per language for Literals.
+    """
+    value = default_lang_value(obj, predicate)
     return serialize_value(value, parse_label=parse_label) if value else default
+
+
+def default_lang_value(obj, predicate):
+    """
+    Return the value with the default language if multiple Literal values exist in different languages.
+    """
+    candidate_values = list(obj.objects(predicate))
+    if not candidate_values:
+        return None
+    for val in candidate_values:
+        if isinstance(val, Literal) and val.language == current_app.config["DEFAULT_LANGUAGE"]:
+            return val
+    # Defaulting to the first value found
+    return candidate_values[0]
 
 
 class HTMLDetector(HTMLParser):
@@ -520,3 +537,14 @@ def graph_response(graph, format):
     if isinstance(graph, RdfResource):
         graph = graph.graph
     return escape_xml_illegal_chars(graph.serialize(format=fmt, **kwargs)), 200, headers
+
+
+def set_harvested_date(obj, rdf_resource, rdf_term, harvest_attr, fallback=None) -> None:
+    """
+    Add a date to the RDF resource from the harvest metadata if available.
+    Use the fallback value for non harvested objects.
+    """
+    if obj.harvest and (harvest_attr_value := getattr(obj.harvest, harvest_attr)):
+        rdf_resource.set(rdf_term, Literal(harvest_attr_value))
+    elif not obj.harvest and fallback:
+        rdf_resource.set(rdf_term, Literal(fallback))

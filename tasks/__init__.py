@@ -1,23 +1,18 @@
-import itertools
-import json
-import os
-import re
 from datetime import datetime
-from glob import iglob
-from os.path import exists, join
+from os.path import join
 from sys import exit
 
 from babel.messages.pofile import read_po, write_po
 from babel.util import LOCALTZ
 from invoke import task
 
-from .helpers import ROOT, cyan, header, info, success
+from .helpers import ROOT, header, info, success
 
 I18N_DOMAIN = "udata"
 
 
 @task
-def clean(ctx, node=False, translations=False, all=False):
+def clean(ctx, translations=False):
     """Cleanup all build artifacts"""
     header("Clean all build artifacts")
     patterns = [
@@ -28,11 +23,8 @@ def clean(ctx, node=False, translations=False, all=False):
         "**/*.pyc",
         "*.egg-info",
         ".tox",
-        "udata/static/*",
     ]
-    if node or all:
-        patterns.append("node_modules")
-    if translations or all:
+    if translations:
         patterns.append("udata/translations/*/LC_MESSAGES/udata.mo")
     for pattern in patterns:
         info(pattern)
@@ -47,12 +39,8 @@ def update(ctx):
     header(msg)
     info("Updating Python dependencies")
     with ctx.cd(ROOT):
-        ctx.run("pip install -r requirements/develop.pip")
-        for requirement_file in ["install", "test", "develop", "doc", "report"]:
-            ctx.run(
-                f"pip-compile requirements/{requirement_file}.in --output-file=requirements/{requirement_file}.pip --upgrade"
-            )
-    # TODO: Add javascript dependencies update
+        ctx.run('pip install -e ".[dev]"')
+    info("Note: Dependencies are now managed in pyproject.toml")
 
 
 @task
@@ -62,7 +50,9 @@ def i18n(ctx, update=False):
 
     info("Extract Python strings")
     with ctx.cd(ROOT):
-        ctx.run("python setup.py extract_messages")
+        ctx.run(
+            "pybabel extract -F babel.cfg -k _ -k N_:1,2 -k P_:1c,2 -k L_ -k gettext -k ngettext:1,2 -k pgettext:1c,2 -k npgettext:1c,2,3 -k lazy_gettext -k lazy_pgettext:1c,2 --add-comments=TRANSLATORS: --width=80 -o udata/translations/udata.pot udata"
+        )
 
     # Fix crowdin requiring Language with `2-digit` iso code in potfile
     # to produce 2-digit iso code pofile
@@ -80,46 +70,7 @@ def i18n(ctx, update=False):
 
     if update:
         with ctx.cd(ROOT):
-            ctx.run("python setup.py update_catalog")
-
-    info("Extract JavaScript strings")
-    keys = set()
-    catalog = {}
-    catalog_filename = join(ROOT, "js", "locales", "{}.en.json".format(I18N_DOMAIN))
-    if exists(catalog_filename):
-        with open(catalog_filename) as f:
-            catalog = json.load(f)
-
-    globs = "*.js", "*.vue", "*.hbs"
-    regexps = [
-        re.compile(r'(?:|\.|\s|\{)_\(\s*(?:"|\')(.*?)(?:"|\')\s*(?:\)|,)'),  # JS _('trad')
-        re.compile(r'v-i18n="(.*?)"'),  # Vue.js directive v-i18n="trad"
-        re.compile(r'"\{\{\{?\s*\'(.*?)\'\s*\|\s*i18n\}\}\}?"'),  # Vue.js filter {{ 'trad'|i18n }}
-        re.compile(r'{{_\s*"(.*?)"\s*}}'),  # Handlebars {{_ "trad" }}
-        re.compile(r"{{_\s*\'(.*?)\'\s*}}"),  # Handlebars {{_ 'trad' }}
-        re.compile(r'\:[a-z0-9_\-]+="\s*_\(\'(.*?)\'\)\s*"'),  # Vue.js binding :prop="_('trad')"
-    ]
-
-    for directory, _, _ in os.walk(join(ROOT, "js")):
-        glob_patterns = (iglob(join(directory, g)) for g in globs)
-        for filename in itertools.chain(*glob_patterns):
-            print("Extracting messages from {0}".format(cyan(filename)))
-            content = open(filename).read()
-            for regexp in regexps:
-                for match in regexp.finditer(content):
-                    key = match.group(1)
-                    key = key.replace("\\n", "\n")
-                    keys.add(key)
-                    if key not in catalog:
-                        catalog[key] = key
-
-    # Remove old/not found translations
-    for key in list(catalog.keys()):
-        if key not in keys:
-            del catalog[key]
-
-    with open(catalog_filename, "w") as f:
-        json.dump(catalog, f, sort_keys=True, indent=4, ensure_ascii=False, separators=(",", ": "))
+            ctx.run("pybabel update -D udata -d udata/translations -i udata/translations/udata.pot")
 
 
 @task
@@ -127,7 +78,7 @@ def i18nc(ctx):
     """Compile translations"""
     header("Compiling translations")
     with ctx.cd(ROOT):
-        ctx.run("python setup.py compile_catalog")
+        ctx.run("pybabel compile -D udata -d udata/translations")
 
 
 @task(i18nc)
@@ -159,15 +110,6 @@ def cover(ctx, html=False):
 
 
 @task
-def jstest(ctx, watch=False):
-    """Run Karma tests suite"""
-    header("Run Karma/Mocha test suite")
-    cmd = "npm run -s test:{0}".format("watch" if watch else "unit")
-    with ctx.cd(ROOT):
-        ctx.run(cmd)
-
-
-@task
 def doc(ctx):
     """Build the documentation"""
     header("Building documentation")
@@ -182,11 +124,8 @@ def qa(ctx):
     info("Python static analysis")
     with ctx.cd(ROOT):
         flake8_results = ctx.run("flake8 udata --jobs 1", pty=True, warn=True)
-    info("JavaScript static analysis")
-    with ctx.cd(ROOT):
-        eslint_results = ctx.run("npm -s run lint", pty=True, warn=True)
-    if flake8_results.failed or eslint_results.failed:
-        exit(flake8_results.return_code or eslint_results.return_code)
+    if flake8_results.failed:
+        exit(flake8_results.return_code)
     success("OK")
 
 
@@ -209,70 +148,20 @@ def beat(ctx, loglevel="info"):
     ctx.run("celery -A udata.worker beat -l %s" % loglevel)
 
 
-@task
-def assets_build(ctx):
-    """Install and compile assets"""
-    header("Building static assets")
-    with ctx.cd(ROOT):
-        ctx.run("npm run assets:build", pty=True)
-
-
-@task
-def widgets_build(ctx):
-    """Compile and minify widgets"""
-    header("Building widgets")
-    with ctx.cd(ROOT):
-        ctx.run("npm run widgets:build", pty=True)
-
-
-@task
-def oembed_build(ctx):
-    """Compile and minify OEmbed assets"""
-    header("Building OEmbed assets")
-    with ctx.cd(ROOT):
-        ctx.run("npm run oembed:build", pty=True)
-
-
-@task
-def assets_watch(ctx):
-    """Build assets on change"""
-    with ctx.cd(ROOT):
-        ctx.run("npm run assets:watch", pty=True)
-
-
-@task
-def widgets_watch(ctx):
-    """Build widgets on changes"""
-    with ctx.cd(ROOT):
-        ctx.run("npm run widgets:watch", pty=True)
-
-
-@task
-def oembed_watch(ctx):
-    """Build OEmbed assets on changes"""
-    with ctx.cd(ROOT):
-        ctx.run("npm run oembed:watch", pty=True)
-
-
-@task(clean, i18nc, assets_build, widgets_build, oembed_build, default=True)
-def dist(ctx, buildno=None):
+@task(clean, i18nc, default=True)
+def dist(ctx):
     """Package for distribution"""
-    perform_dist(ctx, buildno)
+    perform_dist(ctx)
 
 
 @task(i18nc)
-def pydist(ctx, buildno=None):
+def pydist(ctx):
     """Perform python packaging (without compiling assets)"""
-    perform_dist(ctx, buildno)
+    perform_dist(ctx)
 
 
-def perform_dist(ctx, buildno=None):
+def perform_dist(ctx):
     header("Building a distribuable package")
-    cmd = ["python setup.py"]
-    if buildno:
-        cmd.append("egg_info -b {0}".format(buildno))
-    cmd.append("bdist_wheel")
-    with ctx.cd(ROOT):
-        ctx.run(" ".join(cmd), pty=True)
-        ctx.run("twine check dist/*")
+    ctx.run("python -m build")
+    ctx.run("twine check dist/*")
     success("Distribution is available in dist directory")

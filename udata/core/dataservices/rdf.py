@@ -14,9 +14,11 @@ from udata.rdf import (
     TAG_TO_EU_HVD_CATEGORIES,
     contact_points_from_rdf,
     contact_points_to_rdf,
+    default_lang_value,
     namespace_manager,
     rdf_value,
     remote_url_from_rdf,
+    set_harvested_date,
     themes_from_rdf,
     url_from_rdf,
 )
@@ -30,7 +32,7 @@ def dataservice_from_rdf(
     remote_url_prefix: str | None = None,
 ) -> Dataservice:
     """
-    Create or update a dataset from a RDF/DCAT graph
+    Create or update a dataservice from a RDF/DCAT graph
     """
     if node is None:  # Assume first match is the only match
         node = graph.value(predicate=RDF.type, object=DCAT.DataService)
@@ -38,7 +40,9 @@ def dataservice_from_rdf(
     d = graph.resource(node)
 
     dataservice.title = rdf_value(d, DCT.title)
-    dataservice.description = sanitize_html(d.value(DCT.description) or d.value(DCT.abstract))
+    dataservice.description = sanitize_html(
+        default_lang_value(d, DCT.description) or default_lang_value(d, DCT.abstract)
+    )
 
     dataservice.base_api_url = url_from_rdf(d, DCAT.endpointURL)
 
@@ -53,7 +57,6 @@ def dataservice_from_rdf(
         contact_point for role in roles for contact_point in role
     ] or dataservice.contact_points
 
-    datasets = []
     for dataset_node in d.objects(DCAT.servesDataset):
         id = dataset_node.value(DCT.identifier)
         dataset = next(
@@ -67,11 +70,9 @@ def dataservice_from_rdf(
                 None,
             )
 
-        if dataset is not None:
-            datasets.append(dataset.id)
-
-    if datasets:
-        dataservice.datasets = datasets
+        # We append the dataset to the list of the current attached ones if not already attached
+        if dataset is not None and dataset not in dataservice.datasets:
+            dataservice.datasets.append(dataset)
 
     license = rdf_value(d, DCT.license)
     if license is not None:
@@ -84,7 +85,8 @@ def dataservice_from_rdf(
     dataservice.harvest.remote_url = remote_url_from_rdf(
         d, graph, remote_url_prefix=remote_url_prefix
     )
-    dataservice.harvest.created_at = rdf_value(d, DCT.issued)
+    dataservice.harvest.created_at = rdf_value(d, DCT.created)
+    dataservice.harvest.issued_at = rdf_value(d, DCT.issued)
     dataservice.metadata_modified_at = rdf_value(d, DCT.modified)
 
     dataservice.tags = themes_from_rdf(d)
@@ -119,7 +121,14 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
     d.set(DCT.identifier, Literal(identifier))
     d.set(DCT.title, Literal(dataservice.title))
     d.set(DCT.description, Literal(dataservice.description))
-    d.set(DCT.issued, Literal(dataservice.created_at))
+
+    # created
+    set_harvested_date(dataservice, d, DCT.created, "created_at", fallback=dataservice.created_at)
+    # issued
+    set_harvested_date(dataservice, d, DCT.issued, "issued_at", fallback=dataservice.created_at)
+    # modified
+    # uses internal attr instead of harvested one, mapping of metadata_modified_at from harvested is clean enough
+    d.set(DCT.modified, Literal(dataservice.metadata_modified_at))
 
     if dataservice.base_api_url:
         d.set(DCAT.endpointURL, URIRef(dataservice.base_api_url))

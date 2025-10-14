@@ -101,6 +101,24 @@ class Defaults(object):
     SECURITY_RESET_URL = "/reset/"
     SECURITY_CHANGE_EMAIL_URL = "/change-email/"
 
+    # See https://flask-security.readthedocs.io/en/stable/configuration.html#SECURITY_REDIRECT_BEHAVIOR
+    # We do not define all the URLs requested in the documentation because most of the time we do JSON requests in cdata
+    # and catch errors instead of followings the redirects.
+    # The only place where we don't have control over the redirect is when the user is clicking a link directly to udata
+    # (instead of a link to `cdata`) as in /confirm. When the user is clicking on the confirmation link, he's redirected
+    # to `confirm_change_email` endpoint, and then udata redirect him to the homepage of `cdata` with a custom flash message.
+    SECURITY_REDIRECT_BEHAVIOR = "spa"
+    # SECURITY_POST_OAUTH_LOGIN_VIEW = ""    # SECURITY_OAUTH_ENABLE is disabled
+    # SECURITY_LOGIN_ERROR_VIEW = ""         # We don't follow the redirects since we do JSON POST requests during login
+    # SECURITY_CONFIRM_ERROR_VIEW = ""       # Manually changed in `confirm_change_email` and set at runtime. See :SecurityPostConfirmViewAtRuntime
+    # SECURITY_POST_CHANGE_EMAIL_VIEW = ""   # We don't follow the redirects since we do JSON POST requests during change email
+    # SECURITY_CHANGE_EMAIL_ERROR_VIEW = ""  # We don't follow the redirects since we do JSON POST requests during change email
+    # SECURITY_POST_CONFIRM_VIEW = ""        # Set at runtime. See :SecurityPostConfirmViewAtRuntime
+    # SECURITY_RESET_ERROR_VIEW = ""         # We don't follow the redirects since we do JSON POST requests during request reset
+    # SECURITY_RESET_VIEW = ""               # We don't follow the redirects since we do JSON POST requests during request reset
+
+    SECURITY_SPA_ON_SAME_DOMAIN = False
+
     SECURITY_PASSWORD_SALT = "Default uData secret password salt"
     SECURITY_CONFIRM_SALT = "Default uData secret confirm salt"
     SECURITY_RESET_SALT = "Default uData secret reset salt"
@@ -121,6 +139,15 @@ class Defaults(object):
     YEARS_OF_INACTIVITY_BEFORE_DELETION = None
     DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY = 30
     MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS = 200
+
+    # You can activate CaptchEtat, a captcha.com integration by providing
+    # CAPTCHETAT_BASE_URL, CAPTCHETAT_OAUTH_BASE_URL, CAPTCHETAT_CLIENT_ID and CAPTCHETAT_CLIENT_SECRET
+    CAPTCHETAT_BASE_URL = None
+    CAPTCHETAT_OAUTH_BASE_URL = None
+    CAPTCHETAT_CLIENT_ID = None
+    CAPTCHETAT_CLIENT_SECRET = None
+    CAPTCHETAT_TOKEN_CACHE_KEY = "captchetat-bearer-token"
+    CAPTCHETAT_STYLE_NAME = "captchaFR"
 
     # Sentry configuration
     SENTRY_DSN = None
@@ -261,6 +288,8 @@ class Defaults(object):
 
     DELAY_BEFORE_REMINDER_NOTIFICATION = 30  # Days
 
+    # Harvest settings
+    ###########################################################################
     HARVEST_ENABLE_MANUAL_RUN = False
 
     HARVEST_PREVIEW_MAX_ITEMS = 20
@@ -285,7 +314,12 @@ class Defaults(object):
 
     HARVEST_ISO19139_XSLT_URL = "https://raw.githubusercontent.com/SEMICeu/iso-19139-to-dcat-ap/refs/heads/geodcat-ap-2.0.0/iso-19139-to-dcat-ap.xsl"
 
+    # If set, harvest emit activities associated with this user as actor
+    # It should be a dedicated service account
+    HARVEST_ACTIVITY_USER_ID = None
+
     # S3 connection details
+    ###########################################################################
     S3_URL = None
     S3_ACCESS_KEY_ID = None
     S3_SECRET_ACCESS_KEY = None
@@ -626,6 +660,7 @@ class Testing(object):
         "check_deliverability": False
     }  # Disables deliverability for email domain name
     PUBLISH_ON_RESOURCE_EVENTS = False
+    HARVEST_ACTIVITY_USER_ID = None
 
 
 class Debug(Defaults):
@@ -641,7 +676,6 @@ class Debug(Defaults):
         "flask_debugtoolbar.panels.template.TemplateDebugPanel",
         "flask_debugtoolbar.panels.logger.LoggingPanel",
         "flask_debugtoolbar.panels.profiler.ProfilerDebugPanel",
-        "flask_mongoengine.panels.MongoDebugPanel",
     )
     CACHE_TYPE = "flask_caching.backends.null"
     CACHE_NO_NULL_WARNING = True

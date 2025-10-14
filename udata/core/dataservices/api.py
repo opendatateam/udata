@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 
 import mongoengine
 from bson import ObjectId
@@ -9,6 +8,7 @@ from flask_login import current_user
 
 from udata.api import API, api, fields
 from udata.api_fields import patch
+from udata.auth import admin_permission
 from udata.core.dataservices.constants import DATASERVICE_ACCESS_TYPE_RESTRICTED
 from udata.core.dataset.models import Dataset
 from udata.core.followers.api import FollowAPI
@@ -62,7 +62,7 @@ class DataservicesAtomFeedAPI(API):
             _("Latest APIs"), description=None, feed_url=request.url, link=request.url_root
         )
 
-        dataservices: List[Dataservice] = (
+        dataservices: list[Dataservice] = (
             Dataservice.objects.visible().order_by("-created_at").limit(current_site.feed_size)
         )
         for dataservice in dataservices:
@@ -76,9 +76,9 @@ class DataservicesAtomFeedAPI(API):
                 author_uri = dataservice.owner.url_for()
             feed.add_item(
                 dataservice.title,
-                unique_id=dataservice.id,
+                unique_id=dataservice.url_for(_useId=True),
                 description=dataservice.description,
-                content=md(dataservice.description),
+                content=str(md(dataservice.description)),
                 author_name=author_name,
                 author_link=author_uri,
                 link=dataservice.url_for(),
@@ -136,6 +136,28 @@ class DataserviceAPI(API):
         dataservice.save()
 
         return "", 204
+
+
+@ns.route("/<dataservice:dataservice>/featured/", endpoint="dataservice_featured")
+@api.doc(**common_doc)
+class ReuseFeaturedAPI(API):
+    @api.doc("feature_dataservice")
+    @api.secure(admin_permission)
+    @api.marshal_with(Dataservice.__read_fields__)
+    def post(self, dataservice):
+        """Mark a dataservice as featured"""
+        dataservice.featured = True
+        dataservice.save()
+        return dataservice
+
+    @api.doc("unfeature_dataservice")
+    @api.secure(admin_permission)
+    @api.marshal_with(Dataservice.__read_fields__)
+    def delete(self, dataservice):
+        """Unmark a dataservice as featured"""
+        dataservice.featured = False
+        dataservice.save()
+        return dataservice
 
 
 dataservice_add_datasets_fields = api.model(

@@ -18,16 +18,13 @@ log = logging.getLogger(__name__)
 MAX_TAG_LENGTH = 32
 
 
-@pytest.mark.frontend
 class TagsTests:
-    modules = ["core.tags"]
-
     def test_csv(self, client):
         Tag.objects.create(name="datasets-only", counts={"datasets": 15})
         Tag.objects.create(name="reuses-only", counts={"reuses": 10})
         Tag.objects.create(name="both", counts={"reuses": 10, "datasets": 15})
 
-        response = client.get(url_for("tags.csv"))
+        response = client.get(url_for("api.site_tags_csv"))
         assert200(response)
         assert response.mimetype == "text/csv"
         assert response.charset == "utf-8"
@@ -102,11 +99,11 @@ class TagsUtilsTest:
         assert slug("ecole publique-") == "ecole-publique"
         assert slug("ecole publique_") == "ecole-publique"
 
-    @pytest.mark.options(TAG_MAX_LENGTH=MAX_TAG_LENGTH)
+    @pytest.mark.options(TAG_MIN_LENGTH=3, TAG_MAX_LENGTH=10)
     def test_normalize(self, app):
         assert normalize("") == ""
         assert normalize("a") == ""
         assert normalize("aa") == ""
         assert normalize("aaa") == "aaa"
-        assert normalize("a" * (MAX_TAG_LENGTH + 1)) == "a" * MAX_TAG_LENGTH
+        assert normalize("aaaaaaaaaaa") == "aaaaaaaaaa"
         assert normalize("aAa a") == "aaa-a"
