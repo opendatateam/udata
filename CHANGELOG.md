@@ -18,9 +18,9 @@
   - From https://www.data.gouv.fr/proconnect/logout to
   https://www.data.gouv.fr/api/1/proconnect/logout
   - Part of https://github.com/datagouv/data.gouv.fr/issues/1717
-  
+
   ---------
-  
+
   Co-authored-by: maudetes <maudet.estelle@gmail.com>
 - build: use uv ([#3459](https://github.com/opendatateam/udata/pull/3459))
 - ci: do not publish on tags ([#3455](https://github.com/opendatateam/udata/pull/3455))

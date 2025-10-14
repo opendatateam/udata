@@ -18,7 +18,13 @@ from udata.mongo.errors import FieldValidationError
 from udata.uris import cdata_url
 from udata.utils import hash_url
 
-from .constants import IMAGE_MAX_SIZE, IMAGE_SIZES, REUSE_TOPICS, REUSE_TYPES
+from .constants import (
+    DESCRIPTION_SHORT_SIZE_LIMIT,
+    IMAGE_MAX_SIZE,
+    IMAGE_SIZES,
+    REUSE_TOPICS,
+    REUSE_TYPES,
+)
 
 __all__ = ("Reuse",)
 
@@ -80,6 +86,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
         db.StringField(required=True),
         markdown=True,
     )
+    description_short = field(db.StringField(max_length=DESCRIPTION_SHORT_SIZE_LIMIT))
     type = field(
         db.StringField(required=True, choices=list(REUSE_TYPES)),
         filterable={},
