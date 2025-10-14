@@ -372,7 +372,6 @@ class ResourceMixin(object):
         {
             "check:available": db.BooleanField,
             "check:status": db.IntField,
-            "check:url": db.StringField,
             "check:date": db.DateTimeField,
         }
     )
