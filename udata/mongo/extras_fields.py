@@ -11,15 +11,16 @@ ALLOWED_TYPES = (str, int, float, bool, datetime, date, list, dict)
 
 
 class ExtrasField(DictField):
-    def __init__(self, **kwargs):
+    def __init__(self, keys_types={}, **kwargs):
         self.registered = {}
+        for key, dbtype in keys_types.items():
+            self.register(key, dbtype)
         super(ExtrasField, self).__init__()
 
     def register(self, key, dbtype):
         """Register a DB type to add constraint on a given extra key"""
         if not issubclass(dbtype, (BaseField, EmbeddedDocument)):
-            msg = "ExtrasField can only register MongoEngine fields"
-            raise TypeError(msg)
+            raise TypeError("ExtrasField can only register MongoEngine fields")
         self.registered[key] = dbtype
 
     def validate(self, values):

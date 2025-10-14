@@ -1,7 +1,7 @@
 import logging
 from collections.abc import Iterable
 
-from flask_mongoengine import Document
+from udata.flask_mongoengine.document import Document
 
 from .queryset import UDataQuerySet
 

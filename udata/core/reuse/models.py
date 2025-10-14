@@ -3,7 +3,7 @@ from flask import url_for
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
-from udata.api_fields import field, function_field, generate_fields
+from udata.api_fields import field, generate_fields
 from udata.core.activity.models import Auditable
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.linkable import Linkable
@@ -66,7 +66,7 @@ class ReuseBadgeMixin(BadgeMixin):
         {"key": "followers", "value": "metrics.followers"},
         {"key": "views", "value": "metrics.views"},
     ],
-    additional_filters={"organization_badge": "organization.badges"},
+    nested_filters={"organization_badge": "organization.badges"},
     mask="*,datasets{id,title,uri,page}",
 )
 class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Owned, db.Document):
@@ -204,16 +204,16 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
             "api.reuse", reuse=self._link_id(**kwargs), **self._self_api_url_kwargs(**kwargs)
         )
 
-    @function_field(description="Link to the API endpoint for this reuse", show_as_ref=True)
+    @field(description="Link to the API endpoint for this reuse", show_as_ref=True)
     def uri(self, *args, **kwargs):
         return self.self_api_url(*args, **kwargs)
 
-    @function_field(description="Link to the udata web page for this reuse", show_as_ref=True)
+    @field(description="Link to the udata web page for this reuse", show_as_ref=True)
     def page(self, *args, **kwargs):
         return self.self_web_url(*args, **kwargs)
 
     @property
-    @function_field(
+    @field(
         nested_fields=reuse_permissions_fields,
     )
     def permissions(self):

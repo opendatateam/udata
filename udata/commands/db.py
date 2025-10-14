@@ -5,7 +5,6 @@ import os
 import sys
 import traceback
 from itertools import groupby
-from typing import Optional
 from uuid import uuid4
 
 import click
@@ -434,8 +433,8 @@ def check_integrity(models):
 def check_duplicate_resources_ids(
     skip_duplicates_inside_dataset: bool,
     skip_duplicates_outside_dataset: bool,
-    exclude_org: Optional[str],
-    only_org: Optional[str],
+    exclude_org: str | None,
+    only_org: str | None,
     fix: bool,
 ):
     resources = {}

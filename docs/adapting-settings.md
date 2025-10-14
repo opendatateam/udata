@@ -270,50 +270,6 @@ A cron expression used as default harvester schedule when validating harvesters.
 
 The number of days of harvest jobs to keep (ie. number of days of history kept)
 
-## Link checker configuration
-
-### LINKCHECKING_ENABLED
-
-**default**: `True`
-
-A flag to enable the resources urls check by an external link checker.
-
-### LINKCHECKING_DEFAULT_LINKCHECKER
-
-**default**: `no_check`
-
-An entrypoint key of `udata.linkcheckers` that will be used as a default link checker, i.e. when no specific link checker is set for a resource (via `resource.extras.check:checker`).
-
-### LINKCHECKING_IGNORE_DOMAINS
-
-**default**: []
-
-A list of domains to ignore when triggering link checking of resources urls.
-
-### LINKCHECKING_IGNORE_PATTERNS
-
-**default**: ['format=shp']
-
-A list patterns found in checked URL to ignore (ie `pattern in url`).
-
-### LINKCHECKING_MIN_CACHE_DURATION
-
-**default**: 60
-
-The minimum time in minutes between two consecutive checks of a resource's url.
-
-### LINKCHECKING_MAX_CACHE_DURATION
-
-**default**: 1080
-
-The maximum time in minutes between two consecutive checks of a resource's url.
-
-### LINKCHECKING_UNAVAILABLE_THRESHOLD
-
-**default**: 100
-
-The number of unavailable checks after which the resource is considered lastingly unavailable and won't be checked as often.
-
 ## Mongoengine/Flask-Mongoengine options
 
 ### MONGODB_HOST
@@ -582,7 +538,7 @@ The default page size for post listing
 The Sentry DSN associated to this udata instance.
 If defined, the Sentry support is automatically activated.
 
-`sentry-sdk[flask]` needs to be installed for this to work. This requirement is specified in `requirements/sentry.pip`.
+`sentry-sdk[flask]` needs to be installed for this to work. This requirement is specified in `pyproject.toml`.
 
 ### SENTRY_TAGS
 

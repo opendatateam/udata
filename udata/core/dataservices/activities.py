@@ -1,3 +1,5 @@
+from flask import g
+
 from udata.auth import current_user
 from udata.i18n import lazy_gettext as _
 from udata.models import Activity, Dataservice, db
@@ -36,18 +38,18 @@ class UserDeletedDataservice(DataserviceRelatedActivity, Activity):
 
 @Dataservice.on_create.connect
 def on_user_created_dataservice(dataservice):
-    if current_user and current_user.is_authenticated:
+    if (current_user and current_user.is_authenticated) or hasattr(g, "harvest_activity_user"):
         UserCreatedDataservice.emit(dataservice, dataservice.organization)
 
 
 @Dataservice.on_update.connect
 def on_user_updated_dataservice(dataservice, **kwargs):
     changed_fields = kwargs.get("changed_fields", [])
-    if current_user and current_user.is_authenticated:
+    if (current_user and current_user.is_authenticated) or hasattr(g, "harvest_activity_user"):
         UserUpdatedDataservice.emit(dataservice, dataservice.organization, changed_fields)
 
 
 @Dataservice.on_delete.connect
 def on_user_deleted_dataservice(dataservice):
-    if current_user and current_user.is_authenticated:
+    if (current_user and current_user.is_authenticated) or hasattr(g, "harvest_activity_user"):
         UserDeletedDataservice.emit(dataservice, dataservice.organization)

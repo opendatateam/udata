@@ -5,6 +5,7 @@ from datetime import date
 import pytest
 
 from udata.app import create_app
+from udata.core.dataset.constants import UpdateFrequency
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import GeoZoneFactory
 from udata.harvest import actions
@@ -336,7 +337,7 @@ def frequency_as_rdf_uri(resource_data):
         "resources": [resource_data],
         "extras": [{"key": "frequency", "value": "http://purl.org/cld/freq/daily"}],
     }
-    return data, {"expected": "daily"}
+    return data, {"expected": UpdateFrequency.DAILY}
 
 
 @pytest.fixture
@@ -348,7 +349,7 @@ def frequency_as_exact_match(resource_data):
         "resources": [resource_data],
         "extras": [{"key": "frequency", "value": "daily"}],
     }
-    return data, {"expected": "daily"}
+    return data, {"expected": UpdateFrequency.DAILY}
 
 
 @pytest.fixture
@@ -425,7 +426,7 @@ def test_all_metadata(data, result):
     # Use result because format is normalized by CKAN
     assert resource.format == resource_result["format"].lower()
     assert resource.mime == resource_data["mimetype"].lower()
-    assert resource.harvest.created_at.date() == date(2022, 9, 29)
+    assert resource.harvest.issued_at.date() == date(2022, 9, 29)
     assert resource.harvest.modified_at.date() == date(2022, 9, 30)
 
 
@@ -486,7 +487,7 @@ def test_can_parse_frequency_as_exact_match(result, kwargs):
 
 
 @pytest.mark.ckan_data("frequency_as_unknown_value")
-def test_can_parse_frequency_as_unkown_value(result, kwargs):
+def test_can_parse_frequency_as_unknown_value(result, kwargs):
     dataset = dataset_for(result)
     assert dataset.extras["ckan:frequency"] == kwargs["expected"]
     assert dataset.frequency is None

@@ -11,17 +11,16 @@ from flask import url_for
 from werkzeug.test import TestResponse
 
 import udata.core.organization.constants as org_constants
+from udata import uris
 from udata.api import fields
 from udata.app import cache
 from udata.core import storages
 from udata.core.badges.factories import badge_factory
 from udata.core.dataset.constants import (
-    DEFAULT_FREQUENCY,
     DEFAULT_LICENSE,
     FULL_OBJECTS_HEADER,
-    LEGACY_FREQUENCIES,
     RESOURCE_TYPES,
-    UPDATE_FREQUENCIES,
+    UpdateFrequency,
 )
 from udata.core.dataset.factories import (
     CommunityResourceFactory,
@@ -38,7 +37,7 @@ from udata.core.dataset.models import (
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import GeoLevelFactory, SpatialCoverageFactory
-from udata.core.topic.factories import TopicFactory
+from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
 from udata.models import CommunityResource, Dataset, Follow, Member, db
@@ -182,7 +181,8 @@ class DatasetAPITest(APITestCase):
         format_dataset = DatasetFactory(resources=[ResourceFactory(format="my-format")])
         featured_dataset = DatasetFactory(featured=True)
         topic_dataset = DatasetFactory()
-        topic = TopicFactory(datasets=[topic_dataset])
+        topic = TopicFactory()
+        TopicElementDatasetFactory(element=topic_dataset, topic=topic)
 
         paca, _, _ = create_geozones_fixtures()
         geozone_dataset = DatasetFactory(spatial=SpatialCoverageFactory(zones=[paca.id]))
@@ -530,14 +530,14 @@ class DatasetAPITest(APITestCase):
         other = GeoLevelFactory(id="other", name="Autre")
 
         dataset = DatasetFactory(
-            frequency="monthly",
+            frequency=UpdateFrequency.MONTHLY,
             license=license,
             spatial=SpatialCoverageFactory(zones=[paca.id], granularity=country.id),
         )
 
         response = self.get(url_for("apiv2.dataset", dataset=dataset))
         self.assert200(response)
-        assert response.json["frequency"] == "monthly"
+        assert response.json["frequency"] == UpdateFrequency.MONTHLY.id
         assert response.json["license"] == "lov2"
         assert response.json["spatial"]["zones"][0] == paca.id
         assert response.json["spatial"]["granularity"] == "country"
@@ -549,8 +549,8 @@ class DatasetAPITest(APITestCase):
             },
         )
         self.assert200(response)
-        assert response.json["frequency"]["id"] == "monthly"
-        assert response.json["frequency"]["label"] == "Mensuelle"
+        assert response.json["frequency"]["id"] == UpdateFrequency.MONTHLY.id
+        assert response.json["frequency"]["label"] == UpdateFrequency.MONTHLY.label
         assert response.json["license"]["id"] == "lov2"
         assert response.json["license"]["title"] == license.title
         assert response.json["spatial"]["zones"][0]["id"] == paca.id
@@ -571,8 +571,8 @@ class DatasetAPITest(APITestCase):
             },
         )
         self.assert200(response)
-        assert response.json["frequency"]["id"] == DEFAULT_FREQUENCY
-        assert response.json["frequency"]["label"] == UPDATE_FREQUENCIES.get(DEFAULT_FREQUENCY)
+        assert response.json["frequency"]["id"] == UpdateFrequency.UNKNOWN.id
+        assert response.json["frequency"]["label"] == UpdateFrequency.UNKNOWN.label
         assert response.json["license"]["id"] == DEFAULT_LICENSE["id"]
         assert response.json["license"]["title"] == DEFAULT_LICENSE["title"]
         assert len(response.json["spatial"]["zones"]) == 0
@@ -722,12 +722,12 @@ class DatasetAPITest(APITestCase):
         """It should create a dataset from the API with a legacy frequency"""
         self.login()
 
-        for oldFreq, newFreq in LEGACY_FREQUENCIES.items():
+        for oldFreq, newFreq in UpdateFrequency._LEGACY_FREQUENCIES.items():  # type: ignore[misc]
             data = DatasetFactory.as_dict()
             data["frequency"] = oldFreq
             response = self.post(url_for("api.datasets"), data)
             self.assert201(response)
-            self.assertEqual(response.json["frequency"], newFreq)
+            self.assertEqual(response.json["frequency"], newFreq.id)
 
     def test_dataset_api_update(self):
         """It should update a dataset from the API"""
@@ -739,6 +739,37 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description, "new description")
+
+    def test_dataset_api_update_valid_frequency(self):
+        """It should update a dataset from the API"""
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        data = dataset.to_dict()
+        data["frequency"] = "monthly"
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertEqual(Dataset.objects.first().frequency, UpdateFrequency.MONTHLY)
+
+    def test_dataset_api_update_invalid_frequency(self):
+        """It should return an error saying the frequency is invalid"""
+        user = self.login()
+        dataset = DatasetFactory(owner=user, frequency=UpdateFrequency.ANNUAL)
+        data = dataset.to_dict()
+
+        data["frequency"] = 1  # invalid type
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert400(response)
+        self.assertEqual(response.json.get("message"), "'1' is not a valid UpdateFrequency")
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertEqual(Dataset.objects.first().frequency, UpdateFrequency.ANNUAL)
+
+        data["frequency"] = "foo"  # valid type but invalid term
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert400(response)
+        self.assertEqual(response.json.get("message"), "'foo' is not a valid UpdateFrequency")
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertEqual(Dataset.objects.first().frequency, UpdateFrequency.ANNUAL)
 
     def test_cannot_modify_dataset_id(self):
         user = self.login()
@@ -1351,6 +1382,30 @@ class DatasetsFeedAPItest(APITestCase):
         self.assertEqual(author.name, org.name)
         self.assertEqual(author.href, org.url_for())
 
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
+    def test_feed_html_content(self):
+        DatasetFactory(description="# My title\n\n* a list\n* of items")
+
+        response = self.get(url_for("api.recent_datasets_atom_feed"))
+
+        self.assert200(response)
+
+        assert "&lt;h1&gt;" in response.text
+        assert "&lt;ul&gt;" in response.text
+
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
+    def test_feed_id_uri_is_valid(self):
+        DatasetFactory()
+
+        response = self.get(url_for("api.recent_datasets_atom_feed"))
+
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+
+        entry = feed.entries[0]
+        assert uris.validate(entry["id"])
+
 
 class DatasetBadgeAPITest(APITestCase):
     @classmethod
@@ -1821,6 +1876,17 @@ class DatasetResourceAPITest(APITestCase):
         )
         self.assert404(response)
 
+    def test_resource_redirect_success(self):
+        """It should redirect to the resource URL"""
+        resource = ResourceFactory(url="https://example.com/data.csv")
+        DatasetFactory(resources=[resource])
+
+        response = self.get(
+            url_for("api.resource_redirect", id=resource.id), follow_redirects=False
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.location, "https://example.com/data.csv")
+
     def test_follow_dataset(self):
         """It should follow a dataset on POST"""
         user = self.login()
@@ -2032,7 +2098,7 @@ class DatasetReferencesAPITest(APITestCase):
         """It should fetch the dataset frequencies list from the API"""
         response = self.get(url_for("api.dataset_frequencies"))
         self.assert200(response)
-        self.assertEqual(len(response.json), len(UPDATE_FREQUENCIES))
+        self.assertEqual(len(response.json), len(UpdateFrequency))
 
     def test_dataset_allowed_resources_extensions(self):
         """It should fetch the resources allowed extensions list from the API"""
@@ -2426,7 +2492,7 @@ class HarvestMetadataAPITest:
         date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
 
         harvest_metadata = HarvestResourceMetadata(
-            created_at=date,
+            issued_at=date,
             modified_at=date,
             uri="http://domain.gouv.fr/dataset/uri",
         )
@@ -2435,32 +2501,46 @@ class HarvestMetadataAPITest:
         response = api.get(url_for("api.dataset", dataset=dataset))
         assert200(response)
         assert response.json["resources"][0]["harvest"] == {
-            "created_at": date.isoformat(),
+            "issued_at": date.isoformat(),
             "modified_at": date.isoformat(),
             "uri": "http://domain.gouv.fr/dataset/uri",
         }
 
     def test_dataset_with_harvest_computed_dates(self, api):
-        creation_date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
+        # issued_date takes precedence over internal creation date and harvest created_at on dataset
+        issued_date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
+        creation_date = datetime(2022, 2, 23, tzinfo=pytz.UTC)
+        modification_date = datetime(2022, 3, 19, tzinfo=pytz.UTC)
+        harvest_metadata = HarvestDatasetMetadata(
+            created_at=creation_date,
+            issued_at=issued_date,
+            modified_at=modification_date,
+        )
+        dataset = DatasetFactory(harvest=harvest_metadata)
+        response = api.get(url_for("api.dataset", dataset=dataset))
+        assert200(response)
+        assert response.json["created_at"] == issued_date.isoformat()
+        assert response.json["last_modified"] == modification_date.isoformat()
+
+        # without issuance date, creation_date takes precedence over internal creation date on dataset
         modification_date = datetime(2022, 3, 19, tzinfo=pytz.UTC)
         harvest_metadata = HarvestDatasetMetadata(
             created_at=creation_date,
             modified_at=modification_date,
         )
         dataset = DatasetFactory(harvest=harvest_metadata)
-
         response = api.get(url_for("api.dataset", dataset=dataset))
         assert200(response)
         assert response.json["created_at"] == creation_date.isoformat()
         assert response.json["last_modified"] == modification_date.isoformat()
 
+        # issued_date takes precedence over internal creation date on resource
         resource_harvest_metadata = HarvestResourceMetadata(
-            created_at=creation_date,
+            issued_at=issued_date,
             modified_at=modification_date,
         )
         dataset = DatasetFactory(resources=[ResourceFactory(harvest=resource_harvest_metadata)])
-
         response = api.get(url_for("api.dataset", dataset=dataset))
         assert200(response)
-        assert response.json["resources"][0]["created_at"] == creation_date.isoformat()
+        assert response.json["resources"][0]["created_at"] == issued_date.isoformat()
         assert response.json["resources"][0]["last_modified"] == modification_date.isoformat()

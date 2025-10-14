@@ -1,4 +1,3 @@
-import itertools
 from datetime import datetime
 
 from flask import make_response, redirect, request, url_for
@@ -209,9 +208,9 @@ class DataservicesCsv(API):
 class DiscussionsCsvAPI(API):
     def get(self, org):
         datasets = Dataset.objects.filter(organization=str(org.id))
-        discussions = [Discussion.objects.filter(subject=dataset) for dataset in datasets]
-        # Turns a list of lists into a flat list.
-        adapter = DiscussionCsvAdapter(itertools.chain(*discussions))
+        # select_related allows us to dereference subject Referencefield  as efficiently as possible
+        discussions = Discussion.objects.filter(subject__in=datasets).select_related()
+        adapter = DiscussionCsvAdapter(discussions)
         return csv.stream(adapter, "{0}-discussions".format(org.slug))
 
 

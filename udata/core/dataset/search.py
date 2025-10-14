@@ -3,6 +3,7 @@ import datetime
 from udata.core.dataset.api import DEFAULT_SORTING, DatasetApiParser
 from udata.core.spatial.constants import ADMIN_LEVEL_MAX
 from udata.core.spatial.models import admin_levels
+from udata.core.topic.models import TopicElement
 from udata.models import Dataset, GeoZone, License, Organization, Topic, User
 from udata.search import (
     BoolFilter,
@@ -16,6 +17,11 @@ from udata.search import (
 from udata.utils import to_iso_datetime
 
 __all__ = ("DatasetSearch",)
+
+
+# This const is kept to prevent creating huge documents and paylods for datasets
+# with a large number of resources
+MAX_NUMBER_OF_RESOURCES_TO_INDEX = 500
 
 
 @register
@@ -68,7 +74,9 @@ class DatasetSearch(ModelSearchAdapter):
         organization = None
         owner = None
 
-        topics = Topic.objects(datasets=dataset).only("id")
+        topic_ids = list(
+            set(te.topic.id for te in TopicElement.objects(element=dataset) if te.topic)
+        )
 
         if dataset.organization:
             org = Organization.objects(id=dataset.organization.id).first()
@@ -99,11 +107,15 @@ class DatasetSearch(ModelSearchAdapter):
             "reuses": dataset.metrics.get("reuses", 0),
             "featured": 1 if dataset.featured else 0,
             "resources_count": len(dataset.resources),
+            "resources": [
+                {"id": str(res.id), "title": res.title}
+                for res in dataset.resources[:MAX_NUMBER_OF_RESOURCES_TO_INDEX]
+            ],
             "organization": organization,
             "owner": str(owner.id) if owner else None,
             "format": [r.format.lower() for r in dataset.resources if r.format],
             "schema": [r.schema.name for r in dataset.resources if r.schema],
-            "topics": [str(t.id) for t in topics if topics],
+            "topics": [str(tid) for tid in topic_ids],
         }
         extras = {}
         for key, value in dataset.extras.items():
