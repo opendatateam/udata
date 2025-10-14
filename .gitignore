@@ -45,7 +45,6 @@ pip-log.txt
 .cache
 .coverage
 .pytest_cache
-.tox
 cover
 nosetests.xml
 coverage.xml
