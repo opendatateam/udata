@@ -332,7 +332,7 @@ def generate_tags(nb=3) -> [str]:
 
 def generate_tag() -> str:
     fake_tag: str = faker.word()
-    while len(fake_tag) < tags.MIN_TAG_LENGTH:
+    while len(fake_tag) < tags.TAG_MIN_LENGTH:
         fake_tag = faker.word()
     return fake_tag
 

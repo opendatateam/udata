@@ -41,7 +41,7 @@ from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
 from udata.models import CommunityResource, Dataset, Follow, Member, db
-from udata.tags import MAX_TAG_LENGTH, MIN_TAG_LENGTH
+from udata.tags import TAG_MAX_LENGTH, TAG_MIN_LENGTH
 from udata.tests.features.territories import create_geozones_fixtures
 from udata.tests.helpers import assert200, assert404
 from udata.utils import faker, unique_string
@@ -631,19 +631,21 @@ class DatasetAPITest(APITestCase):
         dataset = Dataset.objects.first()
         self.assertEqual(dataset.tags, sorted(data["tags"]))
 
+    @pytest.mark.options(TAG_MIN_LENGTH=3, TAG_MAX_LENGTH=10)
     def test_dataset_api_fail_to_create_too_short_tags(self):
         """It should fail to create a dataset from the API because
         the tag is too short"""
         data = DatasetFactory.as_dict()
-        data["tags"] = [unique_string(MIN_TAG_LENGTH - 1)]
+        data["tags"] = [unique_string(TAG_MIN_LENGTH - 1)]
         with self.api_user():
             response = self.post(url_for("api.datasets"), data)
         self.assertStatus(response, 400)
 
+    @pytest.mark.options(TAG_MIN_LENGTH=3, TAG_MAX_LENGTH=10)
     def test_dataset_api_fail_to_create_too_long_tags(self):
         """Should fail creating a dataset with a tag long"""
         data = DatasetFactory.as_dict()
-        data["tags"] = [unique_string(MAX_TAG_LENGTH + 1)]
+        data["tags"] = [unique_string(TAG_MAX_LENGTH + 1)]
         with self.api_user():
             response = self.post(url_for("api.datasets"), data)
         self.assertStatus(response, 400)
