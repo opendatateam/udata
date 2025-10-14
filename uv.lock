@@ -745,21 +745,6 @@ wheels = [
 ]
 
 [[package]]
-name = "flask-mongoengine"
-version = "1.0.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "flask" },
-    { name = "flask-wtf" },
-    { name = "mongoengine" },
-    { name = "wtforms", extra = ["email"] },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/40/7a/415fa435493ec113edcdc5d0568f5167b06e8d1d878d73b2d2e2d9d41c7f/flask-mongoengine-1.0.0.tar.gz", hash = "sha256:ce68726d2be8d88006e88f17e4be3b7ad07c79ca8dedb60653d3dab5d9485840", size = 117656, upload-time = "2020-11-21T06:02:05.984Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/bc/08/cd2052b0bfb636c5e47bae31ea4b089ace44cdd0c2cc4fd800c8ff63d95f/flask_mongoengine-1.0.0-py3-none-any.whl", hash = "sha256:2db13140ce7f61a935e75268190450d5ecc9b60a7310fd289f9511835aa105d4", size = 25746, upload-time = "2020-11-21T06:02:04.318Z" },
-]
-
-[[package]]
 name = "flask-navigation-temp-python-311"
 version = "0.2.1"
 source = { registry = "https://pypi.org/simple" }
@@ -848,18 +833,19 @@ wheels = [
 
 [[package]]
 name = "flask-storage"
-version = "1.3.2"
+version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boto3" },
     { name = "flask" },
-    { name = "flask-mongoengine" },
     { name = "markupsafe" },
+    { name = "mongoengine" },
     { name = "pillow" },
+    { name = "werkzeug" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/da/c7/d1326c4f97e2e37a5338f1f079839e95307e18808cbb52b65a6e7349d02c/flask-storage-1.3.2.tar.gz", hash = "sha256:12f3b40819f083a06445ee843896038d2e30c3e0f27a79d3ad17fac84014db8a", size = 317621, upload-time = "2023-04-04T14:42:10.356Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/96/cc/088fb52844787e189c6291b3452642552b3ad8614f161707f1e21ff617d7/flask_storage-1.4.0.tar.gz", hash = "sha256:e1ccfffd0782103cb0d1c82e600dba51d6c87d4eb5ae9243881eee64f02b70f6", size = 315021, upload-time = "2025-10-07T15:07:18.374Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b3/be/709d9ca019d90a9f41c0227bcba840bc9db6ba30cd808121402e7bd837e6/flask_storage-1.3.2-py2.py3-none-any.whl", hash = "sha256:080ab42821c0a9eddd10aea9f811e561d85e3bf4496bae3e5d250fd8f8cf75bf", size = 17620, upload-time = "2023-04-04T14:42:08.375Z" },
+    { url = "https://files.pythonhosted.org/packages/e9/0f/db4fbf7a091cee0307512980a1cf3dbf4148d1bc5506a0e37b7333c88ec5/flask_storage-1.4.0-py3-none-any.whl", hash = "sha256:008428a9c0babce5553fec5ba838ef2530360d9da610001c8c9d1890370d3887", size = 17683, upload-time = "2025-10-07T15:07:17.468Z" },
 ]
 
 [[package]]
@@ -2636,7 +2622,7 @@ requires-dist = [
     { name = "flask-security-too", specifier = "==5.1.2" },
     { name = "flask-shell-ipython", marker = "extra == 'dev'", specifier = "==0.5.3" },
     { name = "flask-sitemap", specifier = "==0.4.0" },
-    { name = "flask-storage", specifier = "==1.3.2" },
+    { name = "flask-storage", specifier = "~=1.4.0" },
     { name = "flask-wtf", specifier = "==1.2.2" },
     { name = "geojson", specifier = "==3.2.0" },
     { name = "geomet", specifier = "==1.1.0" },
