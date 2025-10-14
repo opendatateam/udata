@@ -168,6 +168,7 @@ norecursedirs = [
     "build",
     "specs",
     ".cache",
+    "data",
     "udata/templates",
     "udata/translations",
 ]
