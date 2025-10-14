@@ -336,16 +336,6 @@ class Defaults(object):
     # The order is important to compute parents/children, smaller first.
     HANDLED_LEVELS = tuple()
 
-    LINKCHECKING_ENABLED = True
-    # Resource types ignored by linkchecker
-    LINKCHECKING_UNCHECKED_TYPES = ("api",)
-    LINKCHECKING_IGNORE_DOMAINS = []
-    LINKCHECKING_IGNORE_PATTERNS = ["format=shp"]
-    LINKCHECKING_MIN_CACHE_DURATION = 60  # in minutes
-    LINKCHECKING_MAX_CACHE_DURATION = 1080  # in minutes (1 week)
-    LINKCHECKING_UNAVAILABLE_THRESHOLD = 100
-    LINKCHECKING_DEFAULT_LINKCHECKER = "no_check"
-
     # Ignore some endpoint from API tracking
     # By default ignore the 3 most called APIs
     TRACKING_BLACKLIST = [
@@ -681,7 +671,6 @@ class Debug(Defaults):
         "flask_debugtoolbar.panels.template.TemplateDebugPanel",
         "flask_debugtoolbar.panels.logger.LoggingPanel",
         "flask_debugtoolbar.panels.profiler.ProfilerDebugPanel",
-        "flask_mongoengine.panels.MongoDebugPanel",
     )
     CACHE_TYPE = "flask_caching.backends.null"
     CACHE_NO_NULL_WARNING = True
