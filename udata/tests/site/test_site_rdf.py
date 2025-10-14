@@ -19,6 +19,7 @@ pytestmark = pytest.mark.usefixtures("clean_db")
 
 @pytest.mark.frontend
 class CatalogTest:
+    @pytest.mark.options(CDATA_BASE_URL=None)
     def test_minimal(self, app):
         site = SiteFactory()
         home_url = url_for("api.site", _external=True)
