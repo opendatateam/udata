@@ -745,21 +745,6 @@ wheels = [
 ]
 
 [[package]]
-name = "flask-mongoengine"
-version = "1.0.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "flask" },
-    { name = "flask-wtf" },
-    { name = "mongoengine" },
-    { name = "wtforms", extra = ["email"] },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/40/7a/415fa435493ec113edcdc5d0568f5167b06e8d1d878d73b2d2e2d9d41c7f/flask-mongoengine-1.0.0.tar.gz", hash = "sha256:ce68726d2be8d88006e88f17e4be3b7ad07c79ca8dedb60653d3dab5d9485840", size = 117656, upload-time = "2020-11-21T06:02:05.984Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/bc/08/cd2052b0bfb636c5e47bae31ea4b089ace44cdd0c2cc4fd800c8ff63d95f/flask_mongoengine-1.0.0-py3-none-any.whl", hash = "sha256:2db13140ce7f61a935e75268190450d5ecc9b60a7310fd289f9511835aa105d4", size = 25746, upload-time = "2020-11-21T06:02:04.318Z" },
-]
-
-[[package]]
 name = "flask-navigation-temp-python-311"
 version = "0.2.1"
 source = { registry = "https://pypi.org/simple" }
