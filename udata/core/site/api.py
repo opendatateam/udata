@@ -47,11 +47,11 @@ class SiteAPI(API):
         return current_site
 
 
-@api.route("/site/data.<format>", endpoint="site_dataportal")
+@api.route("/site/data.<_format>", endpoint="site_dataportal")
 class SiteDataPortal(API):
-    def get(self, format):
+    def get(self, _format):
         """Root RDF endpoint with content negociation handling"""
-        url = url_for("api.site_rdf_catalog_format", format=format)
+        url = url_for("api.site_rdf_catalog_format", _format=_format)
         return redirect(url)
 
 
@@ -60,21 +60,21 @@ class SiteRdfCatalog(API):
     @api.expect(catalog_parser)
     def get(self):
         """Root RDF endpoint with content negociation handling"""
-        format = RDF_EXTENSIONS[negociate_content()]
+        _format = RDF_EXTENSIONS[negociate_content()]
         # We sanitize the args used as kwargs in url_for
         params = {
             arg: value
             for arg, value in request.args.lists()
             if any(arg == parser_arg.name for parser_arg in dataset_parser.parser.args)
         }
-        url = url_for("api.site_rdf_catalog_format", format=format, **params)
+        url = url_for("api.site_rdf_catalog_format", _format=_format, **params)
         return redirect(url)
 
 
-@api.route("/site/catalog.<format>", endpoint="site_rdf_catalog_format")
+@api.route("/site/catalog.<_format>", endpoint="site_rdf_catalog_format")
 class SiteRdfCatalogFormat(API):
     @api.expect(catalog_parser)
-    def get(self, format):
+    def get(self, _format):
         """
         Return the RDF catalog in the requested format.
         Filtering, sorting and paginating abilities apply to the datasets elements.
@@ -86,10 +86,12 @@ class SiteRdfCatalogFormat(API):
             datasets, params["page"]
         )
 
-        catalog = build_catalog(current_site, datasets, dataservices=dataservices, format=format)
+        catalog = build_catalog(
+            current_site, datasets, dataservices=dataservices, _format=_format, **params
+        )
         # bypass flask-restplus make_response, since graph_response
         # is handling the content negociation directly
-        return make_response(*graph_response(catalog, format))
+        return make_response(*graph_response(catalog, _format))
 
 
 @api.route("/site/datasets.csv", endpoint="site_datasets_csv")
