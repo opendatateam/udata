@@ -161,5 +161,5 @@ def pydist(ctx):
 
 def perform_dist(ctx):
     header("Building a distribuable package")
-    ctx.run("uv build")
+    ctx.run("uv build --wheel")
     success("Distribution is available in dist directory")

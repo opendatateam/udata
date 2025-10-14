@@ -95,7 +95,7 @@ jobs:
       - run:
           name: Build a distributable package as a wheel release
           command: |
-            uv build --wheel
+            uv run inv pydist
       - store_artifacts:
           path: dist
       - persist_to_workspace:
