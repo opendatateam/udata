@@ -161,6 +161,5 @@ def pydist(ctx):
 
 def perform_dist(ctx):
     header("Building a distribuable package")
-    ctx.run("python -m build")
-    ctx.run("twine check dist/*")
+    ctx.run("uv build")
     success("Distribution is available in dist directory")
