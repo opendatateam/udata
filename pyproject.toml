@@ -200,7 +200,7 @@ line-length = 100
 packages = ["udata"]
 
 [tool.setuptools.package-data]
-udata = ["templates/*", "static/*", "translations/*"]
+udata = ["templates/*", "translations/*"]
 
 [tool.tox]
 requires = ["tox>=4.19"]
