@@ -22,7 +22,6 @@ def clean(ctx, translations=False):
         "docs/_build",
         "**/*.pyc",
         "*.egg-info",
-        ".tox",
     ]
     if translations:
         patterns.append("udata/translations/*/LC_MESSAGES/udata.mo")
