@@ -1,6 +1,7 @@
 import pytest
+from flask import url_for
 
-from udata.features.identicon.backends import internal
+from udata.tests.api import APITestCase
 from udata.tests.helpers import assert200
 from udata.utils import faker
 
@@ -14,9 +15,10 @@ def assert_stream_equal(response1, response2):
     assert stream1 == stream2
 
 
-class InternalBackendTest:
+class InternalBackendTest(APITestCase):
     def test_base_rendering(self):
-        response = internal(faker.word(), 32)
+        response = self.get(url_for("api.avatar", identifier=faker.word(), size=32))
+
         assert200(response)
         assert response.mimetype == "image/png"
         assert response.is_streamed
@@ -25,4 +27,7 @@ class InternalBackendTest:
 
     def test_render_twice_the_same(self):
         identifier = faker.word()
-        assert_stream_equal(internal(identifier, 32), internal(identifier, 32))
+        stream_a = self.get(url_for("api.avatar", identifier=identifier, size=32))
+        stream_b = self.get(url_for("api.avatar", identifier=identifier, size=32))
+
+        assert_stream_equal(stream_a, stream_b)
