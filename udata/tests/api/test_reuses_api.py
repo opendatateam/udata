@@ -523,7 +523,7 @@ class ReuseAPITest:
             title="arealtestprefix-4", visible=True, metrics={"followers": 10}
         )
 
-        response = api.get(url_for("api.suggest_reuses"), qs={"q": "arealtestpref", "size": "5"})
+        response = api.get(url_for("api.suggest_reuses", q="arealtestpref", size=5))
         assert200(response)
 
         assert len(response.json) <= 5
@@ -542,7 +542,7 @@ class ReuseAPITest:
         for i in range(4):
             ReuseFactory(title="testé-{0}".format(i) if i % 2 else faker.word(), visible=True)
 
-        response = api.get(url_for("api.suggest_reuses"), qs={"q": "testé", "size": "5"})
+        response = api.get(url_for("api.suggest_reuses", q="testé", size=5))
         assert200(response)
 
         assert len(response.json) <= 5
@@ -559,14 +559,14 @@ class ReuseAPITest:
         """It should not provide reuse suggestion if no match"""
         ReuseFactory.create_batch(3, visible=True)
 
-        response = api.get(url_for("api.suggest_reuses"), qs={"q": "xxxxxx", "size": "5"})
+        response = api.get(url_for("api.suggest_reuses", q="xxxxxx", size=5))
         assert200(response)
         assert len(response.json) == 0
 
     def test_suggest_reuses_api_empty(self, api):
         """It should not provide reuse suggestion if no data"""
         # self.init_search()
-        response = api.get(url_for("api.suggest_reuses"), qs={"q": "xxxxxx", "size": "5"})
+        response = api.get(url_for("api.suggest_reuses", q="xxxxxx", size=5))
         assert200(response)
         assert len(response.json) == 0
 

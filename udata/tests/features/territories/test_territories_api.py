@@ -21,15 +21,15 @@ class TerritoriesAPITest(APITestCase):
         self.assert400(response)
 
     def test_suggest_empty(self):
-        response = self.get(url_for("api.suggest_territory"), qs={"q": "tes"})
+        response = self.get(url_for("api.suggest_territory", q="tes"))
         self.assert200(response)
         self.assertEqual(response.json, [])
-        response = self.get(url_for("api.suggest_territory"), qs={"q": "test"})
+        response = self.get(url_for("api.suggest_territory", q="test"))
         self.assert200(response)
         self.assertEqual(response.json, [])
 
     def test_suggest_town(self):
-        response = self.get(url_for("api.suggest_territory"), qs={"q": "arle"})
+        response = self.get(url_for("api.suggest_territory", q="arle"))
         self.assert200(response)
         result = response.json[0]
         self.assertEqual(result["title"], self.arles.name)
@@ -37,7 +37,7 @@ class TerritoriesAPITest(APITestCase):
         self.assertIn("page", result)
 
     def test_suggest_town_five_letters(self):
-        response = self.get(url_for("api.suggest_territory"), qs={"q": "arles"})
+        response = self.get(url_for("api.suggest_territory", q="arles"))
         self.assert200(response)
         result = response.json[0]
         self.assertEqual(result["title"], self.arles.name)
@@ -45,7 +45,7 @@ class TerritoriesAPITest(APITestCase):
         self.assertIn("page", result)
 
     def test_suggest_town_by_insee_code(self):
-        response = self.get(url_for("api.suggest_territory"), qs={"q": "13004"})
+        response = self.get(url_for("api.suggest_territory", q="13004"))
         self.assert200(response)
         result = response.json[0]
         self.assertEqual(result["id"], self.arles.id)
@@ -55,7 +55,7 @@ class TerritoriesAPITest(APITestCase):
         arles_sur_tech = GeoZoneFactory(
             id="fr:commune:66009", level="fr:commune", name="Arles-sur-Tech", code="66009"
         )
-        response = self.get(url_for("api.suggest_territory"), qs={"q": "arles"})
+        response = self.get(url_for("api.suggest_territory", q="arles"))
         self.assert200(response)
         results = response.json
         self.assertEqual(len(results), 2)
@@ -64,7 +64,7 @@ class TerritoriesAPITest(APITestCase):
         self.assertEqual(results[1]["id"], arles_sur_tech.id)
 
     def test_suggest_county(self):
-        response = self.get(url_for("api.suggest_territory"), qs={"q": "bouche"})
+        response = self.get(url_for("api.suggest_territory", q="bouche"))
         self.assert200(response)
         result = response.json[0]
         self.assertEqual(result["title"], self.bdr.name)
@@ -72,7 +72,7 @@ class TerritoriesAPITest(APITestCase):
         self.assertIn("page", result)
 
     def test_suggest_region(self):
-        response = self.get(url_for("api.suggest_territory"), qs={"q": "prov"})
+        response = self.get(url_for("api.suggest_territory", q="prov"))
         self.assert200(response)
         result = response.json[0]
         self.assertEqual(result["title"], self.paca.name)
@@ -81,7 +81,7 @@ class TerritoriesAPITest(APITestCase):
 
     def test_suggest_old_new_region(self):
         lr, occitanie = create_old_new_regions_fixtures()
-        response = self.get(url_for("api.suggest_territory"), qs={"q": "langue"})
+        response = self.get(url_for("api.suggest_territory", q="langue"))
         self.assert200(response)
         self.assertEqual(len(response.json), 2)
         result = response.json[0]
@@ -92,7 +92,7 @@ class TerritoriesAPITest(APITestCase):
         self.assertEqual(result["id"], lr.id)
 
     def test_suggest_county_by_id(self):
-        response = self.get(url_for("api.suggest_territory"), qs={"q": "13"})
+        response = self.get(url_for("api.suggest_territory", q="13"))
         self.assert200(response)
         result = response.json[0]
         self.assertEqual(result["id"], self.bdr.id)
@@ -102,7 +102,7 @@ class TerritoriesAPITest(APITestCase):
         bouchet = GeoZoneFactory(
             id="fr:commune:26054", level="fr:commune", name="Bouchet", code="26054"
         )
-        response = self.get(url_for("api.suggest_territory"), qs={"q": "bouche"})
+        response = self.get(url_for("api.suggest_territory", q="bouche"))
         self.assert200(response)
         results = response.json
         self.assertEqual(len(results), 2)
@@ -114,7 +114,7 @@ class TerritoriesAPITest(APITestCase):
         guyane = GeoZoneFactory(
             id="fr:departement:973", level="fr:departement", name="Guyane", code="973"
         )
-        response = self.get(url_for("api.suggest_territory"), qs={"q": "guya"})
+        response = self.get(url_for("api.suggest_territory", q="guya"))
         self.assert200(response)
         results = response.json
         self.assertEqual(len(results), 1)
@@ -124,7 +124,7 @@ class TerritoriesAPITest(APITestCase):
         guyane = GeoZoneFactory(
             id="fr:departement:973", level="fr:departement", name="Guyane", code="973"
         )
-        response = self.get(url_for("api.suggest_territory"), qs={"q": "973"})
+        response = self.get(url_for("api.suggest_territory", q="973"))
         self.assert200(response)
         results = response.json
         self.assertEqual(len(results), 1)
@@ -134,7 +134,7 @@ class TerritoriesAPITest(APITestCase):
         bastia = GeoZoneFactory(
             id="fr:commune:2b033", level="fr:commune", name="Bastia", code="2b033"
         )
-        response = self.get(url_for("api.suggest_territory"), qs={"q": "basti"})
+        response = self.get(url_for("api.suggest_territory", q="basti"))
         self.assert200(response)
         results = response.json
         self.assertEqual(len(results), 1)
@@ -144,7 +144,7 @@ class TerritoriesAPITest(APITestCase):
         bastia = GeoZoneFactory(
             id="fr:commune:2b033", level="fr:commune", name="Bastia", code="2b033"
         )
-        response = self.get(url_for("api.suggest_territory"), qs={"q": "2b033"})
+        response = self.get(url_for("api.suggest_territory", q="2b033"))
         self.assert200(response)
         results = response.json
         self.assertEqual(len(results), 1)
@@ -154,7 +154,7 @@ class TerritoriesAPITest(APITestCase):
         haute_corse = GeoZoneFactory(
             id="fr:departement:2b", level="fr:departement", name="Haute-Corse", code="2b"
         )
-        response = self.get(url_for("api.suggest_territory"), qs={"q": "2b"})
+        response = self.get(url_for("api.suggest_territory", q="2b"))
         self.assert200(response)
         results = response.json
         self.assertEqual(len(results), 1)
@@ -162,21 +162,21 @@ class TerritoriesAPITest(APITestCase):
 
     def test_not_suggest_country(self):
         GeoZoneFactory(id="country:fr", level="country", name="France")
-        response = self.get(url_for("api.suggest_territory"), qs={"q": "fra"})
+        response = self.get(url_for("api.suggest_territory", q="fra"))
         self.assert200(response)
         results = response.json
         self.assertEqual(len(results), 0)
-        response = self.get(url_for("api.suggest_territory"), qs={"q": "fran"})
+        response = self.get(url_for("api.suggest_territory", q="fran"))
         self.assert200(response)
         results = response.json
         self.assertEqual(len(results), 0)
-        response = self.get(url_for("api.suggest_territory"), qs={"q": "franc"})
+        response = self.get(url_for("api.suggest_territory", q="franc"))
         self.assert200(response)
         results = response.json
         self.assertEqual(len(results), 0)
 
     def test_suggest_unicode(self):
-        response = self.get(url_for("api.suggest_territory"), qs={"q": "Bouches-du-Rhône"})
+        response = self.get(url_for("api.suggest_territory", q="Bouches-du-Rhône"))
         self.assert200(response)
         result = response.json[0]
         self.assertEqual(result["title"], self.bdr.name)

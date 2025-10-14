@@ -65,7 +65,7 @@ class UserAPITest(APITestCase):
         for i in range(4):
             UserFactory(first_name="first-name-test-{0}".format(i) if i % 2 else faker.word())
 
-        response = self.get(url_for("api.suggest_users"), qs={"q": "first-name-test", "size": "5"})
+        response = self.get(url_for("api.suggest_users", q="first-name-test", size=5))
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -84,7 +84,7 @@ class UserAPITest(APITestCase):
         for i in range(4):
             UserFactory(last_name="last-name-test-{0}".format(i) if i % 2 else faker.word())
 
-        response = self.get(url_for("api.suggest_users"), qs={"q": "last-name-test", "size": "5"})
+        response = self.get(url_for("api.suggest_users", q="last-name-test", size=5))
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -102,7 +102,7 @@ class UserAPITest(APITestCase):
         for i in range(4):
             UserFactory(last_name="last-name-testé-{0}".format(i) if i % 2 else faker.word())
 
-        response = self.get(url_for("api.suggest_users"), qs={"q": "last-name-testé", "size": "5"})
+        response = self.get(url_for("api.suggest_users", q="last-name-testé", size=5))
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -119,13 +119,13 @@ class UserAPITest(APITestCase):
         """It should not provide user suggestion if no match"""
         UserFactory.create_batch(3)
 
-        response = self.get(url_for("api.suggest_users"), qs={"q": "xxxxxx", "size": "5"})
+        response = self.get(url_for("api.suggest_users", q="xxxxxx", size=5))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
     def test_suggest_users_api_empty(self):
         """It should not provide user suggestion if no data"""
-        response = self.get(url_for("api.suggest_users"), qs={"q": "xxxxxx", "size": "5"})
+        response = self.get(url_for("api.suggest_users", q="xxxxxx", size=5))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
@@ -133,7 +133,7 @@ class UserAPITest(APITestCase):
         """It should suggest users without deduplicating homonyms"""
         UserFactory.create_batch(2, first_name="test", last_name="homonym")
 
-        response = self.get(url_for("api.suggest_users"), qs={"q": "homonym", "size": "5"})
+        response = self.get(url_for("api.suggest_users", q="homonym", size=5))
         self.assert200(response)
 
         self.assertEqual(len(response.json), 2)
@@ -144,11 +144,11 @@ class UserAPITest(APITestCase):
 
     def test_suggest_users_api_size_validation(self):
         """It should validate that the size parameter is between 1 and 20."""
-        response = self.get(url_for("api.suggest_users"), qs={"q": "foobar", "size": "0"})
+        response = self.get(url_for("api.suggest_users", q="foobar", size=0))
         self.assert400(response)
         self.assertIn("between 1 and 20", response.json["errors"]["size"])
 
-        response = self.get(url_for("api.suggest_users"), qs={"q": "foobar", "size": "21"})
+        response = self.get(url_for("api.suggest_users", q="foobar", size=21))
 
         self.assert400(response)
         self.assertIn("between 1 and 20", response.json["errors"]["size"])

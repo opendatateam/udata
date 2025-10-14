@@ -678,7 +678,7 @@ class MembershipAPITest:
                 name="test-{0}".format(i) if i % 2 else faker.word(), metrics={"followers": i}
             )
         max_follower_organization = OrganizationFactory(name="test-4", metrics={"followers": 10})
-        response = api.get(url_for("api.suggest_organizations"), qs={"q": "tes", "size": "5"})
+        response = api.get(url_for("api.suggest_organizations", q="tes", size=5))
         assert200(response)
 
         assert len(response.json) <= 5
@@ -698,7 +698,7 @@ class MembershipAPITest:
         for i in range(4):
             OrganizationFactory(name="testé-{0}".format(i) if i % 2 else faker.word())
 
-        response = api.get(url_for("api.suggest_organizations"), qs={"q": "testé", "size": "5"})
+        response = api.get(url_for("api.suggest_organizations", q="testé", size=5))
         assert200(response)
 
         assert len(response.json) <= 5
@@ -716,7 +716,7 @@ class MembershipAPITest:
         for i in range(4):
             OrganizationFactory(name="mon testé-{0}".format(i) if i % 2 else faker.word())
 
-        response = api.get(url_for("api.suggest_organizations"), qs={"q": "mon testé", "size": "5"})
+        response = api.get(url_for("api.suggest_organizations", q="mon testé", size=5))
         assert200(response)
 
         assert len(response.json) <= 5
@@ -736,7 +736,7 @@ class MembershipAPITest:
                 name="Ministère de l'intérieur {0}".format(i) if i % 2 else faker.word()
             )
 
-        response = api.get(url_for("api.suggest_organizations"), qs={"q": "Ministère", "size": "5"})
+        response = api.get(url_for("api.suggest_organizations", q="Ministère", size=5))
         assert200(response)
 
         assert len(response.json) <= 5
@@ -753,13 +753,13 @@ class MembershipAPITest:
         """It should not provide organization suggestion if no match"""
         OrganizationFactory.create_batch(3)
 
-        response = api.get(url_for("api.suggest_organizations"), qs={"q": "xxxxxx", "size": "5"})
+        response = api.get(url_for("api.suggest_organizations", q="xxxxxx", size=5))
         assert200(response)
         assert len(response.json) == 0
 
     def test_suggest_organizations_api_empty(self, api):
         """It should not provide organization suggestion if no data"""
-        response = api.get(url_for("api.suggest_organizations"), qs={"q": "xxxxxx", "size": "5"})
+        response = api.get(url_for("api.suggest_organizations", q="xxxxxx", size=5))
         assert200(response)
         assert len(response.json) == 0
 
@@ -767,7 +767,7 @@ class MembershipAPITest:
         """It should suggest organizations and not deduplicate homonyms"""
         OrganizationFactory.create_batch(2, name="homonym")
 
-        response = api.get(url_for("api.suggest_organizations"), qs={"q": "homonym", "size": "5"})
+        response = api.get(url_for("api.suggest_organizations", q="homonym", size=5))
         assert200(response)
 
         assert len(response.json) == 2
@@ -787,7 +787,7 @@ class MembershipAPITest:
         max_follower_organization = OrganizationFactory(
             name=faker.word(), acronym="UDATA4", metrics={"followers": 10}
         )
-        response = api.get(url_for("api.suggest_organizations"), qs={"q": "uDaTa", "size": "5"})
+        response = api.get(url_for("api.suggest_organizations", q="uDaTa", size=5))
         assert200(response)
 
         assert len(response.json) == 2
@@ -843,7 +843,7 @@ class OrganizationDatasetsAPITest:
         org = OrganizationFactory()
         DatasetFactory.create_batch(3, organization=org)
 
-        response = api.get(url_for("api.org_datasets", org=org), qs={"page_size": 2})
+        response = api.get(url_for("api.org_datasets", org=org, page_size=2))
 
         assert200(response)
         assert len(response.json["data"]) == 2

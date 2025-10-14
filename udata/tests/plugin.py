@@ -7,7 +7,6 @@ from flask import current_app, json, template_rendered, url_for
 from flask.testing import FlaskClient
 from flask_principal import Identity, identity_changed
 from lxml import etree
-from werkzeug.urls import url_encode
 
 from udata import settings
 from udata.app import create_app
@@ -19,28 +18,6 @@ from .helpers import assert200, assert_command_ok
 
 
 class TestClient(FlaskClient):
-    def _build_url(self, url, kwargs):
-        if "qs" not in kwargs:
-            return url
-        qs = kwargs.pop("qs")
-        return "?".join([url, url_encode(qs)])
-
-    def get(self, url, **kwargs):
-        url = self._build_url(url, kwargs)
-        return super(TestClient, self).get(url, **kwargs)
-
-    def post(self, url, data=None, **kwargs):
-        url = self._build_url(url, kwargs)
-        return super(TestClient, self).post(url, data=data, **kwargs)
-
-    def put(self, url, data=None, **kwargs):
-        url = self._build_url(url, kwargs)
-        return super(TestClient, self).put(url, data=data, **kwargs)
-
-    def delete(self, url, data=None, **kwargs):
-        url = self._build_url(url, kwargs)
-        return super(TestClient, self).delete(url, data=data, **kwargs)
-
     def login(self, user=None):
         user = user or UserFactory()
         with self.session_transaction() as session:
