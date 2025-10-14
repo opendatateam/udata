@@ -6,7 +6,7 @@ from udata.auth import admin_permission
 from udata.core import csv
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataset.api import DatasetApiParser, catalog_parser, dataset_parser
+from udata.core.dataset.api import DatasetApiParser, catalog_parser
 from udata.core.dataset.csv import ResourcesCsvAdapter
 from udata.core.dataset.search import DatasetSearch
 from udata.core.dataset.tasks import get_queryset as get_csv_queryset
@@ -62,11 +62,7 @@ class SiteRdfCatalog(API):
         """Root RDF endpoint with content negociation handling"""
         _format = RDF_EXTENSIONS[negociate_content()]
         # We sanitize the args used as kwargs in url_for
-        params = {
-            arg: value
-            for arg, value in request.args.lists()
-            if any(arg == parser_arg.name for parser_arg in dataset_parser.parser.args)
-        }
+        params = catalog_parser.parse_args()
         url = url_for("api.site_rdf_catalog_format", _format=_format, **params)
         return redirect(url)
 

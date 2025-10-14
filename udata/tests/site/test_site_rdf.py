@@ -154,16 +154,18 @@ class SiteRdfViewsTest:
         assert response.json == CONTEXT
 
     def test_catalog_default_to_jsonld(self, client):
-        expected = url_for("api.site_rdf_catalog_format", _format="json")
+        expected = url_for("api.site_rdf_catalog_format", _format="json", page=1, page_size=100)
         response = client.get(url_for("api.site_rdf_catalog"))
         assert_redirects(response, expected)
 
-    def test_catalog_redirect_with_filters_sanitazing(self, client):
+    def test_catalog_redirect_with_filters_sanitizing(self, client):
         """
         It should filter out unknown params (including url_for keywords).
         Repeated keywords should be kept as expected.
         """
-        expected_params = ImmutableMultiDict([("page", 3), ("tag", "hvd"), ("tag", "other")])
+        expected_params = ImmutableMultiDict(
+            [("page", 3), ("tag", "hvd"), ("tag", "other"), ("page_size", 100)]
+        )
         expected = url_for(
             "api.site_rdf_catalog_format", _format="xml", **expected_params.to_dict(flat=False)
         )
@@ -184,7 +186,7 @@ class SiteRdfViewsTest:
         assert_redirects(response, expected)
 
     def test_rdf_perform_content_negociation(self, client):
-        expected = url_for("api.site_rdf_catalog_format", _format="xml")
+        expected = url_for("api.site_rdf_catalog_format", _format="xml", page=1, page_size=100)
         url = url_for("api.site_rdf_catalog")
         headers = {"accept": "application/xml"}
         response = client.get(url, headers=headers)

@@ -235,11 +235,7 @@ class OrganizationRdfAPI(API):
     def get(self, org):
         _format = RDF_EXTENSIONS[negociate_content()]
         # We sanitize the args used as kwargs in url_for
-        params = {
-            arg: value
-            for arg, value in request.args.lists()
-            if any(arg == parser_arg.name for parser_arg in dataset_parser.parser.args)
-        }
+        params = catalog_parser.parse_args()
         url = url_for("api.organization_rdf_format", org=org.id, _format=_format, **params)
         return redirect(url)
 
