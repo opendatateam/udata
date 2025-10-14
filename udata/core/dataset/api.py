@@ -46,7 +46,6 @@ from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.topic.models import Topic
 from udata.frontend.markdown import md
 from udata.i18n import gettext as _
-from udata.linkchecker.checker import check_resource
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
 from udata.utils import get_by
 
@@ -900,20 +899,6 @@ class AllowedExtensionsAPI(API):
     def get(self):
         """List all allowed resources extensions"""
         return sorted(current_app.config["ALLOWED_RESOURCES_EXTENSIONS"])
-
-
-@ns.route(
-    "/<dataset:dataset>/resources/<uuid:rid>/check/",
-    endpoint="check_dataset_resource",
-    doc=common_doc,
-)
-@api.param("rid", "The resource unique identifier")
-class CheckDatasetResource(API, ResourceMixin):
-    @api.doc("check_dataset_resource")
-    def get(self, dataset, rid):
-        """Checks that a resource's URL exists and returns metadata."""
-        resource = self.get_resource_or_404(dataset, rid)
-        return check_resource(resource)
 
 
 @ns.route("/resource_types/", endpoint="resource_types")
