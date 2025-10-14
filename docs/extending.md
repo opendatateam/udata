@@ -107,10 +107,6 @@ This module entrypoint allows you to expose new models or to extend existing one
 Models entrypoints may also expose migrations in the `migrations` folder sibling to the `models` module.
 If you only need to expose migrations, just provide an empty `models` module.
 
-### Link checkers (`udata.linkcheckers`)
-
-This class entrypoint allows to register new link checkers that udata will recognize and use.
-
 ### Tasks and jobs (`udata.tasks`)
 
 This module entrypoint allows to register new asynchronous tasks and schedulable jobs.
