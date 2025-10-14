@@ -207,7 +207,7 @@ include = ["tasks", "udata"]
 typeCheckingMode = "standard"
 
 [tool.pytest.ini_options]
-norecursedirs = [".git", "build", ".tox", "specs", ".cache", "udata/static", "udata/templates", "udata/translations"]
+norecursedirs = [".git", "build", ".tox", "specs", ".cache", "udata/templates", "udata/translations"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 python_classes = ["*Test"]
@@ -232,7 +232,7 @@ line-length = 100
 packages = ["udata"]
 
 [tool.setuptools.package-data]
-udata = ["templates/*", "static/*", "translations/*"]
+udata = ["templates/*", "translations/*"]
 
 [tool.tox]
 requires = ["tox>=4.19"]
