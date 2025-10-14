@@ -189,6 +189,7 @@ class DcatBackendTest:
             == "https://data.paris2024.org/api/explore/v2.1/console"
         )
 
+    @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/schemas")
     def test_harvest_dataservices_keep_attached_associated_datasets(self, rmock):
         """It should update the existing list of dataservice.datasets and not overwrite existing ones"""
         rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
@@ -1036,7 +1037,10 @@ class CswIso19139DcatBackendTest:
             "http://catalogue.geo-ide.developpement-durable.gouv.fr/catalogue/srv/fre/catalog.search#/metadata",
         ],
     )
+    @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/schemas")
     def test_geo2france(self, rmock, remote_url_prefix: str):
+        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
+
         with open(os.path.join(CSW_DCAT_FILES_DIR, "XSLT.xml"), "r") as f:
             xslt = f.read()
         url = mock_csw_pagination(rmock, "geonetwork/srv/eng/csw.rdf", "geonetwork-iso-page-{}.xml")
