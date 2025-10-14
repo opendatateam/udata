@@ -83,7 +83,7 @@ jobs:
           name: Install build tools
           command: |
             pip install uv
-            uv pip install build setuptools-scm
+            uv pip install setuptools-scm
       - run:
           name: Save and show RELEASE_VERSION
           command: |
