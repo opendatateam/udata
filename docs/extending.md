@@ -111,46 +111,6 @@ If you only need to expose migrations, just provide an empty `models` module.
 
 This module entrypoint allows to register new asynchronous tasks and schedulable jobs.
 
-### Previews (`udata.preview`)
-
-A class entrypoint for preview providers.
-
-These plugins should extend `udata.core.dataset.preview.PreviewPlugin`.
-
-*Example:*
-
-```python
-from udata.core.dataset.preview import PreviewPlugin
-
-class MyPreview(PreviewPlugin):
-    def can_preview(self, resource):
-        # Check whether or not you can display a preview
-        # You can access the resource or its dataset (through resource.dataset)
-        # to check your requirements
-
-    def preview_url(self, resource):
-        # Return the absolute preview URL for the given resource.
-        # You can access the resource or its dataset (through resource.dataset)
-        # to build your preview URL
-```
-
-You can mark a preview plugin as `fallback`, meaning it will only be a candidate
-if other plugins can't provide a preview.
-This is typically for plugin displaying generic preview (ie. only relying on mimetype for example):
-
-```python
-from udata.core.dataset.preview import PreviewPlugin
-
-class MyGenericPreview(PreviewPlugin):
-    fallback = True
-```
-
-Enabled plugins are cached so don't forget to [flush cache](administrative-tasks.md#cache) when:
-
-- you change your `PLUGINS` configuration
-- you deliver new plugin versions
-
-
 ### Generic plugins (`udata.plugins`)
 
 A module entrypoint for generic plugins. They just have to expose a `init_app(app)` function
