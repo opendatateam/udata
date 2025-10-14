@@ -239,10 +239,18 @@ class SiteRdfViewsTest:
         assert_redirects(response, expected_url)
 
     def test_catalog_rdf_paginate(self, client):
-        DatasetFactory.create_batch(4)
-        url = url_for("api.site_rdf_catalog_format", _format="n3", page_size=3)
+        DatasetFactory.create_batch(4, tags=["my-tag"])
+        DatasetFactory.create_batch(
+            3, tags=["other-tag"]
+        )  # Shouldn't be returned because of the filter on tag="my-tag"
+        url = url_for("api.site_rdf_catalog_format", _format="n3", page_size=3, tag="my-tag")
         next_url = url_for(
-            "api.site_rdf_catalog_format", _format="n3", page=2, page_size=3, _external=True
+            "api.site_rdf_catalog_format",
+            _format="n3",
+            page=2,
+            page_size=3,
+            _external=True,
+            tag="my-tag",
         )
 
         response = client.get(url, headers={"Accept": "text/n3"})
@@ -254,6 +262,11 @@ class SiteRdfViewsTest:
         pagination = graph.resource(pagination)
         assert not pagination.value(HYDRA.previous)
         assert pagination.value(HYDRA.next).identifier == URIRef(next_url)
+        assert pagination.value(HYDRA.last).identifier == URIRef(next_url)
+        catalog = graph.value(predicate=RDF.type, object=HYDRA.Collection)
+        assert catalog is not None
+        catalog = graph.resource(catalog)
+        assert catalog.value(HYDRA.totalItems) == Literal(4)
 
     def test_catalog_format_unknown(self, client):
         url = url_for("api.site_rdf_catalog_format", _format="unknown")

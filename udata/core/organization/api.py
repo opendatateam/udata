@@ -233,24 +233,24 @@ class DatasetsResourcesCsvAPI(API):
 class OrganizationRdfAPI(API):
     @api.doc("rdf_organization")
     def get(self, org):
-        format = RDF_EXTENSIONS[negociate_content()]
+        _format = RDF_EXTENSIONS[negociate_content()]
         # We sanitize the args used as kwargs in url_for
         params = {
             arg: value
             for arg, value in request.args.lists()
             if any(arg == parser_arg.name for parser_arg in dataset_parser.parser.args)
         }
-        url = url_for("api.organization_rdf_format", org=org.id, format=format, **params)
+        url = url_for("api.organization_rdf_format", org=org.id, _format=_format, **params)
         return redirect(url)
 
 
-@ns.route("/<org:org>/catalog.<format>", endpoint="organization_rdf_format", doc=common_doc)
+@ns.route("/<org:org>/catalog.<_format>", endpoint="organization_rdf_format", doc=common_doc)
 @api.response(404, "Organization not found")
 @api.response(410, "Organization has been deleted")
 class OrganizationRdfFormatAPI(API):
     @api.doc("rdf_organization_format")
     @api.expect(catalog_parser)
-    def get(self, org, format):
+    def get(self, org, _format):
         if org.deleted:
             api.abort(410)
         params = catalog_parser.parse_args()
@@ -264,10 +264,10 @@ class OrganizationRdfFormatAPI(API):
             .visible()
             .filter_by_dataset_pagination(datasets, params["page"])
         )
-        catalog = build_org_catalog(org, datasets, dataservices, format=format)
+        catalog = build_org_catalog(org, datasets, dataservices, _format=_format, **params)
         # bypass flask-restplus make_response, since graph_response
         # is handling the content negociation directly
-        return make_response(*graph_response(catalog, format))
+        return make_response(*graph_response(catalog, _format))
 
 
 @ns.route("/badges/", endpoint="available_organization_badges")
