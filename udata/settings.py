@@ -676,7 +676,6 @@ class Debug(Defaults):
         "flask_debugtoolbar.panels.template.TemplateDebugPanel",
         "flask_debugtoolbar.panels.logger.LoggingPanel",
         "flask_debugtoolbar.panels.profiler.ProfilerDebugPanel",
-        "flask_mongoengine.panels.MongoDebugPanel",
     )
     CACHE_TYPE = "flask_caching.backends.null"
     CACHE_NO_NULL_WARNING = True
