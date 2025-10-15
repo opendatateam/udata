@@ -7,6 +7,12 @@ from ..frontend import FrontTestCase
 
 @pytest.mark.usefixtures("instance_path")
 class APITestCase(FrontTestCase):
+    """
+    See explanation about `get`, `post` overrides in :TestClientOverride
+
+    (switch from `data` in kwargs to `data` in args to avoid doing `data=data` and default to `json=True`)
+    """
+
     @pytest.fixture(autouse=True)
     def inject_api(self, api):
         """

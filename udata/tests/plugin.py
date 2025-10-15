@@ -18,6 +18,23 @@ from .helpers import assert200, assert_command_ok
 
 
 class TestClient(FlaskClient):
+    """
+    The goal of these `post`, `put` and `delete` functions is to
+    switch from `data` in kwargs to `data` in args and be able to
+    `client.post(url, data)` without doing `client.post(url, data=data)`
+
+    Same as in :TestClientOverride
+    """
+
+    def post(self, url, data=None, **kwargs):
+        return super(TestClient, self).post(url, data=data, **kwargs)
+
+    def put(self, url, data=None, **kwargs):
+        return super(TestClient, self).put(url, data=data, **kwargs)
+
+    def delete(self, url, data=None, **kwargs):
+        return super(TestClient, self).delete(url, data=data, **kwargs)
+
     def login(self, user=None):
         user = user or UserFactory()
         with self.session_transaction() as session:
