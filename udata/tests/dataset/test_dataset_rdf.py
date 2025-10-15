@@ -52,11 +52,10 @@ from udata.rdf import (
     default_lang_value,
     primary_topic_identifier_from_rdf,
 )
+from udata.tests import PytestOnlyTestCase
 from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import assert200, assert_redirects
 from udata.utils import faker
-
-pytestmark = pytest.mark.usefixtures("app")
 
 GOV_UK_REF = "http://reference.data.gov.uk/id/year/2017"
 
@@ -1175,7 +1174,7 @@ class DatasetRdfViewsTest(PytestOnlyAPITestCase):
         assert response.content_type == mime
 
 
-class DatasetFromRdfUtilsTest:
+class DatasetFromRdfUtilsTest(PytestOnlyTestCase):
     def test_licenses_from_rdf(self):
         """Test a bunch of cases of licenses detection from RDF"""
         rdf_xml_data = """<?xml version="1.0" encoding="UTF-8"?>

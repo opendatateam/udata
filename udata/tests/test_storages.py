@@ -12,6 +12,7 @@ from udata.core import storages
 from udata.core.storages import utils
 from udata.core.storages.api import META, chunk_filename
 from udata.core.storages.tasks import purge_chunks
+from udata.tests import PytestOnlyTestCase
 from udata.utils import faker
 
 from .helpers import assert200, assert400
@@ -88,8 +89,7 @@ class StorageUtilsTest:
         assert utils.normalize("éàü@€.txt") == "eau-eur.txt"
 
 
-@pytest.mark.usefixtures("app")
-class ConfigurableAllowedExtensionsTest:
+class ConfigurableAllowedExtensionsTest(PytestOnlyTestCase):
     def test_has_default(self):
         assert "csv" in storages.CONFIGURABLE_AUTHORIZED_TYPES
         assert "xml" in storages.CONFIGURABLE_AUTHORIZED_TYPES
