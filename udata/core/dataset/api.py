@@ -290,6 +290,12 @@ community_parser.add_argument(
 
 common_doc = {"params": {"dataset": "The dataset ID or slug"}}
 
+# Build catalog_parser from DatasetApiParser parser with a default page_size of 100
+catalog_parser = DatasetApiParser().parser
+catalog_parser.replace_argument(
+    "page_size", type=int, location="args", default=100, help="The page size"
+)
+
 
 @ns.route("/", endpoint="datasets")
 class DatasetListAPI(API):
@@ -431,17 +437,17 @@ class DatasetFeaturedAPI(API):
 class DatasetRdfAPI(API):
     @api.doc("rdf_dataset")
     def get(self, dataset):
-        format = RDF_EXTENSIONS[negociate_content()]
-        url = url_for("api.dataset_rdf_format", dataset=dataset.id, format=format)
+        _format = RDF_EXTENSIONS[negociate_content()]
+        url = url_for("api.dataset_rdf_format", dataset=dataset.id, _format=_format)
         return redirect(url)
 
 
-@ns.route("/<dataset:dataset>/rdf.<format>", endpoint="dataset_rdf_format", doc=common_doc)
+@ns.route("/<dataset:dataset>/rdf.<_format>", endpoint="dataset_rdf_format", doc=common_doc)
 @api.response(404, "Dataset not found")
 @api.response(410, "Dataset has been deleted")
 class DatasetRdfFormatAPI(API):
     @api.doc("rdf_dataset_format")
-    def get(self, dataset, format):
+    def get(self, dataset, _format):
         if not dataset.permissions["edit"].can():
             if dataset.private:
                 api.abort(404)
@@ -451,7 +457,7 @@ class DatasetRdfFormatAPI(API):
         resource = dataset_to_rdf(dataset)
         # bypass flask-restplus make_response, since graph_response
         # is handling the content negociation directly
-        return make_response(*graph_response(resource, format))
+        return make_response(*graph_response(resource, _format))
 
 
 @ns.route("/badges/", endpoint="available_dataset_badges")

@@ -1,3 +1,7 @@
+from xml.etree.ElementTree import XML
+
+import pytest
+from flask import url_for
 from rdflib import BNode, Literal, URIRef
 from rdflib.namespace import RDF
 from rdflib.resource import Resource as RdfResource
@@ -13,6 +17,7 @@ from udata.rdf import (
     TAG_TO_EU_HVD_CATEGORIES,
 )
 from udata.tests.api import PytestOnlyAPITestCase
+from udata.tests.helpers import assert200, assert_redirects
 
 
 class DataserviceToRdfTest(PytestOnlyAPITestCase):
@@ -74,3 +79,56 @@ class DataserviceToRdfTest(PytestOnlyAPITestCase):
         assert URIRef(TAG_TO_EU_HVD_CATEGORIES["meteorologiques"]) not in hvd_categories
         for distrib in d.objects(DCAT.distribution):
             assert distrib.value(DCATAP.applicableLegislation).identifier == URIRef(HVD_LEGISLATION)
+
+
+class DataserviceRdfViewsTest(PytestOnlyAPITestCase):
+    def test_rdf_default_to_jsonld(self, client):
+        dataservice = DataserviceFactory()
+        expected = url_for("api.dataservice_rdf_format", dataservice=dataservice.id, _format="json")
+        response = client.get(url_for("api.dataservice_rdf", dataservice=dataservice))
+        assert_redirects(response, expected)
+
+    def test_rdf_perform_content_negociation(self, client):
+        dataservice = DataserviceFactory()
+        expected = url_for("api.dataservice_rdf_format", dataservice=dataservice.id, _format="xml")
+        url = url_for("api.dataservice_rdf", dataservice=dataservice)
+        headers = {"accept": "application/xml"}
+        response = client.get(url, headers=headers)
+        assert_redirects(response, expected)
+
+    def test_rdf_perform_content_negociation_response(self, client):
+        """Check we have valid XML as output"""
+        dataservice = DataserviceFactory()
+        url = url_for("api.dataservice_rdf", dataservice=dataservice)
+        headers = {"accept": "application/xml"}
+        response = client.get(url, headers=headers, follow_redirects=True)
+        element = XML(response.data)
+        assert element.tag == "{http://www.w3.org/1999/02/22-rdf-syntax-ns#}RDF"
+
+    def test_dataservice_rdf_json_ld(self, client):
+        dataservice = DataserviceFactory()
+        for fmt in "json", "jsonld":
+            url = url_for("api.dataservice_rdf_format", dataservice=dataservice, _format=fmt)
+            response = client.get(url, headers={"Accept": "application/ld+json"})
+            assert200(response)
+            assert response.content_type == "application/ld+json"
+            assert response.json["@context"]["@vocab"] == "http://www.w3.org/ns/dcat#"
+
+    @pytest.mark.parametrize(
+        "fmt,mime",
+        [
+            ("n3", "text/n3"),
+            ("nt", "application/n-triples"),
+            ("ttl", "application/x-turtle"),
+            ("xml", "application/rdf+xml"),
+            ("rdf", "application/rdf+xml"),
+            ("owl", "application/rdf+xml"),
+            ("trig", "application/trig"),
+        ],
+    )
+    def test_dataservice_rdf_formats(self, client, fmt, mime):
+        dataservice = DataserviceFactory()
+        url = url_for("api.dataservice_rdf_format", dataservice=dataservice, _format=fmt)
+        response = client.get(url, headers={"Accept": mime})
+        assert200(response)
+        assert response.content_type == mime
