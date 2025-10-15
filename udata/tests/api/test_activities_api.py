@@ -1,4 +1,3 @@
-import pytest
 from flask import url_for
 from werkzeug.test import TestResponse
 
@@ -13,10 +12,6 @@ from udata.core.user.factories import AdminFactory, UserFactory
 from udata.mongo import db
 from udata.tests.api import APITestCase
 from udata.tests.helpers import assert200, assert400
-
-pytestmark = [
-    pytest.mark.usefixtures("clean_db"),
-]
 
 
 class FakeDatasetActivity(Activity):

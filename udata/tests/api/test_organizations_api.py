@@ -32,10 +32,6 @@ from udata.tests.helpers import (
 )
 from udata.utils import faker
 
-pytestmark = [
-    pytest.mark.usefixtures("clean_db"),
-]
-
 
 class OrganizationAPITest(PytestOnlyAPITestCase):
     def test_organization_api_list(self, api):

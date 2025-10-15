@@ -17,8 +17,6 @@ from udata.rdf import CONTEXT, DCAT, DCT, HYDRA
 from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import assert200, assert404, assert_redirects
 
-pytestmark = pytest.mark.usefixtures("clean_db")
-
 
 class CatalogTest(PytestOnlyAPITestCase):
     def test_minimal(self, app):

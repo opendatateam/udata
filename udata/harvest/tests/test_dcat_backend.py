@@ -18,6 +18,7 @@ from udata.harvest.models import HarvestJob
 from udata.models import Dataset
 from udata.rdf import DCAT, RDF, namespace_manager
 from udata.storage.s3 import get_from_json
+from udata.tests.api import PytestOnlyDBTestCase
 
 from .. import actions
 from ..backends.dcat import URIS_TO_REPLACE
@@ -67,9 +68,8 @@ def mock_csw_pagination(rmock, path, pattern):
     return url
 
 
-@pytest.mark.usefixtures("clean_db")
 @pytest.mark.options(PLUGINS=["dcat"])
-class DcatBackendTest:
+class DcatBackendTest(PytestOnlyDBTestCase):
     def test_simple_flat(self, rmock):
         filename = "flat.jsonld"
         url = mock_dcat(rmock, filename)
@@ -873,9 +873,8 @@ class DcatBackendTest:
         assert "404 Client Error" in job.errors[0].message
 
 
-@pytest.mark.usefixtures("clean_db")
 @pytest.mark.options(PLUGINS=["csw"])
-class CswDcatBackendTest:
+class CswDcatBackendTest(PytestOnlyDBTestCase):
     def test_geonetworkv4(self, rmock):
         url = mock_csw_pagination(rmock, "geonetwork/srv/eng/csw.rdf", "geonetworkv4-page-{}.xml")
         org = OrganizationFactory()
@@ -1023,9 +1022,8 @@ class CswDcatBackendTest:
         assert len(job.items) == 1
 
 
-@pytest.mark.usefixtures("clean_db")
 @pytest.mark.options(PLUGINS=["csw"])
-class CswIso19139DcatBackendTest:
+class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
     @pytest.mark.parametrize(
         "remote_url_prefix",
         [

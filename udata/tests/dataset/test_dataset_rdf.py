@@ -53,7 +53,7 @@ from udata.rdf import (
     primary_topic_identifier_from_rdf,
 )
 from udata.tests import PytestOnlyTestCase
-from udata.tests.api import PytestOnlyAPITestCase
+from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert200, assert_redirects
 from udata.utils import faker
 
@@ -366,8 +366,7 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         assert dataservice_as_distribution.value(DCAT.accessService).identifier == dataservice_uri
 
 
-@pytest.mark.usefixtures("clean_db")
-class RdfToDatasetTest:
+class RdfToDatasetTest(PytestOnlyDBTestCase):
     def test_minimal(self):
         node = BNode()
         g = Graph()

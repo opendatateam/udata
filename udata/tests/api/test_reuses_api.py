@@ -24,10 +24,6 @@ from udata.tests.helpers import (
 )
 from udata.utils import faker
 
-pytestmark = [
-    pytest.mark.usefixtures("clean_db"),
-]
-
 
 def reuse_in_response(response: TestResponse, reuse: Reuse) -> bool:
     only_reuse = [r for r in response.json["data"] if r["id"] == str(reuse.id)]
