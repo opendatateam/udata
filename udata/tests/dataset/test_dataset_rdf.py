@@ -52,6 +52,7 @@ from udata.rdf import (
     default_lang_value,
     primary_topic_identifier_from_rdf,
 )
+from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import assert200, assert_redirects
 from udata.utils import faker
 
@@ -67,8 +68,7 @@ else:
     GOV_UK_REF_IS_UP = True
 
 
-@pytest.mark.frontend
-class DatasetToRdfTest:
+class DatasetToRdfTest(PytestOnlyAPITestCase):
     def test_minimal(self):
         dataset = DatasetFactory.build()  # Does not have an URL
         d = dataset_to_rdf(dataset)
@@ -1122,8 +1122,7 @@ class RdfToDatasetTest:
         assert value.language == "es"
 
 
-@pytest.mark.frontend
-class DatasetRdfViewsTest:
+class DatasetRdfViewsTest(PytestOnlyAPITestCase):
     def test_rdf_default_to_jsonld(self, client):
         dataset = DatasetFactory()
         expected = url_for("api.dataset_rdf_format", dataset=dataset.id, format="json")

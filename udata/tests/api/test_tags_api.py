@@ -1,15 +1,14 @@
-import pytest
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.tags.tasks import count_tags
+from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import assert200
 from udata.utils import faker
 
 
-@pytest.mark.frontend
-class TagsAPITest:
+class TagsAPITest(PytestOnlyAPITestCase):
     def test_suggest_tags_api(self, api):
         """It should suggest tags"""
         for i in range(3):

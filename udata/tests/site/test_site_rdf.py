@@ -12,13 +12,13 @@ from udata.core.site.factories import SiteFactory
 from udata.core.site.rdf import build_catalog
 from udata.core.user.factories import UserFactory
 from udata.rdf import CONTEXT, DCAT, DCT, HYDRA
+from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import assert200, assert404, assert_redirects
 
 pytestmark = pytest.mark.usefixtures("clean_db")
 
 
-@pytest.mark.frontend
-class CatalogTest:
+class CatalogTest(PytestOnlyAPITestCase):
     def test_minimal(self, app):
         site = SiteFactory()
         home_url = url_for("api.site", _external=True)
@@ -140,8 +140,7 @@ class CatalogTest:
         assert HYDRA.next not in pagination
 
 
-@pytest.mark.frontend
-class SiteRdfViewsTest:
+class SiteRdfViewsTest(PytestOnlyAPITestCase):
     def test_expose_jsonld_context(self, client):
         url = url_for("api.site_jsonld_context")
         assert url == "/api/1/site/context.jsonld"

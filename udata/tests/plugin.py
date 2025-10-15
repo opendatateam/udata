@@ -65,10 +65,7 @@ def app(request):
 @pytest.fixture(autouse=True)
 def _load_frontend(request, _configure_application):
     """
-    Use `pytest.mark.frontend` to specify that frontend/api should be loaded
-    Pass an optionnal list of modules as parameter to restrict loaded modules.
-
-    Handle backward compatibility with Class.modules attribute too
+    Load API routes only for APITestCase (and not for DBTestCase)
     """
     if "app" not in request.fixturenames:
         return

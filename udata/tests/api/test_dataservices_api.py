@@ -26,7 +26,7 @@ from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
 from udata.tests.helpers import assert200, assert400, assert410, assert_redirects
 
-from . import APITestCase
+from . import APITestCase, PytestOnlyAPITestCase
 
 
 def dataservice_in_response(response: TestResponse, dataservice: Dataservice) -> bool:
@@ -662,8 +662,7 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(Dataservice.objects.first().organization.id, new_org.id)
 
 
-@pytest.mark.frontend
-class DataserviceRdfViewsTest:
+class DataserviceRdfViewsTest(PytestOnlyAPITestCase):
     def test_rdf_default_to_jsonld(self, client):
         dataservice = DataserviceFactory()
         expected = url_for("api.dataservice_rdf_format", dataservice=dataservice.id, format="json")

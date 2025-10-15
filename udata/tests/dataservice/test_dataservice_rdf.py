@@ -13,12 +13,12 @@ from udata.rdf import (
     HVD_LEGISLATION,
     TAG_TO_EU_HVD_CATEGORIES,
 )
+from udata.tests import PytestOnlyTestCase
 
 pytestmark = pytest.mark.usefixtures("app")
 
 
-@pytest.mark.frontend
-class DataserviceToRdfTest:
+class DataserviceToRdfTest(PytestOnlyTestCase):
     def test_minimal(self):
         dataservice = DataserviceFactory.build()  # Does not have an URL
         d = dataservice_to_rdf(dataservice)

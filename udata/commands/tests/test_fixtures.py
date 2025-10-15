@@ -18,11 +18,10 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
+from udata.tests.api import PytestOnlyAPITestCase
 
 
-@pytest.mark.usefixtures("clean_db")
-class FixturesTest:
-    @pytest.mark.frontend
+class FixturesTest(PytestOnlyAPITestCase):
     @pytest.mark.options(FIXTURE_DATASET_SLUGS=["some-test-dataset-slug"])
     def test_generate_fixtures_file_then_import(self, app, cli, api, monkeypatch):
         """Test generating fixtures from the current env, then importing them back."""

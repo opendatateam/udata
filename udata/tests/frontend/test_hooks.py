@@ -2,6 +2,7 @@ import pytest
 from flask import Blueprint, render_template_string, url_for
 
 from udata.frontend import template_hook
+from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import assert200
 
 bp = Blueprint("hooks_tests", __name__, url_prefix="/hooks_tests")
@@ -98,8 +99,7 @@ def app(app):
     return app
 
 
-@pytest.mark.frontend
-class HooksTest:
+class HooksTest(PytestOnlyAPITestCase):
     def test_empty_template_hook(self, client):
         response = client.get(url_for("hooks_tests.render_empty"))
         assert200(response)

@@ -6,7 +6,7 @@ import pytest
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.mail import mail, mail_sent, send
-from udata.tests.api import DBTestCase
+from udata.tests.api import DBTestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert_emit, assert_not_emit
 
 SMTPRecipientsRefusedList = ["not-found@udata", "not-found-either@udata"]
@@ -53,9 +53,7 @@ class MailSendTest(DBTestCase):
             send("subject", recipients, "base")
 
 
-@pytest.mark.usefixtures("clean_db")
-@pytest.mark.frontend
-class MailCampaignTest:
+class MailCampaignTest(PytestOnlyDBTestCase):
     def test_send_mail_campaign_link_new_member(self, app):
         # MTM campaign are only added on web URL (not API ones generated when
         # no front-end is configured)
