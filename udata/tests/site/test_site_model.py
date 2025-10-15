@@ -5,10 +5,10 @@ from flask import current_app, g
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.site.models import Site, current_site, get_current_site
-from udata.tests import DBTestMixin, TestCase
+from udata.tests.api import DBTestCase
 
 
-class SiteModelTest(DBTestMixin, TestCase):
+class SiteModelTest(DBTestCase):
     def test_current_site(self):
         current_app.config["SITE_ID"] = "old-id"
         current_app.config["SITE_TITLE"] = "Test"

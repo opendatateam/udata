@@ -3,11 +3,10 @@ from uuid import uuid4
 from flask import url_for
 
 from udata.i18n import _
+from udata.tests.api import APITestCase
 
-from . import FrontTestCase
 
-
-class ErrorHandlersTest(FrontTestCase):
+class ErrorHandlersTest(APITestCase):
     def test_404_in_flask_routing_requesting_html(self):
         """Test that a 404 error displays the custom 404 HTML page"""
         # Request a non-existent page

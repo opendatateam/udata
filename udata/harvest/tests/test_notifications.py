@@ -1,14 +1,12 @@
-import pytest
-
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.harvest.notifications import validate_harvester_notifications
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates
 
 from .factories import HarvestSourceFactory
 
 
-@pytest.mark.usefixtures("clean_db")
-class HarvestNotificationsTest:
+class HarvestNotificationsTest(PytestOnlyDBTestCase):
     def test_pending_harvester_validations(self):
         source = HarvestSourceFactory()
         admin = AdminFactory()

@@ -2,10 +2,10 @@ import pytest
 
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.models import db
+from udata.tests.api import PytestOnlyDBTestCase
 
 
-@pytest.mark.usefixtures("clean_db")
-class ContactPointTest:
+class ContactPointTest(PytestOnlyDBTestCase):
     def test_validate_contact_role_needs_email_or_contact_form(self):
         with pytest.raises(db.ValidationError):
             ContactPointFactory(role="contact", email=None, contact_form=None)

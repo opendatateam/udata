@@ -52,10 +52,10 @@ from udata.rdf import (
     default_lang_value,
     primary_topic_identifier_from_rdf,
 )
+from udata.tests import PytestOnlyTestCase
+from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert200, assert_redirects
 from udata.utils import faker
-
-pytestmark = pytest.mark.usefixtures("app")
 
 GOV_UK_REF = "http://reference.data.gov.uk/id/year/2017"
 
@@ -67,8 +67,7 @@ else:
     GOV_UK_REF_IS_UP = True
 
 
-@pytest.mark.frontend
-class DatasetToRdfTest:
+class DatasetToRdfTest(PytestOnlyAPITestCase):
     def test_minimal(self):
         dataset = DatasetFactory.build()  # Does not have an URL
         d = dataset_to_rdf(dataset)
@@ -367,8 +366,7 @@ class DatasetToRdfTest:
         assert dataservice_as_distribution.value(DCAT.accessService).identifier == dataservice_uri
 
 
-@pytest.mark.usefixtures("clean_db")
-class RdfToDatasetTest:
+class RdfToDatasetTest(PytestOnlyDBTestCase):
     def test_minimal(self):
         node = BNode()
         g = Graph()
@@ -1122,8 +1120,7 @@ class RdfToDatasetTest:
         assert value.language == "es"
 
 
-@pytest.mark.frontend
-class DatasetRdfViewsTest:
+class DatasetRdfViewsTest(PytestOnlyAPITestCase):
     def test_rdf_default_to_jsonld(self, client):
         dataset = DatasetFactory()
         expected = url_for("api.dataset_rdf_format", dataset=dataset.id, _format="json")
@@ -1176,7 +1173,7 @@ class DatasetRdfViewsTest:
         assert response.content_type == mime
 
 
-class DatasetFromRdfUtilsTest:
+class DatasetFromRdfUtilsTest(PytestOnlyTestCase):
     def test_licenses_from_rdf(self):
         """Test a bunch of cases of licenses detection from RDF"""
         rdf_xml_data = """<?xml version="1.0" encoding="UTF-8"?>

@@ -7,8 +7,6 @@ from udata.tests.api import APITestCase
 
 
 class MeAPIv2Test(APITestCase):
-    modules = []
-
     def test_my_org_topics(self):
         user = self.login()
         member = Member(user=user, role="editor")

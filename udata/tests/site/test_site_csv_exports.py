@@ -15,8 +15,6 @@ from udata.tests.api import APITestCase
 
 
 class SiteCsvExportsTest(APITestCase):
-    modules = []
-
     def test_datasets_csv(self):
         self.app.config["EXPORT_CSV_MODELS"] = []
         datasets = [DatasetFactory(resources=[ResourceFactory()]) for _ in range(5)]

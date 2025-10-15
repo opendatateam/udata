@@ -3,6 +3,7 @@ import requests_mock
 
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.transport import clear_datasets, map_transport_datasets
+from udata.tests.api import PytestOnlyDBTestCase
 
 
 @pytest.fixture
@@ -25,8 +26,7 @@ def mock_response():
     ]
 
 
-@pytest.mark.usefixtures("clean_db")
-class TransportTasksTest:
+class TransportTasksTest(PytestOnlyDBTestCase):
     @pytest.mark.options(TRANSPORT_DATASETS_URL="http://local.test/api/datasets")
     def test_map_transport_datasets(self, mock_response):
         ds1 = DatasetFactory(id="61fd29da29ea95c7bc0e1211")

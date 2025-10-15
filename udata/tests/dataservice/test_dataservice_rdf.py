@@ -16,13 +16,11 @@ from udata.rdf import (
     HVD_LEGISLATION,
     TAG_TO_EU_HVD_CATEGORIES,
 )
+from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import assert200, assert_redirects
 
-pytestmark = pytest.mark.usefixtures("app")
 
-
-@pytest.mark.frontend
-class DataserviceToRdfTest:
+class DataserviceToRdfTest(PytestOnlyAPITestCase):
     def test_minimal(self):
         dataservice = DataserviceFactory.build()  # Does not have an URL
         d = dataservice_to_rdf(dataservice)
@@ -83,8 +81,7 @@ class DataserviceToRdfTest:
             assert distrib.value(DCATAP.applicableLegislation).identifier == URIRef(HVD_LEGISLATION)
 
 
-@pytest.mark.frontend
-class DataserviceRdfViewsTest:
+class DataserviceRdfViewsTest(PytestOnlyAPITestCase):
     def test_rdf_default_to_jsonld(self, client):
         dataservice = DataserviceFactory()
         expected = url_for("api.dataservice_rdf_format", dataservice=dataservice.id, _format="json")

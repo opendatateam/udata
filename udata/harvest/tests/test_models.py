@@ -1,7 +1,6 @@
 import logging
 
-import pytest
-
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.utils import faker
 
 from ..models import HarvestSource
@@ -9,8 +8,7 @@ from ..models import HarvestSource
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.usefixtures("clean_db")
-class HarvestSourceTest:
+class HarvestSourceTest(PytestOnlyDBTestCase):
     def test_defaults(self):
         source = HarvestSource.objects.create(name="Test", url=faker.url(), backend="factory")
         assert source.name == "Test"

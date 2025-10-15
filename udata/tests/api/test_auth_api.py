@@ -14,6 +14,7 @@ from udata.api.oauth2 import OAuth2Client, OAuth2Token
 from udata.auth import PermissionDenied
 from udata.core.user.factories import UserFactory
 from udata.forms import Form, fields, validators
+from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import (
     assert200,
     assert400,
@@ -65,10 +66,7 @@ def oauth(app, request):
     return OAuth2Client.objects.create(**kwargs)
 
 
-@pytest.mark.usefixtures("clean_db")
-class APIAuthTest:
-    modules = []
-
+class APIAuthTest(PytestOnlyAPITestCase):
     def test_no_auth(self, api):
         """Should not return a content type if there is no content on delete"""
         response = api.get(url_for("api.fake"))

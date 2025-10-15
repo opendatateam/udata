@@ -4,7 +4,6 @@ from datetime import date
 
 import pytest
 
-from udata.app import create_app
 from udata.core.dataset.constants import UpdateFrequency
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import GeoZoneFactory
@@ -13,34 +12,14 @@ from udata.harvest.backends.ckan.harvesters import ALLOWED_RESOURCE_TYPES
 from udata.harvest.backends.ckan.schemas.ckan import RESOURCE_TYPES
 from udata.harvest.tests.factories import HarvestSourceFactory
 from udata.models import Dataset
-from udata.settings import Defaults, Testing
-from udata.tests.plugin import drop_db
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.utils import faker
 
 
-class CkanSettings(Testing):
-    PLUGINS = ["ckan"]
-
-
 @pytest.fixture
-def app(request):
-    """Create an udata app."""
-    app = create_app(Defaults, override=CkanSettings)
-    with app.app_context():
-        drop_db(app)
-    yield app
-    with app.app_context():
-        drop_db(app)
-
-
-@pytest.fixture
-def source(app, ckan):
-    """
-    Create an harvest source for an organization.
-    """
-    with app.app_context():
-        org = OrganizationFactory()
-        return HarvestSourceFactory(backend="ckan", url=ckan.BASE_URL, organization=org)
+def source(ckan):
+    org = OrganizationFactory()
+    return HarvestSourceFactory(backend="ckan", url=ckan.BASE_URL, organization=org)
 
 
 def ckan_package(data):
@@ -72,7 +51,7 @@ def ckan_package(data):
 
 
 @pytest.fixture
-def harvest_ckan(request, source, ckan, app, rmock):
+def harvest_ckan(request, source, ckan, rmock):
     """
     This fixture performs the harvesting and return the data, result
     and kwargs for this test case
@@ -96,11 +75,10 @@ def harvest_ckan(request, source, ckan, app, rmock):
         headers={"Content-Type": "application/json"},
     )
 
-    with app.app_context():
-        actions.run(source)
-        source.reload()
-        job = source.get_last_job()
-        assert len(job.items) == 1
+    actions.run(source)
+    source.reload()
+    job = source.get_last_job()
+    assert len(job.items) == 1
 
     return data, result, kwargs
 
@@ -223,9 +201,8 @@ def spatial_geom_multipolygon(resource_data):
 
 
 @pytest.fixture
-def known_spatial_text_name(app, resource_data):
-    with app.app_context():
-        zone = GeoZoneFactory()
+def known_spatial_text_name(resource_data):
+    zone = GeoZoneFactory()
     data = {
         "name": faker.unique_string(),
         "title": faker.sentence(),
@@ -237,9 +214,8 @@ def known_spatial_text_name(app, resource_data):
 
 
 @pytest.fixture
-def known_spatial_text_slug(app, resource_data):
-    with app.app_context():
-        zone = GeoZoneFactory()
+def known_spatial_text_slug(resource_data):
+    zone = GeoZoneFactory()
     data = {
         "name": faker.unique_string(),
         "title": faker.sentence(),
@@ -251,10 +227,9 @@ def known_spatial_text_slug(app, resource_data):
 
 
 @pytest.fixture
-def multiple_known_spatial_text(app, resource_data):
+def multiple_known_spatial_text(resource_data):
     name = faker.word()
-    with app.app_context():
-        GeoZoneFactory.create_batch(2, name=name)
+    GeoZoneFactory.create_batch(2, name=name)
     data = {
         "name": faker.unique_string(),
         "title": faker.sentence(),
@@ -389,310 +364,298 @@ def empty_extras(resource_data):
 ##############################################################################
 
 
-@pytest.mark.ckan_data("minimal")
-def test_minimal_metadata(data, result, kwargs):
-    resource_url = kwargs["resource_url"]
+@pytest.mark.options(PLUGINS=["ckan"])
+class CkanBackendTest(PytestOnlyDBTestCase):
+    @pytest.mark.ckan_data("minimal")
+    def test_minimal_metadata(self, data, result, kwargs):
+        resource_url = kwargs["resource_url"]
 
-    dataset = dataset_for(result)
-    assert dataset.title == data["title"]
-    assert dataset.description == data["notes"]
-    assert dataset.harvest.remote_id == result["result"]["id"]
-    assert dataset.harvest.domain == "localhost"
-    assert dataset.harvest.ckan_name == data["name"]
-    assert len(dataset.resources) == 1
+        dataset = dataset_for(result)
+        assert dataset.title == data["title"]
+        assert dataset.description == data["notes"]
+        assert dataset.harvest.remote_id == result["result"]["id"]
+        assert dataset.harvest.domain == "localhost"
+        assert dataset.harvest.ckan_name == data["name"]
+        assert len(dataset.resources) == 1
 
-    resource = dataset.resources[0]
-    assert resource.url == resource_url
+        resource = dataset.resources[0]
+        assert resource.url == resource_url
 
+    @pytest.mark.ckan_data("all_metadata")
+    def test_all_metadata(self, data, result):
+        resource_data = data["resources"][0]
+        resource_result = result["result"]["resources"][0]
 
-@pytest.mark.ckan_data("all_metadata")
-def test_all_metadata(data, result):
-    resource_data = data["resources"][0]
-    resource_result = result["result"]["resources"][0]
+        dataset = dataset_for(result)
+        assert dataset.title == data["title"]
+        assert dataset.description == data["notes"]
+        assert set(dataset.tags) == set([t["name"] for t in data["tags"]])
+        assert dataset.harvest.remote_id == result["result"]["id"]
+        assert dataset.harvest.domain == "localhost"
+        assert dataset.harvest.ckan_name == data["name"]
+        assert len(dataset.resources) == 1
 
-    dataset = dataset_for(result)
-    assert dataset.title == data["title"]
-    assert dataset.description == data["notes"]
-    assert set(dataset.tags) == set([t["name"] for t in data["tags"]])
-    assert dataset.harvest.remote_id == result["result"]["id"]
-    assert dataset.harvest.domain == "localhost"
-    assert dataset.harvest.ckan_name == data["name"]
-    assert len(dataset.resources) == 1
+        resource = dataset.resources[0]
+        assert resource.title == resource_data["name"]
+        assert resource.description == resource_data["description"]
+        assert resource.url == resource_data["url"]
+        # Use result because format is normalized by CKAN
+        assert resource.format == resource_result["format"].lower()
+        assert resource.mime == resource_data["mimetype"].lower()
+        assert resource.harvest.issued_at.date() == date(2022, 9, 29)
+        assert resource.harvest.modified_at.date() == date(2022, 9, 30)
 
-    resource = dataset.resources[0]
-    assert resource.title == resource_data["name"]
-    assert resource.description == resource_data["description"]
-    assert resource.url == resource_data["url"]
-    # Use result because format is normalized by CKAN
-    assert resource.format == resource_result["format"].lower()
-    assert resource.mime == resource_data["mimetype"].lower()
-    assert resource.harvest.issued_at.date() == date(2022, 9, 29)
-    assert resource.harvest.modified_at.date() == date(2022, 9, 30)
+    @pytest.mark.ckan_data("spatial_geom_polygon")
+    def test_geospatial_geom_polygon(self, result, kwargs):
+        polygon = kwargs["polygon"]
+        dataset = dataset_for(result)
 
+        assert dataset.spatial.geom == {
+            "type": "MultiPolygon",
+            "coordinates": [polygon["coordinates"]],
+        }
 
-@pytest.mark.ckan_data("spatial_geom_polygon")
-def test_geospatial_geom_polygon(result, kwargs):
-    polygon = kwargs["polygon"]
-    dataset = dataset_for(result)
+    @pytest.mark.ckan_data("spatial_geom_multipolygon")
+    def test_geospatial_geom_multipolygon(self, result, kwargs):
+        multipolygon = kwargs["multipolygon"]
 
-    assert dataset.spatial.geom == {
-        "type": "MultiPolygon",
-        "coordinates": [polygon["coordinates"]],
-    }
+        dataset = dataset_for(result)
+        assert dataset.spatial.geom == multipolygon
 
+    @pytest.mark.ckan_data("skipped_no_resources")
+    def test_skip_no_resources(self, source, result):
+        job = source.get_last_job()
+        item = job_item_for(job, result)
+        assert item.status == "skipped"
+        assert dataset_for(result) is None
 
-@pytest.mark.ckan_data("spatial_geom_multipolygon")
-def test_geospatial_geom_multipolygon(result, kwargs):
-    multipolygon = kwargs["multipolygon"]
+    @pytest.mark.ckan_data("ckan_url_is_url")
+    def test_ckan_url_is_url(self, data, result):
+        dataset = dataset_for(result)
+        assert dataset.harvest.remote_url == data["url"]
+        assert dataset.harvest.ckan_source is None
 
-    dataset = dataset_for(result)
-    assert dataset.spatial.geom == multipolygon
+    @pytest.mark.ckan_data("ckan_url_is_a_string")
+    def test_ckan_url_is_string(self, ckan, data, result):
+        dataset = dataset_for(result)
+        expected_url = "{0}/dataset/{1}".format(ckan.BASE_URL, data["name"])
+        assert dataset.harvest.remote_url == expected_url
+        assert dataset.harvest.ckan_source == data["url"]
 
+    @pytest.mark.ckan_data("frequency_as_rdf_uri")
+    def test_can_parse_frequency_as_uri(self, result, kwargs):
+        dataset = dataset_for(result)
+        assert dataset.frequency == kwargs["expected"]
+        assert "ckan:frequency" not in dataset.extras
 
-@pytest.mark.ckan_data("skipped_no_resources")
-def test_skip_no_resources(source, result):
-    job = source.get_last_job()
-    item = job_item_for(job, result)
-    assert item.status == "skipped"
-    assert dataset_for(result) is None
+    @pytest.mark.ckan_data("frequency_as_exact_match")
+    def test_can_parse_frequency_as_exact_match(self, result, kwargs):
+        dataset = dataset_for(result)
+        assert dataset.frequency == kwargs["expected"]
+        assert "ckan:frequency" not in dataset.extras
 
+    @pytest.mark.ckan_data("frequency_as_unknown_value")
+    def test_can_parse_frequency_as_unknown_value(self, result, kwargs):
+        dataset = dataset_for(result)
+        assert dataset.extras["ckan:frequency"] == kwargs["expected"]
+        assert dataset.frequency is None
 
-@pytest.mark.ckan_data("ckan_url_is_url")
-def test_ckan_url_is_url(data, result):
-    dataset = dataset_for(result)
-    assert dataset.harvest.remote_url == data["url"]
-    assert dataset.harvest.ckan_source is None
+    @pytest.mark.ckan_data("empty_extras")
+    def test_skip_empty_extras(self, result):
+        dataset = dataset_for(result)
+        assert "none" not in dataset.extras
+        assert "blank" not in dataset.extras
+        assert "spaces" not in dataset.extras
 
+    @pytest.mark.ckan_data("known_spatial_text_name")
+    def test_known_spatial_text_name(self, result, kwargs):
+        zone = kwargs["zone"]
+        dataset = dataset_for(result)
+        assert zone in dataset.spatial.zones
+        assert "ckan:spatial-text" not in dataset.extras
 
-@pytest.mark.ckan_data("ckan_url_is_a_string")
-def test_ckan_url_is_string(ckan, data, result):
-    dataset = dataset_for(result)
-    expected_url = "{0}/dataset/{1}".format(ckan.BASE_URL, data["name"])
-    assert dataset.harvest.remote_url == expected_url
-    assert dataset.harvest.ckan_source == data["url"]
+    @pytest.mark.ckan_data("known_spatial_text_slug")
+    def test_known_spatial_text_slug(self, result, kwargs):
+        zone = kwargs["zone"]
+        dataset = dataset_for(result)
+        assert zone in dataset.spatial.zones
+        assert "ckan:spatial-text" not in dataset.extras
 
+    @pytest.mark.ckan_data("multiple_known_spatial_text")
+    def test_store_unsure_spatial_text_as_extra(self, result, kwargs):
+        dataset = dataset_for(result)
+        assert dataset.extras["ckan:spatial-text"] == kwargs["name"]
+        assert dataset.spatial is None
 
-@pytest.mark.ckan_data("frequency_as_rdf_uri")
-def test_can_parse_frequency_as_uri(result, kwargs):
-    dataset = dataset_for(result)
-    assert dataset.frequency == kwargs["expected"]
-    assert "ckan:frequency" not in dataset.extras
+    @pytest.mark.ckan_data("unknown_spatial_text")
+    def test_keep_unknown_spatial_text_as_extra(self, result, kwargs):
+        dataset = dataset_for(result)
+        assert dataset.extras["ckan:spatial-text"] == kwargs["spatial"]
+        assert dataset.spatial is None
 
-
-@pytest.mark.ckan_data("frequency_as_exact_match")
-def test_can_parse_frequency_as_exact_match(result, kwargs):
-    dataset = dataset_for(result)
-    assert dataset.frequency == kwargs["expected"]
-    assert "ckan:frequency" not in dataset.extras
-
-
-@pytest.mark.ckan_data("frequency_as_unknown_value")
-def test_can_parse_frequency_as_unknown_value(result, kwargs):
-    dataset = dataset_for(result)
-    assert dataset.extras["ckan:frequency"] == kwargs["expected"]
-    assert dataset.frequency is None
-
-
-@pytest.mark.ckan_data("empty_extras")
-def test_skip_empty_extras(result):
-    dataset = dataset_for(result)
-    assert "none" not in dataset.extras
-    assert "blank" not in dataset.extras
-    assert "spaces" not in dataset.extras
-
-
-@pytest.mark.ckan_data("known_spatial_text_name")
-def test_known_spatial_text_name(result, kwargs):
-    zone = kwargs["zone"]
-    dataset = dataset_for(result)
-    assert zone in dataset.spatial.zones
-    assert "ckan:spatial-text" not in dataset.extras
-
-
-@pytest.mark.ckan_data("known_spatial_text_slug")
-def test_known_spatial_text_slug(result, kwargs):
-    zone = kwargs["zone"]
-    dataset = dataset_for(result)
-    assert zone in dataset.spatial.zones
-    assert "ckan:spatial-text" not in dataset.extras
-
-
-@pytest.mark.ckan_data("multiple_known_spatial_text")
-def test_store_unsure_spatial_text_as_extra(result, kwargs):
-    dataset = dataset_for(result)
-    assert dataset.extras["ckan:spatial-text"] == kwargs["name"]
-    assert dataset.spatial is None
-
-
-@pytest.mark.ckan_data("unknown_spatial_text")
-def test_keep_unknown_spatial_text_as_extra(result, kwargs):
-    dataset = dataset_for(result)
-    assert dataset.extras["ckan:spatial-text"] == kwargs["spatial"]
-    assert dataset.spatial is None
-
-
-@pytest.mark.ckan_data("spatial_uri")
-def test_keep_unknown_spatial_uri_as_extra(result, kwargs):
-    dataset = dataset_for(result)
-    assert dataset.extras["ckan:spatial-uri"] == kwargs["spatial"]
-    assert dataset.spatial is None
+    @pytest.mark.ckan_data("spatial_uri")
+    def test_keep_unknown_spatial_uri_as_extra(self, result, kwargs):
+        dataset = dataset_for(result)
+        assert dataset.extras["ckan:spatial-uri"] == kwargs["spatial"]
+        assert dataset.spatial is None
 
 
 ##############################################################################
 #                       Edge cases manually written                          #
 ##############################################################################
-def test_minimal_ckan_response(app, rmock):
-    """CKAN Harvester should accept the minimum dataset payload"""
-    CKAN_URL = "https://harvest.me/"
-    API_URL = "{}api/3/action/".format(CKAN_URL)
-    PACKAGE_LIST_URL = "{}package_list".format(API_URL)
-    PACKAGE_SHOW_URL = "{}package_show".format(API_URL)
-
-    name = faker.unique_string()
-    json = {
-        "success": True,
-        "result": minimal_data(name=name),
-    }
-    source = HarvestSourceFactory(backend="ckan", url=CKAN_URL)
-    rmock.get(
-        PACKAGE_LIST_URL,
-        json={"success": True, "result": [name]},
-        status_code=200,
-        headers={"Content-Type": "application/json"},
-    )
-    rmock.get(
-        PACKAGE_SHOW_URL,
-        json=json,
-        status_code=200,
-        headers={"Content-Type": "application/json"},
-    )
-    actions.run(source)
-    source.reload()
-    assert source.get_last_job().status == "done"
 
 
-def test_flawed_ckan_response(app, rmock):
-    """CKAN Harvester should report item error with id == remote_id in item"""
-    CKAN_URL = "https://harvest.me/"
-    API_URL = "{}api/3/action/".format(CKAN_URL)
-    PACKAGE_LIST_URL = "{}package_list".format(API_URL)
-    PACKAGE_SHOW_URL = "{}package_show".format(API_URL)
+@pytest.mark.options(PLUGINS=["ckan"])
+class CkanBackendEdgeCasesTest(PytestOnlyDBTestCase):
+    def test_minimal_ckan_response(self, rmock):
+        """CKAN Harvester should accept the minimum dataset payload"""
+        CKAN_URL = "https://harvest.me/"
+        API_URL = "{}api/3/action/".format(CKAN_URL)
+        PACKAGE_LIST_URL = "{}package_list".format(API_URL)
+        PACKAGE_SHOW_URL = "{}package_show".format(API_URL)
 
-    name = faker.unique_string()
-    _id = faker.uuid4()
-    # flawed response, missing way too much required attrs
-    json = {
-        "success": True,
-        "result": {
-            "id": _id,
-            "name": name,
-        },
-    }
-    source = HarvestSourceFactory(backend="ckan", url=CKAN_URL)
-    rmock.get(
-        PACKAGE_LIST_URL,
-        json={"success": True, "result": [name]},
-        status_code=200,
-        headers={"Content-Type": "application/json"},
-    )
-    rmock.get(
-        PACKAGE_SHOW_URL,
-        json=json,
-        status_code=200,
-        headers={"Content-Type": "application/json"},
-    )
-    actions.run(source)
-    source.reload()
-    assert source.get_last_job().status == "done-errors"
-    assert source.get_last_job().items[0].remote_id == _id
-    # flawed response, without an id, we should fallback on the name
-    json = {
-        "success": True,
-        "result": {
-            "name": name,
-        },
-    }
-    rmock.get(
-        PACKAGE_SHOW_URL,
-        json=json,
-        status_code=200,
-        headers={"Content-Type": "application/json"},
-    )
-    actions.run(source)
-    source.reload()
-    assert source.get_last_job().status == "done-errors"
-    assert source.get_last_job().items[0].remote_id == name
+        name = faker.unique_string()
+        json = {
+            "success": True,
+            "result": self.minimal_data(name=name),
+        }
+        source = HarvestSourceFactory(backend="ckan", url=CKAN_URL)
+        rmock.get(
+            PACKAGE_LIST_URL,
+            json={"success": True, "result": [name]},
+            status_code=200,
+            headers={"Content-Type": "application/json"},
+        )
+        rmock.get(
+            PACKAGE_SHOW_URL,
+            json=json,
+            status_code=200,
+            headers={"Content-Type": "application/json"},
+        )
+        actions.run(source)
+        source.reload()
+        assert source.get_last_job().status == "done"
 
+    def test_flawed_ckan_response(self, rmock):
+        """CKAN Harvester should report item error with id == remote_id in item"""
+        CKAN_URL = "https://harvest.me/"
+        API_URL = "{}api/3/action/".format(CKAN_URL)
+        PACKAGE_LIST_URL = "{}package_list".format(API_URL)
+        PACKAGE_SHOW_URL = "{}package_show".format(API_URL)
 
-@pytest.mark.options(HARVEST_MAX_ITEMS=1)
-def test_max_items(app, rmock):
-    """CKAN Harvester should report item error with id == remote_id in item"""
-    CKAN_URL = "https://harvest.me/"
-    API_URL = "{}api/3/action/".format(CKAN_URL)
-    PACKAGE_LIST_URL = "{}package_list".format(API_URL)
-    PACKAGE_SHOW_URL = "{}package_show".format(API_URL)
+        name = faker.unique_string()
+        _id = faker.uuid4()
+        # flawed response, missing way too much required attrs
+        json = {
+            "success": True,
+            "result": {
+                "id": _id,
+                "name": name,
+            },
+        }
+        source = HarvestSourceFactory(backend="ckan", url=CKAN_URL)
+        rmock.get(
+            PACKAGE_LIST_URL,
+            json={"success": True, "result": [name]},
+            status_code=200,
+            headers={"Content-Type": "application/json"},
+        )
+        rmock.get(
+            PACKAGE_SHOW_URL,
+            json=json,
+            status_code=200,
+            headers={"Content-Type": "application/json"},
+        )
+        actions.run(source)
+        source.reload()
+        assert source.get_last_job().status == "done-errors"
+        assert source.get_last_job().items[0].remote_id == _id
+        # flawed response, without an id, we should fallback on the name
+        json = {
+            "success": True,
+            "result": {
+                "name": name,
+            },
+        }
+        rmock.get(
+            PACKAGE_SHOW_URL,
+            json=json,
+            status_code=200,
+            headers={"Content-Type": "application/json"},
+        )
+        actions.run(source)
+        source.reload()
+        assert source.get_last_job().status == "done-errors"
+        assert source.get_last_job().items[0].remote_id == name
 
-    name_a = faker.unique_string()
-    name_b = faker.unique_string()
-    id_a = faker.uuid4()
-    json_a = {
-        "success": True,
-        "result": minimal_data(id=id_a, name=name_a),
-    }
-    id_b = faker.uuid4()
-    json_b = {
-        "success": True,
-        "result": minimal_data(id=id_b, name=name_b),
-    }
-    source = HarvestSourceFactory(backend="ckan", url=CKAN_URL)
-    rmock.get(
-        PACKAGE_LIST_URL,
-        json={"success": True, "result": [name_a, name_b]},
-        status_code=200,
-        headers={"Content-Type": "application/json"},
-    )
-    rmock.get(
-        f"{PACKAGE_SHOW_URL}?id={name_a}",
-        json=json_a,
-        status_code=200,
-        headers={"Content-Type": "application/json"},
-    )
-    rmock.get(
-        f"{PACKAGE_SHOW_URL}?id={name_b}",
-        json=json_b,
-        status_code=200,
-        headers={"Content-Type": "application/json"},
-    )
-    actions.run(source)
-    source.reload()
-    assert source.get_last_job().status == "done"
-    assert len(source.get_last_job().items) == 1
-    assert source.get_last_job().items[0].remote_id == id_a
+    @pytest.mark.options(HARVEST_MAX_ITEMS=1)
+    def test_max_items(self, app, rmock):
+        """CKAN Harvester should report item error with id == remote_id in item"""
+        CKAN_URL = "https://harvest.me/"
+        API_URL = "{}api/3/action/".format(CKAN_URL)
+        PACKAGE_LIST_URL = "{}package_list".format(API_URL)
+        PACKAGE_SHOW_URL = "{}package_show".format(API_URL)
 
+        name_a = faker.unique_string()
+        name_b = faker.unique_string()
+        id_a = faker.uuid4()
+        json_a = {
+            "success": True,
+            "result": self.minimal_data(id=id_a, name=name_a),
+        }
+        id_b = faker.uuid4()
+        json_b = {
+            "success": True,
+            "result": self.minimal_data(id=id_b, name=name_b),
+        }
+        source = HarvestSourceFactory(backend="ckan", url=CKAN_URL)
+        rmock.get(
+            PACKAGE_LIST_URL,
+            json={"success": True, "result": [name_a, name_b]},
+            status_code=200,
+            headers={"Content-Type": "application/json"},
+        )
+        rmock.get(
+            f"{PACKAGE_SHOW_URL}?id={name_a}",
+            json=json_a,
+            status_code=200,
+            headers={"Content-Type": "application/json"},
+        )
+        rmock.get(
+            f"{PACKAGE_SHOW_URL}?id={name_b}",
+            json=json_b,
+            status_code=200,
+            headers={"Content-Type": "application/json"},
+        )
+        actions.run(source)
+        source.reload()
+        assert source.get_last_job().status == "done"
+        assert len(source.get_last_job().items) == 1
+        assert source.get_last_job().items[0].remote_id == id_a
 
-def minimal_data(**kwargs):
-    # extras and revision_id are not always present so we exclude them
-    # from the minimal payload
-    return {
-        **{
-            "id": faker.uuid4(),
-            "name": faker.uuid4(),
-            "title": faker.sentence(),
-            "maintainer": faker.name(),
-            "tags": [],
-            "private": False,
-            "maintainer_email": faker.email(),
-            "license_id": None,
-            "metadata_created": faker.iso8601(),
-            "organization": None,
-            "metadata_modified": faker.iso8601(),
-            "author": None,
-            "author_email": None,
-            "notes": faker.paragraph(),
-            "license_title": None,
-            "state": None,
-            "type": "dataset",
-            "resources": [],
-        },
-        **kwargs,
-    }
+    def minimal_data(self, **kwargs):
+        # extras and revision_id are not always present so we exclude them
+        # from the minimal payload
+        return {
+            **{
+                "id": faker.uuid4(),
+                "name": faker.uuid4(),
+                "title": faker.sentence(),
+                "maintainer": faker.name(),
+                "tags": [],
+                "private": False,
+                "maintainer_email": faker.email(),
+                "license_id": None,
+                "metadata_created": faker.iso8601(),
+                "organization": None,
+                "metadata_modified": faker.iso8601(),
+                "author": None,
+                "author_email": None,
+                "notes": faker.paragraph(),
+                "license_title": None,
+                "state": None,
+                "type": "dataset",
+                "resources": [],
+            },
+            **kwargs,
+        }

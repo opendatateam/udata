@@ -9,10 +9,12 @@ from udata.core.spatial.factories import GeoZoneFactory
 from udata.core.spatial.models import GeoZone
 from udata.mongo import db
 from udata.mongo.slug_fields import SlugFollow
+from udata.tests import PytestOnlyTestCase
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert200, assert404, assert_redirects
 
 
-class UUIDConverterTest:
+class UUIDConverterTest(PytestOnlyTestCase):
     @pytest.fixture(autouse=True)
     def setup(self, app):
         @app.route("/uuid/<uuid:uuid>")
@@ -67,8 +69,7 @@ class RedirectTesterConverter(routing.ModelConverter):
     model = RedirectTester
 
 
-@pytest.mark.usefixtures("clean_db")
-class ModelConverterMixin:
+class ModelConverterMixin(PytestOnlyDBTestCase):
     @pytest.fixture(autouse=True)
     def setup(self, app):
         app.url_map.converters["tester"] = self.converter
@@ -295,9 +296,8 @@ class SlugAsSLugFieldWithFollowTest(AsSlugMixin):
         assert SlugFollow.objects.count() == 0
 
 
-@pytest.mark.usefixtures("clean_db")
 @pytest.mark.options(TERRITORY_DEFAULT_PREFIX="fr")  # Not implemented
-class TerritoryConverterTest:
+class TerritoryConverterTest(PytestOnlyDBTestCase):
     @pytest.fixture(autouse=True)
     def setup(self, app):
         @app.route("/territory/<territory:territory>")

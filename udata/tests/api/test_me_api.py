@@ -18,8 +18,6 @@ from . import APITestCase
 
 
 class MeAPITest(APITestCase):
-    modules = []
-
     def test_get_profile(self):
         """It should fetch my user data on GET"""
         self.login()
@@ -105,7 +103,7 @@ class MeAPITest(APITestCase):
         DatasetFactory(owner=user)
         DatasetFactory(organization=organization)
 
-        response = self.get(url_for("api.my_org_datasets"), qs={"q": "foô"})
+        response = self.get(url_for("api.my_org_datasets", q="foô"))
         self.assert200(response)
         self.assertEqual(len(response.json), len(datasets) + len(org_datasets))
 
@@ -139,7 +137,7 @@ class MeAPITest(APITestCase):
         CommunityResourceFactory(owner=user)
         CommunityResourceFactory(organization=organization)
 
-        response = self.get(url_for("api.my_org_community_resources"), qs={"q": "foô"})
+        response = self.get(url_for("api.my_org_community_resources", q="foô"))
         self.assert200(response)
         self.assertEqual(
             len(response.json), len(community_resources) + len(org_community_resources)
@@ -171,7 +169,7 @@ class MeAPITest(APITestCase):
         ReuseFactory(owner=user)
         ReuseFactory(organization=organization)
 
-        response = self.get(url_for("api.my_org_reuses"), qs={"q": "foô"})
+        response = self.get(url_for("api.my_org_reuses", q="foô"))
         self.assert200(response)
         self.assertEqual(len(response.json), len(reuses) + len(org_reuses))
 
@@ -221,7 +219,7 @@ class MeAPITest(APITestCase):
         Discussion.objects.create(subject=DatasetFactory(), title="foô", user=user)
         Discussion.objects.create(subject=ReuseFactory(), title="foô", user=user)
 
-        response = self.get(url_for("api.my_org_discussions"), qs={"q": "foô"})
+        response = self.get(url_for("api.my_org_discussions", q="foô"))
         self.assert200(response)
         self.assertEqual(len(response.json), len(discussions))
 

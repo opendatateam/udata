@@ -1,12 +1,10 @@
 from tempfile import NamedTemporaryFile
 
-import pytest
-
 from udata.core.dataset.factories import DatasetFactory
+from udata.tests.api import PytestOnlyDBTestCase
 
 
-@pytest.mark.usefixtures("clean_db")
-class DatasetCommandTest:
+class DatasetCommandTest(PytestOnlyDBTestCase):
     def test_dataset_archive_one(self, cli):
         dataset = DatasetFactory()
 

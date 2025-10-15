@@ -14,12 +14,11 @@ from udata.features.transfer.actions import accept_transfer, request_transfer
 from udata.features.transfer.factories import TransferFactory
 from udata.features.transfer.notifications import transfer_request_notifications
 from udata.models import Member
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.utils import faker
 
-pytestmark = pytest.mark.usefixtures("clean_db")
 
-
-class TransferStartTest:
+class TransferStartTest(PytestOnlyDBTestCase):
     def assert_transfer_started(self, subject, owner, recipient, comment):
         transfer = request_transfer(subject, recipient, comment)
 
@@ -102,7 +101,7 @@ class TransferStartTest:
             self.assert_transfer_started(dataset, org, org, comment)
 
 
-class TransferAcceptTest:
+class TransferAcceptTest(PytestOnlyDBTestCase):
     def test_recipient_user_can_accept_transfer(self):
         owner = UserFactory()
         recipient = UserFactory()
@@ -175,7 +174,7 @@ class TransferAcceptTest:
             accept_transfer(transfer)
 
 
-class TransferNotificationsTest:
+class TransferNotificationsTest(PytestOnlyDBTestCase):
     def test_pending_transfer_request_for_user(self):
         user = UserFactory()
         datasets = DatasetFactory.create_batch(2, owner=user)

@@ -15,8 +15,6 @@ from . import APITestCase
 
 
 class ReportsReasonsAPITest(APITestCase):
-    modules = []
-
     def test_reports_reasons_api(self):
         response = self.get(url_for("api.reports_reasons"))
         self.assert200(response)
@@ -24,8 +22,6 @@ class ReportsReasonsAPITest(APITestCase):
 
 
 class ReportsAPITest(APITestCase):
-    modules = []
-
     def test_reports_api_create(self):
         user = UserFactory()
 

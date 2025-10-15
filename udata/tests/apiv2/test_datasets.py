@@ -367,8 +367,6 @@ class DatasetResourceAPIV2Test(APITestCase):
 
 
 class DatasetExtrasAPITest(APITestCase):
-    modules = None
-
     def setUp(self):
         self.login()
         self.dataset = DatasetFactory(owner=self.user)
@@ -503,8 +501,6 @@ class DatasetExtrasAPITest(APITestCase):
 
 
 class DatasetResourceExtrasAPITest(APITestCase):
-    modules = None
-
     def setUp(self):
         self.login()
         self.dataset = DatasetFactory(owner=self.user)

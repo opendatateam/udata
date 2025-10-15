@@ -1,17 +1,14 @@
 from datetime import datetime
 
-import pytest
-
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
+from udata.tests.api import PytestOnlyDBTestCase
 
 
-@pytest.mark.frontend
-@pytest.mark.usefixtures("clean_db")
-class DataserviceCSVAdapterTest:
+class DataserviceCSVAdapterTest(PytestOnlyDBTestCase):
     def test_dataservices_csv_adapter(self):
         dataservice = DataserviceFactory(
             created_at=datetime(2022, 12, 31),

@@ -1,13 +1,11 @@
 from tempfile import NamedTemporaryFile
 
-import pytest
-
 from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
 from udata.core.organization.factories import OrganizationFactory
+from udata.tests.api import PytestOnlyDBTestCase
 
 
-@pytest.mark.usefixtures("clean_db")
-class BadgeCommandTest:
+class BadgeCommandTest(PytestOnlyDBTestCase):
     def toggle(self, path_or_id, kind):
         return self.cli("badges", "toggle", path_or_id, kind)
 

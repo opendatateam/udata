@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from udata.tests import DBTestMixin, TestCase
+from udata.tests.api import DBTestCase
 
 from ..factories import GeoZoneFactory
 from ..models import GeoZone, SpatialCoverage
@@ -8,7 +8,7 @@ from ..models import GeoZone, SpatialCoverage
 A_YEAR = timedelta(days=365)
 
 
-class SpacialCoverageTest(DBTestMixin, TestCase):
+class SpacialCoverageTest(DBTestCase):
     def test_top_label_empty(self):
         coverage = SpatialCoverage()
         self.assertIsNone(coverage.top_label)
@@ -19,7 +19,7 @@ class SpacialCoverageTest(DBTestMixin, TestCase):
         self.assertEqual(coverage.top_label, "name")
 
 
-class SpatialTemporalResolutionTest(DBTestMixin, TestCase):
+class SpatialTemporalResolutionTest(DBTestCase):
     def test_resolve_id_only(self):
         zone = GeoZoneFactory()
         for i in range(3):

@@ -46,7 +46,7 @@ from udata.tests.features.territories import create_geozones_fixtures
 from udata.tests.helpers import assert200, assert404
 from udata.utils import faker, unique_string
 
-from . import APITestCase
+from . import APITestCase, PytestOnlyAPITestCase
 
 SAMPLE_GEOM = {
     "type": "MultiPolygon",
@@ -66,8 +66,6 @@ def dataset_in_response(response: TestResponse, dataset: Dataset) -> bool:
 
 
 class DatasetAPITest(APITestCase):
-    modules = []
-
     def test_dataset_api_list(self):
         """It should fetch a dataset list from the API"""
         datasets = [DatasetFactory() for i in range(2)]
@@ -1473,8 +1471,6 @@ class DatasetBadgeAPITest(APITestCase):
 
 
 class DatasetResourceAPITest(APITestCase):
-    modules = None
-
     def setUp(self):
         self.login()
         self.dataset = DatasetFactory(owner=self.user)
@@ -1931,7 +1927,7 @@ class DatasetResourceAPITest(APITestCase):
             ]
         )
 
-        response = self.get(url_for("api.suggest_formats"), qs={"q": "km", "size": "5"})
+        response = self.get(url_for("api.suggest_formats", q="km", size=5))
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -1945,13 +1941,13 @@ class DatasetResourceAPITest(APITestCase):
         """It should not provide format suggestion if no match"""
         DatasetFactory(resources=[ResourceFactory(format=faker.word()) for _ in range(3)])
 
-        response = self.get(url_for("api.suggest_formats"), qs={"q": "test", "size": "5"})
+        response = self.get(url_for("api.suggest_formats", q="test", size=5))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
     def test_suggest_format_api_empty(self):
         """It should not provide format suggestion if no data"""
-        response = self.get(url_for("api.suggest_formats"), qs={"q": "test", "size": "5"})
+        response = self.get(url_for("api.suggest_formats", q="test", size=5))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
@@ -1969,7 +1965,7 @@ class DatasetResourceAPITest(APITestCase):
             ]
         )
 
-        response = self.get(url_for("api.suggest_mime"), qs={"q": "js", "size": "5"})
+        response = self.get(url_for("api.suggest_mime", q="js", size=5))
         self.assert200(response)
         self.assertLessEqual(len(response.json), 5)
 
@@ -1980,7 +1976,7 @@ class DatasetResourceAPITest(APITestCase):
         """It should suggest mime types"""
         DatasetFactory(resources=[ResourceFactory(mime="application/xhtml+xml")])
 
-        response = self.get(url_for("api.suggest_mime"), qs={"q": "xml", "size": "5"})
+        response = self.get(url_for("api.suggest_mime", q="xml", size=5))
         self.assert200(response)
 
         self.assertEqual(len(response.json), 5)
@@ -1989,13 +1985,13 @@ class DatasetResourceAPITest(APITestCase):
         """It should not provide format suggestion if no match"""
         DatasetFactory(resources=[ResourceFactory(mime=faker.word()) for _ in range(3)])
 
-        response = self.get(url_for("api.suggest_mime"), qs={"q": "test", "size": "5"})
+        response = self.get(url_for("api.suggest_mime", q="test", size=5))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
     def test_suggest_mime_api_empty(self):
         """It should not provide mime suggestion if no data"""
-        response = self.get(url_for("api.suggest_mime"), qs={"q": "test", "size": "5"})
+        response = self.get(url_for("api.suggest_mime", q="test", size=5))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
@@ -2011,7 +2007,7 @@ class DatasetResourceAPITest(APITestCase):
             title="title-test-4", visible=True, metrics={"followers": 10}
         )
 
-        response = self.get(url_for("api.suggest_datasets"), qs={"q": "title-test", "size": "5"})
+        response = self.get(url_for("api.suggest_datasets", q="title-test", size=5))
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -2034,7 +2030,7 @@ class DatasetResourceAPITest(APITestCase):
                 visible=True,
             )
 
-        response = self.get(url_for("api.suggest_datasets"), qs={"q": "acronym-test", "size": "5"})
+        response = self.get(url_for("api.suggest_datasets", q="acronym-test", size=5))
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -2056,7 +2052,7 @@ class DatasetResourceAPITest(APITestCase):
                 resources=[ResourceFactory()],
             )
 
-        response = self.get(url_for("api.suggest_datasets"), qs={"q": "title-testé", "size": "5"})
+        response = self.get(url_for("api.suggest_datasets", q="title-testé", size=5))
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -2074,13 +2070,13 @@ class DatasetResourceAPITest(APITestCase):
         for i in range(3):
             DatasetFactory(resources=[ResourceFactory()])
 
-        response = self.get(url_for("api.suggest_datasets"), qs={"q": "xxxxxx", "size": "5"})
+        response = self.get(url_for("api.suggest_datasets", q="xxxxxx", size=5))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
     def test_suggest_datasets_api_empty(self):
         """It should not provide dataset suggestion if no data"""
-        response = self.get(url_for("api.suggest_datasets"), qs={"q": "xxxxxx", "size": "5"})
+        response = self.get(url_for("api.suggest_datasets", q="xxxxxx", size=5))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
@@ -2110,8 +2106,6 @@ class DatasetReferencesAPITest(APITestCase):
 
 
 class DatasetArchivedAPITest(APITestCase):
-    modules = []
-
     def test_dataset_api_search_archived(self):
         """It should search datasets from the API, excluding archived ones"""
         DatasetFactory(archived=None)
@@ -2130,8 +2124,6 @@ class DatasetArchivedAPITest(APITestCase):
 
 
 class CommunityResourceAPITest(APITestCase):
-    modules = []
-
     def test_community_resource_api_get(self):
         """It should fetch a community resource from the API"""
         community_resource = CommunityResourceFactory()
@@ -2385,10 +2377,7 @@ class ResourcesTypesAPITest(APITestCase):
         self.assertEqual(len(response.json), len(RESOURCE_TYPES))
 
 
-@pytest.mark.usefixtures("clean_db")
-class DatasetSchemasAPITest:
-    modules = []
-
+class DatasetSchemasAPITest(PytestOnlyAPITestCase):
     def test_dataset_schemas_api_list(self, api, rmock, app):
         # Can't use @pytest.mark.options otherwise a request will be
         # made before setting up rmock at module load, resulting in a 404
@@ -2449,10 +2438,7 @@ class DatasetSchemasAPITest:
         )
 
 
-@pytest.mark.usefixtures("clean_db")
-class HarvestMetadataAPITest:
-    modules = []
-
+class HarvestMetadataAPITest(PytestOnlyAPITestCase):
     def test_dataset_with_harvest_metadata(self, api):
         date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
         harvest_metadata = HarvestDatasetMetadata(

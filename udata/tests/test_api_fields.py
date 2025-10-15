@@ -13,11 +13,8 @@ from udata.core.storages import default_image_basename, images
 from udata.factories import ModelFactory
 from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics, db
 from udata.mongo.queryset import DBPaginator, UDataQuerySet
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.utils import faker
-
-pytestmark = [
-    pytest.mark.usefixtures("clean_db"),
-]
 
 BIGGEST_IMAGE_SIZE: int = 500
 
@@ -166,7 +163,7 @@ class FakeFactory(ModelFactory):
     archived = None
 
 
-class IndexParserTest:
+class IndexParserTest(PytestOnlyDBTestCase):
     index_parser: RequestParser = Fake.__index_parser__
     index_parser_args: list[Argument] = Fake.__index_parser__.args
     index_parser_args_names: set[str] = set([field.name for field in Fake.__index_parser__.args])
@@ -233,7 +230,7 @@ class IndexParserTest:
         assert set(additional_sorts).issubset(set(choices))
 
 
-class PatchTest:
+class PatchTest(PytestOnlyDBTestCase):
     fake_json = {"url": URL_RAISE_ERROR, "description": None}
 
     def test_patch_check(self) -> None:
@@ -249,7 +246,7 @@ class PatchTest:
             patch_and_save(fake, fake_request)
 
 
-class PatchEmbeddedTest:
+class PatchEmbeddedTest(PytestOnlyDBTestCase):
     fake_json = {
         "url": URL_RAISE_ERROR,
         "description": "desc",
@@ -268,7 +265,7 @@ class PatchEmbeddedTest:
         patch_and_save(fake, fake_request)
 
 
-class ApplySortAndFiltersTest:
+class ApplySortAndFiltersTest(PytestOnlyDBTestCase):
     def test_filterable_field(self, app) -> None:
         """A filterable field filters the results."""
         fake1: Fake = FakeFactory(filter_field="test filter")
@@ -334,7 +331,7 @@ class ApplySortAndFiltersTest:
             assert fake2 not in results
 
 
-class ApplyPaginationTest:
+class ApplyPaginationTest(PytestOnlyDBTestCase):
     def test_default_pagination(self, app) -> None:
         """Results should be returned with default pagination."""
         [FakeFactory() for _ in range(100)]

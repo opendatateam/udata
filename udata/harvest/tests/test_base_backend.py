@@ -10,6 +10,7 @@ from udata.core.dataset import tasks
 from udata.core.dataset.factories import DatasetFactory
 from udata.harvest.models import HarvestItem
 from udata.models import Dataset
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates
 from udata.utils import faker
 
@@ -93,8 +94,7 @@ class HarvestFilterTest:
             HarvestFilter(faker.word(), faker.word(), type, faker.sentence())
 
 
-@pytest.mark.usefixtures("clean_db")
-class BaseBackendTest:
+class BaseBackendTest(PytestOnlyDBTestCase):
     def test_simple_harvest(self):
         now = datetime.utcnow()
         nb_datasets = 3
@@ -420,8 +420,7 @@ class BaseBackendTest:
         assert dataset_reused_uri.harvest.source_id == str(source.id)
 
 
-@pytest.mark.usefixtures("clean_db")
-class BaseBackendValidateTest:
+class BaseBackendValidateTest(PytestOnlyDBTestCase):
     @pytest.fixture
     def validate(self):
         return FakeBackend(HarvestSourceFactory()).validate

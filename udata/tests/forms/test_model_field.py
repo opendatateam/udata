@@ -1,11 +1,9 @@
-import pytest
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
 from udata.i18n import gettext as _
 from udata.mongo import db
-
-pytestmark = [pytest.mark.usefixtures("clean_db")]
+from udata.tests.api import PytestOnlyDBTestCase
 
 
 class Target(db.Document):
@@ -233,7 +231,7 @@ class Optionnal:
         assert model.target is None
 
 
-class CommonMixin:
+class CommonMixin(PytestOnlyDBTestCase):
     @property
     def form(self):
         validators = [fields.validators.DataRequired()] if self.required else []

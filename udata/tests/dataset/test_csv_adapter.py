@@ -1,15 +1,12 @@
 from datetime import datetime, timedelta
 
-import pytest
-
 from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.dataset.models import Dataset
+from udata.tests.api import PytestOnlyDBTestCase
 
 
-@pytest.mark.frontend
-@pytest.mark.usefixtures("clean_db")
-class DatasetCSVAdapterTest:
+class DatasetCSVAdapterTest(PytestOnlyDBTestCase):
     def test_resources_csv_adapter(self):
         date_created = datetime(2022, 12, 31)
         date_modified = date_created + timedelta(days=1)

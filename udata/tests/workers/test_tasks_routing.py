@@ -1,6 +1,7 @@
 import pytest
 
 from udata.tasks import celery, job, task
+from udata.tests import PytestOnlyTestCase
 from udata.utils import unique_string
 
 TASKS = [
@@ -33,37 +34,36 @@ def fake_task(*args, **kwargs):
     pass
 
 
-@pytest.fixture
-def route_to(app, mocker):
-    def assertion(func, args, kwargs, queue, key=None):
-        __tracebackhide__ = True
+class TasksRoutingTest(PytestOnlyTestCase):
+    @pytest.fixture
+    def route_to(self, app, mocker):
+        def assertion(func, args, kwargs, queue, key=None):
+            __tracebackhide__ = True
 
-        decorator = func(*args, **kwargs) if args or kwargs else func
-        router = celery.amqp.router
+            decorator = func(*args, **kwargs) if args or kwargs else func
+            router = celery.amqp.router
 
-        # Celery instanciate only one task by name so we need unique names
-        suffix = unique_string().replace("-", "_")
-        fake_task.__name__ = "task_{0}".format(suffix)
-        t = decorator(fake_task)
+            # Celery instanciate only one task by name so we need unique names
+            suffix = unique_string().replace("-", "_")
+            fake_task.__name__ = "task_{0}".format(suffix)
+            t = decorator(fake_task)
 
-        options = t._get_exec_options()
+            options = t._get_exec_options()
 
-        route = router.route(options, t.name, task_type=t)
-        if queue:
-            assert route["queue"].name == queue, "queue mismatch"
-        if key:
-            key = key.format(name=t.name)
-            assert route["routing_key"] == key, "routing_key mismatch"
-        return route
+            route = router.route(options, t.name, task_type=t)
+            if queue:
+                assert route["queue"].name == queue, "queue mismatch"
+            if key:
+                key = key.format(name=t.name)
+                assert route["routing_key"] == key, "routing_key mismatch"
+            return route
 
-    return assertion
+        return assertion
 
+    @pytest.mark.parametrize("kwargs,queue,key", TASKS, ids=idify(TASKS))
+    def test_tasks_routing(self, route_to, kwargs, queue, key):
+        route_to(task, [], kwargs, queue, key)
 
-@pytest.mark.parametrize("kwargs,queue,key", TASKS, ids=idify(TASKS))
-def test_tasks_routing(route_to, kwargs, queue, key):
-    route_to(task, [], kwargs, queue, key)
-
-
-@pytest.mark.parametrize("kwargs,queue,key", JOBS, ids=idify(JOBS))
-def test_job_routing(route_to, kwargs, queue, key):
-    route_to(job, [unique_string()], kwargs, queue, key)
+    @pytest.mark.parametrize("kwargs,queue,key", JOBS, ids=idify(JOBS))
+    def test_job_routing(self, route_to, kwargs, queue, key):
+        route_to(job, [unique_string()], kwargs, queue, key)

@@ -1,15 +1,13 @@
 from datetime import date, datetime
 
-import pytest
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
 from udata.mongo import db
+from udata.tests import PytestOnlyTestCase
 
-pytestmark = [pytest.mark.usefixtures("app")]
 
-
-class DictFieldTest:
+class DictFieldTest(PytestOnlyTestCase):
     def factory(self):
         class Fake(db.Document):
             raw = db.DictField()
