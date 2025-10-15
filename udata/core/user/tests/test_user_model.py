@@ -8,8 +8,6 @@ from udata.core.user.factories import UserFactory
 from udata.core.user.models import User
 from udata.tests.api import APITestCase
 
-pytestmark = pytest.mark.usefixtures("clean_db")
-
 
 class UserModelTest(APITestCase):
     def test_mark_as_deleted(self):
