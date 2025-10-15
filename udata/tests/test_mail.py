@@ -6,7 +6,7 @@ import pytest
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.mail import mail, mail_sent, send
-from udata.tests import DBTestMixin, TestCase
+from udata.tests.api import DBTestCase
 from udata.tests.helpers import assert_emit, assert_not_emit
 
 SMTPRecipientsRefusedList = ["not-found@udata", "not-found-either@udata"]
@@ -25,7 +25,7 @@ class FakeMail:
         yield FakeSender()
 
 
-class MailSendTest(TestCase, DBTestMixin):
+class MailSendTest(DBTestCase):
     def create_app(self):
         app = super().create_app()
         app.config["SEND_MAIL"] = True

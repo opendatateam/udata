@@ -75,7 +75,7 @@ def _load_frontend(request, _configure_application):
 
     app = request.getfixturevalue("app")
 
-    if not hasattr(request.cls, "do_not_load_api_and_frontend"):
+    if hasattr(request.cls, "load_api_and_frontend"):
         from udata import api, frontend
 
         api.init_app(app)

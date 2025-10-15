@@ -84,8 +84,3 @@ for code in 200, 201, 204, 400, 401, 403, 404, 410, 500:
     name = "assert{0}".format(code)
     helper = getattr(helpers, name)
     setattr(WebTestMixin, name, lambda s, r, h=helper: h(r))
-
-
-@pytest.mark.usefixtures("clean_db")
-class DBTestMixin(object):
-    pass

@@ -2,11 +2,11 @@ from contextlib import contextmanager
 
 import pytest
 
-from udata.tests import DBTestMixin, PytestOnlyTestCase, TestCase, WebTestMixin
+from udata.tests import PytestOnlyTestCase, TestCase, WebTestMixin
 
 
 @pytest.mark.usefixtures("instance_path")
-class APITestCaseMixin(WebTestMixin, DBTestMixin):
+class APITestCaseMixin(WebTestMixin):
     """
     See explanation about `get`, `post` overrides in :TestClientOverride
 
@@ -44,9 +44,19 @@ class APITestCaseMixin(WebTestMixin, DBTestMixin):
         return self.api.options(url, data=data, *args, **kwargs)
 
 
-class APITestCase(APITestCaseMixin, TestCase):
+@pytest.mark.usefixtures("clean_db")
+class DBTestCase(TestCase):
     pass
 
 
-class PytestOnlyAPITestCase(APITestCaseMixin, PytestOnlyTestCase):
+@pytest.mark.usefixtures("clean_db")
+class PytestOnlyDBTestCase(PytestOnlyTestCase):
     pass
+
+
+class APITestCase(APITestCaseMixin, DBTestCase):
+    load_api_and_frontend = True
+
+
+class PytestOnlyAPITestCase(APITestCaseMixin, PytestOnlyDBTestCase):
+    load_api_and_frontend = True

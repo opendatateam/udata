@@ -11,11 +11,11 @@ from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.rdf import build_org_catalog, organization_to_rdf
 from udata.rdf import DCAT, DCT, HYDRA
-from udata.tests import DBTestMixin, TestCase
+from udata.tests.api import DBTestCase
 from udata.utils import faker
 
 
-class OrganizationToRdfTest(DBTestMixin, TestCase):
+class OrganizationToRdfTest(DBTestCase):
     def create_app(self):
         app = super(OrganizationToRdfTest, self).create_app()
         api.init_app(app)

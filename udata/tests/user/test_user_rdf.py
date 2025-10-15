@@ -6,11 +6,11 @@ from rdflib.resource import Resource as RdfResource
 from udata import api
 from udata.core.user.factories import UserFactory
 from udata.core.user.rdf import user_to_rdf
-from udata.tests import DBTestMixin, TestCase
+from udata.tests.api import DBTestCase
 from udata.utils import faker
 
 
-class UserToRdfTest(DBTestMixin, TestCase):
+class UserToRdfTest(DBTestCase):
     def create_app(self):
         app = super(UserToRdfTest, self).create_app()
         api.init_app(app)
