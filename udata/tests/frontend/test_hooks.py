@@ -93,13 +93,11 @@ def iter_conditionnal():
     return render_template_string('{% for w in hook("conditionnal") %}<{{ w }}>{% endfor %}')
 
 
-@pytest.fixture
-def app(app):
-    app.register_blueprint(bp)
-    return app
-
-
 class HooksTest(PytestOnlyAPITestCase):
+    @pytest.fixture(autouse=True)
+    def setup_func(self, app):
+        app.register_blueprint(bp)
+
     def test_empty_template_hook(self, client):
         response = client.get(url_for("hooks_tests.render_empty"))
         assert200(response)

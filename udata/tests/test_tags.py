@@ -10,6 +10,7 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.tags.models import Tag
 from udata.core.tags.tasks import count_tags
 from udata.tags import normalize, slug, tags_list
+from udata.tests import PytestOnlyTestCase
 from udata.tests.helpers import assert200
 
 log = logging.getLogger(__name__)
@@ -64,7 +65,7 @@ class TagsTests:
             assert tag.counts["reuses"] == count
 
 
-class TagsUtilsTest:
+class TagsUtilsTest(PytestOnlyTestCase):
     def test_tags_list(self):
         assert tags_list("") == []
         assert tags_list("a") == ["a"]
