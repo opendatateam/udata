@@ -14,43 +14,41 @@ from udata.tests.api import PytestOnlyDBTestCase
 from .helpers import mock_monthly_metrics_payload
 
 
-@pytest.mark.parametrize(
-    "target,value_keys",
-    [
-        ("dataset", ["visit", "download_resource"]),
-        ("dataservice", ["visit"]),
-        ("reuse", ["visit"]),
-        ("organization", ["visit_dataset", "download_resource", "visit_reuse"]),
-    ],
-)
-def test_get_metrics_for_model(app, rmock, target, value_keys):
-    mock_monthly_metrics_payload(
-        app, rmock, target, data=[(value_key, 2403) for value_key in value_keys]
-    )
-    res = get_metrics_for_model(target, "id", value_keys)
-    for i, key in enumerate(value_keys):
-        assert len(res[i]) == 13  # The current month as well as last year's are included
-        assert list(res[i].values())[-1] == len(key) * 2403 + 1
-        assert list(res[i].values())[-2] == len(key) * 2403
-
-
-def test_get_metrics_for_site(app, rmock):
-    value_keys = [
-        "visit_dataset",
-        "download_resource",
-    ]
-    url = f"{app.config['METRICS_API']}/site/data/?metric_month__sort=desc"
-    mock_monthly_metrics_payload(
-        app, rmock, "site", data=[(value_key, 2403) for value_key in value_keys], url=url
-    )
-    res = get_metrics_for_model("site", None, value_keys)
-    for i, key in enumerate(value_keys):
-        assert len(res[i]) == 13  # The current month as well as last year's are included
-        assert list(res[i].values())[-1] == len(key) * 2403 + 1
-        assert list(res[i].values())[-2] == len(key) * 2403
-
-
 class GetStockMetricsTest(PytestOnlyDBTestCase):
+    @pytest.mark.parametrize(
+        "target,value_keys",
+        [
+            ("dataset", ["visit", "download_resource"]),
+            ("dataservice", ["visit"]),
+            ("reuse", ["visit"]),
+            ("organization", ["visit_dataset", "download_resource", "visit_reuse"]),
+        ],
+    )
+    def test_get_metrics_for_model(self, app, rmock, target, value_keys):
+        mock_monthly_metrics_payload(
+            app, rmock, target, data=[(value_key, 2403) for value_key in value_keys]
+        )
+        res = get_metrics_for_model(target, "id", value_keys)
+        for i, key in enumerate(value_keys):
+            assert len(res[i]) == 13  # The current month as well as last year's are included
+            assert list(res[i].values())[-1] == len(key) * 2403 + 1
+            assert list(res[i].values())[-2] == len(key) * 2403
+
+    def test_get_metrics_for_site(self, app, rmock):
+        value_keys = [
+            "visit_dataset",
+            "download_resource",
+        ]
+        url = f"{app.config['METRICS_API']}/site/data/?metric_month__sort=desc"
+        mock_monthly_metrics_payload(
+            app, rmock, "site", data=[(value_key, 2403) for value_key in value_keys], url=url
+        )
+        res = get_metrics_for_model("site", None, value_keys)
+        for i, key in enumerate(value_keys):
+            assert len(res[i]) == 13  # The current month as well as last year's are included
+            assert list(res[i].values())[-1] == len(key) * 2403 + 1
+            assert list(res[i].values())[-2] == len(key) * 2403
+
     @pytest.mark.parametrize(
         "model,factory,date_label",
         [

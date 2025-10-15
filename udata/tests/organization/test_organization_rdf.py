@@ -3,7 +3,6 @@ from rdflib import BNode, Literal, URIRef
 from rdflib.namespace import FOAF, RDF, RDFS
 from rdflib.resource import Resource as RdfResource
 
-from udata import api
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import DatasetFactory
@@ -11,16 +10,11 @@ from udata.core.dataset.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.rdf import build_org_catalog, organization_to_rdf
 from udata.rdf import DCAT, DCT, HYDRA
-from udata.tests.api import DBTestCase
+from udata.tests.api import APITestCase
 from udata.utils import faker
 
 
-class OrganizationToRdfTest(DBTestCase):
-    def create_app(self):
-        app = super(OrganizationToRdfTest, self).create_app()
-        api.init_app(app)
-        return app
-
+class OrganizationToRdfTest(APITestCase):
     def test_minimal(self):
         org = OrganizationFactory.build()  # Does not have an URL
         o = organization_to_rdf(org)

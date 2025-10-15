@@ -3,6 +3,7 @@ from io import StringIO
 from random import randint
 
 import factory
+import pytest
 from factory.mongoengine import MongoEngineFactory
 from flask import Blueprint, url_for
 
@@ -107,10 +108,9 @@ def with_basename():
 
 
 class CsvTest(APITestCase):
-    def create_app(self):
-        app = super(CsvTest, self).create_app()
+    @pytest.fixture(autouse=True)
+    def setup_func(self, app):
         app.register_blueprint(blueprint)
-        return app
 
     def test_adapter_fields_as_list(self):
         @csv.adapter(Fake)

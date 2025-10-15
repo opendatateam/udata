@@ -25,12 +25,8 @@ class FakeMail:
         yield FakeSender()
 
 
+@pytest.mark.options(SEND_MAIL=True)
 class MailSendTest(DBTestCase):
-    def create_app(self):
-        app = super().create_app()
-        app.config["SEND_MAIL"] = True
-        return app
-
     @pytest.fixture(autouse=True)
     def patch_mail(self, mocker):
         mocker.patch("udata.mail.mail", FakeMail())
