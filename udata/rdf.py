@@ -128,6 +128,12 @@ EU_HVD_CATEGORIES = {
 HVD_LEGISLATION = "http://data.europa.eu/eli/reg_impl/2023/138/oj"
 TAG_TO_EU_HVD_CATEGORIES = {slugify_tag(EU_HVD_CATEGORIES[uri]): uri for uri in EU_HVD_CATEGORIES}
 
+INSPIRE_GEMET_THEME_NAMESPACE = "http://inspire.ec.europa.eu/theme"
+INSPIRE_GEMET_SCHEME_URIS = [
+    INSPIRE_GEMET_THEME_NAMESPACE,
+    "http://www.eionet.europa.eu/gemet/inspire_themes",
+]
+
 AGENT_ROLE_TO_RDF_PREDICATE = {
     "contact": DCAT.contactPoint,
     "publisher": DCT.publisher,
@@ -317,14 +323,22 @@ def theme_labels_from_rdf(rdf):
                 label = EU_HVD_CATEGORIES[uri]
                 # Additionnally yield hvd keyword
                 yield "hvd"
-            elif current_app.config["INSPIRE_SUPPORT"]:
-                if uri.startswith("http://inspire.ec.europa.eu/theme/"):
+            if current_app.config["INSPIRE_SUPPORT"]:
+                if uri.startswith(INSPIRE_GEMET_THEME_NAMESPACE):
                     yield "inspire"
                 else:
-                    if (scheme := theme.value(SKOS.inScheme)) and (
-                        scheme_title := rdf_value(scheme, DCT.title)
-                    ):
-                        if scheme_title.lower() == "gemet - inspire themes, version 1.0":
+                    # Check if the theme belongs to the GEMET INSPIRE scheme
+                    if scheme := theme.value(SKOS.inScheme):
+                        scheme_title = (
+                            rdf_value(scheme, DCT.title)
+                            or rdf_value(scheme, SKOS.prefLabel)
+                            or rdf_value(scheme, RDFS.label)
+                        )
+                        scheme_uri = scheme.identifier.toPython()
+                        if (
+                            scheme_title
+                            and scheme_title.lower() == "gemet - inspire themes, version 1.0"
+                        ) or scheme_uri in INSPIRE_GEMET_SCHEME_URIS:
                             yield "inspire"
         else:
             label = theme.toPython()

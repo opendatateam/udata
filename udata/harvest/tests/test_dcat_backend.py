@@ -445,6 +445,23 @@ class DcatBackendTest:
         assert resources_by_title["Resource 3-1"].schema.url is None
         assert resources_by_title["Resource 3-1"].schema.version == "2.2.0"
 
+    @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/schemas")
+    def test_harvest_inspire_themese(self, rmock):
+        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
+
+        filename = "bnodes.xml"
+        url = mock_dcat(rmock, filename)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
+
+        actions.run(source)
+
+        datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
+
+        assert set(datasets["1"].tags).issuperset(set(["repartition-des-especes", "inspire"]))
+        assert set(datasets["2"].tags).issuperset(set(["hydrographie", "inspire"]))
+        assert "inspire" not in datasets["3"].tags
+
     def test_simple_nested_attributes(self, rmock):
         filename = "nested.jsonld"
         url = mock_dcat(rmock, filename)
