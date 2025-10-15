@@ -67,8 +67,6 @@ def oauth(app, request):
 
 @pytest.mark.usefixtures("clean_db")
 class APIAuthTest:
-    modules = []
-
     def test_no_auth(self, api):
         """Should not return a content type if there is no content on delete"""
         response = api.get(url_for("api.fake"))

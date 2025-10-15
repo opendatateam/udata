@@ -108,6 +108,8 @@ class ConfigurableAllowedExtensionsTest:
 
 @pytest.mark.usefixtures("instance_path")
 class StorageUploadViewTest:
+    do_not_load_api_and_frontend = True
+
     def test_standard_upload(self, client):
         client.login()
         response = client.post(

@@ -16,8 +16,6 @@ pytestmark = [
 
 
 class ContactPointAPITest:
-    modules = []
-
     def test_get_or_create(self):
         org = OrganizationFactory()
         contact_point, created = ContactPoint.objects().get_or_create(

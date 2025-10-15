@@ -12,8 +12,6 @@ from . import APITestCase
 
 
 class TransferAPITest(APITestCase):
-    modules = []
-
     def test_request_dataset_transfer(self):
         user = self.login()
         recipient_user = UserFactory()

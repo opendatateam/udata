@@ -35,8 +35,6 @@ def reuse_in_response(response: TestResponse, reuse: Reuse) -> bool:
 
 
 class ReuseAPITest:
-    modules = []
-
     def test_reuse_api_list(self, api):
         """It should fetch a reuse list from the API"""
         reuses = ReuseFactory.create_batch(3, visible=True)
@@ -628,8 +626,6 @@ class ReusesFeedAPItest(APITestCase):
 
 
 class ReuseBadgeAPITest:
-    modules = []
-
     @pytest.fixture(autouse=True)
     def setup(self, api, clean_db):
         # Register at least two badges
@@ -693,8 +689,6 @@ class ReuseBadgeAPITest:
 
 
 class ReuseReferencesAPITest:
-    modules = []
-
     def test_reuse_types_list(self, api):
         """It should fetch the reuse types list from the API"""
         response = api.get(url_for("api.reuse_types"))

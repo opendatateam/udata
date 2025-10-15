@@ -18,8 +18,6 @@ from . import APITestCase
 
 
 class MeAPITest(APITestCase):
-    modules = []
-
     def test_get_profile(self):
         """It should fetch my user data on GET"""
         self.login()

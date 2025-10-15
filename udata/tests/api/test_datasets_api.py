@@ -66,8 +66,6 @@ def dataset_in_response(response: TestResponse, dataset: Dataset) -> bool:
 
 
 class DatasetAPITest(APITestCase):
-    modules = []
-
     def test_dataset_api_list(self):
         """It should fetch a dataset list from the API"""
         datasets = [DatasetFactory() for i in range(2)]
@@ -1473,8 +1471,6 @@ class DatasetBadgeAPITest(APITestCase):
 
 
 class DatasetResourceAPITest(APITestCase):
-    modules = None
-
     def setUp(self):
         self.login()
         self.dataset = DatasetFactory(owner=self.user)
@@ -2110,8 +2106,6 @@ class DatasetReferencesAPITest(APITestCase):
 
 
 class DatasetArchivedAPITest(APITestCase):
-    modules = []
-
     def test_dataset_api_search_archived(self):
         """It should search datasets from the API, excluding archived ones"""
         DatasetFactory(archived=None)
@@ -2130,8 +2124,6 @@ class DatasetArchivedAPITest(APITestCase):
 
 
 class CommunityResourceAPITest(APITestCase):
-    modules = []
-
     def test_community_resource_api_get(self):
         """It should fetch a community resource from the API"""
         community_resource = CommunityResourceFactory()
@@ -2387,8 +2379,6 @@ class ResourcesTypesAPITest(APITestCase):
 
 @pytest.mark.usefixtures("clean_db")
 class DatasetSchemasAPITest:
-    modules = []
-
     def test_dataset_schemas_api_list(self, api, rmock, app):
         # Can't use @pytest.mark.options otherwise a request will be
         # made before setting up rmock at module load, resulting in a 404
@@ -2451,8 +2441,6 @@ class DatasetSchemasAPITest:
 
 @pytest.mark.usefixtures("clean_db")
 class HarvestMetadataAPITest:
-    modules = []
-
     def test_dataset_with_harvest_metadata(self, api):
         date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
         harvest_metadata = HarvestDatasetMetadata(

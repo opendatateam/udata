@@ -10,7 +10,6 @@ from udata.tests.features.territories import (
 
 
 class TerritoriesAPITest(APITestCase):
-    modules = []
     settings = TerritoriesSettings
 
     def setUp(self):

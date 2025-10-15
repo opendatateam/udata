@@ -37,8 +37,6 @@ pytestmark = [
 
 
 class OrganizationAPITest:
-    modules = []
-
     def test_organization_api_list(self, api):
         """It should fetch an organization list from the API"""
         organizations = OrganizationFactory.create_batch(3)
@@ -236,8 +234,6 @@ class OrganizationAPITest:
 
 
 class MembershipAPITest:
-    modules = []
-
     def test_request_membership(self, api):
         organization = OrganizationFactory()
         user = api.login()
@@ -803,8 +799,6 @@ class MembershipAPITest:
 
 
 class OrganizationDatasetsAPITest:
-    modules = []
-
     def test_list_org_datasets(self, api):
         """Should list organization datasets"""
         org = OrganizationFactory()
@@ -850,8 +844,6 @@ class OrganizationDatasetsAPITest:
 
 
 class OrganizationReusesAPITest:
-    modules = []
-
     def test_list_org_reuses(self, api):
         """Should list organization reuses"""
         org = OrganizationFactory()
@@ -887,8 +879,6 @@ class OrganizationReusesAPITest:
 
 
 class OrganizationDiscussionsAPITest:
-    modules = []
-
     def test_list_org_discussions(self, api):
         """Should list organization discussions"""
         user = UserFactory()
@@ -911,8 +901,6 @@ class OrganizationDiscussionsAPITest:
 
 
 class OrganizationBadgeAPITest:
-    modules = []
-
     @pytest.fixture(autouse=True)
     def setUp(self, api, clean_db):
         self.factory = badge_factory(Organization)
@@ -979,8 +967,6 @@ class OrganizationBadgeAPITest:
 
 
 class OrganizationContactPointsAPITest:
-    modules = []
-
     def test_org_contact_points(self, api):
         user = api.login()
         member = Member(user=user, role="admin")
@@ -1028,8 +1014,6 @@ class OrganizationContactPointsAPITest:
 
 
 class OrganizationCsvExportsTest:
-    modules = []
-
     def test_datasets_csv(self, api):
         org = OrganizationFactory()
         [DatasetFactory(organization=org, resources=[ResourceFactory()]) for _ in range(3)]

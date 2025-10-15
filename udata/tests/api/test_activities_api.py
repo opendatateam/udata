@@ -34,8 +34,6 @@ class FakeTopicActivity(Activity):
 
 
 class ActivityAPITest:
-    modules = []
-
     def test_activity_api_list(self, api) -> None:
         """It should fetch an activity list from the API"""
         activities: list[Activity] = [

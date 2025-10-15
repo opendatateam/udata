@@ -27,8 +27,6 @@ log = logging.getLogger(__name__)
 
 @pytest.mark.usefixtures("clean_db")
 class HarvestAPITest(MockBackendsMixin):
-    modules = []
-
     def test_list_backends(self, api):
         """It should fetch the harvest backends list from the API"""
         response = api.get(url_for("api.harvest_backends"))

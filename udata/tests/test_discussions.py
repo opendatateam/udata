@@ -37,8 +37,6 @@ from .helpers import assert_emit, assert_not_emit
 
 
 class DiscussionsTest(APITestCase):
-    modules = []
-
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_new_discussion(self):
         user = self.login()
@@ -1091,8 +1089,6 @@ class DiscussionsNotificationsTest(TestCase, DBTestMixin):
 
 
 class DiscussionsMailsTest(APITestCase):
-    modules = []
-
     def test_new_discussion_mail(self):
         user = UserFactory()
         owner = UserFactory()

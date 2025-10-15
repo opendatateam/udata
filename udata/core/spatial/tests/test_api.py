@@ -20,8 +20,6 @@ from udata.utils import faker
 
 
 class SpatialApiTest(APITestCase):
-    modules = []
-
     def test_zones_api_one(self):
         zone = GeoZoneFactory()
 
@@ -261,7 +259,6 @@ class SpatialApiTest(APITestCase):
 
 
 class SpatialTerritoriesApiTest(APITestCase):
-    modules = []
     settings = TerritoriesSettings
 
     def test_zone_datasets_with_dynamic_and_setting(self):
@@ -292,8 +289,6 @@ class SpatialTerritoriesApiTest(APITestCase):
 
 
 class DatasetsSpatialAPITest(APITestCase):
-    modules = []
-
     def test_create_spatial_zones(self):
         paca, _, _ = create_geozones_fixtures()
         granularity = spatial_granularities[0][0]

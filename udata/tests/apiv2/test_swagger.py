@@ -7,8 +7,6 @@ from udata.tests.helpers import assert200
 
 
 class SwaggerBlueprintTest:
-    modules = []
-
     def test_swagger_resource_type(self, api):
         response = api.get(url_for("apiv2.specs"))
         assert200(response)

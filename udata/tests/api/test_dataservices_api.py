@@ -35,8 +35,6 @@ def dataservice_in_response(response: TestResponse, dataservice: Dataservice) ->
 
 
 class DataserviceAPITest(APITestCase):
-    modules = []
-
     def test_dataservice_api_get(self):
         """It should fetch a dataservice from the API"""
         dataservice = DataserviceFactory()
