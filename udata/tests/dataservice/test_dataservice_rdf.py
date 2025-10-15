@@ -1,4 +1,3 @@
-import pytest
 from rdflib import BNode, Literal, URIRef
 from rdflib.namespace import RDF
 from rdflib.resource import Resource as RdfResource
@@ -13,12 +12,10 @@ from udata.rdf import (
     HVD_LEGISLATION,
     TAG_TO_EU_HVD_CATEGORIES,
 )
-from udata.tests import PytestOnlyTestCase
-
-pytestmark = pytest.mark.usefixtures("app")
+from udata.tests.api import PytestOnlyAPITestCase
 
 
-class DataserviceToRdfTest(PytestOnlyTestCase):
+class DataserviceToRdfTest(PytestOnlyAPITestCase):
     def test_minimal(self):
         dataservice = DataserviceFactory.build()  # Does not have an URL
         d = dataservice_to_rdf(dataservice)
