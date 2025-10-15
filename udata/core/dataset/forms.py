@@ -116,6 +116,8 @@ class CommunityResourceForm(BaseResourceForm):
 
 
 def unmarshal_frequency(form, field):
+    if field.data is None:
+        return
     # We don't need to worry about invalid field.data being fed to UpdateFrequency here,
     # since the API will already have ensured incoming data matches the field definition,
     # which in our case is an enum of valid UpdateFrequency values.
