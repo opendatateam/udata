@@ -19,6 +19,13 @@ class APITestCaseMixin:
     user = None
 
     @pytest.fixture(autouse=True)
+    def load_api_routes(self, app):
+        from udata import api, frontend
+
+        api.init_app(app)
+        frontend.init_app(app)
+
+    @pytest.fixture(autouse=True)
     def inject_api(self, api):
         """
         Inject API test client for compatibility with legacy tests.
@@ -109,8 +116,8 @@ class PytestOnlyDBTestCase(_CleanDBMixin, PytestOnlyTestCase):
 
 
 class APITestCase(APITestCaseMixin, DBTestCase):
-    load_api_and_frontend = True
+    pass
 
 
 class PytestOnlyAPITestCase(APITestCaseMixin, PytestOnlyDBTestCase):
-    load_api_and_frontend = True
+    pass

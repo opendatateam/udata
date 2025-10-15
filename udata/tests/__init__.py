@@ -4,22 +4,21 @@ import pytest
 from werkzeug import Response
 
 from udata import settings
+from udata.app import UDataApp, create_app
+from udata.tests.plugin import TestClient, get_settings
 
 from . import helpers
 
 
 class TestCaseMixin:
     settings = settings.Testing
+    app: UDataApp
 
-    @pytest.fixture(autouse=True)
-    def inject_app(self, app):
-        self.app = app
-        return self.create_app()
-
-    def create_app(self):
-        """
-        Here for compatibility legacy test classes
-        """
+    @pytest.fixture(autouse=True, name="app")
+    def _app(self, request):
+        test_settings = get_settings(request)
+        self.app = create_app(settings.Defaults, override=test_settings)
+        self.app.test_client_class = TestClient
         return self.app
 
     def assertEqualDates(self, datetime1, datetime2, limit=1):  # Seconds.

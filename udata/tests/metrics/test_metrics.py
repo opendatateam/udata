@@ -14,6 +14,7 @@ from udata.tests.api import PytestOnlyDBTestCase
 from .helpers import mock_monthly_metrics_payload
 
 
+@pytest.mark.options(METRICS_API="http://metrics-api.fr/api")
 class GetStockMetricsTest(PytestOnlyDBTestCase):
     @pytest.mark.parametrize(
         "target,value_keys",

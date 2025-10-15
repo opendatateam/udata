@@ -8,7 +8,6 @@ from flask_principal import Identity, identity_changed
 from lxml import etree
 
 from udata import settings
-from udata.app import create_app
 from udata.core.user.factories import UserFactory
 
 from .helpers import assert200, assert_command_ok
@@ -49,31 +48,6 @@ class TestClient(FlaskClient):
             del session["user_id"]
             del session["_fresh"]
             del session["_id"]
-
-
-@pytest.fixture
-def app(request):
-    test_settings = get_settings(request)
-    app = create_app(settings.Defaults, override=test_settings)
-    app.test_client_class = TestClient
-    return app
-
-
-@pytest.fixture(autouse=True)
-def _load_frontend(request, _configure_application):
-    """
-    Load API routes only for APITestCase (and not for DBTestCase)
-    """
-    if "app" not in request.fixturenames:
-        return
-
-    app = request.getfixturevalue("app")
-
-    if hasattr(request.cls, "load_api_and_frontend"):
-        from udata import api, frontend
-
-        api.init_app(app)
-        frontend.init_app(app)
 
 
 @pytest.fixture
