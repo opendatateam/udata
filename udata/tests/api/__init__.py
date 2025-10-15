@@ -2,11 +2,11 @@ from contextlib import contextmanager
 
 import pytest
 
-from ..frontend import FrontTestCase
+from udata.tests import DBTestMixin, TestCase, WebTestMixin
 
 
 @pytest.mark.usefixtures("instance_path")
-class APITestCase(FrontTestCase):
+class APITestCase(WebTestMixin, DBTestMixin, TestCase):
     """
     See explanation about `get`, `post` overrides in :TestClientOverride
 

@@ -8,9 +8,8 @@ from flask import Blueprint, url_for
 
 from udata.core import csv
 from udata.mongo import db
+from udata.tests.api import APITestCase
 from udata.utils import faker
-
-from . import FrontTestCase
 
 RE_ATTACHMENT = re.compile(r"^attachment; filename=(?P<filename>.*)$")
 RE_FILENAME = re.compile(r"^(?P<basename>.*)-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}\.csv$")
@@ -107,7 +106,7 @@ def with_basename():
     return csv.stream(adapter, "test")
 
 
-class CsvTest(FrontTestCase):
+class CsvTest(APITestCase):
     def create_app(self):
         app = super(CsvTest, self).create_app()
         app.register_blueprint(blueprint)
