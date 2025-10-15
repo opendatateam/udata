@@ -2,10 +2,10 @@ import os
 from contextlib import contextmanager
 from datetime import timedelta
 from io import BytesIO
-from urllib.parse import parse_qs, urljoin, urlparse
+from urllib.parse import parse_qs, urlparse
 
 import mock
-from flask import current_app, json, request, url_for
+from flask import current_app, json
 from flask_security.babel import FsDomain
 from PIL import Image
 
@@ -180,11 +180,6 @@ def assert410(response):
 def assert500(response):
     __tracebackhide__ = True
     assert_status(response, 500)
-
-
-def full_url(*args, **kwargs):
-    """Build a full URL"""
-    return urljoin(request.url_root, url_for(*args, **kwargs))
 
 
 def data_path(filename):

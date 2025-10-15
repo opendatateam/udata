@@ -5,16 +5,18 @@ import pytest
 
 from udata.mongo import db
 from udata.mongo.document import get_all_models
-from udata.tests import PytestOnlyTestCase, TestCase, WebTestMixin
+from udata.tests import PytestOnlyTestCase, TestCase, helpers
 
 
 @pytest.mark.usefixtures("instance_path")
-class APITestCaseMixin(WebTestMixin):
+class APITestCaseMixin:
     """
     See explanation about `get`, `post` overrides in :TestClientOverride
 
     (switch from `data` in kwargs to `data` in args to avoid doing `data=data` and default to `json=True`)
     """
+
+    user = None
 
     @pytest.fixture(autouse=True)
     def inject_api(self, api):
@@ -23,10 +25,21 @@ class APITestCaseMixin(WebTestMixin):
         """
         self.api = api
 
+    @pytest.fixture(autouse=True)
+    def inject_client(self, client):
+        """
+        Inject test client for compatibility with Flask-Testing.
+        """
+        self.client = client
+
     @contextmanager
     def api_user(self, user=None):
         with self.api.user(user) as user:
             yield user
+
+    def login(self, user=None):
+        self.user = self.client.login(user)
+        return self.user
 
     def get(self, url, *args, **kwargs):
         return self.api.get(url, *args, **kwargs)
@@ -45,6 +58,16 @@ class APITestCaseMixin(WebTestMixin):
 
     def options(self, url, data=None, *args, **kwargs):
         return self.api.options(url, data=data, *args, **kwargs)
+
+    def assertStatus(self, response, status_code, message=None):
+        __tracebackhide__ = True
+        helpers.assert_status(response, status_code, message=message)
+
+
+for code in 200, 201, 204, 400, 401, 403, 404, 410, 500:
+    name = "assert{0}".format(code)
+    helper = getattr(helpers, name)
+    setattr(APITestCaseMixin, name, lambda s, r, h=helper: h(r))
 
 
 class _CleanDBMixin:
