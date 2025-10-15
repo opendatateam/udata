@@ -899,7 +899,7 @@ class OrganizationDiscussionsAPITest(PytestOnlyAPITestCase):
 
 class OrganizationBadgeAPITest(PytestOnlyAPITestCase):
     @pytest.fixture(autouse=True)
-    def setUp(self, api, clean_db):
+    def setup_func(self, api):
         self.factory = badge_factory(Organization)
         self.user = api.login(AdminFactory())
         self.organization = OrganizationFactory()

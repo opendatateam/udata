@@ -623,7 +623,7 @@ class ReusesFeedAPItest(APITestCase):
 
 class ReuseBadgeAPITest(PytestOnlyAPITestCase):
     @pytest.fixture(autouse=True)
-    def setup(self, api, clean_db):
+    def setup_func(self, api):
         # Register at least two badges
         Reuse.__badges__["test-1"] = "Test 1"
         Reuse.__badges__["test-2"] = "Test 2"

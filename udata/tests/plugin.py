@@ -12,7 +12,6 @@ from udata import settings
 from udata.app import create_app
 from udata.core.user.factories import UserFactory
 from udata.mongo import db
-from udata.mongo.document import get_all_models
 
 from .helpers import assert200, assert_command_ok
 
@@ -113,23 +112,6 @@ def drop_db(app):
     # drop the leading /
     db_name = parsed_url.path[1:]
     db.connection.drop_database(db_name)
-
-
-@pytest.fixture
-def clean_db(app):
-    drop_db(app)
-    for model in get_all_models():
-        # When dropping the database, MongoEngine will keep the collection cached inside
-        # `_collection` (in memory). This cache is used to call `ensure_indexes` only on the
-        # first call to `_get_collection()`, on subsequent calls the value inside `_collection`
-        # is returned without calling `ensure_indexes`.
-        # In tests, the first test will have a clean memory state, so MongoEngine will initialise
-        # the collection and create the indexes, then the following test, with a clean database (no indexes)
-        # will have the collection cached, so MongoEngine will never create the indexes (except if `auto_create_index_on_save`
-        # is set on the model, which may be the reason it is present on most of the big models, we may remove it?)
-        model._collection = None
-
-    yield
 
 
 @pytest.fixture(name="db")

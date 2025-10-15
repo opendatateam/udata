@@ -4,6 +4,7 @@ import pytest
 from bson import ObjectId
 
 from udata.models import Reuse
+from udata.tests.api import PytestOnlyDBTestCase
 
 
 @pytest.fixture
@@ -62,10 +63,11 @@ def test_unrecord_with_too_many_parameters(cli, migrations):
     assert migrations.count_documents({}) == 1
 
 
-def test_check_references_report_listfield_missing(cli, clean_db):
-    # The cli command `udata db check-integrity` should catch reuse object missing datasets field
-    Reuse._get_collection().insert_one({"_id": ObjectId()})
+class DBCliTest(PytestOnlyDBTestCase):
+    def test_check_references_report_listfield_missing(self, cli):
+        # The cli command `udata db check-integrity` should catch reuse object missing datasets field
+        Reuse._get_collection().insert_one({"_id": ObjectId()})
 
-    result = cli("db check-integrity --models Reuse", check=False)
-    assert "Reuse.datasets(Dataset) — list…: 1" in result.output
-    assert result.exit_code != 0
+        result = cli("db check-integrity --models Reuse", check=False)
+        assert "Reuse.datasets(Dataset) — list…: 1" in result.output
+        assert result.exit_code != 0

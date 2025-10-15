@@ -2,7 +2,9 @@ from contextlib import contextmanager
 
 import pytest
 
+from udata.mongo.document import get_all_models
 from udata.tests import PytestOnlyTestCase, TestCase, WebTestMixin
+from udata.tests.plugin import drop_db
 
 
 @pytest.mark.usefixtures("instance_path")
@@ -44,13 +46,33 @@ class APITestCaseMixin(WebTestMixin):
         return self.api.options(url, data=data, *args, **kwargs)
 
 
-@pytest.mark.usefixtures("clean_db")
-class DBTestCase(TestCase):
+class _CleanDBMixin:
+    """
+    This is only for internal use. We shouldn't inherit from this mixin but
+    from `DBTestCase` or `PytestOnlyDBTestCase` (or `*APITestCase`)
+    This is temporary while we have two hierarchies.
+    """
+
+    @pytest.fixture(autouse=True)
+    def _clean_db(self, app):
+        drop_db(app)
+        for model in get_all_models():
+            # When dropping the database, MongoEngine will keep the collection cached inside
+            # `_collection` (in memory). This cache is used to call `ensure_indexes` only on the
+            # first call to `_get_collection()`, on subsequent calls the value inside `_collection`
+            # is returned without calling `ensure_indexes`.
+            # In tests, the first test will have a clean memory state, so MongoEngine will initialise
+            # the collection and create the indexes, then the following test, with a clean database (no indexes)
+            # will have the collection cached, so MongoEngine will never create the indexes (except if `auto_create_index_on_save`
+            # is set on the model, which may be the reason it is present on most of the big models, we may remove it?)
+            model._collection = None
+
+
+class DBTestCase(_CleanDBMixin, TestCase):
     pass
 
 
-@pytest.mark.usefixtures("clean_db")
-class PytestOnlyDBTestCase(PytestOnlyTestCase):
+class PytestOnlyDBTestCase(_CleanDBMixin, PytestOnlyTestCase):
     pass
 
 

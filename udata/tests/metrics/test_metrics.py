@@ -9,6 +9,7 @@ from udata.core.metrics.helpers import get_metrics_for_model, get_stock_metrics
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.models import Dataset, Organization, Reuse
+from udata.tests.api import PytestOnlyDBTestCase
 
 from .helpers import mock_monthly_metrics_payload
 
@@ -49,19 +50,23 @@ def test_get_metrics_for_site(app, rmock):
         assert list(res[i].values())[-2] == len(key) * 2403
 
 
-@pytest.mark.parametrize(
-    "model,factory,date_label",
-    [
-        (Dataset, DatasetFactory, "created_at_internal"),
-        (Dataservice, DataserviceFactory, "created_at"),
-        (Reuse, ReuseFactory, "created_at"),
-        (Organization, OrganizationFactory, "created_at"),
-    ],
-)
-def test_get_stock_metrics(app, clean_db, model, factory, date_label):
-    [factory() for i in range(10)]
-    [factory(**{date_label: datetime.now().replace(day=1) - timedelta(days=1)}) for i in range(8)]
-    res = get_stock_metrics(model.objects(), date_label)
-    assert list(res.values())[-1] == 10
-    assert list(res.values())[-2] == 8
-    assert list(res.values())[-3] == 0
+class GetStockMetricsTest(PytestOnlyDBTestCase):
+    @pytest.mark.parametrize(
+        "model,factory,date_label",
+        [
+            (Dataset, DatasetFactory, "created_at_internal"),
+            (Dataservice, DataserviceFactory, "created_at"),
+            (Reuse, ReuseFactory, "created_at"),
+            (Organization, OrganizationFactory, "created_at"),
+        ],
+    )
+    def test_get_stock_metrics(self, model, factory, date_label):
+        [factory() for i in range(10)]
+        [
+            factory(**{date_label: datetime.now().replace(day=1) - timedelta(days=1)})
+            for i in range(8)
+        ]
+        res = get_stock_metrics(model.objects(), date_label)
+        assert list(res.values())[-1] == 10
+        assert list(res.values())[-2] == 8
+        assert list(res.values())[-3] == 0
