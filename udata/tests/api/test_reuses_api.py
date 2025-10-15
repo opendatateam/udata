@@ -13,7 +13,7 @@ from udata.core.reuse.constants import REUSE_TOPICS, REUSE_TYPES
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.models import Follow, Member, Reuse
-from udata.tests.api import APITestCase
+from udata.tests.api import APITestCase, PytestOnlyAPITestCase
 from udata.tests.helpers import (
     assert200,
     assert201,
@@ -34,7 +34,7 @@ def reuse_in_response(response: TestResponse, reuse: Reuse) -> bool:
     return len(only_reuse) > 0
 
 
-class ReuseAPITest:
+class ReuseAPITest(PytestOnlyAPITestCase):
     def test_reuse_api_list(self, api):
         """It should fetch a reuse list from the API"""
         reuses = ReuseFactory.create_batch(3, visible=True)
@@ -625,7 +625,7 @@ class ReusesFeedAPItest(APITestCase):
         self.assertEqual(author.href, org.url_for())
 
 
-class ReuseBadgeAPITest:
+class ReuseBadgeAPITest(PytestOnlyAPITestCase):
     @pytest.fixture(autouse=True)
     def setup(self, api, clean_db):
         # Register at least two badges
@@ -688,7 +688,7 @@ class ReuseBadgeAPITest:
         assert404(response)
 
 
-class ReuseReferencesAPITest:
+class ReuseReferencesAPITest(PytestOnlyAPITestCase):
     def test_reuse_types_list(self, api):
         """It should fetch the reuse types list from the API"""
         response = api.get(url_for("api.reuse_types"))

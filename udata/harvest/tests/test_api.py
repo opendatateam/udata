@@ -8,6 +8,7 @@ from pytest_mock import MockerFixture
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.models import Member, PeriodicTask
+from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import assert200, assert201, assert204, assert400, assert403, assert404
 from udata.tests.plugin import ApiClient
 from udata.utils import faker
@@ -25,8 +26,7 @@ from .factories import HarvestSourceFactory, MockBackendsMixin
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.usefixtures("clean_db")
-class HarvestAPITest(MockBackendsMixin):
+class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
     def test_list_backends(self, api):
         """It should fetch the harvest backends list from the API"""
         response = api.get(url_for("api.harvest_backends"))

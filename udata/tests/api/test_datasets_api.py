@@ -46,7 +46,7 @@ from udata.tests.features.territories import create_geozones_fixtures
 from udata.tests.helpers import assert200, assert404
 from udata.utils import faker, unique_string
 
-from . import APITestCase
+from . import APITestCase, PytestOnlyAPITestCase
 
 SAMPLE_GEOM = {
     "type": "MultiPolygon",
@@ -2377,8 +2377,7 @@ class ResourcesTypesAPITest(APITestCase):
         self.assertEqual(len(response.json), len(RESOURCE_TYPES))
 
 
-@pytest.mark.usefixtures("clean_db")
-class DatasetSchemasAPITest:
+class DatasetSchemasAPITest(PytestOnlyAPITestCase):
     def test_dataset_schemas_api_list(self, api, rmock, app):
         # Can't use @pytest.mark.options otherwise a request will be
         # made before setting up rmock at module load, resulting in a 404
@@ -2439,8 +2438,7 @@ class DatasetSchemasAPITest:
         )
 
 
-@pytest.mark.usefixtures("clean_db")
-class HarvestMetadataAPITest:
+class HarvestMetadataAPITest(PytestOnlyAPITestCase):
     def test_dataset_with_harvest_metadata(self, api):
         date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
         harvest_metadata = HarvestDatasetMetadata(

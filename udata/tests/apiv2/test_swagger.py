@@ -3,10 +3,11 @@ import json
 from flask import url_for
 from flask_restx import schemas
 
+from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import assert200
 
 
-class SwaggerBlueprintTest:
+class SwaggerBlueprintTest(PytestOnlyAPITestCase):
     def test_swagger_resource_type(self, api):
         response = api.get(url_for("apiv2.specs"))
         assert200(response)

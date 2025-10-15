@@ -16,6 +16,7 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import _
 from udata.models import Discussion, Follow, Member, MembershipRequest, Organization
+from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import (
     assert200,
     assert201,
@@ -36,7 +37,7 @@ pytestmark = [
 ]
 
 
-class OrganizationAPITest:
+class OrganizationAPITest(PytestOnlyAPITestCase):
     def test_organization_api_list(self, api):
         """It should fetch an organization list from the API"""
         organizations = OrganizationFactory.create_batch(3)
@@ -233,7 +234,7 @@ class OrganizationAPITest:
         assert Organization.objects[0].deleted is None
 
 
-class MembershipAPITest:
+class MembershipAPITest(PytestOnlyAPITestCase):
     def test_request_membership(self, api):
         organization = OrganizationFactory()
         user = api.login()
@@ -798,7 +799,7 @@ class MembershipAPITest:
             assert response.json[0]["id"] == str(max_follower_organization.id)
 
 
-class OrganizationDatasetsAPITest:
+class OrganizationDatasetsAPITest(PytestOnlyAPITestCase):
     def test_list_org_datasets(self, api):
         """Should list organization datasets"""
         org = OrganizationFactory()
@@ -843,7 +844,7 @@ class OrganizationDatasetsAPITest:
         assert len(response.json["data"]) == 2
 
 
-class OrganizationReusesAPITest:
+class OrganizationReusesAPITest(PytestOnlyAPITestCase):
     def test_list_org_reuses(self, api):
         """Should list organization reuses"""
         org = OrganizationFactory()
@@ -878,7 +879,7 @@ class OrganizationReusesAPITest:
         assert len(response.json) == len(reuses)
 
 
-class OrganizationDiscussionsAPITest:
+class OrganizationDiscussionsAPITest(PytestOnlyAPITestCase):
     def test_list_org_discussions(self, api):
         """Should list organization discussions"""
         user = UserFactory()
@@ -900,7 +901,7 @@ class OrganizationDiscussionsAPITest:
             assert discussion["id"] in discussions_ids
 
 
-class OrganizationBadgeAPITest:
+class OrganizationBadgeAPITest(PytestOnlyAPITestCase):
     @pytest.fixture(autouse=True)
     def setUp(self, api, clean_db):
         self.factory = badge_factory(Organization)
@@ -966,7 +967,7 @@ class OrganizationBadgeAPITest:
         assert404(response)
 
 
-class OrganizationContactPointsAPITest:
+class OrganizationContactPointsAPITest(PytestOnlyAPITestCase):
     def test_org_contact_points(self, api):
         user = api.login()
         member = Member(user=user, role="admin")
@@ -1013,7 +1014,7 @@ class OrganizationContactPointsAPITest:
         assert len(response.json) == 0
 
 
-class OrganizationCsvExportsTest:
+class OrganizationCsvExportsTest(PytestOnlyAPITestCase):
     def test_datasets_csv(self, api):
         org = OrganizationFactory()
         [DatasetFactory(organization=org, resources=[ResourceFactory()]) for _ in range(3)]
