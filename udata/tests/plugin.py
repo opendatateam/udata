@@ -1,6 +1,5 @@
 import shlex
 from contextlib import contextmanager
-from urllib.parse import urlparse
 
 import pytest
 from flask import current_app, json, template_rendered, url_for
@@ -11,7 +10,6 @@ from lxml import etree
 from udata import settings
 from udata.app import create_app
 from udata.core.user.factories import UserFactory
-from udata.mongo import db
 
 from .helpers import assert200, assert_command_ok
 
@@ -103,24 +101,6 @@ def get_settings(request):
         plugins += option
     setattr(_settings, "PLUGINS", plugins)
     return _settings
-
-
-def drop_db(app):
-    """Clear the database"""
-    parsed_url = urlparse(app.config["MONGODB_HOST"])
-
-    # drop the leading /
-    db_name = parsed_url.path[1:]
-    db.connection.drop_database(db_name)
-
-
-@pytest.fixture(name="db")
-def raw_db(app, clean_db):
-    """Access to raw PyMongo DB client"""
-    from mongoengine.connection import get_db
-
-    yield get_db()
-    drop_db(app)
 
 
 class ApiClient(object):
