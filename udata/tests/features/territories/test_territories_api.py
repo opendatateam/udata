@@ -1,17 +1,19 @@
+import pytest
 from flask import url_for
 
 from udata.core.spatial.factories import GeoZoneFactory
 from udata.tests.api import APITestCase
 from udata.tests.features.territories import (
-    TerritoriesSettings,
     create_geozones_fixtures,
     create_old_new_regions_fixtures,
 )
 
 
+@pytest.mark.options(
+    ACTIVATE_TERRITORIES=True,
+    HANDLED_LEVELS=("fr:commune", "fr:departement", "fr:region", "country"),
+)
 class TerritoriesAPITest(APITestCase):
-    settings = TerritoriesSettings
-
     def setUp(self):
         self.paca, self.bdr, self.arles = create_geozones_fixtures()
 

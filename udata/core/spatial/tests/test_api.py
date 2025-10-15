@@ -1,3 +1,4 @@
+import pytest
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
@@ -13,7 +14,6 @@ from udata.core.spatial.tasks import compute_geozones_metrics
 from udata.tests.api import APITestCase
 from udata.tests.api.test_datasets_api import SAMPLE_GEOM
 from udata.tests.features.territories import (
-    TerritoriesSettings,
     create_geozones_fixtures,
 )
 from udata.utils import faker
@@ -258,9 +258,11 @@ class SpatialApiTest(APITestCase):
         self.assertEqual(response.json["features"][1]["properties"]["datasets"], 3)
 
 
+@pytest.mark.options(
+    ACTIVATE_TERRITORIES=True,
+    HANDLED_LEVELS=("fr:commune", "fr:departement", "fr:region", "country"),
+)
 class SpatialTerritoriesApiTest(APITestCase):
-    settings = TerritoriesSettings
-
     def test_zone_datasets_with_dynamic_and_setting(self):
         paca, bdr, arles = create_geozones_fixtures()
         organization = OrganizationFactory()
