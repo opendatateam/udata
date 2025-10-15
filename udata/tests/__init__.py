@@ -7,7 +7,7 @@ from udata import settings
 from . import helpers
 
 
-class TestCase(unittest.TestCase):
+class TestCaseMixin:
     settings = settings.Testing
 
     @pytest.fixture(autouse=True)
@@ -25,6 +25,14 @@ class TestCase(unittest.TestCase):
         """Lax date comparison, avoid comparing milliseconds and seconds."""
         __tracebackhide__ = True
         helpers.assert_equal_dates(datetime1, datetime2, limit=1)
+
+
+class TestCase(TestCaseMixin, unittest.TestCase):
+    pass
+
+
+class PytestOnlyTestCase(TestCaseMixin):
+    pass
 
 
 class WebTestMixin(object):
