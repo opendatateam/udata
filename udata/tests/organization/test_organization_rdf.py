@@ -95,7 +95,7 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
         uri_first = url_for(
             "api.organization_rdf_format",
             org=origin_org.id,
-            format="json",
+            _format="json",
             page=1,
             page_size=page_size,
             _external=True,
@@ -103,7 +103,7 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
         uri_last = url_for(
             "api.organization_rdf_format",
             org=origin_org.id,
-            format="json",
+            _format="json",
             page=2,
             page_size=page_size,
             _external=True,
@@ -124,7 +124,7 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
         # First page
         datasets = Dataset.objects.paginate(1, page_size)
         dataservices = Dataservice.objects.filter_by_dataset_pagination(datasets, 1)
-        catalog = build_org_catalog(origin_org, datasets, dataservices, format="json")
+        catalog = build_org_catalog(origin_org, datasets, dataservices, _format="json")
         graph = catalog.graph
 
         self.assertIsInstance(catalog, RdfResource)
@@ -152,7 +152,7 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
         # Second page
         datasets = Dataset.objects.paginate(2, page_size)
         dataservices = Dataservice.objects.filter_by_dataset_pagination(datasets, 2)
-        catalog = build_org_catalog(origin_org, datasets, dataservices, format="json")
+        catalog = build_org_catalog(origin_org, datasets, dataservices, _format="json")
         graph = catalog.graph
 
         self.assertIsInstance(catalog, RdfResource)

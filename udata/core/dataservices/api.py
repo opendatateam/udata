@@ -74,9 +74,9 @@ class DataservicesAtomFeedAPI(API):
                 author_uri = dataservice.owner.url_for()
             feed.add_item(
                 dataservice.title,
-                unique_id=dataservice.id,
+                unique_id=dataservice.url_for(_useId=True),
                 description=dataservice.description,
-                content=md(dataservice.description),
+                content=str(md(dataservice.description)),
                 author_name=author_name,
                 author_link=author_uri,
                 link=dataservice.url_for(),
@@ -236,19 +236,19 @@ class DataserviceDatasetAPI(API):
 class DataserviceRdfAPI(API):
     @api.doc("rdf_dataservice")
     def get(self, dataservice):
-        format = RDF_EXTENSIONS[negociate_content()]
-        url = url_for("api.dataservice_rdf_format", dataservice=dataservice.id, format=format)
+        _format = RDF_EXTENSIONS[negociate_content()]
+        url = url_for("api.dataservice_rdf_format", dataservice=dataservice.id, _format=_format)
         return redirect(url)
 
 
 @ns.route(
-    "/<dataservice:dataservice>/rdf.<format>", endpoint="dataservice_rdf_format", doc=common_doc
+    "/<dataservice:dataservice>/rdf.<_format>", endpoint="dataservice_rdf_format", doc=common_doc
 )
 @api.response(404, "Dataservice not found")
 @api.response(410, "Dataservice has been deleted")
 class DataserviceRdfFormatAPI(API):
     @api.doc("rdf_dataservice_format")
-    def get(self, dataservice: Dataservice, format):
+    def get(self, dataservice: Dataservice, _format):
         if not dataservice.permissions["edit"].can():
             if dataservice.private:
                 api.abort(404)
@@ -258,7 +258,7 @@ class DataserviceRdfFormatAPI(API):
         resource = dataservice_to_rdf(dataservice)
         # bypass flask-restplus make_response, since graph_response
         # is handling the content negociation directly
-        return make_response(*graph_response(resource, format))
+        return make_response(*graph_response(resource, _format))
 
 
 @ns.route("/<id>/followers/", endpoint="dataservice_followers")

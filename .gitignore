@@ -29,17 +29,11 @@ bower
 *.log
 *.pid
 .webassets-cache
-js-built
 .DS_Store
-*.min.css
-*.min.js
 /instance/
 /static/
 /doc/_build/
 /site/
-/node_modules/
-/udata/static/
-/jsdoc/
 *.rdb
 venv
 .venv
@@ -51,7 +45,6 @@ pip-log.txt
 .cache
 .coverage
 .pytest_cache
-.tox
 cover
 nosetests.xml
 coverage.xml
@@ -78,7 +71,6 @@ Procfile
 
 # Python package managers
 .python-version
-*.lock
 
 # Ruff
 .ruff_cache

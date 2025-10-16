@@ -18,7 +18,7 @@ from faker import Faker
 from faker.config import PROVIDERS
 from faker.providers import BaseProvider
 from faker.providers.lorem.la import Provider as LoremProvider
-from flask import abort, current_app
+from flask import abort, current_app, request
 from mongoengine.fields import BaseQuerySet
 
 from udata import tags
@@ -430,3 +430,10 @@ def get_rss_feed_list(queryset: BaseQuerySet, created_at_field: str) -> list[Any
     )[: current_site.feed_size]
 
     return elements
+
+
+def wants_json() -> bool:
+    if request.is_json:
+        return True
+
+    return request.accept_mimetypes.best == "application/json"

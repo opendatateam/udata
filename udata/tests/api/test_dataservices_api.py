@@ -1,8 +1,6 @@
 from datetime import datetime, timedelta
-from xml.etree.ElementTree import XML
 
 import feedparser
-import pytest
 from flask import url_for
 from werkzeug.test import TestResponse
 
@@ -24,7 +22,7 @@ from udata.core.organization.models import Member
 from udata.core.topic.factories import TopicElementFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
-from udata.tests.helpers import assert200, assert400, assert410, assert_redirects
+from udata.tests.helpers import assert200, assert400, assert410
 
 from . import APITestCase
 
@@ -662,60 +660,6 @@ class DataserviceAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(Dataservice.objects.count(), 1)
         self.assertEqual(Dataservice.objects.first().organization.id, new_org.id)
-
-
-@pytest.mark.frontend
-class DataserviceRdfViewsTest:
-    def test_rdf_default_to_jsonld(self, client):
-        dataservice = DataserviceFactory()
-        expected = url_for("api.dataservice_rdf_format", dataservice=dataservice.id, format="json")
-        response = client.get(url_for("api.dataservice_rdf", dataservice=dataservice))
-        assert_redirects(response, expected)
-
-    def test_rdf_perform_content_negociation(self, client):
-        dataservice = DataserviceFactory()
-        expected = url_for("api.dataservice_rdf_format", dataservice=dataservice.id, format="xml")
-        url = url_for("api.dataservice_rdf", dataservice=dataservice)
-        headers = {"accept": "application/xml"}
-        response = client.get(url, headers=headers)
-        assert_redirects(response, expected)
-
-    def test_rdf_perform_content_negociation_response(self, client):
-        """Check we have valid XML as output"""
-        dataservice = DataserviceFactory()
-        url = url_for("api.dataservice_rdf", dataservice=dataservice)
-        headers = {"accept": "application/xml"}
-        response = client.get(url, headers=headers, follow_redirects=True)
-        element = XML(response.data)
-        assert element.tag == "{http://www.w3.org/1999/02/22-rdf-syntax-ns#}RDF"
-
-    def test_dataservice_rdf_json_ld(self, client):
-        dataservice = DataserviceFactory()
-        for fmt in "json", "jsonld":
-            url = url_for("api.dataservice_rdf_format", dataservice=dataservice, format=fmt)
-            response = client.get(url, headers={"Accept": "application/ld+json"})
-            assert200(response)
-            assert response.content_type == "application/ld+json"
-            assert response.json["@context"]["@vocab"] == "http://www.w3.org/ns/dcat#"
-
-    @pytest.mark.parametrize(
-        "fmt,mime",
-        [
-            ("n3", "text/n3"),
-            ("nt", "application/n-triples"),
-            ("ttl", "application/x-turtle"),
-            ("xml", "application/rdf+xml"),
-            ("rdf", "application/rdf+xml"),
-            ("owl", "application/rdf+xml"),
-            ("trig", "application/trig"),
-        ],
-    )
-    def test_dataservice_rdf_formats(self, client, fmt, mime):
-        dataservice = DataserviceFactory()
-        url = url_for("api.dataservice_rdf_format", dataservice=dataservice, format=fmt)
-        response = client.get(url, headers={"Accept": mime})
-        assert200(response)
-        assert response.content_type == mime
 
 
 class DataservicesFeedAPItest(APITestCase):
