@@ -517,17 +517,18 @@ def escape_xml_illegal_chars(val, replacement="?"):
     return illegal_xml_chars_RE.sub(replacement, val)
 
 
-def paginate_catalog(catalog, graph, datasets, format, rdf_catalog_endpoint, **values):
+def paginate_catalog(catalog, graph, datasets, _format, rdf_catalog_endpoint, **values):
     if not format:
         raise ValueError("Pagination requires format")
     catalog.add(RDF.type, HYDRA.Collection)
     catalog.set(HYDRA.totalItems, Literal(datasets.total))
     kwargs = {
-        "format": format,
+        "_format": _format,
         "page_size": datasets.page_size,
         "_external": True,
     }
-
+    values.pop("page", None)
+    values.pop("page_size", None)
     kwargs.update(values)
 
     first_url = url_for(rdf_catalog_endpoint, page=1, **kwargs)
