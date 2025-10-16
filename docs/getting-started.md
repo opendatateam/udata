@@ -272,7 +272,7 @@ Finally, you can see other administrative tasks in [administrative-tasks](admini
 
 # Going further
 
-Once the project is up and running, it’s time to customize it! Take a look at our advanced documentation on [adapting settings](adapting-settings.md), [creating a custom theme](creating-theme.md), [extending udata](extending.md), [testing your code](testing-code.md), [adding translation](adding-translations.md), [setting up a search service][udata-search-service] and so on.
+Once the project is up and running, it’s time to customize it! Take a look at our advanced documentation on [adapting settings](adapting-settings.md), [extending udata](extending.md), [testing your code](testing-code.md), [adding translation](adding-translations.md), [setting up a search service][udata-search-service] and so on.
 
 [github]: https://github.com/opendatateam/udata
 [new issue]: https://github.com/opendatateam/udata/issues/new
