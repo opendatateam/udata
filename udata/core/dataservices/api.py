@@ -12,10 +12,10 @@ from udata.auth import admin_permission
 from udata.core.dataservices.constants import DATASERVICE_ACCESS_TYPE_RESTRICTED
 from udata.core.dataset.models import Dataset
 from udata.core.followers.api import FollowAPI
-from udata.core.site.models import current_site
 from udata.frontend.markdown import md
 from udata.i18n import gettext as _
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
+from udata.utils import get_rss_feed_list
 
 from .models import Dataservice
 from .rdf import dataservice_to_rdf
@@ -62,9 +62,7 @@ class DataservicesAtomFeedAPI(API):
             _("Latest APIs"), description=None, feed_url=request.url, link=request.url_root
         )
 
-        dataservices: list[Dataservice] = (
-            Dataservice.objects.visible().order_by("-created_at").limit(current_site.feed_size)
-        )
+        dataservices = get_rss_feed_list(Dataservice.objects.visible(), "created_at")
         for dataservice in dataservices:
             author_name = None
             author_uri = None
