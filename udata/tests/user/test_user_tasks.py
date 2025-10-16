@@ -75,7 +75,7 @@ class UserTasksTest(APITestCase):
             NB_USERS_TO_NOTIFY - current_app.config["MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS"],
         )
 
-    @pytest.mark.options(YEARS_OF_INACTIVITY_BEFORE_DELETION=3)
+    @pytest.mark.options(YEARS_OF_INACTIVITY_BEFORE_DELETION=3, DEFAULT_LANGUAGE="en")
     def test_delete_inactive_users(self):
         deletion_comparison_date = (
             datetime.utcnow()
@@ -105,10 +105,8 @@ class UserTasksTest(APITestCase):
         self.assertEqual(mails[0].send_to, set([inactive_user_to_delete.email]))
         self.assertEqual(
             mails[0].subject,
-            _(
-                _("Deletion of your inactive {site} account").format(
-                    site=current_app.config["SITE_TITLE"]
-                )
+            _("Deletion of your inactive {site} account").format(
+                site=current_app.config["SITE_TITLE"]
             ),
         )
 

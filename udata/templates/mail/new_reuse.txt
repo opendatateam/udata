@@ -1,9 +1,0 @@
-{% extends 'mail/base.txt' %}
-
-{% block body %}
-{{ _('A new reuse "%(reuse)s" of your dataset "%(dataset)s" as been published',
-    reuse=reuse.title, dataset=dataset.name
-) }}.
-{{ _('You can see this new reuse on its own page:') }}
-{{ reuse.url_for() }}
-{% endblock %}
