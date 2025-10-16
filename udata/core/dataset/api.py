@@ -41,13 +41,12 @@ from udata.core.followers.api import FollowAPI
 from udata.core.followers.models import Follow
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
-from udata.core.site.models import current_site
 from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.topic.models import Topic
 from udata.frontend.markdown import md
 from udata.i18n import gettext as _
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
-from udata.utils import get_by
+from udata.utils import get_by, get_rss_feed_list
 
 from .api_fields import (
     catalog_schema_fields,
@@ -336,9 +335,10 @@ class DatasetsAtomFeedAPI(API):
             link=request.url_root,
         )
 
-        datasets: list[Dataset] = (
-            Dataset.objects.visible().order_by("-created_at_internal").limit(current_site.feed_size)
+        datasets: list[Dataset] = get_rss_feed_list(
+            Dataset.objects.visible(), "created_at_internal"
         )
+
         for dataset in datasets:
             author_name = None
             author_uri = None
