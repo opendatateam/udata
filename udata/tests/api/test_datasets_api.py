@@ -741,6 +741,18 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description, "new description")
 
+    def test_dataset_api_update_with_null_frequency(self):
+        """It should update the item even though internal frequency is null"""
+        user = self.login()
+        dataset = DatasetFactory(owner=user, frequency=None)
+        data = dataset.to_dict()
+        # Update doesn't matter as long as we don't touch `frequency`
+        data["tags"] = ["test"]
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertEqual(Dataset.objects.first().frequency, None)
+
     def test_dataset_api_update_valid_frequency(self):
         """It should update a dataset from the API"""
         user = self.login()
