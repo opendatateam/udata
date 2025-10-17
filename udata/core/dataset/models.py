@@ -1,6 +1,6 @@
 import logging
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from pydoc import locate
 from typing import Self
 from urllib.parse import urlparse
@@ -8,7 +8,6 @@ from urllib.parse import urlparse
 import Levenshtein
 import requests
 from blinker import signal
-from dateutil.parser import parse as parse_dt
 from flask import current_app, url_for
 from flask_babel import LazyString
 from mongoengine import ValidationError as MongoEngineValidationError
@@ -370,7 +369,13 @@ class ResourceMixin(object):
     mime = db.StringField()
     filesize = db.IntField()  # `size` is a reserved keyword for mongoengine.
     fs_filename = db.StringField()
-    extras = db.ExtrasField()
+    extras = db.ExtrasField(
+        {
+            "check:available": db.BooleanField,
+            "check:status": db.IntField,
+            "check:date": db.DateTimeField,
+        }
+    )
     harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)
     schema = db.EmbeddedDocumentField(Schema)
 
@@ -428,41 +433,6 @@ class ResourceMixin(object):
         `all([])` (dataset, organization, user).
         """
         return self.extras.get("check:available", "unknown")
-
-    def need_check(self):
-        """Does the resource needs to be checked against its linkchecker?
-
-        We check unavailable resources often, unless they go over the
-        threshold. Available resources are checked less and less frequently
-        based on their historical availability.
-        """
-        min_cache_duration, max_cache_duration, ko_threshold = [
-            current_app.config.get(k)
-            for k in (
-                "LINKCHECKING_MIN_CACHE_DURATION",
-                "LINKCHECKING_MAX_CACHE_DURATION",
-                "LINKCHECKING_UNAVAILABLE_THRESHOLD",
-            )
-        ]
-        count_availability = self.extras.get("check:count-availability", 1)
-        is_available = self.check_availability()
-        if is_available == "unknown":
-            return True
-        elif is_available or count_availability > ko_threshold:
-            delta = min(min_cache_duration * count_availability, max_cache_duration)
-        else:
-            delta = min_cache_duration
-        if self.extras.get("check:date"):
-            limit_date = datetime.utcnow() - timedelta(minutes=delta)
-            check_date = self.extras["check:date"]
-            if not isinstance(check_date, datetime):
-                try:
-                    check_date = parse_dt(check_date)
-                except (ValueError, TypeError):
-                    return True
-            if check_date >= limit_date:
-                return False
-        return True
 
     @property
     def latest(self):

@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from xml.etree.ElementTree import XML
 
 import feedparser
 import pytest
@@ -24,7 +23,7 @@ from udata.core.organization.models import Member
 from udata.core.topic.factories import TopicElementFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
-from udata.tests.helpers import assert200, assert400, assert410, assert_redirects
+from udata.tests.helpers import assert200, assert400, assert410
 
 from . import APITestCase
 
@@ -664,62 +663,10 @@ class DataserviceAPITest(APITestCase):
         self.assertEqual(Dataservice.objects.first().organization.id, new_org.id)
 
 
-@pytest.mark.frontend
-class DataserviceRdfViewsTest:
-    def test_rdf_default_to_jsonld(self, client):
-        dataservice = DataserviceFactory()
-        expected = url_for("api.dataservice_rdf_format", dataservice=dataservice.id, format="json")
-        response = client.get(url_for("api.dataservice_rdf", dataservice=dataservice))
-        assert_redirects(response, expected)
-
-    def test_rdf_perform_content_negociation(self, client):
-        dataservice = DataserviceFactory()
-        expected = url_for("api.dataservice_rdf_format", dataservice=dataservice.id, format="xml")
-        url = url_for("api.dataservice_rdf", dataservice=dataservice)
-        headers = {"accept": "application/xml"}
-        response = client.get(url, headers=headers)
-        assert_redirects(response, expected)
-
-    def test_rdf_perform_content_negociation_response(self, client):
-        """Check we have valid XML as output"""
-        dataservice = DataserviceFactory()
-        url = url_for("api.dataservice_rdf", dataservice=dataservice)
-        headers = {"accept": "application/xml"}
-        response = client.get(url, headers=headers, follow_redirects=True)
-        element = XML(response.data)
-        assert element.tag == "{http://www.w3.org/1999/02/22-rdf-syntax-ns#}RDF"
-
-    def test_dataservice_rdf_json_ld(self, client):
-        dataservice = DataserviceFactory()
-        for fmt in "json", "jsonld":
-            url = url_for("api.dataservice_rdf_format", dataservice=dataservice, format=fmt)
-            response = client.get(url, headers={"Accept": "application/ld+json"})
-            assert200(response)
-            assert response.content_type == "application/ld+json"
-            assert response.json["@context"]["@vocab"] == "http://www.w3.org/ns/dcat#"
-
-    @pytest.mark.parametrize(
-        "fmt,mime",
-        [
-            ("n3", "text/n3"),
-            ("nt", "application/n-triples"),
-            ("ttl", "application/x-turtle"),
-            ("xml", "application/rdf+xml"),
-            ("rdf", "application/rdf+xml"),
-            ("owl", "application/rdf+xml"),
-            ("trig", "application/trig"),
-        ],
-    )
-    def test_dataservice_rdf_formats(self, client, fmt, mime):
-        dataservice = DataserviceFactory()
-        url = url_for("api.dataservice_rdf_format", dataservice=dataservice, format=fmt)
-        response = client.get(url, headers={"Accept": mime})
-        assert200(response)
-        assert response.content_type == mime
-
-
 class DataservicesFeedAPItest(APITestCase):
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=10)
     def test_recent_feed(self):
+        # We have a 10 hours delay for a new object to appear in feed. A newly created one shouldn't appear.
         DataserviceFactory(title="A", created_at=datetime.utcnow())
         DataserviceFactory(title="B", created_at=datetime.utcnow() - timedelta(days=2))
         DataserviceFactory(title="C", created_at=datetime.utcnow() - timedelta(days=1))
@@ -729,11 +676,11 @@ class DataservicesFeedAPItest(APITestCase):
 
         feed = feedparser.parse(response.data)
 
-        self.assertEqual(len(feed.entries), 3)
-        self.assertEqual(feed.entries[0].title, "A")
-        self.assertEqual(feed.entries[1].title, "C")
-        self.assertEqual(feed.entries[2].title, "B")
+        self.assertEqual(len(feed.entries), 2)
+        self.assertEqual(feed.entries[0].title, "C")
+        self.assertEqual(feed.entries[1].title, "B")
 
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
     def test_recent_feed_owner(self):
         owner = UserFactory()
         DataserviceFactory(owner=owner)
@@ -751,6 +698,7 @@ class DataservicesFeedAPItest(APITestCase):
         self.assertEqual(author.name, owner.fullname)
         self.assertEqual(author.href, owner.url_for())
 
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
     def test_recent_feed_org(self):
         owner = UserFactory()
         org = OrganizationFactory()

@@ -20,6 +20,7 @@ from udata.core.topic.factories import (
 )
 from udata.core.topic.models import Topic, TopicElement
 from udata.core.user.factories import UserFactory
+from udata.i18n import _
 from udata.tests.api import APITestCase
 from udata.tests.api.test_datasets_api import SAMPLE_GEOM
 from udata.tests.features.territories import create_geozones_fixtures
@@ -496,7 +497,7 @@ class TopicElementsAPITest(APITestCase):
 
     def test_elements_list_pagination(self):
         topic = TopicFactory()
-        for _ in range(DEFAULT_PAGE_SIZE + 1):
+        for i in range(DEFAULT_PAGE_SIZE + 1):
             TopicElementFactory(topic=topic)
         response = self.get(url_for("apiv2.topic_elements", topic=topic))
         assert response.status_code == 200
@@ -717,9 +718,8 @@ class TopicElementsAPITest(APITestCase):
         topic = TopicFactory(owner=owner)
         response = self.post(url_for("apiv2.topic_elements", topic=topic), [{}])
         assert response.status_code == 400
-        assert (
-            response.json["errors"][0]["element"][0]
-            == "A topic element must have a title or an element."
+        assert response.json["errors"][0]["element"][0] == _(
+            "A topic element must have a title or an element."
         )
 
     def test_add_datasets_perm(self):

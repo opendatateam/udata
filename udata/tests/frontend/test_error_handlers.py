@@ -2,6 +2,8 @@ from uuid import uuid4
 
 from flask import url_for
 
+from udata.i18n import _
+
 from . import FrontTestCase
 
 
@@ -17,10 +19,12 @@ class ErrorHandlersTest(FrontTestCase):
         # Check that the custom 404 template is rendered
         html = response.data.decode("utf-8")
         assert "404" in html
-        assert "Page not found" in html or "page you are looking for does not exist" in html.lower()
+        assert (
+            _("Page not found") in html or _("The page you are looking for does not exist.") in html
+        )
 
         # Check that there's a link back to the homepage
-        assert "Back to home" in html or "home" in html.lower()
+        assert _("Back to home") in html or _("Home").lower() in html.lower()
 
     def test_404_with_abort_function_requesting_html(self):
         """Test that resource redirect returns HTML 404 when HTML is requested"""
@@ -41,7 +45,9 @@ class ErrorHandlersTest(FrontTestCase):
         # Check that the custom 404 template is rendered
         html = response.data.decode("utf-8")
         assert "404" in html
-        assert "Page not found" in html or "page you are looking for does not exist" in html.lower()
+        assert (
+            _("Page not found") in html or _("The page you are looking for does not exist.") in html
+        )
 
     def test_404_in_flask_routing(self):
         """Test that a 404 error returns JSON when requested"""
