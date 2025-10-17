@@ -12,6 +12,7 @@ from udata.core import csv, storages
 from udata.core.badges import tasks as badge_tasks
 from udata.core.constants import HVD
 from udata.core.dataservices.models import Dataservice
+from udata.core.dataset.constants import INSPIRE
 from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
 from udata.core.organization.models import Organization
 from udata.harvest.models import HarvestJob
@@ -237,6 +238,23 @@ def update_dataset_hvd_badge() -> None:
         dataset.add_badge(HVD)
 
     datasets = Dataset.objects(tags__nin=["hvd"], badges__kind="hvd")
-    log.info(f"Remove HVD badge from {datasets.count()} datasets")
+    log.info(f"Removing HVD badge from {datasets.count()} datasets")
     for dataset in datasets:
         dataset.remove_badge(HVD)
+
+
+@badge_tasks.register(model=Dataset, badge=INSPIRE)
+def update_dataset_inspire_badge() -> None:
+    """
+    Update INSPIRE badges to candidate datasets, based on the inspire tag.
+    """
+
+    datasets = Dataset.objects(tags="inspire", badges__kind__ne="inspire")
+    log.info(f"Adding INSPIRE badge to {datasets.count()} datasets")
+    for dataset in datasets:
+        dataset.add_badge(INSPIRE)
+
+    datasets = Dataset.objects(tags__nin=["inspire"], badges__kind="inspire")
+    log.info(f"Removing INSPIRE badge from {datasets.count()} datasets")
+    for dataset in datasets:
+        dataset.remove_badge(INSPIRE)
