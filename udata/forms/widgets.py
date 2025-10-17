@@ -1,7 +1,7 @@
 from wtforms import widgets
 
-MIN_TAG_LENGTH = 2
-MAX_TAG_LENGTH = 50
+TAG_MIN_LENGTH = 2
+TAG_MAX_LENGTH = 50
 
 
 class WidgetHelper(object):

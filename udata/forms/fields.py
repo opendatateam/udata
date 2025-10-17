@@ -416,11 +416,11 @@ class TagField(Field):
         if not self.data:
             return
         for tag in self.data:
-            if not tags.MIN_TAG_LENGTH <= len(tag) <= tags.MAX_TAG_LENGTH:
+            if not tags.TAG_MIN_LENGTH <= len(tag) <= tags.TAG_MAX_LENGTH:
                 message = _(
                     'Tag "%(tag)s" must be between %(min)d and %(max)d characters long.',
-                    min=tags.MIN_TAG_LENGTH,
-                    max=tags.MAX_TAG_LENGTH,
+                    min=tags.TAG_MIN_LENGTH,
+                    max=tags.TAG_MAX_LENGTH,
                     tag=tag,
                 )
                 raise validators.ValidationError(message)
