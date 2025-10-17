@@ -166,7 +166,6 @@ DEFAULT_CHECKSUM_TYPE = "sha1"
 PIVOTAL_DATA = "pivotal-data"
 SPD = "spd"
 INSPIRE = "inspire"
-HVD = "hvd"
 SL = "sl"
 SR = "sr"
 CLOSED_FORMATS = ("pdf", "doc", "docx", "word", "xls", "excel", "xlsx")
