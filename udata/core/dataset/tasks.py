@@ -13,6 +13,7 @@ from udata.core.badges import tasks as badge_tasks
 from udata.core.constants import HVD
 from udata.core.dataservices.models import Dataservice
 from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
+from udata.core.organization.models import Organization
 from udata.harvest.models import HarvestJob
 from udata.models import Activity, Discussion, Follow, TopicElement, Transfer, db
 from udata.tasks import job
