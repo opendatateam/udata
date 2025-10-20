@@ -1953,7 +1953,7 @@ class DatasetResourceAPITest(APITestCase):
 
     @pytest.mark.options(ALLOWED_RESOURCES_EXTENSIONS=["txt", "html", "kml", "kml-1", "qml", "xml"])
     def test_suggest_formats_api(self):
-        response = self.get(url_for("api.suggest_formats"), q="km", size= 5))
+        response = self.get(url_for("api.suggest_formats", q="km", size= 5))
         self.assert200(response)
 
         self.assertEqual(len(response.json), 2)
@@ -1962,14 +1962,14 @@ class DatasetResourceAPITest(APITestCase):
 
     @pytest.mark.options(ALLOWED_RESOURCES_EXTENSIONS=["txt", "html", "kml", "kml-1", "qml", "xml"])
     def test_suggest_format_api_no_match(self):
-        response = self.get(url_for("api.suggest_formats"), q="test", size=5))
+        response = self.get(url_for("api.suggest_formats", q="test", size=5))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
     @pytest.mark.options(ALLOWED_RESOURCES_EXTENSIONS=[])
     def test_suggest_format_api_empty(self):
         """It should not provide format suggestion if no data"""
-        response = self.get(url_for("api.suggest_formats"), q="txt", size=5))
+        response = self.get(url_for("api.suggest_formats", q="txt", size=5))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
