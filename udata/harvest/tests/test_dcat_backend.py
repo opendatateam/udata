@@ -446,6 +446,23 @@ class DcatBackendTest:
         assert resources_by_title["Resource 3-1"].schema.url is None
         assert resources_by_title["Resource 3-1"].schema.version == "2.2.0"
 
+    @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/schemas")
+    def test_harvest_inspire_themese(self, rmock):
+        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
+
+        filename = "bnodes.xml"
+        url = mock_dcat(rmock, filename)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
+
+        actions.run(source)
+
+        datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
+
+        assert set(datasets["1"].tags).issuperset(set(["repartition-des-especes", "inspire"]))
+        assert set(datasets["2"].tags).issuperset(set(["hydrographie", "inspire"]))
+        assert "inspire" not in datasets["3"].tags
+
     def test_simple_nested_attributes(self, rmock):
         filename = "nested.jsonld"
         url = mock_dcat(rmock, filename)
@@ -673,6 +690,9 @@ class DcatBackendTest:
         assert dataset.temporal_coverage is not None
         assert dataset.temporal_coverage.start == date(2004, 11, 3)
         assert dataset.temporal_coverage.end == date(2005, 3, 30)
+        assert set(dataset.tags) == set(
+            ["inspire", "biodiversity-dynamics"]
+        )  # The DCAT.theme with rdf:resource don't have labels properly defined
 
     def test_sigoreme_xml_catalog(self, rmock):
         LicenseFactory(id="fr-lo", title="Licence ouverte / Open Licence")
@@ -912,6 +932,7 @@ class CswDcatBackendTest:
                 "oise",
                 "somme",
                 "aisne",
+                # "inspire",  TODO: the geonetwork v4 examples use broken URI as theme resources, check if this is still a problem or not
             ]
         )
         assert dataset.harvest.issued_at.date() == date(2017, 1, 1)
@@ -1089,6 +1110,7 @@ class CswIso19139DcatBackendTest:
                 "donnees-ouvertes",
                 "plu",
                 "usage-des-sols",
+                "inspire",
             ]
         )
         assert dataset.harvest.issued_at.date() == date(2017, 10, 7)
@@ -1199,3 +1221,6 @@ class CswIso19139DcatBackendTest:
         assert dataset.extras["dcat"].get("rights") is None
         for resource in dataset.resources:
             assert resource.extras["dcat"].get("rights") is None
+
+        # Additional INSPIRE tag due to the dataset having a GEMET INSPIRE theme
+        assert "inspire" in dataset.tags

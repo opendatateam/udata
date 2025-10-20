@@ -36,6 +36,7 @@ from udata.core.dataset.models import (
     ResourceMixin,
 )
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.models import OrganizationBadge
 from udata.core.spatial.factories import GeoLevelFactory, SpatialCoverageFactory
 from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
@@ -742,6 +743,18 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description, "new description")
 
+    def test_dataset_api_update_with_null_frequency(self):
+        """It should update the item even though internal frequency is null"""
+        user = self.login()
+        dataset = DatasetFactory(owner=user, frequency=None)
+        data = dataset.to_dict()
+        # Update doesn't matter as long as we don't touch `frequency`
+        data["tags"] = ["test"]
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertEqual(Dataset.objects.first().frequency, None)
+
     def test_dataset_api_update_valid_frequency(self):
         """It should update a dataset from the API"""
         user = self.login()
@@ -1324,19 +1337,33 @@ class DatasetAPITest(APITestCase):
 
 
 class DatasetsFeedAPItest(APITestCase):
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=10)
     def test_recent_feed(self):
+        certified_org = OrganizationFactory(badges=[OrganizationBadge(kind="certified")])
+        # We have a 10 hours delay for a new object to appear in feed. A newly created one shouldn't appear.
         DatasetFactory(
             title="A", resources=[ResourceFactory()], created_at_internal=datetime.utcnow()
         )
+        # Except in the case of a new dataset published by a certified organization
         DatasetFactory(
             title="B",
-            resources=[ResourceFactory()],
-            created_at_internal=datetime.utcnow() - timedelta(days=2),
+            created_at_internal=datetime.utcnow(),
+            organization=certified_org,
         )
         DatasetFactory(
             title="C",
-            resources=[ResourceFactory()],
+            created_at_internal=datetime.utcnow() - timedelta(days=2),
+        )
+        DatasetFactory(
+            title="D",
             created_at_internal=datetime.utcnow() - timedelta(days=1),
+        )
+        # Even if dataset E is created more recently than D, it should appear after in the feed, since it doesn't have a delay
+        # before appearing in the field because it is published by a certified organization
+        DatasetFactory(
+            title="E",
+            created_at_internal=datetime.utcnow() - timedelta(hours=23),
+            organization=certified_org,
         )
 
         response = self.get(url_for("api.recent_datasets_atom_feed"))
@@ -1344,11 +1371,13 @@ class DatasetsFeedAPItest(APITestCase):
 
         feed = feedparser.parse(response.data)
 
-        self.assertEqual(len(feed.entries), 3)
-        self.assertEqual(feed.entries[0].title, "A")
-        self.assertEqual(feed.entries[1].title, "C")
-        self.assertEqual(feed.entries[2].title, "B")
+        self.assertEqual(len(feed.entries), 4)
+        self.assertEqual(feed.entries[0].title, "B")
+        self.assertEqual(feed.entries[1].title, "D")
+        self.assertEqual(feed.entries[2].title, "E")
+        self.assertEqual(feed.entries[3].title, "C")
 
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
     def test_recent_feed_owner(self):
         owner = UserFactory()
         DatasetFactory(owner=owner, resources=[ResourceFactory()])
@@ -1366,6 +1395,7 @@ class DatasetsFeedAPItest(APITestCase):
         self.assertEqual(author.name, owner.fullname)
         self.assertEqual(author.href, owner.url_for())
 
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
     def test_recent_feed_org(self):
         owner = UserFactory()
         org = OrganizationFactory()

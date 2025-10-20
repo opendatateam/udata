@@ -1126,13 +1126,13 @@ class RdfToDatasetTest:
 class DatasetRdfViewsTest:
     def test_rdf_default_to_jsonld(self, client):
         dataset = DatasetFactory()
-        expected = url_for("api.dataset_rdf_format", dataset=dataset.id, format="json")
+        expected = url_for("api.dataset_rdf_format", dataset=dataset.id, _format="json")
         response = client.get(url_for("api.dataset_rdf", dataset=dataset))
         assert_redirects(response, expected)
 
     def test_rdf_perform_content_negociation(self, client):
         dataset = DatasetFactory()
-        expected = url_for("api.dataset_rdf_format", dataset=dataset.id, format="xml")
+        expected = url_for("api.dataset_rdf_format", dataset=dataset.id, _format="xml")
         url = url_for("api.dataset_rdf", dataset=dataset)
         headers = {"accept": "application/xml"}
         response = client.get(url, headers=headers)
@@ -1150,7 +1150,7 @@ class DatasetRdfViewsTest:
     def test_dataset_rdf_json_ld(self, client):
         dataset = DatasetFactory()
         for fmt in "json", "jsonld":
-            url = url_for("api.dataset_rdf_format", dataset=dataset, format=fmt)
+            url = url_for("api.dataset_rdf_format", dataset=dataset, _format=fmt)
             response = client.get(url, headers={"Accept": "application/ld+json"})
             assert200(response)
             assert response.content_type == "application/ld+json"
@@ -1170,7 +1170,7 @@ class DatasetRdfViewsTest:
     )
     def test_dataset_rdf_formats(self, client, fmt, mime):
         dataset = DatasetFactory()
-        url = url_for("api.dataset_rdf_format", dataset=dataset, format=fmt)
+        url = url_for("api.dataset_rdf_format", dataset=dataset, _format=fmt)
         response = client.get(url, headers={"Accept": mime})
         assert200(response)
         assert response.content_type == mime

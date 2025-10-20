@@ -288,6 +288,8 @@ class Defaults(object):
 
     DELAY_BEFORE_REMINDER_NOTIFICATION = 30  # Days
 
+    DELAY_BEFORE_APPEARING_IN_RSS_FEED = 10  # Hours
+
     # Harvest settings
     ###########################################################################
     HARVEST_ENABLE_MANUAL_RUN = False
@@ -324,22 +326,17 @@ class Defaults(object):
     S3_ACCESS_KEY_ID = None
     S3_SECRET_ACCESS_KEY = None
 
-    # Specific support for hvd (map HVD categories URIs to keywords)
+    # Specific support for hvd:
+    # - map HVD categories URIs to keywords
     HVD_SUPPORT = True
+
+    # Specific support for inspire:
+    # - add inspire keyword during harvest if GEMETE INSPIRE thesaurus is used in DCAT.theme
+    INSPIRE_SUPPORT = True
 
     ACTIVATE_TERRITORIES = False
     # The order is important to compute parents/children, smaller first.
     HANDLED_LEVELS = tuple()
-
-    LINKCHECKING_ENABLED = True
-    # Resource types ignored by linkchecker
-    LINKCHECKING_UNCHECKED_TYPES = ("api",)
-    LINKCHECKING_IGNORE_DOMAINS = []
-    LINKCHECKING_IGNORE_PATTERNS = ["format=shp"]
-    LINKCHECKING_MIN_CACHE_DURATION = 60  # in minutes
-    LINKCHECKING_MAX_CACHE_DURATION = 1080  # in minutes (1 week)
-    LINKCHECKING_UNAVAILABLE_THRESHOLD = 100
-    LINKCHECKING_DEFAULT_LINKCHECKER = "no_check"
 
     # Ignore some endpoint from API tracking
     # By default ignore the 3 most called APIs
