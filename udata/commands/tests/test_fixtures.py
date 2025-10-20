@@ -112,6 +112,7 @@ class FixturesTest:
         # Deactivate spam detection when testing import fixtures
         SpamMixin.detect_spam_enabled = False
         cli("import-fixtures")
+        SpamMixin.detect_spam_enabled = True
         assert models.Organization.objects.count() > 0
         assert models.Dataset.objects.count() > 0
         assert models.Reuse.objects.count() > 0
