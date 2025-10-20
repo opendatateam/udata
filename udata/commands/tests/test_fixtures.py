@@ -17,6 +17,7 @@ from udata.core.discussions.factories import DiscussionFactory, MessageDiscussio
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.reuse.factories import ReuseFactory
+from udata.core.spam.models import SpamMixin
 from udata.core.user.factories import UserFactory
 
 
@@ -108,6 +109,8 @@ class FixturesTest:
 
     def test_import_fixtures_from_default_file(self, cli):
         """Test importing fixtures from udata.commands.fixture.DEFAULT_FIXTURE_FILE."""
+        # Deactivate spam detection when testing import fixtures
+        SpamMixin.detect_spam_enabled = False
         cli("import-fixtures")
         assert models.Organization.objects.count() > 0
         assert models.Dataset.objects.count() > 0

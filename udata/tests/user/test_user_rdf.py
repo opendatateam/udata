@@ -1,4 +1,3 @@
-import pytest
 from flask import url_for
 from rdflib import BNode, Literal, URIRef
 from rdflib.namespace import FOAF, RDF, RDFS
@@ -31,7 +30,6 @@ class UserToRdfTest(DBTestMixin, TestCase):
         self.assertEqual(u.value(FOAF.name), Literal(user.fullname))
         self.assertEqual(u.value(RDFS.label), Literal(user.fullname))
 
-    @pytest.mark.options(CDATA_BASE_URL=None)
     def test_all_fields(self):
         user = UserFactory(website=faker.uri())
         user_url = url_for("api.user", user=user.id, _external=True)

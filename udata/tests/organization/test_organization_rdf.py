@@ -1,4 +1,3 @@
-import pytest
 from flask import url_for
 from rdflib import BNode, Literal, URIRef
 from rdflib.namespace import FOAF, RDF, RDFS
@@ -36,7 +35,6 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
         self.assertEqual(o.value(FOAF.name), Literal(org.name))
         self.assertEqual(o.value(RDFS.label), Literal(org.name))
 
-    @pytest.mark.options(CDATA_BASE_URL=None)
     def test_all_fields(self):
         org = OrganizationFactory(url=faker.uri())
         org_url = url_for("api.organization", org=org.id, _external=True)

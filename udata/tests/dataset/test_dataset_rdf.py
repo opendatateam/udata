@@ -87,7 +87,6 @@ class DatasetToRdfTest:
         assert d.value(DCT.modified) == Literal(dataset.last_modified)
         assert d.value(DCAT.landingPage) is None
 
-    @pytest.mark.options(CDATA_BASE_URL=None)
     def test_all_dataset_fields(self, app):
         resources = ResourceFactory.build_batch(3)
         org = OrganizationFactory(name="organization")
