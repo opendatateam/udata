@@ -660,6 +660,7 @@ class Testing(object):
     HARVEST_ACTIVITY_USER_ID = None
     SEARCH_SERVICE_API_URL = None
     CDATA_BASE_URL = None
+    SCHEMA_CATALOG_URL = None
 
 
 class Debug(Defaults):
