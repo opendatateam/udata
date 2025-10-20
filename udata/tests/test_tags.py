@@ -16,9 +16,6 @@ from udata.tests.helpers import assert200
 log = logging.getLogger(__name__)
 
 
-MAX_TAG_LENGTH = 32
-
-
 class TagsTests:
     def test_csv(self, client):
         Tag.objects.create(name="datasets-only", counts={"datasets": 15})

@@ -566,7 +566,9 @@ class ReuseAPITest(PytestOnlyAPITestCase):
 
 
 class ReusesFeedAPItest(APITestCase):
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=10)
     def test_recent_feed(self):
+        # We have a 10 hours delay for a new object to appear in feed. A newly created one shouldn't appear.
         ReuseFactory(title="A", datasets=[DatasetFactory()], created_at=datetime.utcnow())
         ReuseFactory(
             title="B", datasets=[DatasetFactory()], created_at=datetime.utcnow() - timedelta(days=2)
@@ -580,11 +582,11 @@ class ReusesFeedAPItest(APITestCase):
 
         feed = feedparser.parse(response.data)
 
-        self.assertEqual(len(feed.entries), 3)
-        self.assertEqual(feed.entries[0].title, "A")
-        self.assertEqual(feed.entries[1].title, "C")
-        self.assertEqual(feed.entries[2].title, "B")
+        self.assertEqual(len(feed.entries), 2)
+        self.assertEqual(feed.entries[0].title, "C")
+        self.assertEqual(feed.entries[1].title, "B")
 
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
     def test_recent_feed_owner(self):
         owner = UserFactory()
         ReuseFactory(owner=owner, datasets=[DatasetFactory()])
@@ -602,6 +604,7 @@ class ReusesFeedAPItest(APITestCase):
         self.assertEqual(author.name, owner.fullname)
         self.assertEqual(author.href, owner.url_for())
 
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
     def test_recent_feed_org(self):
         owner = UserFactory()
         org = OrganizationFactory()
