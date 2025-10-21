@@ -4,127 +4,133 @@ import pytest
 
 from udata.harvest import actions
 from udata.harvest.tests.factories import HarvestSourceFactory
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.utils import faker
 
-pytestmark = [
-    pytest.mark.usefixtures("clean_db"),
-    pytest.mark.options(PLUGINS=["ckan"]),
-]
 
+@pytest.mark.options(PLUGINS=["ckan"])
+class CkanBackendFilterTest(PytestOnlyDBTestCase):
+    def test_include_org_filter(self, ckan, rmock):
+        source = HarvestSourceFactory(
+            backend="ckan",
+            url=ckan.BASE_URL,
+            config={"filters": [{"key": "organization", "value": "organization_name"}]},
+        )
 
-def test_include_org_filter(ckan, rmock):
-    source = HarvestSourceFactory(
-        backend="ckan",
-        url=ckan.BASE_URL,
-        config={"filters": [{"key": "organization", "value": "organization_name"}]},
-    )
+        rmock.get(
+            ckan.PACKAGE_SEARCH_URL,
+            json={"success": True, "result": {"results": []}},
+            status_code=200,
+            headers={"Content-Type": "application/json"},
+        )
 
-    rmock.get(
-        ckan.PACKAGE_SEARCH_URL,
-        json={"success": True, "result": {"results": []}},
-        status_code=200,
-        headers={"Content-Type": "application/json"},
-    )
+        actions.run(source)
+        source.reload()
 
-    actions.run(source)
-    source.reload()
+        assert rmock.call_count == 1
+        params = {"q": "organization:organization_name", "rows": 1000}
+        assert (
+            rmock.last_request.url == f"{ckan.PACKAGE_SEARCH_URL}?{urllib.parse.urlencode(params)}"
+        )
 
-    assert rmock.call_count == 1
-    params = {"q": "organization:organization_name", "rows": 1000}
-    assert rmock.last_request.url == f"{ckan.PACKAGE_SEARCH_URL}?{urllib.parse.urlencode(params)}"
+    def test_exclude_org_filter(self, ckan, rmock):
+        source = HarvestSourceFactory(
+            backend="ckan",
+            url=ckan.BASE_URL,
+            config={
+                "filters": [
+                    {"key": "organization", "value": "organization_name", "type": "exclude"}
+                ]
+            },
+        )
 
+        rmock.get(
+            ckan.PACKAGE_SEARCH_URL,
+            json={"success": True, "result": {"results": []}},
+            status_code=200,
+            headers={"Content-Type": "application/json"},
+        )
 
-def test_exclude_org_filter(ckan, rmock):
-    source = HarvestSourceFactory(
-        backend="ckan",
-        url=ckan.BASE_URL,
-        config={
-            "filters": [{"key": "organization", "value": "organization_name", "type": "exclude"}]
-        },
-    )
+        actions.run(source)
+        source.reload()
 
-    rmock.get(
-        ckan.PACKAGE_SEARCH_URL,
-        json={"success": True, "result": {"results": []}},
-        status_code=200,
-        headers={"Content-Type": "application/json"},
-    )
+        assert rmock.call_count == 1
 
-    actions.run(source)
-    source.reload()
+        params = {"q": "-organization:organization_name", "rows": 1000}
+        assert (
+            rmock.last_request.url == f"{ckan.PACKAGE_SEARCH_URL}?{urllib.parse.urlencode(params)}"
+        )
 
-    assert rmock.call_count == 1
+    def test_tag_filter(self, ckan, rmock):
+        tag = faker.word()
+        source = HarvestSourceFactory(
+            backend="ckan", url=ckan.BASE_URL, config={"filters": [{"key": "tags", "value": tag}]}
+        )
 
-    params = {"q": "-organization:organization_name", "rows": 1000}
-    assert rmock.last_request.url == f"{ckan.PACKAGE_SEARCH_URL}?{urllib.parse.urlencode(params)}"
+        rmock.get(
+            ckan.PACKAGE_SEARCH_URL,
+            json={"success": True, "result": {"results": []}},
+            status_code=200,
+            headers={"Content-Type": "application/json"},
+        )
 
+        actions.run(source)
+        source.reload()
 
-def test_tag_filter(ckan, rmock):
-    tag = faker.word()
-    source = HarvestSourceFactory(
-        backend="ckan", url=ckan.BASE_URL, config={"filters": [{"key": "tags", "value": tag}]}
-    )
+        assert rmock.call_count == 1
+        params = {"q": f"tags:{tag}", "rows": 1000}
+        assert (
+            rmock.last_request.url == f"{ckan.PACKAGE_SEARCH_URL}?{urllib.parse.urlencode(params)}"
+        )
 
-    rmock.get(
-        ckan.PACKAGE_SEARCH_URL,
-        json={"success": True, "result": {"results": []}},
-        status_code=200,
-        headers={"Content-Type": "application/json"},
-    )
+    def test_exclude_tag_filter(self, ckan, rmock):
+        tag = faker.word()
+        source = HarvestSourceFactory(
+            backend="ckan",
+            url=ckan.BASE_URL,
+            config={"filters": [{"key": "tags", "value": tag, "type": "exclude"}]},
+        )
 
-    actions.run(source)
-    source.reload()
+        rmock.get(
+            ckan.PACKAGE_SEARCH_URL,
+            json={"success": True, "result": {"results": []}},
+            status_code=200,
+            headers={"Content-Type": "application/json"},
+        )
 
-    assert rmock.call_count == 1
-    params = {"q": f"tags:{tag}", "rows": 1000}
-    assert rmock.last_request.url == f"{ckan.PACKAGE_SEARCH_URL}?{urllib.parse.urlencode(params)}"
+        actions.run(source)
+        source.reload()
 
+        assert rmock.call_count == 1
+        params = {"q": f"-tags:{tag}", "rows": 1000}
+        assert (
+            rmock.last_request.url == f"{ckan.PACKAGE_SEARCH_URL}?{urllib.parse.urlencode(params)}"
+        )
 
-def test_exclude_tag_filter(ckan, rmock):
-    tag = faker.word()
-    source = HarvestSourceFactory(
-        backend="ckan",
-        url=ckan.BASE_URL,
-        config={"filters": [{"key": "tags", "value": tag, "type": "exclude"}]},
-    )
+    def test_can_have_multiple_filters(self, ckan, rmock):
+        source = HarvestSourceFactory(
+            backend="ckan",
+            url=ckan.BASE_URL,
+            config={
+                "filters": [
+                    {"key": "organization", "value": "organization_name"},
+                    {"key": "tags", "value": "tag-2", "type": "exclude"},
+                ]
+            },
+        )
 
-    rmock.get(
-        ckan.PACKAGE_SEARCH_URL,
-        json={"success": True, "result": {"results": []}},
-        status_code=200,
-        headers={"Content-Type": "application/json"},
-    )
+        rmock.get(
+            ckan.PACKAGE_SEARCH_URL,
+            json={"success": True, "result": {"results": []}},
+            status_code=200,
+            headers={"Content-Type": "application/json"},
+        )
 
-    actions.run(source)
-    source.reload()
+        actions.run(source)
+        source.reload()
 
-    assert rmock.call_count == 1
-    params = {"q": f"-tags:{tag}", "rows": 1000}
-    assert rmock.last_request.url == f"{ckan.PACKAGE_SEARCH_URL}?{urllib.parse.urlencode(params)}"
-
-
-def test_can_have_multiple_filters(ckan, rmock):
-    source = HarvestSourceFactory(
-        backend="ckan",
-        url=ckan.BASE_URL,
-        config={
-            "filters": [
-                {"key": "organization", "value": "organization_name"},
-                {"key": "tags", "value": "tag-2", "type": "exclude"},
-            ]
-        },
-    )
-
-    rmock.get(
-        ckan.PACKAGE_SEARCH_URL,
-        json={"success": True, "result": {"results": []}},
-        status_code=200,
-        headers={"Content-Type": "application/json"},
-    )
-
-    actions.run(source)
-    source.reload()
-
-    assert rmock.call_count == 1
-    params = {"q": "organization:organization_name AND -tags:tag-2", "rows": 1000}
-    assert rmock.last_request.url == f"{ckan.PACKAGE_SEARCH_URL}?{urllib.parse.urlencode(params)}"
+        assert rmock.call_count == 1
+        params = {"q": "organization:organization_name AND -tags:tag-2", "rows": 1000}
+        assert (
+            rmock.last_request.url == f"{ckan.PACKAGE_SEARCH_URL}?{urllib.parse.urlencode(params)}"
+        )

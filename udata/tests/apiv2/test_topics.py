@@ -27,8 +27,6 @@ from udata.tests.features.territories import create_geozones_fixtures
 
 
 class TopicsListAPITest(APITestCase):
-    modules = []
-
     def test_topic_api_list(self):
         """It should fetch a topic list from the API"""
         owner = UserFactory()

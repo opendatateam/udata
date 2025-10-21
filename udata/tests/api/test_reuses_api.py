@@ -13,7 +13,7 @@ from udata.core.reuse.constants import REUSE_TOPICS, REUSE_TYPES
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.models import Follow, Member, Reuse
-from udata.tests.api import APITestCase
+from udata.tests.api import APITestCase, PytestOnlyAPITestCase
 from udata.tests.helpers import (
     assert200,
     assert201,
@@ -24,19 +24,13 @@ from udata.tests.helpers import (
 )
 from udata.utils import faker
 
-pytestmark = [
-    pytest.mark.usefixtures("clean_db"),
-]
-
 
 def reuse_in_response(response: TestResponse, reuse: Reuse) -> bool:
     only_reuse = [r for r in response.json["data"] if r["id"] == str(reuse.id)]
     return len(only_reuse) > 0
 
 
-class ReuseAPITest:
-    modules = []
-
+class ReuseAPITest(PytestOnlyAPITestCase):
     def test_reuse_api_list(self, api):
         """It should fetch a reuse list from the API"""
         reuses = ReuseFactory.create_batch(3, visible=True)
@@ -523,7 +517,7 @@ class ReuseAPITest:
             title="arealtestprefix-4", visible=True, metrics={"followers": 10}
         )
 
-        response = api.get(url_for("api.suggest_reuses"), qs={"q": "arealtestpref", "size": "5"})
+        response = api.get(url_for("api.suggest_reuses", q="arealtestpref", size=5))
         assert200(response)
 
         assert len(response.json) <= 5
@@ -542,7 +536,7 @@ class ReuseAPITest:
         for i in range(4):
             ReuseFactory(title="testé-{0}".format(i) if i % 2 else faker.word(), visible=True)
 
-        response = api.get(url_for("api.suggest_reuses"), qs={"q": "testé", "size": "5"})
+        response = api.get(url_for("api.suggest_reuses", q="testé", size=5))
         assert200(response)
 
         assert len(response.json) <= 5
@@ -559,14 +553,14 @@ class ReuseAPITest:
         """It should not provide reuse suggestion if no match"""
         ReuseFactory.create_batch(3, visible=True)
 
-        response = api.get(url_for("api.suggest_reuses"), qs={"q": "xxxxxx", "size": "5"})
+        response = api.get(url_for("api.suggest_reuses", q="xxxxxx", size=5))
         assert200(response)
         assert len(response.json) == 0
 
     def test_suggest_reuses_api_empty(self, api):
         """It should not provide reuse suggestion if no data"""
         # self.init_search()
-        response = api.get(url_for("api.suggest_reuses"), qs={"q": "xxxxxx", "size": "5"})
+        response = api.get(url_for("api.suggest_reuses", q="xxxxxx", size=5))
         assert200(response)
         assert len(response.json) == 0
 
@@ -630,11 +624,9 @@ class ReusesFeedAPItest(APITestCase):
         self.assertEqual(author.href, org.url_for())
 
 
-class ReuseBadgeAPITest:
-    modules = []
-
+class ReuseBadgeAPITest(PytestOnlyAPITestCase):
     @pytest.fixture(autouse=True)
-    def setup(self, api, clean_db):
+    def setup_func(self, api):
         # Register at least two badges
         Reuse.__badges__["test-1"] = "Test 1"
         Reuse.__badges__["test-2"] = "Test 2"
@@ -695,9 +687,7 @@ class ReuseBadgeAPITest:
         assert404(response)
 
 
-class ReuseReferencesAPITest:
-    modules = []
-
+class ReuseReferencesAPITest(PytestOnlyAPITestCase):
     def test_reuse_types_list(self, api):
         """It should fetch the reuse types list from the API"""
         response = api.get(url_for("api.reuse_types"))

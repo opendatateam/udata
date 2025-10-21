@@ -37,13 +37,12 @@ from udata.core.followers.signals import on_follow, on_unfollow
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.models import Dataset, Follow, License, ResourceSchema, Reuse, Schema, db
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_emit, assert_equal_dates, assert_not_emit
 from udata.utils import faker
 
-pytestmark = pytest.mark.usefixtures("clean_db")
 
-
-class DatasetModelTest:
+class DatasetModelTest(PytestOnlyDBTestCase):
     def test_add_resource(self):
         user = UserFactory()
         dataset = DatasetFactory(owner=user)
@@ -426,7 +425,7 @@ class DatasetModelTest:
         assert dataset.get_metrics()["dataservices"] == 0
 
 
-class ResourceModelTest:
+class ResourceModelTest(PytestOnlyDBTestCase):
     def test_url_is_required(self):
         with pytest.raises(db.ValidationError):
             DatasetFactory(resources=[ResourceFactory(url=None)])
@@ -451,7 +450,7 @@ class ResourceModelTest:
             resource.save(signal_kwargs={"ignores": ["post_save"]})
 
 
-class LicenseModelTest:
+class LicenseModelTest(PytestOnlyDBTestCase):
     @pytest.fixture(autouse=True)
     def setUp(self):
         # Feed the DB with random data to ensure true matching
@@ -672,7 +671,7 @@ class LicenseModelTest:
         assert license.id == found.id
 
 
-class ResourceSchemaTest:
+class ResourceSchemaTest(PytestOnlyDBTestCase):
     @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/notfound")
     def test_resource_schema_objects_404_endpoint(self, rmock):
         rmock.get("https://example.com/notfound", status_code=404)
@@ -787,7 +786,7 @@ class ResourceSchemaTest:
             resource.schema.clean(check_schema_in_catalog=True)
 
 
-class HarvestMetadataTest:
+class HarvestMetadataTest(PytestOnlyDBTestCase):
     def test_harvest_dataset_metadata_validate_success(self):
         dataset = DatasetFactory()
 

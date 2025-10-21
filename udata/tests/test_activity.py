@@ -9,7 +9,7 @@ from udata.core.activity.models import Activity, Auditable
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.models import db
-from udata.tests import DBTestMixin, TestCase, WebTestMixin
+from udata.tests.api import APITestCase
 from udata.tests.helpers import assert_emit, assert_not_emit
 
 
@@ -45,7 +45,7 @@ class FakeActivity(Activity):
     related_to = db.ReferenceField(FakeSubject)
 
 
-class ActivityTest(WebTestMixin, DBTestMixin, TestCase):
+class ActivityTest(APITestCase):
     def setUp(self):
         self.fake = FakeSubject.objects.create(name="fake")
         self.login()
@@ -120,7 +120,7 @@ class ActivityTest(WebTestMixin, DBTestMixin, TestCase):
         self.assertEqual(Activity.objects(actor=self.user).count(), 1)
 
 
-class AuditableTest(WebTestMixin, DBTestMixin, TestCase):
+class AuditableTest(APITestCase):
     def test_auditable_signals_emission(self):
         """It should emit appropriate signals on subject fields creation, update and deletion"""
         with assert_emit(post_save, FakeAuditableSubject.on_create):

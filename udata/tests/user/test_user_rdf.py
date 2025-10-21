@@ -3,19 +3,13 @@ from rdflib import BNode, Literal, URIRef
 from rdflib.namespace import FOAF, RDF, RDFS
 from rdflib.resource import Resource as RdfResource
 
-from udata import api
 from udata.core.user.factories import UserFactory
 from udata.core.user.rdf import user_to_rdf
-from udata.tests import DBTestMixin, TestCase
+from udata.tests.api import APITestCase
 from udata.utils import faker
 
 
-class UserToRdfTest(DBTestMixin, TestCase):
-    def create_app(self):
-        app = super(UserToRdfTest, self).create_app()
-        api.init_app(app)
-        return app
-
+class UserToRdfTest(APITestCase):
     def test_minimal(self):
         user = UserFactory.build()  # Does not have an URL
         u = user_to_rdf(user)
