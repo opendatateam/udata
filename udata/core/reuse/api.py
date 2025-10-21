@@ -24,7 +24,7 @@ from udata.core.storages.api import (
 from udata.frontend.markdown import md
 from udata.i18n import gettext as _
 from udata.models import Dataset
-from udata.utils import id_or_404
+from udata.utils import get_rss_feed_list, id_or_404
 
 from .api_fields import (
     reuse_suggestion_fields,
@@ -143,7 +143,7 @@ class ReusesAtomFeedAPI(API):
             link=request.url_root,
         )
 
-        reuses: list[Reuse] = Reuse.objects.visible().order_by("-created_at").limit(15)
+        reuses = get_rss_feed_list(Reuse.objects.visible(), "created_at")
         for reuse in reuses:
             author_name = None
             author_uri = None

@@ -11,6 +11,7 @@
   xmlns:dcterms="http://purl.org/dc/terms/"
   xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
   xmlns:schema="http://schema.org/"
+  xmlns:skos="http://www.w3.org/2004/02/skos/core#"
 >
   <dcat:Catalog rdf:about="http://data.test.org/">
     <dcat:dataset>
@@ -45,7 +46,6 @@
     <dcterms:title>Sample DCAT Catalog</dcterms:title>
     <dcat:dataset>
       <dcat:Dataset>
-        <dcat:theme>Theme 2</dcat:theme>
         <dcat:contactPoint rdf:resource="http://data.test.org/contacts/1"/>
         <dcat:landingPage>http://data.test.org/datasets/1</dcat:landingPage>
         <dcat:keyword>Tag 3</dcat:keyword>
@@ -75,6 +75,17 @@
         <dcat:distribution rdf:resource="http://data.test.org/datasets/1/resources/1"/>
         <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T18:59:02.737480</dcterms:issued>
         <dcterms:identifier>1</dcterms:identifier>
+        <dcat:theme>
+          <skos:Concept>
+            <skos:prefLabel xml:lang="fr">Répartition des espèces</skos:prefLabel>
+            <skos:inScheme>
+              <skos:ConceptScheme>
+                <dcterms:title xml:lang="fr">GEMET - INSPIRE themes, version 1.0</dcterms:title>
+                <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2018-07-27</dcterms:issued>
+              </skos:ConceptScheme>
+            </skos:inScheme>
+          </skos:Concept>
+        </dcat:theme>
       </dcat:Dataset>
     </dcat:dataset>
     <dcat:dataset>
@@ -110,6 +121,7 @@
         </dct:spatial>
         <dcterms:identifier>2</dcterms:identifier>
         <dct:conformsTo rdf:nodeID="Ne0189e93917c4f67a412fc44883322e7"/>
+        <dcat:theme rdf:resource="http://bnode.namespace.voc/theme/hy"/>
       </dcat:Dataset>
     </dcat:dataset>
     <dcat:service>
@@ -185,4 +197,8 @@
     <dct:type rdf:resource="http://inspire.ec.europa.eu/glossary/SpatialReferenceSystem"/>
     <dct:title xml:lang="fr">RGF93 / Lambert-93 (EPSG:2154)</dct:title>
   </rdf:Description>
+  <skos:Concept rdf:about="http://bnode.namespace.voc/theme/hy">
+    <skos:inScheme rdf:resource="http://inspire.ec.europa.eu/theme"/>
+    <skos:prefLabel>Hydrographie</skos:prefLabel>
+  </skos:Concept>
 </rdf:RDF>

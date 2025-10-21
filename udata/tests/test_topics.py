@@ -17,6 +17,7 @@ from udata.core.topic.factories import (
 )
 from udata.core.topic.models import Topic, TopicElement
 from udata.search import reindex
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_emit
 
 
@@ -31,13 +32,7 @@ def job_reindex_undelayed(mocker):
     return mocker.patch.object(reindex, "delay", side_effect=reindex)
 
 
-pytestmark = pytest.mark.usefixtures("clean_db")
-
-
-class TopicModelTest:
-    # allows url_for with correct context when calling reindex
-    modules = ["admin"]
-
+class TopicModelTest(PytestOnlyDBTestCase):
     def test_pre_save(self, job_reindex):
         topic = TopicFactory()
 
@@ -53,12 +48,12 @@ class TopicModelTest:
         topic.save()
         job_reindex.assert_called()
 
-    @pytest.mark.options(SEARCH_SERVICE_API_URL="smtg")
-    def test_pre_save_reindex(self, job_reindex_undelayed):
+    @pytest.mark.options(SEARCH_SERVICE_API_URL="http://smtg/")
+    def test_pre_save_reindex(self, job_reindex):
         """This will call the real reindex method and thus bubble up errors"""
         # creates a topic with elements, thus calls reindex
         TopicWithElementsFactory()
-        job_reindex_undelayed.assert_called()
+        job_reindex.assert_called()
 
     def test_topic_activities(self, api, mocker):
         # A user must be authenticated for activities to be emitted

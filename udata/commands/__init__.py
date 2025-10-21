@@ -186,7 +186,6 @@ MODULES_WITH_COMMANDS = [
     "core.spatial",
     "core.user",
     "harvest",
-    "linkchecker",
     "search",
 ]
 
