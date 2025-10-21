@@ -81,15 +81,12 @@ def _load_frontend(request, _configure_application):
 
     app = request.getfixturevalue("app")
     marker = request.node.get_closest_marker("frontend")
-    modules = set(marker.args[0] if marker and marker.args else [])
-    if getattr(request.cls, "modules", None):
-        modules |= set(request.cls.modules)
 
-    if marker or hasattr(request.cls, "modules"):
+    if marker:
         from udata import api, frontend
 
         api.init_app(app)
-        frontend.init_app(app, modules)
+        frontend.init_app(app)
 
 
 @pytest.fixture
