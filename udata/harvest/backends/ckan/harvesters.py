@@ -158,7 +158,6 @@ class CkanBackend(BaseBackend):
         dataset.tags = [t["name"] for t in data["tags"] if t["name"]]
 
         dataset.harvest.created_at = data["metadata_created"]
-        dataset.harvest.modified_at = data["metadata_modified"]
 
         dataset.harvest.ckan_name = data["name"]
 
