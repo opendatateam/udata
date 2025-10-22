@@ -438,7 +438,7 @@ def contact_points_to_rdf(contacts, graph=None):
 
         node = graph.resource(id)
         role = AGENT_ROLE_TO_RDF_PREDICATE.get(contact.role, DCAT.contactPoint)
-        # GeoDCAT-AP spec: Only contactPoint is a Kind. Other roles are Agent.
+        # GeoDCAT-AP spec: Only contactPoint is a VCARD.Kind (like in DCAT). Other roles are FOAF.Agent.
         if role == DCAT.contactPoint:
             node.set(RDF.type, VCARD.Kind)
             if contact.name:
