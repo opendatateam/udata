@@ -18,6 +18,7 @@ from udata.harvest.models import HarvestJob
 from udata.models import Dataset
 from udata.rdf import DCAT, RDF, namespace_manager
 from udata.storage.s3 import get_from_json
+from udata.tests.api import PytestOnlyDBTestCase
 
 from .. import actions
 from ..backends.dcat import URIS_TO_REPLACE
@@ -67,9 +68,8 @@ def mock_csw_pagination(rmock, path, pattern):
     return url
 
 
-@pytest.mark.usefixtures("clean_db")
 @pytest.mark.options(PLUGINS=["dcat"])
-class DcatBackendTest:
+class DcatBackendTest(PytestOnlyDBTestCase):
     def test_simple_flat(self, rmock):
         filename = "flat.jsonld"
         url = mock_dcat(rmock, filename)
@@ -191,7 +191,6 @@ class DcatBackendTest:
 
     def test_harvest_dataservices_keep_attached_associated_datasets(self, rmock):
         """It should update the existing list of dataservice.datasets and not overwrite existing ones"""
-        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
 
         filename = "bnodes.xml"
         url = mock_dcat(rmock, filename)
@@ -359,10 +358,8 @@ class DcatBackendTest:
             is None
         )
 
-    @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/schemas", HARVEST_MAX_ITEMS=2)
+    @pytest.mark.options(HARVEST_MAX_ITEMS=2)
     def test_harvest_max_items(self, rmock):
-        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
-
         filename = "bnodes.xml"
         url = mock_dcat(rmock, filename)
         org = OrganizationFactory()
@@ -373,10 +370,7 @@ class DcatBackendTest:
         assert Dataset.objects.count() == 2
         assert HarvestJob.objects.first().status == "done"
 
-    @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/schemas")
     def test_harvest_spatial(self, rmock):
-        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
-
         filename = "bnodes.xml"
         url = mock_dcat(rmock, filename)
         org = OrganizationFactory()
@@ -445,10 +439,7 @@ class DcatBackendTest:
         assert resources_by_title["Resource 3-1"].schema.url is None
         assert resources_by_title["Resource 3-1"].schema.version == "2.2.0"
 
-    @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/schemas")
     def test_harvest_inspire_themese(self, rmock):
-        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
-
         filename = "bnodes.xml"
         url = mock_dcat(rmock, filename)
         org = OrganizationFactory()
@@ -893,9 +884,8 @@ class DcatBackendTest:
         assert "404 Client Error" in job.errors[0].message
 
 
-@pytest.mark.usefixtures("clean_db")
 @pytest.mark.options(PLUGINS=["csw"])
-class CswDcatBackendTest:
+class CswDcatBackendTest(PytestOnlyDBTestCase):
     def test_geonetworkv4(self, rmock):
         url = mock_csw_pagination(rmock, "geonetwork/srv/eng/csw.rdf", "geonetworkv4-page-{}.xml")
         org = OrganizationFactory()
@@ -1044,9 +1034,8 @@ class CswDcatBackendTest:
         assert len(job.items) == 1
 
 
-@pytest.mark.usefixtures("clean_db")
 @pytest.mark.options(PLUGINS=["csw"])
-class CswIso19139DcatBackendTest:
+class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
     @pytest.mark.parametrize(
         "remote_url_prefix",
         [

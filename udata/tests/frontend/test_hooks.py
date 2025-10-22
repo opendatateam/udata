@@ -2,6 +2,7 @@ import pytest
 from flask import Blueprint, render_template_string, url_for
 
 from udata.frontend import template_hook
+from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import assert200
 
 bp = Blueprint("hooks_tests", __name__, url_prefix="/hooks_tests")
@@ -92,14 +93,11 @@ def iter_conditionnal():
     return render_template_string('{% for w in hook("conditionnal") %}<{{ w }}>{% endfor %}')
 
 
-@pytest.fixture
-def app(app):
-    app.register_blueprint(bp)
-    return app
+class HooksTest(PytestOnlyAPITestCase):
+    @pytest.fixture(autouse=True)
+    def setup_func(self, app):
+        app.register_blueprint(bp)
 
-
-@pytest.mark.frontend
-class HooksTest:
     def test_empty_template_hook(self, client):
         response = client.get(url_for("hooks_tests.render_empty"))
         assert200(response)

@@ -5,6 +5,7 @@ import pytest
 from udata.core.jobs.commands import job_label
 from udata.core.jobs.models import PeriodicTask
 from udata.tasks import job
+from udata.tests.api import PytestOnlyDBTestCase
 
 log = logging.getLogger(__name__)
 
@@ -26,8 +27,7 @@ def job_run(mocker):
     return mocker.patch.object(do_nothing, "run")
 
 
-@pytest.mark.usefixtures("clean_db")
-class JobsCommandsTest:
+class JobsCommandsTest(PytestOnlyDBTestCase):
     def test_list_jobs(self, cli):
         result = cli("job list")
         assert JOB_NAME in result.output

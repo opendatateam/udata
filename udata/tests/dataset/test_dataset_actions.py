@@ -1,13 +1,11 @@
-import pytest
-
 from udata.core.dataset.actions import archive
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.models import Discussion
 from udata.core.user.factories import UserFactory
+from udata.tests.api import PytestOnlyDBTestCase
 
 
-@pytest.mark.usefixtures("clean_db")
-class DatasetActionsTest:
+class DatasetActionsTest(PytestOnlyDBTestCase):
     def test_dataset_archive(self, app):
         user = UserFactory()
         app.config["ARCHIVE_COMMENT_USER_ID"] = user.id
