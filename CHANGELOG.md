@@ -122,7 +122,6 @@
 
 - Count dataservices and reuses for datasets based on signal [#3335](https://github.com/opendatateam/udata/pull/3335)
   :warning: the job `update-datasets-reuses-metrics` disappears, you should unschedule it before installing this version
-- Add support for all GeoDCAT-AP roles [#3374](https://github.com/opendatateam/udata/pull/3374)
 - Consolidate CSW harvesting logic [#3378](https://github.com/opendatateam/udata/pull/3378)
   :warning: Config setting `HARVEST_ISO19139_XSL_URL` is renamed to `HARVEST_ISO19139_XSLT_URL`.
 - Compute organization aggregate metrics only once at the end of harvest [#3391](https://github.com/opendatateam/udata/pull/3391)
