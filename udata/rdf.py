@@ -12,6 +12,7 @@ from rdflib import BNode, Graph, Literal, URIRef
 from rdflib.namespace import (
     DCTERMS,
     FOAF,
+    ORG,
     RDF,
     RDFS,
     SKOS,
@@ -369,7 +370,11 @@ def contact_points_from_rdf(rdf, prop, role, dataset):
             email = None
             contact_form = None
         elif prop == DCAT.contactPoint:  # Could be split on the type of contact_point instead
-            name = rdf_value(contact_point, VCARD.fn) or ""
+            name = (
+                rdf_value(contact_point, VCARD["organization-name"])
+                or rdf_value(contact_point, VCARD.fn)
+                or ""
+            )
             email = (
                 rdf_value(contact_point, VCARD.hasEmail)
                 or rdf_value(contact_point, VCARD.email)
@@ -378,12 +383,18 @@ def contact_points_from_rdf(rdf, prop, role, dataset):
             email = email.replace("mailto:", "").strip() if email else None
             contact_form = rdf_value(contact_point, VCARD.hasUrl)
         else:
+            contact_point_org = contact_point.value(ORG.memberOf)
             name = (
-                rdf_value(contact_point, FOAF.name)
+                (contact_point_org and rdf_value(contact_point_org, FOAF.name))
+                or rdf_value(contact_point, FOAF.name)
                 or rdf_value(contact_point, SKOS.prefLabel)
                 or ""
             )
-            email = rdf_value(contact_point, FOAF.mbox)
+            email = (
+                (contact_point_org and rdf_value(contact_point_org, FOAF.mbox))
+                or rdf_value(contact_point, FOAF.mbox)
+                or None
+            )
             email = email.replace("mailto:", "").strip() if email else None
             contact_form = None
 
