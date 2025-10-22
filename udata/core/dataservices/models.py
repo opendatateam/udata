@@ -324,6 +324,10 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
     ]
 
     @property
+    def is_visible(self):
+        return not self.is_hidden
+
+    @property
     def is_hidden(self):
         return self.private or self.deleted_at or self.archived_at
 
