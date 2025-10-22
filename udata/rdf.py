@@ -378,7 +378,7 @@ def contact_points_from_rdf(rdf, prop, role, dataset):
             email = (
                 rdf_value(contact_point, VCARD.hasEmail)
                 or rdf_value(contact_point, VCARD.email)
-                or rdf_value(contact_point, DCAT.email)
+                or None
             )
             email = email.replace("mailto:", "").strip() if email else None
             contact_form = rdf_value(contact_point, VCARD.hasUrl)
