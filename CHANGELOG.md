@@ -1,6 +1,124 @@
 # Changelog
 
-## Current (in progress)
+## 13.0.0 (2025-10-22)
+- **refactor!: remove VueJS old admin and all assets ([#3422](https://github.com/opendatateam/udata/pull/3422))**
+  - [x] Dossiers frontend : js/, less/, specs/, node_modules/
+  - [x] Configuration NPM/Webpack : package.json, webpack.config.*,
+  karma.conf.js, .eslintrc.yml, .nvmrc, babel.cfg
+  - [x] Assets statiques compilés : udata/static/* (remplacé par dossier
+  vide)
+  - [x] Tâches Python frontend : assets_build, widgets_build,
+  oembed_build, *_watch, jstest
+  - [x] CI/CD : Job assets et dépendances dans .circleci/config.yml
+  
+  ---------
+  
+  Co-authored-by: maudetes <maudet.estelle@gmail.com>
+- **refactor!: remove linkchecker ([#3483](https://github.com/opendatateam/udata/pull/3483))**
+  The goal is to remove the entrypoint system. I don't think we use this
+  linkchecker anymore (it's disabled in our settings), hydra is doing this
+  job now? We maybe need to check the `ResourceMixin@ExtrasField` (I just
+  copy/paste but it could be nice in another PR to add hydra types here?)
+  
+  ---------
+  
+  Co-authored-by: maudetes <maudet.estelle@gmail.com>
+- build: build with uv ([#3485](https://github.com/opendatateam/udata/pull/3485))
+- build: remove unused dependencies ([#3454](https://github.com/opendatateam/udata/pull/3454))
+- feat(catalog): parse filters in rdf catalog ([#3474](https://github.com/opendatateam/udata/pull/3474))
+- feat(INSPIRE): detect INSPIRE datasets and dataservices ([#3473](https://github.com/opendatateam/udata/pull/3473))
+- feat(rss): we add a delay for new content in RSS feed ([#3460](https://github.com/opendatateam/udata/pull/3460))
+- feat: update dev, test, doc and report dependencies ([#3481](https://github.com/opendatateam/udata/pull/3481))
+- feat: upgrade flask-storage to 1.4.0 ([#3468](https://github.com/opendatateam/udata/pull/3468))
+- fix(api): "None is not a valid UpdateFrequency" on dataset update ([#3491](https://github.com/opendatateam/udata/pull/3491))
+- fix(dataservice): unindex archived dataservices ([#3493](https://github.com/opendatateam/udata/pull/3493))
+- fix(rss): escape atom feed content ([#3476](https://github.com/opendatateam/udata/pull/3476))
+- fix(test): add data to pytest norecursedirs ([#3486](https://github.com/opendatateam/udata/pull/3486))
+- fix(tests): add some configuration variable for tests requiring it. ([#3487](https://github.com/opendatateam/udata/pull/3487))
+- New Crowdin updates ([#3462](https://github.com/opendatateam/udata/pull/3462))
+- refactor(mongo): remove flask_mongoengine ([#3467](https://github.com/opendatateam/udata/pull/3467))
+- refactor: remove preview entrypoints ([#3484](https://github.com/opendatateam/udata/pull/3484))
+- refactor: remove unused tox ([#3480](https://github.com/opendatateam/udata/pull/3480))
+- test: simplifications ([#3490](https://github.com/opendatateam/udata/pull/3490))
+
+
+## 12.0.1 (2025-10-13)
+
+- fix(security): confirm email error crashing instead of redirecting ([#3478](https://github.com/opendatateam/udata/pull/3478))
+
+
+## 12.0.0 (2025-10-13)
+- **feat!: bump minimum Python version to 3.11 ([#3463](https://github.com/opendatateam/udata/pull/3463))**
+  Python 3.9 is reaching end of life at the end of october
+  https://devguide.python.org/versions/#versions
+- **feat(security)!: enable SPA type security views (login, register) for cdata  ([#3348](https://github.com/opendatateam/udata/pull/3348))**
+  - Add `SECURITY_SPA_ON_SAME_DOMAIN` to `True` if your frontend is on the
+  same domain as the backend.
+  - Change the redirects URLs in ProConnect:
+  - From https://www.data.gouv.fr/proconnect/auth to
+  https://www.data.gouv.fr/api/1/proconnect/auth
+  - From https://www.data.gouv.fr/proconnect/logout to
+  https://www.data.gouv.fr/api/1/proconnect/logout
+  - Part of https://github.com/datagouv/data.gouv.fr/issues/1717
+  
+  ---------
+  
+  Co-authored-by: maudetes <maudet.estelle@gmail.com>
+- build: use uv ([#3459](https://github.com/opendatateam/udata/pull/3459))
+- ci: do not publish on tags ([#3455](https://github.com/opendatateam/udata/pull/3455))
+- feat: add standalone 404 page ([#3457](https://github.com/opendatateam/udata/pull/3457))
+- feat(harvest): add missing EU update frequencies ([#3343](https://github.com/opendatateam/udata/pull/3343))
+- feat(site): add version to response ([#3458](https://github.com/opendatateam/udata/pull/3458))
+- feat(topic): improve perf in dataservice topic filter ([#3465](https://github.com/opendatateam/udata/pull/3465))
+- fix(topic): protect element activity on Topic deletion ([#3461](https://github.com/opendatateam/udata/pull/3461))
+- refactor(datasets): remove frequency reminder task and mail (never used) ([#3472](https://github.com/opendatateam/udata/pull/3472))
+- refactor(tags): move tags.csv to /api/1/site/tags.csv ([#3456](https://github.com/opendatateam/udata/pull/3456))
+
+
+## 11.1.1 (2025-10-02)
+
+- feat(git): new tag_version.sh script to replace Bumpr ([#3451](https://github.com/opendatateam/udata/pull/3451))
+- fix(topics): delete TopicElements when Topic is deleted ([#3452](https://github.com/opendatateam/udata/pull/3452))
+- Update to version 11.1.1.dev for next development cycle
+
+
+## 11.1.0 (2025-09-30)
+
+- chore: migrate to pyproject.toml, replace `CIRCLE_TAG` by `setuptools_scm` to compute the correct version automatically [#3413](https://github.com/opendatateam/udata/pull/3413) [#3434](https://github.com/opendatateam/udata/pull/3434) [#3435](https://github.com/opendatateam/udata/pull/3435) [#3437](https://github.com/opendatateam/udata/pull/3437) [#3438](https://github.com/opendatateam/udata/pull/3438/) [3447](https://github.com/opendatateam/udata/pull/3447)
+- fix(harvest): refactor dates handling [#3352](https://github.com/opendatateam/udata/pull/3352)
+- feat(harvest): emit harvest activities. Set `HARVEST_ACTIVITY_USER_ID` to an existing user account to activate it [#3412](https://github.com/opendatateam/udata/pull/3412)
+- feat(activity): ignore list reordering in changed fields detection [#3448](https://github.com/opendatateam/udata/pull/3448)
+- feat(dataservice): Keep existing attached datasets to a dataservice at harvest time [#3449](https://github.com/opendatateam/udata/pull/3449)
+- feat(badges): add new badges [#3415](https://github.com/opendatateam/udata/pull/3415)
+- fix(badges): remove unused BadgesField [#3420](https://github.com/opendatateam/udata/pull/3420)
+- chore(mail): simplify getting mail connection (dummy or real) condition [#3410](https://github.com/opendatateam/udata/pull/3410)
+- fix(topic): absolute Topic.uri [#3436](https://github.com/opendatateam/udata/pull/3436)
+- feat(topics): search by elements content [#3443](https://github.com/opendatateam/udata/pull/3443)
+- feat(topic): add elements activities [#3439](https://github.com/opendatateam/udata/pull/3439)
+- feat(topics): serialize elements in topic_elements_create response [#3446](https://github.com/opendatateam/udata/pull/3446)
+- feat(topic): add Dataservice to supported elements [#3444](https://github.com/opendatateam/udata/pull/3444)
+- feat(api): refactor `@function_field` and `@field` to provide better doc and type support [#3441](https://github.com/opendatateam/udata/pull/3441/)
+
+## 11.0.1 (2025-09-15)
+
+- fix: PUT topic without elements [#3424](https://github.com/opendatateam/udata/pull/3424)
+
+## 11.0.0 (2025-09-12)
+
+- Change CSW harvesters XML processor from lxml to saxonche [#3380](https://github.com/opendatateam/udata/pull/3380)
+- **breaking change** feat: topic elements [#3318](https://github.com/opendatateam/udata/pull/3318) [#3416](https://github.com/opendatateam/udata/pull/3416) [#3417](https://github.com/opendatateam/udata/pull/3417) [#3418](https://github.com/opendatateam/udata/pull/3418)
+- Allow to send arguments to the `udata user create` command for CI [#3419](https://github.com/opendatateam/udata/pull/3419)
+
+## 10.9.0 (2025-08-28)
+
+- Add editos pages [#3387](https://github.com/opendatateam/udata/pull/3387)
+- Prevent numerous user deleted slug duplicates [#3403](https://github.com/opendatateam/udata/pull/3403)
+- Dataservice feature [#3405](https://github.com/opendatateam/udata/pull/3405)
+- Prefer default lang for literal values with different languages [#3406](https://github.com/opendatateam/udata/pull/3406)
+- Better organization discussion csv export perfs [#3407](https://github.com/opendatateam/udata/pull/3407)
+- Serialize resources ids and titles for indexation [#3408](https://github.com/opendatateam/udata/pull/3408)
+
+## 10.8.3 (2025-08-20)
 
 - Count dataservices and reuses for datasets based on signal [#3335](https://github.com/opendatateam/udata/pull/3335)
   :warning: the job `update-datasets-reuses-metrics` disappears, you should unschedule it before installing this version
@@ -11,6 +129,7 @@
 - Cache dcat harvest pages to avoid two rounds of requests [#3398](https://github.com/opendatateam/udata/pull/3398)
 - Ignore Dataset.accessService when processing DataService [#3399](https://github.com/opendatateam/udata/pull/3399)
 - Add dataset field `description_short` [#3397](https://github.com/opendatateam/udata/pull/3397)
+- Optimize csv organization export [#3401](https://github.com/opendatateam/udata/pull/3401)
 
 ## 10.8.2 (2025-07-31)
 
@@ -782,6 +901,7 @@ Search refactor [#2680](https://github.com/opendatateam/udata/pull/2680)
 
 - Fix fields empty value in admin form to allow for unsetting fields [#2691](https://github.com/opendatateam/udata/pull/2691)
 - :warning: Add a new required topic string field on reuses. The associated migration set default topic to `others` [#2689](https://github.com/opendatateam/udata/pull/2689)
+- Use [uv](https://docs.astral.sh/uv/) as package manager and lockfile [#3459](https://github.com/opendatateam/udata/pull/3459)
 
 ## 3.3.0 (2021-12-10)
 

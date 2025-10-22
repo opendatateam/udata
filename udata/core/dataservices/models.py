@@ -6,9 +6,8 @@ from mongoengine import Q
 from mongoengine.signals import post_save
 
 import udata.core.contact_point.api_fields as contact_api_fields
-import udata.core.dataset.api_fields as datasets_api_fields
 from udata.api import api, fields
-from udata.api_fields import field, function_field, generate_fields
+from udata.api_fields import field, generate_fields
 from udata.core.activity.models import Auditable
 from udata.core.dataservices.constants import (
     DATASERVICE_ACCESS_AUDIENCE_CONDITIONS,
@@ -16,6 +15,7 @@ from udata.core.dataservices.constants import (
     DATASERVICE_ACCESS_TYPES,
     DATASERVICE_FORMATS,
 )
+from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.dataset.models import Dataset
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
@@ -111,6 +111,9 @@ class HarvestMetadata(db.EmbeddedDocument):
     created_at = field(
         db.DateTimeField(), description="Date of the creation as provided by the harvested catalog"
     )
+    issued_at = field(
+        db.DateTimeField(), description="Release date as provided by the harvested catalog"
+    )
     last_update = field(db.DateTimeField(), description="Date of the last harvesting")
     archived_at = field(db.DateTimeField())
     archived_reason = field(db.StringField())
@@ -131,9 +134,28 @@ def check_only_one_condition_per_role(access_audiences, **_kwargs):
         )
 
 
+def filter_by_topic(base_query, filter_value):
+    from udata.core.topic.models import Topic
+
+    try:
+        topic = Topic.objects.get(id=filter_value)
+    except Topic.DoesNotExist:
+        pass
+    else:
+        return base_query.filter(
+            id__in=[
+                element.element.id
+                for element in topic.elements.filter(__raw__={"element._cls": "Dataservice"})
+            ]
+        )
+
+
 @generate_fields(
     searchable=True,
-    additional_filters={"organization_badge": "organization.badges"},
+    nested_filters={"organization_badge": "organization.badges"},
+    standalone_filters=[
+        {"key": "topic", "constraints": "objectid", "query": filter_by_topic, "type": str}
+    ],
     additional_sorts=[
         {"key": "followers", "value": "metrics.followers"},
         {"key": "views", "value": "metrics.views"},
@@ -224,6 +246,13 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
         auditable=False,
     )
 
+    featured = field(
+        db.BooleanField(),
+        filterable={},
+        readonly=True,
+        auditable=False,
+    )
+
     contact_points = field(
         db.ListField(
             field(
@@ -257,7 +286,7 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
         db.ListField(
             field(
                 db.LazyReferenceField(Dataset, passthrough=True),
-                nested_fields=datasets_api_fields.dataset_ref_fields,
+                nested_fields=dataset_ref_fields,
             )
         ),
         filterable={
@@ -274,7 +303,7 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
         auditable=False,
     )
 
-    @function_field(description="Link to the API endpoint for this dataservice")
+    @field(description="Link to the API endpoint for this dataservice")
     def self_api_url(self, **kwargs):
         return url_for(
             "api.dataservice",
@@ -282,7 +311,7 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
             **self._self_api_url_kwargs(**kwargs),
         )
 
-    @function_field(description="Link to the udata web page for this dataservice", show_as_ref=True)
+    @field(description="Link to the udata web page for this dataservice", show_as_ref=True)
     def self_web_url(self, **kwargs):
         return cdata_url(f"/dataservices/{self._link_id(**kwargs)}/", **kwargs)
 
@@ -295,11 +324,15 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
     ]
 
     @property
+    def is_visible(self):
+        return not self.is_hidden
+
+    @property
     def is_hidden(self):
         return self.private or self.deleted_at or self.archived_at
 
     @property
-    @function_field(
+    @field(
         nested_fields=dataservice_permissions_fields,
     )
     def permissions(self):

@@ -128,6 +128,12 @@ EU_HVD_CATEGORIES = {
 HVD_LEGISLATION = "http://data.europa.eu/eli/reg_impl/2023/138/oj"
 TAG_TO_EU_HVD_CATEGORIES = {slugify_tag(EU_HVD_CATEGORIES[uri]): uri for uri in EU_HVD_CATEGORIES}
 
+INSPIRE_GEMET_THEME_NAMESPACE = "http://inspire.ec.europa.eu/theme"
+INSPIRE_GEMET_SCHEME_URIS = [
+    INSPIRE_GEMET_THEME_NAMESPACE,
+    "http://www.eionet.europa.eu/gemet/inspire_themes",
+]
+
 AGENT_ROLE_TO_RDF_PREDICATE = {
     "contact": DCAT.contactPoint,
     "creator": DCT.creator,
@@ -245,9 +251,26 @@ def rdf_unique_values(resource, predicate, parse_label=False) -> set[str]:
 
 
 def rdf_value(obj, predicate, default=None, parse_label=False):
-    """Serialize the value for a predicate on a RdfResource"""
-    value = obj.value(predicate)
+    """
+    Serialize the value for a predicate on a RdfResource,
+    expecting one value only or (at most) one per language for Literals.
+    """
+    value = default_lang_value(obj, predicate)
     return serialize_value(value, parse_label=parse_label) if value else default
+
+
+def default_lang_value(obj, predicate):
+    """
+    Return the value with the default language if multiple Literal values exist in different languages.
+    """
+    candidate_values = list(obj.objects(predicate))
+    if not candidate_values:
+        return None
+    for val in candidate_values:
+        if isinstance(val, Literal) and val.language == current_app.config["DEFAULT_LANGUAGE"]:
+            return val
+    # Defaulting to the first value found
+    return candidate_values[0]
 
 
 class HTMLDetector(HTMLParser):
@@ -292,16 +315,37 @@ def theme_labels_from_rdf(rdf):
     """
     Get theme labels to use as keywords.
     Map HVD keywords from known URIs resources if HVD support is activated.
+    Map INSPIRE keyword from known themes if INSPIRE support is activated.
+    - An INSPIRE dataset is a dataset with a theme INSPIRE encoded with gmd:descriptiveKeywords/gmd:MD_Keywords.
+      In DCAT, it is shown as a DCAT.theme with a SKOS.inScheme pointing to to the INSPIRE thesaurus.
+      We filter on this thesaurus based on its name (expecting "GEMET - INSPIRE themes, version 1.0") or its uri.
     """
     for theme in rdf.objects(DCAT.theme):
         if isinstance(theme, RdfResource):
+            label = rdf_value(theme, SKOS.prefLabel)
             uri = theme.identifier.toPython()
             if current_app.config["HVD_SUPPORT"] and uri in EU_HVD_CATEGORIES:
+                # Map label from EU HVD categories
                 label = EU_HVD_CATEGORIES[uri]
                 # Additionnally yield hvd keyword
                 yield "hvd"
-            else:
-                label = rdf_value(theme, SKOS.prefLabel)
+            if current_app.config["INSPIRE_SUPPORT"]:
+                if uri.startswith(INSPIRE_GEMET_THEME_NAMESPACE):
+                    yield "inspire"
+                else:
+                    # Check if the theme belongs to the GEMET INSPIRE scheme
+                    if scheme := theme.value(SKOS.inScheme):
+                        scheme_title = (
+                            rdf_value(scheme, DCT.title)
+                            or rdf_value(scheme, SKOS.prefLabel)
+                            or rdf_value(scheme, RDFS.label)
+                        )
+                        scheme_uri = scheme.identifier.toPython()
+                        if (
+                            scheme_title
+                            and scheme_title.lower() == "gemet - inspire themes, version 1.0"
+                        ) or scheme_uri in INSPIRE_GEMET_SCHEME_URIS:
+                            yield "inspire"
         else:
             label = theme.toPython()
         if label:
@@ -490,17 +534,18 @@ def escape_xml_illegal_chars(val, replacement="?"):
     return illegal_xml_chars_RE.sub(replacement, val)
 
 
-def paginate_catalog(catalog, graph, datasets, format, rdf_catalog_endpoint, **values):
+def paginate_catalog(catalog, graph, datasets, _format, rdf_catalog_endpoint, **values):
     if not format:
         raise ValueError("Pagination requires format")
     catalog.add(RDF.type, HYDRA.Collection)
     catalog.set(HYDRA.totalItems, Literal(datasets.total))
     kwargs = {
-        "format": format,
+        "_format": _format,
         "page_size": datasets.page_size,
         "_external": True,
     }
-
+    values.pop("page", None)
+    values.pop("page_size", None)
     kwargs.update(values)
 
     first_url = url_for(rdf_catalog_endpoint, page=1, **kwargs)
@@ -537,3 +582,14 @@ def graph_response(graph, format):
     if isinstance(graph, RdfResource):
         graph = graph.graph
     return escape_xml_illegal_chars(graph.serialize(format=fmt, **kwargs)), 200, headers
+
+
+def set_harvested_date(obj, rdf_resource, rdf_term, harvest_attr, fallback=None) -> None:
+    """
+    Add a date to the RDF resource from the harvest metadata if available.
+    Use the fallback value for non harvested objects.
+    """
+    if obj.harvest and (harvest_attr_value := getattr(obj.harvest, harvest_attr)):
+        rdf_resource.set(rdf_term, Literal(harvest_attr_value))
+    elif not obj.harvest and fallback:
+        rdf_resource.set(rdf_term, Literal(fallback))

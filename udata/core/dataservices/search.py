@@ -35,6 +35,7 @@ class DataserviceApiParser(ModelApiParser):
         self.parser.add_argument("tag", type=str, location="args")
         self.parser.add_argument("organization", type=str, location="args")
         self.parser.add_argument("is_restricted", type=bool, location="args")
+        self.parser.add_argument("featured", type=bool, location="args")
 
     @staticmethod
     def parse_filters(dataservices, args):
@@ -57,6 +58,8 @@ class DataserviceApiParser(ModelApiParser):
                 if boolean(args["is_restricted"])
                 else [DATASERVICE_ACCESS_TYPE_OPEN, DATASERVICE_ACCESS_TYPE_OPEN_WITH_ACCOUNT]
             )
+        if args.get("featured"):
+            dataservices = dataservices.filter(featured=args["featured"])
         return dataservices
 
 
@@ -71,11 +74,12 @@ class DataserviceSearch(ModelSearchAdapter):
         "tag": Filter(),
         "organization": ModelTermsFilter(model=Organization),
         "archived": BoolFilter(),
+        "featured": BoolFilter(),
     }
 
     @classmethod
     def is_indexable(cls, dataservice: Dataservice) -> bool:
-        return dataservice.deleted_at is None and not dataservice.private
+        return dataservice.is_visible
 
     @classmethod
     def mongo_search(cls, args):
@@ -116,6 +120,7 @@ class DataserviceSearch(ModelSearchAdapter):
             "archived": to_iso_datetime(dataservice.archived_at)
             if dataservice.archived_at
             else None,
+            "featured": 1 if dataservice.featured else 0,
             "organization": organization,
             "owner": str(owner.id) if owner else None,
             "tags": dataservice.tags,

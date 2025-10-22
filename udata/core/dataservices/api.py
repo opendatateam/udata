@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 
 import mongoengine
 from bson import ObjectId
@@ -9,13 +8,14 @@ from flask_login import current_user
 
 from udata.api import API, api, fields
 from udata.api_fields import patch
+from udata.auth import admin_permission
 from udata.core.dataservices.constants import DATASERVICE_ACCESS_TYPE_RESTRICTED
 from udata.core.dataset.models import Dataset
 from udata.core.followers.api import FollowAPI
-from udata.core.site.models import current_site
 from udata.frontend.markdown import md
 from udata.i18n import gettext as _
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
+from udata.utils import get_rss_feed_list
 
 from .models import Dataservice
 from .rdf import dataservice_to_rdf
@@ -62,9 +62,7 @@ class DataservicesAtomFeedAPI(API):
             _("Latest APIs"), description=None, feed_url=request.url, link=request.url_root
         )
 
-        dataservices: List[Dataservice] = (
-            Dataservice.objects.visible().order_by("-created_at").limit(current_site.feed_size)
-        )
+        dataservices = get_rss_feed_list(Dataservice.objects.visible(), "created_at")
         for dataservice in dataservices:
             author_name = None
             author_uri = None
@@ -76,9 +74,9 @@ class DataservicesAtomFeedAPI(API):
                 author_uri = dataservice.owner.url_for()
             feed.add_item(
                 dataservice.title,
-                unique_id=dataservice.id,
+                unique_id=dataservice.url_for(_useId=True),
                 description=dataservice.description,
-                content=md(dataservice.description),
+                content=str(md(dataservice.description)),
                 author_name=author_name,
                 author_link=author_uri,
                 link=dataservice.url_for(),
@@ -136,6 +134,28 @@ class DataserviceAPI(API):
         dataservice.save()
 
         return "", 204
+
+
+@ns.route("/<dataservice:dataservice>/featured/", endpoint="dataservice_featured")
+@api.doc(**common_doc)
+class ReuseFeaturedAPI(API):
+    @api.doc("feature_dataservice")
+    @api.secure(admin_permission)
+    @api.marshal_with(Dataservice.__read_fields__)
+    def post(self, dataservice):
+        """Mark a dataservice as featured"""
+        dataservice.featured = True
+        dataservice.save()
+        return dataservice
+
+    @api.doc("unfeature_dataservice")
+    @api.secure(admin_permission)
+    @api.marshal_with(Dataservice.__read_fields__)
+    def delete(self, dataservice):
+        """Unmark a dataservice as featured"""
+        dataservice.featured = False
+        dataservice.save()
+        return dataservice
 
 
 dataservice_add_datasets_fields = api.model(
@@ -216,19 +236,19 @@ class DataserviceDatasetAPI(API):
 class DataserviceRdfAPI(API):
     @api.doc("rdf_dataservice")
     def get(self, dataservice):
-        format = RDF_EXTENSIONS[negociate_content()]
-        url = url_for("api.dataservice_rdf_format", dataservice=dataservice.id, format=format)
+        _format = RDF_EXTENSIONS[negociate_content()]
+        url = url_for("api.dataservice_rdf_format", dataservice=dataservice.id, _format=_format)
         return redirect(url)
 
 
 @ns.route(
-    "/<dataservice:dataservice>/rdf.<format>", endpoint="dataservice_rdf_format", doc=common_doc
+    "/<dataservice:dataservice>/rdf.<_format>", endpoint="dataservice_rdf_format", doc=common_doc
 )
 @api.response(404, "Dataservice not found")
 @api.response(410, "Dataservice has been deleted")
 class DataserviceRdfFormatAPI(API):
     @api.doc("rdf_dataservice_format")
-    def get(self, dataservice: Dataservice, format):
+    def get(self, dataservice: Dataservice, _format):
         if not dataservice.permissions["edit"].can():
             if dataservice.private:
                 api.abort(404)
@@ -238,7 +258,7 @@ class DataserviceRdfFormatAPI(API):
         resource = dataservice_to_rdf(dataservice)
         # bypass flask-restplus make_response, since graph_response
         # is handling the content negociation directly
-        return make_response(*graph_response(resource, format))
+        return make_response(*graph_response(resource, _format))
 
 
 @ns.route("/<id>/followers/", endpoint="dataservice_followers")

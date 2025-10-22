@@ -39,6 +39,7 @@ def init_app(app):
     from udata.models import datastore
 
     from .forms import (
+        ExtendedForgotPasswordForm,
         ExtendedLoginForm,
         ExtendedRegisterForm,
         ExtendedResetPasswordForm,
@@ -46,6 +47,19 @@ def init_app(app):
     from .mails import UdataMailUtil
     from .password_validation import UdataPasswordUtil
     from .views import create_security_blueprint
+
+    # We want to alias SECURITY_POST_CONFIRM_VIEW to the CDATA_BASE_URL (the homepage)
+    # but can't do it in `settings.py` because it's not defined yet (`CDATA_BASE_URL` is set
+    # in the env)
+    # :SecurityPostConfirmViewAtRuntime
+    if app.config["CDATA_BASE_URL"]:
+        app.config.setdefault(
+            "SECURITY_POST_CONFIRM_VIEW", app.config["CDATA_BASE_URL"] + "?flash=post_confirm"
+        )
+        app.config.setdefault(
+            "SECURITY_CONFIRM_ERROR_VIEW",
+            app.config["CDATA_BASE_URL"] + "?flash=confirm_error",
+        )
 
     security.init_app(
         app,
@@ -56,6 +70,7 @@ def init_app(app):
         confirm_register_form=ExtendedRegisterForm,
         register_form=ExtendedRegisterForm,
         reset_password_form=ExtendedResetPasswordForm,
+        forgot_password_form=ExtendedForgotPasswordForm,
         mail_util_cls=UdataMailUtil,
         password_util_cls=UdataPasswordUtil,
     )

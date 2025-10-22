@@ -1,35 +1,20 @@
-import pytest
-
-from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.csv import OrganizationCsvAdapter
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
+from udata.tests.api import PytestOnlyDBTestCase
 
 
-@pytest.mark.frontend
-@pytest.mark.usefixtures("clean_db")
-class OrganizationCSVAdapterTest:
+class OrganizationCSVAdapterTest(PytestOnlyDBTestCase):
     def test_organization_downloads_counts(self):
         org_with_dataset = OrganizationFactory()
         org_without_dataset = OrganizationFactory()
 
         DatasetFactory(
             organization=org_with_dataset,
-            resources=[
-                ResourceFactory(
-                    metrics={
-                        "views": 42,
-                    }
-                ),
-                ResourceFactory(
-                    metrics={
-                        "views": 1337,
-                    }
-                ),
-                ResourceFactory(),
-            ],
+            metrics={"resources_downloads": 1337},
         )
-        DatasetFactory(organization=org_with_dataset, resources=[])
+        DatasetFactory(organization=org_with_dataset, metrics={"resources_downloads": 42})
         adapter = OrganizationCsvAdapter(Organization.objects.all())
 
         # Build a dict (Org ID to dict of header name to value) from the CSV values and headers to simplify testing below.

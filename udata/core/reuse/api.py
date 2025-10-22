@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 
 import mongoengine
 from bson.objectid import ObjectId
@@ -25,7 +24,7 @@ from udata.core.storages.api import (
 from udata.frontend.markdown import md
 from udata.i18n import gettext as _
 from udata.models import Dataset
-from udata.utils import id_or_404
+from udata.utils import get_rss_feed_list, id_or_404
 
 from .api_fields import (
     reuse_suggestion_fields,
@@ -144,7 +143,7 @@ class ReusesAtomFeedAPI(API):
             link=request.url_root,
         )
 
-        reuses: List[Reuse] = Reuse.objects.visible().order_by("-created_at").limit(15)
+        reuses = get_rss_feed_list(Reuse.objects.visible(), "created_at")
         for reuse in reuses:
             author_name = None
             author_uri = None
@@ -156,9 +155,9 @@ class ReusesAtomFeedAPI(API):
                 author_uri = reuse.owner.url_for()
             feed.add_item(
                 reuse.title,
-                unique_id=reuse.id,
+                unique_id=reuse.url_for(_useId=True),
                 description=reuse.description,
-                content=md(reuse.description),
+                content=str(md(reuse.description)),
                 author_name=author_name,
                 author_link=author_uri,
                 link=reuse.url_for(),

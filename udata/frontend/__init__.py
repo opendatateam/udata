@@ -1,14 +1,12 @@
 import inspect
 import logging
 from importlib import import_module
-from time import time
 
 import pkg_resources
-from flask import current_app
 from jinja2 import pass_context
 from markupsafe import Markup
 
-from udata import assets, entrypoints
+from udata import entrypoints
 from udata.i18n import I18nBlueprint
 
 from .markdown import UdataCleaner
@@ -25,17 +23,6 @@ _template_hooks = {}
 @hook.app_template_global()
 def package_version(name: str) -> str:
     return pkg_resources.get_distribution(name).version
-
-
-@hook.app_template_global(name="static")
-def static_global(filename, _burst=True, **kwargs):
-    if current_app.config["DEBUG"] or current_app.config["TESTING"]:
-        burst = time()
-    else:
-        burst = package_version("udata")
-    if _burst:
-        kwargs["_"] = burst
-    return assets.cdn_for("static", filename=filename, **kwargs)
 
 
 @hook.app_template_filter()
@@ -121,7 +108,7 @@ def _load_views(app, module):
         app.register_blueprint(blueprint)
 
 
-VIEWS = ["core.storages", "core.tags", "admin"]
+VIEWS = ["core.storages"]
 
 
 def init_app(app, views=None):

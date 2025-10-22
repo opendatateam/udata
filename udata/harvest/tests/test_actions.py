@@ -4,16 +4,20 @@ from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
 
 import pytest
+from flask import current_app
 from mock import patch
 
+from udata.core.activity.models import new_activity
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
+from udata.core.dataset.activities import UserCreatedDataset
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.models import Dataset, PeriodicTask
-from udata.tests.helpers import assert_emit, assert_equal_dates
+from udata.tests.api import PytestOnlyDBTestCase
+from udata.tests.helpers import assert_emit, assert_equal_dates, assert_not_emit
 from udata.utils import faker
 
 from .. import actions, signals
@@ -37,12 +41,8 @@ from .factories import (
 
 log = logging.getLogger(__name__)
 
-pytestmark = [
-    pytest.mark.usefixtures("clean_db"),
-]
 
-
-class HarvestActionsTest:
+class HarvestActionsTest(PytestOnlyDBTestCase):
     def test_list_backends(self):
         for backend in actions.list_backends():
             assert issubclass(backend, BaseBackend)
@@ -450,7 +450,10 @@ class HarvestActionsTest:
         assert result.errors == 1
 
 
-class ExecutionTestMixin(MockBackendsMixin):
+class ExecutionTestMixin(MockBackendsMixin, PytestOnlyDBTestCase):
+    def action(self, *args, **kwargs):
+        raise NotImplementedError
+
     def test_default(self):
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="factory", organization=org)
@@ -578,6 +581,24 @@ class ExecutionTestMixin(MockBackendsMixin):
         self.action(source)
         assert len(Dataset.objects) == 5
 
+    @pytest.mark.options(HARVEST_ACTIVITY_USER_ID="68b860182728e27218dd7c72")
+    def test_harvest_emit_activity(self):
+        # We need to init dataset activities module
+        import udata.core.dataset.activities  # noqa
+
+        user = UserFactory(id=current_app.config["HARVEST_ACTIVITY_USER_ID"])
+        source = HarvestSourceFactory(backend="factory")
+        with assert_emit(Dataset.on_create, new_activity):
+            self.action(source)
+
+        # We have an activity for each dataset created by the source action
+        activities = UserCreatedDataset.objects(actor=user)
+        assert activities.count() == Dataset.objects().count()
+
+        # On a second run, we don't expect any signal sent (no creation, update or deletion)
+        with assert_not_emit(Dataset.on_create, Dataset.on_update, new_activity):
+            self.action(source)
+
 
 class HarvestLaunchTest(ExecutionTestMixin):
     def action(self, *args, **kwargs):
@@ -589,7 +610,7 @@ class HarvestRunTest(ExecutionTestMixin):
         return actions.run(*args, **kwargs)
 
 
-class HarvestPreviewTest(MockBackendsMixin):
+class HarvestPreviewTest(MockBackendsMixin, PytestOnlyDBTestCase):
     def test_preview(self):
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="factory", organization=org)

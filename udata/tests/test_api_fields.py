@@ -3,7 +3,7 @@ import mongoengine
 import pytest
 from flask_restx.reqparse import Argument, RequestParser
 
-from udata.api_fields import field, function_field, generate_fields, patch, patch_and_save
+from udata.api_fields import field, generate_fields, patch, patch_and_save
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.organization import constants as org_constants
 from udata.core.organization.factories import OrganizationFactory
@@ -13,11 +13,8 @@ from udata.core.storages import default_image_basename, images
 from udata.factories import ModelFactory
 from udata.models import Badge, BadgeMixin, BadgesList, WithMetrics, db
 from udata.mongo.queryset import DBPaginator, UDataQuerySet
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.utils import faker
-
-pytestmark = [
-    pytest.mark.usefixtures("clean_db"),
-]
 
 BIGGEST_IMAGE_SIZE: int = 500
 
@@ -65,7 +62,14 @@ class FakeEmbedded(db.EmbeddedDocument):
         {"key": "followers", "value": "metrics.followers"},
         {"key": "views", "value": "metrics.views"},
     ],
-    additional_filters={"organization_badge": "organization.badges"},
+    nested_filters={"organization_badge": "organization.badges"},
+    standalone_filters=[
+        {
+            "key": "standalone",
+            "type": str,
+            "query": lambda base_query, value: base_query.filter(title__contains=value),
+        },
+    ],
 )
 class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
     filter_field = field(db.StringField(), filterable={"key": "filter_field_name"})
@@ -131,7 +135,7 @@ class Fake(WithMetrics, FakeBadgeMixin, Owned, db.Document):
     def __str__(self) -> str:
         return self.title or ""
 
-    @function_field(description="Link to the API endpoint for this fake", show_as_ref=True)
+    @field(description="Link to the API endpoint for this fake", show_as_ref=True)
     def uri(self) -> str:
         return "fake/foobar/endpoint/"
 
@@ -159,7 +163,7 @@ class FakeFactory(ModelFactory):
     archived = None
 
 
-class IndexParserTest:
+class IndexParserTest(PytestOnlyDBTestCase):
     index_parser: RequestParser = Fake.__index_parser__
     index_parser_args: list[Argument] = Fake.__index_parser__.args
     index_parser_args_names: set[str] = set([field.name for field in Fake.__index_parser__.args])
@@ -191,8 +195,8 @@ class IndexParserTest:
         """Filterable fields from mixins should have a parser arg."""
         assert set(["owner", "organization"]).issubset(self.index_parser_args_names)
 
-    def test_additional_filters_in_parser(self) -> None:
-        """Filterable fields from the `additional_filters` decorater parameter should have a parser arg."""
+    def test_nested_filters_in_parser(self) -> None:
+        """Filterable fields from the `nested_filters` decorater parameter should have a parser arg."""
         assert "organization_badge" in self.index_parser_args_names
 
     def test_pagination_fields_in_parser(self) -> None:
@@ -226,44 +230,42 @@ class IndexParserTest:
         assert set(additional_sorts).issubset(set(choices))
 
 
-class PatchTest:
-    class FakeRequest:
-        json = {"url": URL_RAISE_ERROR, "description": None}
+class PatchTest(PytestOnlyDBTestCase):
+    fake_json = {"url": URL_RAISE_ERROR, "description": None}
 
     def test_patch_check(self) -> None:
         fake: Fake = FakeFactory.create()
         with pytest.raises(ValueError, match=URL_EXISTS_ERROR_MESSAGE):
-            patch(fake, self.FakeRequest())
+            patch(fake, self.fake_json)
 
     def test_patch_and_save(self) -> None:
         fake: Fake = FakeFactory.create()
-        fake_request = self.FakeRequest()
-        fake_request.json["url"] = "ok url"
+        fake_request = self.fake_json
+        fake_request["url"] = "ok url"
         with pytest.raises(mongoengine.errors.ValidationError):
             patch_and_save(fake, fake_request)
 
 
-class PatchEmbeddedTest:
-    class FakeRequest:
-        json = {
-            "url": URL_RAISE_ERROR,
-            "description": "desc",
-            "embedded": {"title": "embedded title", "description": "d2"},
-        }
+class PatchEmbeddedTest(PytestOnlyDBTestCase):
+    fake_json = {
+        "url": URL_RAISE_ERROR,
+        "description": "desc",
+        "embedded": {"title": "embedded title", "description": "d2"},
+    }
 
     def test_patch_check(self) -> None:
         fake: Fake = FakeFactory.create()
         with pytest.raises(ValueError, match=URL_EXISTS_ERROR_MESSAGE):
-            patch(fake, self.FakeRequest())
+            patch(fake, self.fake_json)
 
     def test_patch_and_save(self) -> None:
         fake: Fake = FakeFactory.create()
-        fake_request = self.FakeRequest()
-        fake_request.json["url"] = "ok url"
+        fake_request = self.fake_json
+        fake_request["url"] = "ok url"
         patch_and_save(fake, fake_request)
 
 
-class ApplySortAndFiltersTest:
+class ApplySortAndFiltersTest(PytestOnlyDBTestCase):
     def test_filterable_field(self, app) -> None:
         """A filterable field filters the results."""
         fake1: Fake = FakeFactory(filter_field="test filter")
@@ -273,8 +275,8 @@ class ApplySortAndFiltersTest:
             assert fake1 in results
             assert fake2 not in results
 
-    def test_additional_filters(self, app) -> None:
-        """Filtering on an additional filter filters the results."""
+    def test_nested_filters(self, app) -> None:
+        """Filtering on an nested filter filters the results."""
         org_public_service: Organization = OrganizationFactory()
         org_public_service.add_badge(org_constants.PUBLIC_SERVICE)
         org_company: Organization = OrganizationFactory()
@@ -319,8 +321,17 @@ class ApplySortAndFiltersTest:
             results = Fake.apply_sort_filters(Fake.objects)
             assert tuple(results) == (fake2, fake1)
 
+    def test_standalone_filters(self, app) -> None:
+        """Standalone filters should be applied."""
+        fake1: Fake = FakeFactory(title="foo bar")
+        fake2: Fake = FakeFactory(title="bar bar")
+        with app.test_request_context("/foobar", query_string={"standalone": "foo"}):
+            results: UDataQuerySet = Fake.apply_sort_filters(Fake.objects)
+            assert fake1 in results
+            assert fake2 not in results
 
-class ApplyPaginationTest:
+
+class ApplyPaginationTest(PytestOnlyDBTestCase):
     def test_default_pagination(self, app) -> None:
         """Results should be returned with default pagination."""
         [FakeFactory() for _ in range(100)]

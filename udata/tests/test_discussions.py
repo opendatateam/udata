@@ -31,14 +31,11 @@ from udata.models import Dataset, Member
 from udata.tests.helpers import capture_mails
 from udata.utils import faker
 
-from . import DBTestMixin, TestCase
-from .api import APITestCase
+from .api import APITestCase, DBTestCase
 from .helpers import assert_emit, assert_not_emit
 
 
 class DiscussionsTest(APITestCase):
-    modules = []
-
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_new_discussion(self):
         user = self.login()
@@ -1018,7 +1015,7 @@ class DiscussionsTest(APITestCase):
         self.assert403(response)
 
 
-class DiscussionsNotificationsTest(TestCase, DBTestMixin):
+class DiscussionsNotificationsTest(DBTestCase):
     def test_notify_user_discussions(self):
         owner = UserFactory()
         dataset = DatasetFactory(owner=owner)
@@ -1091,8 +1088,6 @@ class DiscussionsNotificationsTest(TestCase, DBTestMixin):
 
 
 class DiscussionsMailsTest(APITestCase):
-    modules = []
-
     def test_new_discussion_mail(self):
         user = UserFactory()
         owner = UserFactory()

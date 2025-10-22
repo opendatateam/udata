@@ -8,14 +8,17 @@ from flask import current_app
 from lxml import etree
 from rdflib import Graph
 
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataset.factories import LicenseFactory, ResourceSchemaMockData
+from udata.core.dataset.constants import UpdateFrequency
+from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceSchemaMockData
 from udata.core.dataset.rdf import dataset_from_rdf
 from udata.core.organization.factories import OrganizationFactory
 from udata.harvest.models import HarvestJob
 from udata.models import Dataset
 from udata.rdf import DCAT, RDF, namespace_manager
 from udata.storage.s3 import get_from_json
+from udata.tests.api import PytestOnlyDBTestCase
 
 from .. import actions
 from ..backends.dcat import URIS_TO_REPLACE
@@ -65,9 +68,8 @@ def mock_csw_pagination(rmock, path, pattern):
     return url
 
 
-@pytest.mark.usefixtures("clean_db")
 @pytest.mark.options(PLUGINS=["dcat"])
-class DcatBackendTest:
+class DcatBackendTest(PytestOnlyDBTestCase):
     def test_simple_flat(self, rmock):
         filename = "flat.jsonld"
         url = mock_dcat(rmock, filename)
@@ -96,7 +98,7 @@ class DcatBackendTest:
             assert d.harvest.dct_identifier == i
             assert d.harvest.remote_url == f"http://data.test.org/datasets/{i}"
             assert d.harvest.uri == f"http://data.test.org/datasets/{i}"
-            assert d.harvest.created_at.date() == date(2016, 12, 14)
+            assert d.harvest.issued_at.date() == date(2016, 12, 14)
             assert d.harvest.modified_at.date() == date(2016, 12, 14)
             assert d.harvest.last_update.date() == date.today()
             assert d.harvest.archived_at is None
@@ -186,6 +188,48 @@ class DcatBackendTest:
             dataservices[0].harvest.remote_url
             == "https://data.paris2024.org/api/explore/v2.1/console"
         )
+
+    def test_harvest_dataservices_keep_attached_associated_datasets(self, rmock):
+        """It should update the existing list of dataservice.datasets and not overwrite existing ones"""
+
+        filename = "bnodes.xml"
+        url = mock_dcat(rmock, filename)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
+
+        previously_attached_dataset = DatasetFactory()
+        previously_harvested_dataset = DatasetFactory(
+            harvest={
+                "remote_id": "2",
+                "domain": source.domain,
+                "source_id": str(source.id),
+            }
+        )
+        existing_dataservice = DataserviceFactory(
+            # Two datasets are already attached, the first one NOT connected via harvesting
+            # when the second one is connected with dcat:servesDataset in harvest graph
+            datasets=[
+                previously_attached_dataset,
+                previously_harvested_dataset,
+            ],
+            harvest={
+                "remote_id": "https://data.paris2024.org/api/explore/v2.1/",
+                "domain": source.domain,
+                "source_id": str(source.id),
+            },
+        )
+
+        actions.run(source)
+
+        existing_dataservice.reload()
+
+        assert len(Dataservice.objects) == 1
+        assert existing_dataservice.title == "Explore API v2"
+        assert (
+            len(existing_dataservice.datasets) == 2 + 1
+        )  # The previsouly harvested dataset, the previously attached one and a new harvested dataset
+        assert previously_attached_dataset in existing_dataservice.datasets
+        assert previously_harvested_dataset in existing_dataservice.datasets
 
     def test_harvest_dataservices_ignore_accessservices(self, rmock):
         rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
@@ -314,10 +358,8 @@ class DcatBackendTest:
             is None
         )
 
-    @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/schemas", HARVEST_MAX_ITEMS=2)
+    @pytest.mark.options(HARVEST_MAX_ITEMS=2)
     def test_harvest_max_items(self, rmock):
-        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
-
         filename = "bnodes.xml"
         url = mock_dcat(rmock, filename)
         org = OrganizationFactory()
@@ -328,10 +370,7 @@ class DcatBackendTest:
         assert Dataset.objects.count() == 2
         assert HarvestJob.objects.first().status == "done"
 
-    @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/schemas")
     def test_harvest_spatial(self, rmock):
-        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
-
         filename = "bnodes.xml"
         url = mock_dcat(rmock, filename)
         org = OrganizationFactory()
@@ -399,6 +438,20 @@ class DcatBackendTest:
         assert resources_by_title["Resource 3-1"].schema.name == "etalab/schema-irve-statique"
         assert resources_by_title["Resource 3-1"].schema.url is None
         assert resources_by_title["Resource 3-1"].schema.version == "2.2.0"
+
+    def test_harvest_inspire_themese(self, rmock):
+        filename = "bnodes.xml"
+        url = mock_dcat(rmock, filename)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
+
+        actions.run(source)
+
+        datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
+
+        assert set(datasets["1"].tags).issuperset(set(["repartition-des-especes", "inspire"]))
+        assert set(datasets["2"].tags).issuperset(set(["hydrographie", "inspire"]))
+        assert "inspire" not in datasets["3"].tags
 
     def test_simple_nested_attributes(self, rmock):
         filename = "nested.jsonld"
@@ -513,9 +566,10 @@ class DcatBackendTest:
         assert dataset.license.id == "lov2"
         assert dataset.harvest.remote_url == "http://data.test.org/datasets/3"
         assert dataset.harvest.remote_id == "3"
-        assert dataset.harvest.created_at.date() == date(2016, 12, 14)
+        assert dataset.harvest.issued_at.date() == date(2016, 12, 14)
+        assert dataset.harvest.created_at.date() == date(2016, 12, 12)
         assert dataset.harvest.modified_at.date() == date(2016, 12, 14)
-        assert dataset.frequency == "daily"
+        assert dataset.frequency == UpdateFrequency.DAILY
         assert dataset.description == "Dataset 3 description"
 
         assert dataset.temporal_coverage is not None
@@ -555,6 +609,8 @@ class DcatBackendTest:
         assert resource_1.description == "A JSON resource"
         assert resource_1.url == "http://data.test.org/datasets/1/resources/1/file.json"
         assert resource_1.type == "main"
+        assert resource_1.harvest.issued_at.date() == date(2018, 3, 12)
+        assert resource_1.harvest.modified_at.date() == date(2018, 3, 14)
 
         resource_2 = next(res for res in dataset.resources if res.title == "Resource 1-2")
         assert resource_2.format == "json"
@@ -612,7 +668,8 @@ class DcatBackendTest:
             dataset.harvest.dct_identifier
             == "0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2"
         )  # noqa
-        assert dataset.harvest.created_at.date() == date(2004, 11, 3)
+        assert dataset.harvest.issued_at.date() == date(2004, 11, 3)
+        assert dataset.harvest.created_at is None
         assert dataset.harvest.modified_at is None
         assert (
             dataset.harvest.uri
@@ -623,6 +680,9 @@ class DcatBackendTest:
         assert dataset.temporal_coverage is not None
         assert dataset.temporal_coverage.start == date(2004, 11, 3)
         assert dataset.temporal_coverage.end == date(2005, 3, 30)
+        assert set(dataset.tags) == set(
+            ["inspire", "biodiversity-dynamics"]
+        )  # The DCAT.theme with rdf:resource don't have labels properly defined
 
     def test_sigoreme_xml_catalog(self, rmock):
         LicenseFactory(id="fr-lo", title="Licence ouverte / Open Licence")
@@ -633,7 +693,7 @@ class DcatBackendTest:
         dataset = Dataset.objects.filter(organization=org).first()
 
         assert dataset is not None
-        assert dataset.frequency == "irregular"
+        assert dataset.frequency == UpdateFrequency.IRREGULAR
         assert "gravi" in dataset.tags  # support dcat:keyword
         assert "geodesy" in dataset.tags  # support dcat:theme
         assert dataset.license.id == "fr-lo"
@@ -723,7 +783,8 @@ class DcatBackendTest:
             dataset.harvest.remote_id
             == "https://vanves-seineouest.opendatasoft.com/explore/dataset/bureau-de-vote-vanves/"
         )
-        assert dataset.harvest.created_at.isoformat() == "2019-04-19T12:21:56"
+        assert dataset.harvest.issued_at.isoformat() == "2019-04-19T12:21:56"
+        assert dataset.harvest.created_at is None
         assert dataset.harvest.modified_at.isoformat() == "2019-04-19T12:21:56"
         assert (
             dataset.harvest.uri
@@ -754,7 +815,8 @@ class DcatBackendTest:
             service.harvest.remote_id
             == "https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/"
         )
-        assert service.harvest.created_at.isoformat() == "2024-07-12T00:03:38.764000"
+        assert service.harvest.issued_at.isoformat() == "2024-07-12T00:03:38.764000"
+        assert service.harvest.created_at is None
         assert (
             service.harvest.remote_url
             == "https://vanves-seineouest.opendatasoft.com/api/explore/v2.1/console"
@@ -864,9 +926,8 @@ class DcatBackendTest:
         assert "404 Client Error" in job.errors[0].message
 
 
-@pytest.mark.usefixtures("clean_db")
 @pytest.mark.options(PLUGINS=["csw"])
-class CswDcatBackendTest:
+class CswDcatBackendTest(PytestOnlyDBTestCase):
     def test_geonetworkv4(self, rmock):
         url = mock_csw_pagination(rmock, "geonetwork/srv/eng/csw.rdf", "geonetworkv4-page-{}.xml")
         org = OrganizationFactory()
@@ -902,9 +963,11 @@ class CswDcatBackendTest:
                 "oise",
                 "somme",
                 "aisne",
+                # "inspire",  TODO: the geonetwork v4 examples use broken URI as theme resources, check if this is still a problem or not
             ]
         )
-        assert dataset.harvest.created_at.date() == date(2017, 1, 1)
+        assert dataset.harvest.issued_at.date() == date(2017, 1, 1)
+        assert dataset.harvest.created_at is None
         assert len(dataset.resources) == 1
         resource = dataset.resources[0]
         assert resource.title == "accidento_hdf_L93"
@@ -923,10 +986,98 @@ class CswDcatBackendTest:
         assert "User-Agent" in get_mock.last_request.headers
         assert get_mock.last_request.headers["User-Agent"] == "uData/0.1 csw-dcat"
 
+    def test_csw_error(self, rmock):
+        exception_report = """<?xml version="1.0" encoding="UTF-8"?>
+        <ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1"
+                             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                             xsi:schemaLocation="http://www.opengis.net/ows/1.1 http://schemas.opengis.net/ows/1.1.0/owsExceptionReport.xsd">
+          <ows:Exception exceptionCode="MissingParameterValue" locator="request">
+            <ows:ExceptionText>Mandatory parameter &lt;request&gt; was not specified</ows:ExceptionText>
+          </ows:Exception>
+        </ows:ExceptionReport>
+        """
+        rmock.head(rmock.ANY, headers={"Content-Type": "application/xml"})
+        rmock.post(rmock.ANY, text=exception_report)
+        source = HarvestSourceFactory(backend="csw-dcat")
 
-@pytest.mark.usefixtures("clean_db")
+        actions.run(source)
+
+        source.reload()
+        job = source.get_last_job()
+
+        assert len(job.errors) == 1
+        assert "Failed to query CSW" in job.errors[0].message
+        assert job.status == "failed"
+
+    def test_disallow_external_entities(self, rmock):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE root [
+          <!ENTITY entity SYSTEM "data:text/plain,EXTERNAL">
+        ]>
+        <csw:GetRecordsResponse xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
+          <csw:SearchStatus timestamp="2023-03-03T16:09:50.697645Z" />
+          <csw:SearchResults numberOfRecordsMatched="1" numberOfRecordsReturned="1" elementSet="full" nextRecord="0">
+            <rdf:RDF xmlns:dct="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="https://example.com/test/">
+                <dct:identifier>https://example.com/test/</dct:identifier>
+                <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset"/>
+                <dct:title>test&entity;</dct:title>
+              </rdf:Description>
+            </rdf:RDF>
+          </csw:SearchResults>
+        </csw:GetRecordsResponse>
+        """
+
+        rmock.head(rmock.ANY, headers={"Content-Type": "application/xml"})
+        rmock.post(rmock.ANY, text=xml)
+        source = HarvestSourceFactory(backend="csw-dcat")
+
+        actions.run(source)
+
+        source.reload()
+        job = source.get_last_job()
+
+        assert job.status == "done"
+        assert Dataset.objects.first().title == "test"
+
+    def test_disallow_external_dtd(self, rmock):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE root SYSTEM "http://www.example.com/evil.dtd">
+        <csw:GetRecordsResponse xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
+                                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
+          <csw:SearchStatus timestamp="2023-03-03T16:09:50.697645Z" />
+          <csw:SearchResults numberOfRecordsMatched="1" numberOfRecordsReturned="1" elementSet="full" nextRecord="0">
+            <rdf:RDF xmlns:dct="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="https://example.com/test/">
+                <dct:identifier>https://example.com/test/</dct:identifier>
+                <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset"/>
+                <dct:title>test</dct:title>
+              </rdf:Description>
+            </rdf:RDF>
+          </csw:SearchResults>
+        </csw:GetRecordsResponse>
+        """
+
+        rmock.get("http://www.example.com/evil.dtd", status_code=404)
+        rmock.head(rmock.ANY, headers={"Content-Type": "application/xml"})
+        rmock.post(rmock.ANY, text=xml)
+        source = HarvestSourceFactory(backend="csw-dcat")
+
+        actions.run(source)
+
+        source.reload()
+        job = source.get_last_job()
+
+        assert not any(h.method == "GET" for h in rmock.request_history)
+        assert job.status == "done"
+        assert len(job.items) == 1
+
+
 @pytest.mark.options(PLUGINS=["csw"])
-class CswIso19139DcatBackendTest:
+class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
     @pytest.mark.parametrize(
         "remote_url_prefix",
         [
@@ -986,9 +1137,11 @@ class CswIso19139DcatBackendTest:
                 "donnees-ouvertes",
                 "plu",
                 "usage-des-sols",
+                "inspire",
             ]
         )
-        assert dataset.harvest.created_at.date() == date(2017, 10, 7)
+        assert dataset.harvest.issued_at.date() == date(2017, 10, 7)
+        assert dataset.harvest.created_at.date() == date(2013, 3, 8)
         assert dataset.spatial.geom == {
             "type": "MultiPolygon",
             "coordinates": [
@@ -1095,3 +1248,6 @@ class CswIso19139DcatBackendTest:
         assert dataset.extras["dcat"].get("rights") is None
         for resource in dataset.resources:
             assert resource.extras["dcat"].get("rights") is None
+
+        # Additional INSPIRE tag due to the dataset having a GEMET INSPIRE theme
+        assert "inspire" in dataset.tags

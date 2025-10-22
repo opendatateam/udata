@@ -4,19 +4,14 @@ from urllib.parse import urljoin
 from uuid import UUID
 
 from udata import uris
-from udata.harvest.models import HarvestItem
-from udata.i18n import lazy_gettext as _
-
-try:
-    from udata.core.dataset.constants import UPDATE_FREQUENCIES
-except ImportError:
-    # legacy import of constants in udata
-    from udata.models import UPDATE_FREQUENCIES
+from udata.core.dataset.constants import UpdateFrequency
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.dataset.rdf import frequency_from_rdf
 from udata.frontend.markdown import parse_html
 from udata.harvest.backends.base import BaseBackend, HarvestFilter
 from udata.harvest.exceptions import HarvestException, HarvestSkipException
+from udata.harvest.models import HarvestItem
+from udata.i18n import lazy_gettext as _
 from udata.models import GeoZone, License, Resource, SpatialCoverage, db
 from udata.utils import daterange_end, daterange_start, get_by
 
@@ -193,14 +188,15 @@ class CkanBackend(BaseBackend):
                 log.debug("spatial-uri value not handled: %s", value)
             elif key == "frequency":
                 # Update frequency
-                freq = frequency_from_rdf(value)
-                if freq:
+                if freq := frequency_from_rdf(value):
                     dataset.frequency = freq
-                elif value in UPDATE_FREQUENCIES:
-                    dataset.frequency = value
                 else:
-                    dataset.extras["ckan:frequency"] = value
-                    log.debug("frequency value not handled: %s", value)
+                    # FIXME(python 3.12+): prefer `if value in UpdateFrequency`
+                    try:
+                        dataset.frequency = UpdateFrequency(value)
+                    except ValueError:
+                        dataset.extras["ckan:frequency"] = value
+                        log.debug("frequency value not handled: %s", value)
             # Temporal coverage start
             elif key == "temporal_start":
                 temporal_start = daterange_start(value)
@@ -263,7 +259,7 @@ class CkanBackend(BaseBackend):
             resource.format = res.get("format")
             resource.mime = res.get("mimetype")
             resource.hash = res.get("hash")
-            resource.harvest.created_at = res["created"]
+            resource.harvest.issued_at = res["created"]
             resource.harvest.modified_at = res["last_modified"]
 
         return dataset

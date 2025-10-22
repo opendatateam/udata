@@ -1,6 +1,6 @@
 import logging
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from pydoc import locate
 from typing import Self
 from urllib.parse import urlparse
@@ -8,7 +8,6 @@ from urllib.parse import urlparse
 import Levenshtein
 import requests
 from blinker import signal
-from dateutil.parser import parse as parse_dt
 from flask import current_app, url_for
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import DateTimeField
@@ -36,13 +35,17 @@ from .constants import (
     CLOSED_FORMATS,
     DEFAULT_LICENSE,
     DESCRIPTION_SHORT_SIZE_LIMIT,
-    LEGACY_FREQUENCIES,
+    HVD,
+    INSPIRE,
     MAX_DISTANCE,
     PIVOTAL_DATA,
     RESOURCE_FILETYPES,
     RESOURCE_TYPES,
     SCHEMA_CACHE_DURATION,
-    UPDATE_FREQUENCIES,
+    SL,
+    SPD,
+    SR,
+    UpdateFrequency,
 )
 from .exceptions import (
     SchemasCacheUnavailableException,
@@ -61,6 +64,11 @@ __all__ = (
 
 BADGES: dict[str, str] = {
     PIVOTAL_DATA: _("Pivotal data"),
+    SPD: _("Reference data public service"),
+    INSPIRE: _("Inspire"),
+    HVD: _("High value datasets"),
+    SL: _("Certified statistic series"),
+    SR: _("Statistical series of general interest"),
 }
 
 NON_ASSIGNABLE_SCHEMA_TYPES = ["datapackage"]
@@ -81,6 +89,7 @@ def get_json_ld_extra(key, value):
 class HarvestDatasetMetadata(db.EmbeddedDocument):
     backend = db.StringField()
     created_at = db.DateTimeField()
+    issued_at = db.DateTimeField()
     modified_at = db.DateTimeField()
     source_id = db.StringField()
     remote_id = db.StringField()
@@ -96,7 +105,7 @@ class HarvestDatasetMetadata(db.EmbeddedDocument):
 
 
 class HarvestResourceMetadata(db.EmbeddedDocument):
-    created_at = db.DateTimeField()
+    issued_at = db.DateTimeField()
     modified_at = db.DateTimeField()
     uri = db.StringField()
     dct_identifier = db.StringField()
@@ -333,6 +342,9 @@ class DatasetQuerySet(OwnedQuerySet):
     def hidden(self):
         return self(db.Q(private=True) | db.Q(deleted__ne=None) | db.Q(archived__ne=None))
 
+    def with_badge(self, kind):
+        return self(badges__kind=kind)
+
 
 class Checksum(db.EmbeddedDocument):
     type = db.StringField(choices=CHECKSUM_TYPES, required=True)
@@ -356,7 +368,13 @@ class ResourceMixin(object):
     mime = db.StringField()
     filesize = db.IntField()  # `size` is a reserved keyword for mongoengine.
     fs_filename = db.StringField()
-    extras = db.ExtrasField()
+    extras = db.ExtrasField(
+        {
+            "check:available": db.BooleanField,
+            "check:status": db.IntField,
+            "check:date": db.DateTimeField,
+        }
+    )
     harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)
     schema = db.EmbeddedDocumentField(Schema)
 
@@ -373,11 +391,9 @@ class ResourceMixin(object):
 
     @property
     def created_at(self):
-        return (
-            self.harvest.created_at
-            if self.harvest and self.harvest.created_at
-            else self.created_at_internal
-        )
+        if self.harvest:
+            return self.harvest.issued_at or self.created_at_internal
+        return self.created_at_internal
 
     @property
     def last_modified(self):
@@ -416,41 +432,6 @@ class ResourceMixin(object):
         `all([])` (dataset, organization, user).
         """
         return self.extras.get("check:available", "unknown")
-
-    def need_check(self):
-        """Does the resource needs to be checked against its linkchecker?
-
-        We check unavailable resources often, unless they go over the
-        threshold. Available resources are checked less and less frequently
-        based on their historical availability.
-        """
-        min_cache_duration, max_cache_duration, ko_threshold = [
-            current_app.config.get(k)
-            for k in (
-                "LINKCHECKING_MIN_CACHE_DURATION",
-                "LINKCHECKING_MAX_CACHE_DURATION",
-                "LINKCHECKING_UNAVAILABLE_THRESHOLD",
-            )
-        ]
-        count_availability = self.extras.get("check:count-availability", 1)
-        is_available = self.check_availability()
-        if is_available == "unknown":
-            return True
-        elif is_available or count_availability > ko_threshold:
-            delta = min(min_cache_duration * count_availability, max_cache_duration)
-        else:
-            delta = min_cache_duration
-        if self.extras.get("check:date"):
-            limit_date = datetime.utcnow() - timedelta(minutes=delta)
-            check_date = self.extras["check:date"]
-            if not isinstance(check_date, datetime):
-                try:
-                    check_date = parse_dt(check_date)
-                except (ValueError, TypeError):
-                    return True
-            if check_date >= limit_date:
-                return False
-        return True
 
     @property
     def latest(self):
@@ -568,7 +549,8 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
     resources = field(db.ListField(db.EmbeddedDocumentField(Resource)), auditable=False)
 
     private = field(db.BooleanField(default=False))
-    frequency = field(db.StringField(choices=list(UPDATE_FREQUENCIES.keys())))
+
+    frequency = field(db.EnumField(UpdateFrequency))
     frequency_date = field(db.DateTimeField(verbose_name=_("Future date of update")))
     temporal_coverage = field(db.EmbeddedDocumentField(db.DateRange))
     spatial = field(db.EmbeddedDocumentField(SpatialCoverage))
@@ -691,8 +673,6 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
 
     def clean(self):
         super(Dataset, self).clean()
-        if self.frequency in LEGACY_FREQUENCIES:
-            self.frequency = LEGACY_FREQUENCIES[self.frequency]
 
         if len(set(res.id for res in self.resources)) != len(self.resources):
             raise MongoEngineValidationError(f"Duplicate resource ID in dataset #{self.id}.")
@@ -770,8 +750,8 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
             return self.owner.avatar.url
 
     @property
-    def frequency_label(self):
-        return UPDATE_FREQUENCIES.get(self.frequency or "unknown", UPDATE_FREQUENCIES["unknown"])
+    def has_frequency(self):
+        return self.frequency not in [None, UpdateFrequency.UNKNOWN]
 
     def check_availability(self):
         """Check if resources from that dataset are available.
@@ -788,11 +768,9 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
 
     @property
     def created_at(self):
-        return (
-            self.harvest.created_at
-            if self.harvest and self.harvest.created_at
-            else self.created_at_internal
-        )
+        if self.harvest:
+            return self.harvest.issued_at or self.harvest.created_at or self.created_at_internal
+        return self.created_at_internal
 
     @property
     def last_modified(self):
@@ -825,33 +803,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
         Ex: the next update for a threeTimesAday freq is not
         every 8 hours, but is maximum 24 hours later.
         """
-        delta = None
-        if self.frequency == "hourly":
-            delta = timedelta(hours=1)
-        elif self.frequency in ["fourTimesADay", "threeTimesADay", "semidaily", "daily"]:
-            delta = timedelta(days=1)
-        elif self.frequency in ["fourTimesAWeek", "threeTimesAWeek", "semiweekly", "weekly"]:
-            delta = timedelta(weeks=1)
-        elif self.frequency == "biweekly":
-            delta = timedelta(weeks=2)
-        elif self.frequency in ["threeTimesAMonth", "semimonthly", "monthly"]:
-            delta = timedelta(days=31)
-        elif self.frequency == "bimonthly":
-            delta = timedelta(days=31 * 2)
-        elif self.frequency == "quarterly":
-            delta = timedelta(days=365 / 4)
-        elif self.frequency in ["threeTimesAYear", "semiannual", "annual"]:
-            delta = timedelta(days=365)
-        elif self.frequency == "biennial":
-            delta = timedelta(days=365 * 2)
-        elif self.frequency == "triennial":
-            delta = timedelta(days=365 * 3)
-        elif self.frequency == "quinquennial":
-            delta = timedelta(days=365 * 5)
-        if delta is None:
-            return
-        else:
-            return self.last_update + delta
+        return self.frequency.next_update(self.last_update) if self.has_frequency else None
 
     @property
     def quality(self):
@@ -870,7 +822,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
             # Allow for being one day late on update.
             # We may have up to one day delay due to harvesting for example
             quality["update_fulfilled_in_time"] = (next_update - datetime.utcnow()).days >= -1
-        elif self.frequency in ["continuous", "irregular", "punctual"]:
+        elif self.has_frequency and self.frequency.delta is None:
             # For these frequencies, we don't expect regular updates or can't quantify them.
             # Thus we consider the update_fulfilled_in_time quality criterion to be true.
             quality["update_fulfilled_in_time"] = True
@@ -895,7 +847,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
         result["temporal_coverage"] = True if self.temporal_coverage else False
         result["spatial"] = True if self.spatial else False
 
-        result["update_frequency"] = self.frequency and self.frequency != "unknown"
+        result["update_frequency"] = self.has_frequency
 
         # We only save the next_update here because it is based on resources
         # We cannot save the `update_fulfilled_in_time` because it is time

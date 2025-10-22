@@ -11,17 +11,16 @@ from flask import url_for
 from werkzeug.test import TestResponse
 
 import udata.core.organization.constants as org_constants
+from udata import uris
 from udata.api import fields
 from udata.app import cache
 from udata.core import storages
 from udata.core.badges.factories import badge_factory
 from udata.core.dataset.constants import (
-    DEFAULT_FREQUENCY,
     DEFAULT_LICENSE,
     FULL_OBJECTS_HEADER,
-    LEGACY_FREQUENCIES,
     RESOURCE_TYPES,
-    UPDATE_FREQUENCIES,
+    UpdateFrequency,
 )
 from udata.core.dataset.factories import (
     CommunityResourceFactory,
@@ -37,17 +36,18 @@ from udata.core.dataset.models import (
     ResourceMixin,
 )
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.organization.models import OrganizationBadge
 from udata.core.spatial.factories import GeoLevelFactory, SpatialCoverageFactory
-from udata.core.topic.factories import TopicFactory
+from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
 from udata.models import CommunityResource, Dataset, Follow, Member, db
-from udata.tags import MAX_TAG_LENGTH, MIN_TAG_LENGTH
+from udata.tags import TAG_MAX_LENGTH, TAG_MIN_LENGTH
 from udata.tests.features.territories import create_geozones_fixtures
 from udata.tests.helpers import assert200, assert404
 from udata.utils import faker, unique_string
 
-from . import APITestCase
+from . import APITestCase, PytestOnlyAPITestCase
 
 SAMPLE_GEOM = {
     "type": "MultiPolygon",
@@ -67,8 +67,6 @@ def dataset_in_response(response: TestResponse, dataset: Dataset) -> bool:
 
 
 class DatasetAPITest(APITestCase):
-    modules = []
-
     def test_dataset_api_list(self):
         """It should fetch a dataset list from the API"""
         datasets = [DatasetFactory() for i in range(2)]
@@ -182,7 +180,8 @@ class DatasetAPITest(APITestCase):
         format_dataset = DatasetFactory(resources=[ResourceFactory(format="my-format")])
         featured_dataset = DatasetFactory(featured=True)
         topic_dataset = DatasetFactory()
-        topic = TopicFactory(datasets=[topic_dataset])
+        topic = TopicFactory()
+        TopicElementDatasetFactory(element=topic_dataset, topic=topic)
 
         paca, _, _ = create_geozones_fixtures()
         geozone_dataset = DatasetFactory(spatial=SpatialCoverageFactory(zones=[paca.id]))
@@ -530,14 +529,14 @@ class DatasetAPITest(APITestCase):
         other = GeoLevelFactory(id="other", name="Autre")
 
         dataset = DatasetFactory(
-            frequency="monthly",
+            frequency=UpdateFrequency.MONTHLY,
             license=license,
             spatial=SpatialCoverageFactory(zones=[paca.id], granularity=country.id),
         )
 
         response = self.get(url_for("apiv2.dataset", dataset=dataset))
         self.assert200(response)
-        assert response.json["frequency"] == "monthly"
+        assert response.json["frequency"] == UpdateFrequency.MONTHLY.id
         assert response.json["license"] == "lov2"
         assert response.json["spatial"]["zones"][0] == paca.id
         assert response.json["spatial"]["granularity"] == "country"
@@ -549,8 +548,8 @@ class DatasetAPITest(APITestCase):
             },
         )
         self.assert200(response)
-        assert response.json["frequency"]["id"] == "monthly"
-        assert response.json["frequency"]["label"] == "Mensuelle"
+        assert response.json["frequency"]["id"] == UpdateFrequency.MONTHLY.id
+        assert response.json["frequency"]["label"] == UpdateFrequency.MONTHLY.label
         assert response.json["license"]["id"] == "lov2"
         assert response.json["license"]["title"] == license.title
         assert response.json["spatial"]["zones"][0]["id"] == paca.id
@@ -571,8 +570,8 @@ class DatasetAPITest(APITestCase):
             },
         )
         self.assert200(response)
-        assert response.json["frequency"]["id"] == DEFAULT_FREQUENCY
-        assert response.json["frequency"]["label"] == UPDATE_FREQUENCIES.get(DEFAULT_FREQUENCY)
+        assert response.json["frequency"]["id"] == UpdateFrequency.UNKNOWN.id
+        assert response.json["frequency"]["label"] == UpdateFrequency.UNKNOWN.label
         assert response.json["license"]["id"] == DEFAULT_LICENSE["id"]
         assert response.json["license"]["title"] == DEFAULT_LICENSE["title"]
         assert len(response.json["spatial"]["zones"]) == 0
@@ -631,19 +630,21 @@ class DatasetAPITest(APITestCase):
         dataset = Dataset.objects.first()
         self.assertEqual(dataset.tags, sorted(data["tags"]))
 
+    @pytest.mark.options(TAG_MIN_LENGTH=3, TAG_MAX_LENGTH=10)
     def test_dataset_api_fail_to_create_too_short_tags(self):
         """It should fail to create a dataset from the API because
         the tag is too short"""
         data = DatasetFactory.as_dict()
-        data["tags"] = [unique_string(MIN_TAG_LENGTH - 1)]
+        data["tags"] = [unique_string(TAG_MIN_LENGTH - 1)]
         with self.api_user():
             response = self.post(url_for("api.datasets"), data)
         self.assertStatus(response, 400)
 
+    @pytest.mark.options(TAG_MIN_LENGTH=3, TAG_MAX_LENGTH=10)
     def test_dataset_api_fail_to_create_too_long_tags(self):
         """Should fail creating a dataset with a tag long"""
         data = DatasetFactory.as_dict()
-        data["tags"] = [unique_string(MAX_TAG_LENGTH + 1)]
+        data["tags"] = [unique_string(TAG_MAX_LENGTH + 1)]
         with self.api_user():
             response = self.post(url_for("api.datasets"), data)
         self.assertStatus(response, 400)
@@ -722,12 +723,12 @@ class DatasetAPITest(APITestCase):
         """It should create a dataset from the API with a legacy frequency"""
         self.login()
 
-        for oldFreq, newFreq in LEGACY_FREQUENCIES.items():
+        for oldFreq, newFreq in UpdateFrequency._LEGACY_FREQUENCIES.items():  # type: ignore[misc]
             data = DatasetFactory.as_dict()
             data["frequency"] = oldFreq
             response = self.post(url_for("api.datasets"), data)
             self.assert201(response)
-            self.assertEqual(response.json["frequency"], newFreq)
+            self.assertEqual(response.json["frequency"], newFreq.id)
 
     def test_dataset_api_update(self):
         """It should update a dataset from the API"""
@@ -739,6 +740,49 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(Dataset.objects.count(), 1)
         self.assertEqual(Dataset.objects.first().description, "new description")
+
+    def test_dataset_api_update_with_null_frequency(self):
+        """It should update the item even though internal frequency is null"""
+        user = self.login()
+        dataset = DatasetFactory(owner=user, frequency=None)
+        data = dataset.to_dict()
+        # Update doesn't matter as long as we don't touch `frequency`
+        data["tags"] = ["test"]
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertEqual(Dataset.objects.first().frequency, None)
+
+    def test_dataset_api_update_valid_frequency(self):
+        """It should update a dataset from the API"""
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        data = dataset.to_dict()
+        data["frequency"] = "monthly"
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertEqual(Dataset.objects.first().frequency, UpdateFrequency.MONTHLY)
+
+    def test_dataset_api_update_invalid_frequency(self):
+        """It should return an error saying the frequency is invalid"""
+        user = self.login()
+        dataset = DatasetFactory(owner=user, frequency=UpdateFrequency.ANNUAL)
+        data = dataset.to_dict()
+
+        data["frequency"] = 1  # invalid type
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert400(response)
+        self.assertEqual(response.json.get("message"), "'1' is not a valid UpdateFrequency")
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertEqual(Dataset.objects.first().frequency, UpdateFrequency.ANNUAL)
+
+        data["frequency"] = "foo"  # valid type but invalid term
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert400(response)
+        self.assertEqual(response.json.get("message"), "'foo' is not a valid UpdateFrequency")
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertEqual(Dataset.objects.first().frequency, UpdateFrequency.ANNUAL)
 
     def test_cannot_modify_dataset_id(self):
         user = self.login()
@@ -1291,19 +1335,33 @@ class DatasetAPITest(APITestCase):
 
 
 class DatasetsFeedAPItest(APITestCase):
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=10)
     def test_recent_feed(self):
+        certified_org = OrganizationFactory(badges=[OrganizationBadge(kind="certified")])
+        # We have a 10 hours delay for a new object to appear in feed. A newly created one shouldn't appear.
         DatasetFactory(
             title="A", resources=[ResourceFactory()], created_at_internal=datetime.utcnow()
         )
+        # Except in the case of a new dataset published by a certified organization
         DatasetFactory(
             title="B",
-            resources=[ResourceFactory()],
-            created_at_internal=datetime.utcnow() - timedelta(days=2),
+            created_at_internal=datetime.utcnow(),
+            organization=certified_org,
         )
         DatasetFactory(
             title="C",
-            resources=[ResourceFactory()],
+            created_at_internal=datetime.utcnow() - timedelta(days=2),
+        )
+        DatasetFactory(
+            title="D",
             created_at_internal=datetime.utcnow() - timedelta(days=1),
+        )
+        # Even if dataset E is created more recently than D, it should appear after in the feed, since it doesn't have a delay
+        # before appearing in the field because it is published by a certified organization
+        DatasetFactory(
+            title="E",
+            created_at_internal=datetime.utcnow() - timedelta(hours=23),
+            organization=certified_org,
         )
 
         response = self.get(url_for("api.recent_datasets_atom_feed"))
@@ -1311,11 +1369,13 @@ class DatasetsFeedAPItest(APITestCase):
 
         feed = feedparser.parse(response.data)
 
-        self.assertEqual(len(feed.entries), 3)
-        self.assertEqual(feed.entries[0].title, "A")
-        self.assertEqual(feed.entries[1].title, "C")
-        self.assertEqual(feed.entries[2].title, "B")
+        self.assertEqual(len(feed.entries), 4)
+        self.assertEqual(feed.entries[0].title, "B")
+        self.assertEqual(feed.entries[1].title, "D")
+        self.assertEqual(feed.entries[2].title, "E")
+        self.assertEqual(feed.entries[3].title, "C")
 
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
     def test_recent_feed_owner(self):
         owner = UserFactory()
         DatasetFactory(owner=owner, resources=[ResourceFactory()])
@@ -1333,6 +1393,7 @@ class DatasetsFeedAPItest(APITestCase):
         self.assertEqual(author.name, owner.fullname)
         self.assertEqual(author.href, owner.url_for())
 
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
     def test_recent_feed_org(self):
         owner = UserFactory()
         org = OrganizationFactory()
@@ -1350,6 +1411,30 @@ class DatasetsFeedAPItest(APITestCase):
         author = entry.authors[0]
         self.assertEqual(author.name, org.name)
         self.assertEqual(author.href, org.url_for())
+
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
+    def test_feed_html_content(self):
+        DatasetFactory(description="# My title\n\n* a list\n* of items")
+
+        response = self.get(url_for("api.recent_datasets_atom_feed"))
+
+        self.assert200(response)
+
+        assert "&lt;h1&gt;" in response.text
+        assert "&lt;ul&gt;" in response.text
+
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0, CDATA_BASE_URL="http://example.org")
+    def test_feed_id_uri_is_valid(self):
+        DatasetFactory()
+
+        response = self.get(url_for("api.recent_datasets_atom_feed"))
+
+        self.assert200(response)
+
+        feed = feedparser.parse(response.data)
+
+        entry = feed.entries[0]
+        assert uris.validate(entry["id"])
 
 
 class DatasetBadgeAPITest(APITestCase):
@@ -1418,8 +1503,6 @@ class DatasetBadgeAPITest(APITestCase):
 
 
 class DatasetResourceAPITest(APITestCase):
-    modules = None
-
     def setUp(self):
         self.login()
         self.dataset = DatasetFactory(owner=self.user)
@@ -1821,6 +1904,17 @@ class DatasetResourceAPITest(APITestCase):
         )
         self.assert404(response)
 
+    def test_resource_redirect_success(self):
+        """It should redirect to the resource URL"""
+        resource = ResourceFactory(url="https://example.com/data.csv")
+        DatasetFactory(resources=[resource])
+
+        response = self.get(
+            url_for("api.resource_redirect", id=resource.id), follow_redirects=False
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.location, "https://example.com/data.csv")
+
     def test_follow_dataset(self):
         """It should follow a dataset on POST"""
         user = self.login()
@@ -1857,35 +1951,25 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(Follow.objects.following(user).count(), 0)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
+    @pytest.mark.options(ALLOWED_RESOURCES_EXTENSIONS=["txt", "html", "kml", "kml-1", "qml", "xml"])
     def test_suggest_formats_api(self):
-        """It should suggest formats"""
-        DatasetFactory(
-            resources=[
-                ResourceFactory(format=f) for f in (faker.word(), faker.word(), "kml", "kml-1")
-            ]
-        )
-
-        response = self.get(url_for("api.suggest_formats"), qs={"q": "km", "size": "5"})
+        response = self.get(url_for("api.suggest_formats", q="km", size=5))
         self.assert200(response)
 
-        self.assertLessEqual(len(response.json), 5)
-        self.assertGreater(len(response.json), 1)
+        self.assertEqual(len(response.json), 2)
+        self.assertEqual(response.json[0]["text"], "kml")
+        self.assertEqual(response.json[1]["text"], "kml-1")
 
-        for suggestion in response.json:
-            self.assertIn("text", suggestion)
-            self.assertIn("km", suggestion["text"])
-
+    @pytest.mark.options(ALLOWED_RESOURCES_EXTENSIONS=["txt", "html", "kml", "kml-1", "qml", "xml"])
     def test_suggest_format_api_no_match(self):
-        """It should not provide format suggestion if no match"""
-        DatasetFactory(resources=[ResourceFactory(format=faker.word()) for _ in range(3)])
-
-        response = self.get(url_for("api.suggest_formats"), qs={"q": "test", "size": "5"})
+        response = self.get(url_for("api.suggest_formats", q="test", size=5))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
+    @pytest.mark.options(ALLOWED_RESOURCES_EXTENSIONS=[])
     def test_suggest_format_api_empty(self):
         """It should not provide format suggestion if no data"""
-        response = self.get(url_for("api.suggest_formats"), qs={"q": "test", "size": "5"})
+        response = self.get(url_for("api.suggest_formats", q="txt", size=5))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
@@ -1903,7 +1987,7 @@ class DatasetResourceAPITest(APITestCase):
             ]
         )
 
-        response = self.get(url_for("api.suggest_mime"), qs={"q": "js", "size": "5"})
+        response = self.get(url_for("api.suggest_mime", q="js", size=5))
         self.assert200(response)
         self.assertLessEqual(len(response.json), 5)
 
@@ -1914,7 +1998,7 @@ class DatasetResourceAPITest(APITestCase):
         """It should suggest mime types"""
         DatasetFactory(resources=[ResourceFactory(mime="application/xhtml+xml")])
 
-        response = self.get(url_for("api.suggest_mime"), qs={"q": "xml", "size": "5"})
+        response = self.get(url_for("api.suggest_mime", q="xml", size=5))
         self.assert200(response)
 
         self.assertEqual(len(response.json), 5)
@@ -1923,13 +2007,13 @@ class DatasetResourceAPITest(APITestCase):
         """It should not provide format suggestion if no match"""
         DatasetFactory(resources=[ResourceFactory(mime=faker.word()) for _ in range(3)])
 
-        response = self.get(url_for("api.suggest_mime"), qs={"q": "test", "size": "5"})
+        response = self.get(url_for("api.suggest_mime", q="test", size=5))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
     def test_suggest_mime_api_empty(self):
         """It should not provide mime suggestion if no data"""
-        response = self.get(url_for("api.suggest_mime"), qs={"q": "test", "size": "5"})
+        response = self.get(url_for("api.suggest_mime", q="test", size=5))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
@@ -1945,7 +2029,7 @@ class DatasetResourceAPITest(APITestCase):
             title="title-test-4", visible=True, metrics={"followers": 10}
         )
 
-        response = self.get(url_for("api.suggest_datasets"), qs={"q": "title-test", "size": "5"})
+        response = self.get(url_for("api.suggest_datasets", q="title-test", size=5))
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -1968,7 +2052,7 @@ class DatasetResourceAPITest(APITestCase):
                 visible=True,
             )
 
-        response = self.get(url_for("api.suggest_datasets"), qs={"q": "acronym-test", "size": "5"})
+        response = self.get(url_for("api.suggest_datasets", q="acronym-test", size=5))
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -1990,7 +2074,7 @@ class DatasetResourceAPITest(APITestCase):
                 resources=[ResourceFactory()],
             )
 
-        response = self.get(url_for("api.suggest_datasets"), qs={"q": "title-testé", "size": "5"})
+        response = self.get(url_for("api.suggest_datasets", q="title-testé", size=5))
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -2008,13 +2092,13 @@ class DatasetResourceAPITest(APITestCase):
         for i in range(3):
             DatasetFactory(resources=[ResourceFactory()])
 
-        response = self.get(url_for("api.suggest_datasets"), qs={"q": "xxxxxx", "size": "5"})
+        response = self.get(url_for("api.suggest_datasets", q="xxxxxx", size=5))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
     def test_suggest_datasets_api_empty(self):
         """It should not provide dataset suggestion if no data"""
-        response = self.get(url_for("api.suggest_datasets"), qs={"q": "xxxxxx", "size": "5"})
+        response = self.get(url_for("api.suggest_datasets", q="xxxxxx", size=5))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
@@ -2032,7 +2116,7 @@ class DatasetReferencesAPITest(APITestCase):
         """It should fetch the dataset frequencies list from the API"""
         response = self.get(url_for("api.dataset_frequencies"))
         self.assert200(response)
-        self.assertEqual(len(response.json), len(UPDATE_FREQUENCIES))
+        self.assertEqual(len(response.json), len(UpdateFrequency))
 
     def test_dataset_allowed_resources_extensions(self):
         """It should fetch the resources allowed extensions list from the API"""
@@ -2044,8 +2128,6 @@ class DatasetReferencesAPITest(APITestCase):
 
 
 class DatasetArchivedAPITest(APITestCase):
-    modules = []
-
     def test_dataset_api_search_archived(self):
         """It should search datasets from the API, excluding archived ones"""
         DatasetFactory(archived=None)
@@ -2064,8 +2146,6 @@ class DatasetArchivedAPITest(APITestCase):
 
 
 class CommunityResourceAPITest(APITestCase):
-    modules = []
-
     def test_community_resource_api_get(self):
         """It should fetch a community resource from the API"""
         community_resource = CommunityResourceFactory()
@@ -2319,10 +2399,7 @@ class ResourcesTypesAPITest(APITestCase):
         self.assertEqual(len(response.json), len(RESOURCE_TYPES))
 
 
-@pytest.mark.usefixtures("clean_db")
-class DatasetSchemasAPITest:
-    modules = []
-
+class DatasetSchemasAPITest(PytestOnlyAPITestCase):
     def test_dataset_schemas_api_list(self, api, rmock, app):
         # Can't use @pytest.mark.options otherwise a request will be
         # made before setting up rmock at module load, resulting in a 404
@@ -2383,10 +2460,7 @@ class DatasetSchemasAPITest:
         )
 
 
-@pytest.mark.usefixtures("clean_db")
-class HarvestMetadataAPITest:
-    modules = []
-
+class HarvestMetadataAPITest(PytestOnlyAPITestCase):
     def test_dataset_with_harvest_metadata(self, api):
         date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
         harvest_metadata = HarvestDatasetMetadata(
@@ -2426,7 +2500,7 @@ class HarvestMetadataAPITest:
         date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
 
         harvest_metadata = HarvestResourceMetadata(
-            created_at=date,
+            issued_at=date,
             modified_at=date,
             uri="http://domain.gouv.fr/dataset/uri",
         )
@@ -2435,32 +2509,46 @@ class HarvestMetadataAPITest:
         response = api.get(url_for("api.dataset", dataset=dataset))
         assert200(response)
         assert response.json["resources"][0]["harvest"] == {
-            "created_at": date.isoformat(),
+            "issued_at": date.isoformat(),
             "modified_at": date.isoformat(),
             "uri": "http://domain.gouv.fr/dataset/uri",
         }
 
     def test_dataset_with_harvest_computed_dates(self, api):
-        creation_date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
+        # issued_date takes precedence over internal creation date and harvest created_at on dataset
+        issued_date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
+        creation_date = datetime(2022, 2, 23, tzinfo=pytz.UTC)
+        modification_date = datetime(2022, 3, 19, tzinfo=pytz.UTC)
+        harvest_metadata = HarvestDatasetMetadata(
+            created_at=creation_date,
+            issued_at=issued_date,
+            modified_at=modification_date,
+        )
+        dataset = DatasetFactory(harvest=harvest_metadata)
+        response = api.get(url_for("api.dataset", dataset=dataset))
+        assert200(response)
+        assert response.json["created_at"] == issued_date.isoformat()
+        assert response.json["last_modified"] == modification_date.isoformat()
+
+        # without issuance date, creation_date takes precedence over internal creation date on dataset
         modification_date = datetime(2022, 3, 19, tzinfo=pytz.UTC)
         harvest_metadata = HarvestDatasetMetadata(
             created_at=creation_date,
             modified_at=modification_date,
         )
         dataset = DatasetFactory(harvest=harvest_metadata)
-
         response = api.get(url_for("api.dataset", dataset=dataset))
         assert200(response)
         assert response.json["created_at"] == creation_date.isoformat()
         assert response.json["last_modified"] == modification_date.isoformat()
 
+        # issued_date takes precedence over internal creation date on resource
         resource_harvest_metadata = HarvestResourceMetadata(
-            created_at=creation_date,
+            issued_at=issued_date,
             modified_at=modification_date,
         )
         dataset = DatasetFactory(resources=[ResourceFactory(harvest=resource_harvest_metadata)])
-
         response = api.get(url_for("api.dataset", dataset=dataset))
         assert200(response)
-        assert response.json["resources"][0]["created_at"] == creation_date.isoformat()
+        assert response.json["resources"][0]["created_at"] == issued_date.isoformat()
         assert response.json["resources"][0]["last_modified"] == modification_date.isoformat()

@@ -1,39 +1,25 @@
-"""Enhance a MongoEngine document class to give it super powers by decorating it with @generate_fields.
+"""API field generation and metadata management for MongoEngine documents.
 
-The main goal of `generate_fields` is to remove duplication: we used to have fields declaration in
-- models.py
-- forms.py
-- api_fields.py
+This module provides tools to automatically generate Flask-RESTX fields from MongoEngine
+documents, reducing duplication between model definitions and API serialization.
 
-Now they're defined in models.py, and adding the `generate_fields` decorator makes them available in the format we need them for the forms or the API.
+Main components:
+- `@generate_fields`: Decorator that adds API field generation to document classes
+- `field()`: Universal function to add metadata to fields and methods
 
+The `@generate_fields` decorator parameters:
 - default_filterable_field: which field in this document should be the default filter, eg when filtering by Badge, you're actually filtering on `Badge.kind`
 - searchable: boolean, if True, the document can be full-text searched using MongoEngine text search
 - additional_sorts: add more sorts than the already available ones based on fields (see below). Eg, sort by metrics.
-- additional_filters: filter on a field of a field (aka "join"), eg filter on `Reuse__organization__badge=PUBLIC_SERVICE`.
+- nested_filters: filter on a field of a field (aka "join"), eg filter on `Reuse__organization__badge=PUBLIC_SERVICE`.
+- standalone_filters: filter on something else than a field. Should be a list of dicts with filterable attributes, as returned by `compute_filter`.
 
+Generated attributes on decorated classes:
+- ref_fields: Minimal fields for embedded/referenced documents
+- read_fields: All fields returned when querying a document
+- write_fields: Fields accepted when creating/updating a document
 
-On top of those functionalities added to the document by the `@generate_fields` decorator parameters,
-the document fields are parsed and enhanced if they are wrapped in the `field` helper.
-
-- sortable: boolean, if True, it'll be available in the list of sort options
-- show_as_ref: add to the list of `ref_fields` (see below)
-- readonly: don't add this field to the `write_fields`
-- markdown: use Mardown to format this field instead of plain old text
-- filterable: this field can be filtered on. It's either an empty dictionnary, either {`key`: `field_name`} if the `field_name` to use is different from the original field, eg `dataset` instead of `datasets`.
-- description: use as the info on the field in the swagger forms.
-- check: provide a function to validate the content of the field.
-- thumbnail_info: add additional info for a thumbnail, eg `{ "size": BIGGEST_IMAGE_SIZE }`.
-
-You may also use the `@function_field` decorator to treat a document method as a field.
-
-
-The following fields are added on the document class once decorated:
-
-- ref_fields: list of fields to return when embedding/referencing a document, eg when querying Reuse.organization, only return a subset of the org fields
-- read_fields: all of the fields to return when querying a document
-- write_fields: list of fields to provide when creating a document, eg when creating a Reuse, we only provide organization IDs, not all the org fields
-
+For field-specific metadata, see the `field()` function documentation.
 """
 
 import functools
@@ -43,6 +29,8 @@ import flask_restx.fields as restx_fields
 import mongoengine
 import mongoengine.fields as mongo_fields
 from bson import DBRef, ObjectId
+from flask import Request
+from flask_restx import marshal
 from flask_restx.inputs import boolean
 from flask_restx.reqparse import RequestParser
 from flask_storage.mongo import ImageField as FlaskStorageImageField
@@ -59,6 +47,24 @@ lazy_reference = api.model(
         "id": restx_fields.Raw(attribute=lambda ref: ref.pk),
     },
 )
+
+DEFAULT_GENERIC_KEY = "class"
+
+classes_by_names = {}
+classes_by_parents = {}
+
+
+class GenericField(restx_fields.Raw):
+    def __init__(self, fields_by_type):
+        super().__init__(self)
+        self.default = None
+        self.fields_by_type = fields_by_type
+
+    def format(self, value):
+        # Value is one of the generic object
+        data = marshal(value, self.fields_by_type[value.__class__.__name__])
+        data[DEFAULT_GENERIC_KEY] = value.__class__.__name__
+        return data
 
 
 def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | None]:
@@ -96,12 +102,19 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         params["enum"] = field.choices
         if field.validation:
             params["validation"] = validation_to_type(field.validation)
+    elif isinstance(field, mongo_fields.UUIDField):
+        # TODO add validation?
+        constructor = restx_fields.String
     elif isinstance(field, mongo_fields.ObjectIdField):
         constructor = restx_fields.String
     elif isinstance(field, mongo_fields.FloatField):
         constructor = restx_fields.Float
         params["min"] = field.min  # TODO min_value?
         params["max"] = field.max
+    elif isinstance(field, mongo_fields.IntField):
+        constructor = restx_fields.Integer
+        params["min"] = field.min_value
+        params["max"] = field.max_value
     elif isinstance(field, mongo_fields.BooleanField):
         constructor = restx_fields.Boolean
     elif isinstance(field, mongo_fields.DateTimeField):
@@ -125,6 +138,7 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         # For lists, we can expose them only by showing a link to the API
         # with the results of the list to avoid listing a lot of sub-ressources
         # (for example for a dataservices with thousands of datasets).
+
         href = info.get("href", None)
         if href:
 
@@ -147,9 +161,36 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         #     2. `__additional_field_info__` of the inner field
         #     3. `__additional_field_info__` of the parent
         inner_info: dict = getattr(field.field, "__additional_field_info__", {})
-        field_read, field_write = convert_db_to_field(
-            f"{key}.inner", field.field, {**info, **inner_info, **info.get("inner_field_info", {})}
+        nested_info = {**info, **inner_info, **info.get("inner_field_info", {})}
+
+        generic = info.get("generic", False)
+
+        allowed_classes = (
+            classes_by_parents[field.field.document_type_obj]
+            if isinstance(field.field, mongoengine.fields.EmbeddedDocumentField)
+            and field.field.document_type_obj in classes_by_parents
+            else set()
         )
+        if generic and allowed_classes:
+            generic_fields = {
+                cls.__name__: convert_db_to_field(
+                    f"{key}.{cls.__name__}",
+                    # Instead of having EmbeddedDocumentField(Bloc) we'll create fields for each
+                    # of the subclasses with EmbededdDocumentField(DatasetsListBloc), EmbeddedDocumentFied(DataservicesListBloc)…
+                    mongoengine.fields.EmbeddedDocumentField(cls),
+                    nested_info,
+                )
+                for cls in allowed_classes
+            }
+
+            field_read = GenericField({k: v[0].model for k, v in generic_fields.items()})
+            field_write = GenericField({k: v[1].model for k, v in generic_fields.items()})
+        else:
+            field_read, field_write = convert_db_to_field(
+                f"{key}.inner",
+                field.field,
+                nested_info,
+            )
 
         if constructor_read is None:
             # We don't want to set the `constructor_read` if it's already set
@@ -243,6 +284,19 @@ def get_fields(cls) -> Iterable[tuple[str, Callable, dict]]:
             )
 
 
+def save_class_by_parents(cls):
+    from udata.mongo.engine import db
+
+    for parent in cls.__bases__:
+        if parent == db.Document:
+            return
+
+        classes_by_parents[parent] = (
+            classes_by_parents[parent] if parent in classes_by_parents else set()
+        )
+        classes_by_parents[parent].add(cls)
+
+
 def generate_fields(**kwargs) -> Callable:
     """Mongoengine document decorator.
 
@@ -264,12 +318,15 @@ def generate_fields(**kwargs) -> Callable:
         ref_fields: dict = {}
         sortables: list = kwargs.get("additional_sorts", [])
 
-        filterables: list[dict] = []
-        additional_filters: dict[str, dict] = get_fields_with_additional_filters(
-            kwargs.get("additional_filters", {})
+        filterables: list[dict] = kwargs.get("standalone_filters", [])
+        nested_filters: dict[str, dict] = get_fields_with_nested_filters(
+            kwargs.get("nested_filters", {})
         )
 
         read_fields["id"] = restx_fields.String(required=True, readonly=True)
+
+        classes_by_names[cls.__name__] = cls
+        save_class_by_parents(cls)
 
         for key, field, info in get_fields(cls):
             sortable_key: bool = info.get("sortable", False)
@@ -285,16 +342,16 @@ def generate_fields(**kwargs) -> Callable:
             if filterable is not None:
                 filterables.append(compute_filter(key, field, info, filterable))
 
-            additional_filter: dict | None = additional_filters.get(key, None)
-            if additional_filter:
+            nested_filter: dict | None = nested_filters.get(key, None)
+            if nested_filter:
                 if not isinstance(
                     field, mongo_fields.ReferenceField | mongo_fields.LazyReferenceField
                 ):
-                    raise Exception("Cannot use additional_filters on a field that is not a ref.")
+                    raise Exception("Cannot use nested_filters on a field that is not a ref.")
 
                 ref_model: db.Document = field.document_type
 
-                for child in additional_filter.get("children", []):
+                for child in nested_filter.get("children", []):
                     inner_field: str = getattr(ref_model, child["key"])
 
                     column: str = f"{key}__{child['key']}"
@@ -330,7 +387,7 @@ def generate_fields(**kwargs) -> Callable:
 
         # The goal of this loop is to fetch all functions (getters) of the class
         # If a function has an `__additional_field_info__` attribute it means
-        # it has been decorated with `@function_field()` and should be included
+        # it has been decorated with `@field()` and should be included
         # in the API response.
         for method_name in dir(cls):
             if method_name == "objects":
@@ -418,7 +475,7 @@ def generate_fields(**kwargs) -> Callable:
 
         for filterable in filterables:
             parser.add_argument(
-                # Use the custom label from `additional_filters` if there's one.
+                # Use the custom label from `nested_filters` if there's one.
                 filterable.get("label", filterable["key"]),
                 type=filterable["type"],
                 location="args",
@@ -449,7 +506,7 @@ def generate_fields(**kwargs) -> Callable:
                 base_query = base_query.search_text(phrase_query)
 
             for filterable in filterables:
-                # If it's from an `additional_filter`, use the custom label instead of the key,
+                # If it's from an `nested_filter`, use the custom label instead of the key,
                 # eg use `organization_badge` instead of `organization.badges` which is
                 # computed to `organization_badges`.
                 filter = args.get(filterable.get("label", filterable["key"]))
@@ -487,22 +544,91 @@ def generate_fields(**kwargs) -> Callable:
     return wrapper
 
 
-def function_field(**info) -> Callable:
-    def inner(func):
-        func.__additional_field_info__ = info
-        return func
+def field(
+    inner=None,
+    sortable: bool | str | None = None,
+    filterable: dict[str, Any] | None = None,
+    readonly: bool | None = None,
+    show_as_ref: bool | None = None,
+    markdown: bool | None = None,
+    description: str | None = None,
+    auditable: bool | None = None,
+    checks: list[Callable] | None = None,
+    attribute: str | None = None,
+    thumbnail_info: dict[str, Any] | None = None,
+    example: str | None = None,
+    nested_fields: dict[str, Any] | None = None,
+    inner_field_info: dict[str, Any] | None = None,
+    size: int | None = None,
+    is_thumbnail: bool | None = None,
+    href: Callable | None = None,
+    generic: bool | None = None,
+    generic_key: str | None = None,
+    convert_to: Callable | None = None,
+    allow_null: bool | None = None,
+    **kwargs: Any,  # Accept any additional parameters, forward to flask rest x constructor.
+):
+    """Universal field decorator/wrapper for API field metadata.
 
-    return inner
+    Can be used in two ways:
 
+    1. As a wrapper for MongoEngine fields:
+        title = field(db.StringField(required=True),
+                     sortable=True,
+                     description="The title of the item")
 
-def field(inner, **kwargs):
-    """Simple wrapper to make a document field visible for the API.
+    2. As a decorator for computed fields:
+        @field(description="Link to the API endpoint", show_as_ref=True)
+        def uri(self):
+            return f"/api/items/{self.id}"
 
-    We can pass additional arguments that will be forwarded to the RestX field constructor.
+    Args:
+        inner: The MongoEngine field to wrap (or None when used as decorator)
+        sortable: If True, field can be sorted. If str, use as custom sort key
+        filterable: Filter configuration dict
+        readonly: If True, exclude from write_fields
+        show_as_ref: If True, include in ref_fields
+        markdown: If True, use Markdown formatter
+        description: Field description for Swagger
+        auditable: If False, exclude from audit trail
+        checks: List of validation functions
+        attribute: Custom attribute name for serialization
+        thumbnail_info: Thumbnail configuration dict
+        example: Example value for documentation
+        nested_fields: RestX model for nested objects
+        inner_field_info: Additional info for list inner fields
+        size: Image size for thumbnails
+        is_thumbnail: If True, this is a thumbnail field
+        href: Function to generate API link
+        generic: If True, handle generic embedded documents
+        generic_key: Key for generic type discrimination
+        convert_to: Custom converter for RestX
+        allow_null: If True, field can be null
+        **kwargs: Any additional parameters not explicitly defined
 
+    Returns:
+        When used as wrapper: The field with __additional_field_info__ attached.
+        When used as decorator: A decorator function.
     """
-    inner.__additional_field_info__ = kwargs
-    return inner
+    # Build field_info from non-None parameters, excluding 'inner' and 'kwargs'
+    field_info = {
+        k: v for k, v in locals().items() if v is not None and k not in ("inner", "kwargs")
+    }
+
+    # Add any extra kwargs passed
+    field_info.update(kwargs)
+
+    if inner is None:
+        # Used as a decorator for methods
+        def decorator(func):
+            func.__additional_field_info__ = field_info
+            return func
+
+        return decorator
+    else:
+        # Used as a field wrapper
+        inner.__additional_field_info__ = field_info
+        return inner
 
 
 def patch(obj, request) -> type:
@@ -513,10 +639,13 @@ def patch(obj, request) -> type:
     """
     from udata.mongo.engine import db
 
-    for key, value in request.json.items():
+    data = request.json if isinstance(request, Request) else request
+    for key, value in data.items():
         field = obj.__write_fields__.get(key)
         if field is not None and not field.readonly:
             model_attribute = getattr(obj.__class__, key)
+            info = getattr(model_attribute, "__additional_field_info__", {})
+
             if hasattr(model_attribute, "from_input"):
                 value = model_attribute.from_input(value)
             elif isinstance(model_attribute, mongoengine.fields.ListField) and isinstance(
@@ -546,18 +675,27 @@ def patch(obj, request) -> type:
                 model_attribute,
                 mongoengine.fields.EmbeddedDocumentField,
             ):
-                embedded_field = model_attribute.document_type()
-                value = embedded_field._from_son(value)
+                embedded_field = model_attribute.document_type().__class__
+                value = patch(embedded_field(), value)
             elif value and isinstance(
                 model_attribute,
                 mongoengine.fields.EmbeddedDocumentListField,
             ):
-                embedded_field = model_attribute.field.document_type()
-                # MongoEngine BaseDocument has a `from_json` method for string and a private `_from_son`
-                # but there is no public `from_son` to use
-                value = [embedded_field._from_son(embedded_value) for embedded_value in value]
+                base_embedded_field = model_attribute.field.document_type().__class__
+                generic = info.get("generic", False)
+                generic_key = info.get("generic_key", DEFAULT_GENERIC_KEY)
 
-            info = getattr(model_attribute, "__additional_field_info__", {})
+                objects = []
+                for embedded_value in value:
+                    # TODO add validation on generic_key presence and value
+                    embedded_field = (
+                        classes_by_names[embedded_value[generic_key]]
+                        if generic
+                        else base_embedded_field
+                    )
+                    objects.append(patch(embedded_field(), embedded_value))
+
+                value = objects
 
             # `checks` field attribute allows to do validation from the request before setting
             # the attribute
@@ -655,21 +793,18 @@ def wrap_primary_key(
         )
 
 
-def get_fields_with_additional_filters(additional_filters: dict[str, str]) -> dict[str, Any]:
+def get_fields_with_nested_filters(nested_filters: dict[str, str]) -> dict[str, Any]:
     """Filter on additional related fields.
 
-    Right now we only support additional filters with a depth of two, eg "organization.badges".
-
-    The goal of this function is to key by the additional filters by the first part (`organization`) to
     be able to compute them when we loop over all the fields (`title`, `organization`…)
 
 
-    The `additional_filters` property is a dict: {"label": "key"}, for example {"organization_badge": "organization.badges"}.
+    The `nested_filters` property is a dict: {"label": "key"}, for example {"organization_badge": "organization.badges"}.
     The `label` will be the name of the parser arg, like `?organization_badge=public-service`, which makes more
     sense than `?organization_badges=public-service`.
     """
     results: dict = {}
-    for label, key in additional_filters.items():
+    for label, key in nested_filters.items():
         parts = key.split(".")
         if len(parts) == 2:
             parent = parts[0]
@@ -687,7 +822,7 @@ def get_fields_with_additional_filters(additional_filters: dict[str, str]) -> di
                 }
             )
         else:
-            raise Exception(f"Do not support `additional_filters` without two parts: {key}.")
+            raise Exception(f"Do not support `nested_filters` without two parts: {key}.")
 
     return results
 
