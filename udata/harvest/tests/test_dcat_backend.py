@@ -714,7 +714,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         )  # noqa
         assert dataset.harvest.last_update.date() == date.today()
 
-    def test_datara_extended_roles_1(self, rmock):
+    def test_datara_extended_roles_foaf(self, rmock):
         # Converted manually from ISO-19139 using SEMICeu XSLT (tag geodcat-ap-2.0.0)
         url = mock_dcat(rmock, "datara--5a26b0f6-0ccf-46ad-ac58-734054b91977.rdf.xml")
         org = OrganizationFactory()
@@ -733,7 +733,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert dataset.contact_points[1].email == "sig.dreal-ara@developpement-durable.gouv.fr"
         assert dataset.contact_points[1].role == "user"
 
-    def test_datara_extended_roles_2(self, rmock):
+    def test_datara_extended_roles_vcard(self, rmock):
         # Converted manually from ISO-19139 using SEMICeu XSLT (tag geodcat-ap-2.0.0)
         url = mock_dcat(rmock, "datara--f40c3860-7236-4b30-a141-23b8ae33f7b2.rdf.xml")
         org = OrganizationFactory()
