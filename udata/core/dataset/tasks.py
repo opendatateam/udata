@@ -1,6 +1,6 @@
 import collections
 import os
-from datetime import datetime
+from datetime import date, datetime
 from tempfile import NamedTemporaryFile
 
 from celery.utils.log import get_task_logger
@@ -12,6 +12,7 @@ from udata.core import csv, storages
 from udata.core.dataservices.models import Dataservice
 from udata.harvest.models import HarvestJob
 from udata.models import Activity, Discussion, Follow, TopicElement, Transfer, db
+from udata.storage.s3 import store_file
 from udata.tasks import job
 
 from .models import Checksum, CommunityResource, Dataset, Resource
@@ -151,6 +152,7 @@ def export_csv_for_model(model, dataset):
         else:
             dataset.last_modified_internal = datetime.utcnow()
             dataset.save()
+        return resource
     finally:
         csvfile.close()
         os.unlink(csvfile.name)
@@ -179,7 +181,11 @@ def export_csv(self, model=None):
 
     models = (model,) if model else ALLOWED_MODELS
     for model in models:
-        export_csv_for_model(model, dataset)
+        resource = export_csv_for_model(model, dataset)
+
+        # If we are the first day of the month, archive today catalogs
+        if date.today().day == 1:
+            store_file(bucket="test", filename=resource.title, filepath=resource.fs_filename)
 
 
 @job("bind-tabular-dataservice")
