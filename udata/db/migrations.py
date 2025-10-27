@@ -11,15 +11,8 @@ import traceback
 from datetime import datetime
 from logging.handlers import QueueHandler
 
-from flask import current_app
 from mongoengine.connection import get_db
-from pkg_resources import (
-    resource_filename,
-    resource_string,
-)
 from pymongo import ReturnDocument
-
-from udata import entrypoints
 
 log = logging.getLogger(__name__)
 
@@ -67,7 +60,7 @@ class Record(dict):
     __getattr__ = dict.get
 
     def load(self):
-        specs = {"plugin": self["plugin"], "filename": self["filename"]}
+        specs = {"filename": self["filename"]}
         self.clear()
         data = get_db().migrations.find_one(specs)
         self.update(data or specs)
@@ -131,7 +124,7 @@ class Record(dict):
         script = inspect.getsource(migration)
         return Record(
             self.collection.find_one_and_update(
-                {"plugin": self.plugin, "filename": self.filename},
+                {"filename": self.filename},
                 {
                     "$push": {
                         "ops": {
@@ -154,17 +147,11 @@ class Record(dict):
 
 
 class Migration:
-    def __init__(self, plugin_or_specs, filename, module_name=None):
-        if filename is None and ":" in plugin_or_specs:
-            plugin, filename = plugin_or_specs.split(":")
-        else:
-            plugin = plugin_or_specs
+    def __init__(self, filename):
         if not filename.endswith(".py"):
             filename += ".py"
 
-        self.plugin = plugin
         self.filename = filename
-        self.module_name = module_name
         self._record = None
         self._module = None
 
@@ -174,16 +161,16 @@ class Migration:
 
     @property
     def db_query(self):
-        return {"plugin": self.plugin, "filename": self.filename}
+        return {"filename": self.filename}
 
     @property
     def label(self):
-        return ":".join((self.plugin, self.filename))
+        return self.filename
 
     @property
     def record(self):
         if self._record is None:
-            specs = {"plugin": self.plugin, "filename": self.filename}
+            specs = {"filename": self.filename}
             data = get_db().migrations.find_one(specs)
             self._record = Record(data or specs)
         return self._record
@@ -191,15 +178,11 @@ class Migration:
     @property
     def module(self):
         if self._module is None:
-            self._module = load_migration(self.plugin, self.filename, module_name=self.module_name)
+            self._module = load_migration(self.filename)
         return self._module
 
     def __eq__(self, value):
-        return (
-            isinstance(value, Migration)
-            and getattr(value, "plugin") == self.plugin
-            and getattr(value, "filename") == self.filename
-        )
+        return isinstance(value, Migration) and getattr(value, "filename") == self.filename
 
     def execute(self, recordonly=False, dryrun=False):
         """
@@ -286,9 +269,9 @@ class Migration:
         )
 
 
-def get(plugin, filename):
+def get(filename):
     """Get a migration"""
-    return Migration(plugin, filename)
+    return Migration(filename)
 
 
 def list_available():
@@ -301,44 +284,32 @@ def list_available():
 
     migrations_path = files("udata").joinpath("migrations")
 
-    migrations = [
-        Migration("udata", item.name, "udata")
-        for item in migrations_path.iterdir()
-        if item.is_file()
-    ]
+    migrations = [Migration(item.name) for item in migrations_path.iterdir() if item.is_file()]
 
     return sorted(migrations, key=lambda m: m.filename)
 
 
-def _module_name(plugin):
-    """Get the module name for a given plugin"""
-    if plugin == "udata":
-        return "udata"
-    module = entrypoints.get_plugin_module("udata.models", current_app, plugin)
-    if module is None:
-        raise MigrationError("Plugin {} not found".format(plugin))
-    return module.__name__
-
-
-def load_migration(plugin, filename, module_name=None):
+def load_migration(filename):
     """
     Load a migration from its python file
 
     :returns: the loaded module
     """
-    module_name = module_name or _module_name(plugin)
+    from importlib.resources import files
+
     basename = os.path.splitext(os.path.basename(filename))[0]
-    name = ".".join((module_name, "migrations", basename))
-    filename = os.path.join("migrations", filename)
+    name = f"udata.migrations.{basename}"
+
     try:
-        script = resource_string(module_name, filename)
+        script = files("udata").joinpath("migrations", filename).read_bytes()
     except Exception:
-        msg = "Unable to load file {} from module {}".format(filename, module_name)
+        msg = f"Unable to load file {filename}"
         raise MigrationError(msg)
+
     spec = importlib.util.spec_from_loader(name, loader=None)
     module = importlib.util.module_from_spec(spec)
     exec(script, module.__dict__)
-    module.__file__ = resource_filename(module_name, filename)
+    module.__file__ = str(files("udata").joinpath("migrations", filename))
     return module
 
 
