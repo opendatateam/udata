@@ -38,11 +38,6 @@ def store_as_json(bucket: str, filename: str, value):
     return store_bytes(bucket, filename, bytes(json.dumps(value).encode("UTF-8")))
 
 
-def store_file(bucket: str, filename: str, filepath):
-    with open(filepath, "rb") as f:
-        return store_bytes(bucket, filename, f.read())
-
-
 def get_bytes(bucket: str, filename: str) -> bytes | None:
     client = get_client()
     try:

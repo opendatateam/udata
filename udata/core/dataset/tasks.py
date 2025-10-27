@@ -12,7 +12,7 @@ from udata.core import csv, storages
 from udata.core.dataservices.models import Dataservice
 from udata.harvest.models import HarvestJob
 from udata.models import Activity, Discussion, Follow, TopicElement, Transfer, db
-from udata.storage.s3 import store_file
+from udata.storage.s3 import store_bytes
 from udata.tasks import job
 
 from .models import Checksum, CommunityResource, Dataset, Resource
@@ -85,13 +85,14 @@ def get_queryset(model_cls):
     # no_cache to avoid eating up too much RAM
     return model_cls.objects.filter(**params).no_cache()
 
+def get_resource_for_csv_export_model(model, dataset):
+    for resource in dataset.resources:
+        if resource.extras.get("csv-export:model", "") == model:
+            return resource
+
 
 def get_or_create_resource(r_info, model, dataset):
-    resource = None
-    for r in dataset.resources:
-        if r.extras.get("csv-export:model", "") == model:
-            resource = r
-            break
+    resource = get_resource_for_csv_export_model(model, dataset)
     if resource:
         for k, v in r_info.items():
             setattr(resource, k, v)
@@ -122,11 +123,16 @@ def store_resource(csvfile, model, dataset):
     return get_or_create_resource(r_info, model, dataset)
 
 
-def export_csv_for_model(model, dataset):
+def export_csv_for_model(model, dataset, replace: bool=False):
     model_cls = getattr(udata_models, model.capitalize(), None)
     if not model_cls:
         log.error("Unknow model %s" % model)
         return
+
+    fs_filename_to_remove = None
+    if existing_resource := get_resource_for_csv_export_model(model, dataset):
+        fs_filename_to_remove = existing_resource.fs_filename
+
     queryset = get_queryset(model_cls)
     adapter = csv.get_adapter(model_cls)
     if not adapter:
@@ -152,6 +158,9 @@ def export_csv_for_model(model, dataset):
         else:
             dataset.last_modified_internal = datetime.utcnow()
             dataset.save()
+        # remove previous catalog if exists and replace is True
+        if replace and fs_filename_to_remove:
+            storages.resources.delete(fs_filename_to_remove)
         return resource
     finally:
         csvfile.close()
@@ -181,11 +190,12 @@ def export_csv(self, model=None):
 
     models = (model,) if model else ALLOWED_MODELS
     for model in models:
-        resource = export_csv_for_model(model, dataset)
+        resource = export_csv_for_model(model, dataset, replace=True)
 
         # If we are the first day of the month, archive today catalogs
-        if date.today().day == 1:
-            store_file(bucket="test", filename=resource.title, filepath=resource.fs_filename)
+        if current_app.config["EXPORT_CSV_ARCHIVE_S3_BUCKET"] and resource and date.today().day == 1:
+            with storages.resources.open(resource.fs_filename, "rb") as f:
+                store_bytes(bucket=current_app.config["EXPORT_CSV_ARCHIVE_S3_BUCKET"], filename=f"{current_app.config['EXPORT_CSV_ARCHIVE_S3_FILENAME_PREFIX']}{resource.title}", bytes=f.read())
 
 
 @job("bind-tabular-dataservice")
