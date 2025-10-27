@@ -34,10 +34,6 @@ class MigrationError(Exception):
         self.traceback = traceback
 
 
-class MigrationFormatter(logging.Formatter):
-    pass
-
-
 class Record(dict):
     """
     A simple wrapper to migrations document
@@ -176,7 +172,6 @@ class Migration:
         """
         q = queue.Queue(-1)  # no limit on size
         handler = QueueHandler(q)
-        handler.setFormatter(MigrationFormatter())
         logger = getattr(self.module, "log", logging.getLogger(self.module.__name__))
         logger.propagate = False
         for h in logger.handlers:
