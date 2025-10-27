@@ -34,8 +34,6 @@ class MigrationError(Exception):
         self.traceback = traceback
 
 
-
-
 class MigrationFormatter(logging.Formatter):
     pass
 
@@ -132,9 +130,6 @@ class Record(dict):
 
 class Migration:
     def __init__(self, filename):
-        if not filename.endswith(".py"):
-            filename += ".py"
-
         self.filename = filename
         self._record = None
         self._module = None
