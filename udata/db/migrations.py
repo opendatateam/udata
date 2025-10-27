@@ -170,13 +170,14 @@ class Migration:
         If recordonly is True, the migration is only recorded
         If dryrun is True, the migration is neither executed nor recorded
         """
-        q = queue.Queue(-1)  # no limit on size
-        handler = QueueHandler(q)
+        q = queue.Queue()
         logger = getattr(self.module, "log", logging.getLogger(self.module.__name__))
+
+        # Logs only go to the queue handler are not shown.
+        # They will be formatted below to be shown all at once at the end
+        # of the migration.
+        logger.addHandler(QueueHandler(q))
         logger.propagate = False
-        for h in logger.handlers:
-            logger.removeHandler(h)
-        logger.addHandler(handler)
 
         out = [["info", "Recorded only"]] if recordonly else []
         state = {}
