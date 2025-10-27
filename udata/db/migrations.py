@@ -62,24 +62,13 @@ class Record(dict):
         """
         Status is the status of the last operation.
 
-        Will be `None` if the record doesn't exists.
-        Possible values are:
-          - success
-          - error
-          - recorded
+        Will be `None` if the record doesn't exist.
+        Returns "success" or "error".
         """
         if not self.exists():
-            return
+            return None
         op = self.ops[-1]
-        if op["success"]:
-            if op["type"] == "migrate":
-                return "success"
-            elif op["type"] == "record":
-                return "recorded"
-            else:
-                return "unknown"
-        else:
-            return "error"
+        return "success" if op["success"] else "error"
 
     @property
     def last_date(self):

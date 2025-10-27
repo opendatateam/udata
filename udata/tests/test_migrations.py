@@ -212,7 +212,9 @@ class MigrationsCommandsTest(PytestOnlyDBTestCase):
             assert len(record["ops"]) > 0, f"Migration {migration.filename} has no operations"
 
             last_op = record["ops"][-1]
-            assert (
-                last_op["success"]
-            ), f"Migration {migration.filename} failed: {last_op.get('output', 'No output')}"
-            assert last_op["type"] == "migrate", f"Migration {migration.filename} last op is not migrate"
+            assert last_op["success"], (
+                f"Migration {migration.filename} failed: {last_op.get('output', 'No output')}"
+            )
+            assert last_op["type"] == "migrate", (
+                f"Migration {migration.filename} last op is not migrate"
+            )
