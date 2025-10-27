@@ -11,9 +11,9 @@ import click
 import mongoengine
 from bson import DBRef
 
-from udata import migrations
 from udata.commands import cli, cyan, echo, green, magenta, red, white, yellow
 from udata.core.dataset.models import Dataset, Resource
+from udata.db import migrations
 from udata.mongo.document import get_all_models
 
 # Date format used to for display

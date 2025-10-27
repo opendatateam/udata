@@ -15,8 +15,6 @@ from flask import current_app
 from mongoengine.connection import get_db
 from pkg_resources import (
     resource_filename,
-    resource_isdir,
-    resource_listdir,
     resource_string,
 )
 from pymongo import ReturnDocument
@@ -295,34 +293,21 @@ def get(plugin, filename):
 
 def list_available():
     """
-    List available migrations for udata and enabled plugins
+    List available migrations from udata/migrations
 
-    Each row is a tuple with following signature:
-
-        (plugin, package, filename)
+    Returns a list of Migration objects sorted by filename
     """
-    migrations = []
+    from importlib.resources import files
 
-    migrations.extend(_iter("udata", "udata"))
+    migrations_path = files("udata").joinpath("migrations")
 
-    plugins = entrypoints.get_enabled("udata.models", current_app)
-    for plugin, module in plugins.items():
-        migrations.extend(_iter(plugin, module))
+    migrations = [
+        Migration("udata", item.name, "udata")
+        for item in migrations_path.iterdir()
+        if item.is_file()
+    ]
+
     return sorted(migrations, key=lambda m: m.filename)
-
-
-def _iter(plugin, module):
-    """
-    Iterate over migrations for a given plugin module
-
-    Yield tuples in the form (plugin_name, module_name, filename)
-    """
-    module_name = module if isinstance(module, str) else module.__name__
-    if not resource_isdir(module_name, "migrations"):
-        return
-    for filename in resource_listdir(module_name, "migrations"):
-        if filename.endswith(".py") and not filename.startswith("__"):
-            yield Migration(plugin, filename, module_name)
 
 
 def _module_name(plugin):

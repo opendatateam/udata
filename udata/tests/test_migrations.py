@@ -5,7 +5,7 @@ from textwrap import dedent
 import pytest
 from mongoengine.connection import get_db
 
-from udata import migrations
+from udata.db import migrations
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates
 
@@ -73,10 +73,10 @@ def mock(app, tmpdir, mocker):
     Mock migrations files
     """
     m = MigrationsMock(tmpdir)
-    mocker.patch("udata.migrations.resource_listdir", side_effect=m.mock_resource_listdir)
-    mocker.patch("udata.migrations.resource_isdir", side_effect=m.mock_resource_isdir)
-    mocker.patch("udata.migrations.resource_string", side_effect=m.mock_resource_string)
-    mocker.patch("udata.migrations.resource_filename", side_effect=m.mock_resource_filename)
+    mocker.patch("udata.db.migrations.resource_listdir", side_effect=m.mock_resource_listdir)
+    mocker.patch("udata.db.migrations.resource_isdir", side_effect=m.mock_resource_isdir)
+    mocker.patch("udata.db.migrations.resource_string", side_effect=m.mock_resource_string)
+    mocker.patch("udata.db.migrations.resource_filename", side_effect=m.mock_resource_filename)
     mocker.patch("udata.entrypoints.get_enabled", side_effect=m.mock_get_enabled_entrypoints)
     mocker.patch("udata.entrypoints.get_plugin_module", side_effect=m.mock_get_plugin_module)
     yield m
