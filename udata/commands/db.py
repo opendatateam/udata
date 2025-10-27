@@ -93,12 +93,11 @@ def unrecord(filename):
 
     FILENAME is the migration filename (e.g., 2024-01-01-my-migration.py)
     """
-    migration = migrations.get(filename)
-    removed = migration.unrecord()
+    removed = migrations.unrecord(filename)
     if removed:
-        echo("Removed migration {}".format(migration.label))
+        echo("Removed migration {}".format(filename))
     else:
-        echo(red("Migration not found {}".format(migration.label)))
+        echo(red("Migration not found {}".format(filename)))
 
 
 @grp.command()

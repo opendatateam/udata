@@ -132,7 +132,16 @@ class Migration:
     def __init__(self, filename):
         self.filename = filename
         self._record = None
-        self._module = None
+        # Load module immediately - migration must exist on disk
+        self._module = load_migration(self.filename)
+        if self._module is None:
+            raise FileNotFoundError(f"Migration {self.filename} file not found")
+        # Extract and store the migrate function
+        if not hasattr(self._module, "migrate"):
+            raise MigrationError(
+                f"Migration {self.filename} is missing required migrate() function"
+            )
+        self.migrate = self._module.migrate
 
     @property
     def collection(self):
@@ -156,8 +165,6 @@ class Migration:
 
     @property
     def module(self):
-        if self._module is None:
-            self._module = load_migration(self.filename)
         return self._module
 
     def __eq__(self, value):
@@ -179,10 +186,6 @@ class Migration:
             logger.removeHandler(h)
         logger.addHandler(handler)
 
-        if not hasattr(self.module, "migrate"):
-            error = SyntaxError("A migration should at least have a migrate(db) function")
-            raise MigrationError("Error while executing migration", exc=error)
-
         out = [["info", "Recorded only"]] if recordonly else []
         state = {}
 
@@ -190,7 +193,7 @@ class Migration:
             db = get_db()
             db._state = state
             try:
-                self.module.migrate(db)
+                self.migrate(db)
                 out = _extract_output(q)
             except Exception as e:
                 out = _extract_output(q)
@@ -204,12 +207,6 @@ class Migration:
             self.add_record("migrate", out, state, True)
 
         return out
-
-    def unrecord(self):
-        """Delete a migration record"""
-        if not self.record.exists():
-            return False
-        return bool(self.collection.delete_one(self.db_query).deleted_count)
 
     def add_record(self, type, output, state, success, traceback=None):
         script = inspect.getsource(self.module)
@@ -240,6 +237,20 @@ def get(filename):
     return Migration(filename)
 
 
+def unrecord(filename):
+    """
+    Delete a migration record from database
+
+    :returns: True if record was deleted, False if it didn't exist
+    """
+    specs = {"filename": filename}
+    db = get_db()
+    record = db.migrations.find_one(specs)
+    if not record:
+        return False
+    return bool(db.migrations.delete_one(specs).deleted_count)
+
+
 def list_available():
     """
     List available migrations from udata/migrations
@@ -259,7 +270,7 @@ def load_migration(filename):
     """
     Load a migration from its python file
 
-    :returns: the loaded module
+    :returns: the loaded module or None if file doesn't exist
     """
     from importlib.resources import files
 
@@ -269,8 +280,8 @@ def load_migration(filename):
     try:
         script = files("udata").joinpath("migrations", filename).read_bytes()
     except Exception:
-        msg = f"Unable to load file {filename}"
-        raise MigrationError(msg)
+        # Return None if file doesn't exist instead of raising
+        return None
 
     spec = importlib.util.spec_from_loader(name, loader=None)
     module = importlib.util.module_from_spec(spec)
