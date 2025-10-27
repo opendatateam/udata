@@ -780,7 +780,7 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
 
     def compute_last_update(self):
         """
-        If harvested, use the harvested dataset modified_at date.
+        If dataset is harvested and its metadata contains a modified_at date, use it.
         Else, use the more recent date we would have at the resource level (harvest, modified).
         Default to dataset last_modified if no resource.
         Resources should be fetched when calling this method.
