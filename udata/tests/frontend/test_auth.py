@@ -2,11 +2,10 @@ from flask import current_app, url_for
 from flask_security.utils import hash_data
 
 from udata.core.user.factories import AdminFactory
+from udata.tests.api import APITestCase
 
-from . import FrontTestCase
 
-
-class AuthTest(FrontTestCase):
+class AuthTest(APITestCase):
     def test_change_mail(self):
         user = self.login(AdminFactory())
 

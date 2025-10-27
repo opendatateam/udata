@@ -1,11 +1,8 @@
-import pytest
 from flask import url_for
 
-from udata.tests.api import APITestCase
+from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import assert200
 from udata.utils import faker
-
-pytestmark = pytest.mark.usefixtures("app")
 
 
 def assert_stream_equal(response1, response2):
@@ -15,7 +12,7 @@ def assert_stream_equal(response1, response2):
     assert stream1 == stream2
 
 
-class InternalBackendTest(APITestCase):
+class InternalBackendTest(PytestOnlyAPITestCase):
     def test_base_rendering(self):
         response = self.get(url_for("api.avatar", identifier=faker.word(), size=32))
 

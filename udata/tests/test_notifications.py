@@ -6,8 +6,7 @@ from flask import url_for
 from udata.core.user.factories import UserFactory
 from udata.features.notifications import actions
 
-from . import DBTestMixin, TestCase
-from .api import APITestCase
+from .api import APITestCase, DBTestCase
 
 
 class NotificationsMixin(object):
@@ -15,7 +14,7 @@ class NotificationsMixin(object):
         actions._providers = {}
 
 
-class NotificationsActionsTest(NotificationsMixin, TestCase, DBTestMixin):
+class NotificationsActionsTest(NotificationsMixin, DBTestCase):
     def test_registered_provider_is_listed(self):
         def fake_provider(user):
             return []

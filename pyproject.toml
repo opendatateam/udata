@@ -116,38 +116,30 @@ udata = "udata.tests.plugin"
 
 [project.optional-dependencies]
 dev = [
-    "flask-shell-ipython==0.5.3",
-    "invoke==2.2.0",
-    "pip-tools==7.4.1",
-    "pre-commit==4.2.0",
-    "ruff==0.11.0",
-    "twine==6.1.0",
-    "wheel==0.45.1",
+    "flask-shell-ipython >= 0.5.3, < 1.0",
+    "invoke >= 2.2.0, < 3.0",
+    "pip-tools >= 7.4.1, < 8.0",
+    "pre-commit >= 4.2.0, < 5.0",
+    "ruff >= 0.11.0, < 1.0",
 ]
 test = [
-    "faker==37.0.2",
-    "feedparser==6.0.11",
-    "httpretty==1.1.4",
-    "mock==5.2.0",
-    "pytest==8.3.5",
-    "pytest-env==1.1.5",
-    "pytest-flask==1.3.0",
-    "pytest-mock==3.14.0",
-    "pytest-sugar==1.0.0",
-    "requests-mock==1.12.1",
+    "faker >= 37.0.2, < 38.0",
+    "feedparser >= 6.0.11, < 7.0",
+    "httpretty >= 1.1.4, < 2.0",
+    "mock >= 5.2.0, < 6.0",
+    "pytest >= 8.3.5, < 9.0",
+    "pytest-env >= 1.1.5, < 2.0",
+    "pytest-flask >= 1.3.0, < 2.0",
+    "pytest-mock >= 3.14.0, < 4.0",
+    "pytest-sugar >= 1.0.0, < 2.0",
+    "requests-mock >= 1.12.1, < 2.0",
 ]
-doc = [
-    "ghp-import==2.1.0",
-    "markdown==3.7",
-    "mergedeep==1.3.4",
-    "mkdocs==1.6.1",
-    "mkdocs-get-deps==0.2.0",
-    "pathspec==0.12.1",
-    "pyyaml==6.0.2",
-    "pyyaml-env-tag==0.1",
-    "watchdog==6.0.0",
+doc = ["mkdocs >= 1.6.1, < 2.0"]
+report = [
+    "coverage[toml] >= 7.7.0, < 8.0",
+    "flake8 >= 7.1.2, < 8.0",
+    "pytest-cov >= 7.0.0, < 8.0",
 ]
-report = ["coverage[toml]==7.7.0", "flake8==7.1.2", "pytest-cov==6.0.0"]
 
 [tool.setuptools_scm]
 version_scheme = "guess-next-dev"
@@ -167,9 +159,9 @@ typeCheckingMode = "standard"
 norecursedirs = [
     ".git",
     "build",
-    ".tox",
     "specs",
     ".cache",
+    "data",
     "udata/templates",
     "udata/translations",
 ]
@@ -195,40 +187,6 @@ packages = ["udata"]
 
 [tool.setuptools.package-data]
 udata = ["templates/*", "translations/*"]
-
-[tool.tox]
-requires = ["tox>=4.19"]
-env_list = ["py311", "py312", "py313", "doc"]
-
-[tool.tox.env_run_base]
-description = "Run tests under {base_python}"
-deps = [
-    "feedparser==6.0.11",
-    "httpretty==1.1.4",
-    "mock==5.2.0",
-    "pytest==8.3.5",
-    "pytest-env==1.1.5",
-    "pytest-flask==1.3.0",
-    "pytest-mock==3.14.0",
-    "pytest-sugar==1.0.0",
-    "requests-mock==1.12.1",
-]
-commands = [["pytest", "udata"]]
-[tool.tox.env.doc]
-description = "Build documentation with sphinx"
-deps = ["sphinx"]
-commands = [
-    [
-        "sphinx-build",
-        "-b",
-        "html",
-        "-d",
-        "{envtmpdir}/doctrees",
-        ".",
-        "{envtmpdir}/html",
-    ],
-]
-change_dir = "doc"
 
 [tool.wheel]
 universal = true

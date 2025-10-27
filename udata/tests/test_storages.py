@@ -12,12 +12,14 @@ from udata.core import storages
 from udata.core.storages import utils
 from udata.core.storages.api import META, chunk_filename
 from udata.core.storages.tasks import purge_chunks
+from udata.tests import PytestOnlyTestCase
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.utils import faker
 
 from .helpers import assert200, assert400
 
 
-class StorageUtilsTest:
+class StorageUtilsTest(PytestOnlyTestCase):
     """
     Perform all tests on a file of size 2 * CHUNCK_SIZE = 2 * (2 ** 16).
     Expected values are precomputed with shell `md5sum`, `sha1sum`...
@@ -88,8 +90,7 @@ class StorageUtilsTest:
         assert utils.normalize("éàü@€.txt") == "eau-eur.txt"
 
 
-@pytest.mark.usefixtures("app")
-class ConfigurableAllowedExtensionsTest:
+class ConfigurableAllowedExtensionsTest(PytestOnlyTestCase):
     def test_has_default(self):
         assert "csv" in storages.CONFIGURABLE_AUTHORIZED_TYPES
         assert "xml" in storages.CONFIGURABLE_AUTHORIZED_TYPES
@@ -107,7 +108,7 @@ class ConfigurableAllowedExtensionsTest:
 
 
 @pytest.mark.usefixtures("instance_path")
-class StorageUploadViewTest:
+class StorageUploadViewTest(PytestOnlyDBTestCase):
     def test_standard_upload(self, client):
         client.login()
         response = client.post(
@@ -221,7 +222,7 @@ class StorageUploadViewTest:
 
 
 @pytest.mark.usefixtures("instance_path")
-class ChunksRetentionTest:
+class ChunksRetentionTest(PytestOnlyTestCase):
     def create_chunks(self, uuid, nb=3, last=None):
         for i in range(nb):
             storages.chunks.write(chunk_filename(uuid, i), faker.word())

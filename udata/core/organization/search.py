@@ -29,7 +29,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
     }
 
     @classmethod
-    def is_indexable(cls, org):
+    def is_indexable(cls, org: Organization):
         return org.deleted is None
 
     @classmethod

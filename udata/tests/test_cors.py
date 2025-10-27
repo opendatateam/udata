@@ -8,8 +8,6 @@ from udata.tests.helpers import assert_status
 
 
 class CorsTest(APITestCase):
-    modules = []
-
     def test_cors_on_allowed_routes(self):
         cors_headers = {
             "Origin": "http://localhost",

@@ -3,6 +3,7 @@ from bleach._vendor import html5lib
 from flask import render_template_string
 
 from udata.frontend.markdown import EXCERPT_TOKEN, md, parse_html
+from udata.tests.api import PytestOnlyAPITestCase
 from udata.utils import faker
 
 parser = html5lib.HTMLParser(tree=html5lib.getTreeBuilder("dom"))
@@ -38,8 +39,7 @@ def md2dom(app):
     return helper
 
 
-@pytest.mark.frontend
-class MarkdownTest:
+class MarkdownTest(PytestOnlyAPITestCase):
     def test_excerpt_is_not_removed(self, app):
         with app.test_request_context("/"):
             assert_md_equal(md(EXCERPT_TOKEN), EXCERPT_TOKEN)
@@ -279,8 +279,7 @@ class MarkdownTest:
         assert_md(text, expected)
 
 
-@pytest.mark.frontend
-class MdStripTest:
+class MdStripTest(PytestOnlyAPITestCase):
     def test_mdstrip_filter(self, app):
         """mdstrip should truncate the text before rendering"""
         text = "1 2 3 4 5 6 7 8 9 0"
