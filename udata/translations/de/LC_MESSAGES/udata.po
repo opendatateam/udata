@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2025-10-08 15:31+0200\n"
-"PO-Revision-Date: 2025-10-08 14:00\n"
+"POT-Creation-Date: 2025-10-27 16:50+0100\n"
+"PO-Revision-Date: 2025-10-27 16:39\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: de\n"
 "Language-Team: German\n"
@@ -42,7 +42,7 @@ msgstr "Das Passwort wurde geändert"
 msgid "Password reset instructions"
 msgstr "Anleitung zum Zurücksetzen des Passworts"
 
-#: udata/settings.py:547
+#: udata/settings.py:544
 msgid "This dataset has been archived"
 msgstr "Dieser Datensatz wurde archiviert"
 
@@ -51,7 +51,7 @@ msgstr "Dieser Datensatz wurde archiviert"
 msgid "Invalid URL \"{url}\": {reason}"
 msgstr ""
 
-#: udata/tests/api/test_datasets_api.py:1155 udata/tests/test_model.py:403
+#: udata/tests/api/test_datasets_api.py:1169 udata/tests/test_model.py:402
 #: udata/uris.py:56
 #, python-brace-format
 msgid "Invalid URL \"{url}\""
@@ -85,7 +85,7 @@ msgstr ""
 msgid "is a local URL"
 msgstr ""
 
-#: udata/tests/test_model.py:421 udata/uris.py:159
+#: udata/tests/test_model.py:420 udata/uris.py:159
 msgid "is a private URL"
 msgstr ""
 
@@ -214,7 +214,7 @@ msgid "Your udata instance is ready!"
 msgstr "Deine udata Instanz ist bereit!"
 
 #: udata/core/owned.py:64 udata/forms/fields.py:759
-#: udata/tests/api/test_dataservices_api.py:550
+#: udata/tests/api/test_dataservices_api.py:547
 msgid "You can only set yourself as owner"
 msgstr ""
 
@@ -223,7 +223,7 @@ msgid "Unknown organization"
 msgstr ""
 
 #: udata/core/owned.py:77 udata/forms/fields.py:791
-#: udata/tests/api/test_dataservices_api.py:563
+#: udata/tests/api/test_dataservices_api.py:560
 msgid "Permission denied for this organization"
 msgstr "Berechtigung für diese Organisation verweigert"
 
@@ -242,7 +242,6 @@ msgstr ""
 #: udata/core/contact_point/forms.py:12 udata/core/jobs/forms.py:27
 #: udata/core/organization/forms.py:46 udata/core/post/forms.py:15
 #: udata/core/topic/forms.py:37 udata/harvest/forms.py:78
-#: udata/templates/api/admin.html:10
 msgid "Name"
 msgstr "Name"
 
@@ -259,7 +258,7 @@ msgid "The organization web contact form"
 msgstr ""
 
 #: udata/core/contact_point/forms.py:20 udata/core/dataset/forms.py:115
-#: udata/core/dataset/forms.py:189 udata/core/discussions/forms.py:13
+#: udata/core/dataset/forms.py:191 udata/core/discussions/forms.py:13
 #: udata/core/discussions/forms.py:29 udata/core/topic/forms.py:35
 #: udata/harvest/forms.py:87
 msgid "Publish as"
@@ -281,7 +280,39 @@ msgstr ""
 msgid "Publisher"
 msgstr ""
 
-#: udata/core/contact_point/models.py:26 udata/tests/api/test_contact_points.py:142
+#: udata/core/contact_point/models.py:12
+msgid "Rights Holder"
+msgstr ""
+
+#: udata/core/contact_point/models.py:13
+msgid "Custodian"
+msgstr ""
+
+#: udata/core/contact_point/models.py:14
+msgid "Distributor"
+msgstr ""
+
+#: udata/core/contact_point/models.py:15
+msgid "Originator"
+msgstr ""
+
+#: udata/core/contact_point/models.py:16
+msgid "Principal Investigator"
+msgstr ""
+
+#: udata/core/contact_point/models.py:17
+msgid "Processor"
+msgstr ""
+
+#: udata/core/contact_point/models.py:18
+msgid "Resource Provider"
+msgstr ""
+
+#: udata/core/contact_point/models.py:19
+msgid "User"
+msgstr ""
+
+#: udata/core/contact_point/models.py:34 udata/tests/api/test_contact_points.py:136
 msgid "At least an email or a contact form is required for a contact point"
 msgstr ""
 
@@ -309,12 +340,12 @@ msgstr ""
 msgid "dataservice"
 msgstr ""
 
-#: udata/core/dataservices/models.py:270 udata/core/dataset/models.py:605
+#: udata/core/dataservices/models.py:270 udata/core/dataset/models.py:575
 #: udata/mongo/datetime_fields.py:60
 msgid "Creation date"
 msgstr "Erstellungsdatum"
 
-#: udata/core/dataservices/models.py:276 udata/core/dataset/models.py:610
+#: udata/core/dataservices/models.py:276 udata/core/dataset/models.py:580
 #: udata/mongo/datetime_fields.py:66
 msgid "Last modification date"
 msgstr "Letzte Änderung"
@@ -343,7 +374,7 @@ msgstr ""
 msgid "removed a resource from a dataset"
 msgstr ""
 
-#: udata/core/dataset/api.py:328
+#: udata/core/dataset/api.py:332
 msgid "Latest datasets"
 msgstr ""
 
@@ -552,7 +583,7 @@ msgstr ""
 msgid "Version of the schema"
 msgstr ""
 
-#: udata/core/dataset/forms.py:64 udata/core/dataset/forms.py:146
+#: udata/core/dataset/forms.py:64 udata/core/dataset/forms.py:148
 #: udata/core/discussions/forms.py:14 udata/core/discussions/forms.py:25
 #: udata/core/site/forms.py:12 udata/core/topic/forms.py:13
 #: udata/templates/mail/discussion_closed.html:26
@@ -561,7 +592,7 @@ msgstr ""
 msgid "Title"
 msgstr "Titel"
 
-#: udata/core/dataset/forms.py:67 udata/core/dataset/forms.py:150
+#: udata/core/dataset/forms.py:67 udata/core/dataset/forms.py:152
 #: udata/core/jobs/forms.py:28 udata/core/organization/forms.py:50
 #: udata/core/topic/forms.py:14 udata/core/topic/forms.py:38
 #: udata/harvest/forms.py:80
@@ -612,146 +643,142 @@ msgstr "Die Dateigröße in Bytes"
 msgid "Related dataset"
 msgstr "Ähnlicher Datensatz"
 
-#: udata/core/dataset/forms.py:138 udata/tests/api/test_datasets_api.py:1067
+#: udata/core/dataset/forms.py:140 udata/tests/api/test_datasets_api.py:1081
 msgid "Wrong contact point id or contact point ownership mismatch"
 msgstr ""
 
-#: udata/core/dataset/forms.py:148 udata/core/organization/forms.py:48
+#: udata/core/dataset/forms.py:150 udata/core/organization/forms.py:48
 msgid "Acronym"
 msgstr "Abkürzung"
 
-#: udata/core/dataset/forms.py:148
+#: udata/core/dataset/forms.py:150
 msgid "An optional acronym"
 msgstr "Eine optionale Abkürzung"
 
-#: udata/core/dataset/forms.py:152
+#: udata/core/dataset/forms.py:154
 msgid "The details about the dataset (collection process, specifics...)."
 msgstr ""
 
-#: udata/core/dataset/forms.py:155
+#: udata/core/dataset/forms.py:157
 msgid "Short description"
 msgstr ""
 
-#: udata/core/dataset/forms.py:157
+#: udata/core/dataset/forms.py:159
 msgid "A short description of the dataset."
 msgstr ""
 
-#: udata/core/dataset/forms.py:159
+#: udata/core/dataset/forms.py:161
 msgid "License"
 msgstr "Lizenz"
 
-#: udata/core/dataset/forms.py:161
+#: udata/core/dataset/forms.py:163
 msgid "Update frequency"
 msgstr "Aktualisierungshäufigkeit"
 
-#: udata/core/dataset/forms.py:171
+#: udata/core/dataset/forms.py:173
 msgid "The frequency at which data are updated."
 msgstr "Die Häufigkeit, mit der Daten aktualisiert werden."
 
-#: udata/core/dataset/forms.py:173
+#: udata/core/dataset/forms.py:175
 msgid "Expected frequency date"
 msgstr "Erwartete Änderungshäufigkeit"
 
-#: udata/core/dataset/forms.py:177
+#: udata/core/dataset/forms.py:179
 msgid "Temporal coverage"
 msgstr "Zeitliche Abdeckung"
 
-#: udata/core/dataset/forms.py:177
+#: udata/core/dataset/forms.py:179
 msgid "The period covered by the data"
 msgstr "Der Zeitraum, der von den Daten abgedeckt wird"
 
-#: udata/core/dataset/forms.py:180 udata/core/spatial/forms.py:85
+#: udata/core/dataset/forms.py:182 udata/core/spatial/forms.py:85
 #: udata/core/topic/forms.py:86
 msgid "Spatial coverage"
 msgstr "Räumliche Abdeckung"
 
-#: udata/core/dataset/forms.py:180 udata/core/topic/forms.py:86
+#: udata/core/dataset/forms.py:182 udata/core/topic/forms.py:86
 msgid "The geographical area covered by the data."
 msgstr "Die geografische Bereich, der von den Daten abgedeckt wird."
 
-#: udata/core/dataset/forms.py:182 udata/core/post/forms.py:26
+#: udata/core/dataset/forms.py:184 udata/core/post/forms.py:26
 #: udata/core/site/forms.py:13 udata/core/topic/forms.py:15
 #: udata/core/topic/forms.py:89
 msgid "Tags"
 msgstr ""
 
-#: udata/core/dataset/forms.py:182
+#: udata/core/dataset/forms.py:184
 msgid "Some taxonomy keywords"
 msgstr ""
 
-#: udata/core/dataset/forms.py:184 udata/core/topic/forms.py:90
+#: udata/core/dataset/forms.py:186 udata/core/topic/forms.py:90
 msgid "Private"
 msgstr "Privat"
 
-#: udata/core/dataset/forms.py:185
+#: udata/core/dataset/forms.py:187
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr ""
 
-#: udata/core/dataset/models.py:67
+#: udata/core/dataset/models.py:66
 msgid "Pivotal data"
 msgstr ""
 
-#: udata/core/dataset/models.py:68
+#: udata/core/dataset/models.py:67
 msgid "Reference data public service"
 msgstr ""
 
-#: udata/core/dataset/models.py:69
+#: udata/core/dataset/models.py:68
 msgid "Inspire"
 msgstr ""
 
-#: udata/core/dataset/models.py:70
+#: udata/core/dataset/models.py:69
 msgid "High value datasets"
 msgstr ""
 
-#: udata/core/dataset/models.py:71
+#: udata/core/dataset/models.py:70
 msgid "Certified statistic series"
 msgstr ""
 
-#: udata/core/dataset/models.py:72
+#: udata/core/dataset/models.py:71
 msgid "Statistical series of general interest"
 msgstr ""
 
-#: udata/core/dataset/models.py:152
+#: udata/core/dataset/models.py:151
 msgid "A schema must contains a name or an URL when a version is provided."
 msgstr ""
 
-#: udata/core/dataset/models.py:184 udata/tests/api/test_datasets_api.py:1163
-#: udata/tests/api/test_datasets_api.py:1174
+#: udata/core/dataset/models.py:183 udata/tests/api/test_datasets_api.py:1177
+#: udata/tests/api/test_datasets_api.py:1188
 #, python-brace-format
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:203 udata/tests/api/test_datasets_api.py:1186
+#: udata/core/dataset/models.py:202 udata/tests/api/test_datasets_api.py:1200
 #, python-brace-format
 msgid "Version \"{version}\" is not an allowed value for the schema \"{name}\". Allowed versions: {values}"
 msgstr ""
 
-#: udata/core/dataset/models.py:481 udata/core/dataset/rdf.py:595
-#: udata/tests/dataset/test_dataset_rdf.py:722
-#: udata/tests/dataset/test_dataset_rdf.py:735
+#: udata/core/dataset/models.py:451 udata/core/dataset/rdf.py:595
+#: udata/tests/dataset/test_dataset_rdf.py:908
+#: udata/tests/dataset/test_dataset_rdf.py:921
 msgid "Nameless resource"
 msgstr "Namenlose Ressource"
 
-#: udata/core/dataset/models.py:584
+#: udata/core/dataset/models.py:554
 msgid "Future date of update"
 msgstr "Zukünftiges Update-Datum"
 
-#: udata/core/dataset/models.py:616
+#: udata/core/dataset/models.py:586
 msgid "Last update of the dataset resources"
 msgstr ""
 
-#: udata/core/dataset/models.py:671
+#: udata/core/dataset/models.py:641
 msgid "dataset"
 msgstr "Datensatz"
 
-#: udata/core/dataset/rdf.py:593 udata/tests/dataset/test_dataset_rdf.py:692
-#: udata/tests/dataset/test_dataset_rdf.py:709
+#: udata/core/dataset/rdf.py:593 udata/tests/dataset/test_dataset_rdf.py:878
+#: udata/tests/dataset/test_dataset_rdf.py:895
 #, python-brace-format
 msgid "{format} resource"
-msgstr ""
-
-#: udata/core/dataset/tasks.py:104
-msgid "You need to update some frequency-based datasets"
 msgstr ""
 
 #: udata/core/discussions/forms.py:16 udata/core/discussions/forms.py:31
@@ -828,17 +855,17 @@ msgid "Refused"
 msgstr "Abgelehnt"
 
 #: udata/core/organization/forms.py:25
-#: udata/tests/api/test_organizations_api.py:164
+#: udata/tests/api/test_organizations_api.py:159
 msgid "A siret number is made of 14 digits"
 msgstr "Eine SIRET-Nummer besteht aus 14 Ziffern"
 
 #: udata/core/organization/forms.py:36
-#: udata/tests/api/test_organizations_api.py:176
+#: udata/tests/api/test_organizations_api.py:171
 msgid "A siret number is only made of digits"
 msgstr "Eine SIRET-Nummer besteht nur aus Ziffern"
 
 #: udata/core/organization/forms.py:39
-#: udata/tests/api/test_organizations_api.py:170
+#: udata/tests/api/test_organizations_api.py:165
 msgid "Invalid Siret number"
 msgstr "Ungültige SIRET-Nummer"
 
@@ -1048,7 +1075,7 @@ msgstr "Visualisierung"
 msgid "Connected device"
 msgstr "Verbundenes Gerät"
 
-#: udata/core/reuse/constants.py:15 udata/tests/reuse/test_reuse_model.py:110
+#: udata/core/reuse/constants.py:15 udata/tests/reuse/test_reuse_model.py:109
 msgid "Health"
 msgstr "Gesundheit"
 
@@ -1241,7 +1268,7 @@ msgstr ""
 msgid "Element"
 msgstr ""
 
-#: udata/core/topic/forms.py:26
+#: udata/core/topic/forms.py:26 udata/tests/apiv2/test_topics.py:720
 msgid "A topic element must have a title or an element."
 msgstr ""
 
@@ -1293,7 +1320,7 @@ msgstr "Über"
 msgid "Roles"
 msgstr "Rollen"
 
-#: udata/core/user/models.py:298 udata/tests/api/test_me_api.py:297
+#: udata/core/user/models.py:298 udata/tests/api/test_me_api.py:295
 msgid "Account deletion"
 msgstr ""
 
@@ -1323,6 +1350,10 @@ msgstr ""
 msgid "Deletion of your inactive {site} account"
 msgstr ""
 
+#: udata/flask_mongoengine/fields.py:85
+msgid "Not a valid choice"
+msgstr ""
+
 #: udata/forms/fields.py:127
 msgid "Please input a date/time value"
 msgstr ""
@@ -1350,8 +1381,8 @@ msgstr ""
 msgid "{0} does not exists"
 msgstr "{0} existiert nicht"
 
-#: udata/forms/fields.py:494 udata/tests/forms/test_model_field.py:333
-#: udata/tests/forms/test_model_field.py:349
+#: udata/forms/fields.py:494 udata/tests/forms/test_model_field.py:331
+#: udata/tests/forms/test_model_field.py:347
 msgid "Missing \"id\" field"
 msgstr ""
 
@@ -1360,8 +1391,8 @@ msgstr ""
 msgid "Expect a \"{0}\" class but \"{1}\" was found"
 msgstr ""
 
-#: udata/forms/fields.py:507 udata/tests/forms/test_model_field.py:41
-#: udata/tests/forms/test_model_field.py:56
+#: udata/forms/fields.py:507 udata/tests/forms/test_model_field.py:39
+#: udata/tests/forms/test_model_field.py:54
 msgid "Expect both class and identifier"
 msgstr ""
 
@@ -1380,7 +1411,7 @@ msgid "Unable to parse date range"
 msgstr ""
 
 #: udata/forms/fields.py:752 udata/forms/fields.py:784
-#: udata/tests/forms/test_publish_as_field.py:214
+#: udata/tests/forms/test_publish_as_field.py:212
 msgid "Cannot change owner after creation. Please use transfer feature."
 msgstr ""
 
@@ -1469,96 +1500,25 @@ msgstr ""
 msgid "A CKAN tag name"
 msgstr ""
 
-#: udata/templates/404.html:6
+#: udata/templates/404.html:6 udata/tests/frontend/test_error_handlers.py:22
+#: udata/tests/frontend/test_error_handlers.py:48
 msgid "Page not found"
 msgstr ""
 
-#: udata/templates/404.html:39
+#: udata/templates/404.html:39 udata/tests/frontend/test_error_handlers.py:22
+#: udata/tests/frontend/test_error_handlers.py:48
 msgid "The page you are looking for does not exist."
 msgstr ""
 
-#: udata/templates/404.html:40
+#: udata/templates/404.html:40 udata/tests/frontend/test_error_handlers.py:26
 msgid "Back to home"
 msgstr ""
-
-#: udata/templates/admin.html:7
-msgid "Admin"
-msgstr ""
-
-#: udata/templates/base.html:7
-msgid "You must be connected to do this action."
-msgstr ""
-
-#: udata/templates/api/admin.html:11
-msgid "Maintainer"
-msgstr ""
-
-#: udata/templates/api/admin.html:31
-msgid "Edit"
-msgstr "Bearbeiten"
-
-#: udata/templates/api/admin.html:34
-msgid "Delete"
-msgstr "Löschen"
-
-#: udata/templates/api/admin.html:42
-msgid "No OAuth clients"
-msgstr "Keine OAuth-Clients"
-
-#: udata/templates/api/admin.html:53
-msgid "Add a client"
-msgstr ""
-
-#: udata/templates/api/oauth_authorize.html:23
-#, python-format
-msgid "%(app)s want to access your %(site)s account."
-msgstr "%(app)s möchte auf Ihr %(site)s Konto zugreifen."
-
-#: udata/templates/api/oauth_authorize.html:35
-msgid "Details"
-msgstr "Details"
-
-#: udata/templates/api/oauth_authorize.html:45
-msgid "Access your profile"
-msgstr ""
-
-#: udata/templates/api/oauth_authorize.html:46
-msgid "Read your profile, the orgnization you belong to, your publications"
-msgstr ""
-
-#: udata/templates/api/oauth_authorize.html:54
-msgid "Publish data"
-msgstr "Daten veröffentlichen"
-
-#: udata/templates/api/oauth_authorize.html:55
-msgid "Publish datasets, reuses, follow or unfollow"
-msgstr ""
-
-#: udata/templates/api/oauth_authorize.html:65
-msgid "Accept"
-msgstr "Annehmen"
-
-#: udata/templates/api/oauth_authorize.html:67
-msgid "Refuse"
-msgstr "Ablehnen"
-
-#: udata/templates/api/oauth_error.html:15
-msgid "OAuth Authentication Error"
-msgstr "OAuth-Authentifizierungsfehler"
-
-#: udata/templates/api/oauth_error.html:20 udata/templates/macros/metadata.html:2
-msgid "Home"
-msgstr "Start"
 
 #: udata/templates/comments/dataset_archived.txt:1
 msgid "This dataset has been archived by our administration team.\n\n"
 "An archived dataset is considered out of date by a combination of factors.\n"
 "It does not appear in the search results and has a special layout warning the site's users.\n\n"
 "If you think this is a mistake, you can contact the site administrator."
-msgstr ""
-
-#: udata/templates/macros/metadata.html:3
-msgid "Share, improve and reuse public data"
 msgstr ""
 
 #: udata/templates/mail/account_deleted.html:4
@@ -1657,24 +1617,6 @@ msgstr ""
 #: udata/templates/mail/new_discussion_comment.html:39
 msgid "See the discussion"
 msgstr "Diskussion ansehen"
-
-#: udata/templates/mail/frequency_reminder.html:6
-msgid "Some of your datasets need to be updated according to the frequency you set:"
-msgstr ""
-
-#: udata/templates/mail/frequency_reminder.html:12
-#, python-format
-msgid "Dataset \"%(dataset_title)s\" last update is on %(published_date)s."
-msgstr ""
-
-#: udata/templates/mail/frequency_reminder.html:17
-#, python-format
-msgid "Given the set frequency (%(dataset_frequency)s) update was due %(due_update_days)s days ago."
-msgstr ""
-
-#: udata/templates/mail/frequency_reminder.html:25
-msgid "Update the dataset and associated resources"
-msgstr ""
 
 #: udata/templates/mail/inactive_account_deleted.html:4
 #, python-format
@@ -1881,9 +1823,13 @@ msgstr ""
 msgid "Here"
 msgstr ""
 
-#: udata/tests/forms/test_model_field.py:165
+#: udata/tests/forms/test_model_field.py:163
 msgid "Expect a \"Target\" class but \"Wrong\" was found"
 msgstr ""
+
+#: udata/tests/frontend/test_error_handlers.py:26
+msgid "Home"
+msgstr "Start"
 
 #: udata/tests/search/test_adapter.py:31
 msgid "Never reused"
