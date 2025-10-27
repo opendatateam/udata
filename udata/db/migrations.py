@@ -180,28 +180,26 @@ class Migration:
         logger.propagate = False
 
         out = [["info", "Recorded only"]] if recordonly else []
-        state = {}
 
         if not recordonly and not dryrun:
             db = get_db()
-            db._state = state
             try:
                 self.migrate(db)
                 out = _extract_output(q)
             except Exception as e:
                 out = _extract_output(q)
                 tb = traceback.format_exc()
-                self.add_record("migrate", out, db._state, False, traceback=tb)
+                self.add_record("migrate", out, False, traceback=tb)
                 raise MigrationError(
                     "Error while executing migration", output=out, exc=e, traceback=tb
                 )
 
         if not dryrun:
-            self.add_record("migrate", out, state, True)
+            self.add_record("migrate", out, True)
 
         return out
 
-    def add_record(self, type, output, state, success, traceback=None):
+    def add_record(self, type, output, success, traceback=None):
         script = inspect.getsource(self.module)
         return Record(
             self.collection.find_one_and_update(
@@ -213,7 +211,6 @@ class Migration:
                             "type": type,
                             "script": script,
                             "output": output,
-                            "state": state,
                             "success": success,
                             "traceback": traceback,
                         }
