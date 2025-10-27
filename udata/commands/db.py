@@ -31,7 +31,7 @@ def grp():
 def log_status(migration, status):
     """Properly display a migration status line"""
     name = os.path.splitext(migration.filename)[0]
-    log.info("%s [%s]", "{:.<70}".format(name + " "), status)
+    echo("{:.<70} [{}]".format(name + " ", status))
 
 
 def status_label(record):
@@ -96,9 +96,9 @@ def unrecord(filename):
     migration = migrations.get(filename)
     removed = migration.unrecord()
     if removed:
-        log.info("Removed migration %s", migration.label)
+        echo("Removed migration {}".format(migration.label))
     else:
-        log.error("Migration not found %s", migration.label)
+        echo(red("Migration not found {}".format(migration.label)))
 
 
 @grp.command()
