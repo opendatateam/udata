@@ -9,13 +9,13 @@ CONTACT_ROLES = {
     "contact": _("Contact"),
     "creator": _("Creator"),
     "publisher": _("Publisher"),
-    "rightsHolder": _("RightsHolder"),
+    "rightsHolder": _("Rights Holder"),
     "custodian": _("Custodian"),
     "distributor": _("Distributor"),
     "originator": _("Originator"),
-    "principalInvestigator": _("PrincipalInvestigator"),
+    "principalInvestigator": _("Principal Investigator"),
     "processor": _("Processor"),
-    "resourceProvider": _("ResourceProvider"),
+    "resourceProvider": _("Resource Provider"),
     "user": _("User"),
 }
 
