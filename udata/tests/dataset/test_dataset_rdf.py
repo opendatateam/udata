@@ -639,7 +639,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert len(dataset.contact_points) == 1
         assert dataset.contact_points[0].role == "contact"
-        assert dataset.contact_points[0].name == "bar"
+        assert dataset.contact_points[0].name == "foo"
         assert dataset.contact_points[0].email == "foo@example.com"
 
     def test_contact_point_organization_member_foaf(self):
@@ -669,8 +669,8 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert len(dataset.contact_points) == 1
         assert dataset.contact_points[0].role == "creator"
-        assert dataset.contact_points[0].name == "bar"
-        assert dataset.contact_points[0].email == "bar@example.com"
+        assert dataset.contact_points[0].name == "foo"
+        assert dataset.contact_points[0].email == "foo@example.com"
 
     def test_contact_point_organization_member_foaf_no_mail(self):
         g = Graph()
@@ -699,7 +699,7 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert len(dataset.contact_points) == 1
         assert dataset.contact_points[0].role == "creator"
-        assert dataset.contact_points[0].name == "bar"
+        assert dataset.contact_points[0].name == "foo"
         assert dataset.contact_points[0].email == "foo@example.com"
 
     def test_theme_and_tags(self):
