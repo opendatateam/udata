@@ -85,6 +85,7 @@ def get_queryset(model_cls):
     # no_cache to avoid eating up too much RAM
     return model_cls.objects.filter(**params).no_cache()
 
+
 def get_resource_for_csv_export_model(model, dataset):
     for resource in dataset.resources:
         if resource.extras.get("csv-export:model", "") == model:
@@ -123,7 +124,7 @@ def store_resource(csvfile, model, dataset):
     return get_or_create_resource(r_info, model, dataset)
 
 
-def export_csv_for_model(model, dataset, replace: bool=False):
+def export_csv_for_model(model, dataset, replace: bool = False):
     model_cls = getattr(udata_models, model.capitalize(), None)
     if not model_cls:
         log.error("Unknow model %s" % model)
@@ -193,9 +194,17 @@ def export_csv(self, model=None):
         resource = export_csv_for_model(model, dataset, replace=True)
 
         # If we are the first day of the month, archive today catalogs
-        if current_app.config["EXPORT_CSV_ARCHIVE_S3_BUCKET"] and resource and date.today().day == 1:
+        if (
+            current_app.config["EXPORT_CSV_ARCHIVE_S3_BUCKET"]
+            and resource
+            and date.today().day == 1
+        ):
             with storages.resources.open(resource.fs_filename, "rb") as f:
-                store_bytes(bucket=current_app.config["EXPORT_CSV_ARCHIVE_S3_BUCKET"], filename=f"{current_app.config['EXPORT_CSV_ARCHIVE_S3_FILENAME_PREFIX']}{resource.title}", bytes=f.read())
+                store_bytes(
+                    bucket=current_app.config["EXPORT_CSV_ARCHIVE_S3_BUCKET"],
+                    filename=f"{current_app.config['EXPORT_CSV_ARCHIVE_S3_FILENAME_PREFIX']}{resource.title}",
+                    bytes=f.read(),
+                )
 
 
 @job("bind-tabular-dataservice")
