@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2025-10-27 16:50+0100\n"
-"PO-Revision-Date: 2025-10-27 16:39\n"
+"PO-Revision-Date: 2025-10-27 18:43\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -282,35 +282,35 @@ msgstr "Éditeur"
 
 #: udata/core/contact_point/models.py:12
 msgid "Rights Holder"
-msgstr ""
+msgstr "Détenteur des droits"
 
 #: udata/core/contact_point/models.py:13
 msgid "Custodian"
-msgstr ""
+msgstr "Gestionnaire"
 
 #: udata/core/contact_point/models.py:14
 msgid "Distributor"
-msgstr ""
+msgstr "Distributeur"
 
 #: udata/core/contact_point/models.py:15
 msgid "Originator"
-msgstr ""
+msgstr "Producteur"
 
 #: udata/core/contact_point/models.py:16
 msgid "Principal Investigator"
-msgstr ""
+msgstr "Investigateur principal"
 
 #: udata/core/contact_point/models.py:17
 msgid "Processor"
-msgstr ""
+msgstr "Exécutant"
 
 #: udata/core/contact_point/models.py:18
 msgid "Resource Provider"
-msgstr ""
+msgstr "Fournisseur"
 
 #: udata/core/contact_point/models.py:19
 msgid "User"
-msgstr ""
+msgstr "Utilisateur"
 
 #: udata/core/contact_point/models.py:34 udata/tests/api/test_contact_points.py:136
 msgid "At least an email or a contact form is required for a contact point"
@@ -1352,7 +1352,7 @@ msgstr "Suppression de votre compte {site} inactif"
 
 #: udata/flask_mongoengine/fields.py:85
 msgid "Not a valid choice"
-msgstr ""
+msgstr "Choix invalide"
 
 #: udata/forms/fields.py:127
 msgid "Please input a date/time value"
