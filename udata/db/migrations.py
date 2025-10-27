@@ -34,18 +34,6 @@ class MigrationError(Exception):
         self.traceback = traceback
 
 
-class RollbackError(MigrationError):
-    """
-    Raised on rollback.
-    Hold the initial migration error and rollback exception (if any)
-    """
-
-    def __init__(self, msg, output=None, exc=None, migrate_exc=None):
-        super().__init__(msg)
-        self.msg = msg
-        self.output = output
-        self.exc = exc
-        self.migrate_exc = migrate_exc
 
 
 class MigrationFormatter(logging.Formatter):
@@ -83,8 +71,6 @@ class Record(dict):
         Will be `None` if the record doesn't exists.
         Possible values are:
           - success
-          - rollback
-          - rollback-error
           - error
           - recorded
         """
@@ -94,14 +80,12 @@ class Record(dict):
         if op["success"]:
             if op["type"] == "migrate":
                 return "success"
-            elif op["type"] == "rollback":
-                return "rollback"
             elif op["type"] == "record":
                 return "recorded"
             else:
                 return "unknown"
         else:
-            return "rollback-error" if op["type"] == "rollback" else "error"
+            return "error"
 
     @property
     def last_date(self):
@@ -217,22 +201,9 @@ class Migration:
                 out = _extract_output(q)
                 tb = traceback.format_exc()
                 self.add_record("migrate", out, db._state, False, traceback=tb)
-                fe = MigrationError(
+                raise MigrationError(
                     "Error while executing migration", output=out, exc=e, traceback=tb
                 )
-                if hasattr(self.module, "rollback"):
-                    try:
-                        self.module.rollback(db)
-                        out = _extract_output(q)
-                        self.add_record("rollback", out, db._state, True)
-                        msg = "Error while executing migration, rollback has been applied"
-                        fe = RollbackError(msg, output=out, migrate_exc=fe)
-                    except Exception as re:
-                        out = _extract_output(q)
-                        self.add_record("rollback", out, db._state, False)
-                        msg = "Error while executing migration rollback"
-                        fe = RollbackError(msg, output=out, exc=re, migrate_exc=fe)
-                raise fe
 
         if not dryrun:
             self.add_record("migrate", out, state, True)

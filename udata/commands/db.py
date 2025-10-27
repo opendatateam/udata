@@ -77,11 +77,6 @@ def migrate(record, dry_run=False):
             log_status(migration, status)
             try:
                 output = migration.execute(recordonly=record, dryrun=dry_run)
-            except migrations.RollbackError as re:
-                format_output(re.migrate_exc.output, False)
-                log_status(migration, red("Rollback"))
-                format_output(re.output, not re.exc)
-                success = False
             except migrations.MigrationError as me:
                 format_output(me.output, False, traceback=me.traceback)
                 success = False
