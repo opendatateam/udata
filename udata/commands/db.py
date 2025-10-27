@@ -31,8 +31,7 @@ def grp():
 def log_status(migration, status):
     """Properly display a migration status line"""
     name = os.path.splitext(migration.filename)[0]
-    display = ":".join((migration.plugin, name)) + " "
-    log.info("%s [%s]", "{:.<70}".format(display), status)
+    log.info("%s [%s]", "{:.<70}".format(name + " "), status)
 
 
 def status_label(record):
@@ -92,20 +91,14 @@ def migrate(record, dry_run=False):
 
 
 @grp.command()
-@click.argument("plugin_or_specs")
-@click.argument("filename", default=None, required=False, metavar="[FILENAME]")
-def unrecord(plugin_or_specs, filename):
+@click.argument("filename")
+def unrecord(filename):
     """
     Remove a database migration record.
 
-    \b
-    A record can be expressed with the following syntaxes:
-     - plugin filename
-     - plugin filename.js
-     - plugin:filename
-     - plugin:fliename.js
+    FILENAME is the migration filename (e.g., 2024-01-01-my-migration.py)
     """
-    migration = migrations.get(plugin_or_specs, filename)
+    migration = migrations.get(filename)
     removed = migration.unrecord()
     if removed:
         log.info("Removed migration %s", migration.label)
@@ -114,13 +107,14 @@ def unrecord(plugin_or_specs, filename):
 
 
 @grp.command()
-@click.argument("plugin_or_specs")
-@click.argument("filename", default=None, required=False, metavar="[FILENAME]")
-def info(plugin_or_specs, filename):
+@click.argument("filename")
+def info(filename):
     """
     Display detailed info about a migration
+
+    FILENAME is the migration filename (e.g., 2024-01-01-my-migration.py)
     """
-    migration = migrations.get(plugin_or_specs, filename)
+    migration = migrations.get(filename)
     log_status(migration, status_label(migration.record))
     try:
         echo(migration.module.__doc__)
