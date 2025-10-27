@@ -133,15 +133,16 @@ class Migration:
         self.filename = filename
         self._record = None
         # Load module immediately - migration must exist on disk
-        self._module = load_migration(self.filename)
-        if self._module is None:
+        module = load_migration(self.filename)
+        if module is None:
             raise FileNotFoundError(f"Migration {self.filename} file not found")
         # Extract and store the migrate function
-        if not hasattr(self._module, "migrate"):
+        if not hasattr(module, "migrate"):
             raise MigrationError(
                 f"Migration {self.filename} is missing required migrate() function"
             )
-        self.migrate = self._module.migrate
+        self.module = module
+        self.migrate = module.migrate
 
     @property
     def collection(self):
@@ -162,10 +163,6 @@ class Migration:
             data = get_db().migrations.find_one(specs)
             self._record = Record(data or specs)
         return self._record
-
-    @property
-    def module(self):
-        return self._module
 
     def __eq__(self, value):
         return isinstance(value, Migration) and getattr(value, "filename") == self.filename
