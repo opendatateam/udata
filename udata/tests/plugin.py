@@ -1,44 +1,33 @@
 import shlex
 from contextlib import contextmanager
-from urllib.parse import urlparse
 
 import pytest
 from flask import current_app, json, template_rendered, url_for
 from flask.testing import FlaskClient
 from flask_principal import Identity, identity_changed
 from lxml import etree
-from werkzeug.urls import url_encode
 
-from udata import settings
-from udata.app import create_app
 from udata.core.user.factories import UserFactory
-from udata.mongo import db
-from udata.mongo.document import get_all_models
 
 from .helpers import assert200, assert_command_ok
 
 
 class TestClient(FlaskClient):
-    def _build_url(self, url, kwargs):
-        if "qs" not in kwargs:
-            return url
-        qs = kwargs.pop("qs")
-        return "?".join([url, url_encode(qs)])
+    """
+    The goal of these `post`, `put` and `delete` functions is to
+    switch from `data` in kwargs to `data` in args and be able to
+    `client.post(url, data)` without doing `client.post(url, data=data)`
 
-    def get(self, url, **kwargs):
-        url = self._build_url(url, kwargs)
-        return super(TestClient, self).get(url, **kwargs)
+    Same as in :TestClientOverride
+    """
 
     def post(self, url, data=None, **kwargs):
-        url = self._build_url(url, kwargs)
         return super(TestClient, self).post(url, data=data, **kwargs)
 
     def put(self, url, data=None, **kwargs):
-        url = self._build_url(url, kwargs)
         return super(TestClient, self).put(url, data=data, **kwargs)
 
     def delete(self, url, data=None, **kwargs):
-        url = self._build_url(url, kwargs)
         return super(TestClient, self).delete(url, data=data, **kwargs)
 
     def login(self, user=None):
@@ -61,101 +50,11 @@ class TestClient(FlaskClient):
 
 
 @pytest.fixture
-def app(request):
-    test_settings = get_settings(request)
-    app = create_app(settings.Defaults, override=test_settings)
-    app.test_client_class = TestClient
-    return app
-
-
-@pytest.fixture(autouse=True)
-def _load_frontend(request, _configure_application):
-    """
-    Use `pytest.mark.frontend` to specify that frontend/api should be loaded
-    Pass an optionnal list of modules as parameter to restrict loaded modules.
-
-    Handle backward compatibility with Class.modules attribute too
-    """
-    if "app" not in request.fixturenames:
-        return
-
-    app = request.getfixturevalue("app")
-    marker = request.node.get_closest_marker("frontend")
-
-    if marker:
-        from udata import api, frontend
-
-        api.init_app(app)
-        frontend.init_app(app)
-
-
-@pytest.fixture
 def client(app):
     """
     Fixes https://github.com/pytest-dev/pytest-flask/issues/42
     """
     return app.test_client()
-
-
-def get_settings(request):
-    """
-    Extract settings from the current test request
-    """
-    marker = request.node.get_closest_marker("settings")
-    if marker:
-        return marker.args[0]
-    _settings = getattr(request.cls, "settings", settings.Testing)
-    # apply the options(plugins) marker from pytest_flask as soon as app is created
-    # https://github.com/pytest-dev/pytest-flask/blob/a62ea18cb0fe89e3f3911192ab9ea4f9b12f8a16/pytest_flask/plugin.py#L126
-    # this lets us have default settings for plugins applied while testing
-    plugins = getattr(_settings, "PLUGINS", [])
-    for options in request.node.iter_markers("options"):
-        option = options.kwargs.get("plugins", []) or options.kwargs.get("PLUGINS", [])
-        plugins += option
-    setattr(_settings, "PLUGINS", plugins)
-    return _settings
-
-
-def drop_db(app):
-    """Clear the database"""
-    parsed_url = urlparse(app.config["MONGODB_HOST"])
-
-    # drop the leading /
-    db_name = parsed_url.path[1:]
-    db.connection.drop_database(db_name)
-
-
-@pytest.fixture
-def clean_db(app):
-    drop_db(app)
-    for model in get_all_models():
-        # When dropping the database, MongoEngine will keep the collection cached inside
-        # `_collection` (in memory). This cache is used to call `ensure_indexes` only on the
-        # first call to `_get_collection()`, on subsequent calls the value inside `_collection`
-        # is returned without calling `ensure_indexes`.
-        # In tests, the first test will have a clean memory state, so MongoEngine will initialise
-        # the collection and create the indexes, then the following test, with a clean database (no indexes)
-        # will have the collection cached, so MongoEngine will never create the indexes (except if `auto_create_index_on_save`
-        # is set on the model, which may be the reason it is present on most of the big models, we may remove it?)
-        model._collection = None
-
-    yield
-
-
-@pytest.fixture(name="db")
-def raw_db(app, clean_db):
-    """Access to raw PyMongo DB client"""
-    from mongoengine.connection import get_db
-
-    yield get_db()
-    drop_db(app)
-
-
-@pytest.fixture
-def enable_resource_event(app):
-    """Enable resource event"""
-    app.config["PUBLISH_ON_RESOURCE_EVENTS"] = True
-    app.config["RESOURCES_ANALYSER_URI"] = "http://local.dev"
 
 
 class ApiClient(object):

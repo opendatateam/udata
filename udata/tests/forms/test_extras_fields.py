@@ -6,11 +6,10 @@ from werkzeug.datastructures import MultiDict
 
 from udata.forms import ModelForm, fields
 from udata.mongo import db
+from udata.tests import PytestOnlyTestCase
 
-pytestmark = [pytest.mark.usefixtures("app")]
 
-
-class ExtrasFieldTest:
+class ExtrasFieldTest(PytestOnlyTestCase):
     def factory(self):
         class Fake(db.Document):
             extras = db.ExtrasField()
