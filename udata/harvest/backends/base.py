@@ -194,7 +194,7 @@ class BaseBackend(object):
 
             if duplicates := self.find_duplicate_remote_ids():
                 msg = "Some records have duplicate remote ids:"
-                for id, urls in duplicates.items():
+                for id, urls in sorted(duplicates.items()):
                     msg += f"""\n- "{id}":"""
                     for url in urls:
                         msg += f"\n  - {url}"
