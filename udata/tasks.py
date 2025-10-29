@@ -5,8 +5,6 @@ from celery import Celery, Task
 from celery.utils.log import get_task_logger
 from celerybeatmongo.schedulers import MongoScheduler
 
-from udata import entrypoints
-
 log = logging.getLogger(__name__)
 
 
@@ -175,7 +173,5 @@ def init_app(app):
     import udata.core.storages.tasks  # noqa
     import udata.harvest.tasks  # noqa
     import udata.db.tasks  # noqa
-
-    entrypoints.get_enabled("udata.tasks", app)
 
     return celery
