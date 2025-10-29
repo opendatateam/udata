@@ -458,7 +458,6 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert len(job.items) == len(dataset_remote_ids) + len(dataservice_remote_ids)
         assert Dataset.objects.count() == len(set(dataset_remote_ids))
         assert Dataservice.objects.count() == len(set(dataservice_remote_ids))
-
         duplicates = BaseBackend.find_duplicate_remote_ids(job.items)
         assert duplicates == {
             "dataservice-id-2": [
