@@ -79,4 +79,4 @@ class MockBackendsMixin(object):
     @pytest.fixture(autouse=True)
     def mock_backend(self, mocker):
         return_value = {"factory": FactoryBackend}
-        mocker.patch("udata.harvest.backends.get_all", return_value=return_value)
+        mocker.patch("udata.harvest.backends.get_all_backends", return_value=return_value)
