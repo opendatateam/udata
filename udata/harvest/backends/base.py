@@ -192,7 +192,7 @@ class BaseBackend(object):
             if any(i.status == "failed" for i in self.job.items):
                 self.job.status += "-errors"
 
-            if duplicates := self.find_duplicate_remote_ids():
+            if duplicates := self.find_duplicate_remote_ids(self.job.items):
                 msg = "Some records have duplicate remote ids:"
                 for id, urls in sorted(duplicates.items()):
                     msg += f"""\n- "{id}":"""
@@ -528,9 +528,10 @@ class BaseBackend(object):
             msg = "\n- ".join(["Validation error:"] + errors)
             raise HarvestValidationError(msg)
 
-    def find_duplicate_remote_ids(self) -> dict[str, list[str]]:
+    @staticmethod
+    def find_duplicate_remote_ids(items: list[HarvestItem]) -> dict[str, list[str]]:
         groups = defaultdict(list)
-        for item in self.job.items:
+        for item in items:
             groups[str(item.remote_id)].append(item.remote_url)
         return {id: urls for id, urls in groups.items() if len(urls) > 1}
 

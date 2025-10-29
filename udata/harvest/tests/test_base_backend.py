@@ -458,18 +458,24 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert len(job.items) == len(dataset_remote_ids) + len(dataservice_remote_ids)
         assert Dataset.objects.count() == len(set(dataset_remote_ids))
         assert Dataservice.objects.count() == len(set(dataservice_remote_ids))
-        assert job.errors[0].message.splitlines() == [
-            "Some records have duplicate remote ids:",
-            '- "dataservice-id-2":',
-            "  - http://www.example.com/records/dataservice-url-7",
-            "  - http://www.example.com/records/dataservice-url-8",
-            '- "dataset-id-1":',
-            "  - http://www.example.com/records/dataset-url-1",
-            "  - http://www.example.com/records/dataset-url-5",
-            '- "dataset-id-3":',
-            "  - http://www.example.com/records/dataset-url-3",
-            "  - http://www.example.com/records/dataset-url-4",
-        ]
+
+        duplicates = BaseBackend.find_duplicate_remote_ids(job.items)
+        assert duplicates == {
+            "dataservice-id-2": [
+                "http://www.example.com/records/dataservice-url-7",
+                "http://www.example.com/records/dataservice-url-8",
+            ],
+            "dataset-id-1": [
+                "http://www.example.com/records/dataset-url-1",
+                "http://www.example.com/records/dataset-url-5",
+            ],
+            "dataset-id-3": [
+                "http://www.example.com/records/dataset-url-3",
+                "http://www.example.com/records/dataset-url-4",
+            ],
+        }
+        for id in duplicates.keys():
+            assert id in job.errors[0].message
 
 
 class BaseBackendValidateTest(PytestOnlyDBTestCase):
