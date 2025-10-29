@@ -11,9 +11,9 @@ import click
 import mongoengine
 from bson import DBRef
 
-from udata import migrations
 from udata.commands import cli, cyan, echo, green, magenta, red, white, yellow
 from udata.core.dataset.models import Dataset, Resource
+from udata.db import migrations
 from udata.mongo.document import get_all_models
 
 # Date format used to for display
@@ -31,8 +31,7 @@ def grp():
 def log_status(migration, status):
     """Properly display a migration status line"""
     name = os.path.splitext(migration.filename)[0]
-    display = ":".join((migration.plugin, name)) + " "
-    log.info("%s [%s]", "{:.<70}".format(display), status)
+    echo("{:.<70} [{}]".format(name + " ", status))
 
 
 def status_label(record):
@@ -78,11 +77,6 @@ def migrate(record, dry_run=False):
             log_status(migration, status)
             try:
                 output = migration.execute(recordonly=record, dryrun=dry_run)
-            except migrations.RollbackError as re:
-                format_output(re.migrate_exc.output, False)
-                log_status(migration, red("Rollback"))
-                format_output(re.output, not re.exc)
-                success = False
             except migrations.MigrationError as me:
                 format_output(me.output, False, traceback=me.traceback)
                 success = False
@@ -92,35 +86,29 @@ def migrate(record, dry_run=False):
 
 
 @grp.command()
-@click.argument("plugin_or_specs")
-@click.argument("filename", default=None, required=False, metavar="[FILENAME]")
-def unrecord(plugin_or_specs, filename):
+@click.argument("filename")
+def unrecord(filename):
     """
     Remove a database migration record.
 
-    \b
-    A record can be expressed with the following syntaxes:
-     - plugin filename
-     - plugin filename.js
-     - plugin:filename
-     - plugin:fliename.js
+    FILENAME is the migration filename (e.g., 2024-01-01-my-migration.py)
     """
-    migration = migrations.get(plugin_or_specs, filename)
-    removed = migration.unrecord()
+    removed = migrations.unrecord(filename)
     if removed:
-        log.info("Removed migration %s", migration.label)
+        echo("Removed migration {}".format(filename))
     else:
-        log.error("Migration not found %s", migration.label)
+        echo(red("Migration not found {}".format(filename)))
 
 
 @grp.command()
-@click.argument("plugin_or_specs")
-@click.argument("filename", default=None, required=False, metavar="[FILENAME]")
-def info(plugin_or_specs, filename):
+@click.argument("filename")
+def info(filename):
     """
     Display detailed info about a migration
+
+    FILENAME is the migration filename (e.g., 2024-01-01-my-migration.py)
     """
-    migration = migrations.get(plugin_or_specs, filename)
+    migration = migrations.get(filename)
     log_status(migration, status_label(migration.record))
     try:
         echo(migration.module.__doc__)
