@@ -193,9 +193,12 @@ class BaseBackend(object):
                 self.job.status += "-errors"
 
             if duplicates := self.find_duplicate_remote_ids():
-                error = HarvestError(
-                    message=f"Some records have duplicate remote ids: {duplicates}"
-                )
+                msg = "Some records have duplicate remote ids:"
+                for id, urls in duplicates.items():
+                    msg += f"""\n- "{id}":"""
+                    for url in urls:
+                        msg += f"\n  - {url}"
+                error = HarvestError(message=msg)
                 self.job.errors.append(error)
                 self.job.status += "-errors"
 
