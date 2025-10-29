@@ -25,6 +25,7 @@ ALLOWED_RESOURCE_TYPES = ("dkan", "file", "file.upload", "api", "metadata")
 
 
 class CkanBackend(BaseBackend):
+    name = "ckan"
     display_name = "CKAN"
     filters = (
         HarvestFilter(_("Organization"), "organization", str, _("A CKAN Organization name")),

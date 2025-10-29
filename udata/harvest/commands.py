@@ -2,7 +2,8 @@ import logging
 
 import click
 
-from udata.commands import cli
+from udata.commands import KO, OK, cli, green, red
+from udata.harvest.backends import get_all_backends, is_backend_enabled
 
 from . import actions
 
@@ -89,9 +90,10 @@ def sources(scheduled=False):
 @grp.command()
 def backends():
     """List available backends"""
-    log.info("Available backends:")
-    for backend in actions.list_backends():
-        log.info("%s (%s)", backend.name, backend.display_name or backend.name)
+    print("Available backends:")
+    for backend in get_all_backends():
+        status = green(OK) if is_backend_enabled(backend) else red(KO)
+        click.echo("{0} {1} ({2})".format(status, backend.display_name, backend.name))
 
 
 @grp.command()

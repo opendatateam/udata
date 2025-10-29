@@ -178,6 +178,7 @@ class Defaults(object):
     UDATA_INSTANCE_NAME = "udata"
 
     PLUGINS = []
+    HARVESTERS_BACKENDS = []
     THEME = None
 
     STATIC_DIRS = []
@@ -639,6 +640,7 @@ class Testing(object):
     CELERY_TASK_EAGER_PROPAGATES = True
     TEST_WITH_PLUGINS = False
     PLUGINS = []
+    HARVESTERS_BACKENDS = []
     TEST_WITH_THEME = False
     THEME = "testing"
     CACHE_TYPE = "flask_caching.backends.null"
