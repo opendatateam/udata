@@ -2,7 +2,6 @@ import inspect
 import logging
 from importlib import import_module
 
-import pkg_resources
 from jinja2 import pass_context
 from markupsafe import Markup
 
@@ -18,11 +17,6 @@ log = logging.getLogger(__name__)
 hook = I18nBlueprint("hook", __name__)
 
 _template_hooks = {}
-
-
-@hook.app_template_global()
-def package_version(name: str) -> str:
-    return pkg_resources.get_distribution(name).version
 
 
 @hook.app_template_filter()

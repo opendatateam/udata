@@ -4,12 +4,11 @@ import sys
 from glob import iglob
 
 import click
-import pkg_resources
 from flask.cli import FlaskGroup, ScriptInfo, shell_command
 
 from udata import entrypoints
 from udata.app import VERBOSE_LOGGERS, create_app, standalone
-from udata.utils import safe_unicode
+from udata.utils import get_udata_version, safe_unicode
 
 log = logging.getLogger(__name__)
 
@@ -253,7 +252,7 @@ class UdataGroup(FlaskGroup):
 def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
         return
-    click.echo(pkg_resources.get_distribution("udata").version)
+    click.echo(get_udata_version())
     ctx.exit()
 
 
