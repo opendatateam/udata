@@ -42,13 +42,6 @@ A secret key used as salt for cryptographic parts.
 
 The site identifier. It is used to attached some database configuration, metrics...
 
-### SITE_TERMS_LOCATION
-
-**default**: `generic embedded terms`
-
-The site terms in markdown. It can be either an URL or a local path to a markdown content.
-If this is an URL, the content is downloaded on the first terms page display and cached.
-
 ### PLUGINS
 
 **default**: `[]`
