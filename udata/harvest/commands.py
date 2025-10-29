@@ -91,7 +91,7 @@ def sources(scheduled=False):
 def backends():
     """List available backends"""
     print("Available backends:")
-    for backend in get_all_backends():
+    for backend in get_all_backends().values():
         status = green(OK) if is_backend_enabled(backend) else red(KO)
         click.echo("{0} {1} ({2})".format(status, backend.display_name, backend.name))
 

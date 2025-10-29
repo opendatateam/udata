@@ -364,7 +364,7 @@ def empty_extras(resource_data):
 ##############################################################################
 
 
-@pytest.mark.options(PLUGINS=["ckan"])
+@pytest.mark.options(HARVESTERS_BACKENDS=["ckan"])
 class CkanBackendTest(PytestOnlyDBTestCase):
     @pytest.mark.ckan_data("minimal")
     def test_minimal_metadata(self, data, result, kwargs):
@@ -505,7 +505,7 @@ class CkanBackendTest(PytestOnlyDBTestCase):
 ##############################################################################
 
 
-@pytest.mark.options(PLUGINS=["ckan"])
+@pytest.mark.options(HARVESTERS_BACKENDS=["ckan"])
 class CkanBackendEdgeCasesTest(PytestOnlyDBTestCase):
     def test_minimal_ckan_response(self, rmock):
         """CKAN Harvester should accept the minimum dataset payload"""

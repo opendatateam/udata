@@ -640,7 +640,7 @@ class Testing(object):
     CELERY_TASK_EAGER_PROPAGATES = True
     TEST_WITH_PLUGINS = False
     PLUGINS = []
-    HARVESTERS_BACKENDS = []
+    HARVESTERS_BACKENDS = ["factory"]
     TEST_WITH_THEME = False
     THEME = "testing"
     CACHE_TYPE = "flask_caching.backends.null"

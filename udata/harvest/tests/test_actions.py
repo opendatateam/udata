@@ -45,7 +45,7 @@ log = logging.getLogger(__name__)
 
 class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
     def test_list_backends(self):
-        # assert len(get_enabled_backends()) > 0
+        assert len(get_enabled_backends()) > 0
         for backend in get_enabled_backends().values():
             assert issubclass(backend, BaseBackend)
 
