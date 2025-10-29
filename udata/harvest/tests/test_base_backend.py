@@ -1,4 +1,3 @@
-import re
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
@@ -67,7 +66,7 @@ class FakeBackend(BaseBackend):
         if not dataset.harvest:
             dataset.harvest = HarvestDatasetMetadata()
         dataset.harvest.remote_url = (
-            f"http://www.example.com/records/remote-dataset-{len(self.job.items)}"
+            f"http://www.example.com/records/dataset-url-{len(self.job.items)}"
         )
         return dataset
 
@@ -82,7 +81,7 @@ class FakeBackend(BaseBackend):
         if not dataservice.harvest:
             dataservice.harvest = HarvestDataserviceMetadata()
         dataservice.harvest.remote_url = (
-            f"http://www.example.com/records/remote-dataservice-{len(self.job.items)}"
+            f"http://www.example.com/records/dataservice-url-{len(self.job.items)}"
         )
         return dataservice
 
@@ -433,8 +432,18 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert dataset_reused_uri.harvest.source_id == str(source.id)
 
     def test_duplicate_remote_ids(self):
-        dataset_remote_ids = ["dataset-1", "dataset-2", "dataset-3", "dataset-3", "dataset-1"]
-        dataservice_remote_ids = ["dataservice-1", "dataservice-2", "dataservice-2"]
+        dataset_remote_ids = [
+            "dataset-id-1",
+            "dataset-id-2",
+            "dataset-id-3",
+            "dataset-id-3",
+            "dataset-id-1",
+        ]
+        dataservice_remote_ids = [
+            "dataservice-id-1",
+            "dataservice-id-2",
+            "dataservice-id-2",
+        ]
         source = HarvestSourceFactory(
             config={
                 "dataset_remote_ids": dataset_remote_ids,
@@ -449,17 +458,18 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert len(job.items) == len(dataset_remote_ids) + len(dataservice_remote_ids)
         assert Dataset.objects.count() == len(set(dataset_remote_ids))
         assert Dataservice.objects.count() == len(set(dataservice_remote_ids))
-        message = job.errors[0].message
-        assert re.search(
-            "'dataset-1'.*'http://.*/remote-dataset-1'.*'http://.*/remote-dataset-5'", message
-        )
-        assert re.search(
-            "'dataset-3'.*'http://.*/remote-dataset-3'.*'http://.*/remote-dataset-4'", message
-        )
-        assert re.search(
-            "'dataservice-2'.*'http://.*/remote-dataservice-7'.*'http://.*/remote-dataservice-8'",
-            message,
-        )
+        assert job.errors[0].message.splitlines() == [
+            "Some records have duplicate remote ids:",
+            '- "dataservice-id-2":',
+            "  - http://www.example.com/records/dataservice-url-7",
+            "  - http://www.example.com/records/dataservice-url-8",
+            '- "dataset-id-1":',
+            "  - http://www.example.com/records/dataset-url-1",
+            "  - http://www.example.com/records/dataset-url-5",
+            '- "dataset-id-3":',
+            "  - http://www.example.com/records/dataset-url-3",
+            "  - http://www.example.com/records/dataset-url-4",
+        ]
 
 
 class BaseBackendValidateTest(PytestOnlyDBTestCase):
