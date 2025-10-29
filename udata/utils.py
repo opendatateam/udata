@@ -4,6 +4,7 @@ import math
 import re
 from collections import Counter
 from datetime import date, datetime, timedelta
+from importlib.metadata import version
 from math import ceil
 from typing import Any, Hashable
 from uuid import UUID, uuid4
@@ -22,6 +23,10 @@ from flask import abort, current_app, request
 from mongoengine.fields import BaseQuerySet
 
 from udata import tags
+
+
+def get_udata_version() -> str:
+    return version("udata")
 
 
 def get_by(lst, field, value):
