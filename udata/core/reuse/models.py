@@ -5,6 +5,7 @@ from werkzeug.utils import cached_property
 
 from udata.api_fields import field, generate_fields
 from udata.core.activity.models import Auditable
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
@@ -113,6 +114,14 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
         ),
         filterable={
             "key": "dataset",
+        },
+    )
+    dataservices = field(
+        db.ListField(
+            field(db.ReferenceField("Dataservice", reverse_delete_rule=db.PULL)),
+        ),
+        filterable={
+            "key": "dataservice",
         },
     )
     tags = field(

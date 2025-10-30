@@ -7,6 +7,7 @@ from werkzeug.test import TestResponse
 
 import udata.core.organization.constants as org_constants
 from udata.core.badges.factories import badge_factory
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.constants import REUSE_TOPICS, REUSE_TYPES
@@ -424,6 +425,56 @@ class ReuseAPITest(PytestOnlyAPITestCase):
         assert404(response)
         reuse.reload()
         assert len(reuse.datasets) == 0
+
+    def test_reuse_api_add_dataservice(self, api):
+        """It should add a dataset to a reuse from the API"""
+        user = api.login()
+        reuse = ReuseFactory(owner=user)
+
+        dataservice = DataserviceFactory()
+        data = {"id": dataservice.id, "class": "Dataservice"}
+        url = url_for("api.reuse_add_dataservice", reuse=reuse)
+        response = api.post(url, data)
+        assert201(response)
+        reuse.reload()
+        assert len(reuse.dataservices) == 1
+        assert reuse.dataservices[-1] == dataservice
+
+        dataservice = DataserviceFactory()
+        data = {"id": dataservice.id, "class": "dataservice"}
+        url = url_for("api.reuse_add_dataservice", reuse=reuse)
+        response = api.post(url, data)
+        assert201(response)
+        reuse.reload()
+        assert len(reuse.dataservices) == 2
+        assert reuse.dataservices[-1] == dataservice
+
+    def test_reuse_api_add_dataservice_twice(self, api):
+        """It should not add twice a dataservice to a reuse from the API"""
+        user = api.login()
+        dataservice = DataserviceFactory()
+        reuse = ReuseFactory(owner=user, dataservices=[dataservice])
+
+        data = {"id": dataservice.id, "class": "Dataservice"}
+        url = url_for("api.reuse_add_dataservice", reuse=reuse)
+        response = api.post(url, data)
+        assert200(response)
+        reuse.reload()
+        assert len(reuse.dataservices) == 1
+        assert reuse.dataservices[-1] == dataservice
+
+    def test_reuse_api_add_dataservice_not_found(self, api):
+        """It should return 404 when adding an unknown dataservice to a reuse"""
+        user = api.login()
+        reuse = ReuseFactory(owner=user)
+
+        data = {"id": "not-found", "class": "Dataservice"}
+        url = url_for("api.reuse_add_dataservice", reuse=reuse)
+        response = api.post(url, data)
+
+        assert404(response)
+        reuse.reload()
+        assert len(reuse.dataservices) == 0
 
     def test_reuse_api_feature(self, api):
         """It should mark the reuse featured on POST"""
