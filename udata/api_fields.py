@@ -215,6 +215,9 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         # the referenced model, if not we return a String (and RestX will call the `str()` of the model
         # when returning from an endpoint)
         nested_fields: dict | None = info.get("nested_fields")
+        if nested_fields is None and hasattr(field.document_type_obj, "__ref_fields__"):
+            nested_fields = field.document_type_obj.__ref_fields__
+
         if nested_fields is None:
             # If there is no `nested_fields` convert the object to the string representation.
             constructor_read = restx_fields.String

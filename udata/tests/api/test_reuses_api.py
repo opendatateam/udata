@@ -376,6 +376,22 @@ class ReuseAPITest(PytestOnlyAPITestCase):
         response = api.delete(url_for("api.reuse", reuse=reuse))
         assert410(response)
 
+    def test_reuse_api_filter_by_dataset(self, api):
+        user = api.login()
+        dataset = DatasetFactory()
+        other_dataset = DatasetFactory()
+        ReuseFactory(owner=user, datasets=[dataset])
+
+        response = api.get(url_for("api.reuses", dataset=dataset.id))
+        assert200(response)
+        assert response.json["total"] == 1
+        assert len(response.json["data"][0]["datasets"]) == 1
+        assert response.json["data"][0]["datasets"][0]["title"] == dataset.title
+
+        response = api.get(url_for("api.reuses", dataset=other_dataset.id))
+        assert200(response)
+        assert response.json["total"] == 0
+
     def test_reuse_api_add_dataset(self, api):
         """It should add a dataset to a reuse from the API"""
         user = api.login()
@@ -425,6 +441,22 @@ class ReuseAPITest(PytestOnlyAPITestCase):
         assert404(response)
         reuse.reload()
         assert len(reuse.datasets) == 0
+
+    def test_reuse_api_filter_by_dataservice(self, api):
+        user = api.login()
+        dataservice = DataserviceFactory()
+        other_dataservice = DataserviceFactory()
+        ReuseFactory(owner=user, dataservices=[dataservice])
+
+        response = api.get(url_for("api.reuses", dataservice=dataservice.id))
+        assert200(response)
+        assert response.json["total"] == 1
+        assert len(response.json["data"][0]["dataservices"]) == 1
+        assert response.json["data"][0]["dataservices"][0]["title"] == dataservice.title
+
+        response = api.get(url_for("api.reuses", dataservice=other_dataservice.id))
+        assert200(response)
+        assert response.json["total"] == 0
 
     def test_reuse_api_add_dataservice(self, api):
         """It should add a dataset to a reuse from the API"""
