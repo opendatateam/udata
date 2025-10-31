@@ -1,5 +1,6 @@
 import logging
 import traceback
+from collections import defaultdict
 from datetime import date, datetime, timedelta
 from uuid import UUID
 
@@ -190,6 +191,17 @@ class BaseBackend(object):
 
             if any(i.status == "failed" for i in self.job.items):
                 self.job.status += "-errors"
+
+            if duplicates := self.find_duplicate_remote_ids(self.job.items):
+                msg = "Some records have duplicate remote ids:"
+                for id, urls in sorted(duplicates.items()):
+                    msg += f"""\n- "{id}":"""
+                    for url in urls:
+                        msg += f"\n  - {url}"
+                error = HarvestError(message=msg)
+                self.job.errors.append(error)
+                self.job.status += "-errors"
+
         except HarvestValidationError as e:
             log.exception(
                 f'Harvesting validation failed for "{safe_unicode(self.source.name)}" ({self.source.backend})'
@@ -232,6 +244,8 @@ class BaseBackend(object):
 
             current_app.logger.addHandler(log_catcher)
             dataset = self.inner_process_dataset(item, **kwargs)
+            if dataset.harvest:
+                item.remote_url = dataset.harvest.remote_url
 
             # Use `item.remote_id` because `inner_process_dataset` could have modified it.
             dataset.harvest = self.update_dataset_harvest_info(dataset.harvest, item.remote_id)
@@ -291,6 +305,8 @@ class BaseBackend(object):
                 raise HarvestSkipException("missing identifier")
 
             dataservice = self.inner_process_dataservice(item, **kwargs)
+            if dataservice.harvest:
+                item.remote_url = dataservice.harvest.remote_url
 
             dataservice.harvest = self.update_dataservice_harvest_info(
                 dataservice.harvest, remote_id
@@ -511,6 +527,13 @@ class BaseBackend(object):
                 errors.append(msg)
             msg = "\n- ".join(["Validation error:"] + errors)
             raise HarvestValidationError(msg)
+
+    @staticmethod
+    def find_duplicate_remote_ids(items: list[HarvestItem]) -> dict[str, list[str]]:
+        groups = defaultdict(list)
+        for item in items:
+            groups[str(item.remote_id)].append(item.remote_url)
+        return {id: urls for id, urls in groups.items() if len(urls) > 1}
 
 
 class LogCatcher(logging.Handler):

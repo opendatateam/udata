@@ -66,6 +66,7 @@ class HarvestLog(db.EmbeddedDocument):
 
 class HarvestItem(db.EmbeddedDocument):
     remote_id = db.StringField()
+    remote_url = db.StringField()
     dataset = db.ReferenceField(Dataset)
     dataservice = db.ReferenceField(Dataservice)
     status = db.StringField(
