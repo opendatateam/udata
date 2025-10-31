@@ -1,8 +1,38 @@
 import logging
 
+from mongoengine import NULLIFY
+
+from udata.api_fields import field, generate_fields
+from udata.core.organization.api_fields import org_ref_fields
+from udata.core.organization.models import Organization
+from udata.core.user.api_fields import user_ref_fields
+from udata.core.user.models import User
+
 from udata.features.notifications.actions import notifier
+from udata.features.notifications.models import Notification
+from udata.models import db
 
 log = logging.getLogger(__name__)
+
+
+@generate_fields()
+class MembershipRequestNotification(Notification):
+    request_organization = field(
+        db.ReferenceField(Organization, reverse_delete_rule=NULLIFY),
+        readonly=True,
+        nested_fields=org_ref_fields,
+        auditable=False,
+        allow_null=True,
+        filterable={},
+    )
+    request_user = field(
+        db.ReferenceField(User, reverse_delete_rule=NULLIFY),
+        nested_fields=user_ref_fields,
+        readonly=True,
+        auditable=False,
+        allow_null=True,
+        filterable={},
+    )
 
 
 @notifier("membership_request")
