@@ -4,7 +4,7 @@ from mongoengine import NULLIFY
 
 from udata.api_fields import field, generate_fields
 from udata.core.organization.api_fields import org_ref_fields
-from udata.core.organization.models import Organization
+from udata.core.organization.models import Member, MembershipRequest, Organization
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 
@@ -34,6 +34,40 @@ class MembershipRequestNotification(Notification):
         filterable={},
     )
 
+@MembershipRequest.after_save.connect
+def on_new_membership_request(request: MembershipRequest,  **kwargs):
+    """Create notification when a new membership request is created"""
+    organization = kwargs.get("org")
+
+    if organization is None:
+        return
+    
+    # Get all admin users for the organization
+    admin_users = [member.user for member in organization.members if member.role == "admin"]
+    
+    # For each pending request, check if a notification already exists
+    for admin_user in admin_users:
+        try:
+            # Check if notification already exists
+            existing = MembershipRequestNotification.objects(
+                user=admin_user,
+                request_organization=organization,
+                request_user=request.user,
+            ).first()
+            
+            if not existing:
+                notification = MembershipRequestNotification(
+                    user=admin_user,
+                    request_organization=organization,
+                    request_user=request.user,
+                )
+                notification.created_at = request.created
+                notification.save()
+        except Exception as e:
+            log.error(
+                f"Error creating notification for user {admin_user.id} "
+                f"and organization {organization.id}: {e}"
+            )
 
 @notifier("membership_request")
 def membership_request_notifications(user):

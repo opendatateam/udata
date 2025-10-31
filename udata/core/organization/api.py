@@ -385,10 +385,8 @@ class MembershipRequestAPI(API):
 
         if not membership_request:
             membership_request = MembershipRequest()
-            org.requests.append(membership_request)
-
-        form.populate_obj(membership_request)
-        org.save()
+            form.populate_obj(membership_request)
+            org.add_membership_request(membership_request)
 
         notify_membership_request.delay(str(org.id), str(membership_request.id))
 

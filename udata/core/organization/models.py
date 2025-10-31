@@ -80,6 +80,8 @@ class MembershipRequest(db.EmbeddedDocument):
     comment = db.StringField()
     refusal_comment = db.StringField()
 
+    after_save = Signal()
+
     @property
     def status_label(self):
         return MEMBERSHIP_STATUS[self.status]
@@ -302,6 +304,11 @@ class Organization(
     @property
     def views_count(self):
         return self.metrics.get("views", 0)
+    
+    def add_membership_request(self, membership_request):
+        self.requests.append(membership_request)
+        self.save()
+        MembershipRequest.after_save.send(membership_request, org=self)
 
     def count_members(self):
         self.metrics["members"] = len(self.members)
