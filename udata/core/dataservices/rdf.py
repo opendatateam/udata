@@ -1,6 +1,7 @@
 from flask import current_app
 from rdflib import RDF, BNode, Graph, Literal, URIRef
 
+from udata.core.constants import HVD
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset.models import Dataset, License
@@ -146,7 +147,7 @@ def dataservice_to_rdf(dataservice: Dataservice, graph=None):
 
     # Add DCAT-AP HVD properties if the dataservice is tagged hvd.
     # See https://semiceu.github.io/DCAT-AP/releases/2.2.0-hvd/
-    is_hvd = current_app.config["HVD_SUPPORT"] and "hvd" in dataservice.tags
+    is_hvd = current_app.config["HVD_SUPPORT"] and any(b.kind == HVD for b in dataservice.badges)
     if is_hvd:
         d.add(DCATAP.applicableLegislation, URIRef(HVD_LEGISLATION))
 
