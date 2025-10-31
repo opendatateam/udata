@@ -383,7 +383,10 @@ class MembershipRequestAPI(API):
 
         form = api.validate(MembershipRequestForm, membership_request)
 
-        if not membership_request:
+        if membership_request:
+            form.populate_obj(membership_request)
+            org.save()
+        else:
             membership_request = MembershipRequest()
             form.populate_obj(membership_request)
             org.add_membership_request(membership_request)
