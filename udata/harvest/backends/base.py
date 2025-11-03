@@ -188,9 +188,10 @@ class BaseBackend(object):
                 self.autoarchive()
 
             self.job.status = "done"
+            has_errors = False
 
             if any(i.status == "failed" for i in self.job.items):
-                self.job.status += "-errors"
+                has_errors = True
 
             if duplicates := self.find_duplicate_remote_ids(self.job.items):
                 msg = "Some records have duplicate remote ids:"
@@ -200,6 +201,9 @@ class BaseBackend(object):
                         msg += f"\n  - {url}"
                 error = HarvestError(message=msg)
                 self.job.errors.append(error)
+                has_errors = True
+
+            if has_errors:
                 self.job.status += "-errors"
 
         except HarvestValidationError as e:
