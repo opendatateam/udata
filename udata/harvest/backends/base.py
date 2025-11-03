@@ -194,12 +194,8 @@ class BaseBackend(object):
                 has_errors = True
 
             if duplicates := self.find_duplicate_remote_ids(self.job.items):
-                msg = "Some records have duplicate remote ids:"
-                for id, urls in sorted(duplicates.items()):
-                    msg += f"""\n- "{id}":"""
-                    for url in urls:
-                        msg += f"\n  - {url}"
-                error = HarvestError(message=msg)
+                message = self.format_duplicate_remote_ids(duplicates)
+                error = HarvestError(message=message)
                 self.job.errors.append(error)
                 has_errors = True
 
@@ -533,11 +529,26 @@ class BaseBackend(object):
             raise HarvestValidationError(msg)
 
     @staticmethod
-    def find_duplicate_remote_ids(items: list[HarvestItem]) -> dict[str, list[str]]:
+    def find_duplicate_remote_ids(items: list[HarvestItem]) -> dict[str, list[str | None]]:
         groups = defaultdict(list)
         for item in items:
             groups[str(item.remote_id)].append(item.remote_url)
         return {id: urls for id, urls in groups.items() if len(urls) > 1}
+
+    @staticmethod
+    def format_duplicate_remote_ids(duplicates: dict[str, list[str | None]]):
+        msg = "Some records have non-unique remote_id:"
+        for id, urls in sorted(duplicates.items()):
+            msg += f"""\n- "{id}":"""
+            missing_urls = 0
+            for url in urls:
+                if url is not None:
+                    msg += f"\n  - {url}"
+                else:
+                    missing_urls += 1
+            if missing_urls > 0:
+                msg += f"\n  - {missing_urls} records with missing remote_url"
+        return msg
 
 
 class LogCatcher(logging.Handler):
