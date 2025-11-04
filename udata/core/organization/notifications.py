@@ -5,7 +5,6 @@ from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.models import MembershipRequest, Organization
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
-
 from udata.features.notifications.actions import notifier
 from udata.models import db
 
@@ -31,18 +30,20 @@ class MembershipRequestNotificationDetails(db.EmbeddedDocument):
         filterable={},
     )
 
+
 @MembershipRequest.after_save.connect
-def on_new_membership_request(request: MembershipRequest,  **kwargs):
+def on_new_membership_request(request: MembershipRequest, **kwargs):
     from udata.features.notifications.models import Notification
+
     """Create notification when a new membership request is created"""
     organization = kwargs.get("org")
 
     if organization is None:
         return
-    
+
     # Get all admin users for the organization
     admin_users = [member.user for member in organization.members if member.role == "admin"]
-    
+
     # For each pending request, check if a notification already exists
     for admin_user in admin_users:
         try:
@@ -50,16 +51,15 @@ def on_new_membership_request(request: MembershipRequest,  **kwargs):
             existing = Notification.objects(
                 user=admin_user,
                 details__request_organization=organization,
-                details__request_user=request.user
+                details__request_user=request.user,
             ).first()
-            
+
             if not existing:
                 notification = Notification(
                     user=admin_user,
                     details=MembershipRequestNotificationDetails(
-                        request_organization=organization,
-                        request_user=request.user
-                    )
+                        request_organization=organization, request_user=request.user
+                    ),
                 )
                 notification.created_at = request.created
                 notification.save()
@@ -68,6 +68,7 @@ def on_new_membership_request(request: MembershipRequest,  **kwargs):
                 f"Error creating notification for user {admin_user.id} "
                 f"and organization {organization.id}: {e}"
             )
+
 
 @notifier("membership_request")
 def membership_request_notifications(user):

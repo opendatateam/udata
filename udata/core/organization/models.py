@@ -304,7 +304,7 @@ class Organization(
     @property
     def views_count(self):
         return self.metrics.get("views", 0)
-    
+
     def add_membership_request(self, membership_request):
         self.requests.append(membership_request)
         self.save()

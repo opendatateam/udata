@@ -698,10 +698,8 @@ def patch(obj, request) -> type:
                 generic = info.get("generic", False)
                 generic_key = info.get("generic_key", DEFAULT_GENERIC_KEY)
                 embedded_field = (
-                        classes_by_names[value[generic_key]]
-                        if generic
-                        else base_embedded_field
-                    )
+                    classes_by_names[value[generic_key]] if generic else base_embedded_field
+                )
                 value = patch(embedded_field(), value)
             elif value and isinstance(
                 model_attribute,

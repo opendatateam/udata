@@ -37,12 +37,9 @@ def migrate(db):
                             details__request_user=request.user,
                         ).first()
                         if not existing:
-                            notification = Notification(
-                                user=admin_user
-                            )
+                            notification = Notification(user=admin_user)
                             notification.details = MembershipRequestNotificationDetails(
-                                request_organization=org,
-                                request_user=request.user
+                                request_organization=org, request_user=request.user
                             )
                             # Set the created_at to match the request creation date
                             notification.created_at = request.created
