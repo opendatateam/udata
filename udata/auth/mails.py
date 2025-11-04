@@ -16,7 +16,6 @@ our folder before fallbacking to the templates inside the `flask_security` packa
 import logging
 
 from flask import current_app
-from flask_security.utils import url_for_security
 
 from udata.mail import MailCTA, MailMessage
 
@@ -132,6 +131,7 @@ def reset_notice(**kwargs) -> MailMessage:
 
 def change_notice(**kwargs) -> MailMessage:
     from udata.i18n import lazy_gettext as _
+    from udata.uris import cdata_url
 
     return MailMessage(
         subject=_("Your password has been changed"),
@@ -141,9 +141,6 @@ def change_notice(**kwargs) -> MailMessage:
                 site=current_app.config["SITE_TITLE"],
             ),
             _("If you did not change your password, please reset it."),
-            MailCTA(
-                _("Reset your password"),
-                url_for_security("reset_password", _external=True),
-            ),
+            MailCTA(_("Reset your password"), cdata_url("/reset/")),
         ],
     )
