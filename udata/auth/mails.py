@@ -36,6 +36,7 @@ def render_mail_template(template_name_or_list: str | list[str], **kwargs):
     (name, format) = template_name_or_list.removeprefix("security/email/").split(".")
 
     mail_message = None
+
     match name:
         case "welcome":
             mail_message = welcome(**kwargs)
@@ -101,8 +102,9 @@ def confirmation_instructions(confirmation_link: str, **kwargs) -> MailMessage:
     )
 
 
-def reset_instructions(reset_link: str, **kwargs) -> MailMessage:
+def reset_instructions(reset_token: str, **kwargs) -> MailMessage:
     from udata.i18n import lazy_gettext as _
+    from udata.uris import cdata_url
 
     return MailMessage(
         subject=_("Reset your password"),
@@ -112,7 +114,7 @@ def reset_instructions(reset_link: str, **kwargs) -> MailMessage:
                 site=current_app.config["SITE_TITLE"],
             ),
             _("If this wasn't you, please ignore this email."),
-            MailCTA(_("Reset your password"), reset_link),
+            MailCTA(_("Reset your password"), cdata_url(f"/reset/{reset_token}")),
         ],
     )
 
