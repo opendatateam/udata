@@ -72,55 +72,6 @@ jobs:
           paths:
             - .venv
 
-  assets:
-    docker:
-      # TODO make an image based on 2-alpine w/ nvm and phantom deps
-      - image: udata/circleci:py<< pipeline.parameters.python-version >>
-    environment:
-      BASH_ENV: /root/.bashrc
-    steps:
-      - checkout
-      - run:
-          name: Compute JS dependencies key
-          command: cat .nvmrc package.json > js.deps
-      - run:
-          name: Get the base reference branch
-          command: export BASE_BRANCH=$(base_branch)
-      - restore_cache:
-          keys:
-            # 1. Exact match of dependencies
-            - js-cache-{{ arch }}-{{ checksum "js.deps" }}
-            # 2. Latest cache from this branch
-            - js-cache-{{ arch }}-{{ .Branch }}
-            # 3. Latest cache from base branch (e.g., master)
-            - js-cache-{{ arch }}-{{ .Environment.BASE_BRANCH }}
-            # 4. Any latest cache for this architecture (fallback)
-            - js-cache-{{ arch }}-
-      - run:
-          name: Install NodeJS and dependencies
-          command: |
-            nvm install
-            npm install
-            npm list || true
-      - save_cache:
-          key: js-cache-{{ arch }}-{{ checksum "js.deps" }}
-          paths:
-            - node_modules
-      - save_cache:
-          key: js-cache-{{ arch }}-{{ .Branch }}
-          paths:
-            - node_modules
-      - run:
-          name: Compile assets
-          command: |
-            npm run assets:build
-            npm run widgets:build
-            npm run oembed:build
-      - persist_to_workspace:
-          root: .
-          paths:
-            - udata/static
-
   dist:
     docker:
       - image: udata/circleci:py<< pipeline.parameters.python-version >>
@@ -132,7 +83,7 @@ jobs:
           name: Install build tools
           command: |
             pip install uv
-            uv pip install build setuptools-scm
+            uv pip install setuptools-scm
       - run:
           name: Save and show RELEASE_VERSION
           command: |
@@ -231,11 +182,9 @@ workflows:
   build-publish-deploy:
     jobs:
       - python
-      - assets
       - dist:
           requires:
             - python
-            - assets
       - publish:
           requires:
             - dist

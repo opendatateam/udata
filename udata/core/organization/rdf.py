@@ -32,7 +32,7 @@ def organization_to_rdf(org, graph=None):
     return o
 
 
-def build_org_catalog(org, datasets, dataservices, format=None):
+def build_org_catalog(org, datasets, dataservices, _format=None, **kwargs):
     graph = Graph(namespace_manager=namespace_manager)
     org_catalog_url = url_for("api.organization_rdf", org=org.id, _external=True)
 
@@ -47,9 +47,9 @@ def build_org_catalog(org, datasets, dataservices, format=None):
     for dataservice in dataservices:
         catalog.add(DCAT.service, dataservice_to_rdf(dataservice, graph))
 
-    values = {"org": org.id}
+    values = {**kwargs, "org": org.id}
 
     if isinstance(datasets, Paginable):
-        paginate_catalog(catalog, graph, datasets, format, "api.organization_rdf_format", **values)
+        paginate_catalog(catalog, graph, datasets, _format, "api.organization_rdf_format", **values)
 
     return catalog

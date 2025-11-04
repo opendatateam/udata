@@ -1,5 +1,3 @@
-import pytest
-
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import (
     DatasetFactory,
@@ -10,10 +8,10 @@ from udata.core.organization.constants import PUBLIC_SERVICE
 from udata.core.reuse.factories import VisibleReuseFactory
 from udata.core.site.factories import SiteFactory
 from udata.harvest.tests.factories import HarvestSourceFactory
+from udata.tests.api import PytestOnlyDBTestCase
 
 
-@pytest.mark.usefixtures("clean_db")
-class SiteMetricTest:
+class SiteMetricTest(PytestOnlyDBTestCase):
     def test_orga_metric(self, app):
         site = SiteFactory.create(id=app.config["SITE_ID"])
         OrganizationFactory.create_batch(3)

@@ -1,14 +1,12 @@
-import pytest
-
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.notifications import membership_request_notifications
 from udata.core.user.factories import UserFactory
 from udata.models import Member, MembershipRequest
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates
 
 
-@pytest.mark.usefixtures("clean_db")
-class OrganizationNotificationsTest:
+class OrganizationNotificationsTest(PytestOnlyDBTestCase):
     def test_pending_membership_requests(self):
         admin = UserFactory()
         editor = UserFactory()

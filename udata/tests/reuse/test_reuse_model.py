@@ -12,12 +12,11 @@ from udata.core.reuse.models import Reuse, ReuseBadge
 from udata.core.user.factories import UserFactory
 from udata.i18n import gettext as _
 from udata.models import db
+from udata.tests.api import DBTestCase
 from udata.tests.helpers import assert_emit
 
-from .. import DBTestMixin, TestCase
 
-
-class ReuseModelTest(TestCase, DBTestMixin):
+class ReuseModelTest(DBTestCase):
     def test_owned_by_user(self):
         user = UserFactory()
         reuse = ReuseFactory(owner=user)
@@ -135,7 +134,7 @@ class ReuseModelTest(TestCase, DBTestMixin):
             ReuseFactory(url="not-an-url")
 
 
-class ReuseBadgeTest(DBTestMixin, TestCase):
+class ReuseBadgeTest(DBTestCase):
     # Model badges can be extended in plugins, for example in udata-front
     # for french only badges.
     Reuse.__badges__["new"] = "new"

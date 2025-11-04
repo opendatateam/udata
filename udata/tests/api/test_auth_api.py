@@ -14,6 +14,7 @@ from udata.api.oauth2 import OAuth2Client, OAuth2Token
 from udata.auth import PermissionDenied
 from udata.core.user.factories import UserFactory
 from udata.forms import Form, fields, validators
+from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import (
     assert200,
     assert400,
@@ -65,10 +66,7 @@ def oauth(app, request):
     return OAuth2Client.objects.create(**kwargs)
 
 
-@pytest.mark.usefixtures("clean_db")
-class APIAuthTest:
-    modules = []
-
+class APIAuthTest(PytestOnlyAPITestCase):
     def test_no_auth(self, api):
         """Should not return a content type if there is no content on delete"""
         response = api.get(url_for("api.fake"))
@@ -192,21 +190,6 @@ class APIAuthTest:
 
         assert200(response)
         assert response.json == {"success": True}
-
-    def test_authorization_display(self, client, oauth):
-        """Should display the OAuth authorization page"""
-        client.login()
-
-        response = client.get(
-            url_for(
-                "oauth.authorize",
-                response_type="code",
-                client_id=oauth.client_id,
-                redirect_uri=oauth.default_redirect_uri,
-            )
-        )
-
-        assert200(response)
 
     def test_authorization_decline(self, client, oauth):
         """Should redirect to the redirect_uri on authorization denied"""
