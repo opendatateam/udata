@@ -45,7 +45,9 @@ def membership_accepted(org: Organization) -> MailMessage:
                     org=org,
                 )
             ),
-            MailCTA(_("View the organization"), cdata_url(f"/admin/organizations/{org.id}/")),
+            MailCTA(
+                _("View the organization"), cdata_url(f"/admin/organizations/{org.id}/datasets")
+            ),
         ],
     )
 
@@ -60,7 +62,9 @@ def new_member(org: Organization) -> MailMessage:
                     org=org,
                 )
             ),
-            MailCTA(_("View the organization"), cdata_url(f"/admin/organizations/{org.id}/")),
+            MailCTA(
+                _("View the organization"), cdata_url(f"/admin/organizations/{org.id}/datasets")
+            ),
         ],
     )
 
@@ -75,7 +79,7 @@ def badge_added_certified(org: Organization) -> MailMessage:
                     org=org,
                 )
             ),
-            MailCTA(_("View the organization"), cdata_url(f"/admin/organizations/{org.id}/")),
+            MailCTA(_("View the organization"), org.self_web_url()),
         ],
     )
 
@@ -90,7 +94,7 @@ def badge_added_public_service(org: Organization) -> MailMessage:
                     org=org,
                 )
             ),
-            MailCTA(_("View the organization"), cdata_url(f"/admin/organizations/{org.id}/")),
+            MailCTA(_("View the organization"), org.self_web_url()),
         ],
     )
 
@@ -105,7 +109,7 @@ def badge_added_local_authority(org: Organization) -> MailMessage:
                     org=org,
                 )
             ),
-            MailCTA(_("View the organization"), cdata_url(f"/admin/organizations/{org.id}/")),
+            MailCTA(_("View the organization"), org.self_web_url()),
         ],
     )
 
@@ -120,7 +124,7 @@ def badge_added_company(org: Organization) -> MailMessage:
                     org=org,
                 )
             ),
-            MailCTA(_("View the organization"), cdata_url(f"/admin/organizations/{org.id}/")),
+            MailCTA(_("View the organization"), org.self_web_url()),
         ],
     )
 
@@ -135,6 +139,6 @@ def badge_added_association(org: Organization) -> MailMessage:
                     org=org,
                 )
             ),
-            MailCTA(_("View the organization"), cdata_url(f"/admin/organizations/{org.id}/")),
+            MailCTA(_("View the organization"), org.self_web_url()),
         ],
     )
