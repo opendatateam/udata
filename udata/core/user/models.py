@@ -103,7 +103,16 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
     on_delete = Signal()
 
     meta = {
-        "indexes": ["$slug", "-created_at", "slug", "apikey"],
+        "indexes": [
+            {
+                "fields": ["$last_name", "$first_name", "$email"],
+                "default_language": "french",
+                "weights": {"last_name": 10, "email": 10, "first_name": 5},
+            },
+            "-created_at",
+            "slug",
+            "apikey",
+        ],
         "ordering": ["-created_at"],
         "auto_create_index_on_save": True,
     }
