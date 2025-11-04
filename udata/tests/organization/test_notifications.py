@@ -1,9 +1,9 @@
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.notifications import (
-    MembershipRequestNotification,
     membership_request_notifications,
 )
 from udata.core.user.factories import UserFactory
+from udata.features.notifications.models import Notification
 from udata.models import Member, MembershipRequest
 from udata.tests.api import DBTestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates
@@ -49,7 +49,7 @@ class MembershipRequestNotificationTest(DBTestCase):
         request = MembershipRequest(user=applicant, comment="test")
         org.add_membership_request(request)
 
-        notifications = MembershipRequestNotification.objects.all()
+        notifications = Notification.objects.all()
         assert len(notifications) == 2
 
         admin_users = [notif.user for notif in notifications]
@@ -71,7 +71,7 @@ class MembershipRequestNotificationTest(DBTestCase):
         org.add_membership_request(request)
         org.add_membership_request(request)
 
-        assert MembershipRequestNotification.objects.count() == 1
+        assert Notification.objects.count() == 1
 
     def test_multiple_requests_create_separate_notifications(self):
         """Multiple requests from different users create separate notifications"""
@@ -86,7 +86,7 @@ class MembershipRequestNotificationTest(DBTestCase):
         request2 = MembershipRequest(user=applicant2, comment="test 2")
         org.add_membership_request(request2)
 
-        notifications = MembershipRequestNotification.objects.all()
+        notifications = Notification.objects.all()
         assert len(notifications) == 2
 
         request_users = [notif.details.request_user for notif in notifications]

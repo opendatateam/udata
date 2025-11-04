@@ -1,15 +1,9 @@
-from datetime import datetime
-
-import pytz
 from flask import url_for
 
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
-from udata.core.organization.notifications import MembershipRequestNotification
-from udata.core.user.factories import UserFactory
-from udata.features.notifications import actions
 
-from .api import APITestCase, DBTestCase
+from .api import APITestCase
 
 
 class NotificationsAPITest(APITestCase):

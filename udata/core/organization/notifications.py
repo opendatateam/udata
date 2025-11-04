@@ -12,7 +12,7 @@ from udata.models import db
 log = logging.getLogger(__name__)
 
 
-@generate_fields()
+@generate_fields(has_id=False)
 class MembershipRequestNotificationDetails(db.EmbeddedDocument):
     request_organization = field(
         db.ReferenceField(Organization),
