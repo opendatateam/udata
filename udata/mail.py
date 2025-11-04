@@ -98,19 +98,20 @@ def send_mail(recipients: object | list, message: MailMessage):
 
     for recipient in recipients:
         lang = i18n._default_lang(recipient)
+        to = recipient if isinstance(recipient, str) else recipient.email
         with i18n.language(lang):
             msg = Message(
                 subject=str(message.subject),
                 body=message.text(recipient),
                 html=message.html(recipient),
-                recipients=[recipient.email],
+                recipients=[to],
             )
 
         if send_mail:
             with mail.connect() as conn:
                 conn.send(msg)
         else:
-            log.debug(f"Sending mail {message.subject} to {recipient.email}")
+            log.debug(f"Sending mail {message.subject} to {to}")
             log.debug(msg.body)
             log.debug(msg.html)
             mail_sent.send(msg)

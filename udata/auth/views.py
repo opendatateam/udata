@@ -49,7 +49,7 @@ def send_change_email_confirmation_instructions(user, new_email):
 
     mails.confirmation_instructions(
         confirmation_link=url_for("security.confirm_change_email", token=token, _external=True)
-    ).send(current_user)
+    ).send(new_email)
 
 
 def confirm_change_email_token_status(token):

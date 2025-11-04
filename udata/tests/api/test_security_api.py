@@ -5,6 +5,7 @@ from flask import url_for
 
 from udata.commands.fixtures import UserFactory
 from udata.tests.api import PytestOnlyAPITestCase
+from udata.tests.helpers import capture_mails
 
 
 class SecurityAPITest(PytestOnlyAPITestCase):
@@ -42,3 +43,24 @@ class SecurityAPITest(PytestOnlyAPITestCase):
             },
         )
         self.assertStatus(response, 200)
+
+    @pytest.mark.options(CAPTCHETAT_BASE_URL=None)
+    def test_change_email_confirmation(self, api, client):
+        user = UserFactory(email="jane@example.org", confirmed_at=datetime.now())
+        self.login(user)
+
+        with capture_mails() as mails:
+            response = api.post(
+                url_for("security.change_email"),
+                {
+                    "new_email": "jane2@example.org",
+                    "new_email_confirm": "jane2@example.org",
+                    "submit": True,
+                },
+            )
+            self.assertStatus(response, 200)
+
+        assert len(mails) == 1
+        assert len(mails[0].recipients) == 1
+        assert mails[0].recipients[0] == "jane2@example.org"
+        assert mails[0].subject == "Confirm your email address"
