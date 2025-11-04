@@ -7,7 +7,8 @@ import logging
 import click
 
 from udata.core.organization.models import Organization
-from udata.core.organization.notifications import MembershipRequestNotification
+from udata.core.organization.notifications import MembershipRequestNotificationDetails
+from udata.features.notifications.models import Notification
 
 log = logging.getLogger(__name__)
 
@@ -30,17 +31,18 @@ def migrate(db):
                 for admin_user in admin_users:
                     try:
                         # Check if notification already exists
-                        existing = MembershipRequestNotification.objects(
+                        existing = Notification.objects(
                             user=admin_user,
-                            request_organization=org,
-                            request_user=request.user,
+                            details__request_organization=org,
+                            details__request_user=request.user,
                         ).first()
-
                         if not existing:
-                            notification = MembershipRequestNotification(
-                                user=admin_user,
+                            notification = Notification(
+                                user=admin_user
+                            )
+                            notification.details = MembershipRequestNotificationDetails(
                                 request_organization=org,
-                                request_user=request.user,
+                                request_user=request.user
                             )
                             # Set the created_at to match the request creation date
                             notification.created_at = request.created

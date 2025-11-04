@@ -1,24 +1,21 @@
 import logging
 
-from mongoengine import NULLIFY
-
 from udata.api_fields import field, generate_fields
 from udata.core.organization.api_fields import org_ref_fields
-from udata.core.organization.models import Member, MembershipRequest, Organization
+from udata.core.organization.models import MembershipRequest, Organization
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 
 from udata.features.notifications.actions import notifier
-from udata.features.notifications.models import Notification
 from udata.models import db
 
 log = logging.getLogger(__name__)
 
 
 @generate_fields()
-class MembershipRequestNotification(Notification):
+class MembershipRequestNotificationDetails(db.EmbeddedDocument):
     request_organization = field(
-        db.ReferenceField(Organization, reverse_delete_rule=NULLIFY),
+        db.ReferenceField(Organization),
         readonly=True,
         nested_fields=org_ref_fields,
         auditable=False,
@@ -26,7 +23,7 @@ class MembershipRequestNotification(Notification):
         filterable={},
     )
     request_user = field(
-        db.ReferenceField(User, reverse_delete_rule=NULLIFY),
+        db.ReferenceField(User),
         nested_fields=user_ref_fields,
         readonly=True,
         auditable=False,
@@ -36,6 +33,7 @@ class MembershipRequestNotification(Notification):
 
 @MembershipRequest.after_save.connect
 def on_new_membership_request(request: MembershipRequest,  **kwargs):
+    from udata.features.notifications.models import Notification
     """Create notification when a new membership request is created"""
     organization = kwargs.get("org")
 
@@ -49,17 +47,19 @@ def on_new_membership_request(request: MembershipRequest,  **kwargs):
     for admin_user in admin_users:
         try:
             # Check if notification already exists
-            existing = MembershipRequestNotification.objects(
+            existing = Notification.objects(
                 user=admin_user,
-                request_organization=organization,
-                request_user=request.user,
+                details__request_organization=organization,
+                details__request_user=request.user
             ).first()
             
             if not existing:
-                notification = MembershipRequestNotification(
+                notification = Notification(
                     user=admin_user,
-                    request_organization=organization,
-                    request_user=request.user,
+                    details=MembershipRequestNotificationDetails(
+                        request_organization=organization,
+                        request_user=request.user
+                    )
                 )
                 notification.created_at = request.created
                 notification.save()

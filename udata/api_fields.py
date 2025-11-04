@@ -225,6 +225,27 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
 
         write_params["description"] = "ID of the reference"
         constructor_write = restx_fields.String
+    elif isinstance(field, mongo_fields.GenericEmbeddedDocumentField):
+        print(field.choices)
+        generic_fields = {
+                cls.__name__: convert_db_to_field(
+                    f"{key}.{cls.__name__}",
+                    # Instead of having EmbeddedDocumentField(Bloc) we'll create fields for each
+                    # of the subclasses with EmbededdDocumentField(DatasetsListBloc), EmbeddedDocumentFied(DataservicesListBloc)…
+                    mongoengine.fields.EmbeddedDocumentField(cls),
+                    info,
+                )
+                for cls in list(field.choices)
+            }
+
+        field_read = GenericField({k: v[0].model for k, v in generic_fields.items()})
+        field_write = GenericField({k: v[1].model for k, v in generic_fields.items()})
+
+        def constructor_read(**kwargs):
+            return restx_fields.Nested(field_read, **kwargs)
+
+        def constructor_write(**kwargs):
+            return restx_fields.Nested(field_write, **kwargs)
     elif isinstance(field, mongo_fields.EmbeddedDocumentField):
         nested_fields = info.get("nested_fields")
         if nested_fields is not None:
@@ -675,7 +696,14 @@ def patch(obj, request) -> type:
                 model_attribute,
                 mongoengine.fields.EmbeddedDocumentField,
             ):
-                embedded_field = model_attribute.document_type().__class__
+                base_embedded_field = model_attribute.field.document_type().__class__
+                generic = info.get("generic", False)
+                generic_key = info.get("generic_key", DEFAULT_GENERIC_KEY)
+                embedded_field = (
+                        classes_by_names[value[generic_key]]
+                        if generic
+                        else base_embedded_field
+                    )
                 value = patch(embedded_field(), value)
             elif value and isinstance(
                 model_attribute,

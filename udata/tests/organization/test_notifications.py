@@ -57,8 +57,8 @@ class MembershipRequestNotificationTest(DBTestCase):
         self.assertIn(admin2, admin_users)
 
         for notification in notifications:
-            assert notification.request_organization == org
-            assert notification.request_user == applicant
+            assert notification.details.request_organization == org
+            assert notification.details.request_user == applicant
             assert_equal_dates(notification.created_at, request.created)
 
     def test_no_duplicate_notifications(self):
@@ -89,6 +89,6 @@ class MembershipRequestNotificationTest(DBTestCase):
         notifications = MembershipRequestNotification.objects.all()
         assert len(notifications) == 2
 
-        request_users = [notif.request_user for notif in notifications]
+        request_users = [notif.details.request_user for notif in notifications]
         self.assertIn(applicant1, request_users)
         self.assertIn(applicant2, request_users)
