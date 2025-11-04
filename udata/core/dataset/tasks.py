@@ -199,6 +199,9 @@ def export_csv(self, model=None):
             and resource
             and date.today().day == 1
         ):
+            log.info(
+                f"Archiving {model} csv catalog on {current_app.config['EXPORT_CSV_ARCHIVE_S3_BUCKET']} bucket"
+            )
             with storages.resources.open(resource.fs_filename, "rb") as f:
                 store_bytes(
                     bucket=current_app.config["EXPORT_CSV_ARCHIVE_S3_BUCKET"],
