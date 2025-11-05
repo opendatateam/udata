@@ -1,4 +1,5 @@
 from celery.utils.log import get_task_logger
+from flask import current_app
 
 from udata.core.badges import tasks as badge_tasks
 from udata.core.constants import HVD
@@ -37,6 +38,9 @@ def update_dataservice_hvd_badge() -> None:
     Update HVD badges to candidate dataservices, based on the hvd tag.
     Only dataservices owned by certified and public service organizations are candidate to have a HVD badge.
     """
+    if not current_app.config["HVD_SUPPORT"]:
+        log.error("You need to set HVD_SUPPORT if you want to update dataservice hvd badge")
+        return
     public_certified_orgs = (
         Organization.objects(badges__kind=PUBLIC_SERVICE).filter(badges__kind=CERTIFIED).only("id")
     )

@@ -18,6 +18,7 @@ from udata.harvest.models import HarvestJob
 from udata.models import Dataset
 from udata.rdf import DCAT, RDF, namespace_manager
 from udata.storage.s3 import get_from_json
+from udata.tests.api import PytestOnlyDBTestCase
 
 from .. import actions
 from ..backends.dcat import URIS_TO_REPLACE
@@ -67,9 +68,8 @@ def mock_csw_pagination(rmock, path, pattern):
     return url
 
 
-@pytest.mark.usefixtures("clean_db")
 @pytest.mark.options(PLUGINS=["dcat"])
-class DcatBackendTest:
+class DcatBackendTest(PytestOnlyDBTestCase):
     def test_simple_flat(self, rmock):
         filename = "flat.jsonld"
         url = mock_dcat(rmock, filename)
@@ -191,7 +191,6 @@ class DcatBackendTest:
 
     def test_harvest_dataservices_keep_attached_associated_datasets(self, rmock):
         """It should update the existing list of dataservice.datasets and not overwrite existing ones"""
-        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
 
         filename = "bnodes.xml"
         url = mock_dcat(rmock, filename)
@@ -359,10 +358,8 @@ class DcatBackendTest:
             is None
         )
 
-    @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/schemas", HARVEST_MAX_ITEMS=2)
+    @pytest.mark.options(HARVEST_MAX_ITEMS=2)
     def test_harvest_max_items(self, rmock):
-        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
-
         filename = "bnodes.xml"
         url = mock_dcat(rmock, filename)
         org = OrganizationFactory()
@@ -373,10 +370,7 @@ class DcatBackendTest:
         assert Dataset.objects.count() == 2
         assert HarvestJob.objects.first().status == "done"
 
-    @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/schemas")
     def test_harvest_spatial(self, rmock):
-        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
-
         filename = "bnodes.xml"
         url = mock_dcat(rmock, filename)
         org = OrganizationFactory()
@@ -445,10 +439,7 @@ class DcatBackendTest:
         assert resources_by_title["Resource 3-1"].schema.url is None
         assert resources_by_title["Resource 3-1"].schema.version == "2.2.0"
 
-    @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/schemas")
     def test_harvest_inspire_themese(self, rmock):
-        rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
-
         filename = "bnodes.xml"
         url = mock_dcat(rmock, filename)
         org = OrganizationFactory()
@@ -723,6 +714,48 @@ class DcatBackendTest:
         )  # noqa
         assert dataset.harvest.last_update.date() == date.today()
 
+    def test_datara_extended_roles_foaf(self, rmock):
+        # Converted manually from ISO-19139 using SEMICeu XSLT (tag geodcat-ap-2.0.0)
+        url = mock_dcat(rmock, "datara--5a26b0f6-0ccf-46ad-ac58-734054b91977.rdf.xml")
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
+        actions.run(source)
+        dataset = Dataset.objects.filter(organization=org).first()
+
+        assert dataset is not None
+        assert len(dataset.contact_points) == 2
+
+        assert dataset.contact_points[0].name == "IGN"
+        assert dataset.contact_points[0].email == "sav.bd@ign.fr"
+        assert dataset.contact_points[0].role == "rightsHolder"
+
+        assert dataset.contact_points[1].name == "Administrateur de Données"
+        assert dataset.contact_points[1].email == "sig.dreal-ara@developpement-durable.gouv.fr"
+        assert dataset.contact_points[1].role == "user"
+
+    def test_datara_extended_roles_vcard(self, rmock):
+        # Converted manually from ISO-19139 using SEMICeu XSLT (tag geodcat-ap-2.0.0)
+        url = mock_dcat(rmock, "datara--f40c3860-7236-4b30-a141-23b8ae33f7b2.rdf.xml")
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
+        actions.run(source)
+        dataset = Dataset.objects.filter(organization=org).first()
+
+        assert dataset is not None
+        assert len(dataset.contact_points) == 3
+
+        assert dataset.contact_points[0].name == "Administrateur de Données"
+        assert dataset.contact_points[0].email == "sig.dreal-ara@developpement-durable.gouv.fr"
+        assert dataset.contact_points[0].role == "contact"
+
+        assert dataset.contact_points[1].name == "Jean-Michel GENIS"
+        assert dataset.contact_points[1].email == "jm.genis@cbn-alpin.fr"
+        assert dataset.contact_points[1].role == "rightsHolder"
+
+        assert dataset.contact_points[2].name == "Conservatoire Botanique National Massif Central"
+        assert dataset.contact_points[2].email == "Benoit.Renaux@cbnmc.fr"
+        assert dataset.contact_points[2].role == "rightsHolder"
+
     def test_udata_xml_catalog(self, rmock):
         LicenseFactory(id="fr-lo", title="Licence ouverte / Open Licence")
         url = mock_dcat(rmock, "udata.xml")
@@ -893,9 +926,8 @@ class DcatBackendTest:
         assert "404 Client Error" in job.errors[0].message
 
 
-@pytest.mark.usefixtures("clean_db")
 @pytest.mark.options(PLUGINS=["csw"])
-class CswDcatBackendTest:
+class CswDcatBackendTest(PytestOnlyDBTestCase):
     def test_geonetworkv4(self, rmock):
         url = mock_csw_pagination(rmock, "geonetwork/srv/eng/csw.rdf", "geonetworkv4-page-{}.xml")
         org = OrganizationFactory()
@@ -1044,9 +1076,8 @@ class CswDcatBackendTest:
         assert len(job.items) == 1
 
 
-@pytest.mark.usefixtures("clean_db")
 @pytest.mark.options(PLUGINS=["csw"])
-class CswIso19139DcatBackendTest:
+class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
     @pytest.mark.parametrize(
         "remote_url_prefix",
         [

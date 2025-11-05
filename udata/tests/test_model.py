@@ -12,9 +12,8 @@ from udata.i18n import _
 from udata.models import Dataset
 from udata.mongo import build_test_config, db, validate_config
 from udata.settings import Defaults
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates, assert_json_equal
-
-pytestmark = [pytest.mark.usefixtures("clean_db")]
 
 
 class UUIDTester(db.Document):
@@ -70,7 +69,7 @@ class PrivateURLTester(db.Document):
     url = db.URLField(private=True)
 
 
-class AutoUUIDFieldTest:
+class AutoUUIDFieldTest(PytestOnlyDBTestCase):
     def test_auto_populate(self):
         """AutoUUIDField should populate itself if not set"""
         obj = UUIDTester()
@@ -103,7 +102,7 @@ class AutoUUIDFieldTest:
         assert isinstance(obj.uuid, UUID)
 
 
-class SlugFieldTest:
+class SlugFieldTest(PytestOnlyDBTestCase):
     def test_populate_on_pre_save_signal_is_registered(self):
         """populate_on_pre_save signal should be registered"""
         # It isn't registered on startup
@@ -278,7 +277,7 @@ class SlugFieldTest:
         assert field.slugify("à-€-ü") == "a-eur-u"
 
 
-class DateFieldTest:
+class DateFieldTest(PytestOnlyDBTestCase):
     def test_none_if_empty_and_not_required(self):
         obj = DateTester()
         assert obj.a_date is None
@@ -308,7 +307,7 @@ class DateFieldTest:
             obj.save()
 
 
-class DateRangeFieldTest:
+class DateRangeFieldTest(PytestOnlyDBTestCase):
     def test_none_if_empty_and_not_required(self):
         obj = DateRangeTester()
         assert obj.temporal is None
@@ -390,7 +389,7 @@ class DateRangeFieldTest:
         assert obj.temporal.end == end
 
 
-class URLFieldTest:
+class URLFieldTest(PytestOnlyDBTestCase):
     def test_none_if_empty_and_not_required(self):
         obj = URLTester()
         assert obj.url is None
@@ -422,7 +421,7 @@ class URLFieldTest:
             URLTester(url=url).save()
 
 
-class DatetimedTest:
+class DatetimedTest(PytestOnlyDBTestCase):
     def test_class(self):
         assert isinstance(DatetimedTester.created_at, db.DateTimeField)
         assert isinstance(DatetimedTester.last_modified, db.DateTimeField)
@@ -483,7 +482,7 @@ class DatetimedTest:
         assert_equal_dates(datetimed.last_modified, manual)
 
 
-class ExtrasFieldTest:
+class ExtrasFieldTest(PytestOnlyDBTestCase):
     def test_default_validate_primitive_type(self):
         class Tester(db.Document):
             extras = db.ExtrasField()
@@ -608,7 +607,7 @@ class ExtrasFieldTest:
         )
 
 
-class ModelResolutionTest:
+class ModelResolutionTest(PytestOnlyDBTestCase):
     def test_resolve_exact_match(self):
         assert db.resolve_model("Dataset") == Dataset
 
@@ -632,7 +631,7 @@ class ModelResolutionTest:
             db.resolve_model({"field": "value"})
 
 
-class MongoConfigTest:
+class MongoConfigTest(PytestOnlyDBTestCase):
     def test_validate_default_value(self):
         validate_config({"MONGODB_HOST": Defaults.MONGODB_HOST})
 

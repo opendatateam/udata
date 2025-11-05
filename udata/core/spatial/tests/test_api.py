@@ -1,3 +1,4 @@
+import pytest
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
@@ -13,15 +14,12 @@ from udata.core.spatial.tasks import compute_geozones_metrics
 from udata.tests.api import APITestCase
 from udata.tests.api.test_datasets_api import SAMPLE_GEOM
 from udata.tests.features.territories import (
-    TerritoriesSettings,
     create_geozones_fixtures,
 )
 from udata.utils import faker
 
 
 class SpatialApiTest(APITestCase):
-    modules = []
-
     def test_zones_api_one(self):
         zone = GeoZoneFactory()
 
@@ -65,7 +63,7 @@ class SpatialApiTest(APITestCase):
         for i in range(4):
             GeoZoneFactory(name="name-test-{0}".format(i) if i % 2 else faker.word())
 
-        response = self.get(url_for("api.suggest_zones"), qs={"q": "name-test", "size": "5"})
+        response = self.get(url_for("api.suggest_zones", q="name-test", size=5))
         self.assert200(response)
 
         self.assertEqual(len(response.json), 2)
@@ -84,7 +82,7 @@ class SpatialApiTest(APITestCase):
         for _ in range(2):
             GeoZoneFactory()
 
-        response = self.get(url_for("api.suggest_zones"), qs={"q": zone.id})
+        response = self.get(url_for("api.suggest_zones", q=zone.id))
         self.assert200(response)
 
         self.assertEqual(response.json[0]["id"], zone["id"])
@@ -96,7 +94,7 @@ class SpatialApiTest(APITestCase):
         country_zone = GeoZoneFactory(name="name-test-country", level=country_level.id)
         region_zone = GeoZoneFactory(name="name-test-region", level=region_level.id)
 
-        response = self.get(url_for("api.suggest_zones"), qs={"q": "name-test", "size": "5"})
+        response = self.get(url_for("api.suggest_zones", q="name-test", size=5))
         self.assert200(response)
 
         self.assertEqual(len(response.json), 2)
@@ -108,7 +106,7 @@ class SpatialApiTest(APITestCase):
         for i in range(4):
             GeoZoneFactory(code="code-test-{0}".format(i) if i % 2 else faker.word())
 
-        response = self.get(url_for("api.suggest_zones"), qs={"q": "code-test", "size": "5"})
+        response = self.get(url_for("api.suggest_zones", q="code-test", size=5))
         self.assert200(response)
 
         self.assertEqual(len(response.json), 2)
@@ -126,7 +124,7 @@ class SpatialApiTest(APITestCase):
         for i in range(3):
             GeoZoneFactory(name=5 * "{0}".format(i), code=3 * "{0}".format(i))
 
-        response = self.get(url_for("api.suggest_zones"), qs={"q": "xxxxxx", "size": "5"})
+        response = self.get(url_for("api.suggest_zones", q="xxxxxx", size=5))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
@@ -135,7 +133,7 @@ class SpatialApiTest(APITestCase):
         for i in range(4):
             GeoZoneFactory(name="name-testé-{0}".format(i) if i % 2 else faker.word())
 
-        response = self.get(url_for("api.suggest_zones"), qs={"q": "name-testé", "size": "5"})
+        response = self.get(url_for("api.suggest_zones", q="name-testé", size=5))
         self.assert200(response)
 
         self.assertEqual(len(response.json), 2)
@@ -150,7 +148,7 @@ class SpatialApiTest(APITestCase):
 
     def test_suggest_zones_empty(self):
         """It should not provide zones suggestion if no data is present"""
-        response = self.get(url_for("api.suggest_zones"), qs={"q": "xxxxxx", "size": "5"})
+        response = self.get(url_for("api.suggest_zones", q="xxxxxx", size=5))
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
@@ -194,7 +192,7 @@ class SpatialApiTest(APITestCase):
                 organization=organization, spatial=SpatialCoverageFactory(zones=[paca.id])
             )
 
-        response = self.get(url_for("api.zone_datasets", id=paca.id), qs={"size": 2})
+        response = self.get(url_for("api.zone_datasets", id=paca.id, size=2))
         self.assert200(response)
         self.assertEqual(len(response.json), 2)
 
@@ -206,7 +204,7 @@ class SpatialApiTest(APITestCase):
                 organization=organization, spatial=SpatialCoverageFactory(zones=[paca.id])
             )
 
-        response = self.get(url_for("api.zone_datasets", id=paca.id), qs={"dynamic": 1})
+        response = self.get(url_for("api.zone_datasets", id=paca.id, dynamic=1))
         self.assert200(response)
         # No dynamic datasets given that the setting is deactivated by default.
         self.assertEqual(len(response.json), 3)
@@ -219,7 +217,7 @@ class SpatialApiTest(APITestCase):
                 organization=organization, spatial=SpatialCoverageFactory(zones=[paca.id])
             )
 
-        response = self.get(url_for("api.zone_datasets", id=paca.id), qs={"dynamic": 1, "size": 2})
+        response = self.get(url_for("api.zone_datasets", id=paca.id, dynamic=1, size=2))
         self.assert200(response)
         # No dynamic datasets given that the setting is deactivated by default.
         self.assertEqual(len(response.json), 2)
@@ -260,10 +258,11 @@ class SpatialApiTest(APITestCase):
         self.assertEqual(response.json["features"][1]["properties"]["datasets"], 3)
 
 
+@pytest.mark.options(
+    ACTIVATE_TERRITORIES=True,
+    HANDLED_LEVELS=("fr:commune", "fr:departement", "fr:region", "country"),
+)
 class SpatialTerritoriesApiTest(APITestCase):
-    modules = []
-    settings = TerritoriesSettings
-
     def test_zone_datasets_with_dynamic_and_setting(self):
         paca, bdr, arles = create_geozones_fixtures()
         organization = OrganizationFactory()
@@ -272,7 +271,7 @@ class SpatialTerritoriesApiTest(APITestCase):
                 organization=organization, spatial=SpatialCoverageFactory(zones=[paca.id])
             )
 
-        response = self.get(url_for("api.zone_datasets", id=paca.id), qs={"dynamic": 1})
+        response = self.get(url_for("api.zone_datasets", id=paca.id, dynamic=1))
         self.assert200(response)
         # No dynamic datasets given that they are added by udata-front extension.
         self.assertEqual(len(response.json), 3)
@@ -285,15 +284,13 @@ class SpatialTerritoriesApiTest(APITestCase):
                 organization=organization, spatial=SpatialCoverageFactory(zones=[paca.id])
             )
 
-        response = self.get(url_for("api.zone_datasets", id=paca.id), qs={"dynamic": 1, "size": 2})
+        response = self.get(url_for("api.zone_datasets", id=paca.id, dynamic=1, size=2))
         self.assert200(response)
         # No dynamic datasets given that they are added by udata-front extension.
         self.assertEqual(len(response.json), 2)
 
 
 class DatasetsSpatialAPITest(APITestCase):
-    modules = []
-
     def test_create_spatial_zones(self):
         paca, _, _ = create_geozones_fixtures()
         granularity = spatial_granularities[0][0]

@@ -54,8 +54,8 @@ class DatasetSearch(ModelSearchAdapter):
     }
 
     @classmethod
-    def is_indexable(cls, dataset):
-        return dataset.deleted is None and dataset.archived is None and not dataset.private
+    def is_indexable(cls, dataset: Dataset):
+        return dataset.is_visible
 
     @classmethod
     def mongo_search(cls, args):
