@@ -251,7 +251,9 @@ def update_dataset_inspire_badge() -> None:
     """
     Update INSPIRE badges to candidate datasets, based on the inspire tag.
     """
-
+    if not current_app.config["INSPIRE_SUPPORT"]:
+        log.error("You need to set INSPIRE_SUPPORT if you want to update dataset INSPIRE badge")
+        return
     datasets = Dataset.objects(tags="inspire", badges__kind__ne="inspire")
     log.info(f"Adding INSPIRE badge to {datasets.count()} datasets")
     for dataset in datasets:
