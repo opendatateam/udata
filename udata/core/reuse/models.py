@@ -116,6 +116,14 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
             "key": "dataset",
         },
     )
+    dataservices = field(
+        db.ListField(
+            field(db.ReferenceField("Dataservice", reverse_delete_rule=db.PULL)),
+        ),
+        filterable={
+            "key": "dataservice",
+        },
+    )
     tags = field(
         db.TagListField(),
         filterable={
