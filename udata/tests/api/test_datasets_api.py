@@ -1366,6 +1366,9 @@ class DatasetAPITest(APITestCase):
             response.json["access_type_reason"]
             == "Les données contiennent des information sensibles ou liées au secret défense"
         )
+        assert response.json["access_audiences"][0]["role"] == AccessAudienceType.ADMINISTRATION
+        assert response.json["access_audiences"][0]["condition"] == AccessAudienceCondition.YES
+        assert "id" not in response.json["access_audiences"][0]
 
         dataset.reload()
         assert dataset.access_type == AccessType.RESTRICTED

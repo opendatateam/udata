@@ -401,7 +401,7 @@ dataset_fields = api.model(
             attribute="license.id", default=DEFAULT_LICENSE["id"], description="The dataset license"
         ),
         "access_type": fields.String(allow_null=True),
-        "access_audiences": fields.Nested(AccessAudience.__read_fields__),
+        "access_audiences": fields.List(fields.Nested(AccessAudience.__read_fields__)),
         "authorization_request_url": fields.String(allow_null=True),
         "access_type_reason_category": fields.String(allow_null=True),
         "access_type_reason": fields.String(allow_null=True),
