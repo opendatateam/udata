@@ -2,6 +2,7 @@ from datetime import datetime
 
 import pytest
 from flask import url_for
+from flask_security.recoverable import generate_reset_password_token
 
 from udata.commands.fixtures import UserFactory
 from udata.tests.api import PytestOnlyAPITestCase
@@ -10,7 +11,48 @@ from udata.tests.helpers import capture_mails
 
 class SecurityAPITest(PytestOnlyAPITestCase):
     @pytest.mark.options(CAPTCHETAT_BASE_URL=None)
-    def test_ask_for_reset(self, api, client):
+    def test_register(self, api):
+        # We cannot test for mail sending since they are sent with Flask
+        # directly and not with our system but if the sending is working
+        # we test the rendering of the mail.
+
+        response = api.post(
+            url_for("security.register"),
+            {
+                "first_name": "Jane",
+                "last_name": "Doe",
+                "accept_conditions": True,
+                "email": "jane@example.org",
+                "password": "Password123",
+                "password_confirm": "Password123",
+                "submit": True,
+            },
+        )
+        self.assertStatus(response, 200)
+
+    @pytest.mark.options(CAPTCHETAT_BASE_URL=None, SECURITY_RETURN_GENERIC_RESPONSES=True)
+    def test_register_existing(self, api):
+        # We cannot test for mail sending since they are sent with Flask
+        # directly and not with our system but if the sending is working
+        # we test the rendering of the mail.
+
+        UserFactory(email="jane@example.org", confirmed_at=datetime.now())
+        response = api.post(
+            url_for("security.register"),
+            {
+                "first_name": "Jane",
+                "last_name": "Doe",
+                "accept_conditions": True,
+                "email": "jane@example.org",
+                "password": "Password123",
+                "password_confirm": "Password123",
+                "submit": True,
+            },
+        )
+        self.assertStatus(response, 200)
+
+    @pytest.mark.options(CAPTCHETAT_BASE_URL=None)
+    def test_ask_for_reset(self, api):
         # We cannot test for mail sending since they are sent with Flask
         # directly and not with our system but if the sending is working
         # we test the rendering of the mail.
@@ -23,7 +65,7 @@ class SecurityAPITest(PytestOnlyAPITestCase):
         self.assertStatus(response, 200)
 
     @pytest.mark.options(CAPTCHETAT_BASE_URL=None)
-    def test_change_password(self, api, client):
+    def test_change_notice_mail(self, api):
         # We cannot test for mail sending since they are sent with Flask
         # directly and not with our system but if the sending is working
         # we test the rendering of the mail.
@@ -45,7 +87,7 @@ class SecurityAPITest(PytestOnlyAPITestCase):
         self.assertStatus(response, 200)
 
     @pytest.mark.options(CAPTCHETAT_BASE_URL=None)
-    def test_change_email_confirmation(self, api, client):
+    def test_change_email_confirmation(self, api):
         user = UserFactory(email="jane@example.org", confirmed_at=datetime.now())
         self.login(user)
 
@@ -64,3 +106,18 @@ class SecurityAPITest(PytestOnlyAPITestCase):
         assert len(mails[0].recipients) == 1
         assert mails[0].recipients[0] == "jane2@example.org"
         assert mails[0].subject == "Confirm your email address"
+
+    @pytest.mark.options(CAPTCHETAT_BASE_URL=None, SECURITY_RETURN_GENERIC_RESPONSES=True)
+    def test_reset_password(self, api):
+        user = UserFactory(email="jane@example.org", confirmed_at=datetime.now())
+        token = generate_reset_password_token(user)
+
+        response = api.post(
+            url_for("security.reset_password", token=token),
+            {
+                "password": "Password123",
+                "password_confirm": "Password123",
+                "submit": True,
+            },
+        )
+        self.assertStatus(response, 200)
