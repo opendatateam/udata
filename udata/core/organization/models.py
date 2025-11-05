@@ -3,6 +3,7 @@ from itertools import chain
 
 from blinker import Signal
 from flask import url_for
+from flask_babel import LazyString
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
@@ -34,7 +35,7 @@ from .constants import (
 
 __all__ = ("Organization", "Team", "Member", "MembershipRequest")
 
-BADGES: dict[str, str] = {
+BADGES: dict[str, LazyString] = {
     PUBLIC_SERVICE: _("Public Service"),
     CERTIFIED: _("Certified"),
     ASSOCIATION: _("Association"),
