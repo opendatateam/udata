@@ -69,6 +69,9 @@ def filter_changed_fields(document, previous, changed_fields: list[str]):
         # the `access_type` of a dataset). This field is then not present in `previous`. Returning `None`
         # is a little bit wrong because we should return the previous value of the `license`. Right now
         # we don't notice license change because `None (not present) == None (removed)` is equal.
+        if field not in previous:
+            continue
+
         previous_value = previous.get(field, None)
         current_value = get_field_value_from_path(document, field)
         # Filter out special case of list reordering, does not support unhashable types
