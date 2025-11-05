@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2025-11-05 10:05+0100\n"
-"PO-Revision-Date: 2025-11-05 09:16\n"
+"PO-Revision-Date: 2025-11-05 09:34\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -171,7 +171,7 @@ msgstr "Modifier l'adresse email"
 #: udata/auth/mails.py:67 udata/auth/mails.py:71 udata/auth/mails.py:96
 #: udata/auth/mails.py:99
 msgid "Confirm your email address"
-msgstr ""
+msgstr "Confirmez votre adresse e-mail"
 
 #: udata/auth/mails.py:69
 #, python-format
@@ -180,47 +180,47 @@ msgstr "Bienvenue sur %(site)s !"
 
 #: udata/auth/mails.py:70 udata/auth/mails.py:98
 msgid "Please confirm your email address."
-msgstr ""
+msgstr "Veuillez confirmer votre adresse e-mail."
 
 #: udata/auth/mails.py:80
 msgid "Your email address is already associated with an account"
-msgstr ""
+msgstr "Votre adresse e-mail est déjà associée à un compte"
 
 #: udata/auth/mails.py:83
 #, python-format
 msgid "Someone (you?) tried to create an account on %(site)s with your email."
-msgstr ""
+msgstr "Quelqu'un (vous? ) a essayé de créer un compte sur %(site)s avec votre email."
 
 #: udata/auth/mails.py:86
 msgid "If you forgot your password, you can reset it."
-msgstr ""
+msgstr "Si vous avez oublié votre mot de passe, vous pouvez le réinitialiser."
 
 #: udata/auth/mails.py:87 udata/auth/mails.py:109 udata/auth/mails.py:116
 #: udata/auth/mails.py:144
 msgid "Reset your password"
-msgstr ""
+msgstr "Réinitialisez votre mot de passe"
 
 #: udata/auth/mails.py:112
 #, python-format
 msgid "Someone requested a password reset for your %(site)s account."
-msgstr ""
+msgstr "Quelqu'un a demandé une réinitialisation du mot de passe pour votre compte %(site)s."
 
 #: udata/auth/mails.py:115
 msgid "If this wasn't you, please ignore this email."
-msgstr ""
+msgstr "Si ce n'était pas vous, veuillez ignorer cet e-mail."
 
 #: udata/auth/mails.py:127
 msgid "Your data.gouv.fr password has been reset."
-msgstr ""
+msgstr "Votre mot de passe data.gouv.fr a été réinitialisé."
 
 #: udata/auth/mails.py:140
 #, python-format
 msgid "Your %(site)s account password has been changed."
-msgstr ""
+msgstr "Le mot de passe de votre compte %(site)s a été modifié."
 
 #: udata/auth/mails.py:143
 msgid "If you did not change your password, please reset it."
-msgstr ""
+msgstr "Si vous n'avez pas changé votre mot de passe, veuillez le réinitialiser."
 
 #: udata/auth/password_validation.py:26
 #, python-brace-format
@@ -845,35 +845,35 @@ msgstr "Sujet"
 #: udata/core/discussions/mails.py:9
 #, python-format
 msgid "A new discussion has been opened on your %(type)s"
-msgstr ""
+msgstr "Une nouvelle discussion a été ouverte sur votre %(type)s"
 
 #: udata/core/discussions/mails.py:15
 #, python-format
 msgid "You have a new discussion from %(user_or_org)s on your %(type)s %(object)s"
-msgstr ""
+msgstr "Vous avez une nouvelle discussion de %(user_or_org)s sur votre %(type)s %(object)s"
 
 #: udata/core/discussions/mails.py:21 udata/core/discussions/mails.py:40
 #: udata/core/discussions/mails.py:59
 msgid "Discussion title:"
-msgstr ""
+msgstr "Titre de la discussion :"
 
 #: udata/core/discussions/mails.py:22 udata/core/discussions/mails.py:41
 #: udata/core/discussions/mails.py:60
 msgid "Comment:"
-msgstr ""
+msgstr "Commentaire :"
 
 #: udata/core/discussions/mails.py:23 udata/core/discussions/mails.py:42
 msgid "Reply"
-msgstr ""
+msgstr "Répondre"
 
 #: udata/core/discussions/mails.py:30
 msgid "A new comment has been added to a discussion"
-msgstr ""
+msgstr "Un nouveau commentaire a été ajouté à une discussion"
 
 #: udata/core/discussions/mails.py:34
 #, python-format
 msgid "You have a new comment from %(user_or_org)s on your %(type)s %(object)s"
-msgstr ""
+msgstr "Vous avez un nouveau commentaire de %(user_or_org)s sur votre %(type)s %(object)s"
 
 #: udata/core/discussions/mails.py:49
 msgid "A discussion has been closed"
@@ -882,11 +882,11 @@ msgstr "Une discussion a été clôturée"
 #: udata/core/discussions/mails.py:53
 #, python-format
 msgid "The discussion you participated in on the %(type)s %(object)s has been closed by %(user_or_org)s."
-msgstr ""
+msgstr "La discussion à laquelle vous avez participé sur l' %(type)s %(object)s a été clôturée par %(user_or_org)s."
 
 #: udata/core/discussions/mails.py:61
 msgid "View the discussion"
-msgstr ""
+msgstr "Voir la discussion"
 
 #: udata/core/jobs/forms.py:29
 msgid "Tasks"
@@ -987,11 +987,11 @@ msgstr "Nouvelle demande d'adhésion"
 #: udata/core/organization/mails.py:13
 #, python-format
 msgid "You received a membership request from %(user)s for your organization %(org)s"
-msgstr ""
+msgstr "Vous avez reçu une demande d'adhésion de %(user)s pour votre organisation %(org)s"
 
 #: udata/core/organization/mails.py:18
 msgid "Reason for the request:"
-msgstr ""
+msgstr "Raison de la demande :"
 
 #: udata/core/organization/mails.py:19
 msgid "See the request"
@@ -1004,77 +1004,77 @@ msgstr "Demande d'adhésion refusée"
 #: udata/core/organization/mails.py:30
 #, python-format
 msgid "Your membership for the organization %(org)s has been refused"
-msgstr ""
+msgstr "Votre adhésion à l'organisation %(org)s a été refusée"
 
 #: udata/core/organization/mails.py:40
 msgid "Your invitation to join an organization has been accepted"
-msgstr ""
+msgstr "Votre invitation à rejoindre une organisation a été acceptée"
 
 #: udata/core/organization/mails.py:44
 #, python-format
 msgid "Good news! Your request to join the organization %(org)s has been approved."
-msgstr ""
+msgstr "Bonne nouvelle ! Votre demande d'adhésion à l'organisation %(org)s a été approuvée."
 
 #: udata/core/organization/mails.py:49 udata/core/organization/mails.py:66
 #: udata/core/organization/mails.py:82 udata/core/organization/mails.py:97
 #: udata/core/organization/mails.py:112 udata/core/organization/mails.py:127
 #: udata/core/organization/mails.py:142
 msgid "View the organization"
-msgstr ""
+msgstr "Voir l'organisation"
 
 #: udata/core/organization/mails.py:57
 msgid "You have been added as a member of an organization"
-msgstr ""
+msgstr "Vous avez été ajouté en tant que membre d'une organisation"
 
 #: udata/core/organization/mails.py:61
 #, python-format
 msgid "Good news! You are now a member of %(org)s."
-msgstr ""
+msgstr "Bonne nouvelle ! Vous êtes maintenant membre de %(org)s."
 
 #: udata/core/organization/mails.py:74
 msgid "Your organization has been certified"
-msgstr ""
+msgstr "Votre organisation a été certifiée"
 
 #: udata/core/organization/mails.py:78
 #, python-format
 msgid "Good news! Your organization %(org)s has been certified by our team. A badge is now associated with your organization."
-msgstr ""
+msgstr "Bonne nouvelle ! Votre organisation %(org)s a été certifiée par notre équipe. Un badge est maintenant associé à votre organisation."
 
 #: udata/core/organization/mails.py:89
 msgid "Your organization has been identified as a public service"
-msgstr ""
+msgstr "Votre organisation a été identifiée comme un service public"
 
 #: udata/core/organization/mails.py:93
 #, python-format
 msgid "Good news! Your organization %(org)s has been identified by our team as a public service. A badge is now associated with your organization."
-msgstr ""
+msgstr "Bonne nouvelle ! Votre organisation %(org)s a été identifiée par notre équipe comme un service public. Un badge est maintenant associé à votre organisation."
 
 #: udata/core/organization/mails.py:104
 msgid "Your organization has been identified as a local authority"
-msgstr ""
+msgstr "Votre organisation a été identifiée comme étant une collectivité territoriale"
 
 #: udata/core/organization/mails.py:108
 #, python-format
 msgid "Good news! Your organization %(org)s has been identified by our team as a local authority. A badge is now associated with your organization."
-msgstr ""
+msgstr "Bonne nouvelle ! Votre organisation %(org)s a été identifiée par notre équipe comme une collectivité territoriale. Un badge est maintenant associé à votre organisation."
 
 #: udata/core/organization/mails.py:119
 msgid "Your organization has been identified as a company"
-msgstr ""
+msgstr "Votre organisation a été identifiée comme entreprise"
 
 #: udata/core/organization/mails.py:123
 #, python-format
 msgid "Your organization %(org)s has been identified by our team as a company. A badge is now associated with your organization."
-msgstr ""
+msgstr "Votre organisation %(org)s a été identifiée par notre équipe comme une entreprise. Un badge est maintenant associé à votre organisation."
 
 #: udata/core/organization/mails.py:134
 msgid "Your organization has been identified as an association"
-msgstr ""
+msgstr "Votre organisation a été identifiée comme une association"
 
 #: udata/core/organization/mails.py:138
 #, python-format
 msgid "Your organization %(org)s has been identified by our team as an association. A badge is now associated with your organization."
-msgstr ""
+msgstr "Votre organisation %(org)s a été identifiée par notre équipe comme une association. Un badge est maintenant associé à votre organisation."
 
 #: udata/core/organization/models.py:38
 msgid "Public Service"
@@ -1274,20 +1274,20 @@ msgstr "Outils open data"
 
 #: udata/core/reuse/mails.py:9
 msgid "New reuse on your dataset"
-msgstr ""
+msgstr "Nouvelle réutilisation de votre jeu de données"
 
 #: udata/core/reuse/mails.py:13
 #, python-format
 msgid "A new reuse has been published by %(user_or_org)s on your dataset %(dataset)s"
-msgstr ""
+msgstr "Une nouvelle réutilisation a été publiée par %(user_or_org)s sur votre jeu de données %(dataset)s"
 
 #: udata/core/reuse/mails.py:18
 msgid "Reuse title:"
-msgstr ""
+msgstr "Titre de la réutilisation :"
 
 #: udata/core/reuse/mails.py:19
 msgid "View the reuse"
-msgstr ""
+msgstr "Voir la réutilisation"
 
 #: udata/core/reuse/models.py:39
 msgid "This URL is already registered"
@@ -1485,7 +1485,7 @@ msgstr "Votre compte est maintenant supprimé"
 #: udata/core/user/mails.py:18
 #, python-format
 msgid "Deletion of your inactive %(site)s account"
-msgstr ""
+msgstr "Suppression de votre compte %(site)s inactif"
 
 #: udata/core/user/mails.py:22
 #, python-format
@@ -1504,7 +1504,7 @@ msgstr "Nous avons constaté que votre compte associé à l'adresse (%(user_emai
 
 #: udata/core/user/mails.py:42
 msgid "If you want to keep your account, please log in with your account."
-msgstr ""
+msgstr "Si vous souhaitez conserver votre compte, veuillez vous connecter avec votre compte."
 
 #: udata/core/user/mails.py:46
 #, python-format
@@ -1727,7 +1727,7 @@ msgstr "L'équipe de %(site)s"
 
 #: udata/templates/mail/message.html:62
 msgid "Have a great day"
-msgstr ""
+msgstr "Très bonne journée"
 
 #: udata/templates/security/change_password.html:9
 #: udata/templates/security/change_password.html:16
@@ -1797,17 +1797,17 @@ msgstr "Soumettre"
 #: udata/tests/test_mail.py:17 udata/tests/test_mail.py:32
 #: udata/tests/test_mail.py:45 udata/tests/test_mail.py:61
 msgid "Some text"
-msgstr ""
+msgstr "Du texte"
 
 #: udata/tests/test_mail.py:76 udata/tests/test_mail.py:151
 #, python-format
 msgid "Some text %(org)s"
-msgstr ""
+msgstr "Du texte %(org)s"
 
 #: udata/tests/test_mail.py:94 udata/tests/test_mail.py:111
 #: udata/tests/test_mail.py:133
 msgid "Some text:"
-msgstr ""
+msgstr "Du texte :"
 
 #: udata/tests/forms/test_model_field.py:163
 msgid "Expect a \"Target\" class but \"Wrong\" was found"
