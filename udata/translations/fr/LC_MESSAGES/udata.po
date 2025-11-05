@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2025-11-05 10:05+0100\n"
-"PO-Revision-Date: 2025-11-05 09:34\n"
+"PO-Revision-Date: 2025-11-05 15:55\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -882,7 +882,7 @@ msgstr "Une discussion a été clôturée"
 #: udata/core/discussions/mails.py:53
 #, python-format
 msgid "The discussion you participated in on the %(type)s %(object)s has been closed by %(user_or_org)s."
-msgstr "La discussion à laquelle vous avez participé sur l' %(type)s %(object)s a été clôturée par %(user_or_org)s."
+msgstr "La discussion à laquelle vous avez participé sur %(type)s %(object)s a été clôturée par %(user_or_org)s."
 
 #: udata/core/discussions/mails.py:61
 msgid "View the discussion"
