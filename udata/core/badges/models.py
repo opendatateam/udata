@@ -57,7 +57,7 @@ class BadgeMixin:
             msg = "Unknown badge type for {model}: {kind}"
             raise db.ValidationError(msg.format(model=self.__class__.__name__, kind=kind))
         badge = self._fields["badges"].field.document_type(kind=kind)
-        if current_user.is_authenticated:
+        if current_user and current_user.is_authenticated:
             badge.created_by = current_user.id
 
         self.update(__raw__={"$push": {"badges": {"$each": [badge.to_mongo()], "$position": 0}}})
