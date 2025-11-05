@@ -287,7 +287,7 @@ class Dataservice(
         auditable=False,
     )
 
-    @field(description="Link to the API endpoint for this dataservice")
+    @field(description="Link to the API endpoint for this dataservice", show_as_ref=True)
     def self_api_url(self, **kwargs):
         return url_for(
             "api.dataservice",
