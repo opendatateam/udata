@@ -325,7 +325,8 @@ def generate_fields(**kwargs) -> Callable:
             kwargs.get("nested_filters", {})
         )
 
-        read_fields["id"] = restx_fields.String(required=True, readonly=True)
+        if isinstance(cls, db.Document) or isinstance(cls, db.DynamicDocument):
+            read_fields["id"] = restx_fields.String(required=True, readonly=True)
 
         classes_by_names[cls.__name__] = cls
         save_class_by_parents(cls)
