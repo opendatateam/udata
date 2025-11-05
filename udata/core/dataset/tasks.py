@@ -225,6 +225,9 @@ def update_dataset_hvd_badge() -> None:
     Update HVD badges to candidate datasets, based on the hvd tag.
     Only datasets owned by certified and public service organizations are candidate to have a HVD badge.
     """
+    if not current_app.config["HVD_SUPPORT"]:
+        log.error("You need to set HVD_SUPPORT if you want to update dataset hvd badge")
+        return
     public_certified_orgs = (
         Organization.objects(badges__kind=PUBLIC_SERVICE).filter(badges__kind=CERTIFIED).only("id")
     )
