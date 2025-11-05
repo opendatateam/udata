@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2025-10-27 16:50+0100\n"
-"PO-Revision-Date: 2025-10-27 16:50+0100\n"
+"POT-Creation-Date: 2025-11-05 10:05+0100\n"
+"PO-Revision-Date: 2025-11-05 10:05+0100\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -31,11 +31,11 @@ msgstr ""
 msgid "Login instructions"
 msgstr ""
 
-#: udata/settings.py:132
+#: udata/auth/mails.py:125 udata/settings.py:132
 msgid "Your password has been reset"
 msgstr ""
 
-#: udata/settings.py:133
+#: udata/auth/mails.py:137 udata/settings.py:133
 msgid "Your password has been changed"
 msgstr ""
 
@@ -171,6 +171,60 @@ msgstr ""
 msgid "Change email"
 msgstr ""
 
+#: udata/auth/mails.py:67 udata/auth/mails.py:71 udata/auth/mails.py:96
+#: udata/auth/mails.py:99
+msgid "Confirm your email address"
+msgstr ""
+
+#: udata/auth/mails.py:69
+#, python-format
+msgid "Welcome to %(site)s!"
+msgstr ""
+
+#: udata/auth/mails.py:70 udata/auth/mails.py:98
+msgid "Please confirm your email address."
+msgstr ""
+
+#: udata/auth/mails.py:80
+msgid "Your email address is already associated with an account"
+msgstr ""
+
+#: udata/auth/mails.py:83
+#, python-format
+msgid "Someone (you?) tried to create an account on %(site)s with your email."
+msgstr ""
+
+#: udata/auth/mails.py:86
+msgid "If you forgot your password, you can reset it."
+msgstr ""
+
+#: udata/auth/mails.py:87 udata/auth/mails.py:109 udata/auth/mails.py:116
+#: udata/auth/mails.py:144
+msgid "Reset your password"
+msgstr ""
+
+#: udata/auth/mails.py:112
+#, python-format
+msgid "Someone requested a password reset for your %(site)s account."
+msgstr ""
+
+#: udata/auth/mails.py:115
+msgid "If this wasn't you, please ignore this email."
+msgstr ""
+
+#: udata/auth/mails.py:127
+msgid "Your data.gouv.fr password has been reset."
+msgstr ""
+
+#: udata/auth/mails.py:140
+#, python-format
+msgid "Your %(site)s account password has been changed."
+msgstr ""
+
+#: udata/auth/mails.py:143
+msgid "If you did not change your password, please reset it."
+msgstr ""
+
 #: udata/auth/password_validation.py:26
 #, python-brace-format
 msgid "Password must be at least {pass_length} characters long"
@@ -190,10 +244,6 @@ msgstr ""
 
 #: udata/auth/password_validation.py:51
 msgid "Password must contain symbols"
-msgstr ""
-
-#: udata/auth/views.py:52
-msgid "Confirm change of email instructions"
 msgstr ""
 
 #: udata/commands/init.py:32
@@ -538,7 +588,11 @@ msgstr ""
 msgid "Other"
 msgstr ""
 
-#: udata/core/dataset/constants.py:74
+#: udata/core/dataset/constants.py:74 udata/tests/test_mail.py:17
+#: udata/tests/test_mail.py:32 udata/tests/test_mail.py:45
+#: udata/tests/test_mail.py:61 udata/tests/test_mail.py:75
+#: udata/tests/test_mail.py:93 udata/tests/test_mail.py:108
+#: udata/tests/test_mail.py:130 udata/tests/test_mail.py:150
 msgid "Unknown"
 msgstr ""
 
@@ -589,9 +643,6 @@ msgstr ""
 #: udata/core/dataset/forms.py:64 udata/core/dataset/forms.py:148
 #: udata/core/discussions/forms.py:14 udata/core/discussions/forms.py:25
 #: udata/core/site/forms.py:12 udata/core/topic/forms.py:13
-#: udata/templates/mail/discussion_closed.html:26
-#: udata/templates/mail/new_discussion.html:25
-#: udata/templates/mail/new_discussion_comment.html:26
 msgid "Title"
 msgstr ""
 
@@ -796,18 +847,52 @@ msgstr ""
 msgid "Subject"
 msgstr ""
 
-#: udata/core/discussions/tasks.py:26
+#: udata/core/discussions/mails.py:9
 #, python-format
-msgid "Your %(type)s have a new discussion"
+msgid "A new discussion has been opened on your %(type)s"
 msgstr ""
 
-#: udata/core/discussions/tasks.py:45
+#: udata/core/discussions/mails.py:15
 #, python-format
-msgid "%(user)s commented your discussion"
+msgid "You have a new discussion from %(user_or_org)s on your %(type)s %(object)s"
 msgstr ""
 
-#: udata/core/discussions/tasks.py:61
+#: udata/core/discussions/mails.py:21 udata/core/discussions/mails.py:40
+#: udata/core/discussions/mails.py:59
+msgid "Discussion title:"
+msgstr ""
+
+#: udata/core/discussions/mails.py:22 udata/core/discussions/mails.py:41
+#: udata/core/discussions/mails.py:60
+msgid "Comment:"
+msgstr ""
+
+#: udata/core/discussions/mails.py:23 udata/core/discussions/mails.py:42
+msgid "Reply"
+msgstr ""
+
+#: udata/core/discussions/mails.py:30
+msgid "A new comment has been added to a discussion"
+msgstr ""
+
+#: udata/core/discussions/mails.py:34
+#, python-format
+msgid "You have a new comment from %(user_or_org)s on your %(type)s %(object)s"
+msgstr ""
+
+#: udata/core/discussions/mails.py:49
 msgid "A discussion has been closed"
+msgstr ""
+
+#: udata/core/discussions/mails.py:53
+#, python-format
+msgid ""
+"The discussion you participated in on the %(type)s %(object)s has been closed"
+" by %(user_or_org)s."
+msgstr ""
+
+#: udata/core/discussions/mails.py:61
+msgid "View the discussion"
 msgstr ""
 
 #: udata/core/jobs/forms.py:29
@@ -902,6 +987,112 @@ msgstr ""
 msgid "Business identification number"
 msgstr ""
 
+#: udata/core/organization/mails.py:9
+msgid "New membership request"
+msgstr ""
+
+#: udata/core/organization/mails.py:13
+#, python-format
+msgid "You received a membership request from %(user)s for your organization %(org)s"
+msgstr ""
+
+#: udata/core/organization/mails.py:18
+msgid "Reason for the request:"
+msgstr ""
+
+#: udata/core/organization/mails.py:19
+msgid "See the request"
+msgstr ""
+
+#: udata/core/organization/mails.py:26
+msgid "Membership refused"
+msgstr ""
+
+#: udata/core/organization/mails.py:30
+#, python-format
+msgid "Your membership for the organization %(org)s has been refused"
+msgstr ""
+
+#: udata/core/organization/mails.py:40
+msgid "Your invitation to join an organization has been accepted"
+msgstr ""
+
+#: udata/core/organization/mails.py:44
+#, python-format
+msgid "Good news! Your request to join the organization %(org)s has been approved."
+msgstr ""
+
+#: udata/core/organization/mails.py:49 udata/core/organization/mails.py:66
+#: udata/core/organization/mails.py:82 udata/core/organization/mails.py:97
+#: udata/core/organization/mails.py:112 udata/core/organization/mails.py:127
+#: udata/core/organization/mails.py:142
+msgid "View the organization"
+msgstr ""
+
+#: udata/core/organization/mails.py:57
+msgid "You have been added as a member of an organization"
+msgstr ""
+
+#: udata/core/organization/mails.py:61
+#, python-format
+msgid "Good news! You are now a member of %(org)s."
+msgstr ""
+
+#: udata/core/organization/mails.py:74
+msgid "Your organization has been certified"
+msgstr ""
+
+#: udata/core/organization/mails.py:78
+#, python-format
+msgid ""
+"Good news! Your organization %(org)s has been certified by our team. A badge "
+"is now associated with your organization."
+msgstr ""
+
+#: udata/core/organization/mails.py:89
+msgid "Your organization has been identified as a public service"
+msgstr ""
+
+#: udata/core/organization/mails.py:93
+#, python-format
+msgid ""
+"Good news! Your organization %(org)s has been identified by our team as a "
+"public service. A badge is now associated with your organization."
+msgstr ""
+
+#: udata/core/organization/mails.py:104
+msgid "Your organization has been identified as a local authority"
+msgstr ""
+
+#: udata/core/organization/mails.py:108
+#, python-format
+msgid ""
+"Good news! Your organization %(org)s has been identified by our team as a "
+"local authority. A badge is now associated with your organization."
+msgstr ""
+
+#: udata/core/organization/mails.py:119
+msgid "Your organization has been identified as a company"
+msgstr ""
+
+#: udata/core/organization/mails.py:123
+#, python-format
+msgid ""
+"Your organization %(org)s has been identified by our team as a company. A "
+"badge is now associated with your organization."
+msgstr ""
+
+#: udata/core/organization/mails.py:134
+msgid "Your organization has been identified as an association"
+msgstr ""
+
+#: udata/core/organization/mails.py:138
+#, python-format
+msgid ""
+"Your organization %(org)s has been identified by our team as an association. "
+"A badge is now associated with your organization."
+msgstr ""
+
 #: udata/core/organization/models.py:38
 msgid "Public Service"
 msgstr ""
@@ -920,44 +1111,6 @@ msgstr ""
 
 #: udata/core/organization/models.py:42
 msgid "Local authority"
-msgstr ""
-
-#: udata/core/organization/tasks.py:52
-msgid "New membership request"
-msgstr ""
-
-#: udata/core/organization/tasks.py:62 udata/core/organization/tasks.py:74
-#, python-format
-msgid "You are now a member of the organization \"%(org)s\""
-msgstr ""
-
-#: udata/core/organization/tasks.py:65
-msgid "Membership refused"
-msgstr ""
-
-#: udata/core/organization/tasks.py:85
-#, python-format
-msgid "Your organization \"%(name)s\" has been certified"
-msgstr ""
-
-#: udata/core/organization/tasks.py:102
-#, python-format
-msgid "Your organization \"%(name)s\" has been identified as public service"
-msgstr ""
-
-#: udata/core/organization/tasks.py:119
-#, python-format
-msgid "Your organization \"%(name)s\" has been identified as a company"
-msgstr ""
-
-#: udata/core/organization/tasks.py:132
-#, python-format
-msgid "Your organization \"%(name)s\" has been identified as an association"
-msgstr ""
-
-#: udata/core/organization/tasks.py:150
-#, python-format
-msgid "Your organization \"%(name)s\" has been identified as a local authority"
 msgstr ""
 
 #: udata/core/post/api.py:118
@@ -1136,16 +1289,29 @@ msgstr ""
 msgid "Open data tools"
 msgstr ""
 
+#: udata/core/reuse/mails.py:9
+msgid "New reuse on your dataset"
+msgstr ""
+
+#: udata/core/reuse/mails.py:13
+#, python-format
+msgid "A new reuse has been published by %(user_or_org)s on your dataset %(dataset)s"
+msgstr ""
+
+#: udata/core/reuse/mails.py:18
+msgid "Reuse title:"
+msgstr ""
+
+#: udata/core/reuse/mails.py:19
+msgid "View the reuse"
+msgstr ""
+
 #: udata/core/reuse/models.py:39
 msgid "This URL is already registered"
 msgstr ""
 
 #: udata/core/reuse/models.py:185
 msgid "reuse"
-msgstr ""
-
-#: udata/core/reuse/tasks.py:48
-msgid "New reuse"
 msgstr ""
 
 #: udata/core/site/forms.py:13
@@ -1325,8 +1491,51 @@ msgstr ""
 msgid "Roles"
 msgstr ""
 
-#: udata/core/user/models.py:298 udata/tests/api/test_me_api.py:295
+#: udata/core/user/mails.py:10 udata/tests/api/test_me_api.py:295
 msgid "Account deletion"
+msgstr ""
+
+#: udata/core/user/mails.py:11
+msgid "Your account has now been deleted"
+msgstr ""
+
+#: udata/core/user/mails.py:18
+#, python-format
+msgid "Deletion of your inactive %(site)s account"
+msgstr ""
+
+#: udata/core/user/mails.py:22
+#, python-format
+msgid "Your account on %(site)s has been deleted due to inactivity"
+msgstr ""
+
+#: udata/core/user/mails.py:33 udata/tests/user/test_user_tasks.py:36
+#, python-brace-format
+msgid "Inactivity of your {site} account"
+msgstr ""
+
+#: udata/core/user/mails.py:36
+#, python-format
+msgid ""
+"We have noticed that your account associated to (%(user_email)s) has been "
+"inactive for %(inactivity_years)d years or more on %(site)s, the open "
+"platform for public data."
+msgstr ""
+
+#: udata/core/user/mails.py:42
+msgid "If you want to keep your account, please log in with your account."
+msgstr ""
+
+#: udata/core/user/mails.py:46
+#, python-format
+msgid "Without logging in, your account will be deleted within %(notify_delay)d days."
+msgstr ""
+
+#: udata/core/user/mails.py:50
+#, python-format
+msgid ""
+"This account is not tied to your other administration accounts and you can "
+"always re-create an account on the %(site)s platform if necessary."
 msgstr ""
 
 #: udata/core/user/permissions.py:5
@@ -1339,20 +1548,6 @@ msgstr ""
 
 #: udata/core/user/permissions.py:7
 msgid "Site moderator"
-msgstr ""
-
-#: udata/core/user/tasks.py:19
-msgid "Test mail"
-msgstr ""
-
-#: udata/core/user/tasks.py:45 udata/tests/user/test_user_tasks.py:36
-#, python-brace-format
-msgid "Inactivity of your {site} account"
-msgstr ""
-
-#: udata/core/user/tasks.py:88 udata/tests/user/test_user_tasks.py:109
-#, python-brace-format
-msgid "Deletion of your inactive {site} account"
 msgstr ""
 
 #: udata/flask_mongoengine/fields.py:85
@@ -1530,167 +1725,31 @@ msgid ""
 "If you think this is a mistake, you can contact the site administrator."
 msgstr ""
 
-#: udata/templates/mail/account_deleted.html:4
-msgid "Your account has now been deleted"
-msgstr ""
-
-#: udata/templates/mail/account_inactivity.html:6
-#, python-format
-msgid ""
-"We have noticed that your account associated to (%(user_email)s) has been "
-"inactive for %(inactivity_years)d years or more on %(site)s, the open "
-"platform for public data."
-msgstr ""
-
-#: udata/templates/mail/account_inactivity.html:17
-#, python-format
-msgid "If you want to keep your account, please log in with your account on %(home)s."
-msgstr ""
-
-#: udata/templates/mail/account_inactivity.html:25
-#, python-format
-msgid "Without logging in, your account will be deleted within %(notify_delay)d days."
-msgstr ""
-
-#: udata/templates/mail/account_inactivity.html:33
-#, python-format
-msgid ""
-"This account is not tied to your other administration accounts and you can "
-"always re-create an account on the %(site)s platform if necessary."
-msgstr ""
-
-#: udata/templates/mail/badge_added_association.html:6
-#, python-format
-msgid "%(user)s has identified your organization \"%(name)s\" as an association"
-msgstr ""
-
-#: udata/templates/mail/badge_added_association.html:27
-#: udata/templates/mail/badge_added_certified.html:27
-#: udata/templates/mail/badge_added_company.html:27
-#: udata/templates/mail/badge_added_local_authority.html:27
-#: udata/templates/mail/badge_added_public_service.html:27
-msgid "See the badge"
-msgstr ""
-
-#: udata/templates/mail/badge_added_certified.html:6
-#, python-format
-msgid "%(user)s has certified your organization \"%(name)s\""
-msgstr ""
-
-#: udata/templates/mail/badge_added_company.html:6
-#, python-format
-msgid "%(user)s has identified your organization \"%(name)s\" as a company"
-msgstr ""
-
-#: udata/templates/mail/badge_added_local_authority.html:6
-#, python-format
-msgid "%(user)s has identified your organization \"%(name)s\" as a local authority"
-msgstr ""
-
-#: udata/templates/mail/badge_added_public_service.html:6
-#, python-format
-msgid "%(user)s has identified your organization \"%(name)s\" as public service"
-msgstr ""
-
-#: udata/templates/mail/base.html:45 udata/templates/security/email/base.html:45
+#: udata/templates/mail/base.html:45
 msgid "on your browser."
 msgstr ""
 
-#: udata/templates/mail/base.html:48 udata/templates/security/email/base.html:48
+#: udata/templates/mail/base.html:48
 #, python-format
 msgid "View this email %(link)s"
 msgstr ""
 
-#: udata/templates/mail/base.html:76 udata/templates/security/email/base.html:76
+#: udata/templates/mail/base.html:76 udata/templates/mail/message.html:41
 #, python-format
 msgid "Hi %(user)s"
 msgstr ""
 
-#: udata/templates/mail/base.html:87 udata/templates/security/email/base.html:87
+#: udata/templates/mail/base.html:87
 msgid "See you soon on the platform"
 msgstr ""
 
-#: udata/templates/mail/base.html:88 udata/templates/security/email/base.html:88
+#: udata/templates/mail/base.html:88 udata/templates/mail/message.html:63
 #, python-format
 msgid "The %(site)s team"
 msgstr ""
 
-#: udata/templates/mail/discussion_closed.html:6
-#, python-format
-msgid "%(user)s closed an discussion on your %(type)s %(subject)s"
-msgstr ""
-
-#: udata/templates/mail/discussion_closed.html:32
-#: udata/templates/mail/new_discussion.html:30
-#: udata/templates/mail/new_discussion_comment.html:31
-msgid "Message"
-msgstr ""
-
-#: udata/templates/mail/discussion_closed.html:41
-#: udata/templates/mail/new_discussion.html:38
-#: udata/templates/mail/new_discussion_comment.html:39
-msgid "See the discussion"
-msgstr ""
-
-#: udata/templates/mail/inactive_account_deleted.html:4
-#, python-format
-msgid "Your account on %(site)s has been deleted due to inactivity"
-msgstr ""
-
-#: udata/templates/mail/membership_refused.html:7
-#, python-format
-msgid "Your membership for the organization \"%(org)s\" has been refused"
-msgstr ""
-
-#: udata/templates/mail/membership_refused.html:18
-msgid "Refusal reason"
-msgstr ""
-
-#: udata/templates/mail/membership_request.html:8
-#, python-format
-msgid ""
-"As an administrator of \"%(org)s\" you are being informed than a new "
-"membership request from %(user)s is pending for validation"
-msgstr ""
-
-#: udata/templates/mail/membership_request.html:40
-msgid "See the request"
-msgstr ""
-
-#: udata/templates/mail/new_discussion.html:6
-#, python-format
-msgid "%(user)s submitted a new discussion on your %(type)s %(subject)s"
-msgstr ""
-
-#: udata/templates/mail/new_discussion_comment.html:6
-#, python-format
-msgid "%(user)s commented an discussion on your %(type)s %(subject)s"
-msgstr ""
-
-#: udata/templates/mail/new_member.html:7
-#, python-format
-msgid "Congratulations, you are now a member of the organization \"%(org)s\""
-msgstr ""
-
-#: udata/templates/mail/new_member.html:21
-msgid "See the organization page"
-msgstr ""
-
-#: udata/templates/mail/new_reuse.html:7
-#, python-format
-msgid "A new reuse of your dataset %(dataset)s has been published"
-msgstr ""
-
-#: udata/templates/mail/new_reuse.html:31
-msgid "See the reuse"
-msgstr ""
-
-#: udata/templates/mail/test.html:4
-msgid "This is a test mail"
-msgstr ""
-
-#: udata/templates/mail/test.html:5
-msgid "If you read this, your mail configuration is working"
+#: udata/templates/mail/message.html:62
+msgid "Have a great day"
 msgstr ""
 
 #: udata/templates/security/change_password.html:9
@@ -1760,89 +1819,19 @@ msgstr ""
 msgid "Submit"
 msgstr ""
 
-#: udata/templates/security/email/change_notice.html:6
-msgid "Your password has been changed."
+#: udata/tests/test_mail.py:17 udata/tests/test_mail.py:32
+#: udata/tests/test_mail.py:45 udata/tests/test_mail.py:61
+msgid "Some text"
 msgstr ""
 
-#: udata/templates/security/email/change_notice.html:10
-msgid "If you did not change your password, click below to reset it."
-msgstr ""
-
-#: udata/templates/security/email/change_notice.html:15
-msgid "Reset password"
-msgstr ""
-
-#: udata/templates/security/email/confirmation_instructions.html:6
-msgid "Please confirm your email through the link below:"
-msgstr ""
-
-#: udata/templates/security/email/confirmation_instructions.html:14
-msgid "Confirm my account"
-msgstr ""
-
-#: udata/templates/security/email/login_instructions.html:6
-msgid "You can log into your account through the link below:"
-msgstr ""
-
-#: udata/templates/security/email/login_instructions.html:13
-msgid "Login now"
-msgstr ""
-
-#: udata/templates/security/email/reset_instructions.html:7
+#: udata/tests/test_mail.py:76 udata/tests/test_mail.py:151
 #, python-format
-msgid ""
-"Someone has requested a password reset for your %(site)s account. If you "
-"didn't, please ignore this email."
+msgid "Some text %(org)s"
 msgstr ""
 
-#: udata/templates/security/email/reset_instructions.html:10
-msgid "To reset your password, please confirm your request through the link below:"
-msgstr ""
-
-#: udata/templates/security/email/reset_instructions.html:18
-msgid "Reset my password"
-msgstr ""
-
-#: udata/templates/security/email/reset_notice.html:7
-#, python-format
-msgid "Your password for %(site)s has been reset."
-msgstr ""
-
-#: udata/templates/security/email/welcome.html:7
-#, python-format
-msgid "Welcome to %(site)s!"
-msgstr ""
-
-#: udata/templates/security/email/welcome.html:10
-msgid ""
-"To activate your account, please confirm your email address through the link "
-"below:"
-msgstr ""
-
-#: udata/templates/security/email/welcome.html:18
-msgid "Confirm now"
-msgstr ""
-
-#: udata/templates/security/email/welcome_existing.html:7
-#, python-format
-msgid "Hello %(email)s!"
-msgstr ""
-
-#: udata/templates/security/email/welcome_existing.html:10
-msgid "Someone (you?) tried to register this email - which is already in our system."
-msgstr ""
-
-#: udata/templates/security/email/welcome_existing.html:14
-#, python-format
-msgid "This account also has the following username associated with it: %(username)s."
-msgstr ""
-
-#: udata/templates/security/email/welcome_existing.html:19
-msgid "If you forgot your password you can reset it"
-msgstr ""
-
-#: udata/templates/security/email/welcome_existing.html:25
-msgid "Here"
+#: udata/tests/test_mail.py:94 udata/tests/test_mail.py:111
+#: udata/tests/test_mail.py:133
+msgid "Some text:"
 msgstr ""
 
 #: udata/tests/forms/test_model_field.py:163
@@ -1868,3 +1857,9 @@ msgstr ""
 #: udata/tests/search/test_adapter.py:34
 msgid "Heavily reused"
 msgstr ""
+
+#: udata/tests/user/test_user_tasks.py:108
+#, python-brace-format
+msgid "Deletion of your inactive {site} account"
+msgstr ""
+
