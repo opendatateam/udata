@@ -1,14 +1,13 @@
 import logging
 
-import pytest
+from udata.tests.api import PytestOnlyDBTestCase
 
 from ..tasks import purge_harvest_jobs, purge_harvest_sources
 
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.usefixtures("clean_db")
-class HarvestActionsTest:
+class HarvestActionsTest(PytestOnlyDBTestCase):
     def test_purge_sources(self, mocker):
         """It should purge from DB sources flagged as deleted"""
         mock = mocker.patch("udata.harvest.actions.purge_sources")

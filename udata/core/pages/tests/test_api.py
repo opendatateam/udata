@@ -6,8 +6,6 @@ from udata.tests.api import APITestCase
 
 
 class PageAPITest(APITestCase):
-    modules = []
-
     def test_create_get_update(self):
         self.login()
         datasets = DatasetFactory.create_batch(3)

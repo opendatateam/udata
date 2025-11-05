@@ -3,14 +3,14 @@ from io import StringIO
 from random import randint
 
 import factory
+import pytest
 from factory.mongoengine import MongoEngineFactory
 from flask import Blueprint, url_for
 
 from udata.core import csv
 from udata.mongo import db
+from udata.tests.api import APITestCase
 from udata.utils import faker
-
-from . import FrontTestCase
 
 RE_ATTACHMENT = re.compile(r"^attachment; filename=(?P<filename>.*)$")
 RE_FILENAME = re.compile(r"^(?P<basename>.*)-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}\.csv$")
@@ -107,13 +107,10 @@ def with_basename():
     return csv.stream(adapter, "test")
 
 
-class CsvTest(FrontTestCase):
-    modules = ["admin"]
-
-    def create_app(self):
-        app = super(CsvTest, self).create_app()
+class CsvTest(APITestCase):
+    @pytest.fixture(autouse=True)
+    def setup_func(self, app):
         app.register_blueprint(blueprint)
-        return app
 
     def test_adapter_fields_as_list(self):
         @csv.adapter(Fake)

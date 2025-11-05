@@ -1,8 +1,7 @@
-import pytest
+from udata.tests.api import PytestOnlyDBTestCase
 
 
-@pytest.mark.usefixtures("clean_db")
-class ParseUrlCommandTest:
+class ParseUrlCommandTest(PytestOnlyDBTestCase):
     def test_parse_url(self, cli, requests_mock, caplog) -> None:
         logs = []
 

@@ -3,7 +3,7 @@ import itertools
 import math
 import re
 from collections import Counter
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from math import ceil
 from typing import Any, Hashable
 from uuid import UUID, uuid4
@@ -18,7 +18,8 @@ from faker import Faker
 from faker.config import PROVIDERS
 from faker.providers import BaseProvider
 from faker.providers.lorem.la import Provider as LoremProvider
-from flask import abort, request
+from flask import abort, current_app, request
+from mongoengine.fields import BaseQuerySet
 
 from udata import tags
 
@@ -339,7 +340,7 @@ def generate_tags(nb=3) -> [str]:
 
 def generate_tag() -> str:
     fake_tag: str = faker.word()
-    while len(fake_tag) < tags.MIN_TAG_LENGTH:
+    while len(fake_tag) < tags.TAG_MIN_LENGTH:
         fake_tag = faker.word()
     return fake_tag
 
@@ -387,6 +388,55 @@ def id_or_404(object_id):
         return object_id
     except InvalidId:
         abort(404)
+
+
+def get_rss_feed_list(queryset: BaseQuerySet, created_at_field: str) -> list[Any]:
+    """
+    Return a list of recent elements for a RSS field.
+
+    We add a delay before a new element appears in feed in order to allow for post-publication moderation.
+    The delay is not taken into account if the element is published by a certified organization.
+    """
+    from udata.core.organization.constants import CERTIFIED
+    from udata.core.site.models import current_site
+    from udata.models import Organization
+
+    certifed_orgs = Organization.objects(badges__kind=CERTIFIED).only("id")
+
+    created_delay = datetime.utcnow() - timedelta(
+        hours=current_app.config["DELAY_BEFORE_APPEARING_IN_RSS_FEED"]
+    )
+    elements_with_delay = list(
+        queryset.filter(
+            **{
+                f"{created_at_field}__lte": created_delay,
+                "organization__nin": certifed_orgs,
+            }
+        )
+        .order_by(f"-{created_at_field}")
+        .limit(current_site.feed_size)
+    )
+    elements_without_delay = list(
+        queryset.filter(organization__in=certifed_orgs)
+        .order_by(f"-{created_at_field}")
+        .limit(current_site.feed_size)
+    )
+
+    # We need to merge the two lists manually, compensating for the delay, else elements with delay may not show
+    # if new elements have been published by certified organization in the meantime
+    def get_sort_key(element):
+        has_delay = not element.organization or not element.organization.certified
+        if has_delay:
+            return getattr(element, created_at_field) + timedelta(
+                hours=current_app.config["DELAY_BEFORE_APPEARING_IN_RSS_FEED"]
+            )
+        return getattr(element, created_at_field)
+
+    elements = sorted(
+        [*elements_with_delay, *elements_without_delay], reverse=True, key=get_sort_key
+    )[: current_site.feed_size]
+
+    return elements
 
 
 def wants_json() -> bool:

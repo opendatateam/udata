@@ -75,7 +75,7 @@ class DataserviceSearch(ModelSearchAdapter):
 
     @classmethod
     def is_indexable(cls, dataservice: Dataservice) -> bool:
-        return dataservice.deleted_at is None and not dataservice.private
+        return dataservice.is_visible
 
     @classmethod
     def mongo_search(cls, args):

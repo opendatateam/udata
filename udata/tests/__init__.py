@@ -1,24 +1,48 @@
 import unittest
 
 import pytest
+from werkzeug import Response
 
 from udata import settings
+from udata.app import UDataApp, create_app
+from udata.tests.plugin import TestClient
 
 from . import helpers
 
 
-class TestCase(unittest.TestCase):
-    settings = settings.Testing
+class TestCaseMixin:
+    app: UDataApp
 
-    @pytest.fixture(autouse=True)
-    def inject_app(self, app):
-        self.app = app
-        return self.create_app()
+    def get_settings(self, request):
+        """
+        This seems really complicated for what it's doing. I think we want to create
+        an app with the default setting being `settings.Testing` and some overrides
+        from the "options" markers. But to do that `settings.Testing` should inherit from
+        `settings.Default`?
 
-    def create_app(self):
+        We may also want to prevent loading `udata.cfg` for testing to avoid failing tests
+        locally because some config is changed on our computer. Tests should work only with
+        default settings (or overrides for a specific test) but not with a local `udata.cfg`.
+
+        Not sure if the plugin situation is still relevant now that plugins are integrated
+        into udata.
         """
-        Here for compatibility legacy test classes
-        """
+        _settings = settings.Testing
+        # apply the options(plugins) marker from pytest_flask as soon as app is created
+        # https://github.com/pytest-dev/pytest-flask/blob/a62ea18cb0fe89e3f3911192ab9ea4f9b12f8a16/pytest_flask/plugin.py#L126
+        # this lets us have default settings for plugins applied while testing
+        plugins = getattr(_settings, "PLUGINS", [])
+        for options in request.node.iter_markers("options"):
+            option = options.kwargs.get("plugins", []) or options.kwargs.get("PLUGINS", [])
+            plugins += option
+        setattr(_settings, "PLUGINS", plugins)
+        return _settings
+
+    @pytest.fixture(autouse=True, name="app")
+    def _app(self, request):
+        test_settings = self.get_settings(request)
+        self.app = create_app(settings.Defaults, override=test_settings)
+        self.app.test_client_class = TestClient
         return self.app
 
     def assertEqualDates(self, datetime1, datetime2, limit=1):  # Seconds.
@@ -26,58 +50,16 @@ class TestCase(unittest.TestCase):
         __tracebackhide__ = True
         helpers.assert_equal_dates(datetime1, datetime2, limit=1)
 
-
-class WebTestMixin(object):
-    user = None
-
-    @pytest.fixture(autouse=True)
-    def inject_client(self, client):
-        """
-        Inject test client for compatibility with Flask-Testing.
-        """
-        self.client = client
-
-    def get(self, url, **kwargs):
-        return self.client.get(url, **kwargs)
-
-    def post(self, url, data=None, **kwargs):
-        return self.client.post(url, data=data, **kwargs)
-
-    def put(self, url, data=None, **kwargs):
-        return self.client.put(url, data=data, **kwargs)
-
-    def delete(self, url, data=None, **kwargs):
-        return self.client.delete(url, data=data, **kwargs)
-
-    def assertRedirects(self, response, location, message=None):
-        """
-        Checks if response is an HTTP redirect to the
-        given location.
-        :param response: Flask response
-        :param location: relative URL path to SERVER_NAME or an absolute URL
-        """
+    def assertStreamEqual(self, response1: Response, response2: Response):
         __tracebackhide__ = True
-        helpers.assert_redirects(response, location, message=message)
-
-    def assertStatus(self, response, status_code, message=None):
-        __tracebackhide__ = True
-        helpers.assert_status(response, status_code, message=message)
-
-    def full_url(self, *args, **kwargs):
-        __tracebackhide__ = True
-        return helpers.full_url(*args, **kwargs)
-
-    def login(self, user=None):
-        self.user = self.client.login(user)
-        return self.user
+        stream1 = list(response1.iter_encoded())
+        stream2 = list(response2.iter_encoded())
+        assert stream1 == stream2
 
 
-for code in 200, 201, 204, 400, 401, 403, 404, 410, 500:
-    name = "assert{0}".format(code)
-    helper = getattr(helpers, name)
-    setattr(WebTestMixin, name, lambda s, r, h=helper: h(r))
+class TestCase(TestCaseMixin, unittest.TestCase):
+    pass
 
 
-@pytest.mark.usefixtures("clean_db")
-class DBTestMixin(object):
+class PytestOnlyTestCase(TestCaseMixin):
     pass

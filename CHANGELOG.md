@@ -1,5 +1,52 @@
 # Changelog
 
+## 13.0.0 (2025-10-22)
+- **refactor!: remove VueJS old admin and all assets ([#3422](https://github.com/opendatateam/udata/pull/3422))**
+  - [x] Dossiers frontend : js/, less/, specs/, node_modules/
+  - [x] Configuration NPM/Webpack : package.json, webpack.config.*,
+  karma.conf.js, .eslintrc.yml, .nvmrc, babel.cfg
+  - [x] Assets statiques compilés : udata/static/* (remplacé par dossier
+  vide)
+  - [x] Tâches Python frontend : assets_build, widgets_build,
+  oembed_build, *_watch, jstest
+  - [x] CI/CD : Job assets et dépendances dans .circleci/config.yml
+  
+  ---------
+  
+  Co-authored-by: maudetes <maudet.estelle@gmail.com>
+- **refactor!: remove linkchecker ([#3483](https://github.com/opendatateam/udata/pull/3483))**
+  The goal is to remove the entrypoint system. I don't think we use this
+  linkchecker anymore (it's disabled in our settings), hydra is doing this
+  job now? We maybe need to check the `ResourceMixin@ExtrasField` (I just
+  copy/paste but it could be nice in another PR to add hydra types here?)
+  
+  ---------
+  
+  Co-authored-by: maudetes <maudet.estelle@gmail.com>
+- build: build with uv ([#3485](https://github.com/opendatateam/udata/pull/3485))
+- build: remove unused dependencies ([#3454](https://github.com/opendatateam/udata/pull/3454))
+- feat(catalog): parse filters in rdf catalog ([#3474](https://github.com/opendatateam/udata/pull/3474))
+- feat(INSPIRE): detect INSPIRE datasets and dataservices ([#3473](https://github.com/opendatateam/udata/pull/3473))
+- feat(rss): we add a delay for new content in RSS feed ([#3460](https://github.com/opendatateam/udata/pull/3460))
+- feat: update dev, test, doc and report dependencies ([#3481](https://github.com/opendatateam/udata/pull/3481))
+- feat: upgrade flask-storage to 1.4.0 ([#3468](https://github.com/opendatateam/udata/pull/3468))
+- fix(api): "None is not a valid UpdateFrequency" on dataset update ([#3491](https://github.com/opendatateam/udata/pull/3491))
+- fix(dataservice): unindex archived dataservices ([#3493](https://github.com/opendatateam/udata/pull/3493))
+- fix(rss): escape atom feed content ([#3476](https://github.com/opendatateam/udata/pull/3476))
+- fix(test): add data to pytest norecursedirs ([#3486](https://github.com/opendatateam/udata/pull/3486))
+- fix(tests): add some configuration variable for tests requiring it. ([#3487](https://github.com/opendatateam/udata/pull/3487))
+- New Crowdin updates ([#3462](https://github.com/opendatateam/udata/pull/3462))
+- refactor(mongo): remove flask_mongoengine ([#3467](https://github.com/opendatateam/udata/pull/3467))
+- refactor: remove preview entrypoints ([#3484](https://github.com/opendatateam/udata/pull/3484))
+- refactor: remove unused tox ([#3480](https://github.com/opendatateam/udata/pull/3480))
+- test: simplifications ([#3490](https://github.com/opendatateam/udata/pull/3490))
+
+
+## 12.0.1 (2025-10-13)
+
+- fix(security): confirm email error crashing instead of redirecting ([#3478](https://github.com/opendatateam/udata/pull/3478))
+
+
 ## 12.0.0 (2025-10-13)
 - **feat!: bump minimum Python version to 3.11 ([#3463](https://github.com/opendatateam/udata/pull/3463))**
   Python 3.9 is reaching end of life at the end of october

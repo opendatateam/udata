@@ -2,6 +2,7 @@ from datetime import datetime
 
 from blinker import Signal
 from flask import url_for
+from flask_babel import LazyString
 from mongoengine import Q
 from mongoengine.signals import post_save
 
@@ -10,6 +11,7 @@ from udata.api import api, fields
 from udata.api_fields import field, generate_fields
 from udata.core.access_type.models import WithAccessType
 from udata.core.activity.models import Auditable
+from udata.core.constants import HVD
 from udata.core.dataservices.constants import DATASERVICE_FORMATS
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.dataset.models import Dataset
@@ -18,18 +20,12 @@ from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
-from udata.models import Discussion, Follow, db
+from udata.models import Badge, BadgeMixin, BadgesList, Discussion, Follow, db
 from udata.uris import cdata_url
 
-# "frequency"
-# "harvest"
-# "internal"
-# "page"
-# "quality" # Peut-être pas dans une v1 car la qualité sera probablement calculé différemment
-# "datasets" # objet : liste de datasets liés à une API
-# "spatial"
-# "temporal_coverage"
-
+BADGES: dict[str, LazyString] = {
+    HVD: _("Dataservice serving high value datasets"),
+}
 
 dataservice_permissions_fields = api.model(
     "DataservicePermissions",
@@ -82,6 +78,20 @@ class DataserviceQuerySet(OwnedQuerySet):
             dataservices_filter = dataservices_filter | Q(datasets__size=0)
 
         return self(dataservices_filter)
+
+
+def validate_badge(value):
+    if value not in Dataservice.__badges__.keys():
+        raise db.ValidationError("Unknown badge type")
+
+
+class DataserviceBadge(Badge):
+    kind = db.StringField(required=True, validation=validate_badge)
+
+
+class DataserviceBadgeMixin(BadgeMixin):
+    badges = field(BadgesList(DataserviceBadge), **BadgeMixin.default_badges_list_params)
+    __badges__ = BADGES
 
 
 @generate_fields()
@@ -141,7 +151,9 @@ def filter_by_topic(base_query, filter_value):
         {"key": "views", "value": "metrics.views"},
     ],
 )
-class Dataservice(Auditable, WithMetrics, WithAccessType, Linkable, Owned, db.Document):
+class Dataservice(
+    Auditable, WithMetrics, WithAccessType, DataserviceBadgeMixin, Linkable, Owned, db.Document
+):
     meta = {
         "indexes": [
             "$title",
@@ -294,6 +306,10 @@ class Dataservice(Auditable, WithMetrics, WithAccessType, Linkable, Owned, db.Do
         "followers_by_months",
         "views",
     ]
+
+    @property
+    def is_visible(self):
+        return not self.is_hidden
 
     @property
     def is_hidden(self):

@@ -1,6 +1,6 @@
 import logging
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from pydoc import locate
 from typing import Self
 from urllib.parse import urlparse
@@ -8,8 +8,8 @@ from urllib.parse import urlparse
 import Levenshtein
 import requests
 from blinker import signal
-from dateutil.parser import parse as parse_dt
 from flask import current_app, url_for
+from flask_babel import LazyString
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import DateTimeField
 from mongoengine.signals import post_save, pre_init, pre_save
@@ -21,6 +21,7 @@ from udata.core import storages
 from udata.core.access_type.constants import AccessType
 from udata.core.access_type.models import WithAccessType, check_only_one_condition_per_role
 from udata.core.activity.models import Auditable
+from udata.core.constants import HVD
 from udata.core.dataset.preview import TabularAPIPreview
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
@@ -38,7 +39,6 @@ from .constants import (
     CLOSED_FORMATS,
     DEFAULT_LICENSE,
     DESCRIPTION_SHORT_SIZE_LIMIT,
-    HVD,
     INSPIRE,
     MAX_DISTANCE,
     PIVOTAL_DATA,
@@ -65,7 +65,7 @@ __all__ = (
     "ResourceSchema",
 )
 
-BADGES: dict[str, str] = {
+BADGES: dict[str, LazyString] = {
     PIVOTAL_DATA: _("Pivotal data"),
     SPD: _("Reference data public service"),
     INSPIRE: _("Inspire"),
@@ -371,7 +371,13 @@ class ResourceMixin(object):
     mime = db.StringField()
     filesize = db.IntField()  # `size` is a reserved keyword for mongoengine.
     fs_filename = db.StringField()
-    extras = db.ExtrasField()
+    extras = db.ExtrasField(
+        {
+            "check:available": db.BooleanField,
+            "check:status": db.IntField,
+            "check:date": db.DateTimeField,
+        }
+    )
     harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)
     schema = db.EmbeddedDocumentField(Schema)
 
@@ -429,41 +435,6 @@ class ResourceMixin(object):
         `all([])` (dataset, organization, user).
         """
         return self.extras.get("check:available", "unknown")
-
-    def need_check(self):
-        """Does the resource needs to be checked against its linkchecker?
-
-        We check unavailable resources often, unless they go over the
-        threshold. Available resources are checked less and less frequently
-        based on their historical availability.
-        """
-        min_cache_duration, max_cache_duration, ko_threshold = [
-            current_app.config.get(k)
-            for k in (
-                "LINKCHECKING_MIN_CACHE_DURATION",
-                "LINKCHECKING_MAX_CACHE_DURATION",
-                "LINKCHECKING_UNAVAILABLE_THRESHOLD",
-            )
-        ]
-        count_availability = self.extras.get("check:count-availability", 1)
-        is_available = self.check_availability()
-        if is_available == "unknown":
-            return True
-        elif is_available or count_availability > ko_threshold:
-            delta = min(min_cache_duration * count_availability, max_cache_duration)
-        else:
-            delta = min_cache_duration
-        if self.extras.get("check:date"):
-            limit_date = datetime.utcnow() - timedelta(minutes=delta)
-            check_date = self.extras["check:date"]
-            if not isinstance(check_date, datetime):
-                try:
-                    check_date = parse_dt(check_date)
-                except (ValueError, TypeError):
-                    return True
-            if check_date >= limit_date:
-                return False
-        return True
 
     @property
     def latest(self):
@@ -818,10 +789,13 @@ class Dataset(
 
     def compute_last_update(self):
         """
-        Use the more recent date we would have on resources (harvest, modified).
+        If dataset is harvested and its metadata contains a modified_at date, use it.
+        Else, use the more recent date we would have at the resource level (harvest, modified).
         Default to dataset last_modified if no resource.
         Resources should be fetched when calling this method.
         """
+        if self.harvest and self.harvest.modified_at:
+            return self.harvest.modified_at
         if self.resources:
             return max([res.last_modified for res in self.resources])
         else:
