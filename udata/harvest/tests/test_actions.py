@@ -16,6 +16,7 @@ from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.models import Dataset, PeriodicTask
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_emit, assert_equal_dates, assert_not_emit
 from udata.utils import faker
 
@@ -40,12 +41,8 @@ from .factories import (
 
 log = logging.getLogger(__name__)
 
-pytestmark = [
-    pytest.mark.usefixtures("clean_db"),
-]
 
-
-class HarvestActionsTest:
+class HarvestActionsTest(PytestOnlyDBTestCase):
     def test_list_backends(self):
         for backend in actions.list_backends():
             assert issubclass(backend, BaseBackend)
@@ -453,7 +450,10 @@ class HarvestActionsTest:
         assert result.errors == 1
 
 
-class ExecutionTestMixin(MockBackendsMixin):
+class ExecutionTestMixin(MockBackendsMixin, PytestOnlyDBTestCase):
+    def action(self, *args, **kwargs):
+        raise NotImplementedError
+
     def test_default(self):
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="factory", organization=org)
@@ -610,7 +610,7 @@ class HarvestRunTest(ExecutionTestMixin):
         return actions.run(*args, **kwargs)
 
 
-class HarvestPreviewTest(MockBackendsMixin):
+class HarvestPreviewTest(MockBackendsMixin, PytestOnlyDBTestCase):
     def test_preview(self):
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="factory", organization=org)

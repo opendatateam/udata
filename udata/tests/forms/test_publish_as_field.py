@@ -1,4 +1,3 @@
-import pytest
 from bson import ObjectId
 from werkzeug.datastructures import MultiDict
 
@@ -8,10 +7,10 @@ from udata.core.user.factories import AdminFactory, UserFactory
 from udata.forms import ModelForm, fields
 from udata.i18n import gettext as _
 from udata.models import Member, Organization, User, db
-from udata.tests import TestCase
+from udata.tests.api import DBTestCase
 
 
-class PublishFieldTest(TestCase):
+class PublishFieldTest(DBTestCase):
     def factory(self, *args, **kwargs):
         class Ownable(db.Document):
             owner = db.ReferenceField(User)
@@ -194,7 +193,6 @@ class PublishFieldTest(TestCase):
         self.assertIn("organization", form.errors)
         self.assertEqual(len(form.errors["organization"]), 1)
 
-    @pytest.mark.usefixtures("clean_db")
     def test_with_initial_and_both_member(self):
         Ownable, OwnableForm = self.factory()
         user = UserFactory()
