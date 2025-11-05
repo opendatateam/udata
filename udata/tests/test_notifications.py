@@ -29,5 +29,5 @@ class NotificationsAPITest(APITestCase):
 
         self.assertEqual(response.json["total"], 1)
         self.assertEqual(
-            response.json["data"][0]["details"]["request_organization"], organization.id
+            response.json["data"][0]["details"]["request_organization"]["id"], str(organization.id)
         )

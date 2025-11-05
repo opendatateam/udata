@@ -692,14 +692,16 @@ def patch(obj, request) -> type:
                 )
             elif value and isinstance(
                 model_attribute,
+                mongoengine.fields.GenericEmbeddedDocumentField,
+            ):
+                generic_key = info.get("generic_key", DEFAULT_GENERIC_KEY)
+                embedded_field = classes_by_names[value[generic_key]]
+                value = patch(embedded_field(), value)
+            elif value and isinstance(
+                model_attribute,
                 mongoengine.fields.EmbeddedDocumentField,
             ):
-                base_embedded_field = model_attribute.field.document_type().__class__
-                generic = info.get("generic", False)
-                generic_key = info.get("generic_key", DEFAULT_GENERIC_KEY)
-                embedded_field = (
-                    classes_by_names[value[generic_key]] if generic else base_embedded_field
-                )
+                embedded_field = model_attribute.document_type().__class__
                 value = patch(embedded_field(), value)
             elif value and isinstance(
                 model_attribute,
