@@ -17,14 +17,6 @@ Plugins can expose extra harvesters via the `udata.harvesters` class entrypoint.
 
 See [the Harvesting section](harvesting.md#custom) for more details
 
-### Views (`udata.views`)
-
-Plugins can expose extra view features via the `udata.views` module entrypoint including:
-
-- a blueprint (should be named `blueprint`)
-- some view filters
-- some hooks implementation
-
 #### Hooks
 
 Hooks are small html snippets loaded dynamicaly.
