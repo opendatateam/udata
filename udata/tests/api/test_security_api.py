@@ -5,6 +5,7 @@ from flask import url_for
 from flask_security.recoverable import generate_reset_password_token
 
 from udata.commands.fixtures import UserFactory
+from udata.i18n import lazy_gettext as _
 from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import capture_mails
 
@@ -105,7 +106,7 @@ class SecurityAPITest(PytestOnlyAPITestCase):
         assert len(mails) == 1
         assert len(mails[0].recipients) == 1
         assert mails[0].recipients[0] == "jane2@example.org"
-        assert mails[0].subject == "Confirm your email address"
+        assert mails[0].subject == _("Confirm your email address")
 
     @pytest.mark.options(CAPTCHETAT_BASE_URL=None, SECURITY_RETURN_GENERIC_RESPONSES=True)
     def test_reset_password(self, api):

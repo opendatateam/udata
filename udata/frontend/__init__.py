@@ -1,11 +1,8 @@
-import inspect
 import logging
-from importlib import import_module
 
 from jinja2 import pass_context
 from markupsafe import Markup
 
-from udata import entrypoints
 from udata.i18n import I18nBlueprint
 
 from .markdown import UdataCleaner
@@ -95,32 +92,12 @@ class SafeMarkup(Markup):
         return super().__new__(cls, cleaner.clean(base), *args, **kwargs)
 
 
-def _load_views(app, module):
-    views = module if inspect.ismodule(module) else import_module(module)
-    blueprint = getattr(views, "blueprint", None)
-    if blueprint:
-        app.register_blueprint(blueprint)
-
-
-VIEWS = ["core.storages"]
-
-
-def init_app(app, views=None):
-    views = views or VIEWS
+def init_app(app):
+    from udata.core.storages.views import blueprint as storage_blueprint
 
     init_markdown(app)
 
-    for view in views:
-        _load_views(app, "udata.{}.views".format(view))
+    app.register_blueprint(storage_blueprint)
 
     # Load hook blueprint
     app.register_blueprint(hook)
-
-    # Load all plugins views and blueprints
-    for module in entrypoints.get_enabled("udata.views", app).values():
-        _load_views(app, module)
-
-    # Load all plugins views and blueprints
-    for module in entrypoints.get_enabled("udata.front", app).values():
-        front_module = module if inspect.ismodule(module) else import_module(module)
-        front_module.init_app(app)
