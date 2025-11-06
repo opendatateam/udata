@@ -6,7 +6,6 @@ ENTRYPOINTS = {
     "udata.harvesters": "Harvest backends",
     "udata.models": "Models and migrations",
     "udata.plugins": "Generic plugin",
-    "udata.tasks": "Tasks and jobs",
 }
 
 
