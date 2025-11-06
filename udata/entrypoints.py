@@ -8,7 +8,6 @@ ENTRYPOINTS = {
     "udata.models": "Models and migrations",
     "udata.plugins": "Generic plugin",
     "udata.tasks": "Tasks and jobs",
-    "udata.themes": "Themes",
 }
 
 

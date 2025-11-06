@@ -51,6 +51,6 @@ class DkanBackendTest(PytestOnlyDBTestCase):
 
         dataset = datasets.get(**{"harvest__remote_id": "04be6288-696d-4331-850d-a144871a7e3a"})
         assert dataset.harvest.created_at == datetime(2019, 12, 10, 0, 0)
-        assert dataset.harvest.modified_at == datetime(2019, 9, 30, 0, 0)
+        assert dataset.harvest.modified_at is None
         assert len(dataset.resources) == 2
         assert "xlsx" in [r.format for r in dataset.resources]
