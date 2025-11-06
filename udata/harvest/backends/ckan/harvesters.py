@@ -266,5 +266,6 @@ class CkanBackend(BaseBackend):
 
 
 class DkanBackend(CkanBackend):
+    name = "dkan"
     schema = dkan_schema
     filters = []
