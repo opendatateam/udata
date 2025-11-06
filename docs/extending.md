@@ -7,14 +7,6 @@ udata is customizable in many ways, just choose yours.
 Before trying to code something specific, take a look at [all the settings](adapting-settings.md),
 there may already be some details you can easily customize with a simple setting.
 
-## Themes
-
-You can totally customize the udata appearence with themes.
-
-See the [dedicated section](creating-theme.md) for more details.
-
-**NB**: A theme is also an [entrypoint](#entrypoints), but a special one.
-
 ## Entrypoints
 
 Entrypoints are modules or classes loaded by udata to extends its features.

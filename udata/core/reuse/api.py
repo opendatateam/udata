@@ -12,6 +12,7 @@ from udata.api_fields import patch, patch_and_save
 from udata.auth import admin_permission
 from udata.core.badges import api as badges_api
 from udata.core.badges.fields import badge_fields
+from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.followers.api import FollowAPI
 from udata.core.organization.models import Organization
@@ -227,10 +228,35 @@ class ReuseDatasetsAPI(API):
             dataset = Dataset.objects.get_or_404(id=id_or_404(request.json["id"]))
         except Dataset.DoesNotExist:
             msg = "Dataset {0} does not exists".format(request.json["id"])
-            api.abort(404, msg)
+            return api.abort(404, msg)
+
         if dataset in reuse.datasets:
             return reuse
         reuse.datasets.append(dataset)
+        reuse.save()
+        return reuse, 201
+
+
+@ns.route("/<reuse:reuse>/dataservices/", endpoint="reuse_add_dataservice")
+class ReuseDataservicesAPI(API):
+    @api.secure
+    @api.doc("reuse_add_dataservice", **common_doc)
+    @api.expect(Dataservice.__ref_fields__)
+    @api.response(200, "The dataservice is already present", Reuse.__read_fields__)
+    @api.marshal_with(Reuse.__read_fields__, code=201)
+    def post(self, reuse):
+        """Add a dataservice to a given reuse"""
+        if "id" not in request.json:
+            api.abort(400, "Expect a dataservice identifier")
+        try:
+            dataservice = Dataservice.objects.get_or_404(id=id_or_404(request.json["id"]))
+        except Dataservice.DoesNotExist:
+            msg = "Dataservice {0} does not exists".format(request.json["id"])
+            return api.abort(404, msg)
+
+        if dataservice in reuse.dataservices:
+            return reuse
+        reuse.dataservices.append(dataservice)
         reuse.save()
         return reuse, 201
 

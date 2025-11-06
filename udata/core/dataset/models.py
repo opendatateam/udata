@@ -18,6 +18,8 @@ from werkzeug.utils import cached_property
 from udata.api_fields import field
 from udata.app import cache
 from udata.core import storages
+from udata.core.access_type.constants import AccessType
+from udata.core.access_type.models import WithAccessType, check_only_one_condition_per_role
 from udata.core.activity.models import Auditable
 from udata.core.constants import HVD
 from udata.core.dataset.preview import TabularAPIPreview
@@ -531,7 +533,9 @@ class DatasetBadgeMixin(BadgeMixin):
     __badges__ = BADGES
 
 
-class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Document):
+class Dataset(
+    Auditable, WithMetrics, WithAccessType, DatasetBadgeMixin, Owned, Linkable, db.Document
+):
     title = field(db.StringField(required=True))
     acronym = field(db.StringField(max_length=128))
     # /!\ do not set directly the slug when creating or updating a dataset
@@ -681,6 +685,10 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
         self.last_update = self.compute_last_update()
 
         self.quality_cached = self.compute_quality()
+
+        check_only_one_condition_per_role(self.access_audiences)
+        if self.access_type and self.access_type != AccessType.OPEN:
+            self.license = None
 
         for key, value in self.extras.items():
             if not key.startswith("custom:"):
