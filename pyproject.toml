@@ -27,9 +27,9 @@ classifiers = [
 ]
 requires-python = ">=3.11,<3.14"
 dependencies = [
-    "authlib==1.5.1",
-    "awesome-slugify==1.6.5",
-    "babel==2.17.0",
+    "authlib>=1.5.1,<2.0.0",
+    "awesome-slugify>=1.6.5,<2.0.0",
+    "babel>=2.17.0,<3.0.0",
     "bcrypt==4.3.0",
     "bleach[css]==6.2.0",
     "blinker==1.5",
