@@ -15,6 +15,12 @@ from udata import uris
 from udata.api import fields
 from udata.app import cache
 from udata.core import storages
+from udata.core.access_type.constants import (
+    AccessAudienceCondition,
+    AccessAudienceType,
+    AccessType,
+    InspireLimitationCategory,
+)
 from udata.core.badges.factories import badge_factory
 from udata.core.dataset.constants import (
     DEFAULT_LICENSE,
@@ -1332,6 +1338,107 @@ class DatasetAPITest(APITestCase):
         dataset.reload()
         assert dataset.resources[0].title == "updated 2"
         assert dataset.resources[0].schema is None
+
+    def test_add_access_type(self):
+        self.login(AdminFactory())
+        dataset = DatasetFactory()
+        assert dataset.access_type == AccessType.OPEN
+
+        response = self.get(url_for("api.dataset", dataset=dataset))
+
+        self.assert200(response)
+        assert response.json["access_type"] == AccessType.OPEN
+
+        response = self.put(
+            url_for("api.dataset", dataset=dataset),
+            {
+                "access_type": AccessType.RESTRICTED,
+                "access_audiences": [
+                    {
+                        "role": AccessAudienceType.ADMINISTRATION,
+                        "condition": AccessAudienceCondition.YES,
+                    },
+                    {"role": AccessAudienceType.COMPANY, "condition": AccessAudienceCondition.NO},
+                    {
+                        "role": AccessAudienceType.PRIVATE,
+                        "condition": AccessAudienceCondition.UNDER_CONDITIONS,
+                    },
+                ],
+                "authorization_request_url": "https://example.org",
+                "access_type_reason_category": InspireLimitationCategory.INTERNATIONAL_RELATIONS,
+                "access_type_reason": "Les données contiennent des information sensibles ou liées au secret défense",
+            },
+        )
+
+        self.assert200(response)
+        assert response.json["access_type"] == AccessType.RESTRICTED
+        assert (
+            response.json["access_type_reason_category"]
+            == InspireLimitationCategory.INTERNATIONAL_RELATIONS
+        )
+        assert (
+            response.json["access_type_reason"]
+            == "Les données contiennent des information sensibles ou liées au secret défense"
+        )
+        assert response.json["access_audiences"][0]["role"] == AccessAudienceType.ADMINISTRATION
+        assert response.json["access_audiences"][0]["condition"] == AccessAudienceCondition.YES
+        assert "id" not in response.json["access_audiences"][0]
+
+        dataset.reload()
+        assert dataset.access_type == AccessType.RESTRICTED
+        assert dataset.access_audiences[0].role == AccessAudienceType.ADMINISTRATION
+        assert dataset.access_audiences[0].condition == AccessAudienceCondition.YES
+        assert dataset.access_audiences[1].role == AccessAudienceType.COMPANY
+        assert dataset.access_audiences[1].condition == AccessAudienceCondition.NO
+        assert dataset.access_audiences[2].role == AccessAudienceType.PRIVATE
+        assert dataset.access_audiences[2].condition == AccessAudienceCondition.UNDER_CONDITIONS
+        assert dataset.authorization_request_url == "https://example.org"
+        assert (
+            dataset.access_type_reason_category == InspireLimitationCategory.INTERNATIONAL_RELATIONS
+        )
+        assert (
+            dataset.access_type_reason
+            == "Les données contiennent des information sensibles ou liées au secret défense"
+        )
+
+    def test_cannot_duplicate_access_audiences(self):
+        self.login(AdminFactory())
+        dataset = DatasetFactory()
+
+        response = self.put(
+            url_for("api.dataset", dataset=dataset),
+            {
+                "access_type": AccessType.RESTRICTED,
+                "access_audiences": [
+                    {
+                        "role": AccessAudienceType.ADMINISTRATION,
+                        "condition": AccessAudienceCondition.YES,
+                    },
+                    {
+                        "role": AccessAudienceType.ADMINISTRATION,
+                        "condition": AccessAudienceCondition.YES,
+                    },
+                ],
+            },
+        )
+
+        self.assert400(response)
+
+    def test_reset_license_on_restricted(self):
+        self.login(AdminFactory())
+        dataset = DatasetFactory(license=LicenseFactory(id="cc-by"))
+
+        response = self.put(
+            url_for("api.dataset", dataset=dataset),
+            {
+                "access_type": AccessType.RESTRICTED,
+            },
+        )
+
+        self.assert200(response)
+
+        dataset.reload()
+        assert dataset.license is None
 
 
 class DatasetsFeedAPItest(APITestCase):

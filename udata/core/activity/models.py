@@ -129,7 +129,7 @@ class Auditable(object):
         if kwargs.get("created"):
             cls.on_create.send(document)
         elif len(changed_fields):
-            previous = getattr(document, "_previous_changed_fields", None)
+            previous = getattr(document, "_previous_changed_fields", {})
             # Filter changed_fields since mongoengine raises some false positive occurences
             changed_fields = filter_changed_fields(document, previous, changed_fields)
             if changed_fields:
