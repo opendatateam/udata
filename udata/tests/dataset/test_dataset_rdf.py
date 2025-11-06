@@ -8,6 +8,7 @@ from rdflib import BNode, Graph, Literal, Namespace, URIRef
 from rdflib.namespace import FOAF, ORG, RDF, RDFS
 from rdflib.resource import Resource as RdfResource
 
+from udata.core.constants import HVD
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.constants import UpdateFrequency
@@ -331,6 +332,7 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         dataset = DatasetFactory(
             resources=ResourceFactory.build_batch(3), tags=["hvd", "mobilite", "test"]
         )
+        dataset.add_badge(HVD)
         d = dataset_to_rdf(dataset)
 
         assert d.value(DCATAP.applicableLegislation).identifier == URIRef(HVD_LEGISLATION)
@@ -348,7 +350,9 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         dataset = DatasetFactory(
             resources=ResourceFactory.build_batch(3), tags=["hvd", "mobilite", "test"]
         )
+        dataset.add_badge(HVD)
         dataservice = DataserviceFactory(datasets=[dataset], tags=["hvd"])
+        dataservice.add_badge(HVD)
         d = dataset_to_rdf(dataset)
         g = d.graph
 

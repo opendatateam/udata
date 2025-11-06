@@ -9,7 +9,12 @@ from mongoengine import ValidationError
 
 from udata import models as udata_models
 from udata.core import csv, storages
+from udata.core.badges import tasks as badge_tasks
+from udata.core.constants import HVD
 from udata.core.dataservices.models import Dataservice
+from udata.core.dataset.constants import INSPIRE
+from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
+from udata.core.organization.models import Organization
 from udata.harvest.models import HarvestJob
 from udata.models import Activity, Discussion, Follow, TopicElement, Transfer, db
 from udata.tasks import job
@@ -213,3 +218,48 @@ def bind_tabular_dataservice(self):
         log.error(exc_info=e)
 
     log.info(f"Bound {datasets.count()} datasets to TabularAPI dataservice")
+
+
+@badge_tasks.register(model=Dataset, badge=HVD)
+def update_dataset_hvd_badge() -> None:
+    """
+    Update HVD badges to candidate datasets, based on the hvd tag.
+    Only datasets owned by certified and public service organizations are candidate to have a HVD badge.
+    """
+    if not current_app.config["HVD_SUPPORT"]:
+        log.error("You need to set HVD_SUPPORT if you want to update dataset hvd badge")
+        return
+    public_certified_orgs = (
+        Organization.objects(badges__kind=PUBLIC_SERVICE).filter(badges__kind=CERTIFIED).only("id")
+    )
+
+    datasets = Dataset.objects(
+        tags="hvd", badges__kind__ne="hvd", organization__in=public_certified_orgs
+    )
+    log.info(f"Adding HVD badge to {datasets.count()} datasets")
+    for dataset in datasets:
+        dataset.add_badge(HVD)
+
+    datasets = Dataset.objects(tags__nin=["hvd"], badges__kind="hvd")
+    log.info(f"Removing HVD badge from {datasets.count()} datasets")
+    for dataset in datasets:
+        dataset.remove_badge(HVD)
+
+
+@badge_tasks.register(model=Dataset, badge=INSPIRE)
+def update_dataset_inspire_badge() -> None:
+    """
+    Update INSPIRE badges to candidate datasets, based on the inspire tag.
+    """
+    if not current_app.config["INSPIRE_SUPPORT"]:
+        log.error("You need to set INSPIRE_SUPPORT if you want to update dataset INSPIRE badge")
+        return
+    datasets = Dataset.objects(tags="inspire", badges__kind__ne="inspire")
+    log.info(f"Adding INSPIRE badge to {datasets.count()} datasets")
+    for dataset in datasets:
+        dataset.add_badge(INSPIRE)
+
+    datasets = Dataset.objects(tags__nin=["inspire"], badges__kind="inspire")
+    log.info(f"Removing INSPIRE badge from {datasets.count()} datasets")
+    for dataset in datasets:
+        dataset.remove_badge(INSPIRE)
