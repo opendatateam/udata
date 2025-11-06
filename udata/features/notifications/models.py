@@ -10,8 +10,6 @@ from udata.mongo.datetime_fields import Datetimed
 
 @generate_fields()
 class Notification(Datetimed, db.Document):
-    # meta = {"allow_inheritance": True}
-
     id = field(db.AutoUUIDField(primary_key=True))
     user = field(
         db.ReferenceField(User, reverse_delete_rule=NULLIFY),
