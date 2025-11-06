@@ -30,6 +30,12 @@ class MembershipRequestNotificationDetails(db.EmbeddedDocument):
         filterable={},
     )
 
+    @property
+    @field()
+    def handled_at(self):
+        request = self.request_organization.pending_request(self.request_user)
+        return request.handled_on if request else None
+
 
 @MembershipRequest.after_save.connect
 def on_new_membership_request(request: MembershipRequest, **kwargs):
