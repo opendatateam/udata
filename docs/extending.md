@@ -80,10 +80,6 @@ def my_hook(ctx, arg, **kwargs):
     # Do something with params
 ```
 
-### Metrics (`udata.metrics`)
-
-A module entrypoint allowing to register new metrics.
-
 ### Models (`udata.models`)
 
 This module entrypoint allows you to expose new models or to extend existing ones by adding new badges or new known extras.
