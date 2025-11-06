@@ -107,6 +107,26 @@ class DataserviceAPITest(APITestCase):
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(reuse_dataservice.id)
 
+    def test_dataservices_topic_filter_errors(self):
+        # non-existing
+        response = self.get(url_for("api.dataservices", topic="690c7f48ec85adaa376c1e93"))
+        assert200(response)
+
+        # not an object ID
+        response = self.get(url_for("api.dataservices", topic="xxx"))
+        assert400(response)
+        assert "`topic` must be an identifier" in response.json["message"]
+
+    def test_dataservices_reuse_filter_errors(self):
+        # non-existing
+        response = self.get(url_for("api.dataservices", reuse="690c7f48ec85adaa376c1e93"))
+        assert200(response)
+
+        # not an object ID
+        response = self.get(url_for("api.dataservices", reuse="xxx"))
+        assert400(response)
+        assert "`reuse` must be an identifier" in response.json["message"]
+
     def test_dataservice_api_create(self):
         user = self.login()
         datasets = DatasetFactory.create_batch(3)

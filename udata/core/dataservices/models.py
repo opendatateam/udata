@@ -130,7 +130,7 @@ def filter_by_topic(base_query, filter_value):
     try:
         topic = Topic.objects.get(id=filter_value)
     except Topic.DoesNotExist:
-        pass
+        return base_query
     else:
         return base_query.filter(
             id__in=[
@@ -146,7 +146,7 @@ def filter_by_reuse(base_query, filter_value):
     try:
         reuse = Reuse.objects.get(id=filter_value)
     except Reuse.DoesNotExist:
-        pass
+        return base_query
     else:
         return base_query.filter(id__in=[dataservice.id for dataservice in reuse.dataservices])
 
@@ -155,8 +155,8 @@ def filter_by_reuse(base_query, filter_value):
     searchable=True,
     nested_filters={"organization_badge": "organization.badges"},
     standalone_filters=[
-        {"key": "topic", "constraints": "objectid", "query": filter_by_topic, "type": str},
-        {"key": "reuse", "constraints": "objectid", "query": filter_by_reuse, "type": str},
+        {"key": "topic", "constraints": ["objectid"], "query": filter_by_topic, "type": str},
+        {"key": "reuse", "constraints": ["objectid"], "query": filter_by_reuse, "type": str},
     ],
     additional_sorts=[
         {"key": "followers", "value": "metrics.followers"},
