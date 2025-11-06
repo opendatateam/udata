@@ -17,8 +17,6 @@ def migrate(db):
     datasets = Dataset.objects(harvest__backend="CKAN", harvest__modified_at__exists=True)
     count = datasets.count()
 
-    log.info("Test")
-
     with click.progressbar(datasets, length=count) as datasets:
         for dataset in datasets:
             dataset.harvest.modified_at = None
