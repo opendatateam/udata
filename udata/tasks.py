@@ -1,4 +1,5 @@
 import logging
+from importlib.metadata import entry_points
 from urllib.parse import urlparse
 
 from celery import Celery, Task
@@ -173,5 +174,8 @@ def init_app(app):
     import udata.core.storages.tasks  # noqa
     import udata.harvest.tasks  # noqa
     import udata.db.tasks  # noqa
+
+    for ep in entry_points(group="udata.tasks"):
+        ep.load()
 
     return celery
