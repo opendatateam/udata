@@ -96,8 +96,8 @@ class MailGenerationTest(APITestCase):
             )
 
         assert len(mails) == 1
-        assert "<strong>Some text:</strong> Some content" in mails[0].html
-        assert "Some text: Some content" in mails[0].body
+        assert "<strong>Du texte :</strong> Some content" in mails[0].html
+        assert "Du texte : Some content" in mails[0].body
 
     @pytest.mark.options(DEFAULT_LANGUAGE="en")
     def test_labelled_bloc_truncation(self):
