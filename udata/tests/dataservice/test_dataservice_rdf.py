@@ -6,6 +6,7 @@ from rdflib import BNode, Literal, URIRef
 from rdflib.namespace import RDF
 from rdflib.resource import Resource as RdfResource
 
+from udata.core.constants import HVD
 from udata.core.dataservices.factories import DataserviceFactory, HarvestMetadataFactory
 from udata.core.dataservices.rdf import dataservice_to_rdf
 from udata.core.dataset.factories import DatasetFactory
@@ -49,6 +50,7 @@ class DataserviceToRdfTest(PytestOnlyAPITestCase):
     def test_hvd_dataservice(self):
         """Test that a dataservice tagged hvd has appropriate DCAT-AP HVD properties"""
         dataservice = DataserviceFactory(tags=["hvd", "mobilite", "test"])
+        dataservice.add_badge(HVD)
         d = dataservice_to_rdf(dataservice)
 
         assert d.value(DCATAP.applicableLegislation).identifier == URIRef(HVD_LEGISLATION)
@@ -65,9 +67,12 @@ class DataserviceToRdfTest(PytestOnlyAPITestCase):
         dataset_hvd_2 = DatasetFactory(
             tags=["hvd", "statistiques", "mobilite", "geospatiales", "not-a-hvd-category"]
         )
+        dataset_hvd_1.add_badge(HVD)
+        dataset_hvd_2.add_badge(HVD)
         dataservice = DataserviceFactory(
             datasets=[dataset, dataset_hvd_1, dataset_hvd_2], tags=["hvd", "mobilite", "test"]
         )
+        dataservice.add_badge(HVD)
         d = dataservice_to_rdf(dataservice)
 
         assert d.value(DCATAP.applicableLegislation).identifier == URIRef(HVD_LEGISLATION)

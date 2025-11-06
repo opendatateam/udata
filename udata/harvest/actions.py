@@ -268,7 +268,7 @@ def schedule(
 def unschedule(source: HarvestSource):
     """Unschedule an harvesting on a source"""
     if not source.periodic_task:
-        msg = "Harvesting on source {0} is ot scheduled".format(source.name)
+        msg = "Harvesting on source {0} is not scheduled".format(source.name)
         raise ValueError(msg)
 
     source.periodic_task.delete()
