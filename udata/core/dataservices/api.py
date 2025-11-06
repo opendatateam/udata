@@ -9,13 +9,13 @@ from flask_login import current_user
 from udata.api import API, api, fields
 from udata.api_fields import patch
 from udata.auth import admin_permission
-from udata.core.dataservices.constants import DATASERVICE_ACCESS_TYPE_RESTRICTED
+from udata.core.access_type.constants import AccessType
 from udata.core.dataset.models import Dataset
 from udata.core.followers.api import FollowAPI
-from udata.core.site.models import current_site
 from udata.frontend.markdown import md
 from udata.i18n import gettext as _
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
+from udata.utils import get_rss_feed_list
 
 from .models import Dataservice
 from .rdf import dataservice_to_rdf
@@ -48,7 +48,7 @@ class DataservicesAPI(API):
         dataservice = patch(Dataservice(), request)
         if not dataservice.owner and not dataservice.organization:
             dataservice.owner = current_user._get_current_object()
-        if dataservice.access_type != DATASERVICE_ACCESS_TYPE_RESTRICTED:
+        if dataservice.access_type != AccessType.RESTRICTED:
             dataservice.access_audiences = []
         dataservice.save()
         return dataservice, 201
@@ -62,9 +62,7 @@ class DataservicesAtomFeedAPI(API):
             _("Latest APIs"), description=None, feed_url=request.url, link=request.url_root
         )
 
-        dataservices: list[Dataservice] = (
-            Dataservice.objects.visible().order_by("-created_at").limit(current_site.feed_size)
-        )
+        dataservices = get_rss_feed_list(Dataservice.objects.visible(), "created_at")
         for dataservice in dataservices:
             author_name = None
             author_uri = None
@@ -117,7 +115,7 @@ class DataserviceAPI(API):
 
         patch(dataservice, request)
         dataservice.metadata_modified_at = datetime.utcnow()
-        if dataservice.access_type != DATASERVICE_ACCESS_TYPE_RESTRICTED:
+        if dataservice.access_type != AccessType.RESTRICTED:
             dataservice.access_audiences = []
 
         dataservice.save()
@@ -238,19 +236,19 @@ class DataserviceDatasetAPI(API):
 class DataserviceRdfAPI(API):
     @api.doc("rdf_dataservice")
     def get(self, dataservice):
-        format = RDF_EXTENSIONS[negociate_content()]
-        url = url_for("api.dataservice_rdf_format", dataservice=dataservice.id, format=format)
+        _format = RDF_EXTENSIONS[negociate_content()]
+        url = url_for("api.dataservice_rdf_format", dataservice=dataservice.id, _format=_format)
         return redirect(url)
 
 
 @ns.route(
-    "/<dataservice:dataservice>/rdf.<format>", endpoint="dataservice_rdf_format", doc=common_doc
+    "/<dataservice:dataservice>/rdf.<_format>", endpoint="dataservice_rdf_format", doc=common_doc
 )
 @api.response(404, "Dataservice not found")
 @api.response(410, "Dataservice has been deleted")
 class DataserviceRdfFormatAPI(API):
     @api.doc("rdf_dataservice_format")
-    def get(self, dataservice: Dataservice, format):
+    def get(self, dataservice: Dataservice, _format):
         if not dataservice.permissions["edit"].can():
             if dataservice.private:
                 api.abort(404)
@@ -260,7 +258,7 @@ class DataserviceRdfFormatAPI(API):
         resource = dataservice_to_rdf(dataservice)
         # bypass flask-restplus make_response, since graph_response
         # is handling the content negociation directly
-        return make_response(*graph_response(resource, format))
+        return make_response(*graph_response(resource, _format))
 
 
 @ns.route("/<id>/followers/", endpoint="dataservice_followers")

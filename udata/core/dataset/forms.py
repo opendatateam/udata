@@ -1,3 +1,10 @@
+from udata.core.access_type.constants import (
+    AccessAudienceCondition,
+    AccessAudienceType,
+    AccessType,
+    InspireLimitationCategory,
+)
+from udata.core.access_type.models import AccessAudience
 from udata.core.spatial.forms import SpatialCoverageField
 from udata.core.storages import resources
 from udata.forms import ModelForm, fields, validators
@@ -116,6 +123,8 @@ class CommunityResourceForm(BaseResourceForm):
 
 
 def unmarshal_frequency(form, field):
+    if field.data is None:
+        return
     # We don't need to worry about invalid field.data being fed to UpdateFrequency here,
     # since the API will already have ensured incoming data matches the field definition,
     # which in our case is an enum of valid UpdateFrequency values.
@@ -139,6 +148,13 @@ def validate_contact_point(form, field):
             )
 
 
+class AccessAudienceForm(ModelForm):
+    model_class = AccessAudience
+
+    role = fields.SelectField(choices=[(e.value, e.value) for e in AccessAudienceType])
+    condition = fields.SelectField(choices=[(e.value, e.value) for e in AccessAudienceCondition])
+
+
 class DatasetForm(ModelForm):
     model_class = Dataset
 
@@ -157,6 +173,19 @@ class DatasetForm(ModelForm):
         description=_("A short description of the dataset."),
     )
     license = fields.ModelSelectField(_("License"), model=License, allow_blank=True)
+    access_type = fields.SelectField(
+        choices=[(e.value, e.value) for e in AccessType],
+        default=AccessType.OPEN,
+        validators=[validators.optional()],
+    )
+    access_audiences = fields.NestedModelList(AccessAudienceForm)
+    authorization_request_url = fields.StringField(_("Authorization request URL"))
+    access_type_reason_category = fields.SelectField(
+        _("Access type reason category"),
+        choices=[(e.value, e.label) for e in InspireLimitationCategory],
+        validators=[validators.optional()],
+    )
+    access_type_reason = fields.StringField(_("Access type reason"))
     frequency = fields.SelectField(
         _("Update frequency"),
         choices=list(UpdateFrequency),

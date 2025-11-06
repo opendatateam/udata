@@ -1,4 +1,3 @@
-import pkg_resources
 from kombu import Exchange, Queue
 from tlds import tld_set
 
@@ -173,7 +172,6 @@ class Defaults(object):
     SITE_AUTHOR_URL = None
     SITE_AUTHOR = "Udata"
     SITE_GITHUB_URL = "https://github.com/etalab/udata"
-    SITE_TERMS_LOCATION = pkg_resources.resource_filename(__name__, "terms.md")
 
     UDATA_INSTANCE_NAME = "udata"
 
@@ -288,6 +286,8 @@ class Defaults(object):
 
     DELAY_BEFORE_REMINDER_NOTIFICATION = 30  # Days
 
+    DELAY_BEFORE_APPEARING_IN_RSS_FEED = 10  # Hours
+
     # Harvest settings
     ###########################################################################
     HARVEST_ENABLE_MANUAL_RUN = False
@@ -324,8 +324,13 @@ class Defaults(object):
     S3_ACCESS_KEY_ID = None
     S3_SECRET_ACCESS_KEY = None
 
-    # Specific support for hvd (map HVD categories URIs to keywords)
+    # Specific support for hvd:
+    # - map HVD categories URIs to keywords
     HVD_SUPPORT = True
+
+    # Specific support for inspire:
+    # - add inspire keyword during harvest if GEMETE INSPIRE thesaurus is used in DCAT.theme
+    INSPIRE_SUPPORT = True
 
     ACTIVATE_TERRITORIES = False
     # The order is important to compute parents/children, smaller first.
@@ -651,6 +656,9 @@ class Testing(object):
     }  # Disables deliverability for email domain name
     PUBLISH_ON_RESOURCE_EVENTS = False
     HARVEST_ACTIVITY_USER_ID = None
+    SEARCH_SERVICE_API_URL = None
+    CDATA_BASE_URL = None
+    SCHEMA_CATALOG_URL = None
 
 
 class Debug(Defaults):

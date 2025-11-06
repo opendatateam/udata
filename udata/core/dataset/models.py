@@ -9,6 +9,7 @@ import Levenshtein
 import requests
 from blinker import signal
 from flask import current_app, url_for
+from flask_babel import LazyString
 from mongoengine import ValidationError as MongoEngineValidationError
 from mongoengine.fields import DateTimeField
 from mongoengine.signals import post_save, pre_init, pre_save
@@ -17,7 +18,10 @@ from werkzeug.utils import cached_property
 from udata.api_fields import field
 from udata.app import cache
 from udata.core import storages
+from udata.core.access_type.constants import AccessType
+from udata.core.access_type.models import WithAccessType, check_only_one_condition_per_role
 from udata.core.activity.models import Auditable
+from udata.core.constants import HVD
 from udata.core.dataset.preview import TabularAPIPreview
 from udata.core.linkable import Linkable
 from udata.core.metrics.helpers import get_stock_metrics
@@ -35,7 +39,6 @@ from .constants import (
     CLOSED_FORMATS,
     DEFAULT_LICENSE,
     DESCRIPTION_SHORT_SIZE_LIMIT,
-    HVD,
     INSPIRE,
     MAX_DISTANCE,
     PIVOTAL_DATA,
@@ -62,7 +65,7 @@ __all__ = (
     "ResourceSchema",
 )
 
-BADGES: dict[str, str] = {
+BADGES: dict[str, LazyString] = {
     PIVOTAL_DATA: _("Pivotal data"),
     SPD: _("Reference data public service"),
     INSPIRE: _("Inspire"),
@@ -530,7 +533,9 @@ class DatasetBadgeMixin(BadgeMixin):
     __badges__ = BADGES
 
 
-class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Document):
+class Dataset(
+    Auditable, WithMetrics, WithAccessType, DatasetBadgeMixin, Owned, Linkable, db.Document
+):
     title = field(db.StringField(required=True))
     acronym = field(db.StringField(max_length=128))
     # /!\ do not set directly the slug when creating or updating a dataset
@@ -681,6 +686,10 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
 
         self.quality_cached = self.compute_quality()
 
+        check_only_one_condition_per_role(self.access_audiences)
+        if self.access_type and self.access_type != AccessType.OPEN:
+            self.license = None
+
         for key, value in self.extras.items():
             if not key.startswith("custom:"):
                 continue
@@ -780,10 +789,13 @@ class Dataset(Auditable, WithMetrics, DatasetBadgeMixin, Owned, Linkable, db.Doc
 
     def compute_last_update(self):
         """
-        Use the more recent date we would have on resources (harvest, modified).
+        If dataset is harvested and its metadata contains a modified_at date, use it.
+        Else, use the more recent date we would have at the resource level (harvest, modified).
         Default to dataset last_modified if no resource.
         Resources should be fetched when calling this method.
         """
+        if self.harvest and self.harvest.modified_at:
+            return self.harvest.modified_at
         if self.resources:
             return max([res.last_modified for res in self.resources])
         else:

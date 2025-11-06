@@ -1,5 +1,4 @@
 from udata.core.spatial.factories import GeoZoneFactory
-from udata.settings import Testing
 
 
 def create_geozones_fixtures():
@@ -19,8 +18,3 @@ def create_old_new_regions_fixtures():
         id="fr:region:76", level="fr:region", name="Languedoc-Rousillon et Midi-Pyrénées", code="76"
     )
     return lr, occitanie
-
-
-class TerritoriesSettings(Testing):
-    ACTIVATE_TERRITORIES = True
-    HANDLED_LEVELS = ("fr:commune", "fr:departement", "fr:region", "country")

@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF xmlns:adms="http://www.w3.org/ns/adms#"
+         xmlns:cnt="http://www.w3.org/2011/content#"
+         xmlns:dc="http://purl.org/dc/elements/1.1/"
+         xmlns:dcat="http://www.w3.org/ns/dcat#"
+         xmlns:dct="http://purl.org/dc/terms/"
+         xmlns:dctype="http://purl.org/dc/dcmitype/"
+         xmlns:dqv="http://www.w3.org/ns/dqv#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/"
+         xmlns:geodcatap="http://data.europa.eu/930/"
+         xmlns:gsp="http://www.opengis.net/ont/geosparql#"
+         xmlns:locn="http://www.w3.org/ns/locn#"
+         xmlns:org="http://www.w3.org/ns/org#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+         xmlns:prov="http://www.w3.org/ns/prov#"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:schema="http://schema.org/"
+         xmlns:sdmx-attribute="http://purl.org/linked-data/sdmx/2009/attribute#"
+         xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+         xmlns:vcard="http://www.w3.org/2006/vcard/ns#">
+   <rdf:Description rdf:about="https://catalogue.open-datara.fr/geonetwork/srv/5a26b0f6-0ccf-46ad-ac58-734054b91977">
+      <foaf:isPrimaryTopicOf>
+         <rdf:Description>
+            <rdf:type rdf:resource="http://www.w3.org/ns/dcat#CatalogRecord"/>
+            <foaf:primaryTopic rdf:resource="https://catalogue.open-datara.fr/geonetwork/srv/5a26b0f6-0ccf-46ad-ac58-734054b91977"/>
+            <dct:conformsTo>
+               <dct:Standard rdf:about="http://data.europa.eu/930/"/>
+            </dct:conformsTo>
+            <dct:language>
+               <dct:LinguisticSystem rdf:about="http://publications.europa.eu/resource/authority/language/FRE"/>
+            </dct:language>
+            <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2022-03-22T08:51:36</dct:modified>
+            <geodcatap:user>
+               <rdf:Description>
+                  <rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
+                  <rdf:type rdf:resource="http://www.w3.org/ns/prov#Agent"/>
+                  <foaf:name xml:lang="fr">Administrateur de Données</foaf:name>
+                  <org:memberOf>
+                     <foaf:Organization>
+                        <foaf:name xml:lang="fr">Direction Régionale de l’Environnement de l’Aménagement et du Logement d'Auvergne-Rhône-Alpes (DREAL Auvergne-Rhône-Alpes)</foaf:name>
+                     </foaf:Organization>
+                  </org:memberOf>
+                  <foaf:mbox rdf:resource="mailto:sig.dreal-ara@developpement-durable.gouv.fr"/>
+                  <locn:address>
+                     <locn:Address>
+                        <locn:thoroughfare>5 place Jules Ferry</locn:thoroughfare>
+                        <locn:postName>LYON</locn:postName>
+                        <locn:postCode>69006</locn:postCode>
+                        <locn:adminUnitL1>France</locn:adminUnitL1>
+                     </locn:Address>
+                  </locn:address>
+               </rdf:Description>
+            </geodcatap:user>
+            <prov:qualifiedAttribution>
+               <prov:Attribution>
+                  <prov:agent>
+                     <rdf:Description>
+                        <rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
+                        <rdf:type rdf:resource="http://www.w3.org/ns/prov#Agent"/>
+                        <foaf:name xml:lang="fr">Administrateur de Données</foaf:name>
+                        <org:memberOf>
+                           <foaf:Organization>
+                              <foaf:name xml:lang="fr">Direction Régionale de l’Environnement de l’Aménagement et du Logement d'Auvergne-Rhône-Alpes (DREAL Auvergne-Rhône-Alpes)</foaf:name>
+                           </foaf:Organization>
+                        </org:memberOf>
+                        <foaf:mbox rdf:resource="mailto:sig.dreal-ara@developpement-durable.gouv.fr"/>
+                        <locn:address>
+                           <locn:Address>
+                              <locn:thoroughfare>5 place Jules Ferry</locn:thoroughfare>
+                              <locn:postName>LYON</locn:postName>
+                              <locn:postCode>69006</locn:postCode>
+                              <locn:adminUnitL1>France</locn:adminUnitL1>
+                           </locn:Address>
+                        </locn:address>
+                     </rdf:Description>
+                  </prov:agent>
+                  <dct:type rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/user"/>
+                  <dcat:hadRole>
+                     <dcat:Role rdf:about="http://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/user"/>
+                  </dcat:hadRole>
+               </prov:Attribution>
+            </prov:qualifiedAttribution>
+            <dct:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">5a26b0f6-0ccf-46ad-ac58-734054b91977</dct:identifier>
+            <dct:source rdf:parseType="Resource">
+               <rdf:type rdf:resource="http://www.w3.org/ns/dcat#CatalogRecord"/>
+               <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2022-03-22T08:51:36</dct:modified>
+               <cnt:characterEncoding rdf:datatype="http://www.w3.org/2001/XMLSchema#string">UTF-8</cnt:characterEncoding>
+               <dct:conformsTo rdf:parseType="Resource">
+                  <rdf:type rdf:resource="http://purl.org/dc/terms/Standard"/>
+                  <dct:title xml:lang="fr">ISO 19115:2003/19139</dct:title>
+                  <owl:versionInfo xml:lang="fr">1.0</owl:versionInfo>
+               </dct:conformsTo>
+            </dct:source>
+         </rdf:Description>
+      </foaf:isPrimaryTopicOf>
+      <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset"/>
+      <dct:type rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ResourceType/dataset"/>
+      <dct:title xml:lang="fr">Campings issus de la BDTopo de Auvergne Rhône-Alpes</dct:title>
+      <dct:description xml:lang="fr">Campings issus de la table des points d'interêts "culture et loisir" de la BDTopo de l'IGN</dct:description>
+      <dct:subject rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/TopicCategory/structure"/>
+      <dcat:keyword xml:lang="fr">RHONE ALPES</dcat:keyword>
+      <dcat:theme rdf:parseType="Resource">
+         <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+         <skos:prefLabel xml:lang="fr">Gestion des crises et des risques</skos:prefLabel>
+         <skos:inScheme>
+            <skos:ConceptScheme>
+               <dct:title xml:lang="fr">theme.environnement.rdf</dct:title>
+            </skos:ConceptScheme>
+         </skos:inScheme>
+      </dcat:theme>
+      <dcat:keyword xml:lang="fr">Culture, Société, Service</dcat:keyword>
+      <dct:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://catalogue.open-datara.fr/geonetwork/srv/5a26b0f6-0ccf-46ad-ac58-734054b91977</dct:identifier>
+      <dct:language>
+         <dct:LinguisticSystem rdf:about="http://publications.europa.eu/resource/authority/language/FRE"/>
+      </dct:language>
+      <dct:spatial rdf:parseType="Resource">
+         <rdf:type rdf:resource="http://purl.org/dc/terms/Location"/>
+         <locn:geometry rdf:datatype="http://www.opengis.net/ont/geosparql#wktLiteral"><![CDATA[POLYGON((2.06287814767608 46.8042870493687,7.18556459920588 46.8042870493687,7.18556459920588 44.1154926129761,2.06287814767608 44.1154926129761,2.06287814767608 46.8042870493687))]]></locn:geometry>
+         <locn:geometry rdf:datatype="http://www.opengis.net/ont/geosparql#gmlLiteral"><![CDATA[<gml:Envelope srsName="http://www.opengis.net/def/crs/OGC/1.3/CRS84"><gml:lowerCorner>2.06287814767608 44.1154926129761</gml:lowerCorner><gml:upperCorner>7.18556459920588 46.8042870493687</gml:upperCorner></gml:Envelope>]]></locn:geometry>
+         <locn:geometry rdf:datatype="https://www.iana.org/assignments/media-types/application/vnd.geo+json"><![CDATA[{"type":"Polygon","coordinates":[[[2.06287814767608,46.8042870493687],[7.18556459920588,46.8042870493687],[7.18556459920588,44.1154926129761],[2.06287814767608,44.1154926129761],[2.06287814767608,46.8042870493687]]]}]]></locn:geometry>
+         <locn:geometry rdf:datatype="http://www.opengis.net/ont/geosparql#geoJSONLiteral"><![CDATA[{"type":"Polygon","coordinates":[[[2.06287814767608,46.8042870493687],[7.18556459920588,46.8042870493687],[7.18556459920588,44.1154926129761],[2.06287814767608,44.1154926129761],[2.06287814767608,46.8042870493687]]]}]]></locn:geometry>
+         <dcat:bbox rdf:datatype="http://www.opengis.net/ont/geosparql#wktLiteral"><![CDATA[POLYGON((2.06287814767608 46.8042870493687,7.18556459920588 46.8042870493687,7.18556459920588 44.1154926129761,2.06287814767608 44.1154926129761,2.06287814767608 46.8042870493687))]]></dcat:bbox>
+         <dcat:bbox rdf:datatype="http://www.opengis.net/ont/geosparql#gmlLiteral"><![CDATA[<gml:Envelope srsName="http://www.opengis.net/def/crs/OGC/1.3/CRS84"><gml:lowerCorner>2.06287814767608 44.1154926129761</gml:lowerCorner><gml:upperCorner>7.18556459920588 46.8042870493687</gml:upperCorner></gml:Envelope>]]></dcat:bbox>
+         <dcat:bbox rdf:datatype="https://www.iana.org/assignments/media-types/application/vnd.geo+json"><![CDATA[{"type":"Polygon","coordinates":[[[2.06287814767608,46.8042870493687],[7.18556459920588,46.8042870493687],[7.18556459920588,44.1154926129761],[2.06287814767608,44.1154926129761],[2.06287814767608,46.8042870493687]]]}]]></dcat:bbox>
+         <dcat:bbox rdf:datatype="http://www.opengis.net/ont/geosparql#geoJSONLiteral"><![CDATA[{"type":"Polygon","coordinates":[[[2.06287814767608,46.8042870493687],[7.18556459920588,46.8042870493687],[7.18556459920588,44.1154926129761],[2.06287814767608,44.1154926129761],[2.06287814767608,46.8042870493687]]]}]]></dcat:bbox>
+      </dct:spatial>
+      <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date"/>
+      <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#date"/>
+      <dct:provenance>
+         <dct:ProvenanceStatement>
+            <rdfs:label xml:lang="fr">requête sur le champ nature='Camping' de la table PAI_CULTURE_SERVICE de la BDTopo et agrégation régionale</rdfs:label>
+         </dct:ProvenanceStatement>
+      </dct:provenance>
+      <dct:conformsTo rdf:parseType="Resource">
+         <rdf:type rdf:resource="http://purl.org/dc/terms/Standard"/>
+         <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+         <dct:type rdf:resource="http://inspire.ec.europa.eu/glossary/SpatialReferenceSystem"/>
+         <dct:title xml:lang="fr">RGF93 / Lambert-93 (EPSG:2154)</dct:title>
+         <skos:prefLabel xml:lang="fr">RGF93 / Lambert-93 (EPSG:2154)</skos:prefLabel>
+         <skos:inScheme>
+            <skos:ConceptScheme>
+               <dct:title xml:lang="fr">EPSG</dct:title>
+            </skos:ConceptScheme>
+         </skos:inScheme>
+         <owl:versionInfo xml:lang="fr">7.4</owl:versionInfo>
+      </dct:conformsTo>
+      <dqv:hasQualityMeasurement>
+         <dqv:QualityMeasurement>
+            <dqv:isMeasurementOf>
+               <dqv:Metric rdf:about="http://data.europa.eu/930/spatialResolutionAsScale"/>
+            </dqv:isMeasurementOf>
+            <dqv:value rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">0.0001</dqv:value>
+         </dqv:QualityMeasurement>
+      </dqv:hasQualityMeasurement>
+      <dcat:landingPage>
+         <foaf:Document rdf:about="https://carto.open-datara.fr/cgi-bin/mapservwfs?">
+            <dct:title xml:lang="fr">CampingsissusdelaBDTopodeRhone</dct:title>
+            <dct:description xml:lang="fr">CampingsissusdelaBDTopodeRhone</dct:description>
+         </foaf:Document>
+      </dcat:landingPage>
+      <dcat:distribution>
+         <dcat:Distribution>
+            <dct:title xml:lang="fr">Accès au téléchargement des données</dct:title>
+            <dcat:accessURL rdf:resource="https://telechargement.open-datara.fr/download/5a26b0f6-0ccf-46ad-ac58-734054b91977"/>
+            <dct:license>
+               <dct:LicenseDocument>
+                  <rdfs:label xml:lang="fr">Ayant droit IGN Bénéficiaires du RGE</rdfs:label>
+               </dct:LicenseDocument>
+            </dct:license>
+            <adms:representationTechnique rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/SpatialRepresentationType/vector"/>
+            <cnt:characterEncoding rdf:datatype="http://www.w3.org/2001/XMLSchema#string">UTF-8</cnt:characterEncoding>
+         </dcat:Distribution>
+      </dcat:distribution>
+      <dcat:landingPage>
+         <foaf:Document rdf:about="https://catalogue.open-datara.fr/geosource/consultationWMS?IDT=2429">
+            <dct:title xml:lang="fr">Accès à la visualisation des données</dct:title>
+         </foaf:Document>
+      </dcat:landingPage>
+      <dct:rightsHolder>
+         <rdf:Description>
+            <rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Organization"/>
+            <rdf:type rdf:resource="http://www.w3.org/ns/prov#Agent"/>
+            <foaf:name xml:lang="fr">IGN</foaf:name>
+            <foaf:mbox rdf:resource="mailto:sav.bd@ign.fr"/>
+         </rdf:Description>
+      </dct:rightsHolder>
+      <prov:qualifiedAttribution>
+         <prov:Attribution>
+            <prov:agent>
+               <rdf:Description>
+                  <rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Organization"/>
+                  <rdf:type rdf:resource="http://www.w3.org/ns/prov#Agent"/>
+                  <foaf:name xml:lang="fr">IGN</foaf:name>
+                  <foaf:mbox rdf:resource="mailto:sav.bd@ign.fr"/>
+               </rdf:Description>
+            </prov:agent>
+            <dct:type rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/owner"/>
+            <dcat:hadRole>
+               <dcat:Role rdf:about="http://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/owner"/>
+            </dcat:hadRole>
+         </prov:Attribution>
+      </prov:qualifiedAttribution>
+      <geodcatap:user>
+         <rdf:Description>
+            <rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
+            <rdf:type rdf:resource="http://www.w3.org/ns/prov#Agent"/>
+            <foaf:name xml:lang="fr">Administrateur de Données</foaf:name>
+            <org:memberOf>
+               <foaf:Organization>
+                  <foaf:name xml:lang="fr">Direction Régionale de l’Environnement de l’Aménagement et du Logement d'Auvergne-Rhône-Alpes (DREAL Auvergne-Rhône-Alpes)</foaf:name>
+               </foaf:Organization>
+            </org:memberOf>
+            <foaf:mbox rdf:resource="mailto:sig.dreal-ara@developpement-durable.gouv.fr"/>
+            <locn:address>
+               <locn:Address>
+                  <locn:thoroughfare>5 place Jules Ferry</locn:thoroughfare>
+                  <locn:postName>LYON</locn:postName>
+                  <locn:postCode>69006</locn:postCode>
+                  <locn:adminUnitL1>France</locn:adminUnitL1>
+               </locn:Address>
+            </locn:address>
+         </rdf:Description>
+      </geodcatap:user>
+      <prov:qualifiedAttribution>
+         <prov:Attribution>
+            <prov:agent>
+               <rdf:Description>
+                  <rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
+                  <rdf:type rdf:resource="http://www.w3.org/ns/prov#Agent"/>
+                  <foaf:name xml:lang="fr">Administrateur de Données</foaf:name>
+                  <org:memberOf>
+                     <foaf:Organization>
+                        <foaf:name xml:lang="fr">Direction Régionale de l’Environnement de l’Aménagement et du Logement d'Auvergne-Rhône-Alpes (DREAL Auvergne-Rhône-Alpes)</foaf:name>
+                     </foaf:Organization>
+                  </org:memberOf>
+                  <foaf:mbox rdf:resource="mailto:sig.dreal-ara@developpement-durable.gouv.fr"/>
+                  <locn:address>
+                     <locn:Address>
+                        <locn:thoroughfare>5 place Jules Ferry</locn:thoroughfare>
+                        <locn:postName>LYON</locn:postName>
+                        <locn:postCode>69006</locn:postCode>
+                        <locn:adminUnitL1>France</locn:adminUnitL1>
+                     </locn:Address>
+                  </locn:address>
+               </rdf:Description>
+            </prov:agent>
+            <dct:type rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/user"/>
+            <dcat:hadRole>
+               <dcat:Role rdf:about="http://inspire.ec.europa.eu/metadata-codelist/ResponsiblePartyRole/user"/>
+            </dcat:hadRole>
+         </prov:Attribution>
+      </prov:qualifiedAttribution>
+   </rdf:Description>
+</rdf:RDF>

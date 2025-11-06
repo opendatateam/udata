@@ -1,4 +1,5 @@
 from udata.api import api, base_reference, fields
+from udata.core.access_type.models import AccessAudience
 from udata.core.badges.fields import badge_fields
 from udata.core.contact_point.api_fields import contact_point_fields
 from udata.core.organization.api_fields import org_ref_fields
@@ -287,6 +288,11 @@ DEFAULT_MASK = ",".join(
         "temporal_coverage",
         "spatial",
         "license",
+        "access_type",
+        "access_audiences",
+        "authorization_request_url",
+        "access_type_reason_category",
+        "access_type_reason",
         "uri",
         "page",
         "last_update",
@@ -394,6 +400,11 @@ dataset_fields = api.model(
         "license": fields.String(
             attribute="license.id", default=DEFAULT_LICENSE["id"], description="The dataset license"
         ),
+        "access_type": fields.String(allow_null=True),
+        "access_audiences": fields.List(fields.Nested(AccessAudience.__read_fields__)),
+        "authorization_request_url": fields.String(allow_null=True),
+        "access_type_reason_category": fields.String(allow_null=True),
+        "access_type_reason": fields.String(allow_null=True),
         "uri": fields.String(
             attribute=lambda d: d.self_api_url(),
             description="The API URI for this dataset",

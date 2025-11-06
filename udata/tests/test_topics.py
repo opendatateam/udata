@@ -17,6 +17,7 @@ from udata.core.topic.factories import (
 )
 from udata.core.topic.models import Topic, TopicElement
 from udata.search import reindex
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_emit
 
 
@@ -31,10 +32,7 @@ def job_reindex_undelayed(mocker):
     return mocker.patch.object(reindex, "delay", side_effect=reindex)
 
 
-pytestmark = pytest.mark.usefixtures("clean_db")
-
-
-class TopicModelTest:
+class TopicModelTest(PytestOnlyDBTestCase):
     def test_pre_save(self, job_reindex):
         topic = TopicFactory()
 

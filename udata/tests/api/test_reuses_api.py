@@ -7,13 +7,14 @@ from werkzeug.test import TestResponse
 
 import udata.core.organization.constants as org_constants
 from udata.core.badges.factories import badge_factory
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.constants import REUSE_TOPICS, REUSE_TYPES
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.models import Follow, Member, Reuse
-from udata.tests.api import APITestCase
+from udata.tests.api import APITestCase, PytestOnlyAPITestCase
 from udata.tests.helpers import (
     assert200,
     assert201,
@@ -24,19 +25,13 @@ from udata.tests.helpers import (
 )
 from udata.utils import faker
 
-pytestmark = [
-    pytest.mark.usefixtures("clean_db"),
-]
-
 
 def reuse_in_response(response: TestResponse, reuse: Reuse) -> bool:
     only_reuse = [r for r in response.json["data"] if r["id"] == str(reuse.id)]
     return len(only_reuse) > 0
 
 
-class ReuseAPITest:
-    modules = []
-
+class ReuseAPITest(PytestOnlyAPITestCase):
     def test_reuse_api_list(self, api):
         """It should fetch a reuse list from the API"""
         reuses = ReuseFactory.create_batch(3, visible=True)
@@ -381,6 +376,22 @@ class ReuseAPITest:
         response = api.delete(url_for("api.reuse", reuse=reuse))
         assert410(response)
 
+    def test_reuse_api_filter_by_dataset(self, api):
+        user = api.login()
+        dataset = DatasetFactory()
+        other_dataset = DatasetFactory()
+        ReuseFactory(owner=user, datasets=[dataset])
+
+        response = api.get(url_for("api.reuses", dataset=dataset.id))
+        assert200(response)
+        assert response.json["total"] == 1
+        assert len(response.json["data"][0]["datasets"]) == 1
+        assert response.json["data"][0]["datasets"][0]["title"] == dataset.title
+
+        response = api.get(url_for("api.reuses", dataset=other_dataset.id))
+        assert200(response)
+        assert response.json["total"] == 0
+
     def test_reuse_api_add_dataset(self, api):
         """It should add a dataset to a reuse from the API"""
         user = api.login()
@@ -430,6 +441,72 @@ class ReuseAPITest:
         assert404(response)
         reuse.reload()
         assert len(reuse.datasets) == 0
+
+    def test_reuse_api_filter_by_dataservice(self, api):
+        user = api.login()
+        dataservice = DataserviceFactory()
+        other_dataservice = DataserviceFactory()
+        ReuseFactory(owner=user, dataservices=[dataservice])
+
+        response = api.get(url_for("api.reuses", dataservice=dataservice.id))
+        assert200(response)
+        assert response.json["total"] == 1
+        assert len(response.json["data"][0]["dataservices"]) == 1
+        assert response.json["data"][0]["dataservices"][0]["title"] == dataservice.title
+
+        response = api.get(url_for("api.reuses", dataservice=other_dataservice.id))
+        assert200(response)
+        assert response.json["total"] == 0
+
+    def test_reuse_api_add_dataservice(self, api):
+        """It should add a dataset to a reuse from the API"""
+        user = api.login()
+        reuse = ReuseFactory(owner=user)
+
+        dataservice = DataserviceFactory()
+        data = {"id": dataservice.id, "class": "Dataservice"}
+        url = url_for("api.reuse_add_dataservice", reuse=reuse)
+        response = api.post(url, data)
+        assert201(response)
+        reuse.reload()
+        assert len(reuse.dataservices) == 1
+        assert reuse.dataservices[-1] == dataservice
+
+        dataservice = DataserviceFactory()
+        data = {"id": dataservice.id, "class": "dataservice"}
+        url = url_for("api.reuse_add_dataservice", reuse=reuse)
+        response = api.post(url, data)
+        assert201(response)
+        reuse.reload()
+        assert len(reuse.dataservices) == 2
+        assert reuse.dataservices[-1] == dataservice
+
+    def test_reuse_api_add_dataservice_twice(self, api):
+        """It should not add twice a dataservice to a reuse from the API"""
+        user = api.login()
+        dataservice = DataserviceFactory()
+        reuse = ReuseFactory(owner=user, dataservices=[dataservice])
+
+        data = {"id": dataservice.id, "class": "Dataservice"}
+        url = url_for("api.reuse_add_dataservice", reuse=reuse)
+        response = api.post(url, data)
+        assert200(response)
+        reuse.reload()
+        assert len(reuse.dataservices) == 1
+        assert reuse.dataservices[-1] == dataservice
+
+    def test_reuse_api_add_dataservice_not_found(self, api):
+        """It should return 404 when adding an unknown dataservice to a reuse"""
+        user = api.login()
+        reuse = ReuseFactory(owner=user)
+
+        data = {"id": "not-found", "class": "Dataservice"}
+        url = url_for("api.reuse_add_dataservice", reuse=reuse)
+        response = api.post(url, data)
+
+        assert404(response)
+        reuse.reload()
+        assert len(reuse.dataservices) == 0
 
     def test_reuse_api_feature(self, api):
         """It should mark the reuse featured on POST"""
@@ -523,7 +600,7 @@ class ReuseAPITest:
             title="arealtestprefix-4", visible=True, metrics={"followers": 10}
         )
 
-        response = api.get(url_for("api.suggest_reuses"), qs={"q": "arealtestpref", "size": "5"})
+        response = api.get(url_for("api.suggest_reuses", q="arealtestpref", size=5))
         assert200(response)
 
         assert len(response.json) <= 5
@@ -542,7 +619,7 @@ class ReuseAPITest:
         for i in range(4):
             ReuseFactory(title="testé-{0}".format(i) if i % 2 else faker.word(), visible=True)
 
-        response = api.get(url_for("api.suggest_reuses"), qs={"q": "testé", "size": "5"})
+        response = api.get(url_for("api.suggest_reuses", q="testé", size=5))
         assert200(response)
 
         assert len(response.json) <= 5
@@ -559,20 +636,22 @@ class ReuseAPITest:
         """It should not provide reuse suggestion if no match"""
         ReuseFactory.create_batch(3, visible=True)
 
-        response = api.get(url_for("api.suggest_reuses"), qs={"q": "xxxxxx", "size": "5"})
+        response = api.get(url_for("api.suggest_reuses", q="xxxxxx", size=5))
         assert200(response)
         assert len(response.json) == 0
 
     def test_suggest_reuses_api_empty(self, api):
         """It should not provide reuse suggestion if no data"""
         # self.init_search()
-        response = api.get(url_for("api.suggest_reuses"), qs={"q": "xxxxxx", "size": "5"})
+        response = api.get(url_for("api.suggest_reuses", q="xxxxxx", size=5))
         assert200(response)
         assert len(response.json) == 0
 
 
 class ReusesFeedAPItest(APITestCase):
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=10)
     def test_recent_feed(self):
+        # We have a 10 hours delay for a new object to appear in feed. A newly created one shouldn't appear.
         ReuseFactory(title="A", datasets=[DatasetFactory()], created_at=datetime.utcnow())
         ReuseFactory(
             title="B", datasets=[DatasetFactory()], created_at=datetime.utcnow() - timedelta(days=2)
@@ -586,11 +665,11 @@ class ReusesFeedAPItest(APITestCase):
 
         feed = feedparser.parse(response.data)
 
-        self.assertEqual(len(feed.entries), 3)
-        self.assertEqual(feed.entries[0].title, "A")
-        self.assertEqual(feed.entries[1].title, "C")
-        self.assertEqual(feed.entries[2].title, "B")
+        self.assertEqual(len(feed.entries), 2)
+        self.assertEqual(feed.entries[0].title, "C")
+        self.assertEqual(feed.entries[1].title, "B")
 
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
     def test_recent_feed_owner(self):
         owner = UserFactory()
         ReuseFactory(owner=owner, datasets=[DatasetFactory()])
@@ -608,6 +687,7 @@ class ReusesFeedAPItest(APITestCase):
         self.assertEqual(author.name, owner.fullname)
         self.assertEqual(author.href, owner.url_for())
 
+    @pytest.mark.options(DELAY_BEFORE_APPEARING_IN_RSS_FEED=0)
     def test_recent_feed_org(self):
         owner = UserFactory()
         org = OrganizationFactory()
@@ -627,11 +707,9 @@ class ReusesFeedAPItest(APITestCase):
         self.assertEqual(author.href, org.url_for())
 
 
-class ReuseBadgeAPITest:
-    modules = []
-
+class ReuseBadgeAPITest(PytestOnlyAPITestCase):
     @pytest.fixture(autouse=True)
-    def setup(self, api, clean_db):
+    def setup_func(self, api):
         # Register at least two badges
         Reuse.__badges__["test-1"] = "Test 1"
         Reuse.__badges__["test-2"] = "Test 2"
@@ -692,9 +770,7 @@ class ReuseBadgeAPITest:
         assert404(response)
 
 
-class ReuseReferencesAPITest:
-    modules = []
-
+class ReuseReferencesAPITest(PytestOnlyAPITestCase):
     def test_reuse_types_list(self, api):
         """It should fetch the reuse types list from the API"""
         response = api.get(url_for("api.reuse_types"))

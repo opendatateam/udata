@@ -9,11 +9,11 @@ from udata.core.user.factories import AdminFactory, UserFactory
 from udata.forms import ModelForm, fields
 from udata.i18n import gettext as _
 from udata.models import User, db
-from udata.tests import DBTestMixin, TestCase
+from udata.tests.api import DBTestCase
 from udata.tests.helpers import security_gettext
 
 
-class CurrentUserFieldTest(TestCase, DBTestMixin):
+class CurrentUserFieldTest(DBTestCase):
     def factory(self, *args, **kwargs):
         class Ownable(db.Document):
             owner = db.ReferenceField(User)

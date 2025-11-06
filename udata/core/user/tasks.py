@@ -4,19 +4,12 @@ from datetime import datetime, timedelta
 
 from flask import current_app
 
-from udata import mail
-from udata.i18n import lazy_gettext as _
-from udata.tasks import job, task
+from udata.tasks import job
 
-from .models import User, datastore
+from . import mails
+from .models import User
 
 log = logging.getLogger(__name__)
-
-
-@task(route="high.mail")
-def send_test_mail(email):
-    user = datastore.find_user(email=email)
-    mail.send(_("Test mail"), user, "test")
 
 
 @job("notify-inactive-users")
@@ -41,12 +34,9 @@ def notify_inactive_users(self):
         if i >= current_app.config["MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS"]:
             logging.warning("MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS reached, stopping here.")
             return
-        mail.send(
-            _("Inactivity of your {site} account").format(site=current_app.config["SITE_TITLE"]),
-            user,
-            "account_inactivity",
-            user=user,
-        )
+
+        mails.inactive_user(user).send(user)
+
         logging.debug(f"Notified {user.email} of account inactivity")
         user.inactive_deletion_notified_at = datetime.utcnow()
         user.save()
@@ -84,11 +74,6 @@ def delete_inactive_users(self):
         copied_user = copy(user)
         user.mark_as_deleted(notify=False, delete_comments=False)
         logging.warning(f"Deleted user {copied_user.email} due to account inactivity")
-        mail.send(
-            _("Deletion of your inactive {site} account").format(
-                site=current_app.config["SITE_TITLE"]
-            ),
-            copied_user,
-            "inactive_account_deleted",
-        )
+        mails.inactive_account_deleted().send(copied_user)
+
     logging.info(f"Deleted {users_to_delete.count()} inactive users")

@@ -7,6 +7,7 @@ from flask_restx import marshal
 
 from udata import search
 from udata.api import API, apiv2, fields
+from udata.core.access_type.models import AccessAudience
 from udata.core.contact_point.api_fields import contact_point_fields
 from udata.core.dataset.api_fields import license_fields
 from udata.core.organization.api_fields import member_user_with_email_fields
@@ -62,6 +63,11 @@ DEFAULT_MASK_APIV2 = ",".join(
         "temporal_coverage",
         "spatial",
         "license",
+        "access_type",
+        "access_audiences",
+        "access_type_reason_category",
+        "access_type_reason",
+        "authorization_request_url",
         "uri",
         "page",
         "last_update",
@@ -202,6 +208,11 @@ dataset_fields = apiv2.model(
             default=DEFAULT_LICENSE["id"],
             description="The dataset license (full License object if `X-Get-Datasets-Full-Objects` is set, ID of the license otherwise)",
         ),
+        "access_type": fields.String(allow_null=True),
+        "access_audiences": fields.Nested(AccessAudience.__read_fields__),
+        "authorization_request_url": fields.String(allow_null=True),
+        "access_type_reason_category": fields.String(allow_null=True),
+        "access_type_reason": fields.String(allow_null=True),
         "uri": fields.String(
             attribute=lambda d: d.self_api_url(),
             description="The API URI for this dataset",
