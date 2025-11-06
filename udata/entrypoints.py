@@ -4,11 +4,8 @@ import pkg_resources
 ENTRYPOINTS = {
     "udata.avatars": "Avatar rendering backends",
     "udata.harvesters": "Harvest backends",
-    "udata.metrics": "Extra metrics",
     "udata.models": "Models and migrations",
     "udata.plugins": "Generic plugin",
-    "udata.themes": "Themes",
-    "udata.views": "Extra views",
 }
 
 
