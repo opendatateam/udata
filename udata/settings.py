@@ -530,6 +530,8 @@ class Defaults(object):
         "harvest",
     )
     EXPORT_CSV_DATASET_ID = None
+    EXPORT_CSV_ARCHIVE_S3_BUCKET = None  # If this setting is set, an archive is uploaded to the corresponding S3 bucket every first day of the month (if export-csv is scheduled to run daily)
+    EXPORT_CSV_ARCHIVE_S3_FILENAME_PREFIX = ""  # Useful to store the csv archives inside a subfolder of the bucket, ie setting 'csv-catalog-archives/'`
 
     # Autocomplete parameters
     #########################
