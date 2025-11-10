@@ -4,6 +4,7 @@ import math
 import re
 from collections import Counter
 from datetime import date, datetime, timedelta
+from importlib.metadata import version
 from math import ceil
 from typing import Any, Hashable
 from uuid import UUID, uuid4
@@ -22,6 +23,10 @@ from flask import abort, current_app, request
 from mongoengine.fields import BaseQuerySet
 
 from udata import tags
+
+
+def get_udata_version() -> str:
+    return version("udata")
 
 
 def get_by(lst, field, value):
@@ -66,7 +71,14 @@ def filter_changed_fields(document, previous, changed_fields: list[str]):
     document.reload()
     filtered_changed_fields = []
     for field in changed_fields:
-        previous_value = previous[field]
+        # Sometimes, we nullify a field in the clean method (for exemple the `license` when we change
+        # the `access_type` of a dataset). This field is then not present in `previous`. Returning `None`
+        # is a little bit wrong because we should return the previous value of the `license`. Right now
+        # we don't notice license change because `None (not present) == None (removed)` is equal.
+        if field not in previous:
+            continue
+
+        previous_value = previous.get(field, None)
         current_value = get_field_value_from_path(document, field)
         # Filter out special case of list reordering, does not support unhashable types
         if (
