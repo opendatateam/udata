@@ -10,7 +10,7 @@ from udata.core.dataset.permissions import OwnablePermission
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.permissions import EditOrganizationPermission
 from udata.core.user.api_fields import user_ref_fields
-from udata.harvest.backends import get_enabled_backends, get_enabled_backends_ids
+from udata.harvest.backends import get_enabled_backends
 
 from . import actions
 from .forms import HarvestSourceForm, HarvestSourceValidationForm
@@ -124,7 +124,7 @@ source_fields = api.model(
         "url": fields.String(description="The source base URL", required=True),
         "backend": fields.String(
             description="The source backend",
-            enum=get_enabled_backends_ids,
+            enum=lambda: list(get_enabled_backends().keys()),
             required=True,
         ),
         "config": fields.Raw(description="The configuration as key-value pairs"),
