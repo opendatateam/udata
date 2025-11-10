@@ -3,6 +3,7 @@ import importlib
 import logging
 import os
 import types
+from importlib.metadata import entry_points
 from os.path import abspath, dirname, exists, isfile, join
 
 import bson
@@ -20,7 +21,6 @@ from flask import (
 )
 from flask_caching import Cache
 from flask_wtf.csrf import CSRFProtect
-from importlib_metadata import entry_points
 from speaklater import is_lazy_string
 from werkzeug.exceptions import NotFound
 from werkzeug.middleware.proxy_fix import ProxyFix
