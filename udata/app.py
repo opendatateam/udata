@@ -1,26 +1,25 @@
-import datetime
+import json
 import logging
 import os
 import types
+import typing as t
 from importlib.metadata import entry_points
 from os.path import abspath, dirname, exists, isfile, join
 
-import bson
 from flask import Blueprint as BaseBlueprint
 from flask import (
     Flask,
     abort,
     g,
-    json,
     jsonify,
     make_response,
     render_template,
     request,
     send_from_directory,
 )
+from flask.json.provider import JSONProvider
 from flask_caching import Cache
 from flask_wtf.csrf import CSRFProtect
-from speaklater import is_lazy_string
 from werkzeug.exceptions import NotFound
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -108,9 +107,9 @@ class Blueprint(BaseBlueprint):
         return wrapper
 
 
-class UDataJsonEncoder(json.JSONEncoder):
+class UdataJsonProvider(JSONProvider):
     """
-    A JSONEncoder subclass to encode unsupported types:
+    A JSONProvider subclass to encode unsupported types:
 
         - ObjectId
         - datetime
@@ -120,21 +119,38 @@ class UDataJsonEncoder(json.JSONEncoder):
     Ensure an app context is always present.
     """
 
-    def default(self, obj):
-        if is_lazy_string(obj):
-            return str(obj)
-        elif isinstance(obj, bson.objectid.ObjectId):
-            return str(obj)
-        elif isinstance(obj, datetime.datetime):
-            return obj.isoformat()
-        elif hasattr(obj, "to_dict"):
-            return obj.to_dict()
-        elif hasattr(obj, "serialize"):
-            return obj.serialize()
-        # Serialize Raw data for Document and EmbeddedDocument.
-        elif hasattr(obj, "_data"):
-            return obj._data
-        return super(UDataJsonEncoder, self).default(obj)
+    def dumps(self, obj: t.Any, **kwargs: t.Any) -> str:
+        """Serialize data as JSON.
+
+        :param obj: The data to serialize.
+        :param kwargs: May be passed to the underlying JSON library.
+        """
+        kwargs.setdefault("default", self)
+        return json.dumps(obj, **kwargs)
+
+    def loads(self, s: str | bytes, **kwargs: t.Any) -> t.Any:
+        """Deserialize data as JSON.
+
+        :param s: Text or UTF-8 bytes.
+        :param kwargs: May be passed to the underlying JSON library.
+        """
+        return json.loads(s, **kwargs)
+
+    # def default(self, obj):
+    #     if is_lazy_string(obj):
+    #         return str(obj)
+    #     elif isinstance(obj, bson.objectid.ObjectId):
+    #         return str(obj)
+    #     elif isinstance(obj, datetime.datetime):
+    #         return obj.isoformat()
+    #     elif hasattr(obj, "to_dict"):
+    #         return obj.to_dict()
+    #     elif hasattr(obj, "serialize"):
+    #         return obj.serialize()
+    #     # Serialize Raw data for Document and EmbeddedDocument.
+    #     elif hasattr(obj, "_data"):
+    #         return obj._data
+    #     return super(UDataJsonEncoder, self).default(obj)
 
 
 # These loggers are very verbose
@@ -166,10 +182,11 @@ def create_app(config="udata.settings.Defaults", override=None, init_logging=ini
     if override:
         app.config.from_object(override)
 
-    app.json_encoder = UDataJsonEncoder
+    provider = UdataJsonProvider(app)
+    app.json = provider
 
     # `ujson` doesn't support `cls` parameter https://github.com/ultrajson/ultrajson/issues/124
-    app.config["RESTX_JSON"] = {"cls": UDataJsonEncoder}
+    app.config["RESTX_JSON"] = {"default": provider}
 
     app.debug = app.config["DEBUG"] and not app.config["TESTING"]
 
