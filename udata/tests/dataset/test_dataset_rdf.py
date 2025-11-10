@@ -5,9 +5,10 @@ import pytest
 import requests
 from flask import url_for
 from rdflib import BNode, Graph, Literal, Namespace, URIRef
-from rdflib.namespace import FOAF, RDF, RDFS
+from rdflib.namespace import FOAF, ORG, RDF, RDFS
 from rdflib.resource import Resource as RdfResource
 
+from udata.core.constants import HVD
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.constants import UpdateFrequency
@@ -166,8 +167,8 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         d = dataset_to_rdf(dataset)
 
         contact_rdf = d.value(DCT.publisher)
-        assert contact_rdf.value(RDF.type).identifier == VCARD.Kind
-        assert contact_rdf.value(VCARD.fn) == Literal("Publisher Contact")
+        assert contact_rdf.value(RDF.type).identifier == FOAF.Agent
+        assert contact_rdf.value(FOAF.name) == Literal("Publisher Contact")
 
         org_rdf = d.value(GEODCAT.distributor)
         assert org_rdf.value(RDF.type).identifier == FOAF.Organization
@@ -331,6 +332,7 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         dataset = DatasetFactory(
             resources=ResourceFactory.build_batch(3), tags=["hvd", "mobilite", "test"]
         )
+        dataset.add_badge(HVD)
         d = dataset_to_rdf(dataset)
 
         assert d.value(DCATAP.applicableLegislation).identifier == URIRef(HVD_LEGISLATION)
@@ -348,7 +350,9 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         dataset = DatasetFactory(
             resources=ResourceFactory.build_batch(3), tags=["hvd", "mobilite", "test"]
         )
+        dataset.add_badge(HVD)
         dataservice = DataserviceFactory(datasets=[dataset], tags=["hvd"])
+        dataservice.add_badge(HVD)
         d = dataset_to_rdf(dataset)
         g = d.graph
 
@@ -513,6 +517,194 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert isinstance(dataset, Dataset)
         assert dataset.harvest.modified_at is None
+
+    def test_contact_point_individual_vcard(self):
+        g = Graph()
+        node = URIRef("https://test.org/dataset")
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.identifier, Literal(faker.uuid4())))
+        g.set((node, DCT.title, Literal(faker.sentence())))
+
+        contact = BNode()
+        g.add((contact, RDF.type, VCARD.Individual))
+        g.add((contact, VCARD.fn, Literal("foo")))
+        g.add((contact, VCARD.email, Literal("foo@example.com")))
+        g.add((node, DCAT.contactPoint, contact))
+
+        # Dataset needs an owner/organization for contact_points_from_rdf() to work
+        d = DatasetFactory.build()
+        d.organization = OrganizationFactory(name="organization")
+
+        dataset = dataset_from_rdf(g, d)
+        dataset.validate()
+
+        assert len(dataset.contact_points) == 1
+        assert dataset.contact_points[0].role == "contact"
+        assert dataset.contact_points[0].name == "foo"
+        assert dataset.contact_points[0].email == "foo@example.com"
+
+    def test_contact_point_individual_foaf(self):
+        g = Graph()
+        node = URIRef("https://test.org/dataset")
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.identifier, Literal(faker.uuid4())))
+        g.set((node, DCT.title, Literal(faker.sentence())))
+
+        contact = BNode()
+        contact_name = Literal("foo")
+        contact_email = Literal("foo@example.com")
+        g.add((contact, RDF.type, FOAF.Person))
+        g.add((contact, FOAF.name, contact_name))
+        g.add((contact, FOAF.mbox, contact_email))
+        g.add((node, DCT.creator, contact))
+
+        # Dataset needs an owner/organization for contact_points_from_rdf() to work
+        d = DatasetFactory.build()
+        d.organization = OrganizationFactory(name="organization")
+
+        dataset = dataset_from_rdf(g, d)
+        dataset.validate()
+
+        assert len(dataset.contact_points) == 1
+        assert dataset.contact_points[0].role == "creator"
+        assert dataset.contact_points[0].name == "foo"
+        assert dataset.contact_points[0].email == "foo@example.com"
+
+    def test_contact_point_organization_vcard(self):
+        g = Graph()
+        node = URIRef("https://test.org/dataset")
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.identifier, Literal(faker.uuid4())))
+        g.set((node, DCT.title, Literal(faker.sentence())))
+
+        contact = BNode()
+        g.add((contact, RDF.type, VCARD.Organization))
+        g.add((contact, VCARD.fn, Literal("foo")))
+        g.add((contact, VCARD.email, Literal("foo@example.com")))
+        g.add((node, DCAT.contactPoint, contact))
+
+        # Dataset needs an owner/organization for contact_points_from_rdf() to work
+        d = DatasetFactory.build()
+        d.organization = OrganizationFactory(name="organization")
+
+        dataset = dataset_from_rdf(g, d)
+        dataset.validate()
+
+        assert len(dataset.contact_points) == 1
+        assert dataset.contact_points[0].role == "contact"
+        assert dataset.contact_points[0].name == "foo"
+        assert dataset.contact_points[0].email == "foo@example.com"
+
+    def test_contact_point_organization_foaf(self):
+        g = Graph()
+        node = URIRef("https://test.org/dataset")
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.identifier, Literal(faker.uuid4())))
+        g.set((node, DCT.title, Literal(faker.sentence())))
+
+        contact = BNode()
+        g.add((contact, RDF.type, FOAF.Organization))
+        g.add((contact, FOAF.name, Literal("foo")))
+        g.add((contact, FOAF.mbox, Literal("foo@example.com")))
+        g.add((node, DCT.creator, contact))
+
+        # Dataset needs an owner/organization for contact_points_from_rdf() to work
+        d = DatasetFactory.build()
+        d.organization = OrganizationFactory(name="organization")
+
+        dataset = dataset_from_rdf(g, d)
+        dataset.validate()
+
+        assert len(dataset.contact_points) == 1
+        assert dataset.contact_points[0].role == "creator"
+        assert dataset.contact_points[0].name == "foo"
+        assert dataset.contact_points[0].email == "foo@example.com"
+
+    def test_contact_point_organization_member_vcard(self):
+        g = Graph()
+        node = URIRef("https://test.org/dataset")
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.identifier, Literal(faker.uuid4())))
+        g.set((node, DCT.title, Literal(faker.sentence())))
+
+        contact = BNode()
+        g.add((contact, RDF.type, VCARD.Organization))
+        g.add((contact, VCARD.fn, Literal("foo")))
+        g.add((contact, VCARD["organization-name"], Literal("bar")))
+        g.add((contact, VCARD.email, Literal("foo@example.com")))
+        g.add((node, DCAT.contactPoint, contact))
+
+        # Dataset needs an owner/organization for contact_points_from_rdf() to work
+        d = DatasetFactory.build()
+        d.organization = OrganizationFactory(name="organization")
+
+        dataset = dataset_from_rdf(g, d)
+        dataset.validate()
+
+        assert len(dataset.contact_points) == 1
+        assert dataset.contact_points[0].role == "contact"
+        assert dataset.contact_points[0].name == "foo"
+        assert dataset.contact_points[0].email == "foo@example.com"
+
+    def test_contact_point_organization_member_foaf(self):
+        g = Graph()
+        node = URIRef("https://test.org/dataset")
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.identifier, Literal(faker.uuid4())))
+        g.set((node, DCT.title, Literal(faker.sentence())))
+
+        org = BNode()
+        g.add((org, RDF.type, FOAF.Organization))
+        g.add((org, FOAF.name, Literal("bar")))
+        g.add((org, FOAF.mbox, Literal("bar@example.com")))
+        contact = BNode()
+        g.add((contact, RDF.type, FOAF.Person))
+        g.add((contact, FOAF.name, Literal("foo")))
+        g.add((contact, FOAF.mbox, Literal("foo@example.com")))
+        g.add((contact, ORG.memberOf, org))
+        g.add((node, DCT.creator, contact))
+
+        # Dataset needs an owner/organization for contact_points_from_rdf() to work
+        d = DatasetFactory.build()
+        d.organization = OrganizationFactory(name="organization")
+
+        dataset = dataset_from_rdf(g, d)
+        dataset.validate()
+
+        assert len(dataset.contact_points) == 1
+        assert dataset.contact_points[0].role == "creator"
+        assert dataset.contact_points[0].name == "foo"
+        assert dataset.contact_points[0].email == "foo@example.com"
+
+    def test_contact_point_organization_member_foaf_no_mail(self):
+        g = Graph()
+        node = URIRef("https://test.org/dataset")
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.identifier, Literal(faker.uuid4())))
+        g.set((node, DCT.title, Literal(faker.sentence())))
+
+        org = BNode()
+        g.add((org, RDF.type, FOAF.Organization))
+        g.add((org, FOAF.name, Literal("bar")))
+        # no organization email
+        contact = BNode()
+        g.add((contact, RDF.type, FOAF.Person))
+        g.add((contact, FOAF.name, Literal("foo")))
+        g.add((contact, FOAF.mbox, Literal("foo@example.com")))
+        g.add((contact, ORG.memberOf, org))
+        g.add((node, DCT.creator, contact))
+
+        # Dataset needs an owner/organization for contact_points_from_rdf() to work
+        d = DatasetFactory.build()
+        d.organization = OrganizationFactory(name="organization")
+
+        dataset = dataset_from_rdf(g, d)
+        dataset.validate()
+
+        assert len(dataset.contact_points) == 1
+        assert dataset.contact_points[0].role == "creator"
+        assert dataset.contact_points[0].name == "foo"
+        assert dataset.contact_points[0].email == "foo@example.com"
 
     def test_theme_and_tags(self):
         node = BNode()

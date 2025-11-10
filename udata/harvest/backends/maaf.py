@@ -129,6 +129,7 @@ def dictize(element):
 
 
 class MaafBackend(BaseBackend):
+    name = "maaf"
     display_name = "MAAF"
     verify_ssl = False
 
