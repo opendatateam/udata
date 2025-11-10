@@ -1,5 +1,4 @@
 import geojson
-from flask import current_app
 from werkzeug.local import LocalProxy
 from werkzeug.utils import cached_property
 
@@ -86,10 +85,6 @@ class GeoZone(WithMetrics, db.Document):
         return self.level_name  # Fallback that should never happen.
 
     @property
-    def handled_level(self):
-        return self.level in current_app.config.get("HANDLED_LEVELS")
-
-    @property
     def url(self):
         return None
 
@@ -157,11 +152,6 @@ class SpatialCoverage(db.EmbeddedDocument):
                 top = zone
                 continue
         return _(top.name)
-
-    @property
-    def handled_zones(self):
-        """Return only zones with a dedicated page."""
-        return [zone for zone in self.zones if zone.handled_level]
 
     def clean(self):
         if self.zones and self.geom:
