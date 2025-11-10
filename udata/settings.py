@@ -1,4 +1,3 @@
-import pkg_resources
 from kombu import Exchange, Queue
 from tlds import tld_set
 
@@ -173,11 +172,11 @@ class Defaults(object):
     SITE_AUTHOR_URL = None
     SITE_AUTHOR = "Udata"
     SITE_GITHUB_URL = "https://github.com/etalab/udata"
-    SITE_TERMS_LOCATION = pkg_resources.resource_filename(__name__, "terms.md")
 
     UDATA_INSTANCE_NAME = "udata"
 
     PLUGINS = []
+    HARVESTER_BACKENDS = []
     THEME = None
 
     STATIC_DIRS = []
@@ -535,6 +534,8 @@ class Defaults(object):
         "harvest",
     )
     EXPORT_CSV_DATASET_ID = None
+    EXPORT_CSV_ARCHIVE_S3_BUCKET = None  # If this setting is set, an archive is uploaded to the corresponding S3 bucket every first day of the month (if export-csv is scheduled to run daily)
+    EXPORT_CSV_ARCHIVE_S3_FILENAME_PREFIX = ""  # Useful to store the csv archives inside a subfolder of the bucket, ie setting 'csv-catalog-archives/'`
 
     # Autocomplete parameters
     #########################
@@ -642,6 +643,7 @@ class Testing(object):
     CELERY_TASK_EAGER_PROPAGATES = True
     TEST_WITH_PLUGINS = False
     PLUGINS = []
+    HARVESTER_BACKENDS = ["factory"]
     TEST_WITH_THEME = False
     THEME = "testing"
     CACHE_TYPE = "flask_caching.backends.null"

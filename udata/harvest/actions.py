@@ -34,11 +34,6 @@ def get_source(ident):
     return HarvestSource.get(ident)
 
 
-def list_backends():
-    """List all available backends"""
-    return backends.get_all(current_app).values()
-
-
 def list_sources(owner=None, deleted=False):
     """List all harvest sources"""
     sources = HarvestSource.objects
@@ -177,7 +172,7 @@ def purge_jobs():
 
 def run(source: HarvestSource):
     """Launch or resume an harvesting for a given source if none is running"""
-    cls = backends.get(current_app, source.backend)
+    cls = backends.get_backend(source.backend)
     backend = cls(source)
     backend.harvest()
 
@@ -189,7 +184,7 @@ def launch(source: HarvestSource):
 
 def preview(source: HarvestSource):
     """Preview an harvesting for a given source"""
-    cls = backends.get(current_app, source.backend)
+    cls = backends.get_backend(source.backend)
     max_items = current_app.config["HARVEST_PREVIEW_MAX_ITEMS"]
     backend = cls(source, dryrun=True, max_items=max_items)
     return backend.harvest()
@@ -226,7 +221,7 @@ def preview_from_config(
         active=active,
         autoarchive=autoarchive,
     )
-    cls = backends.get(current_app, source.backend)
+    cls = backends.get_backend(source.backend)
     max_items = current_app.config["HARVEST_PREVIEW_MAX_ITEMS"]
     backend = cls(source, dryrun=True, max_items=max_items)
     return backend.harvest()
@@ -273,7 +268,7 @@ def schedule(
 def unschedule(source: HarvestSource):
     """Unschedule an harvesting on a source"""
     if not source.periodic_task:
-        msg = "Harvesting on source {0} is ot scheduled".format(source.name)
+        msg = "Harvesting on source {0} is not scheduled".format(source.name)
         raise ValueError(msg)
 
     source.periodic_task.delete()

@@ -2,15 +2,14 @@ import logging
 import re
 import warnings
 
-import pkg_resources
 from werkzeug.exceptions import HTTPException
 
 from udata import entrypoints
 from udata.core.storages.api import UploadProgress
+from udata.utils import get_udata_version
 
 from .app import UDataApp
 from .auth import PermissionDenied
-from .frontend import package_version
 
 log = logging.getLogger(__name__)
 
@@ -64,7 +63,7 @@ def init_app(app: UDataApp):
             dsn=app.config["SENTRY_PUBLIC_DSN"],
             integrations=[FlaskIntegration(), CeleryIntegration()],
             ignore_errors=list(exceptions),
-            release=f"udata@{package_version('udata')}",
+            release=f"udata@{get_udata_version()}",
             environment=app.config.get("SITE_ID", None),
             # Set traces_sample_rate to 1.0 to capture 100%
             # of transactions for performance monitoring.
@@ -88,4 +87,4 @@ def init_app(app: UDataApp):
             if dist.version:
                 sentry_sdk.set_tag(dist.project_name, dist.version)
         # Do not forget udata itself
-        sentry_sdk.set_tag("udata", pkg_resources.get_distribution("udata").version)
+        sentry_sdk.set_tag("udata", get_udata_version())

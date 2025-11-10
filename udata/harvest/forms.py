@@ -1,8 +1,8 @@
 from udata.forms import Form, fields, validators
+from udata.harvest.backends import get_backend, get_enabled_backends
 from udata.i18n import lazy_gettext as _
 from udata.utils import safe_unicode
 
-from .actions import list_backends
 from .models import VALIDATION_REFUSED, VALIDATION_STATES
 
 __all__ = "HarvestSourceForm", "HarvestSourceValidationForm"
@@ -12,9 +12,6 @@ class HarvestConfigField(fields.DictField):
     """
     A DictField with extras validations on known configurations
     """
-
-    def get_backend(self, form):
-        return next(b for b in list_backends() if b.name == form.backend.data)
 
     def get_filter_specs(self, backend, key):
         candidates = (f for f in backend.filters if f.key == key)
@@ -30,7 +27,10 @@ class HarvestConfigField(fields.DictField):
 
     def pre_validate(self, form):
         if self.data:
-            backend = self.get_backend(form)
+            backend = get_backend(form.backend.data)
+            if backend is None:
+                return  # Should have been catch by the enum check for `form.backend`
+
             # Validate filters
             for f in self.data.get("filters") or []:
                 if not ("key" in f and "value" in f):
@@ -49,6 +49,7 @@ class HarvestConfigField(fields.DictField):
                     msg = '"{0}" filter should of type "{1}"'
                     msg = msg.format(specs.key, specs.type.__name__)
                     raise validators.ValidationError(msg)
+
             # Validate extras configs
             for f in self.data.get("extra_configs") or []:
                 if not ("key" in f and "value" in f):
@@ -63,6 +64,7 @@ class HarvestConfigField(fields.DictField):
                     msg = '"{0}" extra config should be of type "{1}"'
                     msg = msg.format(specs.key, specs.type.__name__)
                     raise validators.ValidationError(msg)
+
             # Validate features
             for key, value in (self.data.get("features") or {}).items():
                 if not isinstance(value, bool):
@@ -81,7 +83,8 @@ class HarvestSourceForm(Form):
     )
     url = fields.URLField(_("URL"), [validators.DataRequired()])
     backend = fields.SelectField(
-        _("Backend"), choices=lambda: [(b.name, b.display_name) for b in list_backends()]
+        _("Backend"),
+        choices=lambda: [(b.name, b.display_name) for b in get_enabled_backends().values()],
     )
     owner = fields.CurrentUserField()
     organization = fields.PublishAsField(_("Publish as"))

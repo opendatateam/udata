@@ -42,8 +42,6 @@ def plugins():
     plugins = current_app.config["PLUGINS"]
     for name, description in entrypoints.ENTRYPOINTS.items():
         echo("{0} ({1})".format(white(description), name))
-        if name == "udata.themes":
-            actives = [current_app.config["THEME"]]
         else:
             actives = plugins
         for ep in sorted(entrypoints.iter_all(name), key=by_name):
