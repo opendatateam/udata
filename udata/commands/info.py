@@ -42,7 +42,5 @@ def plugins():
     plugins = current_app.config["PLUGINS"]
     for name, description in entrypoints.ENTRYPOINTS.items():
         echo("{0} ({1})".format(white(description), name))
-        else:
-            actives = plugins
         for ep in sorted(entrypoints.iter_all(name), key=by_name):
-            echo("> {0}: {1}".format(ep.name, is_active(ep, actives)))
+            echo("> {0}: {1}".format(ep.name, is_active(ep, plugins)))
