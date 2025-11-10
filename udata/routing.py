@@ -11,7 +11,6 @@ from udata import models
 from udata.core.dataservices.models import Dataservice
 from udata.core.spatial.models import GeoZone
 from udata.harvest.models import HarvestSource
-from udata.i18n import ISO_639_1_CODES
 from udata.mongo import db
 from udata.uris import cdata_url, homepage_url
 
@@ -21,12 +20,6 @@ class LazyRedirect(object):
 
     def __init__(self, arg):
         self.arg = arg
-
-
-class LanguagePrefixConverter(BaseConverter):
-    def __init__(self, map):
-        super(LanguagePrefixConverter, self).__init__(map)
-        self.regex = "(?:%s)" % "|".join(ISO_639_1_CODES)
 
 
 class ListConverter(BaseConverter):
@@ -241,7 +234,6 @@ def lazy_raise_or_redirect():
 
 def init_app(app):
     app.before_request(lazy_raise_or_redirect)
-    app.url_map.converters["lang"] = LanguagePrefixConverter
     app.url_map.converters["list"] = ListConverter
     app.url_map.converters["pathlist"] = PathListConverter
     app.url_map.converters["uuid"] = UUIDConverter
