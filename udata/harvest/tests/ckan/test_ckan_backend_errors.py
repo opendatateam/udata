@@ -13,7 +13,7 @@ API_URL = "{}api/3/action/package_list".format(CKAN_URL)
 STATUS_CODE = (400, 500)
 
 
-@pytest.mark.options(HARVESTERS_BACKENDS=["ckan"])
+@pytest.mark.options(HARVESTER_BACKENDS=["ckan"])
 class CkanBackendErrorsTest(PytestOnlyDBTestCase):
     @pytest.mark.parametrize("code", STATUS_CODE)
     def test_html_error(self, rmock, code):

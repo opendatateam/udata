@@ -17,7 +17,7 @@ def get_all_backends() -> dict[str, type[BaseBackend]]:
 
 
 def is_backend_enabled(backend: type[BaseBackend]) -> bool:
-    return any(fnmatch(backend.name, g) for g in current_app.config["HARVESTERS_BACKENDS"])
+    return any(fnmatch(backend.name, g) for g in current_app.config["HARVESTER_BACKENDS"])
 
 
 def get_enabled_backends() -> dict[str, type[BaseBackend]]:
@@ -28,6 +28,6 @@ def get_enabled_backends() -> dict[str, type[BaseBackend]]:
 
 def get_enabled_backends_ids() -> list[str]:
     # The enum= is API Fields is loaded before the current app require for
-    # HARVESTERS_BACKENDS so we need to defer it by having a function instead
+    # HARVESTER_BACKENDS so we need to defer it by having a function instead
     # of directly calling `get_enabled_backends().keys()`
     return list(get_enabled_backends().keys())
