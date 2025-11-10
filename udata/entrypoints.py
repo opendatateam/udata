@@ -5,7 +5,6 @@ ENTRYPOINTS = {
     "udata.avatars": "Avatar rendering backends",
     "udata.harvesters": "Harvest backends",
     "udata.models": "Models and migrations",
-    "udata.plugins": "Generic plugin",
 }
 
 

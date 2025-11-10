@@ -20,6 +20,7 @@ from flask import (
 )
 from flask_caching import Cache
 from flask_wtf.csrf import CSRFProtect
+from importlib_metadata import entry_points
 from speaklater import is_lazy_string
 from werkzeug.exceptions import NotFound
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -200,12 +201,21 @@ def create_app(config="udata.settings.Defaults", override=None, init_logging=ini
 def standalone(app):
     """Factory for an all in one application"""
     from udata import api, core, frontend
+    from udata.features import notifications
 
     core.init_app(app)
     frontend.init_app(app)
     api.init_app(app)
+    notifications.init_app(app)
 
-    register_features(app)
+    eps = entry_points(group="udata.plugins")
+    for ep in eps:
+        plugin_module = ep.load()
+
+        if hasattr(plugin_module, "init_app"):
+            plugin_module.init_app(app)
+        else:
+            log.error(f"Plugin {ep.name} ({ep.value}) doesn't expose an `init_app()` function.")
 
     return app
 
@@ -278,12 +288,3 @@ def page_not_found(e: NotFound):
         return render_template("404.html", homepage_url=homepage_url()), 404
 
     return jsonify({"error": e.description, "status": 404}), 404
-
-
-def register_features(app):
-    from udata.features import notifications
-
-    notifications.init_app(app)
-
-    for ep in entrypoints.get_enabled("udata.plugins", app).values():
-        ep.init_app(app)
