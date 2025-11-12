@@ -85,8 +85,8 @@ class BaseBackend(object):
     Also provides a few helpers needed on all or some backends.
     """
 
-    name = None
-    display_name = None
+    name: str
+    display_name: str | None = None
     verify_ssl = True
 
     # Define some allowed filters on the backend

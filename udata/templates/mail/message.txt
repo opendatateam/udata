@@ -1,0 +1,16 @@
+{{ _('Hi %(user)s', user=recipient.first_name) }},
+
+{% for item in message.paragraphs %}
+{% if item.__class__.__name__ == 'MailCTA' %}
+{{ item.label }}: {{ item.link }}
+{% elif item.__class__.__name__ == 'LabelledContent' %}
+{% if item.inline %}{{ item.label }} {{ item.truncated_content }}{% else %}{{ item.label }}
+{{ item.truncated_content }}{% endif %}
+{% else %}
+{{ item }}
+{% endif %}
+
+{% endfor %}
+
+{{ _('Have a great day') }},
+{{ _('The %(site)s team', site=config.SITE_TITLE) }}

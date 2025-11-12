@@ -1,5 +1,3 @@
-from flask import current_app
-
 from udata.tasks import get_logger, job, task
 
 from . import backends
@@ -16,7 +14,7 @@ def harvest(self, ident):
     if source.deleted or not source.active:
         log.info('Ignoring inactive or deleted source "%s"', source.id)
         return  # Ignore deleted and inactive sources
-    Backend = backends.get(current_app, source.backend)
+    Backend = backends.get_backend(source.backend)
     backend = Backend(source)
 
     backend.harvest()
@@ -27,7 +25,7 @@ def harvest_job_item(job_id, item_id):
     log.info('Harvesting item %s for job "%s"', item_id, job_id)
 
     job = HarvestJob.objects.get(pk=job_id)
-    Backend = backends.get(current_app, job.source.backend)
+    Backend = backends.get_backend(job.source.backend)
     backend = Backend(job)
 
     item = next(i for i in job.items if i.remote_id == item_id)
@@ -40,7 +38,7 @@ def harvest_job_item(job_id, item_id):
 def harvest_job_finalize(results, job_id):
     log.info('Finalize harvesting for job "%s"', job_id)
     job = HarvestJob.objects.get(pk=job_id)
-    Backend = backends.get(current_app, job.source.backend)
+    Backend = backends.get_backend(job.source.backend)
     backend = Backend(job)
     backend.finalize()
 

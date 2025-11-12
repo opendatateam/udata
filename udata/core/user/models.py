@@ -12,17 +12,16 @@ from flask_security import MongoEngineUserDatastore, RoleMixin, UserMixin
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
-from udata import mail
 from udata.api_fields import field
 from udata.core import storages
 from udata.core.discussions.models import Discussion
 from udata.core.linkable import Linkable
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
-from udata.i18n import lazy_gettext as _
 from udata.models import Follow, WithMetrics, db
 from udata.uris import cdata_url
 
+from . import mails
 from .constants import AVATAR_SIZES
 
 __all__ = ("User", "Role", "datastore")
@@ -304,7 +303,7 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
         ContactPoint.objects(owner=self).delete()
 
         if notify:
-            mail.send(_("Account deletion"), copied_user, "account_deleted")
+            mails.account_deletion().send(copied_user)
 
     def count_datasets(self):
         from udata.models import Dataset

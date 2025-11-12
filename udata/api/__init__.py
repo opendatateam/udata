@@ -333,6 +333,7 @@ def marshal_page_with(func):
 
 def init_app(app):
     # Load all core APIs
+    import udata.core.access_type.api  # noqa
     import udata.core.activity.api  # noqa
     import udata.core.spatial.api  # noqa
     import udata.core.user.api  # noqa
@@ -357,7 +358,7 @@ def init_app(app):
     import udata.core.contact_point.api  # noqa
     import udata.features.transfer.api  # noqa
     import udata.features.notifications.api  # noqa
-    import udata.features.identicon.api  # noqa
+    import udata.core.avatars.api  # noqa
     import udata.features.territories.api  # noqa
     import udata.harvest.api  # noqa
 

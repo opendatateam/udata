@@ -1,4 +1,3 @@
-import pkg_resources
 from kombu import Exchange, Queue
 from tlds import tld_set
 
@@ -173,11 +172,11 @@ class Defaults(object):
     SITE_AUTHOR_URL = None
     SITE_AUTHOR = "Udata"
     SITE_GITHUB_URL = "https://github.com/etalab/udata"
-    SITE_TERMS_LOCATION = pkg_resources.resource_filename(__name__, "terms.md")
 
     UDATA_INSTANCE_NAME = "udata"
 
     PLUGINS = []
+    HARVESTER_BACKENDS = []
     THEME = None
 
     STATIC_DIRS = []
@@ -468,19 +467,22 @@ class Defaults(object):
     # if set to anything else than `None`
     ###########################################################################
     # avatar provider used to render user avatars
-    AVATAR_PROVIDER = None
     # Number of blocks used by the internal provider
-    AVATAR_INTERNAL_SIZE = None
+    AVATAR_INTERNAL_SIZE = 7
     # List of foreground colors used by the internal provider
-    AVATAR_INTERNAL_FOREGROUND = None
+    AVATAR_INTERNAL_FOREGROUND = [
+        "rgb(45,79,255)",
+        "rgb(254,180,44)",
+        "rgb(226,121,234)",
+        "rgb(30,179,253)",
+        "rgb(232,77,65)",
+        "rgb(49,203,115)",
+        "rgb(141,69,170)",
+    ]
     # Background color used by the internal provider
-    AVATAR_INTERNAL_BACKGROUND = None
+    AVATAR_INTERNAL_BACKGROUND = "rgb(224,224,224)"
     # Padding (in percent) used by the internal provider
-    AVATAR_INTERNAL_PADDING = None
-    # Skin (set) used by the robohash provider
-    AVATAR_ROBOHASH_SKIN = None
-    # The background used by the robohash provider.
-    AVATAR_ROBOHASH_BACKGROUND = None
+    AVATAR_INTERNAL_PADDING = 10
 
     # Post settings
     ###########################################################################
@@ -532,6 +534,8 @@ class Defaults(object):
         "harvest",
     )
     EXPORT_CSV_DATASET_ID = None
+    EXPORT_CSV_ARCHIVE_S3_BUCKET = None  # If this setting is set, an archive is uploaded to the corresponding S3 bucket every first day of the month (if export-csv is scheduled to run daily)
+    EXPORT_CSV_ARCHIVE_S3_FILENAME_PREFIX = ""  # Useful to store the csv archives inside a subfolder of the bucket, ie setting 'csv-catalog-archives/'`
 
     # Autocomplete parameters
     #########################
@@ -639,6 +643,7 @@ class Testing(object):
     CELERY_TASK_EAGER_PROPAGATES = True
     TEST_WITH_PLUGINS = False
     PLUGINS = []
+    HARVESTER_BACKENDS = ["factory"]
     TEST_WITH_THEME = False
     THEME = "testing"
     CACHE_TYPE = "flask_caching.backends.null"
