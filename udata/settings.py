@@ -175,7 +175,6 @@ class Defaults(object):
 
     UDATA_INSTANCE_NAME = "udata"
 
-    PLUGINS = []
     HARVESTER_BACKENDS = []
     THEME = None
 
@@ -642,7 +641,6 @@ class Testing(object):
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_TASK_EAGER_PROPAGATES = True
     TEST_WITH_PLUGINS = False
-    PLUGINS = []
     HARVESTER_BACKENDS = ["factory"]
     TEST_WITH_THEME = False
     THEME = "testing"

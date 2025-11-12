@@ -201,7 +201,6 @@ class UdataGroup(FlaskGroup):
         Load udata commands from:
         - `udata.commands.*` module
         - known internal modules with commands
-        - plugins exporting a `udata.commands` entrypoint
         """
         if self._udata_commands_loaded:
             return

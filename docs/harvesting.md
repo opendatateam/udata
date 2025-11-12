@@ -90,10 +90,10 @@ optional arguments:
 
 `udata` comes with 3 harvest backends (listed below) but you can implement your own backend.
 In order for `udata` to be able to use any of those backends, they first need to be enabled
-in the `udata.cfg` `PLUGINS` section, like so:
+in the `udata.cfg` `HARVESTER_BACKENDS` section, like so:
 
 ```cfg
-PLUGINS = ['dcat']
+HARVESTER_BACKENDS = ['dcat', 'csw*']
 ```
 
 ### DCAT

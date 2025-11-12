@@ -42,12 +42,6 @@ A secret key used as salt for cryptographic parts.
 
 The site identifier. It is used to attached some database configuration, metrics...
 
-### PLUGINS
-
-**default**: `[]`
-
-A list of enabled udata plugins.
-
 ### THEME
 
 **default**: ``'default'``
@@ -570,7 +564,6 @@ SECRET_KEY = 'A unique secret key'
 SERVER_NAME = 'www.data.dev'
 
 DEFAULT_LANGUAGE = 'fr'
-PLUGINS = ['front', 'piwik']
 SITE_ID = 'www.data.dev'
 SITE_TITLE = 'data.dev'
 SITE_URL = 'www.data.dev'
