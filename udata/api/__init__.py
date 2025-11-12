@@ -358,7 +358,7 @@ def init_app(app):
     import udata.core.contact_point.api  # noqa
     import udata.features.transfer.api  # noqa
     import udata.features.notifications.api  # noqa
-    import udata.features.identicon.api  # noqa
+    import udata.core.avatars.api  # noqa
     import udata.features.territories.api  # noqa
     import udata.harvest.api  # noqa
 

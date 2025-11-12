@@ -3,6 +3,7 @@ import importlib
 import logging
 import os
 import types
+from importlib.metadata import entry_points
 from os.path import abspath, dirname, exists, isfile, join
 
 import bson
@@ -20,7 +21,6 @@ from flask import (
 )
 from flask_caching import Cache
 from flask_wtf.csrf import CSRFProtect
-from importlib_metadata import entry_points
 from speaklater import is_lazy_string
 from werkzeug.exceptions import NotFound
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -225,7 +225,6 @@ def register_extensions(app):
         auth,
         i18n,
         mail,
-        models,
         mongo,
         notifications,  # noqa
         routing,
@@ -239,7 +238,6 @@ def register_extensions(app):
     tasks.init_app(app)
     i18n.init_app(app)
     mongo.init_app(app)
-    models.init_app(app)
     routing.init_app(app)
     auth.init_app(app)
     cache.init_app(app)

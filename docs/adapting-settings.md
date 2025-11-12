@@ -454,18 +454,6 @@ Set this to a domain name. If defined, udata will serve its static assets from t
 Theses settings allow you to customize avatar rendering.
 If defined to anything else than a falsy value, theses settings take precedence over the theme configuration and the default values.
 
-### AVATAR_PROVIDER
-
-**default** `'internal'`
-
-Avatar provider used to render user avatars.
-
-udata provides 3 backends:
-
-- `internal`: udata renders avatars itself using [pydenticon](http://pydenticon.readthedocs.io)
-- `adorable`: udata uses [Adorable Avatars](http://avatars.adorable.io/) to render avatars
-- `robohash`: udata uses [Robohash](https://robohash.org/) to render avatars
-
 ### AVATAR_INTERNAL_SIZE
 
 **default**: `7`
@@ -491,20 +479,6 @@ The background color used by the internal provider
 **default**: `10`
 
 The padding (in percent) used by the internal provider
-
-### AVATAR_ROBOHASH_SKIN
-
-**default**: `'set1'`
-
-The skin (set) used by the robohash provider.
-See <https://robohash.org/> for more details.
-
-### AVATAR_ROBOHASH_BACKGROUND
-
-**default**: `'bg0'` (transparent background)
-
-The background used by the robohash provider.
-See <https://robohash.org/> for more details.
 
 ## Posts configuration
 
