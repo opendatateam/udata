@@ -1,8 +1,7 @@
-import importlib.util
 from contextlib import contextmanager
 from datetime import datetime
-from glob import iglob
-from os.path import basename, dirname, join
+from importlib import resources
+from importlib.metadata import entry_points
 
 import flask_babel
 from babel.dates import format_timedelta as babel_format_timedelta
@@ -20,7 +19,6 @@ from flask_babel import Babel, format_date, format_datetime, refresh  # noqa
 from flask_babel import get_locale as get_current_locale  # noqa
 from werkzeug.local import LocalProxy
 
-from udata import entrypoints
 from udata.app import Blueprint
 from udata.auth import current_user
 from udata.errors import ConfigError
@@ -28,22 +26,17 @@ from udata.utils import multi_to_dict
 
 
 def get_translation_directories_and_domains():
-    translations_dir = []
+    translations_dirs = []
     domains = []
 
-    # udata and plugin translations
-    for pkg in entrypoints.get_roots(current_app):
-        spec = importlib.util.find_spec(pkg)
-        path = dirname(spec.origin)
-        plugin_domains = [
-            f.replace(path, "").replace(".pot", "")[1:]
-            for f in iglob(join(path, "**/translations/*.pot"), recursive=True)
-        ]
-        for domain in plugin_domains:
-            translations_dir.append(join(path, dirname(domain)))
-            domains.append(basename(domain))
+    for pkg in entry_points(group="udata.i18n"):
+        module = pkg.load()
+        path = resources.files(module)
+        # `/ ""` is  here to transform MultiplexedPath to a simple str
+        translations_dirs.append(str(path / ""))
+        domains.append(pkg.name)
 
-    return translations_dir, domains
+    return translations_dirs, domains
 
 
 def get_locale():

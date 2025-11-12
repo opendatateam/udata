@@ -6,7 +6,6 @@ from glob import iglob
 import click
 from flask.cli import FlaskGroup, ScriptInfo, shell_command
 
-from udata import entrypoints
 from udata.app import VERBOSE_LOGGERS, create_app, standalone
 from udata.utils import get_udata_version, safe_unicode
 
@@ -148,11 +147,6 @@ def init_logging(app):
     logger.handlers = []
     logger.addHandler(handler)
 
-    for name in entrypoints.get_roots():  # Entrypoints loggers
-        logger = logging.getLogger(name)
-        logger.setLevel(log_level)
-        logger.handlers = []
-
     app.logger.setLevel(log_level)
     app.logger.handlers = []
     app.logger.addHandler(handler)
@@ -227,10 +221,6 @@ class UdataGroup(FlaskGroup):
                 __import__("udata.{0}.commands".format(module))
             except Exception as e:
                 error("Unable to import {0}".format(module), e)
-
-        # Load commands from entry points for enabled plugins
-        app = ctx.ensure_object(ScriptInfo).load_app()
-        entrypoints.get_enabled("udata.commands", app)
 
         # Ensure loading happens once
         self._udata_commands_loaded = False

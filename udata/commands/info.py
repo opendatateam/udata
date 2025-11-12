@@ -3,7 +3,6 @@ import logging
 from click import echo
 from flask import current_app
 
-from udata import entrypoints
 from udata.commands import KO, OK, cli, green, red, white
 
 log = logging.getLogger(__name__)
@@ -34,13 +33,3 @@ def config():
         if key.startswith("__") or not key.isupper():
             continue
         echo("{0}: {1}".format(white(key), current_app.config[key]))
-
-
-@grp.command()
-def plugins():
-    """Display some details about the local plugins"""
-    plugins = current_app.config["PLUGINS"]
-    for name, description in entrypoints.ENTRYPOINTS.items():
-        echo("{0} ({1})".format(white(description), name))
-        for ep in sorted(entrypoints.iter_all(name), key=by_name):
-            echo("> {0}: {1}".format(ep.name, is_active(ep, plugins)))

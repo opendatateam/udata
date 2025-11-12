@@ -110,6 +110,9 @@ maaf = "udata.harvest.backends.maaf:MaafBackend"
 ckan = "udata.harvest.backends.ckan.harvesters:CkanBackend"
 dkan = "udata.harvest.backends.ckan.harvesters:DkanBackend"
 
+[project.entry-points."udata.i18n"]
+udata = "udata.translations"
+
 [project.entry-points."pytest11"]
 udata = "udata.tests.plugin"
 
