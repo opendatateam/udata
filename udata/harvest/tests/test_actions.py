@@ -15,12 +15,14 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
+from udata.harvest.backends import get_enabled_backends
+from udata.harvest.backends.base import BaseBackend
 from udata.models import Dataset, PeriodicTask
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_emit, assert_equal_dates, assert_not_emit
 from udata.utils import faker
 
 from .. import actions, signals
-from ..backends import BaseBackend
 from ..models import (
     VALIDATION_ACCEPTED,
     VALIDATION_PENDING,
@@ -40,14 +42,11 @@ from .factories import (
 
 log = logging.getLogger(__name__)
 
-pytestmark = [
-    pytest.mark.usefixtures("clean_db"),
-]
 
-
-class HarvestActionsTest:
+class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
     def test_list_backends(self):
-        for backend in actions.list_backends():
+        assert len(get_enabled_backends()) > 0
+        for backend in get_enabled_backends().values():
             assert issubclass(backend, BaseBackend)
 
     def test_list_sources(self):
@@ -453,7 +452,10 @@ class HarvestActionsTest:
         assert result.errors == 1
 
 
-class ExecutionTestMixin(MockBackendsMixin):
+class ExecutionTestMixin(MockBackendsMixin, PytestOnlyDBTestCase):
+    def action(self, *args, **kwargs):
+        raise NotImplementedError
+
     def test_default(self):
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="factory", organization=org)
@@ -610,7 +612,7 @@ class HarvestRunTest(ExecutionTestMixin):
         return actions.run(*args, **kwargs)
 
 
-class HarvestPreviewTest(MockBackendsMixin):
+class HarvestPreviewTest(MockBackendsMixin, PytestOnlyDBTestCase):
     def test_preview(self):
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="factory", organization=org)

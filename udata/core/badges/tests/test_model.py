@@ -2,7 +2,7 @@ from udata.api_fields import field
 from udata.auth import login_user
 from udata.core.user.factories import UserFactory
 from udata.mongo import db
-from udata.tests import DBTestMixin, TestCase
+from udata.tests.api import DBTestCase
 
 from ..models import Badge, BadgeMixin, BadgesList
 
@@ -33,7 +33,7 @@ class Fake(db.Document, FakeBadgeMixin):
     pass
 
 
-class BadgeMixinTest(DBTestMixin, TestCase):
+class BadgeMixinTest(DBTestCase):
     def test_attributes(self):
         """It should have a badge list"""
         fake = Fake.objects.create()

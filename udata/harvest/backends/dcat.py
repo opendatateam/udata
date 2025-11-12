@@ -63,6 +63,7 @@ def extract_graph(source, target, node, specs):
 
 
 class DcatBackend(BaseBackend):
+    name = "dcat"
     display_name = "DCAT"
 
     def __init__(self, *args, **kwargs):
@@ -256,6 +257,7 @@ class CswDcatBackend(DcatBackend):
     The parsing of items is then the same as for the DcatBackend.
     """
 
+    name = "csw-dcat"
     display_name = "CSW-DCAT"
 
     extra_configs = (
@@ -433,6 +435,7 @@ class CswIso19139DcatBackend(CswDcatBackend):
     The parsing of items is then the same as for the DcatBackend.
     """
 
+    name = "csw-iso-19139"
     display_name = "CSW-ISO-19139"
 
     CSW_OUTPUT_SCHEMA = "http://www.isotc211.org/2005/gmd"

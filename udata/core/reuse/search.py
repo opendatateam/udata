@@ -40,7 +40,7 @@ class ReuseSearch(ModelSearchAdapter):
 
     @classmethod
     def is_indexable(cls, reuse: Reuse) -> bool:
-        return reuse.deleted is None and len(reuse.datasets) > 0 and not reuse.private
+        return reuse.is_visible
 
     @classmethod
     def mongo_search(cls, args):

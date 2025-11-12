@@ -134,8 +134,7 @@ $ inv update -m i18nc
 
 Now check out our advanced documentation for a focus on some specific tasks.
 You may want to be able to [run the tests](testing-code.md) to for a backend contribution,
-maybe [create a full theme](creating-theme.md)
-or simply provide some fixes to [the translations](adding-translations.md)
+simply provide some fixes to [the translations](adding-translations.md)
 or [the documentation](building-documentation.md).
 
 

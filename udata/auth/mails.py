@@ -1,48 +1,146 @@
-import email_validator
+"""
+We have our own system to build mails without Jinja templates with `MailMessage`.
+To connect our system with the system from flask_security we need to override the Jinja
+`render_template` function, create our MailMessage, and generate the HTML or text version.
+`flask_security` then call the standard mail method from flask to send these strings.
+
+In `render_mail_template` we support a few mails but not all. We could fallback to the regular
+Jinja render function, but since we don't have any mails' templates defined in our application
+the render function will crash, so we crash early in the `render_mail_template` function.
+
+Note that `flask_security` have default templates for all mails but we create our own blueprint
+specifying our `template` folder for templates and the system is not intelligent enough to try
+our folder before fallbacking to the templates inside the `flask_security` package.
+"""
+
+import logging
+
 from flask import current_app
 
-from udata.tasks import task
+from udata.mail import MailCTA, MailMessage
+
+log = logging.getLogger(__name__)
 
 
-@task
-def sendmail(msg):
-    debug = current_app.config.get("DEBUG", False)
-    send_mail = current_app.config.get("SEND_MAIL", not debug)
-    if send_mail:
-        mail = current_app.extensions.get("mail")
-        mail.send(msg)
+def render_mail_template(template_name_or_list: str | list[str], **kwargs):
+    if not isinstance(template_name_or_list, str):
+        return None
+
+    if not template_name_or_list.startswith("security/email/"):
+        return None
+
+    if not template_name_or_list.endswith(".txt") and not template_name_or_list.endswith(".html"):
+        return None
+
+    (name, format) = template_name_or_list.removeprefix("security/email/").split(".")
+
+    mail_message = None
+
+    match name:
+        case "welcome":
+            mail_message = welcome(**kwargs)
+        case "welcome_existing":
+            mail_message = welcome_existing(**kwargs)
+        case "confirmation_instructions":
+            mail_message = confirmation_instructions(**kwargs)
+        case "reset_instructions":
+            mail_message = reset_instructions(**kwargs)
+        case "reset_notice":
+            mail_message = reset_notice(**kwargs)
+        case "change_notice":
+            mail_message = change_notice(**kwargs)
+        case _:
+            raise Exception(f"Unknown mail message template: {name}")
+
+    if format == "txt":
+        return mail_message.text(kwargs.get("user"))
+    elif format == "html":
+        return mail_message.html(kwargs.get("user"))
+    else:
+        raise Exception(f"Mail message with unknown format: {name} (txt or html supported)")
 
 
-class UdataMailUtil:
-    def __init__(self, app):
-        self.app = app
+def welcome(confirmation_link: str, **kwargs) -> MailMessage:
+    from udata.i18n import lazy_gettext as _
 
-    def send_mail(self, template, subject, recipient, sender, body, html, user, **kwargs):
-        from flask_mail import Message
+    return MailMessage(
+        subject=_("Confirm your email address"),
+        paragraphs=[
+            _("Welcome to %(site)s!", site=current_app.config["SITE_TITLE"]),
+            _("Please confirm your email address."),
+            MailCTA(_("Confirm your email address"), confirmation_link),
+        ],
+    )
 
-        # In Flask-Mail, sender can be a two element tuple -- (name, address)
-        if isinstance(sender, tuple) and len(sender) == 2:
-            sender = (str(sender[0]), str(sender[1]))
-        else:
-            sender = str(sender)
-        msg = Message(str(subject), sender=sender, recipients=[recipient])
-        msg.body = body
-        msg.html = html
 
-        sendmail.delay(msg)
+def welcome_existing(recovery_link: str, **kwargs) -> MailMessage:
+    from udata.i18n import lazy_gettext as _
 
-    def normalize(self, email):
-        # Called at registration and login
-        # Calls validate method with deliverability check disabled to prevent
-        # login failure for existing users without a valid email domain name
-        return self.validate(email, validation_args={"check_deliverability": False})
+    return MailMessage(
+        subject=_("Your email address is already associated with an account"),
+        paragraphs=[
+            _(
+                "Someone (you?) tried to create an account on %(site)s with your email.",
+                site=current_app.config["SITE_TITLE"],
+            ),
+            _("If you forgot your password, you can reset it."),
+            MailCTA(_("Reset your password"), recovery_link),
+        ],
+    )
 
-    def validate(self, email, validation_args=None):
-        # Called at registration only
-        # Checks email domain name deliverability
-        # To prevent false email to register
-        validator_args = self.app.config["SECURITY_EMAIL_VALIDATOR_ARGS"] or {}
-        if validation_args:
-            validator_args.update(validation_args)
-        valid = email_validator.validate_email(email, **validator_args)
-        return valid.email
+
+def confirmation_instructions(confirmation_link: str, **kwargs) -> MailMessage:
+    from udata.i18n import lazy_gettext as _
+
+    return MailMessage(
+        subject=_("Confirm your email address"),
+        paragraphs=[
+            _("Please confirm your email address."),
+            MailCTA(_("Confirm your email address"), confirmation_link),
+        ],
+    )
+
+
+def reset_instructions(reset_token: str, **kwargs) -> MailMessage:
+    from udata.i18n import lazy_gettext as _
+    from udata.uris import cdata_url
+
+    return MailMessage(
+        subject=_("Reset your password"),
+        paragraphs=[
+            _(
+                "Someone requested a password reset for your %(site)s account.",
+                site=current_app.config["SITE_TITLE"],
+            ),
+            _("If this wasn't you, please ignore this email."),
+            MailCTA(_("Reset your password"), cdata_url(f"/reset/{reset_token}")),
+        ],
+    )
+
+
+def reset_notice(**kwargs) -> MailMessage:
+    from udata.i18n import lazy_gettext as _
+
+    return MailMessage(
+        subject=_("Your password has been reset"),
+        paragraphs=[
+            _("Your data.gouv.fr password has been reset."),
+        ],
+    )
+
+
+def change_notice(**kwargs) -> MailMessage:
+    from udata.i18n import lazy_gettext as _
+    from udata.uris import cdata_url
+
+    return MailMessage(
+        subject=_("Your password has been changed"),
+        paragraphs=[
+            _(
+                "Your %(site)s account password has been changed.",
+                site=current_app.config["SITE_TITLE"],
+            ),
+            _("If you did not change your password, please reset it."),
+            MailCTA(_("Reset your password"), cdata_url("/reset/")),
+        ],
+    )

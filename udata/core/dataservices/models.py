@@ -2,19 +2,17 @@ from datetime import datetime
 
 from blinker import Signal
 from flask import url_for
+from flask_babel import LazyString
 from mongoengine import Q
 from mongoengine.signals import post_save
 
 import udata.core.contact_point.api_fields as contact_api_fields
 from udata.api import api, fields
 from udata.api_fields import field, generate_fields
+from udata.core.access_type.models import WithAccessType
 from udata.core.activity.models import Auditable
-from udata.core.dataservices.constants import (
-    DATASERVICE_ACCESS_AUDIENCE_CONDITIONS,
-    DATASERVICE_ACCESS_AUDIENCE_TYPES,
-    DATASERVICE_ACCESS_TYPES,
-    DATASERVICE_FORMATS,
-)
+from udata.core.constants import HVD
+from udata.core.dataservices.constants import DATASERVICE_FORMATS
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.dataset.models import Dataset
 from udata.core.linkable import Linkable
@@ -22,19 +20,12 @@ from udata.core.metrics.helpers import get_stock_metrics
 from udata.core.metrics.models import WithMetrics
 from udata.core.owned import Owned, OwnedQuerySet
 from udata.i18n import lazy_gettext as _
-from udata.models import Discussion, Follow, db
-from udata.mongo.errors import FieldValidationError
+from udata.models import Badge, BadgeMixin, BadgesList, Discussion, Follow, db
 from udata.uris import cdata_url
 
-# "frequency"
-# "harvest"
-# "internal"
-# "page"
-# "quality" # Peut-être pas dans une v1 car la qualité sera probablement calculé différemment
-# "datasets" # objet : liste de datasets liés à une API
-# "spatial"
-# "temporal_coverage"
-
+BADGES: dict[str, LazyString] = {
+    HVD: _("Dataservice serving high value datasets"),
+}
 
 dataservice_permissions_fields = api.model(
     "DataservicePermissions",
@@ -89,6 +80,20 @@ class DataserviceQuerySet(OwnedQuerySet):
         return self(dataservices_filter)
 
 
+def validate_badge(value):
+    if value not in Dataservice.__badges__.keys():
+        raise db.ValidationError("Unknown badge type")
+
+
+class DataserviceBadge(Badge):
+    kind = db.StringField(required=True, validation=validate_badge)
+
+
+class DataserviceBadgeMixin(BadgeMixin):
+    badges = field(BadgesList(DataserviceBadge), **BadgeMixin.default_badges_list_params)
+    __badges__ = BADGES
+
+
 @generate_fields()
 class HarvestMetadata(db.EmbeddedDocument):
     backend = field(db.StringField())
@@ -119,50 +124,48 @@ class HarvestMetadata(db.EmbeddedDocument):
     archived_reason = field(db.StringField())
 
 
-@generate_fields()
-class AccessAudience(db.EmbeddedDocument):
-    role = field(db.StringField(choices=DATASERVICE_ACCESS_AUDIENCE_TYPES), filterable={})
-    condition = field(db.StringField(choices=DATASERVICE_ACCESS_AUDIENCE_CONDITIONS), filterable={})
-
-
-def check_only_one_condition_per_role(access_audiences, **_kwargs):
-    roles = set(e["role"] for e in access_audiences)
-    if len(roles) != len(access_audiences):
-        raise FieldValidationError(
-            _("You can only set one condition for a given access audience role"),
-            field="access_audiences",
-        )
-
-
 def filter_by_topic(base_query, filter_value):
     from udata.core.topic.models import Topic
 
     try:
         topic = Topic.objects.get(id=filter_value)
     except Topic.DoesNotExist:
-        pass
+        return base_query
     else:
         return base_query.filter(
             id__in=[
-                elt.element.id
-                for elt in topic.elements
-                if elt.element.__class__.__name__ == "Dataservice"
+                element.element.id
+                for element in topic.elements.filter(__raw__={"element._cls": "Dataservice"})
             ]
         )
+
+
+def filter_by_reuse(base_query, filter_value):
+    from udata.core.reuse.models import Reuse
+
+    try:
+        reuse = Reuse.objects.get(id=filter_value)
+    except Reuse.DoesNotExist:
+        return base_query
+    else:
+        return base_query.filter(id__in=[dataservice.id for dataservice in reuse.dataservices])
 
 
 @generate_fields(
     searchable=True,
     nested_filters={"organization_badge": "organization.badges"},
     standalone_filters=[
-        {"key": "topic", "constraints": "objectid", "query": filter_by_topic, "type": str}
+        {"key": "topic", "constraints": ["objectid"], "query": filter_by_topic, "type": str},
+        {"key": "reuse", "constraints": ["objectid"], "query": filter_by_reuse, "type": str},
     ],
     additional_sorts=[
         {"key": "followers", "value": "metrics.followers"},
         {"key": "views", "value": "metrics.views"},
     ],
 )
-class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
+class Dataservice(
+    Auditable, WithMetrics, WithAccessType, DataserviceBadgeMixin, Linkable, Owned, db.Document
+):
     meta = {
         "indexes": [
             "$title",
@@ -212,14 +215,6 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
 
     availability = field(db.FloatField(min=0, max=100), example="99.99")
     availability_url = field(db.URLField())
-
-    access_type = field(db.StringField(choices=DATASERVICE_ACCESS_TYPES), filterable={})
-    access_audiences = field(
-        db.EmbeddedDocumentListField(AccessAudience),
-        checks=[check_only_one_condition_per_role],
-    )
-
-    authorization_request_url = field(db.URLField())
 
     format = field(db.StringField(choices=DATASERVICE_FORMATS))
 
@@ -304,7 +299,7 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
         auditable=False,
     )
 
-    @field(description="Link to the API endpoint for this dataservice")
+    @field(description="Link to the API endpoint for this dataservice", show_as_ref=True)
     def self_api_url(self, **kwargs):
         return url_for(
             "api.dataservice",
@@ -323,6 +318,10 @@ class Dataservice(Auditable, WithMetrics, Linkable, Owned, db.Document):
         "followers_by_months",
         "views",
     ]
+
+    @property
+    def is_visible(self):
+        return not self.is_hidden
 
     @property
     def is_hidden(self):

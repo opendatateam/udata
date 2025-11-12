@@ -5,8 +5,6 @@ from udata.tests.api import APITestCase
 
 
 class OrganizationExtrasAPITest(APITestCase):
-    modules = None
-
     def setUp(self):
         self.login()
         member = Member(user=self.user, role="admin")

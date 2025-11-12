@@ -7,6 +7,7 @@ from flask_restx import marshal
 
 from udata import search
 from udata.api import API, apiv2, fields
+from udata.core.access_type.models import AccessAudience
 from udata.core.contact_point.api_fields import contact_point_fields
 from udata.core.dataset.api_fields import license_fields
 from udata.core.organization.api_fields import member_user_with_email_fields
@@ -30,7 +31,7 @@ from .api_fields import (
     temporal_coverage_fields,
     user_ref_fields,
 )
-from .constants import DEFAULT_FREQUENCY, DEFAULT_LICENSE, FULL_OBJECTS_HEADER, UPDATE_FREQUENCIES
+from .constants import DEFAULT_LICENSE, FULL_OBJECTS_HEADER, UpdateFrequency
 from .models import CommunityResource, Dataset
 from .search import DatasetSearch
 
@@ -62,6 +63,11 @@ DEFAULT_MASK_APIV2 = ",".join(
         "temporal_coverage",
         "spatial",
         "license",
+        "access_type",
+        "access_audiences",
+        "access_type_reason_category",
+        "access_type_reason",
+        "authorization_request_url",
         "uri",
         "page",
         "last_update",
@@ -157,13 +163,13 @@ dataset_fields = apiv2.model(
         ),
         "frequency": fields.Raw(
             attribute=lambda d: {
-                "id": d.frequency or DEFAULT_FREQUENCY,
-                "label": UPDATE_FREQUENCIES.get(d.frequency or DEFAULT_FREQUENCY),
+                "id": (d.frequency or UpdateFrequency.UNKNOWN).id,
+                "label": (d.frequency or UpdateFrequency.UNKNOWN).label,
             }
             if request.headers.get(FULL_OBJECTS_HEADER, False, bool)
-            else d.frequency,
-            enum=list(UPDATE_FREQUENCIES),
-            default=DEFAULT_FREQUENCY,
+            else (d.frequency or UpdateFrequency.UNKNOWN),
+            enum=list(UpdateFrequency),
+            default=UpdateFrequency.UNKNOWN,
             required=True,
             description="The update frequency (full Frequency object if `X-Get-Datasets-Full-Objects` is set, ID of the frequency otherwise)",
         ),
@@ -202,6 +208,11 @@ dataset_fields = apiv2.model(
             default=DEFAULT_LICENSE["id"],
             description="The dataset license (full License object if `X-Get-Datasets-Full-Objects` is set, ID of the license otherwise)",
         ),
+        "access_type": fields.String(allow_null=True),
+        "access_audiences": fields.Nested(AccessAudience.__read_fields__),
+        "authorization_request_url": fields.String(allow_null=True),
+        "access_type_reason_category": fields.String(allow_null=True),
+        "access_type_reason": fields.String(allow_null=True),
         "uri": fields.String(
             attribute=lambda d: d.self_api_url(),
             description="The API URI for this dataset",

@@ -20,7 +20,7 @@ from udata.core.dataset.activities import (
     UserUpdatedDataset,
     UserUpdatedResource,
 )
-from udata.core.dataset.constants import LEGACY_FREQUENCIES, UPDATE_FREQUENCIES
+from udata.core.dataset.constants import UpdateFrequency
 from udata.core.dataset.exceptions import (
     SchemasCacheUnavailableException,
     SchemasCatalogNotFoundException,
@@ -37,13 +37,12 @@ from udata.core.followers.signals import on_follow, on_unfollow
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.models import Dataset, Follow, License, ResourceSchema, Reuse, Schema, db
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_emit, assert_equal_dates, assert_not_emit
 from udata.utils import faker
 
-pytestmark = pytest.mark.usefixtures("clean_db")
 
-
-class DatasetModelTest:
+class DatasetModelTest(PytestOnlyDBTestCase):
     def test_add_resource(self):
         user = UserFactory()
         dataset = DatasetFactory(owner=user)
@@ -157,49 +156,13 @@ class DatasetModelTest:
         dataset = DatasetFactory()
         assert dataset.next_update is None
 
-    def test_next_update_hourly(self):
-        dataset = DatasetFactory(frequency="hourly")
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(hours=1))
-
-    @pytest.mark.parametrize("freq", ["fourTimesADay", "threeTimesADay", "semidaily", "daily"])
-    def test_next_update_daily(self, freq):
+    @pytest.mark.parametrize("freq", list(UpdateFrequency) + [None])
+    def test_next_update(self, freq: UpdateFrequency | None):
         dataset = DatasetFactory(frequency=freq)
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=1))
-
-    @pytest.mark.parametrize("freq", ["fourTimesAWeek", "threeTimesAWeek", "semiweekly", "weekly"])
-    def test_next_update_weekly(self, freq):
-        dataset = DatasetFactory(frequency=freq)
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=7))
-
-    def test_next_update_biweekly(self):
-        dataset = DatasetFactory(frequency="biweekly")
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(weeks=2))
-
-    def test_next_update_quarterly(self):
-        dataset = DatasetFactory(frequency="quarterly")
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=365 / 4))
-
-    @pytest.mark.parametrize("freq", ["threeTimesAYear", "semiannual", "annual"])
-    def test_next_update_annual(self, freq):
-        dataset = DatasetFactory(frequency=freq)
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=365))
-
-    def test_next_update_biennial(self):
-        dataset = DatasetFactory(frequency="biennial")
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=365 * 2))
-
-    def test_next_update_triennial(self):
-        dataset = DatasetFactory(frequency="triennial")
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=365 * 3))
-
-    def test_next_update_quinquennial(self):
-        dataset = DatasetFactory(frequency="quinquennial")
-        assert_equal_dates(dataset.next_update, datetime.utcnow() + timedelta(days=365 * 5))
-
-    @pytest.mark.parametrize("freq", ["continuous", "punctual", "irregular", "unknown"])
-    def test_next_update_undefined(self, freq):
-        dataset = DatasetFactory(frequency=freq)
-        assert dataset.next_update is None
+        if freq is None or freq.delta is None:
+            assert dataset.next_update is None
+        else:
+            assert_equal_dates(dataset.next_update, freq.next_update(datetime.utcnow()))
 
     def test_quality_default(self):
         dataset = DatasetFactory(description="")
@@ -212,21 +175,21 @@ class DatasetModelTest:
             "score": 0,
         }
 
-    @pytest.mark.parametrize("freq", UPDATE_FREQUENCIES)
-    def test_quality_frequency_update(self, freq):
+    @pytest.mark.parametrize("freq", list(UpdateFrequency) + [None])
+    def test_quality_frequency_update(self, freq: UpdateFrequency | None):
         dataset = DatasetFactory(description="", frequency=freq)
-        if freq == "unknown":
+        if freq in [None, UpdateFrequency.UNKNOWN]:
             assert dataset.quality["update_frequency"] is False
             assert "update_fulfilled_in_time" not in dataset.quality
-            return
-        assert dataset.quality["update_frequency"] is True
-        assert dataset.quality["update_fulfilled_in_time"] is True
-        assert dataset.quality["score"] == Dataset.normalize_score(2)
+        else:
+            assert dataset.quality["update_frequency"] is True
+            assert dataset.quality["update_fulfilled_in_time"] is True
+            assert dataset.quality["score"] == Dataset.normalize_score(2)
 
     def test_quality_frequency_update_one_day_late(self):
         dataset = DatasetFactory(
             description="",
-            frequency="daily",
+            frequency=UpdateFrequency.DAILY,
             last_modified_internal=datetime.utcnow() - timedelta(days=1, hours=1),
         )
         assert dataset.quality["update_frequency"] is True
@@ -236,7 +199,7 @@ class DatasetModelTest:
     def test_quality_frequency_update_two_days_late(self):
         dataset = DatasetFactory(
             description="",
-            frequency="daily",
+            frequency=UpdateFrequency.DAILY,
             last_modified_internal=datetime.utcnow() - timedelta(days=2, hours=1),
         )
         assert dataset.quality["update_frequency"] is True
@@ -309,7 +272,7 @@ class DatasetModelTest:
         assert dataset.tags[1] == "this-is-a-tag"
 
     def test_legacy_frequencies(self):
-        for oldFreq, newFreq in LEGACY_FREQUENCIES.items():
+        for oldFreq, newFreq in UpdateFrequency._LEGACY_FREQUENCIES.items():  # type: ignore[misc]
             dataset = DatasetFactory(frequency=oldFreq)
             assert dataset.frequency == newFreq
 
@@ -462,7 +425,7 @@ class DatasetModelTest:
         assert dataset.get_metrics()["dataservices"] == 0
 
 
-class ResourceModelTest:
+class ResourceModelTest(PytestOnlyDBTestCase):
     def test_url_is_required(self):
         with pytest.raises(db.ValidationError):
             DatasetFactory(resources=[ResourceFactory(url=None)])
@@ -487,7 +450,7 @@ class ResourceModelTest:
             resource.save(signal_kwargs={"ignores": ["post_save"]})
 
 
-class LicenseModelTest:
+class LicenseModelTest(PytestOnlyDBTestCase):
     @pytest.fixture(autouse=True)
     def setUp(self):
         # Feed the DB with random data to ensure true matching
@@ -708,7 +671,7 @@ class LicenseModelTest:
         assert license.id == found.id
 
 
-class ResourceSchemaTest:
+class ResourceSchemaTest(PytestOnlyDBTestCase):
     @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/notfound")
     def test_resource_schema_objects_404_endpoint(self, rmock):
         rmock.get("https://example.com/notfound", status_code=404)
@@ -823,7 +786,7 @@ class ResourceSchemaTest:
             resource.schema.clean(check_schema_in_catalog=True)
 
 
-class HarvestMetadataTest:
+class HarvestMetadataTest(PytestOnlyDBTestCase):
     def test_harvest_dataset_metadata_validate_success(self):
         dataset = DatasetFactory()
 

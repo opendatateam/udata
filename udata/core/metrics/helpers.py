@@ -1,7 +1,6 @@
 import logging
 from collections import OrderedDict
 from datetime import datetime, timedelta
-from typing import Dict, List, Union
 from urllib.parse import urlencode
 
 import requests
@@ -14,13 +13,13 @@ from pymongo.command_cursor import CommandCursor
 log = logging.getLogger(__name__)
 
 
-def get_last_13_months() -> List[str]:
+def get_last_13_months() -> list[str]:
     dstart = datetime.today().replace(day=1) - timedelta(days=365)
     months = rrule(freq=MONTHLY, count=13, dtstart=dstart)
     return [month.strftime("%Y-%m") for month in months]
 
 
-def compute_monthly_metrics(metrics_data: List[Dict], metrics_labels: List[str]) -> OrderedDict:
+def compute_monthly_metrics(metrics_data: list[dict], metrics_labels: list[str]) -> OrderedDict:
     # Initialize default monthly_metrics
     monthly_metrics = OrderedDict(
         (month, {label: 0 for label in metrics_labels}) for month in get_last_13_months()
@@ -35,7 +34,7 @@ def compute_monthly_metrics(metrics_data: List[Dict], metrics_labels: List[str])
     return monthly_metrics
 
 
-def metrics_by_label(monthly_metrics: Dict, metrics_labels: List[str]) -> List[OrderedDict]:
+def metrics_by_label(monthly_metrics: dict, metrics_labels: list[str]) -> list[OrderedDict]:
     metrics_by_label = []
     for label in metrics_labels:
         metrics_by_label.append(
@@ -45,8 +44,8 @@ def metrics_by_label(monthly_metrics: Dict, metrics_labels: List[str]) -> List[O
 
 
 def get_metrics_for_model(
-    model: str, id: Union[str, ObjectId, None], metrics_labels: List[str]
-) -> List[OrderedDict]:
+    model: str, id: str | ObjectId | None, metrics_labels: list[str]
+) -> list[OrderedDict]:
     """
     Get distant metrics for a particular model object
     """
@@ -69,7 +68,7 @@ def get_metrics_for_model(
         return [{} for _ in range(len(metrics_labels))]
 
 
-def get_download_url(model: str, id: Union[str, ObjectId, None]) -> str:
+def get_download_url(model: str, id: str | ObjectId | None) -> str:
     api_namespace = model + "s" if model != "site" else model
     base_url = f"{current_app.config['METRICS_API']}/{api_namespace}/data/csv/"
     args = {"metric_month__sort": "asc"}
