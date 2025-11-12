@@ -80,13 +80,6 @@ def my_hook(ctx, arg, **kwargs):
     # Do something with params
 ```
 
-### Models (`udata.models`)
-
-This module entrypoint allows you to expose new models or to extend existing ones by adding new badges or new known extras.
-
-Models entrypoints may also expose migrations in the `migrations` folder sibling to the `models` module.
-If you only need to expose migrations, just provide an empty `models` module.
-
 ### Tasks and jobs (`udata.tasks`)
 
 This module entrypoint allows to register new asynchronous tasks and schedulable jobs.

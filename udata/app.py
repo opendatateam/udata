@@ -225,7 +225,6 @@ def register_extensions(app):
         auth,
         i18n,
         mail,
-        models,
         mongo,
         notifications,  # noqa
         routing,
@@ -239,7 +238,6 @@ def register_extensions(app):
     tasks.init_app(app)
     i18n.init_app(app)
     mongo.init_app(app)
-    models.init_app(app)
     routing.init_app(app)
     auth.init_app(app)
     cache.init_app(app)
