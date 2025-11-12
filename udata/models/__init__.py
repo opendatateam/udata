@@ -1,3 +1,5 @@
+from udata.mongo import *  # noqa
+
 # Load all core models and mixins
 from udata.core.spatial.models import *  # noqa
 from udata.core.metrics.models import *  # noqa
