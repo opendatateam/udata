@@ -3,7 +3,6 @@ import pkg_resources
 # Here for documentation purpose
 ENTRYPOINTS = {
     "udata.harvesters": "Harvest backends",
-    "udata.models": "Models and migrations",
 }
 
 
