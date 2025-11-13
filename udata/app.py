@@ -221,7 +221,7 @@ def create_app(config="udata.settings.Defaults", override=None, init_logging=ini
     app.json = app.json_provider_class(app)
 
     # `ujson` doesn't support `cls` parameter https://github.com/ultrajson/ultrajson/issues/124
-    app.config["RESTX_JSON"] = {"default": app.json}
+    app.config["RESTX_JSON"] = {"default": UdataJsonProvider.default}
 
     app.debug = app.config["DEBUG"] and not app.config["TESTING"]
 
