@@ -1,8 +1,8 @@
 import datetime
-import importlib
 import logging
 import os
 import types
+from importlib.metadata import entry_points
 from os.path import abspath, dirname, exists, isfile, join
 
 import bson
@@ -20,12 +20,11 @@ from flask import (
 )
 from flask_caching import Cache
 from flask_wtf.csrf import CSRFProtect
-from importlib_metadata import entry_points
 from speaklater import is_lazy_string
 from werkzeug.exceptions import NotFound
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from udata import cors, entrypoints
+from udata import cors
 
 APP_NAME = __name__.split(".")[0]
 ROOT_DIR = abspath(join(dirname(__file__)))
@@ -149,8 +148,6 @@ def init_logging(app):
     debug = app.debug or app.config.get("TESTING")
     log_level = logging.DEBUG if debug else logging.WARNING
     app.logger.setLevel(log_level)
-    for name in entrypoints.get_roots():  # Entrypoints loggers
-        logging.getLogger(name).setLevel(log_level)
     for logger in VERBOSE_LOGGERS:
         logging.getLogger(logger).setLevel(logging.WARNING)
     return app
@@ -168,20 +165,6 @@ def create_app(config="udata.settings.Defaults", override=None, init_logging=ini
 
     if override:
         app.config.from_object(override)
-
-    # Loads defaults from plugins
-    for pkg in entrypoints.get_roots(app):
-        if pkg == "udata":
-            continue  # Defaults are already loaded
-        module = "{}.settings".format(pkg)
-        try:
-            settings = importlib.import_module(module)
-        except ImportError:
-            continue
-        for key, default in settings.__dict__.items():
-            if key.startswith("__"):
-                continue
-            app.config.setdefault(key, default)
 
     app.json_encoder = UDataJsonEncoder
 
@@ -225,7 +208,6 @@ def register_extensions(app):
         auth,
         i18n,
         mail,
-        models,
         mongo,
         notifications,  # noqa
         routing,
@@ -239,7 +221,6 @@ def register_extensions(app):
     tasks.init_app(app)
     i18n.init_app(app)
     mongo.init_app(app)
-    models.init_app(app)
     routing.init_app(app)
     auth.init_app(app)
     cache.init_app(app)

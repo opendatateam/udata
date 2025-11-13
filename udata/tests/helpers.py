@@ -8,6 +8,7 @@ from flask import current_app, json
 from flask_security.babel import FsDomain
 from PIL import Image
 
+from udata.core.spatial.factories import GeoZoneFactory
 from udata.mail import mail_sent
 
 
@@ -217,6 +218,17 @@ def create_test_image():
     file.name = "test.png"
     file.seek(0)
     return file
+
+
+def create_geozones_fixtures():
+    paca = GeoZoneFactory(
+        id="fr:region:93", level="fr:region", name="Provence Alpes Côtes dAzur", code="93"
+    )
+    bdr = GeoZoneFactory(
+        id="fr:departement:13", level="fr:departement", name="Bouches-du-Rhône", code="13"
+    )
+    arles = GeoZoneFactory(id="fr:commune:13004", level="fr:commune", name="Arles", code="13004")
+    return paca, bdr, arles
 
 
 def security_gettext(string):

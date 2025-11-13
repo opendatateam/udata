@@ -4,7 +4,6 @@ import warnings
 
 from werkzeug.exceptions import HTTPException
 
-from udata import entrypoints
 from udata.core.storages.api import UploadProgress
 from udata.utils import get_udata_version
 
@@ -82,9 +81,5 @@ def init_app(app: UDataApp):
         tags = app.config["SENTRY_TAGS"]
         for tag_key in tags:
             sentry_sdk.set_tag(tag_key, tags[tag_key])
-        # Versions Management: uData and plugins versions as tags.
-        for dist in entrypoints.get_plugins_dists(app):
-            if dist.version:
-                sentry_sdk.set_tag(dist.project_name, dist.version)
-        # Do not forget udata itself
+
         sentry_sdk.set_tag("udata", get_udata_version())

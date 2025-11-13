@@ -1,4 +1,3 @@
-import pytest
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
@@ -13,9 +12,7 @@ from udata.core.spatial.models import spatial_granularities
 from udata.core.spatial.tasks import compute_geozones_metrics
 from udata.tests.api import APITestCase
 from udata.tests.api.test_datasets_api import SAMPLE_GEOM
-from udata.tests.features.territories import (
-    create_geozones_fixtures,
-)
+from udata.tests.helpers import create_geozones_fixtures
 from udata.utils import faker
 
 
@@ -256,38 +253,6 @@ class SpatialApiTest(APITestCase):
         self.assertEqual(response.json["features"][0]["properties"]["datasets"], 2)
         self.assertEqual(response.json["features"][1]["id"], "fr:commune:75056")
         self.assertEqual(response.json["features"][1]["properties"]["datasets"], 3)
-
-
-@pytest.mark.options(
-    ACTIVATE_TERRITORIES=True,
-    HANDLED_LEVELS=("fr:commune", "fr:departement", "fr:region", "country"),
-)
-class SpatialTerritoriesApiTest(APITestCase):
-    def test_zone_datasets_with_dynamic_and_setting(self):
-        paca, bdr, arles = create_geozones_fixtures()
-        organization = OrganizationFactory()
-        for _ in range(3):
-            DatasetFactory(
-                organization=organization, spatial=SpatialCoverageFactory(zones=[paca.id])
-            )
-
-        response = self.get(url_for("api.zone_datasets", id=paca.id, dynamic=1))
-        self.assert200(response)
-        # No dynamic datasets given that they are added by udata-front extension.
-        self.assertEqual(len(response.json), 3)
-
-    def test_zone_datasets_with_dynamic_and_setting_and_size(self):
-        paca, bdr, arles = create_geozones_fixtures()
-        organization = OrganizationFactory()
-        for _ in range(3):
-            DatasetFactory(
-                organization=organization, spatial=SpatialCoverageFactory(zones=[paca.id])
-            )
-
-        response = self.get(url_for("api.zone_datasets", id=paca.id, dynamic=1, size=2))
-        self.assert200(response)
-        # No dynamic datasets given that they are added by udata-front extension.
-        self.assertEqual(len(response.json), 2)
 
 
 class DatasetsSpatialAPITest(APITestCase):

@@ -1,6 +1,3 @@
-from mongoengine.errors import ValidationError  # noqa
-
-from udata import entrypoints  # noqa
 from udata.mongo import *  # noqa
 
 # Load all core models and mixins
@@ -26,11 +23,6 @@ from udata.core.dataservices.models import *  # noqa
 from udata.core.pages.models import *  # noqa
 
 from udata.features.transfer.models import *  # noqa
-from udata.features.territories.models import *  # noqa
 
 # Load HarvestSource model as harvest for catalog
 from udata.harvest.models import HarvestSource as Harvest  # noqa
-
-
-def init_app(app):
-    entrypoints.get_enabled("udata.models", app)
