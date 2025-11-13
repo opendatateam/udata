@@ -234,6 +234,7 @@ class DiscussionsTest(APITestCase):
 
         with assert_not_emit(on_new_discussion):
             with assert_emit(on_new_potential_spam):
+                print(dataset.id)
                 response = self.post(
                     url_for("api.discussions"),
                     {
