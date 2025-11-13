@@ -4,6 +4,7 @@ import types
 from importlib.metadata import entry_points
 from os.path import abspath, dirname, exists, isfile, join
 
+import bson
 from bson import json_util
 from flask import Blueprint as BaseBlueprint
 from flask import (
@@ -124,6 +125,8 @@ class UdataJsonProvider(DefaultJSONProvider):
     def default(obj):
         if isinstance(obj, BaseDocument) or isinstance(obj, EmbeddedDocument):
             return json_util._json_convert(obj.to_mongo())
+        elif isinstance(obj, bson.ObjectId):
+            return str(obj)
 
         return super(UdataJsonProvider, UdataJsonProvider).default(obj)
 
@@ -214,15 +217,8 @@ def create_app(config="udata.settings.Defaults", override=None, init_logging=ini
     if override:
         app.config.from_object(override)
 
-    print("Creating app")
-    print("Creating app")
-    print("Creating app")
-    print("Creating app")
-    print("Creating app")
     app.json_provider_class = UdataJsonProvider
     app.json = app.json_provider_class(app)
-
-    print(app.json)
 
     # `ujson` doesn't support `cls` parameter https://github.com/ultrajson/ultrajson/issues/124
     app.config["RESTX_JSON"] = {"default": app.json}
