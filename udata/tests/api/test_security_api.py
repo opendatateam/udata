@@ -74,18 +74,17 @@ class SecurityAPITest(PytestOnlyAPITestCase):
         user = UserFactory(
             email="jane@example.org", password="password", confirmed_at=datetime.now()
         )
-        self.login(user)
-
-        response = self.post(
-            url_for("security.change_password"),
-            {
-                "password": "password",
-                "new_password": "New_password123",
-                "new_password_confirm": "New_password123",
-                "submit": True,
-            },
-        )
-        self.assertStatus(response, 200)
+        with self.api_user(user):
+            response = self.post(
+                url_for("security.change_password"),
+                {
+                    "password": "password",
+                    "new_password": "New_password123",
+                    "new_password_confirm": "New_password123",
+                    "submit": True,
+                },
+            )
+            self.assertStatus(response, 200)
 
     @pytest.mark.options(CAPTCHETAT_BASE_URL=None)
     def test_change_email_confirmation(self):
