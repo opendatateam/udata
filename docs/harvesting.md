@@ -269,9 +269,6 @@ Another trick could be calling the synchronous version of the harvesting command
 $ udata harvest run <source_id>
 ```
 
-`source_id` is the id of your job, taken from the (old) admin at http://dev.local:7000/fr/admin/system/.
-
-
 [DCAT]: https://www.w3.org/TR/vocab-dcat/
 [backends-repository]: https://github.com/opendatateam/udata/tree/master/udata/harvest/backends
 [gov-uk-references]: http://reference.data.gov.uk/

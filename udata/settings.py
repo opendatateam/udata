@@ -21,7 +21,6 @@ class Defaults(object):
     DEFAULT_LANGUAGE = "en"
     SECRET_KEY = "Default uData secret key"
     CONTACT_EMAIL = "contact@example.org"
-    TERRITORIES_EMAIL = "territories@example.org"
 
     CDATA_BASE_URL = None
 
@@ -331,10 +330,6 @@ class Defaults(object):
     # Specific support for inspire:
     # - add inspire keyword during harvest if GEMETE INSPIRE thesaurus is used in DCAT.theme
     INSPIRE_SUPPORT = True
-
-    ACTIVATE_TERRITORIES = False
-    # The order is important to compute parents/children, smaller first.
-    HANDLED_LEVELS = tuple()
 
     # Ignore some endpoint from API tracking
     # By default ignore the 3 most called APIs
@@ -649,7 +644,6 @@ class Testing(object):
     DEBUG_TOOLBAR = False
     SERVER_NAME = "local.test"
     DEFAULT_LANGUAGE = "fr"
-    ACTIVATE_TERRITORIES = False
     LOGGER_HANDLER_POLICY = "never"
     CELERYD_HIJACK_ROOT_LOGGER = False
     URLS_ALLOW_LOCAL = True  # Test server URL is local.test
