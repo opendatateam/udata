@@ -1,8 +1,6 @@
-import inspect
 import logging
 import urllib.parse
 from functools import wraps
-from importlib import import_module
 
 import mongoengine
 from flask import (
@@ -19,7 +17,7 @@ from flask_restx import Api, Resource
 from flask_restx.reqparse import RequestParser
 from flask_storage import UnauthorizedFileType
 
-from udata import entrypoints, tracking
+from udata import tracking
 from udata.app import csrf
 from udata.auth import Permission, PermissionDenied, RoleNeed, current_user, login_user
 from udata.i18n import get_locale
@@ -360,9 +358,6 @@ def init_app(app):
     import udata.features.notifications.api  # noqa
     import udata.core.avatars.api  # noqa
     import udata.harvest.api  # noqa
-
-    for module in entrypoints.get_enabled("udata.apis", app).values():
-        module if inspect.ismodule(module) else import_module(module)
 
     # api.init_app(app)
     app.register_blueprint(apiv1_blueprint)
