@@ -3,9 +3,11 @@ import logging
 import os
 import types
 import typing as t
+from datetime import datetime
 from importlib.metadata import entry_points
 from os.path import abspath, dirname, exists, isfile, join
 
+import bson
 from flask import Blueprint as BaseBlueprint
 from flask import (
     Flask,
@@ -20,6 +22,7 @@ from flask import (
 from flask.json.provider import JSONProvider
 from flask_caching import Cache
 from flask_wtf.csrf import CSRFProtect
+from speaklater import is_lazy_string
 from werkzeug.exceptions import NotFound
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -125,6 +128,21 @@ class UdataJsonProvider(JSONProvider):
         :param obj: The data to serialize.
         :param kwargs: May be passed to the underlying JSON library.
         """
+        if False:
+            if is_lazy_string(obj):
+                return str(obj)
+            elif isinstance(obj, bson.ObjectId):
+                return str(obj)
+            elif isinstance(obj, datetime):
+                return obj.isoformat()
+            elif hasattr(obj, "to_dict"):
+                return obj.to_dict()
+            elif hasattr(obj, "serialize"):
+                return obj.serialize()
+            # Serialize Raw data for Document and EmbeddedDocument.
+            elif hasattr(obj, "_data"):
+                return obj._data
+
         kwargs.setdefault("default", self)
         return json.dumps(obj, **kwargs)
 
