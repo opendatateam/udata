@@ -13,7 +13,14 @@ def migrate(db):
 
     collection = get_db().user
 
+    # Remove previous index
+    try:
+        collection.drop_index("slug_text")
+    except OperationFailure:
+        log.info("Index `slug_text` does not exist?", exc_info=True)
+
+    # Remove new index but not sure if it's necessary…
     try:
         collection.drop_index("last_name_text_first_name_text_email_text")
     except OperationFailure:
-        log.info("Index does not exist?", exc_info=True)
+        log.info("Index `last_name_text_first_name_text_email_text` does not exist?", exc_info=True)
