@@ -110,7 +110,6 @@ URLS_ALLOW_LOCAL = True
 URLS_ALLOWED_TLDS = Defaults.URLS_ALLOWED_TLDS | set(['local'])
 
 RESOURCES_FILE_ALLOWED_DOMAINS = ['*']
-PLUGINS = []
 FS_ROOT = 'fs'
 
 SESSION_COOKIE_SECURE = False
@@ -199,7 +198,6 @@ git clone git@github.com:datagouv/udata-front.git
 Modify your `udata.cfg` with the following lines.
 
 ```bash
-PLUGINS = ['front']
 THEME = 'gouvfr'
 ```
 
@@ -272,7 +270,7 @@ Finally, you can see other administrative tasks in [administrative-tasks](admini
 
 # Going further
 
-Once the project is up and running, it’s time to customize it! Take a look at our advanced documentation on [adapting settings](adapting-settings.md), [creating a custom theme](creating-theme.md), [extending udata](extending.md), [testing your code](testing-code.md), [adding translation](adding-translations.md), [setting up a search service][udata-search-service] and so on.
+Once the project is up and running, it’s time to customize it! Take a look at our advanced documentation on [adapting settings](adapting-settings.md), [extending udata](extending.md), [testing your code](testing-code.md), [adding translation](adding-translations.md), [setting up a search service][udata-search-service] and so on.
 
 [github]: https://github.com/opendatateam/udata
 [new issue]: https://github.com/opendatateam/udata/issues/new

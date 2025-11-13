@@ -401,11 +401,6 @@ LANGUAGES = {
 # Here is you default language
 DEFAULT_LANGUAGE = 'fr'
 
-# Optionally activate some installed plugins
-PLUGINS = (
-    'piwik',
-)
-
 # Optionally activate an installed theme
 # THEME = 'my-theme'
 

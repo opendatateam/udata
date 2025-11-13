@@ -10,7 +10,6 @@ DUMMY_EXTRAS = {
 MAX_SIZE = 50000
 
 
-@pytest.mark.options(PLUGINS=["tabular"])
 class ResourcePreviewTest(PytestOnlyAPITestCase):
     def expected_url(self, rid):
         return "http://preview.me/resources/{0}".format(rid)

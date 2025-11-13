@@ -8,7 +8,7 @@ from udata.tests.api import PytestOnlyDBTestCase
 from udata.utils import faker
 
 
-@pytest.mark.options(PLUGINS=["ckan"])
+@pytest.mark.options(HARVESTER_BACKENDS=["ckan"])
 class CkanBackendFilterTest(PytestOnlyDBTestCase):
     def test_include_org_filter(self, ckan, rmock):
         source = HarvestSourceFactory(

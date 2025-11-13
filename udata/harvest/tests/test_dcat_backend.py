@@ -68,7 +68,7 @@ def mock_csw_pagination(rmock, path, pattern):
     return url
 
 
-@pytest.mark.options(PLUGINS=["dcat"])
+@pytest.mark.options(HARVESTER_BACKENDS=["dcat"])
 class DcatBackendTest(PytestOnlyDBTestCase):
     def test_simple_flat(self, rmock):
         filename = "flat.jsonld"
@@ -932,7 +932,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert "404 Client Error" in job.errors[0].message
 
 
-@pytest.mark.options(PLUGINS=["csw"])
+@pytest.mark.options(HARVESTER_BACKENDS=["csw*"])
 class CswDcatBackendTest(PytestOnlyDBTestCase):
     def test_geonetworkv4(self, rmock):
         url = mock_csw_pagination(rmock, "geonetwork/srv/eng/csw.rdf", "geonetworkv4-page-{}.xml")
@@ -1082,7 +1082,7 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
         assert len(job.items) == 1
 
 
-@pytest.mark.options(PLUGINS=["csw"])
+@pytest.mark.options(HARVESTER_BACKENDS=["csw*"])
 class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
     @pytest.mark.parametrize(
         "remote_url_prefix",
