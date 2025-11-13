@@ -1,6 +1,7 @@
 import logging
 import os
 import types
+from datetime import datetime
 from importlib.metadata import entry_points
 from os.path import abspath, dirname, exists, isfile, join
 
@@ -127,65 +128,10 @@ class UdataJsonProvider(DefaultJSONProvider):
             return json_util._json_convert(obj.to_mongo())
         elif isinstance(obj, bson.ObjectId):
             return str(obj)
+        elif isinstance(obj, datetime):
+            return obj.isoformat()
 
         return super(UdataJsonProvider, UdataJsonProvider).default(obj)
-
-    # def dumps(self, obj: t.Any, **kwargs: t.Any) -> str:
-    #     """Serialize data as JSON.
-
-    #     :param obj: The data to serialize.
-    #     :param kwargs: May be passed to the underlying JSON library.
-    #     """
-    #     print("Here")
-    #     print("Here")
-    #     print("Here")
-    #     print("Here")
-    #     print("Here")
-
-    #     if isinstance(obj, BaseDocument) or isinstance(obj, EmbeddedDocument):
-    #         return json_util._json_convert(obj.to_mongo())
-
-    #     if False:
-    #         if is_lazy_string(obj):
-    #             return str(obj)
-    #         elif isinstance(obj, bson.ObjectId):
-    #             return str(obj)
-    #         elif isinstance(obj, datetime):
-    #             return obj.isoformat()
-    #         elif hasattr(obj, "to_dict"):
-    #             return obj.to_dict()
-    #         elif hasattr(obj, "serialize"):
-    #             return obj.serialize()
-    #         # Serialize Raw data for Document and EmbeddedDocument.
-    #         elif hasattr(obj, "_data"):
-    #             return obj._data
-
-    #     kwargs.setdefault("default", self)
-    #     return json.dumps(obj, **kwargs)
-
-    # def loads(self, s: str | bytes, **kwargs: t.Any) -> t.Any:
-    #     """Deserialize data as JSON.
-
-    #     :param s: Text or UTF-8 bytes.
-    #     :param kwargs: May be passed to the underlying JSON library.
-    #     """
-    #     return json.loads(s, **kwargs)
-
-    # def default(self, obj):
-    #     if is_lazy_string(obj):
-    #         return str(obj)
-    #     elif isinstance(obj, bson.objectid.ObjectId):
-    #         return str(obj)
-    #     elif isinstance(obj, datetime.datetime):
-    #         return obj.isoformat()
-    #     elif hasattr(obj, "to_dict"):
-    #         return obj.to_dict()
-    #     elif hasattr(obj, "serialize"):
-    #         return obj.serialize()
-    #     # Serialize Raw data for Document and EmbeddedDocument.
-    #     elif hasattr(obj, "_data"):
-    #         return obj._data
-    #     return super(UDataJsonEncoder, self).default(obj)
 
 
 # These loggers are very verbose
