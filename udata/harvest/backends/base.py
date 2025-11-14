@@ -1,6 +1,5 @@
 import logging
 import traceback
-from collections import defaultdict
 from datetime import date, datetime, timedelta
 from uuid import UUID
 
@@ -167,6 +166,7 @@ class BaseBackend(object):
         log.debug(f"Starting harvesting {self.source.name} ({self.source.url})…")
         factory = HarvestJob if self.dryrun else HarvestJob.objects.create
         self.job = factory(status="initialized", started=datetime.utcnow(), source=self.source)
+        self.remote_ids = set()
 
         before_harvest_job.send(self)
         # Set harvest_activity_user on global context during the run
@@ -188,18 +188,8 @@ class BaseBackend(object):
                 self.autoarchive()
 
             self.job.status = "done"
-            has_errors = False
 
             if any(i.status == "failed" for i in self.job.items):
-                has_errors = True
-
-            if duplicates := self.find_duplicate_remote_ids(self.job.items):
-                message = self.format_duplicate_remote_ids(duplicates)
-                error = HarvestError(message=message)
-                self.job.errors.append(error)
-                has_errors = True
-
-            if has_errors:
                 self.job.status += "-errors"
 
         except HarvestValidationError as e:
@@ -247,7 +237,10 @@ class BaseBackend(object):
             if dataset.harvest:
                 item.remote_url = dataset.harvest.remote_url
 
-            # Use `item.remote_id` because `inner_process_dataset` could have modified it.
+            # Use `item.remote_id` from this point, because `inner_process_dataset` could have modified it.
+
+            self.ensure_unique_remote_id(item)
+
             dataset.harvest = self.update_dataset_harvest_info(dataset.harvest, item.remote_id)
             dataset.archived = None
 
@@ -308,6 +301,8 @@ class BaseBackend(object):
             if dataservice.harvest:
                 item.remote_url = dataservice.harvest.remote_url
 
+            self.ensure_unique_remote_id(item)
+
             dataservice.harvest = self.update_dataservice_harvest_info(
                 dataservice.harvest, remote_id
             )
@@ -340,6 +335,16 @@ class BaseBackend(object):
         finally:
             item.ended = datetime.utcnow()
             self.save_job()
+
+    def ensure_unique_remote_id(self, item):
+        if item.remote_id in self.remote_ids:
+            raise HarvestValidationError(
+                f"Identifier '{item.remote_id}'"
+                + (f" for {item.remote_url}" if item.remote_url else "")
+                + " already exists"
+            )
+
+        self.remote_ids.add(item.remote_id)
 
     def update_dataset_harvest_info(self, harvest: HarvestDatasetMetadata | None, remote_id: int):
         if not harvest:
@@ -527,28 +532,6 @@ class BaseBackend(object):
                 errors.append(msg)
             msg = "\n- ".join(["Validation error:"] + errors)
             raise HarvestValidationError(msg)
-
-    @staticmethod
-    def find_duplicate_remote_ids(items: list[HarvestItem]) -> dict[str, list[str | None]]:
-        groups = defaultdict(list)
-        for item in items:
-            groups[str(item.remote_id)].append(item.remote_url)
-        return {id: urls for id, urls in groups.items() if len(urls) > 1}
-
-    @staticmethod
-    def format_duplicate_remote_ids(duplicates: dict[str, list[str | None]]):
-        msg = "Some records have non-unique remote_id:"
-        for id, urls in sorted(duplicates.items()):
-            msg += f"""\n- "{id}":"""
-            missing_urls = 0
-            for url in urls:
-                if url is not None:
-                    msg += f"\n  - {url}"
-                else:
-                    missing_urls += 1
-            if missing_urls > 0:
-                msg += f"\n  - {missing_urls} records with missing remote_url"
-        return msg
 
 
 class LogCatcher(logging.Handler):

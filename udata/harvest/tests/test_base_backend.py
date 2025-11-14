@@ -189,6 +189,21 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         backend = FakeBackend(source)
         assert backend.get_extra_config_value("test_str") == "test"
 
+    def test_harvest_item_remote_url(self):
+        n = 3
+        source = HarvestSourceFactory(
+            config={
+                "dataset_remote_ids": gen_remote_IDs(n),
+                "dataservice_remote_ids": gen_remote_IDs(n),
+            }
+        )
+        backend = FakeBackend(source)
+
+        job = backend.harvest()
+
+        assert len(job.items) == 2 * n
+        assert all([item.remote_url for item in job.items])
+
     def test_harvest_source_id(self):
         nb_datasets = 3
         source = HarvestSourceFactory(config={"dataset_remote_ids": gen_remote_IDs(nb_datasets)})
@@ -460,23 +475,15 @@ class BaseBackendTest(PytestOnlyDBTestCase):
         assert len(job.items) == len(dataset_remote_ids) + len(dataservice_remote_ids)
         assert Dataset.objects.count() == len(set(dataset_remote_ids))
         assert Dataservice.objects.count() == len(set(dataservice_remote_ids))
-        duplicates = BaseBackend.find_duplicate_remote_ids(job.items)
-        assert duplicates == {
-            "dataservice-id-2": [
-                "http://www.example.com/records/dataservice-url-7",
-                "http://www.example.com/records/dataservice-url-8",
-            ],
-            "dataset-id-1": [
-                "http://www.example.com/records/dataset-url-1",
-                "http://www.example.com/records/dataset-url-5",
-            ],
-            "dataset-id-3": [
-                "http://www.example.com/records/dataset-url-3",
-                "http://www.example.com/records/dataset-url-4",
-            ],
-        }
-        for id in duplicates.keys():
-            assert id in job.errors[0].message
+        seen = set()
+        for job in job.items:
+            if job.remote_id not in seen:
+                assert job.status == "done"
+                seen.add(job.remote_id)
+            else:
+                assert job.status == "failed"
+                assert job.remote_id in job.errors[0].message
+                assert job.remote_url in job.errors[0].message
 
 
 class BaseBackendValidateTest(PytestOnlyDBTestCase):
