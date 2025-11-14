@@ -49,8 +49,7 @@ from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
 from udata.models import CommunityResource, Dataset, Follow, Member, db
 from udata.tags import TAG_MAX_LENGTH, TAG_MIN_LENGTH
-from udata.tests.features.territories import create_geozones_fixtures
-from udata.tests.helpers import assert200, assert404
+from udata.tests.helpers import assert200, assert404, create_geozones_fixtures
 from udata.utils import faker, unique_string
 
 from . import APITestCase, PytestOnlyAPITestCase

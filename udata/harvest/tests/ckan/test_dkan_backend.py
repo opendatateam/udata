@@ -16,7 +16,7 @@ def data_path(filename):
     return os.path.join(os.path.dirname(__file__), "data", filename)
 
 
-@pytest.mark.options(PLUGINS=["dkan"])
+@pytest.mark.options(HARVESTER_BACKENDS=["dkan"])
 class DkanBackendTest(PytestOnlyDBTestCase):
     def test_dkan_french_w_license(self, rmock):
         """CKAN Harvester should accept the minimum dataset payload"""

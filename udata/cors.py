@@ -1,6 +1,6 @@
 import logging
 
-from flask import current_app, g, request
+from flask import current_app, request
 from werkzeug.datastructures import Headers
 
 log = logging.getLogger(__name__)
@@ -32,10 +32,7 @@ def is_preflight_request() -> bool:
 
 
 def is_allowed_cors_route():
-    if g and hasattr(g, "lang_code"):
-        path: str = request.path.removeprefix(f"/{g.lang_code}")
-    else:
-        path: str = request.path
+    path: str = request.path
 
     # Allow to keep clean CORS when `udata` and the frontend are on the same domain
     # (as it's the case in data.gouv with cdata/udata).
