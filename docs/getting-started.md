@@ -110,7 +110,6 @@ URLS_ALLOW_LOCAL = True
 URLS_ALLOWED_TLDS = Defaults.URLS_ALLOWED_TLDS | set(['local'])
 
 RESOURCES_FILE_ALLOWED_DOMAINS = ['*']
-PLUGINS = []
 FS_ROOT = 'fs'
 
 SESSION_COOKIE_SECURE = False
@@ -199,7 +198,6 @@ git clone git@github.com:datagouv/udata-front.git
 Modify your `udata.cfg` with the following lines.
 
 ```bash
-PLUGINS = ['front']
 THEME = 'gouvfr'
 ```
 

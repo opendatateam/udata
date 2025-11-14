@@ -27,7 +27,7 @@ class CorsTest(APITestCase):
         assert "Access-Control-Allow-Origin" in response.headers
 
         # Resource permalink
-        response = self.get(f"/fr/datasets/r/{dataset.resources[0].id}", headers=cors_headers)
+        response = self.get(f"/datasets/r/{dataset.resources[0].id}", headers=cors_headers)
         assert_status(response, 404)  # The route is defined in udata-front
         assert "Access-Control-Allow-Origin" in response.headers
 

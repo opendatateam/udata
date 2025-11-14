@@ -31,6 +31,8 @@ def gen_remote_IDs(num: int, prefix: str = "") -> list[str]:
 
 
 class FakeBackend(BaseBackend):
+    name = "fake-backend"
+    display_name = "Fake Backend"
     filters = (
         HarvestFilter("First filter", "first", str),
         HarvestFilter("Second filter", "second", str),
