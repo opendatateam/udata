@@ -27,6 +27,7 @@ from werkzeug.exceptions import NotFound
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from udata import cors
+from udata.auth.helpers import login_from_apikey_header_if_exists
 
 APP_NAME = __name__.split(".")[0]
 ROOT_DIR = abspath(join(dirname(__file__)))
@@ -175,6 +176,14 @@ def create_app(config="udata.settings.Defaults", override=None, init_logging=ini
 
     init_logging(app)
     register_extensions(app)
+
+    @app.before_request
+    def load_current_user_from_api_key():
+        # See :DoubleApiKeyAuth
+        # This auth is enable for all routes : API and security
+        # We needed to add this because otherwise API routes only
+        # support session auth and not api key.
+        login_from_apikey_header_if_exists()
 
     return app
 

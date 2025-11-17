@@ -19,7 +19,8 @@ from flask_storage import UnauthorizedFileType
 
 from udata import tracking
 from udata.app import csrf
-from udata.auth import Permission, PermissionDenied, RoleNeed, current_user, login_user
+from udata.auth import Permission, PermissionDenied, RoleNeed, current_user
+from udata.auth.helpers import login_from_apikey_header_if_exists
 from udata.i18n import get_locale
 from udata.utils import safe_unicode
 
@@ -96,22 +97,16 @@ class UDataApi(Api):
         @wraps(func)
         def wrapper(*args, **kwargs):
             from udata.api.oauth2 import check_credentials
-            from udata.core.user.models import User
 
             if current_user.is_authenticated:
                 return func(*args, **kwargs)
 
-            apikey = request.headers.get(HEADER_API_KEY)
-            if apikey:
-                try:
-                    user = User.objects.get(apikey=apikey)
-                except User.DoesNotExist:
-                    self.abort(401, "Invalid API Key")
-
-                if not login_user(user, False):
-                    self.abort(401, "Inactive user")
-            else:
+            # :DoubleApiKeyAuth
+            # The user should already be authenticated with the
+            # global before_request in `load_current_user_from_api_key`
+            if not login_from_apikey_header_if_exists():
                 check_credentials()
+
             return func(*args, **kwargs)
 
         return wrapper
