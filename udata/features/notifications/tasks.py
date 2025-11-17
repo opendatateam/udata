@@ -11,10 +11,6 @@ log = logging.getLogger(__name__)
 
 @job("delete-expired-notifications")
 def delete_expired_notifications(self):
-    if not current_app.config["DAYS_AFTER_NOTIFICATION_EXPIRED"]:
-        logging.warning("DAYS_AFTER_NOTIFICATION_EXPIRED setting is not set, no deletion planned")
-        return
-
     # Delete expired notifications
     handled_at = datetime.utcnow() - timedelta(
         days=current_app.config["DAYS_AFTER_NOTIFICATION_EXPIRED"]
