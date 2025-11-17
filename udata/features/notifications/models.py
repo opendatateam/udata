@@ -40,8 +40,3 @@ class Notification(Datetimed, db.Document):
         db.GenericEmbeddedDocumentField(choices=(MembershipRequestNotificationDetails,)),
         generic=True,
     )
-
-    def clean(self, **kwargs):
-        super().clean()
-        if hasattr(self.details, "handled_at") and self.details.handled_at:
-            self.handled_at = self.details.handled_at

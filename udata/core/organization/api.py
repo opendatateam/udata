@@ -425,6 +425,7 @@ class MembershipAcceptAPI(MembershipAPI):
         org.members.append(member)
         org.count_members()
         org.save()
+        MembershipRequest.after_handle.send(membership_request, org=org)
 
         notify_membership_response.delay(str(org.id), str(membership_request.id))
 
@@ -447,6 +448,7 @@ class MembershipRefuseAPI(MembershipAPI):
         membership_request.refusal_comment = form.comment.data
 
         org.save()
+        MembershipRequest.after_handle.send(membership_request, org=org)
 
         notify_membership_response.delay(str(org.id), str(membership_request.id))
 

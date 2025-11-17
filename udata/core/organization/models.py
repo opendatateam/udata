@@ -82,6 +82,7 @@ class MembershipRequest(db.EmbeddedDocument):
     refusal_comment = db.StringField()
 
     after_create = Signal()
+    after_handle = Signal()
 
     @property
     def status_label(self):

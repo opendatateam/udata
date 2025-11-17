@@ -30,11 +30,6 @@ class MembershipRequestNotificationDetails(db.EmbeddedDocument):
         filterable={},
     )
 
-    @property
-    def handled_at(self):
-        request = self.request_organization.pending_request(self.request_user)
-        return request.handled_on if request else None
-
 
 @MembershipRequest.after_create.connect
 def on_new_membership_request(request: MembershipRequest, **kwargs):
@@ -73,6 +68,25 @@ def on_new_membership_request(request: MembershipRequest, **kwargs):
                 f"Error creating notification for user {admin_user.id} "
                 f"and organization {organization.id}: {e}"
             )
+
+
+@MembershipRequest.after_handle.connect
+def on_handle_membership_request(request: MembershipRequest, **kwargs):
+    from udata.features.notifications.models import Notification
+
+    organization = kwargs.get("org")
+
+    if organization is None:
+        return
+
+    notifications = Notification.objects(
+        details__request_organization=organization,
+        details__request_user=request.user,
+    )
+
+    for notification in notifications:
+        notification.handled_at = request.handled_on
+        notification.save()
 
 
 @notifier("membership_request")
