@@ -7,7 +7,10 @@ from .base import BaseBackend, HarvestExtraConfig, HarvestFeature, HarvestFilter
 
 
 def get_backend(name: str) -> type[BaseBackend] | None:
-    return get_enabled_backends().get(name)
+    backend = get_enabled_backends().get(name)
+    if not backend:
+        raise ValueError(f"Backend {name} unknown. Make sure it is declared in HARVESTER_BACKENDS.")
+    return backend
 
 
 def get_all_backends() -> dict[str, type[BaseBackend]]:
