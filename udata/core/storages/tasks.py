@@ -17,7 +17,11 @@ def purge_chunks(self):
     meta_files = (f for f in chunks.list_files() if f.endswith(META))
     for filename in meta_files:
         metadata = json.loads(chunks.read(filename))
-        if datetime.now(timezone.utc) - parse(metadata["lastchunk"]) >= max_retention:
+        last_chunk = parse(metadata["lastchunk"])
+        if last_chunk.tzinfo is None:
+            last_chunk = last_chunk.replace(tzinfo=timezone.utc)
+
+        if datetime.now(timezone.utc) - last_chunk >= max_retention:
             uuid = metadata["uuid"]
             log.info("Removing %s expired chunks", uuid)
             chunks.delete(uuid)
