@@ -31,13 +31,12 @@ class MembershipRequestNotificationDetails(db.EmbeddedDocument):
     )
 
     @property
-    @field()
     def handled_at(self):
         request = self.request_organization.pending_request(self.request_user)
         return request.handled_on if request else None
 
 
-@MembershipRequest.after_save.connect
+@MembershipRequest.after_create.connect
 def on_new_membership_request(request: MembershipRequest, **kwargs):
     from udata.features.notifications.models import Notification
 
