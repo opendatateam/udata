@@ -34,85 +34,85 @@ from udata.utils import faker
 
 
 class OrganizationAPITest(PytestOnlyAPITestCase):
-    def test_organization_api_list(self, api):
+    def test_organization_api_list(self):
         """It should fetch an organization list from the API"""
         organizations = OrganizationFactory.create_batch(3)
 
-        response = api.get(url_for("api.organizations"))
+        response = self.get(url_for("api.organizations"))
         assert200(response)
         len(response.json["data"]) == len(organizations)
 
-    def test_organization_api_list_with_filters(self, api):
+    def test_organization_api_list_with_filters(self):
         """It should filter the organization list"""
         org = OrganizationFactory(business_number_id="13002526500013")
         org_public_service = OrganizationFactory()
         org_public_service.add_badge(org_constants.PUBLIC_SERVICE)
 
         #### Badges ####
-        response = api.get(url_for("api.organizations", badge=org_constants.PUBLIC_SERVICE))
+        response = self.get(url_for("api.organizations", badge=org_constants.PUBLIC_SERVICE))
         assert200(response)
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(org_public_service.id)
 
-        response = api.get(url_for("api.organizations", badge="bad-badge"))
+        response = self.get(url_for("api.organizations", badge="bad-badge"))
         assert400(response)
 
         #### Name ####
-        response = api.get(url_for("api.organizations", name=org.name))
+        response = self.get(url_for("api.organizations", name=org.name))
         assert200(response)
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(org.id)
 
-        response = api.get(url_for("api.organizations", name=org.name.upper()))
+        response = self.get(url_for("api.organizations", name=org.name.upper()))
         assert200(response)
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(org.id)
 
-        response = api.get(url_for("api.organizations", name="Some other name"))
+        response = self.get(url_for("api.organizations", name="Some other name"))
         assert200(response)
         assert len(response.json["data"]) == 0
 
         #### SIRET ####
-        response = api.get(url_for("api.organizations", business_number_id=org.business_number_id))
+        response = self.get(url_for("api.organizations", business_number_id=org.business_number_id))
         assert200(response)
         print(response.json["data"])
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(org.id)
 
-        response = api.get(url_for("api.organizations", business_number_id="xxx"))
+        response = self.get(url_for("api.organizations", business_number_id="xxx"))
         assert200(response)
         assert len(response.json["data"]) == 0
 
-    def test_organization_role_api_get(self, api):
+    def test_organization_role_api_get(self):
         """It should fetch an organization's roles list from the API"""
-        response = api.get(url_for("api.org_roles"))
+        response = self.get(url_for("api.org_roles"))
         assert200(response)
 
-    def test_organization_api_get(self, api):
+    def test_organization_api_get(self):
         """It should fetch an organization from the API"""
         organization = OrganizationFactory()
-        response = api.get(url_for("api.organization", org=organization))
+        response = self.get(url_for("api.organization", org=organization))
         assert200(response)
 
-    def test_organization_api_get_deleted(self, api):
+    def test_organization_api_get_deleted(self):
         """It should not fetch a deleted organization from the API"""
         organization = OrganizationFactory(deleted=datetime.utcnow())
-        response = api.get(url_for("api.organization", org=organization))
+        response = self.get(url_for("api.organization", org=organization))
         assert410(response)
 
-    def test_organization_api_get_deleted_but_authorized(self, api):
+    def test_organization_api_get_deleted_but_authorized(self):
         """It should fetch a deleted organization from the API if authorized"""
-        user = api.login()
+        user = self.login()
         member = Member(user=user, role="editor")
         organization = OrganizationFactory(deleted=datetime.utcnow(), members=[member])
-        response = api.get(url_for("api.organization", org=organization))
+        response = self.get(url_for("api.organization", org=organization))
         assert200(response)
 
-    def test_organization_api_create(self, api):
+    def test_organization_api_create(self):
         """It should create an organization from the API"""
         data = OrganizationFactory.as_dict()
-        user = api.login()
-        response = api.post(url_for("api.organizations"), data)
+        user = self.login()
+        response = self.post(url_for("api.organizations"), data)
         assert201(response)
         assert Organization.objects.count() == 1
 
@@ -122,121 +122,121 @@ class OrganizationAPITest(PytestOnlyAPITestCase):
         assert member.role == "admin", "Current user should be an administrator"
         assert org.get_metrics()["members"] == 1
 
-    def test_organization_api_update(self, api):
+    def test_organization_api_update(self):
         """It should update an organization from the API"""
-        user = api.login()
+        user = self.login()
         member = Member(user=user, role="admin")
         org = OrganizationFactory(members=[member])
         data = org.to_dict()
         data["description"] = "new description"
-        response = api.put(url_for("api.organization", org=org), data)
+        response = self.put(url_for("api.organization", org=org), data)
         assert200(response)
         assert Organization.objects.count() == 1
         assert Organization.objects.first().description == "new description"
 
-    def test_organization_api_update_business_number_id(self, api):
+    def test_organization_api_update_business_number_id(self):
         """It should update an organization from the API by adding a business number id"""
-        user = api.login()
+        user = self.login()
         member = Member(user=user, role="admin")
         org = OrganizationFactory(members=[member])
         data = org.to_dict()
         data["business_number_id"] = "13002526500013"
-        response = api.put(url_for("api.organization", org=org), data)
+        response = self.put(url_for("api.organization", org=org), data)
         assert200(response)
         assert Organization.objects.count() == 1
         assert Organization.objects.first().business_number_id == "13002526500013"
 
-    def test_organization_api_update_business_number_id_failing(self, api):
+    def test_organization_api_update_business_number_id_failing(self):
         """It should update an organization from the API by adding a business number id"""
-        user = api.login()
+        user = self.login()
         member = Member(user=user, role="admin")
         org = OrganizationFactory(members=[member])
         data = org.to_dict()
         data["business_number_id"] = "110014016"
-        response = api.put(url_for("api.organization", org=org), data)
+        response = self.put(url_for("api.organization", org=org), data)
         assert400(response)
         assert response.json["errors"]["business_number_id"][0] == _(
             "A siret number is made of 14 digits"
         )
 
         data["business_number_id"] = "12345678901234"
-        response = api.put(url_for("api.organization", org=org), data)
+        response = self.put(url_for("api.organization", org=org), data)
         assert400(response)
         assert response.json["errors"]["business_number_id"][0] == _("Invalid Siret number")
 
         data["business_number_id"] = "tttttttttttttt"
-        response = api.put(url_for("api.organization", org=org), data)
+        response = self.put(url_for("api.organization", org=org), data)
         assert400(response)
         assert response.json["errors"]["business_number_id"][0] == _(
             "A siret number is only made of digits"
         )
 
-    def test_organization_api_update_deleted(self, api):
+    def test_organization_api_update_deleted(self):
         """It should not update a deleted organization from the API"""
         org = OrganizationFactory(deleted=datetime.utcnow())
         data = org.to_dict()
         data["description"] = "new description"
-        api.login()
-        response = api.put(url_for("api.organization", org=org), data)
+        self.login()
+        response = self.put(url_for("api.organization", org=org), data)
         assert410(response)
         assert Organization.objects.first().description == org.description
 
-    def test_organization_api_update_forbidden(self, api):
+    def test_organization_api_update_forbidden(self):
         """It should not update an organization from the API if not admin"""
         org = OrganizationFactory()
         data = org.to_dict()
         data["description"] = "new description"
-        api.login()
-        response = api.put(url_for("api.organization", org=org), data)
+        self.login()
+        response = self.put(url_for("api.organization", org=org), data)
         assert403(response)
         assert Organization.objects.count() == 1
         assert Organization.objects.first().description == org.description
 
-    def test_organization_api_delete(self, api):
+    def test_organization_api_delete(self):
         """It should delete an organization from the API"""
-        user = api.login()
+        user = self.login()
         member = Member(user=user, role="admin")
         org = OrganizationFactory(members=[member])
-        response = api.delete(url_for("api.organization", org=org))
+        response = self.delete(url_for("api.organization", org=org))
         assert204(response)
         assert Organization.objects.count() == 1
         assert Organization.objects[0].deleted is not None
 
-    def test_organization_api_delete_deleted(self, api):
+    def test_organization_api_delete_deleted(self):
         """It should not delete a deleted organization from the API"""
-        api.login()
+        self.login()
         organization = OrganizationFactory(deleted=datetime.utcnow())
-        response = api.delete(url_for("api.organization", org=organization))
+        response = self.delete(url_for("api.organization", org=organization))
         assert410(response)
         assert Organization.objects[0].deleted is not None
 
-    def test_organization_api_delete_as_editor_forbidden(self, api):
+    def test_organization_api_delete_as_editor_forbidden(self):
         """It should not delete an organization from the API if not admin"""
-        user = api.login()
+        user = self.login()
         member = Member(user=user, role="editor")
         org = OrganizationFactory(members=[member])
-        response = api.delete(url_for("api.organization", org=org))
+        response = self.delete(url_for("api.organization", org=org))
         assert403(response)
         assert Organization.objects.count() == 1
         assert Organization.objects[0].deleted is None
 
-    def test_organization_api_delete_as_non_member_forbidden(self, api):
+    def test_organization_api_delete_as_non_member_forbidden(self):
         """It should delete an organization from the API if not member"""
-        api.login()
+        self.login()
         org = OrganizationFactory()
-        response = api.delete(url_for("api.organization", org=org))
+        response = self.delete(url_for("api.organization", org=org))
         assert403(response)
         assert Organization.objects.count() == 1
         assert Organization.objects[0].deleted is None
 
 
 class MembershipAPITest(PytestOnlyAPITestCase):
-    def test_request_membership(self, api):
+    def test_request_membership(self):
         organization = OrganizationFactory()
-        user = api.login()
+        user = self.login()
         data = {"comment": "a comment"}
 
-        response = api.post(url_for("api.request_membership", org=organization), data)
+        response = self.post(url_for("api.request_membership", org=organization), data)
         assert201(response)
 
         organization.reload()
@@ -253,13 +253,13 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert request.handled_by is None
         assert request.refusal_comment is None
 
-    def test_request_existing_pending_membership_do_not_duplicate_it(self, api):
-        user = api.login()
+    def test_request_existing_pending_membership_do_not_duplicate_it(self):
+        user = self.login()
         previous_request = MembershipRequest(user=user, comment="previous")
         organization = OrganizationFactory(requests=[previous_request])
         data = {"comment": "a comment"}
 
-        response = api.post(url_for("api.request_membership", org=organization), data)
+        response = self.post(url_for("api.request_membership", org=organization), data)
         assert200(response)
 
         organization.reload()
@@ -276,14 +276,14 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert request.handled_by is None
         assert request.refusal_comment is None
 
-    def test_get_membership_requests(self, api):
-        user = api.login()
+    def test_get_membership_requests(self):
+        user = self.login()
         applicant = UserFactory(email="thibaud@example.org")
         membership_request = MembershipRequest(user=applicant, comment="test")
         member = Member(user=user, role="admin")
         organization = OrganizationFactory(members=[member], requests=[membership_request])
 
-        response = api.get(url_for("api.request_membership", org=organization))
+        response = self.get(url_for("api.request_membership", org=organization))
         assert200(response)
 
         assert len(response.json) == 1
@@ -292,21 +292,21 @@ class MembershipAPITest(PytestOnlyAPITestCase):
             response.json[0]["user"]["email"] == "th*****@example.org"
         )  # Can see partially obfuscated email of applicant
 
-    def test_only_org_member_can_get_membership_requests(self, api):
-        api.login()
+    def test_only_org_member_can_get_membership_requests(self):
+        self.login()
         applicant = UserFactory(email="thibaud@example.org")
         membership_request = MembershipRequest(user=applicant, comment="test")
         organization = OrganizationFactory(members=[], requests=[membership_request])
 
-        response = api.get(url_for("api.request_membership", org=organization))
+        response = self.get(url_for("api.request_membership", org=organization))
         assert403(response)
 
-    def test_applicant_can_get_their_membership_requests(self, api):
-        applicant = api.login()
+    def test_applicant_can_get_their_membership_requests(self):
+        applicant = self.login()
         membership_request = MembershipRequest(user=applicant, comment="test")
         organization = OrganizationFactory(members=[], requests=[membership_request])
 
-        response = api.get(
+        response = self.get(
             url_for("api.request_membership", org=organization),
             query_string={"user": str(applicant.id)},
         )
@@ -323,10 +323,10 @@ class MembershipAPITest(PytestOnlyAPITestCase):
     def test_applicant_can_get_their_membership_requests_with_status(
         self, api, searched_status: str
     ):
-        applicant = api.login()
+        applicant = self.login()
         membership_request = MembershipRequest(user=applicant, comment="test")
         organization = OrganizationFactory(members=[], requests=[membership_request])
-        response = api.get(
+        response = self.get(
             url_for("api.request_membership", org=organization),
             query_string={"user": str(applicant.id), "status": searched_status},
         )
@@ -337,7 +337,7 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         else:
             assert len(requests) == 0
 
-    def test_get_members_with_or_without_email(self, api):
+    def test_get_members_with_or_without_email(self):
         admin = Member(
             user=UserFactory(email="admin@example.org"), role="admin", since="2024-04-14"
         )
@@ -347,8 +347,8 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         organization = OrganizationFactory(members=[admin, editor])
 
         # Organization admin can partially see emails
-        api.login(admin.user)
-        response = api.get(url_for("api.organization", org=organization))
+        self.login(admin.user)
+        response = self.get(url_for("api.organization", org=organization))
         assert200(response)
 
         members = response.json["members"]
@@ -361,8 +361,8 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert members[1]["user"]["email"] == "ed****@example.org"
 
         # Organization editor can partially see emails
-        api.login(editor.user)
-        response = api.get(url_for("api.organization", org=organization))
+        self.login(editor.user)
+        response = self.get(url_for("api.organization", org=organization))
         assert200(response)
 
         members = response.json["members"]
@@ -375,8 +375,8 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert members[1]["user"]["email"] == "ed****@example.org"
 
         # Others cannot see emails
-        api.login(other)
-        response = api.get(url_for("api.organization", org=organization))
+        self.login(other)
+        response = self.get(url_for("api.organization", org=organization))
         assert200(response)
 
         members = response.json["members"]
@@ -389,8 +389,8 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert members[1]["user"]["email"] == "***@example.org"
 
         # Super admin of udata can see emails
-        api.login(AdminFactory())
-        response = api.get(url_for("api.organization", org=organization))
+        self.login(AdminFactory())
+        response = self.get(url_for("api.organization", org=organization))
         assert200(response)
 
         members = response.json["members"]
@@ -402,15 +402,15 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert members[1]["role"] == "editor"
         assert members[1]["user"]["email"] == "editor@example.org"
 
-    def test_accept_membership(self, api):
-        user = api.login()
+    def test_accept_membership(self):
+        user = self.login()
         applicant = UserFactory()
         membership_request = MembershipRequest(user=applicant, comment="test")
         member = Member(user=user, role="admin")
         organization = OrganizationFactory(members=[member], requests=[membership_request])
 
         api_url = url_for("api.accept_membership", org=organization, id=membership_request.id)
-        response = api.post(api_url)
+        response = self.post(api_url)
         assert200(response)
 
         assert response.json["role"] == "editor"
@@ -432,33 +432,33 @@ class MembershipAPITest(PytestOnlyAPITestCase):
 
         # test accepting twice will raise 409
         api_url = url_for("api.accept_membership", org=organization, id=membership_request.id)
-        response = api.post(api_url)
+        response = self.post(api_url)
         assert_status(response, 409)
 
-    def test_only_admin_can_accept_membership(self, api):
-        user = api.login()
+    def test_only_admin_can_accept_membership(self):
+        user = self.login()
         applicant = UserFactory()
         membership_request = MembershipRequest(user=applicant, comment="test")
         member = Member(user=user, role="editor")
         organization = OrganizationFactory(members=[member], requests=[membership_request])
 
         api_url = url_for("api.accept_membership", org=organization, id=membership_request.id)
-        response = api.post(api_url)
+        response = self.post(api_url)
         assert403(response)
 
-    def test_accept_membership_404(self, api):
-        user = api.login()
+    def test_accept_membership_404(self):
+        user = self.login()
         member = Member(user=user, role="admin")
         organization = OrganizationFactory(members=[member])
 
         api_url = url_for("api.accept_membership", org=organization, id=MembershipRequest().id)
-        response = api.post(api_url)
+        response = self.post(api_url)
         assert404(response)
 
         assert response.json["message"] == "Unknown membership request id"
 
-    def test_refuse_membership(self, api):
-        user = api.login()
+    def test_refuse_membership(self):
+        user = self.login()
         applicant = UserFactory()
         membership_request = MembershipRequest(user=applicant, comment="test")
         member = Member(user=user, role="admin")
@@ -466,7 +466,7 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         data = {"comment": "no"}
 
         api_url = url_for("api.refuse_membership", org=organization, id=membership_request.id)
-        response = api.post(api_url, data)
+        response = self.post(api_url, data)
         assert200(response)
 
         organization.reload()
@@ -484,8 +484,8 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert request.handled_by == user
         assert request.handled_on is not None
 
-    def test_only_admin_can_refuse_membership(self, api):
-        user = api.login()
+    def test_only_admin_can_refuse_membership(self):
+        user = self.login()
         applicant = UserFactory()
         membership_request = MembershipRequest(user=applicant, comment="test")
         member = Member(user=user, role="editor")
@@ -493,22 +493,22 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         data = {"comment": "no"}
 
         api_url = url_for("api.refuse_membership", org=organization, id=membership_request.id)
-        response = api.post(api_url, data)
+        response = self.post(api_url, data)
         assert403(response)
 
-    def test_refuse_membership_404(self, api):
-        user = api.login()
+    def test_refuse_membership_404(self):
+        user = self.login()
         member = Member(user=user, role="admin")
         organization = OrganizationFactory(members=[member])
 
         api_url = url_for("api.refuse_membership", org=organization, id=MembershipRequest().id)
-        response = api.post(api_url)
+        response = self.post(api_url)
         assert404(response)
 
         assert response.json["message"] == "Unknown membership request id"
 
-    def test_create_member(self, api):
-        user = api.login()
+    def test_create_member(self):
+        user = self.login()
         added_user = UserFactory()
         organization = OrganizationFactory(
             members=[
@@ -517,7 +517,7 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         )
 
         api_url = url_for("api.member", org=organization, user=added_user)
-        response = api.post(api_url, {"role": "admin"})
+        response = self.post(api_url, {"role": "admin"})
 
         assert201(response)
 
@@ -528,8 +528,8 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert organization.is_admin(added_user)
         assert organization.get_metrics()["members"] == 2
 
-    def test_only_admin_can_create_member(self, api):
-        user = api.login()
+    def test_only_admin_can_create_member(self):
+        user = self.login()
         added_user = UserFactory()
         organization = OrganizationFactory(
             members=[
@@ -538,22 +538,22 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         )
 
         api_url = url_for("api.member", org=organization, user=added_user)
-        response = api.post(api_url, {"role": "editor"})
+        response = self.post(api_url, {"role": "editor"})
 
         assert403(response)
 
         organization.reload()
         assert not organization.is_member(added_user)
 
-    def test_create_member_exists(self, api):
-        user = api.login()
+    def test_create_member_exists(self):
+        user = self.login()
         added_user = UserFactory()
         organization = OrganizationFactory(
             members=[Member(user=user, role="admin"), Member(user=added_user, role="editor")]
         )
 
         api_url = url_for("api.member", org=organization, user=added_user)
-        response = api.post(api_url, {"role": "admin"})
+        response = self.post(api_url, {"role": "admin"})
 
         assert_status(response, 409)
 
@@ -563,15 +563,15 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert organization.is_member(added_user)
         assert not organization.is_admin(added_user)
 
-    def test_update_member(self, api):
-        user = api.login()
+    def test_update_member(self):
+        user = self.login()
         updated_user = UserFactory()
         organization = OrganizationFactory(
             members=[Member(user=user, role="admin"), Member(user=updated_user, role="editor")]
         )
 
         api_url = url_for("api.member", org=organization, user=updated_user)
-        response = api.put(api_url, {"role": "admin"})
+        response = self.put(api_url, {"role": "admin"})
 
         assert200(response)
 
@@ -581,15 +581,15 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert organization.is_member(updated_user)
         assert organization.is_admin(updated_user)
 
-    def test_only_admin_can_update_member(self, api):
-        user = api.login()
+    def test_only_admin_can_update_member(self):
+        user = self.login()
         updated_user = UserFactory()
         organization = OrganizationFactory(
             members=[Member(user=user, role="editor"), Member(user=updated_user, role="editor")]
         )
 
         api_url = url_for("api.member", org=organization, user=updated_user)
-        response = api.put(api_url, {"role": "admin"})
+        response = self.put(api_url, {"role": "admin"})
 
         assert403(response)
 
@@ -597,42 +597,42 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert organization.is_member(updated_user)
         assert not organization.is_admin(updated_user)
 
-    def test_delete_member(self, api):
-        user = api.login()
+    def test_delete_member(self):
+        user = self.login()
         deleted_user = UserFactory()
         organization = OrganizationFactory(
             members=[Member(user=user, role="admin"), Member(user=deleted_user, role="editor")]
         )
 
         api_url = url_for("api.member", org=organization, user=deleted_user)
-        response = api.delete(api_url)
+        response = self.delete(api_url)
         assert204(response)
 
         organization.reload()
         assert not organization.is_member(deleted_user)
         assert organization.get_metrics()["members"] == 1
 
-    def test_only_admin_can_delete_member(self, api):
-        user = api.login()
+    def test_only_admin_can_delete_member(self):
+        user = self.login()
         deleted_user = UserFactory()
         organization = OrganizationFactory(
             members=[Member(user=user, role="editor"), Member(user=deleted_user, role="editor")]
         )
 
         api_url = url_for("api.member", org=organization, user=deleted_user)
-        response = api.delete(api_url)
+        response = self.delete(api_url)
         assert403(response)
 
         organization.reload()
         assert organization.is_member(deleted_user)
 
-    def test_follow_org(self, api):
+    def test_follow_org(self):
         """It should follow an organization on POST"""
-        user = api.login()
+        user = self.login()
         to_follow = OrganizationFactory()
 
         url = url_for("api.organization_followers", id=to_follow.id)
-        response = api.post(url)
+        response = self.post(url)
         assert201(response)
 
         to_follow.count_followers()
@@ -645,14 +645,14 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert Follow.objects.following(user).count() == 1
         assert Follow.objects.followers(user).count() == 0
 
-    def test_unfollow_org(self, api):
+    def test_unfollow_org(self):
         """It should unfollow the organization on DELETE"""
-        user = api.login()
+        user = self.login()
         to_follow = OrganizationFactory()
         Follow.objects.create(follower=user, following=to_follow)
 
         url = url_for("api.organization_followers", id=to_follow.id)
-        response = api.delete(url)
+        response = self.delete(url)
         assert200(response)
 
         nb_followers = Follow.objects.followers(to_follow).count()
@@ -664,14 +664,14 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         assert Follow.objects.following(user).count() == 0
         assert Follow.objects.followers(user).count() == 0
 
-    def test_suggest_organizations_api(self, api):
+    def test_suggest_organizations_api(self):
         """It should suggest organizations"""
         for i in range(3):
             OrganizationFactory(
                 name="test-{0}".format(i) if i % 2 else faker.word(), metrics={"followers": i}
             )
         max_follower_organization = OrganizationFactory(name="test-4", metrics={"followers": 10})
-        response = api.get(url_for("api.suggest_organizations", q="tes", size=5))
+        response = self.get(url_for("api.suggest_organizations", q="tes", size=5))
         assert200(response)
 
         assert len(response.json) <= 5
@@ -686,12 +686,12 @@ class MembershipAPITest(PytestOnlyAPITestCase):
             assert "tes" in suggestion["name"]
             assert response.json[0]["id"] == str(max_follower_organization.id)
 
-    def test_suggest_organizations_with_special_chars(self, api):
+    def test_suggest_organizations_with_special_chars(self):
         """It should suggest organizations with special caracters"""
         for i in range(4):
             OrganizationFactory(name="testé-{0}".format(i) if i % 2 else faker.word())
 
-        response = api.get(url_for("api.suggest_organizations", q="testé", size=5))
+        response = self.get(url_for("api.suggest_organizations", q="testé", size=5))
         assert200(response)
 
         assert len(response.json) <= 5
@@ -704,12 +704,12 @@ class MembershipAPITest(PytestOnlyAPITestCase):
             assert "image_url" in suggestion
             assert "testé" in suggestion["name"]
 
-    def test_suggest_organizations_with_multiple_words(self, api):
+    def test_suggest_organizations_with_multiple_words(self):
         """It should suggest organizations with words"""
         for i in range(4):
             OrganizationFactory(name="mon testé-{0}".format(i) if i % 2 else faker.word())
 
-        response = api.get(url_for("api.suggest_organizations", q="mon testé", size=5))
+        response = self.get(url_for("api.suggest_organizations", q="mon testé", size=5))
         assert200(response)
 
         assert len(response.json) <= 5
@@ -722,14 +722,14 @@ class MembershipAPITest(PytestOnlyAPITestCase):
             assert "image_url" in suggestion
             assert "mon testé" in suggestion["name"]
 
-    def test_suggest_organizations_with_apostrophe(self, api):
+    def test_suggest_organizations_with_apostrophe(self):
         """It should suggest organizations with words"""
         for i in range(4):
             OrganizationFactory(
                 name="Ministère de l'intérieur {0}".format(i) if i % 2 else faker.word()
             )
 
-        response = api.get(url_for("api.suggest_organizations", q="Ministère", size=5))
+        response = self.get(url_for("api.suggest_organizations", q="Ministère", size=5))
         assert200(response)
 
         assert len(response.json) <= 5
@@ -742,25 +742,25 @@ class MembershipAPITest(PytestOnlyAPITestCase):
             assert "image_url" in suggestion
             assert "Ministère" in suggestion["name"]
 
-    def test_suggest_organizations_api_no_match(self, api):
+    def test_suggest_organizations_api_no_match(self):
         """It should not provide organization suggestion if no match"""
         OrganizationFactory.create_batch(3)
 
-        response = api.get(url_for("api.suggest_organizations", q="xxxxxx", size=5))
+        response = self.get(url_for("api.suggest_organizations", q="xxxxxx", size=5))
         assert200(response)
         assert len(response.json) == 0
 
-    def test_suggest_organizations_api_empty(self, api):
+    def test_suggest_organizations_api_empty(self):
         """It should not provide organization suggestion if no data"""
-        response = api.get(url_for("api.suggest_organizations", q="xxxxxx", size=5))
+        response = self.get(url_for("api.suggest_organizations", q="xxxxxx", size=5))
         assert200(response)
         assert len(response.json) == 0
 
-    def test_suggest_organizations_homonyms(self, api):
+    def test_suggest_organizations_homonyms(self):
         """It should suggest organizations and not deduplicate homonyms"""
         OrganizationFactory.create_batch(2, name="homonym")
 
-        response = api.get(url_for("api.suggest_organizations", q="homonym", size=5))
+        response = self.get(url_for("api.suggest_organizations", q="homonym", size=5))
         assert200(response)
 
         assert len(response.json) == 2
@@ -768,7 +768,7 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         for suggestion in response.json:
             assert suggestion["name"] == "homonym"
 
-    def test_suggest_organizations_acronym(self, api):
+    def test_suggest_organizations_acronym(self):
         """Should suggest organizations based on acronym"""
 
         for i in range(3):
@@ -780,7 +780,7 @@ class MembershipAPITest(PytestOnlyAPITestCase):
         max_follower_organization = OrganizationFactory(
             name=faker.word(), acronym="UDATA4", metrics={"followers": 10}
         )
-        response = api.get(url_for("api.suggest_organizations", q="uDaTa", size=5))
+        response = self.get(url_for("api.suggest_organizations", q="uDaTa", size=5))
         assert200(response)
 
         assert len(response.json) == 2
@@ -796,87 +796,87 @@ class MembershipAPITest(PytestOnlyAPITestCase):
 
 
 class OrganizationDatasetsAPITest(PytestOnlyAPITestCase):
-    def test_list_org_datasets(self, api):
+    def test_list_org_datasets(self):
         """Should list organization datasets"""
         org = OrganizationFactory()
         datasets = DatasetFactory.create_batch(3, organization=org)
 
-        response = api.get(url_for("api.org_datasets", org=org))
+        response = self.get(url_for("api.org_datasets", org=org))
 
         assert200(response)
         assert len(response.json["data"]) == len(datasets)
 
-    def test_list_org_datasets_private(self, api):
+    def test_list_org_datasets_private(self):
         """Should include private datasets when member"""
-        user = api.login()
+        user = self.login()
         member = Member(user=user, role="admin")
         org = OrganizationFactory(members=[member])
         datasets = DatasetFactory.create_batch(3, organization=org, private=True)
 
-        response = api.get(url_for("api.org_datasets", org=org))
+        response = self.get(url_for("api.org_datasets", org=org))
 
         assert200(response)
         assert len(response.json["data"]) == len(datasets)
 
-    def test_list_org_datasets_hide_private(self, api):
+    def test_list_org_datasets_hide_private(self):
         """Should not include private datasets when not member"""
         org = OrganizationFactory()
         datasets = DatasetFactory.create_batch(3, organization=org)
         DatasetFactory.create_batch(2, organization=org, private=True)
 
-        response = api.get(url_for("api.org_datasets", org=org))
+        response = self.get(url_for("api.org_datasets", org=org))
 
         assert200(response)
         assert len(response.json["data"]) == len(datasets)
 
-    def test_list_org_datasets_with_size(self, api):
+    def test_list_org_datasets_with_size(self):
         """Should list organization datasets"""
         org = OrganizationFactory()
         DatasetFactory.create_batch(3, organization=org)
 
-        response = api.get(url_for("api.org_datasets", org=org, page_size=2))
+        response = self.get(url_for("api.org_datasets", org=org, page_size=2))
 
         assert200(response)
         assert len(response.json["data"]) == 2
 
 
 class OrganizationReusesAPITest(PytestOnlyAPITestCase):
-    def test_list_org_reuses(self, api):
+    def test_list_org_reuses(self):
         """Should list organization reuses"""
         org = OrganizationFactory()
         reuses = ReuseFactory.create_batch(3, organization=org)
 
-        response = api.get(url_for("api.org_reuses", org=org))
+        response = self.get(url_for("api.org_reuses", org=org))
 
         assert200(response)
         assert len(response.json) == len(reuses)
 
-    def test_list_org_reuses_private(self, api):
+    def test_list_org_reuses_private(self):
         """Should include private reuses when member"""
-        user = api.login()
+        user = self.login()
         member = Member(user=user, role="admin")
         org = OrganizationFactory(members=[member])
         reuses = ReuseFactory.create_batch(3, organization=org, private=True)
 
-        response = api.get(url_for("api.org_reuses", org=org))
+        response = self.get(url_for("api.org_reuses", org=org))
 
         assert200(response)
         assert len(response.json) == len(reuses)
 
-    def test_list_org_reuses_hide_private(self, api):
+    def test_list_org_reuses_hide_private(self):
         """Should not include private reuses when not member"""
         org = OrganizationFactory()
         reuses = ReuseFactory.create_batch(3, organization=org)
         ReuseFactory.create_batch(2, organization=org, private=True)
 
-        response = api.get(url_for("api.org_reuses", org=org))
+        response = self.get(url_for("api.org_reuses", org=org))
 
         assert200(response)
         assert len(response.json) == len(reuses)
 
 
 class OrganizationDiscussionsAPITest(PytestOnlyAPITestCase):
-    def test_list_org_discussions(self, api):
+    def test_list_org_discussions(self):
         """Should list organization discussions"""
         user = UserFactory()
         org = OrganizationFactory()
@@ -887,7 +887,7 @@ class OrganizationDiscussionsAPITest(PytestOnlyAPITestCase):
             Discussion.objects.create(subject=reuse, title="", user=user),
         ]
 
-        response = api.get(url_for("api.org_discussions", org=org))
+        response = self.get(url_for("api.org_discussions", org=org))
 
         assert200(response)
         assert len(response.json) == len(discussions)
@@ -899,40 +899,40 @@ class OrganizationDiscussionsAPITest(PytestOnlyAPITestCase):
 
 class OrganizationBadgeAPITest(PytestOnlyAPITestCase):
     @pytest.fixture(autouse=True)
-    def setup_func(self, api):
+    def setup_func(self):
         self.factory = badge_factory(Organization)
-        self.user = api.login(AdminFactory())
+        self.user = self.login(AdminFactory())
         self.organization = OrganizationFactory()
 
-    def test_list(self, api):
-        response = api.get(url_for("api.available_organization_badges"))
+    def test_list(self):
+        response = self.get(url_for("api.available_organization_badges"))
         assert200(response)
         assert len(response.json) == len(Organization.__badges__)
         for kind, label in Organization.__badges__.items():
             assert kind in response.json
             assert response.json[kind] == label
 
-    def test_create(self, api):
+    def test_create(self):
         data = self.factory.as_dict()
         url = url_for("api.organization_badges", org=self.organization)
         with assert_emit(on_badge_added):
-            response = api.post(url, data)
+            response = self.post(url, data)
             assert201(response)
         self.organization.reload()
         assert len(self.organization.badges) == 1
 
-    def test_create_same(self, api):
+    def test_create_same(self):
         data = self.factory.as_dict()
         url = url_for("api.organization_badges", org=self.organization)
         with assert_emit(on_badge_added):
-            api.post(url, data)
+            self.post(url, data)
         with assert_not_emit(on_badge_added):
-            response = api.post(url, data)
+            response = self.post(url, data)
             assert200(response)
         self.organization.reload()
         assert len(self.organization.badges) == 1
 
-    def test_create_2nd(self, api):
+    def test_create_2nd(self):
         # Explicitely setting the kind to avoid collisions given the
         # small number of choices for kinds.
         kinds_keys = list(Organization.__badges__)
@@ -940,32 +940,32 @@ class OrganizationBadgeAPITest(PytestOnlyAPITestCase):
         data = self.factory.as_dict()
         data["kind"] = kinds_keys[1]
         url = url_for("api.organization_badges", org=self.organization)
-        response = api.post(url, data)
+        response = self.post(url, data)
         assert201(response)
         self.organization.reload()
         assert len(self.organization.badges) == 2
 
-    def test_delete(self, api):
+    def test_delete(self):
         badge = self.factory()
         self.organization.add_badge(badge.kind)
         self.organization.save()
         url = url_for("api.organization_badge", org=self.organization, badge_kind=str(badge.kind))
         with assert_emit(on_badge_removed):
-            response = api.delete(url)
+            response = self.delete(url)
             assert204(response)
         self.organization.reload()
         assert len(self.organization.badges) == 0
 
-    def test_delete_404(self, api):
+    def test_delete_404(self):
         kind = str(self.factory().kind)
         url = url_for("api.organization_badge", org=self.organization, badge_kind=kind)
-        response = api.delete(url)
+        response = self.delete(url)
         assert404(response)
 
 
 class OrganizationContactPointsAPITest(PytestOnlyAPITestCase):
-    def test_org_contact_points(self, api):
-        user = api.login()
+    def test_org_contact_points(self):
+        user = self.login()
         member = Member(user=user, role="admin")
         org = OrganizationFactory(members=[member])
         data = {
@@ -974,17 +974,17 @@ class OrganizationContactPointsAPITest(PytestOnlyAPITestCase):
             "organization": str(org.id),
             "role": "contact",
         }
-        response = api.post(url_for("api.contact_points"), data)
+        response = self.post(url_for("api.contact_points"), data)
         assert201(response)
 
-        response = api.get(url_for("api.org_contact_points", org=org))
+        response = self.get(url_for("api.org_contact_points", org=org))
         assert200(response)
 
         assert response.json["data"][0]["name"] == data["name"]
         assert response.json["data"][0]["email"] == data["email"]
 
-    def test_org_contact_points_suggest(self, api):
-        user = api.login()
+    def test_org_contact_points_suggest(self):
+        user = self.login()
         member = Member(user=user, role="admin")
         org = OrganizationFactory(members=[member])
         data = {
@@ -993,16 +993,16 @@ class OrganizationContactPointsAPITest(PytestOnlyAPITestCase):
             "organization": str(org.id),
             "role": "contact",
         }
-        response = api.post(url_for("api.contact_points"), data)
+        response = self.post(url_for("api.contact_points"), data)
         assert201(response)
 
-        response = api.get(url_for("api.suggest_org_contact_points", org=org, q="mooneywayne"))
+        response = self.get(url_for("api.suggest_org_contact_points", org=org, q="mooneywayne"))
         assert200(response)
 
         assert response.json[0]["name"] == data["name"]
         assert response.json[0]["email"] == data["email"]
 
-        response = api.get(
+        response = self.get(
             url_for("api.suggest_org_contact_points", org=org, q="mooneeejnknywayne")
         )
         assert200(response)
@@ -1011,11 +1011,11 @@ class OrganizationContactPointsAPITest(PytestOnlyAPITestCase):
 
 
 class OrganizationCsvExportsTest(PytestOnlyAPITestCase):
-    def test_datasets_csv(self, api):
+    def test_datasets_csv(self):
         org = OrganizationFactory()
         [DatasetFactory(organization=org, resources=[ResourceFactory()]) for _ in range(3)]
 
-        response = api.get(url_for("api.organization_datasets_csv", org=org))
+        response = self.get(url_for("api.organization_datasets_csv", org=org))
 
         assert200(response)
         assert response.mimetype == "text/csv"
@@ -1034,7 +1034,7 @@ class OrganizationCsvExportsTest(PytestOnlyAPITestCase):
         assert "tags" in header
         assert "metric.reuses" in header
 
-    def test_resources_csv(self, api):
+    def test_resources_csv(self):
         org = OrganizationFactory()
         datasets = [
             DatasetFactory(organization=org, resources=[ResourceFactory(), ResourceFactory()])
@@ -1043,7 +1043,7 @@ class OrganizationCsvExportsTest(PytestOnlyAPITestCase):
         not_org_dataset = DatasetFactory(resources=[ResourceFactory()])
         hidden_dataset = DatasetFactory(private=True)
 
-        response = api.get(url_for("api.organization_datasets_resources_csv", org=org))
+        response = self.get(url_for("api.organization_datasets_resources_csv", org=org))
 
         assert200(response)
         assert response.mimetype == "text/csv"
@@ -1077,11 +1077,11 @@ class OrganizationCsvExportsTest(PytestOnlyAPITestCase):
         assert str(hidden_dataset.id) not in dataset_ids
         assert str(not_org_dataset.id) not in dataset_ids
 
-    def test_dataservices_csv(self, api):
+    def test_dataservices_csv(self):
         org = OrganizationFactory()
         [DataserviceFactory(organization=org) for _ in range(3)]
 
-        response = api.get(url_for("api.organization_dataservices_csv", org=org))
+        response = self.get(url_for("api.organization_dataservices_csv", org=org))
 
         assert200(response)
         assert response.mimetype == "text/csv"
@@ -1101,9 +1101,9 @@ class OrganizationCsvExportsTest(PytestOnlyAPITestCase):
         assert "metric.views" in header
         assert "datasets" in header
 
-    def test_discussions_csv_content_empty(self, api):
+    def test_discussions_csv_content_empty(self):
         organization = OrganizationFactory()
-        response = api.get(url_for("api.organization_discussions_csv", org=organization))
+        response = self.get(url_for("api.organization_discussions_csv", org=organization))
         assert200(response)
 
         assert response.data.decode("utf8") == (
@@ -1112,12 +1112,12 @@ class OrganizationCsvExportsTest(PytestOnlyAPITestCase):
             '"closed_by_organization_id"\r\n'
         )
 
-    def test_discussions_csv_content_filled(self, api):
+    def test_discussions_csv_content_filled(self):
         organization = OrganizationFactory()
         dataset = DatasetFactory(organization=organization)
         user = UserFactory(first_name="John", last_name="Snow")
         discussion = DiscussionFactory(subject=dataset, user=user)
-        response = api.get(url_for("api.organization_discussions_csv", org=organization))
+        response = self.get(url_for("api.organization_discussions_csv", org=organization))
         assert200(response)
 
         headers, data = response.data.decode("utf-8").strip().split("\r\n")

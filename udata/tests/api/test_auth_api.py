@@ -67,34 +67,34 @@ def oauth(app, request):
 
 
 class APIAuthTest(PytestOnlyAPITestCase):
-    def test_no_auth(self, api):
+    def test_no_auth(self):
         """Should not return a content type if there is no content on delete"""
-        response = api.get(url_for("api.fake"))
+        response = self.get(url_for("api.fake"))
 
         assert200(response)
         assert response.content_type == "application/json"
         assert response.json == {"success": True}
 
-    def test_session_auth(self, api):
+    def test_session_auth(self):
         """Should handle session authentication"""
         api.client.login()  # Session auth
 
-        response = api.post(url_for("api.fake"))
+        response = self.post(url_for("api.fake"))
 
         assert200(response)
         assert response.content_type == "application/json"
         assert response.json == {"success": True}
 
-    def test_header_auth(self, api):
+    def test_header_auth(self):
         """Should handle header API Key authentication"""
         with api.user() as user:  # API Key auth
-            response = api.post(url_for("api.fake"), headers={"X-API-KEY": user.apikey})
+            response = self.post(url_for("api.fake"), headers={"X-API-KEY": user.apikey})
 
         assert200(response)
         assert response.content_type == "application/json"
         assert response.json == {"success": True}
 
-    def test_oauth_auth(self, api, oauth):
+    def test_oauth_auth(self, oauth):
         """Should handle OAuth header authentication"""
         user = UserFactory()
         token = OAuth2Token.objects.create(
@@ -104,7 +104,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
             refresh_token="refresh-token",
         )
 
-        response = api.post(
+        response = self.post(
             url_for("api.fake"), headers={"Authorization": " ".join(["Bearer", token.access_token])}
         )
 
@@ -112,7 +112,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
         assert response.content_type == "application/json"
         assert response.json == {"success": True}
 
-    def test_bad_oauth_auth(self, api, oauth):
+    def test_bad_oauth_auth(self, oauth):
         """Should handle wrong OAuth header authentication"""
         user = UserFactory()
         OAuth2Token.objects.create(
@@ -122,53 +122,53 @@ class APIAuthTest(PytestOnlyAPITestCase):
             refresh_token="refresh-token",
         )
 
-        response = api.post(
+        response = self.post(
             url_for("api.fake"), headers={"Authorization": " ".join(["Bearer", "not-my-token"])}
         )
 
         assert401(response)
         assert response.content_type == "application/json"
 
-    def test_no_apikey(self, api):
+    def test_no_apikey(self):
         """Should raise a HTTP 401 if no API Key is provided"""
-        response = api.post(url_for("api.fake"))
+        response = self.post(url_for("api.fake"))
 
         assert401(response)
         assert response.content_type == "application/json"
         assert "message" in response.json
 
-    def test_invalid_apikey(self, api):
+    def test_invalid_apikey(self):
         """Should raise a HTTP 401 if an invalid API Key is provided"""
-        response = api.post(url_for("api.fake"), headers={"X-API-KEY": "fake"})
+        response = self.post(url_for("api.fake"), headers={"X-API-KEY": "fake"})
 
         assert401(response)
         assert response.content_type == "application/json"
         assert "message" in response.json
 
-    def test_inactive_user(self, api):
+    def test_inactive_user(self):
         """Should raise a HTTP 401 if the user is inactive"""
         user = UserFactory(active=False)
         with api.user(user) as user:
-            response = api.post(url_for("api.fake"), headers={"X-API-KEY": user.apikey})
+            response = self.post(url_for("api.fake"), headers={"X-API-KEY": user.apikey})
 
         assert401(response)
         assert response.content_type == "application/json"
         assert "message" in response.json
 
-    def test_deleted_user(self, api):
+    def test_deleted_user(self):
         """Should raise a HTTP 401 if the user is deleted"""
         user = UserFactory()
         user.mark_as_deleted()
         with api.user(user) as user:
-            response = api.post(url_for("api.fake"), headers={"X-API-KEY": user.apikey})
+            response = self.post(url_for("api.fake"), headers={"X-API-KEY": user.apikey})
 
         assert401(response)
         assert response.content_type == "application/json"
         assert "message" in response.json
 
-    def test_validation_errors(self, api):
+    def test_validation_errors(self):
         """Should raise a HTTP 400 and returns errors on validation error"""
-        response = api.put(url_for("api.fake"), {"email": "wrong"})
+        response = self.put(url_for("api.fake"), {"email": "wrong"})
 
         assert400(response)
         assert response.content_type == "application/json"
@@ -177,9 +177,9 @@ class APIAuthTest(PytestOnlyAPITestCase):
             assert field in response.json["errors"]
             assert isinstance(response.json["errors"][field], list)
 
-    def test_no_validation_error(self, api):
+    def test_no_validation_error(self):
         """Should pass if no validation error"""
-        response = api.put(
+        response = self.put(
             url_for("api.fake"),
             {
                 "required": "value",
@@ -776,24 +776,24 @@ class APIAuthTest(PytestOnlyAPITestCase):
         tok = OAuth2Token.objects(pk=token.pk).first()
         assert tok.revoked is False
 
-    def test_value_error(self, api):
+    def test_value_error(self):
         @ns.route("/exception", endpoint="exception")
         class ExceptionAPI(API):
             def get(self):
                 raise ValueError("Not working")
 
-        response = api.get(url_for("api.exception"))
+        response = self.get(url_for("api.exception"))
 
         assert400(response)
         assert response.json["message"] == "Not working"
 
-    def test_permission_denied(self, api):
+    def test_permission_denied(self):
         @ns.route("/exception", endpoint="exception")
         class ExceptionAPI(API):
             def get(self):
                 raise PermissionDenied("Permission denied")
 
-        response = api.get(url_for("api.exception"))
+        response = self.get(url_for("api.exception"))
 
         assert403(response)
         assert "message" in response.json

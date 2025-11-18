@@ -6,6 +6,7 @@ import pytest
 from udata.mongo import db
 from udata.mongo.document import get_all_models
 from udata.tests import PytestOnlyTestCase, TestCase, helpers
+from udata.tests.plugin import ApiClient
 
 
 @pytest.mark.usefixtures("instance_path")
@@ -26,11 +27,11 @@ class APITestCaseMixin:
         frontend.init_app(app)
 
     @pytest.fixture(autouse=True)
-    def inject_api(self, api):
+    def inject_api(self, client):
         """
         Inject API test client for compatibility with legacy tests.
         """
-        self.api = api
+        self.api = ApiClient(client)
 
     @pytest.fixture(autouse=True)
     def inject_client(self, client):

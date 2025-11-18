@@ -55,9 +55,9 @@ class TopicModelTest(PytestOnlyDBTestCase):
         TopicWithElementsFactory()
         job_reindex.assert_called()
 
-    def test_topic_activities(self, api, mocker):
+    def test_topic_activities(self, mocker):
         # A user must be authenticated for activities to be emitted
-        user = api.login()
+        user = self.login()
 
         mock_created = mocker.patch.object(UserCreatedTopic, "emit")
         mock_updated = mocker.patch.object(UserUpdatedTopic, "emit")
@@ -71,9 +71,9 @@ class TopicModelTest(PytestOnlyDBTestCase):
             topic.save()
             mock_updated.assert_called()
 
-    def test_topic_element_activities(self, api, mocker):
+    def test_topic_element_activities(self, mocker):
         # A user must be authenticated for activities to be emitted
-        user = api.login()
+        user = self.login()
         topic = TopicFactory(owner=user)
 
         mock_topic_created = mocker.patch.object(UserCreatedTopic, "emit")

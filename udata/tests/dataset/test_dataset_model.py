@@ -326,9 +326,9 @@ class DatasetModelTest(PytestOnlyDBTestCase):
 
         assert dataset_without_resources.resources_len == 0
 
-    def test_dataset_activities(self, api, mocker):
+    def test_dataset_activities(self, mocker):
         # A user must be authenticated for activities to be emitted
-        user = api.login()
+        user = self.login()
 
         mock_created = mocker.patch.object(UserCreatedDataset, "emit")
         mock_updated = mocker.patch.object(UserUpdatedDataset, "emit")
