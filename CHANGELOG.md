@@ -23,7 +23,7 @@
   
   - The `udata.harvesters` entrypoints are automaticly loaded (without the
   need of `PLUGINS` settings)
-  - Need to move the harvesters from `PLUGINS` to `HARVESTERS_BACKENDS` to
+  - Need to move the harvesters from `PLUGINS` to `HARVESTER_BACKENDS` to
   enable them.
   - Need to add explicit glob with `*`, like `csw*` to enable all backends
   starting with `csw` (before it was an implicit `startswith`)
@@ -33,7 +33,7 @@
   Example of new setting:
   
   ```
-  HARVESTERS_BACKENDS = [
+  HARVESTER_BACKENDS = [
     'ckan',
     'dkan',
     'dcat',
@@ -45,7 +45,7 @@
   - [x] Added `name` to all internal harvesters backends
   - [x] Removed `actions.list_backends()`, use
   `backends.get_enabled_backends()` since it's not really an action.
-  - [x] Added `HARVESTERS_BACKENDS` setting to replace `PLUGINS` for
+  - [x] Added `HARVESTER_BACKENDS` setting to replace `PLUGINS` for
   enabling/disabling harvesters backends
   - [x] Removed broken `/api/1/harvest/job_status/` endpoint
 - build: try using conventional commit in Crowdin PR ([#3511](https://github.com/opendatateam/udata/pull/3511))
