@@ -16,6 +16,7 @@ from udata.core.topic.factories import (
     TopicWithElementsFactory,
 )
 from udata.core.topic.models import Topic, TopicElement
+from udata.core.user.factories import UserFactory
 from udata.search import reindex
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_emit
@@ -57,7 +58,7 @@ class TopicModelTest(PytestOnlyDBTestCase):
 
     def test_topic_activities(self, mocker):
         # A user must be authenticated for activities to be emitted
-        user = self.login()
+        user = UserFactory()
 
         mock_created = mocker.patch.object(UserCreatedTopic, "emit")
         mock_updated = mocker.patch.object(UserUpdatedTopic, "emit")
@@ -73,7 +74,7 @@ class TopicModelTest(PytestOnlyDBTestCase):
 
     def test_topic_element_activities(self, mocker):
         # A user must be authenticated for activities to be emitted
-        user = self.login()
+        user = UserFactory()
         topic = TopicFactory(owner=user)
 
         mock_topic_created = mocker.patch.object(UserCreatedTopic, "emit")

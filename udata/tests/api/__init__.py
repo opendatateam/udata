@@ -58,6 +58,11 @@ class APITestCaseMixin:
         self.user = self.client.login(user)
         return self.user
 
+    def logout(self):
+        """Logout the current user."""
+        self.client.logout()
+        self.user = None
+
     def perform(self, verb, url, **kwargs):
         """
         Perform an HTTP request with JSON handling.
@@ -71,7 +76,10 @@ class APITestCaseMixin:
             Flask test response
         """
         headers = kwargs.pop("headers", {})
-        headers["Content-Type"] = "application/json"
+
+        # Only set Content-Type for methods that have a body
+        if verb in ("post", "put", "patch"):
+            headers["Content-Type"] = "application/json"
 
         data = kwargs.get("data")
         if data is not None:

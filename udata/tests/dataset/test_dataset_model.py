@@ -328,7 +328,7 @@ class DatasetModelTest(PytestOnlyDBTestCase):
 
     def test_dataset_activities(self, mocker):
         # A user must be authenticated for activities to be emitted
-        user = self.login()
+        user = UserFactory()
 
         mock_created = mocker.patch.object(UserCreatedDataset, "emit")
         mock_updated = mocker.patch.object(UserUpdatedDataset, "emit")
