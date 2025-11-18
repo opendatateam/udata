@@ -93,7 +93,7 @@ class APITestCaseMixin:
         headers = kwargs.pop("headers", {})
 
         # Only set Content-Type for methods that have a body
-        if verb in ("post", "put", "patch"):
+        if verb in ("post", "put", "patch", "delete"):
             headers["Content-Type"] = "application/json"
 
         data = kwargs.get("data")

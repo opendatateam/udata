@@ -326,8 +326,10 @@ class DatasetModelTest(PytestOnlyDBTestCase):
 
         assert dataset_without_resources.resources_len == 0
 
-    def test_dataset_activities(self, mocker):
+    def test_dataset_activities(self, app, mocker):
         # A user must be authenticated for activities to be emitted
+        from flask_login import login_user
+
         user = UserFactory()
 
         mock_created = mocker.patch.object(UserCreatedDataset, "emit")
@@ -337,35 +339,38 @@ class DatasetModelTest(PytestOnlyDBTestCase):
         mock_resouce_updated = mocker.patch.object(UserUpdatedResource, "emit")
         mock_resouce_removed = mocker.patch.object(UserRemovedResourceFromDataset, "emit")
 
-        with assert_emit(Dataset.on_create):
-            dataset = DatasetFactory(owner=user)
-            mock_created.assert_called()
+        with app.test_request_context():
+            login_user(user)
 
-        with assert_emit(Dataset.on_update):
-            dataset.title = "new title"
-            dataset.save()
-            mock_updated.assert_called()
+            with assert_emit(Dataset.on_create):
+                dataset = DatasetFactory(owner=user)
+                mock_created.assert_called()
 
-        with assert_emit(Dataset.on_resource_added):
-            dataset.add_resource(ResourceFactory())
-            mock_resource_added.assert_called()
+            with assert_emit(Dataset.on_update):
+                dataset.title = "new title"
+                dataset.save()
+                mock_updated.assert_called()
 
-        dataset.reload()
+            with assert_emit(Dataset.on_resource_added):
+                dataset.add_resource(ResourceFactory())
+                mock_resource_added.assert_called()
 
-        with assert_emit(Dataset.on_resource_updated):
-            resource = dataset.resources[0]
-            resource.description = "New description"
-            dataset.update_resource(resource)
-            mock_resouce_updated.assert_called()
+            dataset.reload()
 
-        with assert_emit(Dataset.on_resource_removed):
-            dataset.remove_resource(dataset.resources[-1])
-            mock_resouce_removed.assert_called()
+            with assert_emit(Dataset.on_resource_updated):
+                resource = dataset.resources[0]
+                resource.description = "New description"
+                dataset.update_resource(resource)
+                mock_resouce_updated.assert_called()
 
-        with assert_emit(Dataset.on_delete):
-            dataset.deleted = datetime.utcnow()
-            dataset.save()
-            mock_deleted.assert_called()
+            with assert_emit(Dataset.on_resource_removed):
+                dataset.remove_resource(dataset.resources[-1])
+                mock_resouce_removed.assert_called()
+
+            with assert_emit(Dataset.on_delete):
+                dataset.deleted = datetime.utcnow()
+                dataset.save()
+                mock_deleted.assert_called()
 
     def test_dataset_metrics(self):
         # We need to init metrics module
