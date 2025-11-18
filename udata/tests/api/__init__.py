@@ -31,11 +31,11 @@ class APITestCaseMixin:
         frontend.init_app(app)
 
     @pytest.fixture(autouse=True)
-    def inject_client(self, client):
+    def inject_client(self, app):
         """
         Inject test client for Flask testing.
         """
-        self.client = client
+        self.client = app.test_client()
 
     @contextmanager
     def api_user(self, user=None):
@@ -55,12 +55,27 @@ class APITestCaseMixin:
 
     def login(self, user=None):
         """Login a user via session authentication."""
-        self.user = self.client.login(user)
+        from flask import current_app
+        from flask_principal import Identity, identity_changed
+
+        user = user or UserFactory()
+        with self.client.session_transaction() as session:
+            # Since flask-security-too 4.0.0, the user.fs_uniquifier is used instead of user.id for auth
+            user_id = getattr(user, current_app.login_manager.id_attribute)()
+            session["user_id"] = user_id
+            session["_fresh"] = True
+            session["_id"] = current_app.login_manager._session_identifier_generator()
+            current_app.login_manager._update_request_context_with_user(user)
+            identity_changed.send(current_app._get_current_object(), identity=Identity(user.id))
+        self.user = user
         return self.user
 
     def logout(self):
         """Logout the current user."""
-        self.client.logout()
+        with self.client.session_transaction() as session:
+            del session["user_id"]
+            del session["_fresh"]
+            del session["_id"]
         self.user = None
 
     def perform(self, verb, url, **kwargs):
@@ -109,7 +124,7 @@ class APITestCaseMixin:
             *args, **kwargs: Additional arguments
         """
         if not json:
-            return self.client.post(url, data or {}, *args, **kwargs)
+            return self.client.post(url, data=data or {}, *args, **kwargs)
         return self.perform("post", url, data=data or {}, *args, **kwargs)
 
     def put(self, url, data=None, json=True, *args, **kwargs):
@@ -123,7 +138,7 @@ class APITestCaseMixin:
             *args, **kwargs: Additional arguments
         """
         if not json:
-            return self.client.put(url, data or {}, *args, **kwargs)
+            return self.client.put(url, data=data or {}, *args, **kwargs)
         return self.perform("put", url, data=data or {}, *args, **kwargs)
 
     def patch(self, url, data=None, json=True, *args, **kwargs):
@@ -137,7 +152,7 @@ class APITestCaseMixin:
             *args, **kwargs: Additional arguments
         """
         if not json:
-            return self.client.patch(url, data or {}, *args, **kwargs)
+            return self.client.patch(url, data=data or {}, *args, **kwargs)
         return self.perform("patch", url, data=data or {}, *args, **kwargs)
 
     def delete(self, url, data=None, *args, **kwargs):

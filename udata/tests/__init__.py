@@ -5,7 +5,6 @@ from werkzeug import Response
 
 from udata import settings
 from udata.app import UDataApp, create_app
-from udata.tests.plugin import TestClient
 
 from . import helpers
 
@@ -33,7 +32,6 @@ class TestCaseMixin:
     def _app(self, request):
         test_settings = self.get_settings(request)
         self.app = create_app(settings.Defaults, override=test_settings)
-        self.app.test_client_class = TestClient
         return self.app
 
     def assertEqualDates(self, datetime1, datetime2, limit=1):  # Seconds.

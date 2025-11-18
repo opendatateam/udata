@@ -2,59 +2,10 @@ import shlex
 from contextlib import contextmanager
 
 import pytest
-from flask import current_app, template_rendered, url_for
-from flask.testing import FlaskClient
-from flask_principal import Identity, identity_changed
+from flask import template_rendered, url_for
 from lxml import etree
 
-from udata.core.user.factories import UserFactory
-
 from .helpers import assert200, assert_command_ok
-
-
-class TestClient(FlaskClient):
-    """
-    The goal of these `post`, `put` and `delete` functions is to
-    switch from `data` in kwargs to `data` in args and be able to
-    `client.post(url, data)` without doing `client.post(url, data=data)`
-
-    Same as in :TestClientOverride
-    """
-
-    def post(self, url, data=None, **kwargs):
-        return super(TestClient, self).post(url, data=data, **kwargs)
-
-    def put(self, url, data=None, **kwargs):
-        return super(TestClient, self).put(url, data=data, **kwargs)
-
-    def delete(self, url, data=None, **kwargs):
-        return super(TestClient, self).delete(url, data=data, **kwargs)
-
-    def login(self, user=None):
-        user = user or UserFactory()
-        with self.session_transaction() as session:
-            # Since flask-security-too 4.0.0, the user.fs_uniquifier is used instead of user.id for auth
-            user_id = getattr(user, current_app.login_manager.id_attribute)()
-            session["user_id"] = user_id
-            session["_fresh"] = True
-            session["_id"] = current_app.login_manager._session_identifier_generator()
-            current_app.login_manager._update_request_context_with_user(user)
-            identity_changed.send(current_app._get_current_object(), identity=Identity(user.id))
-        return user
-
-    def logout(self):
-        with self.session_transaction() as session:
-            del session["user_id"]
-            del session["_fresh"]
-            del session["_id"]
-
-
-@pytest.fixture
-def client(app):
-    """
-    Fixes https://github.com/pytest-dev/pytest-flask/issues/42
-    """
-    return app.test_client()
 
 
 @pytest.fixture(name="cli")

@@ -228,6 +228,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
                 "scope": "default",
                 "accept": "",
             },
+            json=False,
         )
 
         assert_status(response, 302)
@@ -255,6 +256,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
                 "scope": "default",
                 "accept": "",
             },
+            json=False,
         )
 
         assert_status(response, 302)
@@ -282,6 +284,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
                 "scope": "default",
                 "accept": "",
             },
+            json=False,
         )
 
         assert_status(response, 400)
@@ -308,6 +311,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
                 "scope": "default",
                 "accept": "",
             },
+            json=False,
         )
 
         assert_status(response, 400)
@@ -327,6 +331,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
                 "scope": "default",
                 "accept": "",
             },
+            json=False,
         )
 
         uri, params = response.location.split("?")
@@ -367,6 +372,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
                 "scope": "default",
                 "accept": "",
             },
+            json=False,
         )
         assert "code=" in response.location
 
@@ -412,6 +418,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
                 "scope": "default",
                 "accept": "",
             },
+            json=False,
         )
         assert "code=" in response.location
 
@@ -464,6 +471,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
                 "scope": "default",
                 "accept": "",
             },
+            json=False,
         )
         assert "code=" in response.location
 
@@ -514,6 +522,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
                 "scope": "default",
                 "accept": "",
             },
+            json=False,
         )
         assert "code=" in response.location
 
@@ -546,6 +555,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
                     "scope": "default",
                     "accept": "",
                 },
+                json=False,
             )
 
             uri, params = response.location.split("?")
@@ -579,6 +589,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
                 "scope": "default",
                 "accept": "",
             },
+            json=False,
         )
 
         uri, params = response.location.split("?")
@@ -662,6 +673,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
             {
                 "accept": "",
             },
+            json=False,
         )
 
         assert_status(response, 400)
