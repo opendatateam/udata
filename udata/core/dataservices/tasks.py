@@ -6,6 +6,7 @@ from udata.core.constants import HVD
 from udata.core.dataservices.models import Dataservice
 from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
 from udata.core.organization.models import Organization
+from udata.core.pages.models import Page
 from udata.core.topic.models import TopicElement
 from udata.harvest.models import HarvestJob
 from udata.models import Discussion, Follow, Transfer
@@ -28,6 +29,12 @@ def purge_dataservices(self):
         Transfer.objects(subject=dataservice).delete()
         # Remove dataservices references in Topics
         TopicElement.objects(element=dataservice).update(element=None)
+        # Remove dataservices in pages (mongoengine doesn't support updating a field in a generic embed)
+        Page._get_collection().update_many(
+            {"blocs.dataservices": dataservice.id},
+            {"$pull": {"blocs.$[b].dataservices": dataservice.id}},
+            array_filters=[{"b.dataservices": dataservice.id}],
+        )
         # Remove dataservice
         dataservice.delete()
 
