@@ -1,7 +1,6 @@
 from flask import abort, request
-from flask_login import login_user
 from flask_security import current_user
-from flask_security.utils import set_request_attr
+from flask_security.utils import login_user, set_request_attr
 
 
 def current_user_is_admin_or_self() -> bool:
@@ -22,7 +21,7 @@ def login_from_apikey_header_if_exists():
     try:
         user = User.objects.get(apikey=apikey)
 
-        if not login_user(user, remember=False, duration=None, force=True, fresh=True):
+        if not login_user(user, remember=False):
             abort(401, "Inactive user")
 
         # Useful because otherwise Flask-Security refuse the connection.
