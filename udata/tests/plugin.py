@@ -28,7 +28,6 @@ def cli_fixture(app):
 def instance_path(app, tmpdir):
     """Use temporary application instance_path"""
     from udata.core import storages
-    from udata.core.storages.views import blueprint
 
     app.instance_path = str(tmpdir)
     app.config["FS_ROOT"] = str(tmpdir / "fs")
@@ -39,7 +38,6 @@ def instance_path(app, tmpdir):
         app.config.pop(key.format("ROOT"), None)
 
     storages.init_app(app)
-    app.register_blueprint(blueprint, name="test-storage")
 
     return tmpdir
 

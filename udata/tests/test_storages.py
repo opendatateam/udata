@@ -13,7 +13,7 @@ from udata.core.storages import utils
 from udata.core.storages.api import META, chunk_filename
 from udata.core.storages.tasks import purge_chunks
 from udata.tests import PytestOnlyTestCase
-from udata.tests.api import APITestCaseMixin, PytestOnlyDBTestCase
+from udata.tests.api import PytestOnlyAPITestCase
 from udata.utils import faker
 
 from .helpers import assert200, assert400
@@ -107,24 +107,12 @@ class ConfigurableAllowedExtensionsTest(PytestOnlyTestCase):
         assert "bat" not in storages.CONFIGURABLE_AUTHORIZED_TYPES
 
 
-class StorageAPITestMixin(APITestCaseMixin, PytestOnlyDBTestCase):
-    """
-    Test case for storage views that need both API client methods and storage blueprint.
-    Overrides load_api_routes to not load API routes since we use the test-storage blueprint.
-    """
-
-    @pytest.fixture(autouse=True)
-    def load_api_routes(self, app):
-        # Don't load API routes - we use the blueprint from instance_path fixture instead
-        pass
-
-
 @pytest.mark.usefixtures("instance_path")
-class StorageUploadViewTest(StorageAPITestMixin):
+class StorageUploadViewTest(PytestOnlyAPITestCase):
     def test_standard_upload(self):
         self.login()
         response = self.post(
-            url_for("test-storage.upload", name="resources"),
+            url_for("storage.upload", name="resources"),
             {"file": (BytesIO(b"aaa"), "Test with  spaces.TXT")},
             json=False,
         )
@@ -143,7 +131,7 @@ class StorageUploadViewTest(StorageAPITestMixin):
 
     def test_chunked_upload(self):
         self.login()
-        url = url_for("test-storage.upload", name="tmp")
+        url = url_for("storage.upload", name="tmp")
         uuid = str(uuid4())
         parts = 4
 
@@ -197,7 +185,7 @@ class StorageUploadViewTest(StorageAPITestMixin):
 
     def test_chunked_upload_bad_chunk(self):
         self.login()
-        url = url_for("test-storage.upload", name="tmp")
+        url = url_for("storage.upload", name="tmp")
         uuid = str(uuid4())
         parts = 4
 
@@ -229,7 +217,7 @@ class StorageUploadViewTest(StorageAPITestMixin):
     def test_upload_resource_bad_request(self):
         self.login()
         response = self.post(
-            url_for("test-storage.upload", name="tmp"),
+            url_for("storage.upload", name="tmp"),
             {"bad": (BytesIO(b"aaa"), "test.txt")},
             json=False,
         )
