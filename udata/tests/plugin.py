@@ -1,26 +1,7 @@
-import shlex
-
 import pytest
 
-from .helpers import assert_command_ok
 
-
-@pytest.fixture(name="cli")
-def cli_fixture(app):
-    def mock_runner(*args, **kwargs):
-        from udata.commands import cli
-
-        if len(args) == 1 and " " in args[0]:
-            args = shlex.split(args[0])
-        runner = app.test_cli_runner()
-        result = runner.invoke(cli, args, catch_exceptions=False)
-        if kwargs.get("check", True):
-            assert_command_ok(result)
-        return result
-
-    return mock_runner
-
-
+@pytest.fixture
 def rmock():
     """A requests-mock fixture"""
     import requests_mock

@@ -45,6 +45,33 @@ class TestCaseMixin:
         stream2 = list(response2.iter_encoded())
         assert stream1 == stream2
 
+    def cli(self, *args, **kwargs):
+        """
+        Execute a CLI command.
+
+        Usage:
+            self.cli("command", "arg1", "arg2")
+            self.cli("command arg1 arg2")  # Auto-split on spaces
+
+        Args:
+            *args: Command and arguments (can be a single string with spaces or multiple args)
+            **kwargs: Additional arguments for the CLI runner (e.g., expect_error=True)
+
+        Returns:
+            The CLI result object
+        """
+        import shlex
+
+        from udata.commands import cli as cli_cmd
+
+        if len(args) == 1 and " " in args[0]:
+            args = shlex.split(args[0])
+
+        result = self.app.test_cli_runner().invoke(cli_cmd, args, **kwargs)
+        if result.exit_code != 0 and kwargs.get("expect_error") is not True:
+            helpers.assert_command_ok(result)
+        return result
+
 
 class TestCase(TestCaseMixin, unittest.TestCase):
     pass

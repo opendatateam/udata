@@ -43,23 +43,23 @@ class MigrationsCommandsTest(PytestOnlyDBTestCase):
         if migration_path.exists():
             migration_path.unlink()
 
-    def test_list_available_migrations(self, cli):
+    def test_list_available_migrations(self):
         """Test that we can list available migrations"""
-        result = cli("db status")
+        result = self.cli("db status")
         assert result.exit_code == 0
         # Should contain at least some output (may be empty if no migrations)
 
-    def test_migration_workflow(self, cli, db, migration_file):
+    def test_migration_workflow(self, db, migration_file):
         """Test complete migration workflow: info, migrate, status, unrecord"""
 
         # 1. Test info command on non-executed migration
-        result = cli(f"db info {migration_file}")
+        result = self.cli(f"db info {migration_file}")
         assert result.exit_code == 0
         assert "Test migration for integration testing" in result.output
         assert "Not applied" in result.output
 
         # 2. Test migrate command
-        result = cli("db migrate")
+        result = self.cli("db migrate")
         assert result.exit_code == 0
 
         # Verify migration was executed
@@ -76,17 +76,17 @@ class MigrationsCommandsTest(PytestOnlyDBTestCase):
         assert record["ops"][0]["success"] is True
 
         # 3. Test status command after migration
-        result = cli("db status")
+        result = self.cli("db status")
         assert result.exit_code == 0
         assert migration_file.replace(".py", "") in result.output
 
         # 4. Test info command on executed migration
-        result = cli(f"db info {migration_file}")
+        result = self.cli(f"db info {migration_file}")
         assert result.exit_code == 0
         assert "Test migration for integration testing" in result.output
 
         # 5. Test unrecord command
-        result = cli(f"db unrecord {migration_file}")
+        result = self.cli(f"db unrecord {migration_file}")
         assert result.exit_code == 0
 
         # Verify migration record was removed
@@ -101,10 +101,10 @@ class MigrationsCommandsTest(PytestOnlyDBTestCase):
         # Cleanup test data
         db.test_collection.delete_many({})
 
-    def test_migrate_recordonly(self, cli, db, migration_file):
+    def test_migrate_recordonly(self, db, migration_file):
         """Test migrate with --record flag"""
 
-        result = cli("db migrate --record")
+        result = self.cli("db migrate --record")
         assert result.exit_code == 0
 
         # Migration should be recorded
@@ -119,10 +119,10 @@ class MigrationsCommandsTest(PytestOnlyDBTestCase):
         # Cleanup
         db.migrations.delete_one({"filename": migration_file})
 
-    def test_migrate_dry_run(self, cli, db, migration_file):
+    def test_migrate_dry_run(self, db, migration_file):
         """Test migrate with --dry-run flag"""
 
-        result = cli("db migrate --dry-run")
+        result = self.cli("db migrate --dry-run")
         assert result.exit_code == 0
 
         # Migration should NOT be recorded
@@ -133,18 +133,18 @@ class MigrationsCommandsTest(PytestOnlyDBTestCase):
         inserted = db.test_collection.find_one()
         assert inserted is None
 
-    def test_migrate_already_applied(self, cli, db, migration_file):
+    def test_migrate_already_applied(self, db, migration_file):
         """Test that already applied migrations are skipped"""
 
         # First migration
-        result = cli("db migrate")
+        result = self.cli("db migrate")
         assert result.exit_code == 0
 
         # Count records
         count_before = db.test_collection.count_documents({})
 
         # Second migration attempt
-        result = cli("db migrate")
+        result = self.cli("db migrate")
         assert result.exit_code == 0
         assert "Skipped" in result.output
 
@@ -156,7 +156,7 @@ class MigrationsCommandsTest(PytestOnlyDBTestCase):
         db.test_collection.delete_many({})
         db.migrations.delete_one({"filename": migration_file})
 
-    def test_unrecord_with_complete_filename(self, cli, db):
+    def test_unrecord_with_complete_filename(self, db):
         """Should unrecord migration with complete filename"""
         db.migrations.insert_one(
             {
@@ -172,11 +172,11 @@ class MigrationsCommandsTest(PytestOnlyDBTestCase):
                 ],
             }
         )
-        result = cli("db unrecord test.py")
+        result = self.cli("db unrecord test.py")
         assert result.exit_code == 0
         assert db.migrations.count_documents({}) == 0
 
-    def test_unrecord_without_parameters(self, cli, db):
+    def test_unrecord_without_parameters(self, db):
         """Should fail when no filename is provided"""
         db.migrations.insert_one(
             {
@@ -192,17 +192,17 @@ class MigrationsCommandsTest(PytestOnlyDBTestCase):
                 ],
             }
         )
-        result = cli("db unrecord", check=False)
+        result = self.cli("db unrecord", expect_error=True)
         assert result.exit_code != 0
         assert db.migrations.count_documents({}) == 1
 
-    def test_all_existing_migrations_can_run(self, cli, db):
+    def test_all_existing_migrations_can_run(self, db):
         """Test that all existing migrations can be executed without errors on a clean database"""
         # Get all available migrations
         all_migrations = migrations.list_available()
 
         # Run migrations
-        result = cli("db migrate")
+        result = self.cli("db migrate")
         assert result.exit_code == 0
 
         # Verify all migrations were recorded successfully
