@@ -24,7 +24,7 @@ from udata.tests.api import PytestOnlyAPITestCase
 
 class FixturesTest(PytestOnlyAPITestCase):
     @pytest.mark.options(FIXTURE_DATASET_SLUGS=["some-test-dataset-slug"])
-    def test_generate_fixtures_file_then_import(self, app, cli, monkeypatch):
+    def test_generate_fixtures_file_then_import(self, app, cli, mocker):
         """Test generating fixtures from the current env, then importing them back."""
         assert models.Dataset.objects.count() == 0  # Start with a clean slate.
         user = UserFactory()
@@ -55,10 +55,10 @@ class FixturesTest(PytestOnlyAPITestCase):
         DataserviceFactory(datasets=[dataset], organization=org, contact_points=[contact_point])
 
         with NamedTemporaryFile(mode="w+", delete=True) as fixtures_fd:
-            # Get the fixtures from the local instance.
-            monkeypatch.setattr(requests, "get", lambda url: self.get(url))
-            monkeypatch.setattr(Response, "json", Response.get_json)
-            Response.ok = True
+            # Get the fixtures from the local instance by redirecting requests.get to the test client
+            mocker.patch.object(requests, "get", side_effect=lambda url: self.get(url))
+            mocker.patch.object(Response, "json", Response.get_json)
+            mocker.patch.object(Response, "ok", True, create=True)
             result = cli("generate-fixtures-file", "", fixtures_fd.name)
             fixtures_fd.flush()
             assert "Fixtures saved to file " in result.output
