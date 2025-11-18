@@ -77,7 +77,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
     def test_session_auth(self):
         """Should handle session authentication"""
-        api.client.login()  # Session auth
+        self.login()  # Session auth
 
         response = self.post(url_for("api.fake"))
 
@@ -87,7 +87,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
 
     def test_header_auth(self):
         """Should handle header API Key authentication"""
-        with api.user() as user:  # API Key auth
+        with self.api_user() as user:  # API Key auth
             response = self.post(url_for("api.fake"), headers={"X-API-KEY": user.apikey})
 
         assert200(response)
@@ -148,7 +148,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
     def test_inactive_user(self):
         """Should raise a HTTP 401 if the user is inactive"""
         user = UserFactory(active=False)
-        with api.user(user) as user:
+        with self.api_user(user) as user:
             response = self.post(url_for("api.fake"), headers={"X-API-KEY": user.apikey})
 
         assert401(response)
@@ -159,7 +159,7 @@ class APIAuthTest(PytestOnlyAPITestCase):
         """Should raise a HTTP 401 if the user is deleted"""
         user = UserFactory()
         user.mark_as_deleted()
-        with api.user(user) as user:
+        with self.api_user(user) as user:
             response = self.post(url_for("api.fake"), headers={"X-API-KEY": user.apikey})
 
         assert401(response)

@@ -2,7 +2,7 @@ import shlex
 from contextlib import contextmanager
 
 import pytest
-from flask import current_app, json, template_rendered, url_for
+from flask import current_app, template_rendered, url_for
 from flask.testing import FlaskClient
 from flask_principal import Identity, identity_changed
 from lxml import etree
@@ -55,70 +55,6 @@ def client(app):
     Fixes https://github.com/pytest-dev/pytest-flask/issues/42
     """
     return app.test_client()
-
-
-class ApiClient(object):
-    def __init__(self, client):
-        self.client = client
-        self._user = None
-
-    def login(self, *args, **kwargs):
-        return self.client.login(*args, **kwargs)
-
-    @contextmanager
-    def user(self, user=None):
-        self._user = user or UserFactory()
-        if not self._user.apikey:
-            self._user.generate_api_key()
-            self._user.save()
-        yield self._user
-
-    def perform(self, verb, url, **kwargs):
-        headers = kwargs.pop("headers", {})
-        headers["Content-Type"] = "application/json"
-
-        data = kwargs.get("data")
-        if data is not None:
-            data = json.dumps(data)
-            headers["Content-Length"] = len(data)
-            kwargs["data"] = data
-
-        if self._user:
-            headers["X-API-KEY"] = kwargs.get("X-API-KEY", self._user.apikey)
-
-        kwargs["headers"] = headers
-        method = getattr(self.client, verb)
-        return method(url, **kwargs)
-
-    def get(self, url, *args, **kwargs):
-        return self.perform("get", url, *args, **kwargs)
-
-    def post(self, url, data=None, json=True, *args, **kwargs):
-        if not json:
-            return self.client.post(url, data or {}, *args, **kwargs)
-        return self.perform("post", url, data=data or {}, *args, **kwargs)
-
-    def put(self, url, data=None, json=True, *args, **kwargs):
-        if not json:
-            return self.client.put(url, data or {}, *args, **kwargs)
-        return self.perform("put", url, data=data or {}, *args, **kwargs)
-
-    def patch(self, url, data=None, json=True, *args, **kwargs):
-        if not json:
-            return self.client.patch(url, data or {}, *args, **kwargs)
-        return self.perform("patch", url, data=data or {}, *args, **kwargs)
-
-    def delete(self, url, data=None, *args, **kwargs):
-        return self.perform("delete", url, data=data or {}, *args, **kwargs)
-
-    def options(self, url, data=None, *args, **kwargs):
-        return self.perform("options", url, data=data or {}, *args, **kwargs)
-
-
-@pytest.fixture
-def api(client):
-    api_client = ApiClient(client)
-    return api_client
 
 
 @pytest.fixture(name="cli")

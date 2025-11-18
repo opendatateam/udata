@@ -2,22 +2,26 @@ from contextlib import contextmanager
 from urllib.parse import urlparse
 
 import pytest
+from flask import json
 
+from udata.core.user.factories import UserFactory
 from udata.mongo import db
 from udata.mongo.document import get_all_models
 from udata.tests import PytestOnlyTestCase, TestCase, helpers
-from udata.tests.plugin import ApiClient
 
 
 @pytest.mark.usefixtures("instance_path")
 class APITestCaseMixin:
     """
-    See explanation about `get`, `post` overrides in :TestClientOverride
+    API Test Case Mixin with integrated API client functionality.
 
-    (switch from `data` in kwargs to `data` in args to avoid doing `data=data` and default to `json=True`)
+    This mixin provides API testing methods with automatic JSON handling.
+    The `get`, `post`, `put`, `patch`, `delete`, and `options` methods
+    default to JSON content-type and automatic serialization.
     """
 
     user = None
+    _user = None  # For API key authentication context
 
     @pytest.fixture(autouse=True)
     def load_api_routes(self, app):
@@ -27,45 +31,114 @@ class APITestCaseMixin:
         frontend.init_app(app)
 
     @pytest.fixture(autouse=True)
-    def inject_api(self, client):
-        """
-        Inject API test client for compatibility with legacy tests.
-        """
-        self.api = ApiClient(client)
-
-    @pytest.fixture(autouse=True)
     def inject_client(self, client):
         """
-        Inject test client for compatibility with Flask-Testing.
+        Inject test client for Flask testing.
         """
         self.client = client
 
     @contextmanager
     def api_user(self, user=None):
-        with self.api.user(user) as user:
-            yield user
+        """
+        Context manager for API key authentication.
+
+        Usage:
+            with self.api_user(user) as user:
+                response = self.get(url)
+        """
+        self._user = user or UserFactory()
+        if not self._user.apikey:
+            self._user.generate_api_key()
+            self._user.save()
+        yield self._user
+        self._user = None
 
     def login(self, user=None):
+        """Login a user via session authentication."""
         self.user = self.client.login(user)
         return self.user
 
+    def perform(self, verb, url, **kwargs):
+        """
+        Perform an HTTP request with JSON handling.
+
+        Args:
+            verb: HTTP verb (get, post, put, patch, delete, options)
+            url: URL to request
+            **kwargs: Additional arguments for the request
+
+        Returns:
+            Flask test response
+        """
+        headers = kwargs.pop("headers", {})
+        headers["Content-Type"] = "application/json"
+
+        data = kwargs.get("data")
+        if data is not None:
+            data = json.dumps(data)
+            headers["Content-Length"] = len(data)
+            kwargs["data"] = data
+
+        if self._user:
+            headers["X-API-KEY"] = kwargs.get("X-API-KEY", self._user.apikey)
+
+        kwargs["headers"] = headers
+        method = getattr(self.client, verb)
+        return method(url, **kwargs)
+
     def get(self, url, *args, **kwargs):
-        return self.api.get(url, *args, **kwargs)
+        """Perform a GET request with JSON handling."""
+        return self.perform("get", url, *args, **kwargs)
 
     def post(self, url, data=None, json=True, *args, **kwargs):
-        return self.api.post(url, data=data, json=json, *args, **kwargs)
+        """
+        Perform a POST request.
+
+        Args:
+            url: URL to request
+            data: Data to send (will be JSON-encoded if json=True)
+            json: If True, send as JSON (default: True)
+            *args, **kwargs: Additional arguments
+        """
+        if not json:
+            return self.client.post(url, data or {}, *args, **kwargs)
+        return self.perform("post", url, data=data or {}, *args, **kwargs)
 
     def put(self, url, data=None, json=True, *args, **kwargs):
-        return self.api.put(url, data=data, json=json, *args, **kwargs)
+        """
+        Perform a PUT request.
+
+        Args:
+            url: URL to request
+            data: Data to send (will be JSON-encoded if json=True)
+            json: If True, send as JSON (default: True)
+            *args, **kwargs: Additional arguments
+        """
+        if not json:
+            return self.client.put(url, data or {}, *args, **kwargs)
+        return self.perform("put", url, data=data or {}, *args, **kwargs)
 
     def patch(self, url, data=None, json=True, *args, **kwargs):
-        return self.api.patch(url, data=data, json=json, *args, **kwargs)
+        """
+        Perform a PATCH request.
+
+        Args:
+            url: URL to request
+            data: Data to send (will be JSON-encoded if json=True)
+            json: If True, send as JSON (default: True)
+            *args, **kwargs: Additional arguments
+        """
+        if not json:
+            return self.client.patch(url, data or {}, *args, **kwargs)
+        return self.perform("patch", url, data=data or {}, *args, **kwargs)
 
     def delete(self, url, data=None, *args, **kwargs):
-        return self.api.delete(url, data=data, *args, **kwargs)
+        """Perform a DELETE request with JSON handling."""
+        return self.perform("delete", url, data=data or {}, *args, **kwargs)
 
     def options(self, url, data=None, *args, **kwargs):
-        return self.api.options(url, data=data, *args, **kwargs)
+        """Perform an OPTIONS request with JSON handling."""
+        return self.perform("options", url, data=data or {}, *args, **kwargs)
 
     def assertStatus(self, response, status_code, message=None):
         __tracebackhide__ = True

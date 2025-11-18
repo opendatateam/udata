@@ -512,7 +512,7 @@ class ReuseAPITest(PytestOnlyAPITestCase):
         """It should mark the reuse featured on POST"""
         reuse = ReuseFactory(featured=False)
 
-        with api.user(AdminFactory()):
+        with self.api_user(AdminFactory()):
             response = self.post(url_for("api.reuse_featured", reuse=reuse))
         assert200(response)
 
@@ -523,7 +523,7 @@ class ReuseAPITest(PytestOnlyAPITestCase):
         """It shouldn't do anything to feature an already featured reuse"""
         reuse = ReuseFactory(featured=True)
 
-        with api.user(AdminFactory()):
+        with self.api_user(AdminFactory()):
             response = self.post(url_for("api.reuse_featured", reuse=reuse))
         assert200(response)
 
@@ -534,7 +534,7 @@ class ReuseAPITest(PytestOnlyAPITestCase):
         """It should mark the reuse featured on POST"""
         reuse = ReuseFactory(featured=True)
 
-        with api.user(AdminFactory()):
+        with self.api_user(AdminFactory()):
             response = self.delete(url_for("api.reuse_featured", reuse=reuse))
         assert200(response)
 
@@ -545,7 +545,7 @@ class ReuseAPITest(PytestOnlyAPITestCase):
         """It shouldn't do anything to unfeature a not featured reuse"""
         reuse = ReuseFactory(featured=False)
 
-        with api.user(AdminFactory()):
+        with self.api_user(AdminFactory()):
             response = self.delete(url_for("api.reuse_featured", reuse=reuse))
         assert200(response)
 
