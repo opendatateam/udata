@@ -24,7 +24,7 @@ from udata.tests.api import PytestOnlyAPITestCase
 
 class FixturesTest(PytestOnlyAPITestCase):
     @pytest.mark.options(FIXTURE_DATASET_SLUGS=["some-test-dataset-slug"])
-    def test_generate_fixtures_file_then_import(self, app, cli, api, monkeypatch):
+    def test_generate_fixtures_file_then_import(self, mocker):
         """Test generating fixtures from the current env, then importing them back."""
         assert models.Dataset.objects.count() == 0  # Start with a clean slate.
         user = UserFactory()
@@ -55,11 +55,11 @@ class FixturesTest(PytestOnlyAPITestCase):
         DataserviceFactory(datasets=[dataset], organization=org, contact_points=[contact_point])
 
         with NamedTemporaryFile(mode="w+", delete=True) as fixtures_fd:
-            # Get the fixtures from the local instance.
-            monkeypatch.setattr(requests, "get", lambda url: api.get(url))
-            monkeypatch.setattr(Response, "json", Response.get_json)
-            Response.ok = True
-            result = cli("generate-fixtures-file", "", fixtures_fd.name)
+            # Get the fixtures from the local instance by redirecting requests.get to the test client
+            mocker.patch.object(requests, "get", side_effect=lambda url: self.get(url))
+            mocker.patch.object(Response, "json", Response.get_json)
+            mocker.patch.object(Response, "ok", True, create=True)
+            result = self.cli("generate-fixtures-file", "", fixtures_fd.name)
             fixtures_fd.flush()
             assert "Fixtures saved to file " in result.output
 
@@ -81,7 +81,7 @@ class FixturesTest(PytestOnlyAPITestCase):
             assert models.ContactPoint.objects.count() == 0
 
             # Then load them in the database to make sure they're correct.
-            result = cli("import-fixtures", fixtures_fd.name)
+            result = self.cli("import-fixtures", fixtures_fd.name)
         assert models.Organization.objects(slug=org.slug).count() > 0
         result_org = models.Organization.objects.get(slug=org.slug)
         assert result_org.members[0].user.id == user.id
@@ -106,11 +106,11 @@ class FixturesTest(PytestOnlyAPITestCase):
         assert result_dataservice.organization == org
         assert result_dataservice.contact_points == [contact_point]
 
-    def test_import_fixtures_from_default_file(self, cli):
+    def test_import_fixtures_from_default_file(self):
         """Test importing fixtures from udata.commands.fixture.DEFAULT_FIXTURE_FILE."""
         # Deactivate spam detection when testing import fixtures
         SpamMixin.detect_spam_enabled = False
-        cli("import-fixtures")
+        self.cli("import-fixtures")
         SpamMixin.detect_spam_enabled = True
         assert models.Organization.objects.count() > 0
         assert models.Dataset.objects.count() > 0

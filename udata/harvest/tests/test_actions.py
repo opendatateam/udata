@@ -15,13 +15,14 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
+from udata.harvest.backends import get_enabled_backends
+from udata.harvest.backends.base import BaseBackend
 from udata.models import Dataset, PeriodicTask
 from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_emit, assert_equal_dates, assert_not_emit
 from udata.utils import faker
 
 from .. import actions, signals
-from ..backends import BaseBackend
 from ..models import (
     VALIDATION_ACCEPTED,
     VALIDATION_PENDING,
@@ -42,9 +43,10 @@ from .factories import (
 log = logging.getLogger(__name__)
 
 
-class HarvestActionsTest(PytestOnlyDBTestCase):
+class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
     def test_list_backends(self):
-        for backend in actions.list_backends():
+        assert len(get_enabled_backends()) > 0
+        for backend in get_enabled_backends().values():
             assert issubclass(backend, BaseBackend)
 
     def test_list_sources(self):
@@ -269,7 +271,16 @@ class HarvestActionsTest(PytestOnlyDBTestCase):
         assert periodic_task.crontab.day_of_month == "*"
         assert periodic_task.crontab.month_of_year == "*"
         assert periodic_task.enabled
-        assert periodic_task.name == "Harvest {0}".format(source.name)
+        assert periodic_task.name == f"Harvest {source.name} ({source.id})"
+
+    def test_double_schedule_with_same_name(self):
+        source_1 = HarvestSourceFactory(name="A")
+        source_2 = HarvestSourceFactory(name="A")
+
+        actions.schedule(source_1, hour=0)
+        actions.schedule(source_2, hour=0)
+
+        assert len(PeriodicTask.objects) == 2
 
     def test_schedule_from_cron(self):
         source = HarvestSourceFactory()
@@ -286,7 +297,7 @@ class HarvestActionsTest(PytestOnlyDBTestCase):
         assert periodic_task.crontab.month_of_year == "3"
         assert periodic_task.crontab.day_of_week == "sunday"
         assert periodic_task.enabled
-        assert periodic_task.name == "Harvest {0}".format(source.name)
+        assert periodic_task.name == f"Harvest {source.name} ({source.id})"
 
     def test_reschedule(self):
         source = HarvestSourceFactory()
@@ -306,7 +317,7 @@ class HarvestActionsTest(PytestOnlyDBTestCase):
         assert periodic_task.crontab.day_of_month == "*"
         assert periodic_task.crontab.month_of_year == "*"
         assert periodic_task.enabled
-        assert periodic_task.name == "Harvest {0}".format(source.name)
+        assert periodic_task.name == f"Harvest {source.name} ({source.id})"
 
     def test_unschedule(self):
         periodic_task = PeriodicTask.objects.create(

@@ -16,7 +16,7 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
-from udata.core.topic.factories import TopicElementFactory, TopicFactory
+from udata.core.topic.factories import ReuseFactory, TopicElementFactory, TopicFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.i18n import gettext as _
 from udata.tests.helpers import assert200, assert400, assert410
@@ -98,6 +98,34 @@ class DataserviceAPITest(APITestCase):
         assert200(response)
         assert len(response.json["data"]) == 1
         assert response.json["data"][0]["id"] == str(topic_dataservice.id)
+
+        # filter on reuse
+        reuse_dataservice = DataserviceFactory()
+        reuse = ReuseFactory(dataservices=[reuse_dataservice])
+        response = self.get(url_for("api.dataservices", reuse=reuse.id))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(reuse_dataservice.id)
+
+    def test_dataservices_topic_filter_errors(self):
+        # non-existing
+        response = self.get(url_for("api.dataservices", topic="690c7f48ec85adaa376c1e93"))
+        assert200(response)
+
+        # not an object ID
+        response = self.get(url_for("api.dataservices", topic="xxx"))
+        assert400(response)
+        assert "`topic` must be an identifier" in response.json["message"]
+
+    def test_dataservices_reuse_filter_errors(self):
+        # non-existing
+        response = self.get(url_for("api.dataservices", reuse="690c7f48ec85adaa376c1e93"))
+        assert200(response)
+
+        # not an object ID
+        response = self.get(url_for("api.dataservices", reuse="xxx"))
+        assert400(response)
+        assert "`reuse` must be an identifier" in response.json["message"]
 
     def test_dataservice_api_create(self):
         user = self.login()

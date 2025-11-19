@@ -13,7 +13,7 @@ from udata.core.storages import utils
 from udata.core.storages.api import META, chunk_filename
 from udata.core.storages.tasks import purge_chunks
 from udata.tests import PytestOnlyTestCase
-from udata.tests.api import PytestOnlyDBTestCase
+from udata.tests.api import PytestOnlyAPITestCase
 from udata.utils import faker
 
 from .helpers import assert200, assert400
@@ -108,12 +108,13 @@ class ConfigurableAllowedExtensionsTest(PytestOnlyTestCase):
 
 
 @pytest.mark.usefixtures("instance_path")
-class StorageUploadViewTest(PytestOnlyDBTestCase):
-    def test_standard_upload(self, client):
-        client.login()
-        response = client.post(
-            url_for("test-storage.upload", name="resources"),
+class StorageUploadViewTest(PytestOnlyAPITestCase):
+    def test_standard_upload(self):
+        self.login()
+        response = self.post(
+            url_for("storage.upload", name="resources"),
             {"file": (BytesIO(b"aaa"), "Test with  spaces.TXT")},
+            json=False,
         )
 
         assert200(response)
@@ -128,14 +129,14 @@ class StorageUploadViewTest(PytestOnlyDBTestCase):
         assert response.json["url"] == expected
         assert response.json["mime"] == "text/plain"
 
-    def test_chunked_upload(self, client):
-        client.login()
-        url = url_for("test-storage.upload", name="tmp")
+    def test_chunked_upload(self):
+        self.login()
+        url = url_for("storage.upload", name="tmp")
         uuid = str(uuid4())
         parts = 4
 
         for i in range(parts):
-            response = client.post(
+            response = self.post(
                 url,
                 {
                     "file": (BytesIO(b"a"), "blob"),
@@ -147,6 +148,7 @@ class StorageUploadViewTest(PytestOnlyDBTestCase):
                     "totalparts": parts,
                     "chunksize": 1,
                 },
+                json=False,
             )
 
             assert200(response)
@@ -157,7 +159,7 @@ class StorageUploadViewTest(PytestOnlyDBTestCase):
             assert "sha1" not in response.json
             assert "url" not in response.json
 
-        response = client.post(
+        response = self.post(
             url,
             {
                 "uuid": uuid,
@@ -165,6 +167,7 @@ class StorageUploadViewTest(PytestOnlyDBTestCase):
                 "totalfilesize": parts,
                 "totalparts": parts,
             },
+            json=False,
         )
         assert "filename" in response.json
         assert "url" in response.json
@@ -180,13 +183,13 @@ class StorageUploadViewTest(PytestOnlyDBTestCase):
         assert storages.tmp.read(filename) == b"aaaa"
         assert list(storages.chunks.list_files()) == []
 
-    def test_chunked_upload_bad_chunk(self, client):
-        client.login()
-        url = url_for("test-storage.upload", name="tmp")
+    def test_chunked_upload_bad_chunk(self):
+        self.login()
+        url = url_for("storage.upload", name="tmp")
         uuid = str(uuid4())
         parts = 4
 
-        response = client.post(
+        response = self.post(
             url,
             {
                 "file": (BytesIO(b"a"), "blob"),
@@ -198,6 +201,7 @@ class StorageUploadViewTest(PytestOnlyDBTestCase):
                 "totalparts": parts,
                 "chunksize": 10,  # Does not match
             },
+            json=False,
         )
 
         assert400(response)
@@ -210,10 +214,12 @@ class StorageUploadViewTest(PytestOnlyDBTestCase):
 
         assert list(storages.chunks.list_files()) == []
 
-    def test_upload_resource_bad_request(self, client):
-        client.login()
-        response = client.post(
-            url_for("test-storage.upload", name="tmp"), {"bad": (BytesIO(b"aaa"), "test.txt")}
+    def test_upload_resource_bad_request(self):
+        self.login()
+        response = self.post(
+            url_for("storage.upload", name="tmp"),
+            {"bad": (BytesIO(b"aaa"), "test.txt")},
+            json=False,
         )
 
         assert400(response)
