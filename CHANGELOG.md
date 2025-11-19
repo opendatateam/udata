@@ -1,5 +1,22 @@
 # Changelog
 
+## 14.0.2 (2025-11-19)
+
+- feat: update translations ([#3532](https://github.com/opendatateam/udata/pull/3532))
+- fix: do not send security mail on demo ([#3530](https://github.com/opendatateam/udata/pull/3530))
+- fix: incorrect description for GET /harvest/job/{ident} ([#3533](https://github.com/opendatateam/udata/pull/3533))
+- fix: restricted datasets reasons translations and definitions ([#3529](https://github.com/opendatateam/udata/pull/3529))
+- fix: schedule two harvester sources with same name ([#3531](https://github.com/opendatateam/udata/pull/3531))
+
+
+## 14.0.1 (2025-11-19)
+
+- fix: date instead of datetime in HarvestMetadata modified_at ([#3526](https://github.com/opendatateam/udata/pull/3526))
+- fix: deleting and purging page's blocs elements (reuses, datasets and dataservices) ([#3524](https://github.com/opendatateam/udata/pull/3524))
+- fix: HARVESTER_BACKENDS settings in changelog
+- refactor: standardization of test clients, CLI runner, mocker… ([#3525](https://github.com/opendatateam/udata/pull/3525))
+
+
 ## 14.0.0 (2025-11-17)
 - **refactor!: change entrypoints system ([#3518](https://github.com/opendatateam/udata/pull/3518))**
   - remove `udata.models`
@@ -23,7 +40,7 @@
   
   - The `udata.harvesters` entrypoints are automaticly loaded (without the
   need of `PLUGINS` settings)
-  - Need to move the harvesters from `PLUGINS` to `HARVESTERS_BACKENDS` to
+  - Need to move the harvesters from `PLUGINS` to `HARVESTER_BACKENDS` to
   enable them.
   - Need to add explicit glob with `*`, like `csw*` to enable all backends
   starting with `csw` (before it was an implicit `startswith`)
@@ -33,7 +50,7 @@
   Example of new setting:
   
   ```
-  HARVESTERS_BACKENDS = [
+  HARVESTER_BACKENDS = [
     'ckan',
     'dkan',
     'dcat',
@@ -45,7 +62,7 @@
   - [x] Added `name` to all internal harvesters backends
   - [x] Removed `actions.list_backends()`, use
   `backends.get_enabled_backends()` since it's not really an action.
-  - [x] Added `HARVESTERS_BACKENDS` setting to replace `PLUGINS` for
+  - [x] Added `HARVESTER_BACKENDS` setting to replace `PLUGINS` for
   enabling/disabling harvesters backends
   - [x] Removed broken `/api/1/harvest/job_status/` endpoint
 - build: try using conventional commit in Crowdin PR ([#3511](https://github.com/opendatateam/udata/pull/3511))
