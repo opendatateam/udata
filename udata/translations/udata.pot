@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2025-11-19 10:54+0100\n"
-"PO-Revision-Date: 2025-11-19 10:54+0100\n"
+"POT-Creation-Date: 2025-11-19 11:00+0100\n"
+"PO-Revision-Date: 2025-11-19 11:00+0100\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -314,48 +314,63 @@ msgstr ""
 
 #: udata/core/access_type/constants.py:66
 msgid ""
-"The confidentiality of the proceedings of public authorities, where such "
+"Public access to datasets and services would adversely affect the "
+"confidentiality of the proceedings of public authorities, where such "
 "confidentiality is provided for by law."
 msgstr ""
 
-#: udata/core/access_type/constants.py:69
-msgid "International relations, public security or national defence."
+#: udata/core/access_type/constants.py:70
+msgid ""
+"Public access to datasets and services would adversely affect international "
+"relations, public security or national defence."
 msgstr ""
 
-#: udata/core/access_type/constants.py:72
+#: udata/core/access_type/constants.py:74
 msgid ""
-"The course of justice, the ability of any person to receive a fair trial or "
-"the ability of a public authority to conduct an enquiry of a criminal or "
-"disciplinary nature."
+"Public access to datasets and services would adversely affect the course of "
+"justice, the ability of any person to receive a fair trial or the ability of "
+"a public authority to conduct an enquiry of a criminal or disciplinary "
+"nature."
 msgstr ""
 
-#: udata/core/access_type/constants.py:76
+#: udata/core/access_type/constants.py:78
 msgid ""
-"The confidentiality of commercial or industrial information, where such "
+"Public access to datasets and services would adversely affect the "
+"confidentiality of commercial or industrial information, where such "
 "confidentiality is provided for by national or Community law to protect a "
-"legitimate economic interest."
-msgstr ""
-
-#: udata/core/access_type/constants.py:79
-msgid "Intellectual property rights."
+"legitimate economic interest, including the public interest in maintaining "
+"statistical confidentiality and tax secrecy."
 msgstr ""
 
 #: udata/core/access_type/constants.py:82
 msgid ""
-"The confidentiality of personal data and/or files relating to a natural "
-"person where that person has not consented to the disclosure."
+"Public access to datasets and services would adversely affect intellectual "
+"property rights."
 msgstr ""
 
 #: udata/core/access_type/constants.py:86
 msgid ""
-"The interests or protection of any person who supplied the information "
-"requested on a voluntary basis without being under a legal obligation."
+"Public access to datasets and services would adversely affect the "
+"confidentiality of personal data and/or files relating to a natural person "
+"where that person has not consented to the disclosure of the information to "
+"the public, where such confidentiality is provided for by national or "
+"Community law."
 msgstr ""
 
 #: udata/core/access_type/constants.py:90
 msgid ""
-"The protection of the environment to which such information relates, such as "
-"the location of rare species."
+"Public access to datasets and services would adversely affect the interests "
+"or protection of any person who supplied the information requested on a "
+"voluntary basis without being under, or capable of being put under, a legal "
+"obligation to do so, unless that person has consented to the release of the "
+"information concerned."
+msgstr ""
+
+#: udata/core/access_type/constants.py:94
+msgid ""
+"Public access to datasets and services would adversely affect the protection "
+"of the environment to which such information relates, such as the location of"
+" rare species."
 msgstr ""
 
 #: udata/core/access_type/models.py:25
