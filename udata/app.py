@@ -20,6 +20,7 @@ from flask import (
 )
 from flask.json.provider import DefaultJSONProvider
 from flask_caching import Cache
+from flask_login import current_user
 from flask_wtf.csrf import CSRFProtect
 from mongoengine import EmbeddedDocument
 from mongoengine.base import BaseDocument
@@ -183,6 +184,9 @@ def create_app(config="udata.settings.Defaults", override=None, init_logging=ini
         # This auth is enable for all routes : API and security
         # We needed to add this because otherwise API routes only
         # support session auth and not api key.
+        if current_user.is_authenticated:
+            return
+
         login_from_apikey_header_if_exists()
 
     return app
