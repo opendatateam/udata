@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from uuid import uuid4
 
 import pytest
@@ -872,3 +872,26 @@ class HarvestMetadataTest(PytestOnlyDBTestCase):
         resource.validate()
 
         assert resource.last_modified == resource.extras["analysis:last-modified-at"]
+
+    def test_quality_cached_next_update_with_date_last_update(self):
+        """Test that quality_cached with date (not datetime) last_update can be saved to MongoDB.
+
+        This reproduces a production bug where last_update could be a datetime.date instead
+        of datetime.datetime, causing next_update to also be a datetime.date, which BSON
+        cannot encode (it only supports datetime.datetime).
+
+        See error: bson.errors.InvalidDocument: cannot encode object: datetime.date(...), of type: <class 'datetime.date'>
+        """
+        dataset: Dataset = DatasetFactory(
+            frequency=UpdateFrequency.QUARTERLY,
+        )
+        # Set harvest metadata with modified_at as a date instead of datetime
+        # This simulates data coming from harvesting where dates might not be properly typed
+        dataset.harvest = HarvestDatasetMetadata(
+            created_at=datetime(2019, 1, 1),
+            modified_at=date(2019, 6, 7),  # Using date instead of datetime
+        )
+        # Also set last_update as date to fully simulate the production scenario
+        dataset.last_update = date(2019, 6, 7)
+
+        dataset.save()
