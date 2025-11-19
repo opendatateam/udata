@@ -1,5 +1,14 @@
 # Changelog
 
+## 14.0.2 (2025-11-19)
+
+- feat: update translations ([#3532](https://github.com/opendatateam/udata/pull/3532))
+- fix: do not send security mail on demo ([#3530](https://github.com/opendatateam/udata/pull/3530))
+- fix: incorrect description for GET /harvest/job/{ident} ([#3533](https://github.com/opendatateam/udata/pull/3533))
+- fix: restricted datasets reasons translations and definitions ([#3529](https://github.com/opendatateam/udata/pull/3529))
+- fix: schedule two harvester sources with same name ([#3531](https://github.com/opendatateam/udata/pull/3531))
+
+
 ## 14.0.1 (2025-11-19)
 
 - fix: date instead of datetime in HarvestMetadata modified_at ([#3526](https://github.com/opendatateam/udata/pull/3526))
