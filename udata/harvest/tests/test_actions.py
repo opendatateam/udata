@@ -273,6 +273,15 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         assert periodic_task.enabled
         assert periodic_task.name == "Harvest {0}".format(source.name)
 
+    def test_double_schedule_with_same_name(self):
+        source_1 = HarvestSourceFactory(name="A")
+        source_2 = HarvestSourceFactory(name="A")
+
+        actions.schedule(source_1, hour=0)
+        actions.schedule(source_2, hour=0)
+
+        assert len(PeriodicTask.objects) == 2
+
     def test_schedule_from_cron(self):
         source = HarvestSourceFactory()
         with assert_emit(signals.harvest_source_scheduled):
