@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2025-11-19 11:00+0100\n"
-"PO-Revision-Date: 2025-11-19 12:58\n"
+"PO-Revision-Date: 2025-11-19 13:03\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -279,67 +279,67 @@ msgstr "Permission refusée pour cette organisation"
 
 #: udata/core/access_type/constants.py:42
 msgid "Confidentiality of public authorities proceedings"
-msgstr ""
+msgstr "Confidentialité des procédures des autorités publiques"
 
 #: udata/core/access_type/constants.py:44
 msgid "International relations, public security or national defence"
-msgstr ""
+msgstr "Relations internationales, sécurité publique ou défense nationale."
 
 #: udata/core/access_type/constants.py:46
 msgid "Course of justice"
-msgstr ""
+msgstr "Cours de la justice"
 
 #: udata/core/access_type/constants.py:48
 msgid "Commercial or industrial confidentiality"
-msgstr ""
+msgstr "Confidentialité commerciale ou industrielle"
 
 #: udata/core/access_type/constants.py:50
 msgid "Intellectual property rights"
-msgstr ""
+msgstr "Droits de propriété intellectuelle"
 
 #: udata/core/access_type/constants.py:52
 msgid "Personal data confidentiality"
-msgstr ""
+msgstr "Confidentialité des données personnelles"
 
 #: udata/core/access_type/constants.py:54
 msgid "Protection of voluntary information suppliers"
-msgstr ""
+msgstr "Protection des fournisseurs d'informations volontaires"
 
 #: udata/core/access_type/constants.py:56
 msgid "Environmental protection"
-msgstr ""
+msgstr "Protection de l'environnement"
 
 #: udata/core/access_type/constants.py:66
 msgid "Public access to datasets and services would adversely affect the confidentiality of the proceedings of public authorities, where such confidentiality is provided for by law."
-msgstr ""
+msgstr "L'accès du public aux jeux de données et aux services nuirait à la confidentialité des procédures des autorités publiques, lorsque cette confidentialité est prévue par la loi."
 
 #: udata/core/access_type/constants.py:70
 msgid "Public access to datasets and services would adversely affect international relations, public security or national defence."
-msgstr ""
+msgstr "L'accès du public aux jeux de données et aux services aurait des répercussions négatives sur les relations internationales, la sécurité publique ou la défense nationale."
 
 #: udata/core/access_type/constants.py:74
 msgid "Public access to datasets and services would adversely affect the course of justice, the ability of any person to receive a fair trial or the ability of a public authority to conduct an enquiry of a criminal or disciplinary nature."
-msgstr ""
+msgstr "L'accès du public aux jeux de données et aux services aurait un impact négatif sur le cours de la justice, la capacité de toute personne de recevoir un procès équitable ou la capacité d'une autorité publique à mener une enquête à caractère criminel ou disciplinaire."
 
 #: udata/core/access_type/constants.py:78
 msgid "Public access to datasets and services would adversely affect the confidentiality of commercial or industrial information, where such confidentiality is provided for by national or Community law to protect a legitimate economic interest, including the public interest in maintaining statistical confidentiality and tax secrecy."
-msgstr ""
+msgstr "L'accès du public aux jeux de données et aux services nuirait à la confidentialité des informations commerciales ou industrielles, lorsque cette confidentialité est prévue par le droit national ou communautaire pour protéger un intérêt économique légitime, y compris l'intérêt du public pour le maintien de la confidentialité statistique et du secret fiscal."
 
 #: udata/core/access_type/constants.py:82
 msgid "Public access to datasets and services would adversely affect intellectual property rights."
-msgstr ""
+msgstr "L'accès du public aux jeux de données et aux services aurait des répercussions négatives sur les droits de propriété intellectuelle."
 
 #: udata/core/access_type/constants.py:86
 msgid "Public access to datasets and services would adversely affect the confidentiality of personal data and/or files relating to a natural person where that person has not consented to the disclosure of the information to the public, where such confidentiality is provided for by national or Community law."
-msgstr ""
+msgstr "L'accès du public aux jeux de données et aux services nuirait à la confidentialité des données à caractère personnel et/ou des fichiers relatifs à une personne physique où cette personne n'a pas consenti à la divulgation de l'information au public, lorsque cette confidentialité est prévue par le droit national ou communautaire."
 
 #: udata/core/access_type/constants.py:90
 msgid "Public access to datasets and services would adversely affect the interests or protection of any person who supplied the information requested on a voluntary basis without being under, or capable of being put under, a legal obligation to do so, unless that person has consented to the release of the information concerned."
-msgstr ""
+msgstr "L'accès du public aux jeux de données et aux services nuirait aux intérêts ou à la protection de toute personne qui a fourni les informations demandées sur une base volontaire sans être souscrite, ou pouvant être soumis, une obligation légale de le faire, à moins que cette personne ait consenti à la divulgation des renseignements concernés."
 
 #: udata/core/access_type/constants.py:94
 msgid "Public access to datasets and services would adversely affect the protection of the environment to which such information relates, such as the location of rare species."
-msgstr ""
+msgstr "L'accès du public aux jeux de données et aux services nuirait à la protection de l'environnement auquel ces informations se rapportent, comme l'emplacement d'espèces rares."
 
 #: udata/core/access_type/models.py:25
 msgid "You can only set one condition for a given access audience role"
@@ -452,7 +452,7 @@ msgstr "Dernières APIs"
 
 #: udata/core/dataservices/models.py:27
 msgid "Dataservice serving high value datasets"
-msgstr ""
+msgstr "API servant des jeux de données de haute valeur"
 
 #: udata/core/dataservices/models.py:185
 msgid "dataservice"
@@ -792,15 +792,15 @@ msgstr "Licence"
 
 #: udata/core/dataset/forms.py:182
 msgid "Authorization request URL"
-msgstr ""
+msgstr "URL de la demande d'autorisation"
 
 #: udata/core/dataset/forms.py:184
 msgid "Access type reason category"
-msgstr ""
+msgstr "Catégorie de raison du type d'accès"
 
 #: udata/core/dataset/forms.py:188
 msgid "Access type reason"
-msgstr ""
+msgstr "Raison du type d'accès"
 
 #: udata/core/dataset/forms.py:190
 msgid "Update frequency"
