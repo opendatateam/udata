@@ -2506,13 +2506,13 @@ class ResourcesTypesAPITest(APITestCase):
 
 
 class DatasetSchemasAPITest(PytestOnlyAPITestCase):
-    def test_dataset_schemas_api_list(self, api, rmock, app):
+    def test_dataset_schemas_api_list(self, rmock, app):
         # Can't use @pytest.mark.options otherwise a request will be
         # made before setting up rmock at module load, resulting in a 404
         app.config["SCHEMA_CATALOG_URL"] = "https://example.com/schemas"
 
         rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
-        response = api.get(url_for("api.schemas"))
+        response = self.get(url_for("api.schemas"))
 
         assert200(response)
         assert (
@@ -2520,27 +2520,27 @@ class DatasetSchemasAPITest(PytestOnlyAPITestCase):
         )
 
     @pytest.mark.options(SCHEMA_CATALOG_URL=None)
-    def test_dataset_schemas_api_list_no_catalog_url(self, api):
-        response = api.get(url_for("api.schemas"))
+    def test_dataset_schemas_api_list_no_catalog_url(self):
+        response = self.get(url_for("api.schemas"))
 
         assert200(response)
         assert response.json == []
 
     @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/notfound")
-    def test_dataset_schemas_api_list_not_found(self, api, rmock):
+    def test_dataset_schemas_api_list_not_found(self, rmock):
         rmock.get("https://example.com/notfound", status_code=404)
-        response = api.get(url_for("api.schemas"))
+        response = self.get(url_for("api.schemas"))
         assert404(response)
 
     @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/schemas")
-    def test_dataset_schemas_api_list_error_no_cache(self, api, rmock):
+    def test_dataset_schemas_api_list_error_no_cache(self, rmock):
         rmock.get("https://example.com/schemas", status_code=500)
 
-        response = api.get(url_for("api.schemas"))
+        response = self.get(url_for("api.schemas"))
         assert response.status_code == 503
 
     @pytest.mark.options(SCHEMA_CATALOG_URL="https://example.com/schemas")
-    def test_dataset_schemas_api_list_error_w_cache(self, api, rmock, mocker):
+    def test_dataset_schemas_api_list_error_w_cache(self, rmock, mocker):
         cache_mock_set = mocker.patch.object(cache, "set")
         mocker.patch.object(
             cache, "get", return_value=ResourceSchemaMockData.get_mock_data()["schemas"]
@@ -2548,7 +2548,7 @@ class DatasetSchemasAPITest(PytestOnlyAPITestCase):
 
         # Fill cache
         rmock.get("https://example.com/schemas", json=ResourceSchemaMockData.get_mock_data())
-        response = api.get(url_for("api.schemas"))
+        response = self.get(url_for("api.schemas"))
         assert200(response)
         assert (
             response.json == ResourceSchemaMockData.get_expected_assignable_schemas_from_mock_data()
@@ -2559,7 +2559,7 @@ class DatasetSchemasAPITest(PytestOnlyAPITestCase):
         rmock.get("https://example.com/schemas", status_code=500)
 
         # Long term cache is used
-        response = api.get(url_for("api.schemas"))
+        response = self.get(url_for("api.schemas"))
         assert200(response)
         assert (
             response.json == ResourceSchemaMockData.get_expected_assignable_schemas_from_mock_data()
@@ -2567,7 +2567,7 @@ class DatasetSchemasAPITest(PytestOnlyAPITestCase):
 
 
 class HarvestMetadataAPITest(PytestOnlyAPITestCase):
-    def test_dataset_with_harvest_metadata(self, api):
+    def test_dataset_with_harvest_metadata(self):
         date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
         harvest_metadata = HarvestDatasetMetadata(
             backend="DCAT",
@@ -2585,7 +2585,7 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
         )
         dataset = DatasetFactory(harvest=harvest_metadata)
 
-        response = api.get(url_for("api.dataset", dataset=dataset))
+        response = self.get(url_for("api.dataset", dataset=dataset))
         assert200(response)
         assert response.json["harvest"] == {
             "backend": "DCAT",
@@ -2602,7 +2602,7 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
             "archived": "not-on-remote",
         }
 
-    def test_dataset_with_resource_harvest_metadata(self, api):
+    def test_dataset_with_resource_harvest_metadata(self):
         date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
 
         harvest_metadata = HarvestResourceMetadata(
@@ -2612,7 +2612,7 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
         )
         dataset = DatasetFactory(resources=[ResourceFactory(harvest=harvest_metadata)])
 
-        response = api.get(url_for("api.dataset", dataset=dataset))
+        response = self.get(url_for("api.dataset", dataset=dataset))
         assert200(response)
         assert response.json["resources"][0]["harvest"] == {
             "issued_at": date.isoformat(),
@@ -2620,7 +2620,7 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
             "uri": "http://domain.gouv.fr/dataset/uri",
         }
 
-    def test_dataset_with_harvest_computed_dates(self, api):
+    def test_dataset_with_harvest_computed_dates(self):
         # issued_date takes precedence over internal creation date and harvest created_at on dataset
         issued_date = datetime(2022, 2, 22, tzinfo=pytz.UTC)
         creation_date = datetime(2022, 2, 23, tzinfo=pytz.UTC)
@@ -2631,7 +2631,7 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
             modified_at=modification_date,
         )
         dataset = DatasetFactory(harvest=harvest_metadata)
-        response = api.get(url_for("api.dataset", dataset=dataset))
+        response = self.get(url_for("api.dataset", dataset=dataset))
         assert200(response)
         assert response.json["created_at"] == issued_date.isoformat()
         assert response.json["last_modified"] == modification_date.isoformat()
@@ -2643,7 +2643,7 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
             modified_at=modification_date,
         )
         dataset = DatasetFactory(harvest=harvest_metadata)
-        response = api.get(url_for("api.dataset", dataset=dataset))
+        response = self.get(url_for("api.dataset", dataset=dataset))
         assert200(response)
         assert response.json["created_at"] == creation_date.isoformat()
         assert response.json["last_modified"] == modification_date.isoformat()
@@ -2654,7 +2654,7 @@ class HarvestMetadataAPITest(PytestOnlyAPITestCase):
             modified_at=modification_date,
         )
         dataset = DatasetFactory(resources=[ResourceFactory(harvest=resource_harvest_metadata)])
-        response = api.get(url_for("api.dataset", dataset=dataset))
+        response = self.get(url_for("api.dataset", dataset=dataset))
         assert200(response)
         assert response.json["resources"][0]["created_at"] == issued_date.isoformat()
         assert response.json["resources"][0]["last_modified"] == modification_date.isoformat()
