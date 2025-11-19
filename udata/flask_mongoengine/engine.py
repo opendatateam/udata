@@ -7,8 +7,6 @@ from mongoengine.errors import DoesNotExist
 from mongoengine.queryset import QuerySet
 
 from .connection import create_connections
-
-# from .json import override_json_encoder
 from .pagination import ListFieldPagination, Pagination
 from .wtf import WtfBaseField
 
@@ -108,9 +106,6 @@ class MongoEngine(object):
         self.app = app
 
         app.extensions = getattr(app, "extensions", {})
-
-        # Make documents JSON serializable
-        # override_json_encoder(app)
 
         if "mongoengine" not in app.extensions:
             app.extensions["mongoengine"] = {}
