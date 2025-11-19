@@ -437,7 +437,7 @@ class JobAPI(API):
     @api.expect(parser)
     @api.marshal_with(job_fields)
     def get(self, ident):
-        """List all jobs for a given source"""
+        """Get a single job given an ID"""
         return actions.get_job(ident)
 
 
