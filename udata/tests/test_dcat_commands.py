@@ -2,7 +2,7 @@ from udata.tests.api import PytestOnlyDBTestCase
 
 
 class ParseUrlCommandTest(PytestOnlyDBTestCase):
-    def test_parse_url(self, cli, requests_mock, caplog) -> None:
+    def test_parse_url(self, requests_mock, caplog) -> None:
         logs = []
 
         def mock_echo(message: str) -> None:
@@ -15,7 +15,7 @@ class ParseUrlCommandTest(PytestOnlyDBTestCase):
             requests_mock.get(mock_url, text=test_rdf_file.read())
             requests_mock.head(mock_url, text="sig.oreme.rdf")
         dataset_id = "0437a976-cff1-4fa6-807a-c23006df2f8f"
-        result = cli(
+        result = self.cli(
             "dcat",
             "parse-url",
             mock_url,

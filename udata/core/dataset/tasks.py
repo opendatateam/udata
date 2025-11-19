@@ -15,6 +15,7 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.constants import INSPIRE
 from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
 from udata.core.organization.models import Organization
+from udata.core.pages.models import Page
 from udata.harvest.models import HarvestJob
 from udata.models import Activity, Discussion, Follow, TopicElement, Transfer, db
 from udata.storage.s3 import store_bytes
@@ -54,6 +55,12 @@ def purge_datasets(self):
             dataservice.update(datasets=datasets)
         # Remove HarvestItem references
         HarvestJob.objects(items__dataset=dataset).update(set__items__S__dataset=None)
+        # Remove datasets in pages (mongoengine doesn't support updating a field in a generic embed)
+        Page._get_collection().update_many(
+            {"blocs.datasets": dataset.id},
+            {"$pull": {"blocs.$[b].datasets": dataset.id}},
+            array_filters=[{"b.datasets": dataset.id}],
+        )
         # Remove associated Transfers
         Transfer.objects(subject=dataset).delete()
         # Remove each dataset's resource's file
