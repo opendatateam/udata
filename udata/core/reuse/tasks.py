@@ -1,4 +1,5 @@
 from udata.core import storages
+from udata.core.pages.models import Page
 from udata.core.topic.models import TopicElement
 from udata.models import Activity, Discussion, Follow, Transfer
 from udata.tasks import get_logger, job, task
@@ -23,6 +24,12 @@ def purge_reuses(self) -> None:
         Transfer.objects(subject=reuse).delete()
         # Remove reuses references in Topics
         TopicElement.objects(element=reuse).update(element=None)
+        # Remove reuses in pages (mongoengine doesn't support updating a field in a generic embed)
+        Page._get_collection().update_many(
+            {"blocs.reuses": reuse.id},
+            {"$pull": {"blocs.$[b].reuses": reuse.id}},
+            array_filters=[{"b.reuses": reuse.id}],
+        )
         # Remove reuse's logo in all sizes
         if reuse.image.filename is not None:
             storage = storages.images

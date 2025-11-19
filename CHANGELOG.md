@@ -1,5 +1,102 @@
 # Changelog
 
+## 14.0.2 (2025-11-19)
+
+- feat: update translations ([#3532](https://github.com/opendatateam/udata/pull/3532))
+- fix: do not send security mail on demo ([#3530](https://github.com/opendatateam/udata/pull/3530))
+- fix: incorrect description for GET /harvest/job/{ident} ([#3533](https://github.com/opendatateam/udata/pull/3533))
+- fix: restricted datasets reasons translations and definitions ([#3529](https://github.com/opendatateam/udata/pull/3529))
+- fix: schedule two harvester sources with same name ([#3531](https://github.com/opendatateam/udata/pull/3531))
+
+
+## 14.0.1 (2025-11-19)
+
+- fix: date instead of datetime in HarvestMetadata modified_at ([#3526](https://github.com/opendatateam/udata/pull/3526))
+- fix: deleting and purging page's blocs elements (reuses, datasets and dataservices) ([#3524](https://github.com/opendatateam/udata/pull/3524))
+- fix: HARVESTER_BACKENDS settings in changelog
+- refactor: standardization of test clients, CLI runner, mocker… ([#3525](https://github.com/opendatateam/udata/pull/3525))
+
+
+## 14.0.0 (2025-11-17)
+- **refactor!: change entrypoints system ([#3518](https://github.com/opendatateam/udata/pull/3518))**
+  - remove `udata.models`
+  [[#3496](https://github.com/opendatateam/udata/pull/3496)](https://github.com/opendatateam/udata/pull/3496),
+  `udata.metrics`
+  [[#3500](https://github.com/opendatateam/udata/pull/3500)](https://github.com/opendatateam/udata/pull/3500), `udata.apis`,
+  `udata.commands` and `udata.views`
+  [[#3488](https://github.com/opendatateam/udata/pull/3488)](https://github.com/opendatateam/udata/pull/3488) entrypoints
+  - add `udata.i18n` to add new translation directories via plugins
+  - `udata.plugins`
+  [[#3495](https://github.com/opendatateam/udata/pull/3495)](https://github.com/opendatateam/udata/pull/3495) and
+  `udata.tasks` [[#3503](https://github.com/opendatateam/udata/pull/3503)](https://github.com/opendatateam/udata/pull/3503)
+  are always loaded if installed
+  - remove `PLUGINS` setting
+  - add `HARVESTER_BACKENDS` setting to enable harvester backends (use the
+  glob syntax `*` to enable multiple backends starting or ending with a
+  prefix/suffix) [[#3504](https://github.com/opendatateam/udata/pull/3504)](https://github.com/opendatateam/udata/pull/3504)
+- **refactor!: simplify harvesters entrypoint ([#3504](https://github.com/opendatateam/udata/pull/3504))**
+  Working towards removing deprecated `pkg_resources` by removing
+  `entrypoints.py`.
+  
+  - The `udata.harvesters` entrypoints are automaticly loaded (without the
+  need of `PLUGINS` settings)
+  - Need to move the harvesters from `PLUGINS` to `HARVESTER_BACKENDS` to
+  enable them.
+  - Need to add explicit glob with `*`, like `csw*` to enable all backends
+  starting with `csw` (before it was an implicit `startswith`)
+  - Need to add explicit `name` to the backends' classes (before it was
+  the name of the entrypoint)
+  
+  Example of new setting:
+  
+  ```
+  HARVESTER_BACKENDS = [
+    'ckan',
+    'dkan',
+    'dcat',
+    'csw*',
+    'maaf',
+  ]
+  ```
+  
+  - [x] Added `name` to all internal harvesters backends
+  - [x] Removed `actions.list_backends()`, use
+  `backends.get_enabled_backends()` since it's not really an action.
+  - [x] Added `HARVESTER_BACKENDS` setting to replace `PLUGINS` for
+  enabling/disabling harvesters backends
+  - [x] Removed broken `/api/1/harvest/job_status/` endpoint
+- build: try using conventional commit in Crowdin PR ([#3511](https://github.com/opendatateam/udata/pull/3511))
+- chore(harvest): add explicit error message when missing backend ([#3523](https://github.com/opendatateam/udata/pull/3523))
+- feat: add dataservices to reuses ([#3506](https://github.com/opendatateam/udata/pull/3506))
+- feat: add email to user search ([#3507](https://github.com/opendatateam/udata/pull/3507))
+- feat: add reuse filter on dataservices ([#3512](https://github.com/opendatateam/udata/pull/3512))
+- feat: archive and purge csv catalog ([#3509](https://github.com/opendatateam/udata/pull/3509))
+- feat(badge): add HVD and generic update badge job ([#3471](https://github.com/opendatateam/udata/pull/3471))
+- feat(badge): add INSPIRE badge job ([#3492](https://github.com/opendatateam/udata/pull/3492))
+- feat(dataset): if harvested, use the harvested dataset modified_at date ([#3479](https://github.com/opendatateam/udata/pull/3479))
+- feat(datasets): add `access_type` and reasons ([#3425](https://github.com/opendatateam/udata/pull/3425))
+- feat(harvest): add support for all GeoDCAT-AP roles ([#3374](https://github.com/opendatateam/udata/pull/3374))
+- feat: new mails ([#3470](https://github.com/opendatateam/udata/pull/3470))
+- feat: update translations ([#3510](https://github.com/opendatateam/udata/pull/3510))
+- fix: check captcha first before checking for other validations ([#3520](https://github.com/opendatateam/udata/pull/3520))
+- fix: delete user index to recreate it ([#3519](https://github.com/opendatateam/udata/pull/3519))
+- fix: harvest sources periodic task integrity ([#3505](https://github.com/opendatateam/udata/pull/3505))
+- fix: wrong importlib_metadata import ([#3515](https://github.com/opendatateam/udata/pull/3515))
+- New Crowdin updates ([#3498](https://github.com/opendatateam/udata/pull/3498))
+- refactor: remove avatars entrypoint and remove robohash and adorable providers ([#3482](https://github.com/opendatateam/udata/pull/3482))
+- refactor: remove dead i18n code and lang prefixes management ([#3517](https://github.com/opendatateam/udata/pull/3517))
+- refactor: remove metrics entrypoint ([#3500](https://github.com/opendatateam/udata/pull/3500))
+- refactor: remove models entrypoint and simplify migrations core code ([#3496](https://github.com/opendatateam/udata/pull/3496))
+- refactor: remove themes entrypoint ([#3489](https://github.com/opendatateam/udata/pull/3489))
+- refactor: remove unused Jinja hooks and template filters ([#3514](https://github.com/opendatateam/udata/pull/3514))
+- refactor: remove unused terms.md ([#3501](https://github.com/opendatateam/udata/pull/3501))
+- refactor: remove unused territories API ([#3516](https://github.com/opendatateam/udata/pull/3516))
+- refactor: remove views entrypoint ([#3488](https://github.com/opendatateam/udata/pull/3488))
+- refactor: simplify getting udata version ([#3502](https://github.com/opendatateam/udata/pull/3502))
+- refactor: simplify plugins entrypoint ([#3495](https://github.com/opendatateam/udata/pull/3495))
+- refactor: simplify tasks entrypoint ([#3503](https://github.com/opendatateam/udata/pull/3503))
+
+
 ## 13.0.0 (2025-10-22)
 - **refactor!: remove VueJS old admin and all assets ([#3422](https://github.com/opendatateam/udata/pull/3422))**
   - [x] Dossiers frontend : js/, less/, specs/, node_modules/
