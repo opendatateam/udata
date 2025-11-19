@@ -271,7 +271,16 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         assert periodic_task.crontab.day_of_month == "*"
         assert periodic_task.crontab.month_of_year == "*"
         assert periodic_task.enabled
-        assert periodic_task.name == "Harvest {0}".format(source.name)
+        assert periodic_task.name == f"Harvest {source.name} ({source.id})"
+
+    def test_double_schedule_with_same_name(self):
+        source_1 = HarvestSourceFactory(name="A")
+        source_2 = HarvestSourceFactory(name="A")
+
+        actions.schedule(source_1, hour=0)
+        actions.schedule(source_2, hour=0)
+
+        assert len(PeriodicTask.objects) == 2
 
     def test_schedule_from_cron(self):
         source = HarvestSourceFactory()
@@ -288,7 +297,7 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         assert periodic_task.crontab.month_of_year == "3"
         assert periodic_task.crontab.day_of_week == "sunday"
         assert periodic_task.enabled
-        assert periodic_task.name == "Harvest {0}".format(source.name)
+        assert periodic_task.name == f"Harvest {source.name} ({source.id})"
 
     def test_reschedule(self):
         source = HarvestSourceFactory()
@@ -308,7 +317,7 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
         assert periodic_task.crontab.day_of_month == "*"
         assert periodic_task.crontab.month_of_year == "*"
         assert periodic_task.enabled
-        assert periodic_task.name == "Harvest {0}".format(source.name)
+        assert periodic_task.name == f"Harvest {source.name} ({source.id})"
 
     def test_unschedule(self):
         periodic_task = PeriodicTask.objects.create(
