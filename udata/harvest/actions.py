@@ -254,7 +254,7 @@ def schedule(
         source.modify(
             periodic_task=PeriodicTask.objects.create(
                 task="harvest",
-                name="Harvest {0}".format(source.name),
+                name=f"Harvest {source.name} ({source.id})",
                 description="Periodic Harvesting",
                 enabled=True,
                 args=[str(source.id)],
