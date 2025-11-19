@@ -49,6 +49,10 @@ class NoopMailUtil(mail_util.MailUtil):
         html: t.Optional[str],
         **kwargs: t.Any,
     ) -> None:
+        log.debug(f"Sending mail {subject} to {recipient}")
+        log.debug(body)
+        log.debug(html)
+
         return None
 
 
