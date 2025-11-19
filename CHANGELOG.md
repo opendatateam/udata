@@ -1,5 +1,13 @@
 # Changelog
 
+## 14.0.1 (2025-11-19)
+
+- fix: date instead of datetime in HarvestMetadata modified_at ([#3526](https://github.com/opendatateam/udata/pull/3526))
+- fix: deleting and purging page's blocs elements (reuses, datasets and dataservices) ([#3524](https://github.com/opendatateam/udata/pull/3524))
+- fix: HARVESTER_BACKENDS settings in changelog
+- refactor: standardization of test clients, CLI runner, mocker… ([#3525](https://github.com/opendatateam/udata/pull/3525))
+
+
 ## 14.0.0 (2025-11-17)
 - **refactor!: change entrypoints system ([#3518](https://github.com/opendatateam/udata/pull/3518))**
   - remove `udata.models`
