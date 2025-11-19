@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from enum import StrEnum, auto
 
 from flask_babel import LazyString
@@ -100,7 +100,14 @@ class UpdateFrequency(StrEnum):
         return self._delta  # type: ignore[misc]
 
     def next_update(self, last_update: datetime) -> datetime | None:
-        return last_update + self.delta if self.delta else None
+        if not self.delta:
+            return None
+        result = last_update + self.delta
+        # Convert datetime.date to datetime.datetime for BSON compatibility
+        # MongoDB/BSON cannot encode datetime.date objects, only datetime.datetime
+        if isinstance(result, date) and not isinstance(result, datetime):
+            result = datetime.combine(result, datetime.min.time())
+        return result
 
 
 # We must declare UpdateFrequency class variables after the Enum magic
