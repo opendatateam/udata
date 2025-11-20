@@ -7,8 +7,9 @@ import html2text
 import mistune
 from bleach.css_sanitizer import CSSSanitizer
 from bleach.linkifier import LinkifyFilter
-from flask import Markup, current_app, request
+from flask import current_app, request
 from jinja2.filters import do_striptags, do_truncate
+from markupsafe import Markup
 from werkzeug.local import LocalProxy
 
 from udata.i18n import _
