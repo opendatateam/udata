@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 
 import pytest
 from flask import json
+from flask_security.utils import login_user, set_request_attr
 
 from udata.core.user.factories import UserFactory
 from udata.mongo import db
@@ -55,19 +56,11 @@ class APITestCaseMixin:
 
     def login(self, user=None):
         """Login a user via session authentication."""
-        from flask import current_app
-        from flask_principal import Identity, identity_changed
+        self.user = user or UserFactory()
 
-        user = user or UserFactory()
-        with self.client.session_transaction() as session:
-            # Since flask-security-too 4.0.0, the user.fs_uniquifier is used instead of user.id for auth
-            user_id = getattr(user, current_app.login_manager.id_attribute)()
-            session["user_id"] = user_id
-            session["_fresh"] = True
-            session["_id"] = current_app.login_manager._session_identifier_generator()
-            current_app.login_manager._update_request_context_with_user(user)
-            identity_changed.send(current_app._get_current_object(), identity=Identity(user.id))
-        self.user = user
+        login_user(self.user)
+        set_request_attr("fs_authn_via", "session")
+
         return self.user
 
     def logout(self):
