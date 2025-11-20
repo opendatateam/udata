@@ -672,7 +672,7 @@ wheels = [
 
 [[package]]
 name = "flask"
-version = "2.3.3"
+version = "3.0.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "blinker" },
@@ -681,9 +681,9 @@ dependencies = [
     { name = "jinja2" },
     { name = "werkzeug" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/46/b7/4ace17e37abd9c21715dea5ee11774a25e404c486a7893fa18e764326ead/flask-2.3.3.tar.gz", hash = "sha256:09c347a92aa7ff4a8e7f3206795f30d826654baf38b873d0744cd571ca609efc", size = 672756, upload-time = "2023-08-21T19:52:35.012Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/41/e1/d104c83026f8d35dfd2c261df7d64738341067526406b40190bc063e829a/flask-3.0.3.tar.gz", hash = "sha256:ceb27b0af3823ea2737928a4d99d125a06175b8512c445cbd9a9ce200ef76842", size = 676315, upload-time = "2024-04-07T19:26:11.035Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fd/56/26f0be8adc2b4257df20c1c4260ddd0aa396cf8e75d90ab2f7ff99bc34f9/flask-2.3.3-py3-none-any.whl", hash = "sha256:f69fcd559dc907ed196ab9df0e48471709175e696d6e698dd4dbe940f96ce66b", size = 96112, upload-time = "2023-08-21T19:52:33.115Z" },
+    { url = "https://files.pythonhosted.org/packages/61/80/ffe1da13ad9300f87c93af113edd0638c75138c42a0994becfacac078c06/flask-3.0.3-py3-none-any.whl", hash = "sha256:34e815dfaa43340d1d15a5c3a02b8476004037eb4840b34910c6e21679d288f3", size = 101735, upload-time = "2024-04-07T19:26:08.569Z" },
 ]
 
 [[package]]
@@ -790,7 +790,7 @@ wheels = [
 
 [[package]]
 name = "flask-security-too"
-version = "5.4.3"
+version = "5.6.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "email-validator" },
@@ -799,13 +799,15 @@ dependencies = [
     { name = "flask-principal" },
     { name = "flask-wtf" },
     { name = "importlib-resources" },
+    { name = "libpass", marker = "python_full_version >= '3.13'" },
     { name = "markupsafe" },
-    { name = "passlib" },
+    { name = "passlib", marker = "python_full_version < '3.13'" },
+    { name = "setuptools", marker = "python_full_version < '3.13'" },
     { name = "wtforms" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/32/54/92a15b011cb66a4a060ea5aa62035e20f1c1b244f3ca743131bcdca39e80/Flask-Security-Too-5.4.3.tar.gz", hash = "sha256:62b19397e8d71a8d4cb8dc0d4409cc7a1497982549030396960aee518755e583", size = 652228, upload-time = "2024-03-23T15:36:00.247Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/db/40/f1fcb25614e5b38eb7a5914a7aee482f67ba4b3f1bd3523e6faa43eab0c8/flask_security_too-5.6.2.tar.gz", hash = "sha256:5a48b9165146a02cb86a8073832df4ca177fbf4a7dbd707909279fbfad8a4032", size = 698849, upload-time = "2025-05-04T22:09:57.098Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4f/15/344d73b45758b84614fdccbc95501c06068cbb1139da8042d76a3d67d346/Flask_Security_Too-5.4.3-py3-none-any.whl", hash = "sha256:655bf7bd15bf78593d39b1db125d4e8255ae220ed008c6cb35f7466749e0d3af", size = 404484, upload-time = "2024-03-23T15:35:57.702Z" },
+    { url = "https://files.pythonhosted.org/packages/a7/20/f4f732a3e231bc2c0f4d4ce63e32dc02aaea4ab6d7ed3739b69c708b1a3a/flask_security_too-5.6.2-py3-none-any.whl", hash = "sha256:61da7f4b6349e2cdf9f3ea53565cda2ed3588cd740a346be17f024f159e52c93", size = 438888, upload-time = "2025-05-04T22:09:55.079Z" },
 ]
 
 [[package]]
@@ -837,18 +839,14 @@ wheels = [
 
 [[package]]
 name = "flask-storage"
-version = "1.4.1"
-source = { registry = "https://pypi.org/simple" }
+version = "1.4.2.dev0"
+source = { git = "https://github.com/etalab/flask-storage.git?rev=flask_3#c1fd449a693401444981f082358f7ab9f103418e" }
 dependencies = [
     { name = "boto3" },
     { name = "flask" },
     { name = "mongoengine" },
     { name = "pillow" },
     { name = "werkzeug" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/95/44/4f6b5bb6a5d37b9593f3e4a281dc11aae9941953d051ab78366315a2ce44/flask_storage-1.4.1.tar.gz", hash = "sha256:370d7584b11642434ff2c0e63599f60431abe066f984e84d1242b50e64898230", size = 315106, upload-time = "2025-11-10T10:32:11.738Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/79/97/d20359d09a6cc396110acac7a0be79f521ee8ac0e73c791e8460d32adbe6/flask_storage-1.4.1-py3-none-any.whl", hash = "sha256:68b4e544dcc15c8e20a53a4eea9ca9dedcd35771f2b0275af57a63c32254c598", size = 17703, upload-time = "2025-11-10T10:32:10.822Z" },
 ]
 
 [[package]]
@@ -1160,6 +1158,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/60/0c/b72e6e2d16efd57c143785a30370ca50c2e355a9d0d678edb1c024865447/levenshtein-0.27.3-pp311-pypy311_pp73-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:55fa5f11952c38186bd4719e936eb4595b3d519218634924928787c36840256c", size = 130242, upload-time = "2025-11-01T12:14:26.926Z" },
     { url = "https://files.pythonhosted.org/packages/b5/b0/0aafad0dab03a58fd507773d3ff94ec13efdd3772ba217f85366213ab7ae/levenshtein-0.27.3-pp311-pypy311_pp73-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:559d3588e6766134d95f84f830cf40166360e1769d253f5f83474bff10a24341", size = 150655, upload-time = "2025-11-01T12:14:28.034Z" },
     { url = "https://files.pythonhosted.org/packages/b7/77/42dbcbafe9e0b0eb14cb6b08378c8c3bdc563ee34ee58f62e708e7f8956e/levenshtein-0.27.3-pp311-pypy311_pp73-win_amd64.whl", hash = "sha256:82d40da143c1b9e27adcd34a33dfcc4a0761aa717c5f618b9c6f57dec5d7a958", size = 92370, upload-time = "2025-11-01T12:14:29.143Z" },
+]
+
+[[package]]
+name = "libpass"
+version = "1.9.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/2a/f6/210563eef148773ef835d21c0fa1e8a43c5b10fceb1f63d5d650635b81da/libpass-1.9.3.tar.gz", hash = "sha256:7830b9323d9ba96a841ad698a8dec1d43a2b0b7f1c855c76772e7972c1c6d959", size = 692901, upload-time = "2025-10-09T14:26:28.363Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ed/a6/ff00d926a9f4ece9e0732bcea1c3e8e9280390f48cec53f237e21f220082/libpass-1.9.3-py3-none-any.whl", hash = "sha256:3cbeb14d22086660e92c30d787ea981973d67394e81c8c870e1a83cfe1c84353", size = 307118, upload-time = "2025-10-09T14:26:25.551Z" },
 ]
 
 [[package]]
@@ -2465,7 +2472,7 @@ requires-dist = [
     { name = "feedgenerator", specifier = ">=2.1.0,<3.0.0" },
     { name = "feedparser", marker = "extra == 'test'", specifier = ">=6.0.11,<7.0" },
     { name = "flake8", marker = "extra == 'report'", specifier = ">=7.1.2,<8.0" },
-    { name = "flask", specifier = ">=2.1.2,<3.0.0" },
+    { name = "flask", specifier = ">=3.0.0,<3.1.0" },
     { name = "flask-babel", specifier = ">=4.0.0,<5.0.0" },
     { name = "flask-caching", specifier = ">=2.3.1,<3.0.0" },
     { name = "flask-cdn", specifier = ">=1.5.3,<2.0.0" },
@@ -2477,7 +2484,7 @@ requires-dist = [
     { name = "flask-security-too", specifier = ">=5.1.2,<6.0.0" },
     { name = "flask-shell-ipython", marker = "extra == 'dev'", specifier = ">=0.5.3,<1.0" },
     { name = "flask-sitemap", specifier = ">=0.4.0,<1.0.0" },
-    { name = "flask-storage", specifier = ">=1.4.0,<2.0.0" },
+    { name = "flask-storage", git = "https://github.com/etalab/flask-storage.git?rev=flask_3" },
     { name = "flask-wtf", specifier = ">=1.2.2,<2.0.0" },
     { name = "geojson", specifier = ">=3.2.0,<4.0.0" },
     { name = "geomet", specifier = ">=1.1.0,<2.0.0" },
@@ -2525,7 +2532,7 @@ requires-dist = [
     { name = "urlextract", specifier = ">=1.9.0,<2.0.0" },
     { name = "urllib3", specifier = ">=2.0.0,<3.0.0" },
     { name = "voluptuous", specifier = ">=0.15.2,<1.0.0" },
-    { name = "werkzeug", specifier = ">=2.2.3,<3.0.0" },
+    { name = "werkzeug", specifier = ">=3.0.0,<4.0.0" },
     { name = "wtforms", extras = ["email"], specifier = ">=3.2.1,<4.0.0" },
     { name = "wtforms-json", specifier = ">=0.3.5,<1.0.0" },
 ]
@@ -2652,14 +2659,14 @@ wheels = [
 
 [[package]]
 name = "werkzeug"
-version = "2.3.8"
+version = "3.1.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "markupsafe" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3d/4b/d746f1000782c89d6c97df9df43ba8f4d126038608843d3560ae88d201b5/werkzeug-2.3.8.tar.gz", hash = "sha256:554b257c74bbeb7a0d254160a4f8ffe185243f52a52035060b761ca62d977f03", size = 819747, upload-time = "2023-11-08T18:37:03.303Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/9f/69/83029f1f6300c5fb2471d621ab06f6ec6b3324685a2ce0f9777fd4a8b71e/werkzeug-3.1.3.tar.gz", hash = "sha256:60723ce945c19328679790e3282cc758aa4a6040e4bb330f53d30fa546d44746", size = 806925, upload-time = "2024-11-08T15:52:18.093Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fd/21/0a674dfe66e9df9072c46269c882e9f901d36d987d8ea50ead033a9c1e01/werkzeug-2.3.8-py3-none-any.whl", hash = "sha256:bba1f19f8ec89d4d607a3bd62f1904bd2e609472d93cd85e9d4e178f472c3748", size = 242332, upload-time = "2023-11-08T18:37:01.088Z" },
+    { url = "https://files.pythonhosted.org/packages/52/24/ab44c871b0f07f491e5d2ad12c9bd7358e527510618cb1b803a88e986db1/werkzeug-3.1.3-py3-none-any.whl", hash = "sha256:54b78bf3716d19a65be4fceccc0d1d7b89e608834989dfae50ea87564639213e", size = 224498, upload-time = "2024-11-08T15:52:16.132Z" },
 ]
 
 [[package]]
