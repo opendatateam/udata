@@ -41,7 +41,7 @@ def mock_signals(*signals):
     calls_kwargs_by_signal = {}
 
     for requestSignal in signals:
-        # On capture requestSignal via un argument par défaut
+        # We capture requestSignal with a default argument
         def callback(*args, requestSignal=requestSignal, **kwargs):
             calls_kwargs_by_signal.setdefault(requestSignal, [])
             calls_kwargs_by_signal[requestSignal].append(kwargs)
