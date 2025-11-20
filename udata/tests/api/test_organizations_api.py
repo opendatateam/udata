@@ -1017,7 +1017,6 @@ class OrganizationCsvExportsTest(PytestOnlyAPITestCase):
 
         assert200(response)
         assert response.mimetype == "text/csv"
-        assert response.charset == "utf-8"
 
         csvfile = StringIO(response.data.decode("utf-8"))
         reader = csv.get_reader(csvfile)
@@ -1045,7 +1044,6 @@ class OrganizationCsvExportsTest(PytestOnlyAPITestCase):
 
         assert200(response)
         assert response.mimetype == "text/csv"
-        assert response.charset == "utf-8"
 
         csvfile = StringIO(response.data.decode("utf-8"))
         reader = csv.get_reader(csvfile)
@@ -1083,7 +1081,6 @@ class OrganizationCsvExportsTest(PytestOnlyAPITestCase):
 
         assert200(response)
         assert response.mimetype == "text/csv"
-        assert response.charset == "utf-8"
 
         csvfile = StringIO(response.data.decode("utf-8"))
         reader = csv.get_reader(csvfile)

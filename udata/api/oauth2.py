@@ -212,8 +212,8 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
     TOKEN_ENDPOINT_AUTH_METHODS = ["none", "client_secret_basic", "client_secret_post"]
 
     def save_authorization_code(self, code, request):
-        code_challenge = request.data.get("code_challenge")
-        code_challenge_method = request.data.get("code_challenge_method")
+        code_challenge = request.payload.data.get("code_challenge")
+        code_challenge_method = request.payload.data.get("code_challenge_method")
         expires = datetime.utcnow() + timedelta(seconds=GRANT_EXPIRATION)
         auth_code = OAuth2Code.objects.create(
             code=code,
