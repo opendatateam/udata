@@ -3,7 +3,7 @@ from urllib.parse import urlparse
 
 import pytest
 from flask import json
-from flask_security.utils import login_user, set_request_attr
+from flask_security.utils import login_user, logout_user, set_request_attr
 
 from udata.core.user.factories import UserFactory
 from udata.mongo import db
@@ -65,10 +65,7 @@ class APITestCaseMixin:
 
     def logout(self):
         """Logout the current user."""
-        with self.client.session_transaction() as session:
-            del session["user_id"]
-            del session["_fresh"]
-            del session["_id"]
+        logout_user()
         self.user = None
 
     def perform(self, verb, url, **kwargs):
