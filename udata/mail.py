@@ -28,7 +28,7 @@ class LabelledContent:
     label: LazyString
     content: str
     inline: bool = False
-    truncated_at: int = 50
+    truncated_at: int = 200
 
     @property
     def truncated_content(self) -> str:
