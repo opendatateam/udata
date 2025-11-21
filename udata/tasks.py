@@ -172,6 +172,7 @@ def init_app(app):
     import udata.core.discussions.tasks  # noqa
     import udata.core.badges.tasks  # noqa
     import udata.core.storages.tasks  # noqa
+    import udata.features.notifications.tasks  # noqa
     import udata.harvest.tasks  # noqa
     import udata.db.tasks  # noqa
 

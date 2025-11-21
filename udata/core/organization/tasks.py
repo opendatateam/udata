@@ -1,5 +1,6 @@
 from udata.core import storages
 from udata.core.badges.tasks import notify_new_badge
+from udata.features.notifications.models import Notification
 from udata.models import Activity, ContactPoint, Dataset, Follow, Transfer
 from udata.search import reindex
 from udata.tasks import get_logger, job, task
@@ -25,6 +26,8 @@ def purge_organizations(self):
         Transfer.objects(owner=organization).delete()
         # Remove related contact points
         ContactPoint.objects(organization=organization).delete()
+        # Remove related notifications
+        Notification.objects.with_organization_in_details(organization).delete()
         # Store datasets for later reindexation
         d_ids = [d.id for d in Dataset.objects(organization=organization)]
         # Remove organization's logo in all sizes

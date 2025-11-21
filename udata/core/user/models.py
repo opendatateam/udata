@@ -297,6 +297,10 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
                 discussion.save()
         Follow.objects(follower=self).delete()
         Follow.objects(following=self).delete()
+        # Remove related notifications
+        from udata.features.notifications.models import Notification
+
+        Notification.objects.with_user_in_details(self).delete()
 
         from udata.models import ContactPoint
 
