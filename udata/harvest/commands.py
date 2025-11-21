@@ -4,6 +4,7 @@ import click
 
 from udata.commands import KO, OK, cli, green, red
 from udata.harvest.backends import get_all_backends, is_backend_enabled
+from udata.models import Dataset
 
 from . import actions
 
@@ -156,3 +157,32 @@ def attach(domain, filename):
     log.info("Attaching datasets for domain %s", domain)
     result = actions.attach(domain, filename)
     log.info("Attached %s datasets to %s", result.success, domain)
+
+
+@grp.command()
+@click.argument("dataset_id")
+def detach(dataset_id):
+    """
+    Detach a dataset_id from its harvest source 
+
+    The dataset will be cleaned from harvested information
+    """
+    log.info(f"Detaching dataset {dataset_id}")
+    dataset = Dataset.get(dataset_id)
+    actions.detach(dataset)
+    log.info(f"Done")
+
+
+@grp.command()
+@click.argument("identifier")
+def detach_all_from_source(identifier):
+    """
+    Detach all datasets from a harvest source 
+
+    All the datasets will be cleaned from harvested information.
+    Make sure the harvest source won't create new duplicate datasets,
+    either by deactivating it or filtering its scope, etc.
+    """
+    log.info(f"Detaching datasets from harvest source {identifier}")
+    count = actions.detach_all_from_source(actions.get_source(identifier))
+    log.info(f"Detached {count} datasets")
