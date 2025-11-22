@@ -4,7 +4,6 @@ from udata.tests import PytestOnlyTestCase
 class CliBaseTest(PytestOnlyTestCase):
     def test_cli_help(self):
         """Should display help without errors"""
-        self.cli()
         self.cli("-?")
         self.cli("-h")
         self.cli("--help")

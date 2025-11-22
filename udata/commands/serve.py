@@ -3,7 +3,7 @@ import os
 
 import click
 from flask import current_app
-from flask.cli import DispatchingApp, pass_script_info
+from flask.cli import pass_script_info
 from werkzeug.serving import run_simple
 
 from udata.commands import cli
@@ -27,16 +27,10 @@ log = logging.getLogger(__name__)
     help="Enable or disable the debugger.  By default the debugger is active if debug is enabled.",
 )
 @click.option(
-    "--eager-loading/--lazy-loader",
-    default=None,
-    help="Enable or disable eager loading.  By default eager "
-    "loading is enabled if the reloader is disabled.",
-)
-@click.option(
     "--with-threads/--without-threads", default=True, help="Enable or disable multithreading."
 )
 @pass_script_info
-def serve(info, host, port, reload, debugger, eager_loading, with_threads):
+def serve(info, host, port, reload, debugger, with_threads):
     """
     Runs a local udata development server.
 
@@ -62,10 +56,8 @@ def serve(info, host, port, reload, debugger, eager_loading, with_threads):
         reload = bool(debug)
     if debugger is None:
         debugger = bool(debug)
-    if eager_loading is None:
-        eager_loading = not reload
 
-    app = DispatchingApp(info.load_app, use_eager_loading=eager_loading)
+    app = info.load_app()
 
     settings = os.environ.get("UDATA_SETTINGS", os.path.join(os.getcwd(), "udata.cfg"))
     extra_files = [settings]
