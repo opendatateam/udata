@@ -14,7 +14,7 @@ from .constants import REPORT_REASONS_CHOICES, REPORTABLE_MODELS
 
 def filter_by_status(base_query, filter_value):
     if filter_value == "ongoing":
-        return base_query.filter(dismissed_at=None)
+        return base_query.filter(dismissed_at=None, subject__exists=True)
     elif filter_value == "done":
         return base_query.filter(dismissed_at__ne=None)
     else:
