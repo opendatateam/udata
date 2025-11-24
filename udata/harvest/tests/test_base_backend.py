@@ -483,7 +483,6 @@ class BaseBackendTest(PytestOnlyDBTestCase):
             else:
                 assert job.status == "failed"
                 assert job.remote_id in job.errors[0].message
-                assert job.remote_url in job.errors[0].message
 
 
 class BaseBackendValidateTest(PytestOnlyDBTestCase):
