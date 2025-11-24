@@ -166,6 +166,7 @@ class BaseBackend(object):
         log.debug(f"Starting harvesting {self.source.name} ({self.source.url})…")
         factory = HarvestJob if self.dryrun else HarvestJob.objects.create
         self.job = factory(status="initialized", started=datetime.utcnow(), source=self.source)
+        self.remote_ids = set()
 
         before_harvest_job.send(self)
         # Set harvest_activity_user on global context during the run
@@ -190,6 +191,7 @@ class BaseBackend(object):
 
             if any(i.status == "failed" for i in self.job.items):
                 self.job.status += "-errors"
+
         except HarvestValidationError as e:
             log.exception(
                 f'Harvesting validation failed for "{safe_unicode(self.source.name)}" ({self.source.backend})'
@@ -232,8 +234,13 @@ class BaseBackend(object):
 
             current_app.logger.addHandler(log_catcher)
             dataset = self.inner_process_dataset(item, **kwargs)
+            if dataset.harvest:
+                item.remote_url = dataset.harvest.remote_url
 
-            # Use `item.remote_id` because `inner_process_dataset` could have modified it.
+            # Use `item.remote_id` from this point, because `inner_process_dataset` could have modified it.
+
+            self.ensure_unique_remote_id(item)
+
             dataset.harvest = self.update_dataset_harvest_info(dataset.harvest, item.remote_id)
             dataset.archived = None
 
@@ -291,6 +298,10 @@ class BaseBackend(object):
                 raise HarvestSkipException("missing identifier")
 
             dataservice = self.inner_process_dataservice(item, **kwargs)
+            if dataservice.harvest:
+                item.remote_url = dataservice.harvest.remote_url
+
+            self.ensure_unique_remote_id(item)
 
             dataservice.harvest = self.update_dataservice_harvest_info(
                 dataservice.harvest, remote_id
@@ -324,6 +335,12 @@ class BaseBackend(object):
         finally:
             item.ended = datetime.utcnow()
             self.save_job()
+
+    def ensure_unique_remote_id(self, item):
+        if item.remote_id in self.remote_ids:
+            raise HarvestValidationError(f"Identifier '{item.remote_id}' already exists")
+
+        self.remote_ids.add(item.remote_id)
 
     def update_dataset_harvest_info(self, harvest: HarvestDatasetMetadata | None, remote_id: int):
         if not harvest:
