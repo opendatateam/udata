@@ -12,7 +12,20 @@ from udata.mongo import db
 from .constants import REPORT_REASONS_CHOICES, REPORTABLE_MODELS
 
 
-@generate_fields()
+def filter_by_status(base_query, filter_value):
+    if filter_value == "ongoing":
+        return base_query.filter(dismissed_at=None)
+    elif filter_value == "done":
+        return base_query.filter(dismissed_at__ne=None)
+    else:
+        return base_query
+
+
+@generate_fields(
+    standalone_filters=[
+        {"key": "status", "constraints": ["enum"], "query": filter_by_status, "type": str},
+    ],
+)
 class Report(db.Document):
     by = field(
         db.ReferenceField(User, reverse_delete_rule=NULLIFY),
@@ -44,6 +57,15 @@ class Report(db.Document):
     reported_at = field(
         db.DateTimeField(default=datetime.utcnow, required=True),
         readonly=True,
+    )
+
+    dismissed_at = field(
+        db.DateTimeField(),
+    )
+    dismissed_by = field(
+        db.ReferenceField(User, reverse_delete_rule=NULLIFY),
+        nested_fields=user_ref_fields,
+        allow_null=True,
     )
 
     @field(description="Link to the API endpoint for this report")

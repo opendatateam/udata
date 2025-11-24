@@ -42,6 +42,22 @@ class ReportAPI(API):
     def get(self, report):
         return report
 
+    @api.doc("update_report", responses={400: "Validation error"})
+    @api.secure(admin_permission)
+    @api.expect(Report.__write_fields__)
+    @api.marshal_with(Report.__read_fields__, code=200)
+    def patch(self, report):
+        is_dismiss = (
+            "dismissed_at" in request.json and request.json["dismissed_at"] != report.dismissed_at
+        )
+
+        report = patch(report, request)
+        if is_dismiss:
+            report.dismissed_by = current_user._get_current_object()
+
+        report.save()
+        return report, 200
+
 
 @ns.route("/reasons/", endpoint="reports_reasons")
 class ReportsReasonsAPI(API):
