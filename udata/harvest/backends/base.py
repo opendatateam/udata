@@ -338,11 +338,7 @@ class BaseBackend(object):
 
     def ensure_unique_remote_id(self, item):
         if item.remote_id in self.remote_ids:
-            raise HarvestValidationError(
-                f"Identifier '{item.remote_id}'"
-                + (f" for {item.remote_url}" if item.remote_url else "")
-                + " already exists"
-            )
+            raise HarvestValidationError(f"Identifier '{item.remote_id}' already exists")
 
         self.remote_ids.add(item.remote_id)
 
