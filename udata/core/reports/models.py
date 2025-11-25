@@ -12,11 +12,19 @@ from udata.mongo import db
 from .constants import REPORT_REASONS_CHOICES, REPORTABLE_MODELS
 
 
+class ReportQuerySet(db.BaseQuerySet):
+    def ongoing(self):
+        return self.filter(dismissed_at=None, subject_deleted_at=None)
+
+    def done(self):
+        return self.filter(Q(dismissed_at__ne=None) | Q(subject_deleted_at__ne=None))
+
+
 def filter_by_status(base_query, filter_value):
     if filter_value == "ongoing":
-        return base_query.filter(dismissed_at=None, subject_deleted_at=None)
+        return base_query.ongoing()
     elif filter_value == "done":
-        return base_query.filter(Q(dismissed_at__ne=None) | Q(subject_deleted_at__ne=None))
+        return base_query.done()
     else:
         return base_query
 
@@ -67,6 +75,10 @@ class Report(db.Document):
         nested_fields=user_ref_fields,
         allow_null=True,
     )
+
+    meta = {
+        "queryset_class": ReportQuerySet,
+    }
 
     @field(description="Link to the API endpoint for this report")
     def self_api_url(self):
