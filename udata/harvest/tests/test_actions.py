@@ -11,8 +11,8 @@ from udata.core.activity.models import new_activity
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset.activities import UserCreatedDataset
-from udata.core.dataset.factories import DatasetFactory
-from udata.core.dataset.models import HarvestDatasetMetadata
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.harvest.backends import get_enabled_backends
@@ -459,6 +459,50 @@ class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
 
         assert result.success == len(datasets)
         assert result.errors == 1
+
+    def test_detach(self):
+        dataset = DatasetFactory(
+            harvest=HarvestDatasetMetadata(
+                source_id="source id", domain="test.org", remote_id="id"
+            ),
+            resources=[
+                ResourceFactory(
+                    harvest=HarvestResourceMetadata(issued_at=datetime.now(), uri="test.org")
+                )
+            ],
+        )
+
+        actions.detach(dataset)
+
+        dataset.reload()
+        assert dataset.harvest is None
+        for resource in dataset.resources:
+            assert resource.harvest is None
+
+    def test_detach_all(self):
+        source = HarvestSourceFactory()
+        datasets = [
+            DatasetFactory(
+                harvest=HarvestDatasetMetadata(
+                    source_id=str(source.id), domain="test.org", remote_id=str(i)
+                ),
+                resources=[
+                    ResourceFactory(
+                        harvest=HarvestResourceMetadata(issued_at=datetime.now(), uri="test.org")
+                    )
+                ],
+            )
+            for i in range(3)
+        ]
+
+        result = actions.detach_all_from_source(source)
+
+        assert result == len(datasets)
+        for dataset in datasets:
+            dataset.reload()
+            assert dataset.harvest is None
+            for resource in dataset.resources:
+                assert resource.harvest is None
 
 
 class ExecutionTestMixin(MockBackendsMixin, PytestOnlyDBTestCase):

@@ -163,7 +163,7 @@ def attach(domain, filename):
 @click.argument("dataset_id")
 def detach(dataset_id):
     """
-    Detach a dataset_id from its harvest source 
+    Detach a dataset_id from its harvest source
 
     The dataset will be cleaned from harvested information
     """
@@ -177,7 +177,7 @@ def detach(dataset_id):
 @click.argument("identifier")
 def detach_all_from_source(identifier):
     """
-    Detach all datasets from a harvest source 
+    Detach all datasets from a harvest source
 
     All the datasets will be cleaned from harvested information.
     Make sure the harvest source won't create new duplicate datasets,
