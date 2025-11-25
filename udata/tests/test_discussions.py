@@ -142,11 +142,11 @@ class DiscussionsTest(APITestCase):
         with assert_not_emit(on_new_discussion):
             discussion_id = None
 
-            def check_signal(args):
+            def check_signal(kwargs):
                 self.assertIsNotNone(discussion_id)
                 self.assertIn(
                     f"https://data.gouv.fr/datasets/{dataset.slug}/discussions/?discussion_id={discussion_id}",
-                    args[1]["message"],
+                    kwargs["message"],
                 )
 
             with assert_emit(on_new_potential_spam, assertions_callback=check_signal):
@@ -620,8 +620,8 @@ class DiscussionsTest(APITestCase):
         self.login()
         with assert_not_emit(on_new_discussion_comment):
 
-            def check_signal(args):
-                self.assertIn(discussion.url_for(), args[1]["message"])
+            def check_signal(kwargs):
+                self.assertIn(discussion.url_for(), kwargs["message"])
 
             with assert_emit(on_new_potential_spam, assertions_callback=check_signal):
                 response = self.post(
