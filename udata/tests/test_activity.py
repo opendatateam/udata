@@ -211,9 +211,9 @@ class AuditableTest(APITestCase):
             not_auditable="original",
         )
 
-        def check_signal_update(args):
+        def check_signal_update(kwargs):
             self.assertEqual(
-                args[1]["changed_fields"],
+                kwargs["changed_fields"],
                 [
                     "name",
                     "tags",
@@ -224,13 +224,13 @@ class AuditableTest(APITestCase):
                     "embedded_list.1.name",
                 ],
             )
-            self.assertEqual(args[1]["previous"]["name"], "fake")
-            self.assertEqual(args[1]["previous"]["tags"], ["some", "tags"])
-            self.assertEqual(args[1]["previous"]["some_date"], date(2020, 1, 1))
-            self.assertEqual(args[1]["previous"]["daterange_embedded.start"], date(2020, 1, 1))
-            self.assertEqual(args[1]["previous"]["daterange_embedded.end"], date(2020, 12, 31))
-            self.assertEqual(args[1]["previous"]["some_list"], ["some", "list"])
-            self.assertEqual(args[1]["previous"]["embedded_list.1.name"], "fake_embedded_1")
+            self.assertEqual(kwargs["previous"]["name"], "fake")
+            self.assertEqual(kwargs["previous"]["tags"], ["some", "tags"])
+            self.assertEqual(kwargs["previous"]["some_date"], date(2020, 1, 1))
+            self.assertEqual(kwargs["previous"]["daterange_embedded.start"], date(2020, 1, 1))
+            self.assertEqual(kwargs["previous"]["daterange_embedded.end"], date(2020, 12, 31))
+            self.assertEqual(kwargs["previous"]["some_list"], ["some", "list"])
+            self.assertEqual(kwargs["previous"]["embedded_list.1.name"], "fake_embedded_1")
 
         with assert_emit(FakeAuditableSubject.on_update, assertions_callback=check_signal_update):
             fake.name = "different"
