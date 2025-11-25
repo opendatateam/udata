@@ -55,9 +55,7 @@ item_fields = api.model(
     "HarvestItem",
     {
         "remote_id": fields.String(description="The item remote ID to process", required=True),
-        "remote_url": fields.String(
-            description="The item remote url (if available)", required=True
-        ),
+        "remote_url": fields.String(description="The item remote url (if available)"),
         "dataset": fields.Nested(
             dataset_ref_fields, description="The processed dataset", allow_null=True
         ),
