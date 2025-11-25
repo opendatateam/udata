@@ -234,6 +234,13 @@ class ReportsAPITest(APITestCase):
         payload = response.json
         self.assertEqual(payload["total"], 2)
 
+    def test_reports_api_filter_invalid_status(self):
+        """Invalid status values should return 400."""
+        self.login(AdminFactory())
+
+        response = self.get(url_for("api.reports", status="invalid"))
+        self.assert400(response)
+
     def test_reports_api_filter_status_with_deleted_subject(self):
         """Reports with deleted subjects should appear in done status, not ongoing."""
         user = UserFactory()

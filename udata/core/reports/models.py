@@ -12,6 +12,11 @@ from udata.mongo import db
 from .constants import REPORT_REASONS_CHOICES, REPORTABLE_MODELS
 
 
+REPORT_STATUS_ONGOING = "ongoing"
+REPORT_STATUS_DONE = "done"
+REPORT_STATUS_CHOICES = [REPORT_STATUS_ONGOING, REPORT_STATUS_DONE]
+
+
 class ReportQuerySet(db.BaseQuerySet):
     def ongoing(self):
         return self.filter(dismissed_at=None, subject_deleted_at=None)
@@ -21,9 +26,9 @@ class ReportQuerySet(db.BaseQuerySet):
 
 
 def filter_by_status(base_query, filter_value):
-    if filter_value == "ongoing":
+    if filter_value == REPORT_STATUS_ONGOING:
         return base_query.ongoing()
-    elif filter_value == "done":
+    elif filter_value == REPORT_STATUS_DONE:
         return base_query.done()
     else:
         return base_query
@@ -31,7 +36,12 @@ def filter_by_status(base_query, filter_value):
 
 @generate_fields(
     standalone_filters=[
-        {"key": "status", "constraints": ["enum"], "query": filter_by_status, "type": str},
+        {
+            "key": "status",
+            "query": filter_by_status,
+            "type": str,
+            "choices": REPORT_STATUS_CHOICES,
+        },
     ],
 )
 class Report(db.Document):
