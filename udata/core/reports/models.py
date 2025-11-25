@@ -2,7 +2,7 @@ from datetime import datetime
 
 from bson import DBRef
 from flask import url_for
-from mongoengine import DO_NOTHING, NULLIFY, signals
+from mongoengine import DO_NOTHING, NULLIFY, Q, signals
 
 from udata.api_fields import field, generate_fields
 from udata.core.user.api_fields import user_ref_fields
@@ -14,9 +14,9 @@ from .constants import REPORT_REASONS_CHOICES, REPORTABLE_MODELS
 
 def filter_by_status(base_query, filter_value):
     if filter_value == "ongoing":
-        return base_query.filter(dismissed_at=None, subject__exists=True)
+        return base_query.filter(dismissed_at=None, subject_deleted_at=None)
     elif filter_value == "done":
-        return base_query.filter(dismissed_at__ne=None)
+        return base_query.filter(Q(dismissed_at__ne=None) | Q(subject_deleted_at__ne=None))
     else:
         return base_query
 

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
@@ -165,3 +167,100 @@ class ReportsAPITest(APITestCase):
 
         payload = response.json
         self.assertEqual(payload["subject"]["id"], str(spam_dataset.id))
+
+    def test_reports_api_dismiss(self):
+        user = UserFactory()
+        admin = AdminFactory()
+
+        spam_dataset = DatasetFactory.create(owner=user)
+        report = Report(subject=spam_dataset, reason="spam").save()
+
+        dismiss_time = datetime.utcnow().isoformat()
+
+        # Should require admin
+        response = self.patch(url_for("api.report", report=report), {"dismissed_at": dismiss_time})
+        self.assert401(response)
+
+        self.login(user)
+        response = self.patch(url_for("api.report", report=report), {"dismissed_at": dismiss_time})
+        self.assert403(response)
+
+        self.login(admin)
+        response = self.patch(url_for("api.report", report=report), {"dismissed_at": dismiss_time})
+        self.assert200(response)
+
+        payload = response.json
+        self.assertIsNotNone(payload["dismissed_at"])
+        self.assertEqual(payload["dismissed_by"]["id"], str(admin.id))
+
+        report.reload()
+        self.assertIsNotNone(report.dismissed_at)
+        self.assertEqual(report.dismissed_by.id, admin.id)
+
+    def test_reports_api_filter_by_status(self):
+        user = UserFactory()
+        admin = AdminFactory()
+
+        dataset1 = DatasetFactory.create(owner=user)
+        dataset2 = DatasetFactory.create(owner=user)
+
+        # Ongoing report (not dismissed)
+        ongoing_report = Report(subject=dataset1, reason="spam").save()
+
+        # Done report (dismissed)
+        dismissed_report = Report(
+            subject=dataset2, reason="spam", dismissed_at=datetime.utcnow(), dismissed_by=admin
+        ).save()
+
+        self.login(admin)
+
+        # Filter by ongoing status
+        response = self.get(url_for("api.reports", status="ongoing"))
+        self.assert200(response)
+        payload = response.json
+        self.assertEqual(payload["total"], 1)
+        self.assertEqual(payload["data"][0]["id"], str(ongoing_report.id))
+
+        # Filter by done status
+        response = self.get(url_for("api.reports", status="done"))
+        self.assert200(response)
+        payload = response.json
+        self.assertEqual(payload["total"], 1)
+        self.assertEqual(payload["data"][0]["id"], str(dismissed_report.id))
+
+        # No filter (all reports)
+        response = self.get(url_for("api.reports"))
+        self.assert200(response)
+        payload = response.json
+        self.assertEqual(payload["total"], 2)
+
+    def test_reports_api_filter_status_with_deleted_subject(self):
+        """Reports with deleted subjects should appear in done status, not ongoing."""
+        user = UserFactory()
+        admin = AdminFactory()
+
+        dataset1 = DatasetFactory.create(owner=user)
+        dataset2 = DatasetFactory.create(owner=user)
+
+        # Ongoing report (not dismissed, subject exists)
+        ongoing_report = Report(subject=dataset1, reason="spam").save()
+
+        # Report with deleted subject (should appear in "done", not "ongoing")
+        deleted_subject_report = Report(subject=dataset2, reason="spam").save()
+        dataset2.delete()
+
+        self.login(admin)
+
+        # Filter by ongoing status - should only return the report with existing subject
+        response = self.get(url_for("api.reports", status="ongoing"))
+        self.assert200(response)
+        payload = response.json
+        self.assertEqual(payload["total"], 1)
+        self.assertEqual(payload["data"][0]["id"], str(ongoing_report.id))
+
+        # Filter by done status - should return the report with deleted subject
+        response = self.get(url_for("api.reports", status="done"))
+        self.assert200(response)
+        payload = response.json
+        self.assertEqual(payload["total"], 1)
+        self.assertEqual(payload["data"][0]["id"], str(deleted_subject_report.id))
