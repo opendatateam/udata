@@ -1,5 +1,11 @@
 # Changelog
 
+## 14.1.0 (2025-11-25)
+
+- feat(harvest): report duplicate remote ids as an harvesting error ([#3499](https://github.com/opendatateam/udata/pull/3499))
+- fix: logo in mail ([#3535](https://github.com/opendatateam/udata/pull/3535))
+
+
 ## 14.0.2 (2025-11-19)
 
 - feat: update translations ([#3532](https://github.com/opendatateam/udata/pull/3532))
