@@ -5,6 +5,8 @@ import pytest
 from flask import url_for
 from pytest_mock import MockerFixture
 
+from udata.core.dataservices.factories import DataserviceFactory
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.harvest.backends import get_enabled_backends
@@ -18,10 +20,11 @@ from ..models import (
     VALIDATION_ACCEPTED,
     VALIDATION_PENDING,
     VALIDATION_REFUSED,
+    HarvestItem,
     HarvestSource,
     HarvestSourceValidation,
 )
-from .factories import HarvestSourceFactory, MockBackendsMixin
+from .factories import HarvestJobFactory, HarvestSourceFactory, MockBackendsMixin
 
 log = logging.getLogger(__name__)
 
@@ -648,3 +651,40 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
 
         source.reload()
         assert source.periodic_task is not None
+
+    def test_list_items(self):
+        """It should fetch the harvest items list from the API for a specific job"""
+        job = HarvestJobFactory(
+            items=[
+                HarvestItem(dataset=DatasetFactory()),
+                HarvestItem(dataservice=DataserviceFactory()),
+                HarvestItem(dataset=DatasetFactory(), remote_url="https://my.remote.example.com"),
+            ],
+        )
+        response = self.get(url_for("api.harvest_job", ident=str(job.id)))
+        assert200(response)
+        assert len(response.json["items"]) == 3
+        assert set(response.json["items"][0].keys()) == set(
+            [
+                "created",
+                "started",
+                "ended",
+                "dataset",
+                "dataservice",
+                "remote_url",
+                "remote_id",
+                "args",
+                "errors",
+                "kwargs",
+                "logs",
+                "status",
+            ]
+        )
+        # Make sure appropriate dataset or dataservice is set
+        assert response.json["items"][0]["dataset"] is not None
+        assert response.json["items"][0]["dataservice"] is None
+        assert response.json["items"][1]["dataset"] is None
+        assert response.json["items"][1]["dataservice"] is not None
+        # Make sure remote_url is exposed if exists
+        assert response.json["items"][1]["remote_url"] is None
+        assert response.json["items"][2]["remote_url"] == "https://my.remote.example.com"
