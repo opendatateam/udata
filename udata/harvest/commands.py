@@ -186,3 +186,6 @@ def detach_all_from_source(identifier):
     log.info(f"Detaching datasets from harvest source {identifier}")
     count = actions.detach_all_from_source(actions.get_source(identifier))
     log.info(f"Detached {count} datasets")
+    log.warning(
+        f"Make sure the harvest source won't create new duplicate datasets, either by deactivating it or filtering its scope, etc."
+    )
