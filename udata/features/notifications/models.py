@@ -1,3 +1,4 @@
+from flask_restx.inputs import boolean
 from mongoengine import NULLIFY
 
 from udata.api_fields import field, generate_fields
@@ -19,6 +20,16 @@ class NotificationQuerySet(UDataQuerySet):
         return self(details__request_user=user)
 
 
+def is_handled(base_query, filter_value):
+    print(base_query)
+    print(filter_value)
+    if filter_value is None:
+        return base_query
+    if filter_value is True:
+        return base_query.filter(handled_at__ne=None)
+    return base_query.filter(handled_at=None)
+
+
 @generate_fields()
 class Notification(Datetimed, db.Document):
     meta = {
@@ -27,7 +38,12 @@ class Notification(Datetimed, db.Document):
     }
 
     id = field(db.AutoUUIDField(primary_key=True))
-    handled_at = field(db.DateTimeField(), sortable=True, auditable=False)
+    handled_at = field(
+        db.DateTimeField(),
+        sortable=True,
+        auditable=False,
+        filterable={"key": "handled", "query": is_handled, "type": boolean},
+    )
     user = field(
         db.ReferenceField(User, reverse_delete_rule=NULLIFY),
         nested_fields=user_ref_fields,

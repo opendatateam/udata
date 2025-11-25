@@ -15,4 +15,5 @@ class NotificationsAPI(API):
     def get(self):
         """List all current user pending notifications"""
         user = current_user._get_current_object()
-        return Notification.apply_pagination(Notification.objects(user=user))
+        notifications = Notification.objects(user=user)
+        return Notification.apply_pagination(Notification.apply_sort_filters(notifications))
