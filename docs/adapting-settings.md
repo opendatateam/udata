@@ -452,7 +452,7 @@ The background color used by the internal provider
 
 The padding (in percent) used by the internal provider
 
-## Notifications configuraiton
+## Notifications configuration
 
 Theses settings allow you to customize the notification feature.
 
