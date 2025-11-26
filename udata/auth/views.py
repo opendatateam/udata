@@ -140,10 +140,8 @@ def create_security_blueprint(app, state, import_name):
     This creates an I18nBlueprint to use as a base.
     """
     bp = I18nBlueprint(
-        state.blueprint_name,
+        "security",
         import_name,
-        url_prefix=state.url_prefix,
-        subdomain=state.subdomain,
         template_folder="templates",
     )
 

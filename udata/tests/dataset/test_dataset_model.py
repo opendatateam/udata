@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from uuid import uuid4
 
 import pytest
@@ -205,6 +205,18 @@ class DatasetModelTest(PytestOnlyDBTestCase):
         assert dataset.quality["update_frequency"] is True
         assert dataset.quality["update_fulfilled_in_time"] is False
         assert dataset.quality["score"] == Dataset.normalize_score(1)
+
+    def test_quality_frequency_update_with_harvest_timezone_aware(self):
+        """Test that update_fulfilled_in_time works with timezone-aware harvest dates."""
+        dataset = DatasetFactory(
+            description="",
+            frequency=UpdateFrequency.DAILY,
+            harvest=HarvestDatasetMetadata(
+                modified_at=datetime.now(timezone.utc) - timedelta(hours=1),
+            ),
+        )
+        assert dataset.quality["update_frequency"] is True
+        assert dataset.quality["update_fulfilled_in_time"] is True
 
     def test_quality_description_length(self):
         dataset = DatasetFactory(
