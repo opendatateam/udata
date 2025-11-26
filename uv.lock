@@ -172,30 +172,30 @@ wheels = [
 
 [[package]]
 name = "boto3"
-version = "1.41.3"
+version = "1.41.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore" },
     { name = "jmespath" },
     { name = "s3transfer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/90/30/1f1bfb34a97709b5d004d5c16ccac81a73ea6c5ce86ce75eaff0a75aee3f/boto3-1.41.3.tar.gz", hash = "sha256:8a89f3900a356879022c1600f72cbb3d8b85708f094d2d08a461bd193d0b07ca", size = 111614, upload-time = "2025-11-24T20:22:33.007Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f6/93/c68f6f2439032a43493a46c0b0419f67611299f3bd5f271e0c97888af39f/boto3-1.41.4.tar.gz", hash = "sha256:2c6b8d13df6beb9255d0c8cb60a7a2164f5270580ea5b921a65658a0c28e3223", size = 111594, upload-time = "2025-11-25T20:24:07.842Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/37/d3/56e8c147e369fdc1b5526584f87151ca1742949bf5e6ab7500d926107624/boto3-1.41.3-py3-none-any.whl", hash = "sha256:10a3f5a72e071c362f5aa8443bd949edc31b7494c48a315ccdab14b1c387a1fd", size = 139345, upload-time = "2025-11-24T20:22:30.601Z" },
+    { url = "https://files.pythonhosted.org/packages/d8/0a/05bd0d6db8fc8c95ab196d62a32ac294124e4b89112d6001996b560e4713/boto3-1.41.4-py3-none-any.whl", hash = "sha256:77d84b7ce890a9b0c6a8993f8de106d8cf8138f332a4685e6de453965e60cb24", size = 139343, upload-time = "2025-11-25T20:24:06.481Z" },
 ]
 
 [[package]]
 name = "botocore"
-version = "1.41.3"
+version = "1.41.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jmespath" },
     { name = "python-dateutil" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8c/e9/d6207e08f35280cb8755b316f0e0a0cd2e8405d1b849e847c26fb4e3e3a6/botocore-1.41.3.tar.gz", hash = "sha256:1c6ad338f445c9bf02e231bfa302239d60520ec6dd88ded3206b34dca100103c", size = 14658770, upload-time = "2025-11-24T20:22:21.929Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6c/ae/b71dc486eb10fb3821a4825329a25c7da9ed71e50a160b514cf612dcd280/botocore-1.41.4.tar.gz", hash = "sha256:45c78f07b53a64cbe55e5d60297958f151bd4a2c6acb944a8bb65874bc2fd953", size = 14668045, upload-time = "2025-11-25T20:23:56.51Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9f/18/a0597e4491d3a725768162c48a4dd1e1a57323fdb40fca04a34e9a68ef93/botocore-1.41.3-py3-none-any.whl", hash = "sha256:fe2379b30cc726e9e44bf47c3834fe208b85f7eaa57b934ab05f305ca9d05a8b", size = 14328009, upload-time = "2025-11-24T20:22:17.618Z" },
+    { url = "https://files.pythonhosted.org/packages/f7/20/770d81d1cca878ff1ec0bddc25a19fbddb509607bfd134c853427f13ecf9/botocore-1.41.4-py3-none-any.whl", hash = "sha256:7143ef845f1d1400dbbf05d999f8c5e8cfaecd6bd84cbfbe5fa0a40e3a9f6353", size = 14336743, upload-time = "2025-11-25T20:23:53.608Z" },
 ]
 
 [[package]]
@@ -787,7 +787,7 @@ wheels = [
 
 [[package]]
 name = "flask-security-too"
-version = "5.7.0"
+version = "5.7.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "email-validator" },
@@ -799,9 +799,9 @@ dependencies = [
     { name = "markupsafe" },
     { name = "wtforms" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/86/9a/a1cc333f03149371fe310175d264fe7a5fab96443e4c9a18a7991c39bd0d/flask_security_too-5.7.0.tar.gz", hash = "sha256:8f1df73eb337cdf6dbc265f2b51edebc413bc7bdc809f85418f2e3800136788f", size = 717340, upload-time = "2025-11-14T01:24:01.468Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e1/68/f8a59409cbbce9b8ef1d30162d1e3f9ac16510655dde66587356369f5ea4/flask_security_too-5.7.1.tar.gz", hash = "sha256:fff0bdf5cde048b89736523dc061fabd308e074f0ece6dcca0c745555dab7b5a", size = 717869, upload-time = "2025-11-23T15:54:34.945Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/32/e0/e42f8a16464b2864aaae693164bbb73da570d85c8340c45a72586b91f190/flask_security_too-5.7.0-py3-none-any.whl", hash = "sha256:1c9ad4b2530f7d05b037f191726244363f2967fc3a4032cc16cae568797c1d70", size = 459054, upload-time = "2025-11-14T01:23:59.514Z" },
+    { url = "https://files.pythonhosted.org/packages/00/45/41a0f084a95b171d5c9e8820179e3aa1223bdc5c7c5842c2ef5c0cf467ed/flask_security_too-5.7.1-py3-none-any.whl", hash = "sha256:971772ca22a78a3f1971086fb11d6e30e0f7e7729a19f637de04b79873c28a54", size = 459110, upload-time = "2025-11-23T15:54:32.79Z" },
 ]
 
 [[package]]
@@ -833,14 +833,18 @@ wheels = [
 
 [[package]]
 name = "flask-storage"
-version = "1.4.2.dev0"
-source = { git = "https://github.com/etalab/flask-storage.git?rev=flask_3#c1fd449a693401444981f082358f7ab9f103418e" }
+version = "1.4.2"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boto3" },
     { name = "flask" },
     { name = "mongoengine" },
     { name = "pillow" },
     { name = "werkzeug" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/86/0a/f49044f3c0322912b527906a0a99968a364d1779244c934bd61e6e5a127d/flask_storage-1.4.2.tar.gz", hash = "sha256:d8a5ac22a3e24a8b54ba2ef8302ec8e69592da62553680723640d4689317fe8a", size = 315133, upload-time = "2025-11-26T10:06:45.436Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9a/9f/dc2bb3d386e687c81eadd89498751aad06b4df3273a19b85c8e3824da2bc/flask_storage-1.4.2-py3-none-any.whl", hash = "sha256:45b7dad0b64afb637233a6e0b032a335c869e4928ce17de5742b0c4c7cd827e2", size = 17700, upload-time = "2025-11-26T10:06:44.148Z" },
 ]
 
 [[package]]
@@ -2470,7 +2474,7 @@ requires-dist = [
     { name = "flask-security-too", specifier = ">=5.1.2,<6.0.0" },
     { name = "flask-shell-ipython", marker = "extra == 'dev'", specifier = ">=0.5.3,<1.0" },
     { name = "flask-sitemap", specifier = ">=0.4.0,<1.0.0" },
-    { name = "flask-storage", git = "https://github.com/etalab/flask-storage.git?rev=flask_3" },
+    { name = "flask-storage", specifier = ">=1.4.0,<2.0.0" },
     { name = "flask-wtf", specifier = ">=1.2.2,<2.0.0" },
     { name = "geojson", specifier = ">=3.2.0,<4.0.0" },
     { name = "geomet", specifier = ">=1.1.0,<2.0.0" },
