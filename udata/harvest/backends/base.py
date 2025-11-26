@@ -201,6 +201,15 @@ class BaseBackend(object):
 
             error = HarvestError(message=safe_unicode(e))
             self.job.errors.append(error)
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            log.warning(
+                f'Harvesting connection error for "{safe_unicode(self.source.name)}" ({self.source.backend}): {e}'
+            )
+
+            self.job.status = "failed"
+
+            error = HarvestError(message=safe_unicode(e), details=traceback.format_exc())
+            self.job.errors.append(error)
         except Exception as e:
             log.exception(
                 f'Harvesting failed for "{safe_unicode(self.source.name)}" ({self.source.backend})'

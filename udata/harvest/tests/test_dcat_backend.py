@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 from datetime import date
 
 import pytest
+import requests
 from flask import current_app
 from lxml import etree
 from rdflib import Graph
@@ -930,6 +931,34 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert job.status == "failed"
         assert len(job.errors) == 1
         assert "404 Client Error" in job.errors[0].message
+
+    @pytest.mark.parametrize(
+        "exception",
+        [
+            requests.exceptions.ConnectTimeout("Connection timed out"),
+            requests.exceptions.ConnectionError("Name resolution failed"),
+        ],
+    )
+    def test_connection_errors_are_handled_without_sentry(self, rmock, mocker, exception):
+        """Connection exceptions should be logged as warning, not sent to Sentry."""
+        url = DCAT_URL_PATTERN.format(path="test.jsonld", domain=TEST_DOMAIN)
+        rmock.get(url, exc=exception)
+
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=OrganizationFactory())
+
+        mock_warning = mocker.patch("udata.harvest.backends.base.log.warning")
+        mock_exception = mocker.patch("udata.harvest.backends.base.log.exception")
+
+        actions.run(source)
+        source.reload()
+
+        job = source.get_last_job()
+        assert job.status == "failed"
+        assert len(job.errors) == 1
+        assert str(exception) in job.errors[0].message
+        mock_warning.assert_called_once()
+        assert "connection error" in mock_warning.call_args[0][0].lower()
+        mock_exception.assert_not_called()
 
 
 @pytest.mark.options(HARVESTER_BACKENDS=["csw*"])
