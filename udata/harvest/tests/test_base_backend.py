@@ -16,7 +16,13 @@ from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates
 from udata.utils import faker
 
-from ..backends import BaseBackend, HarvestExtraConfig, HarvestFeature, HarvestFilter, get_all_backends
+from ..backends import (
+    BaseBackend,
+    HarvestExtraConfig,
+    HarvestFeature,
+    HarvestFilter,
+    get_all_backends,
+)
 from ..exceptions import HarvestException
 from .factories import HarvestSourceFactory
 
