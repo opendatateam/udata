@@ -17,15 +17,21 @@ def boolean(value):
 
     try:
         return bool(int(value))
-    except ValueError:
+    except (ValueError, TypeError):
+        pass
+
+    try:
         lower_value = value.strip().lower()
-        if not lower_value:
-            return None
-        if lower_value in ("f", "false", "n", "no", "off"):
-            return False
-        if lower_value in ("on", "t", "true", "y", "yes"):
-            return True
+    except AttributeError:
         raise Invalid("Unable to parse boolean {0}".format(value))
+
+    if not lower_value:
+        return None
+    if lower_value in ("f", "false", "n", "no", "off"):
+        return False
+    if lower_value in ("on", "t", "true", "y", "yes"):
+        return True
+    raise Invalid("Unable to parse boolean {0}".format(value))
 
 
 def to_date(value):
