@@ -41,6 +41,9 @@ class FiltersTest:
             filters.boolean("vrai")
 
         with pytest.raises(Invalid):
+            filters.boolean("42")
+
+        with pytest.raises(Invalid):
             filters.boolean({"key": "value"})
 
     def test_empty_none(self):
