@@ -317,3 +317,23 @@ def attach(domain, filename):
             count += 1
 
     return AttachResult(count, errors)
+
+
+def detach(dataset: Dataset):
+    """Detach a dataset from its harvest source
+
+    The dataset will be cleaned from harvested information
+    and will no longer be updated or archived by harvesting.
+    """
+    dataset.harvest = None
+    for resource in dataset.resources:
+        resource.harvest = None
+    dataset.save()
+
+
+def detach_all_from_source(source: HarvestSource):
+    """Detach all datasets linked to a harvest source"""
+    datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
+    for dataset in datasets:
+        detach(dataset)
+    return len(datasets)
