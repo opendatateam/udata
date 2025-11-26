@@ -1,10 +1,11 @@
 from collections import OrderedDict
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from enum import StrEnum, auto
 
 from flask_babel import LazyString
 
 from udata.i18n import lazy_gettext as _
+from udata.utils import to_naive_datetime
 
 
 class UpdateFrequency(StrEnum):
@@ -103,11 +104,10 @@ class UpdateFrequency(StrEnum):
         if not self.delta:
             return None
         result = last_update + self.delta
-        # Convert datetime.date to datetime.datetime for BSON compatibility
-        # MongoDB/BSON cannot encode datetime.date objects, only datetime.datetime
-        if isinstance(result, date) and not isinstance(result, datetime):
-            result = datetime.combine(result, datetime.min.time())
-        return result
+        # Normalize result to naive datetime:
+        # - Convert datetime.date to datetime.datetime (BSON compatibility)
+        # - Convert timezone-aware datetime to naive datetime (harvested data may have timezone)
+        return to_naive_datetime(result)
 
 
 # We must declare UpdateFrequency class variables after the Enum magic
