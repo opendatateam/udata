@@ -5,7 +5,6 @@ from enum import StrEnum, auto
 from flask_babel import LazyString
 
 from udata.i18n import lazy_gettext as _
-from udata.utils import to_naive_datetime
 
 
 class UpdateFrequency(StrEnum):
@@ -101,13 +100,7 @@ class UpdateFrequency(StrEnum):
         return self._delta  # type: ignore[misc]
 
     def next_update(self, last_update: datetime) -> datetime | None:
-        if not self.delta:
-            return None
-        result = last_update + self.delta
-        # Normalize result to naive datetime:
-        # - Convert datetime.date to datetime.datetime (BSON compatibility)
-        # - Convert timezone-aware datetime to naive datetime (harvested data may have timezone)
-        return to_naive_datetime(result)
+        return last_update + self.delta if self.delta else None
 
 
 # We must declare UpdateFrequency class variables after the Enum magic
