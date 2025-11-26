@@ -16,7 +16,7 @@ from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates
 from udata.utils import faker
 
-from ..backends import BaseBackend, HarvestExtraConfig, HarvestFeature, HarvestFilter
+from ..backends import BaseBackend, HarvestExtraConfig, HarvestFeature, HarvestFilter, get_all_backends
 from ..exceptions import HarvestException
 from .factories import HarvestSourceFactory
 
@@ -560,3 +560,19 @@ class BaseBackendValidateTest(PytestOnlyDBTestCase):
         assert "[nested.0.other-bad-value] expected int: wrong" in msg
         assert "[nested.1.bad-value] expected str: 43" in msg
         assert "[nested.1.other-bad-value] expected int: bad" in msg
+
+
+class AllBackendsTest:
+    def test_all_backends_have_unique_display_name(self):
+        """Ensure all harvest backends have unique display_name values."""
+        backends = get_all_backends()
+
+        display_names = {}
+        for name, backend in backends.items():
+            display_name = backend.display_name
+            assert display_name is not None, f"Backend '{name}' has no display_name"
+            assert display_name not in display_names, (
+                f"Duplicate display_name '{display_name}' found in backends "
+                f"'{display_names[display_name]}' and '{name}'"
+            )
+            display_names[display_name] = name
