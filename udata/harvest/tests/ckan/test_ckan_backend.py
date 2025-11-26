@@ -201,6 +201,24 @@ def spatial_geom_multipolygon(resource_data):
 
 
 @pytest.fixture
+def spatial_geom_polygon_as_dict(resource_data):
+    """
+    Test case where extra["value"] is already a dict in CKAN (e.g., datasud.fr).
+    In some CKAN instances, the spatial value is returned as a dict directly
+    instead of a JSON string, so json.loads() would fail.
+    """
+    polygon = faker.polygon()
+    data = {
+        "name": faker.unique_string(),
+        "title": faker.sentence(),
+        "notes": faker.paragraph(),
+        "resources": [resource_data],
+        "extras": [{"key": "spatial", "value": polygon}],
+    }
+    return data, {"polygon": polygon}
+
+
+@pytest.fixture
 def known_spatial_text_name(resource_data):
     zone = GeoZoneFactory()
     data = {
@@ -421,6 +439,21 @@ class CkanBackendTest(PytestOnlyDBTestCase):
 
         dataset = dataset_for(result)
         assert dataset.spatial.geom == multipolygon
+
+    @pytest.mark.ckan_data("spatial_geom_polygon_as_dict")
+    def test_geospatial_geom_polygon_as_dict(self, result, kwargs):
+        """
+        Test that spatial geometry works when the value is already a dict.
+        Some CKAN instances (e.g., datasud.fr) return the spatial value as a dict
+        directly instead of a JSON string.
+        """
+        polygon = kwargs["polygon"]
+        dataset = dataset_for(result)
+
+        assert dataset.spatial.geom == {
+            "type": "MultiPolygon",
+            "coordinates": [polygon["coordinates"]],
+        }
 
     @pytest.mark.ckan_data("skipped_no_resources")
     def test_skip_no_resources(self, source, result):
