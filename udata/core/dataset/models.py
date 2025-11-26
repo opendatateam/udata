@@ -795,7 +795,7 @@ class Dataset(
         Resources should be fetched when calling this method.
         """
         if self.harvest and self.harvest.modified_at:
-            return self.harvest.modified_at
+            return to_naive_datetime(self.harvest.modified_at)
         if self.resources:
             return max([res.last_modified for res in self.resources])
         else:
