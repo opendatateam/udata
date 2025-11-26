@@ -170,7 +170,7 @@ def detach(dataset_id):
     log.info(f"Detaching dataset {dataset_id}")
     dataset = Dataset.get(dataset_id)
     actions.detach(dataset)
-    log.info(f"Done")
+    log.info("Done")
 
 
 @grp.command()
@@ -187,5 +187,5 @@ def detach_all_from_source(identifier):
     count = actions.detach_all_from_source(actions.get_source(identifier))
     log.info(f"Detached {count} datasets")
     log.warning(
-        f"Make sure the harvest source won't create new duplicate datasets, either by deactivating it or filtering its scope, etc."
+        "Make sure the harvest source won't create new duplicate datasets, either by deactivating it or filtering its scope, etc."
     )
