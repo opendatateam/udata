@@ -936,7 +936,10 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         "exception",
         [
             requests.exceptions.ConnectTimeout("Connection timed out"),
-            requests.exceptions.ConnectionError("Name resolution failed"),
+            requests.exceptions.ConnectionError(
+                "Failed to resolve 'example.com' (Name resolution failed)"
+            ),
+            requests.exceptions.SSLError("SSL: CERTIFICATE_VERIFY_FAILED"),
         ],
     )
     def test_connection_errors_are_handled_without_sentry(self, rmock, mocker, exception):
