@@ -10,7 +10,7 @@ from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.mongo import db
 
-from .constants import REPORT_REASONS_CHOICES, REPORTABLE_MODELS
+from .constants import REASON_AUTO_SPAM, REPORT_REASONS_CHOICES, REPORTABLE_MODELS
 
 
 class ReportQuerySet(db.BaseQuerySet):
@@ -82,6 +82,21 @@ class Report(db.Document):
         allow_null=True,
     )
 
+    # Path to target an embedded document within the subject
+    # Format: "<field_name>.<id_or_index>" e.g., "discussion.2" for 3rd message
+    subject_path = field(
+        db.StringField(),
+        allow_null=True,
+        description="Path to embedded document (e.g., 'discussion.2' for 3rd message)",
+    )
+
+    # Callbacks to execute when report is dismissed (for auto-spam reports)
+    # Format: {"method_name": {"args": [...], "kwargs": {...}}}
+    callbacks = field(
+        db.DictField(default=dict),
+        readonly=True,
+    )
+
     meta = {
         "queryset_class": ReportQuerySet,
     }
@@ -89,6 +104,67 @@ class Report(db.Document):
     @field(description="Link to the API endpoint for this report")
     def self_api_url(self):
         return url_for("api.report", report=self, _external=True)
+
+    def get_target(self):
+        """
+        Resolve subject + subject_path to the actual target object.
+        Returns the embedded document if subject_path is set, otherwise the subject itself.
+        Returns None if the path is invalid or the target cannot be found.
+        """
+        subject = self.subject.fetch() if hasattr(self.subject, "fetch") else self.subject
+        if not self.subject_path:
+            return subject
+
+        # Validate path format
+        if "." not in self.subject_path:
+            return None
+
+        field_name, identifier = self.subject_path.split(".", 1)
+        items = getattr(subject, field_name, None)
+
+        if items is None:
+            return None
+
+        # Try as index first (for embedded docs without id like Message)
+        try:
+            index = int(identifier)
+            if 0 <= index < len(items):
+                return items[index]
+            return None
+        except (ValueError, TypeError):
+            # Try as id (for embedded docs with id like Resource)
+            return next((item for item in items if str(item.id) == identifier), None)
+
+    def execute_callbacks(self):
+        """
+        Execute stored callbacks when dismissing an auto-spam report.
+        The callbacks are executed on the subject (base model).
+        """
+        if not self.callbacks:
+            return
+
+        subject = self.subject.fetch() if hasattr(self.subject, "fetch") else self.subject
+        for method_name, call_info in self.callbacks.items():
+            method = getattr(subject, method_name, None)
+            if method:
+                method(*call_info.get("args", []), **call_info.get("kwargs", {}))
+
+    @classmethod
+    def get_auto_spam_report(cls, subject, subject_path=None):
+        """
+        Get the unhandled auto-spam report for a subject (and optional path).
+        Returns None if no such report exists.
+        """
+        query = {
+            "subject": subject,
+            "reason": REASON_AUTO_SPAM,
+            "dismissed_at": None,
+        }
+        if subject_path:
+            query["subject_path"] = subject_path
+        else:
+            query["subject_path"] = None
+        return cls.objects(**query).first()
 
     @classmethod
     def mark_as_deleted_soft_delete(cls, sender, document, **kwargs):
