@@ -4,20 +4,21 @@ from mongoengine import signals
 
 from udata.mongo import db
 
-from .constants import NO_SPAM, NOT_CHECKED, POTENTIAL_SPAM, SPAM_STATUS_CHOICES
 from .signals import on_new_potential_spam
 
 
-class SpamInfo(db.EmbeddedDocument):
-    status = db.StringField(choices=SPAM_STATUS_CHOICES, default=NOT_CHECKED)
-    callbacks = db.DictField(default={})
-
-
 class SpamMixin(object):
-    spam = db.EmbeddedDocumentField(SpamInfo)
+    """
+    Mixin for models that can be checked for spam.
+    Spam detection creates Report objects instead of storing spam info on the model itself.
+    """
 
     attributes_before = None
     detect_spam_enabled: bool = True
+
+    # These will be set during spam detection to track context
+    _spam_report = None  # Reference to the created Report (if any)
+    _spam_base_model = None  # Reference to the base document (for embedded docs)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -57,14 +58,10 @@ class SpamMixin(object):
     def detect_spam(self, breadcrumb=None):
         """
         This is the main function doing the spam detection.
-        This function set a flag POTENTIAL_SPAM if a model is suspicious.
+        If spam is detected, a Report is created after the model is saved.
         """
         if not self.detect_spam_enabled:
             return
-
-        # During initialisation some models can have no spam associated
-        if not self.spam:
-            self.spam = SpamInfo(status=NOT_CHECKED, callbacks={})
 
         if self.spam_is_whitelisted():
             return
@@ -89,8 +86,7 @@ class SpamMixin(object):
 
             for word in SpamMixin.spam_words():
                 if word in text.lower():
-                    self.spam.status = POTENTIAL_SPAM
-                    self._report(
+                    self._schedule_report(
                         text=text, breadcrumb=breadcrumb, reason=f'contains spam words "{word}"'
                     )
                     return
@@ -102,8 +98,7 @@ class SpamMixin(object):
             ):
                 lang = detect(text.lower())
                 if lang not in SpamMixin.allowed_langs():
-                    self.spam.status = POTENTIAL_SPAM
-                    self._report(
+                    self._schedule_report(
                         text=text, breadcrumb=breadcrumb, reason=f'not allowed language "{lang}"'
                     )
                     return
@@ -124,22 +119,40 @@ class SpamMixin(object):
         else:
             raise RuntimeError("SpamMixin should be a Document or an EmbeddedDocument")
 
-    def mark_as_no_spam(self, base_model):
+    def is_spam(self, base_model=None):
         """
-        When an admin mark a model as a false positive (not a real spam)
-        we need to call back the saved callbacks that where delayed in `spam_protected`
+        Check if this model has an unhandled auto-spam report.
+        For embedded documents, base_model must be provided (or cached from spam detection).
         """
-        callbacks = self.spam.callbacks
-        self.spam.status = NO_SPAM
-        self.spam.callbacks = {}
-        base_model.save()
+        return self.get_spam_report(base_model) is not None
 
-        for name, args in callbacks.items():
-            callback = getattr(base_model, name)
-            callback(*args["args"], **args["kwargs"])
+    def get_spam_report(self, base_model=None):
+        """
+        Get the unhandled auto-spam report for this model.
+        For embedded documents, base_model must be provided (or cached from spam detection).
+        """
+        from udata.core.reports.models import Report
 
-    def is_spam(self):
-        return self.spam and self.spam.status == POTENTIAL_SPAM
+        if isinstance(self, db.Document):
+            return Report.get_auto_spam_report(self)
+        elif isinstance(self, db.EmbeddedDocument):
+            if base_model is None:
+                base_model = self._spam_base_model
+            if base_model is None:
+                raise ValueError("base_model is required for embedded documents")
+            subject_path = self._get_subject_path(base_model)
+            return Report.get_auto_spam_report(base_model, subject_path)
+        return None
+
+    def _get_subject_path(self, base_model):
+        """
+        Get the subject_path for this embedded document within base_model.
+        Must be implemented by subclasses that are embedded documents.
+        """
+        raise NotImplementedError(
+            "Embedded documents must implement _get_subject_path to generate the path "
+            "within the parent document (e.g., 'discussion.2' for a Message)."
+        )
 
     def texts_to_check_for_spam(self):
         raise NotImplementedError(
@@ -152,40 +165,75 @@ class SpamMixin(object):
     def spam_is_whitelisted(self) -> bool:
         return False
 
-    def spam_report_message(self):
+    def spam_report_message(self, breadcrumb):
         return f"Spam potentiel sur {type(self).__name__}"
 
-    def _report(self, text, breadcrumb, reason):
+    def _schedule_report(self, text, breadcrumb, reason):
+        """
+        Schedule a Report to be created after the model is saved.
+        We need to wait for save because we need the model's ID.
+        """
         base_model = breadcrumb[0]
+        spam_model = self
 
-        def report_after_save(sender, document, **kwargs):
-            # Here we early out to prevent multiple reports if multiple
-            # spam are sent at the same time. Not sure if it's necessary.
+        # Store reference to base_model for embedded documents
+        if isinstance(self, db.EmbeddedDocument):
+            self._spam_base_model = base_model
+
+        def create_report_after_save(sender, document, **kwargs):
+            # Only process if this is our base_model being saved
             if document != base_model:
                 return
 
-            message = self.spam_report_message(breadcrumb)
+            from udata.core.reports.constants import REASON_AUTO_SPAM
+            from udata.core.reports.models import Report
 
-            on_new_potential_spam.send(self, message=message, text=text, reason=reason)
+            # Compute subject_path for embedded documents
+            subject_path = None
+            if spam_model != base_model:
+                try:
+                    subject_path = spam_model._get_subject_path(base_model)
+                except NotImplementedError:
+                    pass
 
-            # We clean the listener here. Not sure if it's necessary either.
-            signals.post_save.disconnect(report_after_save)
+            # Check if report already exists to avoid duplicates
+            existing = Report.get_auto_spam_report(base_model, subject_path)
+            if existing:
+                signals.post_save.disconnect(create_report_after_save)
+                return
 
-        # For `spam_report_message` we often need the ID of the document so we
-        # must report after saving to have the ID available.
-        # By default the signal is weak so it is dropped at the end of this function and it's
-        # never called. We disconnect the signal in `report_after_save` to avoid leaks.
-        signals.post_save.connect(report_after_save, sender=base_model.__class__, weak=False)
+            # Create the Report
+            message = spam_model.spam_report_message(breadcrumb)
+            report = Report(
+                subject=base_model,
+                subject_path=subject_path,
+                reason=REASON_AUTO_SPAM,
+                message=f"{message}\n\nReason: {reason}\nText: {text[:500]}",
+            )
+            report.save()
+
+            # Store reference to the report
+            spam_model._spam_report = report
+
+            # Emit signal for notifications
+            on_new_potential_spam.send(spam_model, message=message, text=text, reason=reason)
+
+            # Disconnect to avoid memory leaks
+            signals.post_save.disconnect(create_report_after_save)
+
+        # Connect signal - use weak=False to prevent garbage collection
+        signals.post_save.connect(create_report_after_save, sender=base_model.__class__, weak=False)
 
 
 def spam_protected(get_model_to_check=None):
     """
-    This decorator prevent the calling of a class method if the object is a POTENTIAL_SPAM.
-    It will save the class method called with its arguments inside the `SpamInfo` object to be
-    called later if needed (in case of false positive).
-    The decorator accept an argument, a function to get the model to check when we are doing an operation
-    on an embed document. The class method should always take a `self` as a first argument which is the base
-    model to allow saving the callbacks back into Mongo (we cannot .save() an embed document).
+    This decorator prevents the calling of a class method if the object is a POTENTIAL_SPAM.
+    It will save the class method called with its arguments inside the Report's callbacks
+    to be called later if needed (in case of false positive).
+
+    The decorator accepts an argument, a function to get the model to check when we are doing an operation
+    on an embedded document. The class method should always take a `self` as a first argument which is the base
+    model to allow saving the callbacks back into the Report.
     """
 
     def decorator(f):
@@ -207,9 +255,15 @@ def spam_protected(get_model_to_check=None):
                     + " given."
                 )
 
-            if model_to_check.is_spam():
-                model_to_check.spam.callbacks[f.__name__] = {"args": args[1:], "kwargs": kwargs}
-                base_model.save_without_spam_detection()
+            # Check if there's a spam report for this model
+            if model_to_check.is_spam(base_model if model_to_check != base_model else None):
+                # Get the report and save the callback to it
+                report = model_to_check.get_spam_report(
+                    base_model if model_to_check != base_model else None
+                )
+                if report:
+                    report.callbacks[f.__name__] = {"args": args[1:], "kwargs": kwargs}
+                    report.save()
             else:
                 f(*args, **kwargs)
 

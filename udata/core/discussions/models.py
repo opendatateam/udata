@@ -44,6 +44,19 @@ class Message(SpamMixin, db.EmbeddedDocument):
     def texts_to_check_for_spam(self):
         return [self.content]
 
+    def _get_subject_path(self, base_model):
+        """
+        Get the path to this message within the parent Discussion.
+        Returns "discussion.<index>" where index is the position in the discussion list.
+        """
+        if not isinstance(base_model, Discussion):
+            raise ValueError("base_model must be a Discussion")
+        try:
+            index = base_model.discussion.index(self)
+            return f"discussion.{index}"
+        except ValueError:
+            raise ValueError("Message not found in Discussion")
+
     def spam_report_message(self, breadcrumb):
         message = "Spam potentiel dans le message"
         if self.posted_by_org_or_user:
