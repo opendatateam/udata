@@ -2,6 +2,7 @@ from datetime import datetime
 
 from bson import DBRef
 from flask import url_for
+from flask_restx import inputs
 from mongoengine import DO_NOTHING, NULLIFY, Q, signals
 
 from udata.api_fields import field, generate_fields
@@ -34,7 +35,7 @@ def filter_by_handled(base_query, filter_value):
         {
             "key": "handled",
             "query": filter_by_handled,
-            "type": bool,
+            "type": inputs.boolean,
         },
     ],
 )

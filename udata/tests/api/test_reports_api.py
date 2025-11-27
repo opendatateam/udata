@@ -251,14 +251,14 @@ class ReportsAPITest(APITestCase):
         self.login(admin)
 
         # Filter by unhandled
-        response = self.get(url_for("api.reports", handled=False))
+        response = self.get(url_for("api.reports", handled="false"))
         self.assert200(response)
         payload = response.json
         self.assertEqual(payload["total"], 1)
         self.assertEqual(payload["data"][0]["id"], str(ongoing_report.id))
 
         # Filter by handled
-        response = self.get(url_for("api.reports", handled=True))
+        response = self.get(url_for("api.reports", handled="true"))
         self.assert200(response)
         payload = response.json
         self.assertEqual(payload["total"], 1)
@@ -271,7 +271,7 @@ class ReportsAPITest(APITestCase):
         self.assertEqual(payload["total"], 2)
 
     def test_reports_api_filter_handled_with_deleted_subject(self):
-        """Reports with deleted subjects should appear when handled=True, not handled=False."""
+        """Reports with deleted subjects should appear when handled="true", not handled="false"."""
         user = UserFactory()
         admin = AdminFactory()
 
@@ -288,14 +288,14 @@ class ReportsAPITest(APITestCase):
         self.login(admin)
 
         # Filter by unhandled - should only return the report with existing subject
-        response = self.get(url_for("api.reports", handled=False))
+        response = self.get(url_for("api.reports", handled="false"))
         self.assert200(response)
         payload = response.json
         self.assertEqual(payload["total"], 1)
         self.assertEqual(payload["data"][0]["id"], str(ongoing_report.id))
 
         # Filter by handled - should return the report with deleted subject
-        response = self.get(url_for("api.reports", handled=True))
+        response = self.get(url_for("api.reports", handled="true"))
         self.assert200(response)
         payload = response.json
         self.assertEqual(payload["total"], 1)
