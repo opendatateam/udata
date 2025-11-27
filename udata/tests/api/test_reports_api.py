@@ -9,7 +9,7 @@ from udata.core.reports.constants import (
     REASON_SPAM,
     reports_reasons_translations,
 )
-from udata.core.reports.models import Report
+from udata.core.reports.models import REPORT_STATUS_HANDLED, REPORT_STATUS_UNHANDLED, Report
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 
@@ -197,6 +197,42 @@ class ReportsAPITest(APITestCase):
         self.assertIsNotNone(report.dismissed_at)
         self.assertEqual(report.dismissed_by.id, admin.id)
 
+    def test_reports_api_undismiss(self):
+        user = UserFactory()
+        admin = AdminFactory()
+
+        spam_dataset = DatasetFactory.create(owner=user)
+        report = Report(
+            subject=spam_dataset,
+            reason="spam",
+            dismissed_at=datetime.utcnow(),
+            dismissed_by=admin,
+        ).save()
+
+        # Verify report is dismissed
+        self.assertIsNotNone(report.dismissed_at)
+        self.assertIsNotNone(report.dismissed_by)
+
+        # Should require admin
+        response = self.patch(url_for("api.report", report=report), {"dismissed_at": None})
+        self.assert401(response)
+
+        self.login(user)
+        response = self.patch(url_for("api.report", report=report), {"dismissed_at": None})
+        self.assert403(response)
+
+        self.login(admin)
+        response = self.patch(url_for("api.report", report=report), {"dismissed_at": None})
+        self.assert200(response)
+
+        payload = response.json
+        self.assertIsNone(payload["dismissed_at"])
+        self.assertIsNone(payload["dismissed_by"])
+
+        report.reload()
+        self.assertIsNone(report.dismissed_at)
+        self.assertIsNone(report.dismissed_by)
+
     def test_reports_api_filter_by_status(self):
         user = UserFactory()
         admin = AdminFactory()
@@ -204,25 +240,25 @@ class ReportsAPITest(APITestCase):
         dataset1 = DatasetFactory.create(owner=user)
         dataset2 = DatasetFactory.create(owner=user)
 
-        # Ongoing report (not dismissed)
+        # Unhandled report (not dismissed)
         ongoing_report = Report(subject=dataset1, reason="spam").save()
 
-        # Done report (dismissed)
+        # Handled report (dismissed)
         dismissed_report = Report(
             subject=dataset2, reason="spam", dismissed_at=datetime.utcnow(), dismissed_by=admin
         ).save()
 
         self.login(admin)
 
-        # Filter by ongoing status
-        response = self.get(url_for("api.reports", status="ongoing"))
+        # Filter by unhandled status
+        response = self.get(url_for("api.reports", status=REPORT_STATUS_UNHANDLED))
         self.assert200(response)
         payload = response.json
         self.assertEqual(payload["total"], 1)
         self.assertEqual(payload["data"][0]["id"], str(ongoing_report.id))
 
-        # Filter by done status
-        response = self.get(url_for("api.reports", status="done"))
+        # Filter by handled status
+        response = self.get(url_for("api.reports", status=REPORT_STATUS_HANDLED))
         self.assert200(response)
         payload = response.json
         self.assertEqual(payload["total"], 1)
@@ -242,31 +278,31 @@ class ReportsAPITest(APITestCase):
         self.assert400(response)
 
     def test_reports_api_filter_status_with_deleted_subject(self):
-        """Reports with deleted subjects should appear in done status, not ongoing."""
+        """Reports with deleted subjects should appear in handled status, not unhandled."""
         user = UserFactory()
         admin = AdminFactory()
 
         dataset1 = DatasetFactory.create(owner=user)
         dataset2 = DatasetFactory.create(owner=user)
 
-        # Ongoing report (not dismissed, subject exists)
+        # Unhandled report (not dismissed, subject exists)
         ongoing_report = Report(subject=dataset1, reason="spam").save()
 
-        # Report with deleted subject (should appear in "done", not "ongoing")
+        # Report with deleted subject (should appear in "handled", not "unhandled")
         deleted_subject_report = Report(subject=dataset2, reason="spam").save()
         dataset2.delete()
 
         self.login(admin)
 
-        # Filter by ongoing status - should only return the report with existing subject
-        response = self.get(url_for("api.reports", status="ongoing"))
+        # Filter by unhandled status - should only return the report with existing subject
+        response = self.get(url_for("api.reports", status=REPORT_STATUS_UNHANDLED))
         self.assert200(response)
         payload = response.json
         self.assertEqual(payload["total"], 1)
         self.assertEqual(payload["data"][0]["id"], str(ongoing_report.id))
 
-        # Filter by done status - should return the report with deleted subject
-        response = self.get(url_for("api.reports", status="done"))
+        # Filter by handled status - should return the report with deleted subject
+        response = self.get(url_for("api.reports", status=REPORT_STATUS_HANDLED))
         self.assert200(response)
         payload = response.json
         self.assertEqual(payload["total"], 1)

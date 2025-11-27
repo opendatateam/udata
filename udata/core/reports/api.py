@@ -47,13 +47,15 @@ class ReportAPI(API):
     @api.expect(Report.__write_fields__)
     @api.marshal_with(Report.__read_fields__, code=200)
     def patch(self, report):
-        is_dismiss = (
+        dismiss_has_changed = (
             "dismissed_at" in request.json and request.json["dismissed_at"] != report.dismissed_at
         )
 
         report = patch(report, request)
-        if is_dismiss:
-            report.dismissed_by = current_user._get_current_object()
+        if dismiss_has_changed:
+            report.dismissed_by = (
+                current_user._get_current_object() if report.dismissed_at else None
+            )
 
         report.save()
         return report, 200
