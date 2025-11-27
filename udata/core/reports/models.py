@@ -11,9 +11,9 @@ from udata.mongo import db
 
 from .constants import REPORT_REASONS_CHOICES, REPORTABLE_MODELS
 
-REPORT_STATUS_ONGOING = "ongoing"
-REPORT_STATUS_DONE = "done"
-REPORT_STATUS_CHOICES = [REPORT_STATUS_ONGOING, REPORT_STATUS_DONE]
+REPORT_STATUS_UNHANDLED = "unhandled"
+REPORT_STATUS_HANDLED = "handled"
+REPORT_STATUS_CHOICES = [REPORT_STATUS_UNHANDLED, REPORT_STATUS_HANDLED]
 
 
 class ReportQuerySet(db.BaseQuerySet):
@@ -25,9 +25,9 @@ class ReportQuerySet(db.BaseQuerySet):
 
 
 def filter_by_status(base_query, filter_value):
-    if filter_value == REPORT_STATUS_ONGOING:
+    if filter_value == REPORT_STATUS_UNHANDLED:
         return base_query.ongoing()
-    elif filter_value == REPORT_STATUS_DONE:
+    elif filter_value == REPORT_STATUS_HANDLED:
         return base_query.done()
     else:
         return base_query
