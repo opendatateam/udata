@@ -21,8 +21,6 @@ class NotificationQuerySet(UDataQuerySet):
 
 
 def is_handled(base_query, filter_value):
-    print(base_query)
-    print(filter_value)
     if filter_value is None:
         return base_query
     if filter_value is True:
