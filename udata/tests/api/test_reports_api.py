@@ -158,15 +158,9 @@ class ReportsAPITest(APITestCase):
         dataset3 = DatasetFactory.create(owner=user)
 
         # Create reports with different reported_at times
-        report1 = Report(
-            subject=dataset1, reason="spam", reported_at=datetime(2024, 1, 1)
-        ).save()
-        report2 = Report(
-            subject=dataset2, reason="spam", reported_at=datetime(2024, 1, 3)
-        ).save()
-        report3 = Report(
-            subject=dataset3, reason="spam", reported_at=datetime(2024, 1, 2)
-        ).save()
+        report1 = Report(subject=dataset1, reason="spam", reported_at=datetime(2024, 1, 1)).save()
+        report2 = Report(subject=dataset2, reason="spam", reported_at=datetime(2024, 1, 3)).save()
+        report3 = Report(subject=dataset3, reason="spam", reported_at=datetime(2024, 1, 2)).save()
 
         self.login(AdminFactory())
 
