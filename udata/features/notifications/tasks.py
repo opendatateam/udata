@@ -18,7 +18,8 @@ def delete_expired_notifications(self):
     notifications_to_delete = Notification.objects(
         handled_at__lte=handled_at,
     )
+    count = notifications_to_delete.count()
     for notification in notifications_to_delete:
         notification.delete()
 
-    logging.info(f"Deleted {notifications_to_delete.count()} expired notifications")
+    logging.info(f"Deleted {count} expired notifications")
