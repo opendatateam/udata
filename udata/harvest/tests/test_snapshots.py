@@ -14,6 +14,7 @@ from udata.core.dataset.models import Dataset
 from udata.harvest import actions
 from udata.harvest.models import HarvestJob
 from udata.harvest.tests.factories import HarvestSourceFactory
+from udata.tests.api import PytestOnlyAPITestCase
 
 SNAPSHOTS_DIR = join(dirname(__file__), "snapshots")
 
@@ -42,9 +43,8 @@ harvester_configs = [
 ]
 
 
-@pytest.mark.usefixtures("clean_db")
-@pytest.mark.options(PLUGINS=["dcat", "csw-iso-19139", "ckan"])
-class SnapshotsTest:
+@pytest.mark.options(HARVESTER_BACKENDS=["dcat", "csw-iso-19139", "ckan"])
+class SnapshotsTest(PytestOnlyAPITestCase):
     @pytest.mark.parametrize("harvester_conf", harvester_configs)
     def test_all(self, harvester_conf):
         os.makedirs(SNAPSHOTS_DIR, exist_ok=True)
