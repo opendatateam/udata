@@ -11,24 +11,20 @@ from udata.mongo import db
 
 from .constants import REPORT_REASONS_CHOICES, REPORTABLE_MODELS
 
-REPORT_STATUS_UNHANDLED = "unhandled"
-REPORT_STATUS_HANDLED = "handled"
-REPORT_STATUS_CHOICES = [REPORT_STATUS_UNHANDLED, REPORT_STATUS_HANDLED]
-
 
 class ReportQuerySet(db.BaseQuerySet):
-    def ongoing(self):
+    def unhandled(self):
         return self.filter(dismissed_at=None, subject_deleted_at=None)
 
-    def done(self):
+    def handled(self):
         return self.filter(Q(dismissed_at__ne=None) | Q(subject_deleted_at__ne=None))
 
 
-def filter_by_status(base_query, filter_value):
-    if filter_value == REPORT_STATUS_UNHANDLED:
-        return base_query.ongoing()
-    elif filter_value == REPORT_STATUS_HANDLED:
-        return base_query.done()
+def filter_by_handled(base_query, filter_value):
+    if filter_value is True:
+        return base_query.handled()
+    elif filter_value is False:
+        return base_query.unhandled()
     else:
         return base_query
 
@@ -36,10 +32,9 @@ def filter_by_status(base_query, filter_value):
 @generate_fields(
     standalone_filters=[
         {
-            "key": "status",
-            "query": filter_by_status,
-            "type": str,
-            "choices": REPORT_STATUS_CHOICES,
+            "key": "handled",
+            "query": filter_by_handled,
+            "type": bool,
         },
     ],
 )

@@ -9,7 +9,7 @@ from udata.core.reports.constants import (
     REASON_SPAM,
     reports_reasons_translations,
 )
-from udata.core.reports.models import REPORT_STATUS_HANDLED, REPORT_STATUS_UNHANDLED, Report
+from udata.core.reports.models import Report
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 
@@ -233,7 +233,7 @@ class ReportsAPITest(APITestCase):
         self.assertIsNone(report.dismissed_at)
         self.assertIsNone(report.dismissed_by)
 
-    def test_reports_api_filter_by_status(self):
+    def test_reports_api_filter_by_handled(self):
         user = UserFactory()
         admin = AdminFactory()
 
@@ -250,15 +250,15 @@ class ReportsAPITest(APITestCase):
 
         self.login(admin)
 
-        # Filter by unhandled status
-        response = self.get(url_for("api.reports", status=REPORT_STATUS_UNHANDLED))
+        # Filter by unhandled
+        response = self.get(url_for("api.reports", handled=False))
         self.assert200(response)
         payload = response.json
         self.assertEqual(payload["total"], 1)
         self.assertEqual(payload["data"][0]["id"], str(ongoing_report.id))
 
-        # Filter by handled status
-        response = self.get(url_for("api.reports", status=REPORT_STATUS_HANDLED))
+        # Filter by handled
+        response = self.get(url_for("api.reports", handled=True))
         self.assert200(response)
         payload = response.json
         self.assertEqual(payload["total"], 1)
@@ -270,15 +270,8 @@ class ReportsAPITest(APITestCase):
         payload = response.json
         self.assertEqual(payload["total"], 2)
 
-    def test_reports_api_filter_invalid_status(self):
-        """Invalid status values should return 400."""
-        self.login(AdminFactory())
-
-        response = self.get(url_for("api.reports", status="invalid"))
-        self.assert400(response)
-
-    def test_reports_api_filter_status_with_deleted_subject(self):
-        """Reports with deleted subjects should appear in handled status, not unhandled."""
+    def test_reports_api_filter_handled_with_deleted_subject(self):
+        """Reports with deleted subjects should appear when handled=True, not handled=False."""
         user = UserFactory()
         admin = AdminFactory()
 
@@ -294,15 +287,15 @@ class ReportsAPITest(APITestCase):
 
         self.login(admin)
 
-        # Filter by unhandled status - should only return the report with existing subject
-        response = self.get(url_for("api.reports", status=REPORT_STATUS_UNHANDLED))
+        # Filter by unhandled - should only return the report with existing subject
+        response = self.get(url_for("api.reports", handled=False))
         self.assert200(response)
         payload = response.json
         self.assertEqual(payload["total"], 1)
         self.assertEqual(payload["data"][0]["id"], str(ongoing_report.id))
 
-        # Filter by handled status - should return the report with deleted subject
-        response = self.get(url_for("api.reports", status=REPORT_STATUS_HANDLED))
+        # Filter by handled - should return the report with deleted subject
+        response = self.get(url_for("api.reports", handled=True))
         self.assert200(response)
         payload = response.json
         self.assertEqual(payload["total"], 1)
