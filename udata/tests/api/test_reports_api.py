@@ -150,6 +150,34 @@ class ReportsAPITest(APITestCase):
 
         self.assertEqual(payload["data"][1]["subject"]["id"], str(spam_reuse.id))
 
+    def test_reports_api_list_sort_by_reported_at(self):
+        user = UserFactory()
+
+        dataset1 = DatasetFactory.create(owner=user)
+        dataset2 = DatasetFactory.create(owner=user)
+        dataset3 = DatasetFactory.create(owner=user)
+
+        # Create reports with different reported_at times
+        report1 = Report(
+            subject=dataset1, reason="spam", reported_at=datetime(2024, 1, 1)
+        ).save()
+        report2 = Report(
+            subject=dataset2, reason="spam", reported_at=datetime(2024, 1, 3)
+        ).save()
+        report3 = Report(
+            subject=dataset3, reason="spam", reported_at=datetime(2024, 1, 2)
+        ).save()
+
+        self.login(AdminFactory())
+
+        # Sort by -reported_at (most recent first)
+        response = self.get(url_for("api.reports", sort="-reported_at"))
+        self.assert200(response)
+        payload = response.json
+        self.assertEqual(payload["data"][0]["id"], str(report2.id))
+        self.assertEqual(payload["data"][1]["id"], str(report3.id))
+        self.assertEqual(payload["data"][2]["id"], str(report1.id))
+
     def test_reports_api_get(self):
         user = UserFactory()
 

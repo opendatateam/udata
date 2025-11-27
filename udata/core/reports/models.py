@@ -70,6 +70,7 @@ class Report(db.Document):
     reported_at = field(
         db.DateTimeField(default=datetime.utcnow, required=True),
         readonly=True,
+        sortable=True,
     )
 
     dismissed_at = field(
