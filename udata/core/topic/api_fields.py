@@ -52,7 +52,7 @@ topic_fields = apiv2.model(
             user_ref_fields, description="The owner user", readonly=True, allow_null=True
         ),
         "uri": fields.String(
-            attribute=lambda t: url_for("apiv2.topic", topic=t),
+            attribute=lambda t: url_for("apiv2.topic", topic=t, _external=True),
             description="The topic API URI",
             readonly=True,
         ),

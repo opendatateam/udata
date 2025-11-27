@@ -1,13 +1,13 @@
 from flask import url_for
 
+from udata.core.dataset import tasks
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.pages.models import Page
+from udata.core.user.factories import AdminFactory
 from udata.tests.api import APITestCase
 
 
 class PageAPITest(APITestCase):
-    modules = []
-
     def test_create_get_update(self):
         self.login()
         datasets = DatasetFactory.create_batch(3)
@@ -73,3 +73,33 @@ class PageAPITest(APITestCase):
         self.assertEqual("more information", response.json["blocs"][0]["subtitle"])
         self.assertEqual(len(response.json["blocs"][0]["datasets"]), 1)
         self.assertEqual(str(datasets[2].id), response.json["blocs"][0]["datasets"][0]["id"])
+
+    def test_page_with_deleted_dataset(self):
+        self.login(AdminFactory())
+        datasets = DatasetFactory.create_batch(3)
+
+        response = self.post(
+            url_for("api.pages"),
+            {
+                "blocs": [
+                    {
+                        "class": "DatasetsListBloc",
+                        "title": "My awesome title",
+                        "datasets": [str(d.id) for d in datasets],
+                    }
+                ],
+            },
+        )
+        self.assert201(response)
+        page_id = response.json["id"]
+
+        response = self.delete(url_for("api.dataset", dataset=datasets[0].id))
+        self.assert204(response)
+
+        response = self.get(url_for("api.page", page=page_id))
+        self.assert200(response)
+
+        tasks.purge_datasets()
+
+        response = self.get(url_for("api.page", page=page_id))
+        self.assert200(response)

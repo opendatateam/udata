@@ -7,12 +7,12 @@ from udata.core.dataset.events import serialize_resource_for_event
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.dataset.models import Schema
 from udata.models import Dataset
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_emit
 
 
-@pytest.mark.usefixtures("clean_db")
-@pytest.mark.usefixtures("enable_resource_event")
-class DatasetEventsTest:
+@pytest.mark.options(PUBLISH_ON_RESOURCE_EVENTS=True, RESOURCES_ANALYSER_URI="http://local.dev")
+class DatasetEventsTest(PytestOnlyDBTestCase):
     @patch("requests.post")
     @pytest.mark.options(RESOURCES_ANALYSER_API_KEY=None)
     def test_publish_message_resource_created_no_api_key(self, mock_req):

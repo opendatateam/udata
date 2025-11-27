@@ -128,17 +128,29 @@ EU_HVD_CATEGORIES = {
 HVD_LEGISLATION = "http://data.europa.eu/eli/reg_impl/2023/138/oj"
 TAG_TO_EU_HVD_CATEGORIES = {slugify_tag(EU_HVD_CATEGORIES[uri]): uri for uri in EU_HVD_CATEGORIES}
 
+INSPIRE_GEMET_THEME_NAMESPACE = "http://inspire.ec.europa.eu/theme"
+INSPIRE_GEMET_SCHEME_URIS = [
+    INSPIRE_GEMET_THEME_NAMESPACE,
+    "http://www.eionet.europa.eu/gemet/inspire_themes",
+]
+
 AGENT_ROLE_TO_RDF_PREDICATE = {
     "contact": DCAT.contactPoint,
-    "publisher": DCT.publisher,
     "creator": DCT.creator,
+    "publisher": DCT.publisher,
+    "rightsHolder": DCT.rightsHolder,
+    "custodian": GEODCAT.custodian,
+    "distributor": GEODCAT.distributor,
+    "originator": GEODCAT.originator,
+    "principalInvestigator": GEODCAT.principalInvestigator,
+    "processor": GEODCAT.processor,
+    "resourceProvider": GEODCAT.resourceProvider,
+    "user": GEODCAT.user,
 }
 
 # Map rdf contact point entity to role
 CONTACT_POINT_ENTITY_TO_ROLE = {
-    DCAT.contactPoint: "contact",
-    DCT.publisher: "publisher",
-    DCT.creator: "creator",
+    predicate: role for role, predicate in AGENT_ROLE_TO_RDF_PREDICATE.items()
 }
 
 
@@ -303,16 +315,37 @@ def theme_labels_from_rdf(rdf):
     """
     Get theme labels to use as keywords.
     Map HVD keywords from known URIs resources if HVD support is activated.
+    Map INSPIRE keyword from known themes if INSPIRE support is activated.
+    - An INSPIRE dataset is a dataset with a theme INSPIRE encoded with gmd:descriptiveKeywords/gmd:MD_Keywords.
+      In DCAT, it is shown as a DCAT.theme with a SKOS.inScheme pointing to to the INSPIRE thesaurus.
+      We filter on this thesaurus based on its name (expecting "GEMET - INSPIRE themes, version 1.0") or its uri.
     """
     for theme in rdf.objects(DCAT.theme):
         if isinstance(theme, RdfResource):
+            label = rdf_value(theme, SKOS.prefLabel)
             uri = theme.identifier.toPython()
             if current_app.config["HVD_SUPPORT"] and uri in EU_HVD_CATEGORIES:
+                # Map label from EU HVD categories
                 label = EU_HVD_CATEGORIES[uri]
                 # Additionnally yield hvd keyword
                 yield "hvd"
-            else:
-                label = rdf_value(theme, SKOS.prefLabel)
+            if current_app.config["INSPIRE_SUPPORT"]:
+                if uri.startswith(INSPIRE_GEMET_THEME_NAMESPACE):
+                    yield "inspire"
+                else:
+                    # Check if the theme belongs to the GEMET INSPIRE scheme
+                    if scheme := theme.value(SKOS.inScheme):
+                        scheme_title = (
+                            rdf_value(scheme, DCT.title)
+                            or rdf_value(scheme, SKOS.prefLabel)
+                            or rdf_value(scheme, RDFS.label)
+                        )
+                        scheme_uri = scheme.identifier.toPython()
+                        if (
+                            scheme_title
+                            and scheme_title.lower() == "gemet - inspire themes, version 1.0"
+                        ) or scheme_uri in INSPIRE_GEMET_SCHEME_URIS:
+                            yield "inspire"
         else:
             label = theme.toPython()
         if label:
@@ -326,6 +359,8 @@ def themes_from_rdf(rdf):
 
 
 def contact_points_from_rdf(rdf, prop, role, dataset):
+    if not dataset.organization and not dataset.owner:
+        return
     for contact_point in rdf.objects(prop):
         # Read contact point information
         if isinstance(contact_point, Literal):
@@ -338,7 +373,7 @@ def contact_points_from_rdf(rdf, prop, role, dataset):
             email = (
                 rdf_value(contact_point, VCARD.hasEmail)
                 or rdf_value(contact_point, VCARD.email)
-                or rdf_value(contact_point, DCAT.email)
+                or None
             )
             email = email.replace("mailto:", "").strip() if email else None
             contact_form = rdf_value(contact_point, VCARD.hasUrl)
@@ -357,8 +392,6 @@ def contact_points_from_rdf(rdf, prop, role, dataset):
         #         continue
 
         # Create of get contact point object
-        if not dataset.organization and not dataset.owner:
-            continue
         org_or_owner = {}
         if dataset.organization:
             org_or_owner = {"organization": dataset.organization}
@@ -393,14 +426,25 @@ def contact_points_to_rdf(contacts, graph=None):
             id = BNode()
 
         node = graph.resource(id)
-        node.set(RDF.type, VCARD.Kind)
-        if contact.name:
-            node.set(VCARD.fn, Literal(contact.name))
-        if contact.email:
-            node.set(VCARD.hasEmail, URIRef(f"mailto:{contact.email}"))
-        if contact.contact_form:
-            node.set(VCARD.hasUrl, URIRef(contact.contact_form))
-        yield node, AGENT_ROLE_TO_RDF_PREDICATE.get(contact.role, DCAT.contactPoint)
+        role = AGENT_ROLE_TO_RDF_PREDICATE.get(contact.role, DCAT.contactPoint)
+        # GeoDCAT-AP spec: Only contactPoint is a VCARD.Kind (like in DCAT). Other roles are FOAF.Agent.
+        if role == DCAT.contactPoint:
+            node.set(RDF.type, VCARD.Kind)
+            if contact.name:
+                node.set(VCARD.fn, Literal(contact.name))
+            if contact.email:
+                node.set(VCARD.hasEmail, URIRef(f"mailto:{contact.email}"))
+            if contact.contact_form:
+                node.set(VCARD.hasUrl, URIRef(contact.contact_form))
+        else:
+            node.set(RDF.type, FOAF.Agent)
+            node.set(FOAF.name, Literal(contact.name))
+            if contact.email:
+                node.set(FOAF.mbox, URIRef(f"mailto:{contact.email}"))
+            if contact.contact_form:
+                node.set(FOAF.page, URIRef(contact.contact_form))
+
+        yield node, role
 
 
 def primary_topic_identifier_from_rdf(graph: Graph, resource: RdfResource):
@@ -490,17 +534,18 @@ def escape_xml_illegal_chars(val, replacement="?"):
     return illegal_xml_chars_RE.sub(replacement, val)
 
 
-def paginate_catalog(catalog, graph, datasets, format, rdf_catalog_endpoint, **values):
+def paginate_catalog(catalog, graph, datasets, _format, rdf_catalog_endpoint, **values):
     if not format:
         raise ValueError("Pagination requires format")
     catalog.add(RDF.type, HYDRA.Collection)
     catalog.set(HYDRA.totalItems, Literal(datasets.total))
     kwargs = {
-        "format": format,
+        "_format": _format,
         "page_size": datasets.page_size,
         "_external": True,
     }
-
+    values.pop("page", None)
+    values.pop("page_size", None)
     kwargs.update(values)
 
     first_url = url_for(rdf_catalog_endpoint, page=1, **kwargs)
@@ -537,3 +582,14 @@ def graph_response(graph, format):
     if isinstance(graph, RdfResource):
         graph = graph.graph
     return escape_xml_illegal_chars(graph.serialize(format=fmt, **kwargs)), 200, headers
+
+
+def set_harvested_date(obj, rdf_resource, rdf_term, harvest_attr, fallback=None) -> None:
+    """
+    Add a date to the RDF resource from the harvest metadata if available.
+    Use the fallback value for non harvested objects.
+    """
+    if obj.harvest and (harvest_attr_value := getattr(obj.harvest, harvest_attr)):
+        rdf_resource.set(rdf_term, Literal(harvest_attr_value))
+    elif not obj.harvest and fallback:
+        rdf_resource.set(rdf_term, Literal(fallback))

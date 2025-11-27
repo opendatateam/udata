@@ -1,6 +1,7 @@
 import factory
 
 from udata import utils
+from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.factories import ModelFactory
@@ -38,6 +39,10 @@ class TopicElementReuseFactory(TopicElementFactory):
     element = factory.SubFactory(ReuseFactory)
 
 
+class TopicElementDataserviceFactory(TopicElementFactory):
+    element = factory.SubFactory(DataserviceFactory)
+
+
 class TopicFactory(ModelFactory):
     class Meta:
         model = Topic
@@ -58,9 +63,10 @@ class TopicWithElementsFactory(TopicFactory):
         # Create associated elements
         TopicElementDatasetFactory.create_batch(2, topic=self)
         TopicElementReuseFactory.create(topic=self)
+        TopicElementDataserviceFactory.create(topic=self)
 
     @classmethod
-    def elements_as_payload(cls, elements: list) -> dict:
+    def elements_as_payload(cls, elements: list) -> list[dict]:
         return [
             {
                 "element": {"id": str(elt.element.id), "class": elt.element.__class__.__name__},

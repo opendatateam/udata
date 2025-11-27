@@ -1,11 +1,10 @@
 import logging
+from importlib.metadata import entry_points
 from urllib.parse import urlparse
 
 from celery import Celery, Task
 from celery.utils.log import get_task_logger
 from celerybeatmongo.schedulers import MongoScheduler
-
-from udata import entrypoints
 
 log = logging.getLogger(__name__)
 
@@ -176,6 +175,7 @@ def init_app(app):
     import udata.harvest.tasks  # noqa
     import udata.db.tasks  # noqa
 
-    entrypoints.get_enabled("udata.tasks", app)
+    for ep in entry_points(group="udata.tasks"):
+        ep.load()
 
     return celery

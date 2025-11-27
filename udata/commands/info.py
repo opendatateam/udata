@@ -3,9 +3,7 @@ import logging
 from click import echo
 from flask import current_app
 
-from udata import entrypoints
 from udata.commands import KO, OK, cli, green, red, white
-from udata.features.identicon.backends import get_config as avatar_config
 
 log = logging.getLogger(__name__)
 
@@ -35,19 +33,3 @@ def config():
         if key.startswith("__") or not key.isupper():
             continue
         echo("{0}: {1}".format(white(key), current_app.config[key]))
-
-
-@grp.command()
-def plugins():
-    """Display some details about the local plugins"""
-    plugins = current_app.config["PLUGINS"]
-    for name, description in entrypoints.ENTRYPOINTS.items():
-        echo("{0} ({1})".format(white(description), name))
-        if name == "udata.themes":
-            actives = [current_app.config["THEME"]]
-        elif name == "udata.avatars":
-            actives = [avatar_config("provider")]
-        else:
-            actives = plugins
-        for ep in sorted(entrypoints.iter_all(name), key=by_name):
-            echo("> {0}: {1}".format(ep.name, is_active(ep, actives)))

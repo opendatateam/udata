@@ -10,6 +10,7 @@ from udata.core.dataset.permissions import OwnablePermission
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.permissions import EditOrganizationPermission
 from udata.core.user.api_fields import user_ref_fields
+from udata.harvest.backends import get_enabled_backends
 
 from . import actions
 from .forms import HarvestSourceForm, HarvestSourceValidationForm
@@ -23,10 +24,6 @@ from .models import (
 )
 
 ns = api.namespace("harvest", "Harvest related operations")
-
-
-def backends_ids():
-    return [b.name for b in actions.list_backends()]
 
 
 error_fields = api.model(
@@ -58,6 +55,7 @@ item_fields = api.model(
     "HarvestItem",
     {
         "remote_id": fields.String(description="The item remote ID to process", required=True),
+        "remote_url": fields.String(description="The item remote url (if available)"),
         "dataset": fields.Nested(
             dataset_ref_fields, description="The processed dataset", allow_null=True
         ),
@@ -126,7 +124,9 @@ source_fields = api.model(
         "description": fields.Markdown(description="The source description"),
         "url": fields.String(description="The source base URL", required=True),
         "backend": fields.String(
-            description="The source backend", enum=backends_ids, required=True
+            description="The source backend",
+            enum=lambda: list(get_enabled_backends().keys()),
+            required=True,
         ),
         "config": fields.Raw(description="The configuration as key-value pairs"),
         "created_at": fields.ISODateTime(
@@ -438,7 +438,7 @@ class JobAPI(API):
     @api.expect(parser)
     @api.marshal_with(job_fields)
     def get(self, ident):
-        """List all jobs for a given source"""
+        """Get a single job given an ID"""
         return actions.get_job(ident)
 
 
@@ -457,15 +457,7 @@ class ListBackendsAPI(API):
                     "features": [f.as_dict() for f in b.features],
                     "extra_configs": [f.as_dict() for f in b.extra_configs],
                 }
-                for b in actions.list_backends()
+                for b in get_enabled_backends().values()
             ],
             key=lambda b: b["label"],
         )
-
-
-@ns.route("/job_status/", endpoint="havest_job_status")
-class ListHarvesterAPI(API):
-    @api.doc(model=[str])
-    def get(self):
-        """List all available harvesters"""
-        return actions.list_backends()

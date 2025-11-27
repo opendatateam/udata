@@ -12,12 +12,11 @@ from udata.core.organization.models import Organization, OrganizationBadge
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.models import Dataset, Follow, Member, Reuse, db
+from udata.tests.api import DBTestCase
 from udata.tests.helpers import assert_emit
 
-from .. import DBTestMixin, TestCase
 
-
-class OrganizationModelTest(TestCase, DBTestMixin):
+class OrganizationModelTest(DBTestCase):
     # Load metrics
     import udata.core.organization.metrics  # noqa
     import udata.core.followers.metrics  # noqa
@@ -88,7 +87,7 @@ class OrganizationModelTest(TestCase, DBTestMixin):
             OrganizationFactory(url="not-an-url")
 
 
-class OrganizationBadgeTest(DBTestMixin, TestCase):
+class OrganizationBadgeTest(DBTestCase):
     # Model badges can be extended in plugins, for example in udata-front
     # for french only badges.
     Organization.__badges__["new"] = "new"

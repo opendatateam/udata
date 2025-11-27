@@ -1,4 +1,5 @@
 from udata.api import api, base_reference, fields
+from udata.core.access_type.models import AccessAudience
 from udata.core.badges.fields import badge_fields
 from udata.core.contact_point.api_fields import contact_point_fields
 from udata.core.organization.api_fields import org_ref_fields
@@ -9,11 +10,10 @@ from udata.core.user.api_fields import user_ref_fields
 from .constants import (
     CHECKSUM_TYPES,
     DEFAULT_CHECKSUM_TYPE,
-    DEFAULT_FREQUENCY,
     DEFAULT_LICENSE,
     RESOURCE_FILETYPES,
     RESOURCE_TYPES,
-    UPDATE_FREQUENCIES,
+    UpdateFrequency,
 )
 
 checksum_fields = api.model(
@@ -45,6 +45,9 @@ dataset_harvest_fields = api.model(
         "created_at": fields.ISODateTime(
             description="The dataset harvested creation date", allow_null=True, readonly=True
         ),
+        "issued_at": fields.ISODateTime(
+            description="The dataset harvested release date", allow_null=True, readonly=True
+        ),
         "modified_at": fields.ISODateTime(
             description="The dataset harvest last modification date", allow_null=True, readonly=True
         ),
@@ -69,8 +72,8 @@ dataset_harvest_fields = api.model(
 resource_harvest_fields = api.model(
     "HarvestResourceMetadata",
     {
-        "created_at": fields.ISODateTime(
-            description="The resource harvested creation date", allow_null=True, readonly=True
+        "issued_at": fields.ISODateTime(
+            description="The resource harvested release date", allow_null=True, readonly=True
         ),
         "modified_at": fields.ISODateTime(
             description="The resource harvest last modification date",
@@ -285,6 +288,11 @@ DEFAULT_MASK = ",".join(
         "temporal_coverage",
         "spatial",
         "license",
+        "access_type",
+        "access_audiences",
+        "authorization_request_url",
+        "access_type_reason_category",
+        "access_type_reason",
         "uri",
         "page",
         "last_update",
@@ -358,8 +366,8 @@ dataset_fields = api.model(
         "frequency": fields.String(
             description="The update frequency",
             required=True,
-            enum=list(UPDATE_FREQUENCIES),
-            default=DEFAULT_FREQUENCY,
+            enum=list(UpdateFrequency),
+            default=UpdateFrequency.UNKNOWN,
         ),
         "frequency_date": fields.ISODateTime(
             description=(
@@ -392,6 +400,11 @@ dataset_fields = api.model(
         "license": fields.String(
             attribute="license.id", default=DEFAULT_LICENSE["id"], description="The dataset license"
         ),
+        "access_type": fields.String(allow_null=True),
+        "access_audiences": fields.List(fields.Nested(AccessAudience.__read_fields__)),
+        "authorization_request_url": fields.String(allow_null=True),
+        "access_type_reason_category": fields.String(allow_null=True),
+        "access_type_reason": fields.String(allow_null=True),
         "uri": fields.String(
             attribute=lambda d: d.self_api_url(),
             description="The API URI for this dataset",

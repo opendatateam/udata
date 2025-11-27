@@ -1,7 +1,7 @@
 # Installation for production
 
 This page document how to perform a native deployement on a Debian-like environment,
-for a `udata` user with home in`/srv/udata`.
+for a `udata` user with home in `/srv/udata`.
 These steps require the [system dependencies](system-dependencies.md) to be installed.
 
 # User and home dir creation
@@ -38,6 +38,12 @@ It is recommended to work within a virtualenv to ensure proper dependencies isol
 We create a virtualenv in the `udata` home directory so it is activated each time
 you log into its account:
 
+With [uv](https://docs.astral.sh/uv/) (recommended):
+```shell
+uv sync
+```
+
+...or with pip:
 ```shell
 $ python3 -m venv $HOME
 $ . bin/activate
@@ -46,7 +52,6 @@ $ pip install --upgrade setuptools  # Make sure setuptools is up to date
 $ pip install udata
 ```
 You can also install the extensions you want:
-
 ```shell
 $ pip install udata-piwik
 ```
@@ -395,11 +400,6 @@ LANGUAGES = {
 }
 # Here is you default language
 DEFAULT_LANGUAGE = 'fr'
-
-# Optionally activate some installed plugins
-PLUGINS = (
-    'piwik',
-)
 
 # Optionally activate an installed theme
 # THEME = 'my-theme'

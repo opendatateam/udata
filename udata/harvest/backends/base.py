@@ -4,14 +4,14 @@ from datetime import date, datetime, timedelta
 from uuid import UUID
 
 import requests
-from flask import current_app
+from flask import current_app, g
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
 import udata.uris as uris
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset.models import HarvestDatasetMetadata
-from udata.models import Dataset
+from udata.models import Dataset, User
 from udata.utils import safe_unicode
 
 from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
@@ -85,8 +85,8 @@ class BaseBackend(object):
     Also provides a few helpers needed on all or some backends.
     """
 
-    name = None
-    display_name = None
+    name: str
+    display_name: str | None = None
     verify_ssl = True
 
     # Define some allowed filters on the backend
@@ -166,8 +166,20 @@ class BaseBackend(object):
         log.debug(f"Starting harvesting {self.source.name} ({self.source.url})…")
         factory = HarvestJob if self.dryrun else HarvestJob.objects.create
         self.job = factory(status="initialized", started=datetime.utcnow(), source=self.source)
+        self.remote_ids = set()
 
         before_harvest_job.send(self)
+        # Set harvest_activity_user on global context during the run
+        if current_app.config["HARVEST_ACTIVITY_USER_ID"]:
+            try:
+                # Try to fetch the existing harvest activity user
+                g.harvest_activity_user = User.objects.get(
+                    id=current_app.config["HARVEST_ACTIVITY_USER_ID"]
+                )
+            except User.DoesNotExist:
+                log.exception(
+                    "HARVEST_ACTIVITY_USER_ID does not seem to match an existing user id."
+                )
 
         try:
             self.inner_harvest()
@@ -179,6 +191,7 @@ class BaseBackend(object):
 
             if any(i.status == "failed" for i in self.job.items):
                 self.job.status += "-errors"
+
         except HarvestValidationError as e:
             log.exception(
                 f'Harvesting validation failed for "{safe_unicode(self.source.name)}" ({self.source.backend})'
@@ -187,6 +200,15 @@ class BaseBackend(object):
             self.job.status = "failed"
 
             error = HarvestError(message=safe_unicode(e))
+            self.job.errors.append(error)
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            log.warning(
+                f'Harvesting connection error for "{safe_unicode(self.source.name)}" ({self.source.backend}): {e}'
+            )
+
+            self.job.status = "failed"
+
+            error = HarvestError(message=safe_unicode(e), details=traceback.format_exc())
             self.job.errors.append(error)
         except Exception as e:
             log.exception(
@@ -199,6 +221,9 @@ class BaseBackend(object):
             self.job.errors.append(error)
         finally:
             self.end_job()
+            # Clean harvest_activity_user on global context
+            if hasattr(g, "harvest_activity_user"):
+                delattr(g, "harvest_activity_user")
 
         return self.job
 
@@ -218,8 +243,13 @@ class BaseBackend(object):
 
             current_app.logger.addHandler(log_catcher)
             dataset = self.inner_process_dataset(item, **kwargs)
+            if dataset.harvest:
+                item.remote_url = dataset.harvest.remote_url
 
-            # Use `item.remote_id` because `inner_process_dataset` could have modified it.
+            # Use `item.remote_id` from this point, because `inner_process_dataset` could have modified it.
+
+            self.ensure_unique_remote_id(item)
+
             dataset.harvest = self.update_dataset_harvest_info(dataset.harvest, item.remote_id)
             dataset.archived = None
 
@@ -277,6 +307,10 @@ class BaseBackend(object):
                 raise HarvestSkipException("missing identifier")
 
             dataservice = self.inner_process_dataservice(item, **kwargs)
+            if dataservice.harvest:
+                item.remote_url = dataservice.harvest.remote_url
+
+            self.ensure_unique_remote_id(item)
 
             dataservice.harvest = self.update_dataservice_harvest_info(
                 dataservice.harvest, remote_id
@@ -310,6 +344,12 @@ class BaseBackend(object):
         finally:
             item.ended = datetime.utcnow()
             self.save_job()
+
+    def ensure_unique_remote_id(self, item):
+        if item.remote_id in self.remote_ids:
+            raise HarvestValidationError(f"Identifier '{item.remote_id}' already exists")
+
+        self.remote_ids.add(item.remote_id)
 
     def update_dataset_harvest_info(self, harvest: HarvestDatasetMetadata | None, remote_id: int):
         if not harvest:

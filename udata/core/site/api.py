@@ -6,7 +6,7 @@ from udata.auth import admin_permission
 from udata.core import csv
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataset.api import DatasetApiParser
+from udata.core.dataset.api import DatasetApiParser, catalog_parser
 from udata.core.dataset.csv import ResourcesCsvAdapter
 from udata.core.dataset.search import DatasetSearch
 from udata.core.dataset.tasks import get_queryset as get_csv_queryset
@@ -15,6 +15,8 @@ from udata.core.organization.csv import OrganizationCsvAdapter
 from udata.core.organization.models import Organization
 from udata.core.reuse.api import ReuseApiParser
 from udata.core.reuse.csv import ReuseCsvAdapter
+from udata.core.tags.csv import TagCsvAdapter
+from udata.core.tags.models import Tag
 from udata.harvest.csv import HarvestSourceCsvAdapter
 from udata.harvest.models import HarvestSource
 from udata.models import Dataset, Reuse
@@ -45,39 +47,47 @@ class SiteAPI(API):
         return current_site
 
 
-@api.route("/site/data.<format>", endpoint="site_dataportal")
+@api.route("/site/data.<_format>", endpoint="site_dataportal")
 class SiteDataPortal(API):
-    def get(self, format):
+    def get(self, _format):
         """Root RDF endpoint with content negociation handling"""
-        url = url_for("api.site_rdf_catalog_format", format=format)
+        url = url_for("api.site_rdf_catalog_format", _format=_format)
         return redirect(url)
 
 
 @api.route("/site/catalog", endpoint="site_rdf_catalog")
 class SiteRdfCatalog(API):
+    @api.expect(catalog_parser)
     def get(self):
         """Root RDF endpoint with content negociation handling"""
-        format = RDF_EXTENSIONS[negociate_content()]
-        url = url_for("api.site_rdf_catalog_format", format=format)
+        _format = RDF_EXTENSIONS[negociate_content()]
+        # We sanitize the args used as kwargs in url_for
+        params = catalog_parser.parse_args()
+        url = url_for("api.site_rdf_catalog_format", _format=_format, **params)
         return redirect(url)
 
 
-@api.route("/site/catalog.<format>", endpoint="site_rdf_catalog_format")
+@api.route("/site/catalog.<_format>", endpoint="site_rdf_catalog_format")
 class SiteRdfCatalogFormat(API):
-    def get(self, format):
-        params = multi_to_dict(request.args)
-        page = int(params.get("page", 1))
-        page_size = int(params.get("page_size", 100))
-        datasets = Dataset.objects.visible()
-        if "tag" in params:
-            datasets = datasets.filter(tags=params.get("tag", ""))
-        datasets = datasets.paginate(page, page_size)
-        dataservices = Dataservice.objects.visible().filter_by_dataset_pagination(datasets, page)
+    @api.expect(catalog_parser)
+    def get(self, _format):
+        """
+        Return the RDF catalog in the requested format.
+        Filtering, sorting and paginating abilities apply to the datasets elements.
+        """
+        params = catalog_parser.parse_args()
+        datasets = DatasetApiParser.parse_filters(Dataset.objects.visible(), params)
+        datasets = datasets.paginate(params["page"], params["page_size"])
+        dataservices = Dataservice.objects.visible().filter_by_dataset_pagination(
+            datasets, params["page"]
+        )
 
-        catalog = build_catalog(current_site, datasets, dataservices=dataservices, format=format)
+        catalog = build_catalog(
+            current_site, datasets, dataservices=dataservices, _format=_format, **params
+        )
         # bypass flask-restplus make_response, since graph_response
         # is handling the content negociation directly
-        return make_response(*graph_response(catalog, format))
+        return make_response(*graph_response(catalog, _format))
 
 
 @api.route("/site/datasets.csv", endpoint="site_datasets_csv")
@@ -157,6 +167,13 @@ class SiteHarvestsCsv(API):
             return redirect(get_export_url("harvest"))
         adapter = HarvestSourceCsvAdapter(get_csv_queryset(HarvestSource).order_by("created_at"))
         return csv.stream(adapter, "harvest")
+
+
+@api.route("/site/tags.csv", endpoint="site_tags_csv")
+class SiteTagsCsv(API):
+    def get(self):
+        adapter = TagCsvAdapter(Tag.objects.order_by("-total"))
+        return csv.stream(adapter, "tags")
 
 
 @api.route("/site/context.jsonld", endpoint="site_jsonld_context")

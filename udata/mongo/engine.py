@@ -1,11 +1,11 @@
 from bson import DBRef, ObjectId
-from flask_mongoengine import MongoEngine, MongoEngineSessionInterface
 from flask_storage.mongo import FileField, ImageField
 from mongoengine.base import TopLevelDocumentMetaclass, get_document
 from mongoengine.errors import ValidationError
 from mongoengine.signals import post_save, pre_save
 
-from .badges_field import BadgesField
+from udata.flask_mongoengine.engine import MongoEngine
+
 from .datetime_fields import DateField, DateRange, Datetimed
 from .document import DomainModel, UDataDocument
 from .extras_fields import ExtrasField, OrganizationExtrasField
@@ -21,7 +21,6 @@ class UDataMongoEngine(MongoEngine):
 
     def __init__(self, app=None):
         super(UDataMongoEngine, self).__init__(app)
-        self.BadgesField = BadgesField
         self.TagListField = TagListField
         self.DateField = DateField
         self.Datetimed = Datetimed
@@ -66,4 +65,3 @@ class UDataMongoEngine(MongoEngine):
 
 
 db = UDataMongoEngine()
-session_interface = MongoEngineSessionInterface(db)

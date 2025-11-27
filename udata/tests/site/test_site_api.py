@@ -7,8 +7,6 @@ from udata.tests.api import APITestCase
 
 
 class SiteAPITest(APITestCase):
-    modules = []
-
     def test_get_site(self):
         response = self.get(url_for("api.site"))
         self.assert200(response)
@@ -16,6 +14,7 @@ class SiteAPITest(APITestCase):
         site = Site.objects.get(id=self.app.config["SITE_ID"])
 
         self.assertEqual(site.title, response.json["title"])
+        self.assertIsNotNone(response.json["version"])
 
     def test_set_site(self):
         response = self.get(url_for("api.site"))

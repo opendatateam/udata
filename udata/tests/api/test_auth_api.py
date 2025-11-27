@@ -14,6 +14,7 @@ from udata.api.oauth2 import OAuth2Client, OAuth2Token
 from udata.auth import PermissionDenied
 from udata.core.user.factories import UserFactory
 from udata.forms import Form, fields, validators
+from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import (
     assert200,
     assert400,
@@ -65,38 +66,35 @@ def oauth(app, request):
     return OAuth2Client.objects.create(**kwargs)
 
 
-@pytest.mark.usefixtures("clean_db")
-class APIAuthTest:
-    modules = []
-
-    def test_no_auth(self, api):
+class APIAuthTest(PytestOnlyAPITestCase):
+    def test_no_auth(self):
         """Should not return a content type if there is no content on delete"""
-        response = api.get(url_for("api.fake"))
+        response = self.get(url_for("api.fake"))
 
         assert200(response)
         assert response.content_type == "application/json"
         assert response.json == {"success": True}
 
-    def test_session_auth(self, api):
+    def test_session_auth(self):
         """Should handle session authentication"""
-        api.client.login()  # Session auth
+        self.login()  # Session auth
 
-        response = api.post(url_for("api.fake"))
+        response = self.post(url_for("api.fake"))
 
         assert200(response)
         assert response.content_type == "application/json"
         assert response.json == {"success": True}
 
-    def test_header_auth(self, api):
+    def test_header_auth(self):
         """Should handle header API Key authentication"""
-        with api.user() as user:  # API Key auth
-            response = api.post(url_for("api.fake"), headers={"X-API-KEY": user.apikey})
+        with self.api_user() as user:  # API Key auth
+            response = self.post(url_for("api.fake"), headers={"X-API-KEY": user.apikey})
 
         assert200(response)
         assert response.content_type == "application/json"
         assert response.json == {"success": True}
 
-    def test_oauth_auth(self, api, oauth):
+    def test_oauth_auth(self, oauth):
         """Should handle OAuth header authentication"""
         user = UserFactory()
         token = OAuth2Token.objects.create(
@@ -106,7 +104,7 @@ class APIAuthTest:
             refresh_token="refresh-token",
         )
 
-        response = api.post(
+        response = self.post(
             url_for("api.fake"), headers={"Authorization": " ".join(["Bearer", token.access_token])}
         )
 
@@ -114,7 +112,7 @@ class APIAuthTest:
         assert response.content_type == "application/json"
         assert response.json == {"success": True}
 
-    def test_bad_oauth_auth(self, api, oauth):
+    def test_bad_oauth_auth(self, oauth):
         """Should handle wrong OAuth header authentication"""
         user = UserFactory()
         OAuth2Token.objects.create(
@@ -124,53 +122,53 @@ class APIAuthTest:
             refresh_token="refresh-token",
         )
 
-        response = api.post(
+        response = self.post(
             url_for("api.fake"), headers={"Authorization": " ".join(["Bearer", "not-my-token"])}
         )
 
         assert401(response)
         assert response.content_type == "application/json"
 
-    def test_no_apikey(self, api):
+    def test_no_apikey(self):
         """Should raise a HTTP 401 if no API Key is provided"""
-        response = api.post(url_for("api.fake"))
+        response = self.post(url_for("api.fake"))
 
         assert401(response)
         assert response.content_type == "application/json"
         assert "message" in response.json
 
-    def test_invalid_apikey(self, api):
+    def test_invalid_apikey(self):
         """Should raise a HTTP 401 if an invalid API Key is provided"""
-        response = api.post(url_for("api.fake"), headers={"X-API-KEY": "fake"})
+        response = self.post(url_for("api.fake"), headers={"X-API-KEY": "fake"})
 
         assert401(response)
         assert response.content_type == "application/json"
         assert "message" in response.json
 
-    def test_inactive_user(self, api):
+    def test_inactive_user(self):
         """Should raise a HTTP 401 if the user is inactive"""
         user = UserFactory(active=False)
-        with api.user(user) as user:
-            response = api.post(url_for("api.fake"), headers={"X-API-KEY": user.apikey})
+        with self.api_user(user) as user:
+            response = self.post(url_for("api.fake"), headers={"X-API-KEY": user.apikey})
 
         assert401(response)
         assert response.content_type == "application/json"
         assert "message" in response.json
 
-    def test_deleted_user(self, api):
+    def test_deleted_user(self):
         """Should raise a HTTP 401 if the user is deleted"""
         user = UserFactory()
         user.mark_as_deleted()
-        with api.user(user) as user:
-            response = api.post(url_for("api.fake"), headers={"X-API-KEY": user.apikey})
+        with self.api_user(user) as user:
+            response = self.post(url_for("api.fake"), headers={"X-API-KEY": user.apikey})
 
         assert401(response)
         assert response.content_type == "application/json"
         assert "message" in response.json
 
-    def test_validation_errors(self, api):
+    def test_validation_errors(self):
         """Should raise a HTTP 400 and returns errors on validation error"""
-        response = api.put(url_for("api.fake"), {"email": "wrong"})
+        response = self.put(url_for("api.fake"), {"email": "wrong"})
 
         assert400(response)
         assert response.content_type == "application/json"
@@ -179,9 +177,9 @@ class APIAuthTest:
             assert field in response.json["errors"]
             assert isinstance(response.json["errors"][field], list)
 
-    def test_no_validation_error(self, api):
+    def test_no_validation_error(self):
         """Should pass if no validation error"""
-        response = api.put(
+        response = self.put(
             url_for("api.fake"),
             {
                 "required": "value",
@@ -193,26 +191,11 @@ class APIAuthTest:
         assert200(response)
         assert response.json == {"success": True}
 
-    def test_authorization_display(self, client, oauth):
-        """Should display the OAuth authorization page"""
-        client.login()
-
-        response = client.get(
-            url_for(
-                "oauth.authorize",
-                response_type="code",
-                client_id=oauth.client_id,
-                redirect_uri=oauth.default_redirect_uri,
-            )
-        )
-
-        assert200(response)
-
-    def test_authorization_decline(self, client, oauth):
+    def test_authorization_decline(self, oauth):
         """Should redirect to the redirect_uri on authorization denied"""
-        client.login()
+        self.login()
 
-        response = client.post(
+        response = self.post(
             url_for(
                 "oauth.authorize",
                 response_type="code",
@@ -223,17 +206,18 @@ class APIAuthTest:
                 "scope": "default",
                 "refuse": "",
             },
+            json=False,
         )
 
         assert_status(response, 302)
         uri, params = response.location.split("?")
         assert uri == oauth.default_redirect_uri
 
-    def test_authorization_accept(self, client, oauth):
+    def test_authorization_accept(self, oauth):
         """Should redirect to the redirect_uri on authorization accepted"""
-        client.login()
+        self.login()
 
-        response = client.post(
+        response = self.post(
             url_for(
                 "oauth.authorize",
                 response_type="code",
@@ -244,6 +228,7 @@ class APIAuthTest:
                 "scope": "default",
                 "accept": "",
             },
+            json=False,
         )
 
         assert_status(response, 302)
@@ -253,14 +238,14 @@ class APIAuthTest:
 
     @pytest.mark.options(OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI=True)
     @pytest.mark.oauth(redirect_uris=["https://*.test.org/callback"])
-    def test_authorization_accept_wildcard(self, client, oauth):
+    def test_authorization_accept_wildcard(self, oauth):
         """Should redirect to the redirect_uri on authorization accepted
         with wildcard enabled and used in config"""
-        client.login()
+        self.login()
 
         redirect_uri = "https://subdomain.test.org/callback"
 
-        response = client.post(
+        response = self.post(
             url_for(
                 "oauth.authorize",
                 response_type="code",
@@ -271,6 +256,7 @@ class APIAuthTest:
                 "scope": "default",
                 "accept": "",
             },
+            json=False,
         )
 
         assert_status(response, 302)
@@ -280,14 +266,14 @@ class APIAuthTest:
 
     @pytest.mark.options(OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI=False)
     @pytest.mark.oauth(redirect_uris=["https://*.test.org/callback"])
-    def test_authorization_accept_no_wildcard(self, client, oauth):
+    def test_authorization_accept_no_wildcard(self, oauth):
         """Should not redirect to the redirect_uri on authorization accepted
         without wildcard enabled while used in config"""
-        client.login()
+        self.login()
 
         redirect_uri = "https://subdomain.test.org/callback"
 
-        response = client.post(
+        response = self.post(
             url_for(
                 "oauth.authorize",
                 response_type="code",
@@ -298,6 +284,7 @@ class APIAuthTest:
                 "scope": "default",
                 "accept": "",
             },
+            json=False,
         )
 
         assert_status(response, 400)
@@ -306,14 +293,14 @@ class APIAuthTest:
 
     @pytest.mark.options(OAUTH2_ALLOW_WILDCARD_IN_REDIRECT_URI=True)
     @pytest.mark.oauth(redirect_uris=["https://*.test.org/callback"])
-    def test_authorization_accept_wrong_wildcard(self, client, oauth):
+    def test_authorization_accept_wrong_wildcard(self, oauth):
         """Should not redirect to the redirect_uri on authorization accepted
         with wildcard enabled but mismatched from config"""
-        client.login()
+        self.login()
 
         redirect_uri = "https://subdomain.example.com/callback"
 
-        response = client.post(
+        response = self.post(
             url_for(
                 "oauth.authorize",
                 response_type="code",
@@ -324,16 +311,17 @@ class APIAuthTest:
                 "scope": "default",
                 "accept": "",
             },
+            json=False,
         )
 
         assert_status(response, 400)
         assert "error" in response.json
         assert "Redirect URI" in response.json["error_description"]
 
-    def test_authorization_grant_token(self, client, oauth):
-        client.login()
+    def test_authorization_grant_token(self, oauth):
+        self.login()
 
-        response = client.post(
+        response = self.post(
             url_for(
                 "oauth.authorize",
                 response_type="code",
@@ -343,19 +331,21 @@ class APIAuthTest:
                 "scope": "default",
                 "accept": "",
             },
+            json=False,
         )
 
         uri, params = response.location.split("?")
         code = parse_qs(params)["code"][0]
 
-        client.logout()
-        response = client.post(
+        self.logout()
+        response = self.post(
             url_for("oauth.token"),
             {
                 "grant_type": "authorization_code",
                 "code": code,
             },
             headers=basic_header(oauth),
+            json=False,
         )
 
         assert200(response)
@@ -364,13 +354,13 @@ class APIAuthTest:
         tokens = OAuth2Token.objects(access_token=response.json["access_token"])
         assert len(tokens) == 1  # A token has been created and saved.
 
-    def test_s256_code_challenge_success_client_secret_basic(self, client, oauth):
+    def test_s256_code_challenge_success_client_secret_basic(self, oauth):
         code_verifier = generate_token(48)
         code_challenge = create_s256_code_challenge(code_verifier)
 
-        client.login()
+        self.login()
 
-        response = client.post(
+        response = self.post(
             url_for(
                 "oauth.authorize",
                 response_type="code",
@@ -382,16 +372,18 @@ class APIAuthTest:
                 "scope": "default",
                 "accept": "",
             },
+            json=False,
         )
         assert "code=" in response.location
 
         params = dict(url_decode(urlparse.urlparse(response.location).query))
         code = params["code"]
 
-        response = client.post(
+        response = self.post(
             url_for("oauth.token"),
             {"grant_type": "authorization_code", "code": code, "code_verifier": code_verifier},
             headers=basic_header(oauth),
+            json=False,
         )
 
         assert200(response)
@@ -400,7 +392,7 @@ class APIAuthTest:
 
         token = response.json["access_token"]
 
-        response = client.post(
+        response = self.post(
             url_for("api.fake"), headers={"Authorization": " ".join(["Bearer", token])}
         )
 
@@ -408,13 +400,13 @@ class APIAuthTest:
         assert response.content_type == "application/json"
         assert response.json == {"success": True}
 
-    def test_s256_code_challenge_success_client_secret_post(self, client, oauth):
+    def test_s256_code_challenge_success_client_secret_post(self, oauth):
         code_verifier = generate_token(48)
         code_challenge = create_s256_code_challenge(code_verifier)
 
-        client.login()
+        self.login()
 
-        response = client.post(
+        response = self.post(
             url_for(
                 "oauth.authorize",
                 response_type="code",
@@ -426,13 +418,14 @@ class APIAuthTest:
                 "scope": "default",
                 "accept": "",
             },
+            json=False,
         )
         assert "code=" in response.location
 
         params = dict(url_decode(urlparse.urlparse(response.location).query))
         code = params["code"]
 
-        response = client.post(
+        response = self.post(
             url_for("oauth.token"),
             {
                 "grant_type": "authorization_code",
@@ -441,6 +434,7 @@ class APIAuthTest:
                 "client_id": oauth.client_id,
                 "client_secret": oauth.secret,
             },
+            json=False,
         )
 
         assert200(response)
@@ -449,7 +443,7 @@ class APIAuthTest:
 
         token = response.json["access_token"]
 
-        response = client.post(
+        response = self.post(
             url_for("api.fake"), headers={"Authorization": " ".join(["Bearer", token])}
         )
 
@@ -458,14 +452,14 @@ class APIAuthTest:
         assert response.json == {"success": True}
 
     @pytest.mark.oauth(secret=None)
-    def test_s256_code_challenge_success_no_client_secret(self, client, oauth):
+    def test_s256_code_challenge_success_no_client_secret(self, oauth):
         """Authenticate through an OAuth client that has no secret associated (public client)"""
         code_verifier = generate_token(48)
         code_challenge = create_s256_code_challenge(code_verifier)
 
-        client.login()
+        self.login()
 
-        response = client.post(
+        response = self.post(
             url_for(
                 "oauth.authorize",
                 response_type="code",
@@ -477,13 +471,14 @@ class APIAuthTest:
                 "scope": "default",
                 "accept": "",
             },
+            json=False,
         )
         assert "code=" in response.location
 
         params = dict(url_decode(urlparse.urlparse(response.location).query))
         code = params["code"]
 
-        response = client.post(
+        response = self.post(
             url_for("oauth.token"),
             {
                 "grant_type": "authorization_code",
@@ -491,6 +486,7 @@ class APIAuthTest:
                 "code_verifier": code_verifier,
                 "client_id": oauth.client_id,
             },
+            json=False,
         )
 
         assert200(response)
@@ -499,7 +495,7 @@ class APIAuthTest:
 
         token = response.json["access_token"]
 
-        response = client.post(
+        response = self.post(
             url_for("api.fake"), headers={"Authorization": " ".join(["Bearer", token])}
         )
 
@@ -507,14 +503,14 @@ class APIAuthTest:
         assert response.content_type == "application/json"
         assert response.json == {"success": True}
 
-    def test_s256_code_challenge_missing_client_secret(self, client, oauth):
+    def test_s256_code_challenge_missing_client_secret(self, oauth):
         """Fail authentication through an OAuth client with missing secret"""
         code_verifier = generate_token(48)
         code_challenge = create_s256_code_challenge(code_verifier)
 
-        client.login()
+        self.login()
 
-        response = client.post(
+        response = self.post(
             url_for(
                 "oauth.authorize",
                 response_type="code",
@@ -526,13 +522,14 @@ class APIAuthTest:
                 "scope": "default",
                 "accept": "",
             },
+            json=False,
         )
         assert "code=" in response.location
 
         params = dict(url_decode(urlparse.urlparse(response.location).query))
         code = params["code"]
 
-        response = client.post(
+        response = self.post(
             url_for("oauth.token"),
             {
                 "grant_type": "authorization_code",
@@ -540,14 +537,15 @@ class APIAuthTest:
                 "code_verifier": code_verifier,
                 "client_id": oauth.client_id,
             },
+            json=False,
         )
 
         assert401(response)
 
-    def test_authorization_multiple_grant_token(self, client, oauth):
+    def test_authorization_multiple_grant_token(self, oauth):
         for i in range(3):
-            client.login()
-            response = client.post(
+            self.login()
+            response = self.post(
                 url_for(
                     "oauth.authorize",
                     response_type="code",
@@ -557,29 +555,31 @@ class APIAuthTest:
                     "scope": "default",
                     "accept": "",
                 },
+                json=False,
             )
 
             uri, params = response.location.split("?")
             code = parse_qs(params)["code"][0]
 
-            client.logout()
-            response = client.post(
+            self.logout()
+            response = self.post(
                 url_for("oauth.token"),
                 {
                     "grant_type": "authorization_code",
                     "code": code,
                 },
                 headers=basic_header(oauth),
+                json=False,
             )
 
             assert200(response)
             assert response.content_type == "application/json"
             assert "access_token" in response.json
 
-    def test_authorization_grant_token_body_credentials(self, client, oauth):
-        client.login()
+    def test_authorization_grant_token_body_credentials(self, oauth):
+        self.login()
 
-        response = client.post(
+        response = self.post(
             url_for(
                 "oauth.authorize",
                 response_type="code",
@@ -589,13 +589,14 @@ class APIAuthTest:
                 "scope": "default",
                 "accept": "",
             },
+            json=False,
         )
 
         uri, params = response.location.split("?")
         code = parse_qs(params)["code"][0]
 
-        client.logout()
-        response = client.post(
+        self.logout()
+        response = self.post(
             url_for("oauth.token"),
             {
                 "grant_type": "authorization_code",
@@ -603,6 +604,7 @@ class APIAuthTest:
                 "client_id": oauth.client_id,
                 "client_secret": oauth.secret,
             },
+            json=False,
         )
 
         assert200(response)
@@ -610,10 +612,10 @@ class APIAuthTest:
         assert "access_token" in response.json
 
     @pytest.mark.oauth(internal=True)
-    def test_authorization_redirects_for_internal_clients(self, client, oauth):
-        client.login()
+    def test_authorization_redirects_for_internal_clients(self, oauth):
+        self.login()
 
-        response = client.get(
+        response = self.get(
             url_for(
                 "oauth.authorize",
                 response_type="code",
@@ -628,23 +630,24 @@ class APIAuthTest:
         assert uri == oauth.default_redirect_uri
         assert "code" in parse_qs(params)
 
-    def test_client_credentials_grant_token(self, client, oauth):
-        response = client.post(
+    def test_client_credentials_grant_token(self, oauth):
+        response = self.post(
             url_for("oauth.token"),
             {
                 "grant_type": "client_credentials",
             },
             headers=basic_header(oauth),
+            json=False,
         )
 
         assert200(response)
         assert response.content_type == "application/json"
         assert "access_token" in response.json
 
-    def test_password_grant_token(self, client, oauth):
+    def test_password_grant_token(self, oauth):
         user = UserFactory(password="password")
 
-        response = client.post(
+        response = self.post(
             url_for("oauth.token"),
             {
                 "grant_type": "password",
@@ -652,15 +655,16 @@ class APIAuthTest:
                 "password": "password",
             },
             headers=basic_header(oauth),
+            json=False,
         )
 
         assert200(response)
         assert response.content_type == "application/json"
         assert "access_token" in response.json
 
-    def test_invalid_implicit_grant_token(self, client, oauth):
-        client.login()
-        response = client.post(
+    def test_invalid_implicit_grant_token(self, oauth):
+        self.login()
+        response = self.post(
             url_for(
                 "oauth.authorize",
                 response_type="token",
@@ -669,13 +673,14 @@ class APIAuthTest:
             {
                 "accept": "",
             },
+            json=False,
         )
 
         assert_status(response, 400)
         assert response.json["error"] == "unsupported_response_type"
 
     @pytest.mark.oauth(confidential=True)
-    def test_refresh_token(self, client, oauth):
+    def test_refresh_token(self, oauth):
         user = UserFactory()
         token_to_be_refreshed = OAuth2Token.objects.create(
             client=oauth,
@@ -697,13 +702,14 @@ class APIAuthTest:
         )
         tokens_count = OAuth2Token.objects.count()
 
-        response = client.post(
+        response = self.post(
             url_for("oauth.token"),
             {
                 "grant_type": "refresh_token",
                 "refresh_token": token_to_be_refreshed.refresh_token,
             },
             headers=basic_header(oauth),
+            json=False,
         )
 
         assert200(response)
@@ -739,12 +745,13 @@ class APIAuthTest:
             access_token="access-token",
             refresh_token="refresh-token",
         )
-        response = client.post(
+        response = self.post(
             url_for("oauth.revoke_token"),
             {
                 "token": getattr(token, token_type),
             },
             headers=basic_header(oauth),
+            json=False,
         )
 
         assert200(response)
@@ -761,17 +768,18 @@ class APIAuthTest:
             access_token="access-token",
             refresh_token="refresh-token",
         )
-        response = client.post(
+        response = self.post(
             url_for("oauth.revoke_token"),
             {"token": getattr(token, token_type), "token_type_hint": token_type},
             headers=basic_header(oauth),
+            json=False,
         )
         assert200(response)
 
         tok = OAuth2Token.objects(pk=token.pk).first()
         assert tok.revoked is True
 
-    def test_revoke_token_with_bad_hint(self, client, oauth):
+    def test_revoke_token_with_bad_hint(self, oauth):
         user = UserFactory()
         token = OAuth2Token.objects.create(
             client=oauth,
@@ -780,37 +788,38 @@ class APIAuthTest:
             refresh_token="refresh-token",
         )
 
-        response = client.post(
+        response = self.post(
             url_for("oauth.revoke_token"),
             {
                 "token": token.access_token,
                 "token_type_hint": "refresh_token",
             },
             headers=basic_header(oauth),
+            json=False,
         )
         assert200(response)
 
         tok = OAuth2Token.objects(pk=token.pk).first()
         assert tok.revoked is False
 
-    def test_value_error(self, api):
+    def test_value_error(self):
         @ns.route("/exception", endpoint="exception")
         class ExceptionAPI(API):
             def get(self):
                 raise ValueError("Not working")
 
-        response = api.get(url_for("api.exception"))
+        response = self.get(url_for("api.exception"))
 
         assert400(response)
         assert response.json["message"] == "Not working"
 
-    def test_permission_denied(self, api):
+    def test_permission_denied(self):
         @ns.route("/exception", endpoint="exception")
         class ExceptionAPI(API):
             def get(self):
                 raise PermissionDenied("Permission denied")
 
-        response = api.get(url_for("api.exception"))
+        response = self.get(url_for("api.exception"))
 
         assert403(response)
         assert "message" in response.json

@@ -1,4 +1,3 @@
-import pytest
 from flask import url_for
 from werkzeug.test import TestResponse
 
@@ -7,13 +6,12 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.reuse.models import Reuse
+from udata.core.topic.factories import TopicFactory
+from udata.core.topic.models import Topic
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.mongo import db
+from udata.tests.api import APITestCase
 from udata.tests.helpers import assert200, assert400
-
-pytestmark = [
-    pytest.mark.usefixtures("clean_db"),
-]
 
 
 class FakeDatasetActivity(Activity):
@@ -26,26 +24,29 @@ class FakeReuseActivity(Activity):
     related_to = db.ReferenceField(Reuse, required=True)
 
 
-class ActivityAPITest:
-    modules = []
+class FakeTopicActivity(Activity):
+    key = "fakeTopic"
+    related_to = db.ReferenceField(Topic, required=True)
 
-    def test_activity_api_list(self, api) -> None:
+
+class ActivityAPITest(APITestCase):
+    def test_activity_api_list(self) -> None:
         """It should fetch an activity list from the API"""
         activities: list[Activity] = [
             FakeDatasetActivity.objects.create(actor=UserFactory(), related_to=DatasetFactory()),
             FakeReuseActivity.objects.create(actor=UserFactory(), related_to=ReuseFactory()),
         ]
 
-        response: TestResponse = api.get(url_for("api.activity"))
+        response: TestResponse = self.get(url_for("api.activity"))
         assert200(response)
         assert len(response.json["data"]) == len(activities)
 
-    def test_activity_api_list_filter_by_bogus_related_to(self, api) -> None:
+    def test_activity_api_list_filter_by_bogus_related_to(self) -> None:
         """It should return a 400 error if the `related_to` parameter isn't a valid ObjectId."""
-        response: TestResponse = api.get(url_for("api.activity", related_to="foobar"))
+        response: TestResponse = self.get(url_for("api.activity", related_to="foobar"))
         assert400(response)
 
-    def test_activity_api_list_filtered_by_related_to(self, api) -> None:
+    def test_activity_api_list_filtered_by_related_to(self) -> None:
         """It should only return activities that correspond to the `related_to` parameter."""
         dataset1: Dataset = DatasetFactory()
         dataset2: Dataset = DatasetFactory()
@@ -57,18 +58,18 @@ class ActivityAPITest:
             FakeReuseActivity.objects.create(actor=UserFactory(), related_to=reuse),
         ]
 
-        response: TestResponse = api.get(url_for("api.activity", related_to=dataset1.id))
+        response: TestResponse = self.get(url_for("api.activity", related_to=dataset1.id))
         assert200(response)
         len(response.json["data"]) == 2
         assert response.json["data"][0]["related_to"] == dataset1.title
         assert response.json["data"][1]["related_to"] == dataset1.title
 
-        response: TestResponse = api.get(url_for("api.activity", related_to=reuse.id))
+        response: TestResponse = self.get(url_for("api.activity", related_to=reuse.id))
         assert200(response)
         len(response.json["data"]) == 1
         assert response.json["data"][0]["related_to"] == reuse.title
 
-    def test_activity_api_list_with_private(self, api) -> None:
+    def test_activity_api_list_with_private(self) -> None:
         """It should fetch an activity list from the API"""
         activities: list[Activity] = [
             FakeDatasetActivity.objects.create(
@@ -80,18 +81,33 @@ class ActivityAPITest:
         ]
 
         # Anonymised user won't see activities about private documents
-        response: TestResponse = api.get(url_for("api.activity"))
+        response: TestResponse = self.get(url_for("api.activity"))
         assert200(response)
         assert len(response.json["data"]) == 0
 
         # Lambda user won't see activities about private documents
-        api.login()
-        response: TestResponse = api.get(url_for("api.activity"))
+        self.login()
+        response: TestResponse = self.get(url_for("api.activity"))
         assert200(response)
         assert len(response.json["data"]) == 0
 
         # Sysadmin user will see activities about private documents
-        api.login(AdminFactory())
-        response: TestResponse = api.get(url_for("api.activity"))
+        self.login(AdminFactory())
+        response: TestResponse = self.get(url_for("api.activity"))
         assert200(response)
         assert len(response.json["data"]) == len(activities)
+
+    def test_activity_api_with_topic(self) -> None:
+        """It should fetch topic activities from the API"""
+        topic: Topic = TopicFactory()
+        FakeTopicActivity.objects.create(actor=UserFactory(), related_to=topic)
+
+        response: TestResponse = self.get(url_for("api.activity"))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+
+        activity_data = response.json["data"][0]
+        assert activity_data["related_to"] == topic.name
+        assert activity_data["related_to_id"] == str(topic.id)
+        assert activity_data["related_to_kind"] == "Topic"
+        assert activity_data["related_to_url"] == topic.self_api_url()

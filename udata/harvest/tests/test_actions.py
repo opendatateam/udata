@@ -4,20 +4,25 @@ from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
 
 import pytest
+from flask import current_app
 from mock import patch
 
+from udata.core.activity.models import new_activity
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
-from udata.core.dataset.factories import DatasetFactory
-from udata.core.dataset.models import HarvestDatasetMetadata
+from udata.core.dataset.activities import UserCreatedDataset
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
+from udata.harvest.backends import get_enabled_backends
+from udata.harvest.backends.base import BaseBackend
 from udata.models import Dataset, PeriodicTask
-from udata.tests.helpers import assert_emit, assert_equal_dates
+from udata.tests.api import PytestOnlyDBTestCase
+from udata.tests.helpers import assert_emit, assert_equal_dates, assert_not_emit
 from udata.utils import faker
 
 from .. import actions, signals
-from ..backends import BaseBackend
 from ..models import (
     VALIDATION_ACCEPTED,
     VALIDATION_PENDING,
@@ -37,14 +42,11 @@ from .factories import (
 
 log = logging.getLogger(__name__)
 
-pytestmark = [
-    pytest.mark.usefixtures("clean_db"),
-]
 
-
-class HarvestActionsTest:
+class HarvestActionsTest(MockBackendsMixin, PytestOnlyDBTestCase):
     def test_list_backends(self):
-        for backend in actions.list_backends():
+        assert len(get_enabled_backends()) > 0
+        for backend in get_enabled_backends().values():
             assert issubclass(backend, BaseBackend)
 
     def test_list_sources(self):
@@ -269,7 +271,16 @@ class HarvestActionsTest:
         assert periodic_task.crontab.day_of_month == "*"
         assert periodic_task.crontab.month_of_year == "*"
         assert periodic_task.enabled
-        assert periodic_task.name == "Harvest {0}".format(source.name)
+        assert periodic_task.name == f"Harvest {source.name} ({source.id})"
+
+    def test_double_schedule_with_same_name(self):
+        source_1 = HarvestSourceFactory(name="A")
+        source_2 = HarvestSourceFactory(name="A")
+
+        actions.schedule(source_1, hour=0)
+        actions.schedule(source_2, hour=0)
+
+        assert len(PeriodicTask.objects) == 2
 
     def test_schedule_from_cron(self):
         source = HarvestSourceFactory()
@@ -286,7 +297,7 @@ class HarvestActionsTest:
         assert periodic_task.crontab.month_of_year == "3"
         assert periodic_task.crontab.day_of_week == "sunday"
         assert periodic_task.enabled
-        assert periodic_task.name == "Harvest {0}".format(source.name)
+        assert periodic_task.name == f"Harvest {source.name} ({source.id})"
 
     def test_reschedule(self):
         source = HarvestSourceFactory()
@@ -306,7 +317,7 @@ class HarvestActionsTest:
         assert periodic_task.crontab.day_of_month == "*"
         assert periodic_task.crontab.month_of_year == "*"
         assert periodic_task.enabled
-        assert periodic_task.name == "Harvest {0}".format(source.name)
+        assert periodic_task.name == f"Harvest {source.name} ({source.id})"
 
     def test_unschedule(self):
         periodic_task = PeriodicTask.objects.create(
@@ -449,8 +460,55 @@ class HarvestActionsTest:
         assert result.success == len(datasets)
         assert result.errors == 1
 
+    def test_detach(self):
+        dataset = DatasetFactory(
+            harvest=HarvestDatasetMetadata(
+                source_id="source id", domain="test.org", remote_id="id"
+            ),
+            resources=[
+                ResourceFactory(
+                    harvest=HarvestResourceMetadata(issued_at=datetime.now(), uri="test.org")
+                )
+            ],
+        )
 
-class ExecutionTestMixin(MockBackendsMixin):
+        actions.detach(dataset)
+
+        dataset.reload()
+        assert dataset.harvest is None
+        for resource in dataset.resources:
+            assert resource.harvest is None
+
+    def test_detach_all(self):
+        source = HarvestSourceFactory()
+        datasets = [
+            DatasetFactory(
+                harvest=HarvestDatasetMetadata(
+                    source_id=str(source.id), domain="test.org", remote_id=str(i)
+                ),
+                resources=[
+                    ResourceFactory(
+                        harvest=HarvestResourceMetadata(issued_at=datetime.now(), uri="test.org")
+                    )
+                ],
+            )
+            for i in range(3)
+        ]
+
+        result = actions.detach_all_from_source(source)
+
+        assert result == len(datasets)
+        for dataset in datasets:
+            dataset.reload()
+            assert dataset.harvest is None
+            for resource in dataset.resources:
+                assert resource.harvest is None
+
+
+class ExecutionTestMixin(MockBackendsMixin, PytestOnlyDBTestCase):
+    def action(self, *args, **kwargs):
+        raise NotImplementedError
+
     def test_default(self):
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="factory", organization=org)
@@ -578,6 +636,24 @@ class ExecutionTestMixin(MockBackendsMixin):
         self.action(source)
         assert len(Dataset.objects) == 5
 
+    @pytest.mark.options(HARVEST_ACTIVITY_USER_ID="68b860182728e27218dd7c72")
+    def test_harvest_emit_activity(self):
+        # We need to init dataset activities module
+        import udata.core.dataset.activities  # noqa
+
+        user = UserFactory(id=current_app.config["HARVEST_ACTIVITY_USER_ID"])
+        source = HarvestSourceFactory(backend="factory")
+        with assert_emit(Dataset.on_create, new_activity):
+            self.action(source)
+
+        # We have an activity for each dataset created by the source action
+        activities = UserCreatedDataset.objects(actor=user)
+        assert activities.count() == Dataset.objects().count()
+
+        # On a second run, we don't expect any signal sent (no creation, update or deletion)
+        with assert_not_emit(Dataset.on_create, Dataset.on_update, new_activity):
+            self.action(source)
+
 
 class HarvestLaunchTest(ExecutionTestMixin):
     def action(self, *args, **kwargs):
@@ -589,7 +665,7 @@ class HarvestRunTest(ExecutionTestMixin):
         return actions.run(*args, **kwargs)
 
 
-class HarvestPreviewTest(MockBackendsMixin):
+class HarvestPreviewTest(MockBackendsMixin, PytestOnlyDBTestCase):
     def test_preview(self):
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="factory", organization=org)

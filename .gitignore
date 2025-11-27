@@ -29,17 +29,11 @@ bower
 *.log
 *.pid
 .webassets-cache
-js-built
 .DS_Store
-*.min.css
-*.min.js
 /instance/
 /static/
 /doc/_build/
 /site/
-/node_modules/
-/udata/static/
-/jsdoc/
 *.rdb
 venv
 .venv
@@ -51,7 +45,6 @@ pip-log.txt
 .cache
 .coverage
 .pytest_cache
-.tox
 cover
 nosetests.xml
 coverage.xml
@@ -71,23 +64,22 @@ coverage.xml
 .noseids
 Procfile
 
-# Local configuration file of udata
-udata.cfg
-
-# Local data directory
-data
-
-# PyCharm
+# IDEs
+.cursor
 .idea
+.vscode
 
-# Pyenv
+# Python package managers
 .python-version
 
 # Ruff
 .ruff_cache
 
-# VSCode
-.vscode
-
 # Project specific
 fs/resources/
+
+# Local configuration file of udata
+udata.cfg
+
+# Local data directory
+data

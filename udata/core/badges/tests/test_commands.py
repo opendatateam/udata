@@ -1,42 +1,40 @@
 from tempfile import NamedTemporaryFile
 
-import pytest
-
 from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
 from udata.core.organization.factories import OrganizationFactory
+from udata.tests.api import PytestOnlyDBTestCase
 
 
-@pytest.mark.usefixtures("clean_db")
-class BadgeCommandTest:
+class BadgeCommandTest(PytestOnlyDBTestCase):
     def toggle(self, path_or_id, kind):
         return self.cli("badges", "toggle", path_or_id, kind)
 
-    def test_toggle_badge_on(self, cli):
+    def test_toggle_badge_on(self):
         org = OrganizationFactory()
 
-        cli("badges", "toggle", str(org.id), PUBLIC_SERVICE)
+        self.cli("badges", "toggle", str(org.id), PUBLIC_SERVICE)
 
         org.reload()
         assert org.badges[0].kind == PUBLIC_SERVICE
 
-    def test_toggle_badge_off(self, cli):
+    def test_toggle_badge_off(self):
         org = OrganizationFactory()
         org.add_badge(PUBLIC_SERVICE)
         org.add_badge(CERTIFIED)
 
-        cli("badges", "toggle", str(org.id), PUBLIC_SERVICE)
+        self.cli("badges", "toggle", str(org.id), PUBLIC_SERVICE)
 
         org.reload()
         assert org.badges[0].kind == CERTIFIED
 
-    def test_toggle_badge_on_from_file(self, cli):
+    def test_toggle_badge_on_from_file(self):
         orgs = [OrganizationFactory() for _ in range(2)]
 
         with NamedTemporaryFile(mode="w") as temp:
             temp.write("\n".join((str(org.id) for org in orgs)))
             temp.flush()
 
-            cli("badges", "toggle", temp.name, PUBLIC_SERVICE)
+            self.cli("badges", "toggle", temp.name, PUBLIC_SERVICE)
 
         for org in orgs:
             org.reload()

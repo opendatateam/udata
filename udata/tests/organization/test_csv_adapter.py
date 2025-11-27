@@ -1,14 +1,11 @@
-import pytest
-
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.csv import OrganizationCsvAdapter
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
+from udata.tests.api import PytestOnlyDBTestCase
 
 
-@pytest.mark.frontend
-@pytest.mark.usefixtures("clean_db")
-class OrganizationCSVAdapterTest:
+class OrganizationCSVAdapterTest(PytestOnlyDBTestCase):
     def test_organization_downloads_counts(self):
         org_with_dataset = OrganizationFactory()
         org_without_dataset = OrganizationFactory()

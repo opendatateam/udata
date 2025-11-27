@@ -39,7 +39,7 @@ COMMUNITY_RES_URL = "/api/1/datasets/community_resources"
 DISCUSSION_URL = "/api/1/discussions"
 
 
-DEFAULT_FIXTURE_FILE_TAG: str = "v6.0.0"
+DEFAULT_FIXTURE_FILE_TAG: str = "v7.0.0"
 DEFAULT_FIXTURE_FILE: str = f"https://raw.githubusercontent.com/opendatateam/udata-fixtures/{DEFAULT_FIXTURE_FILE_TAG}/results.json"  # noqa
 
 DEFAULT_FIXTURES_RESULTS_FILENAME: str = "results.json"
@@ -51,7 +51,6 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "last_update",
         "last_modified",
         "license",
-        "badges",
         "spatial",
         "quality",
         "permissions",

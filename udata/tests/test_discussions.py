@@ -31,14 +31,11 @@ from udata.models import Dataset, Member
 from udata.tests.helpers import capture_mails
 from udata.utils import faker
 
-from . import DBTestMixin, TestCase
-from .api import APITestCase
+from .api import APITestCase, DBTestCase
 from .helpers import assert_emit, assert_not_emit
 
 
 class DiscussionsTest(APITestCase):
-    modules = []
-
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_new_discussion(self):
         user = self.login()
@@ -145,11 +142,11 @@ class DiscussionsTest(APITestCase):
         with assert_not_emit(on_new_discussion):
             discussion_id = None
 
-            def check_signal(args):
+            def check_signal(kwargs):
                 self.assertIsNotNone(discussion_id)
                 self.assertIn(
                     f"https://data.gouv.fr/datasets/{dataset.slug}/discussions/?discussion_id={discussion_id}",
-                    args[1]["message"],
+                    kwargs["message"],
                 )
 
             with assert_emit(on_new_potential_spam, assertions_callback=check_signal):
@@ -623,8 +620,8 @@ class DiscussionsTest(APITestCase):
         self.login()
         with assert_not_emit(on_new_discussion_comment):
 
-            def check_signal(args):
-                self.assertIn(discussion.url_for(), args[1]["message"])
+            def check_signal(kwargs):
+                self.assertIn(discussion.url_for(), kwargs["message"])
 
             with assert_emit(on_new_potential_spam, assertions_callback=check_signal):
                 response = self.post(
@@ -1018,7 +1015,7 @@ class DiscussionsTest(APITestCase):
         self.assert403(response)
 
 
-class DiscussionsNotificationsTest(TestCase, DBTestMixin):
+class DiscussionsNotificationsTest(DBTestCase):
     def test_notify_user_discussions(self):
         owner = UserFactory()
         dataset = DatasetFactory(owner=owner)
@@ -1091,8 +1088,6 @@ class DiscussionsNotificationsTest(TestCase, DBTestMixin):
 
 
 class DiscussionsMailsTest(APITestCase):
-    modules = []
-
     def test_new_discussion_mail(self):
         user = UserFactory()
         owner = UserFactory()

@@ -25,110 +25,52 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Compute Python dependencies key
-          command: cat requirements/*.pip > python.deps
-      - run:
           name: Get the base reference branch
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
             # 1. Exact match of dependencies
-            - py3-cache-v12-{{ arch }}-{{ checksum "python.deps" }}
+            - py3-cache-v13-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
             # 2. Latest cache from this branch
-            - py3-cache-v12-{{ arch }}-{{ .Branch }}
+            - py3-cache-v13-{{ arch }}-{{ .Branch }}
             # 3. Latest cache from base branch (e.g., master)
-            - py3-cache-v12-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+            - py3-cache-v13-{{ arch }}-{{ .Environment.BASE_BRANCH }}
             # 4. Any latest cache for this architecture (fallback)
-            - py3-cache-v12-{{ arch }}-
+            - py3-cache-v13-{{ arch }}-
       - run:
           name: Install Python dependencies
           command: |
-            python -m venv venv
-            source venv/bin/activate
-            pip install --upgrade wheel pip
-            pip install -r requirements/develop.pip
-            pip install -e .
+            pip install uv
+            uv sync --frozen --extra dev --extra test
       - save_cache:
-          key: py3-cache-v12-{{ arch }}-{{ checksum "python.deps" }}
+          key: py3-cache-v13-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
           paths:
-          - venv
+            - .venv
       - save_cache:
-          key: py3-cache-v12-{{ arch }}-{{ .Branch }}
+          key: py3-cache-v13-{{ arch }}-{{ .Branch }}
           paths:
-          - venv
+            - .venv
       - run:
           name: Lint and format code and sort imports
-          # ruff check --select I . : check linting and imports sorting without fixing (to fix, use --fix)
+          # ruff check --extend-select I . : check linting and imports sorting without fixing (to fix, use --fix)
           # ruff format --check . : check code formatting without fixing (to fix, remove --check)
           command: |
-            source venv/bin/activate
-            ruff check .
-            ruff format --check .
+            uv run ruff check --extend-select I .
+            uv run ruff format --check .
       - run:
           name: Run tests
           command: |
             mkdir -p reports/python
-            source venv/bin/activate
-            inv test --report --ci
+            uv run inv test --report --ci
       - store_test_results:
           path: reports/python
       - store_artifacts:
           path: reports/
           destination: reports
-
       - persist_to_workspace:
           root: .
           paths:
-          - venv
-
-  assets:
-    docker:
-      # TODO make an image based on 2-alpine w/ nvm and phantom deps
-      - image: udata/circleci:py<< pipeline.parameters.python-version >>
-    environment:
-      BASH_ENV: /root/.bashrc
-    steps:
-      - checkout
-      - run:
-          name: Compute JS dependencies key
-          command: cat .nvmrc package.json > js.deps
-      - run:
-          name: Get the base reference branch
-          command: export BASE_BRANCH=$(base_branch)
-      - restore_cache:
-          keys:
-            # 1. Exact match of dependencies
-            - js-cache-{{ arch }}-{{ checksum "js.deps" }}
-            # 2. Latest cache from this branch
-            - js-cache-{{ arch }}-{{ .Branch }}
-            # 3. Latest cache from base branch (e.g., master)
-            - js-cache-{{ arch }}-{{ .Environment.BASE_BRANCH }}
-            # 4. Any latest cache for this architecture (fallback)
-            - js-cache-{{ arch }}-
-      - run:
-          name: Install NodeJS and dependencies
-          command: |
-            nvm install
-            npm install
-            npm list || true
-      - save_cache:
-          key: js-cache-{{ arch }}-{{ checksum "js.deps" }}
-          paths:
-          - node_modules
-      - save_cache:
-          key: js-cache-{{ arch }}-{{ .Branch }}
-          paths:
-          - node_modules
-      - run:
-          name: Compile assets
-          command: |
-            npm run assets:build
-            npm run widgets:build
-            npm run oembed:build
-      - persist_to_workspace:
-          root: .
-          paths:
-            - udata/static
+            - .venv
 
   dist:
     docker:
@@ -138,55 +80,29 @@ jobs:
       - attach_workspace:
           at: .
       - run:
-          name: Set version
+          name: Install build tools
           command: |
-            if [[ $CIRCLE_TAG ]]; then
-                # This is a tagged release, version has been handled upstream
-                RELEASE_VERSION=$CIRCLE_TAG
-                echo "RELEASE_VERSION=$RELEASE_VERSION" > version.sh
-            else
-                # Otherwise, relies on a dev version like "1.2.1.dev" by default
-                # Read version from __init__.py
-                BASE_VERSION=$(python -c "from udata import __version__; print(__version__)")
-                if [[ "$CIRCLE_BRANCH" == feature/* ]]; then
-                    # This is a feature branch
-                    BUILDNO=$CIRCLE_BUILD_NUM${CIRCLE_BRANCH#*/}
-                else
-                    # This is a simple development build
-                    BUILDNO=$CIRCLE_BUILD_NUM
-                fi
-                # Build the release version string with the build number, like "1.2.1.dev1234"
-                RELEASE_VERSION="${BASE_VERSION}${BUILDNO}"
-                echo "BASE_VERSION=$BASE_VERSION" > version.sh
-                echo "BUILDNO=$BUILDNO" >> version.sh
-                echo "RELEASE_VERSION=$RELEASE_VERSION" >> version.sh
-            fi
+            pip install uv
+            uv pip install setuptools-scm
       - run:
-          name: Display build info for debugging
+          name: Save and show RELEASE_VERSION
           command: |
-            source version.sh
-            echo "Base version from __init__.py: $BASE_VERSION"
-            echo "Build number: $BUILDNO"
-            echo "Commit hash: ${CIRCLE_SHA1:0:7}"
-            echo "Git tag: $CIRCLE_TAG"
-            echo "Building a wheel release with version $RELEASE_VERSION"
+            # derive from setuptools_scm or base version + build number
+            RELEASE_VERSION=$(uv run python -m setuptools_scm)
+
+            echo "export RELEASE_VERSION=$RELEASE_VERSION" > release.env
+            echo "RELEASE_VERSION is $RELEASE_VERSION"
       - run:
           name: Build a distributable package as a wheel release
           command: |
-            source venv/bin/activate
-            source version.sh
-            if [[ $CIRCLE_TAG ]]; then
-                inv pydist
-            else
-                inv pydist -b $BUILDNO
-            fi
+            uv run inv pydist
       - store_artifacts:
           path: dist
       - persist_to_workspace:
           root: .
           paths:
             - dist
-            - version.sh
+            - release.env
 
   publish:
     docker:
@@ -197,9 +113,8 @@ jobs:
       - run:
           name: Publish on PyPI
           command: |
-            source venv/bin/activate
-            pip install twine
-            twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
+            pip install uv
+            uv publish --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
 
   trigger-gitlab-pipeline:
     docker:
@@ -228,7 +143,7 @@ jobs:
       - run:
           name: Trigger GitLab CI/CD pipeline for udata to deploy to << pipeline.parameters.deploy-env >> environment
           command: |
-            source version.sh
+            source release.env
             cd scaffold
             # Run the script that triggers the Gitlab CI/CD pipeline.
             # Must have GITLAB_API_TOKEN set in the environment
@@ -249,7 +164,8 @@ jobs:
       - run:
           name: Create Sentry release
           command: |
-            source version.sh
+            source release.env
+
             # Create release
             curl https://errors.data.gouv.fr/api/0/organizations/sentry/releases/ \
               -H "Authorization: Bearer ${SENTRY_AUTH_TOKEN}" \
@@ -265,21 +181,10 @@ jobs:
 workflows:
   build-publish-deploy:
     jobs:
-      - python:
-          filters:
-            tags:
-              only: /v[0-9]+(\.[0-9]+)*/
-      - assets:
-          filters:
-            tags:
-              only: /v[0-9]+(\.[0-9]+)*/
+      - python
       - dist:
           requires:
             - python
-            - assets
-          filters:
-            tags:
-              only: /v[0-9]+(\.[0-9]+)*/
       - publish:
           requires:
             - dist
@@ -287,9 +192,6 @@ workflows:
             branches:
               only:
                 - << pipeline.parameters.publish-branch >>
-                - /[0-9]+(\.[0-9]+)+/
-            tags:
-              only: /v[0-9]+(\.[0-9]+)*/
           context: org-global
       - trigger-gitlab-pipeline:
           requires:
@@ -308,7 +210,5 @@ workflows:
             branches:
               only:
                 - << pipeline.parameters.publish-branch >>
-            tags:
-              only: /v[0-9]+(\.[0-9]+)*/
           context:
             - org-global

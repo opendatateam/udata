@@ -6,7 +6,6 @@ import calendar
 import json
 import logging
 from datetime import date, datetime
-from typing import Optional
 
 from dateutil.parser import parse as parse_dt
 from flask import current_app
@@ -17,6 +16,7 @@ from rdflib.namespace import RDF
 from rdflib.resource import Resource as RdfResource
 
 from udata import i18n, uris
+from udata.core.constants import HVD
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.spatial.models import SpatialCoverage
 from udata.harvest.exceptions import HarvestSkipException
@@ -47,63 +47,91 @@ from udata.rdf import (
     remote_url_from_rdf,
     sanitize_html,
     schema_from_rdf,
+    set_harvested_date,
     themes_from_rdf,
     url_from_rdf,
 )
 from udata.utils import get_by, safe_unicode, to_naive_datetime
 
-from .constants import OGC_SERVICE_FORMATS, UPDATE_FREQUENCIES
+from .constants import OGC_SERVICE_FORMATS, UpdateFrequency
 from .models import Checksum, Dataset, License, Resource
 
 log = logging.getLogger(__name__)
 
-# Map extra frequencies (ie. not defined in Dublin Core) to closest equivalent
-RDF_FREQUENCIES = {
-    "punctual": None,
-    "hourly": FREQ.continuous,
-    "fourTimesADay": FREQ.daily,
-    "threeTimesADay": FREQ.daily,
-    "semidaily": FREQ.daily,
-    "fourTimesAWeek": FREQ.threeTimesAWeek,
-    "quinquennial": None,
-    "unknown": None,
+FREQ_TERM_TO_UDATA = {
+    FREQ.continuous: UpdateFrequency.CONTINUOUS,
+    FREQ.daily: UpdateFrequency.DAILY,
+    FREQ.threeTimesAWeek: UpdateFrequency.THREE_TIMES_A_WEEK,
+    FREQ.semiweekly: UpdateFrequency.SEMIWEEKLY,
+    FREQ.weekly: UpdateFrequency.WEEKLY,
+    FREQ.biweekly: UpdateFrequency.BIWEEKLY,
+    FREQ.threeTimesAMonth: UpdateFrequency.THREE_TIMES_A_MONTH,
+    FREQ.semimonthly: UpdateFrequency.SEMIMONTHLY,
+    FREQ.monthly: UpdateFrequency.MONTHLY,
+    FREQ.bimonthly: UpdateFrequency.BIMONTHLY,
+    FREQ.quarterly: UpdateFrequency.QUARTERLY,
+    FREQ.threeTimesAYear: UpdateFrequency.THREE_TIMES_A_YEAR,
+    FREQ.semiannual: UpdateFrequency.SEMIANNUAL,
+    FREQ.annual: UpdateFrequency.ANNUAL,
+    FREQ.biennial: UpdateFrequency.BIENNIAL,
+    FREQ.triennial: UpdateFrequency.TRIENNIAL,
+    FREQ.irregular: UpdateFrequency.IRREGULAR,
+}
+FREQ_ID_TO_UDATA = {
+    namespace_manager.compute_qname(k)[2].lower(): v for k, v in FREQ_TERM_TO_UDATA.items()
 }
 
-# Map european frequencies to their closest equivalent
-# See:
-#  - http://publications.europa.eu/mdr/resource/authority/frequency/html/frequencies-eng.html # noqa: E501
-#  - https://publications.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/frequency # noqa: E501
-EU_RDF_REQUENCIES = {
-    # Match Dublin Core name
-    EUFREQ.ANNUAL: "annual",
-    EUFREQ.BIENNIAL: "biennial",
-    EUFREQ.TRIENNIAL: "triennial",
-    EUFREQ.QUARTERLY: "quarterly",
-    EUFREQ.MONTHLY: "monthly",
-    EUFREQ.BIMONTHLY: "bimonthly",
-    EUFREQ.WEEKLY: "weekly",
-    EUFREQ.BIWEEKLY: "biweekly",
-    EUFREQ.DAILY: "daily",
-    # Name differs from Dublin Core
-    EUFREQ.ANNUAL_2: "semiannual",
-    EUFREQ.ANNUAL_3: "threeTimesAYear",
-    EUFREQ.MONTHLY_2: "semimonthly",
-    EUFREQ.MONTHLY_3: "threeTimesAMonth",
-    EUFREQ.WEEKLY_2: "semiweekly",
-    EUFREQ.WEEKLY_3: "threeTimesAWeek",
-    EUFREQ.DAILY_2: "semidaily",
-    EUFREQ.CONT: "continuous",
-    EUFREQ.UPDATE_CONT: "continuous",
-    EUFREQ.IRREG: "irregular",
-    EUFREQ.UNKNOWN: "unknown",
-    EUFREQ.OTHER: "unknown",
-    EUFREQ.NEVER: "punctual",
+EUFREQ_TERM_TO_UDATA = {
+    EUFREQ.UNKNOWN: UpdateFrequency.UNKNOWN,
+    EUFREQ.UPDATE_CONT: UpdateFrequency.CONTINUOUS,
+    getattr(EUFREQ, "1MIN"): UpdateFrequency.ONE_MINUTE,
+    getattr(EUFREQ, "5MIN"): UpdateFrequency.FIVE_MINUTES,
+    getattr(EUFREQ, "10MIN"): UpdateFrequency.TEN_MINUTES,
+    getattr(EUFREQ, "15MIN"): UpdateFrequency.FIFTEEN_MINUTES,
+    getattr(EUFREQ, "30MIN"): UpdateFrequency.THIRTY_MINUTES,
+    EUFREQ.HOURLY: UpdateFrequency.HOURLY,
+    EUFREQ.BIHOURLY: UpdateFrequency.BIHOURLY,
+    EUFREQ.TRIHOURLY: UpdateFrequency.TRIHOURLY,
+    getattr(EUFREQ, "12HRS"): UpdateFrequency.TWELVE_HOURS,
+    EUFREQ.CONT: UpdateFrequency.SEVERAL_TIMES_A_DAY,
+    EUFREQ.DAILY_3: UpdateFrequency.THREE_TIMES_A_DAY,
+    EUFREQ.DAILY_2: UpdateFrequency.SEMIDAILY,
+    EUFREQ.DAILY: UpdateFrequency.DAILY,
+    EUFREQ.WEEKLY_5: UpdateFrequency.FIVE_TIMES_A_WEEK,
+    EUFREQ.WEEKLY_3: UpdateFrequency.THREE_TIMES_A_WEEK,
+    EUFREQ.WEEKLY_2: UpdateFrequency.SEMIWEEKLY,
+    EUFREQ.WEEKLY: UpdateFrequency.WEEKLY,
+    EUFREQ.BIWEEKLY: UpdateFrequency.BIWEEKLY,
+    EUFREQ.MONTHLY_3: UpdateFrequency.THREE_TIMES_A_MONTH,
+    EUFREQ.MONTHLY_2: UpdateFrequency.SEMIMONTHLY,
+    EUFREQ.MONTHLY: UpdateFrequency.MONTHLY,
+    EUFREQ.BIMONTHLY: UpdateFrequency.BIMONTHLY,
+    EUFREQ.QUARTERLY: UpdateFrequency.QUARTERLY,
+    EUFREQ.ANNUAL_3: UpdateFrequency.THREE_TIMES_A_YEAR,
+    EUFREQ.ANNUAL_2: UpdateFrequency.SEMIANNUAL,
+    EUFREQ.ANNUAL: UpdateFrequency.ANNUAL,
+    EUFREQ.BIENNIAL: UpdateFrequency.BIENNIAL,
+    EUFREQ.TRIENNIAL: UpdateFrequency.TRIENNIAL,
+    EUFREQ.QUADRENNIAL: UpdateFrequency.QUADRENNIAL,
+    EUFREQ.QUINQUENNIAL: UpdateFrequency.QUINQUENNIAL,
+    EUFREQ.DECENNIAL: UpdateFrequency.DECENNIAL,
+    EUFREQ.BIDECENNIAL: UpdateFrequency.BIDECENNIAL,
+    EUFREQ.TRIDECENNIAL: UpdateFrequency.TRIDECENNIAL,
+    EUFREQ.AS_NEEDED: UpdateFrequency.PUNCTUAL,
+    EUFREQ.IRREG: UpdateFrequency.IRREGULAR,
+    EUFREQ.NEVER: UpdateFrequency.NEVER,
+    EUFREQ.NOT_PLANNED: UpdateFrequency.NOT_PLANNED,
+    EUFREQ.OTHER: UpdateFrequency.OTHER,
+}
+EUFREQ_ID_TO_UDATA = {
+    namespace_manager.compute_qname(k)[2].lower(): v for k, v in EUFREQ_TERM_TO_UDATA.items()
 }
 
+# Merge order matters: we want FREQ to win over EUFREQ
+UDATA_FREQ_ID_TO_TERM = {v: k for k, v in {**EUFREQ_TERM_TO_UDATA, **FREQ_TERM_TO_UDATA}.items()}
 
-def temporal_to_rdf(
-    daterange: db.DateRange, graph: Optional[Graph] = None
-) -> Optional[RdfResource]:
+
+def temporal_to_rdf(daterange: db.DateRange, graph: Graph | None = None) -> RdfResource | None:
     if not daterange:
         return
     graph = graph or Graph(namespace_manager=namespace_manager)
@@ -116,13 +144,11 @@ def temporal_to_rdf(
     return pot
 
 
-def frequency_to_rdf(frequency: str, graph: Optional[Graph] = None) -> Optional[str]:
-    if not frequency:
-        return
-    return RDF_FREQUENCIES.get(frequency, getattr(FREQ, frequency))
+def frequency_to_rdf(frequency: UpdateFrequency | None, graph: Graph | None = None) -> str | None:
+    return UDATA_FREQ_ID_TO_TERM.get(frequency)
 
 
-def owner_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> Optional[RdfResource]:
+def owner_to_rdf(dataset: Dataset, graph: Graph | None = None) -> RdfResource | None:
     from udata.core.organization.rdf import organization_to_rdf
     from udata.core.user.rdf import user_to_rdf
 
@@ -133,7 +159,7 @@ def owner_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> Optional[Rd
     return
 
 
-def detect_ogc_service(resource: Resource) -> Optional[str]:
+def detect_ogc_service(resource: Resource) -> str | None:
     """
     Detect if the resource points towards an OGC Service based on either
     * a known OGC Service format
@@ -152,8 +178,8 @@ def detect_ogc_service(resource: Resource) -> Optional[str]:
 def ogc_service_to_rdf(
     dataset: Dataset,
     resource: Resource,
-    ogc_service_type: Optional[str] = None,
-    graph: Optional[Graph] = None,
+    ogc_service_type: str | None = None,
+    graph: Graph | None = None,
     is_hvd: bool = False,
 ) -> RdfResource:
     """
@@ -195,8 +221,8 @@ def ogc_service_to_rdf(
 
 def resource_to_rdf(
     resource: Resource,
-    dataset: Optional[Dataset] = None,
-    graph: Optional[Graph] = None,
+    dataset: Dataset | None = None,
+    graph: Graph | None = None,
     is_hvd: bool = False,
 ) -> RdfResource:
     """
@@ -214,8 +240,10 @@ def resource_to_rdf(
     r.add(DCT.description, Literal(resource.description))
     r.add(DCAT.downloadURL, URIRef(resource.url))
     r.add(DCAT.accessURL, URIRef(resource.latest))
-    r.add(DCT.issued, Literal(resource.created_at))
-    r.add(DCT.modified, Literal(resource.last_modified))
+    # issued
+    set_harvested_date(resource, r, DCT.issued, "issued_at", fallback=resource.created_at)
+    # modified
+    set_harvested_date(resource, r, DCT.modified, "modified_at", fallback=resource.last_modified)
     if dataset and dataset.license:
         r.add(DCT.rights, Literal(dataset.license.title))
         if dataset.license.url:
@@ -258,7 +286,7 @@ def dataset_to_graph_id(dataset: Dataset) -> URIRef | BNode:
         return BNode()
 
 
-def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResource:
+def dataset_to_rdf(dataset: Dataset, graph: Graph | None = None) -> RdfResource:
     """
     Map a dataset domain model to a DCAT/RDF graph
     """
@@ -285,8 +313,13 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
     d.set(RDF.type, DCAT.Dataset)
     d.set(DCT.title, Literal(dataset.title))
     d.set(DCT.description, Literal(dataset.description))
-    d.set(DCT.issued, Literal(dataset.created_at))
-    d.set(DCT.modified, Literal(dataset.last_modified))
+
+    # created
+    set_harvested_date(dataset, d, DCT.created, "created_at", fallback=dataset.created_at)
+    # issued
+    set_harvested_date(dataset, d, DCT.issued, "issued_at", fallback=dataset.created_at)
+    # modified
+    set_harvested_date(dataset, d, DCT.modified, "modified_at", fallback=dataset.last_modified)
 
     if dataset.harvest and dataset.harvest.remote_url:
         d.set(DCAT.landingPage, URIRef(dataset.harvest.remote_url))
@@ -298,7 +331,7 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
 
     # Add DCAT-AP HVD properties if the dataset is tagged hvd.
     # See https://semiceu.github.io/DCAT-AP/releases/2.2.0-hvd/
-    is_hvd = current_app.config["HVD_SUPPORT"] and "hvd" in dataset.tags
+    is_hvd = current_app.config["HVD_SUPPORT"] and any(b.kind == HVD for b in dataset.badges)
     if is_hvd:
         d.add(DCATAP.applicableLegislation, URIRef(HVD_LEGISLATION))
 
@@ -328,8 +361,7 @@ def dataset_to_rdf(dataset: Dataset, graph: Optional[Graph] = None) -> RdfResour
     if dataset.temporal_coverage:
         d.set(DCT.temporal, temporal_to_rdf(dataset.temporal_coverage, graph))
 
-    frequency = frequency_to_rdf(dataset.frequency)
-    if frequency:
+    if frequency := frequency_to_rdf(dataset.frequency):
         d.set(DCT.accrualPeriodicity, frequency)
 
     owner_role = DCT.publisher
@@ -505,23 +537,19 @@ def spatial_from_rdf(graph):
         return None
 
 
-def frequency_from_rdf(term):
+def frequency_from_rdf(term) -> UpdateFrequency | None:
     if isinstance(term, str):
         try:
             term = URIRef(uris.validate(term))
         except uris.ValidationError:
             pass
     if isinstance(term, Literal):
-        if term.toPython().lower() in UPDATE_FREQUENCIES:
-            return term.toPython().lower()
+        term = term.toPython().lower()
+        return FREQ_ID_TO_UDATA.get(term) or EUFREQ_ID_TO_UDATA.get(term)
     if isinstance(term, RdfResource):
         term = term.identifier
     if isinstance(term, URIRef):
-        if EUFREQ in term:
-            return EU_RDF_REQUENCIES.get(term)
-        _, _, freq = namespace_manager.compute_qname(term)
-        if freq.lower() in UPDATE_FREQUENCIES:
-            return freq.lower()
+        return FREQ_TERM_TO_UDATA.get(term) or EUFREQ_TERM_TO_UDATA.get(term)
 
 
 def mime_from_rdf(resource):
@@ -694,12 +722,12 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
 
     identifier = rdf_value(distrib, DCT.identifier)
     uri = distrib.identifier.toPython() if isinstance(distrib.identifier, URIRef) else None
-    created_at = rdf_value(distrib, DCT.issued)
+    issued_at = rdf_value(distrib, DCT.issued)
     modified_at = rdf_value(distrib, DCT.modified)
 
     if not resource.harvest:
         resource.harvest = HarvestResourceMetadata()
-    resource.harvest.created_at = created_at
+    resource.harvest.issued_at = issued_at
 
     # In the past, we've encountered future `modified_at` during harvesting
     # do not save it. :FutureHarvestModifiedAt
@@ -799,7 +827,8 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
 
     remote_url = remote_url_from_rdf(d, graph, remote_url_prefix=remote_url_prefix)
 
-    created_at = rdf_value(d, DCT.issued)
+    created_at = rdf_value(d, DCT.created)
+    issued_at = rdf_value(d, DCT.issued)
     modified_at = rdf_value(d, DCT.modified)
 
     if not dataset.harvest:
@@ -808,6 +837,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
     dataset.harvest.uri = uri
     dataset.harvest.remote_url = remote_url
     dataset.harvest.created_at = created_at
+    dataset.harvest.issued_at = issued_at
 
     # In the past, we've encountered future `modified_at` during harvesting
     # do not save it. :FutureHarvestModifiedAt

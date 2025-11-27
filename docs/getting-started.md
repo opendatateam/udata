@@ -10,7 +10,7 @@ We’ll use the following repositories:
 # Check the system requirements
 
 !!! info
-    Be aware that udata now requires Python **>3.9,<=3.11** to work.
+    Be aware that udata now requires Python **>3.11,<=3.13** to work.
 
 udata requires several libraries to be installed to work. You can see them on the udata documentation link below.
 
@@ -63,53 +63,24 @@ docker compose up
 
 ## Install virtual env and dependencies
 
-udata uses pip to install its dependencies. You can create a
-[virtualenv](https://realpython.com/blog/python/python-virtual-environments-a-primer/),
-activate it and install the requirements with the following commands.
+With [uv](https://docs.astral.sh/uv/) (recommended):
 
+```bash
+uv sync --extra dev --extra test
+```
+
+...or with pip:
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements/develop.pip
-pip install -e .
+pip install -e ".[dev,test]"
+```
 ```
 
 You can find [common errors and workarounds for Macos on udata documentation](https://udata.readthedocs.io/en/latest/development-environment/#macos-big-sur-caveat).
 
 !!! info
     You need to make sure that your virtualenv is activated for the entire development process.
-
-## Install nvm and dependencies
-
-udata and udata-front use NVM to manage node versions (based on `.nvmrc` file). You can install it based on [their instructions](https://github.com/nvm-sh/nvm).
-
-Then, you can install and activate the required node version.
-
-```bash
-nvm install
-nvm use
-```
-
-You can install JavaScript dependencies with NPM.
-
-```bash
-npm install
-```
-
-Once it's done, you should be able to run the build commands for JS and CSS.
-
-```bash
-inv assets-build
-inv widgets-build
-```
-
-### Alternative to nvm
-
-If you don't want to use nvm and are not actively contributing to the frontend part of udata, you shoud be able to install the dependencies with this command on a modern node version (tested on v20):
-
-```bash
-npm install --legacy-peer-deps
-```
 
 ## Configure udata
 
@@ -139,7 +110,6 @@ URLS_ALLOW_LOCAL = True
 URLS_ALLOWED_TLDS = Defaults.URLS_ALLOWED_TLDS | set(['local'])
 
 RESOURCES_FILE_ALLOWED_DOMAINS = ['*']
-PLUGINS = []
 FS_ROOT = 'fs'
 
 SESSION_COOKIE_SECURE = False
@@ -228,7 +198,6 @@ git clone git@github.com:datagouv/udata-front.git
 Modify your `udata.cfg` with the following lines.
 
 ```bash
-PLUGINS = ['front']
 THEME = 'gouvfr'
 ```
 
@@ -238,11 +207,16 @@ udata-front uses the same virtualenv as udata. You can activate it from your uda
 source $UDATA_WORKSPACE/udata/venv/bin/activate
 ```
 
-Then, you can install pip requirements.
-
+Then, you can install the requirements with:
 ```bash
 cd udata-front
-pip install -e . -r requirements/test.pip -r requirements/develop.pip
+uv sync --extra dev --extra test
+```
+
+...or, with pip:
+```bash
+cd udata-front
+pip install -e ".[test,dev]"
 ```
 
 The last thing to do is to install udata-front NPM packages.
@@ -296,7 +270,7 @@ Finally, you can see other administrative tasks in [administrative-tasks](admini
 
 # Going further
 
-Once the project is up and running, it’s time to customize it! Take a look at our advanced documentation on [adapting settings](adapting-settings.md), [creating a custom theme](creating-theme.md), [extending udata](extending.md), [testing your code](testing-code.md), [adding translation](adding-translations.md), [setting up a search service][udata-search-service] and so on.
+Once the project is up and running, it’s time to customize it! Take a look at our advanced documentation on [adapting settings](adapting-settings.md), [extending udata](extending.md), [testing your code](testing-code.md), [adding translation](adding-translations.md), [setting up a search service][udata-search-service] and so on.
 
 [github]: https://github.com/opendatateam/udata
 [new issue]: https://github.com/opendatateam/udata/issues/new

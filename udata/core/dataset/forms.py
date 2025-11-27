@@ -1,3 +1,10 @@
+from udata.core.access_type.constants import (
+    AccessAudienceCondition,
+    AccessAudienceType,
+    AccessType,
+    InspireLimitationCategory,
+)
+from udata.core.access_type.models import AccessAudience
 from udata.core.spatial.forms import SpatialCoverageField
 from udata.core.storages import resources
 from udata.forms import ModelForm, fields, validators
@@ -6,14 +13,12 @@ from udata.mongo.errors import FieldValidationError
 
 from .constants import (
     CHECKSUM_TYPES,
-    DEFAULT_FREQUENCY,
     DESCRIPTION_SHORT_SIZE_LIMIT,
     DESCRIPTION_SIZE_LIMIT,
-    LEGACY_FREQUENCIES,
     RESOURCE_FILETYPES,
     RESOURCE_TYPES,
     TITLE_SIZE_LIMIT,
-    UPDATE_FREQUENCIES,
+    UpdateFrequency,
 )
 from .models import (
     Checksum,
@@ -117,10 +122,13 @@ class CommunityResourceForm(BaseResourceForm):
     organization = fields.PublishAsField(_("Publish as"))
 
 
-def map_legacy_frequencies(form, field):
-    """Map legacy frequencies to new ones"""
-    if field.data in LEGACY_FREQUENCIES:
-        field.data = LEGACY_FREQUENCIES[field.data]
+def unmarshal_frequency(form, field):
+    if field.data is None:
+        return
+    # We don't need to worry about invalid field.data being fed to UpdateFrequency here,
+    # since the API will already have ensured incoming data matches the field definition,
+    # which in our case is an enum of valid UpdateFrequency values.
+    field.data = UpdateFrequency(field.data)
 
 
 def validate_contact_point(form, field):
@@ -138,6 +146,13 @@ def validate_contact_point(form, field):
             raise validators.ValidationError(
                 _("Wrong contact point id or contact point ownership mismatch")
             )
+
+
+class AccessAudienceForm(ModelForm):
+    model_class = AccessAudience
+
+    role = fields.SelectField(choices=[(e.value, e.value) for e in AccessAudienceType])
+    condition = fields.SelectField(choices=[(e.value, e.value) for e in AccessAudienceCondition])
 
 
 class DatasetForm(ModelForm):
@@ -158,12 +173,30 @@ class DatasetForm(ModelForm):
         description=_("A short description of the dataset."),
     )
     license = fields.ModelSelectField(_("License"), model=License, allow_blank=True)
+    access_type = fields.SelectField(
+        choices=[(e.value, e.value) for e in AccessType],
+        default=AccessType.OPEN,
+        validators=[validators.optional()],
+    )
+    access_audiences = fields.NestedModelList(AccessAudienceForm)
+    authorization_request_url = fields.StringField(_("Authorization request URL"))
+    access_type_reason_category = fields.SelectField(
+        _("Access type reason category"),
+        choices=[(e.value, e.label) for e in InspireLimitationCategory],
+        validators=[validators.optional()],
+    )
+    access_type_reason = fields.StringField(_("Access type reason"))
     frequency = fields.SelectField(
         _("Update frequency"),
-        choices=list(UPDATE_FREQUENCIES.items()),
-        default=DEFAULT_FREQUENCY,
+        choices=list(UpdateFrequency),
+        default=UpdateFrequency.UNKNOWN,
         validators=[validators.optional()],
-        preprocessors=[map_legacy_frequencies],
+        # Unmarshaling should not happen during validation, but flask-restx makes it cumbersome
+        # to do it earlier, requiring a request parser (unmarshaler) separate from the marshaler,
+        # meaning we can't use the same object for @api.expect and @api.marshal_with.
+        # This should get better once flask-restx moves to something like marshmallow, which
+        # handles marshaling/unmarshaling more symmetrically and in the same object.
+        preprocessors=[unmarshal_frequency],
         description=_("The frequency at which data are updated."),
     )
     frequency_date = fields.DateTimeField(_("Expected frequency date"))

@@ -1,8 +1,210 @@
 # Changelog
 
-## Current (in progress)
+## 14.1.0 (2025-11-25)
 
-- Add snapshot tests for harvesting [#3394](https://github.com/opendatateam/udata/pull/3394)
+- feat(harvest): report duplicate remote ids as an harvesting error ([#3499](https://github.com/opendatateam/udata/pull/3499))
+- fix: logo in mail ([#3535](https://github.com/opendatateam/udata/pull/3535))
+
+
+## 14.0.2 (2025-11-19)
+
+- feat: update translations ([#3532](https://github.com/opendatateam/udata/pull/3532))
+- fix: do not send security mail on demo ([#3530](https://github.com/opendatateam/udata/pull/3530))
+- fix: incorrect description for GET /harvest/job/{ident} ([#3533](https://github.com/opendatateam/udata/pull/3533))
+- fix: restricted datasets reasons translations and definitions ([#3529](https://github.com/opendatateam/udata/pull/3529))
+- fix: schedule two harvester sources with same name ([#3531](https://github.com/opendatateam/udata/pull/3531))
+
+
+## 14.0.1 (2025-11-19)
+
+- fix: date instead of datetime in HarvestMetadata modified_at ([#3526](https://github.com/opendatateam/udata/pull/3526))
+- fix: deleting and purging page's blocs elements (reuses, datasets and dataservices) ([#3524](https://github.com/opendatateam/udata/pull/3524))
+- fix: HARVESTER_BACKENDS settings in changelog
+- refactor: standardization of test clients, CLI runner, mocker… ([#3525](https://github.com/opendatateam/udata/pull/3525))
+
+
+## 14.0.0 (2025-11-17)
+- **refactor!: change entrypoints system ([#3518](https://github.com/opendatateam/udata/pull/3518))**
+  - remove `udata.models`
+  [[#3496](https://github.com/opendatateam/udata/pull/3496)](https://github.com/opendatateam/udata/pull/3496),
+  `udata.metrics`
+  [[#3500](https://github.com/opendatateam/udata/pull/3500)](https://github.com/opendatateam/udata/pull/3500), `udata.apis`,
+  `udata.commands` and `udata.views`
+  [[#3488](https://github.com/opendatateam/udata/pull/3488)](https://github.com/opendatateam/udata/pull/3488) entrypoints
+  - add `udata.i18n` to add new translation directories via plugins
+  - `udata.plugins`
+  [[#3495](https://github.com/opendatateam/udata/pull/3495)](https://github.com/opendatateam/udata/pull/3495) and
+  `udata.tasks` [[#3503](https://github.com/opendatateam/udata/pull/3503)](https://github.com/opendatateam/udata/pull/3503)
+  are always loaded if installed
+  - remove `PLUGINS` setting
+  - add `HARVESTER_BACKENDS` setting to enable harvester backends (use the
+  glob syntax `*` to enable multiple backends starting or ending with a
+  prefix/suffix) [[#3504](https://github.com/opendatateam/udata/pull/3504)](https://github.com/opendatateam/udata/pull/3504)
+- **refactor!: simplify harvesters entrypoint ([#3504](https://github.com/opendatateam/udata/pull/3504))**
+  Working towards removing deprecated `pkg_resources` by removing
+  `entrypoints.py`.
+  
+  - The `udata.harvesters` entrypoints are automaticly loaded (without the
+  need of `PLUGINS` settings)
+  - Need to move the harvesters from `PLUGINS` to `HARVESTER_BACKENDS` to
+  enable them.
+  - Need to add explicit glob with `*`, like `csw*` to enable all backends
+  starting with `csw` (before it was an implicit `startswith`)
+  - Need to add explicit `name` to the backends' classes (before it was
+  the name of the entrypoint)
+  
+  Example of new setting:
+  
+  ```
+  HARVESTER_BACKENDS = [
+    'ckan',
+    'dkan',
+    'dcat',
+    'csw*',
+    'maaf',
+  ]
+  ```
+  
+  - [x] Added `name` to all internal harvesters backends
+  - [x] Removed `actions.list_backends()`, use
+  `backends.get_enabled_backends()` since it's not really an action.
+  - [x] Added `HARVESTER_BACKENDS` setting to replace `PLUGINS` for
+  enabling/disabling harvesters backends
+  - [x] Removed broken `/api/1/harvest/job_status/` endpoint
+- build: try using conventional commit in Crowdin PR ([#3511](https://github.com/opendatateam/udata/pull/3511))
+- chore(harvest): add explicit error message when missing backend ([#3523](https://github.com/opendatateam/udata/pull/3523))
+- feat: add dataservices to reuses ([#3506](https://github.com/opendatateam/udata/pull/3506))
+- feat: add email to user search ([#3507](https://github.com/opendatateam/udata/pull/3507))
+- feat: add reuse filter on dataservices ([#3512](https://github.com/opendatateam/udata/pull/3512))
+- feat: archive and purge csv catalog ([#3509](https://github.com/opendatateam/udata/pull/3509))
+- feat(badge): add HVD and generic update badge job ([#3471](https://github.com/opendatateam/udata/pull/3471))
+- feat(badge): add INSPIRE badge job ([#3492](https://github.com/opendatateam/udata/pull/3492))
+- feat(dataset): if harvested, use the harvested dataset modified_at date ([#3479](https://github.com/opendatateam/udata/pull/3479))
+- feat(datasets): add `access_type` and reasons ([#3425](https://github.com/opendatateam/udata/pull/3425))
+- feat(harvest): add support for all GeoDCAT-AP roles ([#3374](https://github.com/opendatateam/udata/pull/3374))
+- feat: new mails ([#3470](https://github.com/opendatateam/udata/pull/3470))
+- feat: update translations ([#3510](https://github.com/opendatateam/udata/pull/3510))
+- fix: check captcha first before checking for other validations ([#3520](https://github.com/opendatateam/udata/pull/3520))
+- fix: delete user index to recreate it ([#3519](https://github.com/opendatateam/udata/pull/3519))
+- fix: harvest sources periodic task integrity ([#3505](https://github.com/opendatateam/udata/pull/3505))
+- fix: wrong importlib_metadata import ([#3515](https://github.com/opendatateam/udata/pull/3515))
+- New Crowdin updates ([#3498](https://github.com/opendatateam/udata/pull/3498))
+- refactor: remove avatars entrypoint and remove robohash and adorable providers ([#3482](https://github.com/opendatateam/udata/pull/3482))
+- refactor: remove dead i18n code and lang prefixes management ([#3517](https://github.com/opendatateam/udata/pull/3517))
+- refactor: remove metrics entrypoint ([#3500](https://github.com/opendatateam/udata/pull/3500))
+- refactor: remove models entrypoint and simplify migrations core code ([#3496](https://github.com/opendatateam/udata/pull/3496))
+- refactor: remove themes entrypoint ([#3489](https://github.com/opendatateam/udata/pull/3489))
+- refactor: remove unused Jinja hooks and template filters ([#3514](https://github.com/opendatateam/udata/pull/3514))
+- refactor: remove unused terms.md ([#3501](https://github.com/opendatateam/udata/pull/3501))
+- refactor: remove unused territories API ([#3516](https://github.com/opendatateam/udata/pull/3516))
+- refactor: remove views entrypoint ([#3488](https://github.com/opendatateam/udata/pull/3488))
+- refactor: simplify getting udata version ([#3502](https://github.com/opendatateam/udata/pull/3502))
+- refactor: simplify plugins entrypoint ([#3495](https://github.com/opendatateam/udata/pull/3495))
+- refactor: simplify tasks entrypoint ([#3503](https://github.com/opendatateam/udata/pull/3503))
+
+
+## 13.0.0 (2025-10-22)
+- **refactor!: remove VueJS old admin and all assets ([#3422](https://github.com/opendatateam/udata/pull/3422))**
+  - [x] Dossiers frontend : js/, less/, specs/, node_modules/
+  - [x] Configuration NPM/Webpack : package.json, webpack.config.*,
+  karma.conf.js, .eslintrc.yml, .nvmrc, babel.cfg
+  - [x] Assets statiques compilés : udata/static/* (remplacé par dossier
+  vide)
+  - [x] Tâches Python frontend : assets_build, widgets_build,
+  oembed_build, *_watch, jstest
+  - [x] CI/CD : Job assets et dépendances dans .circleci/config.yml
+  
+  ---------
+  
+  Co-authored-by: maudetes <maudet.estelle@gmail.com>
+- **refactor!: remove linkchecker ([#3483](https://github.com/opendatateam/udata/pull/3483))**
+  The goal is to remove the entrypoint system. I don't think we use this
+  linkchecker anymore (it's disabled in our settings), hydra is doing this
+  job now? We maybe need to check the `ResourceMixin@ExtrasField` (I just
+  copy/paste but it could be nice in another PR to add hydra types here?)
+  
+  ---------
+  
+  Co-authored-by: maudetes <maudet.estelle@gmail.com>
+- build: build with uv ([#3485](https://github.com/opendatateam/udata/pull/3485))
+- build: remove unused dependencies ([#3454](https://github.com/opendatateam/udata/pull/3454))
+- feat(catalog): parse filters in rdf catalog ([#3474](https://github.com/opendatateam/udata/pull/3474))
+- feat(INSPIRE): detect INSPIRE datasets and dataservices ([#3473](https://github.com/opendatateam/udata/pull/3473))
+- feat(rss): we add a delay for new content in RSS feed ([#3460](https://github.com/opendatateam/udata/pull/3460))
+- feat: update dev, test, doc and report dependencies ([#3481](https://github.com/opendatateam/udata/pull/3481))
+- feat: upgrade flask-storage to 1.4.0 ([#3468](https://github.com/opendatateam/udata/pull/3468))
+- fix(api): "None is not a valid UpdateFrequency" on dataset update ([#3491](https://github.com/opendatateam/udata/pull/3491))
+- fix(dataservice): unindex archived dataservices ([#3493](https://github.com/opendatateam/udata/pull/3493))
+- fix(rss): escape atom feed content ([#3476](https://github.com/opendatateam/udata/pull/3476))
+- fix(test): add data to pytest norecursedirs ([#3486](https://github.com/opendatateam/udata/pull/3486))
+- fix(tests): add some configuration variable for tests requiring it. ([#3487](https://github.com/opendatateam/udata/pull/3487))
+- New Crowdin updates ([#3462](https://github.com/opendatateam/udata/pull/3462))
+- refactor(mongo): remove flask_mongoengine ([#3467](https://github.com/opendatateam/udata/pull/3467))
+- refactor: remove preview entrypoints ([#3484](https://github.com/opendatateam/udata/pull/3484))
+- refactor: remove unused tox ([#3480](https://github.com/opendatateam/udata/pull/3480))
+- test: simplifications ([#3490](https://github.com/opendatateam/udata/pull/3490))
+
+
+## 12.0.1 (2025-10-13)
+
+- fix(security): confirm email error crashing instead of redirecting ([#3478](https://github.com/opendatateam/udata/pull/3478))
+
+
+## 12.0.0 (2025-10-13)
+- **feat!: bump minimum Python version to 3.11 ([#3463](https://github.com/opendatateam/udata/pull/3463))**
+  Python 3.9 is reaching end of life at the end of october
+  https://devguide.python.org/versions/#versions
+- **feat(security)!: enable SPA type security views (login, register) for cdata  ([#3348](https://github.com/opendatateam/udata/pull/3348))**
+  - Add `SECURITY_SPA_ON_SAME_DOMAIN` to `True` if your frontend is on the
+  same domain as the backend.
+  - Change the redirects URLs in ProConnect:
+  - From https://www.data.gouv.fr/proconnect/auth to
+  https://www.data.gouv.fr/api/1/proconnect/auth
+  - From https://www.data.gouv.fr/proconnect/logout to
+  https://www.data.gouv.fr/api/1/proconnect/logout
+  - Part of https://github.com/datagouv/data.gouv.fr/issues/1717
+  
+  ---------
+  
+  Co-authored-by: maudetes <maudet.estelle@gmail.com>
+- build: use uv ([#3459](https://github.com/opendatateam/udata/pull/3459))
+- ci: do not publish on tags ([#3455](https://github.com/opendatateam/udata/pull/3455))
+- feat: add standalone 404 page ([#3457](https://github.com/opendatateam/udata/pull/3457))
+- feat(harvest): add missing EU update frequencies ([#3343](https://github.com/opendatateam/udata/pull/3343))
+- feat(site): add version to response ([#3458](https://github.com/opendatateam/udata/pull/3458))
+- feat(topic): improve perf in dataservice topic filter ([#3465](https://github.com/opendatateam/udata/pull/3465))
+- fix(topic): protect element activity on Topic deletion ([#3461](https://github.com/opendatateam/udata/pull/3461))
+- refactor(datasets): remove frequency reminder task and mail (never used) ([#3472](https://github.com/opendatateam/udata/pull/3472))
+- refactor(tags): move tags.csv to /api/1/site/tags.csv ([#3456](https://github.com/opendatateam/udata/pull/3456))
+
+
+## 11.1.1 (2025-10-02)
+
+- feat(git): new tag_version.sh script to replace Bumpr ([#3451](https://github.com/opendatateam/udata/pull/3451))
+- fix(topics): delete TopicElements when Topic is deleted ([#3452](https://github.com/opendatateam/udata/pull/3452))
+- Update to version 11.1.1.dev for next development cycle
+
+
+## 11.1.0 (2025-09-30)
+
+- chore: migrate to pyproject.toml, replace `CIRCLE_TAG` by `setuptools_scm` to compute the correct version automatically [#3413](https://github.com/opendatateam/udata/pull/3413) [#3434](https://github.com/opendatateam/udata/pull/3434) [#3435](https://github.com/opendatateam/udata/pull/3435) [#3437](https://github.com/opendatateam/udata/pull/3437) [#3438](https://github.com/opendatateam/udata/pull/3438/) [3447](https://github.com/opendatateam/udata/pull/3447)
+- fix(harvest): refactor dates handling [#3352](https://github.com/opendatateam/udata/pull/3352)
+- feat(harvest): emit harvest activities. Set `HARVEST_ACTIVITY_USER_ID` to an existing user account to activate it [#3412](https://github.com/opendatateam/udata/pull/3412)
+- feat(activity): ignore list reordering in changed fields detection [#3448](https://github.com/opendatateam/udata/pull/3448)
+- feat(dataservice): Keep existing attached datasets to a dataservice at harvest time [#3449](https://github.com/opendatateam/udata/pull/3449)
+- feat(badges): add new badges [#3415](https://github.com/opendatateam/udata/pull/3415)
+- fix(badges): remove unused BadgesField [#3420](https://github.com/opendatateam/udata/pull/3420)
+- chore(mail): simplify getting mail connection (dummy or real) condition [#3410](https://github.com/opendatateam/udata/pull/3410)
+- fix(topic): absolute Topic.uri [#3436](https://github.com/opendatateam/udata/pull/3436)
+- feat(topics): search by elements content [#3443](https://github.com/opendatateam/udata/pull/3443)
+- feat(topic): add elements activities [#3439](https://github.com/opendatateam/udata/pull/3439)
+- feat(topics): serialize elements in topic_elements_create response [#3446](https://github.com/opendatateam/udata/pull/3446)
+- feat(topic): add Dataservice to supported elements [#3444](https://github.com/opendatateam/udata/pull/3444)
+- feat(api): refactor `@function_field` and `@field` to provide better doc and type support [#3441](https://github.com/opendatateam/udata/pull/3441/)
+
+## 11.0.1 (2025-09-15)
+
+- fix: PUT topic without elements [#3424](https://github.com/opendatateam/udata/pull/3424)
 
 ## 11.0.0 (2025-09-12)
 
@@ -801,6 +1003,7 @@ Search refactor [#2680](https://github.com/opendatateam/udata/pull/2680)
 
 - Fix fields empty value in admin form to allow for unsetting fields [#2691](https://github.com/opendatateam/udata/pull/2691)
 - :warning: Add a new required topic string field on reuses. The associated migration set default topic to `others` [#2689](https://github.com/opendatateam/udata/pull/2689)
+- Use [uv](https://docs.astral.sh/uv/) as package manager and lockfile [#3459](https://github.com/opendatateam/udata/pull/3459)
 
 ## 3.3.0 (2021-12-10)
 

@@ -7,6 +7,7 @@ from udata.core.storages import tmp
 from udata.forms import Form
 from udata.forms.fields import ImageField
 from udata.mongo import db
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import data_path
 
 log = logging.getLogger(__name__)
@@ -24,8 +25,7 @@ class PostData(dict):
         return value
 
 
-@pytest.mark.usefixtures("clean_db")
-class ImageFieldTest:
+class ImageFieldTest(PytestOnlyDBTestCase):
     class D(db.Document):
         image = db.ImageField(fs=storage)
         thumbnail = db.ImageField(fs=storage, thumbnails=SIZES)
