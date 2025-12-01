@@ -678,7 +678,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
             dataset.harvest.uri
             != "https://sig.oreme.org/geonetwork/srv/resources/datasets/0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2"
         )
-        assert dataset.harvest.uri == None
+        assert dataset.harvest.uri is None
 
         assert dataset.harvest.remote_url is None  # the uri validation failed
         assert dataset.description.startswith("Data of type chemistry")
