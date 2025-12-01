@@ -275,10 +275,21 @@ def resource_to_rdf(
     return r
 
 
+def is_valid_rdf_uri(uri: str) -> bool:
+    """Check if a URI is valid for RDF serialization (no spaces or invalid chars)"""
+    # Spaces and other whitespace are not allowed in URIs
+    if not uri:
+        return False
+    return " " not in uri and "\t" not in uri and "\n" not in uri
+
+
 def dataset_to_graph_id(dataset: Dataset) -> URIRef | BNode:
     if dataset.harvest and dataset.harvest.uri:
-        return URIRef(dataset.harvest.uri)
-    elif dataset.id:
+        if is_valid_rdf_uri(dataset.harvest.uri):
+            return URIRef(dataset.harvest.uri)
+        else:
+            log.warning(f"Invalid harvest URI for dataset {dataset.id}: {dataset.harvest.uri}")
+    if dataset.id:
         return URIRef(dataset.url_for(_useId=True))
     else:
         # Should not happen in production. Some test only
@@ -824,6 +835,11 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
 
     identifier = rdf_value(d, DCT.identifier)
     uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
+
+    # Validate URI before storing - invalid URIs will break RDF serialization
+    if uri and not is_valid_rdf_uri(uri):
+        log.warning(f"Invalid URI in harvested dataset, ignoring: {uri}")
+        uri = None
 
     remote_url = remote_url_from_rdf(d, graph, remote_url_prefix=remote_url_prefix)
 

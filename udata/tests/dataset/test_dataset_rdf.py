@@ -25,9 +25,11 @@ from udata.core.dataset.rdf import (
     EUFREQ_TERM_TO_UDATA,
     FREQ_TERM_TO_UDATA,
     dataset_from_rdf,
+    dataset_to_graph_id,
     dataset_to_rdf,
     frequency_from_rdf,
     frequency_to_rdf,
+    is_valid_rdf_uri,
     licenses_from_rdf,
     resource_from_rdf,
     resource_to_rdf,
@@ -369,6 +371,41 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         )
         assert dataservice_as_distribution.value(DCAT.accessService).identifier == dataservice_uri
 
+    def test_is_valid_rdf_uri(self):
+        """Test URI validation for RDF serialization"""
+        assert is_valid_rdf_uri("https://example.com/dataset/123") is True
+        assert is_valid_rdf_uri("https://example.com/path?query=1") is True
+        # URIs with spaces are invalid
+        assert is_valid_rdf_uri("https://example.com/invalid uri") is False
+        assert is_valid_rdf_uri("https://example.com/path with space") is False
+        # URIs with tabs or newlines are invalid
+        assert is_valid_rdf_uri("https://example.com/\ttab") is False
+        assert is_valid_rdf_uri("https://example.com/\nnewline") is False
+        # Empty or None URIs are invalid
+        assert is_valid_rdf_uri("") is False
+        assert is_valid_rdf_uri(None) is False
+
+    def test_dataset_to_graph_id_with_invalid_harvest_uri(self):
+        """Test that invalid harvest URIs fallback to local URL"""
+        # URI with space should be invalid and fallback to local URL
+        invalid_uri = "https://example.com/dataset/123 invalid"
+        dataset = DatasetFactory(harvest=HarvestDatasetMetadata(uri=invalid_uri))
+        graph_id = dataset_to_graph_id(dataset)
+
+        # Should fallback to local URL, not the invalid harvest URI
+        assert isinstance(graph_id, URIRef)
+        assert str(graph_id) != invalid_uri
+        assert f"datasets/{dataset.id}" in str(graph_id)
+
+    def test_dataset_to_graph_id_with_valid_harvest_uri(self):
+        """Test that valid harvest URIs are used"""
+        valid_uri = "https://example.com/dataset/123"
+        dataset = DatasetFactory(harvest=HarvestDatasetMetadata(uri=valid_uri))
+        graph_id = dataset_to_graph_id(dataset)
+
+        assert isinstance(graph_id, URIRef)
+        assert str(graph_id) == valid_uri
+
 
 class RdfToDatasetTest(PytestOnlyDBTestCase):
     def test_minimal(self):
@@ -484,6 +521,24 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
 
         assert dataset.harvest.dct_identifier == id
         assert dataset.harvest.uri == uri
+
+    def test_invalid_uri_ignored_during_harvest(self):
+        """Invalid URIs (with spaces) should be ignored during harvest"""
+        invalid_uri = "https://test.org/dataset with space"
+        node = URIRef(invalid_uri)
+        g = Graph()
+
+        title = faker.sentence()
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.title, Literal(title)))
+
+        dataset = dataset_from_rdf(g)
+        dataset.validate()
+
+        assert isinstance(dataset, Dataset)
+        assert dataset.title == title
+        # Invalid URI should be ignored
+        assert dataset.harvest.uri is None
 
     def test_html_description(self):
         node = BNode()
