@@ -672,10 +672,14 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert dataset.harvest.issued_at.date() == date(2004, 11, 3)
         assert dataset.harvest.created_at is None
         assert dataset.harvest.modified_at is None
+
+        # The URI contains a space so we shouldn't import it since it's not a valid RDF
         assert (
             dataset.harvest.uri
-            == "https://sig.oreme.org/geonetwork/srv/resources/datasets/0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2"
-        )  # noqa
+            != "https://sig.oreme.org/geonetwork/srv/resources/datasets/0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2"
+        )
+        assert dataset.harvest.uri == None
+
         assert dataset.harvest.remote_url is None  # the uri validation failed
         assert dataset.description.startswith("Data of type chemistry")
         assert dataset.temporal_coverage is not None
