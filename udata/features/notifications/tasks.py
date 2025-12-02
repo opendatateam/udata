@@ -22,4 +22,4 @@ def delete_expired_notifications(self):
     for notification in notifications_to_delete:
         notification.delete()
 
-    logging.info(f"Deleted {count} expired notifications")
+    log.info(f"Deleted {count} expired notifications")
