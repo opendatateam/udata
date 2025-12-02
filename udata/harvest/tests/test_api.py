@@ -476,8 +476,8 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         assert404(response)
 
     def test_source_preview(self):
-        self.login()
-        source = HarvestSourceFactory(backend="factory")
+        user = self.login()
+        source = HarvestSourceFactory(backend="factory", owner=user)
 
         url = url_for("api.preview_harvest_source", source=source)
         response = self.get(url)
@@ -688,3 +688,118 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         # Make sure remote_url is exposed if exists
         assert response.json["items"][1]["remote_url"] is None
         assert response.json["items"][2]["remote_url"] == "https://my.remote.example.com"
+
+    def test_get_source_permissions_as_anonymous(self):
+        """It should return all permissions as False for anonymous users"""
+        source = HarvestSourceFactory()
+
+        url = url_for("api.harvest_source", source=source)
+        response = self.get(url)
+        assert200(response)
+
+        assert "permissions" in response.json
+        permissions = response.json["permissions"]
+        assert permissions["edit"] is False
+        assert permissions["delete"] is False
+        assert permissions["run"] is False
+        assert permissions["preview"] is False
+        assert permissions["validate"] is False
+        assert permissions["schedule"] is False
+
+    def test_get_source_permissions_as_owner(self):
+        """It should return owner permissions as True for source owner"""
+        user = self.login()
+        source = HarvestSourceFactory(owner=user)
+
+        url = url_for("api.harvest_source", source=source)
+        response = self.get(url)
+        assert200(response)
+
+        permissions = response.json["permissions"]
+        assert permissions["edit"] is True
+        assert permissions["delete"] is True
+        assert permissions["run"] is True
+        assert permissions["preview"] is True
+        assert permissions["validate"] is False
+        assert permissions["schedule"] is False
+
+    def test_get_source_permissions_as_org_admin(self):
+        """It should return owner permissions as True for org admins"""
+        user = self.login()
+        member = Member(user=user, role="admin")
+        org = OrganizationFactory(members=[member])
+        source = HarvestSourceFactory(organization=org)
+
+        url = url_for("api.harvest_source", source=source)
+        response = self.get(url)
+        assert200(response)
+
+        permissions = response.json["permissions"]
+        assert permissions["edit"] is True
+        assert permissions["delete"] is True
+        assert permissions["run"] is True
+        assert permissions["preview"] is True
+        assert permissions["validate"] is False
+        assert permissions["schedule"] is False
+
+    def test_get_source_permissions_as_org_editor(self):
+        """It should return owner permissions as True for org editors"""
+        user = self.login()
+        member = Member(user=user, role="editor")
+        org = OrganizationFactory(members=[member])
+        source = HarvestSourceFactory(organization=org)
+
+        url = url_for("api.harvest_source", source=source)
+        response = self.get(url)
+        assert200(response)
+
+        permissions = response.json["permissions"]
+        assert permissions["edit"] is True
+        assert permissions["delete"] is True
+        assert permissions["run"] is True
+        assert permissions["preview"] is True
+        assert permissions["validate"] is False
+        assert permissions["schedule"] is False
+
+    def test_get_source_permissions_as_superadmin(self):
+        """It should return all permissions as True for admin users"""
+        self.login(AdminFactory())
+        source = HarvestSourceFactory()
+
+        url = url_for("api.harvest_source", source=source)
+        response = self.get(url)
+        assert200(response)
+
+        permissions = response.json["permissions"]
+        assert permissions["edit"] is True
+        assert permissions["delete"] is True
+        assert permissions["run"] is True
+        assert permissions["preview"] is True
+        assert permissions["validate"] is True
+        assert permissions["schedule"] is True
+
+    def test_get_source_permissions_as_other_user(self):
+        """It should return all permissions as False for non-owner users"""
+        self.login()
+        source = HarvestSourceFactory()  # owned by another user
+
+        url = url_for("api.harvest_source", source=source)
+        response = self.get(url)
+        assert200(response)
+
+        permissions = response.json["permissions"]
+        assert permissions["edit"] is False
+        assert permissions["delete"] is False
+        assert permissions["run"] is False
+        assert permissions["preview"] is False
+        assert permissions["validate"] is False
+        assert permissions["schedule"] is False
+
+    def test_preview_source_require_permission(self):
+        """It should not allow preview if not the owner"""
+        self.login()
+        source = HarvestSourceFactory()  # owned by another user
+
+        url = url_for("api.preview_harvest_source", source=source)
+        response = self.get(url)
+        assert403(response)
