@@ -454,7 +454,7 @@ The padding (in percent) used by the internal provider
 
 ## Notifications configuration
 
-Theses settings allow you to customize the notification feature.
+These settings allow you to customize the notification feature.
 
 ### DAYS_AFTER_NOTIFICATION_EXPIRED
 
