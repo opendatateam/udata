@@ -26,9 +26,6 @@ def render_security_template(template_name_or_list, **kwargs):
     return render_template(template_name_or_list, **kwargs)
 
 
-security = Security()
-
-
 class Permission(BasePermission):
     def __init__(self, *needs):
         """Let administrator bypass all permissions"""
@@ -86,8 +83,7 @@ def init_app(app):
     send_mail = app.config.get("SEND_MAIL", not debug)
     mail_util_cls = None if send_mail else NoopMailUtil
 
-    security.init_app(
-        app,
+    security = Security(
         datastore,
         register_blueprint=False,
         render_template=render_security_template,
@@ -99,6 +95,8 @@ def init_app(app):
         password_util_cls=UdataPasswordUtil,
         mail_util_cls=mail_util_cls,
     )
+
+    security.init_app(app, datastore, register_blueprint=False)
 
     security_bp = create_security_blueprint(app, app.extensions["security"], "security_blueprint")
 
