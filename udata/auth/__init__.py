@@ -81,7 +81,7 @@ def init_app(app):
     # Same logic as in our own mail system :DisableMail
     debug = app.config.get("DEBUG", False)
     send_mail = app.config.get("SEND_MAIL", not debug)
-    mail_util_cls = None if send_mail else NoopMailUtil
+    mail_util_cls = mail_util.MailUtil if send_mail else NoopMailUtil
 
     security = Security(
         datastore,
