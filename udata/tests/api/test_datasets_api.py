@@ -724,6 +724,19 @@ class DatasetAPITest(APITestCase):
         dataset = Dataset.objects.first()
         self.assertEqual(dataset.spatial.geom, SAMPLE_GEOM)
 
+    def test_dataset_api_create_with_invalid_geom_coordinates(self):
+        """It should return 400 with invalid GeoJSON coordinates, not 500"""
+        self.login()
+        data = DatasetFactory.as_dict()
+        # Invalid GeoJSON: {} in coordinates instead of numbers (Sentry issue)
+        data["spatial"] = {"geom": {"type": "Point", "coordinates": {}}}
+        response = self.post(url_for("api.datasets"), data)
+        self.assert400(response)
+        self.assertEqual(Dataset.objects.count(), 0)
+        # Verify error is properly captured in form validation errors
+        self.assertIn("errors", response.json)
+        self.assertIn("spatial", response.json["errors"])
+
     def test_dataset_api_create_with_legacy_frequency(self):
         """It should create a dataset from the API with a legacy frequency"""
         self.login()
