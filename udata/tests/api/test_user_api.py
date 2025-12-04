@@ -382,7 +382,7 @@ class UserAPITest(APITestCase):
             response = self.delete(url_for("api.user", user=user_to_delete))
             self.assertEqual(list(storages.avatars.list_files()), [])
             self.assert204(response)
-            self.assertEquals(len(mails), 1)
+            self.assertEqual(len(mails), 1)
 
         user_to_delete.reload()
         response = self.delete(url_for("api.user", user=user_to_delete))
