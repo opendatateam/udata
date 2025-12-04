@@ -1847,6 +1847,18 @@ class DatasetResourceAPITest(APITestCase):
             f"Resource ids must match existing ones in dataset, ie: {set(str(r.id) for r in self.dataset.resources)}",
         )
 
+    def test_invalid_reorder_dict_without_id(self):
+        """It should return 400 when dict in resources list has no 'id' key"""
+        self.dataset.resources = ResourceFactory.build_batch(3)
+        self.dataset.save()
+
+        # Dict without 'id' key should fail gracefully, not raise KeyError
+        wrong_order_dict_without_id = [{"title": "foo"}, {"title": "bar"}, {"title": "baz"}]
+        response = self.put(
+            url_for("api.resources", dataset=self.dataset), wrong_order_dict_without_id
+        )
+        self.assertStatus(response, 400)
+
     def test_update_local(self):
         resource = ResourceFactory()
         self.dataset.resources.append(resource)
