@@ -1,5 +1,18 @@
 # Changelog
 
+## 14.2.0 (2025-12-02)
+
+- feat(harvest): add harvest detach actions and commands ([#3537](https://github.com/opendatateam/udata/pull/3537))
+- feat(harvest): expose remote_url at the item level ([#3538](https://github.com/opendatateam/udata/pull/3538))
+- feat: upgrade dependencies ([#3513](https://github.com/opendatateam/udata/pull/3513))
+- feat: upgrade flask from 2.1 to 2.3 ([#3522](https://github.com/opendatateam/udata/pull/3522))
+- feat: upgrade flask from 2.3 to 3.1 ([#3534](https://github.com/opendatateam/udata/pull/3534))
+- fix: do not send harvest connection errors to Sentry ([#3543](https://github.com/opendatateam/udata/pull/3543))
+- fix: no `display_name` for DKAN backend ([#3545](https://github.com/opendatateam/udata/pull/3545))
+- fix: timezone aware datetime in harvesting `modified_at` ([#3544](https://github.com/opendatateam/udata/pull/3544))
+- fix: validating dict in boolean harvest filter ([#3542](https://github.com/opendatateam/udata/pull/3542))
+
+
 ## 14.1.0 (2025-11-25)
 
 - feat(harvest): report duplicate remote ids as an harvesting error ([#3499](https://github.com/opendatateam/udata/pull/3499))

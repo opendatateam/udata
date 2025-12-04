@@ -64,8 +64,8 @@ class GeomField(Field):
                     self.data = geojson.GeoJSON.to_instance(value)
             except Exception:
                 self.data = None
-                log.exception("Unable to parse GeoJSON")
-                raise ValueError(self.gettext("Not a valid GeoJSON"))
+                log.warning(f"Unable to parse GeoJSON: {value}")
+                raise validators.ValidationError(self.gettext("Not a valid GeoJSON"))
 
     def pre_validate(self, form):
         if self.data:
