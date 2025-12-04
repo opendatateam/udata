@@ -375,15 +375,18 @@ class DatasetToRdfTest(PytestOnlyAPITestCase):
         """Test URI validation for RDF serialization"""
         assert is_valid_rdf_uri("https://example.com/dataset/123") is True
         assert is_valid_rdf_uri("https://example.com/path?query=1") is True
-        # URIs with spaces are invalid
-        assert is_valid_rdf_uri("https://example.com/invalid uri") is False
-        assert is_valid_rdf_uri("https://example.com/path with space") is False
-        # URIs with tabs or newlines are invalid
-        assert is_valid_rdf_uri("https://example.com/\ttab") is False
-        assert is_valid_rdf_uri("https://example.com/\nnewline") is False
         # Empty or None URIs are invalid
         assert is_valid_rdf_uri("") is False
         assert is_valid_rdf_uri(None) is False
+        # URIs with RDFLib invalid chars: <>" {}|\^`
+        assert is_valid_rdf_uri("https://example.com/invalid uri") is False
+        assert is_valid_rdf_uri("https://example.com/?param={value}") is False
+        assert is_valid_rdf_uri("https://example.com/<path>") is False
+        assert is_valid_rdf_uri('https://example.com/"quoted"') is False
+        assert is_valid_rdf_uri("https://example.com/|pipe") is False
+        assert is_valid_rdf_uri("https://example.com/\\backslash") is False
+        assert is_valid_rdf_uri("https://example.com/^caret") is False
+        assert is_valid_rdf_uri("https://example.com/`backtick") is False
 
     def test_dataset_to_graph_id_with_invalid_harvest_uri(self):
         """Test that invalid harvest URIs fallback to local URL"""

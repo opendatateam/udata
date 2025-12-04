@@ -276,11 +276,17 @@ def resource_to_rdf(
 
 
 def is_valid_rdf_uri(uri: str) -> bool:
-    """Check if a URI is valid for RDF serialization (no spaces or invalid chars)"""
-    # Spaces and other whitespace are not allowed in URIs
+    """Check if a URI is valid for RDF serialization.
+
+    Uses RDFLib's own validation by attempting to serialize the URI.
+    """
     if not uri:
         return False
-    return " " not in uri and "\t" not in uri and "\n" not in uri
+    try:
+        URIRef(uri).n3()
+        return True
+    except Exception:
+        return False
 
 
 def dataset_to_graph_id(dataset: Dataset) -> URIRef | BNode:
