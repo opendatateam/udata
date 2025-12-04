@@ -88,7 +88,6 @@ def init_app(app):
         register_blueprint=False,
         render_template=render_security_template,
         login_form=ExtendedLoginForm,
-        confirm_register_form=ExtendedRegisterForm,
         register_form=ExtendedRegisterForm,
         reset_password_form=ExtendedResetPasswordForm,
         forgot_password_form=ExtendedForgotPasswordForm,

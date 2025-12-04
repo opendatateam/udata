@@ -8,7 +8,7 @@ from flask_security.forms import (
     ForgotPasswordForm,
     Form,
     LoginForm,
-    RegisterForm,
+    RegisterFormV2,
     ResetPasswordForm,
 )
 
@@ -31,7 +31,7 @@ class WithCaptcha:
         return False
 
 
-class ExtendedRegisterForm(WithCaptcha, RegisterForm):
+class ExtendedRegisterForm(WithCaptcha, RegisterFormV2):
     first_name = fields.StringField(
         _("First name"),
         [
