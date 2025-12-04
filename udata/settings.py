@@ -479,6 +479,11 @@ class Defaults(object):
     # Padding (in percent) used by the internal provider
     AVATAR_INTERNAL_PADDING = 10
 
+    # Notification settings
+    ###########################################################################
+    # Notifications are deleted after being handled for 90 days
+    DAYS_AFTER_NOTIFICATION_EXPIRED = 90
+
     # Post settings
     ###########################################################################
     # Discussions on posts are disabled by default
