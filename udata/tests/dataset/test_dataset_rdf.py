@@ -1380,11 +1380,13 @@ class DatasetRdfViewsTest(PytestOnlyAPITestCase):
         """Invalid URIs (with spaces or curly brackets) shouldn't make rdf export fail in any format"""
         invalid_uri_with_quote = 'https://test.org/dataset_with"quote"'
         invalid_uri_with_curly_bracket = 'http://opendata-sig.saintdenis.re/datasets/identifiant.kml?outSR={"latestWkid":2975,"wkid":2975}'
+        invalid_uri_with_space = "https://catalogue.opendata-ligair.fr/geonetwork/srv/60678572-36e5-4e78-9af3-48f726670dfd fr-modelisation-sirane-vacarm_no2"
         dataset = DatasetFactory(
             resources=[
                 ResourceFactory(url=invalid_uri_with_quote),
                 ResourceFactory(url=invalid_uri_with_curly_bracket),
-            ]
+            ],
+            harvest=HarvestDatasetMetadata(uri=invalid_uri_with_space),
         )
 
         url = url_for("api.dataset_rdf_format", dataset=dataset, _format=fmt)
@@ -1404,11 +1406,13 @@ class DatasetRdfViewsTest(PytestOnlyAPITestCase):
         """Invalid URIs (with spaces or curly brackets) should be escaped in N3/turtle formats"""
         invalid_uri_with_quote = 'https://test.org/dataset_with"quote"'
         invalid_uri_with_curly_bracket = 'http://opendata-sig.saintdenis.re/datasets/identifiant.kml?outSR={"latestWkid":2975,"wkid":2975}'
+        invalid_uri_with_space = "https://catalogue.opendata-ligair.fr/geonetwork/srv/60678572-36e5-4e78-9af3-48f726670dfd fr-modelisation-sirane-vacarm_no2"
         dataset = DatasetFactory(
             resources=[
                 ResourceFactory(url=invalid_uri_with_quote),
                 ResourceFactory(url=invalid_uri_with_curly_bracket),
-            ]
+            ],
+            harvest=HarvestDatasetMetadata(uri=invalid_uri_with_space),
         )
 
         url = url_for("api.dataset_rdf_format", dataset=dataset, _format=fmt)
@@ -1417,6 +1421,10 @@ class DatasetRdfViewsTest(PytestOnlyAPITestCase):
         assert "https://test.org/dataset_with%22quote%22" in response.text
         assert (
             "http://opendata-sig.saintdenis.re/datasets/identifiant.kml?outSR=%7B%22latestWkid%22:2975,%22wkid%22:2975%7D"
+            in response.text
+        )
+        assert (
+            "https://catalogue.opendata-ligair.fr/geonetwork/srv/60678572-36e5-4e78-9af3-48f726670dfd%20fr-modelisation-sirane-vacarm_no2"
             in response.text
         )
 

@@ -578,10 +578,12 @@ def escape_uri_in_graph(graph: Graph) -> Graph:
     escaped_graph = Graph()
     for s, p, o in graph:
         try:
-            if isinstance(o, URIRef):
-                if not _is_valid_uri(str(o)):
-                    encoded_uri = quote(str(o), safe=":/?#[]@!$&'()*+,;=")
-                    o = URIRef(encoded_uri)
+            if isinstance(s, URIRef) and not _is_valid_uri(str(s)):
+                encoded_uri = quote(str(s), safe=":/?#[]@!$&'()*+,;=")
+                s = URIRef(encoded_uri)
+            if isinstance(o, URIRef) and not _is_valid_uri(str(o)):
+                encoded_uri = quote(str(o), safe=":/?#[]@!$&'()*+,;=")
+                o = URIRef(encoded_uri)
             escaped_graph.add((s, p, o))
         except Exception as e:
             log.exception(f"Failing to escape uri on triplet {s} {p} {o} : {e}")
