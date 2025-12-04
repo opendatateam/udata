@@ -162,7 +162,9 @@ done <<< "$COMMIT_HASHES"
 # Sort breaking changes (sort by first line only, keep blocks together)
 BREAKING_CHANGES=""
 if [ -n "$BREAKING_CHANGES_RAW" ]; then
-    BREAKING_CHANGES=$(echo "$BREAKING_CHANGES_RAW" | awk -v delim="$COMMIT_DELIMITER" '
+    # Use gawk if available (required for asort function), fallback to awk
+    AWK_CMD=$(command -v gawk || command -v awk)
+    BREAKING_CHANGES=$(echo "$BREAKING_CHANGES_RAW" | $AWK_CMD -v delim="$COMMIT_DELIMITER" '
         BEGIN { RS=delim"\n"; ORS="" }
         NF { commits[NR] = $0; keys[NR] = $0; sub(/\n.*/, "", keys[NR]) }
         END {
