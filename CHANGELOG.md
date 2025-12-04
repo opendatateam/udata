@@ -69,7 +69,7 @@
 - **refactor!: simplify harvesters entrypoint ([#3504](https://github.com/opendatateam/udata/pull/3504))**
   Working towards removing deprecated `pkg_resources` by removing
   `entrypoints.py`.
-  
+
   - The `udata.harvesters` entrypoints are automaticly loaded (without the
   need of `PLUGINS` settings)
   - Need to move the harvesters from `PLUGINS` to `HARVESTER_BACKENDS` to
@@ -78,9 +78,9 @@
   starting with `csw` (before it was an implicit `startswith`)
   - Need to add explicit `name` to the backends' classes (before it was
   the name of the entrypoint)
-  
+
   Example of new setting:
-  
+
   ```
   HARVESTER_BACKENDS = [
     'ckan',
@@ -90,7 +90,7 @@
     'maaf',
   ]
   ```
-  
+
   - [x] Added `name` to all internal harvesters backends
   - [x] Removed `actions.list_backends()`, use
   `backends.get_enabled_backends()` since it's not really an action.
@@ -139,18 +139,18 @@
   - [x] Tâches Python frontend : assets_build, widgets_build,
   oembed_build, *_watch, jstest
   - [x] CI/CD : Job assets et dépendances dans .circleci/config.yml
-  
+
   ---------
-  
+
   Co-authored-by: maudetes <maudet.estelle@gmail.com>
 - **refactor!: remove linkchecker ([#3483](https://github.com/opendatateam/udata/pull/3483))**
   The goal is to remove the entrypoint system. I don't think we use this
   linkchecker anymore (it's disabled in our settings), hydra is doing this
   job now? We maybe need to check the `ResourceMixin@ExtrasField` (I just
   copy/paste but it could be nice in another PR to add hydra types here?)
-  
+
   ---------
-  
+
   Co-authored-by: maudetes <maudet.estelle@gmail.com>
 - build: build with uv ([#3485](https://github.com/opendatateam/udata/pull/3485))
 - build: remove unused dependencies ([#3454](https://github.com/opendatateam/udata/pull/3454))
@@ -189,9 +189,9 @@
   - From https://www.data.gouv.fr/proconnect/logout to
   https://www.data.gouv.fr/api/1/proconnect/logout
   - Part of https://github.com/datagouv/data.gouv.fr/issues/1717
-  
+
   ---------
-  
+
   Co-authored-by: maudetes <maudet.estelle@gmail.com>
 - build: use uv ([#3459](https://github.com/opendatateam/udata/pull/3459))
 - ci: do not publish on tags ([#3455](https://github.com/opendatateam/udata/pull/3455))
@@ -1065,7 +1065,7 @@ Search refactor [#2680](https://github.com/opendatateam/udata/pull/2680)
 
 ## 3.1.0 (2021-08-31)
 
-- :warning: Use pip-tools for requirements management [#2642](https://github.com/opendatateam/udata/pull/2642)[#2650](https://github.com/opendatateam/udata/pull/2650)[#2651](https://github.com/opendatateam/udata/pull/2651). Please [read the doc](https://github.com/opendatateam/udata/blob/master/docs/development-environment.md#python-and-virtual-environment) if you are a udata developer.
+- :warning: Use pip-tools for requirements management [#2642](https://github.com/opendatateam/udata/pull/2642)[#2650](https://github.com/opendatateam/udata/pull/2650)[#2651](https://github.com/opendatateam/udata/pull/2651). Please [read the doc](https://github.com/opendatateam/udata/blob/main/docs/development-environment.md#python-and-virtual-environment) if you are a udata developer.
 - :warning: Check db integrity and apply temporary and permanent fixes [#2644](https://github.com/opendatateam/udata/pull/2644) :warning: the associated migrations can take a long time to run.
 - :warning: Upgrade to Flask-1.1.4 [#2639](https://github.com/opendatateam/udata/pull/2639)
 - Safeguard `User.delete()` [#2646](https://github.com/opendatateam/udata/pull/2646)
@@ -1099,7 +1099,7 @@ Search refactor [#2680](https://github.com/opendatateam/udata/pull/2680)
 
 ## 3.0.0 (2021-07-07)
 
-- :warning: **breaking change**: most of the theme/templates logic has been moved to https://github.com/etalab/udata-gouvfr. `udata` no longer contains a default theme. In the 3.x series, we hope it will be usable as a "headless" open data platform, but for now you probably need to plug your own theme or use udata-gouvfr. [More info about this change here](https://github.com/opendatateam/udata/blob/master/docs/roadmap/udata-3.md#the-road-to-udata3). [#2522](https://github.com/opendatateam/udata/pull/2522)
+- :warning: **breaking change**: most of the theme/templates logic has been moved to https://github.com/etalab/udata-gouvfr. `udata` no longer contains a default theme. In the 3.x series, we hope it will be usable as a "headless" open data platform, but for now you probably need to plug your own theme or use udata-gouvfr. [More info about this change here](https://github.com/opendatateam/udata/blob/main/docs/roadmap/udata-3.md#the-road-to-udata3). [#2522](https://github.com/opendatateam/udata/pull/2522)
 - Migrate from raven to sentry-sdk [#2620](https://github.com/opendatateam/udata/pull/2620)
 - Add a UdataCleaner class to use udata's markdown configuration on SafeMarkup as well [#2619](https://github.com/opendatateam/udata/pull/2619)
 - Fix schema name display in resource modal [#2617](https://github.com/opendatateam/udata/pull/2617)
@@ -1391,7 +1391,7 @@ Search refactor [#2680](https://github.com/opendatateam/udata/pull/2680)
 - Reduce following to staring [#2192](https://github.com/opendatateam/udata/pull/2192/files)
 - Simplify display of spatial coverage in search results [#2192](https://github.com/opendatateam/udata/pull/2192/files)
 - Add cache for organization and topic display pages [#2194](https://github.com/opendatateam/udata/pull/2194)
-- Dataset of datasets: id as ref instead of slug [#2195](https://github.com/opendatateam/udata/pull/2195) :warning: this introduces some settings changes, cf [documentation for EXPORT_CSV](https://github.com/opendatateam/udata/blob/master/docs/adapting-settings.md).
+- Dataset of datasets: id as ref instead of slug [#2195](https://github.com/opendatateam/udata/pull/2195) :warning: this introduces some settings changes, cf [documentation for EXPORT_CSV](https://github.com/opendatateam/udata/blob/main/docs/adapting-settings.md).
 - Add meta og:type: make twitter cards work [#2196](https://github.com/opendatateam/udata/pull/2196)
 - Fix UI responsiveness [#2199](https://github.com/opendatateam/udata/pull/2199)
 - Remove social media sharing feature [#2200](https://github.com/opendatateam/udata/pull/2200)

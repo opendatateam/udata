@@ -10,7 +10,7 @@ After that you'll be able to reach the crowding pages for the project and intera
 - [udata-front crowdin page][crowdin-udata-front]
 
 !!! warning
-    We only translate strings from the `master` and maintenance branches of the repository.
+    We only translate strings from the `main` and maintenance branches of the repository.
     Do not push languages on any other branch because merging translations is incredibly painful.
 
 
