@@ -173,6 +173,21 @@ class HarvestSource(Owned, db.Document):
     def __str__(self):
         return self.name or ""
 
+    @property
+    def permissions(self):
+        from udata.auth import admin_permission
+
+        from .permissions import HarvestSourceAdminPermission, HarvestSourcePermission
+
+        return {
+            "edit": HarvestSourceAdminPermission(self),
+            "delete": HarvestSourceAdminPermission(self),
+            "run": HarvestSourceAdminPermission(self),
+            "preview": HarvestSourcePermission(self),
+            "validate": admin_permission,
+            "schedule": admin_permission,
+        }
+
 
 class HarvestJob(db.Document):
     """Keep track of harvestings"""
