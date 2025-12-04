@@ -1,5 +1,18 @@
 # Changelog
 
+## 14.3.0 (2025-12-04)
+
+- feat: add new notification system ([#3508](https://github.com/opendatateam/udata/pull/3508))
+- feat: dismiss reports ([#3539](https://github.com/opendatateam/udata/pull/3539))
+- feat: expose harvest source permissions ([#3550](https://github.com/opendatateam/udata/pull/3550))
+- fix: 500 when no `id` in resource reorder ([#3547](https://github.com/opendatateam/udata/pull/3547))
+- fix: change email for already taken email ([#3549](https://github.com/opendatateam/udata/pull/3549))
+- fix: do not send security mail in demo ([#3552](https://github.com/opendatateam/udata/pull/3552))
+- fix: remove some Flask Security warnings ([#3554](https://github.com/opendatateam/udata/pull/3554))
+- fix: Sentry exception log when wrong coordinates ([#3553](https://github.com/opendatateam/udata/pull/3553))
+- refactor: remove unused mail templates ([#3551](https://github.com/opendatateam/udata/pull/3551))
+
+
 ## 14.2.0 (2025-12-02)
 
 - feat(harvest): add harvest detach actions and commands ([#3537](https://github.com/opendatateam/udata/pull/3537))

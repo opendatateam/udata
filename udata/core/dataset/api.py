@@ -531,6 +531,8 @@ class ResourcesAPI(API):
                 f"All resources must be reordered, you provided {len(resources)} "
                 f"out of {len(dataset.resources)}",
             )
+        if any(isinstance(r, dict) and "id" not in r for r in resources):
+            api.abort(400, "Each resource must have an 'id' field")
         if set(r["id"] if isinstance(r, dict) else r for r in resources) != set(
             str(r.id) for r in dataset.resources
         ):

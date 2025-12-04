@@ -724,6 +724,19 @@ class DatasetAPITest(APITestCase):
         dataset = Dataset.objects.first()
         self.assertEqual(dataset.spatial.geom, SAMPLE_GEOM)
 
+    def test_dataset_api_create_with_invalid_geom_coordinates(self):
+        """It should return 400 with invalid GeoJSON coordinates, not 500"""
+        self.login()
+        data = DatasetFactory.as_dict()
+        # Invalid GeoJSON: {} in coordinates instead of numbers (Sentry issue)
+        data["spatial"] = {"geom": {"type": "Point", "coordinates": {}}}
+        response = self.post(url_for("api.datasets"), data)
+        self.assert400(response)
+        self.assertEqual(Dataset.objects.count(), 0)
+        # Verify error is properly captured in form validation errors
+        self.assertIn("errors", response.json)
+        self.assertIn("spatial", response.json["errors"])
+
     def test_dataset_api_create_with_legacy_frequency(self):
         """It should create a dataset from the API with a legacy frequency"""
         self.login()
@@ -1833,6 +1846,18 @@ class DatasetResourceAPITest(APITestCase):
             response.json["message"],
             f"Resource ids must match existing ones in dataset, ie: {set(str(r.id) for r in self.dataset.resources)}",
         )
+
+    def test_invalid_reorder_dict_without_id(self):
+        """It should return 400 when dict in resources list has no 'id' key"""
+        self.dataset.resources = ResourceFactory.build_batch(3)
+        self.dataset.save()
+
+        # Dict without 'id' key should fail gracefully, not raise KeyError
+        wrong_order_dict_without_id = [{"title": "foo"}, {"title": "bar"}, {"title": "baz"}]
+        response = self.put(
+            url_for("api.resources", dataset=self.dataset), wrong_order_dict_without_id
+        )
+        self.assertStatus(response, 400)
 
     def test_update_local(self):
         resource = ResourceFactory()
