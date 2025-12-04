@@ -176,13 +176,14 @@ class HarvestSource(Owned, db.Document):
     @property
     def permissions(self):
         from udata.auth import admin_permission
-        from udata.core.dataset.permissions import OwnablePermission
+
+        from .permissions import HarvestSourceAdminPermission, HarvestSourcePermission
 
         return {
-            "edit": OwnablePermission(self),
-            "delete": OwnablePermission(self),
-            "run": OwnablePermission(self),
-            "preview": OwnablePermission(self),
+            "edit": HarvestSourceAdminPermission(self),
+            "delete": HarvestSourceAdminPermission(self),
+            "run": HarvestSourceAdminPermission(self),
+            "preview": HarvestSourcePermission(self),
             "validate": admin_permission,
             "schedule": admin_permission,
         }

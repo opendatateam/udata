@@ -386,7 +386,7 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         assert source["config"] == {"custom": "value"}
 
     def test_update_source(self):
-        """It should update a source if owner or orga member"""
+        """It should update a source if owner or orga admin"""
         user = self.login()
         source = HarvestSourceFactory(owner=user)
         new_url = faker.url()
@@ -401,8 +401,8 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         assert200(response)
         assert response.json["url"] == new_url
 
-        # Source is now owned by orga, with user as member
-        source.organization = OrganizationFactory(members=[Member(user=user)])
+        # Source is now owned by orga, with user as admin
+        source.organization = OrganizationFactory(members=[Member(user=user, role="admin")])
         source.save()
         api_url = url_for("api.harvest_source", source=source)
         response = self.put(api_url, data)
@@ -743,7 +743,7 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         assert permissions["schedule"] is False
 
     def test_get_source_permissions_as_org_editor(self):
-        """It should return owner permissions as True for org editors"""
+        """It should return only preview permission as True for org editors"""
         user = self.login()
         member = Member(user=user, role="editor")
         org = OrganizationFactory(members=[member])
@@ -754,9 +754,9 @@ class HarvestAPITest(MockBackendsMixin, PytestOnlyAPITestCase):
         assert200(response)
 
         permissions = response.json["permissions"]
-        assert permissions["edit"] is True
-        assert permissions["delete"] is True
-        assert permissions["run"] is True
+        assert permissions["edit"] is False
+        assert permissions["delete"] is False
+        assert permissions["run"] is False
         assert permissions["preview"] is True
         assert permissions["validate"] is False
         assert permissions["schedule"] is False
