@@ -173,7 +173,10 @@ class CkanBackend(BaseBackend):
                 continue
             elif key == "spatial":
                 # GeoJSON representation (Polygon or Point)
-                spatial_geom = json.loads(value)
+                if isinstance(value, dict):
+                    spatial_geom = value
+                else:
+                    spatial_geom = json.loads(value)
             elif key == "spatial-text":
                 # Textual representation of the extent / location
                 qs = GeoZone.objects(db.Q(name=value) | db.Q(slug=value))
@@ -213,12 +216,17 @@ class CkanBackend(BaseBackend):
             dataset.spatial.zones = [spatial_zone]
 
         if spatial_geom:
+            if "type" not in spatial_geom:
+                raise HarvestException(f"Spatial geometry {spatial_geom} without `type`")
+
             if spatial_geom["type"] == "Polygon":
                 coordinates = [spatial_geom["coordinates"]]
             elif spatial_geom["type"] == "MultiPolygon":
                 coordinates = spatial_geom["coordinates"]
             else:
-                raise HarvestException("Unsupported spatial geometry")
+                raise HarvestException(
+                    f"Unsupported spatial geometry {spatial_geom['type']} in {spatial_geom}. (Supported types are `Polygon` and `MultiPolygon`)"
+                )
             dataset.spatial.geom = {"type": "MultiPolygon", "coordinates": coordinates}
 
         if temporal_start and temporal_end:
@@ -267,5 +275,6 @@ class CkanBackend(BaseBackend):
 
 class DkanBackend(CkanBackend):
     name = "dkan"
+    display_name = "DKAN"
     schema = dkan_schema
     filters = []

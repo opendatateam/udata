@@ -383,12 +383,13 @@ class MembershipRequestAPI(API):
 
         form = api.validate(MembershipRequestForm, membership_request)
 
-        if not membership_request:
+        if membership_request:
+            form.populate_obj(membership_request)
+            org.save()
+        else:
             membership_request = MembershipRequest()
-            org.requests.append(membership_request)
-
-        form.populate_obj(membership_request)
-        org.save()
+            form.populate_obj(membership_request)
+            org.add_membership_request(membership_request)
 
         notify_membership_request.delay(str(org.id), str(membership_request.id))
 
@@ -424,6 +425,7 @@ class MembershipAcceptAPI(MembershipAPI):
         org.members.append(member)
         org.count_members()
         org.save()
+        MembershipRequest.after_handle.send(membership_request, org=org)
 
         notify_membership_response.delay(str(org.id), str(membership_request.id))
 
@@ -446,6 +448,7 @@ class MembershipRefuseAPI(MembershipAPI):
         membership_request.refusal_comment = form.comment.data
 
         org.save()
+        MembershipRequest.after_handle.send(membership_request, org=org)
 
         notify_membership_response.delay(str(org.id), str(membership_request.id))
 

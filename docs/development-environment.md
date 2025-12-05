@@ -62,15 +62,6 @@ $ pip install -e ".[dev]"
 
 #### Package installation fails
 
-If installing `cryptography` fails:
-
-```
-brew install openssl@1.1
-export LDFLAGS="-L$(brew --prefix openssl@1.1)/lib"
-export CPPFLAGS="-I$(brew --prefix openssl@1.1)/include"
-pip install -e ".[dev]"
-```
-
 If installing `Pillow` fails:
 
 ```

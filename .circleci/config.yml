@@ -7,7 +7,7 @@ parameters:
     default: "3.11"
   publish-branch:
     type: string
-    default: "master"
+    default: "main"
     description: "Branch to publish to PyPi and trigger the Gitlab CI/CD pipeline when pushed to"
   deploy-env:
     type: string
@@ -33,7 +33,7 @@ jobs:
             - py3-cache-v13-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
             # 2. Latest cache from this branch
             - py3-cache-v13-{{ arch }}-{{ .Branch }}
-            # 3. Latest cache from base branch (e.g., master)
+            # 3. Latest cache from base branch (e.g., main)
             - py3-cache-v13-{{ arch }}-{{ .Environment.BASE_BRANCH }}
             # 4. Any latest cache for this architecture (fallback)
             - py3-cache-v13-{{ arch }}-

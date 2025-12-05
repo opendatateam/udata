@@ -84,6 +84,11 @@ def confirm_change_email(token):
     if flash:
         return redirect(homepage_url(flash=flash, flash_data=flash_data))
 
+    # Check if the new email is already taken by another user
+    existing_user = _datastore.find_user(email=new_email)
+    if existing_user and existing_user.id != user.id:
+        return redirect(homepage_url(flash="change_email_already_taken"))
+
     if user != current_user:
         logout_user()
         login_user(user)
@@ -140,10 +145,8 @@ def create_security_blueprint(app, state, import_name):
     This creates an I18nBlueprint to use as a base.
     """
     bp = I18nBlueprint(
-        state.blueprint_name,
+        "security",
         import_name,
-        url_prefix=state.url_prefix,
-        subdomain=state.subdomain,
         template_folder="templates",
     )
 

@@ -74,6 +74,7 @@ class Defaults(object):
 
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_SAMESITE = None  # Can be set to 'Lax' or 'Strict'. See https://flask.palletsprojects.com/en/2.3.x/security/#security-cookie
+    SECURITY_USE_REGISTER_V2 = True
 
     # Flask-Security-Too settings
 
@@ -477,6 +478,11 @@ class Defaults(object):
     AVATAR_INTERNAL_BACKGROUND = "rgb(224,224,224)"
     # Padding (in percent) used by the internal provider
     AVATAR_INTERNAL_PADDING = 10
+
+    # Notification settings
+    ###########################################################################
+    # Notifications are deleted after being handled for 90 days
+    DAYS_AFTER_NOTIFICATION_EXPIRED = 90
 
     # Post settings
     ###########################################################################

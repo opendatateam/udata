@@ -5,6 +5,7 @@ This module centralize udata-wide RDF helpers and configuration
 import logging
 import re
 from html.parser import HTMLParser
+from urllib.parse import quote
 
 import mongoengine
 from flask import abort, current_app, request, url_for
@@ -21,6 +22,7 @@ from rdflib.namespace import (
     NamespaceManager,
 )
 from rdflib.resource import Resource as RdfResource
+from rdflib.term import _is_valid_uri
 from rdflib.util import SUFFIX_FORMAT_MAP
 from rdflib.util import guess_format as raw_guess_format
 
@@ -579,6 +581,27 @@ def paginate_catalog(catalog, graph, datasets, _format, rdf_catalog_endpoint, **
     return catalog
 
 
+def escape_uri_in_graph(graph: Graph) -> Graph:
+    """
+    Some invalid uri could exist in the graph and they can't be serialized in N3/Turtle.
+    We use a urllib.parse.quote to escape these at best for invalid URIRef.
+    """
+    escaped_graph = Graph()
+    for s, p, o in graph:
+        try:
+            if isinstance(s, URIRef) and not _is_valid_uri(str(s)):
+                encoded_uri = quote(str(s), safe=":/?#[]@!$&'()*+,;=")
+                s = URIRef(encoded_uri)
+            if isinstance(o, URIRef) and not _is_valid_uri(str(o)):
+                encoded_uri = quote(str(o), safe=":/?#[]@!$&'()*+,;=")
+                o = URIRef(encoded_uri)
+            escaped_graph.add((s, p, o))
+        except Exception as e:
+            log.exception(f"Failing to escape uri on triplet {s} {p} {o} : {e}")
+            continue
+    return escaped_graph
+
+
 def graph_response(graph, format):
     """
     Return a proper flask response for a RDF resource given an expected format.
@@ -592,6 +615,8 @@ def graph_response(graph, format):
         kwargs["context"] = CONTEXT
     if isinstance(graph, RdfResource):
         graph = graph.graph
+    if fmt in ["n3", "nt", "turtle", "trig"]:
+        graph = escape_uri_in_graph(graph)
     return escape_xml_illegal_chars(graph.serialize(format=fmt, **kwargs)), 200, headers
 
 

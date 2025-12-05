@@ -452,6 +452,16 @@ The background color used by the internal provider
 
 The padding (in percent) used by the internal provider
 
+## Notifications configuration
+
+These settings allow you to customize the notification feature.
+
+### DAYS_AFTER_NOTIFICATION_EXPIRED
+
+**default**: 90
+
+The delay of days between an handled notification and its deletion.
+
 ## Posts configuration
 
 Theses settings allow you to customize the post feature.

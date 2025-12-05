@@ -14,6 +14,7 @@ log = logging.getLogger(__name__)
 
 
 class Message(SpamMixin, db.EmbeddedDocument):
+    id = db.AutoUUIDField()
     content = db.StringField(required=True)
     posted_on = db.DateTimeField(default=datetime.utcnow, required=True)
     posted_by = db.ReferenceField("User")

@@ -2,17 +2,16 @@ from udata.tests import PytestOnlyTestCase
 
 
 class CliBaseTest(PytestOnlyTestCase):
-    def test_cli_help(self, cli):
+    def test_cli_help(self):
         """Should display help without errors"""
-        cli()
-        cli("-?")
-        cli("-h")
-        cli("--help")
+        self.cli("-?")
+        self.cli("-h")
+        self.cli("--help")
 
-    def test_cli_log_and_printing(self, cli):
+    def test_cli_log_and_printing(self):
         """Should properly log and print"""
-        cli("test log")
+        self.cli("test log")
 
-    def test_cli_version(self, cli):
+    def test_cli_version(self):
         """Should display version without errors"""
-        cli("--version")
+        self.cli("--version")

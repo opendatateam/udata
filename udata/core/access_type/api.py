@@ -13,6 +13,6 @@ class ReasonCategoriesAPI(API):
     def get(self):
         """List all limitation reason categories"""
         return [
-            {"value": category.value, "label": category.label}
+            {"value": category.value, "label": category.label, "definition": category.definition}
             for category in InspireLimitationCategory
         ]
