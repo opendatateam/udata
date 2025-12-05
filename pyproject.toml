@@ -117,7 +117,7 @@ udata = "udata.translations"
 [project.entry-points."pytest11"]
 udata = "udata.tests.plugin"
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "flask-shell-ipython >= 0.5.3, < 1.0",
     "invoke >= 2.2.0, < 3.0",

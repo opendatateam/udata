@@ -2413,7 +2413,7 @@ dependencies = [
     { name = "wtforms-json" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 dev = [
     { name = "flask-shell-ipython" },
     { name = "invoke" },
@@ -2455,13 +2455,9 @@ requires-dist = [
     { name = "celery", specifier = ">=5.4.0,<6.0.0" },
     { name = "celerybeat-mongo", specifier = ">=0.2.0,<1.0.0" },
     { name = "click", specifier = ">=8.1.8,<9.0.0" },
-    { name = "coverage", extras = ["toml"], marker = "extra == 'report'", specifier = ">=7.7.0,<8.0" },
     { name = "email-validator", specifier = ">=2.2.0,<3.0.0" },
     { name = "factory-boy", specifier = ">=3.3.3,<4.0.0" },
-    { name = "faker", marker = "extra == 'test'", specifier = ">=37.0.2,<38.0" },
     { name = "feedgenerator", specifier = ">=2.1.0,<3.0.0" },
-    { name = "feedparser", marker = "extra == 'test'", specifier = ">=6.0.11,<7.0" },
-    { name = "flake8", marker = "extra == 'report'", specifier = ">=7.1.2,<8.0" },
     { name = "flask", specifier = ">=3.0.0,<4.0.0" },
     { name = "flask-babel", specifier = ">=4.0.0,<5.0.0" },
     { name = "flask-caching", specifier = ">=2.3.1,<3.0.0" },
@@ -2472,17 +2468,14 @@ requires-dist = [
     { name = "flask-principal", specifier = ">=0.4.0,<1.0.0" },
     { name = "flask-restx", specifier = ">=1.3.0,<2.0.0" },
     { name = "flask-security-too", specifier = ">=5.1.2,<6.0.0" },
-    { name = "flask-shell-ipython", marker = "extra == 'dev'", specifier = ">=0.5.3,<1.0" },
     { name = "flask-sitemap", specifier = ">=0.4.0,<1.0.0" },
     { name = "flask-storage", specifier = ">=1.4.0,<2.0.0" },
     { name = "flask-wtf", specifier = ">=1.2.2,<2.0.0" },
     { name = "geojson", specifier = ">=3.2.0,<4.0.0" },
     { name = "geomet", specifier = ">=1.1.0,<2.0.0" },
     { name = "html2text", specifier = "==2025.4.15" },
-    { name = "httpretty", marker = "extra == 'test'", specifier = ">=1.1.4,<2.0" },
     { name = "humanfriendly", specifier = ">=10.0,<11.0.0" },
     { name = "importlib-resources", specifier = ">=6.5.2,<7.0.0" },
-    { name = "invoke", marker = "extra == 'dev'", specifier = ">=2.2.0,<3.0" },
     { name = "itsdangerous", specifier = ">=2.2.0,<3.0.0" },
     { name = "jinja2", specifier = ">=3.1.6,<4.0.0" },
     { name = "jsonschema", specifier = ">=4.23.0,<5.0.0" },
@@ -2492,28 +2485,16 @@ requires-dist = [
     { name = "lxml", specifier = ">=6.0.0,<7.0.0" },
     { name = "markupsafe", specifier = ">=3.0.3,<4.0.0" },
     { name = "mistune", specifier = ">=3.1.3,<4.0.0" },
-    { name = "mkdocs", marker = "extra == 'doc'", specifier = ">=1.6.1,<2.0" },
-    { name = "mock", marker = "extra == 'test'", specifier = ">=5.2.0,<6.0" },
     { name = "mongoengine", specifier = ">=0.29.1,<1.0.0" },
     { name = "netaddr", specifier = ">=1.3.0,<2.0.0" },
     { name = "pillow", specifier = ">=11.0.0,<13.0.0" },
-    { name = "pip-tools", marker = "extra == 'dev'", specifier = ">=7.4.1,<8.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.2.0,<5.0" },
     { name = "pydenticon", specifier = ">=0.3.1,<1.0.0" },
     { name = "pymongo", specifier = ">=4.11.3,<5.0.0" },
-    { name = "pytest", marker = "extra == 'test'", specifier = ">=9.0,<10.0" },
-    { name = "pytest-cov", marker = "extra == 'report'", specifier = ">=7.0.0,<8.0" },
-    { name = "pytest-env", marker = "extra == 'test'", specifier = ">=1.1.5,<2.0" },
-    { name = "pytest-flask", marker = "extra == 'test'", specifier = ">=1.3.0,<2.0" },
-    { name = "pytest-mock", marker = "extra == 'test'", specifier = ">=3.14.0,<4.0" },
-    { name = "pytest-sugar", marker = "extra == 'test'", specifier = ">=1.0.0,<2.0" },
     { name = "python-dateutil", specifier = ">=2.9.0.post0,<3.0.0" },
     { name = "pytz" },
     { name = "rdflib", specifier = ">=7.1.3,<8.0.0" },
     { name = "redis", specifier = ">=5.0.0,<8.0.0" },
     { name = "requests", specifier = ">=2.32.4,<3.0.0" },
-    { name = "requests-mock", marker = "extra == 'test'", specifier = ">=1.12.1,<2.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.11.0,<1.0" },
     { name = "saxonche", specifier = ">=12.8.0,<13.0.0" },
     { name = "sentry-sdk", extras = ["flask"], specifier = ">=2.23.1,<3.0.0" },
     { name = "speaklater", specifier = ">=1.3,<2.0.0" },
@@ -2527,7 +2508,33 @@ requires-dist = [
     { name = "wtforms", extras = ["email"], specifier = ">=3.2.1,<4.0.0" },
     { name = "wtforms-json", specifier = ">=0.3.5,<1.0.0" },
 ]
-provides-extras = ["dev", "test", "doc", "report"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "flask-shell-ipython", specifier = ">=0.5.3,<1.0" },
+    { name = "invoke", specifier = ">=2.2.0,<3.0" },
+    { name = "pip-tools", specifier = ">=7.4.1,<8.0" },
+    { name = "pre-commit", specifier = ">=4.2.0,<5.0" },
+    { name = "ruff", specifier = ">=0.11.0,<1.0" },
+]
+doc = [{ name = "mkdocs", specifier = ">=1.6.1,<2.0" }]
+report = [
+    { name = "coverage", extras = ["toml"], specifier = ">=7.7.0,<8.0" },
+    { name = "flake8", specifier = ">=7.1.2,<8.0" },
+    { name = "pytest-cov", specifier = ">=7.0.0,<8.0" },
+]
+test = [
+    { name = "faker", specifier = ">=37.0.2,<38.0" },
+    { name = "feedparser", specifier = ">=6.0.11,<7.0" },
+    { name = "httpretty", specifier = ">=1.1.4,<2.0" },
+    { name = "mock", specifier = ">=5.2.0,<6.0" },
+    { name = "pytest", specifier = ">=9.0,<10.0" },
+    { name = "pytest-env", specifier = ">=1.1.5,<2.0" },
+    { name = "pytest-flask", specifier = ">=1.3.0,<2.0" },
+    { name = "pytest-mock", specifier = ">=3.14.0,<4.0" },
+    { name = "pytest-sugar", specifier = ">=1.0.0,<2.0" },
+    { name = "requests-mock", specifier = ">=1.12.1,<2.0" },
+]
 
 [[package]]
 name = "unidecode"
