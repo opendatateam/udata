@@ -17,7 +17,7 @@ parameters:
 jobs:
   python:
     docker:
-      - image: ghcr.io/astral-sh/uv:python<< pipeline.parameters.python-version >>-bookworm
+      - image: ghcr.io/astral-sh/uv:python<< pipeline.parameters.python-version >>-trixie
       - image: mongo:6.0.4
       - image: redis:alpine
     environment:
@@ -73,7 +73,7 @@ jobs:
 
   dist:
     docker:
-      - image: ghcr.io/astral-sh/uv:python<< pipeline.parameters.python-version >>-bookworm
+      - image: ghcr.io/astral-sh/uv:python<< pipeline.parameters.python-version >>-trixie
     steps:
       - checkout
       - attach_workspace:
@@ -104,7 +104,7 @@ jobs:
 
   publish:
     docker:
-      - image: ghcr.io/astral-sh/uv:python<< pipeline.parameters.python-version >>-bookworm
+      - image: ghcr.io/astral-sh/uv:python<< pipeline.parameters.python-version >>-trixie
     steps:
       - attach_workspace:
           at: .
