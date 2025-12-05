@@ -732,7 +732,7 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
         assert (
             dataset.contact_points[1].name
-            == "Direction Régionale de l’Environnement de l’Aménagement et du Logement d'Auvergne-Rhône-Alpes (DREAL Auvergne-Rhône-Alpes)"
+            == "Administrateur de Données (Direction Régionale de l’Environnement de l’Aménagement et du Logement d'Auvergne-Rhône-Alpes (DREAL Auvergne-Rhône-Alpes))"
         )
         assert dataset.contact_points[1].email == "sig.dreal-ara@developpement-durable.gouv.fr"
         assert dataset.contact_points[1].role == "user"
@@ -750,12 +750,15 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
         assert (
             dataset.contact_points[0].name
-            == "Direction Régionale de l’Environnement de l’Aménagement et du Logement d'Auvergne-Rhône-Alpes (DREAL Auvergne-Rhône-Alpes)"
+            == "Administrateur de Données (Direction Régionale de l’Environnement de l’Aménagement et du Logement d'Auvergne-Rhône-Alpes (DREAL Auvergne-Rhône-Alpes))"
         )
         assert dataset.contact_points[0].email == "sig.dreal-ara@developpement-durable.gouv.fr"
         assert dataset.contact_points[0].role == "contact"
 
-        assert dataset.contact_points[1].name == "Conservatoire Botanique National Alpin"
+        assert (
+            dataset.contact_points[1].name
+            == "Jean-Michel GENIS (Conservatoire Botanique National Alpin)"
+        )
         assert dataset.contact_points[1].email == "jm.genis@cbn-alpin.fr"
         assert dataset.contact_points[1].role == "rightsHolder"
 

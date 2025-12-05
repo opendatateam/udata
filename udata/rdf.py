@@ -361,6 +361,18 @@ def themes_from_rdf(rdf):
     return list(set(tags))
 
 
+def contact_point_name(agent_name: str | None, org_name: str | None) -> str:
+    match (agent_name, org_name):
+        case (None, None):
+            return ""
+        case (agent_name, None):
+            return agent_name
+        case (None, org_name):
+            return org_name
+        case (agent_name, org_name):
+            return f"{agent_name} ({org_name})"
+
+
 def contact_points_from_rdf(rdf, prop, role, dataset):
     if not dataset.organization and not dataset.owner:
         return
@@ -372,10 +384,9 @@ def contact_points_from_rdf(rdf, prop, role, dataset):
             email = None
             contact_form = None
         elif prop == DCAT.contactPoint:  # Could be split on the type of contact_point instead
-            name = (
-                rdf_value(contact_point, VCARD["organization-name"])
-                or rdf_value(contact_point, VCARD.fn)
-                or ""
+            name = contact_point_name(
+                rdf_value(contact_point, VCARD.fn),
+                rdf_value(contact_point, VCARD["organization-name"]),
             )
             email = (
                 rdf_value(contact_point, VCARD.hasEmail)
@@ -386,15 +397,13 @@ def contact_points_from_rdf(rdf, prop, role, dataset):
             contact_form = rdf_value(contact_point, VCARD.hasUrl)
         else:
             contact_point_org = contact_point.value(ORG.memberOf)
-            name = (
-                (contact_point_org and rdf_value(contact_point_org, FOAF.name))
-                or rdf_value(contact_point, FOAF.name)
-                or rdf_value(contact_point, SKOS.prefLabel)
-                or ""
+            name = contact_point_name(
+                rdf_value(contact_point, FOAF.name) or rdf_value(contact_point, SKOS.prefLabel),
+                rdf_value(contact_point_org, FOAF.name) if contact_point_org else None,
             )
             email = (
-                (contact_point_org and rdf_value(contact_point_org, FOAF.mbox))
-                or rdf_value(contact_point, FOAF.mbox)
+                rdf_value(contact_point, FOAF.mbox)
+                or (contact_point_org and rdf_value(contact_point_org, FOAF.mbox))
                 or None
             )
             email = email.replace("mailto:", "").strip() if email else None
