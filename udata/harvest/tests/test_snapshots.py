@@ -1,0 +1,207 @@
+import json
+import os
+from os.path import dirname, isfile, join
+
+import pytest
+import requests_mock
+from deepdiff import DeepDiff
+from pyld import jsonld
+from rdflib import Graph
+from xmldiff import formatting, main
+
+from udata.core.dataservices.models import Dataservice
+from udata.core.dataset.models import Dataset
+from udata.harvest import actions
+from udata.harvest.models import HarvestJob
+from udata.harvest.tests.factories import HarvestSourceFactory
+from udata.tests.api import PytestOnlyAPITestCase
+
+SNAPSHOTS_DIR = join(dirname(__file__), "snapshots")
+
+
+harvester_configs = [
+    {
+        "backend": "dcat",
+        "url": "https://data.capatlantique.fr/api/explore/v2.1/catalog/exports/dcat/?where=publisher%3D%22CCAS+Gu%C3%A9rande%22&include_exports=json%2Ccsv%2Cshp%2Cgeojson&lang=fr",
+    },
+    {
+        "backend": "csw-iso-19139",
+        "url": "https://ogc.geo-ide.developpement-durable.gouv.fr/csw/csw-ddt24",
+    },
+    {
+        "backend": "ckan",
+        "url": "https://www.datasud.fr/fr/indexer/service/ckan/",
+        "config": {
+            "filters": [
+                {
+                    "key": "organization",
+                    "value": '"communaute-dagglomeration-de-gap-tallard-durance"',
+                },
+            ],
+        },
+    },
+]
+
+
+@pytest.mark.options(HARVESTER_BACKENDS=["dcat", "csw-iso-19139", "ckan"])
+class SnapshotsTest(PytestOnlyAPITestCase):
+    @pytest.mark.parametrize("harvester_conf", harvester_configs)
+    def test_all(self, harvester_conf):
+        os.makedirs(SNAPSHOTS_DIR, exist_ok=True)
+
+        harvester = HarvestSourceFactory(
+            backend=harvester_conf["backend"],
+            url=harvester_conf["url"],
+            config=harvester_conf.get("config", {}),
+        )
+
+        data = {}
+        data_path = join(
+            SNAPSHOTS_DIR,
+            f"{harvester.backend}-{harvester.url.replace('://', '_').replace('/', '_')}.json",
+        )
+        refresh = not isfile(data_path) or os.getenv("REFRESH_SNAPSHOTS", False)
+
+        if not refresh:
+            data = json.load(open(data_path))
+
+        with MyMock(real_http=refresh) as m:
+            if not refresh:
+                for history in data["requests_history"]:
+                    history["response"]["headers"].pop("Content-Encoding", None)
+                    m.register_uri(
+                        method=history["request"]["method"],
+                        url=history["request"]["url"],
+                        text=history["response"]["body"],
+                        status_code=history["response"]["status_code"],
+                        headers=history["response"]["headers"],
+                        additional_matcher=make_matcher(history),
+                    )
+
+            actions.run(harvester)
+
+        assert HarvestJob.objects.count() == 1
+
+        new_data = {
+            "requests_history": m.history,
+            "job": HarvestJob.objects[0].to_dict(),
+            "datasets": [d.to_dict() for d in Dataset.objects],
+            "dataservices": [d.to_dict() for d in Dataservice.objects],
+        }
+
+        if refresh:
+            json.dump(new_data, open(data_path, "w"), indent=2, default=str)
+            return
+
+        if "graphs" in data["job"]["data"]:
+            for index, graph in enumerate(data["job"]["data"]["graphs"]):
+                diff = main.diff_texts(
+                    graph.encode("utf-8"),
+                    new_data["job"]["data"]["graphs"][index].encode("utf-8"),
+                    formatter=formatting.DiffFormatter(),
+                )
+
+                rdf_check = compare_rdf_graphs_canonically(
+                    graph, new_data["job"]["data"]["graphs"][index]
+                )
+
+                if not rdf_check:
+                    print(graph, file=open("/tmp/1.xml", "w"))
+                    print(new_data["job"]["data"]["graphs"][index], file=open("/tmp/2.xml", "w"))
+                    print(f"\n\n{graph}\n\n")
+                    print(f"\n\n{new_data['job']['data']['graphs'][index]}\n\n")
+
+                assert rdf_check, "RDF graphs are differents"
+
+        diff = DeepDiff(
+            data,
+            # Compare datetime as strings by serialize/deserialize
+            json.loads(json.dumps(new_data, indent=2, default=str)),
+            verbose_level=2,
+            ignore_order=True,
+            exclude_regex_paths=[
+                r"root\['requests_history'\]",
+                r"_id",
+                r"id",
+                r"created_at_internal",
+                r"last_modified_internal",
+                r"last_update",
+                r"root\['datasets'\]\[\d+]\['harvest'\]\['last_update'\]",
+                r"root\['dataservices'\]\[\d+]\['harvest'\]\['last_update'\]",
+                r"root\['dataservices'\]\[\d+]\['created_at'\]",
+                r"root\['dataservices'\]\[\d+]\['metadata_modified_at'\]",
+                r"root\['dataservices'\]\[\d+]\['datasets'\]",
+                r"\['created'\]",
+                r"\['started'\]",
+                r"\['ended'\]",
+                r"root\['job'\]\['data'\]\['graphs'\]",
+                r"root\['job'\]\['items'\]\[\d+\]\['dataset'\]",
+                r"root\['job'\]\['items'\]\[\d+\]\['dataservice'\]",
+                r"root\['job'\]\['source'\]",
+                r"root\['job'\]\['items'\]\[\d+\]\['errors'\]\[\d+\]\['created_at'\]",
+            ],
+        )
+
+        print(diff.pretty())
+        assert not diff, "Global diffs are different"
+
+
+def rdf_to_canonical_jsonld(xml_string: str) -> str:
+    g = Graph()
+    g.parse(data=xml_string, format="application/rdf+xml")
+    jsonld_data = g.serialize(format="json-ld", indent=2)
+
+    # Parse to dict and canonicalize
+    doc = json.loads(jsonld_data)
+    canon = jsonld.normalize(doc, {"algorithm": "URDNA2015", "format": "application/n-quads"})
+
+    return canon
+
+
+def compare_rdf_graphs_canonically(xml1: str, xml2: str) -> bool:
+    canon1 = rdf_to_canonical_jsonld(xml1)
+    canon2 = rdf_to_canonical_jsonld(xml2)
+    return canon1 == canon2
+
+
+def match_body(request, history):
+    return parse_request_body(request.text) == history["request"]["body"]
+
+
+def make_matcher(history):
+    return lambda request: match_body(request, history)
+
+
+class MyMock(requests_mock.Mocker):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.history = []
+        real_send = self._mock_target.send
+
+        def send(session, request, **kwargs):
+            response = real_send(session, request, **kwargs)
+            self.history.append(
+                {
+                    "request": {
+                        "method": request.method,
+                        "url": request.url,
+                        "headers": dict(request.headers),
+                        "body": parse_request_body(request.body),
+                    },
+                    "response": {
+                        "status_code": response.status_code,
+                        "headers": dict(response.headers),
+                        "body": response.text,
+                    },
+                }
+            )
+            return response
+
+        self._mock_target.send = send
+
+
+def parse_request_body(body):
+    if body is None:
+        return None
+
+    return body.decode() if body and hasattr(body, "decode") else str(body)
