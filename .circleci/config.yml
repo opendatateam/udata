@@ -17,7 +17,7 @@ parameters:
 jobs:
   python:
     docker:
-      - image: udata/circleci:py<< pipeline.parameters.python-version >>
+      - image: ghcr.io/astral-sh/uv:python<< pipeline.parameters.python-version >>-bookworm
       - image: mongo:6.0.4
       - image: redis:alpine
     environment:
@@ -40,7 +40,6 @@ jobs:
       - run:
           name: Install Python dependencies
           command: |
-            pip install uv
             uv sync --frozen --extra dev --extra test
       - save_cache:
           key: py3-cache-v13-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
@@ -74,7 +73,7 @@ jobs:
 
   dist:
     docker:
-      - image: udata/circleci:py<< pipeline.parameters.python-version >>
+      - image: ghcr.io/astral-sh/uv:python<< pipeline.parameters.python-version >>-bookworm
     steps:
       - checkout
       - attach_workspace:
@@ -82,7 +81,6 @@ jobs:
       - run:
           name: Install build tools
           command: |
-            pip install uv
             uv pip install setuptools-scm
       - run:
           name: Save and show RELEASE_VERSION
@@ -106,14 +104,13 @@ jobs:
 
   publish:
     docker:
-      - image: udata/circleci:py<< pipeline.parameters.python-version >>
+      - image: ghcr.io/astral-sh/uv:python<< pipeline.parameters.python-version >>-bookworm
     steps:
       - attach_workspace:
           at: .
       - run:
           name: Publish on PyPI
           command: |
-            pip install uv
             uv publish --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
 
   trigger-gitlab-pipeline:
