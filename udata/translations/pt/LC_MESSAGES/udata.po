@@ -15,7 +15,7 @@ msgstr ""
 "X-Crowdin-Project: udata\n"
 "X-Crowdin-Project-ID: 291291\n"
 "X-Crowdin-Language: pt-PT\n"
-"X-Crowdin-File: /master/udata/translations/udata.pot\n"
+"X-Crowdin-File: /main/udata/translations/udata.pot\n"
 "X-Crowdin-File-ID: 6\n"
 
 #: udata/settings.py:127
@@ -1914,4 +1914,3 @@ msgstr "Muito reutilizado"
 #, python-brace-format
 msgid "Deletion of your inactive {site} account"
 msgstr ""
-

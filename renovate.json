@@ -2,7 +2,7 @@
   "extends": [
     "config:base"
   ],
-  "baseBranches": ["master"],
+  "baseBranches": ["main"],
   "enabledManagers": ["pep621"],
   "pep621": {
     "fileMatch": ["pyproject.toml"]
