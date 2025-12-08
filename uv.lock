@@ -2415,31 +2415,25 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "flask-shell-ipython" },
-    { name = "invoke" },
-    { name = "pip-tools" },
-    { name = "pre-commit" },
-    { name = "ruff" },
-]
-doc = [
-    { name = "mkdocs" },
-]
-report = [
     { name = "coverage", extra = ["toml"] },
-    { name = "flake8" },
-    { name = "pytest-cov" },
-]
-test = [
     { name = "faker" },
     { name = "feedparser" },
+    { name = "flake8" },
+    { name = "flask-shell-ipython" },
     { name = "httpretty" },
+    { name = "invoke" },
+    { name = "mkdocs" },
     { name = "mock" },
+    { name = "pip-tools" },
+    { name = "pre-commit" },
     { name = "pytest" },
+    { name = "pytest-cov" },
     { name = "pytest-env" },
     { name = "pytest-flask" },
     { name = "pytest-mock" },
     { name = "pytest-sugar" },
     { name = "requests-mock" },
+    { name = "ruff" },
 ]
 
 [package.metadata]
@@ -2511,29 +2505,25 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "flask-shell-ipython", specifier = ">=0.5.3,<1.0" },
-    { name = "invoke", specifier = ">=2.2.0,<3.0" },
-    { name = "pip-tools", specifier = ">=7.4.1,<8.0" },
-    { name = "pre-commit", specifier = ">=4.2.0,<5.0" },
-    { name = "ruff", specifier = ">=0.11.0,<1.0" },
-]
-doc = [{ name = "mkdocs", specifier = ">=1.6.1,<2.0" }]
-report = [
     { name = "coverage", extras = ["toml"], specifier = ">=7.7.0,<8.0" },
-    { name = "flake8", specifier = ">=7.1.2,<8.0" },
-    { name = "pytest-cov", specifier = ">=7.0.0,<8.0" },
-]
-test = [
     { name = "faker", specifier = ">=37.0.2,<38.0" },
     { name = "feedparser", specifier = ">=6.0.11,<7.0" },
+    { name = "flake8", specifier = ">=7.1.2,<8.0" },
+    { name = "flask-shell-ipython", specifier = ">=0.5.3,<1.0" },
     { name = "httpretty", specifier = ">=1.1.4,<2.0" },
+    { name = "invoke", specifier = ">=2.2.0,<3.0" },
+    { name = "mkdocs", specifier = ">=1.6.1,<2.0" },
     { name = "mock", specifier = ">=5.2.0,<6.0" },
+    { name = "pip-tools", specifier = ">=7.4.1,<8.0" },
+    { name = "pre-commit", specifier = ">=4.2.0,<5.0" },
     { name = "pytest", specifier = ">=9.0,<10.0" },
+    { name = "pytest-cov", specifier = ">=7.0.0,<8.0" },
     { name = "pytest-env", specifier = ">=1.1.5,<2.0" },
     { name = "pytest-flask", specifier = ">=1.3.0,<2.0" },
     { name = "pytest-mock", specifier = ">=3.14.0,<4.0" },
     { name = "pytest-sugar", specifier = ">=1.0.0,<2.0" },
     { name = "requests-mock", specifier = ">=1.12.1,<2.0" },
+    { name = "ruff", specifier = ">=0.11.0,<1.0" },
 ]
 
 [[package]]
