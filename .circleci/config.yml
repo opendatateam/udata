@@ -41,7 +41,7 @@ jobs:
           name: Install Python dependencies
           command: |
             pip install uv
-            uv sync --frozen --extra dev --extra test
+            uv sync --frozen
       - save_cache:
           key: py3-cache-v13-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
           paths:
