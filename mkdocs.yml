@@ -16,7 +16,6 @@ nav:
         - Getting started: getting-started.md
         - Adapting settings: adapting-settings.md
         - Administrative tasks: administrative-tasks.md
-        - Using plugins: plugins.md
         - Harvesting: harvesting.md
         - RDF support: rdf.md
     - Developping:
@@ -24,7 +23,6 @@ nav:
         - Testing your code: testing-code.md
         - Extending udata: extending.md
         - Adding translations: adding-translations.md
-        - Creating a custom theme: creating-theme.md
         - Building the documentation: building-documentation.md
     - Deploying:
         - System dependencies: system-dependencies.md

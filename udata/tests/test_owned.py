@@ -7,7 +7,7 @@ from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
 from udata.models import Member
 from udata.mongo import db
-from udata.tests import DBTestMixin, TestCase
+from udata.tests.api import DBTestCase
 
 
 class CustomQuerySet(owned.OwnedQuerySet):
@@ -41,7 +41,7 @@ def compute_some_metrics(document, **kwargs):
     document.save(signal_kwargs={"ignores": ["post_save"]})
 
 
-class TestOwnedMixin(DBTestMixin, TestCase):
+class TestOwned(DBTestCase):
     def test_fields(self):
         self.assertIsInstance(Owned.owner, db.ReferenceField)
         self.assertEqual(Owned.owner.document_type_obj, User)
@@ -136,7 +136,7 @@ class TestOwnedMixin(DBTestMixin, TestCase):
         assert owned.organization is None
 
 
-class OwnedQuerysetTest(DBTestMixin, TestCase):
+class OwnedQuerysetTest(DBTestCase):
     def test_queryset_type(self):
         self.assertIsInstance(Owned.objects, owned.OwnedQuerySet)
 

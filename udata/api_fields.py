@@ -55,8 +55,8 @@ classes_by_parents = {}
 
 
 class GenericField(restx_fields.Raw):
-    def __init__(self, fields_by_type):
-        super().__init__(self)
+    def __init__(self, fields_by_type, **kwargs):
+        super(GenericField, self).__init__(**kwargs)
         self.default = None
         self.fields_by_type = fields_by_type
 
@@ -93,12 +93,14 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         # TODO: this is currently never used. We may remove it if the auto-conversion
         # is always good enough.
         return info.get("convert_to"), info.get("convert_to")
-    elif isinstance(field, mongo_fields.StringField):
+    elif isinstance(field, mongo_fields.StringField) or isinstance(field, mongo_fields.EnumField):
         constructor = (
             custom_restx_fields.Markdown if info.get("markdown", False) else restx_fields.String
         )
-        params["min_length"] = field.min_length
-        params["max_length"] = field.max_length
+        if isinstance(field, mongo_fields.StringField):
+            params["min_length"] = field.min_length
+            params["max_length"] = field.max_length
+        # EnumField define choices too from the enum values.
         params["enum"] = field.choices
         if field.validation:
             params["validation"] = validation_to_type(field.validation)
@@ -215,6 +217,9 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         # the referenced model, if not we return a String (and RestX will call the `str()` of the model
         # when returning from an endpoint)
         nested_fields: dict | None = info.get("nested_fields")
+        if nested_fields is None and hasattr(field.document_type_obj, "__ref_fields__"):
+            nested_fields = field.document_type_obj.__ref_fields__
+
         if nested_fields is None:
             # If there is no `nested_fields` convert the object to the string representation.
             constructor_read = restx_fields.String
@@ -225,6 +230,23 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
 
         write_params["description"] = "ID of the reference"
         constructor_write = restx_fields.String
+    elif isinstance(field, mongo_fields.GenericEmbeddedDocumentField):
+        generic_fields = {
+            cls.__name__: convert_db_to_field(
+                f"{key}.{cls.__name__}",
+                # Instead of having GenericEmbeddedDocumentField() we'll create fields for each
+                # of the subclasses with EmbededdDocumentField(MembershipRequestNotificationDetails)…
+                mongoengine.fields.EmbeddedDocumentField(cls),
+                info,
+            )
+            for cls in field.choices
+        }
+
+        def constructor_read(**kwargs):
+            return GenericField({k: v[0].model for k, v in generic_fields.items()}, **kwargs)
+
+        def constructor_write(**kwargs):
+            return GenericField({k: v[1].model for k, v in generic_fields.items()}, **kwargs)
     elif isinstance(field, mongo_fields.EmbeddedDocumentField):
         nested_fields = info.get("nested_fields")
         if nested_fields is not None:
@@ -323,8 +345,8 @@ def generate_fields(**kwargs) -> Callable:
         nested_filters: dict[str, dict] = get_fields_with_nested_filters(
             kwargs.get("nested_filters", {})
         )
-
-        read_fields["id"] = restx_fields.String(required=True, readonly=True)
+        if issubclass(cls, db.Document) or issubclass(cls, db.DynamicDocument):
+            read_fields["id"] = restx_fields.String(required=True, readonly=True)
 
         classes_by_names[cls.__name__] = cls
         save_class_by_parents(cls)
@@ -676,6 +698,13 @@ def patch(obj, request) -> type:
                     value["id"],
                     document_type=db.resolve_model(value["class"]),
                 )
+            elif value and isinstance(
+                model_attribute,
+                mongoengine.fields.GenericEmbeddedDocumentField,
+            ):
+                generic_key = info.get("generic_key", DEFAULT_GENERIC_KEY)
+                embedded_field = classes_by_names[value[generic_key]]
+                value = patch(embedded_field(), value)
             elif value and isinstance(
                 model_attribute,
                 mongoengine.fields.EmbeddedDocumentField,

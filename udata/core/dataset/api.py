@@ -20,7 +20,6 @@ These changes might lead to backward compatibility breakage meaning:
 import logging
 import os
 from datetime import datetime
-from typing import List
 
 import mongoengine
 from bson.objectid import ObjectId
@@ -42,14 +41,12 @@ from udata.core.followers.api import FollowAPI
 from udata.core.followers.models import Follow
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
-from udata.core.site.models import current_site
 from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.topic.models import Topic
 from udata.frontend.markdown import md
 from udata.i18n import gettext as _
-from udata.linkchecker.checker import check_resource
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
-from udata.utils import get_by
+from udata.utils import get_by, get_rss_feed_list
 
 from .api_fields import (
     catalog_schema_fields,
@@ -65,7 +62,7 @@ from .api_fields import (
     upload_community_fields,
     upload_fields,
 )
-from .constants import RESOURCE_TYPES, UPDATE_FREQUENCIES
+from .constants import RESOURCE_TYPES, UpdateFrequency
 from .exceptions import (
     SchemasCacheUnavailableException,
     SchemasCatalogNotFoundException,
@@ -292,6 +289,12 @@ community_parser.add_argument(
 
 common_doc = {"params": {"dataset": "The dataset ID or slug"}}
 
+# Build catalog_parser from DatasetApiParser parser with a default page_size of 100
+catalog_parser = DatasetApiParser().parser
+catalog_parser.replace_argument(
+    "page_size", type=int, location="args", default=100, help="The page size"
+)
+
 
 @ns.route("/", endpoint="datasets")
 class DatasetListAPI(API):
@@ -332,9 +335,10 @@ class DatasetsAtomFeedAPI(API):
             link=request.url_root,
         )
 
-        datasets: List[Dataset] = (
-            Dataset.objects.visible().order_by("-created_at_internal").limit(current_site.feed_size)
+        datasets: list[Dataset] = get_rss_feed_list(
+            Dataset.objects.visible(), "created_at_internal"
         )
+
         for dataset in datasets:
             author_name = None
             author_uri = None
@@ -346,9 +350,9 @@ class DatasetsAtomFeedAPI(API):
                 author_uri = dataset.owner.url_for()
             feed.add_item(
                 dataset.title,
-                unique_id=dataset.id,
+                unique_id=dataset.url_for(_useId=True),
                 description=dataset.description,
-                content=md(dataset.description),
+                content=str(md(dataset.description)),
                 author_name=author_name,
                 author_link=author_uri,
                 link=dataset.url_for(),
@@ -433,17 +437,17 @@ class DatasetFeaturedAPI(API):
 class DatasetRdfAPI(API):
     @api.doc("rdf_dataset")
     def get(self, dataset):
-        format = RDF_EXTENSIONS[negociate_content()]
-        url = url_for("api.dataset_rdf_format", dataset=dataset.id, format=format)
+        _format = RDF_EXTENSIONS[negociate_content()]
+        url = url_for("api.dataset_rdf_format", dataset=dataset.id, _format=_format)
         return redirect(url)
 
 
-@ns.route("/<dataset:dataset>/rdf.<format>", endpoint="dataset_rdf_format", doc=common_doc)
+@ns.route("/<dataset:dataset>/rdf.<_format>", endpoint="dataset_rdf_format", doc=common_doc)
 @api.response(404, "Dataset not found")
 @api.response(410, "Dataset has been deleted")
 class DatasetRdfFormatAPI(API):
     @api.doc("rdf_dataset_format")
-    def get(self, dataset, format):
+    def get(self, dataset, _format):
         if not dataset.permissions["edit"].can():
             if dataset.private:
                 api.abort(404)
@@ -453,7 +457,7 @@ class DatasetRdfFormatAPI(API):
         resource = dataset_to_rdf(dataset)
         # bypass flask-restplus make_response, since graph_response
         # is handling the content negociation directly
-        return make_response(*graph_response(resource, format))
+        return make_response(*graph_response(resource, _format))
 
 
 @ns.route("/badges/", endpoint="available_dataset_badges")
@@ -527,6 +531,8 @@ class ResourcesAPI(API):
                 f"All resources must be reordered, you provided {len(resources)} "
                 f"out of {len(dataset.resources)}",
             )
+        if any(isinstance(r, dict) and "id" not in r for r in resources):
+            api.abort(400, "Each resource must have an 'id' field")
         if set(r["id"] if isinstance(r, dict) else r for r in resources) != set(
             str(r.id) for r in dataset.resources
         ):
@@ -891,7 +897,7 @@ class FrequenciesAPI(API):
     @api.marshal_list_with(frequency_fields)
     def get(self):
         """List all available frequencies"""
-        return [{"id": id, "label": label} for id, label in UPDATE_FREQUENCIES.items()]
+        return [{"id": f.id, "label": f.label} for f in UpdateFrequency]
 
 
 @ns.route("/extensions/", endpoint="allowed_extensions")
@@ -901,20 +907,6 @@ class AllowedExtensionsAPI(API):
     def get(self):
         """List all allowed resources extensions"""
         return sorted(current_app.config["ALLOWED_RESOURCES_EXTENSIONS"])
-
-
-@ns.route(
-    "/<dataset:dataset>/resources/<uuid:rid>/check/",
-    endpoint="check_dataset_resource",
-    doc=common_doc,
-)
-@api.param("rid", "The resource unique identifier")
-class CheckDatasetResource(API, ResourceMixin):
-    @api.doc("check_dataset_resource")
-    def get(self, dataset, rid):
-        """Checks that a resource's URL exists and returns metadata."""
-        resource = self.get_resource_or_404(dataset, rid)
-        return check_resource(resource)
 
 
 @ns.route("/resource_types/", endpoint="resource_types")

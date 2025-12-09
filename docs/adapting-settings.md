@@ -42,19 +42,6 @@ A secret key used as salt for cryptographic parts.
 
 The site identifier. It is used to attached some database configuration, metrics...
 
-### SITE_TERMS_LOCATION
-
-**default**: `generic embedded terms`
-
-The site terms in markdown. It can be either an URL or a local path to a markdown content.
-If this is an URL, the content is downloaded on the first terms page display and cached.
-
-### PLUGINS
-
-**default**: `[]`
-
-A list of enabled udata plugins.
-
 ### THEME
 
 **default**: ``'default'``
@@ -222,28 +209,6 @@ See [udata-search-service][udata-search-service] for more information on using a
 
 List spatial levels that shoudn't be indexed (for time, performance and user experience).
 
-## Territories configuration
-
-### ACTIVATE_TERRITORIES
-
-**default**: `False`
-
-Whether you want to activate pages and API related to territories.
-Don't forget to set the `HANDLED_LEVELS` setting too.
-
-### HANDLED_LEVELS
-
-**default**: `tuple()`
-
-The list of levels that you want to deal with.
-
-Warning: the order is important and will determine parents/children for
-a given territory. You have to set the smallest territory level first:
-
-```python
-HANDLED_LEVELS = ('fr:commune', 'fr:departement', 'fr:region')
-```
-
 ## Harvesting configuration
 
 ### HARVEST_PREVIEW_MAX_ITEMS
@@ -269,50 +234,6 @@ A cron expression used as default harvester schedule when validating harvesters.
 **default**: `365`
 
 The number of days of harvest jobs to keep (ie. number of days of history kept)
-
-## Link checker configuration
-
-### LINKCHECKING_ENABLED
-
-**default**: `True`
-
-A flag to enable the resources urls check by an external link checker.
-
-### LINKCHECKING_DEFAULT_LINKCHECKER
-
-**default**: `no_check`
-
-An entrypoint key of `udata.linkcheckers` that will be used as a default link checker, i.e. when no specific link checker is set for a resource (via `resource.extras.check:checker`).
-
-### LINKCHECKING_IGNORE_DOMAINS
-
-**default**: []
-
-A list of domains to ignore when triggering link checking of resources urls.
-
-### LINKCHECKING_IGNORE_PATTERNS
-
-**default**: ['format=shp']
-
-A list patterns found in checked URL to ignore (ie `pattern in url`).
-
-### LINKCHECKING_MIN_CACHE_DURATION
-
-**default**: 60
-
-The minimum time in minutes between two consecutive checks of a resource's url.
-
-### LINKCHECKING_MAX_CACHE_DURATION
-
-**default**: 1080
-
-The maximum time in minutes between two consecutive checks of a resource's url.
-
-### LINKCHECKING_UNAVAILABLE_THRESHOLD
-
-**default**: 100
-
-The number of unavailable checks after which the resource is considered lastingly unavailable and won't be checked as often.
 
 ## Mongoengine/Flask-Mongoengine options
 
@@ -505,18 +426,6 @@ Set this to a domain name. If defined, udata will serve its static assets from t
 Theses settings allow you to customize avatar rendering.
 If defined to anything else than a falsy value, theses settings take precedence over the theme configuration and the default values.
 
-### AVATAR_PROVIDER
-
-**default** `'internal'`
-
-Avatar provider used to render user avatars.
-
-udata provides 3 backends:
-
-- `internal`: udata renders avatars itself using [pydenticon](http://pydenticon.readthedocs.io)
-- `adorable`: udata uses [Adorable Avatars](http://avatars.adorable.io/) to render avatars
-- `robohash`: udata uses [Robohash](https://robohash.org/) to render avatars
-
 ### AVATAR_INTERNAL_SIZE
 
 **default**: `7`
@@ -543,19 +452,15 @@ The background color used by the internal provider
 
 The padding (in percent) used by the internal provider
 
-### AVATAR_ROBOHASH_SKIN
+## Notifications configuration
 
-**default**: `'set1'`
+These settings allow you to customize the notification feature.
 
-The skin (set) used by the robohash provider.
-See <https://robohash.org/> for more details.
+### DAYS_AFTER_NOTIFICATION_EXPIRED
 
-### AVATAR_ROBOHASH_BACKGROUND
+**default**: 90
 
-**default**: `'bg0'` (transparent background)
-
-The background used by the robohash provider.
-See <https://robohash.org/> for more details.
+The delay of days between an handled notification and its deletion.
 
 ## Posts configuration
 
@@ -647,7 +552,6 @@ SECRET_KEY = 'A unique secret key'
 SERVER_NAME = 'www.data.dev'
 
 DEFAULT_LANGUAGE = 'fr'
-PLUGINS = ['front', 'piwik']
 SITE_ID = 'www.data.dev'
 SITE_TITLE = 'data.dev'
 SITE_URL = 'www.data.dev'

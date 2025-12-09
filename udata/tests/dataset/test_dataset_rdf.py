@@ -5,11 +5,13 @@ import pytest
 import requests
 from flask import url_for
 from rdflib import BNode, Graph, Literal, Namespace, URIRef
-from rdflib.namespace import FOAF, RDF, RDFS
+from rdflib.namespace import FOAF, ORG, RDF, RDFS
 from rdflib.resource import Resource as RdfResource
 
+from udata.core.constants import HVD
 from udata.core.contact_point.factories import ContactPointFactory
 from udata.core.dataservices.factories import DataserviceFactory
+from udata.core.dataset.constants import UpdateFrequency
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceFactory
 from udata.core.dataset.models import (
     Checksum,
@@ -20,7 +22,8 @@ from udata.core.dataset.models import (
     Resource,
 )
 from udata.core.dataset.rdf import (
-    EU_RDF_REQUENCIES,
+    EUFREQ_TERM_TO_UDATA,
+    FREQ_TERM_TO_UDATA,
     dataset_from_rdf,
     dataset_to_rdf,
     frequency_from_rdf,
@@ -38,6 +41,7 @@ from udata.rdf import (
     DCAT,
     DCATAP,
     DCT,
+    EUFREQ,
     FREQ,
     GEODCAT,
     HVD_LEGISLATION,
@@ -49,17 +53,10 @@ from udata.rdf import (
     default_lang_value,
     primary_topic_identifier_from_rdf,
 )
+from udata.tests import PytestOnlyTestCase
+from udata.tests.api import PytestOnlyAPITestCase, PytestOnlyDBTestCase
 from udata.tests.helpers import assert200, assert_redirects
 from udata.utils import faker
-
-pytestmark = pytest.mark.usefixtures("app")
-
-FREQ_SAMPLE = [
-    (FREQ.annual, "annual"),
-    (FREQ.monthly, "monthly"),
-    (FREQ.daily, "daily"),
-    (FREQ.continuous, "continuous"),
-]
 
 GOV_UK_REF = "http://reference.data.gov.uk/id/year/2017"
 
@@ -71,8 +68,7 @@ else:
     GOV_UK_REF_IS_UP = True
 
 
-@pytest.mark.frontend
-class DatasetToRdfTest:
+class DatasetToRdfTest(PytestOnlyAPITestCase):
     def test_minimal(self):
         dataset = DatasetFactory.build()  # Does not have an URL
         d = dataset_to_rdf(dataset)
@@ -104,7 +100,7 @@ class DatasetToRdfTest:
         dataset = DatasetFactory(
             tags=faker.tags(nb=3),
             resources=resources,
-            frequency="daily",
+            frequency=UpdateFrequency.DAILY,
             acronym="acro",
             organization=org,
             contact_points=[contact],
@@ -171,26 +167,26 @@ class DatasetToRdfTest:
         d = dataset_to_rdf(dataset)
 
         contact_rdf = d.value(DCT.publisher)
-        assert contact_rdf.value(RDF.type).identifier == VCARD.Kind
-        assert contact_rdf.value(VCARD.fn) == Literal("Publisher Contact")
+        assert contact_rdf.value(RDF.type).identifier == FOAF.Agent
+        assert contact_rdf.value(FOAF.name) == Literal("Publisher Contact")
 
         org_rdf = d.value(GEODCAT.distributor)
         assert org_rdf.value(RDF.type).identifier == FOAF.Organization
         assert org_rdf.value(FOAF.name) == Literal("organization")
 
-    def test_map_unkownn_frequencies(self):
-        assert frequency_to_rdf("hourly") == FREQ.continuous
+    def test_map_null_frequency(self):
+        assert frequency_to_rdf(None) is None
 
-        assert frequency_to_rdf("fourTimesADay") == FREQ.daily
-        assert frequency_to_rdf("threeTimesADay") == FREQ.daily
-        assert frequency_to_rdf("semidaily") == FREQ.daily
+    @pytest.mark.parametrize("term,freq", FREQ_TERM_TO_UDATA.items())
+    def test_map_dublin_core_frequencies(self, term, freq):
+        assert frequency_to_rdf(freq) == term
 
-        assert frequency_to_rdf("fourTimesAWeek") == FREQ.threeTimesAWeek
-
-        assert frequency_to_rdf("punctual") is None
-        assert frequency_to_rdf("unknown") is None
-
-        assert frequency_to_rdf("quinquennial") is None  # Better idea ?
+    @pytest.mark.parametrize(
+        "term,freq",
+        [(k, v) for k, v in EUFREQ_TERM_TO_UDATA.items() if v not in FREQ_TERM_TO_UDATA.values()],
+    )
+    def test_map_european_frequencies(self, term, freq):
+        assert frequency_to_rdf(freq) == term
 
     def test_minimal_resource_fields(self):
         resource = ResourceFactory()
@@ -336,6 +332,7 @@ class DatasetToRdfTest:
         dataset = DatasetFactory(
             resources=ResourceFactory.build_batch(3), tags=["hvd", "mobilite", "test"]
         )
+        dataset.add_badge(HVD)
         d = dataset_to_rdf(dataset)
 
         assert d.value(DCATAP.applicableLegislation).identifier == URIRef(HVD_LEGISLATION)
@@ -353,7 +350,9 @@ class DatasetToRdfTest:
         dataset = DatasetFactory(
             resources=ResourceFactory.build_batch(3), tags=["hvd", "mobilite", "test"]
         )
+        dataset.add_badge(HVD)
         dataservice = DataserviceFactory(datasets=[dataset], tags=["hvd"])
+        dataservice.add_badge(HVD)
         d = dataset_to_rdf(dataset)
         g = d.graph
 
@@ -371,8 +370,7 @@ class DatasetToRdfTest:
         assert dataservice_as_distribution.value(DCAT.accessService).identifier == dataservice_uri
 
 
-@pytest.mark.usefixtures("clean_db")
-class RdfToDatasetTest:
+class RdfToDatasetTest(PytestOnlyDBTestCase):
     def test_minimal(self):
         node = BNode()
         g = Graph()
@@ -462,7 +460,7 @@ class RdfToDatasetTest:
         g.set((node, DCT.title, Literal(title)))
         g.set((node, SKOS.altLabel, Literal(acronym)))
         g.set((node, DCT.description, Literal(description)))
-        g.set((node, DCT.accrualPeriodicity, FREQ.daily))
+        g.set((node, DCT.accrualPeriodicity, EUFREQ.DAILY))
         pot = BNode()
         g.add((node, DCT.temporal, pot))
         g.set((pot, RDF.type, DCT.PeriodOfTime))
@@ -478,7 +476,7 @@ class RdfToDatasetTest:
         assert dataset.title == title
         assert dataset.acronym == acronym
         assert dataset.description == description
-        assert dataset.frequency == "daily"
+        assert dataset.frequency == UpdateFrequency.DAILY
         assert set(dataset.tags) == set(tags)
         assert isinstance(dataset.temporal_coverage, db.DateRange)
         assert dataset.temporal_coverage.start == start
@@ -520,6 +518,194 @@ class RdfToDatasetTest:
         assert isinstance(dataset, Dataset)
         assert dataset.harvest.modified_at is None
 
+    def test_contact_point_individual_vcard(self):
+        g = Graph()
+        node = URIRef("https://test.org/dataset")
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.identifier, Literal(faker.uuid4())))
+        g.set((node, DCT.title, Literal(faker.sentence())))
+
+        contact = BNode()
+        g.add((contact, RDF.type, VCARD.Individual))
+        g.add((contact, VCARD.fn, Literal("foo")))
+        g.add((contact, VCARD.email, Literal("foo@example.com")))
+        g.add((node, DCAT.contactPoint, contact))
+
+        # Dataset needs an owner/organization for contact_points_from_rdf() to work
+        d = DatasetFactory.build()
+        d.organization = OrganizationFactory(name="organization")
+
+        dataset = dataset_from_rdf(g, d)
+        dataset.validate()
+
+        assert len(dataset.contact_points) == 1
+        assert dataset.contact_points[0].role == "contact"
+        assert dataset.contact_points[0].name == "foo"
+        assert dataset.contact_points[0].email == "foo@example.com"
+
+    def test_contact_point_individual_foaf(self):
+        g = Graph()
+        node = URIRef("https://test.org/dataset")
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.identifier, Literal(faker.uuid4())))
+        g.set((node, DCT.title, Literal(faker.sentence())))
+
+        contact = BNode()
+        contact_name = Literal("foo")
+        contact_email = Literal("foo@example.com")
+        g.add((contact, RDF.type, FOAF.Person))
+        g.add((contact, FOAF.name, contact_name))
+        g.add((contact, FOAF.mbox, contact_email))
+        g.add((node, DCT.creator, contact))
+
+        # Dataset needs an owner/organization for contact_points_from_rdf() to work
+        d = DatasetFactory.build()
+        d.organization = OrganizationFactory(name="organization")
+
+        dataset = dataset_from_rdf(g, d)
+        dataset.validate()
+
+        assert len(dataset.contact_points) == 1
+        assert dataset.contact_points[0].role == "creator"
+        assert dataset.contact_points[0].name == "foo"
+        assert dataset.contact_points[0].email == "foo@example.com"
+
+    def test_contact_point_organization_vcard(self):
+        g = Graph()
+        node = URIRef("https://test.org/dataset")
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.identifier, Literal(faker.uuid4())))
+        g.set((node, DCT.title, Literal(faker.sentence())))
+
+        contact = BNode()
+        g.add((contact, RDF.type, VCARD.Organization))
+        g.add((contact, VCARD.fn, Literal("foo")))
+        g.add((contact, VCARD.email, Literal("foo@example.com")))
+        g.add((node, DCAT.contactPoint, contact))
+
+        # Dataset needs an owner/organization for contact_points_from_rdf() to work
+        d = DatasetFactory.build()
+        d.organization = OrganizationFactory(name="organization")
+
+        dataset = dataset_from_rdf(g, d)
+        dataset.validate()
+
+        assert len(dataset.contact_points) == 1
+        assert dataset.contact_points[0].role == "contact"
+        assert dataset.contact_points[0].name == "foo"
+        assert dataset.contact_points[0].email == "foo@example.com"
+
+    def test_contact_point_organization_foaf(self):
+        g = Graph()
+        node = URIRef("https://test.org/dataset")
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.identifier, Literal(faker.uuid4())))
+        g.set((node, DCT.title, Literal(faker.sentence())))
+
+        contact = BNode()
+        g.add((contact, RDF.type, FOAF.Organization))
+        g.add((contact, FOAF.name, Literal("foo")))
+        g.add((contact, FOAF.mbox, Literal("foo@example.com")))
+        g.add((node, DCT.creator, contact))
+
+        # Dataset needs an owner/organization for contact_points_from_rdf() to work
+        d = DatasetFactory.build()
+        d.organization = OrganizationFactory(name="organization")
+
+        dataset = dataset_from_rdf(g, d)
+        dataset.validate()
+
+        assert len(dataset.contact_points) == 1
+        assert dataset.contact_points[0].role == "creator"
+        assert dataset.contact_points[0].name == "foo"
+        assert dataset.contact_points[0].email == "foo@example.com"
+
+    def test_contact_point_organization_member_vcard(self):
+        g = Graph()
+        node = URIRef("https://test.org/dataset")
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.identifier, Literal(faker.uuid4())))
+        g.set((node, DCT.title, Literal(faker.sentence())))
+
+        contact = BNode()
+        g.add((contact, RDF.type, VCARD.Organization))
+        g.add((contact, VCARD.fn, Literal("foo")))
+        g.add((contact, VCARD["organization-name"], Literal("bar")))
+        g.add((contact, VCARD.email, Literal("foo@example.com")))
+        g.add((node, DCAT.contactPoint, contact))
+
+        # Dataset needs an owner/organization for contact_points_from_rdf() to work
+        d = DatasetFactory.build()
+        d.organization = OrganizationFactory(name="organization")
+
+        dataset = dataset_from_rdf(g, d)
+        dataset.validate()
+
+        assert len(dataset.contact_points) == 1
+        assert dataset.contact_points[0].role == "contact"
+        assert dataset.contact_points[0].name == "foo"
+        assert dataset.contact_points[0].email == "foo@example.com"
+
+    def test_contact_point_organization_member_foaf(self):
+        g = Graph()
+        node = URIRef("https://test.org/dataset")
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.identifier, Literal(faker.uuid4())))
+        g.set((node, DCT.title, Literal(faker.sentence())))
+
+        org = BNode()
+        g.add((org, RDF.type, FOAF.Organization))
+        g.add((org, FOAF.name, Literal("bar")))
+        g.add((org, FOAF.mbox, Literal("bar@example.com")))
+        contact = BNode()
+        g.add((contact, RDF.type, FOAF.Person))
+        g.add((contact, FOAF.name, Literal("foo")))
+        g.add((contact, FOAF.mbox, Literal("foo@example.com")))
+        g.add((contact, ORG.memberOf, org))
+        g.add((node, DCT.creator, contact))
+
+        # Dataset needs an owner/organization for contact_points_from_rdf() to work
+        d = DatasetFactory.build()
+        d.organization = OrganizationFactory(name="organization")
+
+        dataset = dataset_from_rdf(g, d)
+        dataset.validate()
+
+        assert len(dataset.contact_points) == 1
+        assert dataset.contact_points[0].role == "creator"
+        assert dataset.contact_points[0].name == "foo"
+        assert dataset.contact_points[0].email == "foo@example.com"
+
+    def test_contact_point_organization_member_foaf_no_mail(self):
+        g = Graph()
+        node = URIRef("https://test.org/dataset")
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.identifier, Literal(faker.uuid4())))
+        g.set((node, DCT.title, Literal(faker.sentence())))
+
+        org = BNode()
+        g.add((org, RDF.type, FOAF.Organization))
+        g.add((org, FOAF.name, Literal("bar")))
+        # no organization email
+        contact = BNode()
+        g.add((contact, RDF.type, FOAF.Person))
+        g.add((contact, FOAF.name, Literal("foo")))
+        g.add((contact, FOAF.mbox, Literal("foo@example.com")))
+        g.add((contact, ORG.memberOf, org))
+        g.add((node, DCT.creator, contact))
+
+        # Dataset needs an owner/organization for contact_points_from_rdf() to work
+        d = DatasetFactory.build()
+        d.organization = OrganizationFactory(name="organization")
+
+        dataset = dataset_from_rdf(g, d)
+        dataset.validate()
+
+        assert len(dataset.contact_points) == 1
+        assert dataset.contact_points[0].role == "creator"
+        assert dataset.contact_points[0].name == "foo"
+        assert dataset.contact_points[0].email == "foo@example.com"
+
     def test_theme_and_tags(self):
         node = BNode()
         g = Graph()
@@ -539,31 +725,34 @@ class RdfToDatasetTest:
         assert isinstance(dataset, Dataset)
         assert set(dataset.tags) == set(tags + themes)
 
-    @pytest.mark.parametrize("freq,expected", FREQ_SAMPLE)
+    def test_parse_null_frequency(self):
+        assert frequency_from_rdf(None) is None
+
+    @pytest.mark.parametrize("freq,expected", FREQ_TERM_TO_UDATA.items())
     def test_parse_dublin_core_frequencies(self, freq, expected):
         assert frequency_from_rdf(freq) == expected
 
-    @pytest.mark.parametrize("freq,expected", FREQ_SAMPLE)
+    @pytest.mark.parametrize("freq,expected", FREQ_TERM_TO_UDATA.items())
     def test_parse_dublin_core_frequencies_as_resource(self, freq, expected):
         g = Graph()
         resource = RdfResource(g, freq)
         assert frequency_from_rdf(resource) == expected
 
-    @pytest.mark.parametrize("freq,expected", FREQ_SAMPLE)
+    @pytest.mark.parametrize("freq,expected", FREQ_TERM_TO_UDATA.items())
     def test_parse_dublin_core_frequencies_as_url(self, freq, expected):
         assert frequency_from_rdf(str(freq)) == expected
 
-    @pytest.mark.parametrize("freq,expected", EU_RDF_REQUENCIES.items())
+    @pytest.mark.parametrize("freq,expected", EUFREQ_TERM_TO_UDATA.items())
     def test_parse_european_frequencies(self, freq, expected):
         assert frequency_from_rdf(freq) == expected
 
-    @pytest.mark.parametrize("freq,expected", EU_RDF_REQUENCIES.items())
+    @pytest.mark.parametrize("freq,expected", EUFREQ_TERM_TO_UDATA.items())
     def test_parse_european_frequencies_as_resource(self, freq, expected):
         g = Graph()
         resource = RdfResource(g, freq)
         assert frequency_from_rdf(resource) == expected
 
-    @pytest.mark.parametrize("freq,expected", EU_RDF_REQUENCIES.items())
+    @pytest.mark.parametrize("freq,expected", EUFREQ_TERM_TO_UDATA.items())
     def test_parse_european_frequencies_as_url(self, freq, expected):
         assert frequency_from_rdf(str(freq)) == expected
 
@@ -1123,17 +1312,16 @@ class RdfToDatasetTest:
         assert value.language == "es"
 
 
-@pytest.mark.frontend
-class DatasetRdfViewsTest:
+class DatasetRdfViewsTest(PytestOnlyAPITestCase):
     def test_rdf_default_to_jsonld(self, client):
         dataset = DatasetFactory()
-        expected = url_for("api.dataset_rdf_format", dataset=dataset.id, format="json")
+        expected = url_for("api.dataset_rdf_format", dataset=dataset.id, _format="json")
         response = client.get(url_for("api.dataset_rdf", dataset=dataset))
         assert_redirects(response, expected)
 
     def test_rdf_perform_content_negociation(self, client):
         dataset = DatasetFactory()
-        expected = url_for("api.dataset_rdf_format", dataset=dataset.id, format="xml")
+        expected = url_for("api.dataset_rdf_format", dataset=dataset.id, _format="xml")
         url = url_for("api.dataset_rdf", dataset=dataset)
         headers = {"accept": "application/xml"}
         response = client.get(url, headers=headers)
@@ -1151,7 +1339,7 @@ class DatasetRdfViewsTest:
     def test_dataset_rdf_json_ld(self, client):
         dataset = DatasetFactory()
         for fmt in "json", "jsonld":
-            url = url_for("api.dataset_rdf_format", dataset=dataset, format=fmt)
+            url = url_for("api.dataset_rdf_format", dataset=dataset, _format=fmt)
             response = client.get(url, headers={"Accept": "application/ld+json"})
             assert200(response)
             assert response.content_type == "application/ld+json"
@@ -1171,13 +1359,77 @@ class DatasetRdfViewsTest:
     )
     def test_dataset_rdf_formats(self, client, fmt, mime):
         dataset = DatasetFactory()
-        url = url_for("api.dataset_rdf_format", dataset=dataset, format=fmt)
+        url = url_for("api.dataset_rdf_format", dataset=dataset, _format=fmt)
         response = client.get(url, headers={"Accept": mime})
         assert200(response)
         assert response.content_type == mime
 
+    @pytest.mark.parametrize(
+        "fmt,mime",
+        [
+            ("n3", "text/n3"),
+            ("nt", "application/n-triples"),
+            ("ttl", "application/x-turtle"),
+            ("xml", "application/rdf+xml"),
+            ("rdf", "application/rdf+xml"),
+            ("owl", "application/rdf+xml"),
+            ("trig", "application/trig"),
+        ],
+    )
+    def test_dont_fail_with_invalid_uri(self, client, fmt, mime):
+        """Invalid URIs (with spaces or curly brackets) shouldn't make rdf export fail in any format"""
+        invalid_uri_with_quote = 'https://test.org/dataset_with"quote"'
+        invalid_uri_with_curly_bracket = 'http://opendata-sig.saintdenis.re/datasets/identifiant.kml?outSR={"latestWkid":2975,"wkid":2975}'
+        invalid_uri_with_space = "https://catalogue.opendata-ligair.fr/geonetwork/srv/60678572-36e5-4e78-9af3-48f726670dfd fr-modelisation-sirane-vacarm_no2"
+        dataset = DatasetFactory(
+            resources=[
+                ResourceFactory(url=invalid_uri_with_quote),
+                ResourceFactory(url=invalid_uri_with_curly_bracket),
+            ],
+            harvest=HarvestDatasetMetadata(uri=invalid_uri_with_space),
+        )
 
-class DatasetFromRdfUtilsTest:
+        url = url_for("api.dataset_rdf_format", dataset=dataset, _format=fmt)
+        response = client.get(url, headers={"Accept": mime})
+        assert200(response)
+
+    @pytest.mark.parametrize(
+        "fmt,mime",
+        [
+            ("n3", "text/n3"),
+            ("nt", "application/n-triples"),
+            ("ttl", "application/x-turtle"),
+            ("trig", "application/trig"),
+        ],
+    )
+    def test_invalid_uri_escape_in_n3_turtle_format(self, client, fmt, mime):
+        """Invalid URIs (with spaces or curly brackets) should be escaped in N3/turtle formats"""
+        invalid_uri_with_quote = 'https://test.org/dataset_with"quote"'
+        invalid_uri_with_curly_bracket = 'http://opendata-sig.saintdenis.re/datasets/identifiant.kml?outSR={"latestWkid":2975,"wkid":2975}'
+        invalid_uri_with_space = "https://catalogue.opendata-ligair.fr/geonetwork/srv/60678572-36e5-4e78-9af3-48f726670dfd fr-modelisation-sirane-vacarm_no2"
+        dataset = DatasetFactory(
+            resources=[
+                ResourceFactory(url=invalid_uri_with_quote),
+                ResourceFactory(url=invalid_uri_with_curly_bracket),
+            ],
+            harvest=HarvestDatasetMetadata(uri=invalid_uri_with_space),
+        )
+
+        url = url_for("api.dataset_rdf_format", dataset=dataset, _format=fmt)
+        response = client.get(url, headers={"Accept": mime})
+        assert200(response)
+        assert "https://test.org/dataset_with%22quote%22" in response.text
+        assert (
+            "http://opendata-sig.saintdenis.re/datasets/identifiant.kml?outSR=%7B%22latestWkid%22:2975,%22wkid%22:2975%7D"
+            in response.text
+        )
+        assert (
+            "https://catalogue.opendata-ligair.fr/geonetwork/srv/60678572-36e5-4e78-9af3-48f726670dfd%20fr-modelisation-sirane-vacarm_no2"
+            in response.text
+        )
+
+
+class DatasetFromRdfUtilsTest(PytestOnlyTestCase):
     def test_licenses_from_rdf(self):
         """Test a bunch of cases of licenses detection from RDF"""
         rdf_xml_data = """<?xml version="1.0" encoding="UTF-8"?>

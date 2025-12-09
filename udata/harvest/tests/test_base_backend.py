@@ -6,14 +6,23 @@ from voluptuous import Schema
 
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataservices.models import Dataservice
+from udata.core.dataservices.models import HarvestMetadata as HarvestDataserviceMetadata
 from udata.core.dataset import tasks
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.harvest.models import HarvestItem
 from udata.models import Dataset
+from udata.tests.api import PytestOnlyDBTestCase
 from udata.tests.helpers import assert_equal_dates
 from udata.utils import faker
 
-from ..backends import BaseBackend, HarvestExtraConfig, HarvestFeature, HarvestFilter
+from ..backends import (
+    BaseBackend,
+    HarvestExtraConfig,
+    HarvestFeature,
+    HarvestFilter,
+    get_all_backends,
+)
 from ..exceptions import HarvestException
 from .factories import HarvestSourceFactory
 
@@ -28,6 +37,8 @@ def gen_remote_IDs(num: int, prefix: str = "") -> list[str]:
 
 
 class FakeBackend(BaseBackend):
+    name = "fake-backend"
+    display_name = "Fake Backend"
     filters = (
         HarvestFilter("First filter", "first", str),
         HarvestFilter("Second filter", "second", str),
@@ -60,6 +71,11 @@ class FakeBackend(BaseBackend):
                 setattr(dataset, key, value)
         if self.source.config.get("last_modified"):
             dataset.last_modified_internal = self.source.config["last_modified"]
+        if not dataset.harvest:
+            dataset.harvest = HarvestDatasetMetadata()
+        dataset.harvest.remote_url = (
+            f"http://www.example.com/records/dataset-url-{len(self.job.items)}"
+        )
         return dataset
 
     def inner_process_dataservice(self, item: HarvestItem):
@@ -70,6 +86,11 @@ class FakeBackend(BaseBackend):
                 setattr(dataservice, key, value)
         if self.source.config.get("last_modified"):
             dataservice.last_modified_internal = self.source.config["last_modified"]
+        if not dataservice.harvest:
+            dataservice.harvest = HarvestDataserviceMetadata()
+        dataservice.harvest.remote_url = (
+            f"http://www.example.com/records/dataservice-url-{len(self.job.items)}"
+        )
         return dataservice
 
 
@@ -93,8 +114,7 @@ class HarvestFilterTest:
             HarvestFilter(faker.word(), faker.word(), type, faker.sentence())
 
 
-@pytest.mark.usefixtures("clean_db")
-class BaseBackendTest:
+class BaseBackendTest(PytestOnlyDBTestCase):
     def test_simple_harvest(self):
         now = datetime.utcnow()
         nb_datasets = 3
@@ -174,6 +194,21 @@ class BaseBackendTest:
         )
         backend = FakeBackend(source)
         assert backend.get_extra_config_value("test_str") == "test"
+
+    def test_harvest_item_remote_url(self):
+        n = 3
+        source = HarvestSourceFactory(
+            config={
+                "dataset_remote_ids": gen_remote_IDs(n),
+                "dataservice_remote_ids": gen_remote_IDs(n),
+            }
+        )
+        backend = FakeBackend(source)
+
+        job = backend.harvest()
+
+        assert len(job.items) == 2 * n
+        assert all([item.remote_url for item in job.items])
 
     def test_harvest_source_id(self):
         nb_datasets = 3
@@ -419,9 +454,44 @@ class BaseBackendTest:
         assert dataset_reused_uri.harvest.domain == source.domain
         assert dataset_reused_uri.harvest.source_id == str(source.id)
 
+    def test_duplicate_remote_ids(self):
+        dataset_remote_ids = [
+            "dataset-id-1",
+            "dataset-id-2",
+            "dataset-id-3",
+            "dataset-id-3",
+            "dataset-id-1",
+        ]
+        dataservice_remote_ids = [
+            "dataservice-id-1",
+            "dataservice-id-2",
+            "dataservice-id-2",
+        ]
+        source = HarvestSourceFactory(
+            config={
+                "dataset_remote_ids": dataset_remote_ids,
+                "dataservice_remote_ids": dataservice_remote_ids,
+            }
+        )
+        backend = FakeBackend(source)
 
-@pytest.mark.usefixtures("clean_db")
-class BaseBackendValidateTest:
+        job = backend.harvest()
+
+        assert job.status == "done-errors"
+        assert len(job.items) == len(dataset_remote_ids) + len(dataservice_remote_ids)
+        assert Dataset.objects.count() == len(set(dataset_remote_ids))
+        assert Dataservice.objects.count() == len(set(dataservice_remote_ids))
+        seen = set()
+        for job in job.items:
+            if job.remote_id not in seen:
+                assert job.status == "done"
+                seen.add(job.remote_id)
+            else:
+                assert job.status == "failed"
+                assert job.remote_id in job.errors[0].message
+
+
+class BaseBackendValidateTest(PytestOnlyDBTestCase):
     @pytest.fixture
     def validate(self):
         return FakeBackend(HarvestSourceFactory()).validate
@@ -496,3 +566,19 @@ class BaseBackendValidateTest:
         assert "[nested.0.other-bad-value] expected int: wrong" in msg
         assert "[nested.1.bad-value] expected str: 43" in msg
         assert "[nested.1.other-bad-value] expected int: bad" in msg
+
+
+class AllBackendsTest:
+    def test_all_backends_have_unique_display_name(self):
+        """Ensure all harvest backends have unique display_name values."""
+        backends = get_all_backends()
+
+        display_names = {}
+        for name, backend in backends.items():
+            display_name = backend.display_name
+            assert display_name is not None, f"Backend '{name}' has no display_name"
+            assert display_name not in display_names, (
+                f"Duplicate display_name '{display_name}' found in backends "
+                f"'{display_names[display_name]}' and '{name}'"
+            )
+            display_names[display_name] = name

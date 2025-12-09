@@ -62,15 +62,6 @@ $ pip install -e ".[dev]"
 
 #### Package installation fails
 
-If installing `cryptography` fails:
-
-```
-brew install openssl@1.1
-export LDFLAGS="-L$(brew --prefix openssl@1.1)/lib"
-export CPPFLAGS="-I$(brew --prefix openssl@1.1)/include"
-pip install -e ".[dev]"
-```
-
 If installing `Pillow` fails:
 
 ```
@@ -134,8 +125,7 @@ $ inv update -m i18nc
 
 Now check out our advanced documentation for a focus on some specific tasks.
 You may want to be able to [run the tests](testing-code.md) to for a backend contribution,
-maybe [create a full theme](creating-theme.md)
-or simply provide some fixes to [the translations](adding-translations.md)
+simply provide some fixes to [the translations](adding-translations.md)
 or [the documentation](building-documentation.md).
 
 

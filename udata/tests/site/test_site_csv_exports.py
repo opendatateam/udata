@@ -15,8 +15,6 @@ from udata.tests.api import APITestCase
 
 
 class SiteCsvExportsTest(APITestCase):
-    modules = []
-
     def test_datasets_csv(self):
         self.app.config["EXPORT_CSV_MODELS"] = []
         datasets = [DatasetFactory(resources=[ResourceFactory()]) for _ in range(5)]
@@ -27,7 +25,6 @@ class SiteCsvExportsTest(APITestCase):
 
         self.assert200(response)
         self.assertEqual(response.mimetype, "text/csv")
-        self.assertEqual(response.charset, "utf-8")
 
         csvfile = StringIO(response.data.decode("utf8"))
         reader = csv.get_reader(csvfile)
@@ -75,7 +72,6 @@ class SiteCsvExportsTest(APITestCase):
 
         self.assert200(response)
         self.assertEqual(response.mimetype, "text/csv")
-        self.assertEqual(response.charset, "utf-8")
 
         csvfile = StringIO(response.data.decode("utf8"))
         reader = csv.get_reader(csvfile)
@@ -112,7 +108,6 @@ class SiteCsvExportsTest(APITestCase):
 
         self.assert200(response)
         self.assertEqual(response.mimetype, "text/csv")
-        self.assertEqual(response.charset, "utf-8")
 
         csvfile = StringIO(response.data.decode("utf8"))
         reader = csv.get_reader(csvfile)
@@ -166,7 +161,6 @@ class SiteCsvExportsTest(APITestCase):
 
         self.assert200(response)
         self.assertEqual(response.mimetype, "text/csv")
-        self.assertEqual(response.charset, "utf-8")
 
         csvfile = StringIO(response.data.decode("utf8"))
         reader = csv.get_reader(csvfile)
@@ -202,7 +196,6 @@ class SiteCsvExportsTest(APITestCase):
 
         self.assert200(response)
         self.assertEqual(response.mimetype, "text/csv")
-        self.assertEqual(response.charset, "utf-8")
 
         csvfile = StringIO(response.data.decode("utf8"))
         reader = csv.get_reader(csvfile)
@@ -247,7 +240,6 @@ class SiteCsvExportsTest(APITestCase):
 
         self.assert200(response)
         self.assertEqual(response.mimetype, "text/csv")
-        self.assertEqual(response.charset, "utf-8")
 
         csvfile = StringIO(response.data.decode("utf8"))
         reader = csv.get_reader(csvfile)
@@ -295,7 +287,6 @@ class SiteCsvExportsTest(APITestCase):
 
         self.assert200(response)
         self.assertEqual(response.mimetype, "text/csv")
-        self.assertEqual(response.charset, "utf-8")
 
         csvfile = StringIO(response.data.decode("utf8"))
         reader = csv.get_reader(csvfile)
@@ -334,7 +325,6 @@ class SiteCsvExportsTest(APITestCase):
 
         self.assert200(response)
         self.assertEqual(response.mimetype, "text/csv")
-        self.assertEqual(response.charset, "utf-8")
 
         csvfile = StringIO(response.data.decode("utf8"))
         reader = csv.get_reader(csvfile)
@@ -381,7 +371,6 @@ class SiteCsvExportsTest(APITestCase):
 
         self.assert200(response)
         self.assertEqual(response.mimetype, "text/csv")
-        self.assertEqual(response.charset, "utf-8")
 
         csvfile = StringIO(response.data.decode("utf8"))
         reader = csv.get_reader(csvfile)
@@ -426,7 +415,6 @@ class SiteCsvExportsTest(APITestCase):
 
         self.assert200(response)
         self.assertEqual(response.mimetype, "text/csv")
-        self.assertEqual(response.charset, "utf-8")
 
         csvfile = StringIO(response.data.decode("utf8"))
         reader = csv.get_reader(csvfile)

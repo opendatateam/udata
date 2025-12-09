@@ -2,11 +2,7 @@ import pytest
 
 from udata.harvest import actions
 from udata.harvest.tests.factories import HarvestSourceFactory
-
-pytestmark = [
-    pytest.mark.usefixtures("clean_db"),
-    pytest.mark.options(PLUGINS=["ckan"]),
-]
+from udata.tests.api import PytestOnlyDBTestCase
 
 CKAN_URL = "https://harvest.me/"
 API_URL = "{}api/3/action/package_list".format(CKAN_URL)
@@ -17,124 +13,123 @@ API_URL = "{}api/3/action/package_list".format(CKAN_URL)
 STATUS_CODE = (400, 500)
 
 
-@pytest.mark.parametrize("code", STATUS_CODE)
-def test_html_error(rmock, code):
-    # Happens with wrong source URL (html is returned instead of json)
-    html = "<html><body>Error</body></html>"
-    source = HarvestSourceFactory(backend="ckan", url=CKAN_URL)
+@pytest.mark.options(HARVESTER_BACKENDS=["ckan"])
+class CkanBackendErrorsTest(PytestOnlyDBTestCase):
+    @pytest.mark.parametrize("code", STATUS_CODE)
+    def test_html_error(self, rmock, code):
+        # Happens with wrong source URL (html is returned instead of json)
+        html = "<html><body>Error</body></html>"
+        source = HarvestSourceFactory(backend="ckan", url=CKAN_URL)
 
-    rmock.get(API_URL, text=html, status_code=code, headers={"Content-Type": "text/html"})
+        rmock.get(API_URL, text=html, status_code=code, headers={"Content-Type": "text/html"})
 
-    actions.run(source)
+        actions.run(source)
 
-    source.reload()
+        source.reload()
 
-    job = source.get_last_job()
-    assert len(job.items) == 0
-    assert len(job.errors) == 1
-    error = job.errors[0]
-    # HTML is detected and does not clutter the message
-    assert html not in error.message
+        job = source.get_last_job()
+        assert len(job.items) == 0
+        assert len(job.errors) == 1
+        error = job.errors[0]
+        # HTML is detected and does not clutter the message
+        assert html not in error.message
 
+    @pytest.mark.parametrize("code", STATUS_CODE)
+    def test_plain_text_error(self, rmock, code):
+        source = HarvestSourceFactory(backend="ckan", url=CKAN_URL)
 
-@pytest.mark.parametrize("code", STATUS_CODE)
-def test_plain_text_error(rmock, code):
-    source = HarvestSourceFactory(backend="ckan", url=CKAN_URL)
+        rmock.get(
+            API_URL, text='"Some error"', status_code=code, headers={"Content-Type": "text/plain"}
+        )
 
-    rmock.get(
-        API_URL, text='"Some error"', status_code=code, headers={"Content-Type": "text/plain"}
-    )
+        actions.run(source)
 
-    actions.run(source)
+        source.reload()
 
-    source.reload()
+        job = source.get_last_job()
+        assert len(job.items) == 0
+        assert len(job.errors) == 1
+        error = job.errors[0]
+        # Raw quoted string is properly unquoted
+        http_message = "Server Error" if code == 500 else "Client Error"
+        assert (
+            error.message
+            == f"{code} {http_message}: None for url: https://harvest.me/api/3/action/package_list"
+        )
 
-    job = source.get_last_job()
-    assert len(job.items) == 0
-    assert len(job.errors) == 1
-    error = job.errors[0]
-    # Raw quoted string is properly unquoted
-    http_message = "Server Error" if code == 500 else "Client Error"
-    assert (
-        error.message
-        == f"{code} {http_message}: None for url: https://harvest.me/api/3/action/package_list"
-    )
+    def test_200_plain_text_error(self, rmock):
+        source = HarvestSourceFactory(backend="ckan", url=CKAN_URL)
 
+        rmock.get(
+            API_URL, text='"Some error"', status_code=200, headers={"Content-Type": "text/plain"}
+        )
 
-def test_200_plain_text_error(rmock):
-    source = HarvestSourceFactory(backend="ckan", url=CKAN_URL)
+        actions.run(source)
 
-    rmock.get(API_URL, text='"Some error"', status_code=200, headers={"Content-Type": "text/plain"})
+        source.reload()
 
-    actions.run(source)
+        job = source.get_last_job()
+        assert len(job.items) == 0
+        assert len(job.errors) == 1
+        error = job.errors[0]
+        # Raw quoted string is properly unquoted
+        assert error.message == "Some error"
 
-    source.reload()
+    def test_standard_api_json_error(self, rmock):
+        json = {"success": False, "error": "an error"}
+        source = HarvestSourceFactory(backend="ckan", url=CKAN_URL)
 
-    job = source.get_last_job()
-    assert len(job.items) == 0
-    assert len(job.errors) == 1
-    error = job.errors[0]
-    # Raw quoted string is properly unquoted
-    assert error.message == "Some error"
+        rmock.get(API_URL, json=json, status_code=200, headers={"Content-Type": "application/json"})
 
+        actions.run(source)
 
-def test_standard_api_json_error(rmock):
-    json = {"success": False, "error": "an error"}
-    source = HarvestSourceFactory(backend="ckan", url=CKAN_URL)
+        source.reload()
 
-    rmock.get(API_URL, json=json, status_code=200, headers={"Content-Type": "application/json"})
+        job = source.get_last_job()
+        assert len(job.items) == 0
+        assert len(job.errors) == 1
+        error = job.errors[0]
+        assert error.message == "an error"
 
-    actions.run(source)
+    def test_standard_api_json_error_with_details(self, rmock):
+        json = {
+            "success": False,
+            "error": {
+                "message": "an error",
+            },
+        }
+        source = HarvestSourceFactory(backend="ckan", url=CKAN_URL)
 
-    source.reload()
+        rmock.get(API_URL, json=json, status_code=200, headers={"Content-Type": "application/json"})
 
-    job = source.get_last_job()
-    assert len(job.items) == 0
-    assert len(job.errors) == 1
-    error = job.errors[0]
-    assert error.message == "an error"
+        actions.run(source)
 
+        source.reload()
 
-def test_standard_api_json_error_with_details(rmock):
-    json = {
-        "success": False,
-        "error": {
-            "message": "an error",
-        },
-    }
-    source = HarvestSourceFactory(backend="ckan", url=CKAN_URL)
+        job = source.get_last_job()
+        assert len(job.items) == 0
+        assert len(job.errors) == 1
+        error = job.errors[0]
+        assert error.message == "an error"
 
-    rmock.get(API_URL, json=json, status_code=200, headers={"Content-Type": "application/json"})
+    def test_standard_api_json_error_with_details_and_type(self, rmock):
+        json = {
+            "success": False,
+            "error": {
+                "message": "Access denied",
+                "__type": "Authorization Error",
+            },
+        }
+        source = HarvestSourceFactory(backend="ckan", url=CKAN_URL)
 
-    actions.run(source)
+        rmock.get(API_URL, json=json, status_code=200, headers={"Content-Type": "application/json"})
 
-    source.reload()
+        actions.run(source)
 
-    job = source.get_last_job()
-    assert len(job.items) == 0
-    assert len(job.errors) == 1
-    error = job.errors[0]
-    assert error.message == "an error"
+        source.reload()
 
-
-def test_standard_api_json_error_with_details_and_type(rmock):
-    json = {
-        "success": False,
-        "error": {
-            "message": "Access denied",
-            "__type": "Authorization Error",
-        },
-    }
-    source = HarvestSourceFactory(backend="ckan", url=CKAN_URL)
-
-    rmock.get(API_URL, json=json, status_code=200, headers={"Content-Type": "application/json"})
-
-    actions.run(source)
-
-    source.reload()
-
-    job = source.get_last_job()
-    assert len(job.items) == 0
-    assert len(job.errors) == 1
-    error = job.errors[0]
-    assert error.message == "Authorization Error: Access denied"
+        job = source.get_last_job()
+        assert len(job.items) == 0
+        assert len(job.errors) == 1
+        error = job.errors[0]
+        assert error.message == "Authorization Error: Access denied"

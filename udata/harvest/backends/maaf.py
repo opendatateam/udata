@@ -7,6 +7,7 @@ from urllib.parse import urljoin
 from lxml import etree, html
 from voluptuous import All, Any, In, Length, Lower, Optional, Schema
 
+from udata.core.dataset.constants import UpdateFrequency
 from udata.harvest.backends import BaseBackend
 from udata.harvest.filters import (
     boolean,
@@ -38,19 +39,19 @@ ZONES = {
 
 
 FREQUENCIES = {
-    "ponctuelle": "punctual",
-    "temps réel": "continuous",
-    "quotidienne": "daily",
-    "hebdomadaire": "weekly",
-    "bimensuelle": "semimonthly",
-    "mensuelle": "monthly",
-    "bimestrielle": "bimonthly",
-    "trimestrielle": "quarterly",
-    "semestrielle": "semiannual",
-    "annuelle": "annual",
-    "triennale": "triennial",
-    "quinquennale": "quinquennial",
-    "aucune": "unknown",
+    "ponctuelle": UpdateFrequency.PUNCTUAL,
+    "temps réel": UpdateFrequency.CONTINUOUS,
+    "quotidienne": UpdateFrequency.DAILY,
+    "hebdomadaire": UpdateFrequency.WEEKLY,
+    "bimensuelle": UpdateFrequency.SEMIMONTHLY,
+    "mensuelle": UpdateFrequency.MONTHLY,
+    "bimestrielle": UpdateFrequency.BIMONTHLY,
+    "trimestrielle": UpdateFrequency.QUARTERLY,
+    "semestrielle": UpdateFrequency.SEMIANNUAL,
+    "annuelle": UpdateFrequency.ANNUAL,
+    "triennale": UpdateFrequency.TRIENNIAL,
+    "quinquennale": UpdateFrequency.QUINQUENNIAL,
+    "aucune": UpdateFrequency.UNKNOWN,
 }
 
 XSD_PATH = os.path.join(os.path.dirname(__file__), "maaf.xsd")
@@ -128,6 +129,7 @@ def dictize(element):
 
 
 class MaafBackend(BaseBackend):
+    name = "maaf"
     display_name = "MAAF"
     verify_ssl = False
 
@@ -161,7 +163,7 @@ class MaafBackend(BaseBackend):
         dataset = self.get_dataset(item.remote_id)
 
         dataset.title = metadata["title"]
-        dataset.frequency = FREQUENCIES.get(metadata["frequency"], "unknown")
+        dataset.frequency = FREQUENCIES.get(metadata["frequency"], UpdateFrequency.UNKNOWN)
         dataset.description = metadata["notes"]
         dataset.private = metadata["private"]
         dataset.tags = sorted(set(metadata["tags"]))

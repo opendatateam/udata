@@ -49,7 +49,7 @@ basically you’ll have to:
 * commit incrementally with readable and detailed commit messages
 * add the change to the `CHANGELOG.md` file if appropriated
 * submit a pull-request against the right branch of this repository:
-    * `master` for new features or bug fixes for the current state
+    * `main` for new features or bug fixes for the current state
     * `vX.Y` for bugfixes or backports on previous versions
 
 We’ll take care of tagging your issue with the appropriated labels and answer within a week (hopefully less!) to the problem you encounter.
@@ -65,7 +65,7 @@ and will magicaly close the issue as soon as the commit is merged.
 ### Merging
 
 When the PR has been approved (at least once), you are free to merge it
-in master. We have a squash & merge strategy and pay attention to having
+in main. We have a squash & merge strategy and pay attention to having
 a clean commit message. You can then delete the branch. If linked with
 an issue, the issue should be closed automatically.
 
@@ -95,10 +95,6 @@ ruff format .
 > WARNING: running `ruff` on the codebase will lint and format all of it, whereas using `pre-commit` will
   only be done on the staged files.
 
-### JavaScript style guide
-
-We follow the [JavaScript styleguide][js-styleguide] from airbnb.
-
 ### HTML and CSS code guide
 
 We follow @mdo's [code guide][code-guide].
@@ -114,7 +110,6 @@ We try to stay as close as possible to [CommonMark][] but use default [extension
 [PEP-0257]: https://www.python.org/dev/peps/pep-0257/
 [PEP-0020]: https://www.python.org/dev/peps/pep-0020/
 [py-style-guide]: https://google.github.io/styleguide/pyguide.html
-[js-styleguide]: https://github.com/airbnb/javascript
 [code-guide]: http://codeguide.co/
 [commonmark]: http://commonmark.org/
 [extensions-mkdocs]: http://www.mkdocs.org/user-guide/writing-your-docs/

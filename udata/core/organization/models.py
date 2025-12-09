@@ -3,6 +3,7 @@ from itertools import chain
 
 from blinker import Signal
 from flask import url_for
+from flask_babel import LazyString
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
@@ -34,7 +35,7 @@ from .constants import (
 
 __all__ = ("Organization", "Team", "Member", "MembershipRequest")
 
-BADGES: dict[str, str] = {
+BADGES: dict[str, LazyString] = {
     PUBLIC_SERVICE: _("Public Service"),
     CERTIFIED: _("Certified"),
     ASSOCIATION: _("Association"),
@@ -79,6 +80,9 @@ class MembershipRequest(db.EmbeddedDocument):
 
     comment = db.StringField()
     refusal_comment = db.StringField()
+
+    after_create = Signal()
+    after_handle = Signal()
 
     @property
     def status_label(self):
@@ -302,6 +306,11 @@ class Organization(
     @property
     def views_count(self):
         return self.metrics.get("views", 0)
+
+    def add_membership_request(self, membership_request):
+        self.requests.append(membership_request)
+        self.save()
+        MembershipRequest.after_create.send(membership_request, org=self)
 
     def count_members(self):
         self.metrics["members"] = len(self.members)

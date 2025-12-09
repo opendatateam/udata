@@ -1,9 +1,11 @@
+import copy
 import logging
-from contextlib import contextmanager
-from smtplib import SMTPException
+from dataclasses import dataclass
+from html import escape
 
 from blinker import signal
 from flask import current_app, render_template
+from flask_babel import LazyString
 from flask_mail import Mail, Message
 
 from udata import i18n
@@ -15,69 +17,108 @@ mail = Mail()
 mail_sent = signal("mail-sent")
 
 
-class FakeMailer(object):
-    """Display sent mail in logging output"""
-
-    def send(self, msg):
-        log.debug(msg.body)
-        log.debug(msg.html)
-        mail_sent.send(msg)
+@dataclass
+class MailCTA:
+    label: LazyString
+    link: str | None
 
 
-@contextmanager
-def dummyconnection(*args, **kw):
-    """Allow to test email templates rendering without actually send emails."""
-    yield FakeMailer()
+@dataclass
+class LabelledContent:
+    label: LazyString
+    content: str
+    inline: bool = False
+    truncated_at: int = 200
+
+    @property
+    def truncated_content(self) -> str:
+        return (
+            self.content[: self.truncated_at] + "…"
+            if len(self.content) > self.truncated_at
+            else self.content
+        )
+
+
+@dataclass
+class ParagraphWithLinks:
+    paragraph: LazyString
+
+    def __str__(self):
+        return str(self.paragraph)
+
+    @property
+    def html(self):
+        new_paragraph = copy.deepcopy(self.paragraph)
+
+        for key, value in new_paragraph._kwargs.items():
+            if hasattr(value, "url_for"):
+                new_paragraph._kwargs[key] = (
+                    f'<a href="{value.url_for(_mailCampaign=True)}" style="color: #000000; text-decoration: underline;">{escape(str(value))}</a>'
+                )
+
+        return str(new_paragraph)
+
+
+@dataclass
+class MailMessage:
+    subject: LazyString
+    paragraphs: list[LazyString | MailCTA | ParagraphWithLinks | LabelledContent | None]
+
+    def __post_init__(self):
+        self.paragraphs = [p for p in self.paragraphs if p is not None]
+
+    def text(self, recipient) -> str:
+        return render_template(
+            "mail/message.txt",
+            message=self,
+            recipient=recipient,
+        )
+
+    def html(self, recipient) -> str:
+        return render_template(
+            "mail/message.html",
+            message=self,
+            recipient=recipient,
+        )
+
+    def send(self, recipients):
+        send_mail(recipients, self)
 
 
 def init_app(app):
     mail.init_app(app)
 
 
-def send(subject, recipients, template_base, **kwargs):
-    """
-    Send a given email to multiple recipients.
-
-    User prefered language is taken in account.
-    To translate the subject in the right language, you should ugettext_lazy
-    """
-    sender = kwargs.pop("sender", None)
-    if not isinstance(recipients, (list, tuple)):
-        recipients = [recipients]
-
-    tpl_path = f"mail/{template_base}"
-
+def send_mail(recipients: object | list, message: MailMessage):
+    # Security mails are sent via the Flask-Security package and not
+    # from this function. Disabling mail sending logic is duplicated
+    # in :DisableMail.
+    # Flask-Security templates are rendered in `render_mail_template`.
     debug = current_app.config.get("DEBUG", False)
     send_mail = current_app.config.get("SEND_MAIL", not debug)
-    connection = mail.connect if send_mail else dummyconnection
-    extras = get_mail_campaign_dict()
 
-    with connection() as conn:
-        for recipient in recipients:
-            lang = i18n._default_lang(recipient)
-            with i18n.language(lang):
-                log.debug('Sending mail "%s" to recipient "%s"', subject, recipient)
-                msg = Message(subject, sender=sender, recipients=[recipient.email])
-                msg.body = render_template(
-                    f"{tpl_path}.txt",
-                    subject=subject,
-                    sender=sender,
-                    recipient=recipient,
-                    extras=extras,
-                    **kwargs,
-                )
-                msg.html = render_template(
-                    f"{tpl_path}.html",
-                    subject=subject,
-                    sender=sender,
-                    recipient=recipient,
-                    extras=extras,
-                    **kwargs,
-                )
-                try:
-                    conn.send(msg)
-                except SMTPException as e:
-                    log.error(f"Error sending mail {e}")
+    if not isinstance(recipients, list):
+        recipients = [recipients]
+
+    for recipient in recipients:
+        lang = i18n._default_lang(recipient)
+        to = recipient if isinstance(recipient, str) else recipient.email
+        with i18n.language(lang):
+            msg = Message(
+                subject=str(message.subject),
+                body=message.text(recipient),
+                html=message.html(recipient),
+                recipients=[to],
+            )
+
+        if send_mail:
+            with mail.connect() as conn:
+                conn.send(msg)
+        else:
+            log.debug(f"Sending mail {message.subject} to {to}")
+            log.debug(msg.body)
+            log.debug(msg.html)
+            mail_sent.send(msg)
 
 
 def get_mail_campaign_dict() -> dict:

@@ -6,14 +6,10 @@ from udata.core.followers.models import Follow
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.core.user.models import User
+from udata.tests.api import APITestCase
 
-pytestmark = pytest.mark.usefixtures("clean_db")
 
-
-@pytest.mark.frontend
-class UserModelTest:
-    modules = []  # Required for mails
-
+class UserModelTest(APITestCase):
     def test_mark_as_deleted(self):
         user = UserFactory()
         other_user = UserFactory()

@@ -27,7 +27,7 @@ class FakeFormAPI(API):
 class OptionsCORSTest(APITestCase):
     def test_should_allow_options_and_cors(self):
         """Should allow OPTIONS operation and give cors parameters"""
-        response = self.client.options(
+        response = self.options(
             url_for("api.fake-options"),
             headers={
                 "Origin": "http://localhost",
@@ -38,7 +38,7 @@ class OptionsCORSTest(APITestCase):
         self.assert204(response)
         self.assertEqual(response.headers["Access-Control-Allow-Origin"], "http://localhost")
 
-        response = self.client.options(
+        response = self.options(
             url_for("api.fake-options"),
             headers={
                 "Origin": "http://localhost",
@@ -55,8 +55,11 @@ class OptionsCORSTest(APITestCase):
 class JSONFormRequestTest(APITestCase):
     def test_non_json_content_type(self):
         """We expect JSON requests for forms and enforce it"""
-        response = self.client.post(
-            url_for("api.fake-form"), {}, headers={"Content-Type": "multipart/form-data"}
+        response = self.post(
+            url_for("api.fake-form"),
+            {},
+            json=False,
+            headers={"Content-Type": "multipart/form-data"},
         )
         self.assert400(response)
         self.assertEqual(response.json, {"errors": {"Content-Type": "expecting application/json"}})

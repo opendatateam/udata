@@ -4,6 +4,7 @@ import pytest
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.recommendations import recommendations_add, recommendations_clean
 from udata.core.reuse.factories import ReuseFactory
+from udata.tests.api import PytestOnlyDBTestCase
 
 MOCK_URL = "http://reco.net"
 
@@ -64,8 +65,7 @@ def mock_response(datasets, reuses):
     ]
 
 
-@pytest.mark.usefixtures("clean_db")
-class DatasetRecommendationsTest:
+class DatasetRecommendationsTest(PytestOnlyDBTestCase):
     def test_clean(self):
         ds1 = DatasetFactory(
             extras={

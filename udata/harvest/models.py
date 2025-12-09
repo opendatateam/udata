@@ -66,6 +66,7 @@ class HarvestLog(db.EmbeddedDocument):
 
 class HarvestItem(db.EmbeddedDocument):
     remote_id = db.StringField()
+    remote_url = db.StringField()
     dataset = db.ReferenceField(Dataset)
     dataservice = db.ReferenceField(Dataservice)
     status = db.StringField(
@@ -171,6 +172,21 @@ class HarvestSource(Owned, db.Document):
 
     def __str__(self):
         return self.name or ""
+
+    @property
+    def permissions(self):
+        from udata.auth import admin_permission
+
+        from .permissions import HarvestSourceAdminPermission, HarvestSourcePermission
+
+        return {
+            "edit": HarvestSourceAdminPermission(self),
+            "delete": HarvestSourceAdminPermission(self),
+            "run": HarvestSourceAdminPermission(self),
+            "preview": HarvestSourcePermission(self),
+            "validate": admin_permission,
+            "schedule": admin_permission,
+        }
 
 
 class HarvestJob(db.Document):

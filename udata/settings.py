@@ -1,4 +1,3 @@
-import pkg_resources
 from kombu import Exchange, Queue
 from tlds import tld_set
 
@@ -22,7 +21,6 @@ class Defaults(object):
     DEFAULT_LANGUAGE = "en"
     SECRET_KEY = "Default uData secret key"
     CONTACT_EMAIL = "contact@example.org"
-    TERRITORIES_EMAIL = "territories@example.org"
 
     CDATA_BASE_URL = None
 
@@ -76,6 +74,7 @@ class Defaults(object):
 
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_SAMESITE = None  # Can be set to 'Lax' or 'Strict'. See https://flask.palletsprojects.com/en/2.3.x/security/#security-cookie
+    SECURITY_USE_REGISTER_V2 = True
 
     # Flask-Security-Too settings
 
@@ -101,6 +100,24 @@ class Defaults(object):
     SECURITY_RESET_URL = "/reset/"
     SECURITY_CHANGE_EMAIL_URL = "/change-email/"
 
+    # See https://flask-security.readthedocs.io/en/stable/configuration.html#SECURITY_REDIRECT_BEHAVIOR
+    # We do not define all the URLs requested in the documentation because most of the time we do JSON requests in cdata
+    # and catch errors instead of followings the redirects.
+    # The only place where we don't have control over the redirect is when the user is clicking a link directly to udata
+    # (instead of a link to `cdata`) as in /confirm. When the user is clicking on the confirmation link, he's redirected
+    # to `confirm_change_email` endpoint, and then udata redirect him to the homepage of `cdata` with a custom flash message.
+    SECURITY_REDIRECT_BEHAVIOR = "spa"
+    # SECURITY_POST_OAUTH_LOGIN_VIEW = ""    # SECURITY_OAUTH_ENABLE is disabled
+    # SECURITY_LOGIN_ERROR_VIEW = ""         # We don't follow the redirects since we do JSON POST requests during login
+    # SECURITY_CONFIRM_ERROR_VIEW = ""       # Manually changed in `confirm_change_email` and set at runtime. See :SecurityPostConfirmViewAtRuntime
+    # SECURITY_POST_CHANGE_EMAIL_VIEW = ""   # We don't follow the redirects since we do JSON POST requests during change email
+    # SECURITY_CHANGE_EMAIL_ERROR_VIEW = ""  # We don't follow the redirects since we do JSON POST requests during change email
+    # SECURITY_POST_CONFIRM_VIEW = ""        # Set at runtime. See :SecurityPostConfirmViewAtRuntime
+    # SECURITY_RESET_ERROR_VIEW = ""         # We don't follow the redirects since we do JSON POST requests during request reset
+    # SECURITY_RESET_VIEW = ""               # We don't follow the redirects since we do JSON POST requests during request reset
+
+    SECURITY_SPA_ON_SAME_DOMAIN = False
+
     SECURITY_PASSWORD_SALT = "Default uData secret password salt"
     SECURITY_CONFIRM_SALT = "Default uData secret confirm salt"
     SECURITY_RESET_SALT = "Default uData secret reset salt"
@@ -121,6 +138,15 @@ class Defaults(object):
     YEARS_OF_INACTIVITY_BEFORE_DELETION = None
     DAYS_BEFORE_ACCOUNT_INACTIVITY_NOTIFY_DELAY = 30
     MAX_NUMBER_OF_USER_INACTIVITY_NOTIFICATIONS = 200
+
+    # You can activate CaptchEtat, a captcha.com integration by providing
+    # CAPTCHETAT_BASE_URL, CAPTCHETAT_OAUTH_BASE_URL, CAPTCHETAT_CLIENT_ID and CAPTCHETAT_CLIENT_SECRET
+    CAPTCHETAT_BASE_URL = None
+    CAPTCHETAT_OAUTH_BASE_URL = None
+    CAPTCHETAT_CLIENT_ID = None
+    CAPTCHETAT_CLIENT_SECRET = None
+    CAPTCHETAT_TOKEN_CACHE_KEY = "captchetat-bearer-token"
+    CAPTCHETAT_STYLE_NAME = "captchaFR"
 
     # Sentry configuration
     SENTRY_DSN = None
@@ -146,11 +172,10 @@ class Defaults(object):
     SITE_AUTHOR_URL = None
     SITE_AUTHOR = "Udata"
     SITE_GITHUB_URL = "https://github.com/etalab/udata"
-    SITE_TERMS_LOCATION = pkg_resources.resource_filename(__name__, "terms.md")
 
     UDATA_INSTANCE_NAME = "udata"
 
-    PLUGINS = []
+    HARVESTER_BACKENDS = []
     THEME = None
 
     STATIC_DIRS = []
@@ -261,6 +286,8 @@ class Defaults(object):
 
     DELAY_BEFORE_REMINDER_NOTIFICATION = 30  # Days
 
+    DELAY_BEFORE_APPEARING_IN_RSS_FEED = 10  # Hours
+
     # Harvest settings
     ###########################################################################
     HARVEST_ENABLE_MANUAL_RUN = False
@@ -297,22 +324,13 @@ class Defaults(object):
     S3_ACCESS_KEY_ID = None
     S3_SECRET_ACCESS_KEY = None
 
-    # Specific support for hvd (map HVD categories URIs to keywords)
+    # Specific support for hvd:
+    # - map HVD categories URIs to keywords
     HVD_SUPPORT = True
 
-    ACTIVATE_TERRITORIES = False
-    # The order is important to compute parents/children, smaller first.
-    HANDLED_LEVELS = tuple()
-
-    LINKCHECKING_ENABLED = True
-    # Resource types ignored by linkchecker
-    LINKCHECKING_UNCHECKED_TYPES = ("api",)
-    LINKCHECKING_IGNORE_DOMAINS = []
-    LINKCHECKING_IGNORE_PATTERNS = ["format=shp"]
-    LINKCHECKING_MIN_CACHE_DURATION = 60  # in minutes
-    LINKCHECKING_MAX_CACHE_DURATION = 1080  # in minutes (1 week)
-    LINKCHECKING_UNAVAILABLE_THRESHOLD = 100
-    LINKCHECKING_DEFAULT_LINKCHECKER = "no_check"
+    # Specific support for inspire:
+    # - add inspire keyword during harvest if GEMETE INSPIRE thesaurus is used in DCAT.theme
+    INSPIRE_SUPPORT = True
 
     # Ignore some endpoint from API tracking
     # By default ignore the 3 most called APIs
@@ -444,19 +462,27 @@ class Defaults(object):
     # if set to anything else than `None`
     ###########################################################################
     # avatar provider used to render user avatars
-    AVATAR_PROVIDER = None
     # Number of blocks used by the internal provider
-    AVATAR_INTERNAL_SIZE = None
+    AVATAR_INTERNAL_SIZE = 7
     # List of foreground colors used by the internal provider
-    AVATAR_INTERNAL_FOREGROUND = None
+    AVATAR_INTERNAL_FOREGROUND = [
+        "rgb(45,79,255)",
+        "rgb(254,180,44)",
+        "rgb(226,121,234)",
+        "rgb(30,179,253)",
+        "rgb(232,77,65)",
+        "rgb(49,203,115)",
+        "rgb(141,69,170)",
+    ]
     # Background color used by the internal provider
-    AVATAR_INTERNAL_BACKGROUND = None
+    AVATAR_INTERNAL_BACKGROUND = "rgb(224,224,224)"
     # Padding (in percent) used by the internal provider
-    AVATAR_INTERNAL_PADDING = None
-    # Skin (set) used by the robohash provider
-    AVATAR_ROBOHASH_SKIN = None
-    # The background used by the robohash provider.
-    AVATAR_ROBOHASH_BACKGROUND = None
+    AVATAR_INTERNAL_PADDING = 10
+
+    # Notification settings
+    ###########################################################################
+    # Notifications are deleted after being handled for 90 days
+    DAYS_AFTER_NOTIFICATION_EXPIRED = 90
 
     # Post settings
     ###########################################################################
@@ -508,6 +534,8 @@ class Defaults(object):
         "harvest",
     )
     EXPORT_CSV_DATASET_ID = None
+    EXPORT_CSV_ARCHIVE_S3_BUCKET = None  # If this setting is set, an archive is uploaded to the corresponding S3 bucket every first day of the month (if export-csv is scheduled to run daily)
+    EXPORT_CSV_ARCHIVE_S3_FILENAME_PREFIX = ""  # Useful to store the csv archives inside a subfolder of the bucket, ie setting 'csv-catalog-archives/'`
 
     # Autocomplete parameters
     #########################
@@ -614,7 +642,7 @@ class Testing(object):
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_TASK_EAGER_PROPAGATES = True
     TEST_WITH_PLUGINS = False
-    PLUGINS = []
+    HARVESTER_BACKENDS = ["factory"]
     TEST_WITH_THEME = False
     THEME = "testing"
     CACHE_TYPE = "flask_caching.backends.null"
@@ -622,7 +650,6 @@ class Testing(object):
     DEBUG_TOOLBAR = False
     SERVER_NAME = "local.test"
     DEFAULT_LANGUAGE = "fr"
-    ACTIVATE_TERRITORIES = False
     LOGGER_HANDLER_POLICY = "never"
     CELERYD_HIJACK_ROOT_LOGGER = False
     URLS_ALLOW_LOCAL = True  # Test server URL is local.test
@@ -634,6 +661,9 @@ class Testing(object):
     }  # Disables deliverability for email domain name
     PUBLISH_ON_RESOURCE_EVENTS = False
     HARVEST_ACTIVITY_USER_ID = None
+    SEARCH_SERVICE_API_URL = None
+    CDATA_BASE_URL = None
+    SCHEMA_CATALOG_URL = None
 
 
 class Debug(Defaults):
@@ -649,7 +679,6 @@ class Debug(Defaults):
         "flask_debugtoolbar.panels.template.TemplateDebugPanel",
         "flask_debugtoolbar.panels.logger.LoggingPanel",
         "flask_debugtoolbar.panels.profiler.ProfilerDebugPanel",
-        "flask_mongoengine.panels.MongoDebugPanel",
     )
     CACHE_TYPE = "flask_caching.backends.null"
     CACHE_NO_NULL_WARNING = True

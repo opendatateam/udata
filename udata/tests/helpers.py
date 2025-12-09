@@ -2,13 +2,13 @@ import os
 from contextlib import contextmanager
 from datetime import timedelta
 from io import BytesIO
-from urllib.parse import parse_qs, urljoin, urlparse
+from urllib.parse import parse_qs, urlparse
 
-import mock
-from flask import current_app, json, request, url_for
+from flask import current_app, json
 from flask_security.babel import FsDomain
 from PIL import Image
 
+from udata.core.spatial.factories import GeoZoneFactory
 from udata.mail import mail_sent
 
 
@@ -34,50 +34,49 @@ def assert_json_equal(first, second):
 
 
 @contextmanager
-def mock_signals(callback, *signals):
+def mock_signals(*signals):
     __tracebackhide__ = True
-    specs = []
 
-    def handler(sender, **kwargs):
-        pass
+    callbacks_by_signal = {}
+    calls_kwargs_by_signal = {}
 
-    for signal in signals:
-        m = mock.Mock(spec=handler)
-        signal.connect(m, weak=False)
-        specs.append((signal, m))
+    for requestSignal in signals:
+        # We capture requestSignal with a default argument
+        def callback(*args, requestSignal=requestSignal, **kwargs):
+            calls_kwargs_by_signal.setdefault(requestSignal, [])
+            calls_kwargs_by_signal[requestSignal].append(kwargs)
 
-    yield
+        callbacks_by_signal[requestSignal] = callback
+        requestSignal.connect(callback, weak=False)
 
-    for signal, mock_handler in specs:
-        signal.disconnect(mock_handler)
-        signal_name = getattr(signal, "name", str(signal))
-        callback(signal_name, mock_handler)
+    yield calls_kwargs_by_signal
+
+    for sig in signals:
+        sig.disconnect(callbacks_by_signal[sig])
 
 
 @contextmanager
 def assert_emit(*signals, assertions_callback=None):
     __tracebackhide__ = True
-    msg = 'Signal "{0}" should have been emitted'
 
-    def callback(name, handler):
-        assert handler.called, msg.format(name)
-        if assertions_callback is not None:
-            assertions_callback(handler.call_args)
-
-    with mock_signals(callback, *signals):
+    with mock_signals(*signals) as calls_kwargs_by_signal:
         yield
+
+    for signal in signals:
+        assert signal in calls_kwargs_by_signal, f'Signal "{signal}" should have been emitted'
+        if assertions_callback is not None:
+            for kwargs in calls_kwargs_by_signal[signal]:
+                assertions_callback(kwargs)
 
 
 @contextmanager
 def assert_not_emit(*signals):
     __tracebackhide__ = True
-    msg = 'Signal "{0}" should NOT have been emitted'
-
-    def callback(name, handler):
-        assert not handler.called, msg.format(name)
-
-    with mock_signals(callback, *signals):
+    with mock_signals(*signals) as calls_args_by_signal:
         yield
+
+    for signal in signals:
+        assert signal not in calls_args_by_signal, f'Signal "{signal}" should not have been emitted'
 
 
 @contextmanager
@@ -182,11 +181,6 @@ def assert500(response):
     assert_status(response, 500)
 
 
-def full_url(*args, **kwargs):
-    """Build a full URL"""
-    return urljoin(request.url_root, url_for(*args, **kwargs))
-
-
 def data_path(filename):
     """Get a test data path"""
     return os.path.join(os.path.dirname(__file__), "data", filename)
@@ -224,6 +218,17 @@ def create_test_image():
     file.name = "test.png"
     file.seek(0)
     return file
+
+
+def create_geozones_fixtures():
+    paca = GeoZoneFactory(
+        id="fr:region:93", level="fr:region", name="Provence Alpes Côtes dAzur", code="93"
+    )
+    bdr = GeoZoneFactory(
+        id="fr:departement:13", level="fr:departement", name="Bouches-du-Rhône", code="13"
+    )
+    arles = GeoZoneFactory(id="fr:commune:13004", level="fr:commune", name="Arles", code="13004")
+    return paca, bdr, arles
 
 
 def security_gettext(string):

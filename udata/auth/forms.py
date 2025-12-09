@@ -1,14 +1,37 @@
 import datetime
+import logging
 
+import requests
 from flask import current_app
 from flask_login import current_user
-from flask_security.forms import Form, LoginForm, RegisterForm, ResetPasswordForm
+from flask_security.forms import (
+    ForgotPasswordForm,
+    Form,
+    LoginForm,
+    RegisterFormV2,
+    ResetPasswordForm,
+)
 
+from udata.core.captchetat import bearer_token
 from udata.forms import fields, validators
 from udata.i18n import lazy_gettext as _
 
+log = logging.getLogger(__name__)
 
-class ExtendedRegisterForm(RegisterForm):
+
+class WithCaptcha:
+    captcha_code = fields.StringField(_("Captcha code"))
+    captcha_uuid = fields.StringField(_("Captcha ID"))
+
+    def validate_captcha(self):
+        if check_captchetat(self.captcha_uuid.data, self.captcha_code.data):
+            return True
+
+        self.captcha_code.errors = [_("Invalid Captcha")]
+        return False
+
+
+class ExtendedRegisterForm(WithCaptcha, RegisterFormV2):
     first_name = fields.StringField(
         _("First name"),
         [
@@ -23,10 +46,21 @@ class ExtendedRegisterForm(RegisterForm):
             validators.NoURLs(_("URLs not allowed in this field")),
         ],
     )
+    accept_conditions = fields.BooleanField(
+        _("J'accepte les conditions générales d'utilisation"),
+        validators=[
+            validators.DataRequired(message=_("Vous devez accepter les CGU pour continuer."))
+        ],
+    )
 
     def validate(self, **kwargs):
-        # no register allowed when read only mode is on
-        if not super().validate(**kwargs) or current_app.config.get("READ_ONLY_MODE"):
+        if current_app.config.get("READ_ONLY_MODE"):
+            return False
+
+        if not self.validate_captcha():
+            return False
+
+        if not super().validate(**kwargs):
             return False
 
         return True
@@ -57,6 +91,17 @@ class ExtendedResetPasswordForm(ResetPasswordForm):
         return True
 
 
+class ExtendedForgotPasswordForm(WithCaptcha, ForgotPasswordForm):
+    def validate(self, **kwargs):
+        if not self.validate_captcha():
+            return False
+
+        if not super().validate(**kwargs):
+            return False
+
+        return True
+
+
 class ChangeEmailForm(Form):
     new_email = fields.StringField(_("New email"), [validators.DataRequired(), validators.Email()])
     new_email_confirm = fields.StringField(
@@ -76,4 +121,28 @@ class ChangeEmailForm(Form):
                 "Your new email must be different than your previous email"
             )
             return False
+        return True
+
+
+def check_captchetat(id: str, code: str) -> bool:
+    captchetat_url = current_app.config.get("CAPTCHETAT_BASE_URL")
+    if not captchetat_url:
+        return True
+
+    if not id or not code:
+        return False
+
+    headers = {"Authorization": "Bearer " + bearer_token()}
+    try:
+        resp = requests.post(
+            f"{captchetat_url}/valider-captcha",
+            headers=headers,
+            json={
+                "uuid": id,
+                "code": code,
+            },
+        )
+        return resp.text == "true"
+    except requests.exceptions.RequestException as err:
+        log.error(f"Failed to query CaptchEtat: {err}")
         return True

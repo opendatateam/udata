@@ -3,6 +3,9 @@ from voluptuous import Invalid
 
 from udata import tags, uris
 
+TRUTHY_STRINGS = ("on", "t", "true", "y", "yes", "1")
+FALSY_STRINGS = ("f", "false", "n", "no", "off", "0")
+
 
 def boolean(value):
     """
@@ -15,17 +18,25 @@ def boolean(value):
     if value is None or isinstance(value, bool):
         return value
 
-    try:
-        return bool(int(value))
-    except ValueError:
+    if isinstance(value, int):
+        return bool(value)
+
+    if isinstance(value, str):
         lower_value = value.strip().lower()
+
         if not lower_value:
             return None
-        if lower_value in ("f", "false", "n", "no", "off"):
+        if lower_value in FALSY_STRINGS:
             return False
-        if lower_value in ("on", "t", "true", "y", "yes"):
+        if lower_value in TRUTHY_STRINGS:
             return True
-        raise Invalid("Unable to parse boolean {0}".format(value))
+        raise Invalid(
+            f"Unable to parse string '{value}' as boolean. Supported values are {','.join(TRUTHY_STRINGS)} for `True` and {','.join(FALSY_STRINGS)} for `False`."
+        )
+
+    raise Invalid(
+        f"Cannot convert value {value} of type {type(value)} to boolean. Supported types are `bool`, `int` and `str`"
+    )
 
 
 def to_date(value):

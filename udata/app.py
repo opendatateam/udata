@@ -1,30 +1,32 @@
-import datetime
-import importlib
 import logging
 import os
 import types
+from datetime import datetime
+from importlib.metadata import entry_points
 from os.path import abspath, dirname, exists, isfile, join
 
 import bson
+from bson import json_util
 from flask import Blueprint as BaseBlueprint
 from flask import (
     Flask,
     abort,
     g,
-    json,
     jsonify,
     make_response,
     render_template,
     request,
     send_from_directory,
 )
+from flask.json.provider import DefaultJSONProvider
 from flask_caching import Cache
 from flask_wtf.csrf import CSRFProtect
-from speaklater import is_lazy_string
+from mongoengine import EmbeddedDocument
+from mongoengine.base import BaseDocument
 from werkzeug.exceptions import NotFound
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from udata import cors, entrypoints
+from udata import cors
 
 APP_NAME = __name__.split(".")[0]
 ROOT_DIR = abspath(join(dirname(__file__)))
@@ -108,9 +110,9 @@ class Blueprint(BaseBlueprint):
         return wrapper
 
 
-class UDataJsonEncoder(json.JSONEncoder):
+class UdataJsonProvider(DefaultJSONProvider):
     """
-    A JSONEncoder subclass to encode unsupported types:
+    A JSONProvider subclass to encode unsupported types:
 
         - ObjectId
         - datetime
@@ -120,21 +122,16 @@ class UDataJsonEncoder(json.JSONEncoder):
     Ensure an app context is always present.
     """
 
-    def default(self, obj):
-        if is_lazy_string(obj):
+    @staticmethod
+    def default(obj):
+        if isinstance(obj, BaseDocument) or isinstance(obj, EmbeddedDocument):
+            return json_util._json_convert(obj.to_mongo())
+        elif isinstance(obj, bson.ObjectId):
             return str(obj)
-        elif isinstance(obj, bson.objectid.ObjectId):
-            return str(obj)
-        elif isinstance(obj, datetime.datetime):
+        elif isinstance(obj, datetime):
             return obj.isoformat()
-        elif hasattr(obj, "to_dict"):
-            return obj.to_dict()
-        elif hasattr(obj, "serialize"):
-            return obj.serialize()
-        # Serialize Raw data for Document and EmbeddedDocument.
-        elif hasattr(obj, "_data"):
-            return obj._data
-        return super(UDataJsonEncoder, self).default(obj)
+
+        return super(UdataJsonProvider, UdataJsonProvider).default(obj)
 
 
 # These loggers are very verbose
@@ -148,8 +145,6 @@ def init_logging(app):
     debug = app.debug or app.config.get("TESTING")
     log_level = logging.DEBUG if debug else logging.WARNING
     app.logger.setLevel(log_level)
-    for name in entrypoints.get_roots():  # Entrypoints loggers
-        logging.getLogger(name).setLevel(log_level)
     for logger in VERBOSE_LOGGERS:
         logging.getLogger(logger).setLevel(logging.WARNING)
     return app
@@ -168,24 +163,11 @@ def create_app(config="udata.settings.Defaults", override=None, init_logging=ini
     if override:
         app.config.from_object(override)
 
-    # Loads defaults from plugins
-    for pkg in entrypoints.get_roots(app):
-        if pkg == "udata":
-            continue  # Defaults are already loaded
-        module = "{}.settings".format(pkg)
-        try:
-            settings = importlib.import_module(module)
-        except ImportError:
-            continue
-        for key, default in settings.__dict__.items():
-            if key.startswith("__"):
-                continue
-            app.config.setdefault(key, default)
-
-    app.json_encoder = UDataJsonEncoder
+    app.json_provider_class = UdataJsonProvider
+    app.json = app.json_provider_class(app)
 
     # `ujson` doesn't support `cls` parameter https://github.com/ultrajson/ultrajson/issues/124
-    app.config["RESTX_JSON"] = {"cls": UDataJsonEncoder}
+    app.config["RESTX_JSON"] = {"default": UdataJsonProvider.default}
 
     app.debug = app.config["DEBUG"] and not app.config["TESTING"]
 
@@ -200,12 +182,21 @@ def create_app(config="udata.settings.Defaults", override=None, init_logging=ini
 def standalone(app):
     """Factory for an all in one application"""
     from udata import api, core, frontend
+    from udata.features import notifications
 
     core.init_app(app)
     frontend.init_app(app)
     api.init_app(app)
+    notifications.init_app(app)
 
-    register_features(app)
+    eps = entry_points(group="udata.plugins")
+    for ep in eps:
+        plugin_module = ep.load()
+
+        if hasattr(plugin_module, "init_app"):
+            plugin_module.init_app(app)
+        else:
+            log.error(f"Plugin {ep.name} ({ep.value}) doesn't expose an `init_app()` function.")
 
     return app
 
@@ -215,7 +206,6 @@ def register_extensions(app):
         auth,
         i18n,
         mail,
-        models,
         mongo,
         notifications,  # noqa
         routing,
@@ -223,12 +213,12 @@ def register_extensions(app):
         sentry,
         tasks,
     )
+    from udata.auth import proconnect
 
     cors.init_app(app)
     tasks.init_app(app)
     i18n.init_app(app)
     mongo.init_app(app)
-    models.init_app(app)
     routing.init_app(app)
     auth.init_app(app)
     cache.init_app(app)
@@ -236,6 +226,8 @@ def register_extensions(app):
     mail.init_app(app)
     search.init_app(app)
     sentry.init_app(app)
+    proconnect.init_app(app)
+
     app.after_request(return_404_html_if_requested)
     app.register_error_handler(NotFound, page_not_found)
     return app
@@ -275,12 +267,3 @@ def page_not_found(e: NotFound):
         return render_template("404.html", homepage_url=homepage_url()), 404
 
     return jsonify({"error": e.description, "status": 404}), 404
-
-
-def register_features(app):
-    from udata.features import notifications
-
-    notifications.init_app(app)
-
-    for ep in entrypoints.get_enabled("udata.plugins", app).values():
-        ep.init_app(app)

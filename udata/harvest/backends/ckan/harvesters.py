@@ -4,19 +4,14 @@ from urllib.parse import urljoin
 from uuid import UUID
 
 from udata import uris
-from udata.harvest.models import HarvestItem
-from udata.i18n import lazy_gettext as _
-
-try:
-    from udata.core.dataset.constants import UPDATE_FREQUENCIES
-except ImportError:
-    # legacy import of constants in udata
-    from udata.models import UPDATE_FREQUENCIES
+from udata.core.dataset.constants import UpdateFrequency
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.dataset.rdf import frequency_from_rdf
 from udata.frontend.markdown import parse_html
 from udata.harvest.backends.base import BaseBackend, HarvestFilter
 from udata.harvest.exceptions import HarvestException, HarvestSkipException
+from udata.harvest.models import HarvestItem
+from udata.i18n import lazy_gettext as _
 from udata.models import GeoZone, License, Resource, SpatialCoverage, db
 from udata.utils import daterange_end, daterange_start, get_by
 
@@ -30,6 +25,7 @@ ALLOWED_RESOURCE_TYPES = ("dkan", "file", "file.upload", "api", "metadata")
 
 
 class CkanBackend(BaseBackend):
+    name = "ckan"
     display_name = "CKAN"
     filters = (
         HarvestFilter(_("Organization"), "organization", str, _("A CKAN Organization name")),
@@ -163,7 +159,6 @@ class CkanBackend(BaseBackend):
         dataset.tags = [t["name"] for t in data["tags"] if t["name"]]
 
         dataset.harvest.created_at = data["metadata_created"]
-        dataset.harvest.modified_at = data["metadata_modified"]
 
         dataset.harvest.ckan_name = data["name"]
 
@@ -178,7 +173,10 @@ class CkanBackend(BaseBackend):
                 continue
             elif key == "spatial":
                 # GeoJSON representation (Polygon or Point)
-                spatial_geom = json.loads(value)
+                if isinstance(value, dict):
+                    spatial_geom = value
+                else:
+                    spatial_geom = json.loads(value)
             elif key == "spatial-text":
                 # Textual representation of the extent / location
                 qs = GeoZone.objects(db.Q(name=value) | db.Q(slug=value))
@@ -193,14 +191,15 @@ class CkanBackend(BaseBackend):
                 log.debug("spatial-uri value not handled: %s", value)
             elif key == "frequency":
                 # Update frequency
-                freq = frequency_from_rdf(value)
-                if freq:
+                if freq := frequency_from_rdf(value):
                     dataset.frequency = freq
-                elif value in UPDATE_FREQUENCIES:
-                    dataset.frequency = value
                 else:
-                    dataset.extras["ckan:frequency"] = value
-                    log.debug("frequency value not handled: %s", value)
+                    # FIXME(python 3.12+): prefer `if value in UpdateFrequency`
+                    try:
+                        dataset.frequency = UpdateFrequency(value)
+                    except ValueError:
+                        dataset.extras["ckan:frequency"] = value
+                        log.debug("frequency value not handled: %s", value)
             # Temporal coverage start
             elif key == "temporal_start":
                 temporal_start = daterange_start(value)
@@ -217,12 +216,17 @@ class CkanBackend(BaseBackend):
             dataset.spatial.zones = [spatial_zone]
 
         if spatial_geom:
+            if "type" not in spatial_geom:
+                raise HarvestException(f"Spatial geometry {spatial_geom} without `type`")
+
             if spatial_geom["type"] == "Polygon":
                 coordinates = [spatial_geom["coordinates"]]
             elif spatial_geom["type"] == "MultiPolygon":
                 coordinates = spatial_geom["coordinates"]
             else:
-                raise HarvestException("Unsupported spatial geometry")
+                raise HarvestException(
+                    f"Unsupported spatial geometry {spatial_geom['type']} in {spatial_geom}. (Supported types are `Polygon` and `MultiPolygon`)"
+                )
             dataset.spatial.geom = {"type": "MultiPolygon", "coordinates": coordinates}
 
         if temporal_start and temporal_end:
@@ -270,5 +274,7 @@ class CkanBackend(BaseBackend):
 
 
 class DkanBackend(CkanBackend):
+    name = "dkan"
+    display_name = "DKAN"
     schema = dkan_schema
     filters = []

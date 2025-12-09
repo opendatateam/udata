@@ -13,7 +13,7 @@ from udata.core.contact_point.api import ContactPointApiParser
 from udata.core.contact_point.api_fields import contact_point_fields, contact_point_page_fields
 from udata.core.dataservices.csv import DataserviceCsvAdapter
 from udata.core.dataservices.models import Dataservice
-from udata.core.dataset.api import DatasetApiParser
+from udata.core.dataset.api import DatasetApiParser, catalog_parser
 from udata.core.dataset.api_fields import dataset_page_fields
 from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter
 from udata.core.dataset.models import Dataset
@@ -29,7 +29,6 @@ from udata.core.storages.api import (
 )
 from udata.models import ContactPoint
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
-from udata.utils import multi_to_dict
 
 from .api_fields import (
     member_fields,
@@ -50,7 +49,7 @@ from .forms import (
 from .models import Member, MembershipRequest, Organization
 from .permissions import EditOrganizationPermission, OrganizationPrivatePermission
 from .rdf import build_org_catalog
-from .tasks import notify_membership_request, notify_membership_response
+from .tasks import notify_membership_request, notify_membership_response, notify_new_member
 
 DEFAULT_SORTING = "-created_at"
 SUGGEST_SORTING = "-metrics.followers"
@@ -234,32 +233,37 @@ class DatasetsResourcesCsvAPI(API):
 class OrganizationRdfAPI(API):
     @api.doc("rdf_organization")
     def get(self, org):
-        format = RDF_EXTENSIONS[negociate_content()]
-        url = url_for("api.organization_rdf_format", org=org.id, format=format)
+        _format = RDF_EXTENSIONS[negociate_content()]
+        # We sanitize the args used as kwargs in url_for
+        params = catalog_parser.parse_args()
+        url = url_for("api.organization_rdf_format", org=org.id, _format=_format, **params)
         return redirect(url)
 
 
-@ns.route("/<org:org>/catalog.<format>", endpoint="organization_rdf_format", doc=common_doc)
+@ns.route("/<org:org>/catalog.<_format>", endpoint="organization_rdf_format", doc=common_doc)
 @api.response(404, "Organization not found")
 @api.response(410, "Organization has been deleted")
 class OrganizationRdfFormatAPI(API):
     @api.doc("rdf_organization_format")
-    def get(self, org, format):
+    @api.expect(catalog_parser)
+    def get(self, org, _format):
         if org.deleted:
             api.abort(410)
-        params = multi_to_dict(request.args)
-        page = int(params.get("page", 1))
-        page_size = int(params.get("page_size", 100))
-        datasets = Dataset.objects(organization=org).visible().paginate(page, page_size)
+        params = catalog_parser.parse_args()
+        datasets = DatasetApiParser.parse_filters(
+            Dataset.objects(organization=org).visible(), params
+        )
+        datasets = datasets.paginate(params["page"], params["page_size"])
+
         dataservices = (
             Dataservice.objects(organization=org)
             .visible()
-            .filter_by_dataset_pagination(datasets, page)
+            .filter_by_dataset_pagination(datasets, params["page"])
         )
-        catalog = build_org_catalog(org, datasets, dataservices, format=format)
+        catalog = build_org_catalog(org, datasets, dataservices, _format=_format, **params)
         # bypass flask-restplus make_response, since graph_response
         # is handling the content negociation directly
-        return make_response(*graph_response(catalog, format))
+        return make_response(*graph_response(catalog, _format))
 
 
 @ns.route("/badges/", endpoint="available_organization_badges")
@@ -379,12 +383,13 @@ class MembershipRequestAPI(API):
 
         form = api.validate(MembershipRequestForm, membership_request)
 
-        if not membership_request:
+        if membership_request:
+            form.populate_obj(membership_request)
+            org.save()
+        else:
             membership_request = MembershipRequest()
-            org.requests.append(membership_request)
-
-        form.populate_obj(membership_request)
-        org.save()
+            form.populate_obj(membership_request)
+            org.add_membership_request(membership_request)
 
         notify_membership_request.delay(str(org.id), str(membership_request.id))
 
@@ -420,6 +425,7 @@ class MembershipAcceptAPI(MembershipAPI):
         org.members.append(member)
         org.count_members()
         org.save()
+        MembershipRequest.after_handle.send(membership_request, org=org)
 
         notify_membership_response.delay(str(org.id), str(membership_request.id))
 
@@ -442,6 +448,7 @@ class MembershipRefuseAPI(MembershipAPI):
         membership_request.refusal_comment = form.comment.data
 
         org.save()
+        MembershipRequest.after_handle.send(membership_request, org=org)
 
         notify_membership_response.delay(str(org.id), str(membership_request.id))
 
@@ -467,6 +474,8 @@ class MemberAPI(API):
         org.members.append(member)
         org.count_members()
         org.save()
+
+        notify_new_member.delay(str(org.id), str(member.user.email))
 
         return member, 201
 

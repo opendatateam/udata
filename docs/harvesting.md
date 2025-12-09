@@ -90,10 +90,10 @@ optional arguments:
 
 `udata` comes with 3 harvest backends (listed below) but you can implement your own backend.
 In order for `udata` to be able to use any of those backends, they first need to be enabled
-in the `udata.cfg` `PLUGINS` section, like so:
+in the `udata.cfg` `HARVESTER_BACKENDS` section, like so:
 
 ```cfg
-PLUGINS = ['dcat']
+HARVESTER_BACKENDS = ['dcat', 'csw*']
 ```
 
 ### DCAT
@@ -269,10 +269,7 @@ Another trick could be calling the synchronous version of the harvesting command
 $ udata harvest run <source_id>
 ```
 
-`source_id` is the id of your job, taken from the (old) admin at http://dev.local:7000/fr/admin/system/.
-
-
 [DCAT]: https://www.w3.org/TR/vocab-dcat/
-[backends-repository]: https://github.com/opendatateam/udata/tree/master/udata/harvest/backends
+[backends-repository]: https://github.com/opendatateam/udata/tree/main/udata/harvest/backends
 [gov-uk-references]: http://reference.data.gov.uk/
 [cookiecutter-template]: https://github.com/opendatateam/cookiecutter-udata-harvester

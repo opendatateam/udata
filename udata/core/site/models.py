@@ -8,6 +8,7 @@ from udata.core.metrics.helpers import get_metrics_for_model, get_stock_metrics
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
 from udata.models import WithMetrics, db
+from udata.utils import get_udata_version
 
 __all__ = ("Site", "SiteSettings")
 
@@ -66,12 +67,7 @@ class Site(WithMetrics, db.Document):
 
     @field(description="The current version of udata")
     def version(self):
-        try:
-            from importlib.metadata import version
-
-            return version("udata")
-        except Exception:
-            return None
+        return get_udata_version()
 
     def count_users(self):
         from udata.models import User

@@ -6,9 +6,9 @@ udata follows [Python PEP 440 on versioning][pep440] to version its published re
 
 ### Branches management
 
-There is a main branch on the [udata git repository][github], `master` and some temporary feature branches.
+There is a main branch on the [udata git repository][github], `main` and some temporary feature branches.
 
-The `master` is the stable development branch on which:
+The `main` is the stable development branch on which:
 
 - bug fixes should occur (unless the bug is only present on a maintenance branch)
 - security upgrades are done (unless only necessary on a maintenance branch)
@@ -56,7 +56,7 @@ The steps to make a release are:
 ## Feature branches
 
 Sometimes a new feature or an EPIC requires more than one pull request and a lot of testing.
-For these cases, it's not desirable to use the `master` branch to test until it's stable because we want to keep the `master` branch as stable as possible.
+For these cases, it's not desirable to use the `main` branch to test until it's stable because we want to keep the `main` branch as stable as possible.
 
 To handle these cases we are using feature branches, named like `feature/my-feature`. These branches will build on CircleCI and produce a [local version](pep440-local) package.
 

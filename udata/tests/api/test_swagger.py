@@ -3,22 +3,21 @@ import json
 from flask import url_for
 from flask_restx import schemas
 
+from udata.tests.api import PytestOnlyAPITestCase
 from udata.tests.helpers import assert200
 
 
-class SwaggerBlueprintTest:
-    modules = []
-
-    def test_swagger_resource_type(self, api):
-        response = api.get(url_for("api.specs"))
+class SwaggerBlueprintTest(PytestOnlyAPITestCase):
+    def test_swagger_resource_type(self):
+        response = self.get(url_for("api.specs"))
         assert200(response)
         swagger = json.loads(response.data)
         expected = swagger["paths"]["/datasets/{dataset}/resources/"]
         expected = expected["put"]["responses"]["200"]["schema"]["type"]
         assert expected == "array"
 
-    def test_swagger_specs_validate(self, api):
-        response = api.get(url_for("api.specs"))
+    def test_swagger_specs_validate(self):
+        response = self.get(url_for("api.specs"))
         try:
             schemas.validate(response.json)
         except schemas.SchemaValidationError as e:
