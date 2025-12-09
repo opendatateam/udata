@@ -222,6 +222,15 @@ wheels = [
 ]
 
 [[package]]
+name = "cachetools"
+version = "6.2.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/fb/44/ca1675be2a83aeee1886ab745b28cda92093066590233cc501890eb8417a/cachetools-6.2.2.tar.gz", hash = "sha256:8e6d266b25e539df852251cfd6f990b4bc3a141db73b939058d809ebd2590fc6", size = 31571, upload-time = "2025-11-13T17:42:51.465Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e6/46/eb6eca305c77a4489affe1c5d8f4cae82f285d9addd8de4ec084a7184221/cachetools-6.2.2-py3-none-any.whl", hash = "sha256:6c09c98183bf58560c97b2abfcedcbaf6a896a490f534b031b661d3723b45ace", size = 11503, upload-time = "2025-11-13T17:42:50.232Z" },
+]
+
+[[package]]
 name = "celery"
 version = "5.5.3"
 source = { registry = "https://pypi.org/simple" }
@@ -556,6 +565,18 @@ wheels = [
 ]
 
 [[package]]
+name = "deepdiff"
+version = "8.4.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "orderly-set" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/7f/2f/232a9f6d88a59526347cb483ec601d878ad41ab30ee4f2fba4aca1d5a10e/deepdiff-8.4.2.tar.gz", hash = "sha256:5c741c0867ebc7fcb83950ad5ed958369c17f424e14dee32a11c56073f4ee92a", size = 515380, upload-time = "2025-03-17T21:35:57.388Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0b/03/810d2e70a6944eddc826deb7b68879d8de109369040b25eeb58cdd64d94c/deepdiff-8.4.2-py3-none-any.whl", hash = "sha256:7e39e5b26f3747c54f9d0e8b9b29daab670c3100166b77cc0185d5793121b099", size = 87610, upload-time = "2025-03-17T21:35:54.953Z" },
+]
+
+[[package]]
 name = "distlib"
 version = "0.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -859,6 +880,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/80/9b/f1cd6e41bbf874f3436368f2c7ee3216c1e82d666ff90d1d800e20eb1317/flask_wtf-1.2.2.tar.gz", hash = "sha256:79d2ee1e436cf570bccb7d916533fa18757a2f18c290accffab1b9a0b684666b", size = 42641, upload-time = "2024-10-24T07:18:58.555Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/dc/19/354449145fbebb65e7c621235b6ad69bebcfaec2142481f044d0ddc5b5c5/flask_wtf-1.2.2-py3-none-any.whl", hash = "sha256:e93160c5c5b6b571cf99300b6e01b72f9a101027cab1579901f8b10c5daf0b70", size = 12779, upload-time = "2024-10-24T07:18:56.976Z" },
+]
+
+[[package]]
+name = "frozendict"
+version = "2.4.7"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/90/b2/2a3d1374b7780999d3184e171e25439a8358c47b481f68be883c14086b4c/frozendict-2.4.7.tar.gz", hash = "sha256:e478fb2a1391a56c8a6e10cc97c4a9002b410ecd1ac28c18d780661762e271bd", size = 317082, upload-time = "2025-11-11T22:40:14.251Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/38/74/f94141b38a51a553efef7f510fc213894161ae49b88bffd037f8d2a7cb2f/frozendict-2.4.7-py3-none-any.whl", hash = "sha256:972af65924ea25cf5b4d9326d549e69a9a4918d8a76a9d3a7cd174d98b237550", size = 16264, upload-time = "2025-11-11T22:40:12.836Z" },
 ]
 
 [[package]]
@@ -1411,6 +1441,15 @@ wheels = [
 ]
 
 [[package]]
+name = "orderly-set"
+version = "5.5.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/4a/88/39c83c35d5e97cc203e9e77a4f93bf87ec89cf6a22ac4818fdcc65d66584/orderly_set-5.5.0.tar.gz", hash = "sha256:e87185c8e4d8afa64e7f8160ee2c542a475b738bc891dc3f58102e654125e6ce", size = 27414, upload-time = "2025-07-10T20:10:55.885Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/12/27/fb8d7338b4d551900fa3e580acbe7a0cf655d940e164cb5c00ec31961094/orderly_set-5.5.0-py3-none-any.whl", hash = "sha256:46f0b801948e98f427b412fcabb831677194c05c3b699b80de260374baa0b1e7", size = 13068, upload-time = "2025-07-10T20:10:54.377Z" },
+]
+
+[[package]]
 name = "packaging"
 version = "25.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1644,6 +1683,20 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/b0/77/a5b8c569bf593b0140bde72ea885a803b82086995367bf2037de0159d924/pygments-2.19.2.tar.gz", hash = "sha256:636cb2477cec7f8952536970bc533bc43743542f70392ae026374600add5b887", size = 4968631, upload-time = "2025-06-21T13:39:12.283Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c7/21/705964c7812476f378728bdf590ca4b771ec72385c533964653c68e86bdc/pygments-2.19.2-py3-none-any.whl", hash = "sha256:86540386c03d588bb81d44bc3928634ff26449851e99741617ecb9037ee5ec0b", size = 1225217, upload-time = "2025-06-21T13:39:07.939Z" },
+]
+
+[[package]]
+name = "pyld"
+version = "2.0.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cachetools" },
+    { name = "frozendict" },
+    { name = "lxml" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/50/0b/d97dddcc079d4961aa38bec1ad444b8a3e39ea0fd5627682cac25d452c82/PyLD-2.0.4.tar.gz", hash = "sha256:311e350f0dbc964311c79c28e86f84e195a81d06fef5a6f6ac2a4f6391ceeacc", size = 70976, upload-time = "2024-02-16T17:35:51.481Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/44/cd/80760be197a4bd08e7c136ef4bcb4a2c63fc799d8d91f4c177b21183135e/PyLD-2.0.4-py3-none-any.whl", hash = "sha256:6dab9905644616df33f8755489fc9b354ed7d832d387b7d1974b4fbd3b8d2a89", size = 70868, upload-time = "2024-02-16T17:35:49Z" },
 ]
 
 [[package]]
@@ -2430,16 +2483,19 @@ report = [
     { name = "pytest-cov" },
 ]
 test = [
+    { name = "deepdiff" },
     { name = "faker" },
     { name = "feedparser" },
     { name = "httpretty" },
     { name = "mock" },
+    { name = "pyld" },
     { name = "pytest" },
     { name = "pytest-env" },
     { name = "pytest-flask" },
     { name = "pytest-mock" },
     { name = "pytest-sugar" },
     { name = "requests-mock" },
+    { name = "xmldiff" },
 ]
 
 [package.metadata]
@@ -2456,6 +2512,7 @@ requires-dist = [
     { name = "celerybeat-mongo", specifier = ">=0.2.0,<1.0.0" },
     { name = "click", specifier = ">=8.1.8,<9.0.0" },
     { name = "coverage", extras = ["toml"], marker = "extra == 'report'", specifier = ">=7.7.0,<8.0" },
+    { name = "deepdiff", marker = "extra == 'test'", specifier = ">=8.4.2" },
     { name = "email-validator", specifier = ">=2.2.0,<3.0.0" },
     { name = "factory-boy", specifier = ">=3.3.3,<4.0.0" },
     { name = "faker", marker = "extra == 'test'", specifier = ">=37.0.2,<38.0" },
@@ -2500,6 +2557,7 @@ requires-dist = [
     { name = "pip-tools", marker = "extra == 'dev'", specifier = ">=7.4.1,<8.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.2.0,<5.0" },
     { name = "pydenticon", specifier = ">=0.3.1,<1.0.0" },
+    { name = "pyld", marker = "extra == 'test'", specifier = ">=2.0.4" },
     { name = "pymongo", specifier = ">=4.11.3,<5.0.0" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=9.0,<10.0" },
     { name = "pytest-cov", marker = "extra == 'report'", specifier = ">=7.0.0,<8.0" },
@@ -2526,6 +2584,7 @@ requires-dist = [
     { name = "werkzeug", specifier = ">=3.0.0,<4.0.0" },
     { name = "wtforms", extras = ["email"], specifier = ">=3.2.1,<4.0.0" },
     { name = "wtforms-json", specifier = ">=0.3.5,<1.0.0" },
+    { name = "xmldiff", marker = "extra == 'test'", specifier = ">=2.7.0" },
 ]
 provides-extras = ["dev", "test", "doc", "report"]
 
@@ -2695,3 +2754,16 @@ dependencies = [
     { name = "wtforms" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/24/20/4e88bb8417b2f8d63385da8eaedb0a591fed9e7fe72fd883d119319a6b50/WTForms-JSON-0.3.5.tar.gz", hash = "sha256:782728526a3963e9cd85948894185bff55233f3d068155175465cecec09d2234", size = 12797, upload-time = "2022-04-16T19:27:35.17Z" }
+
+[[package]]
+name = "xmldiff"
+version = "2.7.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "lxml" },
+    { name = "setuptools" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/55/d8/b31a4d75bc72d5c3a5adf5012405118169b56d163ebf407e4fc49a575e96/xmldiff-2.7.0.tar.gz", hash = "sha256:c0910b1f800366dd7ec62923e5d06e8b06a1bd9120569a1c27f4f2446b9c68a2", size = 87596, upload-time = "2024-05-13T12:15:48.996Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2d/23/4c026139010faa8a48636fac190e9f8f830f850edca8e85f74123a58ed92/xmldiff-2.7.0-py3-none-any.whl", hash = "sha256:c8020e6aa4aa9fa13c72e5bf0eeafd0be998b0ab55d78b008abc75fbfebaca27", size = 43994, upload-time = "2024-05-13T12:15:46.459Z" },
+]
