@@ -294,17 +294,18 @@ def test_with_credentials_disabled(url):
 
 @pytest.mark.options(CDATA_BASE_URL="http://localhost:3000/")
 class CdataUrlTest(PytestOnlyTestCase):
-    @pytest.mark.options(CDATA_BASE_URL=None)
-    def test_cdata_url_without_base_url(self):
+    def test_cdata_url_without_base_url(self, app):
+        app.config["CDATA_BASE_URL"] = None
         assert uris.cdata_url("test") is None
 
     def test_cdata_url_with_simple_uri(self):
         assert uris.cdata_url("test") == "http://localhost:3000/test"
 
+    @pytest.mark.options(MAIL_CAMPAIGN="mail")
     def test_cdata_url_with_mail_campaign(self):
         assert (
-            uris.cdata_url("test", _mailCampaign="mail")
-            == "http://localhost:3000/test?mtm_campaign=test"
+            uris.cdata_url("test", _mailCampaign=True)
+            == "http://localhost:3000/test?mtm_campaign=mail"
         )
 
     def test_cdata_url_with_trailing_slash(self):
