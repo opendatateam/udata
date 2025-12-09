@@ -16,7 +16,7 @@ def new_membership_request(org: Organization, request: MembershipRequest) -> Mai
                 )
             ),
             LabelledContent(_("Reason for the request:"), request.comment),
-            MailCTA(_("See the request"), cdata_url(f"/admin/organizations/{org.id}/members/")),
+            MailCTA(_("See the request"), cdata_url(f"/admin/organizations/{org.id}/members")),
         ],
     )
 

@@ -199,7 +199,7 @@ class Reuse(db.Datetimed, Auditable, WithMetrics, ReuseBadgeMixin, Linkable, Own
         cls.before_save.send(document)
 
     def self_web_url(self, **kwargs):
-        return cdata_url(f"/reuses/{self._link_id(**kwargs)}/", **kwargs)
+        return cdata_url(f"/reuses/{self._link_id(**kwargs)}", **kwargs)
 
     def self_api_url(self, **kwargs):
         return url_for(

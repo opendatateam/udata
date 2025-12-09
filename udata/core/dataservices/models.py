@@ -309,7 +309,7 @@ class Dataservice(
 
     @field(description="Link to the udata web page for this dataservice", show_as_ref=True)
     def self_web_url(self, **kwargs):
-        return cdata_url(f"/dataservices/{self._link_id(**kwargs)}/", **kwargs)
+        return cdata_url(f"/dataservices/{self._link_id(**kwargs)}", **kwargs)
 
     __metrics_keys__ = [
         "discussions",
