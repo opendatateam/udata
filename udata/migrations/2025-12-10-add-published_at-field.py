@@ -47,3 +47,7 @@ def migrate(db):
                 updated += 1
 
     log.info(f"Phase 2 done: {updated} datasets refined with activity date")
+
+    log.info("Phase 3: Remove deprecated private field...")
+    result = db.dataset.update_many({"private": {"$exists": True}}, {"$unset": {"private": ""}})
+    log.info(f"Phase 3 done: {result.modified_count} datasets cleaned")
