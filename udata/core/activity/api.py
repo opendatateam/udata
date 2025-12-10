@@ -101,7 +101,7 @@ class SiteActivityAPI(API):
         # Always return a result even not complete
         # But log the error (ie. visible in sentry, silent for user)
         # Can happen when someone manually delete an object in DB (ie. without proper purge)
-        # - Filter out private items (except for sysadmin users)
+        # - Filter out items not visible to the current user
         safe_items = []
         for item in qs.queryset.items:
             try:
@@ -109,10 +109,8 @@ class SiteActivityAPI(API):
             except DoesNotExist as e:
                 log.error(e, exc_info=True)
             else:
-                if hasattr(item.related_to, "private") and (
-                    current_user.is_anonymous or not current_user.sysadmin
-                ):
-                    if item.related_to.private:
+                if hasattr(item.related_to, "is_visible_by"):
+                    if not item.related_to.is_visible_by(current_user):
                         continue
                 safe_items.append(item)
         qs.queryset.items = safe_items
