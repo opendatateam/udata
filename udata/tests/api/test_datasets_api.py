@@ -878,6 +878,32 @@ class DatasetAPITest(APITestCase):
         dataset.reload()
         self.assertEqual(dataset.private, True)
 
+    def test_dataset_api_update_published_at(self):
+        """It should allow setting published_at to control visibility"""
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        assert dataset.private is False
+        assert dataset.published_at is not None
+
+        # Setting published_at to None makes the dataset private
+        data = dataset.to_dict()
+        data["published_at"] = None
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        assert dataset.published_at is None
+        assert dataset.private is True
+
+        # Setting published_at to a date makes the dataset public
+        new_date = "2024-06-15T10:30:00"
+        data["published_at"] = new_date
+        response = self.put(url_for("api.dataset", dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        assert dataset.published_at is not None
+        assert dataset.published_at.isoformat().startswith("2024-06-15")
+        assert dataset.private is False
+
     def test_dataset_api_update_new_resource_with_extras(self):
         """It should update a dataset with a new resource with extras"""
         user = self.login()

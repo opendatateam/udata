@@ -260,7 +260,9 @@ class DatasetForm(ModelForm):
                 field.populate_obj(obj, name)
 
     def save(self, commit=True, **kwargs):
-        if self.formdata and "private" in self.formdata:
+        # Handle backward compatibility: if `private` is sent, convert to published_at.
+        # Only do this if published_at was NOT explicitly provided in the request.
+        if self.formdata and "private" in self.formdata and "published_at" not in self.formdata:
             private_value = self.formdata.get("private")
             if private_value is True:
                 self.published_at.data = None

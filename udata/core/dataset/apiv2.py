@@ -1,5 +1,6 @@
 import logging
 
+import mongoengine
 from flask import abort, request, url_for
 from flask_login import current_user
 from flask_restx import marshal
@@ -128,7 +129,7 @@ dataset_fields = apiv2.model(
             description="Is the dataset private (DEPRECATED: use published_at instead)"
         ),
         "published_at": fields.ISODateTime(
-            description="Publication date (null if unpublished/private)"
+            description="Last publication date, null if unpublished/private. Updated each time the dataset is republished."
         ),
         "tags": fields.List(fields.String),
         "badges": fields.List(
@@ -320,7 +321,9 @@ class DatasetListAPI(API):
     def get(self):
         """List or search all datasets"""
         args = dataset_parser.parse()
-        datasets = Dataset.objects.exclude("resources").visible_by_user(current_user)
+        datasets = Dataset.objects.exclude("resources").visible_by_user(
+            current_user, mongoengine.Q(published_at__ne=None, archived=None, deleted=None)
+        )
         datasets = dataset_parser.parse_filters(datasets, args)
         sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
         return datasets.order_by(sort).paginate(args["page"], args["page_size"])

@@ -353,7 +353,7 @@ dataset_fields = api.model(
             description="Is the dataset private (DEPRECATED: use published_at instead)"
         ),
         "published_at": fields.ISODateTime(
-            description="Publication date (null if unpublished/private)"
+            description="Last publication date, null if unpublished/private. Updated each time the dataset is republished."
         ),
         "tags": fields.List(fields.String),
         "badges": fields.List(

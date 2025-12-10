@@ -345,11 +345,6 @@ class DatasetQuerySet(OwnedQuerySet):
     def hidden(self):
         return self(db.Q(published_at=None) | db.Q(deleted__ne=None) | db.Q(archived__ne=None))
 
-    def visible_by_user(self, user):
-        return super().visible_by_user(
-            user, db.Q(published_at__ne=None, archived=None, deleted=None)
-        )
-
     def with_badge(self, kind):
         return self(badges__kind=kind)
 
