@@ -58,7 +58,7 @@ class Post(db.Datetimed, Linkable, db.Document):
         return self.name or ""
 
     def self_web_url(self, **kwargs):
-        return cdata_url(f"/posts/{self._link_id(**kwargs)}/", **kwargs)
+        return cdata_url(f"/posts/{self._link_id(**kwargs)}", **kwargs)
 
     def self_api_url(self, **kwargs):
         return url_for(
