@@ -54,6 +54,7 @@ UNWANTED_KEYS: dict[str, list[str]] = {
         "spatial",
         "quality",
         "permissions",
+        "private",  # Computed from published_at, not a real field
     ],
     "resource": ["latest", "preview_url", "last_modified"],
     "organization": ["class", "page", "uri", "logo_thumbnail"],

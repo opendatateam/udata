@@ -73,7 +73,7 @@ class ActivityAPITest(APITestCase):
         """It should fetch an activity list from the API"""
         activities: list[Activity] = [
             FakeDatasetActivity.objects.create(
-                actor=UserFactory(), related_to=DatasetFactory(private=True)
+                actor=UserFactory(), related_to=DatasetFactory(published_at=None)
             ),
             FakeReuseActivity.objects.create(
                 actor=UserFactory(), related_to=ReuseFactory(private=True)

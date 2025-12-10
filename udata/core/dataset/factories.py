@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from os.path import join
 
 import factory
@@ -19,6 +20,7 @@ class DatasetFactory(ModelFactory):
     title = factory.Faker("sentence")
     description = factory.Faker("text")
     frequency = UpdateFrequency.UNKNOWN
+    published_at = factory.LazyFunction(datetime.utcnow)
     resources = factory.LazyAttribute(lambda o: ResourceFactory.build_batch(o.nb_resources))
 
     class Params:
@@ -31,7 +33,7 @@ class DatasetFactory(ModelFactory):
 
 
 class HiddenDatasetFactory(DatasetFactory):
-    private = True
+    published_at = None
 
 
 class ChecksumFactory(ModelFactory):

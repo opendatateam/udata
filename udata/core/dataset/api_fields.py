@@ -274,6 +274,7 @@ DEFAULT_MASK = ",".join(
         "last_modified",
         "deleted",
         "private",
+        "published_at",
         "tags",
         "badges",
         "resources",
@@ -349,7 +350,10 @@ dataset_fields = api.model(
         "archived": fields.ISODateTime(description="The archival date if archived"),
         "featured": fields.Boolean(description="Is the dataset featured"),
         "private": fields.Boolean(
-            description="Is the dataset private to the owner or the organization"
+            description="Is the dataset private (DEPRECATED: use published_at instead)"
+        ),
+        "published_at": fields.ISODateTime(
+            description="Last publication date, null if unpublished/private. Updated each time the dataset is republished."
         ),
         "tags": fields.List(fields.String),
         "badges": fields.List(
