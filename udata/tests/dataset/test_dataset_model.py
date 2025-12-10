@@ -302,17 +302,24 @@ class DatasetModelTest(PytestOnlyDBTestCase):
             dataset.title = "New title"
             dataset.save(signal_kwargs={"ignores": ["post_save"]})
 
-    def test_dataset_without_private(self):
+    def test_dataset_published_at_and_private_property(self):
+        """Test the published_at field and computed private property."""
+        # A published dataset has published_at set and private=False
         dataset = DatasetFactory()
+        assert dataset.published_at is not None
         assert dataset.private is False
 
-        dataset.private = None
-        dataset.save()
-        assert dataset.private is False
-
-        dataset.private = True
+        # Setting published_at to None makes the dataset private
+        dataset.published_at = None
         dataset.save()
         assert dataset.private is True
+
+        # Setting published_at back makes the dataset public
+        from datetime import datetime
+
+        dataset.published_at = datetime.utcnow()
+        dataset.save()
+        assert dataset.private is False
 
     def test_dataset_fetch_exclude_resource(self):
         # Having a dataset with multiple resources

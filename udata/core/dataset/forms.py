@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from udata.core.access_type.constants import (
     AccessAudienceCondition,
     AccessAudienceType,
@@ -213,12 +215,67 @@ class DatasetForm(ModelForm):
         _("Private"),
         description=_("Restrict the dataset visibility to you or your organization only."),
     )
+    published_at = fields.DateTimeField(_("Publication date"))
 
     owner = fields.CurrentUserField()
     organization = fields.PublishAsField(_("Publish as"))
     extras = fields.ExtrasField()
     resources = fields.NestedModelList(ResourceForm)
     contact_points = fields.ContactPointListField(validators=[validate_contact_point])
+
+    # ==================================================================================
+    # Backward compatibility layer for `private` field
+    # ==================================================================================
+    # The `private` boolean field has been replaced by `published_at` (datetime) on the
+    # Dataset model. However, we need to maintain API backward compatibility.
+    #
+    # Challenges encountered:
+    # 1. MongoEngine rejects unknown fields in constructor - we can't just add a
+    #    `private` property with a setter on the model because ModelForm.save() passes
+    #    self.data directly to the model constructor, which fails with FieldDoesNotExist.
+    #
+    # 2. WTForms BooleanField.process_formdata() doesn't update self.data when the value
+    #    is empty/None, so we can't rely on self.private.data to detect explicit None.
+    #
+    # 3. self.data is a read-only property computed from field values, so we can't
+    #    modify it directly (e.g., self.data.pop("private") fails).
+    #
+    # Solution:
+    # - Override __init__ to populate private.data from the existing instance
+    # - Override populate_obj to skip the private field (model has no such field)
+    # - Override save to:
+    #   a) Check self.formdata (raw JSON dict) to detect if private was explicitly sent
+    #   b) Convert private -> published_at before creating/updating the instance
+    #   c) Exclude private from the data dict when creating new instances
+    # ==================================================================================
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance:
+            self.private.data = self.instance.published_at is None
+
+    def populate_obj(self, obj):
+        for name, field in self._fields.items():
+            if name != "private":
+                field.populate_obj(obj, name)
+
+    def save(self, commit=True, **kwargs):
+        if self.formdata and "private" in self.formdata:
+            private_value = self.formdata.get("private")
+            if private_value is True:
+                self.published_at.data = None
+            elif private_value is False or private_value is None:
+                self.published_at.data = datetime.utcnow()
+
+        if self.instance:
+            self.populate_obj(self.instance)
+        else:
+            data = {k: v for k, v in self.data.items() if k != "private"}
+            self.instance = self.model_class(**data)
+
+        if commit:
+            self.instance.save(**kwargs)
+        return self.instance
 
 
 class ResourcesListForm(ModelForm):

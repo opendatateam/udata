@@ -342,7 +342,7 @@ class DatasetAPITest(APITestCase):
         org = OrganizationFactory(members=[Member(user=owner)])
 
         public_datasets = [DatasetFactory() for i in range(2)]
-        private_datasets = [DatasetFactory(organization=org, private=True) for i in range(3)]
+        private_datasets = [DatasetFactory(organization=org, published_at=None) for i in range(3)]
         archived_datasets = [
             DatasetFactory(organization=org, archived=datetime.utcnow()) for i in range(4)
         ]
@@ -424,8 +424,8 @@ class DatasetAPITest(APITestCase):
         owner = UserFactory()
         org = OrganizationFactory()
         public_dataset = DatasetFactory()
-        private_user_dataset = DatasetFactory(private=True, owner=owner)
-        private_org_dataset = DatasetFactory(private=True, organization=org)
+        private_user_dataset = DatasetFactory(published_at=None, owner=owner)
+        private_org_dataset = DatasetFactory(published_at=None, organization=org)
 
         # Only public datasets for non-authenticated user.
         response = self.get(url_for("api.datasets"))
@@ -513,7 +513,7 @@ class DatasetAPITest(APITestCase):
 
     def test_dataset_api_get_private(self):
         """It should not fetch a private dataset from the API and raise 404"""
-        dataset = DatasetFactory(private=True)
+        dataset = HiddenDatasetFactory()
 
         response = self.get(url_for("api.dataset", dataset=dataset))
         self.assert404(response)
@@ -521,7 +521,7 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_get_private_but_authorized(self):
         """It should fetch a private dataset from the API if user is authorized"""
         self.login()
-        dataset = DatasetFactory(owner=self.user, private=True)
+        dataset = HiddenDatasetFactory(owner=self.user)
 
         response = self.get(url_for("api.dataset", dataset=dataset))
         self.assert200(response)
@@ -1325,7 +1325,7 @@ class DatasetAPITest(APITestCase):
         }
 
         # Empty dataset (no resources)
-        empty_dataset = Dataset.objects.create(title="test", resources=None)
+        empty_dataset = DatasetFactory(resources=[])
         response = self.get(url_for("apiv2.dataset_schemas", dataset=empty_dataset))
         assert len(response.json) == 0
 
