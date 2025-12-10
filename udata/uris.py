@@ -91,8 +91,6 @@ def cdata_url(uri: str, **kwargs) -> str | None:
         uri += f"/{append.lstrip('/')}"
 
     url = urljoin(base_url, uri)
-    if not url.endswith("/"):
-        url += "/"
 
     url_parts = list(urlparse(url))
     url_parts[4] = urlencode(
