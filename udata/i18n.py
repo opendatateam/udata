@@ -19,8 +19,8 @@ def get_translation_directories_and_domains():
     for pkg in entry_points(group="udata.i18n"):
         module = pkg.load()
         path = resources.files(module)
-        # `/ ""` is  here to transform MultiplexedPath to a simple str
-        translations_dirs.append(str(path / ""))
+        # Convert path to string (works with MultiplexedPath in Python 3.13+)
+        translations_dirs.append(str(path))
         domains.append(pkg.name)
 
     return translations_dirs, domains

@@ -77,6 +77,11 @@ def init_app(app):
             "SECURITY_CONFIRM_ERROR_VIEW",
             app.config["CDATA_BASE_URL"] + "?flash=confirm_error",
         )
+        # set redirect after password reset - user is not automatically logged in after password reset
+        app.config.setdefault(
+            "SECURITY_POST_RESET_VIEW",
+            app.config["CDATA_BASE_URL"] + "?flash=password_reset",
+        )
 
     # Same logic as in our own mail system :DisableMail
     debug = app.config.get("DEBUG", False)

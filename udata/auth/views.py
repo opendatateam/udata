@@ -28,7 +28,7 @@ from udata.uris import homepage_url
 from udata.utils import wants_json
 
 from . import mails
-from .forms import ChangeEmailForm
+from .forms import ChangeEmailForm, ExtendedLoginForm
 
 _security = LocalProxy(lambda: current_app.extensions["security"])
 _datastore = LocalProxy(lambda: _security.datastore)
@@ -102,11 +102,61 @@ def confirm_change_email(token):
 def get_csrf():
     # We need to have a public endpoint for getting a CSRF token.
     # In Flask, we can query the form with an Accept:application/json,
-    # for example: GET `/login` to get a JSON with the CSRF token.
+    # for example: GET `/login` to get a JSON with the CSRF token.
     # It's not working in our implementation because GET `/login` is routed to
     # cdata and not udata. So we need to have an endpoint existing only on udata
-    # so we can fetch a valid CSRF token.
+    # so we can fetch a valid CSRF token.
     return jsonify({"response": {"csrf_token": generate_csrf()}})
+
+
+def login_with_password_reset_context():
+    """
+    Wraps Flask-Security's login view to add password_reset_required context
+    when a user's password rotation has been demanded.
+
+    This provides a clear indication to the frontend that:
+    1. The login failed because password rotation is required
+    2. The user should be redirected to the password reset flow
+
+    See: https://github.com/opendatateam/udata/issues/3540
+    """
+    # Call the original login view
+    response = login()
+
+    # Check if this is a JSON request with form errors
+    if wants_json() and request.method == "POST":
+        try:
+            response_data = response.get_json()
+            # Check if there are password errors that indicate password rotation
+            if response_data and "response" in response_data:
+                password_rotation_error = str(ExtendedLoginForm.PASSWORD_ROTATION_ERROR)
+                has_rotation_error = False
+
+                # Check in 'errors' list (Flask-Security format)
+                errors = response_data["response"].get("errors", [])
+                if isinstance(errors, list):
+                    has_rotation_error = any(password_rotation_error in str(err) for err in errors)
+
+                # Also check in 'field_errors.password' (Flask-Security format)
+                if not has_rotation_error:
+                    field_errors = response_data["response"].get("field_errors", {})
+                    password_errors = field_errors.get("password", [])
+                    has_rotation_error = any(
+                        password_rotation_error in str(err) for err in password_errors
+                    )
+
+                if has_rotation_error:
+                    # Add password_reset_required flag to the response
+                    response_data["response"]["password_reset_required"] = True
+                    response_data["response"]["password_reset_url"] = url_for(
+                        "security.forgot_password", _external=True
+                    )
+                    return jsonify(response_data), response.status_code
+        except Exception:
+            # If we can't parse the response, just return the original
+            pass
+
+    return response
 
 
 @login_required
@@ -164,7 +214,12 @@ def create_security_blueprint(app, state, import_name):
             endpoint="token_login",
         )(token_login)
     else:
-        bp.route(app.config["SECURITY_LOGIN_URL"], methods=["GET", "POST"], endpoint="login")(login)
+        # Use custom login view that adds password_reset_required context
+        # when a user's password rotation has been demanded
+        # See: https://github.com/opendatateam/udata/issues/3540
+        bp.route(app.config["SECURITY_LOGIN_URL"], methods=["GET", "POST"], endpoint="login")(
+            login_with_password_reset_context
+        )
 
     if state.registerable:
         bp.route(app.config["SECURITY_REGISTER_URL"], methods=["GET", "POST"], endpoint="register")(

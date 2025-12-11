@@ -67,12 +67,15 @@ class ExtendedRegisterForm(WithCaptcha, RegisterFormV2):
 
 
 class ExtendedLoginForm(LoginForm):
+    # error message for password rotation to identify this specific error in views
+    PASSWORD_ROTATION_ERROR = _("Password must be changed for security reasons")
+
     def validate(self, **kwargs):
         if not super().validate(**kwargs):
             return False
 
         if self.user.password_rotation_demanded:
-            self.password.errors.append(_("Password must be changed for security reasons"))
+            self.password.errors.append(self.PASSWORD_ROTATION_ERROR)
             return False
 
         return True
