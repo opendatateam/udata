@@ -52,23 +52,6 @@ def membership_accepted(org: Organization) -> MailMessage:
     )
 
 
-def new_member(org: Organization) -> MailMessage:
-    return MailMessage(
-        subject=_("You have been added as a member of an organization"),
-        paragraphs=[
-            ParagraphWithLinks(
-                _(
-                    "Good news! You are now a member of %(org)s.",
-                    org=org,
-                )
-            ),
-            MailCTA(
-                _("View the organization"), cdata_url(f"/admin/organizations/{org.id}/datasets")
-            ),
-        ],
-    )
-
-
 def badge_added_certified(org: Organization) -> MailMessage:
     return MailMessage(
         subject=_("Your organization has been certified"),

@@ -70,17 +70,6 @@ def notify_membership_response(org_id, request_id):
         mails.membership_refused(org).send(request.user)
 
 
-@task
-def notify_new_member(org_id, email):
-    org = Organization.objects.get(pk=org_id)
-    member = next((m for m in org.members if m.user.email == email), None)
-
-    if member is None:
-        return
-
-    mails.new_member(org).send(member.user)
-
-
 @task(route="high.mail")
 def notify_membership_invitation(org_id, invitation_id):
     org = Organization.objects.get(pk=org_id)
