@@ -31,6 +31,7 @@ from .constants import (
     ORG_BID_SIZE_LIMIT,
     ORG_ROLES,
     PUBLIC_SERVICE,
+    REQUEST_TYPES,
 )
 
 __all__ = ("Organization", "Team", "Member", "MembershipRequest")
@@ -66,7 +67,18 @@ class Member(db.EmbeddedDocument):
 
 class MembershipRequest(db.EmbeddedDocument):
     """
-    Pending organization membership requests
+    Pending organization membership requests or invitations.
+
+    For requests (user asks to join):
+        - type = "request"
+        - user = the requesting user
+        - created_by = None
+
+    For invitations (org invites user):
+        - type = "invitation"
+        - user = the invited user (or None if email invitation)
+        - email = email for non-registered users
+        - created_by = admin who created the invitation
     """
 
     id = db.AutoUUIDField()
@@ -80,6 +92,12 @@ class MembershipRequest(db.EmbeddedDocument):
 
     comment = db.StringField()
     refusal_comment = db.StringField()
+
+    # New fields for invitation support
+    kind = db.StringField(choices=list(REQUEST_TYPES), default="request")
+    email = db.StringField()  # For inviting non-registered users by email
+    created_by = db.ReferenceField("User")  # Admin who created the invitation
+    role = db.StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE)
 
     after_create = Signal()
     after_handle = Signal()
@@ -256,7 +274,11 @@ class Organization(
 
     def pending_request(self, user):
         for request in self.requests:
-            if request.user == user and request.status == "pending":
+            if (
+                request.user == user
+                and request.status == "pending"
+                and request.kind != "invitation"
+            ):
                 return request
         return None
 

@@ -2,8 +2,9 @@ from flask import url_for
 
 from udata.core import storages
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import AdminFactory, UserFactory
-from udata.models import Discussion, Follow
+from udata.models import Discussion, Follow, Member, MembershipRequest
 from udata.tests.helpers import capture_mails, create_test_image
 from udata.utils import faker
 
@@ -450,3 +451,145 @@ class UserAPITest(APITestCase):
 
         assert response.json["data"][0]["name"] == data["name"]
         assert response.json["data"][0]["email"] == data["email"]
+
+
+class OrgInvitationsAPITest(APITestCase):
+    def test_list_org_invitations(self):
+        """Test listing pending organization invitations."""
+        user = self.login()
+        admin = UserFactory()
+        invitation = MembershipRequest(
+            kind="invitation", user=user, created_by=admin, role="editor", comment="Welcome!"
+        )
+        organization = OrganizationFactory(
+            members=[Member(user=admin, role="admin")], requests=[invitation]
+        )
+
+        response = self.get(url_for("api.my_org_invitations"))
+        self.assert200(response)
+
+        assert len(response.json) == 1
+        assert response.json[0]["organization"]["id"] == str(organization.id)
+        assert response.json[0]["organization"]["name"] == organization.name
+        assert response.json[0]["role"] == "editor"
+        assert response.json[0]["comment"] == "Welcome!"
+
+    def test_list_org_invitations_empty(self):
+        """Test listing invitations when there are none."""
+        self.login()
+
+        response = self.get(url_for("api.my_org_invitations"))
+        self.assert200(response)
+
+        assert len(response.json) == 0
+
+    def test_list_org_invitations_excludes_requests(self):
+        """Test that membership requests are not listed as invitations."""
+        user = self.login()
+        request = MembershipRequest(kind="request", user=user, comment="Please add me")
+        OrganizationFactory(requests=[request])
+
+        response = self.get(url_for("api.my_org_invitations"))
+        self.assert200(response)
+
+        assert len(response.json) == 0
+
+    def test_accept_org_invitation(self):
+        """Test accepting an organization invitation."""
+        user = self.login()
+        admin = UserFactory()
+        invitation = MembershipRequest(
+            kind="invitation", user=user, created_by=admin, role="editor"
+        )
+        organization = OrganizationFactory(
+            members=[Member(user=admin, role="admin")], requests=[invitation]
+        )
+
+        response = self.post(url_for("api.accept_org_invitation", id=invitation.id))
+        self.assert200(response)
+
+        organization.reload()
+        assert organization.is_member(user)
+        member = organization.member(user)
+        assert member.role == "editor"
+        assert organization.requests[0].status == "accepted"
+
+    def test_accept_org_invitation_not_found(self):
+        """Test accepting a non-existent invitation."""
+        self.login()
+
+        response = self.post(
+            url_for("api.accept_org_invitation", id="00000000-0000-0000-0000-000000000000")
+        )
+        self.assert404(response)
+
+    def test_accept_org_invitation_already_accepted(self):
+        """Test accepting an already accepted invitation."""
+        user = self.login()
+        admin = UserFactory()
+        invitation = MembershipRequest(
+            kind="invitation", user=user, created_by=admin, role="editor", status="accepted"
+        )
+        OrganizationFactory(
+            members=[Member(user=admin, role="admin"), Member(user=user, role="editor")],
+            requests=[invitation],
+        )
+
+        response = self.post(url_for("api.accept_org_invitation", id=invitation.id))
+        self.assert400(response)
+
+    def test_refuse_org_invitation(self):
+        """Test refusing an organization invitation."""
+        user = self.login()
+        admin = UserFactory()
+        invitation = MembershipRequest(
+            kind="invitation", user=user, created_by=admin, role="editor"
+        )
+        organization = OrganizationFactory(
+            members=[Member(user=admin, role="admin")], requests=[invitation]
+        )
+
+        response = self.post(url_for("api.refuse_org_invitation", id=invitation.id))
+        self.assert200(response)
+
+        organization.reload()
+        assert not organization.is_member(user)
+        assert organization.requests[0].status == "refused"
+
+    def test_cannot_accept_other_user_invitation(self):
+        """Test that a user cannot accept another user's invitation."""
+        self.login()
+        other_user = UserFactory()
+        admin = UserFactory()
+        invitation = MembershipRequest(
+            kind="invitation", user=other_user, created_by=admin, role="editor"
+        )
+        OrganizationFactory(members=[Member(user=admin, role="admin")], requests=[invitation])
+
+        response = self.post(url_for("api.accept_org_invitation", id=invitation.id))
+        self.assert404(response)
+
+    def test_email_invitation_matched_on_registration(self):
+        """Test that email invitations are linked to user when they register."""
+        admin = UserFactory()
+        invitation = MembershipRequest(
+            kind="invitation", email="newuser@example.com", created_by=admin, role="editor"
+        )
+        organization = OrganizationFactory(
+            members=[Member(user=admin, role="admin")], requests=[invitation]
+        )
+
+        # Create user with the same email - should trigger match_email_invitations
+        new_user = UserFactory(email="newuser@example.com")
+
+        organization.reload()
+        assert organization.requests[0].user == new_user
+        assert organization.requests[0].email is None
+
+        # Now the user should see the invitation
+        self.login(new_user)
+        response = self.get(url_for("api.my_org_invitations"))
+        self.assert200(response)
+
+        assert len(response.json) == 1
+        assert response.json[0]["organization"]["id"] == str(organization.id)

@@ -505,61 +505,124 @@ class MembershipAPITest(PytestOnlyAPITestCase):
 
         assert response.json["message"] == "Unknown membership request id"
 
-    def test_create_member(self):
+    def test_invite_member_by_user_id(self):
+        """Test inviting a user by their user ID creates an invitation."""
         user = self.login()
-        added_user = UserFactory()
+        invited_user = UserFactory()
         organization = OrganizationFactory(
             members=[
                 Member(user=user, role="admin"),
             ]
         )
 
-        api_url = url_for("api.member", org=organization, user=added_user)
-        response = self.post(api_url, {"role": "admin"})
+        api_url = url_for("api.invite_member", org=organization)
+        response = self.post(api_url, {"user": str(invited_user.id), "role": "admin"})
 
         assert201(response)
 
+        assert response.json["kind"] == "invitation"
         assert response.json["role"] == "admin"
+        assert response.json["status"] == "pending"
 
         organization.reload()
-        assert organization.is_member(added_user)
-        assert organization.is_admin(added_user)
-        assert organization.get_metrics()["members"] == 2
+        assert not organization.is_member(invited_user)
+        assert len(organization.requests) == 1
+        assert organization.requests[0].kind == "invitation"
+        assert organization.requests[0].user == invited_user
 
-    def test_only_admin_can_create_member(self):
+    def test_invite_member_by_email(self):
+        """Test inviting by email when user doesn't exist yet."""
         user = self.login()
-        added_user = UserFactory()
+        organization = OrganizationFactory(
+            members=[
+                Member(user=user, role="admin"),
+            ]
+        )
+
+        api_url = url_for("api.invite_member", org=organization)
+        response = self.post(api_url, {"email": "newuser@example.com", "role": "editor"})
+
+        assert201(response)
+
+        assert response.json["kind"] == "invitation"
+        assert response.json["email"] == "newuser@example.com"
+        assert response.json["role"] == "editor"
+
+        organization.reload()
+        assert len(organization.requests) == 1
+        assert organization.requests[0].email == "newuser@example.com"
+        assert organization.requests[0].user is None
+
+    def test_invite_member_by_email_existing_user(self):
+        """Test inviting by email when user already exists links to the user."""
+        user = self.login()
+        existing_user = UserFactory(email="existing@example.com")
+        organization = OrganizationFactory(
+            members=[
+                Member(user=user, role="admin"),
+            ]
+        )
+
+        api_url = url_for("api.invite_member", org=organization)
+        response = self.post(api_url, {"email": "existing@example.com", "role": "editor"})
+
+        assert201(response)
+
+        organization.reload()
+        assert len(organization.requests) == 1
+        assert organization.requests[0].user == existing_user
+        assert organization.requests[0].email is None
+
+    def test_only_admin_can_invite_member(self):
+        user = self.login()
+        invited_user = UserFactory()
         organization = OrganizationFactory(
             members=[
                 Member(user=user, role="editor"),
             ]
         )
 
-        api_url = url_for("api.member", org=organization, user=added_user)
-        response = self.post(api_url, {"role": "editor"})
+        api_url = url_for("api.invite_member", org=organization)
+        response = self.post(api_url, {"user": str(invited_user.id), "role": "editor"})
 
         assert403(response)
 
         organization.reload()
-        assert not organization.is_member(added_user)
+        assert len(organization.requests) == 0
 
-    def test_create_member_exists(self):
+    def test_invite_member_already_member(self):
         user = self.login()
-        added_user = UserFactory()
+        existing_member = UserFactory()
         organization = OrganizationFactory(
-            members=[Member(user=user, role="admin"), Member(user=added_user, role="editor")]
+            members=[Member(user=user, role="admin"), Member(user=existing_member, role="editor")]
         )
 
-        api_url = url_for("api.member", org=organization, user=added_user)
-        response = self.post(api_url, {"role": "admin"})
+        api_url = url_for("api.invite_member", org=organization)
+        response = self.post(api_url, {"user": str(existing_member.id), "role": "admin"})
 
-        assert_status(response, 409)
-
-        assert response.json["role"] == "editor"
+        assert400(response)
 
         organization.reload()
-        assert organization.is_member(added_user)
-        assert not organization.is_admin(added_user)
+        assert len(organization.requests) == 0
+
+    def test_invite_member_duplicate_invitation(self):
+        """Test that we can't create duplicate invitations."""
+        user = self.login()
+        invited_user = UserFactory()
+        existing_invitation = MembershipRequest(
+            kind="invitation", user=invited_user, created_by=user, role="editor"
+        )
+        organization = OrganizationFactory(
+            members=[Member(user=user, role="admin")], requests=[existing_invitation]
+        )
+
+        api_url = url_for("api.invite_member", org=organization)
+        response = self.post(api_url, {"user": str(invited_user.id), "role": "admin"})
+
+        assert400(response)
+
+        organization.reload()
+        assert len(organization.requests) == 1
 
     def test_update_member(self):
         user = self.login()

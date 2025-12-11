@@ -13,6 +13,11 @@ MEMBERSHIP_STATUS = {
     "refused": _("Refused"),
 }
 
+REQUEST_TYPES = {
+    "request": _("Request"),
+    "invitation": _("Invitation"),
+}
+
 LOGO_MAX_SIZE = 500
 LOGO_SIZES = [100, 60, 25]
 BIGGEST_LOGO_SIZE = LOGO_SIZES[0]
