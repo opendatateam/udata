@@ -214,6 +214,104 @@ class ApiKeyAPI(API):
         return "", 204
 
 
+@me.route("/org_invitations/", endpoint="my_org_invitations")
+class MyOrgInvitationsAPI(API):
+    @api.secure
+    @api.doc("list_org_invitations")
+    def get(self):
+        """List pending organization invitations for current user."""
+        from udata.core.organization.models import Organization
+
+        user = current_user._get_current_object()
+        invitations = []
+
+        for org in Organization.objects(
+            requests__kind="invitation", requests__user=user, requests__status="pending"
+        ):
+            for req in org.requests:
+                if req.kind == "invitation" and req.user == user and req.status == "pending":
+                    invitations.append(
+                        {
+                            "id": str(req.id),
+                            "organization": {
+                                "id": str(org.id),
+                                "name": org.name,
+                                "slug": org.slug,
+                                "logo": org.logo.url if org.logo else None,
+                            },
+                            "role": req.role,
+                            "comment": req.comment,
+                            "created": req.created.isoformat() if req.created else None,
+                        }
+                    )
+
+        return invitations
+
+
+@me.route("/org_invitations/<uuid:id>/accept/", endpoint="accept_org_invitation")
+class AcceptOrgInvitationAPI(API):
+    @api.secure
+    @api.doc("accept_org_invitation")
+    @api.response(200, "Invitation accepted")
+    @api.response(400, "Invitation is not pending")
+    @api.response(404, "Invitation not found")
+    def post(self, id):
+        """Accept an organization invitation."""
+        from datetime import datetime
+
+        from udata.core.organization.models import Member, Organization
+
+        user = current_user._get_current_object()
+
+        for org in Organization.objects(requests__id=id):
+            for req in org.requests:
+                if req.id == id and req.kind == "invitation" and req.user == user:
+                    if req.status != "pending":
+                        api.abort(400, "Invitation is not pending")
+
+                    req.status = "accepted"
+                    req.handled_on = datetime.utcnow()
+
+                    member = Member(user=user, role=req.role)
+                    org.members.append(member)
+                    org.count_members()
+                    org.save()
+
+                    return {"message": "Invitation accepted"}, 200
+
+        api.abort(404, "Invitation not found")
+
+
+@me.route("/org_invitations/<uuid:id>/refuse/", endpoint="refuse_org_invitation")
+class RefuseOrgInvitationAPI(API):
+    @api.secure
+    @api.doc("refuse_org_invitation")
+    @api.response(200, "Invitation refused")
+    @api.response(400, "Invitation is not pending")
+    @api.response(404, "Invitation not found")
+    def post(self, id):
+        """Refuse an organization invitation."""
+        from datetime import datetime
+
+        from udata.core.organization.models import Organization
+
+        user = current_user._get_current_object()
+
+        for org in Organization.objects(requests__id=id):
+            for req in org.requests:
+                if req.id == id and req.kind == "invitation" and req.user == user:
+                    if req.status != "pending":
+                        api.abort(400, "Invitation is not pending")
+
+                    req.status = "refused"
+                    req.handled_on = datetime.utcnow()
+                    org.save()
+
+                    return {"message": "Invitation refused"}, 200
+
+        api.abort(404, "Invitation not found")
+
+
 @ns.route("/", endpoint="users")
 class UserListAPI(API):
     model = User

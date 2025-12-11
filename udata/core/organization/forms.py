@@ -12,6 +12,7 @@ __all__ = (
     "MemberForm",
     "MembershipRequestForm",
     "MembershipRefuseForm",
+    "MembershipInviteForm",
 )
 
 
@@ -96,3 +97,14 @@ class MemberForm(ModelForm):
         choices=list(ORG_ROLES.items()),
         validators=[validators.DataRequired()],
     )
+
+
+class MembershipInviteForm(Form):
+    user = fields.StringField(_("User ID"))
+    email = fields.StringField(_("Email"))
+    role = fields.SelectField(
+        _("Role"),
+        default="editor",
+        choices=list(ORG_ROLES.items()),
+    )
+    comment = fields.StringField(_("Comment"))
