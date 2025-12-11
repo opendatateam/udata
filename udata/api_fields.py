@@ -734,12 +734,11 @@ def patch(obj, request) -> type:
                 for check in checks:
                     check(
                         value,
-                        **{
-                            "is_creation": obj._created,
-                            "is_update": not obj._created,
-                            "field": key,
-                        },
-                    )  # TODO add other model attributes in function parameters
+                        is_creation=obj._created,
+                        is_update=not obj._created,
+                        field=key,
+                        request_data=data,
+                    )
 
             setattr(obj, key, value)
 
