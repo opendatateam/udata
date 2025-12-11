@@ -12,7 +12,7 @@ from flask_security import MongoEngineUserDatastore, RoleMixin, UserMixin
 from mongoengine.signals import post_save, pre_save
 from werkzeug.utils import cached_property
 
-from udata.api_fields import field
+from udata.api_fields import field, generate_fields
 from udata.core import storages
 from udata.core.discussions.models import Discussion
 from udata.core.linkable import Linkable
@@ -22,6 +22,7 @@ from udata.models import Follow, WithMetrics, db
 from udata.uris import cdata_url
 
 from . import mails
+from .checks import confirmed, no_urls, password_rules
 from .constants import AVATAR_SIZES
 
 __all__ = ("User", "Role", "datastore")
@@ -44,54 +45,58 @@ class UserSettings(db.EmbeddedDocument):
     prefered_language = db.StringField()
 
 
+@generate_fields()
 class User(WithMetrics, UserMixin, Linkable, db.Document):
     slug = field(
-        db.SlugField(max_length=255, required=True, populate_from="fullname"), auditable=False
+        db.SlugField(max_length=255, required=True, populate_from="fullname"),
+        auditable=False,
+        readonly=True,
     )
-    email = field(db.StringField(max_length=255, required=True, unique=True))
-    password = field(db.StringField())
-    active = field(db.BooleanField())
-    fs_uniquifier = field(db.StringField(max_length=64, unique=True, sparse=True))
-    roles = field(db.ListField(db.ReferenceField(Role), default=[]))
+    email = field(db.StringField(max_length=255, required=True, unique=True), show_as_ref=True)
+    password = field(db.StringField(), checks=[password_rules, confirmed])
+    active = field(db.BooleanField(), readonly=True)
+    fs_uniquifier = field(db.StringField(max_length=64, unique=True, sparse=True), readonly=True)
+    roles = field(db.ListField(db.ReferenceField(Role), default=[]), readonly=True)
 
-    first_name = field(db.StringField(max_length=255, required=True))
-    last_name = field(db.StringField(max_length=255, required=True))
+    first_name = field(
+        db.StringField(max_length=255, required=True), show_as_ref=True, checks=[no_urls]
+    )
+    last_name = field(
+        db.StringField(max_length=255, required=True), show_as_ref=True, checks=[no_urls]
+    )
 
-    avatar_url = field(db.URLField())
+    avatar_url = field(db.URLField(), readonly=True)
     avatar = field(
-        db.ImageField(fs=avatars, basename=default_image_basename, thumbnails=AVATAR_SIZES)
+        db.ImageField(fs=avatars, basename=default_image_basename, thumbnails=AVATAR_SIZES),
+        readonly=True,
     )
     website = field(db.URLField())
     about = field(db.StringField())
 
     prefered_language = field(db.StringField())
 
-    apikey = field(db.StringField())
+    apikey = field(db.StringField(), readonly=True)
 
-    created_at = field(db.DateTimeField(default=datetime.utcnow, required=True), auditable=False)
+    created_at = field(
+        db.DateTimeField(default=datetime.utcnow, required=True), auditable=False, readonly=True
+    )
 
-    # The field below is required for Flask-security
-    # when SECURITY_CONFIRMABLE is True
-    confirmed_at = field(db.DateTimeField(), auditable=False)
+    confirmed_at = field(db.DateTimeField(), auditable=False, readonly=True)
 
-    password_rotation_demanded = field(db.DateTimeField(), auditable=False)
-    password_rotation_performed = field(db.DateTimeField(), auditable=False)
+    password_rotation_demanded = field(db.DateTimeField(), auditable=False, readonly=True)
+    password_rotation_performed = field(db.DateTimeField(), auditable=False, readonly=True)
 
-    # The 5 fields below are required for Flask-security
-    # when SECURITY_TRACKABLE is True
-    last_login_at = field(db.DateTimeField(), auditable=False)
-    current_login_at = field(db.DateTimeField(), auditable=False)
-    last_login_ip = field(db.StringField(), auditable=False)
-    current_login_ip = field(db.StringField(), auditable=False)
-    login_count = field(db.IntField(), auditable=False)
+    last_login_at = field(db.DateTimeField(), auditable=False, readonly=True)
+    current_login_at = field(db.DateTimeField(), auditable=False, readonly=True)
+    last_login_ip = field(db.StringField(), auditable=False, readonly=True)
+    current_login_ip = field(db.StringField(), auditable=False, readonly=True)
+    login_count = field(db.IntField(), auditable=False, readonly=True)
 
-    deleted = field(db.DateTimeField())
-    ext = field(db.MapField(db.GenericEmbeddedDocumentField()))
-    extras = field(db.ExtrasField(), auditable=False)
+    deleted = field(db.DateTimeField(), readonly=True)
+    ext = field(db.MapField(db.GenericEmbeddedDocumentField()), readonly=True)
+    extras = field(db.ExtrasField(), auditable=False, readonly=True)
 
-    # Used to track notification for automatic inactive users deletion
-    # when YEARS_OF_INACTIVITY_BEFORE_DELETION is set
-    inactive_deletion_notified_at = field(db.DateTimeField(), auditable=False)
+    inactive_deletion_notified_at = field(db.DateTimeField(), auditable=False, readonly=True)
 
     before_save = Signal()
     after_save = Signal()

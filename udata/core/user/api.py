@@ -1,9 +1,18 @@
+from datetime import datetime
+from uuid import uuid4
+
+from flask import current_app, request
 from flask_security import current_user, logout_user
+from flask_security.utils import hash_password, url_for_security
+from mongoengine.errors import NotUniqueError
 from slugify import slugify
 
-from udata.api import API, api
+from udata.api import API, api, fields
 from udata.api.parsers import ModelApiParser
+from udata.api_fields import patch
 from udata.auth import admin_permission
+from udata.auth.forms import check_captchetat
+from udata.auth.mails import welcome, welcome_existing
 from udata.core.dataset.api_fields import community_resource_fields, dataset_fields
 from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields
@@ -14,6 +23,7 @@ from udata.core.storages.api import (
     uploaded_image_fields,
 )
 from udata.core.user.models import Role
+from udata.i18n import lazy_gettext as _
 from udata.models import CommunityResource, Dataset, Reuse, User
 
 from .api_fields import (
@@ -28,6 +38,26 @@ from .api_fields import (
 from .forms import UserProfileAdminForm, UserProfileForm
 
 DEFAULT_SORTING = "-created_at"
+
+registration_response = api.model(
+    "RegistrationResponse",
+    {
+        "message": fields.String(description="Registration status message"),
+    },
+)
+
+user_registration_fields = api.inherit(
+    "UserRegistration",
+    User.__write_fields__,
+    {
+        "password_confirmation": fields.String(required=True, description="Password confirmation"),
+        "accept_conditions": fields.Boolean(
+            required=True, description="Accept terms and conditions"
+        ),
+        "captcha_code": fields.String(description="Captcha code (if captcha is enabled)"),
+        "captcha_uuid": fields.String(description="Captcha UUID (if captcha is enabled)"),
+    },
+)
 
 
 class UserApiParser(ModelApiParser):
@@ -240,16 +270,64 @@ class UserListAPI(API):
             return users.order_by(args["sort"]).paginate(args["page"], args["page_size"])
         return users.order_by(DEFAULT_SORTING).paginate(args["page"], args["page_size"])
 
-    @api.secure(admin_permission)
     @api.doc("create_user")
-    @api.expect(user_fields)
-    @api.marshal_with(user_fields, code=201)
+    @api.expect(user_registration_fields)
+    @api.marshal_with(registration_response, code=201)
     @api.response(400, "Validation error")
+    @api.response(423, "Registration disabled")
     def post(self):
-        """Create a new object"""
-        form = api.validate(UserProfileAdminForm)
-        user = form.save()
-        return user, 201
+        """Register a new user"""
+        if current_app.config.get("READ_ONLY_MODE"):
+            api.abort(423, _("Registration is disabled"))
+
+        if current_app.config.get("CAPTCHETAT_BASE_URL"):
+            captcha_uuid = request.json.get("captcha_uuid")
+            captcha_code = request.json.get("captcha_code")
+            if not check_captchetat(captcha_uuid, captcha_code):
+                api.abort(400, _("Invalid captcha"))
+
+        if not request.json.get("accept_conditions"):
+            api.abort(400, _("You must accept the terms to continue"))
+
+        user = patch(User(), request)
+        user.password = hash_password(user.password)
+        user.fs_uniquifier = uuid4().hex
+        user.active = True
+
+        send_mail = current_app.config.get("SEND_MAIL", True)
+        if not send_mail:
+            user.confirmed_at = datetime.utcnow()
+
+        try:
+            user.save()
+            _send_confirmation_email(user)
+        except NotUniqueError:
+            existing_user = User.objects(email=user.email).first()
+            if existing_user:
+                _send_existing_account_email(existing_user)
+
+        if send_mail:
+            msg = _("Please check your email to confirm your account.")
+        else:
+            msg = _("Your account has been created")
+
+        return {"message": msg}, 201
+
+
+def _send_existing_account_email(user):
+    # Could be simplified as soon as we take responsability for resetting the password
+    _security = current_app.extensions["security"]
+    token = _security.reset_serializer.dumps(user.fs_uniquifier)
+    recovery_link = url_for_security("reset_password", token=token, _external=True)
+    welcome_existing(recovery_link=recovery_link).send(user)
+
+
+def _send_confirmation_email(user):
+    # Could be simplified as soon as we take responsability for confirming the email
+    _security = current_app.extensions["security"]
+    token = _security.confirm_serializer.dumps([user.fs_uniquifier, user.email])
+    confirmation_link = url_for_security("confirm_email", token=token, _external=True)
+    welcome(confirmation_link=confirmation_link).send(user)
 
 
 @ns.route("/<user:user>/avatar/", endpoint="user_avatar")
