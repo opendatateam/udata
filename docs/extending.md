@@ -11,6 +11,10 @@ there may already be some details you can easily customize with a simple setting
 
 Entrypoints are modules or classes loaded by udata to extends its features.
 
+### I18N (`udata.i18n`)
+
+Plugins can expose a translation directory with the `udata.i18n` entrypoint.
+
 ### Harvesters (`udata.harvesters`)
 
 Plugins can expose extra harvesters via the `udata.harvesters` class entrypoint.

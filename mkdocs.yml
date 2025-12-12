@@ -16,7 +16,6 @@ nav:
         - Getting started: getting-started.md
         - Adapting settings: adapting-settings.md
         - Administrative tasks: administrative-tasks.md
-        - Using plugins: plugins.md
         - Harvesting: harvesting.md
         - RDF support: rdf.md
     - Developping:

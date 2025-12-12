@@ -8,7 +8,7 @@ from flask_security.forms import (
     ForgotPasswordForm,
     Form,
     LoginForm,
-    RegisterForm,
+    RegisterFormV2,
     ResetPasswordForm,
 )
 
@@ -31,7 +31,7 @@ class WithCaptcha:
         return False
 
 
-class ExtendedRegisterForm(WithCaptcha, RegisterForm):
+class ExtendedRegisterForm(WithCaptcha, RegisterFormV2):
     first_name = fields.StringField(
         _("First name"),
         [
@@ -54,11 +54,13 @@ class ExtendedRegisterForm(WithCaptcha, RegisterForm):
     )
 
     def validate(self, **kwargs):
-        # no register allowed when read only mode is on
-        if not super().validate(**kwargs) or current_app.config.get("READ_ONLY_MODE"):
+        if current_app.config.get("READ_ONLY_MODE"):
             return False
 
         if not self.validate_captcha():
+            return False
+
+        if not super().validate(**kwargs):
             return False
 
         return True
@@ -91,10 +93,10 @@ class ExtendedResetPasswordForm(ResetPasswordForm):
 
 class ExtendedForgotPasswordForm(WithCaptcha, ForgotPasswordForm):
     def validate(self, **kwargs):
-        if not super().validate(**kwargs):
+        if not self.validate_captcha():
             return False
 
-        if not self.validate_captcha():
+        if not super().validate(**kwargs):
             return False
 
         return True

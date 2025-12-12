@@ -23,7 +23,7 @@ from udata.core.user.factories import UserFactory
 from udata.i18n import _
 from udata.tests.api import APITestCase
 from udata.tests.api.test_datasets_api import SAMPLE_GEOM
-from udata.tests.features.territories import create_geozones_fixtures
+from udata.tests.helpers import create_geozones_fixtures
 
 
 class TopicsListAPITest(APITestCase):

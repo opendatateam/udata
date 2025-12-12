@@ -102,7 +102,16 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
     on_delete = Signal()
 
     meta = {
-        "indexes": ["$slug", "-created_at", "slug", "apikey"],
+        "indexes": [
+            {
+                "fields": ["$last_name", "$first_name", "$email"],
+                "default_language": "french",
+                "weights": {"last_name": 10, "email": 10, "first_name": 5},
+            },
+            "-created_at",
+            "slug",
+            "apikey",
+        ],
         "ordering": ["-created_at"],
         "auto_create_index_on_save": True,
     }
@@ -133,7 +142,7 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
         return self.has_role("admin")
 
     def self_web_url(self, **kwargs):
-        return cdata_url(f"/users/{self._link_id(**kwargs)}/", **kwargs)
+        return cdata_url(f"/users/{self._link_id(**kwargs)}", **kwargs)
 
     def self_api_url(self, **kwargs):
         return url_for(
@@ -288,6 +297,10 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
                 discussion.save()
         Follow.objects(follower=self).delete()
         Follow.objects(following=self).delete()
+        # Remove related notifications
+        from udata.features.notifications.models import Notification
+
+        Notification.objects.with_user_in_details(self).delete()
 
         from udata.models import ContactPoint
 

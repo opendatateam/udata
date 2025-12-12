@@ -42,12 +42,6 @@ A secret key used as salt for cryptographic parts.
 
 The site identifier. It is used to attached some database configuration, metrics...
 
-### PLUGINS
-
-**default**: `[]`
-
-A list of enabled udata plugins.
-
 ### THEME
 
 **default**: ``'default'``
@@ -214,28 +208,6 @@ See [udata-search-service][udata-search-service] for more information on using a
 **default**: `tuple()`
 
 List spatial levels that shoudn't be indexed (for time, performance and user experience).
-
-## Territories configuration
-
-### ACTIVATE_TERRITORIES
-
-**default**: `False`
-
-Whether you want to activate pages and API related to territories.
-Don't forget to set the `HANDLED_LEVELS` setting too.
-
-### HANDLED_LEVELS
-
-**default**: `tuple()`
-
-The list of levels that you want to deal with.
-
-Warning: the order is important and will determine parents/children for
-a given territory. You have to set the smallest territory level first:
-
-```python
-HANDLED_LEVELS = ('fr:commune', 'fr:departement', 'fr:region')
-```
 
 ## Harvesting configuration
 
@@ -480,6 +452,16 @@ The background color used by the internal provider
 
 The padding (in percent) used by the internal provider
 
+## Notifications configuration
+
+These settings allow you to customize the notification feature.
+
+### DAYS_AFTER_NOTIFICATION_EXPIRED
+
+**default**: 90
+
+The delay of days between an handled notification and its deletion.
+
 ## Posts configuration
 
 Theses settings allow you to customize the post feature.
@@ -570,7 +552,6 @@ SECRET_KEY = 'A unique secret key'
 SERVER_NAME = 'www.data.dev'
 
 DEFAULT_LANGUAGE = 'fr'
-PLUGINS = ['front', 'piwik']
 SITE_ID = 'www.data.dev'
 SITE_TITLE = 'data.dev'
 SITE_URL = 'www.data.dev'

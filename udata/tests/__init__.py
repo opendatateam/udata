@@ -5,7 +5,6 @@ from werkzeug import Response
 
 from udata import settings
 from udata.app import UDataApp, create_app
-from udata.tests.plugin import TestClient
 
 from . import helpers
 
@@ -27,22 +26,12 @@ class TestCaseMixin:
         Not sure if the plugin situation is still relevant now that plugins are integrated
         into udata.
         """
-        _settings = settings.Testing
-        # apply the options(plugins) marker from pytest_flask as soon as app is created
-        # https://github.com/pytest-dev/pytest-flask/blob/a62ea18cb0fe89e3f3911192ab9ea4f9b12f8a16/pytest_flask/plugin.py#L126
-        # this lets us have default settings for plugins applied while testing
-        plugins = getattr(_settings, "PLUGINS", [])
-        for options in request.node.iter_markers("options"):
-            option = options.kwargs.get("plugins", []) or options.kwargs.get("PLUGINS", [])
-            plugins += option
-        setattr(_settings, "PLUGINS", plugins)
-        return _settings
+        return settings.Testing
 
     @pytest.fixture(autouse=True, name="app")
     def _app(self, request):
         test_settings = self.get_settings(request)
         self.app = create_app(settings.Defaults, override=test_settings)
-        self.app.test_client_class = TestClient
         return self.app
 
     def assertEqualDates(self, datetime1, datetime2, limit=1):  # Seconds.
@@ -55,6 +44,33 @@ class TestCaseMixin:
         stream1 = list(response1.iter_encoded())
         stream2 = list(response2.iter_encoded())
         assert stream1 == stream2
+
+    def cli(self, *args, **kwargs):
+        """
+        Execute a CLI command.
+
+        Usage:
+            self.cli("command", "arg1", "arg2")
+            self.cli("command arg1 arg2")  # Auto-split on spaces
+
+        Args:
+            *args: Command and arguments (can be a single string with spaces or multiple args)
+            **kwargs: Additional arguments for the CLI runner (e.g., expect_error=True)
+
+        Returns:
+            The CLI result object
+        """
+        import shlex
+
+        from udata.commands import cli as cli_cmd
+
+        if len(args) == 1 and " " in args[0]:
+            args = shlex.split(args[0])
+
+        result = self.app.test_cli_runner().invoke(cli_cmd, args, **kwargs)
+        if result.exit_code != 0 and kwargs.get("expect_error") is not True:
+            helpers.assert_command_ok(result)
+        return result
 
 
 class TestCase(TestCaseMixin, unittest.TestCase):

@@ -1,4 +1,5 @@
 import collections
+import gzip
 import os
 from datetime import date, datetime
 from tempfile import NamedTemporaryFile
@@ -15,6 +16,7 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.constants import INSPIRE
 from udata.core.organization.constants import CERTIFIED, PUBLIC_SERVICE
 from udata.core.organization.models import Organization
+from udata.core.pages.models import Page
 from udata.harvest.models import HarvestJob
 from udata.models import Activity, Discussion, Follow, TopicElement, Transfer, db
 from udata.storage.s3 import store_bytes
@@ -54,6 +56,12 @@ def purge_datasets(self):
             dataservice.update(datasets=datasets)
         # Remove HarvestItem references
         HarvestJob.objects(items__dataset=dataset).update(set__items__S__dataset=None)
+        # Remove datasets in pages (mongoengine doesn't support updating a field in a generic embed)
+        Page._get_collection().update_many(
+            {"blocs.datasets": dataset.id},
+            {"$pull": {"blocs.$[b].datasets": dataset.id}},
+            array_filters=[{"b.datasets": dataset.id}],
+        )
         # Remove associated Transfers
         Transfer.objects(subject=dataset).delete()
         # Remove each dataset's resource's file
@@ -166,7 +174,12 @@ def export_csv_for_model(model, dataset, replace: bool = False):
             dataset.save()
         # remove previous catalog if exists and replace is True
         if replace and fs_filename_to_remove:
-            storages.resources.delete(fs_filename_to_remove)
+            try:
+                storages.resources.delete(fs_filename_to_remove)
+            except FileNotFoundError:
+                log.error(
+                    f"File not found while deleting resource #{resource.id} ({fs_filename_to_remove}) in export_csv_for_model cleanup"
+                )
         return resource
     finally:
         csvfile.close()
@@ -210,8 +223,8 @@ def export_csv(self, model=None):
             with storages.resources.open(resource.fs_filename, "rb") as f:
                 store_bytes(
                     bucket=current_app.config["EXPORT_CSV_ARCHIVE_S3_BUCKET"],
-                    filename=f"{current_app.config['EXPORT_CSV_ARCHIVE_S3_FILENAME_PREFIX']}{resource.title}",
-                    bytes=f.read(),
+                    filename=f"{current_app.config['EXPORT_CSV_ARCHIVE_S3_FILENAME_PREFIX']}{resource.title}.gz",
+                    bytes=gzip.compress(f.read()),
                 )
 
 

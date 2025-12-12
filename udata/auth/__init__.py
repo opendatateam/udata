@@ -1,4 +1,5 @@
 import logging
+import typing as t
 
 from flask import render_template
 from flask_principal import Permission as BasePermission
@@ -10,6 +11,7 @@ from flask_security import Security as Security
 from flask_security import current_user as current_user
 from flask_security import login_required as login_required
 from flask_security import login_user as login_user
+from flask_security import mail_util
 
 from . import mails
 
@@ -24,9 +26,6 @@ def render_security_template(template_name_or_list, **kwargs):
     return render_template(template_name_or_list, **kwargs)
 
 
-security = Security()
-
-
 class Permission(BasePermission):
     def __init__(self, *needs):
         """Let administrator bypass all permissions"""
@@ -34,6 +33,24 @@ class Permission(BasePermission):
 
 
 admin_permission = Permission()
+
+
+class NoopMailUtil(mail_util.MailUtil):
+    def send_mail(
+        self,
+        template: str,
+        subject: str,
+        recipient: str,
+        sender: t.Union[str, tuple],
+        body: str,
+        html: t.Optional[str],
+        **kwargs: t.Any,
+    ) -> None:
+        log.debug(f"Sending mail {subject} to {recipient}")
+        log.debug(body)
+        log.debug(html)
+
+        return None
 
 
 def init_app(app):
@@ -61,18 +78,24 @@ def init_app(app):
             app.config["CDATA_BASE_URL"] + "?flash=confirm_error",
         )
 
-    security.init_app(
-        app,
+    # Same logic as in our own mail system :DisableMail
+    debug = app.config.get("DEBUG", False)
+    send_mail = app.config.get("SEND_MAIL", not debug)
+    mail_util_cls = mail_util.MailUtil if send_mail else NoopMailUtil
+
+    security = Security(
         datastore,
         register_blueprint=False,
         render_template=render_security_template,
         login_form=ExtendedLoginForm,
-        confirm_register_form=ExtendedRegisterForm,
         register_form=ExtendedRegisterForm,
         reset_password_form=ExtendedResetPasswordForm,
         forgot_password_form=ExtendedForgotPasswordForm,
         password_util_cls=UdataPasswordUtil,
+        mail_util_cls=mail_util_cls,
     )
+
+    security.init_app(app, datastore, register_blueprint=False)
 
     security_bp = create_security_blueprint(app, app.extensions["security"], "security_blueprint")
 

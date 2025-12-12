@@ -1364,6 +1364,70 @@ class DatasetRdfViewsTest(PytestOnlyAPITestCase):
         assert200(response)
         assert response.content_type == mime
 
+    @pytest.mark.parametrize(
+        "fmt,mime",
+        [
+            ("n3", "text/n3"),
+            ("nt", "application/n-triples"),
+            ("ttl", "application/x-turtle"),
+            ("xml", "application/rdf+xml"),
+            ("rdf", "application/rdf+xml"),
+            ("owl", "application/rdf+xml"),
+            ("trig", "application/trig"),
+        ],
+    )
+    def test_dont_fail_with_invalid_uri(self, client, fmt, mime):
+        """Invalid URIs (with spaces or curly brackets) shouldn't make rdf export fail in any format"""
+        invalid_uri_with_quote = 'https://test.org/dataset_with"quote"'
+        invalid_uri_with_curly_bracket = 'http://opendata-sig.saintdenis.re/datasets/identifiant.kml?outSR={"latestWkid":2975,"wkid":2975}'
+        invalid_uri_with_space = "https://catalogue.opendata-ligair.fr/geonetwork/srv/60678572-36e5-4e78-9af3-48f726670dfd fr-modelisation-sirane-vacarm_no2"
+        dataset = DatasetFactory(
+            resources=[
+                ResourceFactory(url=invalid_uri_with_quote),
+                ResourceFactory(url=invalid_uri_with_curly_bracket),
+            ],
+            harvest=HarvestDatasetMetadata(uri=invalid_uri_with_space),
+        )
+
+        url = url_for("api.dataset_rdf_format", dataset=dataset, _format=fmt)
+        response = client.get(url, headers={"Accept": mime})
+        assert200(response)
+
+    @pytest.mark.parametrize(
+        "fmt,mime",
+        [
+            ("n3", "text/n3"),
+            ("nt", "application/n-triples"),
+            ("ttl", "application/x-turtle"),
+            ("trig", "application/trig"),
+        ],
+    )
+    def test_invalid_uri_escape_in_n3_turtle_format(self, client, fmt, mime):
+        """Invalid URIs (with spaces or curly brackets) should be escaped in N3/turtle formats"""
+        invalid_uri_with_quote = 'https://test.org/dataset_with"quote"'
+        invalid_uri_with_curly_bracket = 'http://opendata-sig.saintdenis.re/datasets/identifiant.kml?outSR={"latestWkid":2975,"wkid":2975}'
+        invalid_uri_with_space = "https://catalogue.opendata-ligair.fr/geonetwork/srv/60678572-36e5-4e78-9af3-48f726670dfd fr-modelisation-sirane-vacarm_no2"
+        dataset = DatasetFactory(
+            resources=[
+                ResourceFactory(url=invalid_uri_with_quote),
+                ResourceFactory(url=invalid_uri_with_curly_bracket),
+            ],
+            harvest=HarvestDatasetMetadata(uri=invalid_uri_with_space),
+        )
+
+        url = url_for("api.dataset_rdf_format", dataset=dataset, _format=fmt)
+        response = client.get(url, headers={"Accept": mime})
+        assert200(response)
+        assert "https://test.org/dataset_with%22quote%22" in response.text
+        assert (
+            "http://opendata-sig.saintdenis.re/datasets/identifiant.kml?outSR=%7B%22latestWkid%22:2975,%22wkid%22:2975%7D"
+            in response.text
+        )
+        assert (
+            "https://catalogue.opendata-ligair.fr/geonetwork/srv/60678572-36e5-4e78-9af3-48f726670dfd%20fr-modelisation-sirane-vacarm_no2"
+            in response.text
+        )
+
 
 class DatasetFromRdfUtilsTest(PytestOnlyTestCase):
     def test_licenses_from_rdf(self):

@@ -6,7 +6,6 @@ from udata.api import API, api, fields
 from udata.auth import admin_permission
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_fields, dataset_ref_fields
-from udata.core.dataset.permissions import OwnablePermission
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.permissions import EditOrganizationPermission
 from udata.core.user.api_fields import user_ref_fields
@@ -55,6 +54,7 @@ item_fields = api.model(
     "HarvestItem",
     {
         "remote_id": fields.String(description="The item remote ID to process", required=True),
+        "remote_url": fields.String(description="The item remote url (if available)"),
         "dataset": fields.Nested(
             dataset_ref_fields, description="The processed dataset", allow_null=True
         ),
@@ -115,6 +115,18 @@ validation_fields = api.model(
     },
 )
 
+source_permissions_fields = api.model(
+    "HarvestSourcePermissions",
+    {
+        "edit": fields.Permission(),
+        "delete": fields.Permission(),
+        "run": fields.Permission(),
+        "preview": fields.Permission(),
+        "validate": fields.Permission(),
+        "schedule": fields.Permission(),
+    },
+)
+
 source_fields = api.model(
     "HarvestSource",
     {
@@ -153,6 +165,7 @@ source_fields = api.model(
         "schedule": fields.String(
             description="The source schedule (interval or cron expression)", readonly=True
         ),
+        "permissions": fields.Nested(source_permissions_fields, readonly=True),
     },
 )
 
@@ -313,7 +326,7 @@ class SourceAPI(API):
     @api.marshal_with(source_fields)
     def put(self, source: HarvestSource):
         """Update a harvest source"""
-        OwnablePermission(source).test()
+        source.permissions["edit"].test()
         form = api.validate(HarvestSourceForm, source)
         source = actions.update_source(source, form.data)
         return source
@@ -322,18 +335,19 @@ class SourceAPI(API):
     @api.doc("delete_harvest_source")
     @api.marshal_with(source_fields)
     def delete(self, source: HarvestSource):
-        OwnablePermission(source).test()
+        source.permissions["delete"].test()
         return actions.delete_source(source), 204
 
 
 @ns.route("/source/<harvest_source:source>/validate/", endpoint="validate_harvest_source")
 class ValidateSourceAPI(API):
     @api.doc("validate_harvest_source")
-    @api.secure(admin_permission)
+    @api.secure
     @api.expect(validation_fields)
     @api.marshal_with(source_fields)
     def post(self, source: HarvestSource):
         """Validate or reject an harvest source"""
+        source.permissions["validate"].test()
         form = api.validate(HarvestSourceValidationForm)
         if form.state.data == VALIDATION_ACCEPTED:
             return actions.validate_source(source, form.comment.data)
@@ -354,7 +368,7 @@ class RunSourceAPI(API):
                 "Cannot run source manually. Please contact the platform if you need to reschedule the harvester.",
             )
 
-        OwnablePermission(source).test()
+        source.permissions["run"].test()
 
         if source.validation.state != VALIDATION_ACCEPTED:
             api.abort(400, "Source is not validated. Please validate the source before running.")
@@ -367,11 +381,12 @@ class RunSourceAPI(API):
 @ns.route("/source/<harvest_source:source>/schedule/", endpoint="schedule_harvest_source")
 class ScheduleSourceAPI(API):
     @api.doc("schedule_harvest_source")
-    @api.secure(admin_permission)
+    @api.secure
     @api.expect((str, "A cron expression"))
     @api.marshal_with(source_fields)
     def post(self, source: HarvestSource):
         """Schedule an harvest source"""
+        source.permissions["schedule"].test()
         # Handle both syntax: quoted and unquoted
         try:
             data = request.json
@@ -380,10 +395,11 @@ class ScheduleSourceAPI(API):
         return actions.schedule(source, data)
 
     @api.doc("unschedule_harvest_source")
-    @api.secure(admin_permission)
+    @api.secure
     @api.marshal_with(source_fields)
     def delete(self, source: HarvestSource):
         """Unschedule an harvest source"""
+        source.permissions["schedule"].test()
         return actions.unschedule(source), 204
 
 
@@ -408,6 +424,7 @@ class PreviewSourceAPI(API):
     @api.marshal_with(preview_job_fields)
     def get(self, source: HarvestSource):
         """Preview a single harvest source given an ID or a slug"""
+        source.permissions["preview"].test()
         return actions.preview(source)
 
 
@@ -437,7 +454,7 @@ class JobAPI(API):
     @api.expect(parser)
     @api.marshal_with(job_fields)
     def get(self, ident):
-        """List all jobs for a given source"""
+        """Get a single job given an ID"""
         return actions.get_job(ident)
 
 

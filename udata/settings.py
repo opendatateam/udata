@@ -21,7 +21,6 @@ class Defaults(object):
     DEFAULT_LANGUAGE = "en"
     SECRET_KEY = "Default uData secret key"
     CONTACT_EMAIL = "contact@example.org"
-    TERRITORIES_EMAIL = "territories@example.org"
 
     CDATA_BASE_URL = None
 
@@ -75,6 +74,7 @@ class Defaults(object):
 
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_SAMESITE = None  # Can be set to 'Lax' or 'Strict'. See https://flask.palletsprojects.com/en/2.3.x/security/#security-cookie
+    SECURITY_USE_REGISTER_V2 = True
 
     # Flask-Security-Too settings
 
@@ -175,7 +175,6 @@ class Defaults(object):
 
     UDATA_INSTANCE_NAME = "udata"
 
-    PLUGINS = []
     HARVESTER_BACKENDS = []
     THEME = None
 
@@ -333,10 +332,6 @@ class Defaults(object):
     # - add inspire keyword during harvest if GEMETE INSPIRE thesaurus is used in DCAT.theme
     INSPIRE_SUPPORT = True
 
-    ACTIVATE_TERRITORIES = False
-    # The order is important to compute parents/children, smaller first.
-    HANDLED_LEVELS = tuple()
-
     # Ignore some endpoint from API tracking
     # By default ignore the 3 most called APIs
     TRACKING_BLACKLIST = [
@@ -483,6 +478,11 @@ class Defaults(object):
     AVATAR_INTERNAL_BACKGROUND = "rgb(224,224,224)"
     # Padding (in percent) used by the internal provider
     AVATAR_INTERNAL_PADDING = 10
+
+    # Notification settings
+    ###########################################################################
+    # Notifications are deleted after being handled for 90 days
+    DAYS_AFTER_NOTIFICATION_EXPIRED = 90
 
     # Post settings
     ###########################################################################
@@ -642,7 +642,6 @@ class Testing(object):
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_TASK_EAGER_PROPAGATES = True
     TEST_WITH_PLUGINS = False
-    PLUGINS = []
     HARVESTER_BACKENDS = ["factory"]
     TEST_WITH_THEME = False
     THEME = "testing"
@@ -651,7 +650,6 @@ class Testing(object):
     DEBUG_TOOLBAR = False
     SERVER_NAME = "local.test"
     DEFAULT_LANGUAGE = "fr"
-    ACTIVATE_TERRITORIES = False
     LOGGER_HANDLER_POLICY = "never"
     CELERYD_HIJACK_ROOT_LOGGER = False
     URLS_ALLOW_LOCAL = True  # Test server URL is local.test

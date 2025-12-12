@@ -28,7 +28,7 @@ class LabelledContent:
     label: LazyString
     content: str
     inline: bool = False
-    truncated_at: int = 50
+    truncated_at: int = 200
 
     @property
     def truncated_content(self) -> str:
@@ -90,6 +90,10 @@ def init_app(app):
 
 
 def send_mail(recipients: object | list, message: MailMessage):
+    # Security mails are sent via the Flask-Security package and not
+    # from this function. Disabling mail sending logic is duplicated
+    # in :DisableMail.
+    # Flask-Security templates are rendered in `render_mail_template`.
     debug = current_app.config.get("DEBUG", False)
     send_mail = current_app.config.get("SEND_MAIL", not debug)
 

@@ -254,7 +254,7 @@ def schedule(
         source.modify(
             periodic_task=PeriodicTask.objects.create(
                 task="harvest",
-                name="Harvest {0}".format(source.name),
+                name=f"Harvest {source.name} ({source.id})",
                 description="Periodic Harvesting",
                 enabled=True,
                 args=[str(source.id)],
@@ -317,3 +317,23 @@ def attach(domain, filename):
             count += 1
 
     return AttachResult(count, errors)
+
+
+def detach(dataset: Dataset):
+    """Detach a dataset from its harvest source
+
+    The dataset will be cleaned from harvested information
+    and will no longer be updated or archived by harvesting.
+    """
+    dataset.harvest = None
+    for resource in dataset.resources:
+        resource.harvest = None
+    dataset.save()
+
+
+def detach_all_from_source(source: HarvestSource):
+    """Detach all datasets linked to a harvest source"""
+    datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
+    for dataset in datasets:
+        detach(dataset)
+    return len(datasets)
