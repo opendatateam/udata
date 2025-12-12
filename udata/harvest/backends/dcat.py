@@ -15,6 +15,7 @@ from udata.i18n import gettext as _
 from udata.rdf import (
     DCAT,
     DCT,
+    GEODCAT,
     HYDRA,
     SPDX,
     guess_format,
@@ -265,6 +266,12 @@ class CswDcatBackend(DcatBackend):
 
     extra_configs = (
         HarvestExtraConfig(
+            _("GeoDCAT-AP"),
+            "enable_geodcat",
+            str,
+            _("Request GeoDCAT-AP to the CSW server (must be supported by the server)."),
+        ),
+        HarvestExtraConfig(
             _("Remote URL prefix"),
             "remote_url_prefix",
             str,
@@ -336,8 +343,6 @@ class CswDcatBackend(DcatBackend):
     </csw:GetRecords>
     """
 
-    CSW_OUTPUT_SCHEMA = "http://www.w3.org/ns/dcat#"
-
     SAXON_SECURITY_FEATURES = {
         "http://saxon.sf.net/feature/allow-external-functions": "false",
         "http://saxon.sf.net/feature/parserFeature?uri=http://apache.org/xml/features/nonvalidating/load-external-dtd": "false",
@@ -356,15 +361,23 @@ class CswDcatBackend(DcatBackend):
         self.xpath_proc = self.saxon_proc.new_xpath_processor()
         self.xpath_proc.declare_namespace("csw", CSW_NAMESPACE)
 
+    @property
+    def output_schema(self):
+        if self.get_extra_config_value("enable_geodcat"):
+            return str(GEODCAT)
+        else:
+            return str(DCAT)
+
     def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
         """
         Yield all RDF pages as `Graph` from the source
         """
+        output_schema = self.output_schema
         page_number = 0
         start = 1
 
         while True:
-            data = self.CSW_REQUEST.format(output_schema=self.CSW_OUTPUT_SCHEMA, start=start)
+            data = self.CSW_REQUEST.format(output_schema=output_schema, start=start)
             response = self.post(url, data=data, headers={"Content-Type": "application/xml"})
             response.raise_for_status()
 
@@ -441,7 +454,7 @@ class CswIso19139DcatBackend(CswDcatBackend):
     name = "csw-iso-19139"
     display_name = "CSW-ISO-19139"
 
-    CSW_OUTPUT_SCHEMA = "http://www.isotc211.org/2005/gmd"
+    extra_configs = [c for c in CswDcatBackend.extra_configs if c.key != "enable_geodcat"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -452,6 +465,11 @@ class CswIso19139DcatBackend(CswDcatBackend):
         self.xslt_exec.set_parameter(
             "CoupledResourceLookUp", self.saxon_proc.make_string_value("disabled")
         )
+
+    @property
+    @override
+    def output_schema(self):
+        return "http://www.isotc211.org/2005/gmd"
 
     @override
     def as_dcat(self, tree: PyXdmNode) -> PyXdmNode:
