@@ -146,7 +146,7 @@ class DiscussionsTest(APITestCase):
             def check_signal(kwargs):
                 self.assertIsNotNone(discussion_id)
                 self.assertIn(
-                    f"https://data.gouv.fr/datasets/{dataset.slug}/discussions/?discussion_id={discussion_id}",
+                    f"https://data.gouv.fr/datasets/{dataset.slug}/discussions?discussion_id={discussion_id}",
                     kwargs["message"],
                 )
 

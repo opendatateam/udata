@@ -81,6 +81,9 @@ class MembershipRequest(db.EmbeddedDocument):
     comment = db.StringField()
     refusal_comment = db.StringField()
 
+    after_create = Signal()
+    after_handle = Signal()
+
     @property
     def status_label(self):
         return MEMBERSHIP_STATUS[self.status]
@@ -198,7 +201,7 @@ class Organization(
         cls.before_save.send(document)
 
     def self_web_url(self, **kwargs):
-        return cdata_url(f"/organizations/{self._link_id(**kwargs)}/", **kwargs)
+        return cdata_url(f"/organizations/{self._link_id(**kwargs)}", **kwargs)
 
     def self_api_url(self, **kwargs):
         return url_for(
@@ -303,6 +306,11 @@ class Organization(
     @property
     def views_count(self):
         return self.metrics.get("views", 0)
+
+    def add_membership_request(self, membership_request):
+        self.requests.append(membership_request)
+        self.save()
+        MembershipRequest.after_create.send(membership_request, org=self)
 
     def count_members(self):
         self.metrics["members"] = len(self.members)
