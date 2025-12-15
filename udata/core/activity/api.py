@@ -4,8 +4,9 @@ from bson import ObjectId
 from mongoengine.errors import DoesNotExist
 
 from udata.api import API, api, fields
-from udata.auth import current_user
+from udata.core.dataset.permissions import OwnableReadPermission
 from udata.core.organization.api_fields import org_ref_fields
+from udata.core.owned import Owned
 from udata.core.user.api_fields import user_ref_fields
 from udata.models import Activity, db
 
@@ -109,8 +110,8 @@ class SiteActivityAPI(API):
             except DoesNotExist as e:
                 log.error(e, exc_info=True)
             else:
-                if hasattr(item.related_to, "is_visible_by"):
-                    if not item.related_to.is_visible_by(current_user):
+                if isinstance(item.related_to, Owned):
+                    if not OwnableReadPermission(item.related_to).can():
                         continue
                 safe_items.append(item)
         qs.queryset.items = safe_items

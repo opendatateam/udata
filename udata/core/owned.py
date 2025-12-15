@@ -1,7 +1,6 @@
 import logging
 
 from blinker import signal
-from flask_login import AnonymousUserMixin
 from mongoengine import NULLIFY, Q, post_save
 from mongoengine.fields import ReferenceField
 
@@ -110,33 +109,6 @@ class Owned(object):
         ],
         "queryset_class": OwnedQuerySet,
     }
-
-    def is_visible_by(self, user: User | AnonymousUserMixin) -> bool:
-        """
-        Check if this object is visible to the given user.
-        An object is visible if:
-        - It's not private, OR
-        - The user is a sysadmin, OR
-        - The user owns it or is a member of the owning organization
-
-        Models using this method must have a `private` attribute.
-        """
-        if not getattr(self, "private", False):
-            return True
-
-        if user.is_anonymous:
-            return False
-
-        if user.sysadmin:
-            return True
-
-        if self.owner and self.owner.id == user.id:
-            return True
-
-        if self.organization and self.organization in user.organizations:
-            return True
-
-        return False
 
     def clean(self):
         """
