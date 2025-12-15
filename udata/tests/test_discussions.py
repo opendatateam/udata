@@ -88,7 +88,7 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(message.content, "bla bla")
         self.assertEqual(message.posted_by, user)
         self.assertIsNotNone(message.posted_on)
-        self.assertFalse(self.has_spam_report(discussion, "discussion.0"))
+        self.assertFalse(self.has_spam_report(discussion, message.id))
 
     def test_new_discussion_on_behalf_of_org(self):
         user = self.login()
@@ -182,7 +182,7 @@ class DiscussionsTest(APITestCase):
 
         discussion = discussions[0]
         self.assertTrue(self.has_spam_report(discussion))
-        self.assertFalse(self.has_spam_report(discussion, "discussion.0"))
+        self.assertFalse(self.has_spam_report(discussion, discussion.discussion[0].id))
 
         # Check that the Report was created with callbacks
         report = self.get_spam_report(discussion)
@@ -275,7 +275,7 @@ class DiscussionsTest(APITestCase):
         # Spam is on the discussion (first comment content is checked at discussion level)
         self.assertTrue(self.has_spam_report(discussion))
         # The message itself doesn't have its own spam report
-        self.assertFalse(self.has_spam_report(discussion, "discussion.0"))
+        self.assertFalse(self.has_spam_report(discussion, discussion.discussion[0].id))
 
     def test_new_discussion_missing_comment(self):
         self.login()
