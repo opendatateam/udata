@@ -1,8 +1,5 @@
 from flask import current_app
 from langdetect import detect
-from mongoengine import signals
-
-from udata.mongo import db
 
 from .signals import on_new_potential_spam
 
@@ -11,21 +8,18 @@ class SpamMixin(object):
     """
     Mixin for models that can be checked for spam.
     Spam detection creates Report objects instead of storing spam info on the model itself.
+
+    Classes using this mixin must connect the post_save signal:
+        post_save.connect(MyModel.post_save, sender=MyModel)
+
+    Subclasses must implement `fields_to_check_for_spam()` which returns a dict
+    mapping field names to their text values, e.g.: {"title": "My title", "content": "Some text"}
     """
 
-    attributes_before = None
     detect_spam_enabled: bool = True
 
-    # These will be set during spam detection to track context
-    _spam_report = None  # Reference to the created Report (if any)
-    _spam_base_model = None  # Reference to the base document (for embedded docs)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # Save the list of texts at initialisation to not recheck for spam a text
-        # if it didn't change during this request lifecycle.
-        self.attributes_before = self.texts_to_check_for_spam()
+    # Reference to the created Report (if any), set after post_save
+    _spam_report = None
 
     @staticmethod
     def spam_words():
@@ -39,14 +33,6 @@ class SpamMixin(object):
     def minimum_string_length_for_lang_check():
         return current_app.config.get("SPAM_MINIMUM_STRING_LENGTH_FOR_LANG_CHECK", 30)
 
-    def clean(self):
-        super().clean()
-
-        # We do not want to check embedded document here, they will be checked
-        # during the clean of their parents.
-        if isinstance(self, db.Document):
-            self.detect_spam()
-
     def save_without_spam_detection(self):
         """
         Allow to save a model without doing the spam detection (useful when saving the callbacks for exemple)
@@ -55,73 +41,14 @@ class SpamMixin(object):
         self.save()
         self.detect_spam_enabled = True
 
-    def detect_spam(self, breadcrumb=None):
+    def fields_to_check_for_spam(self):
         """
-        This is the main function doing the spam detection.
-        If spam is detected, a Report is created after the model is saved.
+        Return a dict mapping field names to text values to check for spam.
+        Field names should match MongoEngine field paths (e.g., "title", "discussion.0.content").
         """
-        if not self.detect_spam_enabled:
-            return
-
-        if self.spam_is_whitelisted():
-            return
-
-        # The breadcrumb is useful during reporting to know where we came from
-        # in case of a potential spam inside an embed.
-        if breadcrumb is None:
-            breadcrumb = []
-
-        breadcrumb.append(self)
-
-        for before, text in zip(self.attributes_before, self.texts_to_check_for_spam()):
-            if not text:
-                continue
-
-            # We do not want to re-run the spam detection if the texts didn't change from the initialisation. If we
-            # don't do this, a potential spam marked as no spam will be re-flag as soon as we make change in the model
-            # (for example to set the spam status, or to add a new message). If the model is new, the texts haven't
-            # changed since the init, but we still want to do the spam check.
-            if before == text and not self.is_new():
-                continue
-
-            for word in SpamMixin.spam_words():
-                if word in text.lower():
-                    self._schedule_report(
-                        text=text, breadcrumb=breadcrumb, reason=f'contains spam words "{word}"'
-                    )
-                    return
-
-            # Language detection is not working well with texts of a few words.
-            if (
-                SpamMixin.allowed_langs()
-                and len(text) > SpamMixin.minimum_string_length_for_lang_check()
-            ):
-                lang = detect(text.lower())
-                if lang not in SpamMixin.allowed_langs():
-                    self._schedule_report(
-                        text=text, breadcrumb=breadcrumb, reason=f'not allowed language "{lang}"'
-                    )
-                    return
-
-        for embed in self.embeds_to_check_for_spam():
-            # We need to copy to avoid adding multiple time (in each loop iteration) a new element to the shared
-            # breadcrumb list
-            embed.detect_spam(breadcrumb.copy())
-
-    def is_new(self):
-        """
-        Check if the model is new (not already saved inside DB), in this case
-        we want to check for spam on all the fields.
-        On subsequent requests we want to check only the modified fields.
-        """
-        if isinstance(self, db.Document) or isinstance(self, db.EmbeddedDocument):
-            return self._created
-        else:
-            raise RuntimeError("SpamMixin should be a Document or an EmbeddedDocument")
-
-    def texts_to_check_for_spam(self):
         raise NotImplementedError(
-            "Please implement the `texts_to_check_for_spam` method. Should return a list of strings to check."
+            "Please implement the `fields_to_check_for_spam` method. "
+            "Should return a dict like {'field_name': 'text value'}."
         )
 
     def embeds_to_check_for_spam(self):
@@ -133,62 +60,153 @@ class SpamMixin(object):
     def spam_report_message(self, breadcrumb):
         return f"Spam potentiel sur {type(self).__name__}"
 
-    def _schedule_report(self, text, breadcrumb, reason):
+    @classmethod
+    def post_save(cls, sender, document, **kwargs):
         """
-        Schedule a Report to be created after the model is saved.
-        We need to wait for save because we need the model's ID.
+        Detect spam and create Report after the document is saved.
+        Must be connected via: post_save.connect(MyModel.post_save, sender=MyModel)
         """
-        base_model = breadcrumb[0]
-        spam_model = self
+        if not document.detect_spam_enabled:
+            return
 
-        # Store reference to base_model for embedded documents
-        if isinstance(self, db.EmbeddedDocument):
-            self._spam_base_model = base_model
+        if document.spam_is_whitelisted():
+            return
 
-        def create_report_after_save(sender, document, **kwargs):
-            # Only process if this is our base_model being saved
-            if document != base_model:
-                return
+        spam_info = cls._detect_spam_in_document(document, kwargs.get("created", False))
+        if not spam_info:
+            return
 
-            from udata.core.reports.constants import REASON_AUTO_SPAM
-            from udata.core.reports.models import Report
+        cls._create_spam_report(document, spam_info)
 
-            subject_embed_id = None
-            if spam_model != base_model and hasattr(spam_model, "id"):
-                subject_embed_id = spam_model.id
+    @classmethod
+    def _detect_spam_in_document(cls, document, is_created, breadcrumb=None):
+        """
+        Detect spam in document and its embeds.
+        Returns spam info dict if spam found, None otherwise.
+        """
+        if breadcrumb is None:
+            breadcrumb = []
 
-            # Check if report already exists to avoid duplicates
-            existing = Report.objects(
-                subject=base_model,
-                reason=REASON_AUTO_SPAM,
-                dismissed_at=None,
-                subject_embed_id=subject_embed_id,
-            ).first()
-            if existing:
-                signals.post_save.disconnect(create_report_after_save)
-                return
+        breadcrumb.append(document)
 
-            # Create the Report
-            message = spam_model.spam_report_message(breadcrumb)
-            report = Report(
-                subject=base_model,
-                subject_embed_id=subject_embed_id,
-                reason=REASON_AUTO_SPAM,
-                message=f"{message}\n\nReason: {reason}\nText: {text[:500]}",
+        changed_fields = set(document._get_changed_fields())
+
+        for field_name, text in document.fields_to_check_for_spam().items():
+            if not text:
+                continue
+
+            # Only check fields that have changed (or all fields if document is new)
+            field_changed = is_created or any(
+                field_name.startswith(cf) or cf.startswith(field_name.split(".")[0])
+                for cf in changed_fields
             )
-            report.save()
+            if not field_changed:
+                continue
 
-            # Store reference to the report
-            spam_model._spam_report = report
+            for word in SpamMixin.spam_words():
+                if word in text.lower():
+                    return {
+                        "spam_model": document,
+                        "text": text,
+                        "breadcrumb": breadcrumb,
+                        "reason": f'contains spam words "{word}"',
+                    }
 
-            # Emit signal for notifications
-            on_new_potential_spam.send(spam_model, message=message, text=text, reason=reason)
+            if (
+                SpamMixin.allowed_langs()
+                and len(text) > SpamMixin.minimum_string_length_for_lang_check()
+            ):
+                lang = detect(text.lower())
+                if lang not in SpamMixin.allowed_langs():
+                    return {
+                        "spam_model": document,
+                        "text": text,
+                        "breadcrumb": breadcrumb,
+                        "reason": f'not allowed language "{lang}"',
+                    }
 
-            # Disconnect to avoid memory leaks
-            signals.post_save.disconnect(create_report_after_save)
+        # Check embedded documents
+        for embed in document.embeds_to_check_for_spam():
+            # Embeds are always "new" in the context of spam checking since we check their content
+            spam_info = cls._detect_spam_in_embed(embed, breadcrumb.copy())
+            if spam_info:
+                return spam_info
 
-        # Connect signal - use weak=False to prevent garbage collection
-        signals.post_save.connect(create_report_after_save, sender=base_model.__class__, weak=False)
+        return None
+
+    @classmethod
+    def _detect_spam_in_embed(cls, embed, breadcrumb):
+        """Detect spam in an embedded document."""
+        breadcrumb.append(embed)
+
+        for field_name, text in embed.fields_to_check_for_spam().items():
+            if not text:
+                continue
+
+            for word in SpamMixin.spam_words():
+                if word in text.lower():
+                    return {
+                        "spam_model": embed,
+                        "text": text,
+                        "breadcrumb": breadcrumb,
+                        "reason": f'contains spam words "{word}"',
+                    }
+
+            if (
+                SpamMixin.allowed_langs()
+                and len(text) > SpamMixin.minimum_string_length_for_lang_check()
+            ):
+                lang = detect(text.lower())
+                if lang not in SpamMixin.allowed_langs():
+                    return {
+                        "spam_model": embed,
+                        "text": text,
+                        "breadcrumb": breadcrumb,
+                        "reason": f'not allowed language "{lang}"',
+                    }
+
+        return None
+
+    @classmethod
+    def _create_spam_report(cls, document, spam_info):
+        """Create a spam Report from detected spam info."""
+        from udata.core.reports.constants import REASON_AUTO_SPAM
+        from udata.core.reports.models import Report
+
+        spam_model = spam_info["spam_model"]
+        text = spam_info["text"]
+        breadcrumb = spam_info["breadcrumb"]
+        reason = spam_info["reason"]
+
+        subject_embed_id = None
+        if spam_model != document and hasattr(spam_model, "id"):
+            subject_embed_id = spam_model.id
+
+        # Check if report already exists to avoid duplicates
+        existing = Report.objects(
+            subject=document,
+            reason=REASON_AUTO_SPAM,
+            dismissed_at=None,
+            subject_embed_id=subject_embed_id,
+        ).first()
+        if existing:
+            return
+
+        # Create the Report
+        message = spam_model.spam_report_message(breadcrumb)
+        report = Report(
+            subject=document,
+            subject_embed_id=subject_embed_id,
+            reason=REASON_AUTO_SPAM,
+            message=f"{message}\n\nReason: {reason}\nText: {text[:500]}",
+        )
+        report.save()
+
+        # Store reference to the report on the spam model
+        spam_model._spam_report = report
+
+        # Emit signal for notifications
+        on_new_potential_spam.send(spam_model, message=message, text=text, reason=reason)
 
 
 def spam_protected(get_model_to_check=None):
