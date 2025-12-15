@@ -71,3 +71,51 @@ class SpamTest(APITestCase):
         discussion.save()
 
         self.assertFalse(self.has_spam_report(discussion))
+
+    @pytest.mark.options(SPAM_WORDS=["spam"])
+    def test_dismissed_spam_in_embed_not_reflagged(self):
+        """
+        When spam is in an embedded document (Message) and the report is dismissed,
+        adding a new comment should NOT create a new report for the same embed.
+        """
+        from datetime import datetime
+
+        user = UserFactory()
+        dataset = DatasetFactory()
+        first_message = Message(content="bla bla", posted_by=user)
+        discussion = Discussion(
+            subject=dataset,
+            user=user,
+            title="Normal title",
+            discussion=[first_message],
+        )
+        discussion.save()
+
+        # Add a spam comment (this is an embed, not the main document)
+        discussion.discussion.append(Message(content="this is spam", posted_by=user))
+        discussion.save()
+
+        spam_message = discussion.discussion[1]
+        self.assertTrue(self.has_spam_report(discussion, spam_message.id))
+
+        # Dismiss the report
+        report = Report.objects(
+            subject=discussion, reason=REASON_AUTO_SPAM, subject_embed_id=spam_message.id
+        ).first()
+        report.dismissed_at = datetime.utcnow()
+        report.save()
+
+        self.assertFalse(self.has_spam_report(discussion, spam_message.id))
+
+        # Add another normal comment
+        discussion.reload()
+        discussion.discussion.append(Message(content="another normal comment", posted_by=user))
+        discussion.save()
+
+        # The dismissed spam embed should NOT be re-flagged
+        self.assertFalse(self.has_spam_report(discussion, spam_message.id))
+        # And no new report should exist for the discussion
+        self.assertEqual(
+            Report.objects(subject=discussion, reason=REASON_AUTO_SPAM, dismissed_at=None).count(),
+            0,
+        )

@@ -182,11 +182,11 @@ class SpamMixin(object):
         if spam_model != document and hasattr(spam_model, "id"):
             subject_embed_id = spam_model.id
 
-        # Check if report already exists to avoid duplicates
+        # Check if report already exists (pending or dismissed) to avoid duplicates
+        # We don't want to re-create a report for something that was already dismissed
         existing = Report.objects(
             subject=document,
             reason=REASON_AUTO_SPAM,
-            dismissed_at=None,
             subject_embed_id=subject_embed_id,
         ).first()
         if existing:
