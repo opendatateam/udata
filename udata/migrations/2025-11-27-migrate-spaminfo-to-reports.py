@@ -89,3 +89,9 @@ def migrate(db):
         {"spam": {"$exists": True}}, {"$unset": {"spam": ""}}
     )
     log.info(f"Cleaned up spam field from {result.modified_count} discussions")
+
+    # Clean up the spam field from all embedded messages in discussions
+    result = discussion_collection.update_many(
+        {"discussion.spam": {"$exists": True}}, {"$unset": {"discussion.$[].spam": ""}}
+    )
+    log.info(f"Cleaned up spam field from messages in {result.modified_count} discussions")
