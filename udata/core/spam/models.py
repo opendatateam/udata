@@ -119,31 +119,6 @@ class SpamMixin(object):
         else:
             raise RuntimeError("SpamMixin should be a Document or an EmbeddedDocument")
 
-    def is_spam(self, base_model=None):
-        """
-        Check if this model has an unhandled auto-spam report.
-        For embedded documents, base_model must be provided (or cached from spam detection).
-        """
-        return self.get_spam_report(base_model) is not None
-
-    def get_spam_report(self, base_model=None):
-        """
-        Get the unhandled auto-spam report for this model.
-        For embedded documents, base_model must be provided (or cached from spam detection).
-        """
-        from udata.core.reports.models import Report
-
-        if isinstance(self, db.Document):
-            return Report.get_auto_spam_report(self)
-        elif isinstance(self, db.EmbeddedDocument):
-            if base_model is None:
-                base_model = self._spam_base_model
-            if base_model is None:
-                raise ValueError("base_model is required for embedded documents")
-            subject_path = self._get_subject_path(base_model)
-            return Report.get_auto_spam_report(base_model, subject_path)
-        return None
-
     def _get_subject_path(self, base_model):
         """
         Get the subject_path for this embedded document within base_model.
@@ -197,7 +172,12 @@ class SpamMixin(object):
                     pass
 
             # Check if report already exists to avoid duplicates
-            existing = Report.get_auto_spam_report(base_model, subject_path)
+            existing = Report.objects(
+                subject=base_model,
+                reason=REASON_AUTO_SPAM,
+                dismissed_at=None,
+                subject_path=subject_path,
+            ).first()
             if existing:
                 signals.post_save.disconnect(create_report_after_save)
                 return
@@ -255,15 +235,11 @@ def spam_protected(get_model_to_check=None):
                     + " given."
                 )
 
-            # Check if there's a spam report for this model
-            if model_to_check.is_spam(base_model if model_to_check != base_model else None):
-                # Get the report and save the callback to it
-                report = model_to_check.get_spam_report(
-                    base_model if model_to_check != base_model else None
-                )
-                if report:
-                    report.callbacks[f.__name__] = {"args": args[1:], "kwargs": kwargs}
-                    report.save()
+            # Check if a spam report was created during this request
+            report = model_to_check._spam_report
+            if report:
+                report.callbacks[f.__name__] = {"args": args[1:], "kwargs": kwargs}
+                report.save()
             else:
                 f(*args, **kwargs)
 

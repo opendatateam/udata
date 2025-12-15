@@ -24,6 +24,7 @@ from udata.core.discussions.tasks import (
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
 from udata.core.reports.constants import REASON_AUTO_SPAM
+from udata.core.reports.models import Report
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.spam.signals import on_new_potential_spam
 from udata.core.user.factories import AdminFactory, UserFactory
@@ -37,6 +38,14 @@ from .helpers import assert_emit, assert_not_emit
 
 
 class DiscussionsTest(APITestCase):
+    def get_spam_report(self, subject, subject_path=None):
+        return Report.objects(
+            subject=subject, reason=REASON_AUTO_SPAM, dismissed_at=None, subject_path=subject_path
+        ).first()
+
+    def has_spam_report(self, subject, subject_path=None):
+        return self.get_spam_report(subject, subject_path) is not None
+
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_new_discussion(self):
         user = self.login()
@@ -70,13 +79,13 @@ class DiscussionsTest(APITestCase):
         self.assertIsNone(discussion.closed)
         self.assertIsNone(discussion.closed_by)
         self.assertEqual(discussion.title, "test title")
-        self.assertFalse(discussion.is_spam())
+        self.assertFalse(self.has_spam_report(discussion))
 
         message = discussion.discussion[0]
         self.assertEqual(message.content, "bla bla")
         self.assertEqual(message.posted_by, user)
         self.assertIsNotNone(message.posted_on)
-        self.assertFalse(message.is_spam(discussion))
+        self.assertFalse(self.has_spam_report(discussion, "discussion.0"))
 
     def test_new_discussion_on_behalf_of_org(self):
         user = self.login()
@@ -169,25 +178,23 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(len(discussions), 1)
 
         discussion = discussions[0]
-        self.assertTrue(discussion.is_spam())
-        self.assertFalse(discussion.discussion[0].is_spam(discussion))
+        self.assertTrue(self.has_spam_report(discussion))
+        self.assertFalse(self.has_spam_report(discussion, "discussion.0"))
 
         # Check that the Report was created with callbacks
-        report = discussion.get_spam_report()
+        report = self.get_spam_report(discussion)
         self.assertIsNotNone(report)
         self.assertEqual(report.reason, REASON_AUTO_SPAM)
         self.assertTrue("signal_new" in report.callbacks)
 
         # Non-admin cannot dismiss the report
         with assert_not_emit(on_new_discussion):
-            from datetime import datetime
-
             response = self.patch(
                 url_for("api.report", report=report),
                 {"dismissed_at": datetime.utcnow().isoformat()},
             )
             self.assertStatus(response, 403)
-            self.assertTrue(discussion.reload().is_spam())
+            self.assertTrue(self.has_spam_report(discussion.reload()))
 
         # Admin can list auto-spam reports
         self.login(AdminFactory())
@@ -198,21 +205,19 @@ class DiscussionsTest(APITestCase):
 
         # Admin can dismiss the report (mark as not spam) which executes callbacks
         with assert_emit(on_new_discussion):
-            from datetime import datetime
-
             response = self.patch(
                 url_for("api.report", report=report),
                 {"dismissed_at": datetime.utcnow().isoformat()},
             )
             self.assertStatus(response, 200)
-            self.assertFalse(discussion.reload().is_spam())
+            self.assertFalse(self.has_spam_report(discussion.reload()))
 
         # Adding a new comment / modifying the not spam discussion
         response = self.post(
             url_for("api.discussion", id=discussion.id), {"comment": "A new normal comment"}
         )
         self.assertStatus(response, 200)
-        self.assertFalse(discussion.reload().is_spam())
+        self.assertFalse(self.has_spam_report(discussion.reload()))
 
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_spam_by_owner(self):
@@ -265,9 +270,9 @@ class DiscussionsTest(APITestCase):
 
         discussion = discussions[0]
         # Spam is on the discussion (first comment content is checked at discussion level)
-        self.assertTrue(discussion.is_spam())
+        self.assertTrue(self.has_spam_report(discussion))
         # The message itself doesn't have its own spam report
-        self.assertFalse(discussion.discussion[0].is_spam(discussion))
+        self.assertFalse(self.has_spam_report(discussion, "discussion.0"))
 
     def test_new_discussion_missing_comment(self):
         self.login()
@@ -620,7 +625,7 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(data["discussion"][1]["content"], "new bla bla")
         self.assertEqual(data["discussion"][1]["posted_by"]["id"], str(poster.id))
         self.assertIsNotNone(data["discussion"][1]["posted_on"])
-        self.assertFalse(discussion.discussion[1].is_spam(discussion))
+        self.assertFalse(self.has_spam_report(discussion, "discussion.1"))
 
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_add_spam_comment_to_discussion(self):
@@ -645,11 +650,11 @@ class DiscussionsTest(APITestCase):
                 self.assert200(response)
 
         discussion.reload()
-        self.assertFalse(discussion.is_spam())
-        self.assertTrue(discussion.discussion[1].is_spam(discussion))
+        self.assertFalse(self.has_spam_report(discussion))
+        self.assertTrue(self.has_spam_report(discussion, "discussion.1"))
 
         # Check that the Report was created with callbacks on the message
-        report = discussion.discussion[1].get_spam_report(discussion)
+        report = self.get_spam_report(discussion, "discussion.1")
         self.assertIsNotNone(report)
         self.assertEqual(report.reason, REASON_AUTO_SPAM)
         self.assertEqual(report.subject_path, "discussion.1")
@@ -663,15 +668,13 @@ class DiscussionsTest(APITestCase):
 
         # Admin can dismiss the report (mark as not spam) which executes callbacks
         with assert_emit(on_new_discussion_comment):
-            from datetime import datetime
-
             response = self.patch(
                 url_for("api.report", report=report),
                 {"dismissed_at": datetime.utcnow().isoformat()},
             )
             self.assertStatus(response, 200)
             discussion.reload()
-            self.assertFalse(discussion.discussion[1].is_spam(discussion))
+            self.assertFalse(self.has_spam_report(discussion, "discussion.1"))
 
         response = self.post(
             url_for("api.discussion", id=discussion.id), {"comment": "New comment"}
@@ -680,7 +683,7 @@ class DiscussionsTest(APITestCase):
 
         # The spam comment marked as no spam is still a no spam
         discussion.reload()
-        self.assertFalse(discussion.discussion[1].is_spam(discussion))
+        self.assertFalse(self.has_spam_report(discussion, "discussion.1"))
 
     def test_close_discussion(self):
         owner = self.login()

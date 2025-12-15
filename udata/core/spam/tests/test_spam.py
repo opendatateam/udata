@@ -9,6 +9,17 @@ from udata.tests.api import APITestCase
 
 
 class SpamTest(APITestCase):
+    def has_spam_report(self, subject, subject_path=None):
+        return (
+            Report.objects(
+                subject=subject,
+                reason=REASON_AUTO_SPAM,
+                dismissed_at=None,
+                subject_path=subject_path,
+            ).first()
+            is not None
+        )
+
     @pytest.mark.options(SPAM_WORDS=["spam"], SPAM_ALLOWED_LANGS=["fr"])
     def test_uppercase_lang_detect(self):
         """French text should not be flagged as spam when only French is allowed."""
@@ -24,8 +35,7 @@ class SpamTest(APITestCase):
         )
         discussion.save()
 
-        self.assertFalse(discussion.is_spam())
-        self.assertEqual(Report.objects(reason=REASON_AUTO_SPAM).count(), 0)
+        self.assertFalse(self.has_spam_report(discussion))
 
     @pytest.mark.options(SPAM_WORDS=["spam"])
     def test_spam_word_detection(self):
@@ -41,7 +51,7 @@ class SpamTest(APITestCase):
         )
         discussion.save()
 
-        self.assertTrue(discussion.is_spam())
+        self.assertTrue(self.has_spam_report(discussion))
         report = Report.objects(reason=REASON_AUTO_SPAM).first()
         self.assertIsNotNone(report)
         self.assertEqual(report.subject, discussion)
@@ -60,5 +70,4 @@ class SpamTest(APITestCase):
         )
         discussion.save()
 
-        self.assertFalse(discussion.is_spam())
-        self.assertEqual(Report.objects(reason=REASON_AUTO_SPAM).count(), 0)
+        self.assertFalse(self.has_spam_report(discussion))

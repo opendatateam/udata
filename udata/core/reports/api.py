@@ -58,8 +58,6 @@ class ReportAPI(API):
             )
 
             # For auto_spam reports, execute callbacks when dismissing (marking as not spam)
-            # We must save BEFORE executing callbacks so that is_spam() returns False
-            # when the @spam_protected decorator re-checks during callback execution
             if report.dismissed_at and report.reason == REASON_AUTO_SPAM and report.callbacks:
                 callbacks = report.callbacks
                 report.callbacks = {}

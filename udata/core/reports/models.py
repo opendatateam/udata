@@ -10,7 +10,7 @@ from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
 from udata.mongo import db
 
-from .constants import REASON_AUTO_SPAM, REPORT_REASONS_CHOICES, REPORTABLE_MODELS
+from .constants import REPORT_REASONS_CHOICES, REPORTABLE_MODELS
 
 
 class ReportQuerySet(db.BaseQuerySet):
@@ -104,23 +104,6 @@ class Report(db.Document):
     @field(description="Link to the API endpoint for this report")
     def self_api_url(self):
         return url_for("api.report", report=self, _external=True)
-
-    @classmethod
-    def get_auto_spam_report(cls, subject, subject_path=None):
-        """
-        Get the unhandled auto-spam report for a subject (and optional path).
-        Returns None if no such report exists.
-        """
-        query = {
-            "subject": subject,
-            "reason": REASON_AUTO_SPAM,
-            "dismissed_at": None,
-        }
-        if subject_path:
-            query["subject_path"] = subject_path
-        else:
-            query["subject_path"] = None
-        return cls.objects(**query).first()
 
     @classmethod
     def mark_as_deleted_soft_delete(cls, sender, document, **kwargs):
