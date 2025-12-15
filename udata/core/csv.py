@@ -5,6 +5,7 @@ from datetime import date, datetime
 from io import StringIO
 
 from flask import Response, stream_with_context
+from mongoengine.queryset import QuerySet
 
 from udata.mongo import db
 from udata.utils import recursive_get
@@ -37,7 +38,9 @@ class Adapter(object):
     def __init__(self, queryset):
         # no_cache() to avoid eating up too much RAM when iterating over large querysets.
         # Applied here rather than upstream to preserve custom QuerySet methods (like with_badge).
-        self.queryset = queryset.no_cache()
+        if isinstance(queryset, QuerySet):
+            queryset = queryset.no_cache()
+        self.queryset = queryset
         self._fields = None
 
     def get_fields(self):
