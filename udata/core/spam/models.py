@@ -119,16 +119,6 @@ class SpamMixin(object):
         else:
             raise RuntimeError("SpamMixin should be a Document or an EmbeddedDocument")
 
-    def _get_subject_path(self, base_model):
-        """
-        Get the subject_path for this embedded document within base_model.
-        Must be implemented by subclasses that are embedded documents.
-        """
-        raise NotImplementedError(
-            "Embedded documents must implement _get_subject_path to generate the path "
-            "within the parent document (e.g., 'discussion.2' for a Message)."
-        )
-
     def texts_to_check_for_spam(self):
         raise NotImplementedError(
             "Please implement the `texts_to_check_for_spam` method. Should return a list of strings to check."
@@ -163,20 +153,16 @@ class SpamMixin(object):
             from udata.core.reports.constants import REASON_AUTO_SPAM
             from udata.core.reports.models import Report
 
-            # Compute subject_path for embedded documents
-            subject_path = None
-            if spam_model != base_model:
-                try:
-                    subject_path = spam_model._get_subject_path(base_model)
-                except NotImplementedError:
-                    pass
+            subject_embed_id = None
+            if spam_model != base_model and hasattr(spam_model, "id"):
+                subject_embed_id = spam_model.id
 
             # Check if report already exists to avoid duplicates
             existing = Report.objects(
                 subject=base_model,
                 reason=REASON_AUTO_SPAM,
                 dismissed_at=None,
-                subject_path=subject_path,
+                subject_embed_id=subject_embed_id,
             ).first()
             if existing:
                 signals.post_save.disconnect(create_report_after_save)
@@ -186,7 +172,7 @@ class SpamMixin(object):
             message = spam_model.spam_report_message(breadcrumb)
             report = Report(
                 subject=base_model,
-                subject_path=subject_path,
+                subject_embed_id=subject_embed_id,
                 reason=REASON_AUTO_SPAM,
                 message=f"{message}\n\nReason: {reason}\nText: {text[:500]}",
             )

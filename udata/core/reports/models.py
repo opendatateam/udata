@@ -82,12 +82,10 @@ class Report(db.Document):
         allow_null=True,
     )
 
-    # Path to target an embedded document within the subject
-    # Format: "<field_name>.<id_or_index>" e.g., "discussion.2" for 3rd message
-    subject_path = field(
-        db.StringField(),
+    subject_embed_id = field(
+        db.UUIDField(),
         allow_null=True,
-        description="Path to embedded document (e.g., 'discussion.2' for 3rd message)",
+        description="UUID of the embedded document within the subject (e.g., a Message within a Discussion)",
     )
 
     # Callbacks to execute when report is dismissed (for auto-spam reports)

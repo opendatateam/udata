@@ -9,13 +9,13 @@ from udata.tests.api import APITestCase
 
 
 class SpamTest(APITestCase):
-    def has_spam_report(self, subject, subject_path=None):
+    def has_spam_report(self, subject, subject_embed_id=None):
         return (
             Report.objects(
                 subject=subject,
                 reason=REASON_AUTO_SPAM,
                 dismissed_at=None,
-                subject_path=subject_path,
+                subject_embed_id=subject_embed_id,
             ).first()
             is not None
         )
