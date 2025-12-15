@@ -105,50 +105,6 @@ class Report(db.Document):
     def self_api_url(self):
         return url_for("api.report", report=self, _external=True)
 
-    def get_target(self):
-        """
-        Resolve subject + subject_path to the actual target object.
-        Returns the embedded document if subject_path is set, otherwise the subject itself.
-        Returns None if the path is invalid or the target cannot be found.
-        """
-        subject = self.subject.fetch() if hasattr(self.subject, "fetch") else self.subject
-        if not self.subject_path:
-            return subject
-
-        # Validate path format
-        if "." not in self.subject_path:
-            return None
-
-        field_name, identifier = self.subject_path.split(".", 1)
-        items = getattr(subject, field_name, None)
-
-        if items is None:
-            return None
-
-        # Try as index first (for embedded docs without id like Message)
-        try:
-            index = int(identifier)
-            if 0 <= index < len(items):
-                return items[index]
-            return None
-        except (ValueError, TypeError):
-            # Try as id (for embedded docs with id like Resource)
-            return next((item for item in items if str(item.id) == identifier), None)
-
-    def execute_callbacks(self):
-        """
-        Execute stored callbacks when dismissing an auto-spam report.
-        The callbacks are executed on the subject (base model).
-        """
-        if not self.callbacks:
-            return
-
-        subject = self.subject.fetch() if hasattr(self.subject, "fetch") else self.subject
-        for method_name, call_info in self.callbacks.items():
-            method = getattr(subject, method_name, None)
-            if method:
-                method(*call_info.get("args", []), **call_info.get("kwargs", {}))
-
     @classmethod
     def get_auto_spam_report(cls, subject, subject_path=None):
         """
