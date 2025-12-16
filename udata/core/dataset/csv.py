@@ -38,6 +38,7 @@ class DatasetCsvAdapter(csv.Adapter):
         "last_modified",
         ("tags", lambda o: ",".join(o.tags)),
         ("archived", lambda o: o.archived or False),
+        "published_at",
         ("resources_count", lambda o: len(o.resources)),
         ("main_resources_count", lambda o: len([r for r in o.resources if r.type == "main"])),
         ("resources_formats", lambda o: ",".join(set(r.format for r in o.resources if r.format))),
@@ -71,6 +72,7 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
         ),
         dataset_field("license"),
         dataset_field("private"),
+        dataset_field("published_at"),
         dataset_field("archived", lambda r: r.archived or False),
     )
     nested_fields = (

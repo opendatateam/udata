@@ -19,7 +19,7 @@ class SiteCsvExportsTest(APITestCase):
         self.app.config["EXPORT_CSV_MODELS"] = []
         datasets = [DatasetFactory(resources=[ResourceFactory()]) for _ in range(5)]
         archived_datasets = [DatasetFactory(archived=datetime.utcnow()) for _ in range(3)]
-        hidden_dataset = DatasetFactory(private=True)
+        hidden_dataset = DatasetFactory(published_at=None)
 
         response = self.get(url_for("api.site_datasets_csv"))
 
@@ -66,7 +66,7 @@ class SiteCsvExportsTest(APITestCase):
             DatasetFactory(resources=[ResourceFactory()], tags=["selected"]) for _ in range(6)
         ]
         datasets = [DatasetFactory(resources=[ResourceFactory()]) for _ in range(3)]
-        hidden_dataset = DatasetFactory(private=True)
+        hidden_dataset = DatasetFactory(published_at=None)
 
         response = self.get(url_for("api.site_datasets_csv", tag="selected", page_size=3))
 

@@ -21,7 +21,6 @@ import logging
 import os
 from datetime import datetime
 
-import mongoengine
 from bson.objectid import ObjectId
 from feedgenerator.django.utils.feedgenerator import Atom1Feed
 from flask import abort, current_app, make_response, redirect, request, url_for
@@ -254,7 +253,10 @@ class DatasetApiParser(ModelApiParser):
         if args.get("private") is not None:
             if current_user.is_anonymous:
                 abort(401)
-            datasets = datasets.filter(private=args["private"])
+            if args["private"]:
+                datasets = datasets.filter(published_at=None)
+            else:
+                datasets = datasets.filter(published_at__ne=None)
         return datasets
 
 
@@ -307,7 +309,7 @@ class DatasetListAPI(API):
         """List or search all datasets"""
         args = dataset_parser.parse()
         datasets = Dataset.objects.visible_by_user(
-            current_user, mongoengine.Q(private__ne=True, archived=None, deleted=None)
+            current_user, Q(published_at__ne=None, archived=None, deleted=None)
         )
         datasets = dataset_parser.parse_filters(datasets, args)
         sort = args["sort"] or ("$text_score" if args["q"] else None) or DEFAULT_SORTING
@@ -829,7 +831,7 @@ class DatasetSuggestAPI(API):
     def get(self):
         """Datasets suggest endpoint using mongoDB contains"""
         args = suggest_parser.parse_args()
-        datasets_query = Dataset.objects(archived=None, deleted=None, private=False)
+        datasets_query = Dataset.objects.visible()
         datasets = datasets_query.filter(
             Q(title__icontains=args["q"]) | Q(acronym__icontains=args["q"])
         )

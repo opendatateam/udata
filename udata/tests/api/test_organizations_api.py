@@ -809,7 +809,7 @@ class OrganizationDatasetsAPITest(PytestOnlyAPITestCase):
         user = self.login()
         member = Member(user=user, role="admin")
         org = OrganizationFactory(members=[member])
-        datasets = DatasetFactory.create_batch(3, organization=org, private=True)
+        datasets = DatasetFactory.create_batch(3, organization=org, published_at=None)
 
         response = self.get(url_for("api.org_datasets", org=org))
 
@@ -820,7 +820,7 @@ class OrganizationDatasetsAPITest(PytestOnlyAPITestCase):
         """Should not include private datasets when not member"""
         org = OrganizationFactory()
         datasets = DatasetFactory.create_batch(3, organization=org)
-        DatasetFactory.create_batch(2, organization=org, private=True)
+        DatasetFactory.create_batch(2, organization=org, published_at=None)
 
         response = self.get(url_for("api.org_datasets", org=org))
 
@@ -1038,7 +1038,7 @@ class OrganizationCsvExportsTest(PytestOnlyAPITestCase):
             for _ in range(3)
         ]
         not_org_dataset = DatasetFactory(resources=[ResourceFactory()])
-        hidden_dataset = DatasetFactory(private=True)
+        hidden_dataset = DatasetFactory(published_at=None)
 
         response = self.get(url_for("api.organization_datasets_resources_csv", org=org))
 

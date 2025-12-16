@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from udata.core.access_type.constants import (
     AccessAudienceCondition,
     AccessAudienceType,
@@ -209,16 +211,35 @@ class DatasetForm(ModelForm):
         _("Spatial coverage"), description=_("The geographical area covered by the data.")
     )
     tags = fields.TagField(_("Tags"), description=_("Some taxonomy keywords"))
-    private = fields.BooleanField(
-        _("Private"),
-        description=_("Restrict the dataset visibility to you or your organization only."),
-    )
+    published_at = fields.DateTimeField(_("Publication date"))
 
     owner = fields.CurrentUserField()
     organization = fields.PublishAsField(_("Publish as"))
     extras = fields.ExtrasField()
     resources = fields.NestedModelList(ResourceForm)
     contact_points = fields.ContactPointListField(validators=[validate_contact_point])
+
+    @classmethod
+    def from_json(cls, formdata=None, *args, **kwargs):
+        """
+        Convert deprecated `private` field to `published_at` for backward compatibility.
+
+        The `private` field no longer exists on the Dataset model. We intercept the JSON
+        here to convert it before WTForms processes it.
+
+        Note: We cannot add a `private` field to this form because `populate_obj()` iterates
+        over all form fields (not just those in the JSON) and would try to set `obj.private`,
+        which doesn't exist on the model.
+        """
+        if formdata and "private" in formdata:
+            formdata = formdata.copy()
+            private = formdata.pop("private")
+            if "published_at" not in formdata:
+                if private is True:
+                    formdata["published_at"] = None
+                else:
+                    formdata["published_at"] = datetime.utcnow().isoformat()
+        return super().from_json(formdata, *args, **kwargs)
 
 
 class ResourcesListForm(ModelForm):

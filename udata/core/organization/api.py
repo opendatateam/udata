@@ -580,7 +580,7 @@ class OrgDatasetsAPI(API):
         args = dataset_parser.parse()
         qs = Dataset.objects.owned_by(org)
         if not OrganizationPrivatePermission(org).can():
-            qs = qs(private__ne=True)
+            qs = qs(published_at__ne=None)
         return qs.order_by(args["sort"]).paginate(args["page"], args["page_size"])
 
 

@@ -91,10 +91,15 @@ def get_queryset(model_cls):
     if model_cls.__name__ == "Resource":
         model_cls = getattr(udata_models, "Dataset")
     params = {}
-    attrs = ("private", "deleted", "deleted_at")
-    for attr in attrs:
+    # Dataset uses published_at instead of private; other models still use private
+    if model_cls.__name__ == "Dataset":
+        params["published_at__ne"] = None
+    elif getattr(model_cls, "private", None):
+        params["private"] = False
+    # Filter out deleted/soft-deleted items
+    for attr in ("deleted", "deleted_at"):
         if getattr(model_cls, attr, None):
-            params[attr] = False
+            params[attr] = None
     # no_cache to avoid eating up too much RAM
     return model_cls.objects.filter(**params).no_cache()
 

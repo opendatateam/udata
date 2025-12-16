@@ -340,10 +340,10 @@ class License(db.Document):
 
 class DatasetQuerySet(OwnedQuerySet):
     def visible(self):
-        return self(private__ne=True, deleted=None, archived=None)
+        return self(published_at__ne=None, deleted=None, archived=None)
 
     def hidden(self):
-        return self(db.Q(private=True) | db.Q(deleted__ne=None) | db.Q(archived__ne=None))
+        return self(db.Q(published_at=None) | db.Q(deleted__ne=None) | db.Q(archived__ne=None))
 
     def with_badge(self, kind):
         return self(badges__kind=kind)
@@ -553,7 +553,7 @@ class Dataset(
     tags = field(db.TagListField())
     resources = field(db.ListField(db.EmbeddedDocumentField(Resource)), auditable=False)
 
-    private = field(db.BooleanField(default=False))
+    published_at = field(db.DateTimeField())
 
     frequency = field(db.EnumField(UpdateFrequency))
     frequency_date = field(db.DateTimeField(verbose_name=_("Future date of update")))
@@ -599,6 +599,11 @@ class Dataset(
 
     def __str__(self):
         return self.title or ""
+
+    def to_dict(self, exclude=None):
+        data = super().to_dict(exclude=exclude)
+        data["private"] = self.private
+        return data
 
     __metrics_keys__ = [
         "discussions",
@@ -743,7 +748,12 @@ class Dataset(
 
     @property
     def is_hidden(self):
-        return self.private or self.deleted or self.archived
+        return self.published_at is None or self.deleted or self.archived
+
+    @property
+    def private(self) -> bool:
+        """Computed property for backward compatibility."""
+        return self.published_at is None
 
     @property
     def full_title(self):
