@@ -362,15 +362,9 @@ def themes_from_rdf(rdf):
 
 
 def contact_point_name(agent_name: str | None, org_name: str | None) -> str:
-    match (agent_name, org_name):
-        case (None, None):
-            return ""
-        case (agent_name, None):
-            return agent_name
-        case (None, org_name):
-            return org_name
-        case (agent_name, org_name):
-            return f"{agent_name} ({org_name})"
+    if agent_name and org_name:
+        return f"{agent_name} ({org_name})"
+    return agent_name or org_name or ""
 
 
 def contact_points_from_rdf(rdf, prop, role, dataset):
