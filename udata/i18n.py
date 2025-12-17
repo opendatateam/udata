@@ -1,3 +1,4 @@
+import sys
 from contextlib import contextmanager
 from importlib import resources
 from importlib.metadata import entry_points
@@ -19,8 +20,12 @@ def get_translation_directories_and_domains():
     for pkg in entry_points(group="udata.i18n"):
         module = pkg.load()
         path = resources.files(module)
-        # `/ ""` is  here to transform MultiplexedPath to a simple str
-        translations_dirs.append(str(path / ""))
+        # `/ ""` is needed on Python 3.11 to convert MultiplexedPath to a simple str,
+        # but it raises StopIteration on Python 3.12+
+        if sys.version_info < (3, 12):
+            translations_dirs.append(str(path / ""))
+        else:
+            translations_dirs.append(str(path))
         domains.append(pkg.name)
 
     return translations_dirs, domains
