@@ -69,21 +69,16 @@ jobs:
       - store_artifacts:
           path: reports/
           destination: reports
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .venv
 
   dist:
     docker:
       - image: ghcr.io/astral-sh/uv:python<< pipeline.parameters.python-version >>-trixie
     steps:
       - checkout
-      - attach_workspace:
-          at: .
       - run:
-          name: Install build tools
+          name: Install dependencies
           command: |
+            uv sync --frozen
             uv pip install setuptools-scm
       - run:
           name: Save and show RELEASE_VERSION
