@@ -117,31 +117,27 @@ udata = "udata.translations"
 [project.entry-points."pytest11"]
 udata = "udata.tests.plugin"
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
+    "coverage[toml] >= 7.7.0, < 8.0",
+    "faker >= 37.0.2, < 39.0",
+    "feedparser >= 6.0.11, < 7.0",
+    "flake8 >= 7.1.2, < 8.0",
     "flask-shell-ipython >= 0.5.3, < 1.0",
+    "httpretty >= 1.1.4, < 2.0",
     "invoke >= 2.2.0, < 3.0",
+    "mkdocs >= 1.6.1, < 2.0",
+    "mock >= 5.2.0, < 6.0",
     "pip-tools >= 7.4.1, < 8.0",
     "pre-commit >= 4.2.0, < 5.0",
-    "ruff >= 0.11.0, < 1.0",
-]
-test = [
-    "faker >= 37.0.2, < 38.0",
-    "feedparser >= 6.0.11, < 7.0",
-    "httpretty >= 1.1.4, < 2.0",
-    "mock >= 5.2.0, < 6.0",
     "pytest >= 9.0, < 10.0",
+    "pytest-cov >= 7.0.0, < 8.0",
     "pytest-env >= 1.1.5, < 2.0",
     "pytest-flask >= 1.3.0, < 2.0",
     "pytest-mock >= 3.14.0, < 4.0",
     "pytest-sugar >= 1.0.0, < 2.0",
     "requests-mock >= 1.12.1, < 2.0",
-]
-doc = ["mkdocs >= 1.6.1, < 2.0"]
-report = [
-    "coverage[toml] >= 7.7.0, < 8.0",
-    "flake8 >= 7.1.2, < 8.0",
-    "pytest-cov >= 7.0.0, < 8.0",
+    "ruff >= 0.11.0, < 1.0",
 ]
 
 [tool.setuptools_scm]

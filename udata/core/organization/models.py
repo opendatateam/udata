@@ -201,7 +201,7 @@ class Organization(
         cls.before_save.send(document)
 
     def self_web_url(self, **kwargs):
-        return cdata_url(f"/organizations/{self._link_id(**kwargs)}/", **kwargs)
+        return cdata_url(f"/organizations/{self._link_id(**kwargs)}", **kwargs)
 
     def self_api_url(self, **kwargs):
         return url_for(
