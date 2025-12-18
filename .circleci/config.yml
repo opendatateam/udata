@@ -16,8 +16,11 @@ parameters:
 
 jobs:
   python:
+    parameters:
+      python-version:
+        type: string
     docker:
-      - image: ghcr.io/astral-sh/uv:python<< pipeline.parameters.python-version >>-trixie
+      - image: ghcr.io/astral-sh/uv:python<< parameters.python-version >>-trixie
       - image: mongo:6.0.4
       - image: redis:alpine
     environment:
@@ -30,23 +33,23 @@ jobs:
       - restore_cache:
           keys:
             # 1. Exact match of dependencies
-            - py3-cache-v13-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
+            - py<< parameters.python-version >>-cache-v1-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
             # 2. Latest cache from this branch
-            - py3-cache-v13-{{ arch }}-{{ .Branch }}
+            - py<< parameters.python-version >>-cache-v1-{{ arch }}-{{ .Branch }}
             # 3. Latest cache from base branch (e.g., main)
-            - py3-cache-v13-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+            - py<< parameters.python-version >>-cache-v1-{{ arch }}-{{ .Environment.BASE_BRANCH }}
             # 4. Any latest cache for this architecture (fallback)
-            - py3-cache-v13-{{ arch }}-
+            - py<< parameters.python-version >>-cache-v1-{{ arch }}-
       - run:
           name: Install Python dependencies
           command: |
             uv sync --frozen
       - save_cache:
-          key: py3-cache-v13-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
+          key: py<< parameters.python-version >>-cache-v1-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
           paths:
             - .venv
       - save_cache:
-          key: py3-cache-v13-{{ arch }}-{{ .Branch }}
+          key: py<< parameters.python-version >>-cache-v1-{{ arch }}-{{ .Branch }}
           paths:
             - .venv
       - run:
@@ -66,21 +69,16 @@ jobs:
       - store_artifacts:
           path: reports/
           destination: reports
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .venv
 
   dist:
     docker:
       - image: ghcr.io/astral-sh/uv:python<< pipeline.parameters.python-version >>-trixie
     steps:
       - checkout
-      - attach_workspace:
-          at: .
       - run:
-          name: Install build tools
+          name: Install dependencies
           command: |
+            uv sync --frozen
             uv pip install setuptools-scm
       - run:
           name: Save and show RELEASE_VERSION
@@ -178,7 +176,10 @@ jobs:
 workflows:
   build-publish-deploy:
     jobs:
-      - python
+      - python:
+          matrix:
+            parameters:
+              python-version: ["3.11", "3.13"]
       - dist:
           requires:
             - python

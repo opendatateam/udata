@@ -180,7 +180,7 @@ def populate_slug(instance, field):
             return qs(**{field.db_field: slug}).clear_cls_query().limit(1).count(True) > 0
 
         def get_existing_slug_suffixes(slug):
-            qs_suffix = qs(slug__regex=f"^{slug}-\d*$").clear_cls_query().only(field.db_field)
+            qs_suffix = qs(slug__regex=rf"^{slug}-\d*$").clear_cls_query().only(field.db_field)
             return [getattr(obj, field.db_field) for obj in qs_suffix]
 
         def trim_base_slug(base_slug, index):
