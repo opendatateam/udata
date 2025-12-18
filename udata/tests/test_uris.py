@@ -2,6 +2,7 @@ import pytest
 
 from udata import uris
 from udata.settings import Defaults
+from udata.tests import PytestOnlyTestCase
 
 PUBLIC_HOSTS = [
     "http://foo.com/blah_blah",
@@ -289,3 +290,35 @@ def test_with_credentials(url):
 def test_with_credentials_disabled(url):
     with pytest.raises(uris.ValidationError, match="Credentials in URL are not allowed"):
         uris.validate(url, credentials=False)
+
+
+@pytest.mark.options(CDATA_BASE_URL="http://localhost:3000/")
+class CdataUrlTest(PytestOnlyTestCase):
+    def test_cdata_url_without_base_url(self, app):
+        app.config["CDATA_BASE_URL"] = None
+        assert uris.cdata_url("test") is None
+
+    def test_cdata_url_with_simple_uri(self):
+        assert uris.cdata_url("test") == "http://localhost:3000/test"
+
+    @pytest.mark.options(MAIL_CAMPAIGN="mail")
+    def test_cdata_url_with_mail_campaign(self):
+        assert (
+            uris.cdata_url("test", _mailCampaign=True)
+            == "http://localhost:3000/test?mtm_campaign=mail"
+        )
+
+    def test_cdata_url_with_trailing_slash(self):
+        assert uris.cdata_url("test/") == "http://localhost:3000/test"
+
+    def test_cdata_url_with_append(self):
+        assert (
+            uris.cdata_url("test/", append="/discussions")
+            == "http://localhost:3000/test/discussions"
+        )
+
+    def test_cdata_url_with_append_and_kwargs(self):
+        assert (
+            uris.cdata_url("test/", append="/discussions", discussion_id="disc_id")
+            == "http://localhost:3000/test/discussions?discussion_id=disc_id"
+        )

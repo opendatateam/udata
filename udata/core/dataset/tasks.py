@@ -1,4 +1,5 @@
 import collections
+import gzip
 import os
 from datetime import date, datetime
 from tempfile import NamedTemporaryFile
@@ -94,8 +95,7 @@ def get_queryset(model_cls):
     for attr in attrs:
         if getattr(model_cls, attr, None):
             params[attr] = False
-    # no_cache to avoid eating up too much RAM
-    return model_cls.objects.filter(**params).no_cache()
+    return model_cls.objects.filter(**params)
 
 
 def get_resource_for_csv_export_model(model, dataset):
@@ -173,7 +173,12 @@ def export_csv_for_model(model, dataset, replace: bool = False):
             dataset.save()
         # remove previous catalog if exists and replace is True
         if replace and fs_filename_to_remove:
-            storages.resources.delete(fs_filename_to_remove)
+            try:
+                storages.resources.delete(fs_filename_to_remove)
+            except FileNotFoundError:
+                log.error(
+                    f"File not found while deleting resource #{resource.id} ({fs_filename_to_remove}) in export_csv_for_model cleanup"
+                )
         return resource
     finally:
         csvfile.close()
@@ -217,8 +222,8 @@ def export_csv(self, model=None):
             with storages.resources.open(resource.fs_filename, "rb") as f:
                 store_bytes(
                     bucket=current_app.config["EXPORT_CSV_ARCHIVE_S3_BUCKET"],
-                    filename=f"{current_app.config['EXPORT_CSV_ARCHIVE_S3_FILENAME_PREFIX']}{resource.title}",
-                    bytes=f.read(),
+                    filename=f"{current_app.config['EXPORT_CSV_ARCHIVE_S3_FILENAME_PREFIX']}{resource.title}.gz",
+                    bytes=gzip.compress(f.read()),
                 )
 
 

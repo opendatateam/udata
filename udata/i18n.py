@@ -1,5 +1,4 @@
 from contextlib import contextmanager
-from importlib import resources
 from importlib.metadata import entry_points
 
 import flask_babel
@@ -18,9 +17,7 @@ def get_translation_directories_and_domains():
 
     for pkg in entry_points(group="udata.i18n"):
         module = pkg.load()
-        path = resources.files(module)
-        # `/ ""` is  here to transform MultiplexedPath to a simple str
-        translations_dirs.append(str(path / ""))
+        translations_dirs.append(module.__path__[0])
         domains.append(pkg.name)
 
     return translations_dirs, domains
