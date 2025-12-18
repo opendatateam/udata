@@ -344,3 +344,29 @@ datastore = MongoEngineUserDatastore(db, User, Role)
 
 pre_save.connect(User.pre_save, sender=User)
 post_save.connect(User.post_save, sender=User)
+
+
+def match_email_invitations(sender, **kwargs):
+    """Match pending email invitations when user registers."""
+    from udata.core.organization.models import Organization
+
+    user = sender
+    for org in Organization.objects(
+        requests__kind="invitation", requests__email=user.email.lower(), requests__status="pending"
+    ):
+        modified = False
+        for req in org.requests:
+            if (
+                req.kind == "invitation"
+                and req.email
+                and req.email.lower() == user.email.lower()
+                and req.status == "pending"
+            ):
+                req.user = user
+                req.email = None
+                modified = True
+        if modified:
+            org.save()
+
+
+User.on_create.connect(match_email_invitations)

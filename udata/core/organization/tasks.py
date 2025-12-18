@@ -70,15 +70,18 @@ def notify_membership_response(org_id, request_id):
         mails.membership_refused(org).send(request.user)
 
 
-@task
-def notify_new_member(org_id, email):
+@task(route="high.mail")
+def notify_membership_invitation(org_id, invitation_id):
     org = Organization.objects.get(pk=org_id)
-    member = next((m for m in org.members if m.user.email == email), None)
+    invitation = next((r for r in org.requests if str(r.id) == invitation_id), None)
 
-    if member is None:
+    if invitation is None:
         return
 
-    mails.new_member(org).send(member.user)
+    if invitation.user:
+        mails.membership_invitation(org, invitation).send(invitation.user)
+    elif invitation.email:
+        mails.membership_invitation(org, invitation).send(invitation.email)
 
 
 @notify_new_badge(Organization, CERTIFIED)
