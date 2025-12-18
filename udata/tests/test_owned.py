@@ -1,13 +1,14 @@
 from mongoengine import post_save
 
 import udata.core.owned as owned
+from udata.core.dataset.permissions import OwnableReadPermission
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.user.models import User
 from udata.models import Member
 from udata.mongo import db
-from udata.tests.api import DBTestCase
+from udata.tests.api import APITestCase, DBTestCase
 
 
 class CustomQuerySet(owned.OwnedQuerySet):
@@ -265,3 +266,82 @@ class OwnedQuerysetTest(DBTestCase):
             name="private_owned_by_other_user"
         )
         self.assertEqual(len(result), 0)
+
+
+class OwnableReadPermissionTest(APITestCase):
+    def setUp(self):
+        super().setUp()
+        from flask import g
+        from flask_principal import AnonymousIdentity
+
+        g.identity = AnonymousIdentity()
+
+    def test_public_object_visible_by_anonymous(self):
+        """Public objects should be visible by anonymous users."""
+        obj = Owned.objects.create(owner=UserFactory(), private=False)
+        assert OwnableReadPermission(obj).can() is True
+
+    def test_public_object_visible_by_authenticated(self):
+        """Public objects should be visible by authenticated users."""
+        obj = Owned.objects.create(owner=UserFactory(), private=False)
+        self.login()
+        assert OwnableReadPermission(obj).can() is True
+
+    def test_private_object_not_visible_by_anonymous(self):
+        """Private objects should not be visible by anonymous users."""
+        obj = Owned.objects.create(owner=UserFactory(), private=True)
+        assert OwnableReadPermission(obj).can() is False
+
+    def test_private_object_not_visible_by_other_user(self):
+        """Private objects should not be visible by other users."""
+        obj = Owned.objects.create(owner=UserFactory(), private=True)
+        self.login()
+        assert OwnableReadPermission(obj).can() is False
+
+    def test_private_object_visible_by_owner(self):
+        """Private objects should be visible by their owner."""
+        owner = UserFactory()
+        obj = Owned.objects.create(owner=owner, private=True)
+        self.login(owner)
+        assert OwnableReadPermission(obj).can() is True
+
+    def test_private_object_visible_by_org_admin(self):
+        """Private objects should be visible by organization admins."""
+        admin = UserFactory()
+        org = OrganizationFactory(members=[Member(user=admin, role="admin")])
+        obj = Owned.objects.create(organization=org, private=True)
+        self.login(admin)
+        assert OwnableReadPermission(obj).can() is True
+
+    def test_private_object_visible_by_org_editor(self):
+        """Private objects should be visible by organization editors."""
+        editor = UserFactory()
+        org = OrganizationFactory(members=[Member(user=editor, role="editor")])
+        obj = Owned.objects.create(organization=org, private=True)
+        self.login(editor)
+        assert OwnableReadPermission(obj).can() is True
+
+    def test_private_object_not_visible_by_other_org_member(self):
+        """Private objects should not be visible by members of other organizations."""
+        member = UserFactory()
+        OrganizationFactory(members=[Member(user=member, role="admin")])
+        org = OrganizationFactory()
+        obj = Owned.objects.create(organization=org, private=True)
+        self.login(member)
+        assert OwnableReadPermission(obj).can() is False
+
+    def test_private_object_visible_by_admin(self):
+        """Private objects should be visible by sysadmins."""
+        admin = AdminFactory()
+        obj = Owned.objects.create(owner=UserFactory(), private=True)
+        self.login(admin)
+        assert OwnableReadPermission(obj).can() is True
+
+    def test_object_without_private_attribute(self):
+        """Objects without private attribute should be visible by everyone."""
+
+        class OwnedWithoutPrivate(owned.Owned, db.Document):
+            name = db.StringField()
+
+        obj = OwnedWithoutPrivate.objects.create(owner=UserFactory())
+        assert OwnableReadPermission(obj).can() is True
