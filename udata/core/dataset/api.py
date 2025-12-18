@@ -331,9 +331,9 @@ class DatasetsAtomFeedAPI(API):
     def get(self):
         args = dataset_parser.parse()
         queryset = Dataset.objects.visible()
-        queryset = DatasetApiParser.parse_filters(queryset, args)
+        queryset = dataset_parser.parse_filters(queryset, args)
 
-        q = args.get("q", "").strip() if args.get("q") else ""
+        q = args.get("q", "").strip()
         has_filters = any(
             args.get(k)
             for k in ["q", "tag", "license", "organization", "owner", "format", "badge", "topic"]
