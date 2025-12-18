@@ -136,3 +136,16 @@ class PostsAPITest(APITestCase):
 
         post.reload()
         assert post.published is None
+
+    def test_post_api_create_with_empty_credit_url(self):
+        """It should create a post with an empty credit_url (converted to None)"""
+        data = PostFactory.as_dict()
+        data["datasets"] = [str(d.id) for d in data["datasets"]]
+        data["reuses"] = [str(r.id) for r in data["reuses"]]
+        data["credit_url"] = ""
+        self.login(AdminFactory())
+        response = self.post(url_for("api.posts"), data)
+        assert201(response)
+        assert Post.objects.count() == 1
+        post = Post.objects.first()
+        assert post.credit_url is None

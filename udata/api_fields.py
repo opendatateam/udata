@@ -673,6 +673,9 @@ def patch(obj, request) -> type:
             model_attribute = getattr(obj.__class__, key)
             info = getattr(model_attribute, "__additional_field_info__", {})
 
+            if value == "" and isinstance(model_attribute, mongo_fields.StringField):
+                value = None
+
             if hasattr(model_attribute, "from_input"):
                 value = model_attribute.from_input(value)
             elif isinstance(model_attribute, mongoengine.fields.ListField) and isinstance(
