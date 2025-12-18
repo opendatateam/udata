@@ -7,6 +7,7 @@ from flask_security import current_user
 from udata.api import API, api, fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import Dataset
+from udata.core.legal.mails import add_send_mail_argument
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
@@ -164,6 +165,9 @@ class DiscussionSpamAPI(SpamAPIMixin):
     model = Discussion
 
 
+discussion_delete_parser = add_send_mail_argument(api.parser())
+
+
 @ns.route("/<id>/", endpoint="discussion")
 class DiscussionAPI(API):
     """
@@ -236,11 +240,17 @@ class DiscussionAPI(API):
         return discussion
 
     @api.doc("delete_discussion")
+    @api.expect(discussion_delete_parser)
     @api.response(403, "Not allowed to delete this discussion")
     def delete(self, id):
         """Delete a discussion given its ID"""
+        args = discussion_delete_parser.parse_args()
         discussion = Discussion.objects.get_or_404(id=id_or_404(id))
         discussion.permissions["delete"].test()
+
+        from udata.core.legal.mails import send_mail_on_deletion
+
+        send_mail_on_deletion(discussion, args)
 
         discussion.delete()
         on_discussion_deleted.send(discussion)
@@ -257,6 +267,9 @@ class DiscussionCommentSpamAPI(SpamAPIMixin):
         elif cidx == 0:
             api.abort(400, "You cannot unspam the first comment of a discussion")
         return discussion, discussion.discussion[cidx]
+
+
+message_delete_parser = add_send_mail_argument(api.parser())
 
 
 @ns.route("/<id>/comments/<int:cidx>/", endpoint="discussion_comment")
@@ -286,16 +299,23 @@ class DiscussionCommentAPI(API):
         return discussion
 
     @api.doc("delete_discussion_comment")
+    @api.expect(message_delete_parser)
     @api.response(403, "Not allowed to delete this comment")
     def delete(self, id, cidx):
         """Delete a comment given its index"""
+        args = message_delete_parser.parse_args()
         discussion = Discussion.objects.get_or_404(id=id_or_404(id))
         if len(discussion.discussion) <= cidx:
             api.abort(404, "Comment does not exist")
         elif cidx == 0:
             api.abort(400, "You cannot delete the first comment of a discussion")
 
-        discussion.discussion[cidx].permissions["delete"].test()
+        message = discussion.discussion[cidx]
+        message.permissions["delete"].test()
+
+        from udata.core.legal.mails import send_mail_on_deletion
+
+        send_mail_on_deletion(message, args)
 
         discussion.discussion.pop(cidx)
         discussion.save()

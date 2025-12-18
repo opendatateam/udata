@@ -173,6 +173,9 @@ class Defaults(object):
     SITE_AUTHOR = "Udata"
     SITE_GITHUB_URL = "https://github.com/etalab/udata"
 
+    TERMS_OF_USE_URL = None
+    TELERECOURS_URL = None
+
     UDATA_INSTANCE_NAME = "udata"
 
     HARVESTER_BACKENDS = []
