@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in development)
+
+- feat(api): add filtering support to datasets Atom feed (`/api/1/datasets/recent.atom`)
+
 ## 14.4.0 (2025-12-16)
 
 - chore: adapt CI and docs to main branch ([#3559](https://github.com/opendatateam/udata/pull/3559))
