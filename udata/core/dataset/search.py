@@ -1,6 +1,7 @@
 import datetime
 
 from udata.core.dataset.api import DEFAULT_SORTING, DatasetApiParser
+from udata.core.dataset.constants import FormatFamily, get_format_family
 from udata.core.spatial.constants import ADMIN_LEVEL_MAX
 from udata.core.spatial.models import admin_levels
 from udata.core.topic.models import TopicElement
@@ -51,11 +52,28 @@ class DatasetSearch(ModelSearchAdapter):
         "temporal_coverage": TemporalCoverageFilter(),
         "featured": BoolFilter(),
         "topic": ModelTermsFilter(model=Topic),
+        "access_type": Filter(),
+        "format_family": Filter(choices=list(FormatFamily)),
     }
 
     @classmethod
     def is_indexable(cls, dataset: Dataset):
         return dataset.is_visible
+
+    @classmethod
+    def _compute_format_family(cls, dataset: Dataset) -> list[str]:
+        """
+        Compute the format families present in the dataset's resources.
+
+        Returns a list of unique format family values based on the formats
+        of all resources in the dataset.
+        """
+        families = set()
+        for resource in dataset.resources:
+            if resource.format:
+                family = get_format_family(resource.format)
+                families.add(family.value)
+        return list(families) if families else [FormatFamily.OTHER.value]
 
     @classmethod
     def mongo_search(cls, args):
@@ -116,6 +134,8 @@ class DatasetSearch(ModelSearchAdapter):
             "format": [r.format.lower() for r in dataset.resources if r.format],
             "schema": [r.schema.name for r in dataset.resources if r.schema],
             "topics": [str(tid) for tid in topic_ids],
+            "access_type": dataset.access_type,
+            "format_family": cls._compute_format_family(dataset),
         }
         extras = {}
         for key, value in dataset.extras.items():

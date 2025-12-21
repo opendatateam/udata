@@ -71,6 +71,7 @@ class DataserviceSearch(ModelSearchAdapter):
         "organization": ModelTermsFilter(model=Organization),
         "archived": BoolFilter(),
         "featured": BoolFilter(),
+        "access_type": Filter(),
     }
 
     @classmethod
@@ -124,4 +125,5 @@ class DataserviceSearch(ModelSearchAdapter):
             "followers": dataservice.metrics.get("followers", 0),
             "is_restricted": dataservice.access_type == AccessType.RESTRICTED,
             "views": dataservice.metrics.get("views", 0),
+            "access_type": dataservice.access_type,
         }

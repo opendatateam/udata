@@ -14,6 +14,8 @@ from udata.core.dataset.factories import (
 )
 from udata.core.dataset.models import Schema
 from udata.core.dataset.search import DatasetSearch
+from udata.core.dataservices.factories import DataserviceFactory
+from udata.core.dataservices.search import DataserviceSearch
 from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
 from udata.i18n import gettext as _
 from udata.search import as_task_param, reindex
@@ -216,3 +218,90 @@ class DatasetSearchAdapterTest(APITestCase):
         assert "topics" in serialized
         assert len(serialized["topics"]) == 1
         assert str(topic.id) in serialized["topics"]
+
+    def test_serialize_includes_access_type(self):
+        """Test that DatasetSearch.serialize includes access_type in the serialized document"""
+        from udata.core.access_type.constants import AccessType
+
+        dataset = DatasetFactory(access_type=AccessType.OPEN)
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "access_type" in serialized
+        assert serialized["access_type"] == "open"
+
+    def test_serialize_includes_format_family_tabular(self):
+        """Test that DatasetSearch.serialize includes format_family for tabular formats"""
+        resource_csv = ResourceFactory(format="csv")
+        resource_xlsx = ResourceFactory(format="xlsx")
+        dataset = DatasetFactory(resources=[resource_csv, resource_xlsx])
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "format_family" in serialized
+        assert serialized["format_family"] == ["tabular"]
+
+    def test_serialize_includes_format_family_machine_readable(self):
+        """Test that DatasetSearch.serialize includes format_family for machine-readable formats"""
+        resource_json = ResourceFactory(format="json")
+        resource_xml = ResourceFactory(format="xml")
+        dataset = DatasetFactory(resources=[resource_json, resource_xml])
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "format_family" in serialized
+        assert serialized["format_family"] == ["machine_readable"]
+
+    def test_serialize_includes_format_family_geographical(self):
+        """Test that DatasetSearch.serialize includes format_family for geographical formats"""
+        resource_shp = ResourceFactory(format="shp")
+        resource_geojson = ResourceFactory(format="geojson")
+        dataset = DatasetFactory(resources=[resource_shp, resource_geojson])
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "format_family" in serialized
+        assert serialized["format_family"] == ["geographical"]
+
+    def test_serialize_includes_format_family_other_for_unknown(self):
+        """Test that DatasetSearch.serialize returns 'other' for unknown formats"""
+        resource_pdf = ResourceFactory(format="pdf")
+        dataset = DatasetFactory(resources=[resource_pdf])
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "format_family" in serialized
+        assert serialized["format_family"] == ["other"]
+
+    def test_serialize_includes_format_family_other_for_no_resources(self):
+        """Test that DatasetSearch.serialize returns 'other' for datasets without resources"""
+        dataset = DatasetFactory(resources=[])
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "format_family" in serialized
+        assert serialized["format_family"] == ["other"]
+
+    def test_serialize_includes_format_family_mixed(self):
+        """Test that DatasetSearch.serialize includes multiple format families when mixed"""
+        resource_csv = ResourceFactory(format="csv")
+        resource_json = ResourceFactory(format="json")
+        resource_pdf = ResourceFactory(format="pdf")
+        resource_shp = ResourceFactory(format="shp")
+        dataset = DatasetFactory(resources=[resource_csv, resource_json, resource_pdf, resource_shp])
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "format_family" in serialized
+        assert set(serialized["format_family"]) == {"tabular", "machine_readable", "geographical", "other"}
+
+
+class DataserviceSearchAdapterTest(APITestCase):
+    def test_serialize_includes_access_type(self):
+        """Test that DataserviceSearch.serialize includes access_type in the serialized document"""
+        from udata.core.access_type.constants import AccessType
+
+        dataservice = DataserviceFactory(access_type=AccessType.OPEN)
+        serialized = DataserviceSearch.serialize(dataservice)
+
+        assert "access_type" in serialized
+        assert serialized["access_type"] == "open"

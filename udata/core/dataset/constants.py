@@ -182,3 +182,50 @@ DESCRIPTION_SIZE_LIMIT = 100000
 DESCRIPTION_SHORT_SIZE_LIMIT = 200
 
 FULL_OBJECTS_HEADER = "X-Get-Datasets-Full-Objects"
+
+
+class FormatFamily(StrEnum):
+    """
+    Classification of resource formats into families for search filtering.
+
+    - TABULAR: Structured data formats optimized for tabular/spreadsheet data
+    - MACHINE_READABLE: Formats designed for machine-to-machine data exchange
+    - GEOGRAPHICAL: Geographical data formats
+    - OTHER: All other formats
+    """
+
+    TABULAR = auto()
+    MACHINE_READABLE = auto()
+    GEOGRAPHICAL = auto()
+    OTHER = auto()
+
+
+# Mapping of file formats (lowercase) to their family
+TABULAR_FORMATS = frozenset({"csv", "parquet", "xls", "xlsx", "ods", "tsv", "parquet", "ods", "csv.gz"})
+MACHINE_READABLE_FORMATS = frozenset({"json", "xml", "rdf", "sql", "jsonl", "ndjson"})
+GEOGRAPHICAL_FORMATS = frozenset({"shp", "kml", "kmz", "gpx", "shx", "ovr", "geojson", "gpkg", "pmtiles", "mbtiles", "wms", "wfs"})
+
+
+def get_format_family(format_str: str | None) -> FormatFamily:
+    """
+    Determine the format family for a given format string.
+
+    Args:
+        format_str: The format string (e.g., "csv", "JSON", "PDF")
+
+    Returns:
+        The corresponding FormatFamily enum value
+    """
+    if not format_str:
+        return FormatFamily.OTHER
+
+    fmt = format_str.lower().strip()
+
+    if fmt in TABULAR_FORMATS:
+        return FormatFamily.TABULAR
+    elif fmt in MACHINE_READABLE_FORMATS:
+        return FormatFamily.MACHINE_READABLE
+    elif fmt in GEOGRAPHICAL_FORMATS:
+        return FormatFamily.GEOGRAPHICAL
+    else:
+        return FormatFamily.OTHER
