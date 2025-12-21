@@ -11,6 +11,7 @@ from udata.models import Dataservice, Organization, User
 from udata.search import (
     BoolFilter,
     Filter,
+    ListFilter,
     ModelSearchAdapter,
     ModelTermsFilter,
     register,
@@ -68,12 +69,13 @@ class DataserviceSearch(ModelSearchAdapter):
     sorts = {"created": "created_at", "views": "views", "followers": "followers"}
 
     filters = {
-        "tag": Filter(),
+        "tag": ListFilter(),
         "organization": ModelTermsFilter(model=Organization),
         "archived": BoolFilter(),
         "featured": BoolFilter(),
         "access_type": Filter(),
         "producer_type": Filter(choices=list(PRODUCER_TYPES)),
+        "last_update_range": Filter(choices=["last_30_days", "last_12_months", "last_3_years"]),
     }
 
     @classmethod

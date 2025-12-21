@@ -6,6 +6,7 @@ from udata.models import Organization, Reuse, User
 from udata.search import (
     BoolFilter,
     Filter,
+    ListFilter,
     ModelSearchAdapter,
     ModelTermsFilter,
     register,
@@ -28,7 +29,7 @@ class ReuseSearch(ModelSearchAdapter):
     }
 
     filters = {
-        "tag": Filter(),
+        "tag": ListFilter(),
         "organization": ModelTermsFilter(model=Organization),
         "organization_badge": Filter(choices=list(Organization.__badges__)),
         "owner": ModelTermsFilter(model=User),
@@ -38,6 +39,7 @@ class ReuseSearch(ModelSearchAdapter):
         "topic": Filter(),
         "archived": BoolFilter(),
         "producer_type": Filter(choices=list(PRODUCER_TYPES)),
+        "last_update_range": Filter(choices=["last_30_days", "last_12_months", "last_3_years"]),
     }
 
     @classmethod

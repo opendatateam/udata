@@ -56,6 +56,7 @@ class DatasetSearch(ModelSearchAdapter):
         "access_type": Filter(),
         "format_family": Filter(choices=list(FormatFamily)),
         "producer_type": Filter(choices=list(PRODUCER_TYPES)),
+        "last_update_range": Filter(choices=["last_30_days", "last_12_months", "last_3_years"]),
     }
 
     @classmethod
