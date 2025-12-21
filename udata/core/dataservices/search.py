@@ -1,6 +1,8 @@
 import datetime
 
+import requests
 from bson.objectid import ObjectId
+from flask import current_app
 from flask_restx.inputs import boolean
 
 from udata.api import api
@@ -17,6 +19,9 @@ from udata.search import (
     register,
 )
 from udata.utils import to_iso_datetime
+
+# Maximum size in bytes for fetched documentation content
+MAX_DOCUMENTATION_SIZE = 1000 * 1024  # 1 MB
 
 __all__ = ("DataserviceSearch",)
 
@@ -83,6 +88,46 @@ class DataserviceSearch(ModelSearchAdapter):
         return dataservice.is_visible
 
     @classmethod
+    def fetch_documentation_content(cls, url: str) -> str | None:
+        """
+        Fetch the content of a documentation URL if it's readable text.
+        Returns None if the content cannot be fetched or is not text.
+        """
+        if not url:
+            return None
+
+        try:
+            timeout = current_app.config.get("SEARCH_SERVICE_REQUEST_TIMEOUT", 10)
+            headers = {
+                'User-Agent': 'udata-search-service/1.0'
+            }
+            response = requests.get(url, timeout=timeout, stream=True, headers=headers)
+            response.raise_for_status()
+
+            if response.encoding is None:
+                response.encoding = response.apparent_encoding or 'utf-8'
+
+            content_parts = []
+            total_size = 0
+            for chunk in response.iter_content(chunk_size=8192, decode_unicode=True):
+                if chunk:
+                    chunk_size = len(chunk)
+                    if total_size + chunk_size > MAX_DOCUMENTATION_SIZE:
+                        remaining = MAX_DOCUMENTATION_SIZE - total_size
+                        content_parts.append(chunk[:remaining])
+                        break
+                    content_parts.append(chunk)
+                    total_size += chunk_size
+
+            content = ''.join(content_parts)
+            return content
+
+        except requests.RequestException:
+            return None
+        except Exception:
+            return None
+
+    @classmethod
     def mongo_search(cls, args):
         dataservices = Dataservice.objects.visible()
         dataservices = DataserviceApiParser.parse_filters(dataservices, args)
@@ -113,6 +158,8 @@ class DataserviceSearch(ModelSearchAdapter):
         for key, value in dataservice.extras.items():
             extras[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
 
+        documentation_content = cls.fetch_documentation_content(dataservice.machine_documentation_url)
+
         return {
             "id": str(dataservice.id),
             "title": dataservice.title,
@@ -132,4 +179,5 @@ class DataserviceSearch(ModelSearchAdapter):
             "views": dataservice.metrics.get("views", 0),
             "access_type": dataservice.access_type,
             "producer_type": get_producer_type(org, owner),
+            "documentation_content": documentation_content,
         }
