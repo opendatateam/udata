@@ -1,5 +1,6 @@
 import datetime
 
+from udata.core.organization.constants import PRODUCER_TYPES, get_producer_type
 from udata.core.reuse.api import DEFAULT_SORTING, ReuseApiParser
 from udata.models import Organization, Reuse, User
 from udata.search import (
@@ -36,6 +37,7 @@ class ReuseSearch(ModelSearchAdapter):
         "featured": BoolFilter(),
         "topic": Filter(),
         "archived": BoolFilter(),
+        "producer_type": Filter(choices=list(PRODUCER_TYPES)),
     }
 
     @classmethod
@@ -58,6 +60,7 @@ class ReuseSearch(ModelSearchAdapter):
     def serialize(cls, reuse: Reuse) -> dict:
         organization = None
         owner = None
+        org = None
         if reuse.organization:
             org = Organization.objects(id=reuse.organization.id).first()
             organization = {
@@ -92,4 +95,5 @@ class ReuseSearch(ModelSearchAdapter):
             "tags": reuse.tags,
             "badges": [badge.kind for badge in reuse.badges],
             "extras": extras,
+            "producer_type": get_producer_type(org, owner),
         }

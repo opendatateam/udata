@@ -2,6 +2,7 @@ import datetime
 
 from udata.core.dataset.api import DEFAULT_SORTING, DatasetApiParser
 from udata.core.dataset.constants import FormatFamily, get_format_family
+from udata.core.organization.constants import PRODUCER_TYPES, get_producer_type
 from udata.core.spatial.constants import ADMIN_LEVEL_MAX
 from udata.core.spatial.models import admin_levels
 from udata.core.topic.models import TopicElement
@@ -54,6 +55,7 @@ class DatasetSearch(ModelSearchAdapter):
         "topic": ModelTermsFilter(model=Topic),
         "access_type": Filter(),
         "format_family": Filter(choices=list(FormatFamily)),
+        "producer_type": Filter(choices=list(PRODUCER_TYPES)),
     }
 
     @classmethod
@@ -91,6 +93,7 @@ class DatasetSearch(ModelSearchAdapter):
     def serialize(cls, dataset):
         organization = None
         owner = None
+        org = None
 
         topic_ids = list(
             set(te.topic.id for te in TopicElement.objects(element=dataset) if te.topic)
@@ -136,6 +139,7 @@ class DatasetSearch(ModelSearchAdapter):
             "topics": [str(tid) for tid in topic_ids],
             "access_type": dataset.access_type,
             "format_family": cls._compute_format_family(dataset),
+            "producer_type": get_producer_type(org, owner),
         }
         extras = {}
         for key, value in dataset.extras.items():

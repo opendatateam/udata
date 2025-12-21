@@ -6,6 +6,7 @@ from flask_restx.inputs import boolean
 from udata.api import api
 from udata.api.parsers import ModelApiParser
 from udata.core.access_type.constants import AccessType
+from udata.core.organization.constants import PRODUCER_TYPES, get_producer_type
 from udata.models import Dataservice, Organization, User
 from udata.search import (
     BoolFilter,
@@ -72,6 +73,7 @@ class DataserviceSearch(ModelSearchAdapter):
         "archived": BoolFilter(),
         "featured": BoolFilter(),
         "access_type": Filter(),
+        "producer_type": Filter(choices=list(PRODUCER_TYPES)),
     }
 
     @classmethod
@@ -94,6 +96,7 @@ class DataserviceSearch(ModelSearchAdapter):
     def serialize(cls, dataservice: Dataservice) -> dict:
         organization = None
         owner = None
+        org = None
         if dataservice.organization:
             org = Organization.objects(id=dataservice.organization.id).first()
             organization = {
@@ -126,4 +129,5 @@ class DataserviceSearch(ModelSearchAdapter):
             "is_restricted": dataservice.access_type == AccessType.RESTRICTED,
             "views": dataservice.metrics.get("views", 0),
             "access_type": dataservice.access_type,
+            "producer_type": get_producer_type(org, owner),
         }
