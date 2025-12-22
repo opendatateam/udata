@@ -114,3 +114,4 @@ def init_app(app):
     import udata.core.dataset.search  # noqa
     import udata.core.reuse.search  # noqa
     import udata.core.organization.search  # noqa
+    import udata.core.topic.search  # noqa

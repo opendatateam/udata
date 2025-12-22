@@ -30,5 +30,4 @@ class DataserviceSearchAPI(API):
     @apiv2.marshal_with(Dataservice.__page_fields__)
     def get(self):
         """Search all dataservices"""
-        search_parser.parse_args()
         return search.query(DataserviceSearch, **multi_to_dict(request.args))
