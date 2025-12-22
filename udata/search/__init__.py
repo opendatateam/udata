@@ -116,3 +116,4 @@ def init_app(app):
     import udata.core.organization.search  # noqa
     import udata.core.topic.search  # noqa
     import udata.core.discussions.search  # noqa
+    import udata.core.post.search  # noqa
