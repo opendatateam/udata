@@ -27,6 +27,9 @@ class TopicSearch(ModelSearchAdapter):
     filters = {
         "tag": ListFilter(),
         "featured": BoolFilter(),
+        "last_update_range": Filter(choices=["last_30_days", "last_12_months", "last_3_years"]),
+        "organization": Filter(),
+        "producer_type": Filter(),
     }
 
     @classmethod
@@ -59,6 +62,15 @@ class TopicSearch(ModelSearchAdapter):
         """
         Serialize a Topic into a flat document suitable for the search-service.
         """
+        producer_type = None
+        organization_id = None
+        if topic.organization:
+            organization_id = str(topic.organization.id)
+            if hasattr(topic.organization, 'public_service') and topic.organization.public_service:
+                producer_type = 'public-service'
+            else:
+                producer_type = 'other'
+        
         return {
             "id": str(topic.id),
             "name": topic.name,
@@ -73,6 +85,8 @@ class TopicSearch(ModelSearchAdapter):
             if hasattr(topic, "last_modified")
             and isinstance(topic.last_modified, (datetime.datetime, datetime.date))
             else None,
+            "organization": organization_id,
+            "producer_type": producer_type,
         }
 
 

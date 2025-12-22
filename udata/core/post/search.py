@@ -15,7 +15,7 @@ class PostSearch(ModelSearchAdapter):
 
     filters = {
         "tag": ListFilter(),
-        "last_modified_range": Filter(choices=["last_30_days", "last_12_months", "last_3_years"]),
+        "last_update_range": Filter(choices=["last_30_days", "last_12_months", "last_3_years"]),
     }
 
     @classmethod

@@ -1,5 +1,5 @@
 from udata.core.discussions.models import Discussion
-from udata.search import BoolFilter, ModelSearchAdapter, register
+from udata.search import BoolFilter, Filter, ModelSearchAdapter, register
 
 
 @register
@@ -14,6 +14,7 @@ class DiscussionSearch(ModelSearchAdapter):
 
     filters = {
         "closed": BoolFilter(),
+        "last_update_range": Filter(choices=["last_30_days", "last_12_months", "last_3_years"]),
     }
 
     @classmethod
