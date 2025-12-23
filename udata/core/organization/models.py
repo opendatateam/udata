@@ -126,7 +126,10 @@ class Organization(
         db.SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
         auditable=False,
     )
-    description = field(db.StringField(required=True))
+    description = field(
+        db.StringField(required=True),
+        markdown=True,
+    )
     url = field(db.URLField())
     image_url = field(db.StringField())
     logo = field(

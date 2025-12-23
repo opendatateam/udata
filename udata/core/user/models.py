@@ -62,7 +62,10 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
         db.ImageField(fs=avatars, basename=default_image_basename, thumbnails=AVATAR_SIZES)
     )
     website = field(db.URLField())
-    about = field(db.StringField())
+    about = field(
+        db.StringField(),
+        markdown=True,
+    )
 
     prefered_language = field(db.StringField())
 
