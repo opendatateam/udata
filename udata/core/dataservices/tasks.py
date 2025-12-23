@@ -23,8 +23,12 @@ def purge_dataservices(self):
         Follow.objects(following=dataservice).delete()
         # Remove discussions
         Discussion.objects(subject=dataservice).delete()
-        # Remove HarvestItem references
-        HarvestJob.objects(items__dataservice=dataservice).update(set__items__S__dataservice=None)
+        # Remove HarvestItem references (using update_many with array_filters to update all matching items)
+        HarvestJob._get_collection().update_many(
+            {"items.dataservice": dataservice.id},
+            {"$set": {"items.$[item].dataservice": None}},
+            array_filters=[{"item.dataservice": dataservice.id}],
+        )
         # Remove associated Transfers
         Transfer.objects(subject=dataservice).delete()
         # Remove dataservices references in Topics

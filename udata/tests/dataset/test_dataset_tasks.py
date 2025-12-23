@@ -60,6 +60,31 @@ class DatasetTasksTest(PytestOnlyDBTestCase):
         assert HarvestJob.objects.filter(items__dataset=datasets[0].id).count() == 0
         assert Dataservice.objects.filter(datasets=datasets[0].id).count() == 0
 
+    def test_purge_datasets_cleans_all_harvest_items_references(self):
+        """Test that purging datasets cleans all HarvestItem references in a job.
+
+        The same dataset can appear multiple times in a job's items (e.g. if the
+        harvest source has duplicates). The $ operator only updates the first match,
+        so we need to use $[] with array_filters to update all matches.
+        """
+        dataset_to_delete = Dataset.objects.create(title="delete me", deleted="2016-01-01")
+        dataset_keep = Dataset.objects.create(title="keep me")
+
+        job = HarvestJobFactory(
+            items=[
+                HarvestItem(dataset=dataset_to_delete, remote_id="1"),
+                HarvestItem(dataset=dataset_keep, remote_id="2"),
+                HarvestItem(dataset=dataset_to_delete, remote_id="3"),
+            ]
+        )
+
+        tasks.purge_datasets()
+
+        job.reload()
+        assert job.items[0].dataset is None
+        assert job.items[1].dataset == dataset_keep
+        assert job.items[2].dataset is None
+
     def test_purge_datasets_community(self):
         dataset = Dataset.objects.create(title="delete me", deleted="2016-01-01")
         community_resource1 = CommunityResourceFactory()
