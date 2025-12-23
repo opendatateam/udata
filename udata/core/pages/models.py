@@ -84,6 +84,14 @@ class LinksListBloc(BlocWithTitleMixin, Bloc):
 
 
 @generate_fields()
+class MarkdownBloc(Bloc):
+    content = field(
+        db.StringField(required=True),
+        markdown=True,
+    )
+
+
+@generate_fields()
 class Page(Auditable, Owned, Datetimed, db.Document):
     blocs = field(
         db.EmbeddedDocumentListField(Bloc),
