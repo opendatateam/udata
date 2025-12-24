@@ -128,7 +128,7 @@ class DcatBackend(BaseBackend):
         else:
             self.job.data["graphs"] = serialized_graphs
 
-    def get_format(self):
+    def get_format(self) -> str:
         fmt = guess_format(self.source.url)
         # if format can't be guessed from the url
         # we fallback on the declared Content-Type
@@ -369,6 +369,10 @@ class BaseCswDcatBackend(DcatBackend):
         Return the input tree as a DCAT tree.
         """
         pass
+
+    @override
+    def get_format(self) -> str:
+        return "xml"
 
     @override
     def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
