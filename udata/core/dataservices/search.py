@@ -9,6 +9,7 @@ from udata.api import api
 from udata.api.parsers import ModelApiParser
 from udata.core.access_type.constants import AccessType
 from udata.core.organization.constants import PRODUCER_TYPES, get_producer_type
+from udata.core.topic.models import Topic, TopicElement
 from udata.models import Dataservice, Organization, User
 from udata.search import (
     BoolFilter,
@@ -75,6 +76,7 @@ class DataserviceSearch(ModelSearchAdapter):
 
     filters = {
         "tag": ListFilter(),
+        "topic": ModelTermsFilter(model=Topic),
         "organization": ModelTermsFilter(model=Organization),
         "archived": BoolFilter(),
         "featured": BoolFilter(),
@@ -144,6 +146,11 @@ class DataserviceSearch(ModelSearchAdapter):
         organization = None
         owner = None
         org = None
+        
+        topic_ids = list(
+            set(te.topic.id for te in TopicElement.objects(element=dataservice) if te.topic)
+        )
+        
         if dataservice.organization:
             org = Organization.objects(id=dataservice.organization.id).first()
             organization = {
@@ -173,6 +180,7 @@ class DataserviceSearch(ModelSearchAdapter):
             "organization": organization,
             "owner": str(owner.id) if owner else None,
             "tags": dataservice.tags,
+            "topics": [str(tid) for tid in topic_ids],
             "extras": extras,
             "followers": dataservice.metrics.get("followers", 0),
             "is_restricted": dataservice.access_type == AccessType.RESTRICTED,

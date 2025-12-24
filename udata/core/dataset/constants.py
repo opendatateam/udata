@@ -191,12 +191,14 @@ class FormatFamily(StrEnum):
     - TABULAR: Structured data formats optimized for tabular/spreadsheet data
     - MACHINE_READABLE: Formats designed for machine-to-machine data exchange
     - GEOGRAPHICAL: Geographical data formats
+    - DOCUMENTS: Document formats (PDF, Word, Markdown, etc.)
     - OTHER: All other formats
     """
 
     TABULAR = auto()
     MACHINE_READABLE = auto()
     GEOGRAPHICAL = auto()
+    DOCUMENTS = auto()
     OTHER = auto()
 
 
@@ -204,6 +206,7 @@ class FormatFamily(StrEnum):
 TABULAR_FORMATS = frozenset({"csv", "parquet", "xls", "xlsx", "ods", "tsv", "parquet", "ods", "csv.gz"})
 MACHINE_READABLE_FORMATS = frozenset({"json", "xml", "rdf", "sql", "jsonl", "ndjson"})
 GEOGRAPHICAL_FORMATS = frozenset({"shp", "kml", "kmz", "gpx", "shx", "ovr", "geojson", "gpkg", "pmtiles", "mbtiles", "wms", "wfs"})
+DOCUMENTS_FORMATS = frozenset({"pdf", "doc", "docx", "md", "txt", "html", "htm", "rtf", "odt"})
 
 
 def get_format_family(format_str: str | None) -> FormatFamily:
@@ -227,5 +230,7 @@ def get_format_family(format_str: str | None) -> FormatFamily:
         return FormatFamily.MACHINE_READABLE
     elif fmt in GEOGRAPHICAL_FORMATS:
         return FormatFamily.GEOGRAPHICAL
+    elif fmt in DOCUMENTS_FORMATS:
+        return FormatFamily.DOCUMENTS
     else:
         return FormatFamily.OTHER

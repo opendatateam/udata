@@ -11,7 +11,6 @@ ns = apiv2.namespace("discussions", "Discussion related operations")
 
 search_parser = DiscussionSearch.as_request_parser(store_missing=False)
 
-# Create API v2 versions of the fields
 discussion_fields_v2 = apiv2.inherit("Discussion", discussion_fields)
 discussion_page_fields = apiv2.model("DiscussionPage", fields.pager(discussion_fields_v2))
 

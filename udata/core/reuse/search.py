@@ -2,6 +2,7 @@ import datetime
 
 from udata.core.organization.constants import PRODUCER_TYPES, get_producer_type
 from udata.core.reuse.api import DEFAULT_SORTING, ReuseApiParser
+from udata.core.topic.models import TopicElement
 from udata.models import Organization, Reuse, User
 from udata.search import (
     BoolFilter,
@@ -63,6 +64,11 @@ class ReuseSearch(ModelSearchAdapter):
         organization = None
         owner = None
         org = None
+        
+        topic_object_ids = list(
+            set(te.topic.id for te in TopicElement.objects(element=reuse) if te.topic)
+        )
+        
         if reuse.organization:
             org = Organization.objects(id=reuse.organization.id).first()
             organization = {
@@ -93,7 +99,8 @@ class ReuseSearch(ModelSearchAdapter):
             "organization": organization,
             "owner": str(owner.id) if owner else None,
             "type": reuse.type,
-            "topic": reuse.topic,
+            "topic": reuse.topic,  # Metadata topic (health, transport, etc.)
+            "topic_object": [str(tid) for tid in topic_object_ids],  # Topic objects linked via TopicElement
             "tags": reuse.tags,
             "badges": [badge.kind for badge in reuse.badges],
             "extras": extras,

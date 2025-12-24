@@ -1,6 +1,8 @@
 import datetime
 
+from udata.core.organization.constants import PRODUCER_TYPES, get_producer_type
 from udata.core.topic.models import Topic
+from udata.models import Organization, User
 from udata.search import (
     BoolFilter,
     Filter,
@@ -29,7 +31,7 @@ class TopicSearch(ModelSearchAdapter):
         "featured": BoolFilter(),
         "last_update_range": Filter(choices=["last_30_days", "last_12_months", "last_3_years"]),
         "organization": Filter(),
-        "producer_type": Filter(),
+        "producer_type": Filter(choices=list(PRODUCER_TYPES)),
     }
 
     @classmethod
@@ -62,15 +64,24 @@ class TopicSearch(ModelSearchAdapter):
         """
         Serialize a Topic into a flat document suitable for the search-service.
         """
-        producer_type = None
-        organization_id = None
-        if topic.organization:
-            organization_id = str(topic.organization.id)
-            if hasattr(topic.organization, 'public_service') and topic.organization.public_service:
-                producer_type = 'public-service'
-            else:
-                producer_type = 'other'
+        from udata.core.topic.models import TopicElement
         
+        organization_id = None
+        organization_name = None
+        org = None
+        owner = None
+        
+        if topic.organization:
+            org = Organization.objects(id=topic.organization.id).first()
+            organization_id = str(org.id)
+            organization_name = org.name
+        elif topic.owner:
+            owner = User.objects(id=topic.owner.id).first()
+    
+        nb_datasets = TopicElement.objects(topic=topic, __raw__={"element._cls": "Dataset"}).count()
+        nb_reuses = TopicElement.objects(topic=topic, __raw__={"element._cls": "Reuse"}).count()
+        nb_dataservices = TopicElement.objects(topic=topic, __raw__={"element._cls": "Dataservice"}).count()
+    
         return {
             "id": str(topic.id),
             "name": topic.name,
@@ -86,7 +97,11 @@ class TopicSearch(ModelSearchAdapter):
             and isinstance(topic.last_modified, (datetime.datetime, datetime.date))
             else None,
             "organization": organization_id,
-            "producer_type": producer_type,
+            "organization_name": organization_name,
+            "producer_type": get_producer_type(org, owner),
+            "nb_datasets": nb_datasets,
+            "nb_reuses": nb_reuses,
+            "nb_dataservices": nb_dataservices,
         }
 
 
