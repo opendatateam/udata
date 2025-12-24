@@ -1,4 +1,5 @@
 import logging
+from abc import abstractmethod
 from datetime import date
 from typing import ClassVar, Generator
 
@@ -255,22 +256,14 @@ class DcatBackend(BaseBackend):
         raise ValueError(f"Unable to find dataset with DCT.identifier:{item.remote_id}")
 
 
-class CswDcatBackend(DcatBackend):
+class BaseCswDcatBackend(DcatBackend):
     """
-    CSW harvester fetching records as DCAT.
-    The parsing of items is then the same as for the DcatBackend.
-    """
+    Abstract base CSW to DCAT harvester.
 
-    name = "csw-dcat"
-    display_name = "CSW-DCAT"
+    Once items are retrieved from CSW, the parsing of these items is the same as DcatBackend.
+    """
 
     extra_configs = (
-        HarvestExtraConfig(
-            _("GeoDCAT-AP"),
-            "enable_geodcat",
-            str,
-            _("Request GeoDCAT-AP to the CSW server (must be supported by the server)."),
-        ),
         HarvestExtraConfig(
             _("Remote URL prefix"),
             "remote_url_prefix",
@@ -362,15 +355,24 @@ class CswDcatBackend(DcatBackend):
         self.xpath_proc.declare_namespace("csw", CSW_NAMESPACE)
 
     @property
+    @abstractmethod
     def output_schema(self):
-        if self.get_extra_config_value("enable_geodcat"):
-            return str(GEODCAT)
-        else:
-            return str(DCAT)
+        """
+        Return the CSW `outputSchema` property.
+        """
+        pass
 
+    @abstractmethod
+    def as_dcat(self, tree: PyXdmNode) -> PyXdmNode:
+        """
+        Return the input tree as a DCAT tree.
+        """
+        pass
+
+    @override
     def walk_graph(self, url: str, fmt: str) -> Generator[tuple[int, Graph], None, None]:
         """
-        Yield all RDF pages as `Graph` from the source
+        Yield all RDF pages as `Graph` from the source.
         """
         output_schema = self.output_schema
         page_number = 0
@@ -411,19 +413,11 @@ class CswDcatBackend(DcatBackend):
                     return
 
             page_number += 1
-            start = self.next_position(start, search_results)
+            start = self._next_position(start, search_results)
             if not start:
                 return
 
-    def as_dcat(self, tree: PyXdmNode) -> PyXdmNode:
-        """
-        Return the input tree as a DCAT tree.
-        For CswDcatBackend, this method return the incoming tree as-is, since it's already DCAT.
-        For subclasses of CswDcatBackend, this method should convert the incoming tree to DCAT.
-        """
-        return tree
-
-    def next_position(self, start: int, search_results: PyXdmNode) -> int | None:
+    def _next_position(self, start: int, search_results: PyXdmNode) -> int | None:
         next_record = int(search_results.get_attribute_value("nextRecord"))
         matched_count = int(search_results.get_attribute_value("numberOfRecordsMatched"))
         returned_count = int(search_results.get_attribute_value("numberOfRecordsReturned"))
@@ -445,16 +439,44 @@ class CswDcatBackend(DcatBackend):
         return None if should_break else next_record
 
 
-class CswIso19139DcatBackend(CswDcatBackend):
+class CswDcatBackend(BaseCswDcatBackend):
+    """
+    CSW harvester fetching records as DCAT.
+    """
+
+    name = "csw-dcat"
+    display_name = "CSW-DCAT"
+
+    extra_configs = (
+        *BaseCswDcatBackend.extra_configs,
+        HarvestExtraConfig(
+            _("GeoDCAT-AP"),
+            "enable_geodcat",
+            str,
+            _("Request GeoDCAT-AP to the CSW server (must be supported by the server)."),
+        ),
+    )
+
+    @property
+    @override
+    def output_schema(self):
+        if self.get_extra_config_value("enable_geodcat"):
+            return str(GEODCAT)
+        else:
+            return str(DCAT)
+
+    @override
+    def as_dcat(self, tree: PyXdmNode) -> PyXdmNode:
+        return tree
+
+
+class CswIso19139DcatBackend(BaseCswDcatBackend):
     """
     CSW harvester fetching records as ISO-19139 and using XSLT to convert them to DCAT.
-    The parsing of items is then the same as for the DcatBackend.
     """
 
     name = "csw-iso-19139"
     display_name = "CSW-ISO-19139"
-
-    extra_configs = [c for c in CswDcatBackend.extra_configs if c.key != "enable_geodcat"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
