@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<csw:GetRecordsResponse xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
+  <csw:SearchStatus timestamp="2025-12-24T14:24:50.840465Z" />
+  <csw:SearchResults numberOfRecordsMatched="169" numberOfRecordsReturned="2" elementSet="brief" nextRecord="3">
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:dct="http://purl.org/dc/terms/" xmlns:dcat="http://www.w3.org/ns/dcat#" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:vcard="http://www.w3.org/2006/vcard/ns#" xmlns:prov="http://www.w3.org/ns/prov#" xmlns:org="http://www.w3.org/ns/org#" xmlns:pav="http://purl.org/pav/" xmlns:adms="http://www.w3.org/ns/adms#" xmlns:skos="http://www.w3.org/2004/02/skos/core#">
+      <rdf:Description rdf:about="https://www.geo2france.fr/insee/partmenage5ans">
+        <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset" />
+        <dct:type>
+          <skos:Concept rdf:about="http://purl.org/dc/dcmitype/Dataset">
+            <skos:prefLabel>Dataset</skos:prefLabel>
+          </skos:Concept>
+        </dct:type>
+        <geodcatap:resourceType xmlns:geodcatap="http://data.europa.eu/930/" rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ResourceType/dataset" />
+        <foaf:isPrimaryTopicOf>
+          <rdf:Description rdf:about="04bcec79-5b25-4b16-b635-73115f7456e4">
+            <rdf:type rdf:resource="http://www.w3.org/ns/dcat#CatalogRecord" />
+            <dct:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">04bcec79-5b25-4b16-b635-73115f7456e4</dct:identifier>
+            <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2021-01-25T14:54:30</dct:modified>
+            <dct:title xml:lang="fre">INSEE - Part des ménages présents depuis 5 ans ou plus dans leur logement actuel (2010)</dct:title>
+            <dct:description xml:lang="fre">Part des ménages présents depuis 5 ans ou plus dans leur logement actuel, par "rectangle INSEE" en Région Hauts-de-France. La taille des cercles proportionnels est relative au nombre de ménages. Le nombre de ménages présents depuis 5 ans ou plus dans leur logement actuel est indiqué dans chaque cercle. Le "rectangle" est l'objet élémentaire des données carroyées à 200 mètres de l'INSEE relatives aux ménages (Millésime 2010).</dct:description>
+            <dct:language>
+              <dct:LinguisticSystem rdf:about="http://publications.europa.eu/resource/authority/language/FRA" />
+            </dct:language>
+            <dcat:contactPoint>
+              <rdf:Description>
+                <rdf:type rdf:resource="http://www.w3.org/2006/vcard/ns#Organization" />
+                <vcard:fn>Géo2France</vcard:fn>
+                <vcard:org>
+                  <rdf:Description>
+                    <vcard:organisation-name xml:lang="fre">Géo2France</vcard:organisation-name>
+                  </rdf:Description>
+                </vcard:org>
+                <vcard:hasEmail rdf:resource="mailto:contact@geo2france.fr" />
+              </rdf:Description>
+            </dcat:contactPoint>
+            <dct:conformsTo>
+              <dct:Standard rdf:about="http://data.europa.eu/930/" />
+            </dct:conformsTo>
+            <dct:conformsTo>
+              <dct:Standard rdf:about="http://data.europa.eu/r5r/" />
+            </dct:conformsTo>
+            <foaf:primaryTopic rdf:resource="https://www.geo2france.fr/insee/partmenage5ans" />
+          </rdf:Description>
+        </foaf:isPrimaryTopicOf>
+        <dct:title xml:lang="fre">INSEE - Part des ménages présents depuis 5 ans ou plus dans leur logement actuel (2010)</dct:title>
+        <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2020-09-22</dct:issued>
+        <dct:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://www.geo2france.fr/insee/partmenage5ans</dct:identifier>
+        <dct:description xml:lang="fre">Part des ménages présents depuis 5 ans ou plus dans leur logement actuel, par "rectangle INSEE" en Région Hauts-de-France. La taille des cercles proportionnels est relative au nombre de ménages. Le nombre de ménages présents depuis 5 ans ou plus dans leur logement actuel est indiqué dans chaque cercle. Le "rectangle" est l'objet élémentaire des données carroyées à 200 mètres de l'INSEE relatives aux ménages (Millésime 2010).</dct:description>
+        <dcat:contactPoint>
+          <rdf:Description>
+            <rdf:type rdf:resource="http://www.w3.org/2006/vcard/ns#Organization" />
+            <vcard:fn>Géo2France</vcard:fn>
+            <vcard:org>
+              <rdf:Description>
+                <vcard:organisation-name xml:lang="fre">Géo2France</vcard:organisation-name>
+              </rdf:Description>
+            </vcard:org>
+            <vcard:hasEmail rdf:resource="mailto:contact@geo2france.fr" />
+          </rdf:Description>
+        </dcat:contactPoint>
+        <dcat:keyword xml:lang="fre">LOGEMENT</dcat:keyword>
+        <dcat:keyword xml:lang="fre">INSTITUT NATIONAL DE LA STATISTIQUE ET DES ETUDES ECONOMIQUES</dcat:keyword>
+        <dcat:keyword xml:lang="fre">MENAGE</dcat:keyword>
+        <dcat:keyword xml:lang="fre">POPULATION</dcat:keyword>
+        <dcat:keyword xml:lang="fre">INSEE</dcat:keyword>
+        <dcat:keyword xml:lang="fre">DONNEE OUVERTE</dcat:keyword>
+        <dcat:keyword xml:lang="fre">HAUTS-DE-FRANCE</dcat:keyword>
+        <dct:language>
+          <dct:LinguisticSystem rdf:about="http://publications.europa.eu/resource/authority/language/FRA" />
+        </dct:language>
+        <dct:provenance>
+          <dct:ProvenanceStatement>
+            <dct:description xml:lang="fre">Source : données carroyées à 200 mètres de l'INSEE. Mise en ligne et représentation : Géo2France.</dct:description>
+          </dct:ProvenanceStatement>
+        </dct:provenance>
+        <dcat:theme>
+          <skos:Concept rdf:about="http://publications.europa.eu/resource/authority/data-theme/SOCI">
+            <skos:prefLabel xml:lang="fr">Population et société</skos:prefLabel>
+          </skos:Concept>
+        </dcat:theme>
+        <geodcatap:topicCategory xmlns:geodcatap="http://data.europa.eu/930/" rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/TopicCategory/society" />
+        <!--WARNING: Spatial resolution only supported in meters.
+          200 http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/uom/ML_gmxUom.xml#m is ignored (can be related to unknown unit or no
+          conversion factor or not a decimal value).
+        -->
+        <dct:spatial>
+          <rdf:Description>
+            <rdf:type rdf:resource="http://purl.org/dc/terms/Location" />
+            <dcat:bbox rdf:datatype="http://www.opengis.net/ont/geosparql#geoJSONLiteral">{"type":"Polygon","coordinates":[[[1.32898744824151,51.0829997967797],[4.30533171628197,51.0829997967797],[4.30533171628197,48.79422289313],[1.32898744824151,48.79422289313],[1.32898744824151,51.0829997967797]]]}</dcat:bbox>
+          </rdf:Description>
+        </dct:spatial>
+        <foaf:page>
+          <foaf:Document rdf:about="https://www.geo2france.fr/public/vignettes_geonetwork/part_menage_5ans.jpg">
+            <dct:description xml:lang="fre">insee</dct:description>
+          </foaf:Document>
+        </foaf:page>
+        <foaf:page>
+          <foaf:Document rdf:about="https://www.data.gouv.fr/fr/datasets/donnees-carroyees-a-200-m-sur-la-population/">
+            <dct:title xml:lang="fre">Métadonnées INSEE - data.gouv.fr</dct:title>
+          </foaf:Document>
+        </foaf:page>
+        <foaf:page>
+          <foaf:Document rdf:about="https://www.insee.fr/fr/statistiques/2520034">
+            <dct:title xml:lang="fre">insee.fr - données carroyées à 200 mètres</dct:title>
+          </foaf:Document>
+        </foaf:page>
+        <foaf:page>
+          <foaf:Document rdf:about="https://www.google.fr/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=2&amp;ved=0ahUKEwiO7-e20qLZAhVE7BQKHWU7DRwQFgg2MAE&amp;url=https%3A%2F%2Fwww.insee.fr%2Ffr%2Fstatistiques%2Ffichier%2F2520034%2Fdonnee-carroyees-documentation-generale.pdf&amp;usg=AOvVaw23DGMDgbpfAt_WkAENe3eG">
+            <dct:title xml:lang="fre">Documentation générale - données carroyées</dct:title>
+            <dct:description xml:lang="fre">Documentation générale - données carroyées</dct:description>
+          </foaf:Document>
+        </foaf:page>
+        <foaf:page>
+          <foaf:Document rdf:about="https://www.insee.fr/fr/statistiques/fichier/2520034/documentation-complete-donnees-a-200m-1.pdf">
+            <dct:title xml:lang="fre">Documentation complète - données carroyées à 200 mètres</dct:title>
+          </foaf:Document>
+        </foaf:page>
+        <dcat:distribution>
+          <dcat:Distribution>
+            <dct:title xml:lang="fre">rectangles_200m_menage_erbm</dct:title>
+            <dct:description xml:lang="fre">INSEE - Part des ménages présents depuis plus de 5 ans</dct:description>
+            <dcat:accessURL rdf:resource="https://www.geo2france.fr/geoserver/insee/ows" />
+            <dcat:accessService>
+              <rdf:Description>
+                <rdf:type rdf:resource="http://www.w3.org/ns/dcat#DataService" />
+                <dct:title xml:lang="fre">rectangles_200m_menage_erbm</dct:title>
+                <dcat:endpointURL rdf:resource="https://www.geo2france.fr/geoserver/insee/ows" />
+                <dct:conformsTo>
+                  <dct:Standard rdf:about="http://www.opengeospatial.org/standards/wms" />
+                </dct:conformsTo>
+              </rdf:Description>
+            </dcat:accessService>
+          </dcat:Distribution>
+        </dcat:distribution>
+        <dcat:distribution>
+          <dcat:Distribution>
+            <dct:title xml:lang="fre">insee:rectangles_200m_menage_erbm</dct:title>
+            <dct:description xml:lang="fre">INSEE - Part des ménages présents depuis plus de 5 ans</dct:description>
+            <dcat:accessURL rdf:resource="https://www.geo2france.fr/geoserver/insee/ows" />
+            <dcat:accessService>
+              <rdf:Description>
+                <rdf:type rdf:resource="http://www.w3.org/ns/dcat#DataService" />
+                <dct:title xml:lang="fre">insee:rectangles_200m_menage_erbm</dct:title>
+                <dcat:endpointURL rdf:resource="https://www.geo2france.fr/geoserver/insee/ows" />
+                <dct:conformsTo>
+                  <dct:Standard rdf:about="http://www.opengeospatial.org/standards/wfs" />
+                </dct:conformsTo>
+              </rdf:Description>
+            </dcat:accessService>
+          </dcat:Distribution>
+        </dcat:distribution>
+      </rdf:Description>
+    </rdf:RDF>
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:dct="http://purl.org/dc/terms/" xmlns:dcat="http://www.w3.org/ns/dcat#" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:vcard="http://www.w3.org/2006/vcard/ns#" xmlns:prov="http://www.w3.org/ns/prov#" xmlns:org="http://www.w3.org/ns/org#" xmlns:pav="http://purl.org/pav/" xmlns:adms="http://www.w3.org/ns/adms#" xmlns:skos="http://www.w3.org/2004/02/skos/core#">
+      <rdf:Description rdf:about="fr-200053742/2019/limite/bud">
+        <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset" />
+        <dct:type>
+          <skos:Concept rdf:about="http://purl.org/dc/dcmitype/Dataset">
+            <skos:prefLabel>Dataset</skos:prefLabel>
+          </skos:Concept>
+        </dct:type>
+        <geodcatap:resourceType xmlns:geodcatap="http://data.europa.eu/930/" rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ResourceType/dataset" />
+        <foaf:isPrimaryTopicOf>
+          <rdf:Description rdf:about="06367a09-096c-4db6-a122-52469176d619">
+            <rdf:type rdf:resource="http://www.w3.org/ns/dcat#CatalogRecord" />
+            <dct:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">06367a09-096c-4db6-a122-52469176d619</dct:identifier>
+            <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-02-07T17:22:30.529297Z</dct:modified>
+            <dct:title xml:lang="fre">Zonage du bassin urbain à dynamiser (BUD) de la Région Hauts-de-France - (2018-2020)</dct:title>
+            <dct:description xml:lang="fre">Zonage défini par un arrêté de 2018. Les entreprises qui se créent sur les communes du bassin urbain à dynamiser (entre le 1/1/2018 et le 31/12/2020) bénéficient pendant 3 ans d'un régime spécifique d'exonération fiscale. Dans les Hauts-de-France 159 communes du bassin minier sont concernées par ce dispositif.
+Arrêté officiel de classement : https://www.legifrance.gouv.fr/affichTexte.do?cidTexte=JORFTEXT000038436169&amp;categorieLien=id</dct:description>
+            <dct:language>
+              <dct:LinguisticSystem rdf:about="http://publications.europa.eu/resource/authority/language/FRA" />
+            </dct:language>
+            <dct:creator>
+              <rdf:Description>
+                <rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Person" />
+                <rdf:type rdf:resource="http://www.w3.org/ns/prov#Agent" />
+                <foaf:name>Géo2France</foaf:name>
+                <org:memberOf>
+                  <foaf:Organization>
+                    <foaf:name xml:lang="fre">Géo2France</foaf:name>
+                  </foaf:Organization>
+                </org:memberOf>
+                <foaf:workplaceHomepage xml:lang="fre">https://www.geo2france.fr</foaf:workplaceHomepage>
+              </rdf:Description>
+            </dct:creator>
+            <dct:conformsTo>
+              <dct:Standard rdf:about="http://data.europa.eu/930/" />
+            </dct:conformsTo>
+            <dct:conformsTo>
+              <dct:Standard rdf:about="http://data.europa.eu/r5r/" />
+            </dct:conformsTo>
+            <foaf:primaryTopic rdf:resource="fr-200053742/2019/limite/bud" />
+          </rdf:Description>
+        </foaf:isPrimaryTopicOf>
+        <dct:title xml:lang="fre">Zonage du bassin urbain à dynamiser (BUD) de la Région Hauts-de-France - (2018-2020)</dct:title>
+        <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2020-05-28</dct:issued>
+        <dct:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">fr-200053742/2019/limite/bud</dct:identifier>
+        <dct:description xml:lang="fre">Zonage défini par un arrêté de 2018. Les entreprises qui se créent sur les communes du bassin urbain à dynamiser (entre le 1/1/2018 et le 31/12/2020) bénéficient pendant 3 ans d'un régime spécifique d'exonération fiscale. Dans les Hauts-de-France 159 communes du bassin minier sont concernées par ce dispositif.
+Arrêté officiel de classement : https://www.legifrance.gouv.fr/affichTexte.do?cidTexte=JORFTEXT000038436169&amp;categorieLien=id</dct:description>
+        <geodcatap:resourceProvider xmlns:geodcatap="http://data.europa.eu/930/">
+          <rdf:Description>
+            <rdf:type rdf:resource="http://www.w3.org/2006/vcard/ns#Organization" />
+            <vcard:fn>Géo2France</vcard:fn>
+            <vcard:org>
+              <rdf:Description>
+                <vcard:organisation-name xml:lang="fre">Géo2France</vcard:organisation-name>
+              </rdf:Description>
+            </vcard:org>
+            <vcard:hasEmail rdf:resource="mailto:contact@geo2france.fr" />
+          </rdf:Description>
+        </geodcatap:resourceProvider>
+        <dcat:keyword xml:lang="fre">COMMUNE</dcat:keyword>
+        <dcat:keyword xml:lang="fre">BUD</dcat:keyword>
+        <dcat:keyword xml:lang="fre">BASSIN URBAIN A DYNAMISER</dcat:keyword>
+        <dcat:keyword xml:lang="fre">ECONOMIE</dcat:keyword>
+        <dcat:keyword xml:lang="fre">ENTREPRISE</dcat:keyword>
+        <dcat:keyword xml:lang="fre">FISCALITE</dcat:keyword>
+        <dcat:keyword xml:lang="fre">EMPLOI</dcat:keyword>
+        <dcat:keyword xml:lang="fre">AIDE ECONOMIQUE</dcat:keyword>
+        <dcat:keyword xml:lang="fre">BASSIN MINIER</dcat:keyword>
+        <dcat:keyword xml:lang="fre">DONNEE OUVERTE</dcat:keyword>
+        <dcat:keyword xml:lang="fre">ECONOMIE</dcat:keyword>
+        <dcat:keyword xml:lang="fre">Unités administratives</dcat:keyword>
+        <dcat:keyword xml:lang="fre">HAUTS-DE-FRANCE</dcat:keyword>
+        <dcat:keyword xml:lang="fre">PAS-DE-CALAIS</dcat:keyword>
+        <dcat:keyword xml:lang="fre">NORD</dcat:keyword>
+        <dct:rights>
+          <dct:RightsStatement>
+            <dct:description xml:lang="fre">Utilisation libre sous réserve de mentionner la source (a minima le nom du producteur) et la date de sa dernière mise à jour</dct:description>
+          </dct:RightsStatement>
+        </dct:rights>
+        <dct:rights>
+          <dct:RightsStatement>
+            <dct:description xml:lang="fre">Données ouvertes</dct:description>
+          </dct:RightsStatement>
+        </dct:rights>
+        <dct:language>
+          <dct:LinguisticSystem rdf:about="http://publications.europa.eu/resource/authority/language/FRA" />
+        </dct:language>
+        <dct:provenance>
+          <dct:ProvenanceStatement>
+            <dct:description xml:lang="fre">Source CGET
+Communes en bassin urbain à dynamiser (159 communes concernées) avec contours basés sur la BD Topo de l’IGN. (05-2020)</dct:description>
+          </dct:ProvenanceStatement>
+        </dct:provenance>
+        <dcat:theme>
+          <skos:Concept rdf:about="http://publications.europa.eu/resource/authority/data-theme/ECON">
+            <skos:prefLabel xml:lang="fr">Économie et finances</skos:prefLabel>
+          </skos:Concept>
+        </dcat:theme>
+        <geodcatap:topicCategory xmlns:geodcatap="http://data.europa.eu/930/" rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/TopicCategory/economy" />
+        <dct:spatial>
+          <rdf:Description>
+            <rdf:type rdf:resource="http://purl.org/dc/terms/Location" />
+            <dcat:bbox rdf:datatype="http://www.opengis.net/ont/geosparql#geoJSONLiteral">{"type":"Polygon","coordinates":[[[1.365,51.09],[4.086,51.09],[4.086,48.827],[1.365,48.827],[1.365,51.09]]]}</dcat:bbox>
+          </rdf:Description>
+        </dct:spatial>
+        <dct:accrualPeriodicity>
+          <dct:Frequency rdf:about="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#asNeeded" />
+        </dct:accrualPeriodicity>
+        <foaf:page>
+          <foaf:Document rdf:about="https://www.geo2france.fr/public/vignettes_geonetwork/bud.jpg">
+            <dct:description xml:lang="fre">bud</dct:description>
+          </foaf:Document>
+        </foaf:page>
+        <dcat:distribution>
+          <dcat:Distribution>
+            <dct:title xml:lang="fre">bassins_urbains_a_dynamiser</dct:title>
+            <dct:description xml:lang="fre">Bassins urbains à dynamiser (BUD)</dct:description>
+            <dcat:accessURL rdf:resource="https://www.geo2france.fr/geoserver/anct/ows" />
+            <dcat:accessService>
+              <rdf:Description>
+                <rdf:type rdf:resource="http://www.w3.org/ns/dcat#DataService" />
+                <dct:title xml:lang="fre">bassins_urbains_a_dynamiser</dct:title>
+                <dcat:endpointURL rdf:resource="https://www.geo2france.fr/geoserver/anct/ows" />
+                <dct:conformsTo>
+                  <dct:Standard rdf:about="http://www.opengeospatial.org/standards/wms" />
+                </dct:conformsTo>
+              </rdf:Description>
+            </dcat:accessService>
+            <dct:format>
+              <dct:MediaTypeOrExtent>
+                <rdfs:label />
+              </dct:MediaTypeOrExtent>
+            </dct:format>
+          </dcat:Distribution>
+        </dcat:distribution>
+        <dcat:distribution>
+          <dcat:Distribution>
+            <dct:title xml:lang="fre">anct:bassins_urbains_a_dynamiser</dct:title>
+            <dct:description xml:lang="fre">Bassins urbains à dynamiser (BUD)</dct:description>
+            <dcat:accessURL rdf:resource="https://www.geo2france.fr/geoserver/anct/ows" />
+            <dcat:accessService>
+              <rdf:Description>
+                <rdf:type rdf:resource="http://www.w3.org/ns/dcat#DataService" />
+                <dct:title xml:lang="fre">anct:bassins_urbains_a_dynamiser</dct:title>
+                <dcat:endpointURL rdf:resource="https://www.geo2france.fr/geoserver/anct/ows" />
+                <dct:conformsTo>
+                  <dct:Standard rdf:about="http://www.opengeospatial.org/standards/wfs" />
+                </dct:conformsTo>
+              </rdf:Description>
+            </dcat:accessService>
+            <dct:format>
+              <dct:MediaTypeOrExtent>
+                <rdfs:label />
+              </dct:MediaTypeOrExtent>
+            </dct:format>
+          </dcat:Distribution>
+        </dcat:distribution>
+      </rdf:Description>
+    </rdf:RDF>
+  </csw:SearchResults>
+</csw:GetRecordsResponse>

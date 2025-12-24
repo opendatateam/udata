@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<csw:GetRecordsResponse xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
+  <csw:SearchStatus timestamp="2025-12-24T14:25:42.753395Z" />
+  <csw:SearchResults numberOfRecordsMatched="169" numberOfRecordsReturned="2" elementSet="brief" nextRecord="7">
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:dct="http://purl.org/dc/terms/" xmlns:dcat="http://www.w3.org/ns/dcat#" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:vcard="http://www.w3.org/2006/vcard/ns#" xmlns:prov="http://www.w3.org/ns/prov#" xmlns:org="http://www.w3.org/ns/org#" xmlns:pav="http://purl.org/pav/" xmlns:adms="http://www.w3.org/ns/adms#" xmlns:skos="http://www.w3.org/2004/02/skos/core#">
+      <rdf:Description rdf:about="0ae299e7-10d6-4290-944e-c6c62e2aeabf">
+        <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset" />
+        <dct:type>
+          <skos:Concept rdf:about="http://purl.org/dc/dcmitype/Dataset">
+            <skos:prefLabel>Dataset</skos:prefLabel>
+          </skos:Concept>
+        </dct:type>
+        <geodcatap:resourceType xmlns:geodcatap="http://data.europa.eu/930/" rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ResourceType/dataset" />
+        <foaf:isPrimaryTopicOf>
+          <rdf:Description rdf:about="0ae299e7-10d6-4290-944e-c6c62e2aeabf">
+            <rdf:type rdf:resource="http://www.w3.org/ns/dcat#CatalogRecord" />
+            <dct:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0ae299e7-10d6-4290-944e-c6c62e2aeabf</dct:identifier>
+            <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-08-21T14:44:26.275862Z</dct:modified>
+            <dct:title xml:lang="fre">Territoires d'exercice de la compétence "Collecte des déchets ménagers"</dct:title>
+            <dct:description xml:lang="fre">L'article L2224-13 du Code général des collectivités territoriales autorise un transfère partiel de la compétence de collecte et de traitement des déchets des ménages. Il est ainsi possible pour les EPCI à fiscalité propre, de ne transférer que la partie de la compétence comprenant le traitement, ou seulement celle comportant la collecte. La gestion des déchetteries étant à l'interface entre la collecte et le traitement, elle peut être rattachée à l'une ou l'autre de ces missions.
+Ainsi, on distingue 3 types de territoires différents : les territoires de collecte, les territoires de traitement, et les territoires de gestion des déchetteries.
+Ces contours ne correspondent pas nécessairement aux contours des EPCI ou syndicats mixtes.</dct:description>
+            <dct:language>
+              <dct:LinguisticSystem rdf:about="http://publications.europa.eu/resource/authority/language/FRA" />
+            </dct:language>
+            <dcat:contactPoint>
+              <rdf:Description>
+                <rdf:type rdf:resource="http://www.w3.org/2006/vcard/ns#Organization" />
+                <vcard:org>
+                  <rdf:Description>
+                    <vcard:organisation-name xml:lang="fre">Géo2France</vcard:organisation-name>
+                  </rdf:Description>
+                </vcard:org>
+                <vcard:hasEmail rdf:resource="mailto:contact@geo2france.fr" />
+              </rdf:Description>
+            </dcat:contactPoint>
+            <dct:conformsTo>
+              <dct:Standard rdf:about="http://data.europa.eu/930/" />
+            </dct:conformsTo>
+            <dct:conformsTo>
+              <dct:Standard rdf:about="http://data.europa.eu/r5r/" />
+            </dct:conformsTo>
+            <foaf:primaryTopic rdf:resource="0ae299e7-10d6-4290-944e-c6c62e2aeabf" />
+          </rdf:Description>
+        </foaf:isPrimaryTopicOf>
+        <dct:title xml:lang="fre">Territoires d'exercice de la compétence "Collecte des déchets ménagers"</dct:title>
+        <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2023</dct:issued>
+        <dct:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0ae299e7-10d6-4290-944e-c6c62e2aeabf</dct:identifier>
+        <dct:description xml:lang="fre">L'article L2224-13 du Code général des collectivités territoriales autorise un transfère partiel de la compétence de collecte et de traitement des déchets des ménages. Il est ainsi possible pour les EPCI à fiscalité propre, de ne transférer que la partie de la compétence comprenant le traitement, ou seulement celle comportant la collecte. La gestion des déchetteries étant à l'interface entre la collecte et le traitement, elle peut être rattachée à l'une ou l'autre de ces missions.
+Ainsi, on distingue 3 types de territoires différents : les territoires de collecte, les territoires de traitement, et les territoires de gestion des déchetteries.
+Ces contours ne correspondent pas nécessairement aux contours des EPCI ou syndicats mixtes.</dct:description>
+        <adms:status>
+          <skos:Concept rdf:about="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#onGoing">
+            <skos:prefLabel xml:lang="fre">Mis à jour continue</skos:prefLabel>
+          </skos:Concept>
+        </adms:status>
+        <dcat:contactPoint>
+          <rdf:Description>
+            <rdf:type rdf:resource="http://www.w3.org/2006/vcard/ns#Organization" />
+            <vcard:org>
+              <rdf:Description>
+                <vcard:organisation-name xml:lang="fre">Odema</vcard:organisation-name>
+              </rdf:Description>
+            </vcard:org>
+            <vcard:hasEmail rdf:resource="mailto:odema@cerdd.org" />
+          </rdf:Description>
+        </dcat:contactPoint>
+        <geodcatap:custodian xmlns:geodcatap="http://data.europa.eu/930/">
+          <rdf:Description>
+            <rdf:type rdf:resource="http://www.w3.org/2006/vcard/ns#Organization" />
+            <vcard:org>
+              <rdf:Description>
+                <vcard:organisation-name xml:lang="fre">Géo2France</vcard:organisation-name>
+              </rdf:Description>
+            </vcard:org>
+            <vcard:hasEmail rdf:resource="mailto:contact@geo2france.fr" />
+          </rdf:Description>
+        </geodcatap:custodian>
+        <dcat:keyword xml:lang="fre">déchets</dcat:keyword>
+        <dcat:keyword xml:lang="fre">déchets assimilés aux ordures ménagères</dcat:keyword>
+        <dcat:keyword xml:lang="fre">collecte des déchets</dcat:keyword>
+        <dcat:theme>
+          <skos:Concept rdf:about="http://geonetwork-opensource.org/administrativeAreaFr#REG_32">
+            <skos:prefLabel xml:lang="fre">Hauts-de-France (Région)</skos:prefLabel>
+          </skos:Concept>
+        </dcat:theme>
+        <dcat:keyword xml:lang="fre">odema</dcat:keyword>
+        <dct:accessRights>
+          <dct:RightsStatement rdf:about="http://inspire.ec.europa.eu/metadatacodelist/LimitationsOnPublicAccess/noLimitations" />
+        </dct:accessRights>
+        <dct:rights>
+          <dct:RightsStatement>
+            <dct:description xml:lang="fre">Licence Ouverte version 2.0  https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf</dct:description>
+          </dct:RightsStatement>
+        </dct:rights>
+        <dct:language>
+          <dct:LinguisticSystem rdf:about="http://publications.europa.eu/resource/authority/language/FRA" />
+        </dct:language>
+        <dct:provenance>
+          <dct:ProvenanceStatement>
+            <dct:description xml:lang="fre">Consolidation des informations Sinoe, avec veille locale de l'Observatoire déchets-matières des Hauts-de-France (Odema).</dct:description>
+          </dct:ProvenanceStatement>
+        </dct:provenance>
+        <dct:spatial>
+          <rdf:Description>
+            <rdf:type rdf:resource="http://purl.org/dc/terms/Location" />
+            <dcat:bbox rdf:datatype="http://www.opengis.net/ont/geosparql#geoJSONLiteral">{"type":"Polygon","coordinates":[[[1.3802175217118144,51.088989439843324],[4.25583684779586,51.088989439843324],[4.25583684779586,48.83720744013672],[1.3802175217118144,48.83720744013672],[1.3802175217118144,51.088989439843324]]]}</dcat:bbox>
+          </rdf:Description>
+        </dct:spatial>
+        <dct:accrualPeriodicity>
+          <dct:Frequency rdf:about="http://publications.europa.eu/resource/authority/frequency/ANNUAL" />
+        </dct:accrualPeriodicity>
+        <foaf:page>
+          <foaf:Document rdf:about="https://www.geo2france.fr/geonetwork/srv/api/records/0ae299e7-10d6-4290-944e-c6c62e2aeabf/attachments/Capture%20d%E2%80%99%C3%A9cran%20du%202024-08-09%2014-00-43.png" />
+        </foaf:page>
+        <dcat:distribution>
+          <dcat:Distribution>
+            <dct:title xml:lang="fre">territoires_collecte</dct:title>
+            <dct:description xml:lang="fre">Territoires de collecte</dct:description>
+            <dcat:accessURL rdf:resource="https://www.geo2france.fr/geoserver/odema/ows" />
+            <dcat:accessService>
+              <rdf:Description>
+                <rdf:type rdf:resource="http://www.w3.org/ns/dcat#DataService" />
+                <dct:title xml:lang="fre">territoires_collecte</dct:title>
+                <dcat:endpointURL rdf:resource="https://www.geo2france.fr/geoserver/odema/ows" />
+                <dct:conformsTo>
+                  <dct:Standard rdf:about="http://www.opengeospatial.org/standards/wms" />
+                </dct:conformsTo>
+              </rdf:Description>
+            </dcat:accessService>
+          </dcat:Distribution>
+        </dcat:distribution>
+        <dcat:distribution>
+          <dcat:Distribution>
+            <dct:title xml:lang="fre">odema:territoires_collecte</dct:title>
+            <dcat:accessURL rdf:resource="https://www.geo2france.fr/geoserver/odema/ows" />
+            <dcat:accessService>
+              <rdf:Description>
+                <rdf:type rdf:resource="http://www.w3.org/ns/dcat#DataService" />
+                <dct:title xml:lang="fre">odema:territoires_collecte</dct:title>
+                <dcat:endpointURL rdf:resource="https://www.geo2france.fr/geoserver/odema/ows" />
+                <dct:conformsTo>
+                  <dct:Standard rdf:about="http://www.opengeospatial.org/standards/wfs" />
+                </dct:conformsTo>
+              </rdf:Description>
+            </dcat:accessService>
+          </dcat:Distribution>
+        </dcat:distribution>
+        <foaf:page>
+          <foaf:Document rdf:about="https://www.geo2france.fr/mviewer/?config=apps/odema/obs_dechet.xml">
+            <dct:title xml:lang="fre">Visionneuse cartographique Odema</dct:title>
+          </foaf:Document>
+        </foaf:page>
+      </rdf:Description>
+    </rdf:RDF>
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:dct="http://purl.org/dc/terms/" xmlns:dcat="http://www.w3.org/ns/dcat#" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:vcard="http://www.w3.org/2006/vcard/ns#" xmlns:prov="http://www.w3.org/ns/prov#" xmlns:org="http://www.w3.org/ns/org#" xmlns:pav="http://purl.org/pav/" xmlns:adms="http://www.w3.org/ns/adms#" xmlns:skos="http://www.w3.org/2004/02/skos/core#">
+      <rdf:Description rdf:about="fr-200053742/2022/societe/plage_sans_plastique">
+        <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset" />
+        <dct:type>
+          <skos:Concept rdf:about="http://purl.org/dc/dcmitype/Dataset">
+            <skos:prefLabel>Dataset</skos:prefLabel>
+          </skos:Concept>
+        </dct:type>
+        <geodcatap:resourceType xmlns:geodcatap="http://data.europa.eu/930/" rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ResourceType/dataset" />
+        <foaf:isPrimaryTopicOf>
+          <rdf:Description rdf:about="0c232513-cb8c-473a-bbdd-8435eb3987cc">
+            <rdf:type rdf:resource="http://www.w3.org/ns/dcat#CatalogRecord" />
+            <dct:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0c232513-cb8c-473a-bbdd-8435eb3987cc</dct:identifier>
+            <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2023-04-26T07:40:35</dct:modified>
+            <dct:title xml:lang="fre">Plages sans plastique en Hauts-de-France en 2022</dct:title>
+            <dct:description xml:lang="fre">Localisation des plages en région Hauts-de-France signataires de la charte d'engagement nationale "plages sans déchets plastique"
+Dernière données disponibles au 01/07/2022
+Plus de renseignements : https://www.ecologie.gouv.fr/plages-sans-dechet-plastique-charte-communes-eco-exemplaires</dct:description>
+            <dct:language>
+              <dct:LinguisticSystem rdf:about="http://publications.europa.eu/resource/authority/language/FRA" />
+            </dct:language>
+            <dcat:contactPoint>
+              <rdf:Description>
+                <rdf:type rdf:resource="http://www.w3.org/2006/vcard/ns#Organization" />
+                <vcard:org>
+                  <rdf:Description>
+                    <vcard:organisation-name xml:lang="fre">Région Hauts-de-France</vcard:organisation-name>
+                  </rdf:Description>
+                </vcard:org>
+                <vcard:hasEmail rdf:resource="mailto:sig@hautsdefrance.fr" />
+              </rdf:Description>
+            </dcat:contactPoint>
+            <dct:conformsTo>
+              <dct:Standard rdf:about="http://data.europa.eu/930/" />
+            </dct:conformsTo>
+            <dct:conformsTo>
+              <dct:Standard rdf:about="http://data.europa.eu/r5r/" />
+            </dct:conformsTo>
+            <foaf:primaryTopic rdf:resource="fr-200053742/2022/societe/plage_sans_plastique" />
+          </rdf:Description>
+        </foaf:isPrimaryTopicOf>
+        <dct:title xml:lang="fre">Plages sans plastique en Hauts-de-France en 2022</dct:title>
+        <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2022-10-17</dct:issued>
+        <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2023-02-15</dct:modified>
+        <dct:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">fr-200053742/2022/societe/plage_sans_plastique</dct:identifier>
+        <dct:description xml:lang="fre">Localisation des plages en région Hauts-de-France signataires de la charte d'engagement nationale "plages sans déchets plastique"
+Dernière données disponibles au 01/07/2022
+Plus de renseignements : https://www.ecologie.gouv.fr/plages-sans-dechet-plastique-charte-communes-eco-exemplaires</dct:description>
+        <adms:status>
+          <skos:Concept rdf:about="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#completed">
+            <skos:prefLabel xml:lang="fre">Finalisé</skos:prefLabel>
+          </skos:Concept>
+        </adms:status>
+        <dcat:contactPoint>
+          <rdf:Description>
+            <rdf:type rdf:resource="http://www.w3.org/2006/vcard/ns#Organization" />
+            <vcard:org>
+              <rdf:Description>
+                <vcard:organisation-name xml:lang="fre">Géo2France</vcard:organisation-name>
+              </rdf:Description>
+            </vcard:org>
+            <vcard:hasEmail rdf:resource="mailto:contact@geo2france.fr" />
+          </rdf:Description>
+        </dcat:contactPoint>
+        <dcat:keyword xml:lang="fre">SOCIETE</dcat:keyword>
+        <dcat:keyword xml:lang="fre">DECHET</dcat:keyword>
+        <dcat:keyword xml:lang="fre">PLAGE</dcat:keyword>
+        <dcat:keyword xml:lang="fre">PARLEMENT DE LA MER</dcat:keyword>
+        <dcat:keyword xml:lang="fre">ENVIRONNEMENT</dcat:keyword>
+        <dcat:keyword xml:lang="fre">PLASTIQUE</dcat:keyword>
+        <dcat:keyword xml:lang="fre">ECOLOGIE</dcat:keyword>
+        <dcat:keyword xml:lang="fre">LABEL ACCUEIL QUALITE BIEN-ETRE</dcat:keyword>
+        <dcat:keyword xml:lang="fre">DONNEE OUVERTE</dcat:keyword>
+        <dcat:keyword xml:lang="fre">Services d'utilité publique et services publics</dcat:keyword>
+        <dcat:keyword xml:lang="fre">HAUTS-DE-FRANCE</dcat:keyword>
+        <dcat:keyword xml:lang="fre">PAS-DE-CALAIS</dcat:keyword>
+        <dct:rights>
+          <dct:RightsStatement>
+            <dct:description xml:lang="fre">Utilisation libre sous réserve de mentionner la source (a minima le nom du producteur) et la date de sa dernière mise à jour</dct:description>
+          </dct:RightsStatement>
+        </dct:rights>
+        <dct:rights>
+          <dct:RightsStatement>
+            <dct:description xml:lang="fre">Données ouvertes</dct:description>
+          </dct:RightsStatement>
+        </dct:rights>
+        <dct:language>
+          <dct:LinguisticSystem rdf:about="http://publications.europa.eu/resource/authority/language/FRA" />
+        </dct:language>
+        <dct:provenance>
+          <dct:ProvenanceStatement>
+            <dct:description xml:lang="fre">Données Ministère de la transition écologique et solidaire
+BD TOPO. 2020-11</dct:description>
+          </dct:ProvenanceStatement>
+        </dct:provenance>
+        <dcat:theme>
+          <skos:Concept rdf:about="http://publications.europa.eu/resource/authority/data-theme/SOCI">
+            <skos:prefLabel xml:lang="fr">Population et société</skos:prefLabel>
+          </skos:Concept>
+        </dcat:theme>
+        <geodcatap:topicCategory xmlns:geodcatap="http://data.europa.eu/930/" rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/TopicCategory/society" />
+        <dct:spatial>
+          <rdf:Description>
+            <rdf:type rdf:resource="http://purl.org/dc/terms/Location" />
+            <dcat:bbox rdf:datatype="http://www.opengis.net/ont/geosparql#geoJSONLiteral">{"type":"Polygon","coordinates":[[[1.36,51.0911],[4.086,51.0911],[4.086,48.827],[1.36,48.827],[1.36,51.0911]]]}</dcat:bbox>
+          </rdf:Description>
+        </dct:spatial>
+        <dct:accrualPeriodicity>
+          <dct:Frequency rdf:about="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#asNeeded" />
+        </dct:accrualPeriodicity>
+        <foaf:page>
+          <foaf:Document rdf:about="https://sig.hautsdefrance.fr/ext/vignettes_metadonnees/sans_plastique.jpg" />
+        </foaf:page>
+        <foaf:page>
+          <foaf:Document rdf:about="https://qgisserver.hautsdefrance.fr/cgi-bin/qgis_mapserv.fcgi?MAP=/var/www/data/qgis/applications/parlement_mer.qgz&amp;request=GetFeature&amp;typename=plage_sans_plastique&amp;outputformat=csv&amp;service=WFS">
+            <dct:title xml:lang="fre">Tableau de données (csv)</dct:title>
+            <dct:description xml:lang="fre">Données brutes au format Csv (Plage sans plastique) et encodage UTF-8</dct:description>
+          </foaf:Document>
+        </foaf:page>
+        <dcat:distribution>
+          <dcat:Distribution>
+            <dct:title xml:lang="fre">plage_sans_plastique</dct:title>
+            <dct:description xml:lang="fre">plage sans plastique</dct:description>
+            <dcat:accessURL rdf:resource="https://qgisserver.hautsdefrance.fr/cgi-bin/qgis_mapserv.fcgi?MAP=/var/www/data/qgis/applications/parlement_mer.qgz" />
+            <dcat:accessService>
+              <rdf:Description>
+                <rdf:type rdf:resource="http://www.w3.org/ns/dcat#DataService" />
+                <dct:title xml:lang="fre">plage_sans_plastique</dct:title>
+                <dcat:endpointURL rdf:resource="https://qgisserver.hautsdefrance.fr/cgi-bin/qgis_mapserv.fcgi?MAP=/var/www/data/qgis/applications/parlement_mer.qgz" />
+                <dct:conformsTo>
+                  <dct:Standard rdf:about="http://www.opengeospatial.org/standards/wms" />
+                </dct:conformsTo>
+              </rdf:Description>
+            </dcat:accessService>
+          </dcat:Distribution>
+        </dcat:distribution>
+        <dcat:distribution>
+          <dcat:Distribution>
+            <dct:title xml:lang="fre">plage_sans_plastique</dct:title>
+            <dct:description xml:lang="fre">plage sans plastique</dct:description>
+            <dcat:accessURL rdf:resource="https://qgisserver.hautsdefrance.fr/cgi-bin/qgis_mapserv.fcgi?MAP=/var/www/data/qgis/applications/parlement_mer.qgz" />
+            <dcat:accessService>
+              <rdf:Description>
+                <rdf:type rdf:resource="http://www.w3.org/ns/dcat#DataService" />
+                <dct:title xml:lang="fre">plage_sans_plastique</dct:title>
+                <dcat:endpointURL rdf:resource="https://qgisserver.hautsdefrance.fr/cgi-bin/qgis_mapserv.fcgi?MAP=/var/www/data/qgis/applications/parlement_mer.qgz" />
+                <dct:conformsTo>
+                  <dct:Standard rdf:about="http://www.opengeospatial.org/standards/wfs" />
+                </dct:conformsTo>
+              </rdf:Description>
+            </dcat:accessService>
+          </dcat:Distribution>
+        </dcat:distribution>
+        <foaf:page>
+          <foaf:Document rdf:about="https://qgisserver.hautsdefrance.fr/cgi-bin/qgis_mapserv.fcgi?MAP=/var/www/data/qgis/applications/parlement_mer.qgz&amp;request=GetFeature&amp;typename=plage_sans_plastique&amp;outputformat=geojson&amp;service=WFS">
+            <dct:title xml:lang="fre">geojson</dct:title>
+            <dct:description xml:lang="fre">Données format Geojson (plage sans plastique)</dct:description>
+          </foaf:Document>
+        </foaf:page>
+        <foaf:page>
+          <foaf:Document rdf:about="https://qgisserver.hautsdefrance.fr/cgi-bin/qgis_mapserv.fcgi?MAP=/var/www/data/qgis/applications/parlement_mer.qgz&amp;request=GetFeature&amp;typename=plage_sans_plastique&amp;outputformat=SHP&amp;service=WFS">
+            <dct:title xml:lang="fre">Label Plage sans plastique (shapefile)</dct:title>
+            <dct:description xml:lang="fre">Données format Shapefile Plage sans plastique</dct:description>
+          </foaf:Document>
+        </foaf:page>
+        <foaf:page>
+          <foaf:Document rdf:about="https://sig.hautsdefrance.fr/ext/mv/?x=703407&amp;y=6995164&amp;z=9&amp;l=plage_sans_plastique*plage_sans_plastique&amp;lb=osmgp2&amp;config=apps/parlement_mer.xml&amp;mode=d">
+            <dct:title xml:lang="fre">Visualisation de la donnée</dct:title>
+            <dct:description xml:lang="fre">Visionneuse cartographique Plages sans plastique</dct:description>
+          </foaf:Document>
+        </foaf:page>
+      </rdf:Description>
+    </rdf:RDF>
+  </csw:SearchResults>
+</csw:GetRecordsResponse>

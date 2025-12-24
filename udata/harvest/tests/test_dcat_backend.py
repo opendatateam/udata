@@ -1046,6 +1046,26 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
         assert resource.format == "ogc:wms"
         assert resource.type == "main"
 
+    def test_geonetwork_geodcatap(self, rmock):
+        url = mock_csw_pagination(
+            rmock, "geonetwork/srv/fre/csw", "geonetwork-geodcatap-page-{}.xml"
+        )
+        source = HarvestSourceFactory(
+            backend="csw-dcat",
+            url=url,
+            config={"extra_configs": [{"key": "enable_geodcat", "value": "true"}]},
+        )
+
+        actions.run(source)
+        source.reload()
+
+        job = source.get_last_job()
+        assert len(job.items) == 6
+
+        # TODO
+        # datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
+        # assert len(datasets) == 6
+
     def test_user_agent_post(self, rmock):
         url = mock_csw_pagination(rmock, "geonetwork/srv/fre/csw", "geonetwork-dcat-page-{}.xml")
         get_mock = rmock.post(url)
