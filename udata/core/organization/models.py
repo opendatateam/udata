@@ -118,11 +118,10 @@ class OrganizationBadge(Badge):
 
 class OrganizationBadgeMixin(BadgeMixin):
     badges = field(
-        BadgesList(OrganizationBadge),
-        show_as_ref=True,
-        **BadgeMixin.default_badges_list_params
+        BadgesList(OrganizationBadge), show_as_ref=True, **BadgeMixin.default_badges_list_params
     )
     __badges__ = BADGES
+
 
 @generate_fields()
 class Organization(

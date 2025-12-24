@@ -206,15 +206,12 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
         def constructor_write(**kwargs):
             return restx_fields.List(field_write, **kwargs)
 
-    elif isinstance(
-        field, mongoengine.fields.GenericLazyReferenceField
-    ):
+    elif isinstance(field, mongoengine.fields.GenericLazyReferenceField):
+
         def constructor(**kwargs):
             return restx_fields.Nested(lazy_reference, **kwargs)
 
-    elif isinstance(
-        field, mongo_fields.GenericReferenceField
-    ):
+    elif isinstance(field, mongo_fields.GenericReferenceField):
         if field.choices:
             generic_fields = {}
             for cls in field.choices:
@@ -233,6 +230,7 @@ def convert_db_to_field(key, field, info) -> tuple[Callable | None, Callable | N
             def constructor_write(**kwargs):
                 return GenericField({k: v[1].model for k, v in generic_fields.items()}, **kwargs)
         else:
+
             def constructor(**kwargs):
                 return restx_fields.Nested(lazy_reference, **kwargs)
 

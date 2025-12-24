@@ -6,8 +6,6 @@ import logging
 
 import click
 
-from udata.core.organization.models import Organization
-from udata.core.user.models import User
 from udata.features.notifications.models import Notification
 from udata.features.transfer.models import Transfer
 from udata.features.transfer.notifications import TransferRequestNotificationDetails
