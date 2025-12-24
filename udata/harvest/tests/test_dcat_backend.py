@@ -999,8 +999,8 @@ class DcatBackendTest(PytestOnlyDBTestCase):
 
 @pytest.mark.options(HARVESTER_BACKENDS=["csw*"])
 class CswDcatBackendTest(PytestOnlyDBTestCase):
-    def test_geonetworkv4(self, rmock):
-        url = mock_csw_pagination(rmock, "geonetwork/srv/eng/csw.rdf", "geonetworkv4-page-{}.xml")
+    def test_geonetwork_dcat(self, rmock):
+        url = mock_csw_pagination(rmock, "geonetwork/srv/fre/csw", "geonetwork-dcat-page-{}.xml")
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="csw-dcat", url=url, organization=org)
 
@@ -1047,7 +1047,7 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
         assert resource.type == "main"
 
     def test_user_agent_post(self, rmock):
-        url = mock_csw_pagination(rmock, "geonetwork/srv/eng/csw.rdf", "geonetworkv4-page-{}.xml")
+        url = mock_csw_pagination(rmock, "geonetwork/srv/fre/csw", "geonetwork-dcat-page-{}.xml")
         get_mock = rmock.post(url)
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="csw-dcat", url=url, organization=org)
@@ -1184,14 +1184,7 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
 
         source = HarvestSourceFactory(
             backend="csw-dcat",
-            config={
-                "extra_configs": [
-                    {
-                        "key": "remote_url_prefix",
-                        "value": remote_url_prefix,
-                    }
-                ]
-            },
+            config={"extra_configs": [{"key": "remote_url_prefix", "value": remote_url_prefix}]},
         )
 
         actions.run(source)
@@ -1224,21 +1217,16 @@ class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
     def test_geo2france(self, rmock, remote_url_prefix: str):
         with open(os.path.join(CSW_DCAT_FILES_DIR, "XSLT.xml"), "r") as f:
             xslt = f.read()
-        url = mock_csw_pagination(rmock, "geonetwork/srv/eng/csw.rdf", "geonetwork-iso-page-{}.xml")
+        url = mock_csw_pagination(
+            rmock, "geonetwork/srv/fre/csw", "geonetwork-iso19139-page-{}.xml"
+        )
         rmock.get(current_app.config.get("HARVEST_ISO19139_XSLT_URL"), text=xslt)
         org = OrganizationFactory()
         source = HarvestSourceFactory(
             backend="csw-iso-19139",
             url=url,
             organization=org,
-            config={
-                "extra_configs": [
-                    {
-                        "key": "remote_url_prefix",
-                        "value": remote_url_prefix,
-                    }
-                ]
-            },
+            config={"extra_configs": [{"key": "remote_url_prefix", "value": remote_url_prefix}]},
         )
 
         actions.run(source)
@@ -1346,7 +1334,9 @@ class CswIso19139DcatBackendTest(PytestOnlyDBTestCase):
 
         with open(os.path.join(CSW_DCAT_FILES_DIR, "XSLT.xml"), "rb") as f:
             xslt = f.read()
-        with open(os.path.join(CSW_DCAT_FILES_DIR, "geo-ide_single-dataset.xml"), "rb") as f:
+        with open(
+            os.path.join(CSW_DCAT_FILES_DIR, "geoide-iso19139-single-dataset.xml"), "rb"
+        ) as f:
             csw = f.read()
 
         # apply xslt transformation manually instead of using the harvest backend since we're only processing one dataset
