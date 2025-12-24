@@ -5,6 +5,7 @@ from udata.api_fields import field, generate_fields
 from udata.core.organization.notifications import MembershipRequestNotificationDetails
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.user.models import User
+from udata.features.transfer.notifications import TransferRequestNotificationDetails
 from udata.models import db
 from udata.mongo.datetime_fields import Datetimed
 from udata.mongo.queryset import UDataQuerySet
@@ -51,6 +52,8 @@ class Notification(Datetimed, db.Document):
         filterable={},
     )
     details = field(
-        db.GenericEmbeddedDocumentField(choices=(MembershipRequestNotificationDetails,)),
+        db.GenericEmbeddedDocumentField(
+            choices=(MembershipRequestNotificationDetails, TransferRequestNotificationDetails)
+        ),
         generic=True,
     )
