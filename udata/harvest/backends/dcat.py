@@ -25,6 +25,7 @@ from udata.rdf import (
     url_from_rdf,
 )
 from udata.storage.s3 import store_as_json
+from udata.utils import to_bool
 
 from .base import BaseBackend, HarvestExtraConfig
 
@@ -460,7 +461,7 @@ class CswDcatBackend(BaseCswDcatBackend):
     @property
     @override
     def output_schema(self):
-        if self.get_extra_config_value("enable_geodcat"):
+        if to_bool(self.get_extra_config_value("enable_geodcat")):
             return str(GEODCAT)
         else:
             return str(DCAT)
