@@ -56,6 +56,21 @@ topic_fields = apiv2.model(
             description="The topic API URI",
             readonly=True,
         ),
+        "nb_datasets": fields.Integer(
+            attribute=lambda t: getattr(t, 'nb_datasets', None),
+            description="Number of datasets in this topic",
+            readonly=True
+        ),
+        "nb_reuses": fields.Integer(
+            attribute=lambda t: getattr(t, 'nb_reuses', None),
+            description="Number of reuses in this topic",
+            readonly=True
+        ),
+        "nb_dataservices": fields.Integer(
+            attribute=lambda t: getattr(t, 'nb_dataservices', None),
+            description="Number of dataservices in this topic",
+            readonly=True
+        ),
         "extras": fields.Raw(description="Extras attributes as key-value pairs"),
     },
 )

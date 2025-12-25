@@ -1,10 +1,13 @@
 import datetime
 
+from udata.core.organization.constants import PRODUCER_TYPES, get_producer_type
 from udata.core.reuse.api import DEFAULT_SORTING, ReuseApiParser
+from udata.core.topic.models import TopicElement
 from udata.models import Organization, Reuse, User
 from udata.search import (
     BoolFilter,
     Filter,
+    ListFilter,
     ModelSearchAdapter,
     ModelTermsFilter,
     register,
@@ -27,7 +30,7 @@ class ReuseSearch(ModelSearchAdapter):
     }
 
     filters = {
-        "tag": Filter(),
+        "tag": ListFilter(),
         "organization": ModelTermsFilter(model=Organization),
         "organization_badge": Filter(choices=list(Organization.__badges__)),
         "owner": ModelTermsFilter(model=User),
@@ -36,6 +39,8 @@ class ReuseSearch(ModelSearchAdapter):
         "featured": BoolFilter(),
         "topic": Filter(),
         "archived": BoolFilter(),
+        "producer_type": Filter(choices=list(PRODUCER_TYPES)),
+        "last_update_range": Filter(choices=["last_30_days", "last_12_months", "last_3_years"]),
     }
 
     @classmethod
@@ -58,6 +63,12 @@ class ReuseSearch(ModelSearchAdapter):
     def serialize(cls, reuse: Reuse) -> dict:
         organization = None
         owner = None
+        org = None
+        
+        topic_object_ids = list(
+            set(te.topic.id for te in TopicElement.objects(element=reuse) if te.topic)
+        )
+        
         if reuse.organization:
             org = Organization.objects(id=reuse.organization.id).first()
             organization = {
@@ -88,8 +99,10 @@ class ReuseSearch(ModelSearchAdapter):
             "organization": organization,
             "owner": str(owner.id) if owner else None,
             "type": reuse.type,
-            "topic": reuse.topic,
+            "topic": reuse.topic,  # Metadata topic (health, transport, etc.)
+            "topic_object": [str(tid) for tid in topic_object_ids],  # Topic objects linked via TopicElement
             "tags": reuse.tags,
             "badges": [badge.kind for badge in reuse.badges],
             "extras": extras,
+            "producer_type": get_producer_type(org, owner),
         }
