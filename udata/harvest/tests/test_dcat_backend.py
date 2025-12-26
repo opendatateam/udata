@@ -15,6 +15,8 @@ from udata.core.dataset.constants import UpdateFrequency
 from udata.core.dataset.factories import DatasetFactory, LicenseFactory, ResourceSchemaMockData
 from udata.core.dataset.rdf import dataset_from_rdf
 from udata.core.organization.factories import OrganizationFactory
+from udata.harvest.backends import get_backend
+from udata.harvest.backends.dcat import CswDcatBackend
 from udata.harvest.models import HarvestJob
 from udata.models import Dataset
 from udata.rdf import DCAT, RDF, namespace_manager
@@ -1004,8 +1006,11 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend="csw-dcat", url=url, organization=org)
 
-        actions.run(source)
+        backend = get_backend(source.backend)(source)
+        assert isinstance(backend, CswDcatBackend)
+        assert backend.output_schema == "http://www.w3.org/ns/dcat#"
 
+        actions.run(source)
         source.reload()
 
         job = source.get_last_job()
@@ -1055,6 +1060,10 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
             url=url,
             config={"extra_configs": [{"key": "enable_geodcat", "value": "true"}]},
         )
+
+        backend = get_backend(source.backend)(source)
+        assert isinstance(backend, CswDcatBackend)
+        assert backend.output_schema == "http://data.europa.eu/930/"
 
         actions.run(source)
         source.reload()
