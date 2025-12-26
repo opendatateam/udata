@@ -4,7 +4,7 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.post.factories import PostFactory
 from udata.core.post.models import Post
 from udata.core.reuse.factories import ReuseFactory
-from udata.core.user.factories import AdminFactory
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.tests.api import APITestCase
 from udata.tests.helpers import assert200, assert201, assert204
 
@@ -136,3 +136,26 @@ class PostsAPITest(APITestCase):
 
         post.reload()
         assert post.published is None
+
+    def test_post_api_create_with_empty_credit_url(self):
+        """It should create a post with an empty credit_url (converted to None)"""
+        data = PostFactory.as_dict()
+        data["datasets"] = [str(d.id) for d in data["datasets"]]
+        data["reuses"] = [str(r.id) for r in data["reuses"]]
+        data["credit_url"] = ""
+        self.login(AdminFactory())
+        response = self.post(url_for("api.posts"), data)
+        assert201(response)
+        assert Post.objects.count() == 1
+        post = Post.objects.first()
+        assert post.credit_url is None
+
+    def test_post_api_list_with_drafts_non_admin(self):
+        """Non-admin users should not see drafts even with with_drafts=True"""
+        PostFactory.create_batch(3)
+        PostFactory(published=None)
+
+        self.login(UserFactory())
+        response = self.get(url_for("api.posts", with_drafts=True))
+        assert200(response)
+        assert len(response.json["data"]) == 3
