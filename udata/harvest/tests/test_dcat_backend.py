@@ -1071,9 +1071,38 @@ class CswDcatBackendTest(PytestOnlyDBTestCase):
         job = source.get_last_job()
         assert len(job.items) == 6
 
-        # TODO
-        # datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
-        # assert len(datasets) == 6
+        datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
+        assert len(datasets) == 6
+
+        # First dataset
+        dataset = datasets["https://www.geo2france.fr/insee/partmenage5ans"]
+        assert (
+            dataset.title
+            == "INSEE - Part des ménages présents depuis 5 ans ou plus dans leur logement actuel (2010)"
+        )
+        assert dataset.description.startswith(
+            "Part des ménages présents depuis 5 ans ou plus dans leur logement actuel"
+        )
+        assert set(dataset.tags) == set(
+            [
+                "logement",
+                "institut-national-de-la-statistique-et-des-etudes-economiques",
+                "menage",
+                "population",
+                "insee",
+                "donnee-ouverte",
+                "hauts-de-france",
+                "population-et-societe",
+            ]
+        )
+        assert dataset.harvest.issued_at.date() == date(2020, 9, 22)
+        assert dataset.harvest.created_at is None
+        # FIXME: len(resources) should be 2 but they have the same url => last wins
+        assert len(dataset.resources) == 1
+        resource = dataset.resources[0]
+        assert resource.title == "insee:rectangles_200m_menage_erbm"
+        assert resource.url == "https://www.geo2france.fr/geoserver/insee/ows"
+        assert resource.type == "api"
 
     def test_user_agent_post(self, rmock):
         url = mock_csw_pagination(rmock, "geonetwork/srv/fre/csw", "geonetwork-dcat-page-{}.xml")

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <csw:GetRecordsResponse xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd">
-  <csw:SearchStatus timestamp="2025-12-24T14:25:42.753395Z" />
-  <csw:SearchResults numberOfRecordsMatched="169" numberOfRecordsReturned="2" elementSet="brief" nextRecord="7">
+  <csw:SearchStatus timestamp="2025-12-26T13:32:33.469059Z" />
+  <csw:SearchResults numberOfRecordsMatched="6" numberOfRecordsReturned="2" elementSet="full" nextRecord="0">
     <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:dct="http://purl.org/dc/terms/" xmlns:dcat="http://www.w3.org/ns/dcat#" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:vcard="http://www.w3.org/2006/vcard/ns#" xmlns:prov="http://www.w3.org/ns/prov#" xmlns:org="http://www.w3.org/ns/org#" xmlns:pav="http://purl.org/pav/" xmlns:adms="http://www.w3.org/ns/adms#" xmlns:skos="http://www.w3.org/2004/02/skos/core#">
       <rdf:Description rdf:about="0ae299e7-10d6-4290-944e-c6c62e2aeabf">
         <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset" />
