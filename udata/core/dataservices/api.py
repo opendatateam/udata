@@ -12,6 +12,7 @@ from udata.auth import admin_permission
 from udata.core.access_type.constants import AccessType
 from udata.core.dataset.models import Dataset
 from udata.core.followers.api import FollowAPI
+from udata.core.legal.mails import add_send_mail_argument
 from udata.frontend.markdown import md
 from udata.i18n import gettext as _
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
@@ -88,6 +89,9 @@ class DataservicesAtomFeedAPI(API):
         return response
 
 
+dataservice_delete_parser = add_send_mail_argument(api.parser())
+
+
 @ns.route("/<dataservice:dataservice>/", endpoint="dataservice")
 class DataserviceAPI(API):
     @api.doc("get_dataservice")
@@ -123,12 +127,19 @@ class DataserviceAPI(API):
 
     @api.secure
     @api.doc("delete_dataservice")
+    @api.expect(dataservice_delete_parser)
     @api.response(204, "dataservice deleted")
     def delete(self, dataservice):
+        args = dataservice_delete_parser.parse_args()
         if dataservice.deleted_at:
             api.abort(410, "dataservice has been deleted")
 
         dataservice.permissions["delete"].test()
+
+        from udata.core.legal.mails import send_mail_on_deletion
+
+        send_mail_on_deletion(dataservice, args)
+
         dataservice.deleted_at = datetime.utcnow()
         dataservice.metadata_modified_at = datetime.utcnow()
         dataservice.save()

@@ -8,6 +8,7 @@ from udata.core.dataset.api_fields import community_resource_fields, dataset_fie
 from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields
 from udata.core.followers.api import FollowAPI
+from udata.core.legal.mails import add_send_mail_argument
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
@@ -265,7 +266,7 @@ class UserAvatarAPI(API):
         return {"image": user.avatar}
 
 
-delete_parser = api.parser()
+delete_parser = add_send_mail_argument(api.parser())
 delete_parser.add_argument(
     "no_mail",
     type=bool,
@@ -321,6 +322,10 @@ class UserAPI(API):
             api.abort(
                 403, "You cannot delete yourself with this API. " + 'Use the "me" API instead.'
             )
+
+        from udata.core.legal.mails import send_mail_on_deletion
+
+        send_mail_on_deletion(user, args)
 
         user.mark_as_deleted(notify=not args["no_mail"], delete_comments=args["delete_comments"])
         return "", 204
