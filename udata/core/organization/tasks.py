@@ -84,12 +84,23 @@ def notify_new_member(org_id, email):
 @notify_new_badge(Organization, CERTIFIED)
 def notify_badge_certified(org_id):
     """
-    Send an email when a `CERTIFIED` badge is added to an `Organization`
+    Send an email and create notifications when a `CERTIFIED` badge is added to an `Organization`
     """
+    from udata.core.organization.notifications import CertifiedNotificationDetails
+
     org = Organization.objects.get(pk=org_id)
     recipients = [member.user for member in org.members]
 
+    # Send email notifications
     mails.badge_added_certified(org).send(recipients)
+
+    # Create in-app notifications
+    for member in org.members:
+        notification = Notification(
+            user=member.user,
+            details=CertifiedNotificationDetails(organization=org),
+        )
+        notification.save()
 
 
 @notify_new_badge(Organization, PUBLIC_SERVICE)

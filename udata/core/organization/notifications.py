@@ -31,6 +31,18 @@ class MembershipRequestNotificationDetails(db.EmbeddedDocument):
     )
 
 
+@generate_fields()
+class CertifiedNotificationDetails(db.EmbeddedDocument):
+    organization = field(
+        db.ReferenceField(Organization),
+        readonly=True,
+        nested_fields=org_ref_fields,
+        auditable=False,
+        allow_null=True,
+        filterable={},
+    )
+
+
 @MembershipRequest.after_create.connect
 def on_new_membership_request(request: MembershipRequest, **kwargs):
     from udata.features.notifications.models import Notification
