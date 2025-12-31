@@ -4,15 +4,14 @@ from udata import search
 from udata.api import API, apiv2, fields
 from udata.utils import multi_to_dict
 
-from .api import post_fields
+from .models import Post
 from .search import PostSearch
 
 ns = apiv2.namespace("posts", "Post related operations")
 
 search_parser = PostSearch.as_request_parser(store_missing=False)
 
-post_fields_v2 = apiv2.inherit("Post", post_fields)
-post_page_fields = apiv2.model("PostPage", fields.pager(post_fields_v2))
+post_page_fields = apiv2.model("PostPage", fields.pager(Post.__read_fields__))
 
 
 @ns.route("/search/", endpoint="post_search")
