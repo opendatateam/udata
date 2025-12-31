@@ -23,8 +23,14 @@ jobs:
       - image: ghcr.io/astral-sh/uv:python<< parameters.python-version >>-trixie
       - image: mongo:6.0.4
       - image: redis:alpine
+      - image: udata/elasticsearch:7.16.2
+        environment:
+          node.name: es01
+          cluster.name: es-docker-cluster
+          cluster.initial_master_nodes: es01
     environment:
       BASH_ENV: /root/.bashrc
+      UDATA_TEST_SEARCH_INTEGRATION: "1"
     steps:
       - checkout
       - run:
@@ -44,6 +50,7 @@ jobs:
           name: Install Python dependencies
           command: |
             uv sync --frozen
+            uv pip install udata-search-service
       - save_cache:
           key: py<< parameters.python-version >>-cache-v1-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
           paths:
@@ -60,7 +67,43 @@ jobs:
             uv run ruff check --extend-select I .
             uv run ruff format --check .
       - run:
+          name: Wait for Elasticsearch
+          command: |
+            apt-get update && apt-get install -y curl
+            for i in $(seq 1 60); do
+              curl -s http://localhost:9200/_cluster/health && exit 0
+              echo "Waiting for Elasticsearch... ($i/60)"
+              sleep 2
+            done
+            echo "Elasticsearch failed to start"
+            exit 1
+      - run:
+          name: Start search-service
+          background: true
+          command: |
+            export ELASTICSEARCH_URL=http://localhost:9200
+            export UDATA_INSTANCE_NAME=udata-test
+            uv run udata-search-service run --host 0.0.0.0 --port 5000
+      - run:
+          name: Wait for search-service
+          command: |
+            for i in $(seq 1 30); do
+              curl -s http://localhost:5000/ && exit 0
+              echo "Waiting for search-service... ($i/30)"
+              sleep 2
+            done
+            echo "Search-service failed to start"
+            exit 1
+      - run:
+          name: Initialize Elasticsearch indices
+          command: |
+            export ELASTICSEARCH_URL=http://localhost:9200
+            export UDATA_INSTANCE_NAME=udata-test
+            uv run udata-search-service init-es
+      - run:
           name: Run tests
+          environment:
+            SEARCH_SERVICE_API_URL: "http://localhost:5000/api/1/"
           command: |
             mkdir -p reports/python
             uv run inv test --report --ci
