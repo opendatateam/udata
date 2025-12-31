@@ -1,8 +1,7 @@
-from flask import abort, request
+from flask import abort
 
 from udata import search
 from udata.api import API, apiv2, fields
-from udata.utils import multi_to_dict
 
 from .models import Post
 from .search import PostSearch
@@ -23,7 +22,7 @@ class PostSearchAPI(API):
     @apiv2.marshal_with(post_page_fields)
     def get(self):
         """List or search all posts"""
-        args = multi_to_dict(request.args)
+        args = search_parser.parse_args()
         try:
             return search.query(PostSearch, **args)
         except NotImplementedError:

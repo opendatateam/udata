@@ -1,8 +1,7 @@
-from flask import abort, request
+from flask import abort
 
 from udata import search
 from udata.api import API, apiv2, fields
-from udata.utils import multi_to_dict
 
 from .api import discussion_fields
 from .search import DiscussionSearch
@@ -24,7 +23,7 @@ class DiscussionSearchAPI(API):
     @apiv2.marshal_with(discussion_page_fields)
     def get(self):
         """List or search all discussions"""
-        args = multi_to_dict(request.args)
+        args = search_parser.parse_args()
         try:
             return search.query(DiscussionSearch, **args)
         except NotImplementedError:

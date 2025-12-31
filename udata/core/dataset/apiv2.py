@@ -12,7 +12,7 @@ from udata.core.contact_point.api_fields import contact_point_fields
 from udata.core.dataset.api_fields import license_fields
 from udata.core.organization.api_fields import member_user_with_email_fields
 from udata.core.spatial.api_fields import geojson
-from udata.utils import get_by, multi_to_dict
+from udata.utils import get_by
 
 from .api import DEFAULT_SORTING, DatasetApiParser, ResourceMixin
 from .api_fields import (
@@ -295,7 +295,7 @@ class DatasetSearchAPI(API):
     @apiv2.marshal_with(dataset_page_fields)
     def get(self):
         """List or search all datasets"""
-        args = multi_to_dict(request.args)
+        args = search_parser.parse_args()
         try:
             return search.query(Dataset, **args)
         except NotImplementedError:

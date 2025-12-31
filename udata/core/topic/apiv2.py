@@ -19,7 +19,6 @@ from udata.core.topic.models import Topic, TopicElement
 from udata.core.topic.parsers import TopicApiParser, TopicElementsParser
 from udata.core.topic.permissions import TopicEditPermission
 from udata.core.topic.search import TopicSearch
-from udata.utils import multi_to_dict
 
 apiv2.inherit("ModelReference", api.model_reference)
 
@@ -47,7 +46,7 @@ class TopicSearchAPI(API):
     @apiv2.marshal_with(topic_page_fields)
     def get(self):
         """List or search all topics"""
-        args = multi_to_dict(request.args)
+        args = search_parser.parse_args()
         try:
             return search.query(TopicSearch, **args)
         except NotImplementedError:
