@@ -53,4 +53,3 @@ class DiscussionSearch(ModelSearchAdapter):
             "subject_class": subject_class,
             "subject_id": subject_id,
         }
-

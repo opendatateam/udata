@@ -31,4 +31,3 @@ class DiscussionSearchAPI(API):
             abort(501, "Search endpoint not enabled")
         except RuntimeError:
             abort(500, "Internal search service error")
-

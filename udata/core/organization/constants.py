@@ -33,7 +33,9 @@ NOT_SPECIFIED = "not-specified"
 PRODUCER_BADGE_TYPES = frozenset({PUBLIC_SERVICE, ASSOCIATION, COMPANY, LOCAL_AUTHORITY})
 
 # All producer types for filtering (includes USER and NOT_SPECIFIED)
-PRODUCER_TYPES = frozenset({PUBLIC_SERVICE, ASSOCIATION, COMPANY, LOCAL_AUTHORITY, USER, NOT_SPECIFIED})
+PRODUCER_TYPES = frozenset(
+    {PUBLIC_SERVICE, ASSOCIATION, COMPANY, LOCAL_AUTHORITY, USER, NOT_SPECIFIED}
+)
 
 
 def get_producer_type(organization, owner) -> list[str]:
@@ -53,8 +55,10 @@ def get_producer_type(organization, owner) -> list[str]:
     """
     if organization is not None:
         # Return badges that are producer types (exclude CERTIFIED)
-        if hasattr(organization, 'badges') and organization.badges:
-            producer_badges = [badge.kind for badge in organization.badges if badge.kind in PRODUCER_BADGE_TYPES]
+        if hasattr(organization, "badges") and organization.badges:
+            producer_badges = [
+                badge.kind for badge in organization.badges if badge.kind in PRODUCER_BADGE_TYPES
+            ]
             if producer_badges:
                 return producer_badges
         # Organization exists but has no producer badges

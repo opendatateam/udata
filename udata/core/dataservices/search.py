@@ -100,14 +100,12 @@ class DataserviceSearch(ModelSearchAdapter):
 
         try:
             timeout = current_app.config.get("SEARCH_SERVICE_REQUEST_TIMEOUT", 10)
-            headers = {
-                'User-Agent': 'udata-search-service/1.0'
-            }
+            headers = {"User-Agent": "udata-search-service/1.0"}
             response = requests.get(url, timeout=timeout, stream=True, headers=headers)
             response.raise_for_status()
 
             if response.encoding is None:
-                response.encoding = response.apparent_encoding or 'utf-8'
+                response.encoding = response.apparent_encoding or "utf-8"
 
             content_parts = []
             total_size = 0
@@ -121,7 +119,7 @@ class DataserviceSearch(ModelSearchAdapter):
                     content_parts.append(chunk)
                     total_size += chunk_size
 
-            content = ''.join(content_parts)
+            content = "".join(content_parts)
             return content
 
         except requests.RequestException:
@@ -146,11 +144,11 @@ class DataserviceSearch(ModelSearchAdapter):
         organization = None
         owner = None
         org = None
-        
+
         topic_ids = list(
             set(te.topic.id for te in TopicElement.objects(element=dataservice) if te.topic)
         )
-        
+
         if dataservice.organization:
             org = Organization.objects(id=dataservice.organization.id).first()
             organization = {
@@ -165,7 +163,9 @@ class DataserviceSearch(ModelSearchAdapter):
         for key, value in dataservice.extras.items():
             extras[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
 
-        documentation_content = cls.fetch_documentation_content(dataservice.machine_documentation_url)
+        documentation_content = cls.fetch_documentation_content(
+            dataservice.machine_documentation_url
+        )
 
         return {
             "id": str(dataservice.id),

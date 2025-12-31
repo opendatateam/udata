@@ -1,7 +1,7 @@
 import logging
 
 import mongoengine
-from flask import request, abort
+from flask import abort, request
 from flask_security import current_user
 
 from udata import search

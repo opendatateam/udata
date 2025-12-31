@@ -66,7 +66,7 @@ class TopicElement(Auditable, db.Document):
         """Reindex topic to update counters in search index (counters are calculated on-the-fly during serialization)"""
         if not topic or not topic.id:
             return
-        
+
         # Reindex the topic to update search index with fresh counters
         reindex.delay(*as_task_param(topic))
 

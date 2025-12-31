@@ -42,4 +42,3 @@ class PostSearch(ModelSearchAdapter):
             "last_modified": post.last_modified.isoformat() if post.last_modified else None,
             "published": post.published.isoformat() if post.published else None,
         }
-

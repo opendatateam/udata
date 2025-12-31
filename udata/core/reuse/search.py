@@ -64,11 +64,11 @@ class ReuseSearch(ModelSearchAdapter):
         organization = None
         owner = None
         org = None
-        
+
         topic_object_ids = list(
             set(te.topic.id for te in TopicElement.objects(element=reuse) if te.topic)
         )
-        
+
         if reuse.organization:
             org = Organization.objects(id=reuse.organization.id).first()
             organization = {
@@ -100,7 +100,9 @@ class ReuseSearch(ModelSearchAdapter):
             "owner": str(owner.id) if owner else None,
             "type": reuse.type,
             "topic": reuse.topic,  # Metadata topic (health, transport, etc.)
-            "topic_object": [str(tid) for tid in topic_object_ids],  # Topic objects linked via TopicElement
+            "topic_object": [
+                str(tid) for tid in topic_object_ids
+            ],  # Topic objects linked via TopicElement
             "tags": reuse.tags,
             "badges": [badge.kind for badge in reuse.badges],
             "extras": extras,

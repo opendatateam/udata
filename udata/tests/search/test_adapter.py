@@ -7,6 +7,8 @@ from flask_restx import inputs
 from flask_restx.reqparse import RequestParser
 
 from udata import search
+from udata.core.dataservices.factories import DataserviceFactory
+from udata.core.dataservices.search import DataserviceSearch
 from udata.core.dataset.factories import (
     DatasetFactory,
     HiddenDatasetFactory,
@@ -14,15 +16,13 @@ from udata.core.dataset.factories import (
 )
 from udata.core.dataset.models import Schema
 from udata.core.dataset.search import DatasetSearch
-from udata.core.dataservices.factories import DataserviceFactory
-from udata.core.dataservices.search import DataserviceSearch
 from udata.core.organization.constants import (
-    PUBLIC_SERVICE,
-    LOCAL_AUTHORITY,
     ASSOCIATION,
     COMPANY,
-    USER,
+    LOCAL_AUTHORITY,
     NOT_SPECIFIED,
+    PUBLIC_SERVICE,
+    USER,
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
@@ -299,13 +299,19 @@ class DatasetSearchAdapterTest(APITestCase):
         resource_json = ResourceFactory(format="json")
         resource_pdf = ResourceFactory(format="pdf")
         resource_shp = ResourceFactory(format="shp")
-        dataset = DatasetFactory(resources=[resource_csv, resource_json, resource_pdf, resource_shp])
+        dataset = DatasetFactory(
+            resources=[resource_csv, resource_json, resource_pdf, resource_shp]
+        )
 
         serialized = DatasetSearch.serialize(dataset)
 
         assert "format_family" in serialized
-        assert set(serialized["format_family"]) == {"tabular", "machine_readable", "geographical", "other"}
-
+        assert set(serialized["format_family"]) == {
+            "tabular",
+            "machine_readable",
+            "geographical",
+            "other",
+        }
 
     def test_serialize_includes_producer_type_public_service(self):
         """Test that DatasetSearch.serialize includes producer_type for public-service orgs"""

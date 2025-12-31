@@ -50,11 +50,13 @@ class OrganizationSearch(search.ModelSearchAdapter):
         extras = {}
         for key, value in organization.extras.items():
             extras[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
-        
+
         producer_types = []
-        if hasattr(organization, 'badges') and organization.badges:
-            producer_types = [badge.kind for badge in organization.badges if badge.kind in PRODUCER_BADGE_TYPES]
-        
+        if hasattr(organization, "badges") and organization.badges:
+            producer_types = [
+                badge.kind for badge in organization.badges if badge.kind in PRODUCER_BADGE_TYPES
+            ]
+
         return {
             "id": str(organization.id),
             "name": organization.name,
