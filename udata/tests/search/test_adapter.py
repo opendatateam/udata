@@ -274,15 +274,15 @@ class DatasetSearchAdapterTest(APITestCase):
         assert "format_family" in serialized
         assert serialized["format_family"] == ["geographical"]
 
-    def test_serialize_includes_format_family_other_for_unknown(self):
-        """Test that DatasetSearch.serialize returns 'other' for unknown formats"""
+    def test_serialize_includes_format_family_documents_for_pdf(self):
+        """Test that DatasetSearch.serialize returns 'documents' for PDF format"""
         resource_pdf = ResourceFactory(format="pdf")
         dataset = DatasetFactory(resources=[resource_pdf])
 
         serialized = DatasetSearch.serialize(dataset)
 
         assert "format_family" in serialized
-        assert serialized["format_family"] == ["other"]
+        assert serialized["format_family"] == ["documents"]
 
     def test_serialize_includes_format_family_other_for_no_resources(self):
         """Test that DatasetSearch.serialize returns 'other' for datasets without resources"""
@@ -310,7 +310,7 @@ class DatasetSearchAdapterTest(APITestCase):
             "tabular",
             "machine_readable",
             "geographical",
-            "other",
+            "documents",
         }
 
     def test_serialize_includes_producer_type_public_service(self):
