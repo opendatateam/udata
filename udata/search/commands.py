@@ -49,13 +49,18 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
     model = adapter.model
     search_service_url = current_app.config["SEARCH_SERVICE_API_URL"]
     log.info("Indexing %s objects", model.__name__)
+    model_name = adapter.model.__name__.lower()
     qs = model.objects
     if from_datetime:
-        date_property = (
-            "last_modified_internal" if model.__name__.lower() in ["dataset"] else "last_modified"
-        )
+        if model_name == "dataset":
+            date_property = "last_modified_internal"
+        elif model_name == "discussion":
+            date_property = "created"
+        elif model_name == "dataservice":
+            date_property = "metadata_modified_at"
+        else:
+            date_property = "last_modified"
         qs = qs.filter(**{f"{date_property}__gte": from_datetime})
-    model_name = adapter.model.__name__.lower()
     index_name = model_name
     if reindex:
         index_name += "-" + default_index_suffix_name(start)
@@ -98,11 +103,15 @@ def finalize_reindex(models, start):
     modified_since_reindex = 0
     for adapter in iter_adapters():
         if not models or adapter.model.__name__.lower() in models:
-            date_property = (
-                "last_modified_internal"
-                if adapter.model.__name__.lower() in ["dataset"]
-                else "last_modified"
-            )
+            model_name = adapter.model.__name__.lower()
+            if model_name == "dataset":
+                date_property = "last_modified_internal"
+            elif model_name == "discussion":
+                date_property = "created"
+            elif model_name == "dataservice":
+                date_property = "metadata_modified_at"
+            else:
+                date_property = "last_modified"
             modified_since_reindex += adapter.model.objects(
                 **{f"{date_property}__gte": start}
             ).count()

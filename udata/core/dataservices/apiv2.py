@@ -15,7 +15,7 @@ apiv2.inherit("AccessAudience (read)", AccessAudience.__read_fields__)
 
 ns = apiv2.namespace("dataservices", "Dataservice related operations")
 
-search_parser = DataserviceSearch.as_request_parser()
+search_parser = DataserviceSearch.as_request_parser(store_missing=False)
 
 
 @ns.route("/search/", endpoint="dataservice_search")
