@@ -15,7 +15,7 @@ from udata.core.badges.fields import badge_fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.followers.api import FollowAPI
-from udata.core.legal.mails import add_send_mail_argument
+from udata.core.legal.mails import add_send_mail_argument, send_mail_on_deletion
 from udata.core.organization.models import Organization
 from udata.core.reuse.constants import REUSE_TOPICS, REUSE_TYPES
 from udata.core.storages.api import (
@@ -214,9 +214,6 @@ class ReuseAPI(API):
         if reuse.deleted:
             api.abort(410, "This reuse has been deleted")
         reuse.permissions["delete"].test()
-
-        from udata.core.legal.mails import send_mail_on_deletion
-
         send_mail_on_deletion(reuse, args)
 
         reuse.deleted = datetime.utcnow()

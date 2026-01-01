@@ -21,7 +21,7 @@ from udata.core.discussions.api import discussion_fields
 from udata.core.discussions.csv import DiscussionCsvAdapter
 from udata.core.discussions.models import Discussion
 from udata.core.followers.api import FollowAPI
-from udata.core.legal.mails import add_send_mail_argument
+from udata.core.legal.mails import add_send_mail_argument, send_mail_on_deletion
 from udata.core.reuse.models import Reuse
 from udata.core.storages.api import (
     image_parser,
@@ -182,9 +182,6 @@ class OrganizationAPI(API):
         if org.deleted:
             api.abort(410, "Organization has been deleted")
         EditOrganizationPermission(org).test()
-
-        from udata.core.legal.mails import send_mail_on_deletion
-
         send_mail_on_deletion(org, args)
 
         org.deleted = datetime.utcnow()

@@ -175,6 +175,7 @@ class Defaults(object):
     SITE_GITHUB_URL = "https://github.com/etalab/udata"
 
     TERMS_OF_USE_URL = None
+    TERMS_OF_USE_DELETION_ARTICLE = None
     TELERECOURS_URL = None
 
     UDATA_INSTANCE_NAME = "udata"

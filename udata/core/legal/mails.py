@@ -61,40 +61,51 @@ def _content_deleted(content_type_label) -> MailMessage:
     admin_name = f"{admin.first_name} {admin.last_name}"
 
     terms_of_use_url = current_app.config.get("TERMS_OF_USE_URL")
+    terms_of_use_deletion_article = current_app.config.get("TERMS_OF_USE_DELETION_ARTICLE")
     telerecours_url = current_app.config.get("TELERECOURS_URL")
 
-    terms_link = (
-        Link(_("terms of use"), terms_of_use_url) if terms_of_use_url else _("terms of use")
-    )
-    telerecours_link = (
-        Link(_("Télérecours citoyens"), telerecours_url)
-        if telerecours_url
-        else _("Télérecours citoyens")
-    )
-
-    paragraphs = [
-        _("Your %(content_type)s has been deleted.", content_type=content_type_label),
-        ParagraphWithLinks(
+    if terms_of_use_url and terms_of_use_deletion_article:
+        terms_paragraph = ParagraphWithLinks(
             _(
-                'Our %(terms_link)s specify in point 5.1.2 that the platform is not "intended to '
-                "disseminate advertising content, promotions of private interests, content contrary "
+                'Our %(terms_link)s specify in point %(article)s that the platform is not "intended '
+                "to disseminate advertising content, promotions of private interests, content contrary "
                 "to public order, illegal content, spam and any contribution violating the applicable "
                 "legal framework. The Editor reserves the right, without prior notice, to remove or "
                 "make inaccessible content published on the Platform that has no connection with its "
                 'Purpose. The Editor does not carry out "a priori" control over publications. As soon '
                 "as the Editor becomes aware of content contrary to these terms of use, it acts quickly "
                 'to remove or make it inaccessible".',
-                terms_link=terms_link,
+                terms_link=Link(_("terms of use"), terms_of_use_url),
+                article=terms_of_use_deletion_article,
             )
-        ),
-        ParagraphWithLinks(
+        )
+    else:
+        terms_paragraph = _(
+            'The platform is not "intended to disseminate advertising content, promotions of '
+            "private interests, content contrary to public order, illegal content, spam and any "
+            "contribution violating the applicable legal framework. The Editor reserves the right, "
+            "without prior notice, to remove or make inaccessible content published on the Platform "
+            'that has no connection with its Purpose. The Editor does not carry out "a priori" '
+            "control over publications. As soon as the Editor becomes aware of content contrary to "
+            'these terms of use, it acts quickly to remove or make it inaccessible".'
+        )
+
+    if telerecours_url:
+        appeal_paragraph = ParagraphWithLinks(
             _(
                 "You may contest this decision within two months of its notification by filing "
                 "an administrative appeal (recours gracieux ou hiérarchique). You may also bring "
                 'the matter before the administrative court via the "%(telerecours_link)s" application.',
-                telerecours_link=telerecours_link,
+                telerecours_link=Link(_("Télérecours citoyens"), telerecours_url),
             )
-        ),
+        )
+    else:
+        appeal_paragraph = _("You may contest this decision by contacting us.")
+
+    paragraphs = [
+        _("Your %(content_type)s has been deleted.", content_type=content_type_label),
+        terms_paragraph,
+        appeal_paragraph,
         _("Best regards,"),
         admin_name,
         _("%(site)s team member", site=current_app.config.get("SITE_TITLE", "data.gouv.fr")),

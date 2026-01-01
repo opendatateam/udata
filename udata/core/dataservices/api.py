@@ -12,7 +12,7 @@ from udata.auth import admin_permission
 from udata.core.access_type.constants import AccessType
 from udata.core.dataset.models import Dataset
 from udata.core.followers.api import FollowAPI
-from udata.core.legal.mails import add_send_mail_argument
+from udata.core.legal.mails import add_send_mail_argument, send_mail_on_deletion
 from udata.frontend.markdown import md
 from udata.i18n import gettext as _
 from udata.rdf import RDF_EXTENSIONS, graph_response, negociate_content
@@ -135,9 +135,6 @@ class DataserviceAPI(API):
             api.abort(410, "dataservice has been deleted")
 
         dataservice.permissions["delete"].test()
-
-        from udata.core.legal.mails import send_mail_on_deletion
-
         send_mail_on_deletion(dataservice, args)
 
         dataservice.deleted_at = datetime.utcnow()

@@ -39,7 +39,7 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.followers.api import FollowAPI
 from udata.core.followers.models import Follow
-from udata.core.legal.mails import add_send_mail_argument
+from udata.core.legal.mails import add_send_mail_argument, send_mail_on_deletion
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
 from udata.core.storages.api import handle_upload, upload_parser
@@ -409,9 +409,6 @@ class DatasetAPI(API):
         if dataset.deleted:
             api.abort(410, "Dataset has been deleted")
         dataset.permissions["delete"].test()
-
-        from udata.core.legal.mails import send_mail_on_deletion
-
         send_mail_on_deletion(dataset, args)
 
         dataset.deleted = datetime.utcnow()
