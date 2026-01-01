@@ -1,4 +1,5 @@
 from flask import current_app
+from flask_babel import LazyString
 from flask_login import current_user
 from flask_restx.inputs import boolean
 
@@ -68,10 +69,8 @@ def send_legal_notice_on_deletion(obj: DeletableObject, args: dict):
         _content_deleted(obj.verbose_name).send(recipients)
 
 
-def _content_deleted(content_type_label) -> MailMessage:
+def _content_deleted(content_type_label: LazyString) -> MailMessage:
     admin = current_user._get_current_object()
-    admin_name = f"{admin.first_name} {admin.last_name}"
-
     terms_of_use_url = current_app.config.get("TERMS_OF_USE_URL")
     terms_of_use_deletion_article = current_app.config.get("TERMS_OF_USE_DELETION_ARTICLE")
     telerecours_url = current_app.config.get("TELERECOURS_URL")
@@ -119,7 +118,7 @@ def _content_deleted(content_type_label) -> MailMessage:
         terms_paragraph,
         appeal_paragraph,
         _("Best regards,"),
-        admin_name,
+        admin.fullname,
         _("%(site)s team member", site=current_app.config.get("SITE_TITLE", "data.gouv.fr")),
     ]
 
