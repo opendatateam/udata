@@ -135,11 +135,11 @@ class DataserviceAPI(API):
             api.abort(410, "dataservice has been deleted")
 
         dataservice.permissions["delete"].test()
+        send_mail_on_deletion(dataservice, args)
 
         dataservice.deleted_at = datetime.utcnow()
         dataservice.metadata_modified_at = datetime.utcnow()
         dataservice.save()
-        send_mail_on_deletion(dataservice, args)
         return "", 204
 
 

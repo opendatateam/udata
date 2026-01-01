@@ -182,10 +182,10 @@ class OrganizationAPI(API):
         if org.deleted:
             api.abort(410, "Organization has been deleted")
         EditOrganizationPermission(org).test()
+        send_mail_on_deletion(org, args)
 
         org.deleted = datetime.utcnow()
         org.save()
-        send_mail_on_deletion(org, args)
         return "", 204
 
 

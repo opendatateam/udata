@@ -247,9 +247,9 @@ class DiscussionAPI(API):
         args = discussion_delete_parser.parse_args()
         discussion = Discussion.objects.get_or_404(id=id_or_404(id))
         discussion.permissions["delete"].test()
+        send_mail_on_deletion(discussion, args)
 
         discussion.delete()
-        send_mail_on_deletion(discussion, args)
         on_discussion_deleted.send(discussion)
         return "", 204
 
@@ -309,10 +309,10 @@ class DiscussionCommentAPI(API):
 
         message = discussion.discussion[cidx]
         message.permissions["delete"].test()
+        send_mail_on_deletion(message, args)
 
         discussion.discussion.pop(cidx)
         discussion.save()
-        send_mail_on_deletion(message, args)
         return "", 204
 
 

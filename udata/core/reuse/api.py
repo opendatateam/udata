@@ -214,10 +214,10 @@ class ReuseAPI(API):
         if reuse.deleted:
             api.abort(410, "This reuse has been deleted")
         reuse.permissions["delete"].test()
+        send_mail_on_deletion(reuse, args)
 
         reuse.deleted = datetime.utcnow()
         reuse.save()
-        send_mail_on_deletion(reuse, args)
         return "", 204
 
 
