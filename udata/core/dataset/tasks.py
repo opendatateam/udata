@@ -95,8 +95,7 @@ def get_queryset(model_cls):
     for attr in attrs:
         if getattr(model_cls, attr, None):
             params[attr] = False
-    # no_cache to avoid eating up too much RAM
-    return model_cls.objects.filter(**params).no_cache()
+    return model_cls.objects.filter(**params)
 
 
 def get_resource_for_csv_export_model(model, dataset):

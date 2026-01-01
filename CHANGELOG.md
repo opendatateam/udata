@@ -1,5 +1,18 @@
 # Changelog
 
+## 14.4.0 (2025-12-16)
+
+- chore: adapt CI and docs to main branch ([#3559](https://github.com/opendatateam/udata/pull/3559))
+- chore: move pyproject optional-dependencies to dependency-groups ([#3560](https://github.com/opendatateam/udata/pull/3560))
+- chore: remove trailing slash in cdata url ([#3565](https://github.com/opendatateam/udata/pull/3565))
+- ci: use uv images ([#3561](https://github.com/opendatateam/udata/pull/3561))
+- feat: add UUID to discussions' messages ([#3555](https://github.com/opendatateam/udata/pull/3555))
+- feat(catalog): compress csv catalog archives ([#3563](https://github.com/opendatateam/udata/pull/3563))
+- feat: update dependencies (celery and kombu 5.6) ([#3564](https://github.com/opendatateam/udata/pull/3564))
+- fix: fix tag_version.sh to work with MacOS ([#3558](https://github.com/opendatateam/udata/pull/3558))
+- fix(rdf): escape invalid URIRef in RDF graph ([#3557](https://github.com/opendatateam/udata/pull/3557))
+
+
 ## 14.3.0 (2025-12-04)
 
 - feat: add new notification system ([#3508](https://github.com/opendatateam/udata/pull/3508))
