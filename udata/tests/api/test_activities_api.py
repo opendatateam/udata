@@ -4,6 +4,7 @@ from werkzeug.test import TestResponse
 from udata.core.activity.models import Activity
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import Dataset
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.reuse.models import Reuse
 from udata.core.topic.factories import TopicFactory
@@ -111,3 +112,38 @@ class ActivityAPITest(APITestCase):
         assert activity_data["related_to_id"] == str(topic.id)
         assert activity_data["related_to_kind"] == "Topic"
         assert activity_data["related_to_url"] == topic.self_api_url()
+
+    def test_activity_api_list_with_private_visible_to_owner(self) -> None:
+        """Owner should see activities about their own private objects."""
+        owner = UserFactory()
+        dataset = DatasetFactory(private=True, owner=owner)
+        FakeDatasetActivity.objects.create(actor=UserFactory(), related_to=dataset)
+
+        # Anonymous user won't see it
+        response = self.get(url_for("api.activity"))
+        assert200(response)
+        assert len(response.json["data"]) == 0
+
+        # Owner should see their own private dataset activity
+        self.login(owner)
+        response = self.get(url_for("api.activity"))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+
+    def test_activity_api_list_with_private_visible_to_org_member(self) -> None:
+        """Organization members should see activities about their org's private objects."""
+        member = UserFactory()
+        org = OrganizationFactory(admins=[member])
+        dataset = DatasetFactory(private=True, organization=org)
+        FakeDatasetActivity.objects.create(actor=UserFactory(), related_to=dataset)
+
+        # Anonymous user won't see it
+        response = self.get(url_for("api.activity"))
+        assert200(response)
+        assert len(response.json["data"]) == 0
+
+        # Org member should see the private dataset activity
+        self.login(member)
+        response = self.get(url_for("api.activity"))
+        assert200(response)
+        assert len(response.json["data"]) == 1

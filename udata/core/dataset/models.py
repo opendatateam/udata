@@ -546,7 +546,10 @@ class Dataset(
         ),
         auditable=False,
     )
-    description = field(db.StringField(required=True, default=""))
+    description = field(
+        db.StringField(required=True, default=""),
+        markdown=True,
+    )
     description_short = field(db.StringField(max_length=DESCRIPTION_SHORT_SIZE_LIMIT))
     license = field(db.ReferenceField("License"))
 

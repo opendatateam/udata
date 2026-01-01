@@ -7,6 +7,7 @@ from flask import url_for
 from udata.core import csv
 from udata.core.dataservices.factories import DataserviceFactory
 from udata.core.dataset import tasks as dataset_tasks
+from udata.core.dataset.constants import SPD
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
@@ -96,6 +97,27 @@ class SiteCsvExportsTest(APITestCase):
         for dataset in datasets:
             self.assertNotIn(str(dataset.id), ids)
         self.assertNotIn(str(hidden_dataset.id), ids)
+
+    def test_datasets_csv_with_badge_filter(self):
+        self.app.config["EXPORT_CSV_MODELS"] = []
+        dataset_with_badge = DatasetFactory(resources=[ResourceFactory()])
+        dataset_with_badge.add_badge(SPD)
+        dataset_without_badge = DatasetFactory(resources=[ResourceFactory()])
+
+        response = self.get(url_for("api.site_datasets_csv", badge=SPD))
+
+        self.assert200(response)
+
+        csvfile = StringIO(response.data.decode("utf8"))
+        reader = csv.get_reader(csvfile)
+        next(reader)  # skip header
+
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        self.assertEqual(len(rows), 1)
+        self.assertIn(str(dataset_with_badge.id), ids)
+        self.assertNotIn(str(dataset_without_badge.id), ids)
 
     def test_resources_csv(self):
         self.app.config["EXPORT_CSV_MODELS"] = []

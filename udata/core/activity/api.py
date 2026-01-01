@@ -4,8 +4,9 @@ from bson import ObjectId
 from mongoengine.errors import DoesNotExist
 
 from udata.api import API, api, fields
-from udata.auth import current_user
+from udata.core.dataset.permissions import OwnableReadPermission
 from udata.core.organization.api_fields import org_ref_fields
+from udata.core.owned import Owned
 from udata.core.user.api_fields import user_ref_fields
 from udata.models import Activity, db
 
@@ -101,7 +102,7 @@ class SiteActivityAPI(API):
         # Always return a result even not complete
         # But log the error (ie. visible in sentry, silent for user)
         # Can happen when someone manually delete an object in DB (ie. without proper purge)
-        # - Filter out private items (except for sysadmin users)
+        # - Filter out items not visible to the current user
         safe_items = []
         for item in qs.queryset.items:
             try:
@@ -109,10 +110,8 @@ class SiteActivityAPI(API):
             except DoesNotExist as e:
                 log.error(e, exc_info=True)
             else:
-                if hasattr(item.related_to, "private") and (
-                    current_user.is_anonymous or not current_user.sysadmin
-                ):
-                    if item.related_to.private:
+                if isinstance(item.related_to, Owned):
+                    if not OwnableReadPermission(item.related_to).can():
                         continue
                 safe_items.append(item)
         qs.queryset.items = safe_items

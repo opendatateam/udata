@@ -201,7 +201,10 @@ class Dataservice(
         ),
         readonly=True,
     )
-    description = field(db.StringField(default=""), description="In markdown")
+    description = field(
+        db.StringField(default=""),
+        markdown=True,
+    )
     base_api_url = field(db.URLField(), sortable=True)
 
     machine_documentation_url = field(

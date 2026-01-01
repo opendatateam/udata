@@ -69,6 +69,7 @@ class Defaults(object):
     # Flask mail settings
 
     MAIL_DEFAULT_SENDER = "webmaster@udata"
+    MAIL_LOGO_URL = "https://www.data.gouv.fr/nuxt_images/udata_mails_external_logo.png"
 
     # Flask security settings
 
