@@ -39,7 +39,7 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.followers.api import FollowAPI
 from udata.core.followers.models import Follow
-from udata.core.legal.mails import add_send_mail_argument, send_mail_on_deletion
+from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
 from udata.core.storages.api import handle_upload, upload_parser
@@ -365,7 +365,7 @@ class DatasetsAtomFeedAPI(API):
         return response
 
 
-dataset_delete_parser = add_send_mail_argument(api.parser())
+dataset_delete_parser = add_send_legal_notice_argument(api.parser())
 
 
 @ns.route("/<dataset:dataset>/", endpoint="dataset", doc=common_doc)
@@ -409,7 +409,7 @@ class DatasetAPI(API):
         if dataset.deleted:
             api.abort(410, "Dataset has been deleted")
         dataset.permissions["delete"].test()
-        send_mail_on_deletion(dataset, args)
+        send_legal_notice_on_deletion(dataset, args)
 
         dataset.deleted = datetime.utcnow()
         dataset.last_modified_internal = datetime.utcnow()

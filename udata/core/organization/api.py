@@ -21,7 +21,7 @@ from udata.core.discussions.api import discussion_fields
 from udata.core.discussions.csv import DiscussionCsvAdapter
 from udata.core.discussions.models import Discussion
 from udata.core.followers.api import FollowAPI
-from udata.core.legal.mails import add_send_mail_argument, send_mail_on_deletion
+from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.reuse.models import Reuse
 from udata.core.storages.api import (
     image_parser,
@@ -138,7 +138,7 @@ class OrganizationListAPI(API):
         return organization, 201
 
 
-org_delete_parser = add_send_mail_argument(api.parser())
+org_delete_parser = add_send_legal_notice_argument(api.parser())
 
 
 @ns.route("/<org:org>/", endpoint="organization", doc=common_doc)
@@ -182,7 +182,7 @@ class OrganizationAPI(API):
         if org.deleted:
             api.abort(410, "Organization has been deleted")
         EditOrganizationPermission(org).test()
-        send_mail_on_deletion(org, args)
+        send_legal_notice_on_deletion(org, args)
 
         org.deleted = datetime.utcnow()
         org.save()

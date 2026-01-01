@@ -8,7 +8,7 @@ from udata.core.dataset.api_fields import community_resource_fields, dataset_fie
 from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields
 from udata.core.followers.api import FollowAPI
-from udata.core.legal.mails import add_send_mail_argument, send_mail_on_deletion
+from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.storages.api import (
     image_parser,
     parse_uploaded_image,
@@ -266,11 +266,14 @@ class UserAvatarAPI(API):
         return {"image": user.avatar}
 
 
-delete_parser = add_send_mail_argument(api.parser())
+delete_parser = add_send_legal_notice_argument(api.parser())
 delete_parser.add_argument(
     "no_mail",
     type=bool,
-    help="Do not send a mail to notify the user of the deletion",
+    help=(
+        "Do not send the simple deletion notification email. "
+        "Note: automatically set to True when send_legal_notice=True to avoid sending duplicate emails."
+    ),
     location="args",
     default=False,
 )
@@ -322,9 +325,11 @@ class UserAPI(API):
             api.abort(
                 403, "You cannot delete yourself with this API. " + 'Use the "me" API instead.'
             )
-        send_mail_on_deletion(user, args)
+        send_legal_notice_on_deletion(user, args)
 
-        user.mark_as_deleted(notify=not args["no_mail"], delete_comments=args["delete_comments"])
+        # Skip simple notification if legal notice is sent (to avoid duplicate emails)
+        skip_notification = args["no_mail"] or args["send_legal_notice"]
+        user.mark_as_deleted(notify=not skip_notification, delete_comments=args["delete_comments"])
         return "", 204
 
 

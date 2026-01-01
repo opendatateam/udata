@@ -14,13 +14,19 @@ from udata.mail import Link, MailMessage, ParagraphWithLinks
 DeletableObject = Dataset | Reuse | Dataservice | Organization | User | Discussion | Message
 
 
-def add_send_mail_argument(parser):
+def add_send_legal_notice_argument(parser):
+    """Add the send_legal_notice argument to a parser.
+
+    When send_legal_notice=true is passed by an admin, a formal legal notice email
+    is sent to the content owner. This email includes terms of use references and
+    information about how to contest the deletion (administrative appeal).
+    """
     parser.add_argument(
-        "send_mail",
+        "send_legal_notice",
         type=boolean,
         default=False,
         location="args",
-        help="Send notification email to owner (admin only)",
+        help="Send formal legal notice with appeal information to owner (admin only)",
     )
     return parser
 
@@ -37,8 +43,14 @@ def _get_recipients_for_owned_object(obj: Dataset | Reuse | Dataservice) -> list
     return []
 
 
-def send_mail_on_deletion(obj: DeletableObject, args: dict):
-    if not args.get("send_mail") or not current_user.sysadmin:
+def send_legal_notice_on_deletion(obj: DeletableObject, args: dict):
+    """Send a formal legal notice email when content is deleted by an admin.
+
+    The email is only sent if:
+    - send_legal_notice=true was passed in args
+    - The current user is a sysadmin
+    """
+    if not args.get("send_legal_notice") or not current_user.sysadmin:
         return
 
     if isinstance(obj, Organization):
