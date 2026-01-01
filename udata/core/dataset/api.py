@@ -409,11 +409,11 @@ class DatasetAPI(API):
         if dataset.deleted:
             api.abort(410, "Dataset has been deleted")
         dataset.permissions["delete"].test()
-        send_mail_on_deletion(dataset, args)
 
         dataset.deleted = datetime.utcnow()
         dataset.last_modified_internal = datetime.utcnow()
         dataset.save()
+        send_mail_on_deletion(dataset, args)
         return "", 204
 
 

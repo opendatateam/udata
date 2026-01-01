@@ -322,9 +322,9 @@ class UserAPI(API):
             api.abort(
                 403, "You cannot delete yourself with this API. " + 'Use the "me" API instead.'
             )
-        send_mail_on_deletion(user, args)
 
         user.mark_as_deleted(notify=not args["no_mail"], delete_comments=args["delete_comments"])
+        send_mail_on_deletion(user, args)
         return "", 204
 
 
