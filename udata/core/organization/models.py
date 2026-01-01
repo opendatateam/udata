@@ -70,12 +70,12 @@ class MembershipRequest(db.EmbeddedDocument):
     Pending organization membership requests or invitations.
 
     For requests (user asks to join):
-        - type = "request"
+        - kind = "request"
         - user = the requesting user
         - created_by = None
 
     For invitations (org invites user):
-        - type = "invitation"
+        - kind = "invitation"
         - user = the invited user (or None if email invitation)
         - email = email for non-registered users
         - created_by = admin who created the invitation

@@ -483,6 +483,9 @@ class MemberInviteAPI(API):
         role = form.role.data or DEFAULT_ROLE
         comment = form.comment.data
 
+        if user_id and email:
+            raise FieldValidationError(field="user", message="Cannot provide both user and email")
+
         user = None
 
         # If user ID provided, get user

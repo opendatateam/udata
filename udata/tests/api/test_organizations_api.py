@@ -568,6 +568,9 @@ class MembershipAPITest(PytestOnlyAPITestCase):
 
         assert201(response)
 
+        assert response.json["user"]["id"] == str(existing_user.id)
+        assert response.json["email"] is None
+
         organization.reload()
         assert len(organization.requests) == 1
         assert organization.requests[0].user == existing_user
@@ -623,6 +626,49 @@ class MembershipAPITest(PytestOnlyAPITestCase):
 
         organization.reload()
         assert len(organization.requests) == 1
+
+    def test_invite_member_invalid_email(self):
+        """Test that inviting with an invalid email is rejected."""
+        user = self.login()
+        organization = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        api_url = url_for("api.invite_member", org=organization)
+        response = self.post(api_url, {"email": "not-an-email", "role": "editor"})
+
+        assert400(response)
+
+        organization.reload()
+        assert len(organization.requests) == 0
+
+    def test_invite_member_requires_user_or_email(self):
+        """Test that inviting without user or email is rejected."""
+        user = self.login()
+        organization = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        api_url = url_for("api.invite_member", org=organization)
+        response = self.post(api_url, {"role": "editor"})
+
+        assert400(response)
+
+        organization.reload()
+        assert len(organization.requests) == 0
+
+    def test_invite_member_cannot_provide_both_user_and_email(self):
+        """Test that providing both user and email is rejected."""
+        user = self.login()
+        invited_user = UserFactory()
+        organization = OrganizationFactory(members=[Member(user=user, role="admin")])
+
+        api_url = url_for("api.invite_member", org=organization)
+        response = self.post(
+            api_url,
+            {"user": str(invited_user.id), "email": "other@example.com", "role": "editor"},
+        )
+
+        assert400(response)
+
+        organization.reload()
+        assert len(organization.requests) == 0
 
     def test_update_member(self):
         user = self.login()

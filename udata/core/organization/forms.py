@@ -101,7 +101,7 @@ class MemberForm(ModelForm):
 
 class MembershipInviteForm(Form):
     user = fields.StringField(_("User ID"))
-    email = fields.StringField(_("Email"))
+    email = fields.StringField(_("Email"), [validators.Optional(), validators.Email()])
     role = fields.SelectField(
         _("Role"),
         default="editor",
