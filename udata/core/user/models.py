@@ -200,7 +200,7 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
         """Return the number of followers of the user."""
         return self.metrics.get("followers", 0)
 
-    @field(description="Link to the API endpoint for this reuse", show_as_ref=True)
+    @field(description="Link to the API endpoint for this user", show_as_ref=True)
     def uri(self, *args, **kwargs):
         return self.self_api_url(*args, **kwargs)
 
