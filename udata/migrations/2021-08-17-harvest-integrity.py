@@ -23,6 +23,8 @@ def migrate(db):
     with click.progressbar(harvest_jobs, length=total, label="Checking sources refs") as jobs:
         for harvest_job in jobs:
             try:
+                if harvest_job.source is None:
+                    raise mongoengine.errors.DoesNotExist()
                 harvest_job.source.id
             except mongoengine.errors.DoesNotExist:
                 count += 1
