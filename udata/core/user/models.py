@@ -204,7 +204,7 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
     def uri(self, *args, **kwargs):
         return self.self_api_url(*args, **kwargs)
 
-    @field(description="Link to the udata web page for this reuse", show_as_ref=True)
+    @field(description="Link to the udata web page for this user", show_as_ref=True)
     def page(self, *args, **kwargs):
         return self.self_web_url(*args, **kwargs)
 
