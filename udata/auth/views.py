@@ -57,11 +57,15 @@ def confirm_change_email_token_status(token):
         token, "confirm", get_within_delta("CONFIRM_EMAIL_WITHIN")
     )
     new_email = None
+    user = None
 
     if not invalid and token_data:
-        user, token_email_hash, new_email = token_data
-        user = _datastore.find_user(fs_uniquifier=user)
-        invalid = not verify_hash(token_email_hash, user.email)
+        user_uniquifier, token_email_hash, new_email = token_data
+        user = _datastore.find_user(fs_uniquifier=user_uniquifier)
+        if user is None:
+            invalid = True
+        else:
+            invalid = not verify_hash(token_email_hash, user.email)
 
     return expired, invalid, user, new_email
 

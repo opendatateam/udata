@@ -1,5 +1,21 @@
 # Changelog
 
+## 14.5.0 (2026-01-05)
+
+- chore: add mailpit ([#3575](https://github.com/opendatateam/udata/pull/3575))
+-  feat(harvest): combine agent and organization names when contact point has both ([#3497](https://github.com/opendatateam/udata/pull/3497))
+- feat: support Python 3.13 ([#3573](https://github.com/opendatateam/udata/pull/3573))
+- fix: activities on private object not visible by owner ([#3567](https://github.com/opendatateam/udata/pull/3567))
+- fix: add missing markdown=True for fields ([#3580](https://github.com/opendatateam/udata/pull/3580))
+- fix: confirm change email after password change ([#3592](https://github.com/opendatateam/udata/pull/3592))
+- fix: no_cache() conflict with with_badge() ([#3572](https://github.com/opendatateam/udata/pull/3572))
+- fix: purge all HarvestItem when purging datasets ([#3579](https://github.com/opendatateam/udata/pull/3579))
+- fix: sending wrong params to search endpoints ([#3585](https://github.com/opendatateam/udata/pull/3585))
+- fix: use external logo in mails ([#3574](https://github.com/opendatateam/udata/pull/3574))
+- refactor(posts): convert Post to new API system ([#3440](https://github.com/opendatateam/udata/pull/3440))
+- test: add search service integration tests ([#3588](https://github.com/opendatateam/udata/pull/3588))
+
+
 ## 14.4.0 (2025-12-16)
 
 - chore: adapt CI and docs to main branch ([#3559](https://github.com/opendatateam/udata/pull/3559))
