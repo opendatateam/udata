@@ -1706,6 +1706,12 @@ class DatasetResourceAPITest(APITestCase):
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 2)
 
+    def test_create_with_list_returns_400(self):
+        """It should return 400 when sending a list instead of a dict"""
+        data = [ResourceFactory.as_dict()]
+        response = self.post(url_for("api.resources", dataset=self.dataset), data)
+        self.assert400(response)
+
     def test_create_with_file(self):
         """It should create a resource from the API with a file"""
         user = self.login()
