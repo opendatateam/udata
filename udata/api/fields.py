@@ -1,4 +1,5 @@
 import datetime
+import inspect
 import logging
 
 import pytz
@@ -30,6 +31,14 @@ from flask_restx.fields import Wildcard as Wildcard
 from udata.utils import multi_to_dict
 
 log = logging.getLogger(__name__)
+
+# Extract Flask's url_for() reserved arguments dynamically to filter from user-provided query params
+URL_FOR_RESERVED_ARGS = {
+    name
+    for name, param in inspect.signature(url_for).parameters.items()
+    if param.kind in (inspect.Parameter.KEYWORD_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD)
+    and name != "values"
+}
 
 
 class ISODateTime(String):
@@ -66,6 +75,8 @@ class NextPageUrl(String):
         args = multi_to_dict(request.args)
         args.update(request.view_args)
         args["page"] = obj.page + 1
+        for reserved in URL_FOR_RESERVED_ARGS:
+            args.pop(reserved, None)
         return url_for(request.endpoint, _external=True, **args)
 
 
@@ -76,6 +87,8 @@ class PreviousPageUrl(String):
         args = multi_to_dict(request.args)
         args.update(request.view_args)
         args["page"] = obj.page - 1
+        for reserved in URL_FOR_RESERVED_ARGS:
+            args.pop(reserved, None)
         return url_for(request.endpoint, _external=True, **args)
 
 
