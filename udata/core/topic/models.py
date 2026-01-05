@@ -16,7 +16,10 @@ __all__ = ("Topic", "TopicElement")
 
 class TopicElement(Auditable, db.Document):
     title = field(db.StringField(required=False))
-    description = field(db.StringField(required=False))
+    description = field(
+        db.StringField(required=False),
+        markdown=True,
+    )
     tags = field(db.ListField(db.StringField()))
     extras = field(db.ExtrasField())
     element = field(db.GenericReferenceField(choices=["Dataset", "Reuse", "Dataservice"]))
@@ -63,7 +66,10 @@ class Topic(db.Datetimed, Auditable, Linkable, db.Document, Owned):
         db.SlugField(max_length=255, required=True, populate_from="name", update=True, follow=True),
         auditable=False,
     )
-    description = field(db.StringField())
+    description = field(
+        db.StringField(),
+        markdown=True,
+    )
     tags = field(db.ListField(db.StringField()))
     color = field(db.IntField())
 
