@@ -19,9 +19,11 @@ jobs:
     parameters:
       python-version:
         type: string
+      mongo-version:
+        type: string
     docker:
       - image: ghcr.io/astral-sh/uv:python<< parameters.python-version >>-trixie
-      - image: mongo:6.0.4
+      - image: mongo:<< parameters.mongo-version >>
       - image: redis:alpine
       - image: udata/elasticsearch:7.16.2
         environment:
@@ -223,6 +225,7 @@ workflows:
           matrix:
             parameters:
               python-version: ["3.11", "3.13"]
+              mongo-version: ["6.0.4", "7.0.28"]
       - dist:
           requires:
             - python
