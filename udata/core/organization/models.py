@@ -272,7 +272,7 @@ class Organization(
                 return request
         return None
 
-    @field(description="Link to the API endpoint for this reuse", show_as_ref=True)
+    @field(description="Link to the API endpoint for this organization", show_as_ref=True)
     def uri(self, *args, **kwargs):
         return self.self_api_url(*args, **kwargs)
 
