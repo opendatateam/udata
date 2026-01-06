@@ -68,7 +68,7 @@ def on_transfer_created(transfer, **kwargs):
                     details=TransferRequestNotificationDetails(
                         transfer_owner=owner,
                         transfer_recipient=recipient,
-                        transfer_subject=transfer,
+                        transfer_subject=transfer.subject,
                     ),
                 )
                 notification.created_at = transfer.created
