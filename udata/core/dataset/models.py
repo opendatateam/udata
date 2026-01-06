@@ -552,7 +552,10 @@ class Dataset(
         ),
         auditable=False,
     )
-    description = field(db.StringField(required=True, default=""))
+    description = field(
+        db.StringField(required=True, default=""),
+        markdown=True,
+    )
     description_short = field(db.StringField(max_length=DESCRIPTION_SHORT_SIZE_LIMIT))
     license = field(db.ReferenceField("License"))
 
@@ -1158,9 +1161,6 @@ class ResourceSchema(object):
             response.raise_for_status()
             data = response.json()
         except requests.exceptions.RequestException as err:
-            log.exception(f"Error while getting schema catalog from {endpoint}: {err}")
-            schemas = cache.get(cache_key)
-        except requests.exceptions.JSONDecodeError as err:
             log.exception(f"Error while getting schema catalog from {endpoint}: {err}")
             schemas = cache.get(cache_key)
         else:

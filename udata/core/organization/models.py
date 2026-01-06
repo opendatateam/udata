@@ -134,7 +134,10 @@ class Organization(
         auditable=False,
         show_as_ref=True,
     )
-    description = field(db.StringField(required=True))
+    description = field(
+        db.StringField(required=True),
+        markdown=True,
+    )
     url = field(db.URLField())
     image_url = field(db.StringField())
     logo = field(
@@ -176,6 +179,8 @@ class Organization(
         "queryset_class": OrganizationQuerySet,
         "auto_create_index_on_save": True,
     }
+
+    verbose_name = _("organization")
 
     def __str__(self):
         return self.name or ""

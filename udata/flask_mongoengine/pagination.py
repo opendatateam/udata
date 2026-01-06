@@ -6,7 +6,7 @@ from mongoengine.queryset import QuerySet
 
 class Pagination(object):
     def __init__(self, iterable, page, per_page):
-        if page < 1:
+        if page < 1 or per_page < 1:
             abort(404)
 
         self.iterable = iterable

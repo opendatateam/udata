@@ -18,6 +18,7 @@ from udata.core.discussions.models import Discussion
 from udata.core.linkable import Linkable
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
+from udata.i18n import lazy_gettext as _
 from udata.models import Follow, WithMetrics, db
 from udata.uris import cdata_url
 
@@ -69,7 +70,10 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
         },
     )
     website = field(db.URLField())
-    about = field(db.StringField())
+    about = field(
+        db.StringField(),
+        markdown=True,
+    )
 
     prefered_language = field(db.StringField())
 
@@ -122,6 +126,8 @@ class User(WithMetrics, UserMixin, Linkable, db.Document):
         "ordering": ["-created_at"],
         "auto_create_index_on_save": True,
     }
+
+    verbose_name = _("account")
 
     __metrics_keys__ = [
         "datasets",

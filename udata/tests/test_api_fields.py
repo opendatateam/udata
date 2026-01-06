@@ -354,3 +354,13 @@ class ApplyPaginationTest(PytestOnlyDBTestCase):
             results: DBPaginator = Fake.apply_pagination(Fake.apply_sort_filters(Fake.objects))
             assert results.page_size == 5
             assert results.page == 3
+
+    def test_negative_page_size_returns_404(self, app) -> None:
+        """Negative page_size should return a 404 error."""
+        from werkzeug.exceptions import NotFound
+
+        FakeFactory()
+
+        with app.test_request_context("/foobar", query_string={"page": 1, "page_size": -5}):
+            with pytest.raises(NotFound):
+                Fake.apply_pagination(Fake.apply_sort_filters(Fake.objects))
