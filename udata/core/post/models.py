@@ -4,6 +4,7 @@ from udata.api_fields import field, generate_fields
 from udata.core.dataset.api_fields import dataset_fields
 from udata.core.linkable import Linkable
 from udata.core.storages import default_image_basename, images
+from udata.core.user.api_fields import user_ref_fields
 from udata.i18n import lazy_gettext as _
 from udata.mongo import db
 from udata.uris import cdata_url
@@ -82,6 +83,7 @@ class Post(db.Datetimed, Linkable, db.Document):
 
     owner = field(
         db.ReferenceField("User"),
+        nested_fields=user_ref_fields,
         readonly=True,
         allow_null=True,
         description="The owner user",
