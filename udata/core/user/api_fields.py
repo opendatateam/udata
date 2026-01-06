@@ -9,7 +9,7 @@ user_ref_fields = api.inherit(
     {
         "first_name": fields.String(description="The user first name", readonly=True),
         "last_name": fields.String(description="The user larst name", readonly=True),
-        "slug": fields.String(description="The user permalink string", required=True),
+        "slug": fields.String(description="The user permalink string", readonly=True),
         "uri": fields.String(
             attribute=lambda u: u.self_api_url(),
             description="The API URI for this user",
@@ -35,8 +35,8 @@ from udata.core.organization.api_fields import member_email_with_visibility_chec
 user_fields = api.model(
     "User",
     {
-        "id": fields.String(description="The user identifier", required=True),
-        "slug": fields.String(description="The user permalink string", required=True),
+        "id": fields.String(description="The user identifier", readonly=True),
+        "slug": fields.String(description="The user permalink string", readonly=True),
         "first_name": fields.String(description="The user first name", required=True),
         "last_name": fields.String(description="The user last name", required=True),
         "email": fields.Raw(
