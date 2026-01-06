@@ -31,6 +31,7 @@ def dataservice_from_rdf(
     node,
     all_datasets: list[Dataset],
     remote_url_prefix: str | None = None,
+    dryrun: bool = False,
 ) -> Dataservice:
     """
     Create or update a dataservice from a RDF/DCAT graph
@@ -51,7 +52,7 @@ def dataservice_from_rdf(
     dataservice.machine_documentation_url = url_from_rdf(d, DCAT.endpointDescription)
 
     roles = [  # Imbricated list of contact points for each role
-        contact_points_from_rdf(d, rdf_entity, role, dataservice)
+        contact_points_from_rdf(d, rdf_entity, role, dataservice, dryrun=dryrun)
         for rdf_entity, role in CONTACT_POINT_ENTITY_TO_ROLE.items()
     ]
     dataservice.contact_points = [  # Flattened list of contact points

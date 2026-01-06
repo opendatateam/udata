@@ -39,6 +39,7 @@ from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.followers.api import FollowAPI
 from udata.core.followers.models import Follow
+from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.organization.models import Organization
 from udata.core.reuse.models import Reuse
 from udata.core.storages.api import handle_upload, upload_parser
@@ -327,17 +328,33 @@ class DatasetListAPI(API):
 @ns.route("/recent.atom", endpoint="recent_datasets_atom_feed")
 class DatasetsAtomFeedAPI(API):
     @api.doc("recent_datasets_atom_feed")
+    @api.expect(dataset_parser.parser)
     def get(self):
+        args = dataset_parser.parse()
+        queryset = Dataset.objects.visible()
+        queryset = DatasetApiParser.parse_filters(queryset, args)
+
+        q = args.get("q").strip() if args.get("q") else ""
+        has_filters = any(
+            args.get(k)
+            for k in ["q", "tag", "license", "organization", "owner", "format", "badge", "topic"]
+        )
+
+        if q:
+            title = _("Datasets search: {q}").format(q=q)
+        elif has_filters:
+            title = _("Filtered datasets")
+        else:
+            title = _("Latest datasets")
+
         feed = Atom1Feed(
-            _("Latest datasets"),
+            title,
             description=None,
             feed_url=request.url,
             link=request.url_root,
         )
 
-        datasets: list[Dataset] = get_rss_feed_list(
-            Dataset.objects.visible(), "created_at_internal"
-        )
+        datasets: list[Dataset] = get_rss_feed_list(queryset, "created_at_internal")
 
         for dataset in datasets:
             author_name = None
@@ -362,6 +379,9 @@ class DatasetsAtomFeedAPI(API):
         response = make_response(feed.writeString("utf-8"))
         response.headers["Content-Type"] = "application/atom+xml"
         return response
+
+
+dataset_delete_parser = add_send_legal_notice_argument(api.parser())
 
 
 @ns.route("/<dataset:dataset>/", endpoint="dataset", doc=common_doc)
@@ -397,12 +417,16 @@ class DatasetAPI(API):
 
     @api.secure
     @api.doc("delete_dataset")
+    @api.expect(dataset_delete_parser)
     @api.response(204, "Dataset deleted")
     def delete(self, dataset):
         """Delete a dataset given its identifier"""
+        args = dataset_delete_parser.parse_args()
         if dataset.deleted:
             api.abort(410, "Dataset has been deleted")
         dataset.permissions["delete"].test()
+        send_legal_notice_on_deletion(dataset, args)
+
         dataset.deleted = datetime.utcnow()
         dataset.last_modified_internal = datetime.utcnow()
         dataset.save()
