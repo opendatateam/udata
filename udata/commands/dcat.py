@@ -85,7 +85,7 @@ def parse_url(url, csw, iso, quiet=False, rid=""):
             echo("Item kwargs: {}".format(yellow(item.kwargs)))
             node = backend.get_node_from_item(graph, item)
             dataset = MockDatasetFactory()
-            dataset = dataset_from_rdf(graph, dataset, node=node)
+            dataset = dataset_from_rdf(graph, dataset, node=node, dryrun=True)
             echo("")
             echo(green("Dataset found!"))
             echo("Title: {}".format(yellow(dataset)))
