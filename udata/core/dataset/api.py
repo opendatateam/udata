@@ -328,17 +328,33 @@ class DatasetListAPI(API):
 @ns.route("/recent.atom", endpoint="recent_datasets_atom_feed")
 class DatasetsAtomFeedAPI(API):
     @api.doc("recent_datasets_atom_feed")
+    @api.expect(dataset_parser.parser)
     def get(self):
+        args = dataset_parser.parse()
+        queryset = Dataset.objects.visible()
+        queryset = DatasetApiParser.parse_filters(queryset, args)
+
+        q = args.get("q").strip() if args.get("q") else ""
+        has_filters = any(
+            args.get(k)
+            for k in ["q", "tag", "license", "organization", "owner", "format", "badge", "topic"]
+        )
+
+        if q:
+            title = _("Datasets search: {q}").format(q=q)
+        elif has_filters:
+            title = _("Filtered datasets")
+        else:
+            title = _("Latest datasets")
+
         feed = Atom1Feed(
-            _("Latest datasets"),
+            title,
             description=None,
             feed_url=request.url,
             link=request.url_root,
         )
 
-        datasets: list[Dataset] = get_rss_feed_list(
-            Dataset.objects.visible(), "created_at_internal"
-        )
+        datasets: list[Dataset] = get_rss_feed_list(queryset, "created_at_internal")
 
         for dataset in datasets:
             author_name = None
