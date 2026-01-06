@@ -1151,9 +1151,6 @@ class ResourceSchema(object):
         except requests.exceptions.RequestException as err:
             log.exception(f"Error while getting schema catalog from {endpoint}: {err}")
             schemas = cache.get(cache_key)
-        except requests.exceptions.JSONDecodeError as err:
-            log.exception(f"Error while getting schema catalog from {endpoint}: {err}")
-            schemas = cache.get(cache_key)
         else:
             schemas = data.get("schemas", [])
             cache.set(cache_key, schemas)
