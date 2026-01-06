@@ -54,8 +54,12 @@ def purge_datasets(self):
             datasets = dataservice.datasets
             datasets.remove(dataset)
             dataservice.update(datasets=datasets)
-        # Remove HarvestItem references
-        HarvestJob.objects(items__dataset=dataset).update(set__items__S__dataset=None)
+        # Remove HarvestItem references (using update_many with array_filters to update all matching items)
+        HarvestJob._get_collection().update_many(
+            {"items.dataset": dataset.id},
+            {"$set": {"items.$[item].dataset": None}},
+            array_filters=[{"item.dataset": dataset.id}],
+        )
         # Remove datasets in pages (mongoengine doesn't support updating a field in a generic embed)
         Page._get_collection().update_many(
             {"blocs.datasets": dataset.id},
