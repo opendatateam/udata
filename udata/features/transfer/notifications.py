@@ -46,11 +46,17 @@ def on_transfer_created(transfer, **kwargs):
 
     recipient = transfer.recipient
     owner = transfer.owner
+    users = []
 
     if isinstance(recipient, User):
+        users = [recipient]
+    elif isinstance(recipient, Organization):
+        users = [member.user for member in recipient.members if member.role == "admin"]
+
+    for user in users:
         try:
             existing = Notification.objects(
-                user=recipient,
+                user=user,
                 details__transfer_recipient=recipient,
                 details__transfer_owner=owner,
                 details__transfer_subject=transfer.subject,
@@ -58,7 +64,7 @@ def on_transfer_created(transfer, **kwargs):
 
             if not existing:
                 notification = Notification(
-                    user=recipient,
+                    user=user,
                     details=TransferRequestNotificationDetails(
                         transfer_owner=owner,
                         transfer_recipient=recipient,
@@ -69,37 +75,9 @@ def on_transfer_created(transfer, **kwargs):
                 notification.save()
         except Exception as e:
             log.error(
-                f"Error creating notification for user {recipient.id} "
-                f"and transfer {transfer.id}: {e}"
+                f"Error creating notification for admin user {user.id} "
+                f"and organization {recipient.id}: {e}"
             )
-    elif isinstance(recipient, Organization):
-        admin_users = [member.user for member in recipient.members if member.role == "admin"]
-
-        for admin_user in admin_users:
-            try:
-                existing = Notification.objects(
-                    user=admin_user,
-                    details__transfer_recipient=recipient,
-                    details__transfer_owner=owner,
-                    details__transfer_subject=transfer.subject,
-                ).first()
-
-                if not existing:
-                    notification = Notification(
-                        user=admin_user,
-                        details=TransferRequestNotificationDetails(
-                            transfer_owner=owner,
-                            transfer_recipient=recipient,
-                            transfer_subject=transfer,
-                        ),
-                    )
-                    notification.created_at = transfer.created
-                    notification.save()
-            except Exception as e:
-                log.error(
-                    f"Error creating notification for admin user {admin_user.id} "
-                    f"and organization {recipient.id}: {e}"
-                )
 
 
 @notifier("transfer_request")
