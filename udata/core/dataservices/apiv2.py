@@ -1,7 +1,10 @@
+from flask import request
+
 from udata import search
 from udata.api import API, apiv2
 from udata.core.access_type.models import AccessAudience
 from udata.core.dataservices.models import Dataservice, HarvestMetadata
+from udata.utils import multi_to_dict
 
 from .models import dataservice_permissions_fields
 from .search import DataserviceSearch
@@ -27,5 +30,5 @@ class DataserviceSearchAPI(API):
     @apiv2.marshal_with(Dataservice.__page_fields__)
     def get(self):
         """Search all dataservices"""
-        args = search_parser.parse_args()
-        return search.query(DataserviceSearch, **args)
+        search_parser.parse_args()
+        return search.query(DataserviceSearch, **multi_to_dict(request.args))
