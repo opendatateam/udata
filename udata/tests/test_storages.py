@@ -228,6 +228,196 @@ class StorageUploadViewTest(PytestOnlyAPITestCase):
 
 
 @pytest.mark.usefixtures("instance_path")
+class BinaryUploadViewTest(PytestOnlyAPITestCase):
+    """
+    Tests for binary (application/octet-stream) upload mode.
+
+    Binary mode avoids multipart parsing ambiguity where a \\r byte at the end
+    of a chunk can be confused with the \\r\\n boundary separator.
+    """
+
+    def test_binary_chunked_upload(self):
+        """Test basic binary chunked upload."""
+        self.login()
+        url = url_for("storage.upload", name="tmp")
+        uuid = str(uuid4())
+        parts = 4
+
+        for i in range(parts):
+            response = self.client.post(
+                url,
+                data=b"a",
+                content_type="application/octet-stream",
+                headers={
+                    "Upload-UUID": uuid,
+                    "Upload-Filename": "test.txt",
+                    "Upload-Part-Index": str(i),
+                    "Upload-Part-Byte-Offset": str(i),
+                    "Upload-Total-Parts": str(parts),
+                    "Upload-Chunk-Size": "1",
+                },
+            )
+
+            assert200(response)
+            assert response.json["success"]
+
+        response = self.post(
+            url,
+            {
+                "uuid": uuid,
+                "filename": "test.txt",
+                "totalfilesize": parts,
+                "totalparts": parts,
+            },
+            json=False,
+        )
+        assert "filename" in response.json
+        assert response.json["size"] == parts
+        assert storages.tmp.read(response.json["filename"]) == b"aaaa"
+
+    def test_binary_chunk_ending_with_carriage_return(self):
+        """
+        Regression test: ensure chunks ending with \\r are not corrupted.
+
+        In multipart mode, a \\r at the end of a chunk can be mistaken for
+        the start of the boundary separator \\r\\n, causing data loss.
+        Binary mode must preserve this byte.
+        """
+        self.login()
+        url = url_for("storage.upload", name="tmp")
+        uuid = str(uuid4())
+
+        chunk1 = b"line1\r"
+        chunk2 = b"\nline2"
+
+        response = self.client.post(
+            url,
+            data=chunk1,
+            content_type="application/octet-stream",
+            headers={
+                "Upload-UUID": uuid,
+                "Upload-Filename": "crlf-test.txt",
+                "Upload-Part-Index": "0",
+                "Upload-Part-Byte-Offset": "0",
+                "Upload-Total-Parts": "2",
+                "Upload-Chunk-Size": str(len(chunk1)),
+            },
+        )
+        assert200(response)
+
+        response = self.client.post(
+            url,
+            data=chunk2,
+            content_type="application/octet-stream",
+            headers={
+                "Upload-UUID": uuid,
+                "Upload-Filename": "crlf-test.txt",
+                "Upload-Part-Index": "1",
+                "Upload-Part-Byte-Offset": str(len(chunk1)),
+                "Upload-Total-Parts": "2",
+                "Upload-Chunk-Size": str(len(chunk2)),
+            },
+        )
+        assert200(response)
+
+        response = self.post(
+            url,
+            {
+                "uuid": uuid,
+                "filename": "crlf-test.txt",
+                "totalfilesize": len(chunk1) + len(chunk2),
+                "totalparts": 2,
+            },
+            json=False,
+        )
+
+        filename = response.json["filename"]
+        content = storages.tmp.read(filename)
+        assert content == b"line1\r\nline2"
+
+    def test_binary_chunk_size_mismatch(self):
+        """Test that chunk size mismatch is detected."""
+        self.login()
+        url = url_for("storage.upload", name="tmp")
+
+        response = self.client.post(
+            url,
+            data=b"test",
+            content_type="application/octet-stream",
+            headers={
+                "Upload-UUID": str(uuid4()),
+                "Upload-Filename": "test.txt",
+                "Upload-Part-Index": "0",
+                "Upload-Part-Byte-Offset": "0",
+                "Upload-Total-Parts": "2",
+                "Upload-Chunk-Size": "10",
+            },
+        )
+
+        assert400(response)
+        assert not response.json["success"]
+
+    def test_binary_upload_missing_header(self):
+        """Test that missing required headers return an error."""
+        self.login()
+        url = url_for("storage.upload", name="tmp")
+
+        response = self.client.post(
+            url,
+            data=b"test",
+            content_type="application/octet-stream",
+            headers={
+                "Upload-UUID": str(uuid4()),
+                "Upload-Part-Index": "0",
+                "Upload-Part-Byte-Offset": "0",
+                "Upload-Total-Parts": "1",
+                "Upload-Chunk-Size": "4",
+            },
+        )
+
+        assert400(response)
+        assert not response.json["success"]
+        assert "Upload-Filename" in response.json.get("error", "")
+
+    def test_multipart_upload_still_works(self):
+        """Ensure backward compatibility: multipart upload still works."""
+        self.login()
+        url = url_for("storage.upload", name="tmp")
+        uuid = str(uuid4())
+        parts = 2
+
+        for i in range(parts):
+            response = self.post(
+                url,
+                {
+                    "file": (BytesIO(b"a"), "blob"),
+                    "uuid": uuid,
+                    "filename": "test.txt",
+                    "partindex": i,
+                    "partbyteoffset": i,
+                    "totalfilesize": parts,
+                    "totalparts": parts,
+                    "chunksize": 1,
+                },
+                json=False,
+            )
+            assert200(response)
+
+        response = self.post(
+            url,
+            {
+                "uuid": uuid,
+                "filename": "test.txt",
+                "totalfilesize": parts,
+                "totalparts": parts,
+            },
+            json=False,
+        )
+        assert response.json["size"] == parts
+        assert storages.tmp.read(response.json["filename"]) == b"aa"
+
+
+@pytest.mark.usefixtures("instance_path")
 class ChunksRetentionTest(PytestOnlyTestCase):
     def create_chunks(self, uuid, nb=3, last=None):
         for i in range(nb):

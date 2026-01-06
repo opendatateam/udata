@@ -1,7 +1,8 @@
 import os
 from datetime import datetime
+from io import BytesIO
 
-from flask import json
+from flask import json, request
 from werkzeug.datastructures import FileStorage
 
 from udata.api import api, fields
@@ -89,8 +90,18 @@ def get_file_size(file):
     return size
 
 
+def get_header(name, type_: type = str):
+    """Get a header value, converting to the specified type."""
+    value = request.headers.get(name)
+    if value is None:
+        raise UploadError(f"Missing required header: {name}")
+    try:
+        return type_(value)
+    except (ValueError, TypeError):
+        raise UploadError(f"Invalid value for header {name}: {value}")
+
+
 def save_chunk(file, args):
-    # Check file size
     if get_file_size(file) != args["chunksize"]:
         raise UploadProgress(ok=False, error="Chunk size mismatch")
     filename = chunk_filename(args["uuid"], args["partindex"])
@@ -133,9 +144,28 @@ def combine_chunks(storage, args, prefix=None):
 
 
 def handle_upload(storage, prefix=None):
-    args = upload_parser.parse_args()
+    content_type = request.content_type or ""
+
+    if content_type.startswith("application/octet-stream"):
+        # Binary upload mode: raw bytes in body, metadata in headers.
+        # This avoids an ambiguity in multipart parsing where a \r byte at the
+        # end of a chunk can be confused with the \r\n boundary separator,
+        # causing data corruption for files with Windows line endings (CRLF).
+        filename = get_header("Upload-Filename")
+        args = {
+            "uuid": get_header("Upload-UUID"),
+            "filename": filename,
+            "partindex": get_header("Upload-Part-Index", int),
+            "partbyteoffset": get_header("Upload-Part-Byte-Offset", int),
+            "totalparts": get_header("Upload-Total-Parts", int),
+            "chunksize": get_header("Upload-Chunk-Size", int),
+        }
+        uploaded_file = FileStorage(stream=BytesIO(request.get_data()), filename=filename)
+    else:
+        args = upload_parser.parse_args()
+        uploaded_file = args["file"]
+
     is_chunk = args["totalparts"] and args["totalparts"] > 1
-    uploaded_file = args["file"]
 
     if is_chunk:
         if uploaded_file:
@@ -145,7 +175,6 @@ def handle_upload(storage, prefix=None):
     elif not uploaded_file:
         raise UploadError("Missing file parameter")
     else:
-        # Normalize filename including extension
         filename = utils.normalize(uploaded_file.filename)
         fs_filename = storage.save(uploaded_file, prefix=prefix, filename=filename)
 
