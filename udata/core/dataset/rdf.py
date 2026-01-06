@@ -742,7 +742,13 @@ def resource_from_rdf(graph_or_distrib, dataset=None, is_additionnal=False):
     return resource
 
 
-def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: str | None = None):
+def dataset_from_rdf(
+    graph: Graph,
+    dataset=None,
+    node=None,
+    remote_url_prefix: str | None = None,
+    dryrun: bool = False,
+):
     """
     Create or update a dataset from a RDF/DCAT graph
     """
@@ -764,7 +770,7 @@ def dataset_from_rdf(graph: Graph, dataset=None, node=None, remote_url_prefix: s
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity)) or dataset.frequency
     roles = [  # Imbricated list of contact points for each role
-        contact_points_from_rdf(d, rdf_entity, role, dataset)
+        contact_points_from_rdf(d, rdf_entity, role, dataset, dryrun=dryrun)
         for rdf_entity, role in CONTACT_POINT_ENTITY_TO_ROLE.items()
     ]
     dataset.contact_points = [  # Flattened list of contact points
