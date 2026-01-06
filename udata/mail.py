@@ -40,6 +40,20 @@ class LabelledContent:
 
 
 @dataclass
+class Link:
+    """Simple linkable object for use in ParagraphWithLinks"""
+
+    label: str
+    url: str
+
+    def __str__(self):
+        return str(self.label)
+
+    def url_for(self, **kwargs):
+        return self.url
+
+
+@dataclass
 class ParagraphWithLinks:
     paragraph: LazyString
 

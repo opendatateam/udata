@@ -332,7 +332,7 @@ dataset_fields = api.model(
         "id": fields.String(description="The dataset identifier", readonly=True),
         "title": fields.String(description="The dataset title", required=True),
         "acronym": fields.String(description="An optional dataset acronym"),
-        "slug": fields.String(description="The dataset permalink string", required=True),
+        "slug": fields.String(description="The dataset permalink string", readonly=True),
         "description": fields.Markdown(
             description="The dataset description in markdown", required=True
         ),
