@@ -755,6 +755,22 @@ class RdfToDatasetTest(PytestOnlyDBTestCase):
         assert isinstance(dataset, Dataset)
         assert set(dataset.tags) == set(tags + themes)
 
+    def test_keyword_as_uriref(self):
+        """Regression test: keywords can be URIRef instead of Literal in some DCAT feeds."""
+        node = BNode()
+        g = Graph()
+
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        g.add((node, DCAT.keyword, Literal("literal-tag")))
+        g.add((node, DCAT.keyword, URIRef("http://example.org/keyword/uriref-tag")))
+
+        dataset = dataset_from_rdf(g)
+        dataset.validate()
+
+        assert isinstance(dataset, Dataset)
+        assert "literal-tag" in dataset.tags
+
     def test_parse_null_frequency(self):
         assert frequency_from_rdf(None) is None
 

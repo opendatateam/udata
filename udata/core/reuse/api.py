@@ -15,6 +15,7 @@ from udata.core.badges.fields import badge_fields
 from udata.core.dataservices.models import Dataservice
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.followers.api import FollowAPI
+from udata.core.legal.mails import add_send_legal_notice_argument, send_legal_notice_on_deletion
 from udata.core.organization.models import Organization
 from udata.core.reuse.constants import REUSE_TOPICS, REUSE_TYPES
 from udata.core.storages.api import (
@@ -170,6 +171,9 @@ class ReusesAtomFeedAPI(API):
         return response
 
 
+reuse_delete_parser = add_send_legal_notice_argument(api.parser())
+
+
 @ns.route("/<reuse:reuse>/", endpoint="reuse", doc=common_doc)
 @api.response(404, "Reuse not found")
 @api.response(410, "Reuse has been deleted")
@@ -202,12 +206,16 @@ class ReuseAPI(API):
 
     @api.secure
     @api.doc("delete_reuse")
+    @api.expect(reuse_delete_parser)
     @api.response(204, "Reuse deleted")
     def delete(self, reuse):
         """Delete a given reuse"""
+        args = reuse_delete_parser.parse_args()
         if reuse.deleted:
             api.abort(410, "This reuse has been deleted")
         reuse.permissions["delete"].test()
+        send_legal_notice_on_deletion(reuse, args)
+
         reuse.deleted = datetime.utcnow()
         reuse.save()
         return "", 204
