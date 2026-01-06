@@ -356,7 +356,13 @@ def theme_labels_from_rdf(rdf):
 
 
 def themes_from_rdf(rdf):
-    tags = [tag.toPython() for tag in rdf.objects(DCAT.keyword)]
+    tags = []
+    for tag in rdf.objects(DCAT.keyword):
+        if isinstance(tag, RdfResource):
+            # dcat:keyword should be Literal, not a Resource/URIRef
+            log.warning(f"Ignoring dcat:keyword with URI value: {tag.identifier}")
+            continue
+        tags.append(tag.toPython())
     tags += theme_labels_from_rdf(rdf)
     return list(set(tags))
 
