@@ -972,6 +972,30 @@ class DcatBackendTest(PytestOnlyDBTestCase):
         assert "connection error" in mock_warning.call_args[0][0].lower()
         mock_exception.assert_not_called()
 
+    def test_preview_does_not_create_contact_points(self, rmock):
+        """Preview should not create ContactPoints in DB."""
+        from udata.core.contact_point.models import ContactPoint
+
+        LicenseFactory(id="lov2", title="Licence Ouverte Version 2.0")
+        LicenseFactory(id="lov1", title="Licence Ouverte Version 1.0")
+
+        url = mock_dcat(rmock, "catalog.xml", path="catalog.xml")
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend="dcat", url=url, organization=org)
+
+        assert ContactPoint.objects.count() == 0
+
+        job = actions.preview(source)
+
+        assert job.status == "done"
+        assert len(job.items) == 4
+
+        # No ContactPoints should have been created in the database
+        assert ContactPoint.objects.count() == 0
+
+        # No datasets should have been created either
+        assert Dataset.objects.count() == 0
+
 
 @pytest.mark.options(HARVESTER_BACKENDS=["csw*"])
 class CswDcatBackendTest(PytestOnlyDBTestCase):
