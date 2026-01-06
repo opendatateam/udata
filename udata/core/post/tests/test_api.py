@@ -163,3 +163,18 @@ class PostsAPITest(APITestCase):
         response = self.get(url_for("api.posts", with_drafts=True))
         assert200(response)
         assert len(response.json["data"]) == 3
+
+    def test_post_api_filter_by_kind(self):
+        """It should filter posts by kind"""
+        news_post = PostFactory(kind="news")
+        page_post = PostFactory(kind="page")
+
+        response = self.get(url_for("api.posts", kind="news"))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(news_post.id)
+
+        response = self.get(url_for("api.posts", kind="page"))
+        assert200(response)
+        assert len(response.json["data"]) == 1
+        assert response.json["data"][0]["id"] == str(page_post.id)

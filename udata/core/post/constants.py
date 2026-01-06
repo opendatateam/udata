@@ -10,3 +10,10 @@ BODY_TYPES = OrderedDict(
         ("html", _("HTML")),
     ]
 )
+
+POST_KINDS = OrderedDict(
+    [
+        ("news", _("News")),
+        ("page", _("Page")),
+    ]
+)
