@@ -1,5 +1,21 @@
 # Changelog
 
+## 14.6.0 (2026-01-06)
+
+- chore: add progress bar to old migration for re-run ([#3595](https://github.com/opendatateam/udata/pull/3595))
+- chore(swagger): clean required fields in swagger ([#3596](https://github.com/opendatateam/udata/pull/3596))
+- feat: add appeal mail on delete ([#3576](https://github.com/opendatateam/udata/pull/3576))
+- feat(datasets): add filtering support to datasets Atom feed ([#3578](https://github.com/opendatateam/udata/pull/3578))
+- feat: upgrade dependencies and downgrade werkzeug ([#3598](https://github.com/opendatateam/udata/pull/3598))
+- fix: do not create contact point if dryrun ([#3589](https://github.com/opendatateam/udata/pull/3589))
+- fix: forms always expect dicts ([#3590](https://github.com/opendatateam/udata/pull/3590))
+- fix: import dataservices tasks in init to purge dataservices ([#3602](https://github.com/opendatateam/udata/pull/3602))
+- fix: negative page size in pagination ([#3591](https://github.com/opendatateam/udata/pull/3591))
+- fix: RDF Resource in tags ([#3599](https://github.com/opendatateam/udata/pull/3599))
+- fix: remove dead code in except ([#3586](https://github.com/opendatateam/udata/pull/3586))
+- fix: wrong owner response for post API ([#3601](https://github.com/opendatateam/udata/pull/3601))
+
+
 ## 14.5.0 (2026-01-05)
 
 - chore: add mailpit ([#3575](https://github.com/opendatateam/udata/pull/3575))
