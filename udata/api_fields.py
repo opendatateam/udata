@@ -52,7 +52,7 @@ def required_if(**conditions):
     """
 
     def check(value, data, field, obj, **_kwargs):
-        if value:
+        if value is not None:
             return
         for condition_field, condition_value in conditions.items():
             actual_condition = data.get(condition_field, getattr(obj, condition_field, None))
