@@ -76,7 +76,7 @@ def on_transfer_created(transfer, **kwargs):
         except Exception as e:
             log.error(
                 f"Error creating notification for admin user {user.id} "
-                f"and organization {recipient.id}: {e}"
+                f"and recipient {recipient.id}: {e}"
             )
 
 
