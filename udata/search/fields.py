@@ -31,7 +31,7 @@ class Filter:
 class ListFilter:
     @classmethod
     def as_request_parser_kwargs(self):
-        return {"action": "append"}
+        return {"action": "append", "type": clean_string}
 
 
 class BoolFilter(Filter):

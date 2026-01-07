@@ -7,6 +7,8 @@ from flask_restx import inputs
 from flask_restx.reqparse import RequestParser
 
 from udata import search
+from udata.core.dataservices.factories import DataserviceFactory
+from udata.core.dataservices.search import DataserviceSearch
 from udata.core.dataset.factories import (
     DatasetFactory,
     HiddenDatasetFactory,
@@ -14,7 +16,19 @@ from udata.core.dataset.factories import (
 )
 from udata.core.dataset.models import Schema
 from udata.core.dataset.search import DatasetSearch
+from udata.core.organization.constants import (
+    ASSOCIATION,
+    COMPANY,
+    LOCAL_AUTHORITY,
+    NOT_SPECIFIED,
+    PUBLIC_SERVICE,
+    USER,
+)
+from udata.core.organization.factories import OrganizationFactory
+from udata.core.reuse.factories import ReuseFactory
+from udata.core.reuse.search import ReuseSearch
 from udata.core.topic.factories import TopicElementDatasetFactory, TopicFactory
+from udata.core.user.factories import UserFactory
 from udata.i18n import gettext as _
 from udata.search import as_task_param, reindex
 from udata.search.commands import index_model
@@ -216,3 +230,232 @@ class DatasetSearchAdapterTest(APITestCase):
         assert "topics" in serialized
         assert len(serialized["topics"]) == 1
         assert str(topic.id) in serialized["topics"]
+
+    def test_serialize_includes_access_type(self):
+        """Test that DatasetSearch.serialize includes access_type in the serialized document"""
+        from udata.core.access_type.constants import AccessType
+
+        dataset = DatasetFactory(access_type=AccessType.OPEN)
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "access_type" in serialized
+        assert serialized["access_type"] == "open"
+
+    def test_serialize_includes_format_family_tabular(self):
+        """Test that DatasetSearch.serialize includes format_family for tabular formats"""
+        resource_csv = ResourceFactory(format="csv")
+        resource_xlsx = ResourceFactory(format="xlsx")
+        dataset = DatasetFactory(resources=[resource_csv, resource_xlsx])
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "format_family" in serialized
+        assert serialized["format_family"] == ["tabular"]
+
+    def test_serialize_includes_format_family_machine_readable(self):
+        """Test that DatasetSearch.serialize includes format_family for machine-readable formats"""
+        resource_json = ResourceFactory(format="json")
+        resource_xml = ResourceFactory(format="xml")
+        dataset = DatasetFactory(resources=[resource_json, resource_xml])
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "format_family" in serialized
+        assert serialized["format_family"] == ["machine_readable"]
+
+    def test_serialize_includes_format_family_geographical(self):
+        """Test that DatasetSearch.serialize includes format_family for geographical formats"""
+        resource_shp = ResourceFactory(format="shp")
+        resource_geojson = ResourceFactory(format="geojson")
+        dataset = DatasetFactory(resources=[resource_shp, resource_geojson])
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "format_family" in serialized
+        assert serialized["format_family"] == ["geographical"]
+
+    def test_serialize_includes_format_family_documents_for_pdf(self):
+        """Test that DatasetSearch.serialize returns 'documents' for PDF format"""
+        resource_pdf = ResourceFactory(format="pdf")
+        dataset = DatasetFactory(resources=[resource_pdf])
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "format_family" in serialized
+        assert serialized["format_family"] == ["documents"]
+
+    def test_serialize_includes_format_family_other_for_no_resources(self):
+        """Test that DatasetSearch.serialize returns 'other' for datasets without resources"""
+        dataset = DatasetFactory(resources=[])
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "format_family" in serialized
+        assert serialized["format_family"] == ["other"]
+
+    def test_serialize_includes_format_family_mixed(self):
+        """Test that DatasetSearch.serialize includes multiple format families when mixed"""
+        resource_csv = ResourceFactory(format="csv")
+        resource_json = ResourceFactory(format="json")
+        resource_pdf = ResourceFactory(format="pdf")
+        resource_shp = ResourceFactory(format="shp")
+        dataset = DatasetFactory(
+            resources=[resource_csv, resource_json, resource_pdf, resource_shp]
+        )
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "format_family" in serialized
+        assert set(serialized["format_family"]) == {
+            "tabular",
+            "machine_readable",
+            "geographical",
+            "documents",
+        }
+
+    def test_serialize_includes_producer_type_public_service(self):
+        """Test that DatasetSearch.serialize includes producer_type for public-service orgs"""
+        org = OrganizationFactory()
+        org.add_badge(PUBLIC_SERVICE)
+        dataset = DatasetFactory(organization=org)
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "producer_type" in serialized
+        assert PUBLIC_SERVICE in serialized["producer_type"]
+
+    def test_serialize_includes_producer_type_local_authority(self):
+        """Test that DatasetSearch.serialize includes producer_type for local-authority orgs"""
+        org = OrganizationFactory()
+        org.add_badge(LOCAL_AUTHORITY)
+        dataset = DatasetFactory(organization=org)
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "producer_type" in serialized
+        assert LOCAL_AUTHORITY in serialized["producer_type"]
+
+    def test_serialize_includes_producer_type_association(self):
+        """Test that DatasetSearch.serialize includes producer_type for association orgs"""
+        org = OrganizationFactory()
+        org.add_badge(ASSOCIATION)
+        dataset = DatasetFactory(organization=org)
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "producer_type" in serialized
+        assert ASSOCIATION in serialized["producer_type"]
+
+    def test_serialize_includes_producer_type_company(self):
+        """Test that DatasetSearch.serialize includes producer_type for company orgs"""
+        org = OrganizationFactory()
+        org.add_badge(COMPANY)
+        dataset = DatasetFactory(organization=org)
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "producer_type" in serialized
+        assert COMPANY in serialized["producer_type"]
+
+    def test_serialize_includes_producer_type_user(self):
+        """Test that DatasetSearch.serialize includes 'user' for datasets owned by users"""
+        user = UserFactory()
+        dataset = DatasetFactory(owner=user, organization=None)
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "producer_type" in serialized
+        assert serialized["producer_type"] == [USER]
+
+    def test_serialize_excludes_certified_from_producer_type(self):
+        """Test that certified badge is excluded from producer_type"""
+        from udata.core.organization.constants import CERTIFIED
+
+        org = OrganizationFactory()
+        org.add_badge(PUBLIC_SERVICE)
+        org.add_badge(CERTIFIED)
+        dataset = DatasetFactory(organization=org)
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "producer_type" in serialized
+        assert PUBLIC_SERVICE in serialized["producer_type"]
+        assert CERTIFIED not in serialized["producer_type"]
+
+    def test_serialize_includes_multiple_producer_types(self):
+        """Test that DatasetSearch.serialize includes multiple producer_types"""
+        org = OrganizationFactory()
+        org.add_badge(PUBLIC_SERVICE)
+        org.add_badge(LOCAL_AUTHORITY)
+        dataset = DatasetFactory(organization=org)
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "producer_type" in serialized
+        assert set(serialized["producer_type"]) == {PUBLIC_SERVICE, LOCAL_AUTHORITY}
+
+    def test_serialize_not_specified_producer_type_for_org_without_badges(self):
+        """Test that DatasetSearch.serialize returns 'not-specified' for orgs without producer badges"""
+        org = OrganizationFactory()
+        dataset = DatasetFactory(organization=org)
+
+        serialized = DatasetSearch.serialize(dataset)
+
+        assert "producer_type" in serialized
+        assert serialized["producer_type"] == [NOT_SPECIFIED]
+
+
+class ReuseSearchAdapterTest(APITestCase):
+    def test_serialize_includes_producer_type_public_service(self):
+        """Test that ReuseSearch.serialize includes producer_type for public-service orgs"""
+        org = OrganizationFactory()
+        org.add_badge(PUBLIC_SERVICE)
+        reuse = ReuseFactory(organization=org)
+
+        serialized = ReuseSearch.serialize(reuse)
+
+        assert "producer_type" in serialized
+        assert PUBLIC_SERVICE in serialized["producer_type"]
+
+    def test_serialize_includes_producer_type_user(self):
+        """Test that ReuseSearch.serialize includes 'user' for reuses owned by users"""
+        user = UserFactory()
+        reuse = ReuseFactory(owner=user, organization=None)
+
+        serialized = ReuseSearch.serialize(reuse)
+
+        assert "producer_type" in serialized
+        assert serialized["producer_type"] == [USER]
+
+
+class DataserviceSearchAdapterTest(APITestCase):
+    def test_serialize_includes_access_type(self):
+        """Test that DataserviceSearch.serialize includes access_type in the serialized document"""
+        from udata.core.access_type.constants import AccessType
+
+        dataservice = DataserviceFactory(access_type=AccessType.OPEN)
+        serialized = DataserviceSearch.serialize(dataservice)
+
+        assert "access_type" in serialized
+        assert serialized["access_type"] == "open"
+
+    def test_serialize_includes_producer_type_public_service(self):
+        """Test that DataserviceSearch.serialize includes producer_type for public-service orgs"""
+        org = OrganizationFactory()
+        org.add_badge(PUBLIC_SERVICE)
+        dataservice = DataserviceFactory(organization=org)
+
+        serialized = DataserviceSearch.serialize(dataservice)
+
+        assert "producer_type" in serialized
+        assert PUBLIC_SERVICE in serialized["producer_type"]
+
+    def test_serialize_includes_producer_type_user(self):
+        """Test that DataserviceSearch.serialize includes 'user' for dataservices owned by users"""
+        user = UserFactory()
+        dataservice = DataserviceFactory(owner=user, organization=None)
+
+        serialized = DataserviceSearch.serialize(dataservice)
+
+        assert "producer_type" in serialized
+        assert serialized["producer_type"] == [USER]

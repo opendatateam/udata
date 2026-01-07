@@ -5,6 +5,9 @@ parameters:
   python-version:
     type: string
     default: "3.11"
+  udata-search-service-package:
+    type: string
+    default: "https://output.circle-artifacts.com/output/job/efd6a72c-0409-47cc-9a63-197d73348958/artifacts/0/dist/udata_search_service-2.2.5.dev383-py2.py3-none-any.whl"
   publish-branch:
     type: string
     default: "main"
@@ -50,7 +53,7 @@ jobs:
           name: Install Python dependencies
           command: |
             uv sync --frozen
-            uv pip install udata-search-service
+            uv pip install << pipeline.parameters.udata-search-service-package >>
       - save_cache:
           key: py<< parameters.python-version >>-cache-v1-{{ arch }}-{{ checksum "pyproject.toml" }}-{{ checksum "uv.lock" }}
           paths:

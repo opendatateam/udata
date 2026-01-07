@@ -343,6 +343,7 @@ def init_app(app):
     import udata.core.dataservices.api  # noqa
     import udata.core.dataservices.apiv2  # noqa
     import udata.core.discussions.api  # noqa
+    import udata.core.discussions.apiv2  # noqa
     import udata.core.reuse.api  # noqa
     import udata.core.reuse.apiv2  # noqa
     import udata.core.organization.api  # noqa
@@ -355,6 +356,7 @@ def init_app(app):
     import udata.core.tags.api  # noqa
     import udata.core.topic.apiv2  # noqa
     import udata.core.post.api  # noqa
+    import udata.core.post.apiv2  # noqa
     import udata.core.contact_point.api  # noqa
     import udata.features.transfer.api  # noqa
     import udata.features.notifications.api  # noqa
