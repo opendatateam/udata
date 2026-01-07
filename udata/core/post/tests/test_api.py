@@ -1,12 +1,13 @@
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.pages.factories import PageFactory
 from udata.core.post.factories import PostFactory
 from udata.core.post.models import Post
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.tests.api import APITestCase
-from udata.tests.helpers import assert200, assert201, assert204
+from udata.tests.helpers import assert200, assert201, assert204, assert400
 
 
 class PostsAPITest(APITestCase):
@@ -163,3 +164,29 @@ class PostsAPITest(APITestCase):
         response = self.get(url_for("api.posts", with_drafts=True))
         assert200(response)
         assert len(response.json["data"]) == 3
+
+    def test_post_api_create_with_blocs_body_type_and_page(self):
+        """It should create a post with body_type='blocs' when page_id is provided"""
+        page = PageFactory()
+        data = PostFactory.as_dict()
+        data["datasets"] = [str(d.id) for d in data["datasets"]]
+        data["reuses"] = [str(r.id) for r in data["reuses"]]
+        data["body_type"] = "blocs"
+        data["page_id"] = str(page.id)
+        self.login(AdminFactory())
+        response = self.post(url_for("api.posts"), data)
+        assert201(response)
+        assert Post.objects.count() == 1
+        post = Post.objects.first()
+        assert post.body_type == "blocs"
+        assert post.page_id.id == page.id
+
+    def test_post_api_create_with_blocs_body_type_without_page(self):
+        """It should fail to create a post with body_type='blocs' without page_id"""
+        data = PostFactory.as_dict()
+        data["datasets"] = [str(d.id) for d in data["datasets"]]
+        data["reuses"] = [str(r.id) for r in data["reuses"]]
+        data["body_type"] = "blocs"
+        self.login(AdminFactory())
+        response = self.post(url_for("api.posts"), data)
+        assert400(response)
